@@ -231,7 +231,7 @@ unsigned
 JsonObjects::add_metadata(const cstring& type, const cstring& name) {
     auto header = new Util::JsonObject();
     unsigned id = BMV2::nextId("headers");
-    LOG1("add metadata header id " << id);
+    LOG3("add metadata header id " << id);
     header->emplace("name", name);
     header->emplace("id", id);
     header->emplace("header_type", type);

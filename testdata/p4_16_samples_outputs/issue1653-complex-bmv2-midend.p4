@@ -32,17 +32,29 @@ header bitvec_hdr {
 }
 
 struct local_metadata_t {
+    @field_list(0) 
     bit<1>     _row0_alt0_valid0;
+    @field_list(0) 
     bit<7>     _row0_alt0_port1;
+    @field_list(0) 
     int<8>     _row0_alt0_hashRes2;
+    @field_list(0) 
     bool       _row0_alt0_useHash3;
+    @field_list(0) 
     bit<16>    _row0_alt0_type4;
+    @field_list(0) 
     bit<7>     _row0_alt0_pad5;
+    @field_list(0) 
     bit<1>     _row0_alt1_valid6;
+    @field_list(0) 
     bit<7>     _row0_alt1_port7;
+    @field_list(0) 
     int<8>     _row0_alt1_hashRes8;
+    @field_list(0) 
     bool       _row0_alt1_useHash9;
+    @field_list(0) 
     bit<16>    _row0_alt1_type10;
+    @field_list(0) 
     bit<7>     _row0_alt1_pad11;
     bit<1>     _row1_alt0_valid12;
     bit<7>     _row1_alt0_port13;
@@ -92,31 +104,31 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         }
         default_action = NoAction_1();
     }
-    @hidden action issue1653complexbmv2l71() {
+    @hidden action issue1653complexbmv2l72() {
         bh_0.setInvalid();
     }
-    @hidden action issue1653complexbmv2l94() {
+    @hidden action issue1653complexbmv2l95() {
         bh_0._row_alt1_type10 = 16w0x800;
         h.bvh0._row_alt1_type10 = 16w0x800;
         local_metadata._row0_alt0_useHash3 = true;
-        clone3<row_t>(CloneType.I2E, 32w0, (row_t){alt0 = (alt_t){valid = local_metadata._row0_alt0_valid0,port = local_metadata._row0_alt0_port1,hashRes = local_metadata._row0_alt0_hashRes2,useHash = true,type = local_metadata._row0_alt0_type4,pad = local_metadata._row0_alt0_pad5},alt1 = (alt_t){valid = local_metadata._row0_alt1_valid6,port = local_metadata._row0_alt1_port7,hashRes = local_metadata._row0_alt1_hashRes8,useHash = local_metadata._row0_alt1_useHash9,type = local_metadata._row0_alt1_type10,pad = local_metadata._row0_alt1_pad11}});
+        clone3(CloneType.I2E, 32w0, 8w0);
     }
-    @hidden table tbl_issue1653complexbmv2l71 {
+    @hidden table tbl_issue1653complexbmv2l72 {
         actions = {
-            issue1653complexbmv2l71();
+            issue1653complexbmv2l72();
         }
-        const default_action = issue1653complexbmv2l71();
+        const default_action = issue1653complexbmv2l72();
     }
-    @hidden table tbl_issue1653complexbmv2l94 {
+    @hidden table tbl_issue1653complexbmv2l95 {
         actions = {
-            issue1653complexbmv2l94();
+            issue1653complexbmv2l95();
         }
-        const default_action = issue1653complexbmv2l94();
+        const default_action = issue1653complexbmv2l95();
     }
     apply {
-        tbl_issue1653complexbmv2l71.apply();
+        tbl_issue1653complexbmv2l72.apply();
         tns_0.apply();
-        tbl_issue1653complexbmv2l94.apply();
+        tbl_issue1653complexbmv2l95.apply();
     }
 }
 

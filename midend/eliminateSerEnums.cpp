@@ -34,6 +34,7 @@ const IR::Node* DoEliminateSerEnums::postorder(IR::Type_Name* type) {
         // This will be resolved by the caller.
         return type;
     auto enumType = canontype->to<IR::Type_SerEnum>();
+    LOG2("Replacing " << type << " with " << enumType->type);
     return enumType->type;
 }
 
@@ -41,8 +42,10 @@ const IR::Node* DoEliminateSerEnums::postorder(IR::Type_Name* type) {
 const IR::Node* DoEliminateSerEnums::postorder(IR::Member* expression) {
     auto ei = EnumInstance::resolve(getOriginal<IR::Member>(), typeMap);
     if (!ei) return expression;
-    if (auto sei = ei->to<SerEnumInstance>())
+    if (auto sei = ei->to<SerEnumInstance>()) {
+        LOG2("Replacing " << expression << " with " << sei->value);
         return sei->value;
+    }
     return expression;
 }
 

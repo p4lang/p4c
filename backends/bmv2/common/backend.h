@@ -122,6 +122,7 @@ class RenameUserMetadata : public Transform {
     // Used as a prefix for the fields of the userMetadata structure
     // and also as a name for the userMetadata type clone.
     cstring namePrefix;
+    bool renamed = false;
 
  public:
     RenameUserMetadata(P4::ReferenceMap* refMap,
@@ -131,11 +132,13 @@ class RenameUserMetadata : public Transform {
 
     const IR::Node* postorder(IR::Type_Struct* type) override {
         // Clone the user metadata type
-        if (userMetaType != getOriginal())
+        auto orig = getOriginal<IR::Type_Struct>();
+        if (userMetaType->name != orig->name)
             return type;
 
         auto vec = new IR::IndexedVector<IR::Node>();
-        LOG2("Creating clone" << getOriginal());
+        LOG2("Creating clone of " << orig);
+        renamed = true;
         auto clone = type->clone();
         clone->name = namePrefix;
         vec->push_back(clone);
@@ -179,6 +182,11 @@ class RenameUserMetadata : public Transform {
             type->path = new IR::Path(type->path->srcInfo, IR::ID(type->path->srcInfo, namePrefix));
         LOG2("Replacing reference with " << type);
         return type;
+    }
+
+    void end_apply(const IR::Node*) override {
+        BUG_CHECK(renamed, "Could not identify user metadata type declaration %1%",
+                  userMetaType);
     }
 };
 

@@ -2,6 +2,10 @@
 #define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
+enum bit<8> FieldLists {
+    redirect_FL = 8w0
+}
+
 struct intrinsic_metadata_t {
     bit<16> mcast_grp;
     bit<4>  egress_rid;
@@ -9,7 +13,9 @@ struct intrinsic_metadata_t {
 }
 
 struct metaA_t {
+    @field_list(FieldLists.redirect_FL) 
     bit<8> f1;
+    @field_list(FieldLists.redirect_FL) 
     bit<8> f2;
 }
 
@@ -48,10 +54,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("._nop") action _nop() {
     }
     @name("._recirculate") action _recirculate() {
-        recirculate<tuple<standard_metadata_t, metaA_t>>({ standard_metadata, meta.metaA });
+        recirculate((bit<8>)FieldLists.redirect_FL);
     }
     @name("._clone_e2e") action _clone_e2e(@name("mirror_id") bit<32> mirror_id) {
-        clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.E2E, mirror_id, { standard_metadata, meta.metaA });
+        clone3(CloneType.E2E, mirror_id, (bit<8>)FieldLists.redirect_FL);
     }
     @name(".t_egress") table t_egress_0 {
         actions = {
@@ -89,10 +95,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.mcast_grp = mgrp;
     }
     @name("._resubmit") action _resubmit() {
-        resubmit<tuple<standard_metadata_t, metaA_t>>({ standard_metadata, meta.metaA });
+        resubmit((bit<8>)FieldLists.redirect_FL);
     }
     @name("._clone_i2e") action _clone_i2e(@name("mirror_id") bit<32> mirror_id_2) {
-        clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.I2E, mirror_id_2, { standard_metadata, meta.metaA });
+        clone3(CloneType.I2E, mirror_id_2, (bit<8>)FieldLists.redirect_FL);
     }
     @name(".t_ingress_1") table t_ingress {
         actions = {

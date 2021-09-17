@@ -2,6 +2,10 @@
 #define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
+enum bit<8> FieldLists {
+    copy_to_cpu_fields = 8w0
+}
+
 struct intrinsic_metadata_t {
     bit<4> mcast_grp;
     bit<4> egress_rid;
@@ -73,7 +77,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".do_copy_to_cpu") action do_copy_to_cpu() {
-        clone3<tuple<standard_metadata_t>>(CloneType.I2E, 32w250, { standard_metadata });
+        clone3(CloneType.I2E, 32w250, (bit<8>)FieldLists.copy_to_cpu_fields);
     }
     @name(".copy_to_cpu") table copy_to_cpu {
         actions = {

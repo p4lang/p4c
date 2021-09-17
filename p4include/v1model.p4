@@ -21,15 +21,6 @@ limitations under the License.
  *
  * https://github.com/p4lang/behavioral-model/blob/main/docs/simple_switch.md
  *
- * Note 2: There were several discussions among P4 working group
- * members in early 2019 regarding exactly how resubmit, recirculate,
- * and clone3 operations can be called anywhere in their respective
- * controls, but the values of the fields to be preserved is the value
- * they have when that control is finished executing.  That is how
- * these operations are defined in P4_14.  See
- * https://github.com/p4lang/behavioral-model/blob/main/docs/simple_switch.md#restrictions-on-recirculate-resubmit-and-clone-operations
- * for more details on the current state of affairs.
- *
  * Note 3: There are at least some P4_14 implementations where
  * invoking a generate_digest operation on a field_list will create a
  * message to the control plane that contains the values of those
@@ -537,6 +528,15 @@ extern void verify_checksum_with_payload<T, O>(in bool condition, in T data, in 
 extern void update_checksum_with_payload<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
 
 /***
+ * clone is in most ways identical to the clone3 operation, with the
+ * only difference being that it never preserves any user-defined
+ * metadata fields with the cloned packet.  It is equivalent to
+ * calling clone3 with the same type and session parameter values,
+ * with empty data.
+ */
+extern void clone(in CloneType type, in bit<32> session);
+
+/***
  * Calling resubmit during execution of the ingress control will,
  * under certain documented conditions, cause the packet to be
  * resubmitted, i.e. it will begin processing again with the parser,
@@ -546,10 +546,8 @@ extern void update_checksum_with_payload<T, O>(in bool condition, in T data, ino
  * metadata fields that the resubmit operation causes to be
  * preserved.
  *
- * The value of the user-defined metadata fields that are preserved in
- * resubmitted packets is the value they have at the end of ingress
- * processing, not their values at the time the resubmit call is made.
- * See Note 2 for issues with this.
+ * The user metadata fields that are tagged with @field_list(index) will
+ * be sent to the parser together with the packet.
  *
  * Calling resubmit is only supported in the ingress control.  There
  * is no way to undo its effects once it has been called.  If resubmit
@@ -558,8 +556,7 @@ extern void update_checksum_with_payload<T, O>(in bool condition, in T data, ino
  * last such call is preserved.  See the v1model architecture
  * documentation (Note 1) for more details.
  */
-extern void resubmit<T>(in T data);
-
+extern void resubmit(bit<8> index);
 /***
  * Calling recirculate during execution of the egress control will,
  * under certain documented conditions, cause the packet to be
@@ -570,10 +567,8 @@ extern void resubmit<T>(in T data);
  * instance_type field.  The caller may request that some user-defined
  * metadata fields be preserved with the recirculated packet.
  *
- * The value of the user-defined metadata fields that are preserved in
- * recirculated packets is the value they have at the end of egress
- * processing, not their values at the time the recirculate call is
- * made.  See Note 2 for issues with this.
+ * The user metadata fields that are tagged with @field_list(index) will be
+ * sent to the parser together with the packet.
  *
  * Calling recirculate is only supported in the egress control.  There
  * is no way to undo its effects once it has been called.  If
@@ -582,17 +577,8 @@ extern void resubmit<T>(in T data);
  * data from the last such call is preserved.  See the v1model
  * architecture documentation (Note 1) for more details.
  */
-extern void recirculate<T>(in T data);
-
-/***
- * clone is in most ways identical to the clone3 operation, with the
- * only difference being that it never preserves any user-defined
- * metadata fields with the cloned packet.  It is equivalent to
- * calling clone3 with the same type and session parameter values,
- * with empty data.
- */
+extern void recirculate(bit<8> index);
 extern void clone(in CloneType type, in bit<32> session);
-
 /***
  * Calling clone3 during execution of the ingress or egress control
  * will cause the packet to be cloned, sometimes also called
@@ -613,12 +599,8 @@ extern void clone(in CloneType type, in bit<32> session);
  * Cloned packets can be distinguished from others by the value of the
  * standard_metadata instance_type field.
  *
- * The caller may request that some user-defined metadata field values
- * from the original packet should be preserved with the cloned
- * packet(s).  The value of the user-defined metadata fields that are
- * preserved with cloned packets is the value they have at the end of
- * ingress or egress processing, not their values at the time the
- * clone3 call is made.  See Note 2 for issues with this.
+ * The user metadata fields that are tagged with @field_list(index) will be
+ * sent to the parser together with a clone of the packet.
  *
  * If clone3 is called during ingress processing, the first parameter
  * must be CloneType.I2E.  If clone3 is called during egress
@@ -630,7 +612,7 @@ extern void clone(in CloneType type, in bit<32> session);
  * clone session and data are used.  See the v1model architecture
  * documentation (Note 1) for more details.
  */
-extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
+extern void clone3(in CloneType type, in bit<32> session, bit<8> index);
 
 extern void truncate(in bit<32> length);
 

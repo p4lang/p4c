@@ -36,6 +36,19 @@ limitations under the License.
 
 namespace P4V1 {
 
+static const IR::IDeclaration* getFirstDeclaration(
+    const IR::Vector<IR::Node>* nodes,
+    cstring name) {
+    for (auto node : *nodes) {
+        auto decl = node->to<IR::IDeclaration>();
+        if (decl == nullptr)
+            continue;
+        if (decl->getName() == name)
+            return decl;
+    }
+    return nullptr;
+}
+
 ProgramStructure::ProgramStructure() :
         v1model(P4V1::V1Model::instance), p4lib(P4::P4CoreLibrary::instance),
         types(&allNames), metadata(&allNames), headers(&allNames), stacks(&allNames),
@@ -102,6 +115,62 @@ void ProgramStructure::checkHeaderType(const IR::Type_StructLike* hdr, bool meta
     }
 }
 
+bool ProgramStructure::isFieldInList(cstring type, cstring field, const IR::FieldList* fl) const {
+    LOG3("Checking " << type << "." << field << " in " << fl);
+    for (auto e : fl->fields) {
+        if (auto mem = e->to<IR::Member>()) {
+            auto expr = mem->expr;
+            auto mfield = mem->member;
+            if (mfield != field)
+                continue;
+            CHECK_NULL(expr->type);
+            auto etype = expr->type->to<IR::Type_StructLike>();
+            if (etype != nullptr && etype->name == type)
+                return true;
+        } else if (auto path = e->to<IR::PathExpression>()) {
+            auto l = field_lists.get(path->path->name);
+            BUG_CHECK(l != nullptr, "%1%: unexpected expression in field list", e);
+            return isFieldInList(type, field, l);
+        } else if (auto chr = e->to<IR::ConcreteHeaderRef>()) {
+            auto htype = chr->ref->type;
+            CHECK_NULL(htype);
+            if (htype->name != type)
+                continue;
+            for (auto f : htype->fields) {
+                if (f->name == field)
+                    return true;
+            }
+        } else {
+            BUG("%1%: unexpected expression in field list", e);
+        }
+    }
+    return false;
+}
+
+const IR::Vector<IR::Expression>* ProgramStructure::listIndexes(cstring type, cstring field) const {
+    IR::Vector<IR::Expression>* result = nullptr;
+    for (auto f : allFieldLists) {
+        if (isFieldInList(type, field, f)) {
+            if (result == nullptr)
+                result = new IR::Vector<IR::Expression>();
+            result->push_back(
+                new IR::Member(new IR::TypeNameExpression(fieldListsEnum), f->name));
+        }
+    }
+    return result;
+}
+
+const IR::Expression* ProgramStructure::listIndex(const IR::Expression* expression) const {
+    auto pe = expression->to<IR::PathExpression>();
+    if (pe == nullptr) {
+        ::error("%1%: Expected a field list", expression);
+        return 0;
+    }
+
+    return new IR::Cast(IR::Type_Bits::get(8),
+                        new IR::Member(new IR::TypeNameExpression(fieldListsEnum), pe->path->name));
+}
+
 cstring ProgramStructure::createType(const IR::Type_StructLike* type, bool header,
                                      std::unordered_set<const IR::Type*> *converted) {
     if (converted->count(type))
@@ -127,6 +196,19 @@ cstring ProgramStructure::createType(const IR::Type_StructLike* type, bool heade
 }
 
 void ProgramStructure::createTypes() {
+    if (allFieldLists.size()) {
+        // An enum containing the recirculated/cloned/resubmitted field lists
+        fieldListsEnum = makeUniqueName("FieldLists");
+        auto members = new IR::IndexedVector<IR::SerEnumMember>();
+        unsigned index = 0;
+        for (auto fl : allFieldLists) {
+            auto me = new IR::SerEnumMember(fl->srcInfo, fl->name, new IR::Constant(index++));
+            members->push_back(me);
+        }
+        auto fieldLists = new IR::Type_SerEnum(fieldListsEnum, IR::Type_Bits::get(8), *members);
+        declarations->push_back(fieldLists);
+    }
+
     std::unordered_set<const IR::Type *> converted;
     // Metadata first
     for (auto it : metadata) {
@@ -182,14 +264,14 @@ void ProgramStructure::createTypes() {
 
 const IR::Type_Struct* ProgramStructure::createFieldListType(const IR::Expression* expression) {
     if (!expression->is<IR::PathExpression>()) {
-      ::error(ErrorType::ERR_EXPECTED, "%1%: expected a field list", expression);
-      return nullptr;
+        ::error(ErrorType::ERR_EXPECTED, "%1%: expected a field list", expression);
+        return nullptr;
     }
     auto nr = expression->to<IR::PathExpression>();
     auto fl = field_lists.get(nr->path->name);
     if (fl == nullptr) {
-      ::error(ErrorType::ERR_EXPECTED, "%1%: Expected a field list", expression);
-      return nullptr;
+        ::error(ErrorType::ERR_EXPECTED, "%1%: Expected a field list", expression);
+        return nullptr;
     }
 
     auto name = makeUniqueName(nr->path->name);
@@ -276,7 +358,8 @@ void ProgramStructure::createExterns() {
         if (auto et = ExternConverter::cvtExternType(this, it.first, it.second)) {
             if (et != it.first)
                 extern_remap[it.first] = et;
-            declarations->push_back(et); } }
+            if (et != getFirstDeclaration(declarations, et->name))
+                declarations->push_back(et); } }
 }
 
 const IR::Expression* ProgramStructure::paramReference(const IR::Parameter* param) {
@@ -1117,14 +1200,14 @@ const IR::Expression* ProgramStructure::convertFieldList(const IR::Expression* e
     ExpressionConverter conv(this);
 
     if (!expression->is<IR::PathExpression>()) {
-      ::error(ErrorType::ERR_EXPECTED, "%1%: expected a field list", expression);
-      return expression;
+        ::error(ErrorType::ERR_EXPECTED, "%1%: expected a field list", expression);
+        return expression;
     }
     auto nr = expression->to<IR::PathExpression>();
     auto fl = field_lists.get(nr->path->name);
     if (fl == nullptr) {
-      ::error(ErrorType::ERR_EXPECTED, "%1%: Expected a field list", expression);
-      return expression;
+        ::error(ErrorType::ERR_EXPECTED, "%1%: Expected a field list", expression);
+        return expression;
     }
     auto result = conv.convert(fl);
     return result;
@@ -1551,11 +1634,10 @@ CONVERT_PRIMITIVE(modify_field_rng_uniform) {
 CONVERT_PRIMITIVE(recirculate) {
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 1);
-    auto right = structure->convertFieldList(primitive->operands.at(0));
-    if (right == nullptr)
-        return nullptr;
     auto args = new IR::Vector<IR::Argument>();
-    args->push_back(new IR::Argument(right));
+    auto fieldList = primitive->operands.at(0);
+    if (auto expr = structure->listIndex(fieldList))
+        args->push_back(new IR::Argument(expr));
     auto path = new IR::PathExpression(structure->v1model.recirculate.Id());
     auto mc = new IR::MethodCallExpression(primitive->srcInfo, path, args);
     return new IR::MethodCallStatement(mc->srcInfo, mc);
@@ -1563,7 +1645,8 @@ CONVERT_PRIMITIVE(recirculate) {
 
 static const IR::Statement *
 convertClone(ProgramStructure *structure, const IR::Primitive *primitive, Model::Elem kind) {
-    BUG_CHECK(primitive->operands.size() == 1 || primitive->operands.size() == 2,
+    unsigned opcount = primitive->operands.size();
+    BUG_CHECK(opcount == 1 || opcount == 2,
               "Expected 1 or 2 operands for %1%", primitive);
     ExpressionConverter conv(structure);
     auto session = conv.convert(primitive->operands.at(0));
@@ -1576,14 +1659,14 @@ convertClone(ProgramStructure *structure, const IR::Primitive *primitive, Model:
     args->push_back(
         new IR::Argument(new IR::Cast(primitive->operands.at(0)->srcInfo,
                                       structure->v1model.clone.sessionType, session)));
-    if (primitive->operands.size() == 2) {
-        auto list = structure->convertFieldList(primitive->operands.at(1));
-        if (list != nullptr)
-            args->push_back(new IR::Argument(list));
-    }
 
-    auto id = primitive->operands.size() == 2 ? structure->v1model.clone.clone3.Id()
-                                               : structure->v1model.clone.Id();
+    auto id = opcount == 2 ? structure->v1model.clone.clone3.Id()
+                           : structure->v1model.clone.Id();
+    if (opcount == 2) {
+        auto fl = primitive->operands.at(1);
+        if (auto expr = structure->listIndex(fl))
+            args->push_back(new IR::Argument(expr));
+    }
     auto clone = new IR::PathExpression(id);
     auto mc = new IR::MethodCallExpression(primitive->srcInfo, clone, args);
     return new IR::MethodCallStatement(mc->srcInfo, mc);
@@ -1600,14 +1683,18 @@ CONVERT_PRIMITIVE(clone_i2e) {
 
 CONVERT_PRIMITIVE(resubmit) {
     ExpressionConverter conv(structure);
-    BUG_CHECK(primitive->operands.size() <= 1, "Expected 0 or 1 operands for %1%", primitive);
-    const IR::Expression *list;
-    if (primitive->operands.size() > 0)
-        list = structure->convertFieldList(primitive->operands.at(0));
-    else
-        list = new IR::ListExpression({});
-    return new IR::MethodCallStatement(primitive->srcInfo, structure->v1model.resubmit.Id(),
-                                       { new IR::Argument(list) });
+    unsigned opcount = primitive->operands.size();
+    BUG_CHECK(opcount <= 1, "Expected 0 or 1 operands for %1%", primitive);
+    auto args = new IR::Vector<IR::Argument>();
+    if (opcount == 1) {
+        auto fl = primitive->operands.at(0);
+        if (auto expr = structure->listIndex(fl))
+            args->push_back(new IR::Argument(expr));
+    }
+    return new IR::MethodCallStatement(primitive->srcInfo,
+        new IR::MethodCallExpression(primitive->srcInfo,
+                                     new IR::PathExpression(structure->v1model.resubmit.Id()),
+                                     args));
 }
 
 CONVERT_PRIMITIVE(execute_meter) {

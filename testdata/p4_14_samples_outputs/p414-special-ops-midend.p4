@@ -10,10 +10,14 @@ struct intrinsic_metadata_t {
 }
 
 struct mymeta_t {
+    @field_list(8w2) 
     bit<8> resubmit_count;
+    @field_list(8w1) 
     bit<8> recirculate_count;
+    @field_list(8w0) 
     bit<8> clone_e2e_count;
     bit<8> last_ing_instance_type;
+    @field_list(8w0, 8w1, 8w2) 
     bit<8> f1;
 }
 
@@ -28,10 +32,14 @@ header ethernet_t {
 }
 
 struct metadata {
+    @field_list(8w2) 
     bit<8>  _mymeta_resubmit_count0;
+    @field_list(8w1) 
     bit<8>  _mymeta_recirculate_count1;
+    @field_list(8w0) 
     bit<8>  _mymeta_clone_e2e_count2;
     bit<8>  _mymeta_last_ing_instance_type3;
+    @field_list(8w0, 8w1, 8w2) 
     bit<8>  _mymeta_f14;
     bit<48> _temporaries_temp15;
 }
@@ -51,23 +59,18 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-struct tuple_0 {
-    bit<8> f0;
-    bit<8> f1;
-}
-
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".do_clone_e2e") action do_clone_e2e() {
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710633;
         meta._mymeta_f14 = meta._mymeta_f14 + 8w23;
         meta._mymeta_clone_e2e_count2 = meta._mymeta_clone_e2e_count2 + 8w1;
-        clone3<tuple_0>(CloneType.E2E, 32w1, (tuple_0){f0 = meta._mymeta_clone_e2e_count2,f1 = meta._mymeta_f14});
+        clone3(CloneType.E2E, 32w1, 8w0);
     }
     @name(".do_recirculate") action do_recirculate() {
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710637;
         meta._mymeta_f14 = meta._mymeta_f14 + 8w19;
         meta._mymeta_recirculate_count1 = meta._mymeta_recirculate_count1 + 8w1;
-        recirculate<tuple_0>((tuple_0){f0 = meta._mymeta_recirculate_count1,f1 = meta._mymeta_f14});
+        recirculate(8w1);
     }
     @name("._nop") action _nop() {
     }
@@ -254,7 +257,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710639;
         meta._mymeta_f14 = meta._mymeta_f14 + 8w17;
         meta._mymeta_resubmit_count0 = meta._mymeta_resubmit_count0 + 8w1;
-        resubmit<tuple_0>((tuple_0){f0 = meta._mymeta_resubmit_count0,f1 = meta._mymeta_f14});
+        resubmit(8w2);
     }
     @name("._nop") action _nop_3() {
     }

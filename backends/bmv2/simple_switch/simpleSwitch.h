@@ -148,6 +148,8 @@ class SimpleSwitchBackend : public Backend {
     ExpressionConverter*        conv = nullptr;
 
  protected:
+    void createRecirculateFieldsList(ConversionContext* ctxt, const IR::ToplevelBlock* tlb,
+                                     cstring scalarName);
     cstring createCalculation(cstring algo, const IR::Expression* fields,
                               Util::JsonArray* calculations, bool usePayload, const IR::Node* node);
 

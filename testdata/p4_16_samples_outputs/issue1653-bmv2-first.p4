@@ -26,7 +26,7 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     bitvec_hdr bh;
     apply {
         bh.x = h.bvh0.x;
-        clone3<parsed_packet_t>(CloneType.I2E, 32w0, h);
+        clone3(CloneType.I2E, 32w0, 8w0);
     }
 }
 
