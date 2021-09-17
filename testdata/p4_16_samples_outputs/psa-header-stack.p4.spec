@@ -104,7 +104,7 @@ apply {
 	emit h.vlan_tag_0
 	emit h.vlan_tag_1
 	tx m.psa_ingress_output_metadata_egress_port
-	LABEL_DROP : drop
+	drop
 }
 
 

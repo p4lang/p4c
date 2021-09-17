@@ -89,7 +89,7 @@ apply {
 	LABEL_4END :	mov h.ethernet.srcAddr 0xcafe
 	LABEL_1END :	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
-	LABEL_DROP : drop
+	drop
 }
 
 

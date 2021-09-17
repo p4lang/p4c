@@ -294,7 +294,6 @@ std::ostream &IR::DpdkListStatement::toSpec(std::ostream &out) const {
         if (!s->to<IR::DpdkLabelStatement>())
             out << std::endl;
     }
-    out << "\tLABEL_DROP : drop" << std::endl;
     out << "}" << std::endl;
     return out;
 }

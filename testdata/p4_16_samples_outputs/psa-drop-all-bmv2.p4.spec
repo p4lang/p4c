@@ -85,7 +85,7 @@ apply {
 	emit h.ethernet
 	emit h.ipv4
 	tx m.psa_ingress_output_metadata_egress_port
-	LABEL_DROP : drop
+	drop
 }
 
 

@@ -113,7 +113,7 @@ table tbl {
 		NoAction
 		execute
 	}
-	default_action NoAction args none
+	default_action NoAction args none 
 	size 0x10000
 }
 
@@ -144,5 +144,7 @@ apply {
 	emit h.ipv4
 	emit h.tcp
 	tx m.psa_ingress_output_metadata_egress_port
-	LABEL_DROP : drop
+	drop
 }
+
+
