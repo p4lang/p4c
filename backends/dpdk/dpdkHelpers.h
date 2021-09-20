@@ -27,6 +27,7 @@ limitations under the License.
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/unusedDeclarations.h"
+#include "midend/removeComplexExpressions.h"
 #include "ir/ir.h"
 #include "lib/gmputil.h"
 #include "lib/json.h"
@@ -149,6 +150,23 @@ class ConvertStatementToDpdk : public Inspector {
     void process_relation_operation(const IR::Expression*, const IR::Operation_Relation*);
     cstring append_parser_name(const IR::P4Parser* p, cstring);
     void set_parser(const IR::P4Parser* p) { parser = p; }
+};
+
+/**
+ * only simplify complex expression in ingress/egress
+ */
+class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
+    const std::set<cstring> *process;
+
+ public:
+    explicit ProcessControls(const std::set<cstring> *process) : process(process) {
+        CHECK_NULL(process);
+    }
+    bool convert(const IR::P4Control* control) const {
+        if (process->find(control->name) != process->end())
+            return true;
+        return false;
+    }
 };
 
 } // namespace DPDK

@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef MIDEND_REMOVE_COMPLEX_EXPRESSIONS_H_
-#define MIDEND_REMOVE_COMPLEX_EXPRESSIONS_H_
+#ifndef MIDEND_REMOVECOMPLEXEXPRESSIONS_H_
+#define MIDEND_REMOVECOMPLEXEXPRESSIONS_H_
 
 #include "ir/ir.h"
 #include "frontends/p4/typeMap.h"
@@ -43,13 +43,12 @@ into temporaries.
 Convert a statement like lookahead<T>() into tmp = lookahead<T>();
 */
 class RemoveComplexExpressions : public Transform {
-    IR::IndexedVector<IR::Declaration> newDecls;
-    IR::IndexedVector<IR::StatOrDecl>  assignments;
-
  public:
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
     RemoveComplexExpressionsPolicy* policy;
+    IR::IndexedVector<IR::Declaration> newDecls;
+    IR::IndexedVector<IR::StatOrDecl>  assignments;
 
     RemoveComplexExpressions(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                              RemoveComplexExpressionsPolicy* policy = nullptr) :
@@ -102,4 +101,4 @@ class RemoveComplexExpressions : public Transform {
 
 }
 
-#endif  /* MIDEND_REMOVE_COMPLEX_EXPRESSIONS_H_ */
+#endif  /* MIDEND_REMOVECOMPLEXEXPRESSIONS_H_ */
