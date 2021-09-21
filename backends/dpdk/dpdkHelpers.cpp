@@ -638,6 +638,8 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             add_instr(new IR::DpdkMovStatement(
                 new IR::Member(new IR::PathExpression("m"), "pna_main_output_metadata_output_port"),
                 a->expr->arguments->at(0)->expression));
+        } else if (a->method->name == "drop_packet") {
+            add_instr(new IR::DpdkDropStatement());
         } else {
             ::error("%1%: Unknown extern function", s);
         }
