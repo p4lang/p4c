@@ -120,7 +120,6 @@ apply {
 	emit h.ethernet
 	emit h.ipv4
 	tx m.pna_main_output_metadata_egress_port
-	LABEL_DROP : drop
 }
 
 

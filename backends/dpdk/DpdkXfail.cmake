@@ -86,6 +86,6 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "Could not find type"
+  "Compiler Bug: Not Implemented"
   testdata/p4_16_samples/psa-example-dpdk-varbit.p4
   )
