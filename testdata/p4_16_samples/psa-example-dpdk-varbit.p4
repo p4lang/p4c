@@ -1,8 +1,6 @@
 #include <core.p4>
 #include <psa.p4>
 
-struct EMPTY { };
-
 typedef bit<48>  EthernetAddress;
 
 header ethernet_t {
@@ -43,6 +41,7 @@ struct headers_t {
     ipv4_option_timestamp_t ipv4_option_timestamp;
 }
 
+struct EMPTY { };
 
 parser MyIP(
     packet_in packet,

@@ -113,6 +113,12 @@ class DpdkEmitStatement : DpdkAsmStatement, IDPDKNode {
 
 class DpdkExtractStatement : DpdkAsmStatement, IDPDKNode {
     Expression header;
+    NullOK optional Expression length;
+    std::ostream& toSpec(std::ostream& out) const override;
+}
+
+class DpdkLookaheadStatement : DpdkAsmStatement, IDPDKNode {
+    Expression header;
     std::ostream& toSpec(std::ostream& out) const override;
 }
 

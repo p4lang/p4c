@@ -315,6 +315,13 @@ std::ostream &IR::DpdkEmitStatement::toSpec(std::ostream &out) const {
 
 std::ostream &IR::DpdkExtractStatement::toSpec(std::ostream &out) const {
     out << "extract " << DPDK::toStr(header);
+    if (length)
+        out << DPDK::toStr(length);
+    return out;
+}
+
+std::ostream &IR::DpdkLookaheadStatement::toSpec(std::ostream &out) const {
+    out << "lookahead " << DPDK::toStr(header);
     return out;
 }
 

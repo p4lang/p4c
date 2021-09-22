@@ -176,6 +176,10 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     i = new IR::DpdkRegisterReadStatement(
                         left, e->object->getName(), index);
                 }
+            } else if (e->originalExternType->getName().name == "packet_in") {
+                if (e->method->getName().name == "lookahead") {
+                    i = new IR::DpdkLookaheadStatement(left);
+                }
             } else {
                 BUG("%1% Not implemented", e->originalExternType->name);
             }
@@ -530,13 +534,19 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         } else if (a->originalExternType->getName().name == "packet_in") {
             if (a->method->getName().name == "extract") {
                 auto args = a->expr->arguments;
-                auto header = args->at(0);
-                if (header->expression->is<IR::Member>() ||
-                    header->expression->is<IR::PathExpression>() ||
-                    header->expression->is<IR::ArrayIndex>()) {
-                    add_instr(new IR::DpdkExtractStatement(header->expression));
-                } else {
-                    ::error(ErrorType::ERR_UNSUPPORTED, "%1% is not supported", s);
+                if (args->size() == 1) {
+                    auto header = args->at(0);
+                    if (header->expression->is<IR::Member>() ||
+                        header->expression->is<IR::PathExpression>() ||
+                        header->expression->is<IR::ArrayIndex>()) {
+                        add_instr(new IR::DpdkExtractStatement(header->expression));
+                    } else {
+                        ::error(ErrorType::ERR_UNSUPPORTED, "%1% is not supported", s);
+                    }
+                } else if (args->size() == 2) {
+                    auto header = args->at(0);
+                    auto length = args->at(1);
+                    add_instr(new IR::DpdkExtractStatement(header->expression, length->expression));
                 }
             }
         } else if (a->originalExternType->getName().name == "Meter") {
