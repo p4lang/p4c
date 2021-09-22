@@ -60,6 +60,22 @@ class DpdkSelector {
 #novalidate
 }
 
+// This class corresponds to the learner table object in dpdk
+// which supports adding an table entry upon hit/miss event.
+// This special table type is defined in PNA specification
+// under the add_on_miss section.
+class DpdkLearner {
+    inline cstring name;
+    Key match_keys;
+    ActionList actions;
+    Expression default_action;
+    TableProperties properties;
+
+    std::ostream& toSpec(std::ostream& out) const;
+#nodbprint
+#novalidate
+}
+
 // Toplevel Assembly representation
 class DpdkAsmProgram {
     inline IndexedVector<DpdkHeaderType> headerType;
@@ -67,14 +83,14 @@ class DpdkAsmProgram {
     inline IndexedVector<DpdkExternDeclaration> externDeclarations;
     inline IndexedVector<DpdkAction> actions;
     inline IndexedVector<DpdkTable> tables;
-	inline IndexedVector<DpdkSelector> selectors;
+    inline IndexedVector<DpdkSelector> selectors;
+    inline IndexedVector<DpdkLearner> learners;
     inline IndexedVector<DpdkAsmStatement> statements;
     inline IndexedVector<DpdkDeclaration> globals;
     std::ostream& toSpec(std::ostream& out) const;
 }
 
 class DpdkListStatement : DpdkAsmStatement, IDPDKNode {
-    optional cstring name;
     optional inline IndexedVector<DpdkAsmStatement> statements;
     std::ostream& toSpec(std::ostream& out) const override;
 }
@@ -83,6 +99,13 @@ class DpdkApplyStatement : DpdkAsmStatement, IDPDKNode {
     cstring table;
     std::ostream& toSpec(std::ostream& out) const override;
 }
+
+class DpdkLearnStatement : DpdkAsmStatement, IDPDKNode {
+    cstring action;
+    optional Expression argument;
+    std::ostream& toSpec(std::ostream& out) const override;
+}
+
 class DpdkEmitStatement : DpdkAsmStatement, IDPDKNode {
     Expression header;
     std::ostream& toSpec(std::ostream& out) const override;
@@ -193,11 +216,13 @@ class DpdkJmpLessStatement: DpdkJmpCondStatement, IDPDKNode {
 }
 
 class DpdkRxStatement : DpdkAsmStatement, IDPDKNode {
+    Expression port;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
 
 class DpdkTxStatement : DpdkAsmStatement, IDPDKNode {
+    Expression port;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }

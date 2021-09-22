@@ -76,7 +76,7 @@ apply {
 	mov h.ethernet.etherType 0xface
 	LABEL_1END :	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
-	LABEL_DROP : drop
+	drop
 }
 
 

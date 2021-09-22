@@ -20,6 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "midend/removeComplexExpressions.h"
 
 namespace BMV2 {
 
@@ -49,80 +50,13 @@ class LowerExpressions : public Transform {
     { prune(); return table; }  // don't simplify expressions in table
 };
 
-/**
-Policy which selects the control blocks where remove
-complex expression is applied.
-*/
-class RemoveComplexExpressionsPolicy {
- public:
-    virtual ~RemoveComplexExpressionsPolicy() {}
-    /**
-       If the policy returns true the control block is processed,
-       otherwise it is left unchanged.
-    */
-    virtual bool convert(const IR::P4Control* control) const = 0;
-};
-
-/**
-BMv2 does not support complex expressions for a select
-or as arguments to external functions.
-Such expressions are lifted into a temporaries.
-Also, convert a statement like lookahead<T>() into
-tmp = lookahead<T>();
-*/
-class RemoveComplexExpressions : public Transform {
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
-    RemoveComplexExpressionsPolicy* policy;
-    IR::IndexedVector<IR::Declaration> newDecls;
-    IR::IndexedVector<IR::StatOrDecl>  assignments;
-
-    const IR::PathExpression* createTemporary(const IR::Expression* expression);
-    const IR::Expression* simplifyExpression(const IR::Expression* expression, bool force);
-    const IR::Vector<IR::Expression>* simplifyExpressions(
-        const IR::Vector<IR::Expression>* vec, bool force = false);
-    const IR::Vector<IR::Argument>* simplifyExpressions(
-        const IR::Vector<IR::Argument>* vec);
-    const IR::IndexedVector<IR::NamedExpression>* simplifyExpressions(
-        const IR::IndexedVector<IR::NamedExpression>* vec);
-
-    const IR::Node* simpleStatement(IR::Statement* statement);
-
+class RemoveComplexExpressions: public P4::RemoveComplexExpressions {
  public:
     RemoveComplexExpressions(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                             RemoveComplexExpressionsPolicy* policy = nullptr) :
-            refMap(refMap), typeMap(typeMap), policy(policy) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap);
-        setName("RemoveComplexExpressions"); }
-    const IR::Node* postorder(IR::SelectExpression* expression) override;
-    const IR::Node* preorder(IR::ParserState* state) override
-    { assignments.clear(); return state; }
-    const IR::Node* postorder(IR::ParserState* state) override {
-        state->components.append(assignments);
-        return state;
-    }
+                             P4::RemoveComplexExpressionsPolicy* policy = nullptr) :
+    P4::RemoveComplexExpressions(refMap, typeMap, policy) {}
+
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
-    const IR::Node* preorder(IR::P4Parser* parser) override
-    { newDecls.clear(); return parser; }
-    const IR::Node* postorder(IR::P4Parser* parser) override {
-        if (newDecls.size() != 0) {
-            // prepend declarations
-            newDecls.append(parser->parserLocals);
-            parser->parserLocals = newDecls;
-        }
-        return parser;
-    }
-    const IR::Node* preorder(IR::P4Control* control) override;
-    const IR::Node* postorder(IR::P4Control* control) override {
-        if (newDecls.size() != 0) {
-            // prepend declarations
-            newDecls.append(control->controlLocals);
-            control->controlLocals = newDecls;
-        }
-        return control;
-    }
-    const IR::Node* postorder(IR::Statement* statement) override;
-    const IR::Node* postorder(IR::MethodCallStatement* statement) override;
 };
 
 }  // namespace BMV2

@@ -617,6 +617,31 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             add_instr(new IR::DpdkJmpLabelStatement(
                         append_parser_name(parser, IR::ParserState::reject)));
             add_instr(new IR::DpdkLabelStatement(end_label));
+        } else if (a->method->name == "add_entry") {
+            auto action = a->expr->arguments->at(0)->expression;
+            auto action_name = action->to<IR::StringLiteral>()->value;
+            auto param = a->expr->arguments->at(1)->expression;
+            if (param->is<IR::Member>()) {
+                auto argument = param->to<IR::Member>();
+                add_instr(new IR::DpdkLearnStatement(action_name, argument));
+            } else if (param->is<IR::StructExpression>()) {
+                auto argument = param->to<IR::StructExpression>()->components.at(0)->expression;
+                add_instr(new IR::DpdkLearnStatement(action_name, argument));
+            } else if (param->is<IR::Constant>()) {
+                add_instr(new IR::DpdkLearnStatement(action_name, param));
+            } else {
+                ::error("%1%: unhandled function", s);
+            }
+        } else if (a->method->name == "send_to_port") {
+            BUG_CHECK(a->expr->arguments->size() == 1,
+                "%1%: expected one argument for send_to_port extern", a);
+            add_instr(new IR::DpdkMovStatement(
+                new IR::Member(new IR::PathExpression("m"), "pna_main_output_metadata_output_port"),
+                a->expr->arguments->at(0)->expression));
+        } else if (a->method->name == "drop_packet") {
+            add_instr(new IR::DpdkDropStatement());
+        } else {
+            ::error("%1%: Unknown extern function", s);
         }
     } else if (auto a = mi->to<P4::BuiltInMethod>()) {
         if (a->name == "setValid") {
