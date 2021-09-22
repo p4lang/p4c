@@ -25,9 +25,11 @@ void ParseDpdkArchitecture::parse_pna_block(const IR::PackageBlock *block) {
     p = block->findParameterValue("main_control");
     auto pipeline = p->to<IR::ControlBlock>();
     structure->pipelines.emplace("MainControlT", pipeline->container);
+    structure->pipeline_controls.emplace(pipeline->container->name);
     p = block->findParameterValue("main_deparser");
     auto deparser = p->to<IR::ControlBlock>();
     structure->deparsers.emplace("MainDeparserT", deparser->container);
+    structure->non_pipeline_controls.emplace(deparser->container->name);
 }
 
 void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
@@ -51,6 +53,7 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         }
         auto pipeline = p->to<IR::ControlBlock>();
         structure->pipelines.emplace("Ingress", pipeline->container);
+        structure->pipeline_controls.emplace(pipeline->container->name);
         p = ingress->findParameterValue("id");
         if (!p) {
             ::error("'ingress' package %1% has no parameter named 'id'", block);
@@ -58,6 +61,7 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         }
         auto deparser = p->to<IR::ControlBlock>();
         structure->deparsers.emplace("IngressDeparser", deparser->container);
+        structure->non_pipeline_controls.emplace(deparser->container->name);
     }
     pkg = block->findParameterValue("egress");
     if (auto egress = pkg->to<IR::PackageBlock>()) {
@@ -75,6 +79,7 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         }
         auto pipeline = p->to<IR::ControlBlock>();
         structure->pipelines.emplace("Egress", pipeline->container);
+        structure->pipeline_controls.emplace(pipeline->container->name);
         p = egress->findParameterValue("ed");
         if (!p) {
             ::error("'egress' package %1% has no parameter named 'ed'", block);
@@ -82,14 +87,17 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         }
         auto deparser = p->to<IR::ControlBlock>();
         structure->deparsers.emplace("EgressDeparser", deparser->container);
+        structure->non_pipeline_controls.emplace(deparser->container->name);
     }
 }
 
 bool ParseDpdkArchitecture::preorder(const IR::PackageBlock* block) {
     auto &options = DPDK::DpdkContext::get().options();
-    if (options.arch == "psa") {
+    if (options.arch == "psa" ||
+        block->instanceType->to<IR::Type_Package>()->name == "PSA_Switch") {
         parse_psa_block(block);
-    } else if (options.arch == "pna") {
+    } else if (options.arch == "pna" ||
+        block->instanceType->to<IR::Type_Package>()->name == "PNA_NIC") {
         parse_pna_block(block);
     } else {
         ::error("Unknown architecture %1%", options.arch);
@@ -275,4 +283,7 @@ bool InspectDpdkProgram::preorder(const IR::Parameter* param) {
     return false;
 }
 
-
+bool InspectDpdkProgram::preorder(const IR::P4Action* action) {
+    structure->actions.emplace(action->name, action);
+    return false;
+}

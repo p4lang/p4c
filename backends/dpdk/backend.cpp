@@ -19,7 +19,9 @@ limitations under the License.
 #include "dpdkAsmOpt.h"
 #include "dpdkHelpers.h"
 #include "dpdkProgram.h"
+#include "frontends/p4/moveDeclarations.h"
 #include "midend/eliminateTypedefs.h"
+#include "midend/removeComplexExpressions.h"
 #include "ir/dbprint.h"
 #include "ir/ir.h"
 #include "lib/stringify.h"
@@ -47,10 +49,14 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap),
         // TBD: implement dpdk lowering passes instead of reusing bmv2's lowering pass.
         new BMV2::LowerExpressions(typeMap),
+        new P4::RemoveComplexExpressions(refMap, typeMap,
+                new DPDK::ProcessControls(&structure.pipeline_controls)),
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         new ConvertActionSelectorAndProfile(refMap, typeMap),
+        new CollectAddOnMissTable(refMap, typeMap, &structure),
+        new P4::MoveDeclarations(),  // Move all local declarations to the beginning
         new CollectProgramStructure(refMap, typeMap, &structure),
         new CollectMetadataHeaderInfo(&structure),
         new ConvertToDpdkArch(refMap, &structure),

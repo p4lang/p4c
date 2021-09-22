@@ -7,6 +7,7 @@
 
 /* Collect information related to P4 programs targeting dpdk */
 struct DpdkProgramStructure {
+    cstring p4arch;  // 'pna' or 'psa'
     ordered_map<cstring, const IR::Declaration_Variable*> scalars;
     unsigned                            scalars_width = 0;
 
@@ -18,6 +19,12 @@ struct DpdkProgramStructure {
     ordered_map<cstring, const IR::Declaration_Variable*> metadata;
     ordered_map<cstring, const IR::Declaration_Variable*> header_stacks;
     ordered_map<cstring, const IR::Declaration_Variable*> header_unions;
+    ordered_map<cstring, const IR::P4Action*> actions;
+
+    // table and action info for learner tables
+    ordered_set<cstring> learner_tables;
+    ordered_set<cstring> learner_actions;
+    ordered_map<cstring, std::vector<cstring>> learner_action_params;
 
     IR::IndexedVector<IR::DpdkDeclaration>       variables;
 
@@ -33,10 +40,13 @@ struct DpdkProgramStructure {
     std::map<cstring, int>                                      error_map;
     std::vector<const IR::Declaration_Instance *>               externDecls;
 
+    std::set<cstring> pipeline_controls;
+    std::set<cstring> non_pipeline_controls;
+
     IR::Type_Struct * metadataStruct;
     cstring local_metadata_type;
     cstring header_type;
-    IR::IndexedVector<IR::StructField> fields;
+    IR::IndexedVector<IR::StructField> compiler_added_fields;
     IR::Vector<IR::Type> used_metadata;
 
     void push_variable(const IR::DpdkDeclaration * d) {
@@ -74,6 +84,7 @@ class ParseDpdkArchitecture : public Inspector {
         structure->parsers.clear();
         structure->deparsers.clear();
         structure->pipelines.clear();
+        structure->actions.clear();
         return Inspector::init_apply(root);
     }
 };
@@ -95,6 +106,7 @@ class InspectDpdkProgram : public Inspector {
     void addHeaderInstance(const IR::Type_StructLike *st, cstring name);
     bool preorder(const IR::Declaration_Variable* dv) override;
     bool preorder(const IR::Parameter* parameter) override;
+    bool preorder(const IR::P4Action*) override;
     bool isStandardMetadata(cstring);
 };
 

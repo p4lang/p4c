@@ -4,6 +4,9 @@
 
 using namespace DBPrint;
 
+static constexpr unsigned DEFAULT_LEARNER_TABLE_SIZE = 0x10000;
+static constexpr unsigned DEFAULT_LEARNER_TABLE_TIMEOUT = 120;
+
 void add_space(std::ostream &out, int size) {
     out << std::setfill(' ') << std::setw(size) << " ";
 }
@@ -135,6 +138,9 @@ std::ostream &IR::DpdkAsmProgram::toSpec(std::ostream &out) const {
         t->toSpec(out) << std::endl << std::endl;
     }
     for (auto s : selectors) {
+        s->toSpec(out) << std::endl;
+    }
+    for (auto s : learners) {
         s->toSpec(out) << std::endl;
     }
     for (auto s : statements) {
@@ -282,22 +288,23 @@ std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
 
 std::ostream &IR::DpdkListStatement::toSpec(std::ostream &out) const {
     out << "apply {" << std::endl;
-    out << "\trx m.psa_ingress_input_metadata_ingress_port" << std::endl;
-    out << "\tmov m.psa_ingress_output_metadata_drop 0x0" << std::endl;
     for (auto s : statements) {
         out << "\t";
         s->toSpec(out);
         if (!s->to<IR::DpdkLabelStatement>())
             out << std::endl;
     }
-    out << "\ttx m.psa_ingress_output_metadata_egress_port" << std::endl;
-    out << "\tLABEL_DROP : drop" << std::endl;
     out << "}" << std::endl;
     return out;
 }
 
 std::ostream &IR::DpdkApplyStatement::toSpec(std::ostream &out) const {
     out << "table " << table;
+    return out;
+}
+
+std::ostream &IR::DpdkLearnStatement::toSpec(std::ostream &out) const {
+    out << "learn " << action << " " << argument;
     return out;
 }
 
@@ -342,12 +349,12 @@ std::ostream& IR::DpdkUnaryStatement::toSpec(std::ostream& out) const {
 }
 
 std::ostream &IR::DpdkRxStatement::toSpec(std::ostream &out) const {
-    out << "rx ";
+    out << "rx " << DPDK::toStr(port);
     return out;
 }
 
 std::ostream &IR::DpdkTxStatement::toSpec(std::ostream &out) const {
-    out << "tx ";
+    out << "tx " << DPDK::toStr(port);
     return out;
 }
 
@@ -428,6 +435,45 @@ std::ostream &IR::DpdkSelector::toSpec(std::ostream &out) const {
     out << "\tn_members_per_group_max " << n_members_per_group_max << std::endl;
     out << "}" << std::endl;
     return out;
+}
+
+std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
+    out << "learner " << name << " {" << std::endl;
+    if (match_keys) {
+        out << "\tkey {" << std::endl;
+        for (auto key : match_keys->keyElements) {
+            out << "\t\t" << DPDK::toStr(key->expression) << std::endl;
+        }
+    }
+    out << "\t}" << std::endl;
+    out << "\tactions {" << std::endl;
+    for (auto action : actions->actionList) {
+        out << "\t\t" << DPDK::toStr(action->expression) << std::endl;
+    }
+    out << "\t}" << std::endl;
+
+    out << "\tdefault_action " << DPDK::toStr(default_action);
+    if (default_action->to<IR::MethodCallExpression>()->arguments->size() ==
+        0) {
+        out << " args none ";
+    } else {
+        BUG("non-zero default action arguments not supported yet");
+    }
+    out << std::endl;
+    if (auto size = properties->getProperty("size")) {
+        out << "\tsize " << DPDK::toStr(size->value) << "" << std::endl;
+    } else {
+        out << "\tsize " << DEFAULT_LEARNER_TABLE_SIZE << std::endl;
+    }
+    if (auto size = properties->getProperty("psa_idle_timeout")) {
+        out << "\ttimeout " << DPDK::toStr(size->value) << "" << std::endl;
+    } else {
+        out << "\ttimeout " << DEFAULT_LEARNER_TABLE_TIMEOUT << std::endl;
+    }
+
+    out << "}" << std::endl;
+    return out;
+
 }
 
 std::ostream &IR::DpdkAction::toSpec(std::ostream &out) const {

@@ -146,8 +146,10 @@ const IR::Node *ConvertToDpdkArch::postorder(IR::Type_Control *c) {
     }
     // Ingress, Egress, IngressDeparser, EgressDeparser are reserved name in psa.p4
     if (c->name == "Ingress" || c->name == "Egress") {
+        structure->p4arch = "psa";
         t = rewriteControlType(c, c->name);
     } else if (c->name == "MainControlT") {
+        structure->p4arch = "pna";
         t = rewriteControlType(c, c->name);
     } else if (c->name == "PreControlT") {
         t = rewriteControlType(c, c->name);
@@ -224,7 +226,6 @@ const IR::Node *ConvertToDpdkArch::preorder(IR::Member *m) {
                     return new IR::Member(new IR::PathExpression(IR::ID("h")),
                                           IR::ID(m->member.name));
                 } else if (type->path->name == structure->local_metadata_type) {
-                    LOG1("metadata " << type->path->name);
                     return new IR::Member(
                         new IR::PathExpression(IR::ID("m")),
                         IR::ID("local_metadata_" + m->member.name));
@@ -318,7 +319,7 @@ bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s) {
     for (auto m : structure->used_metadata) {
         if (m->to<IR::Type_Name>()->path->name.name == s->name.name) {
             for (auto field : s->fields) {
-                structure->fields.push_back(new IR::StructField(
+                structure->compiler_added_fields.push_back(new IR::StructField(
                     IR::ID(TypeStruct2Name(s->name.name) + "_" + field->name),
                     field->type));
             }
@@ -332,7 +333,7 @@ const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct *s) {
     if (s->name == structure->local_metadata_type) {
         auto *annotations = new IR::Annotations(
             {new IR::Annotation(IR::ID("__metadata__"), {})});
-        return new IR::Type_Struct(s->name, annotations, structure->fields);
+        return new IR::Type_Struct(s->name, annotations, structure->compiler_added_fields);
     } else if (s->name == structure->header_type) {
         auto *annotations = new IR::Annotations(
             {new IR::Annotation(IR::ID("__packet_data__"), {})});
@@ -1456,6 +1457,69 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
         return new IR::BlockStatement(*decls);
     }
     return statement;
+}
+
+void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
+    bool use_add_on_miss = false;
+    auto add_on_miss = t->properties->getProperty("add_on_miss");
+    if (add_on_miss == nullptr) return;
+    if (add_on_miss->value->is<IR::ExpressionValue>()) {
+        auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
+        if (!expr->is<IR::BoolLiteral>()) {
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "%1%: expected boolean for 'add_on_miss' property", add_on_miss);
+            return;
+        } else {
+            use_add_on_miss = expr->to<IR::BoolLiteral>()->value;
+            if (use_add_on_miss)
+                structure->learner_tables.insert(t->name.name);
+        }
+    }
+
+    /* sanity checks */
+    auto default_action = t->properties->getProperty("default_action");
+    if (use_add_on_miss && default_action == nullptr) {
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "%1%: add_on_miss property is defined, "
+                "but default_action not specificed for table %2%", default_action, t->name);
+        return;
+    }
+    if (default_action->value->is<IR::ExpressionValue>()) {
+        auto expr = default_action->value->to<IR::ExpressionValue>()->expression;
+        BUG_CHECK(expr->is<IR::MethodCallExpression>(),
+            "%1%: expected expression to an action", default_action);
+        auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
+                refMap, typeMap);
+        BUG_CHECK(mi->is<P4::ActionCall>(),
+            "%1%: expected action in default_action", default_action);
+        if (mi->to<P4::ActionCall>()->action->parameters->parameters.size() != 0) {
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "%1%: action cannot have action argument when used with add_on_miss",
+                    default_action);
+        }
+    }
+}
+
+void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
+    auto mce = mcs->methodCall;
+    auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+    if (!mi->is<P4::ExternFunction>()) {
+        return;
+    }
+    auto func = mi->to<P4::ExternFunction>();
+    if (func->method->name != "add_entry") {
+        return;
+    }
+    auto ctxt = findContext<IR::P4Action>();
+    BUG_CHECK(ctxt != nullptr, "%1%: add_entry extern can only be used in an action", mcs);
+
+    // assuming checking on number of arguments is already performed in frontend.
+    BUG_CHECK(mce->arguments->size() == 2, "%1%: expected two arguments in add_entry extern", mcs);
+    auto action = mce->arguments->at(0);
+    // assuming syntax check is already performed earlier
+    auto action_name = action->expression->to<IR::StringLiteral>()->value;
+    structure->learner_actions.insert(action_name);
+    return;
 }
 
 }  // namespace DPDK

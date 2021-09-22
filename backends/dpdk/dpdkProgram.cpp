@@ -23,17 +23,6 @@ limitations under the License.
 #include "lib/stringify.h"
 
 namespace DPDK {
-const IR::DpdkAsmStatement *ConvertToDpdkProgram::createListStatement(
-    cstring name,
-    std::initializer_list<IR::IndexedVector<IR::DpdkAsmStatement>> list) {
-
-    auto stmts = new IR::IndexedVector<IR::DpdkAsmStatement>();
-    for (auto l : list) {
-        stmts->append(l);
-    }
-    return new IR::DpdkListStatement(name, *stmts);
-}
-
 /* Insert the metadata structure updated with tmp variables created during parser conversion
    Add annotations to metadata and header structures and add all the structures to DPDK
    structtype.
@@ -57,8 +46,8 @@ IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata
                 if (structure->args_struct_map.find(s->name.name) !=
                          structure->args_struct_map.end()) {
                     auto st = new IR::DpdkStructType(s->srcInfo, s->name,
-                                                 s->annotations, s->fields);
-                   structType.push_back(st);
+                            s->annotations, s->fields);
+                    structType.push_back(st);
                 } else if (s->name.name == structure->header_type) {
                     auto *annotations = new IR::Annotations(
                         {new IR::Annotation(IR::ID("__packet_data__"), {})});
@@ -77,6 +66,40 @@ IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata
     prog->objects = *new_objs;
     return structType;
 }
+
+IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_pna_preamble() {
+    IR::IndexedVector<IR::DpdkAsmStatement> instr;
+    instr.push_back(new IR::DpdkRxStatement(
+        new IR::Member(new IR::PathExpression("m"), "pna_main_input_metadata_input_port")));
+    return instr;
+}
+
+IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_preamble() {
+    IR::IndexedVector<IR::DpdkAsmStatement> instr;
+    instr.push_back(new IR::DpdkRxStatement(
+        new IR::Member(new IR::PathExpression("m"), "psa_ingress_input_metadata_ingress_port")));
+    instr.push_back(new IR::DpdkMovStatement(
+        new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
+        new IR::Constant(0)));
+    return instr;
+}
+
+IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_pna_postamble() {
+    IR::IndexedVector<IR::DpdkAsmStatement> instr;
+    instr.push_back(new IR::DpdkTxStatement(
+        new IR::Member(new IR::PathExpression("m"), "pna_main_output_metadata_egress_port")));
+    return instr;
+}
+
+IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_postamble() {
+    IR::IndexedVector<IR::DpdkAsmStatement> instr;
+    instr.push_back(new IR::DpdkTxStatement(
+        new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_egress_port")));
+    instr.push_back(new IR::DpdkLabelStatement("drop"));
+    instr.push_back(new IR::DpdkDropStatement());
+    return instr;
+}
+
 
 const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     IR::Type_Struct *metadataStruct = nullptr;
@@ -137,19 +160,28 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             BUG("Unknown deparser block %s", kv.second->name);
     }
 
-    auto s = createListStatement(
-        "ingress", {ingress_parser_converter->getInstructions(),
-                    ingress_converter->getInstructions(),
-                    ingress_deparser_converter->getInstructions(),
-                    egress_parser_converter->getInstructions(),
-                    egress_converter->getInstructions(),
-                    egress_deparser_converter->getInstructions(),
-                    });
-    statements.push_back(s);
+    IR::IndexedVector<IR::DpdkAsmStatement> instr;
+    if (structure->p4arch == "pna")
+        instr.append(create_pna_preamble());
+    else if (structure->p4arch == "psa")
+        instr.append(create_psa_preamble());
+
+    instr.append(ingress_parser_converter->getInstructions());
+    instr.append(ingress_converter->getInstructions());
+    instr.append(ingress_deparser_converter->getInstructions());
+    instr.append(egress_parser_converter->getInstructions());
+    instr.append(egress_converter->getInstructions());
+    instr.append(egress_deparser_converter->getInstructions());
+
+    if (structure->p4arch == "pna")
+        instr.append(create_pna_postamble());
+    else if (structure->p4arch == "psa")
+        instr.append(create_psa_postamble());
+
+    statements.push_back(new IR::DpdkListStatement(instr));
 
     IR::IndexedVector<IR::DpdkHeaderType> headerType;
     for (auto kv : structure->header_types) {
-        LOG3("add header type " << kv.second);
         auto h = kv.second;
         auto ht = new IR::DpdkHeaderType(h->srcInfo, h->name, h->annotations,
                                          h->fields);
@@ -179,13 +211,15 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     auto selectors = ingress_converter->getSelectors();
     selectors.append(egress_converter->getSelectors());
 
+    auto learners = ingress_converter->getLearners();
+    learners.append(egress_converter->getLearners());
+
     return new IR::DpdkAsmProgram(
-        headerType, structType, dpdkExternDecls, actions, tables, selectors,
+        headerType, structType, dpdkExternDecls, actions, tables, selectors, learners,
         statements, structure->get_globals());
 }
 
 const IR::Node *ConvertToDpdkProgram::preorder(IR::P4Program *prog) {
-    // std::cout << prog << std::endl;
     dpdk_program = create(prog);
     return prog;
 }
@@ -540,28 +574,33 @@ boost::optional<int> ConvertToDpdkControl::getNumberFromProperty(const IR::P4Tab
 
 
 bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
-    if (checkTableValid(t)) {
-        if (t->properties->getProperty("selector") != nullptr) {
-            auto group_id = getIdFromProperty(t, "group_id");
-            auto member_id = getIdFromProperty(t, "member_id");
-            auto selector_key = t->properties->getProperty("selector");
-            auto n_groups_max = getNumberFromProperty(t, "n_groups_max");
-            auto n_members_per_group_max = getNumberFromProperty(t, "n_members_per_group_max");
+    if (!checkTableValid(t))
+        return false;
 
-            if (group_id == boost::none || member_id == boost::none ||
+    if (t->properties->getProperty("selector") != nullptr) {
+        auto group_id = getIdFromProperty(t, "group_id");
+        auto member_id = getIdFromProperty(t, "member_id");
+        auto selector_key = t->properties->getProperty("selector");
+        auto n_groups_max = getNumberFromProperty(t, "n_groups_max");
+        auto n_members_per_group_max = getNumberFromProperty(t, "n_members_per_group_max");
+
+        if (group_id == boost::none || member_id == boost::none ||
                 n_groups_max == boost::none || n_members_per_group_max == boost::none)
-                return false;
+            return false;
 
-            auto selector = new IR::DpdkSelector(t->name,
+        auto selector = new IR::DpdkSelector(t->name,
                 *group_id, *member_id, selector_key->value->to<IR::Key>(),
                 *n_groups_max, *n_members_per_group_max);
 
-            selectors.push_back(selector);
-        } else {
-            auto table = new IR::DpdkTable(t->name.toString(), t->getKey(), t->getActionList(),
-                    t->getDefaultAction(), t->properties);
-            tables.push_back(table);
-        }
+        selectors.push_back(selector);
+    } else if (structure->learner_tables.count(t->name.name) != 0) {
+        auto learner = new IR::DpdkLearner(t->name, t->getKey(), t->getActionList(),
+                t->getDefaultAction(), t->properties);
+        learners.push_back(learner);
+    } else {
+        auto table = new IR::DpdkTable(t->name.toString(), t->getKey(), t->getActionList(),
+                t->getDefaultAction(), t->properties);
+        tables.push_back(table);
     }
     return false;
 }

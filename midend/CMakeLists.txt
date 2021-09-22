@@ -35,6 +35,7 @@ set (MIDEND_SRCS
   parserUnroll.cpp
   predication.cpp
   removeAssertAssume.cpp
+  removeComplexExpressions.cpp
   removeExits.cpp
   removeLeftSlices.cpp
   removeMiss.cpp
@@ -78,6 +79,7 @@ set (MIDEND_HDRS
   parserUnroll.h
   predication.h
   removeAssertAssume.h
+  removeComplexExpressions.h
   removeExits.h
   removeLeftSlices.h
   removeMiss.h
