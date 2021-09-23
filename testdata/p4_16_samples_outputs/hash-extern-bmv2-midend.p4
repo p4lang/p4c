@@ -93,7 +93,7 @@ control ingress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_
     apply {
         tbl_send_to_port.apply();
         tbl_hashexternbmv2l85.apply();
-        if (hdr.ipv4.hdrChecksum == 16w0x92b2) {
+        if (hdr.ipv4.hdrChecksum == 16w0xfe82) {
             tbl_hashexternbmv2l87.apply();
         }
     }
