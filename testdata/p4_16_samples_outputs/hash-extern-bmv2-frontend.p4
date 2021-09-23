@@ -73,7 +73,7 @@ control ingress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_
         a_0 = 12w0x456;
         send_to_port_0();
         hdr.ipv4.hdrChecksum = h_0.get_hash<tuple<bit<12>>>({ a_0 });
-        if (hdr.ipv4.hdrChecksum == 16w0x92b2) {
+        if (hdr.ipv4.hdrChecksum == 16w0xfe82) {
             hdr.ethernet.etherType = 16w7;
         }
     }
