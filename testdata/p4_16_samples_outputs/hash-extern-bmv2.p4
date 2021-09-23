@@ -65,7 +65,7 @@ control ingress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_
     apply {
         send_to_port(ostd, istd.ingress_port);
         hdr.ipv4.hdrChecksum = h.get_hash({ a });
-        if (hdr.ipv4.hdrChecksum == 0x92b2) {
+        if (hdr.ipv4.hdrChecksum == 0xfe82) {
             hdr.ethernet.etherType = 7;
         }
     }
