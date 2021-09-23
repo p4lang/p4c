@@ -634,6 +634,24 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     json->add_meta_info();
 }
 
+cstring PsaProgramStructure::convertHashAlgorithm(cstring algo) {
+    cstring result;
+
+    if (algo == "CRC16") {
+        result = "crc16";
+    } else if (algo == "CRC16_CUSTOM") {
+        result = "crc16_custom";
+    } else if (algo == "CRC32") {
+        result = "crc32";
+    } else if (algo == "CRC32_CUSTOM") {
+        result = "crc32_custom";
+    } else if (algo == "IDENTITY") {
+        result  = "identity";
+    }
+
+    return result;
+}
+
 ExternConverter_Hash ExternConverter_Hash::singleton;
 ExternConverter_Checksum ExternConverter_Checksum::singleton;
 ExternConverter_InternetChecksum ExternConverter_InternetChecksum::singleton;
@@ -648,10 +666,47 @@ ExternConverter_ActionSelector ExternConverter_ActionSelector::singleton;
 ExternConverter_Digest ExternConverter_Digest::singleton;
 
 Util::IJson* ExternConverter_Hash::convertExternObject(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED ConversionContext* ctxt, const P4::ExternMethod* em,
+    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
-    auto primitive = mkPrimitive("Hash");
+    Util::JsonObject* primitive = nullptr;
+    if (mc->arguments->size() == 2)
+        primitive = mkPrimitive("_" + em->originalExternType->name +
+                                "_" + em->method->name);
+    else if (mc->arguments->size() == 4)
+        primitive = mkPrimitive("_" + em->originalExternType->name +
+                                "_" + "get_hash_mod");
+    else {
+        modelError("Expected 1 or 3 arguments for %1%", mc);
+        return nullptr;
+    }
+    auto parameters = mkParameters(primitive);
+    primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    auto hash = new Util::JsonObject();
+    hash->emplace("type", "extern");
+    hash->emplace("value", em->object->controlPlaneName());
+    parameters->append(hash);
+    if (mc->arguments->size() == 2) {  // get_hash
+        auto dst = ctxt->conv->convertLeftValue(mc->arguments->at(0)->expression);
+        auto fieldList = new Util::JsonObject();
+        fieldList->emplace("type", "field_list");
+        auto fieldsJson = ctxt->conv->convert(mc->arguments->at(1)->expression, true, false);
+        fieldList->emplace("value", fieldsJson);
+        parameters->append(dst);
+        parameters->append(fieldList);
+    } else {  // get_hash with base and mod
+        auto dst = ctxt->conv->convertLeftValue(mc->arguments->at(0)->expression);
+        auto base = ctxt->conv->convert(mc->arguments->at(1)->expression);
+        auto fieldList = new Util::JsonObject();
+        fieldList->emplace("type", "field_list");
+        auto fieldsJson = ctxt->conv->convert(mc->arguments->at(2)->expression, true, false);
+        fieldList->emplace("value", fieldsJson);
+        auto max = ctxt->conv->convert(mc->arguments->at(3)->expression);
+        parameters->append(dst);
+        parameters->append(base);
+        parameters->append(fieldList);
+        parameters->append(max);
+    }
     return primitive;
 }
 
@@ -894,9 +949,42 @@ Util::IJson* ExternConverter_Digest::convertExternObject(
 }
 
 void ExternConverter_Hash::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns)
-{ /* TODO */ }
+    ConversionContext* ctxt, const IR::Declaration* c,
+    const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+    auto inst = c->to<IR::Declaration_Instance>();
+    cstring name = inst->controlPlaneName();
+    auto psaStructure = static_cast<PsaProgramStructure *>(ctxt->structure);
+
+    // add hash instance
+    auto jhash=new Util::JsonObject();
+    jhash->emplace("name", name);
+    jhash->emplace("id", nextId("extern_instances"));
+    jhash->emplace("type", eb->getName());
+    jhash->emplace_non_null("source_info", inst->sourceInfoJsonObj());
+    ctxt->json->externs->append(jhash);
+
+        // add attributes
+    if (eb->getConstructorParameters()->size() != 1) {
+      modelError("%1%: expected one parameter", eb);
+      return;
+    }
+
+    Util::JsonArray *arr = ctxt->json->insert_array_field(jhash, "attribute_values");
+
+    auto algo = eb->findParameterValue("algo");
+    CHECK_NULL(algo);
+    if (!algo->is<IR::Declaration_ID>()) {
+        modelError("%1%: expected a declaration", algo->getNode());
+        return;
+    }
+    cstring algo_name = algo->to<IR::Declaration_ID>()->name;
+    algo_name = psaStructure->convertHashAlgorithm(algo_name);
+    auto k = new Util::JsonObject();
+    k->emplace("name", "algo");
+    k->emplace("type", "string");
+    k->emplace("value", algo_name);
+    arr->append(k);
+}
 
 void ExternConverter_Checksum::convertExternInstance(
     UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
