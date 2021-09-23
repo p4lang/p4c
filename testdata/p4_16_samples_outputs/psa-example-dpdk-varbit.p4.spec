@@ -214,8 +214,10 @@ apply {
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_IPV4_OPTION_TIMESTAMP1 :	jmpeq MYIP_ACCEPT 0 0
 	mov metadata 0x3
-	MYIP_ACCEPT :	table tbl
+	MYIP_ACCEPT :	mov m.Ingress_tbl_0_member_id 0x0
+	table tbl
 	table tbl_0_member_table
+	mov m.Ingress_tbl2_0_member_id 0x0
 	table tbl2
 	table tbl2_0_member_table
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
