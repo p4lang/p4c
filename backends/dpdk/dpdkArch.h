@@ -189,6 +189,7 @@ class ExpressionUnroll : public Inspector {
     bool preorder(const IR::Operation_Unary *a) override;
     bool preorder(const IR::Operation_Binary *a) override;
     bool preorder(const IR::MethodCallExpression *a) override;
+    bool preorder(const IR::Cast *a) override;
     bool preorder(const IR::Member *a) override;
     bool preorder(const IR::PathExpression *a) override;
     bool preorder(const IR::Constant *a) override;
