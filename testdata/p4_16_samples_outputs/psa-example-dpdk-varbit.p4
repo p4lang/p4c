@@ -1,9 +1,6 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-struct EMPTY {
-}
-
 typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
@@ -43,6 +40,9 @@ struct headers_t {
     ipv4_option_timestamp_t ipv4_option_timestamp;
 }
 
+struct EMPTY {
+}
+
 parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
     state start {
         packet.extract(hdr.ethernet);
@@ -60,7 +60,7 @@ parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_p
     }
     state parse_ipv4_option_timestamp {
         ipv4_options_t tmp_hdr = packet.lookahead<ipv4_options_t>();
-        packet.extract(hdr.ipv4_option_timestamp, (bit<32>)((bit<32>)tmp_hdr.len * 8 - 16));
+        packet.extract(hdr.ipv4_option_timestamp, (bit<32>)tmp_hdr.len * 8 - 16);
         transition parse_ipv4_options;
     }
     state parse_ipv4_options {

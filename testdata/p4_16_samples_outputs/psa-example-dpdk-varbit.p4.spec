@@ -208,7 +208,7 @@ apply {
 	shl m.IngressParser_parser_tmp_4 0x3
 	mov m.IngressParser_parser_tmp m.IngressParser_parser_tmp_4
 	add m.IngressParser_parser_tmp 0xfffffff0
-	extract h.ipv4_option_timestampm.IngressParser_parser_tmp
+	extract h.ipv4_option_timestamp m.IngressParser_parser_tmp
 	lookahead m.IngressParser_parser_tmp_0
 	jmpeq MYIP_PARSE_IPV4_OPTION_TIMESTAMP1 m.IngressParser_parser_tmp_0 0x44
 	jmp MYIP_ACCEPT
