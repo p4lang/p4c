@@ -42,9 +42,8 @@ p4c_add_xfail_reason("dpdk"
 )
 
 p4c_add_xfail_reason("dpdk"
-  "error: AssignmentStatement"
-  testdata/p4_16_samples/psa-multicast-basic-2-bmv2.p4
-  testdata/p4_16_samples/psa-unicast-or-drop-bmv2.p4
+  "not implemented"
+  testdata/p4_16_samples/psa-example-register2-bmv2.p4
 )
 
 p4c_add_xfail_reason("dpdk"
