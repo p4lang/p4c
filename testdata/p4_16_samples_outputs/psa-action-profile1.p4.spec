@@ -120,6 +120,7 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
+	mov m.Ingress_tbl_0_member_id 0x0
 	table tbl
 	table tbl_0_member_table
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0

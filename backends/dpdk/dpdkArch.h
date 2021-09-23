@@ -549,6 +549,8 @@ class SplitP4TableCommon : public Transform {
     std::set<cstring> match_tables;
     std::map<cstring, cstring> group_tables;
     std::map<cstring, cstring> member_tables;
+    std::map<cstring, cstring> member_ids;
+    std::map<cstring, cstring> group_ids;
 
     SplitP4TableCommon(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) :
         refMap(refMap), typeMap(typeMap) {
