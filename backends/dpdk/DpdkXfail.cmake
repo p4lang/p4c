@@ -85,7 +85,3 @@ p4c_add_xfail_reason("dpdk"
   testdata/p4_16_samples/psa-dpdk-lpm-match-err2.p4
   )
 
-p4c_add_xfail_reason("dpdk"
-  "Compiler Bug: Not Implemented"
-  testdata/p4_16_samples/psa-example-dpdk-varbit.p4
-  )
