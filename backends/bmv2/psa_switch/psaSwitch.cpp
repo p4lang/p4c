@@ -697,7 +697,7 @@ Util::IJson* ExternConverter_Hash::convertExternObject(
     } else {  // get_hash with base and mod
         auto dst = ctxt->conv->convertLeftValue(mc->arguments->at(0)->expression);
         auto base = ctxt->conv->convert(mc->arguments->at(1)->expression);
-        auto fieldList=new Util::JsonObject();
+        auto fieldList = new Util::JsonObject();
         fieldList->emplace("type", "field_list");
         auto fieldsJson = ctxt->conv->convert(mc->arguments->at(2)->expression, true, false);
         fieldList->emplace("value", fieldsJson);
