@@ -1176,6 +1176,8 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
 
     cstring group_id = refMap->newName(tbl->name + "_group_id");
     cstring member_id = refMap->newName(tbl->name + "_member_id");
+    member_ids.emplace(tbl->name, member_id);
+    group_ids.emplace(tbl->name, group_id);
 
     auto group_id_decl = new IR::Declaration_Variable(group_id, IR::Type_Bits::get(32));
     auto member_id_decl = new IR::Declaration_Variable(member_id, IR::Type_Bits::get(32));
@@ -1227,6 +1229,7 @@ const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
 
     auto decls = new IR::IndexedVector<IR::Declaration>();
     cstring member_id = refMap->newName(tbl->name + "_member_id");
+    member_ids.emplace(tbl->name, member_id);
 
     auto member_id_decl = new IR::Declaration_Variable(member_id, IR::Type_Bits::get(32));
     decls->push_back(member_id_decl);
@@ -1265,8 +1268,23 @@ const IR::Node* SplitP4TableCommon::postorder(IR::MethodCallStatement *statement
         if (match_tables.count(table->name) == 0)
             return statement;
         auto decls = new IR::IndexedVector<IR::StatOrDecl>();
-        decls->push_back(statement);
         auto tableName = apply->object->getName().name;
+
+        // member_id and/or group_id must be initialized prior to member table apply.
+        if (member_ids.count(tableName) != 0) {
+            auto member_id = member_ids.at(tableName);
+            decls->push_back(new IR::AssignmentStatement(
+                        new IR::PathExpression(member_id),
+                        new IR::Constant(IR::Type_Bits::get(32), 0))); }
+
+        if (group_ids.count(tableName) != 0) {
+            auto group_id = group_ids.at(tableName);
+            decls->push_back(new IR::AssignmentStatement(
+                        new IR::PathExpression(group_id),
+                        new IR::Constant(IR::Type_Bits::get(32), 0))); }
+
+        decls->push_back(statement);
+
         if (implementation == TableImplementation::ACTION_SELECTOR) {
             if (group_tables.count(tableName) == 0) {
                 ::error("Unable to find group table %1%", tableName);
@@ -1279,6 +1297,7 @@ const IR::Node* SplitP4TableCommon::postorder(IR::MethodCallStatement *statement
             ::error("Unable to find member table %1%", tableName);
             return statement;
         }
+
         auto memberTable = member_tables.at(tableName);
         decls->push_back(gen_apply(memberTable));
         return new IR::BlockStatement(*decls);
