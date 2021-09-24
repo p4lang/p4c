@@ -42,14 +42,12 @@ p4c_add_xfail_reason("dpdk"
 )
 
 p4c_add_xfail_reason("dpdk"
-  "error: AssignmentStatement"
-  testdata/p4_16_samples/psa-multicast-basic-2-bmv2.p4
-  testdata/p4_16_samples/psa-unicast-or-drop-bmv2.p4
+  "not implemented"
+  testdata/p4_16_samples/psa-example-register2-bmv2.p4
 )
 
 p4c_add_xfail_reason("dpdk"
   "Not Implemented"
-  testdata/p4_16_samples/psa-example-register2-bmv2.p4
   testdata/p4_16_samples/psa-register-read-write-2-bmv2.p4
   testdata/p4_16_samples/psa-end-of-ingress-test-bmv2.p4
   )
@@ -85,7 +83,3 @@ p4c_add_xfail_reason("dpdk"
   testdata/p4_16_samples/psa-dpdk-lpm-match-err2.p4
   )
 
-p4c_add_xfail_reason("dpdk"
-  "Compiler Bug: Not Implemented"
-  testdata/p4_16_samples/psa-example-dpdk-varbit.p4
-  )

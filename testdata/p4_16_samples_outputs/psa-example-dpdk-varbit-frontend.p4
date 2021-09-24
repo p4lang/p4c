@@ -1,9 +1,6 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-struct EMPTY {
-}
-
 typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
@@ -41,6 +38,9 @@ struct headers_t {
     ethernet_t              ethernet;
     ipv4_base_t             ipv4_base;
     ipv4_option_timestamp_t ipv4_option_timestamp;
+}
+
+struct EMPTY {
 }
 
 parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {

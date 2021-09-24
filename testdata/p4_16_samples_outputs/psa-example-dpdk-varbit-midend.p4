@@ -1,9 +1,6 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-struct EMPTY {
-}
-
 typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
@@ -41,6 +38,9 @@ struct headers_t {
     ethernet_t              ethernet;
     ipv4_base_t             ipv4_base;
     ipv4_option_timestamp_t ipv4_option_timestamp;
+}
+
+struct EMPTY {
 }
 
 parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
@@ -130,17 +130,17 @@ control MyEC(inout EMPTY a, inout EMPTY b, in psa_egress_input_metadata_t c, ino
 }
 
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in EMPTY e, in psa_ingress_output_metadata_t f) {
-    @hidden action psaexampledpdkvarbit141() {
+    @hidden action psaexampledpdkvarbit140() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psaexampledpdkvarbit141 {
+    @hidden table tbl_psaexampledpdkvarbit140 {
         actions = {
-            psaexampledpdkvarbit141();
+            psaexampledpdkvarbit140();
         }
-        const default_action = psaexampledpdkvarbit141();
+        const default_action = psaexampledpdkvarbit140();
     }
     apply {
-        tbl_psaexampledpdkvarbit141.apply();
+        tbl_psaexampledpdkvarbit140.apply();
     }
 }
 

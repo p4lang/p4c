@@ -51,8 +51,17 @@ void IR::DpdkListStatement::dbprint(std::ostream& out) const {
 }
 
 void IR::DpdkExtractStatement::dbprint(std::ostream& out) const {
+    out << "extract " << header;
+    if (length)
+        out << length << std::endl;
+    else
+        out << std::endl;
+}
+
+void IR::DpdkLookaheadStatement::dbprint(std::ostream& out) const {
     out << "extract " << header << std::endl;
 }
+
 
 void IR::DpdkJmpEqualStatement::dbprint(std::ostream& out) const {
     out << "jmpeq " << label << " " << src1 << " " << src2 << std::endl;

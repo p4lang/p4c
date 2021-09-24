@@ -1,8 +1,6 @@
 #include <core.p4>
 #include <psa.p4>
 
-struct EMPTY { };
-
 typedef bit<48>  EthernetAddress;
 
 header ethernet_t {
@@ -43,6 +41,7 @@ struct headers_t {
     ipv4_option_timestamp_t ipv4_option_timestamp;
 }
 
+struct EMPTY { };
 
 parser MyIP(
     packet_in packet,
@@ -68,7 +67,7 @@ parser MyIP(
     }
     state parse_ipv4_option_timestamp {
         ipv4_options_t tmp_hdr = packet.lookahead<ipv4_options_t>();
-        packet.extract(hdr.ipv4_option_timestamp, (bit<32>)((bit<32>)tmp_hdr.len * 8 - 16));
+        packet.extract(hdr.ipv4_option_timestamp, (bit<32>)tmp_hdr.len * 8 - 16);
         transition parse_ipv4_options;
     }
     state parse_ipv4_options {

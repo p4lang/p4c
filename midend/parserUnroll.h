@@ -22,6 +22,7 @@ limitations under the License.
 #include "frontends/p4/callGraph.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "frontends/p4/simplify.h"
 #include "interpreter.h"
 
 namespace P4 {
@@ -221,6 +222,8 @@ class RewriteAllParsers : public Transform {
 class ParsersUnroll : public PassManager {
  public:
     ParsersUnroll(bool unroll, ReferenceMap* refMap, TypeMap* typeMap) {
+        // remove block statements
+        passes.push_back(new SimplifyControlFlow(refMap, typeMap));
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new RewriteAllParsers(refMap, typeMap, unroll));
         setName("ParsersUnroll");
