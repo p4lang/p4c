@@ -20,7 +20,7 @@ make adding new backends easy.
 The code contains five sample backends:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
   the BMv2 behavioral model https://github.com/p4lang/behavioral-model,
-* p4c-dpdk: can be used to target the DPDK software switch (SXS) pipeline 
+* p4c-dpdk: can be used to target the DPDK software switch (SXS) pipeline
   https://doc.dpdk.org/guides/rel_notes/release_20_11.html,
 * p4c-ebpf: can be used to generate C code which can be compiled to eBPF
   https://en.wikipedia.org/wiki/Berkeley_Packet_Filter and then loaded
@@ -253,6 +253,22 @@ Please note that while all protobuf versions newer than 3.0 should work for
 `p4c` itself, you may run into trouble with some extensions and other p4lang
 projects unless you install version 3.6.1, so you may want to install from
 source even on newer releases of Ubuntu.
+
+## Fedora dependencies
+
+```bash
+sudo dnf install -y cmake g++ git automake libtool gc-devel bison flex \
+libfl-devel gmp-devel boost-devel boost-iostreams boost-graph llvm pkg-config \
+python3 python3-pip tcpdump protobuf-devel protobuf-static
+
+sudo pip3 install scapy ply
+```
+
+For documentation building:
+
+```bash
+sudo dnf install -y doxygen graphviz texlive-scheme-full
+```
 
 ## macOS dependencies
 
