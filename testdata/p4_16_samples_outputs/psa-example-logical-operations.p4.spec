@@ -85,10 +85,10 @@ apply {
 	table tbl
 	mov h.dstAddr m.local_metadata_meta
 	mov h.srcAddr m.local_metadata_meta2
-	cast  m.local_metadata_meta3 bit_16 h.etherType
+	mov  m.local_metadata_meta3 h.etherType
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port
-	drop
+	LABEL_DROP :	drop
 }
 
 

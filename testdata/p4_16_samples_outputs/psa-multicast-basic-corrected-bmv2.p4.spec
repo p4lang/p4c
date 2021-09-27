@@ -61,13 +61,13 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	mov m.psa_ingress_output_metadata_drop 0
-	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_multicast_group
+	mov  h.ethernet.dstAddr m.psa_ingress_output_metadata_multicast_group
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	extract h.ethernet
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
-	drop
+	LABEL_DROP :	drop
 }
 
 

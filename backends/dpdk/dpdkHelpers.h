@@ -127,12 +127,13 @@ class ConvertStatementToDpdk : public Inspector {
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;
     const IR::P4Parser *parser = nullptr;
+    IR::Type_Struct *metadataStruct;
 
   public:
     ConvertStatementToDpdk(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
-        DpdkProgramStructure *structure)
-        : typemap(typemap), refmap(refmap), structure(structure) {}
+        DpdkProgramStructure *structure, IR::Type_Struct *metadataStruct)
+        : typemap(typemap), refmap(refmap), structure(structure), metadataStruct(metadataStruct) {}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
         return instructions;
     }
@@ -142,6 +143,7 @@ class ConvertStatementToDpdk : public Inspector {
     bool preorder(const IR::IfStatement *a) override;
     bool preorder(const IR::MethodCallStatement *a) override;
     bool preorder(const IR::SwitchStatement* a) override;
+    IR::Declaration_Variable *addNewTmpVarToMetadata (cstring name, const IR::Type* type);
 
     void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
     IR::IndexedVector<IR::DpdkAsmStatement> &get_instr() { return instructions; }

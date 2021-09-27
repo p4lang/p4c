@@ -21,6 +21,15 @@ namespace DPDK {
 
 int ConvertStatementToDpdk::next_label_id = 0;
 
+IR::Declaration_Variable *ConvertStatementToDpdk::addNewTmpVarToMetadata(cstring name,
+                                                                         const IR::Type* type) {
+    auto newTmpVar =  new IR::Declaration_Variable(IR::ID(
+                                                   refmap->newName(name)), type);
+    metadataStruct->fields.push_back(new IR::StructField(IR::ID
+                                     (newTmpVar->name.name), newTmpVar->type));
+    return newTmpVar;
+}
+
 // convert relation comparison statements into the corresponding branching
 // instructions in dpdk.
 void ConvertStatementToDpdk::process_relation_operation(const IR::Expression* dst,
@@ -619,11 +628,20 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 ::error("%1%: must be one of the existing errors", s);
             auto error_id = structure->error_map.at(error->expression->to<IR::Member>()->member);
             auto end_label = Util::printf_format("label_%dend", next_label_id++);
-            add_instr(new IR::DpdkJmpEqualStatement(
-                        end_label,
-                        condition->expression, new IR::BoolLiteral(false)));
-            add_instr(new IR::DpdkMovStatement(
-                        new IR::PathExpression("metadata"), new IR::Constant(error_id)));
+            if (condition->expression->is<IR::BoolLiteral>()) {
+                auto tmpDecl = addNewTmpVarToMetadata("tmpVerify", condition->expression->type);
+                auto tmpVerify = new IR::PathExpression(IR::ID("m." + tmpDecl->name.name));
+                add_instr(new IR::DpdkMovStatement(tmpVerify, condition->expression));
+                add_instr(new IR::DpdkJmpNotEqualStatement(end_label, tmpVerify,
+                                                           new IR::BoolLiteral(false)));
+            } else {
+                add_instr(new IR::DpdkJmpNotEqualStatement(
+                            end_label,
+                            condition->expression, new IR::BoolLiteral(false)));
+            }
+            auto tmp = new IR::PathExpression(
+                                   IR::ID("m.psa_ingress_input_metadata_parser_error"));
+            add_instr(new IR::DpdkMovStatement(tmp, new IR::Constant(error_id)));
             add_instr(new IR::DpdkJmpLabelStatement(
                         append_parser_name(parser, IR::ParserState::reject)));
             add_instr(new IR::DpdkLabelStatement(end_label));
@@ -662,7 +680,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             BUG("%1% function not implemented.", s);
         }
     } else if (auto a = mi->to<P4::ActionCall>()) {
-        auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
+        auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure, nullptr);
         a->action->body->apply(*helper);
         for (auto i : helper->get_instr()) {
             add_instr(i);

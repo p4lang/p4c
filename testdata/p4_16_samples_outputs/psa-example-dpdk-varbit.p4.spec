@@ -87,6 +87,7 @@ struct EMPTY {
 	ipv4_options_t IngressParser_parser_tmp_hdr_0
 	bit<8> IngressParser_parser_tmp_0
 	bit<16> IngressParser_parser_tmp_1
+	bit<8> tmpVerify
 }
 metadata instanceof EMPTY
 
@@ -201,9 +202,9 @@ apply {
 	validate m.IngressParser_parser_tmp_hdr_0
 	mov m.IngressParser_parser_tmp_2 m.IngressParser_parser_tmp_1
 	shr m.IngressParser_parser_tmp_2 0x8
-	cast  m.IngressParser_parser_tmp_2 bit_8 m.IngressParser_parser_tmp_hdr_0.value
-	cast  m.IngressParser_parser_tmp_1 bit_8 m.IngressParser_parser_tmp_hdr_0.len
-	cast  m.IngressParser_parser_tmp_1 bit_32 m.IngressParser_parser_tmp_3
+	mov  m.IngressParser_parser_tmp_2 m.IngressParser_parser_tmp_hdr_0.value
+	mov  m.IngressParser_parser_tmp_1 m.IngressParser_parser_tmp_hdr_0.len
+	mov  m.IngressParser_parser_tmp_1 m.IngressParser_parser_tmp_3
 	mov m.IngressParser_parser_tmp_4 m.IngressParser_parser_tmp_3
 	shl m.IngressParser_parser_tmp_4 0x3
 	mov m.IngressParser_parser_tmp m.IngressParser_parser_tmp_4
@@ -212,8 +213,9 @@ apply {
 	lookahead m.IngressParser_parser_tmp_0
 	jmpeq MYIP_PARSE_IPV4_OPTION_TIMESTAMP1 m.IngressParser_parser_tmp_0 0x44
 	jmp MYIP_ACCEPT
-	MYIP_PARSE_IPV4_OPTION_TIMESTAMP1 :	jmpeq MYIP_ACCEPT 0 0
-	mov metadata 0x3
+	MYIP_PARSE_IPV4_OPTION_TIMESTAMP1 :	mov m.tmpVerify 0
+	jmpneq MYIP_ACCEPT m.tmpVerify 0
+	mov m.psa_ingress_input_metadata_parser_error 0x3
 	MYIP_ACCEPT :	mov m.Ingress_tbl_0_member_id 0x0
 	table tbl
 	table tbl_0_member_table
@@ -223,7 +225,7 @@ apply {
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
-	drop
+	LABEL_DROP :	drop
 }
 
 

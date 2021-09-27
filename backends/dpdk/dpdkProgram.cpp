@@ -95,7 +95,7 @@ IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_postamb
     IR::IndexedVector<IR::DpdkAsmStatement> instr;
     instr.push_back(new IR::DpdkTxStatement(
         new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_egress_port")));
-    instr.push_back(new IR::DpdkLabelStatement("drop"));
+    instr.push_back(new IR::DpdkLabelStatement("label_drop"));
     instr.push_back(new IR::DpdkDropStatement());
     return instr;
 }
@@ -357,7 +357,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
             add_instr(i);
         auto c = state->components;
         for (auto stat : c) {
-            DPDK::ConvertStatementToDpdk h(refmap, typemap, structure);
+            DPDK::ConvertStatementToDpdk h(refmap, typemap, structure, metadataStruct);
             h.set_parser(p);
             stat->apply(h);
             for (auto i : h.get_instr())
@@ -476,7 +476,7 @@ bool ConvertToDpdkParser::preorder(const IR::ParserState *) { return false; }
 
 // =====================Control=============================
 bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
-    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
+    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure, nullptr);
     a->body->apply(*helper);
     auto stmt_list = new IR::IndexedVector<IR::DpdkAsmStatement>();
     for (auto i : helper->get_instr())
@@ -611,7 +611,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
             structure->push_variable(new IR::DpdkDeclaration(l));
         }
     }
-    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
+    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure, nullptr);
     c->body->apply(*helper);
     if (deparser) {
         add_inst(new IR::DpdkJmpNotEqualStatement("LABEL_DROP",
