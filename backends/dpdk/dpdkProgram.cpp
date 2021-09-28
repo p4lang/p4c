@@ -357,7 +357,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
             add_instr(i);
         auto c = state->components;
         for (auto stat : c) {
-            DPDK::ConvertStatementToDpdk h(refmap, typemap, structure, metadataStruct);
+            DPDK::ConvertStatementToDpdk h(refmap, typemap, structure);
             h.set_parser(p);
             stat->apply(h);
             for (auto i : h.get_instr())
@@ -476,7 +476,7 @@ bool ConvertToDpdkParser::preorder(const IR::ParserState *) { return false; }
 
 // =====================Control=============================
 bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
-    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure, nullptr);
+    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
     a->body->apply(*helper);
     auto stmt_list = new IR::IndexedVector<IR::DpdkAsmStatement>();
     for (auto i : helper->get_instr())
@@ -611,7 +611,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
             structure->push_variable(new IR::DpdkDeclaration(l));
         }
     }
-    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure, nullptr);
+    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
     c->body->apply(*helper);
     if (deparser) {
         add_inst(new IR::DpdkJmpNotEqualStatement("LABEL_DROP",

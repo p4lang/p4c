@@ -87,7 +87,6 @@ struct EMPTY {
 	ipv4_options_t IngressParser_parser_tmp_hdr_0
 	bit<8> IngressParser_parser_tmp_0
 	bit<16> IngressParser_parser_tmp_1
-	bit<8> tmpVerify
 }
 metadata instanceof EMPTY
 
@@ -213,9 +212,7 @@ apply {
 	lookahead m.IngressParser_parser_tmp_0
 	jmpeq MYIP_PARSE_IPV4_OPTION_TIMESTAMP1 m.IngressParser_parser_tmp_0 0x44
 	jmp MYIP_ACCEPT
-	MYIP_PARSE_IPV4_OPTION_TIMESTAMP1 :	mov m.tmpVerify 0
-	jmpneq MYIP_ACCEPT m.tmpVerify 0
-	mov m.psa_ingress_input_metadata_parser_error 0x3
+	MYIP_PARSE_IPV4_OPTION_TIMESTAMP1 :	mov m.psa_ingress_input_metadata_parser_error 0x3
 	MYIP_ACCEPT :	mov m.Ingress_tbl_0_member_id 0x0
 	table tbl
 	table tbl_0_member_table
