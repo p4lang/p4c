@@ -1,0 +1,15 @@
+stack-bvec-bmv2.p4(38): [--Wwarn=invalid_header] warning: accessing a field of an invalid header tmp[0]
+ tmp[0].row.alt1.valid = 1;
+ ^^^^^^
+stack-bvec-bmv2.p4(39): [--Wwarn=invalid_header] warning: accessing a field of an invalid header tmp[0]
+ tmp[0].f = h.f + 1;
+ ^^^^^^
+stack-bvec-bmv2.p4(40): [--Wwarn=invalid_header] warning: accessing a field of an invalid header tmp[0]
+ h.f = tmp[0].f;
+       ^^^^^^
+stack-bvec-bmv2.p4(41): [--Wwarn=invalid_header] warning: accessing a field of an invalid header tmp[0]
+ tmp[0].row.alt0.port = h.row.alt0.port + 1;
+ ^^^^^^
+stack-bvec-bmv2.p4(42): [--Wwarn=invalid_header] warning: accessing a field of an invalid header tmp[0]
+ h.row.alt1.valid = tmp[0].row.alt1.valid;
+                    ^^^^^^
