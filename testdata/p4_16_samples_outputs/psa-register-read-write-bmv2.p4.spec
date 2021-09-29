@@ -68,7 +68,7 @@ apply {
 	regrd h.ethernet.dstAddr regfile_0 0x1
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
-	mov  h.ethernet.dstAddr m.psa_ingress_output_metadata_egress_port
+	mov  m.psa_ingress_output_metadata_egress_port h.ethernet.dstAddr
 	regrd m.Ingress_tmp regfile_0 0x1
 	jmpneq LABEL_0END m.Ingress_tmp 0x0
 	mov m.psa_ingress_output_metadata_drop 1

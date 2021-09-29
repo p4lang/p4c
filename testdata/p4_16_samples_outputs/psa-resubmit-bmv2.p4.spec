@@ -77,7 +77,7 @@ apply {
 	LABEL_0FALSE :	mov h.ethernet.etherType 0xf00d
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
-	mov  h.ethernet.dstAddr m.psa_ingress_output_metadata_egress_port
+	mov  m.psa_ingress_output_metadata_egress_port h.ethernet.dstAddr
 	mov h.output_data.word0 0x8
 	jmpneq LABEL_1FALSE m.psa_ingress_input_metadata_packet_path 0x0
 	mov h.output_data.word0 0x1

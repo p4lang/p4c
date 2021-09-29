@@ -61,7 +61,7 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	mov m.psa_ingress_output_metadata_drop 0
-	mov  h.ethernet.dstAddr m.psa_ingress_output_metadata_multicast_group
+	mov  m.psa_ingress_output_metadata_multicast_group h.ethernet.dstAddr
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	extract h.ethernet

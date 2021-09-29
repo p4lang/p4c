@@ -201,9 +201,9 @@ apply {
 	validate m.IngressParser_parser_tmp_hdr_0
 	mov m.IngressParser_parser_tmp_2 m.IngressParser_parser_tmp_1
 	shr m.IngressParser_parser_tmp_2 0x8
-	mov  m.IngressParser_parser_tmp_2 m.IngressParser_parser_tmp_hdr_0.value
-	mov  m.IngressParser_parser_tmp_1 m.IngressParser_parser_tmp_hdr_0.len
-	mov  m.IngressParser_parser_tmp_1 m.IngressParser_parser_tmp_3
+	mov  m.IngressParser_parser_tmp_hdr_0.value m.IngressParser_parser_tmp_2
+	mov  m.IngressParser_parser_tmp_hdr_0.len m.IngressParser_parser_tmp_1
+	mov  m.IngressParser_parser_tmp_3 m.IngressParser_parser_tmp_1
 	mov m.IngressParser_parser_tmp_4 m.IngressParser_parser_tmp_3
 	shl m.IngressParser_parser_tmp_4 0x3
 	mov m.IngressParser_parser_tmp m.IngressParser_parser_tmp_4
