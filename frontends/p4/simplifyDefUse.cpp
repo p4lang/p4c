@@ -121,19 +121,38 @@ class HeaderDefinitions {
         refMap(refMap), storageMap(storageMap)
         { CHECK_NULL(refMap); CHECK_NULL(storageMap); }
 
-    /// Helper function for getting a storage location from an expression
+    /// A helper function for getting a storage location from an expression.
+    /// In case of accessing a header stack with non-constant index, returns
+    /// a storage location of the header stack itself. If a field is accessed
+    /// after such indexing, it returns nullptr because it is not known to
+    /// which element of the stack that field belongs.
     const StorageLocation* getStorageLocation(const IR::Expression* expression) const {
         if (auto expr = expression->to<IR::PathExpression>()) {
             return storageMap->getStorage(refMap->getDeclaration(expr->path, true));
+        } else if (auto array = expression->to<IR::ArrayIndex>()) {
+            if (auto array_storage = getStorageLocation(array->left)->to<ArrayLocation>()) {
+                if (auto index = array->right->to<IR::Constant>()) {
+                    LocationSet ls;
+                    array_storage->addElement(index->asInt(), &ls);
+                    if (!ls.isEmpty())
+                        return *ls.begin();
+                }
+                return array_storage;
+            }
         } else if (auto expr = expression->to<IR::Member>()) {
-            auto storage = getStorageLocation(expr->expr);
-            if (!storage)
+            auto base_storage = getStorageLocation(expr->expr);
+            if (!base_storage)
                 return nullptr;
-            if (auto struct_storage = storage->to<StructLocation>()) {
+            if (auto struct_storage = base_storage->to<StructLocation>()) {
                 LocationSet ls;
                 struct_storage->addField(expr->member, &ls);
                 if (!ls.isEmpty())
                     return *ls.begin();
+            } else if (base_storage->is<ArrayLocation>() &&
+                       (expr->member == IR::Type_Stack::next ||
+                       expr->member == IR::Type_Stack::last ||
+                       expr->member == IR::Type_Stack::lastIndex)) {
+                return base_storage;
             }
         }
         return nullptr;
@@ -141,26 +160,9 @@ class HeaderDefinitions {
 
     void checkLocation(const StorageLocation* storage) {
         BUG_CHECK(storage->is<StructLocation>() &&
-                        (storage->to<StructLocation>()->isHeader()
-                         || storage->to<StructLocation>()->isHeaderUnion()),
+                        (storage->to<StructLocation>()->isHeader() ||
+                         storage->to<StructLocation>()->isHeaderUnion()),
                 "location %1% is not a header", storage->name);
-    }
-
-    void add(const StorageLocation* storage, TernaryBool valid) {
-        if (!storage)
-            return;
-
-        checkLocation(storage);
-        defs.emplace(storage, valid);
-        notReport.erase(storage);
-    }
-
-    void add(const IR::Expression *expr, TernaryBool valid) {
-        if (!expr)
-            return;
-
-        auto storage = getStorageLocation(expr);
-        add(storage, valid);
     }
 
     void update(const StorageLocation *storage, TernaryBool valid) {
@@ -173,11 +175,67 @@ class HeaderDefinitions {
     }
 
     void update(const IR::Expression* expr, TernaryBool valid) {
-        if (!expr)
-            return;
+        CHECK_NULL(expr);
+        if (auto storage = getStorageLocation(expr)) {
+            // Accessing an element of a header stack with non-constant index
+            if (auto array_storage = storage->to<ArrayLocation>()) {
+                // we propagate the value to all fields of the stack if the value is not
+                // TernaryBool::No (in order to avoid spurious warnings)
+                if (valid != TernaryBool::No) {
+                    for (auto element : *array_storage)
+                        update(element, valid);
+                }
+                return;
+            }
 
-        auto storage = getStorageLocation(expr);
-        update(storage, valid);
+            auto member = expr->to<IR::Member>();
+            auto base = member ? member->expr : nullptr;
+            auto base_storage = getStorageLocation(base);
+
+            // Accessing a field of a header union
+            if (auto struct_storage = base_storage->to<StructLocation>()) {
+                if (struct_storage->isHeaderUnion()) {
+                    // Invalidate all fields of a header union
+                    for (auto field : struct_storage->fields()) {
+                        update(field, TernaryBool::No);
+                    }
+                    // update the valid bit of a header union
+                    update(base_storage, valid);
+                }
+                update(storage, valid);
+                return;
+            }
+
+            // None of the cases above
+            update(storage, valid);
+        } else {
+            auto member = expr->to<IR::Member>();
+            auto base = member ? member->expr : nullptr;
+            auto base_storage = getStorageLocation(base);
+
+            // Accessing a field of a header union which is an element of a header stack
+            // (non-constant indexing)
+            if (auto array_storage = base_storage->to<ArrayLocation>()) {
+                if (valid != TernaryBool::No) {
+                    for (auto element : *array_storage) {
+                        if (auto struct_storage = element->to<StructLocation>()) {
+                            if (struct_storage->isHeaderUnion()) {
+                                // we don't know precisely which union is accessed, so we
+                                // propagate the value of the corresponding field to all
+                                // unions, without invalidating other fields of these unions
+                                for (auto field : struct_storage->fields()) {
+                                    if (field->name.endsWith('.' + member->member.name)) {
+                                        update(field, valid);
+                                        break;
+                                    }
+                                }
+                                update(element, valid);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     TernaryBool find(const StorageLocation* storage) const {
@@ -191,14 +249,47 @@ class HeaderDefinitions {
     }
 
     TernaryBool find(const IR::Expression* expr) const {
-        if (!expr)
-            return TernaryBool::Yes;
-
+        CHECK_NULL(expr);
         auto storage = getStorageLocation(expr);
+        if (!storage) {
+            auto member = expr->to<IR::Member>();
+            auto base = member ? member->expr : nullptr;
+            auto base_storage = getStorageLocation(base);
+
+            // A field of a header union of a header stack with non-constant index
+            if (auto array_storage = base_storage->to<ArrayLocation>()) {
+                for (auto element : *array_storage) {
+                    if (auto struct_storage = element->to<StructLocation>()) {
+                        if (struct_storage->isHeaderUnion()) {
+                            for (auto field : struct_storage->fields()) {
+                                if (field->name.endsWith('.' + member->member.name)) {
+                                    if (find(field) != TernaryBool::No)
+                                        return TernaryBool::Yes;
+                                    break;
+                                }
+                            }
+                        } else
+                            return TernaryBool::Yes;
+                    } else
+                        return TernaryBool::Yes;
+                }
+                return TernaryBool::No;
+            }
+        } else if (auto array_storage = storage->to<ArrayLocation>()) {  // non-constant index
+            // the result is OR opeation of all elements in the header stack
+            for (auto element : *array_storage) {
+                if (find(element) != TernaryBool::No)
+                    return TernaryBool::Yes;
+            }
+            return TernaryBool::No;
+        }
+
+        // None of the cases above
         return find(storage);
     }
 
     void remove(const StorageLocation* storage) {
+        CHECK_NULL(storage);
         defs.erase(storage);
     }
 
@@ -223,22 +314,34 @@ class HeaderDefinitions {
     HeaderDefinitions* intersect(const HeaderDefinitions* other) const {
         HeaderDefinitions* result = new HeaderDefinitions(refMap, storageMap);
         for (auto def : defs) {
-            auto valid = other->find(def.first);
-            result->add(def.first, valid == def.second ? valid : TernaryBool::Maybe);
+            auto it = other->defs.find(def.first);
+            auto valid = it != other->defs.end() ? it->second : TernaryBool::Maybe;
+            result->update(def.first, valid == def.second ? valid : TernaryBool::Maybe);
         }
         return result;
     }
 
-    void addToNotReport(const IR::Expression* expr) {
-        if (!expr)
-            return;
-
-        auto storage = getStorageLocation(expr);
+    void addToNotReport(const StorageLocation* storage) {
         if (!storage)
             return;
 
-        checkLocation(storage);
-        notReport.emplace(storage);
+        if (auto array_storage = storage->to<ArrayLocation>()) {
+            for (auto element : *array_storage)
+                addToNotReport(element);
+        } else {
+            checkLocation(storage);
+            if (auto struct_storage = storage->to<StructLocation>())
+                if (struct_storage->isHeaderUnion())
+                    for (auto field : struct_storage->fields())
+                        notReport.emplace(field);
+            notReport.emplace(storage);
+        }
+    }
+
+    void addToNotReport(const IR::Expression* expr) {
+        CHECK_NULL(expr);
+        auto storage = getStorageLocation(expr);
+        addToNotReport(storage);
     }
 
     void setNotReport(const HeaderDefinitions* other) {
@@ -333,15 +436,23 @@ class FindUninitialized : public Inspector {
         return defs;
     }
 
-    void initHeaderParam(const StorageLocation* storage, TernaryBool value) {
+    void setValueToStorage(const StorageLocation* storage, TernaryBool value) {
         if (!storage)
             return;
         if (auto struct_storage = storage->to<StructLocation>()) {
             if (struct_storage->isHeader()) {
                 headerDefs->update(struct_storage, value);
-            } else if (struct_storage->isStruct()) {
-                for (auto f : struct_storage->fields())
-                    initHeaderParam(f, value);
+            } else {
+                for (auto f : struct_storage->fields()) {
+                    setValueToStorage(f, value);
+                }
+                if (struct_storage->isHeaderUnion()) {
+                    headerDefs->update(struct_storage, value);
+                }
+            }
+        } else if (auto array_storage = storage->to<ArrayLocation>()) {
+            for (auto element : *array_storage) {
+                setValueToStorage(element, value);
             }
         }
     }
@@ -352,7 +463,7 @@ class FindUninitialized : public Inspector {
             return;
         for (auto p : parameters->parameters)
             if (auto storage = definitions->storageMap->getStorage(p)) {
-                initHeaderParam(storage, p->direction != IR::Direction::Out
+                setValueToStorage(storage, p->direction != IR::Direction::Out
                                          ? TernaryBool::Yes
                                          : TernaryBool::No);
             }
@@ -584,57 +695,81 @@ class FindUninitialized : public Inspector {
         return loc;
     }
 
-    // Used in header-to-header and struct-to-struct assignments
+    // This function is used for copy-out semanthics
     void processHeadersInAssignment(const StorageLocation* dst, const StorageLocation* src) {
-        if (!dst || !src)
-            return;
+        if (auto dst_struct_storage = dst->to<StructLocation>()) {
+            if (auto src_struct_storage = src->to<StructLocation>()) {
+                if (dst_struct_storage->isHeader() && src_struct_storage->isHeader()) {
+                    auto valid = headerDefs->find(src);
+                    headerDefs->update(dst, valid);
+                    return;
+                }
 
-        auto dst_struct_storage = dst->to<StructLocation>();
-        auto src_struct_storage = src->to<StructLocation>();
+                if ((dst_struct_storage->isStruct() && src_struct_storage->isStruct()) ||
+                    (dst_struct_storage->isHeaderUnion() && src_struct_storage->isHeaderUnion())) {
+                    auto dst_fields = dst_struct_storage->fields();
+                    auto src_fields = src_struct_storage->fields();
 
-        if (!dst_struct_storage || !src_struct_storage)
-            return;
+                    auto it1 = dst_fields.begin();
+                    auto it2 = src_fields.begin();
+                    while (it1 != dst_fields.end() && it2 != src_fields.end()) {
+                        processHeadersInAssignment(*it1, *it2);
+                        ++it1;
+                        ++it2;
+                    }
 
-        if (dst_struct_storage->isHeader() && src_struct_storage->isHeader()) {
-            auto valid = headerDefs->find(src);
-            headerDefs->update(dst, valid);
-
+                    if (dst_struct_storage->isHeaderUnion()) {
+                        auto valid = headerDefs->find(src_struct_storage);
+                        headerDefs->update(dst_struct_storage, valid);
+                    }
+                }
+            } else if (src->is<ArrayLocation>()) {
+                if (dst_struct_storage->isHeaderUnion())
+                    setValueToStorage(dst, TernaryBool::Yes);
+                else if (dst_struct_storage->isHeader()) {
+                    auto valid = headerDefs->find(src);
+                    headerDefs->update(dst, valid);
+                }
+            }
             return;
         }
 
-        if (dst_struct_storage->isStruct() && src_struct_storage->isStruct()) {
-            auto dst_fields = dst_struct_storage->fields();
-            auto src_fields = src_struct_storage->fields();
+        if (auto dst_array_storage = dst->to<ArrayLocation>()) {
+            if (auto src_array_storage = src->to<ArrayLocation>()) {
+                auto it1 = dst_array_storage->begin();
+                auto it2 = src_array_storage->begin();
 
-            auto it1 = dst_fields.begin();
-            auto it2 = src_fields.begin();
-            while (it1 != dst_fields.end() && it2 != src_fields.end()) {
-                processHeadersInAssignment(*it1, *it2);
-                ++it1;
-                ++it2;
-            }
+                while (it1 != dst_array_storage->end() && it2 != src_array_storage->end()) {
+                    processHeadersInAssignment(*it1, *it2);
+                    ++it1;
+                    ++it2;
+                }
+            } else if (auto src_struct_storage = src->to<StructLocation>()) {
+                if (src_struct_storage->isHeader()) {
+                    auto valid = headerDefs->find(src_struct_storage);
+                    if (valid != TernaryBool::No)
+                        for (auto element : *dst_array_storage)
+                            headerDefs->update(element, valid);
+                }
+           }
         }
     }
 
-    // Used for more complex assignments
+    // This function is used for copy-in semantics
     void processHeadersInAssignment(const StorageLocation* dst, const IR::Expression* src,
                                     const IR::Type* src_type) {
         if (!dst || !src || !src_type)
             return;
 
+        if (auto src_storage = headerDefs->getStorageLocation(src)) {
+            processHeadersInAssignment(dst, src_storage);
+            return;
+        }
+
         if (auto dst_struct_storage = dst->to<StructLocation>()) {
             if (dst_struct_storage->isHeader()) {
-                if (src->is<IR::StructExpression>()) {
-                    // always sets the valid bit to true
+                if (src->is<IR::StructExpression>() || src->is<IR::MethodCallExpression>()) {
                     headerDefs->update(dst, TernaryBool::Yes);
-                } else if (src->is<IR::MethodCallExpression>()) {
-                    // return value of a function
-                    headerDefs->update(dst, TernaryBool::Yes);
-                } else if (src->is<IR::ArrayIndex>()) {
-                    // TODO: header stacks
-                    headerDefs->update(dst, TernaryBool::Yes);
-                } else if (src_type->is<IR::Type_Header>()) {
-                    processHeadersInAssignment(dst, headerDefs->getStorageLocation(src));
                 } else {
                     BUG("%1%: unexpected expression on RHS", src);
                 }
@@ -653,11 +788,95 @@ class FindUninitialized : public Inspector {
                     for (auto field : dst_struct_storage->fields()) {
                         processHeadersInAssignment(field, src, src_type);
                     }
-                } else if (src_type->is<IR::Type_Struct>()) {
-                    processHeadersInAssignment(dst, headerDefs->getStorageLocation(src));
                 } else {
                     BUG("%1%: unexpected expression on RHS", src);
                 }
+                return;
+            }
+
+            if (dst_struct_storage->isHeaderUnion()) {
+                if (src->is<IR::MethodCallExpression>()) {
+                    setValueToStorage(dst, TernaryBool::Yes);
+                } else {
+                    BUG("%1%: unexpected expression on RHS", src);
+                }
+            }
+            return;
+        }
+
+        if (dst->is<ArrayLocation>()) {
+            if (src->is<IR::StructExpression>() || src->is<IR::MethodCallExpression>()) {
+                setValueToStorage(dst, TernaryBool::Yes);
+            } else {
+                BUG("%1%: unexpected expression on RHS", src);
+            }
+        }
+    }
+
+    // This function is used in assignments
+    void processHeadersInAssignment(const IR::Expression* dst, const IR::Expression* src,
+                                    const IR::Type* dst_type, const IR::Type* src_type) {
+        if (!dst || !src || !dst_type || !src_type)
+            return;
+
+        auto dst_storage = headerDefs->getStorageLocation(dst);
+        if (auto dst_struct_storage = dst_storage->to<StructLocation>()) {
+            if (dst_struct_storage->isHeader()) {
+                if (src->is<IR::StructExpression>() || src->is<IR::MethodCallExpression>()) {
+                    headerDefs->update(dst, TernaryBool::Yes);
+                } else if (src_type->is<IR::Type_Header>()) {
+                    auto valid = headerDefs->find(src);
+                    headerDefs->update(dst, valid);
+                } else {
+                    BUG("%1%: unexpected expression on RHS", src);
+                }
+                return;
+            }
+
+            if (dst_struct_storage->isStruct()) {
+                auto dst_struct = dst_type->to<IR::Type_Struct>();
+                if (auto list = src->to<IR::StructExpression>()) {
+                    auto it = list->components.begin();
+                    for (auto field : dst_struct->fields) {
+                        IR::Member member(dst, field->name);
+                        processHeadersInAssignment(&member, (*it)->expression,
+                                                   typeMap->getType(field, true),
+                                                   typeMap->getType((*it)->expression, true));
+                        ++it;
+                    }
+                } else if (src->is<IR::MethodCallExpression>()) {
+                    for (auto field : dst_struct->fields) {
+                        IR::Member member(dst, field->name);
+                        processHeadersInAssignment(&member, src,
+                                                   typeMap->getType(field, true),
+                                                   src_type);
+                    }
+                } else if (src_type->is<IR::Type_Struct>()) {
+                    processHeadersInAssignment(dst_struct_storage,
+                                               headerDefs->getStorageLocation(src));
+                } else {
+                    BUG("%1%: unexpected expression on RHS", src);
+                }
+                return;
+            }
+
+            if (dst_struct_storage->isHeaderUnion()) {
+                processHeadersInAssignment(dst_struct_storage, src, src_type);
+            }
+            return;
+        }
+
+        if (auto dst_array_storage = dst_storage->to<ArrayLocation>()) {
+            if (src->is<IR::StructExpression>() || src->is<IR::MethodCallExpression>()) {
+                setValueToStorage(dst_array_storage, TernaryBool::Yes);
+            } else if (src_type->is<IR::Type_Stack>()) {
+                processHeadersInAssignment(dst_array_storage, headerDefs->getStorageLocation(src));
+            } else if (src_type->is<IR::Type_Header>()) {
+                 // Indexing with non-constant index on LHS
+                auto valid = headerDefs->find(src);
+                headerDefs->update(dst, valid);
+            } else {
+                BUG("%1%: unexpected expression on RHS", src);
             }
         }
     }
@@ -672,8 +891,9 @@ class FindUninitialized : public Inspector {
             lhs = false;
             visit(statement->right);
             LOG3("FU Returned from " << statement->right);
-            processHeadersInAssignment(headerDefs->getStorageLocation(statement->left),
+            processHeadersInAssignment(statement->left,
                                        statement->right,
+                                       typeMap->getType(statement->left, true),
                                        typeMap->getType(statement->right, true));
         } else {
             LOG3("Unreachable");
@@ -935,37 +1155,25 @@ class FindUninitialized : public Inspector {
         return false;
     }
 
-    void reportWarningIfInvalidHeader(const IR::Expression* expression, const IR::Type *expr_type) {
+    void reportWarningIfInvalidHeader(const IR::Expression* expression) {
         if (!reportInvalidHeaders)
             return;
 
-        if (expr_type->is<IR::Type_Header>()) {
-            if (auto member = expression->to<IR::Member>()) {
-                // TODO: header unions
-                if (typeMap->getType(member->expr, true)->is<IR::Type_HeaderUnion>())
-                    return;
-            }
-            LOG3("Checking if [" << expression->id << "]: " << expression << " is valid");
-            auto valid = headerDefs->find(expression);
-            if (valid == TernaryBool::No) {
-                LOG3("accessing a field of an invalid header ["
-                     << expression->id << "]: " << expression);
-                warn(ErrorType::WARN_INVALID_HEADER,
-                          "accessing a field of an invalid header %1%", expression);
-            } else if (valid == TernaryBool::Maybe) {
-                LOG3("accessing a field of a potentially invalid header ["
-                     << expression->id << "]: " << expression);
-                warn(ErrorType::WARN_INVALID_HEADER,
-                          "accessing a field of a potentially invalid header %1%", expression);
-            } else {
-                LOG3("acessing a field of a valid header ["
-                     << expression->id << "]: " << expression);
-            }
-        } else if (auto structType = expr_type->to<IR::Type_Struct>()) {
-            for (auto field : structType->fields) {
-                IR::Member member(expression, field->name);
-                reportWarningIfInvalidHeader(&member, typeMap->getType(field, true));
-            }
+        LOG3("Checking if [" << expression->id << "]: " << expression << " is valid");
+        auto valid = headerDefs->find(expression);
+        if (valid == TernaryBool::No) {
+            LOG3("accessing a field of an invalid header ["
+                 << expression->id << "]: " << expression);
+            warn(ErrorType::WARN_INVALID_HEADER,
+                      "accessing a field of an invalid header %1%", expression);
+        } else if (valid == TernaryBool::Maybe) {
+            LOG3("accessing a field of a potentially invalid header ["
+                 << expression->id << "]: " << expression);
+            warn(ErrorType::WARN_INVALID_HEADER,
+                      "accessing a field of a potentially invalid header %1%", expression);
+        } else {
+            LOG3("acessing a field of a valid header ["
+                 << expression->id << "]: " << expression);
         }
     }
 
@@ -981,6 +1189,7 @@ class FindUninitialized : public Inspector {
                 // Reads all array fields
                 reads(expression, base);
                 registerUses(expression, false);
+                headerDefs->update(bim->appliedTo, TernaryBool::Yes);
                 return false;
             } else if (name == IR::Type_Header::isValid) {
                 auto storage = base->getField(StorageFactory::validFieldName);
@@ -1013,13 +1222,13 @@ class FindUninitialized : public Inspector {
 
             // We assume control and parser apply calls and
             // extern methods set all output headers to valid
-            if (isControlOrParserApply || mi->to<ExternMethod>())
+            if (isControlOrParserApply || mi->is<ExternMethod>() || mi->is<ExternFunction>())
                 continue;
 
             if (auto actionCall = mi->to<ActionCall>()) {
                 if (auto param = actionCall->action->parameters->getParameter(p->name)) {
                     if (p->direction == IR::Direction::Out) {
-                        initHeaderParam(definitions->storageMap->getStorage(param),
+                        setValueToStorage(definitions->storageMap->getStorage(param),
                                         TernaryBool::No);
                     } else {
                         // we can treat the argument passing as an assignment
@@ -1067,9 +1276,12 @@ class FindUninitialized : public Inspector {
                 visit(expr);
                 lhs = save;
 
-                if (isControlOrParserApply || mi->to<ExternMethod>()) {
-                    initHeaderParam(headerDefs->getStorageLocation(expr->expression),
-                                                                   TernaryBool::Yes);
+                if (isControlOrParserApply || mi->is<ExternMethod>() || mi->is<ExternFunction>()) {
+                    if (typeMap->getType(expr->expression, true)->is<IR::Type_Header>())
+                        headerDefs->update(expr->expression, TernaryBool::Yes);
+                    else
+                        setValueToStorage(headerDefs->getStorageLocation(expr->expression),
+                                          TernaryBool::Yes);
                     continue;
                 }
 
@@ -1123,7 +1335,7 @@ class FindUninitialized : public Inspector {
                 return false;
             }
         } else if (basetype->is<IR::Type_Header>()) {
-            reportWarningIfInvalidHeader(expression->expr, basetype);
+            reportWarningIfInvalidHeader(expression->expr);
         }
 
         auto fields = storage->getField(expression->member);
