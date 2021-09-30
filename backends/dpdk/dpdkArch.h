@@ -229,11 +229,9 @@ class LogicalExpressionUnroll : public Inspector {
     static bool is_logical(const IR::Operation_Binary *bin) {
         if (bin->is<IR::LAnd>() || bin->is<IR::LOr>() || bin->is<IR::Leq>() ||
             bin->is<IR::Equ>() || bin->is<IR::Neq>() || bin->is<IR::Grt>() ||
-            bin->is<IR::Lss>())
+            bin->is<IR::Lss>() || bin->is<IR::Geq>() || bin->is<IR::Leq>())
             return true;
-        else if (bin->is<IR::Geq>() or bin->is<IR::Leq>()) {
-            BUG("%1%: not implemented", bin);
-        } else
+          else
             return false;
     }
 

@@ -10,7 +10,7 @@ struct ipv4_t {
 	bit<4> version
 	bit<4> ihl
 	bit<8> diffserv
-	bit<32> totalLen
+	bit<16> totalLen
 	bit<16> identification
 	bit<3> flags
 	bit<13> fragOffset
@@ -53,6 +53,7 @@ struct metadata_t {
 	bit<8> psa_egress_output_metadata_drop
 	bit<32> local_metadata_port_in
 	bit<32> local_metadata_port_out
+	bit<32> Ingress_tmp_0
 	bit<32> Ingress_color_out_0
 	bit<32> Ingress_color_in_0
 	bit<32> Ingress_tmp
@@ -89,7 +90,8 @@ action NoAction args none {
 }
 
 action execute args instanceof execute_arg_t {
-	meter meter0_0 t.index h.ipv4.totalLen m.Ingress_color_in_0 m.Ingress_color_out_0
+	cast  h.ipv4.totalLen bit_32 m.Ingress_tmp_0
+	meter meter0_0 t.index m.Ingress_tmp_0 m.Ingress_color_in_0 m.Ingress_color_out_0
 	jmpneq LABEL_1FALSE m.Ingress_color_out_0 0x0
 	mov m.Ingress_tmp 0x1
 	jmp LABEL_1END
