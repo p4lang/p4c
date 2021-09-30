@@ -545,7 +545,7 @@ std::ostream &IR::DpdkGetChecksumStatement::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkCastStatement::toSpec(std::ostream &out) const {
-    out << "mov " << " " << DPDK::toStr(dst) << " " << DPDK::toStr(src);
+    out << "mov " << DPDK::toStr(dst) << " " << DPDK::toStr(src);
     return out;
 }
 

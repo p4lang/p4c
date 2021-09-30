@@ -73,17 +73,17 @@ apply {
 	extract h.ethernet
 	extract h.output_data
 	mov m.psa_ingress_output_metadata_drop 0
-	mov  m.psa_ingress_output_metadata_multicast_group h.ethernet.dstAddr
-	mov  m.Ingress_tmp h.ethernet.srcAddr
-	mov  m.psa_ingress_output_metadata_class_of_service m.Ingress_tmp
+	mov m.psa_ingress_output_metadata_multicast_group h.ethernet.dstAddr
+	mov m.Ingress_tmp h.ethernet.srcAddr
+	mov m.psa_ingress_output_metadata_class_of_service m.Ingress_tmp
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.output_data
 	extract h.ethernet
 	extract h.output_data
-	mov  h.output_data.word0 m.psa_egress_input_metadata_egress_port
-	mov  m.Egress_tmp_0 m.psa_egress_input_metadata_instance
-	mov  h.output_data.word1 m.Egress_tmp_0
+	mov h.output_data.word0 m.psa_egress_input_metadata_egress_port
+	mov m.Egress_tmp_0 m.psa_egress_input_metadata_instance
+	mov h.output_data.word1 m.Egress_tmp_0
 	mov h.output_data.word2 0x8
 	jmpneq LABEL_0FALSE m.psa_egress_input_metadata_packet_path 0x0
 	mov h.output_data.word2 0x1
@@ -105,8 +105,8 @@ apply {
 	jmp LABEL_0END
 	LABEL_5FALSE :	jmpneq LABEL_0END m.psa_egress_input_metadata_packet_path 0x6
 	mov h.output_data.word2 0x7
-	LABEL_0END :	mov  m.Egress_tmp_1 m.psa_egress_input_metadata_class_of_service
-	mov  h.output_data.word3 m.Egress_tmp_1
+	LABEL_0END :	mov m.Egress_tmp_1 m.psa_egress_input_metadata_class_of_service
+	mov h.output_data.word3 m.Egress_tmp_1
 	emit h.ethernet
 	emit h.output_data
 	tx m.psa_ingress_output_metadata_egress_port
