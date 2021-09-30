@@ -37,9 +37,13 @@ void ConvertStatementToDpdk::process_relation_operation(const IR::Expression* ds
     } else if (op->is<IR::Grt>()) {
         add_instr(new IR::DpdkJmpGreaterStatement(true_label, op->left, op->right));
     } else if (op->is<IR::Leq>()) {
-        add_instr(new IR::DpdkJmpLessOrEqualStatement(true_label, op->left, op->right));
+        /* Dpdk target does not support the condition Leq, so negate the condition and jump
+           on false label*/
+        add_instr(new IR::DpdkJmpGreaterStatement(false_label, op->left, op->right));
     } else if (op->is<IR::Geq>()) {
-        add_instr(new IR::DpdkJmpGreaterEqualStatement(true_label, op->left, op->right));
+        /* Dpdk target does not support the condition Geq, so negate the condition and jump
+           on false label*/
+        add_instr(new IR::DpdkJmpLessStatement(false_label, op->left, op->right));
     } else {
         BUG("%1% not implemented.", op);
     }
@@ -115,8 +119,6 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
             i = new IR::DpdkEquStatement(left, r->left, r->right);
         } else if (right->is<IR::LOr>() || right->is<IR::LAnd>()) {
             process_logical_operation(left, r);
-        } else if (right->is<IR::Leq>()) {
-            i = new IR::DpdkLeqStatement(left, r->left, r->right);
         } else if (right->is<IR::BOr>()) {
             i = new IR::DpdkOrStatement(left, r->left, r->right);
         } else if (right->is<IR::BAnd>()) {
@@ -337,30 +339,29 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
                         true_label, neq->left, neq->right)); }
         return is_and;
     } else if (auto lss = expr->to<IR::Lss>()) {
-        if (is_and) {
-            instructions.push_back(new IR::DpdkJmpGreaterEqualStatement(
-                        false_label, lss->left, lss->right));
-        } else {
-            instructions.push_back(new IR::DpdkJmpLessStatement(
-                        true_label, lss->left, lss->right)); }
-        return is_and;
+        /* Dpdk target does not support the negated condition Geq,
+           so always jump on true label*/
+        instructions.push_back(new IR::DpdkJmpLessStatement(
+                     true_label, lss->left, lss->right));
+        return false;
     } else if (auto grt = expr->to<IR::Grt>()) {
-        if (is_and) {
-            instructions.push_back(new IR::DpdkJmpLessOrEqualStatement(
-                        false_label, grt->left, grt->right));
-        } else {
-            instructions.push_back(new IR::DpdkJmpGreaterStatement(
-                        true_label, grt->left, grt->right)); }
-        return is_and;
+        /* Dpdk target does not support the negated condition Leq,
+           so always jump on true label*/
+        instructions.push_back(new IR::DpdkJmpGreaterStatement(
+                     true_label, grt->left, grt->right));
+        return false;
+    } else if (auto geq = expr->to<IR::Geq>()) {
+        /* Dpdk target does not support the condition Geq,
+           so always negate the condition and jump on false label*/
+        instructions.push_back(new IR::DpdkJmpLessStatement(
+                     false_label, geq->left, geq->right));
+        return true;
     } else if (auto leq = expr->to<IR::Leq>()) {
-        if (is_and) {
-            instructions.push_back(new IR::DpdkJmpGreaterStatement(
-                        false_label, leq->left, leq->right));
-        } else {
-            instructions.push_back(new IR::DpdkJmpLessOrEqualStatement(
-                        true_label, leq->left, leq->right));
-        }
-        return is_and;
+        /* Dpdk target does not support the condition Leq,
+           so always negate the condition and jump on false label*/
+        instructions.push_back(new IR::DpdkJmpGreaterStatement(
+                     false_label, leq->left, leq->right));
+        return true;
     } else if (auto mce = expr->to<IR::MethodCallExpression>()) {
         auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
         if (auto a = mi->to<P4::BuiltInMethod>()) {
