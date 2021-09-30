@@ -66,6 +66,12 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     struct FuncInfo {
         std::set<cstring>       reads, writes;
         int                     apply_count = 0;
+
+        /// This field is used in assignments. If is_first_write_insert is true, then the
+        /// last inserted expression into the writes set was not in that set before. In
+        /// that case, that expression will be removed from it if, after propagation of the
+        /// values on the left and the right side, the assignment becomes a self-assignment
+        bool                    is_first_write_insert = false;
     };
     std::map<cstring, VarInfo>          available;
     std::map<cstring, TableInfo>        &tables;
