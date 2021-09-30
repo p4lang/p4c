@@ -95,8 +95,11 @@ class InlineActions : public Transform {
     };
     const IR::V1Program *preorder(IR::V1Program *gl) override { return global = gl; }
     const IR::Node *preorder(IR::Primitive *p) override {
-        if (auto af = global->get<IR::ActionFunction>(p->name))
-            return af->action.clone()->apply(SubstActionArgs(af, p));
+        if (auto af = global->get<IR::ActionFunction>(p->name)) {
+            SubstActionArgs saa(af, p);
+            saa.setCalledBy(this);
+            return af->action.clone()->apply(saa);
+        }
         return p; }
 };
 

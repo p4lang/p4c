@@ -121,7 +121,7 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
         return act; }
 
  public:
-    explicit ElimDead(DoLocalCopyPropagation &self) : self(self) {}
+    explicit ElimDead(DoLocalCopyPropagation &self) : self(self) { setCalledBy(&self); }
 };
 
 class DoLocalCopyPropagation::RewriteTableKeys : public Transform {
@@ -154,7 +154,7 @@ class DoLocalCopyPropagation::RewriteTableKeys : public Transform {
         return exp; }
 
  public:
-    explicit RewriteTableKeys(DoLocalCopyPropagation &self) : self(self) {}
+    explicit RewriteTableKeys(DoLocalCopyPropagation &self) : self(self) { setCalledBy(&self); }
 };
 
 void DoLocalCopyPropagation::flow_merge(Visitor &a_) {

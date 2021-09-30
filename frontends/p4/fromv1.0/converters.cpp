@@ -45,7 +45,7 @@ const IR::Node* ExpressionConverter::postorder(IR::Mask* expression) {
     auto cst = expression->right->to<IR::Constant>();
     big_int value = cst->value;
     if (value == 0) {
-        ::warning(ErrorType::WARN_INVALID, "%1%: zero mask", expression->right);
+        warn(ErrorType::WARN_INVALID, "%1%: zero mask", expression->right);
         return cst;
     }
     auto range = Util::findOnes(value);
@@ -462,6 +462,7 @@ const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
             if (len->expr.size() == 1) {
                 auto lenexpr = len->expr[0];
                 ValidateLenExpr vle(type, field);
+                vle.setCalledBy(this);
                 lenexpr->apply(vle);
                 auto scale = new IR::Mul(lenexpr->srcInfo, lenexpr, new IR::Constant(8));
                 auto fieldlen = new IR::Sub(

@@ -137,6 +137,28 @@ class Visitor::ChangeTracker {
     }
 };
 
+// static
+bool Visitor::warning_enabled(const Visitor* visitor, int warning_kind) {
+    auto errorString = ErrorCatalog::getCatalog().getName(warning_kind);
+    while (visitor != nullptr) {
+        auto crt = visitor->ctxt;
+        while (crt != nullptr) {
+            if (auto annotated = crt->node->to<IR::IAnnotated>()) {
+                for (auto a : annotated->getAnnotations()->annotations) {
+                    if (a->name.name == IR::Annotation::noWarnAnnotation) {
+                        auto arg = a->getSingleString();
+                        if (arg == errorString)
+                            return false;
+                    }
+                }
+            }
+            crt = crt->parent;
+        }
+        visitor = visitor->called_by;
+    }
+    return true;
+}
+
 Visitor::profile_t Visitor::init_apply(const IR::Node *root) {
     ctxt = nullptr;
     if (joinFlows) init_join_flows(root);

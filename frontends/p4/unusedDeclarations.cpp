@@ -84,7 +84,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Parser* cont) {
 const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Table* table) {
     if (!refMap->isUsed(getOriginal<IR::IDeclaration>())) {
         if (giveWarning(getOriginal()))
-            ::warning(ErrorType::WARN_UNUSED, "Table %1% is not used; removing", table);
+            warn(ErrorType::WARN_UNUSED, "Table %1% is not used; removing", table);
         LOG3("Removing " << table);
         table = nullptr;
     }
@@ -96,7 +96,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Variable* dec
     prune();
     if (decl->initializer == nullptr)
         return process(decl);
-    if (!SideEffects::check(decl->initializer, nullptr, nullptr))
+    if (!SideEffects::check(decl->initializer, this, nullptr, nullptr))
         return process(decl);
     return decl;
 }
@@ -121,7 +121,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Instance* dec
         return decl;
     if (!refMap->isUsed(getOriginal<IR::Declaration_Instance>())) {
         if (giveWarning(getOriginal()))
-            ::warning(ErrorType::WARN_UNUSED, "%1%: unused instance", decl);
+            warn(ErrorType::WARN_UNUSED, "%1%: unused instance", decl);
         // We won't delete extern instances; these may be useful even if not references.
         auto type = decl->type;
         if (type->is<IR::Type_Specialized>())

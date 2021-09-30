@@ -397,9 +397,9 @@ class CollectExternDeclaration : public Inspector {
                 } else {
                     /* Check if the meter is of PACKETS (0) type */
                     if (d->arguments->at(1)->expression->to<IR::Constant>()->asUnsigned() == 0)
-                        ::warning(ErrorType::WARN_UNSUPPORTED,
-                                  "%1%: Packet metering is not supported." \
-                                  " Falling back to byte metering.", d);
+                        warn(ErrorType::WARN_UNSUPPORTED,
+                             "%1%: Packet metering is not supported."
+                             " Falling back to byte metering.", d);
                 }
             } else if (externTypeName == "Counter") {
                 if (d->arguments->size() != 2 ) {

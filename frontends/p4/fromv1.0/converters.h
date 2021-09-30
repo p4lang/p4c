@@ -187,8 +187,8 @@ class DiscoverStructure : public Inspector {
     { CHECK_NULL(structure); setName("DiscoverStructure"); }
 
     void postorder(const IR::ParserException* ex) override {
-        ::warning(ErrorType::WARN_UNSUPPORTED, "%1%: parser exception is not translated to P4-16",
-                  ex); }
+        warn(ErrorType::WARN_UNSUPPORTED, "%1%: parser exception is not translated to P4-16",
+             ex); }
     void postorder(const IR::Metadata* md) override
     { structure->metadata.emplace(md); checkReserved(md, md->name, "metadata"); }
     void postorder(const IR::Header* hd) override
@@ -596,6 +596,7 @@ class FixExtracts final : public Transform {
 
         // Create actual extract
         RewriteLength rewrite(fixed->fixedHeaderType, var);
+        rewrite.setCalledBy(this);
         auto length = fixed->headerLength->apply(rewrite);
         auto args = new IR::Vector<IR::Argument>();
         args->push_back(arg->clone());

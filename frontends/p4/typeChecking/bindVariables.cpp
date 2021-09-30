@@ -29,8 +29,9 @@ class HasInfInt : public Inspector {
         return false;
     }
     void postorder(const IR::Type_InfInt*) override { found = true; }
-    static bool find(const IR::Node* node) {
+    static bool find(const IR::Node* node, const Visitor* calledBy) {
         HasInfInt hii;
+        hii.setCalledBy(calledBy);
         node->apply(hii);
         return hii.found;
     }
@@ -42,10 +43,12 @@ class HasInfInt : public Inspector {
 /// Type_InfInt inside.
 /// Return nullptr if the type is not suitable to assign to a type variable.
 static const IR::Type* validateType(
-    const IR::Type* type, const TypeMap* typeMap, const IR::Node* errorPosition) {
+    const IR::Type* type, const TypeMap* typeMap,
+    const IR::Node* errorPosition, const Visitor* calledBy) {
     auto repl = type ? type->getP4Type() : nullptr;
-    if (type == nullptr || repl == nullptr || HasInfInt::find(type)) {
+    if (type == nullptr || repl == nullptr || HasInfInt::find(type, calledBy)) {
         auto eoi = new ErrorOnInfInt(typeMap);
+        eoi->setCalledBy(calledBy);
         errorPosition->apply(*eoi);
         return nullptr;
     }
@@ -61,7 +64,7 @@ const IR::Type* DoBindTypeVariables::getVarValue(
                 errorPosition, var);
         return nullptr;
     }
-    auto result = validateType(type, typeMap, errorPosition);
+    auto result = validateType(type, typeMap, errorPosition, this);
     LOG2("Replacing " << var << " with " << result);
     return result;
 }

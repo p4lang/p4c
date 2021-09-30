@@ -855,8 +855,10 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
         cstring nextState = refMap->newName(state->name);
         std::map<cstring, cstring> renameMap;
         ComputeNewStateNames cnn(refMap, callee->name.name, nextState, &renameMap);
+        cnn.setCalledBy(this);
         (void)callee->apply(cnn);
         RenameStates rs(&renameMap);
+        rs.setCalledBy(this);
         auto renamed = callee->apply(rs);
         IR::ID newStartName(::get(renameMap, IR::ParserState::start), IR::ParserState::start);
         auto newState = new IR::ParserState(srcInfo, name, annotations, current,

@@ -373,9 +373,9 @@ class FindUninitialized : public Inspector {
                 loc = storage->removeHeaders();
                 points = defs->getPoints(loc);
                 if (points->containsBeforeStart())
-                    ::warning(ErrorType::WARN_UNINITIALIZED_OUT_PARAM,
-                              "out parameter '%1%' may be uninitialized when "
-                              "'%2%' terminates", p, block->getName());
+                    warn(ErrorType::WARN_UNINITIALIZED_OUT_PARAM,
+                         "out parameter '%1%' may be uninitialized when "
+                         "'%2%' terminates", p, block->getName());
             }
         }
     }
@@ -462,6 +462,7 @@ class FindUninitialized : public Inspector {
 
         ParserCallGraph transitions("transitions");
         ComputeParserCG pcg(refMap, &transitions);
+        pcg.setCalledBy(this);
 
         (void)parser->apply(pcg);
         ordered_set<const IR::ParserState*> toRun;  // worklist
@@ -482,6 +483,7 @@ class FindUninitialized : public Inspector {
             // but we use the same data structures
             headerDefs = inputHeaderDefs[state]->clone();
             FindUninitialized fu(this, currentPoint);
+            fu.setCalledBy(this);
             (void)state->apply(fu);
 
             auto next = transitions.getCallees(state);
@@ -852,7 +854,7 @@ class FindUninitialized : public Inspector {
                 message = "%1% may be uninitialized";
             else
                 message = "%1% may not be completely initialized";
-            ::warning(ErrorType::WARN_UNINITIALIZED_USE, message, expression);
+            warn(ErrorType::WARN_UNINITIALIZED_USE, message, expression);
         }
 
         hasUses->add(points);
@@ -942,12 +944,12 @@ class FindUninitialized : public Inspector {
             if (valid == TernaryBool::No) {
                 LOG3("accessing a field of an invalid header ["
                      << expression->id << "]: " << expression);
-                ::warning(ErrorType::WARN_INVALID_HEADER,
+                warn(ErrorType::WARN_INVALID_HEADER,
                           "accessing a field of an invalid header %1%", expression);
             } else if (valid == TernaryBool::Maybe) {
                 LOG3("accessing a field of a potentially invalid header ["
                      << expression->id << "]: " << expression);
-                ::warning(ErrorType::WARN_INVALID_HEADER,
+                warn(ErrorType::WARN_INVALID_HEADER,
                           "accessing a field of a potentially invalid header %1%", expression);
             } else {
                 LOG3("acessing a field of a valid header ["
@@ -1046,6 +1048,7 @@ class FindUninitialized : public Inspector {
             LOG3("Analyzing " << callee << IndentCtl::indent);
             ProgramPoint pt(context, expression);
             FindUninitialized fu(this, pt);
+            fu.setCalledBy(this);
             for (auto c : callee)
                 (void)c->getNode()->apply(fu);
         }
@@ -1104,8 +1107,8 @@ class FindUninitialized : public Inspector {
                 reads(expression, storage);
                 registerUses(expression, false);
                 if (!lhs && expression->member.name == IR::Type_Stack::next)
-                    ::warning(ErrorType::WARN_UNINITIALIZED,
-                              "%1%: reading uninitialized value", expression);
+                    warn(ErrorType::WARN_UNINITIALIZED,
+                         "%1%: reading uninitialized value", expression);
                 return false;
             } else if (expression->member.name == IR::Type_Stack::lastIndex) {
                 auto index = storage->getArrayLastIndex();
@@ -1209,6 +1212,7 @@ class RemoveUnused : public Transform {
         if (!hasUses->hasUses(getOriginal())) {
             LOG3("Removing statement " << getOriginal() << " " << statement << IndentCtl::indent);
             SideEffects se(refMap, typeMap);
+            se.setCalledBy(this);
             (void)statement->right->apply(se);
 
             if (se.nodeWithSideEffect != nullptr) {
@@ -1255,6 +1259,7 @@ class ProcessDefUse : public PassManager {
 
 const IR::Node* DoSimplifyDefUse::process(const IR::Node* node) {
     ProcessDefUse process(refMap, typeMap);
+    process.setCalledBy(this);
     LOG5("ProcessDefUse of:" << IndentCtl::endl << node);
     return node->apply(process);
 }
