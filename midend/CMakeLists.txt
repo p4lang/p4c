@@ -27,6 +27,7 @@ set (MIDEND_SRCS
   fillEnumMap.cpp
   flattenHeaders.cpp
   flattenInterfaceStructs.cpp
+  hsIndexSimplify.cpp
   interpreter.cpp
   local_copyprop.cpp
   nestedStructs.cpp

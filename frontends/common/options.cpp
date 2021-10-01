@@ -154,6 +154,13 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
             return true;
         },
         "Unrolling all parser's loops");
+    registerOption(
+        "--hsIndexSimplify", nullptr,
+        [this](const char*) {
+            hsIndexSimplify = true;
+            return true;
+        },
+        "Replace all non-cocrete indexes for header stacks in controls");
 }
 
 bool CompilerOptions::enable_intrinsic_metadata_fix() { return true; }

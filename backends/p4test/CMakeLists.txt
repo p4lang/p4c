@@ -120,6 +120,10 @@ set (P4TEST_PARSERUNROLL
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/parser-unroll-*.p4")
 p4c_add_tests("p4unroll" ${P4TEST_DRIVER} "${P4TEST_PARSERUNROLL}" "" "-a '--maxErrorCount 100 --loopsUnroll'")
 
+set (P4TEST_HSINDEX
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/control-hs-index-*.p4")
+p4c_add_tests("p4unroll" ${P4TEST_DRIVER} "${P4TEST_HSINDEX}" "" "-a '--maxErrorCount 100 --hsIndexSimplify'")
+
 set (P4TEST_PARSER_INLINE_TESTS "${P4C_SOURCE_DIR}/testdata/p4_16_samples/parser-inline/*.p4")
 p4c_add_tests("p4" ${P4TEST_DRIVER} "${P4TEST_PARSER_INLINE_TESTS}" "" "-a '--maxErrorCount 100 --parser-inline-opt'")
 
