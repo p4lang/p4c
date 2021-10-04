@@ -47,7 +47,7 @@ SymbolicValue* SymbolicValueFactory::create(const IR::Type* type, bool uninitial
         return create(spec->substituted, uninitialized);
     }
     if (type->is<IR::Type_Parser>() || type->is<IR::Type_Control>() ||
-         type->is<IR::P4Parser>() || type->is<IR::P4Control>())
+        type->is<IR::P4Parser>() || type->is<IR::P4Control>())
         // This implies that inlining has not been done;
         // just ignore these values.
         return nullptr;
