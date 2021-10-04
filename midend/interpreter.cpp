@@ -47,7 +47,7 @@ SymbolicValue* SymbolicValueFactory::create(const IR::Type* type, bool uninitial
         return create(spec->substituted, uninitialized);
     }
     if (type->is<IR::Type_Parser>() || type->is<IR::Type_Control>() ||
-        type->is<IR::P4Parser>() || type->is<IR::P4Control>())
+         type->is<IR::P4Parser>() || type->is<IR::P4Control>())
         // This implies that inlining has not been done;
         // just ignore these values.
         return nullptr;
@@ -727,6 +727,18 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         auto li = l->to<SymbolicInteger>();
         clone->expr = li->constant;
         DoConstantFolding cf(refMap, typeMap);
+        if (auto cast = expression->to<IR::Cast>()) {
+            if (cast->destType->is<IR::Type_Bits>()) {
+                const IR::Constant* constant;
+                if (clone->expr) {
+                    constant = new IR::Constant(cast->destType, 1);
+                } else {
+                    constant = new IR::Constant(cast->destType, 0);
+                }
+                set(expression, new SymbolicInteger(constant->to<IR::Constant>()));
+                return;
+            }
+        }
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
         set(expression, new SymbolicInteger(result->to<IR::Constant>()));
@@ -735,6 +747,18 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         auto li = l->to<SymbolicBool>();
         clone->expr = new IR::BoolLiteral(li->value);
         DoConstantFolding cf(refMap, typeMap);
+        if (auto cast = expression->to<IR::Cast>()) {
+            if (cast->destType->is<IR::Type_Bits>()) {
+                const IR::Constant* constant;
+                if (clone->expr) {
+                    constant = new IR::Constant(cast->destType, 1);
+                } else {
+                    constant = new IR::Constant(cast->destType, 0);
+                }
+                set(expression, new SymbolicInteger(constant->to<IR::Constant>()));
+                return;
+            }
+        }
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
