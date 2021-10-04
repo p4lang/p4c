@@ -1,0 +1,9 @@
+{
+    "program_name": "psa-multicast-basic-corrected-bmv2",
+    "build_date": "Mon Oct  4 23:57:40 2021",
+    "compile_command": "./p4c-dpdk --dump ./tmp8nxft7jq -o ./tmp8nxft7jq/psa-multicast-basic-corrected-bmv2.p4.spec --arch psa --bf-rt-schema ./tmp8nxft7jq/psa-multicast-basic-corrected-bmv2.p4.bfrt.json --context ./tmp8nxft7jq/psa-multicast-basic-corrected-bmv2.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-multicast-basic-corrected-bmv2.p4 ",
+    "compiler_version": "0.1",
+    "schema_version": "0.1",
+    "target": "DPDK",
+    "tables": []
+}

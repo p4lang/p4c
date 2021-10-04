@@ -1,0 +1,9 @@
+{
+    "program_name": "psa-unicast-or-drop-bmv2",
+    "build_date": "Mon Oct  4 23:57:50 2021",
+    "compile_command": "./p4c-dpdk --dump ./tmpi15mkqnf -o ./tmpi15mkqnf/psa-unicast-or-drop-bmv2.p4.spec --arch psa --bf-rt-schema ./tmpi15mkqnf/psa-unicast-or-drop-bmv2.p4.bfrt.json --context ./tmpi15mkqnf/psa-unicast-or-drop-bmv2.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-unicast-or-drop-bmv2.p4 ",
+    "compiler_version": "0.1",
+    "schema_version": "0.1",
+    "target": "DPDK",
+    "tables": []
+}

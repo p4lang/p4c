@@ -19,6 +19,7 @@ limitations under the License.
 #include "dpdkAsmOpt.h"
 #include "dpdkHelpers.h"
 #include "dpdkProgram.h"
+#include "dpdkContext.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "midend/eliminateTypedefs.h"
 #include "midend/removeComplexExpressions.h"
@@ -54,11 +55,12 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
-        new ConvertActionSelectorAndProfile(refMap, typeMap),
+        new ConvertActionSelectorAndProfile(refMap, typeMap, &structure),
         new CollectAddOnMissTable(refMap, typeMap, &structure),
         new P4::MoveDeclarations(),  // Move all local declarations to the beginning
         new CollectProgramStructure(refMap, typeMap, &structure),
         new CollectMetadataHeaderInfo(&structure),
+        new CollectTableInfo(&structure),
         new ConvertToDpdkArch(refMap, &structure),
         new InjectJumboStruct(&structure),
         new P4::ClearTypeMap(typeMap),
@@ -82,6 +84,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new CollectProgramStructure(refMap, typeMap, &structure),
         new InspectDpdkProgram(refMap, typeMap, &structure),
         new DpdkArchLast(),
+        new GenerateContextJson(refMap, typeMap, &structure, options),
         // convert to assembly program
         convertToDpdk,
     };

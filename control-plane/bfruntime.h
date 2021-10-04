@@ -58,6 +58,7 @@ static inline constexpr P4Id getIdPrefix(P4Id id) {
 }
 
 static inline Util::JsonObject* findJsonTable(Util::JsonArray* tablesJson, cstring tblName) {
+    tblName = "pipe." + tblName;
     for (auto *t : *tablesJson) {
         auto *tblObj = t->to<Util::JsonObject>();
         auto tName = tblObj->get("name")->to<Util::JsonValue>()->getString();

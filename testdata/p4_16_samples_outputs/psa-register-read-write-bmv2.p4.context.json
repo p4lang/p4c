@@ -1,0 +1,9 @@
+{
+    "program_name": "psa-register-read-write-bmv2",
+    "build_date": "Mon Oct  4 23:57:44 2021",
+    "compile_command": "./p4c-dpdk --dump ./tmpn0dc61ym -o ./tmpn0dc61ym/psa-register-read-write-bmv2.p4.spec --arch psa --bf-rt-schema ./tmpn0dc61ym/psa-register-read-write-bmv2.p4.bfrt.json --context ./tmpn0dc61ym/psa-register-read-write-bmv2.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-register-read-write-bmv2.p4 ",
+    "compiler_version": "0.1",
+    "schema_version": "0.1",
+    "target": "DPDK",
+    "tables": []
+}

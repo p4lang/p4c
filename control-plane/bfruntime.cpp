@@ -292,7 +292,8 @@ BFRuntimeGenerator::addKeyField(Util::JsonArray* dataJson, P4Id id, cstring name
 BFRuntimeGenerator::initTableJson(const std::string& name,
         P4Id id, cstring tableType, int64_t size, Util::JsonArray* annotations) {
     auto* tableJson = new Util::JsonObject();
-    tableJson->emplace("name", name);
+    const std::string tableName = "pipe." + name;
+    tableJson->emplace("name", tableName);
     tableJson->emplace("id", id);
     tableJson->emplace("table_type", tableType);
     tableJson->emplace("size", size);
@@ -562,7 +563,12 @@ BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table& table,
         auto* spec = new Util::JsonObject();
         const auto& pre = action->preamble();
         spec->emplace("id", pre.id());
-        spec->emplace("name", pre.name());
+        /* NoAction is not prefixed with the control block name */
+        if (pre.name().find(".NoAction") != std::string::npos) {
+            spec->emplace("name", "NoAction");
+        } else {
+            spec->emplace("name", pre.name());
+        }
         switch (action_ref.scope()) {
             case p4configv1::ActionRef::TABLE_AND_DEFAULT:
                 spec->emplace("action_scope", "TableAndDefault");

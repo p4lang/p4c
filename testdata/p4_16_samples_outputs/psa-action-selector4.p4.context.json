@@ -1,0 +1,219 @@
+{
+    "program_name": "psa-action-selector4",
+    "build_date": "Mon Oct  4 23:56:53 2021",
+    "compile_command": "./p4c-dpdk --dump ./tmpvqihwawf -o ./tmpvqihwawf/psa-action-selector4.p4.spec --arch psa --bf-rt-schema ./tmpvqihwawf/psa-action-selector4.p4.bfrt.json --context ./tmpvqihwawf/psa-action-selector4.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-action-selector4.p4 ",
+    "compiler_version": "0.1",
+    "schema_version": "0.1",
+    "target": "DPDK",
+    "tables": [
+        {
+            "table_type": "match",
+            "direction": "ingress",
+            "handle": 65536,
+            "name": "MyIC.tbl",
+            "size": 65536,
+            "stateful_table_refs": [],
+            "statistics_table_refs": [],
+            "meter_table_refs": [],
+            "p4_hidden": false,
+            "action_data_table_refs": [
+                {
+                    "name": "MyIC.as",
+                    "handle": 65538
+                }
+            ],
+            "selection_table_refs": [
+                {
+                    "name": "MyIC.as_sel",
+                    "handle": 65537
+                }
+            ],
+            "action_profile": "as",
+            "match_key_fields": [
+                {
+                    "name": "hdr.ethernet.srcAddr",
+                    "instance_name": "hdr.ethernet",
+                    "field_name": "srcAddr",
+                    "match_type": "exact",
+                    "start_bit": 0,
+                    "bit_width": 48,
+                    "bit_width_full": 48,
+                    "position":0
+                } 
+            ],
+            "actions": [
+                {
+                    "name": "NoAction",
+                    "handle": 131072,
+                    "constant_default_action": false,
+                    "is_compiler_added_action": false,
+                    "allowed_as_hit_action": true,
+                    "allowed_as_default_action": true,
+                    "p4_parameters": []
+                },
+                {
+                    "name": "MyIC.a1",
+                    "handle": 131073,
+                    "constant_default_action": false,
+                    "is_compiler_added_action": false,
+                    "allowed_as_hit_action": true,
+                    "allowed_as_default_action": true,
+                    "p4_parameters": [
+                        {
+                            "name": "param",
+                            "start_bit": 0,
+                            "bit_width": 48,
+                            "position": 0,
+                            "byte_array_index": 0
+                        }
+                    ]
+                },
+                {
+                    "name": "MyIC.a2",
+                    "handle": 131074,
+                    "constant_default_action": false,
+                    "is_compiler_added_action": false,
+                    "allowed_as_hit_action": true,
+                    "allowed_as_default_action": true,
+                    "p4_parameters": [
+                        {
+                            "name": "param",
+                            "start_bit": 0,
+                            "bit_width": 16,
+                            "position": 0,
+                            "byte_array_index": 0
+                        }
+                    ]
+                }
+            ],
+            "match_attributes": {
+                "stage_tables": [
+                    {
+                        "action_format": [
+                            {
+                    "action_name": "NoAction",
+                                "action_handle": 131072,
+                                "immediate_fields": []
+                            },
+                            {
+                    "action_name": "MyIC.a1",
+                                "action_handle": 131073,
+                                "immediate_fields": [
+                                    {
+                                        "param_name": "param",
+                                        "dest_start": 0,
+                                        "dest_width": 48
+                                    }
+                                ]
+                            },
+                            {
+                    "action_name": "MyIC.a2",
+                                "action_handle": 131074,
+                                "immediate_fields": [
+                                    {
+                                        "param_name": "param",
+                                        "dest_start": 0,
+                                        "dest_width": 16
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            "default_action_handle": 131072
+        },
+        {
+            "table_type": "match",
+            "direction": "ingress",
+            "handle": 65539,
+            "name": "MyIC.foo",
+            "size": 65536,
+            "stateful_table_refs": [],
+            "statistics_table_refs": [],
+            "meter_table_refs": [],
+            "p4_hidden": false,
+            "action_data_table_refs": [],
+            "selection_table_refs": [],
+            "match_key_fields": [],
+            "actions": [
+                {
+                    "name": "NoAction",
+                    "handle": 131075,
+                    "constant_default_action": false,
+                    "is_compiler_added_action": false,
+                    "allowed_as_hit_action": true,
+                    "allowed_as_default_action": true,
+                    "p4_parameters": []
+                }
+            ],
+            "match_attributes": {
+                "stage_tables": [
+                    {
+                        "action_format": [
+                            {
+                    "action_name": "NoAction",
+                                "action_handle": 131075,
+                                "immediate_fields": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            "default_action_handle": 131075
+        },
+        {
+            "table_type": "selection",
+            "direction": "ingress",
+            "handle": 65537,
+            "name": "MyIC.as_sel",
+            "size": 65536,
+            "p4_hidden": true,
+            "max_n_groups": 1024,
+            "max_n_members_per_group": 65536,
+            "bound_to_action_data_table_handle": 65538
+        },
+        {
+            "table_type": "action",
+            "direction": "ingress",
+            "handle": 65538,
+            "name": "MyIC.as",
+            "size": 65536,
+            "p4_hidden": true,
+            "actions": [
+                {
+                    "name": "NoAction",
+                    "handle": 131072,
+                    "p4_parameters": []
+                },
+                {
+                    "name": "MyIC.a1",
+                    "handle": 131073,
+                    "p4_parameters": [
+                        {
+                            "name": "param",
+                            "start_bit": 0,
+                            "bit_width": 48,
+                            "position": 0,
+                            "byte_array_index": 0
+                        }
+                    ]
+                },
+                {
+                    "name": "MyIC.a2",
+                    "handle": 131074,
+                    "p4_parameters": [
+                        {
+                            "name": "param",
+                            "start_bit": 0,
+                            "bit_width": 16,
+                            "position": 0,
+                            "byte_array_index": 0
+                        }
+                    ]
+                }
+            ],
+            "default_action_handle": 131072
+        }
+    ]
+}

@@ -2,7 +2,7 @@
   "schema_version" : "1.0.0",
   "tables" : [
     {
-      "name" : "MyIC.tbl",
+      "name" : "pipe.MyIC.tbl",
       "id" : 39967501,
       "table_type" : "MatchAction_Direct",
       "size" : 1024,
@@ -101,7 +101,7 @@
       "attributes" : ["EntryScope"]
     },
     {
-      "name" : "MyIC.foo",
+      "name" : "pipe.MyIC.foo",
       "id" : 49266188,
       "table_type" : "MatchAction_Direct",
       "size" : 1024,
@@ -200,7 +200,7 @@
       "attributes" : ["EntryScope"]
     },
     {
-      "name" : "MyIC.bar",
+      "name" : "pipe.MyIC.bar",
       "id" : 49390123,
       "table_type" : "MatchAction_Direct",
       "size" : 1024,

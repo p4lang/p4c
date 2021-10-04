@@ -1,0 +1,9 @@
+{
+    "program_name": "psa-example-dpdk-local-variable",
+    "build_date": "Mon Oct  4 23:57:21 2021",
+    "compile_command": "./p4c-dpdk --dump ./tmpq2tn_a29 -o ./tmpq2tn_a29/psa-example-dpdk-local-variable.p4.spec --arch psa --bf-rt-schema ./tmpq2tn_a29/psa-example-dpdk-local-variable.p4.bfrt.json --context ./tmpq2tn_a29/psa-example-dpdk-local-variable.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-example-dpdk-local-variable.p4 ",
+    "compiler_version": "0.1",
+    "schema_version": "0.1",
+    "target": "DPDK",
+    "tables": []
+}
