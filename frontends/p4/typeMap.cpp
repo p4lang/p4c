@@ -368,7 +368,11 @@ const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
 
 int TypeMap::minWidthBits(const IR::Type* type, const IR::Node* errorPosition) {
     CHECK_NULL(type);
-    auto t = getTypeType(type, true);
+    const IR::Type* t;
+    if (auto tt = type->to<IR::Type_Type>())
+        t = tt->type;
+    else
+        t = getTypeType(type, true);
     if (auto tb = t->to<IR::Type_Bits>()) {
         return tb->width_bits();
     } else if (auto ts = t->to<IR::Type_StructLike>()) {
