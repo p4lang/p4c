@@ -125,6 +125,7 @@ class TypeInference : public Transform {
     bool checkAbstractMethods(const IR::Declaration_Instance* inst, const IR::Type_Extern* type);
     void addSubstitutions(const TypeVariableSubstitution* tvs);
 
+    const IR::Expression* constantFold(const IR::Expression* expression);
 
     /** Converts each type to a canonical representation.
      *  Made virtual to enable private midend passes to extend standard IR with custom IR classes.

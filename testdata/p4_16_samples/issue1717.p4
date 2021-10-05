@@ -34,15 +34,26 @@ struct S {
 
 header Empty {}
 
-bool v(in H h1, in H1 h2) {
+bit<32> v(in H h1, in H1 h2) {
     Empty e;
     Nested n;
     S s;
     bool b1 = h2.minSizeInBits == 32;
     const bit<32> se = e.minSizeInBits() + n.minSizeInBits();
     const bit<32> sz = h1.minSizeInBits() + h2.minSizeInBits() + h2.minSizeInBytes();
-    return h1.isValid == 0 &&
-    b1 &&
-    h2.minSizeInBits() < (5 + h1.minSizeInBits()) &&
-    se < sz;
+    return h1.isValid +
+    (b1 ? (h2.minSizeInBits() + (5 + h1.minSizeInBits())) : (se + sz));
 }
+
+control c(out bit<32> size) {
+    apply {
+        H h1;
+        H1 h2;
+        size = v(h1, h2);
+    }
+}
+
+control _c(out bit<32> s);
+package top(_c c);
+
+top(c()) main;
