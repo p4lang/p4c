@@ -95,7 +95,7 @@ IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_postamb
     IR::IndexedVector<IR::DpdkAsmStatement> instr;
     instr.push_back(new IR::DpdkTxStatement(
         new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_egress_port")));
-    instr.push_back(new IR::DpdkLabelStatement("drop"));
+    instr.push_back(new IR::DpdkLabelStatement("label_drop"));
     instr.push_back(new IR::DpdkDropStatement());
     return instr;
 }

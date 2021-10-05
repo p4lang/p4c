@@ -63,7 +63,7 @@ apply {
 	mov h.ethernet.etherType 0xff
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port
-	drop
+	LABEL_DROP :	drop
 }
 
 
