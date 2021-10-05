@@ -3524,8 +3524,11 @@ bool TypeInference::containsHeader(const IR::Type* type) {
 static bool validateSelectTypes(const IR::Type* type, const IR::Expression* expression) {
     if (auto tuple = type->to<IR::Type_BaseList>()) {
         for (auto ct : tuple->components) {
-            return validateSelectTypes(ct, expression);
+            auto check = validateSelectTypes(ct, expression);
+            if (!check)
+                return false;
         }
+        return true;
     } else if (type->is<IR::ITypeVar>()) {
         typeError("Cannot infer type for %1%", type);
         return false;
