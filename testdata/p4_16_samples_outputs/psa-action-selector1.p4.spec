@@ -45,8 +45,8 @@ struct user_meta_t {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 	bit<16> local_metadata_data
-	bit<32> Ingress_tbl_group_id
-	bit<32> Ingress_tbl_member_id
+	bit<32> Ingress_as_group_id
+	bit<32> Ingress_as_member_id
 }
 metadata instanceof user_meta_t
 
@@ -87,7 +87,7 @@ action a2 args instanceof a2_arg_t {
 }
 
 action tbl_set_group_id args instanceof tbl_set_group_id_arg_t {
-	mov m.Ingress_tbl_group_id t.group_id
+	mov m.Ingress_as_group_id t.group_id
 	return
 }
 
@@ -106,7 +106,7 @@ table tbl {
 
 table as {
 	key {
-		m.Ingress_tbl_member_id exact
+		m.Ingress_as_member_id exact
 	}
 	actions {
 		NoAction
@@ -119,11 +119,11 @@ table as {
 
 
 selector as_sel {
-	group_id m.Ingress_tbl_group_id
+	group_id m.Ingress_as_group_id
 	selector {
 		m.local_metadata_data
 	}
-	member_id m.Ingress_tbl_member_id
+	member_id m.Ingress_as_member_id
 	n_groups_max 1024
 	n_members_per_group_max 65536
 }
@@ -132,8 +132,8 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
-	mov m.Ingress_tbl_member_id 0x0
-	mov m.Ingress_tbl_group_id 0x0
+	mov m.Ingress_as_member_id 0x0
+	mov m.Ingress_as_group_id 0x0
 	table tbl
 	table as_sel
 	table as

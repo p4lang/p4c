@@ -90,7 +90,7 @@ action NoAction args none {
 }
 
 action execute args instanceof execute_arg_t {
-	cast  h.ipv4.totalLen bit_32 m.Ingress_tmp_0
+	mov m.Ingress_tmp_0 h.ipv4.totalLen
 	meter meter0_0 t.index m.Ingress_tmp_0 m.Ingress_color_in_0 m.Ingress_color_out_0
 	jmpneq LABEL_1FALSE m.Ingress_color_out_0 0x0
 	mov m.Ingress_tmp 0x1

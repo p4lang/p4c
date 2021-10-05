@@ -34,8 +34,8 @@ void CollectTablesForContextJson::setTableAttributes() {
         cstring direction = "";
         if (kv.first == "Ingress")
             direction = "ingress";
-	else if (kv.first == "Egress")
- 	    direction = "egress";
+        else if (kv.first == "Egress")
+            direction = "egress";
         auto control = kv.second->to<IR::P4Control>();
         for (auto d : control->controlLocals) {
             if (auto tbl = d->to<IR::P4Table>()) {
@@ -51,7 +51,7 @@ void CollectTablesForContextJson::setTableAttributes() {
                 } else {
                     tblAttr.isHidden = false;
                     tblAttr.tableType = "match";
-                    tblAttr.tableKeys = ::get (structure->key_map, kv.second->name.originalName
+                    tblAttr.tableKeys = ::get(structure->key_map, kv.second->name.originalName
                                                + "_" + tbl->name.originalName);
                 }
                 if (!hidden)
@@ -62,7 +62,7 @@ void CollectTablesForContextJson::setTableAttributes() {
                     selector_tables.push_back(d);
                 tableAttrmap.emplace(tbl->name.originalName, tblAttr);
             }
-	}
+        }
     }
 
     // Keep the compiler generated (hidden) tables at the end
@@ -121,7 +121,8 @@ bool WriteContextJson::preorder(const IR::P4Program * /*p*/) {
                 add_space(out, 4); out << "\"build_date\": \"" << build_date << "\",\n";
                 add_space(out, 4); out << "\"compile_command\": \"" << compilerCommand << " \",\n";
             }
-            add_space(out, 4); out << "\"compiler_version\": \"" << options.compilerVersion << "\",\n";
+            add_space(out, 4);
+            out << "\"compiler_version\": \"" << options.compilerVersion << "\",\n";
             add_space(out, 4); out << "\"schema_version\": \"0.1\",\n";
             add_space(out, 4); out << "\"target\": \"DPDK\",\n";
 
@@ -153,7 +154,7 @@ bool WriteContextJson::preorder(const IR::P4Program * /*p*/) {
 }
 
 /* This function sets certain attributes for each action within a table */
-void WriteContextJson::setActionAttributes (
+void WriteContextJson::setActionAttributes(
     std::map <cstring, struct actionAttributes> &actionAttrMap, const IR::P4Table *tbl) {
     for (auto act : tbl->getActionList()->actionList) {
         struct actionAttributes attr;
@@ -220,7 +221,7 @@ void WriteContextJson::setActionAttributes (
 }
 
 /* Print a single table object of match_table type in Context JSON*/
-void WriteContextJson::printTableCtxtJson (const IR::P4Table *tbl, std::ostream &out) {
+void WriteContextJson::printTableCtxtJson(const IR::P4Table *tbl, std::ostream &out) {
     bool hasActionProfileSelector = false;
     auto mainTableAttr = ::get(tableAttrmap, tbl->name.originalName);
     cstring tableName = mainTableAttr.controlName + "." + tbl->name.originalName;
@@ -243,10 +244,11 @@ void WriteContextJson::printTableCtxtJson (const IR::P4Table *tbl, std::ostream 
     add_space(out, 12); out << "\"stateful_table_refs\": []" << ",\n";
     add_space(out, 12); out << "\"statistics_table_refs\": []" << ",\n";
     add_space(out, 12); out << "\"meter_table_refs\": []" << ",\n";
-    add_space(out, 12); out << "\"p4_hidden\": " << std::boolalpha << mainTableAttr.isHidden << ",\n";
+    add_space(out, 12); out << "\"p4_hidden\": "
+                            << std::boolalpha << mainTableAttr.isHidden << ",\n";
 
     // Reference to compiler generated member table in case of action profile and action selector.
-    add_space (out, 12); out << "\"action_data_table_refs\": [";
+    add_space(out, 12); out << "\"action_data_table_refs\": [";
     const IR::P4Table *memberTable = nullptr;
     if (structure->member_tables.count(tbl->name)) {
         hasActionProfileSelector = true;
@@ -254,37 +256,37 @@ void WriteContextJson::printTableCtxtJson (const IR::P4Table *tbl, std::ostream 
         auto tableAttr = ::get(tableAttrmap, memberTable->name.originalName);
         tableName = tableAttr.controlName + "." + memberTable->name.originalName;
         out << "\n";
-        add_space (out, 16); out << "{\n";
+        add_space(out, 16); out << "{\n";
         add_space(out, 20);
         out << "\"name\": \"" <<  tableName <<"\",\n";
         add_space(out, 20); out << "\"handle\": " << tableAttr.tableHandle   <<"\n";
-        add_space (out, 16); out << "}\n";
+        add_space(out, 16); out << "}\n";
         add_space(out, 12);
     }
     out << "],\n";
 
     // Reference to compiler generated group table in case of action selector
-    add_space (out, 12); out << "\"selection_table_refs\": [";
+    add_space(out, 12); out << "\"selection_table_refs\": [";
     if (structure->group_tables.count(tbl->name)) {
         hasActionProfileSelector = true;
         auto groupTable = structure->group_tables.at(tbl->name);
         auto tableAttr = ::get(tableAttrmap, groupTable->name.originalName);
         tableName = tableAttr.controlName + "." + groupTable->name.originalName;
         out << "\n";
-        add_space (out, 16); out << "{\n";
+        add_space(out, 16); out << "{\n";
         add_space(out, 20); out << "\"name\": \"" << tableName <<"\",\n";
         add_space(out, 20); out << "\"handle\": " <<  tableAttr.tableHandle <<"\n";
-        add_space (out, 16); out << "}\n";
+        add_space(out, 16); out << "}\n";
         add_space(out, 12);
     }
     out << "],\n";
     if (hasActionProfileSelector) {
-        add_space (out, 12);
+        add_space(out, 12);
         out << "\"action_profile\": \"" << memberTable->name.originalName <<"\",\n";
     }
 
     // Match Key Fields for this table
-    add_space (out, 12); out << "\"match_key_fields\": [";
+    add_space(out, 12); out << "\"match_key_fields\": [";
     auto match_keys = tbl->getKey();
 
     if (match_keys) {
@@ -310,8 +312,10 @@ void WriteContextJson::printTableCtxtJson (const IR::P4Table *tbl, std::ostream 
                 add_space(out, 20); out << "\"field_name\": \"" <<  fieldName <<"\",\n";
                 add_space(out, 20); out << "\"match_type\": \"" <<  toStr(mkf->matchType) <<"\",\n";
                 add_space(out, 20); out << "\"start_bit\": 0,\n";
-                add_space(out, 20); out << "\"bit_width\": " << mkf->expression->type->width_bits() << ",\n";
-                add_space(out, 20); out << "\"bit_width_full\": "  << mkf->expression->type->width_bits() << ",\n";
+                add_space(out, 20); out << "\"bit_width\": "
+                                        << mkf->expression->type->width_bits() << ",\n";
+                add_space(out, 20); out << "\"bit_width_full\": "
+                                        << mkf->expression->type->width_bits() << ",\n";
                 add_space(out, 20); out << "\"position\":" << index << "\n";
                 add_space(out, 16); out << "} ";
                 index++;
@@ -336,7 +340,7 @@ void WriteContextJson::printTableCtxtJson (const IR::P4Table *tbl, std::ostream 
         table = tbl;
     }
 
-    setActionAttributes (actionAttrMap, table);
+    setActionAttributes(actionAttrMap, table);
     cstring default_action_name = "";
 
     unsigned default_action_handle = 0;
@@ -381,9 +385,11 @@ void WriteContextJson::printTableCtxtJson (const IR::P4Table *tbl, std::ostream 
                     if (position) out << ",";
                     out << "\n";
                     add_space(out, 24); out << "{\n";
-                    add_space(out, 28); out << "\"name\": \"" << param->name.originalName << "\",\n";
+                    add_space(out, 28); out << "\"name\": \""
+                                            << param->name.originalName << "\",\n";
                     add_space(out, 28); out << "\"start_bit\": 0,\n";
-                    add_space(out, 28); out << "\"bit_width\": " << param->type->width_bits() << ",\n";
+                    add_space(out, 28); out << "\"bit_width\": "
+                                            << param->type->width_bits() << ",\n";
                     add_space(out, 28); out << "\"position\": " << position++ << ",\n";
                     add_space(out, 28); out << "\"byte_array_index\": "  << index/8 <<  "\n";
                     add_space(out, 24); out << "}";
@@ -430,7 +436,8 @@ void WriteContextJson::printTableCtxtJson (const IR::P4Table *tbl, std::ostream 
               if (position) out << ",";
               out << "\n";
               add_space(out, 36); out << "{\n";
-              add_space(out, 40); out << "\"param_name\": \"" << param->name.originalName << "\",\n";
+              add_space(out, 40); out << "\"param_name\": \""
+                                      << param->name.originalName << "\",\n";
               add_space(out, 40); out << "\"dest_start\": "  << index/8 <<  ",\n";
               add_space(out, 40); out << "\"dest_width\": " << param->type->width_bits() << "\n";
               add_space(out, 36); out << "}";
@@ -457,7 +464,7 @@ void WriteContextJson::printTableCtxtJson (const IR::P4Table *tbl, std::ostream 
 }
 
 /* Print a single selection table object in Context JSON */
-void WriteContextJson::printSelTableCtxtJson (const IR::P4Table *tbl, std::ostream &out) {
+void WriteContextJson::printSelTableCtxtJson(const IR::P4Table *tbl, std::ostream &out) {
     auto mainTableAttr = ::get(tableAttrmap, tbl->name.originalName);
     cstring tableName = mainTableAttr.controlName + "." + tbl->name.originalName;
     add_space(out, 8); out << "{\n";
@@ -499,7 +506,7 @@ void WriteContextJson::printSelTableCtxtJson (const IR::P4Table *tbl, std::ostre
 }
 
 /* Print a single member table object in Context JSON */
-void WriteContextJson::printActionTableCtxtJson (const IR::P4Table *tbl, std::ostream &out) {
+void WriteContextJson::printActionTableCtxtJson(const IR::P4Table *tbl, std::ostream &out) {
     auto mainTableAttr = ::get(tableAttrmap, tbl->name.originalName);
     cstring tableName = mainTableAttr.controlName + "." + tbl->name.originalName;
     add_space(out, 8); out << "{\n";
@@ -564,7 +571,6 @@ void WriteContextJson::printActionTableCtxtJson (const IR::P4Table *tbl, std::os
         out << "]\n";
         add_space(out, 16); out << "}";
         first = false;
-
     }
     if (!first) out << "\n";
     add_space(out, 12); out << "],\n";

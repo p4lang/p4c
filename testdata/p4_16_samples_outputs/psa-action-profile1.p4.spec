@@ -44,7 +44,7 @@ struct EMPTY {
 	bit<8> psa_egress_output_metadata_clone
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
-	bit<32> Ingress_tbl_0_member_id
+	bit<32> Ingress_ap_member_id
 }
 metadata instanceof EMPTY
 
@@ -85,7 +85,7 @@ action a2 args instanceof a2_arg_t {
 }
 
 action tbl_set_member_id args instanceof tbl_set_member_id_arg_t {
-	mov m.Ingress_tbl_0_member_id t.member_id
+	mov m.Ingress_ap_member_id t.member_id
 	return
 }
 
@@ -104,7 +104,7 @@ table tbl {
 
 table ap {
 	key {
-		m.Ingress_tbl_0_member_id exact
+		m.Ingress_ap_member_id exact
 	}
 	actions {
 		NoAction
@@ -120,7 +120,7 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
-	mov m.Ingress_tbl_0_member_id 0x0
+	mov m.Ingress_ap_member_id 0x0
 	table tbl
 	table ap
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
