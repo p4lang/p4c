@@ -378,19 +378,19 @@ int TypeMap::minWidthBits(const IR::Type* type, const IR::Node* errorPosition) {
     } else if (auto ts = t->to<IR::Type_StructLike>()) {
         int result = 0;
         bool isUnion = t->is<IR::Type_HeaderUnion>();
+        if (isUnion)
+            goto error;
         for (auto f : ts->fields) {
             int w = minWidthBits(f->type, errorPosition);
             if (w < 0)
                 return w;
             if (isUnion)
+                // Left here in case we change our mind later.
                 result = std::max(w, result);
             else
                 result = result + w;
         }
         return result;
-    } else if (auto ths = t->to<IR::Type_Stack>()) {
-        auto w = minWidthBits(ths->elementType, errorPosition);
-        return w * ths->getSize();
     } else if (auto te = t->to<IR::Type_SerEnum>()) {
         return minWidthBits(te->type, errorPosition);
     } else if (t->is<IR::Type_Boolean>()) {
@@ -401,7 +401,9 @@ int TypeMap::minWidthBits(const IR::Type* type, const IR::Node* errorPosition) {
         return 0;
     }
 
-    ::error(ErrorType::ERR_UNSUPPORTED, "%1%: width not well-defined", errorPosition);
+  error:
+    ::error(ErrorType::ERR_UNSUPPORTED, "%1%: width not well-defined for values of type %2%",
+            errorPosition, t);
     return -1;
 }
 

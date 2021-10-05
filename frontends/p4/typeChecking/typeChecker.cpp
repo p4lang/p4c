@@ -2831,6 +2831,19 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
     }
 
     bool inMethod = getParent<IR::MethodCallExpression>() != nullptr;
+    // Built-in methods
+    if (inMethod && (member == IR::Type_Header::minSizeInBits ||
+                     member == IR::Type_Header::minSizeInBytes)) {
+        auto type = new IR::Type_Method(
+            new IR::Type_InfInt(), new IR::ParameterList(), member);
+        auto ctype = canonicalize(type);
+        if (ctype == nullptr)
+            return expression;
+        setType(getOriginal(), ctype);
+        setType(expression, ctype);
+        return expression;
+    }
+
     if (type->is<IR::Type_StructLike>()) {
         if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>()) {
             if (inMethod && (member == IR::Type_Header::isValid)) {
@@ -2950,24 +2963,6 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 return expression;
             setType(getOriginal(), canon);
             setType(expression, canon);
-            return expression;
-        }
-    }
-
-    // Built-in methods
-    if (inMethod && (member == IR::Type_Header::minSizeInBits ||
-                     member == IR::Type_Header::minSizeInBytes)) {
-        if (type->is<IR::Type_StructLike>() || type->is<IR::Type_Stack>() ||
-            type->is<IR::Type_Bits>() || type->is<IR::Type_Name>() ||
-            type->is<IR::Type_SerEnum>() || type->is<IR::Type_Type>() ||
-            type->is<IR::Type_Newtype>()) {
-            auto type = new IR::Type_Method(
-                new IR::Type_InfInt(), new IR::ParameterList(), member);
-            auto ctype = canonicalize(type);
-            if (ctype == nullptr)
-                return expression;
-            setType(getOriginal(), ctype);
-            setType(expression, ctype);
             return expression;
         }
     }
@@ -3200,11 +3195,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         if (auto mem = expression->method->to<IR::Member>()) {
             auto type = typeMap->getType(mem->expr, true);
             if ((mem->member == IR::Type_StructLike::minSizeInBits ||
-                 mem->member == IR::Type_StructLike::minSizeInBytes) &&
-                (type->is<IR::Type_StructLike>() || type->is<IR::Type_Stack>() ||
-                 type->is<IR::Type_Bits>() || type->is<IR::Type_SerEnum>() ||
-                 type->is<IR::Type_Varbits>() || type->is<IR::Type_Newtype>() ||
-                 type->is<IR::Type_Type>())) {
+                 mem->member == IR::Type_StructLike::minSizeInBytes)) {
                 LOG3("Folding " << mem->member);
                 int w = typeMap->minWidthBits(type, expression);
                 if (w < 0)

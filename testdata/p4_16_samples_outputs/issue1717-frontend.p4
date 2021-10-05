@@ -28,12 +28,6 @@ header Nested {
 }
 
 struct S {
-    H    h1;
-    H1   h2;
-    H[3] h3;
-}
-
-header_union HU {
     H  h1;
     H1 h2;
 }
