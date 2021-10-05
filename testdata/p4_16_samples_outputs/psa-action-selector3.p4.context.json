@@ -1,7 +1,5 @@
 {
     "program_name": "psa-action-selector3",
-    "build_date": "Mon Oct  4 23:56:52 2021",
-    "compile_command": "./p4c-dpdk --dump ./tmpy9ineezp -o ./tmpy9ineezp/psa-action-selector3.p4.spec --arch psa --bf-rt-schema ./tmpy9ineezp/psa-action-selector3.p4.bfrt.json --context ./tmpy9ineezp/psa-action-selector3.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-action-selector3.p4 ",
     "compiler_version": "0.1",
     "schema_version": "0.1",
     "target": "DPDK",

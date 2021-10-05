@@ -1,7 +1,5 @@
 {
     "program_name": "psa-conditional_operator",
-    "build_date": "Mon Oct  4 23:56:55 2021",
-    "compile_command": "./p4c-dpdk --dump ./tmpis1hh5vn -o ./tmpis1hh5vn/psa-conditional_operator.p4.spec --arch psa --bf-rt-schema ./tmpis1hh5vn/psa-conditional_operator.p4.bfrt.json --context ./tmpis1hh5vn/psa-conditional_operator.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-conditional_operator.p4 ",
     "compiler_version": "0.1",
     "schema_version": "0.1",
     "target": "DPDK",

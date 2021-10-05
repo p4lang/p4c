@@ -1,7 +1,5 @@
 {
     "program_name": "psa-dpdk-table-key-consolidation-if-1",
-    "build_date": "Mon Oct  4 23:57:04 2021",
-    "compile_command": "./p4c-dpdk --dump ./tmpd4cvt0ga -o ./tmpd4cvt0ga/psa-dpdk-table-key-consolidation-if-1.p4.spec --arch psa --bf-rt-schema ./tmpd4cvt0ga/psa-dpdk-table-key-consolidation-if-1.p4.bfrt.json --context ./tmpd4cvt0ga/psa-dpdk-table-key-consolidation-if-1.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-dpdk-table-key-consolidation-if-1.p4 ",
     "compiler_version": "0.1",
     "schema_version": "0.1",
     "target": "DPDK",

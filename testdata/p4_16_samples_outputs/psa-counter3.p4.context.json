@@ -1,7 +1,5 @@
 {
     "program_name": "psa-counter3",
-    "build_date": "Mon Oct  4 23:56:57 2021",
-    "compile_command": "./p4c-dpdk --dump ./tmpi7ofej_l -o ./tmpi7ofej_l/psa-counter3.p4.spec --arch psa --bf-rt-schema ./tmpi7ofej_l/psa-counter3.p4.bfrt.json --context ./tmpi7ofej_l/psa-counter3.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-counter3.p4 ",
     "compiler_version": "0.1",
     "schema_version": "0.1",
     "target": "DPDK",

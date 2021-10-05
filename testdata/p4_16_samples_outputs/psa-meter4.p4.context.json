@@ -1,7 +1,5 @@
 {
     "program_name": "psa-meter4",
-    "build_date": "Mon Oct  4 23:57:36 2021",
-    "compile_command": "./p4c-dpdk --dump ./tmpfys3hswj -o ./tmpfys3hswj/psa-meter4.p4.spec --arch psa --bf-rt-schema ./tmpfys3hswj/psa-meter4.p4.bfrt.json --context ./tmpfys3hswj/psa-meter4.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-meter4.p4 ",
     "compiler_version": "0.1",
     "schema_version": "0.1",
     "target": "DPDK",

@@ -1,7 +1,5 @@
 {
     "program_name": "psa-register-complex-bmv2",
-    "build_date": "Mon Oct  4 23:57:43 2021",
-    "compile_command": "./p4c-dpdk --dump ./tmprs8sd7yj -o ./tmprs8sd7yj/psa-register-complex-bmv2.p4.spec --arch psa --bf-rt-schema ./tmprs8sd7yj/psa-register-complex-bmv2.p4.bfrt.json --context ./tmprs8sd7yj/psa-register-complex-bmv2.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-register-complex-bmv2.p4 ",
     "compiler_version": "0.1",
     "schema_version": "0.1",
     "target": "DPDK",

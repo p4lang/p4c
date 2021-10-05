@@ -1,7 +1,5 @@
 {
     "program_name": "psa-isvalid",
-    "build_date": "Mon Oct  4 23:57:34 2021",
-    "compile_command": "./p4c-dpdk --dump ./tmpwo7ka3j4 -o ./tmpwo7ka3j4/psa-isvalid.p4.spec --arch psa --bf-rt-schema ./tmpwo7ka3j4/psa-isvalid.p4.bfrt.json --context ./tmpwo7ka3j4/psa-isvalid.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-isvalid.p4 ",
     "compiler_version": "0.1",
     "schema_version": "0.1",
     "target": "DPDK",

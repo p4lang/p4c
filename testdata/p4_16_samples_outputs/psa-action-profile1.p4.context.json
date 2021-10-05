@@ -1,7 +1,5 @@
 {
     "program_name": "psa-action-profile1",
-    "build_date": "Mon Oct  4 23:56:48 2021",
-    "compile_command": "./p4c-dpdk --dump ./tmp2ct7m3h0 -o ./tmp2ct7m3h0/psa-action-profile1.p4.spec --arch psa --bf-rt-schema ./tmp2ct7m3h0/psa-action-profile1.p4.bfrt.json --context ./tmp2ct7m3h0/psa-action-profile1.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-action-profile1.p4 ",
     "compiler_version": "0.1",
     "schema_version": "0.1",
     "target": "DPDK",

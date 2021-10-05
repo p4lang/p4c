@@ -1,7 +1,5 @@
 {
     "program_name": "psa-example-logical-operations",
-    "build_date": "Mon Oct  4 23:57:24 2021",
-    "compile_command": "./p4c-dpdk --dump ./tmpkeqgyz3j -o ./tmpkeqgyz3j/psa-example-logical-operations.p4.spec --arch psa --bf-rt-schema ./tmpkeqgyz3j/psa-example-logical-operations.p4.bfrt.json --context ./tmpkeqgyz3j/psa-example-logical-operations.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-example-logical-operations.p4 ",
     "compiler_version": "0.1",
     "schema_version": "0.1",
     "target": "DPDK",

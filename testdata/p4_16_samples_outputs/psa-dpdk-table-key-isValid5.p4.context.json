@@ -1,7 +1,5 @@
 {
     "program_name": "psa-dpdk-table-key-isValid5",
-    "build_date": "Mon Oct  4 23:57:13 2021",
-    "compile_command": "./p4c-dpdk --dump ./tmpi36g45d9 -o ./tmpi36g45d9/psa-dpdk-table-key-isValid5.p4.spec --arch psa --bf-rt-schema ./tmpi36g45d9/psa-dpdk-table-key-isValid5.p4.bfrt.json --context ./tmpi36g45d9/psa-dpdk-table-key-isValid5.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-dpdk-table-key-isValid5.p4 ",
     "compiler_version": "0.1",
     "schema_version": "0.1",
     "target": "DPDK",

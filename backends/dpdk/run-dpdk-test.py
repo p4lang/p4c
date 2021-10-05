@@ -47,6 +47,7 @@ class Options(object):
         self.generateP4Runtime = False
         self.generateBfRt = False
         self.generateContext = False
+        self.testContextJson = True
 
 def usage(options):
     name = options.binary
@@ -223,6 +224,8 @@ def process_file(options, argv):
             args.extend(["--bf-rt-schema", bfRtSchemaFile])
         if options.generateContext:
             args.extend(["--context", contextFile])
+        if options.testContextJson:
+            args.extend(["--testcontextJson"])
 
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
         args.extend(["--std", "p4-14"])

@@ -1,7 +1,5 @@
 {
     "program_name": "psa-example-select_tuple",
-    "build_date": "Mon Oct  4 23:57:31 2021",
-    "compile_command": "./p4c-dpdk --dump ./tmpgq9tvdh_ -o ./tmpgq9tvdh_/psa-example-select_tuple.p4.spec --arch psa --bf-rt-schema ./tmpgq9tvdh_/psa-example-select_tuple.p4.bfrt.json --context ./tmpgq9tvdh_/psa-example-select_tuple.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-example-select_tuple.p4 ",
     "compiler_version": "0.1",
     "schema_version": "0.1",
     "target": "DPDK",

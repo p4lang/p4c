@@ -1,7 +1,5 @@
 {
     "program_name": "psa-register3",
-    "build_date": "Mon Oct  4 23:57:46 2021",
-    "compile_command": "./p4c-dpdk --dump ./tmp8bo4qbzb -o ./tmp8bo4qbzb/psa-register3.p4.spec --arch psa --bf-rt-schema ./tmp8bo4qbzb/psa-register3.p4.bfrt.json --context ./tmp8bo4qbzb/psa-register3.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-register3.p4 ",
     "compiler_version": "0.1",
     "schema_version": "0.1",
     "target": "DPDK",

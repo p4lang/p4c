@@ -1,7 +1,5 @@
 {
     "program_name": "psa-custom-type-counter-index",
-    "build_date": "Mon Oct  4 23:56:59 2021",
-    "compile_command": "./p4c-dpdk --dump ./tmpm5tdli1w -o ./tmpm5tdli1w/psa-custom-type-counter-index.p4.spec --arch psa --bf-rt-schema ./tmpm5tdli1w/psa-custom-type-counter-index.p4.bfrt.json --context ./tmpm5tdli1w/psa-custom-type-counter-index.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-custom-type-counter-index.p4 ",
     "compiler_version": "0.1",
     "schema_version": "0.1",
     "target": "DPDK",

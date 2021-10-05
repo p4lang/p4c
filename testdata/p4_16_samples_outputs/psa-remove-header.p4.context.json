@@ -1,7 +1,5 @@
 {
     "program_name": "psa-remove-header",
-    "build_date": "Mon Oct  4 23:57:47 2021",
-    "compile_command": "./p4c-dpdk --dump ./tmppgq46emj -o ./tmppgq46emj/psa-remove-header.p4.spec --arch psa --bf-rt-schema ./tmppgq46emj/psa-remove-header.p4.bfrt.json --context ./tmppgq46emj/psa-remove-header.p4.context.json /home/ushagupt/contextJSON/P4C/commit/final/p4c/testdata/p4_16_samples/psa-remove-header.p4 ",
     "compiler_version": "0.1",
     "schema_version": "0.1",
     "target": "DPDK",

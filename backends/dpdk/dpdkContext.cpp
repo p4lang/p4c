@@ -117,8 +117,10 @@ bool WriteContextJson::preorder(const IR::P4Program * /*p*/) {
             /* Print program level information*/
             out << "{\n";
             add_space(out, 4); out << "\"program_name\": \"" << progName <<"\",\n";
-            add_space(out, 4); out << "\"build_date\": \"" << build_date << "\",\n";
-            add_space(out, 4); out << "\"compile_command\": \"" << compilerCommand << " \",\n";
+            if (!options.testcontextJson) {
+                add_space(out, 4); out << "\"build_date\": \"" << build_date << "\",\n";
+                add_space(out, 4); out << "\"compile_command\": \"" << compilerCommand << " \",\n";
+            }
             add_space(out, 4); out << "\"compiler_version\": \"" << options.compilerVersion << "\",\n";
             add_space(out, 4); out << "\"schema_version\": \"0.1\",\n";
             add_space(out, 4); out << "\"target\": \"DPDK\",\n";
