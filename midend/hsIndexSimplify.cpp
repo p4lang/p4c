@@ -56,6 +56,7 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(IR::Statement* statement) {
         HSIndexFinder aiElim(nullptr, 0);
         return const_cast<IR::Node*>(statement->apply(aiElim));
     }
+    
     IR::IfStatement* result = nullptr;
     IR::IfStatement* curResult = nullptr;
     size_t sz = aiFinder.getArraySize();
