@@ -460,8 +460,8 @@ class DpdkGetChecksumStatement: DpdkAsmStatement, IDPDKNode {
 }
 
 class DpdkCastStatement: DpdkAsmStatement, IDPDKNode {
-    Expression src;
     Expression dst;
+    Expression src;
     Type type;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint

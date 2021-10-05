@@ -435,8 +435,8 @@ bool ExpressionUnroll::preorder(const IR::Operation_Unary *u) {
             un_expr = new IR::Cmpl(root);
         } else if (u->to<IR::LNot>()) {
             un_expr = new IR::LNot(root);
-        } else if (u->to<IR::Cast>()) {
-            un_expr = new IR::Cast(u->type, root);
+        } else if (auto c = u->to<IR::Cast>()) {
+            un_expr = new IR::Cast(c->destType, root);
         } else {
             std::cout << u->node_type_name() << std::endl;
             BUG("Not Implemented");
@@ -957,7 +957,7 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
         // This prune will prevent the postorder(IR::KeyElement*) below from executing
         prune();
     } else {
-        ::warning(ErrorType::WARN_UNSUPPORTED, "Mismatched header/metadata struct for key "
+        ::warning(ErrorType::WARN_MISMATCH, "Mismatched header/metadata struct for key "
                   "elements in table %1%. Copying all match fields to metadata",
                    findOrigCtxt<IR::P4Table>()->name.toString());
         LOG3("Will pull out " << keys);
