@@ -3521,6 +3521,22 @@ bool TypeInference::containsHeader(const IR::Type* type) {
     return false;
 }
 
+static bool validateSelectTypes(const IR::Type* type, const IR::Expression* expression) {
+    if (auto tuple = type->to<IR::Type_BaseList>()) {
+        for (auto ct : tuple->components) {
+            return validateSelectTypes(ct, expression);
+        }
+    } else if (type->is<IR::ITypeVar>()) {
+        typeError("Cannot infer type for %1%", type);
+        return false;
+    } else if (type->is<IR::Type_Bits>() || type->is<IR::Type_SerEnum>() ||
+               type->is<IR::Type_Boolean>() || type->is<IR::Type_Enum>()) {
+        return true;
+    }
+    typeError("Expression with type %1% cannot be used in select %2%", type, expression);
+    return false;
+}
+
 const IR::Node* TypeInference::postorder(IR::SelectExpression* expression) {
     if (done()) return expression;
     auto selectType = getType(expression->select);
@@ -3528,19 +3544,11 @@ const IR::Node* TypeInference::postorder(IR::SelectExpression* expression) {
         return expression;
 
     // Check that the selectType is determined
-    if (!selectType->is<IR::Type_BaseList>())
-        BUG("%1%: Expected a tuple type for the select expression, got %2%",
-            expression, selectType);
     auto tuple = selectType->to<IR::Type_BaseList>();
-    for (auto ct : tuple->components) {
-        if (ct->is<IR::ITypeVar>()) {
-            typeError("Cannot infer type for %1%", ct);
-            return expression;
-        } else if (containsHeader(ct)) {
-            typeError("Expression with type %1% cannot be used in select %2%", ct, expression);
-            return expression;
-        }
-    }
+    BUG_CHECK(tuple != nullptr, "%1%: Expected a tuple type for the select expression, got %2%",
+              expression, selectType);
+    if (!validateSelectTypes(selectType, expression))
+        return expression;
 
     bool changes = false;
     IR::Vector<IR::SelectCase> vec;
