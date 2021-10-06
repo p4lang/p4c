@@ -71,7 +71,7 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::IfStatement* statement)  {
         statement->ifTrue = e;
     }
 
-    if (SideEffects::check(statement->condition, refMap, typeMap))
+    if (SideEffects::check(statement->condition, this, refMap, typeMap))
         return statement;
     if (statement->ifTrue->is<IR::EmptyStatement>() &&
         (statement->ifFalse == nullptr || statement->ifFalse->is<IR::EmptyStatement>()))
@@ -110,7 +110,7 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::SwitchStatement* statement)
             if ((*it)->statement != nullptr)
                 break;
             else
-                ::warning(ErrorType::WARN_MISSING, "%1%: fallthrough with no statement", last); }
+                warn(ErrorType::WARN_MISSING, "%1%: fallthrough with no statement", last); }
         statement->cases.erase(it.base(), statement->cases.end()); }
     return statement;
 }

@@ -144,7 +144,7 @@ void ParseAnnotations::postorder(IR::Annotation* annotation) {
         // Unknown annotation. Leave as is, but warn if desired.
         if (warnUnknown && warned.count(name) == 0) {
             warned.insert(name);
-            ::warning(ErrorType::WARN_UNKNOWN, "Unknown annotation: %1%", annotation->name);
+            warn(ErrorType::WARN_UNKNOWN, "Unknown annotation: %1%", annotation->name);
         }
         return;
     }

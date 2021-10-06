@@ -670,6 +670,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         }
     } else if (auto a = mi->to<P4::ActionCall>()) {
         auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
+        helper->setCalledBy(this);
         a->action->body->apply(*helper);
         for (auto i : helper->get_instr()) {
             add_instr(i);

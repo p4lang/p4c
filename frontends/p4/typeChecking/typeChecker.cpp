@@ -64,6 +64,7 @@ class ConstantTypeSubstitution : public Transform {
         auto result = expr->apply(*this)->to<IR::Expression>();
         if (result != expr && (::errorCount() == 0)) {
             auto *learn = tc->clone();
+            learn->setCalledBy(this);
             (void)result->apply(*learn);
         }
         return result;
@@ -72,6 +73,7 @@ class ConstantTypeSubstitution : public Transform {
         auto result = vec->apply(*this)->to<IR::Vector<IR::Expression>>();
         if (result != vec) {
             auto *learn = tc->clone();
+            learn->setCalledBy(this);
             (void)result->apply(*learn);
         }
         return result;
@@ -80,6 +82,7 @@ class ConstantTypeSubstitution : public Transform {
         auto result = vec->apply(*this)->to<IR::Vector<IR::Argument>>();
         if (result != vec) {
             auto *learn = tc->clone();
+            learn->setCalledBy(this);
             (void)result->apply(*learn);
         }
         return result;
@@ -111,6 +114,7 @@ const IR::Type* TypeInference::cloneWithFreshTypeVariables(const IR::IMayBeGener
     }
 
     TypeVariableSubstitutionVisitor sv(&tvs, true);
+    sv.setCalledBy(this);
     auto cl = type->to<IR::Type>()->apply(sv);
     CHECK_NULL(cl);
     // Learn this new type
@@ -570,6 +574,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         // learn the types of all components of the specialized type
         LOG2("Scanning the specialized type");
         auto *tc = clone();
+        tc->setCalledBy(this);
         (void)result->apply(*tc);
         return result;
     } else {
@@ -1065,6 +1070,7 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
             return decl;
         }
         auto *learn = clone();
+        learn->setCalledBy(this);
         (void)type->apply(*learn);
         if (args != decl->arguments)
             decl->arguments = args;
@@ -1189,6 +1195,7 @@ const IR::Type* TypeInference::setTypeType(const IR::Type* type, bool learn) {
         if (canon != typeToCanonicalize && learn) {
             auto *tc = clone();
             unsigned e = ::errorCount();
+            tc->setCalledBy(this);
             (void)canon->apply(*tc);
             if (::errorCount() > e)
                 return nullptr;
@@ -1381,6 +1388,7 @@ const IR::Node* TypeInference::postorder(IR::P4ValueSet* decl) {
         if (canon != decl->elementType) {
             auto *tc = clone();
             unsigned e = ::errorCount();
+            tc->setCalledBy(this);
             (void)canon->apply(*tc);
             if (::errorCount() > e)
                 return nullptr;
@@ -2253,8 +2261,8 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
             return expression;
         }
         if (lt != nullptr && shift >= lt->size)
-            ::warning(ErrorType::WARN_OVERFLOW, "%1%: shifting value with %2% bits by %3%",
-                      expression, lt->size, shift);
+            warn(ErrorType::WARN_OVERFLOW, "%1%: shifting value with %2% bits by %3%",
+                 expression, lt->size, shift);
     }
 
     if (rtype->is<IR::Type_Bits>() && rtype->to<IR::Type_Bits>()->isSigned) {
@@ -2900,6 +2908,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             return expression;
         // sometimes this is a synthesized type, so we have to crawl it to understand it
         auto *learn = clone();
+        learn->setCalledBy(this);
         (void)methodType->apply(*learn);
 
         setType(getOriginal(), methodType);
@@ -3247,12 +3256,14 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
 
         LOG2("Method type before specialization " << methodType << " with " << tvs);
         TypeVariableSubstitutionVisitor substVisitor(tvs);
+        substVisitor.setCalledBy(this);
         auto specMethodType = methodType->apply(substVisitor);
         LOG2("Method type after specialization " << specMethodType);
 
         // construct types for the specMethodType, use a new typeChecker
         // that uses the same tables!
         auto *learn = clone();
+        learn->setCalledBy(this);
         (void)specMethodType->apply(*learn);
 
         auto canon = getType(specMethodType);
@@ -3571,8 +3582,8 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
         Comparison comp;
         comp.left = stat->expression;
         if (isCompileTimeConstant(stat->expression))
-            warning(ErrorType::WARN_MISMATCH, "%1%: constant expression in switch",
-                    stat->expression);
+            warn(ErrorType::WARN_MISMATCH, "%1%: constant expression in switch",
+                 stat->expression);
 
         for (auto &c : stat->cases) {
             if (!isCompileTimeConstant(c->label))
@@ -3690,7 +3701,7 @@ const IR::Node* TypeInference::postorder(IR::KeyElement* elem) {
         typeError("%1% must be a %2% value", elem->matchType,
                   IR::Type_MatchKind::get()->toString());
     if (isCompileTimeConstant(elem->expression) && !readOnly)
-        warning(ErrorType::WARN_IGNORE_PROPERTY, "%1%: constant key element", elem);
+        warn(ErrorType::WARN_IGNORE_PROPERTY, "%1%: constant key element", elem);
     return elem;
 }
 

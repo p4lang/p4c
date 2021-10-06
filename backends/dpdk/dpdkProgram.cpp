@@ -477,6 +477,7 @@ bool ConvertToDpdkParser::preorder(const IR::ParserState *) { return false; }
 // =====================Control=============================
 bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
     auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
+    helper->setCalledBy(this);
     a->body->apply(*helper);
     auto stmt_list = new IR::IndexedVector<IR::DpdkAsmStatement>();
     for (auto i : helper->get_instr())
@@ -612,6 +613,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
         }
     }
     auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
+    helper->setCalledBy(this);
     c->body->apply(*helper);
     if (deparser) {
         add_inst(new IR::DpdkJmpNotEqualStatement("LABEL_DROP",

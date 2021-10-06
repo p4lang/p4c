@@ -86,6 +86,7 @@ const IR::Node* DoSimplifyKey::doStatement(const IR::Statement* statement,
                                            const IR::Expression *expression) {
     LOG3("Visiting " << getOriginal());
     HasTableApply hta(refMap, typeMap);
+    hta.setCalledBy(this);
     (void)expression->apply(hta);
     if (hta.table == nullptr)
         return statement;
