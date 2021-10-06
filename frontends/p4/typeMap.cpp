@@ -399,6 +399,9 @@ int TypeMap::minWidthBits(const IR::Type* type, const IR::Node* errorPosition) {
         return minWidthBits(tnt->type, errorPosition);
     } else if (type->is<IR::Type_Varbits>()) {
         return 0;
+    } else if (auto ths = t->to<IR::Type_Stack>()) {
+        auto w = minWidthBits(ths->elementType, errorPosition);
+        return w * ths->getSize();
     }
 
   error:

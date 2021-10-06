@@ -3221,6 +3221,12 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             auto type = typeMap->getType(mem->expr, true);
             if ((mem->member == IR::Type_StructLike::minSizeInBits ||
                  mem->member == IR::Type_StructLike::minSizeInBytes)) {
+                // minWidthInBits handles stacks, but we don't.
+                if (type->is<IR::Type_Stack>()) {
+                    typeError("%1%: %2% not defined for values of type %2%",
+                              expression, mem->member.name, type);
+                    return expression;
+                }
                 int w = typeMap->minWidthBits(type, expression);
                 LOG3("Folding " << mem << " to " << w);
                 if (w < 0)
