@@ -188,7 +188,7 @@ def process_file(options, argv):
     dirname = os.path.dirname(options.p4filename)
     loops_unrolling = False
     for option in options.compilerOptions:
-        if option == "--loopsUnroll" or option == "--hsIndexSimplify":
+        if option == "--loopsUnroll":
             loops_unrolling = True
             break
     if "_samples/" in dirname:

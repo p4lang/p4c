@@ -5,12 +5,11 @@
 
 namespace P4 {
 
-const IR::Node* HSIndexFinder::postorder(IR::ArrayIndex* curArrayIndex) {
+const IR::Node* HSIndexFindOrTransform::postorder(IR::ArrayIndex* curArrayIndex) {
     if (curArrayIndex->right->is<IR::Constant>()) {
-        return exprIndex2Member(curArrayIndex->type, curArrayIndex->left,
-                                curArrayIndex->right->checkedTo<IR::Constant>());
+        return curArrayIndex;
     }
-    // Finding the first occurrence of non-concrete array index.
+    // Find the first occurrence of non-concrete array index.
     if (isFinder) {
         if (arrayIndex == nullptr && !curArrayIndex->right->is<IR::Constant>()) {
             arrayIndex = curArrayIndex;
@@ -18,30 +17,25 @@ const IR::Node* HSIndexFinder::postorder(IR::ArrayIndex* curArrayIndex) {
     } else {
         // Translating current array index.
         if (arrayIndex != nullptr && curArrayIndex->equiv(*arrayIndex)) {
-            return exprIndex2Member(curArrayIndex->type, curArrayIndex->left,
-                                    new IR::Constant(index));
+            auto* newArrayIndex = arrayIndex->clone();
+            newArrayIndex->right = new IR::Constant(index);
+            return newArrayIndex;
         }
     }
     return curArrayIndex;
 }
 
-size_t HSIndexFinder::getArraySize() {
+size_t HSIndexFindOrTransform::getArraySize() {
     const auto* typeStack = arrayIndex->left->type->checkedTo<IR::Type_Stack>();
     return typeStack->getSize();
 }
 
-const IR::ArrayIndex* HSIndexFinder::exprIndex2Member(const IR::Type* type,
-                                                      const IR::Expression* expression,
-                                                      const IR::Constant* constant) {
-    return new IR::ArrayIndex(type, expression, constant);
-}
-
 IR::Node* HSIndexSimplifier::eliminateArrayIndexes(IR::Statement* statement) {
-    // Checking non-concrete array indexes.
-    HSIndexFinder aiFinder;
+    // Check non-concrete array indexes.
+    HSIndexFindOrTransform aiFinder;
     const IR::Statement* elseBody = nullptr;
-    bool isIf = false;
-    if (isIf = statement->is<IR::IfStatement>()) {
+    bool isIf = statement->is<IR::IfStatement>();
+    if (isIf) {
         auto* curIf = statement->to<IR::IfStatement>();
         elseBody = curIf->ifFalse;
         curIf->condition->apply(aiFinder);
@@ -53,15 +47,15 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(IR::Statement* statement) {
     }
     if (aiFinder.arrayIndex == nullptr) {
         // Remove concrete indexes.
-        HSIndexFinder aiElim(nullptr, 0);
+        HSIndexFindOrTransform aiElim(nullptr, 0);
         return const_cast<IR::Node*>(statement->apply(aiElim));
     }
-    
+
     IR::IfStatement* result = nullptr;
     IR::IfStatement* curResult = nullptr;
     size_t sz = aiFinder.getArraySize();
     for (size_t i = 0; i < sz; i++) {
-        HSIndexFinder aiRewriter(aiFinder.arrayIndex, i);
+        HSIndexFindOrTransform aiRewriter(aiFinder.arrayIndex, i);
         IR::IfStatement* newIf = nullptr;
         auto* newStatement = statement->apply(aiRewriter)->to<IR::Statement>();
         auto* newIndex = aiFinder.arrayIndex->right->apply(aiRewriter)->to<IR::Expression>();
@@ -95,7 +89,7 @@ IR::Node* HSIndexSimplifier::preorder(IR::ConstructorCallExpression* expr) {
     // Eliminate concrete indexes.
     auto* newExpr = expr->clone();
     auto* newArguments = new IR::Vector<IR::Argument>();
-    HSIndexFinder aiRewriter(nullptr, 0);
+    HSIndexFindOrTransform aiRewriter(nullptr, 0);
     for (const auto* arg : *expr->arguments)
         newArguments->push_back(arg->apply(aiRewriter)->to<IR::Argument>());
     newExpr->arguments = newArguments;
@@ -107,17 +101,12 @@ IR::Node* HSIndexSimplifier::preorder(IR::IfStatement* ifStatement) {
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::MethodCallStatement* methodCallStatement) {
-    auto* newMethodCall = methodCallStatement->clone();
-    HSIndexFinder aiRewriter(nullptr, 0);
-    newMethodCall->methodCall =
-        newMethodCall->methodCall->apply(aiRewriter)->to<IR::MethodCallExpression>();
-    return newMethodCall;
+    return eliminateArrayIndexes(ifStatement);
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::SelectExpression* selectExpression) {
-    // All non-concrete indexes should be eliminated by ParserUnroll.
-    HSIndexFinder aiElim(nullptr, 0);
-    return const_cast<IR::Node*>(selectExpression->apply(aiElim)->to<IR::Node>());
+    // Ignore SelectExpression.
+    return selectExpression;
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::SwitchStatement* switchStatement) {

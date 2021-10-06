@@ -77,8 +77,6 @@ class CompilerOptions : public ParserOptions {
     cstring arch = nullptr;
     // If true, unroll all parser loops inside the midend.
     bool loopsUnrolling = false;
-    // IF true, replace all non-concrete indexes for header stacks in controls.
-    bool hsIndexSimplify = false;
 
     virtual bool enable_intrinsic_metadata_fix();
 };

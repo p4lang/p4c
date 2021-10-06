@@ -41,7 +41,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action gauntlet_index_7bmv2l51() {
         tmp_0 = h.i.id;
         h.i.id = 1w0;
-        h.h[tmp_0].a = 8w1;
+        if (tmp_0 == 1w0) {
+            h.h[0].a = 8w1;
+        } else if (tmp_0 == 1w1) {
+            h.h[1].a = 8w1;
+        }
     }
     @hidden table tbl_gauntlet_index_7bmv2l51 {
         actions = {

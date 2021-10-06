@@ -12,7 +12,11 @@ control my(out H[2] s) {
         s[32w0].z = 1w1;
         s[32w1].z = 1w0;
         a_0 = f(s[32w0].z, 1w0);
-        a_0 = f(s[a_0].z, 1w1);
+        if (a_0 == 32w0) {
+            a_0 = f(s[0].z, 1w1);
+        } else if (a_0 == 32w1) {
+            a_0 = f(s[1].z, 1w1);
+        }
     }
     @hidden table tbl_array_field26 {
         actions = {

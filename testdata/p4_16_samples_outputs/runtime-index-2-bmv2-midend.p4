@@ -45,9 +45,185 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout 
 
 control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     @hidden action runtimeindex2bmv2l69() {
-        hdr.vector[hdr.ml.idx1 - (hdr.ml.idx2 >> 8w1)].e = hdr.ethernet.etherType[15:8] + 8w7;
-        hdr.ethernet.etherType[7:0] = hdr.vector[(hdr.ml.idx2 ^ 8w0x7) & 8w0x7].e;
-        hdr.vector[hdr.vector[hdr.ethernet.dstAddr[39:32] & 8w0x7].e & 8w0x7].e = hdr.ethernet.dstAddr[47:40];
+        if (hdr.ml.idx1 - (hdr.ml.idx2 >> 8w1) == 8w0) {
+            hdr.vector[0].e = hdr.ethernet.etherType[15:8] + 8w7;
+        } else if (hdr.ml.idx1 - (hdr.ml.idx2 >> 8w1) == 8w1) {
+            hdr.vector[1].e = hdr.ethernet.etherType[15:8] + 8w7;
+        } else if (hdr.ml.idx1 - (hdr.ml.idx2 >> 8w1) == 8w2) {
+            hdr.vector[2].e = hdr.ethernet.etherType[15:8] + 8w7;
+        } else if (hdr.ml.idx1 - (hdr.ml.idx2 >> 8w1) == 8w3) {
+            hdr.vector[3].e = hdr.ethernet.etherType[15:8] + 8w7;
+        } else if (hdr.ml.idx1 - (hdr.ml.idx2 >> 8w1) == 8w4) {
+            hdr.vector[4].e = hdr.ethernet.etherType[15:8] + 8w7;
+        } else if (hdr.ml.idx1 - (hdr.ml.idx2 >> 8w1) == 8w5) {
+            hdr.vector[5].e = hdr.ethernet.etherType[15:8] + 8w7;
+        } else if (hdr.ml.idx1 - (hdr.ml.idx2 >> 8w1) == 8w6) {
+            hdr.vector[6].e = hdr.ethernet.etherType[15:8] + 8w7;
+        } else if (hdr.ml.idx1 - (hdr.ml.idx2 >> 8w1) == 8w7) {
+            hdr.vector[7].e = hdr.ethernet.etherType[15:8] + 8w7;
+        }
+        if ((hdr.ml.idx2 ^ 8w0x7) & 8w0x7 == 8w0) {
+            hdr.ethernet.etherType[7:0] = hdr.vector[0].e;
+        } else if ((hdr.ml.idx2 ^ 8w0x7) & 8w0x7 == 8w1) {
+            hdr.ethernet.etherType[7:0] = hdr.vector[1].e;
+        } else if ((hdr.ml.idx2 ^ 8w0x7) & 8w0x7 == 8w2) {
+            hdr.ethernet.etherType[7:0] = hdr.vector[2].e;
+        } else if ((hdr.ml.idx2 ^ 8w0x7) & 8w0x7 == 8w3) {
+            hdr.ethernet.etherType[7:0] = hdr.vector[3].e;
+        } else if ((hdr.ml.idx2 ^ 8w0x7) & 8w0x7 == 8w4) {
+            hdr.ethernet.etherType[7:0] = hdr.vector[4].e;
+        } else if ((hdr.ml.idx2 ^ 8w0x7) & 8w0x7 == 8w5) {
+            hdr.ethernet.etherType[7:0] = hdr.vector[5].e;
+        } else if ((hdr.ml.idx2 ^ 8w0x7) & 8w0x7 == 8w6) {
+            hdr.ethernet.etherType[7:0] = hdr.vector[6].e;
+        } else if ((hdr.ml.idx2 ^ 8w0x7) & 8w0x7 == 8w7) {
+            hdr.ethernet.etherType[7:0] = hdr.vector[7].e;
+        }
+        if (hdr.ethernet.dstAddr[39:32] & 8w0x7 == 8w0) {
+            if (hdr.vector[0].e & 8w0x7 == 8w0) {
+                hdr.vector[0].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[0].e & 8w0x7 == 8w1) {
+                hdr.vector[1].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[0].e & 8w0x7 == 8w2) {
+                hdr.vector[2].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[0].e & 8w0x7 == 8w3) {
+                hdr.vector[3].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[0].e & 8w0x7 == 8w4) {
+                hdr.vector[4].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[0].e & 8w0x7 == 8w5) {
+                hdr.vector[5].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[0].e & 8w0x7 == 8w6) {
+                hdr.vector[6].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[0].e & 8w0x7 == 8w7) {
+                hdr.vector[7].e = hdr.ethernet.dstAddr[47:40];
+            }
+        } else if (hdr.ethernet.dstAddr[39:32] & 8w0x7 == 8w1) {
+            if (hdr.vector[1].e & 8w0x7 == 8w0) {
+                hdr.vector[0].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[1].e & 8w0x7 == 8w1) {
+                hdr.vector[1].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[1].e & 8w0x7 == 8w2) {
+                hdr.vector[2].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[1].e & 8w0x7 == 8w3) {
+                hdr.vector[3].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[1].e & 8w0x7 == 8w4) {
+                hdr.vector[4].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[1].e & 8w0x7 == 8w5) {
+                hdr.vector[5].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[1].e & 8w0x7 == 8w6) {
+                hdr.vector[6].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[1].e & 8w0x7 == 8w7) {
+                hdr.vector[7].e = hdr.ethernet.dstAddr[47:40];
+            }
+        } else if (hdr.ethernet.dstAddr[39:32] & 8w0x7 == 8w2) {
+            if (hdr.vector[2].e & 8w0x7 == 8w0) {
+                hdr.vector[0].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[2].e & 8w0x7 == 8w1) {
+                hdr.vector[1].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[2].e & 8w0x7 == 8w2) {
+                hdr.vector[2].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[2].e & 8w0x7 == 8w3) {
+                hdr.vector[3].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[2].e & 8w0x7 == 8w4) {
+                hdr.vector[4].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[2].e & 8w0x7 == 8w5) {
+                hdr.vector[5].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[2].e & 8w0x7 == 8w6) {
+                hdr.vector[6].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[2].e & 8w0x7 == 8w7) {
+                hdr.vector[7].e = hdr.ethernet.dstAddr[47:40];
+            }
+        } else if (hdr.ethernet.dstAddr[39:32] & 8w0x7 == 8w3) {
+            if (hdr.vector[3].e & 8w0x7 == 8w0) {
+                hdr.vector[0].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[3].e & 8w0x7 == 8w1) {
+                hdr.vector[1].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[3].e & 8w0x7 == 8w2) {
+                hdr.vector[2].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[3].e & 8w0x7 == 8w3) {
+                hdr.vector[3].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[3].e & 8w0x7 == 8w4) {
+                hdr.vector[4].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[3].e & 8w0x7 == 8w5) {
+                hdr.vector[5].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[3].e & 8w0x7 == 8w6) {
+                hdr.vector[6].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[3].e & 8w0x7 == 8w7) {
+                hdr.vector[7].e = hdr.ethernet.dstAddr[47:40];
+            }
+        } else if (hdr.ethernet.dstAddr[39:32] & 8w0x7 == 8w4) {
+            if (hdr.vector[4].e & 8w0x7 == 8w0) {
+                hdr.vector[0].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[4].e & 8w0x7 == 8w1) {
+                hdr.vector[1].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[4].e & 8w0x7 == 8w2) {
+                hdr.vector[2].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[4].e & 8w0x7 == 8w3) {
+                hdr.vector[3].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[4].e & 8w0x7 == 8w4) {
+                hdr.vector[4].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[4].e & 8w0x7 == 8w5) {
+                hdr.vector[5].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[4].e & 8w0x7 == 8w6) {
+                hdr.vector[6].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[4].e & 8w0x7 == 8w7) {
+                hdr.vector[7].e = hdr.ethernet.dstAddr[47:40];
+            }
+        } else if (hdr.ethernet.dstAddr[39:32] & 8w0x7 == 8w5) {
+            if (hdr.vector[5].e & 8w0x7 == 8w0) {
+                hdr.vector[0].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[5].e & 8w0x7 == 8w1) {
+                hdr.vector[1].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[5].e & 8w0x7 == 8w2) {
+                hdr.vector[2].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[5].e & 8w0x7 == 8w3) {
+                hdr.vector[3].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[5].e & 8w0x7 == 8w4) {
+                hdr.vector[4].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[5].e & 8w0x7 == 8w5) {
+                hdr.vector[5].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[5].e & 8w0x7 == 8w6) {
+                hdr.vector[6].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[5].e & 8w0x7 == 8w7) {
+                hdr.vector[7].e = hdr.ethernet.dstAddr[47:40];
+            }
+        } else if (hdr.ethernet.dstAddr[39:32] & 8w0x7 == 8w6) {
+            if (hdr.vector[6].e & 8w0x7 == 8w0) {
+                hdr.vector[0].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[6].e & 8w0x7 == 8w1) {
+                hdr.vector[1].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[6].e & 8w0x7 == 8w2) {
+                hdr.vector[2].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[6].e & 8w0x7 == 8w3) {
+                hdr.vector[3].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[6].e & 8w0x7 == 8w4) {
+                hdr.vector[4].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[6].e & 8w0x7 == 8w5) {
+                hdr.vector[5].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[6].e & 8w0x7 == 8w6) {
+                hdr.vector[6].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[6].e & 8w0x7 == 8w7) {
+                hdr.vector[7].e = hdr.ethernet.dstAddr[47:40];
+            }
+        } else if (hdr.ethernet.dstAddr[39:32] & 8w0x7 == 8w7) {
+            if (hdr.vector[7].e & 8w0x7 == 8w0) {
+                hdr.vector[0].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[7].e & 8w0x7 == 8w1) {
+                hdr.vector[1].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[7].e & 8w0x7 == 8w2) {
+                hdr.vector[2].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[7].e & 8w0x7 == 8w3) {
+                hdr.vector[3].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[7].e & 8w0x7 == 8w4) {
+                hdr.vector[4].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[7].e & 8w0x7 == 8w5) {
+                hdr.vector[5].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[7].e & 8w0x7 == 8w6) {
+                hdr.vector[6].e = hdr.ethernet.dstAddr[47:40];
+            } else if (hdr.vector[7].e & 8w0x7 == 8w7) {
+                hdr.vector[7].e = hdr.ethernet.dstAddr[47:40];
+            }
+        }
     }
     @hidden table tbl_runtimeindex2bmv2l69 {
         actions = {

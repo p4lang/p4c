@@ -10,7 +10,11 @@ control c(inout bit<32> r) {
         h_0[0].setInvalid();
         h_0[1].setInvalid();
         tmp = f(32w2);
-        h_0[tmp].setValid();
+        if (tmp == 32w0) {
+            h_0[0].setValid();
+        } else if (tmp == 32w1) {
+            h_0[1].setValid();
+        }
     }
     @hidden table tbl_complex2l24 {
         actions = {

@@ -55,10 +55,34 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
     @hidden action issue2726bmv2l81() {
         meta.counter = meta.counter + 8s1;
         hdr.vector[0].e = hdr.pool[1].val + 8w1;
-        hdr.pool[(int<8>)hdr.ml.idx].val = hdr.pool[1].val + 8w1;
-        hdr.pool[(int<8>)hdr.ml.idx].base2 = hdr.vector[0].e;
-        hdr.vector[1].e = hdr.pool[(int<8>)hdr.ml.idx].base0;
-        hdr.pool[(int<8>)hdr.ml.idx].base0 = hdr.pool[(int<8>)hdr.ml.idx].base1 + 8w1;
+        if ((int<8>)hdr.ml.idx == 8s0) {
+            hdr.pool[0].val = hdr.pool[1].val + 8w1;
+        } else if ((int<8>)hdr.ml.idx == 8s1) {
+            hdr.pool[1].val = hdr.pool[1].val + 8w1;
+        } else if ((int<8>)hdr.ml.idx == 8s2) {
+            hdr.pool[2].val = hdr.pool[1].val + 8w1;
+        }
+        if ((int<8>)hdr.ml.idx == 8s0) {
+            hdr.pool[0].base2 = hdr.vector[0].e;
+        } else if ((int<8>)hdr.ml.idx == 8s1) {
+            hdr.pool[1].base2 = hdr.vector[0].e;
+        } else if ((int<8>)hdr.ml.idx == 8s2) {
+            hdr.pool[2].base2 = hdr.vector[0].e;
+        }
+        if ((int<8>)hdr.ml.idx == 8s0) {
+            hdr.vector[1].e = hdr.pool[0].base0;
+        } else if ((int<8>)hdr.ml.idx == 8s1) {
+            hdr.vector[1].e = hdr.pool[1].base0;
+        } else if ((int<8>)hdr.ml.idx == 8s2) {
+            hdr.vector[1].e = hdr.pool[2].base0;
+        }
+        if ((int<8>)hdr.ml.idx == 8s0) {
+            hdr.pool[0].base0 = hdr.pool[0].base1 + 8w1;
+        } else if ((int<8>)hdr.ml.idx == 8s1) {
+            hdr.pool[1].base0 = hdr.pool[1].base1 + 8w1;
+        } else if ((int<8>)hdr.ml.idx == 8s2) {
+            hdr.pool[2].base0 = hdr.pool[2].base1 + 8w1;
+        }
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
     @hidden table tbl_issue2726bmv2l81 {

@@ -23,19 +23,39 @@ control my(inout H[2] s) {
         tmp_0 = g(a_0);
         tmp_1 = f(tmp, tmp_0);
         a_0 = tmp_1;
-        tmp_3 = s[tmp_1].z;
+        if (tmp_1 == 1w0) {
+            tmp_3 = s[0].z;
+        } else if (tmp_1 == 1w1) {
+            tmp_3 = s[1].z;
+        }
         tmp_4 = g(a_0);
         tmp_5 = f(tmp_3, tmp_4);
-        s[tmp_1].z = tmp_3;
+        if (tmp_1 == 1w0) {
+            s[0].z = tmp_3;
+        } else if (tmp_1 == 1w1) {
+            s[1].z = tmp_3;
+        }
         a_0 = tmp_5;
         tmp_6 = g(a_0);
-        tmp_8 = s[tmp_6].z;
+        if (tmp_6 == 1w0) {
+            tmp_8 = s[0].z;
+        } else if (tmp_6 == 1w1) {
+            tmp_8 = s[1].z;
+        }
         tmp_10 = f(tmp_8, a_0);
-        s[tmp_6].z = tmp_8;
+        if (tmp_6 == 1w0) {
+            s[0].z = tmp_8;
+        } else if (tmp_6 == 1w1) {
+            s[1].z = tmp_8;
+        }
         a_0 = tmp_10;
         a_0 = g(a_0);
         a_0 = g(a_0);
-        s[a_0].z = g(a_0);
+        if (a_0 == 1w0) {
+            s[0].z = g(a_0);
+        } else if (a_0 == 1w1) {
+            s[1].z = g(a_0);
+        }
     }
     @hidden table tbl_side_effects27 {
         actions = {

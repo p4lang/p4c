@@ -8,28 +8,28 @@
 
 namespace P4 {
 
-/// The main class for finding of non-concrete haader stack/arrya index.
-class HSIndexFinder : public Transform {
+/// This class finds a header stack with non-concrete index 
+/// which should be eliminated in unfolding if @a isFinder is true.
+/// Otherwise it substitutes index of a header stack in all occuarence of @a arrayIndex.
+class HSIndexFindOrTransform : public Transform {
     friend class HSIndexSimplifier;
     const IR::ArrayIndex* arrayIndex;
     bool isFinder;
     int index;
 
  public:
-    HSIndexFinder() : arrayIndex(nullptr), isFinder(true) {}
-    HSIndexFinder(const IR::ArrayIndex* arrayIndex, int index)
+    HSIndexFindOrTransform() : arrayIndex(nullptr), isFinder(true) {}
+    HSIndexFindOrTransform(const IR::ArrayIndex* arrayIndex, int index)
         : arrayIndex(arrayIndex), isFinder(false), index(index) {}
     const IR::Node* postorder(IR::ArrayIndex* curArrayIndex) override;
     size_t getArraySize();
-    static const IR::ArrayIndex* exprIndex2Member(const IR::Type* type,
-                                                  const IR::Expression* expression,
-                                                  const IR::Constant* constant);
 };
 
-/// The main class for concretization of array index.
+/// This class eliminates all non-concrete indexes of the header stacks in the controls.
+/// It generates all  
 class HSIndexSimplifier : public Transform {
  public:
-    HSIndexSimplifier(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {}
+    HSIndexSimplifier() {}
     IR::Node* preorder(IR::IfStatement* ifStatement) override;
     IR::Node* preorder(IR::AssignmentStatement* assignmentStatement) override;
     IR::Node* preorder(IR::ConstructorCallExpression* expr) override;

@@ -51,7 +51,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         hasReturned = true;
         retval = tmp;
         val = retval;
-        h.h[val].a = 8w1;
+        if (val == 8w0) {
+            h.h[0].a = 8w1;
+        } else if (val == 8w1) {
+            h.h[1].a = 8w1;
+        }
     }
     @hidden table tbl_simple_action {
         actions = {
