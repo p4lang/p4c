@@ -186,6 +186,7 @@ class RewriteAllParsers : public Transform {
     const IR::Node* postorder(IR::P4Parser* parser) override {
         // making rewriting
         auto rewriter = new ParserRewriter(refMap, typeMap, unroll);
+        rewriter->setCalledBy(this);
         parser->apply(*rewriter);
         /// make a new parser
         BUG_CHECK(rewriter->current.result,

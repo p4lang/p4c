@@ -620,11 +620,17 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 ::error("%1%: must be one of the existing errors", s);
             auto error_id = structure->error_map.at(error->expression->to<IR::Member>()->member);
             auto end_label = Util::printf_format("label_%dend", next_label_id++);
-            add_instr(new IR::DpdkJmpEqualStatement(
-                        end_label,
-                        condition->expression, new IR::BoolLiteral(false)));
-            add_instr(new IR::DpdkMovStatement(
-                        new IR::PathExpression("metadata"), new IR::Constant(error_id)));
+            const IR::BoolLiteral *boolLiteral = condition->expression->to<IR::BoolLiteral>();
+            if (!boolLiteral) {
+                add_instr(new IR::DpdkJmpNotEqualStatement(
+                            end_label,
+                            condition->expression, new IR::BoolLiteral(false)));
+            } else if (boolLiteral->value == true) {
+                return false;
+            }
+            auto tmp = new IR::PathExpression(
+                                   IR::ID("m.psa_ingress_input_metadata_parser_error"));
+            add_instr(new IR::DpdkMovStatement(tmp, new IR::Constant(error_id)));
             add_instr(new IR::DpdkJmpLabelStatement(
                         append_parser_name(parser, IR::ParserState::reject)));
             add_instr(new IR::DpdkLabelStatement(end_label));
@@ -664,6 +670,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         }
     } else if (auto a = mi->to<P4::ActionCall>()) {
         auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
+        helper->setCalledBy(this);
         a->action->body->apply(*helper);
         for (auto i : helper->get_instr()) {
             add_instr(i);

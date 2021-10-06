@@ -833,7 +833,8 @@ ProgramStructure::convertActionProfile(const IR::ActionProfile* action_profile, 
         auto size = new IR::Constant(
             action_profile->srcInfo, v1model.action_profile.sizeType, action_profile->size);
         args->push_back(new IR::Argument(size)); }
-    auto decl = new IR::Declaration_Instance(newName, annos, type, args, nullptr);
+    auto decl = new IR::Declaration_Instance(
+        action_profile->srcInfo, newName, annos, type, args, nullptr);
     return decl;
 }
 

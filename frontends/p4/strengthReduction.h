@@ -61,7 +61,7 @@ class DoStrengthReduction final : public Transform {
     /// has side-effects.  If we had a refMap or a typeMap
     /// we could use them here.
     bool hasSideEffects(const IR::Expression* expr) const {
-        return SideEffects::check(expr, nullptr, nullptr);
+        return SideEffects::check(expr, this, nullptr, nullptr);
     }
 
  public:

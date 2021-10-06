@@ -355,7 +355,9 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
         expressionUnrollSanityCheck(bin->right);
         expressionUnrollSanityCheck(bin->left);
         auto left_unroller = new ExpressionUnroll(refMap, structure);
+        left_unroller->setCalledBy(this);
         auto right_unroller = new ExpressionUnroll(refMap, structure);
+        right_unroller->setCalledBy(this);
         bin->left->apply(*left_unroller);
         const IR::Expression *left_tmp = left_unroller->root;
         bin->right->apply(*right_unroller);
@@ -386,6 +388,7 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
         auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
         expressionUnrollSanityCheck(un->expr);
         auto unroller = new ExpressionUnroll(refMap, structure);
+        unroller->setCalledBy(this);
         un->expr->apply(*unroller);
         prune();
         const IR::Expression *un_tmp = unroller->root;
@@ -435,8 +438,8 @@ bool ExpressionUnroll::preorder(const IR::Operation_Unary *u) {
             un_expr = new IR::Cmpl(root);
         } else if (u->to<IR::LNot>()) {
             un_expr = new IR::LNot(root);
-        } else if (u->to<IR::Cast>()) {
-            un_expr = new IR::Cast(u->type, root);
+        } else if (auto c = u->to<IR::Cast>()) {
+            un_expr = new IR::Cast(c->destType, root);
         } else {
             std::cout << u->node_type_name() << std::endl;
             BUG("Not Implemented");
@@ -522,6 +525,7 @@ const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
     expressionUnrollSanityCheck(i->condition);
     auto unroller = new LogicalExpressionUnroll(refMap, structure);
+    unroller->setCalledBy(this);
     i->condition->apply(*unroller);
     for (auto i : unroller->stmt)
         code_block->push_back(i);
@@ -957,9 +961,9 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
         // This prune will prevent the postorder(IR::KeyElement*) below from executing
         prune();
     } else {
-        ::warning(ErrorType::WARN_UNSUPPORTED, "Mismatched header/metadata struct for key "
+        ::warning(ErrorType::WARN_MISMATCH, "Mismatched header/metadata struct for key "
                   "elements in table %1%. Copying all match fields to metadata",
-                   findOrigCtxt<IR::P4Table>()->name.toString());
+                  findOrigCtxt<IR::P4Table>()->name.toString());
         LOG3("Will pull out " << keys);
     }
     return keys;
@@ -1551,4 +1555,3 @@ void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
 }
 
 }  // namespace DPDK
-

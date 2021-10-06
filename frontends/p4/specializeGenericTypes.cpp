@@ -128,6 +128,7 @@ const IR::Node* CreateSpecializedTypes::postorder(IR::Type_Declaration* type) {
             TypeVariableSubstitution ts;
             ts.setBindings(type, genDecl->getTypeParameters(), specialized->arguments);
             TypeSubstitutionVisitor tsv(specMap->typeMap, &ts);
+            tsv.setCalledBy(this);
             auto renamed = type->apply(tsv)->to<IR::Type_StructLike>()->clone();
             cstring name = it.second->name;
             auto empty = new IR::TypeParameters();

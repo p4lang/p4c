@@ -95,7 +95,7 @@ IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_postamb
     IR::IndexedVector<IR::DpdkAsmStatement> instr;
     instr.push_back(new IR::DpdkTxStatement(
         new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_egress_port")));
-    instr.push_back(new IR::DpdkLabelStatement("drop"));
+    instr.push_back(new IR::DpdkLabelStatement("label_drop"));
     instr.push_back(new IR::DpdkDropStatement());
     return instr;
 }
@@ -477,6 +477,7 @@ bool ConvertToDpdkParser::preorder(const IR::ParserState *) { return false; }
 // =====================Control=============================
 bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
     auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
+    helper->setCalledBy(this);
     a->body->apply(*helper);
     auto stmt_list = new IR::IndexedVector<IR::DpdkAsmStatement>();
     for (auto i : helper->get_instr())
@@ -612,6 +613,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
         }
     }
     auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
+    helper->setCalledBy(this);
     c->body->apply(*helper);
     if (deparser) {
         add_inst(new IR::DpdkJmpNotEqualStatement("LABEL_DROP",
