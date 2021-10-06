@@ -728,14 +728,19 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         clone->expr = li->constant;
         DoConstantFolding cf(refMap, typeMap);
         if (auto cast = expression->to<IR::Cast>()) {
-            if (cast->destType->is<IR::Type_Bits>()) {
+            auto bitsType = cast->destType->to<IR::Type_Bits>();
+            if (bitsType->size == 1) {
                 const IR::Constant* constant;
-                if (clone->expr) {
-                    constant = new IR::Constant(cast->destType, 1);
+                auto resConst = clone->expr->to<IR::Constant>();
+                if (resConst) {
+                    if (resConst->value == 0)
+                    constant = new IR::Constant(new IR::Type_Bits(1, true), 1);
+                    if (resConst->value == 1)
+                    constant = new IR::Constant(new IR::Type_Bits(1, true), 0);
                 } else {
-                    constant = new IR::Constant(cast->destType, 0);
+                    BUG("%1%: expected an integer", clone->expr);
                 }
-                set(expression, new SymbolicInteger(constant->to<IR::Constant>()));
+                set(expression, new SymbolicInteger(constant));
                 return;
             }
         }
@@ -748,14 +753,19 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         clone->expr = new IR::BoolLiteral(li->value);
         DoConstantFolding cf(refMap, typeMap);
         if (auto cast = expression->to<IR::Cast>()) {
-            if (cast->destType->is<IR::Type_Bits>()) {
+            auto bitsType = cast->destType->to<IR::Type_Bits>();
+            if (bitsType->size == 1) {
                 const IR::Constant* constant;
-                if (clone->expr) {
-                    constant = new IR::Constant(cast->destType, 1);
+                auto boolLoteral = clone->expr->to<IR::BoolLiteral>();
+                if (boolLoteral) {
+                    if (boolLoteral->value == true)
+                    constant = new IR::Constant(new IR::Type_Bits(1, true), 1);
+                    if (boolLoteral->value == false)
+                    constant = new IR::Constant(new IR::Type_Bits(1, true), 0);
                 } else {
-                    constant = new IR::Constant(cast->destType, 0);
+                    BUG("%1%: expected a boolean", clone->expr);
                 }
-                set(expression, new SymbolicInteger(constant->to<IR::Constant>()));
+                set(expression, new SymbolicInteger(constant));
                 return;
             }
         }
