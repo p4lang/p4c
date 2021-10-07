@@ -56,11 +56,11 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         new ConvertActionSelectorAndProfile(refMap, typeMap, &structure),
+        new CollectTableInfo(&structure),
         new CollectAddOnMissTable(refMap, typeMap, &structure),
         new P4::MoveDeclarations(),  // Move all local declarations to the beginning
         new CollectProgramStructure(refMap, typeMap, &structure),
         new CollectMetadataHeaderInfo(&structure),
-        new CollectTableInfo(&structure),
         new ConvertToDpdkArch(refMap, &structure),
         new InjectJumboStruct(&structure),
         new P4::ClearTypeMap(typeMap),

@@ -102,6 +102,7 @@ class WriteContextJson : public Inspector {
     void printTableCtxtJson (const IR::P4Table *tbl, std::ostream &out);
     void printSelTableCtxtJson (const IR::P4Table *tbl, std::ostream &out);
     void printActionTableCtxtJson (const IR::P4Table *tbl, std::ostream &out);
+    void printReferenceTables(const IR::P4Table *refTable, std::ostream &out);
 };
 
 class GenerateContextJson : public PassManager {

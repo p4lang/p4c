@@ -329,7 +329,7 @@ bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s) {
     return true;
 }
 
-// This function collects the match key information if a table. This is later used for
+// This function collects the match key information of a table. This is later used for
 // generating context JSON.
 bool CollectTableInfo::preorder(const IR::Key *keys) {
     std::vector<cstring> tableKeys;
@@ -344,8 +344,10 @@ bool CollectTableInfo::preorder(const IR::Key *keys) {
             tableKeys.push_back(keyTypeStr);
     }
 
-    auto control =  findOrigCtxt<IR::P4Control>();
-    auto table =  findOrigCtxt<IR::P4Table>();
+    auto control = findOrigCtxt<IR::P4Control>();
+    auto table = findOrigCtxt<IR::P4Table>();
+    CHECK_NULL(control);
+    CHECK_NULL(table);
     structure->key_map.emplace(
                control->name.originalName + "_" + table->name.originalName, tableKeys);
     return false;

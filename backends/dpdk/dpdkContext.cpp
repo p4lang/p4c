@@ -73,20 +73,20 @@ void CollectTablesForContextJson::setTableAttributes() {
 }
 
 bool CollectTablesForContextJson::preorder(const IR::P4Program * /*p*/) {
-        setTableAttributes();
-        return false;
+    setTableAttributes();
+    return false;
 }
 
 // Returns a unique ID for table
 unsigned int CollectTablesForContextJson::getNewTableHandle() {
-        return TABLE_HANDLE_PREFIX | newTableHandle++;
+    return TABLE_HANDLE_PREFIX | newTableHandle++;
 }
 
 unsigned WriteContextJson::newActionHandle = 0;
 
 // Returns a unique ID for action
 unsigned int WriteContextJson::getNewActionHandle() {
-        return ACTION_HANDLE_PREFIX | newActionHandle++;
+    return ACTION_HANDLE_PREFIX | newActionHandle++;
 }
 
 // Helper function for pretty printing into JSON file
@@ -169,9 +169,10 @@ void WriteContextJson::setActionAttributes(
         bool can_be_default_action = !has_constant_default_action;
 
         // First, check for action annotations
-        auto table_only_annot = action_decl->annotations->getSingle("tableonly");
-        auto default_only_annot = action_decl->annotations->getSingle("defaultonly");
-        auto hidden = action_decl->annotations->getSingle(IR::Annotation::hiddenAnnotation);
+        auto actAnnot = action_decl->annotations;
+        auto table_only_annot = actAnnot->getSingle(IR::Annotation::tableOnlyAnnotation);
+        auto default_only_annot = actAnnot->getSingle(IR::Annotation::defaultOnlyAnnotation);
+        auto hidden = actAnnot->getSingle(IR::Annotation::hiddenAnnotation);
 
         if (table_only_annot) {
             can_be_default_action = false;
@@ -191,8 +192,7 @@ void WriteContextJson::setActionAttributes(
             }
 
             auto path = default_action->to<IR::PathExpression>();
-                if (!path)
-                    BUG("Default action path %s cannot be found", default_action);
+            BUG_CHECK(path, "Default action path %s cannot be found", default_action);
             auto actName = refmap->getDeclaration(path->path, true)->getName();
 
             if (actName == act->getName()) {
@@ -218,6 +218,17 @@ void WriteContextJson::setActionAttributes(
         attr.actionHandle = getNewActionHandle();
         actionAttrMap.emplace(act->getName(), attr);
     }
+}
+
+void WriteContextJson::printReferenceTables(const IR::P4Table *refTable, std::ostream &out) {
+    auto tableAttr = ::get(tableAttrmap, refTable->name.originalName);
+    auto tableName = tableAttr.controlName + "." + refTable->name.originalName;
+    out << "\n";
+    add_space(out, 16); out << "{\n";
+    add_space(out, 20); out << "\"name\": \"" <<  tableName <<"\",\n";
+    add_space(out, 20); out << "\"handle\": " << tableAttr.tableHandle   <<"\n";
+    add_space(out, 16); out << "}\n";
+    add_space(out, 12);
 }
 
 /* Print a single table object of match_table type in Context JSON*/
@@ -246,22 +257,13 @@ void WriteContextJson::printTableCtxtJson(const IR::P4Table *tbl, std::ostream &
     add_space(out, 12); out << "\"meter_table_refs\": []" << ",\n";
     add_space(out, 12); out << "\"p4_hidden\": "
                             << std::boolalpha << mainTableAttr.isHidden << ",\n";
-
+    const IR::P4Table *memberTable = nullptr;
     // Reference to compiler generated member table in case of action profile and action selector.
     add_space(out, 12); out << "\"action_data_table_refs\": [";
-    const IR::P4Table *memberTable = nullptr;
     if (structure->member_tables.count(tbl->name)) {
         hasActionProfileSelector = true;
         memberTable = structure->member_tables.at(tbl->name);
-        auto tableAttr = ::get(tableAttrmap, memberTable->name.originalName);
-        tableName = tableAttr.controlName + "." + memberTable->name.originalName;
-        out << "\n";
-        add_space(out, 16); out << "{\n";
-        add_space(out, 20);
-        out << "\"name\": \"" <<  tableName <<"\",\n";
-        add_space(out, 20); out << "\"handle\": " << tableAttr.tableHandle   <<"\n";
-        add_space(out, 16); out << "}\n";
-        add_space(out, 12);
+        printReferenceTables(memberTable, out);
     }
     out << "],\n";
 
@@ -270,16 +272,10 @@ void WriteContextJson::printTableCtxtJson(const IR::P4Table *tbl, std::ostream &
     if (structure->group_tables.count(tbl->name)) {
         hasActionProfileSelector = true;
         auto groupTable = structure->group_tables.at(tbl->name);
-        auto tableAttr = ::get(tableAttrmap, groupTable->name.originalName);
-        tableName = tableAttr.controlName + "." + groupTable->name.originalName;
-        out << "\n";
-        add_space(out, 16); out << "{\n";
-        add_space(out, 20); out << "\"name\": \"" << tableName <<"\",\n";
-        add_space(out, 20); out << "\"handle\": " <<  tableAttr.tableHandle <<"\n";
-        add_space(out, 16); out << "}\n";
-        add_space(out, 12);
+        printReferenceTables(groupTable, out);
     }
     out << "],\n";
+
     if (hasActionProfileSelector) {
         add_space(out, 12);
         out << "\"action_profile\": \"" << memberTable->name.originalName <<"\",\n";
@@ -291,16 +287,9 @@ void WriteContextJson::printTableCtxtJson(const IR::P4Table *tbl, std::ostream &
 
     if (match_keys) {
         int index = 0;
-   /*     if (match_keys->keyElements.size() != mainTableAttr.tableKeys.size()) {
-            std::cout << match_keys->keyElements.size() << " " <<  mainTableAttr.tableKeys.size() << std::endl;
-            BUG("Inconsistent match keys between input program and transformed code");
-        }*/
-//        for (auto mkf : match_keys->keyElements) {
-//            if (mkf->expression->is<IR::Member>()) {
-          for (auto matchKeyFromPrg : mainTableAttr.tableKeys) {
-                auto mkf = match_keys->keyElements.at(index);
-//                auto matchKeyFromPrg = mainTableAttr.tableKeys.at(index);
-               if (mkf->expression->is<IR::Member>()) {
+        for (auto matchKeyFromPrg : mainTableAttr.tableKeys) {
+            auto mkf = match_keys->keyElements.at(index);
+            if (mkf->expression->is<IR::Member>()) {
                 cstring fieldName = matchKeyFromPrg.findlast('.');
                 auto instanceName = matchKeyFromPrg.replace(fieldName, "");
                 fieldName = fieldName.trim(".\t\n\r");
@@ -407,7 +396,7 @@ void WriteContextJson::printTableCtxtJson(const IR::P4Table *tbl, std::ostream &
     if (!first) out << "\n";
     add_space(out, 12); out << "],\n";
 
-    // These fields is similar to the actions array with slightly different information
+    // These fields are similar to the actions array with slightly different information
     // These are currently required by the control plane software but may be removed in future.
     add_space(out, 12); out << "\"match_attributes\": {\n";
     add_space(out, 16); out << "\"stage_tables\": [\n";
@@ -433,16 +422,16 @@ void WriteContextJson::printTableCtxtJson(const IR::P4Table *tbl, std::ostream &
         if (attr.params) {
             int index = 0;
             for (auto param : *(attr.params)) {
-              if (position) out << ",";
-              out << "\n";
-              add_space(out, 36); out << "{\n";
-              add_space(out, 40); out << "\"param_name\": \""
-                                      << param->name.originalName << "\",\n";
-              add_space(out, 40); out << "\"dest_start\": "  << index/8 <<  ",\n";
-              add_space(out, 40); out << "\"dest_width\": " << param->type->width_bits() << "\n";
-              add_space(out, 36); out << "}";
-              index += param->type->width_bits();
-              position++;
+                if (position) out << ",";
+                out << "\n";
+                add_space(out, 36); out << "{\n";
+                add_space(out, 40); out << "\"param_name\": \""
+                                        << param->name.originalName << "\",\n";
+                add_space(out, 40); out << "\"dest_start\": "  << index/8 <<  ",\n";
+                add_space(out, 40); out << "\"dest_width\": " << param->type->width_bits() << "\n";
+                add_space(out, 36); out << "}";
+                index += param->type->width_bits();
+                position++;
             }
         }
         if (position) {

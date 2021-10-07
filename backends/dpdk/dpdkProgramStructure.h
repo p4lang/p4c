@@ -40,8 +40,8 @@ struct DpdkProgramStructure {
     std::map<cstring, int>                                      error_map;
     std::vector<const IR::Declaration_Instance *>               externDecls;
     std::map<cstring, std::vector<cstring>>                     key_map;
-    std::map<cstring, const IR::P4Table *> group_tables;
-    std::map<cstring, const IR::P4Table *> member_tables;
+    std::map<cstring, const IR::P4Table *>                      group_tables;
+    std::map<cstring, const IR::P4Table *>                      member_tables;
 
     std::set<cstring> pipeline_controls;
     std::set<cstring> non_pipeline_controls;
