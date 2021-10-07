@@ -21,6 +21,7 @@ namespace P4 {
 
 const IR::Node* DoRemoveReturns::preorder(IR::P4Action* action) {
     HasExits he;
+    he.setCalledBy(this);
     (void)action->apply(he);
     if (!he.hasReturns) {
         // don't pollute the code unnecessarily
@@ -54,6 +55,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::Function* function) {
     }
 
     HasExits he;
+    he.setCalledBy(this);
     (void)function->apply(he);
     if (!he.hasReturns) {
         // don't pollute the code unnecessarily
@@ -95,6 +97,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::P4Control* control) {
     visit(control->controlLocals, "controlLocals");
 
     HasExits he;
+    he.setCalledBy(this);
     (void)control->body->apply(he);
     if (!he.hasReturns) {
         // don't pollute the code unnecessarily

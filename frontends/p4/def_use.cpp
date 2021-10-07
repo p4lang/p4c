@@ -701,6 +701,7 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
              DBPrint::Reset << IndentCtl::indent);
         ProgramPoint pt(callingContext, expression);
         ComputeWriteSet cw(this, pt, currentDefinitions);
+        cw.setCalledBy(this);
         for (auto c : callees)
             (void)c->getNode()->apply(cw);
         currentDefinitions = cw.currentDefinitions;
@@ -751,6 +752,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
 
     ParserCallGraph transitions("transitions");
     ComputeParserCG pcg(storageMap->refMap, &transitions);
+    pcg.setCalledBy(this);
 
     (void)parser->apply(pcg);
     ordered_set<const IR::ParserState*> toRun;  // worklist
@@ -766,6 +768,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
         ProgramPoint pt(state);
         currentDefinitions = allDefinitions->getDefinitions(pt);
         ComputeWriteSet cws(this, pt, currentDefinitions);
+        cws.setCalledBy(this);
         (void)state->apply(cws);
 
         ProgramPoint sp(state);
@@ -929,8 +932,9 @@ class GetDeclarations : public Inspector {
  public:
     GetDeclarations() : declarations(new IR::IndexedVector<IR::Declaration>())
     { setName("GetDeclarations"); }
-    static IR::IndexedVector<IR::Declaration>* get(const IR::Node* node) {
+    static IR::IndexedVector<IR::Declaration>* get(const IR::Node* node, const Visitor* calledBy) {
         GetDeclarations gd;
+        gd.setCalledBy(calledBy);
         (void)node->apply(gd);
         return gd.declarations;
     }
@@ -947,7 +951,7 @@ bool ComputeWriteSet::preorder(const IR::Function* function) {
     }
     LOG3("CWS Visiting " << dbp(function) << " called from " << callingContext);
     auto point = ProgramPoint(callingContext, function);
-    auto locals = GetDeclarations::get(function->body);
+    auto locals = GetDeclarations::get(function->body, this);
     auto saveReturned = returnedDefinitions;
     enterScope(function->type->parameters, locals, point, false);
 

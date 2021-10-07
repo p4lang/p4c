@@ -62,7 +62,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::Literal* expression) {
 const IR::Node* DoSimplifyExpressions::preorder(IR::ArrayIndex* expression) {
     LOG3("Visiting " << dbp(expression));
     auto type = typeMap->getType(getOriginal(), true);
-    if (SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap) ||
+    if (SideEffects::check(getOriginal<IR::Expression>(), this, refMap, typeMap) ||
         // if the expression appears as part of an argument also use a temporary for the index
         findContext<IR::Argument>() != nullptr) {
         visit(expression->left);
@@ -98,7 +98,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::Member* expression) {
     LOG3("Visiting " << dbp(expression));
     auto type = typeMap->getType(getOriginal(), true);
     const IR::Expression *rv = expression;
-    if (SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap) ||
+    if (SideEffects::check(getOriginal<IR::Expression>(), this, refMap, typeMap) ||
         // This may be part of a left-value that is passed as an out argument
         findContext<IR::Argument>() != nullptr) {
         visit(expression->expr);
@@ -152,7 +152,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::StructExpression* expression
     LOG3("Visiting " << dbp(expression));
     bool foundEffect = false;
     for (auto v : expression->components) {
-        if (SideEffects::check(v->expression, refMap, typeMap)) {
+        if (SideEffects::check(v->expression, this, refMap, typeMap)) {
             foundEffect = true;
             break;
         }
@@ -181,7 +181,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::ListExpression* expression) 
     LOG3("Visiting " << dbp(expression));
     bool foundEffect = false;
     for (auto v : expression->components) {
-        if (SideEffects::check(v, refMap, typeMap)) {
+        if (SideEffects::check(v, this, refMap, typeMap)) {
             foundEffect = true;
             break;
         }
@@ -207,8 +207,8 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::Operation_Binary* expression
     LOG3("Visiting " << dbp(expression));
     auto original = getOriginal<IR::Operation_Binary>();
     auto type = typeMap->getType(original, true);
-    if (SideEffects::check(original, refMap, typeMap)) {
-        if (SideEffects::check(original->right, refMap, typeMap)) {
+    if (SideEffects::check(original, this, refMap, typeMap)) {
+        if (SideEffects::check(original->right, this, refMap, typeMap)) {
             // We are a bit conservative here. We handle this case:
             // T f(inout T val) { ... }
             // val + f(val);
@@ -239,7 +239,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::Operation_Binary* expression
 const IR::Node* DoSimplifyExpressions::shortCircuit(IR::Operation_Binary* expression) {
     LOG3("Visiting " << dbp(expression));
     auto type = typeMap->getType(getOriginal(), true);
-    if (SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
+    if (SideEffects::check(getOriginal<IR::Expression>(), this, refMap, typeMap)) {
         visit(expression->left);
         CHECK_NULL(expression->left);
 
@@ -386,7 +386,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
     LOG3("Visiting " << dbp(mce));
     auto orig = getOriginal<IR::MethodCallExpression>();
     auto type = typeMap->getType(orig, true);
-    if (!SideEffects::check(orig, refMap, typeMap)) {
+    if (!SideEffects::check(orig, this, refMap, typeMap)) {
         return mce;
     }
 
@@ -404,6 +404,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
     // Set of expressions modified while evaluating this method call.
     std::set<const IR::Expression*> modifies;
     GetWrittenExpressions gwe(refMap, typeMap);
+    gwe.setCalledBy(this);
     mce->apply(gwe);
 
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
@@ -421,7 +422,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
 
         // If an argument evaluation has side-effects then
         // always use a temporary to hold the argument value.
-        if (SideEffects::check(arg->expression, refMap, typeMap)) {
+        if (SideEffects::check(arg->expression, this, refMap, typeMap)) {
             LOG3("Using temporary for " << dbp(mce) <<
                  " param " << dbp(p) << " arg side effect");
             useTemporary.emplace(p);
@@ -470,8 +471,8 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
                 LOG3("Using temporary for " << dbp(mce) <<
                      " param " << dbp(p) << " aliasing" << dbp(e));
                 if (p->hasOut())
-                    ::warning(ErrorType::WARN_ORDERING,
-                              "%1%: 'out' argument has fields in common with %2%", arg, e);
+                    warn(ErrorType::WARN_ORDERING,
+                         "%1%: 'out' argument has fields in common with %2%", arg, e);
                 useTemporary.emplace(p);
                 break;
             }
@@ -701,7 +702,7 @@ const IR::Node* KeySideEffect::preorder(IR::Key* key) {
     LOG3("Visiting " << key);
     bool complex = false;
     for (auto k : key->keyElements)
-        complex = complex || P4::SideEffects::check(k->expression, refMap, typeMap);
+        complex = complex || P4::SideEffects::check(k->expression, this, refMap, typeMap);
     if (!complex)
         // This prune will prevent the postoder(IR::KeyElement*) below from executing
         prune();
@@ -767,6 +768,7 @@ const IR::Node* KeySideEffect::doStatement(const IR::Statement* statement,
                                            const IR::Expression *expression) {
     LOG3("Visiting " << getOriginal());
     HasTableApply hta(refMap, typeMap);
+    hta.setCalledBy(this);
     (void)expression->apply(hta);
     if (hta.table == nullptr)
         return statement;

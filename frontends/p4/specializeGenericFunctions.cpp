@@ -37,6 +37,7 @@ const IR::Node* SpecializeFunctions::postorder(IR::Function* function) {
             TypeVariableSubstitution ts;
             ts.setBindings(function, function->type->typeParameters, methodCall->typeArguments);
             TypeSubstitutionVisitor tsv(specMap->typeMap, &ts);
+            tsv.setCalledBy(this);
             LOG3("Substitution " << ts);
             auto specialized = function->apply(tsv)->to<IR::Function>();
             auto renamed = new IR::Function(

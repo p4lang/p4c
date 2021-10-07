@@ -100,10 +100,10 @@ class SideEffects : public Inspector {
             refMap(refMap), typeMap(typeMap) { setName("SideEffects"); }
 
     /// @return true if the expression may have side-effects.
-    static bool check(const IR::Expression* expression,
-                      ReferenceMap* refMap,
-                      TypeMap* typeMap) {
+    static bool check(const IR::Expression* expression, const Visitor* calledBy,
+                      ReferenceMap* refMap, TypeMap* typeMap) {
         SideEffects se(refMap, typeMap);
+        se.setCalledBy(calledBy);
         expression->apply(se);
         return se.nodeWithSideEffect != nullptr;
     }
@@ -334,6 +334,7 @@ class TablesInKeys : public Inspector {
         if (!findContext<IR::Key>())
             return;
         HasTableApply hta(refMap, typeMap);
+        hta.setCalledBy(this);
         (void)mce->apply(hta);
         if (hta.table != nullptr) {
             LOG2("Table " << hta.table << " invoked in key of another table");

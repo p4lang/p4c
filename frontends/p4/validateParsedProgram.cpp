@@ -211,9 +211,9 @@ void ValidateParsedProgram::postorder(const IR::SwitchStatement* statement) {
                         "%1% has multiple 'default' labels: %2% and %3%.",
                         statement, defaultFound->label, c->label);
             else
-                ::warning(ErrorType::WARN_ORDERING,
-                          "%1%: label following 'default' %2% label.",
-                          c->label, defaultFound->label);
+                warn(ErrorType::WARN_ORDERING,
+                     "%1%: label following 'default' %2% label.",
+                     c->label, defaultFound->label);
             break;
         }
         if (c->label->is<IR::DefaultExpression>())

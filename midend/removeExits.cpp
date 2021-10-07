@@ -92,6 +92,7 @@ const IR::Node* DoRemoveExits::preorder(IR::P4Action* action) {
 
 const IR::Node* DoRemoveExits::preorder(IR::P4Control* control) {
     HasExits he;
+    he.setCalledBy(this);
     (void)control->apply(he);
     if (!he.hasExits) {
         // don't pollute the code unnecessarily
@@ -162,6 +163,7 @@ const IR::Node* DoRemoveExits::preorder(IR::IfStatement* statement) {
     push();
 
     CallsExit ce(refMap, typeMap, &callsExit);
+    ce.setCalledBy(this);
     (void)statement->condition->apply(ce);
     auto rcond = ce.callsExit ? TernaryBool::Maybe : TernaryBool::No;
 
@@ -202,6 +204,7 @@ const IR::Node* DoRemoveExits::preorder(IR::IfStatement* statement) {
 const IR::Node* DoRemoveExits::preorder(IR::SwitchStatement* statement) {
     auto r = TernaryBool::No;
     CallsExit ce(refMap, typeMap, &callsExit);
+    ce.setCalledBy(this);
     (void)statement->expression->apply(ce);
 
     /* FIXME -- alter cases in place rather than allocating a new Vector */
@@ -238,6 +241,7 @@ const IR::Node* DoRemoveExits::preorder(IR::SwitchStatement* statement) {
 
 const IR::Node* DoRemoveExits::preorder(IR::AssignmentStatement* statement) {
     CallsExit ce(refMap, typeMap, &callsExit);
+    ce.setCalledBy(this);
     (void)statement->apply(ce);
     if (ce.callsExit)
         set(TernaryBool::Maybe);
@@ -246,6 +250,7 @@ const IR::Node* DoRemoveExits::preorder(IR::AssignmentStatement* statement) {
 
 const IR::Node* DoRemoveExits::preorder(IR::MethodCallStatement* statement) {
     CallsExit ce(refMap, typeMap, &callsExit);
+    ce.setCalledBy(this);
     (void)statement->apply(ce);
     if (ce.callsExit)
         set(TernaryBool::Maybe);
