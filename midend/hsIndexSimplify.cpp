@@ -12,14 +12,35 @@ const IR::Node* HSIndexFindOrTransform::postorder(IR::ArrayIndex* curArrayIndex)
     // Find the first occurrence of non-concrete array index.
     if (isFinder) {
         if (arrayIndex == nullptr && !curArrayIndex->right->is<IR::Constant>()) {
+            // If index is an expression then create new variable.
+            if (blockComponents != nullptr && (curArrayIndex->right->is<IR::Operation_Ternary>() ||
+                curArrayIndex->right->is<IR::Operation_Binary>() ||
+                (curArrayIndex->right->is<IR::Operation_Unary>() && 
+                    !curArrayIndex->right->is<IR::Member>()))) {
+                // Generate new temporary variable.
+                auto* newIndex = new IR::Declaration_Variable(curArrayIndex->right->srcInfo,
+                    IR::ID(std::string("hsiVar")+std::to_string(blockComponents->size())),
+                    curArrayIndex->right->type);
+                blockComponents->insert(blockComponents->begin(), newIndex);
+                auto* newArray = curArrayIndex->clone();
+                newArray->right = new IR::PathExpression(newIndex->srcInfo,
+                                    curArrayIndex->right->type,
+                                    new IR::Path(newIndex->srcInfo, newIndex->name));
+                tmpArrayIndex = newArray;
+            }
             arrayIndex = curArrayIndex;
         }
     } else {
-        // Translating current array index.
-        if (arrayIndex != nullptr && curArrayIndex->equiv(*arrayIndex)) {
-            auto* newArrayIndex = arrayIndex->clone();
-            newArrayIndex->right = new IR::Constant(index);
-            return newArrayIndex;
+        if (curArrayIndex->equiv(*arrayIndex)) {
+            if (tmpArrayIndex != nullptr) {
+                return tmpArrayIndex;
+            }
+            // Translating current array index.
+            if (arrayIndex != nullptr) {
+                auto* newArrayIndex = arrayIndex->clone();
+                newArrayIndex->right = new IR::Constant(index);
+                return newArrayIndex;
+            }
         }
     }
     return curArrayIndex;
@@ -32,23 +53,32 @@ size_t HSIndexFindOrTransform::getArraySize() {
 
 IR::Node* HSIndexSimplifier::eliminateArrayIndexes(IR::Statement* statement) {
     // Check non-concrete array indexes.
-    HSIndexFindOrTransform aiFinder;
+    HSIndexFindOrTransform aiFinder(blockComponents);
+    const IR::Node* updatedStatement = nullptr;
     const IR::Statement* elseBody = nullptr;
-    bool isIf = statement->is<IR::IfStatement>();
-    if (isIf) {
-        auto* curIf = statement->to<IR::IfStatement>();
+    auto* curIf = statement->to<IR::IfStatement>();
+    if (curIf != nullptr) {
         elseBody = curIf->ifFalse;
-        curIf->condition->apply(aiFinder);
+        auto* newIf = curIf->clone();
+        newIf->condition = curIf->condition->apply(aiFinder);
+        updatedStatement = newIf;
     } else if (statement->is<IR::SwitchStatement>()) {
         auto* curSwitch = statement->to<IR::SwitchStatement>();
-        curSwitch->expression->apply(aiFinder);
+        updatedStatement = curSwitch->expression->apply(aiFinder);
     } else {
-        statement->apply(aiFinder);
+        updatedStatement = statement->apply(aiFinder);
     }
     if (aiFinder.arrayIndex == nullptr) {
-        // Remove concrete indexes.
-        HSIndexFindOrTransform aiElim(nullptr, 0);
-        return const_cast<IR::Node*>(statement->apply(aiElim));
+        return statement;
+    }
+    IR::AssignmentStatement* assigment = nullptr;
+    if (aiFinder.tmpArrayIndex != nullptr) {
+        aiFinder.isFinder = false;
+        updatedStatement = updatedStatement->apply(aiFinder)->to<IR::Statement>();
+        assigment = new IR::AssignmentStatement(aiFinder.tmpArrayIndex->srcInfo,
+            aiFinder.tmpArrayIndex->right, aiFinder.arrayIndex->right);
+        aiFinder.arrayIndex = aiFinder.tmpArrayIndex;
+        aiFinder.tmpArrayIndex = nullptr;
     }
     IR::IfStatement* result = nullptr;
     IR::IfStatement* curResult = nullptr;
@@ -56,9 +86,9 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(IR::Statement* statement) {
     for (size_t i = 0; i < sz; i++) {
         HSIndexFindOrTransform aiRewriter(aiFinder.arrayIndex, i);
         IR::IfStatement* newIf = nullptr;
-        auto* newStatement = statement->apply(aiRewriter)->to<IR::Statement>();
-        auto* newIndex = aiFinder.arrayIndex->right->apply(aiRewriter)->to<IR::Expression>();
-        if (isIf) {
+        auto* newStatement = updatedStatement->apply(aiRewriter)->to<IR::Statement>();
+        auto* newIndex = aiFinder.arrayIndex->right->apply(aiRewriter);
+        if (curIf != nullptr) {
             newIf = newStatement->to<IR::IfStatement>()->clone();
             newIf->condition = new IR::LAnd(
                 new IR::Equ(newIndex, new IR::Constant(aiFinder.arrayIndex->right->type, i)),
@@ -77,11 +107,37 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(IR::Statement* statement) {
         }
     }
     curResult->ifFalse = elseBody;
-    return result;
+    if (assigment == nullptr) {
+        return result;
+    } else {
+        IR::IndexedVector<IR::StatOrDecl> components;
+        components.push_back(assigment);
+        components.push_back(result);
+        return new IR::BlockStatement(components);
+    }
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::AssignmentStatement* assignmentStatement) {
     return eliminateArrayIndexes(assignmentStatement);
+}
+
+IR::Node* HSIndexSimplifier::preorder(IR::BlockStatement* blockStatement) {
+    HSIndexSimplifier hsSimplifier;
+    IR::IndexedVector<IR::StatOrDecl> newComponents;
+    hsSimplifier.blockComponents = &newComponents;
+    for (auto& component : blockStatement->components) {
+        const auto* newComponent = component->apply(hsSimplifier)->to<IR::StatOrDecl>();
+        if (const auto* newBlock = newComponent->to<IR::BlockStatement>()) {
+            for (auto& blockComponent : newBlock->components) {
+                newComponents.push_back(blockComponent);
+            }
+        } else {
+            newComponents.push_back(newComponent);
+        }
+    }
+    auto* newBlock = blockStatement->clone();
+    newBlock->components = newComponents;
+    return newBlock;
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::ConstructorCallExpression* expr) {
@@ -100,10 +156,14 @@ IR::Node* HSIndexSimplifier::preorder(IR::IfStatement* ifStatement) {
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::MethodCallStatement* methodCallStatement) {
-    return eliminateArrayIndexes(ifStatement);
+    return eliminateArrayIndexes(methodCallStatement);
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::SelectExpression* selectExpression) {
+    HSIndexFindOrTransform aiFinder(blockComponents);
+    selectExpression->apply(aiFinder);
+    if (aiFinder.arrayIndex != nullptr)
+        ::warning("ParsersUnroll class should be used for elimination of %1%", selectExpression);
     // Ignore SelectExpression.
     return selectExpression;
 }

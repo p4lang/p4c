@@ -14,24 +14,30 @@ namespace P4 {
 class HSIndexFindOrTransform : public Transform {
     friend class HSIndexSimplifier;
     const IR::ArrayIndex* arrayIndex;
+    const IR::ArrayIndex* tmpArrayIndex;
     bool isFinder;
     int index;
-
+    IR::IndexedVector<IR::StatOrDecl>* blockComponents;
  public:
-    HSIndexFindOrTransform() : arrayIndex(nullptr), isFinder(true) {}
-    HSIndexFindOrTransform(const IR::ArrayIndex* arrayIndex, int index)
-        : arrayIndex(arrayIndex), isFinder(false), index(index) {}
+    HSIndexFindOrTransform(IR::IndexedVector<IR::StatOrDecl>* blockComponents) :
+        arrayIndex(nullptr), tmpArrayIndex(nullptr), isFinder(true),
+        blockComponents(blockComponents) {}
+    HSIndexFindOrTransform(const IR::ArrayIndex* arrayIndex, int index) :
+        arrayIndex(arrayIndex), tmpArrayIndex(nullptr), isFinder(false), index(index), 
+        blockComponents(nullptr) {}
     const IR::Node* postorder(IR::ArrayIndex* curArrayIndex) override;
     size_t getArraySize();
 };
 
 /// This class eliminates all non-concrete indexes of the header stacks in the controls.
-/// It generates all  
+/// It generates new variables for all expressions in the header stacks indexes and
+/// checks thier values for substitution of concrete values. 
 class HSIndexSimplifier : public Transform {
  public:
-    HSIndexSimplifier() {}
+    HSIndexSimplifier() : blockComponents(nullptr) {}
     IR::Node* preorder(IR::IfStatement* ifStatement) override;
     IR::Node* preorder(IR::AssignmentStatement* assignmentStatement) override;
+    IR::Node* preorder(IR::BlockStatement* blockStatement) override;
     IR::Node* preorder(IR::ConstructorCallExpression* expr) override;
     IR::Node* preorder(IR::MethodCallStatement* methodCallStatement) override;
     IR::Node* preorder(IR::SelectExpression* selectExpression) override;
@@ -39,6 +45,9 @@ class HSIndexSimplifier : public Transform {
 
  protected:
     IR::Node* eliminateArrayIndexes(IR::Statement* statement);
+
+ private:
+    IR::IndexedVector<IR::StatOrDecl>* blockComponents;
 };
 
 }  // namespace P4
