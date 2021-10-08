@@ -17,14 +17,15 @@ class HSIndexFindOrTransform : public Transform {
     const IR::ArrayIndex* tmpArrayIndex;
     bool isFinder;
     int index;
-    IR::IndexedVector<IR::StatOrDecl>* blockComponents;
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
  public:
-    HSIndexFindOrTransform(IR::IndexedVector<IR::StatOrDecl>* blockComponents) :
+    HSIndexFindOrTransform(ReferenceMap* refMap,TypeMap* typeMap) :
         arrayIndex(nullptr), tmpArrayIndex(nullptr), isFinder(true),
-        blockComponents(blockComponents) {}
+        refMap(refMap), typeMap(typeMap) {}
     HSIndexFindOrTransform(const IR::ArrayIndex* arrayIndex, int index) :
         arrayIndex(arrayIndex), tmpArrayIndex(nullptr), isFinder(false), index(index), 
-        blockComponents(nullptr) {}
+        refMap(nullptr), typeMap(nullptr) {}
     const IR::Node* postorder(IR::ArrayIndex* curArrayIndex) override;
     size_t getArraySize();
 };
@@ -33,8 +34,12 @@ class HSIndexFindOrTransform : public Transform {
 /// It generates new variables for all expressions in the header stacks indexes and
 /// checks thier values for substitution of concrete values. 
 class HSIndexSimplifier : public Transform {
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
+    const IR::Declaration_Variable* newDeclaration;
  public:
-    HSIndexSimplifier() : blockComponents(nullptr) {}
+    HSIndexSimplifier(ReferenceMap* refMap, TypeMap* typeMap) :
+        refMap(refMap), typeMap(typeMap), newDeclaration(nullptr) {}
     IR::Node* preorder(IR::IfStatement* ifStatement) override;
     IR::Node* preorder(IR::AssignmentStatement* assignmentStatement) override;
     IR::Node* preorder(IR::BlockStatement* blockStatement) override;
@@ -45,9 +50,6 @@ class HSIndexSimplifier : public Transform {
 
  protected:
     IR::Node* eliminateArrayIndexes(IR::Statement* statement);
-
- private:
-    IR::IndexedVector<IR::StatOrDecl>* blockComponents;
 };
 
 }  // namespace P4
