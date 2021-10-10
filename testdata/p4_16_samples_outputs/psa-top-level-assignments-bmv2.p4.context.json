@@ -1,7 +1,0 @@
-{
-    "program_name": "psa-top-level-assignments-bmv2",
-    "compiler_version": "0.1",
-    "schema_version": "0.1",
-    "target": "DPDK",
-    "tables": []
-}

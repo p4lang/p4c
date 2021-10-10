@@ -84,7 +84,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new CollectProgramStructure(refMap, typeMap, &structure),
         new InspectDpdkProgram(refMap, typeMap, &structure),
         new DpdkArchLast(),
-        new GenerateContextJson(refMap, typeMap, &structure, options),
+        new DpdkContextGenerator(refMap, typeMap, &structure, options),
         // convert to assembly program
         convertToDpdk,
     };

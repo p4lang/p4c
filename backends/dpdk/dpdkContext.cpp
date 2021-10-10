@@ -17,17 +17,37 @@ limitations under the License.
 #include "dpdkContext.h"
 #include "backend.h"
 #include "printUtils.h"
-
 namespace DPDK {
 
-/* Unique handle for action and table */
-#define TABLE_HANDLE_PREFIX 0x00010000
-#define ACTION_HANDLE_PREFIX 0x00020000
+unsigned DpdkContextGenerator::newTableHandle = 0;
+unsigned DpdkContextGenerator::newActionHandle = 0;
 
-unsigned CollectTablesForContextJson::newTableHandle = 0;
+// Returns a unique ID for table
+unsigned int DpdkContextGenerator::getNewTableHandle() {
+    return TABLE_HANDLE_PREFIX | newTableHandle++;
+}
 
-/* This function sets certain attributes for each table */
-void CollectTablesForContextJson::setTableAttributes() {
+// Returns a unique ID for action
+unsigned int DpdkContextGenerator::getNewActionHandle() {
+    return ACTION_HANDLE_PREFIX | newActionHandle++;
+}
+
+
+bool DpdkContextGenerator::preorder(const IR::P4Program * /*p*/) {
+   // Serialize context json object into user specified file
+    if (!options.ctxtFile.isNullOrEmpty()) {
+        std::ostream *out = openFile(options.ctxtFile, false);
+        if (out != nullptr) {
+            serializeContextJson(out);
+        }
+        out->flush();
+    }
+    return false;
+}
+
+// This function collects all tables in a vector and sets the table attributes required
+// by context json into a map.
+void DpdkContextGenerator::CollectTablesAndSetAttributes() {
     IR::IndexedVector<IR::Declaration> selector_tables;
     IR::IndexedVector<IR::Declaration> action_data_tables;
     for (auto kv : structure->pipelines) {
@@ -43,6 +63,10 @@ void CollectTablesForContextJson::setTableAttributes() {
                 tblAttr.direction = direction;
                 tblAttr.controlName = control->name.originalName;
                 tblAttr.tableHandle = getNewTableHandle();
+                auto size = tbl->properties->getProperty("size");
+                tblAttr.size = DPDK_DEFAULT_TABLE_SIZE;
+                if (size)
+                   tblAttr.size = size->value->to<IR::Constant>()->asUnsigned();
                 auto hidden = tbl->annotations->getSingle(IR::Annotation::hiddenAnnotation);
                 auto selector = tbl->properties->getProperty("selector");
                 if (hidden) {
@@ -72,90 +96,40 @@ void CollectTablesForContextJson::setTableAttributes() {
         tables.push_back(d);
 }
 
-bool CollectTablesForContextJson::preorder(const IR::P4Program * /*p*/) {
-    setTableAttributes();
-    return false;
+// This functions insert a single key field in the match keys array
+void DpdkContextGenerator::addKeyField(
+Util::JsonArray* keyJson, const cstring name, const IR::KeyElement *key, int position) {
+    auto* keyField = new Util::JsonObject();
+    cstring fieldName = name.findlast('.');
+    auto instanceName = name.replace(fieldName, "");
+    fieldName = fieldName.trim(".\t\n\r");
+    keyField->emplace("name", name);
+    keyField->emplace("instance_name", instanceName);
+    keyField->emplace("field_name", fieldName);
+    keyField->emplace("match_type", toStr(key->matchType));
+    keyField->emplace("start_bit", 0);
+    keyField->emplace("bit_width", key->expression->type->width_bits());
+    keyField->emplace("bit_width_full", key->expression->type->width_bits());
+    keyField->emplace("position", position);
+    keyJson->append(keyField);
 }
 
-// Returns a unique ID for table
-unsigned int CollectTablesForContextJson::getNewTableHandle() {
-    return TABLE_HANDLE_PREFIX | newTableHandle++;
+// This function sets the common table properties
+Util::JsonObject* DpdkContextGenerator::initTableCommonJson(
+    const cstring name, const struct TableAttributes & attr) {
+    auto* tableJson = new Util::JsonObject();
+    cstring tableName = attr.controlName + "." + name;
+    tableJson->emplace("name", tableName);
+    tableJson->emplace("direction", attr.direction);
+    tableJson->emplace("handle", attr.tableHandle);
+    tableJson->emplace("table_type", attr.tableType);
+    tableJson->emplace("size", attr.size);
+    tableJson->emplace("p4_hidden", attr.isHidden);
+    return tableJson;
 }
 
-unsigned WriteContextJson::newActionHandle = 0;
-
-// Returns a unique ID for action
-unsigned int WriteContextJson::getNewActionHandle() {
-    return ACTION_HANDLE_PREFIX | newActionHandle++;
-}
-
-// Helper function for pretty printing into JSON file
-void WriteContextJson::add_space(std::ostream &out, int size) {
-    out << std::setfill(' ') << std::setw(size) << " ";
-}
-
-/* Main function for generating context JSON */
-bool WriteContextJson::preorder(const IR::P4Program * /*p*/) {
-    if (!options.ctxtFile.isNullOrEmpty()) {
-        std::ostream *outCtxt = openFile(options.ctxtFile, false);
-        if (outCtxt != nullptr) {
-            std::ostream &out = *outCtxt;
-
-            /* Fetch required information from options */
-            const time_t now = time(NULL);
-            char build_date[50];
-            strftime(build_date, 50, "%c", localtime(&now));
-            cstring compilerCommand = options.DpdkCompCmd;
-            compilerCommand = compilerCommand.replace("(from pragmas)", "");
-            compilerCommand = compilerCommand.trim();
-            cstring progName =  options.file;
-            progName = progName.findlast('/');
-            auto fileext = progName.find(".");
-            progName = progName.replace(fileext, "");
-            progName = progName.trim("/\t\n\r");
-
-            /* Print program level information*/
-            out << "{\n";
-            add_space(out, 4); out << "\"program_name\": \"" << progName <<"\",\n";
-            if (!options.testcontextJson) {
-                add_space(out, 4); out << "\"build_date\": \"" << build_date << "\",\n";
-                add_space(out, 4); out << "\"compile_command\": \"" << compilerCommand << " \",\n";
-            }
-            add_space(out, 4);
-            out << "\"compiler_version\": \"" << options.compilerVersion << "\",\n";
-            add_space(out, 4); out << "\"schema_version\": \"0.1\",\n";
-            add_space(out, 4); out << "\"target\": \"DPDK\",\n";
-
-            /* Table array starts here */
-            add_space(out, 4); out << "\"tables\": [";
-            bool first = true;
-            for (auto t : tables) {
-                if (!first) out << ",";
-                out << "\n";
-                auto tbl = t->to<IR::P4Table>();
-                auto tableAttr = ::get(tableAttrmap, tbl->name.originalName);
-                if (tableAttr.tableType == "match")
-                    printTableCtxtJson(tbl, out);
-                if (tableAttr.tableType == "selection")
-                    printSelTableCtxtJson(tbl, out);
-                else if (tableAttr.tableType == "action")
-                    printActionTableCtxtJson(tbl, out);
-                first = false;
-            }
-            if (!first) {
-                out << "\n"; add_space(out, 4);
-            }
-            out << "]\n";
-            out << "}\n";
-            outCtxt->flush();
-        }
-    }
-    return false;
-}
-
-/* This function sets certain attributes for each action within a table */
-void WriteContextJson::setActionAttributes(
-    std::map <cstring, struct actionAttributes> &actionAttrMap, const IR::P4Table *tbl) {
+// This function sets action attributes for actions in a table.
+void DpdkContextGenerator::setActionAttributes(const IR::P4Table *tbl) {
     for (auto act : tbl->getActionList()->actionList) {
         struct actionAttributes attr;
         auto action_decl = refmap->getDeclaration(act->getPath())->to<IR::P4Action>();
@@ -220,352 +194,245 @@ void WriteContextJson::setActionAttributes(
     }
 }
 
-void WriteContextJson::printReferenceTables(const IR::P4Table *refTable, std::ostream &out) {
-    auto tableAttr = ::get(tableAttrmap, refTable->name.originalName);
-    auto tableName = tableAttr.controlName + "." + refTable->name.originalName;
-    out << "\n";
-    add_space(out, 16); out << "{\n";
-    add_space(out, 20); out << "\"name\": \"" <<  tableName <<"\",\n";
-    add_space(out, 20); out << "\"handle\": " << tableAttr.tableHandle   <<"\n";
-    add_space(out, 16); out << "}\n";
-    add_space(out, 12);
-}
-
-/* Print a single table object of match_table type in Context JSON*/
-void WriteContextJson::printTableCtxtJson(const IR::P4Table *tbl, std::ostream &out) {
-    bool hasActionProfileSelector = false;
-    auto mainTableAttr = ::get(tableAttrmap, tbl->name.originalName);
-    cstring tableName = mainTableAttr.controlName + "." + tbl->name.originalName;
-    add_space(out, 8); out << "{\n";
-    add_space(out, 12); out << "\"table_type\": \"" << mainTableAttr.tableType << "\",\n";
-    add_space(out, 12); out << "\"direction\": \"" << mainTableAttr.direction << "\",\n";
-    add_space(out, 12); out << "\"handle\": " << mainTableAttr.tableHandle << ",\n";
-    add_space(out, 12); out << "\"name\": \"" << tableName << "\",\n";
-    add_space(out, 12); out << "\"size\": ";
-
-    if (auto size = tbl->properties->getProperty("size")) {
-        out << size->value << ",\n";
-    } else {
-        // default table size for DPDK
-        out << "65536" << ",\n";
-    }
-
-    // Below empty arrays are currently required by the control plane software.
-    // May be removed in future.
-    add_space(out, 12); out << "\"stateful_table_refs\": []" << ",\n";
-    add_space(out, 12); out << "\"statistics_table_refs\": []" << ",\n";
-    add_space(out, 12); out << "\"meter_table_refs\": []" << ",\n";
-    add_space(out, 12); out << "\"p4_hidden\": "
-                            << std::boolalpha << mainTableAttr.isHidden << ",\n";
-    const IR::P4Table *memberTable = nullptr;
-    // Reference to compiler generated member table in case of action profile and action selector.
-    add_space(out, 12); out << "\"action_data_table_refs\": [";
-    if (structure->member_tables.count(tbl->name)) {
-        hasActionProfileSelector = true;
-        memberTable = structure->member_tables.at(tbl->name);
-        printReferenceTables(memberTable, out);
-    }
-    out << "],\n";
-
-    // Reference to compiler generated group table in case of action selector
-    add_space(out, 12); out << "\"selection_table_refs\": [";
-    if (structure->group_tables.count(tbl->name)) {
-        hasActionProfileSelector = true;
-        auto groupTable = structure->group_tables.at(tbl->name);
-        printReferenceTables(groupTable, out);
-    }
-    out << "],\n";
-
-    if (hasActionProfileSelector) {
-        add_space(out, 12);
-        out << "\"action_profile\": \"" << memberTable->name.originalName <<"\",\n";
-    }
-
-    // Match Key Fields for this table
-    add_space(out, 12); out << "\"match_key_fields\": [";
-    auto match_keys = tbl->getKey();
-
-    if (match_keys) {
-        int index = 0;
-        for (auto matchKeyFromPrg : mainTableAttr.tableKeys) {
-            auto mkf = match_keys->keyElements.at(index);
-            if (mkf->expression->is<IR::Member>()) {
-                cstring fieldName = matchKeyFromPrg.findlast('.');
-                auto instanceName = matchKeyFromPrg.replace(fieldName, "");
-                fieldName = fieldName.trim(".\t\n\r");
-                if (index) out << ",";
-                out << "\n";
-                add_space(out, 16); out << "{\n";
-                add_space(out, 20); out << "\"name\": \"" <<  matchKeyFromPrg <<"\",\n";
-                add_space(out, 20); out << "\"instance_name\": \"" <<  instanceName <<"\",\n";
-                add_space(out, 20); out << "\"field_name\": \"" <<  fieldName <<"\",\n";
-                add_space(out, 20); out << "\"match_type\": \"" <<  toStr(mkf->matchType) <<"\",\n";
-                add_space(out, 20); out << "\"start_bit\": 0,\n";
-                add_space(out, 20); out << "\"bit_width\": "
-                                        << mkf->expression->type->width_bits() << ",\n";
-                add_space(out, 20); out << "\"bit_width_full\": "
-                                        << mkf->expression->type->width_bits() << ",\n";
-                add_space(out, 20); out << "\"position\":" << index << "\n";
-                add_space(out, 16); out << "} ";
-                index++;
-            } else {
-                // Match keys must be part of header or metadata structures
-                BUG("%1%: invalid match key", mkf->expression);
-            }
-        }
-        if (index) {
-            out << "\n";
-            add_space(out, 12);
-        }
-    }
-    out << "],\n";
-
-    // If table implementation is action profile or action selector, all actions from member
-    // table should be output for the base table.
-    const IR::P4Table *table = nullptr;
-    if (hasActionProfileSelector) {
-        table = memberTable;
-    } else {
-        table = tbl;
-    }
-
-    setActionAttributes(actionAttrMap, table);
+// This functions updates the table attribute map entry with default action handle
+// for the specified table.
+void DpdkContextGenerator::setDefaultActionHandle(const IR::P4Table *table) {
     cstring default_action_name = "";
-
-    unsigned default_action_handle = 0;
-    bool first = true;
     if (table->getDefaultAction())
         default_action_name = toStr(table->getDefaultAction());
 
-    // Print actions associated with this table
-    add_space(out, 12); out << "\"actions\": [";
+    auto tableAttr = ::get(tableAttrmap, table->name.originalName);
     for (auto action : table->getActionList()->actionList) {
         struct actionAttributes attr = ::get(actionAttrMap, action->getName());
-        if (toStr(action->expression) == default_action_name)
-            default_action_handle = attr.actionHandle;
-
-        // Printing compiler added actions is curently not required
-        if (!attr.is_compiler_added_action) {
-            if (!first) out << ",";
-            out << "\n";
-            add_space(out, 16); out << "{\n";
-            auto actName = toStr(action->expression);
-
-            // NoAction is not prefixed with control block name
-            if (actName != "NoAction")
-                actName = mainTableAttr.controlName + "." + actName;
-            add_space(out, 20); out << "\"name\": \"" << actName << "\",\n";
-            add_space(out, 20); out << "\"handle\": " << attr.actionHandle << ",\n";
-            add_space(out, 20); out << "\"constant_default_action\": " <<
-                                       std::boolalpha << attr.constant_default_action << ",\n";
-            add_space(out, 20); out << "\"is_compiler_added_action\": " <<
-                                       std::boolalpha << attr.is_compiler_added_action  << ",\n";
-            add_space(out, 20); out << "\"allowed_as_hit_action\": " <<
-                                       std::boolalpha << attr.allowed_as_hit_action << ",\n";
-            add_space(out, 20); out << "\"allowed_as_default_action\": " <<
-                                       std::boolalpha << attr.allowed_as_default_action << ",\n";
-
-            // Print action parameters
-            add_space(out, 20); out << "\"p4_parameters\": [";
-            int position = 0;
-            if (attr.params) {
-                int index = 0;
-                for (auto param : *(attr.params)) {
-                    if (position) out << ",";
-                    out << "\n";
-                    add_space(out, 24); out << "{\n";
-                    add_space(out, 28); out << "\"name\": \""
-                                            << param->name.originalName << "\",\n";
-                    add_space(out, 28); out << "\"start_bit\": 0,\n";
-                    add_space(out, 28); out << "\"bit_width\": "
-                                            << param->type->width_bits() << ",\n";
-                    add_space(out, 28); out << "\"position\": " << position++ << ",\n";
-                    add_space(out, 28); out << "\"byte_array_index\": "  << index/8 <<  "\n";
-                    add_space(out, 24); out << "}";
-                    index += param->type->width_bits();
-                }
-            }
-            if (position) {
-                out << "\n"; add_space(out, 20);
-            }
-            out << "]\n";
-            add_space(out, 16); out << "}";
-            first = false;
+        if (toStr(action->expression) == default_action_name) {
+            tableAttr.default_action_handle = attr.actionHandle;
+            // Update default table handle in existing table attribute map
+            tableAttrmap.find(table->name.originalName)->second = tableAttr;
+            break;
         }
     }
-    if (!first) out << "\n";
-    add_space(out, 12); out << "],\n";
+}
 
-    // These fields are similar to the actions array with slightly different information
-    // These are currently required by the control plane software but may be removed in future.
-    add_space(out, 12); out << "\"match_attributes\": {\n";
-    add_space(out, 16); out << "\"stage_tables\": [\n";
-    add_space(out, 20); out << "{\n";
-    add_space(out, 24); out << "\"action_format\": [";
-    first = true;
+// This functions creates JSON object for immediate fields (action parameters)
+void DpdkContextGenerator::addImmediateField(
+Util::JsonArray* paramJson, const cstring name, int dest_start, int dest_width) {
+    auto* oneParam = new Util::JsonObject();
+    oneParam->emplace("param_name", name);
+    oneParam->emplace("dest_start", dest_start);
+    oneParam->emplace("dest_width", dest_width);
+    paramJson->append(oneParam);
+}
 
+// This functions creates JSON object for match attributes of a table.
+Util::JsonObject*
+DpdkContextGenerator::addMatchAttributes(const IR::P4Table*table, const cstring ctrlName) {
+    auto* match_attributes = new Util::JsonObject();
+    auto* actFmtArray = new Util::JsonArray();
+    auto* stageTblArray = new Util::JsonArray();
+    auto* oneStageTbl = new Util::JsonObject();
     for (auto action : table->getActionList()->actionList) {
+        auto* oneAction = new Util::JsonObject();
         struct actionAttributes attr = ::get(actionAttrMap, action->getName());
-//        if (toStr(action->expression) == default_action_name)
-//            default_action_handle = attr.actionHandle;
         auto actName = toStr(action->expression);
         if (actName != "NoAction")
-            actName = mainTableAttr.controlName + "." + actName;
-        if (!first) out << ",";
-        out << "\n";
-        add_space(out, 28); out << "{\n";
-        add_space(out, 20); out << "\"action_name\": \"" << actName << "\",\n";
-        add_space(out, 32); out << "\"action_handle\": " << attr.actionHandle << ",\n";
-        add_space(out, 32); out << "\"immediate_fields\": [";
-
-        int position = 0;
+            actName = ctrlName + "." + actName;
+        oneAction->emplace("action_name", actName);
+        oneAction->emplace("action_handle", attr.actionHandle);
+        auto* immFldArray = new Util::JsonArray();
         if (attr.params) {
             int index = 0;
+            int position = 0;
             for (auto param : *(attr.params)) {
-                if (position) out << ",";
-                out << "\n";
-                add_space(out, 36); out << "{\n";
-                add_space(out, 40); out << "\"param_name\": \""
-                                        << param->name.originalName << "\",\n";
-                add_space(out, 40); out << "\"dest_start\": "  << index/8 <<  ",\n";
-                add_space(out, 40); out << "\"dest_width\": " << param->type->width_bits() << "\n";
-                add_space(out, 36); out << "}";
+                addImmediateField(immFldArray, param->name.originalName,
+                                  index/8, param->type->width_bits());
                 index += param->type->width_bits();
                 position++;
             }
         }
-        if (position) {
-            out << "\n"; add_space(out, 32);
-        }
-        out << "]\n";
-        add_space(out, 28); out << "}";
-        first = false;
+        oneAction->emplace("immediate_fields",immFldArray);
+        actFmtArray->append(oneAction);
     }
-    out << "\n";
-    add_space(out, 24); out << "]\n";
-    add_space(out, 20); out << "}\n";
-    add_space(out, 16); out << "]\n";
-    add_space(out, 12); out << "},\n";
-    if (default_action_handle) {
-        add_space(out, 12); out << "\"default_action_handle\": " << default_action_handle << "\n";
-    }
-    add_space(out, 8); out << "}";
+    oneStageTbl->emplace("action_format", actFmtArray);
+    stageTblArray->append(oneStageTbl);
+    match_attributes->emplace("stage_tables", stageTblArray);
+    return match_attributes;
 }
 
-/* Print a single selection table object in Context JSON */
-void WriteContextJson::printSelTableCtxtJson(const IR::P4Table *tbl, std::ostream &out) {
-    auto mainTableAttr = ::get(tableAttrmap, tbl->name.originalName);
-    cstring tableName = mainTableAttr.controlName + "." + tbl->name.originalName;
-    add_space(out, 8); out << "{\n";
-    add_space(out, 12); out << "\"table_type\": \"" << mainTableAttr.tableType << "\",\n";
-    add_space(out, 12); out << "\"direction\": \"" << mainTableAttr.direction << "\",\n";
-    add_space(out, 12); out << "\"handle\": " << mainTableAttr.tableHandle << ",\n";
-    add_space(out, 12); out << "\"name\": \"" <<  tableName << "\",\n";
-    add_space(out, 12); out << "\"size\": ";
-
-    if (auto size = tbl->properties->getProperty("size")) {
-        out << size->value << ",\n";
-    } else {
-        // default table size for DPDK
-        out << "65536" << ",\n";
-    }
-    add_space(out, 12); out << "\"p4_hidden\": " <<
-                               std::boolalpha << mainTableAttr.isHidden << ",\n";
-
-    add_space(out, 12); out << "\"max_n_groups\": ";
-    if (auto n_groups = tbl->properties->getProperty("n_groups_max")) {
-        out << n_groups->value << ",\n";
-    } else {
-        out << "0" << ",\n";
-    }
-    add_space(out, 12); out << "\"max_n_members_per_group\": ";
-    if (auto n_members = tbl->properties->getProperty("n_members_per_group_max")) {
-        out << n_members->value << ",\n";
-    } else {
-        out << "0" << ",\n";
-    }
-
-    // Fetch associated member table handle
-    cstring actionDataTableName = tbl->name.originalName;
-    actionDataTableName = actionDataTableName.replace("_sel", "");
-    auto actionTableAttr = ::get(tableAttrmap, actionDataTableName);
-    add_space(out, 12);
-    out << "\"bound_to_action_data_table_handle\": " << actionTableAttr.tableHandle << "\n";
-    add_space(out, 8); out << "}";
+// This function adds a single parameter to the parameters array.
+void DpdkContextGenerator::addActionParam(Util::JsonArray* paramJson, const cstring name,
+     int bitWidth, int position, int byte_array_index) {
+    auto* oneParam = new Util::JsonObject();
+    oneParam->emplace("name", name);
+    oneParam->emplace("start_bit", 0);
+    oneParam->emplace("bit_width", bitWidth);
+    oneParam->emplace("position", position);
+    oneParam->emplace("byte_array_index", byte_array_index);
+    paramJson->append(oneParam);
 }
 
-/* Print a single member table object in Context JSON */
-void WriteContextJson::printActionTableCtxtJson(const IR::P4Table *tbl, std::ostream &out) {
-    auto mainTableAttr = ::get(tableAttrmap, tbl->name.originalName);
-    cstring tableName = mainTableAttr.controlName + "." + tbl->name.originalName;
-    add_space(out, 8); out << "{\n";
-    add_space(out, 12); out << "\"table_type\": \"" << mainTableAttr.tableType << "\",\n";
-    add_space(out, 12); out << "\"direction\": \"" << mainTableAttr.direction << "\",\n";
-    add_space(out, 12); out << "\"handle\": " << mainTableAttr.tableHandle << ",\n";
-    add_space(out, 12); out << "\"name\": \"" <<  tableName << "\",\n";
-    add_space(out, 12); out << "\"size\": ";
-
-    if (auto size = tbl->properties->getProperty("size")) {
-        out << size->value << ",\n";
-    } else {
-        // default table size for DPDK
-        out << "65536" << ",\n";
-    }
-    add_space(out, 12); out << "\"p4_hidden\": " <<
-                               std::boolalpha << mainTableAttr.isHidden << ",\n";
-
-    cstring default_action_name = "";
-    unsigned default_action_handle = 0;
-
-    if (tbl->getDefaultAction())
-        default_action_name = toStr(tbl->getDefaultAction());
-
-    // Print actions associated with this table
-    add_space(out, 12); out << "\"actions\": [";
-    bool first = true;
-    for (auto action : tbl->getActionList()->actionList) {
+// This function creates JSON objects for  actions within a table.
+Util::JsonArray* DpdkContextGenerator::addActions(
+const IR::P4Table * table, const cstring controlName, bool isMatch) {
+    auto* actArray = new Util::JsonArray();
+    for (auto action : table->getActionList()->actionList) {
         struct actionAttributes attr = ::get(actionAttrMap, action->getName());
-        if (toStr(action->expression) == default_action_name)
-            default_action_handle = attr.actionHandle;
-        auto actName = toStr(action->expression);
-        if (actName != "NoAction")
-            actName = mainTableAttr.controlName + "." + actName;
-        if (!first) out << ",";
-        out << "\n";
-        add_space(out, 16); out << "{\n";
-        add_space(out, 20); out << "\"name\": \"" << actName << "\",\n";
-        add_space(out, 20); out << "\"handle\": " << attr.actionHandle << ",\n";
+        // Printing compiler added actions is curently not required
+        if (!attr.is_compiler_added_action) {
+            auto *act = new Util::JsonObject();
+            auto actName = toStr(action->expression);
 
-        // Print action parameters
-        add_space(out, 20); out << "\"p4_parameters\": [";
-        int position = 0;
-        if (attr.params) {
-            int index = 0;
-            for (auto param : *(attr.params)) {
-                if (position) out << ",";
-                out << "\n";
-                add_space(out, 24); out << "{\n";
-                add_space(out, 28); out << "\"name\": \"" << param->name.originalName << "\",\n";
-                add_space(out, 28); out << "\"start_bit\": 0,\n";
-                add_space(out, 28); out << "\"bit_width\": " << param->type->width_bits() << ",\n";
-                add_space(out, 28); out << "\"position\": " << position++ << ",\n";
-                add_space(out, 28); out << "\"byte_array_index\": "  << index/8 <<  "\n";
-                add_space(out, 24); out << "}";
-                index += param->type->width_bits();
+            // NoAction is not prefixed with control block name
+            if (actName != "NoAction")
+                actName = controlName + "." + actName;
+           act->emplace("name", actName);
+           act->emplace("handle", attr.actionHandle);
+           if (isMatch) {
+               act->emplace("constant_default_action", attr.constant_default_action);
+               act->emplace("is_compiler_added_action", attr.is_compiler_added_action);
+               act->emplace("allowed_as_hit_action", attr.allowed_as_hit_action);
+               act->emplace("allowed_as_default_action", attr.allowed_as_default_action);;
+           }
+           auto* paramJson = new Util::JsonArray();
+           if (attr.params) {
+                int index = 0;
+                int position = 0;
+                for (auto param : *(attr.params)) {
+                    addActionParam(paramJson, param->name.originalName,
+                                   param->type->width_bits(), position, index/8);
+                    position++;
+                    index += param->type->width_bits();
+                }
             }
+            act->emplace("p4_parameters", paramJson);
+            actArray->append(act);
         }
-        if (position) {
-            out << "\n"; add_space(out, 20);
+    }
+    return actArray;
+}
+
+// This function adds the tables referred by this table.
+bool DpdkContextGenerator::addRefTables(
+    const cstring tbl_name, const IR::P4Table **memberTable, Util::JsonObject* tableJson) {
+    bool hasActionProfileSelector = false;
+
+    // Below empty arrays are currently required by the control plane software.
+    // May be removed in future.
+    tableJson->emplace("stateful_table_refs", new Util::JsonArray());
+    tableJson->emplace("statistics_table_refs", new Util::JsonArray());
+    tableJson->emplace("meter_table_refs", new Util::JsonArray());
+
+    // Reference to compiler generated member table in case of action profile and action selector.
+    if (structure->member_tables.count(tbl_name)) {
+        auto* actionDataJson = new Util::JsonArray();
+        hasActionProfileSelector = true;
+        *memberTable = structure->member_tables.at(tbl_name);
+        auto* actionDataField = new Util::JsonObject();
+        auto tableAttr = ::get(tableAttrmap, (*memberTable)->name.originalName);
+        auto tableName = tableAttr.controlName + "." + (*memberTable)->name.originalName;
+        actionDataField->emplace("name", tableName);
+        actionDataField->emplace("handle", tableAttr.tableHandle);
+        actionDataJson->append(actionDataField);
+        tableJson->emplace("action_data_table_refs", actionDataJson);
+    }
+
+    // Reference to compiler generated group table in case of action selector
+    if (structure->group_tables.count(tbl_name)) {
+        auto* selectionJson = new Util::JsonArray();
+        hasActionProfileSelector = true;
+        auto groupTable = structure->group_tables.at(tbl_name);
+        auto* selectField = new Util::JsonObject();
+        auto tableAttr = ::get(tableAttrmap, groupTable->name.originalName);
+        auto tableName = tableAttr.controlName + "." + groupTable->name.originalName;
+        selectField->emplace("name", tableName);
+        selectField->emplace("handle", tableAttr.tableHandle);
+        selectionJson->append(selectField);
+        tableJson->emplace("selection_table_refs", selectionJson);
+    }
+
+    if (hasActionProfileSelector) {
+        tableJson->emplace("action_profile", (*memberTable)->name.originalName);
+    }
+    return hasActionProfileSelector;
+}
+
+// Add tables to the context json
+void DpdkContextGenerator::addMatchTables(Util::JsonArray* tablesJson) {
+    for (auto t : tables) {
+        auto tbl = t->to<IR::P4Table>();
+        auto tableAttr = ::get(tableAttrmap, tbl->name.originalName);
+        auto* tableJson = initTableCommonJson(tbl->name.originalName, tableAttr);
+        bool hasActionProfileSelector = false;
+        bool isMatchTable = tableAttr.tableType == "match";
+        const IR::P4Table *memberTable = nullptr;
+        if (tableAttr.tableType != "selection") {
+            if (isMatchTable) {
+                hasActionProfileSelector = addRefTables(tbl->name, &memberTable, tableJson);
+                auto match_keys = tbl->getKey();
+                if (match_keys) {
+                    auto* keyJson = new Util::JsonArray();
+                    int position = 0;
+                    for (auto matchKeyFromPrg : tableAttr.tableKeys) {
+                        addKeyField(keyJson, matchKeyFromPrg,
+                                    match_keys->keyElements.at(position),position);
+                        position++;
+                    }
+                    tableJson->emplace("match_key_fields", keyJson);
+                }
+            }
+            // If table implementation is action profile or action selector, all actions from member
+            // table should be output for the base table.
+            const IR::P4Table *table = nullptr;
+            if (hasActionProfileSelector) {
+                std::cout << "Reached hasActionProfileSelector\n" << std::endl;
+                table = memberTable;
+            } else {
+                std::cout << "Reached !hasActionProfileSelector\n" << std::endl;
+                table = tbl;
+            }
+
+            setActionAttributes(table);
+            setDefaultActionHandle(table);
+
+            tableAttr = ::get(tableAttrmap, table->name.originalName);
+            tableJson->emplace("actions", addActions(table, tableAttr.controlName, isMatchTable));
+            if (isMatchTable) {
+                tableJson->emplace("match_attributes",
+                                    addMatchAttributes(table, tableAttr.controlName));
+            }
+            tableJson->emplace("default_action_handle", tableAttr.default_action_handle);
+        } else {
+            SelectionTable sel;
+            sel.setAttributes(tbl, tableAttrmap);
+            tableJson->emplace("max_n_groups", sel.max_n_groups);
+            tableJson->emplace("max_n_members_per_group", sel.max_n_members_per_group);
+            tableJson->emplace("bound_to_action_data_table_handle",
+                               sel.bound_to_action_data_table_handle);
         }
-        out << "]\n";
-        add_space(out, 16); out << "}";
-        first = false;
+      tablesJson->append(tableJson);
     }
-    if (!first) out << "\n";
-    add_space(out, 12); out << "],\n";
-    if (default_action_handle) {
-        add_space(out, 12); out << "\"default_action_handle\": " << default_action_handle << "\n";
-    }
-    add_space(out, 8); out << "}";
 }
+
+const Util::JsonObject* DpdkContextGenerator::genContextJsonObject() {
+    auto* json = new Util::JsonObject();
+    auto* tablesJson = new Util::JsonArray();
+    struct TopLevelCtxt tlinfo;
+    tlinfo.initTopLevelCtxt(options);
+    json->emplace("program_name", tlinfo.progName);
+    json->emplace("build_date", tlinfo.buildDate);
+    json->emplace("compile_command", tlinfo.compileCommand);
+    json->emplace("compiler_version", tlinfo.compilerVersion);
+    json->emplace("schema_version", cstring("0.1"));
+    json->emplace("target", cstring("DPDK"));
+    json->emplace("tables", tablesJson);
+    addMatchTables(tablesJson);
+    return json;
 }
+
+void DpdkContextGenerator::serializeContextJson(std::ostream* destination) {
+    CollectTablesAndSetAttributes();
+    auto* json = genContextJsonObject();
+    json->serialize(*destination);
+    destination->flush();
+}
+
+}  // namespace DPDK

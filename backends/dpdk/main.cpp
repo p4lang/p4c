@@ -142,6 +142,5 @@ int main(int argc, char *const argv[]) {
             out->flush();
         }
     }
-
     return ::errorCount() > 0;
 }

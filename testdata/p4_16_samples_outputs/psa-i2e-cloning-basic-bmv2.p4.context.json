@@ -1,7 +1,0 @@
-{
-    "program_name": "psa-i2e-cloning-basic-bmv2",
-    "compiler_version": "0.1",
-    "schema_version": "0.1",
-    "target": "DPDK",
-    "tables": []
-}

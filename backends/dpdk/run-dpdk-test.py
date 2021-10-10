@@ -46,8 +46,6 @@ class Options(object):
         self.runDebugger_skip = 0
         self.generateP4Runtime = False
         self.generateBfRt = False
-        self.generateContext = False
-        self.testContextJson = True
 
 def usage(options):
     name = options.binary
@@ -62,7 +60,6 @@ def usage(options):
     print("          -a \"args\": pass args to the compiler")
     print("          --p4runtime: generate P4Info message in text format")
     print("          --bfrt: generate BfRt message in text format")
-    print("          --context: generate context json")
 
 
 def isError(p4filename):
@@ -196,7 +193,6 @@ def process_file(options, argv):
     p4runtimeFile = os.path.join(tmpdir, basename + ".p4info.txt")
     p4runtimeEntriesFile = os.path.join(tmpdir, basename + ".entries.txt")
     bfRtSchemaFile = os.path.join(tmpdir, basename + ".bfrt.json")
-    contextFile = os.path.join(tmpdir, basename + ".context.json")
     def getArch(path):
         v1Pattern = re.compile('include.*v1model\.p4')
         psaPattern = re.compile('include.*psa\.p4')
@@ -222,10 +218,6 @@ def process_file(options, argv):
             args.extend(["--p4runtime-entries-files", p4runtimeEntriesFile])
         if options.generateBfRt:
             args.extend(["--bf-rt-schema", bfRtSchemaFile])
-        if options.generateContext:
-            args.extend(["--context", contextFile])
-        if options.testContextJson:
-            args.extend(["--testcontextJson"])
 
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
         args.extend(["--std", "p4-14"])
@@ -309,8 +301,6 @@ def main(argv):
             options.generateP4Runtime = True
         elif argv[0] == "--bfrt":
             options.generateBfRt = True
-        elif argv[0] == "--context":
-            options.generateContext = True
         else:
             print("Unknown option ", argv[0], file=sys.stderr)
             usage(options)

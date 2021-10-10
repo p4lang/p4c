@@ -30,11 +30,6 @@ class DpdkOptions : public CompilerOptions {
     cstring ctxtFile = "";
     // read from json
     bool loadIRFromJson = false;
-    // This flag is used only within the regression test script to avoid generating
-    // build date and compiler command line in the context JSON as these fields are
-    // different on each compiler run and the comparison of generated context JSON with
-    // reference context JSON files would always fail for these fields.
-    bool testcontextJson = false;
     // Compilation command line
     static cstring DpdkCompCmd;
 
@@ -57,10 +52,6 @@ class DpdkOptions : public CompilerOptions {
         registerOption("--context", "file",
                 [this](const char *arg) { ctxtFile = arg; return true; },
                 "Generate and write context JSON to the specified file");
-        registerOption("--testcontextJson", nullptr,
-                [this](const char *) { testcontextJson = true; return true; },
-                "Avoid generating build date and compile command in context JSON,"\
-                "to avoid failures in comparison with reference outputs");
         registerOption("--fromJSON", "file",
                 [this](const char* arg) { loadIRFromJson = true; file = arg; return true; },
                 "Use IR representation from JsonFile dumped previously,"\
