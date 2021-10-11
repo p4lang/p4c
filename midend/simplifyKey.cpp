@@ -58,12 +58,12 @@ const IR::Node* DoSimplifyKey::postorder(IR::KeyElement* element) {
     auto type = typeMap->getType(element->expression, true);
     auto decl = new IR::Declaration_Variable(tmp, type, nullptr);
     insertions->declarations.push_back(decl);
-    auto left = new IR::PathExpression(tmp);
+    auto left = new IR::PathExpression(type, new IR::Path(tmp));
     auto right = element->expression;
     auto assign = new IR::AssignmentStatement(element->expression->srcInfo, left, right);
     insertions->statements.push_back(assign);
 
-    auto path = new IR::PathExpression(tmp);
+    auto path = new IR::PathExpression(type, new IR::Path(tmp));
     // This preserves annotations on the key
     element->expression = path;
     LOG2("Created new key expression " << element);
