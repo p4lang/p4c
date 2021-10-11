@@ -13,6 +13,7 @@ namespace P4 {
 /// Otherwise it substitutes index of a header stack in all occuarence of @a arrayIndex.
 class HSIndexFindOrTransform : public Transform {
     friend class HSIndexSimplifier;
+    IR::IndexedVector<IR::StatOrDecl> *components;
     const IR::ArrayIndex* arrayIndex;
     const IR::ArrayIndex* tmpArrayIndex;
     bool isFinder;
@@ -20,8 +21,9 @@ class HSIndexFindOrTransform : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
  public:
-    HSIndexFindOrTransform(ReferenceMap* refMap,TypeMap* typeMap) :
-        arrayIndex(nullptr), tmpArrayIndex(nullptr), isFinder(true),
+    HSIndexFindOrTransform(IR::IndexedVector<IR::StatOrDecl> *components,
+                           ReferenceMap* refMap,TypeMap* typeMap) :
+        components(components), arrayIndex(nullptr), tmpArrayIndex(nullptr), isFinder(true),
         refMap(refMap), typeMap(typeMap) {}
     HSIndexFindOrTransform(const IR::ArrayIndex* arrayIndex, int index) :
         arrayIndex(arrayIndex), tmpArrayIndex(nullptr), isFinder(false), index(index), 
@@ -36,10 +38,11 @@ class HSIndexFindOrTransform : public Transform {
 class HSIndexSimplifier : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
-    const IR::Declaration_Variable* newDeclaration;
+    IR::IndexedVector<IR::StatOrDecl> *components;
  public:
-    HSIndexSimplifier(ReferenceMap* refMap, TypeMap* typeMap) :
-        refMap(refMap), typeMap(typeMap), newDeclaration(nullptr) {}
+    HSIndexSimplifier(ReferenceMap* refMap, TypeMap* typeMap,
+        IR::IndexedVector<IR::StatOrDecl> *components = nullptr) :
+        refMap(refMap), typeMap(typeMap), components(components) {}
     IR::Node* preorder(IR::IfStatement* ifStatement) override;
     IR::Node* preorder(IR::AssignmentStatement* assignmentStatement) override;
     IR::Node* preorder(IR::BlockStatement* blockStatement) override;

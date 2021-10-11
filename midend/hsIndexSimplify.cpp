@@ -13,19 +13,21 @@ const IR::Node* HSIndexFindOrTransform::postorder(IR::ArrayIndex* curArrayIndex)
     if (isFinder) {
         if (arrayIndex == nullptr && !curArrayIndex->right->is<IR::Constant>()) {
             // If index is an expression then create new variable.
-            if (blockComponents != nullptr && (curArrayIndex->right->is<IR::Operation_Ternary>() ||
+            if ((curArrayIndex->right->is<IR::Operation_Ternary>() ||
                 curArrayIndex->right->is<IR::Operation_Binary>() ||
                 (curArrayIndex->right->is<IR::Operation_Unary>() && 
                     !curArrayIndex->right->is<IR::Member>()))) {
                 // Generate new temporary variable.
-                auto* newIndex = new IR::Declaration_Variable(curArrayIndex->right->srcInfo,
-                    IR::ID(std::string("hsiVar")+std::to_string(blockComponents->size())),
+                auto* newDeclaration = new IR::Declaration_Variable(curArrayIndex->right->srcInfo,
+                    IR::ID(std::string("hsiVar")+std::to_string(components->size())),
                     curArrayIndex->right->type);
-                blockComponents->insert(blockComponents->begin(), newIndex);
                 auto* newArray = curArrayIndex->clone();
-                newArray->right = new IR::PathExpression(newIndex->srcInfo,
+                auto* pathExpr = new IR::PathExpression(newDeclaration->srcInfo,
                                     curArrayIndex->right->type,
-                                    new IR::Path(newIndex->srcInfo, newIndex->name));
+                                    new IR::Path(newDeclaration->srcInfo, newDeclaration->name));
+                newArray->right = pathExpr;
+                refMap->setDeclaration(pathExpr->path, newDeclaration);
+                typeMap->setType(pathExpr->path, curArrayIndex->right->type);
                 tmpArrayIndex = newArray;
             }
             arrayIndex = curArrayIndex;
@@ -53,7 +55,7 @@ size_t HSIndexFindOrTransform::getArraySize() {
 
 IR::Node* HSIndexSimplifier::eliminateArrayIndexes(IR::Statement* statement) {
     // Check non-concrete array indexes.
-    HSIndexFindOrTransform aiFinder(blockComponents);
+    HSIndexFindOrTransform aiFinder(components, refMap, typeMap);
     const IR::Node* updatedStatement = nullptr;
     const IR::Statement* elseBody = nullptr;
     auto* curIf = statement->to<IR::IfStatement>();
@@ -110,10 +112,10 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(IR::Statement* statement) {
     if (assigment == nullptr) {
         return result;
     } else {
-        IR::IndexedVector<IR::StatOrDecl> components;
-        components.push_back(assigment);
-        components.push_back(result);
-        return new IR::BlockStatement(components);
+        IR::IndexedVector<IR::StatOrDecl> newComponents;
+        newComponents.push_back(assigment);
+        newComponents.push_back(result);
+        return new IR::BlockStatement(newComponents);
     }
 }
 
@@ -122,20 +124,19 @@ IR::Node* HSIndexSimplifier::preorder(IR::AssignmentStatement* assignmentStateme
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::BlockStatement* blockStatement) {
-    HSIndexSimplifier hsSimplifier;
     IR::IndexedVector<IR::StatOrDecl> newComponents;
-    hsSimplifier.blockComponents = &newComponents;
+    HSIndexSimplifier hsSimplifier(refMap, typeMap, &newComponents);
+    auto* newBlock = blockStatement->clone();
     for (auto& component : blockStatement->components) {
         const auto* newComponent = component->apply(hsSimplifier)->to<IR::StatOrDecl>();
-        if (const auto* newBlock = newComponent->to<IR::BlockStatement>()) {
-            for (auto& blockComponent : newBlock->components) {
+        if (const auto* newComponentBlock = newComponent->to<IR::BlockStatement>()) {
+            for (auto& blockComponent : newComponentBlock->components) {
                 newComponents.push_back(blockComponent);
             }
         } else {
             newComponents.push_back(newComponent);
         }
     }
-    auto* newBlock = blockStatement->clone();
     newBlock->components = newComponents;
     return newBlock;
 }
@@ -160,7 +161,8 @@ IR::Node* HSIndexSimplifier::preorder(IR::MethodCallStatement* methodCallStateme
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::SelectExpression* selectExpression) {
-    HSIndexFindOrTransform aiFinder(blockComponents);
+    IR::IndexedVector<IR::StatOrDecl> components;
+    HSIndexFindOrTransform aiFinder(&components, refMap, typeMap);
     selectExpression->apply(aiFinder);
     if (aiFinder.arrayIndex != nullptr)
         ::warning("ParsersUnroll class should be used for elimination of %1%", selectExpression);
