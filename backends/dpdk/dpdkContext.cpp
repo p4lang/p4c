@@ -230,7 +230,7 @@ DpdkContextGenerator::addMatchAttributes(const IR::P4Table*table, const cstring 
             int index = 0;
             int position = 0;
             for (auto param : *(attr.params)) {
-                //TODO Handle other types of parameters
+                // TODO Handle other types of parameters
                 if (param->type->is<IR::Type_Bits>()) {
                     addImmediateField(immFldArray, param->name.originalName,
                                       index/8, param->type->width_bits());
