@@ -136,7 +136,6 @@ class DpdkContextGenerator : public Inspector {
                          refmap(refmap), typemap(typemap),
                          structure(structure), options(options) {}
 
-    bool preorder(const IR::P4Program *p);
     unsigned int getNewTableHandle();
     unsigned int getNewActionHandle();
     void serializeContextJson(std::ostream* destination);

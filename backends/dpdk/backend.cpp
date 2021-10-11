@@ -43,6 +43,8 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
 
     std::set<const IR::P4Table*> invokedInKey;
     auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure);
+    auto genContextJson = new DpdkContextGenerator(refMap, typeMap, &structure, options);
+
     PassManager simplify = {
         new DpdkArchFirst(),
         new P4::EliminateTypedef(refMap, typeMap),
@@ -84,7 +86,16 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new CollectProgramStructure(refMap, typeMap, &structure),
         new InspectDpdkProgram(refMap, typeMap, &structure),
         new DpdkArchLast(),
-        new DpdkContextGenerator(refMap, typeMap, &structure, options),
+        new VisitFunctor([this, genContextJson] {
+            // Serialize context json object into user specified file
+            if (!options.ctxtFile.isNullOrEmpty()) {
+                std::ostream *out = openFile(options.ctxtFile, false);
+                if (out != nullptr) {
+                    genContextJson->serializeContextJson(out);
+                }
+                out->flush();
+            }
+        }),
         // convert to assembly program
         convertToDpdk,
     };

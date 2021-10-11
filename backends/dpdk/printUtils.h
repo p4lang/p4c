@@ -33,10 +33,7 @@ cstring toStr(const IR::Type *const);
 // string in desired format. For example, for ExpressionValue, it returns
 // toStr(ExpressionValue->expression)
 cstring toStr(const IR::PropertyValue *const);
-
 cstring toStr(const IR::Constant *const c);
-
-
 cstring toDecimal(const IR::Constant*const c);
 
 cstring toStr(const IR::BoolLiteral *const b);
@@ -45,8 +42,4 @@ cstring toStr(const IR::PathExpression *const p);
 
 cstring toStr(const IR::TypeNameExpression *const p);
 cstring toStr(const IR::MethodCallExpression *const m);
-cstring toStr(const IR::Expression *const exp);
-cstring toStr(const IR::Type *const type);
-cstring toStr(const IR::PropertyValue *const property);
-
 }// namespace DPDK

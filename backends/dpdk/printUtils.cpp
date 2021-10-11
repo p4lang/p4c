@@ -16,22 +16,6 @@ limitations under the License.
 #include "printUtils.h"
 
 namespace DPDK {
-// this function takes different subclass of Expression and translate it into
-// string in desired format. For example, for PathExpression, it returns
-// PathExpression->path->name For Member, it returns
-// toStr(Member->expr).Member->member
-cstring toStr(const IR::Expression *const);
-
-// this function takes different subclass of Type and translate it into string
-// in desired format. For example, for Type_Boolean, it returns bool For
-// Type_Bits, it returns bit_<bit_width>
-cstring toStr(const IR::Type *const);
-
-// this function takes different subclass of PropertyValue and translate it into
-// string in desired format. For example, for ExpressionValue, it returns
-// toStr(ExpressionValue->expression)
-cstring toStr(const IR::PropertyValue *const);
-
 cstring toStr(const IR::Constant *const c) {
     std::ostringstream out;
     out << "0x" << std::hex << c->value;

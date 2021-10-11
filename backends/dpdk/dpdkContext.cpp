@@ -32,19 +32,6 @@ unsigned int DpdkContextGenerator::getNewActionHandle() {
     return ACTION_HANDLE_PREFIX | newActionHandle++;
 }
 
-
-bool DpdkContextGenerator::preorder(const IR::P4Program * /*p*/) {
-   // Serialize context json object into user specified file
-    if (!options.ctxtFile.isNullOrEmpty()) {
-        std::ostream *out = openFile(options.ctxtFile, false);
-        if (out != nullptr) {
-            serializeContextJson(out);
-        }
-        out->flush();
-    }
-    return false;
-}
-
 // This function collects all tables in a vector and sets the table attributes required
 // by context json into a map.
 void DpdkContextGenerator::CollectTablesAndSetAttributes() {
@@ -243,10 +230,13 @@ DpdkContextGenerator::addMatchAttributes(const IR::P4Table*table, const cstring 
             int index = 0;
             int position = 0;
             for (auto param : *(attr.params)) {
-                addImmediateField(immFldArray, param->name.originalName,
-                                  index/8, param->type->width_bits());
-                index += param->type->width_bits();
-                position++;
+                //TODO Handle other types of parameters
+                if (param->type->is<IR::Type_Bits>()) {
+                    addImmediateField(immFldArray, param->name.originalName,
+                                      index/8, param->type->width_bits());
+                    index += param->type->width_bits();
+                    position++;
+                }
             }
         }
         oneAction->emplace("immediate_fields",immFldArray);
@@ -383,10 +373,8 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray* tablesJson) {
             // table should be output for the base table.
             const IR::P4Table *table = nullptr;
             if (hasActionProfileSelector) {
-                std::cout << "Reached hasActionProfileSelector\n" << std::endl;
                 table = memberTable;
             } else {
-                std::cout << "Reached !hasActionProfileSelector\n" << std::endl;
                 table = tbl;
             }
 

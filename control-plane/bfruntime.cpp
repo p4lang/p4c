@@ -563,12 +563,7 @@ BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table& table,
         auto* spec = new Util::JsonObject();
         const auto& pre = action->preamble();
         spec->emplace("id", pre.id());
-        /* NoAction is not prefixed with the control block name */
-        if (pre.name().find(".NoAction") != std::string::npos) {
-            spec->emplace("name", "NoAction");
-        } else {
-            spec->emplace("name", pre.name());
-        }
+        spec->emplace("name", pre.name());
         switch (action_ref.scope()) {
             case p4configv1::ActionRef::TABLE_AND_DEFAULT:
                 spec->emplace("action_scope", "TableAndDefault");
