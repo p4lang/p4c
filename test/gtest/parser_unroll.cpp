@@ -311,4 +311,11 @@ TEST_F(P4CParserUnroll, t1_Cond) {
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size());
 }
 
+TEST_F(P4CParserUnroll, bool2bitCast) {
+    auto parsers =  loadExample("issue361-bmv2.p4");
+    ASSERT_TRUE(parsers.first);
+    ASSERT_TRUE(parsers.second);
+    ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size());
+}
+
 }  // namespace Test
