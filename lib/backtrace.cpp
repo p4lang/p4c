@@ -43,12 +43,12 @@ void backtrace_fill_stacktrace(std::string &msg, void *const*backtrace, int size
 #endif
 }
 
-namespace std {
-
 #ifdef __GLIBC__
 /* DANGER -- overrides for glibc++ exception throwers to include a stack trace.
  * correct functions depends on library internals, so may not work on some versions
  * and will fail with non-GNU libc++. These function are declared in bits/functexcept.h. */
+
+namespace std {
 
 void __throw_bad_alloc() {
     throw backtrace_exception<bad_alloc>();
