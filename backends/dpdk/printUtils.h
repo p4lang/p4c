@@ -36,15 +36,6 @@ cstring toStr(const IR::Type *const);
 // string in desired format. For example, for ExpressionValue, it returns
 // toStr(ExpressionValue->expression)
 cstring toStr(const IR::PropertyValue *const);
-cstring toStr(const IR::Constant *const c);
-cstring toDecimal(const IR::Constant*const c);
-
-cstring toStr(const IR::BoolLiteral *const b);
-cstring toStr(const IR::Member *const m);
-cstring toStr(const IR::PathExpression *const p);
-
-cstring toStr(const IR::TypeNameExpression *const p);
-cstring toStr(const IR::MethodCallExpression *const m);
 
 class ConvertExprToString : public Inspector {
 public:
@@ -59,8 +50,20 @@ public:
     bool preorder(const IR::ArrayIndex *e);
 };
 
+class ConvertTypeToString : public Inspector {
+public:
+    cstring str;
+    bool preorder(const IR::Type_Specialized *type);
+    bool preorder(const IR::Type_Name *type);
+    bool preorder(const IR::Type_Boolean *type);
+    bool preorder(const IR::Type_Bits *type);
+};
 
-
+class ConvertPropertyValToString : public Inspector {
+public:
+    cstring str;
+    bool preorder(const IR::ExpressionValue *property);
+};
 }// namespace DPDK
 
 #endif

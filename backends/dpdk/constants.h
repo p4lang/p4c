@@ -18,10 +18,10 @@ limitations under the License.
 #define BACKENDS_DPDK_CONSTANTS_H_
 
 /* Unique handle for action and table */
-#define TABLE_HANDLE_PREFIX 0x00010000
-#define ACTION_HANDLE_PREFIX 0x00020000
+const unsigned table_handle_prefix = 0x00010000;
+const unsigned action_handle_prefix = 0x00020000;
 
 // Default values 
-#define DPDK_DEFAULT_TABLE_SIZE 65536
+const unsigned dpdk_default_table_size = 65536;
 
 #endif

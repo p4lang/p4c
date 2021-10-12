@@ -24,12 +24,12 @@ unsigned DpdkContextGenerator::newActionHandle = 0;
 
 // Returns a unique ID for table
 unsigned int DpdkContextGenerator::getNewTableHandle() {
-    return TABLE_HANDLE_PREFIX | newTableHandle++;
+    return table_handle_prefix | newTableHandle++;
 }
 
 // Returns a unique ID for action
 unsigned int DpdkContextGenerator::getNewActionHandle() {
-    return ACTION_HANDLE_PREFIX | newActionHandle++;
+    return action_handle_prefix | newActionHandle++;
 }
 
 // This function collects all tables in a vector and sets the table attributes required
@@ -51,7 +51,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 tblAttr.controlName = control->name.originalName;
                 tblAttr.tableHandle = getNewTableHandle();
                 auto size = tbl->properties->getProperty("size");
-                tblAttr.size = DPDK_DEFAULT_TABLE_SIZE;
+                tblAttr.size = dpdk_default_table_size;
                 if (size)
                    tblAttr.size = size->value->to<IR::Constant>()->asUnsigned();
                 auto hidden = tbl->annotations->getSingle(IR::Annotation::hiddenAnnotation);
@@ -236,6 +236,8 @@ DpdkContextGenerator::addMatchAttributes(const IR::P4Table*table, const cstring 
                                       index/8, param->type->width_bits());
                     index += param->type->width_bits();
                     position++;
+                } else {
+                    BUG("Unsupported parameter type %1%", param->type);
                 }
             }
         }
@@ -293,6 +295,8 @@ const IR::P4Table * table, const cstring controlName, bool isMatch) {
                                        param->type->width_bits(), position, index/8);
                         position++;
                         index += param->type->width_bits();
+                    } else {
+                        BUG("Unsupported parameter type %1%", param->type);
                     }
                 }
             }

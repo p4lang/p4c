@@ -16,69 +16,45 @@ limitations under the License.
 #include "printUtils.h"
 
 namespace DPDK {
-cstring toStr(const IR::Constant *const c) {
-    std::ostringstream out;
-    out << "0x" << std::hex << c->value;
-    return out.str();
-}
-
-cstring toDecimal(const IR::Constant*const c) {
-    std::ostringstream out;
-    out << c->value;
-    return out.str();
-}
-
-cstring toStr(const IR::BoolLiteral *const b) {
-    std::ostringstream out;
-    out << b->value;
-    return out.str();
-}
-
-cstring toStr(const IR::Member *const m) {
-    std::ostringstream out;
-    out << m->member.originalName;
-    return toStr(m->expr) + "." + out.str();
-}
-
-cstring toStr(const IR::PathExpression *const p) { return p->path->name; }
-
-cstring toStr(const IR::TypeNameExpression *const p) {
-    return p->typeName->path->name;
-}
-
-cstring toStr(const IR::MethodCallExpression *const m) {
-    if (auto path = m->method->to<IR::PathExpression>()) {
-        return path->path->name.toString();
-    } else {
-        ::error("%1% is not a PathExpression", m->toString());
-    }
-    return "";
-}
 
 bool ConvertExprToString::preorder(const IR::Constant *e) {
-    str = toStr(e);
+    std::ostringstream out;
+    out << "0x" << std::hex << e->value;
+    str = out.str();
     return false;
 }
 
 bool ConvertExprToString::preorder(const IR::BoolLiteral *e) {
-    str = toStr(e);
+    std::ostringstream out;
+    out << e->value;
+    str = out.str();
     return false;
 }
 
 bool ConvertExprToString::preorder(const IR::Member *e){
-    str = toStr(e);
+    std::ostringstream out;
+    out << e->member.originalName;
+    str = toStr(e->expr) + "." + out.str();
     return false;
 }
+
 bool ConvertExprToString::preorder(const IR::PathExpression *e) {
-    str = toStr(e);
+    str = e->path->name;
     return false;
 }
+
 bool ConvertExprToString::preorder(const IR::TypeNameExpression *e) {
-    str = toStr(e);
+    str = e->typeName->path->name;
     return false;
 }
+
 bool ConvertExprToString::preorder(const IR::MethodCallExpression *e) {
-    str = toStr(e);
+    str = "";
+    if (auto path = e->method->to<IR::PathExpression>()) {
+        str = path->path->name.toString();
+    } else {
+        ::error("%1% is not a PathExpression", e->toString());
+    }
     return false;
 }
 
@@ -89,7 +65,9 @@ bool ConvertExprToString::preorder(const IR::Cast *e) {
 
 bool ConvertExprToString::preorder(const IR::ArrayIndex *e) {
     if (auto cst = e->right->to<IR::Constant>()) {
-        str = toStr(e->left) + "_" + toDecimal(cst);
+        std::ostringstream out;
+        out << cst->value;
+        str = toStr(e->left) + "_" + out.str();
     } else {
         ::error("%1% is not a constant", e->right);
     }
@@ -102,29 +80,42 @@ cstring toStr(const IR::Expression *const exp) {
     return exprToString->str;
 }
 
-cstring toStr(const IR::Type *const type) {
-    if (type->is<IR::Type_Boolean>())
-        return "bool";
-    else if (auto b = type->to<IR::Type_Bits>()) {
-        std::ostringstream out;
-        out << "bit_" << b->width_bits();
-        return out.str();
-    } else if (auto n = type->to<IR::Type_Name>()) {
-        return n->path->name;
-    } else if (auto n = type->to<IR::Type_Specialized>()) {
-        return n->baseType->path->name.name;
-    } else {
-        std::cerr << type->node_type_name() << std::endl;
-        BUG("not implemented type");
-    }
-}
-cstring toStr(const IR::PropertyValue *const property) {
-    if (auto expr_value = property->to<IR::ExpressionValue>()) {
-        return toStr(expr_value->expression);
-    } else {
-        std::cerr << property->node_type_name() << std::endl;
-        BUG("not implemneted property value");
-    }
+bool ConvertTypeToString::preorder(const IR::Type_Boolean * /*type*/) {
+    str = "bool";
+    return false;
 }
 
+bool ConvertTypeToString::preorder(const IR::Type_Bits *type) {
+    std::ostringstream out;
+    out << "bit_" << type->width_bits();
+    str = out.str();
+    return false;
+}
+
+bool ConvertTypeToString::preorder(const IR::Type_Name *type) {
+    str = type->path->name;
+    return false;
+}
+
+bool ConvertTypeToString::preorder(const IR::Type_Specialized *type) {
+    str = type->baseType->path->name.name;
+    return false;
+}
+
+cstring toStr(const IR::Type *const type) {
+    auto typeToString = new ConvertTypeToString;
+    type->apply(*typeToString);
+    return typeToString->str;
+}
+
+bool ConvertPropertyValToString::preorder(const IR::ExpressionValue *property) {
+    str = toStr(property->expression);
+    return false;
+}
+
+cstring toStr(const IR::PropertyValue *const property) {
+    auto propToString = new ConvertPropertyValToString;
+    property->apply(*propToString);
+    return propToString->str;
+}
 } // namespace DPDK
