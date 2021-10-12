@@ -733,7 +733,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
                 const IR::Constant* constant;
                 auto resConst = clone->expr->to<IR::Constant>();
                 if (resConst) {
-                   (resConst->value) ? new IR::Constant(
+                   constant = (resConst->value) ? new IR::Constant(
                        new IR::Type_Bits(1, false), 1) :
                        new IR::Constant(
                            new IR::Type_Bits(1, false), 0);
@@ -758,7 +758,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
                 const IR::Constant* constant;
                 auto boolLoteral = clone->expr->to<IR::BoolLiteral>();
                 if (boolLoteral) {
-                    (boolLoteral->value) ? new IR::Constant(
+                    constant = (boolLoteral->value) ? new IR::Constant(
                         new IR::Type_Bits(1, false), 1) :
                         new IR::Constant(
                             new IR::Type_Bits(1, false), 0);
