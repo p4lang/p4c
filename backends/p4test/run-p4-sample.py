@@ -178,7 +178,7 @@ def check_generated_files(options, tmpdir, expecteddir):
         produced = tmpdir + "/" + file
         expected = expecteddir + "/" + file
         # Only create files when explicitly asked to do so
-        if not os.path.isfile(expected) and options.replace:
+        if not os.path.isfile(expected) or options.replace:
             if options.verbose:
                 print("Expected file does not exist; creating", expected)
             shutil.copy2(produced, expected)
