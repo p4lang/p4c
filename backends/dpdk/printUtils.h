@@ -13,6 +13,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#ifndef BACKENDS_DPDK_PRINTUTILS_H_
+#define BACKENDS_DPDK_PRINTUTILS_H_
+
 #include "ir/ir.h"
 #include "ir/dbprint.h"
 #include <iostream>
@@ -42,4 +45,23 @@ cstring toStr(const IR::PathExpression *const p);
 
 cstring toStr(const IR::TypeNameExpression *const p);
 cstring toStr(const IR::MethodCallExpression *const m);
+
+class ConvertExprToString : public Inspector {
+public:
+    cstring str;
+    bool preorder(const IR::Constant *c);
+    bool preorder(const IR::BoolLiteral *b);
+    bool preorder(const IR::Member *m);
+    bool preorder(const IR::PathExpression *p);
+    bool preorder(const IR::TypeNameExpression *p);
+    bool preorder(const IR::MethodCallExpression *m);
+    bool preorder(const IR::Cast *e);
+    bool preorder(const IR::ArrayIndex *e);
+};
+
+
+
 }// namespace DPDK
+
+#endif
+// BACKENDS_DPDK_PRINTUTILS_H_

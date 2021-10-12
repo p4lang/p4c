@@ -55,30 +55,51 @@ cstring toStr(const IR::MethodCallExpression *const m) {
     return "";
 }
 
+bool ConvertExprToString::preorder(const IR::Constant *e) {
+    str = toStr(e);
+    return false;
+}
+
+bool ConvertExprToString::preorder(const IR::BoolLiteral *e) {
+    str = toStr(e);
+    return false;
+}
+
+bool ConvertExprToString::preorder(const IR::Member *e){
+    str = toStr(e);
+    return false;
+}
+bool ConvertExprToString::preorder(const IR::PathExpression *e) {
+    str = toStr(e);
+    return false;
+}
+bool ConvertExprToString::preorder(const IR::TypeNameExpression *e) {
+    str = toStr(e);
+    return false;
+}
+bool ConvertExprToString::preorder(const IR::MethodCallExpression *e) {
+    str = toStr(e);
+    return false;
+}
+
+bool ConvertExprToString::preorder(const IR::Cast *e) {
+    str = toStr(e->expr);
+    return false;
+}
+
+bool ConvertExprToString::preorder(const IR::ArrayIndex *e) {
+    if (auto cst = e->right->to<IR::Constant>()) {
+        str = toStr(e->left) + "_" + toDecimal(cst);
+    } else {
+        ::error("%1% is not a constant", e->right);
+    }
+    return false;
+}
+
 cstring toStr(const IR::Expression *const exp) {
-    if (auto e = exp->to<IR::Constant>())
-        return toStr(e);
-    else if (auto e = exp->to<IR::BoolLiteral>())
-        return toStr(e);
-    else if (auto e = exp->to<IR::Member>())
-        return toStr(e);
-    else if (auto e = exp->to<IR::PathExpression>())
-        return toStr(e);
-    else if (auto e = exp->to<IR::TypeNameExpression>())
-        return toStr(e);
-    else if (auto e = exp->to<IR::MethodCallExpression>())
-        return toStr(e);
-    else if (auto e = exp->to<IR::Cast>())
-        return toStr(e->expr);
-    else if (auto e = exp->to<IR::ArrayIndex>()) {
-        if (auto cst = e->right->to<IR::Constant>()) {
-            return toStr(e->left) + "_" + toDecimal(cst);
-        } else {
-            ::error("%1% is not a constant", e->right);
-        }
-    } else
-        BUG("%1% not implemented", exp);
-    return "";
+    auto exprToString = new ConvertExprToString;
+    exp->apply(*exprToString);
+    return exprToString->str;
 }
 
 cstring toStr(const IR::Type *const type) {
