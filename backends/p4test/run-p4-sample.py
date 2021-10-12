@@ -177,14 +177,16 @@ def check_generated_files(options, tmpdir, expecteddir):
             print("Checking", file)
         produced = tmpdir + "/" + file
         expected = expecteddir + "/" + file
-        # Only create files when explicitly asked to do so
+
         if not os.path.isfile(expected) or options.replace:
+            # Only create files when explicitly asked to do so
             if options.verbose:
                 print("Expected file does not exist; creating", expected)
             shutil.copy2(produced, expected)
-        else:
+        elif not os.path.isfile(expected):
+            # The file is missing and we do not replace. This is an error.
             print(
-                "Missing reference for file %s. Please rerun the test with the -f option turned on." % file)
+                "Missing reference for file %s. Please rerun the test with the -f option turned on." % expected)
             return FAILURE
         result = compare_files(
             options, produced, expected, file[-7:] == "-stderr")
