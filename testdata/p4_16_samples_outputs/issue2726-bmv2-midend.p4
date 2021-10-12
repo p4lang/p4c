@@ -52,37 +52,61 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
+    int<8> hsiVar0;
+    int<8> hsiVar1;
+    int<8> hsiVar2;
+    int<8> hsiVar3;
+    @hidden action issue2726bmv2l87() {
+        hdr.pool[0].val = hdr.pool[1].val + 8w1;
+    }
+    @hidden action issue2726bmv2l87_0() {
+        hdr.pool[1].val = hdr.pool[1].val + 8w1;
+    }
+    @hidden action issue2726bmv2l87_1() {
+        hdr.pool[2].val = hdr.pool[1].val + 8w1;
+    }
     @hidden action issue2726bmv2l81() {
         meta.counter = meta.counter + 8s1;
         hdr.vector[0].e = hdr.pool[1].val + 8w1;
-        if ((int<8>)hdr.ml.idx == 8s0) {
-            hdr.pool[0].val = hdr.pool[1].val + 8w1;
-        } else if ((int<8>)hdr.ml.idx == 8s1) {
-            hdr.pool[1].val = hdr.pool[1].val + 8w1;
-        } else if ((int<8>)hdr.ml.idx == 8s2) {
-            hdr.pool[2].val = hdr.pool[1].val + 8w1;
-        }
-        if ((int<8>)hdr.ml.idx == 8s0) {
-            hdr.pool[0].base2 = hdr.vector[0].e;
-        } else if ((int<8>)hdr.ml.idx == 8s1) {
-            hdr.pool[1].base2 = hdr.vector[0].e;
-        } else if ((int<8>)hdr.ml.idx == 8s2) {
-            hdr.pool[2].base2 = hdr.vector[0].e;
-        }
-        if ((int<8>)hdr.ml.idx == 8s0) {
-            hdr.vector[1].e = hdr.pool[0].base0;
-        } else if ((int<8>)hdr.ml.idx == 8s1) {
-            hdr.vector[1].e = hdr.pool[1].base0;
-        } else if ((int<8>)hdr.ml.idx == 8s2) {
-            hdr.vector[1].e = hdr.pool[2].base0;
-        }
-        if ((int<8>)hdr.ml.idx == 8s0) {
-            hdr.pool[0].base0 = hdr.pool[0].base1 + 8w1;
-        } else if ((int<8>)hdr.ml.idx == 8s1) {
-            hdr.pool[1].base0 = hdr.pool[1].base1 + 8w1;
-        } else if ((int<8>)hdr.ml.idx == 8s2) {
-            hdr.pool[2].base0 = hdr.pool[2].base1 + 8w1;
-        }
+        hsiVar0 = (int<8>)hdr.ml.idx;
+    }
+    @hidden action issue2726bmv2l88() {
+        hdr.pool[0].base2 = hdr.vector[0].e;
+    }
+    @hidden action issue2726bmv2l88_0() {
+        hdr.pool[1].base2 = hdr.vector[0].e;
+    }
+    @hidden action issue2726bmv2l88_1() {
+        hdr.pool[2].base2 = hdr.vector[0].e;
+    }
+    @hidden action issue2726bmv2l88_2() {
+        hsiVar1 = (int<8>)hdr.ml.idx;
+    }
+    @hidden action issue2726bmv2l90() {
+        hdr.vector[1].e = hdr.pool[0].base0;
+    }
+    @hidden action issue2726bmv2l90_0() {
+        hdr.vector[1].e = hdr.pool[1].base0;
+    }
+    @hidden action issue2726bmv2l90_1() {
+        hdr.vector[1].e = hdr.pool[2].base0;
+    }
+    @hidden action issue2726bmv2l90_2() {
+        hsiVar2 = (int<8>)hdr.ml.idx;
+    }
+    @hidden action issue2726bmv2l92() {
+        hdr.pool[0].base0 = hdr.pool[0].base1 + 8w1;
+    }
+    @hidden action issue2726bmv2l92_0() {
+        hdr.pool[1].base0 = hdr.pool[1].base1 + 8w1;
+    }
+    @hidden action issue2726bmv2l92_1() {
+        hdr.pool[2].base0 = hdr.pool[2].base1 + 8w1;
+    }
+    @hidden action issue2726bmv2l92_2() {
+        hsiVar3 = (int<8>)hdr.ml.idx;
+    }
+    @hidden action issue2726bmv2l93() {
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
     @hidden table tbl_issue2726bmv2l81 {
@@ -91,8 +115,136 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         }
         const default_action = issue2726bmv2l81();
     }
+    @hidden table tbl_issue2726bmv2l87 {
+        actions = {
+            issue2726bmv2l87();
+        }
+        const default_action = issue2726bmv2l87();
+    }
+    @hidden table tbl_issue2726bmv2l87_0 {
+        actions = {
+            issue2726bmv2l87_0();
+        }
+        const default_action = issue2726bmv2l87_0();
+    }
+    @hidden table tbl_issue2726bmv2l87_1 {
+        actions = {
+            issue2726bmv2l87_1();
+        }
+        const default_action = issue2726bmv2l87_1();
+    }
+    @hidden table tbl_issue2726bmv2l88 {
+        actions = {
+            issue2726bmv2l88_2();
+        }
+        const default_action = issue2726bmv2l88_2();
+    }
+    @hidden table tbl_issue2726bmv2l88_0 {
+        actions = {
+            issue2726bmv2l88();
+        }
+        const default_action = issue2726bmv2l88();
+    }
+    @hidden table tbl_issue2726bmv2l88_1 {
+        actions = {
+            issue2726bmv2l88_0();
+        }
+        const default_action = issue2726bmv2l88_0();
+    }
+    @hidden table tbl_issue2726bmv2l88_2 {
+        actions = {
+            issue2726bmv2l88_1();
+        }
+        const default_action = issue2726bmv2l88_1();
+    }
+    @hidden table tbl_issue2726bmv2l90 {
+        actions = {
+            issue2726bmv2l90_2();
+        }
+        const default_action = issue2726bmv2l90_2();
+    }
+    @hidden table tbl_issue2726bmv2l90_0 {
+        actions = {
+            issue2726bmv2l90();
+        }
+        const default_action = issue2726bmv2l90();
+    }
+    @hidden table tbl_issue2726bmv2l90_1 {
+        actions = {
+            issue2726bmv2l90_0();
+        }
+        const default_action = issue2726bmv2l90_0();
+    }
+    @hidden table tbl_issue2726bmv2l90_2 {
+        actions = {
+            issue2726bmv2l90_1();
+        }
+        const default_action = issue2726bmv2l90_1();
+    }
+    @hidden table tbl_issue2726bmv2l92 {
+        actions = {
+            issue2726bmv2l92_2();
+        }
+        const default_action = issue2726bmv2l92_2();
+    }
+    @hidden table tbl_issue2726bmv2l92_0 {
+        actions = {
+            issue2726bmv2l92();
+        }
+        const default_action = issue2726bmv2l92();
+    }
+    @hidden table tbl_issue2726bmv2l92_1 {
+        actions = {
+            issue2726bmv2l92_0();
+        }
+        const default_action = issue2726bmv2l92_0();
+    }
+    @hidden table tbl_issue2726bmv2l92_2 {
+        actions = {
+            issue2726bmv2l92_1();
+        }
+        const default_action = issue2726bmv2l92_1();
+    }
+    @hidden table tbl_issue2726bmv2l93 {
+        actions = {
+            issue2726bmv2l93();
+        }
+        const default_action = issue2726bmv2l93();
+    }
     apply {
         tbl_issue2726bmv2l81.apply();
+        if (hsiVar0 == 8s0) {
+            tbl_issue2726bmv2l87.apply();
+        } else if (hsiVar0 == 8s1) {
+            tbl_issue2726bmv2l87_0.apply();
+        } else if (hsiVar0 == 8s2) {
+            tbl_issue2726bmv2l87_1.apply();
+        }
+        tbl_issue2726bmv2l88.apply();
+        if (hsiVar1 == 8s0) {
+            tbl_issue2726bmv2l88_0.apply();
+        } else if (hsiVar1 == 8s1) {
+            tbl_issue2726bmv2l88_1.apply();
+        } else if (hsiVar1 == 8s2) {
+            tbl_issue2726bmv2l88_2.apply();
+        }
+        tbl_issue2726bmv2l90.apply();
+        if (hsiVar2 == 8s0) {
+            tbl_issue2726bmv2l90_0.apply();
+        } else if (hsiVar2 == 8s1) {
+            tbl_issue2726bmv2l90_1.apply();
+        } else if (hsiVar2 == 8s2) {
+            tbl_issue2726bmv2l90_2.apply();
+        }
+        tbl_issue2726bmv2l92.apply();
+        if (hsiVar3 == 8s0) {
+            tbl_issue2726bmv2l92_0.apply();
+        } else if (hsiVar3 == 8s1) {
+            tbl_issue2726bmv2l92_1.apply();
+        } else if (hsiVar3 == 8s2) {
+            tbl_issue2726bmv2l92_2.apply();
+        }
+        tbl_issue2726bmv2l93.apply();
     }
 }
 

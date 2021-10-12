@@ -45,11 +45,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tmp_1 = h.i.a;
     }
     @hidden action gauntlet_index_1bmv2l45() {
-        if (tmp_1 == 3w0) {
-            h.h[0].a = 32w1;
-        } else if (tmp_1 == 3w1) {
-            h.h[1].a = 32w1;
-        }
+        h.h[0].a = 32w1;
+    }
+    @hidden action gauntlet_index_1bmv2l45_0() {
+        h.h[1].a = 32w1;
     }
     @hidden table tbl_gauntlet_index_1bmv2l4 {
         actions = {
@@ -69,13 +68,23 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = gauntlet_index_1bmv2l45();
     }
+    @hidden table tbl_gauntlet_index_1bmv2l45_0 {
+        actions = {
+            gauntlet_index_1bmv2l45_0();
+        }
+        const default_action = gauntlet_index_1bmv2l45_0();
+    }
     apply {
         if (h.i.a > 3w1) {
             tbl_gauntlet_index_1bmv2l4.apply();
         } else {
             tbl_gauntlet_index_1bmv2l4_0.apply();
         }
-        tbl_gauntlet_index_1bmv2l45.apply();
+        if (tmp_1 == 3w0) {
+            tbl_gauntlet_index_1bmv2l45.apply();
+        } else if (tmp_1 == 3w1) {
+            tbl_gauntlet_index_1bmv2l45_0.apply();
+        }
     }
 }
 
