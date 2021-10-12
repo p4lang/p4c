@@ -178,7 +178,7 @@ def check_generated_files(options, tmpdir, expecteddir):
         produced = tmpdir + "/" + file
         expected = expecteddir + "/" + file
 
-        if not os.path.isfile(expected) or options.replace:
+        if options.replace:
             # Only create files when explicitly asked to do so
             if options.verbose:
                 print("Expected file does not exist; creating", expected)
