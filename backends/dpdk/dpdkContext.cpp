@@ -287,10 +287,13 @@ const IR::P4Table * table, const cstring controlName, bool isMatch) {
                 int index = 0;
                 int position = 0;
                 for (auto param : *(attr.params)) {
-                    addActionParam(paramJson, param->name.originalName,
-                                   param->type->width_bits(), position, index/8);
-                    position++;
-                    index += param->type->width_bits();
+                // TODO Handle other types of parameters
+                    if (param->type->is<IR::Type_Bits>()) {
+                        addActionParam(paramJson, param->name.originalName,
+                                       param->type->width_bits(), position, index/8);
+                        position++;
+                        index += param->type->width_bits();
+                    }
                 }
             }
             act->emplace("p4_parameters", paramJson);
