@@ -15,14 +15,14 @@ limitations under the License.
 */
 
 #include "config.h"
-#include <cstddef>
-#include <cstring>
 #if HAVE_LIBGC
 #include <gc/gc_cpp.h>
 #include <gc/gc_mark.h>
 #endif  /* HAVE_LIBGC */
-#include <new>
 #include <sys/mman.h>
+#include <cstddef>
+#include <cstring>
+#include <new>
 #include "log.h"
 #include "gc.h"
 #include "cstring.h"
