@@ -186,7 +186,7 @@ def check_generated_files(options, tmpdir, expecteddir):
         elif not os.path.isfile(expected):
             # The file is missing and we do not replace. This is an error.
             print(
-                "Missing reference for file %s. Please rerun the test with the -f option turned on." % expected)
+                "Missing reference for file %s. Please rerun the test with the -f option turned on or rerun all tests using \"P4TEST_REPLACE=True make check\"." % expected)
             return FAILURE
         result = compare_files(
             options, produced, expected, file[-7:] == "-stderr")
