@@ -727,23 +727,6 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         auto li = l->to<SymbolicInteger>();
         clone->expr = li->constant;
         DoConstantFolding cf(refMap, typeMap);
-        if (auto cast = expression->to<IR::Cast>()) {
-            auto bitsType = cast->destType->to<IR::Type_Bits>();
-            if (bitsType->size == 1) {
-                const IR::Constant* constant;
-                auto resConst = clone->expr->to<IR::Constant>();
-                if (resConst) {
-                   constant = (resConst->value) ? new IR::Constant(
-                       new IR::Type_Bits(1, false), 1) :
-                       new IR::Constant(
-                           new IR::Type_Bits(1, false), 0);
-                } else {
-                    BUG("%1%: expected an integer", clone->expr);
-                }
-                set(expression, new SymbolicInteger(constant));
-                return;
-            }
-        }
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
         set(expression, new SymbolicInteger(result->to<IR::Constant>()));
@@ -752,23 +735,6 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         auto li = l->to<SymbolicBool>();
         clone->expr = new IR::BoolLiteral(li->value);
         DoConstantFolding cf(refMap, typeMap);
-        if (auto cast = expression->to<IR::Cast>()) {
-            auto bitsType = cast->destType->to<IR::Type_Bits>();
-            if (bitsType->size == 1) {
-                const IR::Constant* constant;
-                auto boolLoteral = clone->expr->to<IR::BoolLiteral>();
-                if (boolLoteral) {
-                    constant = (boolLoteral->value) ? new IR::Constant(
-                        new IR::Type_Bits(1, false), 1) :
-                        new IR::Constant(
-                            new IR::Type_Bits(1, false), 0);
-                } else {
-                    BUG("%1%: expected a boolean", clone->expr);
-                }
-                set(expression, new SymbolicInteger(constant));
-                return;
-            }
-        }
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
