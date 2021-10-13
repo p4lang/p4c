@@ -60,7 +60,6 @@ class HSIndexSimplifier : public Transform {
     IR::Node* preorder(IR::MethodCallStatement* methodCallStatement) override;
     IR::Node* preorder(IR::P4Control* control) override;
     IR::Node* preorder(IR::P4Parser* parser) override;
-    IR::Node* preorder(IR::SelectExpression* selectExpression) override;
     IR::Node* preorder(IR::SwitchStatement* switchStatement) override;
 
  protected:

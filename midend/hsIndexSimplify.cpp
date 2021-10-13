@@ -130,13 +130,13 @@ IR::Node* HSIndexSimplifier::preorder(IR::P4Control* control) {
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::P4Parser* parser) {
-    auto* newParser = parser->clone();
-    HSIndexSimplifier hsSimplifier(refMap, typeMap, &newParser->parserLocals);
-    IR::IndexedVector<IR::ParserState> states;
-    for (auto state : parser->states)
-        states.push_back(state->apply(hsSimplifier)->to<IR::ParserState>());
-    newParser->states = states;
-    return newParser;
+    IR::IndexedVector<IR::Declaration> components;
+    HSIndexFindOrTransform aiFinder(&components, refMap, typeMap);
+    parser->apply(aiFinder);
+    if (aiFinder.arrayIndex != nullptr)
+        ::warning("ParsersUnroll class should be used for elimination of %1%", parser);
+    // Ignore SelectExpression.
+    return parser;
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::BlockStatement* blockStatement) {
@@ -174,16 +174,6 @@ IR::Node* HSIndexSimplifier::preorder(IR::IfStatement* ifStatement) {
 
 IR::Node* HSIndexSimplifier::preorder(IR::MethodCallStatement* methodCallStatement) {
     return eliminateArrayIndexes(methodCallStatement);
-}
-
-IR::Node* HSIndexSimplifier::preorder(IR::SelectExpression* selectExpression) {
-    IR::IndexedVector<IR::Declaration> components;
-    HSIndexFindOrTransform aiFinder(&components, refMap, typeMap);
-    selectExpression->apply(aiFinder);
-    if (aiFinder.arrayIndex != nullptr)
-        ::warning("ParsersUnroll class should be used for elimination of %1%", selectExpression);
-    // Ignore SelectExpression.
-    return selectExpression;
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::SwitchStatement* switchStatement) {
