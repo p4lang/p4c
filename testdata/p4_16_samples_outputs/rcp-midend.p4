@@ -49,11 +49,9 @@ control ingress(inout H pkt_hdr, in Metadata metadata) {
         const default_action = rcp55();
     }
     apply {
-        @atomic {
-            tbl_rcp50.apply();
-            if (pkt_hdr.rtt < 32w2500) {
-                tbl_rcp55.apply();
-            }
+        tbl_rcp50.apply();
+        if (pkt_hdr.rtt < 32w2500) {
+            tbl_rcp55.apply();
         }
     }
 }

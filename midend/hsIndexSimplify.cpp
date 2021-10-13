@@ -15,8 +15,7 @@ const IR::Node* HSIndexFindOrTransform::postorder(IR::ArrayIndex* curArrayIndex)
             // If index is an expression then create new variable.
             if (locals != nullptr && (curArrayIndex->right->is<IR::Operation_Ternary>() ||
                 curArrayIndex->right->is<IR::Operation_Binary>() ||
-                (curArrayIndex->right->is<IR::Operation_Unary>() && 
-                    !curArrayIndex->right->is<IR::Member>()))) {
+                curArrayIndex->right->is<IR::Operation_Unary>())) {
                 // Generate new temporary variable.
                 auto type = typeMap->getTypeType(curArrayIndex->right->type, true);
                 std::string newName = std::string("hsiVar")+std::to_string(locals->size());
@@ -25,7 +24,8 @@ const IR::Node* HSIndexFindOrTransform::postorder(IR::ArrayIndex* curArrayIndex)
                 locals->push_back(decl);
                 typeMap->setType(decl, type);
                 auto* newArray = curArrayIndex->clone();
-                auto* pathExpr = new IR::PathExpression(curArrayIndex->srcInfo, type, new IR::Path(name));
+                auto* pathExpr =
+                    new IR::PathExpression(curArrayIndex->srcInfo, type, new IR::Path(name));
                 newArray->right = pathExpr;
                 tmpArrayIndex = newArray;
             }

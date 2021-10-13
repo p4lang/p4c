@@ -43,9 +43,7 @@ control ingress(inout H pkt_hdr, in Metadata metadata) {
         const default_action = rcp1l61();
     }
     apply {
-        @atomic {
-            tbl_rcp1l61.apply();
-        }
+        tbl_rcp1l61.apply();
     }
 }
 

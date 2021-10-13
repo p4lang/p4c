@@ -57,7 +57,11 @@ control ingress(inout headers hdr, inout test_metadata_t meta, inout standard_me
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.assign_non_const_array_index") action assign_non_const_array_index() {
-        hdr.ethernet_stack[1] = hdr.ethernet_stack[meta.color];
+        if (meta.color == 32w0) {
+            hdr.ethernet_stack[1] = hdr.ethernet_stack[0];
+        } else if (meta.color == 32w1) {
+            hdr.ethernet_stack[1] = hdr.ethernet_stack[1];
+        }
     }
     @name("ingress.acl_table") table acl_table_0 {
         actions = {

@@ -52,37 +52,61 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
+    int<8> hsiVar0;
+    int<8> hsiVar1;
+    int<8> hsiVar2;
+    int<8> hsiVar3;
+    @hidden action runtimeindexbmv2l80() {
+        hdr.pool[0].val = hdr.pool[1].val + 8w1;
+    }
+    @hidden action runtimeindexbmv2l80_0() {
+        hdr.pool[1].val = hdr.pool[1].val + 8w1;
+    }
+    @hidden action runtimeindexbmv2l80_1() {
+        hdr.pool[2].val = hdr.pool[1].val + 8w1;
+    }
     @hidden action runtimeindexbmv2l75() {
         meta.counter = meta.counter + 8s1;
         hdr.vector[0].e = hdr.pool[1].val + 8w1;
-        if (hdr.ml.idx == 8s0) {
-            hdr.pool[0].val = hdr.pool[1].val + 8w1;
-        } else if (hdr.ml.idx == 8s1) {
-            hdr.pool[1].val = hdr.pool[1].val + 8w1;
-        } else if (hdr.ml.idx == 8s2) {
-            hdr.pool[2].val = hdr.pool[1].val + 8w1;
-        }
-        if (hdr.ml.idx == 8s0) {
-            hdr.pool[0].base2 = hdr.vector[0].e;
-        } else if (hdr.ml.idx == 8s1) {
-            hdr.pool[1].base2 = hdr.vector[0].e;
-        } else if (hdr.ml.idx == 8s2) {
-            hdr.pool[2].base2 = hdr.vector[0].e;
-        }
-        if (hdr.ml.idx == 8s0) {
-            hdr.vector[1].e = hdr.pool[0].base0;
-        } else if (hdr.ml.idx == 8s1) {
-            hdr.vector[1].e = hdr.pool[1].base0;
-        } else if (hdr.ml.idx == 8s2) {
-            hdr.vector[1].e = hdr.pool[2].base0;
-        }
-        if (hdr.ml.idx == 8s0) {
-            hdr.pool[0].base0 = hdr.pool[0].base1 + 8w1;
-        } else if (hdr.ml.idx == 8s1) {
-            hdr.pool[1].base0 = hdr.pool[1].base1 + 8w1;
-        } else if (hdr.ml.idx == 8s2) {
-            hdr.pool[2].base0 = hdr.pool[2].base1 + 8w1;
-        }
+        hsiVar0 = hdr.ml.idx;
+    }
+    @hidden action runtimeindexbmv2l81() {
+        hdr.pool[0].base2 = hdr.vector[0].e;
+    }
+    @hidden action runtimeindexbmv2l81_0() {
+        hdr.pool[1].base2 = hdr.vector[0].e;
+    }
+    @hidden action runtimeindexbmv2l81_1() {
+        hdr.pool[2].base2 = hdr.vector[0].e;
+    }
+    @hidden action runtimeindexbmv2l81_2() {
+        hsiVar1 = hdr.ml.idx;
+    }
+    @hidden action runtimeindexbmv2l83() {
+        hdr.vector[1].e = hdr.pool[0].base0;
+    }
+    @hidden action runtimeindexbmv2l83_0() {
+        hdr.vector[1].e = hdr.pool[1].base0;
+    }
+    @hidden action runtimeindexbmv2l83_1() {
+        hdr.vector[1].e = hdr.pool[2].base0;
+    }
+    @hidden action runtimeindexbmv2l83_2() {
+        hsiVar2 = hdr.ml.idx;
+    }
+    @hidden action runtimeindexbmv2l85() {
+        hdr.pool[0].base0 = hdr.pool[0].base1 + 8w1;
+    }
+    @hidden action runtimeindexbmv2l85_0() {
+        hdr.pool[1].base0 = hdr.pool[1].base1 + 8w1;
+    }
+    @hidden action runtimeindexbmv2l85_1() {
+        hdr.pool[2].base0 = hdr.pool[2].base1 + 8w1;
+    }
+    @hidden action runtimeindexbmv2l85_2() {
+        hsiVar3 = hdr.ml.idx;
+    }
+    @hidden action runtimeindexbmv2l86() {
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
     @hidden table tbl_runtimeindexbmv2l75 {
@@ -91,8 +115,136 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         }
         const default_action = runtimeindexbmv2l75();
     }
+    @hidden table tbl_runtimeindexbmv2l80 {
+        actions = {
+            runtimeindexbmv2l80();
+        }
+        const default_action = runtimeindexbmv2l80();
+    }
+    @hidden table tbl_runtimeindexbmv2l80_0 {
+        actions = {
+            runtimeindexbmv2l80_0();
+        }
+        const default_action = runtimeindexbmv2l80_0();
+    }
+    @hidden table tbl_runtimeindexbmv2l80_1 {
+        actions = {
+            runtimeindexbmv2l80_1();
+        }
+        const default_action = runtimeindexbmv2l80_1();
+    }
+    @hidden table tbl_runtimeindexbmv2l81 {
+        actions = {
+            runtimeindexbmv2l81_2();
+        }
+        const default_action = runtimeindexbmv2l81_2();
+    }
+    @hidden table tbl_runtimeindexbmv2l81_0 {
+        actions = {
+            runtimeindexbmv2l81();
+        }
+        const default_action = runtimeindexbmv2l81();
+    }
+    @hidden table tbl_runtimeindexbmv2l81_1 {
+        actions = {
+            runtimeindexbmv2l81_0();
+        }
+        const default_action = runtimeindexbmv2l81_0();
+    }
+    @hidden table tbl_runtimeindexbmv2l81_2 {
+        actions = {
+            runtimeindexbmv2l81_1();
+        }
+        const default_action = runtimeindexbmv2l81_1();
+    }
+    @hidden table tbl_runtimeindexbmv2l83 {
+        actions = {
+            runtimeindexbmv2l83_2();
+        }
+        const default_action = runtimeindexbmv2l83_2();
+    }
+    @hidden table tbl_runtimeindexbmv2l83_0 {
+        actions = {
+            runtimeindexbmv2l83();
+        }
+        const default_action = runtimeindexbmv2l83();
+    }
+    @hidden table tbl_runtimeindexbmv2l83_1 {
+        actions = {
+            runtimeindexbmv2l83_0();
+        }
+        const default_action = runtimeindexbmv2l83_0();
+    }
+    @hidden table tbl_runtimeindexbmv2l83_2 {
+        actions = {
+            runtimeindexbmv2l83_1();
+        }
+        const default_action = runtimeindexbmv2l83_1();
+    }
+    @hidden table tbl_runtimeindexbmv2l85 {
+        actions = {
+            runtimeindexbmv2l85_2();
+        }
+        const default_action = runtimeindexbmv2l85_2();
+    }
+    @hidden table tbl_runtimeindexbmv2l85_0 {
+        actions = {
+            runtimeindexbmv2l85();
+        }
+        const default_action = runtimeindexbmv2l85();
+    }
+    @hidden table tbl_runtimeindexbmv2l85_1 {
+        actions = {
+            runtimeindexbmv2l85_0();
+        }
+        const default_action = runtimeindexbmv2l85_0();
+    }
+    @hidden table tbl_runtimeindexbmv2l85_2 {
+        actions = {
+            runtimeindexbmv2l85_1();
+        }
+        const default_action = runtimeindexbmv2l85_1();
+    }
+    @hidden table tbl_runtimeindexbmv2l86 {
+        actions = {
+            runtimeindexbmv2l86();
+        }
+        const default_action = runtimeindexbmv2l86();
+    }
     apply {
         tbl_runtimeindexbmv2l75.apply();
+        if (hsiVar0 == 8s0) {
+            tbl_runtimeindexbmv2l80.apply();
+        } else if (hsiVar0 == 8s1) {
+            tbl_runtimeindexbmv2l80_0.apply();
+        } else if (hsiVar0 == 8s2) {
+            tbl_runtimeindexbmv2l80_1.apply();
+        }
+        tbl_runtimeindexbmv2l81.apply();
+        if (hsiVar1 == 8s0) {
+            tbl_runtimeindexbmv2l81_0.apply();
+        } else if (hsiVar1 == 8s1) {
+            tbl_runtimeindexbmv2l81_1.apply();
+        } else if (hsiVar1 == 8s2) {
+            tbl_runtimeindexbmv2l81_2.apply();
+        }
+        tbl_runtimeindexbmv2l83.apply();
+        if (hsiVar2 == 8s0) {
+            tbl_runtimeindexbmv2l83_0.apply();
+        } else if (hsiVar2 == 8s1) {
+            tbl_runtimeindexbmv2l83_1.apply();
+        } else if (hsiVar2 == 8s2) {
+            tbl_runtimeindexbmv2l83_2.apply();
+        }
+        tbl_runtimeindexbmv2l85.apply();
+        if (hsiVar3 == 8s0) {
+            tbl_runtimeindexbmv2l85_0.apply();
+        } else if (hsiVar3 == 8s1) {
+            tbl_runtimeindexbmv2l85_1.apply();
+        } else if (hsiVar3 == 8s2) {
+            tbl_runtimeindexbmv2l85_2.apply();
+        }
+        tbl_runtimeindexbmv2l86.apply();
     }
 }
 

@@ -1,0 +1,6 @@
+parser-unroll-test1.p4(79): warning: ParsersUnroll class should be used for elimination of SelectExpression
+        transition select(hdr.srcRoutes[index - 1].bos) {
+                   ^
+parser-unroll-test1.p4(79): warning: ParsersUnroll class should be used for elimination of SelectExpression
+        transition select(hdr.srcRoutes[index - 1].bos) {
+                   ^

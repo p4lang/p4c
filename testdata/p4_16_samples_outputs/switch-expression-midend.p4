@@ -62,18 +62,16 @@ control c(inout bit<32> b) {
         const default_action = switchexpression10();
     }
     apply {
-        {
-            tbl_switchexpression5.apply();
-            switch (switch_0_table.apply().action_run) {
-                switch_0_case: {
-                    tbl_switchexpression7.apply();
-                }
-                switch_0_case_0: {
-                    tbl_switchexpression8.apply();
-                }
-                switch_0_case_1: {
-                    tbl_switchexpression10.apply();
-                }
+        tbl_switchexpression5.apply();
+        switch (switch_0_table.apply().action_run) {
+            switch_0_case: {
+                tbl_switchexpression7.apply();
+            }
+            switch_0_case_0: {
+                tbl_switchexpression8.apply();
+            }
+            switch_0_case_1: {
+                tbl_switchexpression10.apply();
             }
         }
     }

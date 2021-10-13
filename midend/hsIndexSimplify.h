@@ -34,7 +34,17 @@ class HSIndexFindOrTransform : public Transform {
 
 /// This class eliminates all non-concrete indexes of the header stacks in the controls.
 /// It generates new variables for all expressions in the header stacks indexes and
-/// checks thier values for substitution of concrete values. 
+/// checks thier values for substitution of concrete values.
+/// Let
+/// header h_index { bit<32> index;}
+/// header h_stack { bit<32>  a;}
+/// struct headers { h_stack[2] h; h_index    i;}
+/// headers hdr;
+/// Then the assignment hdr.h[hdr.i] = 1 will be translated into
+/// bit<32> hdivr0;
+/// hdivr0 = hdr.i;
+/// if (hdivr0 == 0) { hdr.h[0] = 1;}
+/// else if (hdivr0 == 1){hdr.h[1] = 1;} 
 class HSIndexSimplifier : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
