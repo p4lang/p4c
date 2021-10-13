@@ -34,7 +34,7 @@ class HSIndexFindOrTransform : public Transform {
 
 /// This class eliminates all non-concrete indexes of the header stacks in the controls.
 /// It generates new variables for all expressions in the header stacks indexes and
-/// checks thier values for substitution of concrete values.
+/// checks their values for substitution of concrete values.
 /// Let
 /// header h_index { bit<32> index;}
 /// header h_stack { bit<32>  a;}
