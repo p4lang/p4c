@@ -46,13 +46,13 @@ class TypeMap final : public ProgramMap {
     std::vector<const IR::Type*> canonicalLists;
 
     // Map each node to its canonical type
-    std::map<const IR::Node*, const IR::Type*> typeMap;
+    ordered_map<const IR::Node*, const IR::Type*> typeMap;
     // All left-values in the program.
-    std::set<const IR::Expression*> leftValues;
+    ordered_set<const IR::Expression*> leftValues;
     // All compile-time constants.  A compile-time constant
     // is not necessarily a constant - it could be a directionless
     // parameter as well.
-    std::set<const IR::Expression*> constants;
+    ordered_set<const IR::Expression*> constants;
     // For each type variable in the program the actual
     // type that is substituted for it.
     TypeVariableSubstitution allTypeVariables;

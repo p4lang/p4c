@@ -29,7 +29,7 @@ namespace P4 {
 template <class T>
 class TypeSubstitution : public IHasDbPrint {
  protected:
-    std::map<T, const IR::Type*> binding;
+    ordered_map<T, const IR::Type*> binding;
 
  public:
     TypeSubstitution() = default;

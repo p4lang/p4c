@@ -64,7 +64,7 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
     bool isv1;
 
     /// Maps paths in the program to declarations.
-    std::map<const IR::Path*, const IR::IDeclaration*> pathToDeclaration;
+    ordered_map<const IR::Path*, const IR::IDeclaration*> pathToDeclaration;
 
     /// Set containing all declarations in the program.
     std::set<const IR::IDeclaration*> used;
