@@ -41,8 +41,10 @@ class CloneConstants : public Transform {
         }
         return new IR::Constant(constant->srcInfo, type, constant->value, constant->base);
     }
-    static const IR::Expression* clone(const IR::Expression* expression) {
-        return expression->apply(CloneConstants())->to<IR::Expression>();
+    static const IR::Expression* clone(const IR::Expression* expression, const Visitor* calledBy) {
+        CloneConstants cc;
+        cc.setCalledBy(calledBy);
+        return expression->apply(cc)->to<IR::Expression>();
     }
 };
 
@@ -72,7 +74,7 @@ const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr)
         // Casts of a constant to a value with type Type_Newtype
         // are constants, but we cannot fold them.
         if (getConstant(cast->expr))
-            return CloneConstants::clone(expr);
+            return CloneConstants::clone(expr, this);
         return nullptr;
     }
     if (typesKnown) {
@@ -99,7 +101,7 @@ const IR::Node* DoConstantFolding::postorder(IR::PathExpression* e) {
                 // type checking; maybe it's wrong.
                 return e;
         }
-        return CloneConstants::clone(cst);
+        return CloneConstants::clone(cst, this);
     }
     return e;
 }
@@ -235,7 +237,7 @@ const IR::Node* DoConstantFolding::preorder(IR::ArrayIndex* e) {
                             "Tuple index %1% out of bounds", e->right);
                     return e;
                 }
-                return CloneConstants::clone(list->components.at(static_cast<size_t>(index)));
+                return CloneConstants::clone(list->components.at(static_cast<size_t>(index)), this);
             }
         }
     }
@@ -661,14 +663,14 @@ const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
 
             if (!found)
                     BUG("Could not find field %1% in type %2%", e->member, type);
-            result = CloneConstants::clone(list->components.at(index));
+            result = CloneConstants::clone(list->components.at(index), this);
         } else if (auto si = expr->to<IR::StructExpression>()) {
             if (origtype->is<IR::Type_Header>() && e->member.name == IR::Type_Header::isValid)
                 return e;
             auto ne = si->components.getDeclaration<IR::NamedExpression>(e->member.name);
             BUG_CHECK(ne != nullptr,
                       "Could not find field %1% in initializer %2%", e->member, si);
-                return CloneConstants::clone(ne->expression);
+                return CloneConstants::clone(ne->expression, this);
         } else {
             BUG("Unexpected initializer: %1%", expr);
         }
@@ -842,7 +844,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
             return new IR::BoolLiteral(e->srcInfo, v == 1);
         }
     } else if (etype->is<IR::Type_StructLike>()) {
-        return CloneConstants::clone(expr);
+        return CloneConstants::clone(expr, this);
     }
     return e;
 }
@@ -958,7 +960,7 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
     for (auto c : expression->selectCases) {
         if (finished) {
             if (warnings)
-                ::warning(ErrorType::WARN_PARSER_TRANSITION, "%1%: unreachable case", c);
+                warn(ErrorType::WARN_PARSER_TRANSITION, "%1%: unreachable case", c);
             continue;
         }
         auto inside = setContains(c->keyset, sel);
@@ -983,7 +985,7 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
 
     if (changes) {
         if (cases.size() == 0 && result == expression && warnings)
-            ::warning(ErrorType::WARN_PARSER_TRANSITION, "%1%: no case matches", expression);
+            warn(ErrorType::WARN_PARSER_TRANSITION, "%1%: no case matches", expression);
         expression->selectCases = std::move(cases);
     }
     return result;
