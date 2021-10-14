@@ -113,8 +113,7 @@ cstring toStr(const IR::Node *const n) {
     n->apply(*nodeToString);
     if (nodeToString->out.str() != "") {
         return nodeToString->out.str();
-    }
-    else {
+    } else {
         std::cerr << n->node_type_name() << std::endl;
         BUG("not implemented type");
     }

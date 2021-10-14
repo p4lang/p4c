@@ -61,7 +61,6 @@ def usage(options):
     print("          --p4runtime: generate P4Info message in text format")
     print("          --bfrt: generate BfRt message in text format")
 
-
 def isError(p4filename):
     # True if the filename represents a p4 program that should fail
     return "_errors" in p4filename
