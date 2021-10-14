@@ -21,25 +21,17 @@ limitations under the License.
 #include <iostream>
 
 namespace DPDK {
-// this function takes different subclass of Expression and translate it into
-// string in desired format. For example, for PathExpression, it returns
-// PathExpression->path->name For Member, it returns
-// toStr(Member->expr).Member->member
-cstring toStr(const IR::Expression *const);
+// this function translates nodes of different subclass of Expression, Type
+// and PropertyValue in desired format. For example, for PathExpression, it returns
+// PathExpression->path->name For Member, it returns toStr(Member->expr).Member->member etc.
+cstring toStr(const IR::Node *const);
 
-// this function takes different subclass of Type and translate it into string
-// in desired format. For example, for Type_Boolean, it returns bool For
-// Type_Bits, it returns bit_<bit_width>
-cstring toStr(const IR::Type *const);
-
-// this function takes different subclass of PropertyValue and translate it into
-// string in desired format. For example, for ExpressionValue, it returns
-// toStr(ExpressionValue->expression)
-cstring toStr(const IR::PropertyValue *const);
-
-class ConvertExprToString : public Inspector {
+class ConvertToString : public Inspector {
 public:
-    cstring str;
+    std::ostringstream out;
+    bool preorder(const IR::Expression *e);
+    bool preorder(const IR::Type *t);
+    bool preorder(const IR::PropertyValue *p);
     bool preorder(const IR::Constant *c);
     bool preorder(const IR::BoolLiteral *b);
     bool preorder(const IR::Member *m);
@@ -48,20 +40,10 @@ public:
     bool preorder(const IR::MethodCallExpression *m);
     bool preorder(const IR::Cast *e);
     bool preorder(const IR::ArrayIndex *e);
-};
-
-class ConvertTypeToString : public Inspector {
-public:
-    cstring str;
     bool preorder(const IR::Type_Specialized *type);
     bool preorder(const IR::Type_Name *type);
     bool preorder(const IR::Type_Boolean *type);
     bool preorder(const IR::Type_Bits *type);
-};
-
-class ConvertPropertyValToString : public Inspector {
-public:
-    cstring str;
     bool preorder(const IR::ExpressionValue *property);
 };
 }// namespace DPDK
