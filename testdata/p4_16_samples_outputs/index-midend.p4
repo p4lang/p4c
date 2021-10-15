@@ -25,11 +25,7 @@ parser P(packet_in p, out H[2] h) {
     }
     state n3 {
         x_0 = x_0 + 32w4294967295;
-        if (x_0 == 32w0) {
-            p.extract<H>(h[0]);
-        } else if (x_0 == 32w1) {
-            p.extract<H>(h[1]);
-        }
+        p.extract<H>(h[x_0]);
         transition accept;
     }
 }

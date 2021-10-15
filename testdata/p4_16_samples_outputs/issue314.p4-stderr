@@ -1,0 +1,3 @@
+issue314.p4(27): warning: ParsersUnroll class should be used for elimination of parser Parser
+parser Parser(inout struct_t input) {
+       ^^^^^^
