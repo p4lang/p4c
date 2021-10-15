@@ -65,6 +65,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new CollectMetadataHeaderInfo(&structure),
         new ConvertToDpdkArch(refMap, &structure),
         new InjectJumboStruct(&structure),
+        new InjectOutputPortMetadataField(&structure),
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap, true),
         new CopyMatchKeysToSingleStruct(refMap, typeMap, &invokedInKey),
