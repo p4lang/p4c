@@ -53,6 +53,8 @@ size_t HSIndexFindOrTransform::getArraySize() {
 }
 
 IR::Node* HSIndexSimplifier::eliminateArrayIndexes(IR::Statement* statement) {
+    if (ignoreParser)
+        return statement;
     // Check non-concrete array indexes.
     HSIndexFindOrTransform aiFinder(locals, refMap, typeMap);
     const IR::Node* updatedStatement = nullptr;
@@ -136,6 +138,7 @@ IR::Node* HSIndexSimplifier::preorder(IR::P4Parser* parser) {
     if (aiFinder.arrayIndex != nullptr)
         ::warning("ParsersUnroll class should be used for elimination of %1%", parser);
     // Ignore SelectExpression.
+    ignoreParser = true;
     return parser;
 }
 

@@ -49,10 +49,11 @@ class HSIndexSimplifier : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
     IR::IndexedVector<IR::Declaration> *locals;
+    bool ignoreParser;
  public:
     HSIndexSimplifier(ReferenceMap* refMap, TypeMap* typeMap,
         IR::IndexedVector<IR::Declaration> *locals = nullptr) :
-        refMap(refMap), typeMap(typeMap), locals(locals) {}
+        refMap(refMap), typeMap(typeMap), locals(locals), ignoreParser(false) {}
     IR::Node* preorder(IR::IfStatement* ifStatement) override;
     IR::Node* preorder(IR::AssignmentStatement* assignmentStatement) override;
     IR::Node* preorder(IR::BlockStatement* assignmentStatement) override;

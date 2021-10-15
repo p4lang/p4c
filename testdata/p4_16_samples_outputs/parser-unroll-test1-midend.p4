@@ -50,13 +50,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         }
     }
     state parse_srcRouting {
-        if (index_0 == 32s0) {
-            packet.extract<srcRoute_t>(hdr.srcRoutes[0]);
-        } else if (index_0 == 32s1) {
-            packet.extract<srcRoute_t>(hdr.srcRoutes[1]);
-        } else if (index_0 == 32s2) {
-            packet.extract<srcRoute_t>(hdr.srcRoutes[2]);
-        }
+        packet.extract<srcRoute_t>(hdr.srcRoutes[index_0]);
         index_0 = index_0 + 32s1;
         transition select(hdr.srcRoutes[index_0 + -32s1].bos) {
             1w1: parse_ipv4;
