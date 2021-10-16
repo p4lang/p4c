@@ -23,14 +23,12 @@ bool ConvertToString::preorder(const IR::Expression *e) {
 }
 
 bool ConvertToString::preorder(const IR::Type *t) {
-    std::cerr << t->node_type_name() << std::endl;
-    BUG("not implemented type");
+    BUG("Not implemented type %1%", t->node_type_name());
     return false;
 }
 
 bool ConvertToString::preorder(const IR::PropertyValue *p) {
-    std::cerr << p->node_type_name() << std::endl;
-    BUG("not implemented property value");
+    BUG("Not implemented property value %1%", p->node_type_name());
     return false;
 }
 
