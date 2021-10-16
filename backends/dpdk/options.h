@@ -26,8 +26,12 @@ class DpdkOptions : public CompilerOptions {
     cstring bfRtSchema = "";
     // file to output to
     cstring outputFile = nullptr;
+    // file to ouput context Json to
+    cstring ctxtFile = "";
     // read from json
     bool loadIRFromJson = false;
+    // Compilation command line
+    static cstring DpdkCompCmd;
 
     DpdkOptions() {
         registerOption(
@@ -45,6 +49,9 @@ class DpdkOptions : public CompilerOptions {
         registerOption("-o", "outfile",
                 [this](const char* arg) { outputFile = arg; return true; },
                 "Write output to outfile");
+        registerOption("--context", "file",
+                [this](const char *arg) { ctxtFile = arg; return true; },
+                "Generate and write context JSON to the specified file");
         registerOption("--fromJSON", "file",
                 [this](const char* arg) { loadIRFromJson = true; file = arg; return true; },
                 "Use IR representation from JsonFile dumped previously,"\

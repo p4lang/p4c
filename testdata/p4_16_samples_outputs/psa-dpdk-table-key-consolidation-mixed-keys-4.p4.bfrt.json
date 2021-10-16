@@ -2,8 +2,8 @@
   "schema_version" : "1.0.0",
   "tables" : [
     {
-      "name" : "pipe.ingress.tbl",
-      "id" : 44506256,
+      "name" : "pipe.egress.tbl",
+      "id" : 35478861,
       "table_type" : "MatchAction_Direct",
       "size" : 1024,
       "annotations" : [],
@@ -44,8 +44,8 @@
           "data" : []
         },
         {
-          "id" : 29480552,
-          "name" : "ingress.execute",
+          "id" : 17082815,
+          "name" : "egress.execute",
           "action_scope" : "TableAndDefault",
           "annotations" : [],
           "data" : []
