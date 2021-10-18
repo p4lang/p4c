@@ -50,10 +50,10 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 tblAttr.direction = direction;
                 tblAttr.controlName = control->name.originalName;
                 tblAttr.tableHandle = getNewTableHandle();
-                auto size = tbl->properties->getProperty("size");
+                auto size = tbl->getSizeProperty();
                 tblAttr.size = dpdk_default_table_size;
                 if (size)
-                   tblAttr.size = size->value->to<IR::Constant>()->asUnsigned();
+                   tblAttr.size = size->asUnsigned();
                 auto hidden = tbl->annotations->getSingle(IR::Annotation::hiddenAnnotation);
                 auto selector = tbl->properties->getProperty("selector");
                 if (hidden) {
