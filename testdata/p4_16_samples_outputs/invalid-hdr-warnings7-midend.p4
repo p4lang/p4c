@@ -23,7 +23,6 @@ control c(inout bit<32> x) {
     @name("c.u1") U u1_1;
     @name("c.hs1") H1[2] hs1_1;
     @name("c.us1") U[2] us1_1;
-    @name("c.u1") U u1_2;
     @name("c.us1") U[2] us1_2;
     @name("c.u1") U u1_3;
     @name("c.hs1") H1[2] hs1_3;
@@ -66,12 +65,9 @@ control c(inout bit<32> x) {
         us_0 = us1_1;
     }
     @name("c.inout_action2") action inout_action2() {
-        u1_2.h1 = u_0.h1;
-        u1_2.h2 = u_0.h2;
         us1_2 = us_0;
         us1_2[1w1].h1.setInvalid();
         us1_2[1w1].h2.setValid();
-        u_0.h2 = u1_2.h2;
         us_0 = us1_2;
     }
     @name("c.xor") action xor() {

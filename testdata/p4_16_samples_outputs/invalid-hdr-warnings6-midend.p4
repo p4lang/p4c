@@ -47,12 +47,6 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name("IngressI.u") Union[2] u_0;
-    @hidden action invalidhdrwarnings6l77() {
-        u_0[1w0].h1.setValid();
-    }
-    @hidden action invalidhdrwarnings6l79() {
-        u_0[1w0].h2.setValid();
-    }
     @hidden action invalidhdrwarnings6l57() {
         u_0[0].h1.setInvalid();
         u_0[0].h2.setInvalid();
@@ -69,8 +63,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         u_0[1].h2 = u_0[1w0].h2;
         u_0[1].h3 = u_0[1w0].h3;
         u_0[1].h2.data = 16w1;
-    }
-    @hidden action invalidhdrwarnings6l83() {
+        u_0[1w0].h2.setValid();
         u_0[1].h1.setInvalid();
         u_0[1w0].h1.setInvalid();
         u_0[1w0].h1.setValid();
@@ -81,32 +74,8 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         }
         const default_action = invalidhdrwarnings6l57();
     }
-    @hidden table tbl_invalidhdrwarnings6l77 {
-        actions = {
-            invalidhdrwarnings6l77();
-        }
-        const default_action = invalidhdrwarnings6l77();
-    }
-    @hidden table tbl_invalidhdrwarnings6l79 {
-        actions = {
-            invalidhdrwarnings6l79();
-        }
-        const default_action = invalidhdrwarnings6l79();
-    }
-    @hidden table tbl_invalidhdrwarnings6l83 {
-        actions = {
-            invalidhdrwarnings6l83();
-        }
-        const default_action = invalidhdrwarnings6l83();
-    }
     apply {
         tbl_invalidhdrwarnings6l57.apply();
-        if (u_0[1].h2.data == 16w0) {
-            tbl_invalidhdrwarnings6l77.apply();
-        } else {
-            tbl_invalidhdrwarnings6l79.apply();
-        }
-        tbl_invalidhdrwarnings6l83.apply();
     }
 }
 

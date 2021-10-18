@@ -37,7 +37,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         regfile_0.write(32w1, 48w3);
         regfile_0.write(32w2, 48w4);
         tmp = regfile_0.read(32w1);
-        hdr.ethernet.dstAddr = tmp + regfile_0.read(32w2) + 48w281474976710651;
+        hdr.ethernet.dstAddr = regfile_0.read(32w1) + regfile_0.read(32w2) + 48w281474976710651;
     }
     @hidden table tbl_psaregistercomplexbmv2l60 {
         actions = {

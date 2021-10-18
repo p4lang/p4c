@@ -27,20 +27,10 @@ parser p(packet_in pkt, out Headers hdr, inout Metadata meta, inout standard_met
 }
 
 control ingress(inout Headers hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
-    @name("ingress.test") simple_struct test_0;
     @name("ingress.pointless_action") action pointless_action() {
-    }
-    @hidden action struct_assignment_optimization35() {
-        test_0.a = 128w0;
     }
     @hidden action struct_assignment_optimization43() {
         hdr.eth_hdr.eth_type = 16w1;
-    }
-    @hidden table tbl_struct_assignment_optimization35 {
-        actions = {
-            struct_assignment_optimization35();
-        }
-        const default_action = struct_assignment_optimization35();
     }
     @hidden table tbl_pointless_action {
         actions = {
@@ -55,7 +45,6 @@ control ingress(inout Headers hdr, inout Metadata meta, inout standard_metadata_
         const default_action = struct_assignment_optimization43();
     }
     apply {
-        tbl_struct_assignment_optimization35.apply();
         tbl_pointless_action.apply();
         tbl_struct_assignment_optimization43.apply();
     }
