@@ -61,7 +61,7 @@ const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr)
                             dv->initializer->is<IR::BoolLiteral>()) {
                                 return dv->initializer;
                             } else if (getConstant(dv->initializer)) {
-                                return CloneConstants::clone(dv->initializer);
+                                return CloneConstants::clone(dv->initializer,this);
                             }
                     }
                 }
