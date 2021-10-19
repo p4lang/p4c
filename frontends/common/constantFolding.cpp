@@ -51,18 +51,18 @@ class CloneConstants : public Transform {
 const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr) const {
     CHECK_NULL(expr);
     if (auto pathexpr = expr->to<IR::PathExpression>()) {
-            if (refMap == nullptr)
-                return expr;
-            auto decl = refMap->getDeclaration(pathexpr->path);
-            if (decl) {
-                if (auto dv = decl->to<IR::Declaration_Variable>()) {
-                    if (dv->initializer) {
-                        if (dv->initializer->is<IR::Constant>() ||
-                            dv->initializer->is<IR::BoolLiteral>()) {
-                                return dv->initializer;
-                            } else if (getConstant(dv->initializer)) {
-                                return CloneConstants::clone(dv->initializer,this);
-                            }
+            if (refMap != nullptr) {
+                auto decl = refMap->getDeclaration(pathexpr->path);
+                if (decl) {
+                    if (auto dv = decl->to<IR::Declaration_Variable>()) {
+                        if (dv->initializer) {
+                            if (dv->initializer->is<IR::Constant>() ||
+                                dv->initializer->is<IR::BoolLiteral>()) {
+                                    return dv->initializer;
+                                } else if (getConstant(dv->initializer)) {
+                                    return CloneConstants::clone(dv->initializer,this);
+                                }
+                        }
                     }
                 }
             }
