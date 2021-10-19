@@ -50,6 +50,23 @@ class CloneConstants : public Transform {
 
 const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr) const {
     CHECK_NULL(expr);
+    if (auto pathexpr = expr->to<IR::PathExpression>()) {
+            if (refMap == nullptr)
+                return expr;
+            auto decl = refMap->getDeclaration(pathexpr->path);
+            if (decl) {
+                if (auto dv = decl->to<IR::Declaration_Variable>()) {
+                    if (dv->initializer) {
+                        if (dv->initializer->is<IR::Constant>() ||
+                            dv->initializer->is<IR::BoolLiteral>()) {
+                                return dv->initializer;
+                            } else if (getConstant(dv->initializer)) {
+                                return CloneConstants::clone(dv->initializer);
+                            }
+                    }
+                }
+            }
+    }
     if (expr->is<IR::Constant>())
         return expr;
     if (expr->is<IR::BoolLiteral>())
@@ -847,6 +864,24 @@ DoConstantFolding::Result
 DoConstantFolding::setContains(const IR::Expression* keySet, const IR::Expression* select) const {
     if (keySet->is<IR::DefaultExpression>())
         return Result::Yes;
+    if (auto pathexpr = expr->to<IR::PathExpression>()) {
+            if (refMap == nullptr)
+                return expr;
+            auto decl = refMap->getDeclaration(pathexpr->path);
+            if (decl) {
+                if (auto dv = decl->to<IR::Declaration_Variable>()) {
+                    if (dv->initializer) {
+                        if (dv->initializer->is<IR::Constant>() ||
+                            dv->initializer->is<IR::BoolLiteral>()) {
+                                return dv->initializer;
+                            } else if (getConstant(dv->initializer)) {
+                                return CloneConstants::clone(dv->initializer);
+                            }
+                    }
+                }
+            }
+    }
+
     if (auto list = select->to<IR::ListExpression>()) {
         if (auto klist = keySet->to<IR::ListExpression>()) {
             BUG_CHECK(list->components.size() == klist->components.size(),
