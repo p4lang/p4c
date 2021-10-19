@@ -56,12 +56,7 @@ const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr)
                 if (decl) {
                     if (auto dv = decl->to<IR::Declaration_Variable>()) {
                         if (dv->initializer) {
-                            if (dv->initializer->is<IR::Constant>() ||
-                                dv->initializer->is<IR::BoolLiteral>()) {
-                                    return dv->initializer;
-                                } else if (getConstant(dv->initializer)) {
-                                    return CloneConstants::clone(dv->initializer,this);
-                                }
+                            return getConstant(dv->initializer);
                         }
                     }
                 }
