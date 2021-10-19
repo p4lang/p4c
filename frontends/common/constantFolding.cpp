@@ -864,22 +864,18 @@ DoConstantFolding::Result
 DoConstantFolding::setContains(const IR::Expression* keySet, const IR::Expression* select) const {
     if (keySet->is<IR::DefaultExpression>())
         return Result::Yes;
-    if (auto pathexpr = expr->to<IR::PathExpression>()) {
-            if (refMap == nullptr)
-                return expr;
-            auto decl = refMap->getDeclaration(pathexpr->path);
-            if (decl) {
-                if (auto dv = decl->to<IR::Declaration_Variable>()) {
-                    if (dv->initializer) {
-                        if (dv->initializer->is<IR::Constant>() ||
-                            dv->initializer->is<IR::BoolLiteral>()) {
-                                return dv->initializer;
-                            } else if (getConstant(dv->initializer)) {
-                                return CloneConstants::clone(dv->initializer);
-                            }
-                    }
-                }
+    if (select->is<IR::PathExpression>()) {
+        if (auto constVar = getConstant(select)) {
+            auto r = setContains(keySet, constVar);
+            if (r == Result::DontKnow || r == Result::No) {
+                return r;
             }
+            return Result::Yes;
+        } else {
+            ::error(ErrorType::ERR_TYPE_ERROR, "%1%: expression must evaluate to a constant",
+                    select);
+            return Result::No;
+        }
     }
 
     if (auto list = select->to<IR::ListExpression>()) {
