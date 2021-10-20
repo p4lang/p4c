@@ -38,6 +38,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<3> tmp_1;
+    H hsVar1;
     @hidden action gauntlet_index_1bmv2l4() {
         tmp_1 = 3w1;
     }
@@ -49,6 +50,12 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @hidden action gauntlet_index_1bmv2l45_0() {
         h.h[1].a = 32w1;
+    }
+    @hidden action gauntlet_index_1bmv2l45_1() {
+        h.h[1].a = 32w1;
+    }
+    @hidden action gauntlet_index_1bmv2l45_2() {
+        h.h[3w1] = hsVar1;
     }
     @hidden table tbl_gauntlet_index_1bmv2l4 {
         actions = {
@@ -74,6 +81,18 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = gauntlet_index_1bmv2l45_0();
     }
+    @hidden table tbl_gauntlet_index_1bmv2l45_1 {
+        actions = {
+            gauntlet_index_1bmv2l45_2();
+        }
+        const default_action = gauntlet_index_1bmv2l45_2();
+    }
+    @hidden table tbl_gauntlet_index_1bmv2l45_2 {
+        actions = {
+            gauntlet_index_1bmv2l45_1();
+        }
+        const default_action = gauntlet_index_1bmv2l45_1();
+    }
     apply {
         if (h.i.a > 3w1) {
             tbl_gauntlet_index_1bmv2l4.apply();
@@ -84,6 +103,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             tbl_gauntlet_index_1bmv2l45.apply();
         } else if (tmp_1 == 3w1) {
             tbl_gauntlet_index_1bmv2l45_0.apply();
+        } else {
+            tbl_gauntlet_index_1bmv2l45_1.apply();
+            if (tmp_1 >= 3w2) {
+                tbl_gauntlet_index_1bmv2l45_2.apply();
+            }
         }
     }
 }

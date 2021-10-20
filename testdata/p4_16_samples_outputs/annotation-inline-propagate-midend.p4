@@ -49,10 +49,12 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
         const default_action = annotationinlinepropagate76();
     }
     apply {
-        if (inner_inner_table.apply().hit) {
-            ;
-        } else {
-            tbl_annotationinlinepropagate76.apply();
+        @my_anno_3 {
+            if (inner_inner_table.apply().hit) {
+                ;
+            } else {
+                tbl_annotationinlinepropagate76.apply();
+            }
         }
     }
 }

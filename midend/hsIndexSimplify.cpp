@@ -85,21 +85,19 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(IR::Statement* statement) {
     }
     IR::IfStatement* result = nullptr;
     IR::IfStatement* curResult = nullptr;
+    IR::IfStatement* newIf = nullptr;
     size_t sz = aiFinder.getArraySize();
     for (size_t i = 0; i < sz; i++) {
         HSIndexFindOrTransform aiRewriter(aiFinder.arrayIndex, i);
-        IR::IfStatement* newIf = nullptr;
         auto* newStatement = updatedStatement->apply(aiRewriter)->to<IR::Statement>();
         auto* newIndex = aiFinder.arrayIndex->right->apply(aiRewriter);
+        auto* newCondition =
+            new IR::Equ(newIndex, new IR::Constant(aiFinder.arrayIndex->right->type, i));
         if (curIf != nullptr) {
             newIf = newStatement->to<IR::IfStatement>()->clone();
-            newIf->condition = new IR::LAnd(
-                new IR::Equ(newIndex, new IR::Constant(aiFinder.arrayIndex->right->type, i)),
-                newIf->condition);
+            newIf->condition = new IR::LAnd(newCondition, newIf->condition);
         } else {
-            newIf = new IR::IfStatement(
-                new IR::Equ(newIndex, new IR::Constant(aiFinder.arrayIndex->right->type, i)),
-                newStatement, nullptr);
+            newIf = new IR::IfStatement(newCondition, newStatement, nullptr);
         }
         if (result == nullptr) {
             result = newIf;
@@ -109,15 +107,46 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(IR::Statement* statement) {
             curResult = newIf;
         }
     }
-    curResult->ifFalse = elseBody;
-    if (assigment == nullptr) {
-        return result;
+    if (locals != nullptr) {
+        // Add case for out of bound.
+        HSIndexFindOrTransform aiRewriter(aiFinder.arrayIndex, sz - 1);
+        auto* newStatement = updatedStatement->apply(aiRewriter)->to<IR::Statement>();
+        auto* newIndex = aiFinder.arrayIndex->right->apply(aiRewriter);
+        auto* newCondition =
+            new IR::Geq(newIndex, new IR::Constant(aiFinder.arrayIndex->right->type, sz));
+        if (curIf != nullptr) {
+            newIf = newStatement->to<IR::IfStatement>()->clone();
+            newIf->condition = new IR::LAnd(newCondition, newIf->condition);
+        } else {
+            newIf = new IR::IfStatement(newCondition, newStatement, nullptr);
+        }
+        // Add assigment of undefined header.
+        auto type = typeMap->getTypeType(aiFinder.arrayIndex->type, true);
+        std::string newName = std::string("hsVar")+std::to_string(locals->size());
+        auto name = refMap->newName(newName);
+        auto decl = new IR::Declaration_Variable(name, type);
+        locals->push_back(decl);
+        typeMap->setType(decl, type);
+        auto* pathExpr =
+            new IR::PathExpression(aiFinder.arrayIndex->srcInfo, type, new IR::Path(name));
+        auto* newArrayIndex = aiFinder.arrayIndex->clone();
+        newArrayIndex->right = new IR::Constant(aiFinder.arrayIndex->right->type, sz - 1);
+        newIf->ifFalse = elseBody;
+        IR::IndexedVector<IR::StatOrDecl> overflowComponents;
+        overflowComponents.push_back(new IR::AssignmentStatement(aiFinder.arrayIndex->srcInfo,
+                                    newArrayIndex, pathExpr));
+        overflowComponents.push_back(newIf);
+        // Set result.
+        curResult->ifFalse = new IR::BlockStatement(overflowComponents);
     } else {
-        IR::IndexedVector<IR::StatOrDecl> newComponents;
-        newComponents.push_back(assigment);
-        newComponents.push_back(result);
-        return new IR::BlockStatement(newComponents);
+        newIf->ifFalse = elseBody;
     }
+    IR::IndexedVector<IR::StatOrDecl> newComponents;
+    if (assigment != nullptr) {
+        newComponents.push_back(assigment);
+    }
+    newComponents.push_back(result);
+    return new IR::BlockStatement(newComponents);
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::AssignmentStatement* assignmentStatement) {
@@ -143,6 +172,12 @@ IR::Node* HSIndexSimplifier::preorder(IR::P4Parser* parser) {
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::BlockStatement* blockStatement) {
+    IR::IndexedVector<IR::Declaration> components;
+    HSIndexFindOrTransform aiFinder(&components, refMap, typeMap);
+    blockStatement->apply(aiFinder);
+    if (aiFinder.arrayIndex == nullptr) {
+        return blockStatement;
+    }
     HSIndexSimplifier hsSimplifier(refMap, typeMap, locals);
     auto* newBlock = blockStatement->clone();
     IR::IndexedVector<IR::StatOrDecl> newComponents;

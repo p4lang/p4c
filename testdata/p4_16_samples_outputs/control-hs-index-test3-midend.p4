@@ -37,11 +37,18 @@ parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<32> hsiVar0;
-    bit<32> hsiVar1;
+    bit<32> hsiVar0_0;
+    h_stack hsVar1;
     bit<32> hsiVar2;
-    bit<32> hsiVar3;
+    h_stack hsVar3;
     bit<32> hsiVar4;
+    h_stack hsVar5;
+    bit<32> hsiVar6;
+    h_stack hsVar7;
+    bit<32> hsiVar8;
+    h_stack hsVar9;
+    bit<32> hsiVar10;
+    h_stack hsVar11;
     @hidden action controlhsindextest3l44() {
         h.h[0].a = 32w1;
     }
@@ -52,34 +59,73 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h[2].a = 32w1;
     }
     @hidden action controlhsindextest3l44_2() {
-        hsiVar1 = h.h[0].a;
+        h.h[2].a = 32w1;
     }
     @hidden action controlhsindextest3l44_3() {
-        h.h[0].a = 32w1;
+        h.h[32w2] = hsVar3;
     }
     @hidden action controlhsindextest3l44_4() {
-        h.h[1].a = 32w1;
+        hsiVar2 = h.h[0].a;
     }
     @hidden action controlhsindextest3l44_5() {
-        h.h[2].a = 32w1;
-    }
-    @hidden action controlhsindextest3l44_6() {
-        hsiVar2 = h.h[1].a;
-    }
-    @hidden action controlhsindextest3l44_7() {
         h.h[0].a = 32w1;
     }
-    @hidden action controlhsindextest3l44_8() {
+    @hidden action controlhsindextest3l44_6() {
         h.h[1].a = 32w1;
     }
-    @hidden action controlhsindextest3l44_9() {
+    @hidden action controlhsindextest3l44_7() {
         h.h[2].a = 32w1;
     }
+    @hidden action controlhsindextest3l44_8() {
+        h.h[2].a = 32w1;
+    }
+    @hidden action controlhsindextest3l44_9() {
+        h.h[32w2] = hsVar5;
+    }
     @hidden action controlhsindextest3l44_10() {
-        hsiVar3 = h.h[2].a;
+        hsiVar4 = h.h[1].a;
+    }
+    @hidden action controlhsindextest3l44_11() {
+        h.h[0].a = 32w1;
+    }
+    @hidden action controlhsindextest3l44_12() {
+        h.h[1].a = 32w1;
+    }
+    @hidden action controlhsindextest3l44_13() {
+        h.h[2].a = 32w1;
+    }
+    @hidden action controlhsindextest3l44_14() {
+        h.h[2].a = 32w1;
+    }
+    @hidden action controlhsindextest3l44_15() {
+        h.h[32w2] = hsVar7;
+    }
+    @hidden action controlhsindextest3l44_16() {
+        hsiVar6 = h.h[2].a;
+    }
+    @hidden action controlhsindextest3l44_17() {
+        h.h[0].a = 32w1;
+    }
+    @hidden action controlhsindextest3l44_18() {
+        h.h[1].a = 32w1;
+    }
+    @hidden action controlhsindextest3l44_19() {
+        h.h[2].a = 32w1;
+    }
+    @hidden action controlhsindextest3l44_20() {
+        h.h[2].a = 32w1;
+    }
+    @hidden action controlhsindextest3l44_21() {
+        h.h[32w2] = hsVar9;
+    }
+    @hidden action controlhsindextest3l44_22() {
+        hsiVar8 = h.h[2].a;
     }
     @hidden action controlhsindextest3l43() {
-        hsiVar0 = h.i.index;
+        h.h[32w2] = hsVar1;
+    }
+    @hidden action controlhsindextest3l43_0() {
+        hsiVar0_0 = h.i.index;
     }
     @hidden action controlhsindextest3l45() {
         h.h[0].setInvalid();
@@ -91,19 +137,25 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h[2].setInvalid();
     }
     @hidden action controlhsindextest3l45_2() {
-        hsiVar4 = h.i.index;
+        h.h[2].setInvalid();
+    }
+    @hidden action controlhsindextest3l45_3() {
+        h.h[32w2] = hsVar11;
+    }
+    @hidden action controlhsindextest3l45_4() {
+        hsiVar10 = h.i.index;
     }
     @hidden table tbl_controlhsindextest3l43 {
         actions = {
-            controlhsindextest3l43();
+            controlhsindextest3l43_0();
         }
-        const default_action = controlhsindextest3l43();
+        const default_action = controlhsindextest3l43_0();
     }
     @hidden table tbl_controlhsindextest3l44 {
         actions = {
-            controlhsindextest3l44_2();
+            controlhsindextest3l44_4();
         }
-        const default_action = controlhsindextest3l44_2();
+        const default_action = controlhsindextest3l44_4();
     }
     @hidden table tbl_controlhsindextest3l44_0 {
         actions = {
@@ -125,21 +177,21 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @hidden table tbl_controlhsindextest3l44_3 {
         actions = {
-            controlhsindextest3l44_6();
-        }
-        const default_action = controlhsindextest3l44_6();
-    }
-    @hidden table tbl_controlhsindextest3l44_4 {
-        actions = {
             controlhsindextest3l44_3();
         }
         const default_action = controlhsindextest3l44_3();
     }
+    @hidden table tbl_controlhsindextest3l44_4 {
+        actions = {
+            controlhsindextest3l44_2();
+        }
+        const default_action = controlhsindextest3l44_2();
+    }
     @hidden table tbl_controlhsindextest3l44_5 {
         actions = {
-            controlhsindextest3l44_4();
+            controlhsindextest3l44_10();
         }
-        const default_action = controlhsindextest3l44_4();
+        const default_action = controlhsindextest3l44_10();
     }
     @hidden table tbl_controlhsindextest3l44_6 {
         actions = {
@@ -149,9 +201,9 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @hidden table tbl_controlhsindextest3l44_7 {
         actions = {
-            controlhsindextest3l44_10();
+            controlhsindextest3l44_6();
         }
-        const default_action = controlhsindextest3l44_10();
+        const default_action = controlhsindextest3l44_6();
     }
     @hidden table tbl_controlhsindextest3l44_8 {
         actions = {
@@ -161,21 +213,99 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @hidden table tbl_controlhsindextest3l44_9 {
         actions = {
-            controlhsindextest3l44_8();
-        }
-        const default_action = controlhsindextest3l44_8();
-    }
-    @hidden table tbl_controlhsindextest3l44_10 {
-        actions = {
             controlhsindextest3l44_9();
         }
         const default_action = controlhsindextest3l44_9();
     }
+    @hidden table tbl_controlhsindextest3l44_10 {
+        actions = {
+            controlhsindextest3l44_8();
+        }
+        const default_action = controlhsindextest3l44_8();
+    }
+    @hidden table tbl_controlhsindextest3l44_11 {
+        actions = {
+            controlhsindextest3l44_16();
+        }
+        const default_action = controlhsindextest3l44_16();
+    }
+    @hidden table tbl_controlhsindextest3l44_12 {
+        actions = {
+            controlhsindextest3l44_11();
+        }
+        const default_action = controlhsindextest3l44_11();
+    }
+    @hidden table tbl_controlhsindextest3l44_13 {
+        actions = {
+            controlhsindextest3l44_12();
+        }
+        const default_action = controlhsindextest3l44_12();
+    }
+    @hidden table tbl_controlhsindextest3l44_14 {
+        actions = {
+            controlhsindextest3l44_13();
+        }
+        const default_action = controlhsindextest3l44_13();
+    }
+    @hidden table tbl_controlhsindextest3l44_15 {
+        actions = {
+            controlhsindextest3l44_15();
+        }
+        const default_action = controlhsindextest3l44_15();
+    }
+    @hidden table tbl_controlhsindextest3l44_16 {
+        actions = {
+            controlhsindextest3l44_14();
+        }
+        const default_action = controlhsindextest3l44_14();
+    }
+    @hidden table tbl_controlhsindextest3l43_0 {
+        actions = {
+            controlhsindextest3l43();
+        }
+        const default_action = controlhsindextest3l43();
+    }
+    @hidden table tbl_controlhsindextest3l44_17 {
+        actions = {
+            controlhsindextest3l44_22();
+        }
+        const default_action = controlhsindextest3l44_22();
+    }
+    @hidden table tbl_controlhsindextest3l44_18 {
+        actions = {
+            controlhsindextest3l44_17();
+        }
+        const default_action = controlhsindextest3l44_17();
+    }
+    @hidden table tbl_controlhsindextest3l44_19 {
+        actions = {
+            controlhsindextest3l44_18();
+        }
+        const default_action = controlhsindextest3l44_18();
+    }
+    @hidden table tbl_controlhsindextest3l44_20 {
+        actions = {
+            controlhsindextest3l44_19();
+        }
+        const default_action = controlhsindextest3l44_19();
+    }
+    @hidden table tbl_controlhsindextest3l44_21 {
+        actions = {
+            controlhsindextest3l44_21();
+        }
+        const default_action = controlhsindextest3l44_21();
+    }
+    @hidden table tbl_controlhsindextest3l44_22 {
+        actions = {
+            controlhsindextest3l44_20();
+        }
+        const default_action = controlhsindextest3l44_20();
+    }
     @hidden table tbl_controlhsindextest3l45 {
         actions = {
-            controlhsindextest3l45_2();
+            controlhsindextest3l45_4();
         }
-        const default_action = controlhsindextest3l45_2();
+        const default_action = controlhsindextest3l45_4();
     }
     @hidden table tbl_controlhsindextest3l45_0 {
         actions = {
@@ -195,43 +325,92 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = controlhsindextest3l45_1();
     }
+    @hidden table tbl_controlhsindextest3l45_3 {
+        actions = {
+            controlhsindextest3l45_3();
+        }
+        const default_action = controlhsindextest3l45_3();
+    }
+    @hidden table tbl_controlhsindextest3l45_4 {
+        actions = {
+            controlhsindextest3l45_2();
+        }
+        const default_action = controlhsindextest3l45_2();
+    }
     apply {
         tbl_controlhsindextest3l43.apply();
-        if (hsiVar0 == 32w0 && h.h[0].isValid()) {
+        if (hsiVar0_0 == 32w0 && h.h[0].isValid()) {
             tbl_controlhsindextest3l44.apply();
-            if (hsiVar1 == 32w0) {
-                tbl_controlhsindextest3l44_0.apply();
-            } else if (hsiVar1 == 32w1) {
-                tbl_controlhsindextest3l44_1.apply();
-            } else if (hsiVar1 == 32w2) {
-                tbl_controlhsindextest3l44_2.apply();
-            }
-        } else if (hsiVar0 == 32w1 && h.h[1].isValid()) {
-            tbl_controlhsindextest3l44_3.apply();
             if (hsiVar2 == 32w0) {
-                tbl_controlhsindextest3l44_4.apply();
+                tbl_controlhsindextest3l44_0.apply();
             } else if (hsiVar2 == 32w1) {
-                tbl_controlhsindextest3l44_5.apply();
+                tbl_controlhsindextest3l44_1.apply();
             } else if (hsiVar2 == 32w2) {
-                tbl_controlhsindextest3l44_6.apply();
+                tbl_controlhsindextest3l44_2.apply();
+            } else {
+                tbl_controlhsindextest3l44_3.apply();
+                if (hsiVar2 >= 32w3) {
+                    tbl_controlhsindextest3l44_4.apply();
+                }
             }
-        } else if (hsiVar0 == 32w2 && h.h[2].isValid()) {
-            tbl_controlhsindextest3l44_7.apply();
-            if (hsiVar3 == 32w0) {
+        } else if (hsiVar0_0 == 32w1 && h.h[1].isValid()) {
+            tbl_controlhsindextest3l44_5.apply();
+            if (hsiVar4 == 32w0) {
+                tbl_controlhsindextest3l44_6.apply();
+            } else if (hsiVar4 == 32w1) {
+                tbl_controlhsindextest3l44_7.apply();
+            } else if (hsiVar4 == 32w2) {
                 tbl_controlhsindextest3l44_8.apply();
-            } else if (hsiVar3 == 32w1) {
+            } else {
                 tbl_controlhsindextest3l44_9.apply();
-            } else if (hsiVar3 == 32w2) {
-                tbl_controlhsindextest3l44_10.apply();
+                if (hsiVar4 >= 32w3) {
+                    tbl_controlhsindextest3l44_10.apply();
+                }
+            }
+        } else if (hsiVar0_0 == 32w2 && h.h[2].isValid()) {
+            tbl_controlhsindextest3l44_11.apply();
+            if (hsiVar6 == 32w0) {
+                tbl_controlhsindextest3l44_12.apply();
+            } else if (hsiVar6 == 32w1) {
+                tbl_controlhsindextest3l44_13.apply();
+            } else if (hsiVar6 == 32w2) {
+                tbl_controlhsindextest3l44_14.apply();
+            } else {
+                tbl_controlhsindextest3l44_15.apply();
+                if (hsiVar6 >= 32w3) {
+                    tbl_controlhsindextest3l44_16.apply();
+                }
+            }
+        } else {
+            tbl_controlhsindextest3l43_0.apply();
+            if (hsiVar0_0 >= 32w3 && h.h[2].isValid()) {
+                tbl_controlhsindextest3l44_17.apply();
+                if (hsiVar8 == 32w0) {
+                    tbl_controlhsindextest3l44_18.apply();
+                } else if (hsiVar8 == 32w1) {
+                    tbl_controlhsindextest3l44_19.apply();
+                } else if (hsiVar8 == 32w2) {
+                    tbl_controlhsindextest3l44_20.apply();
+                } else {
+                    tbl_controlhsindextest3l44_21.apply();
+                    if (hsiVar8 >= 32w3) {
+                        tbl_controlhsindextest3l44_22.apply();
+                    }
+                }
             }
         }
         tbl_controlhsindextest3l45.apply();
-        if (hsiVar4 == 32w0) {
+        if (hsiVar10 == 32w0) {
             tbl_controlhsindextest3l45_0.apply();
-        } else if (hsiVar4 == 32w1) {
+        } else if (hsiVar10 == 32w1) {
             tbl_controlhsindextest3l45_1.apply();
-        } else if (hsiVar4 == 32w2) {
+        } else if (hsiVar10 == 32w2) {
             tbl_controlhsindextest3l45_2.apply();
+        } else {
+            tbl_controlhsindextest3l45_3.apply();
+            if (hsiVar10 >= 32w3) {
+                tbl_controlhsindextest3l45_4.apply();
+            }
         }
     }
 }

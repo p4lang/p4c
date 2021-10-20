@@ -11,7 +11,6 @@ header h_index {
     bit<32> index1;
     bit<32> index2;
     bit<32> index3;
-    bit<32> index4;
 }
 
 header h_stack {
@@ -46,7 +45,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
 
     apply {
         if (h.h[h.i.index1].a + h.h[h.i.index2].b + h.h[h.i.index3].c > 20)
-            h.h[h.i.index4].a = 0;
+            h.h[0].a = 0;
     }
 }
 

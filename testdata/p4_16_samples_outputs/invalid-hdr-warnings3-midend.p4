@@ -68,13 +68,15 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         h1_0.setValid();
         h2_0.setInvalid();
     }
+    @hidden action invalidhdrwarnings3l33() {
+        switch_0_key = hdr.h1.data;
+    }
     @hidden action invalidhdrwarnings3l24() {
         h1_0.setInvalid();
         h2_0.setInvalid();
         h1_0.setInvalid();
         h2_0.setValid();
         h2_0.data = 32w1;
-        switch_0_key = hdr.h1.data;
     }
     @hidden action invalidhdrwarnings3l44() {
         h1_0.setValid();
@@ -84,9 +86,11 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         h1_0.setInvalid();
         h2_0.setInvalid();
     }
+    @hidden action invalidhdrwarnings3l42() {
+        switch_1_key = h2_0.data;
+    }
     @hidden action invalidhdrwarnings3l40() {
         hdr.h1.data = h2_0.data;
-        switch_1_key = h2_0.data;
     }
     @hidden action invalidhdrwarnings3l49() {
         hdr.h1.data = h2_0.data;
@@ -96,6 +100,12 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
             invalidhdrwarnings3l24();
         }
         const default_action = invalidhdrwarnings3l24();
+    }
+    @hidden table tbl_invalidhdrwarnings3l33 {
+        actions = {
+            invalidhdrwarnings3l33();
+        }
+        const default_action = invalidhdrwarnings3l33();
     }
     @hidden table tbl_invalidhdrwarnings3l35 {
         actions = {
@@ -114,6 +124,12 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
             invalidhdrwarnings3l40();
         }
         const default_action = invalidhdrwarnings3l40();
+    }
+    @hidden table tbl_invalidhdrwarnings3l42 {
+        actions = {
+            invalidhdrwarnings3l42();
+        }
+        const default_action = invalidhdrwarnings3l42();
     }
     @hidden table tbl_invalidhdrwarnings3l44 {
         actions = {
@@ -135,21 +151,27 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     apply {
         tbl_invalidhdrwarnings3l24.apply();
-        switch (switch_0_table.apply().action_run) {
-            switch_0_case: {
-                tbl_invalidhdrwarnings3l35.apply();
-            }
-            switch_0_case_0: {
-                tbl_invalidhdrwarnings3l36.apply();
+        {
+            tbl_invalidhdrwarnings3l33.apply();
+            switch (switch_0_table.apply().action_run) {
+                switch_0_case: {
+                    tbl_invalidhdrwarnings3l35.apply();
+                }
+                switch_0_case_0: {
+                    tbl_invalidhdrwarnings3l36.apply();
+                }
             }
         }
         tbl_invalidhdrwarnings3l40.apply();
-        switch (switch_1_table.apply().action_run) {
-            switch_1_case: {
-                tbl_invalidhdrwarnings3l44.apply();
-            }
-            switch_1_case_0: {
-                tbl_invalidhdrwarnings3l45.apply();
+        {
+            tbl_invalidhdrwarnings3l42.apply();
+            switch (switch_1_table.apply().action_run) {
+                switch_1_case: {
+                    tbl_invalidhdrwarnings3l44.apply();
+                }
+                switch_1_case_0: {
+                    tbl_invalidhdrwarnings3l45.apply();
+                }
             }
         }
         tbl_invalidhdrwarnings3l49.apply();
