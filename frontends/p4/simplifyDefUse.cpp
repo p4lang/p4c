@@ -100,7 +100,6 @@ class HasUses {
 };
 
 class HeaderDefinitions {
-    ReferenceMap* refMap;
     StorageMap* storageMap;
 
     /// The current values of the header valid bits are stored here. If the value in the map is Yes,
@@ -117,45 +116,74 @@ class HeaderDefinitions {
     ordered_set<const StorageLocation*> notReport;
 
  public:
-    HeaderDefinitions(ReferenceMap* refMap, StorageMap* storageMap) :
-        refMap(refMap), storageMap(storageMap)
-        { CHECK_NULL(refMap); CHECK_NULL(storageMap); }
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
+
+    HeaderDefinitions(ReferenceMap* refMap, TypeMap* typeMap, StorageMap* storageMap) :
+        storageMap(storageMap), refMap(refMap), typeMap(typeMap)
+        { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(storageMap); }
 
     /// A helper function for getting a storage location from an expression.
-    /// In case of accessing a header stack with non-constant index, returns
-    /// a storage location of the header stack itself. If a field is accessed
-    /// after such indexing, it returns nullptr because it is not known to
-    /// which element of the stack that field belongs.
-    const StorageLocation* getStorageLocation(const IR::Expression* expression) const {
+    /// In case of accessing a header stack with non-constant index, it returns
+    /// storage locations of all elements of the stack. In case of accessing a
+    /// field of a header union stack (indexed with non-constant), it returns
+    /// the corresponding field of all unions in the stack.
+    const LocationSet* getStorageLocation(const IR::Expression* expression) const {
+        LocationSet* result = new LocationSet;
         if (auto expr = expression->to<IR::PathExpression>()) {
-            return storageMap->getStorage(refMap->getDeclaration(expr->path, true));
-        } else if (auto array = expression->to<IR::ArrayIndex>()) {
-            if (auto array_storage = getStorageLocation(array->left)->to<ArrayLocation>()) {
-                if (auto index = array->right->to<IR::Constant>()) {
-                    LocationSet ls;
-                    array_storage->addElement(index->asInt(), &ls);
-                    if (!ls.isEmpty())
-                        return *ls.begin();
-                }
-                return array_storage;
-            }
+            auto decl = refMap->getDeclaration(expr->path, true);
+            result->add(storageMap->getStorage(decl));
         } else if (auto expr = expression->to<IR::Member>()) {
             auto base_storage = getStorageLocation(expr->expr);
-            if (!base_storage)
-                return nullptr;
-            if (auto struct_storage = base_storage->to<StructLocation>()) {
-                LocationSet ls;
-                struct_storage->addField(expr->member, &ls);
-                if (!ls.isEmpty())
-                    return *ls.begin();
-            } else if (base_storage->is<ArrayLocation>() &&
-                       (expr->member == IR::Type_Stack::next ||
-                       expr->member == IR::Type_Stack::last ||
-                       expr->member == IR::Type_Stack::lastIndex)) {
-                return base_storage;
+            for (auto bs : *base_storage) {
+                if (auto struct_storage = bs->to<StructLocation>()) {
+                    struct_storage->addField(expr->member, result);
+                } else if (bs->is<ArrayLocation>() &&
+                          (expr->member == IR::Type_Stack::next ||
+                           expr->member == IR::Type_Stack::last ||
+                           expr->member == IR::Type_Stack::lastIndex)) {
+                    auto array_storage = bs->to<ArrayLocation>();
+                    for (auto element : *array_storage)
+                        result->add(element);
+                }
+            }
+        } else if (auto array = expression->to<IR::ArrayIndex>()) {
+            auto base_storage = getStorageLocation(array->left);
+            for (auto bs : *base_storage) {
+                if (auto array_storage = bs->to<ArrayLocation>()) {
+                    if (auto index = array->right->to<IR::Constant>()) {
+                        array_storage->addElement(index->asInt(), result);
+                    } else {
+                        for (auto element : *array_storage)
+                            result->add(element);
+                    }
+                }
             }
         }
-        return nullptr;
+        return result;
+    }
+
+    /// In case of a header, it simply sets its value in the map. In case
+    /// of header unions and stacks, it sets the value to all their fields.
+    void setValueToStorage(const StorageLocation* storage, TernaryBool value) {
+        if (!storage)
+            return;
+
+        if (auto struct_storage = storage->to<StructLocation>()) {
+            if (struct_storage->isHeader()) {
+                update(struct_storage, value);
+            } else {
+                for (auto f : struct_storage->fields())
+                    setValueToStorage(f, value);
+
+                // update the valid bit of a union itself
+                if (struct_storage->isHeaderUnion())
+                    update(struct_storage, value);
+            }
+        } else if (auto array_storage = storage->to<ArrayLocation>()) {
+            for (auto element : *array_storage)
+                setValueToStorage(element, value);
+        }
     }
 
     void checkLocation(const StorageLocation* storage) {
@@ -165,82 +193,75 @@ class HeaderDefinitions {
                 "location %1% is not a header", storage->name);
     }
 
-    void update(const StorageLocation *storage, TernaryBool valid) {
-        if (!storage)
-            return;
+    bool isNonConstIndexing(const IR::Expression* expr) const {
+        if (auto array = expr->to<IR::ArrayIndex>())
+            if (!array->right->to<IR::Constant>())
+                return true;
 
+        auto member = expr->to<IR::Member>();
+        auto base = member ? member->expr : nullptr;
+
+        if (member && base && typeMap->getType(base, true)->is<IR::Type_Stack>() &&
+           (member->member == IR::Type_Stack::next ||
+            member->member == IR::Type_Stack::last ||
+            member->member == IR::Type_Stack::lastIndex)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    void update(const StorageLocation* storage, TernaryBool valid) {
+        CHECK_NULL(storage);
         checkLocation(storage);
         defs[storage] = valid;
         notReport.erase(storage);
     }
 
-    void update(const IR::Expression* expr, TernaryBool valid) {
-        CHECK_NULL(expr);
-        if (auto storage = getStorageLocation(expr)) {
-            // Accessing an element of a header stack with non-constant index
-            if (auto array_storage = storage->to<ArrayLocation>()) {
-                // we propagate the value to all fields of the stack if the value is not
-                // TernaryBool::No (in order to avoid spurious warnings)
-                if (valid != TernaryBool::No) {
-                    for (auto element : *array_storage)
-                        update(element, valid);
-                }
-                return;
-            }
-
-            auto member = expr->to<IR::Member>();
-            auto base = member ? member->expr : nullptr;
-            auto base_storage = getStorageLocation(base);
-
-            // Accessing a field of a header union
-            if (auto struct_storage = base_storage->to<StructLocation>()) {
-                if (struct_storage->isHeaderUnion()) {
-                    // Invalidate all fields of a header union
-                    for (auto field : struct_storage->fields()) {
-                        update(field, TernaryBool::No);
-                    }
-                    // update the valid bit of a header union
-                    update(base_storage, valid);
-                }
-                update(storage, valid);
-                return;
-            }
-
-            // None of the cases above
+    void update(const LocationSet* locations, TernaryBool valid) {
+        CHECK_NULL(locations);
+        for (auto storage : *locations) {
             update(storage, valid);
-        } else {
-            auto member = expr->to<IR::Member>();
-            auto base = member ? member->expr : nullptr;
-            auto base_storage = getStorageLocation(base);
-
-            // Accessing a field of a header union which is an element of a header stack
-            // (non-constant indexing)
-            if (auto array_storage = base_storage->to<ArrayLocation>()) {
-                if (valid != TernaryBool::No) {
-                    for (auto element : *array_storage) {
-                        if (auto struct_storage = element->to<StructLocation>()) {
-                            if (struct_storage->isHeaderUnion()) {
-                                // we don't know precisely which union is accessed, so we
-                                // propagate the value of the corresponding field to all
-                                // unions, without invalidating other fields of these unions
-                                for (auto field : struct_storage->fields()) {
-                                    if (field->name.endsWith('.' + member->member.name)) {
-                                        update(field, valid);
-                                        break;
-                                    }
-                                }
-                                update(element, valid);
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 
+    void update(const IR::Expression* expr, TernaryBool valid) {
+        CHECK_NULL(expr);
+
+        // skipping invalidation of the whole stack
+        if (isNonConstIndexing(expr) && valid != TernaryBool::Yes)
+            return;
+
+        auto member = expr->to<IR::Member>();
+        if (member && member->expr &&
+            typeMap->getType(member->expr, true)->is<IR::Type_HeaderUnion>()) {
+            // accessing a field of a union of a stack of unions
+            // (with non-constant indexing)
+            if (isNonConstIndexing(member->expr)) {
+                // skipping invalidation of the whole stack (valid isn't TernaryBool::Yes)
+                if (valid == TernaryBool::Yes) {
+                    // we don't invalidate other fields (if any is valid) in order to
+                    // avoid false positives
+                    update(getStorageLocation(expr), valid);
+                }
+            } else {  // constant index or accessing a field of a union which isn't in a stack
+                // invalidate fields of a union
+                auto base_storage = getStorageLocation(member->expr);
+                for (auto bs : *base_storage) {
+                    setValueToStorage(bs, TernaryBool::No);
+                }
+                // update valid bits of a field and a union
+                update(getStorageLocation(expr), valid);
+                update(base_storage, valid);
+            }
+            return;
+        }
+
+        update(getStorageLocation(expr), valid);
+    }
+
     TernaryBool find(const StorageLocation* storage) const {
-        if (!storage)
-            return TernaryBool::Yes;
+        CHECK_NULL(storage);
 
         if (notReport.find(storage) != notReport.end())
             return TernaryBool::Yes;
@@ -248,57 +269,28 @@ class HeaderDefinitions {
         return ::get(defs, storage, TernaryBool::Maybe);
     }
 
-    TernaryBool find(const IR::Expression* expr) const {
-        CHECK_NULL(expr);
-        auto storage = getStorageLocation(expr);
-        if (!storage) {
-            auto member = expr->to<IR::Member>();
-            auto base = member ? member->expr : nullptr;
-            auto base_storage = getStorageLocation(base);
+    // result is OR operation on valid bits of all locations
+    TernaryBool find(const LocationSet* locations) const {
+        CHECK_NULL(locations);
 
-            // A field of a header union of a header stack with non-constant index
-            if (auto array_storage = base_storage->to<ArrayLocation>()) {
-                for (auto element : *array_storage) {
-                    if (auto struct_storage = element->to<StructLocation>()) {
-                        if (struct_storage->isHeaderUnion()) {
-                            for (auto field : struct_storage->fields()) {
-                                if (field->name.endsWith('.' + member->member.name)) {
-                                    if (find(field) != TernaryBool::No)
-                                        return TernaryBool::Yes;
-                                    break;
-                                }
-                            }
-                        } else
-                            return TernaryBool::Yes;
-                    } else
-                        return TernaryBool::Yes;
-                }
-                return TernaryBool::No;
-            }
-        } else if (auto array_storage = storage->to<ArrayLocation>()) {  // non-constant index
-            // the result is OR opeation of all elements in the header stack
-            for (auto element : *array_storage) {
-                if (find(element) != TernaryBool::No)
-                    return TernaryBool::Yes;
-            }
-            return TernaryBool::No;
+        if (locations->isEmpty())
+            return TernaryBool::Yes;
+
+        TernaryBool valid = TernaryBool::No;
+        for (auto storage : *locations) {
+            TernaryBool val = find(storage);
+            if (val == TernaryBool::Maybe)
+                valid = val;
+            else if (val == TernaryBool::Yes)
+                return TernaryBool::Yes;
         }
 
-        // None of the cases above
-        return find(storage);
+        return valid;
     }
 
-    void remove(const StorageLocation* storage) {
-        CHECK_NULL(storage);
-        defs.erase(storage);
-    }
-
-    void remove(const IR::Expression* expr) {
-        if (!expr)
-            return;
-
-        if (auto storage = getStorageLocation(expr))
-            remove(storage);
+    TernaryBool find(const IR::Expression* expr) const {
+        CHECK_NULL(expr);
+        return find(getStorageLocation(expr));
     }
 
     void clear() { defs.clear(); }
@@ -312,36 +304,29 @@ class HeaderDefinitions {
     bool operator!=(const HeaderDefinitions& other) const { return !(*this == other); }
 
     HeaderDefinitions* intersect(const HeaderDefinitions* other) const {
-        HeaderDefinitions* result = new HeaderDefinitions(refMap, storageMap);
+        HeaderDefinitions* result = new HeaderDefinitions(refMap, typeMap, storageMap);
         for (auto def : defs) {
-            auto it = other->defs.find(def.first);
-            auto valid = it != other->defs.end() ? it->second : TernaryBool::Maybe;
-            result->update(def.first, valid == def.second ? valid : TernaryBool::Maybe);
+            auto valid = ::get(other->defs, def.first, TernaryBool::Maybe);
+            result->defs.emplace(def.first, valid == def.second ? valid : TernaryBool::Maybe);
         }
         return result;
     }
 
-    void addToNotReport(const StorageLocation* storage) {
-        if (!storage)
-            return;
-
-        if (auto array_storage = storage->to<ArrayLocation>()) {
-            for (auto element : *array_storage)
-                addToNotReport(element);
-        } else {
+    void addToNotReport(const LocationSet* locations) {
+        CHECK_NULL(locations);
+        for (auto storage : *locations) {
             checkLocation(storage);
-            if (auto struct_storage = storage->to<StructLocation>())
-                if (struct_storage->isHeaderUnion())
-                    for (auto field : struct_storage->fields())
-                        notReport.emplace(field);
             notReport.emplace(storage);
+            if (auto header_union = storage->to<StructLocation>())
+                if (header_union->isHeaderUnion())
+                    for (auto field : header_union->fields())
+                        notReport.emplace(field);
         }
     }
 
     void addToNotReport(const IR::Expression* expr) {
         CHECK_NULL(expr);
-        auto storage = getStorageLocation(expr);
-        addToNotReport(storage);
+        addToNotReport(getStorageLocation(expr));
     }
 
     void setNotReport(const HeaderDefinitions* other) {
@@ -410,7 +395,9 @@ class FindUninitialized : public Inspector {
             typeMap(definitions->storageMap->typeMap),
             definitions(definitions), lhs(false), currentPoint(),
             hasUses(hasUses), virtualMethod(false),
-            headerDefs(new HeaderDefinitions(refMap, definitions->storageMap)) {
+            headerDefs(new HeaderDefinitions(new ReferenceMap(*refMap),
+                                             new TypeMap(*typeMap),
+                                             definitions->storageMap)) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(definitions);
         CHECK_NULL(hasUses);
         visitDagOnce = false; }
@@ -436,36 +423,15 @@ class FindUninitialized : public Inspector {
         return defs;
     }
 
-    void setValueToStorage(const StorageLocation* storage, TernaryBool value) {
-        if (!storage)
-            return;
-        if (auto struct_storage = storage->to<StructLocation>()) {
-            if (struct_storage->isHeader()) {
-                headerDefs->update(struct_storage, value);
-            } else {
-                for (auto f : struct_storage->fields()) {
-                    setValueToStorage(f, value);
-                }
-                if (struct_storage->isHeaderUnion()) {
-                    headerDefs->update(struct_storage, value);
-                }
-            }
-        } else if (auto array_storage = storage->to<ArrayLocation>()) {
-            for (auto element : *array_storage) {
-                setValueToStorage(element, value);
-            }
-        }
-    }
-
     // Called at the beginning of controls, parsers and functions
     void initHeaderParams(const IR::ParameterList* parameters) {
         if (!parameters)
             return;
         for (auto p : parameters->parameters)
             if (auto storage = definitions->storageMap->getStorage(p)) {
-                setValueToStorage(storage, p->direction != IR::Direction::Out
-                                         ? TernaryBool::Yes
-                                         : TernaryBool::No);
+                headerDefs->setValueToStorage(storage, p->direction != IR::Direction::Out
+                                                       ? TernaryBool::Yes
+                                                       : TernaryBool::No);
             }
     }
 
@@ -622,7 +588,8 @@ class FindUninitialized : public Inspector {
         for (auto state : parser->states) {
             if (inputHeaderDefs.find(state) == inputHeaderDefs.end()) {
                 inputHeaderDefs.emplace(state,
-                                        new HeaderDefinitions(refMap, definitions->storageMap));
+                    new HeaderDefinitions(headerDefs->refMap, headerDefs->typeMap,
+                                          definitions->storageMap));
             }
             headerDefs = inputHeaderDefs[state];
             visit(state);
@@ -695,186 +662,115 @@ class FindUninitialized : public Inspector {
         return loc;
     }
 
-    // This function is used for copy-out semanthics
-    void processHeadersInAssignment(const StorageLocation* dst, const StorageLocation* src) {
-        if (auto dst_struct_storage = dst->to<StructLocation>()) {
-            if (auto src_struct_storage = src->to<StructLocation>()) {
-                if (dst_struct_storage->isHeader() && src_struct_storage->isHeader()) {
-                    auto valid = headerDefs->find(src);
-                    headerDefs->update(dst, valid);
-                    return;
-                }
-
-                if ((dst_struct_storage->isStruct() && src_struct_storage->isStruct()) ||
-                    (dst_struct_storage->isHeaderUnion() && src_struct_storage->isHeaderUnion())) {
-                    auto dst_fields = dst_struct_storage->fields();
-                    auto src_fields = src_struct_storage->fields();
-
-                    auto it1 = dst_fields.begin();
-                    auto it2 = src_fields.begin();
-                    while (it1 != dst_fields.end() && it2 != src_fields.end()) {
-                        processHeadersInAssignment(*it1, *it2);
-                        ++it1;
-                        ++it2;
-                    }
-
-                    if (dst_struct_storage->isHeaderUnion()) {
-                        auto valid = headerDefs->find(src_struct_storage);
-                        headerDefs->update(dst_struct_storage, valid);
-                    }
-                }
-            } else if (src->is<ArrayLocation>()) {
-                if (dst_struct_storage->isHeaderUnion())
-                    setValueToStorage(dst, TernaryBool::Yes);
-                else if (dst_struct_storage->isHeader()) {
-                    auto valid = headerDefs->find(src);
-                    headerDefs->update(dst, valid);
-                }
-            }
-            return;
-        }
-
-        if (auto dst_array_storage = dst->to<ArrayLocation>()) {
-            if (auto src_array_storage = src->to<ArrayLocation>()) {
-                auto it1 = dst_array_storage->begin();
-                auto it2 = src_array_storage->begin();
-
-                while (it1 != dst_array_storage->end() && it2 != src_array_storage->end()) {
-                    processHeadersInAssignment(*it1, *it2);
-                    ++it1;
-                    ++it2;
-                }
-            } else if (auto src_struct_storage = src->to<StructLocation>()) {
-                if (src_struct_storage->isHeader()) {
-                    auto valid = headerDefs->find(src_struct_storage);
-                    if (valid != TernaryBool::No)
-                        for (auto element : *dst_array_storage)
-                            headerDefs->update(element, valid);
-                }
-           }
-        }
-    }
-
-    // This function is used for copy-in semantics
-    void processHeadersInAssignment(const StorageLocation* dst, const IR::Expression* src,
-                                    const IR::Type* src_type) {
-        if (!dst || !src || !src_type)
-            return;
-
-        if (auto src_storage = headerDefs->getStorageLocation(src)) {
-            processHeadersInAssignment(dst, src_storage);
-            return;
-        }
-
-        if (auto dst_struct_storage = dst->to<StructLocation>()) {
-            if (dst_struct_storage->isHeader()) {
-                if (src->is<IR::StructExpression>() || src->is<IR::MethodCallExpression>()) {
-                    headerDefs->update(dst, TernaryBool::Yes);
-                } else {
-                    BUG("%1%: unexpected expression on RHS", src);
-                }
-                return;
-            }
-
-            if (dst_struct_storage->isStruct()) {
-                if (auto list = src->to<IR::StructExpression>()) {
-                    auto it = list->components.begin();
-                    for (auto field : dst_struct_storage->fields()) {
-                        processHeadersInAssignment(field, (*it)->expression,
-                                                typeMap->getType((*it)->expression, true));
-                        ++it;
-                    }
-                } else if (src->is<IR::MethodCallExpression>()) {
-                    for (auto field : dst_struct_storage->fields()) {
-                        processHeadersInAssignment(field, src, src_type);
-                    }
-                } else {
-                    BUG("%1%: unexpected expression on RHS", src);
-                }
-                return;
-            }
-
-            if (dst_struct_storage->isHeaderUnion()) {
-                if (src->is<IR::MethodCallExpression>()) {
-                    setValueToStorage(dst, TernaryBool::Yes);
-                } else {
-                    BUG("%1%: unexpected expression on RHS", src);
-                }
-            }
-            return;
-        }
-
-        if (dst->is<ArrayLocation>()) {
-            if (src->is<IR::StructExpression>() || src->is<IR::MethodCallExpression>()) {
-                setValueToStorage(dst, TernaryBool::Yes);
-            } else {
-                BUG("%1%: unexpected expression on RHS", src);
-            }
-        }
-    }
-
-    // This function is used in assignments
     void processHeadersInAssignment(const IR::Expression* dst, const IR::Expression* src,
                                     const IR::Type* dst_type, const IR::Type* src_type) {
         if (!dst || !src || !dst_type || !src_type)
             return;
 
-        auto dst_storage = headerDefs->getStorageLocation(dst);
-        if (auto dst_struct_storage = dst_storage->to<StructLocation>()) {
-            if (dst_struct_storage->isHeader()) {
-                if (src->is<IR::StructExpression>() || src->is<IR::MethodCallExpression>()) {
-                    headerDefs->update(dst, TernaryBool::Yes);
-                } else if (src_type->is<IR::Type_Header>()) {
-                    auto valid = headerDefs->find(src);
-                    headerDefs->update(dst, valid);
-                } else {
-                    BUG("%1%: unexpected expression on RHS", src);
-                }
-                return;
-            }
-
-            if (dst_struct_storage->isStruct()) {
-                auto dst_struct = dst_type->to<IR::Type_Struct>();
-                if (auto list = src->to<IR::StructExpression>()) {
-                    auto it = list->components.begin();
-                    for (auto field : dst_struct->fields) {
-                        IR::Member member(dst, field->name);
-                        processHeadersInAssignment(&member, (*it)->expression,
-                                                   typeMap->getType(field, true),
-                                                   typeMap->getType((*it)->expression, true));
-                        ++it;
-                    }
-                } else if (src->is<IR::MethodCallExpression>()) {
-                    for (auto field : dst_struct->fields) {
-                        IR::Member member(dst, field->name);
-                        processHeadersInAssignment(&member, src,
-                                                   typeMap->getType(field, true),
-                                                   src_type);
-                    }
-                } else if (src_type->is<IR::Type_Struct>()) {
-                    processHeadersInAssignment(dst_struct_storage,
-                                               headerDefs->getStorageLocation(src));
-                } else {
-                    BUG("%1%: unexpected expression on RHS", src);
-                }
-                return;
-            }
-
-            if (dst_struct_storage->isHeaderUnion()) {
-                processHeadersInAssignment(dst_struct_storage, src, src_type);
+        if (dst_type->is<IR::Type_Header>()) {
+            if (src->is<IR::StructExpression>() || src->is<IR::MethodCallExpression>()) {
+                headerDefs->update(dst, TernaryBool::Yes);
+            } else if (src_type->is<IR::Type_Header>()) {
+                auto valid = headerDefs->find(src);
+                headerDefs->update(dst, valid);
+            } else {
+                BUG("%1%: unexpected expression on RHS", src);
             }
             return;
         }
 
-        if (auto dst_array_storage = dst_storage->to<ArrayLocation>()) {
-            if (src->is<IR::StructExpression>() || src->is<IR::MethodCallExpression>()) {
-                setValueToStorage(dst_array_storage, TernaryBool::Yes);
-            } else if (src_type->is<IR::Type_Stack>()) {
-                processHeadersInAssignment(dst_array_storage, headerDefs->getStorageLocation(src));
-            } else if (src_type->is<IR::Type_Header>()) {
-                 // Indexing with non-constant index on LHS
+        if (auto dst_struct = dst_type->to<IR::Type_Struct>()) {
+            if (auto list = src->to<IR::StructExpression>()) {
+                auto it = list->components.begin();
+                for (auto field : dst_struct->fields) {
+                    IR::Member member(dst, field->name);
+                    processHeadersInAssignment(&member, (*it)->expression,
+                                               typeMap->getType(field, true),
+                                               typeMap->getType((*it)->expression, true));
+                    ++it;
+                }
+            } else if (src->is<IR::MethodCallExpression>()) {
+                auto storage = headerDefs->getStorageLocation(dst);
+                for (auto s : *storage) {
+                    headerDefs->setValueToStorage(s, TernaryBool::Yes);
+                }
+            } else if (src_type->to<IR::Type_Struct>()) {
+                for (auto field : dst_struct->fields) {
+                    IR::Member dst_member(dst, field->name);
+                    IR::Member src_member(src, field->name);
+                    processHeadersInAssignment(&dst_member, &src_member,
+                                               typeMap->getType(field, true),
+                                               typeMap->getType(field, true));
+                }
+            } else {
+                BUG("%1%: unexpected expression on RHS", src);
+            }
+            return;
+        }
+
+        if (auto dst_headerunion = dst_type->to<IR::Type_HeaderUnion>()) {
+            if (src->is<IR::MethodCallExpression>()) {
+                auto storage = headerDefs->getStorageLocation(dst);
+                for (auto s : *storage) {
+                    headerDefs->setValueToStorage(s, TernaryBool::Yes);
+                }
+            } else if (src_type->is<IR::Type_HeaderUnion>()) {
+                auto member = dst->to<IR::Member>();
+                bool non_constant_indexing = member ?
+                                             headerDefs->isNonConstIndexing(member->expr) :
+                                             false;
+
+                for (auto field : dst_headerunion->fields) {
+                    IR::Member dst_member(dst, field->name);
+                    IR::Member src_member(src, field->name);
+                    auto valid = headerDefs->find(&src_member);
+                    if (!non_constant_indexing || valid == TernaryBool::Yes)
+                        headerDefs->update(headerDefs->getStorageLocation(&dst_member),
+                                           valid);
+                }
                 auto valid = headerDefs->find(src);
-                headerDefs->update(dst, valid);
+                if (!non_constant_indexing || valid == TernaryBool::Yes)
+                    headerDefs->update(headerDefs->getStorageLocation(dst), TernaryBool::Yes);
+            } else {
+                BUG("%1%: unexpected expression on RHS", src);
+            }
+            return;
+        }
+
+        if (dst_type->is<IR::Type_Stack>()) {
+            if (src->is<IR::StructExpression>() || src->is<IR::MethodCallExpression>()) {
+                auto locations = headerDefs->getStorageLocation(dst);
+                for (auto storage : *locations) {
+                    headerDefs->setValueToStorage(storage, TernaryBool::Yes);
+                }
+            } else if (src_type->is<IR::Type_Stack>()) {
+                auto dst_locations = headerDefs->getStorageLocation(dst);
+                auto src_locations = headerDefs->getStorageLocation(src);
+
+                if (!dst_locations->isEmpty() && !src_locations->isEmpty()) {
+                    auto dst_storage = *dst_locations->begin();
+                    auto src_storage = *src_locations->begin();
+
+                    auto dst_array_storage = dst_storage->to<ArrayLocation>();
+                    auto src_array_storage = src_storage->to<ArrayLocation>();
+                    if (dst_array_storage && src_array_storage) {
+                        auto it = src_array_storage->begin();
+                        for (auto dst_element : *dst_array_storage) {
+                            auto dst_header_union = dst_element->to<StructLocation>();
+                            auto src_header_union = (*it)->to<StructLocation>();
+                            if (dst_header_union->isHeaderUnion() &&
+                                src_header_union->isHeaderUnion()) {
+                                auto field_it = src_header_union->fields().begin();
+                                for (auto field : dst_header_union->fields()) {
+                                    headerDefs->update(field, headerDefs->find(*field_it));
+                                    ++field_it;
+                                }
+                            }
+                            headerDefs->update(dst_element, headerDefs->find(*it));
+                            ++it;
+                        }
+                    }
+                }
             } else {
                 BUG("%1%: unexpected expression on RHS", src);
             }
@@ -1189,13 +1085,14 @@ class FindUninitialized : public Inspector {
                 // Reads all array fields
                 reads(expression, base);
                 registerUses(expression, false);
-                headerDefs->update(bim->appliedTo, TernaryBool::Yes);
+                auto storage = headerDefs->getStorageLocation(bim->appliedTo);
+                for (auto s : *storage)
+                    headerDefs->setValueToStorage(s, TernaryBool::Yes);
                 return false;
             } else if (name == IR::Type_Header::isValid) {
                 auto storage = base->getField(StorageFactory::validFieldName);
                 reads(expression, storage);
                 registerUses(expression);
-                // TODO: conditions with isValid()
                 headerDefs->addToNotReport(bim->appliedTo);
                 return false;
             } else if (name == IR::Type_Header::setValid) {
@@ -1228,12 +1125,15 @@ class FindUninitialized : public Inspector {
             if (auto actionCall = mi->to<ActionCall>()) {
                 if (auto param = actionCall->action->parameters->getParameter(p->name)) {
                     if (p->direction == IR::Direction::Out) {
-                        setValueToStorage(definitions->storageMap->getStorage(param),
-                                        TernaryBool::No);
+                        headerDefs->setValueToStorage(definitions->storageMap->getStorage(param),
+                                                      TernaryBool::No);
                     } else {
                         // we can treat the argument passing as an assignment
-                        processHeadersInAssignment(definitions->storageMap->getStorage(param),
-                                                   expr->expression,
+                        IR::PathExpression* pexpr = new IR::PathExpression(param->name);
+                        headerDefs->refMap->setDeclaration(pexpr->path, param);
+                        headerDefs->typeMap->setType(pexpr, p->type);
+                        processHeadersInAssignment(pexpr, expr->expression,
+                                                   p->type,
                                                    typeMap->getType(expr->expression, true));
                     }
                 }
@@ -1277,18 +1177,25 @@ class FindUninitialized : public Inspector {
                 lhs = save;
 
                 if (isControlOrParserApply || mi->is<ExternMethod>() || mi->is<ExternFunction>()) {
-                    if (typeMap->getType(expr->expression, true)->is<IR::Type_Header>())
+                    if (typeMap->getType(expr->expression, true)->is<IR::Type_Header>()) {
                         headerDefs->update(expr->expression, TernaryBool::Yes);
-                    else
-                        setValueToStorage(headerDefs->getStorageLocation(expr->expression),
-                                          TernaryBool::Yes);
+                    } else {
+                        auto locations = headerDefs->getStorageLocation(expr->expression);
+                        for (auto storage : *locations) {
+                            headerDefs->setValueToStorage(storage, TernaryBool::Yes);
+                        }
+                    }
                     continue;
                 }
 
                 if (auto actionCall = mi->to<ActionCall>()) {
                     if (auto param = actionCall->action->parameters->getParameter(p->name)) {
-                        processHeadersInAssignment(headerDefs->getStorageLocation(expr->expression),
-                                                   definitions->storageMap->getStorage(param));
+                        IR::PathExpression* pexpr = new IR::PathExpression(param->name);
+                        headerDefs->refMap->setDeclaration(pexpr->path, param);
+                        headerDefs->typeMap->setType(pexpr, p->type);
+                        processHeadersInAssignment(expr->expression, pexpr,
+                                                   typeMap->getType(expr->expression, true),
+                                                   p->type);
                     }
                 }
             }

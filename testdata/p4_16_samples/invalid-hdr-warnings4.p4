@@ -108,7 +108,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         h.h1[1].setValid();
         h_copy.h1[0] = h.h1[i];     // h.h1[i] could be valid or invalid here depending on i,
                                     // so h_copy.h1[0] is considered valid from this point in
-                                    // order to avoid false negatives
+                                    // order to avoid false positives
         h_copy.h1[0].data = 1;
     }
 }

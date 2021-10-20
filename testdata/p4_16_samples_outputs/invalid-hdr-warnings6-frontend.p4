@@ -74,6 +74,9 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         } else {
             u_0[i_0].h2.setValid();
         }
+        u_0[1].h1.setInvalid();
+        u_0[i_0].h1.setInvalid();
+        u_0[i_0].h1.setValid();
     }
 }
 
