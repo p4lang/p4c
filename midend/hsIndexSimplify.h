@@ -8,28 +8,40 @@
 
 namespace P4 {
 
-/// This class finds a header stack with non-concrete index 
-/// which should be eliminated in unfolding if @a isFinder is true.
-/// Otherwise it substitutes index of a header stack in all occuarence of @a arrayIndex.
-class HSIndexFindOrTransform : public Transform {
+typedef std::map<cstring, const IR::PathExpression*> generatedVariablesMap;
+
+/// This class finds innermost header stack with non-concrete index.
+/// For each found innermost header stack it generates new local variable and
+/// adds it to the corresponded local definitions.
+class HSIndexFinder : public Inspector {
+    friend class HSIndexTransform;
     friend class HSIndexSimplifier;
     IR::IndexedVector<IR::Declaration> *locals;
-    const IR::ArrayIndex* arrayIndex;
-    const IR::ArrayIndex* tmpArrayIndex;
-    bool isFinder;
-    int index;
     ReferenceMap* refMap;
     TypeMap* typeMap;
+    const IR::ArrayIndex* arrayIndex;
+    const IR::PathExpression* newVariable;
+    generatedVariablesMap* generatedVariables;
  public:
-    HSIndexFindOrTransform(IR::IndexedVector<IR::Declaration> *locals,
-                           ReferenceMap* refMap,TypeMap* typeMap) :
-        locals(locals), arrayIndex(nullptr), tmpArrayIndex(nullptr), isFinder(true),
-        refMap(refMap), typeMap(typeMap) {}
-    HSIndexFindOrTransform(const IR::ArrayIndex* arrayIndex, int index) :
-        arrayIndex(arrayIndex), tmpArrayIndex(nullptr), isFinder(false), index(index), 
-        refMap(nullptr), typeMap(nullptr) {}
+    HSIndexFinder(IR::IndexedVector<IR::Declaration> *locals, ReferenceMap* refMap,
+                  TypeMap* typeMap, generatedVariablesMap* generatedVariables) : locals(locals),
+                  refMap(refMap), typeMap(typeMap), arrayIndex(nullptr), newVariable(nullptr),
+                  generatedVariables(generatedVariables) {}
+    void postorder(const IR::ArrayIndex* curArrayIndex) override;
+
+ protected:
+    void addNewVariable();
+};
+
+/// This class substitutes index of a header stack in all occurence of found header stack.
+class HSIndexTransform : public Transform {
+    friend class HSIndexSimplifier;
+    int index;
+    HSIndexFinder& hsIndexFinder;
+ public:
+    HSIndexTransform(HSIndexFinder& finder, int index) :
+        index(index), hsIndexFinder(finder) {}
     const IR::Node* postorder(IR::ArrayIndex* curArrayIndex) override;
-    size_t getArraySize();
 };
 
 /// This class eliminates all non-concrete indexes of the header stacks in the controls.
@@ -49,22 +61,26 @@ class HSIndexSimplifier : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
     IR::IndexedVector<IR::Declaration> *locals;
-    bool ignoreParser;
+    generatedVariablesMap* generatedVariables;
  public:
     HSIndexSimplifier(ReferenceMap* refMap, TypeMap* typeMap,
-        IR::IndexedVector<IR::Declaration> *locals = nullptr) :
-        refMap(refMap), typeMap(typeMap), locals(locals), ignoreParser(false) {}
+        IR::IndexedVector<IR::Declaration> *locals = nullptr,
+        generatedVariablesMap* generatedVariables = nullptr) :
+        refMap(refMap), typeMap(typeMap), locals(locals),
+        generatedVariables(generatedVariables) {
+            if (generatedVariables == nullptr)
+                generatedVariables = new generatedVariablesMap();
+        }
     IR::Node* preorder(IR::IfStatement* ifStatement) override;
     IR::Node* preorder(IR::AssignmentStatement* assignmentStatement) override;
     IR::Node* preorder(IR::BlockStatement* assignmentStatement) override;
-    IR::Node* preorder(IR::ConstructorCallExpression* expr) override;
     IR::Node* preorder(IR::MethodCallStatement* methodCallStatement) override;
     IR::Node* preorder(IR::P4Control* control) override;
     IR::Node* preorder(IR::P4Parser* parser) override;
     IR::Node* preorder(IR::SwitchStatement* switchStatement) override;
 
  protected:
-    IR::Node* eliminateArrayIndexes(IR::Statement* statement);
+    IR::Node* eliminateArrayIndexes(HSIndexFinder& aiFinder, IR::Statement* statement);
 };
 
 }  // namespace P4

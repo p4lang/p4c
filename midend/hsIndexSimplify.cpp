@@ -5,94 +5,80 @@
 
 namespace P4 {
 
-const IR::Node* HSIndexFindOrTransform::postorder(IR::ArrayIndex* curArrayIndex) {
-    if (curArrayIndex->right->is<IR::Constant>()) {
-        return curArrayIndex;
+void HSIndexFinder::postorder(const IR::ArrayIndex* curArrayIndex) {
+    if (arrayIndex == nullptr && !curArrayIndex->right->is<IR::Constant>()) {
+        arrayIndex = curArrayIndex;
+        addNewVariable();
     }
-    // Find the first occurrence of non-concrete array index.
-    if (isFinder) {
-        if (arrayIndex == nullptr && !curArrayIndex->right->is<IR::Constant>()) {
-            // If index is an expression then create new variable.
-            if (locals != nullptr && (curArrayIndex->right->is<IR::Operation_Ternary>() ||
-                curArrayIndex->right->is<IR::Operation_Binary>() ||
-                curArrayIndex->right->is<IR::Operation_Unary>())) {
-                // Generate new temporary variable.
-                auto type = typeMap->getTypeType(curArrayIndex->right->type, true);
-                std::string newName = std::string("hsiVar")+std::to_string(locals->size());
-                auto name = refMap->newName(newName);
-                auto decl = new IR::Declaration_Variable(name, type);
-                locals->push_back(decl);
-                typeMap->setType(decl, type);
-                auto* newArray = curArrayIndex->clone();
-                auto* pathExpr =
-                    new IR::PathExpression(curArrayIndex->srcInfo, type, new IR::Path(name));
-                newArray->right = pathExpr;
-                tmpArrayIndex = newArray;
-            }
-            arrayIndex = curArrayIndex;
+}
+
+void HSIndexFinder::addNewVariable() {
+    BUG_CHECK(arrayIndex != nullptr, "Can't generate new name for empty ArrayIndex");
+    // If index is an expression then create new variable.
+    if (locals != nullptr && (arrayIndex->right->is<IR::Operation_Ternary>() ||
+        arrayIndex->right->is<IR::Operation_Binary>() ||
+        arrayIndex->right->is<IR::Operation_Unary>() ||
+        arrayIndex->right->is<IR::PathExpression>())) {
+        // Generate new local variable if needed.
+        std::ostringstream ostr;
+        ostr << arrayIndex->right;
+        cstring indexString = ostr.str();
+        if (arrayIndex->right->is<IR::PathExpression>()) {
+            newVariable = arrayIndex->right->to<IR::PathExpression>();
+        } else if (generatedVariables->count(indexString) == 0) {
+            // Generate new temporary variable.
+            auto type = typeMap->getTypeType(arrayIndex->right->type, true);
+            std::string newName = std::string("hsiVar")+std::to_string(generatedVariables->size());
+            auto name = refMap->newName(newName);
+            auto decl = new IR::Declaration_Variable(name, type);
+            locals->push_back(decl);
+            typeMap->setType(decl, type);
+            newVariable = new IR::PathExpression(arrayIndex->srcInfo, type, new IR::Path(name));
+            generatedVariables->emplace(indexString, newVariable);
+        } else {
+            newVariable = generatedVariables->at(indexString);
         }
-    } else {
-        if (curArrayIndex->equiv(*arrayIndex)) {
-            if (tmpArrayIndex != nullptr) {
-                return tmpArrayIndex;
-            }
-            // Translating current array index.
-            if (arrayIndex != nullptr) {
-                auto* newArrayIndex = arrayIndex->clone();
-                newArrayIndex->right = new IR::Constant(index);
-                return newArrayIndex;
-            }
-        }
+    }
+}
+
+const IR::Node* HSIndexTransform::postorder(IR::ArrayIndex* curArrayIndex) {
+    if (hsIndexFinder.arrayIndex != nullptr &&
+        curArrayIndex->equiv(*hsIndexFinder.arrayIndex)) {
+        // Translating current array index.
+        auto* newArrayIndex = hsIndexFinder.arrayIndex->clone();
+        newArrayIndex->right = new IR::Constant(newArrayIndex->right->type, index);
+        return newArrayIndex;
     }
     return curArrayIndex;
 }
 
-size_t HSIndexFindOrTransform::getArraySize() {
-    const auto* typeStack = arrayIndex->left->type->checkedTo<IR::Type_Stack>();
-    return typeStack->getSize();
-}
-
-IR::Node* HSIndexSimplifier::eliminateArrayIndexes(IR::Statement* statement) {
-    if (ignoreParser)
+IR::Node* HSIndexSimplifier::eliminateArrayIndexes(HSIndexFinder& aiFinder,
+                                                   IR::Statement* statement) {
+    if (aiFinder.arrayIndex == nullptr) {
         return statement;
-    // Check non-concrete array indexes.
-    HSIndexFindOrTransform aiFinder(locals, refMap, typeMap);
-    const IR::Node* updatedStatement = nullptr;
+    }
     const IR::Statement* elseBody = nullptr;
     auto* curIf = statement->to<IR::IfStatement>();
     if (curIf != nullptr) {
         elseBody = curIf->ifFalse;
-        auto* newIf = curIf->clone();
-        newIf->condition = curIf->condition->apply(aiFinder);
-        updatedStatement = newIf;
-    } else if (statement->is<IR::SwitchStatement>()) {
-        auto* curSwitch = statement->to<IR::SwitchStatement>();
-        updatedStatement = curSwitch->expression->apply(aiFinder);
-    } else {
-        updatedStatement = statement->apply(aiFinder);
     }
-    if (aiFinder.arrayIndex == nullptr) {
-        return statement;
-    }
-    IR::AssignmentStatement* assigment = nullptr;
-    if (aiFinder.tmpArrayIndex != nullptr) {
-        aiFinder.isFinder = false;
-        updatedStatement = updatedStatement->apply(aiFinder)->to<IR::Statement>();
-        assigment = new IR::AssignmentStatement(aiFinder.tmpArrayIndex->srcInfo,
-            aiFinder.tmpArrayIndex->right, aiFinder.arrayIndex->right);
-        aiFinder.arrayIndex = aiFinder.tmpArrayIndex;
-        aiFinder.tmpArrayIndex = nullptr;
+    IR::IndexedVector<IR::StatOrDecl> newComponents;
+    if (aiFinder.newVariable != nullptr) {
+        if (!aiFinder.newVariable->equiv(*aiFinder.arrayIndex->right)) {
+            newComponents.push_back(new IR::AssignmentStatement(aiFinder.arrayIndex->srcInfo,
+            aiFinder.newVariable, aiFinder.arrayIndex->right));
+        }
     }
     IR::IfStatement* result = nullptr;
     IR::IfStatement* curResult = nullptr;
     IR::IfStatement* newIf = nullptr;
-    size_t sz = aiFinder.getArraySize();
+    const auto* typeStack = aiFinder.arrayIndex->left->type->checkedTo<IR::Type_Stack>();
+    size_t sz = typeStack->getSize();
     for (size_t i = 0; i < sz; i++) {
-        HSIndexFindOrTransform aiRewriter(aiFinder.arrayIndex, i);
-        auto* newStatement = updatedStatement->apply(aiRewriter)->to<IR::Statement>();
-        auto* newIndex = aiFinder.arrayIndex->right->apply(aiRewriter);
-        auto* newCondition =
-            new IR::Equ(newIndex, new IR::Constant(aiFinder.arrayIndex->right->type, i));
+        HSIndexTransform aiRewriter(aiFinder, i);
+        auto* newStatement = statement->apply(aiRewriter)->to<IR::Statement>();
+        auto* newIndex = new IR::Constant(aiFinder.arrayIndex->right->type, i);
+        auto* newCondition = new IR::Equ(aiFinder.newVariable, newIndex);
         if (curIf != nullptr) {
             newIf = newStatement->to<IR::IfStatement>()->clone();
             newIf->condition = new IR::LAnd(newCondition, newIf->condition);
@@ -109,28 +95,34 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(IR::Statement* statement) {
     }
     if (locals != nullptr) {
         // Add case for out of bound.
-        HSIndexFindOrTransform aiRewriter(aiFinder.arrayIndex, sz - 1);
-        auto* newStatement = updatedStatement->apply(aiRewriter)->to<IR::Statement>();
-        auto* newIndex = aiFinder.arrayIndex->right->apply(aiRewriter);
-        auto* newCondition =
-            new IR::Geq(newIndex, new IR::Constant(aiFinder.arrayIndex->right->type, sz));
+        HSIndexTransform aiRewriter(aiFinder, sz - 1);
+        auto* newStatement = statement->apply(aiRewriter)->to<IR::Statement>();
+        auto* newIndex = new IR::Constant(aiFinder.arrayIndex->right->type, sz - 1);
+        auto* newCondition = new IR::Geq(aiFinder.newVariable, newIndex);
         if (curIf != nullptr) {
             newIf = newStatement->to<IR::IfStatement>()->clone();
             newIf->condition = new IR::LAnd(newCondition, newIf->condition);
         } else {
             newIf = new IR::IfStatement(newCondition, newStatement, nullptr);
         }
-        // Add assigment of undefined header.
-        auto type = typeMap->getTypeType(aiFinder.arrayIndex->type, true);
-        std::string newName = std::string("hsVar")+std::to_string(locals->size());
-        auto name = refMap->newName(newName);
-        auto decl = new IR::Declaration_Variable(name, type);
-        locals->push_back(decl);
-        typeMap->setType(decl, type);
-        auto* pathExpr =
-            new IR::PathExpression(aiFinder.arrayIndex->srcInfo, type, new IR::Path(name));
+        cstring typeString = aiFinder.arrayIndex->type->node_type_name();
+        const IR::PathExpression* pathExpr = nullptr;
+        if (generatedVariables->count(typeString) == 0) {
+            // Add assigment of undefined header.
+            auto type = typeMap->getTypeType(aiFinder.arrayIndex->type, true);
+            std::string newName = std::string("hsVar")+std::to_string(locals->size());
+            auto name = refMap->newName(newName);
+            auto decl = new IR::Declaration_Variable(name, type);
+            locals->push_back(decl);
+            typeMap->setType(decl, type);
+            pathExpr =
+                new IR::PathExpression(aiFinder.arrayIndex->srcInfo, type, new IR::Path(name));
+            generatedVariables->emplace(typeString, pathExpr);
+        } else {
+            pathExpr = generatedVariables->at(typeString);
+        }
         auto* newArrayIndex = aiFinder.arrayIndex->clone();
-        newArrayIndex->right = new IR::Constant(aiFinder.arrayIndex->right->type, sz - 1);
+        newArrayIndex->right = newIndex;
         newIf->ifFalse = elseBody;
         IR::IndexedVector<IR::StatOrDecl> overflowComponents;
         overflowComponents.push_back(new IR::AssignmentStatement(aiFinder.arrayIndex->srcInfo,
@@ -141,44 +133,46 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(IR::Statement* statement) {
     } else {
         newIf->ifFalse = elseBody;
     }
-    IR::IndexedVector<IR::StatOrDecl> newComponents;
-    if (assigment != nullptr) {
-        newComponents.push_back(assigment);
-    }
     newComponents.push_back(result);
     return new IR::BlockStatement(newComponents);
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::AssignmentStatement* assignmentStatement) {
-    return eliminateArrayIndexes(assignmentStatement);
+    HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
+    assignmentStatement->apply(aiFinder);
+    return eliminateArrayIndexes(aiFinder, assignmentStatement);
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::P4Control* control) {
     auto* newControl = control->clone();
-    HSIndexSimplifier hsSimplifier(refMap, typeMap, &newControl->controlLocals);
+    IR::IndexedVector<IR::Declaration> newControlLocals;
+    HSIndexSimplifier hsSimplifier(refMap, typeMap, &newControlLocals,
+        generatedVariables);
     newControl->body = newControl->body->apply(hsSimplifier)->to<IR::BlockStatement>();
+    for (auto* declaration : control->controlLocals) {
+        if (declaration->is<IR::P4Action>()) {
+            newControlLocals.push_back(declaration->apply(hsSimplifier)->to<IR::Declaration>());
+        } else {
+            newControlLocals.push_back(declaration);
+        }
+    }
+    newControl->controlLocals = newControlLocals;
     return newControl;
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::P4Parser* parser) {
-    IR::IndexedVector<IR::Declaration> components;
-    HSIndexFindOrTransform aiFinder(&components, refMap, typeMap);
-    parser->apply(aiFinder);
-    if (aiFinder.arrayIndex != nullptr)
-        ::warning("ParsersUnroll class should be used for elimination of %1%", parser);
-    // Ignore SelectExpression.
-    ignoreParser = true;
+    prune();
     return parser;
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::BlockStatement* blockStatement) {
-    IR::IndexedVector<IR::Declaration> components;
-    HSIndexFindOrTransform aiFinder(&components, refMap, typeMap);
+    generatedVariablesMap blockGeneratedVariables;
+    HSIndexFinder aiFinder(locals, refMap, typeMap, &blockGeneratedVariables);
     blockStatement->apply(aiFinder);
     if (aiFinder.arrayIndex == nullptr) {
         return blockStatement;
     }
-    HSIndexSimplifier hsSimplifier(refMap, typeMap, locals);
+    HSIndexSimplifier hsSimplifier(refMap, typeMap, locals, &blockGeneratedVariables);
     auto* newBlock = blockStatement->clone();
     IR::IndexedVector<IR::StatOrDecl> newComponents;
     for (auto& component : blockStatement->components) {
@@ -195,27 +189,22 @@ IR::Node* HSIndexSimplifier::preorder(IR::BlockStatement* blockStatement) {
     return newBlock;
 }
 
-IR::Node* HSIndexSimplifier::preorder(IR::ConstructorCallExpression* expr) {
-    // Eliminate concrete indexes.
-    auto* newExpr = expr->clone();
-    auto* newArguments = new IR::Vector<IR::Argument>();
-    HSIndexFindOrTransform aiRewriter(nullptr, 0);
-    for (const auto* arg : *expr->arguments)
-        newArguments->push_back(arg->apply(aiRewriter)->to<IR::Argument>());
-    newExpr->arguments = newArguments;
-    return newExpr;
-}
-
 IR::Node* HSIndexSimplifier::preorder(IR::IfStatement* ifStatement) {
-    return eliminateArrayIndexes(ifStatement);
+    HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
+    ifStatement->condition->apply(aiFinder);
+    return eliminateArrayIndexes(aiFinder, ifStatement);
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::MethodCallStatement* methodCallStatement) {
-    return eliminateArrayIndexes(methodCallStatement);
+    HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
+    methodCallStatement->apply(aiFinder);
+    return eliminateArrayIndexes(aiFinder, methodCallStatement);
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::SwitchStatement* switchStatement) {
-    return eliminateArrayIndexes(switchStatement);
+    HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
+    switchStatement->expression->apply(aiFinder);
+    return eliminateArrayIndexes(aiFinder, switchStatement);
 }
 
 }  // namespace P4

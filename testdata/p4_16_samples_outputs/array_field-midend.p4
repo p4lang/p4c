@@ -6,19 +6,19 @@ extern bit<32> f(inout bit<1> x, in bit<1> b);
 control c(out H[2] h);
 package top(c _c);
 control my(out H[2] s) {
+    H hsVar0;
     @name("my.a") bit<32> a_0;
-    H hsVar1;
     @hidden action array_field30() {
-        a_0 = f(s[0].z, 1w1);
+        a_0 = f(s[32w0].z, 1w1);
     }
     @hidden action array_field30_0() {
-        a_0 = f(s[1].z, 1w1);
+        a_0 = f(s[32w1].z, 1w1);
     }
     @hidden action array_field30_1() {
-        a_0 = f(s[1].z, 1w1);
+        a_0 = f(s[32w1].z, 1w1);
     }
     @hidden action array_field30_2() {
-        s[32w1] = hsVar1;
+        s[32w1] = hsVar0;
     }
     @hidden action array_field26() {
         a_0 = 32w0;
@@ -64,7 +64,7 @@ control my(out H[2] s) {
             tbl_array_field30_0.apply();
         } else {
             tbl_array_field30_1.apply();
-            if (a_0 >= 32w2) {
+            if (a_0 >= 32w1) {
                 tbl_array_field30_2.apply();
             }
         }

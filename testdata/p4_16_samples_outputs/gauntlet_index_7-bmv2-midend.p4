@@ -37,19 +37,19 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    H hsVar0;
     @name("ingress.tmp_0") bit<1> tmp_0;
-    H hsVar1;
     @hidden action gauntlet_index_7bmv2l51() {
-        h.h[0].a = 8w1;
+        h.h[1w0].a = 8w1;
     }
     @hidden action gauntlet_index_7bmv2l51_0() {
-        h.h[1].a = 8w1;
+        h.h[1w1].a = 8w1;
     }
     @hidden action gauntlet_index_7bmv2l51_1() {
-        h.h[1].a = 8w1;
+        h.h[1w1].a = 8w1;
     }
     @hidden action gauntlet_index_7bmv2l51_2() {
-        h.h[1w1] = hsVar1;
+        h.h[1w1] = hsVar0;
     }
     @hidden action gauntlet_index_7bmv2l51_3() {
         tmp_0 = h.i.id;
@@ -93,7 +93,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             tbl_gauntlet_index_7bmv2l51_1.apply();
         } else {
             tbl_gauntlet_index_7bmv2l51_2.apply();
-            if (tmp_0 >= 1w0) {
+            if (tmp_0 >= 1w1) {
                 tbl_gauntlet_index_7bmv2l51_3.apply();
             }
         }

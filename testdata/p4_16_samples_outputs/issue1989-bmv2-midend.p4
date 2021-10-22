@@ -56,11 +56,19 @@ control compute_checksum_stub(inout headers hdr, inout test_metadata_t meta) {
 control ingress(inout headers hdr, inout test_metadata_t meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
+    bit<32> hsiVar0;
+    ethernet_t hsVar2;
     @name("ingress.assign_non_const_array_index") action assign_non_const_array_index() {
-        if (meta.color == 32w0) {
-            hdr.ethernet_stack[1] = hdr.ethernet_stack[0];
-        } else if (meta.color == 32w1) {
-            hdr.ethernet_stack[1] = hdr.ethernet_stack[1];
+        hsiVar0 = meta.color;
+        if (hsiVar0 == 32w0) {
+            hdr.ethernet_stack[1] = hdr.ethernet_stack[32w0];
+        } else if (hsiVar0 == 32w1) {
+            hdr.ethernet_stack[1] = hdr.ethernet_stack[32w1];
+        } else {
+            hdr.ethernet_stack[32w1] = hsVar2;
+            if (hsiVar0 >= 32w1) {
+                hdr.ethernet_stack[1] = hdr.ethernet_stack[32w1];
+            }
         }
     }
     @name("ingress.acl_table") table acl_table_0 {

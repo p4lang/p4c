@@ -1,3 +1,0 @@
-index.p4(22): warning: ParsersUnroll class should be used for elimination of parser P
-parser P(packet_in p, out H[2] h) {
-       ^

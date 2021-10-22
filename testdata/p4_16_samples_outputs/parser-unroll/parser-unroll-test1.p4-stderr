@@ -1,3 +1,0 @@
-parser-unroll-test1.p4(56): warning: ParsersUnroll class should be used for elimination of parser MyParser
-parser MyParser(packet_in packet,
-       ^^^^^^^^

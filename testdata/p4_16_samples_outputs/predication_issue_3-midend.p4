@@ -38,6 +38,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bit<3> retval;
     @name("ingress.tmp") bit<3> tmp_1;
+    bit<3> hsiVar0;
+    H hsVar9;
     @name("ingress.perform_action") action perform_action() {
         val = (bool_val_0 ? 3w0 : val);
         bound = (bool_val_0 ? 3w1 : bound);
@@ -48,10 +50,16 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         retval = (bool_val_0 ? tmp_1 : retval);
         tmp = (bool_val_0 ? retval : tmp);
         tmp_0 = (bool_val_0 ? tmp : tmp_0);
-        if ((bool_val_0 ? tmp_0 : 3w0) == 3w0) {
-            h.h[0].a = (bool_val_0 ? 8w1 : h.h[0].a);
-        } else if ((bool_val_0 ? tmp_0 : 3w0) == 3w1) {
-            h.h[1].a = (bool_val_0 ? 8w1 : h.h[1].a);
+        hsiVar0 = (bool_val_0 ? tmp_0 : 3w0);
+        if (hsiVar0 == 3w0) {
+            h.h[3w0].a = (bool_val_0 ? 8w1 : h.h[3w0].a);
+        } else if (hsiVar0 == 3w1) {
+            h.h[3w1].a = (bool_val_0 ? 8w1 : h.h[3w1].a);
+        } else {
+            h.h[3w1] = hsVar9;
+            if (hsiVar0 >= 3w1) {
+                h.h[3w1].a = (bool_val_0 ? 8w1 : h.h[3w1].a);
+            }
         }
     }
     @hidden action predication_issue_3l38() {

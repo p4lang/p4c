@@ -42,6 +42,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bit<8> retval;
     @name("ingress.tmp") bit<8> tmp;
+    H hsVar6;
     @name("ingress.simple_action") action simple_action() {
         val_2 = h.idx.idx;
         bound = 8w1;
@@ -52,9 +53,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         retval = tmp;
         val = retval;
         if (val == 8w0) {
-            h.h[0].a = 8w1;
+            h.h[8w0].a = 8w1;
         } else if (val == 8w1) {
-            h.h[1].a = 8w1;
+            h.h[8w1].a = 8w1;
+        } else {
+            h.h[8w1] = hsVar6;
+            if (val >= 8w1) {
+                h.h[8w1].a = 8w1;
+            }
         }
     }
     @hidden table tbl_simple_action {

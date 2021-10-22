@@ -52,25 +52,19 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    int<8> hsiVar0_0;
+    int<8> hsiVar0;
     aggregator_t hsVar1;
-    int<8> hsiVar2;
-    aggregator_t hsVar3;
-    int<8> hsiVar4;
-    aggregator_t hsVar5;
-    int<8> hsiVar6;
-    aggregator_t hsVar7;
     @hidden action issue2726bmv2l87() {
-        hdr.pool[0].val = hdr.pool[1].val + 8w1;
+        hdr.pool[8s0].val = hdr.pool[1].val + 8w1;
     }
     @hidden action issue2726bmv2l87_0() {
-        hdr.pool[1].val = hdr.pool[1].val + 8w1;
+        hdr.pool[8s1].val = hdr.pool[1].val + 8w1;
     }
     @hidden action issue2726bmv2l87_1() {
-        hdr.pool[2].val = hdr.pool[1].val + 8w1;
+        hdr.pool[8s2].val = hdr.pool[1].val + 8w1;
     }
     @hidden action issue2726bmv2l87_2() {
-        hdr.pool[2].val = hdr.pool[1].val + 8w1;
+        hdr.pool[8s2].val = hdr.pool[1].val + 8w1;
     }
     @hidden action issue2726bmv2l87_3() {
         hdr.pool[8s2] = hsVar1;
@@ -78,61 +72,61 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
     @hidden action issue2726bmv2l81() {
         meta.counter = meta.counter + 8s1;
         hdr.vector[0].e = hdr.pool[1].val + 8w1;
-        hsiVar0_0 = (int<8>)hdr.ml.idx;
+        hsiVar0 = (int<8>)hdr.ml.idx;
     }
     @hidden action issue2726bmv2l88() {
-        hdr.pool[0].base2 = hdr.vector[0].e;
+        hdr.pool[8s0].base2 = hdr.vector[0].e;
     }
     @hidden action issue2726bmv2l88_0() {
-        hdr.pool[1].base2 = hdr.vector[0].e;
+        hdr.pool[8s1].base2 = hdr.vector[0].e;
     }
     @hidden action issue2726bmv2l88_1() {
-        hdr.pool[2].base2 = hdr.vector[0].e;
+        hdr.pool[8s2].base2 = hdr.vector[0].e;
     }
     @hidden action issue2726bmv2l88_2() {
-        hdr.pool[2].base2 = hdr.vector[0].e;
+        hdr.pool[8s2].base2 = hdr.vector[0].e;
     }
     @hidden action issue2726bmv2l88_3() {
-        hdr.pool[8s2] = hsVar3;
+        hdr.pool[8s2] = hsVar1;
     }
     @hidden action issue2726bmv2l88_4() {
-        hsiVar2 = (int<8>)hdr.ml.idx;
+        hsiVar0 = (int<8>)hdr.ml.idx;
     }
     @hidden action issue2726bmv2l90() {
-        hdr.vector[1].e = hdr.pool[0].base0;
+        hdr.vector[1].e = hdr.pool[8s0].base0;
     }
     @hidden action issue2726bmv2l90_0() {
-        hdr.vector[1].e = hdr.pool[1].base0;
+        hdr.vector[1].e = hdr.pool[8s1].base0;
     }
     @hidden action issue2726bmv2l90_1() {
-        hdr.vector[1].e = hdr.pool[2].base0;
+        hdr.vector[1].e = hdr.pool[8s2].base0;
     }
     @hidden action issue2726bmv2l90_2() {
-        hdr.vector[1].e = hdr.pool[2].base0;
+        hdr.vector[1].e = hdr.pool[8s2].base0;
     }
     @hidden action issue2726bmv2l90_3() {
-        hdr.pool[8s2] = hsVar5;
+        hdr.pool[8s2] = hsVar1;
     }
     @hidden action issue2726bmv2l90_4() {
-        hsiVar4 = (int<8>)hdr.ml.idx;
+        hsiVar0 = (int<8>)hdr.ml.idx;
     }
     @hidden action issue2726bmv2l92() {
-        hdr.pool[0].base0 = hdr.pool[0].base1 + 8w1;
+        hdr.pool[8s0].base0 = hdr.pool[8s0].base1 + 8w1;
     }
     @hidden action issue2726bmv2l92_0() {
-        hdr.pool[1].base0 = hdr.pool[1].base1 + 8w1;
+        hdr.pool[8s1].base0 = hdr.pool[8s1].base1 + 8w1;
     }
     @hidden action issue2726bmv2l92_1() {
-        hdr.pool[2].base0 = hdr.pool[2].base1 + 8w1;
+        hdr.pool[8s2].base0 = hdr.pool[8s2].base1 + 8w1;
     }
     @hidden action issue2726bmv2l92_2() {
-        hdr.pool[2].base0 = hdr.pool[2].base1 + 8w1;
+        hdr.pool[8s2].base0 = hdr.pool[8s2].base1 + 8w1;
     }
     @hidden action issue2726bmv2l92_3() {
-        hdr.pool[8s2] = hsVar7;
+        hdr.pool[8s2] = hsVar1;
     }
     @hidden action issue2726bmv2l92_4() {
-        hsiVar6 = (int<8>)hdr.ml.idx;
+        hsiVar0 = (int<8>)hdr.ml.idx;
     }
     @hidden action issue2726bmv2l93() {
         standard_metadata.egress_spec = standard_metadata.ingress_port;
@@ -289,54 +283,54 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
     }
     apply {
         tbl_issue2726bmv2l81.apply();
-        if (hsiVar0_0 == 8s0) {
+        if (hsiVar0 == 8s0) {
             tbl_issue2726bmv2l87.apply();
-        } else if (hsiVar0_0 == 8s1) {
+        } else if (hsiVar0 == 8s1) {
             tbl_issue2726bmv2l87_0.apply();
-        } else if (hsiVar0_0 == 8s2) {
+        } else if (hsiVar0 == 8s2) {
             tbl_issue2726bmv2l87_1.apply();
         } else {
             tbl_issue2726bmv2l87_2.apply();
-            if (hsiVar0_0 >= 8s3) {
+            if (hsiVar0 >= 8s2) {
                 tbl_issue2726bmv2l87_3.apply();
             }
         }
         tbl_issue2726bmv2l88.apply();
-        if (hsiVar2 == 8s0) {
+        if (hsiVar0 == 8s0) {
             tbl_issue2726bmv2l88_0.apply();
-        } else if (hsiVar2 == 8s1) {
+        } else if (hsiVar0 == 8s1) {
             tbl_issue2726bmv2l88_1.apply();
-        } else if (hsiVar2 == 8s2) {
+        } else if (hsiVar0 == 8s2) {
             tbl_issue2726bmv2l88_2.apply();
         } else {
             tbl_issue2726bmv2l88_3.apply();
-            if (hsiVar2 >= 8s3) {
+            if (hsiVar0 >= 8s2) {
                 tbl_issue2726bmv2l88_4.apply();
             }
         }
         tbl_issue2726bmv2l90.apply();
-        if (hsiVar4 == 8s0) {
+        if (hsiVar0 == 8s0) {
             tbl_issue2726bmv2l90_0.apply();
-        } else if (hsiVar4 == 8s1) {
+        } else if (hsiVar0 == 8s1) {
             tbl_issue2726bmv2l90_1.apply();
-        } else if (hsiVar4 == 8s2) {
+        } else if (hsiVar0 == 8s2) {
             tbl_issue2726bmv2l90_2.apply();
         } else {
             tbl_issue2726bmv2l90_3.apply();
-            if (hsiVar4 >= 8s3) {
+            if (hsiVar0 >= 8s2) {
                 tbl_issue2726bmv2l90_4.apply();
             }
         }
         tbl_issue2726bmv2l92.apply();
-        if (hsiVar6 == 8s0) {
+        if (hsiVar0 == 8s0) {
             tbl_issue2726bmv2l92_0.apply();
-        } else if (hsiVar6 == 8s1) {
+        } else if (hsiVar0 == 8s1) {
             tbl_issue2726bmv2l92_1.apply();
-        } else if (hsiVar6 == 8s2) {
+        } else if (hsiVar0 == 8s2) {
             tbl_issue2726bmv2l92_2.apply();
         } else {
             tbl_issue2726bmv2l92_3.apply();
-            if (hsiVar6 >= 8s3) {
+            if (hsiVar0 >= 8s2) {
                 tbl_issue2726bmv2l92_4.apply();
             }
         }
