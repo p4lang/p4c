@@ -729,20 +729,15 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         DoConstantFolding cf(refMap, typeMap);
         if (auto cast = expression->to<IR::Cast>()) {
             auto bitsType = cast->destType->to<IR::Type_Bits>();
-            if (bitsType->size == 1) {
                 const IR::Constant* constant;
                 auto resConst = clone->expr->to<IR::Constant>();
                 if (resConst) {
-                   constant = (resConst->value) ? new IR::Constant(
-                       new IR::Type_Bits(1, false), 1) :
-                       new IR::Constant(
-                           new IR::Type_Bits(1, false), 0);
+                   constant = new IR::Constant(bitsType, resConst->value);
                 } else {
                     BUG("%1%: expected an integer", clone->expr);
                 }
                 set(expression, new SymbolicInteger(constant));
                 return;
-            }
         }
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
@@ -845,6 +840,92 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
         clone->left = l->to<SymbolicInteger>()->constant;
         clone->right = r->to<SymbolicInteger>()->constant;
         DoConstantFolding cf(refMap, typeMap);
+        if (expression->is<IR::Equ>()) {
+            auto lValue = clone->left->to<IR::Constant>();
+            auto RValue = clone->right->to<IR::Constant>();
+            BUG_CHECK(clone->left, "%1%: expected a constant", clone->left);
+            BUG_CHECK(clone->right, "%1%: expected a constant", clone->right);
+                if (lValue->value == RValue->value) {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(1)));
+                    return;
+                } else {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(0)));
+                    return;
+                }
+        }
+
+        if (expression->is<IR::Neq>()) {
+            auto lValue = clone->left->to<IR::Constant>();
+            auto RValue = clone->right->to<IR::Constant>();
+            BUG_CHECK(clone->left, "%1%: expected a constant", clone->left);
+            BUG_CHECK(clone->right, "%1%: expected a constant", clone->right);
+                if (lValue->value != RValue->value) {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(1)));
+                    return;
+                } else {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(0)));
+                    return;
+                }
+        }
+
+        if (expression->is<IR::Lss>()) {
+            auto lValue = clone->left->to<IR::Constant>();
+            auto RValue = clone->right->to<IR::Constant>();
+            BUG_CHECK(clone->left, "%1%: expected a constant", clone->left);
+            BUG_CHECK(clone->right, "%1%: expected a constant", clone->right);
+                if (lValue->value < RValue->value) {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(1)));
+                    return;
+                } else {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(0)));
+                    return;
+                }
+        }
+
+        if (expression->is<IR::Leq>()) {
+            auto lValue = clone->left->to<IR::Constant>();
+            auto RValue = clone->right->to<IR::Constant>();
+            BUG_CHECK(clone->left, "%1%: expected a constant", clone->left);
+            BUG_CHECK(clone->right, "%1%: expected a constant", clone->right);
+                if (lValue->value <= RValue->value) {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(1)));
+                    return;
+                } else {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(0)));
+                    return;
+                }
+        }
+
+        if (expression->is<IR::Grt>()) {
+            auto lValue = clone->left->to<IR::Constant>();
+            auto RValue = clone->right->to<IR::Constant>();
+            BUG_CHECK(clone->left, "%1%: expected a constant", clone->left);
+            BUG_CHECK(clone->right, "%1%: expected a constant", clone->right);
+                if (lValue->value > RValue->value) {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(1)));
+                    return;
+                } else {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(0)));
+                    return;
+                }
+        }
+
+        if (expression->is<IR::Geq>()) {
+            auto lValue = clone->left->to<IR::Constant>();
+            auto RValue = clone->right->to<IR::Constant>();
+            BUG_CHECK(clone->left, "%1%: expected a constant", clone->left);
+            BUG_CHECK(clone->right, "%1%: expected a constant", clone->right);
+                if (lValue->value >= RValue->value) {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(1)));
+                    return;
+                } else {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(0)));
+                    return;
+                }
+        }
+        std::cout<<clone->left<<std::endl;
+        std::cout<<clone->right<<std::endl;
+        std::cout<<expression->node_type_name()<<std::endl;
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
@@ -854,6 +935,89 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
         clone->left = new IR::BoolLiteral(l->to<SymbolicBool>()->value);
         clone->right = new IR::BoolLiteral(r->to<SymbolicBool>()->value);
         DoConstantFolding cf(refMap, typeMap);
+        if (expression->is<IR::Equ>()) {
+            auto lValue = clone->left->to<IR::BoolLiteral>();
+            auto RValue = clone->right->to<IR::BoolLiteral>();
+            BUG_CHECK(clone->left, "%1%: expected a boolean", clone->left);
+            BUG_CHECK(clone->right, "%1%: expected a boolean", clone->right);
+                if (lValue->value == RValue->value) {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(1)));
+                    return;
+                } else {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(0)));
+                    return;
+                }
+        }
+
+        if (expression->is<IR::Neq>()) {
+            auto lValue = clone->left->to<IR::BoolLiteral>();
+            auto RValue = clone->right->to<IR::BoolLiteral>();
+            BUG_CHECK(clone->left, "%1%: expected a boolean", clone->left);
+            BUG_CHECK(clone->right, "%1%: expected a boolean", clone->right);
+                if (lValue->value != RValue->value) {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(1)));
+                    return;
+                } else {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(0)));
+                    return;
+                }
+        }
+
+        if (expression->is<IR::Lss>()) {
+            auto lValue = clone->left->to<IR::BoolLiteral>();
+            auto RValue = clone->right->to<IR::BoolLiteral>();
+            BUG_CHECK(clone->left, "%1%: expected a boolean", clone->left);
+            BUG_CHECK(clone->right, "%1%: expected a boolean", clone->right);
+                if (lValue->value < RValue->value) {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(1)));
+                    return;
+                } else {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(0)));
+                    return;
+                }
+        }
+
+        if (expression->is<IR::Leq>()) {
+            auto lValue = clone->left->to<IR::BoolLiteral>();
+            auto RValue = clone->right->to<IR::BoolLiteral>();
+            BUG_CHECK(clone->left, "%1%: expected a boolean", clone->left);
+            BUG_CHECK(clone->right, "%1%: expected a boolean", clone->right);
+                if (lValue->value <= RValue->value) {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(1)));
+                    return;
+                } else {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(0)));
+                    return;
+                }
+        }
+
+        if (expression->is<IR::Grt>()) {
+            auto lValue = clone->left->to<IR::BoolLiteral>();
+            auto RValue = clone->right->to<IR::BoolLiteral>();
+            BUG_CHECK(clone->left, "%1%: expected a boolean", clone->left);
+            BUG_CHECK(clone->right, "%1%: expected a boolean", clone->right);
+                if (lValue->value > RValue->value) {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(1)));
+                    return;
+                } else {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(0)));
+                    return;
+                }
+        }
+
+        if (expression->is<IR::Geq>()) {
+            auto lValue = clone->left->to<IR::BoolLiteral>();
+            auto RValue = clone->right->to<IR::BoolLiteral>();
+            BUG_CHECK(clone->left, "%1%: expected a boolean", clone->left);
+            BUG_CHECK(clone->right, "%1%: expected a boolean", clone->right);
+                if (lValue->value >= RValue->value) {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(1)));
+                    return;
+                } else {
+                    set(expression, new SymbolicBool(new IR::BoolLiteral(0)));
+                    return;
+                }
+        }
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
