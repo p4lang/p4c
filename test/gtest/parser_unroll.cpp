@@ -16,6 +16,7 @@
 #include "p4/createBuiltins.h"
 #include "p4/typeChecking/typeChecker.h"
 
+#include "frontends/p4/removeParameters.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -42,7 +43,6 @@
 #include "midend/replaceSelectRange.h"
 #include "midend/expandEmit.h"
 #include "midend/expandLookahead.h"
-#include "midend/local_copyprop.h"
 #include "midend/midEndLast.h"
 #include "midend/nestedStructs.h"
 #include "midend/noMatch.h"
@@ -56,6 +56,11 @@
 #include "midend/tableHit.h"
 #include "midend/removeAssertAssume.h"
 #include "midend/parserUnroll.h"
+#include "midend/eliminateTypedefs.h"
+#include "midend/orderArguments.h"
+#include "midend/simplifyBitwise.h"
+#include "midend/removeLeftSlices.h"
+#include "midend/local_copyprop.h"
 
 using namespace P4;
 
@@ -102,40 +107,38 @@ class MidEnd : public PassManager {
         addPasses({
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
             new P4::RemoveMiss(&refMap, &typeMap),
-            new P4::EliminateNewtype(&refMap, &typeMap),
-            new P4::EliminateSerEnums(&refMap, &typeMap),
-            new P4::SimplifyKey(&refMap, &typeMap,
-                                new P4::OrPolicy(
-                                    new P4::IsValid(&refMap, &typeMap),
-                                    new P4::IsLikeLeftValue())),
-            new P4::RemoveExits(&refMap, &typeMap),
-            new P4::ConstantFolding(&refMap, &typeMap),
-            new P4::SimplifySelectCases(&refMap, &typeMap, false),  // non-constant keysets
-            new P4::ExpandLookahead(&refMap, &typeMap),
-            new P4::ExpandEmit(&refMap, &typeMap),
-            new P4::HandleNoMatch(&refMap),
-            new P4::SimplifyParsers(&refMap),
-            new P4::StrengthReduction(&refMap, &typeMap),
-            new P4::EliminateTuples(&refMap, &typeMap),
-            new P4::SimplifyComparisons(&refMap, &typeMap),
-            new P4::CopyStructures(&refMap, &typeMap),
-            new P4::NestedStructs(&refMap, &typeMap),
-            new P4::SimplifySelectList(&refMap, &typeMap),
-            new P4::RemoveSelectBooleans(&refMap, &typeMap),
-            new P4::FlattenHeaders(&refMap, &typeMap),
-            new P4::FlattenInterfaceStructs(&refMap, &typeMap),
-            new P4::ReplaceSelectRange(&refMap, &typeMap),
-            new P4::Predication(&refMap),
-            new P4::MoveDeclarations(),  // more may have been introduced
-            new P4::ConstantFolding(&refMap, &typeMap),
-            new P4::LocalCopyPropagation(&refMap, &typeMap),
-            new P4::ConstantFolding(&refMap, &typeMap),
-            new P4::StrengthReduction(&refMap, &typeMap),
-            new P4::MoveDeclarations(),  // more may have been introduced
-            new P4::SimplifyControlFlow(&refMap, &typeMap),
-            new P4::CompileTimeOperations(),
-            new P4::TableHit(&refMap, &typeMap),
-            new P4::EliminateSwitch(&refMap, &typeMap),
+        new P4::EliminateSwitch(&refMap, &typeMap),
+        new P4::EliminateNewtype(&refMap, &typeMap),
+        new P4::EliminateSerEnums(&refMap, &typeMap),
+        new P4::EliminateTypedef(&refMap, &typeMap),
+        new P4::RemoveActionParameters(&refMap, &typeMap),
+        new P4::OrderArguments(&refMap, &typeMap),
+        new P4::TypeChecking(&refMap, &typeMap),
+        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::SimplifySelectCases(&refMap, &typeMap, false),
+        new P4::ExpandLookahead(&refMap, &typeMap),
+        new P4::ExpandEmit(&refMap, &typeMap),
+        new P4::ReplaceSelectRange(&refMap, &typeMap),
+        new P4::EliminateTuples(&refMap, &typeMap),
+        new P4::SimplifyComparisons(&refMap, &typeMap),
+        new P4::SimplifySelectList(&refMap, &typeMap),
+        new P4::RemoveSelectBooleans(&refMap, &typeMap),
+        new P4::NestedStructs(&refMap, &typeMap),
+        new P4::FlattenHeaders(&refMap, &typeMap),
+        new P4::FlattenInterfaceStructs(&refMap, &typeMap),
+        new P4::MoveDeclarations(),
+        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::SimplifyBitwise(),
+        new P4::LocalCopyPropagation(
+            &refMap, &typeMap, nullptr,
+            [this](const Visitor::Context* context, const IR::Expression* expr) {
+                return localCopyPropPolicy(context, expr);
+            }),
+        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::MoveDeclarations(),
+        new P4::SimplifyControlFlow(&refMap, &typeMap),
+        new P4::RemoveLeftSlices(&refMap, &typeMap),
             evaluator,
             [v1controls, evaluator](const IR::Node *root) -> const IR::Node * {
                 auto toplevel = evaluator->getToplevelBlock();
@@ -184,6 +187,7 @@ class MidEnd : public PassManager {
     IR::ToplevelBlock* process(const IR::P4Program *&program) {
         program = program->apply(*this);
         return toplevel; }
+    bool localCopyPropPolicy(const Visitor::Context*, const IR::Expression*) { return true; }
 };
 
 // #define PARSER_UNROLL_TIME_CHECKING
@@ -287,7 +291,7 @@ TEST_F(P4CParserUnroll, switch_20160512) {
         CompilerOptions::FrontendVersion::P4_14);
     ASSERT_TRUE(parsers.first);
     ASSERT_TRUE(parsers.second);
-    ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() - 22 - 4 - 2);
+    ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() - 22 - 4 - 1);
 }
 
 TEST_F(P4CParserUnroll, header_stack_access_remover) {
@@ -317,5 +321,4 @@ TEST_F(P4CParserUnroll, bool2bitCast) {
     ASSERT_TRUE(parsers.second);
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size());
 }
-
 }  // namespace Test
