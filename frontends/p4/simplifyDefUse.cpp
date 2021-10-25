@@ -127,6 +127,8 @@ class HeaderDefinitions {
             return storageMap->getStorage(refMap->getDeclaration(expr->path, true));
         } else if (auto expr = expression->to<IR::Member>()) {
             auto storage = getStorageLocation(expr->expr);
+            if (!storage)
+                return nullptr;
             if (auto struct_storage = storage->to<StructLocation>()) {
                 LocationSet ls;
                 struct_storage->addField(expr->member, &ls);
@@ -204,8 +206,8 @@ class HeaderDefinitions {
         if (!expr)
             return;
 
-        auto storage = getStorageLocation(expr);
-        remove(storage);
+        if (auto storage = getStorageLocation(expr))
+            remove(storage);
     }
 
     void clear() { defs.clear(); }
@@ -332,6 +334,8 @@ class FindUninitialized : public Inspector {
     }
 
     void initHeaderParam(const StorageLocation* storage, TernaryBool value) {
+        if (!storage)
+            return;
         if (auto struct_storage = storage->to<StructLocation>()) {
             if (struct_storage->isHeader()) {
                 headerDefs->update(struct_storage, value);
@@ -344,6 +348,8 @@ class FindUninitialized : public Inspector {
 
     // Called at the beginning of controls, parsers and functions
     void initHeaderParams(const IR::ParameterList* parameters) {
+        if (!parameters)
+            return;
         for (auto p : parameters->parameters)
             if (auto storage = definitions->storageMap->getStorage(p)) {
                 initHeaderParam(storage, p->direction != IR::Direction::Out

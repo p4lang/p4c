@@ -19,6 +19,7 @@ limitations under the License.
 #include "dpdkAsmOpt.h"
 #include "dpdkHelpers.h"
 #include "dpdkProgram.h"
+#include "dpdkContext.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "midend/eliminateTypedefs.h"
 #include "midend/removeComplexExpressions.h"
@@ -42,6 +43,8 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
 
     std::set<const IR::P4Table*> invokedInKey;
     auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure);
+    auto genContextJson = new DpdkContextGenerator(refMap, typeMap, &structure, options);
+
     PassManager simplify = {
         new DpdkArchFirst(),
         new P4::EliminateTypedef(refMap, typeMap),
@@ -54,7 +57,8 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
-        new ConvertActionSelectorAndProfile(refMap, typeMap),
+        new ConvertActionSelectorAndProfile(refMap, typeMap, &structure),
+        new CollectTableInfo(&structure),
         new CollectAddOnMissTable(refMap, typeMap, &structure),
         new P4::MoveDeclarations(),  // Move all local declarations to the beginning
         new CollectProgramStructure(refMap, typeMap, &structure),
@@ -82,6 +86,16 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new CollectProgramStructure(refMap, typeMap, &structure),
         new InspectDpdkProgram(refMap, typeMap, &structure),
         new DpdkArchLast(),
+        new VisitFunctor([this, genContextJson] {
+            // Serialize context json object into user specified file
+            if (!options.ctxtFile.isNullOrEmpty()) {
+                std::ostream *out = openFile(options.ctxtFile, false);
+                if (out != nullptr) {
+                    genContextJson->serializeContextJson(out);
+                }
+                out->flush();
+            }
+        }),
         // convert to assembly program
         convertToDpdk,
     };

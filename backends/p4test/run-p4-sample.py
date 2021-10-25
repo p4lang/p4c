@@ -16,7 +16,7 @@
 # Runs the compiler on a sample P4 V1.2 program
 
 
-from subprocess import Popen,PIPE
+from subprocess import Popen, PIPE
 from threading import Thread
 import errno
 import sys
@@ -32,6 +32,7 @@ import glob
 SUCCESS = 0
 FAILURE = 1
 
+
 class Options(object):
     def __init__(self):
         self.binary = ""                # this program's name
@@ -46,6 +47,7 @@ class Options(object):
         self.runDebugger_skip = 0
         self.generateP4Runtime = False
 
+
 def usage(options):
     name = options.binary
     print(name, "usage:")
@@ -59,9 +61,11 @@ def usage(options):
     print("          -a \"args\": pass args to the compiler")
     print("          --p4runtime: generate P4Info message in text format")
 
+
 def isError(p4filename):
     # True if the filename represents a p4 program that should fail
     return "_errors" in p4filename
+
 
 def ignoreStderr(options):
     for line in open(options.p4filename):
@@ -69,9 +73,11 @@ def ignoreStderr(options):
             return True
     return False
 
+
 class Local(object):
     # object to hold local vars accessable to nested functions
     pass
+
 
 def run_timeout(options, args, timeout, stderr):
     if options.verbose:
@@ -80,6 +86,7 @@ def run_timeout(options, args, timeout, stderr):
     local = Local()
     local.process = None
     local.filter = None
+
     def target():
         procstderr = None
         if stderr is not None:
@@ -93,7 +100,7 @@ def run_timeout(options, args, timeout, stderr):
             # available don't seem to actually work.
             local.filter = Popen(['sed', '-E',
                                   r's|^[-[:alnum:][:punct:][:space:]_/]*/([-[:alnum:][:punct:][:space:]_]+\.[ph]4?[:(][[:digit:]]+)|\1|'],
-                stdin=PIPE, stdout=outfile)
+                                 stdin=PIPE, stdout=outfile)
             procstderr = local.filter.stdin
         local.process = Popen(args, stderr=procstderr)
         local.process.wait()
@@ -116,7 +123,9 @@ def run_timeout(options, args, timeout, stderr):
         print("Exit code ", local.process.returncode)
     return local.process.returncode
 
+
 timeout = 10 * 60
+
 
 def compare_files(options, produced, expected, ignore_case):
     # p4info files should not change
@@ -129,23 +138,24 @@ def compare_files(options, produced, expected, ignore_case):
     if options.verbose:
         print("Comparing", expected, "and", produced)
 
-    args = "-B -u -w";
+    args = "-B -u -w"
     if ignore_case:
-        args = args + " -i";
+        args = args + " -i"
     cmd = ("diff " + args + " " + expected + " " + produced + " >&2")
     if options.verbose:
         print(cmd)
-    exitcode = subprocess.call(cmd, shell=True);
+    exitcode = subprocess.call(cmd, shell=True)
     if exitcode == 0:
         return SUCCESS
     else:
         return FAILURE
 
+
 def recompile_file(options, produced, mustBeIdentical):
     # Compile the generated file a second time
-    secondFile = produced + "-x";
+    secondFile = produced + "-x"
     args = ["./p4test", "-I.", "--pp", secondFile, "--std", "p4-16", produced] + \
-            options.compilerOptions
+        options.compilerOptions
     if options.runDebugger:
         if options.runDebugger_skip > 0:
             options.runDebugger_skip = options.runDebugger_skip - 1
@@ -156,8 +166,9 @@ def recompile_file(options, produced, mustBeIdentical):
     if result != SUCCESS:
         return result
     if mustBeIdentical:
-        result = compare_files(options, produced, secondFile, false)
+        result = compare_files(options, produced, secondFile, False)
     return result
+
 
 def check_generated_files(options, tmpdir, expecteddir):
     files = os.listdir(tmpdir)
@@ -166,18 +177,27 @@ def check_generated_files(options, tmpdir, expecteddir):
             print("Checking", file)
         produced = tmpdir + "/" + file
         expected = expecteddir + "/" + file
-        if not os.path.isfile(expected):
+
+        if options.replace:
+            # Only create files when explicitly asked to do so
             if options.verbose:
                 print("Expected file does not exist; creating", expected)
             shutil.copy2(produced, expected)
-        else:
-            result = compare_files(options, produced, expected, file[-7:] == "-stderr")
-            if result != SUCCESS and (file[-7:] != "-stderr" or not ignoreStderr(options)):
-                return result
+        elif not os.path.isfile(expected):
+            # The file is missing and we do not replace. This is an error.
+            print(
+                "Missing reference for file %s. Please rerun the test with the -f option turned on or rerun all tests using \"P4TEST_REPLACE=True make check\"." % expected)
+            return FAILURE
+        result = compare_files(
+            options, produced, expected, file[-7:] == "-stderr")
+        if result != SUCCESS and (file[-7:] != "-stderr" or not ignoreStderr(options)):
+            return result
     return SUCCESS
+
 
 def file_name(tmpfolder, base, suffix, ext):
     return tmpfolder + "/" + base + "-" + suffix + ext
+
 
 def process_file(options, argv):
     assert isinstance(options, Options)
@@ -201,15 +221,15 @@ def process_file(options, argv):
         expected_dirname = dirname.replace("p4_16/", "p4_16_outputs/", 1)
     elif loops_unrolling:
         expected_dirname = dirname + "_outputs/parser-unroll"
-    else:    
+    else:
         expected_dirname = dirname + "_outputs"  # expected outputs are here
     if not os.path.exists(expected_dirname):
         os.makedirs(expected_dirname)
 
     # We rely on the fact that these keys are in alphabetical order.
-    rename = { "FrontEndDump": "first",
-               "FrontEndLast": "frontend",
-               "MidEndLast": "midend" }
+    rename = {"FrontEndDump": "first",
+              "FrontEndLast": "frontend",
+              "MidEndLast": "midend"}
 
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
@@ -260,7 +280,7 @@ def process_file(options, argv):
             args.extend(["--p4runtime-entries-files", p4runtimeEntriesFile])
 
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
-        args.extend(["--std", "p4-14"]);
+        args.extend(["--std", "p4-14"])
     args.extend(argv)
     if options.runDebugger:
         if options.runDebugger_skip > 0:
@@ -289,9 +309,9 @@ def process_file(options, argv):
     lastFile = None
 
     for k in sorted(rename.keys()):
-        files = glob.glob(tmpdir + "/" + base + "*" + k + "*.p4");
+        files = glob.glob(tmpdir + "/" + base + "*" + k + "*.p4")
         if len(files) > 1:
-            print("Multiple files matching", k);
+            print("Multiple files matching", k)
         elif len(files) == 1:
             file = files[0]
             if os.path.isfile(file):
@@ -300,7 +320,7 @@ def process_file(options, argv):
                 lastFile = newName
 
     if (result == SUCCESS):
-        result = check_generated_files(options, tmpdir, expected_dirname);
+        result = check_generated_files(options, tmpdir, expected_dirname)
     if (result == SUCCESS) and (not expected_error):
         result = recompile_file(options, ppfile, False)
     if (result == SUCCESS) and (not expected_error) and (lastFile is not None) and (arch is not "psa"):
@@ -315,13 +335,15 @@ def process_file(options, argv):
         shutil.rmtree(tmpdir)
     return result
 
+
 def isdir(path):
     try:
         return stat.S_ISDIR(os.stat(path).st_mode)
     except OSError:
-        return False;
+        return False
 
-######################### main
+# main
+
 
 def main(argv):
     options = Options()
@@ -353,7 +375,7 @@ def main(argv):
                 usage(options)
                 sys.exit(FAILURE)
             else:
-                options.compilerOptions += argv[1].split();
+                options.compilerOptions += argv[1].split()
                 argv = argv[1:]
         elif argv[0][1] == 'D' or argv[0][1] == 'I' or argv[0][1] == 'T':
             options.compilerOptions.append(argv[0])
@@ -372,10 +394,10 @@ def main(argv):
     if 'P4TEST_REPLACE' in os.environ:
         options.replace = True
 
-    options.p4filename=argv[-1]
+    options.p4filename = argv[-1]
     options.testName = None
     if options.p4filename.startswith(options.compilerSrcdir):
-        options.testName = options.p4filename[len(options.compilerSrcdir):];
+        options.testName = options.p4filename[len(options.compilerSrcdir):]
         if options.testName.startswith('/'):
             options.testName = options.testName[1:]
         if options.testName.endswith('.p4'):
@@ -386,6 +408,7 @@ def main(argv):
         print("Program was expected to fail")
 
     sys.exit(result)
+
 
 if __name__ == "__main__":
     main(sys.argv)

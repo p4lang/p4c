@@ -44,7 +44,7 @@ p4c_add_xfail_reason("dpdk"
 p4c_add_xfail_reason("dpdk"
   "not implemented"
   testdata/p4_16_samples/psa-example-register2-bmv2.p4
-)
+ )
 
 p4c_add_xfail_reason("dpdk"
   "Not Implemented"
