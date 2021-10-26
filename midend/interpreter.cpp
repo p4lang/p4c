@@ -420,6 +420,18 @@ SymbolicValue* SymbolicArray::next(const IR::Node* node) {
     return new SymbolicException(node, P4::StandardExceptions::StackOutOfBounds);
 }
 
+SymbolicValue* SymbolicArray::lastIndex(const IR::Node* node) {
+    for (unsigned i = 0; i < values.size(); i++) {
+        unsigned index = values.size() - i - 1;
+        auto v = values.at(index);
+        if (v->valid->isUnknown() || v->valid->isUninitialized())
+            return new AnyElement(this);
+        if (v->valid->value)
+            return new SymbolicInteger(new IR::Constant(IR::Type_Bits::get(32), index));
+    }
+    return new SymbolicException(node, P4::StandardExceptions::StackOutOfBounds);
+}
+
 SymbolicValue* SymbolicArray::last(const IR::Node* node) {
     for (unsigned i = 0; i < values.size(); i++) {
         unsigned index = values.size() - i - 1;
@@ -863,6 +875,12 @@ void ExpressionEvaluator::postorder(const IR::Member* expression) {
                 set(expression, v);
                 return;
             }
+        } else if (expression->member.name == IR::Type_Stack::lastIndex) {
+            v = array->lastIndex(expression);
+            if (v->is<SymbolicError>()) {
+                set(expression, v);
+                return;
+            }
         } else {
             BUG("%1%: unexpected expression", expression);
         }
@@ -886,17 +904,19 @@ bool ExpressionEvaluator::preorder(const IR::ArrayIndex* expression) {
 void ExpressionEvaluator::postorder(const IR::ArrayIndex* expression) {
     auto l = get(expression->left);
     auto r = get(expression->right);
+
+    if (l->is<SymbolicError>()) {
+        set(expression, l);
+        return;
+    }
+    if (r->is<SymbolicError>()) {
+        set(expression, r);
+        return;
+    }
+
     auto rv = r->to<ScalarValue>();
     auto lv = l->to<SymbolicArray>();
 
-    if (lv->is<SymbolicError>()) {
-        set(expression, lv);
-        return;
-    }
-    if (rv->is<SymbolicError>()) {
-        set(expression, rv);
-        return;
-    }
     if (rv->isUninitialized() || rv->isUnknown()) {
         if (rv->isUninitialized()) {
             auto result = new SymbolicStaticError(expression->right, "Uninitialized");
