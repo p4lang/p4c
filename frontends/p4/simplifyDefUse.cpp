@@ -99,7 +99,44 @@ class HasUses {
     }
 };
 
+/// Creates temporary expressions from declarations and updates the refMap and typeMap
+class DeclarationToExpression {
+    static DeclarationToExpression* instance;
+
+    /// Stores the temporary expressions so they can be reused
+    ordered_map<const IR::Declaration*, const IR::PathExpression*> paths;
+
+ public:
+    static DeclarationToExpression* getInstance() {
+        if (!instance)
+            instance = new DeclarationToExpression;
+        return instance;
+    }
+
+    const IR::PathExpression* getExpression(const IR::Declaration* decl, ReferenceMap* refMap,
+                                            TypeMap* typeMap) {
+        CHECK_NULL(decl);
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+
+        auto expr = ::get(paths, decl);
+        if (!expr) {
+            expr = new IR::PathExpression(decl->name);
+        }
+        if (!refMap->getDeclaration(expr->path, false)) {
+            refMap->setDeclaration(expr->path, decl);
+            typeMap->setType(expr, typeMap->getType(decl, true));
+            paths[decl] = expr;
+        }
+        return expr;
+    }
+};
+
+DeclarationToExpression* DeclarationToExpression::instance = nullptr;
+
 class HeaderDefinitions {
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
     StorageMap* storageMap;
 
     /// The current values of the header valid bits are stored here. If the value in the map is Yes,
@@ -116,18 +153,15 @@ class HeaderDefinitions {
     ordered_set<const StorageLocation*> notReport;
 
  public:
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
-
     HeaderDefinitions(ReferenceMap* refMap, TypeMap* typeMap, StorageMap* storageMap) :
-        storageMap(storageMap), refMap(refMap), typeMap(typeMap)
+        refMap(refMap), typeMap(typeMap), storageMap(storageMap)
         { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(storageMap); }
 
     /// A helper function for getting a storage location from an expression.
     /// In case of accessing a header stack with non-constant index, it returns
-    /// storage locations of all elements of the stack. In case of accessing a
-    /// field of a header union stack (indexed with non-constant), it returns
-    /// the corresponding field of all unions in the stack.
+    /// storage locations of all elements within the stack. In case of accessing
+    /// a field of a header union within a stack (indexed with non-constant), it
+    /// returns the corresponding field of all unions in the stack.
     const LocationSet* getStorageLocation(const IR::Expression* expression) const {
         LocationSet* result = new LocationSet;
         if (auto expr = expression->to<IR::PathExpression>()) {
@@ -395,9 +429,7 @@ class FindUninitialized : public Inspector {
             typeMap(definitions->storageMap->typeMap),
             definitions(definitions), lhs(false), currentPoint(),
             hasUses(hasUses), virtualMethod(false),
-            headerDefs(new HeaderDefinitions(new ReferenceMap(*refMap),
-                                             new TypeMap(*typeMap),
-                                             definitions->storageMap)) {
+            headerDefs(new HeaderDefinitions(refMap, typeMap, definitions->storageMap)) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(definitions);
         CHECK_NULL(hasUses);
         visitDagOnce = false; }
@@ -588,8 +620,7 @@ class FindUninitialized : public Inspector {
         for (auto state : parser->states) {
             if (inputHeaderDefs.find(state) == inputHeaderDefs.end()) {
                 inputHeaderDefs.emplace(state,
-                    new HeaderDefinitions(headerDefs->refMap, headerDefs->typeMap,
-                                          definitions->storageMap));
+                    new HeaderDefinitions(refMap, typeMap, definitions->storageMap));
             }
             headerDefs = inputHeaderDefs[state];
             visit(state);
@@ -1129,11 +1160,10 @@ class FindUninitialized : public Inspector {
                                                       TernaryBool::No);
                     } else {
                         // we can treat the argument passing as an assignment
-                        IR::PathExpression* pexpr = new IR::PathExpression(param->name);
-                        headerDefs->refMap->setDeclaration(pexpr->path, param);
-                        headerDefs->typeMap->setType(pexpr, p->type);
-                        processHeadersInAssignment(pexpr, expr->expression,
-                                                   p->type,
+                        auto param_expr = DeclarationToExpression::getInstance()->
+                                          getExpression(param, refMap, typeMap);
+                        processHeadersInAssignment(param_expr, expr->expression,
+                                                   typeMap->getType(param_expr, true),
                                                    typeMap->getType(expr->expression, true));
                     }
                 }
@@ -1190,12 +1220,11 @@ class FindUninitialized : public Inspector {
 
                 if (auto actionCall = mi->to<ActionCall>()) {
                     if (auto param = actionCall->action->parameters->getParameter(p->name)) {
-                        IR::PathExpression* pexpr = new IR::PathExpression(param->name);
-                        headerDefs->refMap->setDeclaration(pexpr->path, param);
-                        headerDefs->typeMap->setType(pexpr, p->type);
-                        processHeadersInAssignment(expr->expression, pexpr,
+                        auto param_expr = DeclarationToExpression::getInstance()->
+                                          getExpression(param, refMap, typeMap);
+                        processHeadersInAssignment(expr->expression, param_expr,
                                                    typeMap->getType(expr->expression, true),
-                                                   p->type);
+                                                   typeMap->getType(param_expr, true));
                     }
                 }
             }
