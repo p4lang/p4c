@@ -137,12 +137,6 @@ class ParserStateRewriter : public Transform {
         return newExpression;
     }
 
-    /// Gets value if header stack access index.
-    /// Returns index if expr has Type_Stack, otherwise
-    int getHSIndex(const IR::Expression* expr) {
-        return -1;
-    }
-
     /// Eliminates header stack acces next, last operations.
     IR::Node* postorder(IR::Member* expression) {
         if (!afterExec)
@@ -165,7 +159,7 @@ class ParserStateRewriter : public Transform {
             } else {
                 state->statesIndexes[expression->expr->toString()] = idx;
                 return new IR::ArrayIndex(expression->expr->clone(),
-                                                            new IR::Constant(idx));
+                                          new IR::Constant(IR::Type_Bits::get(32), idx));
             }
         }
         return expression;
