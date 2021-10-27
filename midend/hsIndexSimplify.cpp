@@ -28,8 +28,7 @@ void HSIndexFinder::addNewVariable() {
         } else if (generatedVariables->count(indexString) == 0) {
             // Generate new temporary variable.
             auto type = typeMap->getTypeType(arrayIndex->right->type, true);
-            std::string newName = std::string("hsiVar")+std::to_string(generatedVariables->size());
-            auto name = refMap->newName(newName);
+            auto name = refMap->newName("hsiVar");
             auto decl = new IR::Declaration_Variable(name, type);
             locals->push_back(decl);
             typeMap->setType(decl, type);

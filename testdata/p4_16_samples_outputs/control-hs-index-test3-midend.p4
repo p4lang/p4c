@@ -37,12 +37,12 @@ parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<32> hsiVar0;
+    bit<32> hsiVar;
     h_stack hsVar1;
-    bit<32> hsiVar2;
-    bit<32> hsiVar3;
-    bit<32> hsiVar4;
-    bit<32> hsiVar0_0;
+    bit<32> hsiVar_0;
+    bit<32> hsiVar_1;
+    bit<32> hsiVar_2;
+    bit<32> hsiVar_3;
     h_stack hsVar6;
     @hidden action controlhsindextest3l44() {
         h.h[32w0].a = 32w1;
@@ -60,7 +60,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h[32w2] = hsVar1;
     }
     @hidden action controlhsindextest3l44_4() {
-        hsiVar2 = h.h[32w0].a;
+        hsiVar_0 = h.h[32w0].a;
     }
     @hidden action controlhsindextest3l44_5() {
         h.h[32w0].a = 32w1;
@@ -78,7 +78,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h[32w2] = hsVar1;
     }
     @hidden action controlhsindextest3l44_10() {
-        hsiVar3 = h.h[32w1].a;
+        hsiVar_1 = h.h[32w1].a;
     }
     @hidden action controlhsindextest3l44_11() {
         h.h[32w0].a = 32w1;
@@ -96,7 +96,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h[32w2] = hsVar1;
     }
     @hidden action controlhsindextest3l44_16() {
-        hsiVar4 = h.h[32w2].a;
+        hsiVar_2 = h.h[32w2].a;
     }
     @hidden action controlhsindextest3l44_17() {
         h.h[32w0].a = 32w1;
@@ -114,13 +114,13 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h[32w2] = hsVar6;
     }
     @hidden action controlhsindextest3l44_22() {
-        hsiVar0_0 = h.h[32w2].a;
+        hsiVar_3 = h.h[32w2].a;
     }
     @hidden action controlhsindextest3l43() {
         h.h[32w2] = hsVar1;
     }
     @hidden action controlhsindextest3l43_0() {
-        hsiVar0 = h.i.index;
+        hsiVar = h.i.index;
     }
     @hidden action controlhsindextest3l45() {
         h.h[32w0].setInvalid();
@@ -138,7 +138,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h[32w2] = hsVar1;
     }
     @hidden action controlhsindextest3l45_4() {
-        hsiVar0 = h.i.index;
+        hsiVar = h.i.index;
     }
     @hidden table tbl_controlhsindextest3l43 {
         actions = {
@@ -334,76 +334,76 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         tbl_controlhsindextest3l43.apply();
-        if (hsiVar0 == 32w0 && h.h[32w0].isValid()) {
+        if (hsiVar == 32w0 && h.h[32w0].isValid()) {
             tbl_controlhsindextest3l44.apply();
-            if (hsiVar2 == 32w0) {
+            if (hsiVar_0 == 32w0) {
                 tbl_controlhsindextest3l44_0.apply();
-            } else if (hsiVar2 == 32w1) {
+            } else if (hsiVar_0 == 32w1) {
                 tbl_controlhsindextest3l44_1.apply();
-            } else if (hsiVar2 == 32w2) {
+            } else if (hsiVar_0 == 32w2) {
                 tbl_controlhsindextest3l44_2.apply();
             } else {
                 tbl_controlhsindextest3l44_3.apply();
-                if (hsiVar2 >= 32w2) {
+                if (hsiVar_0 >= 32w2) {
                     tbl_controlhsindextest3l44_4.apply();
                 }
             }
-        } else if (hsiVar0 == 32w1 && h.h[32w1].isValid()) {
+        } else if (hsiVar == 32w1 && h.h[32w1].isValid()) {
             tbl_controlhsindextest3l44_5.apply();
-            if (hsiVar3 == 32w0) {
+            if (hsiVar_1 == 32w0) {
                 tbl_controlhsindextest3l44_6.apply();
-            } else if (hsiVar3 == 32w1) {
+            } else if (hsiVar_1 == 32w1) {
                 tbl_controlhsindextest3l44_7.apply();
-            } else if (hsiVar3 == 32w2) {
+            } else if (hsiVar_1 == 32w2) {
                 tbl_controlhsindextest3l44_8.apply();
             } else {
                 tbl_controlhsindextest3l44_9.apply();
-                if (hsiVar3 >= 32w2) {
+                if (hsiVar_1 >= 32w2) {
                     tbl_controlhsindextest3l44_10.apply();
                 }
             }
-        } else if (hsiVar0 == 32w2 && h.h[32w2].isValid()) {
+        } else if (hsiVar == 32w2 && h.h[32w2].isValid()) {
             tbl_controlhsindextest3l44_11.apply();
-            if (hsiVar4 == 32w0) {
+            if (hsiVar_2 == 32w0) {
                 tbl_controlhsindextest3l44_12.apply();
-            } else if (hsiVar4 == 32w1) {
+            } else if (hsiVar_2 == 32w1) {
                 tbl_controlhsindextest3l44_13.apply();
-            } else if (hsiVar4 == 32w2) {
+            } else if (hsiVar_2 == 32w2) {
                 tbl_controlhsindextest3l44_14.apply();
             } else {
                 tbl_controlhsindextest3l44_15.apply();
-                if (hsiVar4 >= 32w2) {
+                if (hsiVar_2 >= 32w2) {
                     tbl_controlhsindextest3l44_16.apply();
                 }
             }
         } else {
             tbl_controlhsindextest3l43_0.apply();
-            if (hsiVar0 >= 32w2 && h.h[32w2].isValid()) {
+            if (hsiVar >= 32w2 && h.h[32w2].isValid()) {
                 tbl_controlhsindextest3l44_17.apply();
-                if (hsiVar0_0 == 32w0) {
+                if (hsiVar_3 == 32w0) {
                     tbl_controlhsindextest3l44_18.apply();
-                } else if (hsiVar0_0 == 32w1) {
+                } else if (hsiVar_3 == 32w1) {
                     tbl_controlhsindextest3l44_19.apply();
-                } else if (hsiVar0_0 == 32w2) {
+                } else if (hsiVar_3 == 32w2) {
                     tbl_controlhsindextest3l44_20.apply();
                 } else {
                     tbl_controlhsindextest3l44_21.apply();
-                    if (hsiVar0_0 >= 32w2) {
+                    if (hsiVar_3 >= 32w2) {
                         tbl_controlhsindextest3l44_22.apply();
                     }
                 }
             }
         }
         tbl_controlhsindextest3l45.apply();
-        if (hsiVar0 == 32w0) {
+        if (hsiVar == 32w0) {
             tbl_controlhsindextest3l45_0.apply();
-        } else if (hsiVar0 == 32w1) {
+        } else if (hsiVar == 32w1) {
             tbl_controlhsindextest3l45_1.apply();
-        } else if (hsiVar0 == 32w2) {
+        } else if (hsiVar == 32w2) {
             tbl_controlhsindextest3l45_2.apply();
         } else {
             tbl_controlhsindextest3l45_3.apply();
-            if (hsiVar0 >= 32w2) {
+            if (hsiVar >= 32w2) {
                 tbl_controlhsindextest3l45_4.apply();
             }
         }

@@ -38,7 +38,7 @@ parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<32> hsiVar0;
+    bit<32> hsiVar;
     h_stack hsVar1;
     @name("ingress.tmp") bit<32> tmp;
     @name("ingress.hs") h_stack hs_0;
@@ -83,7 +83,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h[32w1] = hsVar1;
     }
     @hidden action controlhsindextest5l48_3() {
-        hsiVar0 = h.i.index;
+        hsiVar = h.i.index;
     }
     @hidden table tbl_controlhsindextest5l47 {
         actions = {
@@ -131,13 +131,13 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         tbl_controlhsindextest5l47.apply();
         tbl_add.apply();
         tbl_controlhsindextest5l48.apply();
-        if (hsiVar0 == 32w0) {
+        if (hsiVar == 32w0) {
             tbl_controlhsindextest5l48_0.apply();
-        } else if (hsiVar0 == 32w1) {
+        } else if (hsiVar == 32w1) {
             tbl_controlhsindextest5l48_1.apply();
         } else {
             tbl_controlhsindextest5l48_2.apply();
-            if (hsiVar0 >= 32w1) {
+            if (hsiVar >= 32w1) {
                 tbl_controlhsindextest5l48_3.apply();
             }
         }
