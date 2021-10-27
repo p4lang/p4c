@@ -38,7 +38,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bit<3> retval;
     @name("ingress.tmp") bit<3> tmp_1;
-    bit<3> hsiVar0;
+    bit<3> hsiVar;
     H hsVar9;
     @name("ingress.perform_action") action perform_action() {
         val = (bool_val_0 ? 3w0 : val);
@@ -50,14 +50,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         retval = (bool_val_0 ? tmp_1 : retval);
         tmp = (bool_val_0 ? retval : tmp);
         tmp_0 = (bool_val_0 ? tmp : tmp_0);
-        hsiVar0 = (bool_val_0 ? tmp_0 : 3w0);
-        if (hsiVar0 == 3w0) {
+        hsiVar = (bool_val_0 ? tmp_0 : 3w0);
+        if (hsiVar == 3w0) {
             h.h[3w0].a = (bool_val_0 ? 8w1 : h.h[3w0].a);
-        } else if (hsiVar0 == 3w1) {
+        } else if (hsiVar == 3w1) {
             h.h[3w1].a = (bool_val_0 ? 8w1 : h.h[3w1].a);
         } else {
             h.h[3w1] = hsVar9;
-            if (hsiVar0 >= 3w1) {
+            if (hsiVar >= 3w1) {
                 h.h[3w1].a = (bool_val_0 ? 8w1 : h.h[3w1].a);
             }
         }
