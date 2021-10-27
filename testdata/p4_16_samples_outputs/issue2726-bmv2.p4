@@ -1,25 +1,8 @@
-/*
-* Copyright 2020, MNK Labs & Consulting
-* http://mnkcg.com
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-*/
-
+#include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 typedef bit<48> mac_addr_t;
-
 header aggregator_t {
     bit<8> base0;
     bit<8> base1;
@@ -27,6 +10,7 @@ header aggregator_t {
     bit<8> base3;
     bit<8> val;
 }
+
 header vec_e_t {
     bit<8> e;
 }
@@ -42,9 +26,9 @@ header ethernet_t {
 }
 
 struct headers {
-    ethernet_t ethernet;
-    ml_hdr_t   ml;
-    vec_e_t[3] vector;
+    ethernet_t      ethernet;
+    ml_hdr_t        ml;
+    vec_e_t[3]      vector;
     aggregator_t[3] pool;
 }
 
@@ -52,8 +36,7 @@ struct metadata_t {
     int<8> counter;
 }
 
-parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta,
-                inout standard_metadata_t standard_metadata) {
+parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     state start {
         packet.extract(hdr.ethernet);
         packet.extract(hdr.ml);
@@ -64,7 +47,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta,
         packet.extract(hdr.pool[1]);
         packet.extract(hdr.pool[2]);
         meta.counter = 0;
-	transition accept;
+        transition accept;
     }
 }
 
@@ -74,37 +57,32 @@ enum int<8> Index_t {
     TWO = 2
 }
 
-control ingress(inout headers hdr, inout metadata_t meta,
-                inout standard_metadata_t standard_metadata) {
+control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     apply {
-        // Legacy programs should not break
         meta.counter = meta.counter + 1;
         hdr.vector[0].e = hdr.pool[1].val + 1;
-        // end legacy test.
-        Index_t i = (Index_t) hdr.ml.idx;
-
-        // Test runtime index as l-value.
+        Index_t i = (Index_t)hdr.ml.idx;
         hdr.pool[i].val = hdr.vector[0].e;
         hdr.pool[i].base2 = hdr.vector[0].e;
-        // Test runtime index as r-value.
         hdr.vector[1].e = hdr.pool[i].base0;
-        // Test runtime index as l- and r-values.
         hdr.pool[i].base0 = hdr.pool[i].base1 + 1;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
 }
 
-control egress(inout headers hdr, inout metadata_t meta,
-               inout standard_metadata_t standard_metadata) {
-    apply {}
+control egress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
+    apply {
+    }
 }
 
 control MyVerifyChecksum(inout headers hdr, inout metadata_t meta) {
-    apply {}
+    apply {
+    }
 }
 
 control MyComputeChecksum(inout headers hdr, inout metadata_t meta) {
-    apply {}
+    apply {
+    }
 }
 
 control MyDeparser(packet_out packet, in headers hdr) {
@@ -113,5 +91,5 @@ control MyDeparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch(MyParser(), MyVerifyChecksum(), ingress(), egress(),
-MyComputeChecksum(), MyDeparser()) main;
+V1Switch(MyParser(), MyVerifyChecksum(), ingress(), egress(), MyComputeChecksum(), MyDeparser()) main;
+

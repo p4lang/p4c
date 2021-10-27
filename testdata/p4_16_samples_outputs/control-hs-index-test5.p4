@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 header ethernet_t {
@@ -8,13 +9,13 @@ header ethernet_t {
 }
 
 header h_stack {
-    bit<32>  a;
-    bit<32>  b;
-    bit<32>  c;
+    bit<32> a;
+    bit<32> b;
+    bit<32> c;
 }
 
 header h_index {
-    bit<32>  index;
+    bit<32> index;
 }
 
 struct headers {
@@ -23,7 +24,8 @@ struct headers {
     h_index    i;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -39,22 +41,30 @@ parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
-    counter((bit<32>) 65536, CounterType.packets) stats;
+    counter((bit<32>)65536, CounterType.packets) stats;
     action add(inout h_stack hs, in bit<32> i) {
         hs.a = hs.a + i;
     }
-    apply { 
+    apply {
         add(h.h[h.i.index], 0xff);
         stats.count(h.h[h.i.index].a);
-     }
+    }
 }
 
-control vrfy(inout headers h, inout Meta m) { apply {
-} }
+control vrfy(inout headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout headers h, inout Meta m) { apply {} }
+control update(inout headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
 control deparser(packet_out pkt, in headers h) {
     apply {
@@ -64,5 +74,6 @@ control deparser(packet_out pkt, in headers h) {
         pkt.emit(h.i);
     }
 }
+
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
 
