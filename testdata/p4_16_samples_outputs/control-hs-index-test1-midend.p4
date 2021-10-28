@@ -37,18 +37,18 @@ parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action controlhsindextest1l44() {
+    @hidden action controlhsindextest1l46() {
         h.h[32w1].a = 32w1;
     }
-    @hidden table tbl_controlhsindextest1l44 {
+    @hidden table tbl_controlhsindextest1l46 {
         actions = {
-            controlhsindextest1l44();
+            controlhsindextest1l46();
         }
-        const default_action = controlhsindextest1l44();
+        const default_action = controlhsindextest1l46();
     }
     apply {
         if (h.h[32w1].a > 32w10) {
-            tbl_controlhsindextest1l44.apply();
+            tbl_controlhsindextest1l46.apply();
         }
     }
 }

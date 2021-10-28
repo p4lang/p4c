@@ -67,29 +67,29 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
             }
         }
     }
-    @hidden action controlhsindextest5l47() {
+    @hidden action controlhsindextest5l49() {
         tmp = h.i.index;
     }
-    @hidden action controlhsindextest5l48() {
+    @hidden action controlhsindextest5l50() {
         stats_0.count(h.h[32w0].a);
     }
-    @hidden action controlhsindextest5l48_0() {
+    @hidden action controlhsindextest5l50_0() {
         stats_0.count(h.h[32w1].a);
     }
-    @hidden action controlhsindextest5l48_1() {
+    @hidden action controlhsindextest5l50_1() {
         stats_0.count(h.h[32w1].a);
     }
-    @hidden action controlhsindextest5l48_2() {
+    @hidden action controlhsindextest5l50_2() {
         h.h[32w1] = hsVar1;
     }
-    @hidden action controlhsindextest5l48_3() {
+    @hidden action controlhsindextest5l50_3() {
         hsiVar = h.i.index;
     }
-    @hidden table tbl_controlhsindextest5l47 {
+    @hidden table tbl_controlhsindextest5l49 {
         actions = {
-            controlhsindextest5l47();
+            controlhsindextest5l49();
         }
-        const default_action = controlhsindextest5l47();
+        const default_action = controlhsindextest5l49();
     }
     @hidden table tbl_add {
         actions = {
@@ -97,48 +97,48 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = add();
     }
-    @hidden table tbl_controlhsindextest5l48 {
+    @hidden table tbl_controlhsindextest5l50 {
         actions = {
-            controlhsindextest5l48_3();
+            controlhsindextest5l50_3();
         }
-        const default_action = controlhsindextest5l48_3();
+        const default_action = controlhsindextest5l50_3();
     }
-    @hidden table tbl_controlhsindextest5l48_0 {
+    @hidden table tbl_controlhsindextest5l50_0 {
         actions = {
-            controlhsindextest5l48();
+            controlhsindextest5l50();
         }
-        const default_action = controlhsindextest5l48();
+        const default_action = controlhsindextest5l50();
     }
-    @hidden table tbl_controlhsindextest5l48_1 {
+    @hidden table tbl_controlhsindextest5l50_1 {
         actions = {
-            controlhsindextest5l48_0();
+            controlhsindextest5l50_0();
         }
-        const default_action = controlhsindextest5l48_0();
+        const default_action = controlhsindextest5l50_0();
     }
-    @hidden table tbl_controlhsindextest5l48_2 {
+    @hidden table tbl_controlhsindextest5l50_2 {
         actions = {
-            controlhsindextest5l48_2();
+            controlhsindextest5l50_2();
         }
-        const default_action = controlhsindextest5l48_2();
+        const default_action = controlhsindextest5l50_2();
     }
-    @hidden table tbl_controlhsindextest5l48_3 {
+    @hidden table tbl_controlhsindextest5l50_3 {
         actions = {
-            controlhsindextest5l48_1();
+            controlhsindextest5l50_1();
         }
-        const default_action = controlhsindextest5l48_1();
+        const default_action = controlhsindextest5l50_1();
     }
     apply {
-        tbl_controlhsindextest5l47.apply();
+        tbl_controlhsindextest5l49.apply();
         tbl_add.apply();
-        tbl_controlhsindextest5l48.apply();
+        tbl_controlhsindextest5l50.apply();
         if (hsiVar == 32w0) {
-            tbl_controlhsindextest5l48_0.apply();
+            tbl_controlhsindextest5l50_0.apply();
         } else if (hsiVar == 32w1) {
-            tbl_controlhsindextest5l48_1.apply();
+            tbl_controlhsindextest5l50_1.apply();
         } else {
-            tbl_controlhsindextest5l48_2.apply();
+            tbl_controlhsindextest5l50_2.apply();
             if (hsiVar >= 32w1) {
-                tbl_controlhsindextest5l48_3.apply();
+                tbl_controlhsindextest5l50_3.apply();
             }
         }
     }
