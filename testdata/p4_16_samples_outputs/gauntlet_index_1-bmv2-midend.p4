@@ -55,6 +55,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h[3w1].a = 32w1;
     }
     @hidden action gauntlet_index_1bmv2l45_2() {
+        h.h[3w0] = hsVar0;
         h.h[3w1] = hsVar0;
     }
     @hidden table tbl_gauntlet_index_1bmv2l4 {

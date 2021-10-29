@@ -67,6 +67,8 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         hdr.pool[8s2].val = hdr.pool[1].val + 8w1;
     }
     @hidden action runtimeindexbmv2l80_3() {
+        hdr.pool[8s0] = hsVar1;
+        hdr.pool[8s1] = hsVar1;
         hdr.pool[8s2] = hsVar1;
     }
     @hidden action runtimeindexbmv2l75() {
@@ -87,6 +89,8 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         hdr.pool[8s2].base2 = hdr.vector[0].e;
     }
     @hidden action runtimeindexbmv2l81_3() {
+        hdr.pool[8s0] = hsVar1;
+        hdr.pool[8s1] = hsVar1;
         hdr.pool[8s2] = hsVar1;
     }
     @hidden action runtimeindexbmv2l81_4() {
@@ -105,6 +109,8 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         hdr.vector[1].e = hdr.pool[8s2].base0;
     }
     @hidden action runtimeindexbmv2l83_3() {
+        hdr.pool[8s0] = hsVar1;
+        hdr.pool[8s1] = hsVar1;
         hdr.pool[8s2] = hsVar1;
     }
     @hidden action runtimeindexbmv2l83_4() {
@@ -123,6 +129,8 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         hdr.pool[8s2].base0 = hdr.pool[8s2].base1 + 8w1;
     }
     @hidden action runtimeindexbmv2l85_3() {
+        hdr.pool[8s0] = hsVar1;
+        hdr.pool[8s1] = hsVar1;
         hdr.pool[8s2] = hsVar1;
     }
     @hidden action runtimeindexbmv2l85_4() {

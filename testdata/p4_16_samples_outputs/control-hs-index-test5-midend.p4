@@ -50,6 +50,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         } else if (tmp == 32w1) {
             hs_0 = h.h[32w1];
         } else {
+            h.h[32w0] = hsVar5;
             h.h[32w1] = hsVar5;
             if (tmp >= 32w1) {
                 hs_0 = h.h[32w1];
@@ -61,6 +62,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         } else if (tmp == 32w1) {
             h.h[32w1] = hs_0;
         } else {
+            h.h[32w0] = hsVar5;
             h.h[32w1] = hsVar5;
             if (tmp >= 32w1) {
                 h.h[32w1] = hs_0;
@@ -80,6 +82,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         stats_0.count(h.h[32w1].a);
     }
     @hidden action controlhsindextest5l50_2() {
+        h.h[32w0] = hsVar1;
         h.h[32w1] = hsVar1;
     }
     @hidden action controlhsindextest5l50_3() {

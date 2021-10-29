@@ -120,12 +120,14 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(HSIndexFinder& aiFinder,
         } else {
             pathExpr = generatedVariables->at(typeString);
         }
-        auto* newArrayIndex = aiFinder.arrayIndex->clone();
-        newArrayIndex->right = newIndex;
         newIf->ifFalse = elseBody;
-        IR::IndexedVector<IR::StatOrDecl> overflowComponents;
-        overflowComponents.push_back(new IR::AssignmentStatement(aiFinder.arrayIndex->srcInfo,
-                                    newArrayIndex, pathExpr));
+        IR::IndexedVector<IR::StatOrDecl> overflowComponents;    
+        for (size_t i = 0; i < sz; i++) {
+            auto* newArrayIndex = aiFinder.arrayIndex->clone();
+            newArrayIndex->right = new IR::Constant(aiFinder.arrayIndex->right->type, i);;
+            overflowComponents.push_back(new IR::AssignmentStatement(aiFinder.arrayIndex->srcInfo,
+                                        newArrayIndex, pathExpr));
+        }
         overflowComponents.push_back(newIf);
         // Set result.
         curResult->ifFalse = new IR::BlockStatement(overflowComponents);

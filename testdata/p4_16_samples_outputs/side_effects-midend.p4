@@ -28,6 +28,7 @@ control my(inout H[2] s) {
         tmp_3 = s[1w1].z;
     }
     @hidden action side_effects30() {
+        s[1w0] = hsVar0;
         s[1w1] = hsVar0;
     }
     @hidden action side_effects27() {
@@ -47,6 +48,7 @@ control my(inout H[2] s) {
         s[1w1].z = tmp_3;
     }
     @hidden action side_effects30_0() {
+        s[1w0] = hsVar0;
         s[1w1] = hsVar0;
     }
     @hidden action act_5() {
@@ -63,6 +65,7 @@ control my(inout H[2] s) {
         tmp_8 = s[1w1].z;
     }
     @hidden action side_effects31() {
+        s[1w0] = hsVar0;
         s[1w1] = hsVar0;
     }
     @hidden action side_effects30_1() {
@@ -79,6 +82,7 @@ control my(inout H[2] s) {
         s[1w1].z = tmp_8;
     }
     @hidden action side_effects31_0() {
+        s[1w0] = hsVar0;
         s[1w1] = hsVar0;
     }
     @hidden action act_12() {
@@ -94,6 +98,7 @@ control my(inout H[2] s) {
         s[1w1].z = g(a_0);
     }
     @hidden action side_effects34_2() {
+        s[1w0] = hsVar0;
         s[1w1] = hsVar0;
     }
     @hidden action side_effects31_1() {

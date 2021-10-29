@@ -17,6 +17,7 @@ control c(inout bit<32> r) {
         h_0[32w1].setValid();
     }
     @hidden action complex2l25_2() {
+        h_0[32w0] = hsVar0;
         h_0[32w1] = hsVar0;
     }
     @hidden action complex2l24() {

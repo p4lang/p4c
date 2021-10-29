@@ -57,6 +57,8 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h[32w2].a = 32w1;
     }
     @hidden action controlhsindextest3l45_3() {
+        h.h[32w0] = hsVar1;
+        h.h[32w1] = hsVar1;
         h.h[32w2] = hsVar1;
     }
     @hidden action controlhsindextest3l45_4() {
@@ -75,6 +77,8 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h[32w2].a = 32w1;
     }
     @hidden action controlhsindextest3l45_9() {
+        h.h[32w0] = hsVar1;
+        h.h[32w1] = hsVar1;
         h.h[32w2] = hsVar1;
     }
     @hidden action controlhsindextest3l45_10() {
@@ -93,6 +97,8 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h[32w2].a = 32w1;
     }
     @hidden action controlhsindextest3l45_15() {
+        h.h[32w0] = hsVar1;
+        h.h[32w1] = hsVar1;
         h.h[32w2] = hsVar1;
     }
     @hidden action controlhsindextest3l45_16() {
@@ -111,12 +117,16 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h[32w2].a = 32w1;
     }
     @hidden action controlhsindextest3l45_21() {
+        h.h[32w0] = hsVar6;
+        h.h[32w1] = hsVar6;
         h.h[32w2] = hsVar6;
     }
     @hidden action controlhsindextest3l45_22() {
         hsiVar_3 = h.h[32w2].a;
     }
     @hidden action controlhsindextest3l44() {
+        h.h[32w0] = hsVar1;
+        h.h[32w1] = hsVar1;
         h.h[32w2] = hsVar1;
     }
     @hidden action controlhsindextest3l44_0() {
@@ -135,6 +145,8 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h[32w2].setInvalid();
     }
     @hidden action controlhsindextest3l47_3() {
+        h.h[32w0] = hsVar1;
+        h.h[32w1] = hsVar1;
         h.h[32w2] = hsVar1;
     }
     @hidden action controlhsindextest3l47_4() {

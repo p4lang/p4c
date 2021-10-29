@@ -23,6 +23,7 @@ control my(out H[2] s) {
         } else if (hsiVar == 32w1) {
             tmp_6 = s[32w1].z;
         } else {
+            s[32w0] = hsVar4;
             s[32w1] = hsVar4;
             if (hsiVar >= 32w1) {
                 tmp_6 = s[32w1].z;
@@ -35,6 +36,7 @@ control my(out H[2] s) {
         } else if (hsiVar == 32w1) {
             s[32w1].z = tmp_6;
         } else {
+            s[32w0] = hsVar4;
             s[32w1] = hsVar4;
             if (hsiVar >= 32w1) {
                 s[32w1].z = tmp_6;

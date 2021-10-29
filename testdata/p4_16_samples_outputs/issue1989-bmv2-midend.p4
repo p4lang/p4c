@@ -65,6 +65,7 @@ control ingress(inout headers hdr, inout test_metadata_t meta, inout standard_me
         } else if (hsiVar == 32w1) {
             hdr.ethernet_stack[1] = hdr.ethernet_stack[32w1];
         } else {
+            hdr.ethernet_stack[32w0] = hsVar2;
             hdr.ethernet_stack[32w1] = hsVar2;
             if (hsiVar >= 32w1) {
                 hdr.ethernet_stack[1] = hdr.ethernet_stack[32w1];

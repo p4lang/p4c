@@ -52,6 +52,8 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h[32w2].a = 32w1;
     }
     @hidden action controlhsindextest2l44() {
+        h.h[32w0] = hsVar1;
+        h.h[32w1] = hsVar1;
         h.h[32w2] = hsVar1;
     }
     @hidden action controlhsindextest2l44_0() {

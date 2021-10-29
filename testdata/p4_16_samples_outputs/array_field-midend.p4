@@ -18,6 +18,7 @@ control my(out H[2] s) {
         a_0 = f(s[32w1].z, 1w1);
     }
     @hidden action array_field30_2() {
+        s[32w0] = hsVar0;
         s[32w1] = hsVar0;
     }
     @hidden action array_field26() {

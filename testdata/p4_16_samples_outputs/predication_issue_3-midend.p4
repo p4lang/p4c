@@ -56,6 +56,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         } else if (hsiVar == 3w1) {
             h.h[3w1].a = (bool_val_0 ? 8w1 : h.h[3w1].a);
         } else {
+            h.h[3w0] = hsVar9;
             h.h[3w1] = hsVar9;
             if (hsiVar >= 3w1) {
                 h.h[3w1].a = (bool_val_0 ? 8w1 : h.h[3w1].a);

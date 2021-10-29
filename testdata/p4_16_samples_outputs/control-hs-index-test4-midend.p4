@@ -87,54 +87,76 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h[0].a = 32w0;
     }
     @hidden action controlhsindextest4l48() {
+        h.h[32w0] = hsVar41;
+        h.h[32w1] = hsVar41;
         h.h[32w2] = hsVar41;
     }
     @hidden action controlhsindextest4l48_0() {
+        h.h[32w0] = hsVar33;
+        h.h[32w1] = hsVar33;
         h.h[32w2] = hsVar33;
         hsiVar_24 = h.i.index3;
     }
     @hidden action controlhsindextest4l48_1() {
+        h.h[32w0] = hsVar38;
+        h.h[32w1] = hsVar38;
         h.h[32w2] = hsVar38;
     }
     @hidden action controlhsindextest4l48_2() {
         hsiVar_22 = h.i.index3;
     }
     @hidden action controlhsindextest4l48_3() {
+        h.h[32w0] = hsVar36;
+        h.h[32w1] = hsVar36;
         h.h[32w2] = hsVar36;
     }
     @hidden action controlhsindextest4l48_4() {
         hsiVar_21 = h.i.index3;
     }
     @hidden action controlhsindextest4l48_5() {
+        h.h[32w0] = hsVar33;
+        h.h[32w1] = hsVar33;
         h.h[32w2] = hsVar33;
     }
     @hidden action controlhsindextest4l48_6() {
         hsiVar_20 = h.i.index3;
     }
     @hidden action controlhsindextest4l48_7() {
+        h.h[32w0] = hsVar1;
+        h.h[32w1] = hsVar1;
         h.h[32w2] = hsVar1;
         hsiVar_19 = h.i.index2;
     }
     @hidden action controlhsindextest4l48_8() {
+        h.h[32w0] = hsVar30;
+        h.h[32w1] = hsVar30;
         h.h[32w2] = hsVar30;
     }
     @hidden action controlhsindextest4l48_9() {
+        h.h[32w0] = hsVar22;
+        h.h[32w1] = hsVar22;
         h.h[32w2] = hsVar22;
         hsiVar_17 = h.i.index3;
     }
     @hidden action controlhsindextest4l48_10() {
+        h.h[32w0] = hsVar27;
+        h.h[32w1] = hsVar27;
         h.h[32w2] = hsVar27;
     }
     @hidden action controlhsindextest4l48_11() {
         hsiVar_15 = h.i.index3;
     }
     @hidden action controlhsindextest4l48_12() {
+        h.h[32w0] = hsVar25;
+        h.h[32w1] = hsVar25;
         h.h[32w2] = hsVar25;
     }
     @hidden action controlhsindextest4l48_13() {
         hsiVar_14 = h.i.index3;
     }
     @hidden action controlhsindextest4l48_14() {
+        h.h[32w0] = hsVar22;
+        h.h[32w1] = hsVar22;
         h.h[32w2] = hsVar22;
     }
     @hidden action controlhsindextest4l48_15() {
@@ -144,25 +166,35 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         hsiVar_12 = h.i.index2;
     }
     @hidden action controlhsindextest4l48_17() {
+        h.h[32w0] = hsVar20;
+        h.h[32w1] = hsVar20;
         h.h[32w2] = hsVar20;
     }
     @hidden action controlhsindextest4l48_18() {
+        h.h[32w0] = hsVar12;
+        h.h[32w1] = hsVar12;
         h.h[32w2] = hsVar12;
         hsiVar_11 = h.i.index3;
     }
     @hidden action controlhsindextest4l48_19() {
+        h.h[32w0] = hsVar17;
+        h.h[32w1] = hsVar17;
         h.h[32w2] = hsVar17;
     }
     @hidden action controlhsindextest4l48_20() {
         hsiVar_9 = h.i.index3;
     }
     @hidden action controlhsindextest4l48_21() {
+        h.h[32w0] = hsVar15;
+        h.h[32w1] = hsVar15;
         h.h[32w2] = hsVar15;
     }
     @hidden action controlhsindextest4l48_22() {
         hsiVar_8 = h.i.index3;
     }
     @hidden action controlhsindextest4l48_23() {
+        h.h[32w0] = hsVar12;
+        h.h[32w1] = hsVar12;
         h.h[32w2] = hsVar12;
     }
     @hidden action controlhsindextest4l48_24() {
@@ -172,25 +204,35 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         hsiVar_6 = h.i.index2;
     }
     @hidden action controlhsindextest4l48_26() {
+        h.h[32w0] = hsVar10;
+        h.h[32w1] = hsVar10;
         h.h[32w2] = hsVar10;
     }
     @hidden action controlhsindextest4l48_27() {
+        h.h[32w0] = hsVar1;
+        h.h[32w1] = hsVar1;
         h.h[32w2] = hsVar1;
         hsiVar_5 = h.i.index3;
     }
     @hidden action controlhsindextest4l48_28() {
+        h.h[32w0] = hsVar7;
+        h.h[32w1] = hsVar7;
         h.h[32w2] = hsVar7;
     }
     @hidden action controlhsindextest4l48_29() {
         hsiVar_3 = h.i.index3;
     }
     @hidden action controlhsindextest4l48_30() {
+        h.h[32w0] = hsVar5;
+        h.h[32w1] = hsVar5;
         h.h[32w2] = hsVar5;
     }
     @hidden action controlhsindextest4l48_31() {
         hsiVar_2 = h.i.index3;
     }
     @hidden action controlhsindextest4l48_32() {
+        h.h[32w0] = hsVar1;
+        h.h[32w1] = hsVar1;
         h.h[32w2] = hsVar1;
     }
     @hidden action controlhsindextest4l48_33() {
