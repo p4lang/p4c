@@ -25,7 +25,7 @@ limitations under the License.
 
 #include "ebpf_common.h"
 
-#include "bpf_endian.h" // definitions for bpf_ntohs etc...
+#include <bpf/bpf_endian.h> // definitions for bpf_ntohs etc...
 
 #undef htonl
 #undef htons
@@ -47,7 +47,7 @@ limitations under the License.
  */
 #ifdef CONTROL_PLANE // BEGIN EBPF USER SPACE DEFINITIONS
 
-#include "bpf.h" // bpf_obj_get/pin, bpf_map_update_elem
+#include <bpf/bpf.h> // bpf_obj_get/pin, bpf_map_update_elem
 
 #define BPF_USER_MAP_UPDATE_ELEM(index, key, value, flags)\
     bpf_map_update_elem(index, key, value, flags)
@@ -59,7 +59,7 @@ limitations under the License.
 #include <linux/pkt_cls.h>  // TC_ACT_OK, TC_ACT_SHOT
 #include "linux/bpf.h"  // types, and general bpf definitions
 // This file contains the definitions of all the kernel bpf essentials
-#include "bpf_helpers.h"
+#include <bpf/bpf_helpers.h>
 
 
 /* a helper structure used by an eBPF C program
