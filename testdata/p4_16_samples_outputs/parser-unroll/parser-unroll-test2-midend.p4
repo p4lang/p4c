@@ -48,22 +48,22 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         transition accept;
     }
     state parse_srcRouting {
-        packet.extract<srcRoute_t>(hdr.srcRoutes[0]);
-        transition select(hdr.srcRoutes[0].bos) {
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32w0]);
+        transition select(hdr.srcRoutes[32w0].bos) {
             1w1: parse_ipv4;
             default: parse_srcRouting1;
         }
     }
     state parse_srcRouting1 {
-        packet.extract<srcRoute_t>(hdr.srcRoutes[1]);
-        transition select(hdr.srcRoutes[1].bos) {
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32w1]);
+        transition select(hdr.srcRoutes[32w1].bos) {
             1w1: parse_ipv4;
             default: parse_srcRouting2;
         }
     }
     state parse_srcRouting2 {
-        packet.extract<srcRoute_t>(hdr.srcRoutes[2]);
-        transition select(hdr.srcRoutes[2].bos) {
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32w2]);
+        transition select(hdr.srcRoutes[32w2].bos) {
             1w1: parse_ipv4;
             default: parse_srcRouting3;
         }
