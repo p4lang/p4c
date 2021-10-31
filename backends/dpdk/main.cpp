@@ -97,17 +97,17 @@ int main(int argc, char *const argv[]) {
         return 1;
 
     if (!options.bfRtSchema.isNullOrEmpty()) {
+        std::ostream* out = openFile(options.bfRtSchema, false);
+        if (!out) {
+            ::error("Could not open BF-RT schema file: %1%", options.bfRtSchema);
+            return 1;
+        }
         auto p4RuntimeSerializer = P4::P4RuntimeSerializer::get();
         p4RuntimeSerializer->registerArch("psa",
                 new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilderForDPDK());
 
         auto p4Runtime = P4::generateP4Runtime(program, options.arch);
         auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info);
-        std::ostream* out = openFile(options.bfRtSchema, false);
-        if (!out) {
-            ::error("Could not open BF-RT schema file: %1%", options.bfRtSchema);
-            return 1;
-        }
         p4rt->serializeBFRuntimeSchema(out);
     }
 
