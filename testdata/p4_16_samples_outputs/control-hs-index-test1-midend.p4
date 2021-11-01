@@ -37,8 +37,25 @@ parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
+    bit<32> hsiVar;
+    bit<32> hsVar;
     @hidden action controlhsindextest1l46() {
         h.h[32w1].a = 32w1;
+    }
+    @hidden action controlhsindextest1l48() {
+        h.i.index = h.h[32w0].a;
+    }
+    @hidden action controlhsindextest1l48_0() {
+        h.i.index = h.h[32w1].a;
+    }
+    @hidden action controlhsindextest1l48_1() {
+        h.i.index = h.h[32w2].a;
+    }
+    @hidden action controlhsindextest1l48_2() {
+        h.i.index = hsVar;
+    }
+    @hidden action controlhsindextest1l48_3() {
+        hsiVar = h.i.index;
     }
     @hidden table tbl_controlhsindextest1l46 {
         actions = {
@@ -46,9 +63,49 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = controlhsindextest1l46();
     }
+    @hidden table tbl_controlhsindextest1l48 {
+        actions = {
+            controlhsindextest1l48_3();
+        }
+        const default_action = controlhsindextest1l48_3();
+    }
+    @hidden table tbl_controlhsindextest1l48_0 {
+        actions = {
+            controlhsindextest1l48();
+        }
+        const default_action = controlhsindextest1l48();
+    }
+    @hidden table tbl_controlhsindextest1l48_1 {
+        actions = {
+            controlhsindextest1l48_0();
+        }
+        const default_action = controlhsindextest1l48_0();
+    }
+    @hidden table tbl_controlhsindextest1l48_2 {
+        actions = {
+            controlhsindextest1l48_1();
+        }
+        const default_action = controlhsindextest1l48_1();
+    }
+    @hidden table tbl_controlhsindextest1l48_3 {
+        actions = {
+            controlhsindextest1l48_2();
+        }
+        const default_action = controlhsindextest1l48_2();
+    }
     apply {
         if (h.h[32w1].a > 32w10) {
             tbl_controlhsindextest1l46.apply();
+        }
+        tbl_controlhsindextest1l48.apply();
+        if (hsiVar == 32w0) {
+            tbl_controlhsindextest1l48_0.apply();
+        } else if (hsiVar == 32w1) {
+            tbl_controlhsindextest1l48_1.apply();
+        } else if (hsiVar == 32w2) {
+            tbl_controlhsindextest1l48_2.apply();
+        } else if (hsiVar >= 32w2) {
+            tbl_controlhsindextest1l48_3.apply();
         }
     }
 }

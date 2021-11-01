@@ -39,34 +39,23 @@ parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<32> hsiVar;
-    h_stack hsVar1;
     @name("ingress.tmp") bit<32> tmp;
     @name("ingress.hs") h_stack hs_0;
     @name("ingress.stats") counter(32w65536, CounterType.packets) stats_0;
-    h_stack hsVar5;
+    h_stack hsVar;
     @name("ingress.add") action add() {
         if (tmp == 32w0) {
             hs_0 = h.h[32w0];
         } else if (tmp == 32w1) {
             hs_0 = h.h[32w1];
-        } else {
-            h.h[32w0] = hsVar5;
-            h.h[32w1] = hsVar5;
-            if (tmp >= 32w1) {
-                hs_0 = h.h[32w1];
-            }
+        } else if (tmp >= 32w1) {
+            hs_0 = hsVar;
         }
         hs_0.a = hs_0.a + 32w0xff;
         if (tmp == 32w0) {
             h.h[32w0] = hs_0;
         } else if (tmp == 32w1) {
             h.h[32w1] = hs_0;
-        } else {
-            h.h[32w0] = hsVar5;
-            h.h[32w1] = hsVar5;
-            if (tmp >= 32w1) {
-                h.h[32w1] = hs_0;
-            }
         }
     }
     @hidden action controlhsindextest5l49() {
@@ -79,13 +68,6 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         stats_0.count(h.h[32w1].a);
     }
     @hidden action controlhsindextest5l50_1() {
-        stats_0.count(h.h[32w1].a);
-    }
-    @hidden action controlhsindextest5l50_2() {
-        h.h[32w0] = hsVar1;
-        h.h[32w1] = hsVar1;
-    }
-    @hidden action controlhsindextest5l50_3() {
         hsiVar = h.i.index;
     }
     @hidden table tbl_controlhsindextest5l49 {
@@ -102,9 +84,9 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @hidden table tbl_controlhsindextest5l50 {
         actions = {
-            controlhsindextest5l50_3();
+            controlhsindextest5l50_1();
         }
-        const default_action = controlhsindextest5l50_3();
+        const default_action = controlhsindextest5l50_1();
     }
     @hidden table tbl_controlhsindextest5l50_0 {
         actions = {
@@ -118,18 +100,6 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = controlhsindextest5l50_0();
     }
-    @hidden table tbl_controlhsindextest5l50_2 {
-        actions = {
-            controlhsindextest5l50_2();
-        }
-        const default_action = controlhsindextest5l50_2();
-    }
-    @hidden table tbl_controlhsindextest5l50_3 {
-        actions = {
-            controlhsindextest5l50_1();
-        }
-        const default_action = controlhsindextest5l50_1();
-    }
     apply {
         tbl_controlhsindextest5l49.apply();
         tbl_add.apply();
@@ -138,11 +108,6 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
             tbl_controlhsindextest5l50_0.apply();
         } else if (hsiVar == 32w1) {
             tbl_controlhsindextest5l50_1.apply();
-        } else {
-            tbl_controlhsindextest5l50_2.apply();
-            if (hsiVar >= 32w1) {
-                tbl_controlhsindextest5l50_3.apply();
-            }
         }
     }
 }

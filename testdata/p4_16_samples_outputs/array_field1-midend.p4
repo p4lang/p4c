@@ -10,7 +10,7 @@ control my(out H[2] s) {
     @name("my.tmp_13") bit<1> tmp_4;
     @name("my.tmp_15") bit<1> tmp_6;
     bit<32> hsiVar;
-    H hsVar4;
+    bit<1> hsVar;
     @name("my.act") action act() {
         s[32w0].z = 1w1;
         s[32w1].z = 1w0;
@@ -22,12 +22,8 @@ control my(out H[2] s) {
             tmp_6 = s[32w0].z;
         } else if (hsiVar == 32w1) {
             tmp_6 = s[32w1].z;
-        } else {
-            s[32w0] = hsVar4;
-            s[32w1] = hsVar4;
-            if (hsiVar >= 32w1) {
-                tmp_6 = s[32w1].z;
-            }
+        } else if (hsiVar >= 32w1) {
+            tmp_6 = hsVar;
         }
         f(tmp_6, 1w1);
         hsiVar = (bit<32>)tmp_4;
@@ -35,12 +31,6 @@ control my(out H[2] s) {
             s[32w0].z = tmp_6;
         } else if (hsiVar == 32w1) {
             s[32w1].z = tmp_6;
-        } else {
-            s[32w0] = hsVar4;
-            s[32w1] = hsVar4;
-            if (hsiVar >= 32w1) {
-                s[32w1].z = tmp_6;
-            }
         }
     }
     @name("my.tbl_act") table tbl_act_0 {

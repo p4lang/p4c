@@ -52,10 +52,12 @@ const IR::Node* HSIndexTransform::postorder(IR::ArrayIndex* curArrayIndex) {
 }
 
 IR::Node* HSIndexSimplifier::eliminateArrayIndexes(HSIndexFinder& aiFinder,
-                                                   IR::Statement* statement) {
+                                                   IR::Statement* statement,
+                                                   const IR::Expression* expr) {
     if (aiFinder.arrayIndex == nullptr) {
         return statement;
     }
+    std::cout << "in : " << statement << std::endl;
     const IR::Statement* elseBody = nullptr;
     auto* curIf = statement->to<IR::IfStatement>();
     if (curIf != nullptr) {
@@ -92,56 +94,44 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(HSIndexFinder& aiFinder,
             curResult = newIf;
         }
     }
-    if (locals != nullptr) {
+    if (expr != nullptr && locals != nullptr) {
         // Add case for out of bound.
-        HSIndexTransform aiRewriter(aiFinder, sz - 1);
-        auto* newStatement = statement->apply(aiRewriter)->to<IR::Statement>();
-        auto* newIndex = new IR::Constant(aiFinder.arrayIndex->right->type, sz - 1);
-        auto* newCondition = new IR::Geq(aiFinder.newVariable, newIndex);
-        if (curIf != nullptr) {
-            newIf = newStatement->to<IR::IfStatement>()->clone();
-            newIf->condition = new IR::LAnd(newCondition, newIf->condition);
-        } else {
-            newIf = new IR::IfStatement(newCondition, newStatement, nullptr);
-        }
-        cstring typeString = aiFinder.arrayIndex->type->node_type_name();
+        cstring typeString = expr->type->node_type_name();
         const IR::PathExpression* pathExpr = nullptr;
         if (generatedVariables->count(typeString) == 0) {
             // Add assigment of undefined header.
-            auto type = typeMap->getTypeType(aiFinder.arrayIndex->type, true);
-            std::string newName = std::string("hsVar")+std::to_string(locals->size());
-            auto name = refMap->newName(newName);
-            auto decl = new IR::Declaration_Variable(name, type);
+            auto name = refMap->newName("hsVar");
+            auto decl = new IR::Declaration_Variable(name, expr->type);
             locals->push_back(decl);
-            typeMap->setType(decl, type);
-            pathExpr =
-                new IR::PathExpression(aiFinder.arrayIndex->srcInfo, type, new IR::Path(name));
+            typeMap->setType(decl, expr->type);
+            pathExpr = new IR::PathExpression(aiFinder.arrayIndex->srcInfo, expr->type,
+                new IR::Path(name));
             generatedVariables->emplace(typeString, pathExpr);
         } else {
             pathExpr = generatedVariables->at(typeString);
         }
-        newIf->ifFalse = elseBody;
-        IR::IndexedVector<IR::StatOrDecl> overflowComponents;    
-        for (size_t i = 0; i < sz; i++) {
-            auto* newArrayIndex = aiFinder.arrayIndex->clone();
-            newArrayIndex->right = new IR::Constant(aiFinder.arrayIndex->right->type, i);;
-            overflowComponents.push_back(new IR::AssignmentStatement(aiFinder.arrayIndex->srcInfo,
-                                        newArrayIndex, pathExpr));
-        }
-        overflowComponents.push_back(newIf);
-        // Set result.
-        curResult->ifFalse = new IR::BlockStatement(overflowComponents);
-    } else {
-        newIf->ifFalse = elseBody;
+        auto* newStatement = 
+            new IR::AssignmentStatement(aiFinder.arrayIndex->srcInfo, expr, pathExpr);
+        auto* newCondition = new IR::Geq(aiFinder.newVariable,
+            new IR::Constant(aiFinder.arrayIndex->right->type, sz - 1));
+        newIf = new IR::IfStatement(newCondition, newStatement, nullptr);
+        curResult->ifFalse = newIf;
     }
+    newIf->ifFalse = elseBody;
+    std::cout << "out : " << result << std::endl;
     newComponents.push_back(result);
     return new IR::BlockStatement(newComponents);
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::AssignmentStatement* assignmentStatement) {
     HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
-    assignmentStatement->apply(aiFinder);
-    return eliminateArrayIndexes(aiFinder, assignmentStatement);
+    assignmentStatement->left->apply(aiFinder);
+    if (aiFinder.arrayIndex == nullptr) {
+        assignmentStatement->right->apply(aiFinder);
+        return eliminateArrayIndexes(aiFinder, assignmentStatement, assignmentStatement->left);
+    } else {
+        return eliminateArrayIndexes(aiFinder, assignmentStatement, nullptr);
+    }
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::P4Control* control) {
@@ -158,6 +148,7 @@ IR::Node* HSIndexSimplifier::preorder(IR::P4Control* control) {
         }
     }
     newControl->controlLocals = newControlLocals;
+    std::cout << "newControl : " << newControl << std::endl;
     return newControl;
 }
 
@@ -193,19 +184,21 @@ IR::Node* HSIndexSimplifier::preorder(IR::BlockStatement* blockStatement) {
 IR::Node* HSIndexSimplifier::preorder(IR::IfStatement* ifStatement) {
     HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
     ifStatement->condition->apply(aiFinder);
-    return eliminateArrayIndexes(aiFinder, ifStatement);
+    return eliminateArrayIndexes(aiFinder, ifStatement, nullptr);
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::MethodCallStatement* methodCallStatement) {
     HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
     methodCallStatement->apply(aiFinder);
-    return eliminateArrayIndexes(aiFinder, methodCallStatement);
+    // Here we mean that in/out parameter will be replaced by correspondent assignments.
+    // In this case no need to consider assignment to undefined value.
+    return eliminateArrayIndexes(aiFinder, methodCallStatement, nullptr);
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::SwitchStatement* switchStatement) {
     HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
     switchStatement->expression->apply(aiFinder);
-    return eliminateArrayIndexes(aiFinder, switchStatement);
+    return eliminateArrayIndexes(aiFinder, switchStatement, nullptr);
 }
 
 }  // namespace P4

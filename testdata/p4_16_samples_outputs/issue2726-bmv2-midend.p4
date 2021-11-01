@@ -53,7 +53,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout 
 
 control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     int<8> hsiVar;
-    aggregator_t hsVar1;
+    bit<8> hsVar;
     @hidden action issue2726bmv2l87() {
         hdr.pool[8s0].val = hdr.pool[1].val + 8w1;
     }
@@ -62,14 +62,6 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
     }
     @hidden action issue2726bmv2l87_1() {
         hdr.pool[8s2].val = hdr.pool[1].val + 8w1;
-    }
-    @hidden action issue2726bmv2l87_2() {
-        hdr.pool[8s2].val = hdr.pool[1].val + 8w1;
-    }
-    @hidden action issue2726bmv2l87_3() {
-        hdr.pool[8s0] = hsVar1;
-        hdr.pool[8s1] = hsVar1;
-        hdr.pool[8s2] = hsVar1;
     }
     @hidden action issue2726bmv2l81() {
         meta.counter = meta.counter + 8s1;
@@ -86,14 +78,6 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         hdr.pool[8s2].base2 = hdr.vector[0].e;
     }
     @hidden action issue2726bmv2l88_2() {
-        hdr.pool[8s2].base2 = hdr.vector[0].e;
-    }
-    @hidden action issue2726bmv2l88_3() {
-        hdr.pool[8s0] = hsVar1;
-        hdr.pool[8s1] = hsVar1;
-        hdr.pool[8s2] = hsVar1;
-    }
-    @hidden action issue2726bmv2l88_4() {
         hsiVar = (int<8>)hdr.ml.idx;
     }
     @hidden action issue2726bmv2l90() {
@@ -106,14 +90,9 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         hdr.vector[1].e = hdr.pool[8s2].base0;
     }
     @hidden action issue2726bmv2l90_2() {
-        hdr.vector[1].e = hdr.pool[8s2].base0;
+        hdr.vector[1].e = hsVar;
     }
     @hidden action issue2726bmv2l90_3() {
-        hdr.pool[8s0] = hsVar1;
-        hdr.pool[8s1] = hsVar1;
-        hdr.pool[8s2] = hsVar1;
-    }
-    @hidden action issue2726bmv2l90_4() {
         hsiVar = (int<8>)hdr.ml.idx;
     }
     @hidden action issue2726bmv2l92() {
@@ -126,14 +105,6 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         hdr.pool[8s2].base0 = hdr.pool[8s2].base1 + 8w1;
     }
     @hidden action issue2726bmv2l92_2() {
-        hdr.pool[8s2].base0 = hdr.pool[8s2].base1 + 8w1;
-    }
-    @hidden action issue2726bmv2l92_3() {
-        hdr.pool[8s0] = hsVar1;
-        hdr.pool[8s1] = hsVar1;
-        hdr.pool[8s2] = hsVar1;
-    }
-    @hidden action issue2726bmv2l92_4() {
         hsiVar = (int<8>)hdr.ml.idx;
     }
     @hidden action issue2726bmv2l93() {
@@ -163,23 +134,11 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         }
         const default_action = issue2726bmv2l87_1();
     }
-    @hidden table tbl_issue2726bmv2l87_2 {
-        actions = {
-            issue2726bmv2l87_3();
-        }
-        const default_action = issue2726bmv2l87_3();
-    }
-    @hidden table tbl_issue2726bmv2l87_3 {
-        actions = {
-            issue2726bmv2l87_2();
-        }
-        const default_action = issue2726bmv2l87_2();
-    }
     @hidden table tbl_issue2726bmv2l88 {
         actions = {
-            issue2726bmv2l88_4();
+            issue2726bmv2l88_2();
         }
-        const default_action = issue2726bmv2l88_4();
+        const default_action = issue2726bmv2l88_2();
     }
     @hidden table tbl_issue2726bmv2l88_0 {
         actions = {
@@ -199,23 +158,11 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         }
         const default_action = issue2726bmv2l88_1();
     }
-    @hidden table tbl_issue2726bmv2l88_3 {
-        actions = {
-            issue2726bmv2l88_3();
-        }
-        const default_action = issue2726bmv2l88_3();
-    }
-    @hidden table tbl_issue2726bmv2l88_4 {
-        actions = {
-            issue2726bmv2l88_2();
-        }
-        const default_action = issue2726bmv2l88_2();
-    }
     @hidden table tbl_issue2726bmv2l90 {
         actions = {
-            issue2726bmv2l90_4();
+            issue2726bmv2l90_3();
         }
-        const default_action = issue2726bmv2l90_4();
+        const default_action = issue2726bmv2l90_3();
     }
     @hidden table tbl_issue2726bmv2l90_0 {
         actions = {
@@ -237,21 +184,15 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
     }
     @hidden table tbl_issue2726bmv2l90_3 {
         actions = {
-            issue2726bmv2l90_3();
-        }
-        const default_action = issue2726bmv2l90_3();
-    }
-    @hidden table tbl_issue2726bmv2l90_4 {
-        actions = {
             issue2726bmv2l90_2();
         }
         const default_action = issue2726bmv2l90_2();
     }
     @hidden table tbl_issue2726bmv2l92 {
         actions = {
-            issue2726bmv2l92_4();
+            issue2726bmv2l92_2();
         }
-        const default_action = issue2726bmv2l92_4();
+        const default_action = issue2726bmv2l92_2();
     }
     @hidden table tbl_issue2726bmv2l92_0 {
         actions = {
@@ -271,18 +212,6 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         }
         const default_action = issue2726bmv2l92_1();
     }
-    @hidden table tbl_issue2726bmv2l92_3 {
-        actions = {
-            issue2726bmv2l92_3();
-        }
-        const default_action = issue2726bmv2l92_3();
-    }
-    @hidden table tbl_issue2726bmv2l92_4 {
-        actions = {
-            issue2726bmv2l92_2();
-        }
-        const default_action = issue2726bmv2l92_2();
-    }
     @hidden table tbl_issue2726bmv2l93 {
         actions = {
             issue2726bmv2l93();
@@ -297,11 +226,6 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
             tbl_issue2726bmv2l87_0.apply();
         } else if (hsiVar == 8s2) {
             tbl_issue2726bmv2l87_1.apply();
-        } else {
-            tbl_issue2726bmv2l87_2.apply();
-            if (hsiVar >= 8s2) {
-                tbl_issue2726bmv2l87_3.apply();
-            }
         }
         tbl_issue2726bmv2l88.apply();
         if (hsiVar == 8s0) {
@@ -310,11 +234,6 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
             tbl_issue2726bmv2l88_1.apply();
         } else if (hsiVar == 8s2) {
             tbl_issue2726bmv2l88_2.apply();
-        } else {
-            tbl_issue2726bmv2l88_3.apply();
-            if (hsiVar >= 8s2) {
-                tbl_issue2726bmv2l88_4.apply();
-            }
         }
         tbl_issue2726bmv2l90.apply();
         if (hsiVar == 8s0) {
@@ -323,11 +242,8 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
             tbl_issue2726bmv2l90_1.apply();
         } else if (hsiVar == 8s2) {
             tbl_issue2726bmv2l90_2.apply();
-        } else {
+        } else if (hsiVar >= 8s2) {
             tbl_issue2726bmv2l90_3.apply();
-            if (hsiVar >= 8s2) {
-                tbl_issue2726bmv2l90_4.apply();
-            }
         }
         tbl_issue2726bmv2l92.apply();
         if (hsiVar == 8s0) {
@@ -336,11 +252,6 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
             tbl_issue2726bmv2l92_1.apply();
         } else if (hsiVar == 8s2) {
             tbl_issue2726bmv2l92_2.apply();
-        } else {
-            tbl_issue2726bmv2l92_3.apply();
-            if (hsiVar >= 8s2) {
-                tbl_issue2726bmv2l92_4.apply();
-            }
         }
         tbl_issue2726bmv2l93.apply();
     }
