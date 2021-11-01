@@ -169,7 +169,7 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
     }
 
     void collectExternInstance(P4RuntimeSymbolTableIface* symbols,
-                               const IR::ExternBlock* externBlock) {
+                               const IR::ExternBlock* externBlock) override {
         P4RuntimeArchHandlerCommon<Arch::PSA>::collectExternInstance(symbols, externBlock);
 
         auto decl = externBlock->node->to<IR::IDeclaration>();
@@ -187,7 +187,7 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
     void addTableProperties(const P4RuntimeSymbolTableIface& symbols,
                             p4configv1::P4Info* p4info,
                             p4configv1::Table* table,
-                            const IR::TableBlock* tableBlock) {
+                            const IR::TableBlock* tableBlock) override {
         P4RuntimeArchHandlerCommon<Arch::PSA>::addTableProperties(
             symbols, p4info, table, tableBlock);
 
