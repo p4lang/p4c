@@ -43,6 +43,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         if (h.h[indexLocal_0].a > 32w10) {
             h.h[indexLocal_0].a = 32w1;
         }
+        h.i.index = h.h[h.i.index].a;
     }
 }
 

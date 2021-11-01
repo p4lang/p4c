@@ -57,7 +57,6 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(HSIndexFinder& aiFinder,
     if (aiFinder.arrayIndex == nullptr) {
         return statement;
     }
-    std::cout << "in : " << statement << std::endl;
     const IR::Statement* elseBody = nullptr;
     auto* curIf = statement->to<IR::IfStatement>();
     if (curIf != nullptr) {
@@ -94,7 +93,7 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(HSIndexFinder& aiFinder,
             curResult = newIf;
         }
     }
-    if (expr != nullptr && locals != nullptr) {
+    if (locals != nullptr) {
         // Add case for out of bound.
         cstring typeString = expr->type->node_type_name();
         const IR::PathExpression* pathExpr = nullptr;
@@ -110,7 +109,7 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(HSIndexFinder& aiFinder,
         } else {
             pathExpr = generatedVariables->at(typeString);
         }
-        auto* newStatement = 
+        auto* newStatement =
             new IR::AssignmentStatement(aiFinder.arrayIndex->srcInfo, expr, pathExpr);
         auto* newCondition = new IR::Geq(aiFinder.newVariable,
             new IR::Constant(aiFinder.arrayIndex->right->type, sz - 1));
@@ -118,7 +117,6 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(HSIndexFinder& aiFinder,
         curResult->ifFalse = newIf;
     }
     newIf->ifFalse = elseBody;
-    std::cout << "out : " << result << std::endl;
     newComponents.push_back(result);
     return new IR::BlockStatement(newComponents);
 }
@@ -148,7 +146,6 @@ IR::Node* HSIndexSimplifier::preorder(IR::P4Control* control) {
         }
     }
     newControl->controlLocals = newControlLocals;
-    std::cout << "newControl : " << newControl << std::endl;
     return newControl;
 }
 
