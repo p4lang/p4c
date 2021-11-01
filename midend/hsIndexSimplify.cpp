@@ -93,7 +93,7 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(HSIndexFinder& aiFinder,
             curResult = newIf;
         }
     }
-    if (locals != nullptr) {
+    if (expr != nullptr && locals != nullptr) {
         // Add case for out of bound.
         cstring typeString = expr->type->node_type_name();
         const IR::PathExpression* pathExpr = nullptr;
