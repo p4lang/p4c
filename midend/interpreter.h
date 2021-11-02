@@ -410,8 +410,24 @@ class SymbolicHeader : public SymbolicStruct {
     bool equals(const SymbolicValue* other) const override;
 };
 
+class SymbolicHeaderUnion : public SymbolicStruct {
+ public:
+    explicit SymbolicHeaderUnion(const IR::Type_HeaderUnion* type) : SymbolicStruct(type) {}
+    SymbolicBool* valid = nullptr;
+    SymbolicHeaderUnion(const IR::Type_HeaderUnion* type, bool uninitialized,
+                   const SymbolicValueFactory* factory);
+    virtual void setValid(bool v);
+    SymbolicValue* clone() const override;
+    SymbolicValue* get(const IR::Node* node, cstring field) const override;
+    void setAllUnknown() override;
+    void assign(const SymbolicValue* other) override;
+    void dbprint(std::ostream& out) const override;
+    bool merge(const SymbolicValue* other) override;
+    bool equals(const SymbolicValue* other) const override;
+};
+
 class SymbolicArray final : public SymbolicValue {
-    std::vector<SymbolicHeader*> values;
+    std::vector<SymbolicStruct*> values;
     friend class AnyElement;
     explicit SymbolicArray(const IR::Type_Stack* type) :
             SymbolicValue(type), size(type->getSize()),
@@ -436,7 +452,6 @@ class SymbolicArray final : public SymbolicValue {
     SymbolicValue* clone() const override;
     SymbolicValue* next(const IR::Node* node);
     SymbolicValue* last(const IR::Node* node);
-    SymbolicValue* lastIndex(const IR::Node* node);
     bool isScalar() const override { return false; }
     void setAllUnknown() override;
     void assign(const SymbolicValue* other) override;
