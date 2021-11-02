@@ -2,7 +2,7 @@
   "schema_version" : "1.0.0",
   "tables" : [
     {
-      "name" : "pipe.ingress.route",
+      "name" : "ip.ingress.route",
       "id" : 40550280,
       "table_type" : "MatchAction_Direct",
       "size" : 1024,

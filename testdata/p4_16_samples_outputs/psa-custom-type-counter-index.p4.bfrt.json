@@ -2,7 +2,7 @@
   "schema_version" : "1.0.0",
   "tables" : [
     {
-      "name" : "pipe.MyIC.tbl",
+      "name" : "ip.MyIC.tbl",
       "id" : 39967501,
       "table_type" : "MatchAction_Direct",
       "size" : 1024,
@@ -44,7 +44,7 @@
       "attributes" : ["EntryScope"]
     },
     {
-      "name" : "pipe.MyIC.counter",
+      "name" : "ip.MyIC.counter",
       "id" : 306209163,
       "table_type" : "Counter",
       "size" : 1024,

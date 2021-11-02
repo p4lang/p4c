@@ -2,7 +2,7 @@
   "schema_version" : "1.0.0",
   "tables" : [
     {
-      "name" : "pipe.MyIC.tbl",
+      "name" : "ip.MyIC.tbl",
       "id" : 39967501,
       "size" : 1024,
       "annotations" : [],
@@ -42,7 +42,7 @@
       "attributes" : ["EntryScope"]
     },
     {
-      "name" : "pipe.MyIC.tbl2",
+      "name" : "ip.MyIC.tbl2",
       "id" : 47318070,
       "size" : 1024,
       "annotations" : [],
@@ -82,7 +82,7 @@
       "attributes" : ["EntryScope"]
     },
     {
-      "name" : "pipe.MyIC.ap",
+      "name" : "ip.MyIC.ap",
       "id" : 298015716,
       "table_type" : "Action",
       "size" : 1024,

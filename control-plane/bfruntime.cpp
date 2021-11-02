@@ -292,8 +292,7 @@ BFRuntimeGenerator::addKeyField(Util::JsonArray* dataJson, P4Id id, cstring name
 BFRuntimeGenerator::initTableJson(const std::string& name,
         P4Id id, cstring tableType, int64_t size, Util::JsonArray* annotations) {
     auto* tableJson = new Util::JsonObject();
-    const std::string tableName = "pipe." + name;
-    tableJson->emplace("name", tableName);
+    tableJson->emplace("name", name);
     tableJson->emplace("id", id);
     tableJson->emplace("table_type", tableType);
     tableJson->emplace("size", size);
