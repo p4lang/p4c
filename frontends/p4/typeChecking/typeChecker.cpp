@@ -134,7 +134,8 @@ const IR::Type* TypeInference::cloneWithFreshTypeVariables(const IR::IMayBeGener
     return cl->to<IR::Type>();
 }
 
-TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool readOnly, bool checkArrays) :
+TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap,
+                             bool readOnly, bool checkArrays) :
         refMap(refMap), typeMap(typeMap),
         initialNode(nullptr), readOnly(readOnly), checkArrays(checkArrays) {
     CHECK_NULL(typeMap);
@@ -2068,7 +2069,8 @@ const IR::Node* TypeInference::postorder(IR::ArrayIndex* expression) {
     // if index is negative here it means it's not a constant
 
     if ((index < 0) && !rtype->is<IR::Type_Bits>()
-        && !rtype->is<IR::Type_SerEnum>()) {
+        && !rtype->is<IR::Type_SerEnum>()
+        && !rtype->is<IR::Type_InfInt>()) {
         typeError("Array index %1% must be an integer, but it has type %2%",
                   expression->right, rtype->toString());
         return expression;
