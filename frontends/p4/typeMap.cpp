@@ -366,7 +366,7 @@ const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
     return type;
 }
 
-int TypeMap::minWidthBits(const IR::Type* type, const IR::Node* errorPosition) {
+int TypeMap::widthBits(const IR::Type* type, const IR::Node* errorPosition, bool max) {
     CHECK_NULL(type);
     const IR::Type* t;
     if (auto tt = type->to<IR::Type_Type>())
@@ -378,33 +378,39 @@ int TypeMap::minWidthBits(const IR::Type* type, const IR::Node* errorPosition) {
     } else if (auto ts = t->to<IR::Type_StructLike>()) {
         int result = 0;
         bool isUnion = t->is<IR::Type_HeaderUnion>();
-        if (isUnion)
-            goto error;
         for (auto f : ts->fields) {
-            int w = minWidthBits(f->type, errorPosition);
+            int w = widthBits(f->type, errorPosition, max);
             if (w < 0)
                 return w;
             if (isUnion)
-                // Left here in case we change our mind later.
                 result = std::max(w, result);
             else
                 result = result + w;
         }
         return result;
+    } else if (auto tt = t->to<IR::Type_Tuple>()) {
+        int result = 0;
+        for (auto f : tt->components) {
+            int w = widthBits(f, errorPosition, max);
+            if (w < 0)
+                return w;
+            result = result + w;
+        }
+        return result;
     } else if (auto te = t->to<IR::Type_SerEnum>()) {
-        return minWidthBits(te->type, errorPosition);
+        return widthBits(te->type, errorPosition, max);
     } else if (t->is<IR::Type_Boolean>()) {
         return 1;
     } else if (auto tnt = t->to<IR::Type_Newtype>()) {
-        return minWidthBits(tnt->type, errorPosition);
-    } else if (type->is<IR::Type_Varbits>()) {
+        return widthBits(tnt->type, errorPosition, max);
+    } else if (auto vb = type->to<IR::Type_Varbits>()) {
+        if (max)
+            return vb->size;
         return 0;
     } else if (auto ths = t->to<IR::Type_Stack>()) {
-        auto w = minWidthBits(ths->elementType, errorPosition);
+        auto w = widthBits(ths->elementType, errorPosition, max);
         return w * ths->getSize();
     }
-
-  error:
     ::error(ErrorType::ERR_UNSUPPORTED, "%1%: width not well-defined for values of type %2%",
             errorPosition, t);
     return -1;

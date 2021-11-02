@@ -132,7 +132,7 @@ size_t Type_Stack::getSize() const {
         return 0;
     }
     int size = cst->asInt();
-    if (size <= 0)
+    if (size < 0)
         ::error(ErrorType::ERR_OVERLIMIT, "Illegal array size: %1%", cst);
     return static_cast<size_t>(size);
 }

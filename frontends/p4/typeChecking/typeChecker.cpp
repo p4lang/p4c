@@ -134,9 +134,9 @@ const IR::Type* TypeInference::cloneWithFreshTypeVariables(const IR::IMayBeGener
     return cl->to<IR::Type>();
 }
 
-TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool readOnly) :
+TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool readOnly, bool checkArrays) :
         refMap(refMap), typeMap(typeMap),
-        initialNode(nullptr), readOnly(readOnly) {
+        initialNode(nullptr), readOnly(readOnly), checkArrays(checkArrays) {
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
     visitDagOnce = false;  // the done() method will take care of this
@@ -2051,15 +2051,16 @@ const IR::Node* TypeInference::postorder(IR::ArrayIndex* expression) {
     auto rtype = getType(expression->right);
     if (ltype == nullptr || rtype == nullptr)
         return expression;
+    auto hst = ltype->to<IR::Type_Stack>();
 
     int index = -1;
     if (auto cst = expression->right->to<IR::Constant>()) {
-        if (!cst->fitsInt()) {
+        if (hst && checkArrays && !cst->fitsInt()) {
             typeError("Index too large: %1%", cst);
             return expression;
         }
         index = cst->asInt();
-        if (index < 0) {
+        if (hst && checkArrays && index < 0) {
             typeError("%1%: Negative array index %2%", expression, cst);
             return expression;
         }
@@ -2074,8 +2075,8 @@ const IR::Node* TypeInference::postorder(IR::ArrayIndex* expression) {
     }
 
     const IR::Type* type = nullptr;
-    if (auto hst = ltype->to<IR::Type_Stack>()) {
-        if (hst->sizeKnown()) {
+    if (hst) {
+        if (checkArrays && hst->sizeKnown()) {
             int size = hst->getSize();
             if (index >= 0 && index >= size) {
                 typeError("Array index %1% larger or equal to array size %2%",
@@ -2857,8 +2858,10 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
 
     bool inMethod = getParent<IR::MethodCallExpression>() != nullptr;
     // Built-in methods
-    if (inMethod && (member == IR::Type_Header::minSizeInBits ||
-                     member == IR::Type_Header::minSizeInBytes)) {
+    if (inMethod && (member == IR::Type::minSizeInBits ||
+                     member == IR::Type::minSizeInBytes ||
+                     member == IR::Type::maxSizeInBits ||
+                     member == IR::Type::maxSizeInBytes)) {
         auto type = new IR::Type_Method(
             new IR::Type_InfInt(), new IR::ParameterList(), member);
         auto ctype = canonicalize(type);
@@ -3216,22 +3219,19 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             inActionsList = true;
         return actionCall(inActionsList, expression);
     } else {
-        // Constant-fold minSizeInBits, minSizeInBytes
+        // Constant-fold constant expressions
         if (auto mem = expression->method->to<IR::Member>()) {
             auto type = typeMap->getType(mem->expr, true);
-            if ((mem->member == IR::Type_StructLike::minSizeInBits ||
-                 mem->member == IR::Type_StructLike::minSizeInBytes)) {
-                // minWidthInBits handles stacks, but we don't.
-                if (type->is<IR::Type_Stack>()) {
-                    typeError("%1%: %2% not defined for values of type %2%",
-                              expression, mem->member.name, type);
-                    return expression;
-                }
-                int w = typeMap->minWidthBits(type, expression);
+            if ((mem->member == IR::Type::minSizeInBits ||
+                 mem->member == IR::Type::minSizeInBytes ||
+                 mem->member == IR::Type::maxSizeInBits ||
+                 mem->member == IR::Type::maxSizeInBytes)) {
+                auto max = mem->member.name.startsWith("max");
+                int w = typeMap->widthBits(type, expression, max);
                 LOG3("Folding " << mem << " to " << w);
                 if (w < 0)
                     return expression;
-                if (mem->member == IR::Type_StructLike::minSizeInBytes)
+                if (mem->member.name.endsWith("Bytes"))
                     w = ROUNDUP(w, 8);
                 auto result = new IR::Constant(w);
                 auto tt = new IR::Type_Type(result->type);
