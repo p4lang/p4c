@@ -1,15 +1,18 @@
+header H {
+}
+
 control c(out bit<32> v) {
-    @hidden action minsize24() {
-        v = 32w64;
+    @hidden action minsize27() {
+        v = 32w128;
     }
-    @hidden table tbl_minsize24 {
+    @hidden table tbl_minsize27 {
         actions = {
-            minsize24();
+            minsize27();
         }
-        const default_action = minsize24();
+        const default_action = minsize27();
     }
     apply {
-        tbl_minsize24.apply();
+        tbl_minsize27.apply();
     }
 }
 

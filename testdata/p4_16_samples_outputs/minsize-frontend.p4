@@ -1,6 +1,9 @@
+header H {
+}
+
 control c(out bit<32> v) {
     apply {
-        v = 32w64;
+        v = 32w128;
     }
 }
 
