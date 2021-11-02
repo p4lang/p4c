@@ -525,6 +525,29 @@ SymbolicValue* SymbolicArray::next(const IR::Node* node) {
     return new SymbolicException(node, P4::StandardExceptions::StackOutOfBounds);
 }
 
+SymbolicValue* SymbolicArray::lastIndex(const IR::Node* node) {
+    for (unsigned i = 0; i < values.size(); i++) {
+        unsigned index = values.size() - i - 1;
+        auto v = values.at(index);
+        if (values[i]->is<SymbolicHeader>()) {
+            if (v->to<SymbolicHeader>()->valid->isUnknown() ||
+                v->to<SymbolicHeader>()->valid->isUninitialized())
+                return new AnyElement(this);
+            if (v->to<SymbolicHeader>()->valid->value)
+                return new SymbolicInteger(new IR::Constant(IR::Type_Bits::get(32), index));
+        }
+
+        if (values[i]->is<SymbolicHeaderUnion>()) {
+            if (v->to<SymbolicHeaderUnion>()->valid->isUnknown() ||
+                v->to<SymbolicHeaderUnion>()->valid->isUninitialized())
+                return new AnyElement(this);
+            if (v->to<SymbolicHeaderUnion>()->valid->value)
+                return new SymbolicInteger(new IR::Constant(IR::Type_Bits::get(32), index));
+        }
+    }
+    return new SymbolicException(node, P4::StandardExceptions::StackOutOfBounds);
+}
+
 SymbolicValue* SymbolicArray::last(const IR::Node* node) {
     for (unsigned i = 0; i < values.size(); i++) {
         unsigned index = values.size() - i - 1;
@@ -777,7 +800,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Ternary* expression) {
         clone->e1 = getConstant(e1i);
         clone->e2 = getConstant(e2i);
         DoConstantFolding cf(refMap, typeMap);
-        cf.setCalledBy(this);
+        //cf.setCalledBy(this);
         auto result = clone->apply(cf);
         checkResult(expression, result);
         return;
@@ -813,7 +836,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Binary* expression) {
         clone->left = getConstant(li);
         clone->right = getConstant(ri);
         DoConstantFolding cf(refMap, typeMap);
-        cf.setCalledBy(this);
+        //cf.setCalledBy(this);
         auto result = clone->apply(cf);
         checkResult(expression, result);
         return;
@@ -844,7 +867,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         auto li = l->to<SymbolicInteger>();
         clone->expr = li->constant;
         DoConstantFolding cf(refMap, typeMap);
-        cf.setCalledBy(this);
+        //cf.setCalledBy(this);
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
         set(expression, new SymbolicInteger(result->to<IR::Constant>()));
@@ -853,7 +876,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         auto li = l->to<SymbolicBool>();
         clone->expr = new IR::BoolLiteral(li->value);
         DoConstantFolding cf(refMap, typeMap);
-        cf.setCalledBy(this);
+        //cf.setCalledBy(this);
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
@@ -930,7 +953,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
         clone->left = l->to<SymbolicInteger>()->constant;
         clone->right = r->to<SymbolicInteger>()->constant;
         DoConstantFolding cf(refMap, typeMap);
-        cf.setCalledBy(this);
+        //cf.setCalledBy(this);
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
@@ -940,7 +963,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
         clone->left = new IR::BoolLiteral(l->to<SymbolicBool>()->value);
         clone->right = new IR::BoolLiteral(r->to<SymbolicBool>()->value);
         DoConstantFolding cf(refMap, typeMap);
-        cf.setCalledBy(this);
+        //cf.setCalledBy(this);
         auto result = expression->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
@@ -978,6 +1001,12 @@ void ExpressionEvaluator::postorder(const IR::Member* expression) {
                 set(expression, v);
                 return;
             }
+        } else if (expression->member.name == IR::Type_Stack::lastIndex) {
+            v = array->lastIndex(expression);
+            if (v->is<SymbolicError>()) {
+                set(expression, v);
+                return;
+            }
         } else {
             BUG("%1%: unexpected expression", expression);
         }
@@ -1001,17 +1030,18 @@ bool ExpressionEvaluator::preorder(const IR::ArrayIndex* expression) {
 void ExpressionEvaluator::postorder(const IR::ArrayIndex* expression) {
     auto l = get(expression->left);
     auto r = get(expression->right);
+
+    if (l->is<SymbolicError>()) {
+        set(expression, l);
+        return;
+    }
+    if (r->is<SymbolicError>()) {
+        set(expression, r);
+        return;
+    }
     auto rv = r->to<ScalarValue>();
     auto lv = l->to<SymbolicArray>();
 
-    if (lv->is<SymbolicError>()) {
-        set(expression, lv);
-        return;
-    }
-    if (rv->is<SymbolicError>()) {
-        set(expression, rv);
-        return;
-    }
     if (rv->isUninitialized() || rv->isUnknown()) {
         if (rv->isUninitialized()) {
             auto result = new SymbolicStaticError(expression->right, "Uninitialized");

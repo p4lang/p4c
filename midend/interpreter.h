@@ -452,6 +452,7 @@ class SymbolicArray final : public SymbolicValue {
     SymbolicValue* clone() const override;
     SymbolicValue* next(const IR::Node* node);
     SymbolicValue* last(const IR::Node* node);
+    SymbolicValue* lastIndex(const IR::Node* node);
     bool isScalar() const override { return false; }
     void setAllUnknown() override;
     void assign(const SymbolicValue* other) override;
