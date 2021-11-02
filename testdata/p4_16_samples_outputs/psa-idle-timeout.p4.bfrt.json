@@ -2,7 +2,7 @@
   "schema_version" : "1.0.0",
   "tables" : [
     {
-      "name" : "pipe.MyIC.tbl_idle_timeout",
+      "name" : "ip.MyIC.tbl_idle_timeout",
       "id" : 38763260,
       "table_type" : "MatchAction_Direct",
       "size" : 1024,
@@ -106,7 +106,7 @@
       "attributes" : ["EntryScope", "IdleTimeout"]
     },
     {
-      "name" : "pipe.MyIC.tbl_no_idle_timeout",
+      "name" : "ip.MyIC.tbl_no_idle_timeout",
       "id" : 46250950,
       "table_type" : "MatchAction_Direct",
       "size" : 1024,
@@ -181,7 +181,7 @@
       "attributes" : ["EntryScope"]
     },
     {
-      "name" : "pipe.MyIC.tbl_no_idle_timeout_prop",
+      "name" : "ip.MyIC.tbl_no_idle_timeout_prop",
       "id" : 43498864,
       "table_type" : "MatchAction_Direct",
       "size" : 1024,

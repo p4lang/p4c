@@ -2,7 +2,7 @@
   "schema_version" : "1.0.0",
   "tables" : [
     {
-      "name" : "pipe.cIngress.tbl",
+      "name" : "ip.cIngress.tbl",
       "id" : 34888878,
       "table_type" : "MatchAction_Direct",
       "size" : 1024,
@@ -24,7 +24,7 @@
       "attributes" : ["EntryScope"]
     },
     {
-      "name" : "pipe.cIngress.counter",
+      "name" : "ip.cIngress.counter",
       "id" : 304351549,
       "table_type" : "Counter",
       "size" : 1024,
