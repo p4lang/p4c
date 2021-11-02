@@ -323,7 +323,7 @@ void SymbolicHeaderUnion::setValid(bool v) {
 
 SymbolicValue* SymbolicHeaderUnion::get(const IR::Node* node, cstring field) const {
     if (valid->isKnown() && !valid->value)
-        return new SymbolicStaticError(node, "Reading field from invalid header");
+        return new SymbolicStaticError(node, "Reading field from invalid header union");
     return SymbolicStruct::get(node, field);
 }
 
