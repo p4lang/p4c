@@ -19,7 +19,7 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
-        clone3(CloneType.I2E, 32w64, 0);
+        clone3_field_list(CloneType.I2E, 32w64, 0);
     }
 }
 

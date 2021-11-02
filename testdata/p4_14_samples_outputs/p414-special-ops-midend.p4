@@ -64,13 +64,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710633;
         meta._mymeta_f14 = meta._mymeta_f14 + 8w23;
         meta._mymeta_clone_e2e_count2 = meta._mymeta_clone_e2e_count2 + 8w1;
-        clone3(CloneType.E2E, 32w1, 8w0);
+        clone3_field_list(CloneType.E2E, 32w1, 8w0);
     }
     @name(".do_recirculate") action do_recirculate() {
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710637;
         meta._mymeta_f14 = meta._mymeta_f14 + 8w19;
         meta._mymeta_recirculate_count1 = meta._mymeta_recirculate_count1 + 8w1;
-        recirculate(8w1);
+        recirculate_field_list(8w1);
     }
     @name("._nop") action _nop() {
     }
@@ -257,7 +257,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710639;
         meta._mymeta_f14 = meta._mymeta_f14 + 8w17;
         meta._mymeta_resubmit_count0 = meta._mymeta_resubmit_count0 + 8w1;
-        resubmit(8w2);
+        resubmit_field_list(8w2);
     }
     @name("._nop") action _nop_3() {
     }

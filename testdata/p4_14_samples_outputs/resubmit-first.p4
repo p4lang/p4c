@@ -55,7 +55,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("._resubmit") action _resubmit() {
         meta.mymeta.f1 = 8w1;
-        resubmit((bit<8>)FieldLists.resubmit_FL);
+        resubmit_field_list((bit<8>)FieldLists.resubmit_FL);
     }
     @name(".t_ingress_1") table t_ingress_1 {
         actions = {

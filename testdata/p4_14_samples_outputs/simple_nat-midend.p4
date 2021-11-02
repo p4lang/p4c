@@ -213,7 +213,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".nat_miss_int_to_ext") action nat_miss_int_to_ext() {
-        clone3(CloneType.I2E, 32w250, 8w0);
+        clone3_field_list(CloneType.I2E, 32w250, 8w0);
     }
     @name(".nat_miss_ext_to_int") action nat_miss_ext_to_int() {
         meta._meta_do_forward0 = 1w0;

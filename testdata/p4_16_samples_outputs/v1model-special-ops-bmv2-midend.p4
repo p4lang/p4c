@@ -139,10 +139,10 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     @name("ingress.do_resubmit") action do_resubmit(@name("new_ipv4_dstAddr") bit<32> new_ipv4_dstAddr) {
         hdr.ipv4.dstAddr = new_ipv4_dstAddr;
-        resubmit(8w0);
+        resubmit_field_list(8w0);
     }
     @name("ingress.do_clone_i2e") action do_clone_i2e(@name("l2ptr") bit<32> l2ptr_3) {
-        clone3(CloneType.I2E, 32w5, 8w0);
+        clone3_field_list(CloneType.I2E, 32w5, 8w0);
         meta._fwd_l2ptr0 = l2ptr_3;
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {
@@ -266,11 +266,11 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
     }
     @name("egress.do_recirculate") action do_recirculate(@name("new_ipv4_dstAddr") bit<32> new_ipv4_dstAddr_2) {
         hdr.ipv4.dstAddr = new_ipv4_dstAddr_2;
-        recirculate(8w0);
+        recirculate_field_list(8w0);
     }
     @name("egress.do_clone_e2e") action do_clone_e2e(@name("smac") bit<48> smac_2) {
         hdr.ethernet.srcAddr = smac_2;
-        clone3(CloneType.E2E, 32w11, 8w0);
+        clone3_field_list(CloneType.E2E, 32w11, 8w0);
     }
     @name("egress.send_frame") table send_frame_0 {
         key = {

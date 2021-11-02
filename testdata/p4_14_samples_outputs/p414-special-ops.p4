@@ -64,13 +64,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr - 48w23;
         meta.mymeta.f1 = meta.mymeta.f1 + 8w23;
         meta.mymeta.clone_e2e_count = meta.mymeta.clone_e2e_count + 8w1;
-        clone3(CloneType.E2E, (bit<32>)32w1, (bit<8>)FieldLists.clone_e2e_FL);
+        clone3_field_list(CloneType.E2E, (bit<32>)32w1, (bit<8>)FieldLists.clone_e2e_FL);
     }
     @name(".do_recirculate") action do_recirculate() {
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr - 48w19;
         meta.mymeta.f1 = meta.mymeta.f1 + 8w19;
         meta.mymeta.recirculate_count = meta.mymeta.recirculate_count + 8w1;
-        recirculate((bit<8>)FieldLists.recirculate_FL);
+        recirculate_field_list((bit<8>)FieldLists.recirculate_FL);
     }
     @name("._nop") action _nop() {
     }
@@ -232,7 +232,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr - 48w17;
         meta.mymeta.f1 = meta.mymeta.f1 + 8w17;
         meta.mymeta.resubmit_count = meta.mymeta.resubmit_count + 8w1;
-        resubmit((bit<8>)FieldLists.resubmit_FL);
+        resubmit_field_list((bit<8>)FieldLists.resubmit_FL);
     }
     @name("._nop") action _nop() {
     }
