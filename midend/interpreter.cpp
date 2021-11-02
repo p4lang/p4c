@@ -848,7 +848,11 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
 
 void ExpressionEvaluator::postorder(const IR::Member* expression) {
     auto type = typeMap->getType(expression, true);
-    if (type->is<IR::Type_MethodBase>() || type->is<IR::Type_Error>()) {
+    if (type->is<IR::Type_Error>()) {
+        set(expression, new SymbolicEnum(expression->type, expression->member));
+        return;
+    }
+    if (type->is<IR::Type_MethodBase>()) {
         // not really void, but we can't do anything with this anyway
         set(expression, SymbolicVoid::get());
         return;
