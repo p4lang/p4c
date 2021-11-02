@@ -536,6 +536,8 @@ extern void update_checksum_with_payload<T, O>(in bool condition, in T data, ino
  */
 extern void clone(in CloneType type, in bit<32> session);
 
+@deprecated("Please use 'resubmit_field_list' instead")
+extern void resubmit<T>(in T data);
 /***
  * Calling resubmit during execution of the ingress control will,
  * under certain documented conditions, cause the packet to be
@@ -556,7 +558,10 @@ extern void clone(in CloneType type, in bit<32> session);
  * last such call is preserved.  See the v1model architecture
  * documentation (Note 1) for more details.
  */
-extern void resubmit(bit<8> index);
+extern void resubmit_field_list(bit<8> index);
+
+@deprecated("Please use 'recirculate_field_list' instead")
+extern void recirculate<T>(in T data);
 /***
  * Calling recirculate during execution of the egress control will,
  * under certain documented conditions, cause the packet to be
@@ -577,8 +582,12 @@ extern void resubmit(bit<8> index);
  * data from the last such call is preserved.  See the v1model
  * architecture documentation (Note 1) for more details.
  */
-extern void recirculate(bit<8> index);
+extern void recirculate_field_list(bit<8> index);
 extern void clone(in CloneType type, in bit<32> session);
+
+@deprecated("Please use 'clone3_field_list' instead")
+extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
+
 /***
  * Calling clone3 during execution of the ingress or egress control
  * will cause the packet to be cloned, sometimes also called
@@ -612,7 +621,7 @@ extern void clone(in CloneType type, in bit<32> session);
  * clone session and data are used.  See the v1model architecture
  * documentation (Note 1) for more details.
  */
-extern void clone3(in CloneType type, in bit<32> session, bit<8> index);
+extern void clone3_field_list(in CloneType type, in bit<32> session, bit<8> index);
 
 extern void truncate(in bit<32> length);
 

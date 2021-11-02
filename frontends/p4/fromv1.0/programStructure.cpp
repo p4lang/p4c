@@ -2675,9 +2675,12 @@ void ProgramStructure::populateOutputNames() {
         "mark_to_drop",
         "hash",
         "resubmit",
+        "resubmit_field_list",
         "recirculate",
+        "recirculate_field_list",
         "clone",
         "clone3",
+        "clone3_field_list",
         "truncate",
         "V1Switch",
         // other v1model names

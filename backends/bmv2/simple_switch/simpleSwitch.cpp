@@ -94,11 +94,11 @@ bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
 }
 
 ExternConverter_clone ExternConverter_clone::singleton;
-ExternConverter_clone3 ExternConverter_clone3::singleton;
+ExternConverter_clone3_field_list ExternConverter_clone3_field_list::singleton;
 ExternConverter_hash ExternConverter_hash::singleton;
 ExternConverter_digest ExternConverter_digest::singleton;
-ExternConverter_resubmit ExternConverter_resubmit::singleton;
-ExternConverter_recirculate ExternConverter_recirculate::singleton;
+ExternConverter_resubmit_field_list ExternConverter_resubmit_field_list::singleton;
+ExternConverter_recirculate_field_list ExternConverter_recirculate_field_list::singleton;
 ExternConverter_mark_to_drop ExternConverter_mark_to_drop::singleton;
 ExternConverter_random ExternConverter_random::singleton;
 ExternConverter_truncate ExternConverter_truncate::singleton;
@@ -184,11 +184,10 @@ static unsigned getFieldListById(ConversionContext* ctxt, unsigned index) {
     return (unsigned)id;
 }
 
-Util::IJson* ExternConverter_clone3::convertExternFunction(
+Util::IJson* ExternConverter_clone3_field_list::convertExternFunction(
     ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
     const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
-    (void) v1model.clone.clone3.name;
     int id = -1;
     if (mc->arguments->size() != 3) {
         modelError("Expected 3 arguments for %1%", mc);
@@ -205,7 +204,7 @@ Util::IJson* ExternConverter_clone3::convertExternFunction(
     if (ei->name == "I2E") {
         prim = "clone_ingress_pkt_to_egress";
         if (ctxt->blockConverted != BlockConverted::Ingress) {
-            ::error("'clone3(I2E, ...) not invoked in ingress %1%", mc);
+            ::error("'clone3_field_list(I2E, ...) not invoked in ingress %1%", mc);
             return nullptr;
         }
     } else {
@@ -313,7 +312,7 @@ Util::IJson* ExternConverter_digest::convertExternFunction(
     return primitive;
 }
 
-Util::IJson* ExternConverter_resubmit::convertExternFunction(
+Util::IJson* ExternConverter_resubmit_field_list::convertExternFunction(
     ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
     const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
@@ -343,7 +342,7 @@ Util::IJson* ExternConverter_resubmit::convertExternFunction(
     return nullptr;
 }
 
-Util::IJson* ExternConverter_recirculate::convertExternFunction(
+Util::IJson* ExternConverter_recirculate_field_list::convertExternFunction(
     ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
     const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
