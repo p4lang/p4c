@@ -1170,6 +1170,16 @@ class FindUninitialized : public Inspector {
             }
         }
 
+        // directionless parameters are set by the control-plane for actions invoked by tables
+        if (auto actionCall = mi->to<ActionCall>()) {
+            for (auto p : actionCall->action->parameters->parameters) {
+                if (p->direction == IR::Direction::None && !mi->substitution.contains(p)) {
+                    headerDefs->setValueToStorage(definitions->storageMap->getStorage(p),
+                                                  TernaryBool::Yes);
+                }
+            }
+        }
+
         // Symbolically call some methods (actions and tables, extern methods)
         std::vector <const IR::IDeclaration *> callee;
         if (auto ac = mi->to<ActionCall>()) {
