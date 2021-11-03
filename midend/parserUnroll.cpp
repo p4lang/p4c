@@ -262,6 +262,9 @@ class ParserSymbolicInterpreter {
             result->set(p, value);
         }
         for (auto d : parser->parserLocals) {
+            if (d->to<IR::ParserState>()) {
+                continue;
+            }
             auto type = typeMap->getType(d);
             SymbolicValue* value = nullptr;
             if (d->is<IR::Declaration_Constant>()) {
