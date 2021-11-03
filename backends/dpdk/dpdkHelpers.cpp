@@ -16,6 +16,7 @@ limitations under the License.
 #include <iostream>
 #include "dpdkHelpers.h"
 #include "ir/ir.h"
+#include "frontends/p4/tableApply.h"
 
 namespace DPDK {
 
@@ -681,9 +682,52 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
     return false;
 }
 
-// TODO(hanw): TBD
-bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *) {
-    BUG("Not implemented");
+// This function assumes EliminateSwitch midend pass is applied and only handles
+// action_run in switch expression.
+bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
+    auto tc = P4::TableApplySolver::isActionRun(s->expression, refmap, typemap);
+    BUG_CHECK(tc != nullptr, "%1%: unexpected switch statement expression",
+              s->expression);
+    auto size = s->cases.size();
+    std::vector <cstring> labels;
+    cstring label;
+    bool isdefaultPresent = false;
+    cstring default_label = "";
+    auto end_label = Util::printf_format("label_endswitch%d", next_label_id++);
+    // Emit jmp on action run statements and collect labels for each case statement
+    for (unsigned i = 0; i < size; i++) {
+        auto caseLabel = s->cases.at(i);
+        if (caseLabel->label->is<IR::DefaultExpression>()) {
+            label = Util::printf_format("label_default%d", next_label_id++);
+            add_instr(new IR::DpdkJmpLabelStatement(label));
+            default_label = label;
+            isdefaultPresent = true;
+        } else {
+            auto pe = caseLabel->label->to<IR::PathExpression>();
+            CHECK_NULL(pe);
+            label = Util::printf_format("label_action%d", next_label_id++);
+            add_instr(new IR::DpdkJmpOnActionRunStatement(label, pe->path->name.name));
+        }
+        labels.push_back(label);
+    }
+
+    if (!isdefaultPresent)
+        add_instr(new IR::DpdkJmpLabelStatement(end_label));
+
+    // Emit block statements corresponding to each case
+    // We emit labels even for the fallthrough case, DpdkAsmOptimization pass will
+    // remove any redundant jumps and labels.
+    for (unsigned i = 0; i < size; i++) {
+        auto caseLabel = s->cases.at(i);
+        label = labels.at(i);
+        add_instr(new IR::DpdkLabelStatement(label));
+        if (caseLabel->statement != nullptr) {
+            visit(caseLabel->statement);
+            if (label != default_label)
+                add_instr(new IR::DpdkJmpLabelStatement(end_label));
+        }
+    }
+    add_instr(new IR::DpdkLabelStatement(end_label));
     return false;
 }
 

@@ -151,6 +151,29 @@ class DpdkJmpMissStatement : DpdkJmpStatement {
         DpdkJmpStatement("jmpnh", label) { }
 }
 
+abstract DpdkJmpActionStatement : DpdkJmpStatement {
+    cstring action;
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+#noconstructor
+    DpdkJmpActionStatement(cstring instruction, cstring label, cstring action) :
+        DpdkJmpStatement(instruction, label), action(action) { }
+}
+
+class DpdkJmpOnActionRunStatement : DpdkJmpActionStatement {
+#nodbprint
+#noconstructor
+    DpdkJmpOnActionRunStatement(cstring label, cstring act) :
+        DpdkJmpActionStatement("jmpa", label, act) { }
+}
+
+class DpdkJmpNotOnActionRunStatement : DpdkJmpActionStatement {
+#nodbprint
+#noconstructor
+    DpdkJmpNotOnActionRunStatement(cstring label, cstring act) :
+        DpdkJmpActionStatement("jmpna", label, act) { }
+}
+
 abstract DpdkJmpHeaderStatement : DpdkJmpStatement {
     Expression header;
     std::ostream& toSpec(std::ostream& out) const override;
