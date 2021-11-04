@@ -23,7 +23,6 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.hasReturned") bool hasReturned;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.call_action") action call_action() {
@@ -36,48 +35,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action act() {
-        hasReturned = false;
-    }
-    @hidden action gauntlet_nested_switchbmv2l47() {
-        h.eth_hdr.eth_type = 16w1;
-    }
-    @hidden action gauntlet_nested_switchbmv2l38() {
-        hasReturned = true;
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
     @hidden table tbl_call_action {
         actions = {
             call_action();
         }
         const default_action = call_action();
     }
-    @hidden table tbl_gauntlet_nested_switchbmv2l38 {
-        actions = {
-            gauntlet_nested_switchbmv2l38();
-        }
-        const default_action = gauntlet_nested_switchbmv2l38();
-    }
-    @hidden table tbl_gauntlet_nested_switchbmv2l47 {
-        actions = {
-            gauntlet_nested_switchbmv2l47();
-        }
-        const default_action = gauntlet_nested_switchbmv2l47();
-    }
     apply {
-        tbl_act.apply();
         tbl_call_action.apply();
-        tbl_gauntlet_nested_switchbmv2l38.apply();
-        if (hasReturned) {
-            ;
-        } else {
-            tbl_gauntlet_nested_switchbmv2l47.apply();
-        }
     }
 }
 

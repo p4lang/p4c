@@ -58,7 +58,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     @name(".update_pkt_ip_byte_count") action update_pkt_ip_byte_count_0() {
         s_0 = tmp_0;
         s_0[79:48] = tmp_0[79:48] + 32w1;
-        s_0[47:0] = s_0[47:0] + (bit<48>)hdr.ipv4.totalLen;
+        s_0[47:0] = s_0[47:0] + 48w14;
         tmp_0 = s_0;
     }
     @name("ingress.port_pkt_ip_bytes_in") Register<PacketByteCountState_t, PortId_t>(32w512) port_pkt_ip_bytes_in_0;

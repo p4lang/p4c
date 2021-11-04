@@ -29,30 +29,8 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.b") bool b_0;
-    @name("ingress.tmp") bit<16> tmp;
-    @name("ingress.tmp_0") bit<16> tmp_0;
-    @name("ingress.dummy_1") H dummy;
-    @name("ingress.hasReturned") bool hasReturned;
-    @name("ingress.retval") bit<16> retval;
     @name("ingress.dummy") action dummy_2() {
-        dummy = (b_0 ? h.h : dummy);
-        hasReturned = (b_0 ? true : hasReturned);
-        retval = (b_0 ? 16w1 : retval);
-        h.h = (b_0 ? dummy : h.h);
-        tmp_0 = (b_0 ? retval : tmp_0);
-        tmp = (b_0 ? tmp_0 : tmp);
-        tmp = (b_0 ? tmp_0 : 16w1);
-        h.eth_hdr.eth_type = (b_0 ? tmp_0 : 16w1);
-    }
-    @hidden action gauntlet_mux_validitybmv2l37() {
-        b_0 = false;
-    }
-    @hidden table tbl_gauntlet_mux_validitybmv2l37 {
-        actions = {
-            gauntlet_mux_validitybmv2l37();
-        }
-        const default_action = gauntlet_mux_validitybmv2l37();
+        h.eth_hdr.eth_type = 16w1;
     }
     @hidden table tbl_dummy {
         actions = {
@@ -61,7 +39,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = dummy_2();
     }
     apply {
-        tbl_gauntlet_mux_validitybmv2l37.apply();
         tbl_dummy.apply();
     }
 }
