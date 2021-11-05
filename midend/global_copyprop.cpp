@@ -127,7 +127,10 @@ bool FindVariableValues::preorder(const IR::AssignmentStatement *stat) {
             return false;
         vars[lvalue_name(stat->left)] = lit;
         LOG5("  Setting value: " << lit << ", for: " << stat->left);
-    } else if (auto lit = vars[lvalue_name(stat->right)]->to<IR::Literal>()) {
+    } else if (auto v = vars[lvalue_name(stat->right)]) {
+        auto lit = v->to<IR::Literal>();
+        if (lit == nullptr)
+            return false;
         if (stat->left->is<IR::Slice>() || stat->right->is<IR::Slice>())
             return false;
         vars[lvalue_name(stat->left)] = lit;
