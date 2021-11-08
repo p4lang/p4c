@@ -138,18 +138,18 @@ apply {
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
 	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_tmp 1
-	jmpv LABEL_0END h.ethernet
+	jmpv LABEL_END h.ethernet
 	mov m.Ingress_tmp 0
-	LABEL_0END :	mov m.Ingress_tmp_0 1
-	jmpv LABEL_1END h.ipv4
+	LABEL_END :	mov m.Ingress_tmp_0 1
+	jmpv LABEL_END_0 h.ipv4
 	mov m.Ingress_tmp_0 0
-	LABEL_1END :	mov m.Ingress_key_0 m.Ingress_tmp
-	jmpeq LABEL_2TRUE m.Ingress_key_0 0x1
-	jmpeq LABEL_2TRUE m.Ingress_tmp_0 0x1
+	LABEL_END_0 :	mov m.Ingress_key_0 m.Ingress_tmp
+	jmpeq LABEL_TRUE m.Ingress_key_0 0x1
+	jmpeq LABEL_TRUE m.Ingress_tmp_0 0x1
 	mov m.Ingress_key_0 0x0
-	jmp LABEL_2END
-	LABEL_2TRUE :	mov m.Ingress_key_0 0x1
-	LABEL_2END :	mov m.Ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
+	jmp LABEL_END_1
+	LABEL_TRUE :	mov m.Ingress_key_0 0x1
+	LABEL_END_1 :	mov m.Ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
 	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0

@@ -120,8 +120,7 @@ action a2 args instanceof a2_arg_t {
 table tbl {
 	key {
 		m.Ingress_tbl_ethernet_srcAddr exact
-		m.local_metadata_data exact
-		m.local_metadata_data1 lpm
+		m.local_metadata_data lpm
 	}
 	actions {
 		NoAction
@@ -167,21 +166,13 @@ apply {
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_TCP :	extract h.tcp
 	MYIP_ACCEPT :	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	table tbl
-	jmpnh LABEL_END
-	table foo
-	LABEL_END :	table tbl
-	jmpnh LABEL_END_0
-	table foo
-	LABEL_END_0 :	table tbl
-	jmpnh LABEL_FALSE_1
-	jmp LABEL_END_1
-	LABEL_FALSE_1 :	table bar
-	LABEL_END_1 :	table tbl
-	jmpnh LABEL_FALSE_2
-	jmp LABEL_END_2
-	LABEL_FALSE_2 :	table bar
-	LABEL_END_2 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	jmpa LABEL_ACTION a1
+	jmpa LABEL_ACTION_0 a2
+	jmp LABEL_ENDSWITCH
+	LABEL_ACTION :	table foo
+	jmp LABEL_ENDSWITCH
+	LABEL_ACTION_0 :	table bar
+	LABEL_ENDSWITCH :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop

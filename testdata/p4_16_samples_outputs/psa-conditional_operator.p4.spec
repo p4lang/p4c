@@ -64,11 +64,11 @@ action NoAction args none {
 }
 
 action execute args none {
-	jmpeq LABEL_1FALSE m.local_metadata_data 0x0
+	jmpeq LABEL_FALSE_0 m.local_metadata_data 0x0
 	mov m.Ingress_tmp_0 0x0
-	jmp LABEL_1END
-	LABEL_1FALSE :	mov m.Ingress_tmp_0 0x1
-	LABEL_1END :	mov m.local_metadata_data m.Ingress_tmp_0
+	jmp LABEL_END_0
+	LABEL_FALSE_0 :	mov m.Ingress_tmp_0 0x1
+	LABEL_END_0 :	mov m.local_metadata_data m.Ingress_tmp_0
 	add m.local_metadata_data 0x1
 	return
 }
@@ -90,11 +90,11 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
-	jmpeq LABEL_0FALSE m.local_metadata_data 0x0
+	jmpeq LABEL_FALSE m.local_metadata_data 0x0
 	mov m.Ingress_tmp_1 0x2
-	jmp LABEL_0END
-	LABEL_0FALSE :	mov m.Ingress_tmp_1 0x5
-	LABEL_0END :	mov m.local_metadata_data m.Ingress_tmp_1
+	jmp LABEL_END
+	LABEL_FALSE :	mov m.Ingress_tmp_1 0x5
+	LABEL_END :	mov m.local_metadata_data m.Ingress_tmp_1
 	add m.local_metadata_data 0x5
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0

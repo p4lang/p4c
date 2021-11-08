@@ -227,6 +227,11 @@ std::ostream& IR::DpdkJmpHeaderStatement::toSpec(std::ostream& out) const {
     return out;
 }
 
+std::ostream& IR::DpdkJmpActionStatement::toSpec(std::ostream& out) const {
+    out << instruction << " " << label << " " << action;
+    return out;
+}
+
 std::ostream& IR::DpdkJmpCondStatement::toSpec(std::ostream& out) const {
     out << instruction << " " << label << " " << DPDK::toStr(src1)
         << " " << DPDK::toStr(src2);
