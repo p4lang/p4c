@@ -1526,10 +1526,8 @@ const IR::Node* SplitP4TableCommon::postorder(IR::IfStatement* statement) {
 
 const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
     auto expr = statement->expression;
-    if (!expr->is<IR::Member>())
-        return statement;
     auto member = expr->to<IR::Member>();
-    if (member->member != "action_run")
+    if (!member || member->member != "action_run")
         return statement;
     if (!member->expr->is<IR::MethodCallExpression>())
         return statement;

@@ -152,13 +152,13 @@ apply {
 	extract h.ethernet
 	table tbl
 	table as_sel
-	jmpa LABEL_ACTION1 a1
-	jmpa LABEL_ACTION2 a2
-	jmp LABEL_ENDSWITCH0
-	LABEL_ACTION1 :	table foo
-	jmp LABEL_ENDSWITCH0
-	LABEL_ACTION2 :	table bar
-	LABEL_ENDSWITCH0 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	jmpa LABEL_ACTION a1
+	jmpa LABEL_ACTION_0 a2
+	jmp LABEL_ENDSWITCH
+	LABEL_ACTION :	table foo
+	jmp LABEL_ENDSWITCH
+	LABEL_ACTION_0 :	table bar
+	LABEL_ENDSWITCH :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop

@@ -160,17 +160,17 @@ abstract DpdkJmpActionStatement : DpdkJmpStatement {
         DpdkJmpStatement(instruction, label), action(action) { }
 }
 
-class DpdkJmpOnActionRunStatement : DpdkJmpActionStatement {
+class DpdkJmpIfActionRunStatement : DpdkJmpActionStatement {
 #nodbprint
 #noconstructor
-    DpdkJmpOnActionRunStatement(cstring label, cstring act) :
+    DpdkJmpIfActionRunStatement(cstring label, cstring act) :
         DpdkJmpActionStatement("jmpa", label, act) { }
 }
 
-class DpdkJmpNotOnActionRunStatement : DpdkJmpActionStatement {
+class DpdkJmpIfActionNotRunStatement : DpdkJmpActionStatement {
 #nodbprint
 #noconstructor
-    DpdkJmpNotOnActionRunStatement(cstring label, cstring act) :
+    DpdkJmpIfActionNotRunStatement(cstring label, cstring act) :
         DpdkJmpActionStatement("jmpna", label, act) { }
 }
 
