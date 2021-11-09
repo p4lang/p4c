@@ -150,6 +150,7 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
         return action;
 
     InsertBeforeExits ibf(postamble);
+    ibf.setCalledBy(this);
     auto actionBody = action->body->apply(ibf)->to<IR::BlockStatement>();
     body->append(actionBody->components);
     body->append(*postamble);
@@ -163,6 +164,7 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
 
 const IR::Node* DoRemoveActionParameters::postorder(IR::ActionListElement* element) {
     RemoveMethodCallArguments rmca;
+    rmca.setCalledBy(this);
     element->expression = element->expression->apply(rmca)->to<IR::Expression>();
     return element;
 }
@@ -171,9 +173,11 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::MethodCallExpression* ex
     auto orig = getOriginal<IR::MethodCallExpression>();
     if (invocations->isCall(orig)) {
         RemoveMethodCallArguments rmca;
+        rmca.setCalledBy(this);
         return expression->apply(rmca);
     } else if (unsigned toRemove = invocations->argsToRemove(orig)) {
         RemoveMethodCallArguments rmca(toRemove);
+        rmca.setCalledBy(this);
         return expression->apply(rmca);
     }
     return expression;

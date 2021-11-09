@@ -28,8 +28,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.do_action") action do_action() {
         val_0 = h.eth_hdr.src_addr;
         h.eth_hdr.src_addr = h.eth_hdr.src_addr;
-        hasExited = (h.eth_hdr.eth_type == 16w1 ? hasExited : true);
-        h.eth_hdr.src_addr = (hasExited ? h.eth_hdr.src_addr : val_0);
+        hasExited = !(h.eth_hdr.eth_type == 16w1);
+        h.eth_hdr.src_addr = (h.eth_hdr.eth_type == 16w1 ? val_0 : h.eth_hdr.src_addr);
     }
     @hidden action act() {
         hasExited = false;

@@ -19,7 +19,9 @@ limitations under the License.
 #include <gc/gc_cpp.h>
 #include <gc/gc_mark.h>
 #endif  /* HAVE_LIBGC */
-#include <unistd.h>
+#include <sys/mman.h>
+#include <cstddef>
+#include <cstring>
 #include <new>
 #include "log.h"
 #include "gc.h"
@@ -69,16 +71,57 @@ void operator delete(void *p) _GLIBCXX_USE_NOEXCEPT {
 void *operator new[](std::size_t size) { return ::operator new(size); }
 void operator delete[](void *p) _GLIBCXX_USE_NOEXCEPT { ::operator delete(p); }
 
+
+namespace {
+
+constexpr size_t headerSize = 16;
+// See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56019
+// p4c requires gcc 4.9+, but there is no harm in adding this; maybe it wil help someone.
+#if __GNUC__ == 4 && __GNUC_MINOR__ <= 8
+  using max_align_t = ::max_align_t;
+#else
+  using max_align_t = std::max_align_t;
+#endif
+static_assert(headerSize >= alignof(max_align_t), "mmap header size not large enough");
+static_assert(headerSize >= sizeof(size_t), "mmap header size not large enough");
+
+void *data_to_header(void *ptr) {
+  return static_cast<char *>(ptr) - headerSize;
+}
+
+void *header_to_data(void *ptr) {
+  return static_cast<char *>(ptr) + headerSize;
+}
+
+size_t raw_size(void *ptr) {
+    size_t size;
+    memcpy(static_cast<void *>(&size), data_to_header(ptr), sizeof(size));
+    return size;
+}
+
+void *raw_alloc(size_t size) {
+    void *ptr = mmap(0, size + headerSize, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+    memcpy(ptr, static_cast<void *>(&size), sizeof(size));
+    return header_to_data(ptr);
+}
+
+void raw_free(void *ptr) {
+    size_t size = raw_size(ptr);
+    munmap(data_to_header(ptr), size + headerSize);
+}
+
+}  // namespace
+
 void *realloc(void *ptr, size_t size) {
     if (!done_init) {
         if (started_init) {
             // called from within GC_INIT, so we can't call it again.  Fall back to using
-            // sbrk and let it leak.
-            size = (size + 0xf) & ~0xf;
-            void *rv = sbrk(size);
+            // mmap.
+            void *rv = raw_alloc(size);
             if (ptr) {
-                size_t max = reinterpret_cast<char *>(rv) - reinterpret_cast<char *>(ptr);
-                memcpy(rv, ptr, max < size ? max : size); }
+                size_t max = raw_size(ptr);
+                memcpy(rv, ptr, max < size ? max : size);
+                raw_free(ptr); }
             return rv;
         } else {
             started_init = true;
@@ -87,9 +130,10 @@ void *realloc(void *ptr, size_t size) {
     if (ptr) {
         if (GC_is_heap_ptr(ptr))
             return GC_realloc(ptr, size);
-        size_t max = reinterpret_cast<char *>(sbrk(0)) - reinterpret_cast<char *>(ptr);
+        size_t max = raw_size(ptr);
         void *rv = GC_malloc(size);
         memcpy(rv, ptr, max < size ? max : size);
+        raw_free(ptr);
         return rv;
     } else {
         return GC_malloc(size);

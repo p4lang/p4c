@@ -62,15 +62,15 @@ apply {
 	extract h.ethernet
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
-	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_egress_port
-	jmpneq LABEL_0END h.ethernet.dstAddr 0x0
+	mov m.psa_ingress_output_metadata_egress_port h.ethernet.dstAddr
+	jmpneq LABEL_END h.ethernet.dstAddr 0x0
 	mov m.psa_ingress_output_metadata_drop 1
-	LABEL_0END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	extract h.ethernet
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
-	drop
+	LABEL_DROP :	drop
 }
 
 

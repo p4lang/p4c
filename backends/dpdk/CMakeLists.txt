@@ -53,6 +53,7 @@ set(P4C_DPDK_SOURCES
     dpdkProgram.cpp
     dpdkProgramStructure.cpp
     dpdkArch.cpp
+    dpdkContext.cpp
     dpdkAsmOpt.cpp
     options.cpp
     control-plane/bfruntime_ext.cpp
@@ -65,7 +66,10 @@ set(P4C_DPDK_HEADERS
     dpdkHelpers.h
     dpdkProgram.h
     dpdkArch.h
+    dpdkContext.h
+    constants.h
     dpdkAsmOpt.h
+    printUtils.h
     dpdkProgramStructure.h
     options.h
     control-plane/bfruntime_ext.h
@@ -76,6 +80,7 @@ set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/dpdk.def PARENT_SC
 
 set(DPDK_IR_SRCS
     spec.cpp
+    printUtils.cpp
     dbprint-dpdk.cpp
     )
 # IR sources that need to go into the frontend library

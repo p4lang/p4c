@@ -94,17 +94,16 @@ apply {
 	MYIP_PARSE_VLAN_TAG1 :	extract h.vlan_tag_1
 	jmpeq MYIP_PARSE_VLAN_TAG2 h.vlan_tag_1.ether_type 0x8100
 	jmp MYIP_ACCEPT
-	MYIP_PARSE_VLAN_TAG2 :	jmpeq MYIP_ACCEPT 0 0
-	mov metadata 0x3
-	MYIP_ACCEPT :	jmpnv LABEL_1FALSE h.ethernet
-	jmp LABEL_1END
-	LABEL_1FALSE :	table tbl
-	LABEL_1END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	MYIP_PARSE_VLAN_TAG2 :	mov m.psa_ingress_input_metadata_parser_error 0x3
+	MYIP_ACCEPT :	jmpnv LABEL_FALSE h.ethernet
+	jmp LABEL_END_0
+	LABEL_FALSE :	table tbl
+	LABEL_END_0 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.vlan_tag_0
 	emit h.vlan_tag_1
 	tx m.psa_ingress_output_metadata_egress_port
-	drop
+	LABEL_DROP :	drop
 }
 
 

@@ -36,11 +36,6 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.val") bit<8> val;
-    @name("ingress.val_0") bit<8> val_2;
-    @name("ingress.bound_0") bit<8> bound;
-    @name("ingress.hasReturned") bool hasReturned;
-    @name("ingress.retval") bit<8> retval;
     @name("ingress.tmp") bit<8> tmp;
     @name("ingress.simple_action") action simple_action() {
         val_2 = h.idx.idx;

@@ -29,6 +29,7 @@ set (MIDEND_SRCS
   flattenInterfaceStructs.cpp
   hsIndexSimplify.cpp
   interpreter.cpp
+  global_copyprop.cpp
   local_copyprop.cpp
   nestedStructs.cpp
   noMatch.cpp
@@ -72,6 +73,7 @@ set (MIDEND_HDRS
   flattenInterfaceStructs.h
   has_side_effects.h
   interpreter.h
+  global_copyprop.h
   local_copyprop.h
   midEndLast.h
   nestedStructs.h

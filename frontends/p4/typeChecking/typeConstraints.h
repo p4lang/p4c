@@ -51,6 +51,7 @@ class Explain : public Inspector {
             return;
         explanation += "Where '" + tv->toString() + "' is bound to '" + val->toString() + "'\n";
         Explain erec(subst);  // recursive explain variables in this substitution
+        erec.setCalledBy(this);
         val->apply(erec);
         explanation += erec.explanation;
     }

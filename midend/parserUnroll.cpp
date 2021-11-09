@@ -154,9 +154,13 @@ class ParserStateRewriter : public Transform {
                 else
                     idx = i;
             }
-            state->statesIndexes[expression->expr->toString()] = idx;
-            return new IR::ArrayIndex(expression->expr->clone(),
-                                                          new IR::Constant(idx));
+            if (expression->member.name == IR::Type_Stack::lastIndex) {
+                return new IR::Constant(IR::Type_Bits::get(32), idx);
+            } else {
+                state->statesIndexes[expression->expr->toString()] = idx;
+                return new IR::ArrayIndex(expression->expr->clone(),
+                                          new IR::Constant(IR::Type_Bits::get(32), idx));
+            }
         }
         return expression;
     }

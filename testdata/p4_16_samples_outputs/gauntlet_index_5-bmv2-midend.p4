@@ -30,17 +30,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.tmp") bit<48> tmp;
     @name("ingress.simple_action") action simple_action() {
-    }
-    @hidden action gauntlet_index_5bmv2l35() {
-        tmp = h.eth_hdr.dst_addr;
-    }
-    @hidden table tbl_gauntlet_index_5bmv2l35 {
-        actions = {
-            gauntlet_index_5bmv2l35();
-        }
-        const default_action = gauntlet_index_5bmv2l35();
     }
     @hidden table tbl_simple_action {
         actions = {
@@ -49,7 +39,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = simple_action();
     }
     apply {
-        tbl_gauntlet_index_5bmv2l35.apply();
         tbl_simple_action.apply();
     }
 }

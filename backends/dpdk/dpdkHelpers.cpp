@@ -16,18 +16,17 @@ limitations under the License.
 #include <iostream>
 #include "dpdkHelpers.h"
 #include "ir/ir.h"
+#include "frontends/p4/tableApply.h"
 
 namespace DPDK {
-
-int ConvertStatementToDpdk::next_label_id = 0;
 
 // convert relation comparison statements into the corresponding branching
 // instructions in dpdk.
 void ConvertStatementToDpdk::process_relation_operation(const IR::Expression* dst,
                                                         const IR::Operation_Relation* op) {
-    auto true_label = Util::printf_format("label_%dtrue", next_label_id);
-    auto false_label = Util::printf_format("label_%dfalse", next_label_id);
-    auto end_label = Util::printf_format("label_%dend", next_label_id++);
+    auto true_label = refmap->newName("label_true");
+    auto false_label = refmap->newName("label_false");
+    auto end_label = refmap->newName("label_end");
     if (op->is<IR::Equ>()) {
         add_instr(new IR::DpdkJmpEqualStatement(true_label, op->left, op->right));
     } else if (op->is<IR::Neq>()) {
@@ -74,9 +73,9 @@ void ConvertStatementToDpdk::process_logical_operation(const IR::Expression* dst
                                                         const IR::Operation_Binary* op) {
     if (!op->is<IR::LOr>() && !op->is<IR::LAnd>())
         return;
-    auto true_label = Util::printf_format("label_%dtrue", next_label_id);
-    auto false_label = Util::printf_format("label_%dfalse", next_label_id);
-    auto end_label = Util::printf_format("label_%dend", next_label_id++);
+    auto true_label = refmap->newName("label_true");
+    auto false_label = refmap->newName("label_false");
+    auto end_label = refmap->newName("label_end");
     if (op->is<IR::LOr>()) {
         add_instr(new IR::DpdkJmpEqualStatement(true_label, op->left, new IR::Constant(true)));
         add_instr(new IR::DpdkJmpEqualStatement(true_label, op->right, new IR::Constant(true)));
@@ -193,7 +192,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                    if (!(hdr.isValid()))
                        var = false;
                 */
-                auto end_label = Util::printf_format("label_%dend", next_label_id++);
+                auto end_label = refmap->newName("label_end");
                 add_instr(new IR::DpdkMovStatement(left, new IR::BoolLiteral(true)));
                 add_instr(new IR::DpdkJmpIfValidStatement(end_label, b->appliedTo));
                 add_instr(new IR::DpdkMovStatement(left, new IR::BoolLiteral(false)));
@@ -219,8 +218,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                else
                    var = 0;
             */
-            auto true_label = Util::printf_format("label_%dtrue", next_label_id);
-            auto end_label = Util::printf_format("label_%dend", next_label_id++);
+            auto true_label = refmap->newName("label_true");
+            auto end_label = refmap->newName("label_end");
             add_instr(new IR::DpdkJmpEqualStatement(true_label, ln->expr, new IR::Constant(false)));
             add_instr(new IR::DpdkMovStatement(left, new IR::Constant(false)));
             add_instr(new IR::DpdkJmpLabelStatement(end_label));
@@ -432,9 +431,9 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
 // whether the true or false code block will go first. This is important because
 // following optimization pass might eliminate some redundant jmps and labels.
 bool ConvertStatementToDpdk::preorder(const IR::IfStatement *s) {
-    auto true_label = Util::printf_format("label_%dtrue", next_label_id);
-    auto false_label = Util::printf_format("label_%dfalse", next_label_id);
-    auto end_label = Util::printf_format("label_%dend", next_label_id++);
+    auto true_label = refmap->newName("label_true");
+    auto false_label = refmap->newName("label_false");
+    auto end_label = refmap->newName("label_end");
     auto gen = new BranchingInstructionGeneration(refmap, typemap);
     bool res = gen->generate(s->condition, true_label, false_label, true);
 
@@ -619,12 +618,18 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             if (!error->expression->is<IR::Member>())
                 ::error("%1%: must be one of the existing errors", s);
             auto error_id = structure->error_map.at(error->expression->to<IR::Member>()->member);
-            auto end_label = Util::printf_format("label_%dend", next_label_id++);
-            add_instr(new IR::DpdkJmpEqualStatement(
-                        end_label,
-                        condition->expression, new IR::BoolLiteral(false)));
-            add_instr(new IR::DpdkMovStatement(
-                        new IR::PathExpression("metadata"), new IR::Constant(error_id)));
+            auto end_label = refmap->newName("label_end");
+            const IR::BoolLiteral *boolLiteral = condition->expression->to<IR::BoolLiteral>();
+            if (!boolLiteral) {
+                add_instr(new IR::DpdkJmpNotEqualStatement(
+                            end_label,
+                            condition->expression, new IR::BoolLiteral(false)));
+            } else if (boolLiteral->value == true) {
+                return false;
+            }
+            auto tmp = new IR::PathExpression(
+                                   IR::ID("m.psa_ingress_input_metadata_parser_error"));
+            add_instr(new IR::DpdkMovStatement(tmp, new IR::Constant(error_id)));
             add_instr(new IR::DpdkJmpLabelStatement(
                         append_parser_name(parser, IR::ParserState::reject)));
             add_instr(new IR::DpdkLabelStatement(end_label));
@@ -664,6 +669,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         }
     } else if (auto a = mi->to<P4::ActionCall>()) {
         auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
+        helper->setCalledBy(this);
         a->action->body->apply(*helper);
         for (auto i : helper->get_instr()) {
             add_instr(i);
@@ -674,9 +680,55 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
     return false;
 }
 
-// TODO(hanw): TBD
-bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *) {
-    BUG("Not implemented");
+// This function assumes EliminateSwitch midend pass is applied and only handles
+// action_run in switch expression.
+bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
+    auto tc = P4::TableApplySolver::isActionRun(s->expression, refmap, typemap);
+    BUG_CHECK(tc != nullptr, "%1%: unexpected switch statement expression",
+              s->expression);
+    auto size = s->cases.size();
+    std::vector <cstring> labels;
+    cstring label;
+    cstring default_label = "";
+    auto end_label = refmap->newName("label_endswitch");
+    // Emit jmp on action run statements and collect labels for each case statement
+    for (unsigned i = 0; i < size - 1; i++) {
+        auto caseLabel = s->cases.at(i);
+        auto pe = caseLabel->label->to<IR::PathExpression>();
+        CHECK_NULL(pe);
+        label = refmap->newName("label_action");
+        add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
+        labels.push_back(label);
+    }
+
+    if (s->cases.at(size-1)->label->is<IR::DefaultExpression>()) {
+        label = refmap->newName("label_default");
+        add_instr(new IR::DpdkJmpLabelStatement(label));
+        default_label = label;
+    } else {
+        auto pe = s->cases.at(size-1)->label->to<IR::PathExpression>();
+        CHECK_NULL(pe);
+        label = refmap->newName("label_action");
+        add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
+        add_instr(new IR::DpdkJmpLabelStatement(end_label));
+    }
+
+    labels.push_back(label);
+
+    // Emit block statements corresponding to each case
+    // We emit labels even for the fallthrough case, DpdkAsmOptimization pass will
+    // remove any redundant jumps and labels.
+    for (unsigned i = 0; i < size; i++) {
+        auto caseLabel = s->cases.at(i);
+        label = labels.at(i);
+        add_instr(new IR::DpdkLabelStatement(label));
+        if (caseLabel->statement != nullptr) {
+            visit(caseLabel->statement);
+            if (label != default_label)
+                add_instr(new IR::DpdkJmpLabelStatement(end_label));
+        }
+    }
+    add_instr(new IR::DpdkLabelStatement(end_label));
     return false;
 }
 

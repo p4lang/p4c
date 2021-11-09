@@ -68,16 +68,16 @@ apply {
 	regrd h.ethernet.dstAddr regfile_0 0x1
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
-	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_egress_port
+	mov m.psa_ingress_output_metadata_egress_port h.ethernet.dstAddr
 	regrd m.Ingress_tmp regfile_0 0x1
-	jmpneq LABEL_0END m.Ingress_tmp 0x0
+	jmpneq LABEL_END m.Ingress_tmp 0x0
 	mov m.psa_ingress_output_metadata_drop 1
-	LABEL_0END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	extract h.ethernet
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
-	drop
+	LABEL_DROP :	drop
 }
 
 

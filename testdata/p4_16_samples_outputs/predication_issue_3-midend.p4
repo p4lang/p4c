@@ -72,7 +72,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = perform_action();
     }
     apply {
-        tbl_predication_issue_3l38.apply();
         tbl_perform_action.apply();
     }
 }

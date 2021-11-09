@@ -37,16 +37,11 @@ parser p(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout standa
 }
 
 control ingress(inout Parsed_packet h, inout Metadata m, inout standard_metadata_t sm) {
-    @name("ingress.tmp") bit<8> tmp;
-    @name("ingress.tmp_0") bit<8> tmp_0;
     @name("ingress.tmp_1") bit<8> tmp_1;
     @name("ingress.do_action_2") action do_action_0() {
-        tmp_0 = 8w2;
         tmp_1 = 8w0;
     }
     @hidden action act() {
-        tmp = h.h.b;
-        tmp_0 = h.h.b;
         tmp_1 = h.h.b;
     }
     @hidden action issue2176bmv2l45() {

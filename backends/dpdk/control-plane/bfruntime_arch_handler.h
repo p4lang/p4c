@@ -57,6 +57,10 @@ namespace ControlPlaneAPI {
 /// Declarations specific to standard architectures (v1model & PSA).
 namespace Standard {
 
+cstring prefix(cstring p, cstring str) {
+    return p.isNullOrEmpty() ? str : p + "." + str;
+}
+
 /// Extends P4RuntimeSymbolType for the DPDK extern types.
 class SymbolTypeDPDK final : public SymbolType {
  public:
@@ -85,7 +89,27 @@ struct ActionSelector {
 };
 
 class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PSA> {
+    std::unordered_map<const IR::Block *, cstring> blockNamePrefixMap;
  public:
+    template <typename Func>
+    void forAllPipeBlocks(const IR::ToplevelBlock* evaluatedProgram, Func function) {
+        auto main = evaluatedProgram->getMain();
+        if (!main)
+            ::error("Program does not contain a `main` module");
+        auto cparams = main->getConstructorParameters();
+        int index = -1;
+        for (auto param : main->constantValue) {
+            index++;
+            if (!param.second) continue;
+            auto pipe = param.second;
+            if (!pipe->is<IR::PackageBlock>())
+                continue;
+            auto idxParam = cparams->getParameter(index);
+            auto pipeName = idxParam->name;
+            function(pipeName, pipe->to<IR::PackageBlock>());
+        }
+    }
+
     using ArchCounterExtern = CounterExtern<Arch::PSA>;
     using CounterTraits = Helpers::CounterlikeTraits<ArchCounterExtern>;
     using ArchMeterExtern = MeterExtern<Arch::PSA>;
@@ -98,7 +122,28 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
 
     BFRuntimeArchHandlerPSA(ReferenceMap* refMap, TypeMap* typeMap,
                             const IR::ToplevelBlock* evaluatedProgram)
-        : P4RuntimeArchHandlerCommon<Arch::PSA>(refMap, typeMap, evaluatedProgram) { }
+        : P4RuntimeArchHandlerCommon<Arch::PSA>(refMap, typeMap, evaluatedProgram) {
+        // Create a map of all blocks to their pipe names. This map will
+        // be used during collect and post processing to prefix
+        // table/extern instances wherever applicable with a fully qualified
+        // name. This distinction is necessary when the driver looks up
+        // context.json across multiple pipes for the table name
+        forAllPipeBlocks(evaluatedProgram, [&](cstring pipeName, const IR::PackageBlock* pkg) {
+            Helpers::forAllEvaluatedBlocks(pkg, [&](const IR::Block* block) {
+                auto decl = pkg->node->to<IR::Declaration_Instance>();
+                cstring blockNamePrefix = pipeName;
+                if (decl)
+                    blockNamePrefix = decl->controlPlaneName();
+                blockNamePrefixMap[block] = blockNamePrefix;
+            });
+        });
+    }
+
+    cstring getBlockNamePrefix(const IR::Block* blk) {
+        if (blockNamePrefixMap.count(blk) > 0)
+            return blockNamePrefixMap[blk];
+        return "";
+    }
 
     static p4configv1::Extern* getP4InfoExtern(P4RuntimeSymbolType typeId,
                                                cstring typeName,
@@ -117,12 +162,12 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
                                         P4RuntimeSymbolType typeId, cstring typeName,
                                         cstring name, const IR::IAnnotated* annotations,
                                         const ::google::protobuf::Message& message,
-                                        p4configv1::P4Info* p4info) {
+                                        p4configv1::P4Info* p4info, cstring pipeName = "") {
         auto* externType = getP4InfoExtern(typeId, typeName, p4info);
         auto* externInstance = externType->add_instances();
         auto* pre = externInstance->mutable_preamble();
         pre->set_id(symbols.getId(typeId, name));
-        pre->set_name(name);
+        pre->set_name(prefix(pipeName, name));
         pre->set_alias(symbols.getAlias(name));
         Helpers::addAnnotations(pre, annotations);
         Helpers::addDocumentation(pre, annotations);
@@ -144,7 +189,7 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
 
     void addActionSelector(const P4RuntimeSymbolTableIface& symbols,
                           p4configv1::P4Info* p4Info,
-                          const ActionSelector& actionSelector) {
+                          const ActionSelector& actionSelector, cstring pipeName = "") {
         ::dpdk::ActionSelector selector;
         selector.set_max_group_size(actionSelector.maxGroupSize);
         selector.set_num_groups(actionSelector.numGroups);
@@ -165,11 +210,11 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
         cstring selectorName = profileName + "_sel";
         addP4InfoExternInstance(symbols, SymbolTypeDPDK::ACTION_SELECTOR(),
                 "ActionSelector", selectorName, actionSelector.annotations,
-                selector, p4Info);
+                selector, p4Info, pipeName);
     }
 
     void collectExternInstance(P4RuntimeSymbolTableIface* symbols,
-                               const IR::ExternBlock* externBlock) {
+                               const IR::ExternBlock* externBlock) override {
         P4RuntimeArchHandlerCommon<Arch::PSA>::collectExternInstance(symbols, externBlock);
 
         auto decl = externBlock->node->to<IR::IDeclaration>();
@@ -187,7 +232,7 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
     void addTableProperties(const P4RuntimeSymbolTableIface& symbols,
                             p4configv1::P4Info* p4info,
                             p4configv1::Table* table,
-                            const IR::TableBlock* tableBlock) {
+                            const IR::TableBlock* tableBlock) override {
         P4RuntimeArchHandlerCommon<Arch::PSA>::addTableProperties(
             symbols, p4info, table, tableBlock);
 
@@ -198,6 +243,12 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
         } else {
             table->set_idle_timeout_behavior(p4configv1::Table::NO_TIMEOUT);
         }
+
+        // add pipe name prefix to the table names
+        auto pipeName = getBlockNamePrefix(tableBlock);
+        auto* pre = table->mutable_preamble();
+        if (pre->name() == tableDeclaration->controlPlaneName())
+            pre->set_name(prefix(pipeName, pre->name()));
     }
 
     void addExternInstance(const P4RuntimeSymbolTableIface& symbols,
@@ -208,13 +259,49 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
 
         auto decl = externBlock->node->to<IR::Declaration_Instance>();
         if (decl == nullptr) return;
+
+        // DPDK control plane software requires pipe name to be prefixed to the
+        // table and extern names
+        cstring pipeName = getBlockNamePrefix(externBlock);
+
         auto p4RtTypeInfo = p4info->mutable_type_info();
         if (externBlock->type->name == "Digest") {
             auto digest = getDigest(decl, p4RtTypeInfo);
             if (digest) addDigest(symbols, p4info, *digest);
         } else if (externBlock->type->name == "ActionSelector") {
             auto actionSelector = getActionSelector(externBlock);
-            if (actionSelector) addActionSelector(symbols, p4info, *actionSelector);
+            if (actionSelector) addActionSelector(symbols, p4info, *actionSelector, pipeName);
+            for (auto& extType : *p4info->mutable_action_profiles()) {
+                auto* pre = extType.mutable_preamble();
+                if (pre->name() == decl->controlPlaneName()) {
+                    pre->set_name(prefix(pipeName, pre->name()));
+                    break;
+                }
+            }
+        } else if (externBlock->type->name == "ActionProfile") {
+            for (auto& extType : *p4info->mutable_action_profiles()) {
+                auto* pre = extType.mutable_preamble();
+                if (pre->name() == decl->controlPlaneName()) {
+                    pre->set_name(prefix(pipeName, pre->name()));
+                    break;
+                }
+            }
+        } else if (externBlock->type->name == "Meter") {
+            for (auto& extType : *p4info->mutable_meters()) {
+                auto* pre = extType.mutable_preamble();
+                if (pre->name() == decl->controlPlaneName()) {
+                    pre->set_name(prefix(pipeName, pre->name()));
+                    break;
+                }
+            }
+        } else if (externBlock->type->name == "Counter") {
+            for (auto& extType : *p4info->mutable_counters()) {
+                auto* pre = extType.mutable_preamble();
+                if (pre->name() == decl->controlPlaneName()) {
+                    pre->set_name(prefix(pipeName, pre->name()));
+                    break;
+                }
+            }
         }
     }
 

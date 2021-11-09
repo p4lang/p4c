@@ -27,6 +27,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name("IngressI.s2") H s2_0;
     @name("IngressI.s") H s_0;
     @name("IngressI.invalid_H") action invalid_H() {
+        s_0 = hdr;
         s_0.h1.setInvalid();
         s_0.h2.setInvalid();
         hdr = s_0;
@@ -46,9 +47,11 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
             h2_0.setValid();
             h2_0.data = 32w0;
         }
+        hdr.h2.data = h2_0.data;
         if (h2_0.data == 32w1) {
             h1_0.setInvalid();
         }
+        hdr.h1.data = h1_0.data;
         h1_0 = h2_0;
         if (h1_0.data == 32w1) {
             s1_0 = (H){h1 = h1_0,h2 = h2_0};
@@ -59,11 +62,15 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
                 } else {
                     s1_0.h1.setInvalid();
                 }
+                hdr.h1.data = s1_0.h1.data;
             } else {
                 s1_0.h1.setValid();
             }
+            hdr.h2.data = s1_0.h1.data;
         }
         invalid_H();
+        hdr.h1.data = 32w1;
+        hdr.h2.data = 32w1;
     }
 }
 
@@ -88,4 +95,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-
