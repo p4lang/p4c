@@ -80,21 +80,20 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(HSIndexFinder& aiFinder,
         auto* newIndex = new IR::Constant(aiFinder.arrayIndex->right->type, i);
         auto* newCondition = new IR::Equ(aiFinder.newVariable, newIndex);
         if (curIf != nullptr) {
-            newIf = newStatement->to<IR::IfStatement>()->clone();
+            newIf = newStatement->checkedTo<IR::IfStatement>()->clone();
             newIf->condition = new IR::LAnd(newCondition, newIf->condition);
         } else {
             newIf = new IR::IfStatement(newCondition, newStatement, nullptr);
         }
         if (result == nullptr) {
             result = newIf;
-            curResult = newIf;
         } else {
             curResult->ifFalse = newIf;
-            curResult = newIf;
         }
+        curResult = newIf;
     }
     if (expr != nullptr && locals != nullptr) {
-        // Add case for out of bound.
+        // Add case for write out of bound.
         cstring typeString = expr->type->node_type_name();
         const IR::PathExpression* pathExpr = nullptr;
         if (generatedVariables->count(typeString) == 0) {
