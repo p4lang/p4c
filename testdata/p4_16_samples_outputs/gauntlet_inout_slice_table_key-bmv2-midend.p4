@@ -24,7 +24,6 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_val") bit<8> tmp_val_0;
-    @name("ingress.tmp") bit<4> tmp;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.simple_action") action simple_action() {
@@ -40,7 +39,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @hidden action gauntlet_inout_slice_table_keybmv2l27() {
         tmp_val_0 = 8w1;
-        tmp = 4w0;
     }
     @hidden action gauntlet_inout_slice_table_keybmv2l41() {
         h.eth_hdr.eth_type = 16w1;

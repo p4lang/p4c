@@ -30,6 +30,8 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     Header s_0_h1;
     Header s_0_h2;
     @name("IngressI.invalid_H") action invalid_H() {
+        s_0_h1 = hdr.h1;
+        s_0_h2 = hdr.h2;
         s_0_h1.setInvalid();
         s_0_h2.setInvalid();
         hdr.h1 = s_0_h1;
@@ -55,11 +57,17 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @hidden action invalidhdrwarnings2l46() {
         h1_0.setInvalid();
     }
+    @hidden action invalidhdrwarnings2l43() {
+        hdr.h2.data = h2_0.data;
+    }
     @hidden action invalidhdrwarnings2l57() {
         s1_0_h1.setInvalid();
     }
     @hidden action invalidhdrwarnings2l59() {
         s1_0_h1.setInvalid();
+    }
+    @hidden action invalidhdrwarnings2l60() {
+        hdr.h1.data = s1_0_h1.data;
     }
     @hidden action invalidhdrwarnings2l62() {
         s1_0_h1.setValid();
@@ -70,8 +78,16 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         s2_0_h1 = h2_0;
         s2_0_h2 = h2_0;
     }
-    @hidden action invalidhdrwarnings2l50() {
+    @hidden action invalidhdrwarnings2l64() {
+        hdr.h2.data = s1_0_h1.data;
+    }
+    @hidden action invalidhdrwarnings2l49() {
+        hdr.h1.data = h1_0.data;
         h1_0 = h2_0;
+    }
+    @hidden action invalidhdrwarnings2l69() {
+        hdr.h1.data = 32w1;
+        hdr.h2.data = 32w1;
     }
     @hidden table tbl_invalidhdrwarnings2l23 {
         actions = {
@@ -91,17 +107,23 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         }
         const default_action = invalidhdrwarnings2l38();
     }
+    @hidden table tbl_invalidhdrwarnings2l43 {
+        actions = {
+            invalidhdrwarnings2l43();
+        }
+        const default_action = invalidhdrwarnings2l43();
+    }
     @hidden table tbl_invalidhdrwarnings2l46 {
         actions = {
             invalidhdrwarnings2l46();
         }
         const default_action = invalidhdrwarnings2l46();
     }
-    @hidden table tbl_invalidhdrwarnings2l50 {
+    @hidden table tbl_invalidhdrwarnings2l49 {
         actions = {
-            invalidhdrwarnings2l50();
+            invalidhdrwarnings2l49();
         }
-        const default_action = invalidhdrwarnings2l50();
+        const default_action = invalidhdrwarnings2l49();
     }
     @hidden table tbl_invalidhdrwarnings2l53 {
         actions = {
@@ -121,17 +143,35 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         }
         const default_action = invalidhdrwarnings2l59();
     }
+    @hidden table tbl_invalidhdrwarnings2l60 {
+        actions = {
+            invalidhdrwarnings2l60();
+        }
+        const default_action = invalidhdrwarnings2l60();
+    }
     @hidden table tbl_invalidhdrwarnings2l62 {
         actions = {
             invalidhdrwarnings2l62();
         }
         const default_action = invalidhdrwarnings2l62();
     }
+    @hidden table tbl_invalidhdrwarnings2l64 {
+        actions = {
+            invalidhdrwarnings2l64();
+        }
+        const default_action = invalidhdrwarnings2l64();
+    }
     @hidden table tbl_invalid_H {
         actions = {
             invalid_H();
         }
         const default_action = invalid_H();
+    }
+    @hidden table tbl_invalidhdrwarnings2l69 {
+        actions = {
+            invalidhdrwarnings2l69();
+        }
+        const default_action = invalidhdrwarnings2l69();
     }
     apply {
         tbl_invalidhdrwarnings2l23.apply();
@@ -140,10 +180,11 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         } else {
             tbl_invalidhdrwarnings2l38.apply();
         }
+        tbl_invalidhdrwarnings2l43.apply();
         if (h2_0.data == 32w1) {
             tbl_invalidhdrwarnings2l46.apply();
         }
-        tbl_invalidhdrwarnings2l50.apply();
+        tbl_invalidhdrwarnings2l49.apply();
         if (h1_0.data == 32w1) {
             tbl_invalidhdrwarnings2l53.apply();
             if (s2_0_h1.data == 32w0 && s2_0_h2.data == 32w0) {
@@ -152,11 +193,14 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
                 } else {
                     tbl_invalidhdrwarnings2l59.apply();
                 }
+                tbl_invalidhdrwarnings2l60.apply();
             } else {
                 tbl_invalidhdrwarnings2l62.apply();
             }
+            tbl_invalidhdrwarnings2l64.apply();
         }
         tbl_invalid_H.apply();
+        tbl_invalidhdrwarnings2l69.apply();
     }
 }
 
@@ -181,4 +225,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

@@ -121,7 +121,6 @@ class BranchingInstructionGeneration {
 };
 
 class ConvertStatementToDpdk : public Inspector {
-    static int next_label_id;
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
@@ -145,7 +144,6 @@ class ConvertStatementToDpdk : public Inspector {
 
     void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
     IR::IndexedVector<IR::DpdkAsmStatement> &get_instr() { return instructions; }
-    int get_label_num() { return next_label_id; }
     void process_logical_operation(const IR::Expression*, const IR::Operation_Binary*);
     void process_relation_operation(const IR::Expression*, const IR::Operation_Relation*);
     cstring append_parser_name(const IR::P4Parser* p, cstring);

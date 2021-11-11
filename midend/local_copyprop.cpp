@@ -661,4 +661,24 @@ IR::ParserState *DoLocalCopyPropagation::postorder(IR::ParserState *state) {
     return state;
 }
 
+// Reset the state of internal data structures after traversing IR,
+// needed for this pass to function correctly when used in a PassRepeated
+Visitor::profile_t DoLocalCopyPropagation::init_apply(const IR::Node* node) {
+    // clear maps
+    available.clear();
+    tables.clear();
+    actions.clear();
+    methods.clear();
+    states.clear();
+    // reset pointers
+    inferForFunc = nullptr;
+    inferForTable = nullptr;
+    // reset flags
+    need_key_rewrite = false;
+    elimUnusedTables = false;
+    working = false;
+
+    return Transform::init_apply(node);
+}
+
 }  // namespace P4

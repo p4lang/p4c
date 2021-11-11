@@ -23,16 +23,8 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.tmp") bool tmp;
-    @name("ingress.tmp_0") bool tmp_0;
-    @name("ingress.hasReturned") bool hasReturned;
-    @name("ingress.retval") bool retval;
     @name(".assign") action assign_0() {
-        hasReturned = true;
-        retval = true;
-        tmp = retval;
-        tmp_0 = (tmp ? 16w0xdead != h.eth_hdr.eth_type : false);
-        h.eth_hdr.dst_addr = (tmp_0 ? 48w1 : h.eth_hdr.dst_addr);
+        h.eth_hdr.dst_addr = (16w0xdead != h.eth_hdr.eth_type ? 48w1 : h.eth_hdr.dst_addr);
     }
     @hidden table tbl_assign {
         actions = {

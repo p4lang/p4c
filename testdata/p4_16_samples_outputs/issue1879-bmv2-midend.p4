@@ -70,7 +70,6 @@ struct headers {
 
 parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("PROTParser.inf_0") prot_i_t inf_0;
-    bit<8> meta_0_currPos;
     currenti_t meta_0_currenti;
     state start {
         packet.extract<preamble_t>(hdr.preamble);
@@ -91,15 +90,13 @@ parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         meta._addrLen2 = meta._addrLen2 + (9w64 - (meta._addrLen2 & 9w63) & 9w63);
         meta._currPos3 = (bit<8>)(9w3 + (meta._addrLen2 >> 6));
         inf_0.setInvalid();
-        meta_0_currPos = (bit<8>)(9w3 + (meta._addrLen2 >> 6));
         meta_0_currenti.upDirection = meta._currenti_upDirection4;
         packet.extract<prot_i_t>(inf_0);
         meta_0_currenti.upDirection = meta._currenti_upDirection4 + (bit<1>)(hdr.prot_common.curri == (bit<8>)(9w3 + (meta._addrLen2 >> 6))) * inf_0.upDirection;
-        meta_0_currPos = (bit<8>)(9w3 + (meta._addrLen2 >> 6)) + 8w1;
         hdr.prot_inf_0 = inf_0;
         meta._hLeft1 = inf_0.segLen;
-        meta._currPos3 = meta_0_currPos;
-        meta._currenti_upDirection4 = meta_0_currenti.upDirection;
+        meta._currPos3 = (bit<8>)(9w3 + (meta._addrLen2 >> 6)) + 8w1;
+        meta._currenti_upDirection4 = meta._currenti_upDirection4 + (bit<1>)(hdr.prot_common.curri == (bit<8>)(9w3 + (meta._addrLen2 >> 6))) * inf_0.upDirection;
         transition parse_prot_h_0_pre;
     }
     state parse_prot_h_0_pre {
@@ -122,11 +119,9 @@ parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state parse_prot_inf_1 {
         inf_0.setInvalid();
-        meta_0_currPos = meta._currPos3;
         meta_0_currenti.upDirection = meta._currenti_upDirection4;
         packet.extract<prot_i_t>(inf_0);
         meta_0_currenti.upDirection = meta._currenti_upDirection4 + (bit<1>)(hdr.prot_common.curri == meta._currPos3) * inf_0.upDirection;
-        meta_0_currPos = meta._currPos3 + 8w1;
         hdr.prot_inf_1 = inf_0;
         meta._hLeft1 = inf_0.segLen;
         meta._currPos3 = meta._currPos3 + 8w1;
