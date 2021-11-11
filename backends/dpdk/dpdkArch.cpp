@@ -469,7 +469,7 @@ bool ExpressionUnroll::preorder(const IR::Operation_Unary *u) {
             BUG("Not Implemented");
         }
     } else {
-        un_expr = u->expr;
+        un_expr = u;
     }
     root = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
     stmt.push_back(new IR::AssignmentStatement(root, un_expr));
@@ -516,13 +516,6 @@ bool ExpressionUnroll::preorder(const IR::MethodCallExpression *m) {
     decl.push_back(new IR::Declaration_Variable(root->path->name, m->type));
     auto new_m = new IR::MethodCallExpression(m->method, args);
     stmt.push_back(new IR::AssignmentStatement(root, new_m));
-    return false;
-}
-
-bool ExpressionUnroll::preorder(const IR::Cast *a) {
-    root = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
-    decl.push_back(new IR::Declaration_Variable(root->path->name, a->type));
-    stmt.push_back(new IR::AssignmentStatement(root, a));
     return false;
 }
 
@@ -602,11 +595,13 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary *u) {
             un_expr = new IR::Cmpl(root);
         } else if (u->to<IR::LNot>()) {
             un_expr = new IR::LNot(root);
+        } else if (auto c = u->to<IR::Cast>()) {
+            un_expr = new IR::Cast(c->destType, root);
         } else {
             BUG("%1% Not Implemented", u);
         }
     } else {
-        un_expr = u->expr;
+        un_expr = u;
     }
 
     auto tmp = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
