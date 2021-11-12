@@ -80,8 +80,9 @@ struct EMPTY {
 	bit<8> psa_egress_output_metadata_drop
 	bit<32> Ingress_ap_member_id
 	bit<16> IngressParser_parser_tmp_2
-	bit<32> IngressParser_parser_tmp_3
+	bit<8> IngressParser_parser_tmp_3
 	bit<32> IngressParser_parser_tmp_4
+	bit<32> IngressParser_parser_tmp_5
 	bit<32> IngressParser_parser_tmp
 	ipv4_options_t IngressParser_parser_tmp_hdr_0
 	bit<8> IngressParser_parser_tmp_0
@@ -186,8 +187,9 @@ apply {
 	mov m.IngressParser_parser_tmp_hdr_0.len m.IngressParser_parser_tmp_1
 	mov m.IngressParser_parser_tmp_3 m.IngressParser_parser_tmp_1
 	mov m.IngressParser_parser_tmp_4 m.IngressParser_parser_tmp_3
-	shl m.IngressParser_parser_tmp_4 0x3
-	mov m.IngressParser_parser_tmp m.IngressParser_parser_tmp_4
+	mov m.IngressParser_parser_tmp_5 m.IngressParser_parser_tmp_4
+	shl m.IngressParser_parser_tmp_5 0x3
+	mov m.IngressParser_parser_tmp m.IngressParser_parser_tmp_5
 	add m.IngressParser_parser_tmp 0xfffffff0
 	extract h.ipv4_option_timestamp m.IngressParser_parser_tmp
 	lookahead m.IngressParser_parser_tmp_0
