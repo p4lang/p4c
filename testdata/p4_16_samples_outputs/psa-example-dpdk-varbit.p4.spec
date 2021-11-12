@@ -40,11 +40,11 @@ struct a2_arg_t {
 	bit<16> param
 }
 
-struct tbl2_0_set_member_id_arg_t {
+struct tbl2_set_member_id_arg_t {
 	bit<32> member_id
 }
 
-struct tbl_0_set_member_id_arg_t {
+struct tbl_set_member_id_arg_t {
 	bit<32> member_id
 }
 
@@ -78,11 +78,11 @@ struct EMPTY {
 	bit<8> psa_egress_output_metadata_clone
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
-	bit<32> Ingress_tbl_0_member_id
-	bit<32> Ingress_tbl2_0_member_id
+	bit<32> Ingress_ap_member_id
 	bit<16> IngressParser_parser_tmp_2
-	bit<32> IngressParser_parser_tmp_3
+	bit<8> IngressParser_parser_tmp_3
 	bit<32> IngressParser_parser_tmp_4
+	bit<32> IngressParser_parser_tmp_5
 	bit<32> IngressParser_parser_tmp
 	ipv4_options_t IngressParser_parser_tmp_hdr_0
 	bit<8> IngressParser_parser_tmp_0
@@ -114,23 +114,18 @@ action NoAction args none {
 	return
 }
 
-action a1 args instanceof a1_arg_t {
-	mov h.ethernet.dstAddr t.param
-	return
-}
-
 action a2 args instanceof a2_arg_t {
 	mov h.ethernet.etherType t.param
 	return
 }
 
-action tbl_0_set_member_id args instanceof tbl_0_set_member_id_arg_t {
-	mov m.Ingress_tbl_0_member_id t.member_id
+action tbl_set_member_id args instanceof tbl_set_member_id_arg_t {
+	mov m.Ingress_ap_member_id t.member_id
 	return
 }
 
-action tbl2_0_set_member_id args instanceof tbl2_0_set_member_id_arg_t {
-	mov m.Ingress_tbl2_0_member_id t.member_id
+action tbl2_set_member_id args instanceof tbl2_set_member_id_arg_t {
+	mov m.Ingress_ap_member_id t.member_id
 	return
 }
 
@@ -139,7 +134,7 @@ table tbl {
 		h.ethernet.srcAddr exact
 	}
 	actions {
-		tbl_0_set_member_id
+		tbl_set_member_id
 		NoAction
 	}
 	default_action NoAction args none 
@@ -147,9 +142,9 @@ table tbl {
 }
 
 
-table tbl_0_member_table {
+table ap {
 	key {
-		m.Ingress_tbl_0_member_id exact
+		m.Ingress_ap_member_id exact
 	}
 	actions {
 		NoAction
@@ -165,21 +160,8 @@ table tbl2 {
 		h.ethernet.srcAddr exact
 	}
 	actions {
-		tbl2_0_set_member_id
+		tbl2_set_member_id
 		NoAction
-	}
-	default_action NoAction args none 
-	size 0x10000
-}
-
-
-table tbl2_0_member_table {
-	key {
-		m.Ingress_tbl2_0_member_id exact
-	}
-	actions {
-		NoAction
-		a1
 	}
 	default_action NoAction args none 
 	size 0x10000
@@ -201,29 +183,29 @@ apply {
 	validate m.IngressParser_parser_tmp_hdr_0
 	mov m.IngressParser_parser_tmp_2 m.IngressParser_parser_tmp_1
 	shr m.IngressParser_parser_tmp_2 0x8
-	cast  m.IngressParser_parser_tmp_2 bit_8 m.IngressParser_parser_tmp_hdr_0.value
-	cast  m.IngressParser_parser_tmp_1 bit_8 m.IngressParser_parser_tmp_hdr_0.len
-	cast  m.IngressParser_parser_tmp_1 bit_32 m.IngressParser_parser_tmp_3
+	mov m.IngressParser_parser_tmp_hdr_0.value m.IngressParser_parser_tmp_2
+	mov m.IngressParser_parser_tmp_hdr_0.len m.IngressParser_parser_tmp_1
+	mov m.IngressParser_parser_tmp_3 m.IngressParser_parser_tmp_1
 	mov m.IngressParser_parser_tmp_4 m.IngressParser_parser_tmp_3
-	shl m.IngressParser_parser_tmp_4 0x3
-	mov m.IngressParser_parser_tmp m.IngressParser_parser_tmp_4
+	mov m.IngressParser_parser_tmp_5 m.IngressParser_parser_tmp_4
+	shl m.IngressParser_parser_tmp_5 0x3
+	mov m.IngressParser_parser_tmp m.IngressParser_parser_tmp_5
 	add m.IngressParser_parser_tmp 0xfffffff0
 	extract h.ipv4_option_timestamp m.IngressParser_parser_tmp
 	lookahead m.IngressParser_parser_tmp_0
 	jmpeq MYIP_PARSE_IPV4_OPTION_TIMESTAMP1 m.IngressParser_parser_tmp_0 0x44
 	jmp MYIP_ACCEPT
-	MYIP_PARSE_IPV4_OPTION_TIMESTAMP1 :	jmpeq MYIP_ACCEPT 0 0
-	mov metadata 0x3
-	MYIP_ACCEPT :	mov m.Ingress_tbl_0_member_id 0x0
+	MYIP_PARSE_IPV4_OPTION_TIMESTAMP1 :	mov m.psa_ingress_input_metadata_parser_error 0x3
+	MYIP_ACCEPT :	mov m.Ingress_ap_member_id 0x0
 	table tbl
-	table tbl_0_member_table
-	mov m.Ingress_tbl2_0_member_id 0x0
+	table ap
+	mov m.Ingress_ap_member_id 0x0
 	table tbl2
-	table tbl2_0_member_table
+	table ap
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
-	drop
+	LABEL_DROP :	drop
 }
 
 

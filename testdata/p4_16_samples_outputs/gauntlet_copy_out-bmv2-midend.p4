@@ -22,21 +22,10 @@ struct Meta {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.c") bit<8> c_0;
     @name("ingress.do_thing") action do_thing() {
-        h.h.a = c_0;
+        h.h.a = 8w12;
     }
     @name("ingress.do_thing") action do_thing_1() {
-        h.h.a = c_0;
-    }
-    @hidden action gauntlet_copy_outbmv2l23() {
-        c_0 = 8w12;
-    }
-    @hidden table tbl_gauntlet_copy_outbmv2l23 {
-        actions = {
-            gauntlet_copy_outbmv2l23();
-        }
-        const default_action = gauntlet_copy_outbmv2l23();
     }
     @hidden table tbl_do_thing {
         actions = {
@@ -51,7 +40,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = do_thing_1();
     }
     apply {
-        tbl_gauntlet_copy_outbmv2l23.apply();
         tbl_do_thing.apply();
         tbl_do_thing_0.apply();
     }

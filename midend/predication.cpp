@@ -141,6 +141,7 @@ const IR::Expression* Predication::clone(const IR::Expression* expression) {
     // an expression. This is most obvious if one clone is on the LHS and one
     // on the RHS of an assigment.
     ClonePathExpressions cloner;
+    cloner.setCalledBy(this);
     return expression->apply(cloner);
 }
 
@@ -149,6 +150,7 @@ const IR::Node* Predication::clone(const IR::AssignmentStatement* statement) {
     // in the end different code will be generated for the different clones of
     // an expression.
     ClonePathExpressions cloner;
+    cloner.setCalledBy(this);
     return statement->apply(cloner);
 }
 
@@ -172,6 +174,7 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
     // The expressionReplacer responsible for transforming this statement
     ExpressionReplacer replacer(clone(statement)->to<IR::AssignmentStatement>(),
             traversalPath, conditions);
+    replacer.setCalledBy(this);
     dependencies.clear();
     visit(statement->right);
     LOG2("Finished visiting right side of statement");
@@ -331,6 +334,7 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
     --ifNestingLevel;
     prune();
     // Remove all empty statements which are inside this 'rv' block
+    remover.setCalledBy(this);
     return rv->apply(remover);
 }
 

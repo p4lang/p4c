@@ -30,40 +30,8 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.bool_val") bool bool_val_0;
-    @name("ingress.tmp_0") bit<3> tmp;
-    @name("ingress.tmp_1") bit<3> tmp_0;
-    @name("ingress.val_0") bit<3> val;
-    @name("ingress.bound_0") bit<3> bound;
-    @name("ingress.hasReturned") bool hasReturned;
-    @name("ingress.retval") bit<3> retval;
-    @name("ingress.tmp") bit<3> tmp_1;
-    bit<3> hsiVar;
     @name("ingress.perform_action") action perform_action() {
-        val = (bool_val_0 ? 3w0 : val);
-        bound = (bool_val_0 ? 3w1 : bound);
-        hasReturned = (bool_val_0 ? false : hasReturned);
-        tmp_1 = (bool_val_0 ? (val < bound ? val : tmp_1) : tmp_1);
-        tmp_1 = (bool_val_0 ? (val < bound ? val : bound) : tmp_1);
-        hasReturned = (bool_val_0 ? true : hasReturned);
-        retval = (bool_val_0 ? tmp_1 : retval);
-        tmp = (bool_val_0 ? retval : tmp);
-        tmp_0 = (bool_val_0 ? tmp : tmp_0);
-        hsiVar = (bool_val_0 ? tmp_0 : 3w0);
-        if (hsiVar == 3w0) {
-            h.h[3w0].a = (bool_val_0 ? 8w1 : h.h[3w0].a);
-        } else if (hsiVar == 3w1) {
-            h.h[3w1].a = (bool_val_0 ? 8w1 : h.h[3w1].a);
-        }
-    }
-    @hidden action predication_issue_3l38() {
-        bool_val_0 = true;
-    }
-    @hidden table tbl_predication_issue_3l38 {
-        actions = {
-            predication_issue_3l38();
-        }
-        const default_action = predication_issue_3l38();
+        h.h[3w0].a = 8w1;
     }
     @hidden table tbl_perform_action {
         actions = {
@@ -72,7 +40,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = perform_action();
     }
     apply {
-        tbl_predication_issue_3l38.apply();
         tbl_perform_action.apply();
     }
 }

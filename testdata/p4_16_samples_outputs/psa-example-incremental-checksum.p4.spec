@@ -141,9 +141,9 @@ apply {
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP h.ipv4.protocol 0x6
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
-	INGRESSPARSERIMPL_ACCEPT :	jmpnv LABEL_0END h.ipv4
+	INGRESSPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
 	table route
-	LABEL_0END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ipv4
 	emit h.tcp
@@ -169,7 +169,7 @@ apply {
 	emit h.ipv4
 	emit h.tcp
 	tx m.psa_ingress_output_metadata_egress_port
-	drop
+	LABEL_DROP :	drop
 }
 
 

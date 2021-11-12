@@ -139,22 +139,22 @@ apply {
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
 	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_tmp 1
-	jmpv LABEL_0END h.ethernet
+	jmpv LABEL_END h.ethernet
 	mov m.Ingress_tmp 0
-	LABEL_0END :	jmpeq LABEL_1TRUE m.Ingress_tmp 0x0
+	LABEL_END :	jmpeq LABEL_TRUE m.Ingress_tmp 0x0
 	mov m.Ingress_tmp_0 0x0
-	jmp LABEL_1END
-	LABEL_1TRUE :	mov m.Ingress_tmp_0 0x1
-	LABEL_1END :	mov m.Ingress_tmp_1 1
-	jmpv LABEL_2END h.ipv4
+	jmp LABEL_END_0
+	LABEL_TRUE :	mov m.Ingress_tmp_0 0x1
+	LABEL_END_0 :	mov m.Ingress_tmp_1 1
+	jmpv LABEL_END_1 h.ipv4
 	mov m.Ingress_tmp_1 0
-	LABEL_2END :	mov m.Ingress_key_0 m.Ingress_tmp_0
-	jmpeq LABEL_3TRUE m.Ingress_key_0 0x1
-	jmpeq LABEL_3TRUE m.Ingress_tmp_1 0x1
+	LABEL_END_1 :	mov m.Ingress_key_0 m.Ingress_tmp_0
+	jmpeq LABEL_TRUE_0 m.Ingress_key_0 0x1
+	jmpeq LABEL_TRUE_0 m.Ingress_tmp_1 0x1
 	mov m.Ingress_key_0 0x0
-	jmp LABEL_3END
-	LABEL_3TRUE :	mov m.Ingress_key_0 0x1
-	LABEL_3END :	mov m.Ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
+	jmp LABEL_END_2
+	LABEL_TRUE_0 :	mov m.Ingress_key_0 0x1
+	LABEL_END_2 :	mov m.Ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
 	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
@@ -165,7 +165,7 @@ apply {
 	emit h.ipv4
 	emit h.tcp
 	tx m.psa_ingress_output_metadata_egress_port
-	drop
+	LABEL_DROP :	drop
 }
 
 

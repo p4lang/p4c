@@ -40,6 +40,7 @@ limitations under the License.
 #include "midend/replaceSelectRange.h"
 #include "midend/expandEmit.h"
 #include "midend/expandLookahead.h"
+#include "midend/global_copyprop.h"
 #include "midend/local_copyprop.h"
 #include "midend/midEndLast.h"
 #include "midend/nestedStructs.h"
@@ -106,8 +107,11 @@ MidEnd::MidEnd(CompilerOptions& options, std::ostream* outStream) {
         new P4::Predication(&refMap),
         new P4::MoveDeclarations(),  // more may have been introduced
         new P4::ConstantFolding(&refMap, &typeMap),
-        new P4::LocalCopyPropagation(&refMap, &typeMap),
-        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::GlobalCopyPropagation(&refMap, &typeMap),
+        new PassRepeated({
+            new P4::LocalCopyPropagation(&refMap, &typeMap),
+            new P4::ConstantFolding(&refMap, &typeMap),
+        }),
         new P4::StrengthReduction(&refMap, &typeMap),
         new P4::MoveDeclarations(),  // more may have been introduced
         new P4::SimplifyControlFlow(&refMap, &typeMap),

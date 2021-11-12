@@ -69,7 +69,7 @@ apply {
 	regadd counter0_0 0x400 1
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port
-	drop
+	LABEL_DROP :	drop
 }
 
 

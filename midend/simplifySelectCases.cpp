@@ -60,7 +60,7 @@ const IR::Node* DoSimplifySelectCases::preorder(IR::SelectExpression* expression
     bool changes = false;
     for (auto c : expression->selectCases) {
         if (seenDefault) {
-            ::warning(ErrorType::WARN_PARSER_TRANSITION, "%1%: unreachable", c);
+            warn(ErrorType::WARN_PARSER_TRANSITION, "%1%: unreachable", c);
             changes = true;
             continue;
         }
@@ -73,8 +73,8 @@ const IR::Node* DoSimplifySelectCases::preorder(IR::SelectExpression* expression
     if (changes) {
         if (cases.size() == 1) {
             // just one default label
-            ::warning(ErrorType::WARN_PARSER_TRANSITION,
-                      "%1%: transition does not depend on select argument", expression->select);
+            warn(ErrorType::WARN_PARSER_TRANSITION,
+                 "%1%: transition does not depend on select argument", expression->select);
             return cases.at(0)->state;
         }
         expression->selectCases = std::move(cases);

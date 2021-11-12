@@ -14,7 +14,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.do_thing") action do_thing() {
         cond = sm.enq_timestamp != 32w6;
         tmp.ingress_port = (sm.enq_timestamp != 32w6 ? sm.ingress_port : tmp.ingress_port);
-        tmp.egress_spec = (sm.enq_timestamp != 32w6 ? sm.egress_spec : tmp.egress_spec);
+        tmp.egress_spec = (sm.enq_timestamp != 32w6 ? 9w2 : tmp.egress_spec);
         tmp.egress_port = (sm.enq_timestamp != 32w6 ? sm.egress_port : tmp.egress_port);
         tmp.instance_type = (sm.enq_timestamp != 32w6 ? sm.instance_type : tmp.instance_type);
         tmp.packet_length = (sm.enq_timestamp != 32w6 ? sm.packet_length : tmp.packet_length);
@@ -30,7 +30,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tmp.parser_error = (sm.enq_timestamp != 32w6 ? sm.parser_error : tmp.parser_error);
         tmp.priority = (sm.enq_timestamp != 32w6 ? sm.priority : tmp.priority);
         sm.ingress_port = (sm.enq_timestamp != 32w6 ? tmp.ingress_port : sm.ingress_port);
-        sm.egress_spec = (sm.enq_timestamp != 32w6 ? tmp.egress_spec : sm.egress_spec);
+        sm.egress_spec = (sm.enq_timestamp != 32w6 ? tmp.egress_spec : 9w2);
         sm.egress_port = (sm.enq_timestamp != 32w6 ? tmp.egress_port : sm.egress_port);
         sm.instance_type = (sm.enq_timestamp != 32w6 ? tmp.instance_type : sm.instance_type);
         sm.packet_length = (sm.enq_timestamp != 32w6 ? tmp.packet_length : sm.packet_length);

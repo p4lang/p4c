@@ -77,7 +77,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         hdr.ipv4.srcAddr = (hdr.ipv4.isValid() ? hdr.ipv4.srcAddr ^ 32w0x12345678 : hdr.ipv4.srcAddr);
         meta.after1 = (hdr.ipv4.isValid() ? hdr.ipv4.srcAddr : meta.after1);
         cond_0 = hdr.ethernet.isValid();
-        hdr.ipv4.protocol = (cond_0 ? (hdr.ethernet.isValid() ? hdr.ipv4.protocol ^ 8w1 : hdr.ipv4.protocol) : hdr.ipv4.protocol);
+        hdr.ipv4.protocol = (hdr.ethernet.isValid() ? (hdr.ethernet.isValid() ? hdr.ipv4.protocol ^ 8w1 : hdr.ipv4.protocol) : hdr.ipv4.protocol);
         meta.before2 = (cond_0 ? hdr.ipv4.dstAddr : meta.before2);
         hdr.ipv4.dstAddr = (cond_0 ? hdr.ipv4.dstAddr ^ 32w0x12345678 : hdr.ipv4.dstAddr);
         meta.after2 = (cond_0 ? hdr.ipv4.dstAddr : meta.after2);

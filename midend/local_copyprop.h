@@ -116,6 +116,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     const IR::P4Parser *postorder(IR::P4Parser *) override;
     IR::ParserState *preorder(IR::ParserState *) override;
     IR::ParserState *postorder(IR::ParserState *) override;
+    Visitor::profile_t init_apply(const IR::Node* node) override;
     class ElimDead;
     class RewriteTableKeys;
 

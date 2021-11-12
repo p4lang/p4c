@@ -73,8 +73,8 @@ class RemoveUnreachableStates : public Transform {
         auto orig = getOriginal<IR::ParserState>();
         if (reachable.find(orig) == reachable.end()) {
             if (state->name == IR::ParserState::accept) {
-                ::warning(ErrorType::WARN_UNREACHABLE,
-                          "%1% state in %2% is unreachable", state, findContext<IR::P4Parser>());
+                warn(ErrorType::WARN_UNREACHABLE,
+                     "%1% state in %2% is unreachable", state, findContext<IR::P4Parser>());
                 return state;
             } else  {
                 LOG1("Removing unreachable state " << dbp(state));
@@ -200,6 +200,7 @@ class SimplifyParser : public PassManager {
 
 const IR::Node* DoSimplifyParsers::preorder(IR::P4Parser* parser) {
     SimplifyParser simpl(refMap);
+    simpl.setCalledBy(this);
     return parser->apply(simpl);
 }
 

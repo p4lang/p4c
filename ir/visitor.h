@@ -57,7 +57,11 @@ class Visitor {
     virtual ~Visitor() = default;
 
     mutable cstring internalName;
+    // Some visitors are created and applied by other visitors.
+    // This field keeps track of the caller.
+    const Visitor* called_by = nullptr;
 
+    const Visitor& setCalledBy(const Visitor* visitor) { called_by = visitor; return *this; }
     // init_apply is called (once) when apply is called on an IR tree
     // it expects to allocate a profile record which will be destroyed
     // when the traversal completes.  Visitor subclasses may extend this
@@ -203,6 +207,34 @@ class Visitor {
     template <class T>
     const T* getCurrentNode() const {
         return ctxt->node ? ctxt->node->to<T>() : nullptr; }
+
+    /// True if the warning with this kind is enabled at this point.
+    /// Warnings can be disabled by using the @noWarn("unused") annotation
+    /// in an enclosing environment.
+    bool warning_enabled(int warning_kind) const {
+        return warning_enabled(this, warning_kind);
+    }
+    /// Static version of the above function, which can be called
+    /// even if not directly in a visitor
+    static bool warning_enabled(const Visitor* visitor, int warning_kind);
+    template<class T,
+             typename = typename std::enable_if<
+                 std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+             class... Args>
+    void warn(const int kind, const char *format, const T *node, Args... args) {
+        if (warning_enabled(kind))
+            ::warning(kind, format, node, std::forward<Args>(args)...);
+    }
+
+    /// The const ref variant of the above
+    template<class T,
+             typename = typename std::enable_if<
+                 std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+             class... Args>
+    void warn(const int kind, const char *format, const T &node, Args... args) {
+        if (warning_enabled(kind))
+            ::warning(kind, format, node, std::forward<Args>(args)...);
+    }
 
  protected:
     // if visitDagOnce is set to 'false' (usually in the derived Visitor

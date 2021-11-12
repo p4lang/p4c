@@ -81,12 +81,13 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
 }
 
 // A parser that contains all states (unlike the P4 v1.0 parser, which is really just a state)
-class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, IContainer {
+class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, IContainer, IAnnotated {
     Type_Parser                                 type;
     optional ParameterList                      constructorParams = new ParameterList;
     optional inline IndexedVector<Declaration>  parserLocals;
     optional inline IndexedVector<ParserState>  states;
 
+    Annotations getAnnotations() const override { return type->getAnnotations(); }
     TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
     std::vector<INamespace> getNestedNamespaces() const override {
         return { type->typeParameters, type->applyParams, constructorParams }; }
@@ -112,12 +113,13 @@ class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, I
     toString { return cstring("parser ") + externalName(); }
 }
 
-class P4Control : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, IContainer {
+class P4Control : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, IContainer, IAnnotated {
     Type_Control                                type;
     optional ParameterList                      constructorParams = new ParameterList;
     optional inline IndexedVector<Declaration>  controlLocals;
     BlockStatement                              body;
 
+    Annotations getAnnotations() const override { return type->getAnnotations(); }
     TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
     std::vector<INamespace> getNestedNamespaces() const override {
         return { type->typeParameters, type->applyParams, constructorParams }; }

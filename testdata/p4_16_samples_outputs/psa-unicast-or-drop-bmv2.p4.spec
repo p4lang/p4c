@@ -74,46 +74,46 @@ apply {
 	extract h.output_data
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
-	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_egress_port
-	jmpneq LABEL_0END h.ethernet.dstAddr 0x0
+	mov m.psa_ingress_output_metadata_egress_port h.ethernet.dstAddr
+	jmpneq LABEL_END h.ethernet.dstAddr 0x0
 	mov m.psa_ingress_output_metadata_drop 1
-	LABEL_0END :	cast  h.ethernet.srcAddr bit_1 m.Ingress_tmp
-	cast  m.Ingress_tmp bit_8 m.psa_ingress_output_metadata_class_of_service
+	LABEL_END :	mov m.Ingress_tmp h.ethernet.srcAddr
+	mov m.psa_ingress_output_metadata_class_of_service m.Ingress_tmp
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.output_data
 	extract h.ethernet
 	extract h.output_data
-	cast  m.psa_egress_input_metadata_egress_port bit_32 h.output_data.word0
-	cast  m.psa_egress_input_metadata_instance bit_16 m.Egress_tmp_0
-	cast  m.Egress_tmp_0 bit_32 h.output_data.word1
+	mov h.output_data.word0 m.psa_egress_input_metadata_egress_port
+	mov m.Egress_tmp_0 m.psa_egress_input_metadata_instance
+	mov h.output_data.word1 m.Egress_tmp_0
 	mov h.output_data.word2 0x8
-	jmpneq LABEL_1FALSE m.psa_egress_input_metadata_packet_path 0x0
+	jmpneq LABEL_FALSE_0 m.psa_egress_input_metadata_packet_path 0x0
 	mov h.output_data.word2 0x1
-	jmp LABEL_1END
-	LABEL_1FALSE :	jmpneq LABEL_2FALSE m.psa_egress_input_metadata_packet_path 0x1
+	jmp LABEL_END_0
+	LABEL_FALSE_0 :	jmpneq LABEL_FALSE_1 m.psa_egress_input_metadata_packet_path 0x1
 	mov h.output_data.word2 0x2
-	jmp LABEL_1END
-	LABEL_2FALSE :	jmpneq LABEL_3FALSE m.psa_egress_input_metadata_packet_path 0x2
+	jmp LABEL_END_0
+	LABEL_FALSE_1 :	jmpneq LABEL_FALSE_2 m.psa_egress_input_metadata_packet_path 0x2
 	mov h.output_data.word2 0x3
-	jmp LABEL_1END
-	LABEL_3FALSE :	jmpneq LABEL_4FALSE m.psa_egress_input_metadata_packet_path 0x3
+	jmp LABEL_END_0
+	LABEL_FALSE_2 :	jmpneq LABEL_FALSE_3 m.psa_egress_input_metadata_packet_path 0x3
 	mov h.output_data.word2 0x4
-	jmp LABEL_1END
-	LABEL_4FALSE :	jmpneq LABEL_5FALSE m.psa_egress_input_metadata_packet_path 0x4
+	jmp LABEL_END_0
+	LABEL_FALSE_3 :	jmpneq LABEL_FALSE_4 m.psa_egress_input_metadata_packet_path 0x4
 	mov h.output_data.word2 0x5
-	jmp LABEL_1END
-	LABEL_5FALSE :	jmpneq LABEL_6FALSE m.psa_egress_input_metadata_packet_path 0x5
+	jmp LABEL_END_0
+	LABEL_FALSE_4 :	jmpneq LABEL_FALSE_5 m.psa_egress_input_metadata_packet_path 0x5
 	mov h.output_data.word2 0x6
-	jmp LABEL_1END
-	LABEL_6FALSE :	jmpneq LABEL_1END m.psa_egress_input_metadata_packet_path 0x6
+	jmp LABEL_END_0
+	LABEL_FALSE_5 :	jmpneq LABEL_END_0 m.psa_egress_input_metadata_packet_path 0x6
 	mov h.output_data.word2 0x7
-	LABEL_1END :	cast  m.psa_egress_input_metadata_class_of_service bit_8 m.Egress_tmp_1
-	cast  m.Egress_tmp_1 bit_32 h.output_data.word3
+	LABEL_END_0 :	mov m.Egress_tmp_1 m.psa_egress_input_metadata_class_of_service
+	mov h.output_data.word3 m.Egress_tmp_1
 	emit h.ethernet
 	emit h.output_data
 	tx m.psa_ingress_output_metadata_egress_port
-	drop
+	LABEL_DROP :	drop
 }
 
 
