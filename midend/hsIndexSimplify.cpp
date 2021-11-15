@@ -1,4 +1,5 @@
 #include "midend/hsIndexSimplify.h"
+#include "midend/simplifyKey.h"
 
 #include <iostream>
 #include <sstream>
@@ -131,13 +132,43 @@ IR::Node* HSIndexSimplifier::preorder(IR::AssignmentStatement* assignmentStateme
     }
 }
 
+/**
+ * Policy that treats a key as ArrayIndex with non constant index.
+ */
+class IsNonConstantArrayIndex : public KeyIsSimple, public Inspector {
+ protected:
+    bool     simple;
+
+ public:
+    IsNonConstantArrayIndex()
+    { setName("IsNonConstantArrayIndex"); }
+
+    void postorder(const IR::Expression*) override {
+        // all other expressions are complicated
+        simple = false;
+    }
+    void postorder(const IR::ArrayIndex* arrayIndex) override {
+        simple = arrayIndex->right->is<IR::Constant>();
+    }
+    profile_t init_apply(const IR::Node* root) override {
+        simple = true;
+        return Inspector::init_apply(root); }
+
+    bool isSimple(const IR::Expression* expression, const Visitor::Context*) override {
+        (void)expression->apply(*this);
+        return simple;
+    }
+};
+
 IR::Node* HSIndexSimplifier::preorder(IR::P4Control* control) {
-    auto* newControl = control->clone();
+    DoSimplifyKey keySimplifier(refMap, typeMap, new IsNonConstantArrayIndex());
+    const auto* controlKeySimplified = control->apply(keySimplifier)->to<IR::P4Control>();
+    auto* newControl = controlKeySimplified->clone();
     IR::IndexedVector<IR::Declaration> newControlLocals;
     HSIndexSimplifier hsSimplifier(refMap, typeMap, &newControlLocals,
         generatedVariables);
     newControl->body = newControl->body->apply(hsSimplifier)->to<IR::BlockStatement>();
-    for (auto* declaration : control->controlLocals) {
+    for (auto* declaration : controlKeySimplified->controlLocals) {
         if (declaration->is<IR::P4Action>()) {
             newControlLocals.push_back(declaration->apply(hsSimplifier)->to<IR::Declaration>());
         } else {
