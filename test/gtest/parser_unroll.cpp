@@ -315,7 +315,9 @@ TEST_F(P4CParserUnroll, header_union) {
     auto parsers =  loadExample("issue561-7-bmv2.p4");
     ASSERT_TRUE(parsers.first);
     ASSERT_TRUE(parsers.second);
-    // adding outOfBound state
+    // The extra state in parsers.second is the outOfBound state that's correct.
+    // But due to the fact that parsers.first does not have such an outOfBound state,
+    // we have to subtract it from parsers.second.
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() - 1);
 }
 
