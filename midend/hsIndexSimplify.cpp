@@ -143,10 +143,6 @@ class IsNonConstantArrayIndex : public KeyIsSimple, public Inspector {
     IsNonConstantArrayIndex()
     { setName("IsNonConstantArrayIndex"); }
 
-    void postorder(const IR::Expression*) override {
-        // all other expressions are complicated
-        simple = false;
-    }
     void postorder(const IR::ArrayIndex* arrayIndex) override {
         simple = arrayIndex->right->is<IR::Constant>();
     }
