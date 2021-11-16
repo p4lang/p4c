@@ -1,8 +1,8 @@
-#include "midend/hsIndexSimplify.h"
-#include "midend/simplifyKey.h"
-
 #include <iostream>
 #include <sstream>
+
+#include "midend/hsIndexSimplify.h"
+#include "midend/simplifyKey.h"
 
 namespace P4 {
 
