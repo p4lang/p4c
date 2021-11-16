@@ -67,8 +67,8 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
             hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
-            next_hop();
-            add_on_miss_action();
+            @tableonly next_hop();
+            @defaultonly add_on_miss_action();
         }
         add_on_miss = true;
         const default_action = add_on_miss_action();
@@ -85,8 +85,8 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
             hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
-            next_hop2();
-            add_on_miss_action2();
+            @tableonly next_hop2();
+            @defaultonly add_on_miss_action2();
         }
         add_on_miss = true;
         const default_action = add_on_miss_action2();

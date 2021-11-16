@@ -86,8 +86,8 @@ learner ipv4_da_0 {
 		h.ipv4.dstAddr
 	}
 	actions {
-		next_hop
-		add_on_miss_action
+		next_hop @tableonly
+		add_on_miss_action @defaultonly
 	}
 	default_action add_on_miss_action args none 
 	size 65536
@@ -99,8 +99,8 @@ learner ipv4_da2_0 {
 		h.ipv4.dstAddr
 	}
 	actions {
-		next_hop2
-		add_on_miss_action2
+		next_hop2 @tableonly
+		add_on_miss_action2 @defaultonly
 	}
 	default_action add_on_miss_action2 args none 
 	size 65536
