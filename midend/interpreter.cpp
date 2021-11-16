@@ -342,16 +342,16 @@ SymbolicValue* SymbolicHeaderUnion::clone() const {
 
 void SymbolicHeaderUnion::assign(const SymbolicValue* other) {
     if (other->is<SymbolicError>()) return;
-    BUG_CHECK(other->is<SymbolicHeaderUnion>(), "%1%: expected a header union", other);
     auto hv = other->to<SymbolicHeaderUnion>();
+    BUG_CHECK(hv, "%1%: expected a header union", other);
     for (auto f : hv->fieldValue)
         fieldValue[f.first]->assign(f.second);
     valid->assign(hv->valid);
 }
 
 bool SymbolicHeaderUnion::merge(const SymbolicValue* other) {
-    BUG_CHECK(other->is<SymbolicHeaderUnion>(), "%1%: expected a header union", other);
     auto hv = other->to<SymbolicHeaderUnion>();
+    BUG_CHECK(hv, "%1%: expected a header union", other);
     bool changes = false;
     for (auto f : hv->fieldValue)
         changes = changes || fieldValue[f.first]->merge(f.second);
