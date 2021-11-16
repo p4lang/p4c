@@ -28,6 +28,7 @@ abstract DpdkAsmStatement : IDPDKNode {
 }
 
 class DpdkAction {
+    optional Annotations        annotations = Annotations::empty;
     inline IndexedVector<DpdkAsmStatement> statements;
     inline ID name;
     inline ParameterList para;
