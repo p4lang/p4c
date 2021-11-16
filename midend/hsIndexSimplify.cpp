@@ -144,7 +144,9 @@ class IsNonConstantArrayIndex : public KeyIsSimple, public Inspector {
     { setName("IsNonConstantArrayIndex"); }
 
     void postorder(const IR::ArrayIndex* arrayIndex) override {
-        simple = arrayIndex->right->is<IR::Constant>();
+        if (simple) {
+            simple = arrayIndex->right->is<IR::Constant>();
+        }
     }
     profile_t init_apply(const IR::Node* root) override {
         simple = true;
