@@ -298,7 +298,12 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
     }
     out << "\tactions {" << std::endl;
     for (auto action : actions->actionList) {
-        out << "\t\t" << DPDK::toStr(action->expression) << std::endl;
+        out << "\t\t" << DPDK::toStr(action->expression);
+        if (action->annotations->getAnnotation("tableonly"))
+            out << " @tableonly";
+        if (action->annotations->getAnnotation("defaultonly"))
+            out << " @defaultonly";
+        out << std::endl;
     }
     out << "\t}" << std::endl;
 
@@ -352,7 +357,12 @@ std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
     out << "\t}" << std::endl;
     out << "\tactions {" << std::endl;
     for (auto action : actions->actionList) {
-        out << "\t\t" << DPDK::toStr(action->expression) << std::endl;
+        out << "\t\t" << DPDK::toStr(action->expression);
+        if (action->getAnnotation("tableonly"))
+            out << " @tableonly";
+        if (action->getAnnotation("defaultonly"))
+            out << " @defaultonly";
+        out << std::endl;
     }
     out << "\t}" << std::endl;
 
