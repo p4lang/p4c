@@ -974,7 +974,7 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
                 if (b->name == "isValid") {
                     copyNeeded = true;
                     break;
-            }
+                }
         }
         if (firstKeyStr != keyTypeStr) {
             if (firstKeyHdr || keyTypeStr.startsWith("h")) {
