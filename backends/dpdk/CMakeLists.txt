@@ -63,6 +63,7 @@ set(P4C_DPDK_HEADERS
     ../bmv2/common/lower.h
     backend.h
     midend.h
+    dpdkCheckExternInvocation.h
     dpdkHelpers.h
     dpdkProgram.h
     dpdkArch.h
