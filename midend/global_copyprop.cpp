@@ -51,7 +51,7 @@ void compareValuesInMaps(std::map<cstring, const IR::Expression*> *oldValues,
     for (auto it : *newValues) {
         auto oldValue = (*oldValues)[it.first];
         if (((it.second == nullptr) ^ (oldValue == nullptr)) ||
-                it.second && oldValue && !(it.second->equiv(*oldValue)))
+            (it.second && oldValue && !(it.second->equiv(*oldValue))))
             removeVarsContaining(oldValues, it.first);
     }
 }
@@ -78,11 +78,11 @@ void FindVariableValues::postorder(const IR::P4Control *ctrl) {
     working = false;
 }
 
-bool FindVariableValues::preorder(const IR::P4Action *act) {
+bool FindVariableValues::preorder(const IR::P4Action*) {
     return false;
 }
 
-bool FindVariableValues::preorder(const IR::P4Table *tab) {
+bool FindVariableValues::preorder(const IR::P4Table*) {
     return false;
 }
 

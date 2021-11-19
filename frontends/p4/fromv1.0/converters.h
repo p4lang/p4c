@@ -729,7 +729,7 @@ class CheckIfMultiEntryPoint: public Inspector {
 class InsertCompilerGeneratedStartState: public Transform {
     ProgramStructure* structure;
     IR::Vector<IR::Node>               allTypeDecls;
-    IR::IndexedVector<IR::Declaration> varDecls;
+    IR::IndexedVector<IR::ParserState> parserStates;
     IR::Vector<IR::SelectCase>         selCases;
     cstring newStartState;
     cstring newInstanceType;
@@ -793,11 +793,11 @@ class InsertCompilerGeneratedStartState: public Transform {
         auto annos = new IR::Annotations();
         annos->add(new IR::Annotation(IR::Annotation::nameAnnotation, ".$start"));
         auto startState = new IR::ParserState(IR::ParserState::start, annos, selects);
-        varDecls.push_back(startState);
+        parserStates.push_back(startState);
 
-        if (!varDecls.empty()) {
-            parser->parserLocals.append(varDecls);
-            varDecls.clear();
+        if (!parserStates.empty()) {
+            parser->states.append(parserStates);
+            parserStates.clear();
         }
         return parser;
     }
