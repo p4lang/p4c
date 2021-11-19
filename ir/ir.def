@@ -109,6 +109,8 @@ class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, I
         parserLocals.check_null();
         states.check_null();
         checkDuplicates();
+        for (auto d : parserLocals)
+            BUG_CHECK(!d->is<ParserState>(), "%1%: state in locals", d);
     }
     toString { return cstring("parser ") + externalName(); }
 }
