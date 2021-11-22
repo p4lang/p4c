@@ -197,15 +197,22 @@ class RewriteAllParsers : public Transform {
         if (rewriter->hasOutOfboundState) {
             // generating state with verify(false, error.StackOutOfBounds)
             IR::Vector<IR::Argument>* arguments = new IR::Vector<IR::Argument>();
-            arguments->push_back(new IR::Argument(new IR::BoolLiteral(false)));
+            arguments->push_back(
+                new IR::Argument(new IR::BoolLiteral(IR::Type::Boolean::get(), false)));
             arguments->push_back(new IR::Argument(new IR::Member(
                 new IR::TypeNameExpression(new IR::Type_Name(IR::ID("error"))),
                     IR::ID("StackOutOfBounds"))));
             IR::IndexedVector<IR::StatOrDecl> components;
-            components.push_back(new IR::MethodCallStatement(
-                new IR::MethodCallExpression(new IR::PathExpression(IR::ID("verify")), arguments)));
-            auto* outOfBoundsState = new IR::ParserState(IR::ID(outOfBoundsStateName), components,
-                nullptr);
+            components.push_back(new IR::MethodCallStatement(new IR::MethodCallExpression(
+                IR::Type::Void::get(),
+                new IR::PathExpression(
+                    new IR::Type_Method(IR::Type::Void::get(), new IR::ParameterList(), "*method"),
+                    new IR::Path(IR::ID("verify"))),
+                arguments)));
+            auto* outOfBoundsState = new IR::ParserState(
+                IR::ID(outOfBoundsStateName), components,
+                new IR::PathExpression(new IR::Type_State(),
+                                       new IR::Path(IR::ParserState::reject, false)));
             newParser->states.push_back(outOfBoundsState);
         }
         for (auto& i : rewriter->current.result->states) {
