@@ -24,6 +24,7 @@ limitations under the License.
  */
 
 #include "dpdkArch.h"
+#include "dpdkHelpers.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/externInstance.h"
@@ -362,6 +363,15 @@ const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct *s) {
         auto *annotations = new IR::Annotations(
             {new IR::Annotation(IR::ID("__packet_data__"), {})});
         return new IR::Type_Struct(s->name, annotations, s->fields);
+    }
+    return s;
+}
+
+const IR::Node *InjectOutputPortMetadataField::preorder(IR::Type_Struct *s) {
+    if (structure->p4arch == "pna" && s->name.name == structure->local_metadata_type) {
+        s->fields.push_back(new IR::StructField(
+            IR::ID(PnaMainOutputMetadataOutputPortName), IR::Type_Bits::get(32)));
+        LOG3("Metadata structure after injecting output port:" << std::endl << s);
     }
     return s;
 }

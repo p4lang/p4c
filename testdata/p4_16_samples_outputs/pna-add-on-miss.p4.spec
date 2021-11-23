@@ -50,6 +50,7 @@ struct main_metadata_t {
 	bit<8> pna_main_input_metadata_class_of_service
 	bit<32> pna_main_input_metadata_input_port
 	bit<8> pna_main_output_metadata_class_of_service
+	bit<32> pna_main_output_metadata_output_port
 	bit<32> MainControlT_tmp
 	bit<32> MainControlT_tmp_0
 }
@@ -119,7 +120,7 @@ apply {
 	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ipv4
-	tx m.pna_main_output_metadata_egress_port
+	tx m.pna_main_output_metadata_output_port
 }
 
 

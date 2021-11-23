@@ -463,6 +463,7 @@ cstring ConvertStatementToDpdk::append_parser_name(const IR::P4Parser* p, cstrin
 bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
     auto mi = P4::MethodInstance::resolve(s->methodCall, refmap, typemap);
     if (auto a = mi->to<P4::ApplyMethod>()) {
+        LOG3("apply method: " << dbp(s) << std::endl << s);
         if (a->isTableApply()) {
             auto table = a->object->to<IR::P4Table>();
             add_instr(new IR::DpdkApplyStatement(table->name.toString()));
@@ -470,6 +471,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             BUG("not implemented for `apply` other than table");
         }
     } else if (auto a = mi->to<P4::ExternMethod>()) {
+        LOG3("extern method: " << dbp(s) << std::endl << s);
         // Checksum function call
         if (a->originalExternType->getName().name == "InternetChecksum") {
             auto res =
@@ -609,6 +611,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             ::error("%1%: Unknown extern function.", s);
         }
     } else if (auto a = mi->to<P4::ExternFunction>()) {
+        LOG3("extern function: " << dbp(s) << std::endl << s);
         if (a->method->name == "verify") {
             if (parser == nullptr)
                 ::error("%1%: verify must be used in parser", s);
@@ -652,7 +655,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             BUG_CHECK(a->expr->arguments->size() == 1,
                 "%1%: expected one argument for send_to_port extern", a);
             add_instr(new IR::DpdkMovStatement(
-                new IR::Member(new IR::PathExpression("m"), "pna_main_output_metadata_output_port"),
+                new IR::Member(new IR::PathExpression("m"), PnaMainOutputMetadataOutputPortName),
                 a->expr->arguments->at(0)->expression));
         } else if (a->method->name == "drop_packet") {
             add_instr(new IR::DpdkDropStatement());
@@ -660,6 +663,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             ::error("%1%: Unknown extern function", s);
         }
     } else if (auto a = mi->to<P4::BuiltInMethod>()) {
+        LOG3("builtin method: " << dbp(s) << std::endl << s);
         if (a->name == "setValid") {
             add_instr(new IR::DpdkValidateStatement(a->appliedTo));
         } else if (a->name == "setInvalid") {
@@ -668,6 +672,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             BUG("%1% function not implemented.", s);
         }
     } else if (auto a = mi->to<P4::ActionCall>()) {
+        LOG3("action call: " << dbp(s) << std::endl << s);
         auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
         helper->setCalledBy(this);
         a->action->body->apply(*helper);
