@@ -203,10 +203,16 @@ class RewriteAllParsers : public Transform {
                 new IR::TypeNameExpression(new IR::Type_Name(IR::ID("error"))),
                     IR::ID("StackOutOfBounds"))));
             IR::IndexedVector<IR::StatOrDecl> components;
+            IR::IndexedVector<IR::Parameter> parameters;
+            parameters.push_back(
+                new IR::Parameter(IR::ID("check"), IR::Direction::In, IR::Type::Boolean::get()));
+            parameters.push_back(new IR::Parameter(IR::ID("toSignal"), IR::Direction::In,
+                                                   new IR::Type_Name(IR::ID("error"))));
             components.push_back(new IR::MethodCallStatement(new IR::MethodCallExpression(
                 IR::Type::Void::get(),
                 new IR::PathExpression(
-                    new IR::Type_Method(IR::Type::Void::get(), new IR::ParameterList(), "*method"),
+                    new IR::Type_Method(IR::Type::Void::get(), new IR::ParameterList(parameters),
+                                        "*method"),
                     new IR::Path(IR::ID("verify"))),
                 arguments)));
             auto* outOfBoundsState = new IR::ParserState(
