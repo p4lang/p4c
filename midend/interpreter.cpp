@@ -869,20 +869,6 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         DoConstantFolding cf(refMap, typeMap);
         cf.setCalledBy(this);
         auto result = expression->apply(cf);
-        if (!result->is<IR::Constant>()) {
-            if (auto cast = expression->to<IR::Cast>()) {
-                auto bitsType = cast->destType->to<IR::Type_Bits>();
-                const IR::Constant* constant;
-                auto resConst = clone->expr->to<IR::Constant>();
-                if (resConst) {
-                    constant = new IR::Constant(bitsType, resConst->value);
-                } else {
-                    BUG("%1%: expected an integer", clone->expr);
-                }
-                set(expression, new SymbolicInteger(constant));
-                return;
-            }
-        }
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
         set(expression, new SymbolicInteger(result->to<IR::Constant>()));
         return;
