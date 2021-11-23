@@ -209,8 +209,14 @@ const LocationSet* LocationSet::getField(cstring field) const {
                 strct->addField(field, result);
             }
         } else if (auto array = l->to<ArrayLocation>()) {
-            for (auto f : *array)
-                f->to<StructLocation>()->addField(field, result);
+            for (auto f : *array) {
+                if (field == IR::Type_Stack::next ||
+                    field == IR::Type_Stack::last) {
+                    result->add(f);
+                } else {
+                    f->to<StructLocation>()->addField(field, result);
+                }
+            }
         }
     }
     return result;

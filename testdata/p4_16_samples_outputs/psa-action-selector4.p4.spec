@@ -142,36 +142,36 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	table tbl
-	jmpnh LABEL_0END
+	jmpnh LABEL_END
 	table as_sel
-	jmpnh LABEL_0END
+	jmpnh LABEL_END
 	table as
-	jmpnh LABEL_0END
+	jmpnh LABEL_END
 	table foo
-	LABEL_0END :	table tbl
-	jmpnh LABEL_3END
+	LABEL_END :	table tbl
+	jmpnh LABEL_END_2
 	table as_sel
-	jmpnh LABEL_3END
+	jmpnh LABEL_END_2
 	table as
-	jmpnh LABEL_3END
+	jmpnh LABEL_END_2
 	table foo
-	LABEL_3END :	table tbl
-	jmpnh LABEL_6END
+	LABEL_END_2 :	table tbl
+	jmpnh LABEL_END_5
 	table as_sel
-	jmpnh LABEL_6END
+	jmpnh LABEL_END_5
 	table as
-	jmpnh LABEL_8FALSE
-	jmp LABEL_6END
-	LABEL_8FALSE :	table foo
-	LABEL_6END :	table tbl
-	jmpnh LABEL_9END
+	jmpnh LABEL_FALSE_7
+	jmp LABEL_END_5
+	LABEL_FALSE_7 :	table foo
+	LABEL_END_5 :	table tbl
+	jmpnh LABEL_END_8
 	table as_sel
-	jmpnh LABEL_9END
+	jmpnh LABEL_END_8
 	table as
-	jmpnh LABEL_11FALSE
-	jmp LABEL_9END
-	LABEL_11FALSE :	table foo
-	LABEL_9END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	jmpnh LABEL_FALSE_10
+	jmp LABEL_END_8
+	LABEL_FALSE_10 :	table foo
+	LABEL_END_8 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop

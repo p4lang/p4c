@@ -35,6 +35,7 @@ limitations under the License.
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
 #include "midend/eliminateTuples.h"
+#include "midend/eliminateSwitch.h"
 #include "midend/expandEmit.h"
 #include "midend/expandLookahead.h"
 #include "midend/fillEnumMap.h"
@@ -192,6 +193,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,
             new P4::SimplifyControlFlow(&refMap, &typeMap),
             new P4::CompileTimeOperations(),
             new P4::TableHit(&refMap, &typeMap),
+            new P4::EliminateSwitch(&refMap, &typeMap),
             new P4::RemoveLeftSlices(&refMap, &typeMap),
             new P4::TypeChecking(&refMap, &typeMap),
             new P4::MidEndLast(),

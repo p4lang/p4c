@@ -13,7 +13,6 @@ control ingress(inout Headers h) {
     @name("ingress.tmp_bool") bool tmp_bool_0;
     @name("ingress.val_undefined") bool val_undefined_0;
     @name("ingress.tmp") bit<16> tmp_4;
-    @name("ingress.val_undefined") bool val_undefined_2;
     @name(".do_global_action") action do_global_action_0() {
         tmp = 16w0;
     }

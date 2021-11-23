@@ -12,7 +12,7 @@ control my(out H[2] s) {
     @name("my.act") action act() {
         s[32w0].z = 1w1;
         s[32w1].z = 1w0;
-        tmp_3 = s[32w0].z;
+        tmp_3 = 1w1;
         tmp_4 = f(tmp_3, 1w0);
         s[32w0].z = tmp_3;
         tmp_6 = s[(bit<32>)tmp_4].z;

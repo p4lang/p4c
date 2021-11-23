@@ -16,18 +16,17 @@ limitations under the License.
 #include <iostream>
 #include "dpdkHelpers.h"
 #include "ir/ir.h"
+#include "frontends/p4/tableApply.h"
 
 namespace DPDK {
-
-int ConvertStatementToDpdk::next_label_id = 0;
 
 // convert relation comparison statements into the corresponding branching
 // instructions in dpdk.
 void ConvertStatementToDpdk::process_relation_operation(const IR::Expression* dst,
                                                         const IR::Operation_Relation* op) {
-    auto true_label = Util::printf_format("label_%dtrue", next_label_id);
-    auto false_label = Util::printf_format("label_%dfalse", next_label_id);
-    auto end_label = Util::printf_format("label_%dend", next_label_id++);
+    auto true_label = refmap->newName("label_true");
+    auto false_label = refmap->newName("label_false");
+    auto end_label = refmap->newName("label_end");
     if (op->is<IR::Equ>()) {
         add_instr(new IR::DpdkJmpEqualStatement(true_label, op->left, op->right));
     } else if (op->is<IR::Neq>()) {
@@ -74,9 +73,9 @@ void ConvertStatementToDpdk::process_logical_operation(const IR::Expression* dst
                                                         const IR::Operation_Binary* op) {
     if (!op->is<IR::LOr>() && !op->is<IR::LAnd>())
         return;
-    auto true_label = Util::printf_format("label_%dtrue", next_label_id);
-    auto false_label = Util::printf_format("label_%dfalse", next_label_id);
-    auto end_label = Util::printf_format("label_%dend", next_label_id++);
+    auto true_label = refmap->newName("label_true");
+    auto false_label = refmap->newName("label_false");
+    auto end_label = refmap->newName("label_end");
     if (op->is<IR::LOr>()) {
         add_instr(new IR::DpdkJmpEqualStatement(true_label, op->left, new IR::Constant(true)));
         add_instr(new IR::DpdkJmpEqualStatement(true_label, op->right, new IR::Constant(true)));
@@ -193,7 +192,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                    if (!(hdr.isValid()))
                        var = false;
                 */
-                auto end_label = Util::printf_format("label_%dend", next_label_id++);
+                auto end_label = refmap->newName("label_end");
                 add_instr(new IR::DpdkMovStatement(left, new IR::BoolLiteral(true)));
                 add_instr(new IR::DpdkJmpIfValidStatement(end_label, b->appliedTo));
                 add_instr(new IR::DpdkMovStatement(left, new IR::BoolLiteral(false)));
@@ -219,8 +218,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                else
                    var = 0;
             */
-            auto true_label = Util::printf_format("label_%dtrue", next_label_id);
-            auto end_label = Util::printf_format("label_%dend", next_label_id++);
+            auto true_label = refmap->newName("label_true");
+            auto end_label = refmap->newName("label_end");
             add_instr(new IR::DpdkJmpEqualStatement(true_label, ln->expr, new IR::Constant(false)));
             add_instr(new IR::DpdkMovStatement(left, new IR::Constant(false)));
             add_instr(new IR::DpdkJmpLabelStatement(end_label));
@@ -432,9 +431,9 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
 // whether the true or false code block will go first. This is important because
 // following optimization pass might eliminate some redundant jmps and labels.
 bool ConvertStatementToDpdk::preorder(const IR::IfStatement *s) {
-    auto true_label = Util::printf_format("label_%dtrue", next_label_id);
-    auto false_label = Util::printf_format("label_%dfalse", next_label_id);
-    auto end_label = Util::printf_format("label_%dend", next_label_id++);
+    auto true_label = refmap->newName("label_true");
+    auto false_label = refmap->newName("label_false");
+    auto end_label = refmap->newName("label_end");
     auto gen = new BranchingInstructionGeneration(refmap, typemap);
     bool res = gen->generate(s->condition, true_label, false_label, true);
 
@@ -464,6 +463,7 @@ cstring ConvertStatementToDpdk::append_parser_name(const IR::P4Parser* p, cstrin
 bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
     auto mi = P4::MethodInstance::resolve(s->methodCall, refmap, typemap);
     if (auto a = mi->to<P4::ApplyMethod>()) {
+        LOG3("apply method: " << dbp(s) << std::endl << s);
         if (a->isTableApply()) {
             auto table = a->object->to<IR::P4Table>();
             add_instr(new IR::DpdkApplyStatement(table->name.toString()));
@@ -471,6 +471,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             BUG("not implemented for `apply` other than table");
         }
     } else if (auto a = mi->to<P4::ExternMethod>()) {
+        LOG3("extern method: " << dbp(s) << std::endl << s);
         // Checksum function call
         if (a->originalExternType->getName().name == "InternetChecksum") {
             auto res =
@@ -610,6 +611,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             ::error("%1%: Unknown extern function.", s);
         }
     } else if (auto a = mi->to<P4::ExternFunction>()) {
+        LOG3("extern function: " << dbp(s) << std::endl << s);
         if (a->method->name == "verify") {
             if (parser == nullptr)
                 ::error("%1%: verify must be used in parser", s);
@@ -619,7 +621,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             if (!error->expression->is<IR::Member>())
                 ::error("%1%: must be one of the existing errors", s);
             auto error_id = structure->error_map.at(error->expression->to<IR::Member>()->member);
-            auto end_label = Util::printf_format("label_%dend", next_label_id++);
+            auto end_label = refmap->newName("label_end");
             const IR::BoolLiteral *boolLiteral = condition->expression->to<IR::BoolLiteral>();
             if (!boolLiteral) {
                 add_instr(new IR::DpdkJmpNotEqualStatement(
@@ -653,7 +655,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             BUG_CHECK(a->expr->arguments->size() == 1,
                 "%1%: expected one argument for send_to_port extern", a);
             add_instr(new IR::DpdkMovStatement(
-                new IR::Member(new IR::PathExpression("m"), "pna_main_output_metadata_output_port"),
+                new IR::Member(new IR::PathExpression("m"), PnaMainOutputMetadataOutputPortName),
                 a->expr->arguments->at(0)->expression));
         } else if (a->method->name == "drop_packet") {
             add_instr(new IR::DpdkDropStatement());
@@ -661,6 +663,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             ::error("%1%: Unknown extern function", s);
         }
     } else if (auto a = mi->to<P4::BuiltInMethod>()) {
+        LOG3("builtin method: " << dbp(s) << std::endl << s);
         if (a->name == "setValid") {
             add_instr(new IR::DpdkValidateStatement(a->appliedTo));
         } else if (a->name == "setInvalid") {
@@ -669,6 +672,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             BUG("%1% function not implemented.", s);
         }
     } else if (auto a = mi->to<P4::ActionCall>()) {
+        LOG3("action call: " << dbp(s) << std::endl << s);
         auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
         helper->setCalledBy(this);
         a->action->body->apply(*helper);
@@ -681,9 +685,55 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
     return false;
 }
 
-// TODO(hanw): TBD
-bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *) {
-    BUG("Not implemented");
+// This function assumes EliminateSwitch midend pass is applied and only handles
+// action_run in switch expression.
+bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
+    auto tc = P4::TableApplySolver::isActionRun(s->expression, refmap, typemap);
+    BUG_CHECK(tc != nullptr, "%1%: unexpected switch statement expression",
+              s->expression);
+    auto size = s->cases.size();
+    std::vector <cstring> labels;
+    cstring label;
+    cstring default_label = "";
+    auto end_label = refmap->newName("label_endswitch");
+    // Emit jmp on action run statements and collect labels for each case statement
+    for (unsigned i = 0; i < size - 1; i++) {
+        auto caseLabel = s->cases.at(i);
+        auto pe = caseLabel->label->to<IR::PathExpression>();
+        CHECK_NULL(pe);
+        label = refmap->newName("label_action");
+        add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
+        labels.push_back(label);
+    }
+
+    if (s->cases.at(size-1)->label->is<IR::DefaultExpression>()) {
+        label = refmap->newName("label_default");
+        add_instr(new IR::DpdkJmpLabelStatement(label));
+        default_label = label;
+    } else {
+        auto pe = s->cases.at(size-1)->label->to<IR::PathExpression>();
+        CHECK_NULL(pe);
+        label = refmap->newName("label_action");
+        add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
+        add_instr(new IR::DpdkJmpLabelStatement(end_label));
+    }
+
+    labels.push_back(label);
+
+    // Emit block statements corresponding to each case
+    // We emit labels even for the fallthrough case, DpdkAsmOptimization pass will
+    // remove any redundant jumps and labels.
+    for (unsigned i = 0; i < size; i++) {
+        auto caseLabel = s->cases.at(i);
+        label = labels.at(i);
+        add_instr(new IR::DpdkLabelStatement(label));
+        if (caseLabel->statement != nullptr) {
+            visit(caseLabel->statement);
+            if (label != default_label)
+                add_instr(new IR::DpdkJmpLabelStatement(end_label));
+        }
+    }
+    add_instr(new IR::DpdkLabelStatement(end_label));
     return false;
 }
 

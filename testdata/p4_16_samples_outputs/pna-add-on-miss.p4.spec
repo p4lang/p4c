@@ -50,6 +50,7 @@ struct main_metadata_t {
 	bit<8> pna_main_input_metadata_class_of_service
 	bit<32> pna_main_input_metadata_input_port
 	bit<8> pna_main_output_metadata_class_of_service
+	bit<32> pna_main_output_metadata_output_port
 	bit<32> MainControlT_tmp
 	bit<32> MainControlT_tmp_0
 }
@@ -86,8 +87,8 @@ learner ipv4_da_0 {
 		h.ipv4.dstAddr
 	}
 	actions {
-		next_hop
-		add_on_miss_action
+		next_hop @tableonly
+		add_on_miss_action @defaultonly
 	}
 	default_action add_on_miss_action args none 
 	size 65536
@@ -99,8 +100,8 @@ learner ipv4_da2_0 {
 		h.ipv4.dstAddr
 	}
 	actions {
-		next_hop2
-		add_on_miss_action2
+		next_hop2 @tableonly
+		add_on_miss_action2 @defaultonly
 	}
 	default_action add_on_miss_action2 args none 
 	size 65536
@@ -113,13 +114,13 @@ apply {
 	jmpeq MAINPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
-	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_0END h.ipv4
+	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
 	table ipv4_da
 	table ipv4_da2
-	LABEL_0END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ipv4
-	tx m.pna_main_output_metadata_egress_port
+	tx m.pna_main_output_metadata_output_port
 }
 
 

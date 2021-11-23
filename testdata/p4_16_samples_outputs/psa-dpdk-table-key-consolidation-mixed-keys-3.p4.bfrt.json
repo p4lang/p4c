@@ -2,7 +2,7 @@
   "schema_version" : "1.0.0",
   "tables" : [
     {
-      "name" : "pipe.ingress.tbl",
+      "name" : "ip.ingress.tbl",
       "id" : 44506256,
       "table_type" : "MatchAction_Direct",
       "size" : 1024,

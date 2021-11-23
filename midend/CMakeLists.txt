@@ -28,6 +28,7 @@ set (MIDEND_SRCS
   flattenHeaders.cpp
   flattenInterfaceStructs.cpp
   interpreter.cpp
+  global_copyprop.cpp
   local_copyprop.cpp
   nestedStructs.cpp
   noMatch.cpp
@@ -54,6 +55,7 @@ set (MIDEND_SRCS
 set (MIDEND_HDRS
   actionSynthesis.h
   checkSize.h
+  checkExternInvocationCommon.h
   compileTimeOps.h
   complexComparison.h
   convertEnums.h
@@ -71,6 +73,7 @@ set (MIDEND_HDRS
   flattenInterfaceStructs.h
   has_side_effects.h
   interpreter.h
+  global_copyprop.h
   local_copyprop.h
   midEndLast.h
   nestedStructs.h

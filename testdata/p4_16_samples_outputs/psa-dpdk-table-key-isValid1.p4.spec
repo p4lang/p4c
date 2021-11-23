@@ -136,9 +136,9 @@ apply {
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
 	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_tbl_ethernet_isValid 1
-	jmpv LABEL_0END h.ethernet
+	jmpv LABEL_END h.ethernet
 	mov m.Ingress_tbl_ethernet_isValid 0
-	LABEL_0END :	mov m.Ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
+	LABEL_END :	mov m.Ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
 	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0

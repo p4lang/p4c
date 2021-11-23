@@ -185,21 +185,21 @@ apply {
 	MYIP_PARSE_TCP :	extract h.tcp
 	MYIP_ACCEPT :	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	table tbl
-	jmpnh LABEL_0END
+	jmpnh LABEL_END
 	mov m.Ingress_foo_ethernet_dstAddr h.ethernet.dstAddr
 	table foo
-	LABEL_0END :	table tbl
-	jmpnh LABEL_1END
+	LABEL_END :	table tbl
+	jmpnh LABEL_END_0
 	table foo
-	LABEL_1END :	table tbl
-	jmpnh LABEL_2FALSE
-	jmp LABEL_2END
-	LABEL_2FALSE :	table bar
-	LABEL_2END :	table tbl
-	jmpnh LABEL_3FALSE
-	jmp LABEL_3END
-	LABEL_3FALSE :	table bar
-	LABEL_3END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	LABEL_END_0 :	table tbl
+	jmpnh LABEL_FALSE_1
+	jmp LABEL_END_1
+	LABEL_FALSE_1 :	table bar
+	LABEL_END_1 :	table tbl
+	jmpnh LABEL_FALSE_2
+	jmp LABEL_END_2
+	LABEL_FALSE_2 :	table bar
+	LABEL_END_2 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop

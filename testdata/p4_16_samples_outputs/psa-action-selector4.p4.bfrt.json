@@ -2,7 +2,7 @@
   "schema_version" : "1.0.0",
   "tables" : [
     {
-      "name" : "pipe.MyIC.tbl",
+      "name" : "ip.MyIC.tbl",
       "id" : 39967501,
       "size" : 1024,
       "annotations" : [],
@@ -53,7 +53,7 @@
       "attributes" : ["EntryScope"]
     },
     {
-      "name" : "pipe.MyIC.foo",
+      "name" : "ip.MyIC.foo",
       "id" : 49266188,
       "table_type" : "MatchAction_Direct",
       "size" : 1024,
@@ -75,7 +75,7 @@
       "attributes" : ["EntryScope"]
     },
     {
-      "name" : "pipe.MyIC.as",
+      "name" : "ip.MyIC.as",
       "id" : 294316857,
       "table_type" : "Action",
       "size" : 1024,
@@ -148,7 +148,7 @@
       "attributes" : []
     },
     {
-      "name" : "pipe.MyIC.as_sel",
+      "name" : "ip.MyIC.as_sel",
       "id" : 2164374905,
       "table_type" : "Selector",
       "size" : 1024,
@@ -213,7 +213,7 @@
       "attributes" : []
     },
     {
-      "name" : "pipe.MyIC.as_sel_get_member",
+      "name" : "ip.MyIC.as_sel_get_member",
       "id" : 2181152121,
       "table_type" : "SelectorGetMember",
       "size" : 1,

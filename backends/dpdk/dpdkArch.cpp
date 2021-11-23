@@ -24,6 +24,7 @@ limitations under the License.
  */
 
 #include "dpdkArch.h"
+#include "dpdkHelpers.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/externInstance.h"
@@ -366,6 +367,15 @@ const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct *s) {
     return s;
 }
 
+const IR::Node *InjectOutputPortMetadataField::preorder(IR::Type_Struct *s) {
+    if (structure->p4arch == "pna" && s->name.name == structure->local_metadata_type) {
+        s->fields.push_back(new IR::StructField(
+            IR::ID(PnaMainOutputMetadataOutputPortName), IR::Type_Bits::get(32)));
+        LOG3("Metadata structure after injecting output port:" << std::endl << s);
+    }
+    return s;
+}
+
 const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
     auto right = a->right;
@@ -469,7 +479,7 @@ bool ExpressionUnroll::preorder(const IR::Operation_Unary *u) {
             BUG("Not Implemented");
         }
     } else {
-        un_expr = u->expr;
+        un_expr = u;
     }
     root = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
     stmt.push_back(new IR::AssignmentStatement(root, un_expr));
@@ -516,13 +526,6 @@ bool ExpressionUnroll::preorder(const IR::MethodCallExpression *m) {
     decl.push_back(new IR::Declaration_Variable(root->path->name, m->type));
     auto new_m = new IR::MethodCallExpression(m->method, args);
     stmt.push_back(new IR::AssignmentStatement(root, new_m));
-    return false;
-}
-
-bool ExpressionUnroll::preorder(const IR::Cast *a) {
-    root = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
-    decl.push_back(new IR::Declaration_Variable(root->path->name, a->type));
-    stmt.push_back(new IR::AssignmentStatement(root, a));
     return false;
 }
 
@@ -602,11 +605,13 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary *u) {
             un_expr = new IR::Cmpl(root);
         } else if (u->to<IR::LNot>()) {
             un_expr = new IR::LNot(root);
+        } else if (auto c = u->to<IR::Cast>()) {
+            un_expr = new IR::Cast(c->destType, root);
         } else {
             BUG("%1% Not Implemented", u);
         }
     } else {
-        un_expr = u->expr;
+        un_expr = u;
     }
 
     auto tmp = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
@@ -972,6 +977,14 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
         cstring keyTypeStr = "";
         if (auto keyField = key->expression->to<IR::Member>()) {
             keyTypeStr =keyField->expr->toString();
+        } else if (auto m = key->expression->to<IR::MethodCallExpression>()) {
+            /* When isValid is present as table key, it should be moved to metadata */
+            auto mi = P4::MethodInstance::resolve(m, refMap, typeMap);
+            if (auto b = mi->to<P4::BuiltInMethod>())
+                if (b->name == "isValid") {
+                    copyNeeded = true;
+                    break;
+                }
         }
         if (firstKeyStr != keyTypeStr) {
             if (firstKeyHdr || keyTypeStr.startsWith("h")) {
@@ -1527,7 +1540,7 @@ const IR::Node* SplitP4TableCommon::postorder(IR::IfStatement* statement) {
 const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
     auto expr = statement->expression;
     auto member = expr->to<IR::Member>();
-    if (member->member != "action_run")
+    if (!member || member->member != "action_run")
         return statement;
     if (!member->expr->is<IR::MethodCallExpression>())
         return statement;

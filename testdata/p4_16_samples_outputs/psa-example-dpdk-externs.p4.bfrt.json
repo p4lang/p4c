@@ -2,7 +2,7 @@
   "schema_version" : "1.0.0",
   "tables" : [
     {
-      "name" : "pipe.ingress.tbl",
+      "name" : "ip.ingress.tbl",
       "id" : 44506256,
       "table_type" : "MatchAction_Direct",
       "size" : 1024,
@@ -57,7 +57,7 @@
       "attributes" : ["EntryScope"]
     },
     {
-      "name" : "pipe.ingress.counter0",
+      "name" : "ip.ingress.counter0",
       "id" : 314114784,
       "table_type" : "Counter",
       "size" : 1024,
@@ -110,7 +110,7 @@
       "attributes" : []
     },
     {
-      "name" : "pipe.ingress.counter1",
+      "name" : "ip.ingress.counter1",
       "id" : 318473483,
       "table_type" : "Counter",
       "size" : 1024,
@@ -149,7 +149,7 @@
       "attributes" : []
     },
     {
-      "name" : "pipe.ingress.counter2",
+      "name" : "ip.ingress.counter2",
       "id" : 313911423,
       "table_type" : "Counter",
       "size" : 1024,
@@ -188,7 +188,7 @@
       "attributes" : []
     },
     {
-      "name" : "pipe.ingress.meter0",
+      "name" : "ip.ingress.meter0",
       "id" : 344514043,
       "table_type" : "Meter",
       "size" : 1024,

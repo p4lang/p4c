@@ -87,7 +87,7 @@ class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, I
     optional inline IndexedVector<Declaration>  parserLocals;
     optional inline IndexedVector<ParserState>  states;
 
-    Annotations getAnnotations() const { return type->getAnnotations(); }
+    Annotations getAnnotations() const override { return type->getAnnotations(); }
     TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
     std::vector<INamespace> getNestedNamespaces() const override {
         return { type->typeParameters, type->applyParams, constructorParams }; }
@@ -109,6 +109,8 @@ class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, I
         parserLocals.check_null();
         states.check_null();
         checkDuplicates();
+        for (auto d : parserLocals)
+            BUG_CHECK(!d->is<ParserState>(), "%1%: state in locals", d);
     }
     toString { return cstring("parser ") + externalName(); }
 }
@@ -119,7 +121,7 @@ class P4Control : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, 
     optional inline IndexedVector<Declaration>  controlLocals;
     BlockStatement                              body;
 
-    Annotations getAnnotations() const { return type->getAnnotations(); }
+    Annotations getAnnotations() const override { return type->getAnnotations(); }
     TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
     std::vector<INamespace> getNestedNamespaces() const override {
         return { type->typeParameters, type->applyParams, constructorParams }; }

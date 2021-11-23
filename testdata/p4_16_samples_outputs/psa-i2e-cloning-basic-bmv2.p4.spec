@@ -62,19 +62,19 @@ apply {
 	extract h.ethernet
 	mov m.psa_ingress_output_metadata_clone 1
 	mov m.psa_ingress_output_metadata_clone_session_id 0x8
-	jmpneq LABEL_0FALSE h.ethernet.dstAddr 0x9
+	jmpneq LABEL_FALSE h.ethernet.dstAddr 0x9
 	mov m.psa_ingress_output_metadata_drop 1
-	jmp LABEL_0END
-	LABEL_0FALSE :	mov h.ethernet.srcAddr 0xcafe
+	jmp LABEL_END
+	LABEL_FALSE :	mov h.ethernet.srcAddr 0xcafe
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
 	mov m.psa_ingress_output_metadata_egress_port h.ethernet.dstAddr
-	LABEL_0END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	extract h.ethernet
-	jmpneq LABEL_1END m.psa_egress_input_metadata_packet_path 0x3
+	jmpneq LABEL_END_0 m.psa_egress_input_metadata_packet_path 0x3
 	mov h.ethernet.etherType 0xface
-	LABEL_1END :	emit h.ethernet
+	LABEL_END_0 :	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop
 }

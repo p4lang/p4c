@@ -35,6 +35,19 @@ limitations under the License.
 #define TOSTR_DECLA(NAME) std::ostream &toStr(std::ostream &, IR::NAME *)
 
 namespace DPDK {
+
+/**
+ * @brief Name of the metadata used as output port.
+ *
+ * PNA specification does not contain standard metadata for specifying output port.
+ * rte_swx_pipeline in DPDK uses instruction 'tx' to specify the output port for a packet.
+ * To send a packet to a specific port, we need to do the following:
+ * - add definition of new metadata field to main metadata structure for rte_swx_pipeline
+ * - use the same name of this newly defined metadata field when assigning value of output port
+ * - use this metadata field with 'tx' instruction
+ */
+const char PnaMainOutputMetadataOutputPortName[] = "pna_main_output_metadata_output_port";
+
 /* This class will generate a optimized jmp and label control flow.
  * Couple of examples here
  *
@@ -121,7 +134,6 @@ class BranchingInstructionGeneration {
 };
 
 class ConvertStatementToDpdk : public Inspector {
-    static int next_label_id;
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
@@ -145,7 +157,6 @@ class ConvertStatementToDpdk : public Inspector {
 
     void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
     IR::IndexedVector<IR::DpdkAsmStatement> &get_instr() { return instructions; }
-    int get_label_num() { return next_label_id; }
     void process_logical_operation(const IR::Expression*, const IR::Operation_Binary*);
     void process_relation_operation(const IR::Expression*, const IR::Operation_Relation*);
     cstring append_parser_name(const IR::P4Parser* p, cstring);

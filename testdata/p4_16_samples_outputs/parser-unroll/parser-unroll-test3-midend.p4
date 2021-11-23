@@ -43,19 +43,20 @@ struct headers {
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state stateOutOfBound {
         verify(false, error.StackOutOfBounds);
+        transition reject;
     }
     state callMidle {
         hdr.index = hdr.index + 32w1;
-        packet.extract<srcRoute_t>(hdr.srcRoutes[1]);
-        transition select(hdr.srcRoutes[1].bos) {
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32w1]);
+        transition select(hdr.srcRoutes[32w1].bos) {
             2w1: parse_ipv4;
             default: parse_srcRouting1;
         }
     }
     state callMidle1 {
         hdr.index = hdr.index + 32w1;
-        packet.extract<srcRoute_t>(hdr.srcRoutes[3]);
-        transition select(hdr.srcRoutes[3].bos) {
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32w3]);
+        transition select(hdr.srcRoutes[32w3].bos) {
             2w1: parse_ipv4;
             default: parse_srcRouting2;
         }
@@ -65,16 +66,16 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         transition accept;
     }
     state parse_srcRouting {
-        packet.extract<srcRoute_t>(hdr.srcRoutes[0]);
-        transition select(hdr.srcRoutes[0].bos) {
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32w0]);
+        transition select(hdr.srcRoutes[32w0].bos) {
             2w1: parse_ipv4;
             2w2: callMidle;
             default: callMidle;
         }
     }
     state parse_srcRouting1 {
-        packet.extract<srcRoute_t>(hdr.srcRoutes[2]);
-        transition select(hdr.srcRoutes[2].bos) {
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32w2]);
+        transition select(hdr.srcRoutes[32w2].bos) {
             2w1: parse_ipv4;
             2w2: callMidle1;
             default: callMidle1;

@@ -227,6 +227,11 @@ std::ostream& IR::DpdkJmpHeaderStatement::toSpec(std::ostream& out) const {
     return out;
 }
 
+std::ostream& IR::DpdkJmpActionStatement::toSpec(std::ostream& out) const {
+    out << instruction << " " << label << " " << action;
+    return out;
+}
+
 std::ostream& IR::DpdkJmpCondStatement::toSpec(std::ostream& out) const {
     out << instruction << " " << label << " " << DPDK::toStr(src1)
         << " " << DPDK::toStr(src2);
@@ -293,7 +298,12 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
     }
     out << "\tactions {" << std::endl;
     for (auto action : actions->actionList) {
-        out << "\t\t" << DPDK::toStr(action->expression) << std::endl;
+        out << "\t\t" << DPDK::toStr(action->expression);
+        if (action->annotations->getAnnotation("tableonly"))
+            out << " @tableonly";
+        if (action->annotations->getAnnotation("defaultonly"))
+            out << " @defaultonly";
+        out << std::endl;
     }
     out << "\t}" << std::endl;
 
@@ -347,7 +357,12 @@ std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
     out << "\t}" << std::endl;
     out << "\tactions {" << std::endl;
     for (auto action : actions->actionList) {
-        out << "\t\t" << DPDK::toStr(action->expression) << std::endl;
+        out << "\t\t" << DPDK::toStr(action->expression);
+        if (action->getAnnotation("tableonly"))
+            out << " @tableonly";
+        if (action->getAnnotation("defaultonly"))
+            out << " @defaultonly";
+        out << std::endl;
     }
     out << "\t}" << std::endl;
 

@@ -95,6 +95,19 @@ class InjectJumboStruct : public Transform {
     const IR::Node *preorder(IR::Type_Struct *s) override;
 };
 
+// This pass injects metadata field which is used as port for 'tx' instruction
+// into the single metadata struct.
+// This pass has to be applied after CollectMetadataHeaderInfo fills
+// local_metadata_type field and ConvertToDpdkArch fills p4arch field of
+// DpdkProgramStructure which is passed to the constructor.
+class InjectOutputPortMetadataField : public Transform {
+    DpdkProgramStructure *structure;
+
+  public:
+    InjectOutputPortMetadataField(DpdkProgramStructure *structure) : structure(structure) {}
+    const IR::Node *preorder(IR::Type_Struct *s) override;
+};
+
 // This class is helpful for StatementUnroll and IfStatementUnroll. Since dpdk
 // asm is not able to process complex expression, e.g., a = b + c * d. We need
 // break it down. Therefore, we need some temporary variables to hold the
@@ -189,7 +202,6 @@ class ExpressionUnroll : public Inspector {
     bool preorder(const IR::Operation_Unary *a) override;
     bool preorder(const IR::Operation_Binary *a) override;
     bool preorder(const IR::MethodCallExpression *a) override;
-    bool preorder(const IR::Cast *a) override;
     bool preorder(const IR::Member *a) override;
     bool preorder(const IR::PathExpression *a) override;
     bool preorder(const IR::Constant *a) override;
