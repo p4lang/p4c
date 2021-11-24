@@ -355,13 +355,16 @@ class ParserSymbolicInterpreter {
         const IR::StatOrDecl* newSord = nullptr;
         ExpressionEvaluator ev(refMap, typeMap, valueMap);
 
+        SymbolicValue* errorValue = nullptr;
         bool success = true;
         if (sord->is<IR::AssignmentStatement>()) {
             auto ass = sord->to<IR::AssignmentStatement>();
             auto left = ev.evaluate(ass->left, true);
+            errorValue = left;
             success = reportIfError(state, left);
             if (success) {
                 auto right = ev.evaluate(ass->right, false);
+                errorValue = right;
                 success = reportIfError(state, right);
                 if (success)
                     left->assign(right);
@@ -370,6 +373,7 @@ class ParserSymbolicInterpreter {
             // can have side-effects
             auto mc = sord->to<IR::MethodCallStatement>();
             auto e = ev.evaluate(mc->methodCall, false);
+            errorValue = e;
             success = reportIfError(state, e);
         } else if (auto bs = sord->to<IR::BlockStatement>()) {
             IR::IndexedVector<IR::StatOrDecl> newComponents;
@@ -384,14 +388,15 @@ class ParserSymbolicInterpreter {
         } else {
             BUG("%1%: unexpected declaration or statement", sord);
         }
-        if (success) {
-            ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
-                                         visitedStates);
-            const IR::Node* node = sord->apply(rewriter);
-            newSord = node->to<IR::StatOrDecl>();
-        } else {
-            newSord = nullptr;
+        if (!success) {
+            std::stringstream errorStr;
+            errorStr << errorValue;
+            ::warning(" %1% is ignored. %2%", sord, errorStr.str());
         }
+        ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
+                                         visitedStates);
+        const IR::Node* node = sord->apply(rewriter);
+        newSord = node->to<IR::StatOrDecl>();
         LOG2("After " << sord << " state is\n" << valueMap);
         return newSord;
     }
