@@ -87,7 +87,7 @@ IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_preambl
 IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_pna_postamble() {
     IR::IndexedVector<IR::DpdkAsmStatement> instr;
     instr.push_back(new IR::DpdkTxStatement(
-        new IR::Member(new IR::PathExpression("m"), "pna_main_output_metadata_egress_port")));
+        new IR::Member(new IR::PathExpression("m"), PnaMainOutputMetadataOutputPortName)));
     return instr;
 }
 
@@ -607,6 +607,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
 }
 
 bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
+    LOG3("P4Control: " << dbp(c) << std::endl << c);
     for (auto l : c->controlLocals) {
         if (!l->is<IR::P4Action>() && !l->is<IR::P4Table>()) {
             structure->push_variable(new IR::DpdkDeclaration(l));
@@ -622,6 +623,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
 
     for (auto i : helper->get_instr()) {
         add_inst(i);
+        LOG3("Adding instruction: " << i);
     }
 
     return true;

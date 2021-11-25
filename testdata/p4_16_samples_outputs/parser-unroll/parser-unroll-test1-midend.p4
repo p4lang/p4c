@@ -43,6 +43,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
     @name("MyParser.index") int<32> index_0;
     state stateOutOfBound {
         verify(false, error.StackOutOfBounds);
+        transition reject;
     }
     state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);

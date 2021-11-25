@@ -17,6 +17,7 @@ limitations under the License.
 #include "backend.h"
 #include "dpdkArch.h"
 #include "dpdkAsmOpt.h"
+#include "dpdkCheckExternInvocation.h"
 #include "dpdkHelpers.h"
 #include "dpdkProgram.h"
 #include "dpdkContext.h"
@@ -65,6 +66,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new CollectMetadataHeaderInfo(&structure),
         new ConvertToDpdkArch(refMap, &structure),
         new InjectJumboStruct(&structure),
+        new InjectOutputPortMetadataField(&structure),
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap, true),
         new CopyMatchKeysToSingleStruct(refMap, typeMap, &invokedInKey),
@@ -85,6 +87,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap, true),
         new CollectProgramStructure(refMap, typeMap, &structure),
         new InspectDpdkProgram(refMap, typeMap, &structure),
+        new CheckExternInvocation(refMap, typeMap, &structure),
         new DpdkArchLast(),
         new VisitFunctor([this, genContextJson] {
             // Serialize context json object into user specified file

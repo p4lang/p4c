@@ -197,15 +197,28 @@ class RewriteAllParsers : public Transform {
         if (rewriter->hasOutOfboundState) {
             // generating state with verify(false, error.StackOutOfBounds)
             IR::Vector<IR::Argument>* arguments = new IR::Vector<IR::Argument>();
-            arguments->push_back(new IR::Argument(new IR::BoolLiteral(false)));
+            arguments->push_back(
+                new IR::Argument(new IR::BoolLiteral(IR::Type::Boolean::get(), false)));
             arguments->push_back(new IR::Argument(new IR::Member(
                 new IR::TypeNameExpression(new IR::Type_Name(IR::ID("error"))),
                     IR::ID("StackOutOfBounds"))));
             IR::IndexedVector<IR::StatOrDecl> components;
-            components.push_back(new IR::MethodCallStatement(
-                new IR::MethodCallExpression(new IR::PathExpression(IR::ID("verify")), arguments)));
-            auto* outOfBoundsState = new IR::ParserState(IR::ID(outOfBoundsStateName), components,
-                nullptr);
+            IR::IndexedVector<IR::Parameter> parameters;
+            parameters.push_back(
+                new IR::Parameter(IR::ID("check"), IR::Direction::In, IR::Type::Boolean::get()));
+            parameters.push_back(new IR::Parameter(IR::ID("toSignal"), IR::Direction::In,
+                                                   new IR::Type_Name(IR::ID("error"))));
+            components.push_back(new IR::MethodCallStatement(new IR::MethodCallExpression(
+                IR::Type::Void::get(),
+                new IR::PathExpression(
+                    new IR::Type_Method(IR::Type::Void::get(), new IR::ParameterList(parameters),
+                                        "*method"),
+                    new IR::Path(IR::ID("verify"))),
+                arguments)));
+            auto* outOfBoundsState = new IR::ParserState(
+                IR::ID(outOfBoundsStateName), components,
+                new IR::PathExpression(new IR::Type_State(),
+                                       new IR::Path(IR::ParserState::reject, false)));
             newParser->states.push_back(outOfBoundsState);
         }
         for (auto& i : rewriter->current.result->states) {
