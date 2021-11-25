@@ -41,6 +41,8 @@ class SymbolicValue {
     virtual void dbprint(std::ostream& out) const = 0;
     template<typename T> T* to() {
         auto result = dynamic_cast<T*>(this);
+                if (result == nullptr)
+            std::cout << 1;
         CHECK_NULL(result); return result; }
     template<typename T> const T* to() const {
         auto result = dynamic_cast<const T*>(this);
@@ -424,7 +426,7 @@ class SymbolicArray final : public SymbolicValue {
                   const SymbolicValueFactory* factory);
     SymbolicValue* get(const IR::Node* node, size_t index) const {
         if (index >= values.size())
-            return new SymbolicStaticError(node, "Out of bounds");
+            return new SymbolicException(node, P4::StandardExceptions::StackOutOfBounds);
         return values.at(index);
     }
     void shift(int amount);  // negative = shift left
