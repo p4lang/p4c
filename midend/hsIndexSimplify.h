@@ -76,7 +76,7 @@ class HSIndexSimplifier : public Transform {
                       IR::IndexedVector<IR::Declaration>* locals = nullptr,
                       generatedVariablesMap* generatedVariables = nullptr)
         : refMap(refMap), typeMap(typeMap), locals(locals), generatedVariables(generatedVariables) {
-        if (generatedVariables == nullptr) generatedVariables = new generatedVariablesMap()
+        if (generatedVariables == nullptr) generatedVariables = new generatedVariablesMap();
     }
     IR::Node* preorder(IR::IfStatement* ifStatement) override;
     IR::Node* preorder(IR::AssignmentStatement* assignmentStatement) override;
