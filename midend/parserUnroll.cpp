@@ -389,6 +389,12 @@ class ParserSymbolicInterpreter {
             BUG("%1%: unexpected declaration or statement", sord);
         }
         if (!success) {
+            if (errorValue->is<SymbolicException>()) {
+                auto* exc = errorValue->to<SymbolicException>();
+                if (exc->exc == P4::StandardExceptions::StackOutOfBounds) {
+                    return newSord;
+                }
+            }
             std::stringstream errorStr;
             errorStr << errorValue;
             ::warning(" %1% is ignored. %2%", sord, errorStr.str());
