@@ -17,9 +17,9 @@ void HSIndexFinder::addNewVariable() {
     BUG_CHECK(arrayIndex != nullptr, "Can't generate new name for empty ArrayIndex");
     // If index is an expression then create new variable.
     if (locals != nullptr && (arrayIndex->right->is<IR::Operation_Ternary>() ||
-        arrayIndex->right->is<IR::Operation_Binary>() ||
-        arrayIndex->right->is<IR::Operation_Unary>() ||
-        arrayIndex->right->is<IR::PathExpression>())) {
+                              arrayIndex->right->is<IR::Operation_Binary>() ||
+                              arrayIndex->right->is<IR::Operation_Unary>() ||
+                              arrayIndex->right->is<IR::PathExpression>())) {
         // Generate new local variable if needed.
         std::ostringstream ostr;
         ostr << arrayIndex->right;
@@ -42,8 +42,7 @@ void HSIndexFinder::addNewVariable() {
 }
 
 const IR::Node* HSIndexTransform::postorder(IR::ArrayIndex* curArrayIndex) {
-    if (hsIndexFinder.arrayIndex != nullptr &&
-        curArrayIndex->equiv(*hsIndexFinder.arrayIndex)) {
+    if (hsIndexFinder.arrayIndex != nullptr && curArrayIndex->equiv(*hsIndexFinder.arrayIndex)) {
         // Translating current array index.
         auto* newArrayIndex = hsIndexFinder.arrayIndex->clone();
         newArrayIndex->right = new IR::Constant(newArrayIndex->right->type, index);
@@ -66,8 +65,8 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(HSIndexFinder& aiFinder,
     IR::IndexedVector<IR::StatOrDecl> newComponents;
     if (aiFinder.newVariable != nullptr) {
         if (!aiFinder.newVariable->equiv(*aiFinder.arrayIndex->right)) {
-            newComponents.push_back(new IR::AssignmentStatement(aiFinder.arrayIndex->srcInfo,
-            aiFinder.newVariable, aiFinder.arrayIndex->right));
+            newComponents.push_back(new IR::AssignmentStatement(
+                aiFinder.arrayIndex->srcInfo, aiFinder.newVariable, aiFinder.arrayIndex->right));
         }
     }
     IR::IfStatement* result = nullptr;
@@ -104,15 +103,15 @@ IR::Node* HSIndexSimplifier::eliminateArrayIndexes(HSIndexFinder& aiFinder,
             locals->push_back(decl);
             typeMap->setType(decl, expr->type);
             pathExpr = new IR::PathExpression(aiFinder.arrayIndex->srcInfo, expr->type,
-                new IR::Path(name));
+                                              new IR::Path(name));
             generatedVariables->emplace(typeString, pathExpr);
         } else {
             pathExpr = generatedVariables->at(typeString);
         }
         auto* newStatement =
             new IR::AssignmentStatement(aiFinder.arrayIndex->srcInfo, expr, pathExpr);
-        auto* newCondition = new IR::Geq(aiFinder.newVariable,
-            new IR::Constant(aiFinder.arrayIndex->right->type, sz - 1));
+        auto* newCondition = new IR::Geq(
+            aiFinder.newVariable, new IR::Constant(aiFinder.arrayIndex->right->type, sz - 1));
         newIf = new IR::IfStatement(newCondition, newStatement, nullptr);
         curResult->ifFalse = newIf;
     }
@@ -137,11 +136,10 @@ IR::Node* HSIndexSimplifier::preorder(IR::AssignmentStatement* assignmentStateme
  */
 class IsNonConstantArrayIndex : public KeyIsSimple, public Inspector {
  protected:
-    bool     simple;
+    bool simple;
 
  public:
-    IsNonConstantArrayIndex()
-    { setName("IsNonConstantArrayIndex"); }
+    IsNonConstantArrayIndex() { setName("IsNonConstantArrayIndex"); }
 
     void postorder(const IR::ArrayIndex* arrayIndex) override {
         if (simple) {
@@ -150,7 +148,8 @@ class IsNonConstantArrayIndex : public KeyIsSimple, public Inspector {
     }
     profile_t init_apply(const IR::Node* root) override {
         simple = true;
-        return Inspector::init_apply(root); }
+        return Inspector::init_apply(root);
+    }
 
     bool isSimple(const IR::Expression* expression, const Visitor::Context*) override {
         (void)expression->apply(*this);
@@ -163,8 +162,7 @@ IR::Node* HSIndexSimplifier::preorder(IR::P4Control* control) {
     const auto* controlKeySimplified = control->apply(keySimplifier)->to<IR::P4Control>();
     auto* newControl = controlKeySimplified->clone();
     IR::IndexedVector<IR::Declaration> newControlLocals;
-    HSIndexSimplifier hsSimplifier(refMap, typeMap, &newControlLocals,
-        generatedVariables);
+    HSIndexSimplifier hsSimplifier(refMap, typeMap, &newControlLocals, generatedVariables);
     newControl->body = newControl->body->apply(hsSimplifier)->to<IR::BlockStatement>();
     for (auto* declaration : controlKeySimplified->controlLocals) {
         if (declaration->is<IR::P4Action>()) {

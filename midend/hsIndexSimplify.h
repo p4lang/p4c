@@ -16,7 +16,7 @@ typedef std::map<cstring, const IR::PathExpression*> generatedVariablesMap;
 class HSIndexFinder : public Inspector {
     friend class HSIndexTransform;
     friend class HSIndexSimplifier;
-    IR::IndexedVector<IR::Declaration> *locals;
+    IR::IndexedVector<IR::Declaration>* locals;
     ReferenceMap* refMap;
     TypeMap* typeMap;
     const IR::ArrayIndex* arrayIndex;
@@ -24,12 +24,18 @@ class HSIndexFinder : public Inspector {
     generatedVariablesMap* generatedVariables;
     std::set<cstring> storedMember;
     std::list<IR::Member*> dependedMembers;
+
  public:
-    HSIndexFinder(IR::IndexedVector<IR::Declaration> *locals, ReferenceMap* refMap,
-                  TypeMap* typeMap, generatedVariablesMap* generatedVariables) : locals(locals),
-                  refMap(refMap), typeMap(typeMap), arrayIndex(nullptr), newVariable(nullptr),
-                  generatedVariables(generatedVariables) {}
+    HSIndexFinder(IR::IndexedVector<IR::Declaration>* locals, ReferenceMap* refMap,
+                  TypeMap* typeMap, generatedVariablesMap* generatedVariables)
+        : locals(locals),
+          refMap(refMap),
+          typeMap(typeMap),
+          arrayIndex(nullptr),
+          newVariable(nullptr),
+          generatedVariables(generatedVariables) {}
     void postorder(const IR::ArrayIndex* curArrayIndex) override;
+
  protected:
     void addNewVariable();
 };
@@ -39,16 +45,16 @@ class HSIndexTransform : public Transform {
     friend class HSIndexSimplifier;
     int index;
     HSIndexFinder& hsIndexFinder;
+
  public:
-    HSIndexTransform(HSIndexFinder& finder, int index) :
-        index(index), hsIndexFinder(finder) {}
+    HSIndexTransform(HSIndexFinder& finder, int index) : index(index), hsIndexFinder(finder) {}
     const IR::Node* postorder(IR::ArrayIndex* curArrayIndex) override;
 };
 
 /// This class eliminates all non-concrete indexes of the header stacks in the controls.
 /// It generates new variables for all expressions in the header stacks indexes and
 /// checks their values for substitution of concrete values.
-/// Restriction : in/out parameters should be replaced by correspondent assignments. 
+/// Restriction : in/out parameters should be replaced by correspondent assignments.
 /// Let
 /// header h_index { bit<32> index;}
 /// header h_stack { bit<32>  a;}
@@ -58,21 +64,20 @@ class HSIndexTransform : public Transform {
 /// bit<32> hdivr0;
 /// hdivr0 = hdr.i;
 /// if (hdivr0 == 0) { hdr.h[0] = 1;}
-/// else if (hdivr0 == 1){hdr.h[1] = 1;} 
+/// else if (hdivr0 == 1){hdr.h[1] = 1;}
 class HSIndexSimplifier : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
-    IR::IndexedVector<IR::Declaration> *locals;
+    IR::IndexedVector<IR::Declaration>* locals;
     generatedVariablesMap* generatedVariables;
+
  public:
     HSIndexSimplifier(ReferenceMap* refMap, TypeMap* typeMap,
-        IR::IndexedVector<IR::Declaration> *locals = nullptr,
-        generatedVariablesMap* generatedVariables = nullptr) :
-        refMap(refMap), typeMap(typeMap), locals(locals),
-        generatedVariables(generatedVariables) {
-            if (generatedVariables == nullptr)
-                generatedVariables = new generatedVariablesMap();
-        }
+                      IR::IndexedVector<IR::Declaration>* locals = nullptr,
+                      generatedVariablesMap* generatedVariables = nullptr)
+        : refMap(refMap), typeMap(typeMap), locals(locals), generatedVariables(generatedVariables) {
+        if (generatedVariables == nullptr) generatedVariables = new generatedVariablesMap()
+    }
     IR::Node* preorder(IR::IfStatement* ifStatement) override;
     IR::Node* preorder(IR::AssignmentStatement* assignmentStatement) override;
     IR::Node* preorder(IR::BlockStatement* assignmentStatement) override;
@@ -88,4 +93,4 @@ class HSIndexSimplifier : public Transform {
 
 }  // namespace P4
 
-#endif /* _MIDEND_HSINDEXSIMPLIFY_H_ */
+#endif /*  _MIDEND_HSINDEXSIMPLIFY_H_ */
