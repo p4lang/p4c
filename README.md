@@ -20,7 +20,7 @@ make adding new backends easy.
 The code contains five sample backends:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
   the BMv2 behavioral model https://github.com/p4lang/behavioral-model,
-* p4c-dpdk: can be used to target the DPDK software switch (SXS) pipeline
+* p4c-dpdk: can be used to target the DPDK software switch (SWX) pipeline
   https://doc.dpdk.org/guides/rel_notes/release_20_11.html,
 * p4c-ebpf: can be used to generate C code which can be compiled to eBPF
   https://en.wikipedia.org/wiki/Berkeley_Packet_Filter and then loaded
