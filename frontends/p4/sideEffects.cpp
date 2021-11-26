@@ -777,8 +777,10 @@ const IR::Node* KeySideEffect::doStatement(const IR::Statement* statement,
         return statement;
 
     auto result = new IR::IndexedVector<IR::StatOrDecl>();
-    for (auto assign : insertions->statements)
-        result->push_back(assign);
+    for (auto assign : insertions->statements){
+        auto cloneAssign = assign->clone();
+        result->push_back(cloneAssign);
+    }
     result->push_back(statement);
     auto block = new IR::BlockStatement(*result);
     return block;
