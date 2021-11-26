@@ -41,8 +41,6 @@ class SymbolicValue {
     virtual void dbprint(std::ostream& out) const = 0;
     template<typename T> T* to() {
         auto result = dynamic_cast<T*>(this);
-                if (result == nullptr)
-            std::cout << 1;
         CHECK_NULL(result); return result; }
     template<typename T> const T* to() const {
         auto result = dynamic_cast<const T*>(this);
