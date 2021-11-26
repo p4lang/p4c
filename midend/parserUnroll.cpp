@@ -280,7 +280,7 @@ class ParserSymbolicInterpreter {
             if (value == nullptr)
                 value = factory->create(type, true);
             if (value->is<SymbolicError>()) {
-                ::error(ErrorType::ERR_EXPRESSION,
+                ::warning(ErrorType::ERR_EXPRESSION,
                         "%1%: %2%", d, value->to<SymbolicError>()->message());
                 return nullptr;
             }
@@ -336,7 +336,7 @@ class ParserSymbolicInterpreter {
 
             if (!stateClone)
                 // errors in the original state are signalled
-                ::error(ErrorType::ERR_EXPRESSION, "%1%: error %2% will be triggered\n%3%",
+                ::warning(ErrorType::ERR_EXPRESSION, "%1%: error %2% will be triggered\n%3%",
                         exc->errorPosition, exc->message(), stateChain(state));
             // else this error will occur in a clone of the state produced
             // by unrolling - if the state is reached.  So we don't give an error.
@@ -546,17 +546,18 @@ class ParserSymbolicInterpreter {
                                     "Potential parser cycle without extracting any bytes:\n%1%",
                                     stateChain(state));
                     else
-                        ::error(ErrorType::ERR_INVALID,
-                                "Parser cycle without extracting any bytes:\n%1%",
-                                stateChain(state));
+                        ::warning(ErrorType::ERR_INVALID,
+                                  "Parser cycle without extracting any bytes:\n%1%",
+                                  stateChain(state));
                     return true;
                 }
 
                 // If no header validity has changed we can't really unroll
                 if (!headerValidityChange(crt->before, state->before)) {
                     if (unroll)
-                        ::error(ErrorType::ERR_INVALID, "Parser cycle cannot be unrolled:\n%1%",
-                                stateChain(state));
+                        ::warning(ErrorType::ERR_INVALID,
+                                  "Parser cycle cannot be unrolled:\n%1%",
+                                  stateChain(state));
                     return true;
                 }
                 break;
