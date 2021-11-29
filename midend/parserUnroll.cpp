@@ -249,8 +249,10 @@ class ParserSymbolicInterpreter {
     ParserInfo*         synthesizedParser;  // output produced
     bool                unroll;
     StatesVisitedMap    visitedStates;
+    bool&               wasError;
 
     ValueMap* initializeVariables() {
+        wasError = false;
         ValueMap* result = new ValueMap();
         ExpressionEvaluator ev(refMap, typeMap, result);
 
@@ -610,8 +612,8 @@ class ParserSymbolicInterpreter {
     bool  hasOutOfboundState;
     /// constructor
     ParserSymbolicInterpreter(ParserStructure* structure, ReferenceMap* refMap, TypeMap* typeMap,
-                              bool unroll) : structure(structure), refMap(refMap),
-                              typeMap(typeMap), synthesizedParser(nullptr), unroll(unroll) {
+                              bool unroll, bool& wasError) : structure(structure), refMap(refMap),
+                              typeMap(typeMap), synthesizedParser(nullptr), unroll(unroll), wasError(wasError) {
         CHECK_NULL(structure); CHECK_NULL(refMap); CHECK_NULL(typeMap);
         factory = new SymbolicValueFactory(typeMap);
         parser = structure->parser;
@@ -645,9 +647,11 @@ class ParserSymbolicInterpreter {
             visited.insert(VisitedKey(stateInfo));  // add to visited map
             stateInfo->scenarioStates.insert(stateInfo->name);  // add to loops detection
             bool infLoop = checkLoops(stateInfo);
-            if (infLoop)
+            if (infLoop) {
+                wasError = true;
                 // don't evaluate successors anymore
                 continue;
+            }
             auto nextStates = evaluateState(stateInfo, newStates);
             if (nextStates.first == nullptr) {
                 if (nextStates.second && stateInfo->predecessor &&
@@ -671,8 +675,8 @@ class ParserSymbolicInterpreter {
 
 }  // namespace ParserStructureImpl
 
-bool ParserStructure::analyze(ReferenceMap* refMap, TypeMap* typeMap, bool unroll) {
-    ParserStructureImpl::ParserSymbolicInterpreter psi(this, refMap, typeMap, unroll);
+bool ParserStructure::analyze(ReferenceMap* refMap, TypeMap* typeMap, bool unroll, bool& wasError) {
+    ParserStructureImpl::ParserSymbolicInterpreter psi(this, refMap, typeMap, unroll, wasError);
     result = psi.run();
     return psi.hasOutOfboundState;
 }
