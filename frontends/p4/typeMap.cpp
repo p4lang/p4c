@@ -395,6 +395,8 @@ int TypeMap::minWidthBits(const IR::Type* type, const IR::Node* errorPosition) {
         return minWidthBits(tnt->type, errorPosition);
     } else if (type->is<IR::Type_Varbits>()) {
         return 0;
+    } else if (type->is<IR::Type_Error>()) {
+        return 8;
     }
 
     ::error(ErrorType::ERR_UNSUPPORTED, "%1%: width not well-defined", errorPosition);
