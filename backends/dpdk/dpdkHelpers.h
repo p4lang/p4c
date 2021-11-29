@@ -117,6 +117,7 @@ const char PnaMainOutputMetadataOutputPortName[] = "pna_main_output_metadata_out
 class BranchingInstructionGeneration {
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
+    DpdkProgramStructure *structure;
     bool nested(const IR::Node *n) {
         if (n->is<IR::LAnd>() || n->is<IR::LOr>()) {
             return true;
@@ -128,9 +129,12 @@ class BranchingInstructionGeneration {
   public:
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     BranchingInstructionGeneration(P4::ReferenceMap *refMap,
-                                   P4::TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap) {}
+                                   P4::TypeMap *typeMap, DpdkProgramStructure *structure)
+        : refMap(refMap), typeMap(typeMap), structure(structure) {}
     bool generate(const IR::Expression *, cstring, cstring, bool);
+    IR::Expression *convertError(const IR::Expression*);
+    IR::DpdkAsmStatement *process_error_expression(const IR::Operation_Relation*,
+                                                   cstring, cstring, bool);
 };
 
 class ConvertStatementToDpdk : public Inspector {
