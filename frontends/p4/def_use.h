@@ -426,8 +426,8 @@ class AllDefinitions : public IHasDbPrint {
         if (!overwrite) {
             auto it = atPoint.find(point);
             if (it != atPoint.end()) {
-                LOG2("Overwriting definitions at " << point << ": " <<
-                     it->second << " with " << defs);
+                LOG2("Overwriting definitions at " << point << ":" << IndentCtl::endl <<
+                     it->second << IndentCtl::endl << "with:" << IndentCtl::endl << defs);
                 BUG_CHECK(false, "Overwriting definitions");
             }
         }
