@@ -27,11 +27,6 @@ struct ipv4_option_timestamp_t {
 	bit<0> data
 }
 
-struct ipv4_options_t {
-	bit<8> value
-	bit<8> len
-}
-
 struct a1_arg_t {
 	bit<48> param
 }
@@ -79,14 +74,7 @@ struct EMPTY {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 	bit<32> Ingress_ap_member_id
-	bit<16> IngressParser_parser_tmp_2
-	bit<8> IngressParser_parser_tmp_3
-	bit<32> IngressParser_parser_tmp_4
-	bit<32> IngressParser_parser_tmp_5
-	bit<32> IngressParser_parser_tmp
-	ipv4_options_t IngressParser_parser_tmp_hdr_0
 	bit<8> IngressParser_parser_tmp_0
-	bit<16> IngressParser_parser_tmp_1
 }
 metadata instanceof EMPTY
 
@@ -179,23 +167,7 @@ apply {
 	lookahead m.IngressParser_parser_tmp_0
 	jmpeq MYIP_PARSE_IPV4_OPTION_TIMESTAMP m.IngressParser_parser_tmp_0 0x44
 	jmp MYIP_ACCEPT
-	MYIP_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead m.IngressParser_parser_tmp_1
-	validate m.IngressParser_parser_tmp_hdr_0
-	mov m.IngressParser_parser_tmp_2 m.IngressParser_parser_tmp_1
-	shr m.IngressParser_parser_tmp_2 0x8
-	mov m.IngressParser_parser_tmp_hdr_0.value m.IngressParser_parser_tmp_2
-	mov m.IngressParser_parser_tmp_hdr_0.len m.IngressParser_parser_tmp_1
-	mov m.IngressParser_parser_tmp_3 m.IngressParser_parser_tmp_1
-	mov m.IngressParser_parser_tmp_4 m.IngressParser_parser_tmp_3
-	mov m.IngressParser_parser_tmp_5 m.IngressParser_parser_tmp_4
-	shl m.IngressParser_parser_tmp_5 0x3
-	mov m.IngressParser_parser_tmp m.IngressParser_parser_tmp_5
-	add m.IngressParser_parser_tmp 0xfffffff0
-	extract h.ipv4_option_timestamp m.IngressParser_parser_tmp
-	lookahead m.IngressParser_parser_tmp_0
-	jmpeq MYIP_PARSE_IPV4_OPTION_TIMESTAMP1 m.IngressParser_parser_tmp_0 0x44
-	jmp MYIP_ACCEPT
-	MYIP_PARSE_IPV4_OPTION_TIMESTAMP1 :	mov m.psa_ingress_input_metadata_parser_error 0x3
+	MYIP_PARSE_IPV4_OPTION_TIMESTAMP :	mov m.psa_ingress_input_metadata_parser_error 0x3
 	MYIP_ACCEPT :	mov m.Ingress_ap_member_id 0x0
 	table tbl
 	table ap
