@@ -613,7 +613,8 @@ class ParserSymbolicInterpreter {
     /// constructor
     ParserSymbolicInterpreter(ParserStructure* structure, ReferenceMap* refMap, TypeMap* typeMap,
                               bool unroll, bool& wasError) : structure(structure), refMap(refMap),
-                              typeMap(typeMap), synthesizedParser(nullptr), unroll(unroll), wasError(wasError) {
+                              typeMap(typeMap), synthesizedParser(nullptr), unroll(unroll),
+                              wasError(wasError) {
         CHECK_NULL(structure); CHECK_NULL(refMap); CHECK_NULL(typeMap);
         factory = new SymbolicValueFactory(typeMap);
         parser = structure->parser;
