@@ -19,7 +19,7 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action issue1001bmv2l20() {
-        clone3_field_list(CloneType.I2E, 32w64, 8w0);
+        clone3_preserving_field_list(CloneType.I2E, 32w64, 8w0);
     }
     @hidden table tbl_issue1001bmv2l20 {
         actions = {

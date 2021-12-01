@@ -536,11 +536,11 @@ extern void update_checksum_with_payload<T, O>(in bool condition, in T data, ino
  */
 extern void clone(in CloneType type, in bit<32> session);
 
-@deprecated("Please use 'resubmit_field_list' instead")
+@deprecated("Please use 'resubmit_preserving_field_list' instead")
 extern void resubmit<T>(in T data);
 /***
- * Calling resubmit during execution of the ingress control will,
- * under certain documented conditions, cause the packet to be
+ * Calling resubmit_preserving_field_list during execution of the ingress
+ * control will cause the packet to be
  * resubmitted, i.e. it will begin processing again with the parser,
  * with the contents of the packet exactly as they were when it last
  * began parsing.  The only difference is in the value of the
@@ -557,14 +557,28 @@ extern void resubmit<T>(in T data);
  * control, only one packet is resubmitted, and only the data from the
  * last such call is preserved.  See the v1model architecture
  * documentation (Note 1) for more details.
+ *
+ * For example, the user metadata fields can be annotated as follows:
+ * struct UM {
+ *    @field_list(1)
+ *    bit<32> x;
+ *    @field_list(1)
+ *    @field_list(2)
+ *    bit<32> y;
+ *    bit<32> z;
+ * }
+ *
+ * Calling resubmit_preserving_field_list(1) will resubmit the packet
+ * and preserve fields x and y of the user metadata.  Calling
+ * resubmit_preserving_field_list(2) will only preserve field y.
  */
-extern void resubmit_field_list(bit<8> index);
+extern void resubmit_preserving_field_list(bit<8> index);
 
-@deprecated("Please use 'recirculate_field_list' instead")
+@deprecated("Please use 'recirculate_preserving_field_list' instead")
 extern void recirculate<T>(in T data);
 /***
- * Calling recirculate during execution of the egress control will,
- * under certain documented conditions, cause the packet to be
+ * Calling recirculate_preserving_field_list during execution of the
+ * egress control will cause the packet to be
  * recirculated, i.e. it will begin processing again with the parser,
  * with the contents of the packet as they are created by the
  * deparser.  Recirculated packets can be distinguished from new
@@ -582,14 +596,13 @@ extern void recirculate<T>(in T data);
  * data from the last such call is preserved.  See the v1model
  * architecture documentation (Note 1) for more details.
  */
-extern void recirculate_field_list(bit<8> index);
-extern void clone(in CloneType type, in bit<32> session);
+extern void recirculate_preserving_field_list(bit<8> index);
 
-@deprecated("Please use 'clone3_field_list' instead")
+@deprecated("Please use 'clone3_preserving_field_list' instead")
 extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
 
 /***
- * Calling clone3 during execution of the ingress or egress control
+ * Calling clone3_preserving_field_list during execution of the ingress or egress control
  * will cause the packet to be cloned, sometimes also called
  * mirroring, i.e. zero or more copies of the packet are made, and
  * each will later begin egress processing as an independent packet
@@ -621,7 +634,7 @@ extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
  * clone session and data are used.  See the v1model architecture
  * documentation (Note 1) for more details.
  */
-extern void clone3_field_list(in CloneType type, in bit<32> session, bit<8> index);
+extern void clone3_preserving_field_list(in CloneType type, in bit<32> session, bit<8> index);
 
 extern void truncate(in bit<32> length);
 

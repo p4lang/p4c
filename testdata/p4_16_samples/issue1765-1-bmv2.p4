@@ -208,12 +208,12 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     action controller_debug() {
         meta.task = TASK_DEBUG;
         meta.ingress_port = standard_metadata.ingress_port;
-        clone3_field_list(CloneType.I2E, 100, 0);
+        clone3_preserving_field_list(CloneType.I2E, 100, 0);
     }
     action controller_reply(task_t task) {
         meta.task = task;
         meta.ingress_port = standard_metadata.ingress_port;
-        clone3_field_list(CloneType.I2E, 100, 0);
+        clone3_preserving_field_list(CloneType.I2E, 100, 0);
     }
     action multicast_pkg(mcast_t mcast_grp) {
         standard_metadata.mcast_grp = mcast_grp;

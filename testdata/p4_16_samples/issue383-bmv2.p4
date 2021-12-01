@@ -106,7 +106,7 @@ control ingress(inout parsed_packet_t h,
         local_metadata.row0.alt0 = local_metadata.row1.alt1;
         local_metadata.row1.alt0.valid = 1;
         local_metadata.row1.alt1.port = local_metadata.row0.alt1.port + 1;
-        clone3_field_list(CloneType.I2E, 0, 0);
+        clone3_preserving_field_list(CloneType.I2E, 0, 0);
 
 /*
         Cast support is TODO for bmv2.

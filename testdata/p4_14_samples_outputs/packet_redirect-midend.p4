@@ -52,10 +52,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("._nop") action _nop() {
     }
     @name("._recirculate") action _recirculate() {
-        recirculate_field_list(8w0);
+        recirculate_preserving_field_list(8w0);
     }
     @name("._clone_e2e") action _clone_e2e(@name("mirror_id") bit<32> mirror_id) {
-        clone3_field_list(CloneType.E2E, mirror_id, 8w0);
+        clone3_preserving_field_list(CloneType.E2E, mirror_id, 8w0);
     }
     @name(".t_egress") table t_egress_0 {
         actions = {
@@ -93,10 +93,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.mcast_grp = mgrp;
     }
     @name("._resubmit") action _resubmit() {
-        resubmit_field_list(8w0);
+        resubmit_preserving_field_list(8w0);
     }
     @name("._clone_i2e") action _clone_i2e(@name("mirror_id") bit<32> mirror_id_2) {
-        clone3_field_list(CloneType.I2E, mirror_id_2, 8w0);
+        clone3_preserving_field_list(CloneType.I2E, mirror_id_2, 8w0);
     }
     @name(".t_ingress_1") table t_ingress {
         actions = {

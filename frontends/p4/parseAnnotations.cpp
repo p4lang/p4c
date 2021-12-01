@@ -46,6 +46,8 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
 
             // @match has an expression argument
             PARSE(IR::Annotation::matchAnnotation, Expression),
+            // @field_list also has an expression
+            PARSE(IR::Annotation::fieldListAnnotation, Expression),
         };
 }
 

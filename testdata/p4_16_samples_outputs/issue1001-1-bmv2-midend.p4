@@ -6,20 +6,29 @@ struct Headers {
 }
 
 struct Meta {
-    @field_list(0) 
+    @field_list(PreservedFieldList . Field) 
     bit<1> b;
 }
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        m.b = m.b + 1;
+        m.b = m.b + 1w1;
         transition accept;
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @hidden action issue10011bmv2l24() {
+        clone3_preserving_field_list(CloneType.I2E, 32w64, 8w1);
+    }
+    @hidden table tbl_issue10011bmv2l24 {
+        actions = {
+            issue10011bmv2l24();
+        }
+        const default_action = issue10011bmv2l24();
+    }
     apply {
-        clone3_preserving_field_list(CloneType.I2E, 32w64, 0);
+        tbl_issue10011bmv2l24.apply();
     }
 }
 
@@ -43,5 +52,5 @@ control deparser(packet_out b, in Headers h) {
     }
 }
 
-V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
 

@@ -283,6 +283,7 @@ class Annotation {
     static const cstring noSideEffectsAnnotation;  /// extern function/method annotation.
     static const cstring noWarnAnnotation;  /// noWarn annotation.
     static const cstring matchAnnotation;  /// Match annotation (for value sets).
+    static const cstring fieldListAnnotation;  /// Used for recirculate, etc.
     toString{ return cstring("@") + name; }
     validate{
         BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name");
