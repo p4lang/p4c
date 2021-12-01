@@ -43,11 +43,11 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
 
             // @synchronous has a list of method names
             PARSE_EXPRESSION_LIST(IR::Annotation::synchronousAnnotation),
+            // @field_list also has a list of expressions
+            PARSE_EXPRESSION_LIST(IR::Annotation::fieldListAnnotation),
 
             // @match has an expression argument
             PARSE(IR::Annotation::matchAnnotation, Expression),
-            // @field_list also has an expression
-            PARSE(IR::Annotation::fieldListAnnotation, Expression),
         };
 }
 

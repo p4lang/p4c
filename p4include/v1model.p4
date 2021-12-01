@@ -562,8 +562,7 @@ extern void resubmit<T>(in T data);
  * struct UM {
  *    @field_list(1)
  *    bit<32> x;
- *    @field_list(1)
- *    @field_list(2)
+ *    @field_list(1, 2)
  *    bit<32> y;
  *    bit<32> z;
  * }
