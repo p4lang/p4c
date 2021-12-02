@@ -59,7 +59,7 @@ void IR::DpdkExtractStatement::dbprint(std::ostream& out) const {
 }
 
 void IR::DpdkLookaheadStatement::dbprint(std::ostream& out) const {
-    out << "extract " << header << std::endl;
+    out << "lookahead " << header << std::endl;
 }
 
 

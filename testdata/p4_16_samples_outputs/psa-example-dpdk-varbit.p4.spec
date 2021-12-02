@@ -24,7 +24,7 @@ struct ipv4_base_t {
 struct ipv4_option_timestamp_t {
 	bit<8> value
 	bit<8> len
-	bit<0> data
+	varbit<304> data
 }
 
 struct a1_arg_t {
