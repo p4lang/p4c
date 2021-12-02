@@ -536,10 +536,12 @@ class ParserSymbolicInterpreter {
                 if (packets->equals(prevPackets)) {
                     bool conservative = false;
                     for (auto p : state->before->map) {
-                        auto pkt = p.second->to<SymbolicPacketIn>();
-                        if (pkt->isConservative()) {
-                            conservative = true;
-                            break;
+                        if (p.second->is<SymbolicPacketIn>()) {
+                            auto pkt = p.second->to<SymbolicPacketIn>();
+                            if (pkt->isConservative()) {
+                                conservative = true;
+                                break;
+                            }
                         }
                     }
 
