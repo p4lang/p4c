@@ -729,6 +729,10 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
         // W if the type is bit<W>, and 0 if the type is string
         return annotation.controller_type.width;
     }
+    /* Treat error type as string */
+    if (type->is<IR::Type_Error>())
+        return 0;
+
     return typeMap->minWidthBits(type, type->getNode());
 }
 
