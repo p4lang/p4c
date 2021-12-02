@@ -77,6 +77,7 @@ class FindVariableValues final : public Inspector {
   bool                                                                  working = false;
 
   bool preorder(const IR::IfStatement *) override;
+  bool preorder(const IR::SwitchStatement *) override;
   void postorder(const IR::P4Control *) override;
   bool preorder(const IR::P4Control *) override;
   bool preorder(const IR::P4Table *) override;

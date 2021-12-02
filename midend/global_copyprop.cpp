@@ -111,6 +111,23 @@ bool FindVariableValues::preorder(const IR::IfStatement *stat) {
     return false;
 }
 
+// Switch statement is equivalent to a series of If stataments
+// That's why implementation for visiting SwitchStatement is the same as for visiting IfStatement
+bool FindVariableValues::preorder(const IR::SwitchStatement *stat) {
+    std::map<cstring, const IR::Expression*> copyOfVars(vars);
+    for (auto caseStatement : stat->cases) {
+        LOG3("Working on case: " << caseStatement->label->toString()
+            << " block: " << caseStatement->statement);
+        visit(caseStatement->statement);
+        compareValuesInMaps(&copyOfVars, &vars);
+        vars = copyOfVars;
+        LOG3("Finished case: " << caseStatement->label->toString()
+            << " block: " << caseStatement->statement);
+    }
+
+    return false;
+}
+
 // Update the value for the 'stat->left' variable.
 bool FindVariableValues::preorder(const IR::AssignmentStatement *stat) {
     if (!working || lvalue_name(stat->left).isNullOrEmpty())
