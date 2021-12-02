@@ -616,7 +616,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
     auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
     helper->setCalledBy(this);
     c->body->apply(*helper);
-    if (deparser) {
+    if (deparser && structure->p4arch == "psa") {
         add_inst(new IR::DpdkJmpNotEqualStatement("LABEL_DROP",
             new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
             new IR::Constant(0))); }
