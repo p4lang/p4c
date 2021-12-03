@@ -54,6 +54,7 @@ class HSIndexTransform : public Transform {
 /// This class eliminates all non-concrete indexes of the header stacks in the controls.
 /// It generates new variables for all expressions in the header stacks indexes and
 /// checks their values for substitution of concrete values.
+/// Each new variable is unique in a scope.
 /// Restriction : in/out parameters should be replaced by correspondent assignments.
 /// Let
 /// header h_index { bit<32> index;}
