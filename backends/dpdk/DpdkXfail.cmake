@@ -5,6 +5,7 @@ p4c_add_xfail_reason("dpdk"
 
 p4c_add_xfail_reason("dpdk"
   "Unsupported parser loop"
+  testdata/p4_16_samples/psa-example-dpdk-varbit.p4
   testdata/p4_16_samples/psa-example-counters-bmv2.p4
   )
 
