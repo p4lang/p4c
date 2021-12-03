@@ -181,7 +181,7 @@ IR::Node* HSIndexSimplifier::preorder(IR::P4Parser* parser) {
 }
 
 IR::Node* HSIndexSimplifier::preorder(IR::BlockStatement* blockStatement) {
-    generatedVariablesMap blockGeneratedVariables;
+    GeneratedVariablesMap blockGeneratedVariables;
     HSIndexFinder aiFinder(locals, refMap, typeMap, &blockGeneratedVariables);
     blockStatement->apply(aiFinder);
     if (aiFinder.arrayIndex == nullptr) {

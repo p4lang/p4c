@@ -8,7 +8,7 @@
 
 namespace P4 {
 
-typedef std::map<cstring, const IR::PathExpression*> generatedVariablesMap;
+typedef std::map<cstring, const IR::PathExpression*> GeneratedVariablesMap;
 
 /// This class finds innermost header stack with non-concrete index.
 /// For each found innermost header stack it generates new local variable and
@@ -21,13 +21,13 @@ class HSIndexFinder : public Inspector {
     TypeMap* typeMap;
     const IR::ArrayIndex* arrayIndex;
     const IR::PathExpression* newVariable;
-    generatedVariablesMap* generatedVariables;
+    GeneratedVariablesMap* generatedVariables;
     std::set<cstring> storedMember;
     std::list<IR::Member*> dependedMembers;
 
  public:
     HSIndexFinder(IR::IndexedVector<IR::Declaration>* locals, ReferenceMap* refMap,
-                  TypeMap* typeMap, generatedVariablesMap* generatedVariables)
+                  TypeMap* typeMap, GeneratedVariablesMap* generatedVariables)
         : locals(locals),
           refMap(refMap),
           typeMap(typeMap),
@@ -54,6 +54,7 @@ class HSIndexTransform : public Transform {
 /// This class eliminates all non-concrete indexes of the header stacks in the controls.
 /// It generates new variables for all expressions in the header stacks indexes and
 /// checks their values for substitution of concrete values.
+/// Each new variable is unique in a scope.
 /// Restriction : in/out parameters should be replaced by correspondent assignments.
 /// Let
 /// header h_index { bit<32> index;}
@@ -69,14 +70,14 @@ class HSIndexSimplifier : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
     IR::IndexedVector<IR::Declaration>* locals;
-    generatedVariablesMap* generatedVariables;
+    GeneratedVariablesMap* generatedVariables;
 
  public:
     HSIndexSimplifier(ReferenceMap* refMap, TypeMap* typeMap,
                       IR::IndexedVector<IR::Declaration>* locals = nullptr,
-                      generatedVariablesMap* generatedVariables = nullptr)
+                      GeneratedVariablesMap* generatedVariables = nullptr)
         : refMap(refMap), typeMap(typeMap), locals(locals), generatedVariables(generatedVariables) {
-        if (generatedVariables == nullptr) generatedVariables = new generatedVariablesMap();
+        if (generatedVariables == nullptr) generatedVariables = new GeneratedVariablesMap();
     }
     IR::Node* preorder(IR::IfStatement* ifStatement) override;
     IR::Node* preorder(IR::AssignmentStatement* assignmentStatement) override;
