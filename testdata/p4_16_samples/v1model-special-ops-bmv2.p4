@@ -239,12 +239,12 @@ control ingress(inout headers_t hdr,
         // that.  A 'mirroring session' and 'clone session' are simply
         // two different names for the same thing.
 
-        // The 3rd argument to clone3() is similar to the only
+        // The 3rd argument to clone() is similar to the only
         // argument to the resubmit() call.  See the notes for the
-        // resubmit() call above.  clone() is the same as clone3(),
+        // resubmit() call above.  clone() is the same as clone(),
         // except there are only 2 parameters, and thus no metadata
         // field values are preserved in the cloned packet.
-        clone3_preserving_field_list(CloneType.I2E, I2E_CLONE_SESSION_ID, 0);
+        clone_preserving_field_list(CloneType.I2E, I2E_CLONE_SESSION_ID, 0);
         meta.fwd.l2ptr = l2ptr;
     }
     table ipv4_da_lpm {
@@ -360,7 +360,7 @@ control egress(inout headers_t hdr,
         hdr.ethernet.srcAddr = smac;
         // See the resubmit() call for notes on the 3rd argument,
         // which is similar to the only argument to resubmit().
-        clone3_preserving_field_list(CloneType.E2E, E2E_CLONE_SESSION_ID, 0);
+        clone_preserving_field_list(CloneType.E2E, E2E_CLONE_SESSION_ID, 0);
     }
     table send_frame {
         key = {

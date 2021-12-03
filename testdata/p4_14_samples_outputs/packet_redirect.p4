@@ -13,9 +13,9 @@ struct intrinsic_metadata_t {
 }
 
 struct metaA_t {
-    @field_list(FieldLists.redirect_FL) 
+    @field_list(FieldLists.redirect_FL)
     bit<8> f1;
-    @field_list(FieldLists.redirect_FL) 
+    @field_list(FieldLists.redirect_FL)
     bit<8> f2;
 }
 
@@ -30,14 +30,14 @@ header hdrA_t {
 }
 
 struct metadata {
-    @name(".metaA") 
+    @name(".metaA")
     metaA_t metaA;
-    @name(".metaB") 
+    @name(".metaB")
     metaB_t metaB;
 }
 
 struct headers {
-    @name(".hdrA") 
+    @name(".hdrA")
     hdrA_t hdrA;
 }
 
@@ -55,7 +55,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         recirculate_preserving_field_list((bit<8>)FieldLists.redirect_FL);
     }
     @name("._clone_e2e") action _clone_e2e(bit<32> mirror_id) {
-        clone3_preserving_field_list(CloneType.E2E, (bit<32>)mirror_id, (bit<8>)FieldLists.redirect_FL);
+        clone_preserving_field_list(CloneType.E2E, (bit<32>)mirror_id, (bit<8>)FieldLists.redirect_FL);
     }
     @name(".t_egress") table t_egress {
         actions = {
@@ -88,7 +88,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         resubmit_preserving_field_list((bit<8>)FieldLists.redirect_FL);
     }
     @name("._clone_i2e") action _clone_i2e(bit<32> mirror_id) {
-        clone3_preserving_field_list(CloneType.I2E, (bit<32>)mirror_id, (bit<8>)FieldLists.redirect_FL);
+        clone_preserving_field_list(CloneType.I2E, (bit<32>)mirror_id, (bit<8>)FieldLists.redirect_FL);
     }
     @name(".t_ingress_1") table t_ingress_1 {
         actions = {
@@ -137,4 +137,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

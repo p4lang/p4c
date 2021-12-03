@@ -26,9 +26,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".cpu_header") 
+    @name(".cpu_header")
     cpu_header_t cpu_header;
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t   ethernet;
 }
 
@@ -75,7 +75,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".do_copy_to_cpu") action do_copy_to_cpu() {
-        clone3_preserving_field_list(CloneType.I2E, (bit<32>)32w250, (bit<8>)FieldLists.copy_to_cpu_fields);
+        clone_preserving_field_list(CloneType.I2E, (bit<32>)32w250, (bit<8>)FieldLists.copy_to_cpu_fields);
     }
     @name(".copy_to_cpu") table copy_to_cpu {
         actions = {
@@ -106,4 +106,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

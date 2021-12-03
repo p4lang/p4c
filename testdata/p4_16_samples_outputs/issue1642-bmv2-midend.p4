@@ -21,13 +21,13 @@ struct parsed_packet_t {
 
 struct local_metadata_t {
     short  _s0;
-    @field_list(0) 
+    @field_list(0)
     bit<1> _row_alt0_valid1;
-    @field_list(0) 
+    @field_list(0)
     bit<7> _row_alt0_port2;
-    @field_list(0) 
+    @field_list(0)
     bit<1> _row_alt1_valid3;
-    @field_list(0) 
+    @field_list(0)
     bit<7> _row_alt1_port4;
 }
 
@@ -45,7 +45,7 @@ control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata
         local_metadata._row_alt0_port2 = local_metadata._row_alt1_port4;
         local_metadata._row_alt0_valid1 = 1w1;
         local_metadata._row_alt1_port4 = local_metadata._row_alt1_port4 + 7w1;
-        clone3_preserving_field_list(CloneType.I2E, 32w0, 8w0);
+        clone_preserving_field_list(CloneType.I2E, 32w0, 8w0);
     }
     @hidden table tbl_issue1642bmv2l37 {
         actions = {
@@ -79,4 +79,3 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
 }
 
 V1Switch<parsed_packet_t, local_metadata_t>(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;
-

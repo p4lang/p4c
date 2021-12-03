@@ -86,7 +86,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         resubmit_preserving_field_list(8w0);
     }
     @name("ingress.do_clone_i2e") action do_clone_i2e(@name("l2ptr") bit<32> l2ptr_3) {
-        clone3_preserving_field_list(CloneType.I2E, 32w5, 8w0);
+        clone_preserving_field_list(CloneType.I2E, 32w5, 8w0);
         meta.fwd.l2ptr = l2ptr_3;
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {
@@ -176,7 +176,7 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
     }
     @name("egress.do_clone_e2e") action do_clone_e2e(@name("smac") bit<48> smac_2) {
         hdr.ethernet.srcAddr = smac_2;
-        clone3_preserving_field_list(CloneType.E2E, 32w11, 8w0);
+        clone_preserving_field_list(CloneType.E2E, 32w11, 8w0);
     }
     @name("egress.send_frame") table send_frame_0 {
         key = {
@@ -229,4 +229,3 @@ control computeChecksum(inout headers_t hdr, inout meta_t meta) {
 }
 
 V1Switch<headers_t, meta_t>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

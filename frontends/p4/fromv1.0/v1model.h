@@ -202,7 +202,7 @@ struct Hash_Model : public ::Model::Elem {
 };
 
 struct Cloner_Model : public ::Model::Extern_Model {
-    Cloner_Model() : Extern_Model("clone"), clone3("clone3_preserving_field_list"), cloneType(),
+    Cloner_Model() : Extern_Model("clone"), clone3("clone_preserving_field_list"), cloneType(),
                      sessionType(IR::Type_Bits::get(32)) {}
     ::Model::Elem   clone3;
     CloneType_Model cloneType;

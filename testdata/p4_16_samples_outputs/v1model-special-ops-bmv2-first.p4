@@ -94,7 +94,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         resubmit_preserving_field_list(8w0);
     }
     action do_clone_i2e(bit<32> l2ptr) {
-        clone3_preserving_field_list(CloneType.I2E, 32w5, 8w0);
+        clone_preserving_field_list(CloneType.I2E, 32w5, 8w0);
         meta.fwd.l2ptr = l2ptr;
     }
     table ipv4_da_lpm {
@@ -166,7 +166,7 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
     }
     action do_clone_e2e(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
-        clone3_preserving_field_list(CloneType.E2E, 32w11, 8w0);
+        clone_preserving_field_list(CloneType.E2E, 32w11, 8w0);
     }
     table send_frame {
         key = {
@@ -219,4 +219,3 @@ control computeChecksum(inout headers_t hdr, inout meta_t meta) {
 }
 
 V1Switch<headers_t, meta_t>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

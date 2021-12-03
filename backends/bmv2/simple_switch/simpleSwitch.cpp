@@ -94,8 +94,8 @@ bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
 }
 
 ExternConverter_clone ExternConverter_clone::singleton;
-ExternConverter_clone3_preserving_field_list
-    ExternConverter_clone3_preserving_field_list::singleton;
+ExternConverter_clone_preserving_field_list
+    ExternConverter_clone_preserving_field_list::singleton;
 ExternConverter_hash ExternConverter_hash::singleton;
 ExternConverter_digest ExternConverter_digest::singleton;
 ExternConverter_resubmit_preserving_field_list
@@ -187,7 +187,7 @@ static unsigned getFieldListById(ConversionContext* ctxt, unsigned index) {
     return (unsigned)id;
 }
 
-Util::IJson* ExternConverter_clone3_preserving_field_list::convertExternFunction(
+Util::IJson* ExternConverter_clone_preserving_field_list::convertExternFunction(
     ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
     const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
@@ -207,13 +207,13 @@ Util::IJson* ExternConverter_clone3_preserving_field_list::convertExternFunction
     if (ei->name == "I2E") {
         prim = "clone_ingress_pkt_to_egress";
         if (ctxt->blockConverted != BlockConverted::Ingress) {
-            ::error("'clone3_preserving_field_list(I2E, ...) not invoked in ingress %1%", mc);
+            ::error("'clone_preserving_field_list(I2E, ...) not invoked in ingress %1%", mc);
             return nullptr;
         }
     } else {
         prim = "clone_egress_pkt_to_egress";
         if (ctxt->blockConverted != BlockConverted::Egress) {
-            ::error("'clone3(E2E, ...) not invoked in egress %1%", mc);
+            ::error("'clone_preserving_field_list(E2E, ...) not invoked in egress %1%", mc);
             return nullptr;
         }
     }

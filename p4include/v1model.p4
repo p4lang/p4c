@@ -528,10 +528,10 @@ extern void verify_checksum_with_payload<T, O>(in bool condition, in T data, in 
 extern void update_checksum_with_payload<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
 
 /***
- * clone is in most ways identical to the clone3 operation, with the
+ * clone is in most ways identical to the clone_preserving_field_list operation, with the
  * only difference being that it never preserves any user-defined
  * metadata fields with the cloned packet.  It is equivalent to
- * calling clone3 with the same type and session parameter values,
+ * calling clone_preserving_field_list with the same type and session parameter values,
  * with empty data.
  */
 extern void clone(in CloneType type, in bit<32> session);
@@ -597,11 +597,11 @@ extern void recirculate<T>(in T data);
  */
 extern void recirculate_preserving_field_list(bit<8> index);
 
-@deprecated("Please use 'clone3_preserving_field_list' instead")
+@deprecated("Please use 'clone_preserving_field_list' instead")
 extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
 
 /***
- * Calling clone3_preserving_field_list during execution of the ingress or egress control
+ * Calling clone_preserving_field_list during execution of the ingress or egress control
  * will cause the packet to be cloned, sometimes also called
  * mirroring, i.e. zero or more copies of the packet are made, and
  * each will later begin egress processing as an independent packet
@@ -623,17 +623,17 @@ extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
  * The user metadata fields that are tagged with @field_list(index) will be
  * sent to the parser together with a clone of the packet.
  *
- * If clone3 is called during ingress processing, the first parameter
- * must be CloneType.I2E.  If clone3 is called during egress
+ * If clone_preserving_field_list is called during ingress processing, the first parameter
+ * must be CloneType.I2E.  If clone_preserving_field_list is called during egress
  * processing, the first parameter must be CloneType.E2E.
  *
  * There is no way to undo its effects once it has been called.  If
- * there are multiple calls to clone3 and/or clone during a single
+ * there are multiple calls to clone_preserving_field_list and/or clone during a single
  * execution of the same ingress (or egress) control, only the last
  * clone session and data are used.  See the v1model architecture
  * documentation (Note 1) for more details.
  */
-extern void clone3_preserving_field_list(in CloneType type, in bit<32> session, bit<8> index);
+extern void clone_preserving_field_list(in CloneType type, in bit<32> session, bit<8> index);
 
 extern void truncate(in bit<32> length);
 

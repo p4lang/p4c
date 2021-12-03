@@ -2680,7 +2680,7 @@ void ProgramStructure::populateOutputNames() {
         "recirculate_preserving_field_list",
         "clone",
         "clone3",
-        "clone3_preserving_field_list",
+        "clone_preserving_field_list",
         "truncate",
         "V1Switch",
         // other v1model names

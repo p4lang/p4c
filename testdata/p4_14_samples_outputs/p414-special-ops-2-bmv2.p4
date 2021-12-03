@@ -16,15 +16,15 @@ struct intrinsic_metadata_t {
 }
 
 struct mymeta_t {
-    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL) 
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL)
     bit<8> resubmit_count;
-    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL) 
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL)
     bit<8> recirculate_count;
-    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL) 
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL)
     bit<8> clone_e2e_count;
-    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL) 
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL)
     bit<8> last_ing_instance_type;
-    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL) 
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL)
     bit<8> f1;
 }
 
@@ -39,14 +39,14 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".mymeta") 
+    @name(".mymeta")
     mymeta_t      mymeta;
-    @name(".temporaries") 
+    @name(".temporaries")
     temporaries_t temporaries;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -65,7 +65,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr - 48w23;
         meta.mymeta.f1 = meta.mymeta.f1 + 8w23;
         meta.mymeta.clone_e2e_count = meta.mymeta.clone_e2e_count + 8w1;
-        clone3_preserving_field_list(CloneType.E2E, (bit<32>)32w1, (bit<8>)FieldLists.clone_e2e_FL);
+        clone_preserving_field_list(CloneType.E2E, (bit<32>)32w1, (bit<8>)FieldLists.clone_e2e_FL);
     }
     @name(".do_recirculate") action do_recirculate() {
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr - 48w19;
@@ -361,4 +361,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-
