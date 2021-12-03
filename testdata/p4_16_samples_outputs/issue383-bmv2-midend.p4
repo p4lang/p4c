@@ -24,9 +24,13 @@ struct col_t {
 }
 
 struct local_metadata_t {
+    @field_list(0) 
     bit<1>     _row0_alt0_valid0;
+    @field_list(0) 
     bit<7>     _row0_alt0_port1;
+    @field_list(0) 
     bit<1>     _row0_alt1_valid2;
+    @field_list(0) 
     bit<7>     _row0_alt1_port3;
     bit<1>     _row1_alt0_valid4;
     bit<7>     _row1_alt0_port5;
@@ -80,36 +84,36 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         }
         default_action = NoAction_1();
     }
-    @hidden action issue383bmv2l74() {
+    @hidden action issue383bmv2l75() {
         s_0_col_bvh.setInvalid();
         s_0_bvh0.setInvalid();
         s_0_bvh1.setInvalid();
         bh_0.setInvalid();
     }
-    @hidden action issue383bmv2l104() {
+    @hidden action issue383bmv2l105() {
         local_metadata._col_bvh8._row_alt0_valid0 = 1w0;
         local_metadata._row0_alt0_valid0 = local_metadata._row1_alt1_valid6;
         local_metadata._row0_alt0_port1 = local_metadata._row1_alt1_port7;
         local_metadata._row1_alt0_valid4 = 1w1;
         local_metadata._row1_alt1_port7 = local_metadata._row0_alt1_port3 + 7w1;
-        clone3<row_t>(CloneType.I2E, 32w0, (row_t){alt0 = (alt_t){valid = local_metadata._row1_alt1_valid6,port = local_metadata._row0_alt0_port1},alt1 = (alt_t){valid = local_metadata._row0_alt1_valid2,port = local_metadata._row0_alt1_port3}});
+        clone3_preserving_field_list(CloneType.I2E, 32w0, 8w0);
     }
-    @hidden table tbl_issue383bmv2l74 {
+    @hidden table tbl_issue383bmv2l75 {
         actions = {
-            issue383bmv2l74();
+            issue383bmv2l75();
         }
-        const default_action = issue383bmv2l74();
+        const default_action = issue383bmv2l75();
     }
-    @hidden table tbl_issue383bmv2l104 {
+    @hidden table tbl_issue383bmv2l105 {
         actions = {
-            issue383bmv2l104();
+            issue383bmv2l105();
         }
-        const default_action = issue383bmv2l104();
+        const default_action = issue383bmv2l105();
     }
     apply {
-        tbl_issue383bmv2l74.apply();
+        tbl_issue383bmv2l75.apply();
         tns_0.apply();
-        tbl_issue383bmv2l104.apply();
+        tbl_issue383bmv2l105.apply();
     }
 }
 

@@ -2,6 +2,15 @@
 #define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
+enum bit<8> FieldLists {
+    i2e_mirror_info = 8w0,
+    cpu_info = 8w1,
+    e2e_mirror_info = 8w2,
+    int_i2e_mirror_info = 8w3,
+    mirror_info = 8w4,
+    sflow_cpu_info = 8w5
+}
+
 struct acl_metadata_t {
     bit<1>  acl_deny;
     bit<1>  acl_copy;
@@ -40,6 +49,7 @@ struct egress_metadata_t {
 struct fabric_metadata_t {
     bit<3>  packetType;
     bit<1>  fabric_header_present;
+    @field_list(FieldLists.cpu_info, FieldLists.sflow_cpu_info) 
     bit<16> reason_code;
     bit<8>  dst_device;
     bit<16> dst_port;
@@ -56,18 +66,24 @@ struct hash_metadata_t {
 }
 
 struct i2e_metadata_t {
+    @field_list(FieldLists.i2e_mirror_info, FieldLists.e2e_mirror_info) 
     bit<32> ingress_tstamp;
+    @field_list(FieldLists.i2e_mirror_info, FieldLists.e2e_mirror_info, FieldLists.int_i2e_mirror_info) 
     bit<16> mirror_session_id;
 }
 
 struct ingress_metadata_t {
+    @field_list(FieldLists.cpu_info, FieldLists.sflow_cpu_info) 
     bit<9>  ingress_port;
+    @field_list(FieldLists.cpu_info, FieldLists.mirror_info, FieldLists.sflow_cpu_info) 
     bit<16> ifindex;
     bit<16> egress_ifindex;
     bit<2>  port_type;
     bit<16> outer_bd;
+    @field_list(FieldLists.cpu_info, FieldLists.sflow_cpu_info) 
     bit<16> bd;
     bit<1>  drop_flag;
+    @field_list(FieldLists.mirror_info) 
     bit<8>  drop_reason;
     bit<1>  control_frame;
     bit<16> bypass_lookups;
@@ -85,6 +101,7 @@ struct int_metadata_t {
 }
 
 struct int_metadata_i2e_t {
+    @field_list(FieldLists.int_i2e_mirror_info) 
     bit<1> sink;
     bit<1> source;
 }
@@ -3028,16 +3045,16 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name(".egress_mirror") action _egress_mirror_0(@name("session_id") bit<32> session_id) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-        clone3<tuple<bit<32>, bit<16>>>(CloneType.E2E, session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+        clone3_preserving_field_list(CloneType.E2E, session_id, (bit<8>)FieldLists.e2e_mirror_info);
     }
     @name(".egress_mirror_drop") action _egress_mirror_drop_0(@name("session_id") bit<32> session_id_6) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id_6;
-        clone3<tuple<bit<32>, bit<16>>>(CloneType.E2E, session_id_6, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+        clone3_preserving_field_list(CloneType.E2E, session_id_6, (bit<8>)FieldLists.e2e_mirror_info);
         mark_to_drop(standard_metadata);
     }
     @name(".egress_redirect_to_cpu") action _egress_redirect_to_cpu_0(@name("reason_code") bit<16> reason_code_0) {
         meta.fabric_metadata.reason_code = reason_code_0;
-        clone3<tuple<bit<16>, bit<16>, bit<16>, bit<9>>>(CloneType.E2E, 32w250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
+        clone3_preserving_field_list(CloneType.E2E, 32w250, (bit<8>)FieldLists.cpu_info);
         mark_to_drop(standard_metadata);
     }
     @name(".egress_acl") table _egress_acl {
@@ -3637,7 +3654,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.int_metadata.insert_byte_cnt = meta.int_metadata.gpe_int_hdr_len << 2;
         meta.int_metadata_i2e.sink = 1w1;
         meta.i2e_metadata.mirror_session_id = (bit<16>)mirror_id;
-        clone3<tuple<bit<1>, bit<16>>>(CloneType.I2E, mirror_id, { meta.int_metadata_i2e.sink, meta.i2e_metadata.mirror_session_id });
+        clone3_preserving_field_list(CloneType.I2E, mirror_id, (bit<8>)FieldLists.int_i2e_mirror_info);
         hdr.int_header.setInvalid();
         hdr.int_val[0].setInvalid();
         hdr.int_val[1].setInvalid();
@@ -4327,7 +4344,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         _sflow_ingress_session_pkt_counter.count();
         meta.fabric_metadata.reason_code = reason_code_5;
         meta.i2e_metadata.mirror_session_id = (bit<16>)sflow_i2e_mirror_id;
-        clone3<tuple<tuple<bit<16>, bit<16>, bit<16>, bit<9>>, bit<16>, bit<16>>>(CloneType.I2E, sflow_i2e_mirror_id, { { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port }, meta.sflow_metadata.sflow_session_id, meta.i2e_metadata.mirror_session_id });
+        clone3_preserving_field_list(CloneType.I2E, sflow_i2e_mirror_id, (bit<8>)FieldLists.sflow_cpu_info);
     }
     @name(".sflow_ing_take_sample") table _sflow_ing_take_sample {
         actions = {
@@ -4511,7 +4528,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".acl_mirror") action _acl_mirror_1(@name("session_id") bit<32> session_id_8, @name("acl_stats_index") bit<14> acl_stats_index_20, @name("acl_meter_index") bit<16> acl_meter_index_11) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id_8;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
-        clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, session_id_8, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+        clone3_preserving_field_list(CloneType.I2E, session_id_8, (bit<8>)FieldLists.i2e_mirror_info);
         meta.acl_metadata.acl_stats_index = acl_stats_index_20;
         meta.meter_metadata.meter_index = acl_meter_index_11;
     }
@@ -4586,14 +4603,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".acl_mirror") action _acl_mirror_2(@name("session_id") bit<32> session_id_9, @name("acl_stats_index") bit<14> acl_stats_index_27, @name("acl_meter_index") bit<16> acl_meter_index_18) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id_9;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
-        clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, session_id_9, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+        clone3_preserving_field_list(CloneType.I2E, session_id_9, (bit<8>)FieldLists.i2e_mirror_info);
         meta.acl_metadata.acl_stats_index = acl_stats_index_27;
         meta.meter_metadata.meter_index = acl_meter_index_18;
     }
     @name(".acl_mirror") action _acl_mirror_3(@name("session_id") bit<32> session_id_10, @name("acl_stats_index") bit<14> acl_stats_index_28, @name("acl_meter_index") bit<16> acl_meter_index_19) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id_10;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
-        clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, session_id_10, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+        clone3_preserving_field_list(CloneType.I2E, session_id_10, (bit<8>)FieldLists.i2e_mirror_info);
         meta.acl_metadata.acl_stats_index = acl_stats_index_28;
         meta.meter_metadata.meter_index = acl_meter_index_19;
     }
@@ -5587,16 +5604,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".copy_to_cpu_with_reason") action _copy_to_cpu_with_reason_0(@name("reason_code") bit<16> reason_code_6) {
         meta.fabric_metadata.reason_code = reason_code_6;
-        clone3<tuple<bit<16>, bit<16>, bit<16>, bit<9>>>(CloneType.I2E, 32w250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
+        clone3_preserving_field_list(CloneType.I2E, 32w250, (bit<8>)FieldLists.cpu_info);
     }
     @name(".redirect_to_cpu") action _redirect_to_cpu_0(@name("reason_code") bit<16> reason_code_7) {
         meta.fabric_metadata.reason_code = reason_code_7;
-        clone3<tuple<bit<16>, bit<16>, bit<16>, bit<9>>>(CloneType.I2E, 32w250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
+        clone3_preserving_field_list(CloneType.I2E, 32w250, (bit<8>)FieldLists.cpu_info);
         mark_to_drop(standard_metadata);
         meta.fabric_metadata.dst_device = 8w0;
     }
     @name(".copy_to_cpu") action _copy_to_cpu_0() {
-        clone3<tuple<bit<16>, bit<16>, bit<16>, bit<9>>>(CloneType.I2E, 32w250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
+        clone3_preserving_field_list(CloneType.I2E, 32w250, (bit<8>)FieldLists.cpu_info);
     }
     @name(".drop_packet") action _drop_packet_0() {
         mark_to_drop(standard_metadata);
@@ -5606,7 +5623,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         mark_to_drop(standard_metadata);
     }
     @name(".negative_mirror") action _negative_mirror_0(@name("session_id") bit<32> session_id_11) {
-        clone3<tuple<bit<16>, bit<8>>>(CloneType.I2E, session_id_11, { meta.ingress_metadata.ifindex, meta.ingress_metadata.drop_reason });
+        clone3_preserving_field_list(CloneType.I2E, session_id_11, (bit<8>)FieldLists.mirror_info);
         mark_to_drop(standard_metadata);
     }
     @name(".drop_stats") table _drop_stats {

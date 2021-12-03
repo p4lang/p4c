@@ -44,7 +44,7 @@ control deparser(packet_out b, in Headers h) {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action issue1043bmv2l33() {
-        resubmit<Meta>(m);
+        resubmit_preserving_field_list(8w0);
         sm.egress_spec = 9w0;
     }
     @hidden table tbl_issue1043bmv2l33 {

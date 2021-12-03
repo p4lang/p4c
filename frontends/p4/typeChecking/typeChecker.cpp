@@ -2625,6 +2625,9 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
                 return expression;
             }
         }
+    } else if (decl->is<IR::Type_Enum>() || decl->is<IR::Type_SerEnum>()) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
     }
 
     if (decl->is<IR::ParserState>()) {

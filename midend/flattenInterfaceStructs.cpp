@@ -21,23 +21,32 @@ namespace P4 {
 void StructTypeReplacement::flatten(const P4::TypeMap* typeMap,
                                     cstring prefix,
                                     const IR::Type* type,
+                                    const IR::Annotations* annotations,  // from parent
                                     IR::IndexedVector<IR::StructField> *fields) {
+    // Drop name annotations
+    IR::Annotations::Filter f =
+            [](const IR::Annotation* a) { return a->name != IR::Annotation::nameAnnotation; };
+    annotations = annotations->where(f);
     if (auto st = type->to<IR::Type_Struct>()) {
         structFieldMap.emplace(prefix, st);
-        for (auto f : st->fields)
-            flatten(typeMap, prefix + "." + f->name, f->type, fields);
+        for (auto f : st->fields) {
+            auto na = new IR::Annotations();
+            na->append(annotations);
+            na->append(f->annotations);
+            flatten(typeMap, prefix + "." + f->name, f->type, na, fields);
+        }
         return;
     }
     cstring fieldName = prefix.replace(".", "_") +
                         cstring::to_cstring(fieldNameRemap.size());
     fieldNameRemap.emplace(prefix, fieldName);
-    fields->push_back(new IR::StructField(IR::ID(fieldName), type->getP4Type()));
+    fields->push_back(new IR::StructField(IR::ID(fieldName), annotations, type->getP4Type()));
 }
 
 StructTypeReplacement::StructTypeReplacement(
     const P4::TypeMap* typeMap, const IR::Type_Struct* type) {
     auto vec = new IR::IndexedVector<IR::StructField>();
-    flatten(typeMap, "", type, vec);
+    flatten(typeMap, "", type, type->annotations, vec);
     replacementType = new IR::Type_Struct(type->name, IR::Annotations::empty, *vec);
 }
 

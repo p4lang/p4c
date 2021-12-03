@@ -148,6 +148,8 @@ class SimpleSwitchBackend : public Backend {
     ExpressionConverter*        conv = nullptr;
 
  protected:
+    void createRecirculateFieldsList(ConversionContext* ctxt, const IR::ToplevelBlock* tlb,
+                                     cstring scalarName);
     cstring createCalculation(cstring algo, const IR::Expression* fields,
                               Util::JsonArray* calculations, bool usePayload, const IR::Node* node);
 
@@ -165,11 +167,11 @@ class SimpleSwitchBackend : public Backend {
 };
 
 EXTERN_CONVERTER_W_FUNCTION(clone)
-EXTERN_CONVERTER_W_FUNCTION_AND_MODEL(clone3, P4V1::V1Model, v1model)
+EXTERN_CONVERTER_W_FUNCTION_AND_MODEL(clone3_preserving_field_list, P4V1::V1Model, v1model)
 EXTERN_CONVERTER_W_FUNCTION_AND_MODEL(hash, P4V1::V1Model, v1model)
 EXTERN_CONVERTER_W_FUNCTION(digest)
-EXTERN_CONVERTER_W_FUNCTION(resubmit)
-EXTERN_CONVERTER_W_FUNCTION(recirculate)
+EXTERN_CONVERTER_W_FUNCTION(resubmit_preserving_field_list)
+EXTERN_CONVERTER_W_FUNCTION(recirculate_preserving_field_list)
 EXTERN_CONVERTER_W_FUNCTION(mark_to_drop)
 EXTERN_CONVERTER_W_FUNCTION(log_msg)
 EXTERN_CONVERTER_W_FUNCTION_AND_MODEL(random, P4V1::V1Model, v1model)
