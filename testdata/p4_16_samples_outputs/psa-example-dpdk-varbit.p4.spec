@@ -74,6 +74,11 @@ struct EMPTY {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 	bit<32> Ingress_ap_member_id
+	bit<32> IngressParser_parser_tmp_2
+	bit<32> IngressParser_parser_tmp_3
+	bit<8> IngressParser_parser_tmp
+	bit<32> IngressParser_parser_tmp_1
+	bit<8> IngressParser_parser_tmp_len_0
 	bit<8> IngressParser_parser_tmp_0
 }
 metadata instanceof EMPTY
@@ -167,7 +172,14 @@ apply {
 	lookahead m.IngressParser_parser_tmp_0
 	jmpeq MYIP_PARSE_IPV4_OPTION_TIMESTAMP m.IngressParser_parser_tmp_0 0x44
 	jmp MYIP_ACCEPT
-	MYIP_PARSE_IPV4_OPTION_TIMESTAMP :	mov m.psa_ingress_input_metadata_parser_error 0x3
+	MYIP_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead m.IngressParser_parser_tmp
+	lookahead m.IngressParser_parser_tmp_len_0
+	mov m.IngressParser_parser_tmp_2 m.IngressParser_parser_tmp_len_0
+	mov m.IngressParser_parser_tmp_3 m.IngressParser_parser_tmp_2
+	shl m.IngressParser_parser_tmp_3 0x3
+	mov m.IngressParser_parser_tmp_1 m.IngressParser_parser_tmp_3
+	add m.IngressParser_parser_tmp_1 0xfffffff0
+	extract h.ipv4_option_timestamp m.IngressParser_parser_tmp_1
 	MYIP_ACCEPT :	mov m.Ingress_ap_member_id 0x0
 	table tbl
 	table ap
