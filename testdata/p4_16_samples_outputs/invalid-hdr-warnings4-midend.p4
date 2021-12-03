@@ -55,7 +55,11 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name("IngressI.validateHeader") action validateHeader_1() {
         hd_11 = h_0_h2[1w1];
         hd_11.setValid();
-        h_0_h2[tmp] = hd_11;
+        if (tmp == 1w0) {
+            h_0_h2[1w0] = hd_11;
+        } else if (tmp == 1w1) {
+            h_0_h2[1w1] = hd_11;
+        }
     }
     @name("IngressI.invalidateHeader") action invalidateHeader() {
         hd_12 = h_0_h2[0];
