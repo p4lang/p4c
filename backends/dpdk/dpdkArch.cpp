@@ -368,7 +368,7 @@ const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct *s) {
 }
 
 const IR::Node *InjectOutputPortMetadataField::preorder(IR::Type_Struct *s) {
-    if (structure->p4arch == "pna" && s->name.name == structure->local_metadata_type) {
+    if (structure->isPNA() && s->name.name == structure->local_metadata_type) {
         s->fields.push_back(new IR::StructField(
             IR::ID(PnaMainOutputMetadataOutputPortName), IR::Type_Bits::get(32)));
         LOG3("Metadata structure after injecting output port:" << std::endl << s);

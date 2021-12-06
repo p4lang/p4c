@@ -161,9 +161,9 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     }
 
     IR::IndexedVector<IR::DpdkAsmStatement> instr;
-    if (structure->p4arch == "pna")
+    if (structure->isPNA())
         instr.append(create_pna_preamble());
-    else if (structure->p4arch == "psa")
+    else if (structure->isPSA())
         instr.append(create_psa_preamble());
 
     instr.append(ingress_parser_converter->getInstructions());
@@ -173,9 +173,9 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     instr.append(egress_converter->getInstructions());
     instr.append(egress_deparser_converter->getInstructions());
 
-    if (structure->p4arch == "pna")
+    if (structure->isPNA())
         instr.append(create_pna_postamble());
-    else if (structure->p4arch == "psa")
+    else if (structure->isPSA())
         instr.append(create_psa_postamble());
 
     statements.push_back(new IR::DpdkListStatement(instr));
@@ -616,7 +616,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
     auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
     helper->setCalledBy(this);
     c->body->apply(*helper);
-    if (deparser && structure->p4arch == "psa") {
+    if (deparser && structure->isPSA()) {
         add_inst(new IR::DpdkJmpNotEqualStatement("LABEL_DROP",
             new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
             new IR::Constant(0))); }

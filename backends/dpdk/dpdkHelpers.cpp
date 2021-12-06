@@ -631,10 +631,10 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 return false;
             }
             IR::PathExpression *error_meta_path;
-            if (structure->p4arch == "psa") {
+            if (structure->isPSA()) {
                 error_meta_path = new IR::PathExpression(
                     IR::ID("m.psa_ingress_input_metadata_parser_error"));
-            } else if (structure->p4arch == "pna") {
+            } else if (structure->isPNA()) {
                 error_meta_path = new IR::PathExpression(
                     IR::ID("m.pna_pre_input_metadata_parser_error"));
             } else {
