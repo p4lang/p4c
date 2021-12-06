@@ -113,19 +113,19 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexampledpdkvarbit135() {
+    @hidden action pnaexampledpdkvarbit134() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_base_t>(hdr.ipv4_base);
         pkt.emit<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp);
     }
-    @hidden table tbl_pnaexampledpdkvarbit135 {
+    @hidden table tbl_pnaexampledpdkvarbit134 {
         actions = {
-            pnaexampledpdkvarbit135();
+            pnaexampledpdkvarbit134();
         }
-        const default_action = pnaexampledpdkvarbit135();
+        const default_action = pnaexampledpdkvarbit134();
     }
     apply {
-        tbl_pnaexampledpdkvarbit135.apply();
+        tbl_pnaexampledpdkvarbit134.apply();
     }
 }
 

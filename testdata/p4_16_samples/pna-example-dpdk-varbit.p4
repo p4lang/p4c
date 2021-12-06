@@ -61,7 +61,6 @@ parser MainParserImpl(
     inout main_metadata_t                  main_meta,
     in    pna_main_parser_input_metadata_t istd)
 {
-
     state start {
         pkt.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
