@@ -16,6 +16,7 @@ set (MIDEND_SRCS
   actionSynthesis.cpp
   complexComparison.cpp
   convertEnums.cpp
+  convertErrors.cpp
   copyStructures.cpp
   eliminateNewtype.cpp
   eliminateSerEnums.cpp
@@ -60,6 +61,7 @@ set (MIDEND_HDRS
   compileTimeOps.h
   complexComparison.h
   convertEnums.h
+  convertErrors.h
   copyStructures.h
   eliminateNewtype.h
   eliminateSerEnums.h

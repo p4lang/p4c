@@ -27,21 +27,10 @@ void ConvertStatementToDpdk::process_relation_operation(const IR::Expression* ds
     auto true_label = refmap->newName("label_true");
     auto false_label = refmap->newName("label_false");
     auto end_label = refmap->newName("label_end");
-    auto handleError = new BranchingInstructionGeneration(refmap, typemap, structure);
-
-    /* Special handling for error constants */
     if (op->is<IR::Equ>()) {
-        auto instr = handleError->process_error_expression(op, true_label, false_label, false);
-        if (instr)
-            add_instr(instr);
-        else
-            add_instr(new IR::DpdkJmpEqualStatement(true_label, op->left, op->right));
+        add_instr(new IR::DpdkJmpEqualStatement(true_label, op->left, op->right));
     } else if (op->is<IR::Neq>()) {
-        auto instr = handleError->process_error_expression(op, true_label, false_label, false);
-        if (instr)
-            add_instr(instr);
-        else
-            add_instr(new IR::DpdkJmpNotEqualStatement(true_label, op->left, op->right));
+        add_instr(new IR::DpdkJmpNotEqualStatement(true_label, op->left, op->right));
     } else if (op->is<IR::Lss>()) {
         add_instr(new IR::DpdkJmpLessStatement(true_label, op->left, op->right));
     } else if (op->is<IR::Grt>()) {
@@ -253,50 +242,6 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
     return false;
 }
 
-/* Helper function to convert error code to its value */
-IR::Expression *BranchingInstructionGeneration::convertError(const IR::Expression* exp) {
-    if (auto mem = exp->to<IR::Member>()) {
-        if (mem->expr->toString() == "error") {
-            auto error_id = structure->error_map.at(mem->member);
-            return  new IR::Constant(error_id);
-        }
-    }
-    return nullptr;
-}
-
-/* This function converts error constant to its value and generates the appropriate
-   jump statements by swapping the operands to keep error constant as the right operand of
-   comparison. The caller also sends a parameter to specify if the jump condition should be
-   negated with the true and false labels swapped  */
-IR::DpdkAsmStatement *BranchingInstructionGeneration::process_error_expression(
-    const IR::Operation_Relation* exp, cstring true_label, cstring false_label, bool neg) {
-    IR::Expression *errConst = nullptr;
-    const IR::Expression *op1 = exp->left;
-
-    if ((errConst = convertError(exp->left))) {
-        op1 = exp->right;
-    } else {
-        errConst = convertError(exp->right);
-    }
-
-    if (errConst) {
-        if (exp->is<IR::Equ>()) {
-            if (neg) {
-                return new IR::DpdkJmpNotEqualStatement(false_label, op1, errConst);
-            } else {
-                return new IR::DpdkJmpEqualStatement(true_label, op1, errConst);
-            }
-        } else if (exp->is<IR::Neq>()) {
-            if (neg) {
-                return new IR::DpdkJmpEqualStatement(false_label, op1, errConst);
-            } else {
-                return new IR::DpdkJmpNotEqualStatement(true_label, op1, errConst);
-            }
-        }
-     }
-     return nullptr;
-}
-
 /* This recursion requires the pass of ConvertLogicalExpression. This pass will
  * transform the logical experssion to a form that this function use as
  * presumption. The presumption of this function is that the left side of
@@ -377,31 +322,21 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
      * through. And finally for a base case, it returns what condition it fall
      * through.
      */
-        auto instr = process_error_expression(equ, true_label, false_label, is_and);
-        if (instr) {
-            instructions.push_back(instr);
+        if (is_and) {
+            instructions.push_back(new IR::DpdkJmpNotEqualStatement(
+                        false_label, equ->left, equ->right));
         } else {
-            if (is_and) {
-                instructions.push_back(new IR::DpdkJmpNotEqualStatement(
-                            false_label, equ->left, equ->right));
-            } else {
-                instructions.push_back(new IR::DpdkJmpEqualStatement(
-                            true_label, equ->left, equ->right));
-            }
+            instructions.push_back(new IR::DpdkJmpEqualStatement(
+                        true_label, equ->left, equ->right));
         }
         return is_and;
     } else if (auto neq = expr->to<IR::Neq>()) {
-        auto instr = process_error_expression(neq, true_label, false_label, is_and);
-        if (instr) {
-            instructions.push_back(instr);
+        if (is_and) {
+            instructions.push_back(new IR::DpdkJmpEqualStatement(
+                        false_label, neq->left, neq->right));
         } else {
-            if (is_and) {
-                instructions.push_back(new IR::DpdkJmpEqualStatement(
-                            false_label, neq->left, neq->right));
-            } else {
-                instructions.push_back(new IR::DpdkJmpNotEqualStatement(
-                            true_label, neq->left, neq->right));
-            }
+            instructions.push_back(new IR::DpdkJmpNotEqualStatement(
+                        true_label, neq->left, neq->right));
         }
         return is_and;
     } else if (auto lss = expr->to<IR::Lss>()) {
@@ -501,7 +436,7 @@ bool ConvertStatementToDpdk::preorder(const IR::IfStatement *s) {
     auto true_label = refmap->newName("label_true");
     auto false_label = refmap->newName("label_false");
     auto end_label = refmap->newName("label_end");
-    auto gen = new BranchingInstructionGeneration(refmap, typemap, structure);
+    auto gen = new BranchingInstructionGeneration(refmap, typemap);
     bool res = gen->generate(s->condition, true_label, false_label, true);
 
     instructions.append(gen->instructions);
@@ -684,10 +619,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 ::error("%1%: verify must be used in parser", s);
             auto args = a->expr->arguments;
             auto condition = args->at(0);
-            auto error = args->at(1);
-            if (!error->expression->is<IR::Member>())
-                ::error("%1%: must be one of the existing errors", s);
-            auto error_id = structure->error_map.at(error->expression->to<IR::Member>()->member);
+            auto error_id = args->at(1);
             auto end_label = refmap->newName("label_end");
             const IR::BoolLiteral *boolLiteral = condition->expression->to<IR::BoolLiteral>();
             if (!boolLiteral) {
@@ -699,7 +631,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             }
             auto tmp = new IR::PathExpression(
                                    IR::ID("m.psa_ingress_input_metadata_parser_error"));
-            add_instr(new IR::DpdkMovStatement(tmp, new IR::Constant(error_id)));
+            add_instr(new IR::DpdkMovStatement(tmp, error_id->expression));
             add_instr(new IR::DpdkJmpLabelStatement(
                         append_parser_name(parser, IR::ParserState::reject)));
             add_instr(new IR::DpdkLabelStatement(end_label));
