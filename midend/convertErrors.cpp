@@ -43,7 +43,7 @@ const IR::Node* DoConvertErrors::postorder(IR::Type_Name* type) {
     return type;
 }
 
-/// process enum expression, e.g., X.a
+/// process error expression, e.g., X.a
 const IR::Node* DoConvertErrors::postorder(IR::Member* expression) {
     if (expression->expr->toString() == "error") {
         auto value = errorRepr->get(expression->member.name);
