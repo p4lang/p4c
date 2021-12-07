@@ -94,9 +94,10 @@ class TypeMap final : public ProgramMap {
 
     // Used for tuples and stacks only
     const IR::Type* getCanonical(const IR::Type* type);
-    /// The minimum width in bits of this type.  If the width is not
+    /// The width in bits of this type.  If the width is not
     /// well-defined this will report an error and return -1.
-    int minWidthBits(const IR::Type* type, const IR::Node* errorPosition);
+    /// max indicates whether we want the max width or min width.
+    int widthBits(const IR::Type* type, const IR::Node* errorPosition, bool max);
 
     /// True is type occupies no storage.
     bool typeIsEmpty(const IR::Type* type) const;

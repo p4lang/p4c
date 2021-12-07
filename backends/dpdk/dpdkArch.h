@@ -553,11 +553,13 @@ class CopyMatchKeysToSingleStruct : public P4::KeySideEffect {
  public:
     CopyMatchKeysToSingleStruct(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
              std::set<const IR::P4Table*>* invokedInKey)
-             : P4::KeySideEffect (refMap, typeMap, invokedInKey)
-    { setName("CopyMatchKeysToSingleStruct"); }
+             : P4::KeySideEffect(refMap, typeMap, invokedInKey)
+    { setName("CopyMatchKeysToSinSgleStruct"); }
 
     const IR::Node* preorder(IR::Key* key) override;
     const IR::Node* postorder(IR::KeyElement* element) override;
+    const IR::Node* doStatement(const IR::Statement* statement,
+                                const IR::Expression* expression) override;
 };
 
 /**

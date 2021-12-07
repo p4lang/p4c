@@ -2,6 +2,12 @@
 #define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
+enum bit<8> FieldLists {
+    clone_e2e_FL = 8w0,
+    recirculate_FL = 8w1,
+    resubmit_FL = 8w2
+}
+
 struct intrinsic_metadata_t {
     bit<48> ingress_global_timestamp;
     bit<48> egress_global_timestamp;
@@ -10,10 +16,15 @@ struct intrinsic_metadata_t {
 }
 
 struct mymeta_t {
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL)
     bit<8> resubmit_count;
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL)
     bit<8> recirculate_count;
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL)
     bit<8> clone_e2e_count;
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL)
     bit<8> last_ing_instance_type;
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL)
     bit<8> f1;
 }
 
@@ -28,14 +39,14 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".mymeta") 
+    @name(".mymeta")
     mymeta_t      mymeta;
-    @name(".temporaries") 
+    @name(".temporaries")
     temporaries_t temporaries;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -54,13 +65,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710633;
         meta.mymeta.f1 = meta.mymeta.f1 + 8w23;
         meta.mymeta.clone_e2e_count = meta.mymeta.clone_e2e_count + 8w1;
-        clone3<tuple<mymeta_t>>(CloneType.E2E, 32w1, { meta.mymeta });
+        clone_preserving_field_list(CloneType.E2E, 32w1, (bit<8>)FieldLists.clone_e2e_FL);
     }
     @name(".do_recirculate") action do_recirculate() {
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710637;
         meta.mymeta.f1 = meta.mymeta.f1 + 8w19;
         meta.mymeta.recirculate_count = meta.mymeta.recirculate_count + 8w1;
-        recirculate<tuple<mymeta_t>>({ meta.mymeta });
+        recirculate_preserving_field_list((bit<8>)FieldLists.recirculate_FL);
     }
     @name("._nop") action _nop() {
     }
@@ -218,7 +229,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710639;
         meta.mymeta.f1 = meta.mymeta.f1 + 8w17;
         meta.mymeta.resubmit_count = meta.mymeta.resubmit_count + 8w1;
-        resubmit<tuple<mymeta_t>>({ meta.mymeta });
+        resubmit_preserving_field_list((bit<8>)FieldLists.resubmit_FL);
     }
     @name("._nop") action _nop() {
     }
@@ -346,4 +357,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

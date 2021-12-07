@@ -242,8 +242,6 @@ class StructField : Declaration, IAnnotated {
 }
 
 abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace, IAnnotated, IMayBeGenericType {
-    static const cstring minSizeInBits;
-    static const cstring minSizeInBytes;
     optional Annotations annotations = Annotations::empty;
     optional TypeParameters typeParameters = new TypeParameters();
     optional inline IndexedVector<StructField>  fields;

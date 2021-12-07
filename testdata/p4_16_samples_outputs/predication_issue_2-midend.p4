@@ -37,10 +37,16 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<8> tmp;
+    bit<8> hsiVar;
     @name("ingress.simple_action") action simple_action() {
         tmp = (h.idx.idx < 8w1 ? h.idx.idx : tmp);
         tmp = (h.idx.idx < 8w1 ? h.idx.idx : 8w1);
-        h.h[(h.idx.idx < 8w1 ? h.idx.idx : 8w1)].a = 8w1;
+        hsiVar = (h.idx.idx < 8w1 ? h.idx.idx : 8w1);
+        if (hsiVar == 8w0) {
+            h.h[8w0].a = 8w1;
+        } else if (hsiVar == 8w1) {
+            h.h[8w1].a = 8w1;
+        }
     }
     @hidden table tbl_simple_action {
         actions = {

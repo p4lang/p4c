@@ -36,6 +36,7 @@ limitations under the License.
 #include "midend/eliminateSwitch.h"
 #include "midend/flattenHeaders.h"
 #include "midend/flattenInterfaceStructs.h"
+#include "midend/hsIndexSimplify.h"
 #include "midend/replaceSelectRange.h"
 #include "midend/expandEmit.h"
 #include "midend/expandLookahead.h"
@@ -142,6 +143,7 @@ MidEnd::MidEnd(CompilerOptions& options, std::ostream* outStream) {
                 v1controls->emplace(deparser->to<IR::ControlBlock>()->container->name);
             }
             return root; },
+        new P4::HSIndexSimplifier(&refMap, &typeMap),
         new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
         new P4::MoveActionsToTables(&refMap, &typeMap),
         options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,

@@ -39,18 +39,40 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_0") bit<1> tmp_0;
     @hidden action gauntlet_index_7bmv2l51() {
+        h.h[1w0].a = 8w1;
+    }
+    @hidden action gauntlet_index_7bmv2l51_0() {
+        h.h[1w1].a = 8w1;
+    }
+    @hidden action gauntlet_index_7bmv2l51_1() {
         tmp_0 = h.i.id;
         h.i.id = 1w0;
-        h.h[tmp_0].a = 8w1;
     }
     @hidden table tbl_gauntlet_index_7bmv2l51 {
+        actions = {
+            gauntlet_index_7bmv2l51_1();
+        }
+        const default_action = gauntlet_index_7bmv2l51_1();
+    }
+    @hidden table tbl_gauntlet_index_7bmv2l51_0 {
         actions = {
             gauntlet_index_7bmv2l51();
         }
         const default_action = gauntlet_index_7bmv2l51();
     }
+    @hidden table tbl_gauntlet_index_7bmv2l51_1 {
+        actions = {
+            gauntlet_index_7bmv2l51_0();
+        }
+        const default_action = gauntlet_index_7bmv2l51_0();
+    }
     apply {
         tbl_gauntlet_index_7bmv2l51.apply();
+        if (tmp_0 == 1w0) {
+            tbl_gauntlet_index_7bmv2l51_0.apply();
+        } else if (tmp_0 == 1w1) {
+            tbl_gauntlet_index_7bmv2l51_1.apply();
+        }
     }
 }
 

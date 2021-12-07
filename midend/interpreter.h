@@ -440,7 +440,7 @@ class SymbolicArray final : public SymbolicValue {
                   const SymbolicValueFactory* factory);
     SymbolicValue* get(const IR::Node* node, size_t index) const {
         if (index >= values.size())
-            return new SymbolicStaticError(node, "Out of bounds");
+            return new SymbolicException(node, P4::StandardExceptions::StackOutOfBounds);
         return values.at(index);
     }
     void shift(int amount);  // negative = shift left

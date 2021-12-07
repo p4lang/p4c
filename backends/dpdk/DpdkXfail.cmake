@@ -5,6 +5,7 @@ p4c_add_xfail_reason("dpdk"
 
 p4c_add_xfail_reason("dpdk"
   "Unsupported parser loop"
+  testdata/p4_16_samples/psa-example-dpdk-varbit.p4
   testdata/p4_16_samples/psa-example-counters-bmv2.p4
   )
 
@@ -16,11 +17,6 @@ p4c_add_xfail_reason("dpdk"
 p4c_add_xfail_reason("dpdk"
   "error: Name .* is used for multiple direct counter objects in the P4Info message"
   testdata/p4_16_samples/psa-counter6.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
-  "error: error: width not well-defined"
-  testdata/p4_16_samples/psa-example-parser-checksum.p4
   )
 
 p4c_add_xfail_reason("dpdk"
@@ -56,6 +52,7 @@ p4c_add_xfail_reason("dpdk"
 
 p4c_add_xfail_reason("dpdk"
   "Unknown extern function"
+  testdata/p4_16_samples/psa-example-parser-checksum.p4
   testdata/p4_16_samples/psa-meter6.p4
   )
 

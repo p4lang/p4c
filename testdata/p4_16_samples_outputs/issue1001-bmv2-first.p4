@@ -6,6 +6,7 @@ struct Headers {
 }
 
 struct Meta {
+    @field_list(0)
     bit<1> b;
 }
 
@@ -17,9 +18,8 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    Meta x;
     apply {
-        clone3<Meta>(CloneType.I2E, 32w64, x);
+        clone_preserving_field_list(CloneType.I2E, 32w64, 8w0);
     }
 }
 
@@ -44,4 +44,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

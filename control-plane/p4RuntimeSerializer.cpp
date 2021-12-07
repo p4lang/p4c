@@ -729,7 +729,11 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
         // W if the type is bit<W>, and 0 if the type is string
         return annotation.controller_type.width;
     }
-    return typeMap->minWidthBits(type, type->getNode());
+    /* Treat error type as string */
+    if (type->is<IR::Type_Error>())
+        return 0;
+
+    return typeMap->widthBits(type, type->getNode(), false);
 }
 
 /// @return the header instance fields matched against by @table's key. The

@@ -229,7 +229,7 @@ control ingress(inout headers_t hdr,
 
         // If you give an entire struct, it includes all fields inside
         // of that struct.
-        resubmit({});
+        resubmit_preserving_field_list(0);
     }
     action do_clone_i2e(bit<32> l2ptr) {
         // BMv2 simple_switch can have multiple different clone
@@ -239,12 +239,12 @@ control ingress(inout headers_t hdr,
         // that.  A 'mirroring session' and 'clone session' are simply
         // two different names for the same thing.
 
-        // The 3rd argument to clone3() is similar to the only
+        // The 3rd argument to clone() is similar to the only
         // argument to the resubmit() call.  See the notes for the
-        // resubmit() call above.  clone() is the same as clone3(),
+        // resubmit() call above.  clone() is the same as clone(),
         // except there are only 2 parameters, and thus no metadata
         // field values are preserved in the cloned packet.
-        clone3(CloneType.I2E, I2E_CLONE_SESSION_ID, {});
+        clone_preserving_field_list(CloneType.I2E, I2E_CLONE_SESSION_ID, 0);
         meta.fwd.l2ptr = l2ptr;
     }
     table ipv4_da_lpm {
@@ -354,13 +354,13 @@ control egress(inout headers_t hdr,
         // See the resubmit() call above for comments about the
         // parameter to recirculate(), which has the same form as for
         // resubmit.
-        recirculate({});
+        recirculate_preserving_field_list(0);
     }
     action do_clone_e2e(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
         // See the resubmit() call for notes on the 3rd argument,
         // which is similar to the only argument to resubmit().
-        clone3(CloneType.E2E, E2E_CLONE_SESSION_ID, {});
+        clone_preserving_field_list(CloneType.E2E, E2E_CLONE_SESSION_ID, 0);
     }
     table send_frame {
         key = {

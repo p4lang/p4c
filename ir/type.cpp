@@ -29,8 +29,10 @@ const cstring IR::Type_Stack::pop_front = "pop_front";
 const cstring IR::Type_Header::isValid = "isValid";
 const cstring IR::Type_Header::setValid = "setValid";
 const cstring IR::Type_Header::setInvalid = "setInvalid";
-const cstring IR::Type_StructLike::minSizeInBits = "minSizeInBits";
-const cstring IR::Type_StructLike::minSizeInBytes = "minSizeInBytes";
+const cstring IR::Type::minSizeInBits = "minSizeInBits";
+const cstring IR::Type::minSizeInBytes = "minSizeInBytes";
+const cstring IR::Type::maxSizeInBits = "maxSizeInBits";
+const cstring IR::Type::maxSizeInBytes = "maxSizeInBytes";
 
 const IR::ID IR::Type_Table::hit = ID("hit");
 const IR::ID IR::Type_Table::miss = ID("miss");
@@ -50,6 +52,7 @@ const cstring IR::Annotation::pureAnnotation = "pure";
 const cstring IR::Annotation::noSideEffectsAnnotation = "noSideEffects";
 const cstring IR::Annotation::noWarnAnnotation = "noWarn";
 const cstring IR::Annotation::matchAnnotation = "match";
+const cstring IR::Annotation::fieldListAnnotation = "field_list";
 
 int Type_Declaration::nextId = 0;
 int Type_InfInt::nextId = 0;

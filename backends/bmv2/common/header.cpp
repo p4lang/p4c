@@ -39,7 +39,7 @@ HeaderConverter::HeaderConverter(ConversionContext* ctxt, cstring scalarsName)
  * @param meta this boolean indicates if the struct is a metadata or header.
  */
 void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool meta) {
-    LOG1("Adding " << type);
+    LOG2("Adding " << type);
     for (auto f : type->fields) {
         auto ft = ctxt->typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
@@ -85,7 +85,7 @@ void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool
             }
         } else if (ft->is<IR::Type_Stack>()) {
             // Done elsewhere
-            LOG1("stack generation done elsewhere");
+            LOG3("stack generation done elsewhere");
             continue;
         } else {
             // Treat this field like a scalar local variable
@@ -141,7 +141,7 @@ Util::JsonArray* HeaderConverter::addHeaderUnionFields(
 }
 
 void HeaderConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
-    LOG1("Creating stack " << headersStruct);
+    LOG2("Creating stack " << headersStruct);
     for (auto f : headersStruct->fields) {
         auto ft = ctxt->typeMap->getType(f, true);
         auto stack = ft->to<IR::Type_Stack>();
@@ -290,7 +290,7 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
     }
     ctxt->json->add_header_type(name, fields, max_length_bytes);
 
-    LOG1("... creating aliases for metadata fields " << st);
+    LOG2("... creating aliases for metadata fields " << st);
     for (auto f : st->fields) {
         if (auto aliasAnnotation = f->getAnnotation("alias")) {
             auto container = new Util::JsonArray();
@@ -328,7 +328,7 @@ Visitor::profile_t HeaderConverter::init_apply(const IR::Node* node) {
     // bit<n>, bool, error are packed into scalars type,
     // varbit, struct and stack introduce new header types
     for (auto v : ctxt->structure->variables) {
-        LOG1("variable " << v);
+        LOG2("variable " << v);
         auto type = ctxt->typeMap->getType(v, true);
         if (auto st = type->to<IR::Type_StructLike>()) {
             auto metadata_type = st->controlPlaneName();
@@ -443,7 +443,7 @@ void HeaderConverter::end_apply(const IR::Node*) {
  */
 bool HeaderConverter::preorder(const IR::Parameter* param) {
     LOG3("convert param " << param);
-    //// keep track of which headers we've already generated the ctxt->json for
+    // keep track of which headers we've already generated in ctxt->json
     auto ft = ctxt->typeMap->getType(param->getNode(), true);
     if (ft->is<IR::Type_Struct>()) {
         auto st = ft->to<IR::Type_Struct>();
