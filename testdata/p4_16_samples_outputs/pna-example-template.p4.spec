@@ -83,8 +83,7 @@ apply {
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
 	table ipv4_da_lpm
-	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
-	emit h.ethernet
+	LABEL_END :	emit h.ethernet
 	emit h.ipv4
 	tx m.pna_main_output_metadata_output_port
 }

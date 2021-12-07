@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <bmv2/psa.p4>
+#include <pna.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -29,52 +29,50 @@ header ipv4_option_timestamp_t {
     varbit<304> data;
 }
 
+struct main_metadata_t {
+}
+
 struct headers_t {
     ethernet_t              ethernet;
     ipv4_base_t             ipv4_base;
     ipv4_option_timestamp_t ipv4_option_timestamp;
 }
 
-struct EMPTY {
-}
-
-parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
+parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t main_meta, in pna_main_parser_input_metadata_t istd) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        pkt.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x800: parse_ipv4;
             default: accept;
         }
     }
     state parse_ipv4 {
-        packet.extract<ipv4_base_t>(hdr.ipv4_base);
+        pkt.extract<ipv4_base_t>(hdr.ipv4_base);
         transition select(hdr.ipv4_base.ihl) {
             4w0x5: accept;
             default: parse_ipv4_options;
         }
     }
     state parse_ipv4_option_timestamp {
-        bit<8> tmp_val = packet.lookahead<bit<8>>();
-        bit<8> tmp_len = packet.lookahead<bit<8>>();
-        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_len << 3) + 32w4294967280);
+        bit<8> tmp_value = pkt.lookahead<bit<8>>();
+        bit<8> tmp_len = pkt.lookahead<bit<8>>();
+        pkt.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_len << 3) + 32w4294967280);
         transition accept;
     }
     state parse_ipv4_options {
-        transition select(packet.lookahead<bit<8>>()) {
+        transition select(pkt.lookahead<bit<8>>()) {
             8w0x44: parse_ipv4_option_timestamp;
             default: accept;
         }
     }
 }
 
-parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_input_metadata_t c, in EMPTY d, in EMPTY e, in EMPTY f) {
-    state start {
-        transition accept;
+control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_input_metadata_t istd, inout pna_pre_output_metadata_t ostd) {
+    apply {
     }
 }
 
-control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    ActionProfile(32w1024) ap;
+control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     action a1(bit<48> param) {
         hdr.ethernet.dstAddr = param;
     }
@@ -89,7 +87,6 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
             NoAction();
             a2();
         }
-        psa_implementation = ap;
         default_action = NoAction();
     }
     table tbl2 {
@@ -100,7 +97,6 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
             NoAction();
             a1();
         }
-        psa_implementation = ap;
         default_action = NoAction();
     }
     apply {
@@ -109,25 +105,13 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     }
 }
 
-control MyEC(inout EMPTY a, inout EMPTY b, in psa_egress_input_metadata_t c, inout psa_egress_output_metadata_t d) {
+control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
     apply {
+        pkt.emit<ethernet_t>(hdr.ethernet);
+        pkt.emit<ipv4_base_t>(hdr.ipv4_base);
+        pkt.emit<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp);
     }
 }
 
-control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in EMPTY e, in psa_ingress_output_metadata_t f) {
-    apply {
-        buffer.emit<ethernet_t>(hdr.ethernet);
-    }
-}
-
-control MyED(packet_out buffer, out EMPTY a, out EMPTY b, inout EMPTY c, in EMPTY d, in psa_egress_output_metadata_t e, in psa_egress_deparser_input_metadata_t f) {
-    apply {
-    }
-}
-
-IngressPipeline<headers_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyIP(), MyIC(), MyID()) ip;
-
-EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEP(), MyEC(), MyED()) ep;
-
-PSA_Switch<headers_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
 

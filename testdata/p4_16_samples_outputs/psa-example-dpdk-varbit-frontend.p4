@@ -23,11 +23,6 @@ header ipv4_base_t {
     bit<32> dstAddr;
 }
 
-header ipv4_options_t {
-    bit<8> value;
-    bit<8> len;
-}
-
 header ipv4_option_timestamp_t {
     bit<8>      value;
     bit<8>      len;
@@ -44,7 +39,7 @@ struct EMPTY {
 }
 
 parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
-    @name("MyIP.tmp_hdr") ipv4_options_t tmp_hdr_0;
+    @name("MyIP.tmp_len") bit<8> tmp_len_0;
     @name("MyIP.tmp") bit<8> tmp;
     @name("MyIP.tmp_0") bit<8> tmp_0;
     state start {
@@ -62,9 +57,10 @@ parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_p
         }
     }
     state parse_ipv4_option_timestamp {
-        tmp_hdr_0 = packet.lookahead<ipv4_options_t>();
-        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_hdr_0.len << 3) + 32w4294967280);
-        transition parse_ipv4_options;
+        packet.lookahead<bit<8>>();
+        tmp_len_0 = packet.lookahead<bit<8>>();
+        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_len_0 << 3) + 32w4294967280);
+        transition accept;
     }
     state parse_ipv4_options {
         tmp_0 = packet.lookahead<bit<8>>();

@@ -66,6 +66,34 @@ struct DpdkProgramStructure {
             return header_union_types.count(u->getName());
         return false;
     }
+
+    /**
+     * @brief Predicate that states whether architecture is PSA or not.
+     *
+     * Architecture is known only after pass ConvertToDpdkArch.
+     * See method:
+     * const IR::Node *ConvertToDpdkArch::postorder(IR::Type_Control *c)
+     *
+     * @return true If architecture is PSA.
+     * @return false If architecture is not PSA.
+     */
+    bool isPSA(void) {
+        return (p4arch == "psa") ? true : false;
+    }
+
+    /**
+     * @brief Predicate that states whether architecture is PNA or not.
+     *
+     * Architecture is known only after pass ConvertToDpdkArch.
+     * See method:
+     * const IR::Node *ConvertToDpdkArch::postorder(IR::Type_Control *c)
+     *
+     * @return true If architecture is PNA.
+     * @return false If architecture is not PNA.
+     */
+    bool isPNA(void) {
+        return (p4arch == "pna") ? true : false;
+    }
 };
 
 class ParseDpdkArchitecture : public Inspector {

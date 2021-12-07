@@ -24,11 +24,6 @@ header ipv4_base_t {
     bit<32> dstAddr;
 }
 
-header ipv4_options_t {
-    bit<8>      value;
-    bit<8>      len;
-}
-
 header ipv4_option_timestamp_t {
     bit<8>      value;
     bit<8>      len;
@@ -66,9 +61,10 @@ parser MyIP(
         }
     }
     state parse_ipv4_option_timestamp {
-        ipv4_options_t tmp_hdr = packet.lookahead<ipv4_options_t>();
-        packet.extract(hdr.ipv4_option_timestamp, (bit<32>)tmp_hdr.len * 8 - 16);
-        transition parse_ipv4_options;
+        bit<8> tmp_val = packet.lookahead<bit<8>>();
+        bit<8> tmp_len = packet.lookahead<bit<8>>();
+        packet.extract(hdr.ipv4_option_timestamp, (bit<32>)tmp_len * 8 - 16);
+        transition accept;
     }
     state parse_ipv4_options {
         transition select(packet.lookahead<bit<8>>()) {
