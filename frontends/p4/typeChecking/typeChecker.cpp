@@ -23,6 +23,7 @@ limitations under the License.
 #include "frontends/p4/toP4/toP4.h"
 #include "syntacticEquivalence.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/common/constantFolding.h"
 #include "frontends/p4/methodInstance.h"
 
 namespace P4 {
@@ -102,6 +103,15 @@ TypeChecking::TypeChecking(ReferenceMap* refMap, TypeMap* typeMap,
 
 //////////////////////////////////////////////////////////////////////////
 
+const IR::Expression* TypeInference::constantFold(const IR::Expression* expression) {
+    if (readOnly)
+        return expression;
+    DoConstantFolding cf(refMap, typeMap, false);
+    auto result = expression->apply(cf);
+    LOG3("Folded " << expression << " into " << result);
+    return result;
+}
+
 // Make a clone of the type where all type variables in
 // the type parameters are replaced with fresh ones.
 // This should only be applied to canonical types.
@@ -124,9 +134,10 @@ const IR::Type* TypeInference::cloneWithFreshTypeVariables(const IR::IMayBeGener
     return cl->to<IR::Type>();
 }
 
-TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool readOnly) :
+TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap,
+                             bool readOnly, bool checkArrays) :
         refMap(refMap), typeMap(typeMap),
-        initialNode(nullptr), readOnly(readOnly) {
+        initialNode(nullptr), readOnly(readOnly), checkArrays(checkArrays) {
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
     visitDagOnce = false;  // the done() method will take care of this
@@ -1752,11 +1763,12 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
     if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_InfInt>()) {
         // This can happen because we are replacing some constant functions with
         // constants during type checking
+        auto result = constantFold(expression);
         setType(getOriginal(), IR::Type_Boolean::get());
-        setType(expression, IR::Type_Boolean::get());
-        setCompileTimeConstant(expression);
+        setType(result, IR::Type_Boolean::get());
+        setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
-        return expression;
+        return result;
     } else if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_Bits>()) {
         auto e = expression->clone();
         auto cst = expression->left->to<IR::Constant>();
@@ -2040,15 +2052,16 @@ const IR::Node* TypeInference::postorder(IR::ArrayIndex* expression) {
     auto rtype = getType(expression->right);
     if (ltype == nullptr || rtype == nullptr)
         return expression;
+    auto hst = ltype->to<IR::Type_Stack>();
 
     int index = -1;
     if (auto cst = expression->right->to<IR::Constant>()) {
-        if (!cst->fitsInt()) {
+        if (hst && checkArrays && !cst->fitsInt()) {
             typeError("Index too large: %1%", cst);
             return expression;
         }
         index = cst->asInt();
-        if (index < 0) {
+        if (hst && checkArrays && index < 0) {
             typeError("%1%: Negative array index %2%", expression, cst);
             return expression;
         }
@@ -2056,15 +2069,16 @@ const IR::Node* TypeInference::postorder(IR::ArrayIndex* expression) {
     // if index is negative here it means it's not a constant
 
     if ((index < 0) && !rtype->is<IR::Type_Bits>()
-        && !rtype->is<IR::Type_SerEnum>()) {
+        && !rtype->is<IR::Type_SerEnum>()
+        && !rtype->is<IR::Type_InfInt>()) {
         typeError("Array index %1% must be an integer, but it has type %2%",
                   expression->right, rtype->toString());
         return expression;
     }
 
     const IR::Type* type = nullptr;
-    if (auto hst = ltype->to<IR::Type_Stack>()) {
-        if (hst->sizeKnown()) {
+    if (hst) {
+        if (checkArrays && hst->sizeKnown()) {
             int size = hst->getSize();
             if (index >= 0 && index >= size) {
                 typeError("Array index %1% larger or equal to array size %2%",
@@ -2148,11 +2162,12 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
         return expression;
     } else if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_InfInt>()) {
         auto t = new IR::Type_InfInt();
+        auto result = constantFold(expression);
+        setType(result, t);
         setType(getOriginal(), t);
-        setType(expression, t);
-        setCompileTimeConstant(expression);
+        setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
-        return expression;
+        return result;
     }
 
     const IR::Type* resultType = ltype;
@@ -2285,8 +2300,10 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
     setType(expression, ltype);
     setType(getOriginal(), ltype);
     if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
-        setCompileTimeConstant(expression);
+        auto result = constantFold(expression);
+        setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
+        return result;
     }
     return expression;
 }
@@ -2317,10 +2334,11 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
     } else if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_InfInt>()) {
         auto t = new IR::Type_InfInt();
         setType(getOriginal(), t);
-        setType(expression, t);
-        setCompileTimeConstant(expression);
+        auto result = constantFold(expression);
+        setType(result, t);
+        setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
-        return expression;
+        return result;
     }
 
     const IR::Type* resultType = ltype;
@@ -2446,8 +2464,10 @@ const IR::Node* TypeInference::postorder(IR::LNot* expression) {
         setType(getOriginal(), IR::Type_Boolean::get());
     }
     if (isCompileTimeConstant(expression->expr)) {
-        setCompileTimeConstant(expression);
+        auto result = constantFold(expression);
+        setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
+        return result;
     }
     return expression;
 }
@@ -2473,8 +2493,10 @@ const IR::Node* TypeInference::postorder(IR::Neg* expression) {
                   expression->getStringOp(), expression->expr, type->toString());
     }
     if (isCompileTimeConstant(expression->expr)) {
-        setCompileTimeConstant(expression);
+        auto result = constantFold(expression);
+        setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
+        return result;
     }
     return expression;
 }
@@ -2499,8 +2521,10 @@ const IR::Node* TypeInference::postorder(IR::Cmpl* expression) {
                   expression->getStringOp(), expression->expr, type->toString());
     }
     if (isCompileTimeConstant(expression->expr)) {
-        setCompileTimeConstant(expression);
+        auto result = constantFold(expression);
+        setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
+        return result;
     }
     return expression;
 }
@@ -2732,8 +2756,10 @@ const IR::Node* TypeInference::postorder(IR::Slice* expression) {
         setLeftValue(getOriginal<IR::Expression>());
     }
     if (isCompileTimeConstant(expression->e0)) {
-        setCompileTimeConstant(expression);
+        auto result = constantFold(expression);
+        setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
+        return result;
     }
     return expression;
 }
@@ -2776,8 +2802,10 @@ const IR::Node* TypeInference::postorder(IR::Mux* expression) {
         if (isCompileTimeConstant(expression->e0) &&
             isCompileTimeConstant(expression->e1) &&
             isCompileTimeConstant(expression->e2)) {
-            setCompileTimeConstant(expression);
+            auto result = constantFold(expression);
+            setCompileTimeConstant(result);
             setCompileTimeConstant(getOriginal<IR::Expression>());
+            return result;
         }
     }
     return expression;
@@ -2834,6 +2862,21 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
     }
 
     bool inMethod = getParent<IR::MethodCallExpression>() != nullptr;
+    // Built-in methods
+    if (inMethod && (member == IR::Type::minSizeInBits ||
+                     member == IR::Type::minSizeInBytes ||
+                     member == IR::Type::maxSizeInBits ||
+                     member == IR::Type::maxSizeInBytes)) {
+        auto type = new IR::Type_Method(
+            new IR::Type_InfInt(), new IR::ParameterList(), member);
+        auto ctype = canonicalize(type);
+        if (ctype == nullptr)
+            return expression;
+        setType(getOriginal(), ctype);
+        setType(expression, ctype);
+        return expression;
+    }
+
     if (type->is<IR::Type_StructLike>()) {
         if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>()) {
             if (inMethod && (member == IR::Type_Header::isValid)) {
@@ -2847,18 +2890,6 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 setType(expression, ctype);
                 return expression;
             }
-        }
-        if (inMethod && (member == IR::Type_Header::minSizeInBits ||
-                         member == IR::Type_Header::minSizeInBytes)) {
-            // Built-in method
-            auto type = new IR::Type_Method(
-                new IR::Type_InfInt(), new IR::ParameterList(), member);
-            auto ctype = canonicalize(type);
-            if (ctype == nullptr)
-                return expression;
-            setType(getOriginal(), ctype);
-            setType(expression, ctype);
-            return expression;
         }
         if (type->is<IR::Type_Header>()) {
             if (inMethod && (member == IR::Type_Header::setValid ||
@@ -2965,17 +2996,6 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 return expression;
             setType(getOriginal(), canon);
             setType(expression, canon);
-            return expression;
-        } else if (inMethod && (
-            member == IR::Type_StructLike::minSizeInBytes ||
-            member == IR::Type_StructLike::minSizeInBits)) {
-            // Built-in method
-            auto type = new IR::Type_Method(new IR::Type_InfInt(), new IR::ParameterList(), member);
-            auto ctype = canonicalize(type);
-            if (ctype == nullptr)
-                return expression;
-            setType(getOriginal(), ctype);
-            setType(expression, ctype);
             return expression;
         }
     }
@@ -3204,18 +3224,19 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             inActionsList = true;
         return actionCall(inActionsList, expression);
     } else {
-        // Constant-fold minSizeInBits, minSizeInBytes
+        // Constant-fold constant expressions
         if (auto mem = expression->method->to<IR::Member>()) {
             auto type = typeMap->getType(mem->expr, true);
-            if ((mem->member == IR::Type_StructLike::minSizeInBits ||
-                 mem->member == IR::Type_StructLike::minSizeInBytes) &&
-                (type->is<IR::Type_StructLike>() ||
-                 type->is<IR::Type_Stack>())) {
-                LOG3("Folding " << mem->member);
-                int w = typeMap->minWidthBits(type, expression);
+            if ((mem->member == IR::Type::minSizeInBits ||
+                 mem->member == IR::Type::minSizeInBytes ||
+                 mem->member == IR::Type::maxSizeInBits ||
+                 mem->member == IR::Type::maxSizeInBytes)) {
+                auto max = mem->member.name.startsWith("max");
+                int w = typeMap->widthBits(type, expression, max);
+                LOG3("Folding " << mem << " to " << w);
                 if (w < 0)
                     return expression;
-                if (mem->member == IR::Type_StructLike::minSizeInBytes)
+                if (mem->member.name.endsWith("Bytes"))
                     w = ROUNDUP(w, 8);
                 auto result = new IR::Constant(w);
                 auto tt = new IR::Type_Type(result->type);

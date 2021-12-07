@@ -733,7 +733,7 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
     if (type->is<IR::Type_Error>())
         return 0;
 
-    return typeMap->minWidthBits(type, type->getNode());
+    return typeMap->widthBits(type, type->getNode(), false);
 }
 
 /// @return the header instance fields matched against by @table's key. The

@@ -25,6 +25,10 @@ interface CompileTimeValue {
 
 /// Base class for P4 types
 abstract Type {
+    static const cstring minSizeInBits;
+    static const cstring minSizeInBytes;
+    static const cstring maxSizeInBits;
+    static const cstring maxSizeInBytes;
 #emit
     typedef Type_Unknown        Unknown;
     typedef Type_Boolean        Boolean;

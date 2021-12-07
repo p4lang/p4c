@@ -74,6 +74,9 @@ bool hasVarbitsOrUnions(const TypeMap* typeMap, const IR::Type* type);
 // with readOnly = true, it will assert that the program is not changed.
 // It is expected that once a program has been type-checked and all casts have
 // been inserted it will not need to change ever again during type-checking.
+// In fact, several passes do modify the program such that types are invalidated.
+// For example, enum elimination converts enum values into integers.  After such
+// changes the typemap has to be cleared and types must be recomputed from scratch.
 class TypeInference : public Transform {
     // Input: reference map
     ReferenceMap* refMap;
@@ -85,11 +88,12 @@ class TypeInference : public Transform {
     // If readOnly=true it will assert that it behaves like
     // an Inspector.
     TypeInference(ReferenceMap* refMap, TypeMap* typeMap,
-                  bool readOnly = false);
+                  bool readOnly = false, bool checkArrays = true);
 
  protected:
     // If true we expect to leave the program unchanged
     bool readOnly;
+    bool checkArrays = true;
     const IR::Type* getType(const IR::Node* element) const;
     const IR::Type* getTypeType(const IR::Node* element) const;
     void setType(const IR::Node* element, const IR::Type* type);
@@ -125,6 +129,7 @@ class TypeInference : public Transform {
     bool checkAbstractMethods(const IR::Declaration_Instance* inst, const IR::Type_Extern* type);
     void addSubstitutions(const TypeVariableSubstitution* tvs);
 
+    const IR::Expression* constantFold(const IR::Expression* expression);
 
     /** Converts each type to a canonical representation.
      *  Made virtual to enable private midend passes to extend standard IR with custom IR classes.
