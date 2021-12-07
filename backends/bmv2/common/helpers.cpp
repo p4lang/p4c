@@ -78,6 +78,135 @@ unsigned nextId(cstring group) {
     return counters[group]++;
 }
 
+void
+ConversionContext::addToFieldList(const IR::Expression* expr, Util::JsonArray* fl) {
+    if (auto le = expr->to<IR::ListExpression>()) {
+        for (auto e : le->components) {
+            addToFieldList(e, fl);
+        }
+        return;
+    } else if (auto si = expr->to<IR::StructExpression>()) {
+        for (auto e : si->components) {
+            addToFieldList(e->expression, fl);
+        }
+        return;
+    }
+
+    auto type = typeMap->getType(expr, true);
+    if (type->is<IR::Type_StructLike>()) {
+        // recursively add all fields
+        auto st = type->to<IR::Type_StructLike>();
+        for (auto f : st->fields) {
+            auto member = new IR::Member(expr, f->name);
+            typeMap->setType(member, typeMap->getType(f, true));
+            addToFieldList(member, fl);
+        }
+        return;
+    }
+
+    bool simple = conv->simpleExpressionsOnly;
+    conv->simpleExpressionsOnly = true;  // we do not want casts d2b in field_lists
+    auto j = conv->convert(expr);
+    conv->simpleExpressionsOnly = simple;  // restore state
+    if (auto jo = j->to<Util::JsonObject>()) {
+        if (auto t = jo->get("type")) {
+            if (auto type = t->to<Util::JsonValue>()) {
+                if (*type == "runtime_data") {
+                    // Can't have runtime_data in field lists -- need hexstr instead
+                    auto val = jo->get("value")->to<Util::JsonValue>();
+                    j = jo = new Util::JsonObject();
+                    jo->emplace("type", "hexstr");
+                    jo->emplace("value", stringRepr(val->getValue()));
+                }
+            }
+        }
+    }
+    fl->append(j);
+}
+
+int
+ConversionContext::createFieldList(
+    const IR::Expression* expr, cstring listName, bool learn) {
+    cstring group;
+    auto fl = new Util::JsonObject();
+    if (learn) {
+        group = "learn_lists";
+        json->learn_lists->append(fl);
+    } else {
+        group = "field_lists";
+        json->field_lists->append(fl);
+    }
+    int id = nextId(group);
+    fl->emplace("id", id);
+    fl->emplace("name", listName);
+    fl->emplace_non_null("source_info", expr->sourceInfoJsonObj());
+    auto elements = mkArrayField(fl, "elements");
+    addToFieldList(expr, elements);
+    return id;
+}
+
+void
+ConversionContext::modelError(const char* format, const IR::Node* node) {
+    ::error(format, node);
+    ::error("Are you using an up-to-date v1model.p4?");
+}
+
+cstring
+ConversionContext::createCalculation(cstring algo, const IR::Expression* fields,
+                                     Util::JsonArray* calculations, bool withPayload,
+                                     const IR::Node* sourcePositionNode = nullptr) {
+    cstring calcName = refMap->newName("calc_");
+    auto calc = new Util::JsonObject();
+    calc->emplace("name", calcName);
+    calc->emplace("id", nextId("calculations"));
+    if (sourcePositionNode != nullptr)
+        calc->emplace_non_null("source_info", sourcePositionNode->sourceInfoJsonObj());
+    calc->emplace("algo", algo);
+    fields = convertToList(fields, typeMap);
+    if (!fields) {
+        modelError("%1%: expected a struct", fields);
+        return calcName;
+    }
+    auto jright = conv->convertWithConstantWidths(fields);
+    if (withPayload) {
+        auto array = jright->to<Util::JsonArray>();
+        BUG_CHECK(array, "expected a JSON array");
+        auto payload = new Util::JsonObject();
+        payload->emplace("type", "payload");
+        payload->emplace("value", (Util::IJson*)nullptr);
+        array->append(payload);
+    }
+    calc->emplace("input", jright);
+    calculations->append(calc);
+    return calcName;
+}
+
+/// Converts expr into a ListExpression or returns nullptr if not
+/// possible
+const IR::ListExpression* convertToList(const IR::Expression* expr, P4::TypeMap* typeMap) {
+    if (auto l = expr->to<IR::ListExpression>())
+        return l;
+
+    // expand it into a list
+    auto list = new IR::ListExpression({});
+    auto type = typeMap->getType(expr, true);
+    auto st = type->to<IR::Type_StructLike>();
+    if (!st) {
+        return nullptr;
+    }
+    if (auto se = expr->to<IR::StructExpression>()) {
+        for (auto f : se->components)
+            list->push_back(f->expression);
+    } else {
+        for (auto f : st->fields) {
+            auto e = new IR::Member(expr, f->name);
+            auto ftype = typeMap->getType(f);
+            typeMap->setType(e, ftype);
+            list->push_back(e);
+        }
+    }
+    typeMap->setType(list, type);
+    return list;
+}
+
 }  // namespace BMV2
-
-

@@ -8,6 +8,7 @@ struct intrinsic_metadata_t {
 }
 
 struct mymeta_t {
+    @field_list(8w0) 
     bit<8> f1;
 }
 
@@ -18,6 +19,7 @@ header ethernet_t {
 }
 
 struct metadata {
+    @field_list(8w0) 
     bit<8> _mymeta_f10;
 }
 
@@ -41,11 +43,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-struct tuple_0 {
-    standard_metadata_t f0;
-    mymeta_t            f1;
-}
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -60,7 +57,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("._resubmit") action _resubmit() {
         meta._mymeta_f10 = 8w1;
-        resubmit<tuple_0>((tuple_0){f0 = standard_metadata,f1 = (mymeta_t){f1 = 8w1}});
+        resubmit_preserving_field_list(8w0);
     }
     @name(".t_ingress_1") table t_ingress {
         actions = {

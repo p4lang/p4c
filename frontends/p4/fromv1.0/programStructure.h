@@ -154,6 +154,8 @@ class ProgramStructure {
     std::map<cstring, const IR::Meter*> directMeters;
     std::map<const IR::Meter*, const IR::Declaration_Instance*> meterMap;
     std::map<cstring, const IR::Declaration_Instance*> counterMap;
+    /// Field lists that appear in the program.
+    ordered_set<const IR::FieldList*> allFieldLists;
 
     std::map<const IR::V1Table*, const IR::V1Control*> tableMapping;
     std::map<const IR::V1Table*, const IR::Apply*> tableInvocation;
@@ -172,6 +174,8 @@ class ProgramStructure {
     std::map<const IR::MethodCallExpression*, const IR::Type_Header*> extractsSynthesized;
 
     std::map<cstring, const IR::ParserState*> parserEntryPoints;
+    /// Name of the serializable enum that holds one id for each field list.
+    cstring fieldListsEnum;
 
     // P4-14 struct/header type can be converted to three types
     // of struct/header in P4-16.
@@ -292,6 +296,13 @@ class ProgramStructure {
     void tablesReferred(const IR::V1Control* control, std::vector<const IR::V1Table*> &out);
     bool isHeader(const IR::ConcreteHeaderRef* nhr) const;
     cstring makeUniqueName(cstring base);
+    bool isFieldInList(cstring type, cstring field, const IR::FieldList* fl) const;
+    /// A vector with indexes of the field lists that contain this field.
+    /// Returns nullptr if the field does not appear in any list.
+    virtual const IR::Vector<IR::Expression>* listIndexes(cstring type, cstring field) const;
+    /// Given an expression which is supposed to be a field list
+    /// return a constant representing its value in the fieldListsEnum.
+    const IR::Expression* listIndex(const IR::Expression* fl) const;
 
     const IR::Type* explodeType(const std::vector<const IR::Type::Bits *> &fieldTypes);
     const IR::Expression* explodeLabel(const IR::Constant* value, const IR::Constant* mask,

@@ -72,6 +72,7 @@ struct StructTypeReplacement : public IHasDbPrint {
     void flatten(const P4::TypeMap* typeMap,
                  cstring prefix,
                  const IR::Type* type,
+                 const IR::Annotations* annotations,
                  IR::IndexedVector<IR::StructField> *fields);
 
     /// Returns a StructExpression suitable for
