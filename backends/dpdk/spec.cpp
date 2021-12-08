@@ -113,7 +113,7 @@ std::ostream &IR::DpdkHeaderType::toSpec(std::ostream &out) const {
         else if ((*it)->type->to<IR::Type_Boolean>())
             out << "\tbool";
         else if (auto t = (*it)->type->to<IR::Type_Varbits>())
-            out << "\tbit<" << t->width_bits() << ">";
+            out << "\tvarbit<" << t->size << ">";
         else {
             BUG("Unsupported type: %1% ", *it);
         }

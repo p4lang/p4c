@@ -152,11 +152,11 @@ class CheckExternInvocation : public Inspector {
             refMap(refMap), typeMap(typeMap), structure(structure) {}
 
     bool preorder(const IR::P4Program *program) {
-        if (structure->p4arch == "pna") {
+        if (structure->isPNA()) {
             LOG1("Checking extern invocations for PNA architecture.");
             auto checker = new CheckPNAExternInvocation(refMap, typeMap, structure);
             program->apply(*checker);
-        } else if (structure->p4arch == "psa") {
+        } else if (structure->isPSA()) {
             LOG1("Checking extern invocations for PSA architecture.");
             // Add class checking PSA constraints here.
         } else {
