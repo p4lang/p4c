@@ -100,9 +100,9 @@ class ErrorWidth : public P4::ChooseErrorRepresentation {
         return true;
     }
 
-    unsigned errorSize(unsigned) const override { return width; }
+    unsigned errorSize(unsigned) const override { return width;}
  public:
-    ErrorWidth(unsigned width) {}
+    ErrorWidth(unsigned width): width(width) {}
 };
 
 DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,

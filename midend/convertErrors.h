@@ -74,8 +74,8 @@ class DoConvertErrors : public Transform {
         if (!convert)
             return type;
         IR::IndexedVector<IR::SerEnumMember> members;
-        unsigned long long count = type->members.size();
-        unsigned long long width = policy->errorSize(count);
+        unsigned count = type->members.size();
+        unsigned width = policy->errorSize(count);
         unsigned idx = 0;
         for (auto d : type->members)
             members.push_back(new IR::SerEnumMember(d->name.name,

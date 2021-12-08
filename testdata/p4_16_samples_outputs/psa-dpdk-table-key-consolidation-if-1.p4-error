@@ -1,8 +1,2 @@
-[--Wwarn=mismatch] warning: 1: value does not fit in 0 bits
-[--Wwarn=mismatch] warning: 2: value does not fit in 0 bits
-[--Wwarn=mismatch] warning: 3: value does not fit in 0 bits
-[--Wwarn=mismatch] warning: 4: value does not fit in 0 bits
-[--Wwarn=mismatch] warning: 5: value does not fit in 0 bits
-[--Wwarn=mismatch] warning: 6: value does not fit in 0 bits
 [--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table tbl. Copying all match fields to metadata
 [--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table foo. Copying all match fields to metadata

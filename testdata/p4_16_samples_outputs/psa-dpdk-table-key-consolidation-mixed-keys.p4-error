@@ -4,10 +4,4 @@ psa-dpdk-table-key-consolidation-mixed-keys.p4(99): [--Wwarn=ignore-prop] warnin
 psa-dpdk-table-key-consolidation-mixed-keys.p4(99): [--Wwarn=mismatch] warning: 8w0x48: Constant key field
             8w0x48 : exact;
             ^^^^^^
-[--Wwarn=mismatch] warning: 1: value does not fit in 0 bits
-[--Wwarn=mismatch] warning: 2: value does not fit in 0 bits
-[--Wwarn=mismatch] warning: 3: value does not fit in 0 bits
-[--Wwarn=mismatch] warning: 4: value does not fit in 0 bits
-[--Wwarn=mismatch] warning: 5: value does not fit in 0 bits
-[--Wwarn=mismatch] warning: 6: value does not fit in 0 bits
 [--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table tbl. Copying all match fields to metadata

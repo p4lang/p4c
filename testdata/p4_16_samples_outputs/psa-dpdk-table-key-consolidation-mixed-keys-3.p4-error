@@ -4,9 +4,3 @@ psa-dpdk-table-key-consolidation-mixed-keys-3.p4(97): [--Wwarn=ignore-prop] warn
 psa-dpdk-table-key-consolidation-mixed-keys-3.p4(97): [--Wwarn=mismatch] warning: 8w0x48: Constant key field
             8w0x48 : exact;
             ^^^^^^
-[--Wwarn=mismatch] warning: 1: value does not fit in 0 bits
-[--Wwarn=mismatch] warning: 2: value does not fit in 0 bits
-[--Wwarn=mismatch] warning: 3: value does not fit in 0 bits
-[--Wwarn=mismatch] warning: 4: value does not fit in 0 bits
-[--Wwarn=mismatch] warning: 5: value does not fit in 0 bits
-[--Wwarn=mismatch] warning: 6: value does not fit in 0 bits
