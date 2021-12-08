@@ -96,7 +96,7 @@ control ingress(inout headers hdr,
         actions = { NoAction; execute; }
     }
     apply {
-        if (error.NoError != istd.parser_error) {
+        if (istd.parser_error != error.NoError) {
             ostd.drop = true;
             return;
         }

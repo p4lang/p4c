@@ -109,7 +109,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     apply {
         tbl_act.apply();
-        if (error.NoError != istd.parser_error) {
+        if (istd.parser_error != error.NoError) {
             tbl_psadpdkerrorcode100.apply();
         }
         if (hasReturned) {

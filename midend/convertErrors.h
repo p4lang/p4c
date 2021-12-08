@@ -22,8 +22,9 @@ limitations under the License.
 namespace P4 {
 
 /**
- * Policy function: given a number of error values should return
- * the size of a Type_Bits type used to represent the values.
+ * Policy function: Determines if the error type should be converted to Ser_Enum.
+ * This Serializable Enum can later be eliminated by replacing the constant by
+ * their respective values.
  */
 class ChooseErrorRepresentation {
  public:
@@ -37,27 +38,7 @@ class ChooseErrorRepresentation {
     virtual unsigned errorSize(unsigned /* errorCount */) const{ return 0;};
 };
 
-class ErrorRepresentation {
-    std::map<cstring, unsigned> repr;
- public:
-    const IR::Type_Bits* type;
-
-    ErrorRepresentation(Util::SourceInfo srcInfo, unsigned width)
-    { type = new IR::Type_Bits(srcInfo, width, false); }
-    void add(cstring decl)
-    { repr.emplace(decl, repr.size()); }
-    unsigned get(cstring decl) const
-    { return ::get(repr, decl); }
-
-    using iterator = decltype(repr)::iterator;
-    using const_iterator = decltype(repr)::const_iterator;
-    iterator begin() { return repr.begin(); }
-    const_iterator begin() const { return repr.begin(); }
-    iterator end() { return repr.end(); }
-    const_iterator end() const { return repr.end(); }
-};
-
-/** implement a pass to convert Type_Error to Type_Bits
+/** implement a pass to convert Type_Error to Type_SerEnum
  *
  *  User must provide a class to extend ChooseErrorRepresentation
  *  to specify the width of the generated Type_Bits. User must
@@ -65,19 +46,14 @@ class ErrorRepresentation {
  *  shall be converted.
  *
  *  Example:
- *
- *  struct st {
- *    // Type_Name
- *    error {...} a;
+ *  error {
+ *      ....
  *  }
+ *  if the policy is to convert error to serializable enum with underlying type to bit<16>,
+ *  then the above is replaced by
  *
- *
- *  if the policy is to convert error to bit<16>, then the above
- *  is replaced by:
- *
- *  struct st {
- *    // Type_Bits
- *    bit<16> a;
+ *  enum bit<width> error {
+ *      ....
  *  }
  *
  *  @pre none
@@ -86,16 +62,26 @@ class ErrorRepresentation {
 class DoConvertErrors : public Transform {
     friend class ConvertErrors;
 
-    ErrorRepresentation* errorRepr;
     ChooseErrorRepresentation* policy;
     TypeMap* typeMap;
  public:
     DoConvertErrors(ChooseErrorRepresentation* policy, TypeMap* typeMap)
             : policy(policy), typeMap(typeMap)
     { CHECK_NULL(policy); CHECK_NULL(typeMap); setName("DoConvertErrors"); }
-    const IR::Node* preorder(IR::Type_Error* type) override;
-    const IR::Node* postorder(IR::Type_Name* type) override;
-    const IR::Node* postorder(IR::Member* expression) override;
+
+    const IR::Node* preorder(IR::Type_Error* type) {
+        bool convert = policy->convert(type);
+        if (!convert)
+            return type;
+        IR::IndexedVector<IR::SerEnumMember> members;
+        unsigned long long count = type->members.size();
+        unsigned long long width = policy->errorSize(count);
+        unsigned idx = 0;
+        for (auto d : type->members)
+            members.push_back(new IR::SerEnumMember(d->name.name,
+                                  new IR::Constant(IR::Type_Bits::get(width),idx++)));
+        return new IR::Type_SerEnum("error", IR::Type_Bits::get(width), members);
+    }
 };
 
 class ConvertErrors : public PassManager {

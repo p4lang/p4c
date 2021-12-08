@@ -45,7 +45,7 @@ struct metadata {
 	bit<32> psa_ingress_input_metadata_ingress_port
 	bit<32> psa_ingress_input_metadata_packet_path
 	bit<64> psa_ingress_input_metadata_ingress_timestamp
-	bit<16> psa_ingress_input_metadata_parser_error
+	bit<0> psa_ingress_input_metadata_parser_error
 	bit<8> psa_ingress_output_metadata_class_of_service
 	bit<8> psa_ingress_output_metadata_clone
 	bit<16> psa_ingress_output_metadata_clone_session_id
@@ -58,7 +58,7 @@ struct metadata {
 	bit<32> psa_egress_input_metadata_packet_path
 	bit<16> psa_egress_input_metadata_instance
 	bit<64> psa_egress_input_metadata_egress_timestamp
-	bit<16> psa_egress_input_metadata_parser_error
+	bit<0> psa_egress_input_metadata_parser_error
 	bit<32> psa_egress_deparser_input_metadata_egress_port
 	bit<8> psa_egress_output_metadata_clone
 	bit<16> psa_egress_output_metadata_clone_session_id

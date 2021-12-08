@@ -629,9 +629,17 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             } else if (boolLiteral->value == true) {
                 return false;
             }
-            auto tmp = new IR::PathExpression(
-                                   IR::ID("m.psa_ingress_input_metadata_parser_error"));
-            add_instr(new IR::DpdkMovStatement(tmp, error_id->expression));
+            IR::PathExpression *error_meta_path;
+            if (structure->isPSA()) {
+                error_meta_path = new IR::PathExpression(
+                    IR::ID("m.psa_ingress_input_metadata_parser_error"));
+            } else if (structure->isPNA()) {
+                error_meta_path = new IR::PathExpression(
+                    IR::ID("m.pna_pre_input_metadata_parser_error"));
+            } else {
+                BUG("Unknown architecture unexpectedly!");
+            }
+            add_instr(new IR::DpdkMovStatement(error_meta_path, error_id->expression));
             add_instr(new IR::DpdkJmpLabelStatement(
                         append_parser_name(parser, IR::ParserState::reject)));
             add_instr(new IR::DpdkLabelStatement(end_label));

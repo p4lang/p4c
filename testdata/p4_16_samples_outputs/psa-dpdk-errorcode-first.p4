@@ -86,7 +86,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         default_action = NoAction();
     }
     apply {
-        if (error.NoError != istd.parser_error) {
+        if (istd.parser_error != error.NoError) {
             ostd.drop = true;
             return;
         }

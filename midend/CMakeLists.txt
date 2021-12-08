@@ -16,7 +16,6 @@ set (MIDEND_SRCS
   actionSynthesis.cpp
   complexComparison.cpp
   convertEnums.cpp
-  convertErrors.cpp
   copyStructures.cpp
   eliminateNewtype.cpp
   eliminateSerEnums.cpp

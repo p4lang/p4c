@@ -90,7 +90,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     apply {
         hasReturned = false;
-        if (error.NoError != istd.parser_error) {
+        if (istd.parser_error != error.NoError) {
             ostd.drop = true;
             hasReturned = true;
         }
