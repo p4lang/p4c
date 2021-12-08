@@ -1093,6 +1093,10 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
         auto bim = mi->to<BuiltInMethod>();
         auto base = get(bim->appliedTo);
         cstring name = bim->name.name;
+        if (auto result = base->to<SymbolicStaticError>()) {
+            set(expression, result);
+            return;
+        }
         if (name == IR::Type_Header::setInvalid ||
             name == IR::Type_Header::setValid) {
             BUG_CHECK(base->is<SymbolicHeader>(), "%1%: expected a header", base);
