@@ -322,8 +322,6 @@ void SymbolicHeaderUnion::setValid(bool v) {
 }
 
 SymbolicValue* SymbolicHeaderUnion::get(const IR::Node* node, cstring field) const {
-    if (valid->isKnown() && !valid->value)
-        return new SymbolicStaticError(node, "Reading field from invalid header union");
     return SymbolicStruct::get(node, field);
 }
 
@@ -1093,10 +1091,6 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
         auto bim = mi->to<BuiltInMethod>();
         auto base = get(bim->appliedTo);
         cstring name = bim->name.name;
-        if (auto result = base->to<SymbolicStaticError>()) {
-            set(expression, result);
-            return;
-        }
         if (name == IR::Type_Header::setInvalid ||
             name == IR::Type_Header::setValid) {
             BUG_CHECK(base->is<SymbolicHeader>(), "%1%: expected a header", base);
