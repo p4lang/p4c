@@ -36,6 +36,18 @@ class ChooseErrorRepresentation {
     // to represent the errors.  Obviously, we must have
     // 2^(return) >= errorCount.
     virtual unsigned errorSize(unsigned /* errorCount */) const{ return 0;};
+    // This function allows backends to override the values for the error constants.
+    // Default values for error constants is a sequence of numbers starting with 0.
+    virtual IR::IndexedVector<IR::SerEnumMember> *assignValues(
+                  IR::Type_Error* type, unsigned width) const {
+        auto members = new IR::IndexedVector<IR::SerEnumMember>;
+        unsigned idx = 0;
+        for (auto d : type->members) {
+            members->push_back(new IR::SerEnumMember(d->name.name,
+                               new IR::Constant(IR::Type_Bits::get(width),idx++)));
+        }
+        return members;
+    }
 };
 
 /** implement a pass to convert Type_Error to Type_SerEnum
@@ -76,11 +88,8 @@ class DoConvertErrors : public Transform {
         IR::IndexedVector<IR::SerEnumMember> members;
         unsigned count = type->members.size();
         unsigned width = policy->errorSize(count);
-        unsigned idx = 0;
-        for (auto d : type->members)
-            members.push_back(new IR::SerEnumMember(d->name.name,
-                                  new IR::Constant(IR::Type_Bits::get(width),idx++)));
-        return new IR::Type_SerEnum("error", IR::Type_Bits::get(width), members);
+        return new IR::Type_SerEnum("error", IR::Type_Bits::get(width),
+                                     *policy->assignValues(type, width));
     }
 };
 
