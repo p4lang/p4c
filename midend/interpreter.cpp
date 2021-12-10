@@ -313,15 +313,37 @@ SymbolicHeaderUnion::SymbolicHeaderUnion(const IR::Type_HeaderUnion* type,
                                bool uninitialized,
                                const SymbolicValueFactory* factory) :
         SymbolicStruct(type, uninitialized, factory),
-        valid(new SymbolicBool(false)) {}
+        valid(new SymbolicBool(false)) {
+            auto index = 0;
+            auto fieldsSize = type->to<IR::Type_StructLike>()->fields.size();
+            auto fieldsClone = fieldValue;
+            for (auto f : type->to<IR::Type_StructLike>()->fields) {
+                std::cout<<fieldsClone[f->name.name]->to<SymbolicHeader>()->valid->value<<std::endl;
+                if (!fieldsClone[f->name.name]->to<SymbolicHeader>()->valid->value) {
+                    index+=1;
+                }
+            }
+            if (index==fieldsSize) 
+                valid->value = false;
+            else 
+                valid->value = true;
+            }
 
 void SymbolicHeaderUnion::setValid(bool v) {
-    if (!v)
-        setAllUnknown();
+    if (!v) {
+        for (auto f : type->to<IR::Type_StructLike>()->fields) {
+            fieldValue[f->name.name]->setAllUnknown();
+        }   
+    }
+    for (auto f : type->to<IR::Type_StructLike>()->fields) {
+            fieldValue[f->name.name]->to<SymbolicHeader>()->setValid(v);
+        } 
     valid = new SymbolicBool(v);
 }
 
 SymbolicValue* SymbolicHeaderUnion::get(const IR::Node* node, cstring field) const {
+    if (valid->isKnown() && valid->isUninitialized())
+        return new SymbolicStaticError(node, "Reading field from invalid header union");
     return SymbolicStruct::get(node, field);
 }
 
