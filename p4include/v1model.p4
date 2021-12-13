@@ -536,7 +536,7 @@ extern void update_checksum_with_payload<T, O>(in bool condition, in T data, ino
  */
 extern void clone(in CloneType type, in bit<32> session);
 
-@eeprecated("Please use 'resubmit_preserving_field_list' instead")
+@deprecated("Please use 'resubmit_preserving_field_list' instead")
 extern void resubmit<T>(in T data);
 /***
  * Calling resubmit_preserving_field_list during execution of the
