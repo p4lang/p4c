@@ -10,14 +10,14 @@ struct intrinsic_metadata_t {
 }
 
 struct mymeta_t {
-    @field_list(8w2)
+    @field_list(8w2) 
     bit<8> resubmit_count;
-    @field_list(8w1)
+    @field_list(8w1) 
     bit<8> recirculate_count;
-    @field_list(8w0)
+    @field_list(8w0) 
     bit<8> clone_e2e_count;
     bit<8> last_ing_instance_type;
-    @field_list(8w0, 8w1, 8w2)
+    @field_list(8w0, 8w1, 8w2) 
     bit<8> f1;
 }
 
@@ -32,20 +32,20 @@ header ethernet_t {
 }
 
 struct metadata {
-    @field_list(8w2)
+    @field_list(8w2) 
     bit<8>  _mymeta_resubmit_count0;
-    @field_list(8w1)
+    @field_list(8w1) 
     bit<8>  _mymeta_recirculate_count1;
-    @field_list(8w0)
+    @field_list(8w0) 
     bit<8>  _mymeta_clone_e2e_count2;
     bit<8>  _mymeta_last_ing_instance_type3;
-    @field_list(8w0, 8w1, 8w2)
+    @field_list(8w0, 8w1, 8w2) 
     bit<8>  _mymeta_f14;
     bit<48> _temporaries_temp15;
 }
 
 struct headers {
-    @name(".ethernet")
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 
@@ -412,3 +412,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

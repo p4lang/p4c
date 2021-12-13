@@ -9,9 +9,9 @@ struct intrinsic_metadata_t {
 }
 
 struct metaA_t {
-    @field_list(8w0)
+    @field_list(8w0) 
     bit<8> f1;
-    @field_list(8w0)
+    @field_list(8w0) 
     bit<8> f2;
 }
 
@@ -26,16 +26,16 @@ header hdrA_t {
 }
 
 struct metadata {
-    @field_list(8w0)
+    @field_list(8w0) 
     bit<8> _metaA_f10;
-    @field_list(8w0)
+    @field_list(8w0) 
     bit<8> _metaA_f21;
     bit<8> _metaB_f12;
     bit<8> _metaB_f23;
 }
 
 struct headers {
-    @name(".hdrA")
+    @name(".hdrA") 
     hdrA_t hdrA;
 }
 
@@ -149,3 +149,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+
