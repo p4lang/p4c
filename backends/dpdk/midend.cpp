@@ -31,6 +31,7 @@ limitations under the License.
 #include "midend/compileTimeOps.h"
 #include "midend/complexComparison.h"
 #include "midend/convertEnums.h"
+#include "midend/convertErrors.h"
 #include "midend/copyStructures.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
@@ -89,10 +90,27 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     EnumOn32Bits() {}
 };
 
+/**
+This class implements a policy suitable for the ConvertErrors pass.
+The policy is: convert all errors to specified width
+*/
+class ErrorWidth : public P4::ChooseErrorRepresentation {
+    unsigned width;
+    bool convert(const IR::Type_Error *) const override {
+        return true;
+    }
+
+    unsigned errorSize(unsigned) const override { return width;}
+ public:
+    explicit ErrorWidth(unsigned width): width(width) {}
+};
+
 DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,
                                  std::ostream *outStream) {
     auto convertEnums =
         new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
+    auto convertErrors =
+        new P4::ConvertErrors(&refMap, &typeMap, new ErrorWidth(16));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     std::function<bool(const Context *, const IR::Expression *)> policy =
         [=](const Context *ctx, const IR::Expression *) -> bool {
@@ -197,6 +215,8 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,
             new P4::EliminateSwitch(&refMap, &typeMap),
             new P4::RemoveLeftSlices(&refMap, &typeMap),
             new P4::TypeChecking(&refMap, &typeMap),
+            convertErrors,
+            new P4::EliminateSerEnums(&refMap, &typeMap),
             new P4::MidEndLast(),
             evaluator,
             new VisitFunctor([this, evaluator]() {
