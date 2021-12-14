@@ -38,7 +38,11 @@ const IR::Expression* DoSimplifyExpressions::addAssignment(
     Util::SourceInfo srcInfo,
     cstring varName,
     const IR::Expression* expression) {
-    auto left = new IR::PathExpression(IR::ID(varName, nullptr));
+    const IR::PathExpression* left;
+    if (auto pe = expression->to<IR::PathExpression>())
+        left = new IR::PathExpression(IR::ID(varName, pe->path->name.originalName));
+    else
+        left = new IR::PathExpression(IR::ID(varName, nullptr));
     auto stat = new IR::AssignmentStatement(srcInfo, left, expression);
     statements.push_back(stat);
     auto result = left->clone();
