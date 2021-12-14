@@ -161,7 +161,7 @@ struct StructTypeReplacement : public IHasDbPrint {
             }
             vec->push_back(new IR::NamedExpression(f->name, expr));
         }
-        auto type = fieldType->getP4Type()->to<IR::Type_Name>();
+        auto type = fieldType->getP4Type()->template to<IR::Type_Name>();
         return new IR::StructExpression(
             root->srcInfo, type, type, *vec);
     }
