@@ -512,6 +512,18 @@ To pass custom arguments to p4c, you can set the environment variable `P4C_ARGS`
 make check P4C_ARGS="-Xp4c=MY_CUSTOM_FLAG"
 ```
 
+When making changes to p4c, it is sometimes useful to be able to run
+the tests while overwriting the expected output files that are saved
+in this repository.  One such situation is when your changes to p4c
+cause the names of compiler-generated local variables to change.  To
+force the expected output files to be rewritten while running the
+tests, assign a value to the shell environment variable
+`P4TEST_REPLACE`.  Here is one example Bash command to do so:
+
+```
+P4TEST_REPLACE=1 make check
+```
+
 ### Installation
 
 Define rules to install your backend. Typically you need to install
