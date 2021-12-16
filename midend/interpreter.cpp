@@ -1158,7 +1158,6 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
               set(expression, SymbolicVoid::get());
               return;
             }
-
           }
 
         } else if (name == IR::Type_Stack::push_front ||
