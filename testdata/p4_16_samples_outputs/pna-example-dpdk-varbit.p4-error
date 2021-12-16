@@ -1,0 +1,3 @@
+pna-example-dpdk-varbit.p4(86): warning:  pkt.extract is ignored. Error: Reading field from invalid header
+        pkt.extract(hdr.ipv4_option_timestamp, (bit<32>)(hdr.ipv4_option.len) * 8 - 16);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

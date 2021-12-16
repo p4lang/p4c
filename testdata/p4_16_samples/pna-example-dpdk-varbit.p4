@@ -40,6 +40,11 @@ header ipv4_base_t {
     bit<32> dstAddr;
 }
 
+header ipv4_option_t {
+    bit<8> val;
+    bit<8> len;
+}
+
 header ipv4_option_timestamp_t {
     bit<8>      value;
     bit<8>      len;
@@ -52,6 +57,7 @@ struct main_metadata_t {
 struct headers_t {
     ethernet_t ethernet;
     ipv4_base_t             ipv4_base;
+    ipv4_option_t           ipv4_option;
     ipv4_option_timestamp_t ipv4_option_timestamp;
 }
 
@@ -76,9 +82,8 @@ parser MainParserImpl(
         }
     }
     state parse_ipv4_option_timestamp {
-        bit<8> tmp_value = pkt.lookahead<bit<8>>();
-        bit<8> tmp_len = pkt.lookahead<bit<8>>();
-        pkt.extract(hdr.ipv4_option_timestamp, (bit<32>)tmp_len * 8 - 16);
+        hdr.ipv4_option = pkt.lookahead<ipv4_option_t>();
+        pkt.extract(hdr.ipv4_option_timestamp, (bit<32>)(hdr.ipv4_option.len) * 8 - 16);
         transition accept;
     }
     state parse_ipv4_options {
@@ -119,6 +124,7 @@ control MainControlImpl(
         actions = { NoAction; a1; }
     }
     apply {
+        send_to_port((PortId_t)0);
         tbl.apply();
         tbl2.apply();
     }
@@ -133,7 +139,6 @@ control MainDeparserImpl(
     apply {
         pkt.emit(hdr.ethernet);
         pkt.emit(hdr.ipv4_base);
-        pkt.emit(hdr.ipv4_option_timestamp);
     }
 }
 

@@ -23,6 +23,11 @@ header ipv4_base_t {
     bit<32> dstAddr;
 }
 
+header ipv4_option_t {
+    bit<8> val;
+    bit<8> len;
+}
+
 header ipv4_option_timestamp_t {
     bit<8>      value;
     bit<8>      len;
@@ -32,6 +37,7 @@ header ipv4_option_timestamp_t {
 struct headers_t {
     ethernet_t              ethernet;
     ipv4_base_t             ipv4_base;
+    ipv4_option_t           ipv4_option;
     ipv4_option_timestamp_t ipv4_option_timestamp;
 }
 
@@ -39,8 +45,8 @@ struct EMPTY {
 }
 
 parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
-    @name("MyIP.tmp_len") bit<8> tmp_len_0;
     @name("MyIP.tmp_0") bit<8> tmp_0;
+    bit<16> tmp_1;
     state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -56,9 +62,11 @@ parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_p
         }
     }
     state parse_ipv4_option_timestamp {
-        packet.lookahead<bit<8>>();
-        tmp_len_0 = packet.lookahead<bit<8>>();
-        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_len_0 << 3) + 32w4294967280);
+        tmp_1 = packet.lookahead<bit<16>>();
+        hdr.ipv4_option.setValid();
+        hdr.ipv4_option.val = tmp_1[15:8];
+        hdr.ipv4_option.len = tmp_1[7:0];
+        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_1[7:0] << 3) + 32w4294967280);
         transition accept;
     }
     state parse_ipv4_options {
@@ -80,6 +88,11 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    }
+    @noWarnUnused @name(".send_to_port") action send_to_port_0() {
+        d.drop = false;
+        d.multicast_group = 32w0;
+        d.egress_port = 32w0;
     }
     @name("MyIC.ap") ActionProfile(32w1024) ap_0;
     @name("MyIC.a1") action a1(@name("param") bit<48> param) {
@@ -110,7 +123,14 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
         psa_implementation = ap_0;
         default_action = NoAction_2();
     }
+    @hidden table tbl_send_to_port {
+        actions = {
+            send_to_port_0();
+        }
+        const default_action = send_to_port_0();
+    }
     apply {
+        tbl_send_to_port.apply();
         tbl_0.apply();
         tbl2_0.apply();
     }
@@ -122,17 +142,18 @@ control MyEC(inout EMPTY a, inout EMPTY b, in psa_egress_input_metadata_t c, ino
 }
 
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in EMPTY e, in psa_ingress_output_metadata_t f) {
-    @hidden action psaexampledpdkvarbit136() {
+    @hidden action psaexampledpdkvarbit142() {
         buffer.emit<ethernet_t>(hdr.ethernet);
+        buffer.emit<ipv4_base_t>(hdr.ipv4_base);
     }
-    @hidden table tbl_psaexampledpdkvarbit136 {
+    @hidden table tbl_psaexampledpdkvarbit142 {
         actions = {
-            psaexampledpdkvarbit136();
+            psaexampledpdkvarbit142();
         }
-        const default_action = psaexampledpdkvarbit136();
+        const default_action = psaexampledpdkvarbit142();
     }
     apply {
-        tbl_psaexampledpdkvarbit136.apply();
+        tbl_psaexampledpdkvarbit142.apply();
     }
 }
 

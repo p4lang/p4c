@@ -24,6 +24,11 @@ header ipv4_base_t {
     bit<32> dstAddr;
 }
 
+header ipv4_option_t {
+    bit<8> val;
+    bit<8> len;
+}
+
 header ipv4_option_timestamp_t {
     bit<8>      value;
     bit<8>      len;
@@ -33,6 +38,7 @@ header ipv4_option_timestamp_t {
 struct headers_t {
     ethernet_t ethernet;
     ipv4_base_t             ipv4_base;
+    ipv4_option_t           ipv4_option;
     ipv4_option_timestamp_t ipv4_option_timestamp;
 }
 
@@ -61,9 +67,8 @@ parser MyIP(
         }
     }
     state parse_ipv4_option_timestamp {
-        bit<8> tmp_val = packet.lookahead<bit<8>>();
-        bit<8> tmp_len = packet.lookahead<bit<8>>();
-        packet.extract(hdr.ipv4_option_timestamp, (bit<32>)tmp_len * 8 - 16);
+        hdr.ipv4_option = packet.lookahead<ipv4_option_t>();
+        packet.extract(hdr.ipv4_option_timestamp, (bit<32>)(hdr.ipv4_option.len) * 8 - 16);
         transition accept;
     }
     state parse_ipv4_options {
@@ -111,6 +116,7 @@ control MyIC(
         psa_implementation = ap;
     }
     apply {
+        send_to_port(d, (PortId_t)0);
         tbl.apply();
         tbl2.apply();
     }
@@ -134,6 +140,7 @@ control MyID(
     in psa_ingress_output_metadata_t f) {
     apply {
         buffer.emit(hdr.ethernet);
+        buffer.emit(hdr.ipv4_base);
     }
 }
 
