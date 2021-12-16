@@ -48,7 +48,7 @@ To load the 'spec' file in dpdk follow the instructions in the
 - Currently, programs written for DPDK target should limit the functionality in Ingress blocks.  When egress block support gets added to the DPDK target, compiler should generate separate spec file for ingress and egress.
 - DPDK architecture assumes the following signatures for programmable block of PSA. P4C-DPDK converts the input program to this form.
 
-```bash
+```P4
 parser IngressParser (packet_in buffer, out H parsed_hdr, inout M user_meta);
 
 control Ingress (inout H hdr, inout M user_meta);
