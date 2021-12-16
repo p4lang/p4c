@@ -1159,8 +1159,6 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
               return;
             }
 
-          } else {
-            BUG("%1%: expected a header or header union", structVar);
           }
 
         } else if (name == IR::Type_Stack::push_front ||
