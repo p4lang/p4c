@@ -1,3 +1,0 @@
-psa-example-dpdk-varbit-bmv2.p4(71): warning:  packet.extract is ignored. Error: Reading field from invalid header
-        packet.extract(hdr.ipv4_option_timestamp, (bit<32>)(hdr.ipv4_option.len) * 8 - 16);
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

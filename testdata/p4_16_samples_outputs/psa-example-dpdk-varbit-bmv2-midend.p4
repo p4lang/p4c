@@ -23,11 +23,6 @@ header ipv4_base_t {
     bit<32> dstAddr;
 }
 
-header ipv4_option_t {
-    bit<8> val;
-    bit<8> len;
-}
-
 header ipv4_option_timestamp_t {
     bit<8>      value;
     bit<8>      len;
@@ -37,7 +32,6 @@ header ipv4_option_timestamp_t {
 struct headers_t {
     ethernet_t              ethernet;
     ipv4_base_t             ipv4_base;
-    ipv4_option_t           ipv4_option;
     ipv4_option_timestamp_t ipv4_option_timestamp;
 }
 
@@ -45,8 +39,8 @@ struct EMPTY {
 }
 
 parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
+    @name("MyIP.tmp16") bit<16> tmp16_0;
     @name("MyIP.tmp_0") bit<8> tmp_0;
-    bit<16> tmp_1;
     state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -62,11 +56,8 @@ parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_p
         }
     }
     state parse_ipv4_option_timestamp {
-        tmp_1 = packet.lookahead<bit<16>>();
-        hdr.ipv4_option.setValid();
-        hdr.ipv4_option.val = tmp_1[15:8];
-        hdr.ipv4_option.len = tmp_1[7:0];
-        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_1[7:0] << 3) + 32w4294967280);
+        tmp16_0 = packet.lookahead<bit<16>>();
+        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp16_0[7:0] << 3) + 32w4294967280);
         transition accept;
     }
     state parse_ipv4_options {
@@ -142,18 +133,18 @@ control MyEC(inout EMPTY a, inout EMPTY b, in psa_egress_input_metadata_t c, ino
 }
 
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in EMPTY e, in psa_ingress_output_metadata_t f) {
-    @hidden action psaexampledpdkvarbitbmv2l142() {
+    @hidden action psaexampledpdkvarbitbmv2l137() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<ipv4_base_t>(hdr.ipv4_base);
     }
-    @hidden table tbl_psaexampledpdkvarbitbmv2l142 {
+    @hidden table tbl_psaexampledpdkvarbitbmv2l137 {
         actions = {
-            psaexampledpdkvarbitbmv2l142();
+            psaexampledpdkvarbitbmv2l137();
         }
-        const default_action = psaexampledpdkvarbitbmv2l142();
+        const default_action = psaexampledpdkvarbitbmv2l137();
     }
     apply {
-        tbl_psaexampledpdkvarbitbmv2l142.apply();
+        tbl_psaexampledpdkvarbitbmv2l137.apply();
     }
 }
 

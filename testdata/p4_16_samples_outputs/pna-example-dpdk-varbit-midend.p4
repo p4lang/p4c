@@ -23,11 +23,6 @@ header ipv4_base_t {
     bit<32> dstAddr;
 }
 
-header ipv4_option_t {
-    bit<8> val;
-    bit<8> len;
-}
-
 header ipv4_option_timestamp_t {
     bit<8>      value;
     bit<8>      len;
@@ -40,13 +35,12 @@ struct main_metadata_t {
 struct headers_t {
     ethernet_t              ethernet;
     ipv4_base_t             ipv4_base;
-    ipv4_option_t           ipv4_option;
     ipv4_option_timestamp_t ipv4_option_timestamp;
 }
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t main_meta, in pna_main_parser_input_metadata_t istd) {
+    @name("MainParserImpl.tmp16") bit<16> tmp16_0;
     @name("MainParserImpl.tmp_0") bit<8> tmp_0;
-    bit<16> tmp_1;
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -62,11 +56,8 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
         }
     }
     state parse_ipv4_option_timestamp {
-        tmp_1 = pkt.lookahead<bit<16>>();
-        hdr.ipv4_option.setValid();
-        hdr.ipv4_option.val = tmp_1[15:8];
-        hdr.ipv4_option.len = tmp_1[7:0];
-        pkt.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_1[7:0] << 3) + 32w4294967280);
+        tmp16_0 = pkt.lookahead<bit<16>>();
+        pkt.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp16_0[7:0] << 3) + 32w4294967280);
         transition accept;
     }
     state parse_ipv4_options {
@@ -114,35 +105,35 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
         default_action = NoAction_2();
     }
-    @hidden action pnaexampledpdkvarbit127() {
+    @hidden action pnaexampledpdkvarbit122() {
         send_to_port(32w0);
     }
-    @hidden table tbl_pnaexampledpdkvarbit127 {
+    @hidden table tbl_pnaexampledpdkvarbit122 {
         actions = {
-            pnaexampledpdkvarbit127();
+            pnaexampledpdkvarbit122();
         }
-        const default_action = pnaexampledpdkvarbit127();
+        const default_action = pnaexampledpdkvarbit122();
     }
     apply {
-        tbl_pnaexampledpdkvarbit127.apply();
+        tbl_pnaexampledpdkvarbit122.apply();
         tbl_0.apply();
         tbl2_0.apply();
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexampledpdkvarbit140() {
+    @hidden action pnaexampledpdkvarbit135() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_base_t>(hdr.ipv4_base);
     }
-    @hidden table tbl_pnaexampledpdkvarbit140 {
+    @hidden table tbl_pnaexampledpdkvarbit135 {
         actions = {
-            pnaexampledpdkvarbit140();
+            pnaexampledpdkvarbit135();
         }
-        const default_action = pnaexampledpdkvarbit140();
+        const default_action = pnaexampledpdkvarbit135();
     }
     apply {
-        tbl_pnaexampledpdkvarbit140.apply();
+        tbl_pnaexampledpdkvarbit135.apply();
     }
 }
 

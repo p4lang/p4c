@@ -21,11 +21,6 @@ struct ipv4_base_t {
 	bit<32> dstAddr
 }
 
-struct ipv4_option_t {
-	bit<8> val
-	bit<8> len
-}
-
 struct ipv4_option_timestamp_t {
 	bit<8> value
 	bit<8> len
@@ -50,7 +45,6 @@ struct tbl_set_member_id_arg_t {
 
 header ethernet instanceof ethernet_t
 header ipv4_base instanceof ipv4_base_t
-header ipv4_option instanceof ipv4_option_t
 header ipv4_option_timestamp instanceof ipv4_option_timestamp_t
 
 struct EMPTY {
@@ -80,9 +74,11 @@ struct EMPTY {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 	bit<32> Ingress_ap_member_id
-	bit<32> IngressParser_parser_tmp_1
+	bit<8> IngressParser_parser_tmp_1
 	bit<32> IngressParser_parser_tmp_2
+	bit<32> IngressParser_parser_tmp_3
 	bit<32> IngressParser_parser_tmp
+	bit<16> IngressParser_parser_tmp16_0
 	bit<8> IngressParser_parser_tmp_0
 }
 metadata instanceof EMPTY
@@ -176,11 +172,12 @@ apply {
 	lookahead m.IngressParser_parser_tmp_0
 	jmpeq MYIP_PARSE_IPV4_OPTION_TIMESTAMP m.IngressParser_parser_tmp_0 0x44
 	jmp MYIP_ACCEPT
-	MYIP_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead h.ipv4_option
-	mov m.IngressParser_parser_tmp_1 h.ipv4_option.len
+	MYIP_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead m.IngressParser_parser_tmp16_0
+	mov m.IngressParser_parser_tmp_1 m.IngressParser_parser_tmp16_0
 	mov m.IngressParser_parser_tmp_2 m.IngressParser_parser_tmp_1
-	shl m.IngressParser_parser_tmp_2 0x3
-	mov m.IngressParser_parser_tmp m.IngressParser_parser_tmp_2
+	mov m.IngressParser_parser_tmp_3 m.IngressParser_parser_tmp_2
+	shl m.IngressParser_parser_tmp_3 0x3
+	mov m.IngressParser_parser_tmp m.IngressParser_parser_tmp_3
 	add m.IngressParser_parser_tmp 0xfffffff0
 	extract h.ipv4_option_timestamp m.IngressParser_parser_tmp
 	MYIP_ACCEPT :	mov m.psa_ingress_output_metadata_drop 0

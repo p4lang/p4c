@@ -20,11 +20,6 @@ struct ipv4_base_t {
 	bit<32> dstAddr
 }
 
-struct ipv4_option_t {
-	bit<8> val
-	bit<8> len
-}
-
 struct ipv4_option_timestamp_t {
 	bit<8> value
 	bit<8> len
@@ -61,16 +56,17 @@ struct main_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
 	bit<8> pna_main_output_metadata_class_of_service
 	bit<32> pna_main_output_metadata_output_port
-	bit<32> MainParserT_parser_tmp_1
+	bit<8> MainParserT_parser_tmp_1
 	bit<32> MainParserT_parser_tmp_2
+	bit<32> MainParserT_parser_tmp_3
 	bit<32> MainParserT_parser_tmp
+	bit<16> MainParserT_parser_tmp16_0
 	bit<8> MainParserT_parser_tmp_0
 }
 metadata instanceof main_metadata_t
 
 header ethernet instanceof ethernet_t
 header ipv4_base instanceof ipv4_base_t
-header ipv4_option instanceof ipv4_option_t
 header ipv4_option_timestamp instanceof ipv4_option_timestamp_t
 
 action NoAction args none {
@@ -123,11 +119,12 @@ apply {
 	lookahead m.MainParserT_parser_tmp_0
 	jmpeq MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP m.MainParserT_parser_tmp_0 0x44
 	jmp MAINPARSERIMPL_ACCEPT
-	MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead h.ipv4_option
-	mov m.MainParserT_parser_tmp_1 h.ipv4_option.len
+	MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead m.MainParserT_parser_tmp16_0
+	mov m.MainParserT_parser_tmp_1 m.MainParserT_parser_tmp16_0
 	mov m.MainParserT_parser_tmp_2 m.MainParserT_parser_tmp_1
-	shl m.MainParserT_parser_tmp_2 0x3
-	mov m.MainParserT_parser_tmp m.MainParserT_parser_tmp_2
+	mov m.MainParserT_parser_tmp_3 m.MainParserT_parser_tmp_2
+	shl m.MainParserT_parser_tmp_3 0x3
+	mov m.MainParserT_parser_tmp m.MainParserT_parser_tmp_3
 	add m.MainParserT_parser_tmp 0xfffffff0
 	extract h.ipv4_option_timestamp m.MainParserT_parser_tmp
 	MAINPARSERIMPL_ACCEPT :	mov m.pna_main_output_metadata_output_port 0x0
