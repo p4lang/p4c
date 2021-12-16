@@ -54,8 +54,8 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
         }
     }
     state parse_ipv4_option_timestamp {
-        bit<8> tmp_value = pkt.lookahead<bit<8>>();
-        bit<8> tmp_len = pkt.lookahead<bit<8>>();
+        bit<16> tmp16 = pkt.lookahead<bit<16>>();
+        bit<8> tmp_len = tmp16[7:0];
         pkt.extract(hdr.ipv4_option_timestamp, (bit<32>)tmp_len * 8 - 16);
         transition accept;
     }
@@ -98,6 +98,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
     }
     apply {
+        send_to_port((PortId_t)0);
         tbl.apply();
         tbl2.apply();
     }
@@ -107,7 +108,6 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
     apply {
         pkt.emit(hdr.ethernet);
         pkt.emit(hdr.ipv4_base);
-        pkt.emit(hdr.ipv4_option_timestamp);
     }
 }
 

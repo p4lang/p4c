@@ -54,8 +54,8 @@ parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_p
         }
     }
     state parse_ipv4_option_timestamp {
-        bit<8> tmp_val = packet.lookahead<bit<8>>();
-        bit<8> tmp_len = packet.lookahead<bit<8>>();
+        bit<16> tmp16 = packet.lookahead<bit<16>>();
+        bit<8> tmp_len = tmp16[7:0];
         packet.extract(hdr.ipv4_option_timestamp, (bit<32>)tmp_len * 8 - 16);
         transition accept;
     }
@@ -102,6 +102,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
         psa_implementation = ap;
     }
     apply {
+        send_to_port(d, (PortId_t)0);
         tbl.apply();
         tbl2.apply();
     }
@@ -115,6 +116,7 @@ control MyEC(inout EMPTY a, inout EMPTY b, in psa_egress_input_metadata_t c, ino
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in EMPTY e, in psa_ingress_output_metadata_t f) {
     apply {
         buffer.emit(hdr.ethernet);
+        buffer.emit(hdr.ipv4_base);
     }
 }
 
