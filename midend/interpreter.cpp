@@ -935,8 +935,6 @@ void ExpressionEvaluator::postorder(const IR::BoolLiteral* expression) {
 void ExpressionEvaluator::postorder(const IR::Equ* expression) {
     auto l = get(expression->left);
     auto clone = expression->clone();
-    DoConstantFolding cf(refMap, typeMap);
-    cf.setCalledBy(this);
     if (l->is<SymbolicInteger>()) {
         auto lValue = clone->left->to<IR::Constant>();
         auto rValue = clone->right->to<IR::Constant>();
@@ -984,8 +982,6 @@ void ExpressionEvaluator::postorder(const IR::Equ* expression) {
 void ExpressionEvaluator::postorder(const IR::Neq* expression) {
     auto l = get(expression->left);
     auto clone = expression->clone();
-    DoConstantFolding cf(refMap, typeMap);
-    cf.setCalledBy(this);
     if (l->is<SymbolicInteger>()) {
         auto lValue = clone->left->to<IR::Constant>();
         auto rValue = clone->right->to<IR::Constant>();
@@ -1033,8 +1029,6 @@ void ExpressionEvaluator::postorder(const IR::Neq* expression) {
 void ExpressionEvaluator::postorder(const IR::Lss* expression) {
     auto l = get(expression->left);
     auto clone = expression->clone();
-    DoConstantFolding cf(refMap, typeMap);
-    cf.setCalledBy(this);
     if (l->is<SymbolicInteger>()) {
         auto lValue = clone->left->to<IR::Constant>();
         auto rValue = clone->right->to<IR::Constant>();
@@ -1062,8 +1056,6 @@ void ExpressionEvaluator::postorder(const IR::Lss* expression) {
 void ExpressionEvaluator::postorder(const IR::Leq* expression) {
     auto l = get(expression->left);
     auto clone = expression->clone();
-    DoConstantFolding cf(refMap, typeMap);
-    cf.setCalledBy(this);
     if (l->is<SymbolicInteger>()) {
         auto lValue = clone->left->to<IR::Constant>();
         auto rValue = clone->right->to<IR::Constant>();
@@ -1091,8 +1083,6 @@ void ExpressionEvaluator::postorder(const IR::Leq* expression) {
 void ExpressionEvaluator::postorder(const IR::Grt* expression) {
     auto l = get(expression->left);
     auto clone = expression->clone();
-    DoConstantFolding cf(refMap, typeMap);
-    cf.setCalledBy(this);
     if (l->is<SymbolicInteger>()) {
         auto lValue = clone->left->to<IR::Constant>();
         auto rValue = clone->right->to<IR::Constant>();
@@ -1120,8 +1110,6 @@ void ExpressionEvaluator::postorder(const IR::Grt* expression) {
 void ExpressionEvaluator::postorder(const IR::Geq* expression) {
     auto l = get(expression->left);
     auto clone = expression->clone();
-    DoConstantFolding cf(refMap, typeMap);
-    cf.setCalledBy(this);
     if (l->is<SymbolicInteger>()) {
         auto lValue = clone->left->to<IR::Constant>();
         auto rValue = clone->right->to<IR::Constant>();
