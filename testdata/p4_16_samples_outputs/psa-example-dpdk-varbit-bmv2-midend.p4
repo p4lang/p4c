@@ -142,18 +142,18 @@ control MyEC(inout EMPTY a, inout EMPTY b, in psa_egress_input_metadata_t c, ino
 }
 
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in EMPTY e, in psa_ingress_output_metadata_t f) {
-    @hidden action psaexampledpdkvarbit142() {
+    @hidden action psaexampledpdkvarbitbmv2l142() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<ipv4_base_t>(hdr.ipv4_base);
     }
-    @hidden table tbl_psaexampledpdkvarbit142 {
+    @hidden table tbl_psaexampledpdkvarbitbmv2l142 {
         actions = {
-            psaexampledpdkvarbit142();
+            psaexampledpdkvarbitbmv2l142();
         }
-        const default_action = psaexampledpdkvarbit142();
+        const default_action = psaexampledpdkvarbitbmv2l142();
     }
     apply {
-        tbl_psaexampledpdkvarbit142.apply();
+        tbl_psaexampledpdkvarbitbmv2l142.apply();
     }
 }
 
