@@ -21,7 +21,7 @@ struct parsed_packet_t {
 
 struct local_metadata_t {
     short s;
-    @field_list(0) 
+    @field_list(0)
     row_t row;
 }
 
@@ -63,4 +63,3 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
 }
 
 V1Switch<parsed_packet_t, local_metadata_t>(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;
-
