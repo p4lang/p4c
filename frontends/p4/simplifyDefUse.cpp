@@ -1002,7 +1002,9 @@ class FindUninitialized : public Inspector {
         LOG3("LocationSet for '" << expression << "' is <<" << read << ">>");
 
         auto points = currentDefinitions->getPoints(read);
-        if (reportUninitialized && !lhs && points->containsBeforeStart()) {
+
+        if (reportUninitialized && !lhs && points->containsBeforeStart()
+            && hasUninitializedHeaderUnion(expression, currentDefinitions, read)) {
             // Do not report uninitialized values on the LHS.
             // This could happen if we are writing to an array element
             // with an unknown index.
@@ -1016,6 +1018,66 @@ class FindUninitialized : public Inspector {
         }
 
         hasUses->add(points);
+    }
+
+    // Checks if header unions and header union stacks are initialized.
+    // Unlike other StructLike types header unions are initialized
+    // if only one member of the union is initialized.
+    // Returns true if header union is uninitialized, or if the type is not,
+    // or does not contain a header union.
+    bool hasUninitializedHeaderUnion(const IR::Expression* expression,
+                                     const P4::Definitions* currentDefinitions,
+                                     const LocationSet* read) {
+        auto type = typeMap->getType(expression, true);
+
+        if (type->is<IR::Type_HeaderUnion>()) {
+            if (isHeaderUnionUninitialized(type, currentDefinitions, read)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else if (type->is<IR::Type_Stack>()) {
+            if (isHeaderUnionStackUninitialized(type, currentDefinitions, read)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return true;
+        }
+    }
+
+    // Checks if a header union is uninitialized
+    bool isHeaderUnionUninitialized(const IR::Type* type,
+                                    const P4::Definitions* currentDefinitions,
+                                    const LocationSet* read) {
+        auto huType = type->to<IR::Type_HeaderUnion>();
+        for (auto header : huType->fields) {
+            auto headerLoc = read->getField(header->name);
+            auto points = currentDefinitions->getPoints(headerLoc);
+            if (!points->containsBeforeStart()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Checks if a header union stack is uninitialized
+    bool isHeaderUnionStackUninitialized(const IR::Type* type,
+                                         const P4::Definitions* currentDefinitions,
+                                         const LocationSet* read) {
+        auto sType = type->to<IR::Type_Stack>();
+        for (unsigned int i=0; i<sType->getSize(); i++) {
+            if (sType->at(i)->is<IR::Type_HeaderUnion>()) {
+                auto stackLoc = read->getIndex(i);
+                if (isHeaderUnionUninitialized(sType->at(i), currentDefinitions, stackLoc)) {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        }
+        return false;
     }
 
     // For the following we compute the read set and save it.
