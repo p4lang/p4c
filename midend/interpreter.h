@@ -149,8 +149,6 @@ class ExpressionEvaluator : public Inspector {
     void postorder(const IR::ListExpression* expression) override;
     void postorder(const IR::StructExpression* expression) override;
     void postorder(const IR::MethodCallExpression* expression) override;
-    void postorder(const IR::Equ* expression) override;
-    void postorder(const IR::Neq* expression) override;
     void postorder(const IR::Lss* expression) override;
     void postorder(const IR::Leq* expression) override;
     void postorder(const IR::Grt* expression) override;
@@ -446,7 +444,7 @@ class SymbolicArray final : public SymbolicValue {
                   const SymbolicValueFactory* factory);
     SymbolicValue* get(const IR::Node* node, size_t index) const {
         if (index >= values.size())
-            return new SymbolicException(node, P4::StandardExceptions::StackOutOfBounds);
+            return new SymbolicStaticError(node, "Out of bounds");
         return values.at(index);
     }
     void shift(int amount);  // negative = shift left
