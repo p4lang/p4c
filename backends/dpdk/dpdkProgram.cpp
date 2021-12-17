@@ -188,11 +188,13 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
         headerType.push_back(ht);
     }
 
-    IR::IndexedVector<IR::DpdkStructType> structType = UpdateHeaderMetadata(prog, metadataStruct);
+    IR::IndexedVector<IR::DpdkStructType> structType;
+    IR::IndexedVector<IR::DpdkStructType> updatedHeaderMetadataStructs =
+            UpdateHeaderMetadata(prog, metadataStruct);
     for (auto kv : structure->metadata_types) {
         auto s = kv.second;
         auto structTypeName = s->getName().name;
-        if (structType.getDeclaration(structTypeName) != nullptr) {
+        if (updatedHeaderMetadataStructs.getDeclaration(structTypeName) != nullptr) {
             /**
              * UpdateHeaderMetadata returns IndexedVector filled with following 3 types of structs:
              * - main metadata structure (whose name is stored in structure->local_metadata_type)
@@ -228,6 +230,7 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             structType.push_back(st);
         }
     }
+    structType.append(updatedHeaderMetadataStructs);
 
     IR::IndexedVector<IR::DpdkExternDeclaration> dpdkExternDecls;
     for (auto ed : structure->externDecls) {

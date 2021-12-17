@@ -5,6 +5,11 @@ struct my_header_t {
 	bit<8> value
 }
 
+struct my_struct_t {
+	bit<8> type1
+	bit<8> type2
+}
+
 struct main_metadata_t {
 	bit<32> pna_pre_input_metadata_input_port
 	bit<16> pna_pre_input_metadata_parser_error
@@ -32,11 +37,6 @@ struct main_metadata_t {
 metadata instanceof main_metadata_t
 
 header h instanceof my_header_t
-
-struct my_struct_t {
-	bit<8> type1
-	bit<8> type2
-}
 
 apply {
 	rx m.pna_main_input_metadata_input_port
