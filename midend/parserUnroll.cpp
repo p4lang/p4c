@@ -249,8 +249,10 @@ class ParserSymbolicInterpreter {
     ParserInfo*         synthesizedParser;  // output produced
     bool                unroll;
     StatesVisitedMap    visitedStates;
+    bool&               wasError;
 
     ValueMap* initializeVariables() {
+        wasError = false;
         ValueMap* result = new ValueMap();
         ExpressionEvaluator ev(refMap, typeMap, result);
 
@@ -280,7 +282,7 @@ class ParserSymbolicInterpreter {
             if (value == nullptr)
                 value = factory->create(type, true);
             if (value->is<SymbolicError>()) {
-                ::error(ErrorType::ERR_EXPRESSION,
+                ::warning(ErrorType::ERR_EXPRESSION,
                         "%1%: %2%", d, value->to<SymbolicError>()->message());
                 return nullptr;
             }
@@ -336,7 +338,7 @@ class ParserSymbolicInterpreter {
 
             if (!stateClone)
                 // errors in the original state are signalled
-                ::error(ErrorType::ERR_EXPRESSION, "%1%: error %2% will be triggered\n%3%",
+                ::warning(ErrorType::ERR_EXPRESSION, "%1%: error %2% will be triggered\n%3%",
                         exc->errorPosition, exc->message(), stateChain(state));
             // else this error will occur in a clone of the state produced
             // by unrolling - if the state is reached.  So we don't give an error.
@@ -355,13 +357,16 @@ class ParserSymbolicInterpreter {
         const IR::StatOrDecl* newSord = nullptr;
         ExpressionEvaluator ev(refMap, typeMap, valueMap);
 
+        SymbolicValue* errorValue = nullptr;
         bool success = true;
         if (sord->is<IR::AssignmentStatement>()) {
             auto ass = sord->to<IR::AssignmentStatement>();
             auto left = ev.evaluate(ass->left, true);
+            errorValue = left;
             success = reportIfError(state, left);
             if (success) {
                 auto right = ev.evaluate(ass->right, false);
+                errorValue = right;
                 success = reportIfError(state, right);
                 if (success)
                     left->assign(right);
@@ -370,6 +375,7 @@ class ParserSymbolicInterpreter {
             // can have side-effects
             auto mc = sord->to<IR::MethodCallStatement>();
             auto e = ev.evaluate(mc->methodCall, false);
+            errorValue = e;
             success = reportIfError(state, e);
         } else if (auto bs = sord->to<IR::BlockStatement>()) {
             IR::IndexedVector<IR::StatOrDecl> newComponents;
@@ -384,14 +390,21 @@ class ParserSymbolicInterpreter {
         } else {
             BUG("%1%: unexpected declaration or statement", sord);
         }
-        if (success) {
-            ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
-                                         visitedStates);
-            const IR::Node* node = sord->apply(rewriter);
-            newSord = node->to<IR::StatOrDecl>();
-        } else {
-            newSord = nullptr;
+        if (!success) {
+            if (errorValue->is<SymbolicException>()) {
+                auto* exc = errorValue->to<SymbolicException>();
+                if (exc->exc == P4::StandardExceptions::StackOutOfBounds) {
+                    return newSord;
+                }
+            }
+            std::stringstream errorStr;
+            errorStr << errorValue;
+            ::warning(" %1% is ignored. %2%", sord, errorStr.str());
         }
+        ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
+                                         visitedStates);
+        const IR::Node* node = sord->apply(rewriter);
+        newSord = node->to<IR::StatOrDecl>();
         LOG2("After " << sord << " state is\n" << valueMap);
         return newSord;
     }
@@ -523,10 +536,12 @@ class ParserSymbolicInterpreter {
                 if (packets->equals(prevPackets)) {
                     bool conservative = false;
                     for (auto p : state->before->map) {
-                        auto pkt = p.second->to<SymbolicPacketIn>();
-                        if (pkt->isConservative()) {
-                            conservative = true;
-                            break;
+                        if (p.second->is<SymbolicPacketIn>()) {
+                            auto pkt = p.second->to<SymbolicPacketIn>();
+                            if (pkt->isConservative()) {
+                                conservative = true;
+                                break;
+                            }
                         }
                     }
 
@@ -535,17 +550,18 @@ class ParserSymbolicInterpreter {
                                     "Potential parser cycle without extracting any bytes:\n%1%",
                                     stateChain(state));
                     else
-                        ::error(ErrorType::ERR_INVALID,
-                                "Parser cycle without extracting any bytes:\n%1%",
-                                stateChain(state));
+                        ::warning(ErrorType::ERR_INVALID,
+                                  "Parser cycle without extracting any bytes:\n%1%",
+                                  stateChain(state));
                     return true;
                 }
 
                 // If no header validity has changed we can't really unroll
                 if (!headerValidityChange(crt->before, state->before)) {
                     if (unroll)
-                        ::error(ErrorType::ERR_INVALID, "Parser cycle cannot be unrolled:\n%1%",
-                                stateChain(state));
+                        ::warning(ErrorType::ERR_INVALID,
+                                  "Parser cycle cannot be unrolled:\n%1%",
+                                  stateChain(state));
                     return true;
                 }
                 break;
@@ -598,8 +614,9 @@ class ParserSymbolicInterpreter {
     bool  hasOutOfboundState;
     /// constructor
     ParserSymbolicInterpreter(ParserStructure* structure, ReferenceMap* refMap, TypeMap* typeMap,
-                              bool unroll) : structure(structure), refMap(refMap),
-                              typeMap(typeMap), synthesizedParser(nullptr), unroll(unroll) {
+                              bool unroll, bool& wasError) : structure(structure), refMap(refMap),
+                              typeMap(typeMap), synthesizedParser(nullptr), unroll(unroll),
+                              wasError(wasError) {
         CHECK_NULL(structure); CHECK_NULL(refMap); CHECK_NULL(typeMap);
         factory = new SymbolicValueFactory(typeMap);
         parser = structure->parser;
@@ -633,9 +650,11 @@ class ParserSymbolicInterpreter {
             visited.insert(VisitedKey(stateInfo));  // add to visited map
             stateInfo->scenarioStates.insert(stateInfo->name);  // add to loops detection
             bool infLoop = checkLoops(stateInfo);
-            if (infLoop)
+            if (infLoop) {
+                wasError = true;
                 // don't evaluate successors anymore
                 continue;
+            }
             auto nextStates = evaluateState(stateInfo, newStates);
             if (nextStates.first == nullptr) {
                 if (nextStates.second && stateInfo->predecessor &&
@@ -659,8 +678,8 @@ class ParserSymbolicInterpreter {
 
 }  // namespace ParserStructureImpl
 
-bool ParserStructure::analyze(ReferenceMap* refMap, TypeMap* typeMap, bool unroll) {
-    ParserStructureImpl::ParserSymbolicInterpreter psi(this, refMap, typeMap, unroll);
+bool ParserStructure::analyze(ReferenceMap* refMap, TypeMap* typeMap, bool unroll, bool& wasError) {
+    ParserStructureImpl::ParserSymbolicInterpreter psi(this, refMap, typeMap, unroll, wasError);
     result = psi.run();
     return psi.hasOutOfboundState;
 }

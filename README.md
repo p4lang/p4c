@@ -20,7 +20,7 @@ make adding new backends easy.
 The code contains five sample backends:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
   the BMv2 behavioral model https://github.com/p4lang/behavioral-model,
-* p4c-dpdk: can be used to target the DPDK software switch (SXS) pipeline
+* p4c-dpdk: can be used to target the DPDK software switch (SWX) pipeline
   https://doc.dpdk.org/guides/rel_notes/release_20_11.html,
 * p4c-ebpf: can be used to generate C code which can be compiled to eBPF
   https://en.wikipedia.org/wiki/Berkeley_Packet_Filter and then loaded
@@ -510,6 +510,18 @@ arguments to these macros.
 To pass custom arguments to p4c, you can set the environment variable `P4C_ARGS`:
 ```
 make check P4C_ARGS="-Xp4c=MY_CUSTOM_FLAG"
+```
+
+When making changes to p4c, it is sometimes useful to be able to run
+the tests while overwriting the expected output files that are saved
+in this repository.  One such situation is when your changes to p4c
+cause the names of compiler-generated local variables to change.  To
+force the expected output files to be rewritten while running the
+tests, assign a value to the shell environment variable
+`P4TEST_REPLACE`.  Here is one example Bash command to do so:
+
+```
+P4TEST_REPLACE=1 make check
 ```
 
 ### Installation

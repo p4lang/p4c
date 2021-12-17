@@ -58,9 +58,6 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
     }
 }
 
-struct tuple_0 {
-}
-
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     @name("ingress.smeta") standard_metadata_t smeta_0;
     @name("ingress.smeta") standard_metadata_t smeta_3;
@@ -142,10 +139,10 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     @name("ingress.do_resubmit") action do_resubmit(@name("new_ipv4_dstAddr") bit<32> new_ipv4_dstAddr) {
         hdr.ipv4.dstAddr = new_ipv4_dstAddr;
-        resubmit<tuple_0>((tuple_0){});
+        resubmit_preserving_field_list(8w0);
     }
     @name("ingress.do_clone_i2e") action do_clone_i2e(@name("l2ptr") bit<32> l2ptr_3) {
-        clone3<tuple_0>(CloneType.I2E, 32w5, (tuple_0){});
+        clone_preserving_field_list(CloneType.I2E, 32w5, 8w0);
         meta._fwd_l2ptr0 = l2ptr_3;
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {
@@ -177,31 +174,31 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         }
         default_action = my_drop_3();
     }
-    @hidden action v1modelspecialopsbmv2l312() {
+    @hidden action v1modelspecialopsbmv2l292() {
         hdr.ipv4.srcAddr = 32w184320258;
         meta._fwd_l2ptr0 = 32w0xe50b;
     }
-    @hidden action v1modelspecialopsbmv2l315() {
+    @hidden action v1modelspecialopsbmv2l295() {
         hdr.ipv4.srcAddr = 32w180835939;
         meta._fwd_l2ptr0 = 32w0xec1c;
     }
-    @hidden table tbl_v1modelspecialopsbmv2l312 {
+    @hidden table tbl_v1modelspecialopsbmv2l292 {
         actions = {
-            v1modelspecialopsbmv2l312();
+            v1modelspecialopsbmv2l292();
         }
-        const default_action = v1modelspecialopsbmv2l312();
+        const default_action = v1modelspecialopsbmv2l292();
     }
-    @hidden table tbl_v1modelspecialopsbmv2l315 {
+    @hidden table tbl_v1modelspecialopsbmv2l295 {
         actions = {
-            v1modelspecialopsbmv2l315();
+            v1modelspecialopsbmv2l295();
         }
-        const default_action = v1modelspecialopsbmv2l315();
+        const default_action = v1modelspecialopsbmv2l295();
     }
     apply {
         if (standard_metadata.instance_type == 32w6) {
-            tbl_v1modelspecialopsbmv2l312.apply();
+            tbl_v1modelspecialopsbmv2l292.apply();
         } else if (standard_metadata.instance_type == 32w4) {
-            tbl_v1modelspecialopsbmv2l315.apply();
+            tbl_v1modelspecialopsbmv2l295.apply();
         } else {
             ipv4_da_lpm_0.apply();
         }
@@ -269,11 +266,11 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
     }
     @name("egress.do_recirculate") action do_recirculate(@name("new_ipv4_dstAddr") bit<32> new_ipv4_dstAddr_2) {
         hdr.ipv4.dstAddr = new_ipv4_dstAddr_2;
-        recirculate<tuple_0>((tuple_0){});
+        recirculate_preserving_field_list(8w0);
     }
     @name("egress.do_clone_e2e") action do_clone_e2e(@name("smac") bit<48> smac_2) {
         hdr.ethernet.srcAddr = smac_2;
-        clone3<tuple_0>(CloneType.E2E, 32w11, (tuple_0){});
+        clone_preserving_field_list(CloneType.E2E, 32w11, 8w0);
     }
     @name("egress.send_frame") table send_frame_0 {
         key = {
@@ -287,33 +284,33 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
         }
         default_action = my_drop_4();
     }
-    @hidden action v1modelspecialopsbmv2l385() {
+    @hidden action v1modelspecialopsbmv2l367() {
         hdr.switch_to_cpu.setValid();
         hdr.switch_to_cpu.word0 = 32w0x12e012e;
         hdr.switch_to_cpu.word1 = 32w0x5a5a5a5a;
     }
-    @hidden action v1modelspecialopsbmv2l391() {
+    @hidden action v1modelspecialopsbmv2l373() {
         hdr.switch_to_cpu.setValid();
         hdr.switch_to_cpu.word0 = 32w0xe2e0e2e;
         hdr.switch_to_cpu.word1 = 32w0x5a5a5a5a;
     }
-    @hidden table tbl_v1modelspecialopsbmv2l385 {
+    @hidden table tbl_v1modelspecialopsbmv2l367 {
         actions = {
-            v1modelspecialopsbmv2l385();
+            v1modelspecialopsbmv2l367();
         }
-        const default_action = v1modelspecialopsbmv2l385();
+        const default_action = v1modelspecialopsbmv2l367();
     }
-    @hidden table tbl_v1modelspecialopsbmv2l391 {
+    @hidden table tbl_v1modelspecialopsbmv2l373 {
         actions = {
-            v1modelspecialopsbmv2l391();
+            v1modelspecialopsbmv2l373();
         }
-        const default_action = v1modelspecialopsbmv2l391();
+        const default_action = v1modelspecialopsbmv2l373();
     }
     apply {
         if (standard_metadata.instance_type == 32w1) {
-            tbl_v1modelspecialopsbmv2l385.apply();
+            tbl_v1modelspecialopsbmv2l367.apply();
         } else if (standard_metadata.instance_type == 32w2) {
-            tbl_v1modelspecialopsbmv2l391.apply();
+            tbl_v1modelspecialopsbmv2l373.apply();
         } else {
             if (standard_metadata.instance_type == 32w5) {
                 get_multicast_copy_out_bd_0.apply();
@@ -331,7 +328,7 @@ control DeparserImpl(packet_out packet, in headers_t hdr) {
     }
 }
 
-struct tuple_1 {
+struct tuple_0 {
     bit<4>  f0;
     bit<4>  f1;
     bit<8>  f2;
@@ -347,13 +344,13 @@ struct tuple_1 {
 
 control verifyChecksum(inout headers_t hdr, inout meta_t meta) {
     apply {
-        verify_checksum<tuple_1, bit<16>>(hdr.ipv4.isValid() && hdr.ipv4.ihl == 4w5, (tuple_1){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid() && hdr.ipv4.ihl == 4w5, (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers_t hdr, inout meta_t meta) {
     apply {
-        update_checksum<tuple_1, bit<16>>(hdr.ipv4.isValid() && hdr.ipv4.ihl == 4w5, (tuple_1){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid() && hdr.ipv4.ihl == 4w5, (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 

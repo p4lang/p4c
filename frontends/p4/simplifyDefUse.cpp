@@ -714,9 +714,10 @@ class FindUninitialized : public Inspector {
             if (auto list = src->to<IR::StructExpression>()) {
                 auto it = list->components.begin();
                 for (auto field : dst_struct->fields) {
-                    IR::Member member(dst, field->name);
-                    processHeadersInAssignment(&member, (*it)->expression,
-                                               typeMap->getType(field, true),
+                    auto ftype = typeMap->getType(field, true);
+                    auto member = new IR::Member(dst, field->name);
+                    typeMap->setType(member, ftype);
+                    processHeadersInAssignment(member, (*it)->expression, ftype,
                                                typeMap->getType((*it)->expression, true));
                     ++it;
                 }
@@ -727,11 +728,12 @@ class FindUninitialized : public Inspector {
                 }
             } else if (src_type->to<IR::Type_Struct>()) {
                 for (auto field : dst_struct->fields) {
-                    IR::Member dst_member(dst, field->name);
-                    IR::Member src_member(src, field->name);
-                    processHeadersInAssignment(&dst_member, &src_member,
-                                               typeMap->getType(field, true),
-                                               typeMap->getType(field, true));
+                    auto ftype = typeMap->getType(field, true);
+                    auto dst_member = new IR::Member(dst, field->name);
+                    auto src_member = new IR::Member(src, field->name);
+                    typeMap->setType(dst_member, ftype);
+                    typeMap->setType(src_member, ftype);
+                    processHeadersInAssignment(dst_member, src_member, ftype, ftype);
                 }
             } else {
                 BUG("%1%: unexpected expression on RHS", src);
@@ -752,11 +754,14 @@ class FindUninitialized : public Inspector {
                                              false;
 
                 for (auto field : dst_headerunion->fields) {
-                    IR::Member dst_member(dst, field->name);
-                    IR::Member src_member(src, field->name);
-                    auto valid = headerDefs->find(&src_member);
+                    auto ftype = typeMap->getType(field, true);
+                    auto dst_member = new IR::Member(dst, field->name);
+                    auto src_member = new IR::Member(src, field->name);
+                    typeMap->setType(dst_member, ftype);
+                    typeMap->setType(src_member, ftype);
+                    auto valid = headerDefs->find(src_member);
                     if (!non_constant_indexing || valid == TernaryBool::Yes)
-                        headerDefs->update(headerDefs->getStorageLocation(&dst_member),
+                        headerDefs->update(headerDefs->getStorageLocation(dst_member),
                                            valid);
                 }
                 auto valid = headerDefs->find(src);

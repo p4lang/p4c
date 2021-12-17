@@ -1,0 +1,42 @@
+minWidth.p4(7): [--Werror=type-error] error: Cannot extract field minWidthInBits from 2 which has type int
+const int xw = x.minWidthInBits();
+                 ^^^^^^^^^^^^^^
+minWidth.p4(6)
+const int x = 2;
+              ^
+minWidth.p4(7): [--Werror=type-error] error: 2.minWidthInBits: Cannot evaluate initializer to a compile-time constant
+const int xw = x.minWidthInBits();
+               ^^^^^^^^^^^^^^^^^^
+minWidth.p4(8): [--Werror=type-error] error: error.minWidthInBits: Invalid enum tag
+const int ew = error.minWidthInBits();
+               ^^^^^^^^^^^^^^^^^^^^
+minWidth.p4(8): [--Werror=type-error] error: error.minWidthInBits is not a method
+const int ew = error.minWidthInBits();
+               ^^^^^^^^^^^^^^^^^^^^^^
+minWidth.p4(8): [--Werror=type-error] error: error.minWidthInBits: Cannot evaluate initializer to a compile-time constant
+const int ew = error.minWidthInBits();
+               ^^^^^^^^^^^^^^^^^^^^^^
+minWidth.p4(9): [--Werror=type-error] error: Cannot extract field minWidthInBits from S which has type Type(string)
+const int sw = S.minWidthInBits();
+                 ^^^^^^^^^^^^^^
+minWidth.p4(9)
+const int sw = S.minWidthInBits();
+               ^
+minWidth.p4(9): [--Werror=type-error] error: S.minWidthInBits: Cannot evaluate initializer to a compile-time constant
+const int sw = S.minWidthInBits();
+               ^^^^^^^^^^^^^^^^^^
+minWidth.p4(16): [--Werror=type-error] error: Cannot extract field minWidthInBits from e which has type E
+const int eew = e.minWidthInBits();
+                  ^^^^^^^^^^^^^^
+minWidth.p4(16)
+const int eew = e.minWidthInBits();
+                ^
+minWidth.p4(16): [--Werror=type-error] error: e.minWidthInBits: Cannot evaluate initializer to a compile-time constant
+const int eew = e.minWidthInBits();
+                ^^^^^^^^^^^^^^^^^^
+minWidth.p4(21): [--Werror=invalid] error: ctr: cannot instantiate at top-level
+c() ctr;
+    ^^^
+minWidth.p4(22): [--Werror=type-error] error: ctr.minWidthInBits: Cannot evaluate initializer to a compile-time constant
+const int ce = ctr.minWidthInBits();
+               ^^^^^^^^^^^^^^^^^^^^

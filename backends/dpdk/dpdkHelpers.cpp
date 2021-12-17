@@ -327,7 +327,8 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
                         false_label, equ->left, equ->right));
         } else {
             instructions.push_back(new IR::DpdkJmpEqualStatement(
-                        true_label, equ->left, equ->right)); }
+                        true_label, equ->left, equ->right));
+        }
         return is_and;
     } else if (auto neq = expr->to<IR::Neq>()) {
         if (is_and) {
@@ -335,7 +336,8 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
                         false_label, neq->left, neq->right));
         } else {
             instructions.push_back(new IR::DpdkJmpNotEqualStatement(
-                        true_label, neq->left, neq->right)); }
+                        true_label, neq->left, neq->right));
+        }
         return is_and;
     } else if (auto lss = expr->to<IR::Lss>()) {
         /* Dpdk target does not support the negated condition Geq,
@@ -617,10 +619,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 ::error("%1%: verify must be used in parser", s);
             auto args = a->expr->arguments;
             auto condition = args->at(0);
-            auto error = args->at(1);
-            if (!error->expression->is<IR::Member>())
-                ::error("%1%: must be one of the existing errors", s);
-            auto error_id = structure->error_map.at(error->expression->to<IR::Member>()->member);
+            auto error_id = args->at(1);
             auto end_label = refmap->newName("label_end");
             const IR::BoolLiteral *boolLiteral = condition->expression->to<IR::BoolLiteral>();
             if (!boolLiteral) {
@@ -630,9 +629,17 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             } else if (boolLiteral->value == true) {
                 return false;
             }
-            auto tmp = new IR::PathExpression(
-                                   IR::ID("m.psa_ingress_input_metadata_parser_error"));
-            add_instr(new IR::DpdkMovStatement(tmp, new IR::Constant(error_id)));
+            IR::PathExpression *error_meta_path;
+            if (structure->isPSA()) {
+                error_meta_path = new IR::PathExpression(
+                    IR::ID("m.psa_ingress_input_metadata_parser_error"));
+            } else if (structure->isPNA()) {
+                error_meta_path = new IR::PathExpression(
+                    IR::ID("m.pna_pre_input_metadata_parser_error"));
+            } else {
+                BUG("Unknown architecture unexpectedly!");
+            }
+            add_instr(new IR::DpdkMovStatement(error_meta_path, error_id->expression));
             add_instr(new IR::DpdkJmpLabelStatement(
                         append_parser_name(parser, IR::ParserState::reject)));
             add_instr(new IR::DpdkLabelStatement(end_label));

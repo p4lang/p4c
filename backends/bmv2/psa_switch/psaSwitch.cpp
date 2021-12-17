@@ -939,8 +939,7 @@ Util::IJson* ExternConverter_Digest::convertExternObject(
             listName = st->controlPlaneName();
         }
     }
-    int id = createFieldList(ctxt, mc->arguments->at(0)->expression, "learn_lists",
-                             listName, ctxt->json->learn_lists);
+    int id = ctxt->createFieldList(mc->arguments->at(0)->expression, listName, true);
     auto cst = new IR::Constant(id);
     ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
     auto jcst = ctxt->conv->convert(cst);
@@ -1055,7 +1054,7 @@ void ExternConverter_Counter::convertExternInstance(
     auto attr_obj = new Util::JsonObject();
     auto arg1 = sz->to<IR::Constant>();
     auto param1 = eb->getConstructorParameters()->getParameter(0);
-    auto bitwidth = ctxt->typeMap->minWidthBits(arg1->type, sz->getNode());
+    auto bitwidth = ctxt->typeMap->widthBits(arg1->type, sz->getNode(), false);
     cstring repr = BMV2::stringRepr(arg1->value, ROUNDUP(bitwidth, 8));
     attr_obj->emplace("name", param1->toString());
     attr_obj->emplace("type", "hexstr");
@@ -1163,7 +1162,7 @@ void ExternConverter_Meter::convertExternInstance(
     }
     auto attr_name = eb->getConstructorParameters()->getParameter(0);
     auto s = sz->to<IR::Constant>();
-    auto bitwidth = ctxt->typeMap->minWidthBits(s->type, sz->getNode());
+    auto bitwidth = ctxt->typeMap->widthBits(s->type, sz->getNode(), false);
     cstring val = BMV2::stringRepr(s->value, ROUNDUP(bitwidth, 8));
     auto msz = new Util::JsonObject();
     msz->emplace("name", attr_name->toString());

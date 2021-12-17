@@ -38,7 +38,11 @@ const IR::Expression* DoSimplifyExpressions::addAssignment(
     Util::SourceInfo srcInfo,
     cstring varName,
     const IR::Expression* expression) {
-    auto left = new IR::PathExpression(IR::ID(varName, nullptr));
+    const IR::PathExpression* left;
+    if (auto pe = expression->to<IR::PathExpression>())
+        left = new IR::PathExpression(IR::ID(varName, pe->path->name.originalName));
+    else
+        left = new IR::PathExpression(IR::ID(varName, nullptr));
     auto stat = new IR::AssignmentStatement(srcInfo, left, expression);
     statements.push_back(stat);
     auto result = left->clone();
@@ -777,8 +781,10 @@ const IR::Node* KeySideEffect::doStatement(const IR::Statement* statement,
         return statement;
 
     auto result = new IR::IndexedVector<IR::StatOrDecl>();
-    for (auto assign : insertions->statements)
-        result->push_back(assign);
+    for (auto assign : insertions->statements){
+        auto cloneAssign = assign->clone();
+        result->push_back(cloneAssign);
+    }
     result->push_back(statement);
     auto block = new IR::BlockStatement(*result);
     return block;

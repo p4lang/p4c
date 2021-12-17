@@ -28,16 +28,35 @@ header Nested {
 }
 
 struct S {
-    H    h1;
-    H1   h2;
-    H[3] h3;
-}
-
-header_union HU {
     H  h1;
     H1 h2;
 }
 
 header Empty {
 }
+
+control c(out bit<32> size) {
+    @name("c.h1") H h1_2;
+    @name("c.h2") H1 h2_2;
+    @name("c.h1_0") H h1_3;
+    @name("c.h2_0") H1 h2_3;
+    @name("c.hasReturned") bool hasReturned;
+    @name("c.retval") bit<32> retval;
+    @name("c.b1") bool b1_0;
+    apply {
+        h1_2.setInvalid();
+        h2_2.setInvalid();
+        h1_3 = h1_2;
+        h2_3 = h2_2;
+        hasReturned = false;
+        b1_0 = h2_3.minSizeInBits == 8w32;
+        hasReturned = true;
+        retval = h1_3.isValid + (b1_0 ? 32w117 : 32w162);
+        size = retval;
+    }
+}
+
+control _c(out bit<32> s);
+package top(_c c);
+top(c()) main;
 

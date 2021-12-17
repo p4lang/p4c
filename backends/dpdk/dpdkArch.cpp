@@ -368,7 +368,7 @@ const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct *s) {
 }
 
 const IR::Node *InjectOutputPortMetadataField::preorder(IR::Type_Struct *s) {
-    if (structure->p4arch == "pna" && s->name.name == structure->local_metadata_type) {
+    if (structure->isPNA() && s->name.name == structure->local_metadata_type) {
         s->fields.push_back(new IR::StructField(
             IR::ID(PnaMainOutputMetadataOutputPortName), IR::Type_Bits::get(32)));
         LOG3("Metadata structure after injecting output port:" << std::endl << s);
@@ -1037,6 +1037,24 @@ const IR::Node* CopyMatchKeysToSingleStruct::postorder(IR::KeyElement* element) 
         element->expression = keyPathExpr;
     }
     return element;
+}
+const IR::Node* CopyMatchKeysToSingleStruct::doStatement(const IR::Statement* statement,
+                                           const IR::Expression *expression) {
+    LOG3("Visiting " << getOriginal());
+    P4::HasTableApply hta(refMap, typeMap);
+    hta.setCalledBy(this);
+    (void)expression->apply(hta);
+    if (hta.table == nullptr)
+        return statement;
+    auto insertions = get(toInsert, hta.table);
+    if (insertions == nullptr)
+        return statement;
+    auto result = new IR::IndexedVector<IR::StatOrDecl>();
+    for (auto assign : insertions->statements)
+        result->push_back(assign);
+    result->push_back(statement);
+    auto block = new IR::BlockStatement(*result);
+    return block;
 }
 
 namespace Helpers {

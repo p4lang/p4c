@@ -84,7 +84,7 @@ DoExpandLookahead::convertLookahead(const IR::MethodCallExpression* expression) 
     if (!typearg->is<IR::Type_StructLike>() && !typearg->is<IR::Type_Tuple>())
         return nullptr;
 
-    int width = typeMap->minWidthBits(typearg, expression);
+    int width = typeMap->widthBits(typearg, expression, false);
     if (width < 0)
         return nullptr;
 

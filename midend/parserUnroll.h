@@ -116,7 +116,7 @@ class ParserStructure {
     void calls(const IR::ParserState* caller, const IR::ParserState* callee)
     { callGraph->calls(caller, callee); }
 
-    bool analyze(ReferenceMap* refMap, TypeMap* typeMap, bool unroll);
+    bool analyze(ReferenceMap* refMap, TypeMap* typeMap, bool unroll, bool& wasError);
     /// check reachability for usage of header stack
     bool reachableHSUsage(IR::ID id, const ParserStateInfo* state) const;
 
@@ -156,14 +156,16 @@ class ParserRewriter : public PassManager {
     friend class RewriteAllParsers;
  public:
     bool hasOutOfboundState;
+    bool wasError;
     ParserRewriter(ReferenceMap* refMap,
                    TypeMap* typeMap, bool unroll) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap);
+        wasError = false;
         setName("ParserRewriter");
         addPasses({
             new AnalyzeParser(refMap, &current),
             [this, refMap, typeMap, unroll](void) {
-                hasOutOfboundState = current.analyze(refMap, typeMap, unroll); },
+                hasOutOfboundState = current.analyze(refMap, typeMap, unroll, wasError); },
         });
     }
 };
@@ -188,6 +190,9 @@ class RewriteAllParsers : public Transform {
         auto rewriter = new ParserRewriter(refMap, typeMap, unroll);
         rewriter->setCalledBy(this);
         parser->apply(*rewriter);
+        if (rewriter->wasError) {
+            return parser;
+        }
         /// make a new parser
         BUG_CHECK(rewriter->current.result,
                   "No result was found after unrolling of the parser loop");

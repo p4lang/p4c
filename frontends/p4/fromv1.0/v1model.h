@@ -202,7 +202,7 @@ struct Hash_Model : public ::Model::Elem {
 };
 
 struct Cloner_Model : public ::Model::Extern_Model {
-    Cloner_Model() : Extern_Model("clone"), clone3("clone3"), cloneType(),
+    Cloner_Model() : Extern_Model("clone"), clone3("clone_preserving_field_list"), cloneType(),
                      sessionType(IR::Type_Bits::get(32)) {}
     ::Model::Elem   clone3;
     CloneType_Model cloneType;
@@ -250,13 +250,13 @@ class V1Model : public ::Model::Model {
             egress("egress", headersType, metadataType, standardMetadataType),
             ingress("ingress", headersType, metadataType, standardMetadataType),
             sw(), counterOrMeter("$"), counter(), meter(), random(), action_profile(),
-            action_selector(), clone(), resubmit("resubmit"),
+            action_selector(), clone(), resubmit("resubmit_preserving_field_list"),
             tableAttributes(), rangeMatchType("range"),
                 optionalMatchType("optional"), selectorMatchType("selector"),
             verify("verifyChecksum", headersType), compute("computeChecksum", headersType),
             digest_receiver(), hash(), algorithm(),
             registers(), drop("mark_to_drop"),
-            recirculate("recirculate"), verify_checksum("verify_checksum"),
+            recirculate("recirculate_preserving_field_list"), verify_checksum("verify_checksum"),
             update_checksum("update_checksum"),
             verify_checksum_with_payload("verify_checksum_with_payload"),
             update_checksum_with_payload("update_checksum_with_payload"),

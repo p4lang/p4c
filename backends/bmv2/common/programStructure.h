@@ -54,13 +54,13 @@ class ProgramStructure {
     // in the scalarsName metadata object, so we may need to rename
     // these fields.  This map holds the new names.
     std::map<const IR::StructField *, cstring> scalarMetadataFields;
-    // All the direct meters.
+    /// All the direct meters.
     DirectMeterMap directMeterMap;
-    // All the direct counters.
+    /// All the direct counters.
     ordered_map<cstring, const IR::P4Table *> directCounterMap;
-    // All match kinds
+    /// All match kinds
     std::set<cstring>  match_kinds;
-    // map IR node to compile-time allocated resource blocks.
+    /// map IR node to compile-time allocated resource blocks.
     ResourceMap resourceMap;
 
     ProgramStructure() {}

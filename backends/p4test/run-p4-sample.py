@@ -256,12 +256,15 @@ def process_file(options, argv):
     # invoke the compiler with a valid --arch.
     def getArch(path):
         v1Pattern = re.compile('include.*v1model\.p4')
+        pnaPattern = re.compile('include.*pna\.p4')
         psaPattern = re.compile('include.*psa\.p4')
         ubpfPattern = re.compile('include.*ubpf_model\.p4')
         with open(path, 'r', encoding='utf-8') as f:
             for line in f:
                 if v1Pattern.search(line):
                     return "v1model"
+                elif pnaPattern.search(line):
+                    return "pna"
                 elif psaPattern.search(line):
                     return "psa"
                 elif ubpfPattern.search(line):
@@ -273,7 +276,8 @@ def process_file(options, argv):
     args = ["./p4test", "--pp", ppfile, "--dump", tmpdir, "--top4", referenceOutputs,
             "--testJson"] + options.compilerOptions
     arch = getArch(options.p4filename)
-    if arch is not None:
+    if arch is not None and arch != "pna":
+        # Arch 'pna' is currently not supported by P4Runtime serializer
         args.extend(["--arch", arch])
         if options.generateP4Runtime:
             args.extend(["--p4runtime-files", p4runtimeFile])
@@ -323,7 +327,7 @@ def process_file(options, argv):
         result = check_generated_files(options, tmpdir, expected_dirname)
     if (result == SUCCESS) and (not expected_error):
         result = recompile_file(options, ppfile, False)
-    if (result == SUCCESS) and (not expected_error) and (lastFile is not None) and (arch is not "psa"):
+    if (result == SUCCESS) and (not expected_error) and (lastFile is not None) and (arch not in ["psa", "pna"]):
         # Unfortunately compilation and pretty-printing of lastFile is
         # not idempotent: For example a constant such as 8s128 is
         # converted by the compiler to -8s128.

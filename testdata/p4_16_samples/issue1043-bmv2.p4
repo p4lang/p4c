@@ -30,7 +30,7 @@ control deparser(packet_out b, in Headers h) {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
-        resubmit(m);
+        resubmit_preserving_field_list(0);
         sm.egress_spec = 0;
     }
 }

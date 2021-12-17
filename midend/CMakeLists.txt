@@ -27,6 +27,7 @@ set (MIDEND_SRCS
   fillEnumMap.cpp
   flattenHeaders.cpp
   flattenInterfaceStructs.cpp
+  hsIndexSimplify.cpp
   interpreter.cpp
   global_copyprop.cpp
   local_copyprop.cpp
@@ -59,6 +60,7 @@ set (MIDEND_HDRS
   compileTimeOps.h
   complexComparison.h
   convertEnums.h
+  convertErrors.h
   copyStructures.h
   eliminateNewtype.h
   eliminateSerEnums.h

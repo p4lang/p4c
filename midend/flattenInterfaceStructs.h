@@ -23,6 +23,27 @@ limitations under the License.
 namespace P4 {
 
 /**
+ * Policy to select which annotations of the nested struct to attach
+ * to the struct fields after the nest struct is flattened.
+ */
+class AnnotationSelectionPolicy {
+ public:
+    virtual ~AnnotationSelectionPolicy() {}
+
+    /**
+     * Call for each nested struct to check if the annotation of the nested
+     * struct should be kept on its fields.
+     *
+     * @return
+     *  true if the annotation should be kept on the field.
+     *  false if the annotation should be discarded.
+     */
+    virtual bool keep(const IR::Annotation*) {
+        return true;
+    }
+};
+
+/**
 Describes how a nested struct type is replaced: the new type to
 replace it and how each field is renamed.  For example, consider
 the following:
@@ -42,8 +63,23 @@ struct M {
    bit<3> x;
 }
 */
+template<typename T>
+// T is the type of objects that will be replaced.  E.g., IR::Type_Struct
 struct StructTypeReplacement : public IHasDbPrint {
-    StructTypeReplacement(const P4::TypeMap* typeMap, const IR::Type_Struct* type);
+    StructTypeReplacement(const P4::TypeMap* typeMap, const IR::Type_StructLike* type,
+                          AnnotationSelectionPolicy *policy) {
+        auto vec = new IR::IndexedVector<IR::StructField>();
+        flatten(typeMap, "", type, type->annotations, vec, policy);
+        if (type->is<IR::Type_Struct>()) {
+            replacementType = new IR::Type_Struct(
+                type->srcInfo, type->name, IR::Annotations::empty, *vec);
+        } else if (type->is<IR::Type_Header>()) {
+            replacementType = new IR::Type_Header(
+                type->srcInfo, type->name, IR::Annotations::empty, *vec);
+        } else {
+            BUG("Unexpected type %1%", type);
+        }
+    }
 
     // Maps nested field names to final field names.
     // In our example this could be:
@@ -55,7 +91,7 @@ struct StructTypeReplacement : public IHasDbPrint {
     // Maps internal fields names to types.
     // .t -> T
     // .t.s -> S
-    std::map<cstring, const IR::Type_Struct*> structFieldMap;
+    std::map<cstring, const IR::Type_StructLike*> structFieldMap;
     // Holds a new flat type
     // struct M {
     //    bit _t_s_a0;
@@ -72,14 +108,63 @@ struct StructTypeReplacement : public IHasDbPrint {
     void flatten(const P4::TypeMap* typeMap,
                  cstring prefix,
                  const IR::Type* type,
-                 IR::IndexedVector<IR::StructField> *fields);
+                 const IR::Annotations* annotations,
+                 IR::IndexedVector<IR::StructField> *fields,
+                 AnnotationSelectionPolicy* policy) {
+        // Drop name annotations
+        IR::Annotations::Filter f =
+                [](const IR::Annotation* a) { return a->name != IR::Annotation::nameAnnotation; };
+        annotations = annotations->where(f);
+        if (auto st = type->to<T>()) {
+            std::function<bool(const IR::Annotation *)> selector =
+                    [&policy](const IR::Annotation *annot) {
+                        if (!policy)
+                            return false;
+                        return policy->keep(annot);
+                    };
+            auto sannotations = st->annotations->where(selector);
+            structFieldMap.emplace(prefix, st);
+            for (auto f : st->fields) {
+                auto na = new IR::Annotations();
+                na->append(sannotations);
+                na->append(annotations);
+                na->append(f->annotations);
+                auto ft = typeMap->getType(f, true);
+                flatten(typeMap, prefix + "." + f->name, ft, na, fields, policy);
+            }
+            return;
+        }
+        cstring fieldName = prefix.replace(".", "_") +
+                cstring::to_cstring(fieldNameRemap.size());
+        fieldNameRemap.emplace(prefix, fieldName);
+        fields->push_back(new IR::StructField(IR::ID(fieldName), annotations, type->getP4Type()));
+        LOG3("Flatten: " << type << " | " << prefix);
+    }
 
     /// Returns a StructExpression suitable for
     /// initializing a struct for the fields that start with the
     /// given prefix.  For example, for prefix .t and root R this returns
     /// { .s = { .a = R._t_s_a0, .b = R._t_s_b1 }, .y = R._t_y2 }
     const IR::StructExpression* explode(
-        const IR::Expression* root, cstring prefix);
+        const IR::Expression* root, cstring prefix) {
+        auto vec = new IR::IndexedVector<IR::NamedExpression>();
+        auto fieldType = ::get(structFieldMap, prefix);
+        BUG_CHECK(fieldType, "No field for %1%", prefix);
+        for (auto f : fieldType->fields) {
+            cstring fieldName = prefix + "." + f->name.name;
+            auto newFieldname = ::get(fieldNameRemap, fieldName);
+            const IR::Expression* expr;
+            if (!newFieldname.isNullOrEmpty()) {
+                expr = new IR::Member(root, newFieldname);
+            } else {
+                expr = explode(root, fieldName);
+            }
+            vec->push_back(new IR::NamedExpression(f->name, expr));
+        }
+        auto type = fieldType->getP4Type()->template to<IR::Type_Name>();
+        return new IR::StructExpression(
+            root->srcInfo, type, type, *vec);
+    }
 };
 
 /**
@@ -90,13 +175,13 @@ struct NestedStructMap {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
 
-    ordered_map<const IR::Type*, StructTypeReplacement*> replacement;
+    ordered_map<const IR::Type*, StructTypeReplacement<IR::Type_Struct>*> replacement;
 
     NestedStructMap(P4::ReferenceMap* refMap, P4::TypeMap* typeMap):
             refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
     void createReplacement(const IR::Type_Struct* type);
-    StructTypeReplacement* getReplacement(const IR::Type* type) const
+    StructTypeReplacement<IR::Type_Struct>* getReplacement(const IR::Type* type) const
     { return ::get(replacement, type); }
     bool empty() const { return replacement.empty(); }
 };
@@ -159,7 +244,7 @@ top<TFlat>(c()) main;
  */
 class ReplaceStructs : public Transform, P4WriteContext {
     NestedStructMap* replacementMap;
-    std::map<const IR::Parameter*, StructTypeReplacement*> toReplace;
+    std::map<const IR::Parameter*, StructTypeReplacement<IR::Type_Struct>*> toReplace;
 
  public:
     explicit ReplaceStructs(NestedStructMap* sm): replacementMap(sm) {

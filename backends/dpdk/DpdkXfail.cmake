@@ -19,11 +19,6 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "error: error: width not well-defined"
-  testdata/p4_16_samples/psa-example-parser-checksum.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
   "Expected psa_implementation property value for table.* to resolve to an extern instance"
   testdata/p4_16_samples/psa-action-profile2.p4
   )
@@ -56,6 +51,7 @@ p4c_add_xfail_reason("dpdk"
 
 p4c_add_xfail_reason("dpdk"
   "Unknown extern function"
+  testdata/p4_16_samples/psa-example-parser-checksum.p4
   testdata/p4_16_samples/psa-meter6.p4
   )
 
