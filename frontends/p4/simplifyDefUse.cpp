@@ -1286,6 +1286,16 @@ class FindUninitialized : public Inspector {
                 if (isControlOrParserApply || mi->is<ExternMethod>() || mi->is<ExternFunction>()) {
                     if (typeMap->getType(expr->expression, true)->is<IR::Type_Header>()) {
                         headerDefs->update(expr->expression, TernaryBool::Yes);
+                        if (expr->expression->is<IR::Member>()) {
+                            auto member = expr->expression->to<IR::Member>();
+                            if (member->member == IR::Type_Stack::next ||
+                                member->member == IR::Type_Stack::last){
+                                auto loc = headerDefs->getStorageLocation(member->expr);
+                                auto def = getCurrentDefinitions();
+                                auto points = def->getPoints(loc);
+                                hasUses->add(points);
+                            }
+                        }
                     } else {
                         auto locations = headerDefs->getStorageLocation(expr->expression);
                         for (auto storage : *locations) {
