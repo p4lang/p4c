@@ -63,7 +63,7 @@ class MidEndForFlatten : public PassManager {
             evaluator,
             new P4::MidEndLast()
         });
- 
+
         toplevel = evaluator->getToplevelBlock();
     }
     IR::ToplevelBlock* process(const IR::P4Program *&program) {
@@ -77,7 +77,8 @@ const IR::Expression* getKeyExpression(const IR::P4Program* program, const char*
     CHECK_NULL(controlName);
     CHECK_NULL(tableName);
     CHECK_NULL(fieldName);
-    const auto* control = program->getDeclsByName(controlName)->toVector()->at(0)->to<IR::P4Control>();
+    const auto* control =
+        program->getDeclsByName(controlName)->toVector()->at(0)->to<IR::P4Control>();
     const auto* table = control->getDeclByName(tableName)->to<IR::P4Table>();
     for (auto key : table->getKey()->keyElements) {
         std::ostringstream output;
