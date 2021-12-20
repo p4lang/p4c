@@ -187,13 +187,46 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
                                          h->fields);
         headerType.push_back(ht);
     }
-    IR::IndexedVector<IR::DpdkStructType> structType = UpdateHeaderMetadata(prog, metadataStruct);
 
+    IR::IndexedVector<IR::DpdkStructType> structType = UpdateHeaderMetadata(prog, metadataStruct);
     for (auto kv : structure->metadata_types) {
         auto s = kv.second;
-        auto st = new IR::DpdkStructType(s->srcInfo, s->name, s->annotations,
-                                         s->fields);
-        structType.push_back(st);
+        auto structTypeName = s->getName().name;
+        if (structType.getDeclaration(structTypeName) != nullptr) {
+            /**
+             * UpdateHeaderMetadata returns IndexedVector filled with following 3 types of structs:
+             * - main metadata structure (whose name is stored in structure->local_metadata_type)
+             * - structures for action arguments created internally by compiler (stored in
+             *   structure->args_struct_map)
+             * - main structure which holds all headers (whose name is stored in
+             *   structure->header_type)
+             *
+             * Only the first one (main metadata structure) can be present in
+             * structure->metadata_types map.
+             * Main metadata structure is added to the map when it contains metadata whose
+             * type is a structure.
+             * It happens during InspectDpdkProgram pass which visits IR::Parameter nodes in
+             * InspectDpdkProgram::preorder(const IR::Parameter* param).
+             * During that pass the visitor only visits the parameter in the statement from
+             * architecture.
+             * Structures internally created for action arguments are not visited in that pass,
+             * so they are not added to structure->metadata_types.
+             * As they are created internally by compiler they are not used as types of fields
+             * in main metadata structure neither.
+             * Main headers structure contains only headers so it is not added to
+             * structure->metadata_types map neither.
+             * InspectDpdkProgram adds there only the structures which contain some field
+             * with structure type.
+             */
+            LOG3("Struct type already added to DpdkStructType vector: " << s << std::endl <<
+                    "Main metadata structure is: " << structure->local_metadata_type);
+            BUG_CHECK(structTypeName == structure->local_metadata_type,
+                    "Unexpectedly duplicating declaration of: %1%", structTypeName);
+        } else {
+            LOG3("Adding DpdkStructType: " << s);
+            auto st = new IR::DpdkStructType(s->srcInfo, s->name, s->annotations, s->fields);
+            structType.push_back(st);
+        }
     }
 
     IR::IndexedVector<IR::DpdkExternDeclaration> dpdkExternDecls;
