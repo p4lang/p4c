@@ -176,9 +176,9 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
         */
         if (m->method->toString() == "SelectByDirection") {
             if (m->arguments->size() != 3)
-                ::error ("Unexpected number of arguments\n");
+                ::error("Unexpected number of arguments\n");
             if (m->typeArguments->size() != 1)
-                ::error ("Unexpected number of type arguments\n");
+                ::error("Unexpected number of type arguments\n");
             auto dir = m->arguments->at(0)->expression;
             auto firstVal = m->arguments->at(1)->expression;
             auto secondVal = m->arguments->at(2)->expression;
