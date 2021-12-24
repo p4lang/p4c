@@ -386,7 +386,8 @@ const IR::Expression* GetWrittenExpressions::everything = new IR::Constant(0);
 }  // namespace
 
 const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
-    BUG_CHECK(!isWrite(), "%1%: method on left hand side?", mce);
+    // BUG_CHECK(!isWrite(), "%1%: method on left hand side?", mce);
+    // isWrite is too conservative, so this check may fail for something like f().isValid()
     LOG3("Visiting " << dbp(mce));
     auto orig = getOriginal<IR::MethodCallExpression>();
     auto type = typeMap->getType(orig, true);
