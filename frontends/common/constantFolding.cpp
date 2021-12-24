@@ -494,10 +494,16 @@ DoConstantFolding::binary(const IR::Operation_Binary* e,
     if (!lunk && !runk) {
         // both typed
         if (!ltb->operator==(*rtb)) {
+          if (ltb->baseName() == "bit" && rtb->baseName() == "int") {
+            if (ltb->size == rtb->size) {
+              resultType = ltb;
+            }
+          } else {
             ::error(ErrorType::ERR_INVALID,
-                    "%1%: operands have different types: %2% and %3%",
-                    e, ltb->toString(), rtb->toString());
+                    "%1%: operands have different types: %2% and %3%", e,
+                    ltb->toString(), rtb->toString());
             return e;
+          }
         }
         resultType = rtb;
     } else if (lunk && runk) {
