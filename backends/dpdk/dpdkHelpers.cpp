@@ -220,23 +220,29 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 }
 
                 apply {
-                    key_0 = SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr);
+                    key_0 =
+                    SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr);
                     ...
                 }
 
-                This is replaced by an assignment of the resultant value into a temporary.
+                This is replaced by an assignment of the resultant value into a temporary based on
+                the direction. Assembly equivalent to the below code is emitted:
+
                 if (istd.direction == PNA_Direction_t.NET_TO_HOST) {
                     key_0 = hdr.ipv4.srcAddr;
                 } else {
                     key_0 = hdr.ipv4.dstAddr;
                 }
+
+                The equivalent assembly looks like this:
+                jmpeq LABEL_TRUE_0 m.pna_main_input_metadata_direction 0x0
+                mov m.<controlBlockName>_key_0 h.ipv4.dstAddr
+                jmp LABEL_END_0
+                LABEL_TRUE_0 : mov m.<controlBlockName>_key_0 h.ipv4.srcAddr
+                LABEL_END_0 : ...
             */
             if (e->method->name == "SelectByDirection") {
                 auto args = e->expr->arguments;
-                if (args->size() != 3)
-                    ::error("Unexpected number of arguments\n");
-                if (e->expr->typeArguments->size() != 1)
-                    ::error("Unexpected number of type arguments\n");
                 auto dir = args->at(0)->expression;
                 auto firstVal = args->at(1)->expression;
                 auto secondVal = args->at(2)->expression;

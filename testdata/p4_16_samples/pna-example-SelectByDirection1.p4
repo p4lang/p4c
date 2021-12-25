@@ -44,15 +44,6 @@ header ipv4_t {
 struct empty_metadata_t {
 }
 
-// BEGIN:Counter_Example_Part1
-typedef bit<48> ByteCounter_t;
-typedef bit<32> PacketCounter_t;
-typedef bit<80> PacketByteCounter_t;
-
-const bit<32> NUM_PORTS = 4;
-// END:Counter_Example_Part1
-
-
 //////////////////////////////////////////////////////////////////////
 // Struct types for holding user-defined collections of headers and
 // metadata in the P4 developer's program.
@@ -82,25 +73,6 @@ control PreControlImpl(
     inout pna_pre_output_metadata_t ostd)
 {
     apply {
-        // Note: This program does not demonstrate all of the code
-        // that would be necessary if you were implementing IPsec
-        // packet decryption.
-
-        // If it did, then this pre control implementation would do
-        // one or more table lookups in order to determine whether the
-        // packet was IPsec encapsulated, and if so, whether it is
-        // part of a security association that was established by the
-        // control plane software.
-
-        // It would also likely perform anti-replay attack detection
-        // on the IPsec sequence number, which is in the unencrypted
-        // part of the packet.
-
-        // Any headers parsed by the pre parser in pre_hdr will be
-        // forgotten after this point.  The main parser will start
-        // parsing over from the beginning, either on the same packet
-        // if the inline extern block did nothing, or on the packet as
-        // modified by the inline extern block.
     }
 }
 
@@ -123,7 +95,6 @@ parser MainParserImpl(
     }
 }
 
-// BEGIN:Counter_Example_Part2
 control MainControlImpl(
     inout headers_t       hdr,           // from main parser
     inout main_metadata_t user_meta,     // from main parser, to "next block"
@@ -154,7 +125,6 @@ control MainControlImpl(
         }
     }
 }
-// END:Counter_Example_Part2
 
 control MainDeparserImpl(
     packet_out pkt,
