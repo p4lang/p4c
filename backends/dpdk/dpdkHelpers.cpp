@@ -223,6 +223,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     key_0 =
                     SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr);
                     ...
+		    ...
                 }
 
                 This is replaced by an assignment of the resultant value into a temporary based on
