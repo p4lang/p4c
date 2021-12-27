@@ -71,36 +71,36 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
         const default_action = default_route_drop();
     }
-    @hidden action pnaexampleSelectByDirection141() {
+    @hidden action pnaexampleSelectByDirection112() {
         key_0 = SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr);
     }
-    @hidden table tbl_pnaexampleSelectByDirection141 {
+    @hidden table tbl_pnaexampleSelectByDirection112 {
         actions = {
-            pnaexampleSelectByDirection141();
+            pnaexampleSelectByDirection112();
         }
-        const default_action = pnaexampleSelectByDirection141();
+        const default_action = pnaexampleSelectByDirection112();
     }
     apply {
         if (hdr.ipv4.isValid()) {
-            tbl_pnaexampleSelectByDirection141.apply();
+            tbl_pnaexampleSelectByDirection112.apply();
             ipv4_da_lpm_0.apply();
         }
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexampleSelectByDirection164() {
+    @hidden action pnaexampleSelectByDirection134() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnaexampleSelectByDirection164 {
+    @hidden table tbl_pnaexampleSelectByDirection134 {
         actions = {
-            pnaexampleSelectByDirection164();
+            pnaexampleSelectByDirection134();
         }
-        const default_action = pnaexampleSelectByDirection164();
+        const default_action = pnaexampleSelectByDirection134();
     }
     apply {
-        tbl_pnaexampleSelectByDirection164.apply();
+        tbl_pnaexampleSelectByDirection134.apply();
     }
 }
 

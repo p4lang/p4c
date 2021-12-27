@@ -91,18 +91,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexampleSelectByDirection1l166() {
+    @hidden action pnaexampleSelectByDirection1l136() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnaexampleSelectByDirection1l166 {
+    @hidden table tbl_pnaexampleSelectByDirection1l136 {
         actions = {
-            pnaexampleSelectByDirection1l166();
+            pnaexampleSelectByDirection1l136();
         }
-        const default_action = pnaexampleSelectByDirection1l166();
+        const default_action = pnaexampleSelectByDirection1l136();
     }
     apply {
-        tbl_pnaexampleSelectByDirection1l166.apply();
+        tbl_pnaexampleSelectByDirection1l136.apply();
     }
 }
 

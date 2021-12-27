@@ -26,10 +26,6 @@ header ipv4_t {
 struct empty_metadata_t {
 }
 
-typedef bit<48> ByteCounter_t;
-typedef bit<32> PacketCounter_t;
-typedef bit<80> PacketByteCounter_t;
-const bit<32> NUM_PORTS = 32w4;
 struct main_metadata_t {
 }
 
