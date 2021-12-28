@@ -318,4 +318,11 @@ TEST_F(P4CParserUnroll, header_union) {
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size());
 }
 
+TEST_F(P4CParserUnroll, bitIntTypes) {
+  auto parsers = loadExample("runtime-index-bmv2.p4");
+  ASSERT_TRUE(parsers.first);
+  ASSERT_TRUE(parsers.second);
+  ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size());
+}
+
 }  // namespace Test
