@@ -622,11 +622,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
     value = value & mask;
     const IR::Type_Bits *resultType;
     if (auto bitType = e->type->to<IR::Type_Bits>()) {
-      if (bitType->baseName() == "int") {
-        resultType = IR::Type_Bits::get(m - l + 1, true);
-      } else {
-        resultType = IR::Type_Bits::get(m - l + 1);
-      }
+      resultType = IR::Type_Bits::get(m - l + 1, bitType->baseName() == "int");
     }
     return new IR::Constant(e->srcInfo, resultType, value, cbase->base, true);
 }
