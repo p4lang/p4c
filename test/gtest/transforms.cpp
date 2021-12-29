@@ -60,6 +60,7 @@ class MidEndForFlatten : public PassManager {
 
         addPasses({
             new P4::FlattenInterfaceStructs(&refMap, &typeMap),
+            new P4::TypeChecking(&refMap, &typeMap, true),
             evaluator,
             new P4::MidEndLast()
         });
@@ -90,6 +91,36 @@ const IR::Expression* getKeyExpression(const IR::P4Program* program, const char*
     return nullptr;
 }
 
+const IR::Expression* getKeyExpressionFromCall(const IR::P4Program* program, const char* controlName,
+                                            const char* tableName, const char* fieldName) {
+    CHECK_NULL(program);
+    CHECK_NULL(controlName);
+    CHECK_NULL(tableName);
+    CHECK_NULL(fieldName);
+    const auto* control =
+        program->getDeclsByName(controlName)->toVector()->at(0)->to<IR::P4Control>();
+    for (auto statement : control->body->components) {
+        if (const auto* methodCall = statement->to<IR::MethodCallStatement>()) {
+            if (const auto* member = methodCall->methodCall->method->to<IR::Member>()) {
+                if (member->member == IR::IApply::applyMethodName) {
+                    if (const auto* type = member->expr->type->to<IR::Type_Table>()) {
+                        if (type->table->name.name == tableName) {
+                                for (auto key : type->table->getKey()->keyElements) {
+                                    std::ostringstream output;
+                                    key->expression->dbprint(output);
+                                    if (output.str().find(fieldName) != std::string::npos) {
+                                        return key->expression;
+                                    }
+                                }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+
 TEST_F(P4C_IR, FlattenInterface) {
     AutoCompileContext autoP4TestContext(new P4CContextWithOptions<P4TestOptions>);
     auto& options = P4TestContext::get().options();
@@ -111,6 +142,11 @@ TEST_F(P4C_IR, FlattenInterface) {
     CHECK_NULL(newKeyExpression);
     CHECK_NULL(oldKeyExpression->type);
     CHECK_NULL(newKeyExpression->type);
+    ASSERT_TRUE(oldKeyExpression->type->equiv(*newKeyExpression->type));
+    oldKeyExpression = getKeyExpressionFromCall(program, "ingress", "debug_table_cksum1", "exp_etherType");
+    newKeyExpression = getKeyExpressionFromCall(newProgram, "ingress", "debug_table_cksum1_0", "exp_etherType");
+    CHECK_NULL(oldKeyExpression);
+    CHECK_NULL(newKeyExpression);
     ASSERT_TRUE(oldKeyExpression->type->equiv(*newKeyExpression->type));
 }
 

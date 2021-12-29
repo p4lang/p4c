@@ -116,7 +116,8 @@ const IR::Node* ReplaceStructs::postorder(IR::Member* expression) {
         // replaced by the NestedStructs pass.)
         result = repl->explode(pe, prefix);
     } else {
-        result = new IR::Member(expression->type, pe, newFieldName);
+        //result = new IR::Member(expression->type, pe, newFieldName);
+        result = new IR::Member(pe, newFieldName);
     }
     LOG3("Replacing " << expression << " with " << result);
     return result;
