@@ -494,16 +494,10 @@ DoConstantFolding::binary(const IR::Operation_Binary* e,
     if (!lunk && !runk) {
         // both typed
         if (!ltb->operator==(*rtb)) {
-          if (ltb->baseName() == "bit" && rtb->baseName() == "int") {
-            if (ltb->size == rtb->size) {
-              resultType = ltb;
-            }
-          } else {
-            ::error(ErrorType::ERR_INVALID,
-                    "%1%: operands have different types: %2% and %3%", e,
-                    ltb->toString(), rtb->toString());
-            return e;
-          }
+          ::error(ErrorType::ERR_INVALID,
+                  "%1%: operands have different types: %2% and %3%", e,
+                  ltb->toString(), rtb->toString());
+          return e;
         }
         resultType = rtb;
     } else if (lunk && runk) {
@@ -626,7 +620,14 @@ const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
     big_int mask = 1;
     mask = (mask << (m - l + 1)) - 1;
     value = value & mask;
-    auto resultType = IR::Type_Bits::get(m - l + 1);
+    const IR::Type_Bits *resultType;
+    if (auto bitType = e->type->to<IR::Type_Bits>()) {
+      if (bitType->baseName() == "int") {
+        resultType = IR::Type_Bits::get(m - l + 1, true);
+      } else {
+        resultType = IR::Type_Bits::get(m - l + 1);
+      }
+    }
     return new IR::Constant(e->srcInfo, resultType, value, cbase->base, true);
 }
 
