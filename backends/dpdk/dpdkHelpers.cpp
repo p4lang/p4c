@@ -184,6 +184,82 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
             } else {
                 BUG("%1% Not implemented", e->originalExternType->name);
             }
+        } else if (auto e = mi->to<P4::ExternFunction>()) {
+            /* PNA SelectByDirection extern is implemented as
+                SelectByDirection<T>(in PNA_Direction_t direction, in T n2h_value, in T h2n_value) {
+                    if (direction == PNA_Direction_t.NET_TO_HOST) {
+                        return n2h_value;
+                    } else {
+                        return h2n_value;
+                    }
+                }
+                Example:
+                    table ipv4_da_lpm {
+                        key = {
+                            SelectByDirection(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr):
+                                                                          lpm @name ("ipv4_addr");
+                        }
+                        ....
+                }
+
+                In this example, KeySideEffect pass inserts a temporary for holding the result of
+                complex key expression and replaces the key expression with the temporary. An
+                assignment is inserted in the apply block before the table apply to assign the complex
+                expression into this temporary variable. After KeySideEffect pass, SelectByDirection
+                extern invocation is present as RHS of assignment and hence is evaluated here in this
+                visitor.
+
+                After keySideEffect pass:
+                bit <> key_0;
+                ...
+                table ipv4_da_lpm {
+                    key = {
+                        key_0: lpm @name ("ipv4_addr");
+                    }
+                    ....
+                }
+
+                apply {
+                    key_0 =
+                    SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr);
+                    ...
+		    ...
+                }
+
+                This is replaced by an assignment of the resultant value into a temporary based on
+                the direction. Assembly equivalent to the below code is emitted:
+
+                if (istd.direction == PNA_Direction_t.NET_TO_HOST) {
+                    key_0 = hdr.ipv4.srcAddr;
+                } else {
+                    key_0 = hdr.ipv4.dstAddr;
+                }
+
+                The equivalent assembly looks like this:
+                jmpeq LABEL_TRUE_0 m.pna_main_input_metadata_direction 0x0
+                mov m.<controlBlockName>_key_0 h.ipv4.dstAddr
+                jmp LABEL_END_0
+                LABEL_TRUE_0 : mov m.<controlBlockName>_key_0 h.ipv4.srcAddr
+                LABEL_END_0 : ...
+            */
+            if (e->method->name == "SelectByDirection") {
+                auto args = e->expr->arguments;
+                auto dir = args->at(0)->expression;
+                auto firstVal = args->at(1)->expression;
+                auto secondVal = args->at(2)->expression;
+                auto true_label = refmap->newName("label_true");
+                auto end_label = refmap->newName("label_end");
+
+                /* Emit jump to block containing assignment for PNA_Direction_t.NET_TO_HOST */
+                add_instr(new IR::DpdkJmpEqualStatement(true_label, dir, new IR::Constant(0)));
+                add_instr(new IR::DpdkMovStatement(left, secondVal));
+                add_instr(new IR::DpdkJmpLabelStatement(end_label));
+                add_instr(new IR::DpdkLabelStatement(true_label));
+                add_instr(new IR::DpdkMovStatement(left, firstVal));
+                i = new IR::DpdkLabelStatement(end_label);
+            } else {
+                BUG("%1% Not Implemented", e->method->name);
+            }
         } else if (auto b = mi->to<P4::BuiltInMethod>()) {
             if (b->name == "isValid") {
                 /* DPDK target does not support isvalid() method call as RHS of assignment
