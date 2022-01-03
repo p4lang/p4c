@@ -75,6 +75,20 @@ const IR::Node* LowerExpressions::postorder(IR::Cast* expression) {
         typeMap->setType(mux, destType);
         LOG3("Replaced " << expression << " with " << mux);
         return mux;
+    } else if (destType->width_bits() < srcType->width_bits()) {
+        // explicitly discard un needed bits from src
+        auto one = new IR::Constant(srcType, 1);
+        auto shl = new IR::Shl(one->srcInfo, one, new IR::Constant(destType->width_bits()));
+        auto mask = new IR::Sub(shl->srcInfo, shl, new IR::Constant(1));
+        auto and0 = new IR::BAnd(expression->srcInfo, expression->expr, mask);
+        auto cast0 = new IR::Cast(expression->srcInfo, destType, and0);
+        typeMap->setType(one, srcType);
+        typeMap->setType(shl, srcType);
+        typeMap->setType(mask, srcType);
+        typeMap->setType(and0, srcType);
+        typeMap->setType(cast0, destType);
+        LOG3("Replaced " << expression << " with " << cast0);
+        return cast0;
     }
     // This may be a new expression
     typeMap->setType(expression, destType);

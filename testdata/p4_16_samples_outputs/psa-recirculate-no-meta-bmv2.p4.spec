@@ -58,7 +58,8 @@ struct metadata_t {
 	bit<8> psa_egress_output_metadata_clone
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
-	bit<4> Ingress_tmp
+	bit<4> Ingress_tmp_0
+	bit<48> Ingress_tmp
 	bit<32> Ingress_int_packet_path_0
 }
 metadata instanceof metadata_t
@@ -85,12 +86,14 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	extract h.output_data
-	mov m.Ingress_tmp h.ethernet.dstAddr
-	jmplt LABEL_FALSE m.Ingress_tmp 0x4
+	mov m.Ingress_tmp_0 h.ethernet.dstAddr
+	jmplt LABEL_FALSE m.Ingress_tmp_0 0x4
 	mov h.output_data.word1 m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
-	mov m.psa_ingress_output_metadata_egress_port h.ethernet.dstAddr
+	mov m.Ingress_tmp h.ethernet.dstAddr
+	and m.Ingress_tmp 0xffffffff
+	mov m.psa_ingress_output_metadata_egress_port m.Ingress_tmp
 	jmp LABEL_END
 	LABEL_FALSE :	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
