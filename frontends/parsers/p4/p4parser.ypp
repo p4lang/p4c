@@ -1227,7 +1227,6 @@ statementOrDeclaration
     : variableDeclaration      { $$ = $1; }
     | constantDeclaration      { $$ = $1; }
     | statement                { $$ = $1; }
-    | instantiation            { $$ = $1; }
     ;
 
 /************************* TABLE *********************************/
