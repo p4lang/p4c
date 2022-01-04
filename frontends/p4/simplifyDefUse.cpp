@@ -1335,6 +1335,7 @@ class FindUninitialized : public Inspector {
         if (basetype->is<IR::Type_Stack>()) {
             if (expression->member.name == IR::Type_Stack::next ||
                 expression->member.name == IR::Type_Stack::last) {
+                // Accessing these fields implies reading the whole stack
                 auto save  = lhs;
                 lhs = false;
                 visit(expression->expr);
