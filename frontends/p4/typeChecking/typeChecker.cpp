@@ -1475,6 +1475,17 @@ const IR::Node* TypeInference::postorder(IR::Type_Typedef* tdecl) {
     return tdecl;
 }
 
+const IR::Node* TypeInference::postorder(IR::Typeof* tof) {
+    if (done()) return tof;
+    auto type = getType(tof->expression);
+    if (type == nullptr)
+        return tof;
+    auto tt = new IR::Type_Type(type);
+    setType(getOriginal(), tt);
+    setType(tof, tt);
+    return tof;
+}
+
 const IR::Node* TypeInference::postorder(IR::Type_Stack* type) {
     auto canon = setTypeType(type);
     if (canon == nullptr)
