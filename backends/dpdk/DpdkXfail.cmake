@@ -35,11 +35,6 @@ p4c_add_xfail_reason("dpdk"
 )
 
 p4c_add_xfail_reason("dpdk"
-  "not defined on bool and bit<"
-  testdata/p4_16_samples/psa-register-read-write-2-bmv2.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
   "Error compiling"
   testdata/p4_16_samples/psa-dpdk-lpm-match-err3.p4
   )
