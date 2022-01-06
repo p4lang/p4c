@@ -248,7 +248,7 @@ class LogicalExpressionUnroll : public Inspector {
     }
 
     LogicalExpressionUnroll(P4::ReferenceMap* refMap, DpdkProgramStructure *structure)
-        : refMap(refMap), structure(structure) {}
+        : refMap(refMap), structure(structure) {visitDagOnce = false;}
     bool preorder(const IR::Operation_Unary *a) override;
     bool preorder(const IR::Operation_Binary *a) override;
     bool preorder(const IR::MethodCallExpression *a) override;

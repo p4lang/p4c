@@ -577,7 +577,6 @@ const IR::Node *IfStatementUnroll::postorder(IR::P4Control *a) {
 // return the expression, else introduce a temporary for the current expression
 // and return the temporary in a pathexpression.
 bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary *u) {
-    visitAgain();
     expressionUnrollSanityCheck(u->expr);
 
     // If the expression is a methodcall expression, do not insert a temporary
@@ -623,7 +622,6 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary *u) {
 }
 
 bool LogicalExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
-    visitAgain();
     expressionUnrollSanityCheck(bin->left);
     expressionUnrollSanityCheck(bin->right);
     visit(bin->left);
@@ -656,7 +654,6 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
 }
 
 bool LogicalExpressionUnroll::preorder(const IR::MethodCallExpression *m) {
-    visitAgain();
     auto args = new IR::Vector<IR::Argument>;
     for (auto arg : *m->arguments) {
         expressionUnrollSanityCheck(arg->expression);
@@ -679,24 +676,20 @@ bool LogicalExpressionUnroll::preorder(const IR::MethodCallExpression *m) {
 }
 
 bool LogicalExpressionUnroll::preorder(const IR::Member *) {
-    visitAgain();
     root = nullptr;
     return false;
 }
 
 bool LogicalExpressionUnroll::preorder(const IR::PathExpression *) {
-    visitAgain();
     root = nullptr;
     return false;
 }
 
 bool LogicalExpressionUnroll::preorder(const IR::Constant *) {
-    visitAgain();
     root = nullptr;
     return false;
 }
 bool LogicalExpressionUnroll::preorder(const IR::BoolLiteral *) {
-    visitAgain();
     root = nullptr;
     return false;
 }
