@@ -105,7 +105,6 @@ class StrengthReduction : public PassManager {
             if (!typeChecking)
                 typeChecking = new TypeChecking(refMap, typeMap, true);
             passes.push_back(typeChecking); }
-        passes.push_back(typeChecking);
         passes.push_back(new DoStrengthReduction());
     }
 };
