@@ -65,7 +65,7 @@ class UBPFModel : public ::Model::Model {
  protected:
     UBPFModel()
         : CPacketName("pkt"),
-          packet("packet", P4::P4CoreLibrary::instance.packetIn, 0),
+          packet("packet", P4::P4CoreLibrary::instance().packetIn, 0),
           pipeline(),
           registerModel(),
           drop("mark_to_drop"),

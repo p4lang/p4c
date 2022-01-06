@@ -17,13 +17,7 @@ limitations under the License.
 #include "coreLibrary.h"
 #include "fromv1.0/v1model.h"
 
-namespace P4 {
-
-P4CoreLibrary P4CoreLibrary::instance;
-
-}  // namespace P4
-
-/* These must be in the same compilation unit to ensure that P4CoreLibrary::instance
+/* These must be in the same compiliation unit to ensure that P4CoreLibrary::instance
  * is initialized before V1Model::instance */
 namespace P4V1 {
 

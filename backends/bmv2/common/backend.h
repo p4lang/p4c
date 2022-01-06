@@ -73,7 +73,7 @@ class Backend {
           refMap(refMap),
           typeMap(typeMap),
           enumMap(enumMap),
-          corelib(P4::P4CoreLibrary::instance),
+          corelib(P4::P4CoreLibrary::instance()),
           json(new BMV2::JsonObjects()) {
         refMap->setIsV1(options.isv1());
     }

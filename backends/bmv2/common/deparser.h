@@ -40,7 +40,7 @@ class DeparserConverter : public Inspector {
     bool preorder(const IR::P4Control *ctrl) override;
 
     explicit DeparserConverter(ConversionContext *ctxt, cstring name = "deparser")
-        : ctxt(ctxt), name(name), corelib(P4::P4CoreLibrary::instance) {
+        : ctxt(ctxt), name(name), corelib(P4::P4CoreLibrary::instance()) {
         setName("DeparserConverter");
     }
 };

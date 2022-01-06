@@ -34,7 +34,7 @@ struct Parser_Model : public ::Model::Elem {
     Parser_Model(Model::Type_Model headersType, Model::Type_Model userMetaType,
                  Model::Type_Model standardMetadataType)
         : Model::Elem("ParserImpl"),
-          packetParam("packet", P4::P4CoreLibrary::instance.packetIn, 0),
+          packetParam("packet", P4::P4CoreLibrary::instance().packetIn, 0),
           headersParam("hdr", headersType, 1),
           metadataParam("meta", userMetaType, 2),
           standardMetadataParam("standard_metadata", standardMetadataType, 3) {}
@@ -47,7 +47,7 @@ struct Parser_Model : public ::Model::Elem {
 struct Deparser_Model : public ::Model::Elem {
     explicit Deparser_Model(Model::Type_Model headersType)
         : Model::Elem("DeparserImpl"),
-          packetParam("packet", P4::P4CoreLibrary::instance.packetOut, 0),
+          packetParam("packet", P4::P4CoreLibrary::instance().packetOut, 0),
           headersParam("hdr", headersType, 1) {}
     ::Model::Param_Model packetParam;
     ::Model::Param_Model headersParam;

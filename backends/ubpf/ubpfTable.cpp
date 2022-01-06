@@ -202,7 +202,7 @@ void UBPFTable::setTableKind() {
     for (auto it : keyGenerator->keyElements) {
         auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
         auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-        if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
+        if (matchType->name.name == P4::P4CoreLibrary::instance().lpmMatch.name) {
             if (tableKind == EBPF::TableLPMTrie) {
                 ::error(ErrorType::ERR_UNSUPPORTED, "only one LPM field allowed", it->matchType);
                 return;
@@ -280,8 +280,8 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
 
             auto mtdecl = program->refMap->getDeclaration(c->matchType->path, true);
             auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-            if (matchType->name.name != P4::P4CoreLibrary::instance.exactMatch.name &&
-                matchType->name.name != P4::P4CoreLibrary::instance.lpmMatch.name)
+            if (matchType->name.name != P4::P4CoreLibrary::instance().exactMatch.name &&
+                matchType->name.name != P4::P4CoreLibrary::instance().lpmMatch.name)
                 ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Match of type %1% not supported",
                         c->matchType);
             key_idx++;
@@ -312,7 +312,7 @@ void UBPFTable::emitActionArguments(EBPF::CodeBuilder *builder, const IR::P4Acti
 }
 
 cstring UBPFTable::generateActionName(const IR::P4Action *action) {
-    if (action->getName().originalName == P4::P4CoreLibrary::instance.noAction.name) {
+    if (action->getName().originalName == P4::P4CoreLibrary::instance().noAction.name) {
         return this->noActionName;
     } else {
         return EBPF::EBPFObject::externalName(action);

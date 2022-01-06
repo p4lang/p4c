@@ -69,8 +69,8 @@ DoExpandLookahead::ExpansionInfo *DoExpandLookahead::convertLookahead(
     auto mi = MethodInstance::resolve(expression, refMap, typeMap);
     if (!mi->is<P4::ExternMethod>()) return nullptr;
     auto em = mi->to<P4::ExternMethod>();
-    if (em->originalExternType->name != P4CoreLibrary::instance.packetIn.name ||
-        em->method->name != P4CoreLibrary::instance.packetIn.lookahead.name)
+    if (em->originalExternType->name != P4CoreLibrary::instance().packetIn.name ||
+        em->method->name != P4CoreLibrary::instance().packetIn.lookahead.name)
         return nullptr;
 
     // this is a call to packet_in.lookahead.

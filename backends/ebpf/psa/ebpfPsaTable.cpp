@@ -202,7 +202,7 @@ class EBPFTablePSAInitializerCodeGen : public CodeGenInspector {
         cstring matchType = key->matchType->path->name.name;
         auto expr = currentEntry->keys->components[currentKeyEntryIndex];
         unsigned width = EBPFInitializerUtils::ebpfTypeWidth(typeMap, key->expression);
-        bool isLPMMatch = matchType == P4::P4CoreLibrary::instance.lpmMatch.name;
+        bool isLPMMatch = matchType == P4::P4CoreLibrary::instance().lpmMatch.name;
         bool genPrefixLen = !tableHasTernaryMatch && isLPMMatch;
         bool doSwapBytes = genPrefixLen && EBPFScalarType::generatesScalar(width);
 
@@ -615,7 +615,7 @@ void EBPFTablePSA::emitDefaultActionInitializer(CodeBuilder *builder) {
     const IR::Expression *defaultAction = t->getDefaultAction();
     auto actionName = getActionNameExpression(defaultAction);
     CHECK_NULL(actionName);
-    if (actionName->path->name.originalName != P4::P4CoreLibrary::instance.noAction.name) {
+    if (actionName->path->name.originalName != P4::P4CoreLibrary::instance().noAction.name) {
         auto value = program->refMap->newName("value");
         emitTableValue(builder, defaultAction, value);
         auto ret = program->refMap->newName("ret");

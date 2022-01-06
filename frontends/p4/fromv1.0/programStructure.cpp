@@ -47,7 +47,7 @@ static const IR::IDeclaration *getFirstDeclaration(const IR::Vector<IR::Node> *n
 
 ProgramStructure::ProgramStructure()
     : v1model(P4V1::V1Model::instance),
-      p4lib(P4::P4CoreLibrary::instance),
+      p4lib(P4::P4CoreLibrary::instance()),
       types(&allNames),
       metadata(&allNames),
       headers(&allNames),

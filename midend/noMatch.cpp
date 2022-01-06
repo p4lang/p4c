@@ -26,7 +26,7 @@ const IR::Node *DoHandleNoMatch::postorder(IR::SelectExpression *expression) {
     }
 
     if (noMatch == nullptr) {
-        P4CoreLibrary &lib = P4CoreLibrary::instance;
+        P4CoreLibrary &lib = P4CoreLibrary::instance();
         cstring name = nameGen->newName("noMatch");
         LOG2("Inserting " << name << " state");
         auto args = new IR::Vector<IR::Argument>();
