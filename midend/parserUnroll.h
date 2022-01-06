@@ -177,11 +177,19 @@ class RewriteAllParsers : public Transform {
     ReferenceMap*           refMap;
     TypeMap*                typeMap;
     bool                    unroll;
+    const IR::Type_Error *errorEnum;
 
- public:
+  public:
     RewriteAllParsers(ReferenceMap* refMap, TypeMap* typeMap, bool unroll) :
             refMap(refMap), typeMap(typeMap), unroll(unroll) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("RewriteAllParsers");
+    }
+
+    IR::Node *preorder(IR::P4Program *program) override {
+      auto delc = program->getDeclsByName(IR::ID("error"));
+      auto errors = delc->toVector()->at(0)->to<IR::Type_Error>();
+      errorEnum = errors;
+      return program;
     }
 
     // start generation of a code
@@ -199,20 +207,27 @@ class RewriteAllParsers : public Transform {
         IR::P4Parser* newParser = parser->clone();
         IR::IndexedVector<IR::ParserState> states = newParser->states;
         newParser->states.clear();
+        // Getting error number from error enum
         if (rewriter->hasOutOfboundState) {
+          int errorId = 0;
+          for (auto error : errorEnum->members) {
+            if (error->name.name == "StackOutOfBounds") {
+              break;
+            }
+            errorId += 1;
+          }
             // generating state with verify(false, error.StackOutOfBounds)
             IR::Vector<IR::Argument>* arguments = new IR::Vector<IR::Argument>();
             arguments->push_back(
                 new IR::Argument(new IR::BoolLiteral(IR::Type::Boolean::get(), false)));
-            arguments->push_back(new IR::Argument(new IR::Member(
-                new IR::TypeNameExpression(new IR::Type_Name(IR::ID("error"))),
-                    IR::ID("StackOutOfBounds"))));
+            arguments->push_back(new IR::Argument(
+                new IR::Constant(IR::Type_Bits::get(32), errorId)));
             IR::IndexedVector<IR::StatOrDecl> components;
             IR::IndexedVector<IR::Parameter> parameters;
             parameters.push_back(
                 new IR::Parameter(IR::ID("check"), IR::Direction::In, IR::Type::Boolean::get()));
-            parameters.push_back(new IR::Parameter(IR::ID("toSignal"), IR::Direction::In,
-                                                   new IR::Type_Name(IR::ID("error"))));
+            parameters.push_back(new IR::Parameter(
+                IR::ID("toSignal"), IR::Direction::In, IR::Type_Bits::get(32)));
             components.push_back(new IR::MethodCallStatement(new IR::MethodCallExpression(
                 IR::Type::Void::get(),
                 new IR::PathExpression(
