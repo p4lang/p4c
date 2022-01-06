@@ -29,6 +29,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/enumInstance.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "lib/ordered_set.h"
@@ -397,7 +398,13 @@ struct Counterlike {
         }
 
         auto size = instance->getParameterValue(CounterlikeTraits<Kind>::sizeParamName());
-        if (!size->template is<IR::Constant>()) {
+        big_int val;
+        if (size->template is<IR::Constant>()) {
+            val = size->template to<IR::Constant>()->value;
+        } else if (size->template is<IR::SerEnumMember>()) {
+            auto sem = size->template to<IR::SerEnumMember>();
+            val = sem->value->template to<IR::Constant>()->value;
+        } else {
             ::error(ErrorType::ERR_INVALID, "%1% '%2%' has a non-constant size: %3%",
                     CounterlikeTraits<Kind>::name(), declaration, size);
             return boost::none;
@@ -424,7 +431,7 @@ struct Counterlike {
         return Counterlike<Kind>{declaration->controlPlaneName(),
                                  declaration->to<IR::IAnnotated>(),
                                  unit->to<IR::Declaration_ID>()->name,
-                                 int(size->template to<IR::Constant>()->value),
+                                 int(val),
                                  boost::none,
                                  index_type_name};
     }
