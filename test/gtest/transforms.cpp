@@ -128,7 +128,7 @@ TEST_F(P4C_IR, FlattenInterface) {
     options.process(1, (char* const*)&argv);
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     const IR::P4Program* load_model(const char* curFile, CompilerOptions& options);
-    const IR::P4Program* program = load_model("issue983-bmv2.p4", options);
+    const IR::P4Program* program = load_model("issue983-simple-bmv2.p4", options);
     P4::FrontEnd frontend;
     program = frontend.run(options, program);
     CHECK_NULL(program);
@@ -147,7 +147,13 @@ TEST_F(P4C_IR, FlattenInterface) {
     newKeyExpression = getKeyExpressionFromCall(newProgram, "ingress", "debug_table_cksum1_0", "exp_etherType");
     CHECK_NULL(oldKeyExpression);
     CHECK_NULL(newKeyExpression);
-    ASSERT_TRUE(oldKeyExpression->type->equiv(*newKeyExpression->type));
+    if (!oldKeyExpression->type->equiv(*newKeyExpression->type)) {
+        FAIL() << "Type of the field '" << oldKeyExpression << "' is '" << oldKeyExpression->type
+               << "', but type of the '" << newKeyExpression << "' is '" <<  newKeyExpression->type
+               << "'" << std::endl;
+        ASSERT_TRUE(false);
+    }
+    
 }
 
 }  // namespace Test
