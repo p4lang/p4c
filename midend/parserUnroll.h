@@ -180,9 +180,13 @@ class RewriteAllParsers : public Transform {
     const IR::Type_Error *errorEnum;
 
   public:
-    RewriteAllParsers(ReferenceMap* refMap, TypeMap* typeMap, bool unroll) :
-            refMap(refMap), typeMap(typeMap), unroll(unroll) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("RewriteAllParsers");
+    RewriteAllParsers(ReferenceMap *refMap, TypeMap *typeMap, bool unroll,
+                      const IR::Type_Error *errorEnum = nullptr)
+        : refMap(refMap), typeMap(typeMap), unroll(unroll),
+          errorEnum(errorEnum) {
+      CHECK_NULL(refMap);
+      CHECK_NULL(typeMap);
+      setName("RewriteAllParsers");
     }
 
     IR::Node *preorder(IR::P4Program *program) override {
