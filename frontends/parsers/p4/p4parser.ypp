@@ -259,8 +259,8 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
                             directApplication
 %type<IR::BlockStatement*>  blockStatement parserBlockStatement controlBody
                             objInitializer
-%type<IR::StatOrDecl*>      statementOrDeclaration parserStatement
-%type<IR::IndexedVector<IR::StatOrDecl>*>  objDeclarations statOrDeclList
+%type<IR::Node*>            statementOrDeclaration parserStatement
+%type<IR::IndexedVector<IR::Node>*>  objDeclarations statOrDeclList
                                            parserStatements
 %type<IR::SwitchCase*>      switchCase
 %type<IR::Vector<IR::SwitchCase>*>  switchCases
