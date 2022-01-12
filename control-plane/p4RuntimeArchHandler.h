@@ -29,7 +29,6 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/methodInstance.h"
-#include "frontends/p4/enumInstance.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "lib/ordered_set.h"
