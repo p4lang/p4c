@@ -62,6 +62,7 @@ struct main_metadata_t {
 	bit<32> MainParserT_parser_tmp
 	bit<16> MainParserT_parser_tmp16_0
 	bit<8> MainParserT_parser_tmp_0
+	bit<32> MainParserT_parser_tmp_extract_tmp
 }
 metadata instanceof main_metadata_t
 
@@ -126,7 +127,9 @@ apply {
 	shl m.MainParserT_parser_tmp_3 0x3
 	mov m.MainParserT_parser_tmp m.MainParserT_parser_tmp_3
 	add m.MainParserT_parser_tmp 0xfffffff0
-	extract h.ipv4_option_timestamp m.MainParserT_parser_tmp
+	mov m.MainParserT_parser_tmp_extract_tmp m.MainParserT_parser_tmp
+	shr m.MainParserT_parser_tmp_extract_tmp 0x3
+	extract h.ipv4_option_timestamp m.MainParserT_parser_tmp_extract_tmp
 	MAINPARSERIMPL_ACCEPT :	mov m.pna_main_output_metadata_output_port 0x0
 	table tbl
 	table tbl2
