@@ -4,7 +4,7 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "Unsupported parser loop"
+  "Expected packet length argument for"
   testdata/p4_16_samples/psa-example-counters-bmv2.p4
   )
 
