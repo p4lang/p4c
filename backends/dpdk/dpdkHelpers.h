@@ -138,7 +138,7 @@ class TypeWidthValidator : public Inspector {
         LOG3("Validating Type_Varbits: " << type);
         if (type->size % 8 != 0) {
             ::error(ErrorType::ERR_UNSUPPORTED,
-                    "%1% Maximum varbit width (%2%) not aligned to 8 bits",
+                    "%1% varbit width (%2%) not aligned to 8 bits",
                     type->srcInfo, type->size);
         }
     }
