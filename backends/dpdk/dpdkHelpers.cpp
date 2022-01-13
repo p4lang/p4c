@@ -626,7 +626,25 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 } else if (args->size() == 2) {
                     auto header = args->at(0);
                     auto length = args->at(1);
-                    add_instr(new IR::DpdkExtractStatement(header->expression, length->expression));
+                    /**
+                     * Extract instruction of DPDK target expects the second argument
+                     * (size of the varbit field of the header) to be the number of bytes
+                     * to be extracted while in P4 it is the number of bits to be extracted.
+                     * We need to compute the size in bytes.
+                     *
+                     * @warning If the value is not aligned to 8 bits, the remainder after
+                     * division is dropped during runtime (this is a target limitation).
+                     */
+                    IR::ID tmpName(refmap->newName(
+                            length->expression->to<IR::Member>()->member.name + "_extract_tmp"));
+                    BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                    metadataStruct->fields.push_back(
+                            new IR::StructField(tmpName, length->expression->type));
+                    auto tmpMember = new IR::Member(new IR::PathExpression("m"), tmpName);
+                    add_instr(new IR::DpdkMovStatement(tmpMember, length->expression));
+                    add_instr(new IR::DpdkShrStatement(tmpMember, tmpMember,
+                            new IR::PathExpression("0x3")));
+                    add_instr(new IR::DpdkExtractStatement(header->expression, tmpMember));
                 }
             }
         } else if (a->originalExternType->getName().name == "Meter") {
