@@ -149,7 +149,10 @@ class ExpressionEvaluator : public Inspector {
     void postorder(const IR::ListExpression* expression) override;
     void postorder(const IR::StructExpression* expression) override;
     void postorder(const IR::MethodCallExpression* expression) override;
+    void postorder(const IR::Lss* expression) override;
+    void postorder(const IR::Leq* expression) override;
     void postorder(const IR::Grt* expression) override;
+    void postorder(const IR::Geq* expression) override;
     void checkResult(const IR::Expression* expression,
                      const IR::Expression* result);
     void setNonConstant(const IR::Expression* expression);
