@@ -315,7 +315,7 @@ SymbolicHeaderUnion::SymbolicHeaderUnion(const IR::Type_HeaderUnion *type,
     : SymbolicStruct(type, uninitialized, factory),
       valid(new SymbolicBool(false)) {
   auto index = 0;
-  auto fieldsSize = type->to<IR::Type_StructLike>()->fields.size();
+  auto fieldsSize = type->checkedTo<IR::Type_StructLike>()->fields.size();
   auto fieldsClone = fieldValue;
   for (auto f : type->to<IR::Type_StructLike>()->fields) {
     if (!fieldsClone[f->name.name]->to<SymbolicHeader>()->valid->value) {
@@ -1130,11 +1130,10 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
         if (name == IR::Type_Header::setInvalid ||
             name == IR::Type_Header::setValid) {
           const IR::Expression *node;
-          cstring memberName;
+          cstring memberName = nullptr;
           bool flag = true;
           if (auto member = expression->method->to<IR::Member>()
                                 ->expr->to<IR::Member>()) {
-            flag = false;
             node = member->expr;
             memberName = member->member.name;
           } else if (auto expr = expression->method->to<IR::Member>()->expr) {
@@ -1148,7 +1147,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
             return;
           } else if (structVar->is<SymbolicHeaderUnion>()) {
             auto headerUnion = structVar->to<SymbolicHeaderUnion>();
-            if (!flag) {
+            if (memberName) {
               headerUnion->setFieldValid(name == IR::Type_Header::setValid,
                                          memberName);
               set(expression, SymbolicVoid::get());
@@ -1174,14 +1173,15 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
           if (ac->isUnknown()) {
             array->setAllUnknown();
             return;
-            }
-            BUG_CHECK(amount->is<SymbolicInteger>(), "%1%: expected an integer", amount);
-            int amt = amount->to<SymbolicInteger>()->constant->asInt();
-            if (name == IR::Type_Stack::pop_front)
-                amt = -amt;
-            array->shift(amt);
-            set(expression, SymbolicVoid::get());
-            return;
+          }
+          BUG_CHECK(amount->is<SymbolicInteger>(), "%1%: expected an integer",
+                    amount);
+          int amt = amount->to<SymbolicInteger>()->constant->asInt();
+          if (name == IR::Type_Stack::pop_front)
+            amt = -amt;
+          array->shift(amt);
+          set(expression, SymbolicVoid::get());
+          return;
         }
     }
 
@@ -1285,4 +1285,4 @@ SymbolicValue* ExpressionEvaluator::evaluate(const IR::Expression* expression, b
     return result;
 }
 
-}  // namespace P4
+} // namespace P4
