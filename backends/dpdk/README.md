@@ -64,6 +64,12 @@ control EgressDeparser (packet_out buffer, inout H hdr, in M meta);
 
 - Size of all structure fields to be multiple of 8 bits and should not be greater than 64-bit. (This limitation is planned to be removed by grouping fields into fields which are multiple of 8-bits)
 - Combination of header and metadata as table key is not allowed. (This limitation is removed by P4C by copying the differing match key fields to metadata)
+- Extract instruction in DPDK target with 2 arguments expects the second argument to be the number
+of bytes to be extracted into the varbit field of the header.
+In P4 the second argument of the extract method is the number of bits.
+Compiler generates instructions which compute the size in bytes from the value in bits.
+If the value in bits is not a multiple of 8, the value is rounded down to the lower
+multiple of 8 bits.
 
 ## Contacts
 

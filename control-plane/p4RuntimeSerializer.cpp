@@ -1539,11 +1539,16 @@ class P4RuntimeEntriesConverter {
             protoParam->set_param_id(parameterId++);
             auto parameter = actionDecl->parameters->parameters.at(parameterIndex++);
             int width = getTypeWidth(parameter->type, typeMap);
+            auto ei = EnumInstance::resolve(arg->expression, typeMap);
             if (arg->expression->is<IR::Constant>()) {
                 auto value = stringRepr(arg->expression->to<IR::Constant>(), width);
                 protoParam->set_value(*value);
             } else if (arg->expression->is<IR::BoolLiteral>()) {
                 auto value = stringRepr(arg->expression->to<IR::BoolLiteral>(), width);
+                protoParam->set_value(*value);
+            } else if (ei != nullptr && ei->is<SerEnumInstance>()) {
+                auto sei = ei->to<SerEnumInstance>();
+                auto value = stringRepr(sei->value->to<IR::Constant>(), width);
                 protoParam->set_value(*value);
             } else {
                 ::error(ErrorType::ERR_UNSUPPORTED,

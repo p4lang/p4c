@@ -148,14 +148,14 @@ class PrimitiveConverter {
  * next highest will be run, etc.  The macro invocation is followed by the body of the
  * converter function.
  */
-#define CONVERT_PRIMITIVE(NAME) \
-    class PrimitiveConverter_##NAME : public PrimitiveConverter {               \
+#define CONVERT_PRIMITIVE(NAME, ...) \
+    class PrimitiveConverter_##NAME##_##__VA_ARGS__ : public PrimitiveConverter {               \
         const IR::Statement *convert(ProgramStructure *, const IR::Primitive *) override;       \
-        PrimitiveConverter_##NAME()                                             \
-        : PrimitiveConverter(#NAME, 0) {}                                       \
-        static PrimitiveConverter_##NAME singleton;                             \
-    } PrimitiveConverter_##NAME::singleton;                                     \
-    const IR::Statement *PrimitiveConverter_##NAME::convert(                    \
+        PrimitiveConverter_##NAME##_##__VA_ARGS__()                                             \
+        : PrimitiveConverter(#NAME, __VA_ARGS__ + 0) {}                                       \
+        static PrimitiveConverter_##NAME##_##__VA_ARGS__ singleton;                             \
+    } PrimitiveConverter_##NAME##_##__VA_ARGS__::singleton;                                     \
+    const IR::Statement *PrimitiveConverter_##NAME##_##__VA_ARGS__::convert(                    \
         ProgramStructure *structure, const IR::Primitive *primitive)
 
 ///////////////////////////////////////////////////////////////

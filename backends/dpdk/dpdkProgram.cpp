@@ -356,22 +356,19 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
     for (auto state : p->states) {
         if (state->name == "start")
             stack.push_back(state);
-        degree_map.insert({state->name.toString(), 0});
-        state_map.insert({state->name.toString(), state});
+        degree_map.insert({state->name, 0});
+        state_map.insert({state->name, state});
     }
     for (auto state : p->states) {
         if (state->selectExpression) {
-            if (state->selectExpression->is<IR::SelectExpression>()) {
-                auto select =
-                    state->selectExpression->to<IR::SelectExpression>();
+            if (auto select = state->selectExpression->to<IR::SelectExpression>()) {
                 for (auto pair : select->selectCases) {
                     auto got = degree_map.find(pair->state->path->name);
                     if (got != degree_map.end()) {
                         got->second++;
                     }
                 }
-            } else if (auto path =
-                           state->selectExpression->to<IR::PathExpression>()) {
+            } else if (auto path = state->selectExpression->to<IR::PathExpression>()) {
                 auto got = degree_map.find(path->path->name);
                 if (got != degree_map.end()) {
                     got->second++;
@@ -393,7 +390,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
             add_instr(i);
         auto c = state->components;
         for (auto stat : c) {
-            DPDK::ConvertStatementToDpdk h(refmap, typemap, structure);
+            DPDK::ConvertStatementToDpdk h(refmap, typemap, structure, metadataStruct);
             h.set_parser(p);
             stat->apply(h);
             for (auto i : h.get_instr())
@@ -453,8 +450,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
                         }
                     }
                 }
-            } else if (auto path =
-                           state->selectExpression->to<IR::PathExpression>()) {
+            } else if (auto path = state->selectExpression->to<IR::PathExpression>()) {
                 auto i = new IR::DpdkJmpLabelStatement(
                         append_parser_name(p, path->path->name));
                 add_instr(i);
@@ -464,17 +460,15 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
         }
         // ===========
         if (state->selectExpression) {
-            if (state->selectExpression->is<IR::SelectExpression>()) {
-                auto select =
-                    state->selectExpression->to<IR::SelectExpression>();
+            if (auto select = state->selectExpression->to<IR::SelectExpression>()) {
                 for (auto pair : select->selectCases) {
-                    auto result = degree_map.find(pair->state->toString());
+                    auto result = degree_map.find(pair->state->path->name);
                     if (result != degree_map.end()) {
                         result->second--;
                     }
                 }
-            } else if (state->selectExpression->is<IR::PathExpression>()) {
-                auto got = degree_map.find(state->selectExpression->toString());
+            } else if (auto path = state->selectExpression->to<IR::PathExpression>()) {
+                auto got = degree_map.find(path->path->name);
                 if (got != degree_map.end()) {
                     got->second--;
                 }
