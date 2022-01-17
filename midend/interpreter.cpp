@@ -1285,4 +1285,4 @@ SymbolicValue* ExpressionEvaluator::evaluate(const IR::Expression* expression, b
     return result;
 }
 
-} // namespace P4
+}  // namespace P4
