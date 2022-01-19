@@ -216,7 +216,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token<Token>      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT
                    ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
                    INT KEY SELECT MATCH_KIND TYPE OUT PACKAGE PARSER PRAGMA RETURN STATE
-                   STRING STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
+                   STRING STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF TYPEOF VARBIT VALUESET VOID
 
 %token<cstring> IDENTIFIER TYPE_IDENTIFIER STRING_LITERAL
 %token<UnparsedConstant>  INTEGER
@@ -236,6 +236,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
                             nonBraceExpression
 %type<ConstType*>           baseType typeOrVoid specializedType headerStackType
                             typeRef tupleType typeArg realTypeArg namedType
+                            typeofDeclaration
 %type<IR::Type_Name*>       typeName
 %type<IR::Argument*>        argument
 %type<IR::Vector<IR::Argument>*>  argumentList nonEmptyArgList
@@ -452,6 +453,7 @@ nonTypeName
     | STATE       { $$ = new IR::ID(@1, "state"); }
     | ENTRIES     { $$ = new IR::ID(@1, "entries"); }
     | TYPE        { $$ = new IR::ID(@1, "type"); }
+    | TYPEOF      { $$ = new IR::ID(@1, "typeof"); }
     ;
 
 name
@@ -465,6 +467,7 @@ nonTableKwName
     | APPLY            { $$ = new IR::ID(@1, "apply"); }
     | STATE            { $$ = new IR::ID(@1, "state"); }
     | TYPE             { $$ = new IR::ID(@1, "type"); }
+    | TYPEOF           { $$ = new IR::ID(@1, "typeof"); }
     ;
 
 optCONST
@@ -561,6 +564,7 @@ annotationToken
     | TRUE             { $$ = $1; }
     | TUPLE            { $$ = $1; }
     | TYPEDEF          { $$ = $1; }
+    | TYPEOF           { $$ = $1; }
     | VARBIT           { $$ = $1; }
     | VALUESET         { $$ = $1; }
     | VOID             { $$ = $1; }
@@ -1053,6 +1057,10 @@ derivedTypeDeclaration
     | enumDeclaration                  { $$ = $1; }
     ;
 
+typeofDeclaration
+    : TYPEOF "(" expression ")"        { $$ = new IR::Typeof(@3, $3); }
+    ;
+
 headerTypeDeclaration
     : optAnnotations HEADER name { driver.structure->pushContainerType(*$3, true); } optTypeParameters {
         driver.structure->markAsTemplate(*$3);
@@ -1126,6 +1134,8 @@ typedefDeclaration
     : optAnnotations TYPEDEF typeRef name   { driver.structure->declareType(*$4);
           $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
     | optAnnotations TYPEDEF derivedTypeDeclaration name   { driver.structure->declareType(*$4);
+                        $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
+    | optAnnotations TYPEDEF typeofDeclaration name { driver.structure->declareType(*$4);
                         $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
     | optAnnotations TYPE typeRef name   { driver.structure->declareType(*$4);
           $$ = new IR::Type_Newtype(@4, *$4, new IR::Annotations(*$1), $3); }

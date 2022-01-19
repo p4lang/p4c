@@ -285,6 +285,14 @@ bool ToP4::preorder(const IR::Type_Typedef* t) {
     return false;
 }
 
+bool ToP4::preorder(const IR::Typeof* t) {
+    dump(2);
+    builder.append("typeof(");
+    visit(t->expression);
+    builder.append(")");
+    return false;
+}
+
 bool ToP4::preorder(const IR::Type_Newtype* t) {
     dump(2);
     visit(t->annotations);

@@ -181,6 +181,8 @@ using Parser = P4::P4Parser;
                   return makeToken(TUPLE); }
 "typedef"       { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(TYPEDEF); }
+"typeof"        { BEGIN(driver.saveState); driver.template_args = false;
+                  return makeToken(TYPEOF); }
 "varbit"        { BEGIN(driver.saveState); driver.template_args = true;
                   return makeToken(VARBIT); }
 "value_set"     { BEGIN(driver.saveState); driver.template_args = true;

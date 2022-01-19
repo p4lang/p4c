@@ -675,4 +675,11 @@ class Type_Extern : Type_Declaration, INestedNamespace, IGeneralNamespace,
     { return lookupMethod(name, arguments); }
 }
 
+/// Represents the type of the expression, typeof(expression) in P4.
+class Typeof : Type {
+    Expression expression;
+    Type getP4Type() const override { return this; }
+#nodbprint
+}
+
 /** @} *//* end group irdefs */
