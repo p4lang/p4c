@@ -32,6 +32,7 @@ limitations under the License.
 #include "checkConstants.h"
 #include "checkCoreMethods.h"
 #include "checkNamedArgs.h"
+#include "checkNameAnnotations.h"
 #include "createBuiltins.h"
 #include "defaultArguments.h"
 #include "deprecated.h"
@@ -151,6 +152,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ResolveReferences(&refMap),  // check shadowing
         new Deprecated(&refMap),
         new CheckNamedArgs(),
+        new CheckNameAnnotations(),
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
         new TypeInference(&refMap, &typeMap, false, false),  // insert casts, dont' check arrays

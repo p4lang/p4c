@@ -493,17 +493,17 @@ annotation
         { // Initialize with an empty sequence of annotation tokens so that the
           // annotation node is marked as unparsed.
           IR::Vector<IR::AnnotationToken> body;
-          $$ = new IR::Annotation(@1, *$2, body); }
+          $$ = new IR::Annotation(@1+@2, *$2, body); }
     | "@" name "(" annotationBody ")"
-        { $$ = new IR::Annotation(@1, *$2, *$4); }
+        { $$ = new IR::Annotation(@1+@5, *$2, *$4); }
     | "@" name "[" expressionList "]"
-        { $$ = new IR::Annotation(@1, *$2, *$4, true); }
+        { $$ = new IR::Annotation(@1+@5, *$2, *$4, true); }
     | "@" name "[" kvList "]"
-        { $$ = new IR::Annotation(@1, *$2, *$4, true); }
+        { $$ = new IR::Annotation(@1+@5, *$2, *$4, true); }
     // Experimental: backwards compatibility with P4-14 pragmas (which
     // themselves are experimental!)
     | PRAGMA name annotationBody END_PRAGMA
-        { $$ = new IR::Annotation(@1, *$2, *$3, false); }
+        { $$ = new IR::Annotation(@1+@4, *$2, *$3, false); }
     ;
 
 annotationBody

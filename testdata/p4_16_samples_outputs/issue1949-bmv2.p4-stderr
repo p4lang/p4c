@@ -1,0 +1,9 @@
+issue1949-bmv2.p4(50): [--Wwarn=shadow] warning: .foo and .foo use the same name in a @name annotation @name
+    @name(".foo") action act2() {
+                         ^^^^
+issue1949-bmv2.p4(47)
+    @name(".foo") action act1() {
+                         ^^^^
+issue1949-bmv2.p4(50)
+    @name(".foo") action act2() {
+    ^^^^^^^^^^^^^
