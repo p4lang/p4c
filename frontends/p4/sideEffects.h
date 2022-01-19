@@ -344,6 +344,31 @@ class TablesInKeys : public Inspector {
     }
 };
 
+/// Discovers action arguments that may involve table applications.
+/// These idioms are currently not supported:
+/// table s { ... }
+/// table t {
+///    actions { a(s.apply().hit ? ... ); }
+class TablesInActions : public Inspector {
+    ReferenceMap* refMap;
+    TypeMap*      typeMap;
+
+ public:
+    TablesInActions(ReferenceMap* refMap, TypeMap* typeMap)
+            : refMap(refMap), typeMap(typeMap) {}
+    void postorder(const IR::MethodCallExpression* expression) override {
+        if (findContext<IR::ActionList>()) {
+            HasTableApply hta(refMap, typeMap);
+            hta.setCalledBy(this);
+            (void)expression->apply(hta);
+            if (hta.table != nullptr) {
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "%1%: table invocation in action argument", expression);
+            }
+        }
+    }
+};
+
 class SideEffectOrdering : public PassRepeated {
     // Contains all tables that are invoked within key
     // computations for other tables.  The keys for these
@@ -362,6 +387,7 @@ class SideEffectOrdering : public PassRepeated {
             passes.push_back(new TypeChecking(refMap, typeMap));
             passes.push_back(new DoSimplifyExpressions(refMap, typeMap, &added));
             passes.push_back(typeChecking);
+            passes.push_back(new TablesInActions(refMap, typeMap));
             passes.push_back(new TablesInKeys(refMap, typeMap, &invokedInKey));
             passes.push_back(new KeySideEffect(refMap, typeMap, &invokedInKey));
         }
