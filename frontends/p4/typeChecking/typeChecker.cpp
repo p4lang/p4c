@@ -3441,6 +3441,8 @@ static void convertStructToTuple(const IR::Type_StructLike* structType, IR::Type
             tuple->components.push_back(ft);
         } else if (auto ft = field->type->to<IR::Type_StructLike>()) {
             convertStructToTuple(ft, tuple);
+        } else if (auto ft = field->type->to<IR::Type_InfInt>()) {
+            tuple->components.push_back(ft);
         } else {
             BUG("Unexpected type %1% for struct field %2%", field->type, field);
         }
@@ -3521,7 +3523,7 @@ bool TypeInference::containsHeader(const IR::Type* type) {
     return false;
 }
 
-static bool validateSelectTypes(const IR::Type* type, const IR::Expression* expression) {
+static bool validateSelectTypes(const IR::Type* type, const IR::SelectExpression* expression) {
     if (auto tuple = type->to<IR::Type_BaseList>()) {
         for (auto ct : tuple->components) {
             auto check = validateSelectTypes(ct, expression);
@@ -3536,7 +3538,8 @@ static bool validateSelectTypes(const IR::Type* type, const IR::Expression* expr
                type->is<IR::Type_Boolean>() || type->is<IR::Type_Enum>()) {
         return true;
     }
-    typeError("Expression with type %1% cannot be used in select %2%", type, expression);
+    typeError("Expression '%1%' with type '%2%' cannot be used in select",
+              expression->select, type);
     return false;
 }
 
