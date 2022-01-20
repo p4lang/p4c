@@ -74,7 +74,7 @@ const IR::Node* DoSimplifySelectCases::preorder(IR::SelectExpression* expression
         if (cases.size() == 1) {
             // just one default label
             warn(ErrorType::WARN_PARSER_TRANSITION,
-                 "%1%: transition does not depend on select argument", expression->select);
+                 "'%1%': transition does not depend on select argument", expression->select);
             return cases.at(0)->state;
         }
         expression->selectCases = std::move(cases);
