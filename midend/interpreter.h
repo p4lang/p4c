@@ -40,11 +40,13 @@ class SymbolicValue : public IHasDbPrint {
     virtual bool isScalar() const = 0;
     virtual void dbprint(std::ostream& out) const = 0;
     template<typename T> T* to() {
+        return dynamic_cast<T*>(this); }
+    template<typename T> T* checkedTo() {
         auto result = dynamic_cast<T*>(this);
         CHECK_NULL(result); return result; }
     template<typename T> const T* to() const {
         auto result = dynamic_cast<const T*>(this);
-        CHECK_NULL(result); return result; }
+        return result; }
     template<typename T> bool is() const { return dynamic_cast<const T*>(this) != nullptr; }
     virtual SymbolicValue* clone() const = 0;
     virtual void setAllUnknown() = 0;

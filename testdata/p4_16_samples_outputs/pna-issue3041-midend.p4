@@ -112,35 +112,35 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
         default_action = NoAction_2();
     }
-    @hidden action issue3041l127() {
+    @hidden action pnaissue3041l127() {
         send_to_port(32w0);
     }
-    @hidden table tbl_issue3041l127 {
+    @hidden table tbl_pnaissue3041l127 {
         actions = {
-            issue3041l127();
+            pnaissue3041l127();
         }
-        const default_action = issue3041l127();
+        const default_action = pnaissue3041l127();
     }
     apply {
-        tbl_issue3041l127.apply();
+        tbl_pnaissue3041l127.apply();
         tbl_0.apply();
         tbl2_0.apply();
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action issue3041l140() {
+    @hidden action pnaissue3041l140() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_base_t>(hdr.ipv4_base);
     }
-    @hidden table tbl_issue3041l140 {
+    @hidden table tbl_pnaissue3041l140 {
         actions = {
-            issue3041l140();
+            pnaissue3041l140();
         }
-        const default_action = issue3041l140();
+        const default_action = pnaissue3041l140();
     }
     apply {
-        tbl_issue3041l140.apply();
+        tbl_pnaissue3041l140.apply();
     }
 }
 
