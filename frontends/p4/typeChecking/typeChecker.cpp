@@ -2301,6 +2301,7 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
     setType(getOriginal(), ltype);
     if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
         auto result = constantFold(expression);
+        setType(result, ltype);
         setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
         return result;
@@ -2465,6 +2466,7 @@ const IR::Node* TypeInference::postorder(IR::LNot* expression) {
     }
     if (isCompileTimeConstant(expression->expr)) {
         auto result = constantFold(expression);
+        setType(result, IR::Type_Boolean::get());
         setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
         return result;
@@ -2494,6 +2496,7 @@ const IR::Node* TypeInference::postorder(IR::Neg* expression) {
     }
     if (isCompileTimeConstant(expression->expr)) {
         auto result = constantFold(expression);
+        setType(result, type);
         setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
         return result;
@@ -2522,6 +2525,7 @@ const IR::Node* TypeInference::postorder(IR::Cmpl* expression) {
     }
     if (isCompileTimeConstant(expression->expr)) {
         auto result = constantFold(expression);
+        setType(result, type);
         setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
         return result;
@@ -2745,18 +2749,19 @@ const IR::Node* TypeInference::postorder(IR::Slice* expression) {
         return expression;
     }
 
-    const IR::Type* result = IR::Type_Bits::get(bst->srcInfo, m - l + 1, false);
-    result = canonicalize(result);
-    if (result == nullptr)
+    const IR::Type* resultType = IR::Type_Bits::get(bst->srcInfo, m - l + 1, false);
+    resultType = canonicalize(resultType);
+    if (resultType == nullptr)
         return expression;
-    setType(getOriginal(), result);
-    setType(expression, result);
+    setType(getOriginal(), resultType);
+    setType(expression, resultType);
     if (isLeftValue(expression->e0)) {
         setLeftValue(expression);
         setLeftValue(getOriginal<IR::Expression>());
     }
     if (isCompileTimeConstant(expression->e0)) {
         auto result = constantFold(expression);
+        setType(result, resultType);
         setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
         return result;
@@ -2803,6 +2808,7 @@ const IR::Node* TypeInference::postorder(IR::Mux* expression) {
             isCompileTimeConstant(expression->e1) &&
             isCompileTimeConstant(expression->e2)) {
             auto result = constantFold(expression);
+            setType(result, secondType);
             setCompileTimeConstant(result);
             setCompileTimeConstant(getOriginal<IR::Expression>());
             return result;
