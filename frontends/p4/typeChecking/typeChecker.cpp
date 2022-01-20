@@ -3523,6 +3523,8 @@ bool TypeInference::containsHeader(const IR::Type* type) {
     return false;
 }
 
+/// Expressions that appear in a select expression are restricted to a small
+/// number of types: bits, enums, serializable enums, and booleans.
 static bool validateSelectTypes(const IR::Type* type, const IR::SelectExpression* expression) {
     if (auto tuple = type->to<IR::Type_BaseList>()) {
         for (auto ct : tuple->components) {
