@@ -28,7 +28,7 @@ namespace P4 {
 class SymbolicValueFactory;
 
 // Base class for all abstract values
-class SymbolicValue {
+class SymbolicValue : public IHasDbPrint {
     static unsigned crtid;
 
  protected:
@@ -133,8 +133,10 @@ class ExpressionEvaluator : public Inspector {
 
     std::map<const IR::Expression*, SymbolicValue*> value;
 
-    SymbolicValue* set(const IR::Expression* expression, SymbolicValue* v)
-    { value.emplace(expression, v); return v; }
+    SymbolicValue* set(const IR::Expression* expression, SymbolicValue* v) {
+        LOG2("Symbolic evaluation of " << expression << " is " << v);
+        value.emplace(expression, v); return v;
+    }
 
     void postorder(const IR::Constant* expression) override;
     void postorder(const IR::BoolLiteral* expression) override;
