@@ -39,7 +39,7 @@ struct headers_t {
 }
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t main_meta, in pna_main_parser_input_metadata_t istd) {
-    @name("MainParserImpl.tmp_len") bit<8> tmp_len_0;
+    @name("MainParserImpl.tmp16") bit<16> tmp16_0;
     @name("MainParserImpl.tmp_0") bit<8> tmp_0;
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
@@ -56,9 +56,8 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
         }
     }
     state parse_ipv4_option_timestamp {
-        pkt.lookahead<bit<8>>();
-        tmp_len_0 = pkt.lookahead<bit<8>>();
-        pkt.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_len_0 << 3) + 32w4294967280);
+        tmp16_0 = pkt.lookahead<bit<16>>();
+        pkt.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp16_0[7:0] << 3) + 32w4294967280);
         transition accept;
     }
     state parse_ipv4_options {
@@ -106,26 +105,35 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
         default_action = NoAction_2();
     }
+    @hidden action pnaexampledpdkvarbit122() {
+        send_to_port(32w0);
+    }
+    @hidden table tbl_pnaexampledpdkvarbit122 {
+        actions = {
+            pnaexampledpdkvarbit122();
+        }
+        const default_action = pnaexampledpdkvarbit122();
+    }
     apply {
+        tbl_pnaexampledpdkvarbit122.apply();
         tbl_0.apply();
         tbl2_0.apply();
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexampledpdkvarbit134() {
+    @hidden action pnaexampledpdkvarbit135() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_base_t>(hdr.ipv4_base);
-        pkt.emit<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp);
     }
-    @hidden table tbl_pnaexampledpdkvarbit134 {
+    @hidden table tbl_pnaexampledpdkvarbit135 {
         actions = {
-            pnaexampledpdkvarbit134();
+            pnaexampledpdkvarbit135();
         }
-        const default_action = pnaexampledpdkvarbit134();
+        const default_action = pnaexampledpdkvarbit135();
     }
     apply {
-        tbl_pnaexampledpdkvarbit134.apply();
+        tbl_pnaexampledpdkvarbit135.apply();
     }
 }
 

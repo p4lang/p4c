@@ -60,6 +60,7 @@ set (MIDEND_HDRS
   compileTimeOps.h
   complexComparison.h
   convertEnums.h
+  convertErrors.h
   copyStructures.h
   eliminateNewtype.h
   eliminateSerEnums.h

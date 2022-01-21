@@ -24,17 +24,21 @@ struct col_t {
 }
 
 struct local_metadata_t {
-    @field_list(0)
+    @MNK_annotation("(test flatten)") @field_list(0) 
     bit<1>     _row0_alt0_valid0;
-    @field_list(0)
+    @MNK_annotation("(test flatten)") @field_list(0) 
     bit<7>     _row0_alt0_port1;
-    @field_list(0)
+    @MNK_annotation("(test flatten)") @field_list(0) 
     bit<1>     _row0_alt1_valid2;
-    @field_list(0)
+    @MNK_annotation("(test flatten)") @field_list(0) 
     bit<7>     _row0_alt1_port3;
+    @MNK_annotation("(test flatten)") 
     bit<1>     _row1_alt0_valid4;
+    @MNK_annotation("(test flatten)") 
     bit<7>     _row1_alt0_port5;
+    @MNK_annotation("(test flatten)") 
     bit<1>     _row1_alt1_valid6;
+    @MNK_annotation("(test flatten)") 
     bit<7>     _row1_alt1_port7;
     bitvec_hdr _col_bvh8;
     bitvec_hdr _bvh09;
@@ -140,3 +144,4 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
 }
 
 V1Switch<parsed_packet_t, local_metadata_t>(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;
+

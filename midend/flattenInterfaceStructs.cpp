@@ -18,59 +18,6 @@ limitations under the License.
 
 namespace P4 {
 
-void StructTypeReplacement::flatten(const P4::TypeMap* typeMap,
-                                    cstring prefix,
-                                    const IR::Type* type,
-                                    const IR::Annotations* annotations,  // from parent
-                                    IR::IndexedVector<IR::StructField> *fields) {
-    // Drop name annotations
-    IR::Annotations::Filter f =
-            [](const IR::Annotation* a) { return a->name != IR::Annotation::nameAnnotation; };
-    annotations = annotations->where(f);
-    if (auto st = type->to<IR::Type_Struct>()) {
-        structFieldMap.emplace(prefix, st);
-        for (auto f : st->fields) {
-            auto na = new IR::Annotations();
-            na->append(annotations);
-            na->append(f->annotations);
-            flatten(typeMap, prefix + "." + f->name, f->type, na, fields);
-        }
-        return;
-    }
-    cstring fieldName = prefix.replace(".", "_") +
-                        cstring::to_cstring(fieldNameRemap.size());
-    fieldNameRemap.emplace(prefix, fieldName);
-    fields->push_back(new IR::StructField(IR::ID(fieldName), annotations, type->getP4Type()));
-}
-
-StructTypeReplacement::StructTypeReplacement(
-    const P4::TypeMap* typeMap, const IR::Type_Struct* type) {
-    auto vec = new IR::IndexedVector<IR::StructField>();
-    flatten(typeMap, "", type, type->annotations, vec);
-    replacementType = new IR::Type_Struct(type->name, IR::Annotations::empty, *vec);
-}
-
-const IR::StructExpression* StructTypeReplacement::explode(
-    const IR::Expression *root, cstring prefix) {
-    auto vec = new IR::IndexedVector<IR::NamedExpression>();
-    auto fieldType = ::get(structFieldMap, prefix);
-    BUG_CHECK(fieldType, "No field for %1%", prefix);
-    for (auto f : fieldType->fields) {
-        cstring fieldName = prefix + "." + f->name.name;
-        auto newFieldname = ::get(fieldNameRemap, fieldName);
-        const IR::Expression* expr;
-        if (!newFieldname.isNullOrEmpty()) {
-            expr = new IR::Member(root, newFieldname);
-        } else {
-            expr = explode(root, fieldName);
-        }
-        vec->push_back(new IR::NamedExpression(f->name, expr));
-    }
-    auto type = fieldType->getP4Type()->to<IR::Type_Name>();
-    return new IR::StructExpression(
-        root->srcInfo, type, type, *vec);
-}
-
 namespace {
 static const IR::Type_Struct* isNestedStruct(const P4::TypeMap* typeMap, const IR::Type* type) {
     if (auto st = type->to<IR::Type_Struct>()) {
@@ -88,7 +35,8 @@ void NestedStructMap::createReplacement(const IR::Type_Struct* type) {
     auto repl = ::get(replacement, type);
     if (repl != nullptr)
         return;
-    repl = new StructTypeReplacement(typeMap, type);
+    repl = new StructTypeReplacement<IR::Type_Struct>(
+        typeMap, type, new AnnotationSelectionPolicy());
     LOG3("Replacement for " << type << " is " << repl);
     replacement.emplace(type, repl);
 }

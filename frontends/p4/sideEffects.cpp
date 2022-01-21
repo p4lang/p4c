@@ -38,7 +38,11 @@ const IR::Expression* DoSimplifyExpressions::addAssignment(
     Util::SourceInfo srcInfo,
     cstring varName,
     const IR::Expression* expression) {
-    auto left = new IR::PathExpression(IR::ID(varName, nullptr));
+    const IR::PathExpression* left;
+    if (auto pe = expression->to<IR::PathExpression>())
+        left = new IR::PathExpression(IR::ID(varName, pe->path->name.originalName));
+    else
+        left = new IR::PathExpression(IR::ID(varName, nullptr));
     auto stat = new IR::AssignmentStatement(srcInfo, left, expression);
     statements.push_back(stat);
     auto result = left->clone();
@@ -382,7 +386,8 @@ const IR::Expression* GetWrittenExpressions::everything = new IR::Constant(0);
 }  // namespace
 
 const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
-    BUG_CHECK(!isWrite(), "%1%: method on left hand side?", mce);
+    // BUG_CHECK(!isWrite(), "%1%: method on left hand side?", mce);
+    // isWrite is too conservative, so this check may fail for something like f().isValid()
     LOG3("Visiting " << dbp(mce));
     auto orig = getOriginal<IR::MethodCallExpression>();
     auto type = typeMap->getType(orig, true);

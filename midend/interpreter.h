@@ -28,7 +28,7 @@ namespace P4 {
 class SymbolicValueFactory;
 
 // Base class for all abstract values
-class SymbolicValue {
+class SymbolicValue : public IHasDbPrint {
     static unsigned crtid;
 
  protected:
@@ -40,11 +40,13 @@ class SymbolicValue {
     virtual bool isScalar() const = 0;
     virtual void dbprint(std::ostream& out) const = 0;
     template<typename T> T* to() {
+        return dynamic_cast<T*>(this); }
+    template<typename T> T* checkedTo() {
         auto result = dynamic_cast<T*>(this);
         CHECK_NULL(result); return result; }
     template<typename T> const T* to() const {
         auto result = dynamic_cast<const T*>(this);
-        CHECK_NULL(result); return result; }
+        return result; }
     template<typename T> bool is() const { return dynamic_cast<const T*>(this) != nullptr; }
     virtual SymbolicValue* clone() const = 0;
     virtual void setAllUnknown() = 0;
@@ -133,8 +135,10 @@ class ExpressionEvaluator : public Inspector {
 
     std::map<const IR::Expression*, SymbolicValue*> value;
 
-    SymbolicValue* set(const IR::Expression* expression, SymbolicValue* v)
-    { value.emplace(expression, v); return v; }
+    SymbolicValue* set(const IR::Expression* expression, SymbolicValue* v) {
+        LOG2("Symbolic evaluation of " << expression << " is " << v);
+        value.emplace(expression, v); return v;
+    }
 
     void postorder(const IR::Constant* expression) override;
     void postorder(const IR::BoolLiteral* expression) override;

@@ -1,0 +1,6 @@
+issue2835-bmv2.p4(86): [--Werror=unsupported] error: t_two.apply: table invocation in action argument
+            a_two(t_two.apply().hit ? bump_val(hdr.ethernet.etherType) : hdr.ethernet.etherType, bump_val(hdr.ethernet.etherType));
+                  ^^^^^^^^^^^^^
+issue2835-bmv2.p4(86): [--Werror=unsupported] error: a_two: table invocation in action argument
+            a_two(t_two.apply().hit ? bump_val(hdr.ethernet.etherType) : hdr.ethernet.etherType, bump_val(hdr.ethernet.etherType));
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

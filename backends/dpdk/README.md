@@ -6,11 +6,13 @@ the DPDK 20.11 LTS release. For more information, please refer to the release
 note at https://doc.dpdk.org/guides/rel_notes/release_20_11.html.
 
 The p4c-dpdk compiler accepts P4-16 programs written for the Portable
-Switch Architecture (PSA) (see the [P4.org specifications page](https://p4.org/specs)
-for the PSA specification document).
+Switch Architecture (PSA) and Portable NIC Architecture (PNA) (see the
+[P4.org specifications page](https://p4.org/specs) for the PSA and PNA
+specification document).
+
 
 The backend for dpdk reuses code from the p4c-bm2 "common" library for
-handling the PSA architecture. Internally, it translates the PSA
+handling the PSA/PNA architecture. Internally, it translates the PSA/PNA
 program to a representation that conforms to the DPDK SWX pipeline and
 generates the 'spec' file to configure the DPDK pipeline.
 
@@ -20,7 +22,7 @@ generates the 'spec' file to configure the DPDK pipeline.
 A sample P4 program can be found in the `examples` directory.  To
 generate the 'spec' file:
 ```bash
-p4c-dpdk vxlan.p4 -o vxlan.spec
+p4c-dpdk --arch psa vxlan.p4 -o vxlan.spec
 ```
 
 To load the 'spec' file in dpdk follow the instructions in the
@@ -28,9 +30,46 @@ To load the 'spec' file in dpdk follow the instructions in the
 
 
 ## Known issues
+### Unsupported Language Features
+- Subparsers
+- Parser Value Sets
 
-TBD
+### Unsupported PSA externs and features
+- Packet Digest
+- Random
+- Hash
+- Timestamp
+- Direct Meter
+- Direct Counter
+- Basic Checksum
+- Packet Cloning/Recirculation/Resubmission
 
+### DPDK target limitations
+- Currently, programs written for DPDK target should limit the functionality in Ingress blocks.  When egress block support gets added to the DPDK target, compiler should generate separate spec file for ingress and egress.
+- DPDK architecture assumes the following signatures for programmable block of PSA. P4C-DPDK converts the input program to this form.
+
+```P4
+parser IngressParser (packet_in buffer, out H parsed_hdr, inout M user_meta);
+
+control Ingress (inout H hdr, inout M user_meta);
+
+control IngressDeparser (packet_out buffer, inout H hdr, in M meta);
+
+parser EgressParser (packet_in buffer, out H parsed_hdr, inout M user_meta);
+
+control Egress (inout H hdr, inout M user_meta);
+
+control EgressDeparser (packet_out buffer, inout H hdr, in M meta);
+```
+
+- Size of all structure fields to be multiple of 8 bits and should not be greater than 64-bit. (This limitation is planned to be removed by grouping fields into fields which are multiple of 8-bits)
+- Combination of header and metadata as table key is not allowed. (This limitation is removed by P4C by copying the differing match key fields to metadata)
+- Extract instruction in DPDK target with 2 arguments expects the second argument to be the number
+of bytes to be extracted into the varbit field of the header.
+In P4 the second argument of the extract method is the number of bits.
+Compiler generates instructions which compute the size in bytes from the value in bits.
+If the value in bits is not a multiple of 8, the value is rounded down to the lower
+multiple of 8 bits.
 
 ## Contacts
 

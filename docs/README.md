@@ -191,6 +191,9 @@ The testing infrastructure is based on small python and shell scripts.
 
 * To rerun the tests that failed last time run `make recheck`
 
+* To run a single test case execute `ctest --output-on-failure -R '<test>'`.
+  Example: `ctest --output-on-failure -R 'psa-switch-expression-without-default'`
+
 * Add unit tests in `test/gtest`
 
 Test programs with file names ending in `-bmv2.p4` or `-ebpf.p4` may

@@ -187,14 +187,50 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
                                          h->fields);
         headerType.push_back(ht);
     }
-    IR::IndexedVector<IR::DpdkStructType> structType = UpdateHeaderMetadata(prog, metadataStruct);
 
+    IR::IndexedVector<IR::DpdkStructType> structType;
+    IR::IndexedVector<IR::DpdkStructType> updatedHeaderMetadataStructs =
+            UpdateHeaderMetadata(prog, metadataStruct);
     for (auto kv : structure->metadata_types) {
         auto s = kv.second;
-        auto st = new IR::DpdkStructType(s->srcInfo, s->name, s->annotations,
-                                         s->fields);
-        structType.push_back(st);
+        auto structTypeName = s->getName().name;
+        if (updatedHeaderMetadataStructs.getDeclaration(structTypeName) != nullptr) {
+            /**
+             * UpdateHeaderMetadata returns IndexedVector filled with following 3 types of structs:
+             * - main metadata structure (whose name is stored in structure->local_metadata_type)
+             * - structures for action arguments created internally by compiler (stored in
+             *   structure->args_struct_map)
+             * - main structure which holds all headers (whose name is stored in
+             *   structure->header_type)
+             *
+             * Only the first one (main metadata structure) can be present in
+             * structure->metadata_types map.
+             * Main metadata structure is added to the map when it contains metadata whose
+             * type is a structure.
+             * It happens during InspectDpdkProgram pass which visits IR::Parameter nodes in
+             * InspectDpdkProgram::preorder(const IR::Parameter* param).
+             * During that pass the visitor only visits the parameter in the statement from
+             * architecture.
+             * Structures internally created for action arguments are not visited in that pass,
+             * so they are not added to structure->metadata_types.
+             * As they are created internally by compiler they are not used as types of fields
+             * in main metadata structure neither.
+             * Main headers structure contains only headers so it is not added to
+             * structure->metadata_types map neither.
+             * InspectDpdkProgram adds there only the structures which contain some field
+             * with structure type.
+             */
+            LOG3("Struct type already added to DpdkStructType vector: " << s << std::endl <<
+                    "Main metadata structure is: " << structure->local_metadata_type);
+            BUG_CHECK(structTypeName == structure->local_metadata_type,
+                    "Unexpectedly duplicating declaration of: %1%", structTypeName);
+        } else {
+            LOG3("Adding DpdkStructType: " << s);
+            auto st = new IR::DpdkStructType(s->srcInfo, s->name, s->annotations, s->fields);
+            structType.push_back(st);
+        }
     }
+    structType.append(updatedHeaderMetadataStructs);
 
     IR::IndexedVector<IR::DpdkExternDeclaration> dpdkExternDecls;
     for (auto ed : structure->externDecls) {
@@ -320,22 +356,19 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
     for (auto state : p->states) {
         if (state->name == "start")
             stack.push_back(state);
-        degree_map.insert({state->name.toString(), 0});
-        state_map.insert({state->name.toString(), state});
+        degree_map.insert({state->name, 0});
+        state_map.insert({state->name, state});
     }
     for (auto state : p->states) {
         if (state->selectExpression) {
-            if (state->selectExpression->is<IR::SelectExpression>()) {
-                auto select =
-                    state->selectExpression->to<IR::SelectExpression>();
+            if (auto select = state->selectExpression->to<IR::SelectExpression>()) {
                 for (auto pair : select->selectCases) {
                     auto got = degree_map.find(pair->state->path->name);
                     if (got != degree_map.end()) {
                         got->second++;
                     }
                 }
-            } else if (auto path =
-                           state->selectExpression->to<IR::PathExpression>()) {
+            } else if (auto path = state->selectExpression->to<IR::PathExpression>()) {
                 auto got = degree_map.find(path->path->name);
                 if (got != degree_map.end()) {
                     got->second++;
@@ -357,7 +390,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
             add_instr(i);
         auto c = state->components;
         for (auto stat : c) {
-            DPDK::ConvertStatementToDpdk h(refmap, typemap, structure);
+            DPDK::ConvertStatementToDpdk h(refmap, typemap, structure, metadataStruct);
             h.set_parser(p);
             stat->apply(h);
             for (auto i : h.get_instr())
@@ -417,8 +450,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
                         }
                     }
                 }
-            } else if (auto path =
-                           state->selectExpression->to<IR::PathExpression>()) {
+            } else if (auto path = state->selectExpression->to<IR::PathExpression>()) {
                 auto i = new IR::DpdkJmpLabelStatement(
                         append_parser_name(p, path->path->name));
                 add_instr(i);
@@ -428,17 +460,15 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
         }
         // ===========
         if (state->selectExpression) {
-            if (state->selectExpression->is<IR::SelectExpression>()) {
-                auto select =
-                    state->selectExpression->to<IR::SelectExpression>();
+            if (auto select = state->selectExpression->to<IR::SelectExpression>()) {
                 for (auto pair : select->selectCases) {
-                    auto result = degree_map.find(pair->state->toString());
+                    auto result = degree_map.find(pair->state->path->name);
                     if (result != degree_map.end()) {
                         result->second--;
                     }
                 }
-            } else if (state->selectExpression->is<IR::PathExpression>()) {
-                auto got = degree_map.find(state->selectExpression->toString());
+            } else if (auto path = state->selectExpression->to<IR::PathExpression>()) {
+                auto got = degree_map.find(path->path->name);
                 if (got != degree_map.end()) {
                     got->second--;
                 }

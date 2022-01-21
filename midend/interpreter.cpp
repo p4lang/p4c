@@ -1254,6 +1254,15 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
                 sh->setValid(true);
                 set(expression, SymbolicVoid::get());
                 return;
+            } else if (em->method->name.name == P4CoreLibrary::instance.packetIn.lookahead.name) {
+                // If lookahead returns a header, it is always valid.
+                auto type = typeMap->getTypeType(mi->actualMethodType->returnType, true);
+                auto res = factory->create(type, false);
+                if (auto sh = res->to<SymbolicHeader>()) {
+                    sh->setValid(true);
+                }
+                set(expression, res);
+                return;
             }
         }
     }

@@ -184,6 +184,82 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
             } else {
                 BUG("%1% Not implemented", e->originalExternType->name);
             }
+        } else if (auto e = mi->to<P4::ExternFunction>()) {
+            /* PNA SelectByDirection extern is implemented as
+                SelectByDirection<T>(in PNA_Direction_t direction, in T n2h_value, in T h2n_value) {
+                    if (direction == PNA_Direction_t.NET_TO_HOST) {
+                        return n2h_value;
+                    } else {
+                        return h2n_value;
+                    }
+                }
+                Example:
+                    table ipv4_da_lpm {
+                        key = {
+                            SelectByDirection(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr):
+                                                                          lpm @name ("ipv4_addr");
+                        }
+                        ....
+                }
+
+                In this example, KeySideEffect pass inserts a temporary for holding the result of
+                complex key expression and replaces the key expression with the temporary. An
+                assignment is inserted in the apply block before the table apply to assign the complex
+                expression into this temporary variable. After KeySideEffect pass, SelectByDirection
+                extern invocation is present as RHS of assignment and hence is evaluated here in this
+                visitor.
+
+                After keySideEffect pass:
+                bit <> key_0;
+                ...
+                table ipv4_da_lpm {
+                    key = {
+                        key_0: lpm @name ("ipv4_addr");
+                    }
+                    ....
+                }
+
+                apply {
+                    key_0 =
+                    SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr);
+                    ...
+		    ...
+                }
+
+                This is replaced by an assignment of the resultant value into a temporary based on
+                the direction. Assembly equivalent to the below code is emitted:
+
+                if (istd.direction == PNA_Direction_t.NET_TO_HOST) {
+                    key_0 = hdr.ipv4.srcAddr;
+                } else {
+                    key_0 = hdr.ipv4.dstAddr;
+                }
+
+                The equivalent assembly looks like this:
+                jmpeq LABEL_TRUE_0 m.pna_main_input_metadata_direction 0x0
+                mov m.<controlBlockName>_key_0 h.ipv4.dstAddr
+                jmp LABEL_END_0
+                LABEL_TRUE_0 : mov m.<controlBlockName>_key_0 h.ipv4.srcAddr
+                LABEL_END_0 : ...
+            */
+            if (e->method->name == "SelectByDirection") {
+                auto args = e->expr->arguments;
+                auto dir = args->at(0)->expression;
+                auto firstVal = args->at(1)->expression;
+                auto secondVal = args->at(2)->expression;
+                auto true_label = refmap->newName("label_true");
+                auto end_label = refmap->newName("label_end");
+
+                /* Emit jump to block containing assignment for PNA_Direction_t.NET_TO_HOST */
+                add_instr(new IR::DpdkJmpEqualStatement(true_label, dir, new IR::Constant(0)));
+                add_instr(new IR::DpdkMovStatement(left, secondVal));
+                add_instr(new IR::DpdkJmpLabelStatement(end_label));
+                add_instr(new IR::DpdkLabelStatement(true_label));
+                add_instr(new IR::DpdkMovStatement(left, firstVal));
+                i = new IR::DpdkLabelStatement(end_label);
+            } else {
+                BUG("%1% Not Implemented", e->method->name);
+            }
         } else if (auto b = mi->to<P4::BuiltInMethod>()) {
             if (b->name == "isValid") {
                 /* DPDK target does not support isvalid() method call as RHS of assignment
@@ -327,7 +403,8 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
                         false_label, equ->left, equ->right));
         } else {
             instructions.push_back(new IR::DpdkJmpEqualStatement(
-                        true_label, equ->left, equ->right)); }
+                        true_label, equ->left, equ->right));
+        }
         return is_and;
     } else if (auto neq = expr->to<IR::Neq>()) {
         if (is_and) {
@@ -335,7 +412,8 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
                         false_label, neq->left, neq->right));
         } else {
             instructions.push_back(new IR::DpdkJmpNotEqualStatement(
-                        true_label, neq->left, neq->right)); }
+                        true_label, neq->left, neq->right));
+        }
         return is_and;
     } else if (auto lss = expr->to<IR::Lss>()) {
         /* Dpdk target does not support the negated condition Geq,
@@ -548,7 +626,25 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 } else if (args->size() == 2) {
                     auto header = args->at(0);
                     auto length = args->at(1);
-                    add_instr(new IR::DpdkExtractStatement(header->expression, length->expression));
+                    /**
+                     * Extract instruction of DPDK target expects the second argument
+                     * (size of the varbit field of the header) to be the number of bytes
+                     * to be extracted while in P4 it is the number of bits to be extracted.
+                     * We need to compute the size in bytes.
+                     *
+                     * @warning If the value is not aligned to 8 bits, the remainder after
+                     * division is dropped during runtime (this is a target limitation).
+                     */
+                    IR::ID tmpName(refmap->newName(
+                            length->expression->to<IR::Member>()->member.name + "_extract_tmp"));
+                    BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                    metadataStruct->fields.push_back(
+                            new IR::StructField(tmpName, length->expression->type));
+                    auto tmpMember = new IR::Member(new IR::PathExpression("m"), tmpName);
+                    add_instr(new IR::DpdkMovStatement(tmpMember, length->expression));
+                    add_instr(new IR::DpdkShrStatement(tmpMember, tmpMember,
+                            new IR::PathExpression("0x3")));
+                    add_instr(new IR::DpdkExtractStatement(header->expression, tmpMember));
                 }
             }
         } else if (a->originalExternType->getName().name == "Meter") {
@@ -617,10 +713,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 ::error("%1%: verify must be used in parser", s);
             auto args = a->expr->arguments;
             auto condition = args->at(0);
-            auto error = args->at(1);
-            if (!error->expression->is<IR::Member>())
-                ::error("%1%: must be one of the existing errors", s);
-            auto error_id = structure->error_map.at(error->expression->to<IR::Member>()->member);
+            auto error_id = args->at(1);
             auto end_label = refmap->newName("label_end");
             const IR::BoolLiteral *boolLiteral = condition->expression->to<IR::BoolLiteral>();
             if (!boolLiteral) {
@@ -640,7 +733,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             } else {
                 BUG("Unknown architecture unexpectedly!");
             }
-            add_instr(new IR::DpdkMovStatement(error_meta_path, new IR::Constant(error_id)));
+            add_instr(new IR::DpdkMovStatement(error_meta_path, error_id->expression));
             add_instr(new IR::DpdkJmpLabelStatement(
                         append_parser_name(parser, IR::ParserState::reject)));
             add_instr(new IR::DpdkLabelStatement(end_label));

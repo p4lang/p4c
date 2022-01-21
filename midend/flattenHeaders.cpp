@@ -19,45 +19,12 @@ limitations under the License.
 
 namespace P4 {
 
-void FindHeaderTypesToReplace::HeaderTypeReplacement::flatten(cstring prefix,
-        const IR::Type* type, const IR::Annotations* annos,
-        IR::IndexedVector<IR::StructField> *fields,
-        AnnotationSelectionPolicy *policy) {
-    if (auto st = type->to<IR::Type_StructLike>()) {
-        std::function<bool(const IR::Annotation *)> selector =
-                [&policy](const IR::Annotation *annot) {
-                    if (!policy)
-                        return false;
-                    return policy->keep(annot);
-                };
-        auto annotations = st->annotations->where(selector);
-        for (auto f : st->fields) {
-            auto ft = typeMap->getType(f, true);
-            flatten(prefix + "." + f->name, ft, annotations, fields, policy);
-        }
-        return;
-    }
-    //  cstring originalName = prefix; TODO once behavioral model is fixed.
-    cstring fieldName = prefix.replace(".", "_") +
-                        cstring::to_cstring(fieldNameRemap.size());
-    fieldNameRemap.emplace(prefix, fieldName);
-    fields->push_back(new IR::StructField(IR::ID(fieldName), annos, type->getP4Type()));
-    LOG3("Flatten: " << type << " | " << prefix);
-}
-
-FindHeaderTypesToReplace::HeaderTypeReplacement::HeaderTypeReplacement(
-    const P4::TypeMap* typeMap, const IR::Type_Header* type, AnnotationSelectionPolicy *policy) :
-    typeMap(typeMap) {
-    auto vec = new IR::IndexedVector<IR::StructField>();
-    flatten("", type, IR::Annotations::empty, vec, policy);
-    replacementType = new IR::Type_Header(type->name, type->annotations, *vec);
-}
-
 void FindHeaderTypesToReplace::createReplacement(const IR::Type_Header* type,
         AnnotationSelectionPolicy *policy) {
     if (replacement.count(type->name))
         return;
-    replacement.emplace(type->name, new HeaderTypeReplacement(typeMap, type, policy));
+    replacement.emplace(type->name,
+                        new StructTypeReplacement<IR::Type_StructLike>(typeMap, type, policy));
 }
 
 bool FindHeaderTypesToReplace::preorder(const IR::Type_Header* type) {
@@ -88,6 +55,7 @@ const IR::Node* ReplaceHeaders::postorder(IR::Type_Header* type) {
     auto repl = findHeaderTypesToReplace->getReplacement(name);
     if (repl != nullptr) {
         LOG3("Replace " << type << " with " << repl->replacementType);
+        BUG_CHECK(repl->replacementType->is<IR::Type_Header>(), "%1% not a header", type);
         return repl->replacementType;
     }
     return type;
@@ -123,11 +91,15 @@ const IR::Node* ReplaceHeaders::postorder(IR::Member* expression) {
         if (getParent<IR::Member>() != nullptr)
             // We only want to process the outermost Member
             return expression;
-        BUG_CHECK(!newFieldName.isNullOrEmpty(),
-                  "cannot find replacement for %s in type %s", prefix, h);
+        if (isWrite()) {
+            ::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1%: writing to a structure nested in a header is not supported", expression);
+            return expression;
+        }
+        result = repl->explode(e, prefix);
+    } else {
+        result = new IR::Member(e, newFieldName);
     }
-
-    result = new IR::Member(e, newFieldName);
     LOG3("Replacing " << expression << " with " << result);
     return result;
 }

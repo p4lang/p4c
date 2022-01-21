@@ -528,35 +528,36 @@ extern void verify_checksum_with_payload<T, O>(in bool condition, in T data, in 
 extern void update_checksum_with_payload<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
 
 /***
- * clone is in most ways identical to the clone_preserving_field_list operation, with the
- * only difference being that it never preserves any user-defined
- * metadata fields with the cloned packet.  It is equivalent to
- * calling clone_preserving_field_list with the same type and session parameter values,
- * with empty data.
+ * clone is in most ways identical to the clone_preserving_field_list
+ * operation, with the only difference being that it never preserves
+ * any user-defined metadata fields with the cloned packet.  It is
+ * equivalent to calling clone_preserving_field_list with the same
+ * type and session parameter values, with empty data.
  */
 extern void clone(in CloneType type, in bit<32> session);
 
 @deprecated("Please use 'resubmit_preserving_field_list' instead")
 extern void resubmit<T>(in T data);
 /***
- * Calling resubmit_preserving_field_list during execution of the ingress
- * control will cause the packet to be
- * resubmitted, i.e. it will begin processing again with the parser,
- * with the contents of the packet exactly as they were when it last
- * began parsing.  The only difference is in the value of the
- * standard_metadata instance_type field, and any user-defined
- * metadata fields that the resubmit operation causes to be
- * preserved.
+ * Calling resubmit_preserving_field_list during execution of the
+ * ingress control will cause the packet to be resubmitted, i.e. it
+ * will begin processing again with the parser, with the contents of
+ * the packet exactly as they were when it last began parsing.  The
+ * only difference is in the value of the standard_metadata
+ * instance_type field, and any user-defined metadata fields that the
+ * resubmit_preserving_field_list operation causes to be preserved.
  *
  * The user metadata fields that are tagged with @field_list(index) will
  * be sent to the parser together with the packet.
  *
- * Calling resubmit is only supported in the ingress control.  There
- * is no way to undo its effects once it has been called.  If resubmit
- * is called multiple times during a single execution of the ingress
- * control, only one packet is resubmitted, and only the data from the
- * last such call is preserved.  See the v1model architecture
- * documentation (Note 1) for more details.
+ * Calling resubmit_preserving_field_list is only supported in the
+ * ingress control.  There is no way to undo its effects once it has
+ * been called.  If resubmit_preserving_field_list is called multiple
+ * times during a single execution of the ingress control, only one
+ * packet is resubmitted, and only the user-defined metadata fields
+ * specified by the field list index from the last such call are
+ * preserved.  See the v1model architecture documentation (Note 1) for
+ * more details.
  *
  * For example, the user metadata fields can be annotated as follows:
  * struct UM {
@@ -577,23 +578,25 @@ extern void resubmit_preserving_field_list(bit<8> index);
 extern void recirculate<T>(in T data);
 /***
  * Calling recirculate_preserving_field_list during execution of the
- * egress control will cause the packet to be
- * recirculated, i.e. it will begin processing again with the parser,
- * with the contents of the packet as they are created by the
- * deparser.  Recirculated packets can be distinguished from new
- * packets in ingress processing by the value of the standard_metadata
- * instance_type field.  The caller may request that some user-defined
- * metadata fields be preserved with the recirculated packet.
+ * egress control will cause the packet to be recirculated, i.e. it
+ * will begin processing again with the parser, with the contents of
+ * the packet as they are created by the deparser.  Recirculated
+ * packets can be distinguished from new packets in ingress processing
+ * by the value of the standard_metadata instance_type field.  The
+ * caller may request that some user-defined metadata fields be
+ * preserved with the recirculated packet.
  *
  * The user metadata fields that are tagged with @field_list(index) will be
  * sent to the parser together with the packet.
  *
- * Calling recirculate is only supported in the egress control.  There
- * is no way to undo its effects once it has been called.  If
- * recirculate is called multiple times during a single execution of
- * the egress control, only one packet is recirculated, and only the
- * data from the last such call is preserved.  See the v1model
- * architecture documentation (Note 1) for more details.
+ * Calling recirculate_preserving_field_list is only supported in the
+ * egress control.  There is no way to undo its effects once it has
+ * been called.  If recirculate_preserving_field_list is called
+ * multiple times during a single execution of the egress control,
+ * only one packet is recirculated, and only the user-defined metadata
+ * fields specified by the field list index from the last such call
+ * are preserved.  See the v1model architecture documentation (Note 1)
+ * for more details.
  */
 extern void recirculate_preserving_field_list(bit<8> index);
 
@@ -601,12 +604,12 @@ extern void recirculate_preserving_field_list(bit<8> index);
 extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
 
 /***
- * Calling clone_preserving_field_list during execution of the ingress or egress control
- * will cause the packet to be cloned, sometimes also called
- * mirroring, i.e. zero or more copies of the packet are made, and
- * each will later begin egress processing as an independent packet
- * from the original packet.  The original packet continues with its
- * normal next steps independent of the clone(s).
+ * Calling clone_preserving_field_list during execution of the ingress
+ * or egress control will cause the packet to be cloned, sometimes
+ * also called mirroring, i.e. zero or more copies of the packet are
+ * made, and each will later begin egress processing as an independent
+ * packet from the original packet.  The original packet continues
+ * with its normal next steps independent of the clone(s).
  *
  * The session parameter is an integer identifying a clone session id
  * (sometimes called a mirror session id).  The control plane software
@@ -623,15 +626,16 @@ extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
  * The user metadata fields that are tagged with @field_list(index) will be
  * sent to the parser together with a clone of the packet.
  *
- * If clone_preserving_field_list is called during ingress processing, the first parameter
- * must be CloneType.I2E.  If clone_preserving_field_list is called during egress
- * processing, the first parameter must be CloneType.E2E.
+ * If clone_preserving_field_list is called during ingress processing,
+ * the first parameter must be CloneType.I2E.  If
+ * clone_preserving_field_list is called during egress processing, the
+ * first parameter must be CloneType.E2E.
  *
  * There is no way to undo its effects once it has been called.  If
- * there are multiple calls to clone_preserving_field_list and/or clone during a single
- * execution of the same ingress (or egress) control, only the last
- * clone session and data are used.  See the v1model architecture
- * documentation (Note 1) for more details.
+ * there are multiple calls to clone_preserving_field_list and/or
+ * clone during a single execution of the same ingress (or egress)
+ * control, only the last clone session and index are used.  See the
+ * v1model architecture documentation (Note 1) for more details.
  */
 extern void clone_preserving_field_list(in CloneType type, in bit<32> session, bit<8> index);
 

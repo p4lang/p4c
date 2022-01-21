@@ -12,41 +12,6 @@ struct output_data_t {
 	bit<32> word3
 }
 
-struct metadata_t {
-	bit<32> psa_ingress_parser_input_metadata_ingress_port
-	bit<32> psa_ingress_parser_input_metadata_packet_path
-	bit<32> psa_egress_parser_input_metadata_egress_port
-	bit<32> psa_egress_parser_input_metadata_packet_path
-	bit<32> psa_ingress_input_metadata_ingress_port
-	bit<32> psa_ingress_input_metadata_packet_path
-	bit<64> psa_ingress_input_metadata_ingress_timestamp
-	bit<8> psa_ingress_input_metadata_parser_error
-	bit<8> psa_ingress_output_metadata_class_of_service
-	bit<8> psa_ingress_output_metadata_clone
-	bit<16> psa_ingress_output_metadata_clone_session_id
-	bit<8> psa_ingress_output_metadata_drop
-	bit<8> psa_ingress_output_metadata_resubmit
-	bit<32> psa_ingress_output_metadata_multicast_group
-	bit<32> psa_ingress_output_metadata_egress_port
-	bit<8> psa_egress_input_metadata_class_of_service
-	bit<32> psa_egress_input_metadata_egress_port
-	bit<32> psa_egress_input_metadata_packet_path
-	bit<16> psa_egress_input_metadata_instance
-	bit<64> psa_egress_input_metadata_egress_timestamp
-	bit<8> psa_egress_input_metadata_parser_error
-	bit<32> psa_egress_deparser_input_metadata_egress_port
-	bit<8> psa_egress_output_metadata_clone
-	bit<16> psa_egress_output_metadata_clone_session_id
-	bit<8> psa_egress_output_metadata_drop
-	bit<16> Egress_tmp_0
-	bit<8> Egress_tmp_1
-	bit<1> Ingress_tmp
-}
-metadata instanceof metadata_t
-
-header ethernet instanceof ethernet_t
-header output_data instanceof output_data_t
-
 struct psa_ingress_output_metadata_t {
 	bit<8> class_of_service
 	bit<8> clone
@@ -67,23 +32,61 @@ struct psa_egress_deparser_input_metadata_t {
 	bit<32> egress_port
 }
 
+struct metadata_t {
+	bit<32> psa_ingress_parser_input_metadata_ingress_port
+	bit<32> psa_ingress_parser_input_metadata_packet_path
+	bit<32> psa_egress_parser_input_metadata_egress_port
+	bit<32> psa_egress_parser_input_metadata_packet_path
+	bit<32> psa_ingress_input_metadata_ingress_port
+	bit<32> psa_ingress_input_metadata_packet_path
+	bit<64> psa_ingress_input_metadata_ingress_timestamp
+	bit<16> psa_ingress_input_metadata_parser_error
+	bit<8> psa_ingress_output_metadata_class_of_service
+	bit<8> psa_ingress_output_metadata_clone
+	bit<16> psa_ingress_output_metadata_clone_session_id
+	bit<8> psa_ingress_output_metadata_drop
+	bit<8> psa_ingress_output_metadata_resubmit
+	bit<32> psa_ingress_output_metadata_multicast_group
+	bit<32> psa_ingress_output_metadata_egress_port
+	bit<8> psa_egress_input_metadata_class_of_service
+	bit<32> psa_egress_input_metadata_egress_port
+	bit<32> psa_egress_input_metadata_packet_path
+	bit<16> psa_egress_input_metadata_instance
+	bit<64> psa_egress_input_metadata_egress_timestamp
+	bit<16> psa_egress_input_metadata_parser_error
+	bit<32> psa_egress_deparser_input_metadata_egress_port
+	bit<8> psa_egress_output_metadata_clone
+	bit<16> psa_egress_output_metadata_clone_session_id
+	bit<8> psa_egress_output_metadata_drop
+	bit<16> Egress_tmp_1
+	bit<8> Egress_tmp_2
+	bit<48> Ingress_tmp
+	bit<1> Ingress_tmp_0
+}
+metadata instanceof metadata_t
+
+header ethernet instanceof ethernet_t
+header output_data instanceof output_data_t
+
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	extract h.output_data
 	mov m.psa_ingress_output_metadata_drop 0
-	mov m.psa_ingress_output_metadata_multicast_group h.ethernet.dstAddr
-	mov m.Ingress_tmp h.ethernet.srcAddr
-	mov m.psa_ingress_output_metadata_class_of_service m.Ingress_tmp
+	mov m.Ingress_tmp h.ethernet.dstAddr
+	and m.Ingress_tmp 0xffffffff
+	mov m.psa_ingress_output_metadata_multicast_group m.Ingress_tmp
+	mov m.Ingress_tmp_0 h.ethernet.srcAddr
+	mov m.psa_ingress_output_metadata_class_of_service m.Ingress_tmp_0
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.output_data
 	extract h.ethernet
 	extract h.output_data
 	mov h.output_data.word0 m.psa_egress_input_metadata_egress_port
-	mov m.Egress_tmp_0 m.psa_egress_input_metadata_instance
-	mov h.output_data.word1 m.Egress_tmp_0
+	mov m.Egress_tmp_1 m.psa_egress_input_metadata_instance
+	mov h.output_data.word1 m.Egress_tmp_1
 	mov h.output_data.word2 0x8
 	jmpneq LABEL_FALSE m.psa_egress_input_metadata_packet_path 0x0
 	mov h.output_data.word2 0x1
@@ -105,8 +108,8 @@ apply {
 	jmp LABEL_END
 	LABEL_FALSE_4 :	jmpneq LABEL_END m.psa_egress_input_metadata_packet_path 0x6
 	mov h.output_data.word2 0x7
-	LABEL_END :	mov m.Egress_tmp_1 m.psa_egress_input_metadata_class_of_service
-	mov h.output_data.word3 m.Egress_tmp_1
+	LABEL_END :	mov m.Egress_tmp_2 m.psa_egress_input_metadata_class_of_service
+	mov h.output_data.word3 m.Egress_tmp_2
 	emit h.ethernet
 	emit h.output_data
 	tx m.psa_ingress_output_metadata_egress_port
