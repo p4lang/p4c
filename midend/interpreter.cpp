@@ -333,26 +333,31 @@ void SymbolicHeaderUnion::setValid(bool v) {
     for (auto f : type->to<IR::Type_StructLike>()->fields) {
       fieldValue[f->name.name]->setAllUnknown();
     }
-  }
-  for (auto f : type->to<IR::Type_StructLike>()->fields) {
-    fieldValue[f->name.name]->to<SymbolicHeader>()->setValid(v);
+  } else {
+    for (auto f : type->to<IR::Type_StructLike>()->fields) {
+      fieldValue[f->name.name]->to<SymbolicHeader>()->setValid(v);
+    }
   }
     valid = new SymbolicBool(v);
 }
 
 void SymbolicHeaderUnion::setFieldValid(bool v, cstring field) {
   fieldValue[field]->to<SymbolicHeader>()->setValid(v);
-  auto index = 0;
-  auto fieldsSize = type->to<IR::Type_StructLike>()->fields.size();
-  for (auto f : type->to<IR::Type_StructLike>()->fields) {
-    if (!fieldValue[f->name.name]->to<SymbolicHeader>()->valid->value) {
-      index += 1;
-    }
-  }
-  if (index == fieldsSize)
-    valid = new SymbolicBool(false);
-  else
+  if (v) {
     valid = new SymbolicBool(true);
+  } else {
+    auto index = 0;
+    auto fieldsSize = type->to<IR::Type_StructLike>()->fields.size();
+    for (auto f : type->to<IR::Type_StructLike>()->fields) {
+      if (!fieldValue[f->name.name]->to<SymbolicHeader>()->valid->value) {
+        index += 1;
+      }
+    }
+    if (index == fieldsSize)
+      valid = new SymbolicBool(false);
+    else
+      valid = new SymbolicBool(true);
+  }
 }
 
 SymbolicValue* SymbolicHeaderUnion::get(const IR::Node* node, cstring field) const {
@@ -1131,7 +1136,6 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
             name == IR::Type_Header::setValid) {
           const IR::Expression *node;
           cstring memberName = nullptr;
-          bool flag = true;
           if (auto member = expression->method->to<IR::Member>()
                                 ->expr->to<IR::Member>()) {
             node = member->expr;
