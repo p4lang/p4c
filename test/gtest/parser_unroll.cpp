@@ -315,13 +315,6 @@ TEST_F(P4CParserUnroll, t1_Cond) {
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size());
 }
 
-TEST_F(P4CParserUnroll, bool2bitCast) {
-    auto parsers =  loadExample("issue361-bmv2.p4");
-    ASSERT_TRUE(parsers.first);
-    ASSERT_TRUE(parsers.second);
-    ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size());
-}
-
 TEST_F(P4CParserUnroll, header_union) {
     auto parsers =  loadExample("issue561-7-bmv2.p4");
     ASSERT_TRUE(parsers.first);
@@ -329,7 +322,7 @@ TEST_F(P4CParserUnroll, header_union) {
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size());
 }
 
-TEST_F(P4CParserUnroll, cast_test) {
+TEST_F(P4CParserUnroll, bool2bit_test) {
   auto parsers = loadExample("issue361-bmv2.p4");
   ASSERT_TRUE(parsers.first);
   ASSERT_TRUE(parsers.second);
