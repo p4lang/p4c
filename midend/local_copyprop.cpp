@@ -17,6 +17,7 @@ limitations under the License.
 #include "local_copyprop.h"
 #include "has_side_effects.h"
 #include "expr_uses.h"
+#include "frontends/common/copySrcInfo.h"
 
 namespace P4 {
 
@@ -235,7 +236,8 @@ IR::Expression *DoLocalCopyPropagation::preorder(IR::Expression *exp) {
     return exp;
 }
 
-const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name) {
+const IR::Expression *DoLocalCopyPropagation::copyprop_name(
+    cstring name, const Util::SourceInfo& srcInfo) {
     if (!name) return nullptr;
     if (inferForTable) {
         const Visitor::Context *ctxt = nullptr;
@@ -262,7 +264,8 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name) {
         if (var->val) {
             if (policy(getChildContext(), var->val)) {
                 LOG3("  propagating value for " << name << ": " << var->val);
-                return var->val; }
+                CopySrcInfo copy(srcInfo);
+                return var->val->apply(copy); }
             LOG3("  policy rejects propagation of " << name << ": " << var->val);
         } else {
             LOG4("  using " << name << " with no propagated value"); }
@@ -276,7 +279,7 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name) {
 }
 
 const IR::Expression *DoLocalCopyPropagation::postorder(IR::PathExpression *path) {
-    auto rv = copyprop_name(path->path->name);
+    auto rv = copyprop_name(path->path->name, path->srcInfo);
     return rv ? rv : path;
 }
 
@@ -284,7 +287,7 @@ const IR::Expression *DoLocalCopyPropagation::preorder(IR::Member *member) {
     visitAgain();
     if (auto name = expr_name(member)) {
         prune();
-        if (auto rv = copyprop_name(name))
+        if (auto rv = copyprop_name(name, member->srcInfo))
             return rv; }
     return member;
 }
@@ -293,7 +296,7 @@ const IR::Expression *DoLocalCopyPropagation::preorder(IR::ArrayIndex *arr) {
     visitAgain();
     if (auto name = expr_name(arr)) {
         prune();
-        if (auto rv = copyprop_name(name))
+        if (auto rv = copyprop_name(name, arr->srcInfo))
             return rv; }
     return arr;
 }

@@ -100,6 +100,7 @@ struct EMPTY {
 	bit<32> IngressParser_parser_tmp
 	bit<16> IngressParser_parser_tmp16_0
 	bit<8> IngressParser_parser_tmp_0
+	bit<32> IngressParser_parser_tmp_extract_tmp
 }
 metadata instanceof EMPTY
 
@@ -179,7 +180,9 @@ apply {
 	shl m.IngressParser_parser_tmp_3 0x3
 	mov m.IngressParser_parser_tmp m.IngressParser_parser_tmp_3
 	add m.IngressParser_parser_tmp 0xfffffff0
-	extract h.ipv4_option_timestamp m.IngressParser_parser_tmp
+	mov m.IngressParser_parser_tmp_extract_tmp m.IngressParser_parser_tmp
+	shr m.IngressParser_parser_tmp_extract_tmp 0x3
+	extract h.ipv4_option_timestamp m.IngressParser_parser_tmp_extract_tmp
 	MYIP_ACCEPT :	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
 	mov m.psa_ingress_output_metadata_egress_port 0x0
