@@ -95,7 +95,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     void visit_local_decl(const IR::Declaration_Variable *);
     const IR::Node *postorder(IR::Declaration_Variable *) override;
     IR::Expression *preorder(IR::Expression *m) override;
-    const IR::Expression *copyprop_name(cstring name);
+    const IR::Expression *copyprop_name(cstring name, const Util::SourceInfo& srcInfo);
     const IR::Expression *postorder(IR::PathExpression *) override;
     const IR::Expression *preorder(IR::Member *) override;
     const IR::Expression *preorder(IR::ArrayIndex *) override;

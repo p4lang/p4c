@@ -27,6 +27,26 @@ struct ipv4_option_timestamp_t {
 	varbit<304> data
 }
 
+struct psa_ingress_output_metadata_t {
+	bit<8> class_of_service
+	bit<8> clone
+	bit<16> clone_session_id
+	bit<8> drop
+	bit<8> resubmit
+	bit<32> multicast_group
+	bit<32> egress_port
+}
+
+struct psa_egress_output_metadata_t {
+	bit<8> clone
+	bit<16> clone_session_id
+	bit<8> drop
+}
+
+struct psa_egress_deparser_input_metadata_t {
+	bit<32> egress_port
+}
+
 struct a1_arg_t {
 	bit<48> param
 }
@@ -80,28 +100,9 @@ struct EMPTY {
 	bit<32> IngressParser_parser_tmp
 	bit<16> IngressParser_parser_tmp16_0
 	bit<8> IngressParser_parser_tmp_0
+	bit<32> IngressParser_parser_tmp_extract_tmp
 }
 metadata instanceof EMPTY
-
-struct psa_ingress_output_metadata_t {
-	bit<8> class_of_service
-	bit<8> clone
-	bit<16> clone_session_id
-	bit<8> drop
-	bit<8> resubmit
-	bit<32> multicast_group
-	bit<32> egress_port
-}
-
-struct psa_egress_output_metadata_t {
-	bit<8> clone
-	bit<16> clone_session_id
-	bit<8> drop
-}
-
-struct psa_egress_deparser_input_metadata_t {
-	bit<32> egress_port
-}
 
 action NoAction args none {
 	return
@@ -179,7 +180,9 @@ apply {
 	shl m.IngressParser_parser_tmp_3 0x3
 	mov m.IngressParser_parser_tmp m.IngressParser_parser_tmp_3
 	add m.IngressParser_parser_tmp 0xfffffff0
-	extract h.ipv4_option_timestamp m.IngressParser_parser_tmp
+	mov m.IngressParser_parser_tmp_extract_tmp m.IngressParser_parser_tmp
+	shr m.IngressParser_parser_tmp_extract_tmp 0x3
+	extract h.ipv4_option_timestamp m.IngressParser_parser_tmp_extract_tmp
 	MYIP_ACCEPT :	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
 	mov m.psa_ingress_output_metadata_egress_port 0x0

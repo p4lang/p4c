@@ -548,7 +548,11 @@ cstring Visitor::demangle(const char *str) {
 static std::map<const Backtrack::trigger *, size_t> trigger_gc_roots;
 #endif /* HAVE_LIBGC */
 
-void Backtrack::trigger::register_for_gc(size_t sz) {
+void Backtrack::trigger::register_for_gc(size_t
+#if HAVE_LIBGC
+                                         sz
+#endif /* HAVE_LIBGC */
+                                         ) {
 #if HAVE_LIBGC
     if (!GC_is_heap_ptr(this)) {
         trigger_gc_roots[this] = sz;
