@@ -314,18 +314,15 @@ SymbolicHeaderUnion::SymbolicHeaderUnion(const IR::Type_HeaderUnion *type,
                                          const SymbolicValueFactory *factory)
     : SymbolicStruct(type, uninitialized, factory),
       valid(new SymbolicBool(false)) {
-  auto index = 0;
   auto fieldsSize = type->checkedTo<IR::Type_StructLike>()->fields.size();
   auto fieldsClone = fieldValue;
+  bool validityFlag = false;
   for (auto f : type->to<IR::Type_StructLike>()->fields) {
-    if (!fieldsClone[f->name.name]->to<SymbolicHeader>()->valid->value) {
-      index += 1;
+    if (fieldsClone[f->name.name]->to<SymbolicHeader>()->valid->value) {
+      validityFlag = true;
     }
   }
-  if (index == fieldsSize)
-    valid = new SymbolicBool(false);
-  else
-    valid = new SymbolicBool(true);
+  valid = new SymbolicBool(validityFlag);
 }
 
 void SymbolicHeaderUnion::setValid(bool v) {
@@ -346,17 +343,13 @@ void SymbolicHeaderUnion::setFieldValid(bool v, cstring field) {
   if (v) {
     valid = new SymbolicBool(true);
   } else {
-    auto index = 0;
     auto fieldsSize = type->to<IR::Type_StructLike>()->fields.size();
     for (auto f : type->to<IR::Type_StructLike>()->fields) {
-      if (!fieldValue[f->name.name]->to<SymbolicHeader>()->valid->value) {
-        index += 1;
+      if (fieldValue[f->name.name]->to<SymbolicHeader>()->valid->value) {
+        v = true;
       }
     }
-    if (index == fieldsSize)
-      valid = new SymbolicBool(false);
-    else
-      valid = new SymbolicBool(true);
+    valid = new SymbolicBool(v);
   }
 }
 
