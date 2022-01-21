@@ -177,13 +177,13 @@ class RewriteAllParsers : public Transform {
     ReferenceMap*           refMap;
     TypeMap*                typeMap;
     bool                    unroll;
-    const IR::Type_Error *errorEnum;
+    int errorOutOfBounds;
 
   public:
     RewriteAllParsers(ReferenceMap *refMap, TypeMap *typeMap, bool unroll,
                       const IR::Type_Error *errorEnum = nullptr)
         : refMap(refMap), typeMap(typeMap), unroll(unroll),
-          errorEnum(errorEnum) {
+          errorOutOfBounds(0) {
       CHECK_NULL(refMap);
       CHECK_NULL(typeMap);
       setName("RewriteAllParsers");
@@ -192,7 +192,15 @@ class RewriteAllParsers : public Transform {
     IR::Node *preorder(IR::P4Program *program) override {
       auto delc = program->getDeclsByName(IR::ID("error"));
       auto errors = delc->toVector()->at(0)->to<IR::Type_Error>();
-      errorEnum = errors;
+      errorOutOfBounds = 0;
+      for (auto error : errors->members) {
+        if (error->name.name == "StackOutOfBounds") {
+          break;
+        }
+        errorOutOfBounds += 1;
+      }
+      BUG_CHECK(errors->members.size() > errorOutOfBounds,
+                "Can`t found error.StackOutOfBounds");
       return program;
     }
 
@@ -213,19 +221,12 @@ class RewriteAllParsers : public Transform {
         newParser->states.clear();
         // Getting error number from error enum
         if (rewriter->hasOutOfboundState) {
-          int errorId = 0;
-          for (auto error : errorEnum->members) {
-            if (error->name.name == "StackOutOfBounds") {
-              break;
-            }
-            errorId += 1;
-          }
             // generating state with verify(false, error.StackOutOfBounds)
             IR::Vector<IR::Argument>* arguments = new IR::Vector<IR::Argument>();
             arguments->push_back(
                 new IR::Argument(new IR::BoolLiteral(IR::Type::Boolean::get(), false)));
             arguments->push_back(new IR::Argument(
-                new IR::Constant(IR::Type_Bits::get(32), errorId)));
+                new IR::Constant(IR::Type_Bits::get(32), errorOutOfBounds)));
             IR::IndexedVector<IR::StatOrDecl> components;
             IR::IndexedVector<IR::Parameter> parameters;
             parameters.push_back(
