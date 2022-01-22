@@ -867,7 +867,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         auto li = l->to<SymbolicInteger>();
         clone->expr = li->constant;
         auto type = typeMap->getType(getOriginal(), true);
-        typeMap->setType(clone, type); // needed by the constant folding
+        typeMap->setType(clone, type);  // needed by the constant folding
         DoConstantFolding cf(refMap, typeMap);
         cf.setCalledBy(this);
         auto result = clone->apply(cf);
