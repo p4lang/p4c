@@ -868,7 +868,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         clone->expr = li->constant;
         DoConstantFolding cf(refMap, typeMap);
         cf.setCalledBy(this);
-        auto result = expression->apply(cf);
+        auto result = clone->apply(cf);
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
         set(expression, new SymbolicInteger(result->to<IR::Constant>()));
         return;
@@ -877,7 +877,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         clone->expr = new IR::BoolLiteral(li->value);
         DoConstantFolding cf(refMap, typeMap);
         cf.setCalledBy(this);
-        auto result = expression->apply(cf);
+        auto result = clone->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
         return;
@@ -954,7 +954,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
         clone->right = r->to<SymbolicInteger>()->constant;
         DoConstantFolding cf(refMap, typeMap);
         cf.setCalledBy(this);
-        auto result = expression->apply(cf);
+        auto result = clone->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
         return;
@@ -964,7 +964,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
         clone->right = new IR::BoolLiteral(r->to<SymbolicBool>()->value);
         DoConstantFolding cf(refMap, typeMap);
         cf.setCalledBy(this);
-        auto result = expression->apply(cf);
+        auto result = clone->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
         return;
