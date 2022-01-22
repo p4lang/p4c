@@ -243,13 +243,25 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
     if (dest->is<IR::ITypeVar>())
         dest = dest->apply(constraints->replaceVariables)->to<IR::Type>();
 
-    if (typeMap->equivalent(dest, src))
+    if (auto dsc = dest->to<IR::Type_SpecializedCanonical>()) {
+        if (auto ssc = src->to<IR::Type_SpecializedCanonical>()) {
+            if (dsc->arguments->size() != ssc->arguments->size())
+                return constraint->reportError(
+                    constraints->getCurrentSubstitution(),
+                    "Type argument lists %1% and %2% have different lengths",
+                    dsc->arguments, ssc->arguments);
+            constraints->add(constraint->create(dsc->baseType, ssc->baseType));
+            for (size_t i=0; i < dsc->arguments->size(); i++) {
+                constraints->add(constraint->create(dsc->arguments->at(i), ssc->arguments->at(i)));
+            }
+            return true;
+        }
+        constraints->add(constraint->create(dsc->substituted, src));
         return true;
+    }
 
-    if (dest->is<IR::Type_SpecializedCanonical>())
-        dest = dest->to<IR::Type_SpecializedCanonical>()->substituted;
-    if (src->is<IR::Type_SpecializedCanonical>())
-        src = src->to<IR::Type_SpecializedCanonical>()->substituted;
+    if (TypeMap::equivalent(dest, src))
+        return true;
 
     if (src->is<IR::Type_Dontcare>() || dest->is<IR::Type_Dontcare>())
         return true;

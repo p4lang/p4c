@@ -493,16 +493,7 @@ class Type_SpecializedCanonical : Type {
         BUG_CHECK(substituted->is<IMayBeGenericType>(), "substituted %1% is not generic", substituted);
     }
     const Type* getP4Type() const override;
-    toString{
-        cstring result = baseType->toString() + "<";
-        cstring sep = "";
-        for (auto t : *arguments) {
-            result += sep + t->toString();
-            sep = ", ";
-        }
-        result += ">";
-        return result;
-    }
+    toString{ return baseType->toString() + "<...>"; }
 }
 
 /// A declaration that consists of just an identifier, e.g., an enum member
