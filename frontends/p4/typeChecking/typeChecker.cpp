@@ -3289,11 +3289,15 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         auto typeParams = methodBaseType->typeParameters;
         for (auto p : *methodBaseType->parameters) {
             if (!p->isOptional()) continue;
-            forAllMatching<IR::Type_Var>(p, [tvs, dontCares, typeParams](const IR::Type_Var *tv) {
-                if (tvs->lookup(tv)) return;  // already bound
-                if (typeParams->getDeclByName(tv->name) != tv) return;  // not a tv of this call
-                dontCares->setBinding(tv, new IR::Type_Dontcare);
-             });
+            forAllMatching<IR::Type_Var>(
+                p, [tvs, dontCares, typeParams, this](const IR::Type_Var *tv) {
+                       if (typeMap->getSubstitutions()->lookup(tv) != nullptr)
+                           return;  // already bound
+                       if (tvs->lookup(tv)) return;  // already bound
+                       if (typeParams->getDeclByName(tv->name) != tv)
+                           return;  // not a tv of this call
+                       dontCares->setBinding(tv, new IR::Type_Dontcare);
+                   });
         }
         addSubstitutions(dontCares);
 
