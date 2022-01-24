@@ -877,19 +877,14 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         clone->expr = new IR::BoolLiteral(li->value);
         DoConstantFolding cf(refMap, typeMap);
         cf.setCalledBy(this);
-        auto result = expression->apply(cf);
-        if (auto cast = result->to<IR::Cast>()) {
-          auto bitsType = cast->destType->to<IR::Type_Bits>();
+        auto result = clone->apply(cf);
+        if (auto resConst = result->to<IR::Constant>()) {
+          auto bitsType = resConst->type->checkedTo<IR::Type_Bits>();
           if (bitsType->size == 1) {
             const IR::Constant *constant;
-            auto boolLiteral = clone->expr->to<IR::BoolLiteral>();
-            if (boolLiteral) {
-              constant = (boolLiteral->value)
-                             ? new IR::Constant(new IR::Type_Bits(1, false), 1)
-                             : new IR::Constant(new IR::Type_Bits(1, false), 0);
-            } else {
-              BUG("%1%: expected a boolean", clone->expr);
-            }
+            constant = (resConst->value == 1)
+                           ? new IR::Constant(new IR::Type_Bits(1, false), 1)
+                           : new IR::Constant(new IR::Type_Bits(1, false), 0);
             set(expression, new SymbolicInteger(constant));
             return;
           }
