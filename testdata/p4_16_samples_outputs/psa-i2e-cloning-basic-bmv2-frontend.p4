@@ -44,14 +44,14 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     }
     @name("cIngress.clone") action clone_1() {
         ostd.clone = true;
-        ostd.clone_session_id = (CloneSessionId_t)16w8;
+        ostd.clone_session_id = (CloneSessionId_t)(CloneSessionIdUint_t)8;
     }
     apply {
         clone_1();
-        if (hdr.ethernet.dstAddr == 48w9) {
+        if (hdr.ethernet.dstAddr == (EthernetAddress)9) {
             ingress_drop_0();
         } else {
-            hdr.ethernet.srcAddr = 48w0xcafe;
+            hdr.ethernet.srcAddr = (EthernetAddress)0xcafe;
             send_to_port_0();
         }
     }
