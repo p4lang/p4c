@@ -792,7 +792,9 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
 
     const IR::Type* etype;
     if (typesKnown)
-        etype = typeMap->getType(getOriginal(), true);
+      etype = typeMap->getType(getOriginal(), false);
+    if (!etype)
+      etype = e->destType;
     else
         etype = e->destType;
 
