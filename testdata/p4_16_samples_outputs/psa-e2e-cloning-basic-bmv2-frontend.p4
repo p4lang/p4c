@@ -47,7 +47,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         ostd = meta_1;
     }
     apply {
-        if (hdr.ethernet.dstAddr == 48w8 && istd.packet_path != PSA_PacketPath_t.RECIRCULATE) {
+        if (hdr.ethernet.dstAddr == (EthernetAddress)8 && istd.packet_path != PSA_PacketPath_t.RECIRCULATE) {
             send_to_port_1();
         } else {
             send_to_port_2();
@@ -71,25 +71,25 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
     }
     @name("cEgress.clone") action clone_1() {
         ostd.clone = true;
-        ostd.clone_session_id = (CloneSessionId_t)16w8;
+        ostd.clone_session_id = (CloneSessionId_t)(CloneSessionIdUint_t)8;
     }
     apply {
         if (istd.packet_path == PSA_PacketPath_t.CLONE_E2E) {
             hdr.ethernet.etherType = 16w0xface;
         } else {
             clone_1();
-            if (hdr.ethernet.dstAddr == 48w9) {
+            if (hdr.ethernet.dstAddr == (EthernetAddress)9) {
                 egress_drop_0();
-                ostd.clone_session_id = (CloneSessionId_t)16w9;
+                ostd.clone_session_id = (CloneSessionId_t)(CloneSessionIdUint_t)9;
             }
             if (istd.egress_port == (PortId_t)32w0xfffffffa) {
-                hdr.ethernet.srcAddr = 48w0xbeef;
-                ostd.clone_session_id = (CloneSessionId_t)16w10;
+                hdr.ethernet.srcAddr = (EthernetAddress)0xbeef;
+                ostd.clone_session_id = (CloneSessionId_t)(CloneSessionIdUint_t)10;
             } else {
-                if (hdr.ethernet.dstAddr == 48w8) {
-                    ostd.clone_session_id = (CloneSessionId_t)16w11;
+                if (hdr.ethernet.dstAddr == (EthernetAddress)8) {
+                    ostd.clone_session_id = (CloneSessionId_t)(CloneSessionIdUint_t)11;
                 }
-                hdr.ethernet.srcAddr = 48w0xcafe;
+                hdr.ethernet.srcAddr = (EthernetAddress)0xcafe;
             }
         }
     }

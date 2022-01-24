@@ -49,7 +49,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         const default_action = send_to_port_2();
     }
     apply {
-        if (hdr.ethernet.dstAddr == 48w8 && istd.packet_path != PSA_PacketPath_t.RECIRCULATE) {
+        if (hdr.ethernet.dstAddr == (EthernetAddress)8 && istd.packet_path != PSA_PacketPath_t.RECIRCULATE) {
             tbl_send_to_port.apply();
         } else {
             tbl_send_to_port_0.apply();
@@ -70,23 +70,23 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
     }
     @name("cEgress.clone") action clone_1() {
         ostd.clone = true;
-        ostd.clone_session_id = 16w8;
+        ostd.clone_session_id = (CloneSessionIdUint_t)8;
     }
     @hidden action psae2ecloningbasicbmv2l93() {
         hdr.ethernet.etherType = 16w0xface;
     }
     @hidden action psae2ecloningbasicbmv2l99() {
-        ostd.clone_session_id = 16w9;
+        ostd.clone_session_id = (CloneSessionIdUint_t)9;
     }
     @hidden action psae2ecloningbasicbmv2l102() {
-        hdr.ethernet.srcAddr = 48w0xbeef;
-        ostd.clone_session_id = 16w10;
+        hdr.ethernet.srcAddr = (EthernetAddress)0xbeef;
+        ostd.clone_session_id = (CloneSessionIdUint_t)10;
     }
     @hidden action psae2ecloningbasicbmv2l106() {
-        ostd.clone_session_id = 16w11;
+        ostd.clone_session_id = (CloneSessionIdUint_t)11;
     }
     @hidden action psae2ecloningbasicbmv2l111() {
-        hdr.ethernet.srcAddr = 48w0xcafe;
+        hdr.ethernet.srcAddr = (EthernetAddress)0xcafe;
     }
     @hidden table tbl_psae2ecloningbasicbmv2l93 {
         actions = {
@@ -135,14 +135,14 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
             tbl_psae2ecloningbasicbmv2l93.apply();
         } else {
             tbl_clone.apply();
-            if (hdr.ethernet.dstAddr == 48w9) {
+            if (hdr.ethernet.dstAddr == (EthernetAddress)9) {
                 tbl_egress_drop.apply();
                 tbl_psae2ecloningbasicbmv2l99.apply();
             }
             if (istd.egress_port == 32w0xfffffffa) {
                 tbl_psae2ecloningbasicbmv2l102.apply();
             } else {
-                if (hdr.ethernet.dstAddr == 48w8) {
+                if (hdr.ethernet.dstAddr == (EthernetAddress)8) {
                     tbl_psae2ecloningbasicbmv2l106.apply();
                 }
                 tbl_psae2ecloningbasicbmv2l111.apply();

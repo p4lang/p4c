@@ -24,9 +24,12 @@ control c(out B32 x) {
         }
         default_action = NoAction_1();
     }
+    @hidden action newtype38() {
+        x = 32w2;
+    }
     @hidden action newtype34() {
         k_0 = 32w0;
-        x = 32w0;
+        x = (B32)32w0;
     }
     @hidden action newtype43() {
         x = 32w3;
@@ -37,6 +40,12 @@ control c(out B32 x) {
         }
         const default_action = newtype34();
     }
+    @hidden table tbl_newtype38 {
+        actions = {
+            newtype38();
+        }
+        const default_action = newtype38();
+    }
     @hidden table tbl_newtype43 {
         actions = {
             newtype43();
@@ -45,8 +54,13 @@ control c(out B32 x) {
     }
     apply {
         tbl_newtype34.apply();
+        if (32w0 == (B32)1) {
+            tbl_newtype38.apply();
+        }
         t_0.apply();
-        tbl_newtype43.apply();
+        if (32w0 == (B32)32w0) {
+            tbl_newtype43.apply();
+        }
     }
 }
 

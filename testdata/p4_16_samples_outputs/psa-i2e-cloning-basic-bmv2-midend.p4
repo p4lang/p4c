@@ -36,10 +36,10 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     }
     @name("cIngress.clone") action clone_1() {
         ostd.clone = true;
-        ostd.clone_session_id = 16w8;
+        ostd.clone_session_id = (CloneSessionIdUint_t)8;
     }
     @hidden action psai2ecloningbasicbmv2l70() {
-        hdr.ethernet.srcAddr = 48w0xcafe;
+        hdr.ethernet.srcAddr = (EthernetAddress)0xcafe;
     }
     @hidden table tbl_clone {
         actions = {
@@ -67,7 +67,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     }
     apply {
         tbl_clone.apply();
-        if (hdr.ethernet.dstAddr == 48w9) {
+        if (hdr.ethernet.dstAddr == (EthernetAddress)9) {
             tbl_ingress_drop.apply();
         } else {
             tbl_psai2ecloningbasicbmv2l70.apply();

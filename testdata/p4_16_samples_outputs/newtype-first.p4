@@ -34,7 +34,7 @@ control c(out B32 x) {
         nn = (NN32)n;
         k = n;
         x = (B32)n;
-        n1 = (N32)32w1;
+        n1 = (N32)(B32)1;
         if (n == n1) {
             x = 32w2;
         }
