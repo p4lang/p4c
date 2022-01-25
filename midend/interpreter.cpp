@@ -866,9 +866,11 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
     if (l->is<SymbolicInteger>()) {
         auto li = l->to<SymbolicInteger>();
         clone->expr = li->constant;
+        auto type = typeMap->getType(getOriginal(), true);
+        typeMap->setType(clone, type);  // needed by the constant folding
         DoConstantFolding cf(refMap, typeMap);
         cf.setCalledBy(this);
-        auto result = expression->apply(cf);
+        auto result = clone->apply(cf);
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
         set(expression, new SymbolicInteger(result->to<IR::Constant>()));
         return;

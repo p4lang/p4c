@@ -3211,8 +3211,8 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
     auto methodType = getType(expression->method);
     if (methodType == nullptr)
         return expression;
-    auto ft = methodType->to<IR::Type_MethodBase>();
-    if (ft == nullptr) {
+    auto methodBaseType = methodType->to<IR::Type_MethodBase>();
+    if (methodBaseType == nullptr) {
         typeError("%1% is not a method", expression);
         return expression;
     }
@@ -3278,11 +3278,28 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         auto callType = new IR::Type_MethodCall(
             expression->srcInfo, typeArgs, rettype, args);
 
-        auto tvs = unify(expression, ft, callType,
+        auto tvs = unify(expression, methodBaseType, callType,
                          "Function type '%1%' does not match invocation type '%2%'",
-                         { ft, callType });
+                         { methodBaseType, callType });
         if (tvs == nullptr)
             return expression;
+
+        // Infer Dont_Care for type vars used only in not-present optional params
+        auto dontCares = new TypeVariableSubstitution();
+        auto typeParams = methodBaseType->typeParameters;
+        for (auto p : *methodBaseType->parameters) {
+            if (!p->isOptional()) continue;
+            forAllMatching<IR::Type_Var>(
+                p, [tvs, dontCares, typeParams, this](const IR::Type_Var *tv) {
+                       if (typeMap->getSubstitutions()->lookup(tv) != nullptr)
+                           return;  // already bound
+                       if (tvs->lookup(tv)) return;  // already bound
+                       if (typeParams->getDeclByName(tv->name) != tv)
+                           return;  // not a tv of this call
+                       dontCares->setBinding(tv, new IR::Type_Dontcare);
+                   });
+        }
+        addSubstitutions(dontCares);
 
         LOG2("Method type before specialization " << methodType << " with " << tvs);
         TypeVariableSubstitutionVisitor substVisitor(tvs);
