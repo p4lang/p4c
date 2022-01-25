@@ -259,6 +259,11 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
         constraints->add(constraint->create(dsc->substituted, src));
         return true;
     }
+    // symmetric case
+    if (auto ssc = src->to<IR::Type_SpecializedCanonical>()) {
+        constraints->add(constraint->create(dest, ssc->substituted));
+        return true;
+    }
 
     if (TypeMap::equivalent(dest, src))
         return true;
@@ -267,6 +272,10 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
         return true;
 
     if (dest->is<IR::Type_ArchBlock>()) {
+        if (auto cont = src->to<IR::IContainer>()) {
+            constraints->add(constraint->create(dest, cont->getType()));
+            return true;
+        }
         if (!src->is<IR::Type_ArchBlock>())
             return constraint->reportError(constraints->getCurrentSubstitution());
         return unifyBlocks(constraint->create(dest, src));

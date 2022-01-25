@@ -398,6 +398,7 @@ abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated, ISimp
 }
 
 class Type_Package : Type_ArchBlock, IContainer, ISimpleNamespace {
+    Type getType() const override { return this; }
     ParameterList constructorParams;
     Type_Method getConstructorMethodType() const override;
     ParameterList getConstructorParameters() const override { return constructorParams; }
