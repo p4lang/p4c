@@ -28,14 +28,14 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     action clone() {
         ostd.clone = true;
-        ostd.clone_session_id = (CloneSessionId_t)(CloneSessionIdUint_t)8;
+        ostd.clone_session_id = (CloneSessionId_t)16w8;
     }
     apply {
         clone();
-        if (hdr.ethernet.dstAddr == (EthernetAddress)9) {
+        if (hdr.ethernet.dstAddr == 48w9) {
             ingress_drop(ostd);
         } else {
-            hdr.ethernet.srcAddr = (EthernetAddress)0xcafe;
+            hdr.ethernet.srcAddr = 48w0xcafe;
             send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
         }
     }

@@ -22,4 +22,4 @@ const T zz = (T){a = (S){a = 32w0,b = 32w1},b = (S){a = 32w2,b = 32w3}};
 const bit<32> x = 32w0;
 const bit<32> x1 = 32w4294967295;
 typedef int<32> int32;
-const int32 izero = (int32)32w0;
+const int32 izero = 32s0;

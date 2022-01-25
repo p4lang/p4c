@@ -39,7 +39,7 @@ control c(inout Headers h) {
         h.eth.setInvalid();
     }
     @hidden action issue2391l51() {
-        h.eth.type = (EthT)16w0;
+        h.eth.type = 16w0;
     }
     @hidden table tbl_act {
         actions = {

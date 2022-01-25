@@ -9,7 +9,7 @@ control c() {
     apply {
         bit<16> var;
         bit<32> hdr = 32w0;
-        hash<bit<16>, bit<16>, bit<32>, bit<16>>(var, HashAlgorithm.crc16, (Hash)0, hdr, (Hash)0xffff);
+        hash<bit<16>, bit<16>, bit<32>, bit<16>>(var, HashAlgorithm.crc16, 16w0, hdr, 16w0xffff);
     }
 }
 
