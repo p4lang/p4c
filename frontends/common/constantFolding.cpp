@@ -791,13 +791,10 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
         return e;
 
     const IR::Type* etype;
-    if (typesKnown) {
-      etype = typeMap->getType(getOriginal(), false);
-      if (!etype)
+    if (typesKnown)
+        etype = typeMap->getType(getOriginal(), true);
+    else
         etype = e->destType;
-    } else {
-        etype = e->destType;
-    }
 
     if (etype->is<IR::Type_Bits>()) {
         auto type = etype->to<IR::Type_Bits>();
