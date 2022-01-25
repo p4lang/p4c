@@ -59,11 +59,28 @@ control c(inout bit<1> r) {
     bit<1> tmp;
     apply {
         S sb;
-        H br = { 1, ... };
-        sb = (S){b = true,h = {b_h = 1, ... }, ... };
-        H hb = { ... };
+        H br = (H){i = 8s1,b = false,bv_h = 14w0,b_h = 1w0};
+        sb.tup_s = { 8s0, false };
+        sb.u_s.h1.setInvalid();
+        sb.strct_s.s_recurs.h_rec.setInvalid();
+        sb.strct_s.s_recurs.i_rec = 2s0;
+        sb.strct_s.b_recurs = false;
+        sb.strct_s.bv_recurs = 7w0;
+        sb.strct_s.h_recurs.setInvalid();
+        sb.val = (myEnum)8w0;
+        sb.val1 = myEnum1.e1;
+        sb.errorNoOne = error.NoError;
+        sb.h = (H){i = 8s0,b = false,bv_h = 14w0,b_h = 1w1};
+        sb.z = 1w0;
+        sb.b = true;
+        sb.i = 8s0;
+        H hb;
         sa = sb;
-        tuple<int<8>, bool, H, H, U> x = { ... };
+        tuple<int<8>, bool, H, H, U> x;
+        H hdr_or_hu;
+        H hdr_or_hu_0;
+        U hdr_or_hu_1;
+        x = { 8s0, false, hdr_or_hu, hdr_or_hu_0, hdr_or_hu_1 };
         f<tuple<int<8>, bool, H, H, U>>(x);
         f<S>(sa);
         tmp = sa.z;
@@ -74,3 +91,4 @@ control c(inout bit<1> r) {
 control simple(inout bit<1> r);
 package top(simple e);
 top(c()) main;
+

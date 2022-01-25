@@ -410,6 +410,11 @@ class ListExpression : Expression {
         validate();
         initUnknown();
     }
+    ListExpression(const IR::Type* type, const IR::Vector<IR::Expression>& components, bool defaultInitializer)
+                        : Expression(type), defaultInitializer(defaultInitializer), components(components) {
+        validate();
+        initUnknown();
+    }
 
     inline Vector<Expression> components;
     ListExpression {
@@ -435,13 +440,13 @@ class ListExpression : Expression {
 /// Currently it does not have a direct representation as P4 source.
 class StructExpression : Expression {
     bool defaultInitializer = false;
-    StructExpression(Util::SourceInfo srcInfo, const IR::Type* type, const IR::Type_Name* typeName, IR::IndexedVector<IR::NamedExpression>& components, bool defaultInitializer)
-                                : Expression(srcInfo, type), defaultInitializer(defaultInitializer), typeName(typeName), components(components) {
+    StructExpression(Util::SourceInfo srcInfo, const IR::Type* type, const IR::Type* structType, IR::IndexedVector<IR::NamedExpression>& components, bool defaultInitializer)
+                                : Expression(srcInfo, type), defaultInitializer(defaultInitializer), structType(structType), components(components) {
         validate();
     }
 
-    StructExpression(const IR::Type* type, const IR::Type_Name* typeName, const IR::IndexedVector<IR::NamedExpression>& components, bool defaultInitializer)
-                                : Expression(type), defaultInitializer(defaultInitializer), typeName(typeName), components(components) {
+    StructExpression(const IR::Type* type, const IR::Type* structType, const IR::IndexedVector<IR::NamedExpression>& components, bool defaultInitializer)
+                                : Expression(type), defaultInitializer(defaultInitializer), structType(structType), components(components) {
         validate();
     }
 

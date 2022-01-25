@@ -179,7 +179,6 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SetStrictStruct(&typeMap, false),
         new ValidateMatchAnnotations(&typeMap),
         new BindTypeVariables(&refMap, &typeMap),
-<<<<<<< HEAD
         new SpecializeGenericTypes(&refMap, &typeMap),
         new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
         new ResolveReferences(&refMap),
@@ -189,9 +188,6 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new CheckCoreMethods(&refMap, &typeMap),
         new RemoveParserIfs(&refMap, &typeMap),
         new StructInitializers(&refMap, &typeMap),
-=======
-        new StructInitializers(&refMap, &typeMap, false),
->>>>>>> Structs, headers and tuples initialization/assignment support (#762) (#2017)
         new SpecializeGenericFunctions(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
         PassRepeated({
@@ -209,7 +205,6 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new UniqueNames(&refMap),  // Give each local declaration a unique internal name
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new MoveInitializers(&refMap),
-        new StructInitializers(&refMap, &typeMap, true),
         new SideEffectOrdering(&refMap, &typeMap, skipSideEffectOrdering),
         new SimplifyControlFlow(&refMap, &typeMap),
         new SimplifySwitch(&refMap, &typeMap),

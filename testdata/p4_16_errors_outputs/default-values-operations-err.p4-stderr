@@ -1,0 +1,15 @@
+default-values-operations-err.p4(16): [--Werror=type-error] error: Default values {...} cannot be used in return statement return StructExpression
+    return { 1, ... };
+    ^^^^^^
+default-values-operations-err.p4(22): [--Werror=type-error] error: Default values {...} cannot be used in operation realation ==
+        if (s == {b = false, ... }) {
+            ^^^^^^^^^^^^^^^^^^^^^^
+default-values-operations-err.p4(27): [--Werror=type-error] error: Default values {...} cannot be used in operation realation !=
+        if (t != { ... }) {
+            ^^^^^^^^^^^^
+default-values-operations-err.p4(30): [--Werror=type-error] error: Default values {...} cannot be used in method call expression f
+        f<S>({h = { 1, true, 2 }, ... });
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+default-values-operations-err.p4(31): [--Werror=type-error] error: Default values {...} cannot be used in operation realation ==
+        s = (s == { ... } ? s : sr);
+             ^^^^^^^^^^^^

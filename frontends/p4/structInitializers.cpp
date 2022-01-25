@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 #include "structInitializers.h"
 
 namespace P4 {
@@ -37,7 +38,8 @@ const IR::Expression* defaultValue(const IR::Type* type, const Util::SourceInfo 
                                                new IR::Type_Name(t->name));
         expr = new IR::Member(srcInfo, tne, t->members.at(0)->name);
     } else if (auto t = type->to<IR::Type_SerEnum>()) {
-        expr = new IR::Constant(t->type, 0);
+        auto zero =  new IR::Constant(t->type,0);
+        expr =  new IR::Cast(t->getP4Type(), zero);
     } else if (type->is<IR::Type_StructLike>() || type->is<IR::Type_BaseList>()) {
         auto vec = new IR::Vector<IR::Expression>();
         auto conv = convert(new IR::ListExpression(srcInfo, *vec, true), type);
@@ -80,7 +82,7 @@ IR::MethodCallStatement* generateSetInvalid(const IR::Type* type, const Util::So
 const IR::Expression* resolveDefaultInitTuple(const IR::Expression* rexpr,
                                               const IR::Type* ltype,
                                               IR::IndexedVector<IR::StatOrDecl>* retval,
-                                              ReferenceMap* refMap) {
+                                              ReferenceMap* refMap, bool isDeclaration = false) {
     if (auto tup = ltype->to<IR::Type_BaseList>()) {
         auto le = rexpr->to<IR::ListExpression>();
         auto vec = new IR::Vector<IR::Expression>();
@@ -97,10 +99,12 @@ const IR::Expression* resolveDefaultInitTuple(const IR::Expression* rexpr,
                                                             type, new IR::Path(name));
                 retval->push_back(decl);
                 vec->push_back(pe);
-                auto stat = generateSetInvalid(type, rexpr->srcInfo, pe);
-                retval->push_back(stat);
+                if (!isDeclaration) {
+                    auto stat = generateSetInvalid(type, rexpr->srcInfo, pe);
+                    retval->push_back(stat);
+                }
             } else if (type->is<IR::Type_BaseList>() || type->is<IR::Type_Struct>()) {
-                vec->push_back(resolveDefaultInitTuple(expr, type, retval, refMap));
+                vec->push_back(resolveDefaultInitTuple(expr, type, retval, refMap, isDeclaration));
             } else {
                 vec->push_back(expr);
             }
@@ -121,12 +125,14 @@ const IR::Expression* resolveDefaultInitTuple(const IR::Expression* rexpr,
                                                             f->type, new IR::Path(name));
                 ne = new IR::NamedExpression(rexpr->srcInfo, f->name, pe);
                 retval->push_back(decl);
-                auto stat = generateSetInvalid(f->type, rexpr->srcInfo, pe);
-                retval->push_back(stat);
-
+                if (!isDeclaration) {
+                    auto stat = generateSetInvalid(f->type, rexpr->srcInfo, pe);
+                    retval->push_back(stat);
+                }
             } else if (f->type->is<IR::Type_BaseList>() || f->type->is<IR::Type_Struct>()) {
                 ne = new IR::NamedExpression(rexpr->srcInfo, f->name,
-                     resolveDefaultInitTuple(ne->expression, f->type, retval, refMap));
+                     resolveDefaultInitTuple(ne->expression, f->type,
+                                            retval, refMap, isDeclaration));
             }
             si->push_back(ne);
         }
@@ -139,7 +145,7 @@ const IR::Expression* resolveDefaultInitTuple(const IR::Expression* rexpr,
 
 const IR::Statement* resolveDefaultInit(IR::AssignmentStatement* statement, const IR::Type* ltype,
                                         IR::IndexedVector<IR::StatOrDecl>* retval,
-                                        ReferenceMap* refMap) {
+                                        ReferenceMap* refMap, bool isDeclaration = false) {
     auto strct = ltype->to<IR::Type_StructLike>();
     if (auto si = statement->right->to<IR::StructExpression>()) {
         for (auto f : strct->fields) {
@@ -147,17 +153,21 @@ const IR::Statement* resolveDefaultInit(IR::AssignmentStatement* statement, cons
             auto left = new IR::Member(statement->left, f->name);
             if ((f->type->is<IR::Type_Header>() && isDefaultInit(right->expression)) ||
                  f->type->is<IR::Type_HeaderUnion>()) {
-                auto stat = generateSetInvalid(f->type, statement->srcInfo, left);
-                retval->push_back(stat);
+                if (!isDeclaration) {
+                    auto stat = generateSetInvalid(f->type, statement->srcInfo, left);
+                    retval->push_back(stat);
+                }
                 continue;
             } else if (f->type->is<IR::Type_Struct>()) {
                 resolveDefaultInit(new IR::AssignmentStatement(statement->srcInfo, left,
-                                   right->expression), f->type, retval, refMap);
+                                   right->expression), f->type, retval, refMap, isDeclaration);
                 continue;
             } else if (f->type->is<IR::Type_BaseList>()) {
-                auto expr = resolveDefaultInitTuple(right->expression, f->type, retval, refMap);
+                auto expr = resolveDefaultInitTuple(right->expression, f->type,
+                                                    retval, refMap, isDeclaration);
                 retval->push_back(new IR::AssignmentStatement(
                                   statement->srcInfo, left, expr));
+                continue;
             }
             retval->push_back(new IR::AssignmentStatement(
                               statement->srcInfo, left, right->expression));
@@ -172,6 +182,7 @@ const IR::Statement* resolveDefaultInit(IR::AssignmentStatement* statement, cons
 const IR::Expression*
 convert(const IR::Expression* expression, const IR::Type* type) {
     bool modified = false;
+    bool hasDefault = false;
     CHECK_NULL(type);
     if (auto st = type->to<IR::Type_StructLike>()) {
         bool isHdr = type->is<IR::Type_Header>();
@@ -186,6 +197,7 @@ convert(const IR::Expression* expression, const IR::Type* type) {
                 }
                 auto expr = le->components.at(index);
                 auto conv = convert(expr, f->type);
+                hasDefault |= isDefaultInit(conv);
                 auto ne = new IR::NamedExpression(conv->srcInfo, f->name, conv);
                 si->push_back(ne);
                 index++;
@@ -200,6 +212,7 @@ convert(const IR::Expression* expression, const IR::Type* type) {
                     for (; index < st->fields.size(); index++) {
                         auto f = st->fields.at(index);
                         expr = defaultValue(f->type, expression->srcInfo);
+                        hasDefault |= isDefaultInit(expr);
                         auto ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
                         si->push_back(ne);
                     }
@@ -207,7 +220,7 @@ convert(const IR::Expression* expression, const IR::Type* type) {
             }
             auto type = st->getP4Type()->to<IR::Type_Name>();
             auto result = new IR::StructExpression(
-                expression->srcInfo, type, type, *si, hdrInvalid);
+                expression->srcInfo, type, type, *si, hdrInvalid | hasDefault);
             return result;
         } else if (auto sli = expression->to<IR::StructExpression>()) {
             if (!sli->defaultInitializer) {
@@ -217,6 +230,7 @@ convert(const IR::Expression* expression, const IR::Type* type) {
                     auto convNe = convert(ne->expression, f->type);
                     if (convNe != ne->expression)
                         modified = true;
+                    hasDefault |= isDefaultInit(convNe);
                     ne = new IR::NamedExpression(ne->srcInfo, f->name, convNe);
                     si->push_back(ne);
                 }
@@ -227,21 +241,23 @@ convert(const IR::Expression* expression, const IR::Type* type) {
                     if (ne == nullptr) {
                         const IR::Expression* expr;
                         expr = defaultValue(f->type, expression->srcInfo);
+                        hasDefault |= isDefaultInit(expr);
                         auto ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
                         si->push_back(ne);
                     } else {
                         auto convNe = convert(ne->expression, f->type);
-                        if (convNe != ne->expression)
-                            modified = true;
+                        hasDefault |= isDefaultInit(convNe);
                         ne = new IR::NamedExpression(ne->srcInfo, f->name, convNe);
                         si->push_back(ne);
                     }
                 }
+                if (sli->defaultInitializer && sli->components.size() == 0 && isHdr)
+                    hdrInvalid = true;
             }
             if (modified || sli->type->is<IR::Type_UnknownStruct>()) {
                 auto type = st->getP4Type()->to<IR::Type_Name>();
                 auto result = new IR::StructExpression(
-                    expression->srcInfo, type, type, *si);
+                    expression->srcInfo, type, type, *si, hdrInvalid | hasDefault);
                 return result;
             }
         } else if (auto mux = expression->to<IR::Mux>()) {
@@ -260,6 +276,7 @@ convert(const IR::Expression* expression, const IR::Type* type) {
             auto expr = le->components.at(index);
             auto type = tup->components.at(index);
             auto conv = convert(expr, type);
+            hasDefault |= isDefaultInit(conv);
             vec->push_back(conv);
             modified |= (conv != expr);
         }
@@ -269,24 +286,17 @@ convert(const IR::Expression* expression, const IR::Type* type) {
             for ( ; index < tup->components.size(); index++) {
                 auto f = tup->components.at(index);
                 expr = defaultValue(f, expression->srcInfo);
+                hasDefault |= isDefaultInit(expr);
                 vec->push_back(expr);
             }
         }
         if (modified) {
-            auto result = new IR::ListExpression(expression->srcInfo, *vec);
+            auto result = new IR::ListExpression(expression->srcInfo, *vec, hasDefault);
             return result;
         }
     }
     return expression;
 }
-
-<<<<<<< HEAD
-const IR::Node* CreateStructInitializers::postorder(IR::AssignmentStatement* statement) {
-    auto type = typeMap->getType(getOriginal<IR::AssignmentStatement>()->left);
-    statement->right = convert(statement->right, type);
-    return statement;
-}
-
 const IR::Node* CreateStructInitializers::postorder(IR::ReturnStatement* statement) {
     if (statement->expression == nullptr)
         return statement;
@@ -294,6 +304,12 @@ const IR::Node* CreateStructInitializers::postorder(IR::ReturnStatement* stateme
     if (func == nullptr)
         return statement;
 
+    if (isDefaultInit(statement->expression)) {
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "Default values {...} cannot be used "
+                    "in return statement %1%", statement);
+            return statement;
+    }
     auto ftype = typeMap->getType(func);
     BUG_CHECK(ftype->is<IR::Type_Method>(), "%1%: expected a method type for function", ftype);
     auto mt = ftype->to<IR::Type_Method>();
@@ -307,13 +323,41 @@ const IR::Node* CreateStructInitializers::postorder(IR::ReturnStatement* stateme
 const IR::Node* CreateStructInitializers::postorder(IR::Declaration_Variable* decl) {
     if (decl->initializer == nullptr)
         return decl;
+    bool defaultInit = false;
     auto type = typeMap->getTypeType(decl->type, true);
-    decl->initializer = convert(decl->initializer, type);
+    auto init = convert(decl->initializer, type);
+    if (init != decl->initializer)
+        decl->initializer = init;
+
+    if (isDefaultInit(decl->initializer)) {
+           defaultInit = true;
+    }
+    if (defaultInit) {
+        auto left = new IR::PathExpression(decl->name);
+        auto statement = new IR::AssignmentStatement(decl->srcInfo, left, decl->initializer);
+        if (type->is<IR::Type_Header>()) {
+            decl->initializer = nullptr;
+            return decl;
+        }
+        IR::IndexedVector<IR::StatOrDecl>* retval = new IR::IndexedVector<IR::StatOrDecl>();
+        if (type->is<IR::Type_Struct>()) {
+            decl->initializer = nullptr;
+            retval->push_back(decl);
+            resolveDefaultInit(statement, decl->type, retval, refMap, true);
+            return retval;
+        } else {
+            decl->initializer = nullptr;
+            retval->push_back(decl);
+            auto defaultTupleInit = resolveDefaultInitTuple(statement->right, type,
+                                                            retval, refMap, true);
+            statement->right = defaultTupleInit;
+            retval->push_back(statement);
+            return retval;
+        }
+    }
     return decl;
 }
 
-=======
->>>>>>> Structs, headers and tuples initialization/assignment support (#762) (#2017)
 const IR::Node* CreateStructInitializers::postorder(IR::MethodCallExpression* expression) {
     auto mi = MethodInstance::resolve(expression, refMap, typeMap);
     auto result = expression;
@@ -321,6 +365,12 @@ const IR::Node* CreateStructInitializers::postorder(IR::MethodCallExpression* ex
     bool modified = false;
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
         auto arg = mi->substitution.lookup(p);
+        if (isDefaultInit(arg->expression)) {
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "Default values {...} cannot be used in method call expression %1%",
+                    expression);
+            return expression;
+        }
         if (p->direction == IR::Direction::In ||
             p->direction == IR::Direction::None) {
             auto paramType = typeMap->getType(p, true);
@@ -352,8 +402,8 @@ const IR::Node* CreateStructInitializers::postorder(IR::Operation_Relation* expr
     auto rtype = typeMap->getType(orig->right, true);
     if (isDefaultInit(expression->right) || isDefaultInit(expression->left)) {
         ::error(ErrorType::ERR_TYPE_ERROR,
-                "%1%: ... can only be used for initialization or asignment %2%",
-                expression->srcInfo, expression);
+                "Default values {...} cannot be used in operation realation %1%",
+                expression);
         return expression;
     }
     if (ltype->is<IR::Type_StructLike>() && rtype->is<IR::Type_List>())
@@ -363,36 +413,28 @@ const IR::Node* CreateStructInitializers::postorder(IR::Operation_Relation* expr
     return expression;
 }
 
-const IR::Node* CreateStructAssignInitializers::postorder(IR::AssignmentStatement* statement) {
+const IR::Node* CreateStructInitializers::postorder(IR::AssignmentStatement* statement) {
     bool defaultInit = false;
-    auto type = typeMap->getType(statement->left);
-    auto right = statement->right;
-    if ((right->is<IR::ListExpression>() &&
-        right->to<IR::ListExpression>()->defaultInitializer) ||
-       (right->is<IR::StructExpression>() &&
-        right->to<IR::StructExpression>()->defaultInitializer)) {
-           defaultInit = true;
-    }
+    auto type = typeMap->getType(getOriginal<IR::AssignmentStatement>()->left);
     auto init = convert(statement->right, type);
     if (init != statement->right)
         statement->right = init;
+    if (isDefaultInit(statement->right)) {
+           defaultInit = true;
+    }
     if (defaultInit) {
         if (type->is<IR::Type_Header>()) {
-            if (!statement->right->to<IR::StructExpression>()->defaultInitializer) {
-                return statement;
-            } else {
-                auto method = new IR::Member(statement->srcInfo, statement->left,
-                                             IR::Type_Header::setInvalid);
-                auto mc = new IR::MethodCallExpression(
-                    statement->srcInfo, method, new IR::Vector<IR::Argument>());
-                auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
-                return stat;
-            }
+            auto method = new IR::Member(statement->srcInfo, statement->left,
+                                            IR::Type_Header::setInvalid);
+            auto mc = new IR::MethodCallExpression(
+                statement->srcInfo, method, new IR::Vector<IR::Argument>());
+            auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
+            return stat;
         }
         IR::IndexedVector<IR::StatOrDecl>* retval = new IR::IndexedVector<IR::StatOrDecl>();
         if (type->is<IR::Type_Struct>()) {
             return resolveDefaultInit(statement, type, retval, refMap);
-        } else {
+        } else if (type->is<IR::Type_BaseList>()) {
             auto defaultTupleInit = resolveDefaultInitTuple(statement->right, type, retval, refMap);
             statement->right = defaultTupleInit;
             retval->push_back(statement);

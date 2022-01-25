@@ -797,15 +797,16 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
             // we still need to recurse over its fields; they many not have
             // the right type.
             CHECK_NULL(si);
-            if (ts->fields.size() != si->components.size()) {
+            if (ts->fields.size() != si->components.size() && !si->defaultInitializer) {
                 typeError("%1%: destination type expects %2% fields, but source only has %3%",
                           errorPosition, ts->fields.size(), si->components.size());
                 return sourceExpression;
             }
             IR::IndexedVector<IR::NamedExpression> vec;
             bool changes = false;
-            for (size_t i = 0; i < ts->fields.size(); i++) {
-                auto fieldI = ts->fields.at(i);
+            for (size_t i = 0; i < si->components.size(); i++) {
+                auto compName = si->components[i]->name;
+                auto fieldI = ts->fields.at(ts->getFieldIndex(compName));
                 auto compI = si->components.at(i)->expression;
                 auto src = assignment(sourceExpression, fieldI->type, compI);
                 if (src != compI)
@@ -815,38 +816,40 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
             if (!changes)
                 vec = si->components;
             if (initType->is<IR::Type_UnknownStruct>() || changes) {
-                sourceExpression = new IR::StructExpression(type, type, vec);
+                sourceExpression = new IR::StructExpression(type, type,
+                                                            vec, si->defaultInitializer);
                 setType(sourceExpression, destType);
             }
         } else if (auto li = sourceExpression->to<IR::ListExpression>()) {
-            if (ts->fields.size() != li->components.size()) {
+            if (ts->fields.size() != li->components.size() && !li->defaultInitializer) {
                 typeError("%1%: destination type expects %2% fields, but source only has %3%",
                           errorPosition, ts->fields.size(), li->components.size());
                 return sourceExpression;
             }
             IR::IndexedVector<IR::NamedExpression> vec;
-            for (size_t i = 0; i < ts->fields.size(); i++) {
+            for (size_t i = 0; i < li->components.size(); i++) {
                 auto fieldI = ts->fields.at(i);
                 auto compI = li->components.at(i);
                 auto src = assignment(sourceExpression, fieldI->type, compI);
                 vec.push_back(new IR::NamedExpression(fieldI->name, src));
             }
-            sourceExpression = new IR::StructExpression(type, type, vec);
+            sourceExpression = new IR::StructExpression(type, type, vec, li->defaultInitializer);
             setType(sourceExpression, destType);
         }
         // else this is some other expression that evaluates to a struct
         if (cst)
             setCompileTimeConstant(sourceExpression);
     } else if (auto tt = concreteType->to<IR::Type_Tuple>()) {
+        auto type = destType->getP4Type();
         if (auto li = sourceExpression->to<IR::ListExpression>()) {
-            if (tt->getSize() != li->components.size()) {
+            if (tt->getSize() != li->components.size() && !li->defaultInitializer) {
                 typeError("%1%: destination type expects %2% fields, but source only has %3%",
                           errorPosition, tt->getSize(), li->components.size());
                 return sourceExpression;
             }
-            bool changed = false;
             IR::Vector<IR::Expression> vec;
-            for (size_t i = 0; i < tt->getSize(); i++) {
+            bool changed = false;
+            for (size_t i = 0; i < li->components.size(); i++) {
                 auto typeI = tt->at(i);
                 auto compI = li->components.at(i);
                 auto src = assignment(sourceExpression, typeI, compI);
@@ -854,11 +857,12 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
                     changed = true;
                 vec.push_back(src);
             }
-            if (changed)
-                sourceExpression = new IR::ListExpression(vec);
+            if (changed) {
+                sourceExpression = new IR::ListExpression(type, vec, li->defaultInitializer);
+                setType(sourceExpression, destType);
+            }
         }
-        // else this is some other expression that evaluates to a tuple
-        setType(sourceExpression, destType);
+
         if (cst)
             setCompileTimeConstant(sourceExpression);
     }
@@ -1695,8 +1699,9 @@ bool TypeInference::compare(const IR::Node* errorPosition,
                 // have StructUnknown types
                 BUG_CHECK(rtype->is<IR::Type_StructLike>(), "%1%: expected a struct", rtype);
                 auto type = new IR::Type_Name(rtype->to<IR::Type_StructLike>()->name);
+                auto vec = l->components;
                 compare->left = new IR::StructExpression(
-                    compare->left->srcInfo, type, type, l->components);
+                    compare->left->srcInfo, type, type, vec, l->defaultInitializer);
                 setType(compare->left, rtype);
                 if (lcst)
                     setCompileTimeConstant(compare->left);
@@ -1706,8 +1711,9 @@ bool TypeInference::compare(const IR::Node* errorPosition,
                 // have StructUnknown types
                 BUG_CHECK(ltype->is<IR::Type_StructLike>(), "%1%: expected a struct", ltype);
                 auto type = new IR::Type_Name(ltype->to<IR::Type_StructLike>()->name);
+                auto vec = r->components;
                 compare->right = new IR::StructExpression(
-                    compare->right->srcInfo, type, type, r->components);
+                    compare->right->srcInfo, type, type, vec, r->defaultInitializer);
                 setType(compare->right, rtype);
                 if (rcst)
                     setCompileTimeConstant(compare->right);
@@ -1991,9 +1997,8 @@ const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
             return expression;
         components->push_back(type);
     }
-
-    auto tupleType = new IR::Type_List(expression->srcInfo, *components,
-                                       expression->defaultInitializer);
+    auto tupleType = new IR::Type_List(expression->srcInfo,
+                    *components, expression->defaultInitializer);
     auto type = canonicalize(tupleType);
     if (type == nullptr)
         return expression;
@@ -2018,7 +2023,6 @@ const IR::Node* TypeInference::postorder(IR::StructExpression* expression) {
             return expression;
         components->push_back(new IR::StructField(c->name, type));
     }
-
     // This is the type inferred by looking at the fields.
     const IR::Type* structType = new IR::Type_UnknownStruct(
         expression->srcInfo, "unknown struct", *components, expression->defaultInitializer);

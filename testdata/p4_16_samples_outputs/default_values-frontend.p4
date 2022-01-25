@@ -55,14 +55,24 @@ struct S {
 
 extern void f<D>(in D data);
 control c(inout bit<1> r) {
-    S sa_0;
-    bit<1> tmp_0;
-    S sb_0;
-    tuple<int<8>, bool, H, H, U> x_0;
-    H hdr_or_hu;
-    H hdr_or_hu_0;
-    U hdr_or_hu_1;
+    @name("c.sa") S sa_0;
+    @name("c.tmp") bit<1> tmp_0;
+    @name("c.sb") S sb_0;
+    @name("c.x") tuple<int<8>, bool, H, H, U> x_0;
+    @name("c.hdr_or_hu") H hdr_or_hu_2;
+    @name("c.hdr_or_hu_0") H hdr_or_hu_3;
+    @name("c.hdr_or_hu_1") U hdr_or_hu_4;
     apply {
+        sa_0.u_s.h1.setInvalid();
+        sa_0.u_s.h2.setInvalid();
+        sa_0.strct_s.s_recurs.h_rec.setInvalid();
+        sa_0.strct_s.h_recurs.setInvalid();
+        sa_0.h.setInvalid();
+        sb_0.u_s.h1.setInvalid();
+        sb_0.u_s.h2.setInvalid();
+        sb_0.strct_s.s_recurs.h_rec.setInvalid();
+        sb_0.strct_s.h_recurs.setInvalid();
+        sb_0.h.setInvalid();
         sb_0.tup_s = { 8s0, false };
         sb_0.u_s.h1.setInvalid();
         sb_0.strct_s.s_recurs.h_rec.setInvalid();
@@ -70,7 +80,7 @@ control c(inout bit<1> r) {
         sb_0.strct_s.b_recurs = false;
         sb_0.strct_s.bv_recurs = 7w0;
         sb_0.strct_s.h_recurs.setInvalid();
-        sb_0.val = 8w0;
+        sb_0.val = (myEnum)8w0;
         sb_0.val1 = myEnum1.e1;
         sb_0.errorNoOne = error.NoError;
         sb_0.h.setValid();
@@ -79,10 +89,11 @@ control c(inout bit<1> r) {
         sb_0.b = true;
         sb_0.i = 8s0;
         sa_0 = sb_0;
-        hdr_or_hu.setInvalid();
-        hdr_or_hu_0.setInvalid();
-        hdr_or_hu_1.h1.setInvalid();
-        x_0 = { 8s0, false, hdr_or_hu, hdr_or_hu_0, hdr_or_hu_1 };
+        hdr_or_hu_2.setInvalid();
+        hdr_or_hu_3.setInvalid();
+        hdr_or_hu_4.h1.setInvalid();
+        hdr_or_hu_4.h2.setInvalid();
+        x_0 = { 8s0, false, hdr_or_hu_2, hdr_or_hu_3, hdr_or_hu_4 };
         f<tuple<int<8>, bool, H, H, U>>(x_0);
         f<S>(sa_0);
         tmp_0 = sa_0.z;
@@ -93,3 +104,4 @@ control c(inout bit<1> r) {
 control simple(inout bit<1> r);
 package top(simple e);
 top(c()) main;
+

@@ -1,8 +1,16 @@
 #include <core.p4>
 
-enum bit<8> myEnum { One = 1, Two = 2, Three = 3 }
+enum bit<8> myEnum {
+    One = 1,
+    Two = 2,
+    Three = 3
+}
 
-enum myEnum1 {e1, e2, e3}
+enum myEnum1 {
+    e1,
+    e2,
+    e3
+}
 
 header H1 {
     bit<8>  bv_h1;
@@ -55,7 +63,7 @@ control c(inout bit<1> r) {
         S sb;
         H br = {1, ...};
         sb = { b = true, h = {b_h = 1, ...}, ...};
-        H hb = ...;
+        H hb = { ... };
         sa = sb;
         tuple<int<8>, bool,  H, H, U> x = { ... };
         f<tuple<int<8>, bool, H, H, U>>(x);

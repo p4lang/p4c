@@ -35,8 +35,8 @@ struct Recurs {
 }
 
 struct tuple_0 {
-    int<8> field;
-    bool   field_0;
+    int<8> f0;
+    bool   f1;
 }
 
 struct S {
@@ -54,25 +54,38 @@ struct S {
 
 extern void f<D>(in D data);
 struct tuple_1 {
-    int<8> field_1;
-    bool   field_2;
-    H      field_3;
-    H      field_4;
-    U      field_5;
+    int<8> f0;
+    bool   f1;
+    H      f2;
+    H      f3;
+    U      f4;
 }
 
 control c(inout bit<1> r) {
     tuple_0 sa_0_tup_s;
     U sa_0_u_s;
+    H sa_0_strct_s_s_recurs_h_rec;
+    H sa_0_strct_s_h_recurs;
+    H sa_0_h;
     U sb_0_u_s;
     H sb_0_strct_s_s_recurs_h_rec;
     H sb_0_strct_s_h_recurs;
     H sb_0_h;
-    U x_0_field_3;
-    H hdr_or_hu;
-    H hdr_or_hu_0;
-    U hdr_or_hu_1;
-    @hidden action default_values57() {
+    U x_0_f4;
+    @name("c.hdr_or_hu") H hdr_or_hu_2;
+    @name("c.hdr_or_hu_0") H hdr_or_hu_3;
+    @name("c.hdr_or_hu_1") U hdr_or_hu_4;
+    @hidden action default_values60() {
+        sa_0_u_s.h1.setInvalid();
+        sa_0_u_s.h2.setInvalid();
+        sa_0_strct_s_s_recurs_h_rec.setInvalid();
+        sa_0_strct_s_h_recurs.setInvalid();
+        sa_0_h.setInvalid();
+        sb_0_u_s.h1.setInvalid();
+        sb_0_u_s.h2.setInvalid();
+        sb_0_strct_s_s_recurs_h_rec.setInvalid();
+        sb_0_strct_s_h_recurs.setInvalid();
+        sb_0_h.setInvalid();
         sb_0_u_s.h1.setInvalid();
         sb_0_strct_s_s_recurs_h_rec.setInvalid();
         sb_0_strct_s_h_recurs.setInvalid();
@@ -81,30 +94,35 @@ control c(inout bit<1> r) {
         sb_0_h.b = false;
         sb_0_h.bv_h = 14w0;
         sb_0_h.b_h = 1w1;
-        sa_0_tup_s.field = 8s0;
-        sa_0_tup_s.field_0 = false;
+        sa_0_tup_s.f0 = 8s0;
+        sa_0_tup_s.f1 = false;
         sa_0_u_s.h1 = sb_0_u_s.h1;
         sa_0_u_s.h2 = sb_0_u_s.h2;
-        hdr_or_hu.setInvalid();
-        hdr_or_hu_0.setInvalid();
-        hdr_or_hu_1.h1.setInvalid();
-        x_0_field_3.h1 = hdr_or_hu_1.h1;
-        x_0_field_3.h2 = hdr_or_hu_1.h2;
-        f<tuple_1>({ 8s0, false, hdr_or_hu, hdr_or_hu_0, x_0_field_3 });
-        f<S>({ sa_0_tup_s, sa_0_u_s, { { sb_0_strct_s_s_recurs_h_rec, 2s0 }, false, 7w0, sb_0_strct_s_h_recurs }, 8w0, myEnum1.e1, error.NoError, sb_0_h, 1w0, true, 8s0 });
+        sa_0_strct_s_s_recurs_h_rec = sb_0_strct_s_s_recurs_h_rec;
+        sa_0_strct_s_h_recurs = sb_0_strct_s_h_recurs;
+        sa_0_h = sb_0_h;
+        hdr_or_hu_2.setInvalid();
+        hdr_or_hu_3.setInvalid();
+        hdr_or_hu_4.h1.setInvalid();
+        hdr_or_hu_4.h2.setInvalid();
+        x_0_f4.h1 = hdr_or_hu_4.h1;
+        x_0_f4.h2 = hdr_or_hu_4.h2;
+        f<tuple_1>((tuple_1){f0 = 8s0,f1 = false,f2 = hdr_or_hu_2,f3 = hdr_or_hu_3,f4 = x_0_f4});
+        f<S>((S){tup_s = sa_0_tup_s,u_s = sa_0_u_s,strct_s = (Recurs){s_recurs = (Recurs1){h_rec = sb_0_strct_s_s_recurs_h_rec,i_rec = 2s0},b_recurs = false,bv_recurs = 7w0,h_recurs = sb_0_strct_s_h_recurs},val = 8w0,val1 = myEnum1.e1,errorNoOne = error.NoError,h = sb_0_h,z = 1w0,b = true,i = 8s0});
         r = 1w0;
     }
-    @hidden table tbl_default_values57 {
+    @hidden table tbl_default_values60 {
         actions = {
-            default_values57();
+            default_values60();
         }
-        const default_action = default_values57();
+        const default_action = default_values60();
     }
     apply {
-        tbl_default_values57.apply();
+        tbl_default_values60.apply();
     }
 }
 
 control simple(inout bit<1> r);
 package top(simple e);
 top(c()) main;
+

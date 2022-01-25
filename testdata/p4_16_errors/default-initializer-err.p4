@@ -1,8 +1,16 @@
 #include <core.p4>
 
-enum bit<8> myEnum { One = 1, Two = 2, Three = 3 }
+enum bit<8> myEnum {
+    One = 1,
+    Two = 2,
+    Three = 3
+}
 
-enum myEnum1 {e1, e2, e3}
+enum myEnum1 {
+    e1,
+    e2,
+    e3
+}
 
 
 header H {
@@ -22,7 +30,6 @@ struct S {
     bit<1>              z;
     bool        b;
     int<8>      i;
-
 }
 
 
@@ -33,12 +40,9 @@ control c(inout bit<1> r) {
     apply {
         S sb;
         sb = { b = false, h={3, true, ...}, ...};
-        H hb = ...;
+        H hb = { ... };
         sb.h = hb;
-        sa = sb;
-        tuple<int<8>, bool, error, myEnum1, myEnum, H, S> x = { 0, true, ... };
-        f<tuple<int<8>, bool, error, myEnum1, myEnum, H, S>>(x);
-        tmp = sa.z;
+        bit<1> a = {...};
         r = tmp;
     }
 }
@@ -46,4 +50,3 @@ control c(inout bit<1> r) {
 control simple(inout bit<1> r);
 package top(simple e);
 top(c()) main;
-

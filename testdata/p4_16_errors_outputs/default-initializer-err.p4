@@ -42,10 +42,7 @@ control c(inout bit<1> r) {
         sb = { b = false, h={3, true, ...}, ...};
         H hb = { ... };
         sb.h = hb;
-        sa = sb;
-        tuple<int<8>, bool, error, myEnum1, myEnum, H, S> x = { 0, true, ... };
-        f<tuple<int<8>, bool, error, myEnum1, myEnum, H, S>>(x);
-        tmp = sa.z;
+        bit<1> a = {...};
         r = tmp;
     }
 }

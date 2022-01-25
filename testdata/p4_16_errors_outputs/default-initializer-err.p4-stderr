@@ -1,28 +1,54 @@
-default-initializer-err.p4(35): [--Werror=type-error] error: AssignmentStatement: Structs, headers and tuples containing varbit<8> fields cannot be initialized using ...: header H = {...}.
+default-initializer-err.p4(42): [--Werror=type-error] error: AssignmentStatement
         sb = { b = false, h={3, true, ...}, ...};
            ^
-default-initializer-err.p4(13)
-    varbit<8> v;
-    ^^^^^^^^^
-default-initializer-err.p4(8)
-header H {
-       ^
-default-initializer-err.p4(36): [--Werror=type-error] error: hb: Structs, headers and tuples containing varbit<8> fields cannot be initialized using ...: header H = {...}.
-        H hb = ...;
-        ^^^^^^^^^^^
-default-initializer-err.p4(13)
-    varbit<8> v;
-    ^^^^^^^^^
-default-initializer-err.p4(8)
-header H {
-       ^
-default-initializer-err.p4(39): [--Werror=type-error] error: x: Structs, headers and tuples containing varbit<8> fields cannot be initialized using ...: header H = {...}.
-        tuple<int<8>, bool, error, myEnum1, myEnum, H, S> x = { 0, true, ... };
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-default-initializer-err.p4(13)
-    varbit<8> v;
-    ^^^^^^^^^
-default-initializer-err.p4(8)
-header H {
-       ^
-
+  ---- Actual error:
+  default-initializer-err.p4(21): Structs, headers and tuples containing varbit<8> fields cannot be initialized using ...: header H = {...}.
+      varbit<8> v;
+      ^^^^^^^^^
+  default-initializer-err.p4(16)
+  header H {
+         ^
+  ---- Originating from:
+  default-initializer-err.p4(42): Source expression 'StructExpression' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct S'
+          sb = { b = false, h={3, true, ...}, ...};
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  default-initializer-err.p4(42)
+          sb = { b = false, h={3, true, ...}, ...};
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  default-initializer-err.p4(25)
+  struct S {
+         ^
+default-initializer-err.p4(43): [--Werror=type-error] error: hb
+        H hb = { ... };
+        ^^^^^^^^^^^^^^^
+  ---- Actual error:
+  default-initializer-err.p4(21): Structs, headers and tuples containing varbit<8> fields cannot be initialized using ...: header H = {...}.
+      varbit<8> v;
+      ^^^^^^^^^
+  default-initializer-err.p4(16)
+  header H {
+         ^
+  ---- Originating from:
+  default-initializer-err.p4(43): Source expression 'ListExpression' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'header H'
+          H hb = { ... };
+                 ^^^^^^^
+  default-initializer-err.p4(43)
+          H hb = { ... };
+                 ^^^^^^^
+  default-initializer-err.p4(16)
+  header H {
+         ^
+default-initializer-err.p4(45): [--Werror=type-error] error: a
+        bit<1> a = {...};
+        ^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+  default-initializer-err.p4(43): Cannot unify type 'tuple<>' with type 'bit<1>'
+          H hb = { ... };
+                 ^^^^^^^
+  ---- Originating from:
+  default-initializer-err.p4(45): Source expression 'ListExpression' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'bit<1>'
+          bit<1> a = {...};
+                     ^^^^^
+  default-initializer-err.p4(43)
+          H hb = { ... };
+                 ^^^^^^^

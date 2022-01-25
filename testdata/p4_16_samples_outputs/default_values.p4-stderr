@@ -1,6 +1,7 @@
-default_values.p4(59): [--Wwarn=uninitialized_use] warning: sb may not be completely initialized
+default_values.p4(67): [--Wwarn=uninitialized_use] warning: sb may not be completely initialized
         sa = sb;
              ^^
-default_values.p4(60): [--Wwarn=uninitialized_use] warning: hdr_or_hu_1 may not be completely initialized
+default_values.p4(68): [--Wwarn=uninitialized_use] warning: hdr_or_hu may not be completely initialized
         tuple<int<8>, bool, H, H, U> x = { ... };
+
                                          ^^^^^^^
