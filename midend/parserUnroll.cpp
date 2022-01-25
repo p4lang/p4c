@@ -399,7 +399,8 @@ class ParserSymbolicInterpreter {
             }
             std::stringstream errorStr;
             errorStr << errorValue;
-            ::warning(" %1% is ignored. %2%", sord, errorStr.str());
+            ::warning(ErrorType::WARN_IGNORE_PROPERTY,
+                      "Result of %1% is not defined: %2%", sord, errorStr.str());
         }
         ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
                                          visitedStates);

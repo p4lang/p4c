@@ -248,7 +248,7 @@ class LogicalExpressionUnroll : public Inspector {
     }
 
     LogicalExpressionUnroll(P4::ReferenceMap* refMap, DpdkProgramStructure *structure)
-        : refMap(refMap), structure(structure) {}
+        : refMap(refMap), structure(structure) {visitDagOnce = false;}
     bool preorder(const IR::Operation_Unary *a) override;
     bool preorder(const IR::Operation_Binary *a) override;
     bool preorder(const IR::MethodCallExpression *a) override;
@@ -444,6 +444,8 @@ class BreakLogicalExpressionParenthesis : public Transform {
         } else if (not land->left->is<IR::LOr>() and
                    not land->left->is<IR::Equ>() and
                    not land->left->is<IR::Neq>() and
+                   not land->left->is<IR::Leq>() and
+                   not land->left->is<IR::Geq>() and
                    not land->left->is<IR::Lss>() and
                    not land->left->is<IR::Grt>() and
                    not land->left->is<IR::MethodCallExpression>() and
@@ -478,8 +480,9 @@ class BreakLogicalExpressionParenthesis : public Transform {
 class SwapSimpleExpressionToFrontOfLogicalExpression : public Transform {
     bool is_simple(const IR::Node *n) {
         if (n->is<IR::Equ>() or n->is<IR::Neq>() or n->is<IR::Lss>() or
-            n->is<IR::Grt>() or n->is<IR::MethodCallExpression>() or
-            n->is<IR::PathExpression>() or n->is<IR::Member>()) {
+            n->is<IR::Grt>() or n->is<IR::Geq>() or n->is<IR::Leq>() or
+            n->is<IR::MethodCallExpression>() or n->is<IR::PathExpression>() or
+            n->is<IR::Member>()) {
             return true;
         } else if (not n->is<IR::LAnd>() and not n->is<IR::LOr>()) {
             BUG("Logical Expression Unroll pass failed");

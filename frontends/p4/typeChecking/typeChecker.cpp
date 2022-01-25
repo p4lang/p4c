@@ -2301,6 +2301,7 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
     setType(getOriginal(), ltype);
     if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
         auto result = constantFold(expression);
+        setType(result, ltype);
         setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
         return result;
@@ -2465,6 +2466,7 @@ const IR::Node* TypeInference::postorder(IR::LNot* expression) {
     }
     if (isCompileTimeConstant(expression->expr)) {
         auto result = constantFold(expression);
+        setType(result, IR::Type_Boolean::get());
         setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
         return result;
@@ -2494,6 +2496,7 @@ const IR::Node* TypeInference::postorder(IR::Neg* expression) {
     }
     if (isCompileTimeConstant(expression->expr)) {
         auto result = constantFold(expression);
+        setType(result, type);
         setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
         return result;
@@ -2522,6 +2525,7 @@ const IR::Node* TypeInference::postorder(IR::Cmpl* expression) {
     }
     if (isCompileTimeConstant(expression->expr)) {
         auto result = constantFold(expression);
+        setType(result, type);
         setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
         return result;
@@ -2745,18 +2749,19 @@ const IR::Node* TypeInference::postorder(IR::Slice* expression) {
         return expression;
     }
 
-    const IR::Type* result = IR::Type_Bits::get(bst->srcInfo, m - l + 1, false);
-    result = canonicalize(result);
-    if (result == nullptr)
+    const IR::Type* resultType = IR::Type_Bits::get(bst->srcInfo, m - l + 1, false);
+    resultType = canonicalize(resultType);
+    if (resultType == nullptr)
         return expression;
-    setType(getOriginal(), result);
-    setType(expression, result);
+    setType(getOriginal(), resultType);
+    setType(expression, resultType);
     if (isLeftValue(expression->e0)) {
         setLeftValue(expression);
         setLeftValue(getOriginal<IR::Expression>());
     }
     if (isCompileTimeConstant(expression->e0)) {
         auto result = constantFold(expression);
+        setType(result, resultType);
         setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
         return result;
@@ -2803,6 +2808,7 @@ const IR::Node* TypeInference::postorder(IR::Mux* expression) {
             isCompileTimeConstant(expression->e1) &&
             isCompileTimeConstant(expression->e2)) {
             auto result = constantFold(expression);
+            setType(result, secondType);
             setCompileTimeConstant(result);
             setCompileTimeConstant(getOriginal<IR::Expression>());
             return result;
@@ -3205,8 +3211,8 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
     auto methodType = getType(expression->method);
     if (methodType == nullptr)
         return expression;
-    auto ft = methodType->to<IR::Type_MethodBase>();
-    if (ft == nullptr) {
+    auto methodBaseType = methodType->to<IR::Type_MethodBase>();
+    if (methodBaseType == nullptr) {
         typeError("%1% is not a method", expression);
         return expression;
     }
@@ -3272,11 +3278,28 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         auto callType = new IR::Type_MethodCall(
             expression->srcInfo, typeArgs, rettype, args);
 
-        auto tvs = unify(expression, ft, callType,
+        auto tvs = unify(expression, methodBaseType, callType,
                          "Function type '%1%' does not match invocation type '%2%'",
-                         { ft, callType });
+                         { methodBaseType, callType });
         if (tvs == nullptr)
             return expression;
+
+        // Infer Dont_Care for type vars used only in not-present optional params
+        auto dontCares = new TypeVariableSubstitution();
+        auto typeParams = methodBaseType->typeParameters;
+        for (auto p : *methodBaseType->parameters) {
+            if (!p->isOptional()) continue;
+            forAllMatching<IR::Type_Var>(
+                p, [tvs, dontCares, typeParams, this](const IR::Type_Var *tv) {
+                       if (typeMap->getSubstitutions()->lookup(tv) != nullptr)
+                           return;  // already bound
+                       if (tvs->lookup(tv)) return;  // already bound
+                       if (typeParams->getDeclByName(tv->name) != tv)
+                           return;  // not a tv of this call
+                       dontCares->setBinding(tv, new IR::Type_Dontcare);
+                   });
+        }
+        addSubstitutions(dontCares);
 
         LOG2("Method type before specialization " << methodType << " with " << tvs);
         TypeVariableSubstitutionVisitor substVisitor(tvs);
@@ -3441,6 +3464,8 @@ static void convertStructToTuple(const IR::Type_StructLike* structType, IR::Type
             tuple->components.push_back(ft);
         } else if (auto ft = field->type->to<IR::Type_StructLike>()) {
             convertStructToTuple(ft, tuple);
+        } else if (auto ft = field->type->to<IR::Type_InfInt>()) {
+            tuple->components.push_back(ft);
         } else {
             BUG("Unexpected type %1% for struct field %2%", field->type, field);
         }
@@ -3521,6 +3546,28 @@ bool TypeInference::containsHeader(const IR::Type* type) {
     return false;
 }
 
+/// Expressions that appear in a select expression are restricted to a small
+/// number of types: bits, enums, serializable enums, and booleans.
+static bool validateSelectTypes(const IR::Type* type, const IR::SelectExpression* expression) {
+    if (auto tuple = type->to<IR::Type_BaseList>()) {
+        for (auto ct : tuple->components) {
+            auto check = validateSelectTypes(ct, expression);
+            if (!check)
+                return false;
+        }
+        return true;
+    } else if (type->is<IR::ITypeVar>()) {
+        typeError("Cannot infer type for %1%", type);
+        return false;
+    } else if (type->is<IR::Type_Bits>() || type->is<IR::Type_SerEnum>() ||
+               type->is<IR::Type_Boolean>() || type->is<IR::Type_Enum>()) {
+        return true;
+    }
+    typeError("Expression '%1%' with type '%2%' cannot be used in select",
+              expression->select, type);
+    return false;
+}
+
 const IR::Node* TypeInference::postorder(IR::SelectExpression* expression) {
     if (done()) return expression;
     auto selectType = getType(expression->select);
@@ -3528,19 +3575,11 @@ const IR::Node* TypeInference::postorder(IR::SelectExpression* expression) {
         return expression;
 
     // Check that the selectType is determined
-    if (!selectType->is<IR::Type_BaseList>())
-        BUG("%1%: Expected a tuple type for the select expression, got %2%",
-            expression, selectType);
     auto tuple = selectType->to<IR::Type_BaseList>();
-    for (auto ct : tuple->components) {
-        if (ct->is<IR::ITypeVar>()) {
-            typeError("Cannot infer type for %1%", ct);
-            return expression;
-        } else if (containsHeader(ct)) {
-            typeError("Expression with type %1% cannot be used in select %2%", ct, expression);
-            return expression;
-        }
-    }
+    BUG_CHECK(tuple != nullptr, "%1%: Expected a tuple type for the select expression, got %2%",
+              expression, selectType);
+    if (!validateSelectTypes(selectType, expression))
+        return expression;
 
     bool changes = false;
     IR::Vector<IR::SelectCase> vec;

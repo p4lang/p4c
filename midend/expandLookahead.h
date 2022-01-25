@@ -28,7 +28,7 @@ namespace P4 {
 /// a = lookahead<T>();
 /// this is transformed into
 /// bit<sizeof(T)> tmp = lookahead<bit<sizeof(T)>>();
-/// a.m.setValid();  // for header fields
+/// a.setValid();  // for header fields
 /// a.m0 = tmp[f1,f0];
 /// a.m1 = tmp[f2, f1+1];
 /// ...
