@@ -786,24 +786,54 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
     return false;
 }
 
-// This function assumes EliminateSwitch midend pass is applied and only handles
-// action_run in switch expression.
+// If we get a switch statement with constant switch expression, only emit the body of
+// matching case label
+bool ConvertStatementToDpdk::handleConstSwitch(const IR::SwitchStatement *s) {
+    auto constSwitchExpr = s->expression->to<IR::Constant>();
+    bool constSwitchFlag = false;
+    std::cout << "constSwitchExpr " << constSwitchExpr << std::endl;
+    for (auto cL : s->cases) {
+         std::cout << "Iterating over cases " << cL->label << std::endl;
+        if (constSwitchExpr->value == cL->label->to<IR::Constant>()->value) {
+            constSwitchFlag = true;
+            std::cout << "found const matching label " << cL->label << std::endl;
+        }
+        // In case of fallthrough, execute body statement of next case label
+        if (constSwitchFlag && cL->statement != nullptr) {
+            visit(cL->statement);
+            std::cout << "Body found " << cL->label << std::endl;
+            break;
+        }
+    }
+    return false;
+}
+
+
 bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
+    // Check if switch expression is action_run expression. DPDK has special jump instructions
+    // for jumping on action run event.
     auto tc = P4::TableApplySolver::isActionRun(s->expression, refmap, typemap);
-    BUG_CHECK(tc != nullptr, "%1%: unexpected switch statement expression",
-              s->expression);
+    if (auto constSwitchExpr = s->expression->to<IR::Constant>())
+        return handleConstSwitch(s);
+
     auto size = s->cases.size();
     std::vector <cstring> labels;
     cstring label;
     cstring default_label = "";
     auto end_label = refmap->newName("label_endswitch");
-    // Emit jmp on action run statements and collect labels for each case statement
+
+    // Emit jmp on action run/jmp on matching label statements and collect labels for
+    // each case statement.
     for (unsigned i = 0; i < size - 1; i++) {
         auto caseLabel = s->cases.at(i);
-        auto pe = caseLabel->label->to<IR::PathExpression>();
-        CHECK_NULL(pe);
-        label = refmap->newName("label_action");
-        add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
+        label = refmap->newName("label_switch");
+        if (tc != nullptr) {
+            auto pe = caseLabel->label->to<IR::PathExpression>();
+            CHECK_NULL(pe);
+            add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
+        } else {
+            add_instr(new IR::DpdkJmpEqualStatement(label, s->expression, caseLabel->label));
+        }
         labels.push_back(label);
     }
 
@@ -812,10 +842,15 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
         add_instr(new IR::DpdkJmpLabelStatement(label));
         default_label = label;
     } else {
-        auto pe = s->cases.at(size-1)->label->to<IR::PathExpression>();
-        CHECK_NULL(pe);
-        label = refmap->newName("label_action");
-        add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
+        label = refmap->newName("label_switch");
+        if (tc != nullptr) {
+            auto pe = s->cases.at(size-1)->label->to<IR::PathExpression>();
+            CHECK_NULL(pe);
+            add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
+        } else {
+            add_instr(new IR::DpdkJmpEqualStatement(label, s->expression,
+                                                    s->cases.at(size-1)->label));
+        }
         add_instr(new IR::DpdkJmpLabelStatement(end_label));
     }
 
@@ -837,5 +872,6 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
     add_instr(new IR::DpdkLabelStatement(end_label));
     return false;
 }
+
 
 }  // namespace DPDK

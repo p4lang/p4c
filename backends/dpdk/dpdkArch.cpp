@@ -548,6 +548,27 @@ bool ExpressionUnroll::preorder(const IR::BoolLiteral *) {
     return false;
 }
 
+const IR::Node *IfStatementUnroll::postorder(IR::SwitchStatement *sw) {
+    std::cout << "Switch statement unroll" << std::endl;
+    auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
+    expressionUnrollSanityCheck(sw->expression);
+    auto unroller = new LogicalExpressionUnroll(refMap, structure);
+    unroller->setCalledBy(this);
+    sw->expression->apply(*unroller);
+    for (auto i : unroller->stmt)
+        code_block->push_back(i);
+
+    auto control = findOrigCtxt<IR::P4Control>();
+
+    for (auto d : unroller->decl)
+        injector.collect(control, nullptr, d);
+    if (unroller->root) {
+        sw->expression = unroller->root;
+    }
+    code_block->push_back(sw);
+    return new IR::BlockStatement(*code_block);
+}
+
 const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
     expressionUnrollSanityCheck(i->condition);
