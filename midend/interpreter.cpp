@@ -883,8 +883,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         if (auto resConst = result->to<IR::Constant>()) {
           auto bitsType = resConst->type->checkedTo<IR::Type_Bits>();
           if (bitsType->size == 1) {
-            const IR::Constant *constant;
-            constant = (resConst->value == 1)
+            const IR::Constant* constant = (resConst->value == 1)
                            ? new IR::Constant(new IR::Type_Bits(1, false), 1)
                            : new IR::Constant(new IR::Type_Bits(1, false), 0);
             set(expression, new SymbolicInteger(constant));
@@ -1213,17 +1212,15 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
                 sh->setValid(true);
                 set(expression, SymbolicVoid::get());
                 return;
-            } else if (em->method->name.name ==
-                       P4CoreLibrary::instance.packetIn.lookahead.name) {
-              // If lookahead returns a header, it is always valid.
-              auto type =
-                  typeMap->getTypeType(mi->actualMethodType->returnType, true);
-              auto res = factory->create(type, false);
-              if (auto sh = res->to<SymbolicHeader>()) {
-                sh->setValid(true);
-              }
-              set(expression, res);
-              return;
+            } else if (em->method->name.name == P4CoreLibrary::instance.packetIn.lookahead.name) {
+                // If lookahead returns a header, it is always valid.
+                auto type = typeMap->getTypeType(mi->actualMethodType->returnType, true);
+                auto res = factory->create(type, false);
+                if (auto sh = res->to<SymbolicHeader>()) {
+                    sh->setValid(true);
+                }
+                set(expression, res);
+                return;
             }
         }
     }
