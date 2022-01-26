@@ -568,7 +568,10 @@ void GeneralInliner::inline_subst(P4Block *caller,
                     substs->paramSubst.add(param, initializer);
                     continue;
                 }
-                if (call != nullptr && (useTemporary.find(param) == useTemporary.end())) {
+                if (call != nullptr && (useTemporary.find(param) == useTemporary.end()) &&
+                    mi->substitution.contains(param))
+                    // This may not be true for @optional parameters
+                {
                     // Substitute argument directly
                     CHECK_NULL(mi);
                     auto initializer = mi->substitution.lookup(param);
