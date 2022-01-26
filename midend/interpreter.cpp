@@ -859,6 +859,24 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         return;
     }
     if (sv->isUnknown()) {
+      if (auto cast = expression->to<IR::Cast>()) {
+        if (cast->destType->is<IR::Type_Boolean>() &&
+            l->is<SymbolicInteger>()) {
+          auto symbInt = l->to<SymbolicInteger>();
+          if (symbInt->constant) {
+            l = (symbInt->constant->value == 1) ? new SymbolicBool(true)
+                                                : new SymbolicBool(false);
+          }
+        } else if (cast->destType->is<IR::Type_Bits>() &&
+                   l->is<SymbolicBool>()) {
+          auto symbBool = l->to<SymbolicBool>();
+          l = (symbBool->value)
+                  ? new SymbolicInteger(
+                        new IR::Constant(new IR::Type_Bits(1, false), 1))
+                  : new SymbolicInteger(
+                        new IR::Constant(new IR::Type_Bits(1, false), 0));
+        }
+      }
         set(expression, l);
         return;
     }
@@ -871,15 +889,34 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         DoConstantFolding cf(refMap, typeMap);
         cf.setCalledBy(this);
         auto result = clone->apply(cf);
+        if (auto resBool = result->to<IR::BoolLiteral>()) {
+          const IR::BoolLiteral* boolLiteral =
+              new IR::BoolLiteral(resBool->value);
+          set(expression, new SymbolicBool(boolLiteral));
+          return;
+        }
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
         set(expression, new SymbolicInteger(result->to<IR::Constant>()));
         return;
     } else if (l->is<SymbolicBool>()) {
         auto li = l->to<SymbolicBool>();
         clone->expr = new IR::BoolLiteral(li->value);
+        auto type = typeMap->getType(getOriginal(), true);
+        typeMap->setType(clone, type);  // needed by the constant folding
         DoConstantFolding cf(refMap, typeMap);
         cf.setCalledBy(this);
         auto result = clone->apply(cf);
+        if (auto resConst = result->to<IR::Constant>()) {
+          auto bitsType = resConst->type->checkedTo<IR::Type_Bits>();
+          if (bitsType->size == 1) {
+            const IR::Constant* constant = (resConst->value == 1)
+                           ? new IR::Constant(new IR::Type_Bits(1, false), 1)
+                           : new IR::Constant(new IR::Type_Bits(1, false), 0);
+            set(expression, new SymbolicInteger(constant));
+            return;
+          }
+        }
+
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
         return;
