@@ -858,7 +858,25 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         set(expression, result);
         return;
     }
-    if (sv->isUnknown() && !expression->is<IR::Cast>()) {
+    if (sv->isUnknown()) {
+      if (auto cast = expression->to<IR::Cast>()) {
+        if (cast->destType->is<IR::Type_Boolean>() &&
+            l->is<SymbolicInteger>()) {
+          auto symbInt = l->to<SymbolicInteger>();
+          if (symbInt->constant) {
+            l = (symbInt->constant->value == 1) ? new SymbolicBool(true)
+                                                : new SymbolicBool(false);
+          }
+        } else if (cast->destType->is<IR::Type_Bits>() &&
+                   l->is<SymbolicBool>()) {
+          auto symbBool = l->to<SymbolicBool>();
+          l = (symbBool->value)
+                  ? new SymbolicInteger(
+                        new IR::Constant(new IR::Type_Bits(1, false), 1))
+                  : new SymbolicInteger(
+                        new IR::Constant(new IR::Type_Bits(1, false), 0));
+        }
+      }
         set(expression, l);
         return;
     }
