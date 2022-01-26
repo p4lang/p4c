@@ -197,10 +197,16 @@ const IR::Node *ConvertToDpdkArch::preorder(IR::PathExpression *pe) {
     auto declaration = refMap->getDeclaration(pe->path);
     if (auto decl = declaration->to<IR::Parameter>()) {
         if (auto type = decl->type->to<IR::Type_Name>()) {
+            LOG3("Expression: " << pe << std::endl <<
+                 "  declaration: " << declaration);
             if (type->path->name == structure->header_type) {
-                return new IR::PathExpression(IR::ID("h"));
+                auto expr = new IR::PathExpression(IR::ID("h"));
+                LOG3("  replaced by: " << expr);
+                return expr;
             } else if (type->path->name == structure->local_metadata_type) {
-                return new IR::PathExpression(IR::ID("m"));
+                auto expr = new IR::PathExpression(IR::ID("m"));
+                LOG3("  replaced by: " << expr);
+                return expr;
             }
         }
     }
@@ -218,18 +224,26 @@ const IR::Node *ConvertToDpdkArch::preorder(IR::Member *m) {
         auto declaration = refMap->getDeclaration(p->path);
         if (auto decl = declaration->to<IR::Parameter>()) {
             if (auto type = decl->type->to<IR::Type_Name>()) {
+                LOG3("Member: " << m << std::endl <<
+                      "  declaration: " << declaration);
                 if (isStandardMetadata(type->path->name)) {
-                    return new IR::Member(
+                    auto nm = new IR::Member(
                         new IR::PathExpression(IR::ID("m")),
                         IR::ID(TypeStruct2Name(type->path->name.name) + "_" +
                                m->member.name));
+                    LOG3("  replaced by new member: " << nm);
+                    return nm;
                 } else if (type->path->name == structure->header_type) {
-                    return new IR::Member(new IR::PathExpression(IR::ID("h")),
+                    auto nm = new IR::Member(new IR::PathExpression(IR::ID("h")),
                                           IR::ID(m->member.name));
+                    LOG3("  replaced by new member: " << nm);
+                    return nm;
                 } else if (type->path->name == structure->local_metadata_type) {
-                    return new IR::Member(
+                    auto nm = new IR::Member(
                         new IR::PathExpression(IR::ID("m")),
                         IR::ID("local_metadata_" + m->member.name));
+                    LOG3("  replaced by new member: " << nm);
+                    return nm;
                 }
             }
         }
@@ -320,9 +334,11 @@ bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s) {
     for (auto m : structure->used_metadata) {
         if (m->to<IR::Type_Name>()->path->name.name == s->name.name) {
             for (auto field : s->fields) {
-                structure->compiler_added_fields.push_back(new IR::StructField(
+                auto sf = new IR::StructField(
                     IR::ID(TypeStruct2Name(s->name.name) + "_" + field->name),
-                    field->type));
+                    field->type);
+                LOG4("Adding metadata field: " << sf);
+                structure->compiler_added_fields.push_back(sf);
             }
             return true;
         }
@@ -772,7 +788,7 @@ const IR::Node *ConvertBinaryOperationTo2Params::postorder(IR::P4Parser *a) {
     return injector.inject_parser(parser, a);
 }
 
-const IR::Node *CollectLocalVariableToMetadata::preorder(IR::P4Program *p) {
+const IR::Node *CollectLocalVariables::preorder(IR::P4Program *p) {
     for (auto kv : structure->parsers) {
         locals_map.emplace(kv.first+"_parser", kv.second->parserLocals);
     }
@@ -780,18 +796,59 @@ const IR::Node *CollectLocalVariableToMetadata::preorder(IR::P4Program *p) {
         locals_map.emplace(kv.first, kv.second->controlLocals);
     }
     for (auto kv : structure->deparsers) {
-        locals_map.emplace(kv.first+"_deprser", kv.second->controlLocals);
+        locals_map.emplace(kv.first+"_deparser", kv.second->controlLocals);
+    }
+    LOG4("Collecting local variables, locals_map:");
+    for (auto kv : locals_map) {
+        LOG4("  " << kv.first << ":");
+        for (auto decl : kv.second) {
+            LOG4("    " << decl);
+        }
     }
     return p;
 }
 
-const IR::Node *CollectLocalVariableToMetadata::postorder(IR::Type_Struct *s) {
+const IR::Node *CollectLocalVariables::postorder(IR::Type_Struct *s) {
     if (s->name.name == structure->local_metadata_type) {
         for (auto kv : locals_map) {
             for (auto d : kv.second) {
                 if (auto dv = d->to<IR::Declaration_Variable>()) {
-                    s->fields.push_back(new IR::StructField(
-                        IR::ID(kv.first + "_" + dv->name.name), dv->type));
+                    auto type = typeMap->getType(dv, true);
+                    if (type->is<IR::Type_Header>()) {
+                        LOG3("Variable: " << dv << std::endl <<
+                             " type: " << type << std::endl <<
+                             " already added to: " << structure->header_type);
+                    } else {
+                        auto sf = new IR::StructField(
+                            IR::ID(kv.first + "_" + dv->name.name), dv->type);
+                        LOG2("New field: " << sf << std::endl <<
+                             " type: " << type << std::endl <<
+                             " added to: " << s->name.name);
+                        s->fields.push_back(sf);
+                    }
+                } else if (!d->is<IR::P4Action>() && !d->is<IR::P4Table>() &&
+                           !d->is<IR::Declaration_Instance>()) {
+                    BUG("%1%: Unhandled declaration type", s);
+                }
+            }
+        }
+    } else if (s->name.name == structure->header_type) {
+        for (auto kv : locals_map) {
+            for (auto d : kv.second) {
+                if (auto dv = d->to<IR::Declaration_Variable>()) {
+                    auto type = typeMap->getType(dv, true);
+                    if (type->is<IR::Type_Header>()) {
+                        auto sf = new IR::StructField(
+                            IR::ID(kv.first + "_" + dv->name.name), dv->type);
+                        LOG2("New field: " << sf << std::endl <<
+                             " type: " << type << std::endl <<
+                             " added to: " << s->name.name);
+                        s->fields.push_back(sf);
+                    } else {
+                        LOG3("Variable: " << dv << std::endl <<
+                             " type: " << type << std::endl <<
+                             " already added to: " << structure->local_metadata_type);
+                    }
                 } else if (!d->is<IR::P4Action>() && !d->is<IR::P4Table>() &&
                            !d->is<IR::Declaration_Instance>()) {
                     BUG("%1%: Unhandled declaration type", s);
@@ -803,15 +860,21 @@ const IR::Node *CollectLocalVariableToMetadata::postorder(IR::Type_Struct *s) {
 }
 
 const IR::Node *
-CollectLocalVariableToMetadata::postorder(IR::PathExpression *p) {
+CollectLocalVariables::postorder(IR::PathExpression *p) {
     if (auto decl =
             refMap->getDeclaration(p->path)->to<IR::Declaration_Variable>()) {
         for (auto kv : locals_map) {
             for (auto d : kv.second) {
                 if (d->equiv(*decl)) {
-                    return new IR::Member(
-                        new IR::PathExpression(IR::ID("m")),
-                        IR::ID(kv.first + "_" + decl->name.name));
+                    IR::ID name(kv.first + "_" + decl->name.name);
+                    IR::Member *member;
+                    if (typeMap->getType(decl, true)->is<IR::Type_Header>()) {
+                        member = new IR::Member(new IR::PathExpression(IR::ID("h")), name);
+                    } else {
+                        member = new IR::Member(new IR::PathExpression(IR::ID("m")), name);
+                    }
+                    LOG2("Expression: " << p << " replaced by: " << member);
+                    return member;
                 }
             }
         }
@@ -820,7 +883,7 @@ CollectLocalVariableToMetadata::postorder(IR::PathExpression *p) {
     return p;
 }
 
-const IR::Node *CollectLocalVariableToMetadata::postorder(IR::P4Control *c) {
+const IR::Node *CollectLocalVariables::postorder(IR::P4Control *c) {
     IR::IndexedVector<IR::Declaration> decls;
     for (auto d : c->controlLocals) {
         if (d->is<IR::Declaration_Instance>() || d->is<IR::P4Action>() ||
@@ -834,7 +897,7 @@ const IR::Node *CollectLocalVariableToMetadata::postorder(IR::P4Control *c) {
     return c;
 }
 
-const IR::Node *CollectLocalVariableToMetadata::postorder(IR::P4Parser *p) {
+const IR::Node *CollectLocalVariables::postorder(IR::P4Parser *p) {
     IR::IndexedVector<IR::Declaration> decls;
     for (auto d : p->parserLocals) {
         if (d->is<IR::Declaration_Instance>()) {
@@ -953,7 +1016,7 @@ const IR::Node* PrependPDotToActionArgs::preorder(IR::MethodCallExpression* mce)
    gets translated to
    control ingress(inout headers h, inout metadata m) {
        bit<48> tbl_ethernet_srcAddr;  // These declarations are later copied to metadata struct
-       bit<16> tbl_ipv4_totalLen;     // in CollectLocalVariableToMetadata pass.
+       bit<16> tbl_ipv4_totalLen;     // in CollectLocalVariables pass.
        ...
        table tbl {
            key = {

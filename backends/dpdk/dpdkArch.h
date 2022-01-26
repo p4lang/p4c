@@ -271,16 +271,21 @@ class ConvertBinaryOperationTo2Params : public Transform {
     const IR::Node *postorder(IR::P4Control *a) override;
     const IR::Node *postorder(IR::P4Parser *a) override;
 };
-// Since in dpdk asm, there is no local variable declaraion, we need to collect
+// Since in dpdk asm, there is no local variable declaration, we need to collect
 // all local variables and inject them into the metadata struct.
-class CollectLocalVariableToMetadata : public Transform {
+// Local variables which are of header types are injected into headers struct
+// instead of metadata struct, so that they can be instantiated as headers in the
+// resulting dpdk asm file.
+class CollectLocalVariables : public Transform {
     std::map<const cstring, IR::IndexedVector<IR::Declaration>> locals_map;
     P4::ReferenceMap *refMap;
+    P4::TypeMap* typeMap;
     DpdkProgramStructure *structure;
 
   public:
-    CollectLocalVariableToMetadata(P4::ReferenceMap *refMap, DpdkProgramStructure *structure)
-        : refMap(refMap), structure(structure) {}
+    CollectLocalVariables(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                   DpdkProgramStructure *structure)
+        : refMap(refMap), typeMap(typeMap), structure(structure) {}
     const IR::Node *preorder(IR::P4Program *p) override;
     const IR::Node *postorder(IR::Type_Struct *s) override;
     const IR::Node *postorder(IR::PathExpression *path) override;
