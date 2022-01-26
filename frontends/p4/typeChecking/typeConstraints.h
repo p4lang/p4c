@@ -229,11 +229,11 @@ class TypeConstraints final {
  public:
     TypeVariableSubstitutionVisitor replaceVariables;
 
-    explicit TypeConstraints(const TypeVariableSubstitution* definedVariables) :
-            unification(new TypeUnification(this)), definedVariables(definedVariables),
+    TypeConstraints(const TypeVariableSubstitution* definedVariables, const P4::TypeMap* typeMap):
+            unification(new TypeUnification(this, typeMap)),
+            definedVariables(definedVariables),
             currentSubstitution(new TypeVariableSubstitution()),
             replaceVariables(definedVariables) {}
-
     // Mark this variable as being free.
     void addUnifiableTypeVariable(const IR::ITypeVar* typeVariable)
     { unifiableTypeVariables.insert(typeVariable); }
