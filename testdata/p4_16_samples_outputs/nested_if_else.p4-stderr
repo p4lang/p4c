@@ -1,0 +1,3 @@
+nested_if_else.p4(75): [--Wwarn=unused] warning: 'offset' is unused
+    action if_testing(out bit<16> value, in bit<8> offset) {
+                                                   ^^^^^^

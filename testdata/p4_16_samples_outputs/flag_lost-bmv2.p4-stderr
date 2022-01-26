@@ -1,0 +1,6 @@
+flag_lost-bmv2.p4(69): [--Wwarn=unused] warning: 'dstAddr' is unused
+    action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
+                                  ^^^^^^^
+flag_lost-bmv2.p4(69): [--Wwarn=unused] warning: 'port' is unused
+    action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
+                                                        ^^^^

@@ -243,7 +243,7 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
     if (dest->is<IR::ITypeVar>())
         dest = dest->apply(constraints->replaceVariables)->to<IR::Type>();
 
-    if (TypeMap::equivalent(dest, src))
+    if (typeMap->equivalent(dest, src))
         return true;
 
     if (dest->is<IR::Type_SpecializedCanonical>())
@@ -299,7 +299,8 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
             }
             return true;
         } else if (auto st = src->to<IR::Type_StructLike>()) {
-            if (strct->name != st->name &&
+            if (typeMap->strictStruct &&
+                strct->name != st->name &&
                 !st->is<IR::Type_UnknownStruct>() &&
                 !strct->is<IR::Type_UnknownStruct>())
                 return constraint->reportError(
