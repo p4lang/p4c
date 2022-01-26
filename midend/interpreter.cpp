@@ -858,7 +858,6 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         set(expression, result);
         return;
     }
-
     if (sv->isUnknown() && !expression->is<IR::Cast>()) {
         set(expression, l);
         return;
