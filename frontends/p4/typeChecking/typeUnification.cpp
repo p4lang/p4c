@@ -265,16 +265,21 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
         return true;
     }
 
-    if (TypeMap::equivalent(dest, src))
+    if (typeMap->equivalent(dest, src))
         return true;
 
     if (src->is<IR::Type_Dontcare>() || dest->is<IR::Type_Dontcare>())
         return true;
 
     if (dest->is<IR::Type_ArchBlock>()) {
+        // This case handles the comparison of Type_Parser with P4Parser
+        // (and similarly for controls).
         if (auto cont = src->to<IR::IContainer>()) {
-            constraints->add(constraint->create(dest, cont->getType()));
-            return true;
+            if (cont->getType() != src) {
+                // For Type_Package cont->getType() == const == src, causing an infinite loop
+                constraints->add(constraint->create(dest, cont->getType()));
+                return true;
+            }
         }
         if (!src->is<IR::Type_ArchBlock>())
             return constraint->reportError(constraints->getCurrentSubstitution());
