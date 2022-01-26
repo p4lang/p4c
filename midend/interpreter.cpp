@@ -859,6 +859,16 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         return;
     }
     if (sv->isUnknown()) {
+        if (auto cast = expression->to<IR::Cast>()) {
+            if (cast->destType->is<IR::Type_Boolean>() &&
+                l->is<SymbolicInteger>()) {
+                l = new SymbolicBool(sv->state);
+
+            } else if (cast->destType->is<IR::Type_Bits>() &&
+                       l->is<SymbolicBool>()) {
+                l = new SymbolicInteger(sv->state, cast->destType->to<IR::Type_Bits>());
+            }
+        }
         set(expression, l);
         return;
     }
@@ -1240,5 +1250,4 @@ SymbolicValue* ExpressionEvaluator::evaluate(const IR::Expression* expression, b
     auto result = get(expression);
     return result;
 }
-
 }  // namespace P4
