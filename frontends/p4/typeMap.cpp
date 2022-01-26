@@ -149,6 +149,7 @@ void TypeMap::addSubstitutions(const TypeVariableSubstitution* tvs) {
 bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool strict) const {
     if (!strict)
         strict = strictStruct;
+    LOG3("Checking equivalence of " << left << " and " << right);
     if (left == nullptr)
         return right == nullptr;
     if (right == nullptr)
@@ -272,7 +273,17 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
     }
     if (auto ls = left->to<IR::Type_SpecializedCanonical>()) {
         auto rs = right->to<IR::Type_SpecializedCanonical>();
-        return equivalent(ls->substituted, rs->substituted, strict);
+        if (!equivalent(ls->baseType, rs->baseType, strict))
+            return false;
+        if (ls->arguments->size() != rs->arguments->size())
+            return false;
+        for (size_t i = 0; i < ls->arguments->size(); i++) {
+            auto lp = ls->arguments->at(i);
+            auto rp = rs->arguments->at(i);
+            if (!equivalent(lp, rp, strict))
+                return false;
+        }
+        return true;
     }
     if (auto la = left->to<IR::Type_ActionEnum>()) {
         auto ra = right->to<IR::Type_ActionEnum>();
