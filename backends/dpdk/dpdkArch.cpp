@@ -549,7 +549,6 @@ bool ExpressionUnroll::preorder(const IR::BoolLiteral *) {
 }
 
 const IR::Node *IfStatementUnroll::postorder(IR::SwitchStatement *sw) {
-    std::cout << "Switch statement unroll" << std::endl;
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
     expressionUnrollSanityCheck(sw->expression);
     auto unroller = new LogicalExpressionUnroll(refMap, structure);

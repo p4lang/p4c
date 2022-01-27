@@ -791,29 +791,24 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
 bool ConvertStatementToDpdk::handleConstSwitch(const IR::SwitchStatement *s) {
     auto constSwitchExpr = s->expression->to<IR::Constant>();
     bool constSwitchFlag = false;
-    std::cout << "constSwitchExpr " << constSwitchExpr << std::endl;
     for (auto cL : s->cases) {
-         std::cout << "Iterating over cases " << cL->label << std::endl;
         if (constSwitchExpr->value == cL->label->to<IR::Constant>()->value) {
             constSwitchFlag = true;
-            std::cout << "found const matching label " << cL->label << std::endl;
         }
         // In case of fallthrough, execute body statement of next case label
         if (constSwitchFlag && cL->statement != nullptr) {
             visit(cL->statement);
-            std::cout << "Body found " << cL->label << std::endl;
             break;
         }
     }
     return false;
 }
 
-
 bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
     // Check if switch expression is action_run expression. DPDK has special jump instructions
     // for jumping on action run event.
     auto tc = P4::TableApplySolver::isActionRun(s->expression, refmap, typemap);
-    if (auto constSwitchExpr = s->expression->to<IR::Constant>())
+    if (s->expression->to<IR::Constant>())
         return handleConstSwitch(s);
 
     auto size = s->cases.size();
