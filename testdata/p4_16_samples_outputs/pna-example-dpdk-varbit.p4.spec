@@ -6,13 +6,11 @@ struct ethernet_t {
 }
 
 struct ipv4_base_t {
-	bit<4> version
-	bit<4> ihl
+	bit<8> version_ihl
 	bit<8> diffserv
 	bit<16> totalLen
 	bit<16> identification
-	bit<3> flags
-	bit<13> fragOffset
+	bit<16> flags_fragOffset
 	bit<8> ttl
 	bit<8> protocol
 	bit<16> hdrChecksum
@@ -24,6 +22,11 @@ struct ipv4_option_timestamp_t {
 	bit<8> value
 	bit<8> len
 	varbit<304> data
+}
+
+struct option_t {
+	bit<8> type
+	bit<8> len
 }
 
 struct a1_arg_t {
@@ -56,12 +59,9 @@ struct main_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
 	bit<8> pna_main_output_metadata_class_of_service
 	bit<32> pna_main_output_metadata_output_port
-	bit<8> MainParserT_parser_tmp_1
-	bit<32> MainParserT_parser_tmp_2
-	bit<32> MainParserT_parser_tmp_3
+	bit<32> MainParserT_parser_tmp_0
+	bit<32> MainParserT_parser_tmp_1
 	bit<32> MainParserT_parser_tmp
-	bit<16> MainParserT_parser_tmp16_0
-	bit<8> MainParserT_parser_tmp_0
 	bit<32> MainParserT_parser_tmp_extract_tmp
 }
 metadata instanceof main_metadata_t
@@ -69,6 +69,7 @@ metadata instanceof main_metadata_t
 header ethernet instanceof ethernet_t
 header ipv4_base instanceof ipv4_base_t
 header ipv4_option_timestamp instanceof ipv4_option_timestamp_t
+header option instanceof option_t
 
 action NoAction args none {
 	return
@@ -116,16 +117,14 @@ apply {
 	jmpeq MAINPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4_base
-	jmpeq MAINPARSERIMPL_ACCEPT h.ipv4_base.ihl 0x5
-	lookahead m.MainParserT_parser_tmp_0
-	jmpeq MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP m.MainParserT_parser_tmp_0 0x44
+	jmpeq MAINPARSERIMPL_ACCEPT h.ipv4_base.version_ihl 0x45
+	lookahead h.option
+	jmpeq MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP h.option.type 0x44
 	jmp MAINPARSERIMPL_ACCEPT
-	MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead m.MainParserT_parser_tmp16_0
-	mov m.MainParserT_parser_tmp_1 m.MainParserT_parser_tmp16_0
-	mov m.MainParserT_parser_tmp_2 m.MainParserT_parser_tmp_1
-	mov m.MainParserT_parser_tmp_3 m.MainParserT_parser_tmp_2
-	shl m.MainParserT_parser_tmp_3 0x3
-	mov m.MainParserT_parser_tmp m.MainParserT_parser_tmp_3
+	MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP :	mov m.MainParserT_parser_tmp_0 h.option.len
+	mov m.MainParserT_parser_tmp_1 m.MainParserT_parser_tmp_0
+	shl m.MainParserT_parser_tmp_1 0x3
+	mov m.MainParserT_parser_tmp m.MainParserT_parser_tmp_1
 	add m.MainParserT_parser_tmp 0xfffffff0
 	mov m.MainParserT_parser_tmp_extract_tmp m.MainParserT_parser_tmp
 	shr m.MainParserT_parser_tmp_extract_tmp 0x3

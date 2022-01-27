@@ -7,13 +7,11 @@ struct ethernet_t {
 }
 
 struct ipv4_base_t {
-	bit<4> version
-	bit<4> ihl
+	bit<8> version_ihl
 	bit<8> diffserv
 	bit<16> totalLen
 	bit<16> identification
-	bit<3> flags
-	bit<13> fragOffset
+	bit<16> flags_fragOffset
 	bit<8> ttl
 	bit<8> protocol
 	bit<16> hdrChecksum
@@ -25,6 +23,11 @@ struct ipv4_option_timestamp_t {
 	bit<8> value
 	bit<8> len
 	varbit<304> data
+}
+
+struct option_t {
+	bit<8> type
+	bit<8> len
 }
 
 struct psa_ingress_output_metadata_t {
@@ -66,6 +69,7 @@ struct tbl_set_member_id_arg_t {
 header ethernet instanceof ethernet_t
 header ipv4_base instanceof ipv4_base_t
 header ipv4_option_timestamp instanceof ipv4_option_timestamp_t
+header option instanceof option_t
 
 struct EMPTY {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
@@ -94,12 +98,9 @@ struct EMPTY {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 	bit<32> Ingress_ap_member_id
-	bit<8> IngressParser_parser_tmp_1
-	bit<32> IngressParser_parser_tmp_2
-	bit<32> IngressParser_parser_tmp_3
+	bit<32> IngressParser_parser_tmp_0
+	bit<32> IngressParser_parser_tmp_1
 	bit<32> IngressParser_parser_tmp
-	bit<16> IngressParser_parser_tmp16_0
-	bit<8> IngressParser_parser_tmp_0
 	bit<32> IngressParser_parser_tmp_extract_tmp
 }
 metadata instanceof EMPTY
@@ -169,16 +170,14 @@ apply {
 	jmpeq MYIP_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_IPV4 :	extract h.ipv4_base
-	jmpeq MYIP_ACCEPT h.ipv4_base.ihl 0x5
-	lookahead m.IngressParser_parser_tmp_0
-	jmpeq MYIP_PARSE_IPV4_OPTION_TIMESTAMP m.IngressParser_parser_tmp_0 0x44
+	jmpeq MYIP_ACCEPT h.ipv4_base.version_ihl 0x45
+	lookahead h.option
+	jmpeq MYIP_PARSE_IPV4_OPTION_TIMESTAMP h.option.type 0x44
 	jmp MYIP_ACCEPT
-	MYIP_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead m.IngressParser_parser_tmp16_0
-	mov m.IngressParser_parser_tmp_1 m.IngressParser_parser_tmp16_0
-	mov m.IngressParser_parser_tmp_2 m.IngressParser_parser_tmp_1
-	mov m.IngressParser_parser_tmp_3 m.IngressParser_parser_tmp_2
-	shl m.IngressParser_parser_tmp_3 0x3
-	mov m.IngressParser_parser_tmp m.IngressParser_parser_tmp_3
+	MYIP_PARSE_IPV4_OPTION_TIMESTAMP :	mov m.IngressParser_parser_tmp_0 h.option.len
+	mov m.IngressParser_parser_tmp_1 m.IngressParser_parser_tmp_0
+	shl m.IngressParser_parser_tmp_1 0x3
+	mov m.IngressParser_parser_tmp m.IngressParser_parser_tmp_1
 	add m.IngressParser_parser_tmp 0xfffffff0
 	mov m.IngressParser_parser_tmp_extract_tmp m.IngressParser_parser_tmp
 	shr m.IngressParser_parser_tmp_extract_tmp 0x3

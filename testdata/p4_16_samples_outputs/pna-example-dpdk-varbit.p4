@@ -9,13 +9,11 @@ header ethernet_t {
 }
 
 header ipv4_base_t {
-    bit<4>  version;
-    bit<4>  ihl;
+    bit<8>  version_ihl;
     bit<8>  diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
-    bit<13> fragOffset;
+    bit<16> flags_fragOffset;
     bit<8>  ttl;
     bit<8>  protocol;
     bit<16> hdrChecksum;
@@ -32,10 +30,16 @@ header ipv4_option_timestamp_t {
 struct main_metadata_t {
 }
 
+header option_t {
+    bit<8> type;
+    bit<8> len;
+}
+
 struct headers_t {
     ethernet_t              ethernet;
     ipv4_base_t             ipv4_base;
     ipv4_option_timestamp_t ipv4_option_timestamp;
+    option_t                option;
 }
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t main_meta, in pna_main_parser_input_metadata_t istd) {
@@ -48,19 +52,18 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
     }
     state parse_ipv4 {
         pkt.extract(hdr.ipv4_base);
-        transition select(hdr.ipv4_base.ihl) {
-            4w0x5: accept;
+        transition select(hdr.ipv4_base.version_ihl) {
+            8w0x45: accept;
             default: parse_ipv4_options;
         }
     }
     state parse_ipv4_option_timestamp {
-        bit<16> tmp16 = pkt.lookahead<bit<16>>();
-        bit<8> tmp_len = tmp16[7:0];
-        pkt.extract(hdr.ipv4_option_timestamp, (bit<32>)tmp_len * 8 - 16);
+        pkt.extract(hdr.ipv4_option_timestamp, (bit<32>)hdr.option.len * 8 - 16);
         transition accept;
     }
     state parse_ipv4_options {
-        transition select(pkt.lookahead<bit<8>>()) {
+        hdr.option = pkt.lookahead<option_t>();
+        transition select(hdr.option.type) {
             8w0x44 &&& 8w0xff: parse_ipv4_option_timestamp;
             default: accept;
         }
