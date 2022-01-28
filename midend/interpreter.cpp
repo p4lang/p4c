@@ -860,14 +860,13 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
     }
     if (sv->isUnknown()) {
         if (auto cast = expression->to<IR::Cast>()) {
-            if (cast->destType->is<IR::Type_Boolean>() &&
-                (l->is<SymbolicInteger>() || l->is<SymbolicBool>())) {
+            if (cast->destType->is<IR::Type_Boolean>() && l->is<SymbolicInteger>()) {
                 l = new SymbolicBool(sv->state);
-            } else if (cast->destType->is<IR::Type_Bits>() &&
-                       (l->is<SymbolicBool>() || l->is<SymbolicInteger>())) {
+            } else if (cast->destType->is<IR::Type_Bits>() && l->is<SymbolicBool>()) {
                 l = new SymbolicInteger(sv->state, cast->destType->to<IR::Type_Bits>());
             } else {
-                BUG("%1% unexpected type %2% in cast", cast, cast->destType);
+                BUG_CHECK(!l->is<SymbolicInteger>() || !l->is<SymbolicBool>(),
+                          "%1% unexpected type %2% in cast", cast, cast->destType);
             }
         }
         set(expression, l);
