@@ -45,7 +45,7 @@ namespace Standard {
 /// the Arch enum class defined below), as a convenient way to access
 /// architecture-specific names in the unified code.
 /// V1MODEL2020 is v1model with a version >= 20200408.
-enum class Arch { V1MODEL, PSA, V1MODEL2020 };
+enum class Arch { V1MODEL, PSA, PNA, V1MODEL2020 };
 
 template <Arch arch> struct CounterExtern { };
 template <Arch arch> struct MeterExtern { };
@@ -144,6 +144,33 @@ template<> struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PSA>
     static boost::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
+/// @ref CounterlikeTraits<> specialization for @ref CounterExtern for PNA
+template<> struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PNA> > {
+    static const cstring name() { return "counter"; }
+    static const cstring directPropertyName() {
+        return "pna_direct_counter";
+    }
+    static const cstring typeName() {
+        return "Counter";
+    }
+    static const cstring directTypeName() {
+        return "DirectCounter";
+    }
+    static const cstring sizeParamName() {
+        return "n_counters";
+    }
+    static p4configv1::CounterSpec::Unit mapUnitName(const cstring name) {
+        using p4configv1::CounterSpec;
+        if (name == "PACKETS") return CounterSpec::PACKETS;
+        else if (name == "BYTES") return CounterSpec::BYTES;
+        else if (name == "PACKETS_AND_BYTES") return CounterSpec::BOTH;
+        return CounterSpec::UNSPECIFIED;
+    }
+    // the index of the type parameter for the counter index, in the type
+    // parameter list of the extern type declaration.
+    static boost::optional<size_t> indexTypeParamIdx() { return 1; }
+};
+
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for v1model
 template<> struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL> > {
     static const cstring name() { return "meter"; }
@@ -217,6 +244,32 @@ template<> struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA> >
     static boost::optional<size_t> indexTypeParamIdx() { return 0; }
 };
 
+/// @ref CounterlikeTraits<> specialization for @ref MeterExtern for PNA
+template<> struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PNA> > {
+    static const cstring name() { return "meter"; }
+    static const cstring directPropertyName() {
+        return "pna_direct_meter";
+    }
+    static const cstring typeName() {
+        return "Meter";
+    }
+    static const cstring directTypeName() {
+        return "DirectMeter";
+    }
+    static const cstring sizeParamName() {
+        return "n_meters";
+    }
+    static p4configv1::MeterSpec::Unit mapUnitName(const cstring name) {
+        using p4configv1::MeterSpec;
+        if (name == "PACKETS") return MeterSpec::PACKETS;
+        else if (name == "BYTES") return MeterSpec::BYTES;
+        return MeterSpec::UNSPECIFIED;
+    }
+    // the index of the type parameter for the meter index, in the type
+    // parameter list of the extern type declaration.
+    static boost::optional<size_t> indexTypeParamIdx() { return 0; }
+};
+
 }  // namespace Helpers
 
 /// Declarations specific to standard architectures (v1model & PSA).
@@ -238,6 +291,14 @@ struct PSAArchHandlerBuilder : public P4RuntimeArchHandlerBuilderIface {
         const IR::ToplevelBlock* evaluatedProgram) const override;
 };
 
+/// The architecture handler builder implementation for PSA.
+struct PNAArchHandlerBuilder : public P4RuntimeArchHandlerBuilderIface {
+    P4RuntimeArchHandlerIface* operator()(
+        ReferenceMap* refMap,
+        TypeMap* typeMap,
+        const IR::ToplevelBlock* evaluatedProgram) const override;
+};
+
 /// The architecture handler builder implementation for UBPF.
 struct UBPFArchHandlerBuilder : public P4RuntimeArchHandlerBuilderIface {
      P4RuntimeArchHandlerIface* operator()(
@@ -247,7 +308,7 @@ struct UBPFArchHandlerBuilder : public P4RuntimeArchHandlerBuilderIface {
 };
 
 
-/// Extends @ref P4RuntimeSymbolType for the standard (v1model & PSA) extern
+/// Extends @ref P4RuntimeSymbolType for the standard (v1model, PSA & PNA) extern
 /// types.
 class SymbolType : public P4RuntimeSymbolType {
  public:
@@ -313,6 +374,17 @@ template<> struct ActionProfileTraits<Arch::PSA> {
     static const cstring sizeParamName() { return "size"; }
 };
 
+template<> struct ActionProfileTraits<Arch::PNA> {
+    static const cstring name() { return "action profile"; }
+    static const cstring propertyName() {
+        return "pna_implementation";
+    }
+    static const cstring typeName() {
+        return "ActionProfile";
+    }
+    static const cstring sizeParamName() { return "size"; }
+};
+
 /// Traits for the action selector extern, must be specialized for v1model and
 /// PSA. Inherits from ActionProfileTraits because of their similarities.
 template <Arch arch> struct ActionSelectorTraits;
@@ -333,6 +405,13 @@ template<> struct ActionSelectorTraits<Arch::V1MODEL2020> :
 };
 
 template<> struct ActionSelectorTraits<Arch::PSA> : public ActionProfileTraits<Arch::PSA> {
+    static const cstring name() { return "action selector"; }
+    static const cstring typeName() {
+        return "ActionSelector";
+    }
+};
+
+template<> struct ActionSelectorTraits<Arch::PNA> : public ActionProfileTraits<Arch::PNA> {
     static const cstring name() { return "action selector"; }
     static const cstring typeName() {
         return "ActionSelector";
@@ -378,7 +457,19 @@ template<> struct RegisterTraits<Arch::PSA> {
     static boost::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
-/// The information about a digest call which is needed to serialize it.
+template<> struct RegisterTraits<Arch::PNA> {
+    static const cstring name() { return "register"; }
+    static const cstring typeName() {
+        return "Register";
+    }
+    static const cstring sizeParamName() { return "size"; }
+    static size_t dataTypeParamIdx() { return 0; }
+    // the index of the type parameter for the register index, in the type
+    // parameter list of the extern type declaration.
+    static boost::optional<size_t> indexTypeParamIdx() { return 1; }
+};
+
+//// The information about a digest call which is needed to serialize it.
 struct Digest {
     const cstring name;       // The fully qualified external name of the digest
                               // *data* - in P4-14, the field list name, or in
