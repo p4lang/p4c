@@ -196,7 +196,7 @@ std::ostream &IR::DpdkApplyStatement::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkLearnStatement::toSpec(std::ostream &out) const {
-    out << "learn " << action << " " << argument;
+    out << "learn " << action << " " << DPDK::toStr(argument);
     return out;
 }
 
