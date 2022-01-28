@@ -205,6 +205,7 @@ class RewriteAllParsers : public Transform {
             arguments->push_back(
                 new IR::Argument(new IR::BoolLiteral(IR::Type::Boolean::get(), false)));
             arguments->push_back(new IR::Argument(new IR::Member(
+                new IR::Type_Error(IR::ID("error")),
                 new IR::TypeNameExpression(new IR::Type_Name(IR::ID("error"))),
                     IR::ID("StackOutOfBounds"))));
             IR::IndexedVector<IR::StatOrDecl> components;
