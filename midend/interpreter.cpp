@@ -332,22 +332,6 @@ void SymbolicHeaderUnion::setValid(bool v, cstring field) {
       if (f->name.name != field)
         fieldValue[f->name.name]->setAllUnknown();
     }
-    for (auto f : type->to<IR::Type_StructLike>()->fields) {
-      if (fieldValue[f->name.name]->to<SymbolicHeader>()->valid->value) {
-        v = true;
-        break;
-      }
-    }
-  } else {
-    if (!v) {
-      for (auto f : type->to<IR::Type_StructLike>()->fields) {
-        fieldValue[f->name.name]->setAllUnknown();
-      }
-    } else {
-      for (auto f : type->to<IR::Type_StructLike>()->fields) {
-        fieldValue[f->name.name]->to<SymbolicHeader>()->setValid(v);
-      }
-    }
   }
   valid = new SymbolicBool(v);
 }
@@ -519,7 +503,7 @@ void SymbolicArray::shift(int amount) {
                 values[i]->to<SymbolicHeader>()->setValid(false);
             }
             if (values[i]->is<SymbolicHeaderUnion>()) {
-              values[i]->to<SymbolicHeaderUnion>()->setValid(false, nullptr);
+              values[i]->to<SymbolicHeaderUnion>()->setValid(false);
             }
         }
     } else if (amount > 0) {
@@ -530,7 +514,7 @@ void SymbolicArray::shift(int amount) {
                 values[i]->to<SymbolicHeader>()->setValid(false);
             }
             if (values[i]->is<SymbolicHeaderUnion>()) {
-              values[i]->to<SymbolicHeaderUnion>()->setValid(false, nullptr);
+              values[i]->to<SymbolicHeaderUnion>()->setValid(false);
             }
         }
     }
@@ -1129,7 +1113,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
         cstring name = bim->name.name;
         if (name == IR::Type_Header::setInvalid ||
             name == IR::Type_Header::setValid) {
-          const IR::Expression *node;
+          const IR::Expression *node = nullptr;
           cstring memberName = nullptr;
           if (auto member = expression->method->to<IR::Member>()
                                 ->expr->to<IR::Member>()) {
@@ -1138,6 +1122,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
           } else if (auto expr = expression->method->to<IR::Member>()->expr) {
             node = expr;
           }
+          CHECK_NULL(node);
           auto structVar = get(node);
           if (auto hv = structVar->to<SymbolicHeader>()) {
             hv->setValid(name == IR::Type_Header::setValid);
