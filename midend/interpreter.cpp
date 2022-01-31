@@ -314,43 +314,42 @@ SymbolicHeaderUnion::SymbolicHeaderUnion(const IR::Type_HeaderUnion *type,
                                          const SymbolicValueFactory *factory)
     : SymbolicStruct(type, uninitialized, factory),
       valid(new SymbolicBool(false)) {
-  auto fieldsSize = type->checkedTo<IR::Type_StructLike>()->fields.size();
   auto fieldsClone = fieldValue;
   bool validityFlag = false;
   for (auto f : type->to<IR::Type_StructLike>()->fields) {
     if (fieldsClone[f->name.name]->to<SymbolicHeader>()->valid->value) {
       validityFlag = true;
+      break;
     }
   }
   valid = new SymbolicBool(validityFlag);
 }
 
-void SymbolicHeaderUnion::setValid(bool v) {
-  if (!v) {
+void SymbolicHeaderUnion::setValid(bool v, cstring field) {
+  if (field) {
+    fieldValue[field]->to<SymbolicHeader>()->setValid(v);
     for (auto f : type->to<IR::Type_StructLike>()->fields) {
-      fieldValue[f->name.name]->setAllUnknown();
+      if (f->name.name != field)
+        fieldValue[f->name.name]->setAllUnknown();
     }
-  } else {
-    for (auto f : type->to<IR::Type_StructLike>()->fields) {
-      fieldValue[f->name.name]->to<SymbolicHeader>()->setValid(v);
-    }
-  }
-    valid = new SymbolicBool(v);
-}
-
-void SymbolicHeaderUnion::setFieldValid(bool v, cstring field) {
-  fieldValue[field]->to<SymbolicHeader>()->setValid(v);
-  if (v) {
-    valid = new SymbolicBool(true);
-  } else {
-    auto fieldsSize = type->to<IR::Type_StructLike>()->fields.size();
     for (auto f : type->to<IR::Type_StructLike>()->fields) {
       if (fieldValue[f->name.name]->to<SymbolicHeader>()->valid->value) {
         v = true;
+        break;
       }
     }
-    valid = new SymbolicBool(v);
+  } else {
+    if (!v) {
+      for (auto f : type->to<IR::Type_StructLike>()->fields) {
+        fieldValue[f->name.name]->setAllUnknown();
+      }
+    } else {
+      for (auto f : type->to<IR::Type_StructLike>()->fields) {
+        fieldValue[f->name.name]->to<SymbolicHeader>()->setValid(v);
+      }
+    }
   }
+  valid = new SymbolicBool(v);
 }
 
 SymbolicValue* SymbolicHeaderUnion::get(const IR::Node* node, cstring field) const {
@@ -520,7 +519,7 @@ void SymbolicArray::shift(int amount) {
                 values[i]->to<SymbolicHeader>()->setValid(false);
             }
             if (values[i]->is<SymbolicHeaderUnion>()) {
-                values[i]->to<SymbolicHeaderUnion>()->setValid(false);
+              values[i]->to<SymbolicHeaderUnion>()->setValid(false, nullptr);
             }
         }
     } else if (amount > 0) {
@@ -531,7 +530,7 @@ void SymbolicArray::shift(int amount) {
                 values[i]->to<SymbolicHeader>()->setValid(false);
             }
             if (values[i]->is<SymbolicHeaderUnion>()) {
-                values[i]->to<SymbolicHeaderUnion>()->setValid(false);
+              values[i]->to<SymbolicHeaderUnion>()->setValid(false, nullptr);
             }
         }
     }
@@ -1140,27 +1139,16 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
             node = expr;
           }
           auto structVar = get(node);
-          if (structVar->is<SymbolicHeader>()) {
-            auto header = structVar->to<SymbolicHeader>();
-            header->setValid(name == IR::Type_Header::setValid);
-            set(expression, SymbolicVoid::get());
-            return;
-          } else if (structVar->is<SymbolicHeaderUnion>()) {
-            auto headerUnion = structVar->to<SymbolicHeaderUnion>();
-            if (memberName) {
-              headerUnion->setFieldValid(name == IR::Type_Header::setValid,
-                                         memberName);
-              set(expression, SymbolicVoid::get());
-              return;
-            } else {
-              headerUnion->setValid(name == IR::Type_Header::setValid);
-              set(expression, SymbolicVoid::get());
-              return;
-            }
+          if (auto hv = structVar->to<SymbolicHeader>()) {
+            hv->setValid(name == IR::Type_Header::setValid);
+          } else if (auto headerUnion = structVar->to<SymbolicHeaderUnion>()) {
+            headerUnion->setValid(name == IR::Type_Header::setValid,
+                                  memberName);
           }
+          set(expression, SymbolicVoid::get());
+          return;
         } else if (name == IR::Type_Stack::push_front ||
                    name == IR::Type_Stack::pop_front) {
-          auto base = get(bim->appliedTo);
           BUG_CHECK(base->is<SymbolicArray>(), "%1%: expected an array", base);
           auto array = base->to<SymbolicArray>();
           BUG_CHECK(expression->arguments->size() == 1,
