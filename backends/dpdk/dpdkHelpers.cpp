@@ -27,6 +27,9 @@ void ConvertStatementToDpdk::process_relation_operation(const IR::Expression* ds
     auto true_label = refmap->newName("label_true");
     auto false_label = refmap->newName("label_false");
     auto end_label = refmap->newName("label_end");
+    cstring label1 = false_label;
+    cstring label2 = true_label;
+    bool condNegated = false;
     if (op->is<IR::Equ>()) {
         add_instr(new IR::DpdkJmpEqualStatement(true_label, op->left, op->right));
     } else if (op->is<IR::Neq>()) {
@@ -38,19 +41,27 @@ void ConvertStatementToDpdk::process_relation_operation(const IR::Expression* ds
     } else if (op->is<IR::Leq>()) {
         /* Dpdk target does not support the condition Leq, so negate the condition and jump
            on false label*/
+        condNegated = true;
         add_instr(new IR::DpdkJmpGreaterStatement(false_label, op->left, op->right));
     } else if (op->is<IR::Geq>()) {
         /* Dpdk target does not support the condition Geq, so negate the condition and jump
            on false label*/
+        condNegated = true;
         add_instr(new IR::DpdkJmpLessStatement(false_label, op->left, op->right));
     } else {
         BUG("%1% not implemented.", op);
     }
-    add_instr(new IR::DpdkLabelStatement(false_label));
-    add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(false)));
+    if (condNegated) {
+        // Since the condition is negated, true and false blocks should also be swapped
+        label1 = true_label;
+        label2 = false_label;
+    }
+
+    add_instr(new IR::DpdkLabelStatement(label1));
+    add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(condNegated)));
     add_instr(new IR::DpdkJmpLabelStatement(end_label));
-    add_instr(new IR::DpdkLabelStatement(true_label));
-    add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(true)));
+    add_instr(new IR::DpdkLabelStatement(label2));
+    add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(!condNegated)));
     add_instr(new IR::DpdkLabelStatement(end_label));
 }
 

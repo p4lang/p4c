@@ -20,6 +20,7 @@ namespace P4 {
 
 void ParameterSubstitution::add(
     const IR::Parameter* parameter, const IR::Argument* value) {
+    CHECK_NULL(value);
     LOG2("Mapping " << dbp(parameter) << " to " << dbp(value));
     cstring name = parameter->name.name;
     auto par = get(parametersByName, name);

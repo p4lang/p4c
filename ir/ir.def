@@ -102,6 +102,7 @@ class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, I
     Type_Method getConstructorMethodType() const override;
     ParameterList getConstructorParameters() const override { return constructorParams; }
     void checkDuplicates() const;
+    Type getType() const override { return this->type; }
 #apply
     validate {
         if (!(name == type->name))
@@ -133,6 +134,7 @@ class P4Control : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, 
     IDeclaration getDeclByName(cstring name) const override {
         return controlLocals.getDeclaration(name); }
     ParameterList getConstructorParameters() const override { return constructorParams; }
+    Type getType() const override { return this->type; }
 #apply
     validate {
         if (!(name == type->name))
