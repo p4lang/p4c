@@ -104,6 +104,7 @@ interface ITypeVar {
 
 /// Implemented by P4Parser, P4Control and Type_Package
 interface IContainer : IMayBeGenericType, IDeclaration, IFunctional {
+    virtual Type getType() const = 0;
     /// The type of the constructor as a method
     virtual Type_Method getConstructorMethodType() const = 0;
     virtual ParameterList getConstructorParameters() const = 0;

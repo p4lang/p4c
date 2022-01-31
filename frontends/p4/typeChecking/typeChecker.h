@@ -85,7 +85,7 @@ class TypeInference : public Transform {
     const IR::Node* initialNode;
 
  public:
-    // @param readOnly If ftrue it will assert that it behaves like
+    // @param readOnly If true it will assert that it behaves like
     //        an Inspector.
     TypeInference(ReferenceMap* refMap, TypeMap* typeMap,
                   bool readOnly = false, bool checkArrays = true);

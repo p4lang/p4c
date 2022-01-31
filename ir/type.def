@@ -398,6 +398,7 @@ abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated, ISimp
 }
 
 class Type_Package : Type_ArchBlock, IContainer, ISimpleNamespace {
+    Type getType() const override { return this; }
     ParameterList constructorParams;
     Type_Method getConstructorMethodType() const override;
     ParameterList getConstructorParameters() const override { return constructorParams; }
@@ -493,16 +494,7 @@ class Type_SpecializedCanonical : Type {
         BUG_CHECK(substituted->is<IMayBeGenericType>(), "substituted %1% is not generic", substituted);
     }
     const Type* getP4Type() const override;
-    toString{
-        cstring result = baseType->toString() + "<";
-        cstring sep = "";
-        for (auto t : *arguments) {
-            result += sep + t->toString();
-            sep = ", ";
-        }
-        result += ">";
-        return result;
-    }
+    toString{ return baseType->toString() + "<...>"; }
 }
 
 /// A declaration that consists of just an identifier, e.g., an enum member

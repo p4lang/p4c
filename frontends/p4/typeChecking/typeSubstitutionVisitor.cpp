@@ -31,10 +31,10 @@ bool TypeOccursVisitor::preorder(const IR::Type_InfInt* typeVariable) {
 }
 
 const IR::Node* TypeVariableSubstitutionVisitor::preorder(IR::TypeParameters *tps) {
-    // remove all variables that were substituted
     for (auto it = tps->parameters.begin(); it != tps->parameters.end();) {
         const IR::Type* type = bindings->lookup(*it);
         if (type != nullptr && !replace) {
+            // remove variables that are substituted
             LOG3("Removing from generic parameters " << *it);
             it = tps->parameters.erase(it);
         } else {

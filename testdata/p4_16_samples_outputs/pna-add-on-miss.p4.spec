@@ -65,7 +65,7 @@ action next_hop args instanceof next_hop_arg_t {
 }
 
 action add_on_miss_action args none {
-	learn next_hop 0
+	learn next_hop 0x0
 	return
 }
 
@@ -78,11 +78,11 @@ action next_hop2 args instanceof next_hop2_arg_t {
 action add_on_miss_action2 args none {
 	mov m.MainControlT_tmp 0x0
 	mov m.MainControlT_tmp_0 0x4d2
-	learn next_hop m.MainControlT_tmp;
+	learn next_hop m.MainControlT_tmp
 	return
 }
 
-learner ipv4_da_0 {
+learner ipv4_da {
 	key {
 		h.ipv4.dstAddr
 	}
@@ -95,7 +95,7 @@ learner ipv4_da_0 {
 	timeout 120
 }
 
-learner ipv4_da2_0 {
+learner ipv4_da2 {
 	key {
 		h.ipv4.dstAddr
 	}
