@@ -1110,19 +1110,19 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
         auto bim = mi->to<BuiltInMethod>();
         auto base = get(bim->appliedTo);
         cstring name = bim->name.name;
+        const IR::Expression *node = nullptr;
+        cstring memberName = nullptr;
+        if (auto member = expression->method->to<IR::Member>()
+                                ->expr->to<IR::Member>()) {
+            node = member->expr;
+            memberName = member->member.name;
+        } else if (auto expr = expression->method->to<IR::Member>()->expr) {
+            node = expr;
+        }
+        CHECK_NULL(node);
+        auto structVar = get(node);
         if (name == IR::Type_Header::setInvalid ||
             name == IR::Type_Header::setValid) {
-            const IR::Expression *node = nullptr;
-            cstring memberName = nullptr;
-            if (auto member = expression->method->to<IR::Member>()
-                                    ->expr->to<IR::Member>()) {
-                node = member->expr;
-                memberName = member->member.name;
-            } else if (auto expr = expression->method->to<IR::Member>()->expr) {
-                node = expr;
-            }
-            CHECK_NULL(node);
-            auto structVar = get(node);
             if (auto hv = structVar->to<SymbolicHeader>()) {
                 hv->setValid(name == IR::Type_Header::setValid);
             } else if (auto headerUnion = structVar->to<SymbolicHeaderUnion>()) {
@@ -1135,24 +1135,35 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
                    name == IR::Type_Stack::pop_front) {
             BUG_CHECK(base->is<SymbolicArray>(), "%1%: expected an array", base);
             auto array = base->to<SymbolicArray>();
-            BUG_CHECK(expression->arguments->size() == 1,
-                        "%1%: not one argument?", expression);
+            BUG_CHECK(expression->arguments->size() == 1, "%1%: not one argument?", expression);
             auto amount = get(expression->arguments->at(0)->expression);
-            BUG_CHECK(amount->is<SymbolicInteger>(), "%1%: expected an integer",
-                        amount);
+            BUG_CHECK(amount->is<SymbolicInteger>(), "%1%: expected an integer", amount);
             auto ac = amount->to<SymbolicInteger>();
             if (ac->isUnknown()) {
                 array->setAllUnknown();
                 return;
             }
-            BUG_CHECK(amount->is<SymbolicInteger>(), "%1%: expected an integer",
-                        amount);
+            BUG_CHECK(amount->is<SymbolicInteger>(), "%1%: expected an integer", amount);
             int amt = amount->to<SymbolicInteger>()->constant->asInt();
             if (name == IR::Type_Stack::pop_front)
                 amt = -amt;
             array->shift(amt);
             set(expression, SymbolicVoid::get());
             return;
+        } else {
+            BUG_CHECK(name == IR::Type_Header::isValid,
+                      "%1%: unexpected method", bim->name);
+            if (auto hv = structVar->to<SymbolicHeader>()) {
+                auto v = hv->valid;
+                set(expression, v);
+                return;
+            } else if (auto huv = structVar->to<SymbolicHeaderUnion>()) {
+                auto v = huv->valid;
+                set(expression, v);
+                return;
+            } else {
+                BUG("Unexpected expression (%1%) type: %2%", base, base->type);
+            }
         }
     }
 
