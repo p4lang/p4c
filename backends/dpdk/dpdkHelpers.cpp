@@ -223,7 +223,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     key_0 =
                     SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr);
                     ...
-		    ...
+                    ...
                 }
 
                 This is replaced by an assignment of the resultant value into a temporary based on
@@ -791,6 +791,13 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
     // for jumping on action run event.
     auto tc = P4::TableApplySolver::isActionRun(s->expression, refmap, typemap);
 
+    // At this point in compilation, the expression in switch is simplified to the extent
+    // that there is no side effect, so when the case statements are empty, we can safely
+    // return without generating any instructions for the switch block.
+    if (s->cases.empty()) {
+        return false;
+    }
+
     auto size = s->cases.size();
     std::vector <cstring> labels;
     cstring label;
@@ -803,8 +810,7 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
         auto caseLabel = s->cases.at(i);
         label = refmap->newName("label_switch");
         if (tc != nullptr) {
-            auto pe = caseLabel->label->to<IR::PathExpression>();
-            CHECK_NULL(pe);
+            auto pe = caseLabel->label->checkedTo<IR::PathExpression>();
             add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
         } else {
             add_instr(new IR::DpdkJmpEqualStatement(label, s->expression, caseLabel->label));
@@ -819,8 +825,7 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
     } else {
         label = refmap->newName("label_switch");
         if (tc != nullptr) {
-            auto pe = s->cases.at(size-1)->label->to<IR::PathExpression>();
-            CHECK_NULL(pe);
+            auto pe = s->cases.at(size-1)->label->checkedTo<IR::PathExpression>();
             add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
         } else {
             add_instr(new IR::DpdkJmpEqualStatement(label, s->expression,

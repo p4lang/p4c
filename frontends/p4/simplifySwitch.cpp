@@ -43,7 +43,7 @@ const IR::Node* DoSimplifySwitch::postorder(IR::SwitchStatement* stat) {
         return stat;
     bool foundMatch = false;
     for (auto ss : stat->cases) {
-        if (matches(ss->label, stat->expression)){
+        if (matches(ss->label, stat->expression)) {
             foundMatch = true;
         }
         // In case of fallthrough, return next available statement body
