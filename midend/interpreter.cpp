@@ -337,10 +337,10 @@ void SymbolicHeaderUnion::setValid(bool v, cstring field) {
 }
 
 SymbolicValue* SymbolicHeaderUnion::get(const IR::Node* node, cstring field) const {
-  if (valid->isKnown() && !valid->value)
-    return new SymbolicStaticError(node,
+    if (valid->isKnown() && !valid->value)
+      return new SymbolicStaticError(node,
                                    "Reading field from invalid header union");
-  return SymbolicStruct::get(node, field);
+    return SymbolicStruct::get(node, field);
 }
 
 void SymbolicHeaderUnion::setAllUnknown() {
@@ -503,7 +503,7 @@ void SymbolicArray::shift(int amount) {
                 values[i]->to<SymbolicHeader>()->setValid(false);
             }
             if (values[i]->is<SymbolicHeaderUnion>()) {
-              values[i]->to<SymbolicHeaderUnion>()->setValid(false);
+                values[i]->to<SymbolicHeaderUnion>()->setValid(false);
             }
         }
     } else if (amount > 0) {
@@ -514,7 +514,7 @@ void SymbolicArray::shift(int amount) {
                 values[i]->to<SymbolicHeader>()->setValid(false);
             }
             if (values[i]->is<SymbolicHeaderUnion>()) {
-              values[i]->to<SymbolicHeaderUnion>()->setValid(false);
+                values[i]->to<SymbolicHeaderUnion>()->setValid(false);
             }
         }
     }
@@ -1113,47 +1113,47 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
         cstring name = bim->name.name;
         if (name == IR::Type_Header::setInvalid ||
             name == IR::Type_Header::setValid) {
-          const IR::Expression *node = nullptr;
-          cstring memberName = nullptr;
-          if (auto member = expression->method->to<IR::Member>()
-                                ->expr->to<IR::Member>()) {
-            node = member->expr;
-            memberName = member->member.name;
-          } else if (auto expr = expression->method->to<IR::Member>()->expr) {
-            node = expr;
-          }
-          CHECK_NULL(node);
-          auto structVar = get(node);
-          if (auto hv = structVar->to<SymbolicHeader>()) {
-            hv->setValid(name == IR::Type_Header::setValid);
-          } else if (auto headerUnion = structVar->to<SymbolicHeaderUnion>()) {
-            headerUnion->setValid(name == IR::Type_Header::setValid,
-                                  memberName);
-          }
-          set(expression, SymbolicVoid::get());
-          return;
+            const IR::Expression *node = nullptr;
+            cstring memberName = nullptr;
+            if (auto member = expression->method->to<IR::Member>()
+                                    ->expr->to<IR::Member>()) {
+                node = member->expr;
+                memberName = member->member.name;
+            } else if (auto expr = expression->method->to<IR::Member>()->expr) {
+                node = expr;
+            }
+            CHECK_NULL(node);
+            auto structVar = get(node);
+            if (auto hv = structVar->to<SymbolicHeader>()) {
+                hv->setValid(name == IR::Type_Header::setValid);
+            } else if (auto headerUnion = structVar->to<SymbolicHeaderUnion>()) {
+                headerUnion->setValid(name == IR::Type_Header::setValid,
+                                    memberName);
+            }
+            set(expression, SymbolicVoid::get());
+            return;
         } else if (name == IR::Type_Stack::push_front ||
                    name == IR::Type_Stack::pop_front) {
-          BUG_CHECK(base->is<SymbolicArray>(), "%1%: expected an array", base);
-          auto array = base->to<SymbolicArray>();
-          BUG_CHECK(expression->arguments->size() == 1,
-                    "%1%: not one argument?", expression);
-          auto amount = get(expression->arguments->at(0)->expression);
-          BUG_CHECK(amount->is<SymbolicInteger>(), "%1%: expected an integer",
-                    amount);
-          auto ac = amount->to<SymbolicInteger>();
-          if (ac->isUnknown()) {
-            array->setAllUnknown();
+            BUG_CHECK(base->is<SymbolicArray>(), "%1%: expected an array", base);
+            auto array = base->to<SymbolicArray>();
+            BUG_CHECK(expression->arguments->size() == 1,
+                        "%1%: not one argument?", expression);
+            auto amount = get(expression->arguments->at(0)->expression);
+            BUG_CHECK(amount->is<SymbolicInteger>(), "%1%: expected an integer",
+                        amount);
+            auto ac = amount->to<SymbolicInteger>();
+            if (ac->isUnknown()) {
+                array->setAllUnknown();
+                return;
+            }
+            BUG_CHECK(amount->is<SymbolicInteger>(), "%1%: expected an integer",
+                        amount);
+            int amt = amount->to<SymbolicInteger>()->constant->asInt();
+            if (name == IR::Type_Stack::pop_front)
+                amt = -amt;
+            array->shift(amt);
+            set(expression, SymbolicVoid::get());
             return;
-          }
-          BUG_CHECK(amount->is<SymbolicInteger>(), "%1%: expected an integer",
-                    amount);
-          int amt = amount->to<SymbolicInteger>()->constant->asInt();
-          if (name == IR::Type_Stack::pop_front)
-            amt = -amt;
-          array->shift(amt);
-          set(expression, SymbolicVoid::get());
-          return;
         }
     }
 
