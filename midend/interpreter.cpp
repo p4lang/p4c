@@ -311,35 +311,34 @@ void SymbolicStruct::dbprint(std::ostream& out) const {
 
 SymbolicHeaderUnion::SymbolicHeaderUnion(const IR::Type_HeaderUnion *type,
                                          bool uninitialized,
-                                         const SymbolicValueFactory *factory)
-    : SymbolicStruct(type, uninitialized, factory),
-      valid(new SymbolicBool(false)) {
-  auto fieldsClone = fieldValue;
-  bool validityFlag = false;
-  for (auto f : type->to<IR::Type_StructLike>()->fields) {
-    if (fieldsClone[f->name.name]->to<SymbolicHeader>()->valid->value) {
-      validityFlag = true;
-      break;
-    }
-  }
-  valid = new SymbolicBool(validityFlag);
+                                         const SymbolicValueFactory *factory) :
+        SymbolicStruct(type, uninitialized, factory),
+        valid(new SymbolicBool(false)) {
+            auto fieldsClone = fieldValue;
+            bool validityFlag = false;
+            for (auto f : type->to<IR::Type_StructLike>()->fields) {
+                if (fieldsClone[f->name.name]->to<SymbolicHeader>()->valid->value) {
+                    validityFlag = true;
+                    break;
+                }
+            }
+            valid = new SymbolicBool(validityFlag);
 }
 
 void SymbolicHeaderUnion::setValid(bool v, cstring field) {
-  if (field) {
-    fieldValue[field]->to<SymbolicHeader>()->setValid(v);
-    for (auto f : type->to<IR::Type_StructLike>()->fields) {
-      if (f->name.name != field)
-        fieldValue[f->name.name]->setAllUnknown();
+    if (field) {
+        fieldValue[field]->to<SymbolicHeader>()->setValid(v);
+        for (auto f : type->to<IR::Type_StructLike>()->fields) {
+            if (f->name.name != field)
+                fieldValue[f->name.name]->setAllUnknown();
+        }
     }
-  }
-  valid = new SymbolicBool(v);
+    valid = new SymbolicBool(v);
 }
 
 SymbolicValue* SymbolicHeaderUnion::get(const IR::Node* node, cstring field) const {
     if (valid->isKnown() && !valid->value)
-      return new SymbolicStaticError(node,
-                                   "Reading field from invalid header union");
+        return new SymbolicStaticError(node,"Reading field from invalid header union");
     return SymbolicStruct::get(node, field);
 }
 
