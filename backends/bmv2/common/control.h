@@ -444,6 +444,8 @@ class ControlConverter : public Inspector {
             for (auto k : keyset->components) {
                 auto key = new Util::JsonObject();
                 auto tableKey = table->getKey()->keyElements.at(keyIndex);
+                BUG_CHECK(!tableKey->expression->type->is<IR::Type_Unknown>(),
+                          "Can't detect width of the table's key %1%", tableKey->expression);
                 auto keyWidth = tableKey->expression->type->width_bits();
                 auto k8 = ROUNDUP(keyWidth, 8);
                 auto matchType = getKeyMatchType(tableKey);
