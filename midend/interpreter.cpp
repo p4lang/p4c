@@ -309,9 +309,9 @@ void SymbolicStruct::dbprint(std::ostream& out) const {
     out << " }";
 }
 
-SymbolicHeaderUnion::SymbolicHeaderUnion(const IR::Type_HeaderUnion *type,
+SymbolicHeaderUnion::SymbolicHeaderUnion(const IR::Type_HeaderUnion* type,
                                          bool uninitialized,
-                                         const SymbolicValueFactory *factory) :
+                                         const SymbolicValueFactory* factory) :
         SymbolicStruct(type, uninitialized, factory),
         valid(new SymbolicBool(false)) {
             auto fieldsClone = fieldValue;
@@ -1110,7 +1110,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
         auto bim = mi->to<BuiltInMethod>();
         auto base = get(bim->appliedTo);
         cstring name = bim->name.name;
-        const IR::Expression *node = nullptr;
+        const IR::Expression* node = nullptr;
         cstring memberName = nullptr;
         if (auto member = expression->method->to<IR::Member>()
                                 ->expr->to<IR::Member>()) {
