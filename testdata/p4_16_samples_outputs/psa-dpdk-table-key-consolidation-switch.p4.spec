@@ -166,12 +166,12 @@ apply {
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_TCP :	extract h.tcp
 	MYIP_ACCEPT :	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	jmpa LABEL_ACTION a1
-	jmpa LABEL_ACTION_0 a2
+	jmpa LABEL_SWITCH a1
+	jmpa LABEL_SWITCH_0 a2
 	jmp LABEL_ENDSWITCH
-	LABEL_ACTION :	table foo
+	LABEL_SWITCH :	table foo
 	jmp LABEL_ENDSWITCH
-	LABEL_ACTION_0 :	table bar
+	LABEL_SWITCH_0 :	table bar
 	LABEL_ENDSWITCH :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port

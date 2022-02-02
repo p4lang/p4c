@@ -94,7 +94,6 @@ struct user_meta_t {
 	bit<16> local_metadata_data
 	bit<16> local_metadata_data1
 	bit<16> Ingress_tmp_0
-	bit<16> Ingress_switch_0_key
 	bit<48> Ingress_tbl_ethernet_srcAddr
 	bit<16> tmpMask
 	bit<8> tmpMask_0
@@ -116,18 +115,6 @@ action a1 args instanceof a1_arg_t {
 
 action a2 args instanceof a2_arg_t {
 	mov h.ethernet.etherType t.param
-	return
-}
-
-action switch_0_case args none {
-	return
-}
-
-action switch_0_case_0 args none {
-	return
-}
-
-action switch_0_case_1 args none {
 	return
 }
 
@@ -164,20 +151,6 @@ table bar {
 }
 
 
-table switch_0_table {
-	key {
-		m.Ingress_switch_0_key exact
-	}
-	actions {
-		switch_0_case
-		switch_0_case_0
-		switch_0_case_1
-	}
-	default_action switch_0_case_1 args none 
-	size 0x10000
-}
-
-
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
@@ -194,24 +167,17 @@ apply {
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_TCP :	extract h.tcp
 	MYIP_ACCEPT :	mov m.Ingress_tmp_0 0x10
-	mov m.Ingress_switch_0_key 0x10
-	jmpa LABEL_ACTION switch_0_case
-	jmpa LABEL_ACTION_0 switch_0_case_0
-	jmpa LABEL_ENDSWITCH switch_0_case_1
+	mov m.Ingress_tmp_0 0x1
+	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	jmpa LABEL_SWITCH a1
+	jmpa LABEL_SWITCH_0 a2
 	jmp LABEL_ENDSWITCH
-	LABEL_ACTION :	mov m.Ingress_tmp_0 0x1
-	jmp LABEL_ENDSWITCH
-	LABEL_ACTION_0 :	mov m.Ingress_tmp_0 0x2
-	LABEL_ENDSWITCH :	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	jmpa LABEL_ACTION_2 a1
-	jmpa LABEL_ACTION_3 a2
-	jmp LABEL_ENDSWITCH_0
-	LABEL_ACTION_2 :	jmpneq LABEL_ENDSWITCH_0 m.Ingress_tmp_0 0x1
+	LABEL_SWITCH :	jmpneq LABEL_ENDSWITCH m.Ingress_tmp_0 0x1
 	table foo
-	jmp LABEL_ENDSWITCH_0
-	jmp LABEL_ENDSWITCH_0
-	LABEL_ACTION_3 :	table bar
-	LABEL_ENDSWITCH_0 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	jmp LABEL_ENDSWITCH
+	jmp LABEL_ENDSWITCH
+	LABEL_SWITCH_0 :	table bar
+	LABEL_ENDSWITCH :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop

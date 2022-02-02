@@ -222,6 +222,7 @@ class IfStatementUnroll : public Transform {
         refMap(refMap), structure(structure) {
         setName("IfStatementUnroll");
     }
+    const IR::Node *postorder(IR::SwitchStatement *a) override;
     const IR::Node *postorder(IR::IfStatement *a) override;
     const IR::Node *postorder(IR::P4Control *a) override;
 };
