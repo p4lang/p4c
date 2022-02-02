@@ -46,6 +46,7 @@ class BackendDriver:
         self._source_filename = None
         self._source_basename = None
         self._verbose = False
+        self._run_preprocessor_only = False
 
     def __str__(self):
         return self._backend
@@ -84,6 +85,7 @@ class BackendDriver:
         self._output_directory = opts.output_directory
         self._source_filename = opts.source_file
         self._source_basename = os.path.splitext(os.path.basename(opts.source_file))[0]
+        self._run_preprocessor_only = opts.run_preprocessor_only
 
         # set preprocessor options
         if 'preprocessor' in self._commands:
@@ -287,7 +289,7 @@ class BackendDriver:
         """
 
         # set output directory
-        if not os.path.exists(self._output_directory):
+        if not os.path.exists(self._output_directory) and not self._run_preprocessor_only:
             os.makedirs(self._output_directory)
 
         for c in self._commandsEnabled:

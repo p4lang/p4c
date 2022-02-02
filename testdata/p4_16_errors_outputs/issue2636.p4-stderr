@@ -1,0 +1,3 @@
+issue2636.p4(13): [--Werror=target-error] error: f: functions or methods returning structures are not supported on this target
+        s = f<bit<32>>();
+            ^^^^^^^^^^

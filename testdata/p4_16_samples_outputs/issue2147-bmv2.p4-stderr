@@ -1,0 +1,3 @@
+issue2147-bmv2.p4(55): [--Wwarn=unused] warning: 'in_bit' is unused
+    action do_action(inout bit<7> in_bit) {
+                                  ^^^^^^

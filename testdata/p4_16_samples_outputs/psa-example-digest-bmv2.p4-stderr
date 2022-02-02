@@ -1,3 +1,12 @@
+psa.p4(546): [--Wwarn=unused] warning: 'W' is unused
+extern Counter<W, S> {
+               ^
+psa.p4(575): [--Wwarn=unused] warning: 'W' is unused
+extern DirectCounter<W> {
+                     ^
+psa-example-digest-bmv2.p4(183): [--Wwarn=unused] warning: 'serEnumT' is unused
+    action do_tst (PortId_t egress_port, EthTypes serEnumT) {
+                                                  ^^^^^^^^
 psa-example-digest-bmv2.p4(84): [--Wwarn=uninitialized_out_param] warning: out parameter 'parsed_hdr' may be uninitialized when 'CommonParser' terminates
     out headers parsed_hdr,
                 ^^^^^^^^^^

@@ -60,6 +60,11 @@ class ReplacementMap {
  *   }
  *   tuple_0 t;
  *
+ * If some of the tuple type arguments are type variables
+ * the tuple is left unchanged, as below:
+ * struct S<T> { tuple<T> x; }
+ * This decision may need to be revisited in the future.
+ *
  *   @pre none
  *   @post ensure all tuples are replaced with struct.
  *         Notice that ListExpressions are not converted
@@ -70,8 +75,9 @@ class DoReplaceTuples final : public Transform {
     ReplacementMap* repl;
 
  public:
-    explicit DoReplaceTuples(ReplacementMap* replMap) : repl(replMap)
-    { CHECK_NULL(repl); setName("DoReplaceTuples"); }
+    DoReplaceTuples(ReferenceMap* refMap, TypeMap* typeMap) :
+            repl(new ReplacementMap(refMap, typeMap))
+    { setName("DoReplaceTuples"); }
     const IR::Node* postorder(IR::Type_BaseList* type) override;
     const IR::Node* insertReplacements(const IR::Node* before);
     const IR::Node* postorder(IR::Type_Struct* type) override
@@ -102,11 +108,10 @@ class EliminateTuples final : public PassManager {
     EliminateTuples(ReferenceMap* refMap, TypeMap* typeMap,
             TypeChecking* typeChecking = nullptr,
             TypeInference* typeInference = nullptr) {
-        auto repl = new ReplacementMap(refMap, typeMap);
         if (!typeChecking)
             typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new DoReplaceTuples(repl));
+        passes.push_back(new DoReplaceTuples(refMap, typeMap));
         passes.push_back(new ClearTypeMap(typeMap));
         // We do a round of type-checking which may mutate the program.
         // This will convert some ListExpressions
