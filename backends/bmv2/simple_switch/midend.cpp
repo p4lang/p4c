@@ -125,7 +125,6 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options, std::ostream* o
             isv1 ? new P4::RemoveUnusedActionParameters(&refMap) : nullptr,
             new P4::TypeChecking(&refMap, &typeMap),
             options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,
-            new P4::TypeChecking(&refMap, &typeMap, true),
             evaluator,
             [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
             new P4::MidEndLast()
