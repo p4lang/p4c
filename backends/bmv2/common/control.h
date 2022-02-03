@@ -39,7 +39,7 @@ template <Standard::Arch arch> class ControlConverter : public Inspector {
   cstring name;
   P4::P4CoreLibrary &corelib;
 
-protected:
+ protected:
   Util::IJson *
   convertTable(const CFG::TableNode *node, Util::JsonArray *action_profiles,
                BMV2::SharedActionSelectorCheck<arch> *selector_check) {
@@ -323,9 +323,9 @@ protected:
 
     auto next_tables = new Util::JsonObject();
 
-    CFG::Node *nextDestination = nullptr; // if no action is executed
+    CFG::Node *nextDestination = nullptr;  // if no action is executed
     CFG::Node *defaultLabelDestination =
-        nullptr; // if the "default" label is executed
+        nullptr;  // if the "default" label is executed
     // Note: the "default" label is not the default_action.
     bool hitMiss = false;
     for (auto s : node->successors.edges) {
@@ -448,7 +448,7 @@ protected:
       return;
 
     auto entries = mkArrayField(jsonTable, "entries");
-    int entryPriority = 1; // default priority is defined by index position
+    int entryPriority = 1;  // default priority is defined by index position
     for (auto e : entriesList->entries) {
       auto entry = new Util::JsonObject();
       entry->emplace_non_null("source_info", e->sourceInfoJsonObj());
@@ -459,7 +459,7 @@ protected:
       for (auto k : keyset->components) {
         auto key = new Util::JsonObject();
         auto tableKey = table->getKey()->keyElements.at(keyIndex);
-        auto *keyExprType = ctxt->typeMap->getType(tableKey->expression->type, true);
+        auto *keyExprType = ctxt->typeMap->getTypeType(tableKey->expression->type, true);
         auto keyWidth = keyExprType->width_bits();
         auto k8 = ROUNDUP(keyWidth, 8);
         auto matchType = getKeyMatchType(tableKey);
@@ -513,7 +513,7 @@ protected:
                 km->right->to<IR::Constant>()->value);
             auto len = trailing_zeros(mask, keyWidth);
             if (len + count_ones(mask) !=
-                keyWidth) // any remaining 0s in the prefix?
+                keyWidth)  // any remaining 0s in the prefix?
               ::error(ErrorType::ERR_INVALID, "%1%: invalid mask for LPM key",
                       k);
             else
@@ -540,7 +540,7 @@ protected:
             key->emplace("end", stringRepr(k->to<IR::Constant>()->value, k8));
           } else if (k->is<IR::DefaultExpression>()) {
             key->emplace("start", stringRepr(0, k8));
-            key->emplace("end", stringRepr((1 << keyWidth) - 1, k8)); // 2^N -1
+            key->emplace("end", stringRepr((1 << keyWidth) - 1, k8));  // 2^N -1
           } else {
             ::error(ErrorType::ERR_UNSUPPORTED,
                     "%1% unsupported range key expression", k);
@@ -788,7 +788,7 @@ protected:
     return result;
   }
 
-public:
+ public:
   const bool emitExterns;
   bool preorder(const IR::P4Control *cont) override {
     auto result = new Util::JsonObject();
@@ -877,6 +877,6 @@ public:
   }
 };
 
-} // namespace BMV2
+}  // namespace BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_CONTROL_H_ */
