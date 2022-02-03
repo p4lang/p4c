@@ -641,6 +641,11 @@ class FindRecirculated : public Inspector {
     ProgramStructure* structure;
 
     void add(const IR::Primitive* primitive, unsigned operand) {
+        if (primitive->operands.size() <= operand) {
+            // not enough arguments, do nothing.
+            // resubmit and recirculate have optional arguments
+            return;
+        }
         auto expression = primitive->operands.at(operand);
         if (!expression->is<IR::PathExpression>()) {
             ::error("%1%: expected a field list", expression);
