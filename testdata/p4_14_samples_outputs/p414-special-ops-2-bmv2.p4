@@ -3,9 +3,10 @@
 #include <v1model.p4>
 
 enum bit<8> FieldLists {
-    clone_e2e_FL = 0,
-    recirculate_FL = 1,
-    resubmit_FL = 2
+    none = 0,
+    clone_e2e_FL = 1,
+    recirculate_FL = 2,
+    resubmit_FL = 3
 }
 
 struct intrinsic_metadata_t {
@@ -16,15 +17,15 @@ struct intrinsic_metadata_t {
 }
 
 struct mymeta_t {
-    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL)
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL) 
     bit<8> resubmit_count;
-    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL)
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL) 
     bit<8> recirculate_count;
-    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL)
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL) 
     bit<8> clone_e2e_count;
-    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL)
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL) 
     bit<8> last_ing_instance_type;
-    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL)
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL) 
     bit<8> f1;
 }
 
@@ -39,14 +40,14 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".mymeta")
+    @name(".mymeta") 
     mymeta_t      mymeta;
-    @name(".temporaries")
+    @name(".temporaries") 
     temporaries_t temporaries;
 }
 
 struct headers {
-    @name(".ethernet")
+    @name(".ethernet") 
     ethernet_t ethernet;
 }
 
@@ -361,3 +362,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

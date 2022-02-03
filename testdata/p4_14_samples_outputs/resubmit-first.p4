@@ -3,7 +3,8 @@
 #include <v1model.p4>
 
 enum bit<8> FieldLists {
-    resubmit_FL = 8w0
+    none = 8w0,
+    resubmit_FL = 8w1
 }
 
 struct intrinsic_metadata_t {
