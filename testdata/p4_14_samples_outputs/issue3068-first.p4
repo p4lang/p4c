@@ -8,7 +8,6 @@ struct intrinsic_metadata_t {
 }
 
 struct mymeta_t {
-    @field_list(8w1) 
     bit<8> f1;
 }
 
@@ -19,8 +18,8 @@ header ethernet_t {
 }
 
 struct metadata {
-    @field_list(8w1) 
-    bit<8> _mymeta_f10;
+    @name(".mymeta") 
+    mymeta_t mymeta;
 }
 
 struct headers {
@@ -44,48 +43,42 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
-    }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
-    }
     @name("._nop") action _nop() {
     }
-    @name("._nop") action _nop_1() {
-    }
-    @name(".set_port") action set_port(@name("port") bit<9> port) {
+    @name(".set_port") action set_port(bit<9> port) {
         standard_metadata.egress_spec = port;
     }
     @name("._resubmit") action _resubmit() {
-        meta._mymeta_f10 = 8w1;
-        resubmit_preserving_field_list(8w1);
+        meta.mymeta.f1 = 8w1;
+        resubmit_preserving_field_list(8w0);
     }
-    @name(".t_ingress_1") table t_ingress {
+    @name(".t_ingress_1") table t_ingress_1 {
         actions = {
             _nop();
             set_port();
-            @defaultonly NoAction_1();
+            @defaultonly NoAction();
         }
         key = {
-            meta._mymeta_f10: exact @name("mymeta.f1") ;
+            meta.mymeta.f1: exact @name("mymeta.f1") ;
         }
         size = 128;
-        default_action = NoAction_1();
+        default_action = NoAction();
     }
-    @name(".t_ingress_2") table t_ingress_0 {
+    @name(".t_ingress_2") table t_ingress_2 {
         actions = {
-            _nop_1();
+            _nop();
             _resubmit();
-            @defaultonly NoAction_2();
+            @defaultonly NoAction();
         }
         key = {
-            meta._mymeta_f10: exact @name("mymeta.f1") ;
+            meta.mymeta.f1: exact @name("mymeta.f1") ;
         }
         size = 128;
-        default_action = NoAction_2();
+        default_action = NoAction();
     }
     apply {
-        t_ingress.apply();
-        t_ingress_0.apply();
+        t_ingress_1.apply();
+        t_ingress_2.apply();
     }
 }
 
