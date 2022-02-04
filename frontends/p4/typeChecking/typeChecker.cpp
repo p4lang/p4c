@@ -25,6 +25,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/enumInstance.h"
 
 namespace P4 {
 
@@ -1488,7 +1489,6 @@ const IR::Node* TypeInference::postorder(IR::Type_Stack* type) {
         return type;
 
     if (!etype->is<IR::Type_Header>() && !etype->is<IR::Type_HeaderUnion>() &&
-        // experimental: generic stacks
         !etype->is<IR::Type_SpecializedCanonical>())
         typeError("Header stack %1% used with non-header type %2%",
                   type, etype->toString());
@@ -1535,11 +1535,8 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
         while (t->is<IR::Type_Newtype>())
             t = getTypeType(t->to<IR::Type_Newtype>()->type);
         return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>() ||
-               // Nested bit-vector struct inside a Header is supported
-               // Experimental feature - see Issue 383.
                (t->is<IR::Type_Struct>() && onlyBitsOrBitStructs(t)) ||
                t->is<IR::Type_SerEnum>() || t->is<IR::Type_Boolean>() ||
-                // experimental: generic headers
                 t->is<IR::Type_Var>() || t->is<IR::Type_SpecializedCanonical>(); };
     validateFields(canon, validator);
     return type;
@@ -1556,7 +1553,6 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
         t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() ||
         t->is<IR::Type_Varbits>() || t->is<IR::Type_ActionEnum>() ||
         t->is<IR::Type_Tuple>() || t->is<IR::Type_SerEnum>() ||
-                // experimental: generic structs
         t->is<IR::Type_Var>() || t->is<IR::Type_SpecializedCanonical>(); };
     (void)validateFields(canon, validator);
     return type;
@@ -1565,7 +1561,6 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
 const IR::Node* TypeInference::postorder(IR::Type_HeaderUnion *type) {
     auto canon = setTypeType(type);
     auto validator = [] (const IR::Type* t) { return t->is<IR::Type_Header>() ||
-                // experimental: generic unions
         t->is<IR::Type_Var>() || t->is<IR::Type_SpecializedCanonical>(); };
     (void)validateFields(canon, validator);
     return type;
@@ -1832,6 +1827,10 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
                   expression->right);
         return expression;
     }
+    if (auto se = ltype->to<IR::Type_SerEnum>())
+        ltype = getTypeType(se->type);
+    if (auto se = rtype->to<IR::Type_SerEnum>())
+        rtype = getTypeType(se->type);
     if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>()) {
         typeError("%1%: Concatenation not defined on %2% and %3%",
                   expression, ltype->toString(), rtype->toString());
@@ -2266,6 +2265,8 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
     if (ltype == nullptr || rtype == nullptr)
         return expression;
 
+    if (auto se = ltype->to<IR::Type_SerEnum>())
+        ltype = getTypeType(se->type);
     auto lt = ltype->to<IR::Type_Bits>();
     if (expression->right->is<IR::Constant>()) {
         auto cst = expression->right->to<IR::Constant>();
@@ -2713,9 +2714,32 @@ const IR::Node* TypeInference::postorder(IR::Slice* expression) {
         return expression;
     }
 
+    auto e1type = getType(expression->e1);
+    if (e1type->is<IR::Type_SerEnum>()) {
+        auto ei = EnumInstance::resolve(expression->e1, typeMap);
+        CHECK_NULL(ei);
+        auto sei = ei->to<SerEnumInstance>();
+        if (sei == nullptr)
+            typeError("%1%: slice bit index values must be constants", expression->e1);
+        expression->e1 = sei->value;
+    }
+    auto e2type = getType(expression->e2);
+    if (e2type->is<IR::Type_SerEnum>()) {
+        auto ei = EnumInstance::resolve(expression->e2, typeMap);
+        CHECK_NULL(ei);
+        auto sei = ei->to<SerEnumInstance>();
+        if (sei == nullptr)
+            typeError("%1%: slice bit index values must be constants", expression->e2);
+        expression->e2 = sei->value;
+    }
+
     auto bst = type->to<IR::Type_Bits>();
-    if (!expression->e1->is<IR::Constant>() || !expression->e2->is<IR::Constant>()) {
-        typeError("%1%: bit index values must be constants", expression);
+    if (!expression->e1->is<IR::Constant>()) {
+        typeError("%1%: slice bit index values must be constants", expression->e1);
+        return expression;
+    }
+    if (!expression->e2->is<IR::Constant>()) {
+        typeError("%1%: slice bit index values must be constants", expression->e2);
         return expression;
     }
 
