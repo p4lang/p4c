@@ -67,6 +67,49 @@ class ConvertToDpdkArch : public Transform {
     }
 };
 
+// DPDK target supports lookahead instruction only with header operand.
+// This pass transforms usage of lookahead method with type parameters
+// of other than header type (IR::Type_Header) to lookahead with header
+// type using the following transformation:
+//
+// This parser code:
+//
+// T var_name;
+//
+// state state_name {
+//   var_name = pkt.lookahead<T>();
+// }
+//
+// is transformed to this:
+//
+// - new header definition:
+//
+// header var_name_header {
+//   T var_name;
+// }
+//
+// - modification in parser code:
+//
+// T var_name;
+// var_name_header var_name_tmp_h;
+//
+// state state_name {
+//   var_name_tmp_h = pkt.lookahead<var_name_header>();
+//   var_name = var_name_tmp_h.var_name;
+// }
+class ConvertLookahead : public Transform {
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    std::unordered_map<const IR::P4Program *, IR::IndexedVector<IR::Node>> newHeaderMap;
+    std::unordered_map<const IR::P4Parser *, IR::IndexedVector<IR::Declaration>> newLocalVarMap;
+  public:
+    ConvertLookahead(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) :
+            refMap(refMap), typeMap(typeMap) {}
+    const IR::Node *preorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *postorder(IR::P4Program *program) override;
+    const IR::Node *postorder(IR::P4Parser *parser) override;
+};
+
 // This Pass collects infomation about the name of all metadata and header
 // And it collects every field of metadata and renames all fields with a prefix
 // according to the metadata struct name. Eventually, the reference of a fields
@@ -271,6 +314,7 @@ class ConvertBinaryOperationTo2Params : public Transform {
     const IR::Node *postorder(IR::P4Control *a) override;
     const IR::Node *postorder(IR::P4Parser *a) override;
 };
+
 // Since in dpdk asm, there is no local variable declaration, we need to collect
 // all local variables and inject them into the metadata struct.
 // Local variables which are of header types are injected into headers struct
