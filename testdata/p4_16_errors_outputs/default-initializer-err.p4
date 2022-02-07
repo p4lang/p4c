@@ -40,9 +40,9 @@ control c(inout bit<1> r) {
     apply {
         S sb;
         sb = { b = false, h={3, true, ...}, ...};
+        bit<1> a = {...};
         H hb = { ... };
         sb.h = hb;
-        bit<1> a = {...};
         r = tmp;
     }
 }

@@ -434,10 +434,12 @@ class ListExpression : Expression {
     validate { components.check_null(); }
     size_t size() const { return components.size(); }
     void push_back(Expression e) { components.push_back(e); }
+    bool hasDefaultInitializer() const {
+        return defaultInitializer;
+    }
 }
 
 /// An expression that evaluates to a struct.
-/// Currently it does not have a direct representation as P4 source.
 class StructExpression : Expression {
     bool defaultInitializer = false;
     StructExpression(Util::SourceInfo srcInfo, const IR::Type* type, const IR::Type* structType, IR::IndexedVector<IR::NamedExpression>& components, bool defaultInitializer)
@@ -461,6 +463,9 @@ class StructExpression : Expression {
                   "%1%: unexpected struct type", this);
     }
     size_t size() const { return components.size(); }
+    bool hasDefaultInitializer() const override {
+        return defaultInitializer;
+    }
 }
 
 /// A ListExpression where all the components are compile-time values.

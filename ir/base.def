@@ -157,9 +157,11 @@ abstract Type_Declaration : Type, IDeclaration {
     toString { return externalName(); }
     const Type* getP4Type() const override { return new Type_Name(name); }
 }
-
+interface IHasDefaultInitializer {
+    virtual bool hasDefaultInitializer() const = 0;
+}
 /// base class for expressions
-abstract Expression {
+abstract Expression: IHasDefaultInitializer {
     /// Note that the type field is not visited.
     /// Most P4_16 passes don't use this field.
     /// It is a used to hold the result of TypeInferencing for the expression.
@@ -167,6 +169,9 @@ abstract Expression {
     /// It is not visited by the visitors by default (can be visited explicitly in preorder)
     optional Type type = Type::Unknown::get();
     visit_children { (void)v; }
+    bool hasDefaultInitializer() const override {
+        return false;
+    }
 #apply
 }
 

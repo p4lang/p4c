@@ -237,6 +237,7 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
     // These are canonical types.
     CHECK_NULL(dest); CHECK_NULL(src);
     LOG3("Unifying " << dest << " with " << src);
+
     if (src->is<IR::ITypeVar>())
         src = src->apply(constraints->replaceVariables)->to<IR::Type>();
     if (dest->is<IR::ITypeVar>())
@@ -295,35 +296,22 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
         if (!src->is<IR::Type_BaseList>())
             return constraint->reportError(constraints->getCurrentSubstitution());
         auto ts = src->to<IR::Type_BaseList>();
-        bool defaultInitializer = false;
+        bool incomplete = false;
         if (auto lst = src->to<IR::Type_List>()) {
-            defaultInitializer = lst->defaultInitializer;
+            incomplete = lst->incomplete;
         }
-        if (td->components.size() != ts->components.size() && !defaultInitializer) {
+        if  (auto ldt = dest->to<IR::Type_List>()) {
+            incomplete |= ldt->incomplete;
+        }
+        if (td->components.size() != ts->components.size() && !incomplete) {
             return constraint->reportError(constraints->getCurrentSubstitution(),
             "Tuples with different sizes %1% vs %2%",td->components.size(), ts->components.size());
         }
-        if (!defaultInitializer) {
+        if (!incomplete) {
             for (size_t i=0; i < td->components.size(); i++) {
                 auto si = ts->components.at(i);
                 auto di = td->components.at(i);
                 constraints->add(constraint->create(di, si));
-            }
-        } else {
-            for (size_t i=0; i < td->components.size(); i++) {
-                auto di = td->components.at(i);
-                if (di->is<IR::Type_Varbits>() || di->is<IR::Type_Stack>()) {
-                    return constraint->reportError(constraints->getCurrentSubstitution(),
-                                                "Structs, headers and tuples "
-                                                "containing %1% fields cannot be initialized "
-                                                "using ...: %2% = {...}.",
-                                                 td->components.at(i), td);
-                } else if (di->is<IR::Type_Struct>() || di->is<IR::Type_Header>()
-                           || di->is<IR::Type_Tuple>()) {
-                    IR::Type_List* src_tmp =
-                                       new IR::Type_List(*(new IR::Vector<IR::Type>()), true);
-                    constraints->add(constraint->create(di, src_tmp));
-                }
             }
         }
         return true;
@@ -331,36 +319,20 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
         auto strct = dest->to<IR::Type_StructLike>();
         if (auto tpl = src->to<IR::Type_List>()) {
             if ((strct->fields.size() != tpl->components.size()) &&
-                !tpl->defaultInitializer) {
+                !tpl->incomplete) {
                 return constraint->reportError(constraints->getCurrentSubstitution(),
                                             "Number of fields %1% in initializer different "
                                              "than number of fields in structure %2%: %3% to %4%",
                                              tpl->components.size(),
                                              strct->fields.size(), tpl, strct);
             }
-            if (!tpl->defaultInitializer) {
+            if (!tpl->incomplete) {
                 int index = 0;
                 for (const IR::StructField* f : strct->fields) {
                     const IR::Type* tplField = tpl->components.at(index);
                     const IR::Type* destt = f->type;
                     constraints->add(constraint->create(destt, tplField));
                     index++;
-                }
-            } else {
-                for (const IR::StructField* f : strct->fields) {
-                    if (f->type->is<IR::Type_Varbits>() || f->type->is<IR::Type_Stack>()) {
-                        return constraint->reportError(constraints->getCurrentSubstitution(),
-                                                "Structs, headers and tuples "
-                                                 "containing %1% fields cannot be initialized "
-                                                 "using ...: %2% = {...}.",
-                                                  f->type, strct);
-
-                    } else if (f->type->is<IR::Type_Struct>() || f->type->is<IR::Type_Header>()
-                               || f->type->is<IR::Type_Tuple>()) {
-                        IR::Type_List* src_tmp =
-                                       new IR::Type_List(*(new IR::Vector<IR::Type>()), true);
-                        constraints->add(constraint->create(f->type, src_tmp));
-                    }
                 }
             }
             return true;
@@ -374,29 +346,27 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
                     "Cannot unify '%1%' with '%2%'", st->name, strct->name);
             // There is another case, in which each field of the source is unifiable with the
             // corresponding field of the destination, e.g., a struct containing tuples.
-            bool defaultInitializer = false;
+            bool incomplete = false;
             if (auto unkn = src->to<IR::Type_UnknownStruct>()) {
-                defaultInitializer = unkn->defaultInitializer;
+                incomplete = unkn->incomplete;
             }
-            if ((strct->fields.size() != st->fields.size()) && !defaultInitializer) {
+            if ((strct->fields.size() != st->fields.size()) && !incomplete) {
                 return constraint->reportError(
                     constraints->getCurrentSubstitution(),
                     "Number of fields %1% in initializer different "
                     "than number of fields in structure %2%: %3% to %4%",
-                    st->fields.size(),
-                    strct->fields.size(), st, strct);
+                    st->fields.size(), strct->fields.size(), st, strct);
             }
-            if (!defaultInitializer) {
+            if (!incomplete) {
                 for (const IR::StructField* f : strct->fields) {
                     auto stField = st->getField(f->name);
-                    if (stField == nullptr) {
+                    if (stField == nullptr)
                         return constraint->reportError(constraints->getCurrentSubstitution(),
-                                                        "No initializer for field %1%", f);
-                    }
+                                                    "No initializer for field %1%", f);
                     auto c = constraint->create(f->type, stField->type);
-                    c->setError("Type of initializer '%1%' does not match type "
-                            "'%2%' of field '%3%' in '%4%'",
-                            { stField->type, f->type, f, strct});
+                    c->setError(
+                    "Type of initializer '%1%' does not match type '%2%' of field '%3%' in '%4%'",
+                    { stField->type, f->type, f, strct });
                     constraints->add(c);
                 }
             } else {
@@ -404,20 +374,7 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
                     auto strctField = strct->getField(f->name);
                     if (strctField == nullptr) {
                         return constraint->reportError(constraints->getCurrentSubstitution(),
-                                        "No field named %1% in structure %2%", f->name, strct);
-                    }
-                }
-                for (const IR::StructField* f : strct->fields) {
-                    if (f->type->is<IR::Type_Varbits>() || f->type->is<IR::Type_Stack>()) {
-                        return constraint->reportError(constraints->getCurrentSubstitution(),
-                                                "Structs, headers and tuples "
-                                                 "containing %1% fields cannot be initialized "
-                                                 "using ...: %2% = {...}.", f->type, strct);
-                    } else if (f->type->is<IR::Type_Struct>() || f->type->is<IR::Type_Header>()
-                               || f->type->is<IR::Type_Tuple>()) {
-                        IR::Type_List* src_tmp =
-                                       new IR::Type_List(*(new IR::Vector<IR::Type>()), true);
-                        constraints->add(constraint->create(f->type, src_tmp));
+                                        "No field named %1% in %2%", f->name, strct);
                     }
                 }
             }

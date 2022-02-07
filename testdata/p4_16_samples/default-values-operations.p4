@@ -12,20 +12,15 @@ struct S {
     bool   b;
 }
 
+S f(in S data) {
+    return { 1, ... };
+}
 control c(inout S r) {
     apply {
         S s = {b = true,h = {c = 1, ... }, ... };
-        S sr = { ... };
-        if (s == {b = false, ... }) {
-            r.i = s.i;
-        }
-        tuple<bool, H, S> t;
-        t = { ... };
-        if (t != { ... }) {
-            r.b = t[0];
-        }
-        s = (s == { ... } ? s : sr);
+        S val = f({h = { 1, true, 2 }, ... });
         r.b = s.b;
+        r.i = val.i;
     }
 }
 

@@ -20,26 +20,27 @@ namespace P4 {
 const IR::Expression*
 convert(const IR::Expression* expression, const IR::Type* type);
 
-const IR::Expression* defaultValue(const IR::Type* type, const Util::SourceInfo srcInfo) {
+/// Given a type and srcInfo synthesize default value for that type
+/// Default values are as proposed in p4-spec
+/// For types that dont have defined values in p4-spec give error
+const IR::Expression* CreateStructInitializers::defaultValue(const IR::Type* type,
+                                                            const Util::SourceInfo srcInfo) {
     IR::Expression* expr = nullptr;
     if (type->is<IR::Type_Bits>()) {
-        expr = new IR::Constant(type, 0);
+        expr = new IR::Constant(srcInfo, type, 0);
     } else if (type->is<IR::Type_Boolean>()) {
-        expr = new IR::BoolLiteral(false);
+        expr = new IR::BoolLiteral(srcInfo, type, false);
     } else if (type->is<IR::Type_Error>()) {
-        auto path = new IR::Path(IR::ID(srcInfo, "error"));
-        auto typeName =  new IR::Type_Name(srcInfo, path);
-        auto id = new IR::ID(srcInfo, "NoError");
-        auto tne = new IR::TypeNameExpression(srcInfo, typeName);
-        expr = new IR::Member(srcInfo, tne, *id);
+        auto typeName = new IR::Type_Name(srcInfo, new IR::Path(IR::ID(srcInfo, "error")));
+        expr = new IR::Member(srcInfo, new IR::TypeNameExpression(srcInfo, typeName), "NoError");
     } else if (auto t = type->to<IR::Type_Enum>()) {
         BUG_CHECK(t->members.size(), "unknown default value for enum with no members");
         auto tne = new IR::TypeNameExpression(srcInfo,
                                                new IR::Type_Name(t->name));
         expr = new IR::Member(srcInfo, tne, t->members.at(0)->name);
     } else if (auto t = type->to<IR::Type_SerEnum>()) {
-        auto zero =  new IR::Constant(t->type,0);
-        expr =  new IR::Cast(t->getP4Type(), zero);
+        auto zero = new IR::Constant(t->type, 0);
+        expr = new IR::Cast(t->getP4Type(), zero);
     } else if (type->is<IR::Type_StructLike>() || type->is<IR::Type_BaseList>()) {
         auto vec = new IR::Vector<IR::Expression>();
         auto conv = convert(new IR::ListExpression(srcInfo, *vec, true), type);
@@ -50,13 +51,8 @@ const IR::Expression* defaultValue(const IR::Type* type, const Util::SourceInfo 
         expr = new IR::Constant(0);  // we just need expr not to be nullptr to avoid
         // compiler bug (e.g if passed as NamedExpression constructor argument)
     }
+    CHECK_NULL(expr);
     return expr;
-}
-
-bool isDefaultInit(const IR::Expression* expr) {
-    auto le = expr->to<IR::ListExpression>();
-    auto se = expr->to<IR::StructExpression>();
-    return ((le && le->defaultInitializer) || (se && se->defaultInitializer));
 }
 
 IR::MethodCallStatement* generateSetInvalid(const IR::Type* type, const Util::SourceInfo srcInfo,
@@ -68,6 +64,8 @@ IR::MethodCallStatement* generateSetInvalid(const IR::Type* type, const Util::So
         return new IR::MethodCallStatement(srcInfo, mc);
     } else {
         auto hu = type->to<IR::Type_HeaderUnion>();
+        CHECK_NULL(hu);
+        BUG_CHECK(hu->fields.size(), "Expected union %1% to have at least one field", hu);
         auto hdr = hu->fields.at(0);
         auto left = new IR::Member(exp, hdr->name);
         auto method = new IR::Member(srcInfo, left,
@@ -79,6 +77,7 @@ IR::MethodCallStatement* generateSetInvalid(const IR::Type* type, const Util::So
 
 // rexpr is struct expression or list expression used to assign a value to struct or tuple
 // respectively; ltype is destination type
+// retval is a vector with unpacked initializations for elements of a rexpr
 const IR::Expression* resolveDefaultInitTuple(const IR::Expression* rexpr,
                                               const IR::Type* ltype,
                                               IR::IndexedVector<IR::StatOrDecl>* retval,
@@ -151,7 +150,7 @@ const IR::Statement* resolveDefaultInit(IR::AssignmentStatement* statement, cons
         for (auto f : strct->fields) {
             auto right = si->components.getDeclaration<IR::NamedExpression>(f->name);
             auto left = new IR::Member(statement->left, f->name);
-            if ((f->type->is<IR::Type_Header>() && isDefaultInit(right->expression)) ||
+            if ((f->type->is<IR::Type_Header>() && right->expression->hasDefaultInitializer()) ||
                  f->type->is<IR::Type_HeaderUnion>()) {
                 if (!isDeclaration) {
                     auto stat = generateSetInvalid(f->type, statement->srcInfo, left);
@@ -197,7 +196,7 @@ convert(const IR::Expression* expression, const IR::Type* type) {
                 }
                 auto expr = le->components.at(index);
                 auto conv = convert(expr, f->type);
-                hasDefault |= isDefaultInit(conv);
+                hasDefault |= conv->hasDefaultInitializer();
                 auto ne = new IR::NamedExpression(conv->srcInfo, f->name, conv);
                 si->push_back(ne);
                 index++;
@@ -208,11 +207,18 @@ convert(const IR::Expression* expression, const IR::Type* type) {
                 }
                 const IR::Expression* expr;
                 modified = true;
-                if (!hdrInvalid) {
-                    for (; index < st->fields.size(); index++) {
-                        auto f = st->fields.at(index);
-                        expr = defaultValue(f->type, expression->srcInfo);
-                        hasDefault |= isDefaultInit(expr);
+                for (; index < st->fields.size(); index++) {
+                    auto f = st->fields.at(index);
+                    if (f->type->is<IR::Type_Varbits>() || f->type->is<IR::Type_Stack>()) {
+                        ::error(ErrorType::ERR_UNSUPPORTED,
+                        "Structs, headers and tuples "
+                        "containing fields %1% cannot be initialized "
+                        "using ...: %2% = {...}.",
+                        f->type, le);
+                    }
+                    if (!hdrInvalid) {
+                        expr = CreateStructInitializers::defaultValue(f->type, expression->srcInfo);
+                        hasDefault |= expr->hasDefaultInitializer();
                         auto ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
                         si->push_back(ne);
                     }
@@ -230,23 +236,30 @@ convert(const IR::Expression* expression, const IR::Type* type) {
                     auto convNe = convert(ne->expression, f->type);
                     if (convNe != ne->expression)
                         modified = true;
-                    hasDefault |= isDefaultInit(convNe);
+                    hasDefault |= convNe->hasDefaultInitializer();
                     ne = new IR::NamedExpression(ne->srcInfo, f->name, convNe);
                     si->push_back(ne);
                 }
             } else {
                 modified = true;
                 for (auto f : st->fields) {
+                    if (f->type->is<IR::Type_Varbits>() || f->type->is<IR::Type_Stack>()) {
+                        ::error(ErrorType::ERR_UNSUPPORTED,
+                        "Structs, headers and tuples "
+                        "containing fields %1% cannot be initialized "
+                        "using ...: %2% = {...}.",
+                        f->type, sli);
+                    }
                     auto ne = sli->components.getDeclaration<IR::NamedExpression>(f->name.name);
                     if (ne == nullptr) {
                         const IR::Expression* expr;
-                        expr = defaultValue(f->type, expression->srcInfo);
-                        hasDefault |= isDefaultInit(expr);
+                        expr = CreateStructInitializers::defaultValue(f->type, expression->srcInfo);
+                        hasDefault |= expr->hasDefaultInitializer();
                         auto ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
                         si->push_back(ne);
                     } else {
                         auto convNe = convert(ne->expression, f->type);
-                        hasDefault |= isDefaultInit(convNe);
+                        hasDefault |= convNe->hasDefaultInitializer();
                         ne = new IR::NamedExpression(ne->srcInfo, f->name, convNe);
                         si->push_back(ne);
                     }
@@ -276,7 +289,7 @@ convert(const IR::Expression* expression, const IR::Type* type) {
             auto expr = le->components.at(index);
             auto type = tup->components.at(index);
             auto conv = convert(expr, type);
-            hasDefault |= isDefaultInit(conv);
+            hasDefault |= conv->hasDefaultInitializer();
             vec->push_back(conv);
             modified |= (conv != expr);
         }
@@ -285,8 +298,15 @@ convert(const IR::Expression* expression, const IR::Type* type) {
             modified = true;
             for ( ; index < tup->components.size(); index++) {
                 auto f = tup->components.at(index);
-                expr = defaultValue(f, expression->srcInfo);
-                hasDefault |= isDefaultInit(expr);
+                if (f->is<IR::Type_Varbits>() || f->is<IR::Type_Stack>()) {
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "Structs, headers and tuples "
+                        "containing fields %1% cannot be initialized "
+                        "using ...: %2% = {...}.",
+                        type, le);
+                }
+                expr = CreateStructInitializers::defaultValue(f, expression->srcInfo);
+                hasDefault |= expr->hasDefaultInitializer();
                 vec->push_back(expr);
             }
         }
@@ -304,18 +324,28 @@ const IR::Node* CreateStructInitializers::postorder(IR::ReturnStatement* stateme
     if (func == nullptr)
         return statement;
 
-    if (isDefaultInit(statement->expression)) {
-            ::error(ErrorType::ERR_TYPE_ERROR,
-                    "Default values {...} cannot be used "
-                    "in return statement %1%", statement);
-            return statement;
-    }
     auto ftype = typeMap->getType(func);
     BUG_CHECK(ftype->is<IR::Type_Method>(), "%1%: expected a method type for function", ftype);
     auto mt = ftype->to<IR::Type_Method>();
     auto returnType = mt->returnType;
     CHECK_NULL(returnType);
+    if (statement->expression->hasDefaultInitializer()){
+        // synthesize temporary variable for default initialization of return expression
+        auto name = refMap->newName("returnTmp");
+        auto returnDecl = new IR::Declaration_Variable(statement->srcInfo, name,
+                                                      returnType, statement->expression);
+        typeMap->setType(returnDecl, returnType);
+        auto returnPathExpr = new IR::PathExpression(returnDecl->srcInfo,
+                                                    new IR::Path(returnDecl->name));
+        typeMap->setType(returnPathExpr, returnType);
+        auto returnStmt = new IR::ReturnStatement(statement->srcInfo, returnPathExpr);
+        typeMap->setType(returnStmt, returnType);
+        auto indexed = new IR::IndexedVector<IR::StatOrDecl>();
+        indexed->push_back(returnDecl);
+        indexed->push_back(returnStmt);
 
+        return indexed;
+    }
     statement->expression = convert(statement->expression, returnType);
     return statement;
 }
@@ -329,8 +359,8 @@ const IR::Node* CreateStructInitializers::postorder(IR::Declaration_Variable* de
     if (init != decl->initializer)
         decl->initializer = init;
 
-    if (isDefaultInit(decl->initializer)) {
-           defaultInit = true;
+    if (decl->initializer->hasDefaultInitializer()) {
+        defaultInit = true;
     }
     if (defaultInit) {
         auto left = new IR::PathExpression(decl->name);
@@ -345,7 +375,7 @@ const IR::Node* CreateStructInitializers::postorder(IR::Declaration_Variable* de
             retval->push_back(decl);
             resolveDefaultInit(statement, decl->type, retval, refMap, true);
             return retval;
-        } else {
+        } else if (type->is<IR::Type_BaseList>()) {
             decl->initializer = nullptr;
             retval->push_back(decl);
             auto defaultTupleInit = resolveDefaultInitTuple(statement->right, type,
@@ -353,6 +383,9 @@ const IR::Node* CreateStructInitializers::postorder(IR::Declaration_Variable* de
             statement->right = defaultTupleInit;
             retval->push_back(statement);
             return retval;
+        } else {
+            BUG("%1% should be Type_Header, Type_Struct or Type_BaseList, not type %2%",
+                statement->left, type);
         }
     }
     return decl;
@@ -365,28 +398,38 @@ const IR::Node* CreateStructInitializers::postorder(IR::MethodCallExpression* ex
     bool modified = false;
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
         auto arg = mi->substitution.lookup(p);
-        if (isDefaultInit(arg->expression)) {
-            ::error(ErrorType::ERR_TYPE_ERROR,
-                    "Default values {...} cannot be used in method call expression %1%",
-                    expression);
-            return expression;
-        }
         if (p->direction == IR::Direction::In ||
             p->direction == IR::Direction::None) {
             auto paramType = typeMap->getType(p, true);
             if (paramType == nullptr)
                 // on error
                 continue;
-            auto init = convert(arg->expression, paramType);
-            CHECK_NULL(init);
-            if (init != arg->expression) {
+            if (arg->expression->hasDefaultInitializer()) {
+                // synthesize temporary variables for default initialization of arguments
+                auto name = refMap->newName("argTmp");
+                auto argDecl = new IR::Declaration_Variable(arg->expression->srcInfo, name,
+                                                           paramType, arg->expression);
+                typeMap->setType(argDecl, paramType);
+                auto argPathExpr = new IR::PathExpression(argDecl->srcInfo,
+                                                          new IR::Path(argDecl->name));
+                typeMap->setType(argPathExpr, paramType);
+                toMove->push_back(argDecl);
+                convertedArgs->push_back(new IR::Argument(arg->srcInfo, arg->name, argPathExpr));
                 modified = true;
-                convertedArgs->push_back(new IR::Argument(arg->srcInfo, arg->name, init));
                 continue;
+            } else {
+                auto init = convert(arg->expression, paramType);
+                CHECK_NULL(init);
+                if (init != arg->expression) {
+                    modified = true;
+                    convertedArgs->push_back(new IR::Argument(arg->srcInfo, arg->name, init));
+                    continue;
+                }
             }
         }
         convertedArgs->push_back(arg);
     }
+
     if (modified) {
         LOG2("Converted some function arguments to struct initializers" << convertedArgs);
         return new IR::MethodCallExpression(
@@ -395,14 +438,23 @@ const IR::Node* CreateStructInitializers::postorder(IR::MethodCallExpression* ex
     return expression;
 }
 
+const IR::Node* CreateStructInitializers::postorder(IR::P4Control* control) {
+    if (toMove->empty())
+        return control;
+    toMove->append(control->body->components);
+    auto newBody = new IR::BlockStatement(control->body->annotations, *toMove);
+    control->body = newBody;
+    toMove = new IR::IndexedVector<IR::StatOrDecl>();
+    return control;
+}
 
 const IR::Node* CreateStructInitializers::postorder(IR::Operation_Relation* expression) {
     auto orig = getOriginal<IR::Operation_Relation>();
     auto ltype = typeMap->getType(orig->left, true);
     auto rtype = typeMap->getType(orig->right, true);
-    if (isDefaultInit(expression->right) || isDefaultInit(expression->left)) {
+    if (expression->right->hasDefaultInitializer() || expression->left->hasDefaultInitializer()) {
         ::error(ErrorType::ERR_TYPE_ERROR,
-                "Default values {...} cannot be used in operation realation %1%",
+                "Default values {...} cannot be used in operation relation %1%",
                 expression);
         return expression;
     }
@@ -419,8 +471,8 @@ const IR::Node* CreateStructInitializers::postorder(IR::AssignmentStatement* sta
     auto init = convert(statement->right, type);
     if (init != statement->right)
         statement->right = init;
-    if (isDefaultInit(statement->right)) {
-           defaultInit = true;
+    if (statement->right->hasDefaultInitializer()) {
+        defaultInit = true;
     }
     if (defaultInit) {
         if (type->is<IR::Type_Header>()) {
@@ -440,6 +492,9 @@ const IR::Node* CreateStructInitializers::postorder(IR::AssignmentStatement* sta
             retval->push_back(statement);
             auto bst = new IR::BlockStatement(statement->srcInfo, *retval);
             return bst;
+        } else {
+            BUG("%1% should be Type_Header, Type_Struct or Type_BaseList, not type %2%",
+                statement->left, type);
         }
     }
     return statement;
