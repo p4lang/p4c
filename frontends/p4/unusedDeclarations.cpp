@@ -172,6 +172,9 @@ bool RemoveUnusedDeclarations::isSystemFile(cstring file) {
     if (file.startsWith(p4includePath)) return true;
     // if the backend is invoked directly with '-I p4include'
     if (file.startsWith("p4include")) return true;
+    // if "-I ./p4include" is specified in the arguments
+    if (file.find("p4include")) return true;
+
     return false;
 }
 
