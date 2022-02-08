@@ -40,10 +40,11 @@ export P4C_RUNTIME_DEPS="cpp \
                      libgmpxx4ldbl \
                      python3"
 
+# use scapy 2.4.5, which is the version on which ptf depends
 export P4C_PIP_PACKAGES="ipaddr \
                           pyroute2 \
                           ply==3.8 \
-                          scapy==2.4.4"
+                          scapy==2.4.5"
 
 
 
