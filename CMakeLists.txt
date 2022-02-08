@@ -90,24 +90,9 @@ if (BUILD_STATIC_RELEASE)
   set(BUILD_SHARED_LIBS OFF)
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
   # Link Boost statically
+  # See https://cmake.org/cmake/help/latest/module/FindBoost.html for details
   set(Boost_USE_STATIC_LIBS ON)
-  set(Boost_USE_STATIC_RUNTIME ON)
-  # After updating to the Ubuntu 20.04 base OS and to Boost 1.71 for CI builds,
-  # the cmake invocation for static builds started failing, with no suitable
-  # iostream library being found:
-  # ***************************
-  # The following variants have been tried and rejected:
-  # * libboost_iostreams.so.1.71.0 (shared, Boost_USE_STATIC_LIBS=ON)
-  # * libboost_iostreams.a (shared runtime, Boost_USE_STATIC_RUNTIME=ON)
-  # ***************************
-  # It was suggested online to try building with -DBoost_NO_BOOST_CMAKE=ON,
-  # which ignores some cmake files shipping with Boost (from Boost 1.70 on).
-  # It seems that setting Boost_USE_STATIC_RUNTIME to OFF may also resolve the
-  # issue. It is unclear why we set it to ON in the first place, since the Boost
-  # cmake documentation includes an example to build against Boost statically,
-  # and they explictly set Boost_USE_STATIC_RUNTIME to OFF.
-  # See https://cmake.org/cmake/help/latest/module/FindBoost.html
-  set(Boost_NO_BOOST_CMAKE ON)
+  set(Boost_USE_STATIC_RUNTIME OFF)
   # Set the static variable
   set(P4C_STATIC_BUILD STATIC)
   # Do not bring in dynamic libstdcc and libgcc
