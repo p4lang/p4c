@@ -307,33 +307,37 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
             return constraint->reportError(constraints->getCurrentSubstitution(),
             "Tuples with different sizes %1% vs %2%",td->components.size(), ts->components.size());
         }
-        if (!incomplete) {
-            for (size_t i=0; i < td->components.size(); i++) {
-                auto si = ts->components.at(i);
-                auto di = td->components.at(i);
-                constraints->add(constraint->create(di, si));
-            }
+        for (size_t i=0; i < ts->components.size(); i++) {
+            auto si = ts->components.at(i);
+            auto di = td->components.at(i);
+            constraints->add(constraint->create(di, si));
         }
         return true;
     } else if (dest->is<IR::Type_Struct>() || dest->is<IR::Type_Header>()) {
         auto strct = dest->to<IR::Type_StructLike>();
+        bool incomplete = false;
+        if (auto unkn = strct->to<IR::Type_UnknownStruct>()) {
+            incomplete |= unkn->incomplete;
+        }
         if (auto tpl = src->to<IR::Type_List>()) {
+            incomplete |= tpl->incomplete;
             if ((strct->fields.size() != tpl->components.size()) &&
-                !tpl->incomplete) {
+                !incomplete) {
                 return constraint->reportError(constraints->getCurrentSubstitution(),
                                             "Number of fields %1% in initializer different "
                                              "than number of fields in structure %2%: %3% to %4%",
                                              tpl->components.size(),
                                              strct->fields.size(), tpl, strct);
             }
-            if (!tpl->incomplete) {
-                int index = 0;
-                for (const IR::StructField* f : strct->fields) {
-                    const IR::Type* tplField = tpl->components.at(index);
-                    const IR::Type* destt = f->type;
-                    constraints->add(constraint->create(destt, tplField));
-                    index++;
+            size_t index = 0;
+            for (const IR::StructField* f : strct->fields) {
+                if (index >= tpl->components.size()) {
+                    break;
                 }
+                const IR::Type* tplField = tpl->components.at(index);
+                const IR::Type* destt = f->type;
+                constraints->add(constraint->create(destt, tplField));
+                index++;
             }
             return true;
         } else if (auto st = src->to<IR::Type_StructLike>()) {
@@ -346,9 +350,8 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
                     "Cannot unify '%1%' with '%2%'", st->name, strct->name);
             // There is another case, in which each field of the source is unifiable with the
             // corresponding field of the destination, e.g., a struct containing tuples.
-            bool incomplete = false;
             if (auto unkn = src->to<IR::Type_UnknownStruct>()) {
-                incomplete = unkn->incomplete;
+                incomplete |= unkn->incomplete;
             }
             if ((strct->fields.size() != st->fields.size()) && !incomplete) {
                 return constraint->reportError(
@@ -362,7 +365,7 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
                     auto stField = st->getField(f->name);
                     if (stField == nullptr)
                         return constraint->reportError(constraints->getCurrentSubstitution(),
-                                                    "No initializer for field %1%", f);
+                                                "No initialer for field %1%", f);
                     auto c = constraint->create(f->type, stField->type);
                     c->setError(
                     "Type of initializer '%1%' does not match type '%2%' of field '%3%' in '%4%'",
@@ -371,11 +374,12 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
                 }
             } else {
                 for (const IR::StructField* f : st->fields) {
-                    auto strctField = strct->getField(f->name);
-                    if (strctField == nullptr) {
+                    auto stField = strct->getField(f->name);
+                    if (stField == nullptr)
                         return constraint->reportError(constraints->getCurrentSubstitution(),
-                                        "No field named %1% in %2%", f->name, strct);
-                    }
+                                                    "No field named %1% in %2%", f->name, strct);
+                    auto c = constraint->create(stField->type, f->type);
+                    constraints->add(c);
                 }
             }
             return true;

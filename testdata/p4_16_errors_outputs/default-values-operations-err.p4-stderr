@@ -1,9 +1,3 @@
-default-values-operations-err.p4(19): [--Werror=type-error] error: Default values {...} cannot be used in operation relation ==
-        if (s == {b = false, ... }) {
-            ^^^^^^^^^^^^^^^^^^^^^^
-default-values-operations-err.p4(24): [--Werror=type-error] error: Default values {...} cannot be used in operation relation !=
-        if (t != { ... }) {
-            ^^^^^^^^^^^^
-default-values-operations-err.p4(27): [--Werror=type-error] error: Default values {...} cannot be used in operation relation ==
-        s = (s == { ... } ? s : sr);
-             ^^^^^^^^^^^^
+default-values-operations-err.p4(12): [--Werror=type-error] error: ==: cannot compare initializers with unknown types
+         bool b1 = {a = 1, b = 1} == {a = 11, b = 22}; // error: ==: cannot compare initializers with unknown types
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

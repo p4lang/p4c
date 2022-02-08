@@ -840,7 +840,6 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
         if (cst)
             setCompileTimeConstant(sourceExpression);
     } else if (auto tt = concreteType->to<IR::Type_Tuple>()) {
-        auto type = destType->getP4Type();
         if (auto li = sourceExpression->to<IR::ListExpression>()) {
             if (tt->getSize() != li->components.size() && !li->defaultInitializer) {
                 typeError("%1%: destination type expects %2% fields, but source only has %3%",
@@ -858,7 +857,7 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
                 vec.push_back(src);
             }
             if (changed) {
-                sourceExpression = new IR::ListExpression(type, vec, li->defaultInitializer);
+                sourceExpression = new IR::ListExpression(vec, li->defaultInitializer);
                 setType(sourceExpression, destType);
             }
         } else {
@@ -1665,7 +1664,12 @@ bool TypeInference::compare(const IR::Node* errorPosition,
                typeMap->equivalent(ltype, rtype)) {
         defined = true;
     } else if (ltype->is<IR::Type_BaseList>() && rtype->is<IR::Type_BaseList>()) {
-        auto tvs = unify(errorPosition, ltype, rtype);
+        P4::TypeVariableSubstitution* tvs = nullptr;
+        if (ltype->is<IR::Type_List>() && ltype->to<IR::Type_List>()->incomplete)
+            tvs = unify(errorPosition, rtype, ltype);
+        else
+            tvs = unify(errorPosition, ltype, rtype);
+
         if (tvs == nullptr)
             return false;
         if (!tvs->isIdentity()) {
@@ -1685,8 +1689,12 @@ bool TypeInference::compare(const IR::Node* errorPosition,
 
             bool lcst = isCompileTimeConstant(compare->left);
             bool rcst = isCompileTimeConstant(compare->right);
+            P4::TypeVariableSubstitution* tvs = nullptr;
+            if (rs != nullptr)
+                tvs = unify(errorPosition, ltype, rtype);
+            else
+                tvs = unify(errorPosition, rtype, ltype);
 
-            auto tvs = unify(errorPosition, ltype, rtype);
             if (tvs == nullptr)
                 return false;
             if (!tvs->isIdentity()) {
@@ -1999,6 +2007,7 @@ const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
             return expression;
         components->push_back(type);
     }
+
     auto tupleType = new IR::Type_List(expression->srcInfo,
                     *components, expression->defaultInitializer);
     auto type = canonicalize(tupleType);
@@ -2564,8 +2573,9 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
                 se->type->is<IR::Type_UnknownStruct>()) {
                 auto type = castType->getP4Type();
                 setType(type, new IR::Type_Type(st));
+                auto vec = se->components;
                 auto sie = new IR::StructExpression(
-                    se->srcInfo, type, se->components);
+                    se->srcInfo, type, type ,vec, se->defaultInitializer);
                 auto result = postorder(sie);  // may insert casts
                 setType(result, st);
                 return result;
@@ -2578,16 +2588,16 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
                 return expression;
             }
         } else if (auto le = expression->expr->to<IR::ListExpression>()) {
-            if (st->fields.size() == le->size()) {
+            if (st->fields.size() == le->size() || le->defaultInitializer) {
                 IR::IndexedVector<IR::NamedExpression> vec;
-                for (size_t i = 0; i < st->fields.size(); i++) {
+                for (size_t i = 0; i < le->components.size(); i++) {
                     auto fieldI = st->fields.at(i);
                     auto compI = le->components.at(i);
                     auto src = assignment(expression, fieldI->type, compI);
                     vec.push_back(new IR::NamedExpression(fieldI->name, src));
                 }
-                auto result = new IR::StructExpression(
-                    le->srcInfo, castType->getP4Type(), vec);
+                auto result = new IR::StructExpression(le->srcInfo, castType->getP4Type(),
+                                                castType->getP4Type(), vec, le->defaultInitializer);
                 setType(result, st);
                 return result;
             } else {

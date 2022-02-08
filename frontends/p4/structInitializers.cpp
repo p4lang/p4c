@@ -75,9 +75,10 @@ IR::MethodCallStatement* generateSetInvalid(const IR::Type* type, const Util::So
     }
 }
 
-// rexpr is struct expression or list expression used to assign a value to struct or tuple
-// respectively; ltype is destination type
-// retval is a vector with unpacked initializations for elements of a rexpr
+/// @param rexpr is a struct expression or list expression
+/// used to assign a value to a struct or a tuple
+/// @param ltype respectively, ltype is destination type
+/// @param retval is a vector with expanded initializers for rexpr
 const IR::Expression* resolveDefaultInitTuple(const IR::Expression* rexpr,
                                               const IR::Type* ltype,
                                               IR::IndexedVector<IR::StatOrDecl>* retval,
@@ -329,23 +330,9 @@ const IR::Node* CreateStructInitializers::postorder(IR::ReturnStatement* stateme
     auto mt = ftype->to<IR::Type_Method>();
     auto returnType = mt->returnType;
     CHECK_NULL(returnType);
-    if (statement->expression->hasDefaultInitializer()){
-        // synthesize temporary variable for default initialization of return expression
-        auto name = refMap->newName("returnTmp");
-        auto returnDecl = new IR::Declaration_Variable(statement->srcInfo, name,
-                                                      returnType, statement->expression);
-        typeMap->setType(returnDecl, returnType);
-        auto returnPathExpr = new IR::PathExpression(returnDecl->srcInfo,
-                                                    new IR::Path(returnDecl->name));
-        typeMap->setType(returnPathExpr, returnType);
-        auto returnStmt = new IR::ReturnStatement(statement->srcInfo, returnPathExpr);
-        typeMap->setType(returnStmt, returnType);
-        auto indexed = new IR::IndexedVector<IR::StatOrDecl>();
-        indexed->push_back(returnDecl);
-        indexed->push_back(returnStmt);
-
-        return indexed;
-    }
+    // MoveDefaultInitializers pass should move default initialized return statements
+    BUG_CHECK(!statement->expression->hasDefaultInitializer(), "Unexpected default initialization"
+                        " %1% as a return statement in function %2%", statement->expression, func);
     statement->expression = convert(statement->expression, returnType);
     return statement;
 }
@@ -404,27 +391,14 @@ const IR::Node* CreateStructInitializers::postorder(IR::MethodCallExpression* ex
             if (paramType == nullptr)
                 // on error
                 continue;
-            if (arg->expression->hasDefaultInitializer()) {
-                // synthesize temporary variables for default initialization of arguments
-                auto name = refMap->newName("argTmp");
-                auto argDecl = new IR::Declaration_Variable(arg->expression->srcInfo, name,
-                                                           paramType, arg->expression);
-                typeMap->setType(argDecl, paramType);
-                auto argPathExpr = new IR::PathExpression(argDecl->srcInfo,
-                                                          new IR::Path(argDecl->name));
-                typeMap->setType(argPathExpr, paramType);
-                toMove->push_back(argDecl);
-                convertedArgs->push_back(new IR::Argument(arg->srcInfo, arg->name, argPathExpr));
+            BUG_CHECK(!arg->expression->hasDefaultInitializer(), "Unexpected default initialization"
+                                " %1% as argument in function %2%", arg->expression, expression);
+            auto init = convert(arg->expression, paramType);
+            CHECK_NULL(init);
+            if (init != arg->expression) {
                 modified = true;
+                convertedArgs->push_back(new IR::Argument(arg->srcInfo, arg->name, init));
                 continue;
-            } else {
-                auto init = convert(arg->expression, paramType);
-                CHECK_NULL(init);
-                if (init != arg->expression) {
-                    modified = true;
-                    convertedArgs->push_back(new IR::Argument(arg->srcInfo, arg->name, init));
-                    continue;
-                }
             }
         }
         convertedArgs->push_back(arg);
@@ -438,26 +412,15 @@ const IR::Node* CreateStructInitializers::postorder(IR::MethodCallExpression* ex
     return expression;
 }
 
-const IR::Node* CreateStructInitializers::postorder(IR::P4Control* control) {
-    if (toMove->empty())
-        return control;
-    toMove->append(control->body->components);
-    auto newBody = new IR::BlockStatement(control->body->annotations, *toMove);
-    control->body = newBody;
-    toMove = new IR::IndexedVector<IR::StatOrDecl>();
-    return control;
-}
-
 const IR::Node* CreateStructInitializers::postorder(IR::Operation_Relation* expression) {
     auto orig = getOriginal<IR::Operation_Relation>();
     auto ltype = typeMap->getType(orig->left, true);
     auto rtype = typeMap->getType(orig->right, true);
-    if (expression->right->hasDefaultInitializer() || expression->left->hasDefaultInitializer()) {
-        ::error(ErrorType::ERR_TYPE_ERROR,
-                "Default values {...} cannot be used in operation relation %1%",
-                expression);
-        return expression;
-    }
+    // MoveDefaultInitializers pass should move all default initialized operands
+    BUG_CHECK(!expression->left->hasDefaultInitializer(), "Unexpected default initialization %1%"
+                                    " in operation relation %2%", expression->left, expression);
+    BUG_CHECK(!expression->right->hasDefaultInitializer(), "Unexpected default initialization %1%"
+                                    " in operation relation %2%", expression->right, expression);
     if (ltype->is<IR::Type_StructLike>() && rtype->is<IR::Type_List>())
         expression->right = convert(expression->right, ltype);
     if (rtype->is<IR::Type_StructLike>() && ltype->is<IR::Type_List>())
@@ -498,6 +461,136 @@ const IR::Node* CreateStructInitializers::postorder(IR::AssignmentStatement* sta
         }
     }
     return statement;
+}
+
+
+const IR::Node* MoveDefaultInitialization::postorder(IR::Operation_Relation* expression) {
+    auto orig = getOriginal<IR::Operation_Relation>();
+    auto ltype = typeMap->getType(orig->left, true);
+    auto rtype = typeMap->getType(orig->right, true);
+    if (expression->left->hasDefaultInitializer() && expression->right->hasDefaultInitializer()) {
+        ::error(ErrorType::ERR_TYPE_ERROR,
+                "Operation relation %1% cannot be used in a case"
+                " where both operands are default initialized",
+                expression);
+        return expression;
+    }
+
+    if (expression->left->hasDefaultInitializer()) {
+        // create a temporary variable for default initialization of left operand expression
+        auto name = refMap->newName("leftTmp");
+        auto leftDecl = new IR::Declaration_Variable(expression->srcInfo, name,
+                                                    rtype, expression->left);
+        auto leftPathExpr = new IR::PathExpression(leftDecl->srcInfo,
+                                                    new IR::Path(leftDecl->name));
+        toMove->push_back(leftDecl);
+        expression->left = leftPathExpr;
+    } else if (expression->right->hasDefaultInitializer()) {
+        // create a temporary variable for default initialization of right operand expression
+        auto name = refMap->newName("rightTmp");
+        auto rightDecl = new IR::Declaration_Variable(expression->srcInfo, name,
+                                                    ltype, expression->right);
+        auto rightPathExpr = new IR::PathExpression(rightDecl->srcInfo,
+                                                    new IR::Path(rightDecl->name));
+        toMove->push_back(rightDecl);
+        expression->right = rightPathExpr;
+    }
+    return expression;
+}
+
+const IR::Node* MoveDefaultInitialization::postorder(IR::MethodCallExpression* expression) {
+    auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+    auto result = expression;
+    auto convertedArgs = new IR::Vector<IR::Argument>();
+    bool modified = false;
+    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        auto arg = mi->substitution.lookup(p);
+        if (p->direction == IR::Direction::In ||
+            p->direction == IR::Direction::None) {
+            auto paramType = typeMap->getType(p, true);
+            if (paramType == nullptr)
+                // on error
+                continue;
+            if (arg->expression->hasDefaultInitializer()) {
+                // create a temporary variable for default initialization of an argument expression
+                auto name = refMap->newName("argTmp");
+                auto argDecl = new IR::Declaration_Variable(arg->expression->srcInfo, name,
+                                                           paramType, arg->expression);
+                auto argPathExpr = new IR::PathExpression(argDecl->srcInfo,
+                                                          new IR::Path(argDecl->name));
+                toMove->push_back(argDecl);
+                convertedArgs->push_back(new IR::Argument(arg->srcInfo, arg->name, argPathExpr));
+                modified = true;
+                continue;
+            }
+        }
+        convertedArgs->push_back(arg);
+    }
+
+    if (modified) {
+        LOG2("Converted some function arguments to struct initializers" << convertedArgs);
+        return new IR::MethodCallExpression(
+            result->srcInfo, result->method, result->typeArguments, convertedArgs);
+    }
+    return expression;
+}
+
+const IR::Node* MoveDefaultInitialization::postorder(IR::ReturnStatement* statement) {
+    if (statement->expression == nullptr)
+        return statement;
+    if (!statement->expression->hasDefaultInitializer())
+        return statement;
+
+    auto func = findOrigCtxt<IR::Function>();
+    if (func == nullptr)
+        return statement;
+
+    auto ftype = typeMap->getType(func);
+    BUG_CHECK(ftype->is<IR::Type_Method>(), "%1%: expected a method type for function", ftype);
+    auto mt = ftype->to<IR::Type_Method>();
+    auto returnType = mt->returnType;
+    CHECK_NULL(returnType);
+    // create a temporary variable for default initialization of return expression
+    auto name = refMap->newName("returnTmp");
+    auto returnDecl = new IR::Declaration_Variable(statement->srcInfo, name,
+                                                  returnType, statement->expression);
+    auto returnPathExpr = new IR::PathExpression(returnDecl->srcInfo,
+                                                 new IR::Path(returnDecl->name));
+    auto returnStmt = new IR::ReturnStatement(statement->srcInfo, returnPathExpr);
+    auto replaced = new IR::IndexedVector<IR::StatOrDecl>();
+    replaced->push_back(returnDecl);
+    replaced->push_back(returnStmt);
+
+    return replaced;
+}
+
+const IR::Node* MoveDefaultInitialization::postorder(IR::Function* function) {
+    if (toMove->empty())
+        return function;
+    toMove->append(function->body->components);
+    auto newBody = new IR::BlockStatement(function->body->annotations, *toMove);
+    function->body = newBody;
+    toMove = new IR::IndexedVector<IR::StatOrDecl>();
+    return function;
+}
+
+const IR::Node* MoveDefaultInitialization::postorder(IR::ParserState* state) {
+    if (toMove->empty())
+        return state;
+    toMove->append(state->components);
+    state->components = *toMove;
+    toMove = new IR::IndexedVector<IR::StatOrDecl>();
+    return state;
+}
+
+const IR::Node* MoveDefaultInitialization::postorder(IR::P4Control* control) {
+    if (toMove->empty())
+        return control;
+    toMove->append(control->body->components);
+    auto newBody = new IR::BlockStatement(control->body->annotations, *toMove);
+    control->body = newBody;
+    toMove = new IR::IndexedVector<IR::StatOrDecl>();
+    return control;
 }
 
 }  // namespace P4

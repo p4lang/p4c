@@ -33,7 +33,6 @@ class CreateStructInitializers : public Transform {
             refMap(refMap), typeMap(typeMap) {
         setName("CreateStructInitializers");
         CHECK_NULL(refMap); CHECK_NULL(typeMap);
-        toMove = new IR::IndexedVector<IR::StatOrDecl>();
     }
 
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
@@ -41,44 +40,40 @@ class CreateStructInitializers : public Transform {
     const IR::Node* postorder(IR::Declaration_Variable* statement) override;
     const IR::Node* postorder(IR::ReturnStatement* statement) override;
     const IR::Node* postorder(IR::AssignmentStatement* statement) override;
-    const IR::Node* postorder(IR::P4Control* control) override;
 
     static const IR::Expression* defaultValue(const IR::Type* type, const Util::SourceInfo srcInfo);
 };
-
+/// Creates temporary variable for every default initialization that
+/// shows up in an inconvenient place
+/// Inconvenient places are operands in operation relation, return statements,
+/// arguments of method call expressions
+class MoveDefaultInitialization : public Transform {
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
+    IR::IndexedVector<IR::StatOrDecl> *toMove;
+ public:
+    MoveDefaultInitialization(ReferenceMap* refMap, TypeMap* typeMap) :
+        refMap(refMap), typeMap(typeMap) {
+        setName("MoveDefaultInitialization");
+        CHECK_NULL(refMap); CHECK_NULL(typeMap);
+        toMove = new IR::IndexedVector<IR::StatOrDecl>();
+    }
+    const IR::Node* postorder(IR::MethodCallExpression* expression) override;
+    const IR::Node* postorder(IR::Operation_Relation* expression) override;
+    const IR::Node* postorder(IR::ReturnStatement* statement) override;
+    const IR::Node* postorder(IR::P4Control* control) override;
+    const IR::Node* postorder(IR::Function* function) override;
+    const IR::Node* postorder(IR::ParserState* state) override;
+};
 class StructInitializers : public PassManager {
  public:
     StructInitializers(ReferenceMap* refMap, TypeMap* typeMap) {
         setName("StructInitializers");
-        /// first repeat splits default initializations into assignments with the default values
-        /// and synthesizes temporary variables for default arguments and
-        /// return statements in method calls
-        /// second repeat is needed to unpack synthesized temporary variables into default values
-        /// S f (in S s1) {
-        ///     /*ommited*/
-        ///     return {...}
-        /// }
-        ///
-        /// --> first repeat
-        /// S f (in S s1) {
-        ///     /*ommited*/
-        ///     S returnTmp = {...};
-        ///     return returnTmp;
-        /// }
-        ///
-        /// --> second repeat
-        /// S f (in S s1) {
-        ///     /*ommited*/
-        ///     S returnTmp;
-        ///     returnTmp.i = 0;
-        ///     returnTmp.b = false;
-        ///     /*ommited*/
-        ///     return returnTmp;
-        /// }
-        auto passRepeat = new PassRepeated{new TypeChecking(refMap, typeMap),
-                                    new CreateStructInitializers(refMap, typeMap)};
-        passRepeat->setRepeats(2);
-        passes.push_back(passRepeat);
+        passes.push_back(new TypeChecking(refMap, typeMap));
+        passes.push_back(new MoveDefaultInitialization(refMap, typeMap));
+        /// TypeChecking is needed for the newly created variables
+        passes.push_back(new TypeChecking(refMap, typeMap));
+        passes.push_back(new CreateStructInitializers(refMap, typeMap));
         passes.push_back(new ClearTypeMap(typeMap));
     }
 };

@@ -1,3 +1,4 @@
-default-values-operations.p4(16): [--Wwarn=uninitialized_use] warning: returnTmp may not be completely initialized
-    return { 1, ... };
+default-values-operations.p4(22): [--Wwarn=uninitialized_use] warning: returnTmp may not be completely initialized
+    return {i = i, ... };
     ^^^^^^
+[--Wwarn=uninitialized_use] warning: argTmp may not be completely initialized

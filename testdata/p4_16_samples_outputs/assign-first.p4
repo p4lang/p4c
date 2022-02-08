@@ -7,5 +7,4 @@ control c() {
     apply {
         hdr = (h){field = 32w10};
     }
-
 }

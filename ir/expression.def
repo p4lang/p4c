@@ -410,8 +410,8 @@ class ListExpression : Expression {
         validate();
         initUnknown();
     }
-    ListExpression(const IR::Type* type, const IR::Vector<IR::Expression>& components, bool defaultInitializer)
-                        : Expression(type), defaultInitializer(defaultInitializer), components(components) {
+    ListExpression(const IR::Vector<IR::Expression>& components, bool defaultInitializer)
+                        : defaultInitializer(defaultInitializer), components(components) {
         validate();
         initUnknown();
     }

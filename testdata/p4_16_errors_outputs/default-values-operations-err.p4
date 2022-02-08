@@ -1,34 +1,20 @@
 #include <core.p4>
 
-header H {
-    bit<1>  a;
-    bool    b;
-    bit<32> c;
-}
 
 struct S {
-    bit<1> i;
-    H      h;
-    bool   b;
+    bit<32> a;
+    bit<32> b;
 }
 
-control c(inout S r) {
+control compute(bit<1> r) {
     apply {
-        S s = {b = true,h = {c = 1, ... }, ... };
-        S sr = { ... };
-        if (s == {b = false, ... }) {
-            r.i = s.i;
-        }
-        tuple<bool, H, S> t;
-        t = { ... };
-        if (t != { ... }) {
-            r.b = t[0];
-        }
-        s = (s == { ... } ? s : sr);
-        r.b = s.b;
+	 S s = {a = 11, b = 22};
+         bool b1 = {a = 1, b = 1} == {a = 11, b = 22};
+         bool _b5 = {1, ...} == {2, ...}; 
+       
     }
 }
 
-control simple(inout S r);
+control simple(bit<1> r);
 package top(simple e);
-top(c()) main;
+top(compute()) main;
