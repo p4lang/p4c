@@ -33,9 +33,6 @@ struct psa_egress_deparser_input_metadata_t {
 	bit<32> egress_port
 }
 
-header ethernet instanceof ethernet_t
-header output_data instanceof output_data_t
-
 struct metadata_t {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
 	bit<32> psa_ingress_parser_input_metadata_packet_path
@@ -78,6 +75,9 @@ struct metadata_t {
 	bit<16> Ingress_next_data_0
 }
 metadata instanceof metadata_t
+
+header ethernet instanceof ethernet_t
+header output_data instanceof output_data_t
 
 regarray reg_0 size 0x6 initval 0
 

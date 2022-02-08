@@ -10,13 +10,11 @@ header ethernet_t {
 }
 
 header ipv4_base_t {
-    bit<4>  version;
-    bit<4>  ihl;
+    bit<8>  version_ihl;
     bit<8>  diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
-    bit<13> fragOffset;
+    bit<16>  flags_fragOffset;
     bit<8>  ttl;
     bit<8>  protocol;
     bit<16> hdrChecksum;
@@ -30,6 +28,10 @@ header ipv4_option_timestamp_t {
     varbit<304> data;
 }
 
+header option_t {
+    bit<8> value;
+    bit<8> len;
+}
 struct headers_t {
     ethernet_t ethernet;
     ipv4_base_t             ipv4_base;
@@ -55,20 +57,19 @@ parser MyIP(
     }
     state parse_ipv4 {
         packet.extract(hdr.ipv4_base);
-        transition select(hdr.ipv4_base.ihl) {
-            4w0x5: accept;
+        transition select(hdr.ipv4_base.version_ihl) {
+            8w0x45: accept;
             default: parse_ipv4_options;
         }
     }
     state parse_ipv4_option_timestamp {
-        bit<16> tmp16 = packet.lookahead<bit<16>>();
-        bit<8> tmp_len = tmp16[7:0];
-        packet.extract(hdr.ipv4_option_timestamp, (bit<32>)tmp_len * 8 - 16);
+        option_t tmp_hdr = packet.lookahead<option_t>();
+        packet.extract(hdr.ipv4_option_timestamp, (bit<32>)tmp_hdr.len * 8 - 16);
         transition accept;
     }
     state parse_ipv4_options {
         transition select(packet.lookahead<bit<8>>()) {
-            8w0x44 &&& 8w0xff: parse_ipv4_option_timestamp;
+            8w0x44: parse_ipv4_option_timestamp;
             default : accept;
         }
     }
