@@ -253,7 +253,7 @@ const IR::Node *ConvertToDpdkArch::preorder(IR::Member *m) {
 
 
 
-const IR::Node *ConvertLookahead::preorder(IR::AssignmentStatement *statement) {
+const IR::Node *DoConvertLookahead::preorder(IR::AssignmentStatement *statement) {
     if (!statement->right->is<IR::MethodCallExpression>())
         return statement;
     auto mce = statement->right->to<IR::MethodCallExpression>();
@@ -382,7 +382,7 @@ const IR::Node *ConvertLookahead::preorder(IR::AssignmentStatement *statement) {
     return newStatements;
 }
 
-const IR::Node *ConvertLookahead::postorder(IR::P4Program *program) {
+const IR::Node *DoConvertLookahead::postorder(IR::P4Program *program) {
     auto origProgram = getOriginal()->to<IR::P4Program>();
     if (newHeaderMap.count(origProgram)) {
         IR::Vector<IR::Node>::iterator insertIter = std::find_if(program->objects.begin(),
@@ -398,7 +398,7 @@ const IR::Node *ConvertLookahead::postorder(IR::P4Program *program) {
     return program;
 }
 
-const IR::Node *ConvertLookahead::postorder(IR::P4Parser *parser) {
+const IR::Node *DoConvertLookahead::postorder(IR::P4Parser *parser) {
     auto origParser = getOriginal()->to<IR::P4Parser>();
     if (newLocalVarMap.count(origParser)) {
         parser->parserLocals.append(newLocalVarMap.at(origParser));
