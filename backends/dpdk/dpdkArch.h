@@ -67,36 +67,38 @@ class ConvertToDpdkArch : public Transform {
     }
 };
 
-// DPDK target supports lookahead instruction only with header operand.
-// This pass transforms usage of lookahead method with type parameters
-// of other than header type (IR::Type_Header) to lookahead with header
-// type using the following transformation:
-//
-// This parser code:
-//
-// T var_name;
-//
-// state state_name {
-//   var_name = pkt.lookahead<T>();
-// }
-//
-// is transformed to this:
-//
-// - new header definition:
-//
-// header var_name_header {
-//   T var_name;
-// }
-//
-// - modification in parser code:
-//
-// T var_name;
-// var_name_header var_name_tmp_h;
-//
-// state state_name {
-//   var_name_tmp_h = pkt.lookahead<var_name_header>();
-//   var_name = var_name_tmp_h.var_name;
-// }
+/**
+ * DPDK target supports lookahead instruction only with header operand.
+ * This pass transforms usage of lookahead method with type parameters
+ * of other than header type (IR::Type_Header) to lookahead with header
+ * type using the following transformation:
+ *
+ * This parser code:
+ *
+ * T var_name;
+ *
+ * state state_name {
+ *   var_name = pkt.lookahead<T>();
+ * }
+ *
+ * is transformed to this:
+ *
+ * - new header definition:
+ *
+ * header var_name_header {
+ *   T var_name;
+ * }
+ *
+ * - modification in parser code:
+ *
+ * T var_name;
+ * var_name_header var_name_tmp_h;
+ *
+ * state state_name {
+ *   var_name_tmp_h = pkt.lookahead<var_name_header>();
+ *   var_name = var_name_tmp_h.var_name;
+ * }
+ */
 class DoConvertLookahead : public Transform {
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
