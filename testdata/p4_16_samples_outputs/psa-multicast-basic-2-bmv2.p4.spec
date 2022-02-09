@@ -58,10 +58,10 @@ struct metadata_t {
 	bit<8> psa_egress_output_metadata_clone
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
-	bit<16> Egress_tmp_1
-	bit<8> Egress_tmp_2
 	bit<48> Ingress_tmp
 	bit<1> Ingress_tmp_0
+	bit<16> Egress_tmp
+	bit<8> Egress_tmp_0
 }
 metadata instanceof metadata_t
 
@@ -85,8 +85,8 @@ apply {
 	extract h.ethernet
 	extract h.output_data
 	mov h.output_data.word0 m.psa_egress_input_metadata_egress_port
-	mov m.Egress_tmp_1 m.psa_egress_input_metadata_instance
-	mov h.output_data.word1 m.Egress_tmp_1
+	mov m.Egress_tmp m.psa_egress_input_metadata_instance
+	mov h.output_data.word1 m.Egress_tmp
 	mov h.output_data.word2 0x8
 	jmpneq LABEL_FALSE m.psa_egress_input_metadata_packet_path 0x0
 	mov h.output_data.word2 0x1
@@ -108,8 +108,8 @@ apply {
 	jmp LABEL_END
 	LABEL_FALSE_4 :	jmpneq LABEL_END m.psa_egress_input_metadata_packet_path 0x6
 	mov h.output_data.word2 0x7
-	LABEL_END :	mov m.Egress_tmp_2 m.psa_egress_input_metadata_class_of_service
-	mov h.output_data.word3 m.Egress_tmp_2
+	LABEL_END :	mov m.Egress_tmp_0 m.psa_egress_input_metadata_class_of_service
+	mov h.output_data.word3 m.Egress_tmp_0
 	emit h.ethernet
 	emit h.output_data
 	tx m.psa_ingress_output_metadata_egress_port

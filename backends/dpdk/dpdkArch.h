@@ -23,6 +23,7 @@ limitations under the License.
 #include "frontends/p4/sideEffects.h"
 #include <ir/ir.h>
 #include "lib/error.h"
+#include "lib/ordered_map.h"
 #include "dpdkProgramStructure.h"
 
 namespace DPDK {
@@ -398,10 +399,22 @@ class ConvertBinaryOperationTo2Params : public Transform {
 // instead of metadata struct, so that they can be instantiated as headers in the
 // resulting dpdk asm file.
 class CollectLocalVariables : public Transform {
-    std::map<const cstring, IR::IndexedVector<IR::Declaration>> locals_map;
+    ordered_map<const IR::Declaration_Variable *, const cstring> localsMap;
     P4::ReferenceMap *refMap;
     P4::TypeMap* typeMap;
     DpdkProgramStructure *structure;
+
+    void insert(const cstring prefix, const IR::IndexedVector<IR::Declaration> *locals) {
+        for (auto d : *locals) {
+            if (auto dv = d->to<IR::Declaration_Variable>()) {
+                const cstring name = refMap->newName(prefix + "_" + dv->name.name);
+                localsMap.emplace(dv, name);
+            } else if (!d->is<IR::P4Action>() && !d->is<IR::P4Table>() &&
+                       !d->is<IR::Declaration_Instance>()) {
+                BUG("%1%: Unhandled declaration type", d);
+            }
+        }
+    }
 
   public:
     CollectLocalVariables(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,

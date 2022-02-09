@@ -59,14 +59,6 @@ struct metadata_t {
 	bit<8> psa_egress_output_metadata_clone
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
-	bit<16> Egress_tmp_8
-	bit<8> Egress_tmp_9
-	bit<16> Egress_tmp_10
-	bit<8> Egress_tmp_11
-	bit<16> Egress_tmp_6
-	bit<16> Egress_tmp_7
-	bit<8> Egress_idx_0
-	bit<16> Egress_write_data_0
 	bit<48> Ingress_tmp
 	bit<1> Ingress_tmp_0
 	bit<48> Ingress_tmp_1
@@ -74,6 +66,14 @@ struct metadata_t {
 	bit<48> Ingress_tmp_3
 	bit<16> Ingress_tmp_4
 	bit<16> Ingress_tmp_5
+	bit<16> Egress_tmp
+	bit<8> Egress_tmp_0
+	bit<16> Egress_tmp_1
+	bit<8> Egress_tmp_2
+	bit<16> Egress_tmp_3
+	bit<16> Egress_tmp_4
+	bit<8> Egress_idx
+	bit<16> Egress_write_data
 }
 metadata instanceof metadata_t
 
@@ -135,27 +135,27 @@ apply {
 	emit h.output_data
 	extract h.ethernet
 	extract h.output_data
-	mov m.Egress_idx_0 h.ethernet.etherType
-	mov m.Egress_tmp_10 h.ethernet.etherType
-	shr m.Egress_tmp_10 0x8
-	mov m.Egress_tmp_11 m.Egress_tmp_10
-	jmpneq LABEL_FALSE_9 m.Egress_tmp_11 0xc0
-	regrd m.Egress_tmp_6 egress_pkt_seen_0 m.Egress_idx_0
-	mov h.output_data.word0 m.Egress_tmp_6
+	mov m.Egress_idx h.ethernet.etherType
+	mov m.Egress_tmp_1 h.ethernet.etherType
+	shr m.Egress_tmp_1 0x8
+	mov m.Egress_tmp_2 m.Egress_tmp_1
+	jmpneq LABEL_FALSE_9 m.Egress_tmp_2 0xc0
+	regrd m.Egress_tmp_3 egress_pkt_seen_0 m.Egress_idx
+	mov h.output_data.word0 m.Egress_tmp_3
 	jmp LABEL_END_9
-	LABEL_FALSE_9 :	mov m.Egress_tmp_8 h.ethernet.etherType
-	shr m.Egress_tmp_8 0x8
-	mov m.Egress_tmp_9 m.Egress_tmp_8
-	jmpneq LABEL_FALSE_10 m.Egress_tmp_9 0xc1
-	mov m.Egress_write_data_0 h.ethernet.srcAddr
-	regwr egress_pkt_seen_0 m.Egress_idx_0 m.Egress_write_data_0
+	LABEL_FALSE_9 :	mov m.Egress_tmp h.ethernet.etherType
+	shr m.Egress_tmp 0x8
+	mov m.Egress_tmp_0 m.Egress_tmp
+	jmpneq LABEL_FALSE_10 m.Egress_tmp_0 0xc1
+	mov m.Egress_write_data h.ethernet.srcAddr
+	regwr egress_pkt_seen_0 m.Egress_idx m.Egress_write_data
 	jmp LABEL_END_9
 	LABEL_FALSE_10 :	jmplt LABEL_TRUE_11 h.ethernet.etherType 0x100
 	jmp LABEL_END_11
-	LABEL_TRUE_11 :	regwr egress_pkt_seen_0 m.Egress_idx_0 0x1
+	LABEL_TRUE_11 :	regwr egress_pkt_seen_0 m.Egress_idx 0x1
 	LABEL_END_11 :	mov h.output_data.word1 m.psa_egress_input_metadata_egress_port
-	mov m.Egress_tmp_7 m.psa_egress_input_metadata_instance
-	mov h.output_data.word2 m.Egress_tmp_7
+	mov m.Egress_tmp_4 m.psa_egress_input_metadata_instance
+	mov h.output_data.word2 m.Egress_tmp_4
 	mov h.output_data.word3 0x8
 	jmpneq LABEL_FALSE_12 m.psa_egress_input_metadata_packet_path 0x0
 	mov h.output_data.word3 0x1

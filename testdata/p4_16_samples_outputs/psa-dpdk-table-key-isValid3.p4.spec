@@ -88,7 +88,7 @@ struct metadata {
 	bit<8> Ingress_tmp_0
 	bit<8> Ingress_tmp_1
 	bit<8> Ingress_tmp_2
-	bit<8> Ingress_key_0
+	bit<8> Ingress_key
 	bit<48> Ingress_tbl_ethernet_dstAddr
 	bit<48> Ingress_tbl_ethernet_srcAddr
 	bit<16> tmpMask
@@ -111,7 +111,7 @@ action execute args none {
 
 table tbl {
 	key {
-		m.Ingress_key_0 exact
+		m.Ingress_key exact
 		m.Ingress_tbl_ethernet_dstAddr exact
 		m.Ingress_tbl_ethernet_srcAddr exact
 	}
@@ -154,12 +154,12 @@ apply {
 	LABEL_END_1 :	mov m.Ingress_tmp_2 1
 	jmpv LABEL_END_2 h.tcp
 	mov m.Ingress_tmp_2 0
-	LABEL_END_2 :	mov m.Ingress_key_0 m.Ingress_tmp_1
-	jmpeq LABEL_TRUE_0 m.Ingress_key_0 0x1
+	LABEL_END_2 :	mov m.Ingress_key m.Ingress_tmp_1
+	jmpeq LABEL_TRUE_0 m.Ingress_key 0x1
 	jmpeq LABEL_TRUE_0 m.Ingress_tmp_2 0x1
-	mov m.Ingress_key_0 0x0
+	mov m.Ingress_key 0x0
 	jmp LABEL_END_3
-	LABEL_TRUE_0 :	mov m.Ingress_key_0 0x1
+	LABEL_TRUE_0 :	mov m.Ingress_key 0x1
 	LABEL_END_3 :	mov m.Ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
 	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	table tbl

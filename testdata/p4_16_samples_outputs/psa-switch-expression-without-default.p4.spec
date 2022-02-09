@@ -93,7 +93,7 @@ struct user_meta_t {
 	bit<8> psa_egress_output_metadata_drop
 	bit<16> local_metadata_data
 	bit<16> local_metadata_data1
-	bit<16> Ingress_tmp_0
+	bit<16> Ingress_tmp
 	bit<48> Ingress_tbl_ethernet_srcAddr
 	bit<16> tmpMask
 	bit<8> tmpMask_0
@@ -166,13 +166,13 @@ apply {
 	jmpeq MYIP_PARSE_TCP m.tmpMask_0 0x4
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_TCP :	extract h.tcp
-	MYIP_ACCEPT :	mov m.Ingress_tmp_0 0x10
-	mov m.Ingress_tmp_0 0x1
+	MYIP_ACCEPT :	mov m.Ingress_tmp 0x10
+	mov m.Ingress_tmp 0x1
 	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	jmpa LABEL_SWITCH a1
 	jmpa LABEL_SWITCH_0 a2
 	jmp LABEL_ENDSWITCH
-	LABEL_SWITCH :	jmpneq LABEL_ENDSWITCH m.Ingress_tmp_0 0x1
+	LABEL_SWITCH :	jmpneq LABEL_ENDSWITCH m.Ingress_tmp 0x1
 	table foo
 	jmp LABEL_ENDSWITCH
 	jmp LABEL_ENDSWITCH

@@ -83,8 +83,8 @@ struct metadata {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 	bit<16> local_metadata_data
-	bit<8> Ingress_err_0
 	bit<8> IngressParser_parser_tmp
+	bit<8> Ingress_err
 	bit<16> tmpMask
 	bit<8> tmpMask_0
 }
@@ -99,7 +99,7 @@ action NoAction args none {
 }
 
 action execute args none {
-	jmpneq LABEL_FALSE_1 m.Ingress_err_0 0x1
+	jmpneq LABEL_FALSE_1 m.Ingress_err 0x1
 	jmp LABEL_END_2
 	LABEL_FALSE_1 :	mov m.local_metadata_data 0x1
 	LABEL_END_2 :	return
@@ -140,9 +140,9 @@ apply {
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
 	INGRESSPARSERIMPL_ACCEPT :	jmpneq LABEL_TRUE_0 m.psa_ingress_input_metadata_parser_error 0x0
-	mov m.Ingress_err_0 0x0
+	mov m.Ingress_err 0x0
 	jmp LABEL_END_1
-	LABEL_TRUE_0 :	mov m.Ingress_err_0 0x1
+	LABEL_TRUE_0 :	mov m.Ingress_err 0x1
 	LABEL_END_1 :	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet

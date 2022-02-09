@@ -32,19 +32,19 @@ metadata instanceof main_metadata_t
 
 header h1 instanceof my_header_t
 header h2 instanceof my_header_t
-header MainParserT_parser_local_hdr_0 instanceof my_header_t
+header MainParserT_parser_local_hdr instanceof my_header_t
 
 apply {
 	rx m.pna_main_input_metadata_input_port
-	invalidate h.MainParserT_parser_local_hdr_0
-	extract h.MainParserT_parser_local_hdr_0
-	jmpeq MAINPARSERIMPL_PARSE_H1 h.MainParserT_parser_local_hdr_0.type1 0x1234
-	jmpeq MAINPARSERIMPL_PARSE_H2 h.MainParserT_parser_local_hdr_0.type1 0x5678
+	invalidate h.MainParserT_parser_local_hdr
+	extract h.MainParserT_parser_local_hdr
+	jmpeq MAINPARSERIMPL_PARSE_H1 h.MainParserT_parser_local_hdr.type1 0x1234
+	jmpeq MAINPARSERIMPL_PARSE_H2 h.MainParserT_parser_local_hdr.type1 0x5678
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_H2 :	validate h.h2
-	mov h.h2.type1 h.MainParserT_parser_local_hdr_0.type1
-	mov h.h2.type2 h.MainParserT_parser_local_hdr_0.type2
-	mov h.h2.value h.MainParserT_parser_local_hdr_0.value
+	mov h.h2.type1 h.MainParserT_parser_local_hdr.type1
+	mov h.h2.type2 h.MainParserT_parser_local_hdr.type2
+	mov h.h2.value h.MainParserT_parser_local_hdr.value
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_H1 :	extract h.h1
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.h1

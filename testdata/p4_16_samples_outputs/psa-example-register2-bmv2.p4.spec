@@ -68,20 +68,20 @@ struct metadata {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 	bit<80> Ingress_tmp
-	bit<80> Ingress_tmp_1
+	bit<80> Ingress_tmp_0
+	bit<32> Ingress_tmp_1
 	bit<32> Ingress_tmp_2
-	bit<32> Ingress_tmp_3
+	bit<80> Ingress_tmp_3
 	bit<80> Ingress_tmp_4
 	bit<80> Ingress_tmp_5
 	bit<80> Ingress_tmp_6
-	bit<80> Ingress_tmp_7
+	bit<48> Ingress_tmp_7
 	bit<48> Ingress_tmp_8
 	bit<48> Ingress_tmp_9
-	bit<48> Ingress_tmp_10
+	bit<80> Ingress_tmp_10
 	bit<80> Ingress_tmp_11
 	bit<80> Ingress_tmp_12
-	bit<80> Ingress_tmp_0
-	bit<80> Ingress_s_0
+	bit<80> Ingress_s
 }
 metadata instanceof metadata
 
@@ -101,35 +101,35 @@ apply {
 	validate h.ipv4
 	mov h.ipv4.totalLen 0xe
 	jmpnv LABEL_END h.ipv4
-	regrd m.Ingress_tmp_0 port_pkt_ip_bytes_in_0 m.psa_ingress_input_metadata_ingress_port
-	mov m.Ingress_s_0 m.Ingress_tmp_0
-	mov m.Ingress_tmp m.Ingress_s_0
+	regrd m.Ingress_tmp_12 port_pkt_ip_bytes_in_0 m.psa_ingress_input_metadata_ingress_port
+	mov m.Ingress_s m.Ingress_tmp_12
+	mov m.Ingress_tmp m.Ingress_s
 	and m.Ingress_tmp 0xffffffffffff
+	mov m.Ingress_tmp_0 m.Ingress_tmp_12
+	shr m.Ingress_tmp_0 0x30
 	mov m.Ingress_tmp_1 m.Ingress_tmp_0
-	shr m.Ingress_tmp_1 0x30
 	mov m.Ingress_tmp_2 m.Ingress_tmp_1
+	add m.Ingress_tmp_2 0x1
 	mov m.Ingress_tmp_3 m.Ingress_tmp_2
-	add m.Ingress_tmp_3 0x1
 	mov m.Ingress_tmp_4 m.Ingress_tmp_3
+	shl m.Ingress_tmp_4 0x30
 	mov m.Ingress_tmp_5 m.Ingress_tmp_4
-	shl m.Ingress_tmp_5 0x30
-	mov m.Ingress_tmp_6 m.Ingress_tmp_5
+	and m.Ingress_tmp_5 0xffffffff000000000000
+	mov m.Ingress_s m.Ingress_tmp
+	or m.Ingress_s m.Ingress_tmp_5
+	mov m.Ingress_tmp_6 m.Ingress_s
 	and m.Ingress_tmp_6 0xffffffff000000000000
-	mov m.Ingress_s_0 m.Ingress_tmp
-	or m.Ingress_s_0 m.Ingress_tmp_6
-	mov m.Ingress_tmp_7 m.Ingress_s_0
-	and m.Ingress_tmp_7 0xffffffff000000000000
-	mov m.Ingress_tmp_8 m.Ingress_s_0
-	mov m.Ingress_tmp_9 h.ipv4.totalLen
-	mov m.Ingress_tmp_10 m.Ingress_tmp_8
-	add m.Ingress_tmp_10 m.Ingress_tmp_9
+	mov m.Ingress_tmp_7 m.Ingress_s
+	mov m.Ingress_tmp_8 h.ipv4.totalLen
+	mov m.Ingress_tmp_9 m.Ingress_tmp_7
+	add m.Ingress_tmp_9 m.Ingress_tmp_8
+	mov m.Ingress_tmp_10 m.Ingress_tmp_9
 	mov m.Ingress_tmp_11 m.Ingress_tmp_10
-	mov m.Ingress_tmp_12 m.Ingress_tmp_11
-	and m.Ingress_tmp_12 0xffffffffffff
-	mov m.Ingress_s_0 m.Ingress_tmp_7
-	or m.Ingress_s_0 m.Ingress_tmp_12
-	mov m.Ingress_tmp_0 m.Ingress_s_0
-	regwr port_pkt_ip_bytes_in_0 m.psa_ingress_input_metadata_ingress_port m.Ingress_tmp_0
+	and m.Ingress_tmp_11 0xffffffffffff
+	mov m.Ingress_s m.Ingress_tmp_6
+	or m.Ingress_s m.Ingress_tmp_11
+	mov m.Ingress_tmp_12 m.Ingress_s
+	regwr port_pkt_ip_bytes_in_0 m.psa_ingress_input_metadata_ingress_port m.Ingress_tmp_12
 	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ipv4
