@@ -98,8 +98,7 @@ class InjectJumboStruct : public Transform {
 // This pass injects metadata field which is used as port for 'tx' instruction
 // into the single metadata struct.
 // This pass has to be applied after CollectMetadataHeaderInfo fills
-// local_metadata_type field and ConvertToDpdkArch fills p4arch field of
-// DpdkProgramStructure which is passed to the constructor.
+// local_metadata_type field DpdkProgramStructure which is passed to the constructor.
 class InjectOutputPortMetadataField : public Transform {
     DpdkProgramStructure *structure;
 

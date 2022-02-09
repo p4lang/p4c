@@ -12,6 +12,7 @@ bool ParseDpdkArchitecture::preorder(const IR::ToplevelBlock* block) {
 }
 
 void ParseDpdkArchitecture::parse_pna_block(const IR::PackageBlock *block) {
+    structure->p4arch = "pna";
     auto p = block->findParameterValue("main_parser");
     if (p == nullptr) {
         ::error("Package %1% has no parameter named 'main_parser'", block);
@@ -33,6 +34,7 @@ void ParseDpdkArchitecture::parse_pna_block(const IR::PackageBlock *block) {
 }
 
 void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
+    structure->p4arch = "psa";
     auto pkg = block->findParameterValue("ingress");
     if (pkg == nullptr) {
         ::error("Package %1% has no parameter named 'ingress'", block);
