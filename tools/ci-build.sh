@@ -72,23 +72,13 @@ cd -
 function build_gauntlet() {
   # For add-apt-repository.
   apt-get install -y software-properties-common
-  # Also pull Gauntlet for translation validation.
-  git clone -b stable https://github.com/p4gauntlet/gauntlet /gauntlet
-  cd /gauntlet
-  git submodule update --init --recursive
-  cd -
-  # Symlink the parent p4c repository with Gauntlet.
-  # TODO: Only use the extension module and its tests.
-  rm -rf /gauntlet/modules/p4c
-  ln -s /p4c /gauntlet/modules/p4c
   # Symlink the toz3 extension for the p4 compiler.
   mkdir -p /p4c/extensions
-  ln -sf /gauntlet/modules/toz3 /p4c/extensions/toz3
-
-  # Install Gauntlet Python dependencies locally.
+  git clone -b stable https://github.com/p4gauntlet/toz3 /p4c/extensions/toz3
+  # The interpreter requires boost filesystem for file management.
   apt install -y libboost-filesystem-dev
-  # Install pytest and pytest-xdist to parallelize tests.
-  python -m pip install pytest pytest-xdist==1.34.0
+  # Disable failures on crashes
+  CMAKE_FLAGS+="-DVALIDATION_IGNORE_CRASHES=ON "
 }
 
 # These steps are necessary to validate the correct compilation of the P4C test
