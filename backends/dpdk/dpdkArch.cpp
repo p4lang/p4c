@@ -253,23 +253,23 @@ const IR::Node *ConvertToDpdkArch::preorder(IR::Member *m) {
 
 
 
-const IR::Node *DoConvertLookahead::preorder(IR::AssignmentStatement *statement) {
+void ConvertLookahead::Collect::postorder(const IR::AssignmentStatement *statement) {
     if (!statement->right->is<IR::MethodCallExpression>())
-        return statement;
+        return;
     auto mce = statement->right->to<IR::MethodCallExpression>();
 
     if (mce->type->is<IR::Type_Header>())
-        return statement;
+        return;
 
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
     if (!mi->is<P4::ExternMethod>())
-        return statement;
+        return;
     auto em = mi->to<P4::ExternMethod>();
     if (em->originalExternType->name != P4::P4CoreLibrary::instance.packetIn.name ||
             em->method->name != P4::P4CoreLibrary::instance.packetIn.lookahead.name)
-        return statement;
+        return;
 
-    LOG2("Converting lookahead in statement:" << std::endl << " " << statement);
+    LOG2("Collecting lookahead in statement:" << std::endl << " " << statement);
 
     /**
      * Store new header in following format in the map:
@@ -285,13 +285,7 @@ const IR::Node *DoConvertLookahead::preorder(IR::AssignmentStatement *statement)
     IR::ID newHeaderName(refMap->newName("lookahead_tmp_hdr"));
     auto newHeader = new IR::Type_Header(newHeaderName, newHeaderFields);
 
-    if (newHeaderMap.count(program)) {
-        newHeaderMap.at(program).push_back(newHeader);
-    } else {
-        newHeaderMap.emplace(program, IR::IndexedVector<IR::Node>(newHeader));
-    }
-
-    LOG2("Adding new header:" << std::endl << " " << newHeader);
+    repl->insertHeader(program, newHeader);
 
     /**
      * Store following declaration of new local variable which is of
@@ -304,13 +298,7 @@ const IR::Node *DoConvertLookahead::preorder(IR::AssignmentStatement *statement)
     auto newLocalVarType = new IR::Type_Name(newHeaderName);
     auto newLocalVar = new IR::Declaration_Variable(newLocalVarName, newLocalVarType);
 
-    if (newLocalVarMap.count(parser)) {
-        newLocalVarMap.at(parser).push_back(newLocalVar);
-    } else {
-        newLocalVarMap.emplace(parser, IR::IndexedVector<IR::Declaration>(newLocalVar));
-    }
-
-    LOG2("Adding new local variable:" << std::endl << " " << newLocalVar);
+    repl->insertVar(parser, newLocalVar);
 
     /**
      * Replace current statement with 2 new statements:
@@ -327,47 +315,59 @@ const IR::Node *DoConvertLookahead::preorder(IR::AssignmentStatement *statement)
     const IR::Expression *newRight;
     const IR::AssignmentStatement *newStat;
 
-    LOG2("Adding new statements:");
-
     newLeft = new IR::PathExpression(newHeader, new IR::Path(newLocalVarName));
     newRight = new IR::MethodCallExpression(newHeader, mce->method,
             new IR::Vector<IR::Type>(newLocalVarType));
     newStat = new IR::AssignmentStatement(newLeft, newRight);
     newStatements->push_back(newStat);
-    LOG2(" " << newStat);
 
     newLeft = statement->left;
     newRight = new IR::Member(new IR::PathExpression(newLocalVarName), newHeaderFieldName);
     newStat = new IR::AssignmentStatement(newLeft, newRight);
     newStatements->push_back(newStat);
-    LOG2(" " << newStat);
 
-    return newStatements;
+    repl->insertStatements(statement, newStatements);
 }
 
-const IR::Node *DoConvertLookahead::postorder(IR::P4Program *program) {
-    auto origProgram = getOriginal()->to<IR::P4Program>();
-    if (newHeaderMap.count(origProgram)) {
-        IR::Vector<IR::Node>::iterator insertIter = std::find_if(program->objects.begin(),
-                program->objects.end(), [](const IR::Node *n){return n->is<IR::P4Parser>();});
-        auto newHeaders = newHeaderMap.at(origProgram);
-        program->objects.insert(insertIter, newHeaders.begin(), newHeaders.end());
+const IR::Node *ConvertLookahead::Replace::postorder(IR::AssignmentStatement *as) {
+    auto result = repl->getStatements(getOriginal()->to<IR::AssignmentStatement>());
+    if (result == nullptr)
+        return as;
 
-        LOG2("Following new headers inserted into program " << dbp(program) << ":");
-        for (auto h : newHeaders) {
-            LOG2(" " << h);
-        }
+    LOG2("Statement:" << std::endl << " " << as);
+    LOG2("replaced by statements:");
+    for (auto s : *result) {
+        LOG2(" " << s);
     }
-    return program;
+
+    return result;
 }
 
-const IR::Node *DoConvertLookahead::postorder(IR::P4Parser *parser) {
-    auto origParser = getOriginal()->to<IR::P4Parser>();
-    if (newLocalVarMap.count(origParser)) {
-        parser->parserLocals.append(newLocalVarMap.at(origParser));
+const IR::Node *ConvertLookahead::Replace::postorder(IR::Type_Struct *s) {
+    auto program = findOrigCtxt<IR::P4Program>();
 
+    if (s->name != structure->header_type || program == nullptr)
+        return s;
+
+    auto result = repl->getHeaders(program);
+    if (result == nullptr)
+        return s;
+
+    LOG2("Following new headers inserted into program " << dbp(program) << ":");
+    for (auto h : *result) {
+        LOG2(" " << h);
+    }
+
+    result->push_back(s);
+    return result;
+}
+
+const IR::Node *ConvertLookahead::Replace::postorder(IR::P4Parser *parser) {
+    auto result = repl->getVars(getOriginal()->to<IR::P4Parser>());
+    if (result != nullptr) {
+        parser->parserLocals.append(*result);
         LOG2("Following new declarations inserted into parser " << dbp(parser) << ":");
-        for (auto decl : newLocalVarMap.at(origParser)) {
+        for (auto decl : *result) {
             LOG2(" " << decl);
         }
     }
@@ -928,50 +928,6 @@ const IR::Node *CollectLocalVariables::preorder(IR::P4Program *p) {
             LOG4("    " << decl);
         }
     }
-
-    /**
-     * It may happen that there are header definitions in the source P4 program
-     * which are placed after the definition of main header structure, which is
-     * perfectly fine if they are not used in the main header structure.
-     * But if such header is used to declare local variable there is created
-     * a new field of the same header type in the main header structure.
-     * If the main header structure is placed before the definition of that
-     * header, it is a problem for Type Checking.
-     * There might also be header definitions internally created by compiler
-     * which would cause the same problem.
-     * Therefore here we move all structure and header definitons directly
-     * before the main header structure to prevent this problem.
-     */
-
-    /* Find main header structure. */
-    IR::Vector<IR::Node>::iterator headerTypeIter = std::find_if(p->objects.begin(),
-            p->objects.end(), [this](const IR::Node *n){
-                return n->is<IR::Type_Struct>() &&
-                       n->to<IR::Type_Struct>()->name == structure->header_type;});
-    auto mainHeaderStructure = *headerTypeIter;
-
-    /**
-     * Store header definitions which will be moved before the main header structure
-     * into temporary vector and remove them temporarily from the objects vector.
-     */
-    IR::IndexedVector<IR::Node> defs;
-    std::copy_if(headerTypeIter, p->objects.end(), std::back_inserter(defs),
-            [this](const IR::Node *n){
-                return n->is<IR::Type_StructLike>() &&
-                n->to<IR::Type_StructLike>()->name != structure->header_type;});
-    p->objects.erase(std::remove_if(headerTypeIter, p->objects.end(),
-            [this](const IR::Node *n){
-                return n->is<IR::Type_StructLike>() &&
-                n->to<IR::Type_StructLike>()->name != structure->header_type;}), p->objects.end());
-
-    /* Insert header definitions before the main header structure. */
-    p->objects.insert(headerTypeIter, defs.begin(), defs.end());
-
-    LOG2("Structure and header definitions:");
-    for (auto d : defs) {
-        LOG2(" " << d);
-    }
-    LOG2("moved before main header structure:" << std::endl << " " << mainHeaderStructure);
 
     return p;
 }

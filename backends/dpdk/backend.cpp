@@ -55,7 +55,6 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new BMV2::LowerExpressions(typeMap),
         new P4::RemoveComplexExpressions(refMap, typeMap,
                 new DPDK::ProcessControls(&structure.pipeline_controls)),
-        new ConvertLookahead(refMap, typeMap),
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
@@ -65,6 +64,8 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::MoveDeclarations(),  // Move all local declarations to the beginning
         new CollectProgramStructure(refMap, typeMap, &structure),
         new CollectMetadataHeaderInfo(&structure),
+        new ConvertLookahead(refMap, typeMap, &structure),
+        new P4::TypeChecking(refMap, typeMap),
         new ConvertToDpdkArch(refMap, &structure),
         new InjectJumboStruct(&structure),
         new InjectOutputPortMetadataField(&structure),

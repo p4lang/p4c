@@ -70,6 +70,12 @@ struct tbl_set_member_id_arg_t {
 	bit<32> member_id
 }
 
+header ethernet instanceof ethernet_t
+header ipv4_base instanceof ipv4_base_t
+header ipv4_option_timestamp instanceof ipv4_option_timestamp_t
+header option instanceof option_t
+header IngressParser_parser_lookahead_tmp instanceof lookahead_tmp_hdr
+
 struct EMPTY {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
 	bit<32> psa_ingress_parser_input_metadata_packet_path
@@ -104,12 +110,6 @@ struct EMPTY {
 	bit<32> IngressParser_parser_tmp_extract_tmp
 }
 metadata instanceof EMPTY
-
-header ethernet instanceof ethernet_t
-header ipv4_base instanceof ipv4_base_t
-header ipv4_option_timestamp instanceof ipv4_option_timestamp_t
-header option instanceof option_t
-header IngressParser_parser_lookahead_tmp instanceof lookahead_tmp_hdr
 
 action NoAction args none {
 	return

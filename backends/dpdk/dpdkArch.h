@@ -99,23 +99,90 @@ class ConvertToDpdkArch : public Transform {
  *   var_name = lookahead_tmp;
  * }
  */
-class DoConvertLookahead : public Transform {
-    P4::ReferenceMap *refMap;
-    P4::TypeMap *typeMap;
-    std::unordered_map<const IR::P4Program *, IR::IndexedVector<IR::Node>> newHeaderMap;
-    std::unordered_map<const IR::P4Parser *, IR::IndexedVector<IR::Declaration>> newLocalVarMap;
-  public:
-    DoConvertLookahead(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) :
-            refMap(refMap), typeMap(typeMap) {}
-    const IR::Node *preorder(IR::AssignmentStatement *statement) override;
-    const IR::Node *postorder(IR::P4Program *program) override;
-    const IR::Node *postorder(IR::P4Parser *parser) override;
-};
-
 struct ConvertLookahead : public PassManager {
-    ConvertLookahead(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
+    class ReplacementMap {
+        std::unordered_map<const IR::P4Program *, IR::IndexedVector<IR::Node>> newHeaderMap;
+        std::unordered_map<const IR::P4Parser *,
+                IR::IndexedVector<IR::Declaration>> newLocalVarMap;
+        std::unordered_map<const IR::AssignmentStatement *,
+                IR::IndexedVector<IR::StatOrDecl>> newStatMap;
+      public:
+        void insertHeader(const IR::P4Program *p, const IR::Type_Header *h) {
+            if (newHeaderMap.count(p)) {
+                newHeaderMap.at(p).push_back(h);
+            } else {
+                newHeaderMap.emplace(p, IR::IndexedVector<IR::Node>(h));
+            }
+            LOG5("Program: " << dbp(p));
+            LOG2("Adding new header:" << std::endl << " " << h);
+        }
+        IR::IndexedVector<IR::Node> *getHeaders(const IR::P4Program *p) {
+            if (newHeaderMap.count(p)) {
+                return new IR::IndexedVector<IR::Node>(newHeaderMap.at(p));
+            }
+            return nullptr;
+        }
+        void insertVar(const IR::P4Parser *p, const IR::Declaration_Variable *v) {
+            if (newLocalVarMap.count(p)) {
+                newLocalVarMap.at(p).push_back(v);
+            } else {
+                newLocalVarMap.emplace(p, IR::IndexedVector<IR::Declaration>(v));
+            }
+            LOG5("Parser: " << dbp(p));
+            LOG2("Adding new local variable:" << std::endl << " " << v);
+        }
+        IR::IndexedVector<IR::Declaration> *getVars(const IR::P4Parser *p) {
+            if (newLocalVarMap.count(p)) {
+                return new IR::IndexedVector<IR::Declaration>(newLocalVarMap.at(p));
+            }
+            return nullptr;
+        }
+        void insertStatements(const IR::AssignmentStatement *as,
+                IR::IndexedVector<IR::StatOrDecl> *vec) {
+            BUG_CHECK(newStatMap.count(as) == 0,
+                    "Unexpectedly converting statement %1% multiple times!", as);
+            newStatMap.emplace(as, *vec);
+            LOG5("AssignmentStatement: " << dbp(as));
+            LOG2("Adding new statements:");
+            for (auto s : *vec) {
+                LOG2(" " << s);
+            }
+        }
+        IR::IndexedVector<IR::StatOrDecl> *getStatements(const IR::AssignmentStatement *as) {
+            if (newStatMap.count(as)) {
+                return new IR::IndexedVector<IR::StatOrDecl>(newStatMap.at(as));
+            }
+            return nullptr;
+        }
+    };
+
+    ReplacementMap repl;
+
+    class Collect : public Inspector {
+        P4::ReferenceMap *refMap;
+        P4::TypeMap *typeMap;
+        ReplacementMap *repl;
+      public:
+        Collect(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, ReplacementMap *repl) :
+                refMap(refMap), typeMap(typeMap), repl(repl) {}
+        void postorder(const IR::AssignmentStatement *statement) override;
+    };
+
+    class Replace : public Transform {
+        DpdkProgramStructure *structure;
+        ReplacementMap *repl;
+      public:
+        Replace(DpdkProgramStructure *structure, ReplacementMap *repl) :
+                structure(structure), repl(repl) {}
+        const IR::Node *postorder(IR::AssignmentStatement *as) override;
+        const IR::Node *postorder(IR::Type_Struct *s) override;
+        const IR::Node *postorder(IR::P4Parser *parser) override;
+    };
+
+    ConvertLookahead(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, DpdkProgramStructure *s) {
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
-        passes.push_back(new DoConvertLookahead(refMap, typeMap));
+        passes.push_back(new Collect(refMap, typeMap, &repl));
+        passes.push_back(new Replace(s, &repl));
         passes.push_back(new P4::ClearTypeMap(typeMap));
     }
 };
