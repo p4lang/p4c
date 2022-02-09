@@ -108,7 +108,7 @@ metadata instanceof EMPTY
 header ethernet instanceof ethernet_t
 header ipv4_base instanceof ipv4_base_t
 header ipv4_option_timestamp instanceof ipv4_option_timestamp_t
-header IngressParser_parser_tmp_hdr_0 instanceof option_t
+header option instanceof option_t
 header IngressParser_parser_tmp_0_tmp_h instanceof tmp_0_header
 
 action NoAction args none {
@@ -181,8 +181,8 @@ apply {
 	mov m.IngressParser_parser_tmp_0 h.IngressParser_parser_tmp_0_tmp_h.tmp_0
 	jmpeq MYIP_PARSE_IPV4_OPTION_TIMESTAMP m.IngressParser_parser_tmp_0 0x44
 	jmp MYIP_ACCEPT
-	MYIP_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead h.IngressParser_parser_tmp_hdr_0
-	mov m.IngressParser_parser_tmp_1 h.IngressParser_parser_tmp_hdr_0.len
+	MYIP_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead h.option
+	mov m.IngressParser_parser_tmp_1 h.option.len
 	mov m.IngressParser_parser_tmp_2 m.IngressParser_parser_tmp_1
 	shl m.IngressParser_parser_tmp_2 0x3
 	mov m.IngressParser_parser_tmp m.IngressParser_parser_tmp_2
