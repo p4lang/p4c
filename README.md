@@ -298,6 +298,9 @@ For documentation building:
 sudo dnf install -y doxygen graphviz texlive-scheme-full
 ```
 
+You can also look at the [dependencies installation script](tools/install_fedora_deps.sh)
+for a fresh Fedora instance.
+
 ## macOS dependencies
 
 Installing on macOS:
