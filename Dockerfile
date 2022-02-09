@@ -1,4 +1,5 @@
 FROM p4lang/behavioral-model:latest
+LABEL maintainer="P4 Developers <p4-dev@lists.p4.org>"
 
 # Default to using 2 make jobs, which is a good default for CI. If you're
 # building locally or you know there are more cores available, you may want to
@@ -17,6 +18,8 @@ ARG VALIDATION=OFF
 # This creates a release build that includes link time optimization and links
 # all libraries statically.
 ARG BUILD_STATIC_RELEASE=OFF
+# No questions asked during package installation.
+ARG DEBIAN_FRONTEND=noninteractive
 
 # Delegate the build to tools/ci-build.
 COPY . /p4c/

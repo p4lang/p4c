@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  # Build and test p4c on Ubuntu 16.04
+  # Build and test p4c on Ubuntu 20.04
   build-linux:
     strategy:
       fail-fast: false
