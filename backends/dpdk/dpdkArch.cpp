@@ -269,57 +269,20 @@ const IR::Node *DoConvertLookahead::preorder(IR::AssignmentStatement *statement)
             em->method->name != P4::P4CoreLibrary::instance.packetIn.lookahead.name)
         return statement;
 
-    IR::ID newHeaderFieldName;
-    const IR::Type *newHeaderFieldType = nullptr;
-
-    /**
-     * Thanks to the fact that lookaheads are already expanded by P4::ExpandLookahead pass
-     * and structures are already flattened, following cases should cover all possibilities.
-     */
-    if (auto left = statement->left->to<IR::PathExpression>()) {
-        /**
-         * Assignment to simple variable:
-         * var_name = pkt.lookahead<T>();
-         */
-        newHeaderFieldName = left->path->name;
-        newHeaderFieldType = left->type;
-    } else if (auto left = statement->left->to<IR::Member>()) {
-        if (auto pe = left->expr->to<IR::PathExpression>()) {
-            /**
-             * Assignment to a header or structure field:
-             * hdr.field = pkt.lookahead<T>();
-             */
-            newHeaderFieldName = IR::ID(pe->path->name + "_" + left->member);
-            newHeaderFieldType = left->type;
-        } else if (left->expr->is<IR::Member>() &&
-                left->expr->to<IR::Member>()->expr->is<IR::PathExpression>()) {
-            /**
-             * Assignment to a header field of a header which is a structure field:
-             * hdrs.hdr_name.field = pkt.lookahead<T>();
-             */
-            auto leftMember = left->expr->to<IR::Member>();
-            auto pe = leftMember->expr->to<IR::PathExpression>();
-            newHeaderFieldName = IR::ID(
-                    pe->path->name + "_" + leftMember->member + "_" + left->member);
-            newHeaderFieldType = left->type;
-        }
-    }
-
-    BUG_CHECK(newHeaderFieldType, "Unsupported lookahead usage: %1%", statement);
-
     LOG2("Converting lookahead in statement:" << std::endl << " " << statement);
 
     /**
      * Store new header in following format in the map:
      *
-     * header var_name_header {
-     *   T var_name;
+     * header lookahead_tmp_hdr {
+     *   T f;
      * }
      */
+    IR::ID newHeaderFieldName("f");
     auto program = findOrigCtxt<IR::P4Program>();
     IR::IndexedVector<IR::StructField> newHeaderFields;
-    newHeaderFields.push_back(new IR::StructField(newHeaderFieldName, newHeaderFieldType));
-    IR::ID newHeaderName(refMap->newName(newHeaderFieldName + "_header"));
+    newHeaderFields.push_back(new IR::StructField(newHeaderFieldName, statement->left->type));
+    IR::ID newHeaderName(refMap->newName("lookahead_tmp_hdr"));
     auto newHeader = new IR::Type_Header(newHeaderName, newHeaderFields);
 
     if (newHeaderMap.count(program)) {
@@ -334,10 +297,10 @@ const IR::Node *DoConvertLookahead::preorder(IR::AssignmentStatement *statement)
      * Store following declaration of new local variable which is of
      * new header type in the map:
      *
-     * var_name_header var_name_tmp_h;
+     * lookahead_tmp_hdr lookahead_tmp;
      */
     auto parser = findOrigCtxt<IR::P4Parser>();
-    IR::ID newLocalVarName(refMap->newName(newHeaderFieldName + "_tmp_h"));
+    IR::ID newLocalVarName(refMap->newName("lookahead_tmp"));
     auto newLocalVarType = new IR::Type_Name(newHeaderName);
     auto newLocalVar = new IR::Declaration_Variable(newLocalVarName, newLocalVarType);
 
@@ -356,8 +319,8 @@ const IR::Node *DoConvertLookahead::preorder(IR::AssignmentStatement *statement)
      * - assignment statement which assigns the field from
      *   newly created header into the original variable
      *
-     * var_name_tmp_h = pkt.lookahead<var_name_header>();
-     * var_name = var_name_tmp_h.var_name;
+     * lookahead_tmp = pkt.lookahead<lookahead_tmp_hdr>();
+     * var_name = lookahead_tmp.f;
      */
     auto newStatements = new IR::IndexedVector<IR::StatOrDecl>;
     const IR::Expression *newLeft;

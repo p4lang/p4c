@@ -85,18 +85,18 @@ class ConvertToDpdkArch : public Transform {
  *
  * - new header definition:
  *
- * header var_name_header {
- *   T var_name;
+ * header lookahead_tmp_hdr {
+ *   T f;
  * }
  *
  * - modification in parser code:
  *
  * T var_name;
- * var_name_header var_name_tmp_h;
+ * lookahead_tmp_hdr lookahead_tmp;
  *
  * state state_name {
- *   var_name_tmp_h = pkt.lookahead<var_name_header>();
- *   var_name = var_name_tmp_h.var_name;
+ *   lookahead_tmp = pkt.lookahead<lookahead_tmp_hdr>();
+ *   var_name = lookahead_tmp;
  * }
  */
 class DoConvertLookahead : public Transform {

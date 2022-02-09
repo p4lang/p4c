@@ -30,8 +30,8 @@ struct option_t {
 	bit<8> len
 }
 
-struct tmp_0_header {
-	bit<8> tmp_0
+struct lookahead_tmp_hdr {
+	bit<8> f
 }
 
 struct psa_ingress_output_metadata_t {
@@ -109,7 +109,7 @@ header ethernet instanceof ethernet_t
 header ipv4_base instanceof ipv4_base_t
 header ipv4_option_timestamp instanceof ipv4_option_timestamp_t
 header option instanceof option_t
-header IngressParser_parser_tmp_0_tmp_h instanceof tmp_0_header
+header IngressParser_parser_lookahead_tmp instanceof lookahead_tmp_hdr
 
 action NoAction args none {
 	return
@@ -177,8 +177,8 @@ apply {
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_IPV4 :	extract h.ipv4_base
 	jmpeq MYIP_ACCEPT h.ipv4_base.version_ihl 0x45
-	lookahead h.IngressParser_parser_tmp_0_tmp_h
-	mov m.IngressParser_parser_tmp_0 h.IngressParser_parser_tmp_0_tmp_h.tmp_0
+	lookahead h.IngressParser_parser_lookahead_tmp
+	mov m.IngressParser_parser_tmp_0 h.IngressParser_parser_lookahead_tmp.f
 	jmpeq MYIP_PARSE_IPV4_OPTION_TIMESTAMP m.IngressParser_parser_tmp_0 0x44
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead h.option

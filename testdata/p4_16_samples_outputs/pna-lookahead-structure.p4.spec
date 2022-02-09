@@ -5,12 +5,12 @@ struct my_header_t {
 	bit<32> value
 }
 
-struct tmp_1_header {
-	bit<24> tmp_1
+struct lookahead_tmp_hdr {
+	bit<24> f
 }
 
-struct tmp_header {
-	bit<24> tmp
+struct lookahead_tmp_hdr_0 {
+	bit<24> f
 }
 
 struct main_metadata_t {
@@ -48,21 +48,21 @@ metadata instanceof main_metadata_t
 
 header h1 instanceof my_header_t
 header h2 instanceof my_header_t
-header MainParserT_parser_tmp_1_tmp_h instanceof tmp_1_header
-header MainParserT_parser_tmp_tmp_h instanceof tmp_header
+header MainParserT_parser_lookahead_tmp instanceof lookahead_tmp_hdr
+header MainParserT_parser_lookahead_tmp_0 instanceof lookahead_tmp_hdr_0
 
 apply {
 	rx m.pna_main_input_metadata_input_port
-	lookahead h.MainParserT_parser_tmp_tmp_h
-	mov m.MainParserT_parser_tmp h.MainParserT_parser_tmp_tmp_h.tmp
+	lookahead h.MainParserT_parser_lookahead_tmp_0
+	mov m.MainParserT_parser_tmp h.MainParserT_parser_lookahead_tmp_0.f
 	mov m.MainParserT_parser_tmp_4 m.MainParserT_parser_tmp
 	shr m.MainParserT_parser_tmp_4 0x8
 	mov m.MainParserT_parser_tmp_2 m.MainParserT_parser_tmp_4
 	jmpeq MAINPARSERIMPL_PARSE_H1 m.MainParserT_parser_tmp_2 0x1234
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_H1 :	extract h.h1
-	lookahead h.MainParserT_parser_tmp_1_tmp_h
-	mov m.MainParserT_parser_tmp_1 h.MainParserT_parser_tmp_1_tmp_h.tmp_1
+	lookahead h.MainParserT_parser_lookahead_tmp
+	mov m.MainParserT_parser_tmp_1 h.MainParserT_parser_lookahead_tmp.f
 	mov m.MainParserT_parser_tmp_3 m.MainParserT_parser_tmp_1
 	shr m.MainParserT_parser_tmp_3 0x8
 	mov m.local_metadata__s1_type10 m.MainParserT_parser_tmp_3

@@ -29,8 +29,8 @@ struct option_t {
 	bit<8> len
 }
 
-struct tmp_0_header {
-	bit<8> tmp_0
+struct lookahead_tmp_hdr {
+	bit<8> f
 }
 
 struct a1_arg_t {
@@ -75,7 +75,7 @@ header ethernet instanceof ethernet_t
 header ipv4_base instanceof ipv4_base_t
 header ipv4_option_timestamp instanceof ipv4_option_timestamp_t
 header MainParserT_parser_tmp_hdr_0 instanceof option_t
-header MainParserT_parser_tmp_0_tmp_h instanceof tmp_0_header
+header MainParserT_parser_lookahead_tmp instanceof lookahead_tmp_hdr
 
 action NoAction args none {
 	return
@@ -124,8 +124,8 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4_base
 	jmpeq MAINPARSERIMPL_ACCEPT h.ipv4_base.version_ihl 0x45
-	lookahead h.MainParserT_parser_tmp_0_tmp_h
-	mov m.MainParserT_parser_tmp_0 h.MainParserT_parser_tmp_0_tmp_h.tmp_0
+	lookahead h.MainParserT_parser_lookahead_tmp
+	mov m.MainParserT_parser_tmp_0 h.MainParserT_parser_lookahead_tmp.f
 	jmpeq MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP m.MainParserT_parser_tmp_0 0x44
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead h.MainParserT_parser_tmp_hdr_0
