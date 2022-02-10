@@ -147,10 +147,8 @@ const IR::Node *ConvertToDpdkArch::postorder(IR::Type_Control *c) {
     }
     // Ingress, Egress, IngressDeparser, EgressDeparser are reserved name in psa.p4
     if (c->name == "Ingress" || c->name == "Egress") {
-        structure->p4arch = "psa";
         t = rewriteControlType(c, c->name);
     } else if (c->name == "MainControlT") {
-        structure->p4arch = "pna";
         t = rewriteControlType(c, c->name);
     } else if (c->name == "PreControlT") {
         t = rewriteControlType(c, c->name);
@@ -1230,7 +1228,13 @@ const IR::P4Table* SplitP4TableCommon::create_group_table(const IR::P4Table* tbl
 const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     bool isConstructedInPlace = false;
     bool isAsInstanceShared = false;
-    auto instance = Helpers::getExternInstanceFromProperty(tbl, "psa_implementation",
+    cstring implementation = "psa_implementation";
+
+    if (structure->isPNA()) {
+        implementation = "pna_implementation";
+    }
+
+    auto instance = Helpers::getExternInstanceFromProperty(tbl, implementation,
                                                            refMap, typeMap, &isConstructedInPlace);
     if (!instance)
         return tbl;
@@ -1342,7 +1346,12 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
 const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
     bool isConstructedInPlace = false;
     bool isApInstanceShared = false;
-    auto instance = Helpers::getExternInstanceFromProperty(tbl, "psa_implementation",
+    cstring implementation = "psa_implementation";
+
+    if (structure->isPNA())
+        implementation = "pna_implementation";
+
+    auto instance = Helpers::getExternInstanceFromProperty(tbl, implementation,
             refMap, typeMap, &isConstructedInPlace);
 
     if (!instance || instance->type->name != "ActionProfile")
