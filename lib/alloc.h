@@ -46,7 +46,7 @@ template<class T> class Alloc1Dbase {
 template<class T, int S> class Alloc1D : public Alloc1Dbase<T> {
     std::array<T, S> data;
  public:
-    Alloc1D() : Alloc1Dbase<T>(S, data.data()) {}
+    Alloc1D() : Alloc1Dbase<T>(S, data.data()), data{} {}
     Alloc1Dbase<T> &base() { return *this; }
 };
 
@@ -102,7 +102,7 @@ template<class T> class Alloc2Dbase {
 template<class T, int R, int C> class Alloc2D : public Alloc2Dbase<T> {
     std::array<T, R*C> data;
  public:
-    Alloc2D() : Alloc2Dbase<T>(R, C, data.data()) {}
+    Alloc2D() : Alloc2Dbase<T>(R, C, data.data()), data{} {}
     Alloc2Dbase<T> &base() { return *this; }
 };
 
