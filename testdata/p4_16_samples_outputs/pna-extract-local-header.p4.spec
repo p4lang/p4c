@@ -1,13 +1,8 @@
 
 struct my_header_t {
-	bit<8> type1
+	bit<16> type1
 	bit<8> type2
-	bit<8> value
-}
-
-struct my_struct_t {
-	bit<8> type1
-	bit<8> type2
+	bit<32> value
 }
 
 struct main_metadata_t {
@@ -32,19 +27,31 @@ struct main_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
 	bit<8> pna_main_output_metadata_class_of_service
 	bit<32> pna_main_output_metadata_output_port
-	my_struct_t MainParserT_parser_tmp_0
 }
 metadata instanceof main_metadata_t
 
-header h instanceof my_header_t
+header h1 instanceof my_header_t
+header h2 instanceof my_header_t
+header MainParserT_parser_local_hdr instanceof my_header_t
 
 apply {
 	rx m.pna_main_input_metadata_input_port
-	lookahead m.MainParserT_parser_tmp_0
-	jmpeq MAINPARSERIMPL_PARSE_HEADER m.MainParserT_parser_tmp_0.type2 0x1
+	invalidate h.MainParserT_parser_local_hdr
+	extract h.MainParserT_parser_local_hdr
+	jmpeq MAINPARSERIMPL_PARSE_H1 h.MainParserT_parser_local_hdr.type1 0x1234
+	jmpeq MAINPARSERIMPL_PARSE_H2 h.MainParserT_parser_local_hdr.type1 0x5678
 	jmp MAINPARSERIMPL_ACCEPT
-	MAINPARSERIMPL_PARSE_HEADER :	extract h.h
-	MAINPARSERIMPL_ACCEPT :	tx m.pna_main_output_metadata_output_port
+	MAINPARSERIMPL_PARSE_H2 :	validate h.h2
+	mov h.h2.type1 h.MainParserT_parser_local_hdr.type1
+	mov h.h2.type2 h.MainParserT_parser_local_hdr.type2
+	mov h.h2.value h.MainParserT_parser_local_hdr.value
+	jmp MAINPARSERIMPL_ACCEPT
+	MAINPARSERIMPL_PARSE_H1 :	extract h.h1
+	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.h1
+	jmpnv LABEL_END h.h2
+	emit h.h1
+	emit h.h2
+	LABEL_END :	tx m.pna_main_output_metadata_output_port
 }
 
 

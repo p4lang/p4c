@@ -73,10 +73,10 @@ struct metadata_t {
 	bit<8> psa_egress_output_metadata_drop
 	bit<32> local_metadata_port_in
 	bit<32> local_metadata_port_out
-	bit<32> Ingress_tmp_0
-	bit<32> Ingress_color_out_0
-	bit<32> Ingress_color_in_0
 	bit<32> Ingress_tmp
+	bit<32> Ingress_color_out
+	bit<32> Ingress_color_in
+	bit<32> Ingress_tmp_0
 }
 metadata instanceof metadata_t
 
@@ -90,13 +90,13 @@ action NoAction args none {
 }
 
 action execute args instanceof execute_arg_t {
-	mov m.Ingress_tmp_0 h.ipv4.totalLen
-	meter meter0_0 t.index m.Ingress_tmp_0 m.Ingress_color_in_0 m.Ingress_color_out_0
-	jmpneq LABEL_FALSE_0 m.Ingress_color_out_0 0x0
-	mov m.Ingress_tmp 0x1
+	mov m.Ingress_tmp h.ipv4.totalLen
+	meter meter0_0 t.index m.Ingress_tmp m.Ingress_color_in m.Ingress_color_out
+	jmpneq LABEL_FALSE_0 m.Ingress_color_out 0x0
+	mov m.Ingress_tmp_0 0x1
 	jmp LABEL_END_0
-	LABEL_FALSE_0 :	mov m.Ingress_tmp 0x0
-	LABEL_END_0 :	mov m.local_metadata_port_out m.Ingress_tmp
+	LABEL_FALSE_0 :	mov m.Ingress_tmp_0 0x0
+	LABEL_END_0 :	mov m.local_metadata_port_out m.Ingress_tmp_0
 	return
 }
 
@@ -120,7 +120,7 @@ apply {
 	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
-	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_color_in_0 0x2
+	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_color_in 0x2
 	jmpneq LABEL_END m.local_metadata_port_out 0x1
 	table tbl
 	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0

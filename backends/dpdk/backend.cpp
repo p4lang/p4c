@@ -64,6 +64,8 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::MoveDeclarations(),  // Move all local declarations to the beginning
         new CollectProgramStructure(refMap, typeMap, &structure),
         new CollectMetadataHeaderInfo(&structure),
+        new ConvertLookahead(refMap, typeMap, &structure),
+        new P4::TypeChecking(refMap, typeMap),
         new ConvertToDpdkArch(refMap, &structure),
         new InjectJumboStruct(&structure),
         new InjectOutputPortMetadataField(&structure),
@@ -77,7 +79,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap, true),
         new ConvertBinaryOperationTo2Params(),
         new CollectProgramStructure(refMap, typeMap, &structure),
-        new CollectLocalVariableToMetadata(refMap, &structure),
+        new CollectLocalVariables(refMap, typeMap, &structure),
         new CollectErrors(&structure),
         new ConvertInternetChecksum(typeMap, &structure),
         new PrependPDotToActionArgs(typeMap, refMap, &structure),

@@ -23,6 +23,7 @@ limitations under the License.
 #include "frontends/p4/sideEffects.h"
 #include <ir/ir.h>
 #include "lib/error.h"
+#include "lib/ordered_map.h"
 #include "dpdkProgramStructure.h"
 
 namespace DPDK {
@@ -64,6 +65,126 @@ class ConvertToDpdkArch : public Transform {
     ConvertToDpdkArch(P4::ReferenceMap *refMap, DpdkProgramStructure *structure) :
         refMap(refMap), structure(structure) {
         CHECK_NULL(structure);
+    }
+};
+
+/**
+ * DPDK target supports lookahead instruction only with header operand.
+ * This pass transforms usage of lookahead method with type parameters
+ * of other than header type (IR::Type_Header) to lookahead with header
+ * type using the following transformation:
+ *
+ * This parser code:
+ *
+ * T var_name;
+ *
+ * state state_name {
+ *   var_name = pkt.lookahead<T>();
+ * }
+ *
+ * is transformed to this:
+ *
+ * - new header definition:
+ *
+ * header lookahead_tmp_hdr {
+ *   T f;
+ * }
+ *
+ * - modification in parser code:
+ *
+ * T var_name;
+ * lookahead_tmp_hdr lookahead_tmp;
+ *
+ * state state_name {
+ *   lookahead_tmp = pkt.lookahead<lookahead_tmp_hdr>();
+ *   var_name = lookahead_tmp;
+ * }
+ */
+struct ConvertLookahead : public PassManager {
+    class ReplacementMap {
+        std::unordered_map<const IR::P4Program *, IR::IndexedVector<IR::Node>> newHeaderMap;
+        std::unordered_map<const IR::P4Parser *,
+                IR::IndexedVector<IR::Declaration>> newLocalVarMap;
+        std::unordered_map<const IR::AssignmentStatement *,
+                IR::IndexedVector<IR::StatOrDecl>> newStatMap;
+      public:
+        void insertHeader(const IR::P4Program *p, const IR::Type_Header *h) {
+            if (newHeaderMap.count(p)) {
+                newHeaderMap.at(p).push_back(h);
+            } else {
+                newHeaderMap.emplace(p, IR::IndexedVector<IR::Node>(h));
+            }
+            LOG5("Program: " << dbp(p));
+            LOG2("Adding new header:" << std::endl << " " << h);
+        }
+        IR::IndexedVector<IR::Node> *getHeaders(const IR::P4Program *p) {
+            if (newHeaderMap.count(p)) {
+                return new IR::IndexedVector<IR::Node>(newHeaderMap.at(p));
+            }
+            return nullptr;
+        }
+        void insertVar(const IR::P4Parser *p, const IR::Declaration_Variable *v) {
+            if (newLocalVarMap.count(p)) {
+                newLocalVarMap.at(p).push_back(v);
+            } else {
+                newLocalVarMap.emplace(p, IR::IndexedVector<IR::Declaration>(v));
+            }
+            LOG5("Parser: " << dbp(p));
+            LOG2("Adding new local variable:" << std::endl << " " << v);
+        }
+        IR::IndexedVector<IR::Declaration> *getVars(const IR::P4Parser *p) {
+            if (newLocalVarMap.count(p)) {
+                return new IR::IndexedVector<IR::Declaration>(newLocalVarMap.at(p));
+            }
+            return nullptr;
+        }
+        void insertStatements(const IR::AssignmentStatement *as,
+                IR::IndexedVector<IR::StatOrDecl> *vec) {
+            BUG_CHECK(newStatMap.count(as) == 0,
+                    "Unexpectedly converting statement %1% multiple times!", as);
+            newStatMap.emplace(as, *vec);
+            LOG5("AssignmentStatement: " << dbp(as));
+            LOG2("Adding new statements:");
+            for (auto s : *vec) {
+                LOG2(" " << s);
+            }
+        }
+        IR::IndexedVector<IR::StatOrDecl> *getStatements(const IR::AssignmentStatement *as) {
+            if (newStatMap.count(as)) {
+                return new IR::IndexedVector<IR::StatOrDecl>(newStatMap.at(as));
+            }
+            return nullptr;
+        }
+    };
+
+    ReplacementMap repl;
+
+    class Collect : public Inspector {
+        P4::ReferenceMap *refMap;
+        P4::TypeMap *typeMap;
+        ReplacementMap *repl;
+      public:
+        Collect(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, ReplacementMap *repl) :
+                refMap(refMap), typeMap(typeMap), repl(repl) {}
+        void postorder(const IR::AssignmentStatement *statement) override;
+    };
+
+    class Replace : public Transform {
+        DpdkProgramStructure *structure;
+        ReplacementMap *repl;
+      public:
+        Replace(DpdkProgramStructure *structure, ReplacementMap *repl) :
+                structure(structure), repl(repl) {}
+        const IR::Node *postorder(IR::AssignmentStatement *as) override;
+        const IR::Node *postorder(IR::Type_Struct *s) override;
+        const IR::Node *postorder(IR::P4Parser *parser) override;
+    };
+
+    ConvertLookahead(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, DpdkProgramStructure *s) {
+        passes.push_back(new P4::TypeChecking(refMap, typeMap));
+        passes.push_back(new Collect(refMap, typeMap, &repl));
+        passes.push_back(new Replace(s, &repl));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
     }
 };
 
@@ -270,16 +391,34 @@ class ConvertBinaryOperationTo2Params : public Transform {
     const IR::Node *postorder(IR::P4Control *a) override;
     const IR::Node *postorder(IR::P4Parser *a) override;
 };
-// Since in dpdk asm, there is no local variable declaraion, we need to collect
+
+// Since in dpdk asm, there is no local variable declaration, we need to collect
 // all local variables and inject them into the metadata struct.
-class CollectLocalVariableToMetadata : public Transform {
-    std::map<const cstring, IR::IndexedVector<IR::Declaration>> locals_map;
+// Local variables which are of header types are injected into headers struct
+// instead of metadata struct, so that they can be instantiated as headers in the
+// resulting dpdk asm file.
+class CollectLocalVariables : public Transform {
+    ordered_map<const IR::Declaration_Variable *, const cstring> localsMap;
     P4::ReferenceMap *refMap;
+    P4::TypeMap* typeMap;
     DpdkProgramStructure *structure;
 
+    void insert(const cstring prefix, const IR::IndexedVector<IR::Declaration> *locals) {
+        for (auto d : *locals) {
+            if (auto dv = d->to<IR::Declaration_Variable>()) {
+                const cstring name = refMap->newName(prefix + "_" + dv->name.name);
+                localsMap.emplace(dv, name);
+            } else if (!d->is<IR::P4Action>() && !d->is<IR::P4Table>() &&
+                       !d->is<IR::Declaration_Instance>()) {
+                BUG("%1%: Unhandled declaration type", d);
+            }
+        }
+    }
+
   public:
-    CollectLocalVariableToMetadata(P4::ReferenceMap *refMap, DpdkProgramStructure *structure)
-        : refMap(refMap), structure(structure) {}
+    CollectLocalVariables(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                   DpdkProgramStructure *structure)
+        : refMap(refMap), typeMap(typeMap), structure(structure) {}
     const IR::Node *preorder(IR::P4Program *p) override;
     const IR::Node *postorder(IR::Type_Struct *s) override;
     const IR::Node *postorder(IR::PathExpression *path) override;

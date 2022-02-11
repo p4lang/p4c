@@ -17,22 +17,23 @@ limitations under the License.
 #include <core.p4>
 #include <pna.p4>
 
-struct my_struct_t {
+header header1_t {
     bit<8> type1;
     bit<8> type2;
 }
 
-header my_header_t {
+header header2_t {
     bit<8> type1;
-    bit<8> type2;
-    bit<8> value;
+    bit<16> type2;
 }
 
 struct main_metadata_t {
+    bit<8> f1;
 }
 
 struct headers_t {
-    my_header_t h;
+    header1_t h1;
+    header2_t h2;
 }
 
 parser MainParserImpl(
@@ -42,15 +43,21 @@ parser MainParserImpl(
     in    pna_main_parser_input_metadata_t istd)
 {
     state start {
-        my_struct_t tmp = pkt.lookahead<my_struct_t>();
-        transition select(tmp.type2) {
-            8w01: parse_header;
+        main_meta.f1 = pkt.lookahead<bit<8>>();
+        transition select(main_meta.f1) {
+            8w01: parse_h1;
+            8w02: parse_h2;
             default: accept;
         }
     }
 
-    state parse_header {
-        pkt.extract(hdr.h);
+    state parse_h1 {
+        pkt.extract(hdr.h1);
+        transition accept;
+    }
+
+    state parse_h2 {
+        pkt.extract(hdr.h2);
         transition accept;
     }
 }

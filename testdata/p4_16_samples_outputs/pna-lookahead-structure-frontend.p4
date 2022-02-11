@@ -2,34 +2,44 @@
 #include <pna.p4>
 
 struct my_struct_t {
-    bit<8> type1;
-    bit<8> type2;
+    bit<16> type1;
+    bit<8>  type2;
 }
 
 header my_header_t {
-    bit<8> type1;
-    bit<8> type2;
-    bit<8> value;
+    bit<16> type1;
+    bit<8>  type2;
+    bit<32> value;
 }
 
 struct main_metadata_t {
+    my_struct_t s1;
 }
 
 struct headers_t {
-    my_header_t h;
+    my_header_t h1;
+    my_header_t h2;
 }
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t main_meta, in pna_main_parser_input_metadata_t istd) {
-    bit<16> tmp;
+    @name("MainParserImpl.tmp") my_struct_t tmp_0;
     state start {
-        tmp = pkt.lookahead<bit<16>>();
-        transition select(tmp[7:0]) {
-            8w1: parse_header;
+        tmp_0 = pkt.lookahead<my_struct_t>();
+        transition select(tmp_0.type1) {
+            16w0x1234: parse_h1;
             default: accept;
         }
     }
-    state parse_header {
-        pkt.extract<my_header_t>(hdr.h);
+    state parse_h1 {
+        pkt.extract<my_header_t>(hdr.h1);
+        main_meta.s1 = pkt.lookahead<my_struct_t>();
+        transition select(main_meta.s1.type2) {
+            8w0x1: parse_h2;
+            default: accept;
+        }
+    }
+    state parse_h2 {
+        pkt.extract<my_header_t>(hdr.h2);
         transition accept;
     }
 }

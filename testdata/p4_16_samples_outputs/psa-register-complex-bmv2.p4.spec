@@ -52,13 +52,13 @@ struct metadata_t {
 	bit<8> psa_egress_output_metadata_clone
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
-	bit<48> Ingress_tmp_3
-	bit<48> Ingress_tmp_4
-	bit<48> Ingress_tmp_5
+	bit<48> Ingress_tmp
 	bit<48> Ingress_tmp_0
 	bit<48> Ingress_tmp_1
 	bit<48> Ingress_tmp_2
-	bit<48> Ingress_tmp
+	bit<48> Ingress_tmp_3
+	bit<48> Ingress_tmp_4
+	bit<48> Ingress_tmp_5
 }
 metadata instanceof metadata_t
 
@@ -72,23 +72,23 @@ apply {
 	extract h.ethernet
 	regwr regfile_0 0x1 0x3
 	regwr regfile_0 0x2 0x4
-	regrd m.Ingress_tmp regfile_0 0x1
-	regrd m.Ingress_tmp_1 regfile_0 0x2
-	mov m.Ingress_tmp_2 m.Ingress_tmp
-	add m.Ingress_tmp_2 m.Ingress_tmp_1
-	mov h.ethernet.dstAddr m.Ingress_tmp_2
-	add h.ethernet.dstAddr 0xfffffffffffb
+	regrd m.Ingress_tmp_5 regfile_0 0x1
 	regrd m.Ingress_tmp_3 regfile_0 0x2
-	mov m.Ingress_tmp_4 m.Ingress_tmp
+	mov m.Ingress_tmp_4 m.Ingress_tmp_5
 	add m.Ingress_tmp_4 m.Ingress_tmp_3
-	mov m.Ingress_tmp_5 m.Ingress_tmp_4
-	add m.Ingress_tmp_5 0xfffffffffffb
-	jmpneq LABEL_END m.Ingress_tmp_5 0x2
+	mov h.ethernet.dstAddr m.Ingress_tmp_4
+	add h.ethernet.dstAddr 0xfffffffffffb
+	regrd m.Ingress_tmp regfile_0 0x2
+	mov m.Ingress_tmp_0 m.Ingress_tmp_5
+	add m.Ingress_tmp_0 m.Ingress_tmp
+	mov m.Ingress_tmp_1 m.Ingress_tmp_0
+	add m.Ingress_tmp_1 0xfffffffffffb
+	jmpneq LABEL_END m.Ingress_tmp_1 0x2
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
-	mov m.Ingress_tmp_0 h.ethernet.dstAddr
-	and m.Ingress_tmp_0 0xffffffff
-	mov m.psa_ingress_output_metadata_egress_port m.Ingress_tmp_0
+	mov m.Ingress_tmp_2 h.ethernet.dstAddr
+	and m.Ingress_tmp_2 0xffffffff
+	mov m.psa_ingress_output_metadata_egress_port m.Ingress_tmp_2
 	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	extract h.ethernet

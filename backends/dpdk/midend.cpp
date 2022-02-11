@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "dpdkArch.h"
 #include "midend.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -185,8 +186,11 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::StrengthReduction(&refMap, &typeMap),
             new P4::SimplifySelectCases(&refMap, &typeMap, true),
-            // The lookahead implementation in DPDK supports header instance has argument.
-            // new P4::ExpandLookahead(&refMap, &typeMap),
+            // The lookahead implementation in DPDK target supports only a header instance as
+            // an operand, we do not expand headers.
+            // Structures expanded here are then processed as base bit type in ConvertLookahead
+            // pass in backend.
+            new P4::ExpandLookahead(&refMap, &typeMap, nullptr, false),
             new P4::ExpandEmit(&refMap, &typeMap),
             new P4::HandleNoMatch(&refMap),
             new P4::SimplifyParsers(&refMap),

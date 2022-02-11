@@ -10,13 +10,11 @@ header ethernet_t {
 }
 
 header ipv4_base_t {
-    bit<4>  version;
-    bit<4>  ihl;
+    bit<8>  version_ihl;
     bit<8>  diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
-    bit<13> fragOffset;
+    bit<16>  flags_fragOffset;
     bit<8>  ttl;
     bit<8>  protocol;
     bit<16> hdrChecksum;
@@ -55,8 +53,8 @@ parser MyIP(
     }
     state parse_ipv4 {
         packet.extract(hdr.ipv4_base);
-        transition select(hdr.ipv4_base.ihl) {
-            4w0x5: accept;
+        transition select(hdr.ipv4_base.version_ihl) {
+            8w0x45: accept;
             default: parse_ipv4_options;
         }
     }
@@ -68,7 +66,7 @@ parser MyIP(
     }
     state parse_ipv4_options {
         transition select(packet.lookahead<bit<8>>()) {
-            8w0x44 &&& 8w0xff: parse_ipv4_option_timestamp;
+            8w0x44: parse_ipv4_option_timestamp;
             default : accept;
         }
     }
