@@ -15,7 +15,7 @@ struct metadata_t {
 
 parser TestParser(packet_in b, out headers_t headers, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     state start {
-        b.extract<test_header_t>(headers.test.next);
+        b.extract<test_header_t>(headers.test[32w0]);
         transition reject;
     }
 }

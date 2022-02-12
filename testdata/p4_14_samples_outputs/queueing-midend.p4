@@ -33,11 +33,11 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".queueing_dummy") state queueing_dummy {
+    state queueing_dummy {
         packet.extract<queueing_metadata_t_padded>(hdr.queueing_hdr);
         transition accept;
     }
-    @name(".start") state start {
+    state start {
         packet.extract<hdr1_t>(hdr.hdr1);
         transition select(standard_metadata.packet_length) {
             32w0: queueing_dummy;

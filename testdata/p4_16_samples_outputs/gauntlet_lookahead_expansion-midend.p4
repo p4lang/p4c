@@ -13,6 +13,10 @@ struct Headers {
 parser p(packet_in pkt, out Headers hdr) {
     @name("p.tmp_0") ethernet_t tmp_0;
     bit<112> tmp_1;
+    state parse_hdrs {
+        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        transition accept;
+    }
     state start {
         tmp_1 = pkt.lookahead<bit<112>>();
         tmp_0.setValid();
@@ -23,10 +27,6 @@ parser p(packet_in pkt, out Headers hdr) {
             16w0xdead: parse_hdrs;
             default: accept;
         }
-    }
-    state parse_hdrs {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        transition accept;
     }
 }
 

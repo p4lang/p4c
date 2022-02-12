@@ -27,7 +27,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".start") state start {
+    state start {
         packet.extract<mac_da_t>(hdr.mac_da);
         packet.extract<mac_sa_t>(hdr.mac_sa);
         packet.extract<len_or_type_t>(hdr.len_or_type);

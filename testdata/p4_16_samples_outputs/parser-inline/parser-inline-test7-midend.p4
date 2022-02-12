@@ -16,14 +16,6 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("ParserImpl.hdr_0") data_t hdr_0;
-    state start {
-        packet.extract<data_t>(hdr.h1);
-        packet.extract<data_t>(hdr.h2);
-        transition select(standard_metadata.ingress_port) {
-            9w0: p0;
-            default: p1;
-        }
-    }
     state p0 {
         hdr_0 = hdr.h1;
         hdr_0.f = 8w42;
@@ -35,6 +27,14 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         hdr_0.f = 8w42;
         hdr.h2 = hdr_0;
         transition accept;
+    }
+    state start {
+        packet.extract<data_t>(hdr.h1);
+        packet.extract<data_t>(hdr.h2);
+        transition select(standard_metadata.ingress_port) {
+            9w0: p0;
+            default: p1;
+        }
     }
 }
 

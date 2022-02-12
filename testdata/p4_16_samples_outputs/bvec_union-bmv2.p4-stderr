@@ -1,0 +1,6 @@
+bvec_union-bmv2.p4(68): warning:  b.extract is ignored. Error: Reading field from invalid header union
+        b.extract(h.u.h2);
+        ^^^^^^^^^^^^^^^^^
+bvec_union-bmv2.p4(63): warning:  b.extract is ignored. Error: Reading field from invalid header union
+        b.extract(h.u.h1);
+        ^^^^^^^^^^^^^^^^^

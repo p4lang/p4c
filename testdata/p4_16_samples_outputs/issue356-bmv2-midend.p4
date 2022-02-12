@@ -15,16 +15,16 @@ control DeparserI(packet_out packet, in H hdr) {
 
 parser parserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t stdmeta) {
     @name("parserI.tmp_0") bit<112> tmp_0;
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
     state start {
         tmp_0 = pkt.lookahead<bit<112>>();
         transition select(tmp_0[111:96]) {
             16w0x1000 &&& 16w0x1000: accept;
             default: noMatch;
         }
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
     }
 }
 

@@ -41,19 +41,58 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".parse_h2") state parse_h2 {
-        packet.extract<h2_t>(hdr.h2.next);
-        transition select(hdr.h2.last.next_hdr_type) {
-            8w2: parse_h2;
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
+    state parse_h2 {
+        packet.extract<h2_t>(hdr.h2[32w0]);
+        transition select(hdr.h2[32w0].next_hdr_type) {
+            8w2: parse_h21;
             8w3: parse_h3;
             default: accept;
         }
     }
-    @name(".parse_h3") state parse_h3 {
+    state parse_h21 {
+        packet.extract<h2_t>(hdr.h2[32w1]);
+        transition select(hdr.h2[32w1].next_hdr_type) {
+            8w2: parse_h22;
+            8w3: parse_h3;
+            default: accept;
+        }
+    }
+    state parse_h22 {
+        packet.extract<h2_t>(hdr.h2[32w2]);
+        transition select(hdr.h2[32w2].next_hdr_type) {
+            8w2: parse_h23;
+            8w3: parse_h3;
+            default: accept;
+        }
+    }
+    state parse_h23 {
+        packet.extract<h2_t>(hdr.h2[32w3]);
+        transition select(hdr.h2[32w3].next_hdr_type) {
+            8w2: parse_h24;
+            8w3: parse_h3;
+            default: accept;
+        }
+    }
+    state parse_h24 {
+        packet.extract<h2_t>(hdr.h2[32w4]);
+        transition select(hdr.h2[32w4].next_hdr_type) {
+            8w2: parse_h25;
+            8w3: parse_h3;
+            default: accept;
+        }
+    }
+    state parse_h25 {
+        transition stateOutOfBound;
+    }
+    state parse_h3 {
         packet.extract<h3_t>(hdr.h3);
         transition accept;
     }
-    @name(".start") state start {
+    state start {
         packet.extract<h1_t>(hdr.h1);
         transition select(hdr.h1.next_hdr_type) {
             8w2: parse_h2;

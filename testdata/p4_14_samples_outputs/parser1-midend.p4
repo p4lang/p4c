@@ -56,7 +56,11 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("ParserImpl.tmp_0") bit<24> tmp_0;
     @name("ParserImpl.tmp_2") bit<4> tmp_2;
-    @name(".parse_ethernet") state parse_ethernet {
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
+    state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x8100: parse_vlan;
@@ -68,11 +72,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name(".parse_ipv4") state parse_ipv4 {
+    state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
         transition accept;
     }
-    @name(".parse_mpls") state parse_mpls {
+    state parse_mpls {
         tmp_0 = packet.lookahead<bit<24>>();
         transition select(tmp_0[0:0]) {
             1w0: parse_mpls_not_bos;
@@ -80,7 +84,31 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name(".parse_mpls_bos") state parse_mpls_bos {
+    state parse_mpls1 {
+        tmp_0 = packet.lookahead<bit<24>>();
+        transition select(tmp_0[0:0]) {
+            1w0: parse_mpls_not_bos1;
+            1w1: parse_mpls_bos;
+            default: accept;
+        }
+    }
+    state parse_mpls2 {
+        tmp_0 = packet.lookahead<bit<24>>();
+        transition select(tmp_0[0:0]) {
+            1w0: parse_mpls_not_bos2;
+            1w1: parse_mpls_bos;
+            default: accept;
+        }
+    }
+    state parse_mpls3 {
+        tmp_0 = packet.lookahead<bit<24>>();
+        transition select(tmp_0[0:0]) {
+            1w0: parse_mpls_not_bos3;
+            1w1: parse_mpls_bos;
+            default: accept;
+        }
+    }
+    state parse_mpls_bos {
         packet.extract<mpls_t>(hdr.mpls_bos);
         tmp_2 = packet.lookahead<bit<4>>();
         transition select(tmp_2) {
@@ -88,23 +116,49 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name(".parse_mpls_not_bos") state parse_mpls_not_bos {
-        packet.extract<mpls_t>(hdr.mpls.next);
-        transition parse_mpls;
+    state parse_mpls_not_bos {
+        packet.extract<mpls_t>(hdr.mpls[32w0]);
+        transition parse_mpls1;
     }
-    @name(".parse_vlan") state parse_vlan {
-        packet.extract<vlan_tag_t>(hdr.vlan_tag_.next);
-        transition select(hdr.vlan_tag_.last.etherType) {
-            16w0x8100: parse_vlan;
-            16w0x9100: parse_vlan;
-            16w0x9200: parse_vlan;
-            16w0x9300: parse_vlan;
+    state parse_mpls_not_bos1 {
+        packet.extract<mpls_t>(hdr.mpls[32w1]);
+        transition parse_mpls2;
+    }
+    state parse_mpls_not_bos2 {
+        packet.extract<mpls_t>(hdr.mpls[32w2]);
+        transition parse_mpls3;
+    }
+    state parse_mpls_not_bos3 {
+        transition stateOutOfBound;
+    }
+    state parse_vlan {
+        packet.extract<vlan_tag_t>(hdr.vlan_tag_[32w0]);
+        transition select(hdr.vlan_tag_[32w0].etherType) {
+            16w0x8100: parse_vlan1;
+            16w0x9100: parse_vlan1;
+            16w0x9200: parse_vlan1;
+            16w0x9300: parse_vlan1;
             16w0x8847: parse_mpls;
             16w0x800: parse_ipv4;
             default: accept;
         }
     }
-    @name(".start") state start {
+    state parse_vlan1 {
+        packet.extract<vlan_tag_t>(hdr.vlan_tag_[32w1]);
+        transition select(hdr.vlan_tag_[32w1].etherType) {
+            16w0x8100: parse_vlan2;
+            16w0x9100: parse_vlan2;
+            16w0x9200: parse_vlan2;
+            16w0x9300: parse_vlan2;
+            16w0x8847: parse_mpls;
+            16w0x800: parse_ipv4;
+            default: accept;
+        }
+    }
+    state parse_vlan2 {
+        transition stateOutOfBound;
+    }
+    state start {
         transition parse_ethernet;
     }
 }

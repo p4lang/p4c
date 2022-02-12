@@ -33,13 +33,6 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
     bit<128> tmp_6;
     bit<128> tmp_7;
     bit<128> tmp_8;
-    state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x1234: check_p4calc;
-            default: accept;
-        }
-    }
     state check_p4calc {
         tmp_6 = packet.lookahead<bit<128>>();
         tmp_0.setValid();
@@ -76,6 +69,13 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
     state parse_p4calc {
         packet.extract<p4calc_t>(hdr.p4calc);
         transition accept;
+    }
+    state start {
+        packet.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0x1234: check_p4calc;
+            default: accept;
+        }
     }
 }
 

@@ -17,10 +17,10 @@ struct Meta {
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        b.extract<hdr>(h.hs.next);
-        m.v = h.hs.last.f2;
-        m.v = h.hs.last.f2 + h.hs.last.f2;
-        transition select(h.hs.last.f1) {
+        b.extract<hdr>(h.hs[32w0]);
+        m.v = h.hs[32w0].f2;
+        m.v = h.hs[32w0].f2 + h.hs[32w0].f2;
+        transition select(h.hs[32w0].f1) {
             32w0: start;
             default: accept;
         }

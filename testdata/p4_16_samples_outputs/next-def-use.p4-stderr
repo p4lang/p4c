@@ -1,0 +1,3 @@
+next-def-use.p4(26): warning:  AssignmentStatement is ignored. Error: Reading field from invalid header
+        hdr.hs.next = {8w0};
+                    ^

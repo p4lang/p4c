@@ -34,23 +34,23 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".ethernet") state ethernet {
+    state ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.ethertype) {
             16w0x800: ipv4;
             default: noMatch;
         }
     }
-    @name(".ipv4") state ipv4 {
+    state ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
         transition accept;
-    }
-    @name(".start") state start {
-        transition ethernet;
     }
     state noMatch {
         verify(false, error.NoMatch);
         transition reject;
+    }
+    state start {
+        transition ethernet;
     }
 }
 

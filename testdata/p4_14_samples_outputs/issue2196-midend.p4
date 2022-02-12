@@ -33,7 +33,7 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".pv2") value_set<bit<16>>(4) pv2_0;
     @name(".pv1") value_set<bit<16>>(4) pv1_0;
-    @name(".parse_pv1") state parse_pv1 {
+    state parse_pv1 {
         meta._my_meta_pv_parsed0 = 8w1;
         packet.extract<my_header_t>(hdr.my_header);
         meta._my_meta_f1_161 = (bit<16>)hdr.my_header.f1;
@@ -42,11 +42,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name(".parse_pv2") state parse_pv2 {
+    state parse_pv2 {
         meta._my_meta_pv_parsed0 = 8w2;
         transition accept;
     }
-    @name(".start") state start {
+    state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.ethertype) {
             16w0x800: accept;

@@ -1,0 +1,6 @@
+issue561-2-bmv2.p4(45): warning:  packet.extract is ignored. Error: Reading field from invalid header union
+        packet.extract(hdr.u.short);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue561-2-bmv2.p4(41): warning:  packet.extract is ignored. Error: Reading field from invalid header union
+        packet.extract(hdr.u.byte);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^

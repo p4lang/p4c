@@ -22,3 +22,8 @@ gauntlet_infinite_loop.p4(23): [--Wwarn=uninitialized_use] warning: padding.p ma
 gauntlet_infinite_loop.p4(23): [--Wwarn=invalid_header] warning: accessing a field of an invalid header padding
         transition select(padding.p) {
                           ^^^^^^^
+gauntlet_infinite_loop.p4(29): warning:  packet.extract is ignored. Exception: OverwritingHeader
+        b.extract(hdr.nop);
+        ^^^^^^^^^^^^^^^^^^
+[--Wwarn=invalid] warning: Parser cycle cannot be unrolled:
+Parser p state chain: start, next, parse_hdr, next, parse_hdr, next

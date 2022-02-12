@@ -35,25 +35,25 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".parseA") state parseA {
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
+    state parseA {
         packet.extract<A_t_0>(hdr.hdrA);
         transition accept;
     }
-    @name(".parseB") state parseB {
+    state parseB {
         packet.extract<B_t_0>(hdr.hdrB);
         transition accept;
     }
-    @name(".start") state start {
+    state start {
         packet.extract<type_t>(hdr.packet_type);
         transition select(hdr.packet_type.type) {
             16w0xa &&& 16w0xf: parseA;
             16w0xb &&& 16w0xf: parseB;
             default: noMatch;
         }
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
     }
 }
 

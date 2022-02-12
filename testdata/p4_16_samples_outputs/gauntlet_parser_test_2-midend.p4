@@ -10,8 +10,8 @@ struct Headers {
 
 parser P(packet_in p, out Headers h) {
     state start {
-        p.extract<Hdr>(h.h1.next);
-        transition select(h.h1.last.x) {
+        p.extract<Hdr>(h.h1[32w0]);
+        transition select(h.h1[32w0].x) {
             8w0: start;
             default: accept;
         }

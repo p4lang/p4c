@@ -33,33 +33,33 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".parse_my_tag_inner") state parse_my_tag_inner {
+    state parse_my_tag_inner {
         packet.extract<my_tag_t>(hdr.my_tag);
         transition select(hdr.my_tag.ethertype) {
             default: accept;
         }
     }
-    @name(".parse_my_tag_outer") state parse_my_tag_outer {
+    state parse_my_tag_outer {
         packet.extract<my_tag_t>(hdr.my_tag);
         transition select(hdr.my_tag.ethertype) {
             16w0x8100 &&& 16w0xefff: parse_vlan_tag_inner;
             default: accept;
         }
     }
-    @name(".parse_vlan_tag_inner") state parse_vlan_tag_inner {
+    state parse_vlan_tag_inner {
         packet.extract<vlan_tag_t>(hdr.vlan_tag);
         transition select(hdr.vlan_tag.ethertype) {
             default: accept;
         }
     }
-    @name(".parse_vlan_tag_outer") state parse_vlan_tag_outer {
+    state parse_vlan_tag_outer {
         packet.extract<vlan_tag_t>(hdr.vlan_tag);
         transition select(hdr.vlan_tag.ethertype) {
             16w0x9000: parse_my_tag_inner;
             default: accept;
         }
     }
-    @name(".start") state start {
+    state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.ethertype) {
             16w0x8100 &&& 16w0xefff: parse_vlan_tag_outer;

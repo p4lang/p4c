@@ -1,0 +1,23 @@
+issue2090.p4(57): warning:  b.extract is ignored. Error: Reading field from invalid header union
+         b.extract(vec.next.sack,
+         ^
+[--Wwarn=invalid] warning: Parser cycle without extracting any bytes:
+Parser Tcp_option_parser state chain: start, parse_tcp_option_sack, start
+issue2090.p4(53): warning:  b.extract is ignored. Error: Reading field from invalid header union
+         b.extract(vec.next.s);
+         ^^^^^^^^^^^^^^^^^^^^^
+[--Wwarn=invalid] warning: Parser cycle without extracting any bytes:
+Parser Tcp_option_parser state chain: start, parse_tcp_option_s, start
+issue2090.p4(49): warning:  b.extract is ignored. Error: Reading field from invalid header union
+         b.extract(vec.next.ss);
+         ^^^^^^^^^^^^^^^^^^^^^^
+[--Wwarn=invalid] warning: Parser cycle without extracting any bytes:
+Parser Tcp_option_parser state chain: start, parse_tcp_option_ss, start
+issue2090.p4(45): warning:  b.extract is ignored. Error: Reading field from invalid header union
+         b.extract(vec.next.nop);
+         ^^^^^^^^^^^^^^^^^^^^^^^
+[--Wwarn=invalid] warning: Parser cycle without extracting any bytes:
+Parser Tcp_option_parser state chain: start, parse_tcp_option_nop, start
+issue2090.p4(41): warning:  b.extract is ignored. Error: Reading field from invalid header union
+        b.extract(vec.next.end);
+        ^^^^^^^^^^^^^^^^^^^^^^^

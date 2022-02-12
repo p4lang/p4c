@@ -26,21 +26,56 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".parse_ethernet") state parse_ethernet {
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
+    state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.ethertype) {
             16w0x8100 &&& 16w0xefff: parse_vlan_tag;
             default: accept;
         }
     }
-    @name(".parse_vlan_tag") state parse_vlan_tag {
-        packet.extract<vlan_tag_t>(hdr.vlan_tag.next);
-        transition select(hdr.vlan_tag.last.ethertype) {
-            16w0x8100 &&& 16w0xefff: parse_vlan_tag;
+    state parse_vlan_tag {
+        packet.extract<vlan_tag_t>(hdr.vlan_tag[32w0]);
+        transition select(hdr.vlan_tag[32w0].ethertype) {
+            16w0x8100 &&& 16w0xefff: parse_vlan_tag1;
             default: accept;
         }
     }
-    @name(".start") state start {
+    state parse_vlan_tag1 {
+        packet.extract<vlan_tag_t>(hdr.vlan_tag[32w1]);
+        transition select(hdr.vlan_tag[32w1].ethertype) {
+            16w0x8100 &&& 16w0xefff: parse_vlan_tag2;
+            default: accept;
+        }
+    }
+    state parse_vlan_tag2 {
+        packet.extract<vlan_tag_t>(hdr.vlan_tag[32w2]);
+        transition select(hdr.vlan_tag[32w2].ethertype) {
+            16w0x8100 &&& 16w0xefff: parse_vlan_tag3;
+            default: accept;
+        }
+    }
+    state parse_vlan_tag3 {
+        packet.extract<vlan_tag_t>(hdr.vlan_tag[32w3]);
+        transition select(hdr.vlan_tag[32w3].ethertype) {
+            16w0x8100 &&& 16w0xefff: parse_vlan_tag4;
+            default: accept;
+        }
+    }
+    state parse_vlan_tag4 {
+        packet.extract<vlan_tag_t>(hdr.vlan_tag[32w4]);
+        transition select(hdr.vlan_tag[32w4].ethertype) {
+            16w0x8100 &&& 16w0xefff: parse_vlan_tag5;
+            default: accept;
+        }
+    }
+    state parse_vlan_tag5 {
+        transition stateOutOfBound;
+    }
+    state start {
         transition parse_ethernet;
     }
 }

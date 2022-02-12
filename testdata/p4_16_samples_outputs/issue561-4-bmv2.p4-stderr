@@ -1,0 +1,24 @@
+issue561-4-bmv2.p4(58): warning:  packet.extract is ignored. Error: Reading field from invalid header union
+        packet.extract(hdr.u[0].short);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue561-4-bmv2.p4(59): warning:  packet.extract is ignored. Error: Reading field from invalid header union
+        packet.extract(hdr.u[1].short);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue561-4-bmv2.p4(53): warning:  packet.extract is ignored. Error: Reading field from invalid header union
+        packet.extract(hdr.u[0].short);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue561-4-bmv2.p4(54): warning:  packet.extract is ignored. Error: Reading field from invalid header union
+        packet.extract(hdr.u[1].byte);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue561-4-bmv2.p4(48): warning:  packet.extract is ignored. Error: Reading field from invalid header union
+        packet.extract(hdr.u[0].byte);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue561-4-bmv2.p4(49): warning:  packet.extract is ignored. Error: Reading field from invalid header union
+        packet.extract(hdr.u[1].short);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue561-4-bmv2.p4(43): warning:  packet.extract is ignored. Error: Reading field from invalid header union
+        packet.extract(hdr.u[0].byte);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue561-4-bmv2.p4(44): warning:  packet.extract is ignored. Error: Reading field from invalid header union
+        packet.extract(hdr.u[1].byte);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

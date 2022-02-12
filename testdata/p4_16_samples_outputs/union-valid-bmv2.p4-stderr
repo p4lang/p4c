@@ -1,0 +1,3 @@
+union-valid-bmv2.p4(50): warning:  b.extract is ignored. Error: Reading field from invalid header union
+        b.extract(h.u.h1);
+        ^^^^^^^^^^^^^^^^^

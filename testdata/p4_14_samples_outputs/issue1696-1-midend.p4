@@ -15,17 +15,17 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".p1") state p1 {
+    state p1 {
         packet.extract<stack_t>(hdr.stack[1]);
         packet.extract<stack_t>(hdr.stack[2]);
         transition accept;
     }
-    @name(".p2") state p2 {
+    state p2 {
         packet.extract<stack_t>(hdr.stack[2]);
         packet.extract<stack_t>(hdr.stack[1]);
         transition accept;
     }
-    @name(".start") state start {
+    state start {
         packet.extract<stack_t>(hdr.stack[0]);
         transition select(hdr.stack[0].f) {
             16w0xffff: p1;

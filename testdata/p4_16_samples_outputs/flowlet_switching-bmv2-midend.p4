@@ -65,25 +65,25 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ParserImpl.parse_ethernet") state parse_ethernet {
+    state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x800: parse_ipv4;
             default: accept;
         }
     }
-    @name("ParserImpl.parse_ipv4") state parse_ipv4 {
+    state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
         transition select(hdr.ipv4.protocol) {
             8w6: parse_tcp;
             default: accept;
         }
     }
-    @name("ParserImpl.parse_tcp") state parse_tcp {
+    state parse_tcp {
         packet.extract<tcp_t>(hdr.tcp);
         transition accept;
     }
-    @name("ParserImpl.start") state start {
+    state start {
         transition parse_ethernet;
     }
 }

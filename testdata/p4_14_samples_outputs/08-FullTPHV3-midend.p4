@@ -676,7 +676,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".start") state start {
+    state start {
         packet.extract<h_8_1_t>(hdr.h_8_1);
         packet.extract<h_8_2_t>(hdr.h_8_2);
         packet.extract<h_8_3_t>(hdr.h_8_3);

@@ -22,11 +22,11 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".ethernet") state ethernet {
+    state ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition accept;
     }
-    @name(".start") state start {
+    state start {
         transition ethernet;
     }
 }

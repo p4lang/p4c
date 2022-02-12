@@ -1,3 +1,0 @@
-issue1409.p4(32): warning: f: implicit transition to `reject'
-  state f {
-        ^

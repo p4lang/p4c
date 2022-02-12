@@ -20,19 +20,19 @@ struct S {
 }
 
 parser p(packet_in pkt, out Headers hdr, inout S s, inout standard_metadata_t sm) {
+    state parse_a {
+        s.a = 8w4;
+        transition parse_b;
+    }
+    state parse_b {
+        s.b = 8w4;
+        s.c = 8w4;
+        transition accept;
+    }
     state start {
         pkt.extract<ethernet_t>(hdr.eth_hdr);
         s.start = 8w0;
         transition parse_a;
-    }
-    @name("p.a") state parse_a {
-        s.a = 8w4;
-        transition parse_b;
-    }
-    @name("p.b") state parse_b {
-        s.b = 8w4;
-        s.c = 8w4;
-        transition accept;
     }
 }
 

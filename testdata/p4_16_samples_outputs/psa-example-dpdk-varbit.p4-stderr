@@ -1,6 +1,5 @@
-psa.p4(546): [--Wwarn=unused] warning: 'W' is unused
-extern Counter<W, S> {
-               ^
-psa.p4(575): [--Wwarn=unused] warning: 'W' is unused
-extern DirectCounter<W> {
-                     ^
+psa-example-dpdk-varbit.p4(70): warning:  packet.extract is ignored. Exception: OverwritingHeader
+        packet.extract(hdr.ipv4_option_timestamp, (bit<32>)tmp_hdr.len * 8 - 16);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[--Wwarn=invalid] warning: Parser cycle cannot be unrolled:
+Parser MyIP state chain: start, parse_ipv4, parse_ipv4_options, parse_ipv4_option_timestamp, parse_ipv4_options, parse_ipv4_option_timestamp, parse_ipv4_options

@@ -151,27 +151,23 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     apply {
         tbl_invalidhdrwarnings3l24.apply();
-        {
-            tbl_invalidhdrwarnings3l33.apply();
-            switch (switch_0_table.apply().action_run) {
-                switch_0_case: {
-                    tbl_invalidhdrwarnings3l35.apply();
-                }
-                switch_0_case_0: {
-                    tbl_invalidhdrwarnings3l36.apply();
-                }
+        tbl_invalidhdrwarnings3l33.apply();
+        switch (switch_0_table.apply().action_run) {
+            switch_0_case: {
+                tbl_invalidhdrwarnings3l35.apply();
+            }
+            switch_0_case_0: {
+                tbl_invalidhdrwarnings3l36.apply();
             }
         }
         tbl_invalidhdrwarnings3l40.apply();
-        {
-            tbl_invalidhdrwarnings3l42.apply();
-            switch (switch_1_table.apply().action_run) {
-                switch_1_case: {
-                    tbl_invalidhdrwarnings3l44.apply();
-                }
-                switch_1_case_0: {
-                    tbl_invalidhdrwarnings3l45.apply();
-                }
+        tbl_invalidhdrwarnings3l42.apply();
+        switch (switch_1_table.apply().action_run) {
+            switch_1_case: {
+                tbl_invalidhdrwarnings3l44.apply();
+            }
+            switch_1_case_0: {
+                tbl_invalidhdrwarnings3l45.apply();
             }
         }
         tbl_invalidhdrwarnings3l49.apply();

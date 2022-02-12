@@ -36,6 +36,63 @@ struct metadata {
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
+    state parse_h2 {
+        pkt.extract<h2_t>(hdr.h2[32w0]);
+        verify(hdr.h2[32w0].hdr_type == 8w2, error.BadHeaderType);
+        transition select(hdr.h2[32w0].next_hdr_type) {
+            8w2: parse_h21;
+            8w3: parse_h3;
+            default: accept;
+        }
+    }
+    state parse_h21 {
+        pkt.extract<h2_t>(hdr.h2[32w1]);
+        verify(hdr.h2[32w1].hdr_type == 8w2, error.BadHeaderType);
+        transition select(hdr.h2[32w1].next_hdr_type) {
+            8w2: parse_h22;
+            8w3: parse_h3;
+            default: accept;
+        }
+    }
+    state parse_h22 {
+        pkt.extract<h2_t>(hdr.h2[32w2]);
+        verify(hdr.h2[32w2].hdr_type == 8w2, error.BadHeaderType);
+        transition select(hdr.h2[32w2].next_hdr_type) {
+            8w2: parse_h23;
+            8w3: parse_h3;
+            default: accept;
+        }
+    }
+    state parse_h23 {
+        pkt.extract<h2_t>(hdr.h2[32w3]);
+        verify(hdr.h2[32w3].hdr_type == 8w2, error.BadHeaderType);
+        transition select(hdr.h2[32w3].next_hdr_type) {
+            8w2: parse_h24;
+            8w3: parse_h3;
+            default: accept;
+        }
+    }
+    state parse_h24 {
+        pkt.extract<h2_t>(hdr.h2[32w4]);
+        verify(hdr.h2[32w4].hdr_type == 8w2, error.BadHeaderType);
+        transition select(hdr.h2[32w4].next_hdr_type) {
+            8w2: parse_h25;
+            8w3: parse_h3;
+            default: accept;
+        }
+    }
+    state parse_h25 {
+        transition stateOutOfBound;
+    }
+    state parse_h3 {
+        pkt.extract<h3_t>(hdr.h3);
+        verify(hdr.h3.hdr_type == 8w3, error.BadHeaderType);
+        transition accept;
+    }
     state start {
         pkt.extract<h1_t>(hdr.h1);
         verify(hdr.h1.hdr_type == 8w1, error.BadHeaderType);
@@ -44,20 +101,6 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
             8w3: parse_h3;
             default: accept;
         }
-    }
-    state parse_h2 {
-        pkt.extract<h2_t>(hdr.h2.next);
-        verify(hdr.h2.last.hdr_type == 8w2, error.BadHeaderType);
-        transition select(hdr.h2.last.next_hdr_type) {
-            8w2: parse_h2;
-            8w3: parse_h3;
-            default: accept;
-        }
-    }
-    state parse_h3 {
-        pkt.extract<h3_t>(hdr.h3);
-        verify(hdr.h3.hdr_type == 8w3, error.BadHeaderType);
-        transition accept;
     }
 }
 

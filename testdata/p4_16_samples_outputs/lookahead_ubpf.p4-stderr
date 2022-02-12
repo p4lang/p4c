@@ -1,0 +1,30 @@
+lookahead_ubpf.p4(50): warning:  p.extract is ignored. Exception: OverwritingHeader
+        p.extract(headers.four);
+        ^^^^^^^^^^^^^^^^^^^^^^^
+[--Wwarn=invalid] warning: Parser cycle cannot be unrolled:
+Parser prs state chain: start, parse_headers, parse_four, parse_headers, parse_four, parse_headers
+lookahead_ubpf.p4(50): warning:  p.extract is ignored. Exception: OverwritingHeader
+        p.extract(headers.four);
+        ^^^^^^^^^^^^^^^^^^^^^^^
+[--Wwarn=invalid] warning: Parser cycle cannot be unrolled:
+Parser prs state chain: start, parse_headers, parse_four, parse_headers, parse_two, parse_headers, parse_four, parse_headers
+lookahead_ubpf.p4(46): warning:  p.extract is ignored. Exception: OverwritingHeader
+        p.extract(headers.two);
+        ^^^^^^^^^^^^^^^^^^^^^^
+[--Wwarn=invalid] warning: Parser cycle cannot be unrolled:
+Parser prs state chain: start, parse_headers, parse_four, parse_headers, parse_two, parse_headers, parse_two, parse_headers
+lookahead_ubpf.p4(50): warning:  p.extract is ignored. Exception: OverwritingHeader
+        p.extract(headers.four);
+        ^^^^^^^^^^^^^^^^^^^^^^^
+[--Wwarn=invalid] warning: Parser cycle cannot be unrolled:
+Parser prs state chain: start, parse_headers, parse_four, parse_headers, parse_two, parse_headers, parse_one, parse_headers, parse_four, parse_headers
+lookahead_ubpf.p4(46): warning:  p.extract is ignored. Exception: OverwritingHeader
+        p.extract(headers.two);
+        ^^^^^^^^^^^^^^^^^^^^^^
+[--Wwarn=invalid] warning: Parser cycle cannot be unrolled:
+Parser prs state chain: start, parse_headers, parse_four, parse_headers, parse_two, parse_headers, parse_one, parse_headers, parse_two, parse_headers
+lookahead_ubpf.p4(42): warning:  p.extract is ignored. Exception: OverwritingHeader
+        p.extract(headers.one);
+        ^^^^^^^^^^^^^^^^^^^^^^
+[--Wwarn=invalid] warning: Parser cycle cannot be unrolled:
+Parser prs state chain: start, parse_headers, parse_four, parse_headers, parse_two, parse_headers, parse_one, parse_headers, parse_one, parse_headers

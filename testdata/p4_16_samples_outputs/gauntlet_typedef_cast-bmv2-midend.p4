@@ -21,17 +21,17 @@ struct Meta {
 }
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
+    state do_parse {
+        pkt.extract<H>(hdr.h);
+        hdr.eth_hdr.dst_addr = 48w1;
+        transition accept;
+    }
     state start {
         pkt.extract<ethernet_t>(hdr.eth_hdr);
         transition select(hdr.eth_hdr.dst_addr[31:31]) {
             1w1: do_parse;
             default: accept;
         }
-    }
-    state do_parse {
-        pkt.extract<H>(hdr.h);
-        hdr.eth_hdr.dst_addr = 48w1;
-        transition accept;
     }
 }
 

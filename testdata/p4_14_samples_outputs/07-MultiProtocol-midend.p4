@@ -96,11 +96,11 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".parse_icmp") state parse_icmp {
+    state parse_icmp {
         packet.extract<icmp_t>(hdr.icmp);
         transition accept;
     }
-    @name(".parse_ipv4") state parse_ipv4 {
+    state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
         transition select(hdr.ipv4.fragOffset, hdr.ipv4.ihl, hdr.ipv4.protocol) {
             (13w0x0 &&& 13w0x0, 4w0x5, 8w0x1): parse_icmp;
@@ -109,7 +109,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name(".parse_ipv6") state parse_ipv6 {
+    state parse_ipv6 {
         packet.extract<ipv6_t>(hdr.ipv6);
         transition select(hdr.ipv6.nextHdr) {
             8w0x1: parse_icmp;
@@ -118,15 +118,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name(".parse_tcp") state parse_tcp {
+    state parse_tcp {
         packet.extract<tcp_t>(hdr.tcp);
         transition accept;
     }
-    @name(".parse_udp") state parse_udp {
+    state parse_udp {
         packet.extract<udp_t>(hdr.udp);
         transition accept;
     }
-    @name(".parse_vlan_tag") state parse_vlan_tag {
+    state parse_vlan_tag {
         packet.extract<vlan_tag_t>(hdr.vlan_tag);
         transition select(hdr.vlan_tag.etherType) {
             16w0x800: parse_ipv4;
@@ -134,7 +134,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name(".start") state start {
+    state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x8100: parse_vlan_tag;

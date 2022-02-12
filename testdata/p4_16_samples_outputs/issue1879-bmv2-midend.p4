@@ -71,67 +71,6 @@ struct headers {
 parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("PROTParser.inf_0") prot_i_t inf_0;
     currenti_t meta_0_currenti;
-    state start {
-        packet.extract<preamble_t>(hdr.preamble);
-        packet.extract<prot_common_t>(hdr.prot_common);
-        packet.extract<prot_addr_common_t>(hdr.prot_addr_common);
-        meta._headerLen0 = hdr.prot_common.hdrLen;
-        packet.extract<prot_host_addr_ipv4_t>(hdr.prot_host_addr_dst.ipv4);
-        meta._addrLen2 = 9w32;
-        transition select(hdr.prot_common.srcType) {
-            6w0x1: parse_prot_host_addr_src_ipv4;
-            default: noMatch;
-        }
-    }
-    state parse_prot_host_addr_src_ipv4 {
-        packet.extract<prot_host_addr_ipv4_t>(hdr.prot_host_addr_src.ipv4);
-        meta._addrLen2 = meta._addrLen2 + 9w32;
-        packet.extract<prot_host_addr_padding_t>(hdr.prot_host_addr_padding, (bit<32>)(9w64 - (meta._addrLen2 & 9w63) & 9w63));
-        meta._addrLen2 = meta._addrLen2 + (9w64 - (meta._addrLen2 & 9w63) & 9w63);
-        meta._currPos3 = (bit<8>)(9w3 + (meta._addrLen2 >> 6));
-        inf_0.setInvalid();
-        meta_0_currenti.upDirection = meta._currenti_upDirection4;
-        packet.extract<prot_i_t>(inf_0);
-        meta_0_currenti.upDirection = meta._currenti_upDirection4 + (bit<1>)(hdr.prot_common.curri == (bit<8>)(9w3 + (meta._addrLen2 >> 6))) * inf_0.upDirection;
-        hdr.prot_inf_0 = inf_0;
-        meta._hLeft1 = inf_0.segLen;
-        meta._currPos3 = (bit<8>)(9w3 + (meta._addrLen2 >> 6)) + 8w1;
-        meta._currenti_upDirection4 = meta._currenti_upDirection4 + (bit<1>)(hdr.prot_common.curri == (bit<8>)(9w3 + (meta._addrLen2 >> 6))) * inf_0.upDirection;
-        transition parse_prot_h_0_pre;
-    }
-    state parse_prot_h_0_pre {
-        transition select(meta._hLeft1) {
-            8w0: parse_prot_1;
-            default: parse_prot_h_0;
-        }
-    }
-    state parse_prot_h_0 {
-        packet.extract<prot_h_t>(hdr.prot_h_0.next);
-        meta._hLeft1 = meta._hLeft1 + 8w255;
-        meta._currPos3 = meta._currPos3 + 8w1;
-        transition parse_prot_h_0_pre;
-    }
-    state parse_prot_1 {
-        transition select(meta._headerLen0 - meta._currPos3) {
-            8w0: accept;
-            default: parse_prot_inf_1;
-        }
-    }
-    state parse_prot_inf_1 {
-        inf_0.setInvalid();
-        meta_0_currenti.upDirection = meta._currenti_upDirection4;
-        packet.extract<prot_i_t>(inf_0);
-        meta_0_currenti.upDirection = meta._currenti_upDirection4 + (bit<1>)(hdr.prot_common.curri == meta._currPos3) * inf_0.upDirection;
-        hdr.prot_inf_1 = inf_0;
-        meta._hLeft1 = inf_0.segLen;
-        meta._currPos3 = meta._currPos3 + 8w1;
-        meta._currenti_upDirection4 = meta_0_currenti.upDirection;
-        transition accept;
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
-    }
 }
 
 control PROTVerifyChecksum(inout headers hdr, inout metadata meta) {

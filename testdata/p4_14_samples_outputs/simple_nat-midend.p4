@@ -89,19 +89,19 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("ParserImpl.tmp_0") bit<64> tmp_0;
-    @name(".parse_cpu_header") state parse_cpu_header {
+    state parse_cpu_header {
         packet.extract<cpu_header_t>(hdr.cpu_header);
         meta._meta_if_index10 = hdr.cpu_header.if_index;
         transition parse_ethernet;
     }
-    @name(".parse_ethernet") state parse_ethernet {
+    state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x800: parse_ipv4;
             default: accept;
         }
     }
-    @name(".parse_ipv4") state parse_ipv4 {
+    state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
         meta._meta_ipv4_sa1 = hdr.ipv4.srcAddr;
         meta._meta_ipv4_da2 = hdr.ipv4.dstAddr;
@@ -111,13 +111,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    @name(".parse_tcp") state parse_tcp {
+    state parse_tcp {
         packet.extract<tcp_t>(hdr.tcp);
         meta._meta_tcp_sp3 = hdr.tcp.srcPort;
         meta._meta_tcp_dp4 = hdr.tcp.dstPort;
         transition accept;
     }
-    @name(".start") state start {
+    state start {
         meta._meta_if_index10 = (bit<8>)standard_metadata.ingress_port;
         tmp_0 = packet.lookahead<bit<64>>();
         transition select(tmp_0) {

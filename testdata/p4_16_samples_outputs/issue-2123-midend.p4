@@ -41,6 +41,13 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
+    state parse_icmp {
+        transition accept;
+    }
     state parse_ipv4 {
         packet.extract<ipv4_t>(hdr = hdr.ipv4);
         transition select(hdr.ipv4.ihl, hdr.ipv4.protocol) {
@@ -50,9 +57,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             (default, default): accept;
             default: noMatch;
         }
-    }
-    state parse_icmp {
-        transition accept;
     }
     state parse_tcp {
         transition accept;
@@ -79,10 +83,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             (16w0x800, 8w0x10, 8w0x6 &&& 8w0x11): parse_ipv4;
             default: accept;
         }
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
     }
 }
 

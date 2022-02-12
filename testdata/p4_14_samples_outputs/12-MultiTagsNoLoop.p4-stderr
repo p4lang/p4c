@@ -1,1 +1,9 @@
 [--Wwarn=ordering] warning: hdr.ethernet: the order of headers in deparser is not uniquely determined by parser!
+12-MultiTagsNoLoop.p4(73): warning:  packet.extract is ignored. Exception: OverwritingHeader
+    extract(my_tag );
+    ^^^^^^^^^^^^^^^^
+12-MultiTagsNoLoop.p4(65): warning:  packet.extract is ignored. Exception: OverwritingHeader
+    extract(vlan_tag );
+    ^^^^^^^^^^^^^^^^^^
+[--Wwarn=invalid] warning: Parser cycle cannot be unrolled:
+Parser ParserImpl state chain: .start, .parse_my_tag, .parse_vlan_tag, .parse_my_tag, .parse_vlan_tag, .parse_my_tag

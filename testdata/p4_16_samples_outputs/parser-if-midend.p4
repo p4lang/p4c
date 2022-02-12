@@ -9,6 +9,10 @@ struct m {
 }
 
 parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t std) {
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
     state start {
         transition select((bit<1>)(std.ingress_port == 9w0)) {
             1w1: start_true;
@@ -16,16 +20,12 @@ parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t
             default: noMatch;
         }
     }
-    state start_true {
-        std.ingress_port = 9w2;
-        transition start_join;
-    }
     state start_join {
         transition accept;
     }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
+    state start_true {
+        std.ingress_port = 9w2;
+        transition start_join;
     }
 }
 

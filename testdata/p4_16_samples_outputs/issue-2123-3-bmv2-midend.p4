@@ -41,6 +41,26 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    state parse_h0 {
+        packet.extract<h0_t>(hdr.h0);
+        transition accept;
+    }
+    state parse_h1 {
+        packet.extract<h1_t>(hdr.h1);
+        transition accept;
+    }
+    state parse_h2 {
+        packet.extract<h2_t>(hdr.h2);
+        transition accept;
+    }
+    state parse_h3 {
+        packet.extract<h3_t>(hdr.h3);
+        transition accept;
+    }
+    state parse_h4 {
+        packet.extract<h4_t>(hdr.h4);
+        transition accept;
+    }
     state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.srcAddr[7:0], hdr.ethernet.etherType) {
@@ -84,26 +104,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             (default, 16w0xaaa): parse_h4;
             default: accept;
         }
-    }
-    state parse_h0 {
-        packet.extract<h0_t>(hdr.h0);
-        transition accept;
-    }
-    state parse_h1 {
-        packet.extract<h1_t>(hdr.h1);
-        transition accept;
-    }
-    state parse_h2 {
-        packet.extract<h2_t>(hdr.h2);
-        transition accept;
-    }
-    state parse_h3 {
-        packet.extract<h3_t>(hdr.h3);
-        transition accept;
-    }
-    state parse_h4 {
-        packet.extract<h4_t>(hdr.h4);
-        transition accept;
     }
 }
 

@@ -1,0 +1,2 @@
+[--Wwarn=invalid] warning: Parser cycle cannot be unrolled:
+Parser MyParser state chain: start, start_0, vlan, start_0, vlan, start_0

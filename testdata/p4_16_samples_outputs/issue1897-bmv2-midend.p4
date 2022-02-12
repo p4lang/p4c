@@ -31,6 +31,26 @@ struct headers {
 
 parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("ProtParser.addr_0") addr_t addr_0;
+    state ProtAddrParser_ipv4 {
+        packet.extract<addr_ipv4_t>(addr_0.ipv4);
+        transition start_0;
+    }
+    state ProtAddrParser_ipv4_0 {
+        packet.extract<addr_ipv4_t>(addr_0.ipv4);
+        transition start_1;
+    }
+    state ProtAddrParser_ipv6 {
+        packet.extract<addr_ipv6_t>(addr_0.ipv6);
+        transition start_0;
+    }
+    state ProtAddrParser_ipv6_0 {
+        packet.extract<addr_ipv6_t>(addr_0.ipv6);
+        transition start_1;
+    }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
     state start {
         packet.extract<addr_type_t>(hdr.addr_type);
         addr_0.ipv4.setInvalid();
@@ -40,14 +60,6 @@ parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout 
             8w0x2: ProtAddrParser_ipv6;
             default: noMatch;
         }
-    }
-    state ProtAddrParser_ipv4 {
-        packet.extract<addr_ipv4_t>(addr_0.ipv4);
-        transition start_0;
-    }
-    state ProtAddrParser_ipv6 {
-        packet.extract<addr_ipv6_t>(addr_0.ipv6);
-        transition start_0;
     }
     state start_0 {
         hdr.addr_dst.ipv4 = addr_0.ipv4;
@@ -60,22 +72,10 @@ parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: noMatch;
         }
     }
-    state ProtAddrParser_ipv4_0 {
-        packet.extract<addr_ipv4_t>(addr_0.ipv4);
-        transition start_1;
-    }
-    state ProtAddrParser_ipv6_0 {
-        packet.extract<addr_ipv6_t>(addr_0.ipv6);
-        transition start_1;
-    }
     state start_1 {
         hdr.addr_src.ipv4 = addr_0.ipv4;
         hdr.addr_src.ipv6 = addr_0.ipv6;
         transition accept;
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
     }
 }
 

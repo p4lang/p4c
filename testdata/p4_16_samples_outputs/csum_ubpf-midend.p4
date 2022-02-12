@@ -39,17 +39,17 @@ struct metadata {
 }
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
+    state ipv4 {
+        p.extract<IPv4>(headers.ipv4);
+        p.extract<udp_t>(headers.udp);
+        transition accept;
+    }
     state start {
         p.extract<Ethernet>(headers.ethernet);
         transition select(headers.ethernet.etherType) {
             16w0x800: ipv4;
             default: reject;
         }
-    }
-    state ipv4 {
-        p.extract<IPv4>(headers.ipv4);
-        p.extract<udp_t>(headers.udp);
-        transition accept;
     }
 }
 
