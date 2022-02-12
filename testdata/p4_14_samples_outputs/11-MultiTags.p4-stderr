@@ -1,27 +1,18 @@
 [--Wwarn=ordering] warning: hdr.ethernet: the order of headers in deparser is not uniquely determined by parser!
-11-MultiTags.p4(74): warning:  packet.extract is ignored. Exception: OverwritingHeader
+11-MultiTags.p4(74): [--Wwarn=ignore-prop] warning: Result of packet.extract is not defined: Exception: OverwritingHeader
     extract(my_tag );
     ^^^^^^^^^^^^^^^^
 [--Wwarn=invalid] warning: Parser cycle cannot be unrolled:
 Parser ParserImpl state chain: .start, .parse_my_tag, .parse_my_tag, .parse_my_tag
-11-MultiTags.p4(74): warning:  packet.extract is ignored. Exception: OverwritingHeader
-    extract(my_tag );
-    ^^^^^^^^^^^^^^^^
 [--Wwarn=invalid] warning: Parser cycle cannot be unrolled:
 Parser ParserImpl state chain: .start, .parse_my_tag, .parse_my_tag, .parse_vlan_tag, .parse_my_tag, .parse_my_tag
-11-MultiTags.p4(65): warning:  packet.extract is ignored. Exception: OverwritingHeader
+11-MultiTags.p4(65): [--Wwarn=ignore-prop] warning: Result of packet.extract is not defined: Exception: OverwritingHeader
     extract(vlan_tag );
     ^^^^^^^^^^^^^^^^^^
 [--Wwarn=invalid] warning: Parser cycle cannot be unrolled:
 Parser ParserImpl state chain: .start, .parse_my_tag, .parse_my_tag, .parse_vlan_tag, .parse_my_tag, .parse_vlan_tag, .parse_my_tag
 [--Wwarn=invalid] warning: Parser cycle cannot be unrolled:
 Parser ParserImpl state chain: .start, .parse_my_tag, .parse_my_tag, .parse_vlan_tag, .parse_my_tag, .parse_vlan_tag, .parse_vlan_tag
-11-MultiTags.p4(65): warning:  packet.extract is ignored. Exception: OverwritingHeader
-    extract(vlan_tag );
-    ^^^^^^^^^^^^^^^^^^
-11-MultiTags.p4(74): warning:  packet.extract is ignored. Exception: OverwritingHeader
-    extract(my_tag );
-    ^^^^^^^^^^^^^^^^
 [--Wwarn=invalid] warning: Parser cycle cannot be unrolled:
 Parser ParserImpl state chain: .start, .parse_my_tag, .parse_my_tag, .parse_vlan_tag, .parse_vlan_tag, .parse_my_tag, .parse_my_tag
 [--Wwarn=invalid] warning: Parser cycle cannot be unrolled:

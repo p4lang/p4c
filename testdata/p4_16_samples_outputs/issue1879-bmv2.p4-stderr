@@ -1,0 +1,6 @@
+issue1879-bmv2.p4(122): [--Wwarn=ignore-prop] warning: Result of packet.extract is not defined: Error: Reading field from invalid header union
+        packet.extract(hdr.prot_host_addr_dst.ipv4);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue1879-bmv2.p4(134): [--Wwarn=ignore-prop] warning: Result of packet.extract is not defined: Error: Reading field from invalid header union
+        packet.extract(hdr.prot_host_addr_src.ipv4);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,6 +1,6 @@
-issue561-3-bmv2.p4(45): warning:  packet.extract is ignored. Error: Reading field from invalid header union
+issue561-3-bmv2.p4(45): [--Wwarn=ignore-prop] warning: Result of packet.extract is not defined: Error: Reading field from invalid header union
         packet.extract(hdr.u.short);
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-issue561-3-bmv2.p4(41): warning:  packet.extract is ignored. Error: Reading field from invalid header union
+issue561-3-bmv2.p4(41): [--Wwarn=ignore-prop] warning: Result of packet.extract is not defined: Error: Reading field from invalid header union
         packet.extract(hdr.u.byte);
         ^^^^^^^^^^^^^^^^^^^^^^^^^^

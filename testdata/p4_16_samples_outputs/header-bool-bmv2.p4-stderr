@@ -1,6 +1,6 @@
-header-bool-bmv2.p4(57): warning:  b.extract is ignored. Error: Reading field from invalid header union
+header-bool-bmv2.p4(57): [--Wwarn=ignore-prop] warning: Result of b.extract is not defined: Error: Reading field from invalid header union
         b.extract(h.u.h2);
         ^^^^^^^^^^^^^^^^^
-header-bool-bmv2.p4(52): warning:  b.extract is ignored. Error: Reading field from invalid header union
+header-bool-bmv2.p4(52): [--Wwarn=ignore-prop] warning: Result of b.extract is not defined: Error: Reading field from invalid header union
         b.extract(h.u.h1);
         ^^^^^^^^^^^^^^^^^

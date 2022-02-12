@@ -32,29 +32,29 @@ header bitvec_hdr {
 }
 
 struct local_metadata_t {
-    @field_list(0)
+    @field_list(0) 
     bit<1>     _row0_alt0_valid0;
-    @field_list(0)
+    @field_list(0) 
     bit<7>     _row0_alt0_port1;
-    @field_list(0)
+    @field_list(0) 
     int<8>     _row0_alt0_hashRes2;
-    @field_list(0)
+    @field_list(0) 
     bool       _row0_alt0_useHash3;
-    @field_list(0)
+    @field_list(0) 
     bit<16>    _row0_alt0_type4;
-    @field_list(0)
+    @field_list(0) 
     bit<7>     _row0_alt0_pad5;
-    @field_list(0)
+    @field_list(0) 
     bit<1>     _row0_alt1_valid6;
-    @field_list(0)
+    @field_list(0) 
     bit<7>     _row0_alt1_port7;
-    @field_list(0)
+    @field_list(0) 
     int<8>     _row0_alt1_hashRes8;
-    @field_list(0)
+    @field_list(0) 
     bool       _row0_alt1_useHash9;
-    @field_list(0)
+    @field_list(0) 
     bit<16>    _row0_alt1_type10;
-    @field_list(0)
+    @field_list(0) 
     bit<7>     _row0_alt1_pad11;
     bit<1>     _row1_alt0_valid12;
     bit<7>     _row1_alt0_port13;
@@ -155,3 +155,4 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
 }
 
 V1Switch<parsed_packet_t, local_metadata_t>(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;
+

@@ -22,7 +22,7 @@ gauntlet_infinite_loop.p4(23): [--Wwarn=uninitialized_use] warning: padding.p ma
 gauntlet_infinite_loop.p4(23): [--Wwarn=invalid_header] warning: accessing a field of an invalid header padding
         transition select(padding.p) {
                           ^^^^^^^
-gauntlet_infinite_loop.p4(29): warning:  packet.extract is ignored. Exception: OverwritingHeader
+gauntlet_infinite_loop.p4(29): [--Wwarn=ignore-prop] warning: Result of packet.extract is not defined: Exception: OverwritingHeader
         b.extract(hdr.nop);
         ^^^^^^^^^^^^^^^^^^
 [--Wwarn=invalid] warning: Parser cycle cannot be unrolled:

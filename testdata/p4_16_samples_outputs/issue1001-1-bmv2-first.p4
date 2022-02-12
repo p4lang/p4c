@@ -10,7 +10,7 @@ enum bit<8> PreservedFieldList {
 }
 
 struct Meta {
-    @field_list(PreservedFieldList.Field)
+    @field_list(PreservedFieldList.Field) 
     bit<1> b;
 }
 
@@ -48,3 +48,4 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+

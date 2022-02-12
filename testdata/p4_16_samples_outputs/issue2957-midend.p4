@@ -23,7 +23,7 @@ parser p(packet_in pkt, out Headers hdr) {
         extern_call(tmp_3);
         hdr.h[3w1] = tmp_3;
         pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h.next);
+        pkt.extract<H>(hdr.h[32w1]);
         transition accept;
     }
 }

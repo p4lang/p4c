@@ -29,6 +29,10 @@ struct headers_t {
 }
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t meta, in pna_main_parser_input_metadata_t istd) {
+    state CommonParser_parse_ipv4 {
+        pkt.extract<ipv4_t>(hdr.ipv4);
+        transition start_0;
+    }
     state start {
         hdr.ethernet.setInvalid();
         hdr.ipv4.setInvalid();
@@ -37,10 +41,6 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t me
             16w0x800: CommonParser_parse_ipv4;
             default: start_0;
         }
-    }
-    state CommonParser_parse_ipv4 {
-        pkt.extract<ipv4_t>(hdr.ipv4);
-        transition start_0;
     }
     state start_0 {
         transition accept;

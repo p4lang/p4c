@@ -25,13 +25,6 @@ struct headers_t {
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t main_meta, in pna_main_parser_input_metadata_t istd) {
     bit<24> tmp;
     bit<24> tmp_1;
-    state start {
-        tmp = pkt.lookahead<bit<24>>();
-        transition select(tmp[23:8]) {
-            16w0x1234: parse_h1;
-            default: accept;
-        }
-    }
     state parse_h1 {
         pkt.extract<my_header_t>(hdr.h1);
         tmp_1 = pkt.lookahead<bit<24>>();
@@ -45,6 +38,13 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
     state parse_h2 {
         pkt.extract<my_header_t>(hdr.h2);
         transition accept;
+    }
+    state start {
+        tmp = pkt.lookahead<bit<24>>();
+        transition select(tmp[23:8]) {
+            16w0x1234: parse_h1;
+            default: accept;
+        }
     }
 }
 

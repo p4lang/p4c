@@ -1,7 +1,7 @@
 issue2314.p4(71): [--Wwarn=uninitialized_use] warning: hdr may not be completely initialized
     l3.apply(b, hdr);
                 ^^^
-issue2314.p4(59): warning:  b.extract is ignored. Exception: OverwritingHeader
+issue2314.p4(59): [--Wwarn=ignore-prop] warning: Result of b.extract is not defined: Exception: OverwritingHeader
     b.extract(hdr.i);
     ^^^^^^^^^^^^^^^^
 [--Wwarn=invalid] warning: Parser cycle cannot be unrolled:
