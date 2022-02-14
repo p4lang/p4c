@@ -6,6 +6,8 @@
 
 namespace P4 {
 
+using TypeLogMsgParams = std::pair<IR::IndexedVector<IR::NamedExpression>, std::string>;
+
 /**
 This pass translates all occuarence of log_msg function with non-flattend arguments into
 set of the flatten calls of log_smg.
@@ -20,8 +22,10 @@ class FlattenLogMsg : public Transform {
     const IR::Node* postorder(IR::MethodCallStatement* methodCallStatement) override;
 
  protected:
-    std::pair<IR::Vector<IR::Expression>, std::string> unfoldStruct(const IR::Expression* expr,
-      const IR::Type_StructLike* typeStruct, std::string& strParam);
+    TypeLogMsgParams unfoldStruct(const IR::Expression* expr, std::string strParam,
+                                  std::string curName = "");
+    const IR::Type_StructLike* generateNewStructType(const IR::Type_StructLike* structType,
+                                                     IR::IndexedVector<IR::NamedExpression> &v);
 };
 
 }  // namespace P4

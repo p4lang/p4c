@@ -24,38 +24,77 @@ const IR::Node* FlattenLogMsg::preorder(IR::BlockStatement* blockStatement) {
     return block;
 }
 
-std::pair<IR::Vector<IR::Expression>, std::string> FlattenLogMsg::unfoldStruct(
-    const IR::Expression* expr, const IR::Type_StructLike* typeStruct, std::string& strParam) {
-    IR::Vector<IR::Expression> result;
+TypeLogMsgParams FlattenLogMsg::unfoldStruct(const IR::Expression* expr, std::string strParam,
+                                             std::string curName) {
+    TypeLogMsgParams result;
+    if (auto structType = expr->type->to<IR::Type_StructLike>()) {
+        result.second += "(";
+        for (auto field : structType->fields) {
+            std::string nm = curName + std::string(".");
+            nm += field->name.name + std::string(" : ");
+            auto* newMember = new IR::Member(field->type, expr, field->name);
+            if (field->type->is<IR::Type_StructLike>()) {
+                auto curResult = unfoldStruct(newMember, strParam, nm);
+                nm += curResult.second;
+                result.first.insert(result.first.end(), curResult.first.begin(),
+                                    curResult.first.end());
+            } else {
+                nm += "{}";
+                result.first.push_back(new IR::NamedExpression(expr->srcInfo, IR::ID(nm),
+                                                               newMember));
+            }
+            result.second += nm + std::string(") ");
+        }
+        return result;
+    }
+    if (!expr->is<IR::StructExpression>()) {
+        result.first.push_back(new IR::NamedExpression(expr->srcInfo, IR::ID(curName), expr));
+        result.second = curName + std::string(" : {}");
+        return result;
+    }
+    auto* structExpr = expr->to<IR::StructExpression>();
     std::string strResult;
-    for (auto field : typeStruct->fields) {
+    for (auto namedExpr : structExpr->components) {
+        std::cout << namedExpr->name << ":" << namedExpr->expression << ":" << namedExpr->expression->type->node_type_name() << std::endl;
         size_t n = strParam.find("{}");
         if (n != std::string::npos) {
             strResult += strParam.substr(0, n);
             strParam = strParam.substr(n + 2); 
         }
-        auto* newMember = new IR::Member(expr->srcInfo, field->type, expr, field->name);
-        std::cout << "member : " << newMember << "\n type : " << newMember->type << std::endl;
-        if (auto *fieldTypeStruct = field->type->to<IR::Type_StructLike>()) {
-            std::string curRes;
-            auto innerFields = unfoldStruct(newMember, fieldTypeStruct, curRes);
-            result.insert(result.end(), innerFields.first.begin(), innerFields.first.end());
+        if (namedExpr->expression->type->is<IR::Type_StructLike>()) {
+            std::string nm;
+            if (curName.length()) {
+                nm = curName + std::string(".");
+            }
+            nm += namedExpr->name.name.c_str();
+            auto innerFields = unfoldStruct(namedExpr->expression, "", nm);
+            result.first.insert(result.first.end(), innerFields.first.begin(), innerFields.first.end());
             strResult += "(";
             strResult += innerFields.second;
             strResult += ")";
         } else {
-            if (expr->is<IR::Member>()) {
-                strResult += field->name;
-                strResult += "=";
-            }
             strResult += "{}";
-            if (expr->is<IR::Member>()) {
-                strResult += " ";
-            }
-            result.push_back(newMember);
+            result.first.push_back(namedExpr);
         }
     }
-    return std::make_pair(result, strResult);
+    result.second = strResult;
+    return result;
+}
+
+const IR::Type_StructLike* FlattenLogMsg::generateNewStructType(
+    const IR::Type_StructLike* structType, IR::IndexedVector<IR::NamedExpression> &v) {
+    IR::IndexedVector<IR::StructField> fields;
+    size_t index = 1;
+    for (auto namedExpr : v) {
+        //StructField(Util::SourceInfo srcInfo, IR::ID name, const IR::Type* type);
+        std::string nm = std::string("f") + std::to_string(index++);
+        fields.push_back(new IR::StructField(namedExpr->srcInfo, IR::ID(nm),
+                                             namedExpr->expression->type));
+    }
+    auto* newStructType = structType->clone();
+    newStructType->fields = fields;
+    newStructType->name.name = newStructType->name.name + cstring("_1");
+    return newStructType;
 }
 
 const IR::Node* FlattenLogMsg::postorder(IR::MethodCallStatement* methodCallStatement) {
@@ -72,29 +111,37 @@ const IR::Node* FlattenLogMsg::postorder(IR::MethodCallStatement* methodCallStat
             std::cout << argType << " : " << argType->node_type_name() << std::endl;
             if (argType->is<IR::Type_StructLike>()) {
                 std::cout << methodCallStatement->methodCall->arguments->at(0)->expression->node_type_name() << " : " << methodCallStatement->methodCall->arguments->at(0)->expression->type << std::endl;
-            std::cout << methodCallStatement->methodCall->arguments->at(1)->expression->node_type_name() << " : " << methodCallStatement->methodCall->arguments->at(1)->expression->type << std::endl;
-              auto exprVector = 
-                unfoldStruct(methodCallStatement->methodCall->arguments->at(1)->expression,
-                             argType->to<IR::Type_StructLike>(), strParam1);
-              auto* newBlock = new IR::BlockStatement();
-              for (auto newExpr : exprVector.first) {
-                  std::cout << "expr : " << newExpr << "\ntype : " << newExpr->type << std::endl;
-                  auto* newMethodCall = methodCallStatement->methodCall->clone();
-                  auto* newTypeArguments = newMethodCall->typeArguments->clone();
-                  newTypeArguments->clear();
-                  newTypeArguments->push_back(newExpr->type);
-                  newMethodCall->typeArguments = newTypeArguments;
-                  auto* newArguments = newMethodCall->arguments->clone(); 
-                  auto* newArgument = newMethodCall->arguments->at(1)->clone();
-                  newArgument->expression = newExpr;
-                  newArguments->at(1) = newArgument;
-                  newMethodCall->arguments = newArguments;
-                  auto* newMethodCallStatement = methodCallStatement->clone();
-                  newMethodCallStatement->methodCall = newMethodCall;
-                  std::cout << "new st : " << newMethodCallStatement << std::endl;
-                  newBlock->components.push_back(newMethodCallStatement);
-              }
-              return newBlock;
+                std::cout << methodCallStatement->methodCall->arguments->at(1)->expression->node_type_name() << " : " << methodCallStatement->methodCall->arguments->at(1)->expression->type << std::endl;
+                auto* structType = argType->to<IR::Type_StructLike>();
+                auto exprVector = 
+                    unfoldStruct(methodCallStatement->methodCall->arguments->at(1)->expression,
+                                 strParam1);
+                if (structType->fields.size() == exprVector.first.size()) {
+                    return methodCallStatement;
+                }
+                structType = generateNewStructType(structType, exprVector.first);
+                auto* newMethodCall = methodCallStatement->methodCall->clone();
+                auto* newTypeArguments = newMethodCall->typeArguments->clone();
+                newTypeArguments->clear();
+                newTypeArguments->push_back(structType);
+                newMethodCall->typeArguments = newTypeArguments;
+                auto* newArguments = newMethodCall->arguments->clone();
+                auto* newArgument = newMethodCall->arguments->at(0)->clone();
+                auto* newString = newArgument->expression->to<IR::StringLiteral>()->clone();
+                newString->value = exprVector.second;
+                newArgument->expression = newString;
+                newArguments->at(0) = newArgument;
+                newArgument = newMethodCall->arguments->at(1)->clone();
+                auto newStructExpression = newArgument->expression->to<IR::StructExpression>()->clone();
+                newStructExpression->type = structType;
+                newStructExpression->components = exprVector.first;
+                newArgument->expression = newStructExpression;
+                newArguments->at(1) = newArgument;
+                newMethodCall->arguments = newArguments;
+                auto* newMethodCallStatement = methodCallStatement->clone();
+                newMethodCallStatement->methodCall = newMethodCall;
+                std::cout << "new st : " << newMethodCallStatement << std::endl;
+                return newMethodCallStatement;
             }
         }
     }
