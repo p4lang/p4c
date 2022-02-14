@@ -24,8 +24,7 @@ limitations under the License.
 
 namespace DPDK {
 /* Insert the metadata structure updated with tmp variables created during parser conversion
-   Add annotations to metadata and header structures and add all the structures to DPDK
-   structtype.
+   Add all the structures to DPDK structtype.
 */
 IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata
                                       (IR::P4Program *prog, IR::Type_Struct *metadata) {
@@ -34,13 +33,9 @@ IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata
     for (auto obj : prog->objects) {
         if (auto s = obj->to<IR::Type_Struct>()) {
             if (s->name.name == structure->local_metadata_type) {
-                auto *annotations = new IR::Annotations(
-                    {new IR::Annotation(IR::ID("__metadata__"), {})});
-                for (auto anno : s->annotations->annotations)
-                    annotations->add(anno);
                 new_objs->push_back(metadata);
                 auto st = new IR::DpdkStructType(s->srcInfo, s->name,
-                                                 annotations, metadata->fields);
+                                                 s->annotations, metadata->fields);
                 structType.push_back(st);
             } else {
                 if (structure->args_struct_map.find(s->name.name) !=
@@ -49,10 +44,6 @@ IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata
                             s->annotations, s->fields);
                     structType.push_back(st);
                 } else if (s->name.name == structure->header_type) {
-                    auto *annotations = new IR::Annotations(
-                        {new IR::Annotation(IR::ID("__packet_data__"), {})});
-                    for (auto anno : s->annotations->annotations)
-                         annotations->add(anno);
                     auto st = new IR::DpdkStructType(s->srcInfo, s->name,
                                                  s->annotations, s->fields);
                     structType.push_back(st);
