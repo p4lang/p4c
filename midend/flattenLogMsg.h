@@ -15,10 +15,10 @@ set of the flatten calls of log_smg.
 class FlattenLogMsg : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
+    size_t index;
 
  public:
     FlattenLogMsg(P4::ReferenceMap* refMap, P4::TypeMap* typeMap);
-    const IR::Node* preorder(IR::BlockStatement* blockStatement) override;
     const IR::Node* postorder(IR::MethodCallStatement* methodCallStatement) override;
 
  protected:
@@ -26,6 +26,7 @@ class FlattenLogMsg : public Transform {
                                   std::string curName = "");
     const IR::Type_StructLike* generateNewStructType(const IR::Type_StructLike* structType,
                                                      IR::IndexedVector<IR::NamedExpression> &v);
+    IR::ID newName();
 };
 
 }  // namespace P4
