@@ -1095,6 +1095,106 @@ const IR::Node* PrependPDotToActionArgs::preorder(IR::MethodCallExpression* mce)
             arguments);
 }
 
+const IR::Node* SimplifyTernaryOperator::preorder(IR::Mux* expression) {
+    // We always dismantle muxes for dpdk
+    auto type = typeMap->getType(getOriginal(), true);
+    visit(expression->e0);
+    auto tmp = createTemporary(type);
+    auto save = statements;
+    statements.clear();
+    visit(expression->e1);
+    (void) addAssignment(expression->srcInfo, tmp, expression->e1);
+    auto ifTrue = statements;
+
+    statements.clear();
+    visit(expression->e2);
+    auto path = addAssignment(expression->srcInfo, tmp, expression->e2);
+    auto ifFalse = statements;
+    statements = save;
+
+    auto ifStatement = new IR::IfStatement(
+        expression->e0, new IR::BlockStatement(ifTrue), new IR::BlockStatement(ifFalse));
+    statements.push_back(ifStatement);
+    typeMap->setType(path, type);
+    prune();
+    return path;
+}
+
+cstring SimplifyTernaryOperator::createTemporary(const IR::Type* type) {
+    type = type->getP4Type();
+    auto tmp = refMap->newName("tmp");
+    auto decl = new IR::Declaration_Variable(IR::ID(tmp, nullptr), type);
+    toInsert.push_back(decl);
+    return tmp;
+}
+
+const IR::Expression* SimplifyTernaryOperator::addAssignment(
+    Util::SourceInfo srcInfo,
+    cstring varName,
+    const IR::Expression* expression) {
+    const IR::PathExpression* left;
+    if (auto pe = expression->to<IR::PathExpression>())
+        left = new IR::PathExpression(IR::ID(varName, pe->path->name.originalName));
+    else
+        left = new IR::PathExpression(IR::ID(varName));
+    auto stat = new IR::AssignmentStatement(srcInfo, left, expression);
+    statements.push_back(stat);
+    auto result = left->clone();
+    return result;
+}
+
+const IR::Node* SimplifyTernaryOperator::postorder(IR::P4Action* action) {
+    if (toInsert.empty())
+        return action;
+    auto body = new IR::BlockStatement(action->body->srcInfo);
+    for (auto a : toInsert)
+        body->push_back(a);
+    for (auto s : action->body->components)
+        body->push_back(s);
+    action->body = body;
+    toInsert.clear();
+    return action;
+}
+
+
+const IR::Node* SimplifyTernaryOperator::postorder(IR::Function* function) {
+    if (toInsert.empty())
+        return function;
+    auto body = new IR::BlockStatement(function->body->srcInfo);
+    for (auto a : toInsert)
+        body->push_back(a);
+    for (auto s : function->body->components)
+        body->push_back(s);
+    function->body = body;
+    toInsert.clear();
+    return function;
+}
+
+const IR::Node* SimplifyTernaryOperator::postorder(IR::P4Parser* parser) {
+    if (toInsert.empty())
+        return parser;
+    parser->parserLocals.append(toInsert);
+    toInsert.clear();
+    return parser;
+}
+
+const IR::Node* SimplifyTernaryOperator::postorder(IR::P4Control* control) {
+    if (toInsert.empty())
+        return control;
+    control->controlLocals.append(toInsert);
+    toInsert.clear();
+    return control;
+}
+
+const IR::Node* SimplifyTernaryOperator::postorder(IR::AssignmentStatement* statement) {
+    if (statements.empty())
+        return statement;
+    statements.push_back(statement);
+    auto block = new IR::BlockStatement(statements);
+    statements.clear();
+    return block;
+}
+
 /* This function transforms the table so that all match keys come from the same struct.
    Mirror copies of match fields are created in metadata struct and table is updated to
    use the metadata fields.
