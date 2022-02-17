@@ -1,5 +1,4 @@
 
-
 struct ethernet_t {
 	bit<48> dstAddr
 	bit<48> srcAddr
@@ -123,27 +122,6 @@ apply {
 	INGRESSPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
 	table route
 	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
-	emit h.ethernet
-	emit h.ipv4
-	emit h.tcp
-	mov h.cksum_state.state_0 0x0
-	ckadd h.cksum_state.state_0 h.ipv4.version
-	ckadd h.cksum_state.state_0 h.ipv4.ihl
-	ckadd h.cksum_state.state_0 h.ipv4.diffserv
-	ckadd h.cksum_state.state_0 h.ipv4.totalLen
-	ckadd h.cksum_state.state_0 h.ipv4.identification
-	ckadd h.cksum_state.state_0 h.ipv4.flags
-	ckadd h.cksum_state.state_0 h.ipv4.fragOffset
-	ckadd h.cksum_state.state_0 h.ipv4.ttl
-	ckadd h.cksum_state.state_0 h.ipv4.protocol
-	ckadd h.cksum_state.state_0 h.ipv4.srcAddr
-	ckadd h.cksum_state.state_0 h.ipv4.dstAddr
-	mov h.ipv4.hdrChecksum h.cksum_state.state_0
-	mov h.cksum_state.state_0 0x0
-	cksub h.cksum_state.state_0 h.tcp.checksum
-	cksub h.cksum_state.state_0 m.local_metadata__fwd_metadata_old_srcAddr0
-	ckadd h.cksum_state.state_0 h.ipv4.srcAddr
-	mov h.tcp.checksum h.cksum_state.state_0
 	emit h.ethernet
 	emit h.ipv4
 	emit h.tcp

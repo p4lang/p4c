@@ -43,7 +43,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     auto program = tlb->getProgram();
 
     std::set<const IR::P4Table*> invokedInKey;
-    auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure);
+    auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure, options);
     auto genContextJson = new DpdkContextGenerator(refMap, typeMap, &structure, options);
 
     PassManager simplify = {
