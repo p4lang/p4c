@@ -136,8 +136,10 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     for (auto kv : structure->pipelines) {
         if (kv.first == "Ingress")
             kv.second->apply(*ingress_converter);
-        else if (kv.first == "Egress")
+        else if (kv.first == "Egress") {
             kv.second->apply(*egress_converter);
+            BUG_CHECK(egress_converter->getInstructions().size() == 0, "Non Empty %s block", kv.first);
+        }
         else if (kv.first == "PreControlT")
             kv.second->apply(*ingress_converter);
         else if (kv.first == "MainControlT")
@@ -152,8 +154,10 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     for (auto kv : structure->deparsers) {
         if (kv.first == "IngressDeparser")
             kv.second->apply(*ingress_deparser_converter);
-        else if (kv.first == "EgressDeparser")
+        else if (kv.first == "EgressDeparser") {
             kv.second->apply(*egress_deparser_converter);
+            BUG_CHECK(egress_deparser_converter->getInstructions().size() == 0, "Non Empty %s block", kv.first);
+        }
         else if (kv.first == "MainDeparserT")
             kv.second->apply(*ingress_deparser_converter);
         else

@@ -136,19 +136,7 @@ control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_me
 }
 
 control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psadpdklpmmatcherr5l155() {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<tcp_t>(hdr.tcp);
-    }
-    @hidden table tbl_psadpdklpmmatcherr5l155 {
-        actions = {
-            psadpdklpmmatcherr5l155();
-        }
-        const default_action = psadpdklpmmatcherr5l155();
-    }
     apply {
-        tbl_psadpdklpmmatcherr5l155.apply();
     }
 }
 

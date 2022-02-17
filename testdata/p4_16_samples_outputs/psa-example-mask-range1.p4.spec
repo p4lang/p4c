@@ -151,10 +151,7 @@ apply {
 	jmpeq EGRESSPARSERIMPL_PARSE_TCP m.tmpMask_2 0x10
 	jmp EGRESSPARSERIMPL_ACCEPT
 	EGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
-	EGRESSPARSERIMPL_ACCEPT :	emit h.ethernet
-	emit h.ipv4
-	emit h.tcp
-	tx m.psa_ingress_output_metadata_egress_port
+	EGRESSPARSERIMPL_ACCEPT :	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop
 }
 

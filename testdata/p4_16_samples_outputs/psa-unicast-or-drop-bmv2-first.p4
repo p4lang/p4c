@@ -74,12 +74,7 @@ parser EgressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user_
 }
 
 control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    @name("packet_path_to_int") packet_path_to_int() packet_path_to_int_inst;
     apply {
-        hdr.output_data.word0 = (bit<32>)istd.egress_port;
-        hdr.output_data.word1 = (bit<32>)(EgressInstanceUint_t)istd.instance;
-        packet_path_to_int_inst.apply(istd.packet_path, hdr.output_data.word2);
-        hdr.output_data.word3 = (bit<32>)(ClassOfServiceUint_t)istd.class_of_service;
     }
 }
 
@@ -98,9 +93,7 @@ control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_me
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    CommonDeparserImpl() cp;
     apply {
-        cp.apply(buffer, hdr);
     }
 }
 

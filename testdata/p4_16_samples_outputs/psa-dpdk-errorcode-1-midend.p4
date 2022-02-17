@@ -132,19 +132,7 @@ control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_me
 }
 
 control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psadpdkerrorcode1l154() {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<tcp_t>(hdr.tcp);
-    }
-    @hidden table tbl_psadpdkerrorcode1l154 {
-        actions = {
-            psadpdkerrorcode1l154();
-        }
-        const default_action = psadpdkerrorcode1l154();
-    }
     apply {
-        tbl_psadpdkerrorcode1l154.apply();
     }
 }
 

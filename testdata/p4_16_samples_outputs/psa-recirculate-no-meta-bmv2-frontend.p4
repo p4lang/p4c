@@ -99,35 +99,7 @@ parser EgressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user_
 }
 
 control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    @name("cEgress.add") action add_1() {
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr + hdr.ethernet.srcAddr;
-    }
-    @name("cEgress.e") table e_0 {
-        actions = {
-            add_1();
-        }
-        default_action = add_1();
-    }
     apply {
-        e_0.apply();
-        if (istd.egress_port == (PortId_t)32w0xfffffffa) {
-            hdr.output_data.word3 = 32w8;
-            if (istd.packet_path == PSA_PacketPath_t.NORMAL) {
-                hdr.output_data.word3 = 32w1;
-            } else if (istd.packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {
-                hdr.output_data.word3 = 32w2;
-            } else if (istd.packet_path == PSA_PacketPath_t.NORMAL_MULTICAST) {
-                hdr.output_data.word3 = 32w3;
-            } else if (istd.packet_path == PSA_PacketPath_t.CLONE_I2E) {
-                hdr.output_data.word3 = 32w4;
-            } else if (istd.packet_path == PSA_PacketPath_t.CLONE_E2E) {
-                hdr.output_data.word3 = 32w5;
-            } else if (istd.packet_path == PSA_PacketPath_t.RESUBMIT) {
-                hdr.output_data.word3 = 32w6;
-            } else if (istd.packet_path == PSA_PacketPath_t.RECIRCULATE) {
-                hdr.output_data.word3 = 32w7;
-            }
-        }
     }
 }
 
@@ -140,8 +112,6 @@ control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_me
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
     apply {
-        buffer.emit<ethernet_t>(hdr.ethernet);
-        buffer.emit<output_data_t>(hdr.output_data);
     }
 }
 

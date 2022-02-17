@@ -9,18 +9,3 @@ actions {
     annotations: "@noWarnUnused"
   }
 }
-actions {
-  preamble {
-    id: 21538986
-    name: "egress_drop"
-    alias: "egress_drop"
-    annotations: "@noWarnUnused"
-  }
-}
-actions {
-  preamble {
-    id: 21288787
-    name: "cEgress.clone"
-    alias: "clone"
-  }
-}

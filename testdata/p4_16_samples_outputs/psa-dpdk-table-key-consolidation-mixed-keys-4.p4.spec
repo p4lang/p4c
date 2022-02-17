@@ -84,7 +84,6 @@ struct metadata {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 	bit<16> local_metadata_data
-	bit<8> Egress_key
 	bit<16> tmpMask
 	bit<8> tmpMask_0
 }
@@ -93,29 +92,6 @@ metadata instanceof metadata
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 header tcp instanceof tcp_t
-
-action NoAction args none {
-	return
-}
-
-action execute args none {
-	mov m.local_metadata_data 0x1
-	return
-}
-
-table tbl {
-	key {
-		m.local_metadata_data exact
-		m.Egress_key exact
-	}
-	actions {
-		NoAction
-		execute
-	}
-	default_action NoAction args none 
-	size 0x10000
-}
-
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
@@ -136,12 +112,7 @@ apply {
 	jmpeq EGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp EGRESSPARSERIMPL_ACCEPT
 	EGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
-	EGRESSPARSERIMPL_ACCEPT :	mov m.Egress_key 0x48
-	table tbl
-	emit h.ethernet
-	emit h.ipv4
-	emit h.tcp
-	tx m.psa_ingress_output_metadata_egress_port
+	EGRESSPARSERIMPL_ACCEPT :	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop
 }
 

@@ -110,9 +110,7 @@ control egressDeparserImpl(packet_out packet,
                            in psa_egress_output_metadata_t istd,
                            in psa_egress_deparser_input_metadata_t edstd)
 {
-    CommonDeparserImpl() cp;
     apply {
-        cp.apply(packet, hdr);
     }
 }
 

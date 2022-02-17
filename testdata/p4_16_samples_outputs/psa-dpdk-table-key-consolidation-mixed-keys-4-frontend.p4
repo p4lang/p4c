@@ -85,24 +85,7 @@ parser EgressParserImpl(packet_in buffer, out headers hdr, inout metadata user_m
 }
 
 control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
-    }
-    @name("egress.execute") action execute_1() {
-        user_meta.data = 16w1;
-    }
-    @name("egress.tbl") table tbl_0 {
-        key = {
-            user_meta.data: exact @name("user_meta.data") ;
-            8w0x48        : exact @name("0x48") ;
-        }
-        actions = {
-            NoAction_1();
-            execute_1();
-        }
-        default_action = NoAction_1();
-    }
     apply {
-        tbl_0.apply();
     }
 }
 
@@ -116,9 +99,6 @@ control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_me
 
 control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<tcp_t>(hdr.tcp);
     }
 }
 

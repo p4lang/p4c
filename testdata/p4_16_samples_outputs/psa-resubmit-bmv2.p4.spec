@@ -106,8 +106,6 @@ apply {
 	emit h.ethernet
 	emit h.output_data
 	extract h.ethernet
-	emit h.ethernet
-	emit h.output_data
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop
 }

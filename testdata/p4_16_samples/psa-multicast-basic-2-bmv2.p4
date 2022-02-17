@@ -120,10 +120,6 @@ control cEgress(inout headers_t hdr,
                 inout psa_egress_output_metadata_t ostd)
 {
     apply {
-        hdr.output_data.word0 = (bit<32>) istd.egress_port;
-        hdr.output_data.word1 = (bit<32>) ((EgressInstanceUint_t) istd.instance);
-        packet_path_to_int.apply(istd.packet_path, hdr.output_data.word2);
-        hdr.output_data.word3 = (bit<32>) ((ClassOfServiceUint_t) istd.class_of_service);
     }
 }
 
@@ -158,9 +154,7 @@ control EgressDeparserImpl(packet_out buffer,
                            in psa_egress_output_metadata_t istd,
                            in psa_egress_deparser_input_metadata_t edstd)
 {
-    CommonDeparserImpl() cp;
     apply {
-        cp.apply(buffer, hdr);
     }
 }
 

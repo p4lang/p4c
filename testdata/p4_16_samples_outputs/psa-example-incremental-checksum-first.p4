@@ -126,19 +126,7 @@ control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_me
 }
 
 control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata user_meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    InternetChecksum() ck;
     apply {
-        ck.clear();
-        ck.add<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-        hdr.ipv4.hdrChecksum = ck.get();
-        ck.clear();
-        ck.subtract<tuple<bit<16>>>({ hdr.tcp.checksum });
-        ck.subtract<tuple<bit<32>>>({ user_meta.fwd_metadata.old_srcAddr });
-        ck.add<tuple<bit<32>>>({ hdr.ipv4.srcAddr });
-        hdr.tcp.checksum = ck.get();
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<tcp_t>(hdr.tcp);
     }
 }
 

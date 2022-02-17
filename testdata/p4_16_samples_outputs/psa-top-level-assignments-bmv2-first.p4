@@ -57,9 +57,7 @@ control ingressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_me
 }
 
 control egressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    CommonDeparserImpl() cp;
     apply {
-        cp.apply(packet, hdr);
     }
 }
 

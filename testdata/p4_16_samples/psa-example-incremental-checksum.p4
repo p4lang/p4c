@@ -182,43 +182,7 @@ control EgressDeparserImpl(packet_out packet,
                            in psa_egress_output_metadata_t istd,
                            in psa_egress_deparser_input_metadata_t edstd)
 {
-    InternetChecksum() ck;
     apply {
-        // Update IPv4 checksum
-        // This clear() call can be removed without affecting
-        // behavior, as an InternetCheckum instance is automatically
-        // cleared for each packet.
-        ck.clear();
-        ck.add({
-            /* 16-bit word  0   */ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv,
-            /* 16-bit word  1   */ hdr.ipv4.totalLen,
-            /* 16-bit word  2   */ hdr.ipv4.identification,
-            /* 16-bit word  3   */ hdr.ipv4.flags, hdr.ipv4.fragOffset,
-            /* 16-bit word  4   */ hdr.ipv4.ttl, hdr.ipv4.protocol,
-            /* 16-bit word  5 skip hdr.ipv4.hdrChecksum, */
-            /* 16-bit words 6-7 */ hdr.ipv4.srcAddr,
-            /* 16-bit words 8-9 */ hdr.ipv4.dstAddr
-            });
-        hdr.ipv4.hdrChecksum = ck.get();
-        // Update TCP checksum
-        // This clear() call is necessary for correct behavior, since
-        // the same instance 'ck' is reused from above for the same
-        // packet.  If a second InternetChecksum instance other than
-        // 'ck' were used below instead, this clear() call would be
-        // unnecessary.
-        ck.clear();
-        // Subtract the original TCP checksum
-        ck.subtract({hdr.tcp.checksum});
-        // Subtract the effect of the original IPv4 source address,
-        // which is part of the TCP 'pseudo-header' for the purposes
-        // of TCP checksum calculation (see RFC 793), then add the
-        // effect of the new IPv4 source address.
-        ck.subtract({user_meta.fwd_metadata.old_srcAddr});
-        ck.add({hdr.ipv4.srcAddr});
-        hdr.tcp.checksum = ck.get();
-        packet.emit(hdr.ethernet);
-        packet.emit(hdr.ipv4);
-        packet.emit(hdr.tcp);
     }
 }
 // END:Incremental_Checksum_Example

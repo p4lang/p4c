@@ -31,4 +31,3 @@ invalid-hdr-warnings5.p4(83): [--Wwarn=invalid_header] warning: accessing a fiel
 invalid-hdr-warnings5.p4(84): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u1.h3
         u1.h3.data = 1;
         ^^^^^
-

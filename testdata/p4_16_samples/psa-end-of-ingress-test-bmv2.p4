@@ -128,44 +128,7 @@ control cEgress(inout headers_t hdr,
                 in    psa_egress_input_metadata_t  istd,
                 inout psa_egress_output_metadata_t ostd)
 {
-    Register<bit<16>, bit<8>>(256) egress_pkt_seen;
-
     apply {
-        bit<8> idx = hdr.ethernet.etherType[7:0];
-        bit<16> cur_count = egress_pkt_seen.read(idx);
-        if (hdr.ethernet.etherType[15:8] == 0xc0) {
-            // 'command packet' to read register
-            hdr.output_data.word0 = (bit<32>) cur_count;
-        } else if (hdr.ethernet.etherType[15:8] == 0xc1) {
-            // 'command packet' to write register
-            bit<16> write_data = hdr.ethernet.srcAddr[15:0];
-            egress_pkt_seen.write(idx, write_data);
-        } else {
-            // 'data packet' that should be recorded that it went
-            // through this code path.  By remembering a packet got
-            // here, and using 'command packets' to read/write the
-            // 'got here' values before and after sending 'data
-            // packets', we can determine from the output packet
-            // contents alone whether a packet was dropped during
-            // ingress and never did egress processing, or did do
-            // egress processing.
-
-            // I tried using a counter instead, but I could not see a
-            // way given the existing STF test file infrastructure to
-            // deterministically wait until all data packets were
-            // processed before sending in the command packet that
-            // reads this value, so I would get packet count values
-            // ranging between 8 and 12, instead of the deterministic
-            // 12 I was hoping for.  Changing it to a flag indicating
-            // that at least one packet was seen gives much more
-            // repeatable results.
-            if (hdr.ethernet.etherType < 256) {
-                egress_pkt_seen.write(idx, 1);
-            }
-            hdr.output_data.word1 = (bit<32>) istd.egress_port;
-            hdr.output_data.word2 = (bit<32>) ((EgressInstanceUint_t) istd.instance);
-            packet_path_to_int.apply(istd.packet_path, hdr.output_data.word3);
-        }
     }
 }
 
@@ -200,9 +163,7 @@ control EgressDeparserImpl(packet_out buffer,
                            in psa_egress_output_metadata_t istd,
                            in psa_egress_deparser_input_metadata_t edstd)
 {
-    CommonDeparserImpl() cp;
     apply {
-        cp.apply(buffer, hdr);
     }
 }
 

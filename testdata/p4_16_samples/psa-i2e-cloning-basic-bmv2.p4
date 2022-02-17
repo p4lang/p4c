@@ -94,10 +94,6 @@ control cEgress(inout headers_t hdr,
                 inout psa_egress_output_metadata_t ostd)
 {
     apply {
-        // mark the clone packets so stf can tell the difference
-        if (istd.packet_path == PSA_PacketPath_t.CLONE_I2E) {
-            hdr.ethernet.etherType = 0xface;
-        }
     }
 }
 
@@ -131,9 +127,7 @@ control EgressDeparserImpl(packet_out buffer,
                            in psa_egress_output_metadata_t istd,
                            in psa_egress_deparser_input_metadata_t edstd)
 {
-    CommonDeparserImpl() cp;
     apply {
-        cp.apply(buffer, hdr);
     }
 }
 

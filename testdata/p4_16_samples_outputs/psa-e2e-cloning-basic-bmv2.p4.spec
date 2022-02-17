@@ -75,22 +75,6 @@ apply {
 	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	extract h.ethernet
-	jmpneq LABEL_FALSE_0 m.psa_egress_input_metadata_packet_path 0x4
-	mov h.ethernet.etherType 0xface
-	jmp LABEL_END_0
-	LABEL_FALSE_0 :	mov m.psa_egress_output_metadata_clone 1
-	mov m.psa_egress_output_metadata_clone_session_id 0x8
-	jmpneq LABEL_END_1 h.ethernet.dstAddr 0x9
-	mov m.psa_egress_output_metadata_drop 1
-	mov m.psa_egress_output_metadata_clone_session_id 0x9
-	LABEL_END_1 :	jmpneq LABEL_FALSE_2 m.psa_egress_input_metadata_egress_port 0xfffffffa
-	mov h.ethernet.srcAddr 0xbeef
-	mov m.psa_egress_output_metadata_clone_session_id 0xa
-	jmp LABEL_END_0
-	LABEL_FALSE_2 :	jmpneq LABEL_END_3 h.ethernet.dstAddr 0x8
-	mov m.psa_egress_output_metadata_clone_session_id 0xb
-	LABEL_END_3 :	mov h.ethernet.srcAddr 0xcafe
-	LABEL_END_0 :	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop
 }

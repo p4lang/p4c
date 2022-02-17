@@ -85,69 +85,29 @@ parser EgressParserImpl(packet_in buffer, out headers hdr, inout metadata user_m
 }
 
 control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    bit<8> key_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
-    }
-    @name("egress.execute") action execute_1() {
-        user_meta.data = 16w1;
-    }
-    @name("egress.tbl") table tbl_0 {
-        key = {
-            user_meta.data: exact @name("user_meta.data") ;
-            key_0         : exact @name("0x48") ;
-        }
-        actions = {
-            NoAction_1();
-            execute_1();
-        }
-        default_action = NoAction_1();
-    }
-    @hidden action psadpdktablekeyconsolidationmixedkeys4l119() {
-        key_0 = 8w0x48;
-    }
-    @hidden table tbl_psadpdktablekeyconsolidationmixedkeys4l119 {
-        actions = {
-            psadpdktablekeyconsolidationmixedkeys4l119();
-        }
-        const default_action = psadpdktablekeyconsolidationmixedkeys4l119();
-    }
     apply {
-        tbl_psadpdktablekeyconsolidationmixedkeys4l119.apply();
-        tbl_0.apply();
     }
 }
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psadpdktablekeyconsolidationmixedkeys4l137() {
+    @hidden action psadpdktablekeyconsolidationmixedkeys4l125() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
         packet.emit<tcp_t>(hdr.tcp);
     }
-    @hidden table tbl_psadpdktablekeyconsolidationmixedkeys4l137 {
+    @hidden table tbl_psadpdktablekeyconsolidationmixedkeys4l125 {
         actions = {
-            psadpdktablekeyconsolidationmixedkeys4l137();
+            psadpdktablekeyconsolidationmixedkeys4l125();
         }
-        const default_action = psadpdktablekeyconsolidationmixedkeys4l137();
+        const default_action = psadpdktablekeyconsolidationmixedkeys4l125();
     }
     apply {
-        tbl_psadpdktablekeyconsolidationmixedkeys4l137.apply();
+        tbl_psadpdktablekeyconsolidationmixedkeys4l125.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psadpdktablekeyconsolidationmixedkeys4l153() {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<tcp_t>(hdr.tcp);
-    }
-    @hidden table tbl_psadpdktablekeyconsolidationmixedkeys4l153 {
-        actions = {
-            psadpdktablekeyconsolidationmixedkeys4l153();
-        }
-        const default_action = psadpdktablekeyconsolidationmixedkeys4l153();
-    }
     apply {
-        tbl_psadpdktablekeyconsolidationmixedkeys4l153.apply();
     }
 }
 

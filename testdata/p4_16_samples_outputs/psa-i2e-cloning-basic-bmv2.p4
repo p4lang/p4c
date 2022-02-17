@@ -50,9 +50,6 @@ parser EgressParserImpl(packet_in buffer, out headers_t hdr, inout metadata_t us
 
 control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
     apply {
-        if (istd.packet_path == PSA_PacketPath_t.CLONE_I2E) {
-            hdr.ethernet.etherType = 0xface;
-        }
     }
 }
 
@@ -70,9 +67,7 @@ control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_me
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    CommonDeparserImpl() cp;
     apply {
-        cp.apply(buffer, hdr);
     }
 }
 

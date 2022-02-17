@@ -67,20 +67,6 @@ metadata instanceof metadata_t
 header ethernet instanceof ethernet_t
 header output_data instanceof output_data_t
 
-action add args none {
-	add h.ethernet.dstAddr h.ethernet.srcAddr
-	return
-}
-
-table e {
-	actions {
-		add
-	}
-	default_action add args none 
-	size 0x10000
-}
-
-
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
@@ -128,31 +114,6 @@ apply {
 	emit h.output_data
 	extract h.ethernet
 	extract h.output_data
-	table e
-	jmpneq LABEL_END_8 m.psa_egress_input_metadata_egress_port 0xfffffffa
-	mov h.output_data.word3 0x8
-	jmpneq LABEL_FALSE_9 m.psa_egress_input_metadata_packet_path 0x0
-	mov h.output_data.word3 0x1
-	jmp LABEL_END_8
-	LABEL_FALSE_9 :	jmpneq LABEL_FALSE_10 m.psa_egress_input_metadata_packet_path 0x1
-	mov h.output_data.word3 0x2
-	jmp LABEL_END_8
-	LABEL_FALSE_10 :	jmpneq LABEL_FALSE_11 m.psa_egress_input_metadata_packet_path 0x2
-	mov h.output_data.word3 0x3
-	jmp LABEL_END_8
-	LABEL_FALSE_11 :	jmpneq LABEL_FALSE_12 m.psa_egress_input_metadata_packet_path 0x3
-	mov h.output_data.word3 0x4
-	jmp LABEL_END_8
-	LABEL_FALSE_12 :	jmpneq LABEL_FALSE_13 m.psa_egress_input_metadata_packet_path 0x4
-	mov h.output_data.word3 0x5
-	jmp LABEL_END_8
-	LABEL_FALSE_13 :	jmpneq LABEL_FALSE_14 m.psa_egress_input_metadata_packet_path 0x5
-	mov h.output_data.word3 0x6
-	jmp LABEL_END_8
-	LABEL_FALSE_14 :	jmpneq LABEL_END_8 m.psa_egress_input_metadata_packet_path 0x6
-	mov h.output_data.word3 0x7
-	LABEL_END_8 :	emit h.ethernet
-	emit h.output_data
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop
 }

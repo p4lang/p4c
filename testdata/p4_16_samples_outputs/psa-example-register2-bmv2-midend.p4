@@ -135,18 +135,7 @@ control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_me
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psaexampleregister2bmv2l164_0() {
-        buffer.emit<ethernet_t>(hdr.ethernet);
-        buffer.emit<ipv4_t>(hdr.ipv4);
-    }
-    @hidden table tbl_psaexampleregister2bmv2l164_0 {
-        actions = {
-            psaexampleregister2bmv2l164_0();
-        }
-        const default_action = psaexampleregister2bmv2l164_0();
-    }
     apply {
-        tbl_psaexampleregister2bmv2l164_0.apply();
     }
 }
 
