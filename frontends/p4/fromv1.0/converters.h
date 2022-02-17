@@ -924,6 +924,47 @@ class MoveIntrinsicMetadata : public Transform {
     }
 };
 
+/// This visitor finds all field lists that participate in
+/// recirculation, resubmission, and cloning
+class FindRecirculated : public Inspector {
+    ProgramStructure* structure;
+
+    void add(const IR::Primitive* primitive, unsigned operand) {
+        if (primitive->operands.size() <= operand) {
+            // not enough arguments, do nothing.
+            // resubmit and recirculate have optional arguments
+            return;
+        }
+        auto expression = primitive->operands.at(operand);
+        if (!expression->is<IR::PathExpression>()) {
+            ::error("%1%: expected a field list", expression);
+            return;
+        }
+        auto nr = expression->to<IR::PathExpression>();
+        auto fl = structure->field_lists.get(nr->path->name);
+        if (fl == nullptr) {
+            ::error("%1%: Expected a field list", expression);
+            return;
+        }
+        LOG3("Recirculated " << nr->path->name);
+        structure->allFieldLists.emplace(fl);
+    }
+
+ public:
+    explicit FindRecirculated(ProgramStructure* structure): structure(structure)
+    { CHECK_NULL(structure); setName("FindRecirculated"); }
+
+    void postorder(const IR::Primitive* primitive) override {
+        if (primitive->name == "recirculate") {
+            add(primitive, 0);
+        } else if (primitive->name == "resubmit") {
+            add(primitive, 0);
+        } else if (primitive->name.startsWith("clone") && primitive->operands.size() == 2) {
+            add(primitive, 1);
+        }
+    }
+};
+
 ///////////////////////////////////////////////////////////////
 
 // Is fed a P4-14 program and outputs an equivalent P4-16 program in v1model
