@@ -1,0 +1,18 @@
+[--Wwarn=uninitialized_use] warning: returnTmp may not be completely initialized
+default-values-operations-1.p4(27): [--Wwarn=uninitialized_use] warning: hdr_or_hu may not be completely initialized
+        if (t != { ... }) {
+                 ^^^^^^^
+default-values-operations-1.p4(22): [--Wwarn=uninitialized_use] warning: rightTmp may not be completely initialized
+        if (s == {b = false, ... }) {
+            ^^^^^^^^^^^^^^^^^^^^^^
+default-values-operations-1.p4(26): [--Wwarn=uninitialized_use] warning: hdr_or_hu_1 may not be completely initialized
+        t = { ... };
+            ^^^^^^^
+default-values-operations-1.p4(31): [--Wwarn=uninitialized_use] warning: leftTmp may not be completely initialized
+        s = ({b = true, ... } == s ? s : sr);
+             ^^^^^^^^^^^^^^^^^^^^^
+default-values-operations-1.p4(31): [--Wwarn=uninitialized_use] warning: sr may not be completely initialized
+        s = ({b = true, ... } == s ? s : sr);
+                                         ^^
+[--Wwarn=uninitialized_use] warning: returnTmp may not be completely initialized
+[--Wwarn=uninitialized_use] warning: returnTmp may not be completely initialized

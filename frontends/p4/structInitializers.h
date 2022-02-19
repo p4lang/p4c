@@ -43,10 +43,6 @@ class CreateStructInitializers : public Transform {
 
     static const IR::Expression* defaultValue(const IR::Type* type, const Util::SourceInfo srcInfo);
 };
-/// Creates temporary variable for every default initialization that
-/// shows up in an inconvenient place
-/// Inconvenient places are operands in operation relation, return statements,
-/// arguments of method call expressions
 class MoveDefaultInitialization : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
@@ -65,6 +61,32 @@ class MoveDefaultInitialization : public Transform {
     const IR::Node* postorder(IR::Function* function) override;
     const IR::Node* postorder(IR::ParserState* state) override;
 };
+/// MoveDefaultInitialization pass creates temporary variables
+/// for default values in operation relation,
+/// return statements, and arguments of method call expressions.
+/// After this pass, only declaration variables
+/// and assignments can have default initializations.
+/// CreateStructInitializers expands default initializations into assignments.
+/// S f (in S s1) {
+///     /*ommited*/
+///     return {...}
+/// }
+///
+/// --> MoveDefaultInitialization
+/// S f (in S s1) {
+///     /*ommited*/
+///     S returnTmp = {...};
+///     return returnTmp;
+/// }
+///
+/// --> CreateStructInitializers
+/// S f (in S s1) {
+///     /*ommited*/
+///     S returnTmp;
+///     returnTmp.i = 0;
+///     returnTmp.b = false;
+///     return returnTmp;
+/// }
 class StructInitializers : public PassManager {
  public:
     StructInitializers(ReferenceMap* refMap, TypeMap* typeMap) {

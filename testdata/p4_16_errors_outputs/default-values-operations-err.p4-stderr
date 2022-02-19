@@ -1,3 +1,0 @@
-default-values-operations-err.p4(12): [--Werror=type-error] error: ==: cannot compare initializers with unknown types
-         bool b1 = {a = 1, b = 1} == {a = 11, b = 22}; // error: ==: cannot compare initializers with unknown types
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

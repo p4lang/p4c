@@ -298,6 +298,8 @@ class Type_Struct : Type_StructLike {
 /// This is the type of a struct-valued expression whose
 /// exact struct type is yet unknown; we only know the field names
 /// and some information about their types.
+/// Variable incomplete represents wheter it is
+/// the type of an expression containing a default initializer.
 class Type_UnknownStruct : Type_StructLike {
 #nodbprint
     bool incomplete = false;
