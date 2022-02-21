@@ -25,6 +25,7 @@ limitations under the License.
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/cloner.h"
 #include "midend/convertErrors.h"
+#include "midend/eliminateSerEnums.h"
 #include "midend/flattenLogMsg.h"
 #include "simpleSwitch.h"
 #include "backends/bmv2/simple_switch/options.h"
