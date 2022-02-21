@@ -54,18 +54,18 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout metadata_t meta, inou
 
 control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     @name("cIngress.C1.stats") counter(32w11, CounterType.packets) C1_stats;
-    @hidden action declcopyprop62() {
+    @hidden action declcopyprop64() {
         hdr.ethernet.etherType = hdr.ethernet.etherType + 16w1;
         C1_stats.count((bit<32>)hdr.ethernet.etherType);
     }
-    @hidden table tbl_declcopyprop62 {
+    @hidden table tbl_declcopyprop64 {
         actions = {
-            declcopyprop62();
+            declcopyprop64();
         }
-        const default_action = declcopyprop62();
+        const default_action = declcopyprop64();
     }
     apply {
-        tbl_declcopyprop62.apply();
+        tbl_declcopyprop64.apply();
     }
 }
 

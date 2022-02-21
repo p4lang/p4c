@@ -41,6 +41,7 @@ struct test2 {
 }
 
 bit<32> f(out bit<32> arg1, in bit<32> arg2) {
+    bit<32> temp = 5;
     arg1 = 5;
     arg1 = arg2 + arg1;
     return arg1;
@@ -57,6 +58,7 @@ control C1(inout bit<16> x)
     bit<32> z = tst2.c + tst2.t1.b + a;
     bit<32> all = a + h + z;
     bit<32> fun = f(h, z);
+    bit<32> ret = fun;
     counter((bit<32>)tst2.t1.tup[0].h1.f2, CounterType.packets) stats;
     apply {
         x = x + 1;
