@@ -24,6 +24,7 @@ limitations under the License.
 #include "backends/bmv2/common/annotations.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/cloner.h"
+#include "midend/convertErrors.h"
 #include "midend/flattenLogMsg.h"
 #include "simpleSwitch.h"
 #include "backends/bmv2/simple_switch/options.h"
@@ -35,6 +36,21 @@ using BMV2::nextId;
 using BMV2::stringRepr;
 
 namespace BMV2 {
+
+/**
+This class implements a policy suitable for the ConvertErrors pass.
+The policy is: convert all errors to specified width
+*/
+class ErrorWidth : public P4::ChooseErrorRepresentation {
+    unsigned width;
+    bool convert(const IR::Type_Error *) const override {
+        return true;
+    }
+
+    unsigned errorSize(unsigned) const override { return width;}
+ public:
+    explicit ErrorWidth(unsigned width): width(width) {}
+};
 
 void ParseV1Architecture::modelError(const char* format, const IR::Node* node) {
     ::error(ErrorType::ERR_MODEL,
@@ -1153,6 +1169,8 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
             new ParseAnnotations(),
         });
     }
+    auto convertErrors =
+        new P4::ConvertErrors(refMap, typeMap, new ErrorWidth(16));
     simplify.addPasses({
         // Because --fromJSON flag is used, input sources are empty
         // and ParseAnnotations should be skipped
@@ -1170,6 +1188,8 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
                                      new ProcessControls(&structure->pipeline_controls)),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
+        convertErrors,
+        new P4::EliminateSerEnums(refMap, typeMap),
         new P4::FlattenLogMsg(refMap, typeMap),
         // Converts the DAG into a TREE (at least for expressions)
         // This is important later for conversion to JSON.
