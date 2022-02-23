@@ -582,8 +582,16 @@ static bool overflowWidth(const IR::Node* node, int width) {
 const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
     const IR::Expression* msb = getConstant(e->e1);
     const IR::Expression* lsb = getConstant(e->e2);
-    if (msb == nullptr || lsb == nullptr) {
-        ::error(ErrorType::ERR_EXPECTED, "%1%: bit indices must be compile-time constants", e);
+    if (msb == nullptr) {
+        if (typesKnown)
+            ::error(ErrorType::ERR_EXPECTED,
+                    "%1%: slice indexes must be compile-time constants", e->e1);
+        return e;
+    }
+    if (lsb == nullptr) {
+        if (typesKnown)
+            ::error(ErrorType::ERR_EXPECTED,
+                    "%1%: slice indexes must be compile-time constants", e->e2);
         return e;
     }
 
@@ -798,11 +806,9 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
 
     if (etype->is<IR::Type_Bits>()) {
         auto type = etype->to<IR::Type_Bits>();
-        if (expr->is<IR::Constant>()) {
-            auto arg = expr->to<IR::Constant>();
+        if (auto arg = expr->to<IR::Constant>()) {
             return cast(arg, arg->base, type);
-        } else if (expr -> is<IR::BoolLiteral>()) {
-            auto arg = expr->to<IR::BoolLiteral>();
+        } else if (auto arg = expr->to<IR::BoolLiteral>()) {
             int v = arg->value ? 1 : 0;
             return new IR::Constant(e->srcInfo, type, v, 10);
         } else {

@@ -3,7 +3,8 @@
 #include <v1model.p4>
 
 enum bit<8> FieldLists {
-    copy_to_cpu_fields = 0
+    none = 0,
+    copy_to_cpu_fields = 1
 }
 
 struct intrinsic_metadata_t {
@@ -67,18 +68,18 @@ header tcp_t {
 }
 
 struct metadata {
-    @name(".meta")
+    @name(".meta") 
     meta_t meta;
 }
 
 struct headers {
-    @name(".cpu_header")
+    @name(".cpu_header") 
     cpu_header_t cpu_header;
-    @name(".ethernet")
+    @name(".ethernet") 
     ethernet_t   ethernet;
-    @name(".ipv4")
+    @name(".ipv4") 
     ipv4_t       ipv4;
-    @name(".tcp")
+    @name(".tcp") 
     tcp_t        tcp;
 }
 
@@ -283,3 +284,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

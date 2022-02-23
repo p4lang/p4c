@@ -23,6 +23,7 @@ limitations under the License.
 #include "frontends/p4/sideEffects.h"
 #include <ir/ir.h>
 #include "lib/error.h"
+#include "lib/ordered_map.h"
 #include "dpdkProgramStructure.h"
 
 namespace DPDK {
@@ -67,6 +68,126 @@ class ConvertToDpdkArch : public Transform {
     }
 };
 
+/**
+ * DPDK target supports lookahead instruction only with header operand.
+ * This pass transforms usage of lookahead method with type parameters
+ * of other than header type (IR::Type_Header) to lookahead with header
+ * type using the following transformation:
+ *
+ * This parser code:
+ *
+ * T var_name;
+ *
+ * state state_name {
+ *   var_name = pkt.lookahead<T>();
+ * }
+ *
+ * is transformed to this:
+ *
+ * - new header definition:
+ *
+ * header lookahead_tmp_hdr {
+ *   T f;
+ * }
+ *
+ * - modification in parser code:
+ *
+ * T var_name;
+ * lookahead_tmp_hdr lookahead_tmp;
+ *
+ * state state_name {
+ *   lookahead_tmp = pkt.lookahead<lookahead_tmp_hdr>();
+ *   var_name = lookahead_tmp;
+ * }
+ */
+struct ConvertLookahead : public PassManager {
+    class ReplacementMap {
+        std::unordered_map<const IR::P4Program *, IR::IndexedVector<IR::Node>> newHeaderMap;
+        std::unordered_map<const IR::P4Parser *,
+                IR::IndexedVector<IR::Declaration>> newLocalVarMap;
+        std::unordered_map<const IR::AssignmentStatement *,
+                IR::IndexedVector<IR::StatOrDecl>> newStatMap;
+      public:
+        void insertHeader(const IR::P4Program *p, const IR::Type_Header *h) {
+            if (newHeaderMap.count(p)) {
+                newHeaderMap.at(p).push_back(h);
+            } else {
+                newHeaderMap.emplace(p, IR::IndexedVector<IR::Node>(h));
+            }
+            LOG5("Program: " << dbp(p));
+            LOG2("Adding new header:" << std::endl << " " << h);
+        }
+        IR::IndexedVector<IR::Node> *getHeaders(const IR::P4Program *p) {
+            if (newHeaderMap.count(p)) {
+                return new IR::IndexedVector<IR::Node>(newHeaderMap.at(p));
+            }
+            return nullptr;
+        }
+        void insertVar(const IR::P4Parser *p, const IR::Declaration_Variable *v) {
+            if (newLocalVarMap.count(p)) {
+                newLocalVarMap.at(p).push_back(v);
+            } else {
+                newLocalVarMap.emplace(p, IR::IndexedVector<IR::Declaration>(v));
+            }
+            LOG5("Parser: " << dbp(p));
+            LOG2("Adding new local variable:" << std::endl << " " << v);
+        }
+        IR::IndexedVector<IR::Declaration> *getVars(const IR::P4Parser *p) {
+            if (newLocalVarMap.count(p)) {
+                return new IR::IndexedVector<IR::Declaration>(newLocalVarMap.at(p));
+            }
+            return nullptr;
+        }
+        void insertStatements(const IR::AssignmentStatement *as,
+                IR::IndexedVector<IR::StatOrDecl> *vec) {
+            BUG_CHECK(newStatMap.count(as) == 0,
+                    "Unexpectedly converting statement %1% multiple times!", as);
+            newStatMap.emplace(as, *vec);
+            LOG5("AssignmentStatement: " << dbp(as));
+            LOG2("Adding new statements:");
+            for (auto s : *vec) {
+                LOG2(" " << s);
+            }
+        }
+        IR::IndexedVector<IR::StatOrDecl> *getStatements(const IR::AssignmentStatement *as) {
+            if (newStatMap.count(as)) {
+                return new IR::IndexedVector<IR::StatOrDecl>(newStatMap.at(as));
+            }
+            return nullptr;
+        }
+    };
+
+    ReplacementMap repl;
+
+    class Collect : public Inspector {
+        P4::ReferenceMap *refMap;
+        P4::TypeMap *typeMap;
+        ReplacementMap *repl;
+      public:
+        Collect(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, ReplacementMap *repl) :
+                refMap(refMap), typeMap(typeMap), repl(repl) {}
+        void postorder(const IR::AssignmentStatement *statement) override;
+    };
+
+    class Replace : public Transform {
+        DpdkProgramStructure *structure;
+        ReplacementMap *repl;
+      public:
+        Replace(DpdkProgramStructure *structure, ReplacementMap *repl) :
+                structure(structure), repl(repl) {}
+        const IR::Node *postorder(IR::AssignmentStatement *as) override;
+        const IR::Node *postorder(IR::Type_Struct *s) override;
+        const IR::Node *postorder(IR::P4Parser *parser) override;
+    };
+
+    ConvertLookahead(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, DpdkProgramStructure *s) {
+        passes.push_back(new P4::TypeChecking(refMap, typeMap));
+        passes.push_back(new Collect(refMap, typeMap, &repl));
+        passes.push_back(new Replace(s, &repl));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+    }
+};
+
 // This Pass collects infomation about the name of all metadata and header
 // And it collects every field of metadata and renames all fields with a prefix
 // according to the metadata struct name. Eventually, the reference of a fields
@@ -98,8 +219,7 @@ class InjectJumboStruct : public Transform {
 // This pass injects metadata field which is used as port for 'tx' instruction
 // into the single metadata struct.
 // This pass has to be applied after CollectMetadataHeaderInfo fills
-// local_metadata_type field and ConvertToDpdkArch fills p4arch field of
-// DpdkProgramStructure which is passed to the constructor.
+// local_metadata_type field in DpdkProgramStructure which is passed to the constructor.
 class InjectOutputPortMetadataField : public Transform {
     DpdkProgramStructure *structure;
 
@@ -222,6 +342,7 @@ class IfStatementUnroll : public Transform {
         refMap(refMap), structure(structure) {
         setName("IfStatementUnroll");
     }
+    const IR::Node *postorder(IR::SwitchStatement *a) override;
     const IR::Node *postorder(IR::IfStatement *a) override;
     const IR::Node *postorder(IR::P4Control *a) override;
 };
@@ -248,7 +369,7 @@ class LogicalExpressionUnroll : public Inspector {
     }
 
     LogicalExpressionUnroll(P4::ReferenceMap* refMap, DpdkProgramStructure *structure)
-        : refMap(refMap), structure(structure) {}
+        : refMap(refMap), structure(structure) {visitDagOnce = false;}
     bool preorder(const IR::Operation_Unary *a) override;
     bool preorder(const IR::Operation_Binary *a) override;
     bool preorder(const IR::MethodCallExpression *a) override;
@@ -270,16 +391,34 @@ class ConvertBinaryOperationTo2Params : public Transform {
     const IR::Node *postorder(IR::P4Control *a) override;
     const IR::Node *postorder(IR::P4Parser *a) override;
 };
-// Since in dpdk asm, there is no local variable declaraion, we need to collect
+
+// Since in dpdk asm, there is no local variable declaration, we need to collect
 // all local variables and inject them into the metadata struct.
-class CollectLocalVariableToMetadata : public Transform {
-    std::map<const cstring, IR::IndexedVector<IR::Declaration>> locals_map;
+// Local variables which are of header types are injected into headers struct
+// instead of metadata struct, so that they can be instantiated as headers in the
+// resulting dpdk asm file.
+class CollectLocalVariables : public Transform {
+    ordered_map<const IR::Declaration_Variable *, const cstring> localsMap;
     P4::ReferenceMap *refMap;
+    P4::TypeMap* typeMap;
     DpdkProgramStructure *structure;
 
+    void insert(const cstring prefix, const IR::IndexedVector<IR::Declaration> *locals) {
+        for (auto d : *locals) {
+            if (auto dv = d->to<IR::Declaration_Variable>()) {
+                const cstring name = refMap->newName(prefix + "_" + dv->name.name);
+                localsMap.emplace(dv, name);
+            } else if (!d->is<IR::P4Action>() && !d->is<IR::P4Table>() &&
+                       !d->is<IR::Declaration_Instance>()) {
+                BUG("%1%: Unhandled declaration type", d);
+            }
+        }
+    }
+
   public:
-    CollectLocalVariableToMetadata(P4::ReferenceMap *refMap, DpdkProgramStructure *structure)
-        : refMap(refMap), structure(structure) {}
+    CollectLocalVariables(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                   DpdkProgramStructure *structure)
+        : refMap(refMap), typeMap(typeMap), structure(structure) {}
     const IR::Node *preorder(IR::P4Program *p) override;
     const IR::Node *postorder(IR::Type_Struct *s) override;
     const IR::Node *postorder(IR::PathExpression *path) override;
@@ -309,6 +448,31 @@ class PrependPDotToActionArgs : public Transform {
     const IR::Node *postorder(IR::P4Program *s) override;
     const IR::Node *preorder(IR::PathExpression *path) override;
     const IR::Node *preorder(IR::MethodCallExpression*) override;
+};
+
+// dpdk does not support ternary operator so we need to translate ternary operator
+// to corresponding if else statement
+// Taken from frontend pass DoSimplifyExpressions in sideEffects.h
+class DismantleMuxExpressions : public Transform {
+    P4::TypeMap* typeMap;
+    P4::ReferenceMap *refMap;
+    IR::IndexedVector<IR::Declaration> toInsert;  // temporaries
+    IR::IndexedVector<IR::StatOrDecl> statements;
+
+    cstring createTemporary(const IR::Type* type);
+    const IR::Expression* addAssignment(Util::SourceInfo srcInfo, cstring varName,
+                                        const IR::Expression* expression);
+
+  public:
+    DismantleMuxExpressions(P4::TypeMap* typeMap,
+                            P4::ReferenceMap *refMap)
+        : typeMap(typeMap), refMap(refMap) {}
+    const IR::Node* preorder(IR::Mux* expression) override;
+    const IR::Node* postorder(IR::P4Parser* parser) override;
+    const IR::Node* postorder(IR::Function* function) override;
+    const IR::Node* postorder(IR::P4Control* control) override;
+    const IR::Node* postorder(IR::P4Action* action) override;
+    const IR::Node* postorder(IR::AssignmentStatement* statement) override;
 };
 
 // For dpdk asm, there is not object-oriented. Therefore, we cannot define a
@@ -444,6 +608,8 @@ class BreakLogicalExpressionParenthesis : public Transform {
         } else if (not land->left->is<IR::LOr>() and
                    not land->left->is<IR::Equ>() and
                    not land->left->is<IR::Neq>() and
+                   not land->left->is<IR::Leq>() and
+                   not land->left->is<IR::Geq>() and
                    not land->left->is<IR::Lss>() and
                    not land->left->is<IR::Grt>() and
                    not land->left->is<IR::MethodCallExpression>() and
@@ -478,8 +644,9 @@ class BreakLogicalExpressionParenthesis : public Transform {
 class SwapSimpleExpressionToFrontOfLogicalExpression : public Transform {
     bool is_simple(const IR::Node *n) {
         if (n->is<IR::Equ>() or n->is<IR::Neq>() or n->is<IR::Lss>() or
-            n->is<IR::Grt>() or n->is<IR::MethodCallExpression>() or
-            n->is<IR::PathExpression>() or n->is<IR::Member>()) {
+            n->is<IR::Grt>() or n->is<IR::Geq>() or n->is<IR::Leq>() or
+            n->is<IR::MethodCallExpression>() or n->is<IR::PathExpression>() or
+            n->is<IR::Member>()) {
             return true;
         } else if (not n->is<IR::LAnd>() and not n->is<IR::LOr>()) {
             BUG("Logical Expression Unroll pass failed");

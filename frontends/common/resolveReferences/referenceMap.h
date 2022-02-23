@@ -32,18 +32,18 @@ class NameGenerator {
 // replacement for ReferenceMap NameGenerator to make it easier to remove uses of refMap
 class MinimalNameGenerator : public NameGenerator, public Inspector {
     std::set<cstring> usedNames;
-    void usedName(cstring name) { usedNames.insert(name); }
     void postorder(const IR::Path *p) override { usedName(p->name.name); }
     void postorder(const IR::Type_Declaration *t) override { usedName(t->name.name); }
     void postorder(const IR::Declaration *d) override { usedName(d->name.name); }
 
  public:
     MinimalNameGenerator();
+    void usedName(cstring name) { usedNames.insert(name); }
     explicit MinimalNameGenerator(const IR::Node *root) : MinimalNameGenerator() {
         root->apply(*this);
     }
 
-    /// Generate a name from @p base that fresh for the program.
+    /// Generate a name from @p base that does not appear in usedNames.
     cstring newName(cstring base) override;
 };
 

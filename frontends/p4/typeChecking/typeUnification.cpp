@@ -243,18 +243,44 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
     if (dest->is<IR::ITypeVar>())
         dest = dest->apply(constraints->replaceVariables)->to<IR::Type>();
 
-    if (TypeMap::equivalent(dest, src))
+    if (auto dsc = dest->to<IR::Type_SpecializedCanonical>()) {
+        if (auto ssc = src->to<IR::Type_SpecializedCanonical>()) {
+            if (dsc->arguments->size() != ssc->arguments->size())
+                return constraint->reportError(
+                    constraints->getCurrentSubstitution(),
+                    "Type argument lists %1% and %2% have different lengths",
+                    dsc->arguments, ssc->arguments);
+            constraints->add(constraint->create(dsc->baseType, ssc->baseType));
+            for (size_t i=0; i < dsc->arguments->size(); i++) {
+                constraints->add(constraint->create(dsc->arguments->at(i), ssc->arguments->at(i)));
+            }
+            return true;
+        }
+        constraints->add(constraint->create(dsc->substituted, src));
         return true;
+    }
+    // symmetric case
+    if (auto ssc = src->to<IR::Type_SpecializedCanonical>()) {
+        constraints->add(constraint->create(dest, ssc->substituted));
+        return true;
+    }
 
-    if (dest->is<IR::Type_SpecializedCanonical>())
-        dest = dest->to<IR::Type_SpecializedCanonical>()->substituted;
-    if (src->is<IR::Type_SpecializedCanonical>())
-        src = src->to<IR::Type_SpecializedCanonical>()->substituted;
+    if (typeMap->equivalent(dest, src))
+        return true;
 
     if (src->is<IR::Type_Dontcare>() || dest->is<IR::Type_Dontcare>())
         return true;
 
     if (dest->is<IR::Type_ArchBlock>()) {
+        // This case handles the comparison of Type_Parser with P4Parser
+        // (and similarly for controls).
+        if (auto cont = src->to<IR::IContainer>()) {
+            if (cont->getType() != src) {
+                // For Type_Package cont->getType() == const == src, causing an infinite loop
+                constraints->add(constraint->create(dest, cont->getType()));
+                return true;
+            }
+        }
         if (!src->is<IR::Type_ArchBlock>())
             return constraint->reportError(constraints->getCurrentSubstitution());
         return unifyBlocks(constraint->create(dest, src));
@@ -299,7 +325,8 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
             }
             return true;
         } else if (auto st = src->to<IR::Type_StructLike>()) {
-            if (strct->name != st->name &&
+            if (typeMap->strictStruct &&
+                strct->name != st->name &&
                 !st->is<IR::Type_UnknownStruct>() &&
                 !strct->is<IR::Type_UnknownStruct>())
                 return constraint->reportError(

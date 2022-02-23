@@ -142,7 +142,7 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
     cstring getBlockNamePrefix(const IR::Block* blk) {
         if (blockNamePrefixMap.count(blk) > 0)
             return blockNamePrefixMap[blk];
-        return "";
+        return "pipe";
     }
 
     static p4configv1::Extern* getP4InfoExtern(P4RuntimeSymbolType typeId,

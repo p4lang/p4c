@@ -222,15 +222,15 @@ class ordered_set {
 };
 
 template<class T, class C1, class A1, class U> inline
-auto operator|=(ordered_set<T, C1, A1> &a, U &b) -> decltype(b.begin(), a) {
+auto operator|=(ordered_set<T, C1, A1> &a, const U &b) -> decltype(b.begin(), a) {
     for (auto &el : b) a.insert(el);
     return a; }
 template<class T, class C1, class A1, class U> inline
-auto operator-=(ordered_set<T, C1, A1> &a, U &b) -> decltype(b.begin(), a) {
+auto operator-=(ordered_set<T, C1, A1> &a, const U &b) -> decltype(b.begin(), a) {
     for (auto &el : b) a.erase(el);
     return a; }
 template<class T, class C1, class A1, class U> inline
-auto operator&=(ordered_set<T, C1, A1> &a, U &b) -> decltype(b.begin(), a) {
+auto operator&=(ordered_set<T, C1, A1> &a, const U &b) -> decltype(b.begin(), a) {
     for (auto it = a.begin(); it != a.end();) {
         if (b.count(*it))
             ++it;

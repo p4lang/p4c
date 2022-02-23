@@ -398,6 +398,7 @@ abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated, ISimp
 }
 
 class Type_Package : Type_ArchBlock, IContainer, ISimpleNamespace {
+    Type getType() const override { return this; }
     ParameterList constructorParams;
     Type_Method getConstructorMethodType() const override;
     ParameterList getConstructorParameters() const override { return constructorParams; }
@@ -460,13 +461,22 @@ class Type_Stack : Type_Indexed, Type {
    extern E<T> { ... }
    Type_Specialized represents a type such
    E<bit<32>>
-   baseType is Type_Extern E, arguments is a vector containing Type_Bits(32) */
+   baseType is Type_Name E, arguments is a vector containing Type_Bits(32) */
 class Type_Specialized : Type {
     Type_Name    baseType;
     Vector<Type> arguments;
-    toString{ return baseType->toString() + "<...>"; }
     validate{ arguments->check_null(); }
     const Type* getP4Type() const override;
+    toString{
+        cstring result = baseType->toString() + "<";
+        cstring sep = "";
+        for (auto t : *arguments) {
+            result += sep + t->toString();
+            sep = ", ";
+        }
+        result += ">";
+        return result;
+    }
 }
 
 /** Canonical representation of a Type_Specialized;
@@ -484,6 +494,7 @@ class Type_SpecializedCanonical : Type {
         BUG_CHECK(substituted->is<IMayBeGenericType>(), "substituted %1% is not generic", substituted);
     }
     const Type* getP4Type() const override;
+    toString{ return baseType->toString() + "<...>"; }
 }
 
 /// A declaration that consists of just an identifier, e.g., an enum member

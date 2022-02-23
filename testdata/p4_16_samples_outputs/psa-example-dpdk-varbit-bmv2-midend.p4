@@ -9,13 +9,11 @@ header ethernet_t {
 }
 
 header ipv4_base_t {
-    bit<4>  version;
-    bit<4>  ihl;
+    bit<8>  version_ihl;
     bit<8>  diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
-    bit<13> fragOffset;
+    bit<16> flags_fragOffset;
     bit<8>  ttl;
     bit<8>  protocol;
     bit<16> hdrChecksum;
@@ -50,8 +48,8 @@ parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_p
     }
     state parse_ipv4 {
         packet.extract<ipv4_base_t>(hdr.ipv4_base);
-        transition select(hdr.ipv4_base.ihl) {
-            4w0x5: accept;
+        transition select(hdr.ipv4_base.version_ihl) {
+            8w0x45: accept;
             default: parse_ipv4_options;
         }
     }
@@ -133,18 +131,18 @@ control MyEC(inout EMPTY a, inout EMPTY b, in psa_egress_input_metadata_t c, ino
 }
 
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in EMPTY e, in psa_ingress_output_metadata_t f) {
-    @hidden action psaexampledpdkvarbitbmv2l137() {
+    @hidden action psaexampledpdkvarbitbmv2l135() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<ipv4_base_t>(hdr.ipv4_base);
     }
-    @hidden table tbl_psaexampledpdkvarbitbmv2l137 {
+    @hidden table tbl_psaexampledpdkvarbitbmv2l135 {
         actions = {
-            psaexampledpdkvarbitbmv2l137();
+            psaexampledpdkvarbitbmv2l135();
         }
-        const default_action = psaexampledpdkvarbitbmv2l137();
+        const default_action = psaexampledpdkvarbitbmv2l135();
     }
     apply {
-        tbl_psaexampledpdkvarbitbmv2l137.apply();
+        tbl_psaexampledpdkvarbitbmv2l135.apply();
     }
 }
 

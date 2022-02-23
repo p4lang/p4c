@@ -158,6 +158,10 @@ class ToP4 : public Inspector {
     bool preorder(const IR::Type_Extern* t) override;
     bool preorder(const IR::Type_Unknown* t) override;
     bool preorder(const IR::Type_BaseList* t) override;
+    bool preorder(const IR::Type* t) override {
+        builder.append(t->toString());
+        return false;
+    }
 
     // declarations
     bool preorder(const IR::Declaration_Constant* cst) override;

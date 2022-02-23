@@ -43,7 +43,7 @@ bool ConvertToString::preorder(const IR::BoolLiteral *e) {
 }
 
 bool ConvertToString::preorder(const IR::Member *e){
-    out << toStr(e->expr) << "." << e->member.originalName;
+    out << toStr(e->expr) << "." << e->member.toString();
     return false;
 }
 

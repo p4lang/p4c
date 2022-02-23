@@ -25,11 +25,9 @@ template<class T> class Alloc1Dbase {
     int         size;
     T           *data;
  protected:
-    explicit Alloc1Dbase(int sz) : size(sz) {
-        data = new T[sz];
-        for (int i = 0; i < sz; i++) data[i] = T(); }
+    Alloc1Dbase(int sz, T* data) : size(sz), data(data) {}
     Alloc1Dbase(Alloc1Dbase &&a) : size(a.size), data(a.data) { a.data = 0; }
-    virtual ~Alloc1Dbase() { delete [] data; }
+    ~Alloc1Dbase() = default;
 
  public:
     typedef T *iterator;
@@ -46,8 +44,9 @@ template<class T> class Alloc1Dbase {
 };
 
 template<class T, int S> class Alloc1D : public Alloc1Dbase<T> {
+    std::array<T, S> data;
  public:
-    Alloc1D() : Alloc1Dbase<T>(S) {}
+    Alloc1D() : Alloc1Dbase<T>(S, data.data()), data{} {}
     Alloc1Dbase<T> &base() { return *this; }
 };
 
@@ -71,12 +70,9 @@ template<class T> class Alloc2Dbase {
     };
 
  protected:
-    Alloc2Dbase(int r, int c) : nrows(r), ncols(c) {
-        size_t sz = r*c;
-        data = new T[sz];
-        for (size_t i = 0; i < sz; i++) data[i] = T(); }
+    Alloc2Dbase(int r, int c, T* data) : nrows(r), ncols(c), data(data) {}
     Alloc2Dbase(Alloc2Dbase &&a) : nrows(a.nrows), ncols(a.ncols), data(a.data) { a.data = 0; }
-    virtual ~Alloc2Dbase() { delete [] data; }
+    ~Alloc2Dbase() = default;
 
  public:
     rowref<T> operator[](int i) {
@@ -104,8 +100,9 @@ template<class T> class Alloc2Dbase {
 };
 
 template<class T, int R, int C> class Alloc2D : public Alloc2Dbase<T> {
+    std::array<T, R*C> data;
  public:
-    Alloc2D() : Alloc2Dbase<T>(R, C) {}
+    Alloc2D() : Alloc2Dbase<T>(R, C, data.data()), data{} {}
     Alloc2Dbase<T> &base() { return *this; }
 };
 

@@ -37,6 +37,26 @@ struct tcp_t {
 	bit<16> urgentPtr
 }
 
+struct psa_ingress_output_metadata_t {
+	bit<8> class_of_service
+	bit<8> clone
+	bit<16> clone_session_id
+	bit<8> drop
+	bit<8> resubmit
+	bit<32> multicast_group
+	bit<32> egress_port
+}
+
+struct psa_egress_output_metadata_t {
+	bit<8> clone
+	bit<16> clone_session_id
+	bit<8> drop
+}
+
+struct psa_egress_deparser_input_metadata_t {
+	bit<32> egress_port
+}
+
 struct metadata {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
 	bit<32> psa_ingress_parser_input_metadata_packet_path
@@ -64,7 +84,7 @@ struct metadata {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 	bit<16> local_metadata_data
-	bit<8> Ingress_key_0
+	bit<8> Ingress_key
 	bit<16> tmpMask
 	bit<8> tmpMask_0
 }
@@ -73,26 +93,6 @@ metadata instanceof metadata
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 header tcp instanceof tcp_t
-
-struct psa_ingress_output_metadata_t {
-	bit<8> class_of_service
-	bit<8> clone
-	bit<16> clone_session_id
-	bit<8> drop
-	bit<8> resubmit
-	bit<32> multicast_group
-	bit<32> egress_port
-}
-
-struct psa_egress_output_metadata_t {
-	bit<8> clone
-	bit<16> clone_session_id
-	bit<8> drop
-}
-
-struct psa_egress_deparser_input_metadata_t {
-	bit<32> egress_port
-}
 
 action NoAction args none {
 	return
@@ -106,7 +106,7 @@ action execute args none {
 table tbl {
 	key {
 		m.local_metadata_data exact
-		m.Ingress_key_0 exact
+		m.Ingress_key exact
 	}
 	actions {
 		NoAction
@@ -132,7 +132,7 @@ apply {
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
-	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_key_0 0x48
+	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_key 0x48
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet

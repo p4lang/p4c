@@ -4,7 +4,7 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "Unsupported parser loop"
+  "Expected packet length argument for"
   testdata/p4_16_samples/psa-example-counters-bmv2.p4
   )
 
@@ -33,11 +33,6 @@ p4c_add_xfail_reason("dpdk"
   testdata/p4_16_samples/psa-meter3.p4
   testdata/p4_16_samples/psa-meter7-bmv2.p4
 )
-
-p4c_add_xfail_reason("dpdk"
-  "not defined on bool and bit<"
-  testdata/p4_16_samples/psa-register-read-write-2-bmv2.p4
-  )
 
 p4c_add_xfail_reason("dpdk"
   "Error compiling"
@@ -70,3 +65,7 @@ p4c_add_xfail_reason("dpdk"
   testdata/p4_16_samples/psa-dpdk-lpm-match-err2.p4
   )
 
+p4c_add_xfail_reason("dpdk"
+  "Non Type_Bits type bool for expression"
+  testdata/p4_16_samples/pna-dpdk-parser-state-err.p4
+  )

@@ -111,6 +111,26 @@ const IR::Node* RemoveUnusedDeclarations::process(const IR::IDeclaration* decl) 
     return nullptr;
 }
 
+const IR::Node* RemoveUnusedDeclarations::preorder(IR::Parameter* param) {
+    // Skip all things that just declare "prototypes"
+    if (findContext<IR::Type_Parser>() && !findContext<IR::P4Parser>())
+        return param;
+    if (findContext<IR::Type_Control>() && !findContext<IR::P4Control>())
+        return param;
+    if (findContext<IR::Type_Package>())
+        return param;
+    if (findContext<IR::Type_Method>() && !findContext<IR::Function>())
+        return param;
+    return warnIfUnused(param);
+}
+
+const IR::Node* RemoveUnusedDeclarations::warnIfUnused(const IR::Node* node) {
+    if (!refMap->isUsed(getOriginal<IR::IDeclaration>()))
+        if (giveWarning(getOriginal()))
+            ::warning(ErrorType::WARN_UNUSED, "'%1%' is unused", node);
+    return node;
+}
+
 const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Instance* decl) {
     // Don't delete instances; they may have consequences on the control-plane API
     if (decl->getName().name == IR::P4Program::main && getParent<IR::P4Program>())
@@ -150,8 +170,10 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::ParserState* state) {
 // Try to guess whether a file is a "system" file
 bool RemoveUnusedDeclarations::isSystemFile(cstring file) {
     if (file.startsWith(p4includePath)) return true;
-    // if the backend is invoked directly with '-I p4include'
-    if (file.startsWith("p4include")) return true;
+    // If the backend is invoked directly with '-I p4include'
+    // In cases such as  "-I ./p4include", p4include may be within the path
+    if (file.find("p4include")) return true;
+
     return false;
 }
 

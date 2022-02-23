@@ -27,13 +27,13 @@ EnumInstance* EnumInstance::resolve(const IR::Expression* expression, const P4::
         return nullptr;
     auto type = typeMap->getType(expression, true);
     if (auto et = type->to<IR::Type_Enum>()) {
-        return new SimpleEnumInstance(et, member->member);
+        return new SimpleEnumInstance(et, member->member, typeMap);
     } else if (auto set = type->to<IR::Type_SerEnum>()) {
         auto decl = set->getDeclByName(member->member);
         CHECK_NULL(decl);
         auto sem = decl->to<IR::SerEnumMember>();
         CHECK_NULL(sem);
-        return new SerEnumInstance(set, member->member, sem->value);
+        return new SerEnumInstance(set, member->member, sem->value, typeMap);
     }
     return nullptr;
 }

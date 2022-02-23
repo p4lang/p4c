@@ -41,9 +41,15 @@ bool DoSimplifySwitch::matches(const IR::Expression* left, const IR::Expression*
 const IR::Node* DoSimplifySwitch::postorder(IR::SwitchStatement* stat) {
     if (!typeMap->isCompileTimeConstant(stat->expression))
         return stat;
+    bool foundMatch = false;
     for (auto ss : stat->cases) {
-        if (matches(ss->label, stat->expression))
+        if (matches(ss->label, stat->expression)) {
+            foundMatch = true;
+        }
+        // In case of fallthrough, return next available statement body
+        if (foundMatch && ss->statement) {
             return ss->statement;
+        }
     }
     // If none of the labels matches none of the cases will be
     // executed.
