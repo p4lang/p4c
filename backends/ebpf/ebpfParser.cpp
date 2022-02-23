@@ -45,7 +45,7 @@ class StateTranslationVisitor : public CodeGenInspector {
     bool preorder(const IR::Member* expression) override;
     bool preorder(const IR::MethodCallExpression* expression) override;
     bool preorder(const IR::MethodCallStatement* stat) override
-    { visit(stat->methodCall); return false; }
+    { visit(stat->methodCall); builder->endOfStatement(true); return false; }
     bool preorder(const IR::AssignmentStatement* stat) override;
 };
 }  // namespace
