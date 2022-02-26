@@ -135,6 +135,30 @@ class RemoveLabelAfterLabel : public Transform {
     }
 };
 
+
+// This pass Collects all metadata struct member used in program
+class CollectUsedMetadataField : public Inspector {
+    ordered_set<cstring>& used_fields;
+ public:
+    explicit CollectUsedMetadataField(ordered_set<cstring>& used_fields)
+        : used_fields(used_fields) {}
+    bool preorder(const IR::Member *m) override {
+        // metadata struct field used like m.<field_name> in expressions
+        if (m->expr->toString() == "m")
+            used_fields.insert(m->member.toString());
+        return true;
+    }
+};
+
+// This pass removes all unused fields from metadata struct
+class RemoveUnusedMetadataFields : public Transform {
+    ordered_set<cstring>& used_fields;
+ public:
+    explicit RemoveUnusedMetadataFields(ordered_set<cstring>& used_fields)
+        : used_fields(used_fields) {}
+    const IR::Node* preorder(IR::DpdkAsmProgram *p) override;
+};
+
 // Instructions can only appear in actions and apply block of .spec file.
 // All these individual passes work on the actions and apply block of .spec file.
 class DpdkAsmOptimization : public PassRepeated {
