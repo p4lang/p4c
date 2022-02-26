@@ -75,6 +75,17 @@ const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr)
         auto ei = EnumInstance::resolve(expr, typeMap);
         if (ei != nullptr)
             return expr;
+        // error and match_kind constants can be recognized from their type.
+        if (auto pe = expr->to<IR::PathExpression>()) {
+            if (auto decl = refMap->getDeclaration(pe->path, true)) {
+                if (decl->is<IR::Declaration_ID>()) {
+                    if (auto declType = typeMap->getType(decl->getNode())) {
+                        if (declType->is<IR::Type_Error>() || declType->is<IR::Type_MatchKind>())
+                            return expr;
+                    }
+                }
+            }
+        }
     }
     return nullptr;
 }
