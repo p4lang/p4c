@@ -1,5 +1,5 @@
 p4c_add_xfail_reason("dpdk"
-  "Expected packet length argument for"
+  "Expected packet length argument for count method of indirect counter"
   testdata/p4_16_samples/psa-example-counters-bmv2.p4
   )
 
