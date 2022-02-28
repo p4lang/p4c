@@ -1110,6 +1110,8 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
         auto bim = mi->to<BuiltInMethod>();
         auto base = get(bim->appliedTo);
         cstring name = bim->name.name;
+        // This code is necessary to find the parent and to check whether the parent
+        // is a header union.
         const IR::Expression* node = nullptr;
         cstring memberName = nullptr;
         if (auto member = expression->method->to<IR::Member>()
