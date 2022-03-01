@@ -351,6 +351,7 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
             if (vp.first != visited->find(n)) BUG("visitor state tracker corrupted");
             vp.first->second.done = true;
         }
+        post_join_flows(n, n);
     }
     if (ctxt)
         ctxt->child_index++;
@@ -474,43 +475,74 @@ void ControlFlowVisitor::init_join_flows(const IR::Node *root) {
         flow_join_points->clear();
     else
         flow_join_points = new std::remove_reference<decltype(*flow_join_points)>::type;
-    root->apply(SetupJoinPoints(*flow_join_points));
+    applySetupJoinPoints(root);
     erase_if(*flow_join_points,
              [this](flow_join_points_t::value_type &el) { return filter_join_point(el.first); });
 }
 
 bool ControlFlowVisitor::join_flows(const IR::Node *n) {
-    if (flow_join_points && flow_join_points->count(n)) {
-        auto &status = flow_join_points->at(n);
-        // BUG_CHECK(status.second > 0, "join point reached too many times");
-        // FIXME -- this means that we calculated the wrong number of parents for a
-        // join point, and completed the join sooner than we should have.  This can
-        // happen if there are recursive calls in the visitor and the differing order
-        // between SetupJoinPoints and the main visitor means that the recursion is
-        // seen differently.  Might be possible to fix this by careful use of
-        // loop_revisit, but if not, we might as well just merge what we have.
+    if (!flow_join_points || !flow_join_points->count(n)) return false;  // not a flow join point
+    auto &status = flow_join_points->at(n);
+    // BUG_CHECK(status.count >= 0, "join point reached too many times");
+    // FIXME -- this means that we calculated the wrong number of parents for a
+    // join point, and completed the join sooner than we should have.  This can
+    // happen if there are recursive calls in the visitor and the differing order
+    // between SetupJoinPoints and the main visitor means that the recursion is
+    // seen differently.  Might be possible to fix this by careful use of
+    // loop_revisit, but if not, we might as well just merge what we have.
+    // Also caused by returning true below and revisiting the nodes that we've already
+    // visited (so calling join_flows for their children more times than expected)
+    // To really fix we need a way of dealing with loops and traversing the loop
+    // repeatedly until a fixed point is reached.
 
-        // Decrement the number of upstream edges yet to be traversed.  If none
-        // remain, merge and return false to visit this node.
-        if (--status.second < 0) {
-            flow_merge(*status.first);
-            return false;
-        } else if (status.first) {
-            // If there are still unvisited upstream edges but this is not the
-            // first time this node has been reached, merge this visitor with
-            // the accumulator (status.first) and return true to defer visiting
-            // this node.
-            status.first->flow_merge(*this);
-            return true;
-        } else {
-            // Otherwise, this is the first time this node has been visited.
-            // Clone this visitor and store it as the initial accumulator
-            // value.
-            status.first = clone();
-            return true;
+    // Decrement the number of upstream edges yet to be traversed.  If none
+    // remain, merge and return false to visit this node.
+    if (--status.count < 0) {
+        flow_merge(*status.vclone);
+        // perhaps should return 'true' if count < -1 -- the case above where we're visiting
+        // again after we thought we'd finished.  Returning 'false' will revisit all the children
+        // which will at least let the visitor know something is going on.
+        return false;
+    }
+    if (status.vclone) {
+        // If there are still unvisited upstream edges but this is not the
+        // first time this node has been reached, merge this visitor with
+        // the accumulator (status.first)
+        status.vclone->flow_merge(*this);
+    } else {
+        // Otherwise, this is the first time this node has been visited.
+        // Clone this visitor and store it as the initial accumulator
+        // value.
+        status.vclone = clone();
+    }
+    if (BackwardsCompatibleBroken) {
+        // We've reached a join point and not all parents have been visited.  Old behavior
+        // was just to punt at this point (don't visit yet), which results in incorrect info
+        // for successors of the current parent.  But some cases appear to depend on this.
+        return true;
+    }
+    bool delta = true;
+    while (delta && status.count >= 0) {
+        delta = false;
+        for (auto *sl = split_link; sl; sl = sl->prev) {
+            if (!sl->finished()) {
+                sl->do_visit();  //  visit some parallel stuff;
+                delta = true;
+                break;
+            }
         }
     }
-    return false;
+    BUG_CHECK(status.count < 0 && status.done, "SplitFlow::do_visit failed to finish node");
+    if (status.done) flow_copy(*status.vclone);
+    return true;
+}
+
+void ControlFlowVisitor::post_join_flows(const IR::Node *n, const IR::Node *) {
+    if (!flow_join_points || !flow_join_points->count(n)) return;  // not a flow join point
+    auto &status = flow_join_points->at(n);
+    BUG_CHECK(!status.done || status.count < -1, "flow join point visited more than once!: %s", n);
+    status.done = true;
+    status.vclone->flow_copy(*this);
 }
 
 bool Inspector::check_clone(const Visitor *v) {
@@ -548,7 +580,7 @@ IRNODE_ALL_NON_TEMPLATE_CLASSES(DEFINE_APPLY_FUNCTIONS, , , )
         visit(static_cast<const IR::Node *const &>(n), name);                    \
     }                                                                            \
     void Visitor::visit(const IR::CLASS *&n, const char *name, int cidx) {       \
-        ctxt->child_index = cidx;                                                \
+        if (ctxt) ctxt->child_index = cidx;                                      \
         auto t = apply_visitor(n, name);                                         \
         n = dynamic_cast<const IR::CLASS *>(t);                                  \
         if (t && !n) BUG("visitor returned non-" #CLASS " type: %1%", t);        \

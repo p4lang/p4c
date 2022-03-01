@@ -338,10 +338,7 @@ class Mux : Operation_Ternary {
     precedence = DBPrint::Prec_Low;
     visit_children {
         v.visit(e0, "e0");
-        auto &clone(v.flow_clone());
-        v.visit(e1, "e1");
-        clone.visit(e2, "e2");
-        v.flow_merge(clone); }
+        SplitFlowVisit<Expression>(v, e1, e2).run_visit(); }
     Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
 }
 
@@ -378,7 +375,7 @@ class SelectExpression : Expression {
     inline Vector<SelectCase> selectCases;
     visit_children {
         v.visit(select, "select");
-        v.parallel_visit(selectCases, "selectCases"); }
+        SplitFlowVisitVector<SelectCase>(v, selectCases).run_visit(); }
 }
 
 class MethodCallExpression : Expression {

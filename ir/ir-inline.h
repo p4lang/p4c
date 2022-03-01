@@ -121,78 +121,15 @@ void IR::Vector<T>::visit_children(Visitor &v) {
 }
 template <class T>
 void IR::Vector<T>::visit_children(Visitor &v) const {
-    for (auto &a : vec) {
-        v.visit(a);
-    }
+    for (auto &a : vec) v.visit(a);
 }
 template <class T>
 void IR::Vector<T>::parallel_visit_children(Visitor &v) {
-    Visitor *start = nullptr;
-    Visitor *tmp = &v;
-    size_t todo = vec.size();
-    if (todo > 1) {
-        start = &v.flow_clone();
-    }
-    for (auto i = vec.begin(); i != vec.end(); --todo, tmp = nullptr) {
-        if (tmp == nullptr) {
-            tmp = todo > 1 ? &start->flow_clone() : start;
-        }
-        auto n = tmp->apply_visitor(*i);
-        if (!n && *i) {
-            i = erase(i);
-        } else if (n == *i) {
-            i++;
-        } else if (auto l = dynamic_cast<const Vector *>(n)) {
-            i = erase(i);
-            i = insert(i, l->vec.begin(), l->vec.end());
-            i += l->vec.size();
-        } else if (const auto *v = dynamic_cast<const VectorBase *>(n)) {
-            if (v->empty()) {
-                i = erase(i);
-            } else {
-                i = insert(i, v->size() - 1, nullptr);
-                for (const auto *el : *v) {
-                    CHECK_NULL(el);
-                    if (auto e = dynamic_cast<const T *>(el)) {
-                        *i++ = e;
-                    } else {
-                        BUG("visitor returned invalid type %s for Vector<%s>", el->node_type_name(),
-                            T::static_type_name());
-                    }
-                }
-            }
-        } else if (auto e = dynamic_cast<const T *>(n)) {
-            *i++ = e;
-        } else {
-            CHECK_NULL(n);
-            BUG("visitor returned invalid type %s for Vector<%s>", n->node_type_name(),
-                T::static_type_name());
-        }
-
-        if (tmp != &v) {
-            v.flow_merge(*tmp);
-        }
-    }
+    SplitFlowVisitVector<T>(v, *this).run_visit();
 }
 template <class T>
 void IR::Vector<T>::parallel_visit_children(Visitor &v) const {
-    Visitor *start = nullptr;
-    Visitor *tmp = &v;
-    size_t todo = vec.size();
-    if (todo > 1) {
-        start = &v.flow_clone();
-    }
-    for (auto &a : vec) {
-        if (tmp == nullptr) {
-            tmp = todo > 1 ? &start->flow_clone() : start;
-        }
-        tmp->visit(a);
-        if (tmp != &v) {
-            v.flow_merge(*tmp);
-        }
-        --todo;
-        tmp = nullptr;
-    }
+    SplitFlowVisitVector<T>(v, *this).run_visit();
 }
 IRNODE_DEFINE_APPLY_OVERLOAD(Vector, template <class T>, <T>)
 template <class T>

@@ -86,6 +86,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
 
     DoLocalCopyPropagation *clone() const override { return new DoLocalCopyPropagation(*this); }
     void flow_merge(Visitor &) override;
+    void flow_copy(ControlFlowVisitor &) override;
     bool name_overlap(cstring, cstring);
     void forOverlapAvail(cstring, std::function<void(cstring, VarInfo *)>);
     void dropValuesUsing(cstring);
