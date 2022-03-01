@@ -446,11 +446,7 @@ class IfStatement : Statement {
     NullOK Statement ifFalse;
     visit_children {
         v.visit(condition, "condition");
-        auto &clone(v.flow_clone());
-        v.visit(ifTrue, "ifTrue");
-        clone.visit(ifFalse, "ifFalse");
-        v.flow_merge(clone);
-    }
+        SplitFlowVisit<Statement>(v, ifTrue, ifFalse).run_visit(); }
 }
 
 class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
@@ -494,7 +490,9 @@ class SwitchStatement : Statement {
     inline Vector<SwitchCase> cases;
     visit_children {
         v.visit(expression, "expression");
-        v.parallel_visit(cases, "cases"); }
+        SplitFlowVisit<SwitchCase> split(v);
+        for (auto &c : cases) split.addNode(c);
+        split.run_visit(); }
 }
 
 class Function : Declaration, IFunctional, ISimpleNamespace, INestedNamespace {

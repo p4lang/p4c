@@ -53,6 +53,10 @@ struct Visitor_Context {
     int depth;
 };
 
+class SplitFlowVisit_base;
+
+class Inspector;
+
 class Visitor {
  public:
     typedef Visitor_Context Context;
@@ -181,6 +185,7 @@ class Visitor {
 
     // Functions for IR visit_children to call for ControlFlowVisitors.
     virtual Visitor &flow_clone() { return *this; }
+    SplitFlowVisit_base *split_link = nullptr;
 
     /** Merge the given visitor into this visitor at a joint point in the
      * control flow graph.  Should update @this and leave the other unchanged.
@@ -321,6 +326,9 @@ class Visitor {
      * to visit @n.
      */
     virtual bool join_flows(const IR::Node *) { return false; }
+    /** Called from `apply_visitor` after visiting the node (pre- and postorder) and
+     *  its children after `join_flows` returned false */
+    virtual void post_join_flows(const IR::Node *, const IR::Node *) {}
 
     void visit_children(const IR::Node *, std::function<void()> fn) { fn(); }
     class ChangeTracker;  // used by Modifier and Transform -- private to them
@@ -429,19 +437,30 @@ class ControlFlowVisitor : public virtual Visitor {
 
  protected:
     ControlFlowVisitor *clone() const override = 0;
-    typedef std::map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> flow_join_points_t;
+    struct flow_join_info_t {
+        ControlFlowVisitor *vclone = nullptr;  // a clone to accumulate info into
+        int count = 0;                         // additional parents needed -1
+        bool done = false;
+    };
+    typedef std::map<const IR::Node *, flow_join_info_t> flow_join_points_t;
     flow_join_points_t *flow_join_points = 0;
     class SetupJoinPoints : public Inspector {
      protected:
         flow_join_points_t &join_points;
-        void revisit(const IR::Node *n) override { ++join_points[n].second; }
+        void revisit(const IR::Node *n) override { ++join_points[n].count; }
 
      public:
         explicit SetupJoinPoints(flow_join_points_t &fjp) : join_points(fjp) {}
     };
+    bool BackwardsCompatibleBroken = false;  // enable old broken behavior for code that
+                                             // depends on it.  Should not be set for new uses.
 
+    virtual void applySetupJoinPoints(const IR::Node *root) {
+        root->apply(SetupJoinPoints(*flow_join_points));
+    }
     void init_join_flows(const IR::Node *root) override;
     bool join_flows(const IR::Node *n) override;
+    void post_join_flows(const IR::Node *, const IR::Node *) override;
 
     /** This will be called for all nodes with multiple incoming edges, and
      * should return 'false' if the node should be considered a join point, and
@@ -450,6 +469,8 @@ class ControlFlowVisitor : public virtual Visitor {
      */
     virtual bool filter_join_point(const IR::Node *) { return false; }
     ControlFlowVisitor &flow_clone() override;
+    void flow_merge(Visitor &) override = 0;
+    virtual void flow_copy(ControlFlowVisitor &) = 0;
     ControlFlowVisitor() : globals(*new std::map<cstring, ControlFlowVisitor &>) {}
 
  public:
@@ -477,6 +498,145 @@ class ControlFlowVisitor : public virtual Visitor {
         }
         ~GuardGlobal() { self.erase_global(key); }
     };
+};
+
+class SplitFlowVisit_base {
+ protected:
+    Visitor &v;
+    SplitFlowVisit_base *prev;
+    std::vector<Visitor *> visitors;
+    int visit_next, start_index;
+    friend ControlFlowVisitor;
+
+    explicit SplitFlowVisit_base(Visitor &v) : v(v), visit_next(0) {
+        prev = v.split_link;
+        v.split_link = this;
+    }
+    ~SplitFlowVisit_base() { v.split_link = prev; }
+
+ public:
+    bool finished() { return size_t(visit_next) >= visitors.size(); }
+    virtual void do_visit() = 0;
+    virtual void run_visit() {
+        auto *ctxt = v.getChildContext();
+        start_index = ctxt ? ctxt->child_index : 0;
+        while (!finished()) do_visit();
+        bool first = true;
+        for (auto *cl : visitors) {
+            if (first)
+                first = false;
+            else
+                v.flow_merge(*cl);
+        }
+    }
+};
+
+template <class N>
+class SplitFlowVisit : public SplitFlowVisit_base {
+    std::vector<const N **> nodes;
+    std::vector<const N *const *> const_nodes;
+
+ public:
+    explicit SplitFlowVisit(Visitor &v) : SplitFlowVisit_base(v) {}
+    void addNode(const N *&node) {
+        BUG_CHECK(const_nodes.empty(), "Mixing const and non-const in SplitFlowVisit");
+        BUG_CHECK(visitors.size() == nodes.size(), "size mismatch in SplitFlowVisit");
+        BUG_CHECK(visit_next == 0, "Can't addNode to SplitFlowVisit after visiting started");
+        visitors.push_back(visitors.empty() ? &v : &v.flow_clone());
+        nodes.emplace_back(&node);
+    }
+    void addNode(const N *const &node) {
+        BUG_CHECK(nodes.empty(), "Mixing const and non-const in SplitFlowVisit");
+        BUG_CHECK(visitors.size() == const_nodes.size(), "size mismatch in SplitFlowVisit");
+        BUG_CHECK(visit_next == 0, "Can't addNode to SplitFlowVisit after visiting started");
+        visitors.push_back(visitors.empty() ? &v : &v.flow_clone());
+        const_nodes.emplace_back(&node);
+    }
+    template <class T1, class T2, class... Args>
+    void addNode(T1 &&t1, T2 &&t2, Args &&...args) {
+        addNode(std::forward<T1>(t1));
+        addNode(std::forward<T2>(t2), std::forward<Args>(args)...);
+    }
+    template <class... Args>
+    explicit SplitFlowVisit(Visitor &v, Args &&...args) : SplitFlowVisit(v) {
+        addNode(std::forward<Args>(args)...);
+    }
+    void do_visit() override {
+        if (!finished()) {
+            int idx = visit_next++;
+            if (nodes.empty())
+                visitors.at(idx)->visit(*const_nodes.at(idx), nullptr, start_index + idx);
+            else
+                visitors.at(idx)->visit(*nodes.at(idx), nullptr, start_index + idx);
+        }
+    }
+};
+
+template <class N>
+class SplitFlowVisitVector : public SplitFlowVisit_base {
+    IR::Vector<N> *vec = nullptr;
+    const IR::Vector<N> *const_vec = nullptr;
+    std::vector<const IR::Node *> result;
+    void init_visit(size_t size) {
+        if (size > 0) visitors.push_back(&v);
+        while (visitors.size() < size) visitors.push_back(&v.flow_clone());
+    }
+
+ public:
+    SplitFlowVisitVector(Visitor &v, IR::Vector<N> &vec) : SplitFlowVisit_base(v), vec(&vec) {
+        result.resize(vec.size());
+        init_visit(vec.size());
+    }
+    SplitFlowVisitVector(Visitor &v, const IR::Vector<N> &vec)
+        : SplitFlowVisit_base(v), const_vec(&vec) {
+        init_visit(vec.size());
+    }
+    void do_visit() override {
+        if (!finished()) {
+            int idx = visit_next++;
+            if (vec)
+                result[idx] = visitors.at(idx)->apply_visitor(vec->at(idx));
+            else
+                visitors.at(idx)->visit(const_vec->at(idx), nullptr, start_index + idx);
+        }
+    }
+    void run_visit() override {
+        SplitFlowVisit_base::run_visit();
+        if (vec) {
+            int idx = 0;
+            for (auto i = vec->begin(); i != vec->end(); ++idx) {
+                if (!result[idx] && *i) {
+                    i = vec->erase(i);
+                } else if (result[idx] == *i) {
+                    ++i;
+                } else if (auto l = dynamic_cast<const IR::Vector<N> *>(result[idx])) {
+                    i = vec->erase(i);
+                    i = vec->insert(i, l->begin(), l->end());
+                    i += l->size();
+                } else if (auto v = dynamic_cast<const IR::VectorBase *>(result[idx])) {
+                    if (v->empty()) {
+                        i = vec->erase(i);
+                    } else {
+                        i = vec->insert(i, v->size() - 1, nullptr);
+                        for (auto el : *v) {
+                            CHECK_NULL(el);
+                            if (auto e = dynamic_cast<const N *>(el))
+                                *i++ = e;
+                            else
+                                BUG("visitor returned invalid type %s for Vector<%s>",
+                                    el->node_type_name(), N::static_type_name());
+                        }
+                    }
+                } else if (auto e = dynamic_cast<const N *>(result[idx])) {
+                    *i++ = e;
+                } else {
+                    CHECK_NULL(result[idx]);
+                    BUG("visitor returned invalid type %s for Vector<%s>",
+                        result[idx]->node_type_name(), N::static_type_name());
+                }
+            }
+        }
+    }
 };
 
 class Backtrack : public virtual Visitor {

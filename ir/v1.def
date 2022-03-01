@@ -143,10 +143,7 @@ class If :  Expression {
     NullOK Vector<Expression>    ifFalse;
     visit_children {
         v.visit(pred, "pred");
-        auto &clone(v.flow_clone());
-        v.visit(ifTrue, "ifTrue");
-        clone.visit(ifFalse, "ifFalse");
-        v.flow_merge(clone);
+        SplitFlowVisit<Vector<Expression>>(v, ifTrue, ifFalse).run_visit();
         Expression::visit_children(v);
     }
 }
