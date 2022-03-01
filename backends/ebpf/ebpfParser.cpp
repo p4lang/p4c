@@ -52,6 +52,11 @@ class StateTranslationVisitor : public CodeGenInspector {
 
 void
 StateTranslationVisitor::compileLookahead(const IR::Expression* destination) {
+    cstring msgStr = Util::printf_format("Parser: lookahead for %s %s",
+         state->parser->typeMap->getType(destination)->toString(),
+         destination->toString());
+    builder->target->emitTraceMessage(builder, msgStr.c_str());
+
     builder->emitIndent();
     builder->blockStart();
     builder->emitIndent();
@@ -99,6 +104,9 @@ bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
     builder->append(":");
     builder->spc();
     builder->blockStart();
+
+    cstring msgStr = Util::printf_format("Parser: state %s", parserState->name.name);
+    builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     visit(parserState->components, "components");
     if (parserState->selectExpression == nullptr) {
@@ -177,6 +185,10 @@ StateTranslationVisitor::compileExtractField(
     const IR::Expression* expr, cstring field, unsigned alignment, EBPFType* type) {
     unsigned widthToExtract = dynamic_cast<IHasWidth*>(type)->widthInBits();
     auto program = state->parser->program;
+    cstring msgStr;
+
+    msgStr = Util::printf_format("Parser: extracting field %s", field);
+    builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     if (widthToExtract <= 64) {
         unsigned lastBitIndex = widthToExtract + alignment - 1;
@@ -261,11 +273,25 @@ StateTranslationVisitor::compileExtractField(
     builder->emitIndent();
     builder->appendFormat("%s += %d", program->offsetVar.c_str(), widthToExtract);
     builder->endOfStatement(true);
+
+    // eBPF can pass 64 bits of data as one argument passed in 64 bit register,
+    // so value of the field is printed only when it fits into that register
+    if (widthToExtract <= 64) {
+        cstring tmp = Util::printf_format("(unsigned long long) %s.%s", expr->toString(), field);
+        msgStr = Util::printf_format("Parser: extracted %s=0x%%llx (%u bits)",
+                                     field, widthToExtract);
+        builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, tmp.c_str());
+    } else {
+        msgStr = Util::printf_format("Parser: extracted %s (%u bits)", field, widthToExtract);
+        builder->target->emitTraceMessage(builder, msgStr.c_str());
+    }
+
     builder->newline();
 }
 
 void
 StateTranslationVisitor::compileExtract(const IR::Expression* destination) {
+    cstring msgStr;
     auto type = state->parser->typeMap->getType(destination);
     auto ht = type->to<IR::Type_StructLike>();
     if (ht == nullptr) {
@@ -276,12 +302,24 @@ StateTranslationVisitor::compileExtract(const IR::Expression* destination) {
 
     unsigned width = ht->width_bits();
     auto program = state->parser->program;
+
+    cstring offsetStr = Util::printf_format("BYTES(%s + %s)",
+                                            program->offsetVar, cstring::to_cstring(width));
+    // Parser generally use difference of packet end and start, so for debug message
+    // also use that difference instead of packet length variable
+    cstring pktLenStr = Util::printf_format("%s - %s",
+                                            program->packetEndVar, program->packetStartVar);
+    builder->target->emitTraceMessage(builder, "Parser: check pkt_len=%d >= last_read_byte=%d",
+                                      2, pktLenStr.c_str(), offsetStr.c_str());
+
     builder->emitIndent();
     builder->appendFormat("if (%s < %s + BYTES(%s + %d)) ",
                           program->packetEndVar.c_str(),
                           program->packetStartVar.c_str(),
                           program->offsetVar.c_str(), width);
     builder->blockStart();
+
+    builder->target->emitTraceMessage(builder, "Parser: invalid packet (packet too short)");
 
     builder->emitIndent();
     builder->appendFormat("%s = %s;", program->errorVar.c_str(),
@@ -292,6 +330,10 @@ StateTranslationVisitor::compileExtract(const IR::Expression* destination) {
     builder->appendFormat("goto %s;", IR::ParserState::reject.c_str());
     builder->newline();
     builder->blockEnd(true);
+
+    msgStr = Util::printf_format("Parser: extracting header %s", destination->toString());
+    builder->target->emitTraceMessage(builder, msgStr.c_str());
+    builder->newline();
 
     unsigned alignment = 0;
     for (auto f : ht->fields) {
@@ -313,6 +355,11 @@ StateTranslationVisitor::compileExtract(const IR::Expression* destination) {
         visit(destination);
         builder->appendLine(".ebpf_valid = 1;");
     }
+
+    msgStr = Util::printf_format("Parser: extracted %s", destination->toString());
+    builder->target->emitTraceMessage(builder, msgStr.c_str());
+
+    builder->newline();
 }
 
 bool StateTranslationVisitor::preorder(const IR::MethodCallExpression* expression) {
@@ -423,10 +470,17 @@ void EBPFParser::emit(CodeBuilder* builder) {
 
     // Create a synthetic reject state
     builder->emitIndent();
-    builder->appendFormat("%s: { return %s; }",
-                          IR::ParserState::reject.c_str(),
-                          builder->target->abortReturnCode().c_str());
+    builder->appendFormat("%s:", IR::ParserState::reject.c_str());
+    builder->spc();
+    builder->blockStart();
+
+    builder->target->emitTraceMessage(builder, "Packet rejected");
+
+    builder->emitIndent();
+    builder->appendFormat("return %s;", builder->target->abortReturnCode().c_str());
     builder->newline();
+
+    builder->blockEnd(true);
     builder->newline();
 }
 

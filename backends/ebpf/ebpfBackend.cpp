@@ -40,7 +40,7 @@ void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* tople
 
     Target* target;
     if (options.target.isNullOrEmpty() || options.target == "kernel") {
-        target = new KernelSamplesTarget();
+        target = new KernelSamplesTarget(options.emitTraceMessages);
     } else if (options.target == "bcc") {
         target = new BccTarget();
     } else if (options.target == "test") {
