@@ -440,6 +440,7 @@ void ControlFlowVisitor::init_join_flows(const IR::Node *root) {
 bool ControlFlowVisitor::join_flows(const IR::Node *n) {
     if (flow_join_points && flow_join_points->count(n)) {
         auto &status = flow_join_points->at(n);
+        BUG_CHECK(status.second > 0, "join point reached too many times");
         // Decrement the number of upstream edges yet to be traversed.  If none
         // remain, merge and return false to visit this node.
         if (!--status.second) {
