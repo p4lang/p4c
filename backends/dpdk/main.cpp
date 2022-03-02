@@ -19,6 +19,7 @@ limitations under the License.
 #include <iostream>
 #include <string>
 
+#include "backends/dpdk/version.h"
 #include "backends/dpdk/backend.h"
 #include "backends/dpdk/midend.h"
 #include "backends/dpdk/options.h"
@@ -44,7 +45,7 @@ int main(int argc, char *const argv[]) {
     AutoCompileContext autoDpdkContext(new DPDK::DpdkContext);
     auto &options = DPDK::DpdkContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
-    options.compilerVersion = "0.1";
+    options.compilerVersion = DPDK_VERSION_STRING;
 
     if (options.process(argc, argv) != nullptr) {
         if (options.loadIRFromJson == false)
