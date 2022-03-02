@@ -6,16 +6,11 @@ struct ethernet_t {
 }
 
 struct ipv4_t {
-	bit<4> version
-	bit<4> ihl
-	bit<6> dscp
-	bit<2> ecn
+	bit<8> version_ihl
+	bit<8> dscp_ecn
 	bit<16> total_len
 	bit<16> identification
-	bit<1> reserved
-	bit<1> do_not_fragment
-	bit<1> more_fragments
-	bit<13> frag_offset
+	bit<16> reserved_do_not_fragment_more_fragments_frag_offset
 	bit<8> ttl
 	bit<8> protocol
 	bit<16> header_checksum
@@ -41,7 +36,7 @@ struct local_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
 	bit<32> local_metadata__outer_ipv4_dst0
 	bit<24> local_metadata__tunnel_id1
-	bit<4> local_metadata__tunnel_tun_type3
+	bit<32> local_metadata__tunnel_tun_type3
 	bit<32> pna_main_output_metadata_output_port
 	bit<32> MainControlT_tunnel_decap_ipv4_tunnel_term_table_outer_ipv4_src_addr
 	bit<32> MainControlT_tunnel_decap_ipv4_tunnel_term_table_outer_ipv4_dst_addr

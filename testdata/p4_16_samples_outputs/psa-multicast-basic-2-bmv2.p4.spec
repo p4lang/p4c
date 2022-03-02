@@ -39,7 +39,7 @@ struct metadata_t {
 	bit<32> psa_ingress_output_metadata_multicast_group
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<48> Ingress_tmp
-	bit<1> Ingress_tmp_0
+	bit<32> Ingress_tmp_0
 }
 metadata instanceof metadata_t
 

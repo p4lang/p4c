@@ -52,6 +52,8 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap),
         // TBD: implement dpdk lowering passes instead of reusing bmv2's lowering pass.
+
+        new ByteAlignment(typeMap, refMap, &structure),
         new BMV2::LowerExpressions(typeMap),
         new DismantleMuxExpressions(typeMap, refMap),
         new P4::RemoveComplexExpressions(refMap, typeMap,
@@ -103,6 +105,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
                 out->flush();
             }
         }),
+        new ReplaceHdrMetaField(typeMap, refMap, &structure),
         // convert to assembly program
         convertToDpdk,
     };
