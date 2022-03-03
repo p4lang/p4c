@@ -679,7 +679,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 auto args = a->expr->arguments;
                 if (args->size() < 1){
                     ::error(ErrorType::ERR_UNEXPECTED, "Expected atleast 1 arguments for %1%",
-                            a->object->getName());
+                            a->method->getName());
                 } else {
                     const IR::Expression *incr = nullptr;
                     auto index = args->at(0)->expression;
@@ -688,7 +688,9 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                         incr = args->at(1)->expression;
                     if (!incr && value > 0) {
                         ::error(ErrorType::ERR_UNEXPECTED,
-                                "Expected packet length argument for %1%", a->object->getName());
+                                "Expected packet length argument for %1% " \
+                                "method of indirect counter",
+                                a->method->getName());
                         return false;
                     }
                     if (value == 2) {
