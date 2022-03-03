@@ -112,6 +112,15 @@ class Visitor::ChangeTracker {
             else
                 ++it; } }
 
+    /** Determine whether @n is currently being visited and the visitor has not finished
+     * That is, `start(@n)` has been invoked, and `finish(@n)` has not,
+     *
+     * @return true if @n is being visited and has not finished
+     */
+    bool busy(const IR::Node *n) const {
+        auto it = visited.find(n);
+        return it != visited.end() && it->second.visit_in_progress; }
+
     /** Determine whether @n has been visited and the visitor has finished
      *  and we don't want to visit @n again the next time we see it.
      * That is, `start(@n)` has been invoked, followed by `finish(@n)`,
@@ -272,7 +281,11 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
-        if (visited->done(n)) {
+        if (visited->busy(n)) {
+            n->apply_visitor_loop_revisit(*this);
+            // FIXME -- should have a way of updating the node?  Needs to be decided
+            // by the visitor somehow, but it is tough
+        } else if (visited->done(n)) {
             n->apply_visitor_revisit(*this, visited->result(n));
             n = visited->result(n);
         } else {
@@ -301,9 +314,9 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
     if (n && !join_flows(n)) {
         PushContext local(ctxt, n);
         auto vp = visited->emplace(n, info_t{false, visitDagOnce});
-        if (!vp.second && !vp.first->second.done)
-            BUG("IR loop detected");
-        if (!vp.second && vp.first->second.visitOnce) {
+        if (!vp.second && !vp.first->second.done) {
+            n->apply_visitor_loop_revisit(*this);
+        } else if (!vp.second && vp.first->second.visitOnce) {
             n->apply_visitor_revisit(*this);
         } else {
             vp.first->second.done = false;
@@ -326,7 +339,11 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
-        if (visited->done(n)) {
+        if (visited->busy(n)) {
+            n->apply_visitor_loop_revisit(*this);
+            // FIXME -- should have a way of updating the node?  Needs to be decided
+            // by the visitor somehow, but it is tough
+        } else if (visited->done(n)) {
             n->apply_visitor_revisit(*this, visited->result(n));
             n = visited->result(n);
         } else {
@@ -386,9 +403,16 @@ void Inspector::revisit_visited() {
 void Modifier::revisit_visited() {
     visited->revisit_visited();
 }
+bool Modifier::visit_in_progress(const IR::Node *n) const {
+    return visited->busy(n);
+}
 void Transform::revisit_visited() {
     visited->revisit_visited();
 }
+bool Transform::visit_in_progress(const IR::Node *n) const {
+    return visited->busy(n);
+}
+
 
 #define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                             \
 bool Modifier::preorder(IR::CLASS *n) {                                                 \
@@ -397,18 +421,24 @@ void Modifier::postorder(IR::CLASS *n) {                                        
     postorder(static_cast<IR::BASE *>(n)); }                                            \
 void Modifier::revisit(const IR::CLASS *o, const IR::CLASS *n) {                        \
     revisit(static_cast<const IR::BASE *>(o), static_cast<const IR::BASE *>(n)); }      \
+void Modifier::loop_revisit(const IR::CLASS *o) {                                       \
+    loop_revisit(static_cast<const IR::BASE *>(o)); }                                   \
 bool Inspector::preorder(const IR::CLASS *n) {                                          \
     return preorder(static_cast<const IR::BASE *>(n)); }                                \
 void Inspector::postorder(const IR::CLASS *n) {                                         \
     postorder(static_cast<const IR::BASE *>(n)); }                                      \
 void Inspector::revisit(const IR::CLASS *n) {                                           \
     revisit(static_cast<const IR::BASE *>(n)); }                                        \
+void Inspector::loop_revisit(const IR::CLASS *n) {                                      \
+    loop_revisit(static_cast<const IR::BASE *>(n)); }                                   \
 const IR::Node *Transform::preorder(IR::CLASS *n) {                                     \
     return preorder(static_cast<IR::BASE *>(n)); }                                      \
 const IR::Node *Transform::postorder(IR::CLASS *n) {                                    \
     return postorder(static_cast<IR::BASE *>(n)); }                                     \
 void Transform::revisit(const IR::CLASS *o, const IR::Node *n) {                        \
     return revisit(static_cast<const IR::BASE *>(o), n); }                              \
+void Transform::loop_revisit(const IR::CLASS *o) {                                      \
+    return loop_revisit(static_cast<const IR::BASE *>(o)); }                            \
 
 IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
 #undef DEFINE_VISIT_FUNCTIONS
@@ -440,9 +470,17 @@ void ControlFlowVisitor::init_join_flows(const IR::Node *root) {
 bool ControlFlowVisitor::join_flows(const IR::Node *n) {
     if (flow_join_points && flow_join_points->count(n)) {
         auto &status = flow_join_points->at(n);
+        // BUG_CHECK(status.second > 0, "join point reached too many times");
+        // FIXME -- this means that we calculated the wrong number of parents for a
+        // join point, and completed the join sooner than we should have.  This can
+        // happen if there are recursive calls in the visitor and the differing order
+        // between SetupJoinPoints and the main visitor means that the recursion is
+        // seen differently.  Might be possible to fix this by careful use of
+        // loop_revisit, but if not, we might as well just merge what we have.
+
         // Decrement the number of upstream edges yet to be traversed.  If none
         // remain, merge and return false to visit this node.
-        if (!--status.second) {
+        if (--status.second <= 0) {
             flow_merge(*status.first);
             return false;
         } else if (status.first) {
