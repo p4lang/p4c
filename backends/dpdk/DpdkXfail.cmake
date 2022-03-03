@@ -1,9 +1,4 @@
 p4c_add_xfail_reason("dpdk"
-  "error: Error when generating BF-RT info for 'Digest' .*: packed type is too complex"
-  testdata/p4_16_samples/psa-example-digest-bmv2.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
   "Expected packet length argument for"
   testdata/p4_16_samples/psa-example-counters-bmv2.p4
   )
@@ -46,6 +41,7 @@ p4c_add_xfail_reason("dpdk"
 
 p4c_add_xfail_reason("dpdk"
   "Unknown extern function"
+  testdata/p4_16_samples/psa-example-digest-bmv2.p4
   testdata/p4_16_samples/psa-example-parser-checksum.p4
   testdata/p4_16_samples/psa-meter6.p4
   )
