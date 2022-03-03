@@ -298,7 +298,11 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
     }
     out << "\tactions {" << std::endl;
     for (auto action : actions->actionList) {
-        out << "\t\t" << DPDK::toStr(action->expression);
+        if (action->expression->toString() == "NoAction") {
+            out << "\t\tNoAction";
+        } else {
+            out << "\t\t" << DPDK::toStr(action->expression);
+        }
         if (action->annotations->getAnnotation("tableonly"))
             out << " @tableonly";
         if (action->annotations->getAnnotation("defaultonly"))
@@ -307,7 +311,10 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
     }
     out << "\t}" << std::endl;
 
-    out << "\tdefault_action " << DPDK::toStr(default_action);
+    if (default_action->toString() == "NoAction")
+        out << "\tdefault_action NoAction";
+    else
+        out << "\tdefault_action " << DPDK::toStr(default_action);
     if (default_action->to<IR::MethodCallExpression>()->arguments->size() ==
         0) {
         out << " args none ";

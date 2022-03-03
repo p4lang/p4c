@@ -1,3 +1,3 @@
 issue2957.p4(23): [--Wwarn=uninitialized_use] warning: hdr.h[tmp_3] may not be completely initialized
-    H tmp = {extern_call(hdr.h[max(3w1, 3w2)])};
-                         ^^^^^^^^^^^^^^^^^^^^
+    H tmp = { extern_call(hdr.h[max(3w1, 3w2)]) };
+                          ^^^^^^^^^^^^^^^^^^^^

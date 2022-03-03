@@ -508,7 +508,10 @@ bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
     for (auto i : helper->get_instr())
         stmt_list->push_back(i);
 
-    auto action = new IR::DpdkAction(*stmt_list, a->name, *a->parameters);
+    auto actName = a->name.name;
+    if (a->name.toString() == "NoAction")
+        actName = "NoAction";
+    auto action = new IR::DpdkAction(*stmt_list, actName, *a->parameters);
     actions.push_back(action);
     return false;
 }
