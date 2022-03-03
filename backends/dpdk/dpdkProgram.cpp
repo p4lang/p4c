@@ -113,9 +113,10 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     for (auto kv : structure->parsers) {
         if (kv.first == "IngressParser")
             kv.second->apply(*ingress_parser_converter);
-        else if (kv.first == "EgressParser")
-            kv.second->apply(*egress_parser_converter);
-        else if (kv.first == "MainParserT")
+        else if (kv.first == "EgressParser") {
+            if (options.enableEgress)
+                kv.second->apply(*egress_parser_converter);
+        } else if (kv.first == "MainParserT")
             kv.second->apply(*ingress_parser_converter);
         else
             BUG("Unknown parser %s", kv.second->name);
@@ -127,9 +128,10 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     for (auto kv : structure->pipelines) {
         if (kv.first == "Ingress")
             kv.second->apply(*ingress_converter);
-        else if (kv.first == "Egress")
-            kv.second->apply(*egress_converter);
-        else if (kv.first == "PreControlT")
+        else if (kv.first == "Egress") {
+            if (options.enableEgress)
+                kv.second->apply(*egress_converter);
+        } else if (kv.first == "PreControlT")
             kv.second->apply(*ingress_converter);
         else if (kv.first == "MainControlT")
             kv.second->apply(*ingress_converter);
@@ -143,9 +145,10 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     for (auto kv : structure->deparsers) {
         if (kv.first == "IngressDeparser")
             kv.second->apply(*ingress_deparser_converter);
-        else if (kv.first == "EgressDeparser")
-            kv.second->apply(*egress_deparser_converter);
-        else if (kv.first == "MainDeparserT")
+        else if (kv.first == "EgressDeparser") {
+            if (options.enableEgress)
+                kv.second->apply(*egress_deparser_converter);
+        } else if (kv.first == "MainDeparserT")
             kv.second->apply(*ingress_deparser_converter);
         else
             BUG("Unknown deparser block %s", kv.second->name);
@@ -160,9 +163,11 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     instr.append(ingress_parser_converter->getInstructions());
     instr.append(ingress_converter->getInstructions());
     instr.append(ingress_deparser_converter->getInstructions());
-    instr.append(egress_parser_converter->getInstructions());
-    instr.append(egress_converter->getInstructions());
-    instr.append(egress_deparser_converter->getInstructions());
+    if (options.enableEgress) {
+        instr.append(egress_parser_converter->getInstructions());
+        instr.append(egress_converter->getInstructions());
+        instr.append(egress_deparser_converter->getInstructions());
+    }
 
     if (structure->isPNA())
         instr.append(create_pna_postamble());
@@ -230,16 +235,15 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     }
 
     auto tables = ingress_converter->getTables();
-    tables.append(egress_converter->getTables());
-
     auto actions = ingress_converter->getActions();
-    actions.append(egress_converter->getActions());
-
     auto selectors = ingress_converter->getSelectors();
-    selectors.append(egress_converter->getSelectors());
-
     auto learners = ingress_converter->getLearners();
-    learners.append(egress_converter->getLearners());
+    if (options.enableEgress) {
+        tables.append(egress_converter->getTables());
+        actions.append(egress_converter->getActions());
+        selectors.append(egress_converter->getSelectors());
+        learners.append(egress_converter->getLearners());
+    }
 
     return new IR::DpdkAsmProgram(
         headerType, structType, dpdkExternDecls, actions, tables, selectors, learners,

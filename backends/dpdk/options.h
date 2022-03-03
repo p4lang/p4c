@@ -32,6 +32,8 @@ class DpdkOptions : public CompilerOptions {
     bool loadIRFromJson = false;
     // Compilation command line
     static cstring DpdkCompCmd;
+    // Enable/Disable Egress pipeline in psa
+    bool enableEgress = false;
 
     DpdkOptions() {
         registerOption(
@@ -43,6 +45,14 @@ class DpdkOptions : public CompilerOptions {
                 return false;
             },
             "[Dpdk back-end] Lists exact name of all midend passes.\n");
+        registerOption(
+            "--enableEgress", nullptr,
+            [this](const char *) {
+                enableEgress = true;
+                return true;
+            },
+            "[Dpdk back-end] Enable egress pipeline's codegen\n", OptionFlags::Hide);
+
         registerOption("--bf-rt-schema", "file",
                 [this](const char *arg) { bfRtSchema = arg; return true; },
                 "Generate and write BF-RT JSON schema to the specified file");

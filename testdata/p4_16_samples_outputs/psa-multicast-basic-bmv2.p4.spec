@@ -46,7 +46,6 @@ apply {
 	mov m.psa_ingress_output_metadata_multicast_group m.Ingress_tmp
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
-	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop
 }

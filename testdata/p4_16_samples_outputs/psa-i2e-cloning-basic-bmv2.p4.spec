@@ -32,7 +32,6 @@ struct metadata_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_multicast_group
 	bit<32> psa_ingress_output_metadata_egress_port
-	bit<32> psa_egress_input_metadata_packet_path
 	bit<48> Ingress_tmp
 }
 metadata instanceof metadata_t
@@ -56,10 +55,6 @@ apply {
 	mov m.psa_ingress_output_metadata_egress_port m.Ingress_tmp
 	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
-	extract h.ethernet
-	jmpneq LABEL_END_0 m.psa_egress_input_metadata_packet_path 0x3
-	mov h.ethernet.etherType 0xface
-	LABEL_END_0 :	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop
 }
