@@ -189,8 +189,8 @@ const IR::Node* ReplaceLogMsg::postorder(IR::Type_Struct* typeStruct) {
 }
 
 const IR::Node* ReplaceLogMsg::postorder(IR::MethodCallStatement* methodCallStatement) {
-    if (auto* newMethod =
-            findTypesInLogMsgInvocationToReplace->getReplacementMethodCall(methodCallStatement->clone_id)) {
+    if (auto* newMethod = findTypesInLogMsgInvocationToReplace->
+        getReplacementMethodCall(methodCallStatement->clone_id)) {
         return newMethod;
     }
     return methodCallStatement;
