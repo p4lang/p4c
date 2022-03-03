@@ -11,15 +11,16 @@ using TypeLogMsgParams = std::pair<IR::IndexedVector<IR::NamedExpression>, std::
 /*
    Find types in log_msg function for replace.
 */
-class FindTypeInLogMsgForReplace : public Inspector {
+class FindTypesInLogMsgInvocationToReplace : public Inspector {
    P4::TypeMap* typeMap;
    ordered_map<cstring, const IR::Type_StructLike*> replacement;
-   ordered_map<unsigned, const IR::MethodCallStatement* > logMsgReplacament;
+   // Map with new log_msg methods where is each key is a original identifier of IR::Node.
+   ordered_map<unsigned, const IR::MethodCallStatement* > logMsgReplacement;
    size_t index;
 
  public:
-    explicit FindTypeInLogMsgForReplace(P4::TypeMap *typeMap) : typeMap(typeMap) {
-        setName("FindTypeInLogMsgForReplace");
+    explicit FindTypesInLogMsgInvocationToReplace(P4::TypeMap *typeMap) : typeMap(typeMap) {
+        setName("FindTypesInLogMsgInvocationToReplace");
         CHECK_NULL(typeMap);
     }
     bool preorder(const IR::MethodCallStatement* methodCallStatement) override;
@@ -29,11 +30,10 @@ class FindTypeInLogMsgForReplace : public Inspector {
     const IR::Type_StructLike* getReplacement(const cstring name) const {
          return ::get(replacement, name); }
     const IR::MethodCallStatement* getReplacementMethodCall(unsigned id) const {
-       return ::get(logMsgReplacament, id);
+       return ::get(logMsgReplacement, id);
     }
     bool empty() const { return replacement.empty(); }
-   const IR::Type_StructLike* hasStructInParameter(
-      const IR::MethodCallStatement* methodCallStatement);
+    bool hasStructInParameter(const IR::MethodCallStatement* methodCallStatement);
 
  protected:
     TypeLogMsgParams unfoldStruct(const IR::Expression* expr, std::string strParam,
@@ -62,12 +62,13 @@ log_msg("t=(valid:{},port:{})", {t.valid, t.port});
 */
 class ReplaceLogMsg : public Transform, P4WriteContext {
     P4::TypeMap* typeMap;
-    FindTypeInLogMsgForReplace* findTypeInLogMsgForReplace;
+    FindTypesInLogMsgInvocationToReplace* findTypesInLogMsgInvocationToReplace;
  public:
     explicit ReplaceLogMsg(P4::TypeMap* typeMap,
-                           FindTypeInLogMsgForReplace* findTypeInLogMsgForReplace)
-         : typeMap(typeMap), findTypeInLogMsgForReplace(findTypeInLogMsgForReplace) {
-       CHECK_NULL(typeMap); CHECK_NULL(findTypeInLogMsgForReplace);
+         FindTypesInLogMsgInvocationToReplace* findTypesInLogMsgInvocationToReplace)
+         : typeMap(typeMap),
+         findTypesInLogMsgInvocationToReplace(findTypesInLogMsgInvocationToReplace) {
+       CHECK_NULL(typeMap); CHECK_NULL(findTypesInLogMsgInvocationToReplace);
        setName("ReplaceLogMsg");
     }
     const IR::Node* preorder(IR::P4Program* program);
@@ -78,10 +79,11 @@ class ReplaceLogMsg : public Transform, P4WriteContext {
 class FlattenLogMsg final : public PassManager {
  public:
     FlattenLogMsg(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
-        auto findTypeInLogMsgForReplace = new FindTypeInLogMsgForReplace(typeMap);
+        auto findTypesInLogMsgInvocationToReplace =
+            new FindTypesInLogMsgInvocationToReplace(typeMap);
         passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(findTypeInLogMsgForReplace);
-        passes.push_back(new ReplaceLogMsg(typeMap, findTypeInLogMsgForReplace));
+        passes.push_back(findTypesInLogMsgInvocationToReplace);
+        passes.push_back(new ReplaceLogMsg(typeMap, findTypesInLogMsgInvocationToReplace));
         passes.push_back(new ClearTypeMap(typeMap));
         setName("FlattenLogMsg");
     }
