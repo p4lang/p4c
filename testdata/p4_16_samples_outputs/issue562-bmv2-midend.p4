@@ -17,7 +17,13 @@ struct parsed_packet_t {
 
 struct local_metadata_t {
     @field_list(0)
-    row_t row;
+    bit<1> _row_alt0_valid0;
+    @field_list(0)
+    bit<7> _row_alt0_port1;
+    @field_list(0)
+    bit<1> _row_alt1_valid2;
+    @field_list(0)
+    bit<7> _row_alt1_port3;
 }
 
 parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
@@ -27,11 +33,21 @@ parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local
 }
 
 control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    apply {
-        local_metadata.row.alt0 = local_metadata.row.alt1;
-        local_metadata.row.alt0.valid = 1w1;
-        local_metadata.row.alt1.port = local_metadata.row.alt1.port + 7w1;
+    @hidden action issue562bmv2l32() {
+        local_metadata._row_alt0_valid0 = local_metadata._row_alt1_valid2;
+        local_metadata._row_alt0_port1 = local_metadata._row_alt1_port3;
+        local_metadata._row_alt0_valid0 = 1w1;
+        local_metadata._row_alt1_port3 = local_metadata._row_alt1_port3 + 7w1;
         clone_preserving_field_list(CloneType.I2E, 32w0, 8w0);
+    }
+    @hidden table tbl_issue562bmv2l32 {
+        actions = {
+            issue562bmv2l32();
+        }
+        const default_action = issue562bmv2l32();
+    }
+    apply {
+        tbl_issue562bmv2l32.apply();
     }
 }
 

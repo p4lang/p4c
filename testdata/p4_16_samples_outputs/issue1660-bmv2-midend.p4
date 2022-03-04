@@ -2,36 +2,35 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-struct alt_t {
-    bit<1> valid;
-    bit<7> port;
-}
-
-struct row_t {
-    alt_t alt0;
-    alt_t alt1;
+struct HasBool {
+    @field_list(0)
+    bool x;
 }
 
 struct parsed_packet_t {
 }
 
 struct local_metadata_t {
-    @field_list(0)
-    row_t row;
 }
 
-parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
+parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     state start {
         transition accept;
     }
 }
 
-control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    apply {
-        local_metadata.row.alt0 = local_metadata.row.alt1;
-        local_metadata.row.alt0.valid = 1w1;
-        local_metadata.row.alt1.port = local_metadata.row.alt1.port + 7w1;
+control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
+    @hidden action issue1660bmv2l23() {
         clone_preserving_field_list(CloneType.I2E, 32w0, 8w0);
+    }
+    @hidden table tbl_issue1660bmv2l23 {
+        actions = {
+            issue1660bmv2l23();
+        }
+        const default_action = issue1660bmv2l23();
+    }
+    apply {
+        tbl_issue1660bmv2l23.apply();
     }
 }
 
@@ -40,7 +39,7 @@ control egress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata,
     }
 }
 
-control deparser(packet_out b, in parsed_packet_t hdr) {
+control deparser(packet_out b, in parsed_packet_t h) {
     apply {
     }
 }

@@ -175,17 +175,9 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-struct tuple_0 {
-    bit<128> f0;
-    bit<128> f1;
-    bit<32>  f2;
-    bit<24>  f3;
-    bit<8>   f4;
-}
-
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum_with_payload<tuple_0, bit<16>>(meta.do_cksum == 1w1, (tuple_0){f0 = hdr.ipv6.src_addr,f1 = hdr.ipv6.dst_addr,f2 = (bit<32>)hdr.ipv6.payload_length,f3 = 24w0,f4 = 8w58}, hdr.icmp6.checksum, HashAlgorithm.csum16);
+        update_checksum_with_payload<tuple<bit<128>, bit<128>, bit<32>, bit<24>, bit<8>>, bit<16>>(meta.do_cksum == 1w1, { hdr.ipv6.src_addr, hdr.ipv6.dst_addr, (bit<32>)hdr.ipv6.payload_length, 24w0, 8w58 }, hdr.icmp6.checksum, HashAlgorithm.csum16);
     }
 }
 
@@ -283,22 +275,13 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
 }
 
 control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @hidden action issue17651bmv2l348() {
-        hdr.cpu.setValid();
-        hdr.cpu.task = meta.task;
-        hdr.cpu.ethertype = hdr.ethernet.ethertype;
-        hdr.cpu.ingress_port = (bit<16>)meta.ingress_port;
-        hdr.ethernet.ethertype = 16w0x4242;
-    }
-    @hidden table tbl_issue17651bmv2l348 {
-        actions = {
-            issue17651bmv2l348();
-        }
-        const default_action = issue17651bmv2l348();
-    }
     apply {
         if (standard_metadata.instance_type == 32w1) {
-            tbl_issue17651bmv2l348.apply();
+            hdr.cpu.setValid();
+            hdr.cpu.task = meta.task;
+            hdr.cpu.ethertype = hdr.ethernet.ethertype;
+            hdr.cpu.ingress_port = (bit<16>)meta.ingress_port;
+            hdr.ethernet.ethertype = 16w0x4242;
         }
     }
 }
