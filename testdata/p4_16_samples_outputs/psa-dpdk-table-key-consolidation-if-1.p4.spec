@@ -61,6 +61,10 @@ struct a1_arg_t {
 	bit<48> param
 }
 
+struct a2_1_arg_t {
+	bit<16> param
+}
+
 struct a2_arg_t {
 	bit<16> param
 }
@@ -98,7 +102,7 @@ action a2 args instanceof a2_arg_t {
 	return
 }
 
-action a2_1 args instanceof a2_arg_t {
+action a2_1 args instanceof a2_1_arg_t {
 	mov h.ethernet.etherType t.param
 	return
 }

@@ -23,11 +23,11 @@ struct ipv4_t {
 	bit<32> dst_addr
 }
 
-struct tunnel_decap_decap_outer_ipv4_arg_t {
+struct tunnel_decap_decap_outer_ipv4_0_arg_t {
 	bit<24> tunnel_id
 }
 
-struct tunnel_encap_set_tunnel_arg_t {
+struct tunnel_encap_set_tunnel_0_arg_t {
 	bit<32> dst_addr
 }
 
@@ -52,12 +52,12 @@ action NoAction args none {
 	return
 }
 
-action tunnel_decap_decap_outer_ipv4_0 args instanceof tunnel_decap_decap_outer_ipv4_arg_t {
+action tunnel_decap_decap_outer_ipv4_0 args instanceof tunnel_decap_decap_outer_ipv4_0_arg_t {
 	mov m.local_metadata__tunnel_id1 t.tunnel_id
 	return
 }
 
-action tunnel_encap_set_tunnel_0 args instanceof tunnel_encap_set_tunnel_arg_t {
+action tunnel_encap_set_tunnel_0 args instanceof tunnel_encap_set_tunnel_0_arg_t {
 	mov m.local_metadata__outer_ipv4_dst0 t.dst_addr
 	return
 }

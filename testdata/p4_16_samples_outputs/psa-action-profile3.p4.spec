@@ -26,8 +26,16 @@ struct psa_egress_deparser_input_metadata_t {
 	bit<32> egress_port
 }
 
+struct a1_1_arg_t {
+	bit<48> param
+}
+
 struct a1_arg_t {
 	bit<48> param
+}
+
+struct a2_1_arg_t {
+	bit<16> param
 }
 
 struct a2_arg_t {
