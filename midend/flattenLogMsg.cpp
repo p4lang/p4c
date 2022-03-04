@@ -125,8 +125,6 @@ TypeLogMsgParams FindTypesInLogMsgInvocationToReplace::unfoldStruct(const IR::Ex
         if (n != std::string::npos) {
             strResult += strParam.substr(0, n);
             strParam = strParam.substr(n + 2);
-        } else {
-            BUG("Can't find '{}' in '%1%'", expr);
         }
         exprType = typeMap->getType(namedExpr->expression, true);
         if (exprType->is<IR::Type_StructLike>()) {
