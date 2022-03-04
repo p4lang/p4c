@@ -450,6 +450,31 @@ class PrependPDotToActionArgs : public Transform {
     const IR::Node *preorder(IR::MethodCallExpression*) override;
 };
 
+// dpdk does not support ternary operator so we need to translate ternary operator
+// to corresponding if else statement
+// Taken from frontend pass DoSimplifyExpressions in sideEffects.h
+class DismantleMuxExpressions : public Transform {
+    P4::TypeMap* typeMap;
+    P4::ReferenceMap *refMap;
+    IR::IndexedVector<IR::Declaration> toInsert;  // temporaries
+    IR::IndexedVector<IR::StatOrDecl> statements;
+
+    cstring createTemporary(const IR::Type* type);
+    const IR::Expression* addAssignment(Util::SourceInfo srcInfo, cstring varName,
+                                        const IR::Expression* expression);
+
+  public:
+    DismantleMuxExpressions(P4::TypeMap* typeMap,
+                            P4::ReferenceMap *refMap)
+        : typeMap(typeMap), refMap(refMap) {}
+    const IR::Node* preorder(IR::Mux* expression) override;
+    const IR::Node* postorder(IR::P4Parser* parser) override;
+    const IR::Node* postorder(IR::Function* function) override;
+    const IR::Node* postorder(IR::P4Control* control) override;
+    const IR::Node* postorder(IR::P4Action* action) override;
+    const IR::Node* postorder(IR::AssignmentStatement* statement) override;
+};
+
 // For dpdk asm, there is not object-oriented. Therefore, we cannot define a
 // checksum in dpdk asm. And dpdk asm only provides ckadd(checksum add) and
 // cksub(checksum sub). So we need to define a explicit state for each checksum

@@ -24,18 +24,24 @@ limitations under the License.
     { Node::traceVisit("Mod post"); v.postorder(this); }                                        \
     TEMPLATE INLINE void IR::CLASS TT::apply_visitor_revisit(Modifier &v, const Node *n) const  \
     { Node::traceVisit("Mod revisit"); v.revisit(this, n); }                                    \
+    TEMPLATE INLINE void IR::CLASS TT::apply_visitor_loop_revisit(Modifier &v) const            \
+    { Node::traceVisit("Mod loop_revisit"); v.loop_revisit(this); }                             \
     TEMPLATE INLINE bool IR::CLASS TT::apply_visitor_preorder(Inspector &v) const               \
     { Node::traceVisit("Insp pre"); return v.preorder(this); }                                  \
     TEMPLATE INLINE void IR::CLASS TT::apply_visitor_postorder(Inspector &v) const              \
     { Node::traceVisit("Insp post"); v.postorder(this); }                                       \
     TEMPLATE INLINE void IR::CLASS TT::apply_visitor_revisit(Inspector &v) const                \
     { Node::traceVisit("Insp revisit"); v.revisit(this); }                                      \
+    TEMPLATE INLINE void IR::CLASS TT::apply_visitor_loop_revisit(Inspector &v) const           \
+    { Node::traceVisit("Insp loop_revisit"); v.loop_revisit(this); }                            \
     TEMPLATE INLINE const IR::Node *IR::CLASS TT::apply_visitor_preorder(Transform &v)          \
     { Node::traceVisit("Trans pre"); return v.preorder(this); }                                 \
     TEMPLATE INLINE const IR::Node *IR::CLASS TT::apply_visitor_postorder(Transform &v)         \
     { Node::traceVisit("Trans post"); return v.postorder(this); }                               \
     TEMPLATE INLINE void IR::CLASS TT::apply_visitor_revisit(Transform &v, const Node *n) const \
-    { Node::traceVisit("Trans revisit"); v.revisit(this, n); }
+    { Node::traceVisit("Trans revisit"); v.revisit(this, n); }                                  \
+    TEMPLATE INLINE void IR::CLASS TT::apply_visitor_loop_revisit(Transform &v) const           \
+    { Node::traceVisit("Trans loop_revisit"); v.loop_revisit(this); }
 
 IRNODE_ALL_TEMPLATES(DEFINE_APPLY_FUNCTIONS, inline)
 

@@ -43,7 +43,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     auto program = tlb->getProgram();
 
     std::set<const IR::P4Table*> invokedInKey;
-    auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure);
+    auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure, options);
     auto genContextJson = new DpdkContextGenerator(refMap, typeMap, &structure, options);
 
     PassManager simplify = {
@@ -53,6 +53,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap),
         // TBD: implement dpdk lowering passes instead of reusing bmv2's lowering pass.
         new BMV2::LowerExpressions(typeMap),
+        new DismantleMuxExpressions(typeMap, refMap),
         new P4::RemoveComplexExpressions(refMap, typeMap,
                 new DPDK::ProcessControls(&structure.pipeline_controls)),
         new P4::ConstantFolding(refMap, typeMap, false),
@@ -107,13 +108,15 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     };
     simplify.addDebugHook(hook, true);
     program = program->apply(simplify);
-
+    ordered_set<cstring> used_fields;
     dpdk_program = convertToDpdk->getDpdkProgram();
     if (!dpdk_program)
         return;
     PassManager post_code_gen = {
         new EliminateUnusedAction(),
         new DpdkAsmOptimization,
+        new CollectUsedMetadataField(used_fields),
+        new RemoveUnusedMetadataFields(used_fields),
     };
 
     dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();

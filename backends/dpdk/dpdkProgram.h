@@ -31,6 +31,8 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/gmputil.h"
 #include "lib/json.h"
+#include "options.h"
+
 namespace DPDK {
 
 /* Maximum size in bits for fields in header and metadata structures */
@@ -40,12 +42,13 @@ class ConvertToDpdkProgram : public Transform {
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;
+    DpdkOptions &options;
     const IR::DpdkAsmProgram *dpdk_program;
 
   public:
     ConvertToDpdkProgram(P4::ReferenceMap *refmap, P4::TypeMap *typemap,
-                         DpdkProgramStructure *structure)
-        : typemap(typemap), refmap(refmap), structure(structure) { }
+                         DpdkProgramStructure *structure, DpdkOptions &options)
+        : typemap(typemap), refmap(refmap), structure(structure), options(options) { }
 
     const IR::DpdkAsmProgram *create(IR::P4Program *prog);
     IR::IndexedVector<IR::DpdkAsmStatement> create_pna_preamble();

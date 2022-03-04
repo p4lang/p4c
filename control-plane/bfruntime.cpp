@@ -55,6 +55,16 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info& p4info,
                 type = makeTypeBytes(fSpec.bitstring().varbit().max_bitwidth());
         } else if (fSpec.has_bool_()) {
             type = makeTypeBool(1);
+        } else if (fSpec.has_new_type()) {
+            auto newtypes = typeInfo.new_types();
+            auto typeName = fSpec.new_type().name();
+            auto newType = newtypes.find(typeName);
+            if (newType == newtypes.end()) {
+                ::error("New type '%1%' not found in typeInfo for '%2%' '%3%'",
+                        typeName, instanceType, instanceName);
+                return;
+            }
+            type = makeTypeBytes(newType->second.translated_type().sdn_bitwidth());
         }
 
         if (!type) {

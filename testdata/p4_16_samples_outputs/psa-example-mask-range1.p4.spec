@@ -1,8 +1,6 @@
 
 
 
-
-
 struct ethernet_t {
 	bit<48> dstAddr
 	bit<48> srcAddr
@@ -59,38 +57,11 @@ struct psa_egress_deparser_input_metadata_t {
 }
 
 struct metadata {
-	bit<32> psa_ingress_parser_input_metadata_ingress_port
-	bit<32> psa_ingress_parser_input_metadata_packet_path
-	bit<32> psa_egress_parser_input_metadata_egress_port
-	bit<32> psa_egress_parser_input_metadata_packet_path
 	bit<32> psa_ingress_input_metadata_ingress_port
-	bit<32> psa_ingress_input_metadata_packet_path
-	bit<64> psa_ingress_input_metadata_ingress_timestamp
-	bit<16> psa_ingress_input_metadata_parser_error
-	bit<8> psa_ingress_output_metadata_class_of_service
-	bit<8> psa_ingress_output_metadata_clone
-	bit<16> psa_ingress_output_metadata_clone_session_id
 	bit<8> psa_ingress_output_metadata_drop
-	bit<8> psa_ingress_output_metadata_resubmit
-	bit<32> psa_ingress_output_metadata_multicast_group
 	bit<32> psa_ingress_output_metadata_egress_port
-	bit<8> psa_egress_input_metadata_class_of_service
-	bit<32> psa_egress_input_metadata_egress_port
-	bit<32> psa_egress_input_metadata_packet_path
-	bit<16> psa_egress_input_metadata_instance
-	bit<64> psa_egress_input_metadata_egress_timestamp
-	bit<16> psa_egress_input_metadata_parser_error
-	bit<32> psa_egress_deparser_input_metadata_egress_port
-	bit<8> psa_egress_output_metadata_clone
-	bit<16> psa_egress_output_metadata_clone_session_id
-	bit<8> psa_egress_output_metadata_drop
 	bit<16> local_metadata_data
-	bit<8> local_metadata_tmpMask
 	bit<16> Ingress_tmpMask
-	bit<16> tmpMask
-	bit<8> tmpMask_0
-	bit<16> tmpMask_1
-	bit<8> tmpMask_2
 }
 metadata instanceof metadata
 
@@ -138,20 +109,6 @@ apply {
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
-	emit h.ipv4
-	emit h.tcp
-	extract h.ethernet
-	mov m.tmpMask_1 h.ethernet.etherType
-	and m.tmpMask_1 0xc0
-	jmpeq EGRESSPARSERIMPL_PARSE_IPV4 m.tmpMask_1 0x80
-	jmp EGRESSPARSERIMPL_ACCEPT
-	EGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
-	mov m.tmpMask_2 h.ipv4.protocol
-	and m.tmpMask_2 0xf8
-	jmpeq EGRESSPARSERIMPL_PARSE_TCP m.tmpMask_2 0x10
-	jmp EGRESSPARSERIMPL_ACCEPT
-	EGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
-	EGRESSPARSERIMPL_ACCEPT :	emit h.ethernet
 	emit h.ipv4
 	emit h.tcp
 	tx m.psa_ingress_output_metadata_egress_port
