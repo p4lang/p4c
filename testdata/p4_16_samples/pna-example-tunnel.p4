@@ -145,7 +145,7 @@ control tunnel_decap(inout headers_t hdr,
     key = {
       hdr.outer_ipv4.src_addr : exact @name("ipv4_src");
       hdr.outer_ipv4.dst_addr : exact @name("ipv4_dst");
-      local_metadata.tunnel.tun_type : exact; /* base it on udp dst port - check parser for tunnel type */
+      local_metadata.tunnel.tun_type : exact;
     }
     actions = {
       decap_outer_ipv4;
