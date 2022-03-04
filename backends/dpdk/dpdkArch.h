@@ -421,6 +421,7 @@ class CollectLocalVariables : public Transform {
         : refMap(refMap), typeMap(typeMap), structure(structure) {}
     const IR::Node *preorder(IR::P4Program *p) override;
     const IR::Node *postorder(IR::Type_Struct *s) override;
+    const IR::Node *postorder(IR::Member *m) override;
     const IR::Node *postorder(IR::PathExpression *path) override;
     const IR::Node *postorder(IR::P4Control *c) override;
     const IR::Node *postorder(IR::P4Parser *p) override;
