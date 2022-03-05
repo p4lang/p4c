@@ -41,7 +41,7 @@ struct psa_egress_deparser_input_metadata_t {
 	bit<32> egress_port
 }
 
-struct execute_arg_t {
+struct execute_1_arg_t {
 	bit<12> index
 }
 
@@ -66,7 +66,7 @@ action NoAction args none {
 	return
 }
 
-action execute args instanceof execute_arg_t {
+action execute_1 args instanceof execute_1_arg_t {
 	mov m.Ingress_tmp h.ipv4.totalLen
 	meter meter0_0 t.index m.Ingress_tmp m.Ingress_color_in m.Ingress_color_out
 	jmpneq LABEL_FALSE_0 m.Ingress_color_out 0x0
@@ -83,7 +83,7 @@ table tbl {
 	}
 	actions {
 		NoAction
-		execute
+		execute_1
 	}
 	default_action NoAction args none 
 	size 0x10000

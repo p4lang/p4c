@@ -39,16 +39,16 @@ header ethernet instanceof ethernet_t
 
 regarray counter_0 size 0x400 initval 0x0
 
-action execute args none {
+action execute_1 args none {
 	regadd counter_0 0x100 1
 	return
 }
 
 table tbl {
 	actions {
-		execute
+		execute_1
 	}
-	default_action execute args none 
+	default_action execute_1 args none 
 	size 0x10000
 }
 

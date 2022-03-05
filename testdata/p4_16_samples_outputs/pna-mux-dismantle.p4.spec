@@ -34,12 +34,12 @@ struct tcp_t {
 	bit<16> urgentPtr
 }
 
-struct do_range_checks_0_arg_t {
+struct do_range_checks_1_arg_t {
 	bit<16> min1
 	bit<16> max1
 }
 
-struct do_range_checks_1_arg_t {
+struct do_range_checks_2_arg_t {
 	bit<16> min1
 	bit<16> max1
 }
@@ -73,7 +73,7 @@ header ipv4 instanceof ipv4_t
 header tcp instanceof tcp_t
 header MainControlT_hdr_3_tcp instanceof tcp_t
 
-action do_range_checks_0 args instanceof do_range_checks_0_arg_t {
+action do_range_checks_1 args instanceof do_range_checks_1_arg_t {
 	mov h.MainControlT_hdr_3_tcp h.tcp
 	jmpgt LABEL_FALSE_1 t.min1 h.MainControlT_hdr_3_tcp.srcPort
 	jmpgt LABEL_FALSE_1 h.MainControlT_hdr_3_tcp.srcPort t.max1
@@ -94,7 +94,7 @@ action add_on_miss_action args none {
 	return
 }
 
-action do_range_checks_1 args instanceof do_range_checks_1_arg_t {
+action do_range_checks_2 args instanceof do_range_checks_2_arg_t {
 	jmpgt LABEL_FALSE_2 t.min1 h.tcp.srcPort
 	jmpgt LABEL_FALSE_2 h.tcp.srcPort t.max1
 	jmpgt LABEL_FALSE_3 0x32 h.tcp.srcPort
@@ -142,8 +142,8 @@ learner ipv4_da2 {
 	actions {
 		next_hop2 @tableonly
 		add_on_miss_action2 @defaultonly
+		do_range_checks_2
 		do_range_checks_1
-		do_range_checks_0
 	}
 	default_action add_on_miss_action2 args none 
 	size 65536

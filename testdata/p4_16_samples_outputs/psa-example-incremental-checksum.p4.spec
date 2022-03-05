@@ -81,7 +81,7 @@ action NoAction args none {
 	return
 }
 
-action drop args none {
+action drop_1 args none {
 	mov m.psa_ingress_output_metadata_drop 1
 	return
 }
@@ -101,7 +101,7 @@ table route {
 	}
 	actions {
 		forward
-		drop
+		drop_1
 		NoAction
 	}
 	default_action NoAction args none 

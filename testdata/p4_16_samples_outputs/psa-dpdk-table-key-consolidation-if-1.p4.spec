@@ -61,6 +61,10 @@ struct a1_arg_t {
 	bit<48> param
 }
 
+struct a2_1_arg_t {
+	bit<16> param
+}
+
 struct a2_arg_t {
 	bit<16> param
 }
@@ -98,6 +102,11 @@ action a2 args instanceof a2_arg_t {
 	return
 }
 
+action a2_1 args instanceof a2_1_arg_t {
+	mov h.ethernet.etherType t.param
+	return
+}
+
 action a3 args instanceof a3_arg_t {
 	mov h.ethernet.srcAddr t.param
 	return
@@ -128,7 +137,7 @@ table foo {
 	actions {
 		NoAction
 		a3
-		a2
+		a2_1
 	}
 	default_action NoAction args none 
 	size 0x10000
