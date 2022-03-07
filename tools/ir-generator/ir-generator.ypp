@@ -92,7 +92,7 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
 %type<str>                      name expression optInitializer fieldName methodName body
 %type<lookup>                   lookup_scope
 
-%error-verbose
+%define parse.error verbose
 %locations
 
 %nonassoc COMMENTBLOCK

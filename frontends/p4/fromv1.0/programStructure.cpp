@@ -33,6 +33,7 @@ limitations under the License.
 #include "frontends/p4/reservedWords.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/tableKeyNames.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 
 namespace P4V1 {
 
@@ -201,6 +202,13 @@ void ProgramStructure::createTypes() {
         fieldListsEnum = makeUniqueName("FieldLists");
         auto members = new IR::IndexedVector<IR::SerEnumMember>();
         unsigned index = 0;
+        P4::MinimalNameGenerator mng;
+        for (auto fl : allFieldLists)
+            mng.usedName(fl->name);
+        cstring noneName = mng.newName("none");
+        // Reserve 0 for an empty field list.
+        auto me = new IR::SerEnumMember(noneName, new IR::Constant(index++));
+        members->push_back(me);
         for (auto fl : allFieldLists) {
             auto me = new IR::SerEnumMember(fl->srcInfo, fl->name, new IR::Constant(index++));
             members->push_back(me);
@@ -1632,13 +1640,20 @@ CONVERT_PRIMITIVE(modify_field_rng_uniform) {
 }
 
 CONVERT_PRIMITIVE(recirculate) {
-    ExpressionConverter conv(structure);
-    OPS_CK(primitive, 1);
+    unsigned opcount = primitive->operands.size();
+    BUG_CHECK(opcount == 0 || opcount == 1,
+              "Expected 0 or 1 operands for %1%", primitive);
     auto args = new IR::Vector<IR::Argument>();
-    auto fieldList = primitive->operands.at(0);
-    if (auto expr = structure->listIndex(fieldList))
-        args->push_back(new IR::Argument(expr));
-    auto path = new IR::PathExpression(structure->v1model.recirculate.Id());
+    if (opcount == 0) {
+        // no list should have this index
+        args->push_back(new IR::Argument(new IR::Constant(IR::Type_Bits::get(8), 0)));
+    } else {
+        auto fieldList = primitive->operands.at(0);
+        if (auto expr = structure->listIndex(fieldList))
+            args->push_back(new IR::Argument(expr));
+    }
+    auto path = new IR::PathExpression(structure->v1model.recirculate.Id(
+        primitive->srcInfo, primitive->name));
     auto mc = new IR::MethodCallExpression(primitive->srcInfo, path, args);
     return new IR::MethodCallStatement(mc->srcInfo, mc);
 }
@@ -1660,8 +1675,8 @@ convertClone(ProgramStructure *structure, const IR::Primitive *primitive, Model:
         new IR::Argument(new IR::Cast(primitive->operands.at(0)->srcInfo,
                                       structure->v1model.clone.sessionType, session)));
 
-    auto id = opcount == 2 ? structure->v1model.clone.clone3.Id()
-                           : structure->v1model.clone.Id();
+    auto id = opcount == 2 ? structure->v1model.clone.clone3.Id(primitive->srcInfo, primitive->name)
+            : structure->v1model.clone.Id(primitive->srcInfo, primitive->name);
     if (opcount == 2) {
         auto fl = primitive->operands.at(1);
         if (auto expr = structure->listIndex(fl))
@@ -1690,11 +1705,17 @@ CONVERT_PRIMITIVE(resubmit) {
         auto fl = primitive->operands.at(0);
         if (auto expr = structure->listIndex(fl))
             args->push_back(new IR::Argument(expr));
+    } else {
+        // no list should have this index
+        args->push_back(new IR::Argument(new IR::Constant(IR::Type_Bits::get(8), 0)));
     }
-    return new IR::MethodCallStatement(primitive->srcInfo,
-        new IR::MethodCallExpression(primitive->srcInfo,
-                                     new IR::PathExpression(structure->v1model.resubmit.Id()),
-                                     args));
+    return new IR::MethodCallStatement(
+        primitive->srcInfo,
+        new IR::MethodCallExpression(
+            primitive->srcInfo,
+            new IR::PathExpression(
+                structure->v1model.resubmit.Id(primitive->srcInfo, primitive->name)),
+            args));
 }
 
 CONVERT_PRIMITIVE(execute_meter) {
@@ -1715,7 +1736,7 @@ CONVERT_PRIMITIVE(execute_meter) {
                   meter);
     auto newname = structure->meters.get(meter);
     auto meterref = new IR::PathExpression(newname);
-    auto methodName = structure->v1model.meter.executeMeter.Id();
+    auto methodName = structure->v1model.meter.executeMeter.Id(primitive->srcInfo, primitive->name);
     auto method = new IR::Member(meterref, methodName);
     auto args = new IR::Vector<IR::Argument>();
     auto arg = new IR::Cast(IR::Type::Bits::get(meter->index_width()),
@@ -1755,7 +1776,8 @@ CONVERT_PRIMITIVE(modify_field_with_hash_based_offset) {
     args->push_back(new IR::Argument(list));
     args->push_back(new IR::Argument(
         new IR::Cast(max->srcInfo, IR::Type_Bits::get(2 * flc->output_width), max)));
-    auto hash = new IR::PathExpression(structure->v1model.hash.Id());
+    auto hash = new IR::PathExpression(structure->v1model.hash.Id(
+        primitive->srcInfo, primitive->name));
     auto mc = new IR::MethodCallExpression(primitive->srcInfo, hash, args);
     auto result = new IR::MethodCallStatement(primitive->srcInfo, mc);
     return result;
@@ -1801,7 +1823,8 @@ CONVERT_PRIMITIVE(generate_digest) {
     auto typeArgs = new IR::Vector<IR::Type>();
     auto typeName = new IR::Type_Name(new IR::Path(type->name));
     typeArgs->push_back(typeName);
-    auto random = new IR::PathExpression(structure->v1model.digest_receiver.Id());
+    auto random = new IR::PathExpression(
+        structure->v1model.digest_receiver.Id(primitive->srcInfo, primitive->name));
     auto mc = new IR::MethodCallExpression(primitive->srcInfo, random, typeArgs, args);
     auto result = new IR::MethodCallStatement(mc->srcInfo, mc);
     return result;
@@ -1822,7 +1845,7 @@ CONVERT_PRIMITIVE(register_read) {
         return nullptr; }
     auto newname = structure->registers.get(reg);
     auto registerref = new IR::PathExpression(newname);
-    auto methodName = structure->v1model.registers.read.Id();
+    auto methodName = structure->v1model.registers.read.Id(primitive->srcInfo, primitive->name);
     auto method = new IR::Member(registerref, methodName);
     auto args = new IR::Vector<IR::Argument>();
     auto arg = new IR::Cast(IR::Type::Bits::get(reg->index_width()),
@@ -1854,7 +1877,7 @@ CONVERT_PRIMITIVE(register_write) {
 
     auto newname = structure->registers.get(reg);
     auto registerref = new IR::PathExpression(newname);
-    auto methodName = structure->v1model.registers.write.Id();
+    auto methodName = structure->v1model.registers.write.Id(primitive->srcInfo, primitive->name);
     auto method = new IR::Member(registerref, methodName);
     auto args = new IR::Vector<IR::Argument>();
     auto arg0 = new IR::Cast(primitive->operands.at(1)->srcInfo,
@@ -1873,7 +1896,7 @@ CONVERT_PRIMITIVE(truncate) {
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 1);
     auto len = primitive->operands.at(0);
-    auto methodName = structure->v1model.truncate.Id();
+    auto methodName = structure->v1model.truncate.Id(primitive->srcInfo, primitive->name);
     auto method = new IR::PathExpression(methodName);
     auto args = new IR::Vector<IR::Argument>();
     auto arg0 = new IR::Cast(len->srcInfo, structure->v1model.truncate.length_type,

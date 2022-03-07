@@ -77,13 +77,13 @@ struct metadata {
 }
 
 struct headers {
-    @name(".cpu_header")
+    @name(".cpu_header") 
     cpu_header_t cpu_header;
-    @name(".ethernet")
+    @name(".ethernet") 
     ethernet_t   ethernet;
-    @name(".ipv4")
+    @name(".ipv4") 
     ipv4_t       ipv4;
-    @name(".tcp")
+    @name(".tcp") 
     tcp_t        tcp;
 }
 
@@ -213,7 +213,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".nat_miss_int_to_ext") action nat_miss_int_to_ext() {
-        clone_preserving_field_list(CloneType.I2E, 32w250, 8w0);
+        clone_preserving_field_list(CloneType.I2E, 32w250, 8w1);
     }
     @name(".nat_miss_ext_to_int") action nat_miss_ext_to_int() {
         meta._meta_do_forward0 = 1w0;
@@ -354,3 +354,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+

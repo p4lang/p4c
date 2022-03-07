@@ -21,6 +21,7 @@ limitations under the License.
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
+#include "frontends/p4/simplifySwitch.h"
 #include "frontends/p4/simplifyParsers.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -210,9 +211,9 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,
             new P4::MoveDeclarations(),
             validateTableProperties(options.arch),
             new P4::SimplifyControlFlow(&refMap, &typeMap),
+            new P4::SimplifySwitch(&refMap, &typeMap),
             new P4::CompileTimeOperations(),
             new P4::TableHit(&refMap, &typeMap),
-            new P4::EliminateSwitch(&refMap, &typeMap),
             new P4::RemoveLeftSlices(&refMap, &typeMap),
             new P4::TypeChecking(&refMap, &typeMap),
             convertErrors,
