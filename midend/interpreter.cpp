@@ -312,18 +312,7 @@ void SymbolicStruct::dbprint(std::ostream& out) const {
 SymbolicHeaderUnion::SymbolicHeaderUnion(const IR::Type_HeaderUnion* type,
                                          bool uninitialized,
                                          const SymbolicValueFactory* factory) :
-        SymbolicStruct(type, uninitialized, factory),
-        valid(new SymbolicBool(false)) {
-            auto fieldsClone = fieldValue;
-            bool validityFlag = false;
-            for (auto f : type->to<IR::Type_StructLike>()->fields) {
-                if (fieldsClone[f->name.name]->to<SymbolicHeader>()->valid->value) {
-                    validityFlag = true;
-                    break;
-                }
-            }
-            valid = new SymbolicBool(validityFlag);
-}
+        SymbolicStruct(type, uninitialized, factory) {}
 
 void SymbolicHeaderUnion::setValid(bool v, cstring field) {
     if (field) {
@@ -333,25 +322,37 @@ void SymbolicHeaderUnion::setValid(bool v, cstring field) {
                 fieldValue[f->name.name]->setAllUnknown();
         }
     }
-    valid = new SymbolicBool(v);
+}
+
+SymbolicBool* SymbolicHeaderUnion::isValid() const {
+    for (auto f : type->to<IR::Type_StructLike>()->fields) {
+         auto fieldsClone = fieldValue;
+         if (fieldsClone[f->name.name]) {
+             if (fieldsClone[f->name.name]->to<SymbolicHeader>()->valid->value)
+                return new SymbolicBool(true);
+         }
+    }
+    return new SymbolicBool(false);
 }
 
 SymbolicValue* SymbolicHeaderUnion::get(const IR::Node* node, cstring field) const {
-    if (valid->isKnown() && !valid->value)
+    auto hu = new SymbolicHeaderUnion(type->to<IR::Type_HeaderUnion>());
+    if (hu->isValid()->isKnown()  && !hu->isValid()->value)
         return new SymbolicStaticError(node,"Reading field from invalid header union");
     return SymbolicStruct::get(node, field);
 }
 
 void SymbolicHeaderUnion::setAllUnknown() {
     SymbolicStruct::setAllUnknown();
-    valid->setAllUnknown();
+    for (auto f : type->to<IR::Type_StructLike>()->fields) {
+        fieldValue[f->name.name]->to<SymbolicHeader>()->setAllUnknown();
+    }
 }
 
 SymbolicValue* SymbolicHeaderUnion::clone() const {
     auto result = new SymbolicHeaderUnion(type->to<IR::Type_HeaderUnion>());
     for (auto f : fieldValue)
         result->fieldValue[f.first] = f.second->clone();
-    result->valid = valid->clone()->to<SymbolicBool>();
     return result;
 }
 
@@ -361,7 +362,9 @@ void SymbolicHeaderUnion::assign(const SymbolicValue* other) {
     BUG_CHECK(hv, "%1%: expected a header union", other);
     for (auto f : hv->fieldValue)
         fieldValue[f.first]->assign(f.second);
-    valid->assign(hv->valid);
+    auto hu = new SymbolicHeaderUnion(type->to<IR::Type_HeaderUnion>());
+    auto valid = hu->isValid();
+    valid->assign(hv->isValid());
 }
 
 bool SymbolicHeaderUnion::merge(const SymbolicValue* other) {
@@ -370,7 +373,9 @@ bool SymbolicHeaderUnion::merge(const SymbolicValue* other) {
     bool changes = false;
     for (auto f : hv->fieldValue)
         changes = changes || fieldValue[f.first]->merge(f.second);
-    changes = changes || valid->merge(hv->valid);
+    auto hu = new SymbolicHeaderUnion(type->to<IR::Type_HeaderUnion>());
+    auto valid = hu->isValid();
+    changes = changes || valid->merge(hv->isValid());
     return changes;
 }
 
@@ -378,7 +383,9 @@ bool SymbolicHeaderUnion::equals(const SymbolicValue* other) const {
     if (!other->is<SymbolicHeaderUnion>())
         return false;
     auto sh = other->to<SymbolicHeaderUnion>();
-    if (!valid->equals(sh->valid))
+    auto hu = new SymbolicHeaderUnion(type->to<IR::Type_HeaderUnion>());
+    auto valid = hu->isValid();
+    if (!valid->equals(sh->isValid()))
         return false;
     if (valid->isKnown() && !valid->value)
         // Invalid headers are equal
@@ -389,6 +396,8 @@ bool SymbolicHeaderUnion::equals(const SymbolicValue* other) const {
 void SymbolicHeaderUnion::dbprint(std::ostream& out) const {
     out << "{ ";
     out << "valid=>";
+    auto hu = new SymbolicHeaderUnion(type->to<IR::Type_HeaderUnion>());
+    auto valid = hu->isValid();
     valid->dbprint(out);
 #if 0
     for (auto f : fieldValue) {
@@ -530,10 +539,10 @@ SymbolicValue* SymbolicArray::next(const IR::Node* node) {
                 return v;
         }
         if (values[i]->is<SymbolicHeaderUnion>()) {
-            if (v->to<SymbolicHeaderUnion>()->valid->isUnknown() ||
-                v->to<SymbolicHeaderUnion>()->valid->isUninitialized())
+            if (v->to<SymbolicHeaderUnion>()->isValid()->isUnknown() ||
+                v->to<SymbolicHeaderUnion>()->isValid()->isUninitialized())
                 return new AnyElement(this);
-            if (!v->to<SymbolicHeaderUnion>()->valid->value)
+            if (!v->to<SymbolicHeaderUnion>()->isValid()->value)
                 return v;
         }
     }
@@ -553,10 +562,10 @@ SymbolicValue* SymbolicArray::lastIndex(const IR::Node* node) {
         }
 
         if (values[i]->is<SymbolicHeaderUnion>()) {
-            if (v->to<SymbolicHeaderUnion>()->valid->isUnknown() ||
-                v->to<SymbolicHeaderUnion>()->valid->isUninitialized())
+            if (v->to<SymbolicHeaderUnion>()->isValid()->isUnknown() ||
+                v->to<SymbolicHeaderUnion>()->isValid()->isUninitialized())
                 return new AnyElement(this);
-            if (v->to<SymbolicHeaderUnion>()->valid->value)
+            if (v->to<SymbolicHeaderUnion>()->isValid()->value)
                 return new SymbolicInteger(new IR::Constant(IR::Type_Bits::get(32), index));
         }
     }
@@ -575,10 +584,10 @@ SymbolicValue* SymbolicArray::last(const IR::Node* node) {
                 return v;
         }
         if (values[i]->is<SymbolicHeaderUnion>()) {
-            if (v->to<SymbolicHeaderUnion>()->valid->isUnknown() ||
-                v->to<SymbolicHeaderUnion>()->valid->isUninitialized())
+            if (v->to<SymbolicHeaderUnion>()->isValid()->isUnknown() ||
+                v->to<SymbolicHeaderUnion>()->isValid()->isUninitialized())
                 return new AnyElement(this);
-            if (v->to<SymbolicHeaderUnion>()->valid->value)
+            if (v->to<SymbolicHeaderUnion>()->isValid()->value)
                 return v;
         }
     }
@@ -1160,7 +1169,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
                 set(expression, v);
                 return;
             } else if (auto huv = structVar->to<SymbolicHeaderUnion>()) {
-                auto v = huv->valid;
+                auto v = huv->isValid();
                 set(expression, v);
                 return;
             } else {
