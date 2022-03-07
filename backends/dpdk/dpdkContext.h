@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_DPDK_CONTEXT_H_
-#define BACKENDS_DPDK_CONTEXT_H_
+#ifndef BACKENDS_DPDK_DPDKCONTEXT_H_
+#define BACKENDS_DPDK_DPDKCONTEXT_H_
 
 #include "dpdkProgramStructure.h"
 #include "options.h"
@@ -163,4 +163,4 @@ class DpdkContextGenerator : public Inspector {
 
 }  // namespace DPDK
 
-#endif /* BACKENDS_DPDK_CONTEXT_H_ */
+#endif /* BACKENDS_DPDK_DPDKCONTEXT_H_ */

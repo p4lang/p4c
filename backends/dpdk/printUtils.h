@@ -16,9 +16,9 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_PRINTUTILS_H_
 #define BACKENDS_DPDK_PRINTUTILS_H_
 
+#include <iostream>
 #include "ir/ir.h"
 #include "ir/dbprint.h"
-#include <iostream>
 
 namespace DPDK {
 // this function translates nodes of different subclass of Expression, Type
@@ -27,7 +27,7 @@ namespace DPDK {
 cstring toStr(const IR::Node *const);
 
 class ConvertToString : public Inspector {
-public:
+ public:
     std::ostringstream out;
     bool preorder(const IR::Expression *e);
     bool preorder(const IR::Type *t);
@@ -46,7 +46,6 @@ public:
     bool preorder(const IR::Type_Bits *type);
     bool preorder(const IR::ExpressionValue *property);
 };
-}// namespace DPDK
+}  // namespace DPDK
 
-#endif
-// BACKENDS_DPDK_PRINTUTILS_H_
+#endif  /* BACKENDS_DPDK_PRINTUTILS_H_ */
