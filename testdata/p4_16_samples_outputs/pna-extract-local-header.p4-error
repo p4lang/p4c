@@ -10,3 +10,12 @@ parser MainParserT<PM, MH, MM>(
 pna.p4(680): [--Wwarn=unused] warning: 'PM' is unused
 control MainControlT<PM, MH, MM>(
                      ^^
+pna-extract-local-header.p4(58): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+        hdr.h2.type1 = local_hdr.type1;
+                     ^
+pna-extract-local-header.p4(59): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+        hdr.h2.type2 = local_hdr.type2;
+                     ^
+pna-extract-local-header.p4(60): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+        hdr.h2.value = local_hdr.value;
+                     ^
