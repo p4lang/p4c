@@ -116,4 +116,4 @@ cstring toStr(const IR::Node *const n) {
         BUG("not implemented type");
     }
 }
-} // namespace DPDK
+}  // namespace DPDK

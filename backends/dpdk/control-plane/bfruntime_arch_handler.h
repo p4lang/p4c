@@ -38,8 +38,6 @@ limitations under the License.
 
 #include "midend/eliminateTypedefs.h"
 
-#include "p4/config/dpdk/p4info.pb.h"
-
 using P4::ReferenceMap;
 using P4::TypeMap;
 using P4::ControlPlaneAPI::Helpers::getExternInstanceFromProperty;
@@ -90,6 +88,7 @@ struct ActionSelector {
 
 class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PSA> {
     std::unordered_map<const IR::Block *, cstring> blockNamePrefixMap;
+
  public:
     template <typename Func>
     void forAllPipeBlocks(const IR::ToplevelBlock* evaluatedProgram, Func function) {
@@ -359,7 +358,8 @@ struct PSAArchHandlerBuilderForDPDK : public P4::ControlPlaneAPI::P4RuntimeArchH
         ReferenceMap* refMap,
         TypeMap* typeMap,
         const IR::ToplevelBlock* evaluatedProgram) const override {
-        return new P4::ControlPlaneAPI::Standard::BFRuntimeArchHandlerPSA(refMap, typeMap, evaluatedProgram);
+        return new P4::ControlPlaneAPI::Standard::BFRuntimeArchHandlerPSA(refMap, typeMap,
+            evaluatedProgram);
     }
 };
 
