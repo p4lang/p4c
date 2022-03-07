@@ -37,45 +37,24 @@ header ethernet instanceof ethernet_t
 header output_data instanceof output_data_t
 
 struct metadata_t {
-	bit<32> psa_ingress_parser_input_metadata_ingress_port
-	bit<32> psa_ingress_parser_input_metadata_packet_path
-	bit<32> psa_egress_parser_input_metadata_egress_port
-	bit<32> psa_egress_parser_input_metadata_packet_path
 	bit<32> psa_ingress_input_metadata_ingress_port
-	bit<32> psa_ingress_input_metadata_packet_path
-	bit<64> psa_ingress_input_metadata_ingress_timestamp
-	bit<16> psa_ingress_input_metadata_parser_error
-	bit<8> psa_ingress_output_metadata_class_of_service
-	bit<8> psa_ingress_output_metadata_clone
-	bit<16> psa_ingress_output_metadata_clone_session_id
 	bit<8> psa_ingress_output_metadata_drop
-	bit<8> psa_ingress_output_metadata_resubmit
 	bit<32> psa_ingress_output_metadata_multicast_group
 	bit<32> psa_ingress_output_metadata_egress_port
-	bit<8> psa_egress_input_metadata_class_of_service
-	bit<32> psa_egress_input_metadata_egress_port
-	bit<32> psa_egress_input_metadata_packet_path
-	bit<16> psa_egress_input_metadata_instance
-	bit<64> psa_egress_input_metadata_egress_timestamp
-	bit<16> psa_egress_input_metadata_parser_error
-	bit<32> psa_egress_deparser_input_metadata_egress_port
-	bit<8> psa_egress_output_metadata_clone
-	bit<16> psa_egress_output_metadata_clone_session_id
-	bit<8> psa_egress_output_metadata_drop
-	bit<48> Ingress_tmp_0
-	bit<8> Ingress_tmp_1
-	bit<48> Ingress_tmp_2
-	bit<8> Ingress_tmp_3
-	bit<48> Ingress_tmp_4
-	bit<8> Ingress_tmp_5
-	bit<48> Ingress_tmp_6
-	bit<8> Ingress_tmp_7
-	bit<48> Ingress_tmp_8
-	bit<8> Ingress_tmp_9
 	bit<48> Ingress_tmp
-	bit<8> Ingress_idx_0
-	bit<16> Ingress_orig_data_0
-	bit<16> Ingress_next_data_0
+	bit<8> Ingress_tmp_0
+	bit<48> Ingress_tmp_1
+	bit<8> Ingress_tmp_2
+	bit<48> Ingress_tmp_3
+	bit<8> Ingress_tmp_4
+	bit<48> Ingress_tmp_5
+	bit<8> Ingress_tmp_6
+	bit<48> Ingress_tmp_7
+	bit<8> Ingress_tmp_8
+	bit<48> Ingress_tmp_9
+	bit<8> Ingress_idx
+	bit<16> Ingress_orig_data
+	bit<16> Ingress_next_data
 }
 metadata instanceof metadata_t
 
@@ -87,42 +66,42 @@ apply {
 	extract h.ethernet
 	extract h.output_data
 	jmpnv LABEL_END h.ethernet
-	mov m.Ingress_idx_0 h.ethernet.dstAddr
-	mov m.Ingress_tmp_0 h.ethernet.dstAddr
-	shr m.Ingress_tmp_0 0x8
-	mov m.Ingress_tmp_1 m.Ingress_tmp_0
-	mov m.Ingress_tmp_2 h.ethernet.dstAddr
-	shr m.Ingress_tmp_2 0x8
-	mov m.Ingress_tmp_3 m.Ingress_tmp_2
-	jmplt LABEL_END_0 m.Ingress_tmp_1 0x1
-	jmpgt LABEL_END_0 m.Ingress_tmp_3 0x3
-	regrd m.Ingress_orig_data_0 reg_0 m.Ingress_idx_0
-	LABEL_END_0 :	mov m.Ingress_tmp_8 h.ethernet.dstAddr
-	shr m.Ingress_tmp_8 0x8
-	mov m.Ingress_tmp_9 m.Ingress_tmp_8
-	jmpneq LABEL_FALSE_1 m.Ingress_tmp_9 0x1
+	mov m.Ingress_idx h.ethernet.dstAddr
 	mov m.Ingress_tmp h.ethernet.dstAddr
-	shr m.Ingress_tmp 0x20
-	mov m.Ingress_next_data_0 m.Ingress_tmp
+	shr m.Ingress_tmp 0x8
+	mov m.Ingress_tmp_0 m.Ingress_tmp
+	mov m.Ingress_tmp_1 h.ethernet.dstAddr
+	shr m.Ingress_tmp_1 0x8
+	mov m.Ingress_tmp_2 m.Ingress_tmp_1
+	jmplt LABEL_END_0 m.Ingress_tmp_0 0x1
+	jmpgt LABEL_END_0 m.Ingress_tmp_2 0x3
+	regrd m.Ingress_orig_data reg_0 m.Ingress_idx
+	LABEL_END_0 :	mov m.Ingress_tmp_7 h.ethernet.dstAddr
+	shr m.Ingress_tmp_7 0x8
+	mov m.Ingress_tmp_8 m.Ingress_tmp_7
+	jmpneq LABEL_FALSE_1 m.Ingress_tmp_8 0x1
+	mov m.Ingress_tmp_9 h.ethernet.dstAddr
+	shr m.Ingress_tmp_9 0x20
+	mov m.Ingress_next_data m.Ingress_tmp_9
 	jmp LABEL_END_1
-	LABEL_FALSE_1 :	mov m.Ingress_tmp_6 h.ethernet.dstAddr
-	shr m.Ingress_tmp_6 0x8
-	mov m.Ingress_tmp_7 m.Ingress_tmp_6
-	jmpneq LABEL_FALSE_2 m.Ingress_tmp_7 0x2
-	mov m.Ingress_next_data_0 m.Ingress_orig_data_0
+	LABEL_FALSE_1 :	mov m.Ingress_tmp_5 h.ethernet.dstAddr
+	shr m.Ingress_tmp_5 0x8
+	mov m.Ingress_tmp_6 m.Ingress_tmp_5
+	jmpneq LABEL_FALSE_2 m.Ingress_tmp_6 0x2
+	mov m.Ingress_next_data m.Ingress_orig_data
 	jmp LABEL_END_1
-	LABEL_FALSE_2 :	mov m.Ingress_tmp_4 h.ethernet.dstAddr
-	shr m.Ingress_tmp_4 0x8
-	mov m.Ingress_tmp_5 m.Ingress_tmp_4
-	jmpneq LABEL_FALSE_3 m.Ingress_tmp_5 0x3
-	mov m.Ingress_next_data_0 m.Ingress_orig_data_0
-	add m.Ingress_next_data_0 0x1
+	LABEL_FALSE_2 :	mov m.Ingress_tmp_3 h.ethernet.dstAddr
+	shr m.Ingress_tmp_3 0x8
+	mov m.Ingress_tmp_4 m.Ingress_tmp_3
+	jmpneq LABEL_FALSE_3 m.Ingress_tmp_4 0x3
+	mov m.Ingress_next_data m.Ingress_orig_data
+	add m.Ingress_next_data 0x1
 	jmp LABEL_END_1
-	LABEL_FALSE_3 :	mov m.Ingress_orig_data_0 0xdead
-	mov m.Ingress_next_data_0 0xbeef
-	LABEL_END_1 :	regwr reg_0 m.Ingress_idx_0 m.Ingress_next_data_0
-	mov h.output_data.word0 m.Ingress_orig_data_0
-	mov h.output_data.word1 m.Ingress_next_data_0
+	LABEL_FALSE_3 :	mov m.Ingress_orig_data 0xdead
+	mov m.Ingress_next_data 0xbeef
+	LABEL_END_1 :	regwr reg_0 m.Ingress_idx m.Ingress_next_data
+	mov h.output_data.word0 m.Ingress_orig_data
+	mov h.output_data.word1 m.Ingress_next_data
 	LABEL_END :	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
 	mov m.psa_ingress_output_metadata_egress_port 0x1

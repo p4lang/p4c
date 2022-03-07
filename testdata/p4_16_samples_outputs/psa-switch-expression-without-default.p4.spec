@@ -66,37 +66,12 @@ struct a2_arg_t {
 }
 
 struct user_meta_t {
-	bit<32> psa_ingress_parser_input_metadata_ingress_port
-	bit<32> psa_ingress_parser_input_metadata_packet_path
-	bit<32> psa_egress_parser_input_metadata_egress_port
-	bit<32> psa_egress_parser_input_metadata_packet_path
 	bit<32> psa_ingress_input_metadata_ingress_port
-	bit<32> psa_ingress_input_metadata_packet_path
-	bit<64> psa_ingress_input_metadata_ingress_timestamp
-	bit<16> psa_ingress_input_metadata_parser_error
-	bit<8> psa_ingress_output_metadata_class_of_service
-	bit<8> psa_ingress_output_metadata_clone
-	bit<16> psa_ingress_output_metadata_clone_session_id
 	bit<8> psa_ingress_output_metadata_drop
-	bit<8> psa_ingress_output_metadata_resubmit
-	bit<32> psa_ingress_output_metadata_multicast_group
 	bit<32> psa_ingress_output_metadata_egress_port
-	bit<8> psa_egress_input_metadata_class_of_service
-	bit<32> psa_egress_input_metadata_egress_port
-	bit<32> psa_egress_input_metadata_packet_path
-	bit<16> psa_egress_input_metadata_instance
-	bit<64> psa_egress_input_metadata_egress_timestamp
-	bit<16> psa_egress_input_metadata_parser_error
-	bit<32> psa_egress_deparser_input_metadata_egress_port
-	bit<8> psa_egress_output_metadata_clone
-	bit<16> psa_egress_output_metadata_clone_session_id
-	bit<8> psa_egress_output_metadata_drop
 	bit<16> local_metadata_data
-	bit<16> local_metadata_data1
-	bit<16> Ingress_tmp_0
+	bit<16> Ingress_tmp
 	bit<48> Ingress_tbl_ethernet_srcAddr
-	bit<16> tmpMask
-	bit<8> tmpMask_0
 }
 metadata instanceof user_meta_t
 
@@ -166,13 +141,13 @@ apply {
 	jmpeq MYIP_PARSE_TCP m.tmpMask_0 0x4
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_TCP :	extract h.tcp
-	MYIP_ACCEPT :	mov m.Ingress_tmp_0 0x10
-	mov m.Ingress_tmp_0 0x1
+	MYIP_ACCEPT :	mov m.Ingress_tmp 0x10
+	mov m.Ingress_tmp 0x1
 	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	jmpa LABEL_SWITCH a1
 	jmpa LABEL_SWITCH_0 a2
 	jmp LABEL_ENDSWITCH
-	LABEL_SWITCH :	jmpneq LABEL_ENDSWITCH m.Ingress_tmp_0 0x1
+	LABEL_SWITCH :	jmpneq LABEL_ENDSWITCH m.Ingress_tmp 0x1
 	table foo
 	jmp LABEL_ENDSWITCH
 	jmp LABEL_ENDSWITCH

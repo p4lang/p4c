@@ -299,13 +299,16 @@ class Modifier : public virtual Visitor {
     virtual bool preorder(IR::Node *) { return true; }
     virtual void postorder(IR::Node *) {}
     virtual void revisit(const IR::Node *, const IR::Node *) {}
+    virtual void loop_revisit(const IR::Node *) { BUG("IR loop detected"); }
 #define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                            \
     virtual bool preorder(IR::CLASS *);                                 \
     virtual void postorder(IR::CLASS *);                                \
-    virtual void revisit(const IR::CLASS *, const IR::CLASS *);
+    virtual void revisit(const IR::CLASS *, const IR::CLASS *);         \
+    virtual void loop_revisit(const IR::CLASS *);
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
+    bool visit_in_progress(const IR::Node *) const;
 };
 
 class Inspector : public virtual Visitor {
@@ -319,13 +322,18 @@ class Inspector : public virtual Visitor {
     virtual bool preorder(const IR::Node *) { return true; }  // return 'false' to prune
     virtual void postorder(const IR::Node *) {}
     virtual void revisit(const IR::Node *) {}
+    virtual void loop_revisit(const IR::Node *) { BUG("IR loop detected"); }
 #define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                            \
     virtual bool preorder(const IR::CLASS *);                           \
     virtual void postorder(const IR::CLASS *);                          \
-    virtual void revisit(const IR::CLASS *);
+    virtual void revisit(const IR::CLASS *);                            \
+    virtual void loop_revisit(const IR::CLASS *);
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
+    bool visit_in_progress(const IR::Node *n) const {
+        if (visited->count(n)) return !visited->at(n).done;
+        return false; }
 };
 
 class Transform : public virtual Visitor {
@@ -340,13 +348,16 @@ class Transform : public virtual Visitor {
     virtual const IR::Node *preorder(IR::Node *n) {return n;}
     virtual const IR::Node *postorder(IR::Node *n) {return n;}
     virtual void revisit(const IR::Node *, const IR::Node *) {}
+    virtual void loop_revisit(const IR::Node *) { BUG("IR loop detected"); }
 #define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                            \
     virtual const IR::Node *preorder(IR::CLASS *);                      \
     virtual const IR::Node *postorder(IR::CLASS *);                     \
-    virtual void revisit(const IR::CLASS *, const IR::Node *);
+    virtual void revisit(const IR::CLASS *, const IR::Node *);          \
+    virtual void loop_revisit(const IR::CLASS *);
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
+    bool visit_in_progress(const IR::Node *) const;
     // can only be called usefully from a 'preorder' function (directly or indirectly)
     void prune() { prune_flag = true; }
 
@@ -362,7 +373,16 @@ class ControlFlowVisitor : public virtual Visitor {
 
  protected:
     ControlFlowVisitor* clone() const override = 0;
-    std::map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> *flow_join_points = 0;
+    typedef std::map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> flow_join_points_t;
+    flow_join_points_t *flow_join_points = 0;
+    class SetupJoinPoints : public Inspector {
+     protected:
+        flow_join_points_t &join_points;
+        void revisit(const IR::Node *n) override { ++join_points[n].second; }
+     public:
+        explicit SetupJoinPoints(flow_join_points_t &fjp) : join_points(fjp) { }
+    };
+
     void init_join_flows(const IR::Node *root) override;
     bool join_flows(const IR::Node *n) override;
 

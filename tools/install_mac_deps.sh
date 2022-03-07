@@ -29,4 +29,5 @@ export PATH="/usr/local/opt/bison/bin:$PATH"
 # install pip and required pip packages
 # curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 # python get-pip.py --user
-pip3 install --user scapy==2.4.0 ply==3.8
+# use scapy 2.4.5, which is the version on which ptf depends
+pip3 install --user scapy==2.4.5 ply==3.8

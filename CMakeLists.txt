@@ -90,8 +90,9 @@ if (BUILD_STATIC_RELEASE)
   set(BUILD_SHARED_LIBS OFF)
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
   # Link Boost statically
+  # See https://cmake.org/cmake/help/latest/module/FindBoost.html for details
   set(Boost_USE_STATIC_LIBS ON)
-  set(Boost_USE_STATIC_RUNTIME ON)
+  set(Boost_USE_STATIC_RUNTIME OFF)
   # Set the static variable
   set(P4C_STATIC_BUILD STATIC)
   # Do not bring in dynamic libstdcc and libgcc

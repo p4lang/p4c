@@ -25,29 +25,11 @@ struct forward_arg_t {
 }
 
 struct main_metadata_t {
-	bit<32> pna_pre_input_metadata_input_port
-	bit<16> pna_pre_input_metadata_parser_error
-	bit<32> pna_pre_input_metadata_direction
-	bit<3> pna_pre_input_metadata_pass
-	bit<8> pna_pre_input_metadata_loopedback
-	bit<8> pna_pre_output_metadata_decrypt
-	bit<32> pna_pre_output_metadata_said
-	bit<16> pna_pre_output_metadata_decrypt_start_offset
-	bit<32> pna_main_parser_input_metadata_direction
-	bit<3> pna_main_parser_input_metadata_pass
-	bit<8> pna_main_parser_input_metadata_loopedback
-	bit<32> pna_main_parser_input_metadata_input_port
 	bit<32> pna_main_input_metadata_direction
-	bit<3> pna_main_input_metadata_pass
-	bit<8> pna_main_input_metadata_loopedback
-	bit<64> pna_main_input_metadata_timestamp
-	bit<16> pna_main_input_metadata_parser_error
-	bit<8> pna_main_input_metadata_class_of_service
 	bit<32> pna_main_input_metadata_input_port
-	bit<8> pna_main_output_metadata_class_of_service
 	bit<32> local_metadata_meta
 	bit<32> pna_main_output_metadata_output_port
-	bit<32> MainControlT_addr_0
+	bit<32> MainControlT_addr
 }
 metadata instanceof main_metadata_t
 
@@ -85,10 +67,10 @@ apply {
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
 	jmpeq LABEL_TRUE_0 m.pna_main_input_metadata_direction 0x0
-	mov m.MainControlT_addr_0 h.ipv4.dstAddr
+	mov m.MainControlT_addr h.ipv4.dstAddr
 	jmp LABEL_END_0
-	LABEL_TRUE_0 :	mov m.MainControlT_addr_0 h.ipv4.srcAddr
-	LABEL_END_0 :	mov m.local_metadata_meta m.MainControlT_addr_0
+	LABEL_TRUE_0 :	mov m.MainControlT_addr h.ipv4.srcAddr
+	LABEL_END_0 :	mov m.local_metadata_meta m.MainControlT_addr
 	jmpneq LABEL_END m.local_metadata_meta h.ipv4.dstAddr
 	table ipv4_da_lpm
 	LABEL_END :	emit h.ethernet

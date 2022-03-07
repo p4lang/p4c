@@ -1,0 +1,274 @@
+structure-valued-expr-errs-1.p4(100): [--Werror=type-error] error: AssignmentStatement
+            hdr.h1 = {};
+                   ^
+  ---- Actual error:
+structure-valued-expr-errs-1.p4(100): Number of fields 0 in initializer tuple<> is different than number of fields 1 in 'header h1_t'
+              hdr.h1 = {};
+                       ^^
+structure-valued-expr-errs-1.p4(31)
+  header h1_t {
+         ^^^^
+  ---- Originating from:
+structure-valued-expr-errs-1.p4(100): Source expression 'ListExpression' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'header h1_t'
+              hdr.h1 = {};
+                       ^^
+structure-valued-expr-errs-1.p4(100)
+              hdr.h1 = {};
+                       ^^
+structure-valued-expr-errs-1.p4(31)
+  header h1_t {
+         ^^^^
+structure-valued-expr-errs-1.p4(101): [--Werror=type-error] error: AssignmentStatement
+            hdr.h2 = {};
+                   ^
+  ---- Actual error:
+structure-valued-expr-errs-1.p4(100): Number of fields 0 in initializer tuple<> is different than number of fields 2 in 'header h2_t'
+              hdr.h1 = {};
+                       ^^
+structure-valued-expr-errs-1.p4(35)
+  header h2_t {
+         ^^^^
+  ---- Originating from:
+structure-valued-expr-errs-1.p4(101): Source expression 'ListExpression' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'header h2_t'
+              hdr.h2 = {};
+                       ^^
+structure-valued-expr-errs-1.p4(100)
+              hdr.h1 = {};
+                       ^^
+structure-valued-expr-errs-1.p4(35)
+  header h2_t {
+         ^^^^
+structure-valued-expr-errs-1.p4(102): [--Werror=type-error] error: AssignmentStatement
+            hdr.h0 = {4};
+                   ^
+  ---- Actual error:
+structure-valued-expr-errs-1.p4(102): Number of fields 1 in initializer tuple<int> is different than number of fields 0 in 'header h0_t'
+              hdr.h0 = {4};
+                       ^^^
+structure-valued-expr-errs-1.p4(28)
+  header h0_t {
+         ^^^^
+  ---- Originating from:
+structure-valued-expr-errs-1.p4(102): Source expression 'ListExpression' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'header h0_t'
+              hdr.h0 = {4};
+                       ^^^
+structure-valued-expr-errs-1.p4(102)
+              hdr.h0 = {4};
+                       ^^^
+structure-valued-expr-errs-1.p4(28)
+  header h0_t {
+         ^^^^
+structure-valued-expr-errs-1.p4(103): [--Werror=type-error] error: AssignmentStatement
+            hdr.h1 = {1, 2};
+                   ^
+  ---- Actual error:
+structure-valued-expr-errs-1.p4(103): Number of fields 2 in initializer tuple<int, int> is different than number of fields 1 in 'header h1_t'
+              hdr.h1 = {1, 2};
+                       ^^^^^^
+structure-valued-expr-errs-1.p4(31)
+  header h1_t {
+         ^^^^
+  ---- Originating from:
+structure-valued-expr-errs-1.p4(103): Source expression 'ListExpression' produces a result of type 'tuple<int, int>' which cannot be assigned to a left-value with type 'header h1_t'
+              hdr.h1 = {1, 2};
+                       ^^^^^^
+structure-valued-expr-errs-1.p4(103)
+              hdr.h1 = {1, 2};
+                       ^^^^^^
+structure-valued-expr-errs-1.p4(31)
+  header h1_t {
+         ^^^^
+structure-valued-expr-errs-1.p4(104): [--Werror=type-error] error: AssignmentStatement
+            hdr.h2 = {3};
+                   ^
+  ---- Actual error:
+structure-valued-expr-errs-1.p4(104): Number of fields 1 in initializer tuple<int> is different than number of fields 2 in 'header h2_t'
+              hdr.h2 = {3};
+                       ^^^
+structure-valued-expr-errs-1.p4(35)
+  header h2_t {
+         ^^^^
+  ---- Originating from:
+structure-valued-expr-errs-1.p4(104): Source expression 'ListExpression' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'header h2_t'
+              hdr.h2 = {3};
+                       ^^^
+structure-valued-expr-errs-1.p4(104)
+              hdr.h2 = {3};
+                       ^^^
+structure-valued-expr-errs-1.p4(35)
+  header h2_t {
+         ^^^^
+structure-valued-expr-errs-1.p4(105): [--Werror=type-error] error: AssignmentStatement
+            hdr.hstructs.s0 = {1};
+                            ^
+  ---- Actual error:
+structure-valued-expr-errs-1.p4(105): Number of fields 1 in initializer tuple<int> is different than number of fields 0 in 'struct s0_t'
+              hdr.hstructs.s0 = {1};
+                                ^^^
+structure-valued-expr-errs-1.p4(40)
+  struct s0_t {
+         ^^^^
+  ---- Originating from:
+structure-valued-expr-errs-1.p4(105): Source expression 'ListExpression' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'struct s0_t'
+              hdr.hstructs.s0 = {1};
+                                ^^^
+structure-valued-expr-errs-1.p4(105)
+              hdr.hstructs.s0 = {1};
+                                ^^^
+structure-valued-expr-errs-1.p4(40)
+  struct s0_t {
+         ^^^^
+structure-valued-expr-errs-1.p4(106): [--Werror=type-error] error: AssignmentStatement
+            hdr.hstructs.s1 = {1, 2};
+                            ^
+  ---- Actual error:
+structure-valued-expr-errs-1.p4(106): Number of fields 2 in initializer tuple<int, int> is different than number of fields 1 in 'struct s1_t'
+              hdr.hstructs.s1 = {1, 2};
+                                ^^^^^^
+structure-valued-expr-errs-1.p4(43)
+  struct s1_t {
+         ^^^^
+  ---- Originating from:
+structure-valued-expr-errs-1.p4(106): Source expression 'ListExpression' produces a result of type 'tuple<int, int>' which cannot be assigned to a left-value with type 'struct s1_t'
+              hdr.hstructs.s1 = {1, 2};
+                                ^^^^^^
+structure-valued-expr-errs-1.p4(106)
+              hdr.hstructs.s1 = {1, 2};
+                                ^^^^^^
+structure-valued-expr-errs-1.p4(43)
+  struct s1_t {
+         ^^^^
+structure-valued-expr-errs-1.p4(107): [--Werror=type-error] error: AssignmentStatement
+            hdr.hstructs.s2 = {3};
+                            ^
+  ---- Actual error:
+structure-valued-expr-errs-1.p4(107): Number of fields 1 in initializer tuple<int> is different than number of fields 2 in 'struct s2_t'
+              hdr.hstructs.s2 = {3};
+                                ^^^
+structure-valued-expr-errs-1.p4(47)
+  struct s2_t {
+         ^^^^
+  ---- Originating from:
+structure-valued-expr-errs-1.p4(107): Source expression 'ListExpression' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'struct s2_t'
+              hdr.hstructs.s2 = {3};
+                                ^^^
+structure-valued-expr-errs-1.p4(107)
+              hdr.hstructs.s2 = {3};
+                                ^^^
+structure-valued-expr-errs-1.p4(47)
+  struct s2_t {
+         ^^^^
+structure-valued-expr-errs-1.p4(112): [--Werror=type-error] error: AssignmentStatement
+            hdr.h1 = {f2=5, f1=2};
+                   ^
+  ---- Actual error:
+structure-valued-expr-errs-1.p4(112): Number of fields 2 in initializer different than number of fields in structure 1: unknown struct to header h1_t
+              hdr.h1 = {f2=5, f1=2};
+                       ^^^^^^^^^^^^
+structure-valued-expr-errs-1.p4(31)
+  header h1_t {
+         ^^^^
+  ---- Originating from:
+structure-valued-expr-errs-1.p4(112): Source expression 'StructExpression' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header h1_t'
+              hdr.h1 = {f2=5, f1=2};
+                       ^^^^^^^^^^^^
+structure-valued-expr-errs-1.p4(112)
+              hdr.h1 = {f2=5, f1=2};
+                       ^^^^^^^^^^^^
+structure-valued-expr-errs-1.p4(31)
+  header h1_t {
+         ^^^^
+structure-valued-expr-errs-1.p4(113): [--Werror=type-error] error: AssignmentStatement
+            hdr.h1 = {f2=5};
+                   ^
+  ---- Actual error:
+structure-valued-expr-errs-1.p4(32): No initializer for field f1
+      bit<8> f1;
+             ^^
+  ---- Originating from:
+structure-valued-expr-errs-1.p4(113): Source expression 'StructExpression' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header h1_t'
+              hdr.h1 = {f2=5};
+                       ^^^^^^
+structure-valued-expr-errs-1.p4(113)
+              hdr.h1 = {f2=5};
+                       ^^^^^^
+structure-valued-expr-errs-1.p4(31)
+  header h1_t {
+         ^^^^
+structure-valued-expr-errs-1.p4(114): [--Werror=type-error] error: AssignmentStatement
+            hdr.hstructs.s1 = {f2=5, f1=2};
+                            ^
+  ---- Actual error:
+structure-valued-expr-errs-1.p4(114): Number of fields 2 in initializer different than number of fields in structure 1: unknown struct to struct s1_t
+              hdr.hstructs.s1 = {f2=5, f1=2};
+                                ^^^^^^^^^^^^
+structure-valued-expr-errs-1.p4(43)
+  struct s1_t {
+         ^^^^
+  ---- Originating from:
+structure-valued-expr-errs-1.p4(114): Source expression 'StructExpression' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct s1_t'
+              hdr.hstructs.s1 = {f2=5, f1=2};
+                                ^^^^^^^^^^^^
+structure-valued-expr-errs-1.p4(114)
+              hdr.hstructs.s1 = {f2=5, f1=2};
+                                ^^^^^^^^^^^^
+structure-valued-expr-errs-1.p4(43)
+  struct s1_t {
+         ^^^^
+structure-valued-expr-errs-1.p4(115): [--Werror=type-error] error: AssignmentStatement
+            hdr.hstructs.s1 = {f2=5};
+                            ^
+  ---- Actual error:
+structure-valued-expr-errs-1.p4(44): No initializer for field f1
+      bit<8> f1;
+             ^^
+  ---- Originating from:
+structure-valued-expr-errs-1.p4(115): Source expression 'StructExpression' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct s1_t'
+              hdr.hstructs.s1 = {f2=5};
+                                ^^^^^^
+structure-valued-expr-errs-1.p4(115)
+              hdr.hstructs.s1 = {f2=5};
+                                ^^^^^^
+structure-valued-expr-errs-1.p4(43)
+  struct s1_t {
+         ^^^^
+structure-valued-expr-errs-1.p4(120): [--Werror=type-error] error: AssignmentStatement
+            hdr.h2 = {f2=5};
+                   ^
+  ---- Actual error:
+structure-valued-expr-errs-1.p4(120): Number of fields 1 in initializer different than number of fields in structure 2: unknown struct to header h2_t
+              hdr.h2 = {f2=5};
+                       ^^^^^^
+structure-valued-expr-errs-1.p4(35)
+  header h2_t {
+         ^^^^
+  ---- Originating from:
+structure-valued-expr-errs-1.p4(120): Source expression 'StructExpression' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header h2_t'
+              hdr.h2 = {f2=5};
+                       ^^^^^^
+structure-valued-expr-errs-1.p4(120)
+              hdr.h2 = {f2=5};
+                       ^^^^^^
+structure-valued-expr-errs-1.p4(35)
+  header h2_t {
+         ^^^^
+structure-valued-expr-errs-1.p4(121): [--Werror=type-error] error: AssignmentStatement
+            hdr.hstructs.s2 = {f2=5};
+                            ^
+  ---- Actual error:
+structure-valued-expr-errs-1.p4(121): Number of fields 1 in initializer different than number of fields in structure 2: unknown struct to struct s2_t
+              hdr.hstructs.s2 = {f2=5};
+                                ^^^^^^
+structure-valued-expr-errs-1.p4(47)
+  struct s2_t {
+         ^^^^
+  ---- Originating from:
+structure-valued-expr-errs-1.p4(121): Source expression 'StructExpression' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct s2_t'
+              hdr.hstructs.s2 = {f2=5};
+                                ^^^^^^
+structure-valued-expr-errs-1.p4(121)
+              hdr.hstructs.s2 = {f2=5};
+                                ^^^^^^
+structure-valued-expr-errs-1.p4(47)
+  struct s2_t {
+         ^^^^
