@@ -314,7 +314,8 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
         auto type = decl->type->to<IR::Type_Specialized>();
         BUG_CHECK(type->arguments->size() == 1, "%1%: expected one type argument", decl);
         auto typeArg = type->arguments->at(0);
-        auto typeSpec = TypeSpecConverter::convert(this->refMap, this->typeMap, typeArg, p4RtTypeInfo);
+        auto typeSpec = TypeSpecConverter::convert(this->refMap, this->typeMap,
+                                                   typeArg, p4RtTypeInfo);
         BUG_CHECK(typeSpec != nullptr,
                   "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
 
@@ -354,17 +355,15 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
     }
 };
 
-class BFRuntimeArchHandlerPSA final : public BFRuntimeArchHandler<Arch::PSA> {
-    public:
-
+class BFRuntimeArchHandlerPSA final :  public BFRuntimeArchHandler<Arch::PSA> {
+ public:
     BFRuntimeArchHandlerPSA(ReferenceMap* refMap, TypeMap* typeMap,
                             const IR::ToplevelBlock* evaluatedProgram)
         : BFRuntimeArchHandler(refMap, typeMap, evaluatedProgram) {}
 };
 
-class BFRuntimeArchHandlerPNA final : public BFRuntimeArchHandler<Arch::PNA> {
-    public:
-
+class BFRuntimeArchHandlerPNA final :  public BFRuntimeArchHandler<Arch::PNA> {
+ public:
     BFRuntimeArchHandlerPNA(ReferenceMap* refMap, TypeMap* typeMap,
                             const IR::ToplevelBlock* evaluatedProgram)
         : BFRuntimeArchHandler(refMap, typeMap, evaluatedProgram) {}
@@ -387,7 +386,8 @@ struct PNAArchHandlerBuilderForDPDK : public P4::ControlPlaneAPI::P4RuntimeArchH
         ReferenceMap* refMap,
         TypeMap* typeMap,
         const IR::ToplevelBlock* evaluatedProgram) const override {
-        return new P4::ControlPlaneAPI::Standard::BFRuntimeArchHandlerPNA(refMap, typeMap, evaluatedProgram);
+        return new P4::ControlPlaneAPI::Standard::BFRuntimeArchHandlerPNA(refMap, typeMap,
+                                                                          evaluatedProgram);
     }
 };
 
