@@ -164,7 +164,6 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/issue986-bmv2.p4
   # These tests use a table key with type 'error'
   testdata/p4_16_samples/issue1062-bmv2.p4
-  testdata/p4_16_samples/issue1062-1-bmv2.p4
   # This test uses an undefined extern
   testdata/p4_16_samples/issue1193-bmv2.p4
   # This test also uses a custom extern
@@ -182,8 +181,6 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/issue1882-bmv2.p4
   testdata/p4_16_samples/issue1882-1-bmv2.p4
   testdata/p4_16_samples/issue2664-bmv2.p4
-  # This one uses arguments of incorrect types to log_msg
-  testdata/p4_16_samples/issue2201-bmv2.p4
 )
 
 set (BMV2_PARSER_INLINE_TESTS "${P4C_SOURCE_DIR}/testdata/p4_16_samples/parser-inline/*.p4")

@@ -61,9 +61,10 @@ class ControlConverter : public Inspector {
             for (auto ke : key->keyElements) {
                 auto expr = ke->expression;
                 auto ket = ctxt->typeMap->getType(expr, true);
-                if (!ket->is<IR::Type_Bits>() && !ket->is<IR::Type_Boolean>())
+                if (!ket->is<IR::Type_Bits>() && !ket->is<IR::Type_Boolean>() &&
+                    !ket->is<IR::Type_Error>())
                     ::error(ErrorType::ERR_UNSUPPORTED, "%1%: unsupporded key type %2%. "
-                            "Supported key types are be bit<> or boolean.", expr, ket);
+                            "Supported key types are be bit<> or boolean, or error.", expr, ket);
 
                 auto match_type = getKeyMatchType(ke);
                 if (match_type == BMV2::MatchImplementation::selectorMatchTypeName)

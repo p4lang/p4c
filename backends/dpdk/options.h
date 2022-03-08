@@ -14,15 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_DPDK_PSA_SWITCH_OPTIONS_H_
-#define BACKENDS_DPDK_PSA_SWITCH_OPTIONS_H_
+#ifndef BACKENDS_DPDK_OPTIONS_H_
+#define BACKENDS_DPDK_OPTIONS_H_
 
 #include "backends/dpdk/midend.h"
 
 namespace DPDK {
 
 class DpdkOptions : public CompilerOptions {
-  public:
+ public:
     cstring bfRtSchema = "";
     // file to output to
     cstring outputFile = nullptr;
@@ -76,6 +76,6 @@ class DpdkOptions : public CompilerOptions {
 
 using DpdkContext = P4CContextWithOptions<DpdkOptions>;
 
-}; // namespace DPDK
+}  // namespace DPDK
 
-#endif /* BACKENDS_DPDK_PSA_SWITCH_OPTIONS_H_ */
+#endif /* BACKENDS_DPDK_OPTIONS_H_ */

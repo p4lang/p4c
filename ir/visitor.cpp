@@ -443,15 +443,6 @@ void Transform::loop_revisit(const IR::CLASS *o) {                              
 IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
 #undef DEFINE_VISIT_FUNCTIONS
 
-class SetupJoinPoints : public Inspector {
-    std::map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> &join_points;
-    bool preorder(const IR::Node *n) override {
-        return ++join_points[n].second == 1; }
- public:
-    explicit SetupJoinPoints(decltype(join_points) &fjp)
-    : join_points(fjp) { visitDagOnce = false; }
-};
-
 void ControlFlowVisitor::init_join_flows(const IR::Node *root) {
     if (!dynamic_cast<Inspector *>(static_cast<Visitor *>(this)))
         BUG("joinFlows only works for Inspector passes currently, not Modifier or Transform");
@@ -460,11 +451,8 @@ void ControlFlowVisitor::init_join_flows(const IR::Node *root) {
     else
         flow_join_points = new std::remove_reference<decltype(*flow_join_points)>::type;
     root->apply(SetupJoinPoints(*flow_join_points));
-    for (auto it = flow_join_points->begin(); it != flow_join_points->end(); ) {
-        if (it->second.second > 1 && !filter_join_point(it->first)) {
-            ++it;
-        } else {
-            it = flow_join_points->erase(it); } }
+    erase_if(*flow_join_points, [this](flow_join_points_t::value_type &el) {
+                return filter_join_point(el.first); });
 }
 
 bool ControlFlowVisitor::join_flows(const IR::Node *n) {
@@ -480,7 +468,7 @@ bool ControlFlowVisitor::join_flows(const IR::Node *n) {
 
         // Decrement the number of upstream edges yet to be traversed.  If none
         // remain, merge and return false to visit this node.
-        if (--status.second <= 0) {
+        if (--status.second < 0) {
             flow_merge(*status.first);
             return false;
         } else if (status.first) {

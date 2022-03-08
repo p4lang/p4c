@@ -332,7 +332,7 @@ class Inspector : public virtual Visitor {
 #undef DECLARE_VISIT_FUNCTIONS
     void revisit_visited();
     bool visit_in_progress(const IR::Node *n) const {
-        if (visited->count(n)) return visited->at(n).done;
+        if (visited->count(n)) return !visited->at(n).done;
         return false; }
 };
 
@@ -373,7 +373,16 @@ class ControlFlowVisitor : public virtual Visitor {
 
  protected:
     ControlFlowVisitor* clone() const override = 0;
-    std::map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> *flow_join_points = 0;
+    typedef std::map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> flow_join_points_t;
+    flow_join_points_t *flow_join_points = 0;
+    class SetupJoinPoints : public Inspector {
+     protected:
+        flow_join_points_t &join_points;
+        void revisit(const IR::Node *n) override { ++join_points[n].second; }
+     public:
+        explicit SetupJoinPoints(flow_join_points_t &fjp) : join_points(fjp) { }
+    };
+
     void init_join_flows(const IR::Node *root) override;
     bool join_flows(const IR::Node *n) override;
 

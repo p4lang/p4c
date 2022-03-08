@@ -60,7 +60,7 @@ bool ConvertToString::preorder(const IR::TypeNameExpression *e) {
 bool ConvertToString::preorder(const IR::MethodCallExpression *e) {
     out << "";
     if (auto path = e->method->to<IR::PathExpression>()) {
-        out << path->path->name.toString();
+        out << path->path->name.name;
     } else {
         ::error("%1% is not a PathExpression", e->toString());
     }
@@ -116,4 +116,4 @@ cstring toStr(const IR::Node *const n) {
         BUG("not implemented type");
     }
 }
-} // namespace DPDK
+}  // namespace DPDK
