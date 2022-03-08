@@ -344,7 +344,7 @@ SymbolicValue* SymbolicHeaderUnion::get(const IR::Node* node, cstring field) con
 
 void SymbolicHeaderUnion::setAllUnknown() {
     SymbolicStruct::setAllUnknown();
-    for (auto f : type->to<IR::Type_StructLike>()->fields) {
+    for (auto f : type->checkedTo<IR::Type_StructLike>()->fields) {
         fieldValue[f->name.name]->to<SymbolicHeader>()->setAllUnknown();
     }
 }
@@ -383,7 +383,7 @@ bool SymbolicHeaderUnion::equals(const SymbolicValue* other) const {
     if (!other->is<SymbolicHeaderUnion>())
         return false;
     auto sh = other->to<SymbolicHeaderUnion>();
-    auto hu = new SymbolicHeaderUnion(type->to<IR::Type_HeaderUnion>());
+    auto hu = new SymbolicHeaderUnion(type->checkedTo<IR::Type_HeaderUnion>());
     auto valid = hu->isValid();
     if (!valid->equals(sh->isValid()))
         return false;
@@ -396,7 +396,7 @@ bool SymbolicHeaderUnion::equals(const SymbolicValue* other) const {
 void SymbolicHeaderUnion::dbprint(std::ostream& out) const {
     out << "{ ";
     out << "valid=>";
-    auto hu = new SymbolicHeaderUnion(type->to<IR::Type_HeaderUnion>());
+    auto hu = new SymbolicHeaderUnion(type->checkedTo<IR::Type_HeaderUnion>());
     auto valid = hu->isValid();
     valid->dbprint(out);
 #if 0
@@ -1133,11 +1133,11 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
         // is a header union.
         const IR::Expression* node = nullptr;
         cstring memberName = nullptr;
-        if (auto member = expression->method->to<IR::Member>()
+        if (auto member = expression->method->checkedTo<IR::Member>()
                                 ->expr->to<IR::Member>()) {
             node = member->expr;
             memberName = member->member.name;
-        } else if (auto expr = expression->method->to<IR::Member>()->expr) {
+        } else if (auto expr = expression->method->checkedTo<IR::Member>()->expr) {
             node = expr;
         }
         CHECK_NULL(node);
