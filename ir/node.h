@@ -59,11 +59,12 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint {
 
     /// A checked version of INode::to. A BUG occurs if the cast fails.
     ///
-    /// A similar effect can be achieved with `&as<T>()`, but this method produces a message that
-    /// is easier to debug.
-    template<typename T> const T *checkedTo() const {
+    /// A similar effect can be achieved with `&as<T>()`, but this method
+    /// produces a message that is easier to debug.
+    template <typename T> const T *checkedTo() const {
         const auto *result = to<T>();
-        BUG_CHECK(result, "Cast failed: %1% is not a %2%. It is a %3% instead.", this, T::static_type_name(), node_type_name());
+        BUG_CHECK(result, "Cast failed: %1% is not a %2%. It is a %3% instead.",
+                  this, T::static_type_name(), node_type_name());
         return result;
     }
 };
