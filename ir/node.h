@@ -63,8 +63,8 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint {
     /// produces a message that is easier to debug.
     template <typename T> const T *checkedTo() const {
         const auto *result = to<T>();
-        BUG_CHECK(result, "Cast failed: %1% is not a %2%. It is a %3% instead.",
-                  this, T::static_type_name(), node_type_name());
+        BUG_CHECK(result, "Cast failed: %1% with type %2% is not a %3%.",
+                  this, node_type_name(), T::static_type_name());
         return result;
     }
 };
