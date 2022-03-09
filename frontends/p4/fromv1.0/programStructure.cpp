@@ -2063,7 +2063,7 @@ ProgramStructure::convert(const IR::Register* reg, cstring newName,
             regElementType = new IR::Type_Name(new IR::Path(str->name));
         // use provided type
     } else if (reg->width > 0) {
-        regElementType = IR::Type_Bits::get(reg->width);
+        regElementType = IR::Type_Bits::get(reg->width, reg->signed_);
     } else if (reg->layout) {
         cstring newName = ::get(registerLayoutType, reg->layout);
         if (newName.isNullOrEmpty())
