@@ -104,7 +104,7 @@ int main(int argc, char *const argv[]) {
                 new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilderForDPDK());
         if (options.arch == "pna")
             p4RuntimeSerializer->registerArch("pna",
-                new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilderForDPDK());
+                new P4::ControlPlaneAPI::Standard::PNAArchHandlerBuilderForDPDK());
         auto p4Runtime = P4::generateP4Runtime(program, options.arch);
         auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info);
         std::ostream* out = openFile(options.bfRtSchema, false);
