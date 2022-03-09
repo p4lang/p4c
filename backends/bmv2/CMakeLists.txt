@@ -184,6 +184,8 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/issue2664-bmv2.p4
   # This one uses arguments of incorrect types to log_msg
   testdata/p4_16_samples/issue2201-bmv2.p4
+  # typedef type as a parameters of a parser
+  testdata/p4_16_samples/strength-simple.p4
 )
 
 set (BMV2_PARSER_INLINE_TESTS "${P4C_SOURCE_DIR}/testdata/p4_16_samples/parser-inline/*.p4")
