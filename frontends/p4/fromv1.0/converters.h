@@ -148,14 +148,14 @@ class PrimitiveConverter {
  * next highest will be run, etc.  The macro invocation is followed by the body of the
  * converter function.
  */
-#define CONVERT_PRIMITIVE(NAME) \
-    class PrimitiveConverter_##NAME : public PrimitiveConverter {               \
+#define CONVERT_PRIMITIVE(NAME, ...) \
+    class PrimitiveConverter_##NAME##_##__VA_ARGS__ : public PrimitiveConverter {               \
         const IR::Statement *convert(ProgramStructure *, const IR::Primitive *) override;       \
-        PrimitiveConverter_##NAME()                                             \
-        : PrimitiveConverter(#NAME, 0) {}                                       \
-        static PrimitiveConverter_##NAME singleton;                             \
-    } PrimitiveConverter_##NAME::singleton;                                     \
-    const IR::Statement *PrimitiveConverter_##NAME::convert(                    \
+        PrimitiveConverter_##NAME##_##__VA_ARGS__()                                             \
+        : PrimitiveConverter(#NAME, __VA_ARGS__ + 0) {}                                       \
+        static PrimitiveConverter_##NAME##_##__VA_ARGS__ singleton;                             \
+    } PrimitiveConverter_##NAME##_##__VA_ARGS__::singleton;                                     \
+    const IR::Statement *PrimitiveConverter_##NAME##_##__VA_ARGS__::convert(                    \
         ProgramStructure *structure, const IR::Primitive *primitive)
 
 ///////////////////////////////////////////////////////////////
@@ -921,6 +921,47 @@ class MoveIntrinsicMetadata : public Transform {
                                     structure->v1model.standardMetadata.name)));
         }
         return member;
+    }
+};
+
+/// This visitor finds all field lists that participate in
+/// recirculation, resubmission, and cloning
+class FindRecirculated : public Inspector {
+    ProgramStructure* structure;
+
+    void add(const IR::Primitive* primitive, unsigned operand) {
+        if (primitive->operands.size() <= operand) {
+            // not enough arguments, do nothing.
+            // resubmit and recirculate have optional arguments
+            return;
+        }
+        auto expression = primitive->operands.at(operand);
+        if (!expression->is<IR::PathExpression>()) {
+            ::error("%1%: expected a field list", expression);
+            return;
+        }
+        auto nr = expression->to<IR::PathExpression>();
+        auto fl = structure->field_lists.get(nr->path->name);
+        if (fl == nullptr) {
+            ::error("%1%: Expected a field list", expression);
+            return;
+        }
+        LOG3("Recirculated " << nr->path->name);
+        structure->allFieldLists.emplace(fl);
+    }
+
+ public:
+    explicit FindRecirculated(ProgramStructure* structure): structure(structure)
+    { CHECK_NULL(structure); setName("FindRecirculated"); }
+
+    void postorder(const IR::Primitive* primitive) override {
+        if (primitive->name == "recirculate") {
+            add(primitive, 0);
+        } else if (primitive->name == "resubmit") {
+            add(primitive, 0);
+        } else if (primitive->name.startsWith("clone") && primitive->operands.size() == 2) {
+            add(primitive, 1);
+        }
     }
 };
 

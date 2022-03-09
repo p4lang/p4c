@@ -30,7 +30,7 @@ jobs:
     - name: Validate
       if: env.BUILD_SUCCESS == 'true'
       run: |
-          docker run -w /gauntlet p4c python3.6 -m pytest test.py -vrf -k "test_p4c" -n $CTEST_PARALLEL_LEVEL --suppress-crashes
+          docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest  -R toz3-validate-p4c --output-on-failure --schedule-random
 
     - name: Build Failed
       if: env.BUILD_SUCCESS == 'false'

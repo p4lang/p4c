@@ -27,6 +27,9 @@ void ConvertStatementToDpdk::process_relation_operation(const IR::Expression* ds
     auto true_label = refmap->newName("label_true");
     auto false_label = refmap->newName("label_false");
     auto end_label = refmap->newName("label_end");
+    cstring label1 = false_label;
+    cstring label2 = true_label;
+    bool condNegated = false;
     if (op->is<IR::Equ>()) {
         add_instr(new IR::DpdkJmpEqualStatement(true_label, op->left, op->right));
     } else if (op->is<IR::Neq>()) {
@@ -38,19 +41,27 @@ void ConvertStatementToDpdk::process_relation_operation(const IR::Expression* ds
     } else if (op->is<IR::Leq>()) {
         /* Dpdk target does not support the condition Leq, so negate the condition and jump
            on false label*/
+        condNegated = true;
         add_instr(new IR::DpdkJmpGreaterStatement(false_label, op->left, op->right));
     } else if (op->is<IR::Geq>()) {
         /* Dpdk target does not support the condition Geq, so negate the condition and jump
            on false label*/
+        condNegated = true;
         add_instr(new IR::DpdkJmpLessStatement(false_label, op->left, op->right));
     } else {
         BUG("%1% not implemented.", op);
     }
-    add_instr(new IR::DpdkLabelStatement(false_label));
-    add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(false)));
+    if (condNegated) {
+        // Since the condition is negated, true and false blocks should also be swapped
+        label1 = true_label;
+        label2 = false_label;
+    }
+
+    add_instr(new IR::DpdkLabelStatement(label1));
+    add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(condNegated)));
     add_instr(new IR::DpdkJmpLabelStatement(end_label));
-    add_instr(new IR::DpdkLabelStatement(true_label));
-    add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(true)));
+    add_instr(new IR::DpdkLabelStatement(label2));
+    add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(!condNegated)));
     add_instr(new IR::DpdkLabelStatement(end_label));
 }
 
@@ -183,6 +194,82 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 }
             } else {
                 BUG("%1% Not implemented", e->originalExternType->name);
+            }
+        } else if (auto e = mi->to<P4::ExternFunction>()) {
+            /* PNA SelectByDirection extern is implemented as
+                SelectByDirection<T>(in PNA_Direction_t direction, in T n2h_value, in T h2n_value) {
+                    if (direction == PNA_Direction_t.NET_TO_HOST) {
+                        return n2h_value;
+                    } else {
+                        return h2n_value;
+                    }
+                }
+                Example:
+                    table ipv4_da_lpm {
+                        key = {
+                            SelectByDirection(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr):
+                                                                          lpm @name ("ipv4_addr");
+                        }
+                        ....
+                }
+
+                In this example, KeySideEffect pass inserts a temporary for holding the result of
+                complex key expression and replaces the key expression with the temporary. An
+                assignment is inserted in the apply block before the table apply to assign the complex
+                expression into this temporary variable. After KeySideEffect pass, SelectByDirection
+                extern invocation is present as RHS of assignment and hence is evaluated here in this
+                visitor.
+
+                After keySideEffect pass:
+                bit <> key_0;
+                ...
+                table ipv4_da_lpm {
+                    key = {
+                        key_0: lpm @name ("ipv4_addr");
+                    }
+                    ....
+                }
+
+                apply {
+                    key_0 =
+                    SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr);
+                    ...
+                    ...
+                }
+
+                This is replaced by an assignment of the resultant value into a temporary based on
+                the direction. Assembly equivalent to the below code is emitted:
+
+                if (istd.direction == PNA_Direction_t.NET_TO_HOST) {
+                    key_0 = hdr.ipv4.srcAddr;
+                } else {
+                    key_0 = hdr.ipv4.dstAddr;
+                }
+
+                The equivalent assembly looks like this:
+                jmpeq LABEL_TRUE_0 m.pna_main_input_metadata_direction 0x0
+                mov m.<controlBlockName>_key_0 h.ipv4.dstAddr
+                jmp LABEL_END_0
+                LABEL_TRUE_0 : mov m.<controlBlockName>_key_0 h.ipv4.srcAddr
+                LABEL_END_0 : ...
+            */
+            if (e->method->name == "SelectByDirection") {
+                auto args = e->expr->arguments;
+                auto dir = args->at(0)->expression;
+                auto firstVal = args->at(1)->expression;
+                auto secondVal = args->at(2)->expression;
+                auto true_label = refmap->newName("label_true");
+                auto end_label = refmap->newName("label_end");
+
+                /* Emit jump to block containing assignment for PNA_Direction_t.NET_TO_HOST */
+                add_instr(new IR::DpdkJmpEqualStatement(true_label, dir, new IR::Constant(0)));
+                add_instr(new IR::DpdkMovStatement(left, secondVal));
+                add_instr(new IR::DpdkJmpLabelStatement(end_label));
+                add_instr(new IR::DpdkLabelStatement(true_label));
+                add_instr(new IR::DpdkMovStatement(left, firstVal));
+                i = new IR::DpdkLabelStatement(end_label);
+            } else {
+                BUG("%1% Not Implemented", e->method->name);
             }
         } else if (auto b = mi->to<P4::BuiltInMethod>()) {
             if (b->name == "isValid") {
@@ -550,7 +637,25 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 } else if (args->size() == 2) {
                     auto header = args->at(0);
                     auto length = args->at(1);
-                    add_instr(new IR::DpdkExtractStatement(header->expression, length->expression));
+                    /**
+                     * Extract instruction of DPDK target expects the second argument
+                     * (size of the varbit field of the header) to be the number of bytes
+                     * to be extracted while in P4 it is the number of bits to be extracted.
+                     * We need to compute the size in bytes.
+                     *
+                     * @warning If the value is not aligned to 8 bits, the remainder after
+                     * division is dropped during runtime (this is a target limitation).
+                     */
+                    IR::ID tmpName(refmap->newName(
+                            length->expression->to<IR::Member>()->member.name + "_extract_tmp"));
+                    BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                    metadataStruct->fields.push_back(
+                            new IR::StructField(tmpName, length->expression->type));
+                    auto tmpMember = new IR::Member(new IR::PathExpression("m"), tmpName);
+                    add_instr(new IR::DpdkMovStatement(tmpMember, length->expression));
+                    add_instr(new IR::DpdkShrStatement(tmpMember, tmpMember,
+                            new IR::PathExpression("0x3")));
+                    add_instr(new IR::DpdkExtractStatement(header->expression, tmpMember));
                 }
             }
         } else if (a->originalExternType->getName().name == "Meter") {
@@ -692,24 +797,35 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
     return false;
 }
 
-// This function assumes EliminateSwitch midend pass is applied and only handles
-// action_run in switch expression.
 bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
+    // Check if switch expression is action_run expression. DPDK has special jump instructions
+    // for jumping on action run event.
     auto tc = P4::TableApplySolver::isActionRun(s->expression, refmap, typemap);
-    BUG_CHECK(tc != nullptr, "%1%: unexpected switch statement expression",
-              s->expression);
+
+    // At this point in compilation, the expression in switch is simplified to the extent
+    // that there is no side effect, so when the case statements are empty, we can safely
+    // return without generating any instructions for the switch block.
+    if (s->cases.empty()) {
+        return false;
+    }
+
     auto size = s->cases.size();
     std::vector <cstring> labels;
     cstring label;
     cstring default_label = "";
     auto end_label = refmap->newName("label_endswitch");
-    // Emit jmp on action run statements and collect labels for each case statement
+
+    // Emit jmp on action run/jmp on matching label statements and collect labels for
+    // each case statement.
     for (unsigned i = 0; i < size - 1; i++) {
         auto caseLabel = s->cases.at(i);
-        auto pe = caseLabel->label->to<IR::PathExpression>();
-        CHECK_NULL(pe);
-        label = refmap->newName("label_action");
-        add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
+        label = refmap->newName("label_switch");
+        if (tc != nullptr) {
+            auto pe = caseLabel->label->checkedTo<IR::PathExpression>();
+            add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
+        } else {
+            add_instr(new IR::DpdkJmpEqualStatement(label, s->expression, caseLabel->label));
+        }
         labels.push_back(label);
     }
 
@@ -718,10 +834,14 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
         add_instr(new IR::DpdkJmpLabelStatement(label));
         default_label = label;
     } else {
-        auto pe = s->cases.at(size-1)->label->to<IR::PathExpression>();
-        CHECK_NULL(pe);
-        label = refmap->newName("label_action");
-        add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
+        label = refmap->newName("label_switch");
+        if (tc != nullptr) {
+            auto pe = s->cases.at(size-1)->label->checkedTo<IR::PathExpression>();
+            add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
+        } else {
+            add_instr(new IR::DpdkJmpEqualStatement(label, s->expression,
+                                                    s->cases.at(size-1)->label));
+        }
         add_instr(new IR::DpdkJmpLabelStatement(end_label));
     }
 
@@ -743,5 +863,6 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
     add_instr(new IR::DpdkLabelStatement(end_label));
     return false;
 }
+
 
 }  // namespace DPDK

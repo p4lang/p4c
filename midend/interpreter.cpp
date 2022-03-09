@@ -859,6 +859,16 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         return;
     }
     if (sv->isUnknown()) {
+        if (auto cast = expression->to<IR::Cast>()) {
+            if (cast->destType->is<IR::Type_Boolean>() && l->is<SymbolicInteger>()) {
+                l = new SymbolicBool(sv->state);
+            } else if (cast->destType->is<IR::Type_Bits>() && l->is<SymbolicBool>()) {
+                l = new SymbolicInteger(sv->state, cast->destType->to<IR::Type_Bits>());
+            } else {
+                BUG_CHECK(!l->is<SymbolicInteger>() || !l->is<SymbolicBool>(),
+                          "%1% unexpected type %2% in cast", cast, cast->destType);
+            }
+        }
         set(expression, l);
         return;
     }
@@ -866,9 +876,11 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
     if (l->is<SymbolicInteger>()) {
         auto li = l->to<SymbolicInteger>();
         clone->expr = li->constant;
+        auto type = typeMap->getType(getOriginal(), true);
+        typeMap->setType(clone, type);  // needed by the constant folding
         DoConstantFolding cf(refMap, typeMap);
         cf.setCalledBy(this);
-        auto result = expression->apply(cf);
+        auto result = clone->apply(cf);
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
         set(expression, new SymbolicInteger(result->to<IR::Constant>()));
         return;
@@ -877,7 +889,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         clone->expr = new IR::BoolLiteral(li->value);
         DoConstantFolding cf(refMap, typeMap);
         cf.setCalledBy(this);
-        auto result = expression->apply(cf);
+        auto result = clone->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
         return;
@@ -954,7 +966,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
         clone->right = r->to<SymbolicInteger>()->constant;
         DoConstantFolding cf(refMap, typeMap);
         cf.setCalledBy(this);
-        auto result = expression->apply(cf);
+        auto result = clone->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
         return;
@@ -964,7 +976,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
         clone->right = new IR::BoolLiteral(r->to<SymbolicBool>()->value);
         DoConstantFolding cf(refMap, typeMap);
         cf.setCalledBy(this);
-        auto result = expression->apply(cf);
+        auto result = clone->apply(cf);
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
         return;
@@ -1199,6 +1211,15 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
                 sh->setValid(true);
                 set(expression, SymbolicVoid::get());
                 return;
+            } else if (em->method->name.name == P4CoreLibrary::instance.packetIn.lookahead.name) {
+                // If lookahead returns a header, it is always valid.
+                auto type = typeMap->getTypeType(mi->actualMethodType->returnType, true);
+                auto res = factory->create(type, false);
+                if (auto sh = res->to<SymbolicHeader>()) {
+                    sh->setValid(true);
+                }
+                set(expression, res);
+                return;
             }
         }
     }
@@ -1229,5 +1250,4 @@ SymbolicValue* ExpressionEvaluator::evaluate(const IR::Expression* expression, b
     auto result = get(expression);
     return result;
 }
-
 }  // namespace P4

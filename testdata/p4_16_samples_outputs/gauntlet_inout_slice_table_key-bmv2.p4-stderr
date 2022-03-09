@@ -1,0 +1,3 @@
+gauntlet_inout_slice_table_key-bmv2.p4(28): [--Wwarn=unused] warning: 'dummy' is unused
+    action simple_action(inout bit<4> dummy) {
+                                      ^^^^^

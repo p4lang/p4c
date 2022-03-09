@@ -6,6 +6,26 @@ struct ethernet_t {
 	bit<16> etherType
 }
 
+struct psa_ingress_output_metadata_t {
+	bit<8> class_of_service
+	bit<8> clone
+	bit<16> clone_session_id
+	bit<8> drop
+	bit<8> resubmit
+	bit<32> multicast_group
+	bit<32> egress_port
+}
+
+struct psa_egress_output_metadata_t {
+	bit<8> clone
+	bit<16> clone_session_id
+	bit<8> drop
+}
+
+struct psa_egress_deparser_input_metadata_t {
+	bit<32> egress_port
+}
+
 struct EMPTY {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
 	bit<32> psa_ingress_parser_input_metadata_packet_path
@@ -36,26 +56,6 @@ struct EMPTY {
 metadata instanceof EMPTY
 
 header ethernet instanceof ethernet_t
-
-struct psa_ingress_output_metadata_t {
-	bit<8> class_of_service
-	bit<8> clone
-	bit<16> clone_session_id
-	bit<8> drop
-	bit<8> resubmit
-	bit<32> multicast_group
-	bit<32> egress_port
-}
-
-struct psa_egress_output_metadata_t {
-	bit<8> clone
-	bit<16> clone_session_id
-	bit<8> drop
-}
-
-struct psa_egress_deparser_input_metadata_t {
-	bit<32> egress_port
-}
 
 action NoAction args none {
 	return

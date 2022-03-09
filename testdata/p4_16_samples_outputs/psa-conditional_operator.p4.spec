@@ -5,6 +5,26 @@ struct ethernet_t {
 	bit<16> etherType
 }
 
+struct psa_ingress_output_metadata_t {
+	bit<8> class_of_service
+	bit<8> clone
+	bit<16> clone_session_id
+	bit<8> drop
+	bit<8> resubmit
+	bit<32> multicast_group
+	bit<32> egress_port
+}
+
+struct psa_egress_output_metadata_t {
+	bit<8> clone
+	bit<16> clone_session_id
+	bit<8> drop
+}
+
+struct psa_egress_deparser_input_metadata_t {
+	bit<32> egress_port
+}
+
 struct user_meta_t {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
 	bit<32> psa_ingress_parser_input_metadata_packet_path
@@ -32,32 +52,12 @@ struct user_meta_t {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 	bit<16> local_metadata_data
+	bit<16> Ingress_tmp
 	bit<16> Ingress_tmp_0
-	bit<16> Ingress_tmp_1
 }
 metadata instanceof user_meta_t
 
 header ethernet instanceof ethernet_t
-
-struct psa_ingress_output_metadata_t {
-	bit<8> class_of_service
-	bit<8> clone
-	bit<16> clone_session_id
-	bit<8> drop
-	bit<8> resubmit
-	bit<32> multicast_group
-	bit<32> egress_port
-}
-
-struct psa_egress_output_metadata_t {
-	bit<8> clone
-	bit<16> clone_session_id
-	bit<8> drop
-}
-
-struct psa_egress_deparser_input_metadata_t {
-	bit<32> egress_port
-}
 
 action NoAction args none {
 	return
@@ -65,10 +65,10 @@ action NoAction args none {
 
 action execute args none {
 	jmpeq LABEL_FALSE_0 m.local_metadata_data 0x0
-	mov m.Ingress_tmp_0 0x0
+	mov m.Ingress_tmp 0x0
 	jmp LABEL_END_0
-	LABEL_FALSE_0 :	mov m.Ingress_tmp_0 0x1
-	LABEL_END_0 :	mov m.local_metadata_data m.Ingress_tmp_0
+	LABEL_FALSE_0 :	mov m.Ingress_tmp 0x1
+	LABEL_END_0 :	mov m.local_metadata_data m.Ingress_tmp
 	add m.local_metadata_data 0x1
 	return
 }
@@ -91,10 +91,10 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	jmpeq LABEL_FALSE m.local_metadata_data 0x0
-	mov m.Ingress_tmp_1 0x2
+	mov m.Ingress_tmp_0 0x2
 	jmp LABEL_END
-	LABEL_FALSE :	mov m.Ingress_tmp_1 0x5
-	LABEL_END :	mov m.local_metadata_data m.Ingress_tmp_1
+	LABEL_FALSE :	mov m.Ingress_tmp_0 0x5
+	LABEL_END :	mov m.local_metadata_data m.Ingress_tmp_0
 	add m.local_metadata_data 0x5
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0

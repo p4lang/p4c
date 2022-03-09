@@ -31,7 +31,7 @@ limitations under the License.
 %define parse.assert true
 
 // Enable verbose error reporting.
-%error-verbose
+%define parse.error verbose
 
 // Declare dependencies.
 %code requires {
@@ -1301,7 +1301,7 @@ entry
     ;
 
 entriesList
-    : entry                          { $$ = new IR::Vector<IR::Entry>(); $$->push_back($1); }
+    : %empty                         { $$ = new IR::Vector<IR::Entry>(); }
     | entriesList entry              { $$ = $1; $$->push_back($2); }
     ;
 

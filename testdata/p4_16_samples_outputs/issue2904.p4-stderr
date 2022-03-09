@@ -1,0 +1,3 @@
+issue2904.p4(34): [--Wwarn=uninitialized_use] warning: y may be uninitialized
+    key = { y : ternary;
+            ^

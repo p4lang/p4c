@@ -133,18 +133,34 @@ class BranchingInstructionGeneration {
     bool generate(const IR::Expression *, cstring, cstring, bool);
 };
 
+class TypeWidthValidator : public Inspector {
+    void postorder(const IR::Type_Varbits *type) override {
+        LOG3("Validating Type_Varbits: " << type);
+        if (type->size % 8 != 0) {
+            ::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1% varbit width (%2%) not aligned to 8 bits",
+                    type->srcInfo, type->size);
+        }
+    }
+};
+
 class ConvertStatementToDpdk : public Inspector {
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;
     const IR::P4Parser *parser = nullptr;
+    IR::Type_Struct *metadataStruct = nullptr;
 
   public:
     ConvertStatementToDpdk(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkProgramStructure *structure)
         : typemap(typemap), refmap(refmap), structure(structure) {}
+    ConvertStatementToDpdk(
+        P4::ReferenceMap *refmap, P4::TypeMap *typemap,
+        DpdkProgramStructure *structure, IR::Type_Struct *metadataStruct)
+        : typemap(typemap), refmap(refmap), structure(structure), metadataStruct(metadataStruct) {}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
         return instructions;
     }
@@ -161,6 +177,7 @@ class ConvertStatementToDpdk : public Inspector {
     void process_relation_operation(const IR::Expression*, const IR::Operation_Relation*);
     cstring append_parser_name(const IR::P4Parser* p, cstring);
     void set_parser(const IR::P4Parser* p) { parser = p; }
+    bool handleConstSwitch(const IR::SwitchStatement* a);
 };
 
 /**

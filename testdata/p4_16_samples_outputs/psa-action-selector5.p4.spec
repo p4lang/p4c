@@ -6,6 +6,26 @@ struct ethernet_t {
 	bit<16> etherType
 }
 
+struct psa_ingress_output_metadata_t {
+	bit<8> class_of_service
+	bit<8> clone
+	bit<16> clone_session_id
+	bit<8> drop
+	bit<8> resubmit
+	bit<32> multicast_group
+	bit<32> egress_port
+}
+
+struct psa_egress_output_metadata_t {
+	bit<8> clone
+	bit<16> clone_session_id
+	bit<8> drop
+}
+
+struct psa_egress_deparser_input_metadata_t {
+	bit<32> egress_port
+}
+
 struct a1_arg_t {
 	bit<48> param
 }
@@ -51,26 +71,6 @@ struct user_meta_t {
 metadata instanceof user_meta_t
 
 header ethernet instanceof ethernet_t
-
-struct psa_ingress_output_metadata_t {
-	bit<8> class_of_service
-	bit<8> clone
-	bit<16> clone_session_id
-	bit<8> drop
-	bit<8> resubmit
-	bit<32> multicast_group
-	bit<32> egress_port
-}
-
-struct psa_egress_output_metadata_t {
-	bit<8> clone
-	bit<16> clone_session_id
-	bit<8> drop
-}
-
-struct psa_egress_deparser_input_metadata_t {
-	bit<32> egress_port
-}
 
 action NoAction args none {
 	return
@@ -152,12 +152,12 @@ apply {
 	extract h.ethernet
 	table tbl
 	table as_sel
-	jmpa LABEL_ACTION a1
-	jmpa LABEL_ACTION_0 a2
+	jmpa LABEL_SWITCH a1
+	jmpa LABEL_SWITCH_0 a2
 	jmp LABEL_ENDSWITCH
-	LABEL_ACTION :	table foo
+	LABEL_SWITCH :	table foo
 	jmp LABEL_ENDSWITCH
-	LABEL_ACTION_0 :	table bar
+	LABEL_SWITCH_0 :	table bar
 	LABEL_ENDSWITCH :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port

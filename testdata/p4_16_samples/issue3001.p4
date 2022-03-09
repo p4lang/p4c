@@ -1,5 +1,5 @@
 /*
-Copyright 2017 VMware, Inc.
+Copyright 2021 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,28 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <core.p4>
-
-struct S {
-    bit<8> f0;
-    bit<8> f1;
+header H {
+    bit<8> x;
 }
 
-parser p() {
-    state start {
-        bit<8> x = 5;
-        S s = { 0, 0 };
+H f() {
+    H h;
+    return h;
+}
 
-        transition select(x, x, {x, x}, x) {
-            (0, 0, {0, 0}, 0): accept;
-            (1, 1, default, 1): accept;
-            (1, 1, {s.f0, s.f1}, 2): accept;
-            default: reject;
-        }
+control c()
+{
+    apply {
+        if (f().isValid()) ;
     }
 }
 
-parser s();
-package top(s _s);
+control C();
+package top(C _c);
 
-top(p()) main;
+top(c()) main;

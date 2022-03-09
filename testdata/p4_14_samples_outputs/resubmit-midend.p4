@@ -8,7 +8,7 @@ struct intrinsic_metadata_t {
 }
 
 struct mymeta_t {
-    @field_list(8w0) 
+    @field_list(8w1) 
     bit<8> f1;
 }
 
@@ -19,7 +19,7 @@ header ethernet_t {
 }
 
 struct metadata {
-    @field_list(8w0) 
+    @field_list(8w1) 
     bit<8> _mymeta_f10;
 }
 
@@ -57,7 +57,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("._resubmit") action _resubmit() {
         meta._mymeta_f10 = 8w1;
-        resubmit_preserving_field_list(8w0);
+        resubmit_preserving_field_list(8w1);
     }
     @name(".t_ingress_1") table t_ingress {
         actions = {
