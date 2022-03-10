@@ -1123,6 +1123,11 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
             return;
         }
         decl = refMap->getDeclaration(headersType->to<IR::Type_Name>()->path);
+        if (auto typeDef = decl->to<IR::Type_Typedef>()) {
+            if (typeDef->type->is<IR::Type_Name>()) {
+                decl = refMap->getDeclaration(typeDef->type->to<IR::Type_Name>()->path);
+            }
+        }
         auto st = decl->to<IR::Type_Struct>();
         if (st == nullptr) {
             ::error(ErrorType::ERR_EXPECTED,
