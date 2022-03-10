@@ -61,6 +61,10 @@ struct a1_arg_t {
 	bit<48> param
 }
 
+struct a2_1_arg_t {
+	bit<16> param
+}
+
 struct a2_arg_t {
 	bit<16> param
 }
@@ -70,37 +74,13 @@ struct a3_arg_t {
 }
 
 struct user_meta_t {
-	bit<32> psa_ingress_parser_input_metadata_ingress_port
-	bit<32> psa_ingress_parser_input_metadata_packet_path
-	bit<32> psa_egress_parser_input_metadata_egress_port
-	bit<32> psa_egress_parser_input_metadata_packet_path
 	bit<32> psa_ingress_input_metadata_ingress_port
-	bit<32> psa_ingress_input_metadata_packet_path
-	bit<64> psa_ingress_input_metadata_ingress_timestamp
-	bit<16> psa_ingress_input_metadata_parser_error
-	bit<8> psa_ingress_output_metadata_class_of_service
-	bit<8> psa_ingress_output_metadata_clone
-	bit<16> psa_ingress_output_metadata_clone_session_id
 	bit<8> psa_ingress_output_metadata_drop
-	bit<8> psa_ingress_output_metadata_resubmit
-	bit<32> psa_ingress_output_metadata_multicast_group
 	bit<32> psa_ingress_output_metadata_egress_port
-	bit<8> psa_egress_input_metadata_class_of_service
-	bit<32> psa_egress_input_metadata_egress_port
-	bit<32> psa_egress_input_metadata_packet_path
-	bit<16> psa_egress_input_metadata_instance
-	bit<64> psa_egress_input_metadata_egress_timestamp
-	bit<16> psa_egress_input_metadata_parser_error
-	bit<32> psa_egress_deparser_input_metadata_egress_port
-	bit<8> psa_egress_output_metadata_clone
-	bit<16> psa_egress_output_metadata_clone_session_id
-	bit<8> psa_egress_output_metadata_drop
 	bit<16> local_metadata_data
 	bit<16> local_metadata_data1
 	bit<48> Ingress_tbl_ethernet_srcAddr
 	bit<48> Ingress_foo_ethernet_dstAddr
-	bit<16> tmpMask
-	bit<8> tmpMask_0
 }
 metadata instanceof user_meta_t
 
@@ -118,6 +98,11 @@ action a1 args instanceof a1_arg_t {
 }
 
 action a2 args instanceof a2_arg_t {
+	mov h.ethernet.etherType t.param
+	return
+}
+
+action a2_1 args instanceof a2_1_arg_t {
 	mov h.ethernet.etherType t.param
 	return
 }
@@ -152,7 +137,7 @@ table foo {
 	actions {
 		NoAction
 		a3
-		a2
+		a2_1
 	}
 	default_action NoAction args none 
 	size 0x10000

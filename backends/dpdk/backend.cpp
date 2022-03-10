@@ -43,7 +43,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     auto program = tlb->getProgram();
 
     std::set<const IR::P4Table*> invokedInKey;
-    auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure);
+    auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure, options);
     auto genContextJson = new DpdkContextGenerator(refMap, typeMap, &structure, options);
 
     PassManager simplify = {
@@ -108,13 +108,15 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     };
     simplify.addDebugHook(hook, true);
     program = program->apply(simplify);
-
+    ordered_set<cstring> used_fields;
     dpdk_program = convertToDpdk->getDpdkProgram();
     if (!dpdk_program)
         return;
     PassManager post_code_gen = {
         new EliminateUnusedAction(),
         new DpdkAsmOptimization,
+        new CollectUsedMetadataField(used_fields),
+        new RemoveUnusedMetadataFields(used_fields),
     };
 
     dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();

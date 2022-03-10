@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKEND_DPDK_OPTIMIZATION_H_
-#define BACKEND_DPDK_OPTIMIZATION_H_
+#ifndef BACKENDS_DPDK_DPDKASMOPT_H_
+#define BACKENDS_DPDK_DPDKASMOPT_H_
 
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
@@ -32,7 +32,7 @@ limitations under the License.
 namespace DPDK {
 // This pass removes label that no jmps jump to
 class RemoveRedundantLabel : public Transform {
-  public:
+ public:
     const IR::IndexedVector<IR::DpdkAsmStatement> *removeRedundantLabel(
                       const IR::IndexedVector<IR::DpdkAsmStatement> &s);
 
@@ -59,7 +59,7 @@ class RemoveRedundantLabel : public Transform {
 // jmp label1 will be removed.
 
 class RemoveConsecutiveJmpAndLabel : public Transform {
-  public:
+ public:
     const IR::IndexedVector<IR::DpdkAsmStatement> *removeJmpAndLabel(
                    const IR::IndexedVector<IR::DpdkAsmStatement> &s);
     const IR::Node *postorder(IR::DpdkListStatement *l) override {
@@ -93,7 +93,7 @@ class RemoveConsecutiveJmpAndLabel : public Transform {
 // jmp label2
 
 class ThreadJumps : public Transform {
-  public:
+ public:
     const IR::IndexedVector<IR::DpdkAsmStatement> *threadJumps(
              const IR::IndexedVector<IR::DpdkAsmStatement> &s);
 
@@ -116,7 +116,7 @@ class ThreadJumps : public Transform {
 // will update any jmp that jump to this label to the label next to it.
 
 class RemoveLabelAfterLabel : public Transform {
-  public:
+ public:
     const IR::IndexedVector<IR::DpdkAsmStatement> *removeLabelAfterLabel(
                   const IR::IndexedVector<IR::DpdkAsmStatement> &s);
 
@@ -135,11 +135,35 @@ class RemoveLabelAfterLabel : public Transform {
     }
 };
 
+
+// This pass Collects all metadata struct member used in program
+class CollectUsedMetadataField : public Inspector {
+    ordered_set<cstring>& used_fields;
+ public:
+    explicit CollectUsedMetadataField(ordered_set<cstring>& used_fields)
+        : used_fields(used_fields) {}
+    bool preorder(const IR::Member *m) override {
+        // metadata struct field used like m.<field_name> in expressions
+        if (m->expr->toString() == "m")
+            used_fields.insert(m->member.toString());
+        return true;
+    }
+};
+
+// This pass removes all unused fields from metadata struct
+class RemoveUnusedMetadataFields : public Transform {
+    ordered_set<cstring>& used_fields;
+ public:
+    explicit RemoveUnusedMetadataFields(ordered_set<cstring>& used_fields)
+        : used_fields(used_fields) {}
+    const IR::Node* preorder(IR::DpdkAsmProgram *p) override;
+};
+
 // Instructions can only appear in actions and apply block of .spec file.
 // All these individual passes work on the actions and apply block of .spec file.
 class DpdkAsmOptimization : public PassRepeated {
-  private:
-  public:
+ private:
+ public:
     DpdkAsmOptimization() {
         passes.push_back(new RemoveRedundantLabel);
         auto r = new PassRepeated{new RemoveLabelAfterLabel};
@@ -151,5 +175,5 @@ class DpdkAsmOptimization : public PassRepeated {
     }
 };
 
-} // namespace DPDK
-#endif
+}  // namespace DPDK
+#endif  /* BACKENDS_DPDK_DPDKASMOPT_H_ */

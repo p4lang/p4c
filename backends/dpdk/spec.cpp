@@ -1,6 +1,5 @@
 #include "dpdkHelpers.h"
 #include "ir/dbprint.h"
-#include <iostream>
 #include "printUtils.h"
 
 using namespace DBPrint;
@@ -52,22 +51,22 @@ std::ostream &IR::DpdkDeclaration::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
-    if ( DPDK::toStr(this->getType()) == "Register") {
+    if (DPDK::toStr(this->getType()) == "Register") {
         auto args = this->arguments;
         if (args->size() == 0) {
-            ::error ("Register extern declaration %1% must contain a size parameter\n", this->Name());
+            ::error("Register extern declaration %1% must contain a size parameter\n",
+                this->Name());
         } else {
             auto size = args->at(0)->expression;
             auto init_val = args->size() == 2? args->at(1)->expression: nullptr;
             auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name(), size, init_val);
             regDecl->toSpec(out) << std::endl;
         }
-    }
-    else if ( DPDK::toStr(this->getType()) == "Counter") {
+    } else if (DPDK::toStr(this->getType()) == "Counter") {
         auto args = this->arguments;
         unsigned value = 0;
         if (args->size() < 2) {
-            ::error ("Counter extern declaration %1% must contain 2 parameters\n", this->Name());
+            ::error("Counter extern declaration %1% must contain 2 parameters\n", this->Name());
         } else {
             auto n_counters = args->at(0)->expression;
             auto counter_type = args->at(1)->expression;
@@ -76,10 +75,10 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
             if (value == 2) {
                 /* For PACKETS_AND_BYTES counter type, two regarray declarations are emitted and
                    the counter name is suffixed with _packets and _bytes */
-                auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name()+"_packets", n_counters,
-                                                                 new IR::Constant(0));
+                auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name() + "_packets",
+                                   n_counters, new IR::Constant(0));
                 regDecl->toSpec(out) << std::endl << std::endl;
-                regDecl = new IR::DpdkRegisterDeclStatement(this->Name()+"_bytes", n_counters,
+                regDecl = new IR::DpdkRegisterDeclStatement(this->Name() + "_bytes", n_counters,
                                                             new IR::Constant(0));
                 regDecl->toSpec(out) << std::endl;
             } else {
@@ -88,12 +87,11 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
                 regDecl->toSpec(out) << std::endl;
             }
         }
-    }
-    else if ( DPDK::toStr(this->getType()) == "Meter") {
+    } else if (DPDK::toStr(this->getType()) == "Meter") {
         auto args = this->arguments;
         if (args->size() < 2) {
-            ::error ("Meter extern declaration %1% must contain a size parameter \
-                      and meter type parameter", this->Name());
+            ::error("Meter extern declaration %1% must contain a size parameter"
+                    " and meter type parameter", this->Name());
         } else {
             auto n_meters = args->at(0)->expression;
             auto metDecl = new IR::DpdkMeterDeclStatement(this->Name(), n_meters);
@@ -298,7 +296,11 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
     }
     out << "\tactions {" << std::endl;
     for (auto action : actions->actionList) {
-        out << "\t\t" << DPDK::toStr(action->expression);
+        if (action->expression->toString() == "NoAction") {
+            out << "\t\tNoAction";
+        } else {
+            out << "\t\t" << DPDK::toStr(action->expression);
+        }
         if (action->annotations->getAnnotation("tableonly"))
             out << " @tableonly";
         if (action->annotations->getAnnotation("defaultonly"))
@@ -307,7 +309,10 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
     }
     out << "\t}" << std::endl;
 
-    out << "\tdefault_action " << DPDK::toStr(default_action);
+    if (default_action->toString() == "NoAction")
+        out << "\tdefault_action NoAction";
+    else
+        out << "\tdefault_action " << DPDK::toStr(default_action);
     if (default_action->to<IR::MethodCallExpression>()->arguments->size() ==
         0) {
         out << " args none ";
@@ -387,7 +392,6 @@ std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
 
     out << "}" << std::endl;
     return out;
-
 }
 
 std::ostream &IR::DpdkAction::toSpec(std::ostream &out) const {

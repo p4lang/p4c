@@ -21,7 +21,7 @@ limitations under the License.
 const unsigned table_handle_prefix = 0x00010000;
 const unsigned action_handle_prefix = 0x00020000;
 
-// Default values 
+// Default values
 const unsigned dpdk_default_table_size = 65536;
 
-#endif
+#endif  /* BACKENDS_DPDK_CONSTANTS_H_ */

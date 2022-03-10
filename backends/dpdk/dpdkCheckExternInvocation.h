@@ -44,15 +44,16 @@ class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
         BLOCK_COUNT,
     };
 
-    virtual void initPipeConstraints() override {
+    void initPipeConstraints() override {
         bitvec validInMainControl;
         validInMainControl.setbit(MAIN_CONTROL);
         setPipeConstraints("send_to_port", validInMainControl);
         // Add new constraints here
     }
 
-    virtual cstring getBlockName(int bit) override {
-        static const char* lookup[] = {"main parser", "pre control", "main control", "main deparser"};
+    cstring getBlockName(int bit) override {
+        static const char* lookup[] = {"main parser", "pre control",
+            "main control", "main deparser"};
         BUG_CHECK(sizeof(lookup)/sizeof(lookup[0]) == BLOCK_COUNT, "Bad lookup table");
         return lookup[bit % BLOCK_COUNT];
     }
@@ -118,13 +119,13 @@ class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
         }
     }
 
-    virtual void checkExtern(const P4::ExternMethod *extMethod,
+    void checkExtern(const P4::ExternMethod *extMethod,
             const IR::MethodCallExpression *expr) override {
         LOG3("ExternMethod: " << extMethod << ", MethodCallExpression: " << expr);
         checkBlock(expr, extMethod->originalExternType->name, extMethod->object->getName().name);
     }
 
-    virtual void checkExtern(const P4::ExternFunction *extFunction,
+    void checkExtern(const P4::ExternFunction *extFunction,
             const IR::MethodCallExpression *expr) override {
         LOG3("ExternFunction: " << extFunction << ", MethodCallExpression: " << expr);
         checkBlock(expr, expr->method->toString(), "");
@@ -146,7 +147,7 @@ class CheckExternInvocation : public Inspector {
     P4::ReferenceMap     *refMap;
     P4::TypeMap          *typeMap;
     DpdkProgramStructure *structure;
-  public:
+ public:
     CheckExternInvocation(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
             DpdkProgramStructure *structure) :
             refMap(refMap), typeMap(typeMap), structure(structure) {}
@@ -166,6 +167,7 @@ class CheckExternInvocation : public Inspector {
     }
 };
 
-} // namespace DPDK
+}  // namespace DPDK
 
 #endif /* BACKENDS_DPDK_DPDKCHECKEXTERNINVOCATION_H_ */
+

@@ -936,6 +936,15 @@ const IR::Node *CollectLocalVariables::postorder(IR::Type_Struct *s) {
                 LOG3("Variable: " << dv << std::endl <<
                      " type: " << type << std::endl <<
                      " already added to: " << structure->header_type);
+            } else if (auto strct = type->to<IR::Type_Struct>()) {
+                for (auto field : strct->fields) {
+                    auto sf = new IR::StructField(IR::ID(kv.second + "_" + field->name),
+                                  field->type);
+                    LOG2("New field: " << sf << std::endl <<
+                         " type: " << field->type << std::endl <<
+                         " added to: " << s->name.name);
+                    s->fields.push_back(sf);
+                }
             } else {
                 auto sf = new IR::StructField(IR::ID(kv.second), dv->type);
                 LOG2("New field: " << sf << std::endl <<
@@ -984,6 +993,18 @@ CollectLocalVariables::postorder(IR::PathExpression *p) {
     return p;
 }
 
+const IR::Node *
+CollectLocalVariables::postorder(IR::Member *mem) {
+    // Ensure that member's expression is a member expression
+    // then convert like (m.field.field_0 to m.field_field_0)
+    auto expr = mem->expr->to<IR::Member>();
+    if (expr && expr->expr->toString() == "m")
+        return new IR::Member(new IR::PathExpression(IR::ID("m")),
+            IR::ID(expr->member.toString() + "_" + mem->member.toString()));
+    else
+        return mem;
+}
+
 const IR::Node *CollectLocalVariables::postorder(IR::P4Control *c) {
     IR::IndexedVector<IR::Declaration> decls;
     for (auto d : c->controlLocals) {
@@ -1017,11 +1038,11 @@ const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Action *a) {
         for (auto p : a->parameters->parameters) {
             l->push_back(p);
         }
-        structure->args_struct_map.emplace(a->name.toString() + "_arg_t", l);
+        structure->args_struct_map.emplace(a->name.name + "_arg_t", l);
         auto new_l = new IR::IndexedVector<IR::Parameter>;
         new_l->push_back(new IR::Parameter(
             IR::ID("t"), IR::Direction::None,
-            new IR::Type_Name(IR::ID(a->name.toString() + "_arg_t"))));
+            new IR::Type_Name(IR::ID(a->name.name + "_arg_t"))));
         a->parameters = new IR::ParameterList(*new_l);
     }
     return a;

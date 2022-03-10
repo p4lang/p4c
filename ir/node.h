@@ -59,11 +59,12 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint {
 
     /// A checked version of INode::to. A BUG occurs if the cast fails.
     ///
-    /// A similar effect can be achieved with `&as<T>()`, but this method produces a message that
-    /// is easier to debug.
-    template<typename T> const T *checkedTo() const {
+    /// A similar effect can be achieved with `&as<T>()`, but this method
+    /// produces a message that is easier to debug.
+    template <typename T> const T *checkedTo() const {
         const auto *result = to<T>();
-        BUG_CHECK(result, "Cast failed: %1% is not a %2%.", this, T::static_type_name());
+        BUG_CHECK(result, "Cast failed: %1% with type %2% is not a %3%.",
+                  this, node_type_name(), T::static_type_name());
         return result;
     }
 };
@@ -73,12 +74,15 @@ class Node : public virtual INode {
     virtual bool apply_visitor_preorder(Modifier &v);
     virtual void apply_visitor_postorder(Modifier &v);
     virtual void apply_visitor_revisit(Modifier &v, const Node *n) const;
+    virtual void apply_visitor_loop_revisit(Modifier &v) const;
     virtual bool apply_visitor_preorder(Inspector &v) const;
     virtual void apply_visitor_postorder(Inspector &v) const;
     virtual void apply_visitor_revisit(Inspector &v) const;
+    virtual void apply_visitor_loop_revisit(Inspector &v) const;
     virtual const Node *apply_visitor_preorder(Transform &v);
     virtual const Node *apply_visitor_postorder(Transform &v);
     virtual void apply_visitor_revisit(Transform &v, const Node *n) const;
+    virtual void apply_visitor_loop_revisit(Transform &v) const;
     Node &operator=(const Node &) = default;
     Node &operator=(Node &&) = default;
 
@@ -168,12 +172,15 @@ inline bool equiv(const INode *a, const INode *b) {
     bool apply_visitor_preorder(Modifier &v) override;                      \
     void apply_visitor_postorder(Modifier &v) override;                     \
     void apply_visitor_revisit(Modifier &v, const Node *n) const override;  \
+    void apply_visitor_loop_revisit(Modifier &v) const override;            \
     bool apply_visitor_preorder(Inspector &v) const override;               \
     void apply_visitor_postorder(Inspector &v) const override;              \
     void apply_visitor_revisit(Inspector &v) const override;                \
+    void apply_visitor_loop_revisit(Inspector &v) const override;           \
     const Node *apply_visitor_preorder(Transform &v) override;              \
     const Node *apply_visitor_postorder(Transform &v) override;             \
     void apply_visitor_revisit(Transform &v, const Node *n) const override; \
+    void apply_visitor_loop_revisit(Transform &v) const override;           \
 
 /* only define 'apply' for a limited number of classes (those we want to call
  * visitors directly on), as defining it and making it virtual would mean that

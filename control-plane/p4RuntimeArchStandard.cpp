@@ -161,19 +161,21 @@ V1ModelArchHandlerBuilder::operator()(
     return new P4RuntimeArchHandlerV1Model(refMap, typeMap, evaluatedProgram);
 }
 
-/// Implements @ref P4RuntimeArchHandlerIface for the PSA architecture. The
+/// Implements  a common @ref P4RuntimeArchHandlerIface for the PSA and PNA architecture. The
 /// overridden methods will be called by the @P4RuntimeSerializer to collect and
-/// serialize PSA-specific symbols which are exposed to the control-plane.
-class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PSA> {
+/// serialize PSA and PNA specific symbols which are exposed to the control-plane.
+template <Arch arch>
+class P4RuntimeArchHandlerPSAPNA : public P4RuntimeArchHandlerCommon<arch> {
  public:
-    P4RuntimeArchHandlerPSA(ReferenceMap* refMap,
+    P4RuntimeArchHandlerPSAPNA(ReferenceMap* refMap,
                             TypeMap* typeMap,
                             const IR::ToplevelBlock* evaluatedProgram)
-        : P4RuntimeArchHandlerCommon<Arch::PSA>(refMap, typeMap, evaluatedProgram) { }
+        : P4RuntimeArchHandlerCommon<arch>(refMap, typeMap, evaluatedProgram) {
+    }
 
     void collectExternInstance(P4RuntimeSymbolTableIface* symbols,
                                const IR::ExternBlock* externBlock) override {
-        P4RuntimeArchHandlerCommon<Arch::PSA>::collectExternInstance(symbols, externBlock);
+        P4RuntimeArchHandlerCommon<arch>::collectExternInstance(symbols, externBlock);
 
         auto decl = externBlock->node->to<IR::IDeclaration>();
         if (decl == nullptr) return;
@@ -186,7 +188,7 @@ class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
                             p4configv1::P4Info* p4info,
                             p4configv1::Table* table,
                             const IR::TableBlock* tableBlock) override {
-        P4RuntimeArchHandlerCommon<Arch::PSA>::addTableProperties(
+        P4RuntimeArchHandlerCommon<arch>::addTableProperties(
             symbols, p4info, table, tableBlock);
 
         auto tableDeclaration = tableBlock->container;
@@ -201,7 +203,7 @@ class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
     void addExternInstance(const P4RuntimeSymbolTableIface& symbols,
                            p4configv1::P4Info* p4info,
                            const IR::ExternBlock* externBlock) override {
-        P4RuntimeArchHandlerCommon<Arch::PSA>::addExternInstance(
+        P4RuntimeArchHandlerCommon<arch>::addExternInstance(
             symbols, p4info, externBlock);
 
         auto decl = externBlock->node->to<IR::Declaration_Instance>();
@@ -209,7 +211,7 @@ class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
         auto p4RtTypeInfo = p4info->mutable_type_info();
         if (externBlock->type->name == "Digest") {
             auto digest = getDigest(decl, p4RtTypeInfo);
-            if (digest) addDigest(symbols, p4info, *digest);
+            if (digest) this->addDigest(symbols, p4info, *digest);
         }
     }
 
@@ -221,7 +223,8 @@ class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
         auto type = decl->type->to<IR::Type_Specialized>();
         BUG_CHECK(type->arguments->size() == 1, "%1%: expected one type argument", decl);
         auto typeArg = type->arguments->at(0);
-        auto typeSpec = TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
+        auto typeSpec = TypeSpecConverter::convert(this->refMap, this->typeMap,
+                                                   typeArg, p4RtTypeInfo);
         BUG_CHECK(typeSpec != nullptr,
                   "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
 
@@ -261,20 +264,28 @@ class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
     }
 };
 
+class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerPSAPNA<Arch::PSA> {
+ public:
+    P4RuntimeArchHandlerPSA(ReferenceMap* refMap,
+                             TypeMap* typeMap,
+                             const IR::ToplevelBlock* evaluatedProgram)
+            : P4RuntimeArchHandlerPSAPNA(refMap, typeMap, evaluatedProgram) {
+     }
+};
+
 P4RuntimeArchHandlerIface*
 PSAArchHandlerBuilder::operator()(
     ReferenceMap* refMap, TypeMap* typeMap, const IR::ToplevelBlock* evaluatedProgram) const {
     return new P4RuntimeArchHandlerPSA(refMap, typeMap, evaluatedProgram);
 }
 
-/// Implements @ref P4RuntimeArchHandlerIface for the PNA architecture.
-/// We re-use PSA to handle externs as most of the PSA externs are available for PNA as well.
-class P4RuntimeArchHandlerPNA final : public P4RuntimeArchHandlerCommon<Arch::PSA> {
+class P4RuntimeArchHandlerPNA final : public P4RuntimeArchHandlerPSAPNA<Arch::PNA> {
  public:
     P4RuntimeArchHandlerPNA(ReferenceMap* refMap,
                              TypeMap* typeMap,
                              const IR::ToplevelBlock* evaluatedProgram)
-            : P4RuntimeArchHandlerCommon<Arch::PSA>(refMap, typeMap, evaluatedProgram) { }
+            : P4RuntimeArchHandlerPSAPNA(refMap, typeMap, evaluatedProgram) {
+     }
 };
 
 P4RuntimeArchHandlerIface*
