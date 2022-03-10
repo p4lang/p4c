@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_DPDK_PROGRAM_H_
-#define BACKENDS_DPDK_PROGRAM_H_
+#ifndef BACKENDS_DPDK_DPDKPROGRAM_H_
+#define BACKENDS_DPDK_DPDKPROGRAM_H_
 
 #include "dpdkArch.h"
 #include "dpdkProgramStructure.h"
@@ -31,6 +31,8 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/gmputil.h"
 #include "lib/json.h"
+#include "options.h"
+
 namespace DPDK {
 
 /* Maximum size in bits for fields in header and metadata structures */
@@ -40,12 +42,13 @@ class ConvertToDpdkProgram : public Transform {
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;
+    DpdkOptions &options;
     const IR::DpdkAsmProgram *dpdk_program;
 
-  public:
+ public:
     ConvertToDpdkProgram(P4::ReferenceMap *refmap, P4::TypeMap *typemap,
-                         DpdkProgramStructure *structure)
-        : typemap(typemap), refmap(refmap), structure(structure) { }
+                         DpdkProgramStructure *structure, DpdkOptions &options)
+        : typemap(typemap), refmap(refmap), structure(structure), options(options) { }
 
     const IR::DpdkAsmProgram *create(IR::P4Program *prog);
     IR::IndexedVector<IR::DpdkAsmStatement> create_pna_preamble();
@@ -65,7 +68,7 @@ class ConvertToDpdkParser : public Inspector {
     DpdkProgramStructure *structure;
     IR::Type_Struct *metadataStruct;
 
-  public:
+ public:
     ConvertToDpdkParser(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkProgramStructure* structure,
@@ -80,7 +83,7 @@ class ConvertToDpdkParser : public Inspector {
     bool preorder(const IR::ParserState *s) override;
     void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
     cstring append_parser_name(const IR::P4Parser* p, cstring);
-    IR::Declaration_Variable *addNewTmpVarToMetadata (cstring name, const IR::Type* type);
+    IR::Declaration_Variable *addNewTmpVarToMetadata(cstring name, const IR::Type* type);
     void handleTupleExpression(const IR::ListExpression *cl, const IR::ListExpression *input,
                                int inputSize, cstring trueLabel, cstring falseLabel);
     void getCondVars(const IR::Expression *sv, const IR::Expression *ce,
@@ -100,7 +103,7 @@ class ConvertToDpdkControl : public Inspector {
     std::set<cstring> unique_actions;
     bool deparser;
 
-  public:
+ public:
     ConvertToDpdkControl(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkProgramStructure *structure,
@@ -134,11 +137,14 @@ class CollectActionUses : public Inspector {
     ordered_set<cstring>& actions;
 
  public:
-    CollectActionUses(ordered_set<cstring>& a) : actions(a) { }
+    explicit CollectActionUses(ordered_set<cstring>& a) : actions(a) { }
     bool preorder(const IR::ActionListElement* ale) {
         if (auto mce = ale->expression->to<IR::MethodCallExpression>()) {
             if (auto path = mce->method->to<IR::PathExpression>()) {
-                actions.insert(path->path->name.toString());
+                if (path->path->name.toString() == "NoAction")
+                    actions.insert("NoAction");
+                else
+                    actions.insert(path->path->name.name);
             }
         }
         return false;
@@ -150,12 +156,12 @@ class ElimUnusedActions : public Transform {
     std::set<cstring> kept_actions;
 
  public:
-    ElimUnusedActions(const ordered_set<cstring>& a) : used_actions(a) {}
+    explicit ElimUnusedActions(const ordered_set<cstring>& a) : used_actions(a) {}
     const IR::Node* postorder(IR::DpdkAction* a) override {
-        if (kept_actions.count(a->name.toString()) != 0)
+        if (kept_actions.count(a->name.name) != 0)
             return nullptr;
-        if (used_actions.find(a->name.toString()) != used_actions.end()) {
-            kept_actions.insert(a->name.toString());
+        if (used_actions.find(a->name.name) != used_actions.end()) {
+            kept_actions.insert(a->name.name);
             return a; }
         return nullptr;
     }
@@ -169,12 +175,12 @@ class EliminateUnusedAction : public PassManager {
 
  public:
     EliminateUnusedAction() {
-        addPasses( {
+        addPasses({
             new CollectActionUses(actions),
             new ElimUnusedActions(actions)
         });
     }
 };
 
-} // namespace DPDK
-#endif
+}  // namespace DPDK
+#endif  /* BACKENDS_DPDK_DPDKPROGRAM_H_ */

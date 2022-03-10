@@ -314,6 +314,17 @@ void EBPFTable::emitKey(CodeBuilder* builder, cstring keyName) {
             codeGen->visit(c->expression);
         }
         builder->endOfStatement(true);
+
+        cstring msgStr, varStr;
+        if (memcpy) {
+            msgStr = Util::printf_format("Control: key %s", c->expression->toString());
+            builder->target->emitTraceMessage(builder, msgStr.c_str());
+        } else {
+            msgStr = Util::printf_format("Control: key %s=0x%%llx", c->expression->toString());
+            varStr = Util::printf_format("(unsigned long long) %s.%s",
+                                         keyName.c_str(), fieldName.c_str());
+            builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, varStr.c_str());
+        }
     }
 }
 
@@ -325,10 +336,31 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName) {
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
+        cstring name = EBPFObject::externalName(action), msgStr, convStr;
         builder->emitIndent();
-        cstring name = EBPFObject::externalName(action);
         builder->appendFormat("case %s: ", name.c_str());
         builder->newline();
+        builder->increaseIndent();
+
+        msgStr = Util::printf_format("Control: executing action %s", name);
+        builder->target->emitTraceMessage(builder, msgStr.c_str());
+        for (auto param : *(action->parameters)) {
+            auto etype = EBPFTypeFactory::instance->create(param->type);
+            int width = dynamic_cast<IHasWidth*>(etype)->widthInBits();
+
+            if (width <= 64) {
+                convStr = Util::printf_format("(unsigned long long) (%s->u.%s.%s)",
+                                              valueName, name, param->toString());
+                msgStr = Util::printf_format("Control: param %s=0x%%llx (%d bits)",
+                                             param->toString(), width);
+                builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, convStr.c_str());
+            } else {
+                msgStr = Util::printf_format("Control: param %s (%d bits)",
+                                             param->toString(), width);
+                builder->target->emitTraceMessage(builder, msgStr.c_str());
+            }
+        }
+
         builder->emitIndent();
 
         ActionTranslationVisitor visitor(valueName, program);
@@ -339,11 +371,18 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName) {
         builder->newline();
         builder->emitIndent();
         builder->appendLine("break;");
+        builder->decreaseIndent();
     }
 
     builder->emitIndent();
-    builder->appendFormat("default: return %s", builder->target->abortReturnCode().c_str());
+    builder->appendLine("default:");
+    builder->increaseIndent();
+    builder->target->emitTraceMessage(builder, "Control: Invalid action type, aborting");
+
+    builder->emitIndent();
+    builder->appendFormat("return %s", builder->target->abortReturnCode().c_str());
     builder->endOfStatement(true);
+    builder->decreaseIndent();
 
     builder->blockEnd(true);
 }

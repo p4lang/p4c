@@ -163,4 +163,35 @@ const IR::IndexedVector<IR::DpdkAsmStatement> *RemoveLabelAfterLabel::removeLabe
     }
     return new_l;
 }
+
+const IR::Node* RemoveUnusedMetadataFields::preorder(IR::DpdkAsmProgram *p) {
+    IR::IndexedVector<IR::DpdkStructType> usedStruct;
+    bool isMetadataStruct = false;
+    for (auto st : p->structType) {
+        if (!isMetadataStruct) {
+            for (auto anno : st->annotations->annotations) {
+                if (anno->name == "__metadata__") {
+                    isMetadataStruct = true;
+                    IR::IndexedVector<IR::StructField> usedMetadataFields;
+                    for (auto field : st->fields) {
+                        if (used_fields.count(field->name.name)) {
+                            usedMetadataFields.push_back(field);
+                        }
+                    }
+                    auto newSt = new IR::DpdkStructType(st->srcInfo, st->name,
+                                                   st->annotations, usedMetadataFields);
+                    usedStruct.push_back(newSt);
+                }
+            }
+            if (!isMetadataStruct) {
+                usedStruct.push_back(st);
+            }
+        } else {
+            usedStruct.push_back(st);
+        }
+    }
+    p->structType = usedStruct;
+    return p;
+}
+
 }  // namespace DPDK

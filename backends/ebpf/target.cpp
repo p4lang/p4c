@@ -20,6 +20,21 @@ limitations under the License.
 namespace EBPF {
 
 
+void Target::emitPreamble(Util::SourceCodeBuilder* builder) const {
+    (void) builder;
+}
+
+void Target::emitTraceMessage(Util::SourceCodeBuilder* builder, const char* format,
+                              int argc, ...) const {
+    (void) builder; (void) format; (void) argc;
+}
+
+void Target::emitTraceMessage(Util::SourceCodeBuilder* builder, const char* format) const {
+    emitTraceMessage(builder, format, 0);
+}
+
+//////////////////////////////////////////////////////////////
+
 void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
     builder->append("#include \"ebpf_kernel.h\"\n");
     builder->newline();
@@ -78,6 +93,52 @@ void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder* builder,
                                    cstring argName) const {
     builder->appendFormat("int %s(SK_BUFF *%s)",
                           functionName.c_str(), argName.c_str());
+}
+
+void KernelSamplesTarget::emitPreamble(Util::SourceCodeBuilder* builder) const {
+    cstring macro;
+    if (emitTraceMessages) {
+        macro = "#define bpf_trace_message(fmt, ...)                                \\\n"
+                "    do {                                                           \\\n"
+                "        char ____fmt[] = fmt;                                      \\\n"
+                "        bpf_trace_printk(____fmt, sizeof(____fmt), ##__VA_ARGS__); \\\n"
+                "    } while(0)";
+    } else {
+        // With disabled tracing also add this (empty) macro
+        // to avoid errors when somewhere it is hardcoded.
+        macro = "#define bpf_trace_message(fmt, ...)";
+    }
+    builder->appendLine(macro);
+    builder->newline();
+}
+
+void KernelSamplesTarget::emitTraceMessage(Util::SourceCodeBuilder* builder, const char* format,
+                                           int argc, ...) const {
+    if (!emitTraceMessages)
+        return;
+
+    cstring msg = format;
+    va_list ap;
+
+    // Older kernels do not append new line when printing message but newer do that,
+    // so ensure that printed message ends with '\n'. Empty lines in logs
+    // will look better than everything in a single line.
+    if (!msg.endsWith("\\n"))
+        msg = msg + "\\n";
+
+    msg = cstring("\"") + msg + "\"";
+    va_start(ap, argc);
+    for (int i = 0; i < argc; ++i) {
+        auto arg = va_arg(ap, const char *);
+        if (!arg)
+            break;
+        msg = msg + ", " + cstring(arg);
+    }
+    va_end(ap);
+
+    builder->emitIndent();
+    builder->appendFormat("bpf_trace_message(%s);", msg);
+    builder->newline();
 }
 
 //////////////////////////////////////////////////////////////

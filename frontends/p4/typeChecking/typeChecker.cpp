@@ -1553,7 +1553,8 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
         t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() ||
         t->is<IR::Type_Varbits>() || t->is<IR::Type_ActionEnum>() ||
         t->is<IR::Type_Tuple>() || t->is<IR::Type_SerEnum>() ||
-        t->is<IR::Type_Var>() || t->is<IR::Type_SpecializedCanonical>(); };
+        t->is<IR::Type_Var>() || t->is<IR::Type_SpecializedCanonical>() ||
+        t->is<IR::Type_MatchKind>(); };
     (void)validateFields(canon, validator);
     return type;
 }
@@ -2658,6 +2659,15 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
             }
         }
     } else if (decl->is<IR::Type_Enum>() || decl->is<IR::Type_SerEnum>()) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
+    // For MatchKind and Errors all ids have a type that has been set
+    // while processing Type_Error or Declaration_Matchkind
+    auto declType = typeMap->getType(decl->getNode());
+    if (decl->is<IR::Declaration_ID>() &&
+        declType &&
+        (declType->is<IR::Type_Error>() || declType->is<IR::Type_MatchKind>())) {
         setCompileTimeConstant(expression);
         setCompileTimeConstant(getOriginal<IR::Expression>());
     }

@@ -29,6 +29,8 @@ class EbpfOptions : public CompilerOptions {
     bool loadIRFromJson = false;
     // Externs generation
     bool emitExterns = false;
+    // tracing eBPF code execution
+    bool emitTraceMessages = false;
     EbpfOptions();
 };
 

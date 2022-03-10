@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_DPDK_PSA_SWITCH_MIDEND_H_
-#define BACKENDS_DPDK_PSA_SWITCH_MIDEND_H_
+#ifndef BACKENDS_DPDK_MIDEND_H_
+#define BACKENDS_DPDK_MIDEND_H_
 
 #include "frontends/common/options.h"
 #include "ir/ir.h"
@@ -24,7 +24,7 @@ limitations under the License.
 namespace DPDK {
 
 class DpdkMidEnd : public PassManager {
-  public:
+ public:
     // These will be accurate when the mid-end completes evaluation
     P4::ReferenceMap    refMap;
     P4::TypeMap         typeMap;
@@ -41,6 +41,6 @@ class DpdkMidEnd : public PassManager {
         return toplevel; }
 };
 
-} // namespace DPDK
+}  // namespace DPDK
 
-#endif /* BACKENDS_DPDK_PSA_SWITCH_MIDEND_H_ */
+#endif /* BACKENDS_DPDK_MIDEND_H_ */

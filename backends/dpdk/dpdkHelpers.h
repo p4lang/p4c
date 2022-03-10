@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_DPDK_HELPER_H_
-#define BACKENDS_DPDK_HELPER_H_
+#ifndef BACKENDS_DPDK_DPDKHELPERS_H_
+#define BACKENDS_DPDK_DPDKHELPERS_H_
 
 #include "dpdkProgramStructure.h"
 #include "frontends/common/constantFolding.h"
@@ -125,7 +125,7 @@ class BranchingInstructionGeneration {
         }
     }
 
-  public:
+ public:
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     BranchingInstructionGeneration(P4::ReferenceMap *refMap,
                                    P4::TypeMap *typeMap)
@@ -152,7 +152,7 @@ class ConvertStatementToDpdk : public Inspector {
     const IR::P4Parser *parser = nullptr;
     IR::Type_Struct *metadataStruct = nullptr;
 
-  public:
+ public:
     ConvertStatementToDpdk(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkProgramStructure *structure)
@@ -197,5 +197,5 @@ class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
     }
 };
 
-} // namespace DPDK
-#endif
+}  // namespace DPDK
+#endif  /* BACKENDS_DPDK_DPDKHELPERS_H_ */

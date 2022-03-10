@@ -1,0 +1,13 @@
+# STF test for /home/vpeschax/networking.switching.barefoot.bf-p4c-tools/res/issue1062-1-bmv2
+# p4testgen seed:  1000
+
+# Traces
+# p: [Parser] p
+# [State] start
+# [Event]: Extract Reject
+# [Event]: Extract Cond: p4t*zombie.const.0.*packetLen_bits >= 48;
+# [Expression]: Invalid emit: h.h.*valid;:  = 0;
+# [Event]: Prepending the emit buffer to the program packet.
+
+packet 0 00000000
+expect 0 00000000$
