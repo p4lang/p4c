@@ -38,8 +38,6 @@ limitations under the License.
 
 #include "midend/eliminateTypedefs.h"
 
-#include "p4/config/dpdk/p4info.pb.h"
-
 using P4::ReferenceMap;
 using P4::TypeMap;
 using P4::ControlPlaneAPI::Helpers::getExternInstanceFromProperty;
@@ -88,8 +86,11 @@ struct ActionSelector {
     }
 };
 
-class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PSA> {
+template <Arch arch>
+class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
+ protected:
     std::unordered_map<const IR::Block *, cstring> blockNamePrefixMap;
+
  public:
     template <typename Func>
     void forAllPipeBlocks(const IR::ToplevelBlock* evaluatedProgram, Func function) {
@@ -110,9 +111,9 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
         }
     }
 
-    using ArchCounterExtern = CounterExtern<Arch::PSA>;
+    using ArchCounterExtern = CounterExtern<arch>;
     using CounterTraits = Helpers::CounterlikeTraits<ArchCounterExtern>;
-    using ArchMeterExtern = MeterExtern<Arch::PSA>;
+    using ArchMeterExtern = MeterExtern<arch>;
     using MeterTraits = Helpers::CounterlikeTraits<ArchMeterExtern>;
 
     using Counter = p4configv1::Counter;
@@ -120,9 +121,9 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
     using CounterSpec = p4configv1::CounterSpec;
     using MeterSpec = p4configv1::MeterSpec;
 
-    BFRuntimeArchHandlerPSA(ReferenceMap* refMap, TypeMap* typeMap,
+    BFRuntimeArchHandler(ReferenceMap* refMap, TypeMap* typeMap,
                             const IR::ToplevelBlock* evaluatedProgram)
-        : P4RuntimeArchHandlerCommon<Arch::PSA>(refMap, typeMap, evaluatedProgram) {
+        : P4RuntimeArchHandlerCommon<arch>(refMap, typeMap, evaluatedProgram) {
         // Create a map of all blocks to their pipe names. This map will
         // be used during collect and post processing to prefix
         // table/extern instances wherever applicable with a fully qualified
@@ -195,8 +196,8 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
         selector.set_num_groups(actionSelector.numGroups);
         p4configv1::ActionProfile profile;
         profile.set_size(actionSelector.size);
-        auto tablesIt = actionProfilesRefs.find(actionSelector.name);
-        if (tablesIt != actionProfilesRefs.end()) {
+        auto tablesIt = this->actionProfilesRefs.find(actionSelector.name);
+        if (tablesIt != this->actionProfilesRefs.end()) {
             for (const auto& table : tablesIt->second) {
                 profile.add_table_ids(symbols.getId(P4RuntimeSymbolType::TABLE(), table));
                 selector.add_table_ids(symbols.getId(P4RuntimeSymbolType::TABLE(), table));
@@ -215,13 +216,13 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
 
     void collectExternInstance(P4RuntimeSymbolTableIface* symbols,
                                const IR::ExternBlock* externBlock) override {
-        P4RuntimeArchHandlerCommon<Arch::PSA>::collectExternInstance(symbols, externBlock);
+        P4RuntimeArchHandlerCommon<arch>::collectExternInstance(symbols, externBlock);
 
         auto decl = externBlock->node->to<IR::IDeclaration>();
         if (decl == nullptr) return;
         if (externBlock->type->name == "Digest") {
             symbols->add(SymbolType::DIGEST(), decl);
-         } else if (externBlock->type->name == ActionSelectorTraits<Arch::PSA>::typeName()) {
+         } else if (externBlock->type->name == ActionSelectorTraits<arch>::typeName()) {
             auto selName = decl->controlPlaneName() + "_sel";
             auto profName = decl->controlPlaneName();
             symbols->add(SymbolTypeDPDK::ACTION_SELECTOR(), selName);
@@ -233,7 +234,7 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
                             p4configv1::P4Info* p4info,
                             p4configv1::Table* table,
                             const IR::TableBlock* tableBlock) override {
-        P4RuntimeArchHandlerCommon<Arch::PSA>::addTableProperties(
+        P4RuntimeArchHandlerCommon<arch>::addTableProperties(
             symbols, p4info, table, tableBlock);
 
         auto tableDeclaration = tableBlock->container;
@@ -254,7 +255,7 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
     void addExternInstance(const P4RuntimeSymbolTableIface& symbols,
                            p4configv1::P4Info* p4info,
                            const IR::ExternBlock* externBlock) override {
-        P4RuntimeArchHandlerCommon<Arch::PSA>::addExternInstance(
+        P4RuntimeArchHandlerCommon<arch>::addExternInstance(
             symbols, p4info, externBlock);
 
         auto decl = externBlock->node->to<IR::Declaration_Instance>();
@@ -267,7 +268,7 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
         auto p4RtTypeInfo = p4info->mutable_type_info();
         if (externBlock->type->name == "Digest") {
             auto digest = getDigest(decl, p4RtTypeInfo);
-            if (digest) addDigest(symbols, p4info, *digest);
+            if (digest) this->addDigest(symbols, p4info, *digest);
         } else if (externBlock->type->name == "ActionSelector") {
             auto actionSelector = getActionSelector(externBlock);
             if (actionSelector) addActionSelector(symbols, p4info, *actionSelector, pipeName);
@@ -313,7 +314,8 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
         auto type = decl->type->to<IR::Type_Specialized>();
         BUG_CHECK(type->arguments->size() == 1, "%1%: expected one type argument", decl);
         auto typeArg = type->arguments->at(0);
-        auto typeSpec = TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
+        auto typeSpec = TypeSpecConverter::convert(this->refMap, this->typeMap,
+                                                   typeArg, p4RtTypeInfo);
         BUG_CHECK(typeSpec != nullptr,
                   "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
 
@@ -353,13 +355,39 @@ class BFRuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
     }
 };
 
+class BFRuntimeArchHandlerPSA final :  public BFRuntimeArchHandler<Arch::PSA> {
+ public:
+    BFRuntimeArchHandlerPSA(ReferenceMap* refMap, TypeMap* typeMap,
+                            const IR::ToplevelBlock* evaluatedProgram)
+        : BFRuntimeArchHandler(refMap, typeMap, evaluatedProgram) {}
+};
+
+class BFRuntimeArchHandlerPNA final :  public BFRuntimeArchHandler<Arch::PNA> {
+ public:
+    BFRuntimeArchHandlerPNA(ReferenceMap* refMap, TypeMap* typeMap,
+                            const IR::ToplevelBlock* evaluatedProgram)
+        : BFRuntimeArchHandler(refMap, typeMap, evaluatedProgram) {}
+};
+
 /// The architecture handler builder implementation for PSA.
 struct PSAArchHandlerBuilderForDPDK : public P4::ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface {
     P4::ControlPlaneAPI::P4RuntimeArchHandlerIface* operator()(
         ReferenceMap* refMap,
         TypeMap* typeMap,
         const IR::ToplevelBlock* evaluatedProgram) const override {
-        return new P4::ControlPlaneAPI::Standard::BFRuntimeArchHandlerPSA(refMap, typeMap, evaluatedProgram);
+        return new P4::ControlPlaneAPI::Standard::BFRuntimeArchHandlerPSA(refMap, typeMap,
+            evaluatedProgram);
+    }
+};
+
+/// The architecture handler builder implementation for PNA.
+struct PNAArchHandlerBuilderForDPDK : public P4::ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface {
+    P4::ControlPlaneAPI::P4RuntimeArchHandlerIface* operator()(
+        ReferenceMap* refMap,
+        TypeMap* typeMap,
+        const IR::ToplevelBlock* evaluatedProgram) const override {
+        return new P4::ControlPlaneAPI::Standard::BFRuntimeArchHandlerPNA(refMap, typeMap,
+                                                                          evaluatedProgram);
     }
 };
 

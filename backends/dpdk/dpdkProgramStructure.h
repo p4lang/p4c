@@ -1,5 +1,5 @@
-#ifndef BACKENDS_DPDK_PROGRAM_STRUCTURE_H_
-#define BACKENDS_DPDK_PROGRAM_STRUCTURE_H_
+#ifndef BACKENDS_DPDK_DPDKPROGRAMSTRUCTURE_H_
+#define BACKENDS_DPDK_DPDKPROGRAMSTRUCTURE_H_
 
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
@@ -96,7 +96,7 @@ class ParseDpdkArchitecture : public Inspector {
     DpdkProgramStructure *structure;
 
  public:
-    ParseDpdkArchitecture(DpdkProgramStructure *structure) :
+    explicit ParseDpdkArchitecture(DpdkProgramStructure *structure) :
         structure(structure) { CHECK_NULL(structure); }
 
     bool preorder(const IR::ToplevelBlock *block) override;
@@ -137,4 +137,4 @@ class InspectDpdkProgram : public Inspector {
     bool isStandardMetadata(cstring);
 };
 
-#endif /* BACKENDS_DPDK_PROGRAM_STRUCTURE_H_ */
+#endif /* BACKENDS_DPDK_DPDKPROGRAMSTRUCTURE_H_ */

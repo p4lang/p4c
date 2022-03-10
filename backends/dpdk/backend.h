@@ -41,7 +41,7 @@ class DpdkBackend {
     const IR::DpdkAsmProgram *dpdk_program = nullptr;
     const IR::ToplevelBlock* toplevel = nullptr;
 
-  public:
+ public:
     void convert(const IR::ToplevelBlock *tlb);
     DpdkBackend(DpdkOptions &options, P4::ReferenceMap *refMap,
                      P4::TypeMap *typeMap,
@@ -50,6 +50,6 @@ class DpdkBackend {
     void codegen(std::ostream &) const;
 };
 
-} // namespace DPDK
+}  // namespace DPDK
 
 #endif /* BACKENDS_DPDK_BACKEND_H_ */
