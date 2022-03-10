@@ -65,3 +65,15 @@ p4c_add_xfail_reason("dpdk"
   "Non Type_Bits type bool for expression"
   testdata/p4_16_samples/pna-dpdk-parser-state-err.p4
   )
+
+p4c_add_xfail_reason("dpdk"
+  "mirror_packet cannot be used in the"
+  testdata/p4_16_samples/pna-example-mirror-packet-ctxt-error.p4
+  testdata/p4_16_samples/pna-example-mirror-packet-ctxt-error1.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Mirror session ID 0 is reserved for use by Architecture"
+  testdata/p4_16_samples/pna-example-mirror-packet-error1.p4
+  )
+

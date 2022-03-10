@@ -20,6 +20,10 @@ void IR::DpdkLearnStatement::dbprint(std::ostream& out) const {
     out << "learn " << action << std::endl;
 }
 
+void IR::DpdkMirrorStatement::dbprint(std::ostream& out) const {
+    out << "mirror " << slotId << " " << sessionId << std::endl;
+}
+
 void IR::DpdkEmitStatement::dbprint(std::ostream& out) const {
     out << "emit " << header << std::endl;
 }

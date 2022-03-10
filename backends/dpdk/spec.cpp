@@ -193,6 +193,11 @@ std::ostream &IR::DpdkApplyStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
+std::ostream &IR::DpdkMirrorStatement::toSpec(std::ostream &out) const {
+    out << "mirror " << DPDK::toStr(slotId) << " " << DPDK::toStr(sessionId);
+    return out;
+}
+
 std::ostream &IR::DpdkLearnStatement::toSpec(std::ostream &out) const {
     out << "learn " << action << " " << DPDK::toStr(argument);
     return out;
