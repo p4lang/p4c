@@ -24,6 +24,7 @@ limitations under the License.
 #include "backends/bmv2/common/annotations.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/cloner.h"
+#include "midend/flattenLogMsg.h"
 #include "simpleSwitch.h"
 #include "backends/bmv2/simple_switch/options.h"
 
@@ -858,7 +859,8 @@ Util::IJson* ExternConverter_log_msg::convertExternFunction(
         auto arr = new Util::JsonArray();
         for (auto v : le->components) {
             auto tf = ctxt->typeMap->getType(v);
-            if (!tf->is<IR::Type_Bits>() && !tf->is<IR::Type_Boolean>()) {
+            if (!tf->is<IR::Type_Bits>() && !tf->is<IR::Type_Boolean>() &&
+                !tf->is<IR::Type_Error>()) {
                 ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                         "%1%: only integral values supported for logged values", mc);
                 return primitive;
@@ -1169,6 +1171,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
                                      new ProcessControls(&structure->pipeline_controls)),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
+        new P4::FlattenLogMsg(refMap, typeMap),
         // Converts the DAG into a TREE (at least for expressions)
         // This is important later for conversion to JSON.
         new P4::ClonePathExpressions(),
