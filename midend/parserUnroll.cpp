@@ -178,13 +178,22 @@ class ParserStateRewriter : public Transform {
     inline size_t getIndex() { return currentIndex; }
 
  protected:
-    const IR::Type* getTypeArray(const IR::Node* element) {
+const IR::Type* getTypeArray(const IR::Node* element) {
         if (element->is<IR::ArrayIndex>()) {
             const IR::Expression* left = element->to<IR::ArrayIndex>()->left;
             if (left->type->is<IR::Type_Stack>())
                 return left->type->to<IR::Type_Stack>()->elementType;
         }
-        return typeMap->getType(element, true);
+        auto* currentType = typeMap->getType(element);
+        if (currentType == nullptr) {
+            if (auto* expr = element->to<IR::Expression>()) {
+                if (!expr->type->is<IR::Type_Unknown>()) {
+                    currentType = expr->type;
+                }
+            }
+            BUG_CHECK(currentType != nullptr, "Can't detect type for %1%", element);
+        }
+        return currentType;
     }
 
     /// Checks if this state was called previously with the same state of header stack indexes.
