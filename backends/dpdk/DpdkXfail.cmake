@@ -77,3 +77,12 @@ p4c_add_xfail_reason("dpdk"
   testdata/p4_16_samples/pna-example-mirror-packet-error1.p4
   )
 
+p4c_add_xfail_reason("dpdk"
+  "argument used for directionless parameter .* must be a compile-time constant"
+  testdata/p4_16_samples/pna-example-mirror-packet-error2.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "No argument supplied for parameter"
+  testdata/p4_16_samples/pna-example-mirror-packet-error3.p4
+  )
