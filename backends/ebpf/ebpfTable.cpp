@@ -206,7 +206,8 @@ void EBPFTable::emitValueActionIDNames(CodeBuilder* builder) {
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
-        // NoAction is from standard library
+        // no need to define a constant for NoAction,
+        // "case 0" will be explicitly generated in the action handling switch
         if (action->name.originalName == P4::P4CoreLibrary::instance.noAction.name) {
             continue;
         }
@@ -435,12 +436,8 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName, cstring acti
         auto action = adecl->getNode()->to<IR::P4Action>();
         cstring name = EBPFObject::externalName(action), msgStr, convStr;
         builder->emitIndent();
-        if (action->name.originalName == P4::P4CoreLibrary::instance.noAction.name) {
-            builder->append("case 0: ");
-        } else {
-            cstring actionName = p4ActionToActionIDName(action);
-            builder->appendFormat("case %s: ", actionName);
-        }
+        cstring actionName = p4ActionToActionIDName(action);
+        builder->appendFormat("case %s: ", actionName);
         builder->newline();
         builder->increaseIndent();
 
@@ -529,12 +526,8 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     builder->appendFormat("struct %s %s = ", valueTypeName.c_str(), value.c_str());
     builder->blockStart();
     builder->emitIndent();
-    if (action->name.originalName == P4::P4CoreLibrary::instance.noAction.name) {
-        builder->append(".action = 0,");
-    } else {
-        cstring actionName = p4ActionToActionIDName(action);
-        builder->appendFormat(".action = %s,", actionName);
-    }
+    cstring actionName = p4ActionToActionIDName(action);
+    builder->appendFormat(".action = %s,", actionName);
     builder->newline();
 
     CodeGenInspector cg(program->refMap, program->typeMap);
@@ -641,6 +634,11 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
 }
 
 cstring EBPFTable::p4ActionToActionIDName(const IR::P4Action * action) const {
+    if (action->name.originalName == P4::P4CoreLibrary::instance.noAction.name) {
+        // NoAction always gets ID=0.
+        return "0";
+    }
+
     cstring actionName = EBPFObject::externalName(action);
     cstring tableInstance = dataMapName;
     return Util::printf_format("%s_ACT_%s", tableInstance.toUpper(), actionName.toUpper());

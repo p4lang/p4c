@@ -464,9 +464,7 @@ bool ControlBodyTranslator::preorder(const IR::SwitchStatement* statement) {
             BUG_CHECK(decl->is<IR::P4Action>(), "%1%: expected an action", pe);
             auto act = decl->to<IR::P4Action>();
             cstring fullActionName = table->p4ActionToActionIDName(act);
-            act->name.originalName == P4::P4CoreLibrary::instance.noAction.name ?
-                builder->append("0") :
-                builder->append(fullActionName);
+            builder->append(fullActionName);
         }
         builder->append(":");
         builder->newline();
