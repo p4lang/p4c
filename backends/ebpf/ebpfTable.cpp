@@ -374,7 +374,12 @@ void EBPFTable::emitKey(CodeBuilder* builder, cstring keyName) {
                 swap = "bpf_htonl";
             } else if (width <= 64) {
                 swap = "bpf_htonll";
-            }  // TODO: handle width > 64 bits
+            } else {
+                // TODO: handle width > 64 bits
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "%1%: fields wider than 64 bits are not supported yet",
+                        fieldName);
+            }
         }
 
         bool isLPMKeyBigEndian = false;
