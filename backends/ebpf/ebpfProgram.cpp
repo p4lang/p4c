@@ -78,7 +78,7 @@ void EBPFProgram::emitC(CodeBuilder* builder, cstring header) {
     builder->append("REGISTER_END()\n");
     builder->newline();
     builder->emitIndent();
-    builder->target->emitCodeSection(builder, functionName);
+    builder->target->emitCodeSection(builder, "prog");
     builder->emitIndent();
     builder->target->emitMain(builder, functionName, model.CPacketName.str());
     builder->blockStart();

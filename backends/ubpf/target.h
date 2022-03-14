@@ -32,6 +32,7 @@ namespace UBPF {
         void emitLicense(Util::SourceCodeBuilder *, cstring) const override {};
         void emitCodeSection(Util::SourceCodeBuilder *, cstring) const override {};
         void emitIncludes(Util::SourceCodeBuilder *builder) const override;
+        void emitResizeBuffer(Util::SourceCodeBuilder* builder, cstring buffer, cstring offsetVar) const override;
         void emitTableLookup(Util::SourceCodeBuilder *builder, cstring tblName,
                              cstring key, cstring value) const override;
         void emitTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName,
@@ -61,6 +62,7 @@ namespace UBPF {
         cstring abortReturnCode() const override { return "1"; }
         cstring forwardReturnCode() const override { return "1"; }
         cstring sysMapPath() const override { return ""; }
+        cstring packetDescriptorType() const override { return "void"; }
     };
 
 }

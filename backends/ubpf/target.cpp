@@ -35,6 +35,12 @@ namespace UBPF {
                               functionName.c_str(), argName.c_str(), standardMetdata.c_str());
     }
 
+    void UbpfTarget::emitResizeBuffer(Util::SourceCodeBuilder *builder,
+                                      cstring buffer, cstring offsetVar) const {
+        builder->appendFormat("ubpf_adjust_head(%s, %s)",
+                              buffer.c_str(), offsetVar.c_str());
+    }
+
     void UbpfTarget::emitTableLookup(Util::SourceCodeBuilder *builder,
                                      cstring tblName,
                                      cstring key,
