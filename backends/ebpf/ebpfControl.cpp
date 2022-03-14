@@ -305,8 +305,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     if (!saveAction.empty()) {
         actionVariableName = saveAction.at(saveAction.size() - 1);
         if (!actionVariableName.isNullOrEmpty()) {
-            builder->appendFormat("enum %s %s;\n",
-                                  table->actionEnumName.c_str(), actionVariableName.c_str());
+            builder->appendFormat("unsigned int %s = 0;\n", actionVariableName.c_str());
             builder->emitIndent();
         }
     }
@@ -334,8 +333,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
         builder->appendLine("/* perform lookup */");
         builder->target->emitTraceMessage(builder, "Control: performing table lookup");
         builder->emitIndent();
-        builder->target->emitTableLookup(builder, table->dataMapName, keyname, valueName);
-        builder->endOfStatement(true);
+        table->emitLookup(builder, keyname, valueName);
     }
 
     builder->emitIndent();
@@ -350,9 +348,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     builder->endOfStatement(true);
 
     builder->emitIndent();
-    builder->target->emitTableLookup(builder, table->defaultActionMapName,
-                                     control->program->zeroKey, valueName);
-    builder->endOfStatement(true);
+    table->emitLookupDefault(builder, control->program->zeroKey, valueName);
     builder->blockEnd(false);
     builder->append(" else ");
     builder->blockStart();
@@ -366,21 +362,21 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     builder->blockStart();
     builder->emitIndent();
     builder->appendLine("/* run action */");
-    table->emitAction(builder, valueName);
-    if (!actionVariableName.isNullOrEmpty()) {
-        builder->emitIndent();
-        builder->appendFormat("%s = %s->action",
-                              actionVariableName.c_str(), valueName.c_str());
-        builder->endOfStatement(true);
-    }
+    table->emitAction(builder, valueName, actionVariableName);
     toDereference.clear();
 
     builder->blockEnd(false);
     builder->appendFormat(" else ");
     builder->blockStart();
-    builder->target->emitTraceMessage(builder, "Control: Entry not found, aborting");
-    builder->emitIndent();
-    builder->appendFormat("return %s", builder->target->abortReturnCode().c_str());
+    if (table->dropOnNoMatchingEntryFound()) {
+        builder->target->emitTraceMessage(builder, "Control: Entry not found, aborting");
+        builder->emitIndent();
+        builder->appendFormat("return %s", builder->target->abortReturnCode().c_str());
+        builder->endOfStatement(true);
+    } else {
+        builder->target->emitTraceMessage(builder,
+                                          "Control: Entry not found, executing implicit NoAction");
+    }
     builder->endOfStatement(true);
     builder->blockEnd(true);
 
@@ -451,6 +447,12 @@ bool ControlBodyTranslator::preorder(const IR::SwitchStatement* statement) {
     builder->append(newName);
     builder->append(") ");
     builder->blockStart();
+
+    BUG_CHECK(mem->expr->type->is<IR::Type_Declaration>(),
+              "%1%: expected table with name", mem->expr);
+    cstring tableName = mem->expr->type->to<IR::Type_Declaration>()->name.name;
+    auto table = control->getTable(tableName);
+
     for (auto c : statement->cases) {
         builder->emitIndent();
         if (c->label->is<IR::DefaultExpression>()) {
@@ -461,8 +463,10 @@ bool ControlBodyTranslator::preorder(const IR::SwitchStatement* statement) {
             auto decl = control->program->refMap->getDeclaration(pe->path, true);
             BUG_CHECK(decl->is<IR::P4Action>(), "%1%: expected an action", pe);
             auto act = decl->to<IR::P4Action>();
-            cstring name = EBPFObject::externalName(act);
-            builder->append(name);
+            cstring fullActionName = table->p4ActionToActionIDName(act);
+            act->name.originalName == P4::P4CoreLibrary::instance.noAction.name ?
+                builder->append("0") :
+                builder->append(fullActionName);
         }
         builder->append(":");
         builder->newline();

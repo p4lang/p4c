@@ -22,45 +22,38 @@ limitations under the License.
 
 namespace EBPF {
 
-namespace {
-class ActionTranslationVisitor : public CodeGenInspector {
- protected:
-    const EBPFProgram*  program;
-    const IR::P4Action* action;
-    cstring             valueName;
-
- public:
-    ActionTranslationVisitor(cstring valueName, const EBPFProgram* program):
-            CodeGenInspector(program->refMap, program->typeMap), program(program),
-            action(nullptr), valueName(valueName)
-    { CHECK_NULL(program); }
-
-    bool preorder(const IR::PathExpression* expression) {
-        auto decl = program->refMap->getDeclaration(expression->path, true);
-        if (decl->is<IR::Parameter>()) {
-            auto param = decl->to<IR::Parameter>();
-            bool isParam = action->parameters->getParameter(param->name) == param;
-            if (isParam) {
-                builder->append(valueName);
-                builder->append("->u.");
-                cstring name = EBPFObject::externalName(action);
-                builder->append(name);
-                builder->append(".");
-                builder->append(expression->path->toString());  // original name
-                return false;
-            }
-        }
-        visit(expression->path);
+bool ActionTranslationVisitor::preorder(const IR::PathExpression* expression) {
+    if (isActionParameter(expression)) {
+        cstring paramStr = getActionParamStr(expression);
+        builder->append(paramStr.c_str());
         return false;
     }
+    visit(expression->path);
+    return false;
+}
 
-    bool preorder(const IR::P4Action* act) {
-        action = act;
-        visit(action->body);
-        return false;
+bool ActionTranslationVisitor::isActionParameter(const IR::PathExpression *expression) const {
+    auto decl = program->refMap->getDeclaration(expression->path, true);
+    if (decl->is<IR::Parameter>()) {
+        auto param = decl->to<IR::Parameter>();
+        return action->parameters->getParameter(param->name) == param;
     }
-};  // ActionTranslationVisitor
-}  // namespace
+    return false;
+}
+
+cstring ActionTranslationVisitor::getActionParamStr(const IR::Expression *expression) const {
+    cstring actionName = EBPFObject::externalName(action);
+    auto paramStr = Util::printf_format("%s->u.%s.%s",
+                                        valueName, actionName,
+                                        expression->toString());
+    return paramStr;
+}
+
+bool ActionTranslationVisitor::preorder(const IR::P4Action* act) {
+    action = act;
+    visit(action->body);
+    return false;
+}
 
 ////////////////////////////////////////////////////////////////
 
@@ -68,13 +61,58 @@ EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table,
                      CodeGenInspector* codeGen) :
         EBPFTableBase(program, EBPFObject::externalName(table->container), codeGen), table(table) {
     cstring base = instanceName + "_defaultAction";
-    defaultActionMapName = program->refMap->newName(base);
+    defaultActionMapName = base;
 
     base = table->container->name.name + "_actions";
     actionEnumName = program->refMap->newName(base);
 
     keyGenerator = table->container->getKey();
     actionList = table->container->getActionList();
+
+    initKey();
+}
+
+void EBPFTable::initKey() {
+    if (keyGenerator != nullptr) {
+        unsigned fieldNumber = 0;
+        for (auto c : keyGenerator->keyElements) {
+            auto type = program->typeMap->getType(c->expression);
+            auto ebpfType = EBPFTypeFactory::instance->create(type);
+            if (!ebpfType->is<IHasWidth>()) {
+                ::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: illegal type %2% for key field", c, type);
+                return;
+            }
+
+            cstring fieldName = cstring("field") + Util::toString(fieldNumber);
+            keyTypes.emplace(c, ebpfType);
+            keyFieldNames.emplace(c, fieldName);
+            fieldNumber++;
+        }
+    }
+}
+
+// Performs the following validations:
+// 1. Validates if LPM key is the last one from match keys (ignores selector fields).
+void EBPFTable::validateKeys() const {
+    if (keyGenerator == nullptr)
+        return;
+
+    auto lastKey = std::find_if(
+            keyGenerator->keyElements.rbegin(), keyGenerator->keyElements.rend(),
+            [](const IR::KeyElement * key)
+                { return key->matchType->path->name.name != "selector"; });
+
+    for (auto it : keyGenerator->keyElements) {
+        auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
+        auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
+        if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
+            if (it != *lastKey) {
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "%1% field key must be at the end of whole key", it->matchType);
+            }
+        }
+    }
 }
 
 void EBPFTable::emitKeyType(CodeBuilder* builder) {
@@ -86,48 +124,45 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
     commentGen.setBuilder(builder);
 
     if (keyGenerator != nullptr) {
-        // Use this to order elements by size
-        std::multimap<size_t, const IR::KeyElement*> ordered;
-        unsigned fieldNumber = 0;
-        for (auto c : keyGenerator->keyElements) {
-            auto type = program->typeMap->getType(c->expression);
-            auto ebpfType = EBPFTypeFactory::instance->create(type);
-            cstring fieldName = cstring("field") + Util::toString(fieldNumber);
-            if (!ebpfType->is<IHasWidth>()) {
-                ::error(ErrorType::ERR_TYPE_ERROR,
-                        "%1%: illegal type %2% for key field", c, type);
-                return;
-            }
-            unsigned width = ebpfType->to<IHasWidth>()->widthInBits();
-            ordered.emplace(width, c);
-            keyTypes.emplace(c, ebpfType);
-            keyFieldNames.emplace(c, fieldName);
-            fieldNumber++;
+        if (isLPMTable()) {
+            // For LPM kind key we need an additional 32 bit field - prefixlen
+            auto prefixType = EBPFTypeFactory::instance->create(IR::Type_Bits::get(32));
+            builder->emitIndent();
+            prefixType->declare(builder, prefixFieldName, false);
+            builder->endOfStatement(true);
         }
 
-        // Emit key in decreasing order size - this way there will be no gaps
-        for (auto it = ordered.rbegin(); it != ordered.rend(); ++it) {
-            auto c = it->second;
+        for (auto c : keyGenerator->keyElements) {
+            auto mtdecl = program->refMap->getDeclaration(c->matchType->path, true);
+            auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
 
             auto ebpfType = ::get(keyTypes, c);
-            builder->emitIndent();
             cstring fieldName = ::get(keyFieldNames, c);
+
+            if (!isMatchTypeSupported(matchType)) {
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "Match of type %1% not supported", c->matchType);
+            }
+
+            builder->emitIndent();
             ebpfType->declare(builder, fieldName, false);
             builder->append("; /* ");
             c->expression->apply(commentGen);
             builder->append(" */");
             builder->newline();
-
-            auto mtdecl = program->refMap->getDeclaration(c->matchType->path, true);
-            auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-            if (matchType->name.name != P4::P4CoreLibrary::instance.exactMatch.name &&
-                matchType->name.name != P4::P4CoreLibrary::instance.lpmMatch.name)
-                ::error(ErrorType::ERR_UNSUPPORTED,
-                        "Match of type %1% not supported", c->matchType);
         }
     }
 
+    // Add dummy key if P4 table define table with empty key. This due to that hash map
+    // cannot have zero-length key. See function htab_map_alloc_check in kernel/bpf/hashtab.c
+    // located in Linux kernel repository
+    if (keyFieldNames.empty()) {
+        builder->emitIndent();
+        builder->appendLine("u8 __dummy_table_key;");
+    }
+
     builder->blockEnd(false);
+    builder->append(" __attribute__((aligned(4)))");
     builder->endOfStatement(true);
 }
 
@@ -151,42 +186,59 @@ void EBPFTable::emitActionArguments(CodeBuilder* builder,
 }
 
 void EBPFTable::emitValueType(CodeBuilder* builder) {
-    // create an enum with tags for all actions
-    builder->emitIndent();
-    builder->append("enum ");
-    builder->append(actionEnumName);
-    builder->spc();
-    builder->blockStart();
-
-    for (auto a : actionList->actionList) {
-        auto adecl = program->refMap->getDeclaration(a->getPath(), true);
-        auto action = adecl->getNode()->to<IR::P4Action>();
-        cstring name = EBPFObject::externalName(action);
-        builder->emitIndent();
-        builder->append(name);
-        builder->append(",");
-        builder->newline();
-    }
-
-    builder->blockEnd(false);
-    builder->endOfStatement(true);
+    emitValueActionIDNames(builder);
 
     // a type-safe union: a struct with a tag and an union
     builder->emitIndent();
     builder->appendFormat("struct %s ", valueTypeName.c_str());
     builder->blockStart();
 
+    emitValueStructStructure(builder);
+
+    builder->blockEnd(false);
+    builder->endOfStatement(true);
+}
+
+void EBPFTable::emitValueActionIDNames(CodeBuilder* builder) {
+    // create type definition for action
     builder->emitIndent();
-    builder->appendFormat("enum %s action;", actionEnumName.c_str());
+    unsigned int action_idx = 1;  // 0 is reserved for NoAction
+    for (auto a : actionList->actionList) {
+        auto adecl = program->refMap->getDeclaration(a->getPath(), true);
+        auto action = adecl->getNode()->to<IR::P4Action>();
+        // NoAction is from standard library
+        if (action->name.originalName == P4::P4CoreLibrary::instance.noAction.name) {
+            continue;
+        }
+        builder->emitIndent();
+        builder->appendFormat("#define %s %d", p4ActionToActionIDName(action), action_idx);
+        builder->newline();
+        action_idx++;
+    }
+    builder->emitIndent();
+}
+
+void EBPFTable::emitValueStructStructure(CodeBuilder* builder) {
+    builder->emitIndent();
+    builder->append("unsigned int action;");
     builder->newline();
 
     builder->emitIndent();
     builder->append("union ");
     builder->blockStart();
 
+    // Declare NoAction data structure at the beginning as it has reserved id 0
+    builder->emitIndent();
+    builder->appendLine("struct {");
+    builder->emitIndent();
+    builder->append("} _NoAction");
+    builder->endOfStatement(true);
+
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
+        if (action->name.originalName == P4::P4CoreLibrary::instance.noAction.name)
+            continue;
         cstring name = EBPFObject::externalName(action);
         emitActionArguments(builder, action, name);
     }
@@ -194,11 +246,10 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
     builder->blockEnd(false);
     builder->spc();
     builder->appendLine("u;");
-    builder->blockEnd(false);
-    builder->endOfStatement(true);
 }
 
 void EBPFTable::emitTypes(CodeBuilder* builder) {
+    validateKeys();
     emitKeyType(builder);
     emitValueType(builder);
 }
@@ -289,29 +340,75 @@ void EBPFTable::emitInstance(CodeBuilder* builder) {
 }
 
 void EBPFTable::emitKey(CodeBuilder* builder, cstring keyName) {
-    if (keyGenerator == nullptr)
+    if (keyGenerator == nullptr) {
         return;
+    }
+
+    if (isLPMTable()) {
+        builder->emitIndent();
+        builder->appendFormat("%s.%s = sizeof(%s)*8 - %d",
+                              keyName.c_str(), prefixFieldName,
+                              keyName, prefixLenFieldWidth);
+        builder->endOfStatement(true);
+    }
+
     for (auto c : keyGenerator->keyElements) {
         auto ebpfType = ::get(keyTypes, c);
         cstring fieldName = ::get(keyFieldNames, c);
-        CHECK_NULL(fieldName);
+        if (fieldName == nullptr || ebpfType == nullptr)
+            continue;
         bool memcpy = false;
         EBPFScalarType* scalar = nullptr;
-        unsigned width = 0;
+        cstring swap;
         if (ebpfType->is<EBPFScalarType>()) {
             scalar = ebpfType->to<EBPFScalarType>();
-            width = scalar->implementationWidthInBits();
+            unsigned width = scalar->implementationWidthInBits();
             memcpy = !EBPFScalarType::generatesScalar(width);
+
+            if (width <= 8) {
+                swap = "";  // single byte, nothing to swap
+            } else if (width <= 16) {
+                swap = "bpf_htons";
+            } else if (width <= 32) {
+                swap = "bpf_htonl";
+            } else if (width <= 64) {
+                swap = "bpf_htonll";
+            }  // TODO: handle width > 64 bits
+        }
+
+        bool isLPMKeyBigEndian = false;
+        if (isLPMTable()) {
+            if (c->matchType->path->name.name == P4::P4CoreLibrary::instance.lpmMatch.name)
+                isLPMKeyBigEndian = true;
         }
 
         builder->emitIndent();
         if (memcpy) {
-            builder->appendFormat("memcpy(&%s.%s, &", keyName.c_str(), fieldName.c_str());
-            codeGen->visit(c->expression);
-            builder->appendFormat(", %d)", scalar->bytesRequired());
+            if (isLPMKeyBigEndian) {
+                // FIXME: will not work on big endian machines because byte swap
+                //  is done always. Also test this solution because fields larger
+                //  than 64 bit are not deparsed correctly
+                const unsigned bytesToCopy = scalar->bytesRequired();
+                for (unsigned byte = 0; byte < bytesToCopy; ++byte) {
+                    builder->appendFormat("%s.%s[%u] = (",
+                                          keyName.c_str(), fieldName.c_str(), byte);
+                    codeGen->visit(c->expression);
+                    builder->appendFormat(")[%u]", bytesToCopy - byte - 1);
+                    builder->endOfStatement(true);
+                    builder->emitIndent();
+                }
+            } else {
+                builder->appendFormat("memcpy(&%s.%s, &", keyName.c_str(), fieldName.c_str());
+                codeGen->visit(c->expression);
+                builder->appendFormat(", %d)", scalar->bytesRequired());
+            }
         } else {
             builder->appendFormat("%s.%s = ", keyName.c_str(), fieldName.c_str());
+            if (isLPMKeyBigEndian)
+                builder->appendFormat("%s(", swap.c_str());
             codeGen->visit(c->expression);
+            if (isLPMKeyBigEndian)
+                builder->append(")");
         }
         builder->endOfStatement(true);
 
@@ -328,7 +425,7 @@ void EBPFTable::emitKey(CodeBuilder* builder, cstring keyName) {
     }
 }
 
-void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName) {
+void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName, cstring actionRunVariable) {
     builder->emitIndent();
     builder->appendFormat("switch (%s->action) ", valueName.c_str());
     builder->blockStart();
@@ -338,7 +435,12 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName) {
         auto action = adecl->getNode()->to<IR::P4Action>();
         cstring name = EBPFObject::externalName(action), msgStr, convStr;
         builder->emitIndent();
-        builder->appendFormat("case %s: ", name.c_str());
+        if (action->name.originalName == P4::P4CoreLibrary::instance.noAction.name) {
+            builder->append("case 0: ");
+        } else {
+            cstring actionName = p4ActionToActionIDName(action);
+            builder->appendFormat("case %s: ", actionName);
+        }
         builder->newline();
         builder->increaseIndent();
 
@@ -346,7 +448,7 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName) {
         builder->target->emitTraceMessage(builder, msgStr.c_str());
         for (auto param : *(action->parameters)) {
             auto etype = EBPFTypeFactory::instance->create(param->type);
-            int width = dynamic_cast<IHasWidth*>(etype)->widthInBits();
+            unsigned width = dynamic_cast<IHasWidth*>(etype)->widthInBits();
 
             if (width <= 64) {
                 convStr = Util::printf_format("(unsigned long long) (%s->u.%s.%s)",
@@ -363,11 +465,11 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName) {
 
         builder->emitIndent();
 
-        ActionTranslationVisitor visitor(valueName, program);
-        visitor.setBuilder(builder);
-        visitor.copySubstitutions(codeGen);
+        auto visitor = createActionTranslationVisitor(valueName, program);
+        visitor->setBuilder(builder);
+        visitor->copySubstitutions(codeGen);
 
-        action->apply(visitor);
+        action->apply(*visitor);
         builder->newline();
         builder->emitIndent();
         builder->appendLine("break;");
@@ -385,6 +487,13 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName) {
     builder->decreaseIndent();
 
     builder->blockEnd(true);
+
+    if (!actionRunVariable.isNullOrEmpty()) {
+        builder->emitIndent();
+        builder->appendFormat("%s = %s->action",
+                              actionRunVariable.c_str(), valueName.c_str());
+        builder->endOfStatement(true);
+    }
 }
 
 void EBPFTable::emitInitializer(CodeBuilder* builder) {
@@ -420,7 +529,12 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     builder->appendFormat("struct %s %s = ", valueTypeName.c_str(), value.c_str());
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat(".action = %s,", name.c_str());
+    if (action->name.originalName == P4::P4CoreLibrary::instance.noAction.name) {
+        builder->append(".action = 0,");
+    } else {
+        cstring actionName = p4ActionToActionIDName(action);
+        builder->appendFormat(".action = %s,", actionName);
+    }
     builder->newline();
 
     CodeGenInspector cg(program->refMap, program->typeMap);
@@ -492,7 +606,8 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
                               valueTypeName.c_str(), value.c_str());
         builder->blockStart();
         builder->emitIndent();
-        builder->appendFormat(".action = %s,", name.c_str());
+        cstring actionName = p4ActionToActionIDName(action);
+        builder->appendFormat(".action = %s,", actionName);
         builder->newline();
 
         CodeGenInspector cg(program->refMap, program->typeMap);
@@ -523,6 +638,33 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
         builder->blockEnd(true);
     }
     builder->blockEnd(true);
+}
+
+cstring EBPFTable::p4ActionToActionIDName(const IR::P4Action * action) const {
+    cstring actionName = EBPFObject::externalName(action);
+    cstring tableInstance = dataMapName;
+    return Util::printf_format("%s_ACT_%s", tableInstance.toUpper(), actionName.toUpper());
+}
+
+// As ternary has precedence over lpm, this function checks if any
+// field is key field is lpm and none of key fields is of type ternary.
+bool EBPFTable::isLPMTable() {
+    bool isLPM = false;
+    if (keyGenerator != nullptr) {
+        // If any key field is LPM we will generate an LPM table
+        for (auto it : keyGenerator->keyElements) {
+            auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
+            auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
+            if (matchType->name.name == P4::P4CoreLibrary::instance.ternaryMatch.name) {
+                // if there is a ternary field, we are sure, it is not a LPM table.
+                return false;
+            } else if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
+                isLPM = true;
+            }
+        }
+    }
+
+    return isLPM;
 }
 
 ////////////////////////////////////////////////////////////////
