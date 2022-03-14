@@ -63,5 +63,4 @@ p4c_add_xfail_reason("dpdk"
 
 p4c_add_xfail_reason("dpdk"
   "Non Type_Bits type bool for expression"
-  testdata/p4_16_samples/pna-dpdk-parser-state-err.p4
   )
