@@ -18,6 +18,7 @@ limitations under the License.
 #define _BACKENDS_EBPF_TARGET_H_
 
 #include "lib/cstring.h"
+#include "lib/error.h"
 #include "lib/sourceCodeBuilder.h"
 #include "lib/exceptions.h"
 
@@ -68,6 +69,9 @@ class Target {
         (void) keyType;
         (void) valueType;
         (void) size;
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "emitTableDeclSpinlock is not supported on %1% target",
+                name);
     }
     // map-in-map requires declaration of both inner and outer map,
     // thus we define them together in a single method.
@@ -86,6 +90,9 @@ class Target {
         (void) outerTableKind;
         (void) outerKeyType;
         (void) outerSize;
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "emitMapInMapDecl is not supported on %1% target",
+                name);
     }
     virtual void emitMain(Util::SourceCodeBuilder* builder,
                           cstring functionName,
