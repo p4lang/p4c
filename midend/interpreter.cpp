@@ -328,16 +328,17 @@ SymbolicBool* SymbolicHeaderUnion::isValid() const {
     for (auto f : type->to<IR::Type_StructLike>()->fields) {
          auto fieldsClone = fieldValue;
          if (fieldsClone[f->name.name]) {
-             if (fieldsClone[f->name.name]->to<SymbolicHeader>()->valid->value)
-                return new SymbolicBool(true);
+             if (auto fildValid = fieldsClone[f->name.name]->to<SymbolicHeader>()->valid) {
+                 if (fildValid->isKnown())
+                     return new SymbolicBool(fildValid->value);
+             }
          }
     }
     return new SymbolicBool(false);
 }
 
 SymbolicValue* SymbolicHeaderUnion::get(const IR::Node* node, cstring field) const {
-    auto hu = new SymbolicHeaderUnion(type->to<IR::Type_HeaderUnion>());
-    if (hu->isValid()->isKnown()  && !hu->isValid()->value)
+    if (this->isValid()->isKnown()  && !this->isValid()->value)
         return new SymbolicStaticError(node,"Reading field from invalid header union");
     return SymbolicStruct::get(node, field);
 }
@@ -362,8 +363,7 @@ void SymbolicHeaderUnion::assign(const SymbolicValue* other) {
     BUG_CHECK(hv, "%1%: expected a header union", other);
     for (auto f : hv->fieldValue)
         fieldValue[f.first]->assign(f.second);
-    auto hu = new SymbolicHeaderUnion(type->to<IR::Type_HeaderUnion>());
-    auto valid = hu->isValid();
+    auto valid = this->isValid();
     valid->assign(hv->isValid());
 }
 
@@ -373,8 +373,7 @@ bool SymbolicHeaderUnion::merge(const SymbolicValue* other) {
     bool changes = false;
     for (auto f : hv->fieldValue)
         changes = changes || fieldValue[f.first]->merge(f.second);
-    auto hu = new SymbolicHeaderUnion(type->to<IR::Type_HeaderUnion>());
-    auto valid = hu->isValid();
+    auto valid = this->isValid();
     changes = changes || valid->merge(hv->isValid());
     return changes;
 }
@@ -383,8 +382,7 @@ bool SymbolicHeaderUnion::equals(const SymbolicValue* other) const {
     if (!other->is<SymbolicHeaderUnion>())
         return false;
     auto sh = other->to<SymbolicHeaderUnion>();
-    auto hu = new SymbolicHeaderUnion(type->checkedTo<IR::Type_HeaderUnion>());
-    auto valid = hu->isValid();
+    auto valid = this->isValid();
     if (!valid->equals(sh->isValid()))
         return false;
     if (valid->isKnown() && !valid->value)
@@ -396,8 +394,7 @@ bool SymbolicHeaderUnion::equals(const SymbolicValue* other) const {
 void SymbolicHeaderUnion::dbprint(std::ostream& out) const {
     out << "{ ";
     out << "valid=>";
-    auto hu = new SymbolicHeaderUnion(type->checkedTo<IR::Type_HeaderUnion>());
-    auto valid = hu->isValid();
+    auto valid = this->isValid();
     valid->dbprint(out);
 #if 0
     for (auto f : fieldValue) {
