@@ -1,0 +1,14 @@
+packet 0 08 00 01
+expect 0 08 00 01
+
+packet 0 10 00 11 01
+expect 0 10 00 11 01
+
+packet 0 20 00 11 22 01
+expect 0 20 00 11 22 01
+
+packet 0 30 00 11 22 33 01
+expect 0 30 00 11 22 33 01
+
+packet 0 00 01
+packet 0 00 01

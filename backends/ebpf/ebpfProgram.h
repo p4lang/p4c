@@ -66,6 +66,7 @@ class EBPFProgram : public EBPFObject {
         errorVar = EBPFModel::reserved("errorCode");
         packetStartVar = EBPFModel::reserved("packetStart");
         packetEndVar = EBPFModel::reserved("packetEnd");
+        lengthVar = EBPFModel::reserved("pkt_len");
         byteVar = EBPFModel::reserved("byte");
         endLabel = EBPFModel::reserved("end");
         errorEnum = EBPFModel::reserved("errorCodes");
