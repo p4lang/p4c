@@ -200,7 +200,12 @@ bool CodeGenInspector::preorder(const IR::Member* expression) {
     auto ei = P4::EnumInstance::resolve(expression, typeMap);
     if (ei == nullptr) {
         visit(expression->expr);
-        builder->append(".");
+        auto pe = expression->expr->to<IR::PathExpression>();
+        if (pe != nullptr && isPointerVariable(pe->path->name.name)) {
+            builder->append("->");
+        } else {
+            builder->append(".");
+        }
     }
     builder->append(expression->member);
     expressionPrecedence = prec;
