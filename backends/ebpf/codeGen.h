@@ -44,6 +44,9 @@ class CodeGenInspector : public Inspector {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
     std::map<const IR::Parameter*, const IR::Parameter*> substitution;
+    // asPointerVariables stores the list of string expressions that
+    // should be emitted as pointer variables.
+    std::set<cstring> asPointerVariables;
 
  public:
     int expressionPrecedence;  /// precedence of current IR::Operation
@@ -63,6 +66,18 @@ class CodeGenInspector : public Inspector {
     void copySubstitutions(CodeGenInspector* other) {
         for (auto s : other->substitution)
             substitute(s.first, s.second);
+    }
+
+    void useAsPointerVariable(cstring name) {
+        this->asPointerVariables.insert(name);
+    }
+    void copyPointerVariables(CodeGenInspector *other) {
+        for (auto s : other->asPointerVariables) {
+            this->asPointerVariables.insert(s);
+        }
+    }
+    bool isPointerVariable(cstring name) {
+        return asPointerVariables.count(name) > 0;
     }
 
     bool notSupported(const IR::Expression* expression)

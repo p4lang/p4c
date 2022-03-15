@@ -537,7 +537,8 @@ void EBPFControl::emitDeclaration(CodeBuilder* builder, const IR::Declaration* d
         auto vd = decl->to<IR::Declaration_Variable>();
         auto etype = EBPFTypeFactory::instance->create(vd->type);
         builder->emitIndent();
-        etype->declareInit(builder, vd->name, false);
+        bool isPointer = codeGen->isPointerVariable(decl->name.name);
+        etype->declareInit(builder, vd->name, isPointer);
         builder->endOfStatement(true);
         BUG_CHECK(vd->initializer == nullptr,
                   "%1%: declarations with initializers not supported", decl);
