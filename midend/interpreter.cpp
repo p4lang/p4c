@@ -315,23 +315,25 @@ SymbolicHeaderUnion::SymbolicHeaderUnion(const IR::Type_HeaderUnion* type,
         SymbolicStruct(type, uninitialized, factory) {}
 
 void SymbolicHeaderUnion::setValid(bool v, cstring field) {
-    if (field) {
-        fieldValue[field]->to<SymbolicHeader>()->setValid(v);
-        for (auto f : type->to<IR::Type_StructLike>()->fields) {
-            if (f->name.name != field)
-                fieldValue[f->name.name]->setAllUnknown();
-        }
+    CHECK_NULL(field);
+    fieldValue[field]->to<SymbolicHeader>()->setValid(v);
+    for (auto f : type->to<IR::Type_StructLike>()->fields) {
+        if (f->name.name != field)
+            fieldValue[f->name.name]->checkedTo<SymbolicHeader>()->setValid(false);
     }
 }
 
 SymbolicBool* SymbolicHeaderUnion::isValid() const {
     for (auto f : type->to<IR::Type_StructLike>()->fields) {
-         auto fieldsClone = fieldValue;
-         if (fieldsClone[f->name.name]) {
-             if (auto fildValid = fieldsClone[f->name.name]->to<SymbolicHeader>()->valid) {
+         if (fieldValue.count(f->name.name)) {
+             if (const auto fildValid = fieldValue.at(f->name.name)
+                                       ->checkedTo<SymbolicHeader>()
+                                       ->valid) {
                  if (fildValid->isKnown())
                      return new SymbolicBool(fildValid->value);
              }
+         } else {
+             BUG("The number of fields in %1% is different from HeaderUnion fieldValue", type);
          }
     }
     return new SymbolicBool(false);
@@ -363,8 +365,6 @@ void SymbolicHeaderUnion::assign(const SymbolicValue* other) {
     BUG_CHECK(hv, "%1%: expected a header union", other);
     for (auto f : hv->fieldValue)
         fieldValue[f.first]->assign(f.second);
-    auto valid = this->isValid();
-    valid->assign(hv->isValid());
 }
 
 bool SymbolicHeaderUnion::merge(const SymbolicValue* other) {
