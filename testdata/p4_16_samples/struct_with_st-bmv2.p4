@@ -33,6 +33,12 @@ parser MyParser(packet_in packet,
         hdr.it = hdr.bits.it;
         hdr.b = hdr.bits.b;
         hdr.x = hdr.bits.x;
+        transition accept;
+    }
+}
+
+control mauif(inout headers hdr, inout metadata meta, inout standard_metadata_t sm) {
+apply {
         if (hdr.b) {
             hdr.x = X.One;
             hdr.bt = 1;
@@ -42,22 +48,23 @@ parser MyParser(packet_in packet,
             hdr.it = -1;
             hdr.x = X.Zero;
         }
-        transition accept;
-    }
+}
 }
 
 control mau(inout headers hdr, inout metadata meta, inout standard_metadata_t sm) {
 apply {
 }
 }
+
 control deparse(packet_out pkt, in headers hdr) {
 apply {}
 }
 control verifyChecksum(inout headers hdr, inout metadata meta) {
-apply {}
+apply {
+}
 }
 control computeChecksum(inout headers hdr, inout metadata meta) {
 apply {}
 }
-V1Switch(MyParser(), verifyChecksum(), mau(), mau(), computeChecksum(),
+V1Switch(MyParser(), verifyChecksum(), mauif(), mau(), computeChecksum(),
         deparse()) main;

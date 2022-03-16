@@ -27,30 +27,39 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         hdr.it = hdr.bits.it;
         hdr.b = hdr.bits.b;
         hdr.x = hdr.bits.x;
-        transition select((bit<1>)hdr.bits.b) {
-            1w1: start_true;
-            1w0: start_false;
-            default: noMatch;
-        }
+        transition accept;
     }
-    state start_true {
+}
+
+control mauif(inout headers hdr, inout metadata meta, inout standard_metadata_t sm) {
+    @hidden action struct_with_stbmv2l43() {
         hdr.x = 7w1;
         hdr.bt = 8w1;
         hdr.it = 8s1;
-        transition start_join;
     }
-    state start_false {
+    @hidden action struct_with_stbmv2l47() {
         hdr.bt = 8w7;
         hdr.it = -8s1;
         hdr.x = 7w0;
-        transition start_join;
     }
-    state start_join {
-        transition accept;
+    @hidden table tbl_struct_with_stbmv2l43 {
+        actions = {
+            struct_with_stbmv2l43();
+        }
+        const default_action = struct_with_stbmv2l43();
     }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
+    @hidden table tbl_struct_with_stbmv2l47 {
+        actions = {
+            struct_with_stbmv2l47();
+        }
+        const default_action = struct_with_stbmv2l47();
+    }
+    apply {
+        if (hdr.b) {
+            tbl_struct_with_stbmv2l43.apply();
+        } else {
+            tbl_struct_with_stbmv2l47.apply();
+        }
     }
 }
 
@@ -74,5 +83,5 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), verifyChecksum(), mau(), mau(), computeChecksum(), deparse()) main;
+V1Switch<headers, metadata>(MyParser(), verifyChecksum(), mauif(), mau(), computeChecksum(), deparse()) main;
 
