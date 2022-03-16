@@ -876,25 +876,28 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
     if (l->is<SymbolicInteger>()) {
         auto li = l->to<SymbolicInteger>();
         clone->expr = li->constant;
-        auto type = typeMap->getType(getOriginal(), true);
-        typeMap->setType(clone, type);  // needed by the constant folding
-        DoConstantFolding cf(refMap, typeMap);
-        cf.setCalledBy(this);
-        auto result = clone->apply(cf);
-        BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
-        set(expression, new SymbolicInteger(result->to<IR::Constant>()));
-        return;
     } else if (l->is<SymbolicBool>()) {
         auto li = l->to<SymbolicBool>();
         clone->expr = new IR::BoolLiteral(li->value);
-        DoConstantFolding cf(refMap, typeMap);
-        cf.setCalledBy(this);
-        auto result = clone->apply(cf);
+    } else {
+        BUG("%1%: unexpected type", l);
+    }
+
+    auto type = typeMap->getType(getOriginal(), true);
+    typeMap->setType(clone, type);  // needed by the constant folding
+    DoConstantFolding cf(refMap, typeMap);
+    cf.setCalledBy(this);
+    auto result = clone->apply(cf);
+
+    if (type->is<IR::Type_Bits>()) {
+        BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
+        set(expression, new SymbolicInteger(result->to<IR::Constant>()));
+    } else if (type->is<IR::Type_Boolean>()) {
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
-        return;
+    } else {
+        BUG("%1%: unexpected type", type);
     }
-    BUG("%1%: unexpected type", l);
 }
 
 void ExpressionEvaluator::postorder(const IR::Constant* expression) {
