@@ -38,7 +38,17 @@ parser MyParser(packet_in packet,
 }
 
 control mau(inout headers hdr, inout metadata meta, inout standard_metadata_t sm) {
-apply {}
+apply {
+    if (hdr.b) {
+        hdr.x = X.One;
+        hdr.bt = 1;
+        hdr.it = 1;
+    } else {
+        hdr.bt = 7;
+        hdr.it = -1;
+        hdr.x = X.Zero;
+    }
+}
 }
 control deparse(packet_out pkt, in headers hdr) {
 apply {}
