@@ -770,6 +770,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             if (args->size() != 2) {
                 ::error(ErrorType::ERR_UNEXPECTED, "Expected 2 arguments for %1%",
                             a->method->name);
+                return false;
             }
             auto slot_id = a->expr->arguments->at(0)->expression;
             auto session_id = a->expr->arguments->at(1)->expression;
@@ -779,8 +780,10 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             BUG_CHECK(session_id->is<IR::Constant>(),
                       "Expected a constant for session_id param of %1%", a->method->name);
             unsigned value =  session_id->to<IR::Constant>()->asUnsigned();
-            if (value == 0)
+            if (value == 0) {
                 ::error("Mirror session ID 0 is reserved for use by Architecture");
+                return false;
+            }
 
             // Mov slot id and session id to metadata fields as DPDK expects these parameters
             // to be in metadata
