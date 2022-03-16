@@ -32,6 +32,24 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         hdr.it = hdr.bits.it;
         hdr.b = hdr.bits.b;
         hdr.x = hdr.bits.x;
+        transition select(hdr.b) {
+            true: start_true;
+            false: start_false;
+        }
+    }
+    state start_true {
+        hdr.x = X.One;
+        hdr.bt = 8w1;
+        hdr.it = 8s1;
+        transition start_join;
+    }
+    state start_false {
+        hdr.bt = 8w7;
+        hdr.it = -8s1;
+        hdr.x = X.Zero;
+        transition start_join;
+    }
+    state start_join {
         transition accept;
     }
 }

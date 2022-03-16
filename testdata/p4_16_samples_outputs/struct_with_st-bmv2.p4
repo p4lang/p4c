@@ -32,6 +32,15 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         hdr.it = hdr.bits.it;
         hdr.b = hdr.bits.b;
         hdr.x = hdr.bits.x;
+        if (hdr.b) {
+            hdr.x = X.One;
+            hdr.bt = 1;
+            hdr.it = 1;
+        } else {
+            hdr.bt = 7;
+            hdr.it = -1;
+            hdr.x = X.Zero;
+        }
         transition accept;
     }
 }
