@@ -189,7 +189,7 @@ testReplaceSelectRange(std::vector<Bound> ranges, ExtraTests extraTests)
         ASSERT_TRUE(left != nullptr);
         auto right = mask->right->to<IR::Constant>();
         ASSERT_TRUE(right != nullptr);
-        maskVals.emplace_back(left->value, right->value);
+        maskVals.emplace_back(unsigned(left->value), unsigned(right->value));
         masksStr << std::hex << "0x" << left->value << " &&& 0x" << right->value << "; ";
     }
     SCOPED_TRACE(masksStr.str());
