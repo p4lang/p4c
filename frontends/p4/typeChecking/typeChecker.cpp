@@ -1653,7 +1653,8 @@ bool TypeInference::compare(const IR::Node* errorPosition,
 
     bool defined = false;
     if (typeMap->equivalent(ltype, rtype) &&
-        (!ltype->is<IR::Type_Void>() && !ltype->is<IR::Type_Varbits>())) {
+        (!ltype->is<IR::Type_Void>() && !ltype->is<IR::Type_Varbits>())
+         && !ltype->to<IR::Type_UnknownStruct>()) {
         defined = true;
     } else if (ltype->is<IR::Type_Base>() && rtype->is<IR::Type_Base>() &&
                typeMap->equivalent(ltype, rtype)) {
@@ -1673,14 +1674,19 @@ bool TypeInference::compare(const IR::Node* errorPosition,
         auto rs = rtype->to<IR::Type_UnknownStruct>();
         if (ls != nullptr || rs != nullptr) {
             if (ls != nullptr && rs != nullptr) {
-                typeError("%1%: cannot compare initializers with unknown types", errorPosition);
+                typeError("%1%: cannot compare structure-valued expressions with unknown types",
+                          errorPosition);
                 return false;
             }
 
             bool lcst = isCompileTimeConstant(compare->left);
             bool rcst = isCompileTimeConstant(compare->right);
-
-            auto tvs = unify(errorPosition, ltype, rtype);
+            TypeVariableSubstitution* tvs;
+            if (ls == nullptr) {
+                tvs = unify(errorPosition, ltype, rtype);
+            } else {
+                tvs = unify(errorPosition, rtype, ltype);
+            }
             if (tvs == nullptr)
                 return false;
             if (!tvs->isIdentity()) {
