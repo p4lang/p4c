@@ -1832,6 +1832,11 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
         ltype = getTypeType(se->type);
     if (auto se = rtype->to<IR::Type_SerEnum>())
         rtype = getTypeType(se->type);
+    if (ltype == nullptr || rtype == nullptr) {
+        typeError("%1%: Could not find a type for enumeration",
+                  expression);
+        return expression;
+    }
     if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>()) {
         typeError("%1%: Concatenation not defined on %2% and %3%",
                   expression, ltype->toString(), rtype->toString());
@@ -2268,6 +2273,11 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
 
     if (auto se = ltype->to<IR::Type_SerEnum>())
         ltype = getTypeType(se->type);
+    if (ltype == nullptr) {
+        typeError("%1%: Could not find a type for enumeration",
+                  expression);
+        return expression;
+    }
     auto lt = ltype->to<IR::Type_Bits>();
     if (expression->right->is<IR::Constant>()) {
         auto cst = expression->right->to<IR::Constant>();
