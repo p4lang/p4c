@@ -77,18 +77,15 @@ StateTranslationVisitor::compileLookahead(const IR::Expression* destination) {
 void
 StateTranslationVisitor::compileAdvance(const P4::ExternMethod* extMethod) {
     auto argExpr = extMethod->expr->arguments->at(0)->expression;
-    cstring argStr;
     if (auto cnst = argExpr->to<IR::Constant>()) {
-        argStr = cstring::to_cstring(cnst->asUnsigned());
-    } else {
-        argStr = argExpr->toString();
+        cstring argStr = cstring::to_cstring(cnst->asUnsigned());
+        cstring offsetStr = Util::printf_format("BYTES(%s + %s)",
+                                                state->parser->program->offsetVar, argStr);
+        builder->target->emitTraceMessage(builder, "Parser (advance): check pkt_len=%%d < "
+                                                   "last_read_byte=%%d", 2,
+                                          state->parser->program->lengthVar.c_str(),
+                                          offsetStr.c_str());
     }
-    cstring offsetStr = Util::printf_format("BYTES(%s + %s)",
-                                            state->parser->program->offsetVar, argStr);
-    builder->target->emitTraceMessage(builder, "Parser (advance): check pkt_len=%%d < "
-                                               "last_read_byte=%%d", 2,
-                                      state->parser->program->lengthVar.c_str(),
-                                      offsetStr.c_str());
     builder->emitIndent();
     builder->appendFormat("if (%s < %s + BYTES(%s + ",
                           state->parser->program->packetEndVar.c_str(),
