@@ -1833,8 +1833,7 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
     if (auto se = rtype->to<IR::Type_SerEnum>())
         rtype = getTypeType(se->type);
     if (ltype == nullptr || rtype == nullptr) {
-        typeError("%1%: Could not find a type for enumeration",
-                  expression);
+        // getTypeType should have already taken care of the error message 
         return expression;
     }
     if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>()) {
@@ -2274,8 +2273,7 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
     if (auto se = ltype->to<IR::Type_SerEnum>())
         ltype = getTypeType(se->type);
     if (ltype == nullptr) {
-        typeError("%1%: Could not find a type for enumeration",
-                  expression);
+        // getTypeType should have already taken care of the error message 
         return expression;
     }
     auto lt = ltype->to<IR::Type_Bits>();
