@@ -86,13 +86,18 @@ StateTranslationVisitor::compileAdvance(const P4::ExternMethod* extMethod) {
                                           state->parser->program->lengthVar.c_str(),
                                           offsetStr.c_str());
     }
+
     builder->emitIndent();
-    builder->appendFormat("if (%s < %s + BYTES(%s + ",
+    builder->appendFormat("%s += ",
+                          state->parser->program->offsetVar.c_str());
+    visit(argExpr);
+    builder->endOfStatement(true);
+
+    builder->emitIndent();
+    builder->appendFormat("if (%s < %s + BYTES(%s)) ",
                           state->parser->program->packetEndVar.c_str(),
                           state->parser->program->packetStartVar.c_str(),
                           state->parser->program->offsetVar.c_str());
-    visit(argExpr);
-    builder->appendFormat(")) ");
     builder->blockStart();
 
     builder->target->emitTraceMessage(builder, "Parser: invalid packet (packet too short)");
@@ -106,12 +111,6 @@ StateTranslationVisitor::compileAdvance(const P4::ExternMethod* extMethod) {
     builder->appendFormat("goto %s;", IR::ParserState::reject.c_str());
     builder->newline();
     builder->blockEnd(true);
-
-    builder->emitIndent();
-    builder->appendFormat("%s += ",
-                          state->parser->program->offsetVar.c_str());
-    visit(argExpr);
-    builder->endOfStatement(true);
 }
 
 bool StateTranslationVisitor::preorder(const IR::AssignmentStatement* statement) {
