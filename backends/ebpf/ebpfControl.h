@@ -26,10 +26,12 @@ namespace EBPF {
 class EBPFControl;
 
 class ControlBodyTranslator : public CodeGenInspector {
+ protected:
     const EBPFControl* control;
     std::set<const IR::Parameter*> toDereference;
     std::vector<cstring> saveAction;
     P4::P4CoreLibrary& p4lib;
+
  public:
     explicit ControlBodyTranslator(const EBPFControl* control);
 
