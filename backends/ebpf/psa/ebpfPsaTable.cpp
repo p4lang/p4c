@@ -26,7 +26,6 @@ namespace EBPF {
 EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* table,
                            CodeGenInspector* codeGen, cstring name, size_t size) :
                            EBPFTable(program, table, codeGen), name(name), size(size) {
-
     auto sizeProperty = table->container->properties->getProperty("size");
     if (keyGenerator == nullptr && sizeProperty != nullptr) {
         ::warning(ErrorType::WARN_IGNORE_PROPERTY,
