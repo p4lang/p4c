@@ -17,7 +17,7 @@ struct Headers_t {
 parser prs(packet_in p, out Headers_t headers) {
     state start {
         p.extract<test_header>(headers.first);
-        p.advance(32w4);
+        p.advance(32w32);
         p.extract<next_header>(headers.next);
         transition accept;
     }
