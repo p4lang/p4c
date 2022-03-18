@@ -45,12 +45,8 @@ DeparserPrepareBufferTranslator::DeparserPrepareBufferTranslator(const EBPFDepar
 
 bool DeparserPrepareBufferTranslator::preorder(const IR::BlockStatement* s) {
     for (auto a : s->components) {
-        if (auto method = a->to<IR::MethodCallStatement>()) {
-            if (auto expr = method->methodCall->method->to<IR::Member>()) {
-                if (expr->member.name == p4lib.packetOut.emit.name) {
-                    visit(a);
-                }
-            }
+        if (a->is<IR::MethodCallStatement>()) {
+            visit(a);
         }
     }
 
@@ -74,6 +70,11 @@ void DeparserPrepareBufferTranslator::processMethod(const P4::ExternMethod *meth
     if (method->method->name.name == p4lib.packetOut.emit.name) {
         auto decl = method->object;
         if (decl == deparser->packet_out) {
+            if (method->expr->arguments->size() != 1) {
+                ::error(ErrorType::ERR_MODEL,
+                        "Not enough arguments to emit() method, exactly 1 required");
+            }
+
             auto expr = method->expr->arguments->at(0)->expression;
             auto exprType = deparser->program->typeMap->getType(expr);
             auto headerToEmit = exprType->to<IR::Type_Header>();
@@ -157,7 +158,11 @@ void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod *method) {
                 alignment %= 8;
             }
             builder->blockEnd(true);
+        } else {
+            BUG("emit() should only be invoked for packet_out");
         }
+    } else {
+        ::error(ErrorType::ERR_UNSUPPORTED, "Unsupported method invocation %1%", method->method);
     }
 }
 
@@ -173,7 +178,7 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder* builder, cstring field,
         return;
     }
     unsigned widthToEmit = et->widthInBits();
-    unsigned loadSize = 0;
+    unsigned emitSize = 0;
     cstring swap = "", msgStr;
 
     if (widthToEmit <= 64) {
@@ -188,20 +193,20 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder* builder, cstring field,
     }
 
     if (widthToEmit <= 8) {
-        loadSize = 8;
+        emitSize = 8;
     } else if (widthToEmit <= 16) {
         swap = "bpf_htons";
-        loadSize = 16;
+        emitSize = 16;
     } else if (widthToEmit <= 32) {
         swap = "htonl";
-        loadSize = 32;
+        emitSize = 32;
     } else if (widthToEmit <= 64) {
         swap = "htonll";
-        loadSize = 64;
+        emitSize = 64;
     }
     unsigned bytes = ROUNDUP(widthToEmit, 8);
     unsigned shift = widthToEmit < 8 ?
-                     (loadSize - alignment - widthToEmit) : (loadSize - widthToEmit);
+                     (emitSize - alignment - widthToEmit) : (emitSize - widthToEmit);
 
     if (!swap.isNullOrEmpty()) {
         builder->emitIndent();
