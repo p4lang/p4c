@@ -37,6 +37,7 @@ limitations under the License.
 #include "midend/eliminateSwitch.h"
 #include "midend/flattenHeaders.h"
 #include "midend/flattenInterfaceStructs.h"
+#include "midend/parserUnroll.h"
 #include "midend/replaceSelectRange.h"
 #include "midend/local_copyprop.h"
 #include "midend/nestedStructs.h"
@@ -160,6 +161,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options, std::ostream* outStre
             new P4::MoveActionsToTables(&refMap, &typeMap),
             new P4::RemoveLeftSlices(&refMap, &typeMap),
             new P4::TypeChecking(&refMap, &typeMap),
+            new P4::ParsersUnroll(true, &refMap, &typeMap),
             new P4::MidEndLast(),
             evaluator,
             [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
