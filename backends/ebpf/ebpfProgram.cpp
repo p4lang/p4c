@@ -241,6 +241,13 @@ void EBPFProgram::emitLocalVariables(CodeBuilder* builder) {
     builder->emitIndent();
     builder->appendFormat("unsigned char %s;", byteVar.c_str());
     builder->newline();
+
+    builder->emitIndent();
+    builder->appendFormat("u32 %s = %s - %s",
+                          lengthVar.c_str(),
+                          packetEndVar.c_str(),
+                          packetStartVar.c_str());
+    builder->endOfStatement(true);
 }
 
 void EBPFProgram::emitHeaderInstances(CodeBuilder* builder) {
