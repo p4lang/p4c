@@ -27,6 +27,7 @@ namespace UBPF {
 
     UBPFControlBodyTranslator::UBPFControlBodyTranslator(
             const UBPFControl *control) :
+            EBPF::CodeGenInspector(control->program->refMap, control->program->typeMap),
             EBPF::ControlBodyTranslator(control), control(control),
             p4lib(P4::P4CoreLibrary::instance) {
         setName("UBPFControlBodyTranslator");

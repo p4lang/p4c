@@ -35,7 +35,26 @@ set (P4C_EBPF_SRCS
   ebpfModel.cpp
   midend.cpp
   lower.cpp
-  )
+  ../bmv2/common/helpers.cpp
+  ../bmv2/common/JsonObjects.cpp
+  ../bmv2/common/action.cpp
+  ../bmv2/common/controlFlowGraph.cpp
+  ../bmv2/common/deparser.cpp
+  ../bmv2/common/expression.cpp
+  ../bmv2/common/extern.cpp
+  ../bmv2/common/globals.cpp
+  ../bmv2/common/header.cpp
+  ../bmv2/common/lower.cpp
+  ../bmv2/common/metermap.cpp
+  ../bmv2/common/parser.cpp
+  ../bmv2/common/programStructure.cpp
+  ../bmv2/psa_switch/psaSwitch.cpp
+  psa/ebpfPsaArch.cpp
+  psa/ebpfPipeline.cpp
+  psa/ebpfPsaParser.cpp
+  psa/ebpfPsaDeparser.cpp
+  psa/ebpfPsaTable.cpp
+  psa/backend.cpp)
 
 set (P4C_EBPF_HDRS
   codeGen.h
@@ -52,7 +71,37 @@ set (P4C_EBPF_HDRS
   midend.h
   target.h
   lower.h
-  )
+  ../bmv2/psa_switch/midend.h
+  ../bmv2/common/helpers.h
+  ../bmv2/common/JsonObjects.h
+  ../bmv2/common/lower.h
+  ../bmv2/common/action.h
+  ../bmv2/common/annotations.h
+  ../bmv2/common/backend.h
+  ../bmv2/common/control.h
+  ../bmv2/common/controlFlowGraph.h
+  ../bmv2/common/deparser.h
+  ../bmv2/common/expression.h
+  ../bmv2/common/extern.h
+  ../bmv2/common/globals.h
+  ../bmv2/common/header.h
+  ../bmv2/common/lower.h
+  ../bmv2/common/metermap.h
+  ../bmv2/common/midend.h
+  ../bmv2/common/options.h
+  ../bmv2/common/parser.h
+  ../bmv2/common/programStructure.h
+  ../bmv2/common/sharedActionSelectorCheck.h
+  ../bmv2/psa_switch/psaSwitch.h
+  psa/backend.h
+  psa/ebpfPsaArch.h
+  psa/xdpHelpProgram.h
+  psa/ebpfPipeline.h
+  psa/ebpfPsaParser.h
+  psa/ebpfPsaDeparser.h
+  psa/ebpfPsaControl.h
+  psa/ebpfPsaTable.h
+)
 
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_EBPF_SRCS};${P4C_EBPF_HDRS}")
 
@@ -187,4 +236,5 @@ p4c_add_test_with_args("ebpf" ${EBPF_DRIVER_TEST} FALSE "testdata/p4_16_samples/
 # FIXME:This does not work yet
 # We do not have support for dynamic addition of tables in the test framework
 p4c_add_test_with_args("ebpf" ${EBPF_DRIVER_TEST} TRUE "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-conntrack-ebpf.c" "")
+
 message(STATUS "Done with configuring BPF back end")

@@ -89,6 +89,7 @@ class EBPFTable : public EBPFTableBase {
     std::map<const IR::KeyElement*, EBPFType*> keyTypes;
 
     EBPFTable(const EBPFProgram* program, const IR::TableBlock* table, CodeGenInspector* codeGen);
+    EBPFTable(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name);
 
     cstring p4ActionToActionIDName(const IR::P4Action * action) const;
     void emitActionArguments(CodeBuilder* builder, const IR::P4Action* action, cstring name);
@@ -117,6 +118,7 @@ class EBPFTable : public EBPFTableBase {
     // Whether to drop packet if no match entry found.
     // Some table implementations may want to continue processing.
     virtual bool dropOnNoMatchingEntryFound() const { return true; }
+    virtual bool singleActionRun() const { return true; }
 };
 
 class EBPFCounterTable : public EBPFTableBase {

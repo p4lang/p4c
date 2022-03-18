@@ -77,13 +77,13 @@ void ControlBodyTranslator::processCustomExternFunction(const P4::ExternFunction
 }
 
 void ControlBodyTranslator::processFunction(const P4::ExternFunction* function) {
-    if (!control->emitExterns)
-        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Not supported", function->method);
     processCustomExternFunction(function, EBPFTypeFactory::instance);
 }
 
 bool ControlBodyTranslator::preorder(const IR::MethodCallExpression* expression) {
-    builder->append("/* ");
+    if (commentDescriptionDepth == 0)
+        builder->append("/* ");
+    commentDescriptionDepth++;
     visit(expression->method);
     builder->append("(");
     bool first = true;
@@ -94,8 +94,15 @@ bool ControlBodyTranslator::preorder(const IR::MethodCallExpression* expression)
         visit(a);
     }
     builder->append(")");
-    builder->append("*/");
-    builder->newline();
+    if (commentDescriptionDepth == 1) {
+        builder->append(" */");
+        builder->newline();
+    }
+    commentDescriptionDepth--;
+
+    // do not process extern when comment is generated
+    if (commentDescriptionDepth != 0)
+        return false;
 
     auto mi = P4::MethodInstance::resolve(expression,
                                           control->program->refMap,
@@ -307,6 +314,11 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
         if (!actionVariableName.isNullOrEmpty()) {
             builder->appendFormat("unsigned int %s = 0;\n", actionVariableName.c_str());
             builder->emitIndent();
+            if (!table->singleActionRun()) {
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1%: action_run statement is not supported here due to an implementation "
+                    "that can call multiple actions", method->expr);
+            }
         }
     }
     builder->blockStart();
@@ -379,7 +391,6 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     }
     builder->endOfStatement(true);
     builder->blockEnd(true);
-
     builder->blockEnd(true);
 
     msgStr = Util::printf_format("Control: %s applied", method->object->getName().name);
@@ -476,6 +487,24 @@ bool ControlBodyTranslator::preorder(const IR::SwitchStatement* statement) {
     }
     builder->blockEnd(false);
     saveAction.pop_back();
+    return false;
+}
+
+bool ControlBodyTranslator::preorder(const IR::StructExpression *expr) {
+    if (commentDescriptionDepth == 0)
+        return CodeGenInspector::preorder(expr);
+
+    // Dump structure for helper comment
+    builder->append("{");
+    bool first = true;
+    for (auto c : expr->components) {
+        if (!first)
+            builder->append(", ");
+        visit(c->expression);
+        first = false;
+    }
+    builder->append("}");
+
     return false;
 }
 

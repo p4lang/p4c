@@ -20,6 +20,7 @@ limitations under the License.
 namespace EBPF {
 
 DeparserBodyTranslator::DeparserBodyTranslator(const EBPFDeparser *deparser) :
+        CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
         ControlBodyTranslator(deparser), deparser(deparser) {
     setName("DeparserBodyTranslator");
 }
@@ -39,6 +40,7 @@ bool DeparserBodyTranslator::preorder(const IR::MethodCallExpression* expression
 }
 
 DeparserPrepareBufferTranslator::DeparserPrepareBufferTranslator(const EBPFDeparser *deparser) :
+        CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
         ControlBodyTranslator(deparser), deparser(deparser) {
     setName("DeparserPrepareBufferTranslator");
 }
@@ -99,6 +101,7 @@ void DeparserPrepareBufferTranslator::processMethod(const P4::ExternMethod *meth
 }
 
 DeparserHdrEmitTranslator::DeparserHdrEmitTranslator(const EBPFDeparser *deparser) :
+        CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
         DeparserPrepareBufferTranslator(deparser), deparser(deparser) {
     setName("DeparserHdrEmitTranslator");
 }

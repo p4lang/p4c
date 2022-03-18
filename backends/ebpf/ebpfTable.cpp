@@ -72,6 +72,10 @@ EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table,
     initKey();
 }
 
+EBPFTable::EBPFTable(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name) :
+        EBPFTableBase(program, name, codeGen),
+        keyGenerator(nullptr), actionList(nullptr), table(nullptr) {}
+
 void EBPFTable::initKey() {
     if (keyGenerator != nullptr) {
         unsigned fieldNumber = 0;
@@ -470,6 +474,7 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName, cstring acti
         auto visitor = createActionTranslationVisitor(valueName, program);
         visitor->setBuilder(builder);
         visitor->copySubstitutions(codeGen);
+        visitor->copyPointerVariables(codeGen);
 
         action->apply(*visitor);
         builder->newline();
