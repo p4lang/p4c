@@ -347,9 +347,7 @@ SymbolicValue* SymbolicHeaderUnion::get(const IR::Node* node, cstring field) con
 
 void SymbolicHeaderUnion::setAllUnknown() {
     SymbolicStruct::setAllUnknown();
-    for (auto f : type->checkedTo<IR::Type_StructLike>()->fields) {
-        fieldValue[f->name.name]->to<SymbolicHeader>()->setAllUnknown();
-    }
+    this->isValid()->setAllUnknown();
 }
 
 SymbolicValue* SymbolicHeaderUnion::clone() const {
