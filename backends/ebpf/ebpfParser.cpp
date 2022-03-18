@@ -85,6 +85,10 @@ StateTranslationVisitor::compileAdvance(const P4::ExternMethod* extMethod) {
                                                    "last_read_byte=%%d", 2,
                                           state->parser->program->lengthVar.c_str(),
                                           offsetStr.c_str());
+    } else {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "packet_in.advance() method with non-constant argument is not supported yet");
+        return;
     }
 
     builder->emitIndent();
