@@ -20,7 +20,7 @@ parser prs(packet_in p, out Headers_t headers) {
         p.extract<first_header>(headers.first);
         tmp_0 = p.length();
         transition select(tmp_0) {
-            32w5: parse_next;
+            32w16: parse_next;
             default: reject;
         }
     }

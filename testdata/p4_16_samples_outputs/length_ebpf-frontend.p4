@@ -22,7 +22,7 @@ parser prs(packet_in p, out Headers_t headers) {
         tmp_0 = p.length();
         tmp = tmp_0;
         transition select(tmp) {
-            32w5: parse_next;
+            32w16: parse_next;
             default: reject;
         }
     }

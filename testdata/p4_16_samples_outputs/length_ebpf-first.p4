@@ -18,7 +18,7 @@ parser prs(packet_in p, out Headers_t headers) {
     state start {
         p.extract<first_header>(headers.first);
         transition select(p.length()) {
-            32w5: parse_next;
+            32w16: parse_next;
             default: reject;
         }
     }
