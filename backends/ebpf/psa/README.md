@@ -11,11 +11,11 @@ This directory implements PSA (Portable Switch Architecture) for the eBPF backen
 
 # Design
 
-P4 packet processing is translated into a set of eBPF programs attached to the TC hook. The eBPF programs implements packet processing defined
+P4 packet processing is translated into a set of eBPF programs attached to the TC hook. The eBPF programs implement packet processing defined
 in a P4 program written according to the PSA model. The TC hook is used as a main engine, because it enables a full implementation of the PSA specification.
-We plan to contribute the XDP-based version of the PSA implementation that does not implement the full specification, but provides better performance.
+We also plan to contribute the XDP-based version of the PSA implementation that does not implement the full specification, but provides better performance.
 
-The general, TC-based design of PSA for eBPF is depicted in Figure below.
+The TC-based design of PSA for eBPF is depicted in Figure below.
 
 ![TC-based PSA-eBPF design](psa-ebpf-design.png)
 
@@ -125,7 +125,7 @@ Follow standard steps for the P4 compiler to install the eBPF backend with the P
 
 ## Using PSA-eBPF
 
-**Note!** The PSA implemented for eBPF backend is verified to work with the kernel version 5.8+.
+**Note!** The PSA implemented for eBPF backend is verified to work with the kernel version 5.8+ and `x86-64` CPU architecture.
 
 You can compile a P4-16 PSA program for eBPF in a single step using:
 
@@ -136,7 +136,7 @@ make -f backends/ebpf/runtime/kernel.mk BPFOBJ={output} ARGS="-DPSA_PORT_RECIRCU
 You can also perform compilation step by step:
 
 ```
-$ p4c-ebpf --arch psa --target kernel -o out.c
+$ p4c-ebpf --arch psa --target kernel -o out.c <program>.p4
 $ clang -O2 -g -c -emit-llvm -DBTF -DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX> -c -o out.bc out.c
 $ llc -march=bpf -filetype=obj -o out.o out.bc
 ```
