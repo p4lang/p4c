@@ -159,7 +159,12 @@ class NamedCond : If {
 
 class Apply : Expression {
     optional ID                         name;
+    // We should not use a NameMap, since it does not have source position information.
     inline NameMap<Vector<Expression>, ordered_map>  actions = {};
+    // We make up for it by storing the position information here.
+    inline NameMap<Path> position = {};
+    /*
+    // This is actually broken, since the srcInfo is 0 for all such vectors
     visit_children {
         auto &clone(v.flow_clone());
         // HACK -- temp sort actions into program (source) order, so that condition names are
@@ -176,6 +181,7 @@ class Apply : Expression {
             v.flow_merge(clone2); }
         Expression::visit_children(v);
     }
+    */
 }
 
 class Primitive : Operation {

@@ -350,10 +350,13 @@ const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
                     destination = new IR::DefaultExpression();
                 } else {
                     cstring act_name = a.first;
+                    auto path = apply->position.get<IR::Path>(act_name);
+                    CHECK_NULL(path);
                     cstring full_name = table->name + '.' + act_name;
                     if (renameMap->count(full_name))
                         act_name = renameMap->at(full_name);
-                    destination = new IR::PathExpression(IR::ID(act_name)); }
+                    destination = new IR::PathExpression(
+                        new IR::Path(path->srcInfo, IR::ID(act_name))); }
                 auto swcase = new IR::SwitchCase(a.second->srcInfo, destination, stat);
                 cases.insert(insert_at, swcase); }
             auto check = new IR::Member(call, IR::Type_Table::action_run);
@@ -504,7 +507,7 @@ class FixupExtern : public Modifier {
             type->annotations = type->annotations->addAnnotationIfNew(
                 IR::Annotation::nameAnnotation, new IR::StringLiteral(type->name.name), false);
             type->name = extname; }
-        // FIXME -- should create ctors based on attributes?  For now just create a
+        // FIXME -- should create ctors based on attributes?  For now j create a
         // FIXME -- 0-arg one if needed
         if (!type->lookupMethod(type->name, new IR::Vector<IR::Argument>())) {
             type->methods.push_back(new IR::Method(type->name, new IR::Type_Method(

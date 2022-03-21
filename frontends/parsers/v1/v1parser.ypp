@@ -846,8 +846,10 @@ control_statement:
 
 apply_case_list: /* epsilon */ { $$ = new IR::Apply; }
     | apply_case_list name_list control_statement
-        { for (auto name : $2->names)
+        { for (auto name : $2->names) {
               $1->actions[name] = $3;
+              $1->position[name] = new IR::Path(name);
+          }
           $$ = $1; }
     | apply_case_list DEFAULT control_statement
         { ($$=$1)->actions["default"] = $3; }
