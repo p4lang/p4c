@@ -15,8 +15,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_BMV2_PSAPROGRAMSTRUCTURE_H_
-#define BACKENDS_BMV2_PSAPROGRAMSTRUCTURE_H_
+#ifndef BACKENDS_BMV2_PSA_SWITCH_PSAPROGRAMSTRUCTURE_H_
+#define BACKENDS_BMV2_PSA_SWITCH_PSAPROGRAMSTRUCTURE_H_
 
 #include "ir/ir.h"
 #include "lib/cstring.h"
@@ -132,4 +132,4 @@ class InspectPsaProgram : public Inspector {
 
 }  // namespace BMV2
 
-#endif  /* BACKENDS_BMV2_PSA_SWITCH_PSASWITCH_H_ */
+#endif  /* BACKENDS_BMV2_PSA_SWITCH_PSAPROGRAMSTRUCTURE_H_ */
