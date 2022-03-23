@@ -180,22 +180,22 @@ bool InspectPsaProgram::preorder(const IR::Parameter* param) {
     LOG3("add param " << ft);
     // only convert parameters that are IR::Type_StructLike
     if (!ft->is<IR::Type_StructLike>()) {
-      return false;
+        return false;
     }
     auto st = ft->to<IR::Type_StructLike>();
     // check if it is psa specific standard metadata
     cstring ptName = param->type->toString();
     // parameter must be a type that we have not seen before
     if (pinfo->hasVisited(st)) {
-      LOG5("Parameter is visited, returning");
-      return false;
+        LOG5("Parameter is visited, returning");
+        return false;
     }
-    if (PsaSwitchExpressionConverter::isStandardMetadata(ptName)) {
-      LOG5("Parameter is psa standard metadata");
-      addHeaderType(st);
-      // remove _t from type name
-      cstring headerName = ptName.exceptLast(2);
-      addHeaderInstance(st, headerName);
+    if (PsaProgramStructure::isStandardMetadata(ptName)) {
+        LOG5("Parameter is psa standard metadata");
+        addHeaderType(st);
+        // remove _t from type name
+        cstring headerName = ptName.exceptLast(2);
+        addHeaderInstance(st, headerName);
     }
     auto isHeader = isHeaders(st);
     addTypesAndInstances(st, isHeader);

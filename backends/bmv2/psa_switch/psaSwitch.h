@@ -54,32 +54,9 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
                  "\nInvalid metadata parameter value for PSA").c_str(), field);
     }
 
-    /**
-     * Checks if a string is of type PSA_CounterType_t returns true
-     * if it is, false otherwise.
-     */
-    static bool isCounterMetadata(cstring ptName) {
-      return !strcmp(ptName, "PSA_CounterType_t");
-    }
-
-    /**
-     * Checks if a string is a psa metadata returns true
-     * if it is, false otherwise.
-     */
-    static bool isStandardMetadata(cstring ptName) {
-      return (!strcmp(ptName, "psa_ingress_parser_input_metadata_t") ||
-        !strcmp(ptName, "psa_egress_parser_input_metadata_t") ||
-        !strcmp(ptName, "psa_ingress_input_metadata_t") ||
-        !strcmp(ptName, "psa_ingress_output_metadata_t") ||
-        !strcmp(ptName, "psa_egress_input_metadata_t") ||
-        !strcmp(ptName, "psa_egress_deparser_input_metadata_t") ||
-        !strcmp(ptName, "psa_egress_output_metadata_t"));
-    }
-
-
     Util::IJson* convertParam(UNUSED const IR::Parameter* param, cstring fieldName) override {
       cstring ptName = param->type->toString();
-      if (isCounterMetadata(ptName)) {  // check if its counter metadata
+      if (PsaProgramStructure::isCounterMetadata(ptName)) {  // check if its counter metadata
           auto jsn = new Util::JsonObject();
           jsn->emplace("name", param->toString());
           jsn->emplace("type", "hexstr");
@@ -100,7 +77,7 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
               return nullptr;
           }
           return jsn;
-      } else if (isStandardMetadata(ptName)) {  // check if its psa metadata
+      } else if (PsaProgramStructure::isStandardMetadata(ptName)) {  // check if its psa metadata
           auto jsn = new Util::JsonObject();
 
           // encode the metadata type and field in json
