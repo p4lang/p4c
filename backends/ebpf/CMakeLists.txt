@@ -35,20 +35,8 @@ set (P4C_EBPF_SRCS
   ebpfModel.cpp
   midend.cpp
   lower.cpp
-  ../bmv2/common/helpers.cpp
-  ../bmv2/common/JsonObjects.cpp
-  ../bmv2/common/action.cpp
-  ../bmv2/common/controlFlowGraph.cpp
-  ../bmv2/common/deparser.cpp
-  ../bmv2/common/expression.cpp
-  ../bmv2/common/extern.cpp
-  ../bmv2/common/globals.cpp
-  ../bmv2/common/header.cpp
-  ../bmv2/common/lower.cpp
-  ../bmv2/common/metermap.cpp
-  ../bmv2/common/parser.cpp
   ../bmv2/common/programStructure.cpp
-  ../bmv2/psa_switch/psaSwitch.cpp
+  ../bmv2/psa_switch/psaProgramStructure.cpp
   psa/ebpfPsaArch.cpp
   psa/ebpfPipeline.cpp
   psa/ebpfPsaParser.cpp
@@ -71,27 +59,8 @@ set (P4C_EBPF_HDRS
   midend.h
   target.h
   lower.h
-  ../bmv2/psa_switch/midend.h
-  ../bmv2/common/helpers.h
-  ../bmv2/common/JsonObjects.h
-  ../bmv2/common/lower.h
-  ../bmv2/common/action.h
-  ../bmv2/common/annotations.h
-  ../bmv2/common/backend.h
-  ../bmv2/common/control.h
-  ../bmv2/common/controlFlowGraph.h
-  ../bmv2/common/deparser.h
-  ../bmv2/common/expression.h
-  ../bmv2/common/extern.h
-  ../bmv2/common/globals.h
-  ../bmv2/common/header.h
-  ../bmv2/common/lower.h
-  ../bmv2/common/metermap.h
-  ../bmv2/common/midend.h
-  ../bmv2/common/options.h
-  ../bmv2/common/parser.h
   ../bmv2/common/programStructure.h
-  ../bmv2/common/sharedActionSelectorCheck.h
+  ../bmv2/psa_switch/psaProgramStructure.h
   ../bmv2/psa_switch/psaSwitch.h
   psa/backend.h
   psa/ebpfPsaArch.h
