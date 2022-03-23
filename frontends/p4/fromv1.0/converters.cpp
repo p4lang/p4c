@@ -507,7 +507,7 @@ class FixupExtern : public Modifier {
             type->annotations = type->annotations->addAnnotationIfNew(
                 IR::Annotation::nameAnnotation, new IR::StringLiteral(type->name.name), false);
             type->name = extname; }
-        // FIXME -- should create ctors based on attributes?  For now j create a
+        // FIXME -- should create ctors based on attributes?  For now just create a
         // FIXME -- 0-arg one if needed
         if (!type->lookupMethod(type->name, new IR::Vector<IR::Argument>())) {
             type->methods.push_back(new IR::Method(type->name, new IR::Type_Method(
