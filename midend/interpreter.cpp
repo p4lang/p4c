@@ -769,7 +769,7 @@ void ExpressionEvaluator::checkResult(const IR::Expression* expression,
 
 void ExpressionEvaluator::setNonConstant(const IR::Expression* expression) {
     auto type = typeMap->getType(expression, true);
-    if (type->is<IR::BoolLiteral>()) {
+    if (type->is<IR::BoolLiteral>() || type->is<IR::Type_Boolean>()) {
         set(expression, new SymbolicBool(ScalarValue::ValueState::NotConstant));
     } else if (type->is<IR::Type_Bits>()) {
         set(expression, new SymbolicInteger(ScalarValue::ValueState::NotConstant,
