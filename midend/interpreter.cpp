@@ -310,50 +310,33 @@ void SymbolicStruct::dbprint(std::ostream& out) const {
 }
 
 SymbolicHeaderUnion::SymbolicHeaderUnion(const IR::Type_HeaderUnion* type,
-                                         bool uninitialized,
-                                         const SymbolicValueFactory* factory) :
-        SymbolicStruct(type, uninitialized, factory) {}
+                               bool uninitialized,
+                               const SymbolicValueFactory* factory) :
+        SymbolicStruct(type, uninitialized, factory),
+        valid(new SymbolicBool(false)) {}
 
-void SymbolicHeaderUnion::setValid(bool v, cstring field) {
-    CHECK_NULL(field);
-    fieldValue[field]->to<SymbolicHeader>()->setValid(v);
-    for (auto f : type->to<IR::Type_StructLike>()->fields) {
-        if (f->name.name != field)
-            fieldValue[f->name.name]->checkedTo<SymbolicHeader>()->setValid(false);
-    }
-}
-
-SymbolicBool* SymbolicHeaderUnion::isValid() const {
-    for (auto f : type->to<IR::Type_StructLike>()->fields) {
-         if (fieldValue.count(f->name.name)) {
-             if (const auto fildValid = fieldValue.at(f->name.name)
-                                       ->checkedTo<SymbolicHeader>()
-                                       ->valid) {
-                 if (fildValid->isKnown())
-                     return new SymbolicBool(fildValid->value);
-             }
-         } else {
-             BUG("The number of fields in %1% is different from HeaderUnion fieldValue", type);
-         }
-    }
-    return new SymbolicBool(false);
+void SymbolicHeaderUnion::setValid(bool v) {
+    if (!v)
+        setAllUnknown();
+    valid = new SymbolicBool(v);
 }
 
 SymbolicValue* SymbolicHeaderUnion::get(const IR::Node* node, cstring field) const {
-    if (this->isValid()->isKnown()  && !this->isValid()->value)
-        return new SymbolicStaticError(node,"Reading field from invalid header union");
+    if (valid->isKnown() && !valid->value)
+        return new SymbolicStaticError(node, "Reading field from invalid header union");
     return SymbolicStruct::get(node, field);
 }
 
 void SymbolicHeaderUnion::setAllUnknown() {
     SymbolicStruct::setAllUnknown();
-    this->isValid()->setAllUnknown();
+    valid->setAllUnknown();
 }
 
 SymbolicValue* SymbolicHeaderUnion::clone() const {
     auto result = new SymbolicHeaderUnion(type->to<IR::Type_HeaderUnion>());
     for (auto f : fieldValue)
         result->fieldValue[f.first] = f.second->clone();
+    result->valid = valid->clone()->to<SymbolicBool>();
     return result;
 }
 
@@ -363,6 +346,7 @@ void SymbolicHeaderUnion::assign(const SymbolicValue* other) {
     BUG_CHECK(hv, "%1%: expected a header union", other);
     for (auto f : hv->fieldValue)
         fieldValue[f.first]->assign(f.second);
+    valid->assign(hv->valid);
 }
 
 bool SymbolicHeaderUnion::merge(const SymbolicValue* other) {
@@ -371,8 +355,7 @@ bool SymbolicHeaderUnion::merge(const SymbolicValue* other) {
     bool changes = false;
     for (auto f : hv->fieldValue)
         changes = changes || fieldValue[f.first]->merge(f.second);
-    auto valid = this->isValid();
-    changes = changes || valid->merge(hv->isValid());
+    changes = changes || valid->merge(hv->valid);
     return changes;
 }
 
@@ -380,8 +363,7 @@ bool SymbolicHeaderUnion::equals(const SymbolicValue* other) const {
     if (!other->is<SymbolicHeaderUnion>())
         return false;
     auto sh = other->to<SymbolicHeaderUnion>();
-    auto valid = this->isValid();
-    if (!valid->equals(sh->isValid()))
+    if (!valid->equals(sh->valid))
         return false;
     if (valid->isKnown() && !valid->value)
         // Invalid headers are equal
@@ -392,7 +374,6 @@ bool SymbolicHeaderUnion::equals(const SymbolicValue* other) const {
 void SymbolicHeaderUnion::dbprint(std::ostream& out) const {
     out << "{ ";
     out << "valid=>";
-    auto valid = this->isValid();
     valid->dbprint(out);
 #if 0
     for (auto f : fieldValue) {
@@ -534,10 +515,10 @@ SymbolicValue* SymbolicArray::next(const IR::Node* node) {
                 return v;
         }
         if (values[i]->is<SymbolicHeaderUnion>()) {
-            if (v->to<SymbolicHeaderUnion>()->isValid()->isUnknown() ||
-                v->to<SymbolicHeaderUnion>()->isValid()->isUninitialized())
+            if (v->to<SymbolicHeaderUnion>()->valid->isUnknown() ||
+                v->to<SymbolicHeaderUnion>()->valid->isUninitialized())
                 return new AnyElement(this);
-            if (!v->to<SymbolicHeaderUnion>()->isValid()->value)
+            if (!v->to<SymbolicHeaderUnion>()->valid->value)
                 return v;
         }
     }
@@ -557,10 +538,10 @@ SymbolicValue* SymbolicArray::lastIndex(const IR::Node* node) {
         }
 
         if (values[i]->is<SymbolicHeaderUnion>()) {
-            if (v->to<SymbolicHeaderUnion>()->isValid()->isUnknown() ||
-                v->to<SymbolicHeaderUnion>()->isValid()->isUninitialized())
+            if (v->to<SymbolicHeaderUnion>()->valid->isUnknown() ||
+                v->to<SymbolicHeaderUnion>()->valid->isUninitialized())
                 return new AnyElement(this);
-            if (v->to<SymbolicHeaderUnion>()->isValid()->value)
+            if (v->to<SymbolicHeaderUnion>()->valid->value)
                 return new SymbolicInteger(new IR::Constant(IR::Type_Bits::get(32), index));
         }
     }
@@ -579,10 +560,10 @@ SymbolicValue* SymbolicArray::last(const IR::Node* node) {
                 return v;
         }
         if (values[i]->is<SymbolicHeaderUnion>()) {
-            if (v->to<SymbolicHeaderUnion>()->isValid()->isUnknown() ||
-                v->to<SymbolicHeaderUnion>()->isValid()->isUninitialized())
+            if (v->to<SymbolicHeaderUnion>()->valid->isUnknown() ||
+                v->to<SymbolicHeaderUnion>()->valid->isUninitialized())
                 return new AnyElement(this);
-            if (v->to<SymbolicHeaderUnion>()->isValid()->value)
+            if (v->to<SymbolicHeaderUnion>()->valid->value)
                 return v;
         }
     }
@@ -769,7 +750,7 @@ void ExpressionEvaluator::checkResult(const IR::Expression* expression,
 
 void ExpressionEvaluator::setNonConstant(const IR::Expression* expression) {
     auto type = typeMap->getType(expression, true);
-    if (type->is<IR::BoolLiteral>() || type->is<IR::Type_Boolean>()) {
+    if (type->is<IR::Type_Boolean>()) {
         set(expression, new SymbolicBool(ScalarValue::ValueState::NotConstant));
     } else if (type->is<IR::Type_Bits>()) {
         set(expression, new SymbolicInteger(ScalarValue::ValueState::NotConstant,
@@ -877,16 +858,14 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
         set(expression, result);
         return;
     }
-    if (sv->isUnknown()) {
-        if (auto cast = expression->to<IR::Cast>()) {
-            if (cast->destType->is<IR::Type_Boolean>() && l->is<SymbolicInteger>()) {
-                l = new SymbolicBool(sv->state);
-            } else if (cast->destType->is<IR::Type_Bits>() && l->is<SymbolicBool>()) {
-                l = new SymbolicInteger(sv->state, cast->destType->to<IR::Type_Bits>());
-            } else {
-                BUG_CHECK(!l->is<SymbolicInteger>() || !l->is<SymbolicBool>(),
-                          "%1% unexpected type %2% in cast", cast, cast->destType);
-            }
+    if (auto cast = expression->to<IR::Cast>()) {
+        if (cast->destType->is<IR::Type_Boolean>() && l->is<SymbolicInteger>()) {
+            l = new SymbolicBool(sv->state);
+        } else if (cast->destType->is<IR::Type_Bits>() && l->is<SymbolicBool>()) {
+            l = new SymbolicInteger(sv->state, cast->destType->to<IR::Type_Bits>());
+        } else {
+            BUG_CHECK(!l->is<SymbolicInteger>() || !l->is<SymbolicBool>(),
+                      "%1% unexpected type %2% in cast", cast, cast->destType);
         }
         set(expression, l);
         return;
@@ -895,25 +874,28 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
     if (l->is<SymbolicInteger>()) {
         auto li = l->to<SymbolicInteger>();
         clone->expr = li->constant;
-        auto type = typeMap->getType(getOriginal(), true);
-        typeMap->setType(clone, type);  // needed by the constant folding
-        DoConstantFolding cf(refMap, typeMap);
-        cf.setCalledBy(this);
-        auto result = clone->apply(cf);
-        BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
-        set(expression, new SymbolicInteger(result->to<IR::Constant>()));
-        return;
     } else if (l->is<SymbolicBool>()) {
         auto li = l->to<SymbolicBool>();
         clone->expr = new IR::BoolLiteral(li->value);
-        DoConstantFolding cf(refMap, typeMap);
-        cf.setCalledBy(this);
-        auto result = clone->apply(cf);
+    } else {
+        BUG("%1%: unexpected type", l);
+    }
+
+    auto type = typeMap->getType(getOriginal(), true);
+    typeMap->setType(clone, type);  // needed by the constant folding
+    DoConstantFolding cf(refMap, typeMap);
+    cf.setCalledBy(this);
+    auto result = clone->apply(cf);
+
+    if (type->is<IR::Type_Bits>()) {
+        BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
+        set(expression, new SymbolicInteger(result->to<IR::Constant>()));
+    } else if (type->is<IR::Type_Boolean>()) {
         BUG_CHECK(result->is<IR::BoolLiteral>(), "%1%: expected a boolean", result);
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
-        return;
+    } else {
+        BUG("%1%: unexpected type", type);
     }
-    BUG("%1%: unexpected type", l);
 }
 
 void ExpressionEvaluator::postorder(const IR::Constant* expression) {
@@ -1124,27 +1106,11 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
         auto bim = mi->to<BuiltInMethod>();
         auto base = get(bim->appliedTo);
         cstring name = bim->name.name;
-        // This code is necessary to find the parent and to check whether the parent
-        // is a header union.
-        const IR::Expression* node = nullptr;
-        cstring memberName = nullptr;
-        if (auto member = expression->method->checkedTo<IR::Member>()
-                                ->expr->to<IR::Member>()) {
-            node = member->expr;
-            memberName = member->member.name;
-        } else if (auto expr = expression->method->checkedTo<IR::Member>()->expr) {
-            node = expr;
-        }
-        CHECK_NULL(node);
-        auto structVar = get(node);
         if (name == IR::Type_Header::setInvalid ||
             name == IR::Type_Header::setValid) {
-            if (auto hv = structVar->to<SymbolicHeader>()) {
-                hv->setValid(name == IR::Type_Header::setValid);
-            } else if (auto headerUnion = structVar->to<SymbolicHeaderUnion>()) {
-                headerUnion->setValid(name == IR::Type_Header::setValid,
-                                    memberName);
-            }
+            BUG_CHECK(base->is<SymbolicHeader>(), "%1%: expected a header", base);
+            auto hv = base->to<SymbolicHeader>();
+            hv->setValid(name == IR::Type_Header::setValid);
             set(expression, SymbolicVoid::get());
             return;
         } else if (name == IR::Type_Stack::push_front ||
@@ -1169,17 +1135,11 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
         } else {
             BUG_CHECK(name == IR::Type_Header::isValid,
                       "%1%: unexpected method", bim->name);
-            if (auto hv = structVar->to<SymbolicHeader>()) {
-                auto v = hv->valid;
-                set(expression, v);
-                return;
-            } else if (auto huv = structVar->to<SymbolicHeaderUnion>()) {
-                auto v = huv->isValid();
-                set(expression, v);
-                return;
-            } else {
-                BUG("Unexpected expression (%1%) type: %2%", base, base->type);
-            }
+            BUG_CHECK(base->is<SymbolicHeader>(), "%1%: expected a header", base);
+            auto hv = base->to<SymbolicHeader>();
+            auto v = hv->valid;
+            set(expression, v);
+            return;
         }
     }
 
