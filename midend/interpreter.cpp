@@ -865,7 +865,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
             l = new SymbolicInteger(sv->state, cast->destType->to<IR::Type_Bits>());
         } else {
             BUG_CHECK(!l->is<SymbolicInteger>() || !l->is<SymbolicBool>(),
-                        "%1% unexpected type %2% in cast", cast, cast->destType);
+                      "%1% unexpected type %2% in cast", cast, cast->destType);
         }
         set(expression, l);
         return;
