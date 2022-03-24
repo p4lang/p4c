@@ -184,7 +184,16 @@ class ParserStateRewriter : public Transform {
             if (left->type->is<IR::Type_Stack>())
                 return left->type->to<IR::Type_Stack>()->elementType;
         }
-        return typeMap->getType(element, true);
+        auto* currentType = typeMap->getType(element);
+        if (currentType == nullptr) {
+            if (auto* expr = element->to<IR::Expression>()) {
+                if (!expr->type->is<IR::Type_Unknown>()) {
+                    currentType = expr->type;
+                }
+            }
+            BUG_CHECK(currentType != nullptr, "Can't detect type for %1%", element);
+        }
+        return currentType;
     }
 
     /// Checks if this state was called previously with the same state of header stack indexes.
@@ -666,6 +675,9 @@ class ParserSymbolicInterpreter {
                         IR::IndexedVector<IR::StatOrDecl>(),
                         new IR::PathExpression(new IR::Type_State(),
                             new IR::Path(outOfBoundsStateName, false)));
+                } else {
+                    // save current state
+                    stateInfo->newState = stateInfo->state->clone();
                 }
                 LOG1("No next states");
                 continue;
