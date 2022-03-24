@@ -184,16 +184,7 @@ class ParserStateRewriter : public Transform {
             if (left->type->is<IR::Type_Stack>())
                 return left->type->to<IR::Type_Stack>()->elementType;
         }
-        auto* currentType = typeMap->getType(element);
-        if (currentType == nullptr) {
-            if (auto* expr = element->to<IR::Expression>()) {
-                if (!expr->type->is<IR::Type_Unknown>()) {
-                    currentType = expr->type;
-                }
-            }
-            BUG_CHECK(currentType != nullptr, "Can't detect type for %1%", element);
-        }
-        return currentType;
+        return typeMap->getType(element, true);
     }
 
     /// Checks if this state was called previously with the same state of header stack indexes.
