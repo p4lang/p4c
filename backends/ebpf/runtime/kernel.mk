@@ -6,7 +6,7 @@ CLANG ?= clang
 override INCLUDES+= -I$(ROOT_DIR) -I$(ROOT_DIR)usr/include/ -I$(ROOT_DIR)contrib/libbpf/include/uapi/
 override LIBS+=
 # Optimization flags to save space
-override CFLAGS+= -O2 -g -D__KERNEL__ -D__ASM_SYSREG_H \
+override CFLAGS+= -O2 -g -c -D__KERNEL__ -D__ASM_SYSREG_H \
 		-Wno-unused-value  -Wno-pointer-sign \
 		-Wno-compare-distinct-pointer-types \
 		-Wno-gnu-variable-sized-type-not-at-end \

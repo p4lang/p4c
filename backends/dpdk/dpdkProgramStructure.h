@@ -51,6 +51,7 @@ struct DpdkProgramStructure {
     cstring header_type;
     IR::IndexedVector<IR::StructField> compiler_added_fields;
     IR::Vector<IR::Type> used_metadata;
+    ordered_map<cstring, std::vector<struct hdrFieldInfo>> hdrFieldInfoList;
 
     void push_variable(const IR::DpdkDeclaration * d) {
         variables.push_back(d); }
@@ -89,6 +90,25 @@ struct DpdkProgramStructure {
      */
     bool isPNA(void) {
         return (p4arch == "pna") ? true : false;
+    }
+};
+
+struct hdrFieldInfo {
+    cstring modifiedName;
+    cstring headerStr;
+    unsigned modifiedWidth;
+    unsigned offset;
+    unsigned lsb;
+    unsigned msb;
+    unsigned fieldWidth;
+    hdrFieldInfo() {
+        modifiedName = "";
+        headerStr = "";
+        modifiedWidth = 0;
+        offset = 0;
+        lsb = 0;
+        msb = 0;
+        fieldWidth = 0;
     }
 };
 

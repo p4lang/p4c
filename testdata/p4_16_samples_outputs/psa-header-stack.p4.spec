@@ -6,9 +6,7 @@ struct ethernet_t {
 }
 
 struct vlan_tag_h {
-	bit<3> pcp
-	bit<1> cfi
-	bit<12> vid
+	bit<16> pcp_cfi_vid
 	bit<16> ether_type
 }
 

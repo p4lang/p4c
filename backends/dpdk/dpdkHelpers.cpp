@@ -765,6 +765,38 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             } else {
                 ::error("%1%: unhandled function", s);
             }
+        } else if (a->method->name == "mirror_packet") {
+            auto args = a->expr->arguments;
+            if (args->size() != 2) {
+                ::error(ErrorType::ERR_UNEXPECTED, "Expected 2 arguments for %1%",
+                            a->method->name);
+                return false;
+            }
+            auto slot_id = a->expr->arguments->at(0)->expression;
+            auto session_id = a->expr->arguments->at(1)->expression;
+            // Frontend rejects programs which have non-constant arguments for mirror_packet()
+            BUG_CHECK(slot_id->is<IR::Constant>(), "Expected a constant for slot_id param of %1%",
+                                                   a->method->name);
+            BUG_CHECK(session_id->is<IR::Constant>(),
+                      "Expected a constant for session_id param of %1%", a->method->name);
+            unsigned value =  session_id->to<IR::Constant>()->asUnsigned();
+            if (value == 0) {
+                ::error("Mirror session ID 0 is reserved for use by Architecture");
+                return false;
+            }
+
+            // Mov slot id and session id to metadata fields as DPDK expects these parameters
+            // to be in metadata
+            BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+            IR::ID slotName(refmap->newName("mirrorSlot"));
+            IR::ID sessionName(refmap->newName("mirrorSession"));
+            metadataStruct->fields.push_back(new IR::StructField(slotName, slot_id->type));
+            metadataStruct->fields.push_back(new IR::StructField(sessionName, session_id->type));
+            auto slotMember = new IR::Member(new IR::PathExpression("m"), slotName);
+            auto sessionMember = new IR::Member(new IR::PathExpression("m"), sessionName);
+            add_instr(new IR::DpdkMovStatement(slotMember, slot_id));
+            add_instr(new IR::DpdkMovStatement(sessionMember, session_id));
+            add_instr(new IR::DpdkMirrorStatement(slotMember, sessionMember));
         } else if (a->method->name == "send_to_port") {
             BUG_CHECK(a->expr->arguments->size() == 1,
                 "%1%: expected one argument for send_to_port extern", a);
@@ -787,7 +819,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         }
     } else if (auto a = mi->to<P4::ActionCall>()) {
         LOG3("action call: " << dbp(s) << std::endl << s);
-        auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
+        auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure, metadataStruct);
         helper->setCalledBy(this);
         a->action->body->apply(*helper);
         for (auto i : helper->get_instr()) {

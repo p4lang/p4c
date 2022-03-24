@@ -19,6 +19,17 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
+  "not implemented"
+  testdata/p4_16_samples/psa-example-dpdk-byte-alignment_3.p4
+  testdata/p4_16_samples/psa-example-dpdk-byte-alignment_4.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "cannot be the target of an assignment"
+  testdata/p4_16_samples/psa-example-dpdk-byte-alignment_2.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
   "Not implemented"
   testdata/p4_16_samples/psa-random.p4
   )
@@ -63,5 +74,25 @@ p4c_add_xfail_reason("dpdk"
 
 p4c_add_xfail_reason("dpdk"
   "Non Type_Bits type bool for expression"
-  testdata/p4_16_samples/pna-dpdk-parser-state-err.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "mirror_packet cannot be used in the"
+  testdata/p4_16_samples/pna-example-mirror-packet-ctxt-error.p4
+  testdata/p4_16_samples/pna-example-mirror-packet-ctxt-error1.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Mirror session ID 0 is reserved for use by Architecture"
+  testdata/p4_16_samples/pna-example-mirror-packet-error1.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "argument used for directionless parameter .* must be a compile-time constant"
+  testdata/p4_16_samples/pna-example-mirror-packet-error2.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "No argument supplied for parameter"
+  testdata/p4_16_samples/pna-example-mirror-packet-error3.p4
   )

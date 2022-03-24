@@ -107,6 +107,12 @@ class DpdkLearnStatement : DpdkAsmStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 }
 
+class DpdkMirrorStatement : DpdkAsmStatement, IDPDKNode {
+    Expression slotId;
+    Expression sessionId;
+    std::ostream& toSpec(std::ostream& out) const override;
+}
+
 class DpdkEmitStatement : DpdkAsmStatement, IDPDKNode {
     Expression header;
     std::ostream& toSpec(std::ostream& out) const override;

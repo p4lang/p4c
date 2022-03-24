@@ -142,17 +142,17 @@ struct StringRef {
 };
 
 template <class T> inline
-    bool operator==(T a, const StringRef &b) { return b == a; }
+    auto operator==(T a, const StringRef &b) -> decltype(b.operator==(a)) { return b == a; }
 template <class T> inline
-    bool operator!=(T a, const StringRef &b) { return b != a; }
+    auto operator!=(T a, const StringRef &b) -> decltype (b.operator!=(a)) { return b != a; }
 template <class T> inline
-    bool operator>=(T a, const StringRef &b) { return b <= a; }
+    auto operator>=(T a, const StringRef &b) -> decltype (b.operator<=(a)) { return b <= a; }
 template <class T> inline
-    bool operator>(T a, const StringRef &b) { return b < a; }
+    auto operator>(T a, const StringRef &b) -> decltype(b.operator<(a)) { return b < a; }
 template <class T> inline
-    bool operator<=(T a, const StringRef &b) { return b >= a; }
+    auto operator<=(T a, const StringRef &b) -> decltype(b.operator>=(a)) { return b >= a; }
 template <class T> inline
-    bool operator<(T a, const StringRef &b) { return b > a; }
+    auto operator<(T a, const StringRef &b) -> decltype(b.operator>(a)) { return b > a; }
 
 inline std::ostream &operator<<(std::ostream &os, const StringRef &a) {
     return a.len ? os.write(a.p, a.len) : os;  }

@@ -6,13 +6,11 @@ struct ethernet_t {
 }
 
 struct ipv4_t {
-	bit<4> version
-	bit<4> ihl
+	bit<8> version_ihl
 	bit<8> diffserv
 	bit<16> totalLen
 	bit<16> identification
-	bit<3> flags
-	bit<13> fragOffset
+	bit<16> flags_fragOffset
 	bit<8> ttl
 	bit<8> protocol
 	bit<16> hdrChecksum
@@ -25,10 +23,7 @@ struct tcp_t {
 	bit<16> dstPort
 	bit<32> seqNo
 	bit<32> ackNo
-	bit<4> dataOffset
-	bit<3> res
-	bit<3> ecn
-	bit<6> flags
+	bit<16> dataOffset_res_ecn_flags
 	bit<16> window
 	bit<16> checksum
 	bit<16> urgentPtr
@@ -55,16 +50,16 @@ struct next_hop_arg_t {
 
 struct main_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
-	bit<1> local_metadata_rng_result1
-	bit<1> local_metadata_val1
-	bit<1> local_metadata_val2
+	bit<32> local_metadata_rng_result1
+	bit<32> local_metadata_val1
+	bit<32> local_metadata_val2
 	bit<32> pna_main_output_metadata_output_port
 	bit<32> MainControlT_tmp
 	bit<32> MainControlT_tmp_0
-	bit<1> MainControlT_tmp_1
-	bit<1> MainControlT_tmp_2
-	bit<1> MainControlT_tmp_3
-	bit<1> MainControlT_tmp_4
+	bit<32> MainControlT_tmp_1
+	bit<32> MainControlT_tmp_2
+	bit<32> MainControlT_tmp_3
+	bit<32> MainControlT_tmp_4
 }
 metadata instanceof main_metadata_t
 

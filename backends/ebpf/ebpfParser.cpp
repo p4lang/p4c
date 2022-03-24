@@ -34,6 +34,7 @@ class StateTranslationVisitor : public CodeGenInspector {
                              unsigned alignment, EBPFType* type);
     void compileExtract(const IR::Expression* destination);
     void compileLookahead(const IR::Expression* destination);
+    void compileAdvance(const P4::ExternMethod* extMethod);
 
  public:
     explicit StateTranslationVisitor(const EBPFParserState* state) :
@@ -73,6 +74,49 @@ StateTranslationVisitor::compileLookahead(const IR::Expression* destination) {
     builder->blockEnd(true);
 }
 
+void
+StateTranslationVisitor::compileAdvance(const P4::ExternMethod* extMethod) {
+    auto argExpr = extMethod->expr->arguments->at(0)->expression;
+    if (auto cnst = argExpr->to<IR::Constant>()) {
+        cstring argStr = cstring::to_cstring(cnst->asUnsigned());
+        cstring offsetStr = Util::printf_format("BYTES(%s + %s)",
+                                                state->parser->program->offsetVar, argStr);
+        builder->target->emitTraceMessage(builder, "Parser (advance): check pkt_len=%%d < "
+                                                   "last_read_byte=%%d", 2,
+                                          state->parser->program->lengthVar.c_str(),
+                                          offsetStr.c_str());
+    } else {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "packet_in.advance() method with non-constant argument is not supported yet");
+        return;
+    }
+
+    builder->emitIndent();
+    builder->appendFormat("%s += ",
+                          state->parser->program->offsetVar.c_str());
+    visit(argExpr);
+    builder->endOfStatement(true);
+
+    builder->emitIndent();
+    builder->appendFormat("if (%s < %s + BYTES(%s)) ",
+                          state->parser->program->packetEndVar.c_str(),
+                          state->parser->program->packetStartVar.c_str(),
+                          state->parser->program->offsetVar.c_str());
+    builder->blockStart();
+
+    builder->target->emitTraceMessage(builder, "Parser: invalid packet (packet too short)");
+
+    builder->emitIndent();
+    builder->appendFormat("%s = %s;", state->parser->program->errorVar.c_str(),
+                          p4lib.packetTooShort.str());
+    builder->newline();
+
+    builder->emitIndent();
+    builder->appendFormat("goto %s;", IR::ParserState::reject.c_str());
+    builder->newline();
+    builder->blockEnd(true);
+}
+
 bool StateTranslationVisitor::preorder(const IR::AssignmentStatement* statement) {
     if (auto mce = statement->right->to<IR::MethodCallExpression>()) {
         auto mi = P4::MethodInstance::resolve(mce,
@@ -87,6 +131,8 @@ bool StateTranslationVisitor::preorder(const IR::AssignmentStatement* statement)
             if (extMethod->method->name.name == p4lib.packetIn.lookahead.name) {
                 compileLookahead(statement->left);
                 return false;
+            } else if (extMethod->method->name.name == p4lib.packetIn.length.name) {
+                return CodeGenInspector::preorder(statement);
             }
         }
         ::error(ErrorType::ERR_UNEXPECTED,
@@ -305,12 +351,8 @@ StateTranslationVisitor::compileExtract(const IR::Expression* destination) {
 
     cstring offsetStr = Util::printf_format("BYTES(%s + %s)",
                                             program->offsetVar, cstring::to_cstring(width));
-    // Parser generally use difference of packet end and start, so for debug message
-    // also use that difference instead of packet length variable
-    cstring pktLenStr = Util::printf_format("%s - %s",
-                                            program->packetEndVar, program->packetStartVar);
     builder->target->emitTraceMessage(builder, "Parser: check pkt_len=%d >= last_read_byte=%d",
-                                      2, pktLenStr.c_str(), offsetStr.c_str());
+                                      2, program->lengthVar.c_str(), offsetStr.c_str());
 
     builder->emitIndent();
     builder->appendFormat("if (%s < %s + BYTES(%s + %d)) ",
@@ -390,6 +432,12 @@ bool StateTranslationVisitor::preorder(const IR::MethodCallExpression* expressio
                     return false;
                 }
                 compileExtract(expression->arguments->at(0)->expression);
+                return false;
+            } else if (extMethod->method->name.name == p4lib.packetIn.length.name) {
+                builder->append(state->parser->program->lengthVar);
+                return false;
+            } else if (extMethod->method->name.name == p4lib.packetIn.advance.name) {
+                compileAdvance(extMethod);
                 return false;
             }
             BUG("Unhandled packet method %1%", expression->method);

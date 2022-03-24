@@ -1653,7 +1653,8 @@ bool TypeInference::compare(const IR::Node* errorPosition,
 
     bool defined = false;
     if (typeMap->equivalent(ltype, rtype) &&
-        (!ltype->is<IR::Type_Void>() && !ltype->is<IR::Type_Varbits>())) {
+        (!ltype->is<IR::Type_Void>() && !ltype->is<IR::Type_Varbits>())
+         && !ltype->to<IR::Type_UnknownStruct>()) {
         defined = true;
     } else if (ltype->is<IR::Type_Base>() && rtype->is<IR::Type_Base>() &&
                typeMap->equivalent(ltype, rtype)) {
@@ -1673,14 +1674,19 @@ bool TypeInference::compare(const IR::Node* errorPosition,
         auto rs = rtype->to<IR::Type_UnknownStruct>();
         if (ls != nullptr || rs != nullptr) {
             if (ls != nullptr && rs != nullptr) {
-                typeError("%1%: cannot compare initializers with unknown types", errorPosition);
+                typeError("%1%: cannot compare structure-valued expressions with unknown types",
+                          errorPosition);
                 return false;
             }
 
             bool lcst = isCompileTimeConstant(compare->left);
             bool rcst = isCompileTimeConstant(compare->right);
-
-            auto tvs = unify(errorPosition, ltype, rtype);
+            TypeVariableSubstitution* tvs;
+            if (ls == nullptr) {
+                tvs = unify(errorPosition, ltype, rtype);
+            } else {
+                tvs = unify(errorPosition, rtype, ltype);
+            }
             if (tvs == nullptr)
                 return false;
             if (!tvs->isIdentity()) {
@@ -1832,6 +1838,10 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
         ltype = getTypeType(se->type);
     if (auto se = rtype->to<IR::Type_SerEnum>())
         rtype = getTypeType(se->type);
+    if (ltype == nullptr || rtype == nullptr) {
+        // getTypeType should have already taken care of the error message
+        return expression;
+    }
     if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>()) {
         typeError("%1%: Concatenation not defined on %2% and %3%",
                   expression, ltype->toString(), rtype->toString());
@@ -2268,6 +2278,10 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
 
     if (auto se = ltype->to<IR::Type_SerEnum>())
         ltype = getTypeType(se->type);
+    if (ltype == nullptr) {
+        // getTypeType should have already taken care of the error message
+        return expression;
+    }
     auto lt = ltype->to<IR::Type_Bits>();
     if (expression->right->is<IR::Constant>()) {
         auto cst = expression->right->to<IR::Constant>();

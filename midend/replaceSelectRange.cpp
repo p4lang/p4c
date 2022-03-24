@@ -46,28 +46,38 @@ DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
                 r->left, r->right);
         return masks;
     }
+    auto constType = r->left->type;
+    auto base = l->base;
 
     int width = r->type->width_bits();
+    BUG_CHECK(width > 0, "zero-width range is not allowed %1%", r->type);
     big_int min = left;
     big_int max = right;
+    BUG_CHECK(min <= max, "range bounds inverted %1%..%2%", left, right);
+    big_int size_mask = ((((big_int) 1) << width) - 1);
+
     big_int range_size_remaining = max - min + 1;
 
     while (range_size_remaining > 0) {
-        big_int range_size = ((big_int) 1) << ((min == 0) ? 0 : ffs(min));
+        // this generates two kinds of mask entries
+        // - 0..2^N - 1 where N is the largest number such that this does not
+        //              overshoot max -- to cover all numbers lower then 2^N - 1
+        //              with one mask entry.
+        // - M..M+2^N - 1 to cover remaining entries with masks that fix a bit
+        //                prefix and leave the last N bits arbitrary.
+        big_int match_stride = ((big_int) 1) << ((min == 0) ? floor_log2(max + 1) : ffs(min));
 
-        while (range_size > range_size_remaining)
-            range_size >>= 1;
+        while (match_stride > range_size_remaining)
+            match_stride >>= 1;
 
-        auto constType = r->left->type;
-        auto base = l->base;
+        big_int mask = ~(match_stride - 1) & size_mask;
+
         auto valConst = new IR::Constant(constType, min, base, true);
-        big_int mask = ~(range_size - 1) & ((((big_int) 1) << width) - 1);
         auto maskConst = new IR::Constant(constType, mask, base, true);
-        auto m = new IR::Mask(r->srcInfo, valConst, maskConst);
+        masks.push_back(new IR::Mask(r->srcInfo, valConst, maskConst));
 
-        masks.push_back(m);
-        range_size_remaining -= range_size;
-        min += range_size;
+        range_size_remaining -= match_stride;
+        min += match_stride;
     }
 
     return masks;
