@@ -66,7 +66,7 @@ struct user_meta_t {
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
 	bit<16> local_metadata_data1
-	bit<48> Ingress_tbl_ethernet_srcAddr
+	bit<48> MyIC_tbl_ethernet_srcAddr
 }
 metadata instanceof user_meta_t
 
@@ -90,7 +90,7 @@ action a2 args instanceof a2_arg_t {
 
 table tbl {
 	key {
-		m.Ingress_tbl_ethernet_srcAddr exact
+		m.MyIC_tbl_ethernet_srcAddr exact
 		m.local_metadata_data exact
 		m.local_metadata_data1 lpm
 	}
@@ -137,7 +137,7 @@ apply {
 	jmpeq MYIP_PARSE_TCP m.tmpMask_0 0x4
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_TCP :	extract h.tcp
-	MYIP_ACCEPT :	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	MYIP_ACCEPT :	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	table tbl
 	jmpnh LABEL_END
 	table foo

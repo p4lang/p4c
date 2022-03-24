@@ -782,12 +782,17 @@ class CollectTableInfo : public Inspector {
 // header/metadata struct. If the match keys are from different headers, this pass creates
 // mirror copies of the struct field into the metadata struct and updates the table to use
 // the metadata copy.
+// This pass must be called right before CollectLocalVariables pass as the temporary
+// variables created for holding copy of the table keys are inserted to Metadata by
+// CollectLocalVariables pass.
 class CopyMatchKeysToSingleStruct : public P4::KeySideEffect {
+    IR::IndexedVector<IR::Declaration> decls;
+    DpdkProgramStructure *structure;
  public:
     CopyMatchKeysToSingleStruct(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-             std::set<const IR::P4Table*>* invokedInKey)
-             : P4::KeySideEffect(refMap, typeMap, invokedInKey)
-    { setName("CopyMatchKeysToSinSgleStruct"); }
+             std::set<const IR::P4Table*>* invokedInKey, DpdkProgramStructure *structure)
+             : P4::KeySideEffect(refMap, typeMap, invokedInKey), structure(structure)
+    { setName("CopyMatchKeysToSingleStruct"); }
 
     const IR::Node* preorder(IR::Key* key) override;
     const IR::Node* postorder(IR::KeyElement* element) override;
