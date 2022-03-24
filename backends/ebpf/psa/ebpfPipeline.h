@@ -107,6 +107,13 @@ class EBPFPipeline : public EBPFProgram {
     void emitHeadersFromCPUMAP(CodeBuilder* builder);
     void emitMetadataFromCPUMAP(CodeBuilder *builder);
 
+    /*
+     * Returns whether the compiler should generate
+     * timestamp retrieved by bpf_ktime_get_ns().
+     *
+     * This allows to avoid overhead introduced by bpf_ktime_get_ns(),
+     * if the timestamp field is not used within a pipeline.
+     */
     bool shouldEmitTimestamp() const {
         return control->timestampIsUsed;
     }
@@ -145,13 +152,6 @@ class EBPFEgressPipeline : public EBPFPipeline {
  public:
     EBPFEgressPipeline(cstring name, const EbpfOptions& options, P4::ReferenceMap* refMap,
                        P4::TypeMap* typeMap) : EBPFPipeline(name, options, refMap, typeMap) { }
-
-    virtual void emitGetSharedHeaders(CodeBuilder* builder) {
-        (void) builder;
-        // this method should never be called.
-        ::error(ErrorType::ERR_UNSUPPORTED,
-                "We only implement pipeline optimization for XDP so far.");
-    }
 
     void emit(CodeBuilder* builder) override;
     void emitPSAControlInputMetadata(CodeBuilder* builder) override;

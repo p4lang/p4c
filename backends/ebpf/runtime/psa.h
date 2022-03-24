@@ -32,10 +32,8 @@ typedef __u8 PSA_PacketPath_t;
 static const PSA_PacketPath_t NORMAL = 0;  /// Packet received by ingress that is none of the cases below.
 static const PSA_PacketPath_t NORMAL_UNICAST = 1;  /// Normal packet received by egress which is unicast
 static const PSA_PacketPath_t NORMAL_MULTICAST = 2;  /// Normal packet received by egress which is multicast
-static const PSA_PacketPath_t CLONE_I2E = 3;  /// Packet created via a clone operation in ingress,
-/// destined for egress
-static const PSA_PacketPath_t CLONE_E2E = 4;  /// Packet created via a clone operation in egress,
-/// destined for egress
+static const PSA_PacketPath_t CLONE_I2E = 3;  /// Packet created via a clone operation in ingress, destined for egress.
+static const PSA_PacketPath_t CLONE_E2E = 4;  /// Packet created via a clone operation in egress, destined for egress.
 static const PSA_PacketPath_t RESUBMIT = 5;  /// Packet arrival is the result of a resubmit operation
 static const PSA_PacketPath_t RECIRCULATE = 6;  /// Packet arrival is the result of a recirculate operation
 
@@ -48,7 +46,7 @@ static const ParserError_t StackOutOfBounds = 3;  /// Reference to invalid eleme
 static const ParserError_t HeaderTooShort = 4;  /// Extracting too many bits into a varbit field.
 static const ParserError_t ParserTimeout = 5;  /// Parser execution time limit exceeded.
 static const ParserError_t ParserInvalidArgument = 6;  /// Parser operation was called with a value
-/// not supported by the implementation
+                                                       /// not supported by the implementation
 
 enum PSA_MeterColor_t { RED, GREEN, YELLOW };
 
@@ -63,9 +61,9 @@ struct psa_ingress_parser_input_metadata_t {
 struct psa_ingress_input_metadata_t {
     // All of these values are initialized by the architecture before
     // the Ingress control block begins executing.
-    PortId_t                 ingress_port;  // taken from xdp_md or __sk_buff
+    PortId_t            ingress_port;  // taken from xdp_md or __sk_buff
     PSA_PacketPath_t    packet_path;        // taken from psa_global_metadata
-    Timestamp_t              ingress_timestamp;  // taken from bpf helper
+    Timestamp_t         ingress_timestamp;  // taken from bpf helper
     ParserError_t       parser_error;       // local to ingress parser
 } __attribute__((aligned(4)));;
 
@@ -86,17 +84,18 @@ struct psa_ingress_output_metadata_t {
  */
 
 struct psa_egress_parser_input_metadata_t {
-    PortId_t                 egress_port;   // taken from xdp_md or __sk_buff
+    PortId_t            egress_port;   // taken from xdp_md or __sk_buff
     PSA_PacketPath_t    packet_path;        // taken from psa_global_metadata
 } __attribute__((aligned(4)));
 
 struct psa_egress_input_metadata_t {
-    ClassOfService_t         class_of_service;  // taken from global metadata
-    PortId_t                 egress_port;       // taken taken from xdp_md or __sk_buff
-    PSA_PacketPath_t    packet_path;            // taken from global metadata
-    EgressInstance_t         instance;          /// instance comes from the PacketReplicationEngine
-                                                // set by PRE as global metadata, in Egress taken from global metadata
-    Timestamp_t              egress_timestamp;  // taken from bpf_helper
+    ClassOfService_t    class_of_service;  // taken from global metadata
+    PortId_t            egress_port;       // taken taken from xdp_md or __sk_buff
+    PSA_PacketPath_t    packet_path;       // taken from global metadata
+    EgressInstance_t    instance;          // instance comes from the PacketReplicationEngine
+                                           // set by PRE as global metadata,
+                                           // in Egress taken from global metadata
+    Timestamp_t         egress_timestamp;  // taken from bpf_helper
     ParserError_t       parser_error;           // local to egress pipeline
 } __attribute__((aligned(4)));
 
@@ -117,13 +116,13 @@ struct psa_egress_deparser_input_metadata_t {
  * The size of this struct must be less than 32 bytes.
  */
 struct psa_global_metadata {
-    MulticastGroup_t                            multicast_group;  /// set by Ingress, read by PRE
-    PortId_t                                    egress_port;  /// set by Ingress, read by PRE
-    CloneSessionId_t                            clone_session_id;  /// set by Ingress/Egress, read by PRE
-    bool                                        clone;  /// set by Ingress/Egress, read by PRE
-    bool                                        drop;   /// set by Ingress/Egress, read by PRE
-    PSA_PacketPath_t                            packet_path;  /// set by eBPF program as helper variable, read by ingress/egress
-    EgressInstance_t                            instance;  /// set by PRE, read by Egress
+    MulticastGroup_t multicast_group;  /// set by Ingress, read by PRE
+    PortId_t         egress_port;  /// set by Ingress, read by PRE
+    CloneSessionId_t clone_session_id;  /// set by Ingress/Egress, read by PRE
+    bool             clone;  /// set by Ingress/Egress, read by PRE
+    bool             drop;   /// set by Ingress/Egress, read by PRE
+    PSA_PacketPath_t packet_path;  /// set by eBPF program as helper variable, read by ingress/egress
+    EgressInstance_t instance;  /// set by PRE, read by Egress
 } __attribute__((aligned(4)));
 
 struct clone_session_entry {

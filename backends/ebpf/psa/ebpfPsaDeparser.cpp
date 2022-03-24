@@ -76,7 +76,7 @@ bool EgressDeparserPSA::build() {
 /*
  * PreDeparser for Ingress pipeline implements:
  * - packet cloning (using clone sessions)
- * - early packet dropEBPFProgram
+ * - early packet drop
  * - resubmission
  */
 void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
@@ -110,6 +110,7 @@ void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     builder->target->emitTraceMessage(builder, "PreDeparser: resubmitting packet, "
                                                "skipping deparser..");
     builder->emitIndent();
+    CHECK_NULL(program);
     auto pipeline = dynamic_cast<const EBPFPipeline*>(program);
     builder->appendFormat("%s->packet_path = RESUBMIT;",
                           pipeline->compilerGlobalMetadata);

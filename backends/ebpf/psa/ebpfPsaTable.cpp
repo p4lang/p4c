@@ -29,7 +29,7 @@ EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* tab
     auto sizeProperty = table->container->properties->getProperty("size");
     if (keyGenerator == nullptr && sizeProperty != nullptr) {
         ::warning(ErrorType::WARN_IGNORE_PROPERTY,
-                  "%1%: property ignored due to not defined table key", sizeProperty);
+                  "%1%: property ignored because table does not have a key", sizeProperty);
     }
     if (keyFieldNames.empty() && size != 1) {
         if (sizeProperty != nullptr) {
