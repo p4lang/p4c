@@ -2935,7 +2935,9 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
     }
 
     if (type->is<IR::Type_StructLike>()) {
+        cstring typeStr = "structure ";
         if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>()) {
+            typeStr = "";
             if (inMethod && (member == IR::Type_Header::isValid)) {
                 // Built-in method
                 auto type = new IR::Type_Method(
@@ -2968,8 +2970,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         auto stb = type->to<IR::Type_StructLike>();
         auto field = stb->getField(member);
         if (field == nullptr) {
-            typeError("Field %1% is not a member of structure %2%",
-                      expression->member, stb);
+            typeError("Field %1% is not a member of %2%%3%",
+                      expression->member, typeStr, stb);
             return expression;
         }
 

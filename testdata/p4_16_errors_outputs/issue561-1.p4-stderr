@@ -18,7 +18,7 @@ issue561-1.p4(29)
 issue561-1.p4(19)
   header_union U {
                ^
-issue561-1.p4(30): [--Werror=type-error] error: Field setValid is not a member of structure header_union U
+issue561-1.p4(30): [--Werror=type-error] error: Field setValid is not a member of header_union U
         u.setValid(); // no such method
           ^^^^^^^^
 issue561-1.p4(19)
