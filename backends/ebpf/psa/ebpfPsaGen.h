@@ -14,8 +14,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef BACKENDS_EBPF_PSA_EBPFPSAARCH_H_
-#define BACKENDS_EBPF_PSA_EBPFPSAARCH_H_
+#ifndef BACKENDS_EBPF_PSA_EBPFPSAGEN_H_
+#define BACKENDS_EBPF_PSA_EBPFPSAGEN_H_
 
 #include "backends/bmv2/psa_switch/psaSwitch.h"
 
@@ -202,4 +202,4 @@ class ConvertToEBPFDeparserPSA : public Inspector {
 
 }  // namespace EBPF
 
-#endif  /* BACKENDS_EBPF_PSA_EBPFPSAARCH_H_ */
+#endif  /* BACKENDS_EBPF_PSA_EBPFPSAGEN_H_ */
