@@ -291,8 +291,8 @@ StateTranslationVisitor::compileExtractField(
     builder->appendFormat("%s += %d", program->offsetVar.c_str(), widthToExtract);
     builder->endOfStatement(true);
 
-    // eBPF can pass 64 bits of data as one argument, so value of the field is
-    // printed only when its fits into register
+    // eBPF can pass 64 bits of data as one argument passed in 64 bit register,
+    // so value of the field is printed only when it fits into that register
     if (widthToExtract <= 64) {
         cstring exprStr = expr->is<IR::PathExpression>() ?
                 expr->to<IR::PathExpression>()->path->name.name : expr->toString();
@@ -340,6 +340,7 @@ StateTranslationVisitor::compileExtract(const IR::Expression* destination) {
     // we must ensure that the larger word is not outside of packet buffer.
     // FIXME: this can fail if a packet does not contain additional payload after header.
     //  However, we don't have better solution in case of using load_X functions to parse packet.
+    // TODO: consider using a collection of smaller widths.
     unsigned curr_padding = 0;
     for (auto f : ht->fields) {
         auto ftype = state->parser->typeMap->getType(f);
@@ -494,24 +495,6 @@ bool StateTranslationVisitor::preorder(const IR::MethodCallExpression* expressio
 
     ::error(ErrorType::ERR_UNEXPECTED,
             "Unexpected method call in parser %1%", expression);
-    return false;
-}
-
-bool StateTranslationVisitor::preorder(const IR::StructExpression *expr) {
-    if (commentDescriptionDepth == 0)
-        return CodeGenInspector::preorder(expr);
-
-    // Dump structure for helper comment
-    builder->append("{");
-    bool first = true;
-    for (auto c : expr->components) {
-        if (!first)
-            builder->append(", ");
-        visit(c->expression);
-        first = false;
-    }
-    builder->append("}");
-
     return false;
 }
 

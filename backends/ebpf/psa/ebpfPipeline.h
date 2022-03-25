@@ -29,12 +29,23 @@ namespace EBPF {
  */
 class EBPFPipeline : public EBPFProgram {
  public:
-    const cstring name;
+    // a custom name of eBPF program
+    cstring name;
+    // eBPF section name, which should a concatenation of `classifier/` + a custom name.
     cstring sectionName;
+    // Variable name storing pointer to eBPF packet descriptor (e.g., __sk_buff).
     cstring contextVar;
-    cstring timestampVar, ifindexVar;
-    cstring priorityVar, packetPathVar, pktInstanceVar;
+    // Variable name storing current timestamp retrieved from bpf_ktime_get_ns().
+    cstring timestampVar;
+    // Variable storing ingress interface index.
+    cstring ifindexVar;
+    // Variable storing skb->priority value (TC only).
+    cstring priorityVar;
+    // Variables storing global metadata (packet_path & instance).
+    cstring packetPathVar, pktInstanceVar;
+    // A name of an internal variable storing global metadata.
     cstring compilerGlobalMetadata;
+    // A variable name storing "1" value. Used to access BPF array map index.
     cstring oneKey;
 
     EBPFControlPSA* control;
@@ -126,6 +137,8 @@ class EBPFPipeline : public EBPFProgram {
 class EBPFIngressPipeline : public EBPFPipeline {
  public:
     unsigned int maxResubmitDepth;
+    // actUnspecCode stores the "undefined action" value.
+    // It's returned from eBPF program is PSA-eBPF doesn't make any forwarding/drop decision.
     int actUnspecCode;
 
     EBPFIngressPipeline(cstring name, const EbpfOptions& options, P4::ReferenceMap* refMap,

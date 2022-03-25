@@ -24,13 +24,14 @@ namespace EBPF {
 
 // =====================EBPFTablePSA=============================
 EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* table,
-                           CodeGenInspector* codeGen, cstring name, size_t size) :
-                           EBPFTable(program, table, codeGen), name(name), size(size) {
+                           CodeGenInspector* codeGen) :
+                           EBPFTable(program, table, codeGen) {
     auto sizeProperty = table->container->properties->getProperty("size");
     if (keyGenerator == nullptr && sizeProperty != nullptr) {
         ::warning(ErrorType::WARN_IGNORE_PROPERTY,
                   "%1%: property ignored because table does not have a key", sizeProperty);
     }
+
     if (keyFieldNames.empty() && size != 1) {
         if (sizeProperty != nullptr) {
             ::warning(ErrorType::WARN_IGNORE,
@@ -38,16 +39,6 @@ EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* tab
                       sizeProperty);
         }
         this->size = 1;
-    }
-}
-
-
-void EBPFTablePSA::emitValueActionIDNames(CodeBuilder* builder) {
-    // For action_run method we preserve these ID names for actions.
-    // Values are the same as for implementation, because the same action
-    // set is enforced.
-    if (singleActionRun()) {
-        EBPFTable::emitValueActionIDNames(builder);
     }
 }
 
@@ -59,7 +50,7 @@ void EBPFTablePSA::emitValueStructStructure(CodeBuilder* builder) {
 void EBPFTablePSA::emitInstance(CodeBuilder *builder) {
     if (keyGenerator != nullptr) {
         TableKind kind = isLPMTable() ? TableLPMTrie : TableHash;
-        emitTableDecl(builder, name, kind,
+        emitTableDecl(builder, instanceName, kind,
                       cstring("struct ") + keyTypeName,
                       cstring("struct ") + valueTypeName, size);
     }
@@ -184,11 +175,11 @@ void EBPFTablePSA::emitConstEntriesInitializer(CodeBuilder *builder) {
             auto ret = program->refMap->newName("ret");
             builder->emitIndent();
             builder->appendFormat("int %s = ", ret.c_str());
-            builder->target->emitTableUpdate(builder, name,
+            builder->target->emitTableUpdate(builder, instanceName,
                                              keyName.c_str(), valueName.c_str());
             builder->newline();
 
-            emitMapUpdateTraceMsg(builder, name, ret);
+            emitMapUpdateTraceMsg(builder, instanceName, ret);
         }
     }
 }

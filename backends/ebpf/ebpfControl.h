@@ -32,8 +32,6 @@ class ControlBodyTranslator : public virtual CodeGenInspector {
     std::vector<cstring> saveAction;
     P4::P4CoreLibrary& p4lib;
 
-    int commentDescriptionDepth;
-
  public:
     explicit ControlBodyTranslator(const EBPFControl* control);
 

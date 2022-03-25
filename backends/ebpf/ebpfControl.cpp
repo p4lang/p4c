@@ -314,11 +314,6 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
         if (!actionVariableName.isNullOrEmpty()) {
             builder->appendFormat("unsigned int %s = 0;\n", actionVariableName.c_str());
             builder->emitIndent();
-            if (!table->singleActionRun()) {
-                ::error(ErrorType::ERR_UNSUPPORTED,
-                    "%1%: action_run statement is not supported here due to an implementation "
-                    "that can call multiple actions", method->expr);
-            }
         }
     }
     builder->blockStart();

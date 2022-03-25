@@ -41,6 +41,13 @@ void EBPFDeparserPSA::emitDeclaration(CodeBuilder* builder, const IR::Declaratio
 // =====================IngressDeparserPSA=============================
 bool IngressDeparserPSA::build() {
     auto pl = controlBlock->container->type->applyParams;
+
+    if (pl->size() != 7) {
+        ::error(ErrorType::ERR_EXPECTED,
+                "Expected ingress deparser to have exactly 7 parameters");
+        return false;
+    }
+
     auto it = pl->parameters.begin();
     packet_out = *it;
     headers = *(it + 4);

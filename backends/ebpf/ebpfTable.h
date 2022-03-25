@@ -70,6 +70,9 @@ class EBPFTable : public EBPFTableBase {
     void initKey();
 
  protected:
+    // Use 1024 by default.
+    // TODO: make it configurable using compiler options.
+    size_t size = 1024;
     const cstring prefixFieldName = "prefixlen";
 
     bool isLPMTable();
@@ -118,7 +121,6 @@ class EBPFTable : public EBPFTableBase {
     // Whether to drop packet if no match entry found.
     // Some table implementations may want to continue processing.
     virtual bool dropOnNoMatchingEntryFound() const { return true; }
-    virtual bool singleActionRun() const { return true; }
 };
 
 class EBPFCounterTable : public EBPFTableBase {

@@ -33,7 +33,7 @@ enum pipeline_type {
     TC_EGRESS
 };
 
-class PSAArch {
+class PSAEbpfGenerator {
  public:
     static const unsigned MaxClones = 64;
     static const unsigned MaxCloneSessions = 1024;
@@ -44,8 +44,8 @@ class PSAArch {
     EBPFPipeline* ingress;
     EBPFPipeline* egress;
 
-    PSAArch(const EbpfOptions &options, std::vector<EBPFType*> &ebpfTypes,
-            EBPFPipeline* ingress, EBPFPipeline* egress)
+    PSAEbpfGenerator(const EbpfOptions &options, std::vector<EBPFType*> &ebpfTypes,
+                     EBPFPipeline* ingress, EBPFPipeline* egress)
             : options(options), ebpfTypes(ebpfTypes), ingress(ingress), egress(egress) {}
 
     virtual void emit(CodeBuilder* builder) const = 0;
@@ -64,13 +64,13 @@ class PSAArch {
     void emitHelperFunctions(CodeBuilder *builder) const;
 };
 
-class PSAArchTC : public PSAArch {
+class PSAArchTC : public PSAEbpfGenerator {
  public:
     XDPHelpProgram* xdp;
 
     PSAArchTC(const EbpfOptions &options, std::vector<EBPFType*> &ebpfTypes,
               XDPHelpProgram* xdp, EBPFPipeline* tcIngress, EBPFPipeline* tcEgress) :
-              PSAArch(options, ebpfTypes, tcIngress, tcEgress), xdp(xdp) { }
+            PSAEbpfGenerator(options, ebpfTypes, tcIngress, tcEgress), xdp(xdp) { }
 
     void emit(CodeBuilder* builder) const override;
 
@@ -83,7 +83,7 @@ class ConvertToEbpfPSA : public Transform {
     BMV2::PsaProgramStructure& structure;
     P4::TypeMap* typemap;
     P4::ReferenceMap* refmap;
-    const PSAArch* ebpf_psa_arch;
+    const PSAEbpfGenerator* ebpf_psa_arch;
 
  public:
     ConvertToEbpfPSA(const EbpfOptions &options,
@@ -92,10 +92,10 @@ class ConvertToEbpfPSA : public Transform {
                      : options(options), structure(structure), typemap(typemap), refmap(refmap),
                      ebpf_psa_arch(nullptr) {}
 
-    const PSAArch *build(const IR::ToplevelBlock *prog);
+    const PSAEbpfGenerator *build(const IR::ToplevelBlock *prog);
     const IR::Node *preorder(IR::ToplevelBlock *p) override;
 
-    const PSAArch *getPSAArchForEBPF() { return ebpf_psa_arch; }
+    const PSAEbpfGenerator *getPSAArchForEBPF() { return ebpf_psa_arch; }
 };
 
 class ConvertToEbpfPipeline : public Inspector {

@@ -25,7 +25,7 @@ limitations under the License.
 #include "ebpfProgram.h"
 
 #include "psa/backend.h"
-#include "psa/ebpfPsaArch.h"
+#include "psa/ebpfPsaGen.h"
 
 namespace EBPF {
 

@@ -60,6 +60,13 @@ bool ActionTranslationVisitor::preorder(const IR::P4Action* act) {
 EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table,
                      CodeGenInspector* codeGen) :
         EBPFTableBase(program, EBPFObject::externalName(table->container), codeGen), table(table) {
+    auto sizeProperty = table->container->properties->getProperty(
+            IR::TableProperties::sizePropertyName);
+    if (sizeProperty != nullptr) {
+        auto expr = sizeProperty->value->to<IR::ExpressionValue>()->expression;
+        this->size = expr->to<IR::Constant>()->asInt();
+    }
+
     cstring base = instanceName + "_defaultAction";
     defaultActionMapName = base;
 

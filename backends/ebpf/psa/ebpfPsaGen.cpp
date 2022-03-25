@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "ebpfPsaArch.h"
+#include "ebpfPsaGen.h"
 #include "ebpfPsaParser.h"
 #include "ebpfPsaDeparser.h"
 #include "ebpfPsaTable.h"
@@ -23,17 +23,18 @@ limitations under the License.
 
 namespace EBPF {
 
-// =====================PSAArch=============================
-void PSAArch::emitPSAIncludes(CodeBuilder *builder) const {
+// =====================PSAEbpfGenerator=============================
+void PSAEbpfGenerator::emitPSAIncludes(CodeBuilder *builder) const {
     builder->appendLine("#include <stdbool.h>");
     builder->appendLine("#include <linux/if_ether.h>");
     builder->appendLine("#include \"psa.h\"");
 }
 
-void PSAArch::emitPreamble(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitPreamble(CodeBuilder *builder) const {
     emitCommonPreamble(builder);
     builder->newline();
 
+    // TODO: enable configuring MAX_PORTS/MAX_INSTANCES/MAX_SESSIONS using compiler optios.
     builder->appendLine("#define CLONE_MAX_PORTS 64");
     builder->appendLine("#define CLONE_MAX_INSTANCES 1");
     builder->appendLine("#define CLONE_MAX_CLONES (CLONE_MAX_PORTS * CLONE_MAX_INSTANCES)");
@@ -49,7 +50,7 @@ void PSAArch::emitPreamble(CodeBuilder *builder) const {
     builder->newline();
 }
 
-void PSAArch::emitCommonPreamble(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitCommonPreamble(CodeBuilder *builder) const {
     builder->newline();
     builder->appendLine("#define EBPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)");
     builder->appendLine("#define BYTES(w) ((w) / 8)");
@@ -62,7 +63,7 @@ void PSAArch::emitCommonPreamble(CodeBuilder *builder) const {
     builder->target->emitPreamble(builder);
 }
 
-void PSAArch::emitInternalStructures(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitInternalStructures(CodeBuilder *builder) const {
     builder->appendLine("struct internal_metadata {\n"
                         "    __u16 pkt_ether_type;\n"
                         "} __attribute__((aligned(4)));");
@@ -83,7 +84,7 @@ void PSAArch::emitInternalStructures(CodeBuilder *builder) const {
 }
 
 /* Generate headers and structs in p4 prog */
-void PSAArch::emitTypes(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitTypes(CodeBuilder *builder) const {
     for (auto type : ebpfTypes) {
         type->emit(builder);
     }
@@ -95,7 +96,7 @@ void PSAArch::emitTypes(CodeBuilder *builder) const {
     builder->newline();
 }
 
-void PSAArch::emitGlobalHeadersMetadata(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitGlobalHeadersMetadata(CodeBuilder *builder) const {
     builder->append("struct hdr_md ");
     builder->blockStart();
     builder->emitIndent();
@@ -119,7 +120,7 @@ void PSAArch::emitGlobalHeadersMetadata(CodeBuilder *builder) const {
     builder->newline();
 }
 
-void PSAArch::emitPacketReplicationTables(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitPacketReplicationTables(CodeBuilder *builder) const {
     builder->target->emitMapInMapDecl(builder, "clone_session_tbl_inner",
                                       TableHash, "elem_t",
                                       "struct element", MaxClones, "clone_session_tbl",
@@ -130,7 +131,7 @@ void PSAArch::emitPacketReplicationTables(CodeBuilder *builder) const {
                                       TableArray, "__u32", MaxCloneSessions);
 }
 
-void PSAArch::emitPipelineInstances(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitPipelineInstances(CodeBuilder *builder) const {
     ingress->parser->emitValueSetInstances(builder);
     ingress->control->emitTableInstances(builder);
 
@@ -142,7 +143,7 @@ void PSAArch::emitPipelineInstances(CodeBuilder *builder) const {
                                    "struct hdr_md", 2);
 }
 
-void PSAArch::emitInitializer(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitInitializer(CodeBuilder *builder) const {
     emitInitializerSection(builder);
     builder->appendFormat("int %s()",
                           "map_initializer");
@@ -159,7 +160,7 @@ void PSAArch::emitInitializer(CodeBuilder *builder) const {
     builder->blockEnd(true);
 }
 
-void PSAArch::emitHelperFunctions(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
     cstring forEachFunc =
             "static __always_inline\n"
             "int do_for_each(SK_BUFF *skb, void *map, "
@@ -349,7 +350,7 @@ void PSAArchTC::emitInitializerSection(CodeBuilder *builder) const {
 }
 
 // =====================ConvertToEbpfPSA=============================
-const PSAArch * ConvertToEbpfPSA::build(const IR::ToplevelBlock *tlb) {
+const PSAEbpfGenerator * ConvertToEbpfPSA::build(const IR::ToplevelBlock *tlb) {
     /*
      * TYPES
      */
@@ -467,6 +468,20 @@ bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock *prsr) {
 
     parser = new EBPFPsaParser(program, prsr, typemap);
 
+    // ingress parser
+    unsigned numOfParams = 6;
+    if (type == TC_EGRESS) {
+        // egress parser
+        numOfParams = 7;
+    }
+
+    if (pl->size() != numOfParams) {
+        ::error(ErrorType::ERR_EXPECTED,
+                "Expected parser to have exactly %1% parameters",
+                numOfParams);
+        return false;
+    }
+
     auto it = pl->parameters.begin();
     parser->packet = *it; ++it;
     parser->headers = *it; ++it;
@@ -557,18 +572,7 @@ bool ConvertToEBPFControlPSA::preorder(const IR::TableBlock *tblblk) {
         }
     }
 
-    // use 1024 by default
-    size_t size = 1024;
-    auto sizeProperty = tblblk->container->properties->getProperty(
-            IR::TableProperties::sizePropertyName);
-    if (sizeProperty != nullptr) {
-        auto expr = sizeProperty->value->to<IR::ExpressionValue>()->expression;
-        size = expr->to<IR::Constant>()->asInt();
-    }
-
-    cstring name = EBPFObject::externalName(tblblk->container);
-
-    EBPFTablePSA *table = new EBPFTablePSA(program, tblblk, control->codeGen, name, size);
+    EBPFTablePSA *table = new EBPFTablePSA(program, tblblk, control->codeGen);
 
     control->tables.emplace(tblblk->container->name, table);
     return true;

@@ -34,7 +34,6 @@ class StateTranslationVisitor : public CodeGenInspector {
 
     P4::P4CoreLibrary& p4lib;
     const EBPFParserState* state;
-    int commentDescriptionDepth;
 
     void compileExtractField(const IR::Expression* expr, cstring name,
                              unsigned alignment, EBPFType* type);
@@ -49,7 +48,7 @@ class StateTranslationVisitor : public CodeGenInspector {
     explicit StateTranslationVisitor(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
             CodeGenInspector(refMap, typeMap),
             p4lib(P4::P4CoreLibrary::instance),
-            state(nullptr), commentDescriptionDepth(0) {}
+            state(nullptr) {}
 
     void setState(const EBPFParserState* state) {
         this->state = state;
@@ -62,7 +61,6 @@ class StateTranslationVisitor : public CodeGenInspector {
     bool preorder(const IR::MethodCallStatement* stat) override
     { visit(stat->methodCall); return false; }
     bool preorder(const IR::AssignmentStatement* stat) override;
-    bool preorder(const IR::StructExpression *expr) override;
 };
 
 class EBPFParserState : public EBPFObject {

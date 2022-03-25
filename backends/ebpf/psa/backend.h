@@ -17,7 +17,7 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_BACKEND_H_
 #define BACKENDS_EBPF_PSA_BACKEND_H_
 
-#include "ebpfPsaArch.h"
+#include "ebpfPsaGen.h"
 
 namespace EBPF {
 
@@ -30,7 +30,7 @@ class PSASwitchBackend {
     const IR::ToplevelBlock*         toplevel = nullptr;
 
     Target*                          target;
-    const PSAArch*                   ebpf_program = nullptr;
+    const PSAEbpfGenerator*                   ebpf_program = nullptr;
 
     PSASwitchBackend(const EbpfOptions& options,
                      Target *target,

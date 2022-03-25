@@ -41,14 +41,10 @@ class EBPFTablePSA : public EBPFTable {
                                cstring returnCode) const;
 
  public:
-    cstring name;
-    size_t size;
-
     EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* table,
-                 CodeGenInspector* codeGen, cstring name, size_t size);
+                 CodeGenInspector* codeGen);
     void emitInstance(CodeBuilder* builder) override;
     void emitTypes(CodeBuilder* builder) override;
-    void emitValueActionIDNames(CodeBuilder* builder) override;
     void emitValueStructStructure(CodeBuilder* builder) override;
     void emitAction(CodeBuilder* builder, cstring valueName, cstring actionRunVariable) override;
     void emitInitializer(CodeBuilder* builder) override;

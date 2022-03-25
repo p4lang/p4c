@@ -31,7 +31,17 @@ bool PsaStateTranslationVisitor::preorder(const IR::Expression* expression) {
 }
 
 bool PsaStateTranslationVisitor::preorder(const IR::Mask *mask) {
-    CHECK_NULL(currentSelectExpression);
+    if (currentSelectExpression == nullptr) {
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "%1%: Masks outside of select expression are not supported.",
+                mask);
+        return false;
+    }
+
+    BUG_CHECK(currentSelectExpression->select->components.size() == 1,
+              "%1%: tuple not eliminated in select",
+              currentSelectExpression->select);
+
     builder->append("(");
     visit(currentSelectExpression->select->components.at(0));
     builder->append(" & ");
@@ -71,29 +81,19 @@ void PsaStateTranslationVisitor::compileVerify(const IR::MethodCallExpression * 
     builder->emitIndent();
     builder->appendFormat("%s = ", parser->program->errorVar.c_str());
 
-    auto mt = expression->arguments->at(1)->expression->to<IR::Member>();
-    if (mt == nullptr) {
-        ::error(ErrorType::ERR_UNEXPECTED, "%1%: not accessing a member error type",
-                expression->arguments->at(1));
+    auto errorType = expression->arguments->at(1)->expression;
+    auto ei = P4::EnumInstance::resolve(errorType, typeMap);
+    if (ei == nullptr) {
+        ::error(ErrorType::ERR_MODEL, "%1%: must be a constant on this target", errorType);
         return;
     }
-    auto tne = mt->expr->to<IR::TypeNameExpression>();
-    if (tne == nullptr) {
-        ::error(ErrorType::ERR_UNEXPECTED, "%1%: not accessing a member error type",
-                expression->arguments->at(1));
-        return;
-    }
-    if (tne->typeName->path->name.name != "error") {
-        ::error(ErrorType::ERR_UNEXPECTED, "%1%: must be an error type",
-                expression->arguments->at(1));
-        return;
-    }
-    builder->append(mt->member.name);
+
+    builder->append(ei->name);
 
     builder->endOfStatement(true);
 
     cstring msg = Util::printf_format("Verify: condition failed, parser_error=%%u (%s)",
-                                      mt->member.name);
+                                      ei->name.name);
     builder->target->emitTraceMessage(builder, msg.c_str(), 1, parser->program->errorVar.c_str());
 
     builder->emitIndent();
