@@ -93,7 +93,7 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     @name("ingress.meta") psa_ingress_output_metadata_t meta_0;
-    @noWarnUnused @name(".ingress_drop") action ingress_drop_0() {
+    @noWarn("unused") @name(".ingress_drop") action ingress_drop_0() {
         meta_0 = ostd;
         meta_0.drop = true;
         ostd = meta_0;

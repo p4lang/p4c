@@ -1,12 +1,6 @@
 psa-switch-expression-without-default.p4(126): [--Wwarn=missing] warning: SwitchCase: fallthrough with no statement
             92:
             ^^
-psa.p4(546): [--Wwarn=unused] warning: 'W' is unused
-extern Counter<W, S> {
-               ^
-psa.p4(575): [--Wwarn=unused] warning: 'W' is unused
-extern DirectCounter<W> {
-                     ^
 psa-switch-expression-without-default.p4(122): [--Wwarn=mismatch] warning: 16w16: constant expression in switch
         switch (tmp) {
                 ^^^

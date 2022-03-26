@@ -40,7 +40,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     @name("cIngress.egress_port") PortId_t egress_port_0;
     @name("cIngress.meta") psa_ingress_output_metadata_t meta_3;
     @name("cIngress.egress_port") PortId_t egress_port_3;
-    @noWarnUnused @name(".send_to_port") action send_to_port_1() {
+    @noWarn("unused") @name(".send_to_port") action send_to_port_1() {
         meta_0 = ostd;
         egress_port_0 = (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr;
         meta_0.drop = false;
@@ -48,7 +48,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         meta_0.egress_port = egress_port_0;
         ostd = meta_0;
     }
-    @noWarnUnused @name(".send_to_port") action send_to_port_2() {
+    @noWarn("unused") @name(".send_to_port") action send_to_port_2() {
         meta_3 = ostd;
         egress_port_3 = (PortId_t)32w0xfffffffa;
         meta_3.drop = false;
