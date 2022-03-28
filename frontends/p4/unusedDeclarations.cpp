@@ -127,7 +127,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Parameter* param) {
 const IR::Node* RemoveUnusedDeclarations::warnIfUnused(const IR::Node* node) {
     if (!refMap->isUsed(getOriginal<IR::IDeclaration>()))
         if (giveWarning(getOriginal()))
-            ::warning(ErrorType::WARN_UNUSED, "'%1%' is unused", node);
+            warn(ErrorType::WARN_UNUSED, "'%1%' is unused", node);
     return node;
 }
 
