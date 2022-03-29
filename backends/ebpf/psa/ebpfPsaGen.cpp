@@ -34,7 +34,7 @@ void PSAEbpfGenerator::emitPreamble(CodeBuilder *builder) const {
     emitCommonPreamble(builder);
     builder->newline();
 
-    // TODO: enable configuring MAX_PORTS/MAX_INSTANCES/MAX_SESSIONS using compiler optios.
+    // TODO: enable configuring MAX_PORTS/MAX_INSTANCES/MAX_SESSIONS using compiler options.
     builder->appendLine("#define CLONE_MAX_PORTS 64");
     builder->appendLine("#define CLONE_MAX_INSTANCES 1");
     builder->appendLine("#define CLONE_MAX_CLONES (CLONE_MAX_PORTS * CLONE_MAX_INSTANCES)");
@@ -578,13 +578,12 @@ bool ConvertToEBPFControlPSA::preorder(const IR::TableBlock *tblblk) {
     return true;
 }
 
-bool ConvertToEBPFControlPSA::preorder(const IR::AssignmentStatement *a) {
-    if (auto m = a->right->to<IR::Member>()) {
-        // the condition covers both ingress and egress timestamp
-        if (m->member.name.endsWith("timestamp")) {
-            control->timestampIsUsed = true;
-        }
+bool ConvertToEBPFControlPSA::preorder(const IR::Member *m) {
+    // the condition covers both ingress and egress timestamp
+    if (m->member.name.endsWith("timestamp")) {
+        control->timestampIsUsed = true;
     }
+
     return true;
 }
 
