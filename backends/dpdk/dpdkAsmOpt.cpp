@@ -232,7 +232,7 @@ bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
         }
         min = max = -1;
         for (auto key : keys->keyElements) {
-            BUG_CHECK(key->expression->is<IR::Member>(), "Table keys must be a structure field."
+            BUG_CHECK(key->expression->is<IR::Member>(), "Table keys must be a structure field. "
                                                           "%1% is not a structure field");
             auto keyMem = key->expression->to<IR::Member>();
             auto type = keyMem->expr->type;
@@ -260,8 +260,8 @@ bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
                  }
              }
             if ((max + size_max_field - min) > 64 * 8) {
-                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,"%1%: All table keys together
-                        with holes in the underlying structure should fit in 64 bytes",tbl->name);
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,"%1%: All table keys together "
+                        "with holes in the underlying structure should fit in 64 bytes",tbl->name);
             }
         }
     }
