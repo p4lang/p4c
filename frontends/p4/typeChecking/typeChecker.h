@@ -275,6 +275,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Range* expression) override { return typeSet(expression); }
     const IR::Node* postorder(IR::LNot* expression) override;
     const IR::Node* postorder(IR::Neg* expression) override;
+    const IR::Node* postorder(IR::UPlus* expression) override;
     const IR::Node* postorder(IR::Cmpl* expression) override;
     const IR::Node* postorder(IR::Cast* expression) override;
     const IR::Node* postorder(IR::Mux* expression) override;

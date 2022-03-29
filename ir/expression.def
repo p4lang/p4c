@@ -18,6 +18,10 @@ class Neg : Operation_Unary {
     stringOp = "-";
 }
 
+class UPlus : Operation_Unary {
+    stringOp = "+";
+}
+
 class Cmpl : Operation_Unary {
     stringOp = "~";
 }

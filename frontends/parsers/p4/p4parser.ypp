@@ -1408,7 +1408,7 @@ expression
     | "!" expression %prec PREFIX        { $$ = new IR::LNot(@1 + @2, $2); }
     | "~" expression %prec PREFIX        { $$ = new IR::Cmpl(@1 + @2, $2); }
     | "-" expression %prec PREFIX        { $$ = new IR::Neg(@1 + @2, $2); }
-    | "+" expression %prec PREFIX        { $$ = $2; }
+    | "+" expression %prec PREFIX        { $$ = new IR::UPlus(@1 + @2, $2); }
     | typeName dot_name %prec DOT
         { $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression(@1, $1), *$2); }
     | ERROR "." name
@@ -1462,7 +1462,7 @@ nonBraceExpression
     | "!" expression %prec PREFIX        { $$ = new IR::LNot(@1 + @2, $2); }
     | "~" expression %prec PREFIX        { $$ = new IR::Cmpl(@1 + @2, $2); }
     | "-" expression %prec PREFIX        { $$ = new IR::Neg(@1 + @2, $2); }
-    | "+" expression %prec PREFIX        { $$ = $2; }
+    | "+" expression %prec PREFIX        { $$ = new IR::UPlus(@1 + @2, $2); }
     | typeName dot_name %prec DOT
         { $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression(@1, $1), *$2); }
     | ERROR "." name

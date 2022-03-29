@@ -2523,6 +2523,36 @@ const IR::Node* TypeInference::postorder(IR::Neg* expression) {
     return expression;
 }
 
+const IR::Node* TypeInference::postorder(IR::UPlus* expression) {
+    if (done()) return expression;
+    auto type = getType(expression->expr);
+    if (type == nullptr)
+        return expression;
+
+    if (auto se = type->to<IR::Type_SerEnum>())
+        type = getTypeType(se->type);
+    BUG_CHECK(type, "Invalid Type_SerEnum/getTypeType");
+
+    if (type->is<IR::Type_InfInt>()) {
+        setType(getOriginal(), type);
+        setType(expression, type);
+    } else if (type->is<IR::Type_Bits>()) {
+        setType(getOriginal(), type);
+        setType(expression, type);
+    } else {
+        typeError("Cannot apply %1% to value %2% of type %3%",
+                  expression->getStringOp(), expression->expr, type->toString());
+    }
+    if (isCompileTimeConstant(expression->expr)) {
+        auto result = constantFold(expression);
+        setType(result, type);
+        setCompileTimeConstant(result);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+        return result;
+    }
+    return expression;
+}
+
 const IR::Node* TypeInference::postorder(IR::Cmpl* expression) {
     if (done()) return expression;
     auto type = getType(expression->expr);
