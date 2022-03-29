@@ -121,6 +121,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new DpdkAsmOptimization,
         new CollectUsedMetadataField(used_fields),
         new RemoveUnusedMetadataFields(used_fields),
+        new ValidateTableKeys()
     };
 
     dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();

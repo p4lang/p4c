@@ -159,6 +159,15 @@ class RemoveUnusedMetadataFields : public Transform {
     const IR::Node* preorder(IR::DpdkAsmProgram *p) override;
 };
 
+// This pass validates that the table keys from Metadata struct fit within 64 bytes including any
+// holes between the key fields in metadata.
+class ValidateTableKeys : public Inspector {
+ public:
+    ValidateTableKeys() {}
+    bool preorder(const IR::DpdkAsmProgram *p) override;
+    bool isMetadataStruct(const IR::Type_Struct *st);
+};
+
 // Instructions can only appear in actions and apply block of .spec file.
 // All these individual passes work on the actions and apply block of .spec file.
 class DpdkAsmOptimization : public PassRepeated {

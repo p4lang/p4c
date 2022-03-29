@@ -175,7 +175,21 @@ const IR::Node* RemoveUnusedMetadataFields::preorder(IR::DpdkAsmProgram *p) {
                     IR::IndexedVector<IR::StructField> usedMetadataFields;
                     for (auto field : st->fields) {
                         if (used_fields.count(field->name.name)) {
-                            usedMetadataFields.push_back(field);
+                            // DPDK implements bool and error types as bit<8>
+                            if (field->type->is<IR::Type_Boolean>() ||
+                                field->type->is<IR::Type_Error>()) {
+                                usedMetadataFields.push_back(new IR::StructField(
+                                                      IR::ID(field->name), IR::Type_Bits::get(8)));
+                            } else if (auto t = field->type->to<IR::Type_Name>()) {
+                                if (t->path->name != "error") {
+                                    usedMetadataFields.push_back(new IR::StructField(
+                                                      IR::ID(field->name), IR::Type_Bits::get(8)));
+                                } else {
+                                    usedMetadataFields.push_back(field);
+                                }
+                            } else {
+                                usedMetadataFields.push_back(field);
+                            }
                         }
                     }
                     auto newSt = new IR::DpdkStructType(st->srcInfo, st->name,
@@ -194,4 +208,63 @@ const IR::Node* RemoveUnusedMetadataFields::preorder(IR::DpdkAsmProgram *p) {
     return p;
 }
 
+bool ValidateTableKeys::isMetadataStruct(const IR::Type_Struct *st) {
+       for (auto anno : st->annotations->annotations) {
+            if (anno->name == "__metadata__") {
+                return true;
+            }
+       }
+       return false;
+}
+
+bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
+    const IR::DpdkStructType *metaStruct;
+    for (auto st : p->structType) {
+        if (isMetadataStruct(st)) {
+            metaStruct = st;
+        }
+    }
+    for (auto tbl : p->tables) {
+        int min, max, size_max_field = 0;
+        auto keys = tbl->match_keys;
+        if (!keys || keys->keyElements.size() == 0) {
+            return false;
+        }
+        min = max = -1;
+        for (auto key : keys->keyElements) {
+            BUG_CHECK(key->expression->is<IR::Member>(), "Table keys must be a structure field."
+                                                          "%1% is not a structure field");
+            auto keyMem = key->expression->to<IR::Member>();
+            auto type = keyMem->expr->type;
+            if (type->is<IR::Type_Struct>() && isMetadataStruct(type->to<IR::Type_Struct>())) {
+                auto offset = metaStruct->getFieldBitOffset(keyMem->member.name);
+                if (min == -1 || min > offset)
+                    min = offset;
+                if (max == -1 || max < offset) {
+                    max = offset;
+                    auto field_type = key->expression->type;
+                    if (auto t = field_type->to<IR::Type_Bits>()) {
+                        size_max_field = t->width_bits();
+                    } else if (field_type->is<IR::Type_Boolean>() ||
+                        field_type->is<IR::Type_Error>()) {
+                        size_max_field = 8;
+                    } else if (auto t = field_type->to<IR::Type_Name>()) {
+                        if (t->path->name == "error") {
+                            size_max_field = 8;
+                        } else {
+                            BUG("Unexpected type %1%", t->path->name);
+                        }
+                    } else {
+                        BUG("Unexpected type %1%",field_type->node_type_name());
+                    }
+                 }
+             }
+            if ((max + size_max_field - min) > 64 * 8) {
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,"%1%: All table keys together
+                        with holes in the underlying structure should fit in 64 bytes",tbl->name);
+            }
+        }
+    }
+    return false;
+}
 }  // namespace DPDK
