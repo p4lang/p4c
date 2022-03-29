@@ -5,23 +5,23 @@ struct ethernet_t {
 	bit<16> etherType
 }
 
-struct psa_ingress_output_metadata_t {
-	bit<8> class_of_service
+struct psa_ingress_out_0 {
+	bit<8> class_of_servic_1
 	bit<8> clone
-	bit<16> clone_session_id
+	bit<16> clone_session_i_2
 	bit<8> drop
 	bit<8> resubmit
 	bit<32> multicast_group
 	bit<32> egress_port
 }
 
-struct psa_egress_output_metadata_t {
+struct psa_egress_outp_3 {
 	bit<8> clone
-	bit<16> clone_session_id
+	bit<16> clone_session_i_2
 	bit<8> drop
 }
 
-struct psa_egress_deparser_input_metadata_t {
+struct psa_egress_depa_4 {
 	bit<32> egress_port
 }
 
@@ -34,12 +34,12 @@ struct a2_arg_t {
 }
 
 struct user_meta_t {
-	bit<32> psa_ingress_input_metadata_ingress_port
-	bit<8> psa_ingress_output_metadata_drop
-	bit<32> psa_ingress_output_metadata_egress_port
-	bit<16> local_metadata_data1
-	bit<16> local_metadata_data2
-	bit<48> Ingress_tbl_ethernet_srcAddr
+	bit<32> psa_ingress_inp_5
+	bit<8> psa_ingress_out_6
+	bit<32> psa_ingress_out_7
+	bit<16> local_metadata__8
+	bit<16> local_metadata__9
+	bit<48> Ingress_tbl_eth_10
 }
 metadata instanceof user_meta_t
 
@@ -61,9 +61,9 @@ action a2 args instanceof a2_arg_t {
 
 table tbl {
 	key {
-		m.Ingress_tbl_ethernet_srcAddr exact
-		m.local_metadata_data1 selector
-		m.local_metadata_data2 selector
+		m.Ingress_tbl_eth_10 exact
+		m.local_metadata__8 selector
+		m.local_metadata__9 selector
 	}
 	actions {
 		NoAction
@@ -76,14 +76,14 @@ table tbl {
 
 
 apply {
-	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	rx m.psa_ingress_inp_5
+	mov m.psa_ingress_out_6 0x0
 	extract h.ethernet
-	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	mov m.Ingress_tbl_eth_10 h.ethernet.srcAddr
 	table tbl
-	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	jmpneq LABEL_DROP m.psa_ingress_out_6 0x0
 	emit h.ethernet
-	tx m.psa_ingress_output_metadata_egress_port
+	tx m.psa_ingress_out_7
 	LABEL_DROP :	drop
 }
 

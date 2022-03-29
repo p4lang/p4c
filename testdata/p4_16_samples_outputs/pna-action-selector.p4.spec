@@ -11,7 +11,7 @@ struct ipv4_t {
 	bit<8> diffserv
 	bit<16> totalLen
 	bit<16> identification
-	bit<16> flags_fragOffset
+	bit<16> flags_fragOffse_0
 	bit<8> ttl
 	bit<8> protocol
 	bit<16> hdrChecksum
@@ -27,16 +27,16 @@ struct a2_arg_t {
 	bit<16> param
 }
 
-struct tbl_set_group_id_arg_t {
+struct tbl_set_group_i_1 {
 	bit<32> group_id
 }
 
 struct main_metadata_t {
-	bit<32> pna_main_input_metadata_input_port
-	bit<16> local_metadata_data
-	bit<32> pna_main_output_metadata_output_port
-	bit<32> MainControlT_as_group_id
-	bit<32> MainControlT_as_member_id
+	bit<32> pna_main_input__2
+	bit<16> local_metadata__3
+	bit<32> pna_main_output_4
+	bit<32> MainControlT_as_5
+	bit<32> MainControlT_as_6
 }
 metadata instanceof main_metadata_t
 
@@ -57,8 +57,8 @@ action a2 args instanceof a2_arg_t {
 	return
 }
 
-action tbl_set_group_id args instanceof tbl_set_group_id_arg_t {
-	mov m.MainControlT_as_group_id t.group_id
+action tbl_set_group_i_7 args instanceof tbl_set_group_i_1 {
+	mov m.MainControlT_as_5 t.group_id
 	return
 }
 
@@ -67,7 +67,7 @@ table tbl {
 		h.ethernet.srcAddr exact
 	}
 	actions {
-		tbl_set_group_id
+		tbl_set_group_i_7
 		NoAction
 	}
 	default_action NoAction args none 
@@ -77,7 +77,7 @@ table tbl {
 
 table as {
 	key {
-		m.MainControlT_as_member_id exact
+		m.MainControlT_as_6 exact
 	}
 	actions {
 		NoAction
@@ -92,7 +92,7 @@ table as {
 selector as_sel {
 	group_id m.MainControlT_as_group_id
 	selector {
-		m.local_metadata_data
+		m.local_metadata__3
 	}
 	member_id m.MainControlT_as_member_id
 	n_groups_max 1024
@@ -100,19 +100,19 @@ selector as_sel {
 }
 
 apply {
-	rx m.pna_main_input_metadata_input_port
+	rx m.pna_main_input__2
 	extract h.ethernet
 	jmpeq MAINPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
-	MAINPARSERIMPL_ACCEPT :	mov m.MainControlT_as_member_id 0x0
-	mov m.MainControlT_as_group_id 0x0
+	MAINPARSERIMPL_ACCEPT :	mov m.MainControlT_as_6 0x0
+	mov m.MainControlT_as_5 0x0
 	table tbl
 	table as_sel
 	table as
 	emit h.ethernet
 	emit h.ipv4
-	tx m.pna_main_output_metadata_output_port
+	tx m.pna_main_output_4
 }
 
 

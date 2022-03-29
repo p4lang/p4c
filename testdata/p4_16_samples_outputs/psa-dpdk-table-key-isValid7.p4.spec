@@ -12,7 +12,7 @@ struct ipv4_t {
 	bit<8> diffserv
 	bit<16> totalLen
 	bit<16> identification
-	bit<16> flags_fragOffset
+	bit<16> flags_fragOffse_0
 	bit<8> ttl
 	bit<8> protocol
 	bit<16> hdrChecksum
@@ -26,40 +26,40 @@ struct tcp_t {
 	bit<16> dstPort
 	bit<32> seqNo
 	bit<32> ackNo
-	bit<16> dataOffset_res_ecn_ctrl
+	bit<16> dataOffset_res__1
 	bit<16> window
 	bit<16> checksum
 	bit<16> urgentPtr
 }
 
-struct psa_ingress_output_metadata_t {
-	bit<8> class_of_service
+struct psa_ingress_out_2 {
+	bit<8> class_of_servic_3
 	bit<8> clone
-	bit<16> clone_session_id
+	bit<16> clone_session_i_4
 	bit<8> drop
 	bit<8> resubmit
 	bit<32> multicast_group
 	bit<32> egress_port
 }
 
-struct psa_egress_output_metadata_t {
+struct psa_egress_outp_5 {
 	bit<8> clone
-	bit<16> clone_session_id
+	bit<16> clone_session_i_4
 	bit<8> drop
 }
 
-struct psa_egress_deparser_input_metadata_t {
+struct psa_egress_depa_6 {
 	bit<32> egress_port
 }
 
 struct metadata {
-	bit<32> psa_ingress_input_metadata_ingress_port
-	bit<8> psa_ingress_output_metadata_drop
-	bit<32> psa_ingress_output_metadata_egress_port
-	bit<16> local_metadata_data
-	bit<8> Ingress_tbl_ethernet_isValid
-	bit<8> Ingress_tbl_tcp_isValid
-	bit<8> Ingress_tbl_ipv4_isValid
+	bit<32> psa_ingress_inp_7
+	bit<8> psa_ingress_out_8
+	bit<32> psa_ingress_out_9
+	bit<16> local_metadata__10
+	bit<8> Ingress_tbl_eth_11
+	bit<8> Ingress_tbl_tcp_12
+	bit<8> Ingress_tbl_ipv_13
 }
 metadata instanceof metadata
 
@@ -72,15 +72,15 @@ action NoAction args none {
 }
 
 action execute_1 args none {
-	mov m.local_metadata_data 0x1
+	mov m.local_metadata__10 0x1
 	return
 }
 
 table tbl {
 	key {
-		m.Ingress_tbl_ethernet_isValid exact
-		m.Ingress_tbl_tcp_isValid exact
-		m.Ingress_tbl_ipv4_isValid exact
+		m.Ingress_tbl_eth_11 exact
+		m.Ingress_tbl_tcp_12 exact
+		m.Ingress_tbl_ipv_13 exact
 	}
 	actions {
 		NoAction
@@ -92,8 +92,8 @@ table tbl {
 
 
 apply {
-	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	rx m.psa_ingress_inp_7
+	mov m.psa_ingress_out_8 0x0
 	extract h.ethernet
 	mov m.tmpMask h.ethernet.etherType
 	and m.tmpMask 0xf00
@@ -106,21 +106,21 @@ apply {
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
-	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_tbl_ethernet_isValid 1
+	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_tbl_eth_11 1
 	jmpv LABEL_END h.ethernet
-	mov m.Ingress_tbl_ethernet_isValid 0
-	LABEL_END :	mov m.Ingress_tbl_tcp_isValid 1
+	mov m.Ingress_tbl_eth_11 0
+	LABEL_END :	mov m.Ingress_tbl_tcp_12 1
 	jmpv LABEL_END_0 h.tcp
-	mov m.Ingress_tbl_tcp_isValid 0
-	LABEL_END_0 :	mov m.Ingress_tbl_ipv4_isValid 1
+	mov m.Ingress_tbl_tcp_12 0
+	LABEL_END_0 :	mov m.Ingress_tbl_ipv_13 1
 	jmpv LABEL_END_1 h.ipv4
-	mov m.Ingress_tbl_ipv4_isValid 0
+	mov m.Ingress_tbl_ipv_13 0
 	LABEL_END_1 :	table tbl
-	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	jmpneq LABEL_DROP m.psa_ingress_out_8 0x0
 	emit h.ethernet
 	emit h.ipv4
 	emit h.tcp
-	tx m.psa_ingress_output_metadata_egress_port
+	tx m.psa_ingress_out_9
 	LABEL_DROP :	drop
 }
 

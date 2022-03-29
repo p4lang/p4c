@@ -10,7 +10,7 @@ struct ipv4_t {
 	bit<8> diffserv
 	bit<16> totalLen
 	bit<16> identification
-	bit<16> flags_fragOffset
+	bit<16> flags_fragOffse_0
 	bit<8> ttl
 	bit<8> protocol
 	bit<16> hdrChecksum
@@ -23,10 +23,10 @@ struct next_hop_arg_t {
 }
 
 struct main_metadata_t {
-	bit<32> pna_main_input_metadata_direction
-	bit<32> pna_main_input_metadata_input_port
-	bit<32> pna_main_output_metadata_output_port
-	bit<32> MainControlT_tmp
+	bit<32> pna_main_input__1
+	bit<32> pna_main_input__2
+	bit<32> pna_main_output_3
+	bit<32> MainControlT_tm_4
 }
 metadata instanceof main_metadata_t
 
@@ -34,11 +34,11 @@ header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 
 action next_hop args instanceof next_hop_arg_t {
-	mov m.pna_main_output_metadata_output_port t.vport
+	mov m.pna_main_output_3 t.vport
 	return
 }
 
-action default_route_drop args none {
+action default_route_d_5 args none {
 	drop
 	return
 }
@@ -49,29 +49,29 @@ table ipv4_da_lpm {
 	}
 	actions {
 		next_hop
-		default_route_drop
+		default_route_d_5
 	}
-	default_action default_route_drop args none 
+	default_action default_route_d_5 args none 
 	size 0x10000
 }
 
 
 apply {
-	rx m.pna_main_input_metadata_input_port
+	rx m.pna_main_input__2
 	extract h.ethernet
 	jmpeq MAINPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
-	jmpeq LABEL_TRUE_0 m.pna_main_input_metadata_direction 0x0
-	mov m.MainControlT_tmp h.ipv4.dstAddr
+	jmpeq LABEL_TRUE_0 m.pna_main_input__1 0x0
+	mov m.MainControlT_tm_4 h.ipv4.dstAddr
 	jmp LABEL_END_0
-	LABEL_TRUE_0 :	mov m.MainControlT_tmp h.ipv4.srcAddr
-	LABEL_END_0 :	jmpneq LABEL_END m.MainControlT_tmp h.ipv4.dstAddr
+	LABEL_TRUE_0 :	mov m.MainControlT_tm_4 h.ipv4.srcAddr
+	LABEL_END_0 :	jmpneq LABEL_END m.MainControlT_tm_4 h.ipv4.dstAddr
 	table ipv4_da_lpm
 	LABEL_END :	emit h.ethernet
 	emit h.ipv4
-	tx m.pna_main_output_metadata_output_port
+	tx m.pna_main_output_3
 }
 
 

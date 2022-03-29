@@ -194,4 +194,5 @@ const IR::Node* RemoveUnusedMetadataFields::preorder(IR::DpdkAsmProgram *p) {
     return p;
 }
 
+size_t ShortenTokenLength::count = 0;
 }  // namespace DPDK

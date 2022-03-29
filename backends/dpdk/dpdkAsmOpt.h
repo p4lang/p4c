@@ -159,6 +159,81 @@ class RemoveUnusedMetadataFields : public Transform {
     const IR::Node* preorder(IR::DpdkAsmProgram *p) override;
 };
 
+// This pass shorten the Identifier length
+class ShortenTokenLength : public Transform {
+    std::map<cstring, cstring> nameMap;
+    static size_t count;
+    cstring shortenString(cstring str) {
+        // if id name less than 15 keep it same
+        if (str.size() <= 15)
+            return str;
+        auto itr = nameMap.find(str);
+        if (itr != nameMap.end())
+            return itr->second;
+        cstring newStr = str.substr(0, 15) + "_";
+        newStr += std::to_string(count);
+        count++;
+        nameMap.insert(std::pair<cstring, cstring>(str, newStr));
+        return newStr;
+    }
+
+ public:
+    const IR::Node* preorder(IR::Member *m) override {
+        m->member = shortenString(m->member);
+        return m;
+    }
+
+    const IR::Node* preorder(IR::DpdkStructType *s) override {
+        s->name = shortenString(s->name);
+        return s;
+    }
+
+    const IR::Node* preorder(IR::DpdkHeaderType *h) override {
+        h->name = shortenString(h->name);
+        return h;
+    }
+
+    const IR::Node* preorder(IR::DpdkExternDeclaration *e) override {
+        e->name = shortenString(e->name);
+        return e;
+    }
+
+    const IR::Node* preorder(IR::Declaration *g) override {
+        g->name = shortenString(g->name);
+        return g;
+    }
+
+    const IR::Node* preorder(IR::StructField *f) override {
+        f->name = shortenString(f->name);
+        return f;
+    }
+
+    const IR::Node* preorder(IR::Path *p) override {
+        p->name = shortenString(p->name);
+        return p;
+    }
+
+    const IR::Node* preorder(IR::DpdkAction *a) override {
+        a->name = shortenString(a->name);
+        return a;
+    }
+
+    const IR::Node* preorder(IR::DpdkTable *t) override {
+        t->name = shortenString(t->name);
+        return t;
+    }
+
+    const IR::Node* preorder(IR::DpdkLearner *l) override {
+        l->name = shortenString(l->name);
+        return l;
+    }
+
+    const IR::Node* preorder(IR::DpdkSelector *s) override {
+        s->name = shortenString(s->name);
+        return s;
+    }
+};
+
 // Instructions can only appear in actions and apply block of .spec file.
 // All these individual passes work on the actions and apply block of .spec file.
 class DpdkAsmOptimization : public PassRepeated {

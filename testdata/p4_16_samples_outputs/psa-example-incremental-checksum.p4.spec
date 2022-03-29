@@ -10,7 +10,7 @@ struct ipv4_t {
 	bit<8> diffserv
 	bit<16> totalLen
 	bit<16> identification
-	bit<16> flags_fragOffset
+	bit<16> flags_fragOffse_0
 	bit<8> ttl
 	bit<8> protocol
 	bit<16> hdrChecksum
@@ -23,7 +23,7 @@ struct tcp_t {
 	bit<16> dstPort
 	bit<32> seqNo
 	bit<32> ackNo
-	bit<16> dataOffset_res_ecn_ctrl
+	bit<16> dataOffset_res__1
 	bit<16> window
 	bit<16> checksum
 	bit<16> urgentPtr
@@ -33,23 +33,23 @@ struct cksum_state_t {
 	bit<16> state_0
 }
 
-struct psa_ingress_output_metadata_t {
-	bit<8> class_of_service
+struct psa_ingress_out_2 {
+	bit<8> class_of_servic_3
 	bit<8> clone
-	bit<16> clone_session_id
+	bit<16> clone_session_i_4
 	bit<8> drop
 	bit<8> resubmit
 	bit<32> multicast_group
 	bit<32> egress_port
 }
 
-struct psa_egress_output_metadata_t {
+struct psa_egress_outp_5 {
 	bit<8> clone
-	bit<16> clone_session_id
+	bit<16> clone_session_i_4
 	bit<8> drop
 }
 
-struct psa_egress_deparser_input_metadata_t {
+struct psa_egress_depa_6 {
 	bit<32> egress_port
 }
 
@@ -59,11 +59,11 @@ struct forward_arg_t {
 }
 
 struct metadata {
-	bit<32> psa_ingress_input_metadata_ingress_port
-	bit<8> psa_ingress_output_metadata_drop
-	bit<32> psa_ingress_output_metadata_multicast_group
-	bit<32> psa_ingress_output_metadata_egress_port
-	bit<32> local_metadata__fwd_metadata_old_srcAddr0
+	bit<32> psa_ingress_inp_7
+	bit<8> psa_ingress_out_8
+	bit<32> psa_ingress_out_9
+	bit<32> psa_ingress_out_10
+	bit<32> local_metadata__11
 }
 metadata instanceof metadata
 
@@ -77,16 +77,16 @@ action NoAction args none {
 }
 
 action drop_1 args none {
-	mov m.psa_ingress_output_metadata_drop 1
+	mov m.psa_ingress_out_8 1
 	return
 }
 
 action forward args instanceof forward_arg_t {
-	mov m.local_metadata__fwd_metadata_old_srcAddr0 h.ipv4.srcAddr
+	mov m.local_metadata__11 h.ipv4.srcAddr
 	mov h.ipv4.srcAddr t.srcAddr
-	mov m.psa_ingress_output_metadata_drop 0
-	mov m.psa_ingress_output_metadata_multicast_group 0x0
-	mov m.psa_ingress_output_metadata_egress_port t.port
+	mov m.psa_ingress_out_8 0
+	mov m.psa_ingress_out_9 0x0
+	mov m.psa_ingress_out_10 t.port
 	return
 }
 
@@ -105,8 +105,8 @@ table route {
 
 
 apply {
-	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	rx m.psa_ingress_inp_7
+	mov m.psa_ingress_out_8 0x0
 	extract h.ethernet
 	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp INGRESSPARSERIMPL_ACCEPT
@@ -116,11 +116,11 @@ apply {
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
 	INGRESSPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
 	table route
-	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_out_8 0x0
 	emit h.ethernet
 	emit h.ipv4
 	emit h.tcp
-	tx m.psa_ingress_output_metadata_egress_port
+	tx m.psa_ingress_out_10
 	LABEL_DROP :	drop
 }
 

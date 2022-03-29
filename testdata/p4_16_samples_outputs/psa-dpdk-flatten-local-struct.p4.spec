@@ -18,23 +18,23 @@ struct ipv4_t {
 	bit<32> dst_addr
 }
 
-struct psa_ingress_output_metadata_t {
-	bit<8> class_of_service
+struct psa_ingress_out_0 {
+	bit<8> class_of_servic_1
 	bit<8> clone
-	bit<16> clone_session_id
+	bit<16> clone_session_i_2
 	bit<8> drop
 	bit<8> resubmit
 	bit<32> multicast_group
 	bit<32> egress_port
 }
 
-struct psa_egress_output_metadata_t {
+struct psa_egress_outp_3 {
 	bit<8> clone
-	bit<16> clone_session_id
+	bit<16> clone_session_i_2
 	bit<8> drop
 }
 
-struct psa_egress_deparser_input_metadata_t {
+struct psa_egress_depa_4 {
 	bit<32> egress_port
 }
 
@@ -48,25 +48,25 @@ header ipv4 instanceof ipv4_t
 header outer_ethernet instanceof ethernet_t
 header outer_ipv4 instanceof ipv4_t
 
-struct local_metadata_t {
-	bit<32> psa_ingress_input_metadata_ingress_port
-	bit<8> psa_ingress_output_metadata_drop
-	bit<32> psa_ingress_output_metadata_egress_port
-	bit<16> Ingress_host_info_rx_bytes_0_flex_up_flex_up1_flex_0
+struct local_metadata__5 {
+	bit<32> psa_ingress_inp_6
+	bit<8> psa_ingress_out_7
+	bit<32> psa_ingress_out_8
+	bit<16> Ingress_host_in_9
 }
-metadata instanceof local_metadata_t
+metadata instanceof local_metadata__5
 
 action action1 args instanceof action1_arg_t {
 	jmpneq LABEL_FALSE t.field 0x1
-	mov m.Ingress_host_info_rx_bytes_0_flex_up_flex_up1_flex_0 t.field
+	mov m.Ingress_host_in_9 t.field
 	jmp LABEL_END
-	LABEL_FALSE :	mov m.Ingress_host_info_rx_bytes_0_flex_up_flex_up1_flex_0 t.field1
-	LABEL_END :	mov h.outer_ethernet.ether_type m.Ingress_host_info_rx_bytes_0_flex_up_flex_up1_flex_0
+	LABEL_FALSE :	mov m.Ingress_host_in_9 t.field1
+	LABEL_END :	mov h.outer_ethernet.ether_type m.Ingress_host_in_9
 	return
 }
 
 action drop_1 args none {
-	mov m.psa_ingress_output_metadata_egress_port 0x4
+	mov m.psa_ingress_out_8 0x4
 	return
 }
 
@@ -84,11 +84,11 @@ table table1 {
 
 
 apply {
-	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	rx m.psa_ingress_inp_6
+	mov m.psa_ingress_out_7 0x0
 	table table1
-	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
-	tx m.psa_ingress_output_metadata_egress_port
+	jmpneq LABEL_DROP m.psa_ingress_out_7 0x0
+	tx m.psa_ingress_out_8
 	LABEL_DROP :	drop
 }
 
