@@ -28,7 +28,7 @@ DeparserBodyTranslatorPSA::DeparserBodyTranslatorPSA(const EBPFDeparserPSA *depa
 void DeparserBodyTranslatorPSA::processFunction(const P4::ExternFunction *function) {
     auto dprs = dynamic_cast<const EBPFDeparserPSA*>(deparser);
     if (function->method->name.name == "psa_resubmit") {
-        builder->appendFormat("!%s->drop && %s->resubmit",
+        builder->appendFormat("(!%s->drop && %s->resubmit)",
                               dprs->istd->name.name, dprs->istd->name.name);
     }
 }

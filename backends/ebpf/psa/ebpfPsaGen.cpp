@@ -579,9 +579,11 @@ bool ConvertToEBPFControlPSA::preorder(const IR::TableBlock *tblblk) {
 }
 
 bool ConvertToEBPFControlPSA::preorder(const IR::AssignmentStatement *a) {
-    // the condition covers both ingress and egress timestamp
-    if (a->right->toString().endsWith("timestamp")) {
-        control->timestampIsUsed = true;
+    if (auto m = a->right->to<IR::Member>()) {
+        // the condition covers both ingress and egress timestamp
+        if (m->member.name.endsWith("timestamp")) {
+            control->timestampIsUsed = true;
+        }
     }
     return true;
 }
