@@ -1558,7 +1558,6 @@ const IR::Node* CopyMatchKeysToSingleStruct::postorder(IR::KeyElement* element) 
         keyName = keyName.replace('.','_');
         keyName = keyName.replace("h_",control->name.toString() + "_" + table->name.toString()+"_");
         IR::ID keyNameId(refMap->newName(keyName));
-        auto keyPathExpr = new IR::PathExpression(keyNameId);
         auto decl = new IR::Declaration_Variable(keyNameId,
                                                  element->expression->type, nullptr);
         // Store the compiler generated table keys in Program structure. These will be

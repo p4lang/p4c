@@ -52,6 +52,7 @@ struct metadata_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<32> local_metadata_port_out
+	bit<48> ingress_tbl_ethernet_srcAddr
 	bit<32> IngressParser_parser_tmp
 	bit<32> Ingress_tmp
 	bit<32> Ingress_tmp_0
@@ -69,7 +70,6 @@ struct metadata_t {
 	bit<32> Ingress_tmp_10
 	bit<32> Ingress_key
 	bit<32> Ingress_key_0
-	bit<48> Ingress_tbl_ethernet_srcAddr
 }
 metadata instanceof metadata_t
 
@@ -121,7 +121,7 @@ action execute_1 args instanceof execute_1_arg_t {
 
 table tbl {
 	key {
-		m.Ingress_tbl_ethernet_srcAddr exact
+		m.ingress_tbl_ethernet_srcAddr exact
 		m.Ingress_key exact
 		m.Ingress_key_0 exact
 	}
@@ -146,7 +146,7 @@ apply {
 	jmpneq LABEL_END m.local_metadata_port_out 0x1
 	mov m.Ingress_key h.ipv4.hdrChecksum
 	mov m.Ingress_key_0 h.ipv4.version_ihl
-	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	mov m.ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	table tbl
 	regadd counter0_0_packets 0x3ff 1
 	regadd counter0_0_bytes 0x3ff 0x14
