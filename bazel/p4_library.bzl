@@ -143,7 +143,7 @@ p4_library = rule(
         "_p4c": attr.label(
             default = Label("@com_github_p4lang_p4c//:p4c_bmv2"),
             executable = True,
-            cfg = "target",
+            cfg = "host",
         ),
         "_p4include": attr.label(
             default = Label("@com_github_p4lang_p4c//:p4include"),
@@ -224,7 +224,7 @@ p4_graphs = rule(
         "_p4c": attr.label(
             default = Label("@com_github_p4lang_p4c//:p4c_graphs"),
             executable = True,
-            cfg = "target",
+            cfg = "host",
         ),
         "_p4include": attr.label(
             default = Label("@com_github_p4lang_p4c//:p4include"),

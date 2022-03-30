@@ -24,6 +24,7 @@ limitations under the License.
 #include "frontends/p4/moveDeclarations.h"
 #include "midend/eliminateTypedefs.h"
 #include "midend/removeComplexExpressions.h"
+#include "midend/simplifyKey.h"
 #include "ir/dbprint.h"
 #include "ir/ir.h"
 #include "lib/stringify.h"
@@ -54,6 +55,11 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         // TBD: implement dpdk lowering passes instead of reusing bmv2's lowering pass.
 
         new ByteAlignment(typeMap, refMap, &structure),
+        new P4::SimplifyKey(
+                refMap, typeMap,
+                new P4::OrPolicy(new P4::IsValid(refMap, typeMap),
+                                 new P4::IsMask())),
+        new P4::TypeChecking(refMap, typeMap),
         new BMV2::LowerExpressions(typeMap),
         new DismantleMuxExpressions(typeMap, refMap),
         new P4::RemoveComplexExpressions(refMap, typeMap,
