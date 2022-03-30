@@ -209,12 +209,12 @@ const IR::Node* RemoveUnusedMetadataFields::preorder(IR::DpdkAsmProgram *p) {
 }
 
 bool ValidateTableKeys::isMetadataStruct(const IR::Type_Struct *st) {
-       for (auto anno : st->annotations->annotations) {
-            if (anno->name == "__metadata__") {
-                return true;
-            }
-       }
-       return false;
+    for (auto anno : st->annotations->annotations) {
+        if (anno->name == "__metadata__") {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
@@ -222,6 +222,7 @@ bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
     for (auto st : p->structType) {
         if (isMetadataStruct(st)) {
             metaStruct = st;
+            break;
         }
     }
     for (auto tbl : p->tables) {
@@ -255,13 +256,14 @@ bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
                             BUG("Unexpected type %1%", t->path->name);
                         }
                     } else {
-                        BUG("Unexpected type %1%",field_type->node_type_name());
+                        BUG("Unexpected type %1%", field_type->node_type_name());
                     }
                  }
              }
-            if ((max + size_max_field - min) > 64 * 8) {
-                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,"%1%: All table keys together "
-                        "with holes in the underlying structure should fit in 64 bytes",tbl->name);
+            if ((max + size_max_field - min) > DPDK_TABLE_MAX_KEY_SIZE) {
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: All table keys together with"
+                        " holes in the underlying structure should fit in 64 bytes", tbl->name);
+                return false;
             }
         }
     }

@@ -29,6 +29,9 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/gmputil.h"
 #include "lib/json.h"
+
+#define DPDK_TABLE_MAX_KEY_SIZE 64*8
+
 namespace DPDK {
 // This pass removes label that no jmps jump to
 class RemoveRedundantLabel : public Transform {
