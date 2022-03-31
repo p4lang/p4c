@@ -17,51 +17,15 @@ limitations under the License.
 
 #include <core.p4>
 #include <psa.p4>
-
-typedef bit<48>  EthernetAddress;
-typedef bit<32>  IPv4Address;
-
-header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
-}
-
-header ipv4_h {
-    bit<4>       version;
-    bit<4>       ihl;
-    bit<8>       diffserv;
-    bit<16>      totalLen;
-    bit<16>      identification;
-    bit<3>       flags;
-    bit<13>      fragOffset;
-    bit<8>       ttl;
-    bit<8>       protocol;
-    bit<16>      hdrChecksum;
-    IPv4Address  srcAddr;
-    IPv4Address  dstAddr;
-}
-
-header mpls_h {
-    bit<20> label;
-    bit<3>  tc;
-    bit<1>  stack;
-    bit<8>  ttl;
-}
-
-struct fwd_metadata_t {
-}
-
-struct empty_t {}
+#include "common_headers.p4"
 
 struct metadata {
-    fwd_metadata_t fwd_metadata;
 }
 
 struct headers {
     ethernet_t ethernet;
-    mpls_h     mpls;
-    ipv4_h     ipv4;
+    mpls_t     mpls;
+    ipv4_t     ipv4;
 }
 
 parser IngressParserImpl(packet_in buffer,

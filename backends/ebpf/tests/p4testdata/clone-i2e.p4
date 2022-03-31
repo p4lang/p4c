@@ -17,14 +17,7 @@ limitations under the License.
 
 #include <core.p4>
 #include <psa.p4>
-
-typedef bit<48>  EthernetAddress;
-
-header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
-}
+#include "common_headers.p4"
 
 struct empty_metadata_t {
 }

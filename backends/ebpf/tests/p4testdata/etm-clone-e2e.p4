@@ -17,16 +17,9 @@ limitations under the License.
 
 #include <core.p4>
 #include <psa.p4>
+#include "common_headers.p4"
 
 // TODO: use clone_i2e_metadata_t
-
-typedef bit<48>  EthernetAddress;
-
-header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
-}
 
 struct recirculate_metadata_t {
 }
@@ -80,7 +73,6 @@ parser EgressParserImpl(packet_in buffer,
     }
 
     state copy_clone_e2e_meta {
-        // parsed_hdr.ethernet.dstAddr = (EthernetAddress) 0x11;
         transition accept;
     }
 }

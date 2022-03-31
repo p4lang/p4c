@@ -17,17 +17,10 @@ limitations under the License.
 
 #include <core.p4>
 #include <psa.p4>
+#include "common_headers.p4"
 
 // TODO: use recirculate_metadata_t
 // TODO: use PSA_PORT_RECIRCULATE instead of direct number of port
-
-typedef bit<48>  EthernetAddress;
-
-header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
-}
 
 struct recirculate_metadata_t {
 }
