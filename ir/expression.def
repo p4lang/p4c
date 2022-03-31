@@ -442,6 +442,16 @@ class ListCompileTimeValue : CompileTimeValue {
 #nodbprint
 }
 
+/// A StructExpression where all the components are compile-time values.
+/// This is used by the evaluator pass.
+class StructCompileTimeValue : CompileTimeValue {
+    inline Vector<Node> components;
+    validate {
+        for (auto v : components)
+            BUG_CHECK(v->is<CompileTimeValue>(), "%1%: not a compile-time value", v); }
+#nodbprint
+}
+
 /// Experimental: an extern methond/function call with constant arguments to be
 /// evaluated at compile time
 class CompileTimeMethodCall : MethodCallExpression, CompileTimeValue {

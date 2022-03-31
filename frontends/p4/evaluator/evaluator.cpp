@@ -318,6 +318,22 @@ bool Evaluator::preorder(const IR::ListExpression *list) {
     return false;
 }
 
+bool Evaluator::preorder(const IR::StructExpression *se) {
+    LOG2("Evaluating " << se);
+    visit(se->components);
+    IR::Vector<IR::Node> comp;
+    for (auto e : se->components) {
+        if (auto value = getValue(e->expression)) {
+            CHECK_NULL(value);
+            comp.push_back(value->getNode());
+        } else {
+            return false;
+        }
+    }
+    setValue(se, new IR::StructCompileTimeValue(std::move(comp)));
+    return false;
+}
+
 //////////////////////////////////////
 
 EvaluatorPass::EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap) {

@@ -122,9 +122,9 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             BUG("Unknown parser %s", kv.second->name);
     }
     auto ingress_converter =
-        new ConvertToDpdkControl(refmap, typemap, structure);
+        new ConvertToDpdkControl(refmap, typemap, structure, metadataStruct);
     auto egress_converter =
-        new ConvertToDpdkControl(refmap, typemap, structure);
+        new ConvertToDpdkControl(refmap, typemap, structure, metadataStruct);
     for (auto kv : structure->pipelines) {
         if (kv.first == "Ingress")
             kv.second->apply(*ingress_converter);
@@ -139,9 +139,9 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             BUG("Unknown control block %s", kv.second->name);
     }
     auto ingress_deparser_converter =
-        new ConvertToDpdkControl(refmap, typemap, structure, true);
+        new ConvertToDpdkControl(refmap, typemap, structure, metadataStruct, true);
     auto egress_deparser_converter =
-        new ConvertToDpdkControl(refmap, typemap, structure);
+        new ConvertToDpdkControl(refmap, typemap, structure, metadataStruct);
     for (auto kv : structure->deparsers) {
         if (kv.first == "IngressDeparser")
             kv.second->apply(*ingress_deparser_converter);
@@ -501,7 +501,7 @@ bool ConvertToDpdkParser::preorder(const IR::ParserState *) { return false; }
 
 // =====================Control=============================
 bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
-    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
+    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure, metadataStruct);
     helper->setCalledBy(this);
     a->body->apply(*helper);
     auto stmt_list = new IR::IndexedVector<IR::DpdkAsmStatement>();
@@ -641,7 +641,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
             structure->push_variable(new IR::DpdkDeclaration(l));
         }
     }
-    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
+    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure, metadataStruct);
     helper->setCalledBy(this);
     c->body->apply(*helper);
     if (deparser && structure->isPSA()) {

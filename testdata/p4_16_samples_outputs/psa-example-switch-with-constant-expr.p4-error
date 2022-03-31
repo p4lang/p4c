@@ -1,9 +1,3 @@
 psa-example-switch-with-constant-expr.p4(65): [--Wwarn=mismatch] warning: 16w2: constant expression in switch
         switch (16w2) {
                 ^^^^
-psa.p4(546): [--Wwarn=unused] warning: 'W' is unused
-extern Counter<W, S> {
-               ^
-psa.p4(575): [--Wwarn=unused] warning: 'W' is unused
-extern DirectCounter<W> {
-                     ^

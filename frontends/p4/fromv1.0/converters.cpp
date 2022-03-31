@@ -350,10 +350,13 @@ const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
                     destination = new IR::DefaultExpression();
                 } else {
                     cstring act_name = a.first;
+                    auto path = apply->position.get<IR::Path>(act_name);
+                    CHECK_NULL(path);
                     cstring full_name = table->name + '.' + act_name;
                     if (renameMap->count(full_name))
                         act_name = renameMap->at(full_name);
-                    destination = new IR::PathExpression(IR::ID(act_name)); }
+                    destination = new IR::PathExpression(
+                        new IR::Path(path->srcInfo, IR::ID(act_name))); }
                 auto swcase = new IR::SwitchCase(a.second->srcInfo, destination, stat);
                 cases.insert(insert_at, swcase); }
             auto check = new IR::Member(call, IR::Type_Table::action_run);

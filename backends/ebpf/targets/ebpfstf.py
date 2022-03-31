@@ -62,7 +62,11 @@ def _generate_control_actions(cmds):
                       " exit(1); }\n\t" % tbl_name)
         generated += ("struct %s_value %s = {\n\t\t" % (
             cmd.table, value_name))
-        generated += ".action = %s,\n\t\t" % (cmd.action[0])
+        if cmd.action[0] == "_NoAction":
+            generated += ".action = 0,\n\t\t"
+        else:
+            action_full_name = "{}_ACT_{}".format(cmd.table.upper(), cmd.action[0].upper())
+            generated += ".action = %s,\n\t\t" % action_full_name
         generated += ".u = {.%s = {" % cmd.action[0]
         for val_num, val_field in enumerate(cmd.action[1]):
             generated += "%s," % val_field[1]

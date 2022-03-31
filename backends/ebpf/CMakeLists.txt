@@ -26,6 +26,7 @@ set (P4C_EBPF_SRCS
   ebpfProgram.cpp
   ebpfTable.cpp
   ebpfControl.cpp
+  ebpfDeparser.cpp
   ebpfParser.cpp
   ebpfOptions.cpp
   target.cpp
@@ -40,6 +41,7 @@ set (P4C_EBPF_HDRS
   codeGen.h
   ebpfBackend.h
   ebpfControl.h
+  ebpfDeparser.h
   ebpfModel.h
   ebpfObject.h
   ebpfProgram.h

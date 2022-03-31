@@ -38,7 +38,7 @@ struct metadata_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_multicast_group
 	bit<32> psa_ingress_output_metadata_egress_port
-	bit<4> Ingress_tmp
+	bit<32> Ingress_tmp
 	bit<48> Ingress_tmp_0
 	bit<32> Ingress_int_packet_path
 }
