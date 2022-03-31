@@ -198,18 +198,18 @@ psabpf-ctl add-port pipe <PIPELINE-ID> dev <INTF>
 ## Running PTF tests
 
 PSA implementation for eBPF backend is covered by a set of PTF tests that verify a correct behavior of various PSA mechanisms. 
-The test scripts, PTF test cases and test P4 programs are located under `backends/ebpf/tests`. 
+The test scripts, PTF test cases and test P4 programs are located under `backends/ebpf/tests`. The tests must be executed from this directory.
 
 To run all PTF tests:
 
 ```
-sudo ./backends/ebpf/tests/test.sh
+sudo ./test.sh
 ```
 
 You can also specify a single PTF test to run:
 
 ```
-sudo ./backends/ebpf/tests/test.sh test.BridgedMetadataPSATest
+sudo ./test.sh test.BridgedMetadataPSATest
 ```
 
 It might be also useful to enable tracing for troubleshooting with `bpftool prog tracelog`:
