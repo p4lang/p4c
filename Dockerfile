@@ -20,6 +20,8 @@ ARG VALIDATION=OFF
 ARG BUILD_STATIC_RELEASE=OFF
 # No questions asked during package installation.
 ARG DEBIAN_FRONTEND=noninteractive
+# Whether to install dependencies required to run PTF-ebpf tests
+ARG INSTALL_PTF_EBPF_DEPENDENCIES=OFF
 
 # Delegate the build to tools/ci-build.
 COPY . /p4c/
