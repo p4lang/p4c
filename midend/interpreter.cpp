@@ -314,23 +314,13 @@ SymbolicHeaderUnion::SymbolicHeaderUnion(const IR::Type_HeaderUnion* type,
                                          const SymbolicValueFactory* factory) :
         SymbolicStruct(type, uninitialized, factory) {}
 
-void SymbolicHeaderUnion::setValid(bool v, cstring field) {
-    CHECK_NULL(field);
-    fieldValue[field]->to<SymbolicHeader>()->setValid(v);
-    for (auto f : type->to<IR::Type_StructLike>()->fields) {
-        if (f->name.name != field)
-            fieldValue[f->name.name]->checkedTo<SymbolicHeader>()->setValid(false);
-    }
-}
-
 SymbolicBool* SymbolicHeaderUnion::isValid() const {
     for (auto f : type->to<IR::Type_StructLike>()->fields) {
          if (fieldValue.count(f->name.name)) {
-             if (const auto fildValid = fieldValue.at(f->name.name)
+             if (const auto fieldValid = fieldValue.at(f->name.name)
                                        ->checkedTo<SymbolicHeader>()
                                        ->valid) {
-                 if (fildValid->isKnown())
-                     return new SymbolicBool(fildValid->value);
+                return new SymbolicBool(fieldValid->value);
              }
          } else {
              BUG("The number of fields in %1% is different from HeaderUnion fieldValue", type);
@@ -340,8 +330,6 @@ SymbolicBool* SymbolicHeaderUnion::isValid() const {
 }
 
 SymbolicValue* SymbolicHeaderUnion::get(const IR::Node* node, cstring field) const {
-    if (this->isValid()->isKnown()  && !this->isValid()->value)
-        return new SymbolicStaticError(node,"Reading field from invalid header union");
     return SymbolicStruct::get(node, field);
 }
 
@@ -371,8 +359,6 @@ bool SymbolicHeaderUnion::merge(const SymbolicValue* other) {
     bool changes = false;
     for (auto f : hv->fieldValue)
         changes = changes || fieldValue[f.first]->merge(f.second);
-    auto valid = this->isValid();
-    changes = changes || valid->merge(hv->isValid());
     return changes;
 }
 
@@ -380,20 +366,11 @@ bool SymbolicHeaderUnion::equals(const SymbolicValue* other) const {
     if (!other->is<SymbolicHeaderUnion>())
         return false;
     auto sh = other->to<SymbolicHeaderUnion>();
-    auto valid = this->isValid();
-    if (!valid->equals(sh->isValid()))
-        return false;
-    if (valid->isKnown() && !valid->value)
-        // Invalid headers are equal
-        return true;
     return SymbolicStruct::equals(other);
 }
 
 void SymbolicHeaderUnion::dbprint(std::ostream& out) const {
     out << "{ ";
-    out << "valid=>";
-    auto valid = this->isValid();
-    valid->dbprint(out);
 #if 0
     for (auto f : fieldValue) {
         out << ", ";
@@ -505,9 +482,6 @@ void SymbolicArray::shift(int amount) {
             if (values[i]->is<SymbolicHeader>()) {
                 values[i]->to<SymbolicHeader>()->setValid(false);
             }
-            if (values[i]->is<SymbolicHeaderUnion>()) {
-                values[i]->to<SymbolicHeaderUnion>()->setValid(false);
-            }
         }
     } else if (amount > 0) {
         for (unsigned i = 0; i < values.size() - amount; i++)
@@ -515,9 +489,6 @@ void SymbolicArray::shift(int amount) {
         for (unsigned i = 0; i < (unsigned)amount; i++){
             if (values[i]->is<SymbolicHeader>()) {
                 values[i]->to<SymbolicHeader>()->setValid(false);
-            }
-            if (values[i]->is<SymbolicHeaderUnion>()) {
-                values[i]->to<SymbolicHeaderUnion>()->setValid(false);
             }
         }
     }
@@ -1127,13 +1098,11 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
         // This code is necessary to find the parent and to check whether the parent
         // is a header union.
         const IR::Expression* node = nullptr;
-        cstring memberName = nullptr;
         if (auto member = expression->method->checkedTo<IR::Member>()
                                 ->expr->to<IR::Member>()) {
             node = member->expr;
-            memberName = member->member.name;
         } else if (auto expr = expression->method->checkedTo<IR::Member>()->expr) {
-            node = expr;
+            node = expr;;
         }
         CHECK_NULL(node);
         auto structVar = get(node);
@@ -1142,8 +1111,11 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
             if (auto hv = structVar->to<SymbolicHeader>()) {
                 hv->setValid(name == IR::Type_Header::setValid);
             } else if (auto headerUnion = structVar->to<SymbolicHeaderUnion>()) {
-                headerUnion->setValid(name == IR::Type_Header::setValid,
-                                    memberName);
+                auto member = expression->method->checkedTo<IR::Member>()
+                                    ->expr->checkedTo<IR::Member>();
+                auto memberVar = get(member);
+                auto hv = memberVar->checkedTo<SymbolicHeader>();
+                hv->setValid(name == IR::Type_Header::setValid);
             }
             set(expression, SymbolicVoid::get());
             return;
