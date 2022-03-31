@@ -1105,7 +1105,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
                                 ->expr->to<IR::Member>()) {
             node = member->expr;
         } else if (auto expr = expression->method->checkedTo<IR::Member>()->expr) {
-            node = expr;;
+            node = expr;
         }
         CHECK_NULL(node);
         auto structVar = get(node);
