@@ -195,6 +195,29 @@ In the next step, for each interface that should be attached to PSA-eBPF run:
 psabpf-ctl add-port pipe <PIPELINE-ID> dev <INTF>
 ```
 
+## Running PTF tests
+
+PSA implementation for eBPF backend is covered by a set of PTF tests that verify a correct behavior of various PSA mechanisms. 
+The test scripts, PTF test cases and test P4 programs are located under `backends/ebpf/tests`. 
+
+To run all PTF tests:
+
+```
+sudo ./backends/ebpf/tests/test.sh
+```
+
+You can also specify a single PTF test to run:
+
+```
+sudo ./backends/ebpf/tests/test.sh test.BridgedMetadataPSATest
+```
+
+It might be also useful to enable tracing for troubleshooting with `bpftool prog tracelog`:
+
+```
+sudo ./test.sh --trace=on
+```
+
 ## Troubleshooting
 
 The PSA implementation for eBPF backend generates standard BPF objects that can be inspected using `bpftool`.
