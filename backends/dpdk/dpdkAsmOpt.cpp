@@ -234,7 +234,7 @@ bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
         min = max = -1;
         for (auto key : keys->keyElements) {
             BUG_CHECK(key->expression->is<IR::Member>(), "Table keys must be a structure field. "
-                                                          "%1% is not a structure field");
+                                                          "%1% is not a structure field", key);
             auto keyMem = key->expression->to<IR::Member>();
             auto type = keyMem->expr->type;
             if (type->is<IR::Type_Struct>() && isMetadataStruct(type->to<IR::Type_Struct>())) {
