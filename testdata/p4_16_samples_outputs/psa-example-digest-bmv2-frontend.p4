@@ -123,24 +123,20 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
         default_action = unknown_source();
     }
     @name("ingress.do_L2_forward") action do_L2_forward(@name("egress_port") PortId_t egress_port_3) {
-        @noWarnUnused {
-            meta_1 = ostd;
-            egress_port_1 = egress_port_3;
-            meta_1.drop = false;
-            meta_1.multicast_group = (MulticastGroup_t)32w0;
-            meta_1.egress_port = egress_port_1;
-            ostd = meta_1;
-        }
+        meta_1 = ostd;
+        egress_port_1 = egress_port_3;
+        meta_1.drop = false;
+        meta_1.multicast_group = (MulticastGroup_t)32w0;
+        meta_1.egress_port = egress_port_1;
+        ostd = meta_1;
     }
     @name("ingress.do_tst") action do_tst(@name("egress_port") PortId_t egress_port_4, @name("serEnumT") EthTypes serEnumT) {
-        @noWarnUnused {
-            meta_2 = ostd;
-            egress_port_2 = egress_port_4;
-            meta_2.drop = false;
-            meta_2.multicast_group = (MulticastGroup_t)32w0;
-            meta_2.egress_port = egress_port_2;
-            ostd = meta_2;
-        }
+        meta_2 = ostd;
+        egress_port_2 = egress_port_4;
+        meta_2.drop = false;
+        meta_2.multicast_group = (MulticastGroup_t)32w0;
+        meta_2.egress_port = egress_port_2;
+        ostd = meta_2;
     }
     @name("ingress.l2_tbl") table l2_tbl_0 {
         key = {

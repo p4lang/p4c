@@ -21,7 +21,7 @@ limitations under the License.
 #ifndef __PNA_P4__
 #define __PNA_P4__
 
-#include<core.p4>
+#include <core.p4>
 
 /**
  *   P4-16 declaration of the Portable NIC Architecture
@@ -370,6 +370,7 @@ enum PNA_CounterType_t {
 /// Indirect counter with n_counters independent counter values, where
 /// every counter value has a data plane size specified by type W.
 
+@noWarn("unused")
 extern Counter<W, S> {
   Counter(bit<32> n_counters, PNA_CounterType_t type);
   void count(in S index);
@@ -377,6 +378,7 @@ extern Counter<W, S> {
 // END:Counter_extern
 
 // BEGIN:DirectCounter_extern
+@noWarn("unused")
 extern DirectCounter<W> {
   DirectCounter(PNA_CounterType_t type);
   void count();
@@ -670,14 +672,14 @@ control PreControlT<PH, PM>(
     in    pna_pre_input_metadata_t  istd,
     inout pna_pre_output_metadata_t ostd);
 
-parser MainParserT<PM, MH, MM>(
+parser MainParserT<MH, MM>(
     packet_in pkt,
     //in    PM pre_user_meta,
     out   MH main_hdr,
     inout MM main_user_meta,
     in    pna_main_parser_input_metadata_t istd);
 
-control MainControlT<PM, MH, MM>(
+control MainControlT<MH, MM>(
     //in    PM pre_user_meta,
     inout MH main_hdr,
     inout MM main_user_meta,
@@ -691,9 +693,9 @@ control MainDeparserT<MH, MM>(
     in    pna_main_output_metadata_t ostd);
 
 package PNA_NIC<PH, PM, MH, MM>(
-    MainParserT<PM, MH, MM> main_parser,
+    MainParserT<MH, MM> main_parser,
     PreControlT<PH, PM> pre_control,
-    MainControlT<PM, MH, MM> main_control,
+    MainControlT<MH, MM> main_control,
     MainDeparserT<MH, MM> main_deparser);
 // END:Programmable_blocks
 

@@ -1,0 +1,3 @@
+issue3153.p4(1): [--Werror=expected] error: false: expected an integer value
+const bool b = +false;
+                ^^^^^

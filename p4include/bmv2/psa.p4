@@ -363,7 +363,7 @@ match_kind {
 /// This action does not change whether a clone or resubmit operation
 /// will occur.
 
-@noWarnUnused
+@noWarn("unused")
 action send_to_port(inout psa_ingress_output_metadata_t meta,
                     in PortId_t egress_port)
 {
@@ -380,7 +380,7 @@ action send_to_port(inout psa_ingress_output_metadata_t meta,
 /// This action does not change whether a clone or resubmit operation
 /// will occur.
 
-@noWarnUnused
+@noWarn("unused")
 action multicast(inout psa_ingress_output_metadata_t meta,
                  in MulticastGroup_t multicast_group)
 {
@@ -396,7 +396,7 @@ action multicast(inout psa_ingress_output_metadata_t meta,
 /// This action does not change whether a clone will occur.  It will
 /// prevent a packet from being resubmitted.
 
-@noWarnUnused
+@noWarn("unused")
 action ingress_drop(inout psa_ingress_output_metadata_t meta)
 {
     meta.drop = true;
@@ -409,7 +409,7 @@ action ingress_drop(inout psa_ingress_output_metadata_t meta)
 
 /// This action does not change whether a clone will occur.
 
-@noWarnUnused
+@noWarn("unused")
 action egress_drop(inout psa_egress_output_metadata_t meta)
 {
     meta.drop = true;
@@ -543,6 +543,7 @@ enum PSA_CounterType_t {
 /// Indirect counter with n_counters independent counter values, where
 /// every counter value has a data plane size specified by type W.
 
+@noWarn("unused")
 extern Counter<W, S> {
   Counter(bit<32> n_counters, PSA_CounterType_t type);
   void count(in S index);
@@ -572,6 +573,7 @@ extern Counter<W, S> {
 // END:Counter_extern
 
 // BEGIN:DirectCounter_extern
+@noWarn("unused")
 extern DirectCounter<W> {
   DirectCounter(PSA_CounterType_t type);
   void count();
