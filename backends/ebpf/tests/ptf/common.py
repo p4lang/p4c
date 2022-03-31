@@ -13,6 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+""" This file implements a PTF test case abstraction for eBPF.
+    Before each test case, the following steps are performed:
+    1. Compile P4/PSA program to eBPF bytecode using 'make psa'.
+    2. Load compiled eBPF programs to eBPF subsystem (psabpf-ctl load).
+    3. Attach eBPF programs to interfaces used by PTF framework.
+
+    After each test case, eBPF programs are detached from interfaces and removed from eBPF subsystem.
+
+    This file also provides functions to manage P4-eBPF tables, clone sessions and multicast groups.
+"""
+
 import os
 import logging
 import json
@@ -126,19 +137,6 @@ class P4EbpfTest(BaseTest):
         self.exec_ns_cmd("psabpf-ctl del-port pipe {} dev {}".format(TEST_PIPELINE_ID, dev))
         if dev.startswith("eth"):
             self.exec_cmd("psabpf-ctl del-port pipe {} dev s1-{}".format(TEST_PIPELINE_ID, dev))
-
-    def remove_map(self, name):
-        self.exec_ns_cmd("rm {}/maps/{}".format(TEST_PIPELINE_MOUNT_PATH, name))
-
-    def remove_maps(self, maps):
-        for map in maps:
-            self.remove_map(map)
-
-    def update_map(self, name, key, value, map_in_map=False):
-        if map_in_map:
-            value = "pinned {}/{} any".format(PIPELINE_MAPS_MOUNT_PATH, value)
-        self.exec_ns_cmd("bpftool map update pinned {}/{} key {} value {}".format(
-            PIPELINE_MAPS_MOUNT_PATH, name, key, value))
 
     def read_map(self, name, key):
         cmd = "bpftool -j map lookup pinned {}/{} key {}".format(PIPELINE_MAPS_MOUNT_PATH, name, key)

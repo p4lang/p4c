@@ -209,11 +209,6 @@ class SimpleLpmP4PSATest(P4EbpfTest):
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
 
-    def tearDown(self):
-        self.remove_map("ingress_tbl_fwd_lpm")
-        self.remove_map("ingress_tbl_fwd_lpm_defaultAction")
-        super(SimpleLpmP4PSATest, self).tearDown()
-
 
 class SimpleLpmP4TwoKeysPSATest(P4EbpfTest):
 
@@ -233,11 +228,6 @@ class SimpleLpmP4TwoKeysPSATest(P4EbpfTest):
         self.table_add(table="ingress_tbl_fwd_exact_lpm", keys=["1.2.3.4", "192.168.2.1/24"], action=1, data=[5])
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
-
-    def tearDown(self):
-        self.remove_map("ingress_tbl_fwd_exact_lpm")
-        self.remove_map("ingress_tbl_fwd_exact_lpm_defaultAction")
-        super(SimpleLpmP4TwoKeysPSATest, self).tearDown()
 
 
 class ConstDefaultActionPSATest(P4EbpfTest):
