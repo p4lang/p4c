@@ -134,6 +134,7 @@ void PSAEbpfGenerator::emitPacketReplicationTables(CodeBuilder *builder) const {
 void PSAEbpfGenerator::emitPipelineInstances(CodeBuilder *builder) const {
     ingress->parser->emitValueSetInstances(builder);
     ingress->control->emitTableInstances(builder);
+    ingress->deparser->emitDigestInstances(builder);
 
     egress->parser->emitValueSetInstances(builder);
     egress->control->emitTableInstances(builder);
@@ -632,11 +633,34 @@ bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock *ctrl) {
 
     if (ctrl->container->is<IR::P4Control>()) {
         auto p4Control = ctrl->container->to<IR::P4Control>();
-        // TODO: placeholder for handling digests
+        findDigests(p4Control);
         this->visit(p4Control->body);
     }
 
     return false;
+}
+
+void ConvertToEBPFDeparserPSA::findDigests(const IR::P4Control *p4Control) {
+    // Digests are only at ingress
+    if (type == TC_INGRESS) {
+        for (auto decl : p4Control->controlLocals) {
+            if (decl->is<IR::Declaration_Instance>()) {
+                auto di = decl->to<IR::Declaration_Instance>();
+                if (di->type->is<IR::Type_Specialized>()) {
+                    auto typeSpec = di->type->to<IR::Type_Specialized>();
+                    auto baseType = typeSpec->baseType;
+                    auto typeName = baseType->to<IR::Type_Name>();
+                    auto digest = typeName->path->name.name;
+                    if (digest == "Digest") {
+                        cstring digestMapName = EBPFObject::externalName(di);
+                        auto messageArg = typeSpec->arguments->front();
+                        auto messageType = typemap->getType(messageArg);
+                        deparser->digests.emplace(digestMapName, messageType);
+                    }
+                }
+            }
+        }
+    }
 }
 
 }  // namespace EBPF

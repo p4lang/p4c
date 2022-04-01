@@ -196,6 +196,7 @@ class ConvertToEBPFDeparserPSA : public Inspector {
                              p4lib(P4::P4CoreLibrary::instance),
                              deparser(nullptr), options(options) {}
 
+    void findDigests(const IR::P4Control *p4Control);
     bool preorder(const IR::ControlBlock *) override;
     EBPF::EBPFDeparserPSA *getEBPFDeparser() { return deparser; }
 };

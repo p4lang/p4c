@@ -30,13 +30,21 @@ class DeparserBodyTranslatorPSA : public DeparserBodyTranslator {
     explicit DeparserBodyTranslatorPSA(const EBPFDeparserPSA* deparser);
 
     void processFunction(const P4::ExternFunction* function) override;
+    void processMethod(const P4::ExternMethod* method) override;
 };
 
 class EBPFDeparserPSA : public EBPFDeparser {
+ private:
+    // arbitrary value for max queue size
+    // TODO: make it configurable
+    int maxDigestQueueSize = 128;
+
  public:
     const IR::Parameter* user_metadata;
     const IR::Parameter* istd;
     const IR::Parameter* resubmit_meta;
+
+    std::map<cstring, const IR::Type *> digests;
 
     EBPFDeparserPSA(const EBPFProgram* program, const IR::ControlBlock* control,
                     const IR::Parameter* parserHeaders, const IR::Parameter *istd) :
@@ -44,6 +52,7 @@ class EBPFDeparserPSA : public EBPFDeparser {
         codeGen = new DeparserBodyTranslatorPSA(this);
     }
 
+    void emitDigestInstances(CodeBuilder* builder) const;
     void emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) override;
 };
 

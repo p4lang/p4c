@@ -33,6 +33,33 @@ void DeparserBodyTranslatorPSA::processFunction(const P4::ExternFunction *functi
     }
 }
 
+void DeparserBodyTranslatorPSA::processMethod(const P4::ExternMethod *method) {
+    if (method->method->name.name == "pack") {
+        // Emit digest pack method
+        auto obj = method->object;
+        auto di = obj->to<IR::Declaration_Instance>();
+        cstring digestMapName = EBPFObject::externalName(di);
+        auto arg = method->expr->arguments->front();
+        builder->appendFormat("bpf_map_push_elem(&%s, &", digestMapName);
+        this->visit(arg);
+        builder->appendFormat(", BPF_EXIST)");
+        return;
+    }
+
+    DeparserBodyTranslator::processMethod(method);
+}
+
+void EBPFDeparserPSA::emitDigestInstances(CodeBuilder* builder) const {
+    for (auto digest : digests) {
+        builder->appendFormat("REGISTER_TABLE_NO_KEY_TYPE(%s, %s, 0, ",
+                              digest.first, "BPF_MAP_TYPE_QUEUE");
+        auto type = EBPFTypeFactory::instance->create(digest.second->to<IR::Type_Type>()->type);
+        type->declare(builder, "", false);
+        builder->appendFormat(", %d)", maxDigestQueueSize);
+        builder->newline();
+    }
+}
+
 void EBPFDeparserPSA::emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) {
     // placeholder for handling checksums
     EBPFDeparser::emitDeclaration(builder, decl);
