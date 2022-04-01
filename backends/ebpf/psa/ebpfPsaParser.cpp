@@ -65,7 +65,15 @@ void PsaStateTranslationVisitor::processFunction(const P4::ExternFunction* funct
 }
 
 void PsaStateTranslationVisitor::processMethod(const P4::ExternMethod* ext) {
-    // TODO: placeholder for handling value sets and checksums
+    auto externName = ext->originalExternType->name.name;
+
+    if (externName == "Checksum") {
+        auto instance = ext->object->getName().name;
+        auto method = ext->method->getName().name;
+        parser->getChecksum(instance)->processMethod(builder, method, ext->expr, this);
+        return;
+    }
+
     StateTranslationVisitor::processMethod(ext);
 }
 
@@ -106,6 +114,25 @@ void PsaStateTranslationVisitor::compileVerify(const IR::MethodCallExpression * 
 EBPFPsaParser::EBPFPsaParser(const EBPFProgram* program, const IR::ParserBlock* block,
                              const P4::TypeMap* typeMap) : EBPFParser(program, block, typeMap) {
     visitor = new PsaStateTranslationVisitor(program->refMap, program->typeMap, this);
+}
+
+void EBPFPsaParser::emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) {
+    if (decl->is<IR::Declaration_Instance>()) {
+        auto di = decl->to<IR::Declaration_Instance>();
+        auto type = di->type->to<IR::Type_Name>();
+        auto typeSpec = di->type->to<IR::Type_Specialized>();
+        cstring name = di->name.name;
+
+        if (typeSpec != nullptr &&
+                typeSpec->baseType->to<IR::Type_Name>()->path->name.name == "Checksum") {
+            auto instance = new EBPFChecksumPSA(program, di, name);
+            checksums.emplace(name, instance);
+            instance->emitVariables(builder);
+            return;
+        }
+    }
+
+    EBPFParser::emitDeclaration(builder, decl);
 }
 
 void EBPFPsaParser::emitRejectState(CodeBuilder* builder) {

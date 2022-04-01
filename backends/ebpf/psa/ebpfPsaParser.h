@@ -20,6 +20,7 @@ limitations under the License.
 #include "backends/ebpf/ebpfType.h"
 #include "backends/ebpf/ebpfParser.h"
 #include "backends/ebpf/psa/ebpfPsaTable.h"
+#include "backends/ebpf/psa/externs/ebpfPsaChecksum.h"
 
 namespace EBPF {
 
@@ -46,10 +47,19 @@ class PsaStateTranslationVisitor : public StateTranslationVisitor {
 
 class EBPFPsaParser : public EBPFParser {
  public:
+    std::map<cstring, EBPFChecksumPSA*> checksums;
+
     EBPFPsaParser(const EBPFProgram* program, const IR::ParserBlock* block,
                   const P4::TypeMap* typeMap);
 
+    void emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) override;
     void emitRejectState(CodeBuilder* builder) override;
+
+    EBPFChecksumPSA* getChecksum(cstring name) const {
+        auto result = ::get(checksums, name);
+        BUG_CHECK(result != nullptr, "No checksum named %1%", name);
+        return result;
+    }
 };
 
 }  // namespace EBPF

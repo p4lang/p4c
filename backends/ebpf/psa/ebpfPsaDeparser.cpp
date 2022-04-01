@@ -34,7 +34,14 @@ void DeparserBodyTranslatorPSA::processFunction(const P4::ExternFunction *functi
 }
 
 void DeparserBodyTranslatorPSA::processMethod(const P4::ExternMethod *method) {
-    if (method->method->name.name == "pack") {
+    auto dprs = dynamic_cast<const EBPFDeparserPSA*>(deparser);
+    auto externName = method->originalExternType->name.name;
+    if (externName == "Checksum") {
+        auto instance = method->object->getName().name;
+        auto methodName = method->method->getName().name;
+        dprs->getChecksum(instance)->processMethod(builder, methodName, method->expr, this);
+        return;
+    } else if (method->method->name.name == "pack") {
         // Emit digest pack method
         auto obj = method->object;
         auto di = obj->to<IR::Declaration_Instance>();
@@ -61,7 +68,21 @@ void EBPFDeparserPSA::emitDigestInstances(CodeBuilder* builder) const {
 }
 
 void EBPFDeparserPSA::emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) {
-    // placeholder for handling checksums
+    if (decl->is<IR::Declaration_Instance>()) {
+        auto di = decl->to<IR::Declaration_Instance>();
+        auto type = di->type->to<IR::Type_Name>();
+        auto typeSpec = di->type->to<IR::Type_Specialized>();
+        cstring name = di->name.name;
+
+        if (typeSpec != nullptr &&
+                typeSpec->baseType->to<IR::Type_Name>()->path->name.name == "Checksum") {
+            auto instance = new EBPFChecksumPSA(program, di, name);
+            checksums.emplace(name, instance);
+            instance->emitVariables(builder);
+            return;
+        }
+    }
+
     EBPFDeparser::emitDeclaration(builder, decl);
 }
 

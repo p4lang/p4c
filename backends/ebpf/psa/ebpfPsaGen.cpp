@@ -21,6 +21,7 @@ limitations under the License.
 #include "ebpfPsaControl.h"
 #include "xdpHelpProgram.h"
 #include "externs/ebpfPsaCounter.h"
+#include "externs/ebpfPsaHashAlgorithm.h"
 
 namespace EBPF {
 
@@ -163,6 +164,8 @@ void PSAEbpfGenerator::emitInitializer(CodeBuilder *builder) const {
 }
 
 void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
+    EBPFHashAlgorithmTypeFactoryPSA::instance()->emitGlobals(builder);
+
     cstring forEachFunc =
             "static __always_inline\n"
             "int do_for_each(SK_BUFF *skb, void *map, "

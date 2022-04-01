@@ -20,6 +20,7 @@ limitations under the License.
 #include "backends/ebpf/ebpfDeparser.h"
 #include "ebpfPsaControl.h"
 #include "backends/ebpf/psa/ebpfPsaParser.h"
+#include "backends/ebpf/psa/externs/ebpfPsaChecksum.h"
 
 namespace EBPF {
 
@@ -43,7 +44,7 @@ class EBPFDeparserPSA : public EBPFDeparser {
     const IR::Parameter* user_metadata;
     const IR::Parameter* istd;
     const IR::Parameter* resubmit_meta;
-
+    std::map<cstring, EBPFChecksumPSA*> checksums;
     std::map<cstring, const IR::Type *> digests;
 
     EBPFDeparserPSA(const EBPFProgram* program, const IR::ControlBlock* control,
@@ -54,6 +55,12 @@ class EBPFDeparserPSA : public EBPFDeparser {
 
     void emitDigestInstances(CodeBuilder* builder) const;
     void emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) override;
+
+    EBPFChecksumPSA* getChecksum(cstring name) const {
+        auto result = ::get(checksums, name);
+        BUG_CHECK(result != nullptr, "No checksum named %1%", name);
+        return result;
+    }
 };
 
 class IngressDeparserPSA : public EBPFDeparserPSA {
