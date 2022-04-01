@@ -60,6 +60,7 @@ struct main_metadata_t {
 	bit<32> MainControlT_tmp_1
 	bit<32> MainControlT_tmp_2
 	bit<32> MainControlT_tmp_3
+	bit<32> learnArg
 }
 metadata instanceof main_metadata_t
 
@@ -85,7 +86,8 @@ action next_hop args instanceof next_hop_arg_t {
 }
 
 action add_on_miss_action args none {
-	learn next_hop 0x0
+	mov m.learnArg 0x0
+	learn next_hop m.learnArg
 	return
 }
 
