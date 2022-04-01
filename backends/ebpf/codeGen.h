@@ -48,6 +48,10 @@ class CodeGenInspector : public Inspector {
     // should be emitted as pointer variables.
     std::set<cstring> asPointerVariables;
 
+    // Since CodeGenInspector also generates C comments,
+    // this variable keeps track of the current comment depth.
+    int commentDescriptionDepth = 0;
+
  public:
     int expressionPrecedence;  /// precedence of current IR::Operation
     CodeGenInspector(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
@@ -109,6 +113,7 @@ class CodeGenInspector : public Inspector {
     bool preorder(const IR::Equ* e) override { return comparison(e); }
     bool preorder(const IR::Neq* e) override { return comparison(e); }
     bool preorder(const IR::Path* path) override;
+    bool preorder(const IR::StructExpression *expr) override;
 
     bool preorder(const IR::Type_Typedef* type) override;
     bool preorder(const IR::Type_Enum* type) override;

@@ -301,6 +301,19 @@ const IR::Node* DoConstantFolding::postorder(IR::Neg* e) {
     return new IR::Constant(cst->srcInfo, t, value, cst->base, true);
 }
 
+const IR::Node* DoConstantFolding::postorder(IR::UPlus* e) {
+    auto op = getConstant(e->expr);
+    if (op == nullptr)
+        return e;
+
+    auto cst = op->to<IR::Constant>();
+    if (cst == nullptr) {
+        ::error(ErrorType::ERR_EXPECTED, "%1%: expected an integer value", op);
+        return e;
+    }
+    return cst;
+}
+
 const IR::Constant*
 DoConstantFolding::cast(const IR::Constant* node, unsigned base, const IR::Type_Bits* type) const {
     return new IR::Constant(node->srcInfo, type, node->value, base);

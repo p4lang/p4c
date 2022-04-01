@@ -37,7 +37,7 @@ boilerplate removed, which the ir-generator generates.
         Expression
         +-- Operation
         |   +-- Operation_Unary
-        |   |   +-- Neg, Cmpl, LNot
+        |   |   +-- Neg, Cmpl, LNot, UPlus
         |   |   \-- Member, Cast
         |   +-- Operation_Binary
         |   |   +-- Mul, Div, Mode, Add, Sub, Shl, Shr

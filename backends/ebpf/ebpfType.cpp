@@ -192,9 +192,10 @@ EBPFStructType::EBPFStructType(const IR::Type_StructLike* strct) :
 void
 EBPFStructType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
     builder->append(kind);
+    builder->appendFormat(" %s ", name.c_str());
     if (asPointer)
         builder->append("*");
-    builder->appendFormat(" %s %s", name.c_str(), id.c_str());
+    builder->appendFormat("%s", id.c_str());
 }
 
 void EBPFStructType::declareInit(CodeBuilder* builder, cstring id, bool asPointer) {

@@ -60,6 +60,13 @@ bool ActionTranslationVisitor::preorder(const IR::P4Action* act) {
 EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table,
                      CodeGenInspector* codeGen) :
         EBPFTableBase(program, EBPFObject::externalName(table->container), codeGen), table(table) {
+    auto sizeProperty = table->container->properties->getProperty(
+            IR::TableProperties::sizePropertyName);
+    if (sizeProperty != nullptr) {
+        auto expr = sizeProperty->value->to<IR::ExpressionValue>()->expression;
+        this->size = expr->to<IR::Constant>()->asInt();
+    }
+
     cstring base = instanceName + "_defaultAction";
     defaultActionMapName = base;
 
@@ -71,6 +78,10 @@ EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table,
 
     initKey();
 }
+
+EBPFTable::EBPFTable(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name) :
+        EBPFTableBase(program, name, codeGen),
+        keyGenerator(nullptr), actionList(nullptr), table(nullptr) {}
 
 void EBPFTable::initKey() {
     if (keyGenerator != nullptr) {
@@ -470,6 +481,7 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName, cstring acti
         auto visitor = createActionTranslationVisitor(valueName, program);
         visitor->setBuilder(builder);
         visitor->copySubstitutions(codeGen);
+        visitor->copyPointerVariables(codeGen);
 
         action->apply(*visitor);
         builder->newline();

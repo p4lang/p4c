@@ -84,6 +84,10 @@ const IR::Node* DoStrengthReduction::postorder(IR::Cmpl* expr) {
     return expr;
 }
 
+const IR::Node* DoStrengthReduction::postorder(IR::UPlus* expr) {
+    return expr->expr;
+}
+
 const IR::Node* DoStrengthReduction::postorder(IR::BAnd* expr) {
     if (isAllOnes(expr->left))
         return expr->right;
