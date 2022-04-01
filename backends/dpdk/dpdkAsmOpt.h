@@ -169,6 +169,7 @@ class ValidateTableKeys : public Inspector {
     ValidateTableKeys() {}
     bool preorder(const IR::DpdkAsmProgram *p) override;
     bool isMetadataStruct(const IR::Type_Struct *st);
+    int getFieldSizeBits(const IR::Type *field_type);
 };
 
 // Instructions can only appear in actions and apply block of .spec file.

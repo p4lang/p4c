@@ -208,6 +208,22 @@ const IR::Node* RemoveUnusedMetadataFields::preorder(IR::DpdkAsmProgram *p) {
     return p;
 }
 
+int ValidateTableKeys::getFieldSizeBits(const IR::Type *field_type) {
+    if (auto t = field_type->to<IR::Type_Bits>()) {
+        return t->width_bits();
+    } else if (field_type->is<IR::Type_Boolean>() ||
+        field_type->is<IR::Type_Error>()) {
+        return 8;
+    } else if (auto t = field_type->to<IR::Type_Name>()) {
+        if (t->path->name == "error") {
+            return 8;
+        } else {
+            return -1;
+        }
+    }
+    return -1;
+}
+
 bool ValidateTableKeys::isMetadataStruct(const IR::Type_Struct *st) {
     for (auto anno : st->annotations->annotations) {
         if (anno->name == "__metadata__") {
@@ -244,19 +260,10 @@ bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
                 if (max == -1 || max < offset) {
                     max = offset;
                     auto field_type = key->expression->type;
-                    if (auto t = field_type->to<IR::Type_Bits>()) {
-                        size_max_field = t->width_bits();
-                    } else if (field_type->is<IR::Type_Boolean>() ||
-                        field_type->is<IR::Type_Error>()) {
-                        size_max_field = 8;
-                    } else if (auto t = field_type->to<IR::Type_Name>()) {
-                        if (t->path->name == "error") {
-                            size_max_field = 8;
-                        } else {
-                            BUG("Unexpected type %1%", t->path->name);
-                        }
-                    } else {
+                    size_max_field = getFieldSizeBits(field_type);
+                    if (size_max_field == -1) {
                         BUG("Unexpected type %1%", field_type->node_type_name());
+                        return false;
                     }
                  }
              }
