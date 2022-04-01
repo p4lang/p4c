@@ -225,3 +225,39 @@ class P4EbpfTest(BaseTest):
             for k in keys:
                 cmd = cmd + "{} ".format(k)
         self.exec_ns_cmd(cmd, "Table delete failed")
+
+    def counter_get(self, name, keys=None):
+        key_str = ""
+        if keys:
+            key_str = key_str + "key"
+            for k in keys:
+                key_str = key_str + " {}".format(k)
+        cmd = "psabpf-ctl counter get pipe {} {} {}".format(TEST_PIPELINE_ID, name, key_str)
+        _, stdout, _ = self.exec_ns_cmd(cmd, "Counter get failed")
+        return json.loads(stdout)['Counter'][name]
+
+    def counter_verify(self, name, keys, bytes=None, packets=None):
+        counter = self.counter_get(name, keys=keys)
+        expected_type = ""
+        if packets:
+            expected_type = "PACKETS"
+        if bytes:
+            if packets:
+                expected_type = expected_type + "_AND_"
+            expected_type = expected_type + "BYTES"
+        counter_type = counter["type"]
+        if expected_type != counter_type:
+            self.fail("Invalid counter type, expected: \"{}\", got \"{}\"".format(expected_type, counter_type))
+
+        entries = counter["entries"]
+        if len(entries) != 1:
+            self.fail("expected one Counter entry")
+        entry = entries[0]
+        if bytes:
+            counter_bytes = int(entry["value"]["bytes"], 0)
+            if counter_bytes != bytes:
+                self.fail("Invalid counter bytes, expected {}, got {}".format(bytes, counter_bytes))
+        if packets:
+            counter_packets = int(entry["value"]["packets"], 0)
+            if counter_packets != packets:
+                self.fail("Invalid counter packets, expected {}, got {}".format(packets, counter_packets))

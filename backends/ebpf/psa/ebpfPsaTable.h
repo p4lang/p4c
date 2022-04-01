@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "frontends/p4/methodInstance.h"
 #include "backends/ebpf/ebpfTable.h"
-#include "ebpfPsaControl.h"
+#include "backends/ebpf/psa/externs/ebpfPsaCounter.h"
 
 namespace EBPF {
 
@@ -33,6 +33,9 @@ class EBPFTablePSA : public EBPFTable {
                        size_t size) const;
 
  protected:
+    ActionTranslationVisitor* createActionTranslationVisitor(
+            cstring valueName, const EBPFProgram* program) const override;
+
     void emitTableValue(CodeBuilder* builder, const IR::MethodCallExpression* actionMce,
                         cstring valueName);
     void emitDefaultActionInitializer(CodeBuilder *builder);

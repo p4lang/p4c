@@ -22,6 +22,52 @@ limitations under the License.
 
 namespace EBPF {
 
+// =====================ActionTranslationVisitorPSA=============================
+ActionTranslationVisitorPSA::ActionTranslationVisitorPSA(const EBPFProgram* program,
+                                                         cstring valueName) :
+        CodeGenInspector(program->refMap, program->typeMap),
+        ActionTranslationVisitor(valueName, program),
+        ControlBodyTranslatorPSA(program->to<EBPFPipeline>()->control) {}
+
+bool ActionTranslationVisitorPSA::preorder(const IR::PathExpression* pe) {
+    if (isActionParameter(pe)) {
+        return ActionTranslationVisitor::preorder(pe);
+    }
+    return ControlBodyTranslator::preorder(pe);
+}
+
+bool ActionTranslationVisitorPSA::isActionParameter(const IR::Expression *expression) const {
+    if (auto path = expression->to<IR::PathExpression>())
+        return ActionTranslationVisitor::isActionParameter(path);
+    else if (auto cast = expression->to<IR::Cast>())
+        return isActionParameter(cast->expr);
+    else
+        return false;
+}
+
+void ActionTranslationVisitorPSA::processMethod(const P4::ExternMethod* method) {
+    auto declType = method->originalExternType;
+    auto decl = method->object;
+    BUG_CHECK(decl->is<IR::Declaration_Instance>(),
+              "Extern has not been declared");
+    auto di = decl->to<IR::Declaration_Instance>();
+    auto instanceName = EBPFObject::externalName(di);
+
+    if (declType->name.name == "Counter") {
+        auto ctr = control->to<EBPFControlPSA>()->getCounter(instanceName);
+        // Counter count() always has one argument/index
+        if (ctr != nullptr) {
+            ctr->to<EBPFCounterPSA>()->emitMethodInvocation(builder, method, this);
+        } else {
+            ::error(ErrorType::ERR_NOT_FOUND,
+                    "%1%: Counter named %2% not found",
+                    method->expr, instanceName);
+        }
+    } else {
+        ControlBodyTranslatorPSA::processMethod(method);
+    }
+}
+
 // =====================EBPFTablePSA=============================
 EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* table,
                            CodeGenInspector* codeGen) :
@@ -40,6 +86,11 @@ EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* tab
         }
         this->size = 1;
     }
+}
+
+ActionTranslationVisitor* EBPFTablePSA::createActionTranslationVisitor(
+        cstring valueName, const EBPFProgram* program) const {
+    return new ActionTranslationVisitorPSA(program->to<EBPFPipeline>(), valueName);
 }
 
 void EBPFTablePSA::emitValueStructStructure(CodeBuilder* builder) {

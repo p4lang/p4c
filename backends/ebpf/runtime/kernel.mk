@@ -22,7 +22,7 @@ TARGET=kernel
 # Extra arguments for the compiler
 ARGS=
 # Extra arguments for the P4 compiler
-P4ARGS=
+P4ARGS=--Werror
 
 # If needed, bpf target files can be hardcoded here
 # This can be any file of type ".c", ".bc" or, ".o"
@@ -65,7 +65,7 @@ $(BPFNAME).c: $(P4FILE)
 		echo "*** ERROR: Cannot find p4c-ebpf"; \
 		exit 1;\
 	fi;
-	$(P4C) --Werror $(P4INCLUDE) --target $(TARGET) -o $@ $< $(P4ARGS) $(P4ARGS_TARGET);
+	$(P4C) $(P4INCLUDE) --target $(TARGET) -o $@ $< $(P4ARGS) $(P4ARGS_TARGET);
 
 # Compile the C code with the clang llvm compiler
 $(BPFNAME).bc: %.bc : %.c
