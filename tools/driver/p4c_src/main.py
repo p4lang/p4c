@@ -169,7 +169,8 @@ def main():
                             "invocations of the same subparser instance.",
                         action="store_true", default=False)
 
-    if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
+    env_indicates_developer_build = os.environ['P4C_BUILD_TYPE'] == "DEVELOPER" ### DRYified
+    if env_indicates_developer_build:
         add_developer_options(parser)
 
     parser.add_argument("source_file", nargs='?', help="Files to compile", default=None)
@@ -238,17 +239,15 @@ def main():
     input_specified = False
     if opts.source_file:
         input_specified = True
-    if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
-        if opts.json_source:
-            input_specified = True
+    if env_indicates_developer_build and opts.json_source:
+       input_specified = True
     if checkInput and not input_specified:
         parser.error('No input specified.')
     elif not checkInput:
         opts.source_file = "dummy.p4"
 
-    if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
-        if opts.json_source:
-            opts.source_file = opts.json_source
+    if env_indicates_developer_build and opts.json_source:
+        opts.source_file = opts.json_source
 
     if checkInput and not os.path.isfile(opts.source_file):
         print('Input file {} does not exist'.format(opts.source_file),
