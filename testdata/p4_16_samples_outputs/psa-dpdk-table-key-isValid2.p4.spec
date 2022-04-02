@@ -57,11 +57,11 @@ struct metadata {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
+	bit<48> ingress_tbl_ethernet_dstAddr
+	bit<48> ingress_tbl_ethernet_srcAddr
 	bit<8> Ingress_tmp
 	bit<8> Ingress_tmp_0
 	bit<8> Ingress_key
-	bit<48> Ingress_tbl_ethernet_dstAddr
-	bit<48> Ingress_tbl_ethernet_srcAddr
 }
 metadata instanceof metadata
 
@@ -81,8 +81,8 @@ action execute_1 args none {
 table tbl {
 	key {
 		m.Ingress_key exact
-		m.Ingress_tbl_ethernet_dstAddr exact
-		m.Ingress_tbl_ethernet_srcAddr exact
+		m.ingress_tbl_ethernet_dstAddr exact
+		m.ingress_tbl_ethernet_srcAddr exact
 	}
 	actions {
 		NoAction
@@ -120,8 +120,8 @@ apply {
 	mov m.Ingress_key 0x0
 	jmp LABEL_END_1
 	LABEL_TRUE :	mov m.Ingress_key 0x1
-	LABEL_END_1 :	mov m.Ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
-	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	LABEL_END_1 :	mov m.ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
+	mov m.ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet

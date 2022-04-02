@@ -57,8 +57,8 @@ struct metadata {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
-	bit<48> Ingress_tbl_ethernet_srcAddr
-	bit<16> Ingress_tbl_ipv4_totalLen
+	bit<48> ingress_tbl_ethernet_srcAddr
+	bit<16> ingress_tbl_ipv4_totalLen
 }
 metadata instanceof metadata
 
@@ -77,8 +77,8 @@ action execute_1 args none {
 
 table tbl {
 	key {
-		m.Ingress_tbl_ethernet_srcAddr lpm
-		m.Ingress_tbl_ipv4_totalLen exact
+		m.ingress_tbl_ethernet_srcAddr lpm
+		m.ingress_tbl_ipv4_totalLen exact
 	}
 	actions {
 		NoAction
@@ -104,8 +104,8 @@ apply {
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
-	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	mov m.Ingress_tbl_ipv4_totalLen h.ipv4.totalLen
+	INGRESSPARSERIMPL_ACCEPT :	mov m.ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	mov m.ingress_tbl_ipv4_totalLen h.ipv4.totalLen
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
