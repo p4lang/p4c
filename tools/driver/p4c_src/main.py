@@ -182,11 +182,6 @@ def main():
         add_developer_options(parser)
 
     parser.add_argument("P4_source_files", nargs='*', help="P4 source files to compile.", default=None)
-                     ### ^^^^^^^^^^^^^^^:
-                     ###   as of this writing, when compiling from P4 source [i.e. not from JSON],
-                     ###     this must be a single-pathname list which must be copied to the property “source_file”.
-                     ###
-                     ###   Also, the value of the property “json_source” ―― if it exists ―― must be copied to the property “source_file”.
 
     # load supported configuration.
     # We load these before we parse options, so that backends can register
