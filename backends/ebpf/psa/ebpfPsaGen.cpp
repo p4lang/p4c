@@ -23,6 +23,7 @@ limitations under the License.
 #include "externs/ebpfPsaCounter.h"
 #include "externs/ebpfPsaHashAlgorithm.h"
 #include "externs/ebpfPsaTableImplementation.h"
+#include "externs/ebpfPsaMeter.h"
 
 namespace EBPF {
 
@@ -91,6 +92,9 @@ void PSAEbpfGenerator::emitTypes(CodeBuilder *builder) const {
     for (auto type : ebpfTypes) {
         type->emit(builder);
     }
+
+    if (ingress->hasAnyMeter() || egress->hasAnyMeter())
+        EBPFMeterPSA::emitValueStruct(builder, ingress->refMap);
 
     ingress->parser->emitTypes(builder);
     ingress->control->emitTableTypes(builder);
@@ -267,6 +271,13 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
 
     builder->appendLine(pktClonesFunc);
     builder->newline();
+
+    if (ingress->hasAnyMeter() || egress->hasAnyMeter()) {
+        cstring meterExecuteFunc =
+                EBPFMeterPSA::meterExecuteFunc(options.emitTraceMessages, ingress->refMap);
+        builder->appendLine(meterExecuteFunc);
+        builder->newline();
+    }
 }
 
 // =====================PSAArchTC=============================
@@ -599,6 +610,14 @@ bool ConvertToEBPFControlPSA::preorder(const IR::Member *m) {
     return true;
 }
 
+bool ConvertToEBPFControlPSA::preorder(const IR::AssignmentStatement *a) {
+    // the condition covers both ingress and egress timestamp
+    if (a->right->toString().endsWith("timestamp")) {
+        control->timestampIsUsed = true;
+    }
+    return true;
+}
+
 bool ConvertToEBPFControlPSA::preorder(const IR::IfStatement *ifState) {
     if (ifState->condition->is<IR::Equ>()) {
         auto i = ifState->condition->to<IR::Equ>();
@@ -633,6 +652,9 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
     } else if (typeName == "Counter") {
         auto ctr = new EBPFCounterPSA(program, di, name, control->codeGen);
         control->counters.emplace(name, ctr);
+    } else if (typeName == "Meter") {
+        auto met = new EBPFMeterPSA(program, name, di, control->codeGen);
+        control->meters.emplace(name, met);
     } else {
         ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
                 instance);

@@ -64,6 +64,16 @@ void ActionTranslationVisitorPSA::processMethod(const P4::ExternMethod* method) 
                     "%1%: Counter named %2% not found",
                     method->expr, instanceName);
         }
+    } else if (declType->name.name == "Meter") {
+        auto met = control->to<EBPFControlPSA>()->getMeter(instanceName);
+        // Meter execute() always has one argument/index
+        if (met != nullptr) {
+            met->emitExecute(builder, method, this);
+        } else {
+            ::error(ErrorType::ERR_NOT_FOUND,
+                    "%1%: Meter named %2% not found",
+                    method->expr, instanceName);
+        }
     } else {
         ControlBodyTranslatorPSA::processMethod(method);
     }
