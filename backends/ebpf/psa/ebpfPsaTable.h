@@ -20,6 +20,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "backends/ebpf/ebpfTable.h"
 #include "backends/ebpf/psa/externs/ebpfPsaCounter.h"
+#include "backends/ebpf/psa/externs/ebpfPsaMeter.h"
 
 namespace EBPF {
 

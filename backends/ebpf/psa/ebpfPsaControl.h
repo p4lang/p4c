@@ -65,6 +65,7 @@ class EBPFControlPSA : public EBPFControl {
 
     std::map<cstring, EBPFHashPSA*> hashes;
     std::map<cstring, EBPFRegisterPSA*>  registers;
+    std::map<cstring, EBPFMeterPSA*>  meters;
 
     EBPFControlPSA(const EBPFProgram* program, const IR::ControlBlock* control,
                    const IR::Parameter* parserHeaders) :
@@ -84,6 +85,12 @@ class EBPFControlPSA : public EBPFControl {
     EBPFHashPSA* getHash(cstring name) const {
         auto result = ::get(hashes, name);
         BUG_CHECK(result != nullptr, "No hash named %1%", name);
+        return result;
+    }
+
+    EBPFMeterPSA* getMeter(cstring name) const {
+        auto result = ::get(meters, name);
+        BUG_CHECK(result != nullptr, "No meter named %1%", name);
         return result;
     }
 };
