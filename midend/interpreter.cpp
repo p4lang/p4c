@@ -1098,28 +1098,14 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
         auto bim = mi->to<BuiltInMethod>();
         auto base = get(bim->appliedTo);
         cstring name = bim->name.name;
-        // This code is necessary to find the parent and to check whether the parent
-        // is a header union.
-        const IR::Expression* node = nullptr;
-        if (auto member = expression->method->checkedTo<IR::Member>()
-                                ->expr->to<IR::Member>()) {
-            node = member->expr;
-        } else if (auto expr = expression->method->checkedTo<IR::Member>()->expr) {
-            node = expr;
-        }
+        // Needed to get Header from HeaderUnion
+        const IR::Expression* node = expression->method->checkedTo<IR::Member>()->expr;
         CHECK_NULL(node);
         auto structVar = get(node);
         if (name == IR::Type_Header::setInvalid ||
             name == IR::Type_Header::setValid) {
-            if (auto hv = structVar->to<SymbolicHeader>()) {
-                hv->setValid(name == IR::Type_Header::setValid);
-            } else if (auto headerUnion = structVar->to<SymbolicHeaderUnion>()) {
-                auto member = expression->method->checkedTo<IR::Member>()
-                                    ->expr->checkedTo<IR::Member>();
-                auto memberVar = get(member);
-                auto hv = memberVar->checkedTo<SymbolicHeader>();
-                hv->setValid(name == IR::Type_Header::setValid);
-            }
+            auto hv = structVar->checkedTo<SymbolicHeader>();
+            hv->setValid(name == IR::Type_Header::setValid);
             set(expression, SymbolicVoid::get());
             return;
         } else if (name == IR::Type_Stack::push_front ||
@@ -1146,10 +1132,6 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
                       "%1%: unexpected method", bim->name);
             if (auto hv = structVar->to<SymbolicHeader>()) {
                 auto v = hv->valid;
-                set(expression, v);
-                return;
-            } else if (auto huv = structVar->to<SymbolicHeaderUnion>()) {
-                auto v = huv->isValid();
                 set(expression, v);
                 return;
             } else {
