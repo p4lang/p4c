@@ -49,7 +49,7 @@ void ActionTranslationVisitorPSA::processMethod(const P4::ExternMethod* method) 
     auto declType = method->originalExternType;
     auto decl = method->object;
     BUG_CHECK(decl->is<IR::Declaration_Instance>(),
-              "Extern has not been declared");
+              "Extern has not been declared: %1%", decl);
     auto di = decl->to<IR::Declaration_Instance>();
     auto instanceName = EBPFObject::externalName(di);
 

@@ -36,14 +36,14 @@ EBPFCounterPSA::EBPFCounterPSA(const EBPFProgram* program, const IR::Declaration
     auto ts = di->type->to<IR::Type_Specialized>();
 
     if (ts->arguments->size() != 2) {
-        ::error(ErrorType::ERR_MODEL, "Expected 2 specialization types: %1%", ts);
+        ::error(ErrorType::ERR_MODEL, "Expected a type specialized with two arguments: %1%", ts);
         return;
     }
 
     // check dataplane counter width
     auto dpwtype = ts->arguments->at(0);
     if (!dpwtype->is<IR::Type_Bits>()) {
-        ::error(ErrorType::ERR_UNSUPPORTED, "Must be bit or int type: %1%", ts);
+        ::error(ErrorType::ERR_UNSUPPORTED, "Must be bit or int type: %1%", dpwtype);
         return;
     }
 
@@ -51,25 +51,25 @@ EBPFCounterPSA::EBPFCounterPSA(const EBPFProgram* program, const IR::Declaration
     unsigned dataplaneWidth = dpwtype->width_bits();
     if (dataplaneWidth > 64) {
         ::error(ErrorType::ERR_UNSUPPORTED,
-                "Counters dataplane width up to 64 bits are supported: %1%", ts);
+                "Counters dataplane width up to 64 bits are supported: %1%", dpwtype);
         return;
     }
     if (dataplaneWidth < 8 || (dataplaneWidth & (dataplaneWidth - 1)) != 0) {
         ::warning(ErrorType::WARN_UNSUPPORTED, "Counter dataplane width will be extended to "
-                                               "nearest type (8, 16, 32 or 64 bits): %1%", ts);
+                                               "nearest type (8, 16, 32 or 64 bits): %1%", dpwtype);
     }
 
     // check index type
     auto istype = ts->arguments->at(1);
     if (!dpwtype->is<IR::Type_Bits>()) {
-        ::error(ErrorType::ERR_UNSUPPORTED, "Must be bit or int type: %1%", ts);
+        ::error(ErrorType::ERR_UNSUPPORTED, "Must be bit or int type: %1%", istype);
         return;
     }
     unsigned indexWidth = istype->width_bits();
     if (indexWidth != 32) {
         // ARRAY_MAP can have only 32 bits key, so assume this and warn user
         ::warning(ErrorType::WARN_UNSUPPORTED,
-                  "Only 32-bit type for index is supported, changed to 32 bit: %1%", ts);
+                  "Only 32-bit type for index is supported, changed to 32 bit: %1%", istype);
         indexWidth = 32;
     }
 
