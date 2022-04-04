@@ -611,9 +611,9 @@ bool ConvertToEBPFControlPSA::preorder(const IR::Declaration_Variable* decl) {
 
 // =====================EBPFDeparser=============================
 bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock *ctrl) {
-    if (type == TC_INGRESS) {
+    if (pipelineType == TC_INGRESS) {
         deparser = new TCIngressDeparserPSA(program, ctrl, parserHeaders, istd);
-    } else if (type == TC_EGRESS) {
+    } else if (pipelineType == TC_EGRESS) {
         deparser = new TCEgressDeparserPSA(program, ctrl, parserHeaders, istd);
     } else {
         BUG("undefined pipeline type, cannot build deparser");
@@ -626,41 +626,34 @@ bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock *ctrl) {
     deparser->codeGen->substitute(deparser->headers, parserHeaders);
     deparser->codeGen->useAsPointerVariable(deparser->headers->name.name);
 
-    if (type == TC_INGRESS) {
+    if (pipelineType == TC_INGRESS) {
         deparser->codeGen->useAsPointerVariable(deparser->resubmit_meta->name.name);
         deparser->codeGen->useAsPointerVariable(deparser->user_metadata->name.name);
     }
 
-    if (ctrl->container->is<IR::P4Control>()) {
-        auto p4Control = ctrl->container->to<IR::P4Control>();
-        findDigests(p4Control);
-        this->visit(p4Control->body);
-    }
+    this->visit(ctrl->container);
 
     return false;
 }
 
-void ConvertToEBPFDeparserPSA::findDigests(const IR::P4Control *p4Control) {
-    // Digests are only at ingress
-    if (type == TC_INGRESS) {
-        for (auto decl : p4Control->controlLocals) {
-            if (decl->is<IR::Declaration_Instance>()) {
-                auto di = decl->to<IR::Declaration_Instance>();
-                if (di->type->is<IR::Type_Specialized>()) {
-                    auto typeSpec = di->type->to<IR::Type_Specialized>();
-                    auto baseType = typeSpec->baseType;
-                    auto typeName = baseType->to<IR::Type_Name>();
-                    auto digest = typeName->path->name.name;
-                    if (digest == "Digest") {
-                        cstring digestMapName = EBPFObject::externalName(di);
-                        auto messageArg = typeSpec->arguments->front();
-                        auto messageType = typemap->getType(messageArg);
-                        deparser->digests.emplace(digestMapName, messageType);
-                    }
-                }
+bool ConvertToEBPFDeparserPSA::preorder(const IR::Declaration_Instance *di) {
+    if (auto typeSpec = di->type->to<IR::Type_Specialized>()) {
+        auto baseType = typeSpec->baseType;
+        auto typeName = baseType->to<IR::Type_Name>();
+        auto digest = typeName->path->name.name;
+        if (digest == "Digest") {
+            if (pipelineType == TC_EGRESS) {
+                ::error(ErrorType::ERR_UNEXPECTED,
+                        "Digests are only supported at ingress, got an instance at egress");
             }
+            cstring digestMapName = EBPFObject::externalName(di);
+            auto messageArg = typeSpec->arguments->front();
+            auto messageType = typemap->getType(messageArg);
+            deparser->digests.emplace(digestMapName, messageType);
         }
     }
+
+    return false;
 }
 
 }  // namespace EBPF
