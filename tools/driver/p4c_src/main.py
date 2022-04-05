@@ -66,9 +66,10 @@ def add_developer_options(parser):
     parser.add_argument("--toJson", dest="json", default=None,
                         help="Dump IR to JSON in the specified file.")
     parser.add_argument(JSON_input_flag, dest="json_source", default=None,
-                        help="Use IR from JSON representation dumped previously. "
-                             "The compilation starts with reduced midEnd. "
-                             "Only allowed/recognized in developer builds.")
+                        help="Use IR from JSON representation dumped"
+                             " previously.  The compilation starts with a"
+                             " reduced midEnd.  Only allowed/recognized in"
+                             " developer builds.")
     parser.add_argument("--pp", dest="pretty_print", default=None,
                         help="Pretty-print the program in the specified file.")
 
@@ -112,8 +113,8 @@ def main():
                         help="specify target architecture",
                         action="store", default="v1model")
     parser.add_argument("-c", "--compile", dest="run_all",
-                        help="Only run preprocess, compile, and assemble steps",
-                        action="store_true", default=True)
+                        help="Only run the preprocess, compile, and assemble"
+                        " steps", action="store_true", default=True)
     parser.add_argument("-D", dest="preprocessor_defines",
                         help="define a macro to be used by the preprocessor",
                         action="append", default=[])
@@ -138,10 +139,11 @@ def main():
                         "[Deprecated; use '--p4runtime-files' instead]",
                         action="store", default=None)
     parser.add_argument("--p4runtime-files",
-                        help="Write the P4Runtime control plane API description (P4Info) "
-                        "to the specified files (comma-separated list); "
-                        "format is detected based on file suffix. "
-                        "Legal suffixes are .txt, .json, .bin.",
+                        help="Write the P4Runtime control plane API "
+                        "description (P4Info) to the specified files "
+                        "(comma-separated list); the format is detected based"
+                        " on the filename suffix. "
+                        ' Legal suffixes are ".txt", ".json", and ".bin".',
                         action="store", default=None)
     parser.add_argument("--p4runtime-format",
                         choices=["binary", "json", "text"],
@@ -150,9 +152,11 @@ def main():
                         "[Deprecated; use '--p4runtime-files' instead]",
                         action="store", default="binary")
     parser.add_argument("--help-pragmas", "--pragma-help", "--pragmas-help",
-                        "--help-annotations", "--annotation-help", "--annotations-help",
-                        dest="help_pragmas", action="store_true", default=False,
-                        help="Print the documentation about supported annotations/pragmas and exit.")
+                        "--help-annotations", "--annotation-help",
+                        "--annotations-help", dest="help_pragmas",
+                        action="store_true", default=False,
+                        help="Print the documentation about supported"
+                             " annotations/pragmas and exit.")
     parser.add_argument("--help-targets", "--target-help", "--targets-help",
                         dest="show_target_help",
                         help="Display target specific command line options.",
@@ -160,13 +164,16 @@ def main():
     parser.add_argument("--disable-annotations", "--disable-annotation",
                         "--disable-pragmas", "--disable-pragma",
                         dest="disabled_annos", action="store",
-                        help="List of annotations (comma separated) that should be ignored by the compiler.")
+                        help="List of (comma-separated) annotations that"
+                             " should be ignored by the compiler.")
     parser.add_argument("-S", dest="run_till_assembler",
                         help="Only run the preprocess and compilation steps",
                         action="store_true", default=False)
     parser.add_argument("--std", "-x", dest="language",
-                        choices = ["p4-14", "p4_14", "p4-16", "p4_16"],
-                        help="Treat subsequent input files as having type language.",
+                        choices=["p4-14", "p4_14", "p4-16", "p4_16"],
+                        help="Treat subsequent input files as having contents "
+                             "of the type indicated by "
+                             "the parameter to this argument.",
                         action="store", default="p4-16")
     parser.add_argument("--ndebug", dest="ndebug_mode",
                         help="Compile program in non-debug mode.\n",
