@@ -53,9 +53,10 @@ def add_developer_options(parser):
                         " per file (see below)")
     parser.add_argument("--top4", dest="passes",
                         action="append", default=[],
-                        help="[Compiler debugging] Dump the P4 representation after \
-                               passes whose name contains one of `passX' substrings. \
-                               When '-v' is used this will include the compiler IR.")
+                        help="[Compiler debugging] Dump the P4 representation"
+                             " after passes whose name contains one of 'passX'"
+                             " substrings.  When '-v' is used this will include"
+                             " the compiler IR.")
     parser.add_argument("--dump", dest="dump_dir", default=None,
                         help="[Compiler debugging] Folder where P4 programs are dumped.")
     parser.add_argument("--toJson", dest="json", default=None,
@@ -282,7 +283,7 @@ def main():
             print ("\nSorry; as of this writing, the P4 compiler driver does not support multiple "
                    "top-level P4 source files in a single invocation.  Multiple P4 source files at a time "
                    'are currently only supported via "#include" (i.e. additional non-top-level P4 source files).  '
-                   "Number of top-level P4 source-file pathnames detected: " + str( len(opts.P4_source_files) ), file = sys.stderr)
+                   "Number of top-level P4 source-file pathnames detected: " + str(len(opts.P4_source_files)), file=sys.stderr)
             error_count += 1
 
         ### We need to do the next 3 lines of code this way
@@ -295,7 +296,7 @@ def main():
 
         for pathname in pathnames_to_check:
             if not os.path.isfile(pathname):
-                print ('\nERROR: the input file "{}" does not exist.'.format(pathname), file = sys.stderr)
+                print('\nERROR: the input file "{}" does not exist.'.format(pathname), file=sys.stderr)
                 error_count += 1
 
     elif not any_input_specified:
@@ -321,7 +322,7 @@ def main():
     ###   since that is the interface contract between the driver and backends as of this writing.
     ### Do some sanity checking along the way (e.g. assertions).
 
-    string_to_pass_as___source_file = "" ### _intentionally_ initializing with a value that Python considers false
+    string_to_pass_as___source_file = ""  ### _intentionally_ initializing with a value that Python considers false
 
     if JSON_input_specified:
         assert 0 == len(opts.P4_source_files)
