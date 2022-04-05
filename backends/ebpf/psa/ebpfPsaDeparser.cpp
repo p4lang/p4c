@@ -26,7 +26,8 @@ DeparserBodyTranslatorPSA::DeparserBodyTranslatorPSA(const EBPFDeparserPSA *depa
 }
 
 void DeparserBodyTranslatorPSA::processFunction(const P4::ExternFunction *function) {
-    auto dprs = dynamic_cast<const EBPFDeparserPSA*>(deparser);
+    auto dprs = deparser->to<EBPFDeparserPSA>();
+    CHECK_NULL(dprs);
     if (function->method->name.name == "psa_resubmit") {
         builder->appendFormat("(!%s->drop && %s->resubmit)",
                               dprs->istd->name.name, dprs->istd->name.name);
@@ -34,7 +35,8 @@ void DeparserBodyTranslatorPSA::processFunction(const P4::ExternFunction *functi
 }
 
 void DeparserBodyTranslatorPSA::processMethod(const P4::ExternMethod *method) {
-    auto dprs = dynamic_cast<const EBPFDeparserPSA*>(deparser);
+    auto dprs = deparser->to<EBPFDeparserPSA>();
+    CHECK_NULL(dprs);
     auto externName = method->originalExternType->name.name;
     if (externName == "Checksum") {
         auto instance = method->object->getName().name;
@@ -68,14 +70,10 @@ void EBPFDeparserPSA::emitDigestInstances(CodeBuilder* builder) const {
 }
 
 void EBPFDeparserPSA::emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) {
-    if (decl->is<IR::Declaration_Instance>()) {
-        auto di = decl->to<IR::Declaration_Instance>();
-        auto type = di->type->to<IR::Type_Name>();
-        auto typeSpec = di->type->to<IR::Type_Specialized>();
+    if (auto di = decl->to<IR::Declaration_Instance>()) {
         cstring name = di->name.name;
 
-        if (typeSpec != nullptr &&
-                typeSpec->baseType->to<IR::Type_Name>()->path->name.name == "Checksum") {
+        if (EBPFObject::getSpecializedTypeName(di) == "Checksum") {
             auto instance = new EBPFChecksumPSA(program, di, name);
             checksums.emplace(name, instance);
             instance->emitVariables(builder);

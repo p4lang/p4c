@@ -117,14 +117,10 @@ EBPFPsaParser::EBPFPsaParser(const EBPFProgram* program, const IR::ParserBlock* 
 }
 
 void EBPFPsaParser::emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) {
-    if (decl->is<IR::Declaration_Instance>()) {
-        auto di = decl->to<IR::Declaration_Instance>();
-        auto type = di->type->to<IR::Type_Name>();
-        auto typeSpec = di->type->to<IR::Type_Specialized>();
+    if (auto di = decl->to<IR::Declaration_Instance>()) {
         cstring name = di->name.name;
 
-        if (typeSpec != nullptr &&
-                typeSpec->baseType->to<IR::Type_Name>()->path->name.name == "Checksum") {
+        if (EBPFObject::getSpecializedTypeName(di) == "Checksum") {
             auto instance = new EBPFChecksumPSA(program, di, name);
             checksums.emplace(name, instance);
             instance->emitVariables(builder);

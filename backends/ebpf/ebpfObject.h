@@ -40,6 +40,16 @@ class EBPFObject {
         cstring name = declaration->externalName();
         return name.replace('.', '_');
     }
+
+    static cstring getSpecializedTypeName(const IR::Declaration_Instance* di) {
+        if (auto typeSpec = di->type->to<IR::Type_Specialized>()) {
+            if (auto typeName = typeSpec->baseType->to<IR::Type_Name>()) {
+                return typeName->path->name.name;
+            }
+        }
+
+        return nullptr;
+    }
 };
 
 }  // namespace EBPF

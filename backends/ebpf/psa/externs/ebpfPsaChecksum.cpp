@@ -36,7 +36,7 @@ EBPFChecksumPSA::EBPFChecksumPSA(const EBPFProgram* program, const IR::Declarati
         ::error(ErrorType::ERR_UNEXPECTED, "Expected exactly 1 argument %1%", block);
         return;
     }
-    int type = di->arguments->at(0)->expression->to<IR::Constant>()->asInt();
+    int type = di->arguments->at(0)->expression->checkedTo<IR::Constant>()->asInt();
     init(program, name, type);
 }
 

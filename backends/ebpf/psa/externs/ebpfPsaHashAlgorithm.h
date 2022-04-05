@@ -80,8 +80,6 @@ class CRCChecksumAlgorithm : public EBPFHashAlgorithmPSA {
     cstring polynomial;
     const int crcWidth;
 
-    cstring reflect(cstring str);
-
  public:
     CRCChecksumAlgorithm(const EBPFProgram* program, cstring name, int width)
             : EBPFHashAlgorithmPSA(program, name), crcWidth(width) {}
@@ -104,12 +102,22 @@ class CRCChecksumAlgorithm : public EBPFHashAlgorithmPSA {
                               const IR::MethodCallExpression * expr) override;
 };
 
+/**
+ * For CRC16 calculation we use a polynomial 0x8005.
+ * - updateMethod adds a data to the checksum
+ * and performs a CRC16 calculation
+ * - finalizeMethod returns the CRC16 result
+ *
+ * Above C functions are emitted via emitGlobals.
+ */
 class CRC16ChecksumAlgorithm : public CRCChecksumAlgorithm {
  public:
     CRC16ChecksumAlgorithm(const EBPFProgram* program, cstring name)
             : CRCChecksumAlgorithm(program, name, 16) {
         initialValue = "0";
-        polynomial = reflect("0x8005");
+        // We use a 0x8005 polynomial.
+        // 0xA001 comes from 0x8005 value bits reflection.
+        polynomial = "0xA001";
         updateMethod = "crc16_update";
         finalizeMethod = "crc16_finalize";
     }
@@ -117,12 +125,23 @@ class CRC16ChecksumAlgorithm : public CRCChecksumAlgorithm {
     static void emitGlobals(CodeBuilder* builder);
 };
 
+/**
+ * For CRC32 calculation we use a polynomial 0x04C11DB7.
+ * - updateMethod adds a data to the checksum
+ * and performs a CRC32 calculation
+ * - finalizeMethod finalizes a CRC32 calculation
+ * and returns the CRC32 result
+ *
+ * Above C functions are emitted via emitGlobals.
+ */
 class CRC32ChecksumAlgorithm : public CRCChecksumAlgorithm {
  public:
     CRC32ChecksumAlgorithm(const EBPFProgram* program, cstring name)
             : CRCChecksumAlgorithm(program, name, 32) {
         initialValue = "0xffffffff";
-        polynomial = reflect("0x04c11db7");
+        // We use a 0x04C11DB7 polynomial.
+        // 0xEDB88320 comes from 0x04C11DB7 value bits reflection.
+        polynomial = "0xEDB88320";
         updateMethod = "crc32_update";
         finalizeMethod = "crc32_finalize";
     }

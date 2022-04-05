@@ -45,26 +45,9 @@ void EBPFHashAlgorithmPSA::emitAddData(CodeBuilder *builder, int dataPos,
 
 // ===========================CRCChecksumAlgorithm===========================
 
-cstring CRCChecksumAlgorithm::reflect(cstring str) {
-    BUG_CHECK(crcWidth <= 64, "CRC checksum width up to 64 bits is supported");
-    unsigned long long poly = std::stoull(str.c_str(), nullptr, 16);
-    unsigned long long result, i, j;
-
-    result = 0;
-    i = 1ull << (crcWidth - 1);
-    j = 1;
-
-    for (; i != 0; i >>=1, j <<= 1) {
-        if (i & poly)
-            result |= j;
-    }
-
-    return Util::printf_format("%llu", result);
-}
-
 void CRCChecksumAlgorithm::emitUpdateMethod(CodeBuilder* builder, int crcWidth) {
     // Note that this update method is optimized for our CRC16 and CRC32, custom
-    // version may require other method of update. To deal with byte order data
+    // version may require other method of update. To deal with byte order, data
     // is read from the end of buffer.
     cstring code = "static __always_inline\n"
                    "void crc%w%_update(u%w% * reg, const u8 * data, "
@@ -126,6 +109,21 @@ void CRCChecksumAlgorithm::emitClear(CodeBuilder* builder) {
     builder->endOfStatement(true);
 }
 
+/*
+ * This method generates a C code that is responsible for updating
+ * a CRC check value from a given data.
+ *
+ * From following P4 code:
+ * Checksum<bit<32>>(PSA_HashAlgorithm_t.CRC32) checksum;
+ * checksum.update(parsed_hdr.crc.f1);
+ * There will be generated a C code:
+ * crc32_update(&c_0_reg, (u8 *) &(parsed_hdr->crc.f1), 5, 0xEDB88320);
+ * Where:
+ * c_0_reg - a checksum internal state (CRC register)
+ * parsed_hdr->field1 - a data on which CRC is calculated
+ * 5 - a field size in bytes
+ * 0xEDB88320 - a polynomial in a reflected bit order.
+ */
 void CRCChecksumAlgorithm::emitAddData(CodeBuilder* builder,
                                        const argumentsList & arguments) {
     cstring tmpVar = program->refMap->newName(baseName + "_tmp");
@@ -147,11 +145,15 @@ void CRCChecksumAlgorithm::emitAddData(CodeBuilder* builder,
         }
         const int width = fieldType->width_bits();
 
+        // We concatenate less than 8-bit fields into one byte
         if (width < 8 || concatenateBits) {
             concatenateBits = true;
             if (width > remainingBits) {
                 ::error(ErrorType::ERR_UNSUPPORTED,
-                        "Sub-byte fields have to be aligned to bytes %1%", field);
+                        "Unable to concatenate fields into one byte. "
+                        "Last field(%1%) overflows one byte. "
+                        "There are %2% remaining bits but field (%1%) has %3% bits width.",
+                        field, remainingBits, width);
                 return;
             }
             if (remainingBits == 8) {
@@ -194,16 +196,16 @@ void CRCChecksumAlgorithm::emitAddData(CodeBuilder* builder,
     cstring varStr = Util::printf_format("(u64) %s", registerVar.c_str());
     builder->target->emitTraceMessage(builder, "CRC: checksum state: %llx", 1, varStr.c_str());
 
-    cstring final_crc = Util::printf_format("(u64) %s(%s, %s)", finalizeMethod.c_str(),
-                                            registerVar.c_str(), polynomial.c_str());
+    cstring final_crc = Util::printf_format("(u64) %s(%s)", finalizeMethod.c_str(),
+                                            registerVar.c_str());
     builder->target->emitTraceMessage(builder, "CRC: final checksum: %llx", 1, final_crc.c_str());
 
     builder->blockEnd(true);
 }
 
 void CRCChecksumAlgorithm::emitGet(CodeBuilder* builder) {
-    builder->appendFormat("%s(%s, %s)", finalizeMethod.c_str(),
-                          registerVar.c_str(), polynomial.c_str());
+    builder->appendFormat("%s(%s)", finalizeMethod.c_str(),
+                          registerVar.c_str());
 }
 
 void CRCChecksumAlgorithm::emitSubtractData(CodeBuilder* builder,
@@ -229,7 +231,7 @@ void CRC16ChecksumAlgorithm::emitGlobals(CodeBuilder* builder) {
     CRCChecksumAlgorithm::emitUpdateMethod(builder, 16);
 
     cstring code ="static __always_inline "
-                  "u16 crc16_finalize(u16 reg, const u16 poly) {\n"
+                  "u16 crc16_finalize(u16 reg) {\n"
                   "    return reg;\n"
                   "}";
     builder->appendLine(code);
@@ -241,7 +243,7 @@ void CRC32ChecksumAlgorithm::emitGlobals(CodeBuilder* builder) {
     CRCChecksumAlgorithm::emitUpdateMethod(builder, 32);
 
     cstring code = "static __always_inline "
-                   "u32 crc32_finalize(u32 reg, const u32 poly) {\n"
+                   "u32 crc32_finalize(u32 reg) {\n"
                    "    return reg ^ 0xFFFFFFFF;\n"
                    "}";
     builder->appendLine(code);
