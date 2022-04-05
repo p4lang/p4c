@@ -289,8 +289,9 @@ def main():
                 ###                                                     ^^
                 ### The above nonsense is to get rid of a W504 in “pycodestyle”
                 ###   [“W504 line break after binary operator”]
-                " other input pathname" +
-                s_and_were_or_just_was(len(opts.P4_source_files)) +
+                ### The same goes for “"" +” two lines down.
+                " other input pathname"
+                "" + s_and_were_or_just_was(len(opts.P4_source_files)) +
                 " specified.  A JSON input at the same time as a P4 input is"
                 " currently unsupported.")
         error_count = 1
@@ -353,17 +354,23 @@ def main():
               "  Aborting the P4 compiler driver.\n".
               format(error_count, s_and_were_or_just_was(error_count)))
         sys.exit(min(255, error_count))
-        ### maximum of 255: being extra-careful here, just in case “error_count” is a positive integer multiple of 256
+        ### maximum of 255: being extra-careful here,
+        ###                 just in case “error_count” is
+        ###                 a positive integer multiple of 256
 
 
 
-    ### A reminder: by this point, “error_count” _must_ equal zero, due to the “sys.exit” call immediately above,
-    ###   so we can make sanity-checking assertions in the following code without double-checking “error_count” first.
+    ### A reminder: by this point, “error_count” _must_ equal zero,
+    ###             due to the “sys.exit” call immediately above,
+    ###             so we can make sanity-checking assertions in the following
+    ###             code without double-checking “error_count” first.
 
 
 
     ### Figure out what we need to pass to the backend as “opts.source_file”,
-    ###   since that is the interface contract between the driver and backends as of this writing.
+    ###   since that is the interface contract between the driver and backends
+    ###   as of this writing.
+    ###
     ### Do some sanity checking along the way (e.g. assertions).
 
     string_to_pass_as___source_file = ""
