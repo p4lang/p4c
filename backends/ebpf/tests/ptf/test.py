@@ -344,3 +344,30 @@ class PacketInAdvancePSATest(P4EbpfTest):
         # check if MPLS is skipped in parser
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, exp_pkt, PORT1)
+
+
+class CountersPSATest(P4EbpfTest):
+    p4_file_path = "p4testdata/counters.p4"
+
+    def runTest(self):
+        pkt = testutils.simple_ip_packet(eth_dst='00:11:22:33:44:55',
+                                         eth_src='00:AA:00:00:00:01',
+                                         pktlen=100)
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+
+        self.counter_verify(name="ingress_test1_cnt", keys=[1], bytes=100)
+        self.counter_verify(name="ingress_test2_cnt", keys=[1], packets=1)
+        self.counter_verify(name="ingress_test3_cnt", keys=[1], bytes=100, packets=1)
+        self.counter_verify(name="ingress_action_cnt", keys=[5], bytes=100, packets=1)
+
+        pkt = testutils.simple_ip_packet(eth_dst='00:11:22:33:44:55',
+                                         eth_src='00:AA:00:00:01:FE',
+                                         pktlen=199)
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+
+        self.counter_verify(name="ingress_test1_cnt", keys=[0x1fe], bytes=199)
+        self.counter_verify(name="ingress_test2_cnt", keys=[0x1fe], packets=1)
+        self.counter_verify(name="ingress_test3_cnt", keys=[0x1fe], bytes=199, packets=1)
+        self.counter_verify(name="ingress_action_cnt", keys=[5], bytes=299, packets=2)
