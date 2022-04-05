@@ -195,11 +195,13 @@ def main():
                              "invocations of the same subparser instance.",
                         action="store_true", default=False)
 
-    env_indicates_developer_build = os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"  ### DRYified
+    ### DRYified “env_indicates_developer_build”
+    env_indicates_developer_build = os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"
     if env_indicates_developer_build:
         add_developer_options(parser)
 
-    parser.add_argument("P4_source_files", nargs='*', help="P4 source files to compile.", default=None)
+    parser.add_argument("P4_source_files", nargs='*',
+                        help="P4 source files to compile.", default=None)
 
     # load supported configuration.
     # We load these before we parse options, so that backends can register
@@ -210,11 +212,12 @@ def main():
         cfg.load_from_config(cf, parser)
     ### ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     ###
-    ### Abe`s note: I hope my {“source_file” → “P4_source_files”} change (to the “parser” object)
-    ###   at this point in time can`t cause any ill effects in the callee “config.Config.load_from_config”.
+    ### Abe`s note: I hope my {“source_file” → “P4_source_files”} change
+    ###   (to the “parser” object) at this point in time can`t cause any
+    ###   ill effects in the callee “config.Config.load_from_config”.
     ###
     ###   WIP To Do: check with somebody more experienced with this codebase
-    ###              before even _thinking_ of merging this changeset into “main”.
+    ###              before even _thinking_ about merging this changeset into “main”.
 
     # parse the arguments
     opts = parser.parse_args()
@@ -222,8 +225,8 @@ def main():
     user_defined_version = os.environ.get('P4C_DEFAULT_VERSION')
     if user_defined_version != None:
         opts.language = user_defined_version
-    # accept multiple ways of specifying which language, and ensure that it is a consistent
-    # string from now on.
+    # Accept multiple ways of specifying which language,
+    #   and ensure that it is a consistent string from now on.
     if  opts.language == "p4_14":
         opts.language =  "p4-14"
     if  opts.language == "p4_16":
@@ -249,7 +252,7 @@ def main():
     # check that the tuple value is correct
     backend = (opts.target, opts.arch)
     if (len(backend) != 2):
-        parser.error("Invalid target and arch tuple: {}\n{}".\
+        parser.error("Invalid target and arch tuple: {}\n{}".
                      format(backend, display_supported_targets(cfg)))
 
     # find the backend
@@ -265,9 +268,11 @@ def main():
                                                      str(opts.arch)))
     error_count = 0
 
-    JSON_input_specified = env_indicates_developer_build and opts.json_source ### DRY
+    JSON_input_specified = env_indicates_developer_build and opts.json_source
+### ^^^^^^^^^^^^^^^^^^^^: DRY
     P4_input_or_inputs_specified = len(opts.P4_source_files) > 0
-    any_input_specified = JSON_input_specified or P4_input_or_inputs_specified ### for readability
+    any_input_specified = JSON_input_specified or P4_input_or_inputs_specified
+### ^^^^^^^^^^^^^^^^^^^: for readability
 
     if JSON_input_specified and P4_input_or_inputs_specified:
         ### Note: this restriction was added by Abe, so if there is a test case that
@@ -324,7 +329,8 @@ def main():
 
     if error_count != 0:
         print("\nSorry; {} error{} found while analyzing the command inputs."
-              "  Aborting the P4 compiler driver.\n".format(error_count, s_and_were_or_just_was(error_count)))
+              "  Aborting the P4 compiler driver.\n".
+              format(error_count, s_and_were_or_just_was(error_count)))
         sys.exit(min(255, error_count))
         ### maximum of 255: being extra-careful here, just in case “error_count” is a positive integer multiple of 256
 
