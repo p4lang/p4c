@@ -232,21 +232,40 @@ def main():
     ###       semantically-equivalent but with different syntax.
     if not (user_defined_version is None):
         opts.language = user_defined_version
-    # Accept multiple ways of specifying which language,
-    #   and ensure that it is a consistent string from now on.
-    if  opts.language == "p4_14":
-        opts.language =  "p4-14"
-    if  opts.language == "p4_16":
-        opts.language =  "p4-16"
+
+    ### Accept multiple ways of specifying which language,
+    ###   and ensure that it is a consistent string from now on.
+    ###
+    ### Abe`s note: before I started working on reformatting this file for
+    ###   style-guidelines compliance, the code for this part was basically:
+    ###
+    #   if  opts.language == "p4_14":
+    #       opts.language =  "p4-14"
+    #   if  opts.language == "p4_16":
+    #       opts.language =  "p4-16"
+    ###
+    ### The following should be more general, i.e. it should handle e.g.
+    ###   “p4_22” ⇒ “p4-22” just fine.
+    ###
+    ### Note: Abe dislikes the ASCII dash/minus in
+    ###   “p4-”<some decimal integer>, but is keeping it here so as to not
+    ###   break/change this part of the contract/interface between the driver
+    ###   and the rest of the compiler.  One of these days/years,
+    ###   Abe suggests switching to e.g. “P4₁₄” and “P4₁₆” instead... ;-)
+    ###   ... or, probably even better, providing that Python≥3.4
+    ###   is an acceptable requirement:
+    ###     <https://docs.python.org/3/library/enum.html>
+    if (len(opts.language) > 2) and ('_' == opts.language[2]):
+        opts.language = opts.language[:2] + '-' + opts.language[3:]
 
     user_defined_target = os.environ.get('P4C_DEFAULT_TARGET')
-    ### Re the next line of real code: please see the 4-line comment above
+    ### Re the next line of real code: please see the 4-line comment, above,
     ###   about “pycodestyle”.
     if not (user_defined_target is None):
         opts.target = user_defined_target
 
     user_defined_arch = os.environ.get('P4C_DEFAULT_ARCH')
-    ### Re the next line of real code: please see the 4-line comment above
+    ### Re the next line of real code: please see the 4-line comment, above,
     ###   about “pycodestyle”.
     if not (user_defined_arch is None):
         opts.arch = user_defined_arch
