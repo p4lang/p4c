@@ -417,11 +417,15 @@ SymbolicValue* SymbolicHeader::clone() const {
 
 void SymbolicHeader::assign(const SymbolicValue* other) {
     if (other->is<SymbolicError>()) return;
-    BUG_CHECK(other->is<SymbolicHeader>(), "%1%: expected a header", other);
-    auto hv = other->to<SymbolicHeader>();
-    for (auto f : hv->fieldValue)
-        fieldValue[f.first]->assign(f.second);
-    valid->assign(hv->valid);
+    BUG_CHECK(other->is<SymbolicStruct>() , "%1%: expected a struct", other);
+    if (auto hv = other->to<SymbolicStruct>()) {
+        for (auto f : hv->fieldValue)
+            fieldValue[f.first]->assign(f.second);
+    }
+    if (auto hv = other->to<SymbolicHeader>())
+        valid->assign(hv->valid);
+    else
+        valid->assign(new SymbolicBool(true));
 }
 
 bool SymbolicHeader::merge(const SymbolicValue* other) {

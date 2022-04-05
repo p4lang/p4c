@@ -225,15 +225,18 @@ bool CodeGenInspector::preorder(const IR::Path* p) {
 }
 
 bool CodeGenInspector::preorder(const IR::StructExpression *expr) {
-    if (commentDescriptionDepth == 0)
-        return CodeGenInspector::preorder(expr);
-
-    // Dump structure for helper comment
+    builder->append("(struct ");
+    CHECK_NULL(expr->structType);
+    visit(expr->structType);
+    builder->append(")");
     builder->append("{");
     bool first = true;
     for (auto c : expr->components) {
         if (!first)
             builder->append(", ");
+        builder->append(".");
+        builder->append(c->name);
+        builder->append(" = ");
         visit(c->expression);
         first = false;
     }
