@@ -31,9 +31,11 @@ import p4c_src
 # \TODO: let the backends set their versions ...
 p4c_version = p4c_src.__version__
 
+
 def set_version(ver):
     global p4c_version
     p4c_version = ver
+
 
 def get_version():
     return p4c_version
@@ -45,7 +47,8 @@ def display_supported_targets(cfg):
         ret += str(target) + "\n"
     return ret
 
-JSON_input_flag = "--fromJson" ### DRY
+
+JSON_input_flag = "--fromJson"  ### DRY
 def add_developer_options(parser):
     parser.add_argument("-T", dest="log_levels",
                         action="append", default=[],
@@ -55,10 +58,11 @@ def add_developer_options(parser):
                         action="append", default=[],
                         help="[Compiler debugging] Dump the P4 representation"
                              " after passes whose name contains one of 'passX'"
-                             " substrings.  When '-v' is used this will include"
-                             " the compiler IR.")
+                             " substrings.  When '-v' is used this will"
+                             " include the compiler IR.")
     parser.add_argument("--dump", dest="dump_dir", default=None,
-                        help="[Compiler debugging] Folder where P4 programs are dumped.")
+                        help="[Compiler debugging] Folder where P4 programs"
+                             " are dumped.")
     parser.add_argument("--toJson", dest="json", default=None,
                         help="Dump IR to JSON in the specified file.")
     parser.add_argument(JSON_input_flag, dest="json_source", default=None,
@@ -148,7 +152,7 @@ def main():
     parser.add_argument("--help-pragmas", "--pragma-help", "--pragmas-help",
                         "--help-annotations", "--annotation-help", "--annotations-help",
                         dest="help_pragmas", action="store_true", default=False,
-                        help = "Print the documentation about supported annotations/pragmas and exit.")
+                        help="Print the documentation about supported annotations/pragmas and exit.")
     parser.add_argument("--help-targets", "--target-help", "--targets-help",
                         dest="show_target_help",
                         help="Display target specific command line options.",
@@ -208,8 +212,10 @@ def main():
         opts.language = user_defined_version
     # accept multiple ways of specifying which language, and ensure that it is a consistent
     # string from now on.
-    if opts.language == "p4_14": opts.language = "p4-14"
-    if opts.language == "p4_16": opts.language = "p4-16"
+    if  opts.language == "p4_14":
+        opts.language =  "p4-14"
+    if  opts.language == "p4_16":
+        opts.language =  "p4-16"
 
     user_defined_target = os.environ.get('P4C_DEFAULT_TARGET')
     if user_defined_target != None:
@@ -276,14 +282,14 @@ def main():
     ###                    pathname handling in the driver is good enough for merging to “main”.
     if checkInput:
         if not any_input_specified:
-          parser.error("no input pathname was specified.")
-          ### reminder: at this point, the program is dead
+            parser.error("no input pathname was specified.")
+            ### reminder: at this point, the program is dead
 
         if len(opts.P4_source_files) > 1:
-            print ("\nSorry; as of this writing, the P4 compiler driver does not support multiple "
-                   "top-level P4 source files in a single invocation.  Multiple P4 source files at a time "
-                   'are currently only supported via "#include" (i.e. additional non-top-level P4 source files).  '
-                   "Number of top-level P4 source-file pathnames detected: " + str(len(opts.P4_source_files)), file=sys.stderr)
+            print("\nSorry; as of this writing, the P4 compiler driver does not support multiple "
+                  "top-level P4 source files in a single invocation.  Multiple P4 source files at a time "
+                  'are currently only supported via "#include" (i.e. additional non-top-level P4 source files).  '
+                  "Number of top-level P4 source-file pathnames detected: " + str(len(opts.P4_source_files)), file=sys.stderr)
             error_count += 1
 
         ### We need to do the next 3 lines of code this way
@@ -308,8 +314,7 @@ def main():
         print("\nSorry; {} error{} found while analyzing the command inputs."
               "  Aborting the P4 compiler driver.\n".format(error_count, s_and_were_or_just_was(error_count)))
         sys.exit(min(255, error_count))
-        ### maximum of 255: being extra-careful here,
-        ###                 just in case “error_count” is a positive integer multiple of 256
+        ### maximum of 255: being extra-careful here, just in case “error_count” is a positive integer multiple of 256
 
 
 
