@@ -284,8 +284,11 @@ def main():
         ###       that will now fail whereas before the JSON input pathname
         ###       would silently override the other input pathname[s].
         print("\nERROR: it seems that both (firstly) a JSON input pathname "
-                'was specified via "' + JSON_input_flag + '"' +
-                " _and_ (secondly) " + str(len(opts.P4_source_files)) +
+                'was specified via "' + JSON_input_flag + '"'
+                " _and_ (secondly) " + str(len(opts.P4_source_files)) + ""
+                ###                                                     ^^
+                ### The above nonsense is to get rid of a W504 in “pycodestyle”
+                ###   [“W504 line break after binary operator”]
                 " other input pathname" +
                 s_and_were_or_just_was(len(opts.P4_source_files)) +
                 " specified.  A JSON input at the same time as a P4 input is"
@@ -294,11 +297,12 @@ def main():
         ### Replace ↑ ‘=’ with “+=” if/when ever moving this line of code
         ###   to somewhere it might not be the first error detection.
 
-    # When using --help-* options, we don't necessarily need to pass an input file
-    # However, by default the driver checks the input and fails if it does not exist.
-    # In that case we set source to dummy.p4 so sanity checking works. Backend can
-    # force this behaviour for its own help options by overriding the
-    # should_not_check_input method.
+    ### When using “--help-”<*> options, we don`t necessarily need to pass
+    ### an input-file pathname.  However, by default the driver checks the
+    ### input pathname and fails if the respective file does not exist.
+    ### In that case we set source to “dummy.p4” so sanity checking works.
+    ### The backend can force this behavior for its own help options by
+    ### overriding the “should_not_check_input” method.
     checkInput = not (opts.help_pragmas or backend.should_not_check_input(opts))
 
     use_a_dummy_P4_pseudoPathname = False
@@ -314,17 +318,22 @@ def main():
             print("\nSorry; as of this writing, the P4 compiler driver does "
                     "_not_ support multiple top-level P4 source files in a "
                     "single invocation.  Multiple P4 source files at a time "
-                    'are currently only supported via "#include" (i.e. '
-                    "additional non-top-level P4 source files).  "
-                    "Number of top-level P4 source-file pathnames detected: " +
-                    str(len(opts.P4_source_files)), file=sys.stderr)
+                    'are currently only supported via "#include"'
+                    "(i.e. additional non-top-level P4 source files).  "
+                    "Number of top-level P4 source-file pathnames detected: "
+                    "" + str(len(opts.P4_source_files)), file=sys.stderr)
+            ###     ^^ this nonsense is to get rid of a W504 in “pycodestyle”
+            ###        [“W504 line break after binary operator”]
             error_count += 1
 
         ### We need to do the next 3 lines of code this way (instead of
         ###   iterating over a concise “list if list else []” expression)
-        ###   because “opts.json_source” might be invalid [i.e. we are _not_ in a developer build].
+        ###   because “opts.json_source” might be invalid
+        ###   [i.e. we are _not_ in a developer build].
         pathnames_to_check = opts.P4_source_files.copy()
-        ### Abe`s reminder to self re the preceding line: a plain “pathnames_to_check = opts.P4_source_files” creates an _alias_!!!
+        ### Abe`s reminder to self re the preceding line:
+        ###  a plain “pathnames_to_check = opts.P4_source_files”
+        ###  creates an _alias_!!!
         if JSON_input_specified:
             pathnames_to_check.append(opts.json_source)
 
