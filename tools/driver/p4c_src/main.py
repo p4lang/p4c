@@ -266,7 +266,7 @@ def main():
         if (pattern.match(opts.target + '-' + opts.arch)):
             backend = target
             break
-    if backend == None:
+    if backend is None:
         parser.error("Unknown backend: {}-{}".format(str(opts.target),
                                                      str(opts.arch)))
     error_count = 0
@@ -291,7 +291,7 @@ def main():
                 ###   [“W504 line break after binary operator”]
                 ### The same goes for “"" +” two lines down.
                 " other input pathname"
-                "" + s_and_were_or_just_was(len(opts.P4_source_files)) +
+                "" + s_and_were_or_just_was(len(opts.P4_source_files)) + ""
                 " specified.  A JSON input at the same time as a P4 input is"
                 " currently unsupported.")
         error_count = 1
@@ -308,23 +308,25 @@ def main():
 
     use_a_dummy_P4_pseudoPathname = False
     ### a note from Abe: do we really still need the dummy pathname?
-    ###                  Maybe we can take all the dummy-related code out once my work to improve the
-    ###                    pathname handling in the driver is good enough for merging to “main”.
+    ###                  Maybe we can take all the dummy-related code out once
+    ###                    my work to improve the pathname handling in the
+    ###                    driver is good enough for merging to “main”.
     if checkInput:
         if not any_input_specified:
             parser.error("no input pathname was specified.")
             ### reminder: at this point, the program is dead
 
         if len(opts.P4_source_files) > 1:
-            print("\nSorry; as of this writing, the P4 compiler driver does "
-                    "_not_ support multiple top-level P4 source files in a "
-                    "single invocation.  Multiple P4 source files at a time "
-                    'are currently only supported via "#include"'
-                    "(i.e. additional non-top-level P4 source files).  "
-                    "Number of top-level P4 source-file pathnames detected: "
-                    "" + str(len(opts.P4_source_files)), file=sys.stderr)
-            ###     ^^ this nonsense is to get rid of a W504 in “pycodestyle”
-            ###        [“W504 line break after binary operator”]
+            print("\n"
+                  "Sorry; as of this writing, the P4 compiler driver does "
+                  "_not_ support multiple top-level P4 source files in a "
+                  "single invocation.  Multiple P4 source files at a time "
+                  'are currently only supported via "#include"'
+                  "(i.e. additional non-top-level P4 source files).  "
+                  "Number of top-level P4 source-file pathnames detected: "
+                  "" + str(len(opts.P4_source_files)), file=sys.stderr)
+            ###   ^^ this nonsense is to get rid of a W504 in “pycodestyle”
+            ###      [“W504 line break after binary operator”]
             error_count += 1
 
         ### We need to do the next 3 lines of code this way (instead of
