@@ -49,6 +49,8 @@ def display_supported_targets(cfg):
 
 
 JSON_input_flag = "--fromJson"  ### DRY
+
+
 def add_developer_options(parser):
     parser.add_argument("-T", dest="log_levels",
                         action="append", default=[],
@@ -217,7 +219,8 @@ def main():
     ###   ill effects in the callee “config.Config.load_from_config”.
     ###
     ###   WIP To Do: check with somebody more experienced with this codebase
-    ###              before even _thinking_ about merging this changeset into “main”.
+    ###              before even _thinking_ about merging
+    ###              this changeset into “main”.
 
     # parse the arguments
     opts = parser.parse_args()
@@ -275,10 +278,11 @@ def main():
 ### ^^^^^^^^^^^^^^^^^^^: for readability
 
     if JSON_input_specified and P4_input_or_inputs_specified:
-        ### Note: this restriction was added by Abe, so if there is a test case which
-        ###       tries to feed the driver both a JSON input pathname via the relevant
-        ###       flag _and_ another input pathname, that will now fail whereas before the
-        ###       JSON input pathname would silently override the other input pathname[s].
+        ### Note: this restriction was added by Abe, so if there is a test case
+        ###       which tries to feed the driver both a JSON input pathname
+        ###       via the relevant flag _and_ another input pathname,
+        ###       that will now fail whereas before the JSON input pathname
+        ###       would silently override the other input pathname[s].
         print("\nERROR: it seems that both (firstly) a JSON input pathname "
                 'was specified via "' + JSON_input_flag + '"' +
                 " _and_ (secondly) " + str(len(opts.P4_source_files)) +
@@ -308,7 +312,7 @@ def main():
 
         if len(opts.P4_source_files) > 1:
             print("\nSorry; as of this writing, the P4 compiler driver does "
-                    "_not_ support multiple top-level P4 source files in a " # noqa
+                    "_not_ support multiple top-level P4 source files in a "
                     "single invocation.  Multiple P4 source files at a time "
                     'are currently only supported via "#include" (i.e. '
                     "additional non-top-level P4 source files).  "
