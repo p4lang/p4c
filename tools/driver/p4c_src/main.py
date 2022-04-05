@@ -275,14 +275,17 @@ def main():
 ### ^^^^^^^^^^^^^^^^^^^: for readability
 
     if JSON_input_specified and P4_input_or_inputs_specified:
-        ### Note: this restriction was added by Abe, so if there is a test case that
-        ###       tries to feed the driver both a JSON input pathname via the relevant flag _and_
-        ###       another input pathname, that will now fail whereas before
-        ###       the JSON input pathname would silently override the other input pathname[s].
-        print ('\nERROR: it seems that both (firstly) a JSON input pathname was specified via "' + JSON_input_flag +
-                '" _and_ (secondly) ' + str( len(opts.P4_source_files) ) +
-                " other input pathname" + s_and_were_or_just_was( len(opts.P4_source_files) ) +
-                " specified.  A JSON input at the same time as a P4 input is currently unsupported.")
+        ### Note: this restriction was added by Abe, so if there is a test case which
+        ###       tries to feed the driver both a JSON input pathname via the relevant
+        ###       flag _and_ another input pathname, that will now fail whereas before the
+        ###       JSON input pathname would silently override the other input pathname[s].
+        print("\nERROR: it seems that both (firstly) a JSON input pathname "
+                'was specified via "' + JSON_input_flag + '"' +
+                " _and_ (secondly) " + str(len(opts.P4_source_files)) +
+                " other input pathname" +
+                s_and_were_or_just_was(len(opts.P4_source_files)) +
+                " specified.  A JSON input at the same time as a P4 input is"
+                " currently unsupported.")
         error_count = 1 ### Replace ‘=’ with “+=” if/when ever moving this line of code to
                         ###   somewhere it might not be the first error detection.
 
@@ -303,10 +306,13 @@ def main():
             ### reminder: at this point, the program is dead
 
         if len(opts.P4_source_files) > 1:
-            print("\nSorry; as of this writing, the P4 compiler driver does not support multiple "
-                  "top-level P4 source files in a single invocation.  Multiple P4 source files at a time "
-                  'are currently only supported via "#include" (i.e. additional non-top-level P4 source files).  '
-                  "Number of top-level P4 source-file pathnames detected: " + str(len(opts.P4_source_files)), file=sys.stderr)
+            print("\nSorry; as of this writing, the P4 compiler driver does "
+                    "_not_ support multiple top-level P4 source files in a "
+                    "single invocation.  Multiple P4 source files at a time "
+                    'are currently only supported via "#include" (i.e. '
+                    "additional non-top-level P4 source files).  "
+                    "Number of top-level P4 source-file pathnames detected: " +
+                    str(len(opts.P4_source_files)), file=sys.stderr)
             error_count += 1
 
         ### We need to do the next 3 lines of code this way
@@ -319,7 +325,8 @@ def main():
 
         for pathname in pathnames_to_check:
             if not os.path.isfile(pathname):
-                print('\nERROR: the input file "{}" does not exist.'.format(pathname), file=sys.stderr)
+                print('\nERROR: the input file "{}" does not exist.'.
+                      format(pathname), file=sys.stderr)
                 error_count += 1
 
     elif not any_input_specified:
@@ -345,7 +352,8 @@ def main():
     ###   since that is the interface contract between the driver and backends as of this writing.
     ### Do some sanity checking along the way (e.g. assertions).
 
-    string_to_pass_as___source_file = ""  ### _intentionally_ initializing with a value that Python considers false
+    string_to_pass_as___source_file = ""
+    ### the preceding line: _intentionally_ initializing with a value that Python considers false
 
     if JSON_input_specified:
         assert 0 == len(opts.P4_source_files)
@@ -366,9 +374,11 @@ def main():
 
 
 
-    ### The following is admittedly somewhat hackish, but was the only way Abe could figure out how to set
-    ###   the appropriate attribute for the interface contract with the back end while maintaining
-    ###   the established norm that “opts” is of type “argparse.Namespace”, as it was before Abe touched this file.
+    ### The following is admittedly somewhat hackish, but was the only way
+    ###   Abe could figure out how to set the appropriate attribute for the
+    ###   interface contract with the back end while maintaining the
+    ###   established norm that “opts” is of type “argparse.Namespace”,
+    ###   as it was before Abe touched this file.
     opts.__setattr__("source_file", string_to_pass_as___source_file)
 
 
