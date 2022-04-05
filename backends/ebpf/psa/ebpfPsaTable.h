@@ -23,6 +23,8 @@ limitations under the License.
 
 namespace EBPF {
 
+class EBPFTableImplementationPSA;
+
 class EBPFTablePSA : public EBPFTable {
  private:
     void emitTableDecl(CodeBuilder *builder,
@@ -36,6 +38,33 @@ class EBPFTablePSA : public EBPFTable {
     ActionTranslationVisitor* createActionTranslationVisitor(
             cstring valueName, const EBPFProgram* program) const override;
 
+    void initImplementation();
+
+    // Executes `func` for every entry in given property
+    template<class F>
+    void forEachPropertyEntry(cstring propertyName, F func) {
+        auto counterProperty = table->container->properties->getProperty(propertyName);
+        if (counterProperty == nullptr)
+            return;
+        if (counterProperty->value->is<IR::ExpressionValue>()) {
+            auto ev = counterProperty->value->to<IR::ExpressionValue>();
+            if (ev->expression->is<IR::PathExpression>()) {
+                func(ev->expression->to<IR::PathExpression>());
+            } else if (ev->expression->is<IR::ListExpression>()) {
+                auto le = ev->expression->to<IR::ListExpression>();
+                for (auto c : le->components) {
+                    func(c->to<IR::PathExpression>());
+                }
+            } else {
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "Unsupported list type: %1%", counterProperty->value);
+            }
+        } else {
+            ::error(ErrorType::ERR_UNKNOWN,
+                    "Unknown property expression type: %1%", counterProperty->value);
+        }
+    }
+
     void emitTableValue(CodeBuilder* builder, const IR::MethodCallExpression* actionMce,
                         cstring valueName);
     void emitDefaultActionInitializer(CodeBuilder *builder);
@@ -44,8 +73,16 @@ class EBPFTablePSA : public EBPFTable {
                                cstring returnCode) const;
 
  public:
+    // TODO: DirectMeter and DirectCounter are not implemented now, but
+    //  they are need in table implementation to validate table properties
+    std::vector<cstring> counters;
+    std::vector<cstring> meters;
+    EBPFTableImplementationPSA* implementation;
+
     EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* table,
                  CodeGenInspector* codeGen);
+    EBPFTablePSA(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name);
+
     void emitInstance(CodeBuilder* builder) override;
     void emitTypes(CodeBuilder* builder) override;
     void emitValueStructStructure(CodeBuilder* builder) override;

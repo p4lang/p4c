@@ -19,6 +19,7 @@ limitations under the License.
 #include "backends/ebpf/ebpfType.h"
 #include "ebpfPsaTable.h"
 #include "ebpfPipeline.h"
+#include "externs/ebpfPsaTableImplementation.h"
 
 namespace EBPF {
 
@@ -71,7 +72,7 @@ void ActionTranslationVisitorPSA::processMethod(const P4::ExternMethod* method) 
 // =====================EBPFTablePSA=============================
 EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* table,
                            CodeGenInspector* codeGen) :
-                           EBPFTable(program, table, codeGen) {
+                           EBPFTable(program, table, codeGen), implementation(nullptr) {
     auto sizeProperty = table->container->properties->getProperty("size");
     if (keyGenerator == nullptr && sizeProperty != nullptr) {
         ::warning(ErrorType::WARN_IGNORE_PROPERTY,
@@ -86,6 +87,41 @@ EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* tab
         }
         this->size = 1;
     }
+
+    initImplementation();
+}
+
+EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name) :
+                           EBPFTable(program, codeGen, name), implementation(nullptr) {}
+
+void EBPFTablePSA::initImplementation() {
+    // PSA table is allowed to have up to one table implementation. Function forEachPropertyEntry
+    // will iterate over all entries in property, so lets use of this and print errors.
+    auto impl = [this](const IR::PathExpression * pe) {
+        CHECK_NULL(pe);
+        auto decl = program->refMap->getDeclaration(pe->path, true);
+        auto di = decl->to<IR::Declaration_Instance>();
+        CHECK_NULL(di);
+        cstring type = di->type->toString();
+
+        if (this->implementation != nullptr) {
+            ::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1%: Up to one implementation is supported in a table", pe);
+            return;
+        }
+
+        if (type == "ActionProfile") {
+            auto ap = program->control->getTable(di->name.name);
+            this->implementation = ap->to<EBPFTableImplementationPSA>();
+        }
+
+        if (this->implementation != nullptr)
+            this->implementation->registerTable(this);
+        else
+            ::error(ErrorType::ERR_UNKNOWN,
+                    "%1%: unknown table implementation %2%", pe, decl);
+    };
+    forEachPropertyEntry("psa_implementation", impl);
 }
 
 ActionTranslationVisitor* EBPFTablePSA::createActionTranslationVisitor(
@@ -94,8 +130,13 @@ ActionTranslationVisitor* EBPFTablePSA::createActionTranslationVisitor(
 }
 
 void EBPFTablePSA::emitValueStructStructure(CodeBuilder* builder) {
-    // TODO: placeholder for handling psa_implementation
-    EBPFTable::emitValueStructStructure(builder);
+    if (implementation != nullptr) {
+        // TODO: add priority for ternary table
+
+        implementation->emitReferenceEntry(builder);
+    } else {
+        EBPFTable::emitValueStructStructure(builder);
+    }
 }
 
 void EBPFTablePSA::emitInstance(CodeBuilder *builder) {
@@ -106,9 +147,12 @@ void EBPFTablePSA::emitInstance(CodeBuilder *builder) {
                       cstring("struct ") + valueTypeName, size);
     }
 
-    emitTableDecl(builder, defaultActionMapName, TableArray,
-                  program->arrayIndexType,
-                  cstring("struct ") + valueTypeName, 1);
+    if (implementation == nullptr) {
+        // Default action is up to implementation, define it when no implementation provided
+        emitTableDecl(builder, defaultActionMapName, TableArray,
+                      program->arrayIndexType,
+                      cstring("struct ") + valueTypeName, 1);
+    }
 }
 
 void EBPFTablePSA::emitTableDecl(CodeBuilder *builder,
@@ -130,13 +174,18 @@ void EBPFTablePSA::emitTypes(CodeBuilder* builder) {
 }
 
 void EBPFTablePSA::emitAction(CodeBuilder* builder, cstring valueName, cstring actionRunVariable) {
-    // TODO: placeholder for handling psa_implementation
-    EBPFTable::emitAction(builder, valueName, actionRunVariable);
+    if (implementation != nullptr)
+        implementation->applyImplementation(builder, valueName, actionRunVariable);
+    else
+        EBPFTable::emitAction(builder, valueName, actionRunVariable);
 }
 
 void EBPFTablePSA::emitInitializer(CodeBuilder *builder) {
-    this->emitDefaultActionInitializer(builder);
-    this->emitConstEntriesInitializer(builder);
+    // Do not emit initializer when table implementation is provided
+    if (implementation == nullptr) {
+        this->emitDefaultActionInitializer(builder);
+        this->emitConstEntriesInitializer(builder);
+    }
 }
 
 void EBPFTablePSA::emitConstEntriesInitializer(CodeBuilder *builder) {
@@ -319,12 +368,19 @@ void EBPFTablePSA::emitLookup(CodeBuilder* builder, cstring key, cstring value) 
 }
 
 void EBPFTablePSA::emitLookupDefault(CodeBuilder* builder, cstring key, cstring value) {
-    // TODO: placeholder for handling psa_implementation
-    EBPFTable::emitLookupDefault(builder, key, value);
+    if (implementation != nullptr) {
+        builder->appendLine("/* table with implementation has default action "
+                            "implicitly set to NoAction, so we can skip execution of it */");
+        builder->target->emitTraceMessage(builder,
+                                          "Control: skipping default action due to implementation");
+    } else {
+        EBPFTable::emitLookupDefault(builder, key, value);
+    }
 }
 
 bool EBPFTablePSA::dropOnNoMatchingEntryFound() const {
-    // TODO: placeholder for handling psa_implementation
+    if (implementation != nullptr)
+        return false;
     return EBPFTable::dropOnNoMatchingEntryFound();
 }
 }  // namespace EBPF
