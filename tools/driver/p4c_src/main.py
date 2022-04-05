@@ -286,8 +286,9 @@ def main():
                 s_and_were_or_just_was(len(opts.P4_source_files)) +
                 " specified.  A JSON input at the same time as a P4 input is"
                 " currently unsupported.")
-        error_count = 1 ### Replace ‘=’ with “+=” if/when ever moving this line of code to
-                        ###   somewhere it might not be the first error detection.
+        error_count = 1
+        ### Replace ↑ ‘=’ with “+=” if/when ever moving this line of code
+        ###   to somewhere it might not be the first error detection.
 
     # When using --help-* options, we don't necessarily need to pass an input file
     # However, by default the driver checks the input and fails if it does not exist.
@@ -307,7 +308,7 @@ def main():
 
         if len(opts.P4_source_files) > 1:
             print("\nSorry; as of this writing, the P4 compiler driver does "
-                    "_not_ support multiple top-level P4 source files in a "
+                    "_not_ support multiple top-level P4 source files in a " # noqa
                     "single invocation.  Multiple P4 source files at a time "
                     'are currently only supported via "#include" (i.e. '
                     "additional non-top-level P4 source files).  "
@@ -315,8 +316,8 @@ def main():
                     str(len(opts.P4_source_files)), file=sys.stderr)
             error_count += 1
 
-        ### We need to do the next 3 lines of code this way
-        ###   (instead of iterating over a concise “list if list else []” expression)
+        ### We need to do the next 3 lines of code this way (instead of
+        ###   iterating over a concise “list if list else []” expression)
         ###   because “opts.json_source” might be invalid [i.e. we are _not_ in a developer build].
         pathnames_to_check = opts.P4_source_files.copy()
         ### Abe`s reminder to self re the preceding line: a plain “pathnames_to_check = opts.P4_source_files” creates an _alias_!!!
