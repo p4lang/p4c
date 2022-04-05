@@ -226,7 +226,11 @@ def main():
     opts = parser.parse_args()
 
     user_defined_version = os.environ.get('P4C_DEFAULT_VERSION')
-    if user_defined_version != None:
+    ### Note: the next line of real code _was_τhe clear and easy-to-understand
+    ###       “if user_defined_version != None:”, but “pycodestyle”
+    ###       complained about that idiom so I rewrote it to something
+    ###       semantically-equivalent but with different syntax.
+    if not (user_defined_version is None):
         opts.language = user_defined_version
     # Accept multiple ways of specifying which language,
     #   and ensure that it is a consistent string from now on.
@@ -236,11 +240,15 @@ def main():
         opts.language =  "p4-16"
 
     user_defined_target = os.environ.get('P4C_DEFAULT_TARGET')
-    if user_defined_target != None:
+    ### Re the next line of real code: please see the 4-line comment above
+    ###   about “pycodestyle”.
+    if not (user_defined_target is None):
         opts.target = user_defined_target
 
     user_defined_arch = os.environ.get('P4C_DEFAULT_ARCH')
-    if user_defined_arch != None:
+    ### Re the next line of real code: please see the 4-line comment above
+    ###   about “pycodestyle”.
+    if not (user_defined_arch is None):
         opts.arch = user_defined_arch
 
     # deal with early exits
@@ -283,17 +291,18 @@ def main():
         ###       via the relevant flag _and_ another input pathname,
         ###       that will now fail whereas before the JSON input pathname
         ###       would silently override the other input pathname[s].
-        print("\nERROR: it seems that both (firstly) a JSON input pathname "
-                'was specified via "' + JSON_input_flag + '"'
-                " _and_ (secondly) " + str(len(opts.P4_source_files)) + ""
-                ###                                                     ^^
-                ### The above nonsense is to get rid of a W504 in “pycodestyle”
-                ###   [“W504 line break after binary operator”]
-                ### The same goes for “"" +” two lines down.
-                " other input pathname"
-                "" + s_and_were_or_just_was(len(opts.P4_source_files)) + ""
-                " specified.  A JSON input at the same time as a P4 input is"
-                " currently unsupported.")
+        print("\n"
+              "ERROR: it seems that both (firstly) a JSON input pathname "
+              'was specified via "' + JSON_input_flag + '"'
+              " _and_ (secondly) " + str(len(opts.P4_source_files)) + ""
+              ###                                                     ^^
+              ### The above nonsense is to get rid of a W504 in “pycodestyle”
+              ###   [“W504 line break after binary operator”]
+              ### The same goes for “"" +” two lines down.
+              " other input pathname"
+              "" + s_and_were_or_just_was(len(opts.P4_source_files)) + ""
+              " specified.  A JSON input at the same time as a P4 input is"
+              " currently unsupported.")
         error_count = 1
         ### Replace ↑ ‘=’ with “+=” if/when ever moving this line of code
         ###   to somewhere it might not be the first error detection.
@@ -376,7 +385,8 @@ def main():
     ### Do some sanity checking along the way (e.g. assertions).
 
     string_to_pass_as___source_file = ""
-    ### the preceding line: _intentionally_ initializing with a value that Python considers false
+    ### the preceding line: _intentionally_ initializing with a value that
+    ###                     Python considers false
 
     if JSON_input_specified:
         assert 0 == len(opts.P4_source_files)
