@@ -1474,6 +1474,14 @@ const IR::Node* TypeInference::postorder(IR::Type_Typedef* tdecl) {
     auto type = getType(tdecl->type);
     if (type == nullptr)
         return tdecl;
+    BUG_CHECK(type->is<IR::Type_Type>(), "%1%: expected a TypeType", type);
+    auto stype = type->to<IR::Type_Type>()->type;
+    if (auto gen = stype->to<IR::IMayBeGenericType>()) {
+        if (gen->getTypeParameters()->size() != 0) {
+            typeError("%1%: no type parameters supplied for generic type", tdecl->type);
+            return tdecl;
+        }
+    }
     setType(getOriginal(), type);
     setType(tdecl, type);
     return tdecl;
