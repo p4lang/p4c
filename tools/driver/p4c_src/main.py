@@ -49,7 +49,8 @@ JSON_input_flag = "--fromJson" ### DRY
 def add_developer_options(parser):
     parser.add_argument("-T", dest="log_levels",
                         action="append", default=[],
-                        help="[Compiler debugging] Adjust logging level per file (see below)")
+                        help="[Compiler debugging] Adjust logging level"
+                        " per file (see below)")
     parser.add_argument("--top4", dest="passes",
                         action="append", default=[],
                         help="[Compiler debugging] Dump the P4 representation after \
@@ -303,10 +304,11 @@ def main():
 
 
     if error_count != 0:
-        print ("\nSorry; {} error{} found while analyzing the command inputs."
-               "  Aborting the P4 compiler driver.\n".format(error_count, s_and_were_or_just_was(error_count) ) )
-        sys.exit( min(255, error_count) ) ### maximum of 255: being extra-careful here,
-                                          ### just in case “error_count” is a positive integer multiple of 256
+        print("\nSorry; {} error{} found while analyzing the command inputs."
+              "  Aborting the P4 compiler driver.\n".format(error_count, s_and_were_or_just_was(error_count)))
+        sys.exit(min(255, error_count))
+        ### maximum of 255: being extra-careful here,
+        ###                 just in case “error_count” is a positive integer multiple of 256
 
 
 
