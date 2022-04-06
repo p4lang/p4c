@@ -836,6 +836,13 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
         } else if (auto arg = expr->to<IR::BoolLiteral>()) {
             int v = arg->value ? 1 : 0;
             return new IR::Constant(e->srcInfo, type, v, 10);
+        } else if (expr->is<IR::Member>()) {
+            auto ei = EnumInstance::resolve(expr, typeMap);
+            if (ei == nullptr)
+                return e;
+            if (auto se = ei->to<SerEnumInstance>()) {
+                return se->value;
+            }
         } else {
             return e;
         }
