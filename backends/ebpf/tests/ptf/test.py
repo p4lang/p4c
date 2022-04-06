@@ -346,6 +346,24 @@ class PacketInAdvancePSATest(P4EbpfTest):
         testutils.verify_packet(self, exp_pkt, PORT1)
 
 
+class DigestPSATest(P4EbpfTest):
+
+    p4_file_path = "p4testdata/digest.p4"
+
+    def runTest(self):
+        pkt = testutils.simple_ip_packet(eth_src="fa:fb:fc:fd:fe:f0")
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.send_packet(self, PORT0, pkt)
+
+        digests = self.digest_get("IngressDeparserImpl_mac_learn_digest")
+        if len(digests) != 3:
+            self.fail("Expected 3 digest messages, got {}".format(len(digests)))
+        for d in digests:
+            if d["srcAddr"] != "0xfafbfcfdfef0" or d["ingress_port"] != "0x4":
+                self.fail("Digest map stored wrong values: mac->{}, port->{}".format(d["srcAddr"], d["ingress_port"]))
+
+                
 class CountersPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/counters.p4"
 

@@ -226,6 +226,11 @@ class P4EbpfTest(BaseTest):
                 cmd = cmd + "{} ".format(k)
         self.exec_ns_cmd(cmd, "Table delete failed")
 
+    def digest_get(self, name):
+        cmd = "psabpf-ctl digest get pipe {} {}".format(TEST_PIPELINE_ID, name)
+        _, stdout, _ = self.exec_ns_cmd(cmd, "Digest get failed")
+        return json.loads(stdout)['Digest'][name]['digests']
+
     def counter_get(self, name, keys=None):
         key_str = ""
         if keys:
