@@ -172,7 +172,9 @@ def main():
                         help="Only run the preprocess and compilation steps",
                         action="store_true", default=False)
     parser.add_argument("--std", "-x", dest="language",
-                        choices=["p4-14", "p4_14", "p4-16", "p4_16"],
+                        choices=["p4-14", "p4-16",  ### dash separator
+                                 "p4_14", "p4_16",  ### underscore separator
+                                 "P4₁₄", "P4₁₆"],   ### Unicode, for fun
                         help="Treat subsequent input files as having contents "
                              "of the type indicated by "
                              "the parameter to this argument.",
@@ -225,6 +227,8 @@ def main():
     # parse the arguments
     opts = parser.parse_args()
 
+
+
     user_defined_version = os.environ.get('P4C_DEFAULT_VERSION')
     ### Note: the next line of real code _was_τhe clear and easy-to-understand
     ###       “if user_defined_version != None:”, but “pycodestyle”
@@ -257,6 +261,13 @@ def main():
     ###     <https://docs.python.org/3/library/enum.html>
     if (len(opts.language) > 2) and ('_' == opts.language[2]):
         opts.language = opts.language[:2] + '-' + opts.language[3:]
+
+    ### Support for specifying the P4 version using Unicode: map to what the
+    ###   rest of the compiler expects/understands.
+    if opts.language in ("P4₁₄", "P4₁₆"):
+        opts.language = "p4-1" + ('4' if '₄' == opts.language[3] else '6')
+
+
 
     user_defined_target = os.environ.get('P4C_DEFAULT_TARGET')
     ### Re the next line of real code: please see the 4-line comment, above,
