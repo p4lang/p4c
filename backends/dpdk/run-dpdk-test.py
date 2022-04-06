@@ -15,7 +15,8 @@
 
 # Runs the compiler on a sample P4 V1.2 program
 
-
+from os import environ
+from threading import Timer
 from subprocess import Popen,PIPE
 from threading import Thread
 import errno
@@ -160,6 +161,54 @@ def check_generated_files(options, tmpdir, expecteddir):
                 return SUCCESS
             if result != SUCCESS and not ignoreStderr(options):
                 return result
+        if produced.endswith(".spec") and environ.get('DPDK_PIPELINE') is not None:
+            clifile = os.path.splitext(produced)[0] + ".cli"
+            with open(clifile,'w',encoding = 'utf-8') as f:
+                f.write("; SPDX-License-Identifier: BSD-3-Clause\n")
+                f.write("; Copyright(c) 2020 Intel Corporation\n")
+                f.write("\n")
+                f.write("mempool MEMPOOL0 buffer 9304 pool 32K cache 256 cpu 0\n")
+                f.write("\n")
+                f.write("link LINK0 dev 0000:00:04.0 rxq 1 128 MEMPOOL0 txq 1 512 promiscuous on\n")
+                f.write("link LINK1 dev 0000:00:05.0 rxq 1 128 MEMPOOL0 txq 1 512 promiscuous on\n")
+                f.write("link LINK2 dev 0000:00:06.0 rxq 1 128 MEMPOOL0 txq 1 512 promiscuous on\n")
+                f.write("link LINK3 dev 0000:00:07.0 rxq 1 128 MEMPOOL0 txq 1 512 promiscuous on\n")
+                f.write("\n")
+                f.write("pipeline PIPELINE0 create 0\n")
+                f.write("\n")
+                f.write("pipeline PIPELINE0 port in 0 link LINK0 rxq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port in 1 link LINK1 rxq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port in 2 link LINK2 rxq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port in 3 link LINK3 rxq 0 bsz 32\n")
+                f.write("\n")
+                f.write("pipeline PIPELINE0 port out 0 link LINK0 txq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port out 1 link LINK1 txq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port out 2 link LINK2 txq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port out 3 link LINK3 txq 0 bsz 32\n")
+                f.write("\n")
+                f.write("pipeline PIPELINE0 build ")
+                f.write(str(expected))
+                f.write("\n")
+                f.write("pipeline PIPELINE0 commit\n")
+                f.write("thread 1 pipeline PIPELINE0 enable\n")
+                f.write("pipeline PIPELINE0 abort\n")
+                f.close()
+            dpdk_log = os.path.splitext(produced)[0] + ".log"
+            def kill(process):
+                process.kill()
+            print("exec " + environ.get('DPDK_PIPELINE')+ " -n 4 -c 0x3 -- -s " + str(clifile)+ " 1>" + dpdk_log)
+            pipe = subprocess.Popen("exec " + environ.get('DPDK_PIPELINE')+ " -n 4 -c 0x3 -- -s " + str(clifile)+ " 1>" + dpdk_log ,cwd=".", shell=True)
+            timer = Timer(5, kill, [pipe])
+            try:
+                timer.start()
+                out, err = pipe.communicate()
+            finally:
+                timer.cancel()
+            with open(dpdk_log, "r") as f:
+                readfile = f.read()
+                if 'Error' in readfile:
+                    print(readfile)
+                    return FAILURE
     return SUCCESS
 
 def file_name(tmpfolder, base, suffix, ext):

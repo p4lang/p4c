@@ -173,6 +173,124 @@ class ValidateTableKeys : public Inspector {
     int getFieldSizeBits(const IR::Type *field_type);
 };
 
+// This pass shorten the Identifier length
+class ShortenTokenLength : public Transform {
+    ordered_map<cstring, cstring> newNameMap;
+    static size_t count;
+    // Currently Dpdk allows Identifier of 63 char long or less
+    // including dots(.) for member exp.
+    // worst case member expression will look like below(for headers)
+    // 1.30.30 => 63(including dot(.))
+    // if id name less than allowedLength keep it same
+    cstring shortenString(cstring str, size_t allowedLength = 60) {
+        if (str.size() <= allowedLength)
+            return str;
+         auto itr = newNameMap.find(str);
+         if (itr != newNameMap.end())
+             return itr->second;
+         // make sure new string length less or equal allowedLength
+         cstring newStr = str.substr(0, allowedLength - std::to_string(count).size());
+         newStr += std::to_string(count);
+         count++;
+         newNameMap.insert(std::pair<cstring, cstring>(str, newStr));
+         origNameMap.insert(std::pair<cstring, cstring>(newStr, str));
+         return newStr;
+    }
+
+ public:
+    static ordered_map<cstring, cstring> origNameMap;
+
+    const IR::Node* preorder(IR::Member *m) override {
+        if (m->toString().startsWith("m."))
+            m->member = shortenString(m->member);
+        else
+            m->member = shortenString(m->member, 30);
+        return m;
+    }
+
+    const IR::Node* preorder(IR::DpdkStructType *s) override {
+        if (s->getAnnotations()->getSingle("__packet_data__")) {
+            s->name = shortenString(s->name);
+            IR::IndexedVector<IR::StructField> changedFields;
+            for (auto field : s->fields) {
+                IR::StructField *f = new IR::StructField(field->name, field->type);
+                f->name = shortenString(f->name, 30);
+                changedFields.push_back(f);
+            }
+            return new IR::DpdkStructType(s->srcInfo, s->name,
+                                          s->annotations, changedFields);
+        } else {
+            s->name = shortenString(s->name);
+            IR::IndexedVector<IR::StructField> changedFields;
+            for (auto field : s->fields) {
+                IR::StructField *f = new IR::StructField(field->name, field->type);
+                f->name = shortenString(f->name);
+                changedFields.push_back(f);
+            }
+            return new IR::DpdkStructType(s->srcInfo, s->name,
+                                          s->annotations, changedFields);
+        }
+        return s;
+    }
+
+    const IR::Node* preorder(IR::DpdkHeaderType *h) override {
+        h->name = shortenString(h->name, 30);
+        IR::IndexedVector<IR::StructField> changedFields;
+        for (auto field : h->fields) {
+             IR::StructField *f = new IR::StructField(field->name, field->type);
+             f->name = shortenString(f->name, 30);
+             changedFields.push_back(f);
+        }
+        return new IR::DpdkHeaderType(h->srcInfo, h->name,
+                                      h->annotations, changedFields);
+    }
+
+    const IR::Node* preorder(IR::DpdkExternDeclaration *e) override {
+        e->name = shortenString(e->name);
+        return e;
+    }
+
+    const IR::Node* preorder(IR::Declaration *g) override {
+        g->name = shortenString(g->name);
+        return g;
+    }
+
+    const IR::Node* preorder(IR::Path *p) override {
+        p->name = shortenString(p->name);
+        return p;
+    }
+
+    const IR::Node* preorder(IR::DpdkAction *a) override {
+        a->name = shortenString(a->name);
+        return a;
+    }
+
+    const IR::Node* preorder(IR::DpdkTable *t) override {
+        t->name = shortenString(t->name);
+        return t;
+    }
+
+    const IR::Node* preorder(IR::DpdkLearner *l) override {
+        l->name = shortenString(l->name);
+        return l;
+    }
+
+    const IR::Node* preorder(IR::DpdkSelector *s) override {
+        s->name = shortenString(s->name);
+        return s;
+    }
+
+    const IR::Node* preorder(IR::DpdkLearnStatement *ls) override{
+        ls->action = shortenString(ls->action);
+        return ls;
+    }
+
+    const IR::Node* preorder(IR::DpdkApplyStatement *as) override{
+        as->table = shortenString(as->table);
+        return as;
+    }
+};
+
 // Instructions can only appear in actions and apply block of .spec file.
 // All these individual passes work on the actions and apply block of .spec file.
 class DpdkAsmOptimization : public PassRepeated {

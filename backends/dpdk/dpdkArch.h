@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKARCH_H_
 #define BACKENDS_DPDK_DPDKARCH_H_
 
-#include <ir/ir.h>
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeMap.h"
