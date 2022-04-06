@@ -1149,6 +1149,9 @@ const IR::Node *CollectLocalVariables::preorder(IR::P4Program *p) {
 
 const IR::Node *CollectLocalVariables::postorder(IR::Type_Struct *s) {
     if (s->name.name == structure->local_metadata_type) {
+        for (auto sf : structure->key_fields) {
+             s->fields.push_back(sf);
+        }
         for (auto kv : localsMap) {
             auto dv = kv.first;
             auto type = typeMap->getType(dv, true);
@@ -1457,25 +1460,26 @@ const IR::Node* DismantleMuxExpressions::postorder(IR::AssignmentStatement* stat
    }
 
    gets translated to
-   control ingress(inout headers h, inout metadata m) {
+   Temporary variable holding table key copies are held in ProgramStructure key_fields.
        bit<48> tbl_ethernet_srcAddr;  // These declarations are later copied to metadata struct
        bit<16> tbl_ipv4_totalLen;     // in CollectLocalVariables pass.
+
+   control ingress(inout headers h, inout metadata m) {
        ...
        table tbl {
            key = {
-               tbl_ethernet_srcAddr: lpm;
-               tbl_ipv4_totalLen   : exact;
+               m.ingress_tbl_ethernet_srcAddr: lpm;
+               m.ingress_tbl_ipv4_totalLen   : exact;
            }
            ...
        }
        apply {
-           tbl_ethernet_srcAddr = h.ethernet.srcAddr;
-           tbl_ipv4_totalLen = h.ipv4.totalLen;
+           m.ingress_tbl_ethernet_srcAddr = h.ethernet.srcAddr;
+           m.ingress_tbl_ipv4_totalLen = h.ipv4.totalLen;
            tbl_0.apply();
        }
   }
 */
-
 const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
     // If any key field is from different structure, put all keys in metadata
     LOG3("Visiting " << keys);
@@ -1536,6 +1540,7 @@ const IR::Node* CopyMatchKeysToSingleStruct::postorder(IR::KeyElement* element) 
     // If we got here we need to put the key element in metadata.
     LOG3("Extracting key element " << element);
     auto table = findOrigCtxt<IR::P4Table>();
+    auto control = findOrigCtxt<IR::P4Control>();
     CHECK_NULL(table);
     P4::TableInsertions* insertions;
     auto it = toInsert.find(table);
@@ -1551,16 +1556,18 @@ const IR::Node* CopyMatchKeysToSingleStruct::postorder(IR::KeyElement* element) 
     /* All header fields are prefixed with "h.", prefix the match field with table name */
     if (keyName.startsWith("h.")) {
         keyName = keyName.replace('.','_');
-        keyName = keyName.replace("h_",table->name.toString()+"_");
-        auto keyPathExpr = new IR::PathExpression(IR::ID(refMap->newName(keyName)));
-        auto decl = new IR::Declaration_Variable(keyPathExpr->path->name,
+        keyName = keyName.replace("h_",control->name.toString() + "_" + table->name.toString()+"_");
+        IR::ID keyNameId(refMap->newName(keyName));
+        auto decl = new IR::Declaration_Variable(keyNameId,
                                                  element->expression->type, nullptr);
-        insertions->declarations.push_back(decl);
+        // Store the compiler generated table keys in Program structure. These will be
+        // inserted to Metadata by CollectLocalVariables pass.
+        structure->key_fields.push_back(new IR::StructField(decl->name.name, decl->type));
         auto right = element->expression;
-        auto assign = new IR::AssignmentStatement(element->expression->srcInfo,
-                                                  keyPathExpr, right);
+        auto left = new IR::Member(new IR::PathExpression(IR::ID("m")), keyNameId);
+        auto assign = new IR::AssignmentStatement(element->expression->srcInfo, left, right);
         insertions->statements.push_back(assign);
-        element->expression = keyPathExpr;
+        element->expression = left;
     }
     return element;
 }

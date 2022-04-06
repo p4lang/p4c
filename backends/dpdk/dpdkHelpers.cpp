@@ -761,7 +761,13 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 auto argument = param->to<IR::StructExpression>()->components.at(0)->expression;
                 add_instr(new IR::DpdkLearnStatement(action_name, argument));
             } else if (param->is<IR::Constant>()) {
-                add_instr(new IR::DpdkLearnStatement(action_name, param));
+                // Move constant param to metadata as DPDK expects it to be in metadata
+                BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                IR::ID learnArg(refmap->newName("learnArg"));
+                metadataStruct->fields.push_back(new IR::StructField(learnArg, param->type));
+                auto learnMember = new IR::Member(new IR::PathExpression("m"), learnArg);
+                add_instr(new IR::DpdkMovStatement(learnMember, param));
+                add_instr(new IR::DpdkLearnStatement(action_name, learnMember));
             } else {
                 ::error("%1%: unhandled function", s);
             }
@@ -785,7 +791,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 return false;
             }
 
-            // Mov slot id and session id to metadata fields as DPDK expects these parameters
+            // Move slot id and session id to metadata fields as DPDK expects these parameters
             // to be in metadata
             BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
             IR::ID slotName(refmap->newName("mirrorSlot"));

@@ -80,7 +80,6 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new InjectOutputPortMetadataField(&structure),
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap, true),
-        new CopyMatchKeysToSingleStruct(refMap, typeMap, &invokedInKey),
         new P4::ResolveReferences(refMap),
         new StatementUnroll(refMap, &structure),
         new IfStatementUnroll(refMap, &structure),
@@ -88,6 +87,8 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap, true),
         new ConvertBinaryOperationTo2Params(),
         new CollectProgramStructure(refMap, typeMap, &structure),
+        new CopyMatchKeysToSingleStruct(refMap, typeMap, &invokedInKey, &structure),
+        new P4::ResolveReferences(refMap),
         new CollectLocalVariables(refMap, typeMap, &structure),
         new CollectErrors(&structure),
         new ConvertInternetChecksum(typeMap, &structure),
@@ -126,6 +127,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new DpdkAsmOptimization,
         new CollectUsedMetadataField(used_fields),
         new RemoveUnusedMetadataFields(used_fields),
+        new ValidateTableKeys()
     };
 
     dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
