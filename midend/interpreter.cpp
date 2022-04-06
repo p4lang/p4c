@@ -315,16 +315,23 @@ SymbolicHeaderUnion::SymbolicHeaderUnion(const IR::Type_HeaderUnion* type,
         SymbolicStruct(type, uninitialized, factory) {}
 
 SymbolicBool* SymbolicHeaderUnion::isValid() const {
+    int validFields = 0;
     for (auto f : type->to<IR::Type_StructLike>()->fields) {
          if (fieldValue.count(f->name.name)) {
-             if (const auto fieldValid = fieldValue.at(f->name.name)
-                                       ->checkedTo<SymbolicHeader>()
-                                       ->valid) {
-                return new SymbolicBool(fieldValid->value);
+             auto fieldValid = fieldValue.at(f->name.name)->checkedTo<SymbolicHeader>()->valid;
+             if (!fieldValid->isKnown() || fieldValid->isUninitialized()) {
+                return new SymbolicBool(false);
+             } else if (fieldValid->value) {
+                validFields +=1;
              }
          } else {
              BUG("The number of fields in %1% is different from HeaderUnion fieldValue", type);
          }
+    }
+    if (validFields == 1) {
+        return new SymbolicBool(true);
+    } else if (validFields > 1) {
+        BUG("In HeaderUnion cannot be more than one valid field");
     }
     return new SymbolicBool(false);
 }
