@@ -396,7 +396,8 @@ def main():
     if error_count != 0:
         print("\nSorry; {} error{} found while analyzing the command inputs."
               "  Aborting the P4 compiler driver.\n".
-              format(error_count, s_and_were_or_just_was(error_count)))
+              format(error_count, s_and_were_or_just_was(error_count)),
+              file=sys.stderr)
         sys.exit(min(255, error_count))
         ### maximum of 255: being extra-careful here,
         ###                 just in case “error_count” is
