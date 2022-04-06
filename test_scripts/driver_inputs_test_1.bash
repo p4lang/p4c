@@ -1,6 +1,6 @@
 #!/bin/bash
 
-### a simple test: ensure that a single non-existant input pathname results in an error output that mentions that pathname.
+### a simple test: ensure that a _single_ non-existant input pathname results in an error output that mentions that pathname.
 
 
 
