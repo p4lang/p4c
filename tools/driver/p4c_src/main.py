@@ -264,8 +264,11 @@ def main():
 
     ### Support for specifying the P4 version using Unicode: map to what the
     ###   rest of the compiler expects/understands.
-    if opts.language in ("P4₁₄", "P4₁₆"):
-        opts.language = "p4-1" + ('4' if '₄' == opts.language[3] else '6')
+    Unicode_to_internal = {"P4₁₄": "p4-14", "P4₁₆": "p4-16"}
+    ### On the next real code line,
+    ###   “.keys()” is implied [by Python] after “Unicode_to_internal”.
+    if opts.language in Unicode_to_internal:
+        opts.language = Unicode_to_internal[opts.language]
 
 
 
