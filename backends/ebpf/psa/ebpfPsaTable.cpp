@@ -95,8 +95,8 @@ EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, CodeGenInspector* codeGen
                            EBPFTable(program, codeGen, name), implementation(nullptr) {}
 
 void EBPFTablePSA::initImplementation() {
-    // PSA table is allowed to have up to one table implementation. Function forEachPropertyEntry
-    // will iterate over all entries in property, so lets use of this and print errors.
+    // PSA table is allowed to have up to one table implementation. EBPFTablePsaPropertyVisitor
+    // will iterate over all entries in property, so lets use this and print errors.
     auto impl = [this](const IR::PathExpression * pe) {
         CHECK_NULL(pe);
         auto decl = program->refMap->getDeclaration(pe->path, true);
@@ -121,7 +121,9 @@ void EBPFTablePSA::initImplementation() {
             ::error(ErrorType::ERR_UNKNOWN,
                     "%1%: unknown table implementation %2%", pe, decl);
     };
-    forEachPropertyEntry("psa_implementation", impl);
+
+    EBPFTablePsaPropertyVisitor<decltype(impl)> visitor(impl, table);
+    visitor.visitTableProperty("psa_implementation");
 }
 
 ActionTranslationVisitor* EBPFTablePSA::createActionTranslationVisitor(

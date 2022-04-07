@@ -25,6 +25,28 @@ namespace EBPF {
 
 class EBPFTableImplementationPSA;
 
+template<class F>
+class EBPFTablePsaPropertyVisitor : public Inspector {
+ protected:
+    F functor;  // called for every property entry
+    const IR::TableBlock* table;
+
+ public:
+    EBPFTablePsaPropertyVisitor(F functor, const IR::TableBlock* table)
+        : functor(functor), table(table) {}
+
+    bool preorder(const IR::PathExpression* pe) override {
+        functor(pe);
+        return false;
+    }
+
+    void visitTableProperty(cstring propertyName) {
+        auto property = table->container->properties->getProperty(propertyName);
+        if (property != nullptr)
+            property->apply(*this);
+    }
+};
+
 class EBPFTablePSA : public EBPFTable {
  private:
     void emitTableDecl(CodeBuilder *builder,
@@ -39,31 +61,6 @@ class EBPFTablePSA : public EBPFTable {
             cstring valueName, const EBPFProgram* program) const override;
 
     void initImplementation();
-
-    // Executes `func` for every entry in given property
-    template<class F>
-    void forEachPropertyEntry(cstring propertyName, F func) {
-        auto counterProperty = table->container->properties->getProperty(propertyName);
-        if (counterProperty == nullptr)
-            return;
-        if (counterProperty->value->is<IR::ExpressionValue>()) {
-            auto ev = counterProperty->value->to<IR::ExpressionValue>();
-            if (ev->expression->is<IR::PathExpression>()) {
-                func(ev->expression->to<IR::PathExpression>());
-            } else if (ev->expression->is<IR::ListExpression>()) {
-                auto le = ev->expression->to<IR::ListExpression>();
-                for (auto c : le->components) {
-                    func(c->to<IR::PathExpression>());
-                }
-            } else {
-                ::error(ErrorType::ERR_UNSUPPORTED,
-                        "Unsupported list type: %1%", counterProperty->value);
-            }
-        } else {
-            ::error(ErrorType::ERR_UNKNOWN,
-                    "Unknown property expression type: %1%", counterProperty->value);
-        }
-    }
 
     void emitTableValue(CodeBuilder* builder, const IR::MethodCallExpression* actionMce,
                         cstring valueName);
