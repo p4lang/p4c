@@ -25,9 +25,10 @@ output_dir=`mktemp -d /tmp/P4C_driver_testing___XXXXXXXXXX`
 
 
 
+humanReadable_test_pathname="`resolve_symlink_only_of_basename "$0"`"
 if [ ! -x ./p4c ] || ./p4c p4include/core.p4 p4include/pna.p4 -o "$output_dir" 2>&1 | grep --ignore-case --quiet 'unrecognized.*arguments'; then
-  echo "Test ''$0'' failed."
+  echo "Test ''$humanReadable_test_pathname'' failed."
   exit 1
 else
-  echo "Test ''$0'' succeeded."
+  echo "Test ''$humanReadable_test_pathname'' succeeded."
 fi
