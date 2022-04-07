@@ -697,9 +697,13 @@ bool CollectTableInfo::preorder(const IR::Key *keys) {
     /* Push all non-selector keys to the key_map for this table.
        Selector keys become part of the selector table */
     for (auto key : keys->keyElements) {
-        cstring keyTypeStr = key->expression->toString();
-        if (key->matchType->toString() != "selector")
-            tableKeys.push_back(keyTypeStr);
+        cstring keyName = key->expression->toString();
+        auto annon = key->getAnnotation(IR::Annotation::nameAnnotation);
+        if (key->matchType->toString() != "selector") {
+            if (annon !=  nullptr)
+                keyName = annon->getSingleString();
+            tableKeys.push_back(keyName);
+        }
     }
 
     auto control = findOrigCtxt<IR::P4Control>();
