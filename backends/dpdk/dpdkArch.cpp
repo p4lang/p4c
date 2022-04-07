@@ -690,16 +690,21 @@ const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
 // This function collects the match key information of a table. This is later used for
 // generating context JSON.
 bool CollectTableInfo::preorder(const IR::Key *keys) {
-    std::vector<cstring> tableKeys;
+    std::vector<std::pair<cstring, cstring>> tableKeys;
     if (!keys || keys->keyElements.size() == 0) {
         return false;
     }
     /* Push all non-selector keys to the key_map for this table.
        Selector keys become part of the selector table */
     for (auto key : keys->keyElements) {
-        cstring keyTypeStr = key->expression->toString();
-        if (key->matchType->toString() != "selector")
-            tableKeys.push_back(keyTypeStr);
+        cstring keyName = key->expression->toString();
+        cstring keyNameAnnon = key->expression->toString();;
+        auto annon = key->getAnnotation(IR::Annotation::nameAnnotation);
+        if (key->matchType->toString() != "selector") {
+            if (annon !=  nullptr)
+                keyNameAnnon = annon->getSingleString();
+            tableKeys.push_back(std::make_pair(keyName, keyNameAnnon));
+        }
     }
 
     auto control = findOrigCtxt<IR::P4Control>();

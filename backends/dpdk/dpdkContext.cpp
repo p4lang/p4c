@@ -85,12 +85,13 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
 
 // This functions insert a single key field in the match keys array
 void DpdkContextGenerator::addKeyField(
-Util::JsonArray* keyJson, const cstring name, const IR::KeyElement *key, int position) {
+Util::JsonArray* keyJson, const cstring name, const cstring nameAnnotation,
+    const IR::KeyElement *key, int position) {
     auto* keyField = new Util::JsonObject();
     cstring fieldName = name.findlast('.');
     auto instanceName = name.replace(fieldName, "");
     fieldName = fieldName.trim(".\t\n\r");
-    keyField->emplace("name", name);
+    keyField->emplace("name", nameAnnotation);
     keyField->emplace("instance_name", instanceName);
     keyField->emplace("field_name", fieldName);
     keyField->emplace("match_type", toStr(key->matchType));
@@ -369,7 +370,7 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray* tablesJson) {
                     auto* keyJson = new Util::JsonArray();
                     int position = 0;
                     for (auto matchKeyFromPrg : tableAttr.tableKeys) {
-                        addKeyField(keyJson, matchKeyFromPrg,
+                        addKeyField(keyJson, matchKeyFromPrg.first, matchKeyFromPrg.second,
                                     match_keys->keyElements.at(position),position);
                         position++;
                     }
