@@ -107,6 +107,7 @@ DeparserHdrEmitTranslator::DeparserHdrEmitTranslator(const EBPFDeparser *deparse
 }
 
 void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod *method) {
+    // This method handles packet_out.emit() only and is intended to skip other externs
     if (method->method->name.name == p4lib.packetOut.emit.name) {
         auto decl = method->object;
         if (decl == deparser->packet_out) {
@@ -164,8 +165,6 @@ void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod *method) {
         } else {
             BUG("emit() should only be invoked for packet_out");
         }
-    } else {
-        ::error(ErrorType::ERR_UNSUPPORTED, "Unsupported method invocation %1%", method->method);
     }
 }
 

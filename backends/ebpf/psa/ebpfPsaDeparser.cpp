@@ -38,7 +38,7 @@ void DeparserBodyTranslatorPSA::processMethod(const P4::ExternMethod *method) {
     auto dprs = deparser->to<EBPFDeparserPSA>();
     CHECK_NULL(dprs);
     auto externName = method->originalExternType->name.name;
-    if (externName == "Checksum") {
+    if (externName == "Checksum" || externName == "InternetChecksum") {
         auto instance = method->object->getName().name;
         auto methodName = method->method->getName().name;
         dprs->getChecksum(instance)->processMethod(builder, methodName, method->expr, this);
@@ -75,6 +75,11 @@ void EBPFDeparserPSA::emitDeclaration(CodeBuilder* builder, const IR::Declaratio
 
         if (EBPFObject::getSpecializedTypeName(di) == "Checksum") {
             auto instance = new EBPFChecksumPSA(program, di, name);
+            checksums.emplace(name, instance);
+            instance->emitVariables(builder);
+            return;
+        } else if (EBPFObject::getTypeName(di) == "InternetChecksum") {
+            auto instance = new EBPFInternetChecksumPSA(program, di, name);
             checksums.emplace(name, instance);
             instance->emitVariables(builder);
             return;
