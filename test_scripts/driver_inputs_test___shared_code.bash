@@ -1,5 +1,7 @@
 ### _intentionally_ no shebang line: this file is _not_ meant to ever be executable.
 
+
+
 ### The following might seem a little bit ironic here, since _this_ file […“shared_code.bash”] _is_ intended to be sourced...
 ###   but the scripts that source it are _not_.
 function check_for_inadvisable_sourcing {
@@ -10,6 +12,8 @@ function check_for_inadvisable_sourcing {
   fi
   return 0
 }
+
+
 
 function check_for_pathname_error {
   ### arg. #1: pathname
@@ -28,5 +32,25 @@ function check_for_pathname_error {
     return 1
   fi
 }
+
+
+
+function report___num_failures___and_clamp_it_to_an_inclusive_maximum_of_255 {
+  if [ $num_failures -ne 0 ]; then
+    echo -n "$num_failures failure"
+    if [ $num_failures -eq 1 ]; then
+      echo -n ' was'
+    else
+      echo -n 's were'
+    fi
+    echo " detected in the test script ''$0''."
+  fi
+
+  ### Clamping the exit code at a max. of 255, for future code that starts with a copy-paste from this file and may experience >255 errors
+  ### [reminder: a positive multiple of 256 is a problem, since those all map to zero and zero means “everything was OK”].
+  if [ $num_failures -gt 255 ]; then num_failures=255; fi
+}
+
+
 
 return 0 ### belt and suspenders ;-)
