@@ -413,12 +413,9 @@ add_test(NAME cpplint
   WORKING_DIRECTORY ${P4C_SOURCE_DIR})
 
 ### Added by Abe starting April 6 2022
-add_test(NAME driver_inputs_test_1
-  COMMAND ${P4C_SOURCE_DIR}/test_scripts/driver_inputs_test_1)
-add_test(NAME driver_inputs_test_2
-  COMMAND ${P4C_SOURCE_DIR}/test_scripts/driver_inputs_test_2)
-add_test(NAME driver_inputs_test_3
-  COMMAND ${P4C_SOURCE_DIR}/test_scripts/driver_inputs_test_3)
+add_test(NAME driver_inputs_test_1 COMMAND ${P4C_SOURCE_DIR}/test_scripts/driver_inputs_test_1)
+add_test(NAME driver_inputs_test_2 COMMAND ${P4C_SOURCE_DIR}/test_scripts/driver_inputs_test_2)
+add_test(NAME driver_inputs_test_3 COMMAND ${P4C_SOURCE_DIR}/test_scripts/driver_inputs_test_3)
 
 set_tests_properties(cpplint PROPERTIES LABELS cpplint)
 
