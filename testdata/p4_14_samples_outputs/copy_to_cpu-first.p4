@@ -78,7 +78,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".do_copy_to_cpu") action do_copy_to_cpu() {
-        clone_preserving_field_list(CloneType.I2E, 32w250, (bit<8>)FieldLists.copy_to_cpu_fields);
+        clone_preserving_field_list(CloneType.I2E, 32w250, 8w1);
     }
     @name(".copy_to_cpu") table copy_to_cpu {
         actions = {

@@ -169,8 +169,9 @@ class InlineDriver : public Visitor {
  public:
     InlineDriver(
         InlineList* toInline, AbstractInliner<InlineList, InlineWorkList> *inliner) :
-            toInline(toInline), inliner(inliner)
-    { CHECK_NULL(toInline); CHECK_NULL(inliner); setName("InlineDriver"); }
+            toInline(toInline), inliner(inliner) {
+        CHECK_NULL(toInline); CHECK_NULL(inliner);
+        setName((cstring("InlineDriver_") + cstring(inliner->name())).c_str()); }
     const IR::Node* apply_visitor(const IR::Node *program, const char * = 0) override {
         LOG2("InlineDriver");
         toInline->analyze();
