@@ -23,6 +23,30 @@ limitations under the License.
 
 namespace EBPF {
 
+class EBPFTableImplementationPSA;
+
+template<class F>
+class EBPFTablePsaPropertyVisitor : public Inspector {
+ protected:
+    F functor;  // called for every property entry
+    const IR::TableBlock* table;
+
+ public:
+    EBPFTablePsaPropertyVisitor(F functor, const IR::TableBlock* table)
+        : functor(functor), table(table) {}
+
+    bool preorder(const IR::PathExpression* pe) override {
+        functor(pe);
+        return false;
+    }
+
+    void visitTableProperty(cstring propertyName) {
+        auto property = table->container->properties->getProperty(propertyName);
+        if (property != nullptr)
+            property->apply(*this);
+    }
+};
+
 class EBPFTablePSA : public EBPFTable {
  private:
     void emitTableDecl(CodeBuilder *builder,
@@ -36,6 +60,8 @@ class EBPFTablePSA : public EBPFTable {
     ActionTranslationVisitor* createActionTranslationVisitor(
             cstring valueName, const EBPFProgram* program) const override;
 
+    void initImplementation();
+
     void emitTableValue(CodeBuilder* builder, const IR::MethodCallExpression* actionMce,
                         cstring valueName);
     void emitDefaultActionInitializer(CodeBuilder *builder);
@@ -43,9 +69,19 @@ class EBPFTablePSA : public EBPFTable {
     void emitMapUpdateTraceMsg(CodeBuilder *builder, cstring mapName,
                                cstring returnCode) const;
 
+    const IR::PathExpression* getActionNameExpression(const IR::Expression* expr) const;
+
  public:
+    // TODO: DirectMeter and DirectCounter are not implemented now, but
+    //  they are need in table implementation to validate table properties
+    std::vector<cstring> counters;
+    std::vector<cstring> meters;
+    EBPFTableImplementationPSA* implementation;
+
     EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* table,
                  CodeGenInspector* codeGen);
+    EBPFTablePSA(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name);
+
     void emitInstance(CodeBuilder* builder) override;
     void emitTypes(CodeBuilder* builder) override;
     void emitValueStructStructure(CodeBuilder* builder) override;

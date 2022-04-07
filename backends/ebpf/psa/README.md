@@ -145,6 +145,20 @@ a con1trol plane must add new element to the inner map.
 
 ## PSA externs
 
+### ActionProfile
+
+[ActionProfile](https://p4.org/p4-spec/docs/PSA.html#sec-action-profile) is a table implementation that separates actions
+(and its parameters) from a P4 table, introducing a level of indirection. The P4-eBPF compiler generates an additional
+BPF hash map, if the Action Profile is specified for a P4 table. The additional BPF map stores the mapping between the
+ActionProfile member reference and a P4 action specification. During the lookup to the P4 table with Action Profile, eBPF
+program first queries the first BPF map using the match key composed from the packet fields and expects the ActionProfile
+member reference to be returned. Next, the eBPF programs uses the obtained member reference as a lookup key to a second
+map to retrieve the action specification. Hence, the eBPF program does one additional lookup to the additional BPF map,
+if the ActionProfile is specified for a P4 table.
+
+**Note:** As of April 2022, support for ActionProfile extern in `psabpf-ctl` CLI/API is not implemented yet. As a workaround
+you can use `psabpf-ctl table` command for this extern.
+
 ### Digest
 
 [Digests](https://p4.org/p4-spec/docs/PSA.html#sec-packet-digest) are intended to carry a small piece of user-defined data from the data plane to a control plane.
@@ -253,12 +267,13 @@ Refer to [the bpftool guide](https://manpages.ubuntu.com/manpages/focal/man8/bpf
 
 We list the known bugs/limitations below. Refer to the Roadmap section for features planned in the near future.
 
-- Larger bit fields (e.g. IPv6 addresses) may not work properly
+- Larger bit fields (e.g. IPv6 addresses) may not work properly.
 - We noticed that `bpf_xdp_adjust_meta()` isn't implemented by some NIC drivers, so the PSA impl may not work 
 with some NICs. So far, we have verified the correct behavior with Intel 82599ES.
 - `lookahead()` with bit fields (e.g., `bit<16>`) doesn't work.
 - `@atomic` operation is not supported yet.
-- `psa_idle_timeout` is not supported yet. 
+- `psa_idle_timeout` is not supported yet.
+- DirectCounter and DirectMeter externs are not supported for P4 tables with implementation (ActionProfile).
 
 # Roadmap
 
