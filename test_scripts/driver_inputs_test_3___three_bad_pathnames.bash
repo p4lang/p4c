@@ -1,6 +1,6 @@
 #!/bin/bash
 
-### ensure that when _two_ non-existant input pathnames are given, each one results in an error output that mentions that pathname.
+### ensure that when _three_ non-existant input pathnames are given, each one results in an error output that mentions that pathname.
 
 
 
