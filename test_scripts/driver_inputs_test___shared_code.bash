@@ -15,6 +15,16 @@ function check_for_inadvisable_sourcing {
 
 
 
+### This one is for reading out the tests names in a way that shows the real Bash files` basenames withOUT replacing e.g. “./” with something long.
+###
+### If you call it withOUT a parameter, I don`t know exactly what will happen, but I don`t think it will be _good_. ;-)
+
+function resolve_symlink_only_of_basename {
+  echo "`dirname "$1"`"/"$(basename `realpath "$1"`)"
+}
+
+
+
 function check_for_pathname_error {
   ### arg. #1: pathname
   ### arg. #2: subtest index
@@ -23,7 +33,7 @@ function check_for_pathname_error {
   ./p4c $1 2>&1 | grep --ignore-case --quiet "error.*$1"
   exit_status_from_grep=$?
 
-  echo -n "Subtest #$2 (out of $3) in the test script ''$0'' " ### DRY
+  echo -n "Subtest #$2 (out of $3) in the test script ''`resolve_symlink_only_of_basename "$0"`'' " ### DRY
   if [ $exit_status_from_grep -eq 0 ]; then
     echo 'succeeded.'
     return 0
@@ -43,7 +53,7 @@ function report___num_failures___and_clamp_it_to_an_inclusive_maximum_of_255 {
     else
       echo -n 's were'
     fi
-    echo " detected in the test script ''$0''."
+    echo " detected in the test script ''`resolve_symlink_only_of_basename "$0"`''."
   fi
 
   ### Clamping the exit code at a max. of 255, for future code that starts with a copy-paste from this file and may experience >255 errors
