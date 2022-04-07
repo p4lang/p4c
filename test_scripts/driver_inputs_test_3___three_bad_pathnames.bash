@@ -32,23 +32,10 @@ echo
 
 
 num_failures=0
-
 if [ $result_1 -ne 0 ]; then num_failures=1; fi
 if [ $result_2 -ne 0 ]; then num_failures=$(($num_failures+1)); fi
 if [ $result_3 -ne 0 ]; then num_failures=$(($num_failures+1)); fi
 
-if [ $num_failures -ne 0 ]; then
-  echo -n "$num_failures failure"
-  if [ $num_failures -eq 1 ]; then
-    echo -n ' was'
-  else
-    echo -n 's were'
-  fi
-  echo " detected in the test script ''$0''."
-fi
-
-### Clamping the exit code at a max. of 255, for future code that starts with a copy-paste from this file and may experience >255 errors
-### [reminder: a positive multiple of 256 is a problem, since those all map to zero and zero means “everything was OK”].
-if [ $num_failures -gt 255 ]; then num_failures=255; fi
+report___num_failures___and_clamp_it_to_an_inclusive_maximum_of_255
 
 exit $num_failures
