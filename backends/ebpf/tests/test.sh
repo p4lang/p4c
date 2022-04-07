@@ -166,12 +166,15 @@ fi
 TEST_CASE=$@
 xdp_enabled="False"
 
-TEST_PARAMS='interfaces="'"$interface_list"'";namespace="switch";trace="'"$TRACE_LOGS"'"'
-# Start tests
-ptf \
-  --test-dir ptf/ \
-  --test-params="$TEST_PARAMS" \
-  --interface 0@s1-eth0 --interface 1@s1-eth1 --interface 2@s1-eth2 --interface 3@s1-eth3 \
-  --interface 4@s1-eth4 --interface 5@s1-eth5 $TEST_CASE
-exit_on_error
-rm -rf ptf_out
+for xdp2tc_mode in "${XDP2TC_MODE[@]}" ; do
+  TEST_PARAMS='interfaces="'"$interface_list"'";namespace="switch";trace="'"$TRACE_LOGS"'"'
+  TEST_PARAMS+=";xdp2tc='$xdp2tc_mode'"
+  # Start tests
+  ptf \
+    --test-dir ptf/ \
+    --test-params="$TEST_PARAMS" \
+    --interface 0@s1-eth0 --interface 1@s1-eth1 --interface 2@s1-eth2 --interface 3@s1-eth3 \
+    --interface 4@s1-eth4 --interface 5@s1-eth5 $TEST_CASE
+  exit_on_error
+  rm -rf ptf_out
+done

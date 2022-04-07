@@ -450,7 +450,15 @@ void TCIngressPipeline::emitGlobalMetadataInitializer(CodeBuilder *builder) {
                           compilerGlobalMetadata);
     builder->blockStart();
     builder->emitIndent();
-    emitTCWorkaroundUsingMeta(builder);
+    if (options.xdp2tcMode == XDP2TC_META) {
+        emitTCWorkaroundUsingMeta(builder);
+    } else if (options.xdp2tcMode == XDP2TC_HEAD) {
+        emitTCWorkaroundUsingHead(builder);
+    } else if (options.xdp2tcMode == XDP2TC_CPUMAP) {
+        emitTCWorkaroundUsingCPUMAP(builder);
+    } else {
+        BUG("no xdp2tc mode specified?");
+    }
     builder->blockEnd(true);
 }
 
@@ -492,7 +500,7 @@ void TCIngressPipeline::emitTCWorkaroundUsingCPUMAP(CodeBuilder *builder) {
     builder->append("    void *data = (void *)(long)skb->data;\n"
                     "    void *data_end = (void *)(long)skb->data_end;\n"
                     "    u32 zeroKey = 0;\n"
-                    "    u16 *orig_ethtype = BPF_MAP_LOOKUP_ELEM(workaround_cpumap, &zeroKey);\n"
+                    "    u16 *orig_ethtype = BPF_MAP_LOOKUP_ELEM(xdp2tc_cpumap, &zeroKey);\n"
                     "    if (!orig_ethtype) {\n"
                     "        return TC_ACT_SHOT;\n"
                     "    }\n"

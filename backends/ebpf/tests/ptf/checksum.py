@@ -11,6 +11,7 @@ PORT2 = 2
 ALL_PORTS = [PORT0, PORT1, PORT2]
 
 
+@xdp2tc_head_not_supported
 class ChecksumCRC32MultipleUpdatesPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/checksum-updates-crc32.p4"
 
@@ -21,6 +22,7 @@ class ChecksumCRC32MultipleUpdatesPSATest(P4EbpfTest):
         testutils.verify_packet_any_port(self, exp_pkt, ALL_PORTS)
 
 
+@xdp2tc_head_not_supported
 class ChecksumCRC16MultipleUpdatesPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/checksum-updates-crc16.p4"
 
