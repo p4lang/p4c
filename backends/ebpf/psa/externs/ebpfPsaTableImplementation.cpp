@@ -29,7 +29,7 @@ EBPFTableImplementationPSA::EBPFTableImplementationPSA(const EBPFProgram* progra
 void EBPFTableImplementationPSA::emitTypes(CodeBuilder* builder) {
     if (table == nullptr)
         return;
-    // key is u32
+    // key is u32, so do not emit type for it
     emitValueType(builder);
 }
 
@@ -64,11 +64,9 @@ void EBPFTableImplementationPSA::verifyTableActionList(const EBPFTablePSA * inst
     if (actionList == nullptr)
         return;
 
-    auto getActionName = [](const IR::ActionList * al, size_t id)->cstring {
-        auto mce = al->actionList.at(id)->expression->to<IR::MethodCallExpression>();
-        BUG_CHECK(mce != nullptr, "%1%: expected an action call", mce);
-        auto pe = mce->method->to<IR::PathExpression>();
-        BUG_CHECK(pe != nullptr, "%1%: expected an action name", pe);
+    auto getActionName = [this](const IR::ActionList * al, size_t id)->cstring {
+        auto pe = this->getActionNameExpression(al->actionList.at(id)->expression);
+        CHECK_NULL(pe);
         return pe->path->name.originalName;
     };
 

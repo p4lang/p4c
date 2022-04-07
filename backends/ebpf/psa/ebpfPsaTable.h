@@ -69,6 +69,8 @@ class EBPFTablePSA : public EBPFTable {
     void emitMapUpdateTraceMsg(CodeBuilder *builder, cstring mapName,
                                cstring returnCode) const;
 
+    const IR::PathExpression* getActionNameExpression(const IR::Expression* expr) const;
+
  public:
     // TODO: DirectMeter and DirectCounter are not implemented now, but
     //  they are need in table implementation to validate table properties

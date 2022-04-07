@@ -183,7 +183,8 @@ void EBPFTablePSA::emitAction(CodeBuilder* builder, cstring valueName, cstring a
 }
 
 void EBPFTablePSA::emitInitializer(CodeBuilder *builder) {
-    // Do not emit initializer when table implementation is provided
+    // Do not emit initializer when table implementation is provided, because it is not supported.
+    // Error for such case is printed when adding implementation to a table.
     if (implementation == nullptr) {
         this->emitDefaultActionInitializer(builder);
         this->emitConstEntriesInitializer(builder);
@@ -289,12 +290,11 @@ void EBPFTablePSA::emitConstEntriesInitializer(CodeBuilder *builder) {
 void EBPFTablePSA::emitDefaultActionInitializer(CodeBuilder *builder) {
     const IR::P4Table* t = table->container;
     const IR::Expression* defaultAction = t->getDefaultAction();
-    BUG_CHECK(defaultAction->is<IR::MethodCallExpression>(),
-              "%1%: expected an action call", defaultAction);
+    auto actionName = getActionNameExpression(defaultAction);
     auto mce = defaultAction->to<IR::MethodCallExpression>();
-    auto pe = mce->method->to<IR::PathExpression>();
-    BUG_CHECK(pe->is<IR::PathExpression>(), "%1%: expected IR::PathExpression type", pe);
-    if (pe->path->name.originalName != P4::P4CoreLibrary::instance.noAction.name) {
+    CHECK_NULL(actionName);
+    CHECK_NULL(mce);
+    if (actionName->path->name.originalName != P4::P4CoreLibrary::instance.noAction.name) {
         auto value = program->refMap->newName("value");
         emitTableValue(builder, mce, value.c_str());
         auto ret = program->refMap->newName("ret");
@@ -330,6 +330,15 @@ void EBPFTablePSA::emitMapUpdateTraceMsg(CodeBuilder *builder, cstring mapName,
     builder->target->emitTraceMessage(builder,
                                       msgStr);
     builder->blockEnd(true);
+}
+
+const IR::PathExpression* EBPFTablePSA::getActionNameExpression(const IR::Expression* expr) const {
+    BUG_CHECK(expr->is<IR::MethodCallExpression>(),
+            "%1%: expected an action call", expr);
+    auto mce = expr->to<IR::MethodCallExpression>();
+    BUG_CHECK(mce->method->is<IR::PathExpression>(),
+            "%1%: expected IR::PathExpression type", mce->method);
+    return mce->method->to<IR::PathExpression>();
 }
 
 void EBPFTablePSA::emitTableValue(CodeBuilder* builder, const IR::MethodCallExpression* actionMce,
