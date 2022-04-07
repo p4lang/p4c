@@ -74,3 +74,15 @@ add_test(NAME driver_inputs_test_1 COMMAND test_scripts/driver_inputs_test_1)
 add_test(NAME driver_inputs_test_2 COMMAND test_scripts/driver_inputs_test_2)
 add_test(NAME driver_inputs_test_3 COMMAND test_scripts/driver_inputs_test_3)
 add_test(NAME driver_inputs_test_4 COMMAND test_scripts/driver_inputs_test_4)
+
+### Nope: this didn`t work to make these 4 tests “XFAIL” tests
+###
+# set(XFAIL driver_inputs_test_1
+#           driver_inputs_test_2
+#           driver_inputs_test_3
+#           driver_inputs_test_4)
+
+set_tests_properties(driver_inputs_test_1 PROPERTIES LABELS "XFAIL")
+set_tests_properties(driver_inputs_test_2 PROPERTIES LABELS "XFAIL")
+set_tests_properties(driver_inputs_test_3 PROPERTIES LABELS "XFAIL")
+set_tests_properties(driver_inputs_test_4 PROPERTIES LABELS "XFAIL")
