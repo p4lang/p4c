@@ -628,8 +628,9 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
                 t->getDefaultAction(), t->properties);
         learners.push_back(learner);
     } else {
+        auto paramList =  structure->defActionParamList[t->toString()];
         auto table = new IR::DpdkTable(t->name.toString(), t->getKey(), t->getActionList(),
-                t->getDefaultAction(), t->properties);
+                t->getDefaultAction(), t->properties, *paramList);
         tables.push_back(table);
     }
     return false;

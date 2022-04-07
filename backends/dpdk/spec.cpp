@@ -343,8 +343,34 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
         0) {
         out << " args none ";
     } else {
-        BUG("non-zero default action arguments not supported yet");
+        out << " args ";
+        auto mce = default_action->to<IR::MethodCallExpression>();
+        auto earg = mce->arguments->at(0)->expression;
+        if (earg->is<IR::ListExpression>()) {
+            auto paramCount = earg->to<IR::ListExpression>()->components.size();
+            std::cout<<"Earg : "<<earg<<std::endl;
+            for (unsigned i = 0; i < paramCount; i++) {
+                if (earg->to<IR::ListExpression>()->components.at(i)->is<IR::Constant>()) {
+                    auto val = earg->to<IR::ListExpression>()->
+                               components.at(i)->to<IR::Constant>()->asUnsigned();
+                    out << default_action_paraList.parameters.at(i)->toString() << " ";
+                    out << "0x" << std::hex << val << " ";
+                } else if (earg->to<IR::ListExpression>()->components.at(i)->
+                           is<IR::BoolLiteral>()) {
+                    earg->dbprint(std::cout);
+                    auto val = earg->to<IR::ListExpression>()->
+                               components.at(i)->to<IR::BoolLiteral>()->value;
+                    out << default_action_paraList.parameters.at(i)->toString() << " ";
+                    out << "0x" << std::hex << val << " ";
+                } else {
+                    BUG("Unsupported parameter type in default action in DPDK Target");
+                }
+            }
+        }
     }
+    auto def = properties->getProperty("default_action");
+    if (def->isConstant)
+        out <<"const";
     out << std::endl;
     if (auto psa_implementation =
             properties->getProperty("psa_implementation")) {

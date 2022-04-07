@@ -42,6 +42,7 @@ class DpdkTable {
     ActionList actions;
     Expression default_action;
     TableProperties properties;
+    inline ParameterList default_action_paraList;
 
     std::ostream& toSpec(std::ostream& out) const;
 #nodbprint
