@@ -145,16 +145,6 @@ a con1trol plane must add new element to the inner map.
 
 ## PSA externs
 
-### Digest
-
-[Digests](https://p4.org/p4-spec/docs/PSA.html#sec-packet-digest) are intended to carry a small piece of user-defined data from the data plane to a control plane.
-The PSA-eBPF compiler translates each Digest instance into `BPF_MAP_TYPE_QUEUE` that implements a FIFO queue.
-If a deparser triggers the `pack()` method, an eBPF program inserts data defined for a Digest into the BPF queue map using `bpf_map_push_elem`.
-A user space application is responsible for performing periodic queries to this map to read a Digest message. It can use either
-`psabpf-ctl digest get pipe`, `psabpf_digest_get_next` from psabpf C API or `bpf_map_lookup_and_delete_elem` from `libbpf` API.
-
-## PSA externs
-
 ### ActionProfile
 
 [ActionProfile](https://p4.org/p4-spec/docs/PSA.html#sec-action-profile) is a table implementation that separates actions
@@ -168,6 +158,14 @@ if the ActionProfile is specified for a P4 table.
 
 **Note:** As of April 2022, support for ActionProfile extern in `psabpf-ctl` CLI/API is not implemented yet. As a workaround
 you can use `psabpf-ctl table` command for this extern.
+
+### Digest
+
+[Digests](https://p4.org/p4-spec/docs/PSA.html#sec-packet-digest) are intended to carry a small piece of user-defined data from the data plane to a control plane.
+The PSA-eBPF compiler translates each Digest instance into `BPF_MAP_TYPE_QUEUE` that implements a FIFO queue.
+If a deparser triggers the `pack()` method, an eBPF program inserts data defined for a Digest into the BPF queue map using `bpf_map_push_elem`.
+A user space application is responsible for performing periodic queries to this map to read a Digest message. It can use either
+`psabpf-ctl digest get pipe`, `psabpf_digest_get_next` from psabpf C API or `bpf_map_lookup_and_delete_elem` from `libbpf` API.
 
 # Getting started
 
