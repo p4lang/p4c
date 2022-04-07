@@ -23,12 +23,36 @@ limitations under the License.
 
 namespace EBPF {
 
+template<class F>
+class EBPFTablePsaPropertyVisitor : public Inspector {
+ protected:
+    F functor;  // called for every property entry
+    const IR::TableBlock* table;
+
+ public:
+    EBPFTablePsaPropertyVisitor(F functor, const IR::TableBlock* table)
+            : functor(functor), table(table) {}
+
+    bool preorder(const IR::PathExpression* pe) override {
+        functor(pe);
+        return false;
+    }
+
+    void visitTableProperty(cstring propertyName) {
+        auto property = table->container->properties->getProperty(propertyName);
+        if (property != nullptr)
+            property->apply(*this);
+    }
+};
+
 // =====================ActionTranslationVisitorPSA=============================
 ActionTranslationVisitorPSA::ActionTranslationVisitorPSA(const EBPFProgram* program,
-                                                         cstring valueName) :
+                                                         cstring valueName,
+                                                         const EBPFTablePSA* table) :
         CodeGenInspector(program->refMap, program->typeMap),
         ActionTranslationVisitor(valueName, program),
-        ControlBodyTranslatorPSA(program->to<EBPFPipeline>()->control) {}
+        ControlBodyTranslatorPSA(program->to<EBPFPipeline>()->control),
+        table(table) {}
 
 bool ActionTranslationVisitorPSA::preorder(const IR::PathExpression* pe) {
     if (isActionParameter(pe)) {
@@ -54,16 +78,14 @@ void ActionTranslationVisitorPSA::processMethod(const P4::ExternMethod* method) 
     auto di = decl->to<IR::Declaration_Instance>();
     auto instanceName = EBPFObject::externalName(di);
 
-    if (declType->name.name == "Counter") {
-        auto ctr = control->to<EBPFControlPSA>()->getCounter(instanceName);
-        // Counter count() always has one argument/index
-        if (ctr != nullptr) {
-            ctr->to<EBPFCounterPSA>()->emitMethodInvocation(builder, method, this);
-        } else {
+    if (declType->name.name == "DirectCounter") {
+        auto ctr = table->getDirectCounter(instanceName);
+        if (ctr != nullptr)
+            ctr->emitDirectMethodInvocation(builder, method, valueName);
+        else
             ::error(ErrorType::ERR_NOT_FOUND,
-                    "%1%: Counter named %2% not found",
-                    method->expr, instanceName);
-        }
+                    "%1%: Table %2% do not own DirectCounter named %3%",
+                    method->expr, table->table->container, instanceName);
     } else {
         ControlBodyTranslatorPSA::processMethod(method);
     }
@@ -88,11 +110,27 @@ EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* tab
         this->size = 1;
     }
 
+    initDirectCounters();
     initImplementation();
 }
 
 EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name) :
                            EBPFTable(program, codeGen, name), implementation(nullptr) {}
+
+void EBPFTablePSA::initDirectCounters() {
+    auto counterAdder = [this](const IR::PathExpression * pe) {
+        CHECK_NULL(pe);
+        auto decl = program->refMap->getDeclaration(pe->path, true);
+        auto di = decl->to<IR::Declaration_Instance>();
+        CHECK_NULL(di);
+        auto counterName = EBPFObject::externalName(di);
+        auto ctr = new EBPFCounterPSA(program, di, counterName, codeGen);
+        this->counters.emplace_back(std::make_pair(counterName, ctr));
+    };
+
+    EBPFTablePsaPropertyVisitor<decltype(counterAdder)> visitor(counterAdder, table);
+    visitor.visitTableProperty("psa_direct_counter");
+}
 
 void EBPFTablePSA::initImplementation() {
     // PSA table is allowed to have up to one table implementation. EBPFTablePsaPropertyVisitor
@@ -128,7 +166,7 @@ void EBPFTablePSA::initImplementation() {
 
 ActionTranslationVisitor* EBPFTablePSA::createActionTranslationVisitor(
         cstring valueName, const EBPFProgram* program) const {
-    return new ActionTranslationVisitorPSA(program->to<EBPFPipeline>(), valueName);
+    return new ActionTranslationVisitorPSA(program->to<EBPFPipeline>(), valueName, this);
 }
 
 void EBPFTablePSA::emitValueStructStructure(CodeBuilder* builder) {
@@ -173,6 +211,17 @@ void EBPFTablePSA::emitTableDecl(CodeBuilder *builder,
 void EBPFTablePSA::emitTypes(CodeBuilder* builder) {
     EBPFTable::emitTypes(builder);
     // TODO: placeholder for handling PSA-specific types
+}
+
+/**
+ * Remember that order of emitting counters and meters affects future access to BPF maps.
+ * Do not change this order!
+ */
+void EBPFTablePSA::emitDirectTypes(CodeBuilder* builder) {
+    for (auto ctr : counters) {
+        ctr.second->emitValueType(builder);
+    }
+    // TODO: support for meters
 }
 
 void EBPFTablePSA::emitAction(CodeBuilder* builder, cstring valueName, cstring actionRunVariable) {

@@ -17,6 +17,7 @@ limitations under the License.
 
 #include "ebpfPsaCounter.h"
 #include "backends/ebpf/ebpfType.h"
+#include "backends/ebpf/psa/ebpfPipeline.h"
 
 namespace EBPF {
 
@@ -24,18 +25,33 @@ EBPFCounterPSA::EBPFCounterPSA(const EBPFProgram* program, const IR::Declaration
                                cstring name, CodeGenInspector* codeGen) :
         EBPFCounterTable(program, name, codeGen, 1, false) {
     CHECK_NULL(di);
-    if (di->arguments->size() != 2) {
-        ::error(ErrorType::ERR_MODEL, "Expected 2 arguments: %1%", di);
-        return;
-    }
-
     if (!di->type->is<IR::Type_Specialized>()) {
         ::error(ErrorType::ERR_MODEL, "Missing specialization: %1%", di);
         return;
     }
     auto ts = di->type->to<IR::Type_Specialized>();
 
-    if (ts->arguments->size() != 2) {
+    if (ts->baseType->toString() == "Counter") {
+        isDirect = false;
+    } else if (ts->baseType->toString() == "DirectCounter") {
+        isDirect = true;
+    } else {
+        ::error(ErrorType::ERR_UNKNOWN, "Unknown counter type extern: %1%", di);
+        return;
+    }
+
+    if (isDirect && di->arguments->size() != 1) {
+        ::error(ErrorType::ERR_MODEL, "Expected 1 argument: %1%", di);
+        return;
+    } else if (!isDirect && di->arguments->size() != 2) {
+        ::error(ErrorType::ERR_MODEL, "Expected 2 arguments: %1%", di);
+        return;
+    }
+
+    if (isDirect && ts->arguments->size() != 1) {
+        ::error(ErrorType::ERR_MODEL, "Expected a type specialized with one argument: %1%", ts);
+        return;
+    } else if (!isDirect && ts->arguments->size() != 2) {
         ::error(ErrorType::ERR_MODEL, "Expected a type specialized with two arguments: %1%", ts);
         return;
     }
@@ -59,33 +75,38 @@ EBPFCounterPSA::EBPFCounterPSA(const EBPFProgram* program, const IR::Declaration
                                                "nearest type (8, 16, 32 or 64 bits): %1%", dpwtype);
     }
 
-    // check index type
-    auto istype = ts->arguments->at(1);
-    if (!dpwtype->is<IR::Type_Bits>()) {
-        ::error(ErrorType::ERR_UNSUPPORTED, "Must be bit or int type: %1%", istype);
-        return;
-    }
-    unsigned indexWidth = istype->width_bits();
-    if (indexWidth != 32) {
-        // ARRAY_MAP can have only 32 bits key, so assume this and warn user
-        ::warning(ErrorType::WARN_UNSUPPORTED,
-                  "Only 32-bit type for index is supported, changed to 32 bit: %1%", istype);
-        indexWidth = 32;
-    }
-
-    indexWidthType = EBPFTypeFactory::instance->create(istype);
-
-    auto declaredSize = di->arguments->at(0)->expression->to<IR::Constant>();
-    if (!declaredSize->fitsInt()) {
-        ::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", declaredSize);
-        return;
-    }
-    size = declaredSize->asUnsigned();
-
-
     // By default, use BPF array map for Counter
     // TODO: add more advance logic to decide whether used map will be HASH_MAP or ARRAY_MAP
     isHash = false;
+
+    // check index type
+    indexWidthType = nullptr;
+    if (!isDirect) {
+        auto istype = ts->arguments->at(1);
+        if (!dpwtype->is<IR::Type_Bits>()) {
+            ::error(ErrorType::ERR_UNSUPPORTED, "Must be bit or int type: %1%", istype);
+            return;
+        }
+
+        if (!isHash && istype->width_bits() != 32) {
+            // ARRAY_MAP can have only 32 bits key, so assume this and warn user
+            ::warning(ErrorType::WARN_UNSUPPORTED,
+                      "Up to 32-bit type for index is supported, using 32 bit: %1%", istype);
+        }
+
+        if (isHash) {
+            indexWidthType = EBPFTypeFactory::instance->create(istype);
+        } else {
+            keyTypeName = "u32";
+        }
+
+        auto declaredSize = di->arguments->at(0)->expression->to<IR::Constant>();
+        if (!declaredSize->fitsUint()) {
+            ::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", declaredSize);
+            return;
+        }
+        size = declaredSize->asUnsigned();
+    }
 
     auto typeArg = di->arguments->at(di->arguments->size() - 1)->expression->to<IR::Constant>();
     type = toCounterType(typeArg->asInt());
@@ -109,17 +130,21 @@ void EBPFCounterPSA::emitTypes(CodeBuilder* builder) {
 }
 
 void EBPFCounterPSA::emitKeyType(CodeBuilder* builder) {
-    builder->emitIndent();
-    builder->append("typedef ");
-    indexWidthType->emit(builder);
-    builder->appendFormat(" %s", keyTypeName.c_str());
-    builder->endOfStatement(true);
+    if (indexWidthType == nullptr)
+        return;
+
+    if (indexWidthType->is<EBPFStructType>()) {
+        builder->emitIndent();
+        indexWidthType->emit(builder);
+        builder->endOfStatement(true);
+    }
 }
 
 void EBPFCounterPSA::emitValueType(CodeBuilder* builder) {
     builder->emitIndent();
-    builder->append("typedef ");
     builder->append("struct ");
+    if (!isDirect)
+        builder->appendFormat("%s ", valueTypeName.c_str());
     builder->blockStart();
     if (type == CounterType::BYTES || type == CounterType::PACKETS_AND_BYTES) {
         builder->emitIndent();
@@ -135,8 +160,16 @@ void EBPFCounterPSA::emitValueType(CodeBuilder* builder) {
     }
 
     builder->blockEnd(false);
-    builder->appendFormat(" %s", valueTypeName.c_str());
+    if (isDirect)
+        builder->appendFormat(" %s", instanceName.c_str());
     builder->endOfStatement(true);
+}
+
+void EBPFCounterPSA::emitInstance(CodeBuilder* builder) {
+    TableKind kind = isHash ? TableHash : TableArray;
+    builder->target->emitTableDecl(
+            builder, dataMapName, kind,
+            keyTypeName, "struct " + valueTypeName, size);
 }
 
 void EBPFCounterPSA::emitMethodInvocation(CodeBuilder* builder, const P4::ExternMethod* method,
@@ -145,12 +178,42 @@ void EBPFCounterPSA::emitMethodInvocation(CodeBuilder* builder, const P4::Extern
         ::error(ErrorType::ERR_UNSUPPORTED, "Unexpected method %1%", method->expr);
         return;
     }
+    BUG_CHECK(!isDirect, "DirectCounter used outside of table");
     BUG_CHECK(method->expr->arguments->size() == 1,
               "Expected just 1 argument for %1%", method->expr);
 
     builder->blockStart();
     this->emitCount(builder, method->expr, codeGen);
     builder->blockEnd(false);
+}
+
+void EBPFCounterPSA::emitDirectMethodInvocation(CodeBuilder* builder,
+                                                const P4::ExternMethod* method,
+                                                cstring valuePtr) {
+    if (method->method->name.name != "count") {
+        ::error(ErrorType::ERR_UNSUPPORTED, "Unexpected method %1%", method->expr);
+        return;
+    }
+    BUG_CHECK(isDirect, "Bad Counter invocation");
+    BUG_CHECK(method->expr->arguments->size() == 0,
+              "Expected no arguments for %1%", method->expr);
+
+    cstring target = valuePtr + "->" + instanceName;
+    auto pipeline = dynamic_cast<const EBPFPipeline *>(program);
+    if (pipeline == nullptr) {
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "DirectCounter used outside of pipeline %1%", method->expr);
+        return;
+    }
+    cstring msgStr = Util::printf_format("Counter: updating %s, packets=1, bytes=%%u",
+                                         instanceName.c_str());
+    cstring varStr = Util::printf_format("%s", pipeline->lengthVar.c_str());
+    builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, varStr.c_str());
+
+    emitCounterUpdate(builder, target, "");
+
+    msgStr = Util::printf_format("Counter: %s updated", instanceName.c_str());
+    builder->target->emitTraceMessage(builder, msgStr.c_str());
 }
 
 void EBPFCounterPSA::emitCount(CodeBuilder* builder,
@@ -162,11 +225,15 @@ void EBPFCounterPSA::emitCount(CodeBuilder* builder,
     cstring msgStr, varStr;
 
     builder->emitIndent();
-    builder->appendFormat("%s *%s", valueTypeName.c_str(), valueName.c_str());
+    builder->appendFormat("struct %s *%s", valueTypeName.c_str(), valueName.c_str());
     builder->endOfStatement(true);
 
     builder->emitIndent();
-    builder->appendFormat("%s %s = ", keyTypeName.c_str(), keyName.c_str());
+    if (indexWidthType != nullptr)
+        indexWidthType->declare(builder, keyName, false);
+    else
+        builder->appendFormat("%s %s", keyTypeName.c_str(), keyName.c_str());
+    builder->append(" = ");
     auto index = expression->arguments->at(0);
     codeGen->visit(index);
     builder->endOfStatement(true);
@@ -189,13 +256,13 @@ void EBPFCounterPSA::emitCount(CodeBuilder* builder,
 void EBPFCounterPSA::emitCounterUpdate(CodeBuilder* builder, const cstring target,
                                        const cstring keyName) {
     cstring varStr;
-    cstring initValueName = program->refMap->newName("init_val");
+    cstring targetWAccess = target + (isDirect ? "." : "->");
 
-    cstring targetWAccess = target + "->";
-
-    builder->emitIndent();
-    builder->appendFormat("if (%s != NULL) ", target.c_str());
-    builder->blockStart();
+    if (!isDirect) {
+        builder->emitIndent();
+        builder->appendFormat("if (%s != NULL) ", target.c_str());
+        builder->blockStart();
+    }
 
     if (type == CounterType::BYTES || type == CounterType::PACKETS_AND_BYTES) {
         builder->emitIndent();
@@ -215,26 +282,29 @@ void EBPFCounterPSA::emitCounterUpdate(CodeBuilder* builder, const cstring targe
         builder->target->emitTraceMessage(builder, "Counter: now packets=%u", 1, varStr.c_str());
     }
 
-    builder->blockEnd(false);
-    builder->append(" else ");
-    builder->blockStart();
+    if (!isDirect) {
+        builder->blockEnd(false);
+        builder->append(" else ");
+        builder->blockStart();
 
-    if (isHash) {
-        builder->target->emitTraceMessage(builder,
-                                          "Counter: data not found, adding new instance");
-        builder->emitIndent();
-        builder->appendFormat("%s %s = ", valueTypeName.c_str(), target.c_str());
-        emitCounterInitializer(builder);
-        builder->endOfStatement(true);
+        if (isHash) {
+            cstring initValueName = program->refMap->newName("init_val");
+            builder->target->emitTraceMessage(builder,
+                                              "Counter: data not found, adding new instance");
+            builder->emitIndent();
+            builder->appendFormat("struct %s %s = ", valueTypeName.c_str(), initValueName.c_str());
+            emitCounterInitializer(builder);
+            builder->endOfStatement(true);
 
-        builder->emitIndent();
-        builder->target->emitTableUpdate(builder, dataMapName, keyName, initValueName);
-        builder->newline();
-    } else {
-        builder->target->emitTraceMessage(builder, "Counter: instance not found");
+            builder->emitIndent();
+            builder->target->emitTableUpdate(builder, dataMapName, keyName, initValueName);
+            builder->newline();
+        } else {
+            builder->target->emitTraceMessage(builder, "Counter: instance not found");
+        }
+
+        builder->blockEnd(true);
     }
-
-    builder->blockEnd(true);
 }
 
 void EBPFCounterPSA::emitCounterInitializer(CodeBuilder* builder) {

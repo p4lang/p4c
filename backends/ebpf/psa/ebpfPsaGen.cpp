@@ -627,6 +627,9 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
     } else if (typeName == "Counter") {
         auto ctr = new EBPFCounterPSA(program, di, name, control->codeGen);
         control->counters.emplace(name, ctr);
+    } else if (typeName == "DirectCounter") {
+        // instance will be created by table
+        return false;
     } else {
         ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
                 instance);

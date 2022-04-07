@@ -27,6 +27,7 @@ class EBPFCounterPSA : public EBPFCounterTable {
  protected:
     EBPFType* dataplaneWidthType;
     EBPFType* indexWidthType;
+    bool isDirect;
 
  public:
     enum CounterType {
@@ -44,9 +45,12 @@ class EBPFCounterPSA : public EBPFCounterTable {
     void emitTypes(CodeBuilder* builder) override;
     virtual void emitKeyType(CodeBuilder* builder);
     virtual void emitValueType(CodeBuilder* builder);
+    void emitInstance(CodeBuilder* builder) override;
 
     void emitMethodInvocation(CodeBuilder* builder, const P4::ExternMethod* method,
                               CodeGenInspector* codeGen);
+    void emitDirectMethodInvocation(CodeBuilder* builder, const P4::ExternMethod* method,
+                                    cstring valuePtr);
     virtual void emitCount(CodeBuilder* builder, const IR::MethodCallExpression *expression,
                            CodeGenInspector* codeGen);
     virtual void emitCounterUpdate(CodeBuilder* builder, cstring target, cstring keyName);
