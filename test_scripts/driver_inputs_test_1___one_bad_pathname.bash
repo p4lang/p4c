@@ -4,11 +4,10 @@
 
 
 
-if [ "$0" = bash -o "$0" = "-bash" -o "$0" = dash -o "$0" = sh ] || echo $0 | grep --quiet '/\(a\|ba\|da\)\?sh$'; then
-  ### the regex on the preceding line matches anything ending in {‘/’ immediately followed by either “ash”, “bash”, or “dash”}
-  echo 'Please do _not_ source this file, because it has an "exit" command in it.'
-  return 255
-fi
+source $(dirname "`realpath "${BASH_SOURCE[0]}"`")/driver_inputs_test___shared_code.bash
+
+check_for_inadvisable_sourcing; returned=$?
+if [ $returned -ne 0 ]; then return $returned; fi ### simulating exception handling for an exception that is not caught at this level
 
 
 
