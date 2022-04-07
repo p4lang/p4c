@@ -320,7 +320,7 @@ SymbolicBool* SymbolicHeaderUnion::isValid() const {
          if (fieldValue.count(f->name.name)) {
              auto fieldValid = fieldValue.at(f->name.name)->checkedTo<SymbolicHeader>()->valid;
              if (!fieldValid->isKnown() || fieldValid->isUninitialized()) {
-                return new SymbolicBool(false);
+                return new SymbolicBool(ScalarValue::ValueState::NotConstant);
              } else if (fieldValid->value) {
                 validFields +=1;
              }
@@ -1106,12 +1106,19 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
         auto base = get(bim->appliedTo);
         cstring name = bim->name.name;
         // Needed to get Header from HeaderUnion
-        const IR::Expression* node = expression->method->checkedTo<IR::Member>()->expr;
+        const auto node = expression->method->checkedTo<IR::Member>()->expr;
         CHECK_NULL(node);
         auto structVar = get(node);
         if (name == IR::Type_Header::setInvalid ||
             name == IR::Type_Header::setValid) {
             auto hv = structVar->checkedTo<SymbolicHeader>();
+            if (auto member = node->to<IR::Member>()) {
+                if (auto hu = get(member->expr)->to<SymbolicHeaderUnion>()) {
+                    if (hu->isValid()) {
+                        hu->setAllUnknown();
+                    }
+                }
+            }
             hv->setValid(name == IR::Type_Header::setValid);
             set(expression, SymbolicVoid::get());
             return;
