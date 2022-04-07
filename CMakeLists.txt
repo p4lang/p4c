@@ -417,6 +417,8 @@ add_test(NAME driver_inputs_test_1
   COMMAND ${P4C_SOURCE_DIR}/test_scripts/driver_inputs_test_1)
 add_test(NAME driver_inputs_test_2
   COMMAND ${P4C_SOURCE_DIR}/test_scripts/driver_inputs_test_2)
+add_test(NAME driver_inputs_test_3
+  COMMAND ${P4C_SOURCE_DIR}/test_scripts/driver_inputs_test_3)
 
 set_tests_properties(cpplint PROPERTIES LABELS cpplint)
 
