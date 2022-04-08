@@ -84,3 +84,5 @@ set_tests_properties(driver_inputs_test_1 PROPERTIES LABELS "XFAIL")
 set_tests_properties(driver_inputs_test_2 PROPERTIES LABELS "XFAIL")
 set_tests_properties(driver_inputs_test_3 PROPERTIES LABELS "XFAIL")
 set_tests_properties(driver_inputs_test_4 PROPERTIES LABELS "XFAIL")
+
+include(driver_Xfail.cmake)
