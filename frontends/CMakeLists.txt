@@ -130,6 +130,7 @@ set (P4_FRONTEND_HDRS
   p4/specialize.h
   p4/specializeGenericFunctions.h
   p4/specializeGenericTypes.h
+  p4/staticAssert.h
   p4/strengthReduction.h
   p4/structInitializers.h
   p4/switchAddDefault.h
