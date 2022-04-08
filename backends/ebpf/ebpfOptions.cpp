@@ -26,4 +26,17 @@ EbpfOptions::EbpfOptions() {
         registerOption("--trace", nullptr,
                 [this](const char*) { emitTraceMessages = true; return true; },
                 "Generate tracing messages of packet processing");
+        registerOption("--xdp2tc", "MODE",
+                [this](const char* arg) {
+                   if (!strcmp(arg, "meta")) {
+                       xdp2tcMode = XDP2TC_META;
+                   } else if (!strcmp(arg, "head")) {
+                       xdp2tcMode = XDP2TC_HEAD;
+                   } else if (!strcmp(arg, "cpumap")) {
+                       xdp2tcMode = XDP2TC_CPUMAP;
+                   }
+                   return true;
+                },
+                "[psa only] Select the mode used to pass metadata from XDP to TC "
+                "(possible values: meta, head, cpumap).");
 }

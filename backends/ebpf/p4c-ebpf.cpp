@@ -100,6 +100,7 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         exit(1);
 
+    options.calculateXDP2TCMode();
     try {
         compile(options);
     } catch (const std::exception &bug) {
