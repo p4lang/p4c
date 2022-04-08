@@ -147,19 +147,17 @@ class ParserStateRewriter : public Transform {
             BUG_CHECK(l->is<SymbolicArray>(), "%1%: expected an array", l);
             auto array = l->to<SymbolicArray>();
             unsigned idx = 0;
-            for (size_t i = 0; i < array->size; i++) {
-                auto* v = array->get(expression, i);
-                if (v->hasUninitializedParts())
-                    break;
-                else
-                    idx = i;
+            unsigned offset = 0;
+            if (state->statesIndexes.count(expression->expr->toString())) {
+                idx = state->statesIndexes.at(expression->expr->toString());
+                offset = 1;
             }
             if (expression->member.name == IR::Type_Stack::lastIndex) {
                 return new IR::Constant(IR::Type_Bits::get(32), idx);
             } else {
-                state->statesIndexes[expression->expr->toString()] = idx;
+                state->statesIndexes[expression->expr->toString()] = idx + offset;
                 return new IR::ArrayIndex(expression->expr->clone(),
-                                          new IR::Constant(IR::Type_Bits::get(32), idx));
+                                          new IR::Constant(IR::Type_Bits::get(32), idx + offset));
             }
         }
         return expression;
