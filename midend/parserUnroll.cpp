@@ -150,7 +150,9 @@ class ParserStateRewriter : public Transform {
             unsigned offset = 0;
             if (state->statesIndexes.count(expression->expr->toString())) {
                 idx = state->statesIndexes.at(expression->expr->toString());
-                offset = 1;
+                if (idx + 1 < array->size && expression->member.name != IR::Type_Stack::last) {
+                    offset = 1;
+                }
             }
             if (expression->member.name == IR::Type_Stack::lastIndex) {
                 return new IR::Constant(IR::Type_Bits::get(32), idx);
