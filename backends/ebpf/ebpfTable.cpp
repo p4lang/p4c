@@ -24,8 +24,8 @@ namespace EBPF {
 
 bool ActionTranslationVisitor::preorder(const IR::PathExpression* expression) {
     if (isActionParameter(expression)) {
-        cstring paramStr = getActionParamStr(expression);
-        builder->append(paramStr.c_str());
+        cstring paramInstanceName = getActionParamInstanceName(expression);
+        builder->append(paramInstanceName.c_str());
         return false;
     }
     visit(expression->path);
@@ -41,7 +41,8 @@ bool ActionTranslationVisitor::isActionParameter(const IR::PathExpression *expre
     return false;
 }
 
-cstring ActionTranslationVisitor::getActionParamStr(const IR::Expression *expression) const {
+cstring ActionTranslationVisitor::getActionParamInstanceName(
+        const IR::Expression *expression) const {
     cstring actionName = EBPFObject::externalName(action);
     auto paramStr = Util::printf_format("%s->u.%s.%s",
                                         valueName, actionName,
