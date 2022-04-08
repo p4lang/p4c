@@ -80,12 +80,7 @@ set(XFAIL driver_inputs_test_1
           driver_inputs_test_3
           driver_inputs_test_4)
 
-set_tests_properties(driver_inputs_test_1 PROPERTIES LABELS "XFAIL")
-set_tests_properties(driver_inputs_test_2 PROPERTIES LABELS "XFAIL")
-set_tests_properties(driver_inputs_test_3 PROPERTIES LABELS "XFAIL")
-set_tests_properties(driver_inputs_test_4 PROPERTIES LABELS "XFAIL")
-
-p4c_add_xfail_reason("driver" "" driver_inputs_test_1)
-p4c_add_xfail_reason("driver" "" driver_inputs_test_2)
-p4c_add_xfail_reason("driver" "" driver_inputs_test_3)
-p4c_add_xfail_reason("driver" "" driver_inputs_test_4)
+set_tests_properties(driver_inputs_test_1 PROPERTIES LABELS "XFAIL" WILL_FAIL 1)
+set_tests_properties(driver_inputs_test_2 PROPERTIES LABELS "XFAIL" WILL_FAIL 1)
+set_tests_properties(driver_inputs_test_3 PROPERTIES LABELS "XFAIL" WILL_FAIL 1)
+set_tests_properties(driver_inputs_test_4 PROPERTIES LABELS "XFAIL" WILL_FAIL 1)
