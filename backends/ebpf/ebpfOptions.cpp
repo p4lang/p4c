@@ -37,5 +37,6 @@ EbpfOptions::EbpfOptions() {
                    }
                    return true;
                 },
-                "[psa only] Select the mode used to pass metadata from XDP to TC (possible values: meta, head, cpumap).");
+                "[psa only] Select the mode used to pass metadata from XDP to TC "
+                "(possible values: meta, head, cpumap).");
 }
