@@ -1,14 +1,22 @@
 #include "dpdkHelpers.h"
 #include "ir/dbprint.h"
 #include "printUtils.h"
-
+#include "dpdkAsmOpt.h"
 using namespace DBPrint;
 
 static constexpr unsigned DEFAULT_LEARNER_TABLE_SIZE = 0x10000;
 static constexpr unsigned DEFAULT_LEARNER_TABLE_TIMEOUT = 120;
+ordered_map<cstring, cstring> DPDK::ShortenTokenLength::origNameMap = {};
+auto& origNameMap =  DPDK::ShortenTokenLength::origNameMap;
 
 void add_space(std::ostream &out, int size) {
     out << std::setfill(' ') << std::setw(size) << " ";
+}
+
+void add_comment(std::ostream& out, cstring str, cstring sep = "") {
+    if (origNameMap.count(str)) {
+        out<<sep<<";oldname:"<<origNameMap.at(str)<<"\n";
+    }
 }
 
 std::ostream &IR::DpdkAsmProgram::toSpec(std::ostream &out) const {
@@ -16,22 +24,32 @@ std::ostream &IR::DpdkAsmProgram::toSpec(std::ostream &out) const {
         l->toSpec(out) << std::endl;
     }
     out << std::endl;
-    for (auto h : headerType)
+    for (auto h : headerType) {
+        add_comment(out, h->name.toString());
         h->toSpec(out) << std::endl;
-    for (auto s : structType)
+    }
+    for (auto s : structType) {
+        add_comment(out, s->name.toString());
         s->toSpec(out) << std::endl;
-    for (auto s : externDeclarations)
+    }
+    for (auto s : externDeclarations) {
+        add_comment(out, s->name.toString());
         s->toSpec(out) << std::endl;
+    }
     for (auto a : actions) {
+        add_comment(out, a->name.toString());
         a->toSpec(out) << std::endl << std::endl;
     }
     for (auto t : tables) {
+        add_comment(out, t->name);
         t->toSpec(out) << std::endl << std::endl;
     }
     for (auto s : selectors) {
+        add_comment(out, s->name);
         s->toSpec(out) << std::endl;
     }
     for (auto s : learners) {
+        add_comment(out, s->name);
         s->toSpec(out) << std::endl;
     }
     for (auto s : statements) {
@@ -104,6 +122,7 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
 std::ostream &IR::DpdkHeaderType::toSpec(std::ostream &out) const {
     out << "struct " << name << " {" << std::endl;
     for (auto it = fields.begin(); it != fields.end(); ++it) {
+        add_comment(out, (*it)->name.toString(), "\t");
         if (auto t = (*it)->type->to<IR::Type_Bits>())
             out << "\tbit<" << t->width_bits() << ">";
         else if (auto t = (*it)->type->to<IR::Type_Name>())
@@ -125,6 +144,7 @@ std::ostream &IR::DpdkHeaderType::toSpec(std::ostream &out) const {
 std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
     if (getAnnotations()->getSingle("__packet_data__")) {
         for (auto it = fields.begin(); it != fields.end(); ++it) {
+            add_comment(out, (*it)->name.toString());
             if (auto t = (*it)->type->to<IR::Type_Name>()) {
                 out << "header " << (*it)->name << " instanceof "
                     << t->path->name;
@@ -147,6 +167,7 @@ std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
     } else {
         out << "struct " << name << " {" << std::endl;
         for (auto it = fields.begin(); it != fields.end(); ++it) {
+            add_comment(out, (*it)->name.toString(), "\t");
             if (auto t = (*it)->type->to<IR::Type_Bits>())
                 out << "\tbit<" << t->width_bits() << ">";
             else if (auto t = (*it)->type->to<IR::Type_Name>()) {
@@ -341,7 +362,7 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
 
 std::ostream &IR::DpdkSelector::toSpec(std::ostream &out) const {
     out << "selector " << name << " {" << std::endl;
-    out << "\tgroup_id " << group_id << std::endl;
+    out << "\tgroup_id " << DPDK::toStr(group_id) << std::endl;
     if (selectors) {
         out << "\tselector {" << std::endl;
         for (auto key : selectors->keyElements) {
@@ -349,7 +370,7 @@ std::ostream &IR::DpdkSelector::toSpec(std::ostream &out) const {
         }
         out << "\t}" << std::endl;
     }
-    out << "\tmember_id " << member_id << std::endl;
+    out << "\tmember_id " << DPDK::toStr(member_id) << std::endl;
     out << "\tn_groups_max " << n_groups_max << std::endl;
     out << "\tn_members_per_group_max " << n_members_per_group_max << std::endl;
     out << "}" << std::endl;
@@ -471,6 +492,7 @@ std::ostream &IR::DpdkVerifyStatement::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkMeterDeclStatement::toSpec(std::ostream &out) const {
+    add_comment(out, meter);
     out << "metarray " << meter << " size " << DPDK::toStr(size);
     return out;
 }
@@ -485,6 +507,7 @@ std::ostream &IR::DpdkMeterExecuteStatement::toSpec(std::ostream &out) const {
    is used for incrementing the counter. Packet counters are incremented by packet length
    specified as parameter and byte counters are incremente by 1 */
 std::ostream &IR::DpdkCounterCountStatement::toSpec(std::ostream &out) const {
+    add_comment(out, counter);
     out << "regadd " << counter << " " << DPDK::toStr(index) << " ";
     if (incr)
         out << DPDK::toStr(incr);
@@ -494,6 +517,7 @@ std::ostream &IR::DpdkCounterCountStatement::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkRegisterDeclStatement::toSpec(std::ostream &out) const {
+    add_comment(out, reg);
     out << "regarray " << reg << " size " << DPDK::toStr(size) << " initval ";
     if (init_val)
         out << DPDK::toStr(init_val);

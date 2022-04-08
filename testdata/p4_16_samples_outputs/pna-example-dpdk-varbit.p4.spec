@@ -56,7 +56,8 @@ header ethernet instanceof ethernet_t
 header ipv4_base instanceof ipv4_base_t
 header ipv4_option_timestamp instanceof ipv4_option_timestamp_t
 header MainParserT_parser_tmp_hdr instanceof option_t
-header MainParserT_parser_lookahead_tmp instanceof lookahead_tmp_hdr
+;oldname:MainParserT_parser_lookahead_tmp
+header MainParserT_parser_lookahead_0 instanceof lookahead_tmp_hdr
 
 action NoAction args none {
 	return
@@ -105,8 +106,8 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4_base
 	jmpeq MAINPARSERIMPL_ACCEPT h.ipv4_base.version_ihl 0x45
-	lookahead h.MainParserT_parser_lookahead_tmp
-	mov m.MainParserT_parser_tmp_2 h.MainParserT_parser_lookahead_tmp.f
+	lookahead h.MainParserT_parser_lookahead_0
+	mov m.MainParserT_parser_tmp_2 h.MainParserT_parser_lookahead_0.f
 	jmpeq MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP m.MainParserT_parser_tmp_2 0x44
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead h.MainParserT_parser_tmp_hdr

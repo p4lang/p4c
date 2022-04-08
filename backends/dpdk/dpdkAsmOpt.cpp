@@ -279,4 +279,6 @@ bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
     }
     return false;
 }
+
+size_t ShortenTokenLength::count = 0;
 }  // namespace DPDK
