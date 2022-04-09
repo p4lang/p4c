@@ -19,6 +19,11 @@ from common import *
 from scapy.layers.l2 import Ether
 from scapy.layers.inet import IP, UDP
 
+PORT0 = 0
+PORT1 = 1
+PORT2 = 2
+ALL_PORTS = [PORT0, PORT1, PORT2]
+
 class RegisterActionPSATest(P4EbpfTest):
     """
     Test register used in an action.
