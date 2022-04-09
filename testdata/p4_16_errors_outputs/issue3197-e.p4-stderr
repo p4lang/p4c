@@ -1,0 +1,3 @@
+issue3197-e.p4(2): [--Werror=not-found] error: f: declaration not found
+ f();
+ ^
