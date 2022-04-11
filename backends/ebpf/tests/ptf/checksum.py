@@ -64,3 +64,48 @@ class InternetChecksumPSATest(P4EbpfTest):
             pkt[IP].chksum = None
             pkt[UDP].chksum = None
             testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+
+
+@xdp2tc_head_not_supported
+class HashCRC16PSATest(P4EbpfTest):
+    p4_file_path = "p4testdata/hash-crc16.p4"
+
+    def runTest(self):
+        pkt = Ether() / "12345678900"
+        exp_pkt = Ether() / bytes.fromhex('313233343536373839 bb3d')
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet_any_port(self, exp_pkt, ALL_PORTS)
+
+
+@xdp2tc_head_not_supported
+class HashInActionPSATest(P4EbpfTest):
+    p4_file_path = "p4testdata/hash-action.p4"
+
+    def runTest(self):
+        pkt = Ether() / "12345678900"
+        exp_pkt = Ether() / bytes.fromhex('313233343536373839 bb3d')
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet_any_port(self, exp_pkt, ALL_PORTS)
+
+
+@xdp2tc_head_not_supported
+class HashCRC32PSATest(P4EbpfTest):
+    p4_file_path = "p4testdata/hash-crc32.p4"
+
+    def runTest(self):
+        pkt = Ether() / "1234567890000"
+        exp_pkt = Ether() / bytes.fromhex('313233343536373839 cbf43926')
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet_any_port(self, exp_pkt, ALL_PORTS)
+
+
+@xdp2tc_head_not_supported
+class HashRangePSATest(P4EbpfTest):
+    p4_file_path = "p4testdata/hash-range.p4"
+
+    def runTest(self):
+        res = 50 + (0xbb3d % 200)
+        pkt = Ether() / "1234567890"
+        exp_pkt = Ether() / bytes.fromhex('313233343536373839 {}'.format(format(res, 'x')))
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet_any_port(self, exp_pkt, ALL_PORTS)

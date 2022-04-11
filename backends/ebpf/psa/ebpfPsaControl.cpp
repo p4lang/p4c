@@ -32,9 +32,38 @@ void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod* method) {
         auto counterMap = control->getCounter(name);
         counterMap->to<EBPFCounterPSA>()->emitMethodInvocation(builder, method, this);
         return;
+    } else if (declType->name.name == "Hash") {
+        auto hash = control->to<EBPFControlPSA>()->getHash(name);
+        hash->processMethod(builder, method->method->name.name, method->expr, this);
+        return;
     }
 
     ControlBodyTranslator::processMethod(method);
+}
+
+bool ControlBodyTranslatorPSA::preorder(const IR::AssignmentStatement* a) {
+    if (auto methodCallExpr = a->right->to<IR::MethodCallExpression>()) {
+        auto mi = P4::MethodInstance::resolve(methodCallExpr,
+                                              control->program->refMap,
+                                              control->program->typeMap);
+        auto ext = mi->to<P4::ExternMethod>();
+        if (ext != nullptr) {
+            if (ext->originalExternType->name.name == "Hash") {
+                cstring name = EBPFObject::externalName(ext->object);
+                auto hash = control->to<EBPFControlPSA>()->getHash(name);
+                hash->processMethod(builder, "update", ext->expr, this);
+                builder->emitIndent();
+            }
+        }
+    }
+
+    return CodeGenInspector::preorder(a);
+}
+
+void EBPFControlPSA::emit(CodeBuilder *builder) {
+        for (auto h : hashes)
+            h.second->emitVariables(builder);
+        EBPFControl::emit(builder);
 }
 
 }
