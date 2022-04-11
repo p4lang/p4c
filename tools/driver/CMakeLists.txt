@@ -65,3 +65,22 @@ add_custom_command(OUTPUT ${P4C_DRIVER_DST}
   )
 
 add_custom_target(p4c_driver ALL DEPENDS ${P4C_DRIVER_DST})
+
+
+
+### Added by Abe starting April 6 2022; these tests are all expected to fail until Abe`s branch with driver improvements is merged.
+
+add_test(NAME driver_inputs_test_1 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_1)
+add_test(NAME driver_inputs_test_2 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_2)
+add_test(NAME driver_inputs_test_3 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_3)
+add_test(NAME driver_inputs_test_4 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_4)
+
+set(XFAIL driver_inputs_test_1
+          driver_inputs_test_2
+          driver_inputs_test_3
+          driver_inputs_test_4)
+
+set_tests_properties(driver_inputs_test_1 PROPERTIES LABELS "XFAIL" WILL_FAIL 1)
+set_tests_properties(driver_inputs_test_2 PROPERTIES LABELS "XFAIL" WILL_FAIL 1)
+set_tests_properties(driver_inputs_test_3 PROPERTIES LABELS "XFAIL" WILL_FAIL 1)
+set_tests_properties(driver_inputs_test_4 PROPERTIES LABELS "XFAIL" WILL_FAIL 1)
