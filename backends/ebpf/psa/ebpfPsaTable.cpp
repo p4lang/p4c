@@ -84,7 +84,7 @@ void ActionTranslationVisitorPSA::processMethod(const P4::ExternMethod* method) 
             ctr->emitDirectMethodInvocation(builder, method, valueName);
         else
             ::error(ErrorType::ERR_NOT_FOUND,
-                    "%1%: Table %2% do not own DirectCounter named %3%",
+                    "%1%: Table %2% does not own DirectCounter named %3%",
                     method->expr, table->table->container, instanceName);
     } else {
         ControlBodyTranslatorPSA::processMethod(method);
@@ -220,7 +220,7 @@ void EBPFTablePSA::emitTypes(CodeBuilder* builder) {
 }
 
 /**
- * Remember that order of emitting counters and meters affects future access to BPF maps.
+ * Order of emitting counters and meters affects generated layout of BPF map value.
  * Do not change this order!
  */
 void EBPFTablePSA::emitDirectTypes(CodeBuilder* builder) {
