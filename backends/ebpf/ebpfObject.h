@@ -50,6 +50,14 @@ class EBPFObject {
 
         return nullptr;
     }
+
+    static cstring getTypeName(const IR::Declaration_Instance* di) {
+        if (auto typeName = di->type->to<IR::Type_Name>()) {
+            return typeName->path->name.name;
+        }
+
+        return nullptr;
+    }
 };
 
 }  // namespace EBPF
