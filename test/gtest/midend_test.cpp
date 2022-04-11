@@ -128,19 +128,22 @@ class CollectRangesAndMasks : public Inspector {
     }
 };
 
-using Bound = std::pair<unsigned, unsigned>;
-using Mask = std::pair<unsigned, unsigned>;
+using Bound = std::pair<int, int>;
+using Mask = std::pair<int, int>;
 
 // note: the callback is used so that SCOPED_TRACE is able to add additional
 // information visible even if the tests in the callback fail
-template<typename ExtraTests>
+template<typename T = uint16_t, typename ExtraTests>
 static void
 testReplaceSelectRange(std::vector<Bound> ranges, ExtraTests extraTests)
 {
+    static_assert(std::is_same<T, uint16_t>::value || std::is_same<T, int16_t>::value,
+                  "only uint16_t and int16_t can be used as template argument "
+                  "of testReplaceSelectRange");
     std::stringstream code;
     code << R"(
         struct bs {
-            bit<16> x;
+            )" << (std::is_signed<T>::value ? "int" : "bit") << R"(<16> x;
         }
 
         parser p(in bs b, out bool matches)
@@ -194,7 +197,9 @@ testReplaceSelectRange(std::vector<Bound> ranges, ExtraTests extraTests)
     }
     SCOPED_TRACE(masksStr.str());
 
-    for (unsigned i = 0; i < 1 << 16; ++i) {
+    int lo = std::numeric_limits<T>::min();
+    int hi = std::numeric_limits<T>::max();
+    for (int i = lo; i <= hi; ++i) {
         bool inRange = std::any_of(ranges.begin(), ranges.end(),
                                    [=](Bound b) { return b.first <= i && i <= b.second; });
 
@@ -275,6 +280,22 @@ TEST_F(P4CMidend, replaceSelectRange1) {
 TEST_F(P4CMidend, replaceSelectRange2) {
     testReplaceSelectRange({{20, 319}}, [](CollectRangesAndMasks collect) {
         ASSERT_EQ(collect.masks.size(), 6u);
+    });
+}
+
+TEST_F(P4CMidend, replaceSelectRangeSigned1) {
+    testReplaceSelectRange<int16_t>({{-4, 3}}, [](CollectRangesAndMasks collect) {
+        for (auto &m : collect.masks)
+            m->dbprint(std::cerr);
+        ASSERT_EQ(collect.masks.size(), 2u);
+    });
+}
+
+TEST_F(P4CMidend, replaceSelectRangeSigned2) {
+    testReplaceSelectRange<int16_t>({{-256, 3}}, [](CollectRangesAndMasks collect) {
+        for (auto &m : collect.masks)
+            m->dbprint(std::cerr);
+        ASSERT_EQ(collect.masks.size(), 2u);
     });
 }
 
