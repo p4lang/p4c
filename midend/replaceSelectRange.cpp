@@ -21,7 +21,7 @@
 namespace P4 {
 
 std::vector<const IR::Mask *>
-DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
+DoReplaceSelectRange::rangeToMasks(const IR::Range *r, int keyIndex) {
     std::vector<const IR::Mask *> masks;
 
     auto l = r->left->to<IR::Constant>();
@@ -46,38 +46,67 @@ DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
                 r->left, r->right);
         return masks;
     }
-    auto constType = r->left->type;
-    auto base = l->base;
 
+    auto inType = r->left->type->to<IR::Type_Bits>();
+    BUG_CHECK(inType != nullptr, "Range type %1% isnot fixed-width integer", r->left->type);
+    bool isSigned = inType->isSigned;
+    auto maskType = isSigned ? new IR::Type_Bits(inType->srcInfo, inType->size, false) : inType;
+
+    auto base = l->base;
     int width = r->type->width_bits();
     BUG_CHECK(width > 0, "zero-width range is not allowed %1%", r->type);
-    big_int min = left;
-    big_int max = right;
-    BUG_CHECK(min <= max, "range bounds inverted %1%..%2%", left, right);
     big_int size_mask = ((((big_int) 1) << width) - 1);
 
-    big_int range_size_remaining = max - min + 1;
+    if (isSigned) {
+        signedIndicesToReplace.emplace(keyIndex);
+    }
 
-    while (range_size_remaining > 0) {
-        // this generates two kinds of mask entries
-        // - 0..2^N - 1 where N is the largest number such that this does not
-        //              overshoot max -- to cover all numbers lower then 2^N - 1
-        //              with one mask entry.
-        // - M..M+2^N - 1 to cover remaining entries with masks that fix a bit
-        //                prefix and leave the last N bits arbitrary.
-        big_int match_stride = ((big_int) 1) << ((min == 0) ? floor_log2(max + 1) : ffs(min));
+    std::vector<std::pair<big_int, big_int>> subranges;
+    if (isSigned && left < 0 && right > 0) {
+        subranges.emplace_back(left, (big_int)-1);
+        subranges.emplace_back((big_int)0, right);
+    } else {
+        subranges.emplace_back(left, right);
+    }
 
-        while (match_stride > range_size_remaining)
-            match_stride >>= 1;
+    for (auto sub : subranges) {
+        BUG_CHECK((sub.first >= 0) == (sub.second >= 0),
+                  "Wrong subrange %1%..%2%", sub.first, sub.second);
+        big_int min;
+        big_int max;
+        if (sub.first >= 0) {
+            std::tie(min, max) = sub;
+        } else {
+            // convert negative range to bit-corresponding positive range
+            min = size_mask + sub.first + 1;
+            max = size_mask + sub.second + 1;
+        }
 
-        big_int mask = ~(match_stride - 1) & size_mask;
+        BUG_CHECK(min <= max, "range bounds inverted %1%..%2%", min, max);
 
-        auto valConst = new IR::Constant(constType, min, base, true);
-        auto maskConst = new IR::Constant(constType, mask, base, true);
-        masks.push_back(new IR::Mask(r->srcInfo, valConst, maskConst));
+        big_int range_size_remaining = max - min + 1;
 
-        range_size_remaining -= match_stride;
-        min += match_stride;
+        while (range_size_remaining > 0) {
+            // this generates two kinds of mask entries
+            // - 0..2^N - 1 where N is the largest number such that this does not
+            //              overshoot max -- to cover all numbers lower then 2^N - 1
+            //              with one mask entry.
+            // - M..M+2^N - 1 to cover remaining entries with masks that fix a bit
+            //                prefix and leave the last N bits arbitrary.
+            big_int match_stride = ((big_int) 1) << ((min == 0) ? floor_log2(max + 1) : ffs(min));
+
+            while (match_stride > range_size_remaining)
+                match_stride >>= 1;
+
+            big_int mask = ~(match_stride - 1) & size_mask;
+
+            auto valConst = new IR::Constant(maskType, min, base, true);
+            auto maskConst = new IR::Constant(maskType, mask, base, true);
+            masks.push_back(new IR::Mask(r->srcInfo, valConst, maskConst));
+
+            range_size_remaining -= match_stride;
+            min += match_stride;
+        }
     }
 
     return masks;
@@ -115,12 +144,47 @@ DoReplaceSelectRange::cartesianAppend(const std::vector<IR::Vector<IR::Expressio
     return newVecs;
 }
 
+const IR::Node *DoReplaceSelectRange::preorder(IR::SelectExpression *e) {
+    BUG_CHECK(!inSelect, "A select nested in select: %1%", e);
+    inSelect = true;
+    signedIndicesToReplace.clear();
+    return e;
+}
+
+const IR::Node *DoReplaceSelectRange::postorder(IR::SelectExpression *e) {
+    BUG_CHECK(inSelect, "A select visited only in postoreder: %1%", e);
+
+    if (!signedIndicesToReplace.empty()) {
+        IR::Vector<IR::Expression> newSelectList;
+        int idx = 0;
+        for (auto *expr : e->select->components) {
+            if (signedIndicesToReplace.count(idx)) {
+                auto eType = expr->type->to<IR::Type_Bits>();
+                BUG_CHECK(eType, "Cannot handle select on types other then fixed-width integeral "
+                          "types: %1%", expr->type);
+                auto unsignedType = new IR::Type_Bits(eType->srcInfo, eType->size, false);
+
+                newSelectList.push_back(new IR::Cast(expr->srcInfo, unsignedType, expr));
+            } else {
+                newSelectList.push_back(expr);
+            }
+            ++idx;
+        }
+        return new IR::SelectExpression(e->srcInfo, e->type,
+            new IR::ListExpression(e->select->srcInfo, newSelectList), e->selectCases);
+    }
+    inSelect = false;
+    return e;
+}
+
 const IR::Node* DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
+    BUG_CHECK(inSelect, "A lone select case not inside select: %1%", sc);
+
     auto newCases = new IR::Vector<IR::SelectCase>();
     auto keySet = sc->keyset;
 
     if (auto r = keySet->to<IR::Range>()) {
-        auto masks = rangeToMasks(r);
+        auto masks = rangeToMasks(r, 0);
         if (masks.empty())
             return sc;
 
@@ -136,9 +200,10 @@ const IR::Node* DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
 
         newVectors.push_back(first);
 
+        int idx = 0;
         for (auto key : oldList->components) {
             if (auto r = key->to<IR::Range>()) {
-                auto masks = rangeToMasks(r);
+                auto masks = rangeToMasks(r, idx);
                 if (masks.empty())
                     return sc;
 
@@ -146,6 +211,7 @@ const IR::Node* DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
             } else {
                 newVectors = cartesianAppend(newVectors, key);
             }
+            ++idx;
         }
 
         for (auto v : newVectors) {

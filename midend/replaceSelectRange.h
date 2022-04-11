@@ -38,12 +38,18 @@ class DoReplaceSelectRange : public Transform {
     // number of new cases generated for ternary operations due to a range
     // Each case is a key set expression.
     const uint MAX_CASES;
+    bool inSelect = false;
+    std::set<int> signedIndicesToReplace;
 
     explicit DoReplaceSelectRange(uint max) : MAX_CASES(max) {
         setName("DoReplaceSelectRange");
     }
-    const IR::Node* postorder(IR::SelectCase* p) override;
-    std::vector<const IR::Mask *> rangeToMasks(const IR::Range *);
+
+    const IR::Node *preorder(IR::SelectExpression *e) override;
+    const IR::Node *postorder(IR::SelectExpression *e) override;
+    const IR::Node *postorder(IR::SelectCase *p) override;
+
+    std::vector<const IR::Mask *> rangeToMasks(const IR::Range *, int);
     std::vector<IR::Vector<IR::Expression>> cartesianAppend(
                const std::vector<IR::Vector<IR::Expression>>& vecs,
                const std::vector<const IR::Mask *>& masks);
