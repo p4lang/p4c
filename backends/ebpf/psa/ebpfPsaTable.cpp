@@ -123,6 +123,12 @@ void EBPFTablePSA::initDirectCounters() {
         auto decl = program->refMap->getDeclaration(pe->path, true);
         auto di = decl->to<IR::Declaration_Instance>();
         CHECK_NULL(di);
+        auto ts = di->type->to<IR::Type_Specialized>();
+        if (ts == nullptr || ts->baseType->toString() != "DirectCounter") {
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "%1%: not a DirectCounter, see declaration of %2%", pe, decl);
+            return;
+        }
         auto counterName = EBPFObject::externalName(di);
         auto ctr = new EBPFCounterPSA(program, di, counterName, codeGen);
         this->counters.emplace_back(std::make_pair(counterName, ctr));
