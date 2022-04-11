@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace EBPF {
 
-EBPFHashAlgorithmPSA::argumentsList EBPFHashAlgorithmPSA::unpackArguments(
+EBPFHashAlgorithmPSA::ArgumentsList EBPFHashAlgorithmPSA::unpackArguments(
         const IR::MethodCallExpression * expr, int dataPos) {
     BUG_CHECK(expr->arguments->size() > ((size_t) dataPos),
               "Data position %1% is outside of the arguments: %2%", dataPos, expr);
@@ -129,7 +129,7 @@ void CRCChecksumAlgorithm::emitClear(CodeBuilder* builder) {
  * 0xEDB88320 - a polynomial in a reflected bit order.
  */
 void CRCChecksumAlgorithm::emitAddData(CodeBuilder* builder,
-                                       const argumentsList & arguments) {
+                                       const ArgumentsList & arguments) {
     cstring tmpVar = program->refMap->newName(baseName + "_tmp");
 
     builder->emitIndent();
@@ -213,7 +213,7 @@ void CRCChecksumAlgorithm::emitGet(CodeBuilder* builder) {
 }
 
 void CRCChecksumAlgorithm::emitSubtractData(CodeBuilder* builder,
-                                            const argumentsList & arguments) {
+                                            const ArgumentsList & arguments) {
     (void) builder; (void) arguments;
     BUG("Not implementable");
 }
@@ -256,7 +256,7 @@ void CRC32ChecksumAlgorithm::emitGlobals(CodeBuilder* builder) {
 // ===========================InternetChecksumAlgorithm===========================
 
 void InternetChecksumAlgorithm::updateChecksum(CodeBuilder* builder,
-                                               const argumentsList & arguments,
+                                               const ArgumentsList & arguments,
                                                bool addData) {
     cstring tmpVar = program->refMap->newName(baseName + "_tmp");
 
@@ -271,7 +271,7 @@ void InternetChecksumAlgorithm::updateChecksum(CodeBuilder* builder,
     for (auto field : arguments) {
         auto fieldType = field->type->to<IR::Type_Bits>();
         if (fieldType == nullptr) {
-            ::error(ErrorType::ERR_UNSUPPORTED, "Only bits types are supported %1%", field);
+            ::error(ErrorType::ERR_UNSUPPORTED, "Unsupported field type: %1%", field->type);
             return;
         }
         const int width = fieldType->width_bits();
@@ -360,7 +360,7 @@ void InternetChecksumAlgorithm::emitClear(CodeBuilder* builder) {
 }
 
 void InternetChecksumAlgorithm::emitAddData(CodeBuilder* builder,
-                                            const argumentsList & arguments) {
+                                            const ArgumentsList & arguments) {
     updateChecksum(builder, arguments, true);
 }
 
@@ -369,7 +369,7 @@ void InternetChecksumAlgorithm::emitGet(CodeBuilder* builder) {
 }
 
 void InternetChecksumAlgorithm::emitSubtractData(CodeBuilder* builder,
-                                                 const argumentsList & arguments) {
+                                                 const ArgumentsList & arguments) {
     updateChecksum(builder, arguments, false);
 }
 
@@ -377,7 +377,6 @@ void InternetChecksumAlgorithm::emitGetInternalState(CodeBuilder* builder) {
     builder->append(stateVar);
 }
 
-// FIXME: works for constant value, but might not for other cases
 void InternetChecksumAlgorithm::emitSetInternalState(CodeBuilder* builder,
                                                      const IR::MethodCallExpression * expr) {
     if (expr->arguments->size() != 1) {
