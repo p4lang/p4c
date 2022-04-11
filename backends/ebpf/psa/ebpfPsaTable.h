@@ -66,7 +66,7 @@ class EBPFTablePSA : public EBPFTable {
     void emitValueStructStructure(CodeBuilder* builder) override;
     void emitAction(CodeBuilder* builder, cstring valueName, cstring actionRunVariable) override;
     void emitInitializer(CodeBuilder* builder) override;
-    void emitDirectTypes(CodeBuilder* builder) override;
+    void emitDirectValueTypes(CodeBuilder* builder) override;
     void emitLookup(CodeBuilder* builder, cstring key, cstring value) override;
     void emitLookupDefault(CodeBuilder* builder, cstring key, cstring value) override;
     bool dropOnNoMatchingEntryFound() const override;

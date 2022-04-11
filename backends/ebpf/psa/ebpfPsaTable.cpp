@@ -223,7 +223,7 @@ void EBPFTablePSA::emitTypes(CodeBuilder* builder) {
  * Order of emitting counters and meters affects generated layout of BPF map value.
  * Do not change this order!
  */
-void EBPFTablePSA::emitDirectTypes(CodeBuilder* builder) {
+void EBPFTablePSA::emitDirectValueTypes(CodeBuilder* builder) {
     for (auto ctr : counters) {
         ctr.second->emitValueType(builder);
     }
