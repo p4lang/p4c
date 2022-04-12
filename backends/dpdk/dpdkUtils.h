@@ -1,5 +1,4 @@
-/*
-Copyright 2021 Intel Corporation
+/* Copyright 2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,15 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_DPDK_CONSTANTS_H_
-#define BACKENDS_DPDK_CONSTANTS_H_
+#ifndef BACKENDS_DPDK_DPDKUTILS_H_
+#define BACKENDS_DPDK_DPDKUTILS_H_
 
-/* Unique handle for action and table */
-const unsigned table_handle_prefix = 0x00010000;
-const unsigned action_handle_prefix = 0x00020000;
+#include "ir/ir.h"
 
-// Default values
-const unsigned dpdk_default_table_size = 65536;
-#define DPDK_MAX_SHIFT_AMOUNT 64
+namespace DPDK {
+bool isSimpleExpression(const IR::Expression *e);
+bool isNonConstantSimpleExpression(const IR::Expression *e);
+bool isCommutativeBinaryOperation(const IR::Operation_Binary *bin);
+bool isStandardMetadata(cstring name);
+}  // namespace DPDK
 
-#endif  /* BACKENDS_DPDK_CONSTANTS_H_ */
+#endif  /* BACKENDS_DPDK_DPDKUTILS_H_ */

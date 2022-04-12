@@ -58,6 +58,7 @@ set(P4C_DPDK_SOURCES
     dpdkArch.cpp
     dpdkContext.cpp
     dpdkAsmOpt.cpp
+    dpdkUtils.cpp
     options.cpp
     control-plane/bfruntime_ext.cpp
     )
@@ -74,6 +75,7 @@ set(P4C_DPDK_HEADERS
     constants.h
     dpdkAsmOpt.h
     printUtils.h
+    dpdkUtils.h
     dpdkProgramStructure.h
     options.h
     control-plane/bfruntime_ext.h

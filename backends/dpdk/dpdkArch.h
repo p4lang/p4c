@@ -448,9 +448,10 @@ class LogicalExpressionUnroll : public Inspector {
 // that has Binary_Operation to become two-parameter form.
 class ConvertBinaryOperationTo2Params : public Transform {
     DeclarationInjector injector;
+    P4::ReferenceMap* refMap;
 
  public:
-    ConvertBinaryOperationTo2Params() {}
+    explicit ConvertBinaryOperationTo2Params(P4::ReferenceMap* refMap) : refMap(refMap) {}
     const IR::Node *postorder(IR::AssignmentStatement *a) override;
     const IR::Node *postorder(IR::P4Control *a) override;
     const IR::Node *postorder(IR::P4Parser *a) override;
