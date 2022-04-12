@@ -23,7 +23,8 @@ struct metadata {
 }
 
 struct headers {
-    ethernet_t       ethernet;
+    ethernet_t ethernet;
+    ipv4_t     ipv4;
 }
 
 parser IngressParserImpl(
@@ -36,6 +37,13 @@ parser IngressParserImpl(
 {
     state start {
         buffer.extract(parsed_hdr.ethernet);
+        transition select(parsed_hdr.ethernet.etherType) {
+            0x0800: parse_ipv4;
+            default: accept;
+        }
+    }
+    state parse_ipv4 {
+        buffer.extract(parsed_hdr.ipv4);
         transition accept;
     }
 }
@@ -46,36 +54,42 @@ control ingress(inout headers hdr,
                 in  psa_ingress_input_metadata_t  istd,
                 inout psa_ingress_output_metadata_t ostd)
 {
-    Counter<bit<64>, bit<32>>(1024, PSA_CounterType_t.BYTES) test1_cnt;
-    Counter<bit<32>, bit<32>>(1024, PSA_CounterType_t.PACKETS) test2_cnt;
-    Counter<bit<32>, bit<32>>(1024, PSA_CounterType_t.PACKETS_AND_BYTES) test3_cnt;
-    Counter<bit<64>, bit<32>>(1024, PSA_CounterType_t.PACKETS_AND_BYTES) action_cnt;
+    DirectCounter<bit<32>>(PSA_CounterType_t.PACKETS) test2_cnt;
+    DirectCounter<bit<32>>(PSA_CounterType_t.PACKETS_AND_BYTES) test3_cnt;
 
-    action do_forward(PortId_t egress_port) {
-        action_cnt.count((bit<32>)egress_port);
-        send_to_port(ostd, egress_port);
+    action execute3() {
+        test3_cnt.count();
+    }
+    action execute2() {
+        test2_cnt.count();
+    }
+    action execute23() {
+        execute2();
+        execute3();
     }
 
-    action do_forward_2(PortId_t egress_port) {
-        action_cnt.count((bit<32>)hdr.ethernet.etherType);
-        send_to_port(ostd, egress_port);
-    }
-
-    table tbl_fwd {
+    table tbl1 {
         key = {
-            istd.ingress_port : exact;
+            hdr.ipv4.srcAddr : exact;
         }
-        actions = { do_forward; do_forward_2; NoAction; }
-        default_action = do_forward((PortId_t) 5);
-        size = 100;
+        actions = { NoAction; execute3; }
+        psa_direct_counter = test3_cnt;
+    }
+
+    table tbl2 {
+        key = {
+            hdr.ipv4.srcAddr : exact;
+        }
+        actions = { NoAction; execute3; execute2; execute23; }
+        psa_direct_counter = { test3_cnt, test2_cnt };
     }
 
     apply {
-        tbl_fwd.apply();
+        ostd.drop = false;
+        ostd.egress_port = (PortId_t) 5;
 
-        test1_cnt.count(hdr.ethernet.srcAddr[31:0]);
-        test2_cnt.count(hdr.ethernet.srcAddr[31:0]);
-        test3_cnt.count(hdr.ethernet.srcAddr[31:0]);
+        tbl1.apply();
+        tbl2.apply();
     }
 }
 
@@ -115,6 +129,7 @@ control IngressDeparserImpl(
 {
     apply {
         packet.emit(hdr.ethernet);
+        packet.emit(hdr.ipv4);
     }
 }
 
