@@ -406,9 +406,13 @@ def main():
 
 
     ### A reminder: by this point, “error_count” _must_ equal zero,
-    ###             due to the “sys.exit” call immediately above,
-    ###             so we can make sanity-checking assertions in the following
-    ###             code without double-checking “error_count” first.
+    ###             due to the “sys.exit” call immediately above.
+    assert 0 == error_count
+    ### _Intentionally_ not “assert error_count < 1” or “assert error_count <= 0”,
+    ###   so that it will crash —— again, _intentionally_ —— if/when “error_count” is negative.
+
+    ### Now we can make sanity-checking assertions in the following
+    ###   code without double-checking “error_count” first.
 
 
 
