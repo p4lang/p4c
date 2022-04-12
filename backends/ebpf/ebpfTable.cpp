@@ -70,9 +70,6 @@ EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table,
     cstring base = instanceName + "_defaultAction";
     defaultActionMapName = base;
 
-    base = table->container->name.name + "_actions";
-    actionEnumName = program->refMap->newName(base);
-
     keyGenerator = table->container->getKey();
     actionList = table->container->getActionList();
 
@@ -87,6 +84,9 @@ void EBPFTable::initKey() {
     if (keyGenerator != nullptr) {
         unsigned fieldNumber = 0;
         for (auto c : keyGenerator->keyElements) {
+            if (c->matchType->path->name.name == "selector")
+                continue;  // this match type is intended for ActionSelector, not table itself
+
             auto type = program->typeMap->getType(c->expression);
             auto ebpfType = EBPFTypeFactory::instance->create(type);
             if (!ebpfType->is<IHasWidth>()) {
@@ -147,13 +147,22 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
             auto mtdecl = program->refMap->getDeclaration(c->matchType->path, true);
             auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
 
-            auto ebpfType = ::get(keyTypes, c);
-            cstring fieldName = ::get(keyFieldNames, c);
-
             if (!isMatchTypeSupported(matchType)) {
                 ::error(ErrorType::ERR_UNSUPPORTED,
                         "Match of type %1% not supported", c->matchType);
             }
+
+            if (matchType->name.name == "selector") {
+                builder->emitIndent();
+                builder->append("/* ");
+                c->expression->apply(commentGen);
+                builder->append(" : selector */");
+                builder->newline();
+                continue;
+            }
+
+            auto ebpfType = ::get(keyTypes, c);
+            cstring fieldName = ::get(keyFieldNames, c);
 
             builder->emitIndent();
             ebpfType->declare(builder, fieldName, false);

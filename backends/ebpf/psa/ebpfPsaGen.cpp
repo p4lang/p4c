@@ -569,7 +569,8 @@ bool ConvertToEBPFControlPSA::preorder(const IR::TableBlock *tblblk) {
             auto mtdecl = refmap->getDeclaration(it->matchType->path, true);
             auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
             if (matchType->name.name != P4::P4CoreLibrary::instance.exactMatch.name &&
-                matchType->name.name != P4::P4CoreLibrary::instance.lpmMatch.name)
+                matchType->name.name != P4::P4CoreLibrary::instance.lpmMatch.name &&
+                matchType->name.name != "selector")
                 ::error(ErrorType::ERR_UNSUPPORTED,
                         "Match of type %1% not supported", it->matchType);
 
@@ -630,6 +631,9 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
     if (typeName == "ActionProfile") {
         auto ap = new EBPFActionProfilePSA(program, control->codeGen, di);
         control->tables.emplace(di->name.name, ap);
+    } else if (typeName == "ActionSelector") {
+        auto as = new EBPFActionSelectorPSA(program, control->codeGen, di);
+        control->tables.emplace(di->name.name, as);
     } else if (typeName == "Counter") {
         auto ctr = new EBPFCounterPSA(program, di, name, control->codeGen);
         control->counters.emplace(name, ctr);

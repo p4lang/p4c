@@ -70,9 +70,6 @@ class EBPFTable : public EBPFTableBase {
     void initKey();
 
  protected:
-    // Use 1024 by default.
-    // TODO: make it configurable using compiler options.
-    size_t size = 1024;
     const cstring prefixFieldName = "prefixlen";
 
     bool isLPMTable();
@@ -87,9 +84,11 @@ class EBPFTable : public EBPFTableBase {
     const IR::ActionList*     actionList;
     const IR::TableBlock*     table;
     cstring               defaultActionMapName;
-    cstring               actionEnumName;
     std::map<const IR::KeyElement*, cstring> keyFieldNames;
     std::map<const IR::KeyElement*, EBPFType*> keyTypes;
+    // Use 1024 by default.
+    // TODO: make it configurable using compiler options.
+    size_t size = 1024;
 
     EBPFTable(const EBPFProgram* program, const IR::TableBlock* table, CodeGenInspector* codeGen);
     EBPFTable(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name);
@@ -112,7 +111,9 @@ class EBPFTable : public EBPFTableBase {
         builder->target->emitTableLookup(builder, dataMapName, key, value);
         builder->endOfStatement(true);
     }
-    virtual void emitLookupDefault(CodeBuilder* builder, cstring key, cstring value) {
+    virtual void emitLookupDefault(CodeBuilder* builder, cstring key, cstring value,
+                                   cstring actionRunVariable) {
+        (void) actionRunVariable;
         builder->target->emitTableLookup(builder, defaultActionMapName, key, value);
         builder->endOfStatement(true);
     }

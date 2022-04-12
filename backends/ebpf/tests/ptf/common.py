@@ -229,6 +229,25 @@ class P4EbpfTest(BaseTest):
                 cmd = cmd + "{} ".format(k)
         self.exec_ns_cmd(cmd, "Table delete failed")
 
+    def action_selector_add_action(self, selector, action, data=None):
+        cmd = "psabpf-ctl action-selector add_member pipe {} {} id {}".format(TEST_PIPELINE_ID, selector, action)
+        if data:
+            cmd = cmd + " data"
+            for d in data:
+                cmd = cmd + " {}".format(d)
+        _, stdout, _ = self.exec_ns_cmd(cmd, "ActionSelector add_member failed")
+        return int(stdout)
+
+    def action_selector_create_empty_group(self, selector):
+        cmd = "psabpf-ctl action-selector create_group pipe {} {}".format(TEST_PIPELINE_ID, selector)
+        _, stdout, _ = self.exec_ns_cmd(cmd, "ActionSelector create_group failed")
+        return int(stdout)
+
+    def action_selector_add_member_to_group(self, selector, group_ref, member_ref):
+        cmd = "psabpf-ctl action-selector add_to_group pipe {} {} {} to {}"\
+            .format(TEST_PIPELINE_ID, selector, member_ref, group_ref)
+        self.exec_ns_cmd(cmd, "ActionSelector add_to_group failed")
+
     def digest_get(self, name):
         cmd = "psabpf-ctl digest get pipe {} {}".format(TEST_PIPELINE_ID, name)
         _, stdout, _ = self.exec_ns_cmd(cmd, "Digest get failed")
