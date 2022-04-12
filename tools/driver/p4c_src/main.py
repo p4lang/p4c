@@ -48,7 +48,7 @@ def display_supported_targets(cfg):
     return ret
 
 
-JSON_input_flag = "--fromJson"  ### DRY
+JSON_input_flag = "--fromJson"  ### DRY, i.e. Don`t Repeat Yourself
 
 
 def add_developer_options(parser):
@@ -313,7 +313,7 @@ def main():
     error_count = 0
 
     JSON_input_specified = env_indicates_developer_build and opts.json_source
-### ^^^^^^^^^^^^^^^^^^^^: DRY
+### ^^^^^^^^^^^^^^^^^^^^: DRY, i.e. Don`t Repeat Yourself
     P4_input_or_inputs_specified = len(opts.P4_source_files) > 0
     any_input_specified = JSON_input_specified or P4_input_or_inputs_specified
 ### ^^^^^^^^^^^^^^^^^^^: for readability
