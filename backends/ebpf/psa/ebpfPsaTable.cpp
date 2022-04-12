@@ -23,25 +23,95 @@ limitations under the License.
 
 namespace EBPF {
 
-template<class F>
 class EBPFTablePsaPropertyVisitor : public Inspector {
  protected:
-    F functor;  // called for every property entry
-    const IR::TableBlock* table;
+    EBPFTablePSA* table;
 
  public:
-    EBPFTablePsaPropertyVisitor(F functor, const IR::TableBlock* table)
-            : functor(functor), table(table) {}
+    explicit EBPFTablePsaPropertyVisitor(EBPFTablePSA* table) : table(table) {}
 
-    bool preorder(const IR::PathExpression* pe) override {
-        functor(pe);
+    // Use these two preorders to print error when property contains something other than name of
+    // extern instance. ListExpression is required because without it Expression will take precede
+    // over it and throw error for whole list.
+    bool preorder(const IR::ListExpression*) override {
+        return true;
+    }
+    bool preorder(const IR::Expression* expr) override {
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "%1%: unsupported expression, expected a named instance", expr);
         return false;
     }
 
     void visitTableProperty(cstring propertyName) {
-        auto property = table->container->properties->getProperty(propertyName);
+        auto property = table->table->container->properties->getProperty(propertyName);
         if (property != nullptr)
             property->apply(*this);
+    }
+};
+
+class EBPFTablePSADirectCounterPropertyVisitor : public EBPFTablePsaPropertyVisitor {
+ public:
+    explicit EBPFTablePSADirectCounterPropertyVisitor(EBPFTablePSA* table)
+        : EBPFTablePsaPropertyVisitor(table) {}
+
+    bool preorder(const IR::PathExpression* pe) override {
+        auto decl = table->program->refMap->getDeclaration(pe->path, true);
+        auto di = decl->to<IR::Declaration_Instance>();
+        CHECK_NULL(di);
+        auto ts = di->type->to<IR::Type_Specialized>();
+        if (ts == nullptr || ts->baseType->toString() != "DirectCounter") {
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "%1%: not a DirectCounter, see declaration of %2%", pe, decl);
+            return false;
+        }
+
+        auto counterName = EBPFObject::externalName(di);
+        auto ctr = new EBPFCounterPSA(table->program, di, counterName, table->codeGen);
+        table->counters.emplace_back(std::make_pair(counterName, ctr));
+
+        return false;
+    }
+
+    void visitTableProperty() {
+        EBPFTablePsaPropertyVisitor::visitTableProperty("psa_direct_counter");
+    }
+};
+
+class EBPFTablePSAImplementationPropertyVisitor : public EBPFTablePsaPropertyVisitor {
+ public:
+    explicit EBPFTablePSAImplementationPropertyVisitor(EBPFTablePSA* table)
+        : EBPFTablePsaPropertyVisitor(table) {}
+
+    // PSA table is allowed to have up to one table implementation. This visitor
+    // will iterate over all entries in property, so lets use this and print errors.
+    bool preorder(const IR::PathExpression* pe) override {
+        auto decl = table->program->refMap->getDeclaration(pe->path, true);
+        auto di = decl->to<IR::Declaration_Instance>();
+        CHECK_NULL(di);
+        cstring type = di->type->toString();
+
+        if (table->implementation != nullptr) {
+            ::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1%: Up to one implementation is supported in a table", pe);
+            return false;
+        }
+
+        if (type == "ActionProfile") {
+            auto ap = table->program->control->getTable(di->name.name);
+            table->implementation = ap->to<EBPFTableImplementationPSA>();
+        }
+
+        if (table->implementation != nullptr)
+            table->implementation->registerTable(table);
+        else
+            ::error(ErrorType::ERR_UNKNOWN,
+                    "%1%: unknown table implementation %2%", pe, decl);
+
+        return false;
+    }
+
+    void visitTableProperty() {
+        EBPFTablePsaPropertyVisitor::visitTableProperty("psa_implementation");
     }
 };
 
@@ -118,56 +188,13 @@ EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, CodeGenInspector* codeGen
                            EBPFTable(program, codeGen, name), implementation(nullptr) {}
 
 void EBPFTablePSA::initDirectCounters() {
-    auto counterAdder = [this](const IR::PathExpression * pe) {
-        CHECK_NULL(pe);
-        auto decl = program->refMap->getDeclaration(pe->path, true);
-        auto di = decl->to<IR::Declaration_Instance>();
-        CHECK_NULL(di);
-        auto ts = di->type->to<IR::Type_Specialized>();
-        if (ts == nullptr || ts->baseType->toString() != "DirectCounter") {
-            ::error(ErrorType::ERR_UNEXPECTED,
-                    "%1%: not a DirectCounter, see declaration of %2%", pe, decl);
-            return;
-        }
-        auto counterName = EBPFObject::externalName(di);
-        auto ctr = new EBPFCounterPSA(program, di, counterName, codeGen);
-        this->counters.emplace_back(std::make_pair(counterName, ctr));
-    };
-
-    EBPFTablePsaPropertyVisitor<decltype(counterAdder)> visitor(counterAdder, table);
-    visitor.visitTableProperty("psa_direct_counter");
+    EBPFTablePSADirectCounterPropertyVisitor visitor(this);
+    visitor.visitTableProperty();
 }
 
 void EBPFTablePSA::initImplementation() {
-    // PSA table is allowed to have up to one table implementation. EBPFTablePsaPropertyVisitor
-    // will iterate over all entries in property, so lets use this and print errors.
-    auto impl = [this](const IR::PathExpression * pe) {
-        CHECK_NULL(pe);
-        auto decl = program->refMap->getDeclaration(pe->path, true);
-        auto di = decl->to<IR::Declaration_Instance>();
-        CHECK_NULL(di);
-        cstring type = di->type->toString();
-
-        if (this->implementation != nullptr) {
-            ::error(ErrorType::ERR_UNSUPPORTED,
-                    "%1%: Up to one implementation is supported in a table", pe);
-            return;
-        }
-
-        if (type == "ActionProfile") {
-            auto ap = program->control->getTable(di->name.name);
-            this->implementation = ap->to<EBPFTableImplementationPSA>();
-        }
-
-        if (this->implementation != nullptr)
-            this->implementation->registerTable(this);
-        else
-            ::error(ErrorType::ERR_UNKNOWN,
-                    "%1%: unknown table implementation %2%", pe, decl);
-    };
-
-    EBPFTablePsaPropertyVisitor<decltype(impl)> visitor(impl, table);
-    visitor.visitTableProperty("psa_implementation");
+    EBPFTablePSAImplementationPropertyVisitor visitor(this);
+    visitor.visitTableProperty();
 }
 
 ActionTranslationVisitor* EBPFTablePSA::createActionTranslationVisitor(
