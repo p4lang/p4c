@@ -2680,19 +2680,7 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
     if (done()) return expression;
     auto decl = refMap->getDeclaration(expression->path, true);
     const IR::Type* type = nullptr;
-    if (decl->is<IR::Function>()) {
-        auto func = findContext<IR::Function>();
-        if (func != nullptr && func->name == decl->getName()) {
-            typeError("%1%: Recursive function call", expression);
-            return expression;
-        }
-    } else if (decl->is<IR::P4Action>()) {
-        auto act = findContext<IR::P4Action>();
-        if (act != nullptr && act->name == decl->getName()) {
-            typeError("%1%: Recursive action call", expression);
-            return expression;
-        }
-    } else if (auto tbl = decl->to<IR::P4Table>()) {
+    if (auto tbl = decl->to<IR::P4Table>()) {
         if (auto current = findContext<IR::P4Table>()) {
             if (current->name == tbl->name) {
                 typeError("%1%: Cannot refer to the containing table %2%", expression, tbl);
