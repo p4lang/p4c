@@ -76,8 +76,8 @@ def add_developer_options(parser):
                         help="Pretty-print the program in the specified file.")
 
 
-### a utility function for grammatical correctness [and DRY]
 def s_and_were_or_just_was(parameter):
+    """a utility function for grammatical correctness [and DRY, i.e. Don`t Repeat Yourself]"""
     return ("s were" if parameter != 1 else " was")
 
 
