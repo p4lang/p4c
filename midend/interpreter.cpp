@@ -320,9 +320,9 @@ SymbolicBool* SymbolicHeaderUnion::isValid() const {
          if (fieldValue.count(f->name.name)) {
              auto fieldValid = fieldValue.at(f->name.name)->checkedTo<SymbolicHeader>()->valid;
              if (!fieldValid->isKnown() || fieldValid->isUninitialized()) {
-                return new SymbolicBool(ScalarValue::ValueState::NotConstant);
+                 return fieldValid;
              } else if (fieldValid->value) {
-                validFields +=1;
+                 validFields +=1;
              }
          } else {
              BUG("The number of fields in %1% is different from HeaderUnion fieldValue", type);
