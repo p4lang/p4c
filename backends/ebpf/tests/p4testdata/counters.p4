@@ -56,11 +56,16 @@ control ingress(inout headers hdr,
         send_to_port(ostd, egress_port);
     }
 
+    action do_forward_2(PortId_t egress_port) {
+        action_cnt.count((bit<32>)hdr.ethernet.etherType);
+        send_to_port(ostd, egress_port);
+    }
+
     table tbl_fwd {
         key = {
             istd.ingress_port : exact;
         }
-        actions = { do_forward; NoAction; }
+        actions = { do_forward; do_forward_2; NoAction; }
         default_action = do_forward((PortId_t) 5);
         size = 100;
     }

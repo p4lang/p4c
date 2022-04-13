@@ -48,3 +48,11 @@ header mpls_t {
     bit<8>  ttl;
 }
 
+header udp_t
+{
+    bit<16> srcPort;
+    bit<16> dstPort;
+    bit<16> length;
+    bit<16> checksum;
+}
+

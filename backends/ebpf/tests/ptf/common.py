@@ -79,6 +79,9 @@ class P4EbpfTest(BaseTest):
         if self.is_trace_logs_enabled():
             p4args += " --trace"
 
+        if "xdp2tc" in testutils.test_params_get():
+            p4args += " --xdp2tc=" + self.xdp2tc_mode()
+
         logger.info("P4ARGS=" + p4args)
         self.exec_cmd("make -f ../runtime/kernel.mk BPFOBJ={output} P4FILE={p4file} "
                       "ARGS=\"{cargs}\" P4C=p4c-ebpf P4ARGS=\"{p4args}\" psa".format(

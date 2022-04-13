@@ -206,6 +206,7 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
     builder->blockStart();
 
     emitValueStructStructure(builder);
+    emitDirectValueTypes(builder);
 
     builder->blockEnd(false);
     builder->endOfStatement(true);

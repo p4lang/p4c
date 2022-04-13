@@ -344,6 +344,12 @@ void PSAArchTC::emit(CodeBuilder *builder) const {
 void PSAArchTC::emitInstances(CodeBuilder *builder) const {
     builder->appendLine("REGISTER_START()");
 
+    if (options.xdp2tcMode == XDP2TC_CPUMAP) {
+        builder->target->emitTableDecl(builder, "xdp2tc_cpumap",
+                                       TablePerCPUArray, "u32",
+                                       "u16", 1);
+    }
+
     emitPacketReplicationTables(builder);
     emitPipelineInstances(builder);
 
@@ -630,6 +636,9 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
     } else if (typeName == "Register") {
         auto reg = new EBPFRegisterPSA(program, name, di, control->codeGen);
         control->registers.emplace(name, reg);
+    } else if (typeName == "DirectCounter") {
+        // instance will be created by table
+        return false;
     } else {
         ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
                 instance);

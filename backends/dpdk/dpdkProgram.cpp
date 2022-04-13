@@ -559,7 +559,8 @@ bool ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
     return true;
 }
 
-boost::optional<cstring> ConvertToDpdkControl::getIdFromProperty(const IR::P4Table* table,
+boost::optional<const IR::Member*>
+ConvertToDpdkControl::getMemExprFromProperty(const IR::P4Table* table,
                                                                  cstring propertyName) {
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return boost::none;
@@ -577,7 +578,7 @@ boost::optional<cstring> ConvertToDpdkControl::getIdFromProperty(const IR::P4Tab
         return boost::none;
     }
 
-    return expr->to<IR::Member>()->toString();
+    return expr->to<IR::Member>();
 }
 
 boost::optional<int> ConvertToDpdkControl::getNumberFromProperty(const IR::P4Table* table,
@@ -607,8 +608,8 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
         return false;
 
     if (t->properties->getProperty("selector") != nullptr) {
-        auto group_id = getIdFromProperty(t, "group_id");
-        auto member_id = getIdFromProperty(t, "member_id");
+        auto group_id = getMemExprFromProperty(t, "group_id");
+        auto member_id = getMemExprFromProperty(t, "member_id");
         auto selector_key = t->properties->getProperty("selector");
         auto n_groups_max = getNumberFromProperty(t, "n_groups_max");
         auto n_members_per_group_max = getNumberFromProperty(t, "n_members_per_group_max");
@@ -618,7 +619,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
             return false;
 
         auto selector = new IR::DpdkSelector(t->name,
-                *group_id, *member_id, selector_key->value->to<IR::Key>(),
+                (*group_id)->clone(), (*member_id)->clone(), selector_key->value->to<IR::Key>(),
                 *n_groups_max, *n_members_per_group_max);
 
         selectors.push_back(selector);

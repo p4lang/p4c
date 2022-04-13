@@ -38,8 +38,12 @@ class ControlBodyTranslatorPSA : public ControlBodyTranslator {
 
 class ActionTranslationVisitorPSA : public ActionTranslationVisitor,
                                     public ControlBodyTranslatorPSA {
+ protected:
+    const EBPFTablePSA* table;
+
  public:
-    ActionTranslationVisitorPSA(const EBPFProgram* program, cstring valueName);
+    ActionTranslationVisitorPSA(const EBPFProgram* program, cstring valueName,
+                                const EBPFTablePSA* table);
 
     bool preorder(const IR::PathExpression* pe) override;
     bool isActionParameter(const IR::Expression *expression) const;

@@ -389,3 +389,21 @@ class CountersPSATest(P4EbpfTest):
         self.counter_verify(name="ingress_test2_cnt", keys=[0x1fe], packets=1)
         self.counter_verify(name="ingress_test3_cnt", keys=[0x1fe], bytes=199, packets=1)
         self.counter_verify(name="ingress_action_cnt", keys=[5], bytes=299, packets=2)
+
+
+class DirectCountersPSATest(P4EbpfTest):
+    p4_file_path = "p4testdata/direct-counters.p4"
+
+    def runTest(self):
+        self.table_add(table="ingress_tbl1", keys=["10.0.0.0"], action=1)
+        self.table_add(table="ingress_tbl2", keys=["10.0.0.1"], action=2)
+        self.table_add(table="ingress_tbl2", keys=["10.0.0.2"], action=3)
+
+        for i in range(3):
+            pkt = testutils.simple_ip_packet(pktlen=100, ip_src='10.0.0.{}'.format(i))
+            testutils.send_packet(self, PORT0, pkt)
+            testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+
+        self.verify_map_entry("ingress_tbl1", "0 0 0 10", "01 00 00 00 64 00 00 00 01 00 00 00")
+        self.verify_map_entry("ingress_tbl2", "1 0 0 10", "02 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00")
+        self.verify_map_entry("ingress_tbl2", "2 0 0 10", "03 00 00 00 64 00 00 00 01 00 00 00 01 00 00 00")

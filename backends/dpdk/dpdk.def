@@ -50,8 +50,8 @@ class DpdkTable {
 
 class DpdkSelector {
     inline cstring name;
-    inline cstring group_id;
-    inline cstring member_id;
+    Expression group_id;
+    Expression member_id;
     Key selectors;
     int n_groups_max;
     int n_members_per_group_max;

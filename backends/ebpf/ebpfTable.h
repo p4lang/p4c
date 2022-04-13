@@ -104,6 +104,8 @@ class EBPFTable : public EBPFTableBase {
     virtual void emitValueType(CodeBuilder* builder);
     virtual void emitValueActionIDNames(CodeBuilder* builder);
     virtual void emitValueStructStructure(CodeBuilder* builder);
+    // Emits value types used by direct externs.
+    virtual void emitDirectValueTypes(CodeBuilder* builder) { (void) builder; }
     virtual void emitAction(CodeBuilder* builder, cstring valueName, cstring actionRunVariable);
     virtual void emitInitializer(CodeBuilder* builder);
     virtual void emitLookup(CodeBuilder* builder, cstring key, cstring value) {

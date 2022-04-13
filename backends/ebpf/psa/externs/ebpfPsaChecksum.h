@@ -45,6 +45,17 @@ class EBPFChecksumPSA : public EBPFObject {
                                const IR::MethodCallExpression * expr, Visitor * visitor);
 };
 
+class EBPFInternetChecksumPSA : public EBPFChecksumPSA {
+ public:
+    EBPFInternetChecksumPSA(const EBPFProgram* program, const IR::Declaration_Instance* block,
+                            cstring name)
+            : EBPFChecksumPSA(program, block, name,
+                              EBPFHashAlgorithmPSA::HashAlgorithm::ONES_COMPLEMENT16) {}
+
+    void processMethod(CodeBuilder* builder, cstring method,
+                       const IR::MethodCallExpression * expr, Visitor * visitor) override;
+};
+
 }  // namespace EBPF
 
 #endif  /* BACKENDS_EBPF_PSA_EXTERNS_EBPFPSACHECKSUM_H_ */
