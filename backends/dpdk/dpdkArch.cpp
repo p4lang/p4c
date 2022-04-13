@@ -1065,10 +1065,10 @@ ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
                 a->right = bin_expr;
                 return a;
             } else {
-                // Expressions like "a = 10 - a" should be replaced with the following block
-                // of statments
-                // tmp = 10;
-                // tmp = tmp - a;
+                // Non-commutative expressions like "a = b << a" should be replaced with the
+                // following block of statments
+                // tmp = b;
+                // tmp = tmp << a;
                 // a = tmp;
                 IR::IndexedVector<IR::StatOrDecl> code_block;
                 auto control = findOrigCtxt<IR::P4Control>();
