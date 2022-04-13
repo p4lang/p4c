@@ -63,12 +63,13 @@ void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod* method) {
             reg->emitRegisterRead(builder, method, this, nullptr);
         }
         return;
+    } else {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "%1%: Unexpected method call", method->expr);
     }
-
-    ControlBodyTranslator::processMethod(method);
 }
 
-cstring ControlBodyTranslatorPSA::getActionParamName(const IR::PathExpression *expr) {
+cstring ControlBodyTranslatorPSA::getParamName(const IR::PathExpression *expr) {
     return expr->path->name.name;
 }
 

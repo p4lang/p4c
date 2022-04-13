@@ -25,8 +25,21 @@ namespace EBPF {
 class ControlBodyTranslatorPSA;
 
 class EBPFRegisterPSA : public EBPFTableBase {
+ private:
+    bool shouldUseArrayMap() {
+        CHECK_NULL(this->keyType);
+        if (auto wt = dynamic_cast<IHasWidth *>(this->keyType)) {
+            unsigned keyWidth = wt->widthInBits();
+            // For keys <= 32 bit register is based on array map,
+            // otherwise we use hash map
+            useArrayMap = (keyWidth > 0 && keyWidth <= 32);
+        }
+    }
+
  protected:
     size_t size;
+    // initial value for Register cells.
+    // It can be nullptr if an initial value is not provided or not IR::Constant.
     const IR::Constant* initialValue = nullptr;
     const IR::Type* keyArg;
     const IR::Type* valueArg;

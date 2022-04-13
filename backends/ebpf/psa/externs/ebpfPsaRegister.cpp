@@ -42,12 +42,7 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program,
     this->keyType = EBPFTypeFactory::instance->create(keyArg);
     this->valueType = EBPFTypeFactory::instance->create(valueArg);
 
-    if (auto wt = dynamic_cast<IHasWidth *>(this->keyType)) {
-        unsigned keyWidth = wt->widthInBits();
-        // For keys <= 32 bit register is based on array map,
-        // otherwise we use hash map
-        useArrayMap = (keyWidth > 0 && keyWidth <= 32);
-    }
+    useArrayMap = shouldUseArrayMap();
 
     if (di->arguments->size() < 1) {
         ::error(ErrorType::ERR_MODEL, "Expected at least 1 argument: %1%", di);
@@ -55,6 +50,8 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program,
     }
 
     auto declaredSize = di->arguments->at(0)->expression->to<IR::Constant>();
+    CHECK_NULL(declaredSize);
+
     if (!declaredSize->fitsUint()) {
         ::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", declaredSize);
         return;
@@ -62,7 +59,9 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program,
     size = declaredSize->asUnsigned();
 
     if (di->arguments->size() == 2) {
-        this->initialValue = di->arguments->at(1)->expression->to<IR::Constant>();
+        if (auto initVal = di->arguments->at(1)->expression->to<IR::Constant>()) {
+            this->initialValue = initVal;
+        }
     }
 }
 
@@ -147,7 +146,7 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder* builder, const P4::ExternMet
                                        ControlBodyTranslatorPSA* translator,
                                        const IR::Expression* leftExpression) {
     auto indexArg = method->expr->arguments->at(0)->expression->to<IR::PathExpression>();
-    cstring indexParamName = translator->getActionParamName(indexArg);
+    cstring indexParamName = translator->getParamName(indexArg);
     BUG_CHECK(!indexParamName.isNullOrEmpty(), "Index param cannot be empty");
 
     cstring valueName = program->refMap->newName("value");
@@ -200,9 +199,9 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder* builder, const P4::ExternMet
 void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder* builder, const P4::ExternMethod* method,
                                         ControlBodyTranslatorPSA* translator) {
     auto indexArgExpr = method->expr->arguments->at(0)->expression->to<IR::PathExpression>();
-    cstring indexParamName = translator->getActionParamName(indexArgExpr);
+    cstring indexParamName = translator->getParamName(indexArgExpr);
     auto valueArgExpr = method->expr->arguments->at(1)->expression->to<IR::PathExpression>();
-    cstring valueParamName = translator->getActionParamName(valueArgExpr);
+    cstring valueParamName = translator->getParamName(valueArgExpr);
     BUG_CHECK(!indexParamName.isNullOrEmpty(), "Index param cannot be empty");
     BUG_CHECK(!valueParamName.isNullOrEmpty(), "Value param cannot be empty");
 

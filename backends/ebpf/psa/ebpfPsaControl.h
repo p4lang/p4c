@@ -33,7 +33,7 @@ class ControlBodyTranslatorPSA : public ControlBodyTranslator {
 
     void processMethod(const P4::ExternMethod* method) override;
 
-    virtual cstring getActionParamName(const IR::PathExpression *);
+    virtual cstring getParamName(const IR::PathExpression *);
 };
 
 class ActionTranslationVisitorPSA : public ActionTranslationVisitor,
@@ -49,8 +49,8 @@ class ActionTranslationVisitorPSA : public ActionTranslationVisitor,
     bool isActionParameter(const IR::Expression *expression) const;
 
     void processMethod(const P4::ExternMethod* method) override;
-    cstring getActionParamInstanceName(const IR::Expression *expression) const override;
-    cstring getActionParamName(const IR::PathExpression *) override;
+    cstring getParamInstanceName(const IR::Expression *expression) const override;
+    cstring getParamName(const IR::PathExpression *) override;
 };
 
 class EBPFControlPSA : public EBPFControl {

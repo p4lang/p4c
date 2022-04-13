@@ -161,20 +161,20 @@ void ActionTranslationVisitorPSA::processMethod(const P4::ExternMethod* method) 
     }
 }
 
-cstring ActionTranslationVisitorPSA::getActionParamInstanceName(
+cstring ActionTranslationVisitorPSA::getParamInstanceName(
         const IR::Expression *expression) const {
     if (auto cast = expression->to<IR::Cast>())
         expression = cast->expr;
 
-    return ActionTranslationVisitor::getActionParamInstanceName(expression);
+    return ActionTranslationVisitor::getParamInstanceName(expression);
 }
 
-cstring ActionTranslationVisitorPSA::getActionParamName(const IR::PathExpression *expr) {
+cstring ActionTranslationVisitorPSA::getParamName(const IR::PathExpression *expr) {
     if (isActionParameter(expr)) {
-        return getActionParamInstanceName(expr);
+        return getParamInstanceName(expr);
     }
 
-    return ControlBodyTranslatorPSA::getActionParamName(expr);
+    return ControlBodyTranslatorPSA::getParamName(expr);
 }
 
 // =====================EBPFTablePSA=============================

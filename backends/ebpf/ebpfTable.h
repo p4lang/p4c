@@ -38,7 +38,7 @@ class ActionTranslationVisitor : public virtual CodeGenInspector {
     bool preorder(const IR::PathExpression* expression);
 
     bool preorder(const IR::P4Action* act);
-    virtual cstring getActionParamInstanceName(const IR::Expression *expression) const;
+    virtual cstring getParamInstanceName(const IR::Expression *expression) const;
     bool isActionParameter(const IR::PathExpression *expression) const;
 };  // ActionTranslationVisitor
 
