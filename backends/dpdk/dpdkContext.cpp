@@ -221,9 +221,15 @@ DpdkContextGenerator::addMatchAttributes(const IR::P4Table*table, const cstring 
         auto* oneAction = new Util::JsonObject();
         struct actionAttributes attr = ::get(actionAttrMap, action->getName());
         auto actName = toStr(action->expression);
-        if (actName != "NoAction")
+        auto name = action->externalName();
+        if (name != "NoAction") {
             actName = ctrlName + "." + actName;
-        oneAction->emplace("action_name", actName);
+            name = ctrlName + "." + name;
+        } else {
+            actName = name;
+        }
+        oneAction->emplace("action_name", name);
+        oneAction->emplace("target_action_name", actName);
         oneAction->emplace("action_handle", attr.actionHandle);
         auto* immFldArray = new Util::JsonArray();
         if (attr.params) {
@@ -271,7 +277,7 @@ const IR::P4Table * table, const cstring controlName, bool isMatch) {
         // Printing compiler added actions is curently not required
         if (!attr.is_compiler_added_action) {
             auto *act = new Util::JsonObject();
-            auto actName = toStr(action->expression);
+            auto actName = action->externalName();
 
             // NoAction is not prefixed with control block name
             if (actName != "NoAction")
