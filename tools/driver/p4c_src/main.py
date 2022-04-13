@@ -360,10 +360,10 @@ def main():
 
         if len(opts.P4_source_files) > 1:
             print("\n"
-                  "Sorry; as of this writing, the P4 compiler driver does "
-                  "_not_ support multiple top-level P4 source files in a "
-                  "single invocation.  Multiple P4 source files at a time "
-                  'are currently only supported via "#include"'
+                  "ERROR: sorry, but as of this writing, the P4 compiler "
+                  "driver does _not_ support multiple top-level P4 source "
+                  "files in a single invocation.  Multiple P4 source files at "
+                  'a time are currently only supported via "#include"'
                   "(i.e. additional non-top-level P4 source files).  "
                   "Number of top-level P4 source-file pathnames detected: "
                   "" + str(len(opts.P4_source_files)), file=sys.stderr)
