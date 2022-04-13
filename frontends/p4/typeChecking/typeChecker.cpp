@@ -64,29 +64,20 @@ class ConstantTypeSubstitution : public Transform {
 
     const IR::Expression* convert(const IR::Expression* expr) {
         auto result = expr->apply(*this)->to<IR::Expression>();
-        if (result != expr && (::errorCount() == 0)) {
-            auto *learn = tc->clone();
-            learn->setCalledBy(this);
-            (void)result->apply(*learn);
-        }
+        if (result != expr && (::errorCount() == 0))
+            tc->learn(result, this);
         return result;
     }
     const IR::Vector<IR::Expression>* convert(const IR::Vector<IR::Expression>* vec) {
         auto result = vec->apply(*this)->to<IR::Vector<IR::Expression>>();
-        if (result != vec) {
-            auto *learn = tc->clone();
-            learn->setCalledBy(this);
-            (void)result->apply(*learn);
-        }
+        if (result != vec)
+            tc->learn(result, this);
         return result;
     }
     const IR::Vector<IR::Argument>* convert(const IR::Vector<IR::Argument>* vec) {
         auto result = vec->apply(*this)->to<IR::Vector<IR::Argument>>();
-        if (result != vec) {
-            auto *learn = tc->clone();
-            learn->setCalledBy(this);
-            (void)result->apply(*learn);
-        }
+        if (result != vec)
+            tc->learn(result, this);
         return result;
     }
 };
@@ -103,6 +94,18 @@ TypeChecking::TypeChecking(ReferenceMap* refMap, TypeMap* typeMap,
 }
 
 //////////////////////////////////////////////////////////////////////////
+
+bool TypeInference::learn(const IR::Node* node, Visitor* caller) {
+    auto *learner = clone();
+    learner->setCalledBy(caller);
+    unsigned previous = ::errorCount();
+    (void)node->apply(*learner);
+    unsigned errCount = ::errorCount();
+    bool result = errCount > previous;
+    if (result)
+        typeError("Error while analyzing %1%", node);
+    return result;
+}
 
 const IR::Expression* TypeInference::constantFold(const IR::Expression* expression) {
     if (readOnly)
@@ -128,9 +131,7 @@ const IR::Type* TypeInference::cloneWithFreshTypeVariables(const IR::IMayBeGener
     sv.setCalledBy(this);
     auto cl = type->to<IR::Type>()->apply(sv);
     CHECK_NULL(cl);
-    // Learn this new type
-    auto *tc = clone();
-    (void)cl->apply(*tc);
+    learn(cl, this);
     LOG3("Cloned for type variables " << type << " into " << cl);
     return cl->to<IR::Type>();
 }
@@ -583,11 +584,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
 
         auto result = new IR::Type_SpecializedCanonical(
             type->srcInfo, baseCanon, args, specialized);
-        // learn the types of all components of the specialized type
         LOG2("Scanning the specialized type");
-        auto *tc = clone();
-        tc->setCalledBy(this);
-        (void)result->apply(*tc);
+        learn(result, this);
         return result;
     } else {
         BUG_CHECK(::errorCount(), "Unexpected type %1%", dbp(type));
@@ -1084,9 +1082,7 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
             prune();
             return decl;
         }
-        auto *learn = clone();
-        learn->setCalledBy(this);
-        (void)type->apply(*learn);
+        learn(type, this);
         if (args != decl->arguments)
             decl->arguments = args;
         setType(decl, type);
@@ -1208,11 +1204,8 @@ const IR::Type* TypeInference::setTypeType(const IR::Type* type, bool learn) {
     if (canon != nullptr) {
         // Learn the new type
         if (canon != typeToCanonicalize && learn) {
-            auto *tc = clone();
-            unsigned e = ::errorCount();
-            tc->setCalledBy(this);
-            (void)canon->apply(*tc);
-            if (::errorCount() > e)
+            bool errs = this->learn(canon, this);
+            if (errs)
                 return nullptr;
         }
         auto tt = new IR::Type_Type(canon);
@@ -1399,13 +1392,9 @@ const IR::Node* TypeInference::postorder(IR::P4ValueSet* decl) {
     // This is a specialized version of setTypeType
     auto canon = canonicalize(decl->elementType);
     if (canon != nullptr) {
-        // Learn the new type
         if (canon != decl->elementType) {
-            auto *tc = clone();
-            unsigned e = ::errorCount();
-            tc->setCalledBy(this);
-            (void)canon->apply(*tc);
-            if (::errorCount() > e)
+            bool errs = learn(canon, this);
+            if (errs)
                 return nullptr;
         }
         auto tt = new IR::Type_Set(canon);
@@ -1474,6 +1463,14 @@ const IR::Node* TypeInference::postorder(IR::Type_Typedef* tdecl) {
     auto type = getType(tdecl->type);
     if (type == nullptr)
         return tdecl;
+    BUG_CHECK(type->is<IR::Type_Type>(), "%1%: expected a TypeType", type);
+    auto stype = type->to<IR::Type_Type>()->type;
+    if (auto gen = stype->to<IR::IMayBeGenericType>()) {
+        if (gen->getTypeParameters()->size() != 0) {
+            typeError("%1%: no type parameters supplied for generic type", tdecl->type);
+            return tdecl;
+        }
+    }
     setType(getOriginal(), type);
     setType(tdecl, type);
     return tdecl;
@@ -2683,19 +2680,7 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
     if (done()) return expression;
     auto decl = refMap->getDeclaration(expression->path, true);
     const IR::Type* type = nullptr;
-    if (decl->is<IR::Function>()) {
-        auto func = findContext<IR::Function>();
-        if (func != nullptr && func->name == decl->getName()) {
-            typeError("%1%: Recursive function call", expression);
-            return expression;
-        }
-    } else if (decl->is<IR::P4Action>()) {
-        auto act = findContext<IR::P4Action>();
-        if (act != nullptr && act->name == decl->getName()) {
-            typeError("%1%: Recursive action call", expression);
-            return expression;
-        }
-    } else if (auto tbl = decl->to<IR::P4Table>()) {
+    if (auto tbl = decl->to<IR::P4Table>()) {
         if (auto current = findContext<IR::P4Table>()) {
             if (current->name == tbl->name) {
                 typeError("%1%: Cannot refer to the containing table %2%", expression, tbl);
@@ -3029,11 +3014,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         methodType = canonicalize(methodType)->to<IR::Type_Method>();
         if (methodType == nullptr)
             return expression;
-        // sometimes this is a synthesized type, so we have to crawl it to understand it
-        auto *learn = clone();
-        learn->setCalledBy(this);
-        (void)methodType->apply(*learn);
-
+        learn(methodType, this);
         setType(getOriginal(), methodType);
         setType(expression, methodType);
         return expression;
@@ -3389,12 +3370,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         substVisitor.setCalledBy(this);
         auto specMethodType = methodType->apply(substVisitor);
         LOG2("Method type after specialization " << specMethodType);
-
-        // construct types for the specMethodType, use a new typeChecker
-        // that uses the same tables!
-        auto *learn = clone();
-        learn->setCalledBy(this);
-        (void)specMethodType->apply(*learn);
+        learn(specMethodType, this);
 
         auto canon = getType(specMethodType);
         if (canon == nullptr)
@@ -3413,7 +3389,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         }
         // The return type may also contain type variables
         returnType = returnType->apply(substVisitor)->to<IR::Type>();
-        (void)returnType->apply(*learn);
+        learn(returnType, this);
         if (returnType->is<IR::Type_Control>() ||
             returnType->is<IR::Type_Parser>() ||
             returnType->is<IR::P4Parser>() ||

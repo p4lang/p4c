@@ -56,12 +56,14 @@ class SymBitMatrix : private bitvec {
                 if (self.getrange((row*row+row)/2, row+1) != 0) return true;
             } else {
                 if (self.getslice((row*row+row)/2, row+1)) return true; }
-            for (auto c = self.size()-1; c > row; --c)
+            const auto size = self.size();
+            for (auto c = row + 1; c < size; ++c)
                 if (self(row, c)) return true;
             return false; }
         operator bitvec() const {
             auto rv = self.getslice((row*row+row)/2, row+1);
-            for (auto c = self.size()-1; c > row; --c)
+            const auto size = self.size();
+            for (auto c = row + 1; c < size; ++c)
                 if (self(row, c)) rv[c] = 1;
             return rv; }
     };

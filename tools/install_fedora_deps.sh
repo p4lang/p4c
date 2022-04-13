@@ -72,12 +72,6 @@ cd behavioral-model
 ./configure --with-pdfixed --with-thrift --with-pi --with-stress-tests --enable-debugger
 make
 make install-strip
-
-cd targets/simple_switch_grpc/
-./autogen.sh
-./configure --with-thrift
-make
-make install-strip
 popd
 
 rm -rf "${tmp_dir}"

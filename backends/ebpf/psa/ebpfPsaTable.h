@@ -19,9 +19,11 @@ limitations under the License.
 
 #include "frontends/p4/methodInstance.h"
 #include "backends/ebpf/ebpfTable.h"
-#include "ebpfPsaControl.h"
+#include "backends/ebpf/psa/externs/ebpfPsaCounter.h"
 
 namespace EBPF {
+
+class EBPFTableImplementationPSA;
 
 class EBPFTablePSA : public EBPFTable {
  private:
@@ -33,6 +35,12 @@ class EBPFTablePSA : public EBPFTable {
                        size_t size) const;
 
  protected:
+    ActionTranslationVisitor* createActionTranslationVisitor(
+            cstring valueName, const EBPFProgram* program) const override;
+
+    void initDirectCounters();
+    void initImplementation();
+
     void emitTableValue(CodeBuilder* builder, const IR::MethodCallExpression* actionMce,
                         cstring valueName);
     void emitDefaultActionInitializer(CodeBuilder *builder);
@@ -40,17 +48,38 @@ class EBPFTablePSA : public EBPFTable {
     void emitMapUpdateTraceMsg(CodeBuilder *builder, cstring mapName,
                                cstring returnCode) const;
 
+    const IR::PathExpression* getActionNameExpression(const IR::Expression* expr) const;
+
  public:
+    std::vector<std::pair<cstring, EBPFCounterPSA *>> counters;
+    // TODO: DirectMeter is not implemented now, but
+    //  this is needed in table implementation to validate table properties
+    std::vector<cstring> meters;
+    EBPFTableImplementationPSA* implementation;
+
     EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* table,
                  CodeGenInspector* codeGen);
+    EBPFTablePSA(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name);
+
     void emitInstance(CodeBuilder* builder) override;
     void emitTypes(CodeBuilder* builder) override;
     void emitValueStructStructure(CodeBuilder* builder) override;
     void emitAction(CodeBuilder* builder, cstring valueName, cstring actionRunVariable) override;
     void emitInitializer(CodeBuilder* builder) override;
+    void emitDirectValueTypes(CodeBuilder* builder) override;
     void emitLookup(CodeBuilder* builder, cstring key, cstring value) override;
     void emitLookupDefault(CodeBuilder* builder, cstring key, cstring value) override;
     bool dropOnNoMatchingEntryFound() const override;
+
+    EBPFCounterPSA* getDirectCounter(cstring name) const {
+        auto result = std::find_if(counters.begin(), counters.end(),
+            [name](std::pair<cstring, EBPFCounterPSA *> elem)->bool {
+                return name == elem.first;
+            });
+        if (result != counters.end())
+            return result->second;
+        return nullptr;
+    }
 };
 
 }  // namespace EBPF

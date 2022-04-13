@@ -50,6 +50,7 @@ struct DpdkProgramStructure {
     cstring local_metadata_type;
     cstring header_type;
     IR::IndexedVector<IR::StructField> compiler_added_fields;
+    IR::IndexedVector<IR::StructField> key_fields;
     IR::Vector<IR::Type> used_metadata;
     ordered_map<cstring, std::vector<struct hdrFieldInfo>> hdrFieldInfoList;
 

@@ -19,13 +19,152 @@ limitations under the License.
 #include "backends/ebpf/ebpfType.h"
 #include "ebpfPsaTable.h"
 #include "ebpfPipeline.h"
+#include "externs/ebpfPsaTableImplementation.h"
 
 namespace EBPF {
+
+class EBPFTablePsaPropertyVisitor : public Inspector {
+ protected:
+    EBPFTablePSA* table;
+
+ public:
+    explicit EBPFTablePsaPropertyVisitor(EBPFTablePSA* table) : table(table) {}
+
+    // Use these two preorders to print error when property contains something other than name of
+    // extern instance. ListExpression is required because without it Expression will take precede
+    // over it and throw error for whole list.
+    bool preorder(const IR::ListExpression*) override {
+        return true;
+    }
+    bool preorder(const IR::Expression* expr) override {
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "%1%: unsupported expression, expected a named instance", expr);
+        return false;
+    }
+
+    void visitTableProperty(cstring propertyName) {
+        auto property = table->table->container->properties->getProperty(propertyName);
+        if (property != nullptr)
+            property->apply(*this);
+    }
+};
+
+class EBPFTablePSADirectCounterPropertyVisitor : public EBPFTablePsaPropertyVisitor {
+ public:
+    explicit EBPFTablePSADirectCounterPropertyVisitor(EBPFTablePSA* table)
+        : EBPFTablePsaPropertyVisitor(table) {}
+
+    bool preorder(const IR::PathExpression* pe) override {
+        auto decl = table->program->refMap->getDeclaration(pe->path, true);
+        auto di = decl->to<IR::Declaration_Instance>();
+        CHECK_NULL(di);
+        auto ts = di->type->to<IR::Type_Specialized>();
+        if (ts == nullptr || ts->baseType->toString() != "DirectCounter") {
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "%1%: not a DirectCounter, see declaration of %2%", pe, decl);
+            return false;
+        }
+
+        auto counterName = EBPFObject::externalName(di);
+        auto ctr = new EBPFCounterPSA(table->program, di, counterName, table->codeGen);
+        table->counters.emplace_back(std::make_pair(counterName, ctr));
+
+        return false;
+    }
+
+    void visitTableProperty() {
+        EBPFTablePsaPropertyVisitor::visitTableProperty("psa_direct_counter");
+    }
+};
+
+class EBPFTablePSAImplementationPropertyVisitor : public EBPFTablePsaPropertyVisitor {
+ public:
+    explicit EBPFTablePSAImplementationPropertyVisitor(EBPFTablePSA* table)
+        : EBPFTablePsaPropertyVisitor(table) {}
+
+    // PSA table is allowed to have up to one table implementation. This visitor
+    // will iterate over all entries in property, so lets use this and print errors.
+    bool preorder(const IR::PathExpression* pe) override {
+        auto decl = table->program->refMap->getDeclaration(pe->path, true);
+        auto di = decl->to<IR::Declaration_Instance>();
+        CHECK_NULL(di);
+        cstring type = di->type->toString();
+
+        if (table->implementation != nullptr) {
+            ::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1%: Up to one implementation is supported in a table", pe);
+            return false;
+        }
+
+        if (type == "ActionProfile") {
+            auto ap = table->program->control->getTable(di->name.name);
+            table->implementation = ap->to<EBPFTableImplementationPSA>();
+        }
+
+        if (table->implementation != nullptr)
+            table->implementation->registerTable(table);
+        else
+            ::error(ErrorType::ERR_UNKNOWN,
+                    "%1%: unknown table implementation %2%", pe, decl);
+
+        return false;
+    }
+
+    void visitTableProperty() {
+        EBPFTablePsaPropertyVisitor::visitTableProperty("psa_implementation");
+    }
+};
+
+// =====================ActionTranslationVisitorPSA=============================
+ActionTranslationVisitorPSA::ActionTranslationVisitorPSA(const EBPFProgram* program,
+                                                         cstring valueName,
+                                                         const EBPFTablePSA* table) :
+        CodeGenInspector(program->refMap, program->typeMap),
+        ActionTranslationVisitor(valueName, program),
+        ControlBodyTranslatorPSA(program->to<EBPFPipeline>()->control),
+        table(table) {}
+
+bool ActionTranslationVisitorPSA::preorder(const IR::PathExpression* pe) {
+    if (isActionParameter(pe)) {
+        return ActionTranslationVisitor::preorder(pe);
+    }
+    return ControlBodyTranslator::preorder(pe);
+}
+
+bool ActionTranslationVisitorPSA::isActionParameter(const IR::Expression *expression) const {
+    if (auto path = expression->to<IR::PathExpression>())
+        return ActionTranslationVisitor::isActionParameter(path);
+    else if (auto cast = expression->to<IR::Cast>())
+        return isActionParameter(cast->expr);
+    else
+        return false;
+}
+
+void ActionTranslationVisitorPSA::processMethod(const P4::ExternMethod* method) {
+    auto declType = method->originalExternType;
+    auto decl = method->object;
+    BUG_CHECK(decl->is<IR::Declaration_Instance>(),
+              "Extern has not been declared: %1%", decl);
+    auto di = decl->to<IR::Declaration_Instance>();
+    auto instanceName = EBPFObject::externalName(di);
+
+    if (declType->name.name == "DirectCounter") {
+        auto ctr = table->getDirectCounter(instanceName);
+        if (ctr != nullptr)
+            ctr->emitDirectMethodInvocation(builder, method, valueName);
+        else
+            ::error(ErrorType::ERR_NOT_FOUND,
+                    "%1%: Table %2% does not own DirectCounter named %3%",
+                    method->expr, table->table->container, instanceName);
+    } else {
+        ControlBodyTranslatorPSA::processMethod(method);
+    }
+}
 
 // =====================EBPFTablePSA=============================
 EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* table,
                            CodeGenInspector* codeGen) :
-                           EBPFTable(program, table, codeGen) {
+                           EBPFTable(program, table, codeGen), implementation(nullptr) {
     auto sizeProperty = table->container->properties->getProperty("size");
     if (keyGenerator == nullptr && sizeProperty != nullptr) {
         ::warning(ErrorType::WARN_IGNORE_PROPERTY,
@@ -40,11 +179,37 @@ EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* tab
         }
         this->size = 1;
     }
+
+    initDirectCounters();
+    initImplementation();
+}
+
+EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name) :
+                           EBPFTable(program, codeGen, name), implementation(nullptr) {}
+
+void EBPFTablePSA::initDirectCounters() {
+    EBPFTablePSADirectCounterPropertyVisitor visitor(this);
+    visitor.visitTableProperty();
+}
+
+void EBPFTablePSA::initImplementation() {
+    EBPFTablePSAImplementationPropertyVisitor visitor(this);
+    visitor.visitTableProperty();
+}
+
+ActionTranslationVisitor* EBPFTablePSA::createActionTranslationVisitor(
+        cstring valueName, const EBPFProgram* program) const {
+    return new ActionTranslationVisitorPSA(program->to<EBPFPipeline>(), valueName, this);
 }
 
 void EBPFTablePSA::emitValueStructStructure(CodeBuilder* builder) {
-    // TODO: placeholder for handling psa_implementation
-    EBPFTable::emitValueStructStructure(builder);
+    if (implementation != nullptr) {
+        // TODO: add priority for ternary table
+
+        implementation->emitReferenceEntry(builder);
+    } else {
+        EBPFTable::emitValueStructStructure(builder);
+    }
 }
 
 void EBPFTablePSA::emitInstance(CodeBuilder *builder) {
@@ -55,9 +220,12 @@ void EBPFTablePSA::emitInstance(CodeBuilder *builder) {
                       cstring("struct ") + valueTypeName, size);
     }
 
-    emitTableDecl(builder, defaultActionMapName, TableArray,
-                  program->arrayIndexType,
-                  cstring("struct ") + valueTypeName, 1);
+    if (implementation == nullptr) {
+        // Default action is up to implementation, define it when no implementation provided
+        emitTableDecl(builder, defaultActionMapName, TableArray,
+                      program->arrayIndexType,
+                      cstring("struct ") + valueTypeName, 1);
+    }
 }
 
 void EBPFTablePSA::emitTableDecl(CodeBuilder *builder,
@@ -78,14 +246,31 @@ void EBPFTablePSA::emitTypes(CodeBuilder* builder) {
     // TODO: placeholder for handling PSA-specific types
 }
 
+/**
+ * Order of emitting counters and meters affects generated layout of BPF map value.
+ * Do not change this order!
+ */
+void EBPFTablePSA::emitDirectValueTypes(CodeBuilder* builder) {
+    for (auto ctr : counters) {
+        ctr.second->emitValueType(builder);
+    }
+    // TODO: support for meters
+}
+
 void EBPFTablePSA::emitAction(CodeBuilder* builder, cstring valueName, cstring actionRunVariable) {
-    // TODO: placeholder for handling psa_implementation
-    EBPFTable::emitAction(builder, valueName, actionRunVariable);
+    if (implementation != nullptr)
+        implementation->applyImplementation(builder, valueName, actionRunVariable);
+    else
+        EBPFTable::emitAction(builder, valueName, actionRunVariable);
 }
 
 void EBPFTablePSA::emitInitializer(CodeBuilder *builder) {
-    this->emitDefaultActionInitializer(builder);
-    this->emitConstEntriesInitializer(builder);
+    // Do not emit initializer when table implementation is provided, because it is not supported.
+    // Error for such case is printed when adding implementation to a table.
+    if (implementation == nullptr) {
+        this->emitDefaultActionInitializer(builder);
+        this->emitConstEntriesInitializer(builder);
+    }
 }
 
 void EBPFTablePSA::emitConstEntriesInitializer(CodeBuilder *builder) {
@@ -187,12 +372,11 @@ void EBPFTablePSA::emitConstEntriesInitializer(CodeBuilder *builder) {
 void EBPFTablePSA::emitDefaultActionInitializer(CodeBuilder *builder) {
     const IR::P4Table* t = table->container;
     const IR::Expression* defaultAction = t->getDefaultAction();
-    BUG_CHECK(defaultAction->is<IR::MethodCallExpression>(),
-              "%1%: expected an action call", defaultAction);
+    auto actionName = getActionNameExpression(defaultAction);
     auto mce = defaultAction->to<IR::MethodCallExpression>();
-    auto pe = mce->method->to<IR::PathExpression>();
-    BUG_CHECK(pe->is<IR::PathExpression>(), "%1%: expected IR::PathExpression type", pe);
-    if (pe->path->name.originalName != P4::P4CoreLibrary::instance.noAction.name) {
+    CHECK_NULL(actionName);
+    CHECK_NULL(mce);
+    if (actionName->path->name.originalName != P4::P4CoreLibrary::instance.noAction.name) {
         auto value = program->refMap->newName("value");
         emitTableValue(builder, mce, value.c_str());
         auto ret = program->refMap->newName("ret");
@@ -228,6 +412,15 @@ void EBPFTablePSA::emitMapUpdateTraceMsg(CodeBuilder *builder, cstring mapName,
     builder->target->emitTraceMessage(builder,
                                       msgStr);
     builder->blockEnd(true);
+}
+
+const IR::PathExpression* EBPFTablePSA::getActionNameExpression(const IR::Expression* expr) const {
+    BUG_CHECK(expr->is<IR::MethodCallExpression>(),
+            "%1%: expected an action call", expr);
+    auto mce = expr->to<IR::MethodCallExpression>();
+    BUG_CHECK(mce->method->is<IR::PathExpression>(),
+            "%1%: expected IR::PathExpression type", mce->method);
+    return mce->method->to<IR::PathExpression>();
 }
 
 void EBPFTablePSA::emitTableValue(CodeBuilder* builder, const IR::MethodCallExpression* actionMce,
@@ -268,12 +461,19 @@ void EBPFTablePSA::emitLookup(CodeBuilder* builder, cstring key, cstring value) 
 }
 
 void EBPFTablePSA::emitLookupDefault(CodeBuilder* builder, cstring key, cstring value) {
-    // TODO: placeholder for handling psa_implementation
-    EBPFTable::emitLookupDefault(builder, key, value);
+    if (implementation != nullptr) {
+        builder->appendLine("/* table with implementation has default action "
+                            "implicitly set to NoAction, so we can skip execution of it */");
+        builder->target->emitTraceMessage(builder,
+                                          "Control: skipping default action due to implementation");
+    } else {
+        EBPFTable::emitLookupDefault(builder, key, value);
+    }
 }
 
 bool EBPFTablePSA::dropOnNoMatchingEntryFound() const {
-    // TODO: placeholder for handling psa_implementation
+    if (implementation != nullptr)
+        return false;
     return EBPFTable::dropOnNoMatchingEntryFound();
 }
 }  // namespace EBPF

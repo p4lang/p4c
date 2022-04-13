@@ -169,13 +169,14 @@ class ConvertToEBPFControlPSA : public Inspector {
     bool preorder(const IR::Declaration_Variable*) override;
     bool preorder(const IR::Member *m) override;
     bool preorder(const IR::IfStatement *a) override;
+    bool preorder(const IR::ExternBlock* instance) override;
 
     EBPF::EBPFControlPSA *getEBPFControl() { return control; }
 };
 
 class ConvertToEBPFDeparserPSA : public Inspector {
     EBPF::EBPFProgram* program;
-    pipeline_type type;
+    pipeline_type pipelineType;
 
     const IR::Parameter* parserHeaders;
     const IR::Parameter* istd;
@@ -191,12 +192,13 @@ class ConvertToEBPFDeparserPSA : public Inspector {
                              const IR::Parameter* istd,
                              P4::ReferenceMap* refmap, P4::TypeMap* typemap,
                              const EbpfOptions &options, pipeline_type type)
-                             : program(program), type(type), parserHeaders(parserHeaders),
+                             : program(program), pipelineType(type), parserHeaders(parserHeaders),
                              istd(istd), typemap(typemap), refmap(refmap),
                              p4lib(P4::P4CoreLibrary::instance),
                              deparser(nullptr), options(options) {}
 
     bool preorder(const IR::ControlBlock *) override;
+    bool preorder(const IR::Declaration_Instance *) override;
     EBPF::EBPFDeparserPSA *getEBPFDeparser() { return deparser; }
 };
 

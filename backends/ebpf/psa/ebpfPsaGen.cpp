@@ -20,6 +20,9 @@ limitations under the License.
 #include "ebpfPsaTable.h"
 #include "ebpfPsaControl.h"
 #include "xdpHelpProgram.h"
+#include "externs/ebpfPsaCounter.h"
+#include "externs/ebpfPsaHashAlgorithm.h"
+#include "externs/ebpfPsaTableImplementation.h"
 
 namespace EBPF {
 
@@ -134,6 +137,7 @@ void PSAEbpfGenerator::emitPacketReplicationTables(CodeBuilder *builder) const {
 void PSAEbpfGenerator::emitPipelineInstances(CodeBuilder *builder) const {
     ingress->parser->emitValueSetInstances(builder);
     ingress->control->emitTableInstances(builder);
+    ingress->deparser->emitDigestInstances(builder);
 
     egress->parser->emitValueSetInstances(builder);
     egress->control->emitTableInstances(builder);
@@ -161,6 +165,8 @@ void PSAEbpfGenerator::emitInitializer(CodeBuilder *builder) const {
 }
 
 void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
+    EBPFHashAlgorithmTypeFactoryPSA::instance()->emitGlobals(builder);
+
     cstring forEachFunc =
             "static __always_inline\n"
             "int do_for_each(SK_BUFF *skb, void *map, "
@@ -337,6 +343,12 @@ void PSAArchTC::emit(CodeBuilder *builder) const {
 
 void PSAArchTC::emitInstances(CodeBuilder *builder) const {
     builder->appendLine("REGISTER_START()");
+
+    if (options.xdp2tcMode == XDP2TC_CPUMAP) {
+        builder->target->emitTableDecl(builder, "xdp2tc_cpumap",
+                                       TablePerCPUArray, "u32",
+                                       "u16", 1);
+    }
 
     emitPacketReplicationTables(builder);
     emitPipelineInstances(builder);
@@ -520,7 +532,7 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ControlBlock *ctrl) {
     control->inputStandardMetadata = *it; ++it;
     control->outputStandardMetadata = *it;
 
-    auto codegen = new ControlBodyTranslator(control);
+    auto codegen = new ControlBodyTranslatorPSA(control);
     codegen->substitute(control->headers, parserHeaders);
 
     if (type != TC_EGRESS) {
@@ -608,11 +620,35 @@ bool ConvertToEBPFControlPSA::preorder(const IR::Declaration_Variable* decl) {
     return true;
 }
 
+bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
+    auto di = instance->node->to<IR::Declaration_Instance>();
+    if (di == nullptr)
+        return false;
+    cstring name = EBPFObject::externalName(di);
+    cstring typeName = instance->type->getName().name;
+
+    if (typeName == "ActionProfile") {
+        auto ap = new EBPFActionProfilePSA(program, control->codeGen, di);
+        control->tables.emplace(di->name.name, ap);
+    } else if (typeName == "Counter") {
+        auto ctr = new EBPFCounterPSA(program, di, name, control->codeGen);
+        control->counters.emplace(name, ctr);
+    } else if (typeName == "DirectCounter") {
+        // instance will be created by table
+        return false;
+    } else {
+        ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
+                instance);
+    }
+
+    return false;
+}
+
 // =====================EBPFDeparser=============================
 bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock *ctrl) {
-    if (type == TC_INGRESS) {
+    if (pipelineType == TC_INGRESS) {
         deparser = new TCIngressDeparserPSA(program, ctrl, parserHeaders, istd);
-    } else if (type == TC_EGRESS) {
+    } else if (pipelineType == TC_EGRESS) {
         deparser = new TCEgressDeparserPSA(program, ctrl, parserHeaders, istd);
     } else {
         BUG("undefined pipeline type, cannot build deparser");
@@ -625,15 +661,31 @@ bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock *ctrl) {
     deparser->codeGen->substitute(deparser->headers, parserHeaders);
     deparser->codeGen->useAsPointerVariable(deparser->headers->name.name);
 
-    if (type == TC_INGRESS) {
+    if (pipelineType == TC_INGRESS) {
         deparser->codeGen->useAsPointerVariable(deparser->resubmit_meta->name.name);
         deparser->codeGen->useAsPointerVariable(deparser->user_metadata->name.name);
     }
 
-    if (ctrl->container->is<IR::P4Control>()) {
-        auto p4Control = ctrl->container->to<IR::P4Control>();
-        // TODO: placeholder for handling digests
-        this->visit(p4Control->body);
+    this->visit(ctrl->container);
+
+    return false;
+}
+
+bool ConvertToEBPFDeparserPSA::preorder(const IR::Declaration_Instance *di) {
+    if (auto typeSpec = di->type->to<IR::Type_Specialized>()) {
+        auto baseType = typeSpec->baseType;
+        auto typeName = baseType->to<IR::Type_Name>();
+        auto digest = typeName->path->name.name;
+        if (digest == "Digest") {
+            if (pipelineType == TC_EGRESS) {
+                ::error(ErrorType::ERR_UNEXPECTED,
+                        "Digests are only supported at ingress, got an instance at egress");
+            }
+            cstring digestMapName = EBPFObject::externalName(di);
+            auto messageArg = typeSpec->arguments->front();
+            auto messageType = typemap->getType(messageArg);
+            deparser->digests.emplace(digestMapName, messageType);
+        }
     }
 
     return false;

@@ -107,6 +107,7 @@ DeparserHdrEmitTranslator::DeparserHdrEmitTranslator(const EBPFDeparser *deparse
 }
 
 void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod *method) {
+    // This method handles packet_out.emit() only and is intended to skip other externs
     if (method->method->name.name == p4lib.packetOut.emit.name) {
         auto decl = method->object;
         if (decl == deparser->packet_out) {
@@ -164,8 +165,6 @@ void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod *method) {
         } else {
             BUG("emit() should only be invoked for packet_out");
         }
-    } else {
-        ::error(ErrorType::ERR_UNSUPPORTED, "Unsupported method invocation %1%", method->method);
     }
 }
 
@@ -185,11 +184,19 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder* builder, cstring field,
     cstring swap = "", msgStr;
 
     if (widthToEmit <= 64) {
-        cstring tmp = Util::printf_format("(unsigned long long) %s.%s",
-                                          hdrExpr->toString(), field);
-        msgStr = Util::printf_format("Deparser: emitting field %s=0x%%llx (%u bits)",
-                                     field, widthToEmit);
-        builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, tmp.c_str());
+        if (program->options.emitTraceMessages) {
+            builder->emitIndent();
+            builder->blockStart();
+            builder->emitIndent();
+            builder->append("u64 tmp = ");
+            visit(hdrExpr);
+            builder->appendFormat(".%s", field.c_str());
+            builder->endOfStatement(true);
+            msgStr = Util::printf_format("Deparser: emitting field %s=0x%%llx (%u bits)",
+                                         field, widthToEmit);
+            builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, "tmp");
+            builder->blockEnd(true);
+        }
     } else {
         msgStr = Util::printf_format("Deparser: emitting field %s (%u bits)", field, widthToEmit);
         builder->target->emitTraceMessage(builder, msgStr.c_str());

@@ -50,6 +50,49 @@ class XDPHelpProgram : public EBPFProgram {
             "\n"
             "    return XDP_PASS;";
 
+    cstring XDPProgUsingHeadForXDP2TC =
+            "    void *data = (void *)(long)skb->data;\n"
+            "    void *data_end = (void *)(long)skb->data_end;\n"
+            "    struct ethhdr *eth = data;\n"
+            "    if ((void *)((struct ethhdr *) eth + 1) > data_end) {\n"
+            "        return XDP_ABORTED;\n"
+            "    }\n"
+            "    __u16 orig_ethtype = eth->h_proto;\n"
+            "    int ret = bpf_xdp_adjust_head(skb, -2);\n"
+            "    if (ret < 0) {\n"
+            "        return XDP_ABORTED;\n"
+            "    }\n"
+            "\n"
+            "    data = (void *)(long)skb->data;\n"
+            "    data_end = (void *)(long)skb->data_end;\n"
+            "\n"
+            "    if ((void *)(data + 16) > data_end) {\n"
+            "        return XDP_ABORTED;\n"
+            "    }\n"
+            "    __builtin_memmove(data, data + 2, 14);\n"
+            "    eth = data;\n"
+            "    if ((void *)((struct ethhdr *) eth + 1) > data_end) {\n"
+            "        return XDP_ABORTED;\n"
+            "    }\n"
+            "    eth->h_proto = bpf_htons(0x0800);\n"
+            "    __builtin_memcpy((char *)data + 14, &orig_ethtype, 2);\n"
+            "    "
+            "\n"
+            "    return XDP_PASS;";
+
+    cstring XDPProgUsingCPUMAPForXDP2TC =
+            "    void *data = (void *)(long)skb->data;\n"
+            "    void *data_end = (void *)(long)skb->data_end;\n"
+            "    struct ethhdr *eth = data;\n"
+            "    if ((void *)((struct ethhdr *) eth + 1) > data_end) {\n"
+            "        return XDP_ABORTED;\n"
+            "    }\n"
+            "    u16 orig_ethtype = eth->h_proto;\n"
+            "    eth->h_proto = bpf_htons(0x0800);\n"
+            "    u32 zero = 0;\n"
+            "    BPF_MAP_UPDATE_ELEM(xdp2tc_cpumap, &zero, &orig_ethtype, BPF_ANY);\n"
+            "    return XDP_PASS;";
+
  public:
     cstring sectionName;
     explicit XDPHelpProgram(const EbpfOptions& options) :
@@ -66,7 +109,14 @@ class XDPHelpProgram : public EBPFProgram {
         builder->spc();
         builder->blockStart();
         builder->emitIndent();
-        builder->appendLine(XDPProgUsingMetaForXDP2TC);
+        // this is static program, so we can just paste a piece of code.
+        if (options.xdp2tcMode == XDP2TC_META) {
+            builder->appendLine(XDPProgUsingMetaForXDP2TC);
+        } else if (options.xdp2tcMode == XDP2TC_HEAD) {
+            builder->appendLine(XDPProgUsingHeadForXDP2TC);
+        } else if (options.xdp2tcMode == XDP2TC_CPUMAP) {
+            builder->appendLine(XDPProgUsingCPUMAPForXDP2TC);
+        }
         builder->blockEnd(true);
     }
 };
