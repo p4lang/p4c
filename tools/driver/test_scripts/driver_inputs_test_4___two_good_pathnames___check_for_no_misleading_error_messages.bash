@@ -52,10 +52,10 @@ fi
 
 echo "In ''$humanReadable_test_pathname'', using ''$P4C'' as the path to the driver of the P4 compiler." >& 2
 
-if [ ! -x $P4C ] ; then
+if [ ! -x "$P4C" ] ; then
   echo "Test ''$humanReadable_test_pathname'' failed due to not being able to execute ''$P4C''." >& 2
   exit 1
-elif $P4C p4include/core.p4 p4include/pna.p4 -o "$output_dir" 2>&1 | grep --ignore-case --quiet 'unrecognized.*arguments'; then
+elif "$P4C" p4include/core.p4 p4include/pna.p4 -o "$output_dir" 2>&1 | grep --ignore-case --quiet 'unrecognized.*arguments'; then
   echo "Test ''$humanReadable_test_pathname'' failed due to a required-to-not-be-present-in-the-output regex having been found/matched by ''grep''." >& 2
   exit 2
 else
