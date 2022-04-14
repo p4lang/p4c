@@ -24,7 +24,11 @@
          "properties": {
             "action_name": {
                "type": "string",
-               "description": "Name of the action"
+               "description": "Name of the action as in P4 file"
+            },
+            "target_action_name": {
+               "type": "string",
+               "description": "Name of the action as in spec file"
             },
             "action_handle": {
                "type": "integer",
