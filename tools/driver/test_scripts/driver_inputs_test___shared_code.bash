@@ -125,7 +125,6 @@ function check_if_this_seems_to_be_our_driver {
 
 ### IMPORTANT: do _not_ include any human-oriented “fluff” in this function`s standard-out output
 function try_to_find_the_driver {
-  echo WIP
   ### NOTES re "$GITHUB_WORKSPACE", "$RUNNER_TEMP", and "$RUNNER_WORKSPACE":
   ###   these were all found by Abe in the GitHub CI/CD environment on April 14 2022
   ###
@@ -154,6 +153,7 @@ function try_to_find_the_driver {
     ### Using “///>>>$foo<<<///” to make it clear that the extra characters are just delimiters
     ###   [which, BTW, are here so that space characters, especially trailing ones, will become visible].
   done
+  return 1
 }
 
 
