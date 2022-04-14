@@ -663,6 +663,18 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
 /* This function processes the metadata structure and modify the metadata field width
    to 32/64 bits if it is not 8-bit aligned */
 const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
+    /* Throw error if field width is greater than 64 bits */
+    for (auto field : st->fields) {
+        if ((*field).type->is<IR::Type_Bits>()) {
+            auto t = (*field).type->to<IR::Type_Bits>();
+            auto width = t->width_bits();
+            if (width > dpdk_max_field_width) {
+            ::error("Unsupported bit width '%1%' for field '%2%'. DPDK "
+                     "does not support metadata/header field with width more than "
+                     "'%3%' bits", width, field, dpdk_max_field_width);
+            }
+        }
+    }
     auto fields = new IR::IndexedVector<IR::StructField>;
     if (st->is<IR::Type_Struct>()) {
         for (auto field : st->fields) {

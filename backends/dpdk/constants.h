@@ -24,4 +24,7 @@ const unsigned action_handle_prefix = 0x00020000;
 // Default values
 const unsigned dpdk_default_table_size = 65536;
 
+// Maximum values
+const int dpdk_max_field_width = 64;
+
 #endif  /* BACKENDS_DPDK_CONSTANTS_H_ */
