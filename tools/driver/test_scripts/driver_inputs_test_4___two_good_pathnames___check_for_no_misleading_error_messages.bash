@@ -24,8 +24,8 @@ if [ $returned -ne 0 ]; then return $returned; fi ### simulating exception handl
 output_dir=`mktemp -d /tmp/P4C_driver_testing___XXXXXXXXXX`
 
 
-echo '===== test debugging ====='
-pwd
+echo '===== vvv ===== test debugging ===== vvv ====='
+echo "''pwd'' result: ''`pwd`''"
 echo
 ls -dl p4c
 echo
@@ -33,7 +33,13 @@ ls -dl p4c*
 echo
 ls -l 
 echo
-echo '===== test debugging ====='
+echo === env ===
+env
+echo
+echo === set ===
+set
+echo
+echo '===== ^^^ ===== test debugging ===== ^^^ ====='
 
 
 P4C=./p4c
