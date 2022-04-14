@@ -24,11 +24,26 @@ if [ $returned -ne 0 ]; then return $returned; fi ### simulating exception handl
 output_dir=`mktemp -d /tmp/P4C_driver_testing___XXXXXXXXXX`
 
 
+echo '===== test debugging ====='
+pwd
+echo
+ls -dl p4c
+echo
+ls -dl p4c*
+echo
+ls -l 
+echo
+echo '===== test debugging ====='
 
+
+P4C=./p4c
 humanReadable_test_pathname="`resolve_symlink_only_of_basename "$0"`"
-if [ ! -x ./p4c ] || ./p4c p4include/core.p4 p4include/pna.p4 -o "$output_dir" 2>&1 | grep --ignore-case --quiet 'unrecognized.*arguments'; then
-  echo "Test ''$humanReadable_test_pathname'' failed."
+if [ ! -x $P4C ] ; then
+  echo "Test ''$humanReadable_test_pathname'' failed due to not being able to execute ''$P4C''."
   exit 1
+elif $P4C p4include/core.p4 p4include/pna.p4 -o "$output_dir" 2>&1 | grep --ignore-case --quiet 'unrecognized.*arguments'; then
+  echo "Test ''$humanReadable_test_pathname'' failed due to a required-to-not-be-present-in-the-output regex having been found/matched by ''grep''."
+  exit 2
 else
   echo "Test ''$humanReadable_test_pathname'' succeeded."
 fi
