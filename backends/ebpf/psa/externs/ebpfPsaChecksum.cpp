@@ -89,19 +89,23 @@ void EBPFHashPSA::processMethod(CodeBuilder* builder, cstring method,
                                 const IR::MethodCallExpression * expr, Visitor * visitor) {
     engine->setVisitor(visitor);
 
-    // Note: "Hash" extern has only one method "get_hash". Method "update" were introduced
-    // in order to calculate hash before assignment and assign it later in one statement.
-    if (method == "update") {
-        // For "Hash" extern, "the data over which to calculate the hash" is passed as
-        // an argument to "get_hash" method. This means that every call to this method
-        // should be independent from another.
-        engine->emitClear(builder);
-        engine->emitAddData(builder, expr->arguments->size() == 3 ? 1 : 0, expr);
-    } else if (method == "get_hash") {
+    if (method == "get_hash") {
         emitGetMethod(builder, expr, visitor);
     } else {
         ::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call %1%", expr);
     }
+}
+
+/**
+ * This method calculates a hash value and saves it to the registerVar.
+ */
+void EBPFHashPSA::calculateHash(CodeBuilder* builder, const IR::MethodCallExpression * expr,
+                                Visitor * visitor) {
+    engine->setVisitor(visitor);
+    // Every call of "get_hash" method should be independent out another. This means that
+    // we need to set hash instance to default value.
+    engine->emitClear(builder);
+    engine->emitAddData(builder, expr->arguments->size() == 3 ? 1 : 0, expr);
 }
 
 void EBPFHashPSA::emitGetMethod(CodeBuilder* builder, const IR::MethodCallExpression * expr,

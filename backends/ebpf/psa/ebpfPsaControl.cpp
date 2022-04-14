@@ -51,7 +51,9 @@ bool ControlBodyTranslatorPSA::preorder(const IR::AssignmentStatement* a) {
             if (ext->originalExternType->name.name == "Hash") {
                 cstring name = EBPFObject::externalName(ext->object);
                 auto hash = control->to<EBPFControlPSA>()->getHash(name);
-                hash->processMethod(builder, "update", ext->expr, this);
+                // Before assigning a value to a left expression we have to calculate a hash.
+                // Then the hash value is stored in a registerVar variable.
+                hash->calculateHash(builder, ext->expr, this);
                 builder->emitIndent();
             }
         }

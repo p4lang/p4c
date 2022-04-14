@@ -64,6 +64,9 @@ class EBPFHashPSA : public EBPFChecksumPSA {
     void processMethod(CodeBuilder* builder, cstring method,
                        const IR::MethodCallExpression * expr, Visitor * visitor) override;
 
+    void calculateHash(CodeBuilder* builder, const IR::MethodCallExpression * expr,
+                       Visitor * visitor);
+
     void emitGetMethod(CodeBuilder* builder, const IR::MethodCallExpression * expr,
                        Visitor * visitor);
 };
