@@ -24,6 +24,7 @@ if [ $returned -ne 0 ]; then return $returned; fi ### simulating exception handl
 output_dir=`mktemp -d /tmp/P4C_driver_testing___XXXXXXXXXX`
 
 
+
 echo '===== vvv ===== test debugging ===== vvv ====='
 echo "''pwd'' result: ''`pwd`''"
 echo
@@ -51,6 +52,8 @@ if ! P4C=`try_to_find_the_driver`; then
 fi
 
 echo "In ''$humanReadable_test_pathname'', using ''$P4C'' as the path to the driver of the P4 compiler." >& 2
+
+
 
 if [ ! -x "$P4C" ] ; then
   echo "Test ''$humanReadable_test_pathname'' failed due to not being able to execute ''$P4C''." >& 2
