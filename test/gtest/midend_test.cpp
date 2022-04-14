@@ -295,4 +295,22 @@ TEST_F(P4CMidend, replaceSelectRangeSigned2) {
     });
 }
 
+TEST_F(P4CMidend, replaceSelectRangeSigned3) {
+    testReplaceSelectRange<int16_t>({{-256, 0}}, [](CollectRangesAndMasks collect) {
+        ASSERT_EQ(collect.masks.size(), 2u);
+    });
+}
+
+TEST_F(P4CMidend, replaceSelectRangeSigned4) {
+    testReplaceSelectRange<int16_t>({{-256, -1}}, [](CollectRangesAndMasks collect) {
+        ASSERT_EQ(collect.masks.size(), 1u);
+    });
+}
+
+TEST_F(P4CMidend, replaceSelectRangeSigned5) {
+    testReplaceSelectRange<int16_t>({{0, 15}}, [](CollectRangesAndMasks collect) {
+        ASSERT_EQ(collect.masks.size(), 1u);
+    });
+}
+
 }  // namespace Test
