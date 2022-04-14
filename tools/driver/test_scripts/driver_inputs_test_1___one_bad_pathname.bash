@@ -19,7 +19,6 @@ if ! P4C=`try_to_find_the_driver`; then
   echo "Unable to find the driver of the P4 compiler.  Aborting the test ''$humanReadable_test_pathname'' with a non-zero exit code.  This test failed." >& 2
   exit 255
 fi
-
 echo "In ''$humanReadable_test_pathname'', using ''$P4C'' as the path to the driver of the P4 compiler." >& 2
 
 
