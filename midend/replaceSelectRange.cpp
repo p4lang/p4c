@@ -20,6 +20,51 @@
 
 namespace P4 {
 
+// expands subranges that do not cross over zero
+static void
+expandRange(const IR::Range *r, std::vector<const IR::Mask *> &masks, const IR::Type *maskType,
+            big_int min, big_int max)
+{
+    int width = r->type->width_bits();
+    BUG_CHECK(width > 0, "zero-width range is not allowed %1%", r->type);
+    big_int size_mask = ((((big_int) 1) << width) - 1);
+    auto base = r->left->to<IR::Constant>()->base;
+
+    BUG_CHECK((min >= 0) == (max >= 0),
+              "Wrong subrange %1%..%2% (going over zero)", min, max);
+    if (min < 0) {
+        // convert negative range to bit-corresponding positive range
+        min = size_mask + min + 1;
+        max = size_mask + max + 1;
+    }
+
+    BUG_CHECK(min <= max, "range bounds inverted %1%..%2%", min, max);
+
+    big_int range_size_remaining = max - min + 1;
+
+    while (range_size_remaining > 0) {
+        // this generates two kinds of mask entries
+        // - 0..2^N - 1 where N is the largest number such that this does not
+        //              overshoot max -- to cover all numbers lower then 2^N - 1
+        //              with one mask entry.
+        // - M..M+2^N - 1 to cover remaining entries with masks that fix a bit
+        //                prefix and leave the last N bits arbitrary.
+        big_int match_stride = ((big_int) 1) << ((min == 0) ? floor_log2(max + 1) : ffs(min));
+
+        while (match_stride > range_size_remaining)
+            match_stride >>= 1;
+
+        big_int mask = ~(match_stride - 1) & size_mask;
+
+        auto valConst = new IR::Constant(maskType, min, base, true);
+        auto maskConst = new IR::Constant(maskType, mask, base, true);
+        masks.push_back(new IR::Mask(r->srcInfo, valConst, maskConst));
+
+        range_size_remaining -= match_stride;
+        min += match_stride;
+    }
+}
+
 std::vector<const IR::Mask *>
 DoReplaceSelectRange::rangeToMasks(const IR::Range *r, int keyIndex) {
     std::vector<const IR::Mask *> masks;
@@ -52,61 +97,15 @@ DoReplaceSelectRange::rangeToMasks(const IR::Range *r, int keyIndex) {
     bool isSigned = inType->isSigned;
     auto maskType = isSigned ? new IR::Type_Bits(inType->srcInfo, inType->size, false) : inType;
 
-    auto base = l->base;
-    int width = r->type->width_bits();
-    BUG_CHECK(width > 0, "zero-width range is not allowed %1%", r->type);
-    big_int size_mask = ((((big_int) 1) << width) - 1);
-
     if (isSigned) {
         signedIndicesToReplace.emplace(keyIndex);
     }
 
-    std::vector<std::pair<big_int, big_int>> subranges;
-    if (isSigned && left < 0 && right > 0) {
-        subranges.emplace_back(left, (big_int)-1);
-        subranges.emplace_back((big_int)0, right);
+    if (isSigned && left < 0 && right >= 0) {
+        expandRange(r, masks, maskType, left, (big_int)-1);
+        expandRange(r, masks, maskType, (big_int)0, right);
     } else {
-        subranges.emplace_back(left, right);
-    }
-
-    for (auto sub : subranges) {
-        BUG_CHECK((sub.first >= 0) == (sub.second >= 0),
-                  "Wrong subrange %1%..%2%", sub.first, sub.second);
-        big_int min;
-        big_int max;
-        if (sub.first >= 0) {
-            std::tie(min, max) = sub;
-        } else {
-            // convert negative range to bit-corresponding positive range
-            min = size_mask + sub.first + 1;
-            max = size_mask + sub.second + 1;
-        }
-
-        BUG_CHECK(min <= max, "range bounds inverted %1%..%2%", min, max);
-
-        big_int range_size_remaining = max - min + 1;
-
-        while (range_size_remaining > 0) {
-            // this generates two kinds of mask entries
-            // - 0..2^N - 1 where N is the largest number such that this does not
-            //              overshoot max -- to cover all numbers lower then 2^N - 1
-            //              with one mask entry.
-            // - M..M+2^N - 1 to cover remaining entries with masks that fix a bit
-            //                prefix and leave the last N bits arbitrary.
-            big_int match_stride = ((big_int) 1) << ((min == 0) ? floor_log2(max + 1) : ffs(min));
-
-            while (match_stride > range_size_remaining)
-                match_stride >>= 1;
-
-            big_int mask = ~(match_stride - 1) & size_mask;
-
-            auto valConst = new IR::Constant(maskType, min, base, true);
-            auto maskConst = new IR::Constant(maskType, mask, base, true);
-            masks.push_back(new IR::Mask(r->srcInfo, valConst, maskConst));
-
-            range_size_remaining -= match_stride;
-            min += match_stride;
-        }
+        expandRange(r, masks, maskType, left, right);
     }
 
     return masks;

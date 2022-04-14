@@ -39,6 +39,9 @@ class DoReplaceSelectRange : public Transform {
     // Each case is a key set expression.
     const uint MAX_CASES;
     bool inSelect = false;
+    // Collects select indices which will need to be replaced with bitcast of
+    // the original value to unsigned. This is needed if we encounter a range
+    // over a signed value at the given index.
     std::set<int> signedIndicesToReplace;
 
     explicit DoReplaceSelectRange(uint max) : MAX_CASES(max) {
