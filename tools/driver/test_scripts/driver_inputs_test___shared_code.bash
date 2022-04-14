@@ -28,7 +28,7 @@ function resolve_symlink_only_of_basename {
 function check_for_pathname_error {
   ### arg. #1: pathname
   ### arg. #2: subtest index
-  ### arg. #3: number of subtests [should be a constant at the time of editing this test file, but what the hell]
+  ### arg. #3: number of subtests [should be a constant at the time of editing the test files that use this shared file, but what the hell]
 
   ./p4c $1 2>&1 | grep --ignore-case --quiet "error.*$1"
   exit_status_from_grep=$?
