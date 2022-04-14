@@ -42,8 +42,6 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program,
     this->keyType = EBPFTypeFactory::instance->create(keyArg);
     this->valueType = EBPFTypeFactory::instance->create(valueArg);
 
-    useArrayMap = shouldUseArrayMap();
-
     if (di->arguments->size() < 1) {
         ::error(ErrorType::ERR_MODEL, "Expected at least 1 argument: %1%", di);
         return;
@@ -63,6 +61,20 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program,
             this->initialValue = initVal;
         }
     }
+}
+
+bool EBPFRegisterPSA::shouldUseArrayMap() {
+    CHECK_NULL(this->keyType);
+    if (auto wt = dynamic_cast<IHasWidth *>(this->keyType)) {
+        unsigned keyWidth = wt->widthInBits();
+        // For keys <= 32 bit register is based on array map,
+        // otherwise we use hash map
+        return (keyWidth > 0 && keyWidth <= 32);
+    }
+
+    ::error(ErrorType::ERR_MODEL, "Unexpected key type: %1%", this->keyType->type);
+
+    return false;
 }
 
 void EBPFRegisterPSA::emitTypes(CodeBuilder* builder) {
@@ -85,7 +97,7 @@ void EBPFRegisterPSA::emitValueType(CodeBuilder* builder) {
 }
 
 void EBPFRegisterPSA::emitInitializer(CodeBuilder* builder) {
-    if (!useArrayMap) {
+    if (!shouldUseArrayMap()) {
         // initialize array-based Registers only,
         // hash-based Registers are "lazy-initialized", upon a first lookup to the map.
         return;
@@ -137,7 +149,7 @@ void EBPFRegisterPSA::emitInitializer(CodeBuilder* builder) {
 
 void EBPFRegisterPSA::emitInstance(CodeBuilder *builder) {
     builder->target->emitTableDecl(builder, instanceName,
-                                   this->useArrayMap ? TableArray : TableHash,
+                                   shouldUseArrayMap() ? TableArray : TableHash,
                                    this->keyTypeName,
                                    this->valueTypeName, size);
 }
