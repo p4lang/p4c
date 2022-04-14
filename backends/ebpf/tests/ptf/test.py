@@ -407,3 +407,26 @@ class DirectCountersPSATest(P4EbpfTest):
         self.verify_map_entry("ingress_tbl1", "0 0 0 10", "01 00 00 00 64 00 00 00 01 00 00 00")
         self.verify_map_entry("ingress_tbl2", "1 0 0 10", "02 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00")
         self.verify_map_entry("ingress_tbl2", "2 0 0 10", "03 00 00 00 64 00 00 00 01 00 00 00 01 00 00 00")
+
+
+class ParserValueSetPSATest(P4EbpfTest):
+    """
+    Test value_set implementation. P4 application will pass packet, which IP destination
+    address contains value_set and destination port 80.
+    """
+    p4_file_path = "p4testdata/pvs.p4"
+
+    def runTest(self):
+        pkt = testutils.simple_udp_packet(ip_dst='10.0.0.1', udp_dport=80)
+
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_no_other_packets(self)
+
+        self.update_map("IngressParserImpl_pvs", '1 0 0 10', '0 0 0 0')
+
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+
+        pkt[IP].dst = '8.8.8.8'
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_no_other_packets(self)

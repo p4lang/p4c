@@ -141,6 +141,12 @@ class P4EbpfTest(BaseTest):
         if dev.startswith("eth"):
             self.exec_cmd("psabpf-ctl del-port pipe {} dev s1-{}".format(TEST_PIPELINE_ID, dev))
 
+    def update_map(self, name, key, value, map_in_map=False):
+        if map_in_map:
+            value = "pinned {}/{} any".format(PIPELINE_MAPS_MOUNT_PATH, value)
+        self.exec_ns_cmd("bpftool map update pinned {}/{} key {} value {}".format(
+            PIPELINE_MAPS_MOUNT_PATH, name, key, value))
+
     def read_map(self, name, key):
         cmd = "bpftool -j map lookup pinned {}/{} key {}".format(PIPELINE_MAPS_MOUNT_PATH, name, key)
         _, stdout, _ = self.exec_ns_cmd(cmd, "Failed to read map {}".format(name))

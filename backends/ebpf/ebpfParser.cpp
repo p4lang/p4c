@@ -165,6 +165,20 @@ bool StateTranslationVisitor::preorder(const IR::SelectExpression* expression) {
     builder->appendFormat("%s = ", selectValue);
     visit(expression->select);
     builder->endOfStatement(true);
+
+    // Init value_sets
+    for (auto e : expression->selectCases) {
+        if (e->keyset->is<IR::PathExpression>()) {
+            cstring pvsName = e->keyset->to<IR::PathExpression>()->path->name.name;
+            cstring pvsKeyVarName = state->parser->program->refMap->newName(pvsName + "_key");
+            auto pvs = state->parser->getValueSet(pvsName);
+            if (pvs != nullptr)
+                pvs->emitKeyInitializer(builder, expression, pvsKeyVarName);
+            else
+                ::error(ErrorType::ERR_UNKNOWN, "%1%: expected a value_set instance", e->keyset);
+        }
+    }
+
     for (auto e : expression->selectCases)
         visit(e);
 
@@ -176,7 +190,14 @@ bool StateTranslationVisitor::preorder(const IR::SelectExpression* expression) {
 
 bool StateTranslationVisitor::preorder(const IR::SelectCase* selectCase) {
     builder->emitIndent();
-    if (auto mask = selectCase->keyset->to<IR::Mask>()) {
+    if (auto pe = selectCase->keyset->to<IR::PathExpression>()) {
+        builder->append("if (");
+        cstring pvsName = pe->path->name.name;
+        auto pvs = state->parser->getValueSet(pvsName);
+        if (pvs)
+            pvs->emitLookup(builder);
+        builder->append(" != NULL)");
+    } else if (auto mask = selectCase->keyset->to<IR::Mask>()) {
         builder->appendFormat("if ((%s", selectValue);
         builder->append(" & ");
         visit(mask->right);
@@ -530,6 +551,8 @@ void EBPFParser::emitDeclaration(CodeBuilder* builder, const IR::Declaration* de
         BUG_CHECK(vd->initializer == nullptr,
                   "%1%: declarations with initializers not supported", decl);
         return;
+    } else if (decl->is<IR::P4ValueSet>()) {
+        return;
     }
     BUG("%1%: not yet handled", decl);
 }
@@ -586,7 +609,29 @@ bool EBPFParser::build() {
     if (ht == nullptr)
         return false;
     headerType = EBPFTypeFactory::instance->create(ht);
+
+    for (auto decl : parserBlock->container->parserLocals) {
+        if (decl->is<IR::P4ValueSet>()) {
+            cstring extName = EBPFObject::externalName(decl);
+            auto pvs = new EBPFValueSet(program, decl->to<IR::P4ValueSet>(),
+                                        extName, visitor);
+            valueSets.emplace(decl->name.name, pvs);
+        }
+    }
+
     return true;
+}
+
+void EBPFParser::emitTypes(CodeBuilder* builder) {
+    for (auto pvs : valueSets) {
+        pvs.second->emitTypes(builder);
+    }
+}
+
+void EBPFParser::emitValueSetInstances(CodeBuilder* builder) {
+    for (auto pvs : valueSets) {
+        pvs.second->emitInstance(builder);
+    }
 }
 
 void EBPFParser::emitRejectState(CodeBuilder* builder) {

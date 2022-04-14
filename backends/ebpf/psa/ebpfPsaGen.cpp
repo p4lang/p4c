@@ -528,6 +528,14 @@ bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock *prsr) {
     return true;
 }
 
+bool ConvertToEBPFParserPSA::preorder(const IR::P4ValueSet* pvs) {
+    cstring extName = EBPFObject::externalName(pvs);
+    auto instance = new EBPFValueSet(program, pvs, extName, parser->visitor);
+    parser->valueSets.emplace(pvs->name.name, instance);
+
+    return false;
+}
+
 // =====================EBPFControl=============================
 bool ConvertToEBPFControlPSA::preorder(const IR::ControlBlock *ctrl) {
     control = new EBPFControlPSA(program,
