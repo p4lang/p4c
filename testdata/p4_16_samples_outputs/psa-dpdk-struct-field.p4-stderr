@@ -1,0 +1,3 @@
+psa-dpdk-struct-field.p4(51): [--Wwarn=uninitialized_use] warning: flg may be uninitialized
+  if (flg == 0x2) {
+      ^^^

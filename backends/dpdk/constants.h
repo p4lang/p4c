@@ -25,4 +25,7 @@ const unsigned action_handle_prefix = 0x00020000;
 const unsigned dpdk_default_table_size = 65536;
 #define DPDK_MAX_SHIFT_AMOUNT 64
 
+// Maximum values
+const int dpdk_max_field_width = 64;
+
 #endif  /* BACKENDS_DPDK_CONSTANTS_H_ */
