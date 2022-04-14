@@ -285,16 +285,12 @@ TEST_F(P4CMidend, replaceSelectRange2) {
 
 TEST_F(P4CMidend, replaceSelectRangeSigned1) {
     testReplaceSelectRange<int16_t>({{-4, 3}}, [](CollectRangesAndMasks collect) {
-        for (auto &m : collect.masks)
-            m->dbprint(std::cerr);
         ASSERT_EQ(collect.masks.size(), 2u);
     });
 }
 
 TEST_F(P4CMidend, replaceSelectRangeSigned2) {
     testReplaceSelectRange<int16_t>({{-256, 3}}, [](CollectRangesAndMasks collect) {
-        for (auto &m : collect.masks)
-            m->dbprint(std::cerr);
         ASSERT_EQ(collect.masks.size(), 2u);
     });
 }
