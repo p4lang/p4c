@@ -25,15 +25,16 @@ function resolve_symlink_only_of_basename {
 
 
 
-function check_for_pathname_error {
-  ### arg. #1: pathname
-  ### arg. #2: subtest index
-  ### arg. #3: number of subtests [should be a constant at the time of editing the test files that use this shared file, but what the hell]
+function check_for_pathname_error_in_P4_compiler_driver_output {
+  ### required arg. #1: pathname         _of_ the driver [can be relative]
+  ### required arg. #2: pathname to give _to_ the driver [can be relative]
+  ### required arg. #3: subtest index
+  ### required arg. #4: number of subtests [should be a constant at the time of editing the test files that use this shared file, but what the hell]
 
-  ./p4c $1 2>&1 | grep --ignore-case --quiet "error.*$1"
+  "$1" "$2" 2>& 1 | grep --ignore-case --quiet "error.*$2"
   exit_status_from_grep=$?
 
-  echo -n "Subtest #$2 (out of $3) in the test script ''`resolve_symlink_only_of_basename "$0"`'' " ### DRY
+  echo -n "Subtest #$3 (out of $4) in the test script ''`resolve_symlink_only_of_basename "$0"`'' " ### DRY
   if [ $exit_status_from_grep -eq 0 ]; then
     echo 'succeeded.'
     return 0
