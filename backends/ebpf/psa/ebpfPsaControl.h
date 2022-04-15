@@ -78,9 +78,9 @@ class EBPFControlPSA : public EBPFControl {
     EBPFRegisterPSA* getRegister(cstring name) const {
         auto result = ::get(registers, name);
         BUG_CHECK(result != nullptr, "No register named %1%", name);
-        return result; 
+        return result;
     }
-  
+
     EBPFHashPSA* getHash(cstring name) const {
         auto result = ::get(hashes, name);
         BUG_CHECK(result != nullptr, "No hash named %1%", name);

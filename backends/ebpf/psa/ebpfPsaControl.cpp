@@ -83,7 +83,7 @@ void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod* method) {
 cstring ControlBodyTranslatorPSA::getParamName(const IR::PathExpression *expr) {
     return expr->path->name.name;
 }
-  
+
 void EBPFControlPSA::emit(CodeBuilder *builder) {
     for (auto h : hashes)
         h.second->emitVariables(builder);
