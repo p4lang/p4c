@@ -355,7 +355,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     builder->endOfStatement(true);
 
     builder->emitIndent();
-    table->emitLookupDefault(builder, control->program->zeroKey, valueName);
+    table->emitLookupDefault(builder, control->program->zeroKey, valueName, actionVariableName);
     builder->blockEnd(false);
     builder->append(" else ");
     builder->blockStart();

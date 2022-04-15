@@ -20,6 +20,7 @@ limitations under the License.
 
 #include "backends/ebpf/ebpfTable.h"
 #include "backends/ebpf/psa/ebpfPsaTable.h"
+#include "backends/ebpf/psa/externs/ebpfPsaHashAlgorithm.h"
 
 namespace EBPF {
 
@@ -58,6 +59,41 @@ class EBPFActionProfilePSA : public EBPFTableImplementationPSA {
     void emitInstance(CodeBuilder *builder) override;
     void applyImplementation(CodeBuilder* builder, cstring tableValueName,
                              cstring actionRunVariable) override;
+};
+
+class EBPFActionSelectorPSA : public EBPFTableImplementationPSA {
+ public:
+    EBPFActionSelectorPSA(const EBPFProgram* program, CodeGenInspector* codeGen,
+                          const IR::Declaration_Instance* decl);
+
+    void emitInitializer(CodeBuilder *builder) override;
+    void emitInstance(CodeBuilder *builder) override;
+    void emitReferenceEntry(CodeBuilder *builder) override;
+
+    void applyImplementation(CodeBuilder* builder, cstring tableValueName,
+                             cstring actionRunVariable) override;
+
+    void registerTable(const EBPFTablePSA * instance) override;
+
+ protected:
+    typedef std::vector<const IR::KeyElement *> SelectorsListType;
+
+    const IR::Property * emptyGroupAction;
+    EBPFHashAlgorithmPSA * hashEngine;
+    SelectorsListType selectors;
+    cstring actionsMapName;
+    cstring groupsMapName;
+    cstring emptyGroupActionMapName;
+    size_t groupsMapSize;
+    cstring outputHashMask;
+    cstring isGroupEntryName;
+    cstring groupStateVarName;
+
+    EBPFHashAlgorithmPSA::ArgumentsList unpackSelectors();
+    SelectorsListType getSelectorsFromTable(const EBPFTablePSA * instance);
+
+    void verifyTableSelectorKeySet(const EBPFTablePSA * instance);
+    void verifyTableEmptyGroupAction(const EBPFTablePSA * instance);
 };
 
 }  // namespace EBPF

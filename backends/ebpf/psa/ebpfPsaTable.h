@@ -68,7 +68,8 @@ class EBPFTablePSA : public EBPFTable {
     void emitInitializer(CodeBuilder* builder) override;
     void emitDirectValueTypes(CodeBuilder* builder) override;
     void emitLookup(CodeBuilder* builder, cstring key, cstring value) override;
-    void emitLookupDefault(CodeBuilder* builder, cstring key, cstring value) override;
+    void emitLookupDefault(CodeBuilder* builder, cstring key, cstring value,
+                           cstring actionRunVariable) override;
     bool dropOnNoMatchingEntryFound() const override;
 
     EBPFCounterPSA* getDirectCounter(cstring name) const {
@@ -79,6 +80,11 @@ class EBPFTablePSA : public EBPFTable {
         if (result != counters.end())
             return result->second;
         return nullptr;
+    }
+
+    bool isMatchTypeSupported(const IR::Declaration_ID* matchType) override {
+        return EBPFTable::isMatchTypeSupported(matchType) ||
+               matchType->name.name == "selector";
     }
 };
 

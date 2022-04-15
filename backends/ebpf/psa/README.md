@@ -180,6 +180,88 @@ if the ActionProfile is specified for a P4 table.
 **Note:** As of April 2022, support for ActionProfile extern in `psabpf-ctl` CLI/API is not implemented yet. As a workaround
 you can use `psabpf-ctl table` command for this extern.
 
+### ActionSelector
+
+[ActionSelector](https://p4.org/p4-spec/docs/PSA-v1.1.0.html#sec-action-selector) is a table implementation similar to
+an ActionProfile, but extends its functionality with support for groups of actions. If a table entry contains a member
+reference, the ActionSelector behaves in the same way as an ActionProfile. In case of group references, the PSA-eBPF compiler
+generates additional BPF maps. One of additional BPF maps (hash map of maps) maps a group reference ID to an inner map 
+that contains a group of entries. The inner map (might be created at runtime by `psabpf-ctl`) stores a number of all
+members in a group as the first element of the inner map. The rest of entries contains members of the ActionSelector group.
+To choose a member from a group, a checksum is calculated from all `selector` match keys. Next, the obtained member from
+the group map is used to get and execute an action.
+
+The second compiler-created map contains an action for an empty group. For the ActionSelector, there are two fields stored
+in a table that uses given ActionSelector instance, one is reference, second is marker whether reference points to group
+or member.
+
+Before action execution, following source code will be generated (and some additional comments to it) for table lookup,
+which has implementation `ActionSelector`:
+```c
+struct ingress_as_value * as_value = NULL;  // pointer to an action data
+u32 as_action_ref = value->ingress_as_ref;  // value->ingress_as_ref is entry from table (reference)
+u8 as_group_state = 0;                      // which map contains action data
+if (value->ingress_as_is_group_ref != 0) {  // (1)
+    bpf_trace_message("ActionSelector: group reference %u\n", as_action_ref);
+    void * as_group_map = BPF_MAP_LOOKUP_ELEM(ingress_as_groups, &as_action_ref);  // get group map
+    if (as_group_map != NULL) {
+        u32 * num_of_members = bpf_map_lookup_elem(as_group_map, &ebpf_zero);      // (2)
+        if (num_of_members != NULL) {
+            if (*num_of_members != 0) {
+                u32 ingress_as_hash_reg = 0xffffffff;  // start calculation of hash
+                {
+                    u8 ingress_as_hash_tmp = 0;
+                    crc32_update(&ingress_as_hash_reg, (u8 *) &(hdr->ethernet.etherType), 2, 3988292384);
+                    bpf_trace_message("CRC: checksum state: %llx\n", (u64) ingress_as_hash_reg);
+                    bpf_trace_message("CRC: final checksum: %llx\n", (u64) crc32_finalize(ingress_as_hash_reg));
+                }
+                u64 as_checksum_val = crc32_finalize(ingress_as_hash_reg) & 0xffff;     // (3)
+                as_action_ref = 1 + (as_checksum_val % (*num_of_members));              // (4)
+                bpf_trace_message("ActionSelector: selected action %u from group\n", as_action_ref);
+                u32 * as_map_entry = bpf_map_lookup_elem(as_group_map, &as_action_ref); // (5)
+                if (as_map_entry != NULL) {
+                    as_action_ref = *as_map_entry;
+                } else {
+                    /* Not found, probably bug. Skip further execution of the extern. */
+                    bpf_trace_message("ActionSelector: Entry with action reference was not found, dropping packet. Bug?\n");
+                    return TC_ACT_SHOT;
+                }
+            } else {
+                bpf_trace_message("ActionSelector: empty group, going to default action\n");
+                as_group_state = 1;
+            }
+        } else {
+            bpf_trace_message("ActionSelector: entry with number of elements not found, dropping packet. Bug?\n");
+            return TC_ACT_SHOT;
+        }
+    } else {
+        bpf_trace_message("ActionSelector: group map was not found, dropping packet. Bug?\n");
+        return TC_ACT_SHOT;
+    }
+}
+if (as_group_state == 0) {
+    bpf_trace_message("ActionSelector: member reference %u\n", as_action_ref);
+    as_value = BPF_MAP_LOOKUP_ELEM(ingress_as_actions, &as_action_ref);         // (6)
+} else if (as_group_state == 1) {
+    bpf_trace_message("ActionSelector: empty group, executing default group action\n");
+    as_value = BPF_MAP_LOOKUP_ELEM(ingress_as_defaultActionGroup, &ebpf_zero);  // (7)
+}
+```
+Description of marked lines:
+1. Detect if a reference is a group reference. When the `_is_group_ref` field is non-zero, the reference is assumed to be
+   a group reference.
+2. Read a first entry in a group. This gives the number of members in a group.
+3. From calculated hash N LSB bits are taken into account. N is obtained from last parameter of constructor of `ActionSelector`.
+4. The number of members in a group is known (the first entry in a table) and one of them must be dynamically selected.
+   An action ID in a group is chosen based on the calculated hash value. A valid value of an action ID in a group is within
+   the following range: {1, 2, ... number of members}.
+5. This lookup is necessary to translate the action ID in a group into a member reference.
+6. When a member reference is found, action data is read from the `_actions` map.
+7. For an empty group (without members), action data is read from the `_defaultActionGroup` table.
+
+To manage the ActionSelector instance (do not confuse with a table that uses this implementation), you can use 
+`psabpf-ctl action-selector` command or C API from psabpf.
+
 ### Digest
 
 [Digests](https://p4.org/p4-spec/docs/PSA.html#sec-packet-digest) are intended to carry a small piece of user-defined data from the data plane to a control plane.

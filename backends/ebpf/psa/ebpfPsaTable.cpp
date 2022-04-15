@@ -31,8 +31,8 @@ class EBPFTablePsaPropertyVisitor : public Inspector {
     explicit EBPFTablePsaPropertyVisitor(EBPFTablePSA* table) : table(table) {}
 
     // Use these two preorders to print error when property contains something other than name of
-    // extern instance. ListExpression is required because without it Expression will take precede
-    // over it and throw error for whole list.
+    // extern instance. ListExpression is required because without it Expression will take
+    // precedence over it and throw error for whole list.
     bool preorder(const IR::ListExpression*) override {
         return true;
     }
@@ -58,8 +58,7 @@ class EBPFTablePSADirectCounterPropertyVisitor : public EBPFTablePsaPropertyVisi
         auto decl = table->program->refMap->getDeclaration(pe->path, true);
         auto di = decl->to<IR::Declaration_Instance>();
         CHECK_NULL(di);
-        auto ts = di->type->to<IR::Type_Specialized>();
-        if (ts == nullptr || ts->baseType->toString() != "DirectCounter") {
+        if (EBPFObject::getSpecializedTypeName(di) != "DirectCounter") {
             ::error(ErrorType::ERR_UNEXPECTED,
                     "%1%: not a DirectCounter, see declaration of %2%", pe, decl);
             return false;
@@ -96,7 +95,7 @@ class EBPFTablePSAImplementationPropertyVisitor : public EBPFTablePsaPropertyVis
             return false;
         }
 
-        if (type == "ActionProfile") {
+        if (type == "ActionProfile" || type == "ActionSelector") {
             auto ap = table->program->control->getTable(di->name.name);
             table->implementation = ap->to<EBPFTableImplementationPSA>();
         }
@@ -211,6 +210,39 @@ void EBPFTablePSA::initDirectCounters() {
 void EBPFTablePSA::initImplementation() {
     EBPFTablePSAImplementationPropertyVisitor visitor(this);
     visitor.visitTableProperty();
+
+    bool hasActionSelector = (implementation != nullptr &&
+            implementation->is<EBPFActionSelectorPSA>());
+
+    // check if we have also selector key
+    const IR::KeyElement * selectorKey = nullptr;
+    if (keyGenerator != nullptr) {
+        for (auto k : keyGenerator->keyElements) {
+            auto mkdecl = program->refMap->getDeclaration(k->matchType->path, true);
+            auto matchType = mkdecl->getNode()->to<IR::Declaration_ID>();
+            if (matchType->name.name == "selector") {
+                selectorKey = k;
+                break;
+            }
+        }
+    }
+
+    if (hasActionSelector && selectorKey == nullptr) {
+        ::error(ErrorType::ERR_NOT_FOUND,
+                "%1%: ActionSelector provided but there is no selector key",
+                table->container);
+    }
+    if (!hasActionSelector && selectorKey != nullptr) {
+        ::error(ErrorType::ERR_NOT_FOUND,
+                "%1%: implementation not found, ActionSelector is required",
+                selectorKey->matchType);
+    }
+    auto emptyGroupAction = table->container->properties->getProperty("psa_empty_group_action");
+    if (!hasActionSelector && emptyGroupAction != nullptr) {
+        ::warning(ErrorType::WARN_UNUSED,
+                  "%1%: unused property (ActionSelector not provided)",
+                  emptyGroupAction);
+    }
 }
 
 ActionTranslationVisitor* EBPFTablePSA::createActionTranslationVisitor(
@@ -476,14 +508,21 @@ void EBPFTablePSA::emitLookup(CodeBuilder* builder, cstring key, cstring value) 
     EBPFTable::emitLookup(builder, key, value);
 }
 
-void EBPFTablePSA::emitLookupDefault(CodeBuilder* builder, cstring key, cstring value) {
+void EBPFTablePSA::emitLookupDefault(CodeBuilder* builder, cstring key, cstring value,
+                                     cstring actionRunVariable) {
     if (implementation != nullptr) {
         builder->appendLine("/* table with implementation has default action "
                             "implicitly set to NoAction, so we can skip execution of it */");
         builder->target->emitTraceMessage(builder,
                                           "Control: skipping default action due to implementation");
+
+        if (!actionRunVariable.isNullOrEmpty()) {
+            builder->emitIndent();
+            builder->appendFormat("%s = 0", actionRunVariable.c_str());  // set to NoAction
+            builder->endOfStatement(true);
+        }
     } else {
-        EBPFTable::emitLookupDefault(builder, key, value);
+        EBPFTable::emitLookupDefault(builder, key, value, actionRunVariable);
     }
 }
 
