@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "ebpfPsaTable.h"
 #include "backends/ebpf/ebpfControl.h"
+#include "backends/ebpf/psa/externs/ebpfPsaChecksum.h"
 #include "backends/ebpf/psa/externs/ebpfPsaRegister.h"
 
 namespace EBPF {
@@ -62,12 +63,14 @@ class EBPFControlPSA : public EBPFControl {
     const IR::Parameter* inputStandardMetadata;
     const IR::Parameter* outputStandardMetadata;
 
+    std::map<cstring, EBPFHashPSA*> hashes;
     std::map<cstring, EBPFRegisterPSA*>  registers;
 
     EBPFControlPSA(const EBPFProgram* program, const IR::ControlBlock* control,
                    const IR::Parameter* parserHeaders) :
         EBPFControl(program, control, parserHeaders) {}
 
+    void emit(CodeBuilder* builder) override;
     void emitTableTypes(CodeBuilder* builder) override;
     void emitTableInstances(CodeBuilder* builder) override;
     void emitTableInitializers(CodeBuilder* builder) override;
@@ -75,7 +78,14 @@ class EBPFControlPSA : public EBPFControl {
     EBPFRegisterPSA* getRegister(cstring name) const {
         auto result = ::get(registers, name);
         BUG_CHECK(result != nullptr, "No register named %1%", name);
-        return result; }
+        return result;
+    }
+
+    EBPFHashPSA* getHash(cstring name) const {
+        auto result = ::get(hashes, name);
+        BUG_CHECK(result != nullptr, "No hash named %1%", name);
+        return result;
+    }
 };
 
 }  // namespace EBPF

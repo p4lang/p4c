@@ -643,6 +643,9 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
     } else if (typeName == "DirectCounter") {
         // instance will be created by table
         return false;
+    } else if (typeName == "Hash") {
+        auto hash = new EBPFHashPSA(program, di, name);
+        control->hashes.emplace(name, hash);
     } else {
         ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
                 instance);

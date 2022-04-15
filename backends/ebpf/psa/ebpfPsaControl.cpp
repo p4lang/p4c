@@ -39,6 +39,13 @@ bool ControlBodyTranslatorPSA::preorder(const IR::AssignmentStatement* a) {
             auto reg = control->to<EBPFControlPSA>()->getRegister(name);
             reg->emitRegisterRead(builder, ext, this, a->left);
             return false;
+        } else if (ext->originalExternType->name.name == "Hash") {
+            cstring name = EBPFObject::externalName(ext->object);
+            auto hash = control->to<EBPFControlPSA>()->getHash(name);
+            // Before assigning a value to a left expression we have to calculate a hash.
+            // Then the hash value is stored in a registerVar variable.
+            hash->calculateHash(builder, ext->expr, this);
+            builder->emitIndent();
         }
     }
 
@@ -53,6 +60,10 @@ void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod* method) {
     if (declType->name.name == "Counter") {
         auto counterMap = control->getCounter(name);
         counterMap->to<EBPFCounterPSA>()->emitMethodInvocation(builder, method, this);
+        return;
+    } else if (declType->name.name == "Hash") {
+        auto hash = control->to<EBPFControlPSA>()->getHash(name);
+        hash->processMethod(builder, method->method->name.name, method->expr, this);
         return;
     } else if (declType->name.name == "Register") {
         auto reg = control->to<EBPFControlPSA>()->getRegister(name);
@@ -71,6 +82,12 @@ void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod* method) {
 
 cstring ControlBodyTranslatorPSA::getParamName(const IR::PathExpression *expr) {
     return expr->path->name.name;
+}
+
+void EBPFControlPSA::emit(CodeBuilder *builder) {
+    for (auto h : hashes)
+        h.second->emitVariables(builder);
+    EBPFControl::emit(builder);
 }
 
 void EBPFControlPSA::emitTableTypes(CodeBuilder *builder) {

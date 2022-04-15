@@ -119,14 +119,12 @@ EBPFPsaParser::EBPFPsaParser(const EBPFProgram* program, const IR::ParserBlock* 
 void EBPFPsaParser::emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) {
     if (auto di = decl->to<IR::Declaration_Instance>()) {
         cstring name = di->name.name;
-        auto type = di->type->to<IR::Type_Name>();
-        auto typeSpec = di->type->to<IR::Type_Specialized>();
         if (EBPFObject::getSpecializedTypeName(di) == "Checksum") {
             auto instance = new EBPFChecksumPSA(program, di, name);
             checksums.emplace(name, instance);
             instance->emitVariables(builder);
             return;
-        } else if (type != nullptr && type->path->name.name == "InternetChecksum") {
+        } else if (EBPFObject::getTypeName(di) == "InternetChecksum") {
             auto instance = new EBPFInternetChecksumPSA(program, di, name);
             checksums.emplace(name, instance);
             instance->emitVariables(builder);

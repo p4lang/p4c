@@ -85,4 +85,51 @@ void EBPFInternetChecksumPSA::processMethod(CodeBuilder* builder, cstring method
     }
 }
 
+void EBPFHashPSA::processMethod(CodeBuilder* builder, cstring method,
+                                const IR::MethodCallExpression * expr, Visitor * visitor) {
+    engine->setVisitor(visitor);
+
+    if (method == "get_hash") {
+        emitGetMethod(builder, expr, visitor);
+    } else {
+        ::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call %1%", expr);
+    }
+}
+
+/**
+ * This method calculates a hash value and saves it to the registerVar.
+ */
+void EBPFHashPSA::calculateHash(CodeBuilder* builder, const IR::MethodCallExpression * expr,
+                                Visitor * visitor) {
+    engine->setVisitor(visitor);
+    // Every call of "get_hash" method should be independent out another. This means that
+    // we need to set hash instance to default value.
+    engine->emitClear(builder);
+    engine->emitAddData(builder, expr->arguments->size() == 3 ? 1 : 0, expr);
+}
+
+void EBPFHashPSA::emitGetMethod(CodeBuilder* builder, const IR::MethodCallExpression * expr,
+                                Visitor * visitor) {
+    BUG_CHECK(expr->arguments->size() == 1 || expr->arguments->size() == 3,
+              "Expected 1 or 3 arguments: %1%", expr);
+
+    // Two forms of get method:
+    // 1: (state)
+    // 2: (( (state) % (max)) + (base))
+
+    if (expr->arguments->size() == 3) {
+        builder->append("((");
+    }
+
+    engine->emitGet(builder);
+
+    if (expr->arguments->size() == 3) {
+        builder->append(" % (");
+        visitor->visit(expr->arguments->at(2));
+        builder->append(")) + (");
+        visitor->visit(expr->arguments->at(0));
+        builder->append("))");
+    }
+}
+
 }  // namespace EBPF
