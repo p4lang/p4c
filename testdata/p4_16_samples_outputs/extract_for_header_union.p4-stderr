@@ -1,0 +1,15 @@
+extract_for_header_union.p4(41): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+    state start {
+          ^^^^^
+extract_for_header_union.p4(37): [--Wwarn=parser-transition] warning: accept state in parser ProtParser is unreachable
+parser ProtParser(packet_in packet,
+       ^^^^^^^^^^
+extract_for_header_union.p4(43): [--Wwarn=uninitialized_use] warning: hdr.addr_src2.ipv4.addr may be uninitialized
+        hdr.addr_src1.ipv4.addr = hdr.addr_src2.ipv4.addr;
+                                  ^^^^^^^^^^^^^^^^^^^^^^^
+extract_for_header_union.p4(43): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.addr_src2.ipv4
+        hdr.addr_src1.ipv4.addr = hdr.addr_src2.ipv4.addr;
+                                  ^^^^^^^^^^^^^^^^^^
+extract_for_header_union.p4(37): [--Wwarn=parser-transition] warning: accept state in parser ProtParser is unreachable
+parser ProtParser(packet_in packet,
+       ^^^^^^^^^^

@@ -237,7 +237,7 @@ bool ValidateTableKeys::isMetadataStruct(const IR::Type_Struct *st) {
 }
 
 bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
-    const IR::DpdkStructType *metaStruct;
+    const IR::DpdkStructType *metaStruct = nullptr;
     for (auto st : p->structType) {
         if (isMetadataStruct(st)) {
             metaStruct = st;

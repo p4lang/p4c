@@ -25,6 +25,7 @@ limitations under the License.
 
 #include "dpdkArch.h"
 #include "dpdkHelpers.h"
+#include "dpdkUtils.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/externInstance.h"
@@ -32,34 +33,6 @@ limitations under the License.
 #include "frontends/p4/tableApply.h"
 
 namespace DPDK {
-
-bool isSimpleExpression(const IR::Expression *e) {
-    if (e->is<IR::Member>() || e->is<IR::PathExpression>() ||
-        e->is<IR::Constant>() || e->is<IR::BoolLiteral>())
-        return true;
-    return false;
-}
-bool isNonConstantSimpleExpression(const IR::Expression *e) {
-    if (e->is<IR::Member>() || e->is<IR::PathExpression>())
-        return true;
-    return false;
-}
-
-bool isStandardMetadata(cstring name) {
-    bool isStdMeta = name == "psa_ingress_parser_input_metadata_t" ||
-                     name == "psa_ingress_input_metadata_t" ||
-                     name == "psa_ingress_output_metadata_t" ||
-                     name == "psa_egress_parser_input_metadata_t" ||
-                     name == "psa_egress_input_metadata_t" ||
-                     name == "psa_egress_output_metadata_t" ||
-                     name == "psa_egress_deparser_input_metadata_t" ||
-                     name == "pna_pre_input_metadata_t" ||
-                     name == "pna_pre_output_metadata_t" ||
-                     name == "pna_main_input_metadata_t" ||
-                     name == "pna_main_output_metadata_t" ||
-                     name == "pna_main_parser_input_metadata_t";
-    return isStdMeta;
-}
 
 cstring TypeStruct2Name(const cstring s) {
     if (isStandardMetadata(s)) {
@@ -663,6 +636,18 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
 /* This function processes the metadata structure and modify the metadata field width
    to 32/64 bits if it is not 8-bit aligned */
 const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
+    /* Throw error if field width is greater than 64 bits */
+    for (auto field : st->fields) {
+        if ((*field).type->is<IR::Type_Bits>()) {
+            auto t = (*field).type->to<IR::Type_Bits>();
+            auto width = t->width_bits();
+            if (width > dpdk_max_field_width) {
+            ::error("Unsupported bit width '%1%' for field '%2%'. DPDK "
+                     "does not support metadata/header field with width more than "
+                     "'%3%' bits", width, field, dpdk_max_field_width);
+            }
+        }
+    }
     auto fields = new IR::IndexedVector<IR::StructField>;
     if (st->is<IR::Type_Struct>()) {
         for (auto field : st->fields) {
@@ -690,16 +675,21 @@ const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
 // This function collects the match key information of a table. This is later used for
 // generating context JSON.
 bool CollectTableInfo::preorder(const IR::Key *keys) {
-    std::vector<cstring> tableKeys;
+    std::vector<std::pair<cstring, cstring>> tableKeys;
     if (!keys || keys->keyElements.size() == 0) {
         return false;
     }
     /* Push all non-selector keys to the key_map for this table.
        Selector keys become part of the selector table */
     for (auto key : keys->keyElements) {
-        cstring keyTypeStr = key->expression->toString();
-        if (key->matchType->toString() != "selector")
-            tableKeys.push_back(keyTypeStr);
+        cstring keyName = key->expression->toString();
+        cstring keyNameAnnon = key->expression->toString();;
+        auto annon = key->getAnnotation(IR::Annotation::nameAnnotation);
+        if (key->matchType->toString() != "selector") {
+            if (annon !=  nullptr)
+                keyNameAnnon = annon->getSingleString();
+            tableKeys.push_back(std::make_pair(keyName, keyNameAnnon));
+        }
     }
 
     auto control = findOrigCtxt<IR::P4Control>();
@@ -1086,10 +1076,29 @@ ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
         } else if (left->equiv(*r->right)) {
             IR::Operation_Binary *bin_expr;
             bin_expr = r->clone();
-            bin_expr->left = r->right;
-            bin_expr->right = r->left;
-            a->right = bin_expr;
-            return a;
+            if (isCommutativeBinaryOperation(r)) {
+                bin_expr->left = r->right;
+                bin_expr->right = r->left;
+                a->right = bin_expr;
+                return a;
+            } else {
+                // Non-commutative expressions like "a = b << a" should be replaced with the
+                // following block of statments
+                // tmp = b;
+                // tmp = tmp << a;
+                // a = tmp;
+                IR::IndexedVector<IR::StatOrDecl> code_block;
+                auto control = findOrigCtxt<IR::P4Control>();
+                auto parser = findOrigCtxt<IR::P4Parser>();
+                auto tmpOp1 = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
+                injector.collect(control, parser,
+                                 new IR::Declaration_Variable(tmpOp1->path->name, left->type));
+                code_block.push_back(new IR::AssignmentStatement(tmpOp1, r->left));
+                bin_expr->left = tmpOp1;
+                code_block.push_back(new IR::AssignmentStatement(tmpOp1, bin_expr));
+                code_block.push_back(new IR::AssignmentStatement(left, tmpOp1));
+                return new IR::BlockStatement(code_block);
+            }
         } else {
             IR::IndexedVector<IR::StatOrDecl> code_block;
             const IR::Expression *src1;
@@ -1098,8 +1107,13 @@ ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
                 src1 = r->left;
                 src2 = r->right;
             } else if (isNonConstantSimpleExpression(r->right)) {
-                src1 = r->right;
-                src2 = r->left;
+                if (isCommutativeBinaryOperation(r)) {
+                    src1 = r->right;
+                    src2 = r->left;
+                } else {
+                    src1 = r->left;
+                    src2 = r->right;
+                }
             } else {
                 std::cerr << r->right->node_type_name() << std::endl;
                 std::cerr << r->left->node_type_name() << std::endl;
@@ -1112,7 +1126,6 @@ ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
             expr->left = left;
             expr->right = src2;
             code_block.push_back(new IR::AssignmentStatement(left, expr));
-            // code_block.push_back(new IR::AssignmentStatement(left, tmp));
             return new IR::BlockStatement(code_block);
         }
     }

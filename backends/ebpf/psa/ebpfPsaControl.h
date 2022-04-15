@@ -20,6 +20,7 @@ limitations under the License.
 #include "ebpfPsaTable.h"
 #include "backends/ebpf/ebpfControl.h"
 #include "backends/ebpf/psa/externs/ebpfPsaChecksum.h"
+#include "backends/ebpf/psa/externs/ebpfPsaRegister.h"
 
 namespace EBPF {
 
@@ -29,8 +30,11 @@ class ControlBodyTranslatorPSA : public ControlBodyTranslator {
  public:
     explicit ControlBodyTranslatorPSA(const EBPFControlPSA* control);
 
-    void processMethod(const P4::ExternMethod* method) override;
     bool preorder(const IR::AssignmentStatement* a) override;
+
+    void processMethod(const P4::ExternMethod* method) override;
+
+    virtual cstring getParamName(const IR::PathExpression *);
 };
 
 class ActionTranslationVisitorPSA : public ActionTranslationVisitor,
@@ -46,6 +50,8 @@ class ActionTranslationVisitorPSA : public ActionTranslationVisitor,
     bool isActionParameter(const IR::Expression *expression) const;
 
     void processMethod(const P4::ExternMethod* method) override;
+    cstring getParamInstanceName(const IR::Expression *expression) const override;
+    cstring getParamName(const IR::PathExpression *) override;
 };
 
 class EBPFControlPSA : public EBPFControl {
@@ -58,13 +64,23 @@ class EBPFControlPSA : public EBPFControl {
     const IR::Parameter* outputStandardMetadata;
 
     std::map<cstring, EBPFHashPSA*> hashes;
+    std::map<cstring, EBPFRegisterPSA*>  registers;
 
     EBPFControlPSA(const EBPFProgram* program, const IR::ControlBlock* control,
                    const IR::Parameter* parserHeaders) :
         EBPFControl(program, control, parserHeaders) {}
 
     void emit(CodeBuilder* builder) override;
+    void emitTableTypes(CodeBuilder* builder) override;
+    void emitTableInstances(CodeBuilder* builder) override;
+    void emitTableInitializers(CodeBuilder* builder) override;
 
+    EBPFRegisterPSA* getRegister(cstring name) const {
+        auto result = ::get(registers, name);
+        BUG_CHECK(result != nullptr, "No register named %1%", name);
+        return result; 
+    }
+  
     EBPFHashPSA* getHash(cstring name) const {
         auto result = ::get(hashes, name);
         BUG_CHECK(result != nullptr, "No hash named %1%", name);

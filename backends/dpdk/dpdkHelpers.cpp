@@ -15,6 +15,7 @@ limitations under the License.
 */
 #include <iostream>
 #include "dpdkHelpers.h"
+#include "dpdkUtils.h"
 #include "ir/ir.h"
 #include "frontends/p4/tableApply.h"
 
@@ -117,24 +118,40 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
     if (auto r = right->to<IR::Operation_Relation>()) {
         process_relation_operation(left, r);
     } else if (auto r = right->to<IR::Operation_Binary>()) {
+        auto src1Op = r->left;
+        auto src2Op = r->right;
+        if (r->left->is<IR::Constant>()) {
+            if (isCommutativeBinaryOperation(r)) {
+                src1Op = r->right;
+                src2Op = r->left;
+            } else {
+                // Move constant param to metadata as DPDK expects it to be in metadata
+                BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                IR::ID src1(refmap->newName("tmpSrc1"));
+                metadataStruct->fields.push_back(new IR::StructField(src1, r->left->type));
+                auto src1Member = new IR::Member(new IR::PathExpression("m"), src1);
+                add_instr(new IR::DpdkMovStatement(src1Member, r->left));
+                src1Op = src1Member;
+            }
+        }
         if (right->is<IR::Add>()) {
-            i = new IR::DpdkAddStatement(left, r->left, r->right);
+            i = new IR::DpdkAddStatement(left, src1Op, src2Op);
         } else if (right->is<IR::Sub>()) {
-            i = new IR::DpdkSubStatement(left, r->left, r->right);
+            i = new IR::DpdkSubStatement(left, src1Op, src2Op);
         } else if (right->is<IR::Shl>()) {
-            i = new IR::DpdkShlStatement(left, r->left, r->right);
+            i = new IR::DpdkShlStatement(left, src1Op, src2Op);
         } else if (right->is<IR::Shr>()) {
-            i = new IR::DpdkShrStatement(left, r->left, r->right);
+            i = new IR::DpdkShrStatement(left, src1Op, src2Op);
         } else if (right->is<IR::Equ>()) {
-            i = new IR::DpdkEquStatement(left, r->left, r->right);
+            i = new IR::DpdkEquStatement(left, src1Op, src2Op);
         } else if (right->is<IR::LOr>() || right->is<IR::LAnd>()) {
             process_logical_operation(left, r);
         } else if (right->is<IR::BOr>()) {
-            i = new IR::DpdkOrStatement(left, r->left, r->right);
+            i = new IR::DpdkOrStatement(left, src1Op, src2Op);
         } else if (right->is<IR::BAnd>()) {
-            i = new IR::DpdkAndStatement(left, r->left, r->right);
+            i = new IR::DpdkAndStatement(left, src1Op, src2Op);
         } else if (right->is<IR::BXor>()) {
-            i = new IR::DpdkXorStatement(left, r->left, r->right);
+            i = new IR::DpdkXorStatement(left, src1Op, src2Op);
         } else {
             BUG("%1% not implemented.", right);
         }

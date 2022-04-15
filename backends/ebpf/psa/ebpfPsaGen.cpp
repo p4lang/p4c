@@ -633,6 +633,9 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
     } else if (typeName == "Counter") {
         auto ctr = new EBPFCounterPSA(program, di, name, control->codeGen);
         control->counters.emplace(name, ctr);
+    } else if (typeName == "Register") {
+        auto reg = new EBPFRegisterPSA(program, name, di, control->codeGen);
+        control->registers.emplace(name, reg);
     } else if (typeName == "DirectCounter") {
         // instance will be created by table
         return false;

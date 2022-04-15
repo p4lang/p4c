@@ -564,6 +564,27 @@ void EBPFControl::emitDeclaration(CodeBuilder* builder, const IR::Declaration* d
         bool isPointer = codeGen->isPointerVariable(decl->name.name);
         etype->declareInit(builder, vd->name, isPointer);
         builder->endOfStatement(true);
+
+        if (!isPointer) {
+            if (auto type = etype->to<EBPFTypeName>()) {
+                if (type->canonicalTypeIs<EBPFStructType>()) {
+                    // A struct type might be used as a lookup key.
+                    // When a data structure is aligned and is not packed,
+                    // the compiler might generate offsets between fields.
+                    // The BPF verifier may reject using such structures with
+                    // uninitialized offsets as lookup keys.
+                    // Therefore, this piece of code zero-initialize structures
+                    // that might be used as keys.
+                    builder->emitIndent();
+                    builder->appendFormat("__builtin_memset((void *) &%s, 0, sizeof(",
+                                          vd->name.name);
+                    etype->declare(builder, cstring::empty, false);
+                    builder->append("))");
+                    builder->endOfStatement(true);
+                }
+            }
+        }
+
         BUG_CHECK(vd->initializer == nullptr,
                   "%1%: declarations with initializers not supported", decl);
         return;

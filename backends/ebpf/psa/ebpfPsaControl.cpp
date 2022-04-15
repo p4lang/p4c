@@ -23,6 +23,35 @@ ControlBodyTranslatorPSA::ControlBodyTranslatorPSA(const EBPFControlPSA* control
         CodeGenInspector(control->program->refMap, control->program->typeMap),
         ControlBodyTranslator(control) {}
 
+bool ControlBodyTranslatorPSA::preorder(const IR::AssignmentStatement* a) {
+    if (auto methodCallExpr = a->right->to<IR::MethodCallExpression>()) {
+        auto mi = P4::MethodInstance::resolve(methodCallExpr,
+                                              control->program->refMap,
+                                              control->program->typeMap);
+        auto ext = mi->to<P4::ExternMethod>();
+        if (ext == nullptr) {
+            return false;
+        }
+
+        if (ext->originalExternType->name.name == "Register" &&
+            ext->method->type->name == "read") {
+            cstring name = EBPFObject::externalName(ext->object);
+            auto reg = control->to<EBPFControlPSA>()->getRegister(name);
+            reg->emitRegisterRead(builder, ext, this, a->left);
+            return false;
+        } else if (ext->originalExternType->name.name == "Hash") {
+            cstring name = EBPFObject::externalName(ext->object);
+            auto hash = control->to<EBPFControlPSA>()->getHash(name);
+            // Before assigning a value to a left expression we have to calculate a hash.
+            // Then the hash value is stored in a registerVar variable.
+            hash->calculateHash(builder, ext->expr, this);
+            builder->emitIndent();
+        }
+    }
+
+    return CodeGenInspector::preorder(a);
+}
+
 void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod* method) {
     auto decl = method->object;
     auto declType = method->originalExternType;
@@ -36,36 +65,54 @@ void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod* method) {
         auto hash = control->to<EBPFControlPSA>()->getHash(name);
         hash->processMethod(builder, method->method->name.name, method->expr, this);
         return;
-    }
-
-    ControlBodyTranslator::processMethod(method);
-}
-
-bool ControlBodyTranslatorPSA::preorder(const IR::AssignmentStatement* a) {
-    if (auto methodCallExpr = a->right->to<IR::MethodCallExpression>()) {
-        auto mi = P4::MethodInstance::resolve(methodCallExpr,
-                                              control->program->refMap,
-                                              control->program->typeMap);
-        auto ext = mi->to<P4::ExternMethod>();
-        if (ext != nullptr) {
-            if (ext->originalExternType->name.name == "Hash") {
-                cstring name = EBPFObject::externalName(ext->object);
-                auto hash = control->to<EBPFControlPSA>()->getHash(name);
-                // Before assigning a value to a left expression we have to calculate a hash.
-                // Then the hash value is stored in a registerVar variable.
-                hash->calculateHash(builder, ext->expr, this);
-                builder->emitIndent();
-            }
+    } else if (declType->name.name == "Register") {
+        auto reg = control->to<EBPFControlPSA>()->getRegister(name);
+        if (method->method->type->name == "write") {
+            reg->emitRegisterWrite(builder, method, this);
+        } else if (method->method->type->name == "read") {
+            ::warning(ErrorType::WARN_UNUSED, "This Register(%1%) read value is not used!", name);
+            reg->emitRegisterRead(builder, method, this, nullptr);
         }
+        return;
+    } else {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "%1%: Unexpected method call", method->expr);
     }
-
-    return CodeGenInspector::preorder(a);
 }
 
+cstring ControlBodyTranslatorPSA::getParamName(const IR::PathExpression *expr) {
+    return expr->path->name.name;
+}
+  
 void EBPFControlPSA::emit(CodeBuilder *builder) {
-        for (auto h : hashes)
-            h.second->emitVariables(builder);
-        EBPFControl::emit(builder);
+    for (auto h : hashes)
+        h.second->emitVariables(builder);
+    EBPFControl::emit(builder);
+}
+
+void EBPFControlPSA::emitTableTypes(CodeBuilder *builder) {
+    EBPFControl::emitTableTypes(builder);
+
+    for (auto it : registers)
+        it.second->emitTypes(builder);
+}
+
+void EBPFControlPSA::emitTableInstances(CodeBuilder* builder) {
+    for (auto it : tables)
+        it.second->emitInstance(builder);
+    for (auto it : counters)
+        it.second->emitInstance(builder);
+    for (auto it : registers)
+        it.second->emitInstance(builder);
+}
+
+void EBPFControlPSA::emitTableInitializers(CodeBuilder* builder) {
+    for (auto it : tables) {
+        it.second->emitInitializer(builder);
+    }
+    for (auto it : registers) {
+        it.second->emitInitializer(builder);
+    }
 }
 
 }
