@@ -729,7 +729,9 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
             return b->size == 1 && !b->isSigned;
         }
     } else if (src->is<IR::Type_InfInt>()) {
-        return dest->is<IR::Type_Bits>() || dest->is<IR::Type_Boolean>();
+        return dest->is<IR::Type_Bits>() ||
+                dest->is<IR::Type_Boolean>() ||
+                dest->is<IR::Type_InfInt>();
     } else if (src->is<IR::Type_Newtype>()) {
         auto st = getTypeType(src->to<IR::Type_Newtype>()->type);
         return typeMap->equivalent(dest, st);
