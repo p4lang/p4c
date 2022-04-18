@@ -59,6 +59,8 @@ header MainParserT_parser_tmp_hdr instanceof option_t
 ;oldname:MainParserT_parser_lookahead_tmp
 header MainParserT_parser_lookahead_0 instanceof lookahead_tmp_hdr
 
+regarray direction_port_mask size 0x1 initval 0
+
 action NoAction args none {
 	return
 }

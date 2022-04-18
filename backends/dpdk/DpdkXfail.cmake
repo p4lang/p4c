@@ -72,10 +72,6 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "Non Type_Bits type bool for expression"
-  )
-
-p4c_add_xfail_reason("dpdk"
   "mirror_packet cannot be used in the"
   testdata/p4_16_samples/pna-example-mirror-packet-ctxt-error.p4
   testdata/p4_16_samples/pna-example-mirror-packet-ctxt-error1.p4
@@ -94,6 +90,11 @@ p4c_add_xfail_reason("dpdk"
 p4c_add_xfail_reason("dpdk"
   "No argument supplied for parameter"
   testdata/p4_16_samples/pna-example-mirror-packet-error3.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "declaration not found"
+  testdata/p4_16_samples/pna-direction-main-parser-err.p4
   )
 
 p4c_add_xfail_reason("dpdk"

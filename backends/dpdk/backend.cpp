@@ -122,6 +122,14 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     dpdk_program = convertToDpdk->getDpdkProgram();
     if (!dpdk_program)
         return;
+    if (structure.p4arch == "pna") {
+        PassManager post_code_gen = {
+            new DirectionToRegRead(),
+            new AddNewMetadataFields(),
+        };
+        dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
+    }
+
     PassManager post_code_gen = {
         new EliminateUnusedAction(),
         new DpdkAsmOptimization,

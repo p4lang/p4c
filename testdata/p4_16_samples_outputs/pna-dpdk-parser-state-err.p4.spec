@@ -69,6 +69,8 @@ header ipv4 instanceof ipv4_t
 header tcp instanceof tcp_t
 header MainControlT_hdr_3_tcp instanceof tcp_t
 
+regarray direction_port_mask size 0x1 initval 0
+
 action do_range_checks_1 args instanceof do_range_checks_1_arg_t {
 	mov h.MainControlT_hdr_3_tcp h.tcp
 	jmpgt LABEL_FALSE_2 t.min1 h.MainControlT_hdr_3_tcp.srcPort

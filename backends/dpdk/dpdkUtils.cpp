@@ -53,4 +53,14 @@ bool isStandardMetadata(cstring name) {
                      name == "pna_main_parser_input_metadata_t";
     return isStdMeta;
 }
+
+bool isMetadataStruct(const IR::Type_Struct *st) {
+    for (auto anno : st->annotations->annotations) {
+        if (anno->name == "__metadata__") {
+            return true;
+        }
+    }
+    return false;
+}
+
 }  // namespace DPDK

@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "dpdkAsmOpt.h"
+#include "dpdkUtils.h"
 
 namespace DPDK {
 // The assumption is compiler can only produce forward jumps.
@@ -178,12 +179,8 @@ bool RemoveUnusedMetadataFields::isByteSizeField(const IR::Type *field_type) {
 
 const IR::Node* RemoveUnusedMetadataFields::preorder(IR::DpdkAsmProgram *p) {
     IR::IndexedVector<IR::DpdkStructType> usedStruct;
-    bool isMetadataStruct = false;
     for (auto st : p->structType) {
-        if (!isMetadataStruct) {
-            for (auto anno : st->annotations->annotations) {
-                if (anno->name == "__metadata__") {
-                    isMetadataStruct = true;
+        if (isMetadataStruct(st)) {
                     IR::IndexedVector<IR::StructField> usedMetadataFields;
                     for (auto field : st->fields) {
                         if (used_fields.count(field->name.name)) {
@@ -198,11 +195,6 @@ const IR::Node* RemoveUnusedMetadataFields::preorder(IR::DpdkAsmProgram *p) {
                     auto newSt = new IR::DpdkStructType(st->srcInfo, st->name,
                                                    st->annotations, usedMetadataFields);
                     usedStruct.push_back(newSt);
-                }
-            }
-            if (!isMetadataStruct) {
-                usedStruct.push_back(st);
-            }
         } else {
             usedStruct.push_back(st);
         }
@@ -227,15 +219,6 @@ int ValidateTableKeys::getFieldSizeBits(const IR::Type *field_type) {
     return -1;
 }
 
-bool ValidateTableKeys::isMetadataStruct(const IR::Type_Struct *st) {
-    for (auto anno : st->annotations->annotations) {
-        if (anno->name == "__metadata__") {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
     const IR::DpdkStructType *metaStruct = nullptr;
     for (auto st : p->structType) {
@@ -256,7 +239,8 @@ bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
                                                           "%1% is not a structure field", key);
             auto keyMem = key->expression->to<IR::Member>();
             auto type = keyMem->expr->type;
-            if (type->is<IR::Type_Struct>() && isMetadataStruct(type->to<IR::Type_Struct>())) {
+            if (type->is<IR::Type_Struct>()
+                && isMetadataStruct(type->to<IR::Type_Struct>())) {
                 auto offset = metaStruct->getFieldBitOffset(keyMem->member.name);
                 if (min == -1 || min > offset)
                     min = offset;
@@ -280,5 +264,104 @@ bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
     return false;
 }
 
+const IR::Node* AddNewMetadataFields::preorder(IR::DpdkStructType *st) {
+    if (isMetadataStruct(st)) {
+        for (auto nf : newMetadataFields) {
+                st->fields.push_back(nf);
+        }
+        auto newSt = new IR::DpdkStructType(st->srcInfo, st->name,
+                                          st->annotations, st->fields);
+        newMetadataFields.clear();
+        return newSt;
+    }
+    return st;
+}
+
+const IR::Node* DirectionToRegRead::preorder(IR::DpdkAsmProgram *p) {
+        p->externDeclarations.push_back(addRegDeclInstance(registerInstanceName));
+        return p;
+     }
+
+IR::DpdkExternDeclaration* DirectionToRegRead::addRegDeclInstance(cstring instanceName) {
+    auto typepath = new IR::Path("Register");
+    auto type = new IR::Type_Name(typepath);
+    auto typeargs = new IR::Vector<IR::Type>({IR::Type::Bits::get(32),
+                                              IR::Type::Bits::get(32)});
+    auto spectype = new IR::Type_Specialized(type, typeargs);
+    auto args = new IR::Vector<IR::Argument>();
+    args->push_back(new IR::Argument(new IR::Constant(IR::Type::Bits::get(32), 1)));
+    auto annot = IR::Annotations::empty;
+    annot->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                              new IR::StringLiteral(instanceName));
+    auto decl = new IR::DpdkExternDeclaration(instanceName, annot, spectype, args,
+                    nullptr);
+    return decl;
+}
+
+void DirectionToRegRead::addMetadataField(cstring fieldName) {
+    if (newFieldName.count(fieldName))
+        return;
+     newMetadataFields.push_back(new IR::StructField(IR::ID(fieldName),
+                                 IR::Type::Bits::get(32)));
+     newFieldName.insert(fieldName);
+}
+
+bool DirectionToRegRead::isDirection(const IR::Member *m) {
+    if (m == nullptr)
+        return false;
+     return m->member.name == "pna_main_input_metadata_direction"
+         || m->member.name == "pna_pre_input_metadata_direction"
+         || m->member.name == "pna_main_parser_input_metadata_direction";
+}
+
+const IR::Node *DirectionToRegRead::postorder(IR::DpdkListStatement *l) {
+    l->statements = replaceDirectionWithRegRead(l->statements);
+    newStmts.clear();
+    return l;
+}
+
+void DirectionToRegRead::replaceDirection(const IR::Member *m) {
+    addMetadataField(reg_read_tmp);
+    addMetadataField(left_shift_tmp);
+    auto reade = new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                IR::ID(reg_read_tmp));
+    auto reads = new IR::DpdkRegisterReadStatement(reade, registerInstanceName,
+                                                   new IR::Constant(IR::Type::Bits::get(32),
+                                                   0));
+    auto shld = new IR::Member(new IR::PathExpression(IR::ID("m")),
+                               IR::ID(left_shift_tmp));
+    auto mov = new IR::DpdkMovStatement(shld, new IR::Constant(IR::Type::Bits::get(32), 1));
+    auto shl = new IR::DpdkShlStatement(shld, shld,
+               new IR::Member(new IR::PathExpression(IR::ID("m")),
+                              IR::ID(dirToInput[m->member.name])));
+    auto mov1 = new IR::DpdkMovStatement(m, reade);
+    auto and0 = new IR::DpdkAndStatement(m, m, shld);
+    newStmts.push_back(reads);
+    newStmts.push_back(mov);
+    newStmts.push_back(shl);
+    newStmts.push_back(mov1);
+    newStmts.push_back(and0);
+}
+
+IR::IndexedVector<IR::DpdkAsmStatement>
+DirectionToRegRead::replaceDirectionWithRegRead(IR::IndexedVector<IR::DpdkAsmStatement> stmts) {
+    for (auto s : stmts) {
+         if (auto jc = s->to<IR::DpdkJmpCondStatement>()) {
+             if (isDirection(jc->src1->to<IR::Member>())) {
+                 replaceDirection(jc->src1->to<IR::Member>());
+             } else if (isDirection(jc->src2->to<IR::Member>())) {
+                    replaceDirection(jc->src2->to<IR::Member>());
+             }
+         } else if (auto u = s->to<IR::DpdkUnaryStatement>()) {
+             if (isDirection(u->src->to<IR::Member>())) {
+                 replaceDirection(u->src->to<IR::Member>());
+             }
+         }
+         newStmts.push_back(s);
+    }
+    return newStmts;
+}
+
 size_t ShortenTokenLength::count = 0;
+IR::IndexedVector<IR::StructField> AddNewMetadataFields::newMetadataFields = {};
 }  // namespace DPDK

@@ -54,6 +54,8 @@ header ipv4_base instanceof ipv4_base_t
 header ipv4_option_timestamp instanceof ipv4_option_timestamp_t
 header option instanceof option_t
 
+regarray direction_port_mask size 0x1 initval 0
+
 action NoAction args none {
 	return
 }

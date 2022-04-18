@@ -23,10 +23,14 @@ struct next_hop_arg_t {
 }
 
 struct main_metadata_t {
+	bit<32> pna_pre_input_metadata_input_port
+	bit<32> pna_pre_input_metadata_direction
 	bit<32> pna_main_input_metadata_direction
 	bit<32> pna_main_input_metadata_input_port
+	bit<32> local_metadata_tmpDir
+	bit<8> local_metadata_b
 	bit<32> pna_main_output_metadata_output_port
-	bit<32> MainControlT_key
+	bit<32> MainControlT_tmpDir
 	bit<32> reg_read_tmp
 	bit<32> left_shift_tmp
 }
@@ -49,7 +53,7 @@ action default_route_drop args none {
 
 table ipv4_da_lpm {
 	key {
-		m.MainControlT_key lpm
+		m.MainControlT_tmpDir lpm
 	}
 	actions {
 		next_hop
@@ -66,18 +70,36 @@ apply {
 	jmpeq MAINPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
-	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
-	regrd m.reg_read_tmp direction_port_mask 0x0
+	MAINPARSERIMPL_ACCEPT :	regrd m.reg_read_tmp direction_port_mask 0x0
+	mov m.left_shift_tmp 0x1
+	shl m.left_shift_tmp m.pna_pre_input_metadata_input_port
+	mov m.pna_pre_input_metadata_direction m.reg_read_tmp
+	and m.pna_pre_input_metadata_direction m.left_shift_tmp
+	jmpneq LABEL_TRUE m.pna_pre_input_metadata_direction 0x0
+	mov m.local_metadata_b 0x0
+	jmp LABEL_END
+	LABEL_TRUE :	mov m.local_metadata_b 0x1
+	LABEL_END :	regrd m.reg_read_tmp direction_port_mask 0x0
+	mov m.left_shift_tmp 0x1
+	shl m.left_shift_tmp m.pna_pre_input_metadata_input_port
+	mov m.pna_pre_input_metadata_direction m.reg_read_tmp
+	and m.pna_pre_input_metadata_direction m.left_shift_tmp
+	jmpneq LABEL_FALSE_0 0x0 m.pna_pre_input_metadata_direction
+	mov m.local_metadata_tmpDir h.ipv4.srcAddr
+	jmp LABEL_END_0
+	LABEL_FALSE_0 :	mov m.local_metadata_tmpDir h.ipv4.dstAddr
+	LABEL_END_0 :	regrd m.reg_read_tmp direction_port_mask 0x0
 	mov m.left_shift_tmp 0x1
 	shl m.left_shift_tmp m.pna_main_input_metadata_input_port
 	mov m.pna_main_input_metadata_direction m.reg_read_tmp
 	and m.pna_main_input_metadata_direction m.left_shift_tmp
-	jmpeq LABEL_TRUE_0 m.pna_main_input_metadata_direction 0x0
-	mov m.MainControlT_key h.ipv4.dstAddr
-	jmp LABEL_END_0
-	LABEL_TRUE_0 :	mov m.MainControlT_key h.ipv4.srcAddr
-	LABEL_END_0 :	table ipv4_da_lpm
-	LABEL_END :	emit h.ethernet
+	jmpneq LABEL_FALSE_1 0x0 m.pna_main_input_metadata_direction
+	mov m.MainControlT_tmpDir h.ipv4.srcAddr
+	jmp LABEL_END_1
+	LABEL_FALSE_1 :	mov m.MainControlT_tmpDir h.ipv4.dstAddr
+	LABEL_END_1 :	jmpnv LABEL_END_2 h.ipv4
+	table ipv4_da_lpm
+	LABEL_END_2 :	emit h.ethernet
 	emit h.ipv4
 	tx m.pna_main_output_metadata_output_port
 }
