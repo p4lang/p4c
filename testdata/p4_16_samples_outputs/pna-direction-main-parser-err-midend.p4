@@ -112,29 +112,29 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
         const default_action = default_route_drop_0();
     }
-    @hidden action pnadirectionmainparsererr144() {
+    @hidden action pnadirectionmainparsererr138() {
         tmpDir_1 = hdr.ipv4.srcAddr;
     }
-    @hidden action pnadirectionmainparsererr146() {
+    @hidden action pnadirectionmainparsererr140() {
         tmpDir_1 = hdr.ipv4.dstAddr;
     }
-    @hidden table tbl_pnadirectionmainparsererr144 {
+    @hidden table tbl_pnadirectionmainparsererr138 {
         actions = {
-            pnadirectionmainparsererr144();
+            pnadirectionmainparsererr138();
         }
-        const default_action = pnadirectionmainparsererr144();
+        const default_action = pnadirectionmainparsererr138();
     }
-    @hidden table tbl_pnadirectionmainparsererr146 {
+    @hidden table tbl_pnadirectionmainparsererr140 {
         actions = {
-            pnadirectionmainparsererr146();
+            pnadirectionmainparsererr140();
         }
-        const default_action = pnadirectionmainparsererr146();
+        const default_action = pnadirectionmainparsererr140();
     }
     apply {
         if (PNA_Direction_t.NET_TO_HOST == istd.direction) {
-            tbl_pnadirectionmainparsererr144.apply();
+            tbl_pnadirectionmainparsererr138.apply();
         } else {
-            tbl_pnadirectionmainparsererr146.apply();
+            tbl_pnadirectionmainparsererr140.apply();
         }
         if (hdr.ipv4.isValid()) {
             ipv4_da_lpm.apply();
@@ -143,18 +143,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadirectionmainparsererr169() {
+    @hidden action pnadirectionmainparsererr155() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadirectionmainparsererr169 {
+    @hidden table tbl_pnadirectionmainparsererr155 {
         actions = {
-            pnadirectionmainparsererr169();
+            pnadirectionmainparsererr155();
         }
-        const default_action = pnadirectionmainparsererr169();
+        const default_action = pnadirectionmainparsererr155();
     }
     apply {
-        tbl_pnadirectionmainparsererr169.apply();
+        tbl_pnadirectionmainparsererr155.apply();
     }
 }
 

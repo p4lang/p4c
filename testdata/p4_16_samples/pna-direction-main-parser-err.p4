@@ -91,7 +91,6 @@ parser MainParserImpl(
     in    pna_main_parser_input_metadata_t istd)
 {
     bit<32> tmpDir;
-
     state start {
         pkt.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -106,7 +105,6 @@ parser MainParserImpl(
         } else {
             tmpDir = hdr.ipv4.dstAddr;
         }
-
         transition accept;
     }
 }

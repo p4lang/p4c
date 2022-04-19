@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "dpdkPnaDirection.h"
+#include "dpdkMetadata.h"
 #include "dpdkUtils.h"
 
 namespace DPDK {
@@ -31,11 +31,31 @@ const IR::Node* AddNewMetadataFields::preorder(IR::DpdkStructType *st) {
     return st;
 }
 
+// make sure new decls and fields name are unique
+void DirectionToRegRead::uniqueNames(IR::DpdkAsmProgram *p) {
+    P4::MinimalNameGenerator mng;
+    for (auto st : p->structType) {
+        if (isMetadataStruct(st)) {
+            for (auto field : st->fields)
+                mng.usedName(field->name);
+        }
+    }
+    reg_read_tmp = mng.newName("reg_read_tmp");
+    left_shift_tmp = mng.newName("left_shift_tmp");
+    P4::MinimalNameGenerator mng1;
+    for (auto decl : p->externDeclarations) {
+        mng1.usedName(decl->name);
+    }
+    registerInstanceName = mng1.newName("network_port_mask");
+}
+
 const IR::Node* DirectionToRegRead::preorder(IR::DpdkAsmProgram *p) {
+        uniqueNames(p);
         p->externDeclarations.push_back(addRegDeclInstance(registerInstanceName));
         return p;
 }
 
+// create and add register declaration instance to program
 IR::DpdkExternDeclaration* DirectionToRegRead::addRegDeclInstance(cstring instanceName) {
     auto typepath = new IR::Path("Register");
     auto type = new IR::Type_Name(typepath);
@@ -52,6 +72,7 @@ IR::DpdkExternDeclaration* DirectionToRegRead::addRegDeclInstance(cstring instan
     return decl;
 }
 
+// add new fields in metadata structure
 void DirectionToRegRead::addMetadataField(cstring fieldName) {
     if (newFieldName.count(fieldName))
         return;
@@ -60,6 +81,7 @@ void DirectionToRegRead::addMetadataField(cstring fieldName) {
      newFieldName.insert(fieldName);
 }
 
+// check member expression using metadata direction field
 bool DirectionToRegRead::isDirection(const IR::Member *m) {
     if (m == nullptr)
         return false;
@@ -80,6 +102,8 @@ const IR::Node *DirectionToRegRead::postorder(IR::DpdkAction *a) {
     return a;
 }
 
+// replace direction field uses with register read i.e.
+// istd.direction -> (direction_port_mask.read(0) & (32w0x1 << istd.input_port))
 void DirectionToRegRead::replaceDirection(const IR::Member *m) {
     addMetadataField(reg_read_tmp);
     addMetadataField(left_shift_tmp);

@@ -77,7 +77,7 @@ control PreControlImpl(
 {
 
     apply {
-    meta.b = istd.direction != PNA_Direction_t.NET_TO_HOST;
+        meta.b = istd.direction != PNA_Direction_t.NET_TO_HOST;
         if (PNA_Direction_t.NET_TO_HOST == istd.direction) {
             meta.tmpDir = hdr.ipv4.srcAddr;
         } else {
@@ -94,8 +94,6 @@ parser MainParserImpl(
     inout main_metadata_t main_meta,
     in    pna_main_parser_input_metadata_t istd)
 {
-    bit<32> tmpDir;
-
     state start {
         pkt.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {

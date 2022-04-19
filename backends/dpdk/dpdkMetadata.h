@@ -14,9 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_DPDK_DPDKPNADIRECTION_H_
-#define BACKENDS_DPDK_DPDKPNADIRECTION_H_
+#ifndef BACKENDS_DPDK_DPDKMETADATA_H_
+#define BACKENDS_DPDK_DPDKMETADATA_H_
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
 
 namespace DPDK {
@@ -38,9 +39,6 @@ class DirectionToRegRead : public Transform {
 
  public:
     DirectionToRegRead() {
-    reg_read_tmp = "reg_read_tmp";
-    left_shift_tmp = "left_shift_tmp";
-    registerInstanceName = "network_port_mask";
     // direction to input metadata field name mapping
     dirToInput.insert(std::make_pair(cstring("pna_main_input_metadata_direction"),
                                      cstring("pna_main_input_metadata_input_port")));
@@ -49,24 +47,19 @@ class DirectionToRegRead : public Transform {
     dirToInput.insert(std::make_pair(cstring("pna_main_parser_input_metadata_direction"),
                                      cstring("pna_main_parser_input_metadata_input_port")));
     }
-
+    void uniqueNames(IR::DpdkAsmProgram *p);
     const IR::Node* preorder(IR::DpdkAsmProgram *p) override;
 
-    // create and add register declaration instance to program
     IR::DpdkExternDeclaration*
     addRegDeclInstance(cstring instanceName);
-    // add new fields in metadata structure
     void addMetadataField(cstring fieldName);
-    // check member expression using metadata direction field
     bool isDirection(const IR::Member *m);
     const IR::Node *postorder(IR::DpdkAction *a);
     const IR::Node *postorder(IR::DpdkListStatement *l) override;
-    // replace direction field uses with register read i.e.
-    // istd.direction -> (direction_port_mask.read(0) & (32w0x1 << istd.input_port))
     void replaceDirection(const IR::Member *m);
     IR::IndexedVector<IR::DpdkAsmStatement>
     replaceDirectionWithRegRead(IR::IndexedVector<IR::DpdkAsmStatement> stmts);
 };
 
 }  // namespace DPDK
-#endif  // BACKENDS_DPDK_DPDKPNADIRECTION_H_
+#endif  // BACKENDS_DPDK_DPDKMETADATA_H_
