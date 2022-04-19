@@ -443,6 +443,11 @@ class DpdkReturnStatement : DpdkAsmStatement, IDPDKNode {
 #nodbprint
 }
 
+class DpdkRecirculateStatement : DpdkAsmStatement, IDPDKNode {
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
 class DpdkLabelStatement : DpdkAsmStatement, IDPDKNode {
     cstring label;
     std::ostream& toSpec(std::ostream& out) const override;
