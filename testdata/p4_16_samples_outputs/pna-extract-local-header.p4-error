@@ -1,0 +1,27 @@
+<DpdkRxStatement>(324519)MAINPARSERIMPL_START
+invalidate h.MainParserT_parser_local_hdr;
+extract h.MainParserT_parser_local_hdr;
+jmpeq MAINPARSERIMPL_PARSE_H1 h.MainParserT_parser_local_hdr.type1; 4660
+jmpeq MAINPARSERIMPL_PARSE_H2 h.MainParserT_parser_local_hdr.type1; 22136
+jmp MAINPARSERIMPL_ACCEPT
+MAINPARSERIMPL_PARSE_H2
+validate h.h2;
+mov h.h2.type1; h.MainParserT_parser_local_hdr.type1;
+mov h.h2.type2; h.MainParserT_parser_local_hdr.type2;
+mov h.h2.value; h.MainParserT_parser_local_hdr.value;
+jmp MAINPARSERIMPL_ACCEPT
+MAINPARSERIMPL_PARSE_H1
+extract h.h1;
+jmp MAINPARSERIMPL_ACCEPT
+MAINPARSERIMPL_REJECT
+MAINPARSERIMPL_ACCEPT
+jmpnv LABEL_FALSE h.h1;
+jmpnv LABEL_FALSE h.h2;
+jmp LABEL_TRUE
+LABEL_TRUE
+emit h.h1;
+emit h.h2;
+jmp LABEL_END
+LABEL_FALSE
+LABEL_END
+<DpdkTxStatement>(324525)

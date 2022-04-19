@@ -29,6 +29,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/stringify.h"
 #include "../bmv2/common/lower.h"
+#include "dpdkPnaDirection.h"
 
 namespace DPDK {
 

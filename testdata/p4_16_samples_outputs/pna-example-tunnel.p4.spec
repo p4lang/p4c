@@ -48,7 +48,7 @@ struct local_metadata_t {
 }
 metadata instanceof local_metadata_t
 
-regarray direction_port_mask size 0x1 initval 0
+regarray network_port_mask size 0x1 initval 0
 
 action NoAction args none {
 	return
@@ -98,7 +98,7 @@ apply {
 	jmpeq PACKET_PARSER_PARSE_IPV4_OTR h.outer_ethernet.ether_type 0x800
 	jmp PACKET_PARSER_ACCEPT
 	PACKET_PARSER_PARSE_IPV4_OTR :	extract h.outer_ipv4
-	PACKET_PARSER_ACCEPT :	regrd m.reg_read_tmp direction_port_mask 0x0
+	PACKET_PARSER_ACCEPT :	regrd m.reg_read_tmp network_port_mask 0x0
 	mov m.left_shift_tmp 0x1
 	shl m.left_shift_tmp m.pna_main_input_metadata_input_port
 	mov m.pna_main_input_metadata_direction m.reg_read_tmp

@@ -34,7 +34,7 @@ header MainParserT_parser_lookahead_0 instanceof lookahead_tmp_hdr
 ;oldname:MainParserT_parser_lookahead_tmp_0
 header MainParserT_parser_lookahead_1 instanceof lookahead_tmp_hdr_0
 
-regarray direction_port_mask size 0x1 initval 0
+regarray network_port_mask size 0x1 initval 0
 
 apply {
 	rx m.pna_main_input_metadata_input_port

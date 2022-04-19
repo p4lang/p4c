@@ -39,7 +39,7 @@ metadata instanceof main_metadata_t
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 
-regarray direction_port_mask size 0x1 initval 0
+regarray network_port_mask size 0x1 initval 0
 
 action next_hop args instanceof next_hop_arg_t {
 	mov m.pna_main_output_metadata_output_port t.vport
@@ -70,7 +70,7 @@ apply {
 	jmpeq MAINPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
-	MAINPARSERIMPL_ACCEPT :	regrd m.reg_read_tmp direction_port_mask 0x0
+	MAINPARSERIMPL_ACCEPT :	regrd m.reg_read_tmp network_port_mask 0x0
 	mov m.left_shift_tmp 0x1
 	shl m.left_shift_tmp m.pna_pre_input_metadata_input_port
 	mov m.pna_pre_input_metadata_direction m.reg_read_tmp
@@ -79,7 +79,7 @@ apply {
 	mov m.local_metadata_b 0x0
 	jmp LABEL_END
 	LABEL_TRUE :	mov m.local_metadata_b 0x1
-	LABEL_END :	regrd m.reg_read_tmp direction_port_mask 0x0
+	LABEL_END :	regrd m.reg_read_tmp network_port_mask 0x0
 	mov m.left_shift_tmp 0x1
 	shl m.left_shift_tmp m.pna_pre_input_metadata_input_port
 	mov m.pna_pre_input_metadata_direction m.reg_read_tmp
@@ -88,7 +88,7 @@ apply {
 	mov m.local_metadata_tmpDir h.ipv4.srcAddr
 	jmp LABEL_END_0
 	LABEL_FALSE_0 :	mov m.local_metadata_tmpDir h.ipv4.dstAddr
-	LABEL_END_0 :	regrd m.reg_read_tmp direction_port_mask 0x0
+	LABEL_END_0 :	regrd m.reg_read_tmp network_port_mask 0x0
 	mov m.left_shift_tmp 0x1
 	shl m.left_shift_tmp m.pna_main_input_metadata_input_port
 	mov m.pna_main_input_metadata_direction m.reg_read_tmp

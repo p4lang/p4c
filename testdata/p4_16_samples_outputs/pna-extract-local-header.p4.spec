@@ -15,7 +15,7 @@ header h1 instanceof my_header_t
 header h2 instanceof my_header_t
 header MainParserT_parser_local_hdr instanceof my_header_t
 
-regarray direction_port_mask size 0x1 initval 0
+regarray network_port_mask size 0x1 initval 0
 
 apply {
 	rx m.pna_main_input_metadata_input_port

@@ -80,7 +80,6 @@ control PreControlImpl(
         } else {
             meta.tmpDir = hdr.ipv4.dstAddr;
         }
-
     }
 
 }
@@ -112,7 +111,6 @@ parser MainParserImpl(
     }
 }
 
-//Register<bit<32>, bit<16>>(1) direction_port_mask;
 control MainControlImpl(
     inout headers_t       hdr,           // from main parser
     inout main_metadata_t user_meta,     // from main parser, to "next block"
@@ -120,8 +118,6 @@ control MainControlImpl(
     inout pna_main_output_metadata_t ostd)
 {
     bit<32> tmpDir;
-// This is to be inserted by the compiler for direction metadata
-   //Register<bit<32>, bit<16>>(1) direction_port_mask;
     action next_hop(PortId_t vport) {
         send_to_port(vport);
     }
@@ -145,14 +141,6 @@ control MainControlImpl(
         } else {
             tmpDir = hdr.ipv4.dstAddr;
         }
-/*
-//        istd.direction should be replaced with "direction_port_mask.read(0) & (32w0x1 << istd.input_port"
-        if ((direction_port_mask.read(0) & (32w0x1 << istd.input_port)) != 0) {
-             tmpDir = hdr.ipv4.srcAddr;
-        } else {
-             tmpDir = hdr.ipv4.dstAddr;
-        }
-*/
         if (hdr.ipv4.isValid()) {
             ipv4_da_lpm.apply();
         }

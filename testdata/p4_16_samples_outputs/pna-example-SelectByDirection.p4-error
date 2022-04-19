@@ -1,0 +1,26 @@
+mov m.pna_main_output_metadata_output_port; t.vport;
+drop
+<DpdkRxStatement>(384359)MAINPARSERIMPL_START
+extract h.ethernet;
+jmpeq MAINPARSERIMPL_PARSE_IPV4 h.ethernet.etherType; 2048
+jmp MAINPARSERIMPL_ACCEPT
+MAINPARSERIMPL_PARSE_IPV4
+extract h.ipv4;
+jmp MAINPARSERIMPL_ACCEPT
+MAINPARSERIMPL_REJECT
+MAINPARSERIMPL_ACCEPT
+jmpnv LABEL_FALSE h.ipv4;
+LABEL_TRUE
+jmpeq LABEL_TRUE_0 m.pna_main_input_metadata_direction; 0
+mov m.MainControlT_key; h.ipv4.dstAddr;
+jmp LABEL_END_0
+LABEL_TRUE_0
+mov m.MainControlT_key; h.ipv4.srcAddr;
+LABEL_END_0
+apply ipv4_da_lpm
+jmp LABEL_END
+LABEL_FALSE
+LABEL_END
+emit h.ethernet;
+emit h.ipv4;
+<DpdkTxStatement>(384365)

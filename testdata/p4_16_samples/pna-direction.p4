@@ -58,8 +58,8 @@ struct empty_metadata_t {
 struct main_metadata_t {
     // empty for this skeleton
     bit<32> tmpDir;
-PNA_Direction_t t1;
-bool b;
+    PNA_Direction_t t1;
+    bool b;
 }
 
 // User-defined struct containing all of those headers parsed in the
@@ -105,17 +105,10 @@ parser MainParserImpl(
     }
     state parse_ipv4 {
         pkt.extract(hdr.ipv4);
-        /*if (PNA_Direction_t.NET_TO_HOST == istd.direction) {
-            tmpDir = hdr.ipv4.srcAddr;
-        } else {
-            tmpDir = hdr.ipv4.dstAddr;
-        }*/
-
         transition accept;
     }
 }
 
-//Register<bit<32>, bit<16>>(1) direction_port_mask;
 control MainControlImpl(
     inout headers_t       hdr,           // from main parser
     inout main_metadata_t user_meta,     // from main parser, to "next block"
@@ -123,8 +116,6 @@ control MainControlImpl(
     inout pna_main_output_metadata_t ostd)
 {
     bit<32> tmpDir;
-// This is to be inserted by the compiler for direction metadata
-   //Register<bit<32>, bit<16>>(1) direction_port_mask;
     action next_hop(PortId_t vport) {
         send_to_port(vport);
     }
@@ -148,14 +139,6 @@ control MainControlImpl(
         } else {
             tmpDir = hdr.ipv4.dstAddr;
         }
-/*
-//        istd.direction should be replaced with "direction_port_mask.read(0) & (32w0x1 << istd.input_port"
-        if ((direction_port_mask.read(0) & (32w0x1 << istd.input_port)) != 0) {
-             tmpDir = hdr.ipv4.srcAddr;
-        } else {
-             tmpDir = hdr.ipv4.dstAddr;
-        }
-*/
         if (hdr.ipv4.isValid()) {
             ipv4_da_lpm.apply();
         }

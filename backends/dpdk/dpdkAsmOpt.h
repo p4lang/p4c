@@ -290,50 +290,6 @@ class ShortenTokenLength : public Transform {
     }
 };
 
-class AddNewMetadataFields : public Transform {
- public:
-     static IR::IndexedVector<IR::StructField> newMetadataFields;
-     const IR::Node* preorder(IR::DpdkStructType *st) override;
-};
-
-class DirectionToRegRead : public Transform {
-    ordered_map<cstring, cstring> dirToInput;
-    IR::IndexedVector<IR::DpdkAsmStatement> newStmts;
-    IR::IndexedVector<IR::StructField> &newMetadataFields = AddNewMetadataFields::newMetadataFields;
-    ordered_set<cstring> newFieldName;
-    cstring reg_read_tmp;
-    cstring left_shift_tmp;
-    cstring registerInstanceName;
-
- public:
-    DirectionToRegRead() {
-    reg_read_tmp = "reg_read_tmp";
-    left_shift_tmp = "left_shift_tmp";
-    registerInstanceName = "direction_port_mask";
-    // direction to input metadata field name mapping
-    dirToInput.insert(std::make_pair(cstring("pna_main_input_metadata_direction"),
-                                     cstring("pna_main_input_metadata_input_port")));
-    dirToInput.insert(std::make_pair(cstring("pna_pre_input_metadata_direction"),
-                                     cstring("pna_pre_input_metadata_input_port")));
-    dirToInput.insert(std::make_pair(cstring("pna_main_parser_input_metadata_direction"),
-                                     cstring("pna_main_parser_input_metadata_input_port")));
-    }
-
-    const IR::Node* preorder(IR::DpdkAsmProgram *p) override;
-
-    IR::DpdkExternDeclaration*
-    addRegDeclInstance(cstring instanceName);
-    void addMetadataField(cstring fieldName);
-    bool isDirection(const IR::Member *m);
-
-    const IR::Node *postorder(IR::DpdkListStatement *l) override;
-
-    void replaceDirection(const IR::Member *m);
-    IR::IndexedVector<IR::DpdkAsmStatement>
-    replaceDirectionWithRegRead(IR::IndexedVector<IR::DpdkAsmStatement> stmts);
-};
-
-
 // Instructions can only appear in actions and apply block of .spec file.
 // All these individual passes work on the actions and apply block of .spec file.
 class DpdkAsmOptimization : public PassRepeated {
