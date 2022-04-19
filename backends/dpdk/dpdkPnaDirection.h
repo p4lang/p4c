@@ -61,7 +61,8 @@ class DirectionToRegRead : public Transform {
     bool isDirection(const IR::Member *m);
     const IR::Node *postorder(IR::DpdkAction *a);
     const IR::Node *postorder(IR::DpdkListStatement *l) override;
-    // replace direction field uses with register read
+    // replace direction field uses with register read i.e.
+    // istd.direction -> (direction_port_mask.read(0) & (32w0x1 << istd.input_port))
     void replaceDirection(const IR::Member *m);
     IR::IndexedVector<IR::DpdkAsmStatement>
     replaceDirectionWithRegRead(IR::IndexedVector<IR::DpdkAsmStatement> stmts);

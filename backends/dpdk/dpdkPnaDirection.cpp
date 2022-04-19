@@ -115,7 +115,6 @@ DirectionToRegRead::replaceDirectionWithRegRead(IR::IndexedVector<IR::DpdkAsmSta
             if (isDirection(u->src->to<IR::Member>()))
                 replaceDirection(u->src->to<IR::Member>());
         }
-        s->dbprint(std::cerr);
         newStmts.push_back(s);
     }
     return newStmts;
