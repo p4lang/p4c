@@ -42,11 +42,17 @@ void DirectionToRegRead::uniqueNames(IR::DpdkAsmProgram *p) {
     }
     reg_read_tmp = mng.newName("reg_read_tmp");
     left_shift_tmp = mng.newName("left_shift_tmp");
+    registerInstanceName = "network_port_mask";
+
     P4::MinimalNameGenerator mng1;
     for (auto decl : p->externDeclarations) {
         mng1.usedName(decl->name);
     }
-    registerInstanceName = mng1.newName("network_port_mask");
+    // "network_port_mask" name is used in dpdk for initialzing direction port mask
+    // make sure no such decls exist with that name
+    if (mng1.newName(registerInstanceName) != registerInstanceName)
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,"decl name %s is reserved for dpdk pna",
+                registerInstanceName);
 }
 
 const IR::Node* DirectionToRegRead::preorder(IR::DpdkAsmProgram *p) {

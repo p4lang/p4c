@@ -107,29 +107,29 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
         const default_action = default_route_drop();
     }
-    @hidden action pnadirection147() {
+    @hidden action pnadirection136() {
         tmpDir_0 = hdr.ipv4.srcAddr;
     }
-    @hidden action pnadirection149() {
+    @hidden action pnadirection138() {
         tmpDir_0 = hdr.ipv4.dstAddr;
     }
-    @hidden table tbl_pnadirection147 {
+    @hidden table tbl_pnadirection136 {
         actions = {
-            pnadirection147();
+            pnadirection136();
         }
-        const default_action = pnadirection147();
+        const default_action = pnadirection136();
     }
-    @hidden table tbl_pnadirection149 {
+    @hidden table tbl_pnadirection138 {
         actions = {
-            pnadirection149();
+            pnadirection138();
         }
-        const default_action = pnadirection149();
+        const default_action = pnadirection138();
     }
     apply {
         if (PNA_Direction_t.NET_TO_HOST == istd.direction) {
-            tbl_pnadirection147.apply();
+            tbl_pnadirection136.apply();
         } else {
-            tbl_pnadirection149.apply();
+            tbl_pnadirection138.apply();
         }
         if (hdr.ipv4.isValid()) {
             ipv4_da_lpm_0.apply();
@@ -138,18 +138,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadirection172() {
+    @hidden action pnadirection153() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadirection172 {
+    @hidden table tbl_pnadirection153 {
         actions = {
-            pnadirection172();
+            pnadirection153();
         }
-        const default_action = pnadirection172();
+        const default_action = pnadirection153();
     }
     apply {
-        tbl_pnadirection172.apply();
+        tbl_pnadirection153.apply();
     }
 }
 
