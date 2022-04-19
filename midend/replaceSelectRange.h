@@ -39,9 +39,11 @@ class DoReplaceSelectRange : public Transform {
     // Each case is a key set expression.
     const uint MAX_CASES;
     bool inSelect = false;
-    // Collects select indices which will need to be replaced with bitcast of
-    // the original value to unsigned. This is needed if we encounter a range
-    // over a signed value at the given index.
+    // An index i is in this set if selectExpression->components[i] needs to be
+    // cast from int to bit. This is needed if and only if the expression at
+    // position i is of int type and there is a label that has in the i-th
+    // position a range expression. This is needed since we replace ranges with
+    // masks and masks are only defined for signed types.
     std::set<size_t> signedIndicesToReplace;
 
     explicit DoReplaceSelectRange(uint max) : MAX_CASES(max) {
