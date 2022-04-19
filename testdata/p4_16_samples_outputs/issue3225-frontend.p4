@@ -24,7 +24,7 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
-        h.h.b = (bit<1>)h.h.c;
+        h.h.b = (bit<1>)h.h.a + (bit<1>)h.h.c;
     }
 }
 
