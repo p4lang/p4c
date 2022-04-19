@@ -444,10 +444,22 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
     }
 
     while (auto cast = expr->e0->to<IR::Cast>()) {
-        if (expr->getH() < size_t(cast->expr->type->width_bits())) {
-            expr->e0 = cast->expr;
+        if (auto tb = cast->expr->type->to<IR::Type_Bits>()) {
+            auto type = expr->type->to<IR::Type_Bits>();
+            CHECK_NULL(type);
+            if (tb->isSigned != type->isSigned)
+                // Cannot remove casts that change sign.
+                break;
+            if (expr->getH() < size_t(tb->width_bits())) {
+                expr->e0 = cast->expr;
+            } else {
+                break;
+            }
         } else {
-            break; } }
+            // Cast from a different type.
+            break;
+        }
+    }
 
     // out-of-bound error has been caught in type checking
     if (auto sl = expr->e0->to<IR::Slice>()) {
