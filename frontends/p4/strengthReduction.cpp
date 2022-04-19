@@ -445,8 +445,7 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
 
     while (auto cast = expr->e0->to<IR::Cast>()) {
         if (auto tb = cast->expr->type->to<IR::Type_Bits>()) {
-            auto type = expr->type->to<IR::Type_Bits>();
-            CHECK_NULL(type);
+            auto type = expr->type->checkedTo<IR::Type_Bits>();
             if (tb->isSigned != type->isSigned)
                 // Cannot remove casts that change sign.
                 break;
