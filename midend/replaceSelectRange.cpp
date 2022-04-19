@@ -66,7 +66,7 @@ expandRange(const IR::Range *r, std::vector<const IR::Mask *> &masks, const IR::
 }
 
 std::vector<const IR::Mask *>
-DoReplaceSelectRange::rangeToMasks(const IR::Range *r, int keyIndex) {
+DoReplaceSelectRange::rangeToMasks(const IR::Range *r, size_t keyIndex) {
     std::vector<const IR::Mask *> masks;
 
     auto l = r->left->to<IR::Constant>();
@@ -155,7 +155,7 @@ const IR::Node *DoReplaceSelectRange::postorder(IR::SelectExpression *e) {
 
     if (!signedIndicesToReplace.empty()) {
         IR::Vector<IR::Expression> newSelectList;
-        int idx = 0;
+        size_t idx = 0;
         for (auto *expr : e->select->components) {
             if (signedIndicesToReplace.count(idx)) {
                 auto eType = expr->type->to<IR::Type_Bits>();
@@ -199,7 +199,7 @@ const IR::Node* DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
 
         newVectors.push_back(first);
 
-        int idx = 0;
+        size_t idx = 0;
         for (auto key : oldList->components) {
             if (auto r = key->to<IR::Range>()) {
                 auto masks = rangeToMasks(r, idx);

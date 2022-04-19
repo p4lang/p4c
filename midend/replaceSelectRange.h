@@ -42,7 +42,7 @@ class DoReplaceSelectRange : public Transform {
     // Collects select indices which will need to be replaced with bitcast of
     // the original value to unsigned. This is needed if we encounter a range
     // over a signed value at the given index.
-    std::set<int> signedIndicesToReplace;
+    std::set<size_t> signedIndicesToReplace;
 
     explicit DoReplaceSelectRange(uint max) : MAX_CASES(max) {
         setName("DoReplaceSelectRange");
@@ -52,7 +52,7 @@ class DoReplaceSelectRange : public Transform {
     const IR::Node *postorder(IR::SelectExpression *e) override;
     const IR::Node *postorder(IR::SelectCase *p) override;
 
-    std::vector<const IR::Mask *> rangeToMasks(const IR::Range *, int);
+    std::vector<const IR::Mask *> rangeToMasks(const IR::Range *, size_t);
     std::vector<IR::Vector<IR::Expression>> cartesianAppend(
                const std::vector<IR::Vector<IR::Expression>>& vecs,
                const std::vector<const IR::Mask *>& masks);
