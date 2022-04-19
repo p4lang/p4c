@@ -27,6 +27,38 @@ limitations under the License.
 
 namespace EBPF {
 
+class PSAErrorCodesGen : public Inspector {
+    CodeBuilder* builder;
+
+ public:
+    explicit PSAErrorCodesGen(CodeBuilder* builder) : builder(builder) {}
+
+    bool preorder(const IR::Type_Error* errors) override {
+        int id = -1;
+        for (auto decl : errors->members) {
+            ++id;
+            if (decl->srcInfo.isValid()) {
+                auto sourceFile = decl->srcInfo.getSourceFile();
+                // all the error codes are located in core.p4 file, they are defined in psa.h
+                if (sourceFile.endsWith("p4include/core.p4"))
+                    continue;
+            }
+
+            builder->emitIndent();
+            builder->appendFormat("static const ParserError_t %s = %d", decl->name.name, id);
+            builder->endOfStatement(true);
+
+            // type ParserError_t is u8, which can have values from 0 to 255
+            if (id > 255) {
+                ::error(ErrorType::ERR_OVERLIMIT,
+                        "%1%: Reached maximum number of possible errors", decl);
+            }
+        }
+        builder->newline();
+        return false;
+    }
+};
+
 // =====================PSAEbpfGenerator=============================
 void PSAEbpfGenerator::emitPSAIncludes(CodeBuilder *builder) const {
     builder->appendLine("#include <stdbool.h>");
@@ -89,6 +121,9 @@ void PSAEbpfGenerator::emitInternalStructures(CodeBuilder *builder) const {
 
 /* Generate headers and structs in p4 prog */
 void PSAEbpfGenerator::emitTypes(CodeBuilder *builder) const {
+    PSAErrorCodesGen errorGen(builder);
+    ingress->program->apply(errorGen);
+
     for (auto type : ebpfTypes) {
         type->emit(builder);
     }
@@ -447,6 +482,8 @@ const PSAEbpfGenerator * ConvertToEbpfPSA::build(const IR::ToplevelBlock *tlb) {
 
 const IR::Node *ConvertToEbpfPSA::preorder(IR::ToplevelBlock *tlb) {
     ebpf_psa_arch = build(tlb);
+    ebpf_psa_arch->ingress->program = tlb->getProgram();
+    ebpf_psa_arch->egress->program = tlb->getProgram();
     return tlb;
 }
 
