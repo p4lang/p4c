@@ -88,8 +88,8 @@ struct VisitedKey {
     cstring                     name;       // name of a state.
     std::map<StackVariable, size_t>   indexes;    // indexes of header stacks.
 
-    VisitedKey(cstring name, std::map<StackVariable, size_t>& indexes) : name(name), indexes(indexes) {
-    }
+    VisitedKey(cstring name, std::map<StackVariable, size_t>& indexes)
+        : name(name), indexes(indexes) {}
 
     explicit VisitedKey(const ParserStateInfo* stateInfo) {
         CHECK_NULL(stateInfo);
