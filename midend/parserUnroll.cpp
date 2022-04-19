@@ -5,12 +5,90 @@
 
 namespace P4 {
 
+StackVariable::StackVariable(const IR::Expression* expr)
+    : expr(checkedTo<IR::Member>(expr)) {}
+
+bool StackVariable::repOk(const IR::Expression* expr) {
+    // Only members can be stack variables.
+    const auto* member = expr->to<IR::Member>();
+    if (member == nullptr) {
+        return false;
+    }
+
+    // A member is a stack variable if it is qualified by a PathExpression or if its qualifier is a
+    // stack variable.
+    return member->expr->is<IR::PathExpression>() || repOk(member->expr);
+}
+
+bool StackVariable::operator<(const StackVariable& other) const {
+    return compare(expr, other.expr) < 0;
+}
+
+bool StackVariable::operator==(const StackVariable& other) const {
+    // Delegate to IR's notion of equality.
+    return *expr == *other.expr;
+}
+
+int StackVariable::compare(const IR::Expression* e1, const IR::Expression* e2) {
+    if (const auto* m1 = e1->to<IR::Member>()) {
+        return compare(m1, e2);
+    }
+    if (const auto* p1 = e1->to<IR::PathExpression>()) {
+        return compare(p1, e2);
+    }
+    BUG("Not a valid StateVariable: %1%", e1);
+}
+
+int StackVariable::compare(const IR::Member* m1, const IR::Expression* e2) {
+    if (const auto* m2 = e2->to<IR::Member>()) {
+        return compare(m1, m2);
+    }
+    if (e2->is<IR::PathExpression>()) {
+        return 1;
+    }
+    BUG("Not a valid StateVariable: %1%", e2);
+}
+
+int StackVariable::compare(const IR::Member* m1, const IR::Member* m2) {
+    auto result = compare(m1->expr, m2->expr);
+    if (result != 0) {
+        return result;
+    }
+    if (m1->member.name < m2->member.name) {
+        return -1;
+    }
+    if (m1->member.name > m2->member.name) {
+        return 1;
+    }
+    return 0;
+}
+
+int StackVariable::compare(const IR::PathExpression* p1, const IR::Expression* e2) {
+    if (const auto* p2 = e2->to<IR::PathExpression>()) {
+        return compare(p1, p2);
+    }
+    if (e2->is<IR::Member>()) {
+        return -1;
+    }
+    BUG("Not a valid StateVariable: %1%", e2);
+}
+
+int StackVariable::compare(const IR::PathExpression* p1, const IR::PathExpression* p2) {
+    if (p1->path->name.name < p2->path->name.name) {
+        return -1;
+    }
+    if (p1->path->name.name > p2->path->name.name) {
+        return 1;
+    }
+    return 0;
+}
+
 /// The main class for parsers' states key for visited checking.
 struct VisitedKey {
     cstring                     name;       // name of a state.
-    std::map<cstring, size_t>   indexes;    // indexes of header stacks.
+    std::map<StackVariable, size_t>   indexes;    // indexes of header stacks.
 
-    VisitedKey(cstring name, std::map<cstring, size_t>& indexes) : name(name), indexes(indexes) {
+    VisitedKey(cstring name, std::map<StackVariable, size_t>& indexes) : name(name), indexes(indexes) {
     }
 
     explicit VisitedKey(const ParserStateInfo* stateInfo) {
@@ -32,7 +110,7 @@ struct VisitedKey {
             return true;
         if (name > e.name)
             return false;
-        std::map<cstring, std::pair<size_t, size_t> > mp;
+        std::map<StackVariable, std::pair<size_t, size_t> > mp;
         for (auto& i1 : indexes)
             mp.emplace(i1.first, std::make_pair(i1.second, -1));
         for (auto& i2 : e.indexes) {
@@ -133,7 +211,7 @@ class ParserStateRewriter : public Transform {
         auto* res = value->to<SymbolicInteger>()->constant->clone();
         newExpression->right = res;
         BUG_CHECK(res->fitsInt64(), "To big integer for a header stack index %1%", res);
-        state->statesIndexes[expression->left->toString()] = (size_t)res->asInt64();
+        state->statesIndexes[expression->left] = (size_t)res->asInt64();
         return newExpression;
     }
 
@@ -148,8 +226,8 @@ class ParserStateRewriter : public Transform {
             auto array = l->to<SymbolicArray>();
             unsigned idx = 0;
             unsigned offset = 0;
-            if (state->statesIndexes.count(expression->expr->toString())) {
-                idx = state->statesIndexes.at(expression->expr->toString());
+            if (state->statesIndexes.count(expression->expr)) {
+                idx = state->statesIndexes.at(expression->expr);
                 if (idx + 1 < array->size && expression->member.name != IR::Type_Stack::last) {
                     offset = 1;
                 }
@@ -157,7 +235,7 @@ class ParserStateRewriter : public Transform {
             if (expression->member.name == IR::Type_Stack::lastIndex) {
                 return new IR::Constant(IR::Type_Bits::get(32), idx);
             } else {
-                state->statesIndexes[expression->expr->toString()] = idx + offset;
+                state->statesIndexes[expression->expr] = idx + offset;
                 return new IR::ArrayIndex(expression->expr->clone(),
                                           new IR::Constant(IR::Type_Bits::get(32), idx + offset));
             }
@@ -448,9 +526,9 @@ class ParserSymbolicInterpreter {
                                          visitedStates);
             const IR::Node* node = se->select->apply(rewriter);
             const IR::ListExpression* newListSelect = node->to<IR::ListExpression>();
-            std::map<cstring, size_t> etalonStateIndexes = state->statesIndexes;
+            auto etalonStateIndexes = state->statesIndexes;
             for (auto c : se->selectCases) {
-                std::map<cstring, size_t> currentStateIndexes = etalonStateIndexes;
+                auto currentStateIndexes = etalonStateIndexes;
                 auto path = c->state->path;
                 auto next = refMap->getDeclaration(path);
                 BUG_CHECK(next->is<IR::ParserState>(), "%1%: expected a state", path);
