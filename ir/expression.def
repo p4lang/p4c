@@ -420,6 +420,7 @@ class ListExpression : Expression {
     validate { components.check_null(); }
     size_t size() const { return components.size(); }
     void push_back(Expression e) { components.push_back(e); }
+    cstring toString() const;
 }
 
 /// An expression that evaluates to a struct.

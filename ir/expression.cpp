@@ -146,3 +146,12 @@ IR::Constant
 IR::Constant::GetMask(unsigned width) {
   return (IR::Constant(1) << width) - IR::Constant(1);
 }
+
+cstring IR::ListExpression::toString() const {
+    cstring str = "{";
+    if (!components.empty())
+        str += " " + components.at(0)->toString();
+    for (unsigned i = 1; i < size(); i++)
+        str += ", " + components.at(i)->toString();
+    return str + " }";
+}
