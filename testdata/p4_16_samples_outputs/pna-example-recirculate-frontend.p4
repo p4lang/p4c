@@ -42,7 +42,6 @@ struct headers_t {
     udp_t      udp;
 }
 
-extern void recirculate();
 control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_input_metadata_t istd, inout pna_pre_output_metadata_t ostd) {
     apply {
     }
