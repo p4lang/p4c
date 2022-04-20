@@ -23,6 +23,6 @@ bool isSimpleExpression(const IR::Expression *e);
 bool isNonConstantSimpleExpression(const IR::Expression *e);
 bool isCommutativeBinaryOperation(const IR::Operation_Binary *bin);
 bool isStandardMetadata(cstring name);
+bool isMetadataStruct(const IR::Type_Struct *st);
 }  // namespace DPDK
-
 #endif  /* BACKENDS_DPDK_DPDKUTILS_H_ */

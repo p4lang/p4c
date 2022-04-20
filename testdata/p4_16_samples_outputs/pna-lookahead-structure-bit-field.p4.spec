@@ -25,6 +25,8 @@ header h2 instanceof header2_t
 ;oldname:MainParserT_parser_lookahead_tmp
 header MainParserT_parser_lookahead_0 instanceof lookahead_tmp_hdr
 
+regarray network_port_mask size 0x1 initval 0
+
 apply {
 	rx m.pna_main_input_metadata_input_port
 	lookahead h.MainParserT_parser_lookahead_0

@@ -43,6 +43,8 @@ metadata instanceof main_metadata_t
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 
+regarray network_port_mask size 0x1 initval 0
+
 action NoAction args none {
 	return
 }

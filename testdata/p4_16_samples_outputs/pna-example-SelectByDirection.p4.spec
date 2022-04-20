@@ -27,11 +27,15 @@ struct main_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
 	bit<32> pna_main_output_metadata_output_port
 	bit<32> MainControlT_key
+	bit<32> reg_read_tmp
+	bit<32> left_shift_tmp
 }
 metadata instanceof main_metadata_t
 
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
+
+regarray network_port_mask size 0x1 initval 0
 
 action next_hop args instanceof next_hop_arg_t {
 	mov m.pna_main_output_metadata_output_port t.vport
@@ -63,6 +67,11 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
+	regrd m.reg_read_tmp network_port_mask 0x0
+	mov m.left_shift_tmp 0x1
+	shl m.left_shift_tmp m.pna_main_input_metadata_input_port
+	mov m.pna_main_input_metadata_direction m.reg_read_tmp
+	and m.pna_main_input_metadata_direction m.left_shift_tmp
 	jmpeq LABEL_TRUE_0 m.pna_main_input_metadata_direction 0x0
 	mov m.MainControlT_key h.ipv4.dstAddr
 	jmp LABEL_END_0
