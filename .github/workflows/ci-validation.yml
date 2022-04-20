@@ -9,10 +9,10 @@ on:
 # Cancel any preceding run on the pull request.
 concurrency:
   group: validation-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  # We run validation in parallel with the normal tests
+  # We run validation in parallel with the normal tests.
   # Validation ensures that P4C compiles P4-16 programs correctly.
   # We only test the front end and some mid end passes for now.
   validate:

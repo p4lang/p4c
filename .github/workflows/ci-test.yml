@@ -9,10 +9,10 @@ on:
 # Cancel any preceding run on the pull request.
 concurrency:
   group: test-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  # Build and test p4c on Ubuntu 20.04
+  # Build and test p4c on Ubuntu 20.04.
   build-linux:
     strategy:
       fail-fast: false
