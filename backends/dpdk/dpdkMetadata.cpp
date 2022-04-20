@@ -42,23 +42,25 @@ void DirectionToRegRead::uniqueNames(IR::DpdkAsmProgram *p) {
     }
     reg_read_tmp = mng.newName("reg_read_tmp");
     left_shift_tmp = mng.newName("left_shift_tmp");
-    registerInstanceName = "network_port_mask";
 
-    P4::MinimalNameGenerator mng1;
-    for (auto decl : p->externDeclarations) {
-        mng1.usedName(decl->name);
-    }
     // "network_port_mask" name is used in dpdk for initialzing direction port mask
     // make sure no such decls exist with that name
-    if (mng1.newName(registerInstanceName) != registerInstanceName)
+    registerInstanceName = "network_port_mask";
+    for (auto decl : p->externDeclarations) {
+        usedNames.insert(decl->name);
+    }
+
+    if (usedNames.count(registerInstanceName))
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,"decl name %s is reserved for dpdk pna",
                 registerInstanceName);
 }
 
 const IR::Node* DirectionToRegRead::preorder(IR::DpdkAsmProgram *p) {
-        uniqueNames(p);
-        p->externDeclarations.push_back(addRegDeclInstance(registerInstanceName));
-        return p;
+    uniqueNames(p);
+    addMetadataField(reg_read_tmp);
+    addMetadataField(left_shift_tmp);
+    p->externDeclarations.push_back(addRegDeclInstance(registerInstanceName));
+    return p;
 }
 
 // create and add register declaration instance to program
@@ -80,11 +82,8 @@ IR::DpdkExternDeclaration* DirectionToRegRead::addRegDeclInstance(cstring instan
 
 // add new fields in metadata structure
 void DirectionToRegRead::addMetadataField(cstring fieldName) {
-    if (newFieldName.count(fieldName))
-        return;
-     newMetadataFields.push_back(new IR::StructField(IR::ID(fieldName),
+    newMetadataFields.push_back(new IR::StructField(IR::ID(fieldName),
                                  IR::Type::Bits::get(32)));
-     newFieldName.insert(fieldName);
 }
 
 // check member expression using metadata direction field
@@ -111,8 +110,6 @@ const IR::Node *DirectionToRegRead::postorder(IR::DpdkAction *a) {
 // replace direction field uses with register read i.e.
 // istd.direction -> (direction_port_mask.read(0) & (32w0x1 << istd.input_port))
 void DirectionToRegRead::replaceDirection(const IR::Member *m) {
-    addMetadataField(reg_read_tmp);
-    addMetadataField(left_shift_tmp);
     auto reade = new IR::Member(new IR::PathExpression(IR::ID("m")),
                                 IR::ID(reg_read_tmp));
     auto reads = new IR::DpdkRegisterReadStatement(reade, registerInstanceName,

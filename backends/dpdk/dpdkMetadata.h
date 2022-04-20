@@ -22,17 +22,25 @@ limitations under the License.
 
 namespace DPDK {
 
+// If any pass requires to add metadata field to metadata structure
+// then just have to create and append struct field to static member newMetadataFields
+// In passmanager's passes list AddNewMetadataFields should follow the pass which
+// added fields into newMetadataFields
 class AddNewMetadataFields : public Transform {
  public:
      static IR::IndexedVector<IR::StructField> newMetadataFields;
      const IR::Node* preorder(IR::DpdkStructType *st) override;
 };
 
+// This pass adds decl instance of Register extern in dpdk pna program which will
+// be used by dpdk backend for initializing the mask for calculating packet direction
+// and all the use point of istd.direction will follow below calculation and assignment
+// istd.direction = network_port_mask.read(0) & (32w0x1 << istd.input_port)
 class DirectionToRegRead : public Transform {
     ordered_map<cstring, cstring> dirToInput;
     IR::IndexedVector<IR::DpdkAsmStatement> newStmts;
     IR::IndexedVector<IR::StructField> &newMetadataFields = AddNewMetadataFields::newMetadataFields;
-    ordered_set<cstring> newFieldName;
+    ordered_set<cstring> usedNames;
     cstring reg_read_tmp;
     cstring left_shift_tmp;
     cstring registerInstanceName;
