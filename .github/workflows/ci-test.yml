@@ -6,8 +6,13 @@ on:
   pull_request:
     branches: [ main ]
 
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: test-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
-  # Build and test p4c on Ubuntu 20.04
+  # Build and test p4c on Ubuntu 20.04.
   build-linux:
     strategy:
       fail-fast: false
@@ -25,11 +30,6 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Cancel previous runs
-      uses: styfle/cancel-workflow-action@0.9.0
-      with:
-        access_token: ${{ github.token }}
-
     - name: Build (Ubuntu Linux)
       run: |
         tools/start_ccache
@@ -39,13 +39,13 @@ jobs:
         docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=${{matrix.unified}} --build-arg ENABLE_GMP=${{ matrix.enable_gmp }} .
 
       # run with sudo (...) --privileged
-      # this is needed to create network namespaces for the ebpf tests
+      # this is needed to create network namespaces for the ebpf tests.
     - name: Run tests (Ubuntu Linux)
       run: |
         sudo docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
       if: matrix.unified == 'ON'
 
-  # Build and test p4c on Fedora
+  # Build and test p4c on Fedora.
   build-fedora-linux:
     strategy:
       fail-fast: false
@@ -55,14 +55,14 @@ jobs:
         exclude:
           - unified: OFF
             enable_gmp: OFF
-    # This job runs in Fedora container that runs in Ubuntu VM
+    # This job runs in Fedora container that runs in Ubuntu VM.
     runs-on: ubuntu-latest
     container:
       image: registry.fedoraproject.org/fedora:latest
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:
-    # We need to install git here because it is not provided out of the box in Fedora container
+    # We need to install git here because it is not provided out of the box in Fedora container.
     - name: Install git
       run: dnf install -y -q git
 
