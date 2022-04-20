@@ -445,10 +445,6 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
 
     while (auto cast = expr->e0->to<IR::Cast>()) {
         if (auto tb = cast->expr->type->to<IR::Type_Bits>()) {
-            auto type = expr->type->checkedTo<IR::Type_Bits>();
-            if (tb->isSigned != type->isSigned)
-                // Cannot remove casts that change sign.
-                break;
             if (expr->getH() < size_t(tb->width_bits())) {
                 expr->e0 = cast->expr;
             } else {
@@ -470,8 +466,15 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
 
     auto slice_width = expr->getH() - expr->getL() + 1;
     if (slice_width == (unsigned)expr->e0->type->width_bits() &&
-        !hasSideEffects(expr->e1))
+        !hasSideEffects(expr->e1)) {
+        // A slice implies a cast to unsigned; have to be careful not
+        // to lose those.
+        if (auto type = expr->e0->type->to<IR::Type_Bits>()) {
+            if (type->isSigned)
+                return new IR::Cast(expr->srcInfo, expr->type, expr->e0);
+        }
         return expr->e0;
+    }
 
     return expr;
 }
