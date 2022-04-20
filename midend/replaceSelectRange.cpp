@@ -143,16 +143,8 @@ DoReplaceSelectRange::cartesianAppend(const std::vector<IR::Vector<IR::Expressio
     return newVecs;
 }
 
-const IR::Node *DoReplaceSelectRange::preorder(IR::SelectExpression *e) {
-    BUG_CHECK(!inSelect, "A select nested in select: %1%", e);
-    inSelect = true;
-    signedIndicesToReplace.clear();
-    return e;
-}
-
 const IR::Node *DoReplaceSelectRange::postorder(IR::SelectExpression *e) {
-    BUG_CHECK(inSelect, "A select visited only in postoreder: %1%", e);
-
+    BUG_CHECK(findContext<IR::SelectExpression>() == nullptr, "A select nested in select: %1%", e);
     if (!signedIndicesToReplace.empty()) {
         IR::Vector<IR::Expression> newSelectList;
         size_t idx = 0;
@@ -169,15 +161,16 @@ const IR::Node *DoReplaceSelectRange::postorder(IR::SelectExpression *e) {
             }
             ++idx;
         }
+        signedIndicesToReplace.clear();
         return new IR::SelectExpression(e->srcInfo, e->type,
             new IR::ListExpression(e->select->srcInfo, newSelectList), e->selectCases);
     }
-    inSelect = false;
     return e;
 }
 
 const IR::Node* DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
-    BUG_CHECK(inSelect, "A lone select case not inside select: %1%", sc);
+    BUG_CHECK(findContext<IR::SelectExpression>() != nullptr,
+              "A lone select case not inside select: %1%", sc);
 
     auto newCases = new IR::Vector<IR::SelectCase>();
     auto keySet = sc->keyset;

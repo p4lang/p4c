@@ -38,7 +38,6 @@ class DoReplaceSelectRange : public Transform {
     // number of new cases generated for ternary operations due to a range
     // Each case is a key set expression.
     const uint MAX_CASES;
-    bool inSelect = false;
     // An index i is in this set if selectExpression->components[i] needs to be
     // cast from int to bit. This is needed if and only if the expression at
     // position i is of int type and there is a label that has in the i-th
@@ -50,7 +49,6 @@ class DoReplaceSelectRange : public Transform {
         setName("DoReplaceSelectRange");
     }
 
-    const IR::Node *preorder(IR::SelectExpression *e) override;
     const IR::Node *postorder(IR::SelectExpression *e) override;
     const IR::Node *postorder(IR::SelectCase *p) override;
 
