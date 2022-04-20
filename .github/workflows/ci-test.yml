@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
   # Build and test p4c on Ubuntu 20.04
   build-linux:
@@ -24,11 +28,6 @@ jobs:
     - uses: actions/checkout@v2
       with:
         submodules: recursive
-
-    - name: Cancel previous runs
-      uses: styfle/cancel-workflow-action@0.9.0
-      with:
-        access_token: ${{ github.token }}
 
     - name: Build (Ubuntu Linux)
       run: |

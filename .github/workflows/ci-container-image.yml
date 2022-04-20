@@ -9,6 +9,10 @@ on:
     # is updated, this is good enough.
     - cron: '15 0-23/4 * * *' # "At minute 15 past every 4th hour from midnight through 23."
 
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     if: ${{ github.repository == 'p4lang/p4c' }}

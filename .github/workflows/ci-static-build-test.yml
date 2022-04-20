@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ main ]
 
+
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
   # Build a p4c release on Ubuntu 20.04
   build-linux:

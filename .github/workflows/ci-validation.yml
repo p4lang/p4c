@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
   # We run validation in parallel with the normal tests
   # Validation ensures that P4C compiles P4-16 programs correctly.
