@@ -42,7 +42,6 @@ struct headers_t {
     udp_t      udp;
 }
 
-extern void recirculate();
 control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_input_metadata_t istd, inout pna_pre_output_metadata_t ostd) {
     apply {
     }
@@ -64,37 +63,37 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @hidden action pnaexamplerecirculate110() {
+    @hidden action pnaexamplerecirculate108() {
         hdr.udp.src_port = hdr.udp.src_port + 16w1;
         recirculate();
     }
-    @hidden table tbl_pnaexamplerecirculate110 {
+    @hidden table tbl_pnaexamplerecirculate108 {
         actions = {
-            pnaexamplerecirculate110();
+            pnaexamplerecirculate108();
         }
-        const default_action = pnaexamplerecirculate110();
+        const default_action = pnaexamplerecirculate108();
     }
     apply {
         if (istd.pass != 3w4) {
-            tbl_pnaexamplerecirculate110.apply();
+            tbl_pnaexamplerecirculate108.apply();
         }
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexamplerecirculate123() {
+    @hidden action pnaexamplerecirculate121() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
         pkt.emit<udp_t>(hdr.udp);
     }
-    @hidden table tbl_pnaexamplerecirculate123 {
+    @hidden table tbl_pnaexamplerecirculate121 {
         actions = {
-            pnaexamplerecirculate123();
+            pnaexamplerecirculate121();
         }
-        const default_action = pnaexamplerecirculate123();
+        const default_action = pnaexamplerecirculate121();
     }
     apply {
-        tbl_pnaexamplerecirculate123.apply();
+        tbl_pnaexamplerecirculate121.apply();
     }
 }
 
