@@ -21,6 +21,8 @@ limitations under the License.
 
 namespace P4 {
 
+#define ERR_STR_DUPLICATED_NAME "conflicting control plane name"
+
 /**
  * This transform will adjust the @name annotations on objects
  * to reflect their position in the hierarchy.  Only relative names
@@ -53,9 +55,12 @@ control c() {
 This pass should be run after inlining.  It assumes that all
 externally-visible objects already have @name annotations -- this is
 done by the UniqueNames front-end pass.
+The pass also checks the uniqueness of the control plane names.
 */
 class HierarchicalNames : public Transform {
     std::vector<cstring> stack;
+    /// Used for detection of conflicting control plane names
+    std::map<cstring, const IR::Node *> annotatedNodes;
  public:
     cstring getName(const IR::IDeclaration* decl);
 
