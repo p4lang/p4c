@@ -11,7 +11,7 @@ on:
 
 # Cancel any preceding run on the pull request.
 concurrency:
-  group: ${{ github.head_ref }}
+  group: container-image-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
