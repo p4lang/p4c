@@ -9,6 +9,7 @@ on:
     # is updated, this is good enough.
     - cron: '15 0-23/4 * * *' # "At minute 15 past every 4th hour from midnight through 23."
 
+# Cancel any preceding run on the pull request.
 concurrency:
   group: ${{ github.head_ref }}
   cancel-in-progress: true

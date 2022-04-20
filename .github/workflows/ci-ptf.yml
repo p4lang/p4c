@@ -21,6 +21,7 @@ on:
   pull_request:
     branches: [ main ]
 
+# Cancel any preceding run on the pull request.
 concurrency:
   group: ${{ github.head_ref }}
   cancel-in-progress: true
