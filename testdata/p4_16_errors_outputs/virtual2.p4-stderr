@@ -1,4 +1,4 @@
-virtual2.p4(23): [--Werror=type-error] error: return +: return expression in function with void return
+virtual2.p4(23): [--Werror=type-error] error: return ix + 16w1: return expression in function with void return
             return (ix + 1);
             ^^^^^^
 virtual2.p4(21): [--Werror=type-error] error: cntr

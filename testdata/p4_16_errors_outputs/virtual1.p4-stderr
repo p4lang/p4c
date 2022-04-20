@@ -1,10 +1,10 @@
-virtual1.p4(23): [--Werror=type-error] error: return +
+virtual1.p4(23): [--Werror=type-error] error: return ix + 16w1
             return (ix + 1);
             ^^^^^^
   ---- Actual error:
   Cannot unify type 'bit<16>' with type 'bool'
   ---- Originating from:
-virtual1.p4(23): Source expression '+' produces a result of type 'bit<16>' which cannot be assigned to a left-value with type 'bool'
+virtual1.p4(23): Source expression 'ix + 16w1' produces a result of type 'bit<16>' which cannot be assigned to a left-value with type 'bool'
               return (ix + 1);
                       ^^^^^^
 virtual1.p4(21): [--Werror=type-error] error: cntr

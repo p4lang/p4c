@@ -1,4 +1,4 @@
-newtype-err.p4(10): [--Werror=type-error] error: AssignmentStatement
+newtype-err.p4(10): [--Werror=type-error] error: n = b + b
         n = b + b;
           ^
   ---- Actual error:
@@ -6,7 +6,7 @@ newtype-err.p4(2): Cannot unify type 'bit<32>' with type 'N32'
   type bit<32> N32;
                ^^^
   ---- Originating from:
-newtype-err.p4(10): Source expression '+' produces a result of type 'bit<32>' which cannot be assigned to a left-value with type 'N32'
+newtype-err.p4(10): Source expression 'b + b' produces a result of type 'bit<32>' which cannot be assigned to a left-value with type 'N32'
           n = b + b;
               ^^^^^
 newtype-err.p4(2)
@@ -15,7 +15,7 @@ newtype-err.p4(2)
 newtype-err.p4(11): [--Werror=type-error] error: +: cannot be applied to expression 'n' with type 'N32'
         n1 = n + 0;
              ^
-newtype-err.p4(12): [--Werror=type-error] error: AssignmentStatement
+newtype-err.p4(12): [--Werror=type-error] error: x = n
         x = n;
           ^
   ---- Actual error:

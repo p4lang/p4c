@@ -1,4 +1,4 @@
-signed.p4(5): [--Werror=type-error] error: AssignmentStatement
+signed.p4(5): [--Werror=type-error] error: signed_int1[7:0] = signed_int2
         signed_int1[7:0] = signed_int2;
                          ^
   ---- Actual error:

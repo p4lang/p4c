@@ -37,6 +37,7 @@ abstract Operation_Binary : Operation {
         if (!srcInfo && left && right) srcInfo = left->srcInfo + right->srcInfo;
         if (type->is<Type::Unknown>() && left && right && left->type == right->type)
             type = left->type; }
+    toString { return left->toString() + " " + getStringOp() + " " +  right->toString(); }
 }
 
 abstract Operation_Ternary : Operation {
