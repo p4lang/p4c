@@ -436,6 +436,7 @@ class StructExpression : Expression {
                   "%1%: unexpected struct type", this);
     }
     size_t size() const { return components.size(); }
+    cstring toString() const;
 }
 
 /// A ListExpression where all the components are compile-time values.
