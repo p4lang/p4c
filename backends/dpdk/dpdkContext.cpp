@@ -85,12 +85,13 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
 
 // This functions insert a single key field in the match keys array
 void DpdkContextGenerator::addKeyField(
-Util::JsonArray* keyJson, const cstring name, const IR::KeyElement *key, int position) {
+Util::JsonArray* keyJson, const cstring name, const cstring nameAnnotation,
+    const IR::KeyElement *key, int position) {
     auto* keyField = new Util::JsonObject();
     cstring fieldName = name.findlast('.');
     auto instanceName = name.replace(fieldName, "");
     fieldName = fieldName.trim(".\t\n\r");
-    keyField->emplace("name", name);
+    keyField->emplace("name", nameAnnotation);
     keyField->emplace("instance_name", instanceName);
     keyField->emplace("field_name", fieldName);
     keyField->emplace("match_type", toStr(key->matchType));
@@ -221,9 +222,15 @@ DpdkContextGenerator::addMatchAttributes(const IR::P4Table*table, const cstring 
         auto* oneAction = new Util::JsonObject();
         struct actionAttributes attr = ::get(actionAttrMap, action->getName());
         auto actName = toStr(action->expression);
-        if (actName != "NoAction")
+        auto name = action->externalName();
+        if (name != "NoAction") {
             actName = ctrlName + "." + actName;
-        oneAction->emplace("action_name", actName);
+            name = ctrlName + "." + name;
+        } else {
+            actName = name;
+        }
+        oneAction->emplace("action_name", name);
+        oneAction->emplace("target_action_name", actName);
         oneAction->emplace("action_handle", attr.actionHandle);
         auto* immFldArray = new Util::JsonArray();
         if (attr.params) {
@@ -271,7 +278,7 @@ const IR::P4Table * table, const cstring controlName, bool isMatch) {
         // Printing compiler added actions is curently not required
         if (!attr.is_compiler_added_action) {
             auto *act = new Util::JsonObject();
-            auto actName = toStr(action->expression);
+            auto actName = action->externalName();
 
             // NoAction is not prefixed with control block name
             if (actName != "NoAction")
@@ -369,7 +376,7 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray* tablesJson) {
                     auto* keyJson = new Util::JsonArray();
                     int position = 0;
                     for (auto matchKeyFromPrg : tableAttr.tableKeys) {
-                        addKeyField(keyJson, matchKeyFromPrg,
+                        addKeyField(keyJson, matchKeyFromPrg.first, matchKeyFromPrg.second,
                                     match_keys->keyElements.at(position),position);
                         position++;
                     }

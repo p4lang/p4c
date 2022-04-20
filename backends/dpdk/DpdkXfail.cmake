@@ -20,7 +20,6 @@ p4c_add_xfail_reason("dpdk"
 
 p4c_add_xfail_reason("dpdk"
   "not implemented"
-  testdata/p4_16_samples/psa-example-dpdk-byte-alignment_3.p4
   testdata/p4_16_samples/psa-example-dpdk-byte-alignment_4.p4
   )
 
@@ -96,3 +95,15 @@ p4c_add_xfail_reason("dpdk"
   "No argument supplied for parameter"
   testdata/p4_16_samples/pna-example-mirror-packet-error3.p4
   )
+
+p4c_add_xfail_reason("dpdk"
+  "All table keys together with holes in the underlying structure should fit in 64 bytes"
+   testdata/p4_16_samples/psa-dpdk-table-key-error.p4
+   testdata/p4_16_samples/psa-dpdk-table-key-error-1.p4
+   )
+
+p4c_add_xfail_reason("dpdk"
+  "Unsupported bit width"
+   testdata/p4_16_samples/psa-dpdk-struct-field.p4
+   testdata/p4_16_samples/psa-example-register2-bmv2.p4
+   )

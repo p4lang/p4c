@@ -21,12 +21,17 @@ P4C=p4c-ebpf
 TARGET=kernel
 # Extra arguments for the compiler
 ARGS=
+# Extra arguments for the P4 compiler
+P4ARGS=--Werror
 
 # If needed, bpf target files can be hardcoded here
 # This can be any file of type ".c", ".bc" or, ".o"
 BPFOBJ=
 # Get the source name of the object to match targets
 BPFNAME=$(basename $(BPFOBJ))
+
+# Possible values: "-mcpu=generic|probe|v1|v2|v3" or "-mcpu=v1|v2 -mattr=+alu32"
+LLC_FLAGS="-mcpu=generic"
 
 all: verify_target_bpf $(BPFOBJ)
 
@@ -60,15 +65,21 @@ $(BPFNAME).c: $(P4FILE)
 		echo "*** ERROR: Cannot find p4c-ebpf"; \
 		exit 1;\
 	fi;
-	$(P4C) --Werror $(P4INCLUDE) --target $(TARGET) -o $@ $< $(P4ARGS);
+	$(P4C) $(P4INCLUDE) --target $(TARGET) -o $@ $< $(P4ARGS) $(P4ARGS_TARGET);
 
 # Compile the C code with the clang llvm compiler
 $(BPFNAME).bc: %.bc : %.c
-	$(CLANG) $(CFLAGS) $(INCLUDES) -emit-llvm -c $< -o $@
+	$(CLANG) $(ARGS) $(CFLAGS) $(INCLUDES) -emit-llvm -c $< -o $@
 
 # Invoke the llvm on the generated .bc code and produce bpf byte code
 $(BPFNAME).o: %.o : %.bc
 	$(LLC) -march=bpf -mcpu=probe -filetype=obj $< -o $@
+
+.PHONY: psa
+psa: P4ARGS_TARGET= --arch psa
+psa: $(BPFNAME).c
+	$(CLANG) $(ARGS) $(CFLAGS) $(INCLUDES) -emit-llvm -DBTF -c -o  $(BPFNAME).bc $(BPFNAME).c
+	$(LLC) -march=bpf $(LLC_FLAGS) -filetype=obj -o $(BPFNAME).o $(BPFNAME).bc
 
 clean:
 	rm -f *.o *.bc $(BPFNAME).c $(BPFNAME).h

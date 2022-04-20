@@ -77,13 +77,13 @@ void ControlBodyTranslator::processCustomExternFunction(const P4::ExternFunction
 }
 
 void ControlBodyTranslator::processFunction(const P4::ExternFunction* function) {
-    if (!control->emitExterns)
-        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Not supported", function->method);
     processCustomExternFunction(function, EBPFTypeFactory::instance);
 }
 
 bool ControlBodyTranslator::preorder(const IR::MethodCallExpression* expression) {
-    builder->append("/* ");
+    if (commentDescriptionDepth == 0)
+        builder->append("/* ");
+    commentDescriptionDepth++;
     visit(expression->method);
     builder->append("(");
     bool first = true;
@@ -94,8 +94,15 @@ bool ControlBodyTranslator::preorder(const IR::MethodCallExpression* expression)
         visit(a);
     }
     builder->append(")");
-    builder->append("*/");
-    builder->newline();
+    if (commentDescriptionDepth == 1) {
+        builder->append(" */");
+        builder->newline();
+    }
+    commentDescriptionDepth--;
+
+    // do not process extern when comment is generated
+    if (commentDescriptionDepth != 0)
+        return false;
 
     auto mi = P4::MethodInstance::resolve(expression,
                                           control->program->refMap,
@@ -348,7 +355,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     builder->endOfStatement(true);
 
     builder->emitIndent();
-    table->emitLookupDefault(builder, control->program->zeroKey, valueName);
+    table->emitLookupDefault(builder, control->program->zeroKey, valueName, actionVariableName);
     builder->blockEnd(false);
     builder->append(" else ");
     builder->blockStart();
@@ -379,7 +386,6 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     }
     builder->endOfStatement(true);
     builder->blockEnd(true);
-
     builder->blockEnd(true);
 
     msgStr = Util::printf_format("Control: %s applied", method->object->getName().name);
@@ -479,6 +485,24 @@ bool ControlBodyTranslator::preorder(const IR::SwitchStatement* statement) {
     return false;
 }
 
+bool ControlBodyTranslator::preorder(const IR::StructExpression *expr) {
+    if (commentDescriptionDepth == 0)
+        return CodeGenInspector::preorder(expr);
+
+    // Dump structure for helper comment
+    builder->append("{");
+    bool first = true;
+    for (auto c : expr->components) {
+        if (!first)
+            builder->append(", ");
+        visit(c->expression);
+        first = false;
+    }
+    builder->append("}");
+
+    return false;
+}
+
 /////////////////////////////////////////////////
 
 EBPFControl::EBPFControl(const EBPFProgram* program, const IR::ControlBlock* block,
@@ -540,6 +564,27 @@ void EBPFControl::emitDeclaration(CodeBuilder* builder, const IR::Declaration* d
         bool isPointer = codeGen->isPointerVariable(decl->name.name);
         etype->declareInit(builder, vd->name, isPointer);
         builder->endOfStatement(true);
+
+        if (!isPointer) {
+            if (auto type = etype->to<EBPFTypeName>()) {
+                if (type->canonicalTypeIs<EBPFStructType>()) {
+                    // A struct type might be used as a lookup key.
+                    // When a data structure is aligned and is not packed,
+                    // the compiler might generate offsets between fields.
+                    // The BPF verifier may reject using such structures with
+                    // uninitialized offsets as lookup keys.
+                    // Therefore, this piece of code zero-initialize structures
+                    // that might be used as keys.
+                    builder->emitIndent();
+                    builder->appendFormat("__builtin_memset((void *) &%s, 0, sizeof(",
+                                          vd->name.name);
+                    etype->declare(builder, cstring::empty, false);
+                    builder->append("))");
+                    builder->endOfStatement(true);
+                }
+            }
+        }
+
         BUG_CHECK(vd->initializer == nullptr,
                   "%1%: declarations with initializers not supported", decl);
         return;

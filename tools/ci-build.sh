@@ -67,6 +67,31 @@ cd /p4c
 backends/ebpf/build_libbpf
 cd -
 
+function install_ptf_ebpf_test_deps() (
+  export P4C_PTF_PACKAGES="gcc-multilib \
+                           python3-six \
+                           libjansson-dev \
+                           linux-tools-`uname -r`"
+  # Package "linux-tools-generic-hwe-20.04" is not required because
+  # we test under current kernel, not the newest one
+  apt-get install -y --no-install-recommends ${P4C_PTF_PACKAGES}
+
+  git clone --recursive https://github.com/P4-Research/psabpf.git /tmp/psabpf
+  cd /tmp/psabpf
+  # FIXME: psabpf is under heavy development, later use git tags when it will be ready to use
+  git reset --hard 8fc9687
+  ./build_libbpf.sh
+  mkdir build
+  cd build
+  cmake ..
+  make "-j$(nproc)"
+  make install
+)
+
+if [[ "${INSTALL_PTF_EBPF_DEPENDENCIES}" == "ON" ]] ; then
+  install_ptf_ebpf_test_deps
+fi
+
 # ! ------  BEGIN VALIDATION -----------------------------------------------
 
 function build_gauntlet() {

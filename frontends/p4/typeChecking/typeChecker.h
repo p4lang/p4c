@@ -275,6 +275,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Range* expression) override { return typeSet(expression); }
     const IR::Node* postorder(IR::LNot* expression) override;
     const IR::Node* postorder(IR::Neg* expression) override;
+    const IR::Node* postorder(IR::UPlus* expression) override;
     const IR::Node* postorder(IR::Cmpl* expression) override;
     const IR::Node* postorder(IR::Cast* expression) override;
     const IR::Node* postorder(IR::Mux* expression) override;
@@ -305,6 +306,10 @@ class TypeInference : public Transform {
     void end_apply(const IR::Node* Node) override;
 
     TypeInference* clone() const override;
+    // Apply recursively the typechecker to the newly created node
+    // to add all component subtypes in the typemap.
+    // Return 'true' if errors were discovered in the learning process.
+    bool learn(const IR::Node* node, Visitor* caller);
 };
 
 // Copy types from the typeMap to expressions.  Updates the typeMap with newly created nodes

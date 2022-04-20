@@ -84,7 +84,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     }
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarnUnused @name(".send_to_port") action send_to_port_0() {
+    @noWarn("unused") @name(".send_to_port") action send_to_port_0() {
         meta_0 = d;
         egress_port_0 = (PortId_t)32w0;
         meta_0.drop = false;

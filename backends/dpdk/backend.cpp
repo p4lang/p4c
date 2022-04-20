@@ -24,6 +24,7 @@ limitations under the License.
 #include "frontends/p4/moveDeclarations.h"
 #include "midend/eliminateTypedefs.h"
 #include "midend/removeComplexExpressions.h"
+#include "midend/simplifyKey.h"
 #include "ir/dbprint.h"
 #include "ir/ir.h"
 #include "lib/stringify.h"
@@ -54,7 +55,12 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         // TBD: implement dpdk lowering passes instead of reusing bmv2's lowering pass.
 
         new ByteAlignment(typeMap, refMap, &structure),
-        new BMV2::LowerExpressions(typeMap),
+        new P4::SimplifyKey(
+                refMap, typeMap,
+                new P4::OrPolicy(new P4::IsValid(refMap, typeMap),
+                                 new P4::IsMask())),
+        new P4::TypeChecking(refMap, typeMap),
+        new BMV2::LowerExpressions(typeMap, DPDK_MAX_SHIFT_AMOUNT),
         new DismantleMuxExpressions(typeMap, refMap),
         new P4::RemoveComplexExpressions(refMap, typeMap,
                 new DPDK::ProcessControls(&structure.pipeline_controls)),
@@ -74,14 +80,15 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new InjectOutputPortMetadataField(&structure),
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap, true),
-        new CopyMatchKeysToSingleStruct(refMap, typeMap, &invokedInKey),
         new P4::ResolveReferences(refMap),
         new StatementUnroll(refMap, &structure),
         new IfStatementUnroll(refMap, &structure),
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap, true),
-        new ConvertBinaryOperationTo2Params(),
+        new ConvertBinaryOperationTo2Params(refMap),
         new CollectProgramStructure(refMap, typeMap, &structure),
+        new CopyMatchKeysToSingleStruct(refMap, typeMap, &invokedInKey, &structure),
+        new P4::ResolveReferences(refMap),
         new CollectLocalVariables(refMap, typeMap, &structure),
         new CollectErrors(&structure),
         new ConvertInternetChecksum(typeMap, &structure),
@@ -120,6 +127,8 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new DpdkAsmOptimization,
         new CollectUsedMetadataField(used_fields),
         new RemoveUnusedMetadataFields(used_fields),
+        new ValidateTableKeys(),
+        new ShortenTokenLength(),
     };
 
     dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
@@ -128,5 +137,4 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
 void DpdkBackend::codegen(std::ostream &out) const {
     dpdk_program->toSpec(out) << std::endl;
 }
-
 }  // namespace DPDK

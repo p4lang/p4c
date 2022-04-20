@@ -38,7 +38,7 @@ class ActionTranslationVisitor : public virtual CodeGenInspector {
     bool preorder(const IR::PathExpression* expression);
 
     bool preorder(const IR::P4Action* act);
-    virtual cstring getActionParamStr(const IR::Expression *expression) const;
+    virtual cstring getParamInstanceName(const IR::Expression *expression) const;
     bool isActionParameter(const IR::PathExpression *expression) const;
 };  // ActionTranslationVisitor
 
@@ -84,11 +84,14 @@ class EBPFTable : public EBPFTableBase {
     const IR::ActionList*     actionList;
     const IR::TableBlock*     table;
     cstring               defaultActionMapName;
-    cstring               actionEnumName;
     std::map<const IR::KeyElement*, cstring> keyFieldNames;
     std::map<const IR::KeyElement*, EBPFType*> keyTypes;
+    // Use 1024 by default.
+    // TODO: make it configurable using compiler options.
+    size_t size = 1024;
 
     EBPFTable(const EBPFProgram* program, const IR::TableBlock* table, CodeGenInspector* codeGen);
+    EBPFTable(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name);
 
     cstring p4ActionToActionIDName(const IR::P4Action * action) const;
     void emitActionArguments(CodeBuilder* builder, const IR::P4Action* action, cstring name);
@@ -100,13 +103,17 @@ class EBPFTable : public EBPFTableBase {
     virtual void emitValueType(CodeBuilder* builder);
     virtual void emitValueActionIDNames(CodeBuilder* builder);
     virtual void emitValueStructStructure(CodeBuilder* builder);
+    // Emits value types used by direct externs.
+    virtual void emitDirectValueTypes(CodeBuilder* builder) { (void) builder; }
     virtual void emitAction(CodeBuilder* builder, cstring valueName, cstring actionRunVariable);
     virtual void emitInitializer(CodeBuilder* builder);
     virtual void emitLookup(CodeBuilder* builder, cstring key, cstring value) {
         builder->target->emitTableLookup(builder, dataMapName, key, value);
         builder->endOfStatement(true);
     }
-    virtual void emitLookupDefault(CodeBuilder* builder, cstring key, cstring value) {
+    virtual void emitLookupDefault(CodeBuilder* builder, cstring key, cstring value,
+                                   cstring actionRunVariable) {
+        (void) actionRunVariable;
         builder->target->emitTableLookup(builder, defaultActionMapName, key, value);
         builder->endOfStatement(true);
     }

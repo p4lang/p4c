@@ -35,7 +35,20 @@ set (P4C_EBPF_SRCS
   ebpfModel.cpp
   midend.cpp
   lower.cpp
-  )
+  ../bmv2/common/programStructure.cpp
+  ../bmv2/psa_switch/psaProgramStructure.cpp
+  psa/ebpfPsaGen.cpp
+  psa/ebpfPipeline.cpp
+  psa/ebpfPsaParser.cpp
+  psa/ebpfPsaDeparser.cpp
+  psa/ebpfPsaControl.cpp
+  psa/ebpfPsaTable.cpp
+  psa/backend.cpp
+  psa/externs/ebpfPsaCounter.cpp
+  psa/externs/ebpfPsaChecksum.cpp
+  psa/externs/ebpfPsaHashAlgorithm.cpp
+  psa/externs/ebpfPsaTableImplementation.cpp
+  psa/externs/ebpfPsaRegister.cpp)
 
 set (P4C_EBPF_HDRS
   codeGen.h
@@ -52,7 +65,23 @@ set (P4C_EBPF_HDRS
   midend.h
   target.h
   lower.h
-  )
+  ../bmv2/common/programStructure.h
+  ../bmv2/psa_switch/psaProgramStructure.h
+  ../bmv2/psa_switch/psaSwitch.h
+  psa/backend.h
+  psa/ebpfPsaGen.h
+  psa/xdpHelpProgram.h
+  psa/ebpfPipeline.h
+  psa/ebpfPsaParser.h
+  psa/ebpfPsaDeparser.h
+  psa/ebpfPsaControl.h
+  psa/ebpfPsaTable.h
+  psa/externs/ebpfPsaCounter.h
+  psa/externs/ebpfPsaChecksum.h
+  psa/externs/ebpfPsaHashAlgorithm.h
+  psa/externs/ebpfPsaTableImplementation.h
+  psa/externs/ebpfPsaRegister.h
+)
 
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_EBPF_SRCS};${P4C_EBPF_HDRS}")
 
@@ -187,4 +216,5 @@ p4c_add_test_with_args("ebpf" ${EBPF_DRIVER_TEST} FALSE "testdata/p4_16_samples/
 # FIXME:This does not work yet
 # We do not have support for dynamic addition of tables in the test framework
 p4c_add_test_with_args("ebpf" ${EBPF_DRIVER_TEST} TRUE "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-conntrack-ebpf.c" "")
+
 message(STATUS "Done with configuring BPF back end")

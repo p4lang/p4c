@@ -224,6 +224,27 @@ bool CodeGenInspector::preorder(const IR::Path* p) {
     return false;
 }
 
+bool CodeGenInspector::preorder(const IR::StructExpression *expr) {
+    builder->append("(struct ");
+    CHECK_NULL(expr->structType);
+    visit(expr->structType);
+    builder->append(")");
+    builder->append("{");
+    bool first = true;
+    for (auto c : expr->components) {
+        if (!first)
+            builder->append(", ");
+        builder->append(".");
+        builder->append(c->name);
+        builder->append(" = ");
+        visit(c->expression);
+        first = false;
+    }
+    builder->append("}");
+
+    return false;
+}
+
 bool CodeGenInspector::preorder(const IR::BoolLiteral* b) {
     builder->append(b->toString());
     return false;

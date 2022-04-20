@@ -417,10 +417,9 @@ class SymbolicHeader : public SymbolicStruct {
 class SymbolicHeaderUnion : public SymbolicStruct {
  public:
     explicit SymbolicHeaderUnion(const IR::Type_HeaderUnion* type) : SymbolicStruct(type) {}
-    SymbolicBool* valid = nullptr;
     SymbolicHeaderUnion(const IR::Type_HeaderUnion* type, bool uninitialized,
                    const SymbolicValueFactory* factory);
-    virtual void setValid(bool v);
+    SymbolicBool* isValid() const;
     SymbolicValue* clone() const override;
     SymbolicValue* get(const IR::Node* node, cstring field) const override;
     void setAllUnknown() override;

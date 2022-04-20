@@ -19,7 +19,8 @@ limitations under the License.
 #include "lib/hex.h"
 
 #define ALL_UNARY_OPS(M, ...)           \
-    M(Neg, -, ##__VA_ARGS__) M(Cmpl, ~, ##__VA_ARGS__) M(LNot, !, ##__VA_ARGS__)
+    M(UPlus, +, ##__VA_ARGS__) M(Neg, -, ##__VA_ARGS__) \
+    M(Cmpl, ~, ##__VA_ARGS__) M(LNot, !, ##__VA_ARGS__)
 #define ALL_BINARY_OPS(M, ...)                                                  \
     M(Mul, Binary, *, ##__VA_ARGS__)                                            \
     M(Div, Binary, /, ##__VA_ARGS__) M(Mod, Binary, %, ##__VA_ARGS__)           \

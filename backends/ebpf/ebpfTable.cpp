@@ -24,8 +24,8 @@ namespace EBPF {
 
 bool ActionTranslationVisitor::preorder(const IR::PathExpression* expression) {
     if (isActionParameter(expression)) {
-        cstring paramStr = getActionParamStr(expression);
-        builder->append(paramStr.c_str());
+        cstring paramInstanceName = getParamInstanceName(expression);
+        builder->append(paramInstanceName.c_str());
         return false;
     }
     visit(expression->path);
@@ -41,7 +41,8 @@ bool ActionTranslationVisitor::isActionParameter(const IR::PathExpression *expre
     return false;
 }
 
-cstring ActionTranslationVisitor::getActionParamStr(const IR::Expression *expression) const {
+cstring ActionTranslationVisitor::getParamInstanceName(
+        const IR::Expression *expression) const {
     cstring actionName = EBPFObject::externalName(action);
     auto paramStr = Util::printf_format("%s->u.%s.%s",
                                         valueName, actionName,
@@ -60,11 +61,15 @@ bool ActionTranslationVisitor::preorder(const IR::P4Action* act) {
 EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table,
                      CodeGenInspector* codeGen) :
         EBPFTableBase(program, EBPFObject::externalName(table->container), codeGen), table(table) {
+    auto sizeProperty = table->container->properties->getProperty(
+            IR::TableProperties::sizePropertyName);
+    if (sizeProperty != nullptr) {
+        auto expr = sizeProperty->value->to<IR::ExpressionValue>()->expression;
+        this->size = expr->to<IR::Constant>()->asInt();
+    }
+
     cstring base = instanceName + "_defaultAction";
     defaultActionMapName = base;
-
-    base = table->container->name.name + "_actions";
-    actionEnumName = program->refMap->newName(base);
 
     keyGenerator = table->container->getKey();
     actionList = table->container->getActionList();
@@ -72,10 +77,17 @@ EBPFTable::EBPFTable(const EBPFProgram* program, const IR::TableBlock* table,
     initKey();
 }
 
+EBPFTable::EBPFTable(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name) :
+        EBPFTableBase(program, name, codeGen),
+        keyGenerator(nullptr), actionList(nullptr), table(nullptr) {}
+
 void EBPFTable::initKey() {
     if (keyGenerator != nullptr) {
         unsigned fieldNumber = 0;
         for (auto c : keyGenerator->keyElements) {
+            if (c->matchType->path->name.name == "selector")
+                continue;  // this match type is intended for ActionSelector, not table itself
+
             auto type = program->typeMap->getType(c->expression);
             auto ebpfType = EBPFTypeFactory::instance->create(type);
             if (!ebpfType->is<IHasWidth>()) {
@@ -136,13 +148,22 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
             auto mtdecl = program->refMap->getDeclaration(c->matchType->path, true);
             auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
 
-            auto ebpfType = ::get(keyTypes, c);
-            cstring fieldName = ::get(keyFieldNames, c);
-
             if (!isMatchTypeSupported(matchType)) {
                 ::error(ErrorType::ERR_UNSUPPORTED,
                         "Match of type %1% not supported", c->matchType);
             }
+
+            if (matchType->name.name == "selector") {
+                builder->emitIndent();
+                builder->append("/* ");
+                c->expression->apply(commentGen);
+                builder->append(" : selector */");
+                builder->newline();
+                continue;
+            }
+
+            auto ebpfType = ::get(keyTypes, c);
+            cstring fieldName = ::get(keyFieldNames, c);
 
             builder->emitIndent();
             ebpfType->declare(builder, fieldName, false);
@@ -194,6 +215,7 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
     builder->blockStart();
 
     emitValueStructStructure(builder);
+    emitDirectValueTypes(builder);
 
     builder->blockEnd(false);
     builder->endOfStatement(true);
@@ -470,6 +492,7 @@ void EBPFTable::emitAction(CodeBuilder* builder, cstring valueName, cstring acti
         auto visitor = createActionTranslationVisitor(valueName, program);
         visitor->setBuilder(builder);
         visitor->copySubstitutions(codeGen);
+        visitor->copyPointerVariables(codeGen);
 
         action->apply(*visitor);
         builder->newline();

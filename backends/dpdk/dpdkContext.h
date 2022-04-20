@@ -48,7 +48,7 @@ struct TableAttributes {
     cstring controlName;
     unsigned default_action_handle;
     /* Non selector table keys from original P4 program */
-    std::vector<cstring> tableKeys;
+    std::vector<std::pair<cstring, cstring>> tableKeys;
 };
 
 /* This structure holds action attributes required for context JSON which are not
@@ -146,7 +146,7 @@ class DpdkContextGenerator : public Inspector {
     const Util::JsonObject* genContextJsonObject();
     void addMatchTables(Util::JsonArray* tablesJson);
     Util::JsonObject* initTableCommonJson(const cstring name, const struct TableAttributes & attr);
-    void addKeyField(Util::JsonArray* keyJson, const cstring name,
+    void addKeyField(Util::JsonArray* keyJson, const cstring name, const cstring annon,
                      const IR::KeyElement *key, int position);
     Util::JsonArray* addActions(const IR::P4Table * table, const cstring ctrlName, bool isMatch);
     bool addRefTables(const cstring tbl_name, const IR::P4Table **memberTable,

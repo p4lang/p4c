@@ -36,8 +36,10 @@ set (BMV2_PSA_SWITCH_SRCS
     psa_switch/midend.cpp
     psa_switch/midend.h
     psa_switch/psaSwitch.cpp
-    psa_switch/options.cpp
     psa_switch/psaSwitch.h
+    psa_switch/psaProgramStructure.cpp
+    psa_switch/psaProgramStructure.h
+    psa_switch/options.cpp
     psa_switch/options.h
     )
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_PSA_SWITCH_SRCS}")
