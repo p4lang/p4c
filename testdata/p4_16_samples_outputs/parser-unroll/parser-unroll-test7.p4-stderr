@@ -1,6 +1,0 @@
-parser-unroll-test7.p4(33): [--Wwarn=ignore-prop] warning: Result of packet.extract is not defined: Error: Reading field from invalid header union
-        packet.extract(hdr.u.next.byte);
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-parser-unroll-test7.p4(34): [--Wwarn=ignore-prop] warning: Result of packet.extract is not defined: Error: Reading field from invalid header union
-        packet.extract(hdr.u.next.short);
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
