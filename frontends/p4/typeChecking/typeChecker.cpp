@@ -2605,11 +2605,7 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
                 setType(result, st);
                 return result;
             } else {
-                auto sit = getTypeType(se->type);
-                if (typeMap->equivalent(st, sit))
-                    return expression->expr;
-                else
-                    typeError("%1%: cast not supported", expression->destType);
+                typeError("%1%: cast not supported", expression->destType);
                 return expression;
             }
         } else if (auto le = expression->expr->to<IR::ListExpression>()) {
@@ -2621,8 +2617,10 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
                     auto src = assignment(expression, fieldI->type, compI);
                     vec.push_back(new IR::NamedExpression(fieldI->name, src));
                 }
+                auto setype = castType->getP4Type();
+                setType(setype, new IR::Type_Type(st));
                 auto result = new IR::StructExpression(
-                    le->srcInfo, castType->getP4Type(), vec);
+                    le->srcInfo, setype, setype, vec);
                 setType(result, st);
                 return result;
             } else {
