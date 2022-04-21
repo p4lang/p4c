@@ -439,6 +439,12 @@ class DpdkExternFuncStatement : DpdkAsmStatement, IDPDKNode {
 #nodbprint
 }
 
+class DpdkRecircidStatement : DpdkAsmStatement, IDPDKNode {
+    Expression pass;
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
 class DpdkReturnStatement : DpdkAsmStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint

@@ -303,6 +303,10 @@ std::ostream &IR::DpdkReturnStatement::toSpec(std::ostream &out) const {
 
 std::ostream &IR::DpdkRecirculateStatement::toSpec(std::ostream &out) const {
     out << "recirculate";
+}
+
+std::ostream &IR::DpdkRecircidStatement::toSpec(std::ostream &out) const {
+    out << "recircid " << DPDK::toStr(pass);
     return out;
 }
 

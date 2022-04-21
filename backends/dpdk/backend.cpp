@@ -126,6 +126,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         return;
     if (structure.p4arch == "pna") {
         PassManager post_code_gen = {
+            new PrependPassRecircId(),
             new DirectionToRegRead(),
             new AddNewMetadataFields(),
         };
