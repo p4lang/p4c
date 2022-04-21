@@ -929,6 +929,50 @@ class CollectErrors : public Inspector {
     }
 };
 
+/**
+ * Eliminate temporary copies of header, which generally populated after inlining,
+ * if it's not temporary copy then transform direct header copy to element wise copy
+ * i.e.
+ * case 1) when header copied to temporary
+ * eth_0 = hdr.ethernet
+ * eth_1 = hdr.outer_ethernet
+ * eth_0.srcAddr = eth_1.srcAddr
+ * eth_0.dstAddr = eth_1.dstAddr
+ * eth_0.etherType = eth_1.etherType
+ * hdr.ethernet = eth_0
+ * above block will be transformed into
+ * hdr.ethernet.srcAddr = hdr.outer_ethernet.srcAddr
+ * hdr.ethernet.dstAddr = hdr.outer_ethernet.dstAddr
+ * hdr.ethernet.etherType = hdr.outer_ethernet.etherType
+ *
+ * case 2) when header copied to non temporary
+ * hdr.ethernet = hdr.outer_ethernet
+ * it will be transformed into below memberwise copy
+ * hdr.ethernet.srcAddr = hdr.outer_ethernet.srcAddr
+ * hdr.ethernet.dstAddr = hdr.outer_ethernet.dstAddr
+ * hdr.ethernet.etherType = hdr.outer_ethernet.etherType
+ *
+ */
+class ElimHeaderCopy : public Transform {
+    P4::TypeMap *typeMap;
+    /// It's for populating replacement map by keeping temporary header name as key
+    /// and source of assignment statement as value.
+    /// i.e.
+    /// for below assignment statement
+    /// eth_0 = hdr.ethernet
+    /// replacement map will be like
+    /// replacementMap["eth_0"] = hdr.ethernet;
+    /// later on all uses of eth_0 will be replace with there value in replacementMap.
+    ordered_map<cstring, const IR::Member*> replacementMap;
+
+ public:
+    explicit ElimHeaderCopy(P4::TypeMap *typeMap) : typeMap{typeMap} {}
+    bool isHeader(const IR::Expression* e);
+    const IR::Node* preorder(IR::AssignmentStatement* as) override;
+    const IR::Node* preorder(IR::MethodCallStatement *mcs) override;
+    const IR::Node* postorder(IR::Member* m) override;
+};
+
 class DpdkArchFirst : public PassManager {
  public:
     DpdkArchFirst() { setName("DpdkArchFirst"); }
