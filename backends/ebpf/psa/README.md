@@ -270,6 +270,21 @@ If a deparser triggers the `pack()` method, an eBPF program inserts data defined
 A user space application is responsible for performing periodic queries to this map to read a Digest message. It can use either
 `psabpf-ctl digest get pipe`, `psabpf_digest_get_next` from psabpf C API or `bpf_map_lookup_and_delete_elem` from `libbpf` API.
 
+### Meters
+
+[Meters](https://p4.org/p4-spec/docs/PSA.html#sec-meters) are a mechanism for "marking" packets that exceed an average packet or bit rate.
+Meters implement Dual Token Bucket Algorithm with both "color aware" and "color blind" modes. The PSA-eBPF implementation uses a BPF hash map
+to store a Meter state. The current implementation in eBPF uses BPF spinlocks to make operations on Meters atomic. The `bpf_ktime_get_ns()` helper is used to get a packet arrival timestamp. 
+
+The best way to configure a Meter is to use `psabpf-ctl meter` tool as in the following example:
+```bash
+# 1Mb/s -> 128 000 bytes/s (132 kbytes/s PIR, 128 kbytes/s CIR), let CBS, PBS -> 10 kbytes
+$ psabpf-ctl meter update pipe "$PIPELINE" DemoIngress_meter index 0 132000:10000 128000:10000
+```
+
+`psabpf-ctl` accepts PIR and CIR values in bytes/s units or packets/s. PBS and CBS in bytes or packets.
+
+
 # Getting started
 
 ## Installation 

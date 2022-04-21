@@ -118,6 +118,9 @@ class EBPFPipeline : public EBPFProgram {
     void emitHeadersFromCPUMAP(CodeBuilder* builder);
     void emitMetadataFromCPUMAP(CodeBuilder *builder);
 
+    bool hasAnyMeter() const {
+        return !control->meters.empty();
+    }
     /*
      * Returns whether the compiler should generate
      * timestamp retrieved by bpf_ktime_get_ns().
@@ -126,7 +129,7 @@ class EBPFPipeline : public EBPFProgram {
      * if the timestamp field is not used within a pipeline.
      */
     bool shouldEmitTimestamp() const {
-        return control->timestampIsUsed;
+        return hasAnyMeter() || control->timestampIsUsed;
     }
 };
 
