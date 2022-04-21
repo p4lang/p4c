@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "dpdkAsmOpt.h"
+#include "dpdkUtils.h"
 
 namespace DPDK {
 // The assumption is compiler can only produce forward jumps.
@@ -178,12 +179,8 @@ bool RemoveUnusedMetadataFields::isByteSizeField(const IR::Type *field_type) {
 
 const IR::Node* RemoveUnusedMetadataFields::preorder(IR::DpdkAsmProgram *p) {
     IR::IndexedVector<IR::DpdkStructType> usedStruct;
-    bool isMetadataStruct = false;
     for (auto st : p->structType) {
-        if (!isMetadataStruct) {
-            for (auto anno : st->annotations->annotations) {
-                if (anno->name == "__metadata__") {
-                    isMetadataStruct = true;
+        if (isMetadataStruct(st)) {
                     IR::IndexedVector<IR::StructField> usedMetadataFields;
                     for (auto field : st->fields) {
                         if (used_fields.count(field->name.name)) {
@@ -198,11 +195,6 @@ const IR::Node* RemoveUnusedMetadataFields::preorder(IR::DpdkAsmProgram *p) {
                     auto newSt = new IR::DpdkStructType(st->srcInfo, st->name,
                                                    st->annotations, usedMetadataFields);
                     usedStruct.push_back(newSt);
-                }
-            }
-            if (!isMetadataStruct) {
-                usedStruct.push_back(st);
-            }
         } else {
             usedStruct.push_back(st);
         }
@@ -227,15 +219,6 @@ int ValidateTableKeys::getFieldSizeBits(const IR::Type *field_type) {
     return -1;
 }
 
-bool ValidateTableKeys::isMetadataStruct(const IR::Type_Struct *st) {
-    for (auto anno : st->annotations->annotations) {
-        if (anno->name == "__metadata__") {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
     const IR::DpdkStructType *metaStruct = nullptr;
     for (auto st : p->structType) {
@@ -256,7 +239,8 @@ bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
                                                           "%1% is not a structure field", key);
             auto keyMem = key->expression->to<IR::Member>();
             auto type = keyMem->expr->type;
-            if (type->is<IR::Type_Struct>() && isMetadataStruct(type->to<IR::Type_Struct>())) {
+            if (type->is<IR::Type_Struct>()
+                && isMetadataStruct(type->to<IR::Type_Struct>())) {
                 auto offset = metaStruct->getFieldBitOffset(keyMem->member.name);
                 if (min == -1 || min > offset)
                     min = offset;
