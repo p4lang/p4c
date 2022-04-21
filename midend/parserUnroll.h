@@ -33,13 +33,13 @@ const char outOfBoundsStateName[] = "stateOutOfBound";
 //////////////////////////////////////////////
 // The following are for a single parser
 
-/// Represents a variable instance in a parser.
-///
-/// This is a thin wrapper around a 'const IR::Member*' to (1) enforce invariants on which forms of
-/// Members can represent state variables and (2) enable the use of StackVariable as map keys.
-///
-/// A Member can represent a StackVariable exactly when its qualifying expression
-/// (IR::Member::expr) either is a PathExpression or can represent a StackVariable.
+// Represents a variable for storing indexes values for a header stack.
+//
+// This is a thin wrapper around a 'const IR::Member*' to (1) enforce invariants on which forms of
+// Members can represent state variables and (2) enable the use of StackVariable as map keys.
+//
+// A Member can represent a StackVariable exactly when its qualifying variable
+// (IR::Member::expr) either is a PathExpression or can represent a StackVariable.
 class StackVariable {
  public:
     /// Determines whether @expr can represent a StateVariable.
@@ -51,30 +51,10 @@ class StackVariable {
     const IR::Expression* operator->() const { return expr; }
 
     // Implements comparisons so that StateVariables can be used as map keys.
-    bool operator<(const StackVariable& other) const;
     bool operator==(const StackVariable& other) const;
 
  private:
     const IR::Expression* expr;
-
-    template <class T>
-    static const T* checkedTo(const IR::Expression* e) {
-        const T* result = e->to<T>();
-        BUG_CHECK(result, "Cast failed: %1% is not a %2%. It is a %3% instead.", e,
-                  T::static_type_name(), e->node_type_name());
-        return result;
-    }
-
-    // Returns a negative value if e1 < e2, zero if e1 == e2, and a positive value otherwise.
-    // In these comparisons,
-    //   * PathExpressions < Members.
-    //   * PathExpressions are ordered on the name contained in their Paths.
-    //   * Members are ordered first by their expressions, then by their member.
-    static int compare(const IR::Expression* e1, const IR::Expression* e2);
-    static int compare(const IR::Member* m1, const IR::Expression* e2);
-    static int compare(const IR::Member* m1, const IR::Member* m2);
-    static int compare(const IR::PathExpression* p1, const IR::Expression* e2);
-    static int compare(const IR::PathExpression* p1, const IR::PathExpression* p2);
 
  public:
     /// Implicitly converts IR::Expression* to a StackVariable.
@@ -282,7 +262,6 @@ class RewriteAllParsers : public Transform {
         // adding accept/reject
         newParser->states.push_back(new IR::ParserState(IR::ParserState::accept, nullptr));
         newParser->states.push_back(new IR::ParserState(IR::ParserState::reject, nullptr));
-        std::cout << newParser << std::endl;
         return newParser;
     }
 };

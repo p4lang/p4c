@@ -5,8 +5,10 @@
 
 namespace P4 {
 
-StackVariable::StackVariable(const IR::Expression* expr)
-    : expr(checkedTo<IR::Member>(expr)) {}
+StackVariable::StackVariable(const IR::Expression* expr) : expr(expr) {
+    CHECK_NULL(expr);
+    expr->checkedTo<IR::Member>();
+}
 
 bool StackVariable::repOk(const IR::Expression* expr) {
     // Only members can be stack variables.
@@ -20,67 +22,9 @@ bool StackVariable::repOk(const IR::Expression* expr) {
     return member->expr->is<IR::PathExpression>() || repOk(member->expr);
 }
 
-bool StackVariable::operator<(const StackVariable& other) const {
-    return compare(expr, other.expr) < 0;
-}
-
 bool StackVariable::operator==(const StackVariable& other) const {
     // Delegate to IR's notion of equality.
     return *expr == *other.expr;
-}
-
-int StackVariable::compare(const IR::Expression* e1, const IR::Expression* e2) {
-    if (const auto* m1 = e1->to<IR::Member>()) {
-        return compare(m1, e2);
-    }
-    if (const auto* p1 = e1->to<IR::PathExpression>()) {
-        return compare(p1, e2);
-    }
-    BUG("Not a valid StateVariable: %1%", e1);
-}
-
-int StackVariable::compare(const IR::Member* m1, const IR::Expression* e2) {
-    if (const auto* m2 = e2->to<IR::Member>()) {
-        return compare(m1, m2);
-    }
-    if (e2->is<IR::PathExpression>()) {
-        return 1;
-    }
-    BUG("Not a valid StateVariable: %1%", e2);
-}
-
-int StackVariable::compare(const IR::Member* m1, const IR::Member* m2) {
-    auto result = compare(m1->expr, m2->expr);
-    if (result != 0) {
-        return result;
-    }
-    if (m1->member.name < m2->member.name) {
-        return -1;
-    }
-    if (m1->member.name > m2->member.name) {
-        return 1;
-    }
-    return 0;
-}
-
-int StackVariable::compare(const IR::PathExpression* p1, const IR::Expression* e2) {
-    if (const auto* p2 = e2->to<IR::PathExpression>()) {
-        return compare(p1, p2);
-    }
-    if (e2->is<IR::Member>()) {
-        return -1;
-    }
-    BUG("Not a valid StateVariable: %1%", e2);
-}
-
-int StackVariable::compare(const IR::PathExpression* p1, const IR::PathExpression* p2) {
-    if (p1->path->name.name < p2->path->name.name) {
-        return -1;
-    }
-    if (p1->path->name.name > p2->path->name.name) {
-        return 1;
-    }
-    return 0;
 }
 
 /// The main class for parsers' states key for visited checking.
@@ -225,16 +169,15 @@ class ParserStateRewriter : public Transform {
             BUG_CHECK(l->is<SymbolicArray>(), "%1%: expected an array", l);
             auto array = l->to<SymbolicArray>();
             unsigned idx = 0;
-            unsigned offset = 0;
             if (state->statesIndexes.count(expression->expr)) {
                 idx = state->statesIndexes.at(expression->expr);
-                if (idx + 1 < array->size && expression->member.name != IR::Type_Stack::last) {
-                    offset = 1;
-                }
             }
             if (expression->member.name == IR::Type_Stack::lastIndex) {
                 return new IR::Constant(IR::Type_Bits::get(32), idx);
             } else {
+                int offset =
+                    (idx + 1 < array->size && expression->member.name == IR::Type_Stack::next) ? 1
+                                                                                               : 0;
                 state->statesIndexes[expression->expr] = idx + offset;
                 return new IR::ArrayIndex(expression->expr->clone(),
                                           new IR::Constant(IR::Type_Bits::get(32), idx + offset));
