@@ -46,15 +46,27 @@ class StackVariable {
     static bool repOk(const IR::Expression* expr);
 
     // Implicit conversions to allow implementations to be treated like a Node*.
-    operator const IR::Expression*() const { return expr; }
-    const IR::Expression& operator*() const { return *expr; }
-    const IR::Expression* operator->() const { return expr; }
+    operator const IR::Member*() const { return member; }
+    const IR::Member& operator*() const { return *member; }
+    const IR::Member* operator->() const { return member; }
 
     // Implements comparisons so that StateVariables can be used as map keys.
+    bool operator<(const StackVariable& other) const;
     bool operator==(const StackVariable& other) const;
 
  private:
-    const IR::Expression* expr;
+    const IR::Member* member;
+
+    // Returns a negative value if e1 < e2, zero if e1 == e2, and a positive value otherwise.
+    // In these comparisons,
+    //   * PathExpressions < Members.
+    //   * PathExpressions are ordered on the name contained in their Paths.
+    //   * Members are ordered first by their expressions, then by their member.
+    static int compare(const IR::Expression* e1, const IR::Expression* e2);
+    static int compare(const IR::Member* m1, const IR::Expression* e2);
+    static int compare(const IR::Member* m1, const IR::Member* m2);
+    static int compare(const IR::PathExpression* p1, const IR::Expression* e2);
+    static int compare(const IR::PathExpression* p1, const IR::PathExpression* p2);
 
  public:
     /// Implicitly converts IR::Expression* to a StackVariable.
