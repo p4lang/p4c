@@ -517,6 +517,25 @@ class PrependPDotToActionArgs : public Transform {
     const IR::Node *preorder(IR::MethodCallExpression*) override;
 };
 
+/* This class is used to process the default action
+   and store the parameter list for each table.
+   Later, this infomation is passed and saved in table
+   properties and then used for generating instruction
+   for default action in each table.
+*/
+class DefActionValue : public Inspector {
+    P4::TypeMap* typeMap;
+    P4::ReferenceMap *refMap;
+    DpdkProgramStructure* structure;
+
+ public:
+    DefActionValue(P4::TypeMap* typeMap,
+                            P4::ReferenceMap *refMap,
+                            DpdkProgramStructure* structure)
+        : typeMap(typeMap), refMap(refMap), structure(structure) {}
+    void postorder(const IR::P4Table* t) override;
+};
+
 // dpdk does not support ternary operator so we need to translate ternary operator
 // to corresponding if else statement
 // Taken from frontend pass DoSimplifyExpressions in sideEffects.h

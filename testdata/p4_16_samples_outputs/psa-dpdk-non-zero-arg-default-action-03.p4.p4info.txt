@@ -1,0 +1,34 @@
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 43002152
+    name: "MyIngressControl.stub"
+    alias: "stub"
+  }
+  action_refs {
+    id: 20013177
+  }
+  action_refs {
+    id: 29027610
+  }
+  const_default_action_id: 20013177
+  size: 1000000
+}
+actions {
+  preamble {
+    id: 29027610
+    name: "MyIngressControl.nonDefAct"
+    alias: "nonDefAct"
+  }
+}
+actions {
+  preamble {
+    id: 20013177
+    name: "MyIngressControl.macswp"
+    alias: "macswp"
+  }
+}
+type_info {
+}

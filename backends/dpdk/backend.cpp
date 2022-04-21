@@ -93,6 +93,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new CollectLocalVariables(refMap, typeMap, &structure),
         new CollectErrors(&structure),
         new ConvertInternetChecksum(typeMap, &structure),
+        new DefActionValue(typeMap, refMap, &structure),
         new PrependPDotToActionArgs(typeMap, refMap, &structure),
         new ConvertLogicalExpression(),
         new CollectExternDeclaration(&structure),

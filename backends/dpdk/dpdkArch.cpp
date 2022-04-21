@@ -1268,6 +1268,21 @@ const IR::Node *CollectLocalVariables::postorder(IR::P4Parser *p) {
     return p;
 }
 
+/* This function stores the information about parameters of default action
+   for each table */
+void DefActionValue::postorder(const IR::P4Table *t) {
+    auto default_action = t->properties->getProperty("default_action");
+    if (default_action != nullptr && default_action->value->is<IR::ExpressionValue>()) {
+        auto expr = default_action->value->to<IR::ExpressionValue>()->expression;
+        auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
+                refMap, typeMap);
+        BUG_CHECK(mi->is<P4::ActionCall>(),
+            "%1%: expected action in default_action", default_action);
+        structure->defActionParamList[t->toString()] =
+                   new IR::ParameterList(mi->to<P4::ActionCall>()->action->parameters->parameters);
+    }
+}
+
 const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Action *a) {
     if (a->parameters->size() > 0) {
         auto l = new IR::IndexedVector<IR::Parameter>;

@@ -51,7 +51,7 @@ table ipv4_da_lpm {
 		next_hop
 		default_route_drop
 	}
-	default_action default_route_drop args none 
+	default_action default_route_drop args none const
 	size 0x10000
 }
 
