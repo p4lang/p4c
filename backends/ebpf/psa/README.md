@@ -276,7 +276,7 @@ A user space application is responsible for performing periodic queries to this 
 Meters implement Dual Token Bucket Algorithm with both "color aware" and "color blind" modes. The PSA-eBPF implementation uses a BPF hash map
 to store a Meter state. The current implementation in eBPF uses BPF spinlocks to make operations on Meters atomic. The `bpf_ktime_get_ns()` helper is used to get a packet arrival timestamp. 
 
-The best way to configure a Meter is to use `psabpf-ctl meter` tool. Please see an example.
+The best way to configure a Meter is to use `psabpf-ctl meter` tool as in the following example:
 ```bash
 # 1Mb/s -> 128 000 bytes/s (132 kbytes/s PIR, 128 kbytes/s CIR), let CBS, PBS -> 10 kbytes
 $ psabpf-ctl meter update pipe "$PIPELINE" DemoIngress_meter index 0 132000:10000 128000:10000

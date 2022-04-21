@@ -37,7 +37,6 @@ class EBPFMeterPSA : public EBPFTableBase {
     const cstring spinlockField = "lock";
 
     size_t size{};
-    const IR::Type *keyArg{};
     EBPFType *keyType{};
     bool isDirect;
 

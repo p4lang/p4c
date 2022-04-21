@@ -27,7 +27,7 @@ EBPFMeterPSA::EBPFMeterPSA(const EBPFProgram *program,
     } else if (typeName.startsWith("Meter")) {
         isDirect = false;
         auto ts = di->type->to<IR::Type_Specialized>();
-        this->keyArg = ts->arguments->at(0);
+        auto keyArg = ts->arguments->at(0);
         this->keyType = EBPFTypeFactory::instance->create(keyArg);
 
         auto declaredSize = di->arguments->at(0)->expression->to<IR::Constant>();
@@ -100,17 +100,21 @@ EBPFMeterPSA::MeterType EBPFMeterPSA::toType(const int typeCode) {
 
 IR::IndexedVector<IR::StructField> EBPFMeterPSA::getValueFields() {
     auto vec = IR::IndexedVector<IR::StructField>();
-    auto bits_64 = new IR::Type_Bits(64, false);
-    vec.push_back(new IR::StructField(IR::ID("pir_period"), bits_64));
-    vec.push_back(new IR::StructField(IR::ID("pir_unit_per_period"), bits_64));
-    vec.push_back(new IR::StructField(IR::ID("cir_period"), bits_64));
-    vec.push_back(new IR::StructField(IR::ID("cir_unit_per_period"), bits_64));
-    vec.push_back(new IR::StructField(IR::ID("pbs"), bits_64));
-    vec.push_back(new IR::StructField(IR::ID("cbs"), bits_64));
-    vec.push_back(new IR::StructField(IR::ID("pbs_left"), bits_64));
-    vec.push_back(new IR::StructField(IR::ID("cbs_left"), bits_64));
-    vec.push_back(new IR::StructField(IR::ID("time_p"), bits_64));
-    vec.push_back(new IR::StructField(IR::ID("time_c"), bits_64));
+    auto bits_64 = IR::Type_Bits::get(64, false);
+    const std::initializer_list<cstring> fieldsNames = {"pir_period",
+                                                        "pir_unit_per_period",
+                                                        "cir_period",
+                                                        "cir_unit_per_period",
+                                                        "pbs",
+                                                        "cbs",
+                                                        "pbs_left",
+                                                        "cbs_left",
+                                                        "time_p",
+                                                        "time_c"};
+    for (auto fieldName : fieldsNames) {
+        vec.push_back(new IR::StructField(IR::ID(fieldName), bits_64));
+    }
+
     return vec;
 }
 
@@ -162,10 +166,7 @@ void EBPFMeterPSA::emitInstance(CodeBuilder *builder) const {
 void EBPFMeterPSA::emitExecute(CodeBuilder* builder, const P4::ExternMethod* method,
                                ControlBodyTranslatorPSA* translator) const {
     auto pipeline = dynamic_cast<const EBPFPipeline *>(program);
-    if (pipeline == nullptr) {
-        ::error(ErrorType::ERR_INVALID, "Meter used outside of pipeline %1%", method->expr);
-        return;
-    }
+    CHECK_NULL(pipeline);
 
     cstring functionNameSuffix;
     if (method->expr->arguments->size() == 2) {
