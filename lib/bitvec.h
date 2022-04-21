@@ -130,6 +130,11 @@ class bitvec {
             bool rv = self.getbit(idx);
             b ? self.setbit(idx) : self.clrbit(idx);
             return rv; }
+        using difference_type = std::ptrdiff_t;
+        using value_type = const bitvec;
+        using pointer = const bitvec*;
+        using reference = const bool&;
+        using iterator_category = std::bidirectional_iterator_tag;
     };
     typedef nonconst_bitref     iterator;
 
@@ -140,6 +145,11 @@ class bitvec {
         const_bitref(const bitref<const bitvec &> &a) : bitref(a) {}  // NOLINT(runtime/explicit)
         const_bitref(const const_bitref &a) = default;
         const_bitref(const_bitref &&a) = default;
+        using difference_type = std::ptrdiff_t;
+        using value_type = const bitvec;
+        using pointer = const bitvec*;
+        using reference = const bool&;
+        using iterator_category = std::bidirectional_iterator_tag;
     };
     typedef const_bitref        const_iterator;
 
