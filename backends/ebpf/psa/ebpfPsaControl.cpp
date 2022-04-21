@@ -46,6 +46,11 @@ bool ControlBodyTranslatorPSA::preorder(const IR::AssignmentStatement* a) {
             // Then the hash value is stored in a registerVar variable.
             hash->calculateHash(builder, ext->expr, this);
             builder->emitIndent();
+        } else if (ext->originalExternType->name.name == "Meter") {
+            // It is just for trace message before meter execution
+            cstring name = EBPFObject::externalName(ext->object);
+            auto msgStr = Util::printf_format("Executing meter: %s", name);
+            builder->target->emitTraceMessage(builder, msgStr.c_str());
         }
     }
 
@@ -60,6 +65,10 @@ void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod* method) {
     if (declType->name.name == "Counter") {
         auto counterMap = control->getCounter(name);
         counterMap->to<EBPFCounterPSA>()->emitMethodInvocation(builder, method, this);
+        return;
+    } else if (declType->name.name == "Meter") {
+        auto meter = control->to<EBPFControlPSA>()->getMeter(name);
+        meter->emitExecute(builder, method, this);
         return;
     } else if (declType->name.name == "Hash") {
         auto hash = control->to<EBPFControlPSA>()->getHash(name);
@@ -95,6 +104,13 @@ void EBPFControlPSA::emitTableTypes(CodeBuilder *builder) {
 
     for (auto it : registers)
         it.second->emitTypes(builder);
+    for (auto it : meters)
+        it.second->emitKeyType(builder);
+
+    //  Value type for any indirect meter is the same
+    if (!meters.empty()) {
+        meters.begin()->second->emitValueType(builder);
+    }
 }
 
 void EBPFControlPSA::emitTableInstances(CodeBuilder* builder) {
@@ -103,6 +119,8 @@ void EBPFControlPSA::emitTableInstances(CodeBuilder* builder) {
     for (auto it : counters)
         it.second->emitInstance(builder);
     for (auto it : registers)
+        it.second->emitInstance(builder);
+    for (auto it : meters)
         it.second->emitInstance(builder);
 }
 

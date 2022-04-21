@@ -288,3 +288,9 @@ class P4EbpfTest(BaseTest):
             counter_packets = int(entry["value"]["packets"], 0)
             if counter_packets != packets:
                 self.fail("Invalid counter packets, expected {}, got {}".format(packets, counter_packets))
+
+    def meter_update(self, name, index, pir, pbs, cir, cbs):
+        cmd = "psabpf-ctl meter update pipe {} {} " \
+              "index {} {}:{} {}:{}".format(TEST_PIPELINE_ID, name,
+                                            index, pir, pbs, cir, cbs)
+        self.exec_ns_cmd(cmd, "Meter update failed")

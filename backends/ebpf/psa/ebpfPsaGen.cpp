@@ -23,6 +23,7 @@ limitations under the License.
 #include "externs/ebpfPsaCounter.h"
 #include "externs/ebpfPsaHashAlgorithm.h"
 #include "externs/ebpfPsaTableImplementation.h"
+#include "externs/ebpfPsaMeter.h"
 
 namespace EBPF {
 
@@ -91,6 +92,9 @@ void PSAEbpfGenerator::emitTypes(CodeBuilder *builder) const {
     for (auto type : ebpfTypes) {
         type->emit(builder);
     }
+
+    if (ingress->hasAnyMeter() || egress->hasAnyMeter())
+        EBPFMeterPSA::emitValueStruct(builder, ingress->refMap);
 
     ingress->parser->emitTypes(builder);
     ingress->control->emitTableTypes(builder);
@@ -267,6 +271,13 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
 
     builder->appendLine(pktClonesFunc);
     builder->newline();
+
+    if (ingress->hasAnyMeter() || egress->hasAnyMeter()) {
+        cstring meterExecuteFunc =
+                EBPFMeterPSA::meterExecuteFunc(options.emitTraceMessages, ingress->refMap);
+        builder->appendLine(meterExecuteFunc);
+        builder->newline();
+    }
 }
 
 // =====================PSAArchTC=============================
@@ -646,6 +657,9 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
     } else if (typeName == "Hash") {
         auto hash = new EBPFHashPSA(program, di, name);
         control->hashes.emplace(name, hash);
+    } else if (typeName == "Meter") {
+        auto met = new EBPFMeterPSA(program, name, di, control->codeGen);
+        control->meters.emplace(name, met);
     } else {
         ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
                 instance);

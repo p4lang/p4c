@@ -53,6 +53,7 @@ struct DpdkProgramStructure {
     IR::IndexedVector<IR::StructField> key_fields;
     IR::Vector<IR::Type> used_metadata;
     ordered_map<cstring, std::vector<struct hdrFieldInfo>> hdrFieldInfoList;
+    ordered_map<cstring, IR::ParameterList*> defActionParamList;
 
     void push_variable(const IR::DpdkDeclaration * d) {
         variables.push_back(d); }
