@@ -894,13 +894,16 @@ EBPFValueSet::EBPFValueSet(const EBPFProgram* program, const IR::P4ValueSet* p4v
     }
 
     // validate type
-    if (pvs->elementType->is<IR::Type_Bits>() || pvs->elementType->is<IR::Type_Tuple>()) {
-        // no restrictions
-    } else if (pvs->elementType->is<IR::Type_Name>()) {
-        auto type = pvs->elementType->to<IR::Type_Name>();
-        keyTypeName = type->path->name.name;
+    auto elemType = program->typeMap->getType(pvs->elementType, true);
+    if (elemType->is<IR::Type_Type>())
+        elemType = elemType->to<IR::Type_Type>()->type;
 
-        auto decl = program->refMap->getDeclaration(type->path, true);
+    if (elemType->is<IR::Type_Bits>() || elemType->is<IR::Type_Tuple>()) {
+        // no restrictions
+    } else if (auto tn = elemType->to<IR::Type_Name>()) {
+        keyTypeName = tn->path->name.name;
+
+        auto decl = program->refMap->getDeclaration(tn->path, true);
         if (decl->is<IR::Type_Header>()) {
             ::warning("Header type may contain additional shadow data: %1%", pvs->elementType);
             ::warning("Header defined here: %1%", decl);
@@ -919,9 +922,12 @@ EBPFValueSet::EBPFValueSet(const EBPFProgram* program, const IR::P4ValueSet* p4v
 }
 
 void EBPFValueSet::emitTypes(CodeBuilder* builder) {
-    if (pvs->elementType->is<IR::Type_Name>()) {
-        auto type = pvs->elementType->to<IR::Type_Name>();
-        auto decl = program->refMap->getDeclaration(type->path, true);
+    auto elemType = program->typeMap->getType(pvs->elementType, true);
+    if (elemType->is<IR::Type_Type>())
+        elemType = elemType->to<IR::Type_Type>()->type;
+
+    if (auto tn = elemType->to<IR::Type_Name>()) {
+        auto decl = program->refMap->getDeclaration(tn->path, true);
         auto tsl = decl->to<IR::Type_StructLike>();
         CHECK_NULL(tsl);
         for (auto field : tsl->fields) {
@@ -942,13 +948,11 @@ void EBPFValueSet::emitTypes(CodeBuilder* builder) {
         builder->endOfStatement(true);
     };
 
-    if (pvs->elementType->is<IR::Type_Bits>()) {
-        auto type = pvs->elementType->to<IR::Type_Bits>();
+    if (auto tb = elemType->to<IR::Type_Bits>()) {
         cstring name = "field0";
-        fieldEmitter(type, name);
-        fieldNames.emplace_back(std::make_pair(name, type));
-    } else if (pvs->elementType->is<IR::Type_Tuple>()) {
-        auto tuple = pvs->elementType->to<IR::Type_Tuple>();
+        fieldEmitter(tb, name);
+        fieldNames.emplace_back(std::make_pair(name, tb));
+    } else if (auto tuple = elemType->to<IR::Type_Tuple>()) {
         int i = 0;
         for (auto field : tuple->components) {
             cstring name = Util::printf_format("field%d", i++);
@@ -978,19 +982,33 @@ void EBPFValueSet::emitKeyInitializer(CodeBuilder* builder,
     }
     keyVarName = varName;
     builder->emitIndent();
-    builder->appendFormat("%s %s = ", keyTypeName.c_str(), keyVarName.c_str());
-    builder->blockStart();
+    builder->appendFormat("%s %s = {0}", keyTypeName.c_str(), keyVarName.c_str());
+    builder->endOfStatement(true);
 
-    // initialize small fields up to 64 bits
     for (unsigned int i = 0; i < fieldNames.size(); i++) {
+        bool useMemcpy = true;
         if (fieldNames.at(i).second->is<IR::Type_Bits>()) {
-            int width = fieldNames.at(i).second->to<IR::Type_Bits>()->width_bits();
-            if (width > 64)
-                continue;
+            if (fieldNames.at(i).second->to<IR::Type_Bits>()->width_bits() <= 64)
+                useMemcpy = false;
+        }
+        builder->emitIndent();
 
-            builder->emitIndent();
-            builder->appendFormat(".%s = ", fieldNames.at(i).first);
-            auto keyExpr = expression->select->components.at(i);
+        auto keyExpr = expression->select->components.at(i);
+        if (useMemcpy) {
+            if (keyExpr->is<IR::Mask>()) {
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "%1%: mask not supported for fields larger than 64 bits within value_set",
+                        keyExpr);
+                continue;
+            }
+
+            cstring dst = Util::printf_format("%s.%s", keyVarName.c_str(),
+                                              fieldNames.at(i).first.c_str());
+            builder->appendFormat("__builtin_memcpy(&%s, &(", dst.c_str());
+            codeGen->visit(keyExpr);
+            builder->appendFormat("), sizeof(%s))", dst.c_str());
+        } else {
+            builder->appendFormat("%s.%s = ", keyVarName.c_str(), fieldNames.at(i).first.c_str());
             if (auto mask = keyExpr->to<IR::Mask>()) {
                 builder->append("((");
                 codeGen->visit(mask->left);
@@ -1000,35 +1018,8 @@ void EBPFValueSet::emitKeyInitializer(CodeBuilder* builder,
             } else {
                 codeGen->visit(keyExpr);
             }
-            builder->appendLine(",");
-        }
-    }
-
-    builder->blockEnd(false);
-    builder->endOfStatement(true);
-
-    // init other bigger fields
-    for (unsigned int i = 0; i < fieldNames.size(); i++) {
-        if (fieldNames.at(i).second->is<IR::Type_Bits>()) {
-            int width = fieldNames.at(i).second->to<IR::Type_Bits>()->width_bits();
-            if (width <= 64)
-                continue;
         }
 
-        auto keyExpr = expression->select->components.at(i);
-        if (keyExpr->is<IR::Mask>()) {
-            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "%1%: mask not supported for fields larger than 64 bits within value_set",
-                    keyExpr);
-            continue;
-        }
-
-        builder->emitIndent();
-        cstring dst = Util::printf_format("%s.%s", keyVarName.c_str(),
-                                          fieldNames.at(i).first.c_str());
-        builder->appendFormat("__builtin_memcpy(&%s, &(", dst.c_str());
-        codeGen->visit(keyExpr);
-        builder->appendFormat("), sizeof(%s))", dst.c_str());
         builder->endOfStatement(true);
     }
 }
