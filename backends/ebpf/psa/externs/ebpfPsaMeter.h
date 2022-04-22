@@ -60,6 +60,8 @@ class EBPFMeterPSA : public EBPFTableBase {
     void emitInstance(CodeBuilder* builder) const;
     void emitExecute(CodeBuilder* builder, const P4::ExternMethod* method,
                      ControlBodyTranslatorPSA* translator) const;
+    void emitDirectExecute(CodeBuilder* builder, const P4::ExternMethod* method,
+                           cstring valuePtr) const;
 
     static cstring meterExecuteFunc(bool trace, P4::ReferenceMap* refMap);
 };

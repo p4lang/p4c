@@ -651,7 +651,7 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
     } else if (typeName == "Register") {
         auto reg = new EBPFRegisterPSA(program, name, di, control->codeGen);
         control->registers.emplace(name, reg);
-    } else if (typeName == "DirectCounter") {
+    } else if (typeName == "DirectCounter" || typeName == "DirectMeter") {
         // instance will be created by table
         return false;
     } else if (typeName == "Hash") {

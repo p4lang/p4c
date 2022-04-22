@@ -119,7 +119,13 @@ class EBPFPipeline : public EBPFProgram {
     void emitMetadataFromCPUMAP(CodeBuilder *builder);
 
     bool hasAnyMeter() const {
-        return !control->meters.empty();
+        auto directMeter = std::find_if(control->tables.begin(),
+                                        control->tables.end(),
+                                        [](std::pair<const cstring, EBPFTable*> elem) {
+                                            return !elem.second->to<EBPFTablePSA>()->meters.empty();
+                                        });
+        bool anyDirectMeter = directMeter != control->tables.end();
+        return anyDirectMeter || (!control->meters.empty());
     }
     /*
      * Returns whether the compiler should generate

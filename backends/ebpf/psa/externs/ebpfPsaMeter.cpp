@@ -208,6 +208,43 @@ void EBPFMeterPSA::emitIndex(CodeBuilder *builder, const P4::ExternMethod* metho
     translator->visit(argument);
 }
 
+void EBPFMeterPSA::emitDirectExecute(CodeBuilder *builder,
+                                     const P4::ExternMethod *method,
+                                     cstring valuePtr) const {
+    auto pipeline = dynamic_cast<const EBPFPipeline *>(program);
+    CHECK_NULL(pipeline);
+
+    cstring functionNameSuffix;
+    if (method->expr->arguments->size() == 1) {
+        functionNameSuffix = "_color_aware";
+    } else {
+        functionNameSuffix = "";
+    }
+
+    cstring lockVar = valuePtr + "->" + spinlockField;
+    cstring valueMeter = valuePtr + "->" + instanceName;
+    if (type == BYTES) {
+        builder->appendFormat("meter_execute_bytes_value%s(&%s, &%s, &%s, &%s",
+                              functionNameSuffix,
+                              valueMeter,
+                              lockVar,
+                              pipeline->lengthVar.c_str(),
+                              pipeline->timestampVar.c_str());
+    } else {
+        builder->appendFormat("meter_execute_packets_value%s(&%s, &%s, &%s",
+                              functionNameSuffix,
+                              valueMeter,
+                              lockVar,
+                              pipeline->timestampVar.c_str());
+    }
+
+    if (method->expr->arguments->size() == 1) {
+        builder->append(", ");
+        program->control->codeGen->visit(method->expr->arguments->at(0));
+    }
+    builder->append(")");
+}
+
 cstring EBPFMeterPSA::meterExecuteFunc(bool trace, P4::ReferenceMap* refMap) {
     cstring meterExecuteFunc =
             "static __always_inline\n"

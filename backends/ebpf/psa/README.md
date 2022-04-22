@@ -284,6 +284,10 @@ $ psabpf-ctl meter update pipe "$PIPELINE" DemoIngress_meter index 0 132000:1000
 
 `psabpf-ctl` accepts PIR and CIR values in bytes/s units or packets/s. PBS and CBS in bytes or packets.
 
+#### Direct Meter
+[Direct Meter](https://p4.org/p4-spec/docs/PSA.html#sec-direct-meters) is always associated with the table entry that matched. 
+The Direct Meter state is stored within the table entry value.  
+For now we don't support Direct Meters in `psabpf-ctl` tool, but we will add it soon. 
 
 # Getting started
 
