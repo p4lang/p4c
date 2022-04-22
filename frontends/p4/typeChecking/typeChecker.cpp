@@ -2650,7 +2650,7 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
             destType = getTypeType(destType->to<IR::Type_Newtype>()->type);
 
         auto tvs = unify(expression, destType, sourceType,
-                         "Cannot cast from '%1%' to '%2%'", { sourceType, destType });
+                         "Cannot cast from '%1%' to '%2%'", { sourceType, castType });
         if (tvs == nullptr)
             return expression;
         const IR::Expression* rhs = expression;
