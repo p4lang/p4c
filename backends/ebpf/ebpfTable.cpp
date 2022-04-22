@@ -900,19 +900,13 @@ EBPFValueSet::EBPFValueSet(const EBPFProgram* program, const IR::P4ValueSet* p4v
 
     if (elemType->is<IR::Type_Bits>() || elemType->is<IR::Type_Tuple>()) {
         // no restrictions
-    } else if (auto tn = elemType->to<IR::Type_Name>()) {
-        keyTypeName = tn->path->name.name;
+    } else if (elemType->is<IR::Type_Struct>()) {
+        keyTypeName = elemType->to<IR::Type_Struct>()->name.name;
+    } else if (auto h = elemType->to<IR::Type_Header>()) {
+        keyTypeName = h->name.name;
 
-        auto decl = program->refMap->getDeclaration(tn->path, true);
-        if (decl->is<IR::Type_Header>()) {
-            ::warning("Header type may contain additional shadow data: %1%", pvs->elementType);
-            ::warning("Header defined here: %1%", decl);
-        }
-        if (!decl->is<IR::Type_StructLike>()) {
-            ::error(ErrorType::ERR_UNSUPPORTED,
-                    "Unsupported type for value_set (hint: it can be a struct): %1%",
-                    pvs->elementType);
-        }
+        ::warning("Header type may contain additional shadow data: %1%", pvs->elementType);
+        ::warning("Header defined here: %1%", h);
     } else {
         ::error(ErrorType::ERR_UNSUPPORTED,
                 "Unsupported type with value_set: %1%", pvs->elementType);
@@ -926,10 +920,7 @@ void EBPFValueSet::emitTypes(CodeBuilder* builder) {
     if (elemType->is<IR::Type_Type>())
         elemType = elemType->to<IR::Type_Type>()->type;
 
-    if (auto tn = elemType->to<IR::Type_Name>()) {
-        auto decl = program->refMap->getDeclaration(tn->path, true);
-        auto tsl = decl->to<IR::Type_StructLike>();
-        CHECK_NULL(tsl);
+    if (auto tsl = elemType->to<IR::Type_StructLike>()) {
         for (auto field : tsl->fields) {
             fieldNames.emplace_back(std::make_pair(field->name.name, field->type));
         }
