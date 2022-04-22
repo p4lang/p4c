@@ -145,6 +145,24 @@ class EBPFCounterTable : public EBPFTableBase {
     virtual void emitMethodInvocation(CodeBuilder* builder, const P4::ExternMethod* method);
 };
 
+class EBPFValueSet : public EBPFTableBase {
+ protected:
+    size_t size;
+    const IR::P4ValueSet* pvs;
+    std::vector<std::pair<cstring, const IR::Type*>> fieldNames;
+    cstring keyVarName;
+
+ public:
+    EBPFValueSet(const EBPFProgram* program, const IR::P4ValueSet* p4vs,
+                 cstring instanceName, CodeGenInspector* codeGen);
+
+    void emitTypes(CodeBuilder* builder);
+    void emitInstance(CodeBuilder* builder);
+    void emitKeyInitializer(CodeBuilder* builder, const IR::SelectExpression* expression,
+                            cstring varName);
+    void emitLookup(CodeBuilder* builder);
+};
+
 }  // namespace EBPF
 
 #endif /* _BACKENDS_EBPF_EBPFTABLE_H_ */

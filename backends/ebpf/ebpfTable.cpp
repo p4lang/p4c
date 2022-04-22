@@ -872,4 +872,146 @@ void EBPFCounterTable::emitTypes(CodeBuilder* builder) {
     builder->endOfStatement(true);
 }
 
+////////////////////////////////////////////////////////////////
+
+EBPFValueSet::EBPFValueSet(const EBPFProgram* program, const IR::P4ValueSet* p4vs,
+                           cstring instanceName, CodeGenInspector* codeGen)
+        : EBPFTableBase(program, instanceName, codeGen), size(0), pvs(p4vs) {
+    CHECK_NULL(pvs);
+    valueTypeName = "u32";  // map value is not used, so its type can be anything
+
+    // validate size
+    if (pvs->size->is<IR::Constant>()) {
+        auto sc = pvs->size->to<IR::Constant>();
+        if (sc->fitsUint())
+            size = sc->asUnsigned();
+        if (size == 0)
+            ::error(ErrorType::ERR_OVERLIMIT,
+                    "Size must be a positive value less than 2^32, got %1% entries", pvs->size);
+    } else {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "Size of value_set must be know at compilation time: %1%", pvs->size);
+    }
+
+    // validate type
+    auto elemType = program->typeMap->getTypeType(pvs->elementType, true);
+    if (elemType->is<IR::Type_Bits>() || elemType->is<IR::Type_Tuple>()) {
+        // no restrictions
+    } else if (elemType->is<IR::Type_Struct>()) {
+        keyTypeName = elemType->to<IR::Type_Struct>()->name.name;
+    } else if (auto h = elemType->to<IR::Type_Header>()) {
+        keyTypeName = h->name.name;
+
+        ::warning("Header type may contain additional shadow data: %1%", pvs->elementType);
+        ::warning("Header defined here: %1%", h);
+    } else {
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "Unsupported type with value_set: %1%", pvs->elementType);
+    }
+
+    keyTypeName = "struct " + keyTypeName;
+}
+
+void EBPFValueSet::emitTypes(CodeBuilder* builder) {
+    auto elemType = program->typeMap->getTypeType(pvs->elementType, true);
+
+    if (auto tsl = elemType->to<IR::Type_StructLike>()) {
+        for (auto field : tsl->fields) {
+            fieldNames.emplace_back(std::make_pair(field->name.name, field->type));
+        }
+        // Do not re-declare this type
+        return;
+    }
+
+    builder->emitIndent();
+    builder->appendFormat("%s ", keyTypeName.c_str());
+    builder->blockStart();
+
+    auto fieldEmitter = [builder](const IR::Type* type, cstring name){
+        auto etype = EBPFTypeFactory::instance->create(type);
+        builder->emitIndent();
+        etype->declare(builder, name, false);
+        builder->endOfStatement(true);
+    };
+
+    if (auto tb = elemType->to<IR::Type_Bits>()) {
+        cstring name = "field0";
+        fieldEmitter(tb, name);
+        fieldNames.emplace_back(std::make_pair(name, tb));
+    } else if (auto tuple = elemType->to<IR::Type_Tuple>()) {
+        int i = 0;
+        for (auto field : tuple->components) {
+            cstring name = Util::printf_format("field%d", i++);
+            fieldEmitter(field, name);
+            fieldNames.emplace_back(std::make_pair(name, field));
+        }
+    } else {
+        BUG("Type for value_set not implemented %1%", pvs->elementType);
+    }
+
+    builder->blockEnd(false);
+    builder->endOfStatement(true);
+}
+
+void EBPFValueSet::emitInstance(CodeBuilder* builder) {
+    builder->target->emitTableDecl(builder, instanceName, TableKind::TableHash,
+                                   keyTypeName, valueTypeName, size);
+}
+
+void EBPFValueSet::emitKeyInitializer(CodeBuilder* builder,
+                                      const IR::SelectExpression* expression,
+                                      cstring varName) {
+    if (fieldNames.size() != expression->select->components.size()) {
+        ::error(ErrorType::ERR_EXPECTED,
+                "Fields number of value_set do not match number of arguments: %1%", expression);
+        return;
+    }
+    keyVarName = varName;
+    builder->emitIndent();
+    builder->appendFormat("%s %s = {0}", keyTypeName.c_str(), keyVarName.c_str());
+    builder->endOfStatement(true);
+
+    for (unsigned int i = 0; i < fieldNames.size(); i++) {
+        bool useMemcpy = true;
+        if (fieldNames.at(i).second->is<IR::Type_Bits>()) {
+            if (fieldNames.at(i).second->to<IR::Type_Bits>()->width_bits() <= 64)
+                useMemcpy = false;
+        }
+        builder->emitIndent();
+
+        auto keyExpr = expression->select->components.at(i);
+        if (useMemcpy) {
+            if (keyExpr->is<IR::Mask>()) {
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "%1%: mask not supported for fields larger than 64 bits within value_set",
+                        keyExpr);
+                continue;
+            }
+
+            cstring dst = Util::printf_format("%s.%s", keyVarName.c_str(),
+                                              fieldNames.at(i).first.c_str());
+            builder->appendFormat("__builtin_memcpy(&%s, &(", dst.c_str());
+            codeGen->visit(keyExpr);
+            builder->appendFormat("), sizeof(%s))", dst.c_str());
+        } else {
+            builder->appendFormat("%s.%s = ", keyVarName.c_str(), fieldNames.at(i).first.c_str());
+            if (auto mask = keyExpr->to<IR::Mask>()) {
+                builder->append("((");
+                codeGen->visit(mask->left);
+                builder->append(") & (");
+                codeGen->visit(mask->right);
+                builder->append("))");
+            } else {
+                codeGen->visit(keyExpr);
+            }
+        }
+
+        builder->endOfStatement(true);
+    }
+}
+
+void EBPFValueSet::emitLookup(CodeBuilder* builder) {
+    builder->target->emitTableLookup(builder, instanceName, keyVarName, "");
+}
+
 }  // namespace EBPF

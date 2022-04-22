@@ -31,30 +31,6 @@ bool PsaStateTranslationVisitor::preorder(const IR::Expression* expression) {
     return CodeGenInspector::preorder(expression);
 }
 
-bool PsaStateTranslationVisitor::preorder(const IR::Mask *mask) {
-    if (currentSelectExpression == nullptr) {
-        ::error(ErrorType::ERR_UNSUPPORTED,
-                "%1%: Masks outside of select expression are not supported.",
-                mask);
-        return false;
-    }
-
-    BUG_CHECK(currentSelectExpression->select->components.size() == 1,
-              "%1%: tuple not eliminated in select",
-              currentSelectExpression->select);
-
-    builder->append("(");
-    visit(currentSelectExpression->select->components.at(0));
-    builder->append(" & ");
-    visit(mask->right);
-    builder->append(") == (");
-    visit(mask->left);
-    builder->append(" & ");
-    visit(mask->right);
-    builder->append(")");
-    return false;
-}
-
 void PsaStateTranslationVisitor::processFunction(const P4::ExternFunction* function) {
     if (function->method->name.name == "verify") {
         compileVerify(function->expr);
@@ -111,6 +87,7 @@ void PsaStateTranslationVisitor::compileVerify(const IR::MethodCallExpression * 
     builder->blockEnd(true);
 }
 
+// =====================EBPFPsaParser=============================
 EBPFPsaParser::EBPFPsaParser(const EBPFProgram* program, const IR::ParserBlock* block,
                              const P4::TypeMap* typeMap) : EBPFParser(program, block, typeMap) {
     visitor = new PsaStateTranslationVisitor(program->refMap, program->typeMap, this);

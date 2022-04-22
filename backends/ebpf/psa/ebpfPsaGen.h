@@ -140,9 +140,8 @@ class ConvertToEBPFParserPSA : public Inspector {
             parser(nullptr), options(options) {}
 
     bool preorder(const IR::ParserBlock *prsr) override;
+    bool preorder(const IR::P4ValueSet* pvs) override;
     EBPF::EBPFParser* getEBPFParser() { return parser; }
-
-    void findValueSets(const IR::ParserBlock *prsr);
 };
 
 class ConvertToEBPFControlPSA : public Inspector {
