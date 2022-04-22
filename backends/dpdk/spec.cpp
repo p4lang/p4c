@@ -301,6 +301,11 @@ std::ostream &IR::DpdkReturnStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
+std::ostream &IR::DpdkRecirculateStatement::toSpec(std::ostream &out) const {
+    out << "recirculate";
+    return out;
+}
+
 std::ostream &IR::DpdkLabelStatement::toSpec(std::ostream &out) const {
     out << label << " :";
     return out;

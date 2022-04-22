@@ -581,6 +581,8 @@ extern void send_to_port(PortId_t dest_port);
 extern void mirror_packet(MirrorSlotId_t mirror_slot_id,
                           MirrorSessionId_t mirror_session_id);
 
+extern void recirculate();
+
 // TBD: Does it make sense to have a data plane add of a hit action
 // that has in, out, or inout parameters?
 //

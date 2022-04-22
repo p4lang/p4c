@@ -820,6 +820,8 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             add_instr(new IR::DpdkMovStatement(slotMember, slot_id));
             add_instr(new IR::DpdkMovStatement(sessionMember, session_id));
             add_instr(new IR::DpdkMirrorStatement(slotMember, sessionMember));
+        } else if (a->method->name == "recirculate") {
+            add_instr(new IR::DpdkRecirculateStatement());
         } else if (a->method->name == "send_to_port") {
             BUG_CHECK(a->expr->arguments->size() == 1,
                 "%1%: expected one argument for send_to_port extern", a);
