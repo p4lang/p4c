@@ -894,10 +894,7 @@ EBPFValueSet::EBPFValueSet(const EBPFProgram* program, const IR::P4ValueSet* p4v
     }
 
     // validate type
-    auto elemType = program->typeMap->getType(pvs->elementType, true);
-    if (elemType->is<IR::Type_Type>())
-        elemType = elemType->to<IR::Type_Type>()->type;
-
+    auto elemType = program->typeMap->getTypeType(pvs->elementType, true);
     if (elemType->is<IR::Type_Bits>() || elemType->is<IR::Type_Tuple>()) {
         // no restrictions
     } else if (elemType->is<IR::Type_Struct>()) {
@@ -916,9 +913,7 @@ EBPFValueSet::EBPFValueSet(const EBPFProgram* program, const IR::P4ValueSet* p4v
 }
 
 void EBPFValueSet::emitTypes(CodeBuilder* builder) {
-    auto elemType = program->typeMap->getType(pvs->elementType, true);
-    if (elemType->is<IR::Type_Type>())
-        elemType = elemType->to<IR::Type_Type>()->type;
+    auto elemType = program->typeMap->getTypeType(pvs->elementType, true);
 
     if (auto tsl = elemType->to<IR::Type_StructLike>()) {
         for (auto field : tsl->fields) {
