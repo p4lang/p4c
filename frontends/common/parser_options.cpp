@@ -344,11 +344,14 @@ FILE* ParserOptions::preprocess() {
         std::string cmd("cpp");
 #endif
 
+        if (file == nullptr)
+            file = "";
+        if (file.find(' '))
+            file = cstring("\"") + file + "\"";
         cmd +=
             cstring(" -C -undef -nostdinc -x assembler-with-cpp") + " " +
             preprocessor_options +
-            getIncludePath() + " " +
-            (file != nullptr ? file : "");
+            getIncludePath() + " " + file;
 
         if (Log::verbose())
             std::cerr << "Invoking preprocessor " << std::endl
