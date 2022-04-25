@@ -74,6 +74,10 @@ void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod* method) {
         auto hash = control->to<EBPFControlPSA>()->getHash(name);
         hash->processMethod(builder, method->method->name.name, method->expr, this);
         return;
+    } else if (declType->name.name == "Random") {
+        auto rand = control->to<EBPFControlPSA>()->getRandomExt(name);
+        rand->processMethod(builder, method);
+        return;
     } else if (declType->name.name == "Register") {
         auto reg = control->to<EBPFControlPSA>()->getRegister(name);
         if (method->method->type->name == "write") {

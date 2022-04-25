@@ -20,6 +20,7 @@ limitations under the License.
 #include "ebpfPsaTable.h"
 #include "backends/ebpf/ebpfControl.h"
 #include "backends/ebpf/psa/externs/ebpfPsaChecksum.h"
+#include "backends/ebpf/psa/externs/ebpfPsaRandom.h"
 #include "backends/ebpf/psa/externs/ebpfPsaRegister.h"
 
 namespace EBPF {
@@ -64,6 +65,7 @@ class EBPFControlPSA : public EBPFControl {
     const IR::Parameter* outputStandardMetadata;
 
     std::map<cstring, EBPFHashPSA*> hashes;
+    std::map<cstring, EBPFRandomPSA*> randoms;
     std::map<cstring, EBPFRegisterPSA*>  registers;
     std::map<cstring, EBPFMeterPSA*>  meters;
 
@@ -75,6 +77,12 @@ class EBPFControlPSA : public EBPFControl {
     void emitTableTypes(CodeBuilder* builder) override;
     void emitTableInstances(CodeBuilder* builder) override;
     void emitTableInitializers(CodeBuilder* builder) override;
+
+    EBPFRandomPSA* getRandomExt(cstring name) const {
+        auto result = ::get(randoms, name);
+        BUG_CHECK(result != nullptr, "No random generator named %1%", name);
+        return result;
+    }
 
     EBPFRegisterPSA* getRegister(cstring name) const {
         auto result = ::get(registers, name);

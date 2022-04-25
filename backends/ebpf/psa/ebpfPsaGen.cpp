@@ -23,6 +23,7 @@ limitations under the License.
 #include "externs/ebpfPsaCounter.h"
 #include "externs/ebpfPsaHashAlgorithm.h"
 #include "externs/ebpfPsaTableImplementation.h"
+#include "externs/ebpfPsaRandom.h"
 #include "externs/ebpfPsaMeter.h"
 
 namespace EBPF {
@@ -656,6 +657,9 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
     } else if (typeName == "Counter") {
         auto ctr = new EBPFCounterPSA(program, di, name, control->codeGen);
         control->counters.emplace(name, ctr);
+    } else if (typeName == "Random") {
+        auto rand = new EBPFRandomPSA(di);
+        control->randoms.emplace(name, rand);
     } else if (typeName == "Register") {
         auto reg = new EBPFRegisterPSA(program, name, di, control->codeGen);
         control->registers.emplace(name, reg);
