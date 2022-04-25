@@ -14,14 +14,105 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from common import *
+import math
 
 PORT0 = 0
 PORT1 = 1
 PORT2 = 2
 ALL_PORTS = [PORT0, PORT1, PORT2]
 
-meter_value_mask = 0xff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00
-two_meters_value_mask = 0xff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00
+
+def get_meter_value_mask():
+    """
+    This function is used to create a meter_value mask
+    that hides last three meter_value fields:
+    two timestamps and spin lock field.
+    """
+    full_value = 0xffffffffffffffff
+    zero_value = 0x0000000000000000
+    mask = full_value  # pir_period
+
+    # pir_unit_per_period, cir_period, cir_unit_per_period
+    # pbs, cbs, pbs_left, cbs_left
+    for i in range(0, 7):
+        mask = mask + full_value
+
+    # time_p, time_c, spin lock
+    for i in range(0, 3):
+        mask = mask + zero_value
+
+    return mask
+
+
+def convert_dec_to_hex_string(decimal_value):
+    """
+    This function converts a decimal value into 8-byte hex string
+    and reverses the order of bytes.
+    """
+    hex_str = '{:016x}'.format(decimal_value)
+    reversed_hex = []
+    index = len(hex_str)
+    while index > 0:
+        reversed_hex += hex_str[index - 2:index].capitalize() + ' '
+        index = index - 2
+    return ''.join(reversed_hex)
+
+
+def convert_rate(rate):
+    """
+    This function converts provided pir or cir rate (byte/s or packet/s) into
+    period and unit_per_period.
+    These values are stored in the Meter state.
+    """
+    NS_IN_S = 1e9
+    METER_PERIOD_MIN = 100
+
+    if rate == 0:
+        unit_per_period = 0
+        period = 0
+        return int(period), int(unit_per_period)
+
+    period = NS_IN_S / rate
+
+    if period >= METER_PERIOD_MIN:
+        unit_per_period = 1
+    else:
+        unit_per_period = math.ceil(METER_PERIOD_MIN / period)
+        period = (NS_IN_S * unit_per_period) / rate
+
+    return int(period), int(unit_per_period)
+
+
+def build_meter_value(pir, cir,
+                      pbs, cbs,
+                      pbs_left, cbs_left):
+    """
+    This function builds a hex string with the values that are stored in the Meter state.
+    :param pir: peak information rate in byte/s or packet/s
+    :param cir: committed information rate in byte/s or packet/s
+    :param pbs: peak bucket size in bytes or packets
+    :param cbs: committed bucket size in bytes or packets
+    :param pbs_left: peak bucket size left in bytes or packets
+    :param cbs_left: committed bucket size left in bytes or packets
+    :return:
+    """
+    pir_period, pir_unit_per_period = convert_rate(pir)
+    cir_period, cir_unit_per_period = convert_rate(cir)
+
+    meter_value = [convert_dec_to_hex_string(pir_period),
+                   convert_dec_to_hex_string(pir_unit_per_period),
+                   convert_dec_to_hex_string(cir_period),
+                   convert_dec_to_hex_string(cir_unit_per_period),
+                   convert_dec_to_hex_string(pbs),
+                   convert_dec_to_hex_string(cbs),
+                   convert_dec_to_hex_string(pbs_left),
+                   convert_dec_to_hex_string(cbs_left),
+                   # Last three fields are not being checked
+                   convert_dec_to_hex_string(0),
+                   convert_dec_to_hex_string(0),
+                   convert_dec_to_hex_string(0)]
+
+    return 'hex ' + ''.join(meter_value)
 
 
 class MeterPSATest(P4EbpfTest):
@@ -40,21 +131,12 @@ class MeterPSATest(P4EbpfTest):
                           pir=250000, pbs=2500, cir=250000, cbs=2500)
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
+
         # Expecting pbs_left, cbs_left 2500 B - 100 B = 2400 B -> 09 60
+        meter_value = build_meter_value(pir=250000, cir=250000, pbs=2500,
+                                        pbs_left=2400, cbs=2500, cbs_left=2400)
         self.verify_map_entry(name="ingress_meter1", key="hex 00",
-                              expected_value="hex "
-                                             "A0 0F 00 00 00 00 00 00 "  # pir_period
-                                             "01 00 00 00 00 00 00 00 "  # pir_unit_per_period
-                                             "A0 0F 00 00 00 00 00 00 "  # cir_period
-                                             "01 00 00 00 00 00 00 00 "  # cir_unit_per_period
-                                             "C4 09 00 00 00 00 00 00 "  # pbs
-                                             "C4 09 00 00 00 00 00 00 "  # cbs
-                                             "60 09 00 00 00 00 00 00 "  # pbs_left
-                                             "60 09 00 00 00 00 00 00 "  # cbs_left
-                                             "00 00 00 00 00 00 00 00 "  # time_p
-                                             "00 00 00 00 00 00 00 00 "  # time_c
-                                             "00 00 00 00 00 00 00 00",  # Spin lock
-                              mask=meter_value_mask)
+                              expected_value=meter_value, mask=get_meter_value_mask())
 
 
 class MeterColorAwarePSATest(P4EbpfTest):
@@ -67,27 +149,17 @@ class MeterColorAwarePSATest(P4EbpfTest):
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
-        # cir, pir -> 2 Mb/s -> 250000 byte/s, cbs, pbs -> bs (10 ms) -> 2500 B -> 09 C4
-        # period 4000 ns -> 0F A0, 1 B per period -> 01
+        # cir, pir -> 2 Mb/s -> 250000 byte/s, cbs, pbs -> bs (10 ms) -> 2500 B
         self.meter_update(name="ingress_meter1", index=0,
                           pir=250000, pbs=2500, cir=250000, cbs=2500)
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
-        # Expecting pbs_left, cbs_left 2500 B - 100 B = 2400 B -> 09 60
+        # Expecting pbs_left, 2500 - 100 B = 2400 B, cbs_left stays 2500 B
+        meter_value = build_meter_value(pir=250000, cir=250000, pbs=2500,
+                                        pbs_left=2400, cbs=2500, cbs_left=2500)
         self.verify_map_entry(name="ingress_meter1", key="hex 00",
-                              expected_value="hex "
-                                             "A0 0F 00 00 00 00 00 00 "  # pir_period
-                                             "01 00 00 00 00 00 00 00 "  # pir_unit_per_period
-                                             "A0 0F 00 00 00 00 00 00 "  # cir_period
-                                             "01 00 00 00 00 00 00 00 "  # cir_unit_per_period
-                                             "C4 09 00 00 00 00 00 00 "  # pbs
-                                             "C4 09 00 00 00 00 00 00 "  # cbs
-                                             "60 09 00 00 00 00 00 00 "  # pbs_left
-                                             "C4 09 00 00 00 00 00 00 "  # cbs_left
-                                             "00 00 00 00 00 00 00 00 "  # time_p
-                                             "00 00 00 00 00 00 00 00 "  # time_c
-                                             "00 00 00 00 00 00 00 00",  # Spin lock
-                              mask=meter_value_mask)
+                              expected_value=meter_value,
+                              mask=get_meter_value_mask())
 
 
 class MeterActionPSATest(P4EbpfTest):
@@ -101,29 +173,19 @@ class MeterActionPSATest(P4EbpfTest):
     def runTest(self):
         pkt = testutils.simple_ip_packet()
 
-        # cir, pir -> 10 Mb/s -> 1,25 MB/s, cbs, pbs -> bs (10 ms) -> 6250 B -> 18 6A
-        # period 800 ns -> 03 20,  1 B per period -> 01
+        # cir, pir -> 10 Mb/s -> 1,25 MB/s, cbs, pbs -> bs (10 ms) -> 6250 B
         self.meter_update(name="ingress_meter1", index=0,
                           pir=1250000, pbs=6250, cir=1250000, cbs=6250)
         self.table_add(table="ingress_tbl_fwd", keys=[4], action=1, data=[5])
 
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
-        # Expecting pbs_left, cbs_left 6250 B - 100 B = 6150 B -> 18 06
+        # Expecting pbs_left, cbs_left 6250 B - 100 B = 6150 B
+        meter_value = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
+                                        pbs_left=6150, cbs=6250, cbs_left=6150)
         self.verify_map_entry(name="ingress_meter1", key="hex 00",
-                              expected_value="hex "
-                                             "20 03 00 00 00 00 00 00 "  # pir_period
-                                             "01 00 00 00 00 00 00 00 "  # pir_unit_per_period
-                                             "20 03 00 00 00 00 00 00 "  # cir_period
-                                             "01 00 00 00 00 00 00 00 "  # cir_unit_per_period
-                                             "6A 18 00 00 00 00 00 00 "  # pbs
-                                             "6A 18 00 00 00 00 00 00 "  # cbs
-                                             "06 18 00 00 00 00 00 00 "  # pbs_left
-                                             "06 18 00 00 00 00 00 00 "  # cbs_left
-                                             "00 00 00 00 00 00 00 00 "  # time_p
-                                             "00 00 00 00 00 00 00 00 "  # time_c
-                                             "00 00 00 00 00 00 00 00",  # Spin lock
-                              mask=meter_value_mask)
+                              expected_value=meter_value,
+                              mask=get_meter_value_mask())
 
 
 class MeterPacketsPSATest(P4EbpfTest):
@@ -136,26 +198,17 @@ class MeterPacketsPSATest(P4EbpfTest):
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
-        # cir, pir -> 100 packets/s, period 10M -> 98 96 80, bs -> 10 -> 0A
+        # cir, pir -> 100 packets/s, bs -> 10 packets
         self.meter_update(name="ingress_meter1", index=0,
                           pir=100, pbs=10, cir=100, cbs=10)
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
         # Expecting pbs_left, cbs_left 10 - 1 = 9
+        meter_value = build_meter_value(pir=100, cir=100, pbs=10,
+                                        pbs_left=9, cbs=10, cbs_left=9)
         self.verify_map_entry(name="ingress_meter1", key="hex 00",
-                              expected_value="hex "
-                                             "80 96 98 00 00 00 00 00 "  # pir_period
-                                             "01 00 00 00 00 00 00 00 "  # pir_unit_per_period
-                                             "80 96 98 00 00 00 00 00 "  # cir_period
-                                             "01 00 00 00 00 00 00 00 "  # cir_unit_per_period
-                                             "0A 00 00 00 00 00 00 00 "  # pbs
-                                             "0A 00 00 00 00 00 00 00 "  # cbs
-                                             "09 00 00 00 00 00 00 00 "  # pbs_left
-                                             "09 00 00 00 00 00 00 00 "  # cbs_left
-                                             "00 00 00 00 00 00 00 00 "  # time_p
-                                             "00 00 00 00 00 00 00 00 "  # time_c
-                                             "00 00 00 00 00 00 00 00",  # Spin lock
-                              mask=meter_value_mask)
+                              expected_value=meter_value,
+                              mask=get_meter_value_mask())
 
 
 class DirectMeterPSATest(P4EbpfTest):
@@ -203,7 +256,7 @@ class DirectMeterPSATest(P4EbpfTest):
                                              "00 00 00 00 00 00 00 00 "
                                              "00 00 00 00 00 00 00 00 "
                                              "00 00 00 00 00 00 00 00",
-                              mask=meter_value_mask)
+                              mask=get_meter_value_mask())
 
 
 class DirectMeterColorAwarePSATest(P4EbpfTest):
@@ -251,7 +304,7 @@ class DirectMeterColorAwarePSATest(P4EbpfTest):
                                              "00 00 00 00 00 00 00 00 "
                                              "00 00 00 00 00 00 00 00 "
                                              "00 00 00 00 00 00 00 00",
-                              mask=meter_value_mask)
+                              mask=get_meter_value_mask())
 
 
 class DirectAndIndirectMeterPSATest(P4EbpfTest):
@@ -315,7 +368,7 @@ class DirectAndIndirectMeterPSATest(P4EbpfTest):
                                              "00 00 00 00 00 00 00 00 "
                                              "00 00 00 00 00 00 00 00 "
                                              "00 00 00 00 00 00 00 00",
-                              mask=meter_value_mask)
+                              mask=get_meter_value_mask())
 
         # Expecting pbs_left, cbs_left 6250 B - 100 B = 6150 B -> 18 06
         self.verify_map_entry(name="ingress_indirect_meter", key="hex 00",
@@ -331,7 +384,7 @@ class DirectAndIndirectMeterPSATest(P4EbpfTest):
                                              "00 00 00 00 00 00 00 00 "
                                              "00 00 00 00 00 00 00 00 "
                                              "00 00 00 00 00 00 00 00",
-                              mask=meter_value_mask)
+                              mask=get_meter_value_mask())
 
 
 class DirectAndIndirectActionMeterPSATest(DirectAndIndirectMeterPSATest):
@@ -408,7 +461,7 @@ class DirectTwoMetersPSATest(P4EbpfTest):
                                              "00 00 00 00 00 00 00 00 "
                                              "00 00 00 00 00 00 00 00 "
                                              "00 00 00 00 00 00 00 00",
-                              mask=two_meters_value_mask)
+                              mask=get_meter_value_mask() + get_meter_value_mask())
 
 
 class DirectAndCounterMeterPSATest(P4EbpfTest):
@@ -458,4 +511,4 @@ class DirectAndCounterMeterPSATest(P4EbpfTest):
                                              "00 00 00 00 00 00 00 00 "
                                              "00 00 00 00 00 00 00 00 "
                                              "00 00 00 00 00 00 00 00",
-                              mask=meter_value_mask)
+                              mask=get_meter_value_mask())
