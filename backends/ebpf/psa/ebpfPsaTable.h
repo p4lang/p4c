@@ -53,6 +53,8 @@ class EBPFTablePSA : public EBPFTable {
     const IR::PathExpression* getActionNameExpression(const IR::Expression* expr) const;
 
  public:
+    // We use vectors to keep an order of Direct Meters or Counters from a P4 program.
+    // This order is important from CLI tool point of view.
     std::vector<std::pair<cstring, EBPFCounterPSA *>> counters;
     std::vector<std::pair<cstring, EBPFMeterPSA *>> meters;
     EBPFTableImplementationPSA* implementation;

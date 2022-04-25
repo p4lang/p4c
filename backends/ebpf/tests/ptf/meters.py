@@ -27,7 +27,7 @@ two_meters_value_mask = 0xff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_ff_
 class MeterPSATest(P4EbpfTest):
     """
     Test Meter used in control block. Type BYTES.
-    Send 100 B packet and verify if there is 100 tokens less left.
+    Send 100 B packet and verify that the number of tokes decreases by 100.
     """
 
     p4_file_path = "p4testdata/meters.p4"
@@ -60,7 +60,7 @@ class MeterPSATest(P4EbpfTest):
 class MeterColorAwarePSATest(P4EbpfTest):
     """
     Test color-aware Meter used in control block. Type BYTES. Pre coloured with YELLOW.
-    Send 100 B packet and verify if there is 100 tokens less left in a Peak bucket only.
+    Send 100 B packet and verify that the number of tokes decreases by 100 in a Peak bucket only.
     """
 
     p4_file_path = "p4testdata/meters-color-aware.p4"
@@ -93,7 +93,7 @@ class MeterColorAwarePSATest(P4EbpfTest):
 class MeterActionPSATest(P4EbpfTest):
     """
     Test Meter used in action. Type BYTES.
-    Send 100 B packet and verify if there is 100 tokens less left.
+    Send 100 B packet and verify that the number of tokes decreases by 100.
     """
 
     p4_file_path = "p4testdata/meters-action.p4"
@@ -129,7 +129,7 @@ class MeterActionPSATest(P4EbpfTest):
 class MeterPacketsPSATest(P4EbpfTest):
     """
     Test Meter used in control block. Type PACKETS.
-    Send 1 packet and verify if there is 9 tokens left.
+    Send 1 packet and verify that the number of tokes decreases by 1.
     """
 
     p4_file_path = "p4testdata/meters-packets.p4"
@@ -161,7 +161,7 @@ class MeterPacketsPSATest(P4EbpfTest):
 class DirectMeterPSATest(P4EbpfTest):
     """
     Test Direct Meter. Type BYTES.
-    Send 100 B packet and verify if there is 100 tokens less left.
+    Send 100 B packet and verify that the number of tokes decreases by 100.
     """
 
     p4_file_path = "p4testdata/meters-direct.p4"
@@ -209,7 +209,7 @@ class DirectMeterPSATest(P4EbpfTest):
 class DirectMeterColorAwarePSATest(P4EbpfTest):
     """
     Test color-aware Direct Meter. Type BYTES. Pre coloured with YELLOW.
-    Send 100 B packet and verify if there is 100 tokens less left in a Peak bucket only.
+    Send 100 B packet and verify that the number of tokes decreases by 100 in a Peak bucket only.
     """
 
     p4_file_path = "p4testdata/meters-direct-color-aware.p4"
@@ -257,7 +257,7 @@ class DirectMeterColorAwarePSATest(P4EbpfTest):
 class DirectAndIndirectMeterPSATest(P4EbpfTest):
     """
     Test Direct Meter and Indirect Meter together. Type BYTES.
-    Send 100 B packet and verify if there is 100 tokens less left.
+    Send 100 B packet and verify that the number of tokes decreases by 100.
     """
 
     p4_file_path = "p4testdata/meters-direct-and-indirect.p4"
@@ -346,7 +346,7 @@ class DirectAndIndirectActionMeterPSATest(DirectAndIndirectMeterPSATest):
 class DirectTwoMetersPSATest(P4EbpfTest):
     """
     Test two Direct Meters in one table. Type BYTES.
-    Send 100 B packet and verify if there is 100 tokens less left.
+    Send 100 B packet and verify that the number of tokes decreases by 100.
     """
 
     p4_file_path = "p4testdata/meters-two-direct.p4"
@@ -414,7 +414,7 @@ class DirectTwoMetersPSATest(P4EbpfTest):
 class DirectAndCounterMeterPSATest(P4EbpfTest):
     """
     Test Direct Meter with Direct Counter.
-    Send 100 B packet and verify if there is 100 tokens less left.
+    Send 100 B packet and verify that the number of tokes decreases by 100.
     """
 
     p4_file_path = "p4testdata/meters-direct-and-counter.p4"
