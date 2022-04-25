@@ -243,6 +243,7 @@ include_directories (
   ${P4C_SOURCE_DIR}/extensions
   ${P4C_SOURCE_DIR}
   ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include
+  ${P4C_SOURCE_DIR}/test/frameworks/gtest/googlemock/include
   ${P4C_BINARY_DIR}
   )
 add_definitions (-DCONFIG_PREFIX="${CMAKE_INSTALL_PREFIX}")
