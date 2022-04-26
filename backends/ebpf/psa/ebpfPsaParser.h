@@ -34,12 +34,7 @@ class PsaStateTranslationVisitor : public StateTranslationVisitor {
                                         EBPFPsaParser * prsr) :
         StateTranslationVisitor(refMap, typeMap), parser(prsr) {}
 
-    bool preorder(const IR::Expression* expression) override;
-
-    void processFunction(const P4::ExternFunction* function) override;
     void processMethod(const P4::ExternMethod* ext) override;
-
-    void compileVerify(const IR::MethodCallExpression * expression);
 };
 
 class EBPFPsaParser : public EBPFParser {

@@ -88,6 +88,39 @@ StateTranslationVisitor::compileAdvance(const P4::ExternMethod* extMethod) {
     builder->blockEnd(true);
 }
 
+void StateTranslationVisitor::compileVerify(const IR::MethodCallExpression * expression) {
+    BUG_CHECK(expression->arguments->size() == 2, "Expected 2 arguments: %1%", expression);
+
+    auto errorExpr = expression->arguments->at(1)->expression;
+    auto errorMember = errorExpr->to<IR::Member>();
+    auto type = typeMap->getType(errorExpr, true);
+    if (!type->is<IR::Type_Error>() || errorMember == nullptr) {
+        ::error(ErrorType::ERR_UNEXPECTED, "%1%: not accessing a member error type", errorExpr);
+        return;
+    }
+
+    builder->emitIndent();
+    builder->append("if (!(");
+    visit(expression->arguments->at(0));
+    builder->append(")) ");
+    builder->blockStart();
+
+    builder->emitIndent();
+    builder->appendFormat("%s = %s",
+                          state->parser->program->errorVar.c_str(), errorMember->member.name);
+    builder->endOfStatement(true);
+
+    cstring msg = Util::printf_format("Verify: condition failed, parser_error=%%u (%s)",
+                                      errorMember->member.name);
+    builder->target->emitTraceMessage(builder, msg.c_str(),
+                                      1, state->parser->program->errorVar.c_str());
+
+    builder->emitIndent();
+    builder->appendFormat("goto %s", IR::ParserState::reject.c_str());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+}
+
 bool StateTranslationVisitor::preorder(const IR::AssignmentStatement* statement) {
     if (auto mce = statement->right->to<IR::MethodCallExpression>()) {
         auto mi = P4::MethodInstance::resolve(mce,
@@ -426,8 +459,12 @@ StateTranslationVisitor::compileExtract(const IR::Expression* destination) {
 }
 
 void StateTranslationVisitor::processFunction(const P4::ExternFunction* function) {
-    ::error(ErrorType::ERR_UNEXPECTED,
-            "Unexpected extern function call in parser %1%", function->expr);
+    if (function->method->name.name == IR::ParserState::verify) {
+        compileVerify(function->expr);
+    } else {
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "Unexpected extern function call in parser %1%", function->expr);
+    }
 }
 
 void StateTranslationVisitor::processMethod(const P4::ExternMethod* method) {
