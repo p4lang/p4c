@@ -135,13 +135,7 @@ set(EBPF_DRIVER_KERNEL "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t kernel -
 set(EBPF_DRIVER_BCC "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t bcc -c \"${P4C_BINARY_DIR}/p4c-ebpf\"")
 set(EBPF_DRIVER_TEST "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t test -c \"${P4C_BINARY_DIR}/p4c-ebpf\"")
 
-set (XFAIL_TESTS_KERNEL
-  # Rejected by kernel verifier, likely reasons:
-  # https://github.com/xdp-project/xdp-tutorial/issues/38
-  # We are using iproute2, which has a bug.
-  # Load eBPF code directly to avoid this
-  ${P4C_SOURCE_DIR}/testdata/p4_16_samples/lpm_ebpf.p4
-  )
+set (XFAIL_TESTS_KERNEL)
 set (XFAIL_TESTS_BCC)
 set (XFAIL_TESTS_TEST
   # lpm not implemented for stf tests
