@@ -19,7 +19,11 @@ limitations under the License.
 #include <psa.p4>
 #include "common_headers.p4"
 
+struct fwd_metadata_t {
+}
+
 struct metadata {
+    fwd_metadata_t fwd_metadata;
 }
 
 struct headers {
@@ -76,22 +80,31 @@ control ingress(inout headers hdr,
                 in    psa_ingress_input_metadata_t  istd,
                 inout psa_ingress_output_metadata_t ostd)
 {
+    DirectMeter(PSA_MeterType_t.BYTES) meter1;
+    PSA_MeterColor_t color1 = PSA_MeterColor_t.RED;
 
     action do_forward(PortId_t egress_port) {
-        send_to_port(ostd, egress_port);
+        color1 = meter1.execute(PSA_MeterColor_t.YELLOW);
+
+        if (color1 != PSA_MeterColor_t.RED) {
+            send_to_port(ostd, egress_port);
+        } else {
+            ingress_drop(ostd);
+        }
     }
 
-    table tbl_const_action {
+    table tbl_fwd {
         key = {
             istd.ingress_port : exact;
         }
         actions = { do_forward; NoAction; }
-        const default_action = do_forward((PortId_t) 5);
+        default_action = do_forward((PortId_t) 6);
         size = 100;
+        psa_direct_meter = meter1;
     }
 
     apply {
-         tbl_const_action.apply();
+         tbl_fwd.apply();
     }
 }
 

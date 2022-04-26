@@ -41,6 +41,7 @@ class StateTranslationVisitor : public CodeGenInspector {
     virtual void compileExtract(const IR::Expression* destination);
     void compileLookahead(const IR::Expression* destination);
     void compileAdvance(const P4::ExternMethod *ext);
+    void compileVerify(const IR::MethodCallExpression * expression);
 
     virtual void processFunction(const P4::ExternFunction* function);
     virtual void processMethod(const P4::ExternMethod* method);

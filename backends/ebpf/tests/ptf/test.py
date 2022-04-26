@@ -482,3 +482,27 @@ class RandomPSATest(P4EbpfTest):
         logger.info("f1 sequence: {}".format(sequence[0]))
         logger.info("f2 sequence: {}".format(sequence[1]))
         logger.info("f3 sequence: {}".format(sequence[2]))
+
+
+class VerifyPSATest(P4EbpfTest):
+    p4_file_path = "p4testdata/verify.p4"
+
+    def runTest(self):
+        pkt = testutils.simple_ip_packet()
+
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+
+        pkt[Ether].src = '00:00:00:00:00:00'
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_no_other_packets(self)
+
+        pkt[Ether].src = '00:A0:00:00:00:01'
+        pkt[Ether].type = 0x1111
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_no_other_packets(self)
+
+        # explicit transition to reject state
+        pkt[Ether].type = 0xFF00
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_no_other_packets(self)
