@@ -22,14 +22,14 @@ PORT2 = 2
 ALL_PORTS = [PORT0, PORT1, PORT2]
 
 
-def get_meter_value_mask():
+def get_meter_value_mask(with_spin_lock=True, add_hex_prefix=True):
     """
     This function is used to create a meter_value mask
     that hides last three meter_value fields:
     two timestamps and spin lock field.
     """
-    full_value = 0xffffffffffffffff
-    zero_value = 0x0000000000000000
+    full_value = "ffffffffffffffff"
+    zero_value = "0000000000000000"
     mask = full_value  # pir_period
 
     # pir_unit_per_period, cir_period, cir_unit_per_period
@@ -37,11 +37,11 @@ def get_meter_value_mask():
     for i in range(0, 7):
         mask = mask + full_value
 
-    # time_p, time_c, spin lock
-    for i in range(0, 3):
+    # time_p, time_c, spin lock (optionally)
+    for i in range(0, 3 if with_spin_lock else 2):
         mask = mask + zero_value
 
-    return mask
+    return "0x" + mask if add_hex_prefix else mask
 
 
 def convert_dec_to_hex_string(decimal_value):
@@ -85,7 +85,7 @@ def convert_rate(rate):
 
 def build_meter_value(pir, cir,
                       pbs, cbs,
-                      pbs_left, cbs_left):
+                      pbs_left, cbs_left, add_spin_lock=True):
     """
     This function builds a hex string with the values that are stored in the Meter state.
     :param pir: peak information rate in byte/s or packet/s
@@ -94,6 +94,8 @@ def build_meter_value(pir, cir,
     :param cbs: committed bucket size in bytes or packets
     :param pbs_left: peak bucket size left in bytes or packets
     :param cbs_left: committed bucket size left in bytes or packets
+    :param add_spin_lock: indicates if add spin lock field at the end of meter value.
+    The spin lock field is always placed at the end of meter entry or table entry with direct meter
     :return:
     """
     pir_period, pir_unit_per_period = convert_rate(pir)
@@ -109,10 +111,12 @@ def build_meter_value(pir, cir,
                    convert_dec_to_hex_string(cbs_left),
                    # Last three fields are not being checked
                    convert_dec_to_hex_string(0),
-                   convert_dec_to_hex_string(0),
                    convert_dec_to_hex_string(0)]
 
-    return 'hex ' + ''.join(meter_value)
+    if add_spin_lock:
+        meter_value.append(convert_dec_to_hex_string(0))
+
+    return ''.join(meter_value)
 
 
 class MeterPSATest(P4EbpfTest):
@@ -222,40 +226,22 @@ class DirectMeterPSATest(P4EbpfTest):
     def runTest(self):
         pkt = testutils.simple_ip_packet()
 
-        # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B -> 18 6A
-        # period 1ms -> 1250 B per period, 1ms -> 1e6 ns -> 0F 42 40, 1250 -> 04 E2
+        # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B
+        meter_value = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
+                                        pbs_left=6250, cbs=6250, cbs_left=6250)
+        # action id | egress_port | meter_value
+        update_value = "hex 01 00 00 00 05 00 00 00 " + meter_value
         self.update_map(name="ingress_tbl_fwd", key="hex 04 00 00 00",
-                        value="hex "
-                              "01 00 00 00 05 00 00 00 "  # action id | egress port
-                              "40 42 0F 00 00 00 00 00 "  # pir_period
-                              "E2 04 00 00 00 00 00 00 "  # pir_unit_per_period
-                              "40 42 0F 00 00 00 00 00 "  # cir_period
-                              "E2 04 00 00 00 00 00 00 "  # cir_unit_per_period
-                              "6A 18 00 00 00 00 00 00 "  # pbs
-                              "6A 18 00 00 00 00 00 00 "  # cbs
-                              "6A 18 00 00 00 00 00 00 "  # pbs_left
-                              "6A 18 00 00 00 00 00 00 "  # cbs_left
-                              "00 00 00 00 00 00 00 00 "  # time_p
-                              "00 00 00 00 00 00 00 00 "  # time_c
-                              "00 00 00 00 00 00 00 00")  # Spin lock
+                        value=update_value)
 
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
-        # Expecting pbs_left, cbs_left 6250 B - 100 B = 6150 B -> 18 06
+        # Expecting pbs_left, cbs_left 6250 B - 100 B = 6150 B
+        meter_value = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
+                                        pbs_left=6150, cbs=6250, cbs_left=6150)
+        expected_value = "hex 01 00 00 00 05 00 00 00 " + meter_value
         self.verify_map_entry(name="ingress_tbl_fwd", key="hex 04 00 00 00",
-                              expected_value="hex "
-                                             "01 00 00 00 05 00 00 00 "
-                                             "40 42 0F 00 00 00 00 00 "
-                                             "E2 04 00 00 00 00 00 00 "
-                                             "40 42 0F 00 00 00 00 00 "
-                                             "E2 04 00 00 00 00 00 00 "
-                                             "6A 18 00 00 00 00 00 00 "
-                                             "6A 18 00 00 00 00 00 00 "
-                                             "06 18 00 00 00 00 00 00 "  # pbs_left
-                                             "06 18 00 00 00 00 00 00 "  # cbs_left
-                                             "00 00 00 00 00 00 00 00 "
-                                             "00 00 00 00 00 00 00 00 "
-                                             "00 00 00 00 00 00 00 00",
+                              expected_value=expected_value,
                               mask=get_meter_value_mask())
 
 
@@ -270,40 +256,22 @@ class DirectMeterColorAwarePSATest(P4EbpfTest):
     def runTest(self):
         pkt = testutils.simple_ip_packet()
 
-        # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B -> 18 6A
-        # period 1ms -> 1250 B per period, 1ms -> 1e6 ns -> 0F 42 40, 1250 -> 04 E2
+        # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B
+        meter_value = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
+                                        pbs_left=6250, cbs=6250, cbs_left=6250)
+        # action id | egress_port | meter_value
+        update_value = "hex 01 00 00 00 05 00 00 00 " + meter_value
         self.update_map(name="ingress_tbl_fwd", key="hex 04 00 00 00",
-                        value="hex "
-                              "01 00 00 00 05 00 00 00 "  # action id | egress port
-                              "40 42 0F 00 00 00 00 00 "  # pir_period
-                              "E2 04 00 00 00 00 00 00 "  # pir_unit_per_period
-                              "40 42 0F 00 00 00 00 00 "  # cir_period
-                              "E2 04 00 00 00 00 00 00 "  # cir_unit_per_period
-                              "6A 18 00 00 00 00 00 00 "  # pbs
-                              "6A 18 00 00 00 00 00 00 "  # cbs
-                              "6A 18 00 00 00 00 00 00 "  # pbs_left
-                              "6A 18 00 00 00 00 00 00 "  # cbs_left
-                              "00 00 00 00 00 00 00 00 "  # time_p
-                              "00 00 00 00 00 00 00 00 "  # time_c
-                              "00 00 00 00 00 00 00 00")  # Spin lock
+                        value=update_value)
 
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
-        # Expecting pbs_left, cbs_left 6250 B - 100 B = 6150 B -> 18 06
+        # Expecting pbs_left 6250 B - 100 B = 6150 B, cbs_left unchanged 6250 B
+        meter_value = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
+                                        pbs_left=6150, cbs=6250, cbs_left=6250)
+        expected_value = "hex 01 00 00 00 05 00 00 00 " + meter_value
         self.verify_map_entry(name="ingress_tbl_fwd", key="hex 04 00 00 00",
-                              expected_value="hex "
-                                             "01 00 00 00 05 00 00 00 "
-                                             "40 42 0F 00 00 00 00 00 "
-                                             "E2 04 00 00 00 00 00 00 "
-                                             "40 42 0F 00 00 00 00 00 "
-                                             "E2 04 00 00 00 00 00 00 "
-                                             "6A 18 00 00 00 00 00 00 "
-                                             "6A 18 00 00 00 00 00 00 "
-                                             "06 18 00 00 00 00 00 00 "  # pbs_left
-                                             "6A 18 00 00 00 00 00 00 "  # cbs_left
-                                             "00 00 00 00 00 00 00 00 "
-                                             "00 00 00 00 00 00 00 00 "
-                                             "00 00 00 00 00 00 00 00",
+                              expected_value=expected_value,
                               mask=get_meter_value_mask())
 
 
@@ -318,72 +286,38 @@ class DirectAndIndirectMeterPSATest(P4EbpfTest):
     def runTest(self):
         pkt = testutils.simple_ip_packet()
 
-        # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B -> 18 6A
-        # period 1ms -> 1250 B per period, 1ms -> 1e6 ns -> 0F 42 40, 1250 -> 04 E2
+        # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B
+        meter_value = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
+                                        pbs_left=6250, cbs=6250, cbs_left=6250)
+        # action id | egress_port | meter_value
+        update_value = "hex 01 00 00 00 05 00 00 00 " + meter_value
         self.update_map(name="ingress_tbl_fwd", key="hex 04 00 00 00",
-                        value="hex "
-                              "01 00 00 00 05 00 00 00 "  # action id | egress port
-                              "40 42 0F 00 00 00 00 00 "  # pir_period
-                              "E2 04 00 00 00 00 00 00 "  # pir_unit_per_period
-                              "40 42 0F 00 00 00 00 00 "  # cir_period
-                              "E2 04 00 00 00 00 00 00 "  # cir_unit_per_period
-                              "6A 18 00 00 00 00 00 00 "  # pbs
-                              "6A 18 00 00 00 00 00 00 "  # cbs
-                              "6A 18 00 00 00 00 00 00 "  # pbs_left
-                              "6A 18 00 00 00 00 00 00 "  # cbs_left
-                              "00 00 00 00 00 00 00 00 "  # time_p
-                              "00 00 00 00 00 00 00 00 "  # time_c
-                              "00 00 00 00 00 00 00 00")  # Spin lock
+                        value=update_value)
 
-        # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B -> 18 6A
-        # period 1ms -> 1250 B per period, 1ms -> 1e6 ns -> 0F 42 40, 1250 -> 04 E2
+        # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B
+        meter_value = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
+                                        pbs_left=6250, cbs=6250, cbs_left=6250)
+        update_value = "hex " + meter_value
         self.update_map(name="ingress_indirect_meter", key="hex 00",
-                        value="hex "
-                              "40 42 0F 00 00 00 00 00 "  # pir_period
-                              "E2 04 00 00 00 00 00 00 "  # pir_unit_per_period
-                              "40 42 0F 00 00 00 00 00 "  # cir_period
-                              "E2 04 00 00 00 00 00 00 "  # cir_unit_per_period
-                              "6A 18 00 00 00 00 00 00 "  # pbs
-                              "6A 18 00 00 00 00 00 00 "  # cbs
-                              "6A 18 00 00 00 00 00 00 "  # pbs_left
-                              "6A 18 00 00 00 00 00 00 "  # cbs_left
-                              "00 00 00 00 00 00 00 00 "  # time_p
-                              "00 00 00 00 00 00 00 00 "  # time_c
-                              "00 00 00 00 00 00 00 00")  # Spin lock
+                        value=update_value)
 
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
-        # Expecting pbs_left, cbs_left 6250 B - 100 B = 6150 B -> 18 06
+        # Expecting pbs_left, cbs_left 6250 B - 100 B = 6150 B
+        meter_value = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
+                                        pbs_left=6150, cbs=6250, cbs_left=6150)
+        # action id | egress_port | meter_value
+        expected_value = "hex 01 00 00 00 05 00 00 00 " + meter_value
         self.verify_map_entry(name="ingress_tbl_fwd", key="hex 04 00 00 00",
-                              expected_value="hex "
-                                             "01 00 00 00 05 00 00 00 "
-                                             "40 42 0F 00 00 00 00 00 "
-                                             "E2 04 00 00 00 00 00 00 "
-                                             "40 42 0F 00 00 00 00 00 "
-                                             "E2 04 00 00 00 00 00 00 "
-                                             "6A 18 00 00 00 00 00 00 "
-                                             "6A 18 00 00 00 00 00 00 "
-                                             "06 18 00 00 00 00 00 00 "  # pbs_left
-                                             "06 18 00 00 00 00 00 00 "  # cbs_left
-                                             "00 00 00 00 00 00 00 00 "
-                                             "00 00 00 00 00 00 00 00 "
-                                             "00 00 00 00 00 00 00 00",
+                              expected_value=expected_value,
                               mask=get_meter_value_mask())
 
-        # Expecting pbs_left, cbs_left 6250 B - 100 B = 6150 B -> 18 06
+        # Expecting pbs_left, cbs_left 6250 B - 100 B = 6150 B
+        meter_value = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
+                                        pbs_left=6150, cbs=6250, cbs_left=6150)
+        expected_value = "hex " + meter_value
         self.verify_map_entry(name="ingress_indirect_meter", key="hex 00",
-                              expected_value="hex "
-                                             "40 42 0F 00 00 00 00 00 "
-                                             "E2 04 00 00 00 00 00 00 "
-                                             "40 42 0F 00 00 00 00 00 "
-                                             "E2 04 00 00 00 00 00 00 "
-                                             "6A 18 00 00 00 00 00 00 "
-                                             "6A 18 00 00 00 00 00 00 "
-                                             "06 18 00 00 00 00 00 00 "  # pbs_left
-                                             "06 18 00 00 00 00 00 00 "  # cbs_left
-                                             "00 00 00 00 00 00 00 00 "
-                                             "00 00 00 00 00 00 00 00 "
-                                             "00 00 00 00 00 00 00 00",
+                              expected_value=expected_value,
                               mask=get_meter_value_mask())
 
 
@@ -407,61 +341,33 @@ class DirectTwoMetersPSATest(P4EbpfTest):
     def runTest(self):
         pkt = testutils.simple_ip_packet()
 
-        # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B -> 18 6A
-        # period 1ms -> 1250 B per period, 1ms -> 1e6 ns -> 0F 42 40, 1250 -> 04 E2
+        # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B
+        meter_value_1 = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
+                                        pbs_left=6250, cbs=6250, cbs_left=6250,
+                                        add_spin_lock=False)
+        meter_value_2 = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
+                                          pbs_left=6250, cbs=6250, cbs_left=6250,
+                                          add_spin_lock=True)
+        # action id | egress_port | meter_value
+        update_value = "hex 01 00 00 00 05 00 00 00 " + meter_value_1 + meter_value_2
+        # print(update_value)
         self.update_map(name="ingress_tbl_fwd", key="hex 04 00 00 00",
-                        value="hex "
-                              "01 00 00 00 05 00 00 00 "  # action id | egress port
-                              "40 42 0F 00 00 00 00 00 "  # pir_period
-                              "E2 04 00 00 00 00 00 00 "  # pir_unit_per_period
-                              "40 42 0F 00 00 00 00 00 "  # cir_period
-                              "E2 04 00 00 00 00 00 00 "  # cir_unit_per_period
-                              "6A 18 00 00 00 00 00 00 "  # pbs
-                              "6A 18 00 00 00 00 00 00 "  # cbs
-                              "6A 18 00 00 00 00 00 00 "  # pbs_left
-                              "6A 18 00 00 00 00 00 00 "  # cbs_left
-                              "00 00 00 00 00 00 00 00 "  # time_p
-                              "00 00 00 00 00 00 00 00 "  # time_c
-                              "40 42 0F 00 00 00 00 00 "  # pir_period -- second meter
-                              "E2 04 00 00 00 00 00 00 "  # pir_unit_per_period
-                              "40 42 0F 00 00 00 00 00 "  # cir_period
-                              "E2 04 00 00 00 00 00 00 "  # cir_unit_per_period
-                              "6A 18 00 00 00 00 00 00 "  # pbs
-                              "6A 18 00 00 00 00 00 00 "  # cbs
-                              "6A 18 00 00 00 00 00 00 "  # pbs_left
-                              "6A 18 00 00 00 00 00 00 "  # cbs_left
-                              "00 00 00 00 00 00 00 00 "  # time_p
-                              "00 00 00 00 00 00 00 00 "  # time_c
-                              "00 00 00 00 00 00 00 00")  # Spin lock
+                        value=update_value)
 
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
-        # Expecting pbs_left, cbs_left 6250 B - 100 B = 6150 B -> 18 06
+        # Expecting pbs_left, cbs_left 6250 B - 100 B = 6150 B
+        meter_1_value = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
+                                          pbs_left=6150, cbs=6250, cbs_left=6150,
+                                          add_spin_lock=False)
+        meter_2_value = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
+                                          pbs_left=6150, cbs=6250, cbs_left=6150,
+                                          add_spin_lock=True)
+        expected_value = "hex 01 00 00 00 05 00 00 00 " + meter_1_value + meter_2_value
         self.verify_map_entry(name="ingress_tbl_fwd", key="hex 04 00 00 00",
-                              expected_value="hex "
-                                             "01 00 00 00 05 00 00 00 "
-                                             "40 42 0F 00 00 00 00 00 "
-                                             "E2 04 00 00 00 00 00 00 "
-                                             "40 42 0F 00 00 00 00 00 "
-                                             "E2 04 00 00 00 00 00 00 "
-                                             "6A 18 00 00 00 00 00 00 "
-                                             "6A 18 00 00 00 00 00 00 "
-                                             "06 18 00 00 00 00 00 00 "  # pbs_left
-                                             "06 18 00 00 00 00 00 00 "  # cbs_left
-                                             "00 00 00 00 00 00 00 00 "
-                                             "00 00 00 00 00 00 00 00 "
-                                             "40 42 0F 00 00 00 00 00 "  # second meter
-                                             "E2 04 00 00 00 00 00 00 "
-                                             "40 42 0F 00 00 00 00 00 "
-                                             "E2 04 00 00 00 00 00 00 "
-                                             "6A 18 00 00 00 00 00 00 "
-                                             "6A 18 00 00 00 00 00 00 "
-                                             "06 18 00 00 00 00 00 00 "  # pbs_left
-                                             "06 18 00 00 00 00 00 00 "  # cbs_left
-                                             "00 00 00 00 00 00 00 00 "
-                                             "00 00 00 00 00 00 00 00 "
-                                             "00 00 00 00 00 00 00 00",
-                              mask=get_meter_value_mask() + get_meter_value_mask())
+                              expected_value=expected_value,
+                              mask=get_meter_value_mask(with_spin_lock=False) +
+                                   get_meter_value_mask(add_hex_prefix=False))
 
 
 class DirectAndCounterMeterPSATest(P4EbpfTest):
@@ -475,40 +381,21 @@ class DirectAndCounterMeterPSATest(P4EbpfTest):
     def runTest(self):
         pkt = testutils.simple_ip_packet()
 
-        # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B -> 18 6A
-        # period 1ms -> 1250 B per period, 1ms -> 1e6 ns -> 0F 42 40, 1250 -> 04 E2
+        # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B
+        meter_value = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
+                                        pbs_left=6250, cbs=6250, cbs_left=6250)
+        # action id | egress_port | counter packets and padding | meter_value
+        update_value = "hex 01 00 00 00 05 00 00 00 00 00 00 00 00 00 00 00 " + meter_value
         self.update_map(name="ingress_tbl_fwd", key="hex 04 00 00 00",
-                        value="hex "
-                              "01 00 00 00 05 00 00 00 "  # action id | egress port
-                              "00 00 00 00 00 00 00 00 "  # counter packets and padding
-                              "40 42 0F 00 00 00 00 00 "  # pir_period
-                              "E2 04 00 00 00 00 00 00 "  # pir_unit_per_period
-                              "40 42 0F 00 00 00 00 00 "  # cir_period
-                              "E2 04 00 00 00 00 00 00 "  # cir_unit_per_period
-                              "6A 18 00 00 00 00 00 00 "  # pbs
-                              "6A 18 00 00 00 00 00 00 "  # cbs
-                              "6A 18 00 00 00 00 00 00 "  # pbs_left
-                              "6A 18 00 00 00 00 00 00 "  # cbs_left
-                              "00 00 00 00 00 00 00 00 "  # time_p
-                              "00 00 00 00 00 00 00 00 "  # time_c
-                              "00 00 00 00 00 00 00 00")  # Spin lock
+                        value=update_value)
 
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
-        # Expecting pbs_left, cbs_left 6250 B - 100 B = 6150 B -> 18 06
+        # Expecting pbs_left, cbs_left 6250 B - 100 B = 6150 B
+        meter_value = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
+                                        pbs_left=6150, cbs=6250, cbs_left=6150)
+        # action id | egress_port | counter packets and padding | meter_value
+        expected_value = "hex 01 00 00 00 05 00 00 00 01 00 00 00 00 00 00 00 " + meter_value
         self.verify_map_entry(name="ingress_tbl_fwd", key="hex 04 00 00 00",
-                              expected_value="hex "
-                                             "01 00 00 00 05 00 00 00 "
-                                             "01 00 00 00 00 00 00 00 "  # counter packets and padding
-                                             "40 42 0F 00 00 00 00 00 "
-                                             "E2 04 00 00 00 00 00 00 "
-                                             "40 42 0F 00 00 00 00 00 "
-                                             "E2 04 00 00 00 00 00 00 "
-                                             "6A 18 00 00 00 00 00 00 "
-                                             "6A 18 00 00 00 00 00 00 "
-                                             "06 18 00 00 00 00 00 00 "  # pbs_left
-                                             "06 18 00 00 00 00 00 00 "  # cbs_left
-                                             "00 00 00 00 00 00 00 00 "
-                                             "00 00 00 00 00 00 00 00 "
-                                             "00 00 00 00 00 00 00 00",
+                              expected_value=expected_value,
                               mask=get_meter_value_mask())
