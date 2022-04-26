@@ -299,6 +299,12 @@ for a given key exists. A value of the BPF map is ignored.
 **Note:** As of April 2022, support for value_set in `psabpf-ctl` CLI/API is not implemented yet. As a workaround you can
 use the `bpftool` command.
 
+### Random 
+
+The [Random](https://p4.org/p4-spec/docs/PSA.html#sec-random) extern is a mean to retrieve a pseudo-random number in a specified range within a P4 program.
+The PSA-eBPF compiler uses the `bpf_get_prandom_u32()` BPF helper to get a pseudo-random number. 
+Each `read()` operation on the Random extern in a P4 program is translated into a call to the BPF helper.
+
 # Getting started
 
 ## Installation 
