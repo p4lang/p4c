@@ -40,6 +40,7 @@ class EBPFTablePSA : public EBPFTable {
             cstring valueName, const EBPFProgram* program) const override;
 
     void initDirectCounters();
+    void initDirectMeters();
     void initImplementation();
 
     void emitTableValue(CodeBuilder* builder, const IR::MethodCallExpression* actionMce,
@@ -52,10 +53,10 @@ class EBPFTablePSA : public EBPFTable {
     const IR::PathExpression* getActionNameExpression(const IR::Expression* expr) const;
 
  public:
+    // We use vectors to keep an order of Direct Meters or Counters from a P4 program.
+    // This order is important from CLI tool point of view.
     std::vector<std::pair<cstring, EBPFCounterPSA *>> counters;
-    // TODO: DirectMeter is not implemented now, but
-    //  this is needed in table implementation to validate table properties
-    std::vector<cstring> meters;
+    std::vector<std::pair<cstring, EBPFMeterPSA *>> meters;
     EBPFTableImplementationPSA* implementation;
 
     EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* table,
@@ -79,6 +80,16 @@ class EBPFTablePSA : public EBPFTable {
                 return name == elem.first;
             });
         if (result != counters.end())
+            return result->second;
+        return nullptr;
+    }
+
+    EBPFMeterPSA* getMeter(cstring name) const {
+        auto result = std::find_if(meters.begin(), meters.end(),
+                                   [name](std::pair<cstring, EBPFMeterPSA *> elem)->bool {
+                                       return name == elem.first;
+                                   });
+        if (result != meters.end())
             return result->second;
         return nullptr;
     }

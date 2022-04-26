@@ -165,8 +165,8 @@ class P4EbpfTest(BaseTest):
         value = value.replace(" ", "")
 
         if mask:
-            expected_value = int(expected_value, 0) & mask
-            value = int(value, 0) & mask
+            expected_value = int(expected_value, 0) & int(mask, 0)
+            value = int(value, 0) & int(mask, 0)
 
         if expected_value != value:
             self.fail("Map {} key {} does not have correct value. Expected {}; got {}"
