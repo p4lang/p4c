@@ -75,7 +75,7 @@ class P4EbpfTest(BaseTest):
         filename = tail.split(".")[0]
         self.test_prog_image = os.path.join("ptf_out", filename + ".o")
 
-        p4args = "--Wdisable=unused"
+        p4args = "--Wdisable=unused --max-ternary-masks 3"
         if self.is_trace_logs_enabled():
             p4args += " --trace"
 
