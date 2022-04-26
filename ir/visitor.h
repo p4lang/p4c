@@ -290,7 +290,7 @@ class Visitor {
 };
 
 class Modifier : public virtual Visitor {
-    ChangeTracker       *visited = nullptr;
+    std::shared_ptr<ChangeTracker> visited;
     void visitor_const_error() override;
     bool check_clone(const Visitor *) override;
  public:
@@ -314,7 +314,7 @@ class Modifier : public virtual Visitor {
 class Inspector : public virtual Visitor {
     struct info_t { bool done, visitOnce; };
     typedef std::unordered_map<const IR::Node *, info_t>       visited_t;
-    visited_t   *visited = nullptr;
+    std::shared_ptr<visited_t> visited;
     bool check_clone(const Visitor *) override;
  public:
     profile_t init_apply(const IR::Node *root) override;
@@ -337,7 +337,7 @@ class Inspector : public virtual Visitor {
 };
 
 class Transform : public virtual Visitor {
-    ChangeTracker       *visited = nullptr;
+    std::shared_ptr<ChangeTracker> visited;
     bool prune_flag = false;
     void visitor_const_error() override;
     bool check_clone(const Visitor *) override;

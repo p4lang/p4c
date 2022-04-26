@@ -75,6 +75,7 @@ void EBPFProgram::emitC(CodeBuilder* builder, cstring header) {
     emitPreamble(builder);
     builder->append("REGISTER_START()\n");
     control->emitTableInstances(builder);
+    parser->emitValueSetInstances(builder);
     builder->append("REGISTER_END()\n");
     builder->newline();
     builder->emitIndent();
@@ -138,6 +139,7 @@ void EBPFProgram::emitH(CodeBuilder* builder, cstring) {
     builder->newline();
     emitTypes(builder);
     control->emitTableTypes(builder);
+    parser->emitTypes(builder);
     builder->appendLine("#if CONTROL_PLANE");
     builder->appendLine("static void init_tables() ");
     builder->blockStart();

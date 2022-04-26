@@ -22,14 +22,14 @@ The code contains five sample backends:
   the BMv2 behavioral model https://github.com/p4lang/behavioral-model,
 * p4c-dpdk: can be used to target the DPDK software switch (SWX) pipeline
   https://doc.dpdk.org/guides/rel_notes/release_20_11.html,
-* p4c-ebpf: can be used to generate C code which can be compiled to eBPF
-  https://en.wikipedia.org/wiki/Berkeley_Packet_Filter and then loaded
-  in the Linux kernel for packet filtering,
+* p4c-ebpf: can be used to generate C code which can be compiled to [eBPF](https://en.wikipedia.org/wiki/Berkeley_Packet_Filter)
+  and then loaded in the Linux kernel. The eBPF backend currently implements two architecture models:
+  [ebpf_model.p4 for packet filtering](./backends/ebpf/README.md) and [the fully-featured PSA (Portable Switch Architecture) model](./backends/ebpf/psa/README.md). 
 * p4test: a source-to-source P4 translator which can be used for
   testing, learning compiler internals and debugging,
 * p4c-graphs: can be used to generate visual representations of a P4 program;
   for now it only supports generating graphs of top-level control flows, and
-* p4c-ubfp: can be used to generate eBPF code that runs in user-space.
+* p4c-ubpf: can be used to generate eBPF code that runs in user-space.
 
 Sample command lines:
 
@@ -351,7 +351,7 @@ Installing on macOS:
 ## Garbage collector
 
 P4c relies on [BDW garbage collector](https://github.com/ivmai/bdwgc)
-to manage its memory.  By default, the p4c exectuables are linked with
+to manage its memory.  By default, the p4c executables are linked with
 the garbage collector library.  When the GC causes problems, this can
 be disabled by setting `ENABLE_GC` cmake option to `OFF`.  However,
 this will dramatically increase the memory usage by the compiler, and
