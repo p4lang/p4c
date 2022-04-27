@@ -1,0 +1,27 @@
+issue3246.p4(3): [--Werror=type-error] error: 1w1.minSizeInBits
+  return (1w1).minSizeInBits<int, int, int, int, int>();
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+  minSizeInBits: 0 type parameters expected, but 5 type arguments supplied
+  ---- Originating from:
+issue3246.p4(3): Function type 'minSizeInBits' does not match invocation type '<Method call>'
+    return (1w1).minSizeInBits<int, int, int, int, int>();
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue3246.p4(8): [--Werror=type-error] error: 1w1.minSizeInBits
+  return (1w1).minSizeInBits<int, int, int, int, int>(_,_,_);
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+  minSizeInBits: 3 arguments supplied while 0 are expected
+  ---- Originating from:
+issue3246.p4(8): Function type 'minSizeInBits' does not match invocation type '<Method call>'
+    return (1w1).minSizeInBits<int, int, int, int, int>(_,_,_);
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue3246.p4(13): [--Werror=type-error] error: 1w1.minSizeInBits
+  return (1w1).minSizeInBits<int, int, int, int, int>(a = 1, b = 1, c = 1);
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+  minSizeInBits: 3 arguments supplied while 0 are expected
+  ---- Originating from:
+issue3246.p4(13): Function type 'minSizeInBits' does not match invocation type '<Method call>'
+    return (1w1).minSizeInBits<int, int, int, int, int>(a = 1, b = 1, c = 1);
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
