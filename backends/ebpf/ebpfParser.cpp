@@ -401,7 +401,11 @@ StateTranslationVisitor::compileExtract(const IR::Expression* destination) {
         auto etype = EBPFTypeFactory::instance->create(ftype);
         if (etype->is<EBPFScalarType>()) {
             auto scalarType = etype->to<EBPFScalarType>();
-            unsigned padding = scalarType->alignment() * 8 - scalarType->widthInBits();
+            unsigned readWordSize = scalarType->alignment() * 8;
+            unsigned unaligned = scalarType->widthInBits() % readWordSize;
+            unsigned padding = readWordSize - unaligned;
+            if (padding == readWordSize)
+                padding = 0;
             if (scalarType->widthInBits() + padding >= curr_padding) {
                 curr_padding = padding;
             }
