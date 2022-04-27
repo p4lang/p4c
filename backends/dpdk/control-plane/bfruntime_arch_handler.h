@@ -96,7 +96,8 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
     void forAllPipeBlocks(const IR::ToplevelBlock* evaluatedProgram, Func function) {
         auto main = evaluatedProgram->getMain();
         if (!main)
-            ::error("Program does not contain a `main` module");
+            ::error(ErrorType::ERR_NOT_FOUND,
+                    "Program does not contain a `main` module");
         auto cparams = main->getConstructorParameters();
         int index = -1;
         for (auto param : main->constantValue) {

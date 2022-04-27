@@ -72,7 +72,8 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
     if (DPDK::toStr(this->getType()) == "Register") {
         auto args = this->arguments;
         if (args->size() == 0) {
-            ::error("Register extern declaration %1% must contain a size parameter\n",
+            ::error(ErrorType::ERR_INVALID,
+                    "Register extern declaration %1% must contain a size parameter\n",
                 this->Name());
         } else {
             auto size = args->at(0)->expression;
@@ -84,7 +85,8 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
         auto args = this->arguments;
         unsigned value = 0;
         if (args->size() < 2) {
-            ::error("Counter extern declaration %1% must contain 2 parameters\n", this->Name());
+            ::error(ErrorType::ERR_INVALID,
+                    "Counter extern declaration %1% must contain 2 parameters\n", this->Name());
         } else {
             auto n_counters = args->at(0)->expression;
             auto counter_type = args->at(1)->expression;
@@ -108,7 +110,8 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
     } else if (DPDK::toStr(this->getType()) == "Meter") {
         auto args = this->arguments;
         if (args->size() < 2) {
-            ::error("Meter extern declaration %1% must contain a size parameter"
+            ::error(ErrorType::ERR_INVALID,
+                    "Meter extern declaration %1% must contain a size parameter"
                     " and meter type parameter", this->Name());
         } else {
             auto n_meters = args->at(0)->expression;
@@ -500,7 +503,8 @@ std::ostream &IR::DpdkGetHashStatement::toSpec(std::ostream &out) const {
             out << " " << DPDK::toStr(c);
         }
     } else {
-        ::error("get_hash's arg is not a ListExpression.");
+        ::error(ErrorType::ERR_INVALID,
+                "%1%: get_hash's arg is not a ListExpression.", this);
     }
     out << ")";
     return out;
@@ -583,4 +587,3 @@ std::ostream& IR::DpdkDropStatement::toSpec(std::ostream& out) const {
     out << "drop";
     return out;
 }
-
