@@ -261,12 +261,14 @@ class PathExpression : Expression {
 // X.a
 // The 'X' portion is a TypeNameExpression
 class TypeNameExpression : Expression {
-    Type_Name typeName;
+    Type typeName;
     TypeNameExpression { if (!srcInfo && typeName) srcInfo = typeName->srcInfo; }
     TypeNameExpression(ID id) : Expression(id.srcInfo),
                                 typeName(new IR::Type_Name(new IR::Path(id))) {}
     dbprint{ out << typeName; }
     toString { return typeName->toString(); }
+    validate { BUG_CHECK(typeName->is<Type_Name>() || typeName->is<Type_Specialized>(),
+                         "%1 unexpected type in TypeNameExpression", typeName); }
 }
 
 class Slice : Operation_Ternary {
