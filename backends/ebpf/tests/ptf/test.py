@@ -539,8 +539,15 @@ class PSATernaryTest(P4EbpfTest):
         self.table_add(table="ingress_tbl_ternary_3", keys=["0xffffffff^0xffffffff", "0x7"], references=[ref1], priority=1)
         self.table_add(table="ingress_tbl_ternary_3", keys=["0x0^0x0", "0x7"], references=[ref2], priority=10)
 
-        pkt = testutils.simple_udp_packet(ip_src='1.2.3.4', ip_dst='192.168.2.1')
+        # flow rules 'tbl_ternary_4':
+        # 2. hdr.ethernet.srcAddr=00:00:33:44:55:00^00:00:FF:FF:FF:00 => action 1 priority 10
+        self.table_add(table="ingress_ap", keys=[0x10], action=1, data=[])
+        self.table_add(table="ingress_tbl_ternary_4", keys=["00:00:33:44:55:00^00:00:FF:FF:FF:00"],
+                       references=["0x10"], priority=10)
+
+        pkt = testutils.simple_udp_packet(eth_src="11:22:33:44:55:66", ip_src='1.2.3.4', ip_dst='192.168.2.1')
         testutils.send_packet(self, PORT0, pkt)
+        pkt[Ether].type = 0x1122
         pkt[IP].proto = 0x7
         pkt[IP].tos = 0x5
         pkt[IP].chksum = 0xb3e7

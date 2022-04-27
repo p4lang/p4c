@@ -67,6 +67,7 @@ control ingress(inout headers hdr,
                 in    psa_ingress_input_metadata_t  istd,
                 inout psa_ingress_output_metadata_t ostd)
 {
+    ActionProfile(1024) ap;
     ActionSelector(PSA_HashAlgorithm_t.CRC32, 32w1024, 32w16) as;
 
     action do_change_src_addr() {
@@ -83,6 +84,10 @@ control ingress(inout headers hdr,
 
     action do_change_diffserv() {
         hdr.ipv4.diffserv = 0x5;
+    }
+
+    action do_modify_eth_type() {
+        hdr.ethernet.etherType = 0x1122;
     }
 
     table tbl_ternary_0 {
@@ -128,12 +133,24 @@ control ingress(inout headers hdr,
         psa_implementation = as;
     }
 
+    table tbl_ternary_4 {
+        key = {
+            hdr.ethernet.srcAddr  : ternary;
+        }
+        actions = { do_modify_eth_type; NoAction; }
+        default_action = NoAction;
+        size = 100;
+
+        psa_implementation = ap;
+    }
+
     apply {
          send_to_port(ostd, (PortId_t) 5);
          tbl_ternary_0.apply();
          tbl_ternary_2.apply();
          tbl_ternary_1.apply();
          tbl_ternary_3.apply();
+         tbl_ternary_4.apply();
     }
 }
 
