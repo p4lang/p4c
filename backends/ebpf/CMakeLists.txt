@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Makefile for the EBPF P4-16 back-end.
-# To be included in the main P4C compiler makefile
+# CMakefile for the EBPF P4-16 back-end.
+# To be included in the main P4C compiler CMakefile
 
 message(STATUS "Start configuring eBPF back end")
 
