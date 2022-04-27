@@ -611,47 +611,7 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ControlBlock *ctrl) {
 }
 
 bool ConvertToEBPFControlPSA::preorder(const IR::TableBlock *tblblk) {
-    // use HASH_MAP as default type
-    TableKind tableKind = TableHash;
-
-    bool isTernaryTable = false;
-    // If any key field is LPM we will generate an LPM table
-    auto keyGenerator = tblblk->container->getKey();
-    if (keyGenerator != nullptr) {
-        for (auto it : keyGenerator->keyElements) {
-            // optimization: check if we should generate timestamp
-            if (it->expression->toString().endsWith("timestamp")) {
-                control->timestampIsUsed = true;
-            }
-
-            auto mtdecl = refmap->getDeclaration(it->matchType->path, true);
-            auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-            if (matchType->name.name != P4::P4CoreLibrary::instance.exactMatch.name &&
-                matchType->name.name != P4::P4CoreLibrary::instance.lpmMatch.name &&
-                matchType->name.name != P4::P4CoreLibrary::instance.ternaryMatch.name &&
-                matchType->name.name != "selector")
-                ::error(ErrorType::ERR_UNSUPPORTED,
-                        "Match of type %1% not supported", it->matchType);
-
-            if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
-                if (tableKind == TableLPMTrie) {
-                    ::error(ErrorType::ERR_UNSUPPORTED,
-                            "%1%: only one LPM field allowed", it->matchType);
-                    return false;
-                }
-                if (isTernaryTable) {
-                    // if at least one field is ternary, the whole table should be ternary
-                    continue;
-                }
-                tableKind = TableLPMTrie;
-            } else if (matchType->name.name == P4::P4CoreLibrary::instance.ternaryMatch.name) {
-                isTernaryTable = true;
-            }
-        }
-    }
-
     EBPFTablePSA *table = new EBPFTablePSA(program, tblblk, control->codeGen);
-
     control->tables.emplace(tblblk->container->name, table);
     return true;
 }
