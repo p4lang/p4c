@@ -196,7 +196,7 @@ class MACLearningTest(L2L3SwitchTest):
         for p in pairs:
             pkt = testutils.simple_udp_packet(eth_src=p[1])
             testutils.send_packet(self, p[0], pkt)
-            value = self.digest_get("mac_learn_digest_0")
+            value = self.digest_get("ingress_mac_learn_digest")
             if len(value) != 1:
                 self.fail("Digest not generated")
             if int(value[0]["port"], 0) != p[0]+4:
