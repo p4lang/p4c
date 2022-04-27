@@ -181,7 +181,7 @@ class MACLearningTest(L2L3SwitchTest):
         # should NOT generate learn digest
         pkt = testutils.simple_udp_packet(eth_src='00:06:07:08:09:0a')
         testutils.send_packet(self, PORT0, pkt)
-        value = self.digest_get("mac_learn_digest_0")
+        value = self.digest_get("ingress_mac_learn_digest")
         if len(value) != 0:
             self.fail("Program should not generate digest")
 
