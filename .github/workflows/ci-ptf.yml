@@ -37,10 +37,16 @@ jobs:
         with:
           submodules: recursive
 
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: test-${{ env.UNIFIED }}-${{ runner.os }}
+          max-size: 1000M
+
       - name: Build (Linux)
         run: |
-          tools/start_ccache
           docker build --network host -t p4c --build-arg MAKEFLAGS=-j8 --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg ENABLE_GMP=$ENABLE_GMP --build-arg INSTALL_PTF_EBPF_DEPENDENCIES=ON .
+          ./tools/export_ccache.sh
 
       - name: Run PTF tests for eBPF backend (Linux)
         run: |
