@@ -105,23 +105,47 @@ void EBPFTable::initKey() {
 }
 
 // Performs the following validations:
-// 1. Validates if LPM key is the last one from match keys (ignores selector fields).
+// - Validates if LPM key is the last one from match keys in an LPM table (ignores selector fields).
+// - Validates if match fields in ternary tables are sorted by size
+//   in descending order (ignores selector fields).
 void EBPFTable::validateKeys() const {
     if (keyGenerator == nullptr)
         return;
 
-    auto lastKey = std::find_if(
-            keyGenerator->keyElements.rbegin(), keyGenerator->keyElements.rend(),
-            [](const IR::KeyElement * key)
+    if (isTernaryTable()) {
+        unsigned last_key_size = std::numeric_limits<unsigned>::max();
+        for (auto it : keyGenerator->keyElements) {
+            if (it->matchType->path->name.name == "selector")
+                continue;
+
+            auto type = program->typeMap->getType(it->expression);
+            auto ebpfType = EBPFTypeFactory::instance->create(type);
+            if (!ebpfType->is<IHasWidth>())
+                continue;
+
+            unsigned width = ebpfType->to<IHasWidth>()->widthInBits();
+            if (width > last_key_size) {
+                ::error(ErrorType::WARN_ORDERING,
+                        "%1%: key field larger than previous key, move it before previous key "
+                        "to avoid padding between these keys", it->expression);
+                return;
+            }
+            last_key_size = width;
+        }
+    } else {
+        auto lastKey = std::find_if(
+                keyGenerator->keyElements.rbegin(), keyGenerator->keyElements.rend(),
+                [](const IR::KeyElement * key)
                 { return key->matchType->path->name.name != "selector"; });
 
-    for (auto it : keyGenerator->keyElements) {
-        auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
-        auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-        if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
-            if (it != *lastKey) {
-                ::error(ErrorType::ERR_UNSUPPORTED,
-                        "%1% field key must be at the end of whole key", it->matchType);
+        for (auto it : keyGenerator->keyElements) {
+            auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
+            auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
+            if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
+                if (it != *lastKey) {
+                    ::error(ErrorType::ERR_UNSUPPORTED,
+                            "%1% field key must be at the end of whole key", it->matchType);
+                }
             }
         }
     }
@@ -135,6 +159,7 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
     CodeGenInspector commentGen(program->refMap, program->typeMap);
     commentGen.setBuilder(builder);
 
+    unsigned int structAlignment = 4;  // 4 by default
     if (keyGenerator != nullptr) {
         if (isLPMTable()) {
             // For LPM kind key we need an additional 32 bit field - prefixlen
@@ -165,8 +190,14 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
             auto ebpfType = ::get(keyTypes, c);
             cstring fieldName = ::get(keyFieldNames, c);
 
+            if (ebpfType->is<EBPFScalarType>() &&
+                ebpfType->to<EBPFScalarType>()->alignment() > structAlignment) {
+                structAlignment = 8;
+            }
+
             builder->emitIndent();
             ebpfType->declare(builder, fieldName, false);
+
             builder->append("; /* ");
             c->expression->apply(commentGen);
             builder->append(" */");
@@ -183,8 +214,28 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
     }
 
     builder->blockEnd(false);
-    builder->append(" __attribute__((aligned(4)))");
+    builder->appendFormat(" __attribute__((aligned(%d)))", structAlignment);
     builder->endOfStatement(true);
+
+    if (isTernaryTable()) {
+        // generate mask key
+        builder->emitIndent();
+        builder->appendFormat("#define MAX_%s_MASKS %u", keyTypeName.toUpper(),
+                              program->options.maxTernaryMasks);
+        builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat("struct %s_mask ", keyTypeName.c_str());
+        builder->blockStart();
+
+        builder->emitIndent();
+        builder->appendFormat("__u8 mask[sizeof(struct %s)];", keyTypeName.c_str());
+        builder->newline();
+
+        builder->blockEnd(false);
+        builder->appendFormat(" __attribute__((aligned(%d)))", structAlignment);
+        builder->endOfStatement(true);
+    }
 }
 
 void EBPFTable::emitActionArguments(CodeBuilder* builder,
@@ -219,6 +270,23 @@ void EBPFTable::emitValueType(CodeBuilder* builder) {
 
     builder->blockEnd(false);
     builder->endOfStatement(true);
+
+    if (isTernaryTable()) {
+        // emit ternary mask value
+        builder->emitIndent();
+        builder->appendFormat("struct %s_mask ", valueTypeName.c_str());
+        builder->blockStart();
+
+        builder->emitIndent();
+        builder->appendLine("__u32 tuple_id;");
+        builder->emitIndent();
+        builder->appendFormat("struct %s_mask next_tuple_mask;", keyTypeName.c_str());
+        builder->newline();
+        builder->emitIndent();
+        builder->appendLine("__u8 has_next;");
+        builder->blockEnd(false);
+        builder->endOfStatement(true);
+    }
 }
 
 void EBPFTable::emitValueActionIDNames(CodeBuilder* builder) {
@@ -245,6 +313,12 @@ void EBPFTable::emitValueStructStructure(CodeBuilder* builder) {
     builder->emitIndent();
     builder->append("unsigned int action;");
     builder->newline();
+
+    if (isTernaryTable()) {
+        builder->emitIndent();
+        builder->append("__u32 priority;");
+        builder->newline();
+    }
 
     builder->emitIndent();
     builder->append("union ");
@@ -277,85 +351,99 @@ void EBPFTable::emitTypes(CodeBuilder* builder) {
     emitValueType(builder);
 }
 
+void EBPFTable::emitTernaryInstance(CodeBuilder *builder) {
+    builder->target->emitTableDecl(builder, instanceName + "_prefixes", TableHash,
+                                   "struct " + keyTypeName + "_mask",
+                                   "struct " + valueTypeName + "_mask", size);
+    builder->target->emitMapInMapDecl(builder, instanceName + "_tuple",
+                                      TableHash, "struct " + keyTypeName,
+                                      "struct " + valueTypeName, size,
+                                      instanceName + "_tuples_map", TableArray, "__u32", size);
+}
+
 void EBPFTable::emitInstance(CodeBuilder* builder) {
-    if (keyGenerator != nullptr) {
-        auto impl = table->container->properties->getProperty(
-            program->model.tableImplProperty.name);
-        if (impl == nullptr) {
-            ::error(ErrorType::ERR_EXPECTED, "Table %1% does not have an %2% property",
-                    table->container, program->model.tableImplProperty.name);
-            return;
-        }
-
-        // Some type checking...
-        if (!impl->value->is<IR::ExpressionValue>()) {
-            ::error(ErrorType::ERR_EXPECTED,
-                    "%1%: Expected property to be an `extern` block", impl);
-            return;
-        }
-
-        auto expr = impl->value->to<IR::ExpressionValue>()->expression;
-        if (!expr->is<IR::ConstructorCallExpression>()) {
-            ::error(ErrorType::ERR_EXPECTED,
-                    "%1%: Expected property to be an `extern` block", impl);
-            return;
-        }
-
-        auto block = table->getValue(expr);
-        if (block == nullptr || !block->is<IR::ExternBlock>()) {
-            ::error(ErrorType::ERR_EXPECTED,
-                    "%1%: Expected property to be an `extern` block", impl);
-            return;
-        }
-
-        TableKind tableKind;
-        auto extBlock = block->to<IR::ExternBlock>();
-        if (extBlock->type->name.name == program->model.array_table.name) {
-            tableKind = TableArray;
-        } else if (extBlock->type->name.name == program->model.hash_table.name) {
-            tableKind = TableHash;
-        } else {
-            ::error(ErrorType::ERR_EXPECTED,
-                    "%1%: implementation must be one of %2% or %3%",
-                    impl, program->model.array_table.name, program->model.hash_table.name);
-            return;
-        }
-
-        // If any key field is LPM we will generate an LPM table
-        for (auto it : keyGenerator->keyElements) {
-            auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
-            auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-            if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
-                if (tableKind == TableLPMTrie) {
-                    ::error(ErrorType::ERR_UNSUPPORTED,
-                            "%1%: only one LPM field allowed", it->matchType);
-                    return;
-                }
-                tableKind = TableLPMTrie;
+    if (isTernaryTable()) {
+        emitTernaryInstance(builder);
+    } else {
+        if (keyGenerator != nullptr) {
+            auto impl = table->container->properties->getProperty(
+                    program->model.tableImplProperty.name);
+            if (impl == nullptr) {
+                ::error(ErrorType::ERR_EXPECTED, "Table %1% does not have an %2% property",
+                        table->container, program->model.tableImplProperty.name);
+                return;
             }
-        }
 
-        auto sz = extBlock->getParameterValue(program->model.array_table.size.name);
-        if (sz == nullptr || !sz->is<IR::Constant>()) {
-            ::error(ErrorType::ERR_UNSUPPORTED,
-                    "%1%: Expected an integer argument; is the model corrupted?", expr);
-            return;
-        }
-        auto cst = sz->to<IR::Constant>();
-        if (!cst->fitsInt()) {
-            ::error(ErrorType::ERR_UNSUPPORTED, "%1%: size too large", cst);
-            return;
-        }
-        int size = cst->asInt();
-        if (size <= 0) {
-            ::error(ErrorType::ERR_INVALID, "%1%: negative size", cst);
-            return;
-        }
+            // Some type checking...
+            if (!impl->value->is<IR::ExpressionValue>()) {
+                ::error(ErrorType::ERR_EXPECTED,
+                        "%1%: Expected property to be an `extern` block", impl);
+                return;
+            }
 
-        cstring name = EBPFObject::externalName(table->container);
-        builder->target->emitTableDecl(builder, name, tableKind,
-                                       cstring("struct ") + keyTypeName,
-                                       cstring("struct ") + valueTypeName, size);
+            auto expr = impl->value->to<IR::ExpressionValue>()->expression;
+            if (!expr->is<IR::ConstructorCallExpression>()) {
+                ::error(ErrorType::ERR_EXPECTED,
+                        "%1%: Expected property to be an `extern` block", impl);
+                return;
+            }
+
+            auto block = table->getValue(expr);
+            if (block == nullptr || !block->is<IR::ExternBlock>()) {
+                ::error(ErrorType::ERR_EXPECTED,
+                        "%1%: Expected property to be an `extern` block", impl);
+                return;
+            }
+
+            TableKind tableKind;
+            auto extBlock = block->to<IR::ExternBlock>();
+            if (extBlock->type->name.name == program->model.array_table.name) {
+                tableKind = TableArray;
+            } else if (extBlock->type->name.name == program->model.hash_table.name) {
+                tableKind = TableHash;
+            } else {
+                ::error(ErrorType::ERR_EXPECTED,
+                        "%1%: implementation must be one of %2% or %3%",
+                        impl, program->model.array_table.name, program->model.hash_table.name);
+                return;
+            }
+
+            // If any key field is LPM we will generate an LPM table
+            for (auto it : keyGenerator->keyElements) {
+                auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
+                auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
+                if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
+                    if (tableKind == TableLPMTrie) {
+                        ::error(ErrorType::ERR_UNSUPPORTED,
+                                "%1%: only one LPM field allowed", it->matchType);
+                        return;
+                    }
+                    tableKind = TableLPMTrie;
+                }
+            }
+
+            auto sz = extBlock->getParameterValue(program->model.array_table.size.name);
+            if (sz == nullptr || !sz->is<IR::Constant>()) {
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "%1%: Expected an integer argument; is the model corrupted?", expr);
+                return;
+            }
+            auto cst = sz->to<IR::Constant>();
+            if (!cst->fitsInt()) {
+                ::error(ErrorType::ERR_UNSUPPORTED, "%1%: size too large", cst);
+                return;
+            }
+            int size = cst->asInt();
+            if (size <= 0) {
+                ::error(ErrorType::ERR_INVALID, "%1%: negative size", cst);
+                return;
+            }
+
+            cstring name = EBPFObject::externalName(table->container);
+            builder->target->emitTableDecl(builder, name, tableKind,
+                                           cstring("struct ") + keyTypeName,
+                                           cstring("struct ") + valueTypeName, size);
+        }
     }
     builder->target->emitTableDecl(builder, defaultActionMapName, TableArray,
                                    program->arrayIndexType,
@@ -661,6 +749,129 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
     builder->blockEnd(true);
 }
 
+void EBPFTable::emitLookup(CodeBuilder* builder, cstring key, cstring value) {
+    if (!isTernaryTable()) {
+        builder->target->emitTableLookup(builder, dataMapName, key, value);
+        builder->endOfStatement(true);
+        return;
+    }
+
+    // for ternary tables
+    builder->appendFormat("struct %s_mask head = {0};", keyTypeName);
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("struct %s_mask *", valueTypeName);
+    builder->target->emitTableLookup(builder, instanceName + "_prefixes", "head", "val");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->append("if (val && val->has_next != 0) ");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("struct %s_mask next = val->next_tuple_mask;", keyTypeName);
+    builder->newline();
+    builder->emitIndent();
+    builder->appendLine("#pragma clang loop unroll(disable)");
+    builder->emitIndent();
+    builder->appendFormat("for (int i = 0; i < MAX_%s_MASKS; i++) ", keyTypeName.toUpper());
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("struct %s_mask *", valueTypeName);
+    builder->target->emitTableLookup(builder, instanceName + "_prefixes", "next", "v");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->append("if (!v) ");
+    builder->blockStart();
+    builder->target->emitTraceMessage(builder,
+                                      "Control: No next element found!");
+    builder->emitIndent();
+    builder->appendLine("break;");
+    builder->blockEnd(true);
+    builder->emitIndent();
+    cstring new_key = "k";
+    builder->appendFormat("struct %s %s = {};", keyTypeName, new_key);
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("__u32 *chunk = ((__u32 *) &%s);", new_key);
+    builder->newline();
+    builder->emitIndent();
+    builder->appendLine("__u32 *mask = ((__u32 *) &next);");
+    builder->emitIndent();
+    builder->appendLine("#pragma clang loop unroll(disable)");
+    builder->emitIndent();
+    builder->appendFormat("for (int i = 0; i < sizeof(struct %s_mask) / 4; i++) ", keyTypeName);
+    builder->blockStart();
+    cstring str = Util::printf_format("*(((__u32 *) &%s) + i)", key);
+    builder->target->emitTraceMessage(builder,
+                                  "Control: [Ternary] Masking next 4 bytes of %llx with mask %llx",
+                                  2, str, "mask[i]");
+
+    builder->emitIndent();
+    builder->appendFormat("chunk[i] = ((__u32 *) &%s)[i] & mask[i];", key);
+    builder->newline();
+    builder->blockEnd(true);
+
+    builder->emitIndent();
+    builder->appendLine("__u32 tuple_id = v->tuple_id;");
+    builder->emitIndent();
+    builder->append("next = v->next_tuple_mask;");
+    builder->newline();
+    builder->emitIndent();
+    builder->append("struct bpf_elf_map *");
+    builder->target->emitTableLookup(builder, instanceName + "_tuples_map",
+                                     "tuple_id", "tuple");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->append("if (!tuple) ");
+    builder->blockStart();
+    builder->target->emitTraceMessage(builder,
+          Util::printf_format("Control: Tuples map %s not found during ternary lookup. Bug?",
+          instanceName));
+    builder->emitIndent();
+    builder->append("break;");
+    builder->newline();
+    builder->blockEnd(true);
+
+    builder->emitIndent();
+    builder->appendFormat("struct %s *tuple_entry = "
+                          "bpf_map_lookup_elem(%s, &%s)",
+                          valueTypeName, "tuple", new_key);
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->append("if (!tuple_entry) ");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->append("if (v->has_next == 0) ");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendLine("break;");
+    builder->blockEnd(true);
+    builder->emitIndent();
+    builder->append("continue;");
+    builder->newline();
+    builder->blockEnd(true);
+    builder->target->emitTraceMessage(builder,
+                                      "Control: Ternary match found, priority=%d.", 1,
+                                      "tuple_entry->priority");
+
+    builder->emitIndent();
+    builder->appendFormat("if (%s == NULL || tuple_entry->priority > %s->priority) ",
+                          value, value);
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("%s = tuple_entry;", value);
+    builder->newline();
+    builder->blockEnd(true);
+
+    builder->emitIndent();
+    builder->append("if (v->has_next == 0) ");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendLine("break;");
+    builder->blockEnd(true);
+    builder->blockEnd(true);
+    builder->blockEnd(true);
+}
+
 cstring EBPFTable::p4ActionToActionIDName(const IR::P4Action * action) const {
     if (action->name.originalName == P4::P4CoreLibrary::instance.noAction.name) {
         // NoAction always gets ID=0.
@@ -674,7 +885,7 @@ cstring EBPFTable::p4ActionToActionIDName(const IR::P4Action * action) const {
 
 // As ternary has precedence over lpm, this function checks if any
 // field is key field is lpm and none of key fields is of type ternary.
-bool EBPFTable::isLPMTable() {
+bool EBPFTable::isLPMTable() const {
     bool isLPM = false;
     if (keyGenerator != nullptr) {
         // If any key field is LPM we will generate an LPM table
@@ -682,7 +893,7 @@ bool EBPFTable::isLPMTable() {
             auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
             auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
             if (matchType->name.name == P4::P4CoreLibrary::instance.ternaryMatch.name) {
-                // if there is a ternary field, we are sure, it is not a LPM table.
+                // if there is a ternary field, we are sure, it is not an LPM table.
                 return false;
             } else if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
                 isLPM = true;
@@ -691,6 +902,21 @@ bool EBPFTable::isLPMTable() {
     }
 
     return isLPM;
+}
+
+bool EBPFTable::isTernaryTable() const {
+    if (keyGenerator != nullptr) {
+        // If any key field is a ternary field we will generate a ternary table
+        for (auto it : keyGenerator->keyElements) {
+            auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
+            auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
+            if (matchType->name.name == P4::P4CoreLibrary::instance.ternaryMatch.name) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 ////////////////////////////////////////////////////////////////

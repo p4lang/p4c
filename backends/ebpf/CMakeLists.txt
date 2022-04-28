@@ -136,10 +136,14 @@ set(EBPF_DRIVER_BCC "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t bcc -c \"${
 set(EBPF_DRIVER_TEST "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t test -c \"${P4C_BINARY_DIR}/p4c-ebpf\"")
 
 set (XFAIL_TESTS_KERNEL)
-set (XFAIL_TESTS_BCC)
+set (XFAIL_TESTS_BCC
+  # ternary not implemented for BCC
+  ${P4C_SOURCE_DIR}/testdata/p4_16_samples/ternary_ebpf.p4
+  )
 set (XFAIL_TESTS_TEST
-  # lpm not implemented for stf tests
+  # lpm and ternary not implemented for stf tests
   ${P4C_SOURCE_DIR}/testdata/p4_16_samples/lpm_ebpf.p4
+  ${P4C_SOURCE_DIR}/testdata/p4_16_samples/ternary_ebpf.p4
   )
 
 set (EBPF_TEST_SUITES
