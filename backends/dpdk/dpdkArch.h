@@ -667,7 +667,7 @@ class CollectExternDeclaration : public Inspector {
             } else if (externTypeName == "Counter") {
                 if (d->arguments->size() != 2) {
                     ::error(ErrorType::ERR_EXPECTED,
-                            "%1%: expected number of_counters and type of counter as arguments", d);
+                            "%1%: expected number of counters and type of counter as arguments", d);
                 }
             } else if (externTypeName == "Register") {
                 if (d->arguments->size() != 1 && d->arguments->size() != 2) {
