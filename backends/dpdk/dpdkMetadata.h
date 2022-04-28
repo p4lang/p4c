@@ -69,6 +69,9 @@ class DirectionToRegRead : public Transform {
     replaceDirectionWithRegRead(IR::IndexedVector<IR::DpdkAsmStatement> stmts);
 };
 
+// DPDK implements pass metadata using "recircid" instruction.
+// All occurrences of pass metadata usage should be prepended with recircid instruction to fetch
+// the latest pass_id from the target.
 class PrependPassRecircId : public Transform {
     IR::IndexedVector<IR::DpdkAsmStatement> newStmts;
 

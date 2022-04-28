@@ -150,6 +150,7 @@ DirectionToRegRead::replaceDirectionWithRegRead(IR::IndexedVector<IR::DpdkAsmSta
 IR::IndexedVector<IR::StructField> AddNewMetadataFields::newMetadataFields = {};
 
 // check member expression using metadata pass field
+// "recircid" instruction takes the pass metadata type as argument to fetch the pass_id.
 bool PrependPassRecircId::isPass(const IR::Member *m) {
     if (m == nullptr)
         return false;
