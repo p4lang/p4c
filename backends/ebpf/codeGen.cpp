@@ -197,8 +197,10 @@ bool CodeGenInspector::preorder(const IR::Cast* c) {
 bool CodeGenInspector::preorder(const IR::Member* expression) {
     bool isErrorAccess = false;
     if (auto tne = expression->expr->to<IR::TypeNameExpression>()) {
-        if (tne->typeName->path->name.name == IR::Type_Error::error)
-            isErrorAccess = true;
+        if (auto tn = tne->typeName->to<IR::Type_Name>()) {
+            if (tn->path->name.name == IR::Type_Error::error)
+                isErrorAccess = true;
+        }
     }
 
     int prec = expressionPrecedence;

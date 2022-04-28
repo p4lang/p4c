@@ -80,13 +80,14 @@ int main(int argc, char *const argv[]) {
     } else {
         std::filebuf fb;
         if (fb.open(options.file, std::ios::in) == nullptr) {
-            ::error("%s: No such file or directory.", options.file);
+            ::error(ErrorType::ERR_NOT_FOUND,
+                    "%s: No such file or directory.", options.file);
             return 1;
         }
         std::istream inJson(&fb);
         JSONLoader jsonFileLoader(inJson);
         if (jsonFileLoader.json == nullptr) {
-            ::error("Not valid input file");
+            ::error(ErrorType::ERR_INVALID, "Not valid input file");
             return 1;
         }
         program = new IR::P4Program(jsonFileLoader);
@@ -109,7 +110,8 @@ int main(int argc, char *const argv[]) {
         auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info);
         std::ostream* out = openFile(options.bfRtSchema, false);
         if (!out) {
-            ::error("Could not open BF-RT schema file: %1%", options.bfRtSchema);
+            ::error(ErrorType::ERR_IO,
+                    "Could not open BF-RT schema file: %1%", options.bfRtSchema);
             return 1;
         }
         p4rt->serializeBFRuntimeSchema(out);
