@@ -195,17 +195,26 @@ add_cxx_compiler_option ("-Wno-deprecated")
 add_cxx_compiler_option ("-Wno-deprecated-declarations")
 # add_cxx_compiler_option ("-fsanitize=null")
 
-# If we're on GCC, use the gold linker if available.
+# If we're on GCC, use the LLD (preferred) or gold linker if available.
 if(CMAKE_COMPILER_IS_GNUCC)
     execute_process(
-            COMMAND ${CMAKE_C_COMPILER} -fuse-ld=gold -Wl,--version
+            COMMAND ${CMAKE_C_COMPILER} -fuse-ld=lld -Wl,--version
             ERROR_QUIET OUTPUT_VARIABLE LD_VERSION)
-    if ("${LD_VERSION}" MATCHES "GNU gold")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fuse-ld=gold")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fuse-ld=gold")
-        message(STATUS "Using the GNU gold linker.")
+    if ("${LD_VERSION}" MATCHES "LLD.*compatible with GNU linkers")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fuse-ld=lld")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fuse-ld=lld")
+        message(STATUS "Using the LLVM LDD linker.")
     else ()
-        message(STATUS "Using the default system linker.")
+        execute_process(
+                COMMAND ${CMAKE_C_COMPILER} -fuse-ld=gold -Wl,--version
+                ERROR_QUIET OUTPUT_VARIABLE LD_VERSION)
+        if ("${LD_VERSION}" MATCHES "GNU gold")
+            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fuse-ld=gold")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fuse-ld=gold")
+            message(STATUS "Using the GNU gold linker.")
+        else ()
+            message(STATUS "Using the default system linker.")
+        endif ()
     endif ()
     unset(LD_VERSION)
 endif ()
