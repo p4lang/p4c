@@ -200,6 +200,9 @@ class P4EbpfTest(BaseTest):
         self.exec_ns_cmd("psabpf-ctl multicast-group delete pipe {} id {}".format(TEST_PIPELINE_ID, group))
 
     def _table_create_str_from_data(self, data, counters, meters):
+        """ Creates string from action data, direct counters and direct meters
+            which can be passed to the psabpf-cli as an argument.
+        """
         s = ""
         if data or counters or meters:
             s = "data "
@@ -224,6 +227,8 @@ class P4EbpfTest(BaseTest):
         return s
 
     def _table_create_str_from_key(self, keys):
+        """ Creates string from keys which can be passed to the psabpf-cli as an argument.
+        """
         s = "key none "
         if keys:
             s = "key "
@@ -234,7 +239,7 @@ class P4EbpfTest(BaseTest):
     def table_write(self, method, table, keys, action=0, data=None, priority=None, references=None,
                     counters=None, meters=None):
         """
-        Use table_add or table_update instead of this method
+        Use table_add or table_update instead of this method.
         """
         cmd = "psabpf-ctl table {} pipe {} {} ".format(method, TEST_PIPELINE_ID, table)
         if references:
@@ -250,36 +255,60 @@ class P4EbpfTest(BaseTest):
 
     def table_add(self, table, keys, action=0, data=None, priority=None, references=None,
                   counters=None, meters=None):
+        """ Adds a new entry to a table.
+            :param table: Table name.
+            :param keys: List of keys, each key must be convertible to string.
+            :param action: Action ID in the dataplane.
+            :param data: List of action parameters.
+            :param priority: Priority of the new entry.
+            :param references: List of references for indirect table (parameter data is ignored then).
+            :param counters: Dictionary of counter's names (key) and dictionary of counter value (value).
+                Inner dictionary can have two entries: "bytes", "packets"
+            :param meters: Dictionary of meter's names (key) and dictionary of meter value (value).
+                Inner dictionary must have four entries: "pir", "pbs", "cir", "cbs"
+        """
         self.table_write(method="add", table=table, keys=keys, action=action, data=data,
                          priority=priority, references=references, counters=counters, meters=meters)
 
     def table_update(self, table, keys, action=0, data=None, priority=None, references=None,
                      counters=None, meters=None):
+        """ See documentation for table_add. This method updates existing entry instead of new one.
+        """
         self.table_write(method="update", table=table, keys=keys, action=action, data=data,
                          priority=priority, references=references, counters=counters, meters=meters)
 
     def table_delete(self, table, keys=None):
+        """ Deletes existing table entry
+        """
         cmd = "psabpf-ctl table delete pipe {} {} ".format(TEST_PIPELINE_ID, table)
         if keys:
             cmd = cmd + self._table_create_str_from_key(keys)
         self.exec_ns_cmd(cmd, "Table delete failed")
 
     def table_set_default(self, table, action=0, data=None, counters=None, meters=None):
+        """ Sets default action for table. For parameters documentation see `table_add` method.
+        """
         cmd = "psabpf-ctl table default set pipe {} {} id {} ".format(TEST_PIPELINE_ID, table, action)
         cmd = cmd + self._table_create_str_from_data(data=data, counters=counters, meters=meters)
         self.exec_ns_cmd(cmd, "Table set default entry failed")
 
     def table_get(self, table, keys, indirect=False):
+        """ Returns JSON containing parsed table entry - action data, meters, counters.
+            If table has an implementation, set param `indirect` to True.
+        """
         cmd = "psabpf-ctl table get pipe {} {} ".format(TEST_PIPELINE_ID, table)
         if indirect:
             # TODO: cmd = cmd + "ref "
-            self.fail("support for indirect table not supported yet")
+            self.fail("support for indirect table is not implemented yet")
         cmd = cmd + self._table_create_str_from_key(keys=keys)
         _, stdout, _ = self.exec_ns_cmd(cmd, "Table get entry failed")
         return json.loads(stdout)[table]
 
     def table_verify(self, table, keys, action=0, priority=None, data=None, references=None,
                      counters=None, meters=None):
+        """ Verify that values in table entry fields are equal to provided arguments. For parameters
+            documentation see `table_add` method. Field not referenced by any argument will not be tested.
+        """
         json_data = self.table_get(table=table, keys=keys, indirect=references)
         entries = json_data["entries"]
         if len(entries) != 1:
@@ -342,6 +371,8 @@ class P4EbpfTest(BaseTest):
         return json.loads(stdout)['Counter'][name]
 
     def _do_counter_verify(self, bytes, packets, entry_value, counter_type):
+        """ Verify counter value and type. Use `counter_verify` or `table_verify` instead.
+        """
         expected_type = ""
         if packets is not None:
             expected_type = "PACKETS"
