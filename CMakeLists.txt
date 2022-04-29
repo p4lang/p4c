@@ -237,6 +237,18 @@ if(CMAKE_COMPILER_IS_GNUCC)
     unset(LD_VERSION)
 endif ()
 
+set(BUILD_USE_COLOR OFF CACHE BOOL "Use color in C++ compiler output (even if "
+    "the compiler does not detect terminal, e.g. when using ccache/distcc)")
+if (BUILD_USE_COLOR)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-color=always")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
+    else()
+        message(WARNING "Colors enabled (BUILD_USE_COLOR=ON) but we don't know "
+                "how to enable them for ${CMAKE_CXX_COMPILER_ID} C++ compiler")
+    endif()
+endif()
+
 include_directories (
   ${P4C_SOURCE_DIR}/frontends
   ${P4C_SOURCE_DIR}/backends
