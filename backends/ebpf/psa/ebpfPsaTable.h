@@ -27,14 +27,6 @@ namespace EBPF {
 class EBPFTableImplementationPSA;
 
 class EBPFTablePSA : public EBPFTable {
- private:
-    void emitTableDecl(CodeBuilder *builder,
-                       cstring tblName,
-                       TableKind kind,
-                       cstring keyTypeName,
-                       cstring valueTypeName,
-                       size_t size) const;
-
  protected:
     ActionTranslationVisitor* createActionTranslationVisitor(
             cstring valueName, const EBPFProgram* program) const override;
@@ -69,7 +61,6 @@ class EBPFTablePSA : public EBPFTable {
     void emitAction(CodeBuilder* builder, cstring valueName, cstring actionRunVariable) override;
     void emitInitializer(CodeBuilder* builder) override;
     void emitDirectValueTypes(CodeBuilder* builder) override;
-    void emitLookup(CodeBuilder* builder, cstring key, cstring value) override;
     void emitLookupDefault(CodeBuilder* builder, cstring key, cstring value,
                            cstring actionRunVariable) override;
     bool dropOnNoMatchingEntryFound() const override;

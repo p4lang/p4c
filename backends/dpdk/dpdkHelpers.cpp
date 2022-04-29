@@ -734,13 +734,13 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 add_instr(new IR::DpdkRegisterWriteStatement(reg, index, src));
             }
         } else {
-            ::error("%1%: Unknown extern function.", s);
+            ::error(ErrorType::ERR_UNKNOWN, "%1%: Unknown extern function.", s);
         }
     } else if (auto a = mi->to<P4::ExternFunction>()) {
         LOG3("extern function: " << dbp(s) << std::endl << s);
         if (a->method->name == "verify") {
             if (parser == nullptr)
-                ::error("%1%: verify must be used in parser", s);
+                ::error(ErrorType::ERR_INVALID, "%1%: verify must be used in parser", s);
             auto args = a->expr->arguments;
             auto condition = args->at(0);
             auto error_id = args->at(1);
@@ -786,7 +786,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 add_instr(new IR::DpdkMovStatement(learnMember, param));
                 add_instr(new IR::DpdkLearnStatement(action_name, learnMember));
             } else {
-                ::error("%1%: unhandled function", s);
+                ::error(ErrorType::ERR_UNEXPECTED, "%1%: unhandled function", s);
             }
         } else if (a->method->name == "mirror_packet") {
             auto args = a->expr->arguments;
@@ -804,7 +804,8 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                       "Expected a constant for session_id param of %1%", a->method->name);
             unsigned value =  session_id->to<IR::Constant>()->asUnsigned();
             if (value == 0) {
-                ::error("Mirror session ID 0 is reserved for use by Architecture");
+                ::error(ErrorType::ERR_INVALID,
+                        "Mirror session ID 0 is reserved for use by Architecture");
                 return false;
             }
 
@@ -831,7 +832,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         } else if (a->method->name == "drop_packet") {
             add_instr(new IR::DpdkDropStatement());
         } else {
-            ::error("%1%: Unknown extern function", s);
+            ::error(ErrorType::ERR_UNKNOWN, "%1%: Unknown extern function", s);
         }
     } else if (auto a = mi->to<P4::BuiltInMethod>()) {
         LOG3("builtin method: " << dbp(s) << std::endl << s);

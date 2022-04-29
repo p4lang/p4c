@@ -937,13 +937,13 @@ class FindRecirculated : public Inspector {
         }
         auto expression = primitive->operands.at(operand);
         if (!expression->is<IR::PathExpression>()) {
-            ::error("%1%: expected a field list", expression);
+            ::error(ErrorType::ERR_EXPECTED, "%1%: expected a field list", expression);
             return;
         }
         auto nr = expression->to<IR::PathExpression>();
         auto fl = structure->field_lists.get(nr->path->name);
         if (fl == nullptr) {
-            ::error("%1%: Expected a field list", expression);
+            ::error(ErrorType::ERR_EXPECTED, "%1%: Expected a field list", expression);
             return;
         }
         LOG3("Recirculated " << nr->path->name);

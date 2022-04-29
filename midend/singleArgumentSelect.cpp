@@ -66,7 +66,8 @@ void DoSingleArgumentSelect::checkExpressionType(const IR::Expression* expressio
             checkExpressionType(c);
         }
     } else {
-        ::error("%1%: expression type %2% not supported in select expression",
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "%1%: expression type %2% not supported in select expression",
                 expression, type);
     }
 }

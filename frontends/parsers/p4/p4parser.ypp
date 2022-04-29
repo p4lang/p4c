@@ -1180,6 +1180,11 @@ directApplication
                                       @1 + @3, new IR::TypeNameExpression($1), IR::ID(@3, "apply"));
                                   auto mce = new IR::MethodCallExpression(@1 + @6, method, $5);
                                   $$ = new IR::MethodCallStatement(@1 + @6, mce); }
+    | specializedType "." APPLY "(" argumentList ")" ";" {
+                                  auto method = new IR::Member(
+                                      @1 + @3, new IR::TypeNameExpression($1), IR::ID(@3, "apply"));
+                                  auto mce = new IR::MethodCallExpression(@1 + @6, method, $5);
+                                  $$ = new IR::MethodCallStatement(@1 + @6, mce); }
     ;
 
 statement

@@ -26,6 +26,14 @@ EbpfOptions::EbpfOptions() {
         registerOption("--trace", nullptr,
                 [this](const char*) { emitTraceMessages = true; return true; },
                 "Generate tracing messages of packet processing");
+        registerOption("--max-ternary-masks", "MAX_TERNARY_MASKS",
+                [this](const char *arg) {
+                   unsigned int parsed_val = std::strtoul(arg, nullptr, 0);
+                   if (parsed_val >= 2)
+                       this->maxTernaryMasks = parsed_val;
+                   return true;
+                }, "Set number of maximum possible masks for a ternary key"
+                  " in a single table");
         registerOption("--xdp2tc", "MODE",
                 [this](const char* arg) {
                    if (!strcmp(arg, "meta")) {

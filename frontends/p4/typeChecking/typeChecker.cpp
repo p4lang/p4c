@@ -3297,10 +3297,13 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         // Constant-fold constant expressions
         if (auto mem = expression->method->to<IR::Member>()) {
             auto type = typeMap->getType(mem->expr, true);
-            if ((mem->member == IR::Type::minSizeInBits ||
+            if (((mem->member == IR::Type::minSizeInBits ||
                  mem->member == IR::Type::minSizeInBytes ||
                  mem->member == IR::Type::maxSizeInBits ||
-                 mem->member == IR::Type::maxSizeInBytes)) {
+                 mem->member == IR::Type::maxSizeInBytes)) &&
+                !type->is<IR::Type_Extern>() &&
+                expression->typeArguments->size() == 0 &&
+                expression->arguments->size() == 0) {
                 auto max = mem->member.name.startsWith("max");
                 int w = typeMap->widthBits(type, expression, max);
                 LOG3("Folding " << mem << " to " << w);

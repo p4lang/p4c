@@ -39,6 +39,8 @@ class EbpfOptions : public CompilerOptions {
     bool emitTraceMessages = false;
     // XDP2TC mode for PSA-eBPF
     enum XDP2TC xdp2tcMode = XDP2TC_NONE;
+    // maximum number of unique ternary masks
+    unsigned int maxTernaryMasks = 128;
 
     EbpfOptions();
 

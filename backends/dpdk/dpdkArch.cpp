@@ -490,7 +490,8 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
                     field_name_list.emplace(field->name, obj);
                 } else {
                     if (size_sum_so_far != 0) {
-                        ::error("Header Structure '%1%' has non-contiguous non-aligned fields"
+                        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                                "Header Structure '%1%' has non-contiguous non-aligned fields"
                                 " which cannot be combined to align to 8-bit. DPDK does not"
                                 " support non 8-bit aligned header field",st->name.name);
                         return st;
@@ -558,7 +559,8 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
                         field_name_list.clear();
                     }
                 } else {
-                    ::error("Combining the contiguos non 8-bit aligned fields result in a field"
+                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                            "Combining the contiguos non 8-bit aligned fields result in a field"
                             " with bit-width '%1%' > 64-bit in header structure '%2%'. DPDK does"
                             " not support non 8-bit aligned and greater than 64-bit header field"
                             ,size_sum_so_far, st->name.name);
@@ -570,7 +572,8 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
         }
         /* Throw error if there is non-aligned field present at the end in header */
         if (size_sum_so_far != 0) {
-            ::error("8-bit Alignment for Header Structure '%1%' is not possible as no more header"
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "8-bit Alignment for Header Structure '%1%' is not possible as no more header"
                     " fields available in header to combine. DPDK does not support non-aligned"
                     " header fields.", st->name.name);
             return st;
@@ -642,7 +645,8 @@ const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
             auto t = (*field).type->to<IR::Type_Bits>();
             auto width = t->width_bits();
             if (width > dpdk_max_field_width) {
-            ::error("Unsupported bit width '%1%' for field '%2%'. DPDK "
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Unsupported bit width '%1%' for field '%2%'. DPDK "
                      "does not support metadata/header field with width more than "
                      "'%3%' bits", width, field, dpdk_max_field_width);
             }
@@ -1785,7 +1789,8 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
         return tbl;
 
     if (instance->arguments->size() != 3) {
-        ::error("Incorrect number of argument on action selector %1%", *instance->name);
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "Incorrect number of argument on action selector %1%", *instance->name);
         return tbl;
     }
 
@@ -1901,7 +1906,8 @@ const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
         return tbl;
 
     if (instance->arguments->size() != 1) {
-        ::error("Incorrect number of argument on action profile %1%", *instance->name);
+        ::error(ErrorType::ERR_MODEL,
+                "Incorrect number of argument on action profile %1%", *instance->name);
         return tbl;
     }
 
@@ -1999,14 +2005,16 @@ const IR::Node* SplitP4TableCommon::postorder(IR::MethodCallStatement *statement
 
         if (implementation == TableImplementation::ACTION_SELECTOR) {
             if (group_tables.count(tableName) == 0) {
-                ::error("Unable to find group table %1%", tableName);
+                ::error(ErrorType::ERR_NOT_FOUND,
+                        "Unable to find group table %1%", tableName);
                 return statement;
             }
             auto selectorTable = group_tables.at(tableName);
             decls->push_back(gen_apply(selectorTable));
         }
         if (member_tables.count(tableName) == 0) {
-            ::error("Unable to find member table %1%", tableName);
+            ::error(ErrorType::ERR_NOT_FOUND,
+                    "Unable to find member table %1%", tableName);
             return statement;
         }
 
@@ -2170,7 +2178,8 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
 
         if (implementation == TableImplementation::ACTION_SELECTOR) {
             if (group_tables.count(tableName) == 0) {
-                ::error("Unable to find group table %1%", tableName);
+                ::error(ErrorType::ERR_NOT_FOUND,
+                        "Unable to find group table %1%", tableName);
                 return statement; }
             auto selectorTable = group_tables.at(tableName);
             auto t1stat = gen_apply(selectorTable);
@@ -2178,7 +2187,8 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
         }
 
         if (member_tables.count(tableName) == 0) {
-            ::error("Unable to find member table %1%", tableName);
+            ::error(ErrorType::ERR_NOT_FOUND,
+                    "Unable to find member table %1%", tableName);
             return statement; }
         auto memberTable = member_tables.at(tableName);
         auto t2stat = gen_action_run(memberTable);

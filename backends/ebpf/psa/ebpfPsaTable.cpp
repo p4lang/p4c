@@ -293,8 +293,11 @@ ActionTranslationVisitor* EBPFTablePSA::createActionTranslationVisitor(
 
 void EBPFTablePSA::emitValueStructStructure(CodeBuilder* builder) {
     if (implementation != nullptr) {
-        // TODO: add priority for ternary table
-
+        if (isTernaryTable()) {
+            builder->emitIndent();
+            builder->append("__u32 priority;");
+            builder->newline();
+        }
         implementation->emitReferenceEntry(builder);
     } else {
         EBPFTable::emitValueStructStructure(builder);
@@ -302,39 +305,20 @@ void EBPFTablePSA::emitValueStructStructure(CodeBuilder* builder) {
 }
 
 void EBPFTablePSA::emitInstance(CodeBuilder *builder) {
-    if (keyGenerator != nullptr) {
+    if (isTernaryTable()) {
+        emitTernaryInstance(builder);
+    } else {
         TableKind kind = isLPMTable() ? TableLPMTrie : TableHash;
-        emitTableDecl(builder, instanceName, kind,
+        builder->target->emitTableDecl(builder, instanceName, kind,
                       cstring("struct ") + keyTypeName,
                       cstring("struct ") + valueTypeName, size);
     }
 
     if (implementation == nullptr) {
         // Default action is up to implementation, define it when no implementation provided
-        emitTableDecl(builder, defaultActionMapName, TableArray,
+        builder->target->emitTableDecl(builder, defaultActionMapName, TableArray,
                       program->arrayIndexType,
                       cstring("struct ") + valueTypeName, 1);
-    }
-}
-
-void EBPFTablePSA::emitTableDecl(CodeBuilder *builder,
-                                 cstring tblName,
-                                 TableKind kind,
-                                 cstring keyTypeName,
-                                 cstring valueTypeName,
-                                 size_t size) const {
-    if (meters.empty()) {
-        builder->target->emitTableDecl(builder,
-                                       tblName, kind,
-                                       keyTypeName,
-                                       valueTypeName,
-                                       size);
-    } else {
-        builder->target->emitTableDeclSpinlock(builder,
-                                               tblName, kind,
-                                               keyTypeName,
-                                               valueTypeName,
-                                               size);
     }
 }
 
@@ -555,11 +539,6 @@ void EBPFTablePSA::emitTableValue(CodeBuilder* builder, const IR::MethodCallExpr
     builder->append("}},\n");
     builder->blockEnd(false);
     builder->endOfStatement(true);
-}
-
-void EBPFTablePSA::emitLookup(CodeBuilder* builder, cstring key, cstring value) {
-    // TODO: placeholder for handling ternary table caching
-    EBPFTable::emitLookup(builder, key, value);
 }
 
 void EBPFTablePSA::emitLookupDefault(CodeBuilder* builder, cstring key, cstring value,

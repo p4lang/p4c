@@ -82,9 +82,9 @@ bool SameExpression::sameExpression(const IR::Expression* left, const IR::Expres
         auto rd = refMap->getDeclaration(right->to<IR::PathExpression>()->path, true);
         return ld == rd;
     } else if (left->is<IR::TypeNameExpression>()) {
-        auto ld = refMap->getDeclaration(left->to<IR::TypeNameExpression>()->typeName->path, true);
-        auto rd = refMap->getDeclaration(right->to<IR::TypeNameExpression>()->typeName->path, true);
-        return ld == rd;
+        auto lt = left->to<IR::TypeNameExpression>()->typeName;
+        auto rt = right->to<IR::TypeNameExpression>()->typeName;
+        return sameType(lt, rt);
     } else if (left->is<IR::ListExpression>()) {
         auto ll = left->to<IR::ListExpression>();
         auto rl = right->to<IR::ListExpression>();

@@ -15,7 +15,8 @@ void ParseDpdkArchitecture::parse_pna_block(const IR::PackageBlock *block) {
     structure->p4arch = "pna";
     auto p = block->findParameterValue("main_parser");
     if (p == nullptr) {
-        ::error("Package %1% has no parameter named 'main_parser'", block);
+        ::error(ErrorType::ERR_MODEL,
+                "Package %1% has no parameter named 'main_parser'", block);
         return;
     }
     auto parser = p->to<IR::ParserBlock>();
@@ -37,20 +38,23 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
     structure->p4arch = "psa";
     auto pkg = block->findParameterValue("ingress");
     if (pkg == nullptr) {
-        ::error("Package %1% has no parameter named 'ingress'", block);
+        ::error(ErrorType::ERR_MODEL,
+                "Package %1% has no parameter named 'ingress'", block);
         return;
     }
     if (auto ingress = pkg->to<IR::PackageBlock>()) {
         auto p = ingress->findParameterValue("ip");
         if (!p) {
-            ::error("'ingress' package %1% has no parameter named 'ip'", block);
+            ::error(ErrorType::ERR_MODEL,
+                    "'ingress' package %1% has no parameter named 'ip'", block);
             return;
         }
         auto parser = p->to<IR::ParserBlock>();
         structure->parsers.emplace("IngressParser", parser->container);
         p = ingress->findParameterValue("ig");
         if (!p) {
-            ::error("'ingress' package %1% has no parameter named 'ig'", block);
+            ::error(ErrorType::ERR_MODEL,
+                    "'ingress' package %1% has no parameter named 'ig'", block);
             return;
         }
         auto pipeline = p->to<IR::ControlBlock>();
@@ -58,7 +62,8 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         structure->pipeline_controls.emplace(pipeline->container->name);
         p = ingress->findParameterValue("id");
         if (!p) {
-            ::error("'ingress' package %1% has no parameter named 'id'", block);
+            ::error(ErrorType::ERR_MODEL,
+                    "'ingress' package %1% has no parameter named 'id'", block);
             return;
         }
         auto deparser = p->to<IR::ControlBlock>();
@@ -69,14 +74,16 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
     if (auto egress = pkg->to<IR::PackageBlock>()) {
         auto p = egress->findParameterValue("ep");
         if (!p) {
-            ::error("'egress' package %1% has no parameter named 'ep'", block);
+            ::error(ErrorType::ERR_MODEL,
+                    "'egress' package %1% has no parameter named 'ep'", block);
             return;
         }
         auto parser = p->to<IR::ParserBlock>();
         structure->parsers.emplace("EgressParser", parser->container);
         p = egress->findParameterValue("eg");
         if (!p) {
-            ::error("'egress' package %1% has no parameter named 'eg'", block);
+            ::error(ErrorType::ERR_MODEL,
+                    "'egress' package %1% has no parameter named 'eg'", block);
             return;
         }
         auto pipeline = p->to<IR::ControlBlock>();
@@ -84,7 +91,8 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         structure->pipeline_controls.emplace(pipeline->container->name);
         p = egress->findParameterValue("ed");
         if (!p) {
-            ::error("'egress' package %1% has no parameter named 'ed'", block);
+            ::error(ErrorType::ERR_MODEL,
+                    "'egress' package %1% has no parameter named 'ed'", block);
             return;
         }
         auto deparser = p->to<IR::ControlBlock>();
@@ -102,7 +110,8 @@ bool ParseDpdkArchitecture::preorder(const IR::PackageBlock* block) {
         block->instanceType->to<IR::Type_Package>()->name == "PNA_NIC") {
         parse_pna_block(block);
     } else {
-        ::error("Unknown architecture %1%", options.arch);
+        ::error(ErrorType::ERR_MODEL,
+                "Unknown architecture %1%", options.arch);
     }
     return false;
 }

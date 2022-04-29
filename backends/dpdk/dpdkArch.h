@@ -655,7 +655,8 @@ class CollectExternDeclaration : public Inspector {
             auto externTypeName = type->baseType->path->name.name;
             if (externTypeName == "Meter") {
                 if (d->arguments->size() != 2) {
-                    ::error("%1%: expected number of meters and type of meter as arguments", d);
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "%1%: expected number of meters and type of meter as arguments", d);
                 } else {
                     /* Check if the meter is of PACKETS (0) type */
                     if (d->arguments->at(1)->expression->to<IR::Constant>()->asUnsigned() == 0)
@@ -665,11 +666,13 @@ class CollectExternDeclaration : public Inspector {
                 }
             } else if (externTypeName == "Counter") {
                 if (d->arguments->size() != 2) {
-                    ::error("%1%: expected number of_counters and type of counter as arguments", d);
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "%1%: expected number of counters and type of counter as arguments", d);
                 }
             } else if (externTypeName == "Register") {
                 if (d->arguments->size() != 1 && d->arguments->size() != 2) {
-                    ::error("%1%: expected size and optionally init_val as arguments", d);
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "%1%: expected size and optionally init_val as arguments", d);
                 }
             } else {
                 // unsupported extern type

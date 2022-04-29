@@ -77,7 +77,8 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
         const auto& pre = externInstance.preamble();
         p4configv1::ActionProfile actionProfile;
         if (!externInstance.info().UnpackTo(&actionProfile)) {
-            ::error("Extern instance %1% does not pack an ActionProfile object", pre.name());
+            ::error(ErrorType::ERR_NOT_FOUND,
+                    "Extern instance %1% does not pack an ActionProfile object", pre.name());
             return boost::none;
         }
         auto tableIds = collectTableIds(
