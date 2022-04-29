@@ -52,6 +52,7 @@ apply {
 	mov m.MainControlT_tmp_0 m.MainControlT_tmp
 	jmpgt LABEL_END m.MainControlT_tmp_0 0x4
 	add h.udp.src_port 0x1
+	recirculate
 	LABEL_END :	emit h.ethernet
 	emit h.ipv4
 	emit h.udp

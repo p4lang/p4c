@@ -46,6 +46,7 @@ struct headers_t {
 control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_input_metadata_t istd, inout pna_pre_output_metadata_t ostd) {
     @hidden action pnaexamplepass3l75() {
         meta.port = hdr.udp.src_port;
+        recirculate();
     }
     @hidden table tbl_pnaexamplepass3l75 {
         actions = {
@@ -76,36 +77,37 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @hidden action pnaexamplepass3l111() {
+    @hidden action pnaexamplepass3l112() {
         hdr.udp.src_port = hdr.udp.src_port + 16w1;
+        recirculate();
     }
-    @hidden table tbl_pnaexamplepass3l111 {
+    @hidden table tbl_pnaexamplepass3l112 {
         actions = {
-            pnaexamplepass3l111();
+            pnaexamplepass3l112();
         }
-        const default_action = pnaexamplepass3l111();
+        const default_action = pnaexamplepass3l112();
     }
     apply {
         if ((bit<8>)(PassNumberUint_t)istd.pass <= 8w0x4) {
-            tbl_pnaexamplepass3l111.apply();
+            tbl_pnaexamplepass3l112.apply();
         }
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexamplepass3l123() {
+    @hidden action pnaexamplepass3l125() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
         pkt.emit<udp_t>(hdr.udp);
     }
-    @hidden table tbl_pnaexamplepass3l123 {
+    @hidden table tbl_pnaexamplepass3l125 {
         actions = {
-            pnaexamplepass3l123();
+            pnaexamplepass3l125();
         }
-        const default_action = pnaexamplepass3l123();
+        const default_action = pnaexamplepass3l125();
     }
     apply {
-        tbl_pnaexamplepass3l123.apply();
+        tbl_pnaexamplepass3l125.apply();
     }
 }
 

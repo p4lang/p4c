@@ -69,6 +69,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     apply {
         if ((bit<8>)(PassNumberUint_t)istd.pass <= 8w0x4) {
             hdr.udp.src_port = hdr.udp.src_port + 16w1;
+            recirculate();
         }
     }
 }

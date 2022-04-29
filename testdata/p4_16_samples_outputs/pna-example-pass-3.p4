@@ -47,6 +47,7 @@ control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_
     apply {
         if (istd.pass != (PassNumber_t)1) {
             meta.port = hdr.udp.src_port;
+            recirculate();
         }
     }
 }
@@ -73,6 +74,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     apply {
         if ((bit<8>)(PassNumberUint_t)istd.pass <= 8w0x4) {
             hdr.udp.src_port = hdr.udp.src_port + 1;
+            recirculate();
         }
     }
 }

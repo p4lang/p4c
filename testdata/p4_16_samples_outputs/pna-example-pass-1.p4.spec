@@ -48,6 +48,7 @@ apply {
 	MAINPARSERIMPL_ACCEPT :	recircid m.pna_main_input_metadata_pass
 	jmpneq LABEL_END m.pna_main_input_metadata_pass 0x4
 	add h.udp.src_port 0x1
+	recirculate
 	LABEL_END :	emit h.ethernet
 	emit h.ipv4
 	emit h.udp

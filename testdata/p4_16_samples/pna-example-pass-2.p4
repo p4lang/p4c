@@ -104,6 +104,8 @@ control MainControlImpl(
     action next_hop(in PassNumber_t pass, PortId_t vport) {
         if (pass == (PassNumber_t)1)
             send_to_port(vport);
+        else
+            recirculate();
     }
     action default_route_drop() {
         drop_packet();

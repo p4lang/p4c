@@ -105,6 +105,7 @@ control MainControlImpl(
     apply {
     if (istd.pass == (PassNumber_t)4) {
             hdr.udp.src_port = hdr.udp.src_port + 1;
+            recirculate();
         }
     }
 }

@@ -40,8 +40,10 @@ regarray network_port_mask size 0x1 initval 0
 
 action next_hop args instanceof next_hop_arg_t {
 	recircid m.pna_main_input_metadata_pass
-	jmpneq LABEL_END_2 m.pna_main_input_metadata_pass 0x1
+	jmpneq LABEL_FALSE_1 m.pna_main_input_metadata_pass 0x1
 	mov m.pna_main_output_metadata_output_port t.vport
+	jmp LABEL_END_2
+	LABEL_FALSE_1 :	recirculate
 	LABEL_END_2 :	return
 }
 

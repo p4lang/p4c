@@ -73,6 +73,7 @@ control PreControlImpl(
     apply {
        if (istd.pass != (PassNumber_t)1) {
             meta.port = hdr.udp.src_port;
+            recirculate();
         }
     }
 }
@@ -109,6 +110,7 @@ control MainControlImpl(
     apply {
       if ((bit <8>)(PassNumberUint_t)istd.pass <= 8w0x4) {
             hdr.udp.src_port = hdr.udp.src_port + 1;
+            recirculate();
         }
     }
 }

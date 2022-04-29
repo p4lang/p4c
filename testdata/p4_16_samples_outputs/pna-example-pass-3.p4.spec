@@ -52,11 +52,13 @@ apply {
 	MAINPARSERIMPL_ACCEPT :	recircid m.pna_pre_input_metadata_pass
 	jmpeq LABEL_END m.pna_pre_input_metadata_pass 0x1
 	mov m.local_metadata_port h.udp.src_port
+	recirculate
 	LABEL_END :	recircid m.pna_main_input_metadata_pass
 	mov m.MainControlT_tmp m.pna_main_input_metadata_pass
 	mov m.MainControlT_tmp_0 m.MainControlT_tmp
 	jmpgt LABEL_END_0 m.MainControlT_tmp_0 0x4
 	add h.udp.src_port 0x1
+	recirculate
 	LABEL_END_0 :	emit h.ethernet
 	emit h.ipv4
 	emit h.udp

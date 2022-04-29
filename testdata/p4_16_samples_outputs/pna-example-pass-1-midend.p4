@@ -65,6 +65,7 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     @hidden action pnaexamplepass1l107() {
         hdr.udp.src_port = hdr.udp.src_port + 16w1;
+        recirculate();
     }
     @hidden table tbl_pnaexamplepass1l107 {
         actions = {
@@ -80,19 +81,19 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexamplepass1l119() {
+    @hidden action pnaexamplepass1l120() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
         pkt.emit<udp_t>(hdr.udp);
     }
-    @hidden table tbl_pnaexamplepass1l119 {
+    @hidden table tbl_pnaexamplepass1l120 {
         actions = {
-            pnaexamplepass1l119();
+            pnaexamplepass1l120();
         }
-        const default_action = pnaexamplepass1l119();
+        const default_action = pnaexamplepass1l120();
     }
     apply {
-        tbl_pnaexamplepass1l119.apply();
+        tbl_pnaexamplepass1l120.apply();
     }
 }
 
