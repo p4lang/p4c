@@ -37,6 +37,17 @@ void Graphs::add_edge(const vertex_t &from, const vertex_t &to, const cstring &n
     boost::put(boost::edge_name, g->root(), ep.first, name);
 }
 
+void Graphs::add_edge(const vertex_t &from, const vertex_t &to, const cstring &name,
+                      unsigned cluster_id) {
+    auto ep = boost::add_edge(from, to, g->root());
+    boost::put(boost::edge_name, g->root(), ep.first, name);
+
+    auto attrs = boost::get(boost::edge_attribute, g->root());
+
+    attrs[ep.first]["ltail"] = "cluster"+Util::toString(cluster_id-2);
+    attrs[ep.first]["lhead"] = "cluster"+Util::toString(cluster_id-1);
+}
+
 boost::optional<Graphs::vertex_t> Graphs::merge_other_statements_into_vertex() {
     if (statementsStack.empty()) return boost::none;
     std::stringstream sstream;
