@@ -102,10 +102,10 @@ control MainControlImpl(
     inout pna_main_output_metadata_t ostd)
 {
     action next_hop(in PassNumber_t pass, PortId_t vport) {
-        if (pass == (PassNumber_t)1)
-            send_to_port(vport);
-        else
+        if (pass == (PassNumber_t)0)
             recirculate();
+        else
+            send_to_port(vport);
     }
     action default_route_drop() {
         drop_packet();
