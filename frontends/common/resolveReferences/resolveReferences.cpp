@@ -358,9 +358,11 @@ void ResolveReferences::postorder(const IR::P4Program *) {
 
 bool ResolveReferences::preorder(const IR::This *pointer) {
     auto decl = findContext<IR::Declaration_Instance>();
-    if (findContext<IR::Function>() == nullptr || decl == nullptr)
+    if (findContext<IR::Function>() == nullptr || decl == nullptr) {
         ::error(ErrorType::ERR_INVALID,
-                "%1% can only be used in the definition of an abstract method", pointer);
+                "'%1%' can only be used in the definition of an abstract method", pointer);
+        return false;
+    }
     refMap->setDeclaration(pointer, decl);
     return true;
 }

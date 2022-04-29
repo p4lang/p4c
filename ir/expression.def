@@ -351,9 +351,10 @@ class DefaultExpression : Expression {}
 // That's why we use a hidden id field to distinguish them.
 class This : Expression {
     int id = nextId++;
+    toString { return "this"; }
  private:
     static int nextId;
-}  // experimental
+}
 
 class Cast : Operation_Unary {
     Type destType = type;
