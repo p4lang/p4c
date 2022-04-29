@@ -131,6 +131,7 @@ bool ControlGraphs::preorder(const IR::P4Control *cont) {
     return_parents.clear();
     visit(cont->body);
     merge_other_statements_into_vertex();
+
     parents.insert(parents.end(), return_parents.begin(), return_parents.end());
     return_parents.clear();
     if (doPop) g = controlStack.popBack();
@@ -141,6 +142,7 @@ bool ControlGraphs::preorder(const IR::BlockStatement *statement) {
     for (const auto component : statement->components)
         visit(component);
     merge_other_statements_into_vertex();
+
     return false;
 }
 
@@ -148,10 +150,12 @@ bool ControlGraphs::preorder(const IR::IfStatement *statement) {
     std::stringstream sstream;
     statement->condition->dbprint(sstream);
     auto v = add_and_connect_vertex(cstring(sstream), VertexType::CONDITION);
+
     Parents new_parents;
     parents = {{v, new EdgeIf(EdgeIf::Branch::TRUE)}};
     visit(statement->ifTrue);
     merge_other_statements_into_vertex();
+
     new_parents.insert(new_parents.end(), parents.begin(), parents.end());
     parents = {{v, new EdgeIf(EdgeIf::Branch::FALSE)}};
     if (statement->ifFalse != nullptr) {
@@ -207,6 +211,7 @@ bool ControlGraphs::preorder(const IR::SwitchStatement *statement) {
 
 bool ControlGraphs::preorder(const IR::MethodCallStatement *statement) {
     auto instance = P4::MethodInstance::resolve(statement->methodCall, refMap, typeMap);
+
     if (instance->is<P4::ApplyMethod>()) {
         auto am = instance->to<P4::ApplyMethod>();
         if (am->object->is<IR::P4Table>()) {
@@ -244,6 +249,7 @@ bool ControlGraphs::preorder(const IR::AssignmentStatement *statement) {
 
 bool ControlGraphs::preorder(const IR::ReturnStatement *) {
     merge_other_statements_into_vertex();
+
     return_parents.insert(return_parents.end(), parents.begin(), parents.end());
     parents.clear();
     return false;
@@ -251,16 +257,78 @@ bool ControlGraphs::preorder(const IR::ReturnStatement *) {
 
 bool ControlGraphs::preorder(const IR::ExitStatement *) {
     merge_other_statements_into_vertex();
+
     for (auto parent : parents)
         add_edge(parent.first, exit_v, parent.second->label());
     parents.clear();
     return false;
 }
 
+bool ControlGraphs::preorder(const IR::Key *key) {
+    std::stringstream sstream;
+
+    // Build key
+    for (auto elVec : key->keyElements) {
+        sstream << elVec->matchType->path->name.name << ": ";
+        sstream << elVec->annotations->annotations.front()->expr.front() << "\\n";
+    }
+
+    auto v = add_and_connect_vertex(cstring(sstream), VertexType::KEY);
+
+    parents = {{v, new EdgeUnconditional()}};
+
+    return false;
+}
+
+bool ControlGraphs::preorder(const IR::P4Action *action) {
+    visit(action->body);
+    return false;
+}
+
 bool ControlGraphs::preorder(const IR::P4Table *table) {
     auto name = controlStack.getName(table->controlPlaneName());
     auto v = add_and_connect_vertex(name, VertexType::TABLE);
+
     parents = {{v, new EdgeUnconditional()}};
+
+    auto key = table->getKey();
+    visit(key);
+
+    Parents keyNode;
+    keyNode.emplace_back(parents.back());
+
+    Parents new_parents;
+
+    auto actions = table->getActionList()->actionList;
+    for (auto action : actions){
+        parents = keyNode;
+
+        auto v = add_and_connect_vertex(action->getName(), VertexType::ACTION);
+
+        parents = {{v, new EdgeUnconditional()}};
+
+        if (action->expression->is<IR::MethodCallExpression>()) {
+            auto mce = action->expression->to<IR::MethodCallExpression>();
+
+            // needed for visiting body of P4Action
+            auto resolved = P4::MethodInstance::resolve(mce, refMap, typeMap);
+
+            if (resolved->is<P4::ActionCall>()) {
+                auto ac = resolved->to<P4::ActionCall>();
+                if (ac->action->is<IR::P4Action>()) {
+                    visit(ac->action->to<IR::P4Action>());
+                }
+            }
+        }
+
+        merge_other_statements_into_vertex();
+
+        new_parents.insert(new_parents.end(), parents.begin(), parents.end());
+        parents.clear();
+    }
+
+    parents = new_parents;
+
     return false;
 }
 
