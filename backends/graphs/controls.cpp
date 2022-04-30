@@ -24,7 +24,6 @@ limitations under the License.
 #include "frontends/p4/tableApply.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
-#include "lib/path.h"
 #include "controls.h"
 
 namespace graphs {

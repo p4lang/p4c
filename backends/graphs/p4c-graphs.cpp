@@ -179,7 +179,7 @@ int main(int argc, char *const argv[]) {
     program->apply(pgg);
 
     graphs::Graph_visitor gvs(options.graphsDir, options.graphs, options.fullGraph,
-                              options.jsonOut);
+                              options.jsonOut, options.file);
 
     gvs.process(cgen.controlGraphsArray, pgg.parserGraphsArray);
 

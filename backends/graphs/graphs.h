@@ -216,6 +216,14 @@ class Graphs : public Inspector {
     vertex_t exit_v{};
     Parents parents{};
     std::vector<const IR::Statement *> statementsStack{};
+
+ private:
+    /**
+     * @brief Limits string size in helper_sstream and resets it
+     * @param[out] sstream stringstream where trimmed string is stored
+     * @param helper_sstream contains string, which will be trimmed
+     */
+    void limitStringSize(std::stringstream &sstream, std::stringstream &helper_sstream);
 };
 
 }  // namespace graphs

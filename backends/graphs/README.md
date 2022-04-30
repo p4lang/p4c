@@ -34,7 +34,7 @@ Output in json format is an object with fields:
 
 - `info` (object)
 
-    - `name` - Filename of P4 program (for now just a placeholder value).
+    - `name` - Filename of P4 program.
     
 - `nodes` (array) - Contains objects, representing program blocks.
 

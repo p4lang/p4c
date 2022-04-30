@@ -71,9 +71,11 @@ class Graph_visitor : public Graphs {
      * @param jsonOut option to create json fullGraph
      */
     Graph_visitor(const cstring &graphsDir, const bool &graphs,
-                  const bool &fullGraph, const bool &jsonOut) :
+                  const bool &fullGraph, const bool &jsonOut,
+                  const cstring &filename) :
             graphsDir(graphsDir), graphs(graphs),
-            fullGraph(fullGraph), jsonOut(jsonOut) {}
+            fullGraph(fullGraph), jsonOut(jsonOut),
+            filename(filename) {}
     /** 
      * @brief Maps VertexType to string
      * @param v_type VertexType to map
@@ -132,6 +134,7 @@ class Graph_visitor : public Graphs {
     const bool &fullGraph;  // merge boost graphs into one CFG, and output to file
     const bool &jsonOut;  // iterate over boost graphs, and create json representation of these
                           // graphs
+    const cstring filename;
 };
 
 }  // namespace graphs

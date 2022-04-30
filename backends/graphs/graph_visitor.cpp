@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-#include "graphs.h"
 #include "graph_visitor.h"
+
+#include "graphs.h"
+#include "lib/path.h"
 
 namespace graphs {
 
@@ -199,7 +201,16 @@ void Graph_visitor::process(std::vector<Graph *> &controlGraphsArray,
 
     if (jsonOut) {
         json = new Util::JsonObject();
-        json->emplace("name", "program");
+
+        // remove '.p4' and path from program name
+        auto file_without_p4 = (filename.findlast('.') == nullptr) ? filename :
+                            filename.before(filename.findlast('.'));
+        const char* file_without_path = file_without_p4;
+        if (file_without_p4.findlast('/') != nullptr) {
+            file_without_path = file_without_p4.findlast('/') + 1;  // char* without '/'
+        }
+
+        json->emplace("name", file_without_path);
         programBlocks = new Util::JsonArray();
         json->emplace("nodes", programBlocks);
 

@@ -48,19 +48,36 @@ void Graphs::add_edge(const vertex_t &from, const vertex_t &to, const cstring &n
     attrs[ep.first]["lhead"] = "cluster"+Util::toString(cluster_id-1);
 }
 
+void Graphs::limitStringSize(std::stringstream &sstream, std::stringstream &helper_sstream){
+    if (helper_sstream.str().size() > 25) {
+        sstream << helper_sstream.str().substr(0, 25) << "...";
+    } else {
+        sstream << helper_sstream.str();
+    }
+    helper_sstream.str("");
+    helper_sstream.clear();
+}
+
 boost::optional<Graphs::vertex_t> Graphs::merge_other_statements_into_vertex() {
     if (statementsStack.empty()) return boost::none;
     std::stringstream sstream;
+    std::stringstream helper_sstream;  // to limit line width
+
     if (statementsStack.size() == 1) {
-        statementsStack[0]->dbprint(sstream);
+        statementsStack[0]->dbprint(helper_sstream);
+        limitStringSize(sstream, helper_sstream);
     } else if (statementsStack.size() == 2) {
-        statementsStack[0]->dbprint(sstream);
-        sstream << "\n";
-        statementsStack[1]->dbprint(sstream);
+        statementsStack[0]->dbprint(helper_sstream);
+        limitStringSize(sstream, helper_sstream);
+        sstream << "\\n";
+        statementsStack[1]->dbprint(helper_sstream);
+        limitStringSize(sstream, helper_sstream);
     } else {
-        statementsStack[0]->dbprint(sstream);
-        sstream << "\n...\n";
-        statementsStack.back()->dbprint(sstream);
+        statementsStack[0]->dbprint(helper_sstream);
+        limitStringSize(sstream, helper_sstream);
+        sstream << "\\n...\\n";
+        statementsStack.back()->dbprint(helper_sstream);
+        limitStringSize(sstream, helper_sstream);
     }
     auto v = add_vertex(cstring(sstream), VertexType::STATEMENTS);
     for (auto parent : parents)
