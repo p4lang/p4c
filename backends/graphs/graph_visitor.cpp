@@ -121,9 +121,7 @@ void Graph_visitor::forLoopJson(std::vector<Graph *> &graphsArray, PrevType node
             edge->emplace("from", from);
             edge->emplace("to", to);
 
-            auto attrs = boost::get(boost::edge_attribute, subg);
-
-            edge->emplace("cond", attrs[*eit]["label"].escapeJson());
+            edge->emplace("cond", boost::get(boost::edge_name, subg, *eit).escapeJson());
         }
     }
 }
