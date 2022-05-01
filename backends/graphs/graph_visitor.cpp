@@ -17,6 +17,7 @@
 #include "graph_visitor.h"
 
 #include "graphs.h"
+#include "lib/nullstream.h"
 #include "lib/path.h"
 
 namespace graphs {
