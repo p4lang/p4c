@@ -309,6 +309,11 @@ std::ostream &IR::DpdkRecirculateStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
+std::ostream &IR::DpdkRecircidStatement::toSpec(std::ostream &out) const {
+    out << "recircid " << DPDK::toStr(pass);
+    return out;
+}
+
 std::ostream &IR::DpdkLabelStatement::toSpec(std::ostream &out) const {
     out << label << " :";
     return out;

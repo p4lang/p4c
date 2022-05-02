@@ -46,7 +46,7 @@ apply {
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	extract h.udp
 	MAINPARSERIMPL_ACCEPT :	recircid m.pna_main_input_metadata_pass
-	jmpeq LABEL_END m.pna_main_input_metadata_pass 0x4
+	jmpneq LABEL_END m.pna_main_input_metadata_pass 0x4
 	add h.udp.src_port 0x1
 	recirculate
 	LABEL_END :	emit h.ethernet

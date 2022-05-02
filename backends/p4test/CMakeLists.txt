@@ -105,9 +105,10 @@ set (P4_XFAIL_TESTS
   # This program uses a list of expressions on the 'psa_implementation' property
   # which is currently unsupported
   testdata/p4_16_samples/psa-action-profile2.p4
-  # This program uses conditional execution inside action body which is currently
+  # These programs uses conditional execution inside action body which is currently
   # unsupported
   testdata/p4_16_samples/psa-dpdk-action-jumpOpt.p4
+  testdata/p4_16_samples/pna-example-pass-2.p4
   # These tests are added to check mirror_packet extern invocation with non-constant
   # arguments and with incorrect number of arguments
   testdata/p4_16_samples/pna-example-mirror-packet-error2.p4

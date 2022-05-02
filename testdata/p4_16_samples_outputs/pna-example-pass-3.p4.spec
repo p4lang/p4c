@@ -26,9 +26,13 @@ struct udp_t {
 }
 
 struct main_metadata_t {
+	bit<32> pna_pre_input_metadata_pass
 	bit<32> pna_main_input_metadata_pass
 	bit<32> pna_main_input_metadata_input_port
+	bit<16> local_metadata_port
 	bit<32> pna_main_output_metadata_output_port
+	bit<32> MainControlT_tmp
+	bit<8> MainControlT_tmp_0
 }
 metadata instanceof main_metadata_t
 
@@ -45,11 +49,17 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	extract h.udp
-	MAINPARSERIMPL_ACCEPT :	recircid m.pna_main_input_metadata_pass
-	jmpeq LABEL_END m.pna_main_input_metadata_pass 0x4
+	MAINPARSERIMPL_ACCEPT :	recircid m.pna_pre_input_metadata_pass
+	jmpeq LABEL_END m.pna_pre_input_metadata_pass 0x1
+	mov m.local_metadata_port h.udp.src_port
+	recirculate
+	LABEL_END :	recircid m.pna_main_input_metadata_pass
+	mov m.MainControlT_tmp m.pna_main_input_metadata_pass
+	mov m.MainControlT_tmp_0 m.MainControlT_tmp
+	jmpgt LABEL_END_0 m.MainControlT_tmp_0 0x4
 	add h.udp.src_port 0x1
 	recirculate
-	LABEL_END :	emit h.ethernet
+	LABEL_END_0 :	emit h.ethernet
 	emit h.ipv4
 	emit h.udp
 	tx m.pna_main_output_metadata_output_port

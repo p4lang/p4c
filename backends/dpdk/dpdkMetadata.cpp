@@ -148,4 +148,49 @@ DirectionToRegRead::replaceDirectionWithRegRead(IR::IndexedVector<IR::DpdkAsmSta
 }
 
 IR::IndexedVector<IR::StructField> AddNewMetadataFields::newMetadataFields = {};
+
+// check member expression using metadata pass field
+// "recircid" instruction takes the pass metadata type as argument to fetch the pass_id.
+bool PrependPassRecircId::isPass(const IR::Member *m) {
+    if (m == nullptr)
+        return false;
+     return m->member.name == "pna_main_input_metadata_pass"
+         || m->member.name == "pna_pre_input_metadata_pass"
+         || m->member.name == "pna_main_parser_input_metadata_pass";
+}
+
+const IR::Node *PrependPassRecircId::postorder(IR::DpdkListStatement *l) {
+    l->statements = prependPassWithRecircid(l->statements);
+    newStmts.clear();
+    return l;
+}
+
+const IR::Node *PrependPassRecircId::postorder(IR::DpdkAction *a) {
+    a->statements = prependPassWithRecircid(a->statements);
+    newStmts.clear();
+    return a;
+}
+
+IR::IndexedVector<IR::DpdkAsmStatement>
+PrependPassRecircId::prependPassWithRecircid(IR::IndexedVector<IR::DpdkAsmStatement> stmts) {
+    for (auto s : stmts) {
+        if (auto jc = s->to<IR::DpdkJmpCondStatement>()) {
+            if (isPass(jc->src1->to<IR::Member>()))
+                newStmts.push_back(new IR::DpdkRecircidStatement(jc->src1->to<IR::Member>()));
+            else if (isPass(jc->src2->to<IR::Member>()))
+                newStmts.push_back(new IR::DpdkRecircidStatement(jc->src2->to<IR::Member>()));
+        } else if (auto u = s->to<IR::DpdkUnaryStatement>()) {
+            if (isPass(u->src->to<IR::Member>())) {
+                newStmts.push_back(new IR::DpdkRecircidStatement(u->src->to<IR::Member>()));
+            }
+        } else if (auto u = s->to<IR::DpdkCastStatement>()) {
+            if (isPass(u->src->to<IR::Member>())) {
+                newStmts.push_back(new IR::DpdkRecircidStatement(u->src->to<IR::Member>()));
+            }
+        }
+        newStmts.push_back(s);
+    }
+    return newStmts;
+}
+
 }  // namespace DPDK
