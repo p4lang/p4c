@@ -170,6 +170,10 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Instance* decl) {
     if (findContext<IR::ParserState>())
         ::error(ErrorType::ERR_INVALID,
                 "%1%: invalid declaration. Instantiations cannot be in a parser state.", decl);
+    if (findContext<IR::Function>() || findContext<IR::Method>())
+        ::error(ErrorType::ERR_INVALID,
+                "%1%: invalid declaration. Instantiations cannot be in a function or method.",
+                decl);
     auto inAction = findContext<IR::P4Action>();
     if (inAction != nullptr)
         ::error(ErrorType::ERR_INVALID,
