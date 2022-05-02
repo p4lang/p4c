@@ -28,6 +28,7 @@ class DontcareArgs : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
     IR::IndexedVector<IR::Declaration> toAdd;
+
  public:
     DontcareArgs(ReferenceMap* refMap, TypeMap* typeMap): refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DontcareArgs"); }

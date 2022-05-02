@@ -113,7 +113,7 @@ class SideEffects : public Inspector {
                               TypeMap* typeMap) {
         // mce does not produce a side effect in few cases:
         //  * isValid()
-        //  * function, extern function, or extern method with noSideEffectsAnnotation
+        //  * function, extern function, or extern method with noSideEffects annotation
         auto mi = MethodInstance::resolve(mce, refMap, typeMap);
         if (auto em = mi->to<P4::ExternMethod>()) {
             if (em->method->getAnnotation(IR::Annotation::noSideEffectsAnnotation)) {
