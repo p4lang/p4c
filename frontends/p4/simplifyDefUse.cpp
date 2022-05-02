@@ -1473,6 +1473,7 @@ class RemoveUnused : public Transform {
                 return mcs;
             }
             // removing
+            LOG3("Removing statement " << getOriginal() << IndentCtl::indent);
             return new IR::EmptyStatement();
         }
         return mcs;
