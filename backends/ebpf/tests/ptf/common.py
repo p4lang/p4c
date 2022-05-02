@@ -42,6 +42,7 @@ TEST_PIPELINE_ID = 1
 TEST_PIPELINE_MOUNT_PATH = "/sys/fs/bpf/pipeline{}".format(TEST_PIPELINE_ID)
 PIPELINE_MAPS_MOUNT_PATH = "{}/maps".format(TEST_PIPELINE_MOUNT_PATH)
 
+
 def xdp2tc_head_not_supported(cls):
     if cls.xdp2tc_mode(cls) == 'head':
         cls.skip = True
@@ -198,9 +199,47 @@ class P4EbpfTest(BaseTest):
     def multicast_group_delete(self, group):
         self.exec_ns_cmd("psabpf-ctl multicast-group delete pipe {} id {}".format(TEST_PIPELINE_ID, group))
 
-    def table_write(self, method, table, keys, action=0, data=None, priority=None, references=None):
+    def _table_create_str_from_data(self, data, counters, meters):
+        """ Creates string from action data, direct counters and direct meters
+            which can be passed to the psabpf-cli as an argument.
         """
-        Use table_add or table_update instead of this method
+        s = ""
+        if data or counters or meters:
+            s = "data "
+            if data:
+                for d in data:
+                    s = s + "{} ".format(d)
+            if counters:
+                for k, v in counters.items():
+                    value = ""
+                    bytes_cnt = v.get("bytes", None)
+                    packets_cnt = v.get("packets", None)
+                    if bytes_cnt is not None:
+                        value = "{}".format(bytes_cnt)
+                    if packets_cnt is not None:
+                        if bytes_cnt is not None:
+                            value = value + ":"
+                        value = value + "{}".format(packets_cnt)
+                    s = s + "counter {} {} ".format(k, value)
+            if meters:
+                for k, v in meters.items():
+                    s = s + "meter {} {}:{} {}:{} ".format(k, v["pir"], v["pbs"], v["cir"], v["cbs"])
+        return s
+
+    def _table_create_str_from_key(self, keys):
+        """ Creates string from keys which can be passed to the psabpf-cli as an argument.
+        """
+        s = "key none "
+        if keys:
+            s = "key "
+            for k in keys:
+                s = s + "{} ".format(k)
+        return s
+
+    def table_write(self, method, table, keys, action=0, data=None, priority=None, references=None,
+                    counters=None, meters=None):
+        """
+        Use table_add or table_update instead of this method.
         """
         cmd = "psabpf-ctl table {} pipe {} {} ".format(method, TEST_PIPELINE_ID, table)
         if references:
@@ -208,32 +247,98 @@ class P4EbpfTest(BaseTest):
             cmd = cmd + "ref "
         else:
             cmd = cmd + "id {} ".format(action)
-        cmd = cmd + "key "
-        for k in keys:
-            cmd = cmd + "{} ".format(k)
-        if data:
-            cmd = cmd + "data "
-            for d in data:
-                cmd = cmd + "{} ".format(d)
+        cmd = cmd + self._table_create_str_from_key(keys=keys)
+        cmd = cmd + self._table_create_str_from_data(data=data, counters=counters, meters=meters)
         if priority:
             cmd = cmd + "priority {}".format(priority)
         self.exec_ns_cmd(cmd, "Table {} failed".format(method))
 
-    def table_add(self, table, keys, action=0, data=None, priority=None, references=None):
+    def table_add(self, table, keys, action=0, data=None, priority=None, references=None,
+                  counters=None, meters=None):
+        """ Adds a new entry to a table.
+            :param table: Table name.
+            :param keys: List of keys, each key must be convertible to string.
+            :param action: Action ID in the dataplane.
+            :param data: List of action parameters.
+            :param priority: Priority of the new entry.
+            :param references: List of references for indirect table (parameter data is ignored then).
+            :param counters: Dictionary of counter's names (key) and dictionary of counter value (value).
+                Inner dictionary can have two entries: "bytes", "packets"
+            :param meters: Dictionary of meter's names (key) and dictionary of meter value (value).
+                Inner dictionary must have four entries: "pir", "pbs", "cir", "cbs"
+        """
         self.table_write(method="add", table=table, keys=keys, action=action, data=data,
-                         priority=priority, references=references)
+                         priority=priority, references=references, counters=counters, meters=meters)
 
-    def table_update(self, table, keys, action=0, data=None, priority=None, references=None):
+    def table_update(self, table, keys, action=0, data=None, priority=None, references=None,
+                     counters=None, meters=None):
+        """ See documentation for table_add. This method updates existing entry instead of new one.
+        """
         self.table_write(method="update", table=table, keys=keys, action=action, data=data,
-                         priority=priority, references=references)
+                         priority=priority, references=references, counters=counters, meters=meters)
 
     def table_delete(self, table, keys=None):
+        """ Deletes existing table entry
+        """
         cmd = "psabpf-ctl table delete pipe {} {} ".format(TEST_PIPELINE_ID, table)
         if keys:
-            cmd = cmd + "key "
-            for k in keys:
-                cmd = cmd + "{} ".format(k)
+            cmd = cmd + self._table_create_str_from_key(keys)
         self.exec_ns_cmd(cmd, "Table delete failed")
+
+    def table_set_default(self, table, action=0, data=None, counters=None, meters=None):
+        """ Sets default action for table. For parameters documentation see `table_add` method.
+        """
+        cmd = "psabpf-ctl table default set pipe {} {} id {} ".format(TEST_PIPELINE_ID, table, action)
+        cmd = cmd + self._table_create_str_from_data(data=data, counters=counters, meters=meters)
+        self.exec_ns_cmd(cmd, "Table set default entry failed")
+
+    def table_get(self, table, keys, indirect=False):
+        """ Returns JSON containing parsed table entry - action data, meters, counters.
+            If table has an implementation, set param `indirect` to True.
+        """
+        cmd = "psabpf-ctl table get pipe {} {} ".format(TEST_PIPELINE_ID, table)
+        if indirect:
+            # TODO: cmd = cmd + "ref "
+            self.fail("support for indirect table is not implemented yet")
+        cmd = cmd + self._table_create_str_from_key(keys=keys)
+        _, stdout, _ = self.exec_ns_cmd(cmd, "Table get entry failed")
+        return json.loads(stdout)[table]
+
+    def table_verify(self, table, keys, action=0, priority=None, data=None, references=None,
+                     counters=None, meters=None):
+        """ Verify that values in table entry fields are equal to provided arguments. For parameters
+            documentation see `table_add` method. Field not referenced by any argument will not be tested.
+        """
+        json_data = self.table_get(table=table, keys=keys, indirect=references)
+        entries = json_data["entries"]
+        if len(entries) != 1:
+            self.fail("Expected 1 table entry to verify")
+        entry = entries[0]
+
+        if action is not None:
+            if action != entry["action"]["id"]:
+                self.fail("Invalid action ID: expected {}, got {}".format(action, entry["action"]["id"]))
+        if priority is not None:
+            if priority != entry["priority"]:
+                self.fail("Invalid priority: expected {}, got {}".format(priority, entry["priority"]))
+        if data:
+            action_params = entry["action"]["parameters"]
+            if len(action_params) != len(data):
+                self.fail("Invalid number of action parameters: expected {}, got {}".format(len(data), len(action_params)))
+            for k, v in enumerate(data):
+                if v != int(action_params[k]["value"], 0):
+                    self.fail("Invalid action parameter {} (id {}): expected {}, got {}".
+                              format(action_params[k]["name"], k, v, int(action_params[k]["value"], 0)))
+        if references:
+            self.fail("Support for table references is not implemented yet")
+        if counters:
+            for k, v in counters.items():
+                type = json_data["DirectCounter"][k]["type"]
+                entry_value = entry["DirectCounter"][k]
+                self._do_counter_verify(bytes=v.get("bytes", None), packets=v.get("packets", None),
+                                        entry_value=entry_value, counter_type=type)
+        if meters:
+            self.fail("Support for DirectMeter is not implemented yet (psabpf doesn't return internal state of meter if you need it)")
 
     def action_selector_add_action(self, selector, action, data=None):
         cmd = "psabpf-ctl action-selector add_member pipe {} {} id {}".format(TEST_PIPELINE_ID, selector, action)
@@ -260,40 +365,39 @@ class P4EbpfTest(BaseTest):
         return json.loads(stdout)['Digest'][name]['digests']
 
     def counter_get(self, name, keys=None):
-        key_str = ""
-        if keys:
-            key_str = key_str + "key"
-            for k in keys:
-                key_str = key_str + " {}".format(k)
+        key_str = self._table_create_str_from_key(keys=keys)
         cmd = "psabpf-ctl counter get pipe {} {} {}".format(TEST_PIPELINE_ID, name, key_str)
         _, stdout, _ = self.exec_ns_cmd(cmd, "Counter get failed")
         return json.loads(stdout)['Counter'][name]
 
-    def counter_verify(self, name, keys, bytes=None, packets=None):
-        counter = self.counter_get(name, keys=keys)
+    def _do_counter_verify(self, bytes, packets, entry_value, counter_type):
+        """ Verify counter value and type. Use `counter_verify` or `table_verify` instead.
+        """
         expected_type = ""
-        if packets:
+        if packets is not None:
             expected_type = "PACKETS"
-        if bytes:
-            if packets:
+        if bytes is not None:
+            if packets is not None:
                 expected_type = expected_type + "_AND_"
             expected_type = expected_type + "BYTES"
-        counter_type = counter["type"]
         if expected_type != counter_type:
             self.fail("Invalid counter type, expected: \"{}\", got \"{}\"".format(expected_type, counter_type))
+        if bytes is not None:
+            counter_bytes = int(entry_value["bytes"], 0)
+            if counter_bytes != bytes:
+                self.fail("Invalid counter bytes, expected {}, got {}".format(bytes, counter_bytes))
+        if packets is not None:
+            counter_packets = int(entry_value["packets"], 0)
+            if counter_packets != packets:
+                self.fail("Invalid counter packets, expected {}, got {}".format(packets, counter_packets))
 
+    def counter_verify(self, name, keys, bytes=None, packets=None):
+        counter = self.counter_get(name, keys=keys)
         entries = counter["entries"]
         if len(entries) != 1:
             self.fail("expected one Counter entry")
         entry = entries[0]
-        if bytes:
-            counter_bytes = int(entry["value"]["bytes"], 0)
-            if counter_bytes != bytes:
-                self.fail("Invalid counter bytes, expected {}, got {}".format(bytes, counter_bytes))
-        if packets:
-            counter_packets = int(entry["value"]["packets"], 0)
-            if counter_packets != packets:
-                self.fail("Invalid counter packets, expected {}, got {}".format(packets, counter_packets))
+        self._do_counter_verify(bytes=bytes, packets=packets, entry_value=entry["value"], counter_type=counter["type"])
 
     def meter_update(self, name, index, pir, pbs, cir, cbs):
         cmd = "psabpf-ctl meter update pipe {} {} " \

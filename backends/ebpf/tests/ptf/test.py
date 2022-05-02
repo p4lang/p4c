@@ -40,9 +40,10 @@ class SimpleForwardingPSATest(P4EbpfTest):
         # use default action
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
-
-    def tearDown(self):
-        super(SimpleForwardingPSATest, self).tearDown()
+        # change default action
+        self.table_set_default(table="ingress_tbl_fwd", action=1, data=[6])
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, pkt, PORT2)
 
 
 class PSAResubmitTest(P4EbpfTest):
@@ -404,9 +405,14 @@ class DirectCountersPSATest(P4EbpfTest):
             testutils.send_packet(self, PORT0, pkt)
             testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
 
-        self.verify_map_entry("ingress_tbl1", "0 0 0 10", "01 00 00 00 64 00 00 00 01 00 00 00")
-        self.verify_map_entry("ingress_tbl2", "1 0 0 10", "02 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00")
-        self.verify_map_entry("ingress_tbl2", "2 0 0 10", "03 00 00 00 64 00 00 00 01 00 00 00 01 00 00 00")
+        self.table_verify(table="ingress_tbl1", keys=["10.0.0.0"], action=1,
+                          counters={"ingress_test3_cnt": {"bytes": 100, "packets": 1}})
+        self.table_verify(table="ingress_tbl2", keys=["10.0.0.1"], action=2,
+                          counters={"ingress_test2_cnt": {"packets": 1},
+                                    "ingress_test3_cnt": {"bytes": 0, "packets": 0}})
+        self.table_verify(table="ingress_tbl2", keys=["10.0.0.2"], action=3,
+                          counters={"ingress_test2_cnt": {"packets": 1},
+                                    "ingress_test3_cnt": {"bytes": 100, "packets": 1}})
 
 
 class ParserValueSetPSATest(P4EbpfTest):
