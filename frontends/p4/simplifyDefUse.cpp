@@ -478,7 +478,7 @@ class FindUninitialized : public Inspector {
                             const IR::ParameterList* parameters,
                             Definitions* defs) {
         LOG2("Checking output parameters of " << block <<
-             "; definitions are " << Log::endl << defs);
+             "; definitions are " << IndentCtl::endl << defs);
         for (auto p : parameters->parameters) {
             if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
                 auto storage = definitions->storageMap->getStorage(p);
