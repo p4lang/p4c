@@ -136,6 +136,7 @@ apply {
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_TCP :	extract h.tcp
 	MYIP_ACCEPT :	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl
 	jmpa LABEL_SWITCH a1
 	jmpa LABEL_SWITCH_0 a2
 	jmp LABEL_ENDSWITCH
