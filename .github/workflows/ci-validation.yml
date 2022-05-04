@@ -36,7 +36,7 @@ jobs:
     - name: Build (Linux)
       run: |
         docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg ENABLE_GMP=$ENABLE_GMP --build-arg VALIDATION=ON . || echo "BUILD_SUCCESS=false" >> $GITHUB_ENV
-        ./tools/export_ccache.sh
+        ./tools/export_ccache.sh || echo "BUILD_SUCCESS=false" >> $GITHUB_ENV
 
     - name: Validate
       if: env.BUILD_SUCCESS == 'true'

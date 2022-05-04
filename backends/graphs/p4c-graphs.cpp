@@ -30,6 +30,7 @@ limitations under the License.
 #include "graphs.h"
 #include "controls.h"
 #include "parsers.h"
+#include "graph_visitor.h"
 #include "ir/json_loader.h"
 #include "fstream"
 
@@ -63,8 +64,10 @@ MidEnd::MidEnd(CompilerOptions& options) {
 class Options : public CompilerOptions {
  public:
     cstring graphsDir{"."};
-    // read from json
-    bool loadIRFromJson = false;
+    bool loadIRFromJson = false;  // read from json
+    bool graphs = true;  // default behavior
+    bool fullGraph = false;
+    bool jsonOut = false;
     Options() {
         registerOption("--graphs-dir", "dir",
                        [this](const char* arg) { graphsDir = arg; return true; },
@@ -72,9 +75,26 @@ class Options : public CompilerOptions {
                        "(default is current working directory)\n");
         registerOption("--fromJSON", "file",
                 [this](const char* arg) { loadIRFromJson = true; file = arg; return true; },
-                "Use IR representation from JsonFile dumped previously,"\
+                "Use IR representation from JsonFile dumped previously, "\
                 "the compilation starts with reduced midEnd.");
+        registerOption("--graphs", nullptr,
+                [this](const char*){ graphs = true; isGraphsSet = true; return true; },
+                "Use if you want default behavior - generation of separate graphs "\
+                "for each program block (enabled by default, "\
+                "if options --fullGraph or --jsonOut are not present).");
+        registerOption("--fullGraph", nullptr,
+                [this](const char*){ fullGraph = true;
+                                     if (!isGraphsSet) graphs = false; return true; },
+                "Use if you want to generate graph depicting control flow "\
+                "through all program blocks (fullGraph).");
+        registerOption("--jsonOut", nullptr,
+                [this](const char*){ jsonOut = true;
+                                     if (!isGraphsSet) graphs = false; return true; },
+                "Use to generate json output of fullGraph.");
     }
+
+ private:
+    bool isGraphsSet = false;
 };
 
 using GraphsContext = P4CContextWithOptions<Options>;
@@ -157,6 +177,11 @@ int main(int argc, char *const argv[]) {
     LOG2("Generating parser graphs");
     graphs::ParserGraphs pgg(&midEnd.refMap, &midEnd.typeMap, options.graphsDir);
     program->apply(pgg);
+
+    graphs::Graph_visitor gvs(options.graphsDir, options.graphs, options.fullGraph,
+                              options.jsonOut, options.file);
+
+    gvs.process(cgen.controlGraphsArray, pgg.parserGraphsArray);
 
     return ::errorCount() > 0;
 }
