@@ -130,6 +130,7 @@ apply {
 	extract h.ethernet
 	table tbl
 	table as_sel
+	table as
 	jmpa LABEL_SWITCH a1
 	jmpa LABEL_SWITCH_0 a2
 	jmp LABEL_ENDSWITCH

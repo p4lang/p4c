@@ -874,7 +874,9 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
     cstring label;
     cstring default_label = "";
     auto end_label = refmap->newName("label_endswitch");
-
+    if (tc) {
+        add_instr(new IR::DpdkApplyStatement(tc->name.toString()));
+    }
     // Emit jmp on action run/jmp on matching label statements and collect labels for
     // each case statement.
     for (unsigned i = 0; i < size - 1; i++) {
