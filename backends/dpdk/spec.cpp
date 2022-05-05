@@ -512,16 +512,20 @@ std::ostream &IR::DpdkChecksumClearStatement::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkGetHashStatement::toSpec(std::ostream &out) const {
-    out << "hash_get " << DPDK::toStr(dst) << " " << hash << " (";
+    out << "hash " << hash << " " << DPDK::toStr(dst) << " ";
     if (auto l = fields->to<IR::ListExpression>()) {
-        for (auto c : l->components) {
-            out << " " << DPDK::toStr(c);
+        if (l->components.size() == 1) {
+            out << " " << DPDK::toStr(l->components.at(0));
+            out << " " << DPDK::toStr(l->components.at(0));
+        } else {
+            out << " " << DPDK::toStr(l->components.at(0));
+            out << " " << DPDK::toStr(l->components.at(l->components.size() - 1));
         }
     } else {
         ::error(ErrorType::ERR_INVALID,
                 "%1%: get_hash's arg is not a ListExpression.", this);
     }
-    out << ")";
+    out << "";
     return out;
 }
 

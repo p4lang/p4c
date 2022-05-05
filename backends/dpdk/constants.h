@@ -28,4 +28,12 @@ const unsigned dpdk_default_table_size = 65536;
 // Maximum values
 const int dpdk_max_field_width = 64;
 
+// HASH Values
+#define JHASH0 0
+#define CRC1 1
+#define CRC2 2
+#define CRC3 3
+#define CRC4 4
+#define JHASH5 5
+
 #endif  /* BACKENDS_DPDK_CONSTANTS_H_ */

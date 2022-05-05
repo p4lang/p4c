@@ -159,10 +159,80 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
         auto mi = P4::MethodInstance::resolve(m, refmap, typemap);
         if (auto e = mi->to<P4::ExternMethod>()) {
             if (e->originalExternType->getName().name == "Hash") {
+                auto di = e->object->to<IR::Declaration_Instance>();
+                auto declArgs = di->arguments;
+                if (declArgs->size() == 0) {
+                    ::error(ErrorType::ERR_UNEXPECTED, "Expected atleast 1 argument for %1%",
+                                e->object->getName());
+                        return false;
+                }
+                auto hash_alg = declArgs->at(0)->expression;
+                unsigned hashAlgValue = 0;
+                if (hash_alg->is<IR::Constant>())
+                    hashAlgValue = hash_alg->to<IR::Constant>()->asUnsigned();
+                cstring hashAlgName = "";
+                if (hashAlgValue == JHASH0 || hashAlgValue == JHASH5)
+                    hashAlgName = "jhash";
+                else if (hashAlgValue >= CRC1 && hashAlgValue <= CRC4)
+                    hashAlgName = "crc32";
+
+                IR::Vector<IR::Expression> components;
+                IR::ListExpression *listExp = nullptr;
+
+                /* This processes two prototypes of get_hash method of Hash extern
+                    /// Constructor
+                    Hash(PSA_HashAlgorithm_t algo);
+
+                    1. Compute the hash for data.
+                        O get_hash<D>(in D data);
+
+                    2. Compute the hash for data, with modulo by max, then add base.
+                        O get_hash<T, D>(in T base, in D data, in T max);
+
+                        Here, DPDK targets allows "only" constant expression for
+                        'base' and 'max' parameter
+                */
                 if (e->expr->arguments->size() == 1) {
                     auto field = (*e->expr->arguments)[0];
-                    i = new IR::DpdkGetHashStatement(e->object->getName(),
-                                                     field->expression, left);
+                    processHashParams(field, components);
+                    listExp = new IR::ListExpression(components);
+                    i = new IR::DpdkGetHashStatement(hashAlgName, listExp, left);
+                } else if (e->expr->arguments->size() == 3) {
+                    auto maxValue = 0;
+                    auto base    = (*e->expr->arguments)[0];
+                    auto field   = (*e->expr->arguments)[1];
+                    auto max_val = (*e->expr->arguments)[2];
+
+                    /* Checks whether 'base' and 'max' param values are const values or not.
+                       If not, throw an error.
+                    */
+                    if (auto b = base->expression->to<IR::Expression>()) {
+                        if (!b->is<IR::Constant>())
+                            ::error("Expecting const expression '%1%' for 'base' value in"
+                            " get_hash method of Hash extern in DPDK Target", base);
+                    }
+
+                    if (auto b = max_val->expression->to<IR::Expression>()) {
+                        if (b->is<IR::Constant>()) {
+                            maxValue = b->to<IR::Constant>()->asUnsigned();
+                            // Check whether max value is power of 2 or not
+                            if (maxValue == 0 || ((maxValue & (maxValue - 1)) != 0)) {
+                                ::error("Invalid Max value '%1%'. DPDK Target expect 'Max'"
+                                " value to be power of 2", maxValue);
+                            }
+                        } else {
+                            ::error("Expecting const expression '%1%' for 'Max' value in"
+                            " get_hash method of Hash extern in DPDK Target", max_val);
+                        }
+                    }
+
+                    processHashParams(field, components);
+                    listExp = new IR::ListExpression(components);
+                    auto bs = base->expression->to<IR::Expression>();
+                    add_instr(new IR::DpdkGetHashStatement(hashAlgName, listExp, left));
+                    add_instr(new IR::DpdkAndStatement(left, left,
+                                                       new IR::Constant(maxValue - 1)));
+                    i = new IR::DpdkAddStatement(left, left, bs);
                 }
             } else if (e->originalExternType->getName().name ==
                        "InternetChecksum") {
@@ -346,6 +416,41 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
     return false;
 }
 
+/* This function processes the hash parameters and stores it in
+   "components" which is further used for generating hash instruction
+*/
+void ConvertStatementToDpdk::processHashParams(const IR::Argument* field,
+                                               IR::Vector<IR::Expression>& components) {
+    if (auto params = field->expression->to<IR::Member>()) {
+        auto typeInfo = typemap->getType(params);
+        if (typeInfo->is<IR::Type_Header>()) {
+            auto typeheader = typeInfo->to<IR::Type_Header>();
+            for (auto it : typeheader->fields) {
+                IR::ID name(params->member.name + "." + it->name);
+                auto m = new IR::Member(new IR::PathExpression(IR::ID("h")), name);
+                components.push_back(m);
+            }
+        } else {
+            components.push_back(params);
+        }
+    } else if (auto s = field->expression->to<IR::StructExpression>()) {
+        for (auto field1 : s->components) {
+            if (auto params = field1->expression->to<IR::Member>()) {
+                auto typeInfo = typemap->getType(params);
+                if (typeInfo->is<IR::Type_Header>()) {
+                    auto typeheader = typeInfo->to<IR::Type_Header>();
+                    for (auto it : typeheader->fields) {
+                        IR::ID name(params->member.name + "." + it->name);
+                        auto m = new IR::Member(new IR::PathExpression(IR::ID("h")), name);
+                        components.push_back(m);
+                    }
+                } else {
+                    components.push_back(params);
+                }
+            }
+        }
+    }
+}
 /* This recursion requires the pass of ConvertLogicalExpression. This pass will
  * transform the logical experssion to a form that this function use as
  * presumption. The presumption of this function is that the left side of
