@@ -1014,7 +1014,8 @@ bool TypeInference::checkAbstractMethods(const IR::Declaration_Instance* inst,
                 { func, methtype });
             if (tvs == nullptr)
                 return false;
-            BUG_CHECK(tvs->isIdentity(), "%1%: expected no type variables", tvs);
+            BUG_CHECK(errorCount() > 0 || tvs->isIdentity(),
+                      "%1%: expected no type variables", tvs);
         }
     }
     bool rv = true;
@@ -1418,6 +1419,10 @@ const IR::Node* TypeInference::postorder(IR::Type_Method* type) {
         auto extName = ext->name.name;
         if (auto method = findContext<IR::Method>()) {
             auto name = method->name.name;
+            if (methodType->returnType &&
+                (methodType->returnType->is<IR::Type_InfInt>() ||
+                 methodType->returnType->is<IR::Type_String>()))
+                typeError("%1%: illegal return type for method", method->type->returnType);
             if (name == extName) {
                 // This is a constructor.
                 if (method->type->typeParameters != nullptr &&

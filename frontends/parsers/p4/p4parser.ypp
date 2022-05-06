@@ -969,12 +969,12 @@ specializedType
     ;
 
 baseType
-    : BOOL   { $$ = IR::Type_Boolean::get(); }
-    | MATCH_KIND { $$ = IR::Type_MatchKind::get(); }
+    : BOOL   { $$ = new IR::Type_Boolean(@1); }
+    | MATCH_KIND { $$ = new IR::Type_MatchKind(@1); }
     | ERROR  { $$ = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"))); }
     | BIT    { $$ = IR::Type::Bits::get(@1, 1); }
-    | STRING { $$ = IR::Type::String::get(); }
-    | INT    { $$ = new IR::Type_InfInt(); }
+    | STRING { $$ = new IR::Type::String(@1); }
+    | INT    { $$ = new IR::Type_InfInt(@1); }
     | BIT l_angle INTEGER r_angle
       { $$ = IR::Type::Bits::get(@1+@4, parseConstantChecked(@3, $3), false); }
     | INT l_angle INTEGER r_angle
