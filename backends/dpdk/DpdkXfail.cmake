@@ -108,3 +108,10 @@ p4c_add_xfail_reason("dpdk"
    testdata/p4_16_samples/psa-dpdk-struct-field.p4
    testdata/p4_16_samples/psa-example-register2-bmv2.p4
    )
+
+p4c_add_xfail_reason("dpdk"
+  "must only be called from within an action"
+  testdata/p4_16_samples/pna-add-on-miss-err.p4
+  testdata/p4_16_samples/pna-example-tcp-connection-tracking-err-1.p4
+  testdata/p4_16_samples/pna-example-tcp-connection-tracking-err.p4
+  )

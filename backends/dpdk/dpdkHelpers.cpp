@@ -768,15 +768,35 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                         append_parser_name(parser, IR::ParserState::reject)));
             add_instr(new IR::DpdkLabelStatement(end_label));
         } else if (a->method->name == "add_entry") {
+            auto args = a->expr->arguments;
+            auto argSize = args->size();
+            if (argSize != 3) {
+                ::error(ErrorType::ERR_UNEXPECTED, "Unexpected number of arguments for %1%",
+                            a->method->name);
+                return false;
+            }
             auto action = a->expr->arguments->at(0)->expression;
             auto action_name = action->to<IR::StringLiteral>()->value;
             auto param = a->expr->arguments->at(1)->expression;
+            auto timeout_id = a->expr->arguments->at(2)->expression;
+            if (timeout_id->is<IR::Constant>()) {
+                BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                IR::ID tmo(refmap->newName("timeout_id"));
+                auto timeout = new IR::Member(new IR::PathExpression("m"), tmo);
+                metadataStruct->fields.push_back(new IR::StructField(tmo, timeout_id->type));
+                add_instr(new IR::DpdkMovStatement(timeout, timeout_id));
+                timeout_id = timeout;
+            }
             if (param->is<IR::Member>()) {
                 auto argument = param->to<IR::Member>();
-                add_instr(new IR::DpdkLearnStatement(action_name, argument));
+                add_instr(new IR::DpdkLearnStatement(action_name, timeout_id, argument));
             } else if (param->is<IR::StructExpression>()) {
-                auto argument = param->to<IR::StructExpression>()->components.at(0)->expression;
-                add_instr(new IR::DpdkLearnStatement(action_name, argument));
+                if (param->to<IR::StructExpression>()->components.size() == 0) {
+                    add_instr(new IR::DpdkLearnStatement(action_name, timeout_id));
+                } else {
+                    auto argument = param->to<IR::StructExpression>()->components.at(0)->expression;
+                    add_instr(new IR::DpdkLearnStatement(action_name, timeout_id, argument));
+                }
             } else if (param->is<IR::Constant>()) {
                 // Move constant param to metadata as DPDK expects it to be in metadata
                 BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
@@ -784,10 +804,31 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 metadataStruct->fields.push_back(new IR::StructField(learnArg, param->type));
                 auto learnMember = new IR::Member(new IR::PathExpression("m"), learnArg);
                 add_instr(new IR::DpdkMovStatement(learnMember, param));
-                add_instr(new IR::DpdkLearnStatement(action_name, learnMember));
+                add_instr(new IR::DpdkLearnStatement(action_name, timeout_id, learnMember));
             } else {
                 ::error(ErrorType::ERR_UNEXPECTED, "%1%: unhandled function", s);
             }
+        } else if (a->method->name == "restart_expire_timer") {
+            add_instr(new IR::DpdkRearmStatement());
+        } else if (a->method->name == "set_entry_expire_time") {
+            auto args = a->expr->arguments;
+            if (args->size() != 1) {
+                ::error(ErrorType::ERR_UNEXPECTED, "Expected 1 arguments for %1%",
+                            a->method->name);
+                return false;
+            }
+            auto timeout = a->expr->arguments->at(0)->expression;
+            if (timeout->is<IR::Constant>()) {
+                // Move timeout_is to metadata fields as DPDK expects these parameters
+                // to be in metadata
+                BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                IR::ID tmo(refmap->newName("new_timeout"));
+                metadataStruct->fields.push_back(new IR::StructField(tmo, timeout->type));
+                auto tmoMem = new IR::Member(new IR::PathExpression("m"), tmo);
+                add_instr(new IR::DpdkMovStatement(tmoMem, timeout));
+                timeout = tmoMem;
+            }
+            add_instr(new IR::DpdkRearmStatement(timeout));
         } else if (a->method->name == "mirror_packet") {
             auto args = a->expr->arguments;
             if (args->size() != 2) {

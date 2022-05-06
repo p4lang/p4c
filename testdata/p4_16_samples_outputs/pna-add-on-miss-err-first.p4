@@ -26,8 +26,11 @@ header ipv4_t {
 struct empty_metadata_t {
 }
 
+typedef bit<48> ByteCounter_t;
+typedef bit<32> PacketCounter_t;
+typedef bit<80> PacketByteCounter_t;
+const bit<32> NUM_PORTS = 32w4;
 struct main_metadata_t {
-    bit<32>               key;
     ExpireTimeProfileId_t timeout;
 }
 
@@ -55,39 +58,35 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
     }
 }
 
-struct tuple_0 {
-    bit<32> f0;
-    bit<32> f1;
-}
-
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @name("MainControlImpl.next_hop") action next_hop(@name("vport") PortId_t vport) {
+    action next_hop(PortId_t vport) {
         send_to_port(vport);
     }
-    @name("MainControlImpl.add_on_miss_action") action add_on_miss_action() {
-        add_entry<bit<32>>(action_name = "next_hop", action_params = 32w0, expire_time_profile_id = user_meta.timeout);
+    action add_on_miss_action() {
+        bit<32> tmp = 32w0;
+        add_entry<bit<32>>(action_name = "next_hop", action_params = tmp, expire_time_profile_id = user_meta.timeout);
     }
-    @name("MainControlImpl.ipv4_da") table ipv4_da_0 {
+    table ipv4_da {
         key = {
-            hdr.ipv4.dstAddr: exact @name("ipv4_addr_0") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
             @tableonly next_hop();
             @defaultonly add_on_miss_action();
         }
-        add_on_miss = true;
+        add_on_miss = false;
         const default_action = add_on_miss_action();
     }
-    @name("MainControlImpl.next_hop2") action next_hop2(@name("vport") PortId_t vport_2, @name("newAddr") bit<32> newAddr) {
-        send_to_port(vport_2);
+    action next_hop2(PortId_t vport, bit<32> newAddr) {
+        send_to_port(vport);
         hdr.ipv4.srcAddr = newAddr;
     }
-    @name("MainControlImpl.add_on_miss_action2") action add_on_miss_action2() {
-        add_entry<tuple_0>(action_name = "next_hop", action_params = (tuple_0){f0 = 32w0,f1 = 32w1234}, expire_time_profile_id = user_meta.timeout);
+    action add_on_miss_action2() {
+        add_entry<tuple<bit<32>, bit<32>>>(action_name = "next_hop2", action_params = { 32w0, 32w1234 }, expire_time_profile_id = user_meta.timeout);
     }
-    @name("MainControlImpl.ipv4_da2") table ipv4_da2_0 {
+    table ipv4_da2 {
         key = {
-            user_meta.key: exact @name("user_meta.key") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
             @tableonly next_hop2();
@@ -98,25 +97,16 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     apply {
         if (hdr.ipv4.isValid()) {
-            ipv4_da_0.apply();
-            ipv4_da2_0.apply();
+            ipv4_da.apply();
+            ipv4_da2.apply();
         }
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdktablekeyuseannon188() {
+    apply {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
-    }
-    @hidden table tbl_pnadpdktablekeyuseannon188 {
-        actions = {
-            pnadpdktablekeyuseannon188();
-        }
-        const default_action = pnadpdktablekeyuseannon188();
-    }
-    apply {
-        tbl_pnadpdktablekeyuseannon188.apply();
     }
 }
 

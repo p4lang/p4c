@@ -104,7 +104,8 @@ class DpdkApplyStatement : DpdkAsmStatement, IDPDKNode {
 
 class DpdkLearnStatement : DpdkAsmStatement, IDPDKNode {
     cstring action;
-    optional Expression argument;
+    Expression timeout;
+    NullOK optional Expression argument;
     std::ostream& toSpec(std::ostream& out) const override;
 }
 
@@ -446,6 +447,12 @@ class DpdkRecircidStatement : DpdkAsmStatement, IDPDKNode {
 }
 
 class DpdkReturnStatement : DpdkAsmStatement, IDPDKNode {
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
+class DpdkRearmStatement : DpdkAsmStatement, IDPDKNode {
+    NullOK optional Expression timeout;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }

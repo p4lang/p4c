@@ -598,7 +598,8 @@ extern void recirculate();
 // entry's initial expire_time_profile_id.
 
 extern bool add_entry<T>(string action_name,
-                         in T action_params);
+                         in T action_params,
+                         in ExpireTimeProfileId_t expire_time_profile_id);
 
 extern FlowId_t allocate_flow_id();
 
