@@ -148,7 +148,7 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
     auto sh = new IR::Shl(cast0->srcInfo, cast0, new IR::Constant(sizeofb));
     big_int m = Util::maskFromSlice(sizeofb, 0);
     auto mask = new IR::Constant(expression->right->srcInfo,
-                                 IR::Type_Bits::get(sizeofresult), m, 16);
+                                 resulttype, m, 16);
     auto and0 = new IR::BAnd(expression->right->srcInfo, cast1, mask);
     auto result = new IR::BOr(expression->srcInfo, sh, and0);
     typeMap->setType(cast0, resulttype);
