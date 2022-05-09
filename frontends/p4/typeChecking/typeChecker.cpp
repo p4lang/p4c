@@ -2315,17 +2315,18 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
             warn(ErrorType::WARN_OVERFLOW, "%1%: shifting value with %2% bits by %3%",
                  expression, lt->size, shift);
         // If the amount is signed but positive, make it unsigned
-        auto bt = rtype->checkedTo<IR::Type_Bits>();
-        if (bt->isSigned) {
-            rtype = new IR::Type_Bits(rtype->srcInfo, bt->width_bits(), false);
-            auto amt = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
-            if (expression->is<IR::Shl>()) {
-                expression = new IR::Shl(expression->srcInfo, expression->left, amt);
-            } else {
-                expression = new IR::Shr(expression->srcInfo, expression->left, amt);
+        if (auto bt = rtype->to<IR::Type_Bits>()) {
+            if (bt->isSigned) {
+                rtype = new IR::Type_Bits(rtype->srcInfo, bt->width_bits(), false);
+                auto amt = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
+                if (expression->is<IR::Shl>()) {
+                    expression = new IR::Shl(expression->srcInfo, expression->left, amt);
+                } else {
+                    expression = new IR::Shr(expression->srcInfo, expression->left, amt);
+                }
+                setCompileTimeConstant(expression->right);
+                setType(expression->right, rtype);
             }
-            setCompileTimeConstant(expression->right);
-            setType(expression->right, rtype);
         }
     }
 
