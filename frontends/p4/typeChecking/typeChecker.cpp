@@ -1188,6 +1188,17 @@ const IR::Node* TypeInference::postorder(IR::Method* method) {
     auto type = getTypeType(method->type);
     if (type == nullptr)
         return method;
+    if (auto mtype = type->to<IR::Type_Method>()) {
+        if (mtype->returnType) {
+            if (auto gen = mtype->returnType->to<IR::IMayBeGenericType>()) {
+                if (gen->getTypeParameters()->size() != 0) {
+                    typeError("%1%: no type parameters supplied for return generic type",
+                              method->type->returnType);
+                    return method;
+                }
+            }
+        }
+    }
     setType(getOriginal(), type);
     setType(method, type);
     return method;
