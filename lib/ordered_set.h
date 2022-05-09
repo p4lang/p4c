@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef _LIB_ORDERED_SET_H_
 #define _LIB_ORDERED_SET_H_
 
+#include "util_container.h"
+
 #include <functional>
 #include <initializer_list>
 #include <list>
@@ -142,14 +144,18 @@ class ordered_set {
         auto it = find(v);
         if (it == data.end()) {
             it = data.insert(data.end(), v);
+            auto guard = MakeAutoEraseGuard (&data, it);
             data_map.emplace(&*it, it);
+            guard.dismiss ();
             return std::make_pair(it, true); }
         return std::make_pair(it, false); }
     std::pair<iterator, bool> insert(T &&v) {
         auto it = find(v);
         if (it == data.end()) {
             it = data.insert(data.end(), std::move(v));
+            auto guard = MakeAutoEraseGuard (&data, it);
             data_map.emplace(&*it, it);
+            guard.dismiss ();
             return std::make_pair(it, true); }
         return std::make_pair(it, false); }
     void insert(ordered_set::const_iterator begin, ordered_set::const_iterator end) {
@@ -160,7 +166,9 @@ class ordered_set {
         auto it = find(v);
         if (it == data.end()) {
             it = data.insert(pos, v);
+            auto guard = MakeAutoEraseGuard (&data, it);
             data_map.emplace(&*it, it);
+            guard.dismiss ();
             return it; }
         return it;
     }
@@ -168,7 +176,9 @@ class ordered_set {
         auto it = find(v);
         if (it == data.end()) {
             it = data.insert(pos, std::move(v));
+            auto guard = MakeAutoEraseGuard (&data, it);
             data_map.emplace(&*it, it);
+            guard.dismiss ();
             return it; }
         return it;
     }
@@ -177,14 +187,18 @@ class ordered_set {
         auto it = find(v);
         if (it == data.end()) {
             it = data.insert(data.end(), v);
+            auto guard = MakeAutoEraseGuard (&data, it);
             data_map.emplace(&*it, it);
+            guard.dismiss ();
         } else {
             data.splice(data.end(), data, it); } }
     void push_back(T &&v) {
         auto it = find(v);
         if (it == data.end()) {
             it = data.insert(data.end(), std::move(v));
+            auto guard = MakeAutoEraseGuard (&data, it);
             data_map.emplace(&*it, it);
+            guard.dismiss ();
         } else {
             data.splice(data.end(), data, it); } }
 
@@ -193,7 +207,9 @@ class ordered_set {
         auto it = data.emplace(data.end(), std::forward<Args>(args)...);
         auto old = find(*it);
         if (old == data.end()) {
+            auto guard = MakeAutoEraseGuard (&data, it);
             data_map.emplace(&*it, it);
+            guard.dismiss ();
             return std::make_pair(it, true);
         } else {
             data.erase(it);
@@ -205,7 +221,9 @@ class ordered_set {
         auto old = find(*it);
         if (old != data.end()) {
             data.erase(old); }
+        auto guard = MakeAutoEraseGuard (&data, it);
         data_map.emplace(&*it, it);
+        guard.dismiss ();
         return std::make_pair(it, true); }
 
     /* should be erase(const_iterator), but glibc++ std::list::erase is broken */
