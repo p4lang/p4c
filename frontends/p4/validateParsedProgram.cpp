@@ -227,10 +227,13 @@ void ValidateParsedProgram::postorder(const IR::SwitchStatement* statement) {
 
 /// Return statements are not allowed in parsers
 void ValidateParsedProgram::postorder(const IR::ReturnStatement* statement) {
-    auto inParser = findContext<IR::P4Parser>();
-    if (inParser != nullptr)
-        ::error(ErrorType::ERR_INVALID,
-                "%1%: invalid statement. 'return' statements not allowed in parsers.", statement);
+    if (!findContext<IR::Function>()) {
+        auto inParser = findContext<IR::P4Parser>();
+        if (inParser != nullptr)
+            ::error(ErrorType::ERR_INVALID,
+                    "%1%: invalid statement. 'return' statements not allowed in parsers.",
+                    statement);
+    }
 }
 
 /// Exit statements are not allowed in parsers or functions

@@ -260,6 +260,8 @@ class cstring {
 
     // convert the cstring to upper case
     cstring toUpper();
+    // capitalize the first symbol
+    cstring capitalize();
 };
 
 inline bool operator==(const char *a, cstring b) { return b == a; }

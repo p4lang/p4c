@@ -50,7 +50,7 @@ class CFG final : public IHasDbPrint {
         bool checkSame(const EdgeSet& other) const;
         /// Check if this destination appears in this edgeset.
         /// Importantly, a TableNode is a destination if it points to
-        /// the same table as an existin destination (pointer equality
+        /// the same table as an existing destination (pointer equality
         /// is not enough).
         bool isDestination(const CFG::Node* destination) const;
     };
