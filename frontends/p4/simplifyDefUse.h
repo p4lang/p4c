@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/cloner.h"
 
 namespace P4 {
 
