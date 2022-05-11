@@ -17,6 +17,7 @@ limitations under the License.
 #include "methodInstance.h"
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/evaluator/substituteParameters.h"
 
 namespace P4 {
 
