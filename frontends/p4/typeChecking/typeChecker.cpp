@@ -567,12 +567,15 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             auto atype = getTypeType(a);
             if (atype == nullptr)
                 return nullptr;
-            if (atype->is<IR::Type_Control>() ||
-                atype->is<IR::Type_Parser>() ||
-                atype->is<IR::Type_Package>() ||
-                atype->is<IR::P4Parser>() ||
-                atype->is<IR::P4Control>()) {
-                typeError("%1%: Cannot use %2% as a type parameter", type, atype);
+            auto checkType = atype;
+            if (auto tsc = atype->to<IR::Type_SpecializedCanonical>())
+                checkType = tsc->baseType;
+            if (checkType->is<IR::Type_Control>() ||
+                checkType->is<IR::Type_Parser>() ||
+                checkType->is<IR::Type_Package>() ||
+                checkType->is<IR::P4Parser>() ||
+                checkType->is<IR::P4Control>()) {
+                typeError("%1%: Cannot use %2% as a type parameter", type, checkType);
                 return nullptr;
             }
             const IR::Type* canon = canonicalize(atype);
