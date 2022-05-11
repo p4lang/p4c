@@ -428,7 +428,7 @@ class AllDefinitions : public IHasDbPrint {
             if (it != atPoint.end()) {
                 LOG2("Overwriting definitions at " << point << ": " <<
                      it->second << " with " << defs);
-                BUG_CHECK(false, "Overwriting definitions");
+                BUG_CHECK(false, "Overwriting definitions at %1%", point);
             }
         }
         atPoint[point] = defs;
@@ -489,6 +489,9 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     }
     void expressionWrites(const IR::Expression* expression, const LocationSet* loc) {
         CHECK_NULL(expression); CHECK_NULL(loc);
+        LOG3(expression << dbp(expression) << " writes " << loc);
+        BUG_CHECK(writes.find(expression) == writes.end() || expression->is<IR::Literal>(),
+                  "Expression %1% write set already set", expression);
         writes.emplace(expression, loc);
     }
     void dbprint(std::ostream& out) const override {
