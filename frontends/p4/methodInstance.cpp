@@ -124,6 +124,12 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, DeclarationLookup* 
     return nullptr;  // unreachable
 }
 
+const IR::P4Action* ActionCall::specialize(ReferenceMap* refMap) const {
+    SubstituteParameters sp(refMap, &substitution, new TypeVariableSubstitution());
+    auto result = action->apply(sp);
+    return result->to<IR::P4Action>();
+}
+
 ConstructorCall*
 ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
                          DeclarationLookup* refMap, TypeMap* typeMap) {
