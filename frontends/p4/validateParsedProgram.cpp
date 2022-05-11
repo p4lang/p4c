@@ -227,7 +227,8 @@ void ValidateParsedProgram::postorder(const IR::ReturnStatement* statement) {
         auto inParser = findContext<IR::P4Parser>();
         if (inParser != nullptr)
             ::error(ErrorType::ERR_INVALID,
-                    "%1%: invalid statement. 'return' statements not allowed in parsers.", statement);
+                    "%1%: invalid statement. 'return' statements not allowed in parsers.",
+                    statement);
     }
 }
 
