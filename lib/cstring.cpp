@@ -265,3 +265,9 @@ cstring cstring::toUpper() {
     return ret;
 }
 
+cstring cstring::capitalize() {
+    std::string st = str;
+    st[0] = ::toupper(st[0]);
+    cstring ret = cstring::to_cstring(st);
+    return ret;
+}
