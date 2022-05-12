@@ -96,15 +96,11 @@ class Graphs : public Inspector {
  public:
     enum class VertexType {
         TABLE,
-        KEY,
-        ACTION,
         CONDITION,
         SWITCH,
         STATEMENTS,
         CONTROL,
-        OTHER,
-        STATE,
-        EMPTY
+        OTHER
     };
     struct Vertex {
         cstring name;
@@ -144,15 +140,6 @@ class Graphs : public Inspector {
     vertex_t add_vertex(const cstring &name, VertexType type);
     vertex_t add_and_connect_vertex(const cstring &name, VertexType type);
     void add_edge(const vertex_t &from, const vertex_t &to, const cstring &name);
-    /** 
-     * @brief used to connect subgraphs
-     * @param from node from wich edge will start
-     * @param to node where edge will end
-     * @param name used as edge label
-     * @param cluster_id id of cluster, that will be connected to previous cluster
-     */
-    void add_edge(const vertex_t &from, const vertex_t &to, const cstring &name,
-                  unsigned cluster_id);
 
     class GraphAttributeSetter {
      public:
@@ -177,7 +164,6 @@ class Graphs : public Inspector {
         static cstring vertexTypeGetShape(VertexType type) {
             switch (type) {
             case VertexType::TABLE:
-            case VertexType::ACTION:
                 return "ellipse";
             default:
                 return "rectangle";
@@ -190,11 +176,6 @@ class Graphs : public Inspector {
             switch (type) {
             case VertexType::CONTROL:
                 return "dashed";
-            case VertexType::EMPTY:
-                return "invis";
-            case VertexType::KEY:
-            case VertexType::CONDITION:
-                return "rounded";
             default:
                 return "solid";
             }
@@ -216,14 +197,6 @@ class Graphs : public Inspector {
     vertex_t exit_v{};
     Parents parents{};
     std::vector<const IR::Statement *> statementsStack{};
-
- private:
-    /**
-     * @brief Limits string size in helper_sstream and resets it
-     * @param[out] sstream stringstream where trimmed string is stored
-     * @param helper_sstream contains string, which will be trimmed
-     */
-    void limitStringSize(std::stringstream &sstream, std::stringstream &helper_sstream);
 };
 
 }  // namespace graphs

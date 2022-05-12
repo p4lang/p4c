@@ -15,15 +15,12 @@
  * limitations under the License.
  */
 
-#include "parsers.h"
-
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "lib/nullstream.h"
+#include "parsers.h"
 
 namespace graphs {
-
-using Graph = ParserGraphs::Graph;
 
 static cstring toString(const IR::Expression* expression) {
     std::stringstream ss;
@@ -33,30 +30,16 @@ static cstring toString(const IR::Expression* expression) {
     return cstring(ss.str());
 }
 
-// we always have only one subgraph
-Graph *ParserGraphs::CreateSubGraph(Graph &currentSubgraph, const cstring &name ){
-    auto &newSubgraph = currentSubgraph.create_subgraph();
-    boost::get_property(newSubgraph, boost::graph_name) = "cluster" + name;
-    boost::get_property(newSubgraph, boost::graph_graph_attribute)["label"] = name;
-    boost::get_property(newSubgraph, boost::graph_graph_attribute)["fontsize"] = "22pt";
-    boost::get_property(newSubgraph, boost::graph_graph_attribute)["style"] = "bold";
-    return &newSubgraph;
-}
-
-ParserGraphs::ParserGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                             const cstring &graphsDir)
-    : refMap(refMap), typeMap(typeMap), graphsDir(graphsDir) {
-    visitDagOnce = false;
-}
-
 void ParserGraphs::postorder(const IR::P4Parser *parser) {
-    Graph *g_ = new Graph();
-    g = CreateSubGraph(*g_, parser->name);
-    boost::get_property(*g_, boost::graph_name) = parser->name;
+    auto path = Util::PathName(graphsDir).join(parser->name + ".dot");
+    LOG2("Writing parser graph " << parser->name);
+    auto out = openFile(path.toString(), false);
+    if (out == nullptr) {
+        ::error(ErrorType::ERR_IO, "Failed to open file %1%", path.toString());
+        return;
+    }
 
-    std::map<const char*, unsigned int> nodes;
-    unsigned int iter = 0;
-
+    (*out) << "digraph " << parser->name << "{" << std::endl;
     for (auto state : states[parser]) {
         cstring label = state->name;
         if (state->selectExpression != nullptr &&
@@ -64,17 +47,15 @@ void ParserGraphs::postorder(const IR::P4Parser *parser) {
             label += "\n" + toString(
                 state->selectExpression->to<IR::SelectExpression>()->select);
         }
-        add_vertex(label, VertexType::STATE);
-        nodes.emplace(std::make_pair(state->name.name.c_str(), iter++));
+        (*out) << state->name.name << " [shape=rectangle,label=\"" <<
+                label << "\"]" << std::endl;
     }
 
     for (auto edge : transitions[parser]) {
-        auto from = nodes[edge->sourceState->name.name.c_str()];
-        auto to = nodes[edge->destState->name.name.c_str()];
-        add_edge((vertex_t)from, (vertex_t)to, edge->label);
+        *out << edge->sourceState->name.name << " -> " << edge->destState->name.name <<
+                " [label=\"" << edge->label << "\"]" << std::endl;
     }
-
-    parserGraphsArray.push_back(g_);
+    *out << "}" << std::endl;
 }
 
 void ParserGraphs::postorder(const IR::ParserState* state) {
