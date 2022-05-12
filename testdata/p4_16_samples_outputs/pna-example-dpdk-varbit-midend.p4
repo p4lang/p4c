@@ -64,7 +64,7 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
         tmp_hdr_0.setValid();
         tmp_hdr_0.value = tmp_1[15:8];
         tmp_hdr_0.len = tmp_1[7:0];
-        pkt.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_1[7:0] << 3) + 32w4294967280);
+        pkt.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_1[7:0] << 3) - 32w16);
         transition accept;
     }
     state parse_ipv4_options {

@@ -134,11 +134,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ingress.fib_hit_nexthop") action fib_hit_nexthop(@name("nexthop_index") bit<16> nexthop_index_1) {
         meta._ingress_metadata_nexthop_index2 = nexthop_index_1;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name("ingress.fib_hit_nexthop") action fib_hit_nexthop_1(@name("nexthop_index") bit<16> nexthop_index_2) {
         meta._ingress_metadata_nexthop_index2 = nexthop_index_2;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name("ingress.set_egress_details") action set_egress_details(@name("egress_spec") bit<9> egress_spec_1) {
         standard_metadata.egress_spec = egress_spec_1;

@@ -3,7 +3,7 @@ control c(inout bit<32> x) {
         x = 32w10;
         if (x == 32w10) {
             x = x + 32w2;
-            x = x + 32w4294967290;
+            x = x - 32w6;
         } else {
             x = x << 2;
         }

@@ -88,7 +88,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_ipv4") state parse_ipv4 {
         packet.extract<ipv4_base_t>(hdr.ipv4_base);
-        meta.my_metadata.parse_ipv4_counter = (bit<8>)((hdr.ipv4_base.ihl << 2) + 4w12);
+        meta.my_metadata.parse_ipv4_counter = (bit<8>)((hdr.ipv4_base.ihl << 2) - 4w4);
         transition select(hdr.ipv4_base.ihl) {
             4w0x5: accept;
             default: parse_ipv4_options;
@@ -96,22 +96,22 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_ipv4_option_EOL") state parse_ipv4_option_EOL {
         packet.extract<ipv4_option_EOL_t>(hdr.ipv4_option_EOL.next);
-        meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter + 8w255;
+        meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter - 8w1;
         transition parse_ipv4_options;
     }
     @name(".parse_ipv4_option_NOP") state parse_ipv4_option_NOP {
         packet.extract<ipv4_option_NOP_t>(hdr.ipv4_option_NOP.next);
-        meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter + 8w255;
+        meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter - 8w1;
         transition parse_ipv4_options;
     }
     @name(".parse_ipv4_option_security") state parse_ipv4_option_security {
         packet.extract<ipv4_option_security_t>(hdr.ipv4_option_security);
-        meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter + 8w245;
+        meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter - 8w11;
         transition parse_ipv4_options;
     }
     @name(".parse_ipv4_option_timestamp") state parse_ipv4_option_timestamp {
         tmp_hdr = packet.lookahead<ipv4_option_timestamp_t_1>();
-        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_hdr.len << 3) + 32w4294967280);
+        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_hdr.len << 3) - 32w16);
         meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter - hdr.ipv4_option_timestamp.len;
         transition parse_ipv4_options;
     }

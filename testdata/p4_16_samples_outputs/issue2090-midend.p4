@@ -79,7 +79,7 @@ parser Tcp_option_parser(packet_in b, out Tcp_option_stack vec) {
     }
     state parse_tcp_option_sack {
         tmp_5 = b.lookahead<bit<24>>();
-        b.extract<Tcp_option_sack_h>(vec.next.sack, (bit<32>)((tmp_5[15:8] << 3) + 8w240));
+        b.extract<Tcp_option_sack_h>(vec.next.sack, (bit<32>)((tmp_5[15:8] << 3) - 8w16));
         transition start;
     }
     state noMatch {

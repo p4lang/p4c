@@ -114,7 +114,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         meta.fwd.out_bd = bd;
         hdr.ethernet.dstAddr = dmac;
         standard_metadata.egress_spec = intf;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     table mac_da {
         key = {

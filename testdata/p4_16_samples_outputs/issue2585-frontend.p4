@@ -8,7 +8,7 @@ header Header {
 parser p0(packet_in p, out Header h) {
     state start {
         p.extract<Header>(h);
-        h.data = h.data2 + 32w4294967262;
+        h.data = h.data2 - 32w8 - 32w8 - 32w2 - 32w16;
         transition accept;
     }
 }

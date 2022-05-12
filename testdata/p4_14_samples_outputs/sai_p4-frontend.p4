@@ -181,13 +181,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.nhop = next_hop_id;
         meta.ingress_metadata.routed = 1w1;
         meta.ingress_metadata.ip_dest = hdr.ipv4.dstAddr;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name(".route_set_nexthop_group") action route_set_nexthop_group(@name("next_hop_group_id") bit<16> next_hop_group_id) {
         meta.ingress_metadata.ecmp_nhop = next_hop_group_id;
         meta.ingress_metadata.routed = 1w1;
         meta.ingress_metadata.ip_dest = hdr.ipv4.dstAddr;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name(".set_router_interface") action set_router_interface(@name("virtual_router_id") bit<16> virtual_router_id, @name("type_") bit<1> type_6, @name("port_id") bit<9> port_id_4, @name("vlan_id") bit<12> vlan_id_1, @name("src_mac_address") bit<48> src_mac_address, @name("admin_v4_state") bit<1> admin_v4_state, @name("admin_v6_state") bit<1> admin_v6_state, @name("mtu") bit<14> mtu_2) {
         meta.ingress_metadata.vrf = virtual_router_id;

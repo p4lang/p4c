@@ -61,7 +61,7 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
         }
     }
     state parse_ipv4_option_timestamp {
-        pkt.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)hdr.option.len << 3) + 32w4294967280);
+        pkt.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)hdr.option.len << 3) - 32w16);
         transition accept;
     }
     state parse_ipv4_options {

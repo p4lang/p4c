@@ -105,7 +105,7 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
     state parse_ipv4 {
         tmp = pkt.lookahead<IPv4_up_to_ihl_only_h>();
         tmp_0 = (bit<9>)tmp.ihl << 2;
-        tmp_1 = tmp_0 + 9w492;
+        tmp_1 = tmp_0 - 9w20;
         tmp_2 = tmp_1 << 3;
         tmp_3 = (bit<32>)tmp_2;
         pkt.extract<ipv4_t>(hdr.ipv4, tmp_3);
@@ -121,7 +121,7 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
     state parse_tcp {
         tmp_4 = pkt.lookahead<tcp_upto_data_offset_only_h>();
         tmp_5 = (bit<9>)tmp_4.dataOffset << 2;
-        tmp_6 = tmp_5 + 9w492;
+        tmp_6 = tmp_5 - 9w20;
         tmp_7 = tmp_6 << 3;
         tmp_8 = (bit<32>)tmp_7;
         pkt.extract<tcp_t>(hdr.tcp, tmp_8);
@@ -141,12 +141,12 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("cIngress.foot") action foot() {
         hdr.tcp.srcPort = hdr.tcp.srcPort + 16w1;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
         hdr.ipv4.dstAddr = hdr.ipv4.dstAddr + 32w4;
     }
     @name("cIngress.foou") action foou() {
         hdr.udp.srcPort = hdr.udp.srcPort + 16w1;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
         hdr.ipv4.dstAddr = hdr.ipv4.dstAddr + 32w4;
     }
     @name("cIngress.guh") table guh_0 {

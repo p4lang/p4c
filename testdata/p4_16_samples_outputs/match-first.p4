@@ -42,7 +42,7 @@ parser Top(packet_in b, out Parsed_headers headers) {
         transition parse_ipv4_options;
     }
     state parse_ipv4_options {
-        b.extract<Ipv4_options_h>(headers.ipv4options, (bit<32>)(((bit<8>)headers.ipv4.ihl << 2) + 8w236 << 3));
+        b.extract<Ipv4_options_h>(headers.ipv4options, (bit<32>)(((bit<8>)headers.ipv4.ihl << 2) - 8w20 << 3));
         transition select(headers.ipv4.protocol) {
             8w6: parse_tcp;
             8w17: parse_udp;

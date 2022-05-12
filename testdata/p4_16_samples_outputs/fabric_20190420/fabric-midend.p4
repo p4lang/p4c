@@ -991,13 +991,13 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
         mark_to_drop(standard_metadata);
     }
     @hidden action next326() {
-        hdr.mpls.ttl = hdr.mpls.ttl + 8w255;
+        hdr.mpls.ttl = hdr.mpls.ttl - 8w1;
     }
     @hidden action next331() {
         mark_to_drop(standard_metadata);
     }
     @hidden action next330() {
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @hidden table tbl_act_0 {
         actions = {

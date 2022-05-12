@@ -148,7 +148,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
 control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action rewrite_mac(macAddr_t srcAddr) {
         hdr.ethernet.srcAddr = srcAddr;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     table send_frame {
         key = {

@@ -85,7 +85,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     IPv4Address nextHop;
     action Set_nhop(IPv4Address ipv4_dest, PortId port) {
         nextHop = ipv4_dest;
-        headers.ip.ttl = headers.ip.ttl + 8w255;
+        headers.ip.ttl = headers.ip.ttl - 8w1;
         outCtrl.outputPort = port;
     }
     table ipv4_match {

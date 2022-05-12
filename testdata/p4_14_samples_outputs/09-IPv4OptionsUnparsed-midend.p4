@@ -90,7 +90,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         tmp_hdr_0.hdrChecksum = tmp[79:64];
         tmp_hdr_0.srcAddr = tmp[63:32];
         tmp_hdr_0.dstAddr = tmp[31:0];
-        packet.extract<ipv4_t>(hdr.ipv4, ((bit<32>)tmp[155:152] << 5) + 32w4294967136);
+        packet.extract<ipv4_t>(hdr.ipv4, ((bit<32>)tmp[155:152] << 5) - 32w160);
         transition accept;
     }
     @name(".parse_vlan_tag") state parse_vlan_tag {

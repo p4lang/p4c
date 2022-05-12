@@ -106,7 +106,7 @@ parser Tcp_option_parser(packet_in b, in bit<4> tcp_hdr_data_offset, out Tcp_opt
     bit<7> tcp_hdr_bytes_left;
     state start {
         verify(tcp_hdr_data_offset >= 4w5, error.TcpDataOffsetTooSmall);
-        tcp_hdr_bytes_left = (bit<7>)(tcp_hdr_data_offset + 4w11) << 2;
+        tcp_hdr_bytes_left = (bit<7>)(tcp_hdr_data_offset - 4w5) << 2;
         transition next_option;
     }
     state next_option {
@@ -126,7 +126,7 @@ parser Tcp_option_parser(packet_in b, in bit<4> tcp_hdr_data_offset, out Tcp_opt
     }
     state parse_tcp_option_end {
         b.extract<Tcp_option_end_h>(vec.next.end);
-        tcp_hdr_bytes_left = tcp_hdr_bytes_left + 7w127;
+        tcp_hdr_bytes_left = tcp_hdr_bytes_left - 7w1;
         transition consume_remaining_tcp_hdr_and_accept;
     }
     state consume_remaining_tcp_hdr_and_accept {
@@ -135,18 +135,18 @@ parser Tcp_option_parser(packet_in b, in bit<4> tcp_hdr_data_offset, out Tcp_opt
     }
     state parse_tcp_option_nop {
         b.extract<Tcp_option_nop_h>(vec.next.nop);
-        tcp_hdr_bytes_left = tcp_hdr_bytes_left + 7w127;
+        tcp_hdr_bytes_left = tcp_hdr_bytes_left - 7w1;
         transition next_option;
     }
     state parse_tcp_option_ss {
         verify(tcp_hdr_bytes_left >= 7w5, error.TcpOptionTooLongForHeader);
-        tcp_hdr_bytes_left = tcp_hdr_bytes_left + 7w123;
+        tcp_hdr_bytes_left = tcp_hdr_bytes_left - 7w5;
         b.extract<Tcp_option_ss_h>(vec.next.ss);
         transition next_option;
     }
     state parse_tcp_option_s {
         verify(tcp_hdr_bytes_left >= 7w4, error.TcpOptionTooLongForHeader);
-        tcp_hdr_bytes_left = tcp_hdr_bytes_left + 7w124;
+        tcp_hdr_bytes_left = tcp_hdr_bytes_left - 7w4;
         b.extract<Tcp_option_s_h>(vec.next.s);
         transition next_option;
     }
@@ -155,7 +155,7 @@ parser Tcp_option_parser(packet_in b, in bit<4> tcp_hdr_data_offset, out Tcp_opt
         verify(n_sack_bytes == 8w10 || n_sack_bytes == 8w18 || n_sack_bytes == 8w26 || n_sack_bytes == 8w34, error.TcpBadSackOptionLength);
         verify(tcp_hdr_bytes_left >= (bit<7>)n_sack_bytes, error.TcpOptionTooLongForHeader);
         tcp_hdr_bytes_left = tcp_hdr_bytes_left - (bit<7>)n_sack_bytes;
-        b.extract<Tcp_option_sack_h>(vec.next.sack, (bit<32>)((n_sack_bytes << 3) + 8w240));
+        b.extract<Tcp_option_sack_h>(vec.next.sack, (bit<32>)((n_sack_bytes << 3) - 8w16));
         transition next_option;
     }
 }
@@ -208,7 +208,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.fwd_metadata.out_bd = bd;
         hdr.ethernet.dstAddr = dmac;
         standard_metadata.egress_spec = intf;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     table mac_da {
         key = {

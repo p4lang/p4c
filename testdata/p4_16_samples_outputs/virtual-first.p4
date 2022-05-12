@@ -20,7 +20,7 @@ control c(inout bit<16> p) {
                 x.a = ix.a + 16w1;
             }
             if (ix.a > ix.b) {
-                x.a = ix.a + 16w65535;
+                x.a = ix.a - 16w1;
             }
         }
     };

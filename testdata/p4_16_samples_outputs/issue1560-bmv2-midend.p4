@@ -81,7 +81,7 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
         tmp.setValid();
         tmp.version = tmp_4[7:4];
         tmp.ihl = tmp_4[3:0];
-        pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)(((bit<9>)tmp_4[3:0] << 2) + 9w492 << 3));
+        pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)(((bit<9>)tmp_4[3:0] << 2) - 9w20 << 3));
         verify(hdr.ipv4.version == 4w4, error.IPv4IncorrectVersion);
         verify(hdr.ipv4.ihl >= 4w5, error.IPv4HeaderTooShort);
         transition select(hdr.ipv4.protocol) {

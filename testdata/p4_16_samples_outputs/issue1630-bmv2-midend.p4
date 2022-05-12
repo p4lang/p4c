@@ -78,7 +78,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = dstAddr_1;
         standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
         hdr.ipv4.hdrChecksum = 16w1;
     }
     @name("MyIngress.ipv4_lpm") table ipv4_lpm_0 {

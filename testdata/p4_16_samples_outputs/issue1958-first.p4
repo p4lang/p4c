@@ -39,7 +39,7 @@ control foo2(inout headers_t my_headers, inout metadata_t meta, register<bit<8>>
     action foo2_action() {
         idx = (bit<32>)my_headers.ethernet.srcAddr[7:0];
         my_reg.read(val, idx);
-        val = val + 8w249;
+        val = val - 8w7;
         my_reg.write(idx, val);
     }
     table foo2_table {

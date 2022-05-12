@@ -95,7 +95,7 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
         }
     }
     state parse_ipv4 {
-        pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)(((bit<9>)(pkt.lookahead<IPv4_up_to_ihl_only_h>()).ihl << 2) + 9w492 << 3));
+        pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)(((bit<9>)(pkt.lookahead<IPv4_up_to_ihl_only_h>()).ihl << 2) - 9w20 << 3));
         verify(hdr.ipv4.version == 4w4, error.IPv4IncorrectVersion);
         verify(hdr.ipv4.ihl >= 4w5, error.IPv4HeaderTooShort);
         meta.l4Len = hdr.ipv4.totalLen - ((bit<16>)hdr.ipv4.ihl << 2);
@@ -106,7 +106,7 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
         }
     }
     state parse_tcp {
-        pkt.extract<tcp_t>(hdr.tcp, (bit<32>)(((bit<9>)(pkt.lookahead<tcp_upto_data_offset_only_h>()).dataOffset << 2) + 9w492 << 3));
+        pkt.extract<tcp_t>(hdr.tcp, (bit<32>)(((bit<9>)(pkt.lookahead<tcp_upto_data_offset_only_h>()).dataOffset << 2) - 9w20 << 3));
         verify(hdr.tcp.dataOffset >= 4w5, error.TCPHeaderTooShort);
         transition accept;
     }
@@ -119,12 +119,12 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     action foot() {
         hdr.tcp.srcPort = hdr.tcp.srcPort + 16w1;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
         hdr.ipv4.dstAddr = hdr.ipv4.dstAddr + 32w4;
     }
     action foou() {
         hdr.udp.srcPort = hdr.udp.srcPort + 16w1;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
         hdr.ipv4.dstAddr = hdr.ipv4.dstAddr + 32w4;
     }
     table guh {

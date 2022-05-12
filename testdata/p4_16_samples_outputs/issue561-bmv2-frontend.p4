@@ -179,7 +179,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state Tcp_option_parser_start {
         verify(hdr.tcp.dataOffset >= 4w5, error.TcpDataOffsetTooSmall);
-        Tcp_option_parser_tcp_hdr_bytes_left = (bit<7>)(hdr.tcp.dataOffset + 4w11) << 2;
+        Tcp_option_parser_tcp_hdr_bytes_left = (bit<7>)(hdr.tcp.dataOffset - 4w5) << 2;
         transition Tcp_option_parser_next_option;
     }
     state Tcp_option_parser_next_option {
@@ -201,24 +201,24 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state Tcp_option_parser_parse_tcp_option_end {
         packet.extract<Tcp_option_end_h>(hdr.tcp_options_vec.next.end);
-        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w127;
+        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left - 7w1;
         packet.extract<Tcp_option_padding_h>(hdr.tcp_options_padding, (bit<32>)((bit<9>)Tcp_option_parser_tcp_hdr_bytes_left << 3));
         transition parse_tcp_0;
     }
     state Tcp_option_parser_parse_tcp_option_nop {
         packet.extract<Tcp_option_nop_h>(hdr.tcp_options_vec.next.nop);
-        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w127;
+        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left - 7w1;
         transition Tcp_option_parser_next_option;
     }
     state Tcp_option_parser_parse_tcp_option_ss {
         verify(Tcp_option_parser_tcp_hdr_bytes_left >= 7w5, error.TcpOptionTooLongForHeader);
-        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w123;
+        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left - 7w5;
         packet.extract<Tcp_option_ss_h>(hdr.tcp_options_vec.next.ss);
         transition Tcp_option_parser_next_option;
     }
     state Tcp_option_parser_parse_tcp_option_s {
         verify(Tcp_option_parser_tcp_hdr_bytes_left >= 7w4, error.TcpOptionTooLongForHeader);
-        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w124;
+        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left - 7w4;
         packet.extract<Tcp_option_s_h>(hdr.tcp_options_vec.next.s);
         transition Tcp_option_parser_next_option;
     }
@@ -228,7 +228,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         verify(Tcp_option_parser_n_sack_bytes == 8w10 || Tcp_option_parser_n_sack_bytes == 8w18 || Tcp_option_parser_n_sack_bytes == 8w26 || Tcp_option_parser_n_sack_bytes == 8w34, error.TcpBadSackOptionLength);
         verify(Tcp_option_parser_tcp_hdr_bytes_left >= (bit<7>)Tcp_option_parser_n_sack_bytes, error.TcpOptionTooLongForHeader);
         Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left - (bit<7>)Tcp_option_parser_n_sack_bytes;
-        packet.extract<Tcp_option_sack_h>(hdr.tcp_options_vec.next.sack, (bit<32>)((Tcp_option_parser_n_sack_bytes << 3) + 8w240));
+        packet.extract<Tcp_option_sack_h>(hdr.tcp_options_vec.next.sack, (bit<32>)((Tcp_option_parser_n_sack_bytes << 3) - 8w16));
         transition Tcp_option_parser_next_option;
     }
     state parse_tcp_0 {
@@ -266,7 +266,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.fwd_metadata.out_bd = bd;
         hdr.ethernet.dstAddr = dmac;
         standard_metadata.egress_spec = intf;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name("ingress.mac_da") table mac_da_0 {
         key = {

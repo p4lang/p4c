@@ -136,7 +136,7 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("MyEgress.rewrite_mac") action rewrite_mac(@name("srcAddr") EthernetAddr_t srcAddr_1) {
         hdr.ethernet.srcAddr = srcAddr_1;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name("MyEgress.send_frame") table send_frame_0 {
         key = {

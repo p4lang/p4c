@@ -38,7 +38,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     action a_one(inout bit<48> x) {
         hdr.ethernet.srcAddr = 48w5;
-        x = x + 48w281474976710649;
+        x = x - 48w7;
     }
     action a_two(in bit<16> y, in bit<16> z) {
         hdr.ethernet.srcAddr[15:0] = y + z;

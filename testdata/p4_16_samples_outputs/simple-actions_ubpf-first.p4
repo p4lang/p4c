@@ -74,7 +74,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         headers.mpls.tc = tc;
     }
     action mpls_decrement_ttl() {
-        headers.mpls.ttl = headers.mpls.ttl + 8w255;
+        headers.mpls.ttl = headers.mpls.ttl - 8w1;
     }
     action mpls_set_label_decrement_ttl(bit<20> label) {
         headers.mpls.label = label;

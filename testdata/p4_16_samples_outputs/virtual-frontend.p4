@@ -21,7 +21,7 @@ control c(inout bit<16> p) {
                 x.a = ix_0.a + 16w1;
             }
             if (ix_0.a > ix_0.b) {
-                x.a = ix_0.a + 16w65535;
+                x.a = ix_0.a - 16w1;
             }
         }
     };

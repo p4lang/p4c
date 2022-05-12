@@ -113,7 +113,7 @@ apply {
 	mov m.MainParserT_parser_tmp_1 m.MainParserT_parser_tmp_0
 	shl m.MainParserT_parser_tmp_1 0x3
 	mov m.MainParserT_parser_tmp_3 m.MainParserT_parser_tmp_1
-	add m.MainParserT_parser_tmp_3 0xfffffff0
+	sub m.MainParserT_parser_tmp_3 0x10
 	mov m.MainParserT_parser_tmp_3_extract_tmp m.MainParserT_parser_tmp_3
 	shr m.MainParserT_parser_tmp_3_extract_tmp 0x3
 	extract h.ipv4_option_timestamp m.MainParserT_parser_tmp_3_extract_tmp

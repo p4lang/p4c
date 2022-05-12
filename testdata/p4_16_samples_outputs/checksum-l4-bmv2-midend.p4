@@ -102,7 +102,7 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
         tmp.setValid();
         tmp.version = tmp_9[7:4];
         tmp.ihl = tmp_9[3:0];
-        pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)(((bit<9>)tmp_9[3:0] << 2) + 9w492 << 3));
+        pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)(((bit<9>)tmp_9[3:0] << 2) - 9w20 << 3));
         verify(hdr.ipv4.version == 4w4, error.IPv4IncorrectVersion);
         verify(hdr.ipv4.ihl >= 4w5, error.IPv4HeaderTooShort);
         meta._l4Len2 = hdr.ipv4.totalLen - ((bit<16>)hdr.ipv4.ihl << 2);
@@ -121,7 +121,7 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
         tmp_4.ackNo = tmp_10[39:8];
         tmp_4.dataOffset = tmp_10[7:4];
         tmp_4.dontCare = tmp_10[3:0];
-        pkt.extract<tcp_t>(hdr.tcp, (bit<32>)(((bit<9>)tmp_10[7:4] << 2) + 9w492 << 3));
+        pkt.extract<tcp_t>(hdr.tcp, (bit<32>)(((bit<9>)tmp_10[7:4] << 2) - 9w20 << 3));
         verify(hdr.tcp.dataOffset >= 4w5, error.TCPHeaderTooShort);
         transition accept;
     }
@@ -138,12 +138,12 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("cIngress.foot") action foot() {
         hdr.tcp.srcPort = hdr.tcp.srcPort + 16w1;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
         hdr.ipv4.dstAddr = hdr.ipv4.dstAddr + 32w4;
     }
     @name("cIngress.foou") action foou() {
         hdr.udp.srcPort = hdr.udp.srcPort + 16w1;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
         hdr.ipv4.dstAddr = hdr.ipv4.dstAddr + 32w4;
     }
     @name("cIngress.guh") table guh_0 {

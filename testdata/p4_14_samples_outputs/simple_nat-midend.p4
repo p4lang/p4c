@@ -105,7 +105,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         packet.extract<ipv4_t>(hdr.ipv4);
         meta._meta_ipv4_sa1 = hdr.ipv4.srcAddr;
         meta._meta_ipv4_da2 = hdr.ipv4.dstAddr;
-        meta._meta_tcpLength9 = hdr.ipv4.totalLen + 16w65516;
+        meta._meta_tcpLength9 = hdr.ipv4.totalLen - 16w20;
         transition select(hdr.ipv4.protocol) {
             8w0x6: parse_tcp;
             default: accept;
@@ -210,7 +210,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".set_nhop") action set_nhop(@name("nhop_ipv4") bit<32> nhop_ipv4_1, @name("port") bit<9> port) {
         meta._meta_nhop_ipv45 = nhop_ipv4_1;
         standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name(".nat_miss_int_to_ext") action nat_miss_int_to_ext() {
         clone_preserving_field_list(CloneType.I2E, 32w250, 8w1);

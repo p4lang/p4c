@@ -202,7 +202,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".hop_ipv4") action hop_ipv4(@name("egress_spec") bit<9> egress_spec_0) {
         standard_metadata.egress_spec = egress_spec_0;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name(".act") action act() {
         cnt1.count(5w10);

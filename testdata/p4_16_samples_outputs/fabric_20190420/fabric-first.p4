@@ -620,12 +620,12 @@ control EgressNextControl(inout parsed_headers_t hdr, inout fabric_metadata_t fa
             push_vlan();
         }
         if (hdr.mpls.isValid()) {
-            hdr.mpls.ttl = hdr.mpls.ttl + 8w255;
+            hdr.mpls.ttl = hdr.mpls.ttl - 8w1;
             if (hdr.mpls.ttl == 8w0) {
                 mark_to_drop(standard_metadata);
             }
         } else if (hdr.ipv4.isValid()) {
-            hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+            hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
             if (hdr.ipv4.ttl == 8w0) {
                 mark_to_drop(standard_metadata);
             }

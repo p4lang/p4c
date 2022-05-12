@@ -26,7 +26,7 @@ control DeparserI(packet_out packet, in Parsed_packet hdr) {
 
 control cBar(inout mystruct1 meta) {
     apply {
-        meta.a = meta.a + 4w15;
+        meta.a = meta.a - 4w1;
     }
 }
 

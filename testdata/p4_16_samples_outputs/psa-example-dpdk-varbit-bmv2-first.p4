@@ -54,7 +54,7 @@ parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_p
     state parse_ipv4_option_timestamp {
         bit<16> tmp16 = packet.lookahead<bit<16>>();
         bit<8> tmp_len = tmp16[7:0];
-        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_len << 3) + 32w4294967280);
+        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_len << 3) - 32w16);
         transition accept;
     }
     state parse_ipv4_options {

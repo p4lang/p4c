@@ -170,7 +170,7 @@ apply {
 	mov m.IngressParser_parser_tmp_1 m.IngressParser_parser_tmp_0
 	shl m.IngressParser_parser_tmp_1 0x3
 	mov m.IngressParser_parser_tmp_2 m.IngressParser_parser_tmp_1
-	add m.IngressParser_parser_tmp_2 0xfffffff0
+	sub m.IngressParser_parser_tmp_2 0x10
 	mov m.IngressParser_parser_tmp_2_extract_tmp m.IngressParser_parser_tmp_2
 	shr m.IngressParser_parser_tmp_2_extract_tmp 0x3
 	extract h.ipv4_option_timestamp m.IngressParser_parser_tmp_2_extract_tmp

@@ -29,7 +29,7 @@ control c(inout bit<32> x) {
         retval = tmp_1;
         tmp = retval;
         a_3 = x;
-        b_3 = x + 32w4294967295;
+        b_3 = x - 32w1;
         hasReturned_1 = false;
         if (a_3 > b_3) {
             tmp_5 = b_3;

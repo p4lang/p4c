@@ -29,7 +29,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action do_round(inout bit<16> x) {
-        x = x + 16w65535 & x;
+        x = x - 16w1 & x;
     }
     action do_n_rounds(inout bit<16> x) {
         do_round(x);

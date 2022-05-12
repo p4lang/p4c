@@ -9,7 +9,7 @@ control c(inout bit<32> x) {
         tmp_1 = x;
     }
     @hidden action issue15442l2_1() {
-        tmp_5 = x + 32w4294967295;
+        tmp_5 = x - 32w1;
     }
     @hidden action issue15442l2_2() {
         tmp_5 = x;
@@ -71,7 +71,7 @@ control c(inout bit<32> x) {
         } else {
             tbl_issue15442l2_0.apply();
         }
-        if (x > x + 32w4294967295) {
+        if (x > x - 32w1) {
             tbl_issue15442l2_1.apply();
         } else {
             tbl_issue15442l2_2.apply();

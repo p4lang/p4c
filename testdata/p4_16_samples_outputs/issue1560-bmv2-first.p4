@@ -75,7 +75,7 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
         }
     }
     state parse_ipv4 {
-        pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)(((bit<9>)(pkt.lookahead<IPv4_up_to_ihl_only_h>()).ihl << 2) + 9w492 << 3));
+        pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)(((bit<9>)(pkt.lookahead<IPv4_up_to_ihl_only_h>()).ihl << 2) - 9w20 << 3));
         verify(hdr.ipv4.version == 4w4, error.IPv4IncorrectVersion);
         verify(hdr.ipv4.ihl >= 4w5, error.IPv4HeaderTooShort);
         transition select(hdr.ipv4.protocol) {

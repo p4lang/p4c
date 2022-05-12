@@ -80,7 +80,7 @@ parser Tcp_option_parser(packet_in b, out Tcp_option_stack vec) {
         transition start;
     }
     state parse_tcp_option_sack {
-        b.extract<Tcp_option_sack_h>(vec.next.sack, (bit<32>)(((b.lookahead<Tcp_option_sack_top>()).length << 3) + 8w240));
+        b.extract<Tcp_option_sack_h>(vec.next.sack, (bit<32>)(((b.lookahead<Tcp_option_sack_top>()).length << 3) - 8w16));
         transition start;
     }
 }

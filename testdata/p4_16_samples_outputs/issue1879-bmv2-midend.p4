@@ -107,7 +107,7 @@ parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state parse_prot_h_0 {
         packet.extract<prot_h_t>(hdr.prot_h_0.next);
-        meta._hLeft1 = meta._hLeft1 + 8w255;
+        meta._hLeft1 = meta._hLeft1 - 8w1;
         meta._currPos3 = meta._currPos3 + 8w1;
         transition parse_prot_h_0_pre;
     }

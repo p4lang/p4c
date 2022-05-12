@@ -19,7 +19,7 @@ parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t
         transition q0;
     }
     state q0 {
-        meta.counter = meta.counter + 3w7;
+        meta.counter = meta.counter - 3w1;
         transition accept;
     }
 }

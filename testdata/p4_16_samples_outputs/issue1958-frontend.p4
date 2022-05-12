@@ -42,7 +42,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name("ingressImpl.foo2_inst.foo2_action") action foo2_inst_foo2_action_0() {
         foo2_inst_idx = (bit<32>)hdr.ethernet.srcAddr[7:0];
         reg1_0.read(foo2_inst_val, foo2_inst_idx);
-        foo2_inst_val = foo2_inst_val + 8w249;
+        foo2_inst_val = foo2_inst_val - 8w7;
         reg1_0.write(foo2_inst_idx, foo2_inst_val);
     }
     @name("ingressImpl.foo2_inst.foo2_table") table foo2_inst_foo2_table {

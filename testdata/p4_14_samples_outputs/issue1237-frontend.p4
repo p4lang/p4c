@@ -39,7 +39,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".mooneys") action mooneys() {
         hdr.expressivenesss.breasted = hdr.expressivenesss.breasted - hdr.expressivenesss.peptides;
-        hdr.kilometer.sleeting = hdr.kilometer.sleeting + 16w65529;
+        hdr.kilometer.sleeting = hdr.kilometer.sleeting - 16w7;
     }
     @name(".conceptualization") table conceptualization_0 {
         actions = {

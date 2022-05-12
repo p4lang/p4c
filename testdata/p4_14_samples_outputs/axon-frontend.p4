@@ -39,7 +39,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name("ParserImpl.tmp_0") bit<64> tmp_0;
     @name(".parse_fwdHop") state parse_fwdHop {
         packet.extract<axon_hop_t>(hdr.axon_fwdHop.next);
-        meta.my_metadata.fwdHopCount = meta.my_metadata.fwdHopCount + 8w255;
+        meta.my_metadata.fwdHopCount = meta.my_metadata.fwdHopCount - 8w1;
         transition parse_next_fwdHop;
     }
     @name(".parse_head") state parse_head {
@@ -66,7 +66,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_revHop") state parse_revHop {
         packet.extract<axon_hop_t>(hdr.axon_revHop.next);
-        meta.my_metadata.revHopCount = meta.my_metadata.revHopCount + 8w255;
+        meta.my_metadata.revHopCount = meta.my_metadata.revHopCount - 8w1;
         transition parse_next_revHop;
     }
     @name(".start") state start {
@@ -97,7 +97,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".route") action route() {
         standard_metadata.egress_spec = (bit<9>)hdr.axon_fwdHop[0].port;
-        hdr.axon_head.fwdHopCount = hdr.axon_head.fwdHopCount + 8w255;
+        hdr.axon_head.fwdHopCount = hdr.axon_head.fwdHopCount - 8w1;
         hdr.axon_fwdHop.pop_front(1);
         hdr.axon_head.revHopCount = hdr.axon_head.revHopCount + 8w1;
         hdr.axon_revHop.push_front(1);

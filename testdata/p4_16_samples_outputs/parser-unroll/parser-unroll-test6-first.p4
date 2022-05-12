@@ -17,7 +17,7 @@ parser TestParser(packet_in b, out headers_t headers, inout metadata_t meta, ino
     state start {
         b.extract<test_header_t>(headers.test.next);
         bit<32> test_f = headers.test.lastIndex << 1;
-        transition select(test_f + 32w4294967295) {
+        transition select(test_f - 32w1) {
             32w0: f;
             default: a;
         }

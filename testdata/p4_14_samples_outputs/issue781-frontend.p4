@@ -46,7 +46,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name(".start") state start {
         tmp_hdr_0.setInvalid();
         tmp_hdr_0 = packet.lookahead<ipv4_t_1>();
-        packet.extract<ipv4_t>(hdr.h, ((bit<32>)tmp_hdr_0.ihl << 5) + 32w4294967136);
+        packet.extract<ipv4_t>(hdr.h, ((bit<32>)tmp_hdr_0.ihl << 5) - 32w160);
         transition accept;
     }
 }

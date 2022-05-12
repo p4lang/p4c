@@ -3,7 +3,7 @@ bit<32> min(in bit<32> a, in bit<32> b) {
 }
 control c(inout bit<32> x) {
     apply {
-        x = min(min(x, x + 32w1), min(x, x + 32w4294967295));
+        x = min(min(x, x + 32w1), min(x, x - 32w1));
     }
 }
 

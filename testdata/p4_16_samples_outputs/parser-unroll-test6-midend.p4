@@ -16,7 +16,7 @@ struct metadata_t {
 parser TestParser(packet_in b, out headers_t headers, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     state start {
         b.extract<test_header_t>(headers.test.next);
-        transition select((headers.test.lastIndex << 1) + 32w4294967295) {
+        transition select((headers.test.lastIndex << 1) - 32w1) {
             32w0: f;
             default: a;
         }

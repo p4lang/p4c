@@ -77,11 +77,11 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         headers.mpls.tc = tc_3;
     }
     @name("pipe.mpls_decrement_ttl") action mpls_decrement_ttl() {
-        headers.mpls.ttl = headers.mpls.ttl + 8w255;
+        headers.mpls.ttl = headers.mpls.ttl - 8w1;
     }
     @name("pipe.mpls_set_label_decrement_ttl") action mpls_set_label_decrement_ttl(@name("label") bit<20> label_5) {
         headers.mpls.label = label_5;
-        headers.mpls.ttl = headers.mpls.ttl + 8w255;
+        headers.mpls.ttl = headers.mpls.ttl - 8w1;
     }
     @name("pipe.mpls_modify_stack") action mpls_modify_stack(@name("stack") bit<1> stack_1) {
         headers.mpls.stack = stack_1;

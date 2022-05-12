@@ -58,7 +58,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".route") action route() {
         standard_metadata.egress_spec = (bit<9>)hdr.easyroute_port.port;
-        hdr.easyroute_head.num_valid = hdr.easyroute_head.num_valid + 32w4294967295;
+        hdr.easyroute_head.num_valid = hdr.easyroute_head.num_valid - 32w1;
         hdr.easyroute_port.setInvalid();
     }
     @name(".route_pkt") table route_pkt_0 {

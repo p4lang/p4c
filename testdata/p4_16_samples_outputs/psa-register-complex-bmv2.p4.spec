@@ -56,12 +56,12 @@ apply {
 	mov m.Ingress_tmp_4 m.Ingress_tmp_5
 	add m.Ingress_tmp_4 m.Ingress_tmp_3
 	mov h.ethernet.dstAddr m.Ingress_tmp_4
-	add h.ethernet.dstAddr 0xfffffffffffb
+	sub h.ethernet.dstAddr 0x5
 	regrd m.Ingress_tmp regfile_0 0x2
 	mov m.Ingress_tmp_0 m.Ingress_tmp_5
 	add m.Ingress_tmp_0 m.Ingress_tmp
 	mov m.Ingress_tmp_1 m.Ingress_tmp_0
-	add m.Ingress_tmp_1 0xfffffffffffb
+	sub m.Ingress_tmp_1 0x5
 	jmpneq LABEL_END m.Ingress_tmp_1 0x2
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0

@@ -30,7 +30,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     apply {
         regfile.write(32w1, 48w3);
         regfile.write(32w2, 48w4);
-        hdr.ethernet.dstAddr = regfile.read(32w1) + regfile.read(32w2) + 48w281474976710651;
+        hdr.ethernet.dstAddr = regfile.read(32w1) + regfile.read(32w2) - 48w5;
         if (hdr.ethernet.dstAddr == 48w2) {
             send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
         }

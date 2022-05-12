@@ -20,7 +20,7 @@ control c(inout Headers hdr) {
         tmp_val_0 = 16w3;
     }
     @hidden action issue2279_4l19() {
-        tmp_val_0 = (hdr.eth_hdr.eth_type >> 1) + 16w65533;
+        tmp_val_0 = (hdr.eth_hdr.eth_type >> 1) - 16w3;
     }
     @hidden table tbl_issue2279_4l12 {
         actions = {

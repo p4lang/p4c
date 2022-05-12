@@ -20,11 +20,11 @@ header hdr {
 control c(in hdr h, inout standard_metadata_t standard_meta) {
     action a() {
         standard_meta.egress_port = 9w0;
-        standard_meta.packet_length = standard_meta.packet_length + 16w65531;
+        standard_meta.packet_length = standard_meta.packet_length - 16w5;
     }
     action b() {
         standard_meta.egress_port = 9w1;
-        standard_meta.packet_length = standard_meta.packet_length + 16w65531;
+        standard_meta.packet_length = standard_meta.packet_length - 16w5;
     }
     table t {
         key = {

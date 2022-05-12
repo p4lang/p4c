@@ -38,7 +38,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     @name("ingressImpl.a1") action a1() {
         hdr.ethernet.srcAddr = 48w5;
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr + 48w281474976710649;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr - 48w7;
     }
     @name("ingressImpl.a2") action a2() {
         retval = (hdr.ethernet.etherType | 16w7) >> 1;

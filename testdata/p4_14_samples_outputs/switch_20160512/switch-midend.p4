@@ -1940,23 +1940,23 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name(".ipv4_unicast_rewrite") action _ipv4_unicast_rewrite_0() {
         hdr.ethernet.dstAddr = meta._egress_metadata_mac_da21;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name(".ipv4_multicast_rewrite") action _ipv4_multicast_rewrite_0() {
         hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | 48w0x1005e000000;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name(".ipv6_unicast_rewrite") action _ipv6_unicast_rewrite_0() {
         hdr.ethernet.dstAddr = meta._egress_metadata_mac_da21;
-        hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
+        hdr.ipv6.hopLimit = hdr.ipv6.hopLimit - 8w1;
     }
     @name(".ipv6_multicast_rewrite") action _ipv6_multicast_rewrite_0() {
         hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | 48w0x333300000000;
-        hdr.ipv6.hopLimit = hdr.ipv6.hopLimit + 8w255;
+        hdr.ipv6.hopLimit = hdr.ipv6.hopLimit - 8w1;
     }
     @name(".mpls_rewrite") action _mpls_rewrite_0() {
         hdr.ethernet.dstAddr = meta._egress_metadata_mac_da21;
-        hdr.mpls[0].ttl = hdr.mpls[0].ttl + 8w255;
+        hdr.mpls[0].ttl = hdr.mpls[0].ttl - 8w1;
     }
     @name(".rewrite_smac") action _rewrite_smac_0(@name("smac") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;

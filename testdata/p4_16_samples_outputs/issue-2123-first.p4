@@ -105,7 +105,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     action fib_hit_nexthop(bit<16> nexthop_index) {
         meta.ingress_metadata.nexthop_index = nexthop_index;
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     action set_egress_details(bit<9> egress_spec) {
         standard_metadata.egress_spec = egress_spec;

@@ -23,7 +23,7 @@ parser P(packet_in p, out H[2] h) {
         transition n3;
     }
     state n3 {
-        x = x + 32w4294967295;
+        x = x - 32w1;
         transition n4;
     }
     state n4 {

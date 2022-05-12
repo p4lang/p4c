@@ -49,7 +49,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         tmp = tmp_0;
         tmp_1 = regfile_0.read(32w2);
         tmp_2 = tmp + tmp_1;
-        tmp_3 = tmp_2 + 48w281474976710651;
+        tmp_3 = tmp_2 - 48w5;
         hdr.ethernet.dstAddr = tmp_3;
         if (hdr.ethernet.dstAddr == 48w2) {
             send_to_port_0();

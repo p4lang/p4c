@@ -55,7 +55,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     @hidden action matchonexprsbmv2l64() {
         key_1 = hdr.ethernet.dstAddr & 48w0x10101010101;
-        key_2 = hdr.ethernet.etherType + 16w65526;
+        key_2 = hdr.ethernet.etherType - 16w10;
     }
     @hidden table tbl_matchonexprsbmv2l64 {
         actions = {

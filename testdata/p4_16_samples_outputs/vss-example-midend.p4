@@ -98,7 +98,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     @name("TopPipe.Set_nhop") action Set_nhop(@name("ipv4_dest") IPv4Address ipv4_dest, @name("port") PortId port) {
         nextHop_0 = ipv4_dest;
-        headers.ip.ttl = headers.ip.ttl + 8w255;
+        headers.ip.ttl = headers.ip.ttl - 8w1;
         outCtrl.outputPort = port;
     }
     @name("TopPipe.ipv4_match") table ipv4_match_0 {

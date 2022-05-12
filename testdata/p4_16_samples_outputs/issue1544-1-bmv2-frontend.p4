@@ -51,7 +51,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         x = hdr.ethernet.srcAddr[15:0];
         hasReturned = false;
         if (x > 16w5) {
-            tmp_0 = x + 16w65535;
+            tmp_0 = x - 16w1;
         } else {
             tmp_0 = x;
         }

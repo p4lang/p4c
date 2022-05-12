@@ -63,13 +63,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".do_clone_e2e") action do_clone_e2e() {
-        hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710633;
+        hdr.ethernet.srcAddr = hdr.ethernet.srcAddr - 48w23;
         meta._mymeta_f14 = meta._mymeta_f14 + 8w23;
         meta._mymeta_clone_e2e_count2 = meta._mymeta_clone_e2e_count2 + 8w1;
         clone_preserving_field_list(CloneType.E2E, 32w1, 8w1);
     }
     @name(".do_recirculate") action do_recirculate() {
-        hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710637;
+        hdr.ethernet.srcAddr = hdr.ethernet.srcAddr - 48w19;
         meta._mymeta_f14 = meta._mymeta_f14 + 8w19;
         meta._mymeta_recirculate_count1 = meta._mymeta_recirculate_count1 + 8w1;
         recirculate_preserving_field_list(8w2);
@@ -256,7 +256,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".do_resubmit") action do_resubmit() {
-        hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710639;
+        hdr.ethernet.srcAddr = hdr.ethernet.srcAddr - 48w17;
         meta._mymeta_f14 = meta._mymeta_f14 + 8w17;
         meta._mymeta_resubmit_count0 = meta._mymeta_resubmit_count0 + 8w1;
         resubmit_preserving_field_list(8w3);

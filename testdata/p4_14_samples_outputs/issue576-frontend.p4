@@ -67,9 +67,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         packet.extract<simpleipv4_t>(hdr.sh.next);
         packet.extract<simpleipv4_t>(hdr.sh.next);
         tmp_hdr_1 = packet.lookahead<ipv4_t_1>();
-        packet.extract<ipv4_t>(hdr.h.next, ((bit<32>)tmp_hdr_1.ihl << 5) + 32w4294967136);
+        packet.extract<ipv4_t>(hdr.h.next, ((bit<32>)tmp_hdr_1.ihl << 5) - 32w160);
         tmp_hdr_2 = packet.lookahead<ipv4_t_1>();
-        packet.extract<ipv4_t>(hdr.h.next, ((bit<32>)tmp_hdr_2.ihl << 5) + 32w4294967136);
+        packet.extract<ipv4_t>(hdr.h.next, ((bit<32>)tmp_hdr_2.ihl << 5) - 32w160);
         transition accept;
     }
 }

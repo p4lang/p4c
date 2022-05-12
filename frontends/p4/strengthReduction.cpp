@@ -221,9 +221,13 @@ const IR::Node* DoStrengthReduction::postorder(IR::Sub* expr) {
         return expr->left;
     if (isZero(expr->left))
         return new IR::Neg(expr->srcInfo, expr->right);
-    // Replace `a - constant` with `a + (-constant)`
+    // Replace `a - constant` with `a + (-constant) for signed expressions`
     if (expr->right->is<IR::Constant>()) {
         auto cst = expr->right->to<IR::Constant>();
+        if (cst->type->is<IR::Type_Bits>()) {
+                if (!cst->type->to<IR::Type_Bits>()->isSigned)
+                    return expr;
+        }
         auto neg = new IR::Constant(cst->srcInfo, cst->type, -cst->value, cst->base, true);
         auto result = new IR::Add(expr->srcInfo, expr->left, neg);
         return result;

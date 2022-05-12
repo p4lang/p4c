@@ -27,8 +27,8 @@ control strength() {
         y = 4w0;
         y = 4w0;
         y = y & 4w3;
-        y = y + 4w15;
-        y = y + 4w0x1;
+        y = y - 4w1;
+        y = y - 4w0xf;
         int<4> w;
         w = w + -4s1;
         w = w + 4s0x1;

@@ -74,7 +74,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = my_drop_0();
     }
     @hidden action issue1544bmv2l24() {
-        retval = hdr.ethernet.srcAddr[15:0] + 16w65535;
+        retval = hdr.ethernet.srcAddr[15:0] - 16w1;
     }
     @hidden action issue1544bmv2l26() {
         retval = hdr.ethernet.srcAddr[15:0];
