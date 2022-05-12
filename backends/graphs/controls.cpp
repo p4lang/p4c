@@ -282,7 +282,7 @@ bool ControlGraphs::preorder(const IR::P4Table *table) {
 
     parents = {{v, new EdgeUnconditional()}};
 
-    /*auto key = table->getKey();
+    auto key = table->getKey();
     visit(key);
 
     Parents keyNode;
@@ -318,7 +318,7 @@ bool ControlGraphs::preorder(const IR::P4Table *table) {
         parents.clear();
     }
 
-    parents = new_parents;*/
+    parents = new_parents;
 
     return false;
 }
