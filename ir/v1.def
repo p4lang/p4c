@@ -126,7 +126,12 @@ class HeaderStackItemRef : HeaderRef {
             if (auto *hr = base_->to<HeaderRef>())
                 type = hr->baseRef()->type; }
     Expression base() const { return base_; }
-    HeaderOrMetadata baseRef() const override { return base_->to<HeaderRef>()->baseRef(); }
+    /// Returns `nullptr` if the base is not `HeaderOrMetadata` (e.g. when this
+    /// is stack ref of an expression such as `lookahead`).
+    HeaderOrMetadata baseRef() const override {
+        auto hdrRef = base_->to<HeaderRef>();
+        return hdrRef ? hdrRef->baseRef() : nullptr;
+    }
     Expression index() const { return index_; }
     void set_base(Expression b) { base_ = b; }
     toString{ return base_->toString() + "[" + index_->toString() + "]"; }
