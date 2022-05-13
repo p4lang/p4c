@@ -470,7 +470,8 @@ class FindUninitialized : public Inspector {
     void checkOutParameters(const IR::IDeclaration* block,
                             const IR::ParameterList* parameters,
                             Definitions* defs) {
-        LOG2("Checking output parameters; definitions are " << IndentCtl::endl << defs);
+        LOG2("Checking output parameters of " << block <<
+             "; definitions are " << IndentCtl::endl << defs);
         for (auto p : parameters->parameters) {
             if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
                 auto storage = definitions->storageMap->getStorage(p);
@@ -1463,7 +1464,7 @@ class RemoveUnused : public Transform {
                 return new IR::MethodCallStatement(statement->srcInfo, mce);
             }
             // removing
-            return new IR::EmptyStatement();
+            return new IR::EmptyStatement(statement->srcInfo);
         }
         return statement;
     }
@@ -1473,7 +1474,8 @@ class RemoveUnused : public Transform {
                 return mcs;
             }
             // removing
-            return new IR::EmptyStatement();
+            LOG3("Removing statement " << getOriginal() << IndentCtl::indent);
+            return new IR::EmptyStatement(mcs->srcInfo);
         }
         return mcs;
     }
