@@ -24,7 +24,7 @@ namespace EBPF {
 class XDPHelpProgram : public EBPFProgram {
     cstring XDPProgUsingMetaForXDP2TC =
             "    void *data_end = (void *)(long)skb->data_end;\n"
-            "    struct ethhdr *eth = (struct ethhdr *) skb->data;\n"
+            "    struct ethhdr *eth = (struct ethhdr *)(long)skb->data;\n"
             "    if ((void *)((struct ethhdr *) eth + 1) > data_end) {\n"
             "        return XDP_ABORTED;\n"
             "    }\n"
@@ -40,7 +40,7 @@ class XDPHelpProgram : public EBPFProgram {
             "    meta = (struct internal_metadata *)(unsigned long)skb->data_meta;\n"
             "    eth = (void *)(long)skb->data;\n"
             "    data_end = (void *)(long)skb->data_end;\n"
-            "    if ((void *) ((struct internal_metadata *) meta + 1) > (void *) skb->data)\n"
+            "    if ((void *) ((struct internal_metadata *) meta + 1) > (void *)(long)skb->data)\n"
             "        return XDP_ABORTED;\n"
             "    if ((void *)((struct ethhdr *) eth + 1) > data_end) {\n"
             "        return XDP_ABORTED;\n"
