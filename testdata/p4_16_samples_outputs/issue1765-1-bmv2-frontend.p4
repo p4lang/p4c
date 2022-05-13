@@ -121,7 +121,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
     }
     state ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
-        meta.tcp_length = hdr.ipv4.totalLen + 16w65516;
+        meta.tcp_length = hdr.ipv4.totalLen - 16w20;
         transition select(hdr.ipv4.protocol) {
             8w6: tcp;
             8w17: udp;
