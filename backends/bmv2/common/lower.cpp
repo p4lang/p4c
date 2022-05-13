@@ -141,7 +141,6 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
     BUG_CHECK(resulttype->is<IR::Type_Bits>(), "%1%: expected a bitstring got a %2%",
               expression->right, type);
     unsigned sizeofb = type->to<IR::Type_Bits>()->size;
-    unsigned sizeofresult = resulttype->to<IR::Type_Bits>()->size;
     auto cast0 = new IR::Cast(expression->left->srcInfo, resulttype, expression->left);
     auto cast1 = new IR::Cast(expression->right->srcInfo, resulttype, expression->right);
 
