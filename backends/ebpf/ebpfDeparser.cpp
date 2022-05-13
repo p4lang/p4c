@@ -83,6 +83,7 @@ void DeparserPrepareBufferTranslator::processMethod(const P4::ExternMethod *meth
             if (headerToEmit == nullptr) {
                 ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                         "Cannot emit a non-header type %1%", expr);
+                return;
             }
 
             unsigned width = headerToEmit->width_bits();
