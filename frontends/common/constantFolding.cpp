@@ -777,12 +777,6 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
         ::error(ErrorType::ERR_INVALID, "%1%: Shifts with negative amounts are not permitted", e);
         return e;
     }
-    if (auto crTypeBits = cr->type->to<IR::Type_Bits>()) {
-        if (crTypeBits->isSigned) {
-            ::error(ErrorType::ERR_EXPECTED, "%1%: shift amounts cannot be signed", right);
-            return e;
-        }
-    }
 
     if (cr->value == 0) {
         // ::warning("%1% with zero", e);
