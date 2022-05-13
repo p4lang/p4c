@@ -194,6 +194,7 @@ class Graphs : public Inspector {
                 return "invis";
             case VertexType::KEY:
             case VertexType::CONDITION:
+            case VertexType::SWITCH:
                 return "rounded";
             default:
                 return "solid";

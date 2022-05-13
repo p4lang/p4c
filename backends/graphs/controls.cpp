@@ -161,18 +161,15 @@ bool ControlGraphs::preorder(const IR::SwitchStatement *statement) {
     auto tbl = P4::TableApplySolver::isActionRun(statement->expression, refMap, typeMap);
     vertex_t v;
     // special case for action_run
+    std::stringstream sstream;
     if (tbl == nullptr) {
-        std::stringstream sstream;
         statement->expression->dbprint(sstream);
-        v = add_and_connect_vertex(cstring(sstream), VertexType::SWITCH);
     } else {
         visit(tbl);
-        BUG_CHECK(parents.size() == 1, "Unexpected parents size");
-        auto parent = parents.front();
-        BUG_CHECK(dynamic_cast<EdgeUnconditional *>(parent.second) != nullptr,
-                  "Unexpected eged type");
-        v = parent.first;
+        sstream << "switch: action_run";
     }
+    v = add_and_connect_vertex(cstring(sstream), VertexType::SWITCH);
+
     Parents new_parents;
     parents = {};
     bool hasDefault{false};
