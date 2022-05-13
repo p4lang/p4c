@@ -423,12 +423,10 @@ Also, make sure you have the following packages installed:
 $ sudo apt install -y clang llvm libelf-dev
 ```
 
-You should also install `libbpf`. Run the following commands:
+You should also install a static `libbpf` library. Run the following commands:
 
 ```bash
 $ python3 backends/ebpf/build_libbpf
-$ cd backends/ebpf/runtime/contrib/libbpf/src
-$ sudo make install
 ```
 
 ### Compilation
@@ -443,7 +441,7 @@ You can also perform compilation step by step:
 
 ```
 $ p4c-ebpf --arch psa --target kernel -o out.c <program>.p4
-$ clang -Ibackends/ebpf/runtime -O2 -g -c -emit-llvm -DBTF -DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX> -o out.bc out.c
+$ clang -Ibackends/ebpf/runtime -Ibackends/ebpf/runtime/usr/include -O2 -g -c -emit-llvm -DBTF -DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX> -o out.bc out.c
 $ llc -march=bpf -mcpu=generic -filetype=obj -o out.o out.bc
 ```
 
