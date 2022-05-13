@@ -2272,6 +2272,7 @@ void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
 
 void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
     bool isValidExternCall = false;
+    cstring propName = "";
     auto mce = mcs->methodCall;
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
     if (!mi->is<P4::ExternFunction>()) {
@@ -2291,6 +2292,7 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
             auto idle_timeout_with_auto_delete =
                  tbl->properties->getProperty("idle_timeout_with_auto_delete");
             if (idle_timeout_with_auto_delete != nullptr) {
+                propName = "idle_timeout_with_auto_delete";
                 if (idle_timeout_with_auto_delete->value->is<IR::ExpressionValue>()) {
                     auto expr =
                     idle_timeout_with_auto_delete->value->to<IR::ExpressionValue>()->expression;
@@ -2307,15 +2309,11 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
                 }
             }
         }
-        if (!isValidExternCall) {
-            ::error(ErrorType::ERR_UNEXPECTED,
-                    "%1% must only be called from within an action with of a table with "
-                    "'idle_timeout_with_auto_delete' property equal to true", externFuncName);
-        }
     } else if (externFuncName == "add_entry") {
         if (tbl) {
             auto add_on_miss = tbl->properties->getProperty("add_on_miss");
             if (add_on_miss != nullptr) {
+                propName = "add_on_miss";
                 if (add_on_miss->value->is<IR::ExpressionValue>()) {
                     auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
                     if (!expr->is<IR::BoolLiteral>()) {
@@ -2330,11 +2328,11 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
                 }
             }
         }
-        if (!isValidExternCall) {
-            ::error(ErrorType::ERR_UNEXPECTED,
-                    "%1% must only be called from within an action with 'add_on_miss'"
-                   " property equal to true", externFuncName);
-        }
+    }
+    if (!isValidExternCall) {
+         ::error(ErrorType::ERR_UNEXPECTED,
+                 "%1% must only be called from within an action with '%2%'"
+                 " property equal to true", externFuncName, propName);
     }
     return;
 }

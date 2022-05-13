@@ -813,7 +813,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         } else if (a->method->name == "set_entry_expire_time") {
             auto args = a->expr->arguments;
             if (args->size() != 1) {
-                ::error(ErrorType::ERR_UNEXPECTED, "Expected 1 arguments for %1%",
+                ::error(ErrorType::ERR_UNEXPECTED, "Expected 1 argument for %1%",
                             a->method->name);
                 return false;
             }
