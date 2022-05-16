@@ -257,7 +257,17 @@ bool ControlGraphs::preorder(const IR::Key *key) {
     // Build key
     for (auto elVec : key->keyElements) {
         sstream << elVec->matchType->path->name.name << ": ";
-        sstream << elVec->annotations->annotations.front()->expr.front() << "\\n";
+        bool has_name = false;
+        for (auto ann : elVec->annotations->annotations) {
+            if (ann->toString() == "@name") {
+                sstream << ann->getName();
+                has_name = true;
+                break;
+            }
+        }
+        if (!has_name)
+            sstream << elVec->expression->toString();
+        sstream << "\\n";
     }
 
     auto v = add_and_connect_vertex(cstring(sstream), VertexType::KEY);
