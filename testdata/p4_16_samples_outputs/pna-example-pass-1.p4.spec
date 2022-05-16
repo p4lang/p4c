@@ -36,7 +36,7 @@ header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 header udp instanceof udp_t
 
-regarray network_port_mask size 0x1 initval 0
+regarray direction size 0x100 initval 0
 
 apply {
 	rx m.pna_main_input_metadata_input_port
