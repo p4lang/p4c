@@ -70,8 +70,8 @@ class Graph_visitor : public Graphs {
      * @param fullGraph option to create fullGraph
      * @param jsonOut option to create json fullGraph
      */
-    Graph_visitor(const cstring &graphsDir, const bool &graphs,
-                  const bool &fullGraph, const bool &jsonOut,
+    Graph_visitor(const cstring &graphsDir, const bool graphs,
+                  const bool fullGraph, const bool jsonOut,
                   const cstring &filename) :
             graphsDir(graphsDir), graphs(graphs),
             fullGraph(fullGraph), jsonOut(jsonOut),
@@ -130,10 +130,10 @@ class Graph_visitor : public Graphs {
     Util::JsonArray* programBlocks;  // stores objects in top level array "nodes"
     const cstring graphsDir;
     // options
-    const bool &graphs;  // output boost graphs to files
-    const bool &fullGraph;  // merge boost graphs into one CFG, and output to file
-    const bool &jsonOut;  // iterate over boost graphs, and create json representation of these
-                          // graphs
+    const bool graphs;      // output boost graphs to files
+    const bool fullGraph;   // merge boost graphs into one CFG, and output to file
+    const bool jsonOut;     // iterate over boost graphs, and create json representation of these
+                            // graphs
     const cstring filename;
 };
 
