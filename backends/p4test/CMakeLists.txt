@@ -108,6 +108,9 @@ set (P4_XFAIL_TESTS
   # These programs uses conditional execution inside action body which is currently
   # unsupported
   testdata/p4_16_samples/psa-dpdk-action-jumpOpt.p4
+  testdata/p4_16_samples/pna-example-tcp-connection-tracking.p4
+  testdata/p4_16_samples/pna-example-tcp-connection-tracking-err-1.p4
+  testdata/p4_16_samples/pna-example-tcp-connection-tracking-err.p4
   testdata/p4_16_samples/pna-example-pass-2.p4
   # These tests are added to check mirror_packet extern invocation with non-constant
   # arguments and with incorrect number of arguments

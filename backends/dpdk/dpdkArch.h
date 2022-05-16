@@ -913,6 +913,19 @@ class CollectAddOnMissTable : public Inspector {
     void postorder(const IR::MethodCallStatement*) override;
 };
 
+class ValidateAddOnMissExterns : public Inspector {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    DpdkProgramStructure* structure;
+
+ public:
+    ValidateAddOnMissExterns(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+            DpdkProgramStructure* structure) :
+    refMap(refMap), typeMap(typeMap), structure(structure) {}
+
+    void postorder(const IR::MethodCallStatement*) override;
+};
+
 class CollectErrors : public Inspector {
     DpdkProgramStructure *structure;
 

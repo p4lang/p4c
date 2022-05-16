@@ -25,6 +25,7 @@ struct DpdkProgramStructure {
     ordered_set<cstring> learner_tables;
     ordered_set<cstring> learner_actions;
     ordered_map<cstring, std::vector<cstring>> learner_action_params;
+    ordered_map<cstring, const IR::P4Table *> learner_action_table;
 
     IR::IndexedVector<IR::DpdkDeclaration>       variables;
 
