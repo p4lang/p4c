@@ -43,8 +43,6 @@ struct metadata_t {
 	bit<32> MainControlT_key_0
 	bit<16> MainControlT_key_1
 	bit<16> MainControlT_key_2
-	bit<32> reg_read_tmp
-	bit<32> left_shift_tmp
 }
 metadata instanceof metadata_t
 
@@ -52,7 +50,7 @@ header eth instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 header tcp instanceof tcp_t
 
-regarray network_port_mask size 0x1 initval 0
+regarray direction size 0x100 initval 0
 
 action tcp_syn_packet args none {
 	mov m.MainControlT_do_add_on_miss 1
@@ -139,50 +137,26 @@ apply {
 	MAINPARSERIMPL_PARSE_TCP :	extract h.tcp
 	MAINPARSERIMPL_ACCEPT :	mov m.MainControlT_do_add_on_miss 0
 	mov m.MainControlT_update_expire_time 0
-	regrd m.reg_read_tmp network_port_mask 0x0
-	mov m.left_shift_tmp 0x1
-	shl m.left_shift_tmp m.pna_main_input_metadata_input_port
-	mov m.pna_main_input_metadata_direction m.reg_read_tmp
-	and m.pna_main_input_metadata_direction m.left_shift_tmp
+	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
 	jmpneq LABEL_END m.pna_main_input_metadata_direction 0x1
 	jmpnv LABEL_END h.ipv4
 	jmpnv LABEL_END h.tcp
 	table set_ct_options
 	LABEL_END :	jmpnv LABEL_END_0 h.ipv4
 	jmpnv LABEL_END_0 h.tcp
-	regrd m.reg_read_tmp network_port_mask 0x0
-	mov m.left_shift_tmp 0x1
-	shl m.left_shift_tmp m.pna_main_input_metadata_input_port
-	mov m.pna_main_input_metadata_direction m.reg_read_tmp
-	and m.pna_main_input_metadata_direction m.left_shift_tmp
 	jmpeq LABEL_TRUE_1 m.pna_main_input_metadata_direction 0x0
 	mov m.MainControlT_key h.ipv4.dstAddr
 	jmp LABEL_END_1
 	LABEL_TRUE_1 :	mov m.MainControlT_key h.ipv4.srcAddr
-	LABEL_END_1 :	regrd m.reg_read_tmp network_port_mask 0x0
-	mov m.left_shift_tmp 0x1
-	shl m.left_shift_tmp m.pna_main_input_metadata_input_port
-	mov m.pna_main_input_metadata_direction m.reg_read_tmp
-	and m.pna_main_input_metadata_direction m.left_shift_tmp
-	jmpeq LABEL_TRUE_2 m.pna_main_input_metadata_direction 0x0
+	LABEL_END_1 :	jmpeq LABEL_TRUE_2 m.pna_main_input_metadata_direction 0x0
 	mov m.MainControlT_key_0 h.ipv4.srcAddr
 	jmp LABEL_END_2
 	LABEL_TRUE_2 :	mov m.MainControlT_key_0 h.ipv4.dstAddr
-	LABEL_END_2 :	regrd m.reg_read_tmp network_port_mask 0x0
-	mov m.left_shift_tmp 0x1
-	shl m.left_shift_tmp m.pna_main_input_metadata_input_port
-	mov m.pna_main_input_metadata_direction m.reg_read_tmp
-	and m.pna_main_input_metadata_direction m.left_shift_tmp
-	jmpeq LABEL_TRUE_3 m.pna_main_input_metadata_direction 0x0
+	LABEL_END_2 :	jmpeq LABEL_TRUE_3 m.pna_main_input_metadata_direction 0x0
 	mov m.MainControlT_key_1 h.tcp.dstPort
 	jmp LABEL_END_3
 	LABEL_TRUE_3 :	mov m.MainControlT_key_1 h.tcp.srcPort
-	LABEL_END_3 :	regrd m.reg_read_tmp network_port_mask 0x0
-	mov m.left_shift_tmp 0x1
-	shl m.left_shift_tmp m.pna_main_input_metadata_input_port
-	mov m.pna_main_input_metadata_direction m.reg_read_tmp
-	and m.pna_main_input_metadata_direction m.left_shift_tmp
-	jmpeq LABEL_TRUE_4 m.pna_main_input_metadata_direction 0x0
+	LABEL_END_3 :	jmpeq LABEL_TRUE_4 m.pna_main_input_metadata_direction 0x0
 	mov m.MainControlT_key_2 h.tcp.srcPort
 	jmp LABEL_END_4
 	LABEL_TRUE_4 :	mov m.MainControlT_key_2 h.tcp.dstPort
