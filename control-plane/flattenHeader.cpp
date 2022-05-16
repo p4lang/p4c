@@ -21,7 +21,7 @@ namespace P4 {
 
 namespace ControlPlaneAPI {
 
-FlattenHeader::FlattenHeader(const P4::TypeMap* typeMap, IR::Type_Header* flattenedHeader)
+FlattenHeader::FlattenHeader(P4::TypeMap* typeMap, IR::Type_Header* flattenedHeader)
     : typeMap(typeMap), flattenedHeader(flattenedHeader) { }
 
 void FlattenHeader::doFlatten(const IR::Type* type) {
@@ -42,7 +42,10 @@ void FlattenHeader::doFlatten(const IR::Type* type) {
         auto annotations = mergeAnnotations();
         annotations = annotations->addOrReplace(
             IR::Annotation::nameAnnotation, new IR::StringLiteral(originalName));
-        newFields.push_back(new IR::StructField(IR::ID(newName), annotations, type));
+        auto field = new IR::StructField(IR::ID(newName), annotations, type);
+        newFields.push_back(field);
+        auto ftype = typeMap->getTypeType(type, true);
+        typeMap->setType(field, ftype);
     }
 }
 
@@ -69,7 +72,7 @@ const IR::Annotations* FlattenHeader::mergeAnnotations() const {
 
 /* static */
 const IR::Type_Header* FlattenHeader::flatten(
-    const P4::TypeMap* typeMap, const IR::Type_Header* headerType) {
+    P4::TypeMap* typeMap, const IR::Type_Header* headerType) {
     auto flattenedHeader = headerType->clone();
     flattenedHeader->fields.clear();
     FlattenHeader flattener(typeMap, flattenedHeader);

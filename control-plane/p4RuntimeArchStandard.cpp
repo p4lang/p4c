@@ -83,7 +83,7 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
     static boost::optional<Digest>
     getDigestCall(const P4::ExternFunction* function,
                   ReferenceMap* refMap,
-                  const P4::TypeMap* typeMap,
+                  P4::TypeMap* typeMap,
                   p4configv1::P4TypeInfo* p4RtTypeInfo) {
         if (function->method->name != P4V1::V1Model::instance.digest_receiver.name)
             return boost::none;
