@@ -82,7 +82,7 @@ bool hasTranslationAnnotation(const IR::Type* type,
     return false;
 }
 
-cstring getTypeName(const IR::Type* type, const TypeMap* typeMap) {
+cstring getTypeName(const IR::Type* type, TypeMap* typeMap) {
     CHECK_NULL(type);
 
     auto t = typeMap->getTypeType(type, true);
@@ -93,7 +93,7 @@ cstring getTypeName(const IR::Type* type, const TypeMap* typeMap) {
 }
 
 TypeSpecConverter::TypeSpecConverter(
-    const P4::ReferenceMap* refMap, const P4::TypeMap* typeMap, P4TypeInfo* p4RtTypeInfo)
+    const P4::ReferenceMap* refMap, P4::TypeMap* typeMap, P4TypeInfo* p4RtTypeInfo)
     : refMap(refMap), typeMap(typeMap), p4RtTypeInfo(p4RtTypeInfo) {
     CHECK_NULL(refMap);
     CHECK_NULL(typeMap);
@@ -388,7 +388,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Error* type) {
 
 const P4DataTypeSpec* TypeSpecConverter::convert(
     const P4::ReferenceMap* refMap,
-    const P4::TypeMap* typeMap,
+    P4::TypeMap* typeMap,
     const IR::Type* type, P4TypeInfo* typeInfo) {
     TypeSpecConverter typeSpecConverter(refMap, typeMap, typeInfo);
     type->apply(typeSpecConverter);
