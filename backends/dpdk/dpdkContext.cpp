@@ -57,6 +57,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 auto hidden = tbl->annotations->getSingle(IR::Annotation::hiddenAnnotation);
                 auto selector = tbl->properties->getProperty("selector");
                 tblAttr.is_add_on_miss = false;
+                tblAttr.idle_timeout_with_auto_delete = false;
                 auto add_on_miss = tbl->properties->getProperty("add_on_miss");
                 if (add_on_miss != nullptr) {
                     if (add_on_miss->value->is<IR::ExpressionValue>()) {
