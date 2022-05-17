@@ -1623,6 +1623,13 @@ const IR::Node* TypeInference::postorder(IR::Parameter* param) {
             return param;
         }
     }
+
+    if (param->defaultValue) {
+        if (!typeMap->isCompileTimeConstant(param->defaultValue))
+            typeError("%1%: expression must be a compile-time constant",
+                      param->defaultValue);
+    }
+
     setType(getOriginal(), paramType);
     setType(param, paramType);
     return param;
