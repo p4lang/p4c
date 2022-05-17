@@ -108,7 +108,9 @@ void IR::V1Parser::dbprint(std::ostream &out) const {
 }
 void IR::ParserException::dbprint(std::ostream &out) const { out << "IR::ParserException"; }
 void IR::ParserState::dbprint(std::ostream &out) const {
-    out << "state " << name << " " << annotations << "{" << indent;
+    out << "state " << name;
+    if (dbgetflags(out) & Brief) return;
+    out << " " << annotations << "{" << indent;
     for (auto s : components) out << Log::endl << s;
     if (selectExpression) out << Log::endl << selectExpression;
     out << " }" << unindent;
