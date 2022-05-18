@@ -30,10 +30,10 @@ interface CompileTimeValue {
 
 /// Base class for P4 types
 abstract Type {
-    static const cstring minSizeInBits;
-    static const cstring minSizeInBytes;
-    static const cstring maxSizeInBits;
-    static const cstring maxSizeInBytes;
+    static const cstring minSizeInBits = "minSizeInBits"_cs;
+    static const cstring minSizeInBytes = "minSizeInBytes"_cs;
+    static const cstring maxSizeInBits = "maxSizeInBits"_cs;
+    static const cstring maxSizeInBytes = "maxSizeInBytes"_cs;
 #emit
     typedef Type_Unknown        Unknown;
     typedef Type_Boolean        Boolean;
@@ -51,22 +51,22 @@ abstract Type {
     virtual bool variable() const { return false; }
     /// When possible returns the corresponding type that can be inserted
     /// in a P4 program; may return a Type_Name
-    virtual const Type* getP4Type() const = 0;
+    virtual Type getP4Type() const = 0;
 }
 
 /// Implemented by all types that may be generic:
 /// Control, Extern, Method, Package, and Parser
 interface IMayBeGenericType {
     /// Allows the retrieval of type parameters
-    virtual const TypeParameters* getTypeParameters() const = 0;
+    virtual const TypeParameters *getTypeParameters() const = 0;
 }
 
 /// Implemented by objects with an 'apply' method: Parser, Control, Table
 interface IApply {
-    static const cstring applyMethodName;
+    static const cstring applyMethodName = "apply"_cs;
     /// @returns the type signature of the apply method
-    virtual const Type_Method* getApplyMethodType() const = 0;
-    virtual const ParameterList* getApplyParameters() const = 0;
+    virtual Type_Method getApplyMethodType() const = 0;
+    virtual ParameterList getApplyParameters() const = 0;
 }
 
 /// base class for namespaces
@@ -103,7 +103,7 @@ interface IFunctional {
     virtual ParameterList getParameters() const = 0;
     /// Returns true if the parameters can be matched with the
     /// supplied arguments.
-    bool callMatches(Vector<Argument> arguments) const;
+    bool callMatches(const Vector<Argument> *arguments) const;
 }
 
 /// Implemented by things that look like type variables
@@ -126,7 +126,7 @@ interface IContainer : IMayBeGenericType, IDeclaration, IFunctional {
 /// This represents a primitive type
 /// (called base type in the spec)
 abstract Type_Base : Type {
-    const Type* getP4Type() const override { return this; }
+    Type getP4Type() const override { return this; }
     virtual bool variable() const override { return false; }
 }
 
@@ -148,7 +148,7 @@ abstract Declaration : StatOrDecl, IDeclaration {
     ID getName() const override { return name; }
     equiv { return name == a.name; /* ignore declid */ }
  private:
-    static long nextId;
+    static long nextId = 0;
  public:
     toString { return externalName(); }
 }
@@ -164,10 +164,10 @@ abstract Type_Declaration : Type, IDeclaration {
     ID getName() const override { return name; }
     equiv { return name == a.name; /* ignore declid */ }
  private:
-    static long nextId;
+    static long nextId = 0;
  public:
     toString { return externalName(); }
-    const Type* getP4Type() const override { return new Type_Name(name); }
+    Type getP4Type() const override { return new Type_Name(name); }
 }
 
 /// base class for expressions
@@ -249,7 +249,7 @@ class Annotation {
 
     // The remaining constructors are for compiler-generated annotations.
     inline Annotation(Util::SourceInfo si, ID n,
-                      std::initializer_list<const Expression *> a, bool structured = false)
+                      std::initializer_list<Expression> a, bool structured = false)
         : Node(si), name(n), body(a), structured(structured) {}
     inline Annotation(Util::SourceInfo si, ID n,
                       const Expression *a, bool structured = false)
@@ -265,7 +265,7 @@ class Annotation {
         : name(n), body(), structured(structured) {
         body.emplace<ExpressionAnnotation>(a);
     }
-    inline Annotation(ID n, std::initializer_list<const Expression *> a, bool structured = false)
+    inline Annotation(ID n, std::initializer_list<Expression> a, bool structured = false)
         : name(n), body(a), structured(structured) {}
     inline Annotation(ID n, const IR::Vector<Expression> &a, bool structured = false)
         : name(n), body(a), structured(structured) {}
@@ -281,27 +281,28 @@ class Annotation {
     }
     //  : Annotation(n, { new StringLiteral(v) }, structured) { }
 
-    static const cstring nameAnnotation;  /// Indicates the control-plane name.
-    static const cstring tableOnlyAnnotation;  /// Action cannot be a default_action.
-    static const cstring defaultOnlyAnnotation;  /// action can only be a default_action.
-    static const cstring atomicAnnotation;  /// Code should be executed atomically.
-    static const cstring hiddenAnnotation;  /// Object should not be exposed to the control-plane.
-    static const cstring lengthAnnotation;  /// P4-14 annotation for varbit fields.
-    static const cstring maxLengthAnnotation;  /// P4-14 annotation for varbit fields.
-    static const cstring optionalAnnotation;  /// Optional parameter annotation
-    static const cstring pkginfoAnnotation;  /// Package documentation annotation.
-    static const cstring deprecatedAnnotation;  /// Deprecation annotation.
-    static const cstring synchronousAnnotation;  /// Synchronous annotation.
-    static const cstring pureAnnotation;  /// extern function/method annotation.
-    static const cstring noSideEffectsAnnotation;  /// extern function/method annotation.
-    static const cstring noWarnAnnotation;  /// noWarn annotation.
-    static const cstring matchAnnotation;  /// Match annotation (for value sets).
-    static const cstring fieldListAnnotation;  /// Used for recirculate, etc.
-    static const cstring debugLoggingAnnotation;  /// Used by compiler implementer to limit debug log to the annotated IR context.
-    static const cstring disableOptimizationAnnotation; /// annotation to disable certain optimization
-    static const cstring inlinedFromAnnotation; /// annotation to mark block of inlined function
-    static const cstring likelyAnnotation;  /// annotation for likely taken blocks/branchs
-    static const cstring unlikelyAnnotation;  /// annotation for likely not taken blocks/branchs
+    static const cstring nameAnnotation = "name"_cs;  /// Indicates the control-plane name.
+    static const cstring tableOnlyAnnotation = "tableonly"_cs;  /// Action cannot be a default_action.
+    static const cstring defaultOnlyAnnotation = "defaultonly"_cs;  /// action can only be a default_action.
+    static const cstring atomicAnnotation = "atomic"_cs;  /// Code should be executed atomically.
+    static const cstring hiddenAnnotation = "hidden"_cs;  /// Object should not be exposed to the control-plane.
+    static const cstring lengthAnnotation = "length"_cs;  /// P4-14 annotation for varbit fields.
+    static const cstring maxLengthAnnotation = "max_length"_cs;  /// P4-14 annotation for varbit fields.
+    static const cstring optionalAnnotation = "optional"_cs;  /// Optional parameter annotation
+    static const cstring pkginfoAnnotation = "pkginfo"_cs;  /// Package documentation annotation.
+    static const cstring deprecatedAnnotation = "deprecated"_cs;  /// Deprecation annotation.
+    static const cstring synchronousAnnotation = "synchronous"_cs;  /// Synchronous annotation.
+    static const cstring pureAnnotation = "pure"_cs;  /// extern function/method annotation.
+    static const cstring noSideEffectsAnnotation = "noSideEffects"_cs;  /// extern function/method annotation.
+    static const cstring noWarnAnnotation = "noWarn"_cs;  /// noWarn annotation.
+    static const cstring matchAnnotation = "match"_cs;  /// Match annotation (for value sets).
+    static const cstring fieldListAnnotation = "field_list"_cs;  /// Used for recirculate, etc.
+    static const cstring debugLoggingAnnotation = "__debug"_cs;  /// Used by compiler implementer to limit debug log to the annotated IR context.
+    static const cstring disableOptimizationAnnotation = "disable_optimization"_cs; /// annotation to disable certain optimization
+    static const cstring inlinedFromAnnotation = "inlinedFrom"_cs; /// annotation to mark block of inlined function
+    static const cstring likelyAnnotation = "likely"_cs;  /// annotation for likely taken blocks/branchs
+    static const cstring unlikelyAnnotation = "unlikely"_cs;  /// annotation for likely not taken blocks/branchs
+
     toString{ return absl::StrCat("@", name); }
     validate{
         BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name");

@@ -88,7 +88,7 @@ struct StatementSplitter : Inspector, ResolutionContext {
         afterIf->ifFalse = results[1].after;
         result.after = afterIf;
 
-        for (auto **trueBranch : {&beforeIf->ifTrue, &afterIf->ifTrue}) {
+        for (auto *trueBranch : {&beforeIf->ifTrue, &afterIf->ifTrue}) {
             if (*trueBranch == nullptr) {
                 *trueBranch = new IR::BlockStatement(ifs->ifTrue->srcInfo);
             }
@@ -101,8 +101,8 @@ struct StatementSplitter : Inspector, ResolutionContext {
             return false;  // split on the switch itself
         }
 
-        std::vector<const IR::Statement *> branches;
-        for (const auto *case_ : sw->cases) {
+        std::vector<IR::Ptr<IR::Statement>> branches;
+        for (const IR::SwitchCase *case_ : sw->cases) {
             branches.push_back(case_->statement);
         }
         auto [results, anySplit] = splitBranches(branches);
@@ -113,8 +113,8 @@ struct StatementSplitter : Inspector, ResolutionContext {
 
         IR::ID selName{nameGen.newName("selector"), nullptr};
         const auto &si = sw->srcInfo;
-        const auto *selType = typeMap ? typeMap->getType(sw->expression) : nullptr;
-        selType = selType ? selType : sw->expression->type;
+        const IR::Type *selType = typeMap ? typeMap->getType(sw->expression) : nullptr;
+        if (!selType) selType = sw->expression->type;
         BUG_CHECK(selType && !selType->is<IR::Type::Unknown>(),
                   "Cannot split switch statement with unknown selector type %1%", sw->expression);
         const auto *decl = new IR::Declaration_Variable(si, selName, selType);
@@ -125,7 +125,7 @@ struct StatementSplitter : Inspector, ResolutionContext {
 
         // ensure we don't accidentally create fallthrough
         for (size_t i = 0; i < branches.size(); ++i) {
-            for (const auto **val : {&results[i].before, &results[i].after}) {
+            for (auto *val : {&results[i].before, &results[i].after}) {
                 if (!*val && branches[i]) {
                     *val = new IR::BlockStatement(branches[i]->srcInfo);
                 }
@@ -177,19 +177,19 @@ struct StatementSplitter : Inspector, ResolutionContext {
                });
     }
 
-    void takeHoisted(std::vector<const IR::Declaration *> &decls) {
+    void takeHoisted(std::vector<IR::Ptr<IR::Declaration>> &decls) {
         result.hoistedDeclarations.insert(result.hoistedDeclarations.end(), decls.begin(),
                                           decls.end());
         decls.clear();
     }
 
     std::pair<std::vector<SplitResult<IR::Statement>>, bool> splitBranches(
-        std::vector<const IR::Statement *> branches) {
+        std::vector<IR::Ptr<IR::Statement>> branches) {
         std::vector<SplitResult<IR::Statement>> res;
         bool anySplit = false;
         res.reserve(branches.size());
 
-        for (const auto *branch : branches) {
+        for (auto branch : branches) {
             if (!branch) {
                 res.emplace_back();
                 continue;
@@ -230,7 +230,7 @@ struct StatementSplitter : Inspector, ResolutionContext {
     const T *filterDeclarations(const T *node) {
         struct FilterDecls : Transform {
             FilterDecls(absl::flat_hash_set<P4::cstring, Util::Hash> &needed,
-                        std::vector<const IR::Declaration *> &hoisted)
+                        std::vector<IR::Ptr<IR::Declaration>> &hoisted)
                 : needed(needed), hoisted(hoisted) {}
 
             const IR::Node *preorder(IR::Declaration_Variable *decl) override {
@@ -242,7 +242,7 @@ struct StatementSplitter : Inspector, ResolutionContext {
             }
 
             absl::flat_hash_set<P4::cstring, Util::Hash> &needed;
-            std::vector<const IR::Declaration *> &hoisted;
+            std::vector<IR::Ptr<IR::Declaration>> &hoisted;
         };
 
         FilterDecls filter(neededDecls, result.hoistedDeclarations);

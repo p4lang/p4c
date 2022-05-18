@@ -15,6 +15,10 @@
 #include "lib/rtti.h"
 #include "lib/source_file.h"
 
+#if !HAVE_LIBGC
+#include "shared_ptr.h"
+#endif /* !HAVE_LIBGC */
+
 namespace P4 {
 class JSONGenerator;
 class JSONLoader;
@@ -38,8 +42,25 @@ struct has_static_type_name<T, std::void_t<decltype(T::static_type_name())>> : s
 template <class T>
 inline constexpr bool has_static_type_name_v = has_static_type_name<T>::value;
 
+#if HAVE_LIBGC
+template <class T> using Ptr = const T *;
+#else
+template <class T> using Ptr = shared_ptr<T>;
+#endif
+
 // node interface
-class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable {
+class INode :
+#if !HAVE_LIBGC
+    public shared_ptr_base,
+#endif /* !HAVE_LIBGC */
+    public Util::IHasSourceInfo,
+    public IHasDbPrint,
+    public ICastable {
+#if HAVE_LIBGC
+ protected:
+    const char *dbheap() const { return ""; }
+#endif /* !HAVE_LIBGC */
+
  public:
     virtual ~INode() {}
     virtual const Node *getNode() const = 0;

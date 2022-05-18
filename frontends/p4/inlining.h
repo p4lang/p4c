@@ -410,7 +410,7 @@ class GeneralInliner : public AbstractInliner<InlineList, InlineSummary> {
      */
     template <class P4Block, class P4BlockType>
     void inline_subst(P4Block *caller, IR::IndexedVector<IR::Declaration> P4Block::*blockLocals,
-                      const P4BlockType *P4Block::*blockType);
+                      P4BlockType P4Block::*blockType);
     const IR::Node *preorder(IR::P4Control *caller) override;
     const IR::Node *preorder(IR::P4Parser *caller) override;
     const IR::Node *preorder(IR::ParserState *state) override;
