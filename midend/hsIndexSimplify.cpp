@@ -30,7 +30,7 @@ void HSIndexFinder::addNewVariable() {
             newVariable = arrayIndex->right->to<IR::PathExpression>();
         } else if (generatedVariables->count(indexString) == 0) {
             // Generate new temporary variable.
-            const auto *type = typeMap->getTypeType(arrayIndex->right->type, true);
+            const IR::Type *type = typeMap->getTypeType(arrayIndex->right->type, true);
             auto name = nameGen->newName("hsiVar");
             auto *decl = new IR::Declaration_Variable(name, type);
             locals->push_back(decl);
@@ -187,7 +187,7 @@ IR::Node *HSIndexContretizer::preorder(IR::P4Control *control) {
     HSIndexContretizer hsSimplifier(typeMap, maxExpansion, nameGen, &newControlLocals,
                                     &blockGeneratedVariables);
     newControl->body = newControl->body->apply(hsSimplifier)->to<IR::BlockStatement>();
-    for (const auto *declaration : controlKeySimplified->controlLocals) {
+    for (const IR::Declaration *declaration : controlKeySimplified->controlLocals) {
         if (declaration->is<IR::P4Action>()) {
             newControlLocals.push_back(declaration->apply(hsSimplifier)->to<IR::Declaration>());
         } else {

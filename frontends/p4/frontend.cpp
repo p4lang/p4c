@@ -144,7 +144,7 @@ class ValidateSwitchStatements : public Inspector {
     bool preorder(const IR::SwitchStatement *stat) override {
         const IR::Node *foundDefault = nullptr;
         for (unsigned i = 0; i < stat->cases.size(); i++) {
-            const auto *c = stat->cases.at(i);
+            const IR::SwitchCase *c = stat->cases.at(i);
             if (c->label->is<IR::DefaultExpression>()) {
                 if (foundDefault)
                     P4::error(P4::ErrorType::ERR_INVALID, "%1%: multiple 'default' labels %2%",
@@ -153,7 +153,7 @@ class ValidateSwitchStatements : public Inspector {
                 continue;
             }
             for (unsigned j = i + 1; j < stat->cases.size(); j++) {
-                auto *other = stat->cases.at(j);
+                const IR::SwitchCase *other = stat->cases.at(j);
                 if (other->label->equiv(*c->label)) {
                     P4::error(P4::ErrorType::ERR_INVALID, "%1%: duplicate case label %2%",
                               other->label, c->label);
@@ -181,9 +181,9 @@ class ValidateOverloadedMethods : public Inspector {
         auto aParams = a->getParameters()->parameters;
         auto bParams = b->getParameters()->parameters;
         if (aParams.size() != bParams.size()) return false;
-        for (const auto *ap : aParams) {
+        for (const IR::Parameter *ap : aParams) {
             bool found = false;
-            for (const auto *bp : bParams) {
+            for (const IR::Parameter *bp : bParams) {
                 if (ap->name.name == bp->name.name) {
                     found = true;
                     break;
@@ -197,9 +197,9 @@ class ValidateOverloadedMethods : public Inspector {
  public:
     bool preorder(const IR::Type_Extern *ext) override {
         for (size_t i = 0; i < ext->methods.size(); i++) {
-            const auto *m = ext->methods.at(i);
+            const IR::Method *m = ext->methods.at(i);
             for (size_t j = i + 1; j < ext->methods.size(); j++) {
-                const auto *other = ext->methods.at(j);
+                const IR::Method *other = ext->methods.at(j);
                 if (m->name == other->name && sameSignature(m, other)) {
                     P4::error(P4::ErrorType::ERR_DUPLICATE,
                               "Duplicate declaration of %1%: previous declaration at %2%",

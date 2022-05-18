@@ -20,6 +20,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "config.h"
 #include "iterator_range.h"
 
 namespace P4::Util {
@@ -362,34 +363,17 @@ class FilterEnumerator final : public Enumerator<T> {
 
 ///////////////////////////
 
-namespace Detail {
-// See if we can use ICastable interface to cast from T to S. This is only possible if:
-// - Both T and S are pointer types (let's denote T = From* and S = To*)
-// - Expression (From*)()->to<To>() is well-formed
-// Essentially this means the following code is well-formed:
-// From *current = input->getCurrent(); current->to<To>();
-template <typename From, typename To, typename = void>
-static constexpr bool can_be_casted = false;
-
-template <typename From, typename To>
-static constexpr bool
-    can_be_casted<From *, To *, std::void_t<decltype(std::declval<From *>()->template to<To>())>> =
-        true;
-}  // namespace Detail
-
-/// Casts each element
+/// Casts each element, preserving ownership when S is a smart pointer.
 template <typename T, typename S>
 class AsEnumerator final : public Enumerator<S> {
-    template <typename U = S>
-    typename std::enable_if_t<!Detail::can_be_casted<T, S>, U> getCurrentImpl() const {
+    S getCurrentImpl() const {
         T current = input->getCurrent();
-        return dynamic_cast<S>(current);
-    }
-
-    template <typename U = S>
-    typename std::enable_if_t<Detail::can_be_casted<T, S>, U> getCurrentImpl() const {
-        T current = input->getCurrent();
-        return current->template to<std::remove_pointer_t<S>>();
+        using Target = typename std::pointer_traits<S>::element_type;
+        if constexpr (requires { current->template to<Target>(); }) {
+            return current ? current->template to<Target>() : nullptr;
+        } else {
+            return dynamic_cast<S>(current);
+        }
     }
 
  protected:

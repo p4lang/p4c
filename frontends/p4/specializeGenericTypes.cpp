@@ -112,7 +112,7 @@ Visitor::profile_t FindTypeSpecializations::init_apply(const IR::Node *node) {
 }
 
 void FindTypeSpecializations::postorder(const IR::Type_Specialized *type) {
-    const auto *baseType = getDeclaration(type->baseType->path, true);
+    const IR::IDeclaration *baseType = getDeclaration(type->baseType->path, true);
     const auto *st = baseType->to<IR::Type_StructLike>();
     if (st == nullptr || st->typeParameters->size() == 0)
         // nothing to specialize
@@ -156,7 +156,7 @@ void CreateSpecializedTypes::postorder(IR::Type_Specialized *spec) {
 
 void CreateSpecializedTypes::postorder(IR::P4Program *prog) {
     IR::Vector<IR::Node> newObjects;
-    for (const auto *obj : prog->objects) {
+    for (const IR::Node *obj : prog->objects) {
         newObjects.push_back(obj);
         if (const auto *tdec = obj->to<IR::Type_Declaration>()) {
             specMap->markDefined(tdec);
@@ -218,7 +218,7 @@ std::string toString(const SpecSignature &sig) {
 std::optional<SpecSignature> SpecSignature::get(const IR::Type_Specialized *spec) {
     SpecSignature out;
     out.baseType = spec->baseType->path->name;
-    for (const auto *arg : *spec->arguments) {
+    for (const IR::Type *arg : *spec->arguments) {
         if (ContainsTypeVariable::inspect(arg)) {
             return {};
         }
