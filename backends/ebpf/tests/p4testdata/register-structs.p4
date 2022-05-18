@@ -97,7 +97,7 @@ control ingress(inout headers hdr,
          if (tmp.srcAddr < (bit<32>)5) {
              tmp.srcAddr = (bit<32>)5;
          } else {
-             tmp.srcAddr = tmp.srcAddr + 10;
+             tmp.dstAddr = tmp.dstAddr + 13;
          }
          reg.write(reg_key, tmp);
     }

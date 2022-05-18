@@ -226,17 +226,28 @@ class P4EbpfTest(BaseTest):
                     s = s + "meter {} {}:{} {}:{} ".format(k, v["pir"], v["pbs"], v["cir"], v["cbs"])
         return s
 
-    def _table_create_str_from_key(self, keys):
-        """ Creates string from keys which can be passed to the psabpf-cli as an argument.
+    def _table_create_str_from_(self, name="key", value=None):
         """
-        s = "key none "
-        if keys:
-            s = "key "
-            for k in keys:
-                s = s + "{} ".format(k)
+        Creates a string from value (a list of fields)
+        which can be passed to the psabpf-cli as an argument.
+        """
+        s = name + " none"
+        if value:
+            s = name + " "
+            for field in value:
+                s = s + "{} ".format(field)
         return s
 
-    def table_write(self, method, table, keys, action=0, data=None, priority=None, references=None,
+    def _table_create_str_from_key(self, key):
+        return self._table_create_str_from_(name="key", value=key)
+
+    def _table_create_str_from_index(self, index):
+        return self._table_create_str_from_(name="index", value=index)
+
+    def _table_create_str_from_value(self, value):
+        return self._table_create_str_from_(name="value", value=value)
+
+    def table_write(self, method, table, key, action=0, data=None, priority=None, references=None,
                     counters=None, meters=None):
         """
         Use table_add or table_update instead of this method.
@@ -247,17 +258,17 @@ class P4EbpfTest(BaseTest):
             cmd = cmd + "ref "
         else:
             cmd = cmd + "id {} ".format(action)
-        cmd = cmd + self._table_create_str_from_key(keys=keys)
+        cmd = cmd + self._table_create_str_from_key(key=key)
         cmd = cmd + self._table_create_str_from_data(data=data, counters=counters, meters=meters)
         if priority:
             cmd = cmd + "priority {}".format(priority)
         self.exec_ns_cmd(cmd, "Table {} failed".format(method))
 
-    def table_add(self, table, keys, action=0, data=None, priority=None, references=None,
+    def table_add(self, table, key, action=0, data=None, priority=None, references=None,
                   counters=None, meters=None):
         """ Adds a new entry to a table.
             :param table: Table name.
-            :param keys: List of keys, each key must be convertible to string.
+            :param key: List of key fields, each field must be convertible to string.
             :param action: Action ID in the dataplane.
             :param data: List of action parameters.
             :param priority: Priority of the new entry.
@@ -267,22 +278,22 @@ class P4EbpfTest(BaseTest):
             :param meters: Dictionary of meter's names (key) and dictionary of meter value (value).
                 Inner dictionary must have four entries: "pir", "pbs", "cir", "cbs"
         """
-        self.table_write(method="add", table=table, keys=keys, action=action, data=data,
+        self.table_write(method="add", table=table, key=key, action=action, data=data,
                          priority=priority, references=references, counters=counters, meters=meters)
 
-    def table_update(self, table, keys, action=0, data=None, priority=None, references=None,
+    def table_update(self, table, key, action=0, data=None, priority=None, references=None,
                      counters=None, meters=None):
         """ See documentation for table_add. This method updates existing entry instead of new one.
         """
-        self.table_write(method="update", table=table, keys=keys, action=action, data=data,
+        self.table_write(method="update", table=table, key=key, action=action, data=data,
                          priority=priority, references=references, counters=counters, meters=meters)
 
-    def table_delete(self, table, keys=None):
+    def table_delete(self, table, key=None):
         """ Deletes existing table entry
         """
         cmd = "psabpf-ctl table delete pipe {} {} ".format(TEST_PIPELINE_ID, table)
-        if keys:
-            cmd = cmd + self._table_create_str_from_key(keys)
+        if key:
+            cmd = cmd + self._table_create_str_from_key(key)
         self.exec_ns_cmd(cmd, "Table delete failed")
 
     def table_set_default(self, table, action=0, data=None, counters=None, meters=None):
@@ -292,7 +303,7 @@ class P4EbpfTest(BaseTest):
         cmd = cmd + self._table_create_str_from_data(data=data, counters=counters, meters=meters)
         self.exec_ns_cmd(cmd, "Table set default entry failed")
 
-    def table_get(self, table, keys, indirect=False):
+    def table_get(self, table, key, indirect=False):
         """ Returns JSON containing parsed table entry - action data, meters, counters.
             If table has an implementation, set param `indirect` to True.
         """
@@ -300,16 +311,16 @@ class P4EbpfTest(BaseTest):
         if indirect:
             # TODO: cmd = cmd + "ref "
             self.fail("support for indirect table is not implemented yet")
-        cmd = cmd + self._table_create_str_from_key(keys=keys)
+        cmd = cmd + self._table_create_str_from_key(key=key)
         _, stdout, _ = self.exec_ns_cmd(cmd, "Table get entry failed")
         return json.loads(stdout)[table]
 
-    def table_verify(self, table, keys, action=0, priority=None, data=None, references=None,
+    def table_verify(self, table, key, action=0, priority=None, data=None, references=None,
                      counters=None, meters=None):
         """ Verify that values in table entry fields are equal to provided arguments. For parameters
             documentation see `table_add` method. Field not referenced by any argument will not be tested.
         """
-        json_data = self.table_get(table=table, keys=keys, indirect=references)
+        json_data = self.table_get(table=table, key=key, indirect=references)
         entries = json_data["entries"]
         if len(entries) != 1:
             self.fail("Expected 1 table entry to verify")
@@ -364,8 +375,8 @@ class P4EbpfTest(BaseTest):
         _, stdout, _ = self.exec_ns_cmd(cmd, "Digest get failed")
         return json.loads(stdout)['Digest'][name]['digests']
 
-    def counter_get(self, name, keys=None):
-        key_str = self._table_create_str_from_key(keys=keys)
+    def counter_get(self, name, key=None):
+        key_str = self._table_create_str_from_key(key=key)
         cmd = "psabpf-ctl counter get pipe {} {} {}".format(TEST_PIPELINE_ID, name, key_str)
         _, stdout, _ = self.exec_ns_cmd(cmd, "Counter get failed")
         return json.loads(stdout)['Counter'][name]
@@ -391,8 +402,8 @@ class P4EbpfTest(BaseTest):
             if counter_packets != packets:
                 self.fail("Invalid counter packets, expected {}, got {}".format(packets, counter_packets))
 
-    def counter_verify(self, name, keys, bytes=None, packets=None):
-        counter = self.counter_get(name, keys=keys)
+    def counter_verify(self, name, key, bytes=None, packets=None):
+        counter = self.counter_get(name, key=key)
         entries = counter["entries"]
         if len(entries) != 1:
             self.fail("expected one Counter entry")
@@ -404,3 +415,35 @@ class P4EbpfTest(BaseTest):
               "index {} {}:{} {}:{}".format(TEST_PIPELINE_ID, name,
                                             index, pir, pbs, cir, cbs)
         self.exec_ns_cmd(cmd, "Meter update failed")
+
+    def register_get(self, name, index=None):
+        index_str = self._table_create_str_from_index(index=index)
+        cmd = "psabpf-ctl register get pipe {} {} {}".format(TEST_PIPELINE_ID, name, index_str)
+        _, stdout, _ = self.exec_ns_cmd(cmd, "Register get failed")
+        return json.loads(stdout)[name]
+
+    def register_set(self, name, index=None, value=None):
+        index_str = self._table_create_str_from_index(index=index)
+        value_str = self._table_create_str_from_value(value=value)
+        cmd = "psabpf-ctl register set pipe {} {} {} {}".format(TEST_PIPELINE_ID, name,
+                                                                index_str, value_str)
+        _, stdout, _ = self.exec_ns_cmd(cmd, "Register set failed")
+
+    def register_verify(self, name, index, expected_value):
+        """
+        Verifies a register value.
+        :param name: Register name
+        :param key: A list of hex string
+        :param expected_value: A list of hex string
+        """
+        entries = self.register_get(name, index=index)
+        if len(entries) != 1:
+            self.fail("expected one Register entry")
+        entry = entries[0]
+        reg_value = entry["value"]
+        for idx, field_value in enumerate(reg_value.values()):
+            field_value = int(field_value, 0)
+            expected_field_value = int(expected_value[idx], 0)
+            if field_value != expected_field_value:
+                self.fail("Invalid register value, expected {}, got {}".format(expected_field_value,
+                          field_value))

@@ -42,8 +42,8 @@ class SimpleActionProfilePSATest(P4EbpfTest):
         testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
 
         # FIXME: API/CLI for ActionProfile is not done yet, we are using table API/CLI for now
-        self.table_add(table="MyIC_ap", keys=[0x10], action=2, data=[0x1122])
-        self.table_add(table="MyIC_tbl", keys=["11:22:33:44:55:66"], references=[0x10])
+        self.table_add(table="MyIC_ap", key=[0x10], action=2, data=[0x1122])
+        self.table_add(table="MyIC_tbl", key=["11:22:33:44:55:66"], references=[0x10])
 
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
@@ -57,9 +57,9 @@ class ActionProfileTwoTablesSameInstancePSATest(P4EbpfTest):
     p4_file_path = "p4testdata/action-profile2.p4"
 
     def runTest(self):
-        self.table_add(table="MyIC_ap", keys=[0x10], action=2, data=[0x1122])
-        self.table_add(table="MyIC_tbl", keys=["11:22:33:44:55:66"], references=[0x10])
-        self.table_add(table="MyIC_tbl2", keys=["AA:BB:CC:DD:EE:FF"], references=[0x10])
+        self.table_add(table="MyIC_ap", key=[0x10], action=2, data=[0x1122])
+        self.table_add(table="MyIC_tbl", key=["11:22:33:44:55:66"], references=[0x10])
+        self.table_add(table="MyIC_tbl2", key=["AA:BB:CC:DD:EE:FF"], references=[0x10])
 
         pkt = testutils.simple_ip_packet(eth_src="11:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
@@ -80,8 +80,8 @@ class ActionProfileLPMTablePSATest(P4EbpfTest):
 
     def runTest(self):
         # Match all 11:22:33:44:55:xx MAC addresses
-        self.table_add(table="MyIC_tbl", keys=["0x112233445500/40"], references=[0x10])
-        self.table_add(table="MyIC_ap", keys=[0x10], action=2, data=[0x1122])
+        self.table_add(table="MyIC_tbl", key=["0x112233445500/40"], references=[0x10])
+        self.table_add(table="MyIC_ap", key=[0x10], action=2, data=[0x1122])
 
         pkt = testutils.simple_ip_packet(eth_src="AA:BB:CC:DD:EE:FF", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
@@ -103,10 +103,10 @@ class ActionProfileActionRunPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/action-profile-action-run.p4"
 
     def runTest(self):
-        self.table_add(table="MyIC_ap", keys=[0x10], action=2, data=[0x1122])
-        self.table_add(table="MyIC_ap", keys=[0x20], action=1, data=["AA:BB:CC:DD:EE:FF"])
-        self.table_add(table="MyIC_tbl", keys=["11:22:33:44:55:66"], references=[0x10])
-        self.table_add(table="MyIC_tbl", keys=["AA:BB:CC:DD:EE:FF"], references=[0x20])
+        self.table_add(table="MyIC_ap", key=[0x10], action=2, data=[0x1122])
+        self.table_add(table="MyIC_ap", key=[0x20], action=1, data=["AA:BB:CC:DD:EE:FF"])
+        self.table_add(table="MyIC_tbl", key=["11:22:33:44:55:66"], references=[0x10])
+        self.table_add(table="MyIC_tbl", key=["AA:BB:CC:DD:EE:FF"], references=[0x20])
 
         # action MyIC_a1
         pkt = testutils.simple_ip_packet(eth_src="AA:BB:CC:DD:EE:FF", eth_dst="22:33:44:55:66:77")
@@ -132,8 +132,8 @@ class ActionProfileHitPSATest(P4EbpfTest):
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_no_other_packets(self)
 
-        self.table_add(table="MyIC_ap", keys=[0x10], action=2, data=[0x1122])
-        self.table_add(table="MyIC_tbl", keys=["11:22:33:44:55:66"], references=[0x10])
+        self.table_add(table="MyIC_ap", key=[0x10], action=2, data=[0x1122])
+        self.table_add(table="MyIC_tbl", key=["11:22:33:44:55:66"], references=[0x10])
 
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
@@ -166,8 +166,8 @@ class ActionSelectorTest(P4EbpfTest):
         self.default_group_ports = [PORT3, PORT4, PORT5]
 
         if table:
-            self.table_add(table=table, keys=["02:22:33:44:55:66"], references=["0x2"])
-            self.table_add(table=table, keys=["07:22:33:44:55:66"], references=["group {}".format(self.group_id)])
+            self.table_add(table=table, key=["02:22:33:44:55:66"], references=["0x2"])
+            self.table_add(table=table, key=["07:22:33:44:55:66"], references=["group {}".format(self.group_id)])
 
 
 class SimpleActionSelectorPSATest(ActionSelectorTest):
@@ -215,7 +215,7 @@ class ActionSelectorTwoTablesSameInstancePSATest(ActionSelectorTest):
 
     def runTest(self):
         self.create_default_rule_set(table="MyIC_tbl", selector="MyIC_as")
-        self.table_add(table="MyIC_tbl2", keys=[0x1122], references=[3])
+        self.table_add(table="MyIC_tbl2", key=[0x1122], references=[3])
 
         pkt = testutils.simple_ip_packet(eth_src="02:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
@@ -240,7 +240,7 @@ class ActionSelectorDefaultEmptyGroupActionPSATest(ActionSelectorTest):
         testutils.verify_no_other_packets(self)
 
         gid = self.action_selector_create_empty_group(selector="MyIC_as")
-        self.table_add(table="MyIC_tbl", keys=["08:22:33:44:55:66"], references=["group {}".format(gid)])
+        self.table_add(table="MyIC_tbl", key=["08:22:33:44:55:66"], references=["group {}".format(gid)])
 
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
@@ -260,7 +260,7 @@ class ActionSelectorMultipleSelectorsPSATest(ActionSelectorTest):
 
     def runTest(self):
         self.create_default_rule_set(table="MyIC_tbl", selector="MyIC_as")
-        self.table_add(table="MyIC_tbl", keys=["07:22:33:44:55:67"], references=["group {}".format(self.group_id)])
+        self.table_add(table="MyIC_tbl", key=["07:22:33:44:55:67"], references=["group {}".format(self.group_id)])
 
         allowed_ports = self.default_group_ports
         pkt = testutils.simple_ip_packet(eth_src="07:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
@@ -293,7 +293,7 @@ class ActionSelectorMultipleSelectorsTwoTablesPSATest(ActionSelectorTest):
 
     def runTest(self):
         self.create_default_rule_set(table="MyIC_tbl", selector="MyIC_as")
-        self.table_add(table="MyIC_tbl2", keys=["AA:BB:CC:DD:EE:FF"], references=["group {}".format(self.group_id)])
+        self.table_add(table="MyIC_tbl2", key=["AA:BB:CC:DD:EE:FF"], references=["group {}".format(self.group_id)])
 
         pkt = testutils.simple_ip_packet(eth_src="07:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
@@ -313,9 +313,9 @@ class ActionSelectorLPMTablePSATest(ActionSelectorTest):
     def runTest(self):
         self.create_default_rule_set(table=None, selector="MyIC_as")
         # Match all 00:22:02:44:55:xx MAC addresses into action ref 2
-        self.table_add(table="MyIC_tbl", keys=["0x002202445500/40"], references=[2])
+        self.table_add(table="MyIC_tbl", key=["0x002202445500/40"], references=[2])
         # Match all 00:22:07:44:55:xx MAC addresses into group g7
-        self.table_add(table="MyIC_tbl", keys=["0x2207445500/40"], references=["group {}".format(self.group_id)])
+        self.table_add(table="MyIC_tbl", key=["0x2207445500/40"], references=["group {}".format(self.group_id)])
 
         pkt = testutils.simple_ip_packet(eth_src="00:22:07:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
@@ -338,8 +338,8 @@ class ActionSelectorActionRunPSATest(ActionSelectorTest):
     def runTest(self):
         ref1 = self.action_selector_add_action(selector="MyIC_as", action=1, data=[5])
         ref2 = self.action_selector_add_action(selector="MyIC_as", action=0, data=[])
-        self.table_add(table="MyIC_tbl", keys=["02:22:33:44:55:66"], references=[ref1])
-        self.table_add(table="MyIC_tbl", keys=["03:22:33:44:55:66"], references=[ref2])
+        self.table_add(table="MyIC_tbl", key=["02:22:33:44:55:66"], references=[ref1])
+        self.table_add(table="MyIC_tbl", key=["03:22:33:44:55:66"], references=[ref2])
 
         pkt = testutils.simple_ip_packet(eth_src="02:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
