@@ -175,8 +175,13 @@ const IR::Node *UnusedDeclarations::process(const IR::IDeclaration *decl, bool s
     // of UnusedDeclarations in the scope of WarnAboutUnusedDeclarations, we cannot
     // use externalName as it expects the @name annotation to be a single string.
     bool skipNameCheck = false;
-    if (const auto *anno = decl->getAnnotation(IR::Annotation::nameAnnotation))
+    if (const IR::Annotation *anno = decl->getAnnotation(IR::Annotation::nameAnnotation))
         skipNameCheck = anno->getSingleString(false) == cstring::empty;
+    if (const auto *annotated = decl->to<IR::IAnnotated>()) {
+        if (const IR::Annotation *anno = annotated->getAnnotation(IR::Annotation::nameAnnotation)) {
+            skipNameCheck = anno->getSingleString(false) == cstring::empty;
+        }
+    }
     if (!skipNameCheck && decl->externalName(decl->getName().name).startsWith("__"))
         // Internal identifiers, e.g., __v1model_version
         return decl->getNode();

@@ -16,6 +16,13 @@
 #include "lib/stringify.h"
 
 namespace P4 {
+#if !HAVE_LIBGC
+namespace IR {
+template <class T>
+class shared_ptr;
+}
+#endif /* !HAVE_LIBGC */
+
 namespace priv {
 
 // All these methods return std::string because this is the native format of boost::format
@@ -74,6 +81,16 @@ auto error_helper(boost::format &f, ErrorMessage out, const T &t,
     maybeAddSourceInfo(out, t);
     return error_helper(f % t.toString(), std::move(out), std::forward<Args>(args)...);
 }
+
+#if !HAVE_LIBGC
+template <typename T, class... Args>
+ErrorMessage error_helper(boost::format &f, ErrorMessage out, const IR::shared_ptr<T> &t,
+                          Args... args) {
+    auto info = t->getSourceInfo();
+    if (info.isValid()) out.locations.push_back(info);
+    return error_helper(f % t->toString(), out, std::forward<Args>(args)...);
+}
+#endif /* !HAVE_LIBGC */
 
 }  // namespace priv
 

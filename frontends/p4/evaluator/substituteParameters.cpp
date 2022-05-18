@@ -29,7 +29,7 @@ const IR::Node *SubstituteParameters::postorder(IR::PathExpression *expr) {
         (refMap ? refMap->getDeclaration(expr->path, true) : getDeclaration(expr->path, true));
     auto param = decl->to<IR::Parameter>();
     if (param != nullptr && subst->contains(param)) {
-        const auto *value = subst->lookup(param)->expression;
+        const IR::Expression *value = subst->lookup(param)->expression;
         LOG1("Replaced " << dbp(expr) << " with " << dbp(value));
         // Return a new Expression with source info of the PathExpression
         // being substituted.

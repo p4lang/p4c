@@ -16,6 +16,7 @@
 
 #include "lib/exceptions.h"
 #include "lib/rtti_utils.h"
+#include "ir/node.h"
 
 #ifndef IR_IR_TRAVERSAL_INTERNAL_ENABLE
 #error "This file must not be used directly"
@@ -82,14 +83,15 @@ struct Traverse {
     }
 
     template <typename T, typename... Selectors>
+    static void modifyRef(IR::Ptr<T> &ref, Selectors &&...selectors) {
+        ref = modify(ref->clone(), std::forward<Selectors>(selectors)...);
+    }
+
+    template <typename T, typename... Selectors>
     static void modifyRef(T &ref, Selectors &&...selectors) {
-        if constexpr (std::is_pointer_v<T>) {
-            ref = modify(ref->clone(), std::forward<Selectors>(selectors)...);
-        } else {
-            auto *res = modify(&ref, std::forward<Selectors>(selectors)...);
-            if (&ref != res) {
-                ref = *res;
-            }
+        auto *res = modify(&ref, std::forward<Selectors>(selectors)...);
+        if (&ref != res) {
+            ref = *res;
         }
     }
 };

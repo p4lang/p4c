@@ -206,7 +206,7 @@ class P4TCTarget : public KernelSamplesTarget {
     // FIXME: The code is terrible broken: the function is called on both
     // *parsed* and *unparsed* annotations (!!!!)
     static cstring getByteOrderFromAnnotation(const IR::IAnnotated *node) {
-        if (const auto *anno = node->getAnnotation("tc_type"_cs)) {
+        if (const IR::Annotation *anno = node->getAnnotation("tc_type"_cs)) {
             cstring value = anno->needsParsing()
                                 ? anno->getUnparsed().at(0)->text
                                 : anno->getExpr().at(0)->checkedTo<IR::StringLiteral>()->value;

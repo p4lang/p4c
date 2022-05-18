@@ -33,7 +33,7 @@ class PhvAllocation : public Visitor {
     PhvInfo &phv_i;
     int pipe_id_i = -1;
 
-    const IR::Node *apply_visitor(const IR::Node *root, const char *name = 0) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *root, const char *name = 0) override;
 
  public:
     PhvAllocation(const PhvKit &kit, const MauBacktracker &mau, PhvInfo &phv)

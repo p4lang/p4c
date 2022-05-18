@@ -58,7 +58,7 @@ const char *t2na_header() {
     frontendTestCase->program->apply(BFN::FindArchitecture());
 
     BFN::MidEnd midend(options);
-    auto *midendProgram = frontendTestCase->program->apply(midend);
+    const IR::P4Program *midendProgram = frontendTestCase->program->apply(midend);
     if (midendProgram == nullptr) {
         std::cerr << "Midend failed" << std::endl;
         return std::nullopt;
@@ -84,7 +84,7 @@ const char *t2na_header() {
     frontendTestCase->program->apply(BFN::FindArchitecture());
 
     BFN::MidEnd midend(options);
-    auto *midendProgram = frontendTestCase->program->apply(midend);
+    const IR::P4Program *midendProgram = frontendTestCase->program->apply(midend);
     if (midendProgram == nullptr) {
         std::cerr << "Midend failed" << std::endl;
         return std::nullopt;
@@ -102,7 +102,7 @@ const char *t2na_header() {
         std::cerr << "backend converter failed" << std::endl;
         return std::nullopt;
     }
-    auto *pipe = postmid.pipe[0];
+    const IR::BFN::Pipe *pipe = postmid.pipe[0];
     if (pipe == nullptr) {
         std::cerr << "extract_maupipe failed" << std::endl;
         return std::nullopt;

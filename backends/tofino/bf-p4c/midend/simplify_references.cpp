@@ -213,7 +213,7 @@ struct SimplifyHeaderValidMethods : public Transform {
     }
 
     const IR::Statement *preorder(IR::MethodCallStatement *statement) override {
-        auto *call = statement->methodCall;
+        const IR::MethodCallExpression *call = statement->methodCall;
         auto *method = call->method->to<IR::Member>();
         if (!method) return statement;
 
@@ -231,7 +231,7 @@ struct SimplifyHeaderValidMethods : public Transform {
                                              const IR::Member *method) {
         BUG_CHECK(call->arguments->size() == 0, "Wrong number of arguments for method call: %1%",
                   call);
-        auto *target = method->expr;
+        const IR::Expression *target = method->expr;
         BUG_CHECK(target != nullptr, "Method has no target: %1%", call);
         BUG_CHECK(target->type->is<IR::Type_Header>(), "Invoking isValid() on unexpected type %1%",
                   target->type);
@@ -258,7 +258,7 @@ struct SimplifyHeaderValidMethods : public Transform {
                                              const IR::Member *method, unsigned value) {
         BUG_CHECK(statement->methodCall->arguments->size() == 0,
                   "Wrong number of arguments for method call: %1%", statement);
-        auto *target = method->expr;
+        const IR::Expression *target = method->expr;
         BUG_CHECK(target != nullptr, "Method has no target: %1%", statement);
         BUG_CHECK(target->type->is<IR::Type_Header>(), "Invoking isValid() on unexpected type %1%",
                   target->type);

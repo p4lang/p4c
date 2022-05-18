@@ -1674,7 +1674,7 @@ class P4RuntimeDataTypeSpec : public P4Runtime {
 TEST_F(P4RuntimeDataTypeSpec, Bits) {
     int size(9);
     bool isSigned(true);
-    auto *type = IR::Type_Bits::get(size, isSigned);
+    auto type = IR::Type_Bits::get(size, isSigned);
     const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_bitstring());
@@ -1685,7 +1685,7 @@ TEST_F(P4RuntimeDataTypeSpec, Bits) {
 
 TEST_F(P4RuntimeDataTypeSpec, Varbits) {
     int size(64);
-    auto *type = IR::Type_Varbits::get(size);
+    auto type = IR::Type_Varbits::get(size);
     const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_bitstring());
@@ -1695,15 +1695,15 @@ TEST_F(P4RuntimeDataTypeSpec, Varbits) {
 }
 
 TEST_F(P4RuntimeDataTypeSpec, Boolean) {
-    auto *type = IR::Type_Boolean::get();
+    auto type = IR::Type_Boolean::get();
     const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     EXPECT_TRUE(typeSpec->has_bool_());
 }
 
 TEST_F(P4RuntimeDataTypeSpec, Tuple) {
-    auto *typeMember1 = IR::Type_Bits::get(1, false);
-    auto *typeMember2 = IR::Type_Bits::get(2, false);
+    auto typeMember1 = IR::Type_Bits::get(1, false);
+    auto typeMember2 = IR::Type_Bits::get(2, false);
     IR::Vector<IR::Type> components = {typeMember1, typeMember2};
     auto *type = new IR::Type_Tuple(std::move(components));
     const auto *typeSpec =

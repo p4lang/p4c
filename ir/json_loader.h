@@ -389,6 +389,13 @@ class JSONLoader {
         }
     }
 
+#if !HAVE_LIBGC
+    template <typename T>
+    void unpack_json(IR::shared_ptr<T> &v) {
+        v = get_node()->to<T>();
+    }
+#endif /* !HAVE_LIBGC */
+
  public:
     template <typename T>
     void load(const JsonData &json, T &v) {

@@ -102,7 +102,7 @@ class PassManager : virtual public Visitor, virtual public Backtrack {
     }
     void removePasses(const std::vector<cstring> &exclude);
     void listPasses(std::ostream &, cstring sep) const;
-    const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *, const char * = 0) override;
     bool backtrack(trigger &trig) override;
     bool never_backtracks() override;
     void setStopOnError(bool stop) { stop_on_error = stop; }
@@ -131,7 +131,7 @@ class OnBacktrack : virtual public Visitor, virtual public Backtrack {
 
  public:
     explicit OnBacktrack(std::function<void(T *)> f) : fn(f) {}
-    const IR::Node *apply_visitor(const IR::Node *n, const char * = 0) override { return n; }
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *n, const char * = 0) override { return n; }
     bool backtrack(trigger &trig) override {
         if (auto *t = dynamic_cast<T *>(&trig)) {
             fn(t);
@@ -151,7 +151,7 @@ class PassRepeated : virtual public PassManager {
         : PassManager(init), repeats(repeats) {}
     explicit PassRepeated(const PassManager &other, unsigned repeats = 0)
         : PassManager(other), repeats(repeats) {}
-    const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *, const char * = 0) override;
     PassRepeated *setRepeats(unsigned repeats) {
         this->repeats = repeats;
         return this;
@@ -166,7 +166,7 @@ class PassRepeatUntil : virtual public PassManager {
     explicit PassRepeatUntil(std::function<bool()> done) : done(done) {}
     PassRepeatUntil(const std::initializer_list<VisitorRef> &init, std::function<bool()> done)
         : PassManager(init), done(done) {}
-    const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *, const char * = 0) override;
     PassRepeatUntil *clone() const override { return new PassRepeatUntil(*this); }
 };
 
@@ -177,14 +177,14 @@ class PassIf : virtual public PassManager {
     explicit PassIf(std::function<bool()> cond) : cond(cond) {}
     PassIf(std::function<bool()> cond, const std::initializer_list<VisitorRef> &init)
         : PassManager(init), cond(cond) {}
-    const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *, const char * = 0) override;
     PassIf *clone() const override { return new PassIf(*this); }
 };
 
 // Converts a function Node* -> Node* into a visitor
 class VisitFunctor : virtual public Visitor {
     std::function<const IR::Node *(const IR::Node *)> fn;
-    const IR::Node *apply_visitor(const IR::Node *n, const char * = 0) override { return fn(n); }
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *n, const char * = 0) override { return fn(n); }
 
  public:
     explicit VisitFunctor(std::function<const IR::Node *(const IR::Node *)> f) : fn(f) {}
@@ -209,7 +209,7 @@ class DynamicVisitor : virtual public Visitor {
     void end_apply(const IR::Node *root) override {
         if (visitor) visitor->end_apply(root);
     }
-    const IR::Node *apply_visitor(const IR::Node *root, const char *name = 0) override {
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *root, const char *name = 0) override {
         if (visitor) return visitor->apply_visitor(root, name);
         return root;
     }

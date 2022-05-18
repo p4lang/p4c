@@ -275,7 +275,7 @@ bool isActionRun(const IR::Expression *e, const DeclarationLookup *refMap) {
 
     const auto *tablePathExpr = applyMceMem->expr->to<IR::PathExpression>();
     if (!tablePathExpr) return false;
-    const auto *tableDecl = refMap->getDeclaration(tablePathExpr->path);
+    const IR::IDeclaration *tableDecl = refMap->getDeclaration(tablePathExpr->path);
     if (!tableDecl) return false;
 
     return tableDecl->is<IR::P4Table>();
@@ -964,7 +964,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
         }
     } else if (etype->is<IR::Type_InfInt>()) {
         if (const auto *constant = expr->to<IR::Constant>()) {
-            const auto *ctype = constant->type;
+            const IR::Type *ctype = constant->type;
             if (!ctype->is<IR::Type_Bits>() && !ctype->is<IR::Type_InfInt>()) {
                 ::P4::error(ErrorType::ERR_INVALID,
                             "%1%: Cannot cast %1% to arbitrary precision integer", ctype);

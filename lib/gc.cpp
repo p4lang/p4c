@@ -50,6 +50,7 @@ using namespace P4;
 // One can disable the GC, e.g., to run under Valgrind, by editing config.h or toggling
 // -DENABLE_GC=OFF in CMake.
 #if HAVE_LIBGC
+
 static bool done_init, started_init;
 
 // emergency pool to allow a few extra allocations after a bad_alloc is thrown so we

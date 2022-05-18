@@ -34,7 +34,7 @@ namespace P4::IR {
 // - inherits from IR::Node itself
 class VectorBase : public Node {
  public:
-    typedef const Node *const *iterator;
+    typedef IR::Ptr<Node> const *iterator;
     virtual iterator VectorBase_begin() const = 0;
     virtual iterator VectorBase_end() const = 0;
     virtual size_t size() const = 0;
@@ -57,10 +57,15 @@ class VectorBase : public Node {
 // User-level code should use regular std::vector
 template <class T>
 class Vector : public VectorBase {
-    safe_vector<const T *> vec;
+    safe_vector<IR::Ptr<T>> vec;
 
  public:
-    typedef const T *value_type;
+    typedef typename decltype(vec)::const_iterator const_iterator;
+    typedef typename decltype(vec)::const_reference const_reference;
+    typedef typename decltype(vec)::iterator iterator;
+    typedef typename decltype(vec)::reference reference;
+    typedef typename decltype(vec)::size_type size_type;
+    typedef typename decltype(vec)::value_type value_type;
     Vector() = default;
     Vector(const Vector &) = default;
     Vector(Vector &&) = default;
@@ -68,16 +73,13 @@ class Vector : public VectorBase {
     Vector &operator=(const Vector &) = default;
     Vector &operator=(Vector &&) = default;
     explicit Vector(const T *a) { vec.emplace_back(a); }
-    explicit Vector(const safe_vector<const T *> &a) { vec.insert(vec.end(), a.begin(), a.end()); }
-    Vector(std::initializer_list<const T *> a) : vec(a) {}
+    explicit Vector(const safe_vector<IR::Ptr<T>> &a) : vec(a.begin(), a.end()) {}
+    Vector(std::initializer_list<IR::Ptr<T>> a) : vec(a.begin(), a.end()) {}
     template <class InputIt>
     Vector(InputIt first, InputIt last) : vec(first, last) {}
-    Vector(Util::Enumerator<const T *> *e)  // NOLINT(runtime/explicit)
+    Vector(Util::Enumerator<IR::Ptr<T>> *e)  // NOLINT(runtime/explicit)
         : vec(e->begin(), e->end()) {}
     static Node *fromJSON(JSONLoader &json);
-
-    using iterator = typename safe_vector<const T *>::iterator;
-    using const_iterator = typename safe_vector<const T *>::const_iterator;
 
     iterator begin() { return vec.begin(); }
     const_iterator begin() const { return vec.begin(); }
@@ -98,8 +100,8 @@ class Vector : public VectorBase {
     size_t size() const override { return vec.size(); }
     void resize(size_t sz) { vec.resize(sz); }
     bool empty() const override { return vec.empty(); }
-    const T *const &front() const { return vec.front(); }
-    const T *&front() { return vec.front(); }
+    value_type const &front() const { return vec.front(); }
+    value_type &front() { return vec.front(); }
     void clear() { vec.clear(); }
     iterator erase(iterator i) { return vec.erase(i); }
     iterator erase(iterator s, iterator e) { return vec.erase(s, e); }
@@ -136,10 +138,10 @@ class Vector : public VectorBase {
     iterator insert(iterator i, const T *v) { return vec.insert(i, v); }
     iterator insert(iterator i, size_t n, const T *v) { return vec.insert(i, n, v); }
 
-    const T *const &operator[](size_t idx) const { return vec[idx]; }
-    const T *&operator[](size_t idx) { return vec[idx]; }
-    const T *const &at(size_t idx) const { return vec.at(idx); }
-    const T *&at(size_t idx) { return vec.at(idx); }
+    value_type const &operator[](size_t idx) const { return vec[idx]; }
+    value_type &operator[](size_t idx) { return vec[idx]; }
+    value_type const &at(size_t idx) const { return vec.at(idx); }
+    value_type &at(size_t idx) { return vec.at(idx); }
     template <class... Args>
     void emplace_back(Args &&...args) {
         vec.emplace_back(new T(std::forward<Args>(args)...));
@@ -147,11 +149,12 @@ class Vector : public VectorBase {
     void push_back(T *a) { vec.push_back(a); }
     void push_back(const T *a) { vec.push_back(a); }
     void pop_back() { vec.pop_back(); }
-    const T *const &back() const { return vec.back(); }
-    const T *&back() { return vec.back(); }
-    template <class U>
+    value_type const &back() const { return vec.back(); }
+    value_type &back() { return vec.back(); }
+    template <class U,
+              typename = typename std::enable_if<std::is_convertible<U, const T *>::value>::type>
     void push_back(U &a) {
-        vec.push_back(a);
+        vec.push_back(static_cast<const T *>(a));
     }
     void check_null() const {
         for (auto e : vec) CHECK_NULL(e);
@@ -181,7 +184,7 @@ class Vector : public VectorBase {
         auto &a = static_cast<const Vector<T> &>(a_);
         if (size() != a.size()) return false;
         auto it = a.begin();
-        for (auto *el : *this)
+        for (auto el : *this)
             if (!el->equiv(**it++)) return false;
         return true;
     }
@@ -192,9 +195,9 @@ class Vector : public VectorBase {
     virtual void parallel_visit_children(Visitor &v, const char *name = nullptr);
     virtual void parallel_visit_children(Visitor &v, const char *name = nullptr) const;
     void toJSON(JSONGenerator &json) const override;
-    Util::Enumerator<const T *> *getEnumerator() const { return Util::enumerate(vec); }
+    Util::Enumerator<IR::Ptr<T>> *getEnumerator() const { return Util::enumerate(vec); }
     template <typename S>
-    Util::Enumerator<const S *> *only() const {
+    Util::Enumerator<IR::Ptr<S>> *only() const {
         return getEnumerator()->template as<const S *>()->where(
             [](const T *d) { return d != nullptr; });
     }

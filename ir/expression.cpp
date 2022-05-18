@@ -28,7 +28,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Expression *IR::Slice::make(const IR::Expression *e, unsigned lo, unsigned hi) {
+IR::Ptr<IR::Expression> IR::Slice::make(const IR::Expression *e, unsigned lo, unsigned hi) {
     if (auto k = e->to<IR::Constant>()) {
         auto rv = ((*k >> lo) & IR::Constant((1U << (hi - lo + 1)) - 1)).clone();
         rv->type = IR::Type::Bits::get(hi - lo + 1);
@@ -46,7 +46,7 @@ const IR::Expression *IR::Slice::make(const IR::Expression *e, unsigned lo, unsi
         e = sl->e0;
     }
     if (auto sl = e->to<IR::PlusSlice>()) {
-        auto *e2 = sl->e2;
+        const IR::Expression *e2 = sl->e2;
         if (lo > 0) e2 = new IR::Add(e2, new IR::Constant(lo));
         return new IR::PlusSlice(sl->e1, e2, hi - lo + 1);
     }

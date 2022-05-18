@@ -380,7 +380,7 @@ void EBPFMethodDeclaration::emit(CodeBuilder *builder) {
     builder->append(" ");
     builder->append(method_->name);
     builder->append("(");
-    for (const auto *parameter : method_->getParameters()->parameters) {
+    for (const IR::Parameter *parameter : method_->getParameters()->parameters) {
         if (parameter->direction == IR::Direction::None ||
             parameter->direction == IR::Direction::In) {
             builder->append("const ");

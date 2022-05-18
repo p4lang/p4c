@@ -34,9 +34,10 @@ namespace P4::IR {
 
 template <class T, template <class K, class V, class COMP, class ALLOC> class MAP = std::map,
           class COMP = std::less<cstring>,
-          class ALLOC = std::allocator<std::pair<const cstring, const T *>>>
+          class ALLOC = std::allocator<std::pair<const cstring, IR::Ptr<T>>>>
 class NameMap : public Node {
-    typedef MAP<cstring, const T *, COMP, ALLOC> map_t;
+    typedef MAP<cstring, IR::Ptr<T>, COMP, ALLOC> map_t;
+
     map_t symbols;
     /* if the object has a 'name' field, is it the same as name? */
     template <class U>
@@ -57,6 +58,8 @@ class NameMap : public Node {
     explicit NameMap(JSONLoader &);
     NameMap &operator=(const NameMap &) = default;
     NameMap &operator=(NameMap &&) = default;
+    typedef typename map_t::key_type key_type;
+    typedef typename map_t::mapped_type mapped_type;
     typedef typename map_t::value_type value_type;
     typedef typename map_t::iterator iterator;
     typedef typename map_t::const_iterator const_iterator;
@@ -125,8 +128,8 @@ class NameMap : public Node {
     }
     elem_ref operator[](cstring name) { return elem_ref(*this, name); }
     const T *operator[](cstring name) const { return count(name) ? at(name) : nullptr; }
-    const T *&at(cstring name) { return symbols.at(name); }
-    const T *const &at(cstring name) const { return symbols.at(name); }
+    mapped_type &at(cstring name) { return symbols.at(name); }
+    mapped_type const &at(cstring name) const { return symbols.at(name); }
     void check_null() const {
         for (auto &e : symbols) CHECK_NULL(e.second);
     }
@@ -151,11 +154,12 @@ class NameMap : public Node {
     void toJSON(JSONGenerator &json) const override;
     static Node *fromJSON(JSONLoader &json);
 
-    Util::Enumerator<const T *> *valueEnumerator() const {
+    Util::Enumerator<IR::Ptr<T>> *valueEnumerator() const {
         return Util::enumerate(Values(symbols));
     }
+
     template <typename S>
-    Util::Enumerator<const S *> *only() const {
+    Util::Enumerator<IR::Ptr<S>> *only() const {
         return valueEnumerator()->template as<const S *>()->where(
             [](const T *d) { return d != nullptr; });
     }

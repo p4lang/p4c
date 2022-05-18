@@ -290,7 +290,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Set *type) {
 }
 
 const IR::Type_Bits *TypeInferenceBase::checkUnderlyingEnumType(const IR::Type *enumType) {
-    const auto *resolvedType = getTypeType(enumType);
+    const IR::Type *resolvedType = getTypeType(enumType);
     CHECK_NULL(resolvedType);
     if (const auto *type = resolvedType->to<IR::Type_Bits>()) {
         return type;

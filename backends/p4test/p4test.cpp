@@ -142,14 +142,14 @@ int main(int argc, char *const argv[]) {
         if (options.loadIRFromJson == false) options.setInputFile();
     }
     if (::P4::errorCount() > 0) return 1;
-    const IR::P4Program *program = nullptr;
+    IR::Ptr<IR::P4Program> program = nullptr;
     auto hook = options.getDebugHook();
     if (options.loadIRFromJson) {
         std::ifstream json(options.file);
         if (json) {
             JsonData::strict = true;
             JSONLoader loader(json);
-            const IR::Node *node = nullptr;
+            IR::Ptr<IR::Node> node = nullptr;
             loader >> node;
             if (!(program = node->to<IR::P4Program>()))
                 error(ErrorType::ERR_INVALID, "%s is not a P4Program in json format", options.file);
@@ -200,7 +200,7 @@ int main(int argc, char *const argv[]) {
                 loader >> program;
             }
 #endif
-            const IR::ToplevelBlock *top = nullptr;
+            IR::Ptr<IR::ToplevelBlock> top = nullptr;
             try {
                 top = midEnd.process(program);
                 // This can modify program!
@@ -222,7 +222,7 @@ int main(int argc, char *const argv[]) {
                 JsonData::strict = true;
                 gen1.emit(program);
 
-                const IR::Node *node = nullptr;
+                IR::Ptr<IR::Node> node = nullptr;
                 JSONLoader loader(ss1);
                 loader >> node;
 

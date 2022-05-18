@@ -1730,10 +1730,9 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
     }
 
     if (auto *apply = type->to<IR::IApply>(); apply && member == IR::IApply::applyMethodName) {
-        auto *methodType = apply->getApplyMethodType();
-        auto *canon = canonicalize(methodType);
+        auto *canon = canonicalize(apply->getApplyMethodType());
         if (!canon) return expression;
-        methodType = canon->to<IR::Type_Method>();
+        auto *methodType = canon->to<IR::Type_Method>();
         if (methodType == nullptr) return expression;
         learn(methodType, this, getChildContext());
         setType(getOriginal(), methodType);

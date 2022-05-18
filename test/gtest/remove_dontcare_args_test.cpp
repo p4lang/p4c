@@ -32,14 +32,14 @@ class CollectActionAndControlLocals : public Inspector {
     unsigned controlDecls = 0;
 
     bool preorder(const IR::P4Action *action) override {
-        for (const auto *c : action->body->components) {
+        for (const IR::StatOrDecl *c : action->body->components) {
             if (c->is<IR::Declaration_Variable>()) ++actionDecls;
         }
         return true;
     }
 
     bool preorder(const IR::P4Control *control) override {
-        for (const auto *c : control->controlLocals) {
+        for (const IR::Declaration *c : control->controlLocals) {
             if (c->is<IR::Declaration_Variable>()) ++controlDecls;
         }
         return true;

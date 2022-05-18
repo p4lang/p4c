@@ -11,7 +11,7 @@ namespace P4 {
 
 const IR::Node *DoEliminateSwitch::postorder(IR::P4Program *program) {
     if (!exactNeeded) return program;
-    for (auto *obj : program->objects) {
+    for (const IR::Node *obj : program->objects) {
         if (auto *match_kind = obj->to<IR::Declaration_MatchKind>()) {
             if (match_kind->getDeclByName(P4CoreLibrary::instance().exactMatch.Id()))
                 return program;

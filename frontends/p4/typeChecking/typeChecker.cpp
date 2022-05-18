@@ -135,8 +135,8 @@ bool TypeInferenceBase::done() const {
     return done;
 }
 
-const IR::Type *TypeInferenceBase::getType(const IR::Node *element) const {
-    const IR::Type *result = typeMap->getType(element);
+IR::Ptr<IR::Type> TypeInferenceBase::getType(const IR::Node *element) const {
+    IR::Ptr<IR::Type> result = typeMap->getType(element);
     // This should be happening only when type-checking already failed
     // for some node; we are now just trying to typecheck a parent node.
     // So an error should have already been signalled.
@@ -145,8 +145,8 @@ const IR::Type *TypeInferenceBase::getType(const IR::Node *element) const {
     return result;
 }
 
-const IR::Type *TypeInferenceBase::getTypeType(const IR::Node *element) const {
-    const IR::Type *result = typeMap->getType(element);
+IR::Ptr<IR::Type> TypeInferenceBase::getTypeType(const IR::Node *element) const {
+    IR::Ptr<IR::Type> result = typeMap->getType(element);
     // See comment in getType() above.
     if (result == nullptr) {
         if (auto *us = element->to<IR::Type_UnknownStruct>())
@@ -757,9 +757,9 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Annotation *annotation) {
             [&](const auto &body) {
                 using T = std::decay_t<decltype(body)>;
                 if constexpr (std::is_same_v<T, IR::Vector<IR::Expression>>) {
-                    for (const auto *e : body) checkAnnotation(e);
+                    for (const IR::Expression *e : body) checkAnnotation(e);
                 } else if constexpr (std::is_same_v<T, IR::IndexedVector<IR::NamedExpression>>) {
-                    for (const auto *e : body) checkAnnotation(e->expression);
+                    for (const IR::NamedExpression *e : body) checkAnnotation(e->expression);
                 } else {
                     BUG("Unexpected variant field");
                 }

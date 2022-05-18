@@ -817,14 +817,14 @@ class AllocatePHV : public Visitor {
     const MauBacktracker &mau_i;
     CoreAllocation core_alloc_i;
     PhvInfo &phv_i;
-    const IR::BFN::Pipe *root = nullptr;
+    IR::Ptr<IR::BFN::Pipe> root = nullptr;
     // const DependencyGraph &deps_i;
     PHV::ConcreteAllocation *alloc = nullptr;
     std::list<const PHV::SuperCluster *> &unallocated_i;
     /** The entry point.  This "pass" doesn't actually traverse the IR, but it
      * marks the place in the back end where PHV allocation does its work.
      */
-    const IR::Node *apply_visitor(const IR::Node *root, const char *name = 0) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *root, const char *name = 0) override;
 
     /// Throw a pretty-printed error when allocation fails due to
     /// unsatisfiable constraints.
@@ -881,7 +881,7 @@ class IncrementalPHVAllocation : public Visitor {
     const ordered_set<PHV::Field *> &temp_vars_i;
 
     // This pass does not traverse IR.
-    const IR::Node *apply_visitor(const IR::Node *root, const char *name = 0) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *root, const char *name = 0) override;
 
  public:
     explicit IncrementalPHVAllocation(const ordered_set<PHV::Field *> &temp_vars,

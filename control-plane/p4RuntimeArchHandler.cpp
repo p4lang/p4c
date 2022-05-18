@@ -152,11 +152,11 @@ void serializeOneStructuredAnnotation(const IR::Annotation *annotation,
         [&](const auto &body) {
             using T = std::decay_t<decltype(body)>;
             if constexpr (std::is_same_v<T, IR::Vector<IR::Expression>>) {
-                for (auto *expr : body)
+                for (const IR::Expression *expr : body)
                     serializeStructuredExpression(
                         expr, structuredAnnotation->mutable_expression_list()->add_expressions());
             } else if constexpr (std::is_same_v<T, IR::IndexedVector<IR::NamedExpression>>) {
-                for (auto *kv : body)
+                for (const IR::NamedExpression *kv : body)
                     serializeStructuredKVPair(
                         kv, structuredAnnotation->mutable_kv_pair_list()->add_kv_pairs());
             } else {

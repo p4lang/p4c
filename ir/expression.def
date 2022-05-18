@@ -358,7 +358,7 @@ class Constant : Literal {
     toString {
         unsigned width;
         bool sign;
-        if (const IR::Type_Bits* tb = type->to<IR::Type_Bits>()) {
+        if (const IR::Type_Bits* tb = type ? type->to<IR::Type_Bits>() : nullptr) {
             width = tb->size;
             sign = tb->isSigned;
         } else {
@@ -433,7 +433,7 @@ class Slice : AbstractSlice {
         if (type->is<Type::Unknown>() && e1 && e1->is<Constant>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(getH() - getL() + 1); }
     // make a slice, folding slices on slices and slices on constants automatically
-    static Expression make(Expression a, unsigned hi, unsigned lo);
+    static Expression make(const Expression *a, unsigned hi, unsigned lo);
 }
 
 class PlusSlice : AbstractSlice {
@@ -515,7 +515,7 @@ class This : Expression {
     long id = nextId++;
     toString { return "this"_cs; }
  private:
-    static long nextId;
+    static long nextId = 0;
 }
 
 class Cast : Operation_Unary {

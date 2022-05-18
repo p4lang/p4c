@@ -70,7 +70,7 @@ using Helpers::setPreamble;
 /// this rather than e.g. controlPlaneName() when we want to prevent any
 /// fallback.
 static std::optional<cstring> explicitNameAnnotation(const IR::IAnnotated *item) {
-    auto *anno = item->getAnnotation(IR::Annotation::nameAnnotation);
+    const IR::Annotation *anno = item->getAnnotation(IR::Annotation::nameAnnotation);
     if (!anno) return std::nullopt;
     const auto &expr = anno->getExpr();
     if (expr.size() != 1) {
@@ -248,7 +248,7 @@ static std::optional<DefaultAction> getDefaultAction(const IR::P4Table *table, R
                                                      TypeMap *typeMap) {
     // not using getDefaultAction() here as I actually need the property IR node
     // to check if the default action is constant.
-    const auto *defaultActionProperty =
+    const IR::Property *defaultActionProperty =
         table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
     if (defaultActionProperty == nullptr) {
         ::P4::error(ErrorType::ERR_EXPECTED, "Expected table %1% to have a default action", table);
@@ -260,12 +260,12 @@ static std::optional<DefaultAction> getDefaultAction(const IR::P4Table *table, R
         return std::nullopt;
     }
 
-    const auto *expr = defaultActionProperty->value->to<IR::ExpressionValue>()->expression;
+    auto expr = defaultActionProperty->value->to<IR::ExpressionValue>()->expression;
     cstring actionName;
     const IR::Vector<IR::Argument> *arguments = nullptr;
     const IR::P4Action *action = nullptr;
     if (expr->is<IR::PathExpression>()) {
-        const auto *decl = refMap->getDeclaration(expr->to<IR::PathExpression>()->path, true);
+        auto decl = refMap->getDeclaration(expr->to<IR::PathExpression>()->path, true);
         action = decl->to<IR::P4Action>();
         BUG_CHECK(action, "Expected an action: %1%", expr);
         actionName = action->controlPlaneName();
@@ -376,7 +376,7 @@ static std::vector<MatchField> getMatchFields(const IR::P4Table *table, Referenc
                   "Table '%1%': Match field '%2%' has no "
                   "@name annotation",
                   table->controlPlaneName(), keyElement->expression);
-        auto *matchFieldType = typeMap->getType(keyElement->expression->getNode(), true);
+        const IR::Type *matchFieldType = typeMap->getType(keyElement->expression->getNode(), true);
         BUG_CHECK(matchFieldType != nullptr, "Couldn't determine type for key element %1%",
                   keyElement);
         // We ignore the return type on purpose, but the call is required to update p4RtTypeInfo if
@@ -676,15 +676,15 @@ class P4RuntimeAnalyzer {
         table->mutable_initial_default_action()->set_action_id(id);
         int parameterIndex = 0;
         int parameterId = 1;
-        for (const auto *argument : *defaultAction->arguments) {
+        for (const IR::Argument *argument : *defaultAction->arguments) {
             auto value = stringRepr(*typeMap, argument->expression);
             if (!value.has_value()) {
                 continue;
             }
             auto *protoParam = table->mutable_initial_default_action()->mutable_arguments()->Add();
-            const auto *parameter =
+            const IR::Parameter *parameter =
                 defaultAction->action->parameters->parameters.at(parameterIndex++);
-            if (const auto *idAnnotation = parameter->getAnnotation("id"_cs)) {
+            if (const IR::Annotation *idAnnotation = parameter->getAnnotation("id"_cs)) {
                 protoParam->set_param_id(
                     idAnnotation->getExpr(0)->checkedTo<IR::Constant>()->asInt());
             } else {
@@ -914,7 +914,7 @@ class P4RuntimeAnalyzer {
     /// Sets the pkg_info field of the P4Info message, using the annotations on
     /// the P4 program package.
     void addPkgInfo(const IR::ToplevelBlock *evaluatedProgram, cstring arch) const {
-        auto *main = evaluatedProgram->getMain();
+        auto main = evaluatedProgram->getMain();
         if (main == nullptr) {
             ::P4::warning(ErrorType::WARN_MISSING,
                           "Program does not contain a main module, "
@@ -930,8 +930,9 @@ class P4RuntimeAnalyzer {
         std::set<cstring> keysVisited;
 
         // @pkginfo annotation
-        if (const auto *annotation = decl->getAnnotation(IR::Annotation::pkginfoAnnotation)) {
-            for (auto *kv : annotation->getKV()) {
+        if (const IR::Annotation *annotation =
+                decl->getAnnotation(IR::Annotation::pkginfoAnnotation)) {
+            for (const IR::NamedExpression *kv : annotation->getKV()) {
                 auto name = kv->name.name;
                 auto setStringField = [kv, pkginfo, &keysVisited](cstring fName) {
                     auto *v = kv->expression->to<IR::StringLiteral>();
@@ -972,9 +973,9 @@ class P4RuntimeAnalyzer {
         }
 
         // Parse `@platform_property` annotation into the PkgInfo.
-        if (const auto *annotation = decl->getAnnotation("platform_property"_cs)) {
+        if (const IR::Annotation *annotation = decl->getAnnotation("platform_property"_cs)) {
             auto *platform_properties = pkginfo->mutable_platform_properties();
-            for (auto *kv : annotation->getKV()) {
+            for (const IR::NamedExpression *kv : annotation->getKV()) {
                 auto name = kv->name.name;
                 auto setInt32Field = [kv, &platform_properties](cstring fName) {
                     auto *v = kv->expression->to<IR::Constant>();
@@ -1476,8 +1477,8 @@ P4RuntimeAPI P4RuntimeSerializer::generateP4Runtime(const IR::P4Program *program
         new ControlPlaneAPI::ParseP4RuntimeAnnotations(),
         // Update types and reevaluate the program.
         new P4::TypeChecking(&refMap, &typeMap, /* updateExpressions = */ true), evaluator};
-    auto *p4RuntimeProgram = program->apply(p4RuntimeFixups);
-    auto *evaluatedProgram = evaluator->getToplevelBlock();
+    auto p4RuntimeProgram = program->apply(p4RuntimeFixups);
+    auto evaluatedProgram = evaluator->getToplevelBlock();
 
     if (!p4RuntimeProgram || !evaluatedProgram) {
         ::P4::error(ErrorType::ERR_UNSUPPORTED,

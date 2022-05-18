@@ -112,7 +112,8 @@ const IR::Node *ExpressionConverter::postorder(IR::Primitive *primitive) {
     } else {
         auto func = new IR::PathExpression(IR::ID(primitive->srcInfo, primitive->name));
         auto args = new IR::Vector<IR::Argument>;
-        for (auto *op : primitive->operands) args->push_back(new IR::Argument(op->srcInfo, op));
+        for (const IR::Expression *op : primitive->operands)
+            args->push_back(new IR::Argument(op->srcInfo, op));
         auto result = new IR::MethodCallExpression(primitive->srcInfo, func, args);
         return result;
     }
@@ -386,20 +387,28 @@ const IR::Node *StatementConverter::preorder(IR::If *cond) {
     return result;
 }
 
-const IR::Statement *StatementConverter::convert(const IR::Vector<IR::Expression> *toConvert) {
-    auto stats = new IR::IndexedVector<IR::StatOrDecl>();
-    for (auto e : *toConvert) {
-        auto s = convert(e);
-        stats->push_back(s);
+const IR::Statement *StatementConverter::convert(const IR::Node *node) {
+    if (auto *toConvert = node->to<IR::Vector<IR::Expression>>()) {
+        auto stats = new IR::IndexedVector<IR::StatOrDecl>();
+        for (auto e : *toConvert) {
+            auto s = convert(e);
+            stats->push_back(s);
+        }
+        auto result = new IR::BlockStatement(toConvert->srcInfo, *stats);
+        return result;
+    } else {
+        auto conv = node->apply(*this);
+        auto result = conv->to<IR::Statement>();
+        BUG_CHECK(result != nullptr, "Conversion of %1% did not produce a statement", node);
+        return result;
     }
-    auto result = new IR::BlockStatement(toConvert->srcInfo, *stats);
-    return result;
 }
 
 const IR::Type_Varbits *TypeConverter::postorder(IR::Type_Varbits *vbtype) {
     if (vbtype->size == 0) {
         if (auto type = findContext<IR::Type_StructLike>()) {
-            if (const auto *max = type->getAnnotation(IR::Annotation::maxLengthAnnotation)) {
+            if (const IR::Annotation *max =
+                    type->getAnnotation(IR::Annotation::maxLengthAnnotation)) {
                 const auto &expr = max->getExpr();
                 if (expr.size() != 1 || !expr[0]->is<IR::Constant>())
                     error(ErrorType::ERR_UNSUPPORTED, "%s: max_length must be a constant", max);
@@ -449,7 +458,7 @@ const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
     // given a struct with length and max_length, the
     // varbit field size is max_length * 8 - struct_size
     if (field->type->is<IR::Type_Varbits>()) {
-        if (const auto *len = type->getAnnotation(IR::Annotation::lengthAnnotation)) {
+        if (const IR::Annotation *len = type->getAnnotation(IR::Annotation::lengthAnnotation)) {
             const auto &expr = len->getExpr();
             if (expr.size() == 1) {
                 auto lenexpr = expr[0];

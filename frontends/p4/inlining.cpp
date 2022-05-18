@@ -443,10 +443,10 @@ Visitor::profile_t GeneralInliner::init_apply(const IR::Node *node) {
 template <class P4Block, class P4BlockType>
 void GeneralInliner::inline_subst(P4Block *caller,
                                   IR::IndexedVector<IR::Declaration> P4Block::*blockLocals,
-                                  const P4BlockType *P4Block::*blockType) {
+                                  P4BlockType P4Block::*blockType) {
     LOG3("Analyzing " << dbp(caller));
     IR::IndexedVector<IR::Declaration> locals;
-    P4BlockType *type = (caller->*blockType)->clone();
+    auto *type = (caller->*blockType)->clone();
     IR::Vector<IR::Annotation> annos = type->annotations;
     for (auto s : caller->*blockLocals) {
         /* Even if we inline the block, the declaration may still be needed.
@@ -470,7 +470,7 @@ void GeneralInliner::inline_subst(P4Block *caller,
             workToDo->substitutions[inst] = substs;
 
             // Propagate annotations
-            for (const auto *ann : (callee->*blockType)->annotations) {
+            for (const IR::Annotation *ann : (callee->*blockType)->annotations) {
                 if (Inline::isAnnotationNoPropagate(ann->name)) continue;
                 IR::Annotations::addIfNew(annos, ann);
             }

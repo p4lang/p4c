@@ -856,7 +856,7 @@ unsigned int PnaStateTranslationVisitor::compileExtractField(const IR::Expressio
     }
 
     bool noEndiannessConversion = false;
-    if (const auto *anno = field->getAnnotation(ParseTCAnnotations::tcType)) {
+    if (const IR::Annotation *anno = field->getAnnotation(ParseTCAnnotations::tcType)) {
         cstring value = anno->getExpr(0)->checkedTo<IR::StringLiteral>()->value;
         if (value == "macaddr" || value == "ipv4" || value == "ipv6") {
             noEndiannessConversion = true;
@@ -3164,7 +3164,7 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
                     return;
                 }
                 bool noEndiannessConversion = false;
-                if (const auto *anno = f->getAnnotation(ParseTCAnnotations::tcType)) {
+                if (const IR::Annotation *anno = f->getAnnotation(ParseTCAnnotations::tcType)) {
                     cstring value = anno->getExpr(0)->checkedTo<IR::StringLiteral>()->value;
                     noEndiannessConversion = value == "macaddr" || value == "ipv4" ||
                                              value == "ipv6" || value == "be16" ||

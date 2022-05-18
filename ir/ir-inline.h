@@ -60,11 +60,11 @@ namespace P4 {
         Node::traceVisit("Insp loop_revisit");                                                    \
         v.loop_revisit(this);                                                                     \
     }                                                                                             \
-    TEMPLATE INLINE const IR::Node *IR::CLASS TT::apply_visitor_preorder(Transform &v) {          \
+    TEMPLATE INLINE IR::Ptr<IR::Node> IR::CLASS TT::apply_visitor_preorder(Transform &v) {        \
         Node::traceVisit("Trans pre");                                                            \
         return v.preorder(this);                                                                  \
     }                                                                                             \
-    TEMPLATE INLINE const IR::Node *IR::CLASS TT::apply_visitor_postorder(Transform &v) {         \
+    TEMPLATE INLINE IR::Ptr<IR::Node> IR::CLASS TT::apply_visitor_postorder(Transform &v) {       \
         Node::traceVisit("Trans post");                                                           \
         return v.postorder(this);                                                                 \
     }                                                                                             \
@@ -82,7 +82,7 @@ IRNODE_ALL_TEMPLATES(DEFINE_APPLY_FUNCTIONS, inline)
 template <class T>
 void IR::Vector<T>::visit_children(Visitor &v, const char *name) {
     for (auto i = vec.begin(); i != vec.end();) {
-        const IR::Node *n = v.apply_visitor(*i, name);
+        auto n = v.apply_visitor(*i, name);
         if (!n && *i) {
             i = erase(i);
             continue;
@@ -92,18 +92,18 @@ void IR::Vector<T>::visit_children(Visitor &v, const char *name) {
             i++;
             continue;
         }
-        if (auto l = n->to<Vector<T>>()) {
+        if (auto l = n->template to<Vector<T>>()) {
             i = erase(i);
             i = insert(i, l->vec.begin(), l->vec.end());
             i += l->vec.size();
             continue;
         }
-        if (const auto *v = n->to<VectorBase>()) {
+        if (const auto *v = n->template to<VectorBase>()) {
             if (v->empty()) {
                 i = erase(i);
             } else {
                 i = insert(i, v->size() - 1, nullptr);
-                for (const auto *el : *v) {
+                for (const IR::Node *el : *v) {
                     CHECK_NULL(el);
                     if (auto e = el->template to<T>()) {
                         *i++ = e;
@@ -115,7 +115,7 @@ void IR::Vector<T>::visit_children(Visitor &v, const char *name) {
             }
             continue;
         }
-        if (auto e = n->to<T>()) {
+        if (auto e = n->template to<T>()) {
             *i++ = e;
             continue;
         }
@@ -222,7 +222,7 @@ template <class T, template <class K, class V, class COMP, class ALLOC> class MA
 void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v, const char *) {
     map_t new_symbols;
     for (auto i = symbols.begin(); i != symbols.end();) {
-        const IR::Node *n = v.apply_visitor(i->second, i->first.c_str());
+        auto n = v.apply_visitor(i->second, i->first.c_str());
         if (!n && i->second) {
             i = symbols.erase(i);
             continue;
@@ -232,12 +232,12 @@ void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v, const char *) 
             i++;
             continue;
         }
-        if (auto m = n->to<NameMap>()) {
+        if (auto m = n->template to<NameMap>()) {
             namemap_insert_helper(i, m->symbols.begin(), m->symbols.end(), symbols, new_symbols);
             i = symbols.erase(i);
             continue;
         }
-        if (auto s = n->to<T>()) {
+        if (auto s = n->template to<T>()) {
             if (match_name(i->first, s)) {
                 i->second = s;
                 i++;

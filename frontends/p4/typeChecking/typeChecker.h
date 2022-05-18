@@ -100,8 +100,8 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     bool checkArrays = true;
     bool errorOnNullDecls = false;
     const IR::Node *getInitialNode() const { return initialNode; }
-    const IR::Type *getType(const IR::Node *element) const;
-    const IR::Type *getTypeType(const IR::Node *element) const;
+    IR::Ptr<IR::Type> getType(const IR::Node *element) const;
+    IR::Ptr<IR::Type> getTypeType(const IR::Node *element) const;
     void setType(const IR::Node *element, const IR::Type *type);
     void setLeftValue(const IR::Expression *expression) { typeMap->setLeftValue(expression); }
     bool isLeftValue(const IR::Expression *expression) const {
@@ -508,7 +508,7 @@ class TypeInference : public virtual Transform, public TypeInferenceBase {
         : TypeInferenceBase(typeMap, readOnly, checkArrays, errorOnNullDecls) {}
 
     Visitor::profile_t init_apply(const IR::Node *node) override;
-    const IR::Node *apply_visitor(const IR::Node *, const char *name = nullptr) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *, const char *name = nullptr) override;
     void end_apply(const IR::Node *Node) override;
 
     const IR::Node *pruneIfDone(const IR::Node *node) {

@@ -57,10 +57,10 @@ class MinimalNameGenerator : public NameGenerator, public Inspector {
 class DeclarationLookup {
  public:
     virtual ~DeclarationLookup() = default;
-    virtual const IR::IDeclaration *getDeclaration(const IR::Path *,
-                                                   bool notNull = false) const = 0;
-    virtual const IR::IDeclaration *getDeclaration(const IR::This *,
-                                                   bool notNull = false) const = 0;
+    virtual IR::Ptr<IR::IDeclaration> getDeclaration(const IR::Path *,
+                                                     bool notNull = false) const = 0;
+    virtual IR::Ptr<IR::IDeclaration> getDeclaration(const IR::This *,
+                                                     bool notNull = false) const = 0;
 };
 
 /// Class used to encode maps from paths to declarations.
@@ -86,16 +86,16 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
     ReferenceMap();
     /// Looks up declaration for @p path. If @p notNull is false, then
     /// failure to find a declaration is an error.
-    const IR::IDeclaration *getDeclaration(const IR::Path *path,
-                                           bool notNull = false) const override;
+    IR::Ptr<IR::IDeclaration> getDeclaration(const IR::Path *path,
+                                             bool notNull = false) const override;
 
     /// Sets declaration for @p path to @p decl.
     void setDeclaration(const IR::Path *path, const IR::IDeclaration *decl);
 
     /// Looks up declaration for @p pointer. If @p notNull is false,
     /// then failure to find a declaration is an error.
-    const IR::IDeclaration *getDeclaration(const IR::This *pointer,
-                                           bool notNull = false) const override;
+    IR::Ptr<IR::IDeclaration> getDeclaration(const IR::This *pointer,
+                                             bool notNull = false) const override;
 
     /// Sets declaration for @p pointer to @p decl.
     void setDeclaration(const IR::This *pointer, const IR::IDeclaration *decl);

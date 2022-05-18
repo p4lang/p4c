@@ -66,14 +66,7 @@ class StatementConverter : public ExpressionConverter {
     const IR::Node *preorder(IR::Apply *apply) override;
     const IR::Node *preorder(IR::Primitive *primitive) override;
     const IR::Node *preorder(IR::If *cond) override;
-    const IR::Statement *convert(const IR::Vector<IR::Expression> *toConvert);
-
-    const IR::Statement *convert(const IR::Node *node) {
-        auto conv = node->apply(*this);
-        auto result = conv->to<IR::Statement>();
-        BUG_CHECK(result != nullptr, "Conversion of %1% did not produce a statement", node);
-        return result;
-    }
+    const IR::Statement *convert(const IR::Node *node);
 };
 
 class TypeConverter : public ExpressionConverter {
@@ -765,7 +758,7 @@ class CheckIfMultiEntryPoint : public Inspector {
         setName("CheckIfMultiEntryPoint");
     }
     bool preorder(const IR::ParserState *state) override {
-        for (const auto *anno : state->getAnnotations()) {
+        for (const IR::Annotation *anno : state->getAnnotations()) {
             if (anno->name == "packet_entry") {
                 structure->parserEntryPoints.emplace(state->name, state);
             }

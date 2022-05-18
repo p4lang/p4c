@@ -20,6 +20,7 @@ limitations under the License.
 #include <vector>
 
 #include "absl/strings/str_cat.h"
+#include "config.h"
 #include "lib/cstring.h"
 #include "lib/source_file.h"
 

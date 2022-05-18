@@ -25,7 +25,12 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/source_file.h"
 
+#if !HAVE_LIBGC
+#include "shared_ptr.h"
+#endif /* !HAVE_LIBGC */
+
 namespace P4 {
+
 class Visitor;
 struct Visitor_Context;
 class Inspector;
@@ -50,6 +55,9 @@ class Vector;  // IWYU pragma: keep
 template <class T>
 class IndexedVector;  // IWYU pragma: keep
 
+#pragma GCC diagnostic ignored "-Wvirtual-move-assign"
+// Yes the base class may have a non-trivial move assignment -- that's why we have an
+// explicit `= default` here (that and C++11 doesn't create a default move without it)
 class Node : public virtual INode {
  public:
     virtual bool apply_visitor_preorder(Modifier &v);
@@ -60,12 +68,14 @@ class Node : public virtual INode {
     virtual void apply_visitor_postorder(Inspector &v) const;
     virtual void apply_visitor_revisit(Inspector &v) const;
     virtual void apply_visitor_loop_revisit(Inspector &v) const;
-    virtual const Node *apply_visitor_preorder(Transform &v);
-    virtual const Node *apply_visitor_postorder(Transform &v);
+    virtual IR::Ptr<Node> apply_visitor_preorder(Transform &v);
+    virtual IR::Ptr<Node> apply_visitor_postorder(Transform &v);
     virtual void apply_visitor_revisit(Transform &v, const Node *n) const;
     virtual void apply_visitor_loop_revisit(Transform &v) const;
     Node &operator=(const Node &) = default;
     Node &operator=(Node &&) = default;
+
+#pragma GCC diagnostic pop
 
  protected:
     static int currentId;
@@ -77,21 +87,29 @@ class Node : public virtual INode {
     cstring prepareSourceInfoForJSON(Util::SourceInfo &si, unsigned *lineNumber,
                                      unsigned *columnNumber) const;
 
+#if HAVE_LIBGC
+#define INODE_INIT
+#else /* !HAVE_LIBGC */
+/* IF using IR::shared_ptr, need explicit initialization of INode to avoid spurious warnings */
+#define INODE_INIT INode(),
+#endif /* !HAVE_LIBGC */
+
  public:
     Util::SourceInfo srcInfo;
     int id;        // unique id for each node
     int clone_id;  // unique id this node was cloned from (recursively)
     void traceCreation() const;
-    Node() : id(currentId++), clone_id(id) { traceCreation(); }
+    Node() : INODE_INIT id(currentId++), clone_id(id) { traceCreation(); }
     explicit Node(Util::SourceInfo si) : srcInfo(si), id(currentId++), clone_id(id) {
         traceCreation();
     }
-    Node(const Node &other) : srcInfo(other.srcInfo), id(currentId++), clone_id(other.clone_id) {
+    Node(const Node &other)
+        : INODE_INIT srcInfo(other.srcInfo), id(currentId++), clone_id(other.clone_id) {
         traceCreation();
     }
-    virtual ~Node() {}
-    const Node *apply(Visitor &v, const Visitor_Context *ctxt = nullptr) const;
-    const Node *apply(Visitor &&v, const Visitor_Context *ctxt = nullptr) const {
+    virtual ~Node();
+    IR::Ptr<Node> apply(Visitor &v, const Visitor_Context *ctxt = nullptr) const;
+    IR::Ptr<Node> apply(Visitor &&v, const Visitor_Context *ctxt = nullptr) const {
         return apply(v, ctxt);
     }
     virtual Node *clone() const = 0;
@@ -169,27 +187,27 @@ inline bool equiv(const INode *a, const INode *b) {
     void apply_visitor_postorder(Inspector &v) const override;              \
     void apply_visitor_revisit(Inspector &v) const override;                \
     void apply_visitor_loop_revisit(Inspector &v) const override;           \
-    const Node *apply_visitor_preorder(Transform &v) override;              \
-    const Node *apply_visitor_postorder(Transform &v) override;             \
+    IR::Ptr<Node> apply_visitor_preorder(Transform &v) override;            \
+    IR::Ptr<Node> apply_visitor_postorder(Transform &v) override;           \
     void apply_visitor_revisit(Transform &v, const Node *n) const override; \
     void apply_visitor_loop_revisit(Transform &v) const override;
 
 /* only define 'apply' for a limited number of classes (those we want to call
  * visitors directly on), as defining it and making it virtual would mean that
  * NO Transform could transform the class into a sibling class */
-#define IRNODE_DECLARE_APPLY_OVERLOAD(T)                                       \
-    const T *apply(Visitor &v, const Visitor_Context *ctxt = nullptr) const;   \
-    const T *apply(Visitor &&v, const Visitor_Context *ctxt = nullptr) const { \
-        return apply(v, ctxt);                                                 \
+#define IRNODE_DECLARE_APPLY_OVERLOAD(T)                                         \
+    IR::Ptr<T> apply(Visitor &v, const Visitor_Context *ctxt = nullptr) const;   \
+    IR::Ptr<T> apply(Visitor &&v, const Visitor_Context *ctxt = nullptr) const { \
+        return apply(v, ctxt);                                                   \
     }
-#define IRNODE_DEFINE_APPLY_OVERLOAD(CLASS, TEMPLATE, TT)                                    \
-    TEMPLATE                                                                                 \
-    const IR::CLASS TT *IR::CLASS TT::apply(Visitor &v, const Visitor_Context *ctxt) const { \
-        const CLASS *tmp = this;                                                             \
-        auto prof = v.init_apply(tmp, ctxt);                                                 \
-        v.visit(tmp);                                                                        \
-        v.end_apply(tmp);                                                                    \
-        return tmp;                                                                          \
+#define IRNODE_DEFINE_APPLY_OVERLOAD(CLASS, TEMPLATE, TT)                                      \
+    TEMPLATE                                                                                   \
+    IR::Ptr<IR::CLASS TT> IR::CLASS TT::apply(Visitor &v, const Visitor_Context *ctxt) const { \
+        IR::Ptr<CLASS> tmp = this;                                                             \
+        auto prof = v.init_apply(tmp, ctxt);                                                   \
+        v.visit(tmp);                                                                          \
+        v.end_apply(tmp);                                                                      \
+        return tmp;                                                                            \
     }
 
 }  // namespace P4::IR

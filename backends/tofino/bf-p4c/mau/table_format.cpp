@@ -666,7 +666,7 @@ bitvec TableFormat::bitvec_necessary(type_t type) const {
         }
     } else if (type == METER || type == METER_PFE || type == METER_TYPE) {
         const IR::MAU::AttachedMemory *meter_addr_user = nullptr;
-        for (auto *ba : tbl->attached) {
+        for (auto ba : tbl->attached) {
             if (ba->attached->is<IR::MAU::StatefulAlu>() &&
                 ba->use != IR::MAU::StatefulUse::NO_USE) {
                 meter_addr_user = ba->attached;

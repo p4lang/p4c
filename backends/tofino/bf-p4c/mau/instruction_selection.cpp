@@ -91,10 +91,10 @@ const IR::Expression *ToFunnelShiftInstruction::preorder(IR::Cast *e) {
 
 const IR::Expression *ConvertFunnelShiftExtern::preorder(IR::Primitive *prim) {
     if (prim->name != "funnel_shift_right") return prim;
-    const auto *dst = prim->operands[0];
-    const auto *src1 = prim->operands[1];
-    const auto *src2 = prim->operands[2];
-    const auto *n_shift = prim->operands[3];
+    const IR::Expression *dst = prim->operands[0];
+    const IR::Expression *src1 = prim->operands[1];
+    const IR::Expression *src2 = prim->operands[2];
+    const IR::Expression *n_shift = prim->operands[3];
     return new IR::MAU::Instruction(prim->srcInfo, "funnel-shift"_cs, {dst, src1, src2, n_shift});
 }
 
@@ -243,7 +243,7 @@ bool HashGenSetup::CreateHashGenExprs::preorder(const IR::MAU::Primitive *prim) 
               prim->name);
     auto glob = (*it)->to<IR::GlobalRef>();
     auto decl = glob->obj->to<IR::Declaration_Instance>();
-    auto *orig_type = decl->type->to<IR::Type_Specialized>()->arguments->at(0);
+    const IR::Type *orig_type = decl->type->to<IR::Type_Specialized>()->arguments->at(0);
     int hash_output_width = orig_type->width_bits();
     int bit_size = hash_output_width;
 
@@ -296,7 +296,7 @@ bool HashGenSetup::CreateHashGenExprs::preorder(const IR::MAU::Primitive *prim) 
     load_hash_details(self.options, orig_hash_list, hash_output_width, hash_name, alg_names, fle);
 
     check_for_symmetric(decl, fle, algorithm, &fle->symmetric_keys);
-    auto *type = IR::Type::Bits::get(bit_size);
+    const IR::Type *type = IR::Type::Bits::get(bit_size);
     hge = new IR::MAU::HashGenExpression(prim->srcInfo, type, fle, IR::ID(hash_name), algorithm);
     // Symmetric is not supported with bf-utils dynamic hash library
     hge->dynamic = fle->symmetric_keys.empty();
@@ -430,7 +430,7 @@ const IR::Node *Synth2PortSetup::postorder(IR::MAU::Primitive *prim) {
             auto t = IR::Type::Bits::get(32);
             return new IR::MAU::StatefulCounter(prim->srcInfo, t, salu);
         }
-        auto *salu_inst = salu->calledAction(tbl, act);
+        const IR::MAU::SaluAction *salu_inst = salu->calledAction(tbl, act);
         BUG_CHECK(salu_inst != nullptr, "%s: Could not find called action for stateful memory in ",
                   prim->srcInfo, salu->name);
         auto salu_index = salu_inst->inst_code;
@@ -605,7 +605,7 @@ IR::Member *DoInstructionSelection::genIntrinsicMetadata(gress_t gress, cstring 
         BUG("Unable to find metadata %s", metadataName);
         return nullptr;
     }
-    if (auto *f = meta->type->getField(field))
+    if (const IR::StructField *f = meta->type->getField(field))
         return new IR::Member(f->type, new IR::ConcreteHeaderRef(meta), field);
     BUG("No field %s in %s", field, metadataName);
     return nullptr;
@@ -734,7 +734,8 @@ const IR::MAU::TableSeq *DoInstructionSelection::postorder(IR::MAU::TableSeq *ts
 const IR::MAU::Action *DoInstructionSelection::postorder(IR::MAU::Action *af) {
     IR::Vector<IR::MAU::Primitive> split;
     // FIXME: This should be pulled out as a different pass
-    for (auto *p : af->action) split.push_back(p->apply(SplitInstructions(split)));
+    for (const IR::MAU::Primitive *p : af->action)
+        split.push_back(p->apply(SplitInstructions(split)));
     if (split.size() > af->action.size()) af->action = std::move(split);
 
     LOG5("Postorder " << af);
@@ -826,7 +827,7 @@ const IR::Expression *DoInstructionSelection::postorder(IR::BoolLiteral *bl) {
 
 const IR::Expression *DoInstructionSelection::postorder(IR::BAnd *e) {
     if (!af) return e;
-    auto *left = e->left, *right = e->right;
+    const IR::Expression *left = e->left, *right = e->right;
     std::string op = "and";
     auto *l = left->to<IR::MAU::Instruction>();
     auto *r = right->to<IR::MAU::Instruction>();
@@ -846,7 +847,7 @@ const IR::Expression *DoInstructionSelection::postorder(IR::BAnd *e) {
 
 const IR::Expression *DoInstructionSelection::postorder(IR::BOr *e) {
     if (!af) return e;
-    auto *left = e->left, *right = e->right;
+    const IR::Expression *left = e->left, *right = e->right;
     std::string op = "or";
     auto *l = left->to<IR::MAU::Instruction>();
     auto *r = right->to<IR::MAU::Instruction>();
@@ -866,7 +867,7 @@ const IR::Expression *DoInstructionSelection::postorder(IR::BOr *e) {
 
 const IR::Expression *DoInstructionSelection::postorder(IR::BXor *e) {
     if (!af) return e;
-    auto *left = e->left, *right = e->right;
+    const IR::Expression *left = e->left, *right = e->right;
     std::string op = "xor";
     auto *l = left->to<IR::MAU::Instruction>();
     auto *r = right->to<IR::MAU::Instruction>();
@@ -1192,7 +1193,7 @@ const IR::Node *DoInstructionSelection::postorder(IR::MAU::Primitive *prim) {
              *   set A[N-1:0], B
              */
             auto *cc = prim->operands[1]->to<IR::BFN::ReinterpretCast>()->expr->to<IR::Concat>();
-            auto *k = cc->left;
+            const IR::Expression *k = cc->left;
             auto *inst_phv = new IR::MAU::Instruction(
                 prim->srcInfo, "set"_cs, MakeSlice(dest, 0, cc->right->type->width_bits() - 1),
                 cc->right);
@@ -2063,7 +2064,7 @@ bool SetupAttachedAddressing::ScanTables::preorder(const IR::MAU::Table *tbl) {
 
     for (auto &action : tbl->actions) {
         auto &act_name = action.first;
-        auto *act = action.second;
+        const IR::MAU::Action *act = action.second;
 
         if (act->miss_only()) continue;
 
@@ -2104,7 +2105,7 @@ bool SetupAttachedAddressing::ScanTables::preorder(const IR::MAU::Table *tbl) {
                 create_issue_item(act_name, meter_enabled->toString(), meter_disabled->toString()));
         }
         const IR::MAU::StatefulCall *stats_call = nullptr, *meter_call = nullptr;
-        for (auto *sc : act->stateful_calls) {
+        for (const IR::MAU::StatefulCall *sc : act->stateful_calls) {
             const IR::MAU::StatefulCall **prev;
             if (sc->attached_callee->usesStatsBus())
                 prev = &stats_call;

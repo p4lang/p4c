@@ -29,7 +29,7 @@ namespace P4::IR {
  */
 template <class T>
 class IndexedVector : public Vector<T> {
-    string_map<const IDeclaration *> declarations;
+    string_map<IR::Ptr<IDeclaration>> declarations;
     bool invalid = false;  // set when an error occurs; then we don't
                            // expect the validity check to succeed.
 
@@ -60,7 +60,7 @@ class IndexedVector : public Vector<T> {
     IndexedVector() = default;
     IndexedVector(const IndexedVector &) = default;
     IndexedVector(IndexedVector &&) = default;
-    IndexedVector(std::initializer_list<const T *> a) : Vector<T>(a) {
+    IndexedVector(std::initializer_list<IR::Ptr<T>> a) : Vector<T>(a) {
         for (auto el : *this) insertInMap(el);
     }
     IndexedVector &operator=(const IndexedVector &) = default;
@@ -86,7 +86,7 @@ class IndexedVector : public Vector<T> {
     using iterator = typename Vector<T>::iterator;
     using const_iterator = typename Vector<T>::const_iterator;
 
-    const IDeclaration *getDeclaration(cstring name) const {
+    IR::Ptr<IDeclaration> getDeclaration(cstring name) const {
         auto it = declarations.find(name);
         if (it == declarations.end()) return nullptr;
         return it->second;
@@ -97,7 +97,7 @@ class IndexedVector : public Vector<T> {
         return it->second;
     }
     template <class U>
-    const U *getDeclaration(cstring name) const {
+    IR::Ptr<U> getDeclaration(cstring name) const {
         auto it = declarations.find(name);
         if (it == declarations.end()) return nullptr;
         return it->second->template to<U>();
@@ -108,7 +108,7 @@ class IndexedVector : public Vector<T> {
         if (it == declarations.end()) return nullptr;
         return it->second->template to<U>();
     }
-    Util::Enumerator<const IDeclaration *> *getDeclarations() const {
+    Util::Enumerator<IR::Ptr<IDeclaration>> *getDeclarations() const {
         return Util::enumerate(Values(declarations));
     }
     iterator erase(iterator from, iterator to) {
