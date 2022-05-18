@@ -281,7 +281,7 @@ void ActionAnalysis::initialize_action_data(const IR::Expression *expr) {
 
 ActionAnalysis::ActionParam::speciality_t ActionAnalysis::classify_attached_output(
     const IR::MAU::AttachedOutput *ao) {
-    auto *at = ao->attached;
+    const IR::MAU::AttachedMemory *at = ao->attached;
     if (auto mtr = at->to<IR::MAU::Meter>()) {
         if (mtr->alu_output())
             return ActionParam::METER_ALU;
@@ -987,7 +987,7 @@ bool ActionAnalysis::init_ad_alloc_alignment(const ActionParam &read, ContainerA
         param = new ActionData::Argument(action_arg->to<IR::MAU::ActionArg>()->name, read.range());
     } else if (type == ActionParam::CONSTANT) {
         auto *adc = action_arg->to<IR::MAU::ActionDataConstant>();
-        auto *ir_con = adc->constant;
+        const IR::Constant *ir_con = adc->constant;
         uint32_t constant_value = 0U;
         if (ir_con->fitsInt())
             constant_value = static_cast<uint32_t>(adc->constant->asInt());

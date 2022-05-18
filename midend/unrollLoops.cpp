@@ -275,7 +275,7 @@ const IR::Statement *UnrollLoops::doUnroll(const loop_bounds_t &bounds, const IR
             blk = newblk;
         }
         if (updates) {
-            for (auto *u : *updates) {
+            for (const IR::StatOrDecl *u : *updates) {
                 auto *n = u->apply(rir)->to<IR::StatOrDecl>();
                 BUG_CHECK(n, "unexpected nullptr");
                 blk->append(n);
@@ -292,7 +292,7 @@ const IR::Statement *UnrollLoops::preorder(IR::ForStatement *fstmt) {
     if (canUnroll && shouldUnroll) {
         LOG3("Unrolling loop" << Log::indent << Log::endl << fstmt << Log::unindent);
         auto *rv = new IR::BlockStatement;
-        for (auto *i : fstmt->init) rv->append(i);
+        for (const IR::StatOrDecl *i : fstmt->init) rv->append(i);
         rv->append(doUnroll(bounds, fstmt->body, &fstmt->updates));
         LOG4("Unrolled loop" << Log::indent << Log::endl << rv << Log::unindent);
         return rv;

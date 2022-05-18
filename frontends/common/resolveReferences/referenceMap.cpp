@@ -59,7 +59,8 @@ void ReferenceMap::setDeclaration(const IR::This *pointer, const IR::IDeclaratio
     thisToDeclaration.emplace(pointer, decl);
 }
 
-const IR::IDeclaration *ReferenceMap::getDeclaration(const IR::This *pointer, bool notNull) const {
+IR::Ptr<IR::IDeclaration> ReferenceMap::getDeclaration(const IR::This *pointer,
+                                                       bool notNull) const {
     CHECK_NULL(pointer);
     const auto *result = get(thisToDeclaration, pointer);
 
@@ -72,7 +73,7 @@ const IR::IDeclaration *ReferenceMap::getDeclaration(const IR::This *pointer, bo
     return result;
 }
 
-const IR::IDeclaration *ReferenceMap::getDeclaration(const IR::Path *path, bool notNull) const {
+IR::Ptr<IR::IDeclaration> ReferenceMap::getDeclaration(const IR::Path *path, bool notNull) const {
     CHECK_NULL(path);
     const auto *result = get(pathToDeclaration, path);
 

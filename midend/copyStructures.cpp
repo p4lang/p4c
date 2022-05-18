@@ -11,7 +11,7 @@
 namespace P4 {
 
 const IR::Node *RemoveAliases::postorder(IR::AssignmentStatement *statement) {
-    const auto *type = typeMap->getType(statement->left);
+    const IR::Type *type = typeMap->getType(statement->left);
     if (!type->is<IR::Type_StructLike>()) {
         return statement;
     }
@@ -53,7 +53,7 @@ const IR::Node *RemoveAliases::postorder(IR::P4Control *control) {
 }
 
 const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) {
-    const auto *ltype = typeMap->getType(statement->left, true);
+    const IR::Type *ltype = typeMap->getType(statement->left, true);
 
     // If the left type is not a struct like or a header stack, return.
     if (!ltype->is<IR::Type_StructLike>() && !ltype->is<IR::Type_Array>() &&
@@ -79,12 +79,12 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
         return statement;
     }
 
-    const auto &srcInfo = statement->srcInfo;
+    const Util::SourceInfo &srcInfo = statement->srcInfo;
     IR::IndexedVector<IR::StatOrDecl> retval;
     if (const auto *si = statement->right->to<IR::StructExpression>()) {
         const auto *strct = ltype->checkedTo<IR::Type_StructLike>();
-        for (const auto *f : strct->fields) {
-            const auto *right = si->components.getDeclaration<IR::NamedExpression>(f->name);
+        for (const IR::StructField *f : strct->fields) {
+            auto right = si->components.getDeclaration<IR::NamedExpression>(f->name);
             const auto *left = new IR::Member(statement->left, f->name);
             retval.push_back(
                 new IR::AssignmentStatement(statement->srcInfo, left, right->expression));
@@ -110,7 +110,7 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
         // Build the "then" branch: set the validity bit and copy the fields.
         IR::IndexedVector<IR::StatOrDecl> thenStmts;
         thenStmts.push_back(new IR::MethodCallStatement(srcInfo, setDstValidCall));
-        for (const auto *field : header->fields) {
+        for (const IR::StructField *field : header->fields) {
             const auto *left = new IR::Member(field->type, statement->left, field->name);
             const auto *right = new IR::Member(field->type, statement->right, field->name);
             thenStmts.push_back(new IR::AssignmentStatement(srcInfo, left, right));
@@ -146,7 +146,7 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
     } else if (auto *tup = ltype->to<IR::Type_Tuple>()) {
         if (!copyTuples) return statement;
         int idx = 0;
-        for (auto *el : tup->components) {
+        for (const IR::Type *el : tup->components) {
             const auto *left = new IR::ArrayIndex(el, statement->left, new IR::Constant(idx));
             const auto *right = new IR::ArrayIndex(el, statement->right, new IR::Constant(idx));
             retval.push_back(new IR::AssignmentStatement(srcInfo, left, right));
@@ -161,7 +161,7 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
         BUG_CHECK(statement->right->is<IR::PathExpression>() ||
                       statement->right->is<IR::Member>() || statement->right->is<IR::ArrayIndex>(),
                   "%1%: Unexpected operation when eliminating struct copying", statement->right);
-        for (const auto *f : strct->fields) {
+        for (const IR::StructField *f : strct->fields) {
             const auto *right = new IR::Member(statement->right, f->name);
             const auto *left = new IR::Member(statement->left, f->name);
             retval.push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));

@@ -57,10 +57,10 @@ class ConstantFoldFilter : public P4::ConstantFoldingPolicy {
 
 const IR::StructField *getStructField(const IR::P4Program *program, cstring struct_name,
                                       cstring field_name) {
-    for (const auto *d : *program->getDeclarations()) {
+    for (const IR::IDeclaration *d : *program->getDeclarations()) {
         const auto *ts = d->to<IR::Type_Struct>();
         if (ts && ts->name == struct_name) {
-            for (const auto *f : ts->fields) {
+            for (const IR::StructField *f : ts->fields) {
                 const auto *sf = f->to<IR::StructField>();
                 if (sf && sf->name == field_name) {
                     return sf;

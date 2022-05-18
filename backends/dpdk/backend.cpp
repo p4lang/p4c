@@ -145,7 +145,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new ShortenTokenLength(newNameMap),
         new EmitDpdkTableConfig(refMap, typeMap, newNameMap),
     });
-    const auto *optimizedProgram = dpdk_program->apply(postCodeGen);
+    auto optimizedProgram = dpdk_program->apply(postCodeGen);
     if (errorCount() > 0) {
         return;
     }

@@ -177,7 +177,8 @@ class InlineDriver : public Visitor {
         CHECK_NULL(inliner);
         setName(("InlineDriver_"_cs + cstring(inliner->name())).c_str());
     }
-    const IR::Node *apply_visitor(const IR::Node *program, const char * = 0) override {
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *program_, const char * = 0) override {
+        IR::Ptr<IR::Node> program = program_;
         LOG2("InlineDriver");
         toInline->analyze();
         LOG3("InlineList size " << toInline->size());

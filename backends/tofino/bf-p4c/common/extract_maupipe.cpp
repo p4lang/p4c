@@ -1231,7 +1231,7 @@ void AttachTables::InitializeStatefulAlus ::updateAttachedSalu(const IR::Declara
             if (auto str = regtype->arguments->at(0)->to<IR::Type_Struct>())
                 salu->dual = str->fields.size() > 1;
             if (reg->arguments->size() > !salu->direct) {
-                auto *init = reg->arguments->at(!salu->direct)->expression;
+                const IR::Expression *init = reg->arguments->at(!salu->direct)->expression;
                 // any malformed initial value should have been diagnosed already, so no need
                 // for error messages here
                 if (auto *k = init->to<IR::Constant>()) {
@@ -1350,7 +1350,8 @@ bool AttachTables::InitializeRegisterParams::preorder(const IR::MAU::Primitive *
     if (auto *reg_act_decl = findContext<IR::Declaration_Instance>()) {
         if (isSaluActionType(getBaseType(reg_act_decl->type))) {
             BUG_CHECK(!reg_act_decl->arguments->empty(), "RegisterAction misses an argument");
-            auto *reg_act_decl_arg0_expr = reg_act_decl->arguments->at(0)->expression;
+            const IR::Expression *reg_act_decl_arg0_expr =
+                reg_act_decl->arguments->at(0)->expression;
             if (auto *reg_decl_path = reg_act_decl_arg0_expr->to<IR::PathExpression>())
                 reg_decl = getDeclInst(self.refMap, reg_decl_path);
         } else {
@@ -1385,8 +1386,8 @@ void AttachTables::InitializeRegisterParams::end_apply() {
         auto *salu = p.second;
         int index = static_cast<int>(salu->regfile.size());
         BUG_CHECK(!decl->arguments->empty(), "RegisterParam misses an argument");
-        auto *initial_expr = decl->arguments->at(0)->expression;
-        auto *initial_expr_type = self.typeMap->getType(initial_expr);
+        const IR::Expression *initial_expr = decl->arguments->at(0)->expression;
+        const IR::Type *initial_expr_type = self.typeMap->getType(initial_expr);
         BUG_CHECK(initial_expr_type != nullptr,
                   "Missing type information about RegisterParam argument");
         auto *bits = initial_expr_type->to<IR::Type_Bits>();
@@ -1563,7 +1564,7 @@ class GetBackendTables : public MauInspector {
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     gress_t gress;
-    const IR::MAU::TableSeq *&rv;
+    IR::Ptr<IR::MAU::TableSeq> &rv;
     DeclarationConversions &converted;
     StatefulSelectors &stateful_selectors;
     DeclarationConversions assoc_profiles;
@@ -1578,7 +1579,7 @@ class GetBackendTables : public MauInspector {
 
  public:
     GetBackendTables(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, gress_t gr,
-                     const IR::MAU::TableSeq *&rv, DeclarationConversions &con,
+                     IR::Ptr<IR::MAU::TableSeq> &rv, DeclarationConversions &con,
                      StatefulSelectors &ss, CollectSourceInfoLogging &sourceInfoLogging)
         : refMap(refMap),
           typeMap(typeMap),
@@ -1638,7 +1639,7 @@ class GetBackendTables : public MauInspector {
         auto h = table->getAnnotation("hidden"_cs);
         if (h) tt->is_compiler_generated = true;
 
-        auto *key = table->getKey();
+        const IR::Key *key = table->getKey();
         if (key == nullptr) return;
         int p4_param_order = 0;
 
@@ -1973,7 +1974,7 @@ cstring BackendConverter::getPipelineName(const IR::P4Program *program, int inde
 // toplevel pipeline structure.
 bool BackendConverter::preorder(const IR::P4Program *program) {
     ApplyEvaluator eval(refMap, typeMap);
-    auto *new_program = program->apply(eval);
+    auto new_program = program->apply(eval);
 
     toplevel = eval.getToplevelBlock();
     BUG_CHECK(toplevel, "toplevel cannot be nullptr");
