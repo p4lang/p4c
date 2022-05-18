@@ -177,7 +177,7 @@ class RoutingTest(L2L3SwitchTest):
 class MACLearningTest(L2L3SwitchTest):
 
     def runTest(self):
-        self.table_add(table="ingress_tbl_mac_learning", keys=["00:06:07:08:09:0a"], action=0)
+        self.table_add(table="ingress_tbl_mac_learning", key=["00:06:07:08:09:0a"], action=0)
         # should NOT generate learn digest
         pkt = testutils.simple_udp_packet(eth_src='00:06:07:08:09:0a')
         testutils.send_packet(self, PORT0, pkt)
@@ -222,11 +222,11 @@ class BroadcastTest(L2L3SwitchTest):
         self.multicast_group_add_member(group=3, egress_port=9)
 
         # no VLAN, Multicast group ID = 0
-        self.table_add(table="ingress_tbl_switching", keys=["ff:ff:ff:ff:ff:ff", 0], action=2, data=[3])
+        self.table_add(table="ingress_tbl_switching", key=["ff:ff:ff:ff:ff:ff", 0], action=2, data=[3])
         # VLAN 1, Multicast group ID = 1
-        self.table_add(table="ingress_tbl_switching", keys=["ff:ff:ff:ff:ff:ff", 1], action=2, data=[1])
+        self.table_add(table="ingress_tbl_switching", key=["ff:ff:ff:ff:ff:ff", 1], action=2, data=[1])
         # VLAN 2, Multicast group ID = 2
-        self.table_add(table="ingress_tbl_switching", keys=["ff:ff:ff:ff:ff:ff", 2], action=2, data=[2])
+        self.table_add(table="ingress_tbl_switching", key=["ff:ff:ff:ff:ff:ff", 2], action=2, data=[2])
 
         pkt = testutils.simple_udp_packet(eth_src='00:06:07:08:09:0a',
                                           eth_dst='ff:ff:ff:ff:ff:ff')
@@ -249,7 +249,7 @@ class BroadcastTest(L2L3SwitchTest):
 class ACLTest(L2L3SwitchTest):
 
     def runTest(self):
-        self.table_add(table="ingress_tbl_switching", keys=["00:01:02:03:04:05", 0], action=1, data=[9])
+        self.table_add(table="ingress_tbl_switching", key=["00:01:02:03:04:05", 0], action=1, data=[9])
         udp_pkt_1 = testutils.simple_udp_packet(ip_src="10.0.0.1", ip_dst="10.0.0.2",
                                                 udp_sport=1234, udp_dport=50051)
         tcp_pkt_1 = testutils.simple_tcp_packet(ip_src="10.0.0.1", ip_dst="10.0.0.2",
@@ -263,8 +263,8 @@ class ACLTest(L2L3SwitchTest):
                                                 udp_sport=80, udp_dport=8080)
         tcp_pkt_2 = testutils.simple_tcp_packet(ip_src="10.0.0.1", ip_dst="10.0.0.2",
                                                 tcp_sport=80, tcp_dport=8080)
-        self.table_add(table="ingress_tbl_acl", keys=["10.0.0.1", "10.0.0.2", 0x11, 80, 8080], action=1)
-        self.table_add(table="ingress_tbl_acl", keys=["10.0.0.1", "10.0.0.2", 0x6, 80, 8080], action=1)
+        self.table_add(table="ingress_tbl_acl", key=["10.0.0.1", "10.0.0.2", 0x11, 80, 8080], action=1)
+        self.table_add(table="ingress_tbl_acl", key=["10.0.0.1", "10.0.0.2", 0x6, 80, 8080], action=1)
 
         testutils.send_packet(self, PORT0, udp_pkt_1)
         testutils.verify_packet(self, udp_pkt_1, PORT5)
@@ -280,7 +280,7 @@ class ACLTest(L2L3SwitchTest):
 class PortCountersTest(L2L3SwitchTest):
 
     def runTest(self):
-        self.table_add(table="ingress_tbl_switching", keys=["00:00:00:00:00:03", 1], action=1, data=[8])
+        self.table_add(table="ingress_tbl_switching", key=["00:00:00:00:00:03", 1], action=1, data=[8])
         pkt = testutils.simple_udp_packet(eth_dst="00:00:00:00:00:03")
         pkt = pkt_add_vlan(pkt, vlan_vid=1)
 
@@ -293,5 +293,5 @@ class PortCountersTest(L2L3SwitchTest):
             ig_bytes += len(pkt)
             eg_bytes = ig_bytes + (4*(i+1))
             pkts_cnt = i + 1
-            self.counter_verify(name="ingress_in_pkts", keys=[5], bytes=ig_bytes, packets=pkts_cnt)
+            self.counter_verify(name="ingress_in_pkts", key=[5], bytes=ig_bytes, packets=pkts_cnt)
             self.verify_map_entry("egress_tbl_vlan_egress", "8 00 00 00", "02 00 00 00 01 00 00 00 {} 00 00 00 0{} 00 00 00".format(hex(eg_bytes).split('x')[-1], pkts_cnt))
