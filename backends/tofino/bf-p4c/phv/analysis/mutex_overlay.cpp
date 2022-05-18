@@ -53,7 +53,7 @@ bool ExcludeParserLoopReachableFields::is_loop_reachable(
     return false;
 }
 
-const IR::Node *ExcludeParserLoopReachableFields::apply_visitor(const IR::Node *root,
+IR::Ptr<IR::Node> ExcludeParserLoopReachableFields::apply_visitor(const IR::Node *root,
                                                                 const char *) {
     for (auto &kv : fieldToStates.field_to_parser_states) {
         for (auto &xk : fieldToStates.field_to_parser_states) {

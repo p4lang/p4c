@@ -187,7 +187,7 @@ TEST_F(P4CFrontendMoveInitializers, P4ControlSrcInfo) {
     // is correctly maintained by MoveInitializers.
     const auto *p4prog = prog->to<IR::P4Program>();
     ASSERT_TRUE(p4prog);
-    for (const auto *node : p4prog->objects) {
+    for (const IR::Node *node : p4prog->objects) {
         if (const auto *control = node->to<IR::P4Control>()) {
             ASSERT_TRUE(control->body->srcInfo.isValid());
         }

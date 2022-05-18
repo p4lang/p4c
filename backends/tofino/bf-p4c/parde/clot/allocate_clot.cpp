@@ -1275,7 +1275,7 @@ class GreedyClotAllocator : public Visitor {
         return result;
     }
 
-    const IR::Node *apply_visitor(const IR::Node *root, const char *) override {
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *root, const char *) override {
         const auto *pipe = root->to<IR::BFN::Pipe>();
         BUG_CHECK(pipe, "GreedyClotAllocator must be applied to pipe");
 
@@ -1605,7 +1605,7 @@ Visitor::profile_t ClotAdjuster::init_apply(const IR::Node *root) {
     return result;
 }
 
-const IR::Node *ClotAdjuster::apply_visitor(const IR::Node *root, const char *) {
+IR::Ptr<IR::Node> ClotAdjuster::apply_visitor(const IR::Node *root, const char *) {
     clotInfo.adjust_clots(phv);
 
     const IR::BFN::Pipe *pipe = root->to<IR::BFN::Pipe>();

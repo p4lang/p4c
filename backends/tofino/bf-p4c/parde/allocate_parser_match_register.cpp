@@ -711,7 +711,7 @@ class MatcherAllocator : public Visitor {
         return Visitor::init_apply(root);
     }
 
-    const IR::Node *apply_visitor(const IR::Node *root, const char *) override {
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *root, const char *) override {
         for (auto &kv : parser_use_def) allocate_all(kv.first, kv.second);
         return root;
     }

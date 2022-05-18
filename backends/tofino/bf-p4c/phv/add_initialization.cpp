@@ -65,7 +65,7 @@ const IR::MAU::Instruction *MapFieldToExpr::generateInitInstruction(
     return prim;
 }
 
-const IR::Node *ComputeFieldsRequiringInit::apply_visitor(const IR::Node *root, const char *) {
+IR::Ptr<IR::Node> ComputeFieldsRequiringInit::apply_visitor(const IR::Node *root, const char *) {
     actionInits.clear();
     fieldsForInit.clear();
     for (auto &f : phv) {

@@ -13,7 +13,7 @@ using namespace literals;
 bool ComplexValues::isNestedStruct(const IR::Type *type) const {
     if (!type->is<IR::Type_Struct>()) return false;
     auto st = type->to<IR::Type_Struct>();
-    for (const auto *f : st->fields) {
+    for (const IR::StructField *f : st->fields) {
         auto ftype = typeMap->getType(f, true);
         if (ftype->is<IR::Type_StructLike>() || ftype->is<IR::Type_Tuple>() ||
             ftype->is<IR::Type_Array>()) {
@@ -28,7 +28,7 @@ template <class T>
 void ComplexValues::explode(std::string_view prefix, const IR::Type_Struct *type, FieldsMap *map,
                             IR::Vector<T> *result) {
     CHECK_NULL(type);
-    for (const auto *f : type->fields) {
+    for (const IR::StructField *f : type->fields) {
         std::string fname = absl::StrCat(prefix, "_", f->name);
         auto ftype = typeMap->getType(f, true);
         if (isNestedStruct(ftype)) {

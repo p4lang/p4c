@@ -2035,7 +2035,7 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
                     unsigned int width = paramType->to<IR::Type_Bits>()->width_bits();
                     tcActionParam->setBitSize(width);
                 }
-                if (const auto *anno = param->getAnnotation(ParseTCAnnotations::tcType)) {
+                if (const IR::Annotation *anno = param->getAnnotation(ParseTCAnnotations::tcType)) {
                     auto expr = anno->getExpr(0);
                     if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
                         auto val = getTcType(typeLiteral);
@@ -2229,7 +2229,7 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
             bool isDefaultHit = false;
             bool isDefaultHitConst = false;
             bool isTcMayOverrideHit = false;
-            for (const auto *anno : action->getAnnotations()) {
+            for (const IR::Annotation *anno : action->getAnnotations()) {
                 if (anno->name == IR::Annotation::tableOnlyAnnotation) {
                     isTableOnly = true;
                 } else if (anno->name == ParseTCAnnotations::defaultHit) {
@@ -2359,8 +2359,9 @@ void ConvertToBackendIR::updatePnaDirectCounter(const IR::P4Table *t, IR::TCTabl
         if (ext.first == externInstance->type->toString()) {
             auto externDefinition = tcPipeline->getExternDefinition(ext.first);
             if (externDefinition) {
-                auto extInstDef = ((IR::TCExternInstance *)externDefinition->getExternInstance(
-                    externInstanceName));
+                auto extInstDef = const_cast<IR::TCExternInstance *>(
+                    externDefinition->getExternInstance(externInstanceName)
+                        ->to<IR::TCExternInstance>());
                 extInstDef->setExternTableBindable(true);
                 extInstDef->setNumElements(tentries);
                 break;
@@ -2393,8 +2394,9 @@ void ConvertToBackendIR::updatePnaDirectMeter(const IR::P4Table *t, IR::TCTable 
         if (ext.first == externInstance->type->toString()) {
             auto externDefinition = tcPipeline->getExternDefinition(ext.first);
             if (externDefinition) {
-                auto extInstDef = ((IR::TCExternInstance *)externDefinition->getExternInstance(
-                    externInstanceName));
+                auto extInstDef = const_cast<IR::TCExternInstance *>(
+                    externDefinition->getExternInstance(externInstanceName)
+                        ->to<IR::TCExternInstance>());
                 extInstDef->setExternTableBindable(true);
                 extInstDef->setNumElements(tentries);
                 foundExtern = true;
@@ -2415,7 +2417,7 @@ void ConvertToBackendIR::updateAddOnMissTable(const IR::P4Table *t) {
     for (auto table : tcPipeline->tableDefs) {
         if (table->tableName == tblname) {
             add_on_miss_tables.push_back(t);
-            auto tableDefinition = ((IR::TCTable *)table);
+            auto tableDefinition = const_cast<IR::TCTable *>(table->to<IR::TCTable>());
             tableDefinition->setTableAddOnMiss();
             tableDefinition->setTablePermission(HandleTableAccessPermission(t));
         }
@@ -2550,7 +2552,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
         }
         tableDefinition->setKeySize(keySize);
         tableKeysizeList.emplace(tId, keySize);
-        for (const auto *anno : t->getAnnotations()) {
+        for (const IR::Annotation *anno : t->getAnnotations()) {
             if (anno->name == ParseTCAnnotations::tc_acl) {
                 tablePermissions.emplace(t->name.originalName, GetAnnotatedAccessPath(anno));
             } else if (anno->name == ParseTCAnnotations::numMask) {
@@ -2582,7 +2584,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
                     tcAction = tcPipeline->NoAction;
                 }
                 unsigned int tableFlag = TC::TABLEDEFAULT;
-                for (const auto *anno : action->getAnnotations()) {
+                for (const IR::Annotation *anno : action->getAnnotations()) {
                     if (anno->name == IR::Annotation::tableOnlyAnnotation) {
                         tableFlag = TC::TABLEONLY;
                     } else if (anno->name == IR::Annotation::defaultOnlyAnnotation) {
@@ -2608,7 +2610,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
 cstring ConvertToBackendIR::processExternPermission(const IR::Type_Extern *ext) {
     cstring control_path, data_path;
     // Check if access permissions is defined with annotation @tc_acl
-    if (const auto *anno = ext->getAnnotation(ParseTCAnnotations::tc_acl)) {
+    if (const IR::Annotation *anno = ext->getAnnotation(ParseTCAnnotations::tc_acl)) {
         auto path = GetAnnotatedAccessPath(anno);
         control_path = path->first;
         data_path = path->second;
@@ -2628,10 +2630,10 @@ cstring ConvertToBackendIR::processExternPermission(const IR::Type_Extern *ext) 
     return value.str();
 }
 
-safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternConstructor(
+safe_vector<IR::Ptr<IR::TCKey>> ConvertToBackendIR::processExternConstructor(
     const IR::Type_Extern *extn, const IR::Declaration_Instance *decl,
     struct ExternInstance *instance) {
-    safe_vector<const IR::TCKey *> keys;
+    safe_vector<IR::Ptr<IR::TCKey>> keys;
     for (auto gd : *extn->getDeclarations()) {
         if (!gd->getNode()->is<IR::Method>()) {
             continue;
@@ -2695,10 +2697,10 @@ ConvertToBackendIR::CounterType ConvertToBackendIR::toCounterType(const int type
     BUG("Unknown counter type %1%", type);
 }
 
-safe_vector<const IR::TCKey *> ConvertToBackendIR::processCounterControlPathKeys(
+safe_vector<IR::Ptr<IR::TCKey>> ConvertToBackendIR::processCounterControlPathKeys(
     const IR::Type_Struct *extern_control_path, const IR::Type_Extern *extn,
     const IR::Declaration_Instance *decl) {
-    safe_vector<const IR::TCKey *> keys;
+    safe_vector<IR::Ptr<IR::TCKey>> keys;
     auto typeArg = decl->arguments->at(decl->arguments->size() - 1)->expression->to<IR::Constant>();
     CounterType type = toCounterType(typeArg->asInt());
     int kId = 1;
@@ -2738,9 +2740,9 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processCounterControlPathKeys
     return keys;
 }
 
-safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternControlPath(
+safe_vector<IR::Ptr<IR::TCKey>> ConvertToBackendIR::processExternControlPath(
     const IR::Type_Extern *extn, const IR::Declaration_Instance *decl, cstring eName) {
-    safe_vector<const IR::TCKey *> keys;
+    safe_vector<IR::Ptr<IR::TCKey>> keys;
     auto find = ControlStructPerExtern.find(eName);
     if (find != ControlStructPerExtern.end()) {
         auto extern_control_path = ControlStructPerExtern[eName];
@@ -2780,10 +2782,10 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternControlPath(
     return keys;
 }
 
-safe_vector<const IR::TCKey *> ConvertToBackendIR::HandleTypeNameStructField(
+safe_vector<IR::Ptr<IR::TCKey>> ConvertToBackendIR::HandleTypeNameStructField(
     const IR::StructField *field, const IR::Type_Extern *extn, const IR::Declaration_Instance *decl,
     int &kId, cstring annoName) {
-    safe_vector<const IR::TCKey *> keys;
+    safe_vector<IR::Ptr<IR::TCKey>> keys;
     auto type_extern_params = extn->getTypeParameters()->parameters;
     for (unsigned itr = 0; itr < type_extern_params.size(); itr++) {
         if (type_extern_params.at(itr)->toString() == field->type->toString()) {
@@ -2917,7 +2919,8 @@ void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
             tcPipeline->addExternDefinition(externDefinition);
         } else {
             auto eb = externsInfo[eName];
-            externDefinition = ((IR::TCExtern *)tcPipeline->getExternDefinition(eName));
+            externDefinition = const_cast<IR::TCExtern *>(
+                tcPipeline->getExternDefinition(eName)->to<IR::TCExtern>());
             externDefinition->numinstances = ++eb->no_of_instances;
             instance->instance_id = eb->no_of_instances;
             eb->eInstance.push_back(instance);

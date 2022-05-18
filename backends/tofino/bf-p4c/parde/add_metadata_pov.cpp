@@ -61,10 +61,10 @@ IR::Node *AddMetadataPOV::insert_deparser_param_pov_write(const IR::MAU::Primiti
     Log::TempIndent indent;
     LOG5("Insert deparser param for pov write : " << p << ", validate: " << (validate ? "Y" : "N")
                                                   << indent);
-    auto *dest = p->operands.at(0);
-    for (auto *param : dp->params) {
+    const IR::Expression *dest = p->operands.at(0);
+    for (const IR::BFN::DeparserParameter *param : dp->params) {
         if (equiv(dest, param->source->field)) {
-            auto pov_write = create_pov_write(param->povBit->field, validate);
+            auto *pov_write = create_pov_write(param->povBit->field, validate);
             LOG5("Inserting param for pov write: " << pov_write);
             if (validate)
                 return new IR::Vector<IR::MAU::Primitive>({p, pov_write});

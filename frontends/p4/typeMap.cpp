@@ -99,9 +99,9 @@ void TypeMap::setType(const IR::Node *element, const IR::Type *type) {
     LOG3("setType " << dbp(element) << " => " << dbp(type));
 }
 
-const IR::Type *TypeMap::getType(const IR::Node *element, bool notNull) const {
+IR::Ptr<IR::Type> TypeMap::getType(const IR::Node *element, bool notNull) const {
     CHECK_NULL(element);
-    const auto *result = get(typeMap, element);
+    IR::Ptr<IR::Type> result = get(typeMap, element);
     LOG4("Looking up type for " << dbp(element) << " => " << dbp(result));
     if (notNull && result == nullptr)
         BUG_CHECK(errorCount() > 0, "Could not find type for %1%", dbp(element));
@@ -109,9 +109,9 @@ const IR::Type *TypeMap::getType(const IR::Node *element, bool notNull) const {
     return result;
 }
 
-const IR::Type *TypeMap::getTypeType(const IR::Node *element, bool notNull) const {
+IR::Ptr<IR::Type> TypeMap::getTypeType(const IR::Node *element, bool notNull) const {
     CHECK_NULL(element);
-    auto result = getType(element, notNull);
+    const IR::Type *result = getType(element, notNull);
     if (!result) return result;
     auto typeType = result->to<IR::Type_Type>();
     BUG_CHECK(typeType, "%1%: expected a TypeType", result);
@@ -324,7 +324,7 @@ bool TypeMap::implicitlyConvertibleTo(const IR::Type *from, const IR::Type *to) 
 // Used for tuples, stacks and lists only
 const IR::Type *TypeMap::getCanonical(const IR::Type *type) {
     // Currently a linear search; hopefully this won't be too expensive in practice
-    std::vector<const IR::Type *> *searchIn;
+    std::vector<IR::Ptr<IR::Type>> *searchIn;
     if (type->is<IR::Type_Array>())
         searchIn = &canonicalStacks;
     else if (type->is<IR::Type_Tuple>())

@@ -53,7 +53,7 @@ bool ParserResourcesLogging::preorder(const IR::BFN::LoweredParserState *state) 
               parserIR->name);
     ParserLogData &p = parsers[parserIR->name];
 
-    for (const auto *match : state->transitions) {
+    for (const IR::BFN::LoweredParserMatch *match : state->transitions) {
         LOG1("State Match: " << match);
         std::string nextStateName = (match->next ? match->next->name.string()
                                                  : (match->loop ? match->loop.string() : "END"));
@@ -85,7 +85,7 @@ ParserResourcesLogging::logStateTransitionsByMatch(const std::string &nextStateN
             hasCounter, nextStateId, nextStateName, prevStateId, shifts, tcamRow, prevStateName);
 
         CHECK_NULL(match);
-        for (auto *stmt : match->extracts) {
+        for (const IR::BFN::LoweredParserPrimitive *stmt : match->extracts) {
             CHECK_NULL(stmt);
 
             if (auto *extract = stmt->to<IR::BFN::LoweredExtractClot>()) {
@@ -136,7 +136,7 @@ int ParserResourcesLogging::getTcamId(const IR::BFN::LoweredParserMatch *match, 
 void ParserResourcesLogging::logStateExtracts(const IR::BFN::LoweredParserMatch *match,
                                               std::vector<StateExtracts *> &result) {
     std::map<size_t, int> extractorIds;
-    for (const auto *prim : match->extracts) {
+    for (const IR::BFN::LoweredParserPrimitive *prim : match->extracts) {
         auto extractIR = prim->to<IR::BFN::LoweredExtractPhv>();
         if (extractIR) {
             const size_t bitWidth = extractIR->dest->container.size();

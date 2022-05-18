@@ -75,7 +75,7 @@ std::vector<const IR::Mask *> *ReplaceSelectRange::rangeToMasks(const IR::Range 
         return masks;
     }
 
-    auto inType = r->left->type->to<IR::Type_Bits>();
+    IR::Ptr<IR::Type_Bits> inType = r->left->type->to<IR::Type_Bits>();
     BUG_CHECK(inType != nullptr, "Range type %1% is not fixed-width integer", r->left->type);
     bool isSigned = inType->isSigned;
     auto maskType = isSigned ? IR::Type_Bits::get(inType->srcInfo, inType->size, false) : inType;
@@ -130,7 +130,7 @@ const IR::Node *ReplaceSelectRange::postorder(IR::SelectExpression *e) {
     if (!signedIndicesToReplace.empty()) {
         IR::Vector<IR::Expression> newSelectList;
         size_t idx = 0;
-        for (auto *expr : e->select->components) {
+        for (const IR::Expression *expr : e->select->components) {
             if (signedIndicesToReplace.count(idx)) {
                 auto eType = expr->type->to<IR::Type_Bits>();
                 BUG_CHECK(eType,

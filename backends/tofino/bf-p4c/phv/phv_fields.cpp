@@ -2519,7 +2519,7 @@ void dump(const PhvInfo *phv) { std::cout << *phv; }
 void dump(const PHV::Field &f) { std::cout << f << std::endl; }
 void dump(const PHV::Field *f) { std::cout << *f << std::endl; }
 
-const IR::Node *PhvInfo::DumpPhvFields::apply_visitor(const IR::Node *n, const char *) {
+IR::Ptr<IR::Node> PhvInfo::DumpPhvFields::apply_visitor(const IR::Node *n, const char *) {
     LOG1("");
     LOG1("--- PHV FIELDS -------------------------------------------");
     LOG1("");

@@ -24,7 +24,7 @@ struct MultiVisitInspector : public Inspector, virtual public P4::ResolutionCont
     void loop_revisit(const IR::ParserState *) override {}
 
     void visit_def(const IR::PathExpression *pe) {
-        auto *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
+        auto d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
         BUG_CHECK(d, "failed to resolve %s", pe);
         if (auto *ps = d->to<IR::ParserState>()) {
             visit(ps, "transition");
@@ -54,7 +54,7 @@ struct MultiVisitModifier : public Modifier,
     void loop_revisit(const IR::ParserState *) override {}
 
     void visit_def(const IR::PathExpression *pe) {
-        auto *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
+        auto d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
         BUG_CHECK(d, "failed to resolve %s", pe);
         if (auto *ps = d->to<IR::ParserState>()) {
             visit(ps, "transition");

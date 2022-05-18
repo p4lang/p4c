@@ -72,7 +72,7 @@ class CanBeIXBarExpr : public Inspector {
     }
     bool preorder(const IR::Constant *) { return false; }
     bool preorder(const IR::Member *m) {
-        auto *base = m->expr;
+        const IR::Expression *base = m->expr;
         while ((m = base->to<IR::Member>())) base = m->expr;
         if (auto *pe = base->to<IR::PathExpression>()) {
             if (!checkPath(pe)) rv = false;
@@ -170,7 +170,7 @@ class IXBarExprSeed : public Inspector {
     bool preorder(const IR::ListExpression *fl) {
         auto tmp = slice;
         auto old_shift = shift;
-        for (auto *e : boost::adaptors::reverse(fl->components)) {
+        for (const IR::Expression *e : boost::adaptors::reverse(fl->components)) {
             int width = e->type->width_bits();
             if (slice.lo < width) {
                 auto t2 = slice;

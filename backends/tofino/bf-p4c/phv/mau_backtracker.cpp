@@ -68,7 +68,7 @@ bool MauBacktracker::backtrack(trigger &trig) {
     return false;
 }
 
-const IR::Node *MauBacktracker::apply_visitor(const IR::Node *root, const char *) {
+IR::Ptr<IR::Node> MauBacktracker::apply_visitor(const IR::Node *root, const char *) {
     LOG1("MauBacktracker called " << numInvoked << " time(s)");
     LOG1("  Is metadata initialization disabled? " << (metaInitDisable ? "YES" : "NO"));
     LOG1("  Should pack conflicts be ignored? " << (ignorePackConflicts ? "YES" : "NO"));

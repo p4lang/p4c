@@ -27,32 +27,32 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
  private:
     // Returns a vector of the decls that exist in the given namespace, and caches the result
     // for future lookups.
-    const std::vector<const IR::IDeclaration *> &memoizeDeclarations(
+    const std::vector<IR::Ptr<IR::IDeclaration>> &memoizeDeclarations(
         const IR::INamespace *ns) const;
 
-    using DeclsVector = absl::InlinedVector<const IR::IDeclaration *, 2>;
+    using DeclsVector = absl::InlinedVector<IR::Ptr<IR::IDeclaration>, 2>;
     using NamespaceDeclsByName = absl::flat_hash_map<cstring, DeclsVector, Util::Hash>;
 
     // Returns a mapping from name -> decl for the given namespace, and caches the result for
     // future lookups.
     NamespaceDeclsByName &memoizeDeclsByName(const IR::INamespace *ns) const;
 
-    mutable absl::flat_hash_map<const IR::INamespace *, std::vector<const IR::IDeclaration *>,
+    mutable absl::flat_hash_map<IR::Ptr<IR::INamespace>, std::vector<IR::Ptr<IR::IDeclaration>>,
                                 Util::Hash>
         namespaceDecls;
-    mutable absl::flat_hash_map<const IR::INamespace *, NamespaceDeclsByName, Util::Hash>
+    mutable absl::flat_hash_map<IR::Ptr<IR::INamespace>, NamespaceDeclsByName, Util::Hash>
         namespaceDeclNames;
 
  protected:
     // Note that all errors have been merged by the parser into
     // a single error { } namespace.
-    std::vector<const IR::IDeclaration *> lookup(const IR::INamespace *ns, const IR::ID &name,
-                                                 ResolutionType type) const;
+    std::vector<IR::Ptr<IR::IDeclaration>> lookup(const IR::INamespace *ns, const IR::ID &name,
+                                                  ResolutionType type) const;
 
     // match kinds exist in their own special namespace, made from all the match_kind
     // declarations in the global scope.  Unlike errors, we don't merge those scopes in
     // the parser, so we have to find them and scan them here.
-    std::vector<const IR::IDeclaration *> lookupMatchKind(const IR::ID &name) const;
+    std::vector<IR::Ptr<IR::IDeclaration>> lookupMatchKind(const IR::ID &name) const;
 
     // P4_14 allows things to be used before their declaration while P4_16 (generally)
     // does not, so we will resolve names to things declared later only when translating
@@ -64,26 +64,26 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
     explicit ResolutionContext(bool ao) : anyOrder(ao) {}
 
     /// We are resolving a method call.  Find the arguments from the context.
-    const IR::Vector<IR::Argument> *methodArguments(cstring name) const;
+    IR::Ptr<IR::Vector<IR::Argument>> methodArguments(cstring name) const;
 
  public:
     /// Resolve references for @p name, restricted to @p type declarations.
-    std::vector<const IR::IDeclaration *> resolve(const IR::ID &name, ResolutionType type) const;
+    std::vector<IR::Ptr<IR::IDeclaration>> resolve(const IR::ID &name, ResolutionType type) const;
 
     /// Resolve reference for @p name, restricted to @p type declarations, and expect one result.
-    const IR::IDeclaration *resolveUnique(const IR::ID &name, ResolutionType type,
-                                          const IR::INamespace * = nullptr) const;
+    IR::Ptr<IR::IDeclaration> resolveUnique(const IR::ID &name, ResolutionType type,
+                                            const IR::INamespace * = nullptr) const;
 
     /// Resolve @p path; if @p isType is `true` then resolution will
     /// only return type nodes.
-    virtual const IR::IDeclaration *resolvePath(const IR::Path *path, bool isType) const;
+    virtual IR::Ptr<IR::IDeclaration> resolvePath(const IR::Path *path, bool isType) const;
 
     /// Resolve a refrence to a type @p type.
-    const IR::Type *resolveType(const IR::Type *type) const;
+    IR::Ptr<IR::Type> resolveType(const IR::Type *type) const;
 
-    const IR::IDeclaration *getDeclaration(const IR::Path *path,
-                                           bool notNull = false) const override;
-    const IR::IDeclaration *getDeclaration(const IR::This *, bool notNull = false) const override;
+    IR::Ptr<IR::IDeclaration> getDeclaration(const IR::Path *path,
+                                             bool notNull = false) const override;
+    IR::Ptr<IR::IDeclaration> getDeclaration(const IR::This *, bool notNull = false) const override;
 
     /// Returns the set of decls that exist in the given namespace.
     auto getDeclarations(const IR::INamespace *ns) const {
@@ -100,7 +100,7 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
 
         auto decls = namesToDecls.find(name);
         if (decls == namesToDecls.end())
-            return Util::Enumerator<const IR::IDeclaration *>::emptyEnumerator();
+            return Util::Enumerator<IR::Ptr<IR::IDeclaration>>::emptyEnumerator();
         return Util::enumerate(decls->second);
     }
 };
@@ -122,7 +122,7 @@ class ResolveReferences : public Inspector, private ResolutionContext {
  private:
     /// Resolve @p path; if @p isType is `true` then resolution will
     /// only return type nodes.
-    const IR::IDeclaration *resolvePath(const IR::Path *path, bool isType) const override;
+    IR::Ptr<IR::IDeclaration> resolvePath(const IR::Path *path, bool isType) const override;
 
  public:
     explicit ResolveReferences(/* out */ P4::ReferenceMap *refMap, bool checkShadow = false);
