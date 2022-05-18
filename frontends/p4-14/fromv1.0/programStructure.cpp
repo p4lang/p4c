@@ -546,7 +546,7 @@ const IR::ParserState *ProgramStructure::convertParser(
 
                 auto type = explodeType(fieldTypes);
                 const IR::Constant *sizeConstant;
-                if (const auto *sizeAnnotation =
+                if (const IR::Annotation *sizeAnnotation =
                         value_set->getAnnotation(parserValueSetSizeAnnotation)) {
                     const auto &expr = sizeAnnotation->getExpr();
                     if (expr.size() != 1) {
@@ -676,7 +676,7 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
             const auto *code =
                 P4::P4ParserDriver::parse(preprocessorResult.value().get(), options.file.string());
             if ((code != nullptr) && (::P4::errorCount() == 0U)) {
-                for (const auto *decl : code->objects) {
+                for (const IR::Node *decl : code->objects) {
                     declarations->push_back(decl);
                 }
             }
@@ -1136,7 +1136,7 @@ static const cstring saturatingAnnotation = "saturating"_cs;
 
 static bool isSaturatedField(const IR::Expression *expr) {
     auto member = expr->to<IR::Member>();
-    if (!member) return false;
+    if (!member || !member->expr || !member->expr->type) return false;
     auto header_type = member->expr->type->to<IR::Type_StructLike>();
     if (!header_type) return false;
     auto field = header_type->getField(member->member.name);
@@ -2564,13 +2564,13 @@ void ProgramStructure::createChecksumUpdates() {
                 body->annotations.emplace_back("zeros_as_ones"_cs, methodCallExpression);
             }
 
-            for (auto *annot : cf->annotations) {
+            for (const IR::Annotation *annot : cf->annotations) {
                 auto newAnnot = new IR::Annotation(annot->name, annot->getExpr(), false);
                 newAnnot->getExpr().push_back(
                     new IR::StringLiteral(methodCallExpression->toString()));
                 body->annotations.push_back(newAnnot);
             }
-            for (auto *annot : flc->annotations) {
+            for (const IR::Annotation *annot : flc->annotations) {
                 auto newAnnot = new IR::Annotation(annot->name, annot->getExpr(), false);
                 newAnnot->getExpr().push_back(
                     new IR::StringLiteral(methodCallExpression->toString()));

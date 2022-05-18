@@ -11,10 +11,9 @@
 
 namespace P4 {
 
-StackVariable::StackVariable(const IR::Expression *expr) : variable(expr) {
+StackVariable::StackVariable(IR::Ptr<IR::Expression> expr) : variable(expr) {
     CHECK_NULL(expr);
     BUG_CHECK(repOk(expr), "Invalid stack variable %1%", expr);
-    variable = expr;
 }
 
 bool StackVariable::repOk(const IR::Expression *expr) {
@@ -490,7 +489,7 @@ class ParserSymbolicInterpreter {
             success = reportIfError(state, e);
         } else if (auto bs = sord->to<IR::BlockStatement>()) {
             IR::IndexedVector<IR::StatOrDecl> newComponents;
-            for (auto *component : bs->components) {
+            for (const IR::StatOrDecl *component : bs->components) {
                 auto newComponent = executeStatement(state, component, valueMap);
                 if (!newComponent)
                     success = false;

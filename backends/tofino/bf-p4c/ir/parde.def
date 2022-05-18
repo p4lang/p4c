@@ -157,7 +157,7 @@ abstract ParserPrimitive {
 #emit
     /// Get destination out of a parser write primitive -- either Emit, or
     /// ParserChecksumWritePrimitive. Fails if input is not a write primitive.
-    virtual const ParserLVal* getWriteDest() const {
+    virtual IR::Ptr<ParserLVal> getWriteDest() const {
         BUG("%1%: Write is neither extract nor checksum write", this);
     }
 
@@ -316,7 +316,7 @@ abstract ParserChecksumPrimitive : ParserPrimitive {
 
 abstract ParserChecksumWritePrimitive : ParserChecksumPrimitive {
     // this is here to declare that all checksum writes return FieldLVal not just ParserLVal
-    FieldLVal getWriteDest() const override {
+    ParserLVal getWriteDest() const override {
         BUG("calling getWriteDest from abtract base, this should have beed overwritten");
     }
 
@@ -328,7 +328,7 @@ abstract ParserChecksumWritePrimitive : ParserChecksumPrimitive {
 class ChecksumVerify : ParserChecksumWritePrimitive {
     dbprint { out << "verify checksum " << declName; }
 
-    FieldLVal getWriteDest() const override { return dest; }
+    ParserLVal getWriteDest() const override { return dest; }
 
     optional NullOK FieldLVal dest;
 }
@@ -336,7 +336,7 @@ class ChecksumVerify : ParserChecksumWritePrimitive {
 class ChecksumResidualDeposit : ParserChecksumWritePrimitive {
     dbprint { out << "subtract and deposit checksum " << declName; }
 
-    FieldLVal getWriteDest() const override { return dest; }
+    ParserLVal getWriteDest() const override { return dest; }
 
     FieldLVal dest;
     // header end position relative to current state's input buffer

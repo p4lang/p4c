@@ -47,7 +47,7 @@ std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::tr
                          ? P4ParserDriver::parseExpressionList(annotation->srcInfo,
                                                                annotation->getUnparsed())
                          : &annotation->getExpr();
-        for (auto *arg : *args) {
+        for (const IR::Expression *arg : *args) {
             if (auto *a = arg->to<IR::StringLiteral>()) {
                 options.push_back(a->value.c_str());
             } else {

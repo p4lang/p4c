@@ -24,7 +24,7 @@ class MoveToEgress::FindIngressPacketMods : public Visitor {
     MoveToEgress &self;
 
     void apply();
-    const IR::Node *apply_visitor(const IR::Node *n, const char * = 0) override {
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *n, const char * = 0) override {
         apply();
         return n;
     }

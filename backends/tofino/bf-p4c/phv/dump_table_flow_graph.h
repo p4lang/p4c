@@ -109,7 +109,7 @@ struct DumpTableFlowGraph : public Visitor {
         return new std::ofstream(filepath);
     }
 
-    const IR::Node *apply_visitor(const IR::Node *n, const char *) override { return n; }
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *n, const char *) override { return n; }
 
     Visitor::profile_t init_apply(const IR::Node *root) override {
         auto rv = Visitor::init_apply(root);

@@ -436,7 +436,7 @@ struct DependencyGraph {
     bool happens_phys_before_recursive(const IR::MAU::Table *t1, const IR::MAU::TableSeq *s) const {
         check_finalized();
         if (happens_phys_before_map.count(t1))
-            for (auto *t2 : s->tables)
+            for (const IR::MAU::Table *t2 : s->tables)
                 if (happens_phys_before_recursive(t1, t2)) return true;
         return false;
     }
@@ -446,7 +446,7 @@ struct DependencyGraph {
         check_finalized();
         if (happens_phys_before_map.count(t1)) {
             if (t2 != t1 && happens_phys_before_map.at(t1).count(t2)) return true;
-            for (auto *next : Values(t2->next))
+            for (const IR::MAU::TableSeq *next : Values(t2->next))
                 if (happens_phys_before_recursive(t1, next)) return true;
         }
         return false;

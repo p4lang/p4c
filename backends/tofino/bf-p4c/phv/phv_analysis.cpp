@@ -130,9 +130,9 @@ class ApplyGlobalPragmas : public Visitor {
     PHV::AllocSetting &settings_i;
 
  protected:
-    const IR::Node *apply_visitor(const IR::Node *root_, const char *) override {
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *root_, const char *) override {
         BUG_CHECK(root_->is<IR::BFN::Pipe>(), "IR root is not a BFN::Pipe: %s", root_);
-        const auto *root = root_->to<IR::BFN::Pipe>();
+        auto root = root_->to<IR::BFN::Pipe>();
         // phv container pragma
         applyGlobalPragmas(Device::phvSpec(), root->global_pragmas);
         // single parser gress pragma

@@ -27,7 +27,7 @@ class TypeCheck : public PassManager {
 
  public:
     TypeCheck();
-    const IR::Node *apply_visitor(const IR::Node *, const char *) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *, const char *) override;
 };
 
 }  // namespace P4

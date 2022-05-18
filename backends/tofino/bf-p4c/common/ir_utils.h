@@ -53,7 +53,7 @@ class CatchBacktrack : public Backtrack {
         }
     }
     // pass does nothing
-    const IR::Node *apply_visitor(const IR::Node *n, const char * = 0) override { return n; }
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *n, const char * = 0) override { return n; }
 
  public:
     explicit CatchBacktrack(std::function<void(BT *)> f) : fn(f) {}
