@@ -1,3 +1,6 @@
 accept_e.p4(18): [--Werror=invalid] error: Invalid parser state: accept should not be implemented, it is built-in
     state accept { // reserved name
           ^^^^^^
+accept_e.p4(16): [--Werror=invalid] error: Parser parser p has no 'start' state
+parser p()
+       ^
