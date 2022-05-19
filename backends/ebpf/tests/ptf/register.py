@@ -123,7 +123,7 @@ class RegisterStructsPSATest(P4EbpfTest):
     add 5 and write it to the register
     3. Verify a value stored in register (5)
     4. Set register value to port (0xDA), srcAddr (0x55), dstAddr (0x0)
-    5. Verify a srcAddr field change to 0x0D
+    5. Verify a dstAddr field change to 0x0D
     """
     p4_file_path = "p4testdata/register-structs.p4"
 

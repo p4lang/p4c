@@ -78,6 +78,8 @@ control ingress(inout headers hdr,
     Register<bit<32>, bit<64>>(10, (bit<32>) 6) reg;
 
     apply {
+         // Values used there are arbitrary chosen just for PTF tests
+         // See PTF test description
          bit<64> egress_port = (bit<64>) 5;
          bit<32> tmp;
          tmp = reg.read(egress_port);

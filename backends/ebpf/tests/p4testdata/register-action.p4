@@ -77,6 +77,8 @@ control ingress(inout headers hdr,
     Register<bit<32>, PortId_t>(10) reg;
 
     action do_forward(PortId_t egress_port) {
+        // Values used there are arbitrary chosen just for PTF tests
+        // See PTF test description
         bit<32> tmp;
         tmp = reg.read(egress_port);
         if (tmp < 5) {
