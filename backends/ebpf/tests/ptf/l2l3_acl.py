@@ -41,11 +41,11 @@ class L2L3SwitchTest(P4EbpfTest):
 
     def configure_port(self, port_id, vlan_id=None):
         if vlan_id is None:
-            self.table_add(table="ingress_tbl_ingress_vlan", keys=[port_id, 0], action=1)
-            self.table_add(table="egress_tbl_vlan_egress", keys=[port_id], action=1)
+            self.table_add(table="ingress_tbl_ingress_vlan", key=[port_id, 0], action=1)
+            self.table_add(table="egress_tbl_vlan_egress", key=[port_id], action=1)
         else:
-            self.table_add(table="ingress_tbl_ingress_vlan", keys=[port_id, 1], action=0)
-            self.table_add(table="egress_tbl_vlan_egress", keys=[port_id], action=2, data=[vlan_id])
+            self.table_add(table="ingress_tbl_ingress_vlan", key=[port_id, 1], action=0)
+            self.table_add(table="egress_tbl_vlan_egress", key=[port_id], action=2, data=[vlan_id])
 
     def setUp(self):
         super(L2L3SwitchTest, self).setUp()
@@ -76,9 +76,9 @@ class SwitchingTest(L2L3SwitchTest):
         testutils.verify_no_other_packets(self)
 
         # check connectivity between ports in VLAN 1
-        self.table_add(table="ingress_tbl_switching", keys=["00:00:00:00:00:01", 1], action=1, data=[5])
-        self.table_add(table="ingress_tbl_switching", keys=["00:00:00:00:00:02", 1], action=1, data=[6])
-        self.table_add(table="ingress_tbl_switching", keys=["00:00:00:00:00:03", 1], action=1, data=[8])
+        self.table_add(table="ingress_tbl_switching", key=["00:00:00:00:00:01", 1], action=1, data=[5])
+        self.table_add(table="ingress_tbl_switching", key=["00:00:00:00:00:02", 1], action=1, data=[6])
+        self.table_add(table="ingress_tbl_switching", key=["00:00:00:00:00:03", 1], action=1, data=[8])
         pkt = testutils.simple_udp_packet(eth_dst="00:00:00:00:00:03")
         pkt = pkt_add_vlan(pkt, vlan_vid=1)
         testutils.send_packet(self, PORT1, pkt)
@@ -99,8 +99,8 @@ class SwitchingTest(L2L3SwitchTest):
         testutils.verify_no_other_packets(self)
 
         # check connectivity between ports with no VLAN
-        self.table_add(table="ingress_tbl_switching", keys=["00:00:00:00:00:01", 0], action=1, data=[4])
-        self.table_add(table="ingress_tbl_switching", keys=["00:00:00:00:00:02", 0], action=1, data=[9])
+        self.table_add(table="ingress_tbl_switching", key=["00:00:00:00:00:01", 0], action=1, data=[4])
+        self.table_add(table="ingress_tbl_switching", key=["00:00:00:00:00:02", 0], action=1, data=[9])
         pkt = testutils.simple_udp_packet(eth_dst="00:00:00:00:00:02")
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT5)
@@ -109,14 +109,14 @@ class SwitchingTest(L2L3SwitchTest):
         testutils.verify_packet(self, pkt, PORT0)
 
         # check no connectivity between VLAN 1 and VLAN 2
-        self.table_add(table="ingress_tbl_switching", keys=["00:00:00:00:02:02", 2], action=1, data=[6])
+        self.table_add(table="ingress_tbl_switching", key=["00:00:00:00:02:02", 2], action=1, data=[6])
         pkt = testutils.simple_udp_packet(eth_dst="00:00:00:00:02:02")
         pkt = pkt_add_vlan(pkt, vlan_vid=1)
         testutils.send_packet(self, PORT1, pkt)
         testutils.verify_no_packet(self, pkt, PORT3)
 
         # check no connectivity between VLAN 1 and no VLAN ports
-        self.table_add(table="ingress_tbl_switching", keys=["00:00:00:00:03:02", 0], action=1, data=[4])
+        self.table_add(table="ingress_tbl_switching", key=["00:00:00:00:03:02", 0], action=1, data=[4])
         pkt = testutils.simple_udp_packet(eth_dst="00:00:00:00:02:02")
         pkt = pkt_add_vlan(pkt, vlan_vid=1)
         testutils.send_packet(self, PORT1, pkt)
@@ -126,10 +126,10 @@ class SwitchingTest(L2L3SwitchTest):
 class RoutingTest(L2L3SwitchTest):
 
     def runTest(self):
-        self.table_add(table="ingress_tbl_switching", keys=["00:00:00:00:02:02", 2], action=1, data=[7])
-        self.table_add(table="ingress_tbl_switching", keys=["00:00:00:00:00:01", 1], action=1, data=[5])
-        self.table_add(table="ingress_tbl_switching", keys=["00:00:00:00:00:02", 1], action=1, data=[6])
-        self.table_add(table="ingress_tbl_switching", keys=["00:00:00:00:00:03", 1], action=1, data=[8])
+        self.table_add(table="ingress_tbl_switching", key=["00:00:00:00:02:02", 2], action=1, data=[7])
+        self.table_add(table="ingress_tbl_switching", key=["00:00:00:00:00:01", 1], action=1, data=[5])
+        self.table_add(table="ingress_tbl_switching", key=["00:00:00:00:00:02", 1], action=1, data=[6])
+        self.table_add(table="ingress_tbl_switching", key=["00:00:00:00:00:03", 1], action=1, data=[8])
 
         # check no connectivity between VLAN 1 and VLAN 2
         pkt = testutils.simple_udp_packet(eth_dst="00:00:00:00:02:02")
@@ -138,7 +138,7 @@ class RoutingTest(L2L3SwitchTest):
         testutils.verify_no_packet(self, pkt, PORT2)
 
         # enable routing from VLAN 1 to VLAN 2
-        self.table_add(table="ingress_tbl_routable", keys=["00:00:00:00:01:01", 2], action=0)
+        self.table_add(table="ingress_tbl_routable", key=["00:00:00:00:01:01", 2], action=0)
 
         # create all possible actions                                                  smac                 dmac                vlan_id
         act1 = self.action_selector_add_action(selector="ingress_as", action=1, data=["00:00:00:00:01:02", "00:00:00:00:00:01", 1])
@@ -151,7 +151,7 @@ class RoutingTest(L2L3SwitchTest):
         self.action_selector_add_member_to_group(selector="ingress_as", group_ref=gid, member_ref=act3)
 
         # ActionSelector reference = gid (should be 1, but not guaranteed), is_group_ref=True
-        self.table_add(table="ingress_tbl_routing", keys=["20.0.0.0/24"], references=["group {}".format(gid)])
+        self.table_add(table="ingress_tbl_routing", key=["20.0.0.0/24"], references=["group {}".format(gid)])
 
         pkt = testutils.simple_udp_packet(eth_dst="00:00:00:00:01:33", ip_dst="20.0.0.2", ip_src="10.0.0.1")
         pkt = pkt_add_vlan(pkt, vlan_vid=2)
@@ -177,7 +177,7 @@ class RoutingTest(L2L3SwitchTest):
 class MACLearningTest(L2L3SwitchTest):
 
     def runTest(self):
-        self.table_add(table="ingress_tbl_mac_learning", keys=["00:06:07:08:09:0a"], action=0)
+        self.table_add(table="ingress_tbl_mac_learning", key=["00:06:07:08:09:0a"], action=0)
         # should NOT generate learn digest
         pkt = testutils.simple_udp_packet(eth_src='00:06:07:08:09:0a')
         testutils.send_packet(self, PORT0, pkt)
@@ -222,11 +222,11 @@ class BroadcastTest(L2L3SwitchTest):
         self.multicast_group_add_member(group=3, egress_port=9)
 
         # no VLAN, Multicast group ID = 0
-        self.table_add(table="ingress_tbl_switching", keys=["ff:ff:ff:ff:ff:ff", 0], action=2, data=[3])
+        self.table_add(table="ingress_tbl_switching", key=["ff:ff:ff:ff:ff:ff", 0], action=2, data=[3])
         # VLAN 1, Multicast group ID = 1
-        self.table_add(table="ingress_tbl_switching", keys=["ff:ff:ff:ff:ff:ff", 1], action=2, data=[1])
+        self.table_add(table="ingress_tbl_switching", key=["ff:ff:ff:ff:ff:ff", 1], action=2, data=[1])
         # VLAN 2, Multicast group ID = 2
-        self.table_add(table="ingress_tbl_switching", keys=["ff:ff:ff:ff:ff:ff", 2], action=2, data=[2])
+        self.table_add(table="ingress_tbl_switching", key=["ff:ff:ff:ff:ff:ff", 2], action=2, data=[2])
 
         pkt = testutils.simple_udp_packet(eth_src='00:06:07:08:09:0a',
                                           eth_dst='ff:ff:ff:ff:ff:ff')
@@ -249,7 +249,7 @@ class BroadcastTest(L2L3SwitchTest):
 class ACLTest(L2L3SwitchTest):
 
     def runTest(self):
-        self.table_add(table="ingress_tbl_switching", keys=["00:01:02:03:04:05", 0], action=1, data=[9])
+        self.table_add(table="ingress_tbl_switching", key=["00:01:02:03:04:05", 0], action=1, data=[9])
         udp_pkt_1 = testutils.simple_udp_packet(ip_src="10.0.0.1", ip_dst="10.0.0.2",
                                                 udp_sport=1234, udp_dport=50051)
         tcp_pkt_1 = testutils.simple_tcp_packet(ip_src="10.0.0.1", ip_dst="10.0.0.2",
@@ -263,8 +263,8 @@ class ACLTest(L2L3SwitchTest):
                                                 udp_sport=80, udp_dport=8080)
         tcp_pkt_2 = testutils.simple_tcp_packet(ip_src="10.0.0.1", ip_dst="10.0.0.2",
                                                 tcp_sport=80, tcp_dport=8080)
-        self.table_add(table="ingress_tbl_acl", keys=["10.0.0.1", "10.0.0.2", 0x11, 80, 8080], action=1)
-        self.table_add(table="ingress_tbl_acl", keys=["10.0.0.1", "10.0.0.2", 0x6, 80, 8080], action=1)
+        self.table_add(table="ingress_tbl_acl", key=["10.0.0.1", "10.0.0.2", 0x11, 80, 8080], action=1)
+        self.table_add(table="ingress_tbl_acl", key=["10.0.0.1", "10.0.0.2", 0x6, 80, 8080], action=1)
 
         testutils.send_packet(self, PORT0, udp_pkt_1)
         testutils.verify_packet(self, udp_pkt_1, PORT5)
@@ -280,7 +280,7 @@ class ACLTest(L2L3SwitchTest):
 class PortCountersTest(L2L3SwitchTest):
 
     def runTest(self):
-        self.table_add(table="ingress_tbl_switching", keys=["00:00:00:00:00:03", 1], action=1, data=[8])
+        self.table_add(table="ingress_tbl_switching", key=["00:00:00:00:00:03", 1], action=1, data=[8])
         pkt = testutils.simple_udp_packet(eth_dst="00:00:00:00:00:03")
         pkt = pkt_add_vlan(pkt, vlan_vid=1)
 
@@ -293,5 +293,5 @@ class PortCountersTest(L2L3SwitchTest):
             ig_bytes += len(pkt)
             eg_bytes = ig_bytes + (4*(i+1))
             pkts_cnt = i + 1
-            self.counter_verify(name="ingress_in_pkts", keys=[5], bytes=ig_bytes, packets=pkts_cnt)
+            self.counter_verify(name="ingress_in_pkts", key=[5], bytes=ig_bytes, packets=pkts_cnt)
             self.verify_map_entry("egress_tbl_vlan_egress", "8 00 00 00", "02 00 00 00 01 00 00 00 {} 00 00 00 0{} 00 00 00".format(hex(eg_bytes).split('x')[-1], pkts_cnt))
