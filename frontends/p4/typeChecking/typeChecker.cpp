@@ -3660,14 +3660,11 @@ static bool validateSelectTypes(const IR::Type* type, const IR::SelectExpression
                 return false;
         }
         return true;
-    } else if (type->is<IR::ITypeVar>()) {
-        typeError("Cannot infer type for %1%", type);
-        return false;
     } else if (type->is<IR::Type_Bits>() || type->is<IR::Type_SerEnum>() ||
                type->is<IR::Type_Boolean>() || type->is<IR::Type_Enum>()) {
         return true;
     }
-    typeError("Expression '%1%' with type '%2%' cannot be used in select",
+    typeError("Expression '%1%' with a component of type '%2%' cannot be used in 'select'",
               expression->select, type);
     return false;
 }
