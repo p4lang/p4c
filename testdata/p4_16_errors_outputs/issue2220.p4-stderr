@@ -1,27 +1,6 @@
-issue2220.p4(11): [--Werror=type-error] error: s1
+issue2220.p4(11): [--Werror=type-error] error: StructExpression: values of type 'bit<8>' cannot be implicitly cast to type 'myEnum'
  S s1 = { val = (bit<8>)0 };
- ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  ---- Actual error:
-issue2220.p4(3): Cannot unify type 'bit<8>' with type 'myEnum'
-  enum bit<8> myEnum { One = 1 }
-              ^^^^^^
-  ---- Originating from:
-issue2220.p4(3): Type of initializer 'bit<8>' does not match type 'myEnum' of field 'val' in 'struct S'
-  enum bit<8> myEnum { One = 1 }
-              ^^^^^^
-issue2220.p4(6)
-      myEnum val;
-             ^^^
-issue2220.p4(5)
-  struct S {
-         ^
-  ---- Originating from:
-issue2220.p4(11): Source expression 'StructExpression' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct S'
-   S s1 = { val = (bit<8>)0 };
-          ^^^^^^^^^^^^^^^^^^^
-issue2220.p4(11)
-   S s1 = { val = (bit<8>)0 };
-          ^^^^^^^^^^^^^^^^^^^
-issue2220.p4(5)
-  struct S {
-         ^
+        ^^^^^^^^^^^^^^^^^^^
+issue2220.p4(3)
+enum bit<8> myEnum { One = 1 }
+            ^^^^^^
