@@ -27,6 +27,13 @@ namespace EBPF {
 class EBPFTableImplementationPSA;
 
 class EBPFTablePSA : public EBPFTable {
+ private:
+    std::vector<std::vector<const IR::Entry*>> getConstEntriesGroupedByPrefix();
+    bool hasConstEntries();
+    const cstring addPrefixFunctionName = "add_prefix_and_entries";
+    const cstring tuplesMapName = instanceName + "_tuples_map";
+    const cstring prefixesMapName = instanceName + "_prefixes";
+
  protected:
     ActionTranslationVisitor* createActionTranslationVisitor(
             cstring valueName, const EBPFProgram* program) const override;
@@ -39,8 +46,18 @@ class EBPFTablePSA : public EBPFTable {
                         cstring valueName);
     void emitDefaultActionInitializer(CodeBuilder *builder);
     void emitConstEntriesInitializer(CodeBuilder *builder);
+    void emitTernaryConstEntriesInitializer(CodeBuilder *builder);
     void emitMapUpdateTraceMsg(CodeBuilder *builder, cstring mapName,
                                cstring returnCode) const;
+    void emitValueMask(CodeBuilder *builder, cstring valueMask,
+                       cstring nextMask, int tupleId) const;
+    void emitKeyMasks(CodeBuilder *builder,
+                      std::vector<std::vector<const IR::Entry *>> &entriesList,
+                      std::vector<cstring> &keyMasksNames);
+    void emitKeysAndValues(CodeBuilder *builder,
+                           std::vector<const IR::Entry *> &samePrefixEntries,
+                           std::vector<cstring> &keyNames,
+                           std::vector<cstring> &valueNames);
 
     const IR::PathExpression* getActionNameExpression(const IR::Expression* expr) const;
 
@@ -64,6 +81,7 @@ class EBPFTablePSA : public EBPFTable {
     void emitLookupDefault(CodeBuilder* builder, cstring key, cstring value,
                            cstring actionRunVariable) override;
     bool dropOnNoMatchingEntryFound() const override;
+    static cstring addPrefixFunc(bool trace);
 
     EBPFCounterPSA* getDirectCounter(cstring name) const {
         auto result = std::find_if(counters.begin(), counters.end(),
