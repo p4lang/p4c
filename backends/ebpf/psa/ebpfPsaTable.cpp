@@ -580,8 +580,8 @@ bool EBPFTablePSA::dropOnNoMatchingEntryFound() const {
 }
 
 void EBPFTablePSA::emitTernaryConstEntriesInitializer(CodeBuilder *builder) {
-    std::vector<std::vector<const IR::Entry*>> entriesList = getConstEntriesGroupedByPrefix();
-    if (entriesList.empty())
+    std::vector<std::vector<const IR::Entry*>> entriesGroupedByPrefix = getConstEntriesGroupedByPrefix();
+    if (entriesGroupedByPrefix.empty())
         return;
 
     CodeGenInspector cg(program->refMap, program->typeMap);
@@ -597,7 +597,7 @@ void EBPFTablePSA::emitTernaryConstEntriesInitializer(CodeBuilder *builder) {
     builder->endOfStatement(true);
 
     // emit key masks
-    emitKeyMasks(builder, entriesList, keyMasksNames);
+    emitKeyMasks(builder, entriesGroupedByPrefix, keyMasksNames);
 
     builder->newline();
 
@@ -616,8 +616,8 @@ void EBPFTablePSA::emitTernaryConstEntriesInitializer(CodeBuilder *builder) {
     builder->newline();
 
     // emit values + updates
-    for (size_t i = 0; i < entriesList.size(); i++) {
-        auto samePrefixEntries = entriesList[i];
+    for (size_t i = 0; i < entriesGroupedByPrefix.size(); i++) {
+        auto samePrefixEntries = entriesGroupedByPrefix[i];
         valueMask = program->refMap->newName("value_mask");
         std::vector<cstring> keyNames;
         std::vector<cstring> valueNames;
@@ -626,7 +626,7 @@ void EBPFTablePSA::emitTernaryConstEntriesInitializer(CodeBuilder *builder) {
         cstring keyMaskVarName = keyMasksNames[i];
 
         nextMask = cstring::empty;
-        if (entriesList.size() > i + 1) {
+        if (entriesGroupedByPrefix.size() > i + 1) {
             nextMask = keyMasksNames[i + 1];
         }
         emitValueMask(builder, valueMask, nextMask, tuple_id);
@@ -721,12 +721,12 @@ void EBPFTablePSA::emitKeysAndValues(CodeBuilder *builder,
 }
 
 void EBPFTablePSA::emitKeyMasks(CodeBuilder *builder,
-                                       std::vector<std::vector<const IR::Entry *>> &entriesList,
+                                       std::vector<std::vector<const IR::Entry *>> &entriesGroupedByPrefix,
                                        std::vector<cstring> &keyMasksNames) {
     CodeGenInspector cg(program->refMap, program->typeMap);
     cg.setBuilder(builder);
 
-    for (auto samePrefixEntries : entriesList) {
+    for (auto samePrefixEntries : entriesGroupedByPrefix) {
         auto firstEntry = samePrefixEntries.front();
         cstring keyFieldName = program->refMap->newName("key_mask");
         keyMasksNames.push_back(keyFieldName);
