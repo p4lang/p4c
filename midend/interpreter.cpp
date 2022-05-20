@@ -534,10 +534,6 @@ SymbolicValue* SymbolicArray::lastIndex(const IR::Node* node) {
         }
 
         if (values[i]->is<SymbolicHeaderUnion>()) {
-            if (v->to<SymbolicHeaderUnion>()->isValid()->isUnknown() ||
-                v->to<SymbolicHeaderUnion>()->isValid()->isUninitialized())
-                return new AnyElement(this);
-            if (v->to<SymbolicHeaderUnion>()->isValid()->value)
                 return new SymbolicInteger(new IR::Constant(IR::Type_Bits::get(32), index));
         }
     }
@@ -556,10 +552,6 @@ SymbolicValue* SymbolicArray::last(const IR::Node* node) {
                 return v;
         }
         if (values[i]->is<SymbolicHeaderUnion>()) {
-            if (v->to<SymbolicHeaderUnion>()->isValid()->isUnknown() ||
-                v->to<SymbolicHeaderUnion>()->isValid()->isUninitialized())
-                return new AnyElement(this);
-            if (v->to<SymbolicHeaderUnion>()->isValid()->value)
                 return v;
         }
     }
