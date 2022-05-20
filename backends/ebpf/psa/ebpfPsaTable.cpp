@@ -307,6 +307,16 @@ void EBPFTablePSA::emitValueStructStructure(CodeBuilder* builder) {
 void EBPFTablePSA::emitInstance(CodeBuilder *builder) {
     if (isTernaryTable()) {
         emitTernaryInstance(builder);
+        if (hasConstEntries()) {
+            auto entries = getConstEntriesGroupedByPrefix();
+            // A number of tuples is equal to number of unique prefixes
+            int nrOfTuples = entries.size();
+            for (int i = 0; i < nrOfTuples; i++) {
+                builder->target->emitTableDecl(builder, instanceName + "_tuple_" + std::to_string(i),
+                                               TableHash,"struct " + keyTypeName,
+                                               "struct " + valueTypeName, size);
+            }
+        }
     } else {
         TableKind kind = isLPMTable() ? TableLPMTrie : TableHash;
         builder->target->emitTableDecl(builder, instanceName, kind,
@@ -319,16 +329,6 @@ void EBPFTablePSA::emitInstance(CodeBuilder *builder) {
         builder->target->emitTableDecl(builder, defaultActionMapName, TableArray,
                       program->arrayIndexType,
                       cstring("struct ") + valueTypeName, 1);
-        if (hasConstEntries()) {
-            auto entries = getConstEntriesGroupedByPrefix();
-            // A number of tuples is equal to number of unique prefixes
-            int nrOfTuples = entries.size();
-            for (int i = 0; i < nrOfTuples; i++) {
-                builder->target->emitTableDecl(builder, instanceName + "_tuple_" + std::to_string(i),
-                                               TableHash,"struct " + keyTypeName,
-                                               "struct " + valueTypeName, size);
-            }
-        }
     }
 }
 
