@@ -515,10 +515,6 @@ SymbolicValue* SymbolicArray::next(const IR::Node* node) {
                 return v;
         }
         if (values[i]->is<SymbolicHeaderUnion>()) {
-            if (v->to<SymbolicHeaderUnion>()->isValid()->isUnknown() ||
-                v->to<SymbolicHeaderUnion>()->isValid()->isUninitialized())
-                return new AnyElement(this);
-            if (!v->to<SymbolicHeaderUnion>()->isValid()->value)
                 return v;
         }
     }
@@ -1029,6 +1025,10 @@ void ExpressionEvaluator::postorder(const IR::Member* expression) {
         } else {
             BUG("%1%: unexpected expression", expression);
         }
+        set(expression, v);
+    } else if (basetype->is<IR::Type_HeaderUnion>()) {
+        BUG_CHECK(l->is<SymbolicHeaderUnion>(), "%1%: expected a header union", l);
+        auto v = l->to<SymbolicHeaderUnion>()->get(expression, expression->member.name);
         set(expression, v);
     } else {
         BUG_CHECK(l->is<SymbolicStruct>(), "%1%: expected a struct", l);
