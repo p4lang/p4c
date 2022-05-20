@@ -584,9 +584,11 @@ class ConstEntryTernaryPSATest(P4EbpfTest):
         pkt[IP].src = 0x33333333
 
         # via ternary const entry
+        pkt[Ether].src = "55:55:55:55:55:11"  # mask is 0xFFFFFFFFFF00
         pkt[IP].dst = 0x11229900  # mask is 0xFFFF00FF
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT2)
+        pkt[Ether].src = "77:77:77:77:11:11"  # mask is 0xFFFFFFFF0000
         pkt[IP].dst = 0x11993355  # mask is 0xFF00FFFF
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)

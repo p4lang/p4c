@@ -1,43 +1,14 @@
 #include <core.p4>
 #include <psa.p4>
-
-typedef bit<48>  EthernetAddress;
-
-header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
-}
-
-header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
-    bit<16> totalLen;
-    bit<16> identification;
-    bit<3>  flags;
-    bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
-    bit<16> hdrChecksum;
-    bit<32> srcAddr;
-    bit<32> dstAddr;
-}
-
-struct fwd_metadata_t {
-}
-
-struct empty_t {}
+#include "common_headers.p4"
 
 struct metadata {
-    fwd_metadata_t fwd_metadata;
 }
 
 struct headers {
     ethernet_t       ethernet;
     ipv4_t           ipv4;
 }
-
 
 parser IngressParserImpl(packet_in buffer,
                          out headers parsed_hdr,
@@ -94,13 +65,15 @@ control ingress(inout headers hdr,
 
     table tbl_ternary {
         key = {
+            hdr.ethernet.srcAddr : lpm;
             hdr.ipv4.dstAddr : ternary;
             hdr.ipv4.srcAddr : ternary;
+            hdr.ipv4.protocol : exact;
         }
         actions = { do_forward; NoAction; }
         const entries = {
-            (0x11223300 &&& 0xFFFF00FF, 0x33333333 &&& 0xFFFFFFFF) : do_forward((PortId_t) 6);
-            (0x11223355 &&& 0xFF00FFFF, 0x33333333 &&& 0xFFFFFFFF) : do_forward((PortId_t) 5);
+            (0x5555555555 &&& 0x000000000000, 0x11223300 &&& 0xFFFF00FF, 0x33333333 &&& 0xFFFFFFFF, 0x00) : do_forward((PortId_t) 6);
+            (0x7777777777 &&& 0x000000000000, 0x11223355 &&& 0xFF00FFFF, 0x33333333 &&& 0xFFFFFFFF, 0x00) : do_forward((PortId_t) 5);
         }
     }
 

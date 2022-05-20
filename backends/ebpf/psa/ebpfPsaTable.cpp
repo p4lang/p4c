@@ -740,7 +740,6 @@ void EBPFTablePSA::emitKeyMasks(CodeBuilder *builder,
         builder->appendFormat("char *%s = &%s.mask", keyFieldNamePtr, keyFieldName);
         builder->endOfStatement(true);
 
-        cstring prevField;
         for (size_t i = 0; i < keyGenerator->keyElements.size(); i++) {
             auto keyElement = keyGenerator->keyElements[i];
             auto expr = firstEntry->keys->components[i];
@@ -768,15 +767,11 @@ void EBPFTablePSA::emitKeyMasks(CodeBuilder *builder,
                 builder->endOfStatement(true);
             }
             builder->emitIndent();
-            if (i == 0) {
-                builder->appendFormat("__builtin_memcpy(%s, &%s, sizeof(%s))",
-                                      keyFieldNamePtr, fieldName, fieldName);
-            } else {
-                builder->appendFormat("__builtin_memcpy(%s + sizeof(%s), &%s, sizeof(%s))",
-                                      keyFieldNamePtr, prevField, fieldName, fieldName);
-            }
+            builder->appendFormat("__builtin_memcpy(%s, &%s, sizeof(%s))",
+                                  keyFieldNamePtr, fieldName, fieldName);
             builder->endOfStatement(true);
-            prevField = cstring(fieldName);
+            builder->appendFormat("%s = %s + sizeof(%s)", keyFieldNamePtr, keyFieldNamePtr, fieldName);
+            builder->endOfStatement(true);
         }
     }
 }
