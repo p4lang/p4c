@@ -383,7 +383,10 @@ void PSAArchTC::emit(CodeBuilder *builder) const {
     /*
      * 10. TC Egress program.
      */
-    egress->emit(builder);
+    if (!egress->isEmpty()) {
+        // Do not generate TC Egress program if PSA egress pipeline is not used (empty).
+        egress->emit(builder);
+    }
 
     builder->target->emitLicense(builder, ingress->license);
 }

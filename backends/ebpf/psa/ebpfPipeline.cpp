@@ -19,6 +19,32 @@ limitations under the License.
 
 namespace EBPF {
 
+bool EBPFPipeline::isEmpty() const {
+    // check if parser doesn't have any state
+    // Why 3? Parser will always have at least start, accept and reject states.
+    if (parser->parserBlock->container->states.size() > 3) {
+        return false;
+    }
+
+    auto startState = parser->parserBlock->container->states.at(0);
+    auto pathExpr = startState->selectExpression->to<IR::PathExpression>()->path;
+    if (!startState->components.empty() || pathExpr->name.name != IR::ParserState::accept) {
+        return false;
+    }
+
+    // check if control is empty
+    if (!control->controlBlock->container->body->components.empty()) {
+        return false;
+    }
+
+    // check if deparser doesn't emit anything
+    if (!deparser->controlBlock->container->body->components.empty()) {
+        return false;
+    }
+
+    return true;
+}
+
 void EBPFPipeline::emitLocalVariables(CodeBuilder* builder) {
     builder->emitIndent();
     builder->appendFormat("unsigned %s = 0;", offsetVar.c_str());
