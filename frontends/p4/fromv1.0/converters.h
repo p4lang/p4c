@@ -737,9 +737,9 @@ class InsertCompilerGeneratedStartState: public Transform {
  public:
     explicit InsertCompilerGeneratedStartState(ProgramStructure* structure) : structure(structure) {
         setName("InsertCompilerGeneratedStartState");
-        structure->allNames.emplace("start");
+        structure->allNames.emplace(IR::ParserState::start);
         structure->allNames.emplace("InstanceType");
-        newStartState = structure->makeUniqueName("start");
+        newStartState = structure->makeUniqueName(IR::ParserState::start);
         newInstanceType = structure->makeUniqueName("InstanceType");
     }
 
@@ -757,6 +757,16 @@ class InsertCompilerGeneratedStartState: public Transform {
             state->name = newStartState;
         }
         return state;
+    }
+
+    // Rename any path refering to original start state
+    const IR::Node* postorder(IR::Path* path) override {
+        // At this point any identifier called start should have been renamed
+        // to unique name (e.g. start_1) => we can safely assume that any
+        // "start" refers to the parser state
+        if (path->name.name == IR::ParserState::start)
+            path->name = newStartState;
+        return path;
     }
 
     const IR::Node* postorder(IR::P4Parser* parser) override {
