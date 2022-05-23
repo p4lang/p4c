@@ -627,7 +627,6 @@ void EBPFTablePSA::emitTernaryConstEntriesInitializer(CodeBuilder *builder) {
         cstring valuesArray = program->refMap->newName("values");
         cstring keyMaskVarName = keyMasksNames[i];
 
-        nextMask = cstring::empty;
         if (entriesGroupedByPrefix.size() > i + 1) {
             nextMask = keyMasksNames[i + 1];
         }
