@@ -200,7 +200,7 @@ class SimpleLpmP4PSATest(P4EbpfTest):
     def runTest(self):
         # This command adds LPM entry 10.10.0.0/16 with action forwarding on port 6 (PORT2 in ptf)
         self.table_add(table="ingress_tbl_fwd_lpm", key=["10.10.0.0/16"], action=1, data=[6])
-        self.table_add(table="ingress_tbl_fwd_lpm", key=["10.10.10.10/8"], action=0)
+        self.table_add(table="ingress_tbl_fwd_lpm", key=["10.10.10.10/8"], action="_NoAction")
         pkt = testutils.simple_ip_packet(ip_src='1.1.1.1', ip_dst='10.10.11.11')
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT2)

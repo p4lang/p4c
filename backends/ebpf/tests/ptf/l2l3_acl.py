@@ -294,4 +294,5 @@ class PortCountersTest(L2L3SwitchTest):
             eg_bytes = ig_bytes + (4*(i+1))
             pkts_cnt = i + 1
             self.counter_verify(name="ingress_in_pkts", key=[5], bytes=ig_bytes, packets=pkts_cnt)
-            self.verify_map_entry("egress_tbl_vlan_egress", "8 00 00 00", "02 00 00 00 01 00 00 00 {} 00 00 00 0{} 00 00 00".format(hex(eg_bytes).split('x')[-1], pkts_cnt))
+            self.table_verify(table="egress_tbl_vlan_egress", key=[8], action=2, data=[1],
+                              counters={"egress_out_pkts": {"bytes": eg_bytes, "packets": pkts_cnt}})
