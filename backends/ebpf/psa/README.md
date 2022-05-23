@@ -32,7 +32,8 @@ The TC-based design of PSA for eBPF is depicted in Figure below.
   The role of Traffic Manager is to redirect traffic between the Ingress (TC) and Egress (TC).
   It is also responsible for packet replication via clone sessions or multicast groups and sending packet to CPU.
 - `tc-egress` - The PSA Egress pipeline (composed of Parser, Control block and Deparser) is attached to the TC Egress hook. As there is no
-  XDP hook in the Egress path, the use of TC is mandatory for the egress processing.
+  XDP hook in the Egress path, the use of TC is mandatory for the egress processing. **Note!** If the PSA Egress pipeline is not used (i.e. it is left empty by a developer),
+  the PSA-eBPF compiler will not generate the TC Egress program. This brings a noticeable performance gain, if the egress pipeline is not used. 
   
 ## Packet paths
 
