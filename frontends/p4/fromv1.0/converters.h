@@ -764,6 +764,8 @@ class InsertCompilerGeneratedStartState: public Transform {
         // At this point any identifier called start should have been renamed
         // to unique name (e.g. start_1) => we can safely assume that any
         // "start" refers to the parser state
+        if (!structure->parserEntryPoints.size())
+            return path;
         if (path->name.name == IR::ParserState::start)
             path->name = newStartState;
         return path;
