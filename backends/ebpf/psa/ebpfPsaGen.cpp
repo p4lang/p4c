@@ -79,9 +79,7 @@ void PSAEbpfGenerator::emitPreamble(CodeBuilder *builder) const {
     builder->newline();
 
     builder->appendLine("#ifndef PSA_PORT_RECIRCULATE\n"
-        "#error \"PSA_PORT_RECIRCULATE not specified, "
-        "please use -DPSA_PORT_RECIRCULATE=n option to specify index of recirculation "
-        "interface (see the result of command 'ip link')\"\n"
+        "#define PSA_PORT_RECIRCULATE 0\n"
         "#endif");
     builder->appendLine("#define P4C_PSA_PORT_RECIRCULATE 0xfffffffa");
     builder->newline();
