@@ -33,12 +33,12 @@ bool EBPFPipeline::isEmpty() const {
     }
 
     // check if control is empty
-    if (!control->p4Control->body->components.empty()) {
+    if (!control->controlBlock->container->body->components.empty()) {
         return false;
     }
 
     // check if deparser doesn't emit anything
-    if (!deparser->headersToEmit.empty()) {
+    if (!deparser->controlBlock->container->body->components.empty()) {
         return false;
     }
 
