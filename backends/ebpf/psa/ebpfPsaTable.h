@@ -52,7 +52,7 @@ class EBPFTablePSA : public EBPFTable {
     void emitValueMask(CodeBuilder *builder, cstring valueMask,
                        cstring nextMask, int tupleId) const;
     void emitKeyMasks(CodeBuilder *builder,
-                      std::vector<std::vector<const IR::Entry *>> &entriesGroupedByPrefix,
+                      std::vector<std::vector<const IR::Entry *>> &entriesGrpedByPrefix,
                       std::vector<cstring> &keyMasksNames);
     void emitKeysAndValues(CodeBuilder *builder,
                            std::vector<const IR::Entry *> &samePrefixEntries,

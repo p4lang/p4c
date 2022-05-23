@@ -312,7 +312,8 @@ void EBPFTablePSA::emitInstance(CodeBuilder *builder) {
             // A number of tuples is equal to number of unique prefixes
             int nrOfTuples = entries.size();
             for (int i = 0; i < nrOfTuples; i++) {
-                builder->target->emitTableDecl(builder, instanceName + "_tuple_" + std::to_string(i),
+                builder->target->emitTableDecl(builder,
+                                               instanceName + "_tuple_" + std::to_string(i),
                                                TableHash,"struct " + keyTypeName,
                                                "struct " + valueTypeName, size);
             }
@@ -580,7 +581,8 @@ bool EBPFTablePSA::dropOnNoMatchingEntryFound() const {
 }
 
 void EBPFTablePSA::emitTernaryConstEntriesInitializer(CodeBuilder *builder) {
-    std::vector<std::vector<const IR::Entry*>> entriesGroupedByPrefix = getConstEntriesGroupedByPrefix();
+    std::vector<std::vector<const IR::Entry*>> entriesGroupedByPrefix =
+            getConstEntriesGroupedByPrefix();
     if (entriesGroupedByPrefix.empty())
         return;
 
@@ -721,12 +723,12 @@ void EBPFTablePSA::emitKeysAndValues(CodeBuilder *builder,
 }
 
 void EBPFTablePSA::emitKeyMasks(CodeBuilder *builder,
-                                       std::vector<std::vector<const IR::Entry *>> &entriesGroupedByPrefix,
-                                       std::vector<cstring> &keyMasksNames) {
+                                std::vector<std::vector<const IR::Entry *>> &entriesGrpedByPrefix,
+                                std::vector<cstring> &keyMasksNames) {
     CodeGenInspector cg(program->refMap, program->typeMap);
     cg.setBuilder(builder);
 
-    for (auto samePrefixEntries : entriesGroupedByPrefix) {
+    for (auto samePrefixEntries : entriesGrpedByPrefix) {
         auto firstEntry = samePrefixEntries.front();
         cstring keyFieldName = program->refMap->newName("key_mask");
         keyMasksNames.push_back(keyFieldName);
@@ -770,7 +772,8 @@ void EBPFTablePSA::emitKeyMasks(CodeBuilder *builder,
             builder->appendFormat("__builtin_memcpy(%s, &%s, sizeof(%s))",
                                   keyFieldNamePtr, fieldName, fieldName);
             builder->endOfStatement(true);
-            builder->appendFormat("%s = %s + sizeof(%s)", keyFieldNamePtr, keyFieldNamePtr, fieldName);
+            builder->appendFormat("%s = %s + sizeof(%s)", keyFieldNamePtr,
+                                  keyFieldNamePtr, fieldName);
             builder->endOfStatement(true);
         }
     }
@@ -800,50 +803,42 @@ void EBPFTablePSA::emitValueMask(CodeBuilder *builder, const cstring valueMask,
 
 std::vector<std::vector<const IR::Entry*>> EBPFTablePSA::getConstEntriesGroupedByPrefix() {
     std::vector<std::vector<const IR::Entry*>> entriesGroupedByPrefix;
-    std::vector<std::vector<int>> list;
     const IR::EntriesList* entries = table->container->getEntries();
     if (entries != nullptr) {
         for (int i = 0; i < (int)entries->entries.size(); i++) {
-            if (!list.empty()) {
-                auto last = list.back();
+            if (!entriesGroupedByPrefix.empty()) {
+                auto last = entriesGroupedByPrefix.back();
                 auto it = std::find(last.begin(), last.end(), i);
                 if (it != last.end()) {
                     // If this entry was added in a previous iteration
                     continue;
                 }
             }
-            auto main_entr = entries->entries[i];
-            std::vector<int> indexes;
-            indexes.push_back(i);
+            auto mainEntr = entries->entries[i];
+            std::vector<const IR::Entry*> samePrefEntries;
+            samePrefEntries.push_back(mainEntr);
             for (int j = i; j < (int)entries->entries.size(); j++) {
-                auto ref_entr = entries->entries[j];
+                auto refEntr = entries->entries[j];
                 if (i != j) {
                     bool isTheSamePrefix = true;
-                    for (size_t k = 0; k < main_entr->keys->components.size(); k++) {
-                        auto k1 = main_entr->keys->components[k];
-                        auto k2 = ref_entr->keys->components[k];
+                    for (size_t k = 0; k < mainEntr->keys->components.size(); k++) {
+                        auto k1 = mainEntr->keys->components[k];
+                        auto k2 = refEntr->keys->components[k];
                         if (auto k1Mask = k1->to<IR::Mask>()) {
                             if (auto k2Mask = k2->to<IR::Mask>()) {
                                 auto val1 = k1Mask->right->to<IR::Constant>();
                                 auto val2 = k2Mask->right->to<IR::Constant>();
                                 if (val1->value != val2->value) {
                                     isTheSamePrefix = false;
+                                    break;
                                 }
                             }
                         }
                     }
                     if (isTheSamePrefix) {
-                        indexes.push_back(j);
+                        samePrefEntries.push_back(refEntr);
                     }
                 }
-            }
-            list.push_back(indexes);
-        }
-
-        for (auto samePrefixEntries : list) {
-            std::vector<const IR::Entry*> samePrefEntries;
-            for (int i : samePrefixEntries) {
-                samePrefEntries.push_back(entries->entries[i]);
             }
             entriesGroupedByPrefix.push_back(samePrefEntries);
         }
