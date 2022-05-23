@@ -1414,6 +1414,15 @@ const IR::Node* TypeInference::postorder(IR::P4ValueSet* decl) {
             if (errs)
                 return nullptr;
         }
+        if (!canon->is<IR::Type_Newtype>() &&
+            !canon->is<IR::Type_Bits>() &&
+            !canon->is<IR::Type_SerEnum>() &&
+            !canon->is<IR::Type_Boolean>() &&
+            !canon->is<IR::Type_Enum>() &&
+            !canon->is<IR::Type_Struct>() &&
+            !canon->is<IR::Type_Tuple>())
+            typeError("%1%: Illegal type for value_set element type", decl->elementType);
+
         auto tt = new IR::Type_Set(canon);
         setType(getOriginal(), tt);
         setType(decl, tt);
