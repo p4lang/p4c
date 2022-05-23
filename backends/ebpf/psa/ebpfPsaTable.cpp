@@ -806,15 +806,15 @@ std::vector<std::vector<const IR::Entry*>> EBPFTablePSA::getConstEntriesGroupedB
     const IR::EntriesList* entries = table->container->getEntries();
     if (entries != nullptr) {
         for (int i = 0; i < (int)entries->entries.size(); i++) {
+            auto mainEntr = entries->entries[i];
             if (!entriesGroupedByPrefix.empty()) {
                 auto last = entriesGroupedByPrefix.back();
-                auto it = std::find(last.begin(), last.end(), i);
+                auto it = std::find(last.begin(), last.end(), mainEntr);
                 if (it != last.end()) {
                     // If this entry was added in a previous iteration
                     continue;
                 }
             }
-            auto mainEntr = entries->entries[i];
             std::vector<const IR::Entry*> samePrefEntries;
             samePrefEntries.push_back(mainEntr);
             for (int j = i; j < (int)entries->entries.size(); j++) {
