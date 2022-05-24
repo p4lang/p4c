@@ -48,6 +48,7 @@ limitations under the License.
 #include "parseAnnotations.h"
 #include "parserControlFlow.h"
 #include "reassociation.h"
+#include "redundantParsers.h"
 #include "removeParameters.h"
 #include "removeReturns.h"
 #include "resetHeaders.h"
@@ -219,6 +220,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new MoveConstructors(&refMap),
         new RemoveAllUnusedDeclarations(&refMap),
         new ClearTypeMap(&typeMap),
+        new RemoveRedundantParsers(&typeMap),
         evaluator,
         new Inline(&refMap, &typeMap, evaluator, options.optimizeParserInlining),
         new InlineActions(&refMap, &typeMap),
