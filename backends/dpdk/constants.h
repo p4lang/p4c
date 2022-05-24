@@ -25,6 +25,10 @@ const unsigned action_handle_prefix = 0x00020000;
 const unsigned dpdk_default_table_size = 65536;
 #define DPDK_MAX_SHIFT_AMOUNT 64
 
+// Maximum number of configurable timeout values
+const unsigned dpdk_learner_max_configurable_timeout_values = 16;
+const unsigned default_learner_table_size = 0x10000;
+const unsigned default_learner_table_timeout = 120;
 // Maximum values
 const int dpdk_max_field_width = 64;
 

@@ -2,10 +2,9 @@
 #include "ir/dbprint.h"
 #include "printUtils.h"
 #include "dpdkAsmOpt.h"
+#include "constants.h"
 using namespace DBPrint;
 
-static constexpr unsigned DEFAULT_LEARNER_TABLE_SIZE = 0x10000;
-static constexpr unsigned DEFAULT_LEARNER_TABLE_TIMEOUT = 120;
 ordered_map<cstring, cstring> DPDK::ShortenTokenLength::origNameMap = {};
 auto& origNameMap =  DPDK::ShortenTokenLength::origNameMap;
 
@@ -457,14 +456,15 @@ std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
     if (auto size = properties->getProperty("size")) {
         out << "\tsize " << DPDK::toStr(size->value) << "" << std::endl;
     } else {
-        out << "\tsize " << DEFAULT_LEARNER_TABLE_SIZE << std::endl;
+        out << "\tsize " << default_learner_table_size << std::endl;
     }
 
     // The initial timeout values
+    // This initializes 16 timeout values which can later be configured through control plane APIs.
     out << "\ttimeout {" << std::endl;
-    out << "\t\t" << 60 << std::endl;
-    out << "\t\t" << 120 << std::endl;
-    out << "\t\t" << 180 << "\n\t\t}";
+    for (int i = 0; i < dpdk_learner_max_configurable_timeout_values ; i++)
+        out << "\t\t" << default_learner_table_timeout << std::endl;
+    out << "\n\t\t}";
     out << "\n}" << std::endl;
     return out;
 }
