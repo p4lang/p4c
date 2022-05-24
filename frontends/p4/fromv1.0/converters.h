@@ -761,12 +761,22 @@ class InsertCompilerGeneratedStartState: public Transform {
 
     // Rename any path refering to original start state
     const IR::Node* postorder(IR::Path* path) override {
+        if (!structure->parserEntryPoints.size())
+            return path;
         // At this point any identifier called start should have been renamed
         // to unique name (e.g. start_1) => we can safely assume that any
         // "start" refers to the parser state
-        if (!structure->parserEntryPoints.size())
+        if (path->name.name != IR::ParserState::start)
             return path;
-        if (path->name.name == IR::ParserState::start)
+        // Just to make sure we can also check it explicitly
+        auto pe = getContext()->node->to<IR::PathExpression>();;
+        auto sc = findContext<IR::SelectCase>();
+        auto ps = findContext<IR::ParserState>();
+        // Either the path is within SelectCase->state<PathExpression>->path
+        if (pe &&
+            ((sc && pe->equiv(*sc->state->to<IR::PathExpression>())) ||
+        // Or just within ParserState->selectExpression<PathExpression>->path
+             (ps && pe->equiv(*ps->selectExpression->to<IR::PathExpression>()))))
             path->name = newStartState;
         return path;
     }
