@@ -158,7 +158,9 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
         return false;
 
     // Below we are sure that it's the same Node class
-    if (left->is<IR::Type_Base>() || left->is<IR::Type_Newtype>())
+    if (left->is<IR::Type_Base>() || left->is<IR::Type_Newtype>() ||
+        left->is<IR::Type_Var>() || left->is<IR::Type_Name>())
+        // The last case can happen when checking generic functions
         return *left == *right;
     if (auto tt = left->to<IR::Type_Type>())
         return equivalent(tt->type, right->to<IR::Type_Type>()->type, strict);
