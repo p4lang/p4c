@@ -973,13 +973,15 @@ class P4RuntimeAnalyzer {
             auto paramType = typeMap->getType(actionParam, true);
             if (!paramType->is<IR::Type_Bits>() && !paramType->is<IR::Type_Boolean>()
                 && !paramType->is<IR::Type_Newtype>() &&
-                !paramType->is<IR::Type_SerEnum>()) {
+                !paramType->is<IR::Type_SerEnum>() && !paramType->is<IR::Type_Enum>()) {
                 ::error(ErrorType::ERR_TYPE_ERROR, "Action parameter %1% has a type which is not "
                         "bit<>, int<>, bool, type or serializable enum", actionParam);
                 continue;
             }
-            int w = getTypeWidth(paramType, typeMap);
-            param->set_bitwidth(w);
+            if (!paramType->is<IR::Type_Enum>()) {
+                int w = getTypeWidth(paramType, typeMap);
+                param->set_bitwidth(w);
+            }
             // We ignore the return type on purpose, but the call is required to update p4RtTypeInfo
             // if the action parameter has a user-defined type.
             TypeSpecConverter::convert(refMap, typeMap, paramType, p4Info->mutable_type_info());
@@ -987,6 +989,8 @@ class P4RuntimeAnalyzer {
             if (type_name) {
                 auto namedType = param->mutable_type_name();
                 namedType->set_name(type_name);
+            } else if (auto e = paramType->to<IR::Type_Enum>()) {
+                param->mutable_type_name()->set_name(std::string(e->controlPlaneName()));
             }
         }
     }
