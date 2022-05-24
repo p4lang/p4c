@@ -768,20 +768,31 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
     if (right == nullptr)
         return e;
 
-    auto cr = right->to<IR::Constant>();
-    if (cr == nullptr) {
-        ::error(ErrorType::ERR_EXPECTED, "%1%: expected an integer value", right);
+    const IR::Constant* shift_amt = nullptr;
+    if (right->is<IR::Constant>()) {
+        shift_amt = right->to<IR::Constant>();
+    } else if (typesKnown) {
+        auto ei = EnumInstance::resolve(right, typeMap);
+        if (ei == nullptr)
+            return e;
+        if (auto se = ei->to<SerEnumInstance>()) {
+            shift_amt = se->value->checkedTo<IR::Constant>();
+        } else {
+            return e;
+        }
+    } else {
+        // We will do this one later.
         return e;
     }
-    if (cr->value < 0) {
+
+    CHECK_NULL(shift_amt);
+    if (shift_amt->value < 0) {
         ::error(ErrorType::ERR_INVALID, "%1%: Shifts with negative amounts are not permitted", e);
         return e;
     }
 
-    if (cr->value == 0) {
-        // ::warning("%1% with zero", e);
+    if (shift_amt->value == 0)
         return e->left;
-    }
 
     auto left = getConstant(e->left);
     if (left == nullptr)
@@ -794,7 +805,7 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
     }
 
     big_int value = cl->value;
-    unsigned shift = static_cast<unsigned>(cr->asInt());
+    unsigned shift = static_cast<unsigned>(shift_amt->asInt());
     if (overflowWidth(e, shift))
         return e;
 
