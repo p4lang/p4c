@@ -769,7 +769,7 @@ class InsertCompilerGeneratedStartState: public Transform {
         if (path->name.name != IR::ParserState::start)
             return path;
         // Just to make sure we can also check it explicitly
-        auto pe = getContext()->node->to<IR::PathExpression>();;
+        auto pe = getContext()->node->to<IR::PathExpression>();
         auto sc = findContext<IR::SelectCase>();
         auto ps = findContext<IR::ParserState>();
         // Either the path is within SelectCase->state<PathExpression>->path
