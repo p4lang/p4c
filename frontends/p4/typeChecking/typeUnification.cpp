@@ -374,6 +374,9 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
         if (!success)
             return constraint->reportError(constraints->getCurrentSubstitution());
         return true;
+    } else if (auto se = dest->to<IR::Type_SerEnum>()) {
+        constraints->add(constraint->create(se->type, src));
+        return true;
     } else if (dest->is<IR::Type_Declaration>() && src->is<IR::Type_Declaration>()) {
         bool canUnify = typeid(dest) == typeid(src) &&
             dest->to<IR::Type_Declaration>()->name == src->to<IR::Type_Declaration>()->name;
