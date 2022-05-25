@@ -561,3 +561,34 @@ class PSATernaryTest(P4EbpfTest):
         pkt[IP].dst = '255.255.255.255'
         pkt[UDP].chksum = 0x044D
         testutils.verify_packet(self, pkt, PORT1)
+
+
+class ActionDefaultTernaryPSATest(P4EbpfTest):
+
+    p4_file_path = "p4testdata/action-default-ternary.p4"
+
+    def runTest(self):
+        pkt = testutils.simple_ip_packet()
+
+        # Test default action for ternary match
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, pkt, PORT1)
+
+
+class ConstEntryTernaryPSATest(P4EbpfTest):
+
+    p4_file_path = "p4testdata/const-entry-ternary.p4"
+
+    def runTest(self):
+        pkt = testutils.simple_ip_packet()
+        pkt[IP].src = 0x33333333
+
+        # via ternary const entry
+        pkt[Ether].src = "55:55:55:55:55:11"  # mask is 0xFFFFFFFFFF00
+        pkt[IP].dst = 0x11229900  # mask is 0xFFFF00FF
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, pkt, PORT2)
+        pkt[Ether].src = "77:77:77:77:11:11"  # mask is 0xFFFFFFFF0000
+        pkt[IP].dst = 0x11993355  # mask is 0xFF00FFFF
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, pkt, PORT1)
