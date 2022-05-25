@@ -674,8 +674,9 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Variable* decl) {
     const IR::Type* baseType = type;
     if (auto sc = type->to<IR::Type_SpecializedCanonical>())
         baseType = sc->baseType;
-    if (baseType->is<IR::IContainer>() || baseType->is<IR::Type_Extern>()) {
-        typeError("%1%: cannot declare variables of type %2% (consider using an instantiation)",
+    if (baseType->is<IR::IContainer>() || baseType->is<IR::Type_Extern>() ||
+        baseType->is<IR::Type_Parser>() || baseType->is<IR::Type_Control>()) {
+        typeError("%1%: cannot declare variables of type '%2%' (consider using an instantiation)",
                   decl, type);
         return decl;
     }
