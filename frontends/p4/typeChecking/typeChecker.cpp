@@ -3610,9 +3610,10 @@ TypeInference::matchCase(const IR::SelectExpression* select, const IR::Type_Base
         }
         useSelType = selectType->components.at(0);
     }
-    auto tvs = unify(select, useSelType, caseType,
-                     "'match' case label type '%1%' does not match expected type '%2%'",
-                     { caseType, useSelType });
+    auto tvs = unify(
+        select, useSelType, caseType,
+        "'match' case label '%1%' has type '%2%' which does not match the expected type '%3%'",
+        { selectCase->keyset, caseType, useSelType });
     if (tvs == nullptr)
         return nullptr;
     ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
