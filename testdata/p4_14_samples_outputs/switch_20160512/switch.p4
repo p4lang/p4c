@@ -885,7 +885,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_fabric_header_cpu") state parse_fabric_header_cpu {
         packet.extract(hdr.fabric_header_cpu);
-        meta.ingress_metadata.bypass_lookups = hdr.fabric_header_cpu.reasonCode;
+        meta.ingress_metadata.bypass_lookups = (bit<16>)hdr.fabric_header_cpu.reasonCode;
         transition select(hdr.fabric_header_cpu.reasonCode) {
             16w0x4: parse_fabric_sflow_header;
             default: parse_fabric_payload_header;
@@ -929,7 +929,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_geneve") state parse_geneve {
         packet.extract(hdr.genv);
-        meta.tunnel_metadata.tunnel_vni = hdr.genv.vni;
+        meta.tunnel_metadata.tunnel_vni = (bit<24>)hdr.genv.vni;
         meta.tunnel_metadata.ingress_tunnel_type = 5w4;
         transition select(hdr.genv.ver, hdr.genv.optLen, hdr.genv.protoType) {
             (2w0x0, 6w0x0, 16w0x6558): parse_inner_ethernet;
@@ -970,7 +970,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_icmp") state parse_icmp {
         packet.extract(hdr.icmp);
-        meta.l3_metadata.lkp_outer_l4_sport = hdr.icmp.typeCode;
+        meta.l3_metadata.lkp_outer_l4_sport = (bit<16>)hdr.icmp.typeCode;
         transition select(hdr.icmp.typeCode) {
             16w0x8200 &&& 16w0xfe00: parse_set_prio_med;
             16w0x8400 &&& 16w0xfc00: parse_set_prio_med;
@@ -980,8 +980,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_inner_ethernet") state parse_inner_ethernet {
         packet.extract(hdr.inner_ethernet);
-        meta.l2_metadata.lkp_mac_sa = hdr.inner_ethernet.srcAddr;
-        meta.l2_metadata.lkp_mac_da = hdr.inner_ethernet.dstAddr;
+        meta.l2_metadata.lkp_mac_sa = (bit<48>)hdr.inner_ethernet.srcAddr;
+        meta.l2_metadata.lkp_mac_da = (bit<48>)hdr.inner_ethernet.dstAddr;
         transition select(hdr.inner_ethernet.etherType) {
             16w0x800: parse_inner_ipv4;
             16w0x86dd: parse_inner_ipv6;
@@ -990,15 +990,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_inner_icmp") state parse_inner_icmp {
         packet.extract(hdr.inner_icmp);
-        meta.l3_metadata.lkp_l4_sport = hdr.inner_icmp.typeCode;
+        meta.l3_metadata.lkp_l4_sport = (bit<16>)hdr.inner_icmp.typeCode;
         transition accept;
     }
     @name(".parse_inner_ipv4") state parse_inner_ipv4 {
         packet.extract(hdr.inner_ipv4);
-        meta.ipv4_metadata.lkp_ipv4_sa = hdr.inner_ipv4.srcAddr;
-        meta.ipv4_metadata.lkp_ipv4_da = hdr.inner_ipv4.dstAddr;
-        meta.l3_metadata.lkp_ip_proto = hdr.inner_ipv4.protocol;
-        meta.l3_metadata.lkp_ip_ttl = hdr.inner_ipv4.ttl;
+        meta.ipv4_metadata.lkp_ipv4_sa = (bit<32>)hdr.inner_ipv4.srcAddr;
+        meta.ipv4_metadata.lkp_ipv4_da = (bit<32>)hdr.inner_ipv4.dstAddr;
+        meta.l3_metadata.lkp_ip_proto = (bit<8>)hdr.inner_ipv4.protocol;
+        meta.l3_metadata.lkp_ip_ttl = (bit<8>)hdr.inner_ipv4.ttl;
         transition select(hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ihl, hdr.inner_ipv4.protocol) {
             (13w0x0, 4w0x5, 8w0x1): parse_inner_icmp;
             (13w0x0, 4w0x5, 8w0x6): parse_inner_tcp;
@@ -1008,10 +1008,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_inner_ipv6") state parse_inner_ipv6 {
         packet.extract(hdr.inner_ipv6);
-        meta.ipv6_metadata.lkp_ipv6_sa = hdr.inner_ipv6.srcAddr;
-        meta.ipv6_metadata.lkp_ipv6_da = hdr.inner_ipv6.dstAddr;
-        meta.l3_metadata.lkp_ip_proto = hdr.inner_ipv6.nextHdr;
-        meta.l3_metadata.lkp_ip_ttl = hdr.inner_ipv6.hopLimit;
+        meta.ipv6_metadata.lkp_ipv6_sa = (bit<128>)hdr.inner_ipv6.srcAddr;
+        meta.ipv6_metadata.lkp_ipv6_da = (bit<128>)hdr.inner_ipv6.dstAddr;
+        meta.l3_metadata.lkp_ip_proto = (bit<8>)hdr.inner_ipv6.nextHdr;
+        meta.l3_metadata.lkp_ip_ttl = (bit<8>)hdr.inner_ipv6.hopLimit;
         transition select(hdr.inner_ipv6.nextHdr) {
             8w58: parse_inner_icmp;
             8w6: parse_inner_tcp;
@@ -1025,14 +1025,14 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_inner_tcp") state parse_inner_tcp {
         packet.extract(hdr.inner_tcp);
-        meta.l3_metadata.lkp_l4_sport = hdr.inner_tcp.srcPort;
-        meta.l3_metadata.lkp_l4_dport = hdr.inner_tcp.dstPort;
+        meta.l3_metadata.lkp_l4_sport = (bit<16>)hdr.inner_tcp.srcPort;
+        meta.l3_metadata.lkp_l4_dport = (bit<16>)hdr.inner_tcp.dstPort;
         transition accept;
     }
     @name(".parse_inner_udp") state parse_inner_udp {
         packet.extract(hdr.inner_udp);
-        meta.l3_metadata.lkp_l4_sport = hdr.inner_udp.srcPort;
-        meta.l3_metadata.lkp_l4_dport = hdr.inner_udp.dstPort;
+        meta.l3_metadata.lkp_l4_sport = (bit<16>)hdr.inner_udp.srcPort;
+        meta.l3_metadata.lkp_l4_dport = (bit<16>)hdr.inner_udp.dstPort;
         transition accept;
     }
     @name(".parse_int_header") state parse_int_header {
@@ -1145,7 +1145,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name(".parse_nvgre") state parse_nvgre {
         packet.extract(hdr.nvgre);
         meta.tunnel_metadata.ingress_tunnel_type = 5w5;
-        meta.tunnel_metadata.tunnel_vni = hdr.nvgre.tni;
+        meta.tunnel_metadata.tunnel_vni = (bit<24>)hdr.nvgre.tni;
         transition parse_inner_ethernet;
     }
     @name(".parse_pw") state parse_pw {
@@ -1214,8 +1214,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_tcp") state parse_tcp {
         packet.extract(hdr.tcp);
-        meta.l3_metadata.lkp_outer_l4_sport = hdr.tcp.srcPort;
-        meta.l3_metadata.lkp_outer_l4_dport = hdr.tcp.dstPort;
+        meta.l3_metadata.lkp_outer_l4_sport = (bit<16>)hdr.tcp.srcPort;
+        meta.l3_metadata.lkp_outer_l4_dport = (bit<16>)hdr.tcp.dstPort;
         transition select(hdr.tcp.dstPort) {
             16w179: parse_set_prio_med;
             16w639: parse_set_prio_med;
@@ -1228,8 +1228,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_udp") state parse_udp {
         packet.extract(hdr.udp);
-        meta.l3_metadata.lkp_outer_l4_sport = hdr.udp.srcPort;
-        meta.l3_metadata.lkp_outer_l4_dport = hdr.udp.dstPort;
+        meta.l3_metadata.lkp_outer_l4_sport = (bit<16>)hdr.udp.srcPort;
+        meta.l3_metadata.lkp_outer_l4_dport = (bit<16>)hdr.udp.dstPort;
         transition select(hdr.udp.dstPort) {
             16w4789: parse_vxlan;
             16w6081: parse_geneve;
@@ -1247,8 +1247,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_udp_v6") state parse_udp_v6 {
         packet.extract(hdr.udp);
-        meta.l3_metadata.lkp_outer_l4_sport = hdr.udp.srcPort;
-        meta.l3_metadata.lkp_outer_l4_dport = hdr.udp.dstPort;
+        meta.l3_metadata.lkp_outer_l4_sport = (bit<16>)hdr.udp.srcPort;
+        meta.l3_metadata.lkp_outer_l4_dport = (bit<16>)hdr.udp.dstPort;
         transition select(hdr.udp.dstPort) {
             16w67: parse_set_prio_med;
             16w68: parse_set_prio_med;
@@ -1282,13 +1282,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name(".parse_vxlan") state parse_vxlan {
         packet.extract(hdr.vxlan);
         meta.tunnel_metadata.ingress_tunnel_type = 5w1;
-        meta.tunnel_metadata.tunnel_vni = hdr.vxlan.vni;
+        meta.tunnel_metadata.tunnel_vni = (bit<24>)hdr.vxlan.vni;
         transition parse_inner_ethernet;
     }
     @name(".parse_vxlan_gpe") state parse_vxlan_gpe {
         packet.extract(hdr.vxlan_gpe);
         meta.tunnel_metadata.ingress_tunnel_type = 5w12;
-        meta.tunnel_metadata.tunnel_vni = hdr.vxlan_gpe.vni;
+        meta.tunnel_metadata.tunnel_vni = (bit<24>)hdr.vxlan_gpe.vni;
         transition select(hdr.vxlan_gpe.flags, hdr.vxlan_gpe.next_proto) {
             (8w0x8 &&& 8w0x8, 8w0x5 &&& 8w0xff): parse_gpe_int_header;
             default: parse_inner_ethernet;
@@ -1317,8 +1317,8 @@ control process_replication(inout headers hdr, inout metadata meta, inout standa
         meta.egress_metadata.bd = bd;
         meta.multicast_metadata.replica = 1w1;
         meta.multicast_metadata.inner_replica = 1w0;
-        meta.egress_metadata.routed = meta.l3_metadata.outer_routed;
-        meta.egress_metadata.same_bd_check = bd ^ meta.ingress_metadata.outer_bd;
+        meta.egress_metadata.routed = (bit<1>)meta.l3_metadata.outer_routed;
+        meta.egress_metadata.same_bd_check = (bit<16>)bd ^ (bit<16>)meta.ingress_metadata.outer_bd;
         meta.tunnel_metadata.tunnel_index = tunnel_index;
         meta.tunnel_metadata.egress_tunnel_type = tunnel_type;
         meta.tunnel_metadata.egress_header_count = header_count;
@@ -1327,8 +1327,8 @@ control process_replication(inout headers hdr, inout metadata meta, inout standa
         meta.egress_metadata.bd = bd;
         meta.multicast_metadata.replica = 1w1;
         meta.multicast_metadata.inner_replica = 1w1;
-        meta.egress_metadata.routed = meta.l3_metadata.routed;
-        meta.egress_metadata.same_bd_check = bd ^ meta.ingress_metadata.bd;
+        meta.egress_metadata.routed = (bit<1>)meta.l3_metadata.routed;
+        meta.egress_metadata.same_bd_check = (bit<16>)bd ^ (bit<16>)meta.ingress_metadata.bd;
         meta.tunnel_metadata.tunnel_index = tunnel_index;
         meta.tunnel_metadata.egress_tunnel_type = tunnel_type;
         meta.tunnel_metadata.egress_header_count = header_count;
@@ -1367,11 +1367,11 @@ control process_vlan_decap(inout headers hdr, inout metadata meta, inout standar
     @name(".nop") action nop() {
     }
     @name(".remove_vlan_single_tagged") action remove_vlan_single_tagged() {
-        hdr.ethernet.etherType = hdr.vlan_tag_[0].etherType;
+        hdr.ethernet.etherType = (bit<16>)hdr.vlan_tag_[0].etherType;
         hdr.vlan_tag_[0].setInvalid();
     }
     @name(".remove_vlan_double_tagged") action remove_vlan_double_tagged() {
-        hdr.ethernet.etherType = hdr.vlan_tag_[1].etherType;
+        hdr.ethernet.etherType = (bit<16>)hdr.vlan_tag_[1].etherType;
         hdr.vlan_tag_[0].setInvalid();
         hdr.vlan_tag_[1].setInvalid();
     }
@@ -1494,7 +1494,7 @@ control process_tunnel_decap(inout headers hdr, inout metadata meta, inout stand
         hdr.ethernet.etherType = 16w0x86dd;
     }
     @name(".decap_gre_inner_non_ip") action decap_gre_inner_non_ip() {
-        hdr.ethernet.etherType = hdr.gre.proto;
+        hdr.ethernet.etherType = (bit<16>)hdr.gre.proto;
         hdr.gre.setInvalid();
         hdr.ipv4.setInvalid();
         hdr.inner_ipv6.setInvalid();
@@ -1687,13 +1687,13 @@ control process_rewrite(inout headers hdr, inout metadata meta, inout standard_m
     }
     @name(".set_l2_rewrite") action set_l2_rewrite() {
         meta.egress_metadata.routed = 1w0;
-        meta.egress_metadata.bd = meta.ingress_metadata.bd;
-        meta.egress_metadata.outer_bd = meta.ingress_metadata.bd;
+        meta.egress_metadata.bd = (bit<16>)meta.ingress_metadata.bd;
+        meta.egress_metadata.outer_bd = (bit<16>)meta.ingress_metadata.bd;
     }
     @name(".set_l2_rewrite_with_tunnel") action set_l2_rewrite_with_tunnel(bit<14> tunnel_index, bit<5> tunnel_type) {
         meta.egress_metadata.routed = 1w0;
-        meta.egress_metadata.bd = meta.ingress_metadata.bd;
-        meta.egress_metadata.outer_bd = meta.ingress_metadata.bd;
+        meta.egress_metadata.bd = (bit<16>)meta.ingress_metadata.bd;
+        meta.egress_metadata.outer_bd = (bit<16>)meta.ingress_metadata.bd;
         meta.tunnel_metadata.tunnel_index = tunnel_index;
         meta.tunnel_metadata.egress_tunnel_type = tunnel_type;
     }
@@ -1701,34 +1701,34 @@ control process_rewrite(inout headers hdr, inout metadata meta, inout standard_m
         meta.egress_metadata.routed = 1w1;
         meta.egress_metadata.mac_da = dmac;
         meta.egress_metadata.bd = bd;
-        meta.egress_metadata.outer_bd = bd;
+        meta.egress_metadata.outer_bd = (bit<16>)bd;
         meta.l3_metadata.mtu_index = mtu_index;
     }
     @name(".set_l3_rewrite_with_tunnel") action set_l3_rewrite_with_tunnel(bit<16> bd, bit<48> dmac, bit<14> tunnel_index, bit<5> tunnel_type) {
         meta.egress_metadata.routed = 1w1;
         meta.egress_metadata.mac_da = dmac;
         meta.egress_metadata.bd = bd;
-        meta.egress_metadata.outer_bd = bd;
+        meta.egress_metadata.outer_bd = (bit<16>)bd;
         meta.tunnel_metadata.tunnel_index = tunnel_index;
         meta.tunnel_metadata.egress_tunnel_type = tunnel_type;
     }
     @name(".set_mpls_swap_push_rewrite_l2") action set_mpls_swap_push_rewrite_l2(bit<20> label, bit<14> tunnel_index, bit<4> header_count) {
-        meta.egress_metadata.routed = meta.l3_metadata.routed;
-        meta.egress_metadata.bd = meta.ingress_metadata.bd;
+        meta.egress_metadata.routed = (bit<1>)meta.l3_metadata.routed;
+        meta.egress_metadata.bd = (bit<16>)meta.ingress_metadata.bd;
         hdr.mpls[0].label = label;
         meta.tunnel_metadata.tunnel_index = tunnel_index;
         meta.tunnel_metadata.egress_header_count = header_count;
         meta.tunnel_metadata.egress_tunnel_type = 5w13;
     }
     @name(".set_mpls_push_rewrite_l2") action set_mpls_push_rewrite_l2(bit<14> tunnel_index, bit<4> header_count) {
-        meta.egress_metadata.routed = meta.l3_metadata.routed;
-        meta.egress_metadata.bd = meta.ingress_metadata.bd;
+        meta.egress_metadata.routed = (bit<1>)meta.l3_metadata.routed;
+        meta.egress_metadata.bd = (bit<16>)meta.ingress_metadata.bd;
         meta.tunnel_metadata.tunnel_index = tunnel_index;
         meta.tunnel_metadata.egress_header_count = header_count;
         meta.tunnel_metadata.egress_tunnel_type = 5w13;
     }
     @name(".set_mpls_swap_push_rewrite_l3") action set_mpls_swap_push_rewrite_l3(bit<16> bd, bit<48> dmac, bit<20> label, bit<14> tunnel_index, bit<4> header_count) {
-        meta.egress_metadata.routed = meta.l3_metadata.routed;
+        meta.egress_metadata.routed = (bit<1>)meta.l3_metadata.routed;
         meta.egress_metadata.bd = bd;
         hdr.mpls[0].label = label;
         meta.egress_metadata.mac_da = dmac;
@@ -1737,7 +1737,7 @@ control process_rewrite(inout headers hdr, inout metadata meta, inout standard_m
         meta.tunnel_metadata.egress_tunnel_type = 5w14;
     }
     @name(".set_mpls_push_rewrite_l3") action set_mpls_push_rewrite_l3(bit<16> bd, bit<48> dmac, bit<14> tunnel_index, bit<4> header_count) {
-        meta.egress_metadata.routed = meta.l3_metadata.routed;
+        meta.egress_metadata.routed = (bit<1>)meta.l3_metadata.routed;
         meta.egress_metadata.bd = bd;
         meta.egress_metadata.mac_da = dmac;
         meta.tunnel_metadata.tunnel_index = tunnel_index;
@@ -1813,7 +1813,7 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
     @name(".nop") action nop() {
     }
     @name(".ipv4_unicast_rewrite") action ipv4_unicast_rewrite() {
-        hdr.ethernet.dstAddr = meta.egress_metadata.mac_da;
+        hdr.ethernet.dstAddr = (bit<48>)meta.egress_metadata.mac_da;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name(".ipv4_multicast_rewrite") action ipv4_multicast_rewrite() {
@@ -1821,7 +1821,7 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
         hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name(".ipv6_unicast_rewrite") action ipv6_unicast_rewrite() {
-        hdr.ethernet.dstAddr = meta.egress_metadata.mac_da;
+        hdr.ethernet.dstAddr = (bit<48>)meta.egress_metadata.mac_da;
         hdr.ipv6.hopLimit = hdr.ipv6.hopLimit - 8w1;
     }
     @name(".ipv6_multicast_rewrite") action ipv6_multicast_rewrite() {
@@ -1829,7 +1829,7 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
         hdr.ipv6.hopLimit = hdr.ipv6.hopLimit - 8w1;
     }
     @name(".mpls_rewrite") action mpls_rewrite() {
-        hdr.ethernet.dstAddr = meta.egress_metadata.mac_da;
+        hdr.ethernet.dstAddr = (bit<48>)meta.egress_metadata.mac_da;
         hdr.mpls[0].ttl = hdr.mpls[0].ttl - 8w1;
     }
     @name(".rewrite_smac") action rewrite_smac(bit<48> smac) {
@@ -1874,10 +1874,10 @@ control process_mtu(inout headers hdr, inout metadata meta, inout standard_metad
         meta.l3_metadata.l3_mtu_check = 16w0xffff;
     }
     @name(".ipv4_mtu_check") action ipv4_mtu_check(bit<16> l3_mtu) {
-        meta.l3_metadata.l3_mtu_check = l3_mtu |-| hdr.ipv4.totalLen;
+        meta.l3_metadata.l3_mtu_check = l3_mtu |-| (bit<16>)hdr.ipv4.totalLen;
     }
     @name(".ipv6_mtu_check") action ipv6_mtu_check(bit<16> l3_mtu) {
-        meta.l3_metadata.l3_mtu_check = l3_mtu |-| hdr.ipv6.payloadLen;
+        meta.l3_metadata.l3_mtu_check = l3_mtu |-| (bit<16>)hdr.ipv6.payloadLen;
     }
     @name(".mtu") table mtu {
         actions = {
@@ -1925,9 +1925,9 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
     @name(".nop") action nop() {
     }
     @name(".int_transit") action int_transit(bit<32> switch_id) {
-        meta.int_metadata.insert_cnt = hdr.int_header.max_hop_cnt - hdr.int_header.total_hop_cnt;
+        meta.int_metadata.insert_cnt = (bit<8>)hdr.int_header.max_hop_cnt - (bit<8>)hdr.int_header.total_hop_cnt;
         meta.int_metadata.switch_id = switch_id;
-        meta.int_metadata.insert_byte_cnt = meta.int_metadata.instruction_cnt << 2;
+        meta.int_metadata.insert_byte_cnt = (bit<16>)(meta.int_metadata.instruction_cnt << 2);
         meta.int_metadata.gpe_int_hdr_len8 = (bit<8>)hdr.int_header.ins_cnt;
     }
     @name(".int_src") action int_src(bit<32> switch_id, bit<8> hop_cnt, bit<5> ins_cnt, bit<4> ins_mask0003, bit<4> ins_mask0407, bit<16> ins_byte_cnt, bit<8> total_words) {
@@ -1942,7 +1942,7 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
         hdr.int_header.e = 1w0;
         hdr.int_header.rsvd1 = 5w0;
         hdr.int_header.ins_cnt = ins_cnt;
-        hdr.int_header.max_hop_cnt = hop_cnt;
+        hdr.int_header.max_hop_cnt = (bit<8>)hop_cnt;
         hdr.int_header.total_hop_cnt = 8w0;
         hdr.int_header.instruction_mask_0003 = ins_mask0003;
         hdr.int_header.instruction_mask_0407 = ins_mask0407;
@@ -1982,7 +1982,7 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
     @name(".int_set_header_1") action int_set_header_1() {
         hdr.int_ingress_port_id_header.setValid();
         hdr.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
-        hdr.int_ingress_port_id_header.ingress_port_id_0 = meta.ingress_metadata.ifindex;
+        hdr.int_ingress_port_id_header.ingress_port_id_0 = (bit<16>)meta.ingress_metadata.ifindex;
     }
     @name(".int_set_header_0003_i4") action int_set_header_0003_i4() {
         int_set_header_1();
@@ -2294,7 +2294,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     @name(".inner_ipv4_udp_rewrite") action inner_ipv4_udp_rewrite() {
         hdr.inner_ipv4 = hdr.ipv4;
         hdr.inner_udp = hdr.udp;
-        meta.egress_metadata.payload_length = hdr.ipv4.totalLen;
+        meta.egress_metadata.payload_length = (bit<16>)hdr.ipv4.totalLen;
         hdr.udp.setInvalid();
         hdr.ipv4.setInvalid();
         meta.tunnel_metadata.inner_ip_proto = 8w4;
@@ -2302,7 +2302,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     @name(".inner_ipv4_tcp_rewrite") action inner_ipv4_tcp_rewrite() {
         hdr.inner_ipv4 = hdr.ipv4;
         hdr.inner_tcp = hdr.tcp;
-        meta.egress_metadata.payload_length = hdr.ipv4.totalLen;
+        meta.egress_metadata.payload_length = (bit<16>)hdr.ipv4.totalLen;
         hdr.tcp.setInvalid();
         hdr.ipv4.setInvalid();
         meta.tunnel_metadata.inner_ip_proto = 8w4;
@@ -2310,28 +2310,28 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     @name(".inner_ipv4_icmp_rewrite") action inner_ipv4_icmp_rewrite() {
         hdr.inner_ipv4 = hdr.ipv4;
         hdr.inner_icmp = hdr.icmp;
-        meta.egress_metadata.payload_length = hdr.ipv4.totalLen;
+        meta.egress_metadata.payload_length = (bit<16>)hdr.ipv4.totalLen;
         hdr.icmp.setInvalid();
         hdr.ipv4.setInvalid();
         meta.tunnel_metadata.inner_ip_proto = 8w4;
     }
     @name(".inner_ipv4_unknown_rewrite") action inner_ipv4_unknown_rewrite() {
         hdr.inner_ipv4 = hdr.ipv4;
-        meta.egress_metadata.payload_length = hdr.ipv4.totalLen;
+        meta.egress_metadata.payload_length = (bit<16>)hdr.ipv4.totalLen;
         hdr.ipv4.setInvalid();
         meta.tunnel_metadata.inner_ip_proto = 8w4;
     }
     @name(".inner_ipv6_udp_rewrite") action inner_ipv6_udp_rewrite() {
         hdr.inner_ipv6 = hdr.ipv6;
         hdr.inner_udp = hdr.udp;
-        meta.egress_metadata.payload_length = hdr.ipv6.payloadLen + 16w40;
+        meta.egress_metadata.payload_length = (bit<16>)hdr.ipv6.payloadLen + 16w40;
         hdr.ipv6.setInvalid();
         meta.tunnel_metadata.inner_ip_proto = 8w41;
     }
     @name(".inner_ipv6_tcp_rewrite") action inner_ipv6_tcp_rewrite() {
         hdr.inner_ipv6 = hdr.ipv6;
         hdr.inner_tcp = hdr.tcp;
-        meta.egress_metadata.payload_length = hdr.ipv6.payloadLen + 16w40;
+        meta.egress_metadata.payload_length = (bit<16>)hdr.ipv6.payloadLen + 16w40;
         hdr.tcp.setInvalid();
         hdr.ipv6.setInvalid();
         meta.tunnel_metadata.inner_ip_proto = 8w41;
@@ -2339,14 +2339,14 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     @name(".inner_ipv6_icmp_rewrite") action inner_ipv6_icmp_rewrite() {
         hdr.inner_ipv6 = hdr.ipv6;
         hdr.inner_icmp = hdr.icmp;
-        meta.egress_metadata.payload_length = hdr.ipv6.payloadLen + 16w40;
+        meta.egress_metadata.payload_length = (bit<16>)hdr.ipv6.payloadLen + 16w40;
         hdr.icmp.setInvalid();
         hdr.ipv6.setInvalid();
         meta.tunnel_metadata.inner_ip_proto = 8w41;
     }
     @name(".inner_ipv6_unknown_rewrite") action inner_ipv6_unknown_rewrite() {
         hdr.inner_ipv6 = hdr.ipv6;
-        meta.egress_metadata.payload_length = hdr.ipv6.payloadLen + 16w40;
+        meta.egress_metadata.payload_length = (bit<16>)hdr.ipv6.payloadLen + 16w40;
         hdr.ipv6.setInvalid();
         meta.tunnel_metadata.inner_ip_proto = 8w41;
     }
@@ -2357,18 +2357,18 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.inner_ethernet = hdr.ethernet;
         hdr.udp.setValid();
         hdr.vxlan.setValid();
-        hdr.udp.srcPort = meta.hash_metadata.entropy_hash;
+        hdr.udp.srcPort = (bit<16>)meta.hash_metadata.entropy_hash;
         hdr.udp.dstPort = 16w4789;
         hdr.udp.checksum = 16w0;
-        hdr.udp.length_ = meta.egress_metadata.payload_length + 16w30;
+        hdr.udp.length_ = (bit<16>)meta.egress_metadata.payload_length + 16w30;
         hdr.vxlan.flags = 8w0x8;
         hdr.vxlan.reserved = 24w0;
-        hdr.vxlan.vni = meta.tunnel_metadata.vnid;
+        hdr.vxlan.vni = (bit<24>)meta.tunnel_metadata.vnid;
         hdr.vxlan.reserved2 = 8w0;
     }
     @name(".f_insert_ipv4_header") action f_insert_ipv4_header(bit<8> proto) {
         hdr.ipv4.setValid();
-        hdr.ipv4.protocol = proto;
+        hdr.ipv4.protocol = (bit<8>)proto;
         hdr.ipv4.ttl = 8w64;
         hdr.ipv4.version = 4w0x4;
         hdr.ipv4.ihl = 4w0x5;
@@ -2377,30 +2377,30 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     @name(".ipv4_vxlan_rewrite") action ipv4_vxlan_rewrite() {
         f_insert_vxlan_header();
         f_insert_ipv4_header(8w17);
-        hdr.ipv4.totalLen = meta.egress_metadata.payload_length + 16w50;
+        hdr.ipv4.totalLen = (bit<16>)meta.egress_metadata.payload_length + 16w50;
         hdr.ethernet.etherType = 16w0x800;
     }
     @name(".f_insert_genv_header") action f_insert_genv_header() {
         hdr.inner_ethernet = hdr.ethernet;
         hdr.udp.setValid();
         hdr.genv.setValid();
-        hdr.udp.srcPort = meta.hash_metadata.entropy_hash;
+        hdr.udp.srcPort = (bit<16>)meta.hash_metadata.entropy_hash;
         hdr.udp.dstPort = 16w6081;
         hdr.udp.checksum = 16w0;
-        hdr.udp.length_ = meta.egress_metadata.payload_length + 16w30;
+        hdr.udp.length_ = (bit<16>)meta.egress_metadata.payload_length + 16w30;
         hdr.genv.ver = 2w0;
         hdr.genv.oam = 1w0;
         hdr.genv.critical = 1w0;
         hdr.genv.optLen = 6w0;
         hdr.genv.protoType = 16w0x6558;
-        hdr.genv.vni = meta.tunnel_metadata.vnid;
+        hdr.genv.vni = (bit<24>)meta.tunnel_metadata.vnid;
         hdr.genv.reserved = 6w0;
         hdr.genv.reserved2 = 8w0;
     }
     @name(".ipv4_genv_rewrite") action ipv4_genv_rewrite() {
         f_insert_genv_header();
         f_insert_ipv4_header(8w17);
-        hdr.ipv4.totalLen = meta.egress_metadata.payload_length + 16w50;
+        hdr.ipv4.totalLen = (bit<16>)meta.egress_metadata.payload_length + 16w50;
         hdr.ethernet.etherType = 16w0x800;
     }
     @name(".f_insert_nvgre_header") action f_insert_nvgre_header() {
@@ -2416,13 +2416,13 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.gre.C = 1w0;
         hdr.gre.S = 1w0;
         hdr.gre.s = 1w0;
-        hdr.nvgre.tni = meta.tunnel_metadata.vnid;
+        hdr.nvgre.tni = (bit<24>)meta.tunnel_metadata.vnid;
         hdr.nvgre.flow_id[7:0] = ((bit<8>)meta.hash_metadata.entropy_hash)[7:0];
     }
     @name(".ipv4_nvgre_rewrite") action ipv4_nvgre_rewrite() {
         f_insert_nvgre_header();
         f_insert_ipv4_header(8w47);
-        hdr.ipv4.totalLen = meta.egress_metadata.payload_length + 16w42;
+        hdr.ipv4.totalLen = (bit<16>)meta.egress_metadata.payload_length + 16w42;
         hdr.ethernet.etherType = 16w0x800;
     }
     @name(".f_insert_gre_header") action f_insert_gre_header() {
@@ -2430,14 +2430,14 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     }
     @name(".ipv4_gre_rewrite") action ipv4_gre_rewrite() {
         f_insert_gre_header();
-        hdr.gre.proto = hdr.ethernet.etherType;
+        hdr.gre.proto = (bit<16>)hdr.ethernet.etherType;
         f_insert_ipv4_header(8w47);
-        hdr.ipv4.totalLen = meta.egress_metadata.payload_length + 16w24;
+        hdr.ipv4.totalLen = (bit<16>)meta.egress_metadata.payload_length + 16w24;
         hdr.ethernet.etherType = 16w0x800;
     }
     @name(".ipv4_ip_rewrite") action ipv4_ip_rewrite() {
         f_insert_ipv4_header(meta.tunnel_metadata.inner_ip_proto);
-        hdr.ipv4.totalLen = meta.egress_metadata.payload_length + 16w20;
+        hdr.ipv4.totalLen = (bit<16>)meta.egress_metadata.payload_length + 16w20;
         hdr.ethernet.etherType = 16w0x800;
     }
     @name(".f_insert_erspan_t3_header") action f_insert_erspan_t3_header() {
@@ -2453,7 +2453,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.gre.flags = 5w0;
         hdr.gre.ver = 3w0;
         hdr.gre.proto = 16w0x22eb;
-        hdr.erspan_t3_header.timestamp = meta.i2e_metadata.ingress_tstamp;
+        hdr.erspan_t3_header.timestamp = (bit<32>)meta.i2e_metadata.ingress_tstamp;
         hdr.erspan_t3_header.span_id = (bit<10>)meta.i2e_metadata.mirror_session_id;
         hdr.erspan_t3_header.version = 4w2;
         hdr.erspan_t3_header.sgt_other = 32w0;
@@ -2461,50 +2461,50 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
     @name(".ipv4_erspan_t3_rewrite") action ipv4_erspan_t3_rewrite() {
         f_insert_erspan_t3_header();
         f_insert_ipv4_header(8w47);
-        hdr.ipv4.totalLen = meta.egress_metadata.payload_length + 16w50;
+        hdr.ipv4.totalLen = (bit<16>)meta.egress_metadata.payload_length + 16w50;
     }
     @name(".f_insert_ipv6_header") action f_insert_ipv6_header(bit<8> proto) {
         hdr.ipv6.setValid();
         hdr.ipv6.version = 4w0x6;
-        hdr.ipv6.nextHdr = proto;
+        hdr.ipv6.nextHdr = (bit<8>)proto;
         hdr.ipv6.hopLimit = 8w64;
         hdr.ipv6.trafficClass = 8w0;
         hdr.ipv6.flowLabel = 20w0;
     }
     @name(".ipv6_gre_rewrite") action ipv6_gre_rewrite() {
         f_insert_gre_header();
-        hdr.gre.proto = hdr.ethernet.etherType;
+        hdr.gre.proto = (bit<16>)hdr.ethernet.etherType;
         f_insert_ipv6_header(8w47);
-        hdr.ipv6.payloadLen = meta.egress_metadata.payload_length + 16w4;
+        hdr.ipv6.payloadLen = (bit<16>)meta.egress_metadata.payload_length + 16w4;
         hdr.ethernet.etherType = 16w0x86dd;
     }
     @name(".ipv6_ip_rewrite") action ipv6_ip_rewrite() {
         f_insert_ipv6_header(meta.tunnel_metadata.inner_ip_proto);
-        hdr.ipv6.payloadLen = meta.egress_metadata.payload_length;
+        hdr.ipv6.payloadLen = (bit<16>)meta.egress_metadata.payload_length;
         hdr.ethernet.etherType = 16w0x86dd;
     }
     @name(".ipv6_nvgre_rewrite") action ipv6_nvgre_rewrite() {
         f_insert_nvgre_header();
         f_insert_ipv6_header(8w47);
-        hdr.ipv6.payloadLen = meta.egress_metadata.payload_length + 16w22;
+        hdr.ipv6.payloadLen = (bit<16>)meta.egress_metadata.payload_length + 16w22;
         hdr.ethernet.etherType = 16w0x86dd;
     }
     @name(".ipv6_vxlan_rewrite") action ipv6_vxlan_rewrite() {
         f_insert_vxlan_header();
         f_insert_ipv6_header(8w17);
-        hdr.ipv6.payloadLen = meta.egress_metadata.payload_length + 16w30;
+        hdr.ipv6.payloadLen = (bit<16>)meta.egress_metadata.payload_length + 16w30;
         hdr.ethernet.etherType = 16w0x86dd;
     }
     @name(".ipv6_genv_rewrite") action ipv6_genv_rewrite() {
         f_insert_genv_header();
         f_insert_ipv6_header(8w17);
-        hdr.ipv6.payloadLen = meta.egress_metadata.payload_length + 16w30;
+        hdr.ipv6.payloadLen = (bit<16>)meta.egress_metadata.payload_length + 16w30;
         hdr.ethernet.etherType = 16w0x86dd;
     }
     @name(".ipv6_erspan_t3_rewrite") action ipv6_erspan_t3_rewrite() {
         f_insert_erspan_t3_header();
         f_insert_ipv6_header(8w47);
-        hdr.ipv6.payloadLen = meta.egress_metadata.payload_length + 16w26;
+        hdr.ipv6.payloadLen = (bit<16>)meta.egress_metadata.payload_length + 16w26;
     }
     @name(".mpls_ethernet_push1_rewrite") action mpls_ethernet_push1_rewrite() {
         hdr.inner_ethernet = hdr.ethernet;
@@ -2561,7 +2561,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         meta.tunnel_metadata.tunnel_index = tunnel_index;
     }
     @name(".tunnel_mtu_check") action tunnel_mtu_check(bit<16> l3_mtu) {
-        meta.l3_metadata.l3_mtu_check = l3_mtu |-| meta.egress_metadata.payload_length;
+        meta.l3_metadata.l3_mtu_check = l3_mtu |-| (bit<16>)meta.egress_metadata.payload_length;
     }
     @name(".tunnel_mtu_miss") action tunnel_mtu_miss() {
         meta.l3_metadata.l3_mtu_check = 16w0xffff;
@@ -2617,11 +2617,11 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.fabric_header.packetType = 3w5;
         hdr.fabric_header_cpu.setValid();
         hdr.fabric_header_cpu.ingressPort = (bit<16>)meta.ingress_metadata.ingress_port;
-        hdr.fabric_header_cpu.ingressIfindex = meta.ingress_metadata.ifindex;
-        hdr.fabric_header_cpu.ingressBd = meta.ingress_metadata.bd;
-        hdr.fabric_header_cpu.reasonCode = meta.fabric_metadata.reason_code;
+        hdr.fabric_header_cpu.ingressIfindex = (bit<16>)meta.ingress_metadata.ifindex;
+        hdr.fabric_header_cpu.ingressBd = (bit<16>)meta.ingress_metadata.bd;
+        hdr.fabric_header_cpu.reasonCode = (bit<16>)meta.fabric_metadata.reason_code;
         hdr.fabric_payload_header.setValid();
-        hdr.fabric_payload_header.etherType = hdr.ethernet.etherType;
+        hdr.fabric_payload_header.etherType = (bit<16>)hdr.ethernet.etherType;
         hdr.ethernet.etherType = 16w0x9000;
     }
     @name(".fabric_unicast_rewrite") action fabric_unicast_rewrite() {
@@ -2630,16 +2630,16 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.fabric_header.packetVersion = 2w0;
         hdr.fabric_header.pad1 = 1w0;
         hdr.fabric_header.packetType = 3w1;
-        hdr.fabric_header.dstDevice = meta.fabric_metadata.dst_device;
-        hdr.fabric_header.dstPortOrGroup = meta.fabric_metadata.dst_port;
+        hdr.fabric_header.dstDevice = (bit<8>)meta.fabric_metadata.dst_device;
+        hdr.fabric_header.dstPortOrGroup = (bit<16>)meta.fabric_metadata.dst_port;
         hdr.fabric_header_unicast.setValid();
-        hdr.fabric_header_unicast.tunnelTerminate = meta.tunnel_metadata.tunnel_terminate;
-        hdr.fabric_header_unicast.routed = meta.l3_metadata.routed;
-        hdr.fabric_header_unicast.outerRouted = meta.l3_metadata.outer_routed;
-        hdr.fabric_header_unicast.ingressTunnelType = meta.tunnel_metadata.ingress_tunnel_type;
-        hdr.fabric_header_unicast.nexthopIndex = meta.l3_metadata.nexthop_index;
+        hdr.fabric_header_unicast.tunnelTerminate = (bit<1>)meta.tunnel_metadata.tunnel_terminate;
+        hdr.fabric_header_unicast.routed = (bit<1>)meta.l3_metadata.routed;
+        hdr.fabric_header_unicast.outerRouted = (bit<1>)meta.l3_metadata.outer_routed;
+        hdr.fabric_header_unicast.ingressTunnelType = (bit<5>)meta.tunnel_metadata.ingress_tunnel_type;
+        hdr.fabric_header_unicast.nexthopIndex = (bit<16>)meta.l3_metadata.nexthop_index;
         hdr.fabric_payload_header.setValid();
-        hdr.fabric_payload_header.etherType = hdr.ethernet.etherType;
+        hdr.fabric_payload_header.etherType = (bit<16>)hdr.ethernet.etherType;
         hdr.ethernet.etherType = 16w0x9000;
     }
     @name(".fabric_multicast_rewrite") action fabric_multicast_rewrite(bit<16> fabric_mgid) {
@@ -2650,16 +2650,16 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.fabric_header.packetType = 3w2;
         hdr.fabric_header.dstDevice = 8w127;
         hdr.fabric_header.dstPortOrGroup = fabric_mgid;
-        hdr.fabric_header_multicast.ingressIfindex = meta.ingress_metadata.ifindex;
-        hdr.fabric_header_multicast.ingressBd = meta.ingress_metadata.bd;
+        hdr.fabric_header_multicast.ingressIfindex = (bit<16>)meta.ingress_metadata.ifindex;
+        hdr.fabric_header_multicast.ingressBd = (bit<16>)meta.ingress_metadata.bd;
         hdr.fabric_header_multicast.setValid();
-        hdr.fabric_header_multicast.tunnelTerminate = meta.tunnel_metadata.tunnel_terminate;
-        hdr.fabric_header_multicast.routed = meta.l3_metadata.routed;
-        hdr.fabric_header_multicast.outerRouted = meta.l3_metadata.outer_routed;
-        hdr.fabric_header_multicast.ingressTunnelType = meta.tunnel_metadata.ingress_tunnel_type;
-        hdr.fabric_header_multicast.mcastGrp = meta.multicast_metadata.mcast_grp;
+        hdr.fabric_header_multicast.tunnelTerminate = (bit<1>)meta.tunnel_metadata.tunnel_terminate;
+        hdr.fabric_header_multicast.routed = (bit<1>)meta.l3_metadata.routed;
+        hdr.fabric_header_multicast.outerRouted = (bit<1>)meta.l3_metadata.outer_routed;
+        hdr.fabric_header_multicast.ingressTunnelType = (bit<5>)meta.tunnel_metadata.ingress_tunnel_type;
+        hdr.fabric_header_multicast.mcastGrp = (bit<16>)meta.multicast_metadata.mcast_grp;
         hdr.fabric_payload_header.setValid();
-        hdr.fabric_payload_header.etherType = hdr.ethernet.etherType;
+        hdr.fabric_payload_header.etherType = (bit<16>)hdr.ethernet.etherType;
         hdr.ethernet.etherType = 16w0x9000;
     }
     @name(".rewrite_tunnel_smac") action rewrite_tunnel_smac(bit<48> smac) {
@@ -2820,18 +2820,18 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
 
 control process_int_outer_encap(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".int_update_vxlan_gpe_ipv4") action int_update_vxlan_gpe_ipv4() {
-        hdr.ipv4.totalLen = hdr.ipv4.totalLen + meta.int_metadata.insert_byte_cnt;
-        hdr.udp.length_ = hdr.udp.length_ + meta.int_metadata.insert_byte_cnt;
-        hdr.vxlan_gpe_int_header.len = hdr.vxlan_gpe_int_header.len + meta.int_metadata.gpe_int_hdr_len8;
+        hdr.ipv4.totalLen = hdr.ipv4.totalLen + (bit<16>)meta.int_metadata.insert_byte_cnt;
+        hdr.udp.length_ = hdr.udp.length_ + (bit<16>)meta.int_metadata.insert_byte_cnt;
+        hdr.vxlan_gpe_int_header.len = hdr.vxlan_gpe_int_header.len + (bit<8>)meta.int_metadata.gpe_int_hdr_len8;
     }
     @name(".int_add_update_vxlan_gpe_ipv4") action int_add_update_vxlan_gpe_ipv4() {
         hdr.vxlan_gpe_int_header.setValid();
         hdr.vxlan_gpe_int_header.int_type = 8w0x1;
         hdr.vxlan_gpe_int_header.next_proto = 8w3;
         hdr.vxlan_gpe.next_proto = 8w5;
-        hdr.vxlan_gpe_int_header.len = meta.int_metadata.gpe_int_hdr_len8;
-        hdr.ipv4.totalLen = hdr.ipv4.totalLen + meta.int_metadata.insert_byte_cnt;
-        hdr.udp.length_ = hdr.udp.length_ + meta.int_metadata.insert_byte_cnt;
+        hdr.vxlan_gpe_int_header.len = (bit<8>)meta.int_metadata.gpe_int_hdr_len8;
+        hdr.ipv4.totalLen = hdr.ipv4.totalLen + (bit<16>)meta.int_metadata.insert_byte_cnt;
+        hdr.udp.length_ = hdr.udp.length_ + (bit<16>)meta.int_metadata.insert_byte_cnt;
     }
     @name(".nop") action nop() {
     }
@@ -2861,14 +2861,14 @@ control process_vlan_xlate(inout headers hdr, inout metadata meta, inout standar
     }
     @name(".set_egress_packet_vlan_tagged") action set_egress_packet_vlan_tagged(bit<12> vlan_id) {
         hdr.vlan_tag_[0].setValid();
-        hdr.vlan_tag_[0].etherType = hdr.ethernet.etherType;
+        hdr.vlan_tag_[0].etherType = (bit<16>)hdr.ethernet.etherType;
         hdr.vlan_tag_[0].vid = vlan_id;
         hdr.ethernet.etherType = 16w0x8100;
     }
     @name(".set_egress_packet_vlan_double_tagged") action set_egress_packet_vlan_double_tagged(bit<12> s_tag, bit<12> c_tag) {
         hdr.vlan_tag_[1].setValid();
         hdr.vlan_tag_[0].setValid();
-        hdr.vlan_tag_[1].etherType = hdr.ethernet.etherType;
+        hdr.vlan_tag_[1].etherType = (bit<16>)hdr.ethernet.etherType;
         hdr.vlan_tag_[1].vid = c_tag;
         hdr.vlan_tag_[0].etherType = 16w0x8100;
         hdr.vlan_tag_[0].vid = s_tag;
@@ -2893,9 +2893,9 @@ control process_vlan_xlate(inout headers hdr, inout metadata meta, inout standar
 
 control process_egress_filter(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".egress_filter_check") action egress_filter_check() {
-        meta.egress_filter_metadata.ifindex_check = meta.ingress_metadata.ifindex ^ meta.egress_metadata.ifindex;
-        meta.egress_filter_metadata.bd = meta.ingress_metadata.outer_bd ^ meta.egress_metadata.outer_bd;
-        meta.egress_filter_metadata.inner_bd = meta.ingress_metadata.bd ^ meta.egress_metadata.bd;
+        meta.egress_filter_metadata.ifindex_check = (bit<16>)meta.ingress_metadata.ifindex ^ (bit<16>)meta.egress_metadata.ifindex;
+        meta.egress_filter_metadata.bd = (bit<16>)meta.ingress_metadata.outer_bd ^ (bit<16>)meta.egress_metadata.outer_bd;
+        meta.egress_filter_metadata.inner_bd = (bit<16>)meta.ingress_metadata.bd ^ (bit<16>)meta.egress_metadata.bd;
     }
     @name(".set_egress_filter_drop") action set_egress_filter_drop() {
         mark_to_drop(standard_metadata);
@@ -2986,7 +2986,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name(".sflow_pkt_to_cpu") action sflow_pkt_to_cpu() {
         hdr.fabric_header_sflow.setValid();
-        hdr.fabric_header_sflow.sflow_session_id = meta.sflow_metadata.sflow_session_id;
+        hdr.fabric_header_sflow.sflow_session_id = (bit<16>)meta.sflow_metadata.sflow_session_id;
     }
     @name(".egress_port_mapping") table egress_port_mapping {
         actions = {
@@ -3092,8 +3092,8 @@ control process_ingress_port_mapping(inout headers hdr, inout metadata meta, ino
 control validate_outer_ipv4_header(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".set_valid_outer_ipv4_packet") action set_valid_outer_ipv4_packet() {
         meta.l3_metadata.lkp_ip_type = 2w1;
-        meta.l3_metadata.lkp_ip_tc = hdr.ipv4.diffserv;
-        meta.l3_metadata.lkp_ip_version = hdr.ipv4.version;
+        meta.l3_metadata.lkp_ip_tc = (bit<8>)hdr.ipv4.diffserv;
+        meta.l3_metadata.lkp_ip_version = (bit<4>)hdr.ipv4.version;
     }
     @name(".set_malformed_outer_ipv4_packet") action set_malformed_outer_ipv4_packet(bit<8> drop_reason) {
         meta.ingress_metadata.drop_flag = 1w1;
@@ -3119,8 +3119,8 @@ control validate_outer_ipv4_header(inout headers hdr, inout metadata meta, inout
 control validate_outer_ipv6_header(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".set_valid_outer_ipv6_packet") action set_valid_outer_ipv6_packet() {
         meta.l3_metadata.lkp_ip_type = 2w2;
-        meta.l3_metadata.lkp_ip_tc = hdr.ipv6.trafficClass;
-        meta.l3_metadata.lkp_ip_version = hdr.ipv6.version;
+        meta.l3_metadata.lkp_ip_tc = (bit<8>)hdr.ipv6.trafficClass;
+        meta.l3_metadata.lkp_ip_version = (bit<4>)hdr.ipv6.version;
     }
     @name(".set_malformed_outer_ipv6_packet") action set_malformed_outer_ipv6_packet(bit<8> drop_reason) {
         meta.ingress_metadata.drop_flag = 1w1;
@@ -3145,16 +3145,16 @@ control validate_outer_ipv6_header(inout headers hdr, inout metadata meta, inout
 
 control validate_mpls_header(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".set_valid_mpls_label1") action set_valid_mpls_label1() {
-        meta.tunnel_metadata.mpls_label = hdr.mpls[0].label;
-        meta.tunnel_metadata.mpls_exp = hdr.mpls[0].exp;
+        meta.tunnel_metadata.mpls_label = (bit<20>)hdr.mpls[0].label;
+        meta.tunnel_metadata.mpls_exp = (bit<3>)hdr.mpls[0].exp;
     }
     @name(".set_valid_mpls_label2") action set_valid_mpls_label2() {
-        meta.tunnel_metadata.mpls_label = hdr.mpls[1].label;
-        meta.tunnel_metadata.mpls_exp = hdr.mpls[1].exp;
+        meta.tunnel_metadata.mpls_label = (bit<20>)hdr.mpls[1].label;
+        meta.tunnel_metadata.mpls_exp = (bit<3>)hdr.mpls[1].exp;
     }
     @name(".set_valid_mpls_label3") action set_valid_mpls_label3() {
-        meta.tunnel_metadata.mpls_label = hdr.mpls[2].label;
-        meta.tunnel_metadata.mpls_exp = hdr.mpls[2].exp;
+        meta.tunnel_metadata.mpls_label = (bit<20>)hdr.mpls[2].label;
+        meta.tunnel_metadata.mpls_exp = (bit<3>)hdr.mpls[2].exp;
     }
     @name(".validate_mpls_packet") table validate_mpls_packet {
         actions = {
@@ -3187,51 +3187,51 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
     }
     @name(".set_valid_outer_unicast_packet_untagged") action set_valid_outer_unicast_packet_untagged() {
         meta.l2_metadata.lkp_pkt_type = 3w1;
-        meta.l2_metadata.lkp_mac_type = hdr.ethernet.etherType;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.ethernet.etherType;
     }
     @name(".set_valid_outer_unicast_packet_single_tagged") action set_valid_outer_unicast_packet_single_tagged() {
         meta.l2_metadata.lkp_pkt_type = 3w1;
-        meta.l2_metadata.lkp_mac_type = hdr.vlan_tag_[0].etherType;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.vlan_tag_[0].etherType;
     }
     @name(".set_valid_outer_unicast_packet_double_tagged") action set_valid_outer_unicast_packet_double_tagged() {
         meta.l2_metadata.lkp_pkt_type = 3w1;
-        meta.l2_metadata.lkp_mac_type = hdr.vlan_tag_[1].etherType;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.vlan_tag_[1].etherType;
     }
     @name(".set_valid_outer_unicast_packet_qinq_tagged") action set_valid_outer_unicast_packet_qinq_tagged() {
         meta.l2_metadata.lkp_pkt_type = 3w1;
-        meta.l2_metadata.lkp_mac_type = hdr.ethernet.etherType;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.ethernet.etherType;
     }
     @name(".set_valid_outer_multicast_packet_untagged") action set_valid_outer_multicast_packet_untagged() {
         meta.l2_metadata.lkp_pkt_type = 3w2;
-        meta.l2_metadata.lkp_mac_type = hdr.ethernet.etherType;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.ethernet.etherType;
     }
     @name(".set_valid_outer_multicast_packet_single_tagged") action set_valid_outer_multicast_packet_single_tagged() {
         meta.l2_metadata.lkp_pkt_type = 3w2;
-        meta.l2_metadata.lkp_mac_type = hdr.vlan_tag_[0].etherType;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.vlan_tag_[0].etherType;
     }
     @name(".set_valid_outer_multicast_packet_double_tagged") action set_valid_outer_multicast_packet_double_tagged() {
         meta.l2_metadata.lkp_pkt_type = 3w2;
-        meta.l2_metadata.lkp_mac_type = hdr.vlan_tag_[1].etherType;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.vlan_tag_[1].etherType;
     }
     @name(".set_valid_outer_multicast_packet_qinq_tagged") action set_valid_outer_multicast_packet_qinq_tagged() {
         meta.l2_metadata.lkp_pkt_type = 3w2;
-        meta.l2_metadata.lkp_mac_type = hdr.ethernet.etherType;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.ethernet.etherType;
     }
     @name(".set_valid_outer_broadcast_packet_untagged") action set_valid_outer_broadcast_packet_untagged() {
         meta.l2_metadata.lkp_pkt_type = 3w4;
-        meta.l2_metadata.lkp_mac_type = hdr.ethernet.etherType;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.ethernet.etherType;
     }
     @name(".set_valid_outer_broadcast_packet_single_tagged") action set_valid_outer_broadcast_packet_single_tagged() {
         meta.l2_metadata.lkp_pkt_type = 3w4;
-        meta.l2_metadata.lkp_mac_type = hdr.vlan_tag_[0].etherType;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.vlan_tag_[0].etherType;
     }
     @name(".set_valid_outer_broadcast_packet_double_tagged") action set_valid_outer_broadcast_packet_double_tagged() {
         meta.l2_metadata.lkp_pkt_type = 3w4;
-        meta.l2_metadata.lkp_mac_type = hdr.vlan_tag_[1].etherType;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.vlan_tag_[1].etherType;
     }
     @name(".set_valid_outer_broadcast_packet_qinq_tagged") action set_valid_outer_broadcast_packet_qinq_tagged() {
         meta.l2_metadata.lkp_pkt_type = 3w4;
-        meta.l2_metadata.lkp_mac_type = hdr.ethernet.etherType;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.ethernet.etherType;
     }
     @name(".validate_outer_ethernet") table validate_outer_ethernet {
         actions = {
@@ -3287,8 +3287,8 @@ control process_global_params(inout headers hdr, inout metadata meta, inout stan
     @name(".set_config_parameters") action set_config_parameters(bit<8> enable_dod) {
         deflect_on_drop(enable_dod);
         meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
-        meta.ingress_metadata.ingress_port = standard_metadata.ingress_port;
-        meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
+        meta.ingress_metadata.ingress_port = (bit<9>)standard_metadata.ingress_port;
+        meta.l2_metadata.same_if_check = (bit<16>)meta.ingress_metadata.ifindex;
         standard_metadata.egress_spec = 9w511;
         random(meta.ingress_metadata.sflow_take_sample, (bit<32>)0, 32w0x7fffffff);
     }
@@ -3306,7 +3306,7 @@ control process_global_params(inout headers hdr, inout metadata meta, inout stan
 control process_port_vlan_mapping(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".set_bd_properties") action set_bd_properties(bit<16> bd, bit<16> vrf, bit<10> stp_group, bit<1> learning_enabled, bit<16> bd_label, bit<16> stats_idx, bit<10> rmac_group, bit<1> ipv4_unicast_enabled, bit<1> ipv6_unicast_enabled, bit<2> ipv4_urpf_mode, bit<2> ipv6_urpf_mode, bit<1> igmp_snooping_enabled, bit<1> mld_snooping_enabled, bit<1> ipv4_multicast_enabled, bit<1> ipv6_multicast_enabled, bit<16> mrpf_group, bit<16> ipv4_mcast_key, bit<1> ipv4_mcast_key_type, bit<16> ipv6_mcast_key, bit<1> ipv6_mcast_key_type) {
         meta.ingress_metadata.bd = bd;
-        meta.ingress_metadata.outer_bd = bd;
+        meta.ingress_metadata.outer_bd = (bit<16>)bd;
         meta.acl_metadata.bd_label = bd_label;
         meta.l2_metadata.stp_group = stp_group;
         meta.l2_metadata.bd_stats_idx = stats_idx;
@@ -3413,10 +3413,10 @@ control process_ip_sourceguard(inout headers hdr, inout metadata meta, inout sta
 
 control process_int_endpoint(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".int_sink_update_vxlan_gpe_v4") action int_sink_update_vxlan_gpe_v4() {
-        hdr.vxlan_gpe.next_proto = hdr.vxlan_gpe_int_header.next_proto;
+        hdr.vxlan_gpe.next_proto = (bit<8>)hdr.vxlan_gpe_int_header.next_proto;
         hdr.vxlan_gpe_int_header.setInvalid();
-        hdr.ipv4.totalLen = hdr.ipv4.totalLen - meta.int_metadata.insert_byte_cnt;
-        hdr.udp.length_ = hdr.udp.length_ - meta.int_metadata.insert_byte_cnt;
+        hdr.ipv4.totalLen = hdr.ipv4.totalLen - (bit<16>)meta.int_metadata.insert_byte_cnt;
+        hdr.udp.length_ = hdr.udp.length_ - (bit<16>)meta.int_metadata.insert_byte_cnt;
     }
     @name(".nop") action nop() {
     }
@@ -3457,7 +3457,7 @@ control process_int_endpoint(inout headers hdr, inout metadata meta, inout stand
         hdr.int_val[23].setInvalid();
     }
     @name(".int_sink_gpe") action int_sink_gpe(bit<32> mirror_id) {
-        meta.int_metadata.insert_byte_cnt = meta.int_metadata.gpe_int_hdr_len << 2;
+        meta.int_metadata.insert_byte_cnt = (bit<16>)(meta.int_metadata.gpe_int_hdr_len << 2);
         int_sink(mirror_id);
     }
     @name(".int_no_sink") action int_no_sink() {
@@ -3521,41 +3521,41 @@ control process_ingress_fabric(inout headers hdr, inout metadata meta, inout sta
     }
     @name(".terminate_cpu_packet") action terminate_cpu_packet() {
         standard_metadata.egress_spec = (bit<9>)hdr.fabric_header.dstPortOrGroup;
-        meta.egress_metadata.bypass = hdr.fabric_header_cpu.txBypass;
-        hdr.ethernet.etherType = hdr.fabric_payload_header.etherType;
+        meta.egress_metadata.bypass = (bit<1>)hdr.fabric_header_cpu.txBypass;
+        hdr.ethernet.etherType = (bit<16>)hdr.fabric_payload_header.etherType;
         hdr.fabric_header.setInvalid();
         hdr.fabric_header_cpu.setInvalid();
         hdr.fabric_payload_header.setInvalid();
     }
     @name(".switch_fabric_unicast_packet") action switch_fabric_unicast_packet() {
         meta.fabric_metadata.fabric_header_present = 1w1;
-        meta.fabric_metadata.dst_device = hdr.fabric_header.dstDevice;
-        meta.fabric_metadata.dst_port = hdr.fabric_header.dstPortOrGroup;
+        meta.fabric_metadata.dst_device = (bit<8>)hdr.fabric_header.dstDevice;
+        meta.fabric_metadata.dst_port = (bit<16>)hdr.fabric_header.dstPortOrGroup;
     }
     @name(".terminate_fabric_unicast_packet") action terminate_fabric_unicast_packet() {
         standard_metadata.egress_spec = (bit<9>)hdr.fabric_header.dstPortOrGroup;
-        meta.tunnel_metadata.tunnel_terminate = hdr.fabric_header_unicast.tunnelTerminate;
-        meta.tunnel_metadata.ingress_tunnel_type = hdr.fabric_header_unicast.ingressTunnelType;
-        meta.l3_metadata.nexthop_index = hdr.fabric_header_unicast.nexthopIndex;
-        meta.l3_metadata.routed = hdr.fabric_header_unicast.routed;
-        meta.l3_metadata.outer_routed = hdr.fabric_header_unicast.outerRouted;
-        hdr.ethernet.etherType = hdr.fabric_payload_header.etherType;
+        meta.tunnel_metadata.tunnel_terminate = (bit<1>)hdr.fabric_header_unicast.tunnelTerminate;
+        meta.tunnel_metadata.ingress_tunnel_type = (bit<5>)hdr.fabric_header_unicast.ingressTunnelType;
+        meta.l3_metadata.nexthop_index = (bit<16>)hdr.fabric_header_unicast.nexthopIndex;
+        meta.l3_metadata.routed = (bit<1>)hdr.fabric_header_unicast.routed;
+        meta.l3_metadata.outer_routed = (bit<1>)hdr.fabric_header_unicast.outerRouted;
+        hdr.ethernet.etherType = (bit<16>)hdr.fabric_payload_header.etherType;
         hdr.fabric_header.setInvalid();
         hdr.fabric_header_unicast.setInvalid();
         hdr.fabric_payload_header.setInvalid();
     }
     @name(".switch_fabric_multicast_packet") action switch_fabric_multicast_packet() {
         meta.fabric_metadata.fabric_header_present = 1w1;
-        standard_metadata.mcast_grp = hdr.fabric_header.dstPortOrGroup;
+        standard_metadata.mcast_grp = (bit<16>)hdr.fabric_header.dstPortOrGroup;
     }
     @name(".terminate_fabric_multicast_packet") action terminate_fabric_multicast_packet() {
-        meta.tunnel_metadata.tunnel_terminate = hdr.fabric_header_multicast.tunnelTerminate;
-        meta.tunnel_metadata.ingress_tunnel_type = hdr.fabric_header_multicast.ingressTunnelType;
+        meta.tunnel_metadata.tunnel_terminate = (bit<1>)hdr.fabric_header_multicast.tunnelTerminate;
+        meta.tunnel_metadata.ingress_tunnel_type = (bit<5>)hdr.fabric_header_multicast.ingressTunnelType;
         meta.l3_metadata.nexthop_index = 16w0;
-        meta.l3_metadata.routed = hdr.fabric_header_multicast.routed;
-        meta.l3_metadata.outer_routed = hdr.fabric_header_multicast.outerRouted;
-        standard_metadata.mcast_grp = hdr.fabric_header_multicast.mcastGrp;
-        hdr.ethernet.etherType = hdr.fabric_payload_header.etherType;
+        meta.l3_metadata.routed = (bit<1>)hdr.fabric_header_multicast.routed;
+        meta.l3_metadata.outer_routed = (bit<1>)hdr.fabric_header_multicast.outerRouted;
+        standard_metadata.mcast_grp = (bit<16>)hdr.fabric_header_multicast.mcastGrp;
+        hdr.ethernet.etherType = (bit<16>)hdr.fabric_payload_header.etherType;
         hdr.fabric_header.setInvalid();
         hdr.fabric_header_multicast.setInvalid();
         hdr.fabric_payload_header.setInvalid();
@@ -3563,27 +3563,27 @@ control process_ingress_fabric(inout headers hdr, inout metadata meta, inout sta
     @name(".set_ingress_ifindex_properties") action set_ingress_ifindex_properties() {
     }
     @name(".non_ip_over_fabric") action non_ip_over_fabric() {
-        meta.l2_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
-        meta.l2_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
-        meta.l2_metadata.lkp_mac_type = hdr.ethernet.etherType;
+        meta.l2_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
+        meta.l2_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.ethernet.etherType;
     }
     @name(".ipv4_over_fabric") action ipv4_over_fabric() {
-        meta.l2_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
-        meta.l2_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
-        meta.ipv4_metadata.lkp_ipv4_sa = hdr.ipv4.srcAddr;
-        meta.ipv4_metadata.lkp_ipv4_da = hdr.ipv4.dstAddr;
-        meta.l3_metadata.lkp_ip_proto = hdr.ipv4.protocol;
-        meta.l3_metadata.lkp_l4_sport = meta.l3_metadata.lkp_outer_l4_sport;
-        meta.l3_metadata.lkp_l4_dport = meta.l3_metadata.lkp_outer_l4_dport;
+        meta.l2_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
+        meta.l2_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
+        meta.ipv4_metadata.lkp_ipv4_sa = (bit<32>)hdr.ipv4.srcAddr;
+        meta.ipv4_metadata.lkp_ipv4_da = (bit<32>)hdr.ipv4.dstAddr;
+        meta.l3_metadata.lkp_ip_proto = (bit<8>)hdr.ipv4.protocol;
+        meta.l3_metadata.lkp_l4_sport = (bit<16>)meta.l3_metadata.lkp_outer_l4_sport;
+        meta.l3_metadata.lkp_l4_dport = (bit<16>)meta.l3_metadata.lkp_outer_l4_dport;
     }
     @name(".ipv6_over_fabric") action ipv6_over_fabric() {
-        meta.l2_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
-        meta.l2_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
-        meta.ipv6_metadata.lkp_ipv6_sa = hdr.ipv6.srcAddr;
-        meta.ipv6_metadata.lkp_ipv6_da = hdr.ipv6.dstAddr;
-        meta.l3_metadata.lkp_ip_proto = hdr.ipv6.nextHdr;
-        meta.l3_metadata.lkp_l4_sport = meta.l3_metadata.lkp_outer_l4_sport;
-        meta.l3_metadata.lkp_l4_dport = meta.l3_metadata.lkp_outer_l4_dport;
+        meta.l2_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
+        meta.l2_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
+        meta.ipv6_metadata.lkp_ipv6_sa = (bit<128>)hdr.ipv6.srcAddr;
+        meta.ipv6_metadata.lkp_ipv6_da = (bit<128>)hdr.ipv6.dstAddr;
+        meta.l3_metadata.lkp_ip_proto = (bit<8>)hdr.ipv6.nextHdr;
+        meta.l3_metadata.lkp_l4_sport = (bit<16>)meta.l3_metadata.lkp_outer_l4_sport;
+        meta.l3_metadata.lkp_l4_dport = (bit<16>)meta.l3_metadata.lkp_outer_l4_dport;
     }
     @name(".fabric_ingress_dst_lkp") table fabric_ingress_dst_lkp {
         actions = {
@@ -3643,7 +3643,7 @@ control process_outer_ipv4_multicast(inout headers hdr, inout metadata meta, ino
     @name(".outer_multicast_route_s_g_hit") action outer_multicast_route_s_g_hit(bit<16> mc_index, bit<16> mcast_rpf_group) {
         standard_metadata.mcast_grp = mc_index;
         meta.multicast_metadata.outer_mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ (bit<16>)meta.multicast_metadata.bd_mrpf_group;
         meta.fabric_metadata.dst_device = 8w127;
     }
     @name(".outer_multicast_bridge_s_g_hit") action outer_multicast_bridge_s_g_hit(bit<16> mc_index) {
@@ -3655,14 +3655,14 @@ control process_outer_ipv4_multicast(inout headers hdr, inout metadata meta, ino
         meta.multicast_metadata.outer_mcast_mode = 2w1;
         standard_metadata.mcast_grp = mc_index;
         meta.multicast_metadata.outer_mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ (bit<16>)meta.multicast_metadata.bd_mrpf_group;
         meta.fabric_metadata.dst_device = 8w127;
     }
     @name(".outer_multicast_route_bidir_star_g_hit") action outer_multicast_route_bidir_star_g_hit(bit<16> mc_index, bit<16> mcast_rpf_group) {
         meta.multicast_metadata.outer_mcast_mode = 2w2;
         standard_metadata.mcast_grp = mc_index;
         meta.multicast_metadata.outer_mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | (bit<16>)meta.multicast_metadata.bd_mrpf_group;
         meta.fabric_metadata.dst_device = 8w127;
     }
     @name(".outer_multicast_bridge_star_g_hit") action outer_multicast_bridge_star_g_hit(bit<16> mc_index) {
@@ -3716,7 +3716,7 @@ control process_outer_ipv6_multicast(inout headers hdr, inout metadata meta, ino
     @name(".outer_multicast_route_s_g_hit") action outer_multicast_route_s_g_hit(bit<16> mc_index, bit<16> mcast_rpf_group) {
         standard_metadata.mcast_grp = mc_index;
         meta.multicast_metadata.outer_mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ (bit<16>)meta.multicast_metadata.bd_mrpf_group;
         meta.fabric_metadata.dst_device = 8w127;
     }
     @name(".outer_multicast_bridge_s_g_hit") action outer_multicast_bridge_s_g_hit(bit<16> mc_index) {
@@ -3728,14 +3728,14 @@ control process_outer_ipv6_multicast(inout headers hdr, inout metadata meta, ino
         meta.multicast_metadata.outer_mcast_mode = 2w1;
         standard_metadata.mcast_grp = mc_index;
         meta.multicast_metadata.outer_mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ (bit<16>)meta.multicast_metadata.bd_mrpf_group;
         meta.fabric_metadata.dst_device = 8w127;
     }
     @name(".outer_multicast_route_bidir_star_g_hit") action outer_multicast_route_bidir_star_g_hit(bit<16> mc_index, bit<16> mcast_rpf_group) {
         meta.multicast_metadata.outer_mcast_mode = 2w2;
         standard_metadata.mcast_grp = mc_index;
         meta.multicast_metadata.outer_mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | (bit<16>)meta.multicast_metadata.bd_mrpf_group;
         meta.fabric_metadata.dst_device = 8w127;
     }
     @name(".outer_multicast_bridge_star_g_hit") action outer_multicast_bridge_star_g_hit(bit<16> mc_index) {
@@ -3905,47 +3905,47 @@ control process_mpls(inout headers hdr, inout metadata meta, inout standard_meta
         meta.tunnel_metadata.tunnel_terminate = 1w1;
         meta.tunnel_metadata.ingress_tunnel_type = tunnel_type;
         meta.ingress_metadata.bd = bd;
-        meta.l2_metadata.lkp_mac_type = hdr.inner_ethernet.etherType;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.inner_ethernet.etherType;
     }
     @name(".terminate_vpls") action terminate_vpls(bit<16> bd, bit<5> tunnel_type) {
         meta.tunnel_metadata.tunnel_terminate = 1w1;
         meta.tunnel_metadata.ingress_tunnel_type = tunnel_type;
         meta.ingress_metadata.bd = bd;
-        meta.l2_metadata.lkp_mac_type = hdr.inner_ethernet.etherType;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.inner_ethernet.etherType;
     }
     @name(".terminate_ipv4_over_mpls") action terminate_ipv4_over_mpls(bit<16> vrf, bit<5> tunnel_type) {
         meta.tunnel_metadata.tunnel_terminate = 1w1;
         meta.tunnel_metadata.ingress_tunnel_type = tunnel_type;
         meta.l3_metadata.vrf = vrf;
-        meta.l2_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
-        meta.l2_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.l2_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
+        meta.l2_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
         meta.l3_metadata.lkp_ip_type = 2w1;
-        meta.l2_metadata.lkp_mac_type = hdr.inner_ethernet.etherType;
-        meta.l3_metadata.lkp_ip_version = hdr.inner_ipv4.version;
-        meta.l3_metadata.lkp_ip_tc = hdr.inner_ipv4.diffserv;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.inner_ethernet.etherType;
+        meta.l3_metadata.lkp_ip_version = (bit<4>)hdr.inner_ipv4.version;
+        meta.l3_metadata.lkp_ip_tc = (bit<8>)hdr.inner_ipv4.diffserv;
     }
     @name(".terminate_ipv6_over_mpls") action terminate_ipv6_over_mpls(bit<16> vrf, bit<5> tunnel_type) {
         meta.tunnel_metadata.tunnel_terminate = 1w1;
         meta.tunnel_metadata.ingress_tunnel_type = tunnel_type;
         meta.l3_metadata.vrf = vrf;
-        meta.l2_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
-        meta.l2_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.l2_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
+        meta.l2_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
         meta.l3_metadata.lkp_ip_type = 2w2;
-        meta.l2_metadata.lkp_mac_type = hdr.inner_ethernet.etherType;
-        meta.l3_metadata.lkp_ip_version = hdr.inner_ipv6.version;
-        meta.l3_metadata.lkp_ip_tc = hdr.inner_ipv6.trafficClass;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.inner_ethernet.etherType;
+        meta.l3_metadata.lkp_ip_version = (bit<4>)hdr.inner_ipv6.version;
+        meta.l3_metadata.lkp_ip_tc = (bit<8>)hdr.inner_ipv6.trafficClass;
     }
     @name(".terminate_pw") action terminate_pw(bit<16> ifindex) {
         meta.ingress_metadata.egress_ifindex = ifindex;
-        meta.l2_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
-        meta.l2_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.l2_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
+        meta.l2_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
     }
     @name(".forward_mpls") action forward_mpls(bit<16> nexthop_index) {
         meta.l3_metadata.fib_nexthop = nexthop_index;
         meta.l3_metadata.fib_nexthop_type = 1w0;
         meta.l3_metadata.fib_hit = 1w1;
-        meta.l2_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
-        meta.l2_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.l2_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
+        meta.l2_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
     }
     @name(".mpls") table mpls_0 {
         actions = {
@@ -3984,22 +3984,22 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
         meta.acl_metadata.bd_label = bd_label;
         meta.l2_metadata.bd_stats_idx = stats_idx;
         meta.l3_metadata.lkp_ip_type = 2w0;
-        meta.l2_metadata.lkp_mac_type = hdr.inner_ethernet.etherType;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.inner_ethernet.etherType;
     }
     @name(".terminate_tunnel_inner_ethernet_ipv4") action terminate_tunnel_inner_ethernet_ipv4(bit<16> bd, bit<16> vrf, bit<10> rmac_group, bit<16> bd_label, bit<1> ipv4_unicast_enabled, bit<2> ipv4_urpf_mode, bit<1> igmp_snooping_enabled, bit<16> stats_idx, bit<1> ipv4_multicast_enabled, bit<16> mrpf_group) {
         meta.tunnel_metadata.tunnel_terminate = 1w1;
         meta.ingress_metadata.bd = bd;
         meta.l3_metadata.vrf = vrf;
-        meta.qos_metadata.outer_dscp = meta.l3_metadata.lkp_ip_tc;
+        meta.qos_metadata.outer_dscp = (bit<8>)meta.l3_metadata.lkp_ip_tc;
         meta.ipv4_metadata.ipv4_unicast_enabled = ipv4_unicast_enabled;
         meta.ipv4_metadata.ipv4_urpf_mode = ipv4_urpf_mode;
         meta.l3_metadata.rmac_group = rmac_group;
         meta.acl_metadata.bd_label = bd_label;
         meta.l2_metadata.bd_stats_idx = stats_idx;
         meta.l3_metadata.lkp_ip_type = 2w1;
-        meta.l2_metadata.lkp_mac_type = hdr.inner_ethernet.etherType;
-        meta.l3_metadata.lkp_ip_version = hdr.inner_ipv4.version;
-        meta.l3_metadata.lkp_ip_tc = hdr.inner_ipv4.diffserv;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.inner_ethernet.etherType;
+        meta.l3_metadata.lkp_ip_version = (bit<4>)hdr.inner_ipv4.version;
+        meta.l3_metadata.lkp_ip_tc = (bit<8>)hdr.inner_ipv4.diffserv;
         meta.multicast_metadata.igmp_snooping_enabled = igmp_snooping_enabled;
         meta.multicast_metadata.ipv4_multicast_enabled = ipv4_multicast_enabled;
         meta.multicast_metadata.bd_mrpf_group = mrpf_group;
@@ -4007,15 +4007,15 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
     @name(".terminate_tunnel_inner_ipv4") action terminate_tunnel_inner_ipv4(bit<16> vrf, bit<10> rmac_group, bit<2> ipv4_urpf_mode, bit<1> ipv4_unicast_enabled, bit<1> ipv4_multicast_enabled, bit<16> mrpf_group) {
         meta.tunnel_metadata.tunnel_terminate = 1w1;
         meta.l3_metadata.vrf = vrf;
-        meta.qos_metadata.outer_dscp = meta.l3_metadata.lkp_ip_tc;
+        meta.qos_metadata.outer_dscp = (bit<8>)meta.l3_metadata.lkp_ip_tc;
         meta.ipv4_metadata.ipv4_unicast_enabled = ipv4_unicast_enabled;
         meta.ipv4_metadata.ipv4_urpf_mode = ipv4_urpf_mode;
         meta.l3_metadata.rmac_group = rmac_group;
-        meta.l2_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
-        meta.l2_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.l2_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
+        meta.l2_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
         meta.l3_metadata.lkp_ip_type = 2w1;
-        meta.l3_metadata.lkp_ip_version = hdr.inner_ipv4.version;
-        meta.l3_metadata.lkp_ip_tc = hdr.inner_ipv4.diffserv;
+        meta.l3_metadata.lkp_ip_version = (bit<4>)hdr.inner_ipv4.version;
+        meta.l3_metadata.lkp_ip_tc = (bit<8>)hdr.inner_ipv4.diffserv;
         meta.multicast_metadata.bd_mrpf_group = mrpf_group;
         meta.multicast_metadata.ipv4_multicast_enabled = ipv4_multicast_enabled;
     }
@@ -4023,16 +4023,16 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
         meta.tunnel_metadata.tunnel_terminate = 1w1;
         meta.ingress_metadata.bd = bd;
         meta.l3_metadata.vrf = vrf;
-        meta.qos_metadata.outer_dscp = meta.l3_metadata.lkp_ip_tc;
+        meta.qos_metadata.outer_dscp = (bit<8>)meta.l3_metadata.lkp_ip_tc;
         meta.ipv6_metadata.ipv6_unicast_enabled = ipv6_unicast_enabled;
         meta.ipv6_metadata.ipv6_urpf_mode = ipv6_urpf_mode;
         meta.l3_metadata.rmac_group = rmac_group;
         meta.acl_metadata.bd_label = bd_label;
         meta.l2_metadata.bd_stats_idx = stats_idx;
         meta.l3_metadata.lkp_ip_type = 2w2;
-        meta.l2_metadata.lkp_mac_type = hdr.inner_ethernet.etherType;
-        meta.l3_metadata.lkp_ip_version = hdr.inner_ipv6.version;
-        meta.l3_metadata.lkp_ip_tc = hdr.inner_ipv6.trafficClass;
+        meta.l2_metadata.lkp_mac_type = (bit<16>)hdr.inner_ethernet.etherType;
+        meta.l3_metadata.lkp_ip_version = (bit<4>)hdr.inner_ipv6.version;
+        meta.l3_metadata.lkp_ip_tc = (bit<8>)hdr.inner_ipv6.trafficClass;
         meta.multicast_metadata.bd_mrpf_group = mrpf_group;
         meta.multicast_metadata.ipv6_multicast_enabled = ipv6_multicast_enabled;
         meta.multicast_metadata.mld_snooping_enabled = mld_snooping_enabled;
@@ -4040,45 +4040,45 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
     @name(".terminate_tunnel_inner_ipv6") action terminate_tunnel_inner_ipv6(bit<16> vrf, bit<10> rmac_group, bit<1> ipv6_unicast_enabled, bit<2> ipv6_urpf_mode, bit<1> ipv6_multicast_enabled, bit<16> mrpf_group) {
         meta.tunnel_metadata.tunnel_terminate = 1w1;
         meta.l3_metadata.vrf = vrf;
-        meta.qos_metadata.outer_dscp = meta.l3_metadata.lkp_ip_tc;
+        meta.qos_metadata.outer_dscp = (bit<8>)meta.l3_metadata.lkp_ip_tc;
         meta.ipv6_metadata.ipv6_unicast_enabled = ipv6_unicast_enabled;
         meta.ipv6_metadata.ipv6_urpf_mode = ipv6_urpf_mode;
         meta.l3_metadata.rmac_group = rmac_group;
-        meta.l2_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
-        meta.l2_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.l2_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
+        meta.l2_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
         meta.l3_metadata.lkp_ip_type = 2w2;
-        meta.ipv6_metadata.lkp_ipv6_sa = hdr.inner_ipv6.srcAddr;
-        meta.ipv6_metadata.lkp_ipv6_da = hdr.inner_ipv6.dstAddr;
-        meta.l3_metadata.lkp_ip_version = hdr.inner_ipv6.version;
-        meta.l3_metadata.lkp_ip_tc = hdr.inner_ipv6.trafficClass;
+        meta.ipv6_metadata.lkp_ipv6_sa = (bit<128>)hdr.inner_ipv6.srcAddr;
+        meta.ipv6_metadata.lkp_ipv6_da = (bit<128>)hdr.inner_ipv6.dstAddr;
+        meta.l3_metadata.lkp_ip_version = (bit<4>)hdr.inner_ipv6.version;
+        meta.l3_metadata.lkp_ip_tc = (bit<8>)hdr.inner_ipv6.trafficClass;
         meta.multicast_metadata.bd_mrpf_group = mrpf_group;
         meta.multicast_metadata.ipv6_multicast_enabled = ipv6_multicast_enabled;
     }
     @name(".non_ip_tunnel_lookup_miss") action non_ip_tunnel_lookup_miss() {
-        meta.l2_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
-        meta.l2_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
+        meta.l2_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
+        meta.l2_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
         standard_metadata.mcast_grp = 16w0;
     }
     @name(".ipv4_tunnel_lookup_miss") action ipv4_tunnel_lookup_miss() {
-        meta.l2_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
-        meta.l2_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
-        meta.ipv4_metadata.lkp_ipv4_sa = hdr.ipv4.srcAddr;
-        meta.ipv4_metadata.lkp_ipv4_da = hdr.ipv4.dstAddr;
-        meta.l3_metadata.lkp_ip_proto = hdr.ipv4.protocol;
-        meta.l3_metadata.lkp_ip_ttl = hdr.ipv4.ttl;
-        meta.l3_metadata.lkp_l4_sport = meta.l3_metadata.lkp_outer_l4_sport;
-        meta.l3_metadata.lkp_l4_dport = meta.l3_metadata.lkp_outer_l4_dport;
+        meta.l2_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
+        meta.l2_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
+        meta.ipv4_metadata.lkp_ipv4_sa = (bit<32>)hdr.ipv4.srcAddr;
+        meta.ipv4_metadata.lkp_ipv4_da = (bit<32>)hdr.ipv4.dstAddr;
+        meta.l3_metadata.lkp_ip_proto = (bit<8>)hdr.ipv4.protocol;
+        meta.l3_metadata.lkp_ip_ttl = (bit<8>)hdr.ipv4.ttl;
+        meta.l3_metadata.lkp_l4_sport = (bit<16>)meta.l3_metadata.lkp_outer_l4_sport;
+        meta.l3_metadata.lkp_l4_dport = (bit<16>)meta.l3_metadata.lkp_outer_l4_dport;
         standard_metadata.mcast_grp = 16w0;
     }
     @name(".ipv6_tunnel_lookup_miss") action ipv6_tunnel_lookup_miss() {
-        meta.l2_metadata.lkp_mac_sa = hdr.ethernet.srcAddr;
-        meta.l2_metadata.lkp_mac_da = hdr.ethernet.dstAddr;
-        meta.ipv6_metadata.lkp_ipv6_sa = hdr.ipv6.srcAddr;
-        meta.ipv6_metadata.lkp_ipv6_da = hdr.ipv6.dstAddr;
-        meta.l3_metadata.lkp_ip_proto = hdr.ipv6.nextHdr;
-        meta.l3_metadata.lkp_ip_ttl = hdr.ipv6.hopLimit;
-        meta.l3_metadata.lkp_l4_sport = meta.l3_metadata.lkp_outer_l4_sport;
-        meta.l3_metadata.lkp_l4_dport = meta.l3_metadata.lkp_outer_l4_dport;
+        meta.l2_metadata.lkp_mac_sa = (bit<48>)hdr.ethernet.srcAddr;
+        meta.l2_metadata.lkp_mac_da = (bit<48>)hdr.ethernet.dstAddr;
+        meta.ipv6_metadata.lkp_ipv6_sa = (bit<128>)hdr.ipv6.srcAddr;
+        meta.ipv6_metadata.lkp_ipv6_da = (bit<128>)hdr.ipv6.dstAddr;
+        meta.l3_metadata.lkp_ip_proto = (bit<8>)hdr.ipv6.nextHdr;
+        meta.l3_metadata.lkp_ip_ttl = (bit<8>)hdr.ipv6.hopLimit;
+        meta.l3_metadata.lkp_l4_sport = (bit<16>)meta.l3_metadata.lkp_outer_l4_sport;
+        meta.l3_metadata.lkp_l4_dport = (bit<16>)meta.l3_metadata.lkp_outer_l4_dport;
         standard_metadata.mcast_grp = 16w0;
     }
     @name(".outer_rmac") table outer_rmac {
@@ -4230,7 +4230,7 @@ control process_storm_control(inout headers hdr, inout metadata meta, inout stan
     }
     @name(".set_storm_control_meter") action set_storm_control_meter(bit<16> meter_idx) {
         storm_control_meter.execute_meter((bit<10>)(bit<10>)meter_idx, meta.meter_metadata.meter_color);
-        meta.meter_metadata.meter_index = meter_idx;
+        meta.meter_metadata.meter_index = (bit<16>)meter_idx;
     }
     @name(".storm_control") table storm_control {
         actions = {
@@ -4310,7 +4310,7 @@ control process_mac(inout headers hdr, inout metadata meta, inout standard_metad
     }
     @name(".dmac_hit") action dmac_hit(bit<16> ifindex) {
         meta.ingress_metadata.egress_ifindex = ifindex;
-        meta.l2_metadata.same_if_check = meta.l2_metadata.same_if_check ^ ifindex;
+        meta.l2_metadata.same_if_check = meta.l2_metadata.same_if_check ^ (bit<16>)ifindex;
     }
     @name(".dmac_multicast_hit") action dmac_multicast_hit(bit<16> mc_index) {
         standard_metadata.mcast_grp = mc_index;
@@ -4337,7 +4337,7 @@ control process_mac(inout headers hdr, inout metadata meta, inout standard_metad
         meta.l2_metadata.l2_src_miss = 1w1;
     }
     @name(".smac_hit") action smac_hit(bit<16> ifindex) {
-        meta.l2_metadata.l2_src_move = meta.ingress_metadata.ifindex ^ ifindex;
+        meta.l2_metadata.l2_src_move = (bit<16>)meta.ingress_metadata.ifindex ^ ifindex;
     }
     @name(".dmac") table dmac {
         support_timeout = true;
@@ -4596,7 +4596,7 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_mode = 2w1;
         meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ (bit<16>)meta.multicast_metadata.bd_mrpf_group;
     }
     @name(".multicast_route_star_g_miss") action multicast_route_star_g_miss() {
         meta.l3_metadata.l3_copy = 1w1;
@@ -4605,13 +4605,13 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
         meta.multicast_metadata.mcast_mode = 2w1;
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ (bit<16>)meta.multicast_metadata.bd_mrpf_group;
     }
     @name(".multicast_route_bidir_star_g_hit") action multicast_route_bidir_star_g_hit(bit<16> mc_index, bit<16> mcast_rpf_group) {
         meta.multicast_metadata.mcast_mode = 2w2;
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | (bit<16>)meta.multicast_metadata.bd_mrpf_group;
     }
     @name(".ipv4_multicast_bridge") table ipv4_multicast_bridge {
         actions = {
@@ -4644,7 +4644,7 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_mode = 2w1;
         meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ (bit<16>)meta.multicast_metadata.bd_mrpf_group;
     }
     @name(".ipv4_multicast_route") table ipv4_multicast_route {
         actions = {
@@ -4668,14 +4668,14 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
         meta.multicast_metadata.mcast_mode = 2w1;
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ (bit<16>)meta.multicast_metadata.bd_mrpf_group;
     }
     @name(".multicast_route_bidir_star_g_hit") action multicast_route_bidir_star_g_hit_0(bit<16> mc_index, bit<16> mcast_rpf_group) {
         ipv4_multicast_route_star_g_stats.count();
         meta.multicast_metadata.mcast_mode = 2w2;
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | (bit<16>)meta.multicast_metadata.bd_mrpf_group;
     }
     @name(".ipv4_multicast_route_star_g") table ipv4_multicast_route_star_g {
         actions = {
@@ -4727,7 +4727,7 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_mode = 2w1;
         meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ (bit<16>)meta.multicast_metadata.bd_mrpf_group;
     }
     @name(".multicast_route_star_g_miss") action multicast_route_star_g_miss() {
         meta.l3_metadata.l3_copy = 1w1;
@@ -4736,13 +4736,13 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
         meta.multicast_metadata.mcast_mode = 2w1;
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ (bit<16>)meta.multicast_metadata.bd_mrpf_group;
     }
     @name(".multicast_route_bidir_star_g_hit") action multicast_route_bidir_star_g_hit(bit<16> mc_index, bit<16> mcast_rpf_group) {
         meta.multicast_metadata.mcast_mode = 2w2;
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | (bit<16>)meta.multicast_metadata.bd_mrpf_group;
     }
     @name(".ipv6_multicast_bridge") table ipv6_multicast_bridge {
         actions = {
@@ -4775,7 +4775,7 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_mode = 2w1;
         meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ (bit<16>)meta.multicast_metadata.bd_mrpf_group;
     }
     @name(".ipv6_multicast_route") table ipv6_multicast_route {
         actions = {
@@ -4799,14 +4799,14 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
         meta.multicast_metadata.mcast_mode = 2w1;
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group ^ (bit<16>)meta.multicast_metadata.bd_mrpf_group;
     }
     @name(".multicast_route_bidir_star_g_hit") action multicast_route_bidir_star_g_hit_1(bit<16> mc_index, bit<16> mcast_rpf_group) {
         ipv6_multicast_route_star_g_stats.count();
         meta.multicast_metadata.mcast_mode = 2w2;
         meta.multicast_metadata.multicast_route_mc_index = mc_index;
         meta.multicast_metadata.mcast_route_hit = 1w1;
-        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | meta.multicast_metadata.bd_mrpf_group;
+        meta.multicast_metadata.mcast_rpf_group = mcast_rpf_group | (bit<16>)meta.multicast_metadata.bd_mrpf_group;
     }
     @name(".ipv6_multicast_route_star_g") table ipv6_multicast_route_star_g {
         actions = {
@@ -4919,7 +4919,7 @@ control process_ipv4_urpf(inout headers hdr, inout metadata meta, inout standard
     @name(".ipv4_urpf_hit") action ipv4_urpf_hit(bit<16> urpf_bd_group) {
         meta.l3_metadata.urpf_hit = 1w1;
         meta.l3_metadata.urpf_bd_group = urpf_bd_group;
-        meta.l3_metadata.urpf_mode = meta.ipv4_metadata.ipv4_urpf_mode;
+        meta.l3_metadata.urpf_mode = (bit<2>)meta.ipv4_metadata.ipv4_urpf_mode;
     }
     @name(".urpf_miss") action urpf_miss() {
         meta.l3_metadata.urpf_check_fail = 1w1;
@@ -5062,7 +5062,7 @@ control process_ipv6_urpf(inout headers hdr, inout metadata meta, inout standard
     @name(".ipv6_urpf_hit") action ipv6_urpf_hit(bit<16> urpf_bd_group) {
         meta.l3_metadata.urpf_hit = 1w1;
         meta.l3_metadata.urpf_bd_group = urpf_bd_group;
-        meta.l3_metadata.urpf_mode = meta.ipv6_metadata.ipv6_urpf_mode;
+        meta.l3_metadata.urpf_mode = (bit<2>)meta.ipv6_metadata.ipv6_urpf_mode;
     }
     @name(".urpf_miss") action urpf_miss() {
         meta.l3_metadata.urpf_check_fail = 1w1;
@@ -5207,11 +5207,11 @@ control process_hashes(inout headers hdr, inout metadata meta, inout standard_me
         hash(meta.hash_metadata.hash2, HashAlgorithm.crc16, (bit<16>)0, { meta.ingress_metadata.ifindex, meta.l2_metadata.lkp_mac_sa, meta.l2_metadata.lkp_mac_da, meta.l2_metadata.lkp_mac_type }, (bit<32>)65536);
     }
     @name(".computed_two_hashes") action computed_two_hashes() {
-        meta.hash_metadata.entropy_hash = meta.hash_metadata.hash2;
+        meta.hash_metadata.entropy_hash = (bit<16>)meta.hash_metadata.hash2;
     }
     @name(".computed_one_hash") action computed_one_hash() {
-        meta.hash_metadata.hash1 = meta.hash_metadata.hash2;
-        meta.hash_metadata.entropy_hash = meta.hash_metadata.hash2;
+        meta.hash_metadata.hash1 = (bit<16>)meta.hash_metadata.hash2;
+        meta.hash_metadata.entropy_hash = (bit<16>)meta.hash_metadata.hash2;
     }
     @name(".compute_ipv4_hashes") table compute_ipv4_hashes {
         actions = {
@@ -5354,15 +5354,15 @@ control process_fwd_results(inout headers hdr, inout metadata meta, inout standa
     @name(".nop") action nop() {
     }
     @name(".set_l2_redirect_action") action set_l2_redirect_action() {
-        meta.l3_metadata.nexthop_index = meta.l2_metadata.l2_nexthop;
-        meta.nexthop_metadata.nexthop_type = meta.l2_metadata.l2_nexthop_type;
+        meta.l3_metadata.nexthop_index = (bit<16>)meta.l2_metadata.l2_nexthop;
+        meta.nexthop_metadata.nexthop_type = (bit<1>)meta.l2_metadata.l2_nexthop_type;
         meta.ingress_metadata.egress_ifindex = 16w0;
         standard_metadata.mcast_grp = 16w0;
         meta.fabric_metadata.dst_device = 8w0;
     }
     @name(".set_fib_redirect_action") action set_fib_redirect_action() {
-        meta.l3_metadata.nexthop_index = meta.l3_metadata.fib_nexthop;
-        meta.nexthop_metadata.nexthop_type = meta.l3_metadata.fib_nexthop_type;
+        meta.l3_metadata.nexthop_index = (bit<16>)meta.l3_metadata.fib_nexthop;
+        meta.nexthop_metadata.nexthop_type = (bit<1>)meta.l3_metadata.fib_nexthop_type;
         meta.l3_metadata.routed = 1w1;
         standard_metadata.mcast_grp = 16w0;
         meta.fabric_metadata.reason_code = 16w0x217;
@@ -5376,15 +5376,15 @@ control process_fwd_results(inout headers hdr, inout metadata meta, inout standa
         meta.fabric_metadata.dst_device = 8w0;
     }
     @name(".set_acl_redirect_action") action set_acl_redirect_action() {
-        meta.l3_metadata.nexthop_index = meta.acl_metadata.acl_nexthop;
-        meta.nexthop_metadata.nexthop_type = meta.acl_metadata.acl_nexthop_type;
+        meta.l3_metadata.nexthop_index = (bit<16>)meta.acl_metadata.acl_nexthop;
+        meta.nexthop_metadata.nexthop_type = (bit<1>)meta.acl_metadata.acl_nexthop_type;
         meta.ingress_metadata.egress_ifindex = 16w0;
         standard_metadata.mcast_grp = 16w0;
         meta.fabric_metadata.dst_device = 8w0;
     }
     @name(".set_racl_redirect_action") action set_racl_redirect_action() {
-        meta.l3_metadata.nexthop_index = meta.acl_metadata.racl_nexthop;
-        meta.nexthop_metadata.nexthop_type = meta.acl_metadata.racl_nexthop_type;
+        meta.l3_metadata.nexthop_index = (bit<16>)meta.acl_metadata.racl_nexthop;
+        meta.nexthop_metadata.nexthop_type = (bit<1>)meta.acl_metadata.racl_nexthop_type;
         meta.l3_metadata.routed = 1w1;
         meta.ingress_metadata.egress_ifindex = 16w0;
         standard_metadata.mcast_grp = 16w0;
@@ -5393,14 +5393,14 @@ control process_fwd_results(inout headers hdr, inout metadata meta, inout standa
     @name(".set_multicast_route_action") action set_multicast_route_action() {
         meta.fabric_metadata.dst_device = 8w127;
         meta.ingress_metadata.egress_ifindex = 16w0;
-        standard_metadata.mcast_grp = meta.multicast_metadata.multicast_route_mc_index;
+        standard_metadata.mcast_grp = (bit<16>)meta.multicast_metadata.multicast_route_mc_index;
         meta.l3_metadata.routed = 1w1;
         meta.l3_metadata.same_bd_check = 16w0xffff;
     }
     @name(".set_multicast_bridge_action") action set_multicast_bridge_action() {
         meta.fabric_metadata.dst_device = 8w127;
         meta.ingress_metadata.egress_ifindex = 16w0;
-        standard_metadata.mcast_grp = meta.multicast_metadata.multicast_bridge_mc_index;
+        standard_metadata.mcast_grp = (bit<16>)meta.multicast_metadata.multicast_bridge_mc_index;
     }
     @name(".set_multicast_flood") action set_multicast_flood() {
         meta.fabric_metadata.dst_device = 8w127;
@@ -5453,27 +5453,27 @@ control process_nexthop(inout headers hdr, inout metadata meta, inout standard_m
     @name(".set_ecmp_nexthop_details") action set_ecmp_nexthop_details(bit<16> ifindex, bit<16> bd, bit<16> nhop_index, bit<1> tunnel) {
         meta.ingress_metadata.egress_ifindex = ifindex;
         meta.l3_metadata.nexthop_index = nhop_index;
-        meta.l3_metadata.same_bd_check = meta.ingress_metadata.bd ^ bd;
-        meta.l2_metadata.same_if_check = meta.l2_metadata.same_if_check ^ ifindex;
-        meta.tunnel_metadata.tunnel_if_check = meta.tunnel_metadata.tunnel_terminate ^ tunnel;
+        meta.l3_metadata.same_bd_check = (bit<16>)meta.ingress_metadata.bd ^ bd;
+        meta.l2_metadata.same_if_check = meta.l2_metadata.same_if_check ^ (bit<16>)ifindex;
+        meta.tunnel_metadata.tunnel_if_check = (bit<1>)meta.tunnel_metadata.tunnel_terminate ^ tunnel;
     }
     @name(".set_ecmp_nexthop_details_for_post_routed_flood") action set_ecmp_nexthop_details_for_post_routed_flood(bit<16> bd, bit<16> uuc_mc_index, bit<16> nhop_index) {
         standard_metadata.mcast_grp = uuc_mc_index;
         meta.l3_metadata.nexthop_index = nhop_index;
         meta.ingress_metadata.egress_ifindex = 16w0;
-        meta.l3_metadata.same_bd_check = meta.ingress_metadata.bd ^ bd;
+        meta.l3_metadata.same_bd_check = (bit<16>)meta.ingress_metadata.bd ^ bd;
         meta.fabric_metadata.dst_device = 8w127;
     }
     @name(".set_nexthop_details") action set_nexthop_details(bit<16> ifindex, bit<16> bd, bit<1> tunnel) {
         meta.ingress_metadata.egress_ifindex = ifindex;
-        meta.l3_metadata.same_bd_check = meta.ingress_metadata.bd ^ bd;
-        meta.l2_metadata.same_if_check = meta.l2_metadata.same_if_check ^ ifindex;
-        meta.tunnel_metadata.tunnel_if_check = meta.tunnel_metadata.tunnel_terminate ^ tunnel;
+        meta.l3_metadata.same_bd_check = (bit<16>)meta.ingress_metadata.bd ^ bd;
+        meta.l2_metadata.same_if_check = meta.l2_metadata.same_if_check ^ (bit<16>)ifindex;
+        meta.tunnel_metadata.tunnel_if_check = (bit<1>)meta.tunnel_metadata.tunnel_terminate ^ tunnel;
     }
     @name(".set_nexthop_details_for_post_routed_flood") action set_nexthop_details_for_post_routed_flood(bit<16> bd, bit<16> uuc_mc_index) {
         standard_metadata.mcast_grp = uuc_mc_index;
         meta.ingress_metadata.egress_ifindex = 16w0;
-        meta.l3_metadata.same_bd_check = meta.ingress_metadata.bd ^ bd;
+        meta.l3_metadata.same_bd_check = (bit<16>)meta.ingress_metadata.bd ^ bd;
         meta.fabric_metadata.dst_device = 8w127;
     }
     @name(".ecmp_group") table ecmp_group {
@@ -5597,7 +5597,7 @@ control process_fabric_lag(inout headers hdr, inout metadata meta, inout standar
         standard_metadata.egress_spec = port;
     }
     @name(".set_fabric_multicast") action set_fabric_multicast(bit<8> fabric_mgid) {
-        meta.multicast_metadata.mcast_grp = standard_metadata.mcast_grp;
+        meta.multicast_metadata.mcast_grp = (bit<16>)standard_metadata.mcast_grp;
     }
     @name(".fabric_lag") table fabric_lag {
         actions = {

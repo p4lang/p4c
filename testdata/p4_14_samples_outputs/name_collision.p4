@@ -46,7 +46,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".noop") action noop() {
     }
     @name(".B") action B_2() {
-        B_1.count((bit<10>)meta.meta.B);
+        B_1.count((bit<10>)(bit<10>)meta.meta.B);
     }
     @name(".A") table A_4 {
         actions = {
