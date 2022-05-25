@@ -156,6 +156,11 @@ class ConvertStatementToDpdk : public Inspector {
  private:
     void processHashParams(const IR::Argument* field,
                            IR::Vector<IR::Expression>& components);
+    bool checkIfBelongToSameHdrMdStructure(const IR::Argument* field);
+    void updateMdStrAndGenInstr(const IR::Argument* field,
+                                IR::Vector<IR::Expression>& components);
+    cstring getHdrMdStrName(const IR::Member* mem);
+    // bool checkIfConsecutiveHdrMdfields(const IR::Argument* field);
 
  public:
     ConvertStatementToDpdk(
