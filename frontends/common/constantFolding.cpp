@@ -971,7 +971,7 @@ DoConstantFolding::setContains(const IR::Expression* keySet, const IR::Expressio
             return Result::Yes;
         return Result::No;
     }
-    ::error(ErrorType::ERR_INVALID, "%1%: unexpected expression", keySet);
+    // Otherwise the keyset may be a ValueSet
     return Result::DontKnow;
 }
 
@@ -985,10 +985,8 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
     bool someUnknown = false;
     bool changes = false;
     bool finished = false;
-
     const IR::Expression* result = expression;
-    /* FIXME -- should erase/replace each element as needed, rather than creating a new Vector.
-     * Should really implement this in SelectCase pre/postorder and this postorder goes away */
+
     for (auto c : expression->selectCases) {
         if (finished) {
             if (warnings)
@@ -1003,9 +1001,10 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
             someUnknown = true;
             cases.push_back(c);
         } else {
-            changes = true;
             finished = true;
             if (someUnknown) {
+                if (!c->keyset->is<IR::DefaultExpression>())
+                    changes = true;
                 auto newc = new IR::SelectCase(c->srcInfo, new IR::DefaultExpression(), c->state);
                 cases.push_back(newc);
             } else {
