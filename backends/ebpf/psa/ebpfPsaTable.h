@@ -30,6 +30,7 @@ class EBPFTablePSA : public EBPFTable {
  private:
     std::vector<std::vector<const IR::Entry*>> getConstEntriesGroupedByPrefix();
     bool hasConstEntries();
+    void emitMaskForExactMatch(CodeBuilder *builder, cstring &fieldName, EBPFType *ebpfType) const;
     const cstring addPrefixFunctionName = "add_prefix_and_entries";
     const cstring tuplesMapName = instanceName + "_tuples_map";
     const cstring prefixesMapName = instanceName + "_prefixes";

@@ -670,9 +670,9 @@ void EBPFTablePSA::emitTernaryConstEntriesInitializer(CodeBuilder *builder) {
 }
 
 void EBPFTablePSA::emitKeysAndValues(CodeBuilder *builder,
-                                            std::vector<const IR::Entry *> &samePrefixEntries,
-                                            std::vector<cstring> &keyNames,
-                                            std::vector<cstring> &valueNames) {
+                                     std::vector<const IR::Entry *> &samePrefixEntries,
+                                     std::vector<cstring> &keyNames,
+                                     std::vector<cstring> &valueNames) {
     CodeGenInspector cg(program->refMap, program->typeMap);
     cg.setBuilder(builder);
 
@@ -702,15 +702,7 @@ void EBPFTablePSA::emitKeysAndValues(CodeBuilder *builder,
             } else {
                 expr->apply(cg);
                 builder->append(" & ");
-                unsigned width = 0;
-                if (auto hasWidth = ebpfType->to<IHasWidth>()) {
-                    width = hasWidth->widthInBits();
-                } else {
-                    BUG("Cannot assess field bit width");
-                }
-                builder->append("0x");
-                for (int j = 0; j < width / 8; j++)
-                    builder->append("ff");
+                emitMaskForExactMatch(builder, fieldName, ebpfType);
             }
             builder->endOfStatement(true);
         }
@@ -756,16 +748,7 @@ void EBPFTablePSA::emitKeyMasks(CodeBuilder *builder,
                 // MidEnd transforms 0xffff... masks into exact match
                 // So we receive there a Constant same as exact match
                 // So we have to create 0xffff... mask on our own
-                unsigned width = 0;
-                if (auto hasWidth = ebpfType->to<IHasWidth>()) {
-                    width = hasWidth->widthInBits();
-                } else {
-                    BUG("Cannot assess field bit width");
-                }
-                builder->append("0x");
-                for (int j = 0; j < width / 8; j++)
-                    builder->append("ff");
-                builder->endOfStatement(true);
+                emitMaskForExactMatch(builder, fieldName, ebpfType);
             }
             builder->emitIndent();
             builder->appendFormat("__builtin_memcpy(%s, &%s, sizeof(%s))",
@@ -776,6 +759,35 @@ void EBPFTablePSA::emitKeyMasks(CodeBuilder *builder,
             builder->endOfStatement(true);
         }
     }
+}
+
+void EBPFTablePSA::emitMaskForExactMatch(CodeBuilder *builder,
+                                         cstring &fieldName,
+                                         EBPFType *ebpfType) const {
+    unsigned width = 0;
+    if (auto hasWidth = ebpfType->to<IHasWidth>()) {
+        width = hasWidth->widthInBits();
+        if (width <= 8) {
+            width = 8;
+        } else if (width <= 16) {
+            width = 16;
+        } else if (width <= 32) {
+            width = 32;
+        } else if (width <= 64) {
+            width = 64;
+        } else {
+            // TODO: handle width > 64 bits
+            error(ErrorType::ERR_UNSUPPORTED,
+                    "%1%: fields wider than 64 bits are not supported yet",
+                    fieldName);
+        }
+    } else {
+        BUG("Cannot assess field bit width");
+    }
+    builder->append("0x");
+    for (int j = 0; j < width / 8; j++)
+        builder->append("ff");
+    builder->endOfStatement(true);
 }
 
 void EBPFTablePSA::emitValueMask(CodeBuilder *builder, const cstring valueMask,
@@ -800,47 +812,55 @@ void EBPFTablePSA::emitValueMask(CodeBuilder *builder, const cstring valueMask,
     }
 }
 
+/**
+ * This method groups entries with the same prefix into separate lists.
+ * For example four entries which have two different prefixes
+ * will give as a result a vector of two vectors (each with two entries).
+ * @return a vector of vectors with const entries that have the same prefix
+ */
 std::vector<std::vector<const IR::Entry*>> EBPFTablePSA::getConstEntriesGroupedByPrefix() {
     std::vector<std::vector<const IR::Entry*>> entriesGroupedByPrefix;
     const IR::EntriesList* entries = table->container->getEntries();
-    if (entries != nullptr) {
-        for (int i = 0; i < (int)entries->entries.size(); i++) {
-            auto mainEntr = entries->entries[i];
-            if (!entriesGroupedByPrefix.empty()) {
-                auto last = entriesGroupedByPrefix.back();
-                auto it = std::find(last.begin(), last.end(), mainEntr);
-                if (it != last.end()) {
-                    // If this entry was added in a previous iteration
-                    continue;
-                }
+
+    if (!entries)
+        return entriesGroupedByPrefix;
+
+    for (int i = 0; i < (int)entries->entries.size(); i++) {
+        auto mainEntr = entries->entries[i];
+        if (!entriesGroupedByPrefix.empty()) {
+            auto last = entriesGroupedByPrefix.back();
+            auto it = std::find(last.begin(), last.end(), mainEntr);
+            if (it != last.end()) {
+                // If this entry was added in a previous iteration
+                continue;
             }
-            std::vector<const IR::Entry*> samePrefEntries;
-            samePrefEntries.push_back(mainEntr);
-            for (int j = i; j < (int)entries->entries.size(); j++) {
-                auto refEntr = entries->entries[j];
-                if (i != j) {
-                    bool isTheSamePrefix = true;
-                    for (size_t k = 0; k < mainEntr->keys->components.size(); k++) {
-                        auto k1 = mainEntr->keys->components[k];
-                        auto k2 = refEntr->keys->components[k];
-                        if (auto k1Mask = k1->to<IR::Mask>()) {
-                            if (auto k2Mask = k2->to<IR::Mask>()) {
-                                auto val1 = k1Mask->right->to<IR::Constant>();
-                                auto val2 = k2Mask->right->to<IR::Constant>();
-                                if (val1->value != val2->value) {
-                                    isTheSamePrefix = false;
-                                    break;
-                                }
+        }
+        std::vector<const IR::Entry*> samePrefEntries;
+        samePrefEntries.push_back(mainEntr);
+        for (int j = i; j < (int)entries->entries.size(); j++) {
+            auto refEntr = entries->entries[j];
+            if (i != j) {
+                bool isTheSamePrefix = true;
+                for (size_t k = 0; k < mainEntr->keys->components.size(); k++) {
+                    auto k1 = mainEntr->keys->components[k];
+                    auto k2 = refEntr->keys->components[k];
+                    if (auto k1Mask = k1->to<IR::Mask>()) {
+                        if (auto k2Mask = k2->to<IR::Mask>()) {
+                            auto val1 = k1Mask->right->to<IR::Constant>();
+                            auto val2 = k2Mask->right->to<IR::Constant>();
+                            if (val1->value != val2->value) {
+                                isTheSamePrefix = false;
+                                break;
                             }
                         }
                     }
-                    if (isTheSamePrefix) {
-                        samePrefEntries.push_back(refEntr);
-                    }
+                }
+                if (isTheSamePrefix) {
+                    samePrefEntries.push_back(refEntr);
                 }
             }
-            entriesGroupedByPrefix.push_back(samePrefEntries);
         }
+        entriesGroupedByPrefix.push_back(samePrefEntries);
     }
 
     return entriesGroupedByPrefix;
