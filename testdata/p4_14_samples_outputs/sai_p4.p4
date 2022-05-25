@@ -151,7 +151,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".set_dmac") action set_dmac(bit<48> dst_mac_address, bit<9> port_id) {
         hdr.eth.dstAddr = dst_mac_address;
-        hdr.eth.srcAddr = meta.ingress_metadata.def_smac;
+        hdr.eth.srcAddr = (bit<48>)meta.ingress_metadata.def_smac;
         standard_metadata.egress_spec = port_id;
     }
     @name(".set_next_hop") action set_next_hop(bit<8> type_, bit<8> ip, bit<16> router_interface_id) {
@@ -184,13 +184,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".route_set_nexthop") action route_set_nexthop(bit<16> next_hop_id) {
         meta.ingress_metadata.nhop = next_hop_id;
         meta.ingress_metadata.routed = 1w1;
-        meta.ingress_metadata.ip_dest = hdr.ipv4.dstAddr;
+        meta.ingress_metadata.ip_dest = (bit<32>)hdr.ipv4.dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name(".route_set_nexthop_group") action route_set_nexthop_group(bit<16> next_hop_group_id) {
         meta.ingress_metadata.ecmp_nhop = next_hop_group_id;
         meta.ingress_metadata.routed = 1w1;
-        meta.ingress_metadata.ip_dest = hdr.ipv4.dstAddr;
+        meta.ingress_metadata.ip_dest = (bit<32>)hdr.ipv4.dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name(".set_router_interface") action set_router_interface(bit<16> virtual_router_id, bit<1> type_, bit<9> port_id, bit<12> vlan_id, bit<48> src_mac_address, bit<1> admin_v4_state, bit<1> admin_v6_state, bit<14> mtu) {
@@ -214,7 +214,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.cpu_port = cpu_port;
         meta.ingress_metadata.max_ports = port_number;
         meta.ingress_metadata.oper_status = oper_status;
-        standard_metadata.ingress_port = standard_metadata.ingress_port;
+        standard_metadata.ingress_port = (bit<9>)standard_metadata.ingress_port;
     }
     @name(".set_router") action set_router(bit<1> admin_v4_state, bit<1> admin_v6_state, bit<48> src_mac_address, bit<8> violation_ttl1_action, bit<8> violation_ip_options) {
         meta.ingress_metadata.def_smac = src_mac_address;

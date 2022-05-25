@@ -172,7 +172,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".drop_stats_update") action drop_stats_update() {
-        drop_stats_2.count((bit<8>)meta.ingress_metadata.drop_reason);
+        drop_stats_2.count((bit<8>)(bit<8>)meta.ingress_metadata.drop_reason);
     }
     @name(".nop") action nop() {
     }
