@@ -26,7 +26,7 @@ const unsigned dpdk_default_table_size = 65536;
 #define DPDK_MAX_SHIFT_AMOUNT 64
 
 // Maximum number of configurable timeout values
-const unsigned dpdk_learner_max_configurable_timeout_values = 16;
+const unsigned dpdk_learner_max_configurable_timeout_values = 8;
 const unsigned default_learner_table_size = 0x10000;
 const unsigned default_learner_table_timeout = 120;
 // Maximum values

@@ -86,14 +86,6 @@ learner ipv4_da {
 		120
 		120
 		120
-		120
-		120
-		120
-		120
-		120
-		120
-		120
-		120
 
 		}
 }
@@ -109,14 +101,6 @@ learner ipv4_da2 {
 	default_action add_on_miss_action2 args none 
 	size 65536
 	timeout {
-		120
-		120
-		120
-		120
-		120
-		120
-		120
-		120
 		120
 		120
 		120

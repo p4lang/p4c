@@ -460,7 +460,7 @@ std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
     }
 
     // The initial timeout values
-    // This initializes 16 timeout values which can later be configured through control plane APIs.
+    // This initializes 8 timeout values which can later be configured through control plane APIs.
     out << "\ttimeout {" << std::endl;
     for (int i = 0; i < dpdk_learner_max_configurable_timeout_values ; i++)
         out << "\t\t" << default_learner_table_timeout << std::endl;
