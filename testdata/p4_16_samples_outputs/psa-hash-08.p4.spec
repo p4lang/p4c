@@ -44,22 +44,40 @@ struct user_meta_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
-	bit<16> Ingress_tmp
+	bit<16> ethernet_t_srcAddr
+	bit<8> ipv4_t_version_ihl
+	bit<8> ipv4_t_diffserv
+	bit<32> ipv4_t_totalLen
+	bit<16> ipv4_t_identification
+	bit<16> ipv4_t_flags_fragOffset
+	bit<8> ipv4_t_ttl
+	bit<8> ipv4_t_protocol
+	bit<16> ipv4_t_hdrChecksum
+	bit<32> ipv4_t_srcAddr
+	bit<32> ipv4_t_dstAddr
 }
 metadata instanceof user_meta_t
 
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
-header Ingress_tmp_0 instanceof ipv4_t
 
 action NoAction args none {
 	return
 }
 
 action a1 args none {
-	mov m.Ingress_tmp h.ethernet.srcAddr
-	mov h.Ingress_tmp_0 h.ipv4
-	hash crc32 m.local_metadata_data  m.Ingress_tmp h.Ingress_tmp_0.dstAddr
+	mov m.ethernet_t_srcAddr h.ethernet.srcAddr
+	mov m.ipv4_t_version_ihl h.ipv4.version_ihl
+	mov m.ipv4_t_diffserv h.ipv4.diffserv
+	mov m.ipv4_t_totalLen h.ipv4.totalLen
+	mov m.ipv4_t_identification h.ipv4.identification
+	mov m.ipv4_t_flags_fragOffset h.ipv4.flags_fragOffset
+	mov m.ipv4_t_ttl h.ipv4.ttl
+	mov m.ipv4_t_protocol h.ipv4.protocol
+	mov m.ipv4_t_hdrChecksum h.ipv4.hdrChecksum
+	mov m.ipv4_t_srcAddr h.ipv4.srcAddr
+	mov m.ipv4_t_dstAddr h.ipv4.dstAddr
+	hash crc32 m.local_metadata_data  m.ethernet_t_srcAddr m.ipv4_t_dstAddr
 	and m.local_metadata_data 0x1f
 	add m.local_metadata_data 0xf
 	return

@@ -31,8 +31,6 @@ struct user_meta_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
-	bit<16> Ingress_tmp
-	bit<16> Ingress_tmp_0
 }
 metadata instanceof user_meta_t
 
@@ -43,9 +41,7 @@ action NoAction args none {
 }
 
 action a1 args none {
-	mov m.Ingress_tmp h.ethernet.srcAddr
-	mov m.Ingress_tmp_0 h.ethernet.etherType
-	hash crc32 m.local_metadata_data  m.Ingress_tmp m.Ingress_tmp_0
+	hash crc32 m.local_metadata_data  h.ethernet.srcAddr h.ethernet.etherType
 	and m.local_metadata_data 0x1f
 	add m.local_metadata_data 0x2
 	return

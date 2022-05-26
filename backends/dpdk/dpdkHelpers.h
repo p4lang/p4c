@@ -160,7 +160,7 @@ class ConvertStatementToDpdk : public Inspector {
     void updateMdStrAndGenInstr(const IR::Argument* field,
                                 IR::Vector<IR::Expression>& components);
     cstring getHdrMdStrName(const IR::Member* mem);
-    // bool checkIfConsecutiveHdrMdfields(const IR::Argument* field);
+    bool checkIfConsecutiveHdrMdfields(const IR::Argument* field);
 
  public:
     ConvertStatementToDpdk(

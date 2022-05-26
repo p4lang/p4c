@@ -194,11 +194,12 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 */
                 if (e->expr->arguments->size() == 1) {
                     auto field = (*e->expr->arguments)[0];
-                    auto flg = checkIfBelongToSameHdrMdStructure(field);
-                    if (flg == false)
+                    if (!checkIfBelongToSameHdrMdStructure(field) ||
+                        !checkIfConsecutiveHdrMdfields(field))
                         updateMdStrAndGenInstr(field, components);
-                    else
+                    else {
                         processHashParams(field, components);
+                    }
                     listExp = new IR::ListExpression(components);
                     i = new IR::DpdkGetHashStatement(hashAlgName, listExp, left);
                 } else if (e->expr->arguments->size() == 3) {
@@ -230,11 +231,12 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                         }
                     }
 
-                    auto flg = checkIfBelongToSameHdrMdStructure(field);
-                    if (flg == false)
+                    if (!checkIfBelongToSameHdrMdStructure(field) ||
+                        !checkIfConsecutiveHdrMdfields(field))
                         updateMdStrAndGenInstr(field, components);
-                    else
+                    else {
                         processHashParams(field, components);
+                    }
                     listExp = new IR::ListExpression(components);
                     auto bs = base->expression->to<IR::Expression>();
                     add_instr(new IR::DpdkGetHashStatement(hashAlgName, listExp, left));
@@ -468,16 +470,17 @@ void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument* field,
             auto typeheader = typeInfo->to<IR::Type_Header>();
             for (auto it : typeheader->fields) {
                 IR::ID name(params->member.name + "." + it->name);
-                IR::ID fldName(typeheader->name.toString() + "_" + it->name);
+                IR::ID fldName(refmap->newName(typeheader->name.toString() + "_" + it->name));
                 auto rt = new IR::Member(new IR::PathExpression(IR::ID("h")), name);
                 auto lt = new IR::Member(new IR::PathExpression(IR::ID("m")), fldName);
                 BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+
                 metadataStruct->fields.push_back(new IR::StructField(fldName, it->type));
                 add_instr(new IR::DpdkMovStatement(lt, rt));
                 components.push_back(lt);
             }
         } else {
-            IR::ID name(getHdrMdStrName(params) + "_" + params->member.name);
+            IR::ID name(refmap->newName(getHdrMdStrName(params) + "_" + params->member.name));
             BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
             metadataStruct->fields.push_back(new IR::StructField(name, params->type));
             auto lt = new IR::Member(new IR::PathExpression(IR::ID("m")), name);
@@ -491,8 +494,9 @@ void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument* field,
                 if (typeInfo->is<IR::Type_Header>()) {
                     auto typeheader = typeInfo->to<IR::Type_Header>();
                     for (auto it : typeheader->fields) {
-                        IR::ID name(params->member.name + "." + it->name);
-                        IR::ID fldName(typeheader->name.toString() + "_" + it->name);
+                        IR::ID name(refmap->newName(params->member.name + "." + it->name));
+                        IR::ID fldName(refmap->newName(typeheader->name.toString() + "_" +
+                                                       it->name));
                         auto rt = new IR::Member(new IR::PathExpression(IR::ID("h")), name);
                         auto lt = new IR::Member(new IR::PathExpression(IR::ID("m")), fldName);
                         BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
@@ -501,7 +505,8 @@ void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument* field,
                         components.push_back(lt);
                     }
                 } else {
-                    IR::ID name(getHdrMdStrName(params) + "_" + params->member.name);
+                    IR::ID name(refmap->newName(getHdrMdStrName(params) + "_" +
+                                                params->member.name));
                     BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
                     metadataStruct->fields.push_back(new IR::StructField(name, params->type));
                     auto lt = new IR::Member(new IR::PathExpression(IR::ID("m")), name);
@@ -523,7 +528,6 @@ cstring ConvertStatementToDpdk::getHdrMdStrName(const IR::Member* mem) {
     } else if ((mem != nullptr) && (mem->expr != nullptr) &&
                (mem->expr->type != nullptr) &&
                (mem->expr->type->is<IR::Type_Struct>())) {
-        std::cout<<"St Param : "<<mem<<std::endl;
         auto str_type = mem->expr->type->to<IR::Type_Struct>();
         sName = str_type->name.name;
     }
@@ -539,7 +543,6 @@ bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argumen
         for (auto field1 : s->components) {
             cstring sName = "";
             if (auto params = field1->expression->to<IR::Member>()) {
-                //auto typeInfo = typemap->getType(params);
                 auto type = typemap->getType(params, true);
                 if (type->is<IR::Type_Header>()) {
                     auto typeheader = type->to<IR::Type_Header>();
@@ -552,10 +555,8 @@ bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argumen
                 } else if ((params != nullptr) && (params->expr != nullptr) &&
                            (params->expr->type != nullptr) &&
                            (params->expr->type->is<IR::Type_Struct>())) {
-                    std::cout<<"St Param : "<<params<<std::endl;
                     auto str_type = params->expr->type->to<IR::Type_Struct>();
                     sName = str_type->name.name;
-                    std::cout<<"Str Name : "<<sName<<std::endl;
                 }
             }
             if (hdrStrName == "")
@@ -567,15 +568,50 @@ bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argumen
     return true;
 }
 
-/*
 bool ConvertStatementToDpdk::checkIfConsecutiveHdrMdfields(const IR::Argument* field) {
     if (auto s = field->expression->to<IR::StructExpression>()) {
         if (s->components.size() == 1)
             return true;
+        cstring stName = "";
+        const IR::Type* hdrMdType = nullptr;
+        std::vector<cstring> fldList;
+        for (auto field1 : s->components) {
+            if (auto params = field1->expression->to<IR::Member>()) {
+                if (stName == "")
+                    stName = getHdrMdStrName(params);
+
+                auto type = typemap->getType(params, true);
+                if (type->is<IR::Type_Header>()) {
+                    hdrMdType = type->to<IR::Type_Header>();
+                } else if ((params != nullptr) && (params->expr != nullptr) &&
+                           (params->expr->type != nullptr) &&
+                           (params->expr->type->is<IR::Type_Header>())) {
+                    fldList.push_back(params->member.name);
+                    hdrMdType = params->expr->type->to<IR::Type_Header>();
+                } else if ((params != nullptr) && (params->expr != nullptr) &&
+                       (params->expr->type != nullptr) &&
+                       (params->expr->type->is<IR::Type_Struct>())) {
+                    fldList.push_back(params->member.name);
+                    hdrMdType = params->expr->type->to<IR::Type_Struct>();
+                }
+            }
+        }
+        if (hdrMdType->is<IR::Type_Header>()) {
+            auto typeheader = hdrMdType->to<IR::Type_Header>();
+            for (unsigned idx = 0; idx != typeheader->fields.size(); idx++) {
+                if (typeheader->fields[idx]->name == fldList[0]) {
+                    for (unsigned j = 1; j != fldList.size(); j++) {
+                        if (fldList[j] != typeheader->fields[++idx]->name)
+                            return false;
+                    }
+                    break;
+                }
+            }
+        }
     }
     return true;
 }
-*/
+
 /* This recursion requires the pass of ConvertLogicalExpression. This pass will
  * transform the logical experssion to a form that this function use as
  * presumption. The presumption of this function is that the left side of
