@@ -256,16 +256,11 @@ DpdkContextGenerator::addMatchAttributes(const IR::P4Table* table, const cstring
     for (auto action : table->getActionList()->actionList) {
         auto* oneAction = new Util::JsonObject();
         struct actionAttributes attr = ::get(actionAttrMap, action->getName());
-        auto actName = toStr(action->expression);
         auto name = action->externalName();
         if (name != "NoAction") {
-            actName = ctrlName + "." + actName;
             name = ctrlName + "." + name;
-        } else {
-            actName = name;
         }
         oneAction->emplace("action_name", name);
-        oneAction->emplace("target_action_name", actName);
         oneAction->emplace("action_handle", attr.actionHandle);
         auto* immFldArray = new Util::JsonArray();
         if (attr.params) {
@@ -314,12 +309,16 @@ const IR::P4Table * table, const cstring controlName, bool isMatch) {
         // Printing compiler added actions is curently not required
         if (!attr.is_compiler_added_action) {
             auto *act = new Util::JsonObject();
-            auto actName = action->externalName();
-
-            // NoAction is not prefixed with control block name
-            if (actName != "NoAction")
+            auto actName = toStr(action->expression);
+            auto name = action->externalName();
+            if (name != "NoAction") {
                 actName = controlName + "." + actName;
-           act->emplace("name", actName);
+                name = controlName + "." + name;
+            } else {
+                actName = name;
+            }
+           act->emplace("name", name);
+           act->emplace("target_action_name", actName);
            act->emplace("handle", attr.actionHandle);
            if (isMatch) {
                act->emplace("constant_default_action", attr.constant_default_action);
