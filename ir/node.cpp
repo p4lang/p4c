@@ -18,11 +18,20 @@ limitations under the License.
 #include "ir/json_loader.h"
 
 #include "node.h"
+// #include <signal.h>
 
 void IR::Node::traceVisit(const char* visitor) const
 { LOG3("Visiting " << visitor << " " << id << ":" << node_type_name()); }
 
-void IR::Node::traceCreation() const { LOG5("Created node " << id); }
+void IR::Node::traceCreation() const {
+    /*
+      You can use this to trigger a breakpoint in the debugger when a
+      specific node is created
+    if (id == 279493)
+        raise(SIGINT);
+    */
+    LOG5("Created node " << id);
+}
 
 int IR::Node::currentId = 0;
 
