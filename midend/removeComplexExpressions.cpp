@@ -161,12 +161,6 @@ RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
     if (expression->arguments->size() == 0)
         return expression;
     auto mi = P4::MethodInstance::resolve(expression, refMap, typeMap);
-    // Do not optimize HASH parameters
-    if (auto e = mi->to<P4::ExternMethod>()) {
-            if (e->originalExternType->getName().name == "Hash") {
-                return expression;
-            }
-    }
     if (mi->isApply() || mi->is<P4::BuiltInMethod>())
         return expression;
 

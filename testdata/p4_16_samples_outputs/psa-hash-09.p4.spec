@@ -44,8 +44,10 @@ struct user_meta_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
-	bit<48> ethernet_t_srcAddr
-	bit<16> ethernet_t_etherType
+	bit<48> Ingress_tmp
+	bit<16> Ingress_tmp_0
+	bit<48> user_meta_t_Ingress_tmp
+	bit<16> user_meta_t_Ingress_tmp_0
 	bit<8> ipv4_t_version_ihl
 	bit<8> ipv4_t_diffserv
 	bit<32> ipv4_t_totalLen
@@ -61,25 +63,28 @@ metadata instanceof user_meta_t
 
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
+header Ingress_tmp_1 instanceof ipv4_t
 
 action NoAction args none {
 	return
 }
 
 action a1 args none {
-	mov m.ethernet_t_srcAddr h.ethernet.srcAddr
-	mov m.ethernet_t_etherType h.ethernet.etherType
-	mov m.ipv4_t_version_ihl h.ipv4.version_ihl
-	mov m.ipv4_t_diffserv h.ipv4.diffserv
-	mov m.ipv4_t_totalLen h.ipv4.totalLen
-	mov m.ipv4_t_identification h.ipv4.identification
-	mov m.ipv4_t_flags_fragOffset h.ipv4.flags_fragOffset
-	mov m.ipv4_t_ttl h.ipv4.ttl
-	mov m.ipv4_t_protocol h.ipv4.protocol
-	mov m.ipv4_t_hdrChecksum h.ipv4.hdrChecksum
-	mov m.ipv4_t_srcAddr h.ipv4.srcAddr
-	mov m.ipv4_t_dstAddr h.ipv4.dstAddr
-	hash crc32 m.local_metadata_data  m.ethernet_t_srcAddr m.ipv4_t_dstAddr
+	mov m.Ingress_tmp h.ethernet.srcAddr
+	mov m.Ingress_tmp_0 h.ethernet.etherType
+	mov m.user_meta_t_Ingress_tmp m.Ingress_tmp
+	mov m.user_meta_t_Ingress_tmp_0 m.Ingress_tmp_0
+	mov m.ipv4_t_version_ihl h.Ingress_tmp_1.version_ihl
+	mov m.ipv4_t_diffserv h.Ingress_tmp_1.diffserv
+	mov m.ipv4_t_totalLen h.Ingress_tmp_1.totalLen
+	mov m.ipv4_t_identification h.Ingress_tmp_1.identification
+	mov m.ipv4_t_flags_fragOffset h.Ingress_tmp_1.flags_fragOffset
+	mov m.ipv4_t_ttl h.Ingress_tmp_1.ttl
+	mov m.ipv4_t_protocol h.Ingress_tmp_1.protocol
+	mov m.ipv4_t_hdrChecksum h.Ingress_tmp_1.hdrChecksum
+	mov m.ipv4_t_srcAddr h.Ingress_tmp_1.srcAddr
+	mov m.ipv4_t_dstAddr h.Ingress_tmp_1.dstAddr
+	hash crc32 m.local_metadata_data  m.user_meta_t_Ingress_tmp m.ipv4_t_dstAddr
 	return
 }
 
