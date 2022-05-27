@@ -318,7 +318,7 @@ const IR::P4Table * table, const cstring controlName, bool isMatch) {
                 actName = name;
             }
            act->emplace("name", name);
-           act->emplace("target_action_name", actName);
+           act->emplace("target_name", actName);
            act->emplace("handle", attr.actionHandle);
            if (isMatch) {
                act->emplace("constant_default_action", attr.constant_default_action);
