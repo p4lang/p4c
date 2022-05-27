@@ -194,9 +194,14 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 */
                 if (e->expr->arguments->size() == 1) {
                     auto field = (*e->expr->arguments)[0];
-                    /* Check if the Hash Parameters belong to same header/metadata structures
-                       or if the parameters are consecutive fields if belong to same 
-                       header/metadata structures
+                    /* All the Hash parameters should be in contiguos memory for hash
+                       value calculation.
+
+                       Below conditions check if all the parameters
+                       belongs to same header/metadata structure or not and if all the
+                       parameters are contiguos or not in a header/metadata structure.
+                       If not, all the parameters are moved to user metadata to aligned
+                       contiguosly.
                     */
                     if (!checkIfBelongToSameHdrMdStructure(field) ||
                         !checkIfConsecutiveHdrMdfields(field))
@@ -217,8 +222,9 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     */
                     if (auto b = base->expression->to<IR::Expression>()) {
                         if (!b->is<IR::Constant>())
-                            ::error("Expecting const expression '%1%' for 'base' value in"
-                            " get_hash method of Hash extern in DPDK Target", base);
+                            ::error(ErrorType::ERR_UNEXPECTED, "Expecting const expression '%1%'"
+                            " for 'base' value in get_hash method of Hash extern in DPDK Target",
+                            base);
                     }
 
                     if (auto b = max_val->expression->to<IR::Expression>()) {
@@ -226,15 +232,25 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                             maxValue = b->to<IR::Constant>()->asUnsigned();
                             // Check whether max value is power of 2 or not
                             if (maxValue == 0 || ((maxValue & (maxValue - 1)) != 0)) {
-                                ::error("Invalid Max value '%1%'. DPDK Target expect 'Max'"
-                                " value to be power of 2", maxValue);
+                                ::error(ErrorType::ERR_UNEXPECTED, "Invalid Max value '%1%'. DPDK"
+                                " Target expect 'Max' value to be power of 2", maxValue);
                             }
                         } else {
-                            ::error("Expecting const expression '%1%' for 'Max' value in"
-                            " get_hash method of Hash extern in DPDK Target", max_val);
+                            ::error(ErrorType::ERR_UNEXPECTED, "Expecting const expression '%1%'"
+                            " for 'Max' value in get_hash method of Hash extern in DPDK Target",
+                            max_val);
                         }
                     }
 
+                    /* All the hash parameters should be in contiguos memory for hash
+                       value calculation.
+
+                       Below conditions check if all the parameters
+                       belongs to same header/metadata structure or not and if all the
+                       parameters are contiguos or not in a header/metadata structure.
+                       If not, all the parameters are moved to user metadata to aligned
+                       contiguosly.
+                    */
                     if (!checkIfBelongToSameHdrMdStructure(field) ||
                         !checkIfConsecutiveHdrMdfields(field))
                         updateMdStrAndGenInstr(field, components);
@@ -437,8 +453,7 @@ void ConvertStatementToDpdk::processHashParams(const IR::Argument* field,
                                                IR::Vector<IR::Expression>& components) {
     if (auto params = field->expression->to<IR::Member>()) {
         auto typeInfo = typemap->getType(params);
-        if (typeInfo->is<IR::Type_Header>()) {
-            auto typeheader = typeInfo->to<IR::Type_Header>();
+        if (auto typeheader = typeInfo->to<IR::Type_Header>()) {
             for (auto it : typeheader->fields) {
                 IR::ID name(params->member.name + "." + it->name);
                 auto m = new IR::Member(new IR::PathExpression(IR::ID("h")), name);
@@ -451,8 +466,7 @@ void ConvertStatementToDpdk::processHashParams(const IR::Argument* field,
         for (auto field1 : s->components) {
             if (auto params = field1->expression->to<IR::Member>()) {
                 auto typeInfo = typemap->getType(params);
-                if (typeInfo->is<IR::Type_Header>()) {
-                    auto typeheader = typeInfo->to<IR::Type_Header>();
+                if (auto typeheader = typeInfo->to<IR::Type_Header>()) {
                     for (auto it : typeheader->fields) {
                         IR::ID name(params->member.name + "." + it->name);
                         auto m = new IR::Member(new IR::PathExpression(IR::ID("h")), name);
@@ -466,36 +480,13 @@ void ConvertStatementToDpdk::processHashParams(const IR::Argument* field,
     }
 }
 
-/* This function processes the hash parameters and update the fields in metadata structure
-   with modified field name, generates mov instruction for each field and store the fields
-   in "components" data structure which is later used to generate HASH instruction
+/* This function moves the hash parameter fields to metadata structure if they happen
+   to come from different header/metadata structures or are not consecutively laid in
+   the structure they are coming from
 */
 void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument* field,
                                                IR::Vector<IR::Expression>& components) {
-    if (auto params = field->expression->to<IR::Member>()) {
-        auto typeInfo = typemap->getType(params);
-        if (typeInfo->is<IR::Type_Header>()) {
-            auto typeheader = typeInfo->to<IR::Type_Header>();
-            for (auto it : typeheader->fields) {
-                IR::ID name(params->member.name + "." + it->name);
-                IR::ID fldName(refmap->newName(typeheader->name.toString() + "_" + it->name));
-                auto rt = new IR::Member(new IR::PathExpression(IR::ID("h")), name);
-                auto lt = new IR::Member(new IR::PathExpression(IR::ID("m")), fldName);
-                BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
-
-                metadataStruct->fields.push_back(new IR::StructField(fldName, it->type));
-                add_instr(new IR::DpdkMovStatement(lt, rt));
-                components.push_back(lt);
-            }
-        } else {
-            IR::ID name(refmap->newName(getHdrMdStrName(params) + "_" + params->member.name));
-            BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
-            metadataStruct->fields.push_back(new IR::StructField(name, params->type));
-            auto lt = new IR::Member(new IR::PathExpression(IR::ID("m")), name);
-            add_instr(new IR::DpdkMovStatement(lt, params));
-            components.push_back(lt);
-        }
-    } else if (auto s = field->expression->to<IR::StructExpression>()) {
+    if (auto s = field->expression->to<IR::StructExpression>()) {
         for (auto field1 : s->components) {
             if (auto params = field1->expression->to<IR::Member>()) {
                 auto typeInfo = typemap->getType(params);
@@ -530,15 +521,12 @@ void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument* field,
 cstring ConvertStatementToDpdk::getHdrMdStrName(const IR::Member* mem) {
     cstring sName = "";
     if ((mem != nullptr) && (mem->expr != nullptr) &&
-       (mem->expr->type != nullptr) &&
-       (mem->expr->type->is<IR::Type_Header>())) {
-        auto str_type = mem->expr->type->to<IR::Type_Header>();
-        sName = str_type->name.name;
-    } else if ((mem != nullptr) && (mem->expr != nullptr) &&
-               (mem->expr->type != nullptr) &&
-               (mem->expr->type->is<IR::Type_Struct>())) {
-        auto str_type = mem->expr->type->to<IR::Type_Struct>();
-        sName = str_type->name.name;
+       (mem->expr->type != nullptr)) {
+        if (auto st = mem->expr->type->to<IR::Type_Header>()) {
+            sName = st->name.name;
+        } else if (auto st = mem->expr->type->to<IR::Type_Struct>()) {
+             sName = st->name.name;
+        }
     }
     return sName;
 }
@@ -560,15 +548,8 @@ bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argumen
                     auto typeheader = type->to<IR::Type_Header>();
                     sName = typeheader->name.name;
                 } else if ((params != nullptr) && (params->expr != nullptr) &&
-                           (params->expr->type != nullptr) &&
-                           (params->expr->type->is<IR::Type_Header>())) {
-                    auto str_type = params->expr->type->to<IR::Type_Header>();
-                    sName = str_type->name.name;
-                } else if ((params != nullptr) && (params->expr != nullptr) &&
-                           (params->expr->type != nullptr) &&
-                           (params->expr->type->is<IR::Type_Struct>())) {
-                    auto str_type = params->expr->type->to<IR::Type_Struct>();
-                    sName = str_type->name.name;
+                           (params->expr->type != nullptr)) {
+                    sName = getHdrMdStrName(params);
                 }
             }
             if (hdrStrName == "")
@@ -580,8 +561,8 @@ bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argumen
     return true;
 }
 
-/* This function processes Hash parameters and checks if all parameters
-   are consecutive field or not in a header/metadata structure.
+/* This function processes hash parameters and checks if all parameters
+   are contiguos field or not in a header/metadata structure.
 */
 bool ConvertStatementToDpdk::checkIfConsecutiveHdrMdfields(const IR::Argument* field) {
     if (auto s = field->expression->to<IR::StructExpression>()) {
@@ -599,15 +580,13 @@ bool ConvertStatementToDpdk::checkIfConsecutiveHdrMdfields(const IR::Argument* f
                 if (type->is<IR::Type_Header>()) {
                     hdrMdType = type->to<IR::Type_Header>();
                 } else if ((params != nullptr) && (params->expr != nullptr) &&
-                           (params->expr->type != nullptr) &&
-                           (params->expr->type->is<IR::Type_Header>())) {
+                           (params->expr->type != nullptr)) {
+                    if (auto st = params->expr->type->to<IR::Type_Header>()) {
+                        hdrMdType = st;
+                    } else if (auto st = params->expr->type->to<IR::Type_Struct>()) {
+                        hdrMdType = st;
+                    }
                     fldList.push_back(params->member.name);
-                    hdrMdType = params->expr->type->to<IR::Type_Header>();
-                } else if ((params != nullptr) && (params->expr != nullptr) &&
-                       (params->expr->type != nullptr) &&
-                       (params->expr->type->is<IR::Type_Struct>())) {
-                    fldList.push_back(params->member.name);
-                    hdrMdType = params->expr->type->to<IR::Type_Struct>();
                 }
             }
         }
