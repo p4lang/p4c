@@ -194,12 +194,12 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 */
                 if (e->expr->arguments->size() == 1) {
                     auto field = (*e->expr->arguments)[0];
-                    /* All the Hash parameters should be in contiguos memory for hash
+                    /* All the Hash parameters should be in contiguous memory for hash
                        value calculation.
 
                        Below conditions check if all the parameters
                        belongs to same header/metadata structure or not and if all the
-                       parameters are contiguos or not in a header/metadata structure.
+                       parameters are contiguous or not in a header/metadata structure.
                        If not, all the parameters are moved to user metadata to aligned
                        contiguosly.
                     */
@@ -242,15 +242,6 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                         }
                     }
 
-                    /* All the hash parameters should be in contiguos memory for hash
-                       value calculation.
-
-                       Below conditions check if all the parameters
-                       belongs to same header/metadata structure or not and if all the
-                       parameters are contiguos or not in a header/metadata structure.
-                       If not, all the parameters are moved to user metadata to aligned
-                       contiguosly.
-                    */
                     if (!checkIfBelongToSameHdrMdStructure(field) ||
                         !checkIfConsecutiveHdrMdfields(field))
                         updateMdStrAndGenInstr(field, components);
@@ -562,7 +553,7 @@ bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argumen
 }
 
 /* This function processes hash parameters and checks if all parameters
-   are contiguos field or not in a header/metadata structure.
+   are contiguous field or not in a header/metadata structure.
 */
 bool ConvertStatementToDpdk::checkIfConsecutiveHdrMdfields(const IR::Argument* field) {
     if (auto s = field->expression->to<IR::StructExpression>()) {
