@@ -690,7 +690,6 @@ void EBPFTablePSA::emitKeysAndValues(CodeBuilder *builder,
             CHECK_NULL(fieldName);
             builder->emitIndent();
             builder->appendFormat("%s.%s = ", keyName.c_str(), fieldName.c_str());
-            auto mtdecl = program->refMap->getDeclaration(keyElement->matchType->path, true);
             auto expr = entry->keys->components[k];
             auto ebpfType = get(keyTypes, keyElement);
             if (auto km = expr->to<IR::Mask>()) {
