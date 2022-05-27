@@ -297,32 +297,35 @@ bool ControlGraphs::preorder(const IR::P4Table *table) {
 
     Parents new_parents;
 
-    auto actions = table->getActionList()->actionList;
-    for (auto action : actions){
-        parents = keyNode;
+    auto actList = table->getActionList();
+    if (actList) {
+        auto actions = actList->actionList;
+        for (auto action : actions){
+            parents = keyNode;
 
-        auto v = add_and_connect_vertex(action->getName(), VertexType::ACTION);
+            auto v = add_and_connect_vertex(action->getName(), VertexType::ACTION);
 
-        parents = {{v, new EdgeUnconditional()}};
+            parents = {{v, new EdgeUnconditional()}};
 
-        if (action->expression->is<IR::MethodCallExpression>()) {
-            auto mce = action->expression->to<IR::MethodCallExpression>();
+            if (action->expression->is<IR::MethodCallExpression>()) {
+                auto mce = action->expression->to<IR::MethodCallExpression>();
 
-            // needed for visiting body of P4Action
-            auto resolved = P4::MethodInstance::resolve(mce, refMap, typeMap);
+                // needed for visiting body of P4Action
+                auto resolved = P4::MethodInstance::resolve(mce, refMap, typeMap);
 
-            if (resolved->is<P4::ActionCall>()) {
-                auto ac = resolved->to<P4::ActionCall>();
-                if (ac->action->is<IR::P4Action>()) {
-                    visit(ac->action->to<IR::P4Action>());
+                if (resolved->is<P4::ActionCall>()) {
+                    auto ac = resolved->to<P4::ActionCall>();
+                    if (ac->action->is<IR::P4Action>()) {
+                        visit(ac->action->to<IR::P4Action>());
+                    }
                 }
             }
+
+            merge_other_statements_into_vertex();
+
+            new_parents.insert(new_parents.end(), parents.begin(), parents.end());
+            parents.clear();
         }
-
-        merge_other_statements_into_vertex();
-
-        new_parents.insert(new_parents.end(), parents.begin(), parents.end());
-        parents.clear();
     }
 
     parents = new_parents;
