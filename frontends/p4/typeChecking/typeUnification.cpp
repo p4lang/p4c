@@ -363,9 +363,11 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
             return true;
         }
         if (auto senum = src->to<IR::Type_SerEnum>()) {
-            if (dest->is<IR::Type_Bits>())
+            if (dest->is<IR::Type_Bits>()) {
                 // unify with enum's underlying type
-                return unify(constraint->create(senum->type, dest));
+                auto stype = typeMap->getTypeType(senum->type, true);
+                return unify(constraint->create(stype, dest));
+            }
         }
         if (!src->is<IR::Type_Base>())
             return constraint->reportError(constraints->getCurrentSubstitution());
