@@ -194,6 +194,10 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 */
                 if (e->expr->arguments->size() == 1) {
                     auto field = (*e->expr->arguments)[0];
+                    /* Check if the Hash Parameters belong to same header/metadata structures
+                       or if the parameters are consecutive fields if belong to same 
+                       header/metadata structures
+                    */
                     if (!checkIfBelongToSameHdrMdStructure(field) ||
                         !checkIfConsecutiveHdrMdfields(field))
                         updateMdStrAndGenInstr(field, components);
@@ -462,6 +466,10 @@ void ConvertStatementToDpdk::processHashParams(const IR::Argument* field,
     }
 }
 
+/* This function processes the hash parameters and update the fields in metadata structure
+   with modified field name, generates mov instruction for each field and store the fields
+   in "components" data structure which is later used to generate HASH instruction
+*/
 void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument* field,
                                                IR::Vector<IR::Expression>& components) {
     if (auto params = field->expression->to<IR::Member>()) {
@@ -518,6 +526,7 @@ void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument* field,
     }
 }
 
+/* This function returns the header/metadata structure name */
 cstring ConvertStatementToDpdk::getHdrMdStrName(const IR::Member* mem) {
     cstring sName = "";
     if ((mem != nullptr) && (mem->expr != nullptr) &&
@@ -534,6 +543,9 @@ cstring ConvertStatementToDpdk::getHdrMdStrName(const IR::Member* mem) {
     return sName;
 }
 
+/* This function processes Hash parameters and checks if all parameters
+   belong to same header/metadata structure.
+*/
 bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argument* field) {
     if (auto s = field->expression->to<IR::StructExpression>()) {
         if (s->components.size() == 1)
@@ -568,6 +580,9 @@ bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argumen
     return true;
 }
 
+/* This function processes Hash parameters and checks if all parameters
+   are consecutive field or not in a header/metadata structure.
+*/
 bool ConvertStatementToDpdk::checkIfConsecutiveHdrMdfields(const IR::Argument* field) {
     if (auto s = field->expression->to<IR::StructExpression>()) {
         if (s->components.size() == 1)
