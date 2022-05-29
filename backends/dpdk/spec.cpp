@@ -525,7 +525,6 @@ std::ostream &IR::DpdkGetHashStatement::toSpec(std::ostream &out) const {
         ::error(ErrorType::ERR_INVALID,
                 "%1%: get_hash's arg is not a ListExpression.", this);
     }
-    out << "";
     return out;
 }
 
