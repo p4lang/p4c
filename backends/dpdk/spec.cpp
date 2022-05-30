@@ -370,7 +370,6 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
         auto earg = mce->arguments->at(0)->expression;
         if (earg->is<IR::ListExpression>()) {
             auto paramCount = earg->to<IR::ListExpression>()->components.size();
-            std::cout<<"Earg : "<<earg<<std::endl;
             for (unsigned i = 0; i < paramCount; i++) {
                 if (earg->to<IR::ListExpression>()->components.at(i)->is<IR::Constant>()) {
                     auto val = earg->to<IR::ListExpression>()->
@@ -456,14 +455,14 @@ std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
     if (auto size = properties->getProperty("size")) {
         out << "\tsize " << DPDK::toStr(size->value) << "" << std::endl;
     } else {
-        out << "\tsize " << default_learner_table_size << std::endl;
+        out << "\tsize 0x" << std::hex << default_learner_table_size << std::endl;
     }
 
     // The initial timeout values
     // This initializes 8 timeout values which can later be configured through control plane APIs.
     out << "\ttimeout {" << std::endl;
-    for (int i = 0; i < dpdk_learner_max_configurable_timeout_values ; i++)
-        out << "\t\t" << default_learner_table_timeout << std::endl;
+    for (unsigned int i = 0; i < dpdk_learner_max_configurable_timeout_values ; i++)
+        out << "\t\t" << std::dec << default_learner_table_timeout << std::endl;
     out << "\n\t\t}";
     out << "\n}" << std::endl;
     return out;
