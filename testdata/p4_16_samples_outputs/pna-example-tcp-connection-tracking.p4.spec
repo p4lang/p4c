@@ -118,7 +118,7 @@ learner ct_tcp_table {
 		ct_tcp_table_miss @defaultonly
 	}
 	default_action ct_tcp_table_miss args none 
-	size 65536
+	size 0x10000
 	timeout {
 		120
 		120
