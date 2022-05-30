@@ -880,7 +880,13 @@ bool ExpressionUnroll::preorder(const IR::MethodCallExpression *m) {
     return false;
 }
 
-bool ExpressionUnroll::preorder(const IR::Member *) {
+bool ExpressionUnroll::preorder(const IR::Member *m) {
+    if (m->expr->is<IR::ArrayIndex>()) {
+        root = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
+        decl.push_back(new IR::Declaration_Variable(root->path->name, m->type));
+        stmt.push_back(new IR::AssignmentStatement(root, m));
+        return false;
+    }
     root = nullptr;
     return false;
 }
@@ -1046,7 +1052,14 @@ bool LogicalExpressionUnroll::preorder(const IR::MethodCallExpression *m) {
     return false;
 }
 
-bool LogicalExpressionUnroll::preorder(const IR::Member *) {
+bool LogicalExpressionUnroll::preorder(const IR::Member *m) {
+    if (m->expr->is<IR::ArrayIndex>()) {
+        auto tmp = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
+        root = tmp;
+        decl.push_back(new IR::Declaration_Variable(tmp->path->name, m->type));
+        stmt.push_back(new IR::AssignmentStatement(root, m));
+        return false;
+    }
     root = nullptr;
     return false;
 }
@@ -1397,7 +1410,169 @@ const IR::Node* DismantleMuxExpressions::preorder(IR::Mux* expression) {
     return path2;
 }
 
-cstring DismantleMuxExpressions::createTemporary(const IR::Type* type) {
+const IR::Node* DismantleMuxExpressions::postorder(IR::AssignmentStatement* statement) {
+    if (statements.empty())
+        return statement;
+    statements.push_back(statement);
+    auto block = new IR::BlockStatement(statements);
+    statements.clear();
+    return block;
+}
+
+bool SplitHSIndexExpression::hasHSE(const IR::Expression *hse) {
+    if (auto mem = hse->to<IR::Member>()) {
+        if (auto ai = mem->expr->to<IR::ArrayIndex>()) {
+            if (!ai->right->is<IR::Constant>())
+                return true;
+        }
+    }
+    return false;
+}
+
+// This function drives the replacement of statements with variable array index expressions
+// with a series of if statements based on the number of elements in the header stack.
+void SplitHSIndexExpression::replaceVarIndexWithIf(IR::AssignmentStatement *statement) {
+    const IR::Member *mem = nullptr;
+    const IR::ArrayIndex *ai = nullptr;
+    size_t n_elem = 0;
+    bool leftHasHSE = hasHSE(statement->left);
+    bool rightHasHSE = hasHSE(statement->right);
+
+    if (!leftHasHSE && !rightHasHSE)
+        return;
+
+    if (leftHasHSE && rightHasHSE) {
+        mem = statement->left->to<IR::Member>();
+        ai = mem->expr->to<IR::ArrayIndex>();
+        BUG_CHECK(ai->left->is<IR::Member>(), "Expected a member expression here");
+        n_elem = ::get(hsMap, ai->left->to<IR::Member>()->member.toString());
+        auto right_mem = statement->right->to<IR::Member>();
+        auto ai_right = right_mem->expr->to<IR::ArrayIndex>();
+        auto index_left = ai->right;
+        auto index_right = ai_right->right;
+        if (equiv(index_left, index_right))
+            replaceSimple(BOTH, index_left, statement, n_elem);
+        else {
+            replaceSimple(LEFT, index_left, statement, n_elem);
+
+            // statements will be modified in replaceSimple so save them
+            IR::IndexedVector<IR::StatOrDecl> new_stmts;
+            auto save = statements;
+            for (auto s : save) {
+                statements.clear();
+                // We assume that the left side variable array index expression
+                // is already converted to if
+                BUG_CHECK(s->is<IR::IfStatement>(), "Expected an IfStatement here, found %1%", s);
+                auto iftrue = s->to<IR::IfStatement>()->ifTrue;
+                BUG_CHECK(iftrue->is<IR::AssignmentStatement>(),
+                          "Expected an AssignmentStatement here");
+                auto assign = iftrue->to<IR::AssignmentStatement>();
+                auto right_mem = assign->right->to<IR::Member>();
+                auto ai_right = right_mem->expr->to<IR::ArrayIndex>();
+                auto index_right = ai_right->right;
+                BUG_CHECK(ai_right->left->is<IR::Member>(), "Expected a member expression here");
+                n_elem = ::get(hsMap, ai_right->left->to<IR::Member>()->member.toString());
+                replaceSimple(RIGHT, index_right, assign, n_elem);
+                auto block = new IR::BlockStatement(statements);
+                new_stmts.push_back(new IR::IfStatement(s->srcInfo,
+                                    s->to<IR::IfStatement>()->condition, block, nullptr));
+            }
+            statements = new_stmts;
+        }
+    } else if (leftHasHSE) {
+        mem = statement->left->to<IR::Member>();
+        ai = mem->expr->to<IR::ArrayIndex>();
+        if (ai->left->is<IR::Member>())
+            n_elem = ::get(hsMap, ai->left->to<IR::Member>()->member.toString());
+        auto index_left = ai->right;
+        replaceSimple(LEFT, index_left, statement, n_elem);
+    } else if (rightHasHSE) {
+        mem = statement->right->to<IR::Member>();
+        ai = mem->expr->to<IR::ArrayIndex>();
+        if (ai->left->is<IR::Member>())
+            n_elem = ::get(hsMap, ai->left->to<IR::Member>()->member.toString());
+        auto index_right = ai->right;
+        replaceSimple(RIGHT, index_right, statement, n_elem);
+    }
+}
+
+void SplitHSIndexExpression::replaceSimple(VARINDEX_ENUM exp, const IR::Expression *index,
+                                const IR::AssignmentStatement *statement, size_t n_elem) {
+    auto type = typeMap->getType(index);
+    if (!isSimpleExpression(index)) {
+        auto tmp = createTemporary(type);
+        statements.clear();
+        auto tmpPath = addAssignment(index->srcInfo, tmp, index);
+        typeMap->setType(tmpPath, type);
+        index = tmpPath;
+    }
+
+    auto width = type->width_bits();
+    for (size_t i = 0; i < n_elem; i++) {
+        IR::AssignmentStatement *newStmt = statement->clone();
+        if (exp == LEFT || exp == BOTH) {
+            BUG_CHECK(newStmt->left->is<IR::Member>(), "Unexpected LHS, expected a Member");
+            auto mem = newStmt->left->to<IR::Member>();
+            newStmt->left = new IR::Member(mem->srcInfo, new IR::ArrayIndex(
+                                           mem->expr->to<IR::ArrayIndex>()->srcInfo,
+                                           mem->expr->to<IR::ArrayIndex>()->left,
+                                           new IR::Constant(IR::Type_Bits::get(width),i)),
+                                           mem->member);
+        }
+        if (exp == RIGHT || exp == BOTH) {
+            BUG_CHECK(newStmt->right->is<IR::Member>(), "Unexpected RHS, expected a Member");
+            auto mem = newStmt->right->to<IR::Member>();
+            newStmt->right = new IR::Member(mem->srcInfo, new IR::ArrayIndex(
+                                            mem->expr->to<IR::ArrayIndex>()->srcInfo,
+                                            mem->expr->to<IR::ArrayIndex>()->left,
+                                            new IR::Constant(IR::Type_Bits::get(width),i)),
+                                             mem->member);
+        }
+        auto ifStatement = new IR::IfStatement(new IR::Equ(index,
+                           new IR::Constant(IR::Type_Bits::get(width),i)), newStmt, nullptr);
+        statements.push_back(ifStatement);
+    }
+}
+
+const IR::Node* SplitHSIndexExpression::postorder(IR::AssignmentStatement* statement) {
+    CHECK_NULL(statement);
+    replaceVarIndexWithIf(statement);
+    if (statements.empty())
+        return statement;
+    auto block = new IR::BlockStatement(statements);
+    statements.clear();
+    return block;
+}
+
+const IR::Node* PrepSplitHSIndexExpression::preorder(IR::StructField *sf) {
+    if (sf->type->is<IR::Type_Stack>()) {
+        hsMap.emplace(sf->getName(), sf->type->to<IR::Type_Stack>()->getSize());
+    }
+    return sf;
+}
+
+
+const IR::Node* PrepSplitHSIndexExpression::preorder(IR::Key* keys) {
+    LOG3("Visiting " << keys);
+    bool complex = false;
+    for (auto k : keys->keyElements) {
+         if (auto keyField = k->expression->to<IR::Member>()) {
+             if (keyField->expr->is<IR::ArrayIndex>() &&
+                 keyField->expr->type->is<IR::Type_Header>()) {
+                 complex = true;
+                 break;
+             }
+         }
+    }
+    if (!complex)
+        // This prune will prevent the postoder(IR::KeyElement*) below from executing
+        prune();
+    else
+        LOG3("Will pull out " << keys);
+    return keys;
+}
+
+cstring TransformComplexExpr::createTemporary(const IR::Type* type) {
     type = type->getP4Type();
     auto tmp = refMap->newName("tmp");
     auto decl = new IR::Declaration_Variable(IR::ID(tmp, nullptr), type);
@@ -1405,7 +1580,7 @@ cstring DismantleMuxExpressions::createTemporary(const IR::Type* type) {
     return tmp;
 }
 
-const IR::Expression* DismantleMuxExpressions::addAssignment(
+const IR::Expression* TransformComplexExpr::addAssignment(
     Util::SourceInfo srcInfo,
     cstring varName,
     const IR::Expression* expression) {
@@ -1420,7 +1595,7 @@ const IR::Expression* DismantleMuxExpressions::addAssignment(
     return result;
 }
 
-const IR::Node* DismantleMuxExpressions::postorder(IR::P4Action* action) {
+const IR::Node* TransformComplexExpr::postorder(IR::P4Action* action) {
     if (toInsert.empty())
         return action;
     auto body = new IR::BlockStatement(action->body->srcInfo);
@@ -1434,7 +1609,7 @@ const IR::Node* DismantleMuxExpressions::postorder(IR::P4Action* action) {
 }
 
 
-const IR::Node* DismantleMuxExpressions::postorder(IR::Function* function) {
+const IR::Node* TransformComplexExpr::postorder(IR::Function* function) {
     if (toInsert.empty())
         return function;
     auto body = new IR::BlockStatement(function->body->srcInfo);
@@ -1447,7 +1622,7 @@ const IR::Node* DismantleMuxExpressions::postorder(IR::Function* function) {
     return function;
 }
 
-const IR::Node* DismantleMuxExpressions::postorder(IR::P4Parser* parser) {
+const IR::Node* TransformComplexExpr::postorder(IR::P4Parser* parser) {
     if (toInsert.empty())
         return parser;
     parser->parserLocals.append(toInsert);
@@ -1455,21 +1630,12 @@ const IR::Node* DismantleMuxExpressions::postorder(IR::P4Parser* parser) {
     return parser;
 }
 
-const IR::Node* DismantleMuxExpressions::postorder(IR::P4Control* control) {
+const IR::Node* TransformComplexExpr::postorder(IR::P4Control* control) {
     if (toInsert.empty())
         return control;
     control->controlLocals.append(toInsert);
     toInsert.clear();
     return control;
-}
-
-const IR::Node* DismantleMuxExpressions::postorder(IR::AssignmentStatement* statement) {
-    if (statements.empty())
-        return statement;
-    statements.push_back(statement);
-    auto block = new IR::BlockStatement(statements);
-    statements.clear();
-    return block;
 }
 
 /* This function transforms the table so that all match keys come from the same struct.
