@@ -589,7 +589,6 @@ void EBPFTablePSA::emitTernaryConstEntriesInitializer(CodeBuilder *builder) {
     CodeGenInspector cg(program->refMap, program->typeMap);
     cg.setBuilder(builder);
     std::vector<cstring> keyMasksNames;
-    cstring uniquePrefix = instanceName;
     int tuple_id = 0;  // We have preallocated tuple maps with ids starting from 0
 
     // emit key head mask
@@ -692,7 +691,6 @@ void EBPFTablePSA::emitKeysAndValues(CodeBuilder *builder,
             builder->emitIndent();
             builder->appendFormat("%s.%s = ", keyName.c_str(), fieldName.c_str());
             auto mtdecl = program->refMap->getDeclaration(keyElement->matchType->path, true);
-            auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
             auto expr = entry->keys->components[k];
             auto ebpfType = get(keyTypes, keyElement);
             if (auto km = expr->to<IR::Mask>()) {
@@ -785,7 +783,7 @@ void EBPFTablePSA::emitMaskForExactMatch(CodeBuilder *builder,
         BUG("Cannot assess field bit width");
     }
     builder->append("0x");
-    for (int j = 0; j < width / 8; j++)
+    for (size_t j = 0; j < width / 8; j++)
         builder->append("ff");
     builder->endOfStatement(true);
 }
