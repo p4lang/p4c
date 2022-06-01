@@ -942,13 +942,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 }
             }
         } else if (a->originalExternType->getName().name == "Meter") {
-            if (a->method->getName().name == "execute") {
-                // DPDK target requires the result of meter execute method is assigned to a
-                // variable of PSA_MeterColor_t type.
-                ::error(ErrorType::ERR_UNSUPPORTED, "LHS of meter execute statement is missing " \
-                        "Use this format instead : color_out = %1%.execute(index, color_in)",
-                         a->object->getName());
-            } else {
+            if (a->method->getName().name != "execute") {
                 BUG("Meter function not implemented.");
             }
         } else if (a->originalExternType->getName().name == "Counter") {

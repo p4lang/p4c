@@ -71,12 +71,6 @@ set (P4TEST_SUITES
 # would not make sense to run all the tests twice (one with and one without
 # P4Runtime).
 set (P4RUNTIME_EXCLUDE
-  # See discussion on this p4c PR: https://github.com/p4lang/p4c/pull/2425
-  # It seems that the best long term approach for supporting programs
-  # like this one is to enhance the P4Runtime API to support enum
-  # types as action parameters, as requested in this issue:
-  # https://github.com/p4lang/p4runtime/issues/191
-  testdata/p4_16_samples/psa-meter1.p4
   # error not supported in static entries, not strictly required for P4Info
   # generation though
   testdata/p4_16_samples/issue1062-bmv2.p4
