@@ -1838,7 +1838,6 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
         expression->right = c.right;
     } else {
         if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>() || !(ltype->equiv(*rtype))) {
-            std::cerr << "Here" << std::endl;
             typeError("%1%: not defined on %2% and %3%",
                       expression, ltype->toString(), rtype->toString());
             return expression;
