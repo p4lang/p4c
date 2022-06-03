@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "redundantParsers.h"
+#include "typeMap.h"
 
 namespace P4 {
 bool FindRedundantParsers::preorder(const IR::P4Parser *parser) {
