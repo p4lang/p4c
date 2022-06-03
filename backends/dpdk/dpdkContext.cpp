@@ -49,6 +49,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 struct TableAttributes tblAttr;
                 tblAttr.direction = direction;
                 tblAttr.controlName = control->name.originalName;
+                tblAttr.externalName = tbl->controlPlaneName();
                 tblAttr.tableHandle = getNewTableHandle();
                 auto size = tbl->getSizeProperty();
                 tblAttr.size = dpdk_default_table_size;
@@ -139,7 +140,8 @@ Util::JsonObject* DpdkContextGenerator::initTableCommonJson(
     const cstring name, const struct TableAttributes & attr) {
     auto* tableJson = new Util::JsonObject();
     cstring tableName = attr.controlName + "." + name;
-    tableJson->emplace("name", tableName);
+    tableJson->emplace("name", attr.externalName);
+    tableJson->emplace("target_name", tableName);
     tableJson->emplace("direction", attr.direction);
     tableJson->emplace("handle", attr.tableHandle);
     tableJson->emplace("table_type", attr.tableType);

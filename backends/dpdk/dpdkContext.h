@@ -48,6 +48,7 @@ struct TableAttributes {
     bool isHidden;
     unsigned size;
     cstring controlName;
+    cstring externalName;
     unsigned default_action_handle;
     /* Non selector table keys from original P4 program */
     std::vector<std::pair<cstring, cstring>> tableKeys;
