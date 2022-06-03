@@ -1676,8 +1676,6 @@ SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
     } else {
         BUG("Unexpected table implementation type");
     }
-    auto hidden = new IR::Annotations();
-    hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
     IR::Vector<IR::KeyElement> match_keys;
     for (auto key : tbl->getKey()->keyElements) {
         if (key->matchType->toString() != "selector") {
@@ -1697,7 +1695,8 @@ SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
     if (tbl->getSizeProperty()) {
         properties.push_back(new IR::Property("size",
                              new IR::ExpressionValue(tbl->getSizeProperty()), false)); }
-    auto match_table = new IR::P4Table(tbl->name, new IR::TableProperties(properties));
+    auto match_table = new IR::P4Table(tbl->name, tbl->annotations,
+                                       new IR::TableProperties(properties));
     return std::make_tuple(match_table, actionName);
 }
 
@@ -1725,6 +1724,10 @@ const IR::P4Table* SplitP4TableCommon::create_member_table(const IR::P4Table* tb
 
     auto hidden = new IR::Annotations();
     hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
+    auto nameAnnon = tbl->getAnnotation(IR::Annotation::nameAnnotation);
+    cstring nameA = nameAnnon->getSingleString();
+    cstring memName = nameA.replace(nameA.findlast('.'), "." + memberTableName);
+    hidden->addAnnotation(IR::Annotation::nameAnnotation, new IR::StringLiteral(memName), false);
 
     IR::IndexedVector<IR::ActionListElement> memberActionList;
     for (auto action : tbl->getActionList()->actionList)
@@ -1755,6 +1758,10 @@ const IR::P4Table* SplitP4TableCommon::create_group_table(const IR::P4Table* tbl
     }
     auto hidden = new IR::Annotations();
     hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
+    auto nameAnnon = tbl->getAnnotation(IR::Annotation::nameAnnotation);
+    cstring nameA = nameAnnon->getSingleString();
+    cstring selName = nameA.replace(nameA.findlast('.'), "." + selectorTableName);
+    hidden->addAnnotation(IR::Annotation::nameAnnotation, new IR::StringLiteral(selName), false);
     IR::IndexedVector<IR::Property> selector_properties;
     selector_properties.push_back(new IR::Property("selector", new IR::Key(selector_keys), false));
     selector_properties.push_back(new IR::Property("group_id",
