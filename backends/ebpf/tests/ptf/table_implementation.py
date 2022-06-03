@@ -245,7 +245,7 @@ class ActionSelectorDefaultEmptyGroupActionPSATest(ActionSelectorTest):
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
 
-        cmd = "psabpf-ctl action-selector default_group_action pipe {} MyIC_as id 1 data 6".format(TEST_PIPELINE_ID)
+        cmd = "psabpf-ctl action-selector default_group_action pipe {} MyIC_as action id 1 data 6".format(TEST_PIPELINE_ID)
         self.exec_ns_cmd(cmd, "default group action update failed")
 
         testutils.send_packet(self, PORT0, pkt)
@@ -336,7 +336,7 @@ class ActionSelectorActionRunPSATest(ActionSelectorTest):
     p4_file_path = "p4testdata/action-selector-action-run.p4"
 
     def runTest(self):
-        ref1 = self.action_selector_add_action(selector="MyIC_as", action=1, data=[5])
+        ref1 = self.action_selector_add_action(selector="MyIC_as", action="MyIC_fwd", data=[5])
         ref2 = self.action_selector_add_action(selector="MyIC_as", action=0, data=[])
         self.table_add(table="MyIC_tbl", key=["02:22:33:44:55:66"], references=[ref1])
         self.table_add(table="MyIC_tbl", key=["03:22:33:44:55:66"], references=[ref2])
