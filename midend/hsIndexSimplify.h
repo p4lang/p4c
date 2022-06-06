@@ -15,7 +15,7 @@ typedef std::map<cstring, const IR::PathExpression*> GeneratedVariablesMap;
 /// adds it to the corresponded local definitions.
 class HSIndexFinder : public Inspector {
     friend class HSIndexTransform;
-    friend class HSIndexSimplifier;
+    friend class HSIndexContretizer;
     IR::IndexedVector<IR::Declaration>* locals;
     ReferenceMap* refMap;
     TypeMap* typeMap;
@@ -42,7 +42,7 @@ class HSIndexFinder : public Inspector {
 
 /// This class substitutes index of a header stack in all occurence of found header stack.
 class HSIndexTransform : public Transform {
-    friend class HSIndexSimplifier;
+    friend class HSIndexContretizer;
     int index;
     HSIndexFinder& hsIndexFinder;
 
@@ -66,14 +66,14 @@ class HSIndexTransform : public Transform {
 /// hdivr0 = hdr.i;
 /// if (hdivr0 == 0) { hdr.h[0] = 1;}
 /// else if (hdivr0 == 1){hdr.h[1] = 1;}
-class HSIndexSimplifier : public Transform {
+class HSIndexContretizer : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
     IR::IndexedVector<IR::Declaration>* locals;
     GeneratedVariablesMap* generatedVariables;
 
  public:
-    HSIndexSimplifier(ReferenceMap* refMap, TypeMap* typeMap,
+    HSIndexContretizer(ReferenceMap* refMap, TypeMap* typeMap,
                       IR::IndexedVector<IR::Declaration>* locals = nullptr,
                       GeneratedVariablesMap* generatedVariables = nullptr)
         : refMap(refMap), typeMap(typeMap), locals(locals), generatedVariables(generatedVariables) {
@@ -91,6 +91,17 @@ class HSIndexSimplifier : public Transform {
     IR::Node* eliminateArrayIndexes(HSIndexFinder& aiFinder, IR::Statement* statement,
                                     const IR::Expression* expr);
 };
+
+class HSIndexSimplifier : public PassManager {
+ public:
+    HSIndexSimplifier(ReferenceMap* refMap, TypeMap* typeMap) {
+        // remove block statements
+        passes.push_back(new TypeChecking(refMap, typeMap, true));
+        passes.push_back(new HSIndexContretizer(refMap, typeMap));
+        setName("HSIndexSimplifier");
+    }
+};
+
 
 }  // namespace P4
 
