@@ -110,9 +110,6 @@ set (P4_XFAIL_TESTS
   # arguments and with incorrect number of arguments
   testdata/p4_16_samples/pna-example-mirror-packet-error2.p4
   testdata/p4_16_samples/pna-example-mirror-packet-error3.p4
-  # This test fails with type error but is a valid switch expression having
-  # dynamic index for accessing header stack element
-  testdata/p4_16_samples/pna-example-varIndex-2.p4
   )
 # we invoke p4c with --p4runtime-files even for programs in p4_16_errors. This
 # enables us to use p4_16_errors even for programs which pass compilation but

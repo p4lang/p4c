@@ -68,8 +68,6 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout EMPTY_M b, in psa_egress_pars
 control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     bit<2> hsiVar;
     bit<16> hsVar;
-    bit<2> hsiVar_0;
-    bit<16> hsVar_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIC.tbl") table tbl_0 {
@@ -100,10 +98,10 @@ control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t 
         b.ret = (bit<16>)a.vlan_tag[2w1].vid + 16w5;
     }
     @hidden action psavariableindex110_1() {
-        b.ret = hsVar_0;
+        b.ret = hsVar;
     }
     @hidden action psavariableindex110_2() {
-        hsiVar_0 = b.depth;
+        hsiVar = b.depth;
     }
     @hidden table tbl_psavariableindex108 {
         actions = {
@@ -166,11 +164,11 @@ control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t 
             ;
         } else {
             tbl_psavariableindex110.apply();
-            if (hsiVar_0 == 2w0) {
+            if (hsiVar == 2w0) {
                 tbl_psavariableindex110_0.apply();
-            } else if (hsiVar_0 == 2w1) {
+            } else if (hsiVar == 2w1) {
                 tbl_psavariableindex110_1.apply();
-            } else if (hsiVar_0 >= 2w1) {
+            } else if (hsiVar >= 2w1) {
                 tbl_psavariableindex110_2.apply();
             }
             tbl_0.apply();

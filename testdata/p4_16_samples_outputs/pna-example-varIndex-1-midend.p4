@@ -51,30 +51,27 @@ parser MainParserImpl(packet_in pkt, out headers_t hdrs, inout main_metadata_t m
 
 control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     bit<2> hsiVar;
-    bit<2> hsiVar_0;
     bit<12> hsVar;
-    bit<2> hsiVar_1;
-    bit<2> hsiVar_2;
-    bit<12> hsVar_0;
+    bit<2> hsiVar_0;
     @name("MainControlImpl.execute") action execute_1() {
-        hsiVar_1 = meta.depth;
-        if (hsiVar_1 == 2w0) {
-            hsiVar_2 = meta.depth + 2w3;
-            if (hsiVar_2 == 2w0) {
+        hsiVar = meta.depth;
+        if (hsiVar == 2w0) {
+            hsiVar_0 = meta.depth + 2w3;
+            if (hsiVar_0 == 2w0) {
                 hdrs.vlan_tag[2w0].vid = hdrs.vlan_tag[2w0].vid;
-            } else if (hsiVar_2 == 2w1) {
+            } else if (hsiVar_0 == 2w1) {
                 hdrs.vlan_tag[2w0].vid = hdrs.vlan_tag[2w1].vid;
-            } else if (hsiVar_2 >= 2w1) {
-                hdrs.vlan_tag[2w0].vid = hsVar_0;
+            } else if (hsiVar_0 >= 2w1) {
+                hdrs.vlan_tag[2w0].vid = hsVar;
             }
-        } else if (hsiVar_1 == 2w1) {
-            hsiVar_2 = meta.depth + 2w3;
-            if (hsiVar_2 == 2w0) {
+        } else if (hsiVar == 2w1) {
+            hsiVar_0 = meta.depth + 2w3;
+            if (hsiVar_0 == 2w0) {
                 hdrs.vlan_tag[2w1].vid = hdrs.vlan_tag[2w0].vid;
-            } else if (hsiVar_2 == 2w1) {
+            } else if (hsiVar_0 == 2w1) {
                 hdrs.vlan_tag[2w1].vid = hdrs.vlan_tag[2w1].vid;
-            } else if (hsiVar_2 >= 2w1) {
-                hdrs.vlan_tag[2w1].vid = hsVar_0;
+            } else if (hsiVar_0 >= 2w1) {
+                hdrs.vlan_tag[2w1].vid = hsVar;
             }
         }
     }
@@ -99,7 +96,7 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
         key_0 = hsVar;
     }
     @hidden action pnaexamplevarIndex1l102_2() {
-        hsiVar_0 = meta.depth;
+        hsiVar = meta.depth;
     }
     @hidden table tbl_pnaexamplevarIndex1l102 {
         actions = {
@@ -127,11 +124,11 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
     }
     apply {
         tbl_pnaexamplevarIndex1l102.apply();
-        if (hsiVar_0 == 2w0) {
+        if (hsiVar == 2w0) {
             tbl_pnaexamplevarIndex1l102_0.apply();
-        } else if (hsiVar_0 == 2w1) {
+        } else if (hsiVar == 2w1) {
             tbl_pnaexamplevarIndex1l102_1.apply();
-        } else if (hsiVar_0 >= 2w1) {
+        } else if (hsiVar >= 2w1) {
             tbl_pnaexamplevarIndex1l102_2.apply();
         }
         stub_0.apply();

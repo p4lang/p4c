@@ -48,7 +48,6 @@ struct main_metadata_t {
 	bit<16> MainControlT_tmp_25
 	bit<16> MainControlT_tmp_26
 	bit<32> MainControlT_hsVar
-	bit<32> MainControlT_hsVar_0
 	bit<32> MainControlT_key
 }
 metadata instanceof main_metadata_t
@@ -82,7 +81,7 @@ action execute_1 args none {
 	jmplt LABEL_END_3 m.MainControlT_tmp 0x1
 	mov m.MainControlT_tmp_11 h.vlan_tag_0.pcp_cfi_vid
 	and m.MainControlT_tmp_11 0xf
-	mov m.MainControlT_tmp_12 m.MainControlT_hsVar_0
+	mov m.MainControlT_tmp_12 m.MainControlT_hsVar
 	mov m.MainControlT_tmp_13 m.MainControlT_tmp_12
 	shl m.MainControlT_tmp_13 0x4
 	mov m.MainControlT_tmp_14 m.MainControlT_tmp_13
@@ -116,7 +115,7 @@ action execute_1 args none {
 	jmplt LABEL_END_3 m.MainControlT_tmp_2 0x1
 	mov m.MainControlT_tmp_21 h.vlan_tag_1.pcp_cfi_vid
 	and m.MainControlT_tmp_21 0xf
-	mov m.MainControlT_tmp_22 m.MainControlT_hsVar_0
+	mov m.MainControlT_tmp_22 m.MainControlT_hsVar
 	mov m.MainControlT_tmp_23 m.MainControlT_tmp_22
 	shl m.MainControlT_tmp_23 0x4
 	mov m.MainControlT_tmp_24 m.MainControlT_tmp_23

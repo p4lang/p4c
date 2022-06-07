@@ -53,7 +53,6 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
     bit<2> hsiVar;
     bit<2> hsiVar_0;
     bit<16> hsVar;
-    bit<2> hsiVar_1;
     @name("MainControlImpl.execute") action execute_1() {
         hsiVar_0 = meta.depth + 2w3;
         if (hsiVar_0 == 2w0) {
@@ -69,16 +68,16 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
         } else if (hsiVar_0 == 2w1) {
             hdrs.vlan_tag[2w1].ether_type = 16w2;
         }
-        hsiVar_1 = meta.depth;
-        if (hsiVar_1 == 2w0) {
+        hsiVar = meta.depth;
+        if (hsiVar == 2w0) {
             hdrs.vlan_tag[2w0].vid = (bit<12>)hdrs.vlan_tag[2w0].cfi;
-        } else if (hsiVar_1 == 2w1) {
+        } else if (hsiVar == 2w1) {
             hdrs.vlan_tag[2w1].vid = (bit<12>)hdrs.vlan_tag[2w1].cfi;
         }
-        hsiVar_1 = meta.depth;
-        if (hsiVar_1 == 2w0) {
+        hsiVar = meta.depth;
+        if (hsiVar == 2w0) {
             hdrs.vlan_tag[2w0].vid = hdrs.vlan_tag[1].vid;
-        } else if (hsiVar_1 == 2w1) {
+        } else if (hsiVar == 2w1) {
             hdrs.vlan_tag[2w1].vid = hdrs.vlan_tag[1].vid;
         }
     }
