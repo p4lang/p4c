@@ -247,6 +247,12 @@ class P4EbpfTest(BaseTest):
     def _table_create_str_from_value(self, value):
         return self._table_create_str_from_(name="value", value=value)
 
+    def _table_create_str_from_action(self, action):
+        if isinstance(action, int):
+            return "action id {} ".format(action)
+        else:
+            return "action name {} ".format(action)
+
     def table_write(self, method, table, key, action=0, data=None, priority=None, references=None,
                     counters=None, meters=None):
         """
@@ -257,7 +263,7 @@ class P4EbpfTest(BaseTest):
             data = references
             cmd = cmd + "ref "
         else:
-            cmd = cmd + "id {} ".format(action)
+            cmd = cmd + self._table_create_str_from_action(action)
         cmd = cmd + self._table_create_str_from_key(key=key)
         cmd = cmd + self._table_create_str_from_data(data=data, counters=counters, meters=meters)
         if priority:
@@ -299,7 +305,8 @@ class P4EbpfTest(BaseTest):
     def table_set_default(self, table, action=0, data=None, counters=None, meters=None):
         """ Sets default action for table. For parameters documentation see `table_add` method.
         """
-        cmd = "psabpf-ctl table default set pipe {} {} id {} ".format(TEST_PIPELINE_ID, table, action)
+        cmd = "psabpf-ctl table default set pipe {} {} ".format(TEST_PIPELINE_ID, table)
+        cmd = cmd + self._table_create_str_from_action(action)
         cmd = cmd + self._table_create_str_from_data(data=data, counters=counters, meters=meters)
         self.exec_ns_cmd(cmd, "Table set default entry failed")
 
@@ -352,7 +359,8 @@ class P4EbpfTest(BaseTest):
             self.fail("Support for DirectMeter is not implemented yet (psabpf doesn't return internal state of meter if you need it)")
 
     def action_selector_add_action(self, selector, action, data=None):
-        cmd = "psabpf-ctl action-selector add_member pipe {} {} id {}".format(TEST_PIPELINE_ID, selector, action)
+        cmd = "psabpf-ctl action-selector add_member pipe {} {} ".format(TEST_PIPELINE_ID, selector)
+        cmd = cmd + self._table_create_str_from_action(action)
         if data:
             cmd = cmd + " data"
             for d in data:
@@ -371,15 +379,15 @@ class P4EbpfTest(BaseTest):
         self.exec_ns_cmd(cmd, "ActionSelector add_to_group failed")
 
     def digest_get(self, name):
-        cmd = "psabpf-ctl digest get pipe {} {}".format(TEST_PIPELINE_ID, name)
+        cmd = "psabpf-ctl digest get-all pipe {} {}".format(TEST_PIPELINE_ID, name)
         _, stdout, _ = self.exec_ns_cmd(cmd, "Digest get failed")
-        return json.loads(stdout)['Digest'][name]['digests']
+        return json.loads(stdout)[name]['digests']
 
     def counter_get(self, name, key=None):
         key_str = self._table_create_str_from_key(key=key)
         cmd = "psabpf-ctl counter get pipe {} {} {}".format(TEST_PIPELINE_ID, name, key_str)
         _, stdout, _ = self.exec_ns_cmd(cmd, "Counter get failed")
-        return json.loads(stdout)['Counter'][name]
+        return json.loads(stdout)[name]
 
     def _do_counter_verify(self, bytes, packets, entry_value, counter_type):
         """ Verify counter value and type. Use `counter_verify` or `table_verify` instead.
