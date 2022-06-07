@@ -125,6 +125,10 @@ const IR::Node* DoSynthesizeActions::postorder(IR::P4Control* control) {
 }
 
 const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
+    if (statement->annotations->getSingle("atomic")) {
+        return createAction(statement);
+    }
+
     // Find a chain of statements to convert
     auto actbody = new IR::BlockStatement;  // build here new action
     auto left = new IR::BlockStatement(statement->annotations);  // leftover statements
@@ -203,6 +207,7 @@ const IR::Statement* DoSynthesizeActions::createAction(const IR::Statement* toAd
 
     auto annos = new IR::Annotations();
     annos->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
+    for (auto anno : body->getAnnotations()->annotations) annos->add(anno);
     auto action = new IR::P4Action(name, annos, new IR::ParameterList(), body);
     actions.push_back(action);
     auto actpath = new IR::PathExpression(name);
