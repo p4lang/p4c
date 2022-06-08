@@ -214,6 +214,7 @@ void DpdkContextGenerator::setActionAttributes(const IR::P4Table *tbl) {
         attr.allowed_as_hit_action = can_be_hit_action;
         attr.allowed_as_default_action = can_be_default_action;
         attr.actionHandle = getNewActionHandle();
+        attr.externalName = action_decl->controlPlaneName();
         actionAttrMap.emplace(act->getName(), attr);
     }
 }
@@ -315,11 +316,10 @@ const IR::P4Table * table, const cstring controlName, bool isMatch) {
             auto name = action->externalName();
             if (name != "NoAction") {
                 actName = controlName + "." + actName;
-                name = controlName + "." + name;
             } else {
                 actName = name;
             }
-           act->emplace("name", name);
+           act->emplace("name", attr.externalName);
            act->emplace("target_name", actName);
            act->emplace("handle", attr.actionHandle);
            if (isMatch) {

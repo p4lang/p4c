@@ -62,6 +62,7 @@ struct actionAttributes {
     bool allowed_as_hit_action;
     bool allowed_as_default_action;
     unsigned actionHandle;
+    cstring externalName;
     IR::IndexedVector<IR::Parameter> *params;
 };
 
