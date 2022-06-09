@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef _MIDEND_PARSERUNROLL_H_
 #define _MIDEND_PARSERUNROLL_H_
 
+#include <unordered_map>
+
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/callGraph.h"
@@ -51,27 +53,23 @@ class StackVariable {
     const IR::Member* operator->() const { return member; }
 
     // Implements comparisons so that StateVariables can be used as map keys.
-    bool operator<(const StackVariable& other) const;
     bool operator==(const StackVariable& other) const;
 
  private:
     const IR::Member* member;
 
-    // Returns a negative value if e1 < e2, zero if e1 == e2, and a positive value otherwise.
-    // In these comparisons,
-    //   * PathExpressions < Members.
-    //   * PathExpressions are ordered on the name contained in their Paths.
-    //   * Members are ordered first by their expressions, then by their member.
-    static int compare(const IR::Expression* e1, const IR::Expression* e2);
-    static int compare(const IR::Member* m1, const IR::Expression* e2);
-    static int compare(const IR::Member* m1, const IR::Member* m2);
-    static int compare(const IR::PathExpression* p1, const IR::Expression* e2);
-    static int compare(const IR::PathExpression* p1, const IR::PathExpression* p2);
-
  public:
     /// Implicitly converts IR::Expression* to a StackVariable.
     StackVariable(const IR::Expression* expr);  // NOLINT(runtime/explicit)
 };
+
+/// Class with hash function for @a StackVariable.
+class StackVariableHash {
+ public:
+     size_t operator()(const StackVariable& var) const;
+};
+
+typedef std::unordered_map<StackVariable, size_t, StackVariableHash> StackVariableMap;
 
 /// Information produced for a parser state by the symbolic evaluator
 struct ParserStateInfo {
@@ -84,7 +82,7 @@ struct ParserStateInfo {
     ValueMap*                       after;
     IR::ParserState*                newState;        // pointer to a new state
     size_t                          currentIndex;
-    std::map<StackVariable, size_t> statesIndexes;   // global map in state indexes
+    StackVariableMap                statesIndexes;   // global map in state indexes
     // set of parsers' states names with are in current path.
     std::unordered_set<cstring>     scenarioStates;
     std::unordered_set<cstring>     scenarioHS;      // scenario header stack's operations
