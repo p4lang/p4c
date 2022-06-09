@@ -21,16 +21,16 @@ limitations under the License.
 
 namespace P4 {
 
-class TypeMap;
+class ReferenceMap;
 
 /** Find parsers that have an unconditional "accept" in their start
  *  state, and put them in redundantParsers.
  */
 class FindRedundantParsers : public Inspector {
-    std::set<cstring> &redundantParsers;
+    std::set<const IR::P4Parser *> &redundantParsers;
     bool preorder(const IR::P4Parser *parser) override;
  public:
-    explicit FindRedundantParsers(std::set<cstring> &redundantParsers)
+    explicit FindRedundantParsers(std::set<const IR::P4Parser *> &redundantParsers)
         : redundantParsers(redundantParsers) { }
 };
 
@@ -38,22 +38,23 @@ class FindRedundantParsers : public Inspector {
  *  eliminate them.
  */
 class EliminateSubparserCalls : public Transform {
-    const std::set<cstring> &redundantParsers;
-    TypeMap *typeMap;
+    const std::set<const IR::P4Parser *> &redundantParsers;
+    ReferenceMap *refMap;
     const IR::Node *postorder(IR::MethodCallStatement *methodCallStmt) override;
  public:
-    EliminateSubparserCalls(const std::set<cstring> &redundantParsers, TypeMap *typeMap)
-        : redundantParsers(redundantParsers), typeMap(typeMap)
+    EliminateSubparserCalls(const std::set<const IR::P4Parser *> &redundantParsers,
+                            ReferenceMap *refMap)
+        : redundantParsers(redundantParsers), refMap(refMap)
     { }
 };
 
 class RemoveRedundantParsers : public PassManager {
-    std::set<cstring> redundantParsers;
+    std::set<const IR::P4Parser *> redundantParsers;
  public:
-    explicit RemoveRedundantParsers(TypeMap *typeMap)
+    explicit RemoveRedundantParsers(ReferenceMap *refMap)
         : PassManager {
                 new FindRedundantParsers(redundantParsers),
-                new EliminateSubparserCalls(redundantParsers, typeMap)
+                new EliminateSubparserCalls(redundantParsers, refMap)
         } {
         setName("RemoveRedundantParsers");
     }

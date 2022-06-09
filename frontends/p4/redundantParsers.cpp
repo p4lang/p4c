@@ -15,7 +15,9 @@ limitations under the License.
 */
 
 #include "redundantParsers.h"
-#include "typeMap.h"
+
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/methodInstance.h"
 
 namespace P4 {
 bool FindRedundantParsers::preorder(const IR::P4Parser *parser) {
@@ -30,30 +32,35 @@ bool FindRedundantParsers::preorder(const IR::P4Parser *parser) {
             continue;
         }
         LOG4("Found redundant parser " << parser->name);
-        redundantParsers.insert(parser->type->name);
+        redundantParsers.insert(parser);
     }
     return false;
 }
 
 const IR::Node *EliminateSubparserCalls::postorder(IR::MethodCallStatement *mcs) {
-    auto method = mcs->methodCall->method;
-    auto *member = method->to<IR::Member>();
-    if (!member || member->member != IR::IApply::applyMethodName) {
-        return mcs;
-    }
-    auto type = typeMap->getType(member->expr);
-    if (!type) {
-        return mcs;
-    }
-    auto parser = type->to<IR::Type_Parser>();
-    if (!parser) {
-        return mcs;
-    }
-    if (redundantParsers.count(parser->name)) {
-        LOG4("Removing apply call to redundant parser " << parser->getName()
-             << ": " << *mcs);
-        return nullptr;
-    }
-    return mcs;
+    if (mcs->methodCall->method->type->is<IR::Type_Unknown>()) return mcs;
+    auto mem = mcs->methodCall->method->to<IR::Member>();
+    if (!mem) return mcs;
+
+    auto pe = mem->expr->to<IR::PathExpression>();
+    if (!pe || !pe->type->is<IR::IApply>()) return mcs;
+
+    auto mi = MethodInstance::resolve(mcs->methodCall, refMap, nullptr, true);
+    if (!mi->isApply()) return mcs;
+
+    auto apply = mi->to<ApplyMethod>()->applyObject;
+    auto parser = apply->to<IR::Type_Parser>();
+    if (!parser) return mcs;
+
+    auto declInstance = mi->object->to<IR::Declaration_Instance>();
+    if (!declInstance) return mcs;
+
+    auto decl = refMap->getDeclaration(declInstance->type->to<IR::Type_Name>()->path);
+    auto p4parser = decl->to<IR::P4Parser>();
+    if (!p4parser || !redundantParsers.count(p4parser)) return mcs;
+
+    LOG4("Removing apply call to redundant parser " << parser->getName()
+         << ": " << *mcs);
+    return nullptr;
 }
 }

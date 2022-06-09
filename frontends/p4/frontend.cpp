@@ -219,7 +219,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new RemoveDontcareArgs(&refMap, &typeMap),
         new MoveConstructors(&refMap),
         new RemoveAllUnusedDeclarations(&refMap),
-        new RemoveRedundantParsers(&typeMap),
+        new RemoveRedundantParsers(&refMap),
         new ClearTypeMap(&typeMap),
         evaluator,
         new Inline(&refMap, &typeMap, evaluator, options.optimizeParserInlining),
