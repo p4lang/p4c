@@ -73,14 +73,8 @@ struct TopLevelCtxt{
     cstring compileCommand;
     cstring compilerVersion;
     void initTopLevelCtxt(DpdkOptions &options) {
-        /* Fetch required information from options */
-        const time_t now = time(NULL);
-        char build_date[50];
-        strftime(build_date, 50, "%c", localtime(&now));
-        buildDate = build_date;
-        compileCommand = options.DpdkCompCmd;
-        compileCommand = compileCommand.replace("(from pragmas)", "");
-        compileCommand = compileCommand.trim();
+        buildDate = options.getBuildDate();
+        compileCommand = options.getCompileCommand();
         progName =  options.file;
         auto fileName = progName.findlast('/');
         // Handle the case when input file is in the current working directory.

@@ -4,18 +4,10 @@
 
 namespace DPDK {
 
-// Collect the command line arguments into DpdkCompCmd
-cstring DpdkOptions::DpdkCompCmd = "";
-
 std::vector<const char*>* DpdkOptions::process(int argc, char* const argv[]) {
     searchForIncludePath(p4includePath,
             {"p4include/dpdk", "../p4include/dpdk", "../../p4include/dpdk"},
             exename(argv[0]));
-
-    for (auto i = 0; i < argc ; i++) {
-         DpdkCompCmd += argv[i];
-         DpdkCompCmd += " " ;
-    }
 
     auto remainingOptions = CompilerOptions::process(argc, argv);
 
