@@ -1,0 +1,18 @@
+pkg_info {
+  arch: "v1model"
+}
+controller_packet_metadata {
+  preamble {
+    id: 76689799
+    name: "packet_out"
+    alias: "packet_out"
+    annotations: "@controller_header(\"packet_out\")"
+  }
+  metadata {
+    id: 1
+    name: "b.b"
+    bitwidth: 32
+  }
+}
+type_info {
+}

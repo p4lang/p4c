@@ -32,6 +32,7 @@ limitations under the License.
 #include "midend/convertEnums.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateTuples.h"
+#include "midend/expandEmit.h"
 #include "midend/local_copyprop.h"
 #include "midend/midEndLast.h"
 #include "midend/noMatch.h"
@@ -88,6 +89,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
             new P4::RemoveExits(&refMap, &typeMap),
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::SimplifySelectCases(&refMap, &typeMap, false),  // accept non-constant keysets
+            new P4::ExpandEmit(&refMap, &typeMap),
             new P4::HandleNoMatch(&refMap),
             new P4::SimplifyParsers(&refMap),
             new P4::StrengthReduction(&refMap, &typeMap),

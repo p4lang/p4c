@@ -108,7 +108,7 @@ bool CodeGenInspector::comparison(const IR::Operation_Relation* b) {
             builder->append(")");
     } else {
         if (!et->is<IHasWidth>())
-            BUG("%1%: Comparisons for type %2% not yet implemented", type);
+            BUG("%1%: Comparisons for type %2% not yet implemented", b->left, type);
         unsigned width = et->to<IHasWidth>()->implementationWidthInBits();
         builder->append("memcmp(&");
         visit(b->left);
@@ -195,10 +195,18 @@ bool CodeGenInspector::preorder(const IR::Cast* c) {
 }
 
 bool CodeGenInspector::preorder(const IR::Member* expression) {
+    bool isErrorAccess = false;
+    if (auto tne = expression->expr->to<IR::TypeNameExpression>()) {
+        if (auto tn = tne->typeName->to<IR::Type_Name>()) {
+            if (tn->path->name.name == IR::Type_Error::error)
+                isErrorAccess = true;
+        }
+    }
+
     int prec = expressionPrecedence;
     expressionPrecedence = expression->getPrecedence();
     auto ei = P4::EnumInstance::resolve(expression, typeMap);
-    if (ei == nullptr) {
+    if (ei == nullptr && !isErrorAccess) {
         visit(expression->expr);
         auto pe = expression->expr->to<IR::PathExpression>();
         if (pe != nullptr && isPointerVariable(pe->path->name.name)) {

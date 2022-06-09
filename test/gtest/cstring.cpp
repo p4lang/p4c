@@ -50,6 +50,16 @@ TEST(cstring, construct) {
     EXPECT_FALSE(c.isNull());
 }
 
+TEST(cstring, toupper) {
+    cstring c = "simple";
+    cstring c1= "";
+
+    EXPECT_EQ(c.toUpper(), "SIMPLE");
+    EXPECT_EQ(c1.toUpper(), "");
+    EXPECT_EQ(c.capitalize(), "Simple");
+    EXPECT_EQ(c1.capitalize(), "");
+}
+
 TEST(cstring, compare) {
     cstring c = "simple";
     cstring c1 = "";

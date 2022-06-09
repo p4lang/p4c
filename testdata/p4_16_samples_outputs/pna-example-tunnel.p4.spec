@@ -46,6 +46,8 @@ struct local_metadata_t {
 }
 metadata instanceof local_metadata_t
 
+regarray direction size 0x100 initval 0
+
 action NoAction args none {
 	return
 }
@@ -70,7 +72,7 @@ table tunnel_decap_ipv4_tunnel_term_table {
 		tunnel_decap_decap_outer_ipv4_0
 		NoAction
 	}
-	default_action NoAction args none 
+	default_action NoAction args none const
 	size 0x10000
 }
 
@@ -83,7 +85,7 @@ table tunnel_encap_set_tunnel_encap {
 		tunnel_encap_set_tunnel_0
 		NoAction
 	}
-	default_action NoAction args none 
+	default_action NoAction args none const
 	size 0x100
 }
 
@@ -94,7 +96,8 @@ apply {
 	jmpeq PACKET_PARSER_PARSE_IPV4_OTR h.outer_ethernet.ether_type 0x800
 	jmp PACKET_PARSER_ACCEPT
 	PACKET_PARSER_PARSE_IPV4_OTR :	extract h.outer_ipv4
-	PACKET_PARSER_ACCEPT :	jmpneq LABEL_FALSE m.pna_main_input_metadata_direction 0x0
+	PACKET_PARSER_ACCEPT :	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
+	jmpneq LABEL_FALSE m.pna_main_input_metadata_direction 0x0
 	mov m.main_control_tunnel_decap_ipv4_tunnel_term_table_outer_ipv41 h.outer_ipv4.src_addr
 	mov m.main_control_tunnel_decap_ipv4_tunnel_term_table_outer_ipv42 h.outer_ipv4.dst_addr
 	table tunnel_decap_ipv4_tunnel_term_table

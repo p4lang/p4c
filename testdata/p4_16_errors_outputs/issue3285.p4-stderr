@@ -1,0 +1,4 @@
+issue3285.p4(1): [--Werror=invalid] error: int<0>: Width of signed type cannot be zero
+const int t = 0s0
+              ^^^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

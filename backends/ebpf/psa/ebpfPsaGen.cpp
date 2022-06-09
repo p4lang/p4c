@@ -23,8 +23,42 @@ limitations under the License.
 #include "externs/ebpfPsaCounter.h"
 #include "externs/ebpfPsaHashAlgorithm.h"
 #include "externs/ebpfPsaTableImplementation.h"
+#include "externs/ebpfPsaRandom.h"
+#include "externs/ebpfPsaMeter.h"
 
 namespace EBPF {
+
+class PSAErrorCodesGen : public Inspector {
+    CodeBuilder* builder;
+
+ public:
+    explicit PSAErrorCodesGen(CodeBuilder* builder) : builder(builder) {}
+
+    bool preorder(const IR::Type_Error* errors) override {
+        int id = -1;
+        for (auto decl : errors->members) {
+            ++id;
+            if (decl->srcInfo.isValid()) {
+                auto sourceFile = decl->srcInfo.getSourceFile();
+                // all the error codes are located in core.p4 file, they are defined in psa.h
+                if (sourceFile.endsWith("p4include/core.p4"))
+                    continue;
+            }
+
+            builder->emitIndent();
+            builder->appendFormat("static const ParserError_t %s = %d", decl->name.name, id);
+            builder->endOfStatement(true);
+
+            // type ParserError_t is u8, which can have values from 0 to 255
+            if (id > 255) {
+                ::error(ErrorType::ERR_OVERLIMIT,
+                        "%1%: Reached maximum number of possible errors", decl);
+            }
+        }
+        builder->newline();
+        return false;
+    }
+};
 
 // =====================PSAEbpfGenerator=============================
 void PSAEbpfGenerator::emitPSAIncludes(CodeBuilder *builder) const {
@@ -45,9 +79,7 @@ void PSAEbpfGenerator::emitPreamble(CodeBuilder *builder) const {
     builder->newline();
 
     builder->appendLine("#ifndef PSA_PORT_RECIRCULATE\n"
-        "#error \"PSA_PORT_RECIRCULATE not specified, "
-        "please use -DPSA_PORT_RECIRCULATE=n option to specify index of recirculation "
-        "interface (see the result of command 'ip link')\"\n"
+        "#define PSA_PORT_RECIRCULATE 0\n"
         "#endif");
     builder->appendLine("#define P4C_PSA_PORT_RECIRCULATE 0xfffffffa");
     builder->newline();
@@ -88,9 +120,15 @@ void PSAEbpfGenerator::emitInternalStructures(CodeBuilder *builder) const {
 
 /* Generate headers and structs in p4 prog */
 void PSAEbpfGenerator::emitTypes(CodeBuilder *builder) const {
+    PSAErrorCodesGen errorGen(builder);
+    ingress->program->apply(errorGen);
+
     for (auto type : ebpfTypes) {
         type->emit(builder);
     }
+
+    if (ingress->hasAnyMeter() || egress->hasAnyMeter())
+        EBPFMeterPSA::emitValueStruct(builder, ingress->refMap);
 
     ingress->parser->emitTypes(builder);
     ingress->control->emitTableTypes(builder);
@@ -267,6 +305,17 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
 
     builder->appendLine(pktClonesFunc);
     builder->newline();
+
+    if (ingress->hasAnyMeter() || egress->hasAnyMeter()) {
+        cstring meterExecuteFunc =
+                EBPFMeterPSA::meterExecuteFunc(options.emitTraceMessages, ingress->refMap);
+        builder->appendLine(meterExecuteFunc);
+        builder->newline();
+    }
+
+    cstring addPrefixFunc = EBPFTablePSA::addPrefixFunc(options.emitTraceMessages);
+    builder->appendLine(addPrefixFunc);
+    builder->newline();
 }
 
 // =====================PSAArchTC=============================
@@ -313,20 +362,20 @@ void PSAArchTC::emit(CodeBuilder *builder) const {
     emitInstances(builder);
 
     /*
-     * 6. BPF map initialization
+     * 6. Helper functions for ingress and egress program.
+     */
+    emitHelperFunctions(builder);
+
+    /*
+     * 7. BPF map initialization.
      */
     emitInitializer(builder);
     builder->newline();
 
     /*
-     * 7. XDP helper program.
+     * 8. XDP helper program.
      */
     xdp->emit(builder);
-
-    /*
-     * 8. Helper functions for ingress and egress program.
-     */
-    emitHelperFunctions(builder);
 
     /*
      * 9. TC Ingress program.
@@ -336,7 +385,10 @@ void PSAArchTC::emit(CodeBuilder *builder) const {
     /*
      * 10. TC Egress program.
      */
-    egress->emit(builder);
+    if (!egress->isEmpty()) {
+        // Do not generate TC Egress program if PSA egress pipeline is not used (empty).
+        egress->emit(builder);
+    }
 
     builder->target->emitLicense(builder, ingress->license);
 }
@@ -436,6 +488,8 @@ const PSAEbpfGenerator * ConvertToEbpfPSA::build(const IR::ToplevelBlock *tlb) {
 
 const IR::Node *ConvertToEbpfPSA::preorder(IR::ToplevelBlock *tlb) {
     ebpf_psa_arch = build(tlb);
+    ebpf_psa_arch->ingress->program = tlb->getProgram();
+    ebpf_psa_arch->egress->program = tlb->getProgram();
     return tlb;
 }
 
@@ -517,6 +571,14 @@ bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock *prsr) {
     return true;
 }
 
+bool ConvertToEBPFParserPSA::preorder(const IR::P4ValueSet* pvs) {
+    cstring extName = EBPFObject::externalName(pvs);
+    auto instance = new EBPFValueSet(program, pvs, extName, parser->visitor);
+    parser->valueSets.emplace(pvs->name.name, instance);
+
+    return false;
+}
+
 // =====================EBPFControl=============================
 bool ConvertToEBPFControlPSA::preorder(const IR::ControlBlock *ctrl) {
     control = new EBPFControlPSA(program,
@@ -554,39 +616,7 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ControlBlock *ctrl) {
 }
 
 bool ConvertToEBPFControlPSA::preorder(const IR::TableBlock *tblblk) {
-    // use HASH_MAP as default type
-    TableKind tableKind = TableHash;
-
-    // If any key field is LPM we will generate an LPM table
-    auto keyGenerator = tblblk->container->getKey();
-    if (keyGenerator != nullptr) {
-        for (auto it : keyGenerator->keyElements) {
-            // optimization: check if we should generate timestamp
-            if (it->expression->toString().endsWith("timestamp")) {
-                control->timestampIsUsed = true;
-            }
-
-            auto mtdecl = refmap->getDeclaration(it->matchType->path, true);
-            auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-            if (matchType->name.name != P4::P4CoreLibrary::instance.exactMatch.name &&
-                matchType->name.name != P4::P4CoreLibrary::instance.lpmMatch.name &&
-                matchType->name.name != "selector")
-                ::error(ErrorType::ERR_UNSUPPORTED,
-                        "Match of type %1% not supported", it->matchType);
-
-            if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
-                if (tableKind == TableLPMTrie) {
-                    ::error(ErrorType::ERR_UNSUPPORTED,
-                            "%1%: only one LPM field allowed", it->matchType);
-                    return false;
-                }
-                tableKind = TableLPMTrie;
-            }
-        }
-    }
-
     EBPFTablePSA *table = new EBPFTablePSA(program, tblblk, control->codeGen);
-
     control->tables.emplace(tblblk->container->name, table);
     return true;
 }
@@ -637,15 +667,21 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
     } else if (typeName == "Counter") {
         auto ctr = new EBPFCounterPSA(program, di, name, control->codeGen);
         control->counters.emplace(name, ctr);
+    } else if (typeName == "Random") {
+        auto rand = new EBPFRandomPSA(di);
+        control->randoms.emplace(name, rand);
     } else if (typeName == "Register") {
         auto reg = new EBPFRegisterPSA(program, name, di, control->codeGen);
         control->registers.emplace(name, reg);
-    } else if (typeName == "DirectCounter") {
+    } else if (typeName == "DirectCounter" || typeName == "DirectMeter") {
         // instance will be created by table
         return false;
     } else if (typeName == "Hash") {
         auto hash = new EBPFHashPSA(program, di, name);
         control->hashes.emplace(name, hash);
+    } else if (typeName == "Meter") {
+        auto met = new EBPFMeterPSA(program, name, di, control->codeGen);
+        control->meters.emplace(name, met);
     } else {
         ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
                 instance);

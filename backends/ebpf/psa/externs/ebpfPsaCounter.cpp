@@ -200,11 +200,8 @@ void EBPFCounterPSA::emitDirectMethodInvocation(CodeBuilder* builder,
 
     cstring target = valuePtr + "->" + instanceName;
     auto pipeline = dynamic_cast<const EBPFPipeline *>(program);
-    if (pipeline == nullptr) {
-        ::error(ErrorType::ERR_UNSUPPORTED,
-                "DirectCounter used outside of pipeline %1%", method->expr);
-        return;
-    }
+    CHECK_NULL(pipeline);
+
     cstring msgStr = Util::printf_format("Counter: updating %s, packets=1, bytes=%%u",
                                          instanceName.c_str());
     cstring varStr = Util::printf_format("%s", pipeline->lengthVar.c_str());

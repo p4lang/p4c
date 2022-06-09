@@ -517,6 +517,25 @@ class PrependPDotToActionArgs : public Transform {
     const IR::Node *preorder(IR::MethodCallExpression*) override;
 };
 
+/* This class is used to process the default action
+   and store the parameter list for each table.
+   Later, this infomation is passed and saved in table
+   properties and then used for generating instruction
+   for default action in each table.
+*/
+class DefActionValue : public Inspector {
+    P4::TypeMap* typeMap;
+    P4::ReferenceMap *refMap;
+    DpdkProgramStructure* structure;
+
+ public:
+    DefActionValue(P4::TypeMap* typeMap,
+                            P4::ReferenceMap *refMap,
+                            DpdkProgramStructure* structure)
+        : typeMap(typeMap), refMap(refMap), structure(structure) {}
+    void postorder(const IR::P4Table* t) override;
+};
+
 // dpdk does not support ternary operator so we need to translate ternary operator
 // to corresponding if else statement
 // Taken from frontend pass DoSimplifyExpressions in sideEffects.h
@@ -636,7 +655,8 @@ class CollectExternDeclaration : public Inspector {
             auto externTypeName = type->baseType->path->name.name;
             if (externTypeName == "Meter") {
                 if (d->arguments->size() != 2) {
-                    ::error("%1%: expected number of meters and type of meter as arguments", d);
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "%1%: expected number of meters and type of meter as arguments", d);
                 } else {
                     /* Check if the meter is of PACKETS (0) type */
                     if (d->arguments->at(1)->expression->to<IR::Constant>()->asUnsigned() == 0)
@@ -646,11 +666,13 @@ class CollectExternDeclaration : public Inspector {
                 }
             } else if (externTypeName == "Counter") {
                 if (d->arguments->size() != 2) {
-                    ::error("%1%: expected number of_counters and type of counter as arguments", d);
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "%1%: expected number of counters and type of counter as arguments", d);
                 }
             } else if (externTypeName == "Register") {
                 if (d->arguments->size() != 1 && d->arguments->size() != 2) {
-                    ::error("%1%: expected size and optionally init_val as arguments", d);
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "%1%: expected size and optionally init_val as arguments", d);
                 }
             } else {
                 // unsupported extern type
@@ -891,6 +913,19 @@ class CollectAddOnMissTable : public Inspector {
     void postorder(const IR::MethodCallStatement*) override;
 };
 
+class ValidateAddOnMissExterns : public Inspector {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    DpdkProgramStructure* structure;
+
+ public:
+    ValidateAddOnMissExterns(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+            DpdkProgramStructure* structure) :
+    refMap(refMap), typeMap(typeMap), structure(structure) {}
+
+    void postorder(const IR::MethodCallStatement*) override;
+};
+
 class CollectErrors : public Inspector {
     DpdkProgramStructure *structure;
 
@@ -905,6 +940,50 @@ class CollectErrors : public Inspector {
             }
         }
     }
+};
+
+/**
+ * Eliminate temporary copies of header, which generally populated after inlining,
+ * if it's not temporary copy then transform direct header copy to element wise copy
+ * i.e.
+ * case 1) when header copied to temporary
+ * eth_0 = hdr.ethernet
+ * eth_1 = hdr.outer_ethernet
+ * eth_0.srcAddr = eth_1.srcAddr
+ * eth_0.dstAddr = eth_1.dstAddr
+ * eth_0.etherType = eth_1.etherType
+ * hdr.ethernet = eth_0
+ * above block will be transformed into
+ * hdr.ethernet.srcAddr = hdr.outer_ethernet.srcAddr
+ * hdr.ethernet.dstAddr = hdr.outer_ethernet.dstAddr
+ * hdr.ethernet.etherType = hdr.outer_ethernet.etherType
+ *
+ * case 2) when header copied to non temporary
+ * hdr.ethernet = hdr.outer_ethernet
+ * it will be transformed into below memberwise copy
+ * hdr.ethernet.srcAddr = hdr.outer_ethernet.srcAddr
+ * hdr.ethernet.dstAddr = hdr.outer_ethernet.dstAddr
+ * hdr.ethernet.etherType = hdr.outer_ethernet.etherType
+ *
+ */
+class ElimHeaderCopy : public Transform {
+    P4::TypeMap *typeMap;
+    /// It's for populating replacement map by keeping temporary header name as key
+    /// and source of assignment statement as value.
+    /// i.e.
+    /// for below assignment statement
+    /// eth_0 = hdr.ethernet
+    /// replacement map will be like
+    /// replacementMap["eth_0"] = hdr.ethernet;
+    /// later on all uses of eth_0 will be replace with there value in replacementMap.
+    ordered_map<cstring, const IR::Member*> replacementMap;
+
+ public:
+    explicit ElimHeaderCopy(P4::TypeMap *typeMap) : typeMap{typeMap} {}
+    bool isHeader(const IR::Expression* e);
+    const IR::Node* preorder(IR::AssignmentStatement* as) override;
+    const IR::Node* preorder(IR::MethodCallStatement *mcs) override;
+    const IR::Node* postorder(IR::Member* m) override;
 };
 
 class DpdkArchFirst : public PassManager {

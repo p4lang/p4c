@@ -2,10 +2,9 @@
 #include "ir/dbprint.h"
 #include "printUtils.h"
 #include "dpdkAsmOpt.h"
+#include "constants.h"
 using namespace DBPrint;
 
-static constexpr unsigned DEFAULT_LEARNER_TABLE_SIZE = 0x10000;
-static constexpr unsigned DEFAULT_LEARNER_TABLE_TIMEOUT = 120;
 ordered_map<cstring, cstring> DPDK::ShortenTokenLength::origNameMap = {};
 auto& origNameMap =  DPDK::ShortenTokenLength::origNameMap;
 
@@ -72,7 +71,8 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
     if (DPDK::toStr(this->getType()) == "Register") {
         auto args = this->arguments;
         if (args->size() == 0) {
-            ::error("Register extern declaration %1% must contain a size parameter\n",
+            ::error(ErrorType::ERR_INVALID,
+                    "Register extern declaration %1% must contain a size parameter\n",
                 this->Name());
         } else {
             auto size = args->at(0)->expression;
@@ -84,7 +84,8 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
         auto args = this->arguments;
         unsigned value = 0;
         if (args->size() < 2) {
-            ::error("Counter extern declaration %1% must contain 2 parameters\n", this->Name());
+            ::error(ErrorType::ERR_INVALID,
+                    "Counter extern declaration %1% must contain 2 parameters\n", this->Name());
         } else {
             auto n_counters = args->at(0)->expression;
             auto counter_type = args->at(1)->expression;
@@ -108,7 +109,8 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
     } else if (DPDK::toStr(this->getType()) == "Meter") {
         auto args = this->arguments;
         if (args->size() < 2) {
-            ::error("Meter extern declaration %1% must contain a size parameter"
+            ::error(ErrorType::ERR_INVALID,
+                    "Meter extern declaration %1% must contain a size parameter"
                     " and meter type parameter", this->Name());
         } else {
             auto n_meters = args->at(0)->expression;
@@ -220,7 +222,10 @@ std::ostream &IR::DpdkMirrorStatement::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkLearnStatement::toSpec(std::ostream &out) const {
-    out << "learn " << action << " " << DPDK::toStr(argument);
+    out << "learn " << action << " ";
+    if (argument)
+        out << DPDK::toStr(argument) << " ";
+    out << DPDK::toStr(timeout);
     return out;
 }
 
@@ -301,6 +306,23 @@ std::ostream &IR::DpdkReturnStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
+std::ostream &IR::DpdkRearmStatement::toSpec(std::ostream &out) const {
+    out << "rearm";
+    if (timeout)
+        out << " " << DPDK::toStr(timeout);
+    return out;
+}
+
+std::ostream &IR::DpdkRecirculateStatement::toSpec(std::ostream &out) const {
+    out << "recirculate";
+    return out;
+}
+
+std::ostream &IR::DpdkRecircidStatement::toSpec(std::ostream &out) const {
+    out << "recircid " << DPDK::toStr(pass);
+    return out;
+}
+
 std::ostream &IR::DpdkLabelStatement::toSpec(std::ostream &out) const {
     out << label << " :";
     return out;
@@ -343,8 +365,33 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
         0) {
         out << " args none ";
     } else {
-        BUG("non-zero default action arguments not supported yet");
+        out << " args ";
+        auto mce = default_action->to<IR::MethodCallExpression>();
+        auto earg = mce->arguments->at(0)->expression;
+        if (earg->is<IR::ListExpression>()) {
+            auto paramCount = earg->to<IR::ListExpression>()->components.size();
+            for (unsigned i = 0; i < paramCount; i++) {
+                if (earg->to<IR::ListExpression>()->components.at(i)->is<IR::Constant>()) {
+                    auto val = earg->to<IR::ListExpression>()->
+                               components.at(i)->to<IR::Constant>()->asUnsigned();
+                    out << default_action_paraList.parameters.at(i)->toString() << " ";
+                    out << "0x" << std::hex << val << " ";
+                } else if (earg->to<IR::ListExpression>()->components.at(i)->
+                           is<IR::BoolLiteral>()) {
+                    earg->dbprint(std::cout);
+                    auto val = earg->to<IR::ListExpression>()->
+                               components.at(i)->to<IR::BoolLiteral>()->value;
+                    out << default_action_paraList.parameters.at(i)->toString() << " ";
+                    out << "0x" << std::hex << val << " ";
+                } else {
+                    BUG("Unsupported parameter type in default action in DPDK Target");
+                }
+            }
+        }
     }
+    auto def = properties->getProperty("default_action");
+    if (def->isConstant)
+        out <<"const";
     out << std::endl;
     if (auto psa_implementation =
             properties->getProperty("psa_implementation")) {
@@ -408,15 +455,16 @@ std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
     if (auto size = properties->getProperty("size")) {
         out << "\tsize " << DPDK::toStr(size->value) << "" << std::endl;
     } else {
-        out << "\tsize " << DEFAULT_LEARNER_TABLE_SIZE << std::endl;
-    }
-    if (auto size = properties->getProperty("psa_idle_timeout")) {
-        out << "\ttimeout " << DPDK::toStr(size->value) << "" << std::endl;
-    } else {
-        out << "\ttimeout " << DEFAULT_LEARNER_TABLE_TIMEOUT << std::endl;
+        out << "\tsize 0x" << std::hex << default_learner_table_size << std::endl;
     }
 
-    out << "}" << std::endl;
+    // The initial timeout values
+    // This initializes 8 timeout values which can later be configured through control plane APIs.
+    out << "\ttimeout {" << std::endl;
+    for (unsigned int i = 0; i < dpdk_learner_max_configurable_timeout_values ; i++)
+        out << "\t\t" << std::dec << default_learner_table_timeout << std::endl;
+    out << "\n\t\t}";
+    out << "\n}" << std::endl;
     return out;
 }
 
@@ -463,15 +511,19 @@ std::ostream &IR::DpdkChecksumClearStatement::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkGetHashStatement::toSpec(std::ostream &out) const {
-    out << "hash_get " << DPDK::toStr(dst) << " " << hash << " (";
+    out << "hash " << hash << " " << DPDK::toStr(dst) << " ";
     if (auto l = fields->to<IR::ListExpression>()) {
-        for (auto c : l->components) {
-            out << " " << DPDK::toStr(c);
+        if (l->components.size() == 1) {
+            out << " " << DPDK::toStr(l->components.at(0));
+            out << " " << DPDK::toStr(l->components.at(0));
+        } else {
+            out << " " << DPDK::toStr(l->components.at(0));
+            out << " " << DPDK::toStr(l->components.at(l->components.size() - 1));
         }
     } else {
-        ::error("get_hash's arg is not a ListExpression.");
+        ::error(ErrorType::ERR_INVALID,
+                "%1%: get_hash's arg is not a ListExpression.", this);
     }
-    out << ")";
     return out;
 }
 
@@ -552,4 +604,3 @@ std::ostream& IR::DpdkDropStatement::toSpec(std::ostream& out) const {
     out << "drop";
     return out;
 }
-

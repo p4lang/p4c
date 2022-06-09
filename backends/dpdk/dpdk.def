@@ -42,6 +42,7 @@ class DpdkTable {
     ActionList actions;
     Expression default_action;
     TableProperties properties;
+    inline ParameterList default_action_paraList;
 
     std::ostream& toSpec(std::ostream& out) const;
 #nodbprint
@@ -103,7 +104,8 @@ class DpdkApplyStatement : DpdkAsmStatement, IDPDKNode {
 
 class DpdkLearnStatement : DpdkAsmStatement, IDPDKNode {
     cstring action;
-    optional Expression argument;
+    Expression timeout;
+    NullOK optional Expression argument;
     std::ostream& toSpec(std::ostream& out) const override;
 }
 
@@ -438,7 +440,24 @@ class DpdkExternFuncStatement : DpdkAsmStatement, IDPDKNode {
 #nodbprint
 }
 
+class DpdkRecircidStatement : DpdkAsmStatement, IDPDKNode {
+    Expression pass;
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
 class DpdkReturnStatement : DpdkAsmStatement, IDPDKNode {
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
+class DpdkRearmStatement : DpdkAsmStatement, IDPDKNode {
+    NullOK optional Expression timeout;
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
+class DpdkRecirculateStatement : DpdkAsmStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }

@@ -34,6 +34,8 @@ metadata instanceof main_metadata_t
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 
+regarray direction size 0x100 initval 0
+
 action forward args instanceof forward_arg_t {
 	mov m.local_metadata_meta t.addr
 	return
@@ -52,7 +54,7 @@ table ipv4_da_lpm {
 		forward
 		default_route_drop
 	}
-	default_action default_route_drop args none 
+	default_action default_route_drop args none const
 	size 0x10000
 }
 
@@ -64,6 +66,7 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
+	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
 	jmpeq LABEL_TRUE_0 m.pna_main_input_metadata_direction 0x0
 	mov m.MainControlT_addr h.ipv4.dstAddr
 	jmp LABEL_END_0

@@ -138,13 +138,15 @@ Util::IJson* ExternConverter_clone::convertExternFunction(
     if (ei->name == "I2E") {
         prim = "clone_ingress_pkt_to_egress";
         if (ctxt->blockConverted != BlockConverted::Ingress) {
-            ::error("'clone(I2E, ...) not invoked in ingress %1%", mc);
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "'clone(I2E, ...) not invoked in ingress %1%", mc);
             return nullptr;
         }
     } else {
         prim = "clone_egress_pkt_to_egress";
         if (ctxt->blockConverted != BlockConverted::Egress) {
-            ::error("'clone(E2E, ...) not invoked in egress %1%", mc);
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "'clone(E2E, ...) not invoked in egress %1%", mc);
             return nullptr;
         }
     }
@@ -208,13 +210,15 @@ Util::IJson* ExternConverter_clone_preserving_field_list::convertExternFunction(
     if (ei->name == "I2E") {
         prim = "clone_ingress_pkt_to_egress";
         if (ctxt->blockConverted != BlockConverted::Ingress) {
-            ::error("'clone_preserving_field_list(I2E, ...) not invoked in ingress %1%", mc);
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "'clone_preserving_field_list(I2E, ...) not invoked in ingress %1%", mc);
             return nullptr;
         }
     } else {
         prim = "clone_egress_pkt_to_egress";
         if (ctxt->blockConverted != BlockConverted::Egress) {
-            ::error("'clone_preserving_field_list(E2E, ...) not invoked in egress %1%", mc);
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "'clone_preserving_field_list(E2E, ...) not invoked in egress %1%", mc);
             return nullptr;
         }
     }
@@ -321,7 +325,8 @@ Util::IJson* ExternConverter_resubmit_preserving_field_list::convertExternFuncti
     const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
     if (ctxt->blockConverted != BlockConverted::Ingress) {
-        ::error("'resubmit' can only be invoked in ingress %1%", mc);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "'resubmit' can only be invoked in ingress %1%", mc);
         return nullptr;
     }
     if (mc->arguments->size() == 1) {
@@ -351,7 +356,8 @@ Util::IJson* ExternConverter_recirculate_preserving_field_list::convertExternFun
     const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
     if (ctxt->blockConverted != BlockConverted::Egress) {
-        ::error("'resubmit' can only be invoked in egress %1%", mc);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "'resubmit' can only be invoked in egress %1%", mc);
         return nullptr;
     }
     if (mc->arguments->size() == 1) {
@@ -1034,7 +1040,8 @@ SimpleSwitchBackend::createRecirculateFieldsList(
         for (auto e : anno->expr) {
             auto cst = e->to<IR::Constant>();
             if (cst == nullptr) {
-                ::error("%1%: Annotation must be a constant integer", e);
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "%1%: Annotation must be a constant integer", e);
                 continue;
             }
 
@@ -1176,6 +1183,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         // This is important later for conversion to JSON.
         new P4::ClonePathExpressions(),
         new P4::ClearTypeMap(typeMap),
+        new P4::TypeChecking(refMap, typeMap, true),
         evaluator,
         [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
     });

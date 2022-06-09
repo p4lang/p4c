@@ -1,0 +1,3 @@
+issue3271.p4(3): [--Werror=invalid] error: a: invalid declaration. Instantiations cannot be in a function or method.
+    myp(1w1) a;
+             ^

@@ -139,6 +139,7 @@ apply {
 	MYIP_ACCEPT :	mov m.Ingress_tmp 0x10
 	mov m.Ingress_tmp 0x1
 	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl
 	jmpa LABEL_SWITCH a1
 	jmpa LABEL_SWITCH_0 a2
 	jmp LABEL_ENDSWITCH

@@ -5,9 +5,15 @@ on:
     branches:
       - main
   schedule:
-    # Ideally, we would update the image every time the base image (p4lang/behavioral-model)
-    # is updated, this is good enough.
-    - cron: '15 0-23/4 * * *' # "At minute 15 past every 4th hour from midnight through 23."
+    # Ideally, we would update the image every time the base image
+    # (p4lang/behavioral-model) is updated, this is good enough.
+    # "At minute 15 past every 4th hour from midnight through 23."
+    - cron: '15 0-23/4 * * *'
+
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: container-image-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build:

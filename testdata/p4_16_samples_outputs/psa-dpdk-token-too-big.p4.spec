@@ -155,7 +155,7 @@ table vxlan_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpd6 {
 		vxlan_encap_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dp5
 		drop_1
 	}
-	default_action drop_1 args none 
+	default_action drop_1 args none const
 	size 0x100000
 }
 

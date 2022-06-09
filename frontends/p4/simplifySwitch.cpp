@@ -53,7 +53,7 @@ const IR::Node* DoSimplifySwitch::postorder(IR::SwitchStatement* stat) {
     }
     // If none of the labels matches none of the cases will be
     // executed.
-    return new IR::EmptyStatement();
+    return new IR::EmptyStatement(stat->srcInfo);
 }
 
 }  // namespace P4

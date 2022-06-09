@@ -71,6 +71,10 @@ class EBPFPipeline : public EBPFProgram {
         oneKey = EBPFModel::reserved("one");
     }
 
+    /* Check if pipeline does any processing.
+     * Return false if not. */
+    bool isEmpty() const;
+
     virtual cstring dropReturnCode() {
         if (sectionName.startsWith("xdp")) {
             return "XDP_DROP";
@@ -118,6 +122,15 @@ class EBPFPipeline : public EBPFProgram {
     void emitHeadersFromCPUMAP(CodeBuilder* builder);
     void emitMetadataFromCPUMAP(CodeBuilder *builder);
 
+    bool hasAnyMeter() const {
+        auto directMeter = std::find_if(control->tables.begin(),
+                                        control->tables.end(),
+                                        [](std::pair<const cstring, EBPFTable*> elem) {
+                                            return !elem.second->to<EBPFTablePSA>()->meters.empty();
+                                        });
+        bool anyDirectMeter = directMeter != control->tables.end();
+        return anyDirectMeter || (!control->meters.empty());
+    }
     /*
      * Returns whether the compiler should generate
      * timestamp retrieved by bpf_ktime_get_ns().
@@ -126,7 +139,7 @@ class EBPFPipeline : public EBPFProgram {
      * if the timestamp field is not used within a pipeline.
      */
     bool shouldEmitTimestamp() const {
-        return control->timestampIsUsed;
+        return hasAnyMeter() || control->timestampIsUsed;
     }
 };
 

@@ -29,6 +29,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/stringify.h"
 #include "../bmv2/common/lower.h"
+#include "dpdkMetadata.h"
 
 namespace DPDK {
 
@@ -65,11 +66,13 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::RemoveComplexExpressions(refMap, typeMap,
                 new DPDK::ProcessControls(&structure.pipeline_controls)),
         new P4::ConstantFolding(refMap, typeMap, false),
+        new ElimHeaderCopy(typeMap),
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         new ConvertActionSelectorAndProfile(refMap, typeMap, &structure),
         new CollectTableInfo(&structure),
         new CollectAddOnMissTable(refMap, typeMap, &structure),
+        new ValidateAddOnMissExterns(refMap, typeMap, &structure),
         new P4::MoveDeclarations(),  // Move all local declarations to the beginning
         new CollectProgramStructure(refMap, typeMap, &structure),
         new CollectMetadataHeaderInfo(&structure),
@@ -92,6 +95,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new CollectLocalVariables(refMap, typeMap, &structure),
         new CollectErrors(&structure),
         new ConvertInternetChecksum(typeMap, &structure),
+        new DefActionValue(typeMap, refMap, &structure),
         new PrependPDotToActionArgs(typeMap, refMap, &structure),
         new ConvertLogicalExpression(),
         new CollectExternDeclaration(&structure),
@@ -122,6 +126,14 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     dpdk_program = convertToDpdk->getDpdkProgram();
     if (!dpdk_program)
         return;
+    if (structure.p4arch == "pna") {
+        PassManager post_code_gen = {
+            new PrependPassRecircId(),
+            new DirectionToRegRead(),
+        };
+        dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
+    }
+
     PassManager post_code_gen = {
         new EliminateUnusedAction(),
         new DpdkAsmOptimization,

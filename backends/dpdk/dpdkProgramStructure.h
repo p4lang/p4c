@@ -24,7 +24,9 @@ struct DpdkProgramStructure {
     // table and action info for learner tables
     ordered_set<cstring> learner_tables;
     ordered_set<cstring> learner_actions;
+    ordered_map<cstring, cstring> learner_action_map;
     ordered_map<cstring, std::vector<cstring>> learner_action_params;
+    ordered_map<cstring, const IR::P4Table *> learner_action_table;
 
     IR::IndexedVector<IR::DpdkDeclaration>       variables;
 
@@ -53,6 +55,7 @@ struct DpdkProgramStructure {
     IR::IndexedVector<IR::StructField> key_fields;
     IR::Vector<IR::Type> used_metadata;
     ordered_map<cstring, std::vector<struct hdrFieldInfo>> hdrFieldInfoList;
+    ordered_map<cstring, IR::ParameterList*> defActionParamList;
 
     void push_variable(const IR::DpdkDeclaration * d) {
         variables.push_back(d); }

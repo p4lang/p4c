@@ -34,10 +34,7 @@ struct meta_t {
 control Ingress(inout headers_t hdr, inout meta_t meta) {
     Hash<bit<32>>(algo = HashAlgorithm_t.CRC32) hash1;
     Hash<bit<32>>(poly = CRCPolynomial(coeff = 16w0x107)) hash2;
-    LCGMatrix(8w4, 10w7, "1000100
-         0100011
-         0010110
-         0001001") hamming;
+    LCGMatrix(8w4, 10w7, "1000100\n         0100011\n         0010110\n         0001001") hamming;
     Hash<bit<32>>(matrix = hamming) hash3;
     Hash<bit<32>>(formula = "magic_formula()") hash4;
     apply {

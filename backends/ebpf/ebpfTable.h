@@ -72,7 +72,11 @@ class EBPFTable : public EBPFTableBase {
  protected:
     const cstring prefixFieldName = "prefixlen";
 
-    bool isLPMTable();
+    bool isLPMTable() const;
+    bool isTernaryTable() const;
+
+    void emitTernaryInstance(CodeBuilder* builder);
+
     virtual void validateKeys() const;
     virtual ActionTranslationVisitor*
     createActionTranslationVisitor(cstring valueName, const EBPFProgram* program) const {
@@ -107,10 +111,7 @@ class EBPFTable : public EBPFTableBase {
     virtual void emitDirectValueTypes(CodeBuilder* builder) { (void) builder; }
     virtual void emitAction(CodeBuilder* builder, cstring valueName, cstring actionRunVariable);
     virtual void emitInitializer(CodeBuilder* builder);
-    virtual void emitLookup(CodeBuilder* builder, cstring key, cstring value) {
-        builder->target->emitTableLookup(builder, dataMapName, key, value);
-        builder->endOfStatement(true);
-    }
+    virtual void emitLookup(CodeBuilder* builder, cstring key, cstring value);
     virtual void emitLookupDefault(CodeBuilder* builder, cstring key, cstring value,
                                    cstring actionRunVariable) {
         (void) actionRunVariable;
@@ -119,6 +120,7 @@ class EBPFTable : public EBPFTableBase {
     }
     virtual bool isMatchTypeSupported(const IR::Declaration_ID* matchType) {
         return matchType->name.name == P4::P4CoreLibrary::instance.exactMatch.name ||
+               matchType->name.name == P4::P4CoreLibrary::instance.ternaryMatch.name ||
                matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name;
     }
     // Whether to drop packet if no match entry found.
@@ -143,6 +145,24 @@ class EBPFCounterTable : public EBPFTableBase {
                                       const IR::MethodCallExpression* expression);
     virtual void emitCounterAdd(CodeBuilder* builder, const IR::MethodCallExpression* expression);
     virtual void emitMethodInvocation(CodeBuilder* builder, const P4::ExternMethod* method);
+};
+
+class EBPFValueSet : public EBPFTableBase {
+ protected:
+    size_t size;
+    const IR::P4ValueSet* pvs;
+    std::vector<std::pair<cstring, const IR::Type*>> fieldNames;
+    cstring keyVarName;
+
+ public:
+    EBPFValueSet(const EBPFProgram* program, const IR::P4ValueSet* p4vs,
+                 cstring instanceName, CodeGenInspector* codeGen);
+
+    void emitTypes(CodeBuilder* builder);
+    void emitInstance(CodeBuilder* builder);
+    void emitKeyInitializer(CodeBuilder* builder, const IR::SelectExpression* expression,
+                            cstring varName);
+    void emitLookup(CodeBuilder* builder);
 };
 
 }  // namespace EBPF

@@ -83,6 +83,10 @@ class ValidateParsedProgram final : public Inspector {
                            control->getApplyParameters(),
                            control->getConstructorParameters()); }
     void postorder(const IR::P4Parser* parser) override {
+        auto start = parser->states.getDeclaration("start");
+        if (!start) {
+            ::error(ErrorType::ERR_INVALID, "Parser %1% has no 'start' state", parser);
+        }
         container(parser);
         distinctParameters(parser->getTypeParameters(),
                            parser->getApplyParameters(),

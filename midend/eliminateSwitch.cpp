@@ -27,6 +27,11 @@ const IR::Node* DoEliminateSwitch::postorder(IR::P4Control* control) {
 }
 
 const IR::Node* DoEliminateSwitch::postorder(IR::SwitchStatement* statement) {
+    if (findContext<IR::P4Action>()) {
+        ::error("%1%: switch statements not supported in actions on this target",
+                statement);
+        return statement;
+    }
     auto type = typeMap->getType(statement->expression);
     if (type->is<IR::Type_ActionEnum>())
         // Classic switch; no changes needed

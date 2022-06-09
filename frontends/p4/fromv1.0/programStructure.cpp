@@ -164,7 +164,8 @@ const IR::Vector<IR::Expression>* ProgramStructure::listIndexes(cstring type, cs
 const IR::Expression* ProgramStructure::listIndex(const IR::Expression* expression) const {
     auto pe = expression->to<IR::PathExpression>();
     if (pe == nullptr) {
-        ::error("%1%: Expected a field list", expression);
+        ::error(ErrorType::ERR_EXPECTED,
+                "%1%: Expected a field list", expression);
         return 0;
     }
 

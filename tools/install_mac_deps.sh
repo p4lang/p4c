@@ -7,19 +7,10 @@ if [[ ! -x $BREW ]]; then
 fi
 
 $BREW update
-$BREW install autoconf automake bdw-gc bison boost ccache cmake git \
+$BREW install autoconf automake bdw-gc bison boost ccache cmake \
       libtool openssl pkg-config python
-$BREW install gmp --c++11
-
-# Install specific version of Protobuf, since newer versions break compatibility
-wget https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1/protobuf-all-3.6.1.tar.gz
-tar xfz protobuf-all-3.6.1.tar.gz
-cd protobuf-3.6.1
-./configure
-make
-sudo make install
-cd ..
-rm -rf protobuf-3.6.1
+$BREW install protobuf
+$BREW install gmp
 
 # Prefer Homebrew's bison over the macOS-provided version
 $BREW link --force bison

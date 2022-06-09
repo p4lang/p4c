@@ -20,6 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ebpfObject.h"
 #include "ebpfProgram.h"
+#include "ebpfTable.h"
 #include "frontends/p4/methodInstance.h"
 
 namespace EBPF {
@@ -40,6 +41,7 @@ class StateTranslationVisitor : public CodeGenInspector {
     virtual void compileExtract(const IR::Expression* destination);
     void compileLookahead(const IR::Expression* destination);
     void compileAdvance(const P4::ExternMethod *ext);
+    void compileVerify(const IR::MethodCallExpression * expression);
 
     virtual void processFunction(const P4::ExternFunction* function);
     virtual void processMethod(const P4::ExternMethod* method);
@@ -86,15 +88,21 @@ class EBPFParser : public EBPFObject {
 
     StateTranslationVisitor*      visitor;
 
+    std::map<cstring, EBPFValueSet*> valueSets;
+
     explicit EBPFParser(const EBPFProgram* program, const IR::ParserBlock* block,
                         const P4::TypeMap* typeMap);
     virtual void emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl);
     void emit(CodeBuilder* builder);
     virtual bool build();
 
-    virtual void emitTypes(CodeBuilder* builder) { (void) builder; }
-    virtual void emitValueSetInstances(CodeBuilder* builder) { (void) builder; }
+    virtual void emitTypes(CodeBuilder* builder);
+    virtual void emitValueSetInstances(CodeBuilder* builder);
     virtual void emitRejectState(CodeBuilder* builder);
+
+    EBPFValueSet* getValueSet(cstring name) const {
+        return ::get(valueSets, name);
+    }
 };
 
 }  // namespace EBPF

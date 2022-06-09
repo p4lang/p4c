@@ -416,12 +416,14 @@ cc_library(
     srcs = [
         "backends/graphs/controls.cpp",
         "backends/graphs/graphs.cpp",
+        "backends/graphs/graph_visitor.cpp",
         "backends/graphs/p4c-graphs.cpp",
         "backends/graphs/parsers.cpp",
     ],
     hdrs = [
         "backends/graphs/controls.h",
         "backends/graphs/graphs.h",
+        "backends/graphs/graph_visitor.h",
         "backends/graphs/parsers.h",
         "backends/graphs/version.h",
     ],

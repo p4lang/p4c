@@ -36,11 +36,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".sat_plus") action sat_plus() {
         standard_metadata.egress_spec = 9w0;
-        hdr.data.res_8 = hdr.data.opr1_8 |+| hdr.data.opr2_8;
+        hdr.data.res_8 = (bit<8>)hdr.data.opr1_8 |+| (bit<8>)hdr.data.opr2_8;
     }
     @name(".sat_minus") action sat_minus() {
         standard_metadata.egress_spec = 9w0;
-        hdr.data.res_8 = hdr.data.opr1_8 |-| hdr.data.opr2_8;
+        hdr.data.res_8 = (bit<8>)hdr.data.opr1_8 |-| (bit<8>)hdr.data.opr2_8;
     }
     @name(".sat_add_to") action sat_add_to() {
         standard_metadata.egress_spec = 9w0;

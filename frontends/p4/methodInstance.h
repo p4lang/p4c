@@ -192,6 +192,9 @@ class ActionCall final : public MethodInstance {
     friend class MethodInstance;
  public:
     const IR::P4Action* action;
+    /// Generate a version of the action where the parameters in the
+    /// substitution have been replaced with the arguments.
+    const IR::P4Action* specialize(ReferenceMap* refMap) const;
 };
 
 /**

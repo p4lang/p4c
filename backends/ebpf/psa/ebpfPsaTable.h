@@ -20,6 +20,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "backends/ebpf/ebpfTable.h"
 #include "backends/ebpf/psa/externs/ebpfPsaCounter.h"
+#include "backends/ebpf/psa/externs/ebpfPsaMeter.h"
 
 namespace EBPF {
 
@@ -27,34 +28,45 @@ class EBPFTableImplementationPSA;
 
 class EBPFTablePSA : public EBPFTable {
  private:
-    void emitTableDecl(CodeBuilder *builder,
-                       cstring tblName,
-                       TableKind kind,
-                       cstring keyTypeName,
-                       cstring valueTypeName,
-                       size_t size) const;
+    std::vector<std::vector<const IR::Entry*>> getConstEntriesGroupedByPrefix();
+    bool hasConstEntries();
+    void emitMaskForExactMatch(CodeBuilder *builder, cstring &fieldName, EBPFType *ebpfType) const;
+    const cstring addPrefixFunctionName = "add_prefix_and_entries";
+    const cstring tuplesMapName = instanceName + "_tuples_map";
+    const cstring prefixesMapName = instanceName + "_prefixes";
 
  protected:
     ActionTranslationVisitor* createActionTranslationVisitor(
             cstring valueName, const EBPFProgram* program) const override;
 
     void initDirectCounters();
+    void initDirectMeters();
     void initImplementation();
 
     void emitTableValue(CodeBuilder* builder, const IR::MethodCallExpression* actionMce,
                         cstring valueName);
     void emitDefaultActionInitializer(CodeBuilder *builder);
     void emitConstEntriesInitializer(CodeBuilder *builder);
+    void emitTernaryConstEntriesInitializer(CodeBuilder *builder);
     void emitMapUpdateTraceMsg(CodeBuilder *builder, cstring mapName,
                                cstring returnCode) const;
+    void emitValueMask(CodeBuilder *builder, cstring valueMask,
+                       cstring nextMask, int tupleId) const;
+    void emitKeyMasks(CodeBuilder *builder,
+                      std::vector<std::vector<const IR::Entry *>> &entriesGrpedByPrefix,
+                      std::vector<cstring> &keyMasksNames);
+    void emitKeysAndValues(CodeBuilder *builder,
+                           std::vector<const IR::Entry *> &samePrefixEntries,
+                           std::vector<cstring> &keyNames,
+                           std::vector<cstring> &valueNames);
 
     const IR::PathExpression* getActionNameExpression(const IR::Expression* expr) const;
 
  public:
+    // We use vectors to keep an order of Direct Meters or Counters from a P4 program.
+    // This order is important from CLI tool point of view.
     std::vector<std::pair<cstring, EBPFCounterPSA *>> counters;
-    // TODO: DirectMeter is not implemented now, but
-    //  this is needed in table implementation to validate table properties
-    std::vector<cstring> meters;
+    std::vector<std::pair<cstring, EBPFMeterPSA *>> meters;
     EBPFTableImplementationPSA* implementation;
 
     EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* table,
@@ -67,10 +79,10 @@ class EBPFTablePSA : public EBPFTable {
     void emitAction(CodeBuilder* builder, cstring valueName, cstring actionRunVariable) override;
     void emitInitializer(CodeBuilder* builder) override;
     void emitDirectValueTypes(CodeBuilder* builder) override;
-    void emitLookup(CodeBuilder* builder, cstring key, cstring value) override;
     void emitLookupDefault(CodeBuilder* builder, cstring key, cstring value,
                            cstring actionRunVariable) override;
     bool dropOnNoMatchingEntryFound() const override;
+    static cstring addPrefixFunc(bool trace);
 
     EBPFCounterPSA* getDirectCounter(cstring name) const {
         auto result = std::find_if(counters.begin(), counters.end(),
@@ -78,6 +90,16 @@ class EBPFTablePSA : public EBPFTable {
                 return name == elem.first;
             });
         if (result != counters.end())
+            return result->second;
+        return nullptr;
+    }
+
+    EBPFMeterPSA* getMeter(cstring name) const {
+        auto result = std::find_if(meters.begin(), meters.end(),
+                                   [name](std::pair<cstring, EBPFMeterPSA *> elem)->bool {
+                                       return name == elem.first;
+                                   });
+        if (result != meters.end())
             return result->second;
         return nullptr;
     }

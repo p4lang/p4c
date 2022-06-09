@@ -490,7 +490,8 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
                     field_name_list.emplace(field->name, obj);
                 } else {
                     if (size_sum_so_far != 0) {
-                        ::error("Header Structure '%1%' has non-contiguous non-aligned fields"
+                        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                                "Header Structure '%1%' has non-contiguous non-aligned fields"
                                 " which cannot be combined to align to 8-bit. DPDK does not"
                                 " support non 8-bit aligned header field",st->name.name);
                         return st;
@@ -558,7 +559,8 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
                         field_name_list.clear();
                     }
                 } else {
-                    ::error("Combining the contiguos non 8-bit aligned fields result in a field"
+                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                            "Combining the contiguos non 8-bit aligned fields result in a field"
                             " with bit-width '%1%' > 64-bit in header structure '%2%'. DPDK does"
                             " not support non 8-bit aligned and greater than 64-bit header field"
                             ,size_sum_so_far, st->name.name);
@@ -570,7 +572,8 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
         }
         /* Throw error if there is non-aligned field present at the end in header */
         if (size_sum_so_far != 0) {
-            ::error("8-bit Alignment for Header Structure '%1%' is not possible as no more header"
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "8-bit Alignment for Header Structure '%1%' is not possible as no more header"
                     " fields available in header to combine. DPDK does not support non-aligned"
                     " header fields.", st->name.name);
             return st;
@@ -642,7 +645,8 @@ const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
             auto t = (*field).type->to<IR::Type_Bits>();
             auto width = t->width_bits();
             if (width > dpdk_max_field_width) {
-            ::error("Unsupported bit width '%1%' for field '%2%'. DPDK "
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Unsupported bit width '%1%' for field '%2%'. DPDK "
                      "does not support metadata/header field with width more than "
                      "'%3%' bits", width, field, dpdk_max_field_width);
             }
@@ -1268,6 +1272,21 @@ const IR::Node *CollectLocalVariables::postorder(IR::P4Parser *p) {
     return p;
 }
 
+/* This function stores the information about parameters of default action
+   for each table */
+void DefActionValue::postorder(const IR::P4Table *t) {
+    auto default_action = t->properties->getProperty("default_action");
+    if (default_action != nullptr && default_action->value->is<IR::ExpressionValue>()) {
+        auto expr = default_action->value->to<IR::ExpressionValue>()->expression;
+        auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
+                refMap, typeMap);
+        BUG_CHECK(mi->is<P4::ActionCall>(),
+            "%1%: expected action in default_action", default_action);
+        structure->defActionParamList[t->toString()] =
+                   new IR::ParameterList(mi->to<P4::ActionCall>()->action->parameters->parameters);
+    }
+}
+
 const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Action *a) {
     if (a->parameters->size() > 0) {
         auto l = new IR::IndexedVector<IR::Parameter>;
@@ -1657,8 +1676,6 @@ SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
     } else {
         BUG("Unexpected table implementation type");
     }
-    auto hidden = new IR::Annotations();
-    hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
     IR::Vector<IR::KeyElement> match_keys;
     for (auto key : tbl->getKey()->keyElements) {
         if (key->matchType->toString() != "selector") {
@@ -1678,7 +1695,8 @@ SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
     if (tbl->getSizeProperty()) {
         properties.push_back(new IR::Property("size",
                              new IR::ExpressionValue(tbl->getSizeProperty()), false)); }
-    auto match_table = new IR::P4Table(tbl->name, new IR::TableProperties(properties));
+    auto match_table = new IR::P4Table(tbl->name, tbl->annotations,
+                                       new IR::TableProperties(properties));
     return std::make_tuple(match_table, actionName);
 }
 
@@ -1706,6 +1724,10 @@ const IR::P4Table* SplitP4TableCommon::create_member_table(const IR::P4Table* tb
 
     auto hidden = new IR::Annotations();
     hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
+    auto nameAnnon = tbl->getAnnotation(IR::Annotation::nameAnnotation);
+    cstring nameA = nameAnnon->getSingleString();
+    cstring memName = nameA.replace(nameA.findlast('.'), "." + memberTableName);
+    hidden->addAnnotation(IR::Annotation::nameAnnotation, new IR::StringLiteral(memName), false);
 
     IR::IndexedVector<IR::ActionListElement> memberActionList;
     for (auto action : tbl->getActionList()->actionList)
@@ -1736,6 +1758,10 @@ const IR::P4Table* SplitP4TableCommon::create_group_table(const IR::P4Table* tbl
     }
     auto hidden = new IR::Annotations();
     hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
+    auto nameAnnon = tbl->getAnnotation(IR::Annotation::nameAnnotation);
+    cstring nameA = nameAnnon->getSingleString();
+    cstring selName = nameA.replace(nameA.findlast('.'), "." + selectorTableName);
+    hidden->addAnnotation(IR::Annotation::nameAnnotation, new IR::StringLiteral(selName), false);
     IR::IndexedVector<IR::Property> selector_properties;
     selector_properties.push_back(new IR::Property("selector", new IR::Key(selector_keys), false));
     selector_properties.push_back(new IR::Property("group_id",
@@ -1770,7 +1796,8 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
         return tbl;
 
     if (instance->arguments->size() != 3) {
-        ::error("Incorrect number of argument on action selector %1%", *instance->name);
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "Incorrect number of argument on action selector %1%", *instance->name);
         return tbl;
     }
 
@@ -1886,7 +1913,8 @@ const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
         return tbl;
 
     if (instance->arguments->size() != 1) {
-        ::error("Incorrect number of argument on action profile %1%", *instance->name);
+        ::error(ErrorType::ERR_MODEL,
+                "Incorrect number of argument on action profile %1%", *instance->name);
         return tbl;
     }
 
@@ -1984,14 +2012,16 @@ const IR::Node* SplitP4TableCommon::postorder(IR::MethodCallStatement *statement
 
         if (implementation == TableImplementation::ACTION_SELECTOR) {
             if (group_tables.count(tableName) == 0) {
-                ::error("Unable to find group table %1%", tableName);
+                ::error(ErrorType::ERR_NOT_FOUND,
+                        "Unable to find group table %1%", tableName);
                 return statement;
             }
             auto selectorTable = group_tables.at(tableName);
             decls->push_back(gen_apply(selectorTable));
         }
         if (member_tables.count(tableName) == 0) {
-            ::error("Unable to find member table %1%", tableName);
+            ::error(ErrorType::ERR_NOT_FOUND,
+                    "Unable to find member table %1%", tableName);
             return statement;
         }
 
@@ -2155,7 +2185,8 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
 
         if (implementation == TableImplementation::ACTION_SELECTOR) {
             if (group_tables.count(tableName) == 0) {
-                ::error("Unable to find group table %1%", tableName);
+                ::error(ErrorType::ERR_NOT_FOUND,
+                        "Unable to find group table %1%", tableName);
                 return statement; }
             auto selectorTable = group_tables.at(tableName);
             auto t1stat = gen_apply(selectorTable);
@@ -2163,7 +2194,8 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
         }
 
         if (member_tables.count(tableName) == 0) {
-            ::error("Unable to find member table %1%", tableName);
+            ::error(ErrorType::ERR_NOT_FOUND,
+                    "Unable to find member table %1%", tableName);
             return statement; }
         auto memberTable = member_tables.at(tableName);
         auto t2stat = gen_action_run(memberTable);
@@ -2214,6 +2246,19 @@ void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
                     default_action);
         }
     }
+    if (use_add_on_miss) {
+        for (auto action : t->getActionList()->actionList) {
+            auto action_decl = refMap->getDeclaration(action->getPath())->to<IR::P4Action>();
+            // Map the compiler generated internal name of action (emitted in .spec file) with
+            // user visible name in P4 program.
+            // To get the user visible name, strip any prefixes from externalName.
+            cstring userVisibleName = action_decl->externalName();
+            userVisibleName = userVisibleName.findlast('.');
+            userVisibleName = userVisibleName.trim(".\t\n\r");
+            structure->learner_action_map.emplace(userVisibleName, action_decl->name.name);
+            structure->learner_action_table.emplace(action_decl->externalName(), t);
+        }
+    }
 }
 
 void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
@@ -2230,12 +2275,171 @@ void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
     BUG_CHECK(ctxt != nullptr, "%1%: add_entry extern can only be used in an action", mcs);
 
     // assuming checking on number of arguments is already performed in frontend.
-    BUG_CHECK(mce->arguments->size() == 2, "%1%: expected two arguments in add_entry extern", mcs);
+    BUG_CHECK(mce->arguments->size() == 3,
+              "%1%: expected 3 arguments in add_entry extern", mcs);
     auto action = mce->arguments->at(0);
     // assuming syntax check is already performed earlier
     auto action_name = action->expression->to<IR::StringLiteral>()->value;
     structure->learner_actions.insert(action_name);
     return;
+}
+
+void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
+    bool isValidExternCall = false;
+    cstring propName = "";
+    auto mce = mcs->methodCall;
+    auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+    if (!mi->is<P4::ExternFunction>()) {
+        return;
+    }
+    auto func = mi->to<P4::ExternFunction>();
+    auto externFuncName = func->method->name;
+    if (externFuncName != "restart_expire_timer" && externFuncName != "set_entry_expire_time" &&
+        externFuncName != "add_entry")
+        return;
+    auto act = findOrigCtxt<IR::P4Action>();
+    BUG_CHECK(act != nullptr, "%1%: %2% extern can only be used in an action", mcs, externFuncName);
+    auto tbl = ::get(structure->learner_action_table,act->externalName());
+    if (externFuncName == "restart_expire_timer" || externFuncName == "set_entry_expire_time") {
+        bool use_idle_timeout_with_auto_delete = false;
+        if (tbl) {
+            auto idle_timeout_with_auto_delete =
+                 tbl->properties->getProperty("idle_timeout_with_auto_delete");
+            if (idle_timeout_with_auto_delete != nullptr) {
+                propName = "idle_timeout_with_auto_delete";
+                if (idle_timeout_with_auto_delete->value->is<IR::ExpressionValue>()) {
+                    auto expr =
+                    idle_timeout_with_auto_delete->value->to<IR::ExpressionValue>()->expression;
+                    if (!expr->is<IR::BoolLiteral>()) {
+                        ::error(ErrorType::ERR_UNEXPECTED,
+                               "%1%: expected boolean for 'idle_timeout_with_auto_delete' property",
+                               idle_timeout_with_auto_delete);
+                        return;
+                     } else {
+                         use_idle_timeout_with_auto_delete = expr->to<IR::BoolLiteral>()->value;
+                         if (use_idle_timeout_with_auto_delete)
+                             isValidExternCall = true;
+                     }
+                }
+            }
+        }
+    } else if (externFuncName == "add_entry") {
+        if (tbl) {
+            auto add_on_miss = tbl->properties->getProperty("add_on_miss");
+            if (add_on_miss != nullptr) {
+                propName = "add_on_miss";
+                if (add_on_miss->value->is<IR::ExpressionValue>()) {
+                    auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
+                    if (!expr->is<IR::BoolLiteral>()) {
+                        ::error(ErrorType::ERR_UNEXPECTED,
+                                "%1%: expected boolean for 'add_on_miss' property", add_on_miss);
+                        return;
+                    } else {
+                        auto use_add_on_miss = expr->to<IR::BoolLiteral>()->value;
+                        if (use_add_on_miss)
+                            isValidExternCall = true;
+                    }
+                }
+            }
+        }
+    }
+    if (!isValidExternCall) {
+         ::error(ErrorType::ERR_UNEXPECTED,
+                 "%1% must only be called from within an action with '%2%'"
+                 " property equal to true", externFuncName, propName);
+    }
+    return;
+}
+
+bool ElimHeaderCopy::isHeader(const IR::Expression* e) {
+    auto type = typeMap->getType(e);
+    if (type)
+        return type->is<IR::Type_Header>() && !e->is<IR::MethodCallExpression>();
+    return false;
+}
+
+const IR::Node* ElimHeaderCopy::preorder(IR::AssignmentStatement* as) {
+    if (isHeader(as->left) && isHeader(as->right)) {
+        if (auto path = as->left->to<IR::PathExpression>()) {
+            replacementMap.insert(std::make_pair(path->path->name.name,
+                                   as->right->to<IR::Member>()));
+            return new IR::EmptyStatement();
+        } else if (auto path = as->right->to<IR::PathExpression>()) {
+            replacementMap.insert(std::make_pair(path->path->name.name,
+                                  as->left->to<IR::Member>()));
+            return  new IR::EmptyStatement();
+        } else {
+            IR::ID methodName;
+            IR::IndexedVector<IR::StatOrDecl> components;
+            // copy validity flag
+            auto isValid = new IR::Member(as->right->srcInfo, as->right,
+                              IR::ID(IR::Type_Header::isValid));
+            auto result = new IR::MethodCallExpression(as->right->srcInfo, IR::Type::Boolean::get(),
+                                                   isValid);
+            typeMap->setType(isValid, new IR::Type_Method(IR::Type::Boolean::get(),
+                                          new IR::ParameterList(), IR::Type_Header::isValid));
+            auto method = new IR::Member(as->left->srcInfo, as->left,
+                                         IR::ID(IR::Type_Header::setValid));
+            auto mc = new IR::MethodCallExpression(as->left->srcInfo, method,
+                          new IR::Vector<IR::Argument>());
+            typeMap->setType(method, new IR::Type_Method(IR::Type_Void::get(),
+                                new IR::ParameterList(), IR::Type_Header::setValid));
+            components.push_back(new IR::MethodCallStatement(mc->srcInfo, mc));
+            auto ifTrue = components;
+            components.clear();
+            auto method1 = new IR::Member(as->left->srcInfo, as->left,
+                                              IR::ID(IR::Type_Header::setInvalid));
+            auto mc1 = new IR::MethodCallExpression(as->left->srcInfo, method1,
+                          new IR::Vector<IR::Argument>());
+            typeMap->setType(method1, new IR::Type_Method(IR::Type_Void::get(),
+                                new IR::ParameterList(), IR::Type_Header::setInvalid));
+            components.push_back(new IR::MethodCallStatement(mc1->srcInfo, mc1));
+            auto ifFalse = components;
+            components.clear();
+            auto ifStatement = new IR::IfStatement(
+              result, new IR::BlockStatement(ifTrue), new IR::BlockStatement(ifFalse));
+            components.push_back(ifStatement);
+            // both are non temporary header instance do element wise copy
+            for (auto field : typeMap->getType(as->left)->to<IR::Type_Header>()->fields) {
+                components.push_back(new IR::AssignmentStatement(as->srcInfo,
+                                     new IR::Member(as->left, field->name),
+                                     new IR::Member(as->right, field->name)));
+            }
+            return new IR::BlockStatement(as->srcInfo, components);
+        }
+    }
+    return as;
+}
+
+/**
+ * Replace method call expression with temporary instances
+ * like eth_0.setInvalid()
+ * with empty statement as all uses of eth_0 already replaced
+ *
+ */
+const IR::Node* ElimHeaderCopy::preorder(IR::MethodCallStatement *mcs) {
+    auto me = mcs->methodCall;
+    auto m = me->method->to<IR::Member>();
+    if (!m)
+        return mcs;
+    if (!isHeader(m->expr))
+        return mcs;
+    auto expr = m->expr->to<IR::PathExpression>();
+    if (expr && replacementMap.count(expr->path->name.name)) {
+        return new IR::EmptyStatement();
+    }
+    return mcs;
+}
+
+const IR::Node* ElimHeaderCopy::postorder(IR::Member* m) {
+    if (!isHeader(m->expr)) {
+        return m;
+    }
+    auto expr = m->expr->to<IR::PathExpression>();
+    if (expr && replacementMap.count(expr->path->name.name)) {
+        return new IR::Member(replacementMap.at(expr->path->name.name), m->member);
+    }
+    return m;
 }
 
 }  // namespace DPDK

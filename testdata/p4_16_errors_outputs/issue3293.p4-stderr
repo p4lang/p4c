@@ -1,0 +1,3 @@
+issue3293.p4(3): [--Werror=type-error] error: t1: no type parameters supplied for return generic type
+extern t1 f();
+       ^^

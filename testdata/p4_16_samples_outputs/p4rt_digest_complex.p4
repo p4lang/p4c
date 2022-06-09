@@ -9,6 +9,15 @@ struct s_t {
     bit<16> f16;
 }
 
+struct s2_t<T> {
+    bit<16> f16;
+    T       f;
+}
+
+@name("s3_t") struct s3_t<T> {
+    T f;
+}
+
 header h_t {
     s_t     s;
     bit<32> f32;
@@ -43,14 +52,16 @@ control MyEC(inout EMPTY a, inout EMPTY b, in psa_egress_input_metadata_t c, ino
 }
 
 struct digest_t {
-    h_t      h;
-    PortId_t port;
+    h_t           h;
+    PortId_t      port;
+    s2_t<bit<32>> s2;
+    s3_t<bit<64>> s3;
 }
 
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers hdr, in EMPTY e, in psa_ingress_output_metadata_t f) {
     Digest<digest_t>() digest;
     apply {
-        digest.pack({ hdr.h, f.egress_port });
+        digest.pack({ hdr.h, f.egress_port, { 16w10, 32w20 }, { 64w30 } });
     }
 }
 

@@ -31,7 +31,8 @@ typedef bit<32> PacketCounter_t;
 typedef bit<80> PacketByteCounter_t;
 const bit<32> NUM_PORTS = 4;
 struct main_metadata_t {
-    bit<32> key;
+    bit<32>               key;
+    ExpireTimeProfileId_t timeout;
 }
 
 struct headers_t {
@@ -64,7 +65,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     action add_on_miss_action() {
         bit<32> tmp = 0;
-        add_entry(action_name = "next_hop", action_params = tmp);
+        add_entry(action_name = "next_hop", action_params = tmp, expire_time_profile_id = user_meta.timeout);
     }
     table ipv4_da {
         key = {
@@ -82,7 +83,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         hdr.ipv4.srcAddr = newAddr;
     }
     action add_on_miss_action2() {
-        add_entry(action_name = "next_hop", action_params = { 32w0, 32w1234 });
+        add_entry(action_name = "next_hop", action_params = { 32w0, 32w1234 }, expire_time_profile_id = user_meta.timeout);
     }
     table ipv4_da2 {
         key = {

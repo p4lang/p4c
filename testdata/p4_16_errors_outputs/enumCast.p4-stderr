@@ -4,65 +4,30 @@ enumCast.p4(26): [--Werror=type-error] error: y: values of type 'int' cannot be 
 enumCast.p4(3)
 enum bit<32> X {
              ^
-enumCast.p4(27): [--Werror=type-error] error: AssignmentStatement
+enumCast.p4(27): [--Werror=type-error] error: AssignmentStatement: values of type 'bit<32>' cannot be implicitly cast to type 'X'
         y = 32w1; // Error: no implicit cast to enum
           ^
-  ---- Actual error:
-enumCast.p4(3): Cannot unify type 'bit<32>' with type 'X'
-  enum bit<32> X {
-               ^
-  ---- Originating from:
-enumCast.p4(27): Source expression '32w1' produces a result of type 'bit<32>' which cannot be assigned to a left-value with type 'X'
-          y = 32w1; // Error: no implicit cast to enum
-              ^^^^
 enumCast.p4(3)
-  enum bit<32> X {
-               ^
-enumCast.p4(33): [--Werror=type-error] error: AssignmentStatement
+enum bit<32> X {
+             ^
+enumCast.p4(33): [--Werror=type-error] error: AssignmentStatement: values of type 'E2' cannot be implicitly cast to type 'E1'
         a = b; // Error: b is automatically cast to bit<8>,
           ^
-  ---- Actual error:
-enumCast.p4(12): Cannot unify type 'E2' with type 'E1'
-  enum bit<8> E2 {
-              ^^
-enumCast.p4(8)
-  enum bit<8> E1 {
-              ^^
-  ---- Originating from:
-enumCast.p4(33): Source expression 'b' produces a result of type 'E2' which cannot be assigned to a left-value with type 'E1'
-          a = b; // Error: b is automatically cast to bit<8>,
-              ^
 enumCast.p4(12)
-  enum bit<8> E2 {
-              ^^
+enum bit<8> E2 {
+            ^^
 enumCast.p4(8)
-  enum bit<8> E1 {
-              ^^
-enumCast.p4(35): [--Werror=type-error] error: AssignmentStatement
+enum bit<8> E1 {
+            ^^
+enumCast.p4(35): [--Werror=type-error] error: AssignmentStatement: values of type 'bit<8>' cannot be implicitly cast to type 'E1'
         a = E1.e1 + 1; // Error: E.e1 is automatically cast to bit<8>,
           ^
-  ---- Actual error:
-enumCast.p4(8): Cannot unify type 'bit<8>' with type 'E1'
-  enum bit<8> E1 {
-              ^^
-  ---- Originating from:
-enumCast.p4(35): Source expression '+' produces a result of type 'bit<8>' which cannot be assigned to a left-value with type 'E1'
-          a = E1.e1 + 1; // Error: E.e1 is automatically cast to bit<8>,
-              ^^^^^^^^^
 enumCast.p4(8)
-  enum bit<8> E1 {
-              ^^
-enumCast.p4(38): [--Werror=type-error] error: AssignmentStatement
+enum bit<8> E1 {
+            ^^
+enumCast.p4(38): [--Werror=type-error] error: AssignmentStatement: values of type 'bit<8>' cannot be implicitly cast to type 'E1'
         a = E1.e1 + E1.e2; // Error: both arguments to the addition are automatically
           ^
-  ---- Actual error:
-enumCast.p4(8): Cannot unify type 'bit<8>' with type 'E1'
-  enum bit<8> E1 {
-              ^^
-  ---- Originating from:
-enumCast.p4(38): Source expression '+' produces a result of type 'bit<8>' which cannot be assigned to a left-value with type 'E1'
-          a = E1.e1 + E1.e2; // Error: both arguments to the addition are automatically
-              ^^^^^^^^^^^^^
 enumCast.p4(8)
-  enum bit<8> E1 {
-              ^^
+enum bit<8> E1 {
+            ^^

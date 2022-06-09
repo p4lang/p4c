@@ -73,7 +73,7 @@ class Type_Type : Type {
     Type type;
     toString { return "Type(" + type->toString() + ")"; }
     dbprint { out << "Type(" << type << ")"; }
-    Type getP4Type() const override { return type; }
+    const Type* getP4Type() const override { return type; }
     validate { BUG_CHECK(!type->is<IR::Type_Type>(), "%1%: nested Type_Type", type); }
 }
 

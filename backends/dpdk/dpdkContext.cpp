@@ -49,6 +49,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 struct TableAttributes tblAttr;
                 tblAttr.direction = direction;
                 tblAttr.controlName = control->name.originalName;
+                tblAttr.externalName = tbl->controlPlaneName();
                 tblAttr.tableHandle = getNewTableHandle();
                 auto size = tbl->getSizeProperty();
                 tblAttr.size = dpdk_default_table_size;
@@ -56,6 +57,38 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                    tblAttr.size = size->asUnsigned();
                 auto hidden = tbl->annotations->getSingle(IR::Annotation::hiddenAnnotation);
                 auto selector = tbl->properties->getProperty("selector");
+                tblAttr.is_add_on_miss = false;
+                tblAttr.idle_timeout_with_auto_delete = false;
+                auto add_on_miss = tbl->properties->getProperty("add_on_miss");
+                if (add_on_miss != nullptr) {
+                    if (add_on_miss->value->is<IR::ExpressionValue>()) {
+                        auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
+                        if (!expr->is<IR::BoolLiteral>()) {
+                            ::error(ErrorType::ERR_UNEXPECTED,
+                                   "%1%: expected boolean for 'add_on_miss' property", add_on_miss);
+                            return;
+                        } else {
+                            tblAttr.is_add_on_miss = expr->to<IR::BoolLiteral>()->value;
+                        }
+                    }
+                }
+                auto idle_timeout_with_auto_delete =
+                     tbl->properties->getProperty("idle_timeout_with_auto_delete");
+                if (idle_timeout_with_auto_delete != nullptr) {
+                    if (idle_timeout_with_auto_delete->value->is<IR::ExpressionValue>()) {
+                        auto expr =
+                        idle_timeout_with_auto_delete->value->to<IR::ExpressionValue>()->expression;
+                        if (!expr->is<IR::BoolLiteral>()) {
+                            ::error(ErrorType::ERR_UNEXPECTED,
+                            "%1%: expected boolean for 'idle_timeout_with_auto_delete' property",
+                            idle_timeout_with_auto_delete);
+                            return;
+                         } else {
+                             tblAttr.idle_timeout_with_auto_delete =
+                                      expr->to<IR::BoolLiteral>()->value;
+                         }
+                    }
+                }
                 if (hidden) {
                     tblAttr.tableType = selector ? "selection" : "action";
                     tblAttr.isHidden = true;
@@ -107,12 +140,15 @@ Util::JsonObject* DpdkContextGenerator::initTableCommonJson(
     const cstring name, const struct TableAttributes & attr) {
     auto* tableJson = new Util::JsonObject();
     cstring tableName = attr.controlName + "." + name;
-    tableJson->emplace("name", tableName);
+    tableJson->emplace("name", attr.externalName);
+    tableJson->emplace("target_name", tableName);
     tableJson->emplace("direction", attr.direction);
     tableJson->emplace("handle", attr.tableHandle);
     tableJson->emplace("table_type", attr.tableType);
     tableJson->emplace("size", attr.size);
     tableJson->emplace("p4_hidden", attr.isHidden);
+    tableJson->emplace("add_on_miss", attr.is_add_on_miss);
+    tableJson->emplace("idle_timeout_with_auto_delete",  attr.idle_timeout_with_auto_delete);
     return tableJson;
 }
 
@@ -178,6 +214,7 @@ void DpdkContextGenerator::setActionAttributes(const IR::P4Table *tbl) {
         attr.allowed_as_hit_action = can_be_hit_action;
         attr.allowed_as_default_action = can_be_default_action;
         attr.actionHandle = getNewActionHandle();
+        attr.externalName = action_decl->controlPlaneName();
         actionAttrMap.emplace(act->getName(), attr);
     }
 }
@@ -213,7 +250,8 @@ Util::JsonArray* paramJson, const cstring name, int dest_start, int dest_width) 
 
 // This functions creates JSON object for match attributes of a table.
 Util::JsonObject*
-DpdkContextGenerator::addMatchAttributes(const IR::P4Table*table, const cstring ctrlName) {
+DpdkContextGenerator::addMatchAttributes(const IR::P4Table* table, const cstring ctrlName) {
+    auto tableAttr = ::get(tableAttrmap, table->name.originalName);
     auto* match_attributes = new Util::JsonObject();
     auto* actFmtArray = new Util::JsonArray();
     auto* stageTblArray = new Util::JsonArray();
@@ -221,31 +259,27 @@ DpdkContextGenerator::addMatchAttributes(const IR::P4Table*table, const cstring 
     for (auto action : table->getActionList()->actionList) {
         auto* oneAction = new Util::JsonObject();
         struct actionAttributes attr = ::get(actionAttrMap, action->getName());
-        auto actName = toStr(action->expression);
         auto name = action->externalName();
         if (name != "NoAction") {
-            actName = ctrlName + "." + actName;
             name = ctrlName + "." + name;
-        } else {
-            actName = name;
         }
         oneAction->emplace("action_name", name);
-        oneAction->emplace("target_action_name", actName);
         oneAction->emplace("action_handle", attr.actionHandle);
         auto* immFldArray = new Util::JsonArray();
         if (attr.params) {
             int index = 0;
             int position = 0;
+            int param_width = 8;   // Minimum width for dpdk action params
             for (auto param : *(attr.params)) {
-                // TODO Handle other types of parameters
                 if (param->type->is<IR::Type_Bits>()) {
-                    addImmediateField(immFldArray, param->name.originalName,
-                                      index/8, param->type->width_bits());
-                    index += param->type->width_bits();
-                    position++;
-                } else {
+                    param_width = param->type->width_bits();
+                } else if (!param->type->is<IR::Type_Boolean>()) {
                     BUG("Unsupported parameter type %1%", param->type);
                 }
+                addImmediateField(immFldArray, param->name.originalName,
+                                  index/8, param_width);
+                index += param_width;
+                position++;
             }
         }
         oneAction->emplace("immediate_fields",immFldArray);
@@ -278,12 +312,15 @@ const IR::P4Table * table, const cstring controlName, bool isMatch) {
         // Printing compiler added actions is curently not required
         if (!attr.is_compiler_added_action) {
             auto *act = new Util::JsonObject();
-            auto actName = action->externalName();
-
-            // NoAction is not prefixed with control block name
-            if (actName != "NoAction")
+            auto actName = toStr(action->expression);
+            auto name = action->externalName();
+            if (name != "NoAction") {
                 actName = controlName + "." + actName;
-           act->emplace("name", actName);
+            } else {
+                actName = name;
+            }
+           act->emplace("name", attr.externalName);
+           act->emplace("target_name", actName);
            act->emplace("handle", attr.actionHandle);
            if (isMatch) {
                act->emplace("constant_default_action", attr.constant_default_action);
@@ -295,16 +332,17 @@ const IR::P4Table * table, const cstring controlName, bool isMatch) {
            if (attr.params) {
                 int index = 0;
                 int position = 0;
+                int param_width = 8;
                 for (auto param : *(attr.params)) {
-                // TODO Handle other types of parameters
                     if (param->type->is<IR::Type_Bits>()) {
-                        addActionParam(paramJson, param->name.originalName,
-                                       param->type->width_bits(), position, index/8);
-                        position++;
-                        index += param->type->width_bits();
-                    } else {
+                        param_width = param->type->width_bits();
+                    } else if (!param->type->is<IR::Type_Boolean>()) {
                         BUG("Unsupported parameter type %1%", param->type);
                     }
+                    addActionParam(paramJson, param->name.originalName,
+                                   param_width, position, index/8);
+                    index += param_width;
+                    position++;
                 }
             }
             act->emplace("p4_parameters", paramJson);
