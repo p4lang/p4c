@@ -16,6 +16,7 @@ header vlan_tag_1 instanceof vlan_tag_h
 
 
 struct main_metadata_t {
+	bit<16> pna_pre_input_metadata_parser_error
 	bit<32> pna_main_input_metadata_input_port
 	bit<32> local_metadata_depth
 	bit<32> pna_main_output_metadata_output_port
