@@ -44,6 +44,7 @@ limitations under the License.
 #include "midend/fillEnumMap.h"
 #include "midend/flattenHeaders.h"
 #include "midend/flattenInterfaceStructs.h"
+#include "midend/hsIndexSimplify.h"
 #include "midend/local_copyprop.h"
 #include "midend/midEndLast.h"
 #include "midend/nestedStructs.h"
@@ -205,10 +206,9 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,
             new P4::FlattenHeaders(&refMap, &typeMap),
             new P4::FlattenInterfaceStructs(&refMap, &typeMap),
             new P4::SimplifyControlFlow(&refMap, &typeMap),
+            new P4::HSIndexSimplifier(&refMap, &typeMap),
             new P4::ParsersUnroll(true, &refMap, &typeMap),
             new P4::ReplaceSelectRange(&refMap, &typeMap),
-            // DPDK architecture does not currently support predicated instructions
-            // new P4::Predication(&refMap),
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap, nullptr, policy),
