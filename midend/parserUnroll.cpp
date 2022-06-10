@@ -32,7 +32,7 @@ bool StackVariable::operator==(const StackVariable& other) const {
 size_t StackVariableHash::operator()(const StackVariable& var) const {
     const IR::Member* curMember = var.operator->();
     std::vector<size_t> h;
-    while(curMember) {
+    while (curMember) {
         h.push_back(Util::Hash::fnv1a<const cstring>(curMember->member.name));
         if (auto* path = curMember->expr->to<IR::PathExpression>()) {
             h.push_back(Util::Hash::fnv1a<const cstring>(path->path->name));
