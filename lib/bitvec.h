@@ -24,6 +24,7 @@ limitations under the License.
 #include <string.h>
 #include <utility>
 #include <iostream>
+#include <type_traits>
 #include "config.h"
 
 #if HAVE_LIBGC
@@ -42,6 +43,7 @@ limitations under the License.
 #undef clrbit
 #endif
 
+namespace bv {
 #if defined(__GNUC__) || defined(__clang__)
 /* use builtin count leading/trailing bits of type-approprite size */
 static inline int builtin_ctz(unsigned x) { return __builtin_ctz(x); }
@@ -54,6 +56,48 @@ static inline int builtin_popcount(unsigned x) { return __builtin_popcount(x); }
 static inline int builtin_popcount(unsigned long x) { return __builtin_popcountl(x); }
 static inline int builtin_popcount(unsigned long long x) { return __builtin_popcountll(x); }
 #endif
+
+template<typename I>
+int count_trailing_zeroes(I x) {
+    static_assert(std::is_integral<I>::value, "'I' has to be integral type");
+#if defined(__GNUC__) || defined(__clang__)
+    return bv::builtin_ctz(x);
+#else
+    int cnt = 0;
+    while ((x & 0xff) == 0) { cnt += 8; val >>= 8; }
+    while ((x & 1) == 0) { cnt++; val >>= 1; }
+    return cnt;
+#endif
+}
+
+template<typename I>
+int count_leading_zeroes(I x) {
+    static_assert(std::is_integral<I>::value, "'I' has to be integral type");
+#if defined(__GNUC__) || defined(__clang__)
+    return bv::builtin_clz(x);
+#else
+    int cnt = 0;
+    while (!(x >> (CHAR_BIT * sizeof(I) - 1))) {
+        --cnt;
+        x <<= 1;
+    }
+    return cnt;
+#endif
+}
+
+template<typename I>
+int popcount(I x) {
+    static_assert(std::is_integral<I>::value, "'I' has to be integral type");
+#if defined(__GNUC__) || defined(__clang__)
+    return builtin_popcount(x);
+#else
+    int rv = 0;
+    for (auto v = x; v; v &= v - 1)
+        ++rv;
+    return rv;
+#endif
+}
+}  // namespace bv
 
 
 class bitvec {
@@ -85,13 +129,7 @@ class bitvec {
         bitref &operator++() {
             while ((size_t)++idx < self.size * bitvec::bits_per_unit) {
                 if (auto w = self.word(idx/bitvec::bits_per_unit) >> (idx%bitvec::bits_per_unit)) {
-#if defined(__GNUC__) || defined(__clang__)
-                    idx += builtin_ctz(w);
-#else
-                    while (!(w & 1)) {
-                        ++idx;
-                        w >>= 1; }
-#endif
+                    idx += bv::count_trailing_zeroes(w);
                     return *this; }
                 idx = (idx / bitvec::bits_per_unit) * bitvec::bits_per_unit
                     + bitvec::bits_per_unit - 1; }
@@ -102,13 +140,7 @@ class bitvec {
             while (--idx >= 0) {
                 if (auto w = self.word(idx/bitvec::bits_per_unit)
                            << (bitvec::bits_per_unit - 1 - idx%bitvec::bits_per_unit)) {
-#if defined(__GNUC__) || defined(__clang__)
-                    idx -= builtin_clz(w);
-#else
-                    while (!(w >> (bitvec::bits_per_unit - 1))) {
-                        --idx;
-                        w <<= 1; }
-#endif
+                    idx -= bv::count_leading_zeroes(w);
                     return *this; }
                 idx = (idx / bitvec::bits_per_unit) * bitvec::bits_per_unit; }
             return *this; }
@@ -460,12 +492,7 @@ class bitvec {
     int popcount() const {
         int rv = 0;
         for (size_t i = 0; i < size; i++)
-#if defined(__GNUC__) || defined(__clang__)
-            rv += builtin_popcount(word(i));
-#else
-            for (auto v = word(i); v; v &= v-1)
-                ++rv;
-#endif
+            rv += bv::popcount(word(i));
         return rv; }
     bool is_contiguous() const;
 
