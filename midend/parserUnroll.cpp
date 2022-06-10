@@ -26,7 +26,7 @@ bool StackVariable::repOk(const IR::Expression* expr) {
 
 bool StackVariable::operator==(const StackVariable& other) const {
     // Delegate to IR's notion of equality.
-    return *member == *other.member;
+    return member->equiv(*other.member);
 }
 
 size_t StackVariableHash::operator()(const StackVariable& var) const {
@@ -197,6 +197,7 @@ class ParserStateRewriter : public Transform {
                 return new IR::Constant(IR::Type_Bits::get(32), idx);
             } else {
                 state->statesIndexes[expression->expr] = idx + offset;
+                std::cout << state->statesIndexes.size() << std::endl;
                 return new IR::ArrayIndex(expression->expr->clone(),
                                           new IR::Constant(IR::Type_Bits::get(32), idx + offset));
             }
