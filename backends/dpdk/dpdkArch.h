@@ -410,6 +410,7 @@ class IfStatementUnroll : public Transform {
     const IR::Node *postorder(IR::SwitchStatement *a) override;
     const IR::Node *postorder(IR::IfStatement *a) override;
     const IR::Node *postorder(IR::P4Control *a) override;
+    const IR::Node *postorder(IR::P4Parser *a) override;
 };
 
 /* Assume one logical expression looks like this: a && (b + c > d), this pass
