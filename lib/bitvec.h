@@ -60,6 +60,7 @@ static inline int builtin_popcount(unsigned long long x) { return __builtin_popc
 template<typename I>
 int count_trailing_zeroes(I x) {
     static_assert(std::is_integral<I>::value, "'I' has to be integral type");
+    assert(x != 0);
 #if defined(__GNUC__) || defined(__clang__)
     return bv::builtin_ctz(x);
 #else
@@ -73,6 +74,7 @@ int count_trailing_zeroes(I x) {
 template<typename I>
 int count_leading_zeroes(I x) {
     static_assert(std::is_integral<I>::value, "'I' has to be integral type");
+    assert(x != 0);
 #if defined(__GNUC__) || defined(__clang__)
     return bv::builtin_clz(x);
 #else
