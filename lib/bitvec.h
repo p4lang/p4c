@@ -58,8 +58,15 @@ static inline int builtin_popcount(unsigned long long x) { return __builtin_popc
 #endif
 
 template<typename I>
+void _check_bit_op_type_valid() {
+    static_assert(std::is_integral<I>::value && std::is_unsigned<I>::value
+        && sizeof(I) <= sizeof(unsigned long long) && sizeof(unsigned) <= sizeof(I),
+        "'I' has to be unsigned integral type of size between unsigned and unsigned long long");
+}
+
+template<typename I>
 int count_trailing_zeroes(I x) {
-    static_assert(std::is_integral<I>::value, "'I' has to be integral type");
+    _check_bit_op_type_valid<I>();
     assert(x != 0);
 #if defined(__GNUC__) || defined(__clang__)
     return bv::builtin_ctz(x);
@@ -73,7 +80,7 @@ int count_trailing_zeroes(I x) {
 
 template<typename I>
 int count_leading_zeroes(I x) {
-    static_assert(std::is_integral<I>::value, "'I' has to be integral type");
+    _check_bit_op_type_valid<I>();
     assert(x != 0);
 #if defined(__GNUC__) || defined(__clang__)
     return bv::builtin_clz(x);
@@ -89,7 +96,7 @@ int count_leading_zeroes(I x) {
 
 template<typename I>
 int popcount(I x) {
-    static_assert(std::is_integral<I>::value, "'I' has to be integral type");
+    _check_bit_op_type_valid<I>();
 #if defined(__GNUC__) || defined(__clang__)
     return builtin_popcount(x);
 #else
