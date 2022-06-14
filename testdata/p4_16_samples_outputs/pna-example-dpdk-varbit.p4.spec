@@ -44,10 +44,8 @@ struct a2_arg_t {
 struct main_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
 	bit<32> pna_main_output_metadata_output_port
-	bit<32> MainParserT_parser_tmp
 	bit<32> MainParserT_parser_tmp_0
 	bit<32> MainParserT_parser_tmp_1
-	bit<8> MainParserT_parser_tmp_2
 	bit<32> MainParserT_parser_tmp_1_extract_tmp
 }
 metadata instanceof main_metadata_t
@@ -109,12 +107,10 @@ apply {
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4_base
 	jmpeq MAINPARSERIMPL_ACCEPT h.ipv4_base.version_ihl 0x45
 	lookahead h.MainParserT_parser_lookahead_0
-	mov m.MainParserT_parser_tmp_2 h.MainParserT_parser_lookahead_0.f
-	jmpeq MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP m.MainParserT_parser_tmp_2 0x44
+	jmpeq MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP h.MainParserT_parser_lookahead_0.f 0x44
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead h.MainParserT_parser_tmp_hdr
-	mov m.MainParserT_parser_tmp h.MainParserT_parser_tmp_hdr.len
-	mov m.MainParserT_parser_tmp_0 m.MainParserT_parser_tmp
+	mov m.MainParserT_parser_tmp_0 h.MainParserT_parser_tmp_hdr.len
 	shl m.MainParserT_parser_tmp_0 0x3
 	mov m.MainParserT_parser_tmp_1 m.MainParserT_parser_tmp_0
 	add m.MainParserT_parser_tmp_1 0xfffffff0

@@ -31,8 +31,6 @@ struct main_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
 	bit<16> local_metadata_port
 	bit<32> pna_main_output_metadata_output_port
-	bit<32> MainControlT_tmp
-	bit<8> MainControlT_tmp_0
 }
 metadata instanceof main_metadata_t
 
@@ -54,9 +52,7 @@ apply {
 	mov m.local_metadata_port h.udp.src_port
 	recirculate
 	LABEL_END :	recircid m.pna_main_input_metadata_pass
-	mov m.MainControlT_tmp m.pna_main_input_metadata_pass
-	mov m.MainControlT_tmp_0 m.MainControlT_tmp
-	jmpgt LABEL_END_0 m.MainControlT_tmp_0 0x4
+	jmpgt LABEL_END_0 m.pna_main_input_metadata_pass 0x4
 	add h.udp.src_port 0x1
 	recirculate
 	LABEL_END_0 :	emit h.ethernet

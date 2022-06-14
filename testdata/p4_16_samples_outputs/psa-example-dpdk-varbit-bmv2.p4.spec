@@ -82,12 +82,8 @@ struct EMPTY {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_multicast_group
 	bit<32> psa_ingress_output_metadata_egress_port
-	bit<8> IngressParser_parser_tmp
-	bit<32> IngressParser_parser_tmp_0
 	bit<32> IngressParser_parser_tmp_1
 	bit<32> IngressParser_parser_tmp_2
-	bit<16> IngressParser_parser_tmp16
-	bit<8> IngressParser_parser_tmp_3
 	bit<32> Ingress_ap_member_id
 	bit<32> IngressParser_parser_tmp_2_extract_tmp
 }
@@ -160,14 +156,10 @@ apply {
 	MYIP_PARSE_IPV4 :	extract h.ipv4_base
 	jmpeq MYIP_ACCEPT h.ipv4_base.version_ihl 0x45
 	lookahead h.IngressParser_parser_lookahea1
-	mov m.IngressParser_parser_tmp_3 h.IngressParser_parser_lookahea1.f
-	jmpeq MYIP_PARSE_IPV4_OPTION_TIMESTAMP m.IngressParser_parser_tmp_3 0x44
+	jmpeq MYIP_PARSE_IPV4_OPTION_TIMESTAMP h.IngressParser_parser_lookahea1.f 0x44
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead h.IngressParser_parser_lookahea0
-	mov m.IngressParser_parser_tmp16 h.IngressParser_parser_lookahea0.f
-	mov m.IngressParser_parser_tmp m.IngressParser_parser_tmp16
-	mov m.IngressParser_parser_tmp_0 m.IngressParser_parser_tmp
-	mov m.IngressParser_parser_tmp_1 m.IngressParser_parser_tmp_0
+	mov m.IngressParser_parser_tmp_1 h.IngressParser_parser_lookahea0.f
 	shl m.IngressParser_parser_tmp_1 0x3
 	mov m.IngressParser_parser_tmp_2 m.IngressParser_parser_tmp_1
 	add m.IngressParser_parser_tmp_2 0xfffffff0
