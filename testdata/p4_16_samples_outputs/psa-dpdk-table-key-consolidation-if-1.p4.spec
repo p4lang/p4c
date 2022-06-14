@@ -168,14 +168,18 @@ apply {
 	jmpnh LABEL_END
 	mov m.MyIC_foo_ethernet_dstAddr h.ethernet.dstAddr
 	table foo
-	LABEL_END :	table tbl
+	LABEL_END :	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl
 	jmpnh LABEL_END_0
+	mov m.MyIC_foo_ethernet_dstAddr h.ethernet.dstAddr
 	table foo
-	LABEL_END_0 :	table tbl
+	LABEL_END_0 :	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl
 	jmpnh LABEL_FALSE_1
 	jmp LABEL_END_1
 	LABEL_FALSE_1 :	table bar
-	LABEL_END_1 :	table tbl
+	LABEL_END_1 :	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl
 	jmpnh LABEL_FALSE_2
 	jmp LABEL_END_2
 	LABEL_FALSE_2 :	table bar

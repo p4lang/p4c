@@ -183,6 +183,7 @@ apply {
 	mov m.MainControlT_tmp_31 h.vlan_tag_1.pcp_cfi_vid
 	shr m.MainControlT_tmp_31 0x4
 	mov m.MainControlT_key m.MainControlT_tmp_31
+	table stub
 	LABEL_END_0 :	emit h.ethernet
 	emit h.vlan_tag_0
 	emit h.vlan_tag_1

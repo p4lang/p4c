@@ -166,11 +166,12 @@ class ConvertStatementToDpdk : public Inspector {
     ConvertStatementToDpdk(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkProgramStructure *structure)
-        : typemap(typemap), refmap(refmap), structure(structure) {}
+        : typemap(typemap), refmap(refmap), structure(structure) {visitDagOnce = false;}
     ConvertStatementToDpdk(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkProgramStructure *structure, IR::Type_Struct *metadataStruct)
-        : typemap(typemap), refmap(refmap), structure(structure), metadataStruct(metadataStruct) {}
+        : typemap(typemap), refmap(refmap), structure(structure),
+          metadataStruct(metadataStruct) {visitDagOnce = false;}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
         return instructions;
     }
