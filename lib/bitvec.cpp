@@ -146,12 +146,7 @@ int bitvec::ffs(unsigned start) const {
         val = ~static_cast<uintptr_t>(0); }
     if (idx >= size) return -1;
     unsigned rv = idx * bits_per_unit;
-#if defined(__GNUC__) || defined(__clang__)
-    rv += builtin_ctz(val);
-#else
-    while ((val & 0xff) == 0) { rv += 8; val >>= 8; }
-    while ((val & 1) == 0) { rv++; val >>= 1; }
-#endif
+    rv += bv::count_trailing_zeroes(val);
     return rv;
 }
 
@@ -163,12 +158,7 @@ unsigned bitvec::ffz(unsigned start) const {
         ++idx;
         val = 0; }
     unsigned rv = idx * bits_per_unit;
-#if defined(__GNUC__) || defined(__clang__)
-    rv += builtin_ctz(~val);
-#else
-    while ((val & 0xff) == 0xff) { rv += 8; val >>= 8; }
-    while (val & 1) { rv++; val >>= 1; }
-#endif
+    rv += bv::count_trailing_zeroes(~val);
     return rv;
 }
 
