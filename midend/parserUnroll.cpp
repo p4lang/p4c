@@ -38,8 +38,7 @@ size_t StackVariableHash::operator()(const StackVariable& var) const {
             h.push_back(Util::Hash::fnv1a<const cstring>(path->path->name));
             break;
         }
-        BUG_CHECK(curMember->expr->is<IR::Member>(), "Not a valid StateVariable: %1%", curMember);
-        curMember = curMember->expr->to<IR::Member>();
+        curMember = curMember->expr->checkedTo<IR::Member>();
     }
     return Util::Hash::fnv1a(h.data(), sizeof(size_t) * h.size());
 }
