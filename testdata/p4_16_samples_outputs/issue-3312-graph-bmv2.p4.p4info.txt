@@ -1,0 +1,58 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 34728461
+    name: "ingress.t"
+    alias: "t"
+  }
+  action_refs {
+    id: 20728178
+  }
+  action_refs {
+    id: 26265154
+  }
+  const_default_action_id: 20728178
+  size: 1024
+}
+tables {
+  preamble {
+    id: 39755323
+    name: "ingress.t1"
+    alias: "t1"
+  }
+  action_refs {
+    id: 26265154
+  }
+  const_default_action_id: 26265154
+  size: 1024
+}
+tables {
+  preamble {
+    id: 42400396
+    name: "ingress.t2"
+    alias: "t2"
+  }
+  action_refs {
+    id: 20728178
+  }
+  const_default_action_id: 20728178
+  size: 1024
+}
+actions {
+  preamble {
+    id: 20728178
+    name: "ingress.add"
+    alias: "add"
+  }
+}
+actions {
+  preamble {
+    id: 26265154
+    name: "ingress.sub"
+    alias: "sub"
+  }
+}
+type_info {
+}

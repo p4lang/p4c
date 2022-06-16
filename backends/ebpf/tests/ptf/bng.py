@@ -149,11 +149,11 @@ class BNGTest(P4EbpfTest):
         key_vlan_id = "{}^0xffff".format(vlan_id) if vlan_valid else "0^0"
         key_inner_vlan_id = "{}^0xffff".format(inner_vlan_id) if inner_vlan_id is not None else "0^0"
         keys = [ingress_port, key_vlan_id, key_inner_vlan_id, vlan_valid_]
-        self.table_add(table="ingress_ingress_port_vlan", keys=keys, action=action_id, data=action_data)
+        self.table_add(table="ingress_ingress_port_vlan", key=keys, action=action_id, data=action_data)
 
     def set_egress_vlan(self, egress_port, vlan_id, push_vlan=False):
         action_id = 1 if push_vlan else 2
-        self.table_add(table="egress_egress_vlan", keys=[vlan_id, egress_port],
+        self.table_add(table="egress_egress_vlan", key=[vlan_id, egress_port],
                        action=action_id)
 
     def set_forwarding_type(self, ingress_port, eth_dstAddr, ethertype=ETH_TYPE_IPV4,
@@ -171,29 +171,29 @@ class BNGTest(P4EbpfTest):
 
         matches = [key_eth_dst, ingress_port, key_eth_type, key_ip_eth_type]
 
-        self.table_add(table="ingress_fwd_classifier", keys=matches, action=1, # set_forwarding_type
+        self.table_add(table="ingress_fwd_classifier", key=matches, action=1, # set_forwarding_type
                        data=[fwd_type])
 
     def add_forwarding_routing_v4_entry(self, ipv4_dstAddr, ipv4_pLen,
                                         egress_port, smac, dmac):
-        self.table_add(table="ingress_routing_v4", keys=["{}/{}".format(ipv4_dstAddr, ipv4_pLen)],
+        self.table_add(table="ingress_routing_v4", key=["{}/{}".format(ipv4_dstAddr, ipv4_pLen)],
                        action=1, data=[egress_port, smac, dmac])
 
     def add_next_vlan(self, port_id, new_vlan_id):
-        self.table_add(table="ingress_next_vlan", keys=[port_id],
+        self.table_add(table="ingress_next_vlan", key=[port_id],
                        action=1, data=[new_vlan_id])
 
     def add_next_double_vlan(self, port_id, new_vlan_id, new_inner_vlan_id):
-        self.table_add(table="ingress_next_vlan", keys=[port_id],
+        self.table_add(table="ingress_next_vlan", key=[port_id],
                        action=2, data=[new_vlan_id, new_inner_vlan_id])
 
     def set_upstream_pppoe_cp_table(self, pppoe_codes=()):
         for code in pppoe_codes:
-            self.table_add(table="ingress_t_pppoe_cp", keys=[code], action=1, priority=1)
+            self.table_add(table="ingress_t_pppoe_cp", key=[code], action=1, priority=1)
 
     def set_line_map(self, s_tag, c_tag, line_id):
         assert line_id != 0
-        self.table_add(table="ingress_t_line_map", keys=[s_tag, c_tag], action=1, data=[line_id])
+        self.table_add(table="ingress_t_line_map", key=[s_tag, c_tag], action=1, data=[line_id])
 
     def setup_line_v4(self, s_tag, c_tag, line_id, ipv4_addr,
                       pppoe_session_id, enabled=True):
@@ -207,15 +207,16 @@ class BNGTest(P4EbpfTest):
         # Upstream
         if enabled:
             # Enable upstream termination.
-            self.table_add(table="ingress_t_pppoe_term_v4", keys=[line_id, str(ipv4_addr), pppoe_session_id], action=1)
+            self.table_add(table="ingress_t_pppoe_term_v4", key=[line_id, str(ipv4_addr), pppoe_session_id], action=1)
 
         # Downstream
         if enabled:
-            self.table_add(table="ingress_t_line_session_map", keys=[line_id],
+            self.table_add(table="ingress_t_line_session_map", key=[line_id],
                            action=1, data=[pppoe_session_id])
         else:
-            self.table_add(table="ingress_t_line_session_map", keys=[line_id],
+            self.table_add(table="ingress_t_line_session_map", key=[line_id],
                            action=2)
+
 
 class PPPoEUpstreamTest(BNGTest):
 
@@ -260,6 +261,7 @@ class PPPoEUpstreamTest(BNGTest):
             pkt[Ether].dst = SWITCH_MAC
             pkt[IP].src = CLIENT_IP
             self.doRunTest(pkt)
+
 
 class PPPoEDownstreamTest(BNGTest):
 

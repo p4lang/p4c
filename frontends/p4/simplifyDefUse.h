@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/cloner.h"
 
 namespace P4 {
 
@@ -47,15 +48,36 @@ class DoSimplifyDefUse : public Transform {
     { return process(control); }
 };
 
-class SimplifyDefUse : public PassRepeated {
+class SimplifyDefUse : public PassManager {
+    class Cloner : public ClonePathExpressions {
+     public:
+        Cloner() { setName("Cloner"); }
+        const IR::Node* postorder(IR::EmptyStatement* stat) override {
+            // You cannot clone an empty statement, since
+            // the visitor claims it's equal to the original one.
+            // So we cheat and make an empty block.
+            return new IR::BlockStatement(stat->srcInfo);
+        }
+    };
+
+
  public:
     SimplifyDefUse(ReferenceMap* refMap, TypeMap* typeMap,
-             TypeChecking* typeChecking = nullptr) : PassRepeated({}) {
+             TypeChecking* typeChecking = nullptr) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap);
+
+        // SimplifyDefUse needs the expression tree *not* to be a DAG,
+        // because it keeps state in hash-maps indexed with PathExpressions.
+        // This is achieved by Cloner.
+        passes.push_back(new Cloner());
         if (!typeChecking)
             typeChecking = new TypeChecking(refMap, typeMap);
-        passes.push_back(typeChecking);
-        passes.push_back(new DoSimplifyDefUse(refMap, typeMap));
+
+        auto repeated = new PassRepeated({
+                typeChecking,
+                new DoSimplifyDefUse(refMap, typeMap)
+            });
+        passes.push_back(repeated);
         setName("SimplifyDefUse");
     }
 };

@@ -29,7 +29,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".copy2") action copy2(inout bit<8> dest, bit<8> val) {
-        dest = val;
+        dest = (bit<8>)val;
     }
     @name(".copy") action copy(inout bit<8> dest, bit<8> val) {
         copy2(dest, val);

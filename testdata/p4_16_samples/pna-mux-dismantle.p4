@@ -81,6 +81,7 @@ struct main_metadata_t {
     bit<1> rng_result1;
     bit<1> val1;
     bit<1> val2;
+    ExpireTimeProfileId_t timeout;
 }
 
 // User-defined struct containing all of those headers parsed in the
@@ -142,7 +143,7 @@ control MainControlImpl(
     }
     action add_on_miss_action() {
         bit<32> tmp = 0;
-        add_entry(action_name="next_hop", action_params = tmp);
+        add_entry(action_name="next_hop", action_params = tmp, expire_time_profile_id = user_meta.timeout);
     }
 
     action do_range_checks_1 (
@@ -169,7 +170,7 @@ control MainControlImpl(
         hdr.ipv4.srcAddr = newAddr;
     }
     action add_on_miss_action2() {
-        add_entry(action_name="next_hop", action_params = {32w0, 32w1234});
+        add_entry(action_name="next_hop", action_params = {32w0, 32w1234}, expire_time_profile_id = user_meta.timeout);
     }
     table ipv4_da2 {
         key = {

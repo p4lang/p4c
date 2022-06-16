@@ -4,11 +4,6 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "error: Action parameter color has a type which is not bit<>, int<>, bool, type or serializable enum"
-  testdata/p4_16_samples/psa-meter1.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
   "error: Name .* is used for multiple direct counter objects in the P4Info message"
   testdata/p4_16_samples/psa-counter6.p4
   )
@@ -42,11 +37,6 @@ p4c_add_xfail_reason("dpdk"
 p4c_add_xfail_reason("dpdk"
   "Error compiling"
   testdata/p4_16_samples/psa-dpdk-lpm-match-err3.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
-  "get_hash's arg is not a ListExpression"
-  testdata/p4_16_samples/psa-hash.p4
   )
 
 p4c_add_xfail_reason("dpdk"
@@ -108,3 +98,10 @@ p4c_add_xfail_reason("dpdk"
    testdata/p4_16_samples/psa-dpdk-struct-field.p4
    testdata/p4_16_samples/psa-example-register2-bmv2.p4
    )
+
+p4c_add_xfail_reason("dpdk"
+  "must only be called from within an action"
+  testdata/p4_16_samples/pna-add-on-miss-err.p4
+  testdata/p4_16_samples/pna-example-tcp-connection-tracking-err-1.p4
+  testdata/p4_16_samples/pna-example-tcp-connection-tracking-err.p4
+  )

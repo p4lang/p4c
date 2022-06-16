@@ -656,6 +656,7 @@ class ParserSymbolicInterpreter {
                 // don't evaluate successors anymore
                 continue;
             }
+            bool notAdded = newStates.count(getNewName(stateInfo)) == 0;
             auto nextStates = evaluateState(stateInfo, newStates);
             if (nextStates.first == nullptr) {
                 if (nextStates.second && stateInfo->predecessor &&
@@ -666,6 +667,11 @@ class ParserSymbolicInterpreter {
                         IR::IndexedVector<IR::StatOrDecl>(),
                         new IR::PathExpression(new IR::Type_State(),
                             new IR::Path(outOfBoundsStateName, false)));
+                } else {
+                    // save current state
+                    if (notAdded) {
+                        stateInfo->newState = stateInfo->state->clone();
+                    }
                 }
                 LOG1("No next states");
                 continue;

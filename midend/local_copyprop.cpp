@@ -97,7 +97,7 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
                 if (!self.hasSideEffects(s->condition)) {
                     return nullptr;
                 } else {
-                    s->ifTrue = new IR::EmptyStatement();
+                    s->ifTrue = new IR::EmptyStatement(s->srcInfo);
                     return s;
                 }
             }

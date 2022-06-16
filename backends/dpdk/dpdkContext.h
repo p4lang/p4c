@@ -43,9 +43,12 @@ struct TableAttributes {
        Match table is a regular P4 table, selection table and action tables are compiler
        generated tables when psa_implementation is action_selector or action_profile */
     cstring tableType;
+    bool is_add_on_miss;
+    bool idle_timeout_with_auto_delete;
     bool isHidden;
     unsigned size;
     cstring controlName;
+    cstring externalName;
     unsigned default_action_handle;
     /* Non selector table keys from original P4 program */
     std::vector<std::pair<cstring, cstring>> tableKeys;
@@ -59,6 +62,7 @@ struct actionAttributes {
     bool allowed_as_hit_action;
     bool allowed_as_default_action;
     unsigned actionHandle;
+    cstring externalName;
     IR::IndexedVector<IR::Parameter> *params;
 };
 
@@ -69,14 +73,8 @@ struct TopLevelCtxt{
     cstring compileCommand;
     cstring compilerVersion;
     void initTopLevelCtxt(DpdkOptions &options) {
-        /* Fetch required information from options */
-        const time_t now = time(NULL);
-        char build_date[50];
-        strftime(build_date, 50, "%c", localtime(&now));
-        buildDate = build_date;
-        compileCommand = options.DpdkCompCmd;
-        compileCommand = compileCommand.replace("(from pragmas)", "");
-        compileCommand = compileCommand.trim();
+        buildDate = options.getBuildDate();
+        compileCommand = options.getCompileCommand();
         progName =  options.file;
         auto fileName = progName.findlast('/');
         // Handle the case when input file is in the current working directory.

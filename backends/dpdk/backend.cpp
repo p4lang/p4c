@@ -63,15 +63,16 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap),
         new BMV2::LowerExpressions(typeMap, DPDK_MAX_SHIFT_AMOUNT),
         new DismantleMuxExpressions(typeMap, refMap),
-        new ElimHeaderCopy(typeMap),
         new P4::RemoveComplexExpressions(refMap, typeMap,
                 new DPDK::ProcessControls(&structure.pipeline_controls)),
         new P4::ConstantFolding(refMap, typeMap, false),
+        new ElimHeaderCopy(typeMap),
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         new ConvertActionSelectorAndProfile(refMap, typeMap, &structure),
         new CollectTableInfo(&structure),
         new CollectAddOnMissTable(refMap, typeMap, &structure),
+        new ValidateAddOnMissExterns(refMap, typeMap, &structure),
         new P4::MoveDeclarations(),  // Move all local declarations to the beginning
         new CollectProgramStructure(refMap, typeMap, &structure),
         new CollectMetadataHeaderInfo(&structure),
@@ -129,7 +130,6 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         PassManager post_code_gen = {
             new PrependPassRecircId(),
             new DirectionToRegRead(),
-            new AddNewMetadataFields(),
         };
         dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
     }

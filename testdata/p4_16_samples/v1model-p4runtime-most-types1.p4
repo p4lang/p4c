@@ -354,26 +354,26 @@ parser ParserImpl(packet_in packet,
             , hdr.packet_out.addr2
 #endif // PROBLEM_VALUE_SET_FIELD_TYPE
             , hdr.packet_out.e
-            
+
             , hdr.packet_out.e0
 #ifdef PROBLEM_VALUE_SET_FIELD_TYPE
             , hdr.packet_out.e1
             , hdr.packet_out.e2
 #endif // PROBLEM_VALUE_SET_FIELD_TYPE
-            
+
             , hdr.packet_out.e00
 #ifdef PROBLEM_VALUE_SET_FIELD_TYPE
             , hdr.packet_out.e01
             , hdr.packet_out.e02
-            
+
             , hdr.packet_out.e10
             , hdr.packet_out.e11
             , hdr.packet_out.e12
-            
+
             , hdr.packet_out.e20
             , hdr.packet_out.e21
             , hdr.packet_out.e22
-            
+
             , hdr.packet_out.e001
             , hdr.packet_out.e002
             , hdr.packet_out.e101
@@ -381,7 +381,7 @@ parser ParserImpl(packet_in packet,
             , hdr.packet_out.e201
             , hdr.packet_out.e202
             , hdr.packet_out.e220
-            
+
             , hdr.packet_out.e0020010
             , hdr.packet_out.e0020020
 #endif // PROBLEM_VALUE_SET_FIELD_TYPE
@@ -443,7 +443,7 @@ control ingress(inout headers_t hdr,
         Custom201_t e201,
         Custom202_t e202,
         Custom220_t e220,
-    
+
         Custom0020010_t e0020010,
         Custom0020020_t e0020020,
 
@@ -491,23 +491,23 @@ control ingress(inout headers_t hdr,
             hdr.custom.addr1 : exact;
             hdr.custom.addr2 : exact;
             hdr.custom.e : exact;
-            
+
             hdr.custom.e0 : exact;
             hdr.custom.e1 : exact;
             hdr.custom.e2 : exact;
-            
+
             hdr.custom.e00 : exact;
             hdr.custom.e01 : exact;
             hdr.custom.e02 : exact;
-            
+
             hdr.custom.e10 : exact;
             hdr.custom.e11 : exact;
             hdr.custom.e12 : exact;
-            
+
             hdr.custom.e20 : exact;
             hdr.custom.e21 : exact;
             hdr.custom.e22 : exact;
-            
+
             hdr.custom.e001 : exact;
             hdr.custom.e002 : exact;
             hdr.custom.e101 : exact;
@@ -558,23 +558,23 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
                 hdr.custom.addr1,
                 hdr.custom.addr2,
                 hdr.custom.e,
-                
+
                 hdr.custom.e0,
                 hdr.custom.e1,
                 hdr.custom.e2,
-                
+
                 hdr.custom.e00,
                 hdr.custom.e01,
                 hdr.custom.e02,
-                
+
                 hdr.custom.e10,
                 hdr.custom.e11,
                 hdr.custom.e12,
-                
+
                 hdr.custom.e20,
                 hdr.custom.e21,
                 hdr.custom.e22,
-                
+
                 hdr.custom.e001,
                 hdr.custom.e002,
                 hdr.custom.e101,
@@ -600,23 +600,23 @@ control computeChecksum(inout headers_t hdr, inout metadata_t meta) {
                 hdr.custom.addr1,
                 hdr.custom.addr2,
                 hdr.custom.e,
-                
+
                 hdr.custom.e0,
                 hdr.custom.e1,
                 hdr.custom.e2,
-                
+
                 hdr.custom.e00,
                 hdr.custom.e01,
                 hdr.custom.e02,
-                
+
                 hdr.custom.e10,
                 hdr.custom.e11,
                 hdr.custom.e12,
-                
+
                 hdr.custom.e20,
                 hdr.custom.e21,
                 hdr.custom.e22,
-                
+
                 hdr.custom.e001,
                 hdr.custom.e002,
                 hdr.custom.e101,
@@ -640,4 +640,3 @@ V1Switch(ParserImpl(),
          egress(),
          computeChecksum(),
          DeparserImpl()) main;
-

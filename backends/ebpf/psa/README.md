@@ -32,7 +32,8 @@ The TC-based design of PSA for eBPF is depicted in Figure below.
   The role of Traffic Manager is to redirect traffic between the Ingress (TC) and Egress (TC).
   It is also responsible for packet replication via clone sessions or multicast groups and sending packet to CPU.
 - `tc-egress` - The PSA Egress pipeline (composed of Parser, Control block and Deparser) is attached to the TC Egress hook. As there is no
-  XDP hook in the Egress path, the use of TC is mandatory for the egress processing.
+  XDP hook in the Egress path, the use of TC is mandatory for the egress processing. **Note!** If the PSA Egress pipeline is not used (i.e. it is left empty by a developer),
+  the PSA-eBPF compiler will not generate the TC Egress program. This brings a noticeable performance gain, if the egress pipeline is not used. 
   
 ## Packet paths
 
@@ -417,23 +418,50 @@ Follow standard steps for the P4 compiler to install the eBPF backend with the P
 The PSA implemented for eBPF backend is verified to work with the kernel version 5.8+ and `x86-64` CPU architecture.
 Moreover, make sure that the BPF filesystem is mounted under `/sys/fs/bpf`.
 
+Also, make sure you have the following packages installed:
+
+```bash
+$ sudo apt install -y clang llvm libelf-dev
+```
+
+You should also install a static `libbpf` library. Run the following commands:
+
+```bash
+$ python3 backends/ebpf/build_libbpf
+```
+
 ### Compilation
 
 You can compile a P4-16 PSA program for eBPF in a single step using:
 
 ```bash
-make -f backends/ebpf/runtime/kernel.mk BPFOBJ={output} ARGS="-DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX>" P4FILE=<P4-PROGRAM>.p4 P4C=p4c-ebpf psa
+make -f backends/ebpf/runtime/kernel.mk BPFOBJ=out.o P4FILE=<P4-PROGRAM>.p4 P4C=p4c-ebpf psa
 ```
 
 You can also perform compilation step by step:
 
 ```
 $ p4c-ebpf --arch psa --target kernel -o out.c <program>.p4
-$ clang -O2 -g -c -emit-llvm -DBTF -DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX> -c -o out.bc out.c
-$ llc -march=bpf -filetype=obj -o out.o out.bc
+$ clang -Ibackends/ebpf/runtime -Ibackends/ebpf/runtime/usr/include -O2 -g -c -emit-llvm -o out.bc out.c
+$ llc -march=bpf -mcpu=generic -filetype=obj -o out.o out.bc
 ```
 
+Note that you can use `-mcpu` flag to define the eBPF instruction set. Visit [this blog post](https://pchaigno.github.io/bpf/2021/10/20/ebpf-instruction-sets.html) to learn more about eBPF instruction sets.
+
 The above steps generate `out.o` BPF object file that can be loaded to the kernel. 
+
+#### Optional flags
+
+Supposing we want to use a packet recirculation we have to specify the `PSA_PORT_RECIRCULATE` port.
+We can use `-DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX>` Clang flag via `kernel.mk`
+```bash
+make -f backends/ebpf/runtime/kernel.mk BPFOBJ=out.o ARGS="-DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX>" P4FILE=<P4-PROGRAM>.p4 P4C=p4c-ebpf psa
+```
+or directly:
+`clang ... -DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX> ...`,  
+where `RECIRCULATE_PORT_IDX` is a number of a `psa_recirc` interface (this number can be obtained from `ip -n switch link`).
+
+By default `PSA_PORT_RECIRCULATE` is set to 0.
 
 ### psabpf API and psabpf-ctl
 
@@ -505,8 +533,8 @@ Refer to [the bpftool guide](https://manpages.ubuntu.com/manpages/focal/man8/bpf
 We list the known bugs/limitations below. Refer to the Roadmap section for features planned in the near future.
 
 - Larger bit fields (e.g. IPv6 addresses) may not work properly.
-- We noticed that `bpf_xdp_adjust_meta()` isn't implemented by some NIC drivers, so the PSA impl may not work 
-with some NICs. So far, we have verified the correct behavior with Intel 82599ES.
+- We noticed that `bpf_xdp_adjust_meta()` isn't implemented by some NIC drivers, so the `meta` XDP2TC mode may not work 
+with some NICs. So far, we have verified the correct behavior with Intel 82599ES. If a NIC doesn't support the `meta` XDP2TC mode you can use `head` or `cpumap` modes.
 - `lookahead()` with bit fields (e.g., `bit<16>`) doesn't work.
 - `@atomic` operation is not supported yet.
 - `psa_idle_timeout` is not supported yet.
@@ -528,11 +556,7 @@ All the below features are already implemented and will be contributed to the P4
 - **XDP support.** The current version of P4-eBPF compiler leverages the BPF TC hook for P4-programmable packet processing. 
 The TC subsystem enables implementation of the full PSA specification, contrary to XDP, but offers lower throughput. We're going to 
 contribute the XDP-based version of P4-eBPF that is not fully spec-compliant, but provides higher throughput.
-- **XDP2TC mode.** the generated eBPF programs use `bpf_xdp_adjust_meta()` to transfer original EtherType from XDP to TC. This mode 
-may not be supported by some NIC drivers. We will add two other modes that can be used alternatively. 
-- **ValueSet support.** We plan to extend implementation to support other match kinds and multiple fields in the `select()` expression.
-- **All PSA externs.** We plan to contribute implementation of [all PSA externs defined by the PSA specification](https://p4.org/p4-spec/docs/PSA.html#sec-psa-externs). 
-- **Ternary matching.** The PSA implementation for eBPF backend currently supports `exact` and `lpm` only. We will add support for `ternary` match kind. 
+- **Extended ValueSet support.** We plan to extend implementation to support other match kinds and multiple fields in the `select()` expression.
 
 ## Long-term goals
 

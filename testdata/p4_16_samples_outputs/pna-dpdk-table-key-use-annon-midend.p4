@@ -27,7 +27,8 @@ struct empty_metadata_t {
 }
 
 struct main_metadata_t {
-    bit<32> key;
+    bit<32>               key;
+    ExpireTimeProfileId_t timeout;
 }
 
 struct headers_t {
@@ -64,7 +65,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         send_to_port(vport);
     }
     @name("MainControlImpl.add_on_miss_action") action add_on_miss_action() {
-        add_entry<bit<32>>(action_name = "next_hop", action_params = 32w0);
+        add_entry<bit<32>>(action_name = "next_hop", action_params = 32w0, expire_time_profile_id = user_meta.timeout);
     }
     @name("MainControlImpl.ipv4_da") table ipv4_da_0 {
         key = {
@@ -82,7 +83,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         hdr.ipv4.srcAddr = newAddr;
     }
     @name("MainControlImpl.add_on_miss_action2") action add_on_miss_action2() {
-        add_entry<tuple_0>(action_name = "next_hop", action_params = (tuple_0){f0 = 32w0,f1 = 32w1234});
+        add_entry<tuple_0>(action_name = "next_hop", action_params = (tuple_0){f0 = 32w0,f1 = 32w1234}, expire_time_profile_id = user_meta.timeout);
     }
     @name("MainControlImpl.ipv4_da2") table ipv4_da2_0 {
         key = {

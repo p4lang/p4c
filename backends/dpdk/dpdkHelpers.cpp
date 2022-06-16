@@ -159,10 +159,103 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
         auto mi = P4::MethodInstance::resolve(m, refmap, typemap);
         if (auto e = mi->to<P4::ExternMethod>()) {
             if (e->originalExternType->getName().name == "Hash") {
+                auto di = e->object->to<IR::Declaration_Instance>();
+                auto declArgs = di->arguments;
+                if (declArgs->size() == 0) {
+                    ::error(ErrorType::ERR_UNEXPECTED, "Expected atleast 1 argument for %1%",
+                                e->object->getName());
+                        return false;
+                }
+                auto hash_alg = declArgs->at(0)->expression;
+                unsigned hashAlgValue = 0;
+                if (hash_alg->is<IR::Constant>())
+                    hashAlgValue = hash_alg->to<IR::Constant>()->asUnsigned();
+                cstring hashAlgName = "";
+                if (hashAlgValue == JHASH0 || hashAlgValue == JHASH5)
+                    hashAlgName = "jhash";
+                else if (hashAlgValue >= CRC1 && hashAlgValue <= CRC4)
+                    hashAlgName = "crc32";
+
+                IR::Vector<IR::Expression> components;
+                IR::ListExpression *listExp = nullptr;
+
+                /* This processes two prototypes of get_hash method of Hash extern
+                    /// Constructor
+                    Hash(PSA_HashAlgorithm_t algo);
+
+                    1. Compute the hash for data.
+                        O get_hash<D>(in D data);
+
+                    2. Compute the hash for data, with modulo by max, then add base.
+                        O get_hash<T, D>(in T base, in D data, in T max);
+
+                        Here, DPDK targets allows "only" constant expression for
+                        'base' and 'max' parameter
+                */
                 if (e->expr->arguments->size() == 1) {
                     auto field = (*e->expr->arguments)[0];
-                    i = new IR::DpdkGetHashStatement(e->object->getName(),
-                                                     field->expression, left);
+                    /* All the Hash parameters should be in contiguous memory for hash
+                       value calculation.
+
+                       Below conditions check if all the parameters
+                       belongs to same header/metadata structure or not and if all the
+                       parameters are contiguous or not in a header/metadata structure.
+                       If not, all the parameters are moved to user metadata to aligned
+                       contiguosly.
+                    */
+                    if (!checkIfBelongToSameHdrMdStructure(field) ||
+                        !checkIfConsecutiveHdrMdfields(field))
+                        updateMdStrAndGenInstr(field, components);
+                    else {
+                        processHashParams(field, components);
+                    }
+                    listExp = new IR::ListExpression(components);
+                    i = new IR::DpdkGetHashStatement(hashAlgName, listExp, left);
+                } else if (e->expr->arguments->size() == 3) {
+                    auto maxValue = 0;
+                    auto base    = (*e->expr->arguments)[0];
+                    auto field   = (*e->expr->arguments)[1];
+                    auto max_val = (*e->expr->arguments)[2];
+
+                    /* Checks whether 'base' and 'max' param values are const values or not.
+                       If not, throw an error.
+                    */
+                    if (auto b = base->expression->to<IR::Expression>()) {
+                        if (!b->is<IR::Constant>())
+                            ::error(ErrorType::ERR_UNEXPECTED, "Expecting const expression '%1%'"
+                            " for 'base' value in get_hash method of Hash extern in DPDK Target",
+                            base);
+                    }
+
+                    if (auto b = max_val->expression->to<IR::Expression>()) {
+                        if (b->is<IR::Constant>()) {
+                            maxValue = b->to<IR::Constant>()->asUnsigned();
+                            // Check whether max value is power of 2 or not
+                            if (maxValue == 0 || ((maxValue & (maxValue - 1)) != 0)) {
+                                ::error(ErrorType::ERR_UNEXPECTED, "Invalid Max value '%1%'. DPDK"
+                                " Target expect 'Max' value to be power of 2", maxValue);
+                                return false;
+                            }
+                        } else {
+                            ::error(ErrorType::ERR_UNEXPECTED, "Expecting const expression '%1%'"
+                            " for 'Max' value in get_hash method of Hash extern in DPDK Target",
+                            max_val);
+                            return false;
+                        }
+                    }
+
+                    if (!checkIfBelongToSameHdrMdStructure(field) ||
+                        !checkIfConsecutiveHdrMdfields(field))
+                        updateMdStrAndGenInstr(field, components);
+                    else {
+                        processHashParams(field, components);
+                    }
+                    listExp = new IR::ListExpression(components);
+                    auto bs = base->expression->to<IR::Expression>();
+                    add_instr(new IR::DpdkGetHashStatement(hashAlgName, listExp, left));
+                    add_instr(new IR::DpdkAndStatement(left, left,
+                                                       new IR::Constant(maxValue - 1)));
+                    i = new IR::DpdkAddStatement(left, left, bs);
                 }
             } else if (e->originalExternType->getName().name ==
                        "InternetChecksum") {
@@ -344,6 +437,179 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
     if (i)
         add_instr(i);
     return false;
+}
+
+/* This function processes the hash parameters and stores them in
+   "components" which is further used for generating hash instruction
+*/
+void ConvertStatementToDpdk::processHashParams(const IR::Argument* field,
+                                               IR::Vector<IR::Expression>& components) {
+    if (auto exp = field->expression->to<IR::Member>()) {
+        auto typeInfo = typemap->getType(exp);
+        if (auto typeheader = typeInfo->to<IR::Type_Header>()) {
+            for (auto it : typeheader->fields) {
+                IR::ID name(exp->member.name + "." + it->name);
+                auto m = new IR::Member(new IR::PathExpression(IR::ID("h")), name);
+                components.push_back(m);
+            }
+        } else {
+            components.push_back(exp);
+        }
+    } else if (auto s = field->expression->to<IR::StructExpression>()) {
+        for (auto field1 : s->components) {
+            if (auto exp = field1->expression->to<IR::Member>()) {
+                auto typeInfo = typemap->getType(exp);
+                if (auto typeheader = typeInfo->to<IR::Type_Header>()) {
+                    for (auto it : typeheader->fields) {
+                        IR::ID name(exp->member.name + "." + it->name);
+                        auto m = new IR::Member(new IR::PathExpression(IR::ID("h")), name);
+                        components.push_back(m);
+                    }
+                } else {
+                    components.push_back(exp);
+                }
+            }
+        }
+    }
+}
+
+/* This function moves the hash parameter fields to metadata structure if they happen
+   to come from different header/metadata structures or are not consecutively laid in
+   the structure they are coming from
+*/
+void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument* field,
+                                               IR::Vector<IR::Expression>& components) {
+    if (auto s = field->expression->to<IR::StructExpression>()) {
+        for (auto field1 : s->components) {
+            if (auto exp = field1->expression->to<IR::Member>()) {
+                auto typeInfo = typemap->getType(exp);
+                if (typeInfo->is<IR::Type_Header>()) {
+                    auto typeheader = typeInfo->to<IR::Type_Header>();
+                    for (auto it : typeheader->fields) {
+                        IR::ID name(refmap->newName(exp->member.name + "." + it->name));
+                        IR::ID fldName(refmap->newName(typeheader->name.toString() + "_" +
+                                                       it->name));
+                        auto rt = new IR::Member(new IR::PathExpression(IR::ID("h")), name);
+                        auto lt = new IR::Member(new IR::PathExpression(IR::ID("m")), fldName);
+                        BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                        metadataStruct->fields.push_back(new IR::StructField(fldName, it->type));
+                        add_instr(new IR::DpdkMovStatement(lt, rt));
+                        components.push_back(lt);
+                    }
+                } else {
+                    IR::ID name(refmap->newName(getHdrMdStrName(exp) + "_" +
+                                                exp->member.name));
+                    BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                    metadataStruct->fields.push_back(new IR::StructField(name, exp->type));
+                    auto lt = new IR::Member(new IR::PathExpression(IR::ID("m")), name);
+                    add_instr(new IR::DpdkMovStatement(lt, exp));
+                    components.push_back(lt);
+                }
+            }
+        }
+    }
+}
+
+/* This function returns the header/metadata structure name */
+cstring ConvertStatementToDpdk::getHdrMdStrName(const IR::Member* mem) {
+    cstring sName = "";
+    if ((mem != nullptr) && (mem->expr != nullptr) &&
+       (mem->expr->type != nullptr)) {
+        if (auto st = mem->expr->type->to<IR::Type_Header>()) {
+            sName = st->name.name;
+        } else if (auto st = mem->expr->type->to<IR::Type_Struct>()) {
+             sName = st->name.name;
+        }
+    }
+    return sName;
+}
+
+/* This function processes Hash parameters and checks if all parameters
+   belong to same header/metadata structure.
+*/
+bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argument* field) {
+    if (auto s = field->expression->to<IR::StructExpression>()) {
+        if (s->components.size() == 1)
+            return true;
+
+        cstring hdrStrName = "";
+        for (auto field1 : s->components) {
+            cstring sName = "";
+            if (auto exp = field1->expression->to<IR::Member>()) {
+                auto type = typemap->getType(exp, true);
+                if (type->is<IR::Type_Header>()) {
+                    auto typeheader = type->to<IR::Type_Header>();
+                    sName = typeheader->name.name;
+                } else if ((exp != nullptr) && (exp->expr != nullptr) &&
+                           (exp->expr->type != nullptr)) {
+                    sName = getHdrMdStrName(exp);
+                }
+            }
+            if (hdrStrName == "")
+                hdrStrName = sName;
+            else if (hdrStrName != sName)
+                return false;
+        }
+    }
+    return true;
+}
+
+/* This function processes hash parameters and checks if all parameters
+   are contiguous field or not in a header/metadata structure.
+   For eg:
+   header ethernet_t {
+       EthernetAddress dstAddr;
+       EthernetAddress srcAddr;
+       bit<16>         etherType;
+   }
+
+   1. h.get_hash(hdr.ethernet.dstAddr, hdr.ethernet.etherType)
+      Here, 'dstAddr' and 'etherType' are not contiguous fields in header 'ethernet_t'.
+      So this function returns "false".
+   2. h.get_hash(hdr.ethernet.dstAddr, hdr.ethernet.srcAddr, hdr.ethernet.etherType)
+      Here, 'dstAddr', 'srcAddr' and 'etherType' are contiguous fields in header 'ethernet_t'.
+      So this function returns "true".
+*/
+bool ConvertStatementToDpdk::checkIfConsecutiveHdrMdfields(const IR::Argument* field) {
+    if (auto s = field->expression->to<IR::StructExpression>()) {
+        if (s->components.size() == 1)
+            return true;
+        cstring stName = "";
+        const IR::Type* hdrMdType = nullptr;
+        std::vector<cstring> fldList;
+        for (auto field1 : s->components) {
+            if (auto exp = field1->expression->to<IR::Member>()) {
+                if (stName == "")
+                    stName = getHdrMdStrName(exp);
+
+                auto type = typemap->getType(exp, true);
+                if (type->is<IR::Type_Header>()) {
+                    hdrMdType = type->to<IR::Type_Header>();
+                } else if ((exp != nullptr) && (exp->expr != nullptr) &&
+                           (exp->expr->type != nullptr)) {
+                    if (auto st = exp->expr->type->to<IR::Type_Header>()) {
+                        hdrMdType = st;
+                    } else if (auto st = exp->expr->type->to<IR::Type_Struct>()) {
+                        hdrMdType = st;
+                    }
+                    fldList.push_back(exp->member.name);
+                }
+            }
+        }
+        if (hdrMdType->is<IR::Type_Header>()) {
+            auto typeheader = hdrMdType->to<IR::Type_Header>();
+            for (unsigned idx = 0; idx != typeheader->fields.size(); idx++) {
+                if (typeheader->fields[idx]->name == fldList[0]) {
+                    for (unsigned j = 1; j != fldList.size(); j++) {
+                        if (fldList[j] != typeheader->fields[++idx]->name)
+                            return false;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    return true;
 }
 
 /* This recursion requires the pass of ConvertLogicalExpression. This pass will
@@ -676,13 +942,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 }
             }
         } else if (a->originalExternType->getName().name == "Meter") {
-            if (a->method->getName().name == "execute") {
-                // DPDK target requires the result of meter execute method is assigned to a
-                // variable of PSA_MeterColor_t type.
-                ::error(ErrorType::ERR_UNSUPPORTED, "LHS of meter execute statement is missing " \
-                        "Use this format instead : color_out = %1%.execute(index, color_in)",
-                         a->object->getName());
-            } else {
+            if (a->method->getName().name != "execute") {
                 BUG("Meter function not implemented.");
             }
         } else if (a->originalExternType->getName().name == "Counter") {
@@ -753,30 +1013,52 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             } else if (boolLiteral->value == true) {
                 return false;
             }
-            IR::PathExpression *error_meta_path;
+            IR::Member *error_meta_path;
             if (structure->isPSA()) {
-                error_meta_path = new IR::PathExpression(
-                    IR::ID("m.psa_ingress_input_metadata_parser_error"));
+                error_meta_path = new IR::Member(new IR::PathExpression(
+                    IR::ID("m")), IR::ID("psa_ingress_input_metadata_parser_error"));
             } else if (structure->isPNA()) {
-                error_meta_path = new IR::PathExpression(
-                    IR::ID("m.pna_pre_input_metadata_parser_error"));
+                error_meta_path = new IR::Member( new IR::PathExpression(IR::ID("m")),
+                    IR::ID("pna_pre_input_metadata_parser_error"));
             } else {
                 BUG("Unknown architecture unexpectedly!");
             }
+
             add_instr(new IR::DpdkMovStatement(error_meta_path, error_id->expression));
             add_instr(new IR::DpdkJmpLabelStatement(
                         append_parser_name(parser, IR::ParserState::reject)));
             add_instr(new IR::DpdkLabelStatement(end_label));
         } else if (a->method->name == "add_entry") {
+            auto args = a->expr->arguments;
+            auto argSize = args->size();
+            if (argSize != 3) {
+                ::error(ErrorType::ERR_UNEXPECTED, "Unexpected number of arguments for %1%",
+                            a->method->name);
+                return false;
+            }
             auto action = a->expr->arguments->at(0)->expression;
             auto action_name = action->to<IR::StringLiteral>()->value;
+            action_name = ::get(structure->learner_action_map, action_name);
             auto param = a->expr->arguments->at(1)->expression;
+            auto timeout_id = a->expr->arguments->at(2)->expression;
+            if (timeout_id->is<IR::Constant>()) {
+                BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                IR::ID tmo(refmap->newName("timeout_id"));
+                auto timeout = new IR::Member(new IR::PathExpression("m"), tmo);
+                metadataStruct->fields.push_back(new IR::StructField(tmo, timeout_id->type));
+                add_instr(new IR::DpdkMovStatement(timeout, timeout_id));
+                timeout_id = timeout;
+            }
             if (param->is<IR::Member>()) {
                 auto argument = param->to<IR::Member>();
-                add_instr(new IR::DpdkLearnStatement(action_name, argument));
+                add_instr(new IR::DpdkLearnStatement(action_name, timeout_id, argument));
             } else if (param->is<IR::StructExpression>()) {
-                auto argument = param->to<IR::StructExpression>()->components.at(0)->expression;
-                add_instr(new IR::DpdkLearnStatement(action_name, argument));
+                if (param->to<IR::StructExpression>()->components.size() == 0) {
+                    add_instr(new IR::DpdkLearnStatement(action_name, timeout_id));
+                } else {
+                    auto argument = param->to<IR::StructExpression>()->components.at(0)->expression;
+                    add_instr(new IR::DpdkLearnStatement(action_name, timeout_id, argument));
+                }
             } else if (param->is<IR::Constant>()) {
                 // Move constant param to metadata as DPDK expects it to be in metadata
                 BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
@@ -784,10 +1066,31 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 metadataStruct->fields.push_back(new IR::StructField(learnArg, param->type));
                 auto learnMember = new IR::Member(new IR::PathExpression("m"), learnArg);
                 add_instr(new IR::DpdkMovStatement(learnMember, param));
-                add_instr(new IR::DpdkLearnStatement(action_name, learnMember));
+                add_instr(new IR::DpdkLearnStatement(action_name, timeout_id, learnMember));
             } else {
                 ::error(ErrorType::ERR_UNEXPECTED, "%1%: unhandled function", s);
             }
+        } else if (a->method->name == "restart_expire_timer") {
+            add_instr(new IR::DpdkRearmStatement());
+        } else if (a->method->name == "set_entry_expire_time") {
+            auto args = a->expr->arguments;
+            if (args->size() != 1) {
+                ::error(ErrorType::ERR_UNEXPECTED, "Expected 1 argument for %1%",
+                            a->method->name);
+                return false;
+            }
+            auto timeout = a->expr->arguments->at(0)->expression;
+            if (timeout->is<IR::Constant>()) {
+                // Move timeout_is to metadata fields as DPDK expects these parameters
+                // to be in metadata
+                BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                IR::ID tmo(refmap->newName("new_timeout"));
+                metadataStruct->fields.push_back(new IR::StructField(tmo, timeout->type));
+                auto tmoMem = new IR::Member(new IR::PathExpression("m"), tmo);
+                add_instr(new IR::DpdkMovStatement(tmoMem, timeout));
+                timeout = tmoMem;
+            }
+            add_instr(new IR::DpdkRearmStatement(timeout));
         } else if (a->method->name == "mirror_packet") {
             auto args = a->expr->arguments;
             if (args->size() != 2) {

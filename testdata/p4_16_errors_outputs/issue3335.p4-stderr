@@ -1,0 +1,3 @@
+issue3335.p4(3): [--Werror=type-error] error: Expression 'ListExpression' with a component of type 'int' cannot be used in 'select'
+        transition select(1) {
+                          ^

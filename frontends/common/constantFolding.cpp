@@ -768,26 +768,31 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
     if (right == nullptr)
         return e;
 
-    auto cr = right->to<IR::Constant>();
-    if (cr == nullptr) {
-        ::error(ErrorType::ERR_EXPECTED, "%1%: expected an integer value", right);
+    const IR::Constant* shift_amt = nullptr;
+    if (right->is<IR::Constant>()) {
+        shift_amt = right->to<IR::Constant>();
+    } else if (typesKnown) {
+        auto ei = EnumInstance::resolve(right, typeMap);
+        if (ei == nullptr)
+            return e;
+        if (auto se = ei->to<SerEnumInstance>()) {
+            shift_amt = se->value->checkedTo<IR::Constant>();
+        } else {
+            return e;
+        }
+    } else {
+        // We will do this one later.
         return e;
     }
-    if (cr->value < 0) {
+
+    CHECK_NULL(shift_amt);
+    if (shift_amt->value < 0) {
         ::error(ErrorType::ERR_INVALID, "%1%: Shifts with negative amounts are not permitted", e);
         return e;
     }
-    if (auto crTypeBits = cr->type->to<IR::Type_Bits>()) {
-        if (crTypeBits->isSigned) {
-            ::error(ErrorType::ERR_EXPECTED, "%1%: shift amounts cannot be signed", right);
-            return e;
-        }
-    }
 
-    if (cr->value == 0) {
-        // ::warning("%1% with zero", e);
+    if (shift_amt->value == 0)
         return e->left;
-    }
 
     auto left = getConstant(e->left);
     if (left == nullptr)
@@ -800,7 +805,7 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
     }
 
     big_int value = cl->value;
-    unsigned shift = static_cast<unsigned>(cr->asInt());
+    unsigned shift = static_cast<unsigned>(shift_amt->asInt());
     if (overflowWidth(e, shift))
         return e;
 
@@ -966,7 +971,7 @@ DoConstantFolding::setContains(const IR::Expression* keySet, const IR::Expressio
             return Result::Yes;
         return Result::No;
     }
-    ::error(ErrorType::ERR_INVALID, "%1%: unexpected expression", keySet);
+    // Otherwise the keyset may be a ValueSet
     return Result::DontKnow;
 }
 
@@ -980,10 +985,8 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
     bool someUnknown = false;
     bool changes = false;
     bool finished = false;
-
     const IR::Expression* result = expression;
-    /* FIXME -- should erase/replace each element as needed, rather than creating a new Vector.
-     * Should really implement this in SelectCase pre/postorder and this postorder goes away */
+
     for (auto c : expression->selectCases) {
         if (finished) {
             if (warnings)
@@ -998,9 +1001,10 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
             someUnknown = true;
             cases.push_back(c);
         } else {
-            changes = true;
             finished = true;
             if (someUnknown) {
+                if (!c->keyset->is<IR::DefaultExpression>())
+                    changes = true;
                 auto newc = new IR::SelectCase(c->srcInfo, new IR::DefaultExpression(), c->state);
                 cases.push_back(newc);
             } else {

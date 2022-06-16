@@ -161,18 +161,15 @@ bool ControlGraphs::preorder(const IR::SwitchStatement *statement) {
     auto tbl = P4::TableApplySolver::isActionRun(statement->expression, refMap, typeMap);
     vertex_t v;
     // special case for action_run
+    std::stringstream sstream;
     if (tbl == nullptr) {
-        std::stringstream sstream;
         statement->expression->dbprint(sstream);
-        v = add_and_connect_vertex(cstring(sstream), VertexType::SWITCH);
     } else {
         visit(tbl);
-        BUG_CHECK(parents.size() == 1, "Unexpected parents size");
-        auto parent = parents.front();
-        BUG_CHECK(dynamic_cast<EdgeUnconditional *>(parent.second) != nullptr,
-                  "Unexpected eged type");
-        v = parent.first;
+        sstream << "switch: action_run";
     }
+    v = add_and_connect_vertex(cstring(sstream), VertexType::SWITCH);
+
     Parents new_parents;
     parents = {};
     bool hasDefault{false};
@@ -260,7 +257,17 @@ bool ControlGraphs::preorder(const IR::Key *key) {
     // Build key
     for (auto elVec : key->keyElements) {
         sstream << elVec->matchType->path->name.name << ": ";
-        sstream << elVec->annotations->annotations.front()->expr.front() << "\\n";
+        bool has_name = false;
+        for (auto ann : elVec->annotations->annotations) {
+            if (ann->toString() == "@name") {
+                sstream << ann->getName();
+                has_name = true;
+                break;
+            }
+        }
+        if (!has_name)
+            sstream << elVec->expression->toString();
+        sstream << "\\n";
     }
 
     auto v = add_and_connect_vertex(cstring(sstream), VertexType::KEY);
@@ -290,32 +297,35 @@ bool ControlGraphs::preorder(const IR::P4Table *table) {
 
     Parents new_parents;
 
-    auto actions = table->getActionList()->actionList;
-    for (auto action : actions){
-        parents = keyNode;
+    auto actList = table->getActionList();
+    if (actList) {
+        auto actions = actList->actionList;
+        for (auto action : actions){
+            parents = keyNode;
 
-        auto v = add_and_connect_vertex(action->getName(), VertexType::ACTION);
+            auto v = add_and_connect_vertex(action->getName(), VertexType::ACTION);
 
-        parents = {{v, new EdgeUnconditional()}};
+            parents = {{v, new EdgeUnconditional()}};
 
-        if (action->expression->is<IR::MethodCallExpression>()) {
-            auto mce = action->expression->to<IR::MethodCallExpression>();
+            if (action->expression->is<IR::MethodCallExpression>()) {
+                auto mce = action->expression->to<IR::MethodCallExpression>();
 
-            // needed for visiting body of P4Action
-            auto resolved = P4::MethodInstance::resolve(mce, refMap, typeMap);
+                // needed for visiting body of P4Action
+                auto resolved = P4::MethodInstance::resolve(mce, refMap, typeMap);
 
-            if (resolved->is<P4::ActionCall>()) {
-                auto ac = resolved->to<P4::ActionCall>();
-                if (ac->action->is<IR::P4Action>()) {
-                    visit(ac->action->to<IR::P4Action>());
+                if (resolved->is<P4::ActionCall>()) {
+                    auto ac = resolved->to<P4::ActionCall>();
+                    if (ac->action->is<IR::P4Action>()) {
+                        visit(ac->action->to<IR::P4Action>());
+                    }
                 }
             }
+
+            merge_other_statements_into_vertex();
+
+            new_parents.insert(new_parents.end(), parents.begin(), parents.end());
+            parents.clear();
         }
-
-        merge_other_statements_into_vertex();
-
-        new_parents.insert(new_parents.end(), parents.begin(), parents.end());
-        parents.clear();
     }
 
     parents = new_parents;

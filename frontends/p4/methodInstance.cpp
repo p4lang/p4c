@@ -29,7 +29,7 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, DeclarationLookup* 
     auto mt = typeMap ? typeMap->getType(mce->method) : nullptr;
     if (mt == nullptr && useExpressionType)
         mt = mce->method->type;
-    CHECK_NULL(mt);
+    BUG_CHECK(mt, "%1%: unknown type", mce->method);
     BUG_CHECK(mt->is<IR::Type_MethodBase>(), "%1%: expected a MethodBase type", mt);
     auto originalType = mt->to<IR::Type_MethodBase>();
     auto actualType = originalType;

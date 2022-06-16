@@ -674,8 +674,9 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Variable* decl) {
     const IR::Type* baseType = type;
     if (auto sc = type->to<IR::Type_SpecializedCanonical>())
         baseType = sc->baseType;
-    if (baseType->is<IR::IContainer>() || baseType->is<IR::Type_Extern>()) {
-        typeError("%1%: cannot declare variables of type %2% (consider using an instantiation)",
+    if (baseType->is<IR::IContainer>() || baseType->is<IR::Type_Extern>() ||
+        baseType->is<IR::Type_Parser>() || baseType->is<IR::Type_Control>()) {
+        typeError("%1%: cannot declare variables of type '%2%' (consider using an instantiation)",
                   decl, type);
         return decl;
     }
@@ -1414,6 +1415,15 @@ const IR::Node* TypeInference::postorder(IR::P4ValueSet* decl) {
             if (errs)
                 return nullptr;
         }
+        if (!canon->is<IR::Type_Newtype>() &&
+            !canon->is<IR::Type_Bits>() &&
+            !canon->is<IR::Type_SerEnum>() &&
+            !canon->is<IR::Type_Boolean>() &&
+            !canon->is<IR::Type_Enum>() &&
+            !canon->is<IR::Type_Struct>() &&
+            !canon->is<IR::Type_Tuple>())
+            typeError("%1%: Illegal type for value_set element type", decl->elementType);
+
         auto tt = new IR::Type_Set(canon);
         setType(getOriginal(), tt);
         setType(decl, tt);
@@ -1623,6 +1633,13 @@ const IR::Node* TypeInference::postorder(IR::Parameter* param) {
             return param;
         }
     }
+
+    if (param->defaultValue) {
+        if (!typeMap->isCompileTimeConstant(param->defaultValue))
+            typeError("%1%: expression must be a compile-time constant",
+                      param->defaultValue);
+    }
+
     setType(getOriginal(), paramType);
     setType(param, paramType);
     return param;
@@ -1820,7 +1837,7 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
         expression->left = c.left;
         expression->right = c.right;
     } else {
-        if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>() || !(ltype == rtype)) {
+        if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>() || !(ltype->equiv(*rtype))) {
             typeError("%1%: not defined on %2% and %3%",
                       expression, ltype->toString(), rtype->toString());
             return expression;
@@ -2301,8 +2318,7 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
         return expression;
     }
     auto lt = ltype->to<IR::Type_Bits>();
-    if (expression->right->is<IR::Constant>()) {
-        auto cst = expression->right->to<IR::Constant>();
+    if (auto cst = expression->right->to<IR::Constant>()) {
         if (!cst->fitsInt()) {
             typeError("Shift amount too large: %1%", cst);
             return expression;
@@ -2315,6 +2331,20 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
         if (lt != nullptr && shift >= lt->size)
             warn(ErrorType::WARN_OVERFLOW, "%1%: shifting value with %2% bits by %3%",
                  expression, lt->size, shift);
+        // If the amount is signed but positive, make it unsigned
+        if (auto bt = rtype->to<IR::Type_Bits>()) {
+            if (bt->isSigned) {
+                rtype = new IR::Type_Bits(rtype->srcInfo, bt->width_bits(), false);
+                auto amt = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
+                if (expression->is<IR::Shl>()) {
+                    expression = new IR::Shl(expression->srcInfo, expression->left, amt);
+                } else {
+                    expression = new IR::Shr(expression->srcInfo, expression->left, amt);
+                }
+                setCompileTimeConstant(expression->right);
+                setType(expression->right, rtype);
+            }
+        }
     }
 
     if (rtype->is<IR::Type_Bits>() && rtype->to<IR::Type_Bits>()->isSigned) {
@@ -3581,9 +3611,10 @@ TypeInference::matchCase(const IR::SelectExpression* select, const IR::Type_Base
         }
         useSelType = selectType->components.at(0);
     }
-    auto tvs = unify(select, useSelType, caseType,
-                     "'match' case label type '%1%' does not match expected type '%2%'",
-                     { caseType, useSelType });
+    auto tvs = unify(
+        select, useSelType, caseType,
+        "'match' case label '%1%' has type '%2%' which does not match the expected type '%3%'",
+        { selectCase->keyset, caseType, useSelType });
     if (tvs == nullptr)
         return nullptr;
     ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
@@ -3640,14 +3671,11 @@ static bool validateSelectTypes(const IR::Type* type, const IR::SelectExpression
                 return false;
         }
         return true;
-    } else if (type->is<IR::ITypeVar>()) {
-        typeError("Cannot infer type for %1%", type);
-        return false;
     } else if (type->is<IR::Type_Bits>() || type->is<IR::Type_SerEnum>() ||
                type->is<IR::Type_Boolean>() || type->is<IR::Type_Enum>()) {
         return true;
     }
-    typeError("Expression '%1%' with type '%2%' cannot be used in select",
+    typeError("Expression '%1%' with a component of type '%2%' cannot be used in 'select'",
               expression->select, type);
     return false;
 }

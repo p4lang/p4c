@@ -71,12 +71,6 @@ set (P4TEST_SUITES
 # would not make sense to run all the tests twice (one with and one without
 # P4Runtime).
 set (P4RUNTIME_EXCLUDE
-  # See discussion on this p4c PR: https://github.com/p4lang/p4c/pull/2425
-  # It seems that the best long term approach for supporting programs
-  # like this one is to enhance the P4Runtime API to support enum
-  # types as action parameters, as requested in this issue:
-  # https://github.com/p4lang/p4runtime/issues/191
-  testdata/p4_16_samples/psa-meter1.p4
   # error not supported in static entries, not strictly required for P4Info
   # generation though
   testdata/p4_16_samples/issue1062-bmv2.p4
@@ -108,6 +102,9 @@ set (P4_XFAIL_TESTS
   # These programs uses conditional execution inside action body which is currently
   # unsupported
   testdata/p4_16_samples/psa-dpdk-action-jumpOpt.p4
+  testdata/p4_16_samples/pna-example-tcp-connection-tracking.p4
+  testdata/p4_16_samples/pna-example-tcp-connection-tracking-err-1.p4
+  testdata/p4_16_samples/pna-example-tcp-connection-tracking-err.p4
   testdata/p4_16_samples/pna-example-pass-2.p4
   # These tests are added to check mirror_packet extern invocation with non-constant
   # arguments and with incorrect number of arguments
