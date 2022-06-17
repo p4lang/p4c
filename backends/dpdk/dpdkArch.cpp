@@ -677,36 +677,7 @@ const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
     return st;
 }
 
-const IR::Node* TempPass::postorder(IR::Add* expr) {
-    if (expr == nullptr)
-        return expr;
-    if (auto mem = expr->left->to<IR::Member>()) {
-       if (expr->right->is<IR::Constant>()) {
-           auto it = structure->modifiedMdList.find(mem->member.name);
-            if (it != structure->modifiedMdList.end()) {
-                auto bit_size = structure->modifiedMdList[mem->member.name];
-                auto consValue = expr->right->to<IR::Constant>()->value;
-                auto consOrgBitwidth = expr->right->to<IR::Constant>()->type->width_bits();
-                std::cout<<"consValue : " <<consValue<<std::endl;
-                auto mask = 1 << (consOrgBitwidth - 1);
-                auto msb = (consValue & mask) >> (consOrgBitwidth - 1);
-                auto orgMask = 0;
-                if (msb) {
-                    for (auto i = consOrgBitwidth; i < bit_size; i++)
-                        orgMask |= 1 << i;
-                    
-                    consValue |= orgMask;
-                }
-                std::cout<<"consValue : "<<consValue<<std::endl;
-                auto cns = new IR::Constant(IR::Type_Bits::get(bit_size), consValue);
-                return new IR::Add(expr->srcInfo, expr->left, cns);
-            }
-        }
-    }
-    return expr;
-}
- 
-const IR::Node* TempPass::postorder(IR::AssignmentStatement* asn) {
+const IR::Node* ReplaceHdrMetaField::postorder(IR::AssignmentStatement* asn) {
     if (auto mem = asn->left->to<IR::Member>()) {
         if (asn->right->is<IR::Constant>()) {
             auto it = structure->modifiedMdList.find(mem->member.name);
@@ -719,6 +690,33 @@ const IR::Node* TempPass::postorder(IR::AssignmentStatement* asn) {
         }
     }
     return asn;
+}
+
+const IR::Node* ReplaceHdrMetaField::postorder(IR::Operation_Binary* expr) {
+    if (expr == nullptr)
+        return expr;
+    if (auto mem = expr->left->to<IR::Member>()) {
+       if (expr->right->is<IR::Constant>()) {
+           auto it = structure->modifiedMdList.find(mem->member.name);
+            if (it != structure->modifiedMdList.end()) {
+                auto bit_size = structure->modifiedMdList[mem->member.name];
+                auto consValue = expr->right->to<IR::Constant>()->value;
+                auto consOrgBitwidth = expr->right->to<IR::Constant>()->type->width_bits();
+                auto mask = 1 << (consOrgBitwidth - 1);
+                auto msb = (consValue & mask) >> (consOrgBitwidth - 1);
+                auto orgMask = 0;
+                if (msb) {
+                    for (auto i = consOrgBitwidth; i < bit_size; i++)
+                        orgMask |= 1 << i;
+
+                    consValue |= orgMask;
+                }
+                auto cns = new IR::Constant(IR::Type_Bits::get(bit_size), consValue);
+                return new IR::Add(expr->srcInfo, expr->left, cns);
+            }
+        }
+    }
+    return expr;
 }
 
 // This function collects the match key information of a table. This is later used for

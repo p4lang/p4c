@@ -117,10 +117,6 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
             }
         }),
         new ReplaceHdrMetaField(typeMap, refMap, &structure),
-        new TempPass(typeMap, refMap, &structure),
-        new P4::ClearTypeMap(typeMap),
-        new P4::TypeChecking(refMap, typeMap, true),
-        new P4::ResolveReferences(refMap),
         // convert to assembly program
         convertToDpdk,
     };

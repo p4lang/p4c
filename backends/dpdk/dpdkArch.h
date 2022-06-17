@@ -284,21 +284,8 @@ class ReplaceHdrMetaField : public Transform {
         CHECK_NULL(structure);
     }
     const IR::Node* postorder(IR::Type_Struct *st) override;
-};
-
-class TempPass : public Transform {
-    P4::TypeMap* typeMap;
-    P4::ReferenceMap *refMap;
-    DpdkProgramStructure *structure;
- public:
-    TempPass(P4::TypeMap* typeMap,
-                            P4::ReferenceMap *refMap,
-                            DpdkProgramStructure* structure)
-        : typeMap(typeMap), refMap(refMap), structure(structure) {
-        CHECK_NULL(structure);
-    }
-    const IR::Node* postorder(IR::Add* expr) override;
-    const IR::Node* postorder(IR::AssignmentStatement* asn) override; 
+    const IR::Node* postorder(IR::AssignmentStatement* asn) override;
+    const IR::Node* postorder(IR::Operation_Binary* expr) override;
 };
 
 struct fieldInfo {
