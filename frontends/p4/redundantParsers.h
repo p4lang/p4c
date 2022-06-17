@@ -1,5 +1,5 @@
 /*
-Copyright 2022-present Barefoot Networks, Inc.
+Copyright 2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,10 +18,9 @@ limitations under the License.
 #define FRONTENDS_P4_REDUNDANTPARSERS_H_
 
 #include "ir/ir.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
-
-class ReferenceMap;
 
 /** Find parsers that have an unconditional "accept" in their start
  *  state, and put them in redundantParsers.
@@ -40,21 +39,24 @@ class FindRedundantParsers : public Inspector {
 class EliminateSubparserCalls : public Transform {
     const std::set<const IR::P4Parser *> &redundantParsers;
     ReferenceMap *refMap;
+    TypeMap *typeMap;
     const IR::Node *postorder(IR::MethodCallStatement *methodCallStmt) override;
  public:
     EliminateSubparserCalls(const std::set<const IR::P4Parser *> &redundantParsers,
-                            ReferenceMap *refMap)
-        : redundantParsers(redundantParsers), refMap(refMap)
+                            ReferenceMap *refMap,
+                            TypeMap *typeMap)
+        : redundantParsers(redundantParsers), refMap(refMap), typeMap(typeMap)
     { }
 };
 
 class RemoveRedundantParsers : public PassManager {
     std::set<const IR::P4Parser *> redundantParsers;
  public:
-    explicit RemoveRedundantParsers(ReferenceMap *refMap)
+    RemoveRedundantParsers(ReferenceMap *refMap, TypeMap *typeMap)
         : PassManager {
+                new TypeChecking(refMap, typeMap, true),
                 new FindRedundantParsers(redundantParsers),
-                new EliminateSubparserCalls(redundantParsers, refMap)
+                new EliminateSubparserCalls(redundantParsers, refMap, typeMap)
         } {
         setName("RemoveRedundantParsers");
     }

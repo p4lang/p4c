@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -38,14 +38,7 @@ bool FindRedundantParsers::preorder(const IR::P4Parser *parser) {
 }
 
 const IR::Node *EliminateSubparserCalls::postorder(IR::MethodCallStatement *mcs) {
-    if (mcs->methodCall->method->type->is<IR::Type_Unknown>()) return mcs;
-    auto mem = mcs->methodCall->method->to<IR::Member>();
-    if (!mem) return mcs;
-
-    auto pe = mem->expr->to<IR::PathExpression>();
-    if (!pe || !pe->type->is<IR::IApply>()) return mcs;
-
-    auto mi = MethodInstance::resolve(mcs->methodCall, refMap, nullptr, true);
+    auto mi = MethodInstance::resolve(mcs->methodCall, refMap, typeMap, true);
     if (!mi->isApply()) return mcs;
 
     auto apply = mi->to<ApplyMethod>()->applyObject;
