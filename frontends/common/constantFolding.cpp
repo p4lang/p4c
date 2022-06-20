@@ -116,8 +116,8 @@ const IR::Node* DoConstantFolding::postorder(IR::Type_Bits* type) {
         if (auto cst = type->expression->to<IR::Constant>()) {
             type->size = cst->asInt();
             type->expression = nullptr;
-            if (type->size < 0 ||
-                (type->size == 0 && type->isSigned)) {
+            if (type->width_bits() < 0 ||
+                (type->width_bits() == 0 && type->isSigned)) {
                 ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
                 // Convert it to something legal so we don't get
                 // weird errors elsewhere.
@@ -135,7 +135,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Type_Varbits* type) {
         if (auto cst = type->expression->to<IR::Constant>()) {
             type->size = cst->asInt();
             type->expression = nullptr;
-            if (type->size <= 0)
+            if (type->width_bits() <= 0)
                 ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
         } else {
             ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", type->expression);
@@ -542,11 +542,11 @@ DoConstantFolding::binary(const IR::Operation_Binary* e,
         if ((rtb = resultType->to<IR::Type::Bits>())) {
             big_int limit = 1;
             if (rtb->isSigned) {
-                limit <<= rtb->size-1;
+                limit <<= rtb->width_bits() - 1;
                 if (value < -limit)
                     value = -limit;
             } else {
-                limit <<= rtb->size;
+                limit <<= rtb->width_bits();
                 if (value < 0)
                     value = 0; }
             if (value >= limit)
@@ -729,10 +729,11 @@ const IR::Node* DoConstantFolding::postorder(IR::Concat* e) {
         return e;
     }
 
-    auto resultType = IR::Type_Bits::get(lt->size + rt->size, lt->isSigned);
-    if (overflowWidth(e, resultType->size))
+    auto resultType = IR::Type_Bits::get(lt->width_bits() + rt->width_bits(), lt->isSigned);
+    if (overflowWidth(e, resultType->width_bits()))
         return e;
-    big_int value = Util::shift_left(left->value, static_cast<unsigned>(rt->size)) + right->value;
+    big_int value =
+        Util::shift_left(left->value, static_cast<unsigned>(rt->width_bits())) + right->value;
     return new IR::Constant(e->srcInfo, resultType, value, left->base);
 }
 
@@ -811,9 +812,9 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
 
     auto tb = left->type->to<IR::Type_Bits>();
     if (tb != nullptr) {
-        if (((unsigned)tb->size < shift) && warnings)
+        if (((unsigned)tb->width_bits() < shift) && warnings)
             ::warning(ErrorType::WARN_OVERFLOW,
-                      "%1%: Shifting %2%-bit value with %3%", e, tb->size, shift);
+                      "%1%: Shifting %2%-bit value with %3%", e, tb->width_bits(), shift);
     }
 
     if (e->is<IR::Shl>())
@@ -863,7 +864,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
                     ::error(ErrorType::ERR_INVALID, "%1%: Cannot cast signed value to boolean", e);
                     return e;
                 }
-                if (tb->size != 1) {
+                if (tb->width_bits() != 1) {
                     ::error(ErrorType::ERR_INVALID,
                             "%1%: Only bit<1> values can be cast to bool", e);
                     return e;
