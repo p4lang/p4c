@@ -32,7 +32,8 @@ The TC-based design of PSA for eBPF is depicted in Figure below.
   The role of Traffic Manager is to redirect traffic between the Ingress (TC) and Egress (TC).
   It is also responsible for packet replication via clone sessions or multicast groups and sending packet to CPU.
 - `tc-egress` - The PSA Egress pipeline (composed of Parser, Control block and Deparser) is attached to the TC Egress hook. As there is no
-  XDP hook in the Egress path, the use of TC is mandatory for the egress processing.
+  XDP hook in the Egress path, the use of TC is mandatory for the egress processing. **Note!** If the PSA Egress pipeline is not used (i.e. it is left empty by a developer),
+  the PSA-eBPF compiler will not generate the TC Egress program. This brings a noticeable performance gain, if the egress pipeline is not used. 
   
 ## Packet paths
 
@@ -434,20 +435,33 @@ $ python3 backends/ebpf/build_libbpf
 You can compile a P4-16 PSA program for eBPF in a single step using:
 
 ```bash
-make -f backends/ebpf/runtime/kernel.mk BPFOBJ=out.o ARGS="-DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX>" P4FILE=<P4-PROGRAM>.p4 P4C=p4c-ebpf psa
+make -f backends/ebpf/runtime/kernel.mk BPFOBJ=out.o P4FILE=<P4-PROGRAM>.p4 P4C=p4c-ebpf psa
 ```
 
 You can also perform compilation step by step:
 
 ```
 $ p4c-ebpf --arch psa --target kernel -o out.c <program>.p4
-$ clang -Ibackends/ebpf/runtime -Ibackends/ebpf/runtime/usr/include -O2 -g -c -emit-llvm -DBTF -DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX> -o out.bc out.c
+$ clang -Ibackends/ebpf/runtime -Ibackends/ebpf/runtime/usr/include -O2 -g -c -emit-llvm -o out.bc out.c
 $ llc -march=bpf -mcpu=generic -filetype=obj -o out.o out.bc
 ```
 
 Note that you can use `-mcpu` flag to define the eBPF instruction set. Visit [this blog post](https://pchaigno.github.io/bpf/2021/10/20/ebpf-instruction-sets.html) to learn more about eBPF instruction sets.
 
 The above steps generate `out.o` BPF object file that can be loaded to the kernel. 
+
+#### Optional flags
+
+Supposing we want to use a packet recirculation we have to specify the `PSA_PORT_RECIRCULATE` port.
+We can use `-DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX>` Clang flag via `kernel.mk`
+```bash
+make -f backends/ebpf/runtime/kernel.mk BPFOBJ=out.o ARGS="-DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX>" P4FILE=<P4-PROGRAM>.p4 P4C=p4c-ebpf psa
+```
+or directly:
+`clang ... -DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX> ...`,  
+where `RECIRCULATE_PORT_IDX` is a number of a `psa_recirc` interface (this number can be obtained from `ip -n switch link`).
+
+By default `PSA_PORT_RECIRCULATE` is set to 0.
 
 ### psabpf API and psabpf-ctl
 

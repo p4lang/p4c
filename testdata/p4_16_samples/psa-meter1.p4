@@ -49,8 +49,9 @@ control MyIC(
     inout psa_ingress_output_metadata_t d) {
 
     Meter<bit<12>>(1024, PSA_MeterType_t.PACKETS) meter0;
+    PSA_MeterColor_t c1;
     action execute(bit<12> index, PSA_MeterColor_t color) {
-        meter0.execute(index, color);
+        c1 = meter0.execute(index, color);
     }
     table tbl {
         key = {

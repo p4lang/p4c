@@ -1,0 +1,40 @@
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 39967501
+    name: "MyIC.tbl"
+    alias: "tbl"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.srcAddr"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 21832421
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 21832421
+    name: "MyIC.a1"
+    alias: "a1"
+  }
+}
+type_info {
+}

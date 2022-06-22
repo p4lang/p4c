@@ -98,17 +98,28 @@ const Type_String *Type_String::get() {
 }
 
 const Type::Bits *Type::Bits::get(Util::SourceInfo si, int sz, bool isSigned) {
-    if (sz < 0)
-        ::error(ErrorType::ERR_INVALID, "%1%: Width cannot be negative", si);
-    if (sz == 0 && isSigned)
-        ::error(ErrorType::ERR_INVALID, "%1%: Width cannot be zero", si);
-    return get(sz, isSigned);
+    auto result = new IR::Type_Bits(si, sz, isSigned);
+    if (sz < 0) {
+        ::error(ErrorType::ERR_INVALID, "%1%: Width of type cannot be negative", result);
+        // Return a value that will not cause crashes later on
+        return new IR::Type_Bits(si, 1024, isSigned);
+    }
+    if (sz == 0 && isSigned) {
+        ::error(ErrorType::ERR_INVALID, "%1%: Width of signed type cannot be zero", result);
+        // Return a value that will not cause crashes later on
+        return new IR::Type_Bits(si, 1024, isSigned);
+    }
+    return result;
 }
 
 const Type::Varbits *Type::Varbits::get(Util::SourceInfo si, int sz) {
-    if (sz < 0)
-        ::error(ErrorType::ERR_INVALID, "%1%: Width cannot be negative or zero", si);
-    return new Type::Varbits(si, sz);
+    auto result = new Type::Varbits(si, sz);
+    if (sz < 0) {
+        ::error(ErrorType::ERR_INVALID, "%1%: Width cannot be negative or zero", result);
+        // Return a value that will not cause crashes later on
+        return new IR::Type_Varbits(si, 1024);
+    }
+    return result;
 }
 
 const Type::Varbits *Type::Varbits::get() {

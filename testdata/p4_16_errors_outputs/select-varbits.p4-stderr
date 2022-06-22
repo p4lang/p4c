@@ -1,4 +1,4 @@
-select-varbits.p4(16): [--Werror=type-error] error: Expression 'ListExpression' with type 'varbit<12>' cannot be used in select
+select-varbits.p4(16): [--Werror=type-error] error: Expression 'ListExpression' with a component of type 'varbit<12>' cannot be used in 'select'
         transition select (h.h1.v) {
                            ^^^^^^
 select-varbits.p4(4)

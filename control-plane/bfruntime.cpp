@@ -601,9 +601,15 @@ BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table& table,
         for (const auto& param : action->params()) {
             auto* annotations = transformAnnotations(
                 param.annotations().begin(), param.annotations().end());
-            addActionDataField(
-                dataJson, param.id(), param.name(), true /* mandatory */,
-                false /* read_only */, makeTypeBytes(param.bitwidth()), annotations);
+            if (param.type_name().name() == "PSA_MeterColor_t") {
+                addActionDataField(
+                    dataJson, param.id(), param.name(), true /* mandatory */,
+                    false /* read_only */, makeTypeEnum({"RED","GREEN","YELLOW"}), annotations);
+            } else {
+                addActionDataField(
+                    dataJson, param.id(), param.name(), true /* mandatory */,
+                    false /* read_only */, makeTypeBytes(param.bitwidth()), annotations);
+            }
             if (param.id() > maxId) maxId = param.id();
         }
         spec->emplace("data", dataJson);

@@ -129,11 +129,17 @@ learner ipv4_da {
 		add_on_miss_action @defaultonly
 	}
 	default_action add_on_miss_action args none 
-	size 65536
+	size 0x10000
 	timeout {
-		60
 		120
-		180
+		120
+		120
+		120
+		120
+		120
+		120
+		120
+
 		}
 }
 
@@ -148,11 +154,17 @@ learner ipv4_da2 {
 		do_range_checks_1
 	}
 	default_action add_on_miss_action2 args none 
-	size 65536
+	size 0x10000
 	timeout {
-		60
 		120
-		180
+		120
+		120
+		120
+		120
+		120
+		120
+		120
+
 		}
 }
 

@@ -1183,6 +1183,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         // This is important later for conversion to JSON.
         new P4::ClonePathExpressions(),
         new P4::ClearTypeMap(typeMap),
+        new P4::TypeChecking(refMap, typeMap, true),
         evaluator,
         [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
     });

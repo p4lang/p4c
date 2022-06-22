@@ -49,6 +49,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 struct TableAttributes tblAttr;
                 tblAttr.direction = direction;
                 tblAttr.controlName = control->name.originalName;
+                tblAttr.externalName = tbl->controlPlaneName();
                 tblAttr.tableHandle = getNewTableHandle();
                 auto size = tbl->getSizeProperty();
                 tblAttr.size = dpdk_default_table_size;
@@ -139,7 +140,8 @@ Util::JsonObject* DpdkContextGenerator::initTableCommonJson(
     const cstring name, const struct TableAttributes & attr) {
     auto* tableJson = new Util::JsonObject();
     cstring tableName = attr.controlName + "." + name;
-    tableJson->emplace("name", tableName);
+    tableJson->emplace("name", attr.externalName);
+    tableJson->emplace("target_name", tableName);
     tableJson->emplace("direction", attr.direction);
     tableJson->emplace("handle", attr.tableHandle);
     tableJson->emplace("table_type", attr.tableType);
@@ -212,6 +214,7 @@ void DpdkContextGenerator::setActionAttributes(const IR::P4Table *tbl) {
         attr.allowed_as_hit_action = can_be_hit_action;
         attr.allowed_as_default_action = can_be_default_action;
         attr.actionHandle = getNewActionHandle();
+        attr.externalName = action_decl->controlPlaneName();
         actionAttrMap.emplace(act->getName(), attr);
     }
 }
@@ -256,16 +259,11 @@ DpdkContextGenerator::addMatchAttributes(const IR::P4Table* table, const cstring
     for (auto action : table->getActionList()->actionList) {
         auto* oneAction = new Util::JsonObject();
         struct actionAttributes attr = ::get(actionAttrMap, action->getName());
-        auto actName = toStr(action->expression);
         auto name = action->externalName();
         if (name != "NoAction") {
-            actName = ctrlName + "." + actName;
             name = ctrlName + "." + name;
-        } else {
-            actName = name;
         }
         oneAction->emplace("action_name", name);
-        oneAction->emplace("target_action_name", actName);
         oneAction->emplace("action_handle", attr.actionHandle);
         auto* immFldArray = new Util::JsonArray();
         if (attr.params) {
@@ -314,12 +312,15 @@ const IR::P4Table * table, const cstring controlName, bool isMatch) {
         // Printing compiler added actions is curently not required
         if (!attr.is_compiler_added_action) {
             auto *act = new Util::JsonObject();
-            auto actName = action->externalName();
-
-            // NoAction is not prefixed with control block name
-            if (actName != "NoAction")
+            auto actName = toStr(action->expression);
+            auto name = action->externalName();
+            if (name != "NoAction") {
                 actName = controlName + "." + actName;
-           act->emplace("name", actName);
+            } else {
+                actName = name;
+            }
+           act->emplace("name", attr.externalName);
+           act->emplace("target_name", actName);
            act->emplace("handle", attr.actionHandle);
            if (isMatch) {
                act->emplace("constant_default_action", attr.constant_default_action);

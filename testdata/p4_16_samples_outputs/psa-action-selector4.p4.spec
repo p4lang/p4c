@@ -134,21 +134,29 @@ apply {
 	jmpnh LABEL_END_2
 	table foo
 	LABEL_END_2 :	table tbl
-	jmpnh LABEL_END_5
+	jmpnh LABEL_FALSE_5
 	table as_sel
-	jmpnh LABEL_END_5
+	jmpnh LABEL_FALSE_6
 	table as
 	jmpnh LABEL_FALSE_7
 	jmp LABEL_END_5
 	LABEL_FALSE_7 :	table foo
+	jmp LABEL_END_5
+	LABEL_FALSE_6 :	table foo
+	jmp LABEL_END_5
+	LABEL_FALSE_5 :	table foo
 	LABEL_END_5 :	table tbl
-	jmpnh LABEL_END_8
+	jmpnh LABEL_FALSE_8
 	table as_sel
-	jmpnh LABEL_END_8
+	jmpnh LABEL_FALSE_9
 	table as
 	jmpnh LABEL_FALSE_10
 	jmp LABEL_END_8
 	LABEL_FALSE_10 :	table foo
+	jmp LABEL_END_8
+	LABEL_FALSE_9 :	table foo
+	jmp LABEL_END_8
+	LABEL_FALSE_8 :	table foo
 	LABEL_END_8 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port

@@ -79,9 +79,7 @@ void PSAEbpfGenerator::emitPreamble(CodeBuilder *builder) const {
     builder->newline();
 
     builder->appendLine("#ifndef PSA_PORT_RECIRCULATE\n"
-        "#error \"PSA_PORT_RECIRCULATE not specified, "
-        "please use -DPSA_PORT_RECIRCULATE=n option to specify index of recirculation "
-        "interface (see the result of command 'ip link')\"\n"
+        "#define PSA_PORT_RECIRCULATE 0\n"
         "#endif");
     builder->appendLine("#define P4C_PSA_PORT_RECIRCULATE 0xfffffffa");
     builder->newline();
@@ -314,6 +312,10 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
         builder->appendLine(meterExecuteFunc);
         builder->newline();
     }
+
+    cstring addPrefixFunc = EBPFTablePSA::addPrefixFunc(options.emitTraceMessages);
+    builder->appendLine(addPrefixFunc);
+    builder->newline();
 }
 
 // =====================PSAArchTC=============================
@@ -360,20 +362,20 @@ void PSAArchTC::emit(CodeBuilder *builder) const {
     emitInstances(builder);
 
     /*
-     * 6. BPF map initialization
+     * 6. Helper functions for ingress and egress program.
+     */
+    emitHelperFunctions(builder);
+
+    /*
+     * 7. BPF map initialization.
      */
     emitInitializer(builder);
     builder->newline();
 
     /*
-     * 7. XDP helper program.
+     * 8. XDP helper program.
      */
     xdp->emit(builder);
-
-    /*
-     * 8. Helper functions for ingress and egress program.
-     */
-    emitHelperFunctions(builder);
 
     /*
      * 9. TC Ingress program.
@@ -383,7 +385,10 @@ void PSAArchTC::emit(CodeBuilder *builder) const {
     /*
      * 10. TC Egress program.
      */
-    egress->emit(builder);
+    if (!egress->isEmpty()) {
+        // Do not generate TC Egress program if PSA egress pipeline is not used (empty).
+        egress->emit(builder);
+    }
 
     builder->target->emitLicense(builder, ingress->license);
 }

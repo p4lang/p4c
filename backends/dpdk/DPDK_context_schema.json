@@ -6,7 +6,11 @@
          "properties": {
             "name": {
                "type": "string",
-               "description": "Name of the referenced table."
+               "description": "Name of the referenced table as in the P4 file."
+            },
+            "target_name": {
+               "type": "string",
+               "description": "Name of the referenced table as in the spec file."
             },
             "handle": {
                "type": "integer",
@@ -26,7 +30,7 @@
                "type": "string",
                "description": "Name of the action as in P4 file"
             },
-            "target_action_name": {
+            "target_name": {
                "type": "string",
                "description": "Name of the action as in spec file"
             },

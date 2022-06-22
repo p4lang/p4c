@@ -89,15 +89,17 @@ control ingress(inout headers hdr,
     Register<reg_value_t, reg_key_t>(10) reg;
 
     apply {
+         // Values used there are arbitrary chosen just for PTF tests
+         // See PTF test description
          reg_key_t reg_key;
          reg_key.port = (PortId_t)5;
          reg_key.srcAddr = 0xffffffffffff;
          reg_value_t tmp;
          tmp = reg.read(reg_key);
-         if (tmp.srcAddr < (bit<32>)5) {
-             tmp.srcAddr = (bit<32>)5;
+         if (tmp.srcAddr < (bit<32>) 5) {
+             tmp.srcAddr = (bit<32>) 5;
          } else {
-             tmp.srcAddr = tmp.srcAddr + 10;
+             tmp.dstAddr = tmp.dstAddr + 13;
          }
          reg.write(reg_key, tmp);
     }

@@ -2,10 +2,9 @@
 #include "ir/dbprint.h"
 #include "printUtils.h"
 #include "dpdkAsmOpt.h"
+#include "constants.h"
 using namespace DBPrint;
 
-static constexpr unsigned DEFAULT_LEARNER_TABLE_SIZE = 0x10000;
-static constexpr unsigned DEFAULT_LEARNER_TABLE_TIMEOUT = 120;
 ordered_map<cstring, cstring> DPDK::ShortenTokenLength::origNameMap = {};
 auto& origNameMap =  DPDK::ShortenTokenLength::origNameMap;
 
@@ -371,7 +370,6 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
         auto earg = mce->arguments->at(0)->expression;
         if (earg->is<IR::ListExpression>()) {
             auto paramCount = earg->to<IR::ListExpression>()->components.size();
-            std::cout<<"Earg : "<<earg<<std::endl;
             for (unsigned i = 0; i < paramCount; i++) {
                 if (earg->to<IR::ListExpression>()->components.at(i)->is<IR::Constant>()) {
                     auto val = earg->to<IR::ListExpression>()->
@@ -457,14 +455,15 @@ std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
     if (auto size = properties->getProperty("size")) {
         out << "\tsize " << DPDK::toStr(size->value) << "" << std::endl;
     } else {
-        out << "\tsize " << DEFAULT_LEARNER_TABLE_SIZE << std::endl;
+        out << "\tsize 0x" << std::hex << default_learner_table_size << std::endl;
     }
 
     // The initial timeout values
+    // This initializes 8 timeout values which can later be configured through control plane APIs.
     out << "\ttimeout {" << std::endl;
-    out << "\t\t" << 60 << std::endl;
-    out << "\t\t" << 120 << std::endl;
-    out << "\t\t" << 180 << "\n\t\t}";
+    for (unsigned int i = 0; i < dpdk_learner_max_configurable_timeout_values ; i++)
+        out << "\t\t" << std::dec << default_learner_table_timeout << std::endl;
+    out << "\n\t\t}";
     out << "\n}" << std::endl;
     return out;
 }
@@ -512,16 +511,19 @@ std::ostream &IR::DpdkChecksumClearStatement::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkGetHashStatement::toSpec(std::ostream &out) const {
-    out << "hash_get " << DPDK::toStr(dst) << " " << hash << " (";
+    out << "hash " << hash << " " << DPDK::toStr(dst) << " ";
     if (auto l = fields->to<IR::ListExpression>()) {
-        for (auto c : l->components) {
-            out << " " << DPDK::toStr(c);
+        if (l->components.size() == 1) {
+            out << " " << DPDK::toStr(l->components.at(0));
+            out << " " << DPDK::toStr(l->components.at(0));
+        } else {
+            out << " " << DPDK::toStr(l->components.at(0));
+            out << " " << DPDK::toStr(l->components.at(l->components.size() - 1));
         }
     } else {
         ::error(ErrorType::ERR_INVALID,
                 "%1%: get_hash's arg is not a ListExpression.", this);
     }
-    out << ")";
     return out;
 }
 
