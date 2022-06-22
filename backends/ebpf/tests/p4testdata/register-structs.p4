@@ -95,13 +95,15 @@ control ingress(inout headers hdr,
          reg_key.port = (PortId_t)5;
          reg_key.srcAddr = 0xffffffffffff;
          reg_value_t tmp;
-         tmp = reg.read(reg_key);
-         if (tmp.srcAddr < (bit<32>) 5) {
-             tmp.srcAddr = (bit<32>) 5;
-         } else {
-             tmp.dstAddr = tmp.dstAddr + 13;
+         @atomic {
+            tmp = reg.read(reg_key);
+            if (tmp.srcAddr < (bit<32>) 5) {
+                tmp.srcAddr = (bit<32>) 5;
+            } else {
+                tmp.dstAddr = tmp.dstAddr + 13;
+            }
+            reg.write(reg_key, tmp);
          }
-         reg.write(reg_key, tmp);
     }
 }
 

@@ -129,6 +129,7 @@ class EBPFTypeName : public EBPFType, public IHasWidth {
 
     template<typename T> bool canonicalTypeIs() const
     { return dynamic_cast<const T*>(this->canonical) != nullptr; }
+    template<typename T> T *toCanonical() { return dynamic_cast<T*>(this->canonical); }
 };
 
 // Also represents headers and unions

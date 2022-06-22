@@ -25,6 +25,9 @@ namespace EBPF {
 class ControlBodyTranslatorPSA;
 
 class EBPFRegisterPSA : public EBPFTableBase {
+ private:
+    cstring readValueName;
+
  protected:
     size_t size;
     // initial value for Register cells.
@@ -38,6 +41,8 @@ class EBPFRegisterPSA : public EBPFTableBase {
     bool shouldUseArrayMap();
 
  public:
+    bool isAtomic = false;
+
     EBPFRegisterPSA(const EBPFProgram* program, cstring instanceName,
                     const IR::Declaration_Instance* di,
                     CodeGenInspector* codeGen);

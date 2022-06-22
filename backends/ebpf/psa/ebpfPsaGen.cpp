@@ -690,6 +690,76 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
     return false;
 }
 
+void ConvertToEBPFControlPSA::processAtomicAnnotation(const IR::BlockStatement* b) {
+    auto ann = b->getAnnotation(IR::Annotation::atomicAnnotation);
+    cstring registerName = cstring::empty;
+
+    if (ann) {
+        int registerReadCounter = 0;
+        int registerWriteCounter = 0;
+        for (auto comp : b->components) {
+            const IR::MethodCallExpression *mExpr = nullptr;
+            if (auto assign = comp->to<IR::AssignmentStatement>()) {
+                mExpr = assign->right->to<IR::MethodCallExpression>();
+            } else if (comp->is<IR::MethodCallExpression>()) {
+                mExpr = comp->to<IR::MethodCallExpression>();
+            }
+
+            if (mExpr) {
+                auto mi = P4::MethodInstance::resolve(mExpr,
+                                                      control->program->refMap,
+                                                      control->program->typeMap);
+                auto ext = mi->to<P4::ExternMethod>();
+                if (ext != nullptr) {
+                    auto decl = ext->object;
+                    auto declType = ext->originalExternType;
+                    if (declType->name.name == "Hash")
+                        continue;
+                    else if (declType->name.name == "Register") {
+                        if (registerName.isNullOrEmpty())
+                            registerName = EBPFObject::externalName(decl);
+                        else if (registerName != EBPFObject::externalName(decl)) {
+                            ::error("You can handle only one register in the same atomic block");
+                            return;
+                        } else if (ext->method->name.name == "read" &&
+                                ++registerReadCounter > 1) {
+                            ::error("You can handle only one register read operation"
+                                    " in the same atomic block");
+                            return;
+                        } else if (ext->method->name.name == "write" &&
+                                ++registerWriteCounter > 1) {
+                            ::error("You can handle only one register write operation"
+                                    " in the same atomic block");
+                            return;
+                        }
+                    } else {
+                        ::error("You can handle only one Register, Hash "
+                                "externs in the same atomic block");
+                        return;
+                    }
+                } else {
+                    ::error("You can handle only one register in the same atomic block");
+                    return;
+                }
+            }
+        }
+
+        auto reg = control->getRegister(registerName);
+        if (reg)
+            reg->isAtomic = true;
+        else {
+            ::error("No register found: %s", registerName);
+            return;
+        }
+    }
+}
+
+bool ConvertToEBPFControlPSA::preorder(const IR::BlockStatement* b) {
+    auto ret = Inspector::preorder(b);
+    processAtomicAnnotation(b);
+    return ret;
+}
+
 // =====================EBPFDeparser=============================
 bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock *ctrl) {
     if (pipelineType == TC_INGRESS) {
