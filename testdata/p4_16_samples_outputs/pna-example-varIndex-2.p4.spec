@@ -138,11 +138,14 @@ apply {
 	shr m.MainControlT_tmp_1 0x4
 	mov m.MainControlT_tmp_2 m.MainControlT_tmp_1
 	jmpeq LABEL_SWITCH_1 m.MainControlT_tmp_2 0x1
-	jmpeq LABEL_END_0 m.MainControlT_tmp_2 0x2
+	jmpeq LABEL_SWITCH_2 m.MainControlT_tmp_2 0x2
 	jmp LABEL_END_0
 	LABEL_SWITCH_1 :	mov m.MainControlT_tmp_16 h.vlan_tag_1.pcp_cfi_vid
 	shr m.MainControlT_tmp_16 0x4
 	mov m.MainControlT_key m.MainControlT_tmp_16
+	table stub
+	jmp LABEL_END_0
+	LABEL_SWITCH_2 :	table stub1
 	LABEL_END_0 :	emit h.ethernet
 	emit h.vlan_tag_0
 	emit h.vlan_tag_1
