@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import shlex, subprocess
+import signal
+import shlex
+import subprocess
 import sys
+import traceback
 
 import p4c_src.util as util
 
@@ -245,7 +248,6 @@ class BackendDriver:
         try:
             p = subprocess.Popen(args)
         except:
-            import traceback
             print("error invoking {}".format(" ".join(cmd)), file=sys.stderr)
             print(traceback.format_exc(), file=sys.stderr)
             return 1
@@ -264,10 +266,8 @@ class BackendDriver:
                     p.communicate()
                     break  # done waiting, process ended
                 except KeyboardInterrupt:
-                    import signal
                     p.send_signal(signal.SIGINT)
         except:
-            import traceback
             p.terminate()  # don't leave process possibly running
             try:
                 p.communicate(timeout=0.1)
