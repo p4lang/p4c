@@ -698,7 +698,7 @@ const IR::Node* ReplaceHdrMetaField::postorder(IR::AssignmentStatement* asn) {
                     auto consValue = binExp->right->to<IR::Constant>()->value;
                     auto tb = binExp->right->type->to<IR::Type_Bits>();
                     if (tb->isSigned) {
-                        /*auto mask = 1 << (consOrgBitwidth - 1);
+                        auto mask = 1 << (consOrgBitwidth - 1);
                         auto msb = (consValue & mask) >> (consOrgBitwidth - 1);
                         auto orgMask = 0;
                         if (msb) {
@@ -708,22 +708,24 @@ const IR::Node* ReplaceHdrMetaField::postorder(IR::AssignmentStatement* asn) {
                             consValue |= orgMask;
                         }
                         auto cns = new IR::Constant(IR::Type_Bits::get(bitWidth), consValue);
-                        Operation_Binary* newRightExp = new IR::???(binExp->srcInfo, binExp->left, cns);
-                        return new IR::AssignmentStatement(asn->left, newRightExp);*/
+                        IR::Operation_Binary *bin_expr = binExp->clone();
+                        bin_expr->left = binExp->left;
+                        bin_expr->right = cns;
+                        return new IR::AssignmentStatement(asn->left, bin_expr);
                     } else if (!tb->isSigned && bitWidth != consOrgBitwidth) {
-                        if (asn->right->to<IR::Add>()) {
-                            auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
-                            auto root = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
-                            auto cns = new IR::Constant(IR::Type_Bits::get(bitWidth), consValue);
-                            auto instr1 = new IR::Add(binExp->srcInfo, binExp->left, cns);
-                            code_block->push_back(new IR::AssignmentStatement(root, instr1));
-                            root = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
-                            auto mask = (1 << consOrgBitwidth) - 1;
-                            auto instr2 = new IR::BAnd(binExp->srcInfo, binExp->left,
-                                                       new IR::Constant(mask));
-                            code_block->push_back(new IR::AssignmentStatement(root, instr2));
-                            return new IR::BlockStatement(*code_block);
-                        }
+                        auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
+                        auto cns = new IR::Constant(IR::Type_Bits::get(bitWidth), consValue);
+                        IR::Operation_Binary *bin_expr = binExp->clone();
+                        bin_expr->left = binExp->left;
+                        bin_expr->right = cns;
+                        auto as1 = new IR::AssignmentStatement(asn->left, bin_expr);
+                        code_block->push_back(as1);
+                        auto mask = (1 << consOrgBitwidth) - 1;
+                        auto instr2 = new IR::BAnd(asn->srcInfo, asn->left,
+                                                   new IR::Constant(mask));
+                        auto as2 = new IR::AssignmentStatement(asn->left, instr2);
+                        code_block->push_back(as2);
+                        return new IR::BlockStatement(*code_block);
                     }
                 }
             }
