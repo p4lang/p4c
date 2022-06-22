@@ -687,11 +687,52 @@ const IR::Node* ReplaceHdrMetaField::postorder(IR::AssignmentStatement* asn) {
                 auto cns = new IR::Constant(IR::Type_Bits::get(bit_size), consValue);
                 return new IR::AssignmentStatement(asn->left, cns);
             }
+        } else if (auto binExp = asn->right->to<IR::Operation_Binary>()) {
+            if (binExp->right->is<IR::Constant>()) {
+                auto it = structure->modifiedMdList.find(
+                                          binExp->left->to<IR::Member>()->member.name);
+                if (it != structure->modifiedMdList.end()) {
+                    auto bitWidth =
+                       structure->modifiedMdList[binExp->left->to<IR::Member>()->member.name];
+                    auto consOrgBitwidth = binExp->right->to<IR::Constant>()->type->width_bits();
+                    auto consValue = binExp->right->to<IR::Constant>()->value;
+                    auto tb = binExp->right->type->to<IR::Type_Bits>();
+                    if (tb->isSigned) {
+                        /*auto mask = 1 << (consOrgBitwidth - 1);
+                        auto msb = (consValue & mask) >> (consOrgBitwidth - 1);
+                        auto orgMask = 0;
+                        if (msb) {
+                            for (auto i = consOrgBitwidth; i < bitWidth; i++)
+                                orgMask |= 1 << i;
+
+                            consValue |= orgMask;
+                        }
+                        auto cns = new IR::Constant(IR::Type_Bits::get(bitWidth), consValue);
+                        Operation_Binary* newRightExp = new IR::???(binExp->srcInfo, binExp->left, cns);
+                        return new IR::AssignmentStatement(asn->left, newRightExp);*/
+                    } else if (!tb->isSigned && bitWidth != consOrgBitwidth) {
+                        if (asn->right->to<IR::Add>()) {
+                            auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
+                            auto root = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
+                            auto cns = new IR::Constant(IR::Type_Bits::get(bitWidth), consValue);
+                            auto instr1 = new IR::Add(binExp->srcInfo, binExp->left, cns);
+                            code_block->push_back(new IR::AssignmentStatement(root, instr1));
+                            root = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
+                            auto mask = (1 << consOrgBitwidth) - 1;
+                            auto instr2 = new IR::BAnd(binExp->srcInfo, binExp->left,
+                                                       new IR::Constant(mask));
+                            code_block->push_back(new IR::AssignmentStatement(root, instr2));
+                            return new IR::BlockStatement(*code_block);
+                        }
+                    }
+                }
+            }
         }
     }
     return asn;
 }
 
+/*
 const IR::Node* ReplaceHdrMetaField::postorder(IR::Operation_Binary* expr) {
     if (expr == nullptr)
         return expr;
@@ -699,25 +740,39 @@ const IR::Node* ReplaceHdrMetaField::postorder(IR::Operation_Binary* expr) {
        if (expr->right->is<IR::Constant>()) {
            auto it = structure->modifiedMdList.find(mem->member.name);
             if (it != structure->modifiedMdList.end()) {
-                auto bit_size = structure->modifiedMdList[mem->member.name];
-                auto consValue = expr->right->to<IR::Constant>()->value;
+                auto bitWidth = structure->modifiedMdList[mem->member.name];
                 auto consOrgBitwidth = expr->right->to<IR::Constant>()->type->width_bits();
-                auto mask = 1 << (consOrgBitwidth - 1);
-                auto msb = (consValue & mask) >> (consOrgBitwidth - 1);
-                auto orgMask = 0;
-                if (msb) {
-                    for (auto i = consOrgBitwidth; i < bit_size; i++)
-                        orgMask |= 1 << i;
+                auto consValue = expr->right->to<IR::Constant>()->value;
+                auto tb = expr->right->type->to<IR::Type_Bits>();
+                if (tb->isSigned) {
+                    auto mask = 1 << (consOrgBitwidth - 1);
+                    auto msb = (consValue & mask) >> (consOrgBitwidth - 1);
+                    auto orgMask = 0;
+                    if (msb) {
+                        for (auto i = consOrgBitwidth; i < bitWidth; i++)
+                            orgMask |= 1 << i;
 
-                    consValue |= orgMask;
+                        consValue |= orgMask;
+                    }
+                    auto cns = new IR::Constant(IR::Type_Bits::get(bitWidth), consValue);
+                    return new IR::Add(expr->srcInfo, expr->left, cns);
+                } else if (!tb->isSigned && bitWidth != consOrgBitwidth) {
+                    root = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
+                    auto cns = new IR::Constant(IR::Type_Bits::get(bitWidth), consValue);
+                    IR::Operation_Binary* instr1 = new IR::Add(expr->srcInfo, expr->left, cns);
+                    stmt.push_back(new IR::AssignmentStatement(root, instr1));
+
+                    root = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
+                    auto mask = (1 << consOrgBitwidth) - 1;
+                    IR::Operation_Binary* instr2 = new IR::BAnd(expr->srcInfo, expr->left, new IR::Constant(mask));
+                    stmt.push_back(new IR::AssignmentStatement(root, instr2));
+                    return instr1;
                 }
-                auto cns = new IR::Constant(IR::Type_Bits::get(bit_size), consValue);
-                return new IR::Add(expr->srcInfo, expr->left, cns);
             }
         }
     }
     return expr;
-}
+}*/
 
 // This function collects the match key information of a table. This is later used for
 // generating context JSON.

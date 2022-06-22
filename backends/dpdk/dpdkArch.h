@@ -285,7 +285,7 @@ class ReplaceHdrMetaField : public Transform {
     }
     const IR::Node* postorder(IR::Type_Struct *st) override;
     const IR::Node* postorder(IR::AssignmentStatement* asn) override;
-    const IR::Node* postorder(IR::Operation_Binary* expr) override;
+    // const IR::Node* postorder(IR::Operation_Binary* expr) override;
 };
 
 struct fieldInfo {

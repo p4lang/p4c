@@ -22,15 +22,15 @@ header udp_t {
 
 struct headers_t {
     ethernet_t  ethernet;
-	udp_t[MAX_LAYERS] udp;
+    udp_t[MAX_LAYERS] udp;
 }
 
 struct user_meta_data_t {
     bit<48> addr;
-	bit<7> depth1;
-	bit<7> depth2;
-	bit<7> depth3;
-	bit<7> depth4;
+    bit<3> depth1;
+    bit<3> depth2;
+    bit<3> depth3;
+    bit<3> depth4;
 }
 
 /*************************************************************************
@@ -55,21 +55,21 @@ control MyIngressControl(
     inout user_meta_data_t meta,
     in psa_ingress_input_metadata_t c,
     inout psa_ingress_output_metadata_t d) {
-    bit<7> var = 2; 
-	action nonDefAct() {
+    bit<3> var = 2;
+    action nonDefAct() {
         meta.depth1 = var ^ 2;
         meta.depth2 = var - 1;
         meta.depth3 = var + 3;
         meta.depth4 = var - 3;
     }
-	
+    
     table stub {
         key = {}
 
         actions = {
-			nonDefAct;
+            nonDefAct;
         }
-		const default_action = nonDefAct;
+        const default_action = nonDefAct;
         size=1000000;
     }
 
