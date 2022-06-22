@@ -722,7 +722,7 @@ const IR::Node* ReplaceHdrMetaField::postorder(IR::AssignmentStatement* asn) {
                         code_block->push_back(as1);
                         auto mask = (1 << consOrgBitwidth) - 1;
                         auto instr2 = new IR::BAnd(asn->srcInfo, asn->left,
-                                                   new IR::Constant(mask));
+                                                   new IR::Constant(IR::Type_Bits::get(bitWidth), mask));
                         auto as2 = new IR::AssignmentStatement(asn->left, instr2);
                         code_block->push_back(as2);
                         return new IR::BlockStatement(*code_block);
