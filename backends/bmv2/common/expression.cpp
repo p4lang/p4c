@@ -363,8 +363,20 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
     if (expression->expr->is<IR::Member>()) {
         auto mem = expression->expr->to<IR::Member>();
         auto memtype = typeMap->getType(mem->expr, true);
-        if (memtype->is<IR::Type_Stack>() && mem->member == IR::Type_Stack::next)
-            ::error(ErrorType::ERR_UNINITIALIZED, "%1% uninitialized: next field read", mem);
+        if (memtype->is<IR::Type_Stack>() && mem->member == IR::Type_Stack::next) {
+            auto l = get(mem->expr);
+            if (!l)
+                return;
+            result->emplace("type", "stack_field");
+            auto e = mkArrayField(result, "value");
+            if (l->is<Util::JsonObject>())
+                e->append(l->to<Util::JsonObject>()->get("value"));
+            else
+                e->append(l);
+            e->append(fieldName);
+            done = true;
+        }
+
         // array.last.field => type: "stack_field", value: [ array, field ]
         if (memtype->is<IR::Type_Stack>() && mem->member == IR::Type_Stack::last) {
             auto l = get(mem->expr);
