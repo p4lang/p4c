@@ -359,24 +359,24 @@ class P4EbpfTest(BaseTest):
             self.fail("Support for DirectMeter is not implemented yet (psabpf doesn't return internal state of meter if you need it)")
 
     def action_selector_add_action(self, selector, action, data=None):
-        cmd = "psabpf-ctl action-selector add_member pipe {} {} ".format(TEST_PIPELINE_ID, selector)
+        cmd = "psabpf-ctl action-selector add-member pipe {} {} ".format(TEST_PIPELINE_ID, selector)
         cmd = cmd + self._table_create_str_from_action(action)
         if data:
             cmd = cmd + " data"
             for d in data:
                 cmd = cmd + " {}".format(d)
-        _, stdout, _ = self.exec_ns_cmd(cmd, "ActionSelector add_member failed")
+        _, stdout, _ = self.exec_ns_cmd(cmd, "ActionSelector add-member failed")
         return int(stdout)
 
     def action_selector_create_empty_group(self, selector):
-        cmd = "psabpf-ctl action-selector create_group pipe {} {}".format(TEST_PIPELINE_ID, selector)
-        _, stdout, _ = self.exec_ns_cmd(cmd, "ActionSelector create_group failed")
+        cmd = "psabpf-ctl action-selector create-group pipe {} {}".format(TEST_PIPELINE_ID, selector)
+        _, stdout, _ = self.exec_ns_cmd(cmd, "ActionSelector create-group failed")
         return int(stdout)
 
     def action_selector_add_member_to_group(self, selector, group_ref, member_ref):
-        cmd = "psabpf-ctl action-selector add_to_group pipe {} {} {} to {}"\
+        cmd = "psabpf-ctl action-selector add-to-group pipe {} {} {} to {}"\
             .format(TEST_PIPELINE_ID, selector, member_ref, group_ref)
-        self.exec_ns_cmd(cmd, "ActionSelector add_to_group failed")
+        self.exec_ns_cmd(cmd, "ActionSelector add-to-group failed")
 
     def digest_get(self, name):
         cmd = "psabpf-ctl digest get-all pipe {} {}".format(TEST_PIPELINE_ID, name)
