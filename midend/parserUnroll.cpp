@@ -179,7 +179,9 @@ class ParserStateRewriter : public Transform {
     IR::Node* postorder(IR::Member* expression) {
         if (!afterExec)
             return expression;
-        auto basetype = getTypeArray(expression->expr);
+        const IR::Type* basetype = getTypeArray(expression->expr);
+        if (!basetype)
+            basetype = expression->expr->type;
         if (basetype->is<IR::Type_Stack>()) {
             auto l = afterExec->get(expression->expr);
             BUG_CHECK(l->is<SymbolicArray>(), "%1%: expected an array", l);
@@ -196,7 +198,6 @@ class ParserStateRewriter : public Transform {
                 return new IR::Constant(IR::Type_Bits::get(32), idx);
             } else {
                 state->statesIndexes[expression->expr] = idx + offset;
-                std::cout << state->statesIndexes.size() << std::endl;
                 return new IR::ArrayIndex(expression->expr->clone(),
                                           new IR::Constant(IR::Type_Bits::get(32), idx + offset));
             }
@@ -223,7 +224,7 @@ class ParserStateRewriter : public Transform {
             if (left->type->is<IR::Type_Stack>())
                 return left->type->to<IR::Type_Stack>()->elementType;
         }
-        return typeMap->getType(element, true);
+        return typeMap->getType(element, false);
     }
 
     /// Checks if this state was called previously with the same state of header stack indexes.
