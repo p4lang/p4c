@@ -55,6 +55,9 @@ class StackVariable {
     // Implements comparisons so that StateVariables can be used as map keys.
     bool operator==(const StackVariable& other) const;
 
+ protected:
+    const IR::Expression* pathExprToMember(const IR::Expression* expr);
+
  private:
     const IR::Member* member;
 

@@ -8,6 +8,8 @@ namespace P4 {
 
 StackVariable::StackVariable(const IR::Expression* expr) : member(nullptr) {
     CHECK_NULL(expr);
+    // Translate PathExpression into Member.
+    expr = pathExprToMember(expr);
     BUG_CHECK(repOk(expr), "Invalid stack variable %1%", expr);
     member = expr->checkedTo<IR::Member>();
 }
@@ -41,6 +43,13 @@ size_t StackVariableHash::operator()(const StackVariable& var) const {
         curMember = curMember->expr->checkedTo<IR::Member>();
     }
     return Util::Hash::fnv1a(h.data(), sizeof(size_t) * h.size());
+}
+
+const IR::Expression* StackVariable::pathExprToMember(const IR::Expression* expr) {
+    if (expr->is<IR::PathExpression>()) {
+        return new IR::Member(expr->srcInfo, expr->type, expr, IR::ID(" "));
+    }
+    return expr;
 }
 
 /// The main class for parsers' states key for visited checking.
