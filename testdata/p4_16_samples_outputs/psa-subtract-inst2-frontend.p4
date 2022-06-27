@@ -38,12 +38,14 @@ parser MyIngressParser(packet_in pkt, out headers_t hdr, inout user_meta_data_t 
 }
 
 control MyIngressControl(inout headers_t hdrs, inout user_meta_data_t meta, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @name("MyIngressControl.var") bit<3> var_0;
+    @name("MyIngressControl.var1") bit<3> var1_0;
+    @name("MyIngressControl.var2") bit<3> var2_0;
+    @name("MyIngressControl.var3") int<3> var3_0;
+    @name("MyIngressControl.var4") int<3> var4_0;
     @name("MyIngressControl.nonDefAct") action nonDefAct() {
-        meta.depth1 = var_0 ^ 3w2;
-        meta.depth2 = var_0 + 3w7;
-        meta.depth3 = var_0 + 3w3;
-        meta.depth4 = var_0 + 3w5;
+        if (var4_0 == 3s3) {
+            meta.depth1 = var1_0 + var2_0;
+        }
     }
     @name("MyIngressControl.stub") table stub_0 {
         key = {
@@ -54,34 +56,18 @@ control MyIngressControl(inout headers_t hdrs, inout user_meta_data_t meta, in p
         const default_action = nonDefAct();
         size = 1000000;
     }
-    @hidden action psasubstractinst1l58() {
-        var_0 = 3w2;
-        d.egress_port = (bit<32>)c.ingress_port ^ 32w1;
-    }
-    @hidden table tbl_psasubstractinst1l58 {
-        actions = {
-            psasubstractinst1l58();
-        }
-        const default_action = psasubstractinst1l58();
-    }
     apply {
-        tbl_psasubstractinst1l58.apply();
+        var1_0 = 3w0;
+        var2_0 = 3w2;
+        var4_0 = var3_0 + -3s3;
+        d.egress_port = (PortId_t)((bit<32>)c.ingress_port ^ 32w1);
         stub_0.apply();
     }
 }
 
 control MyIngressDeparser(packet_out pkt, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in user_meta_data_t e, in psa_ingress_output_metadata_t f) {
-    @hidden action psasubstractinst1l92() {
-        pkt.emit<ethernet_t>(hdr.ethernet);
-    }
-    @hidden table tbl_psasubstractinst1l92 {
-        actions = {
-            psasubstractinst1l92();
-        }
-        const default_action = psasubstractinst1l92();
-    }
     apply {
-        tbl_psasubstractinst1l92.apply();
+        pkt.emit<ethernet_t>(hdr.ethernet);
     }
 }
 

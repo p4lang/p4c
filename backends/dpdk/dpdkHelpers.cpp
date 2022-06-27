@@ -114,12 +114,12 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
     auto right = a->right;
 
     IR::DpdkAsmStatement *i = nullptr;
-
     if (auto r = right->to<IR::Operation_Relation>()) {
         process_relation_operation(left, r);
     } else if (auto r = right->to<IR::Operation_Binary>()) {
         auto src1Op = r->left;
         auto src2Op = r->right;
+        bool isSignExtended = false;
         if (r->left->is<IR::Constant>()) {
             if (isCommutativeBinaryOperation(r)) {
                 src1Op = r->right;
@@ -134,26 +134,52 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 src1Op = src1Member;
             }
         }
+        if (src2Op->is<IR::Constant>()) {
+            if (auto tb = src2Op->type->to<IR::Type_Bits>()) {
+                if (tb != nullptr && tb->isSigned) {
+                    isSignExtended = true;
+                    auto consOrgBitwidth = src2Op->to<IR::Constant>()->type->width_bits();
+                    auto bitWidth = consOrgBitwidth < 32 ? 32 : 64;
+                    auto consValue = src2Op->to<IR::Constant>()->value;
+                    auto mask = 1 << (consOrgBitwidth - 1);
+                    auto msb = (consValue & mask) >> (consOrgBitwidth - 1);
+                    auto orgMask = 0;
+                    if (msb) {
+                        for (auto i = consOrgBitwidth; i < bitWidth; i++)
+                            orgMask |= 1 << i;
+
+                        consValue |= orgMask;
+                    }
+                    src2Op = new IR::Constant(IR::Type_Bits::get(bitWidth), consValue);
+                }
+            }
+        }
+
         if (right->is<IR::Add>()) {
-            i = new IR::DpdkAddStatement(left, src1Op, src2Op);
+            add_instr(new IR::DpdkAddStatement(left, src1Op, src2Op));
         } else if (right->is<IR::Sub>()) {
-            i = new IR::DpdkSubStatement(left, src1Op, src2Op);
+            add_instr(new IR::DpdkSubStatement(left, src1Op, src2Op));
         } else if (right->is<IR::Shl>()) {
-            i = new IR::DpdkShlStatement(left, src1Op, src2Op);
+            add_instr(new IR::DpdkShlStatement(left, src1Op, src2Op));
         } else if (right->is<IR::Shr>()) {
-            i = new IR::DpdkShrStatement(left, src1Op, src2Op);
+            add_instr(new IR::DpdkShrStatement(left, src1Op, src2Op));
         } else if (right->is<IR::Equ>()) {
-            i = new IR::DpdkEquStatement(left, src1Op, src2Op);
+            add_instr(new IR::DpdkEquStatement(left, src1Op, src2Op));
         } else if (right->is<IR::LOr>() || right->is<IR::LAnd>()) {
             process_logical_operation(left, r);
         } else if (right->is<IR::BOr>()) {
-            i = new IR::DpdkOrStatement(left, src1Op, src2Op);
+            add_instr(new IR::DpdkOrStatement(left, src1Op, src2Op));
         } else if (right->is<IR::BAnd>()) {
-            i = new IR::DpdkAndStatement(left, src1Op, src2Op);
+            add_instr(new IR::DpdkAndStatement(left, src1Op, src2Op));
         } else if (right->is<IR::BXor>()) {
-            i = new IR::DpdkXorStatement(left, src1Op, src2Op);
+            add_instr(new IR::DpdkXorStatement(left, src1Op, src2Op));
         } else {
             BUG("%1% not implemented.", right);
+        }
+        if (!isEightBitAligned(left) && !isSignExtended) {
+            auto width = left->type->width_bits();
+            auto mask = (1 << width) - 1;
+            add_instr(new IR::DpdkAndStatement(left, left, new IR::Constant(mask)));
         }
     } else if (auto m = right->to<IR::MethodCallExpression>()) {
         auto mi = P4::MethodInstance::resolve(m, refmap, typemap);

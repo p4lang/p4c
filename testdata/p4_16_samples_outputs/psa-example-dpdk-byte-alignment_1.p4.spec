@@ -166,6 +166,7 @@ apply {
 	mov m.Ingress_tmp_6 h.ipv4.version_ihl
 	mov m.Ingress_tmp_7 m.Ingress_tmp_6
 	add m.Ingress_tmp_7 0x5
+	and m.Ingress_tmp_7 0xf
 	mov m.Ingress_tmp_8 m.Ingress_tmp_7
 	mov m.Ingress_tmp_9 m.Ingress_tmp_8
 	and m.Ingress_tmp_9 0xf

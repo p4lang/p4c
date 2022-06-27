@@ -122,7 +122,8 @@ apply {
 	mov m.Ingress_tmp_1 0x1
 	jmp LABEL_END_1
 	LABEL_FALSE :	mov m.Ingress_tmp_1 0x0
-	LABEL_END_1 :	mov m.Ingress_tmp_2 1
+	LABEL_END_1 :	and m.Ingress_tmp_1 0x1
+	mov m.Ingress_tmp_2 1
 	jmpv LABEL_END_2 h.tcp
 	mov m.Ingress_tmp_2 0
 	LABEL_END_2 :	mov m.Ingress_key m.Ingress_tmp_1
@@ -131,7 +132,8 @@ apply {
 	mov m.Ingress_key 0x0
 	jmp LABEL_END_3
 	LABEL_TRUE_0 :	mov m.Ingress_key 0x1
-	LABEL_END_3 :	mov m.ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
+	LABEL_END_3 :	and m.Ingress_key 0x1
+	mov m.ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
 	mov m.ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0

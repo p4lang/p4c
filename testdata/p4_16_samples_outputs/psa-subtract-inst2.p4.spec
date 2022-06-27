@@ -42,24 +42,20 @@ struct user_meta_data_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<32> local_metadata_depth1
-	bit<32> local_metadata_depth2
-	bit<32> local_metadata_depth3
-	bit<32> local_metadata_depth4
 	bit<32> Ingress_tmp
-	bit<32> Ingress_var
+	bit<32> Ingress_var1
+	bit<32> Ingress_var2
+	bit<32> Ingress_var3
+	bit<32> Ingress_var4
 }
 metadata instanceof user_meta_data_t
 
 action nonDefAct args none {
-	mov m.local_metadata_depth1 m.Ingress_var
-	xor m.local_metadata_depth1 0x2
-	mov m.local_metadata_depth2 m.Ingress_var
-	add m.local_metadata_depth2 0x7
-	mov m.local_metadata_depth3 m.Ingress_var
-	add m.local_metadata_depth3 0x3
-	mov m.local_metadata_depth4 m.Ingress_var
-	add m.local_metadata_depth4 0x5
-	return
+	jmpneq LABEL_END m.Ingress_var4 0x3
+	mov m.local_metadata_depth1 m.Ingress_var1
+	add m.local_metadata_depth1 m.Ingress_var2
+	and m.local_metadata_depth1 0x7
+	LABEL_END :	return
 }
 
 table stub {
@@ -77,7 +73,10 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
-	mov m.Ingress_var 0x2
+	mov m.Ingress_var1 0x0
+	mov m.Ingress_var2 0x2
+	mov m.Ingress_var4 m.Ingress_var3
+	add m.Ingress_var4 0xfffffffd
 	mov m.Ingress_tmp m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_egress_port m.Ingress_tmp
 	xor m.psa_ingress_output_metadata_egress_port 0x1

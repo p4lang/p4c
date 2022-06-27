@@ -6,7 +6,7 @@ struct Headers {
 }
 
 struct Meta {
-    @field_list(0)
+    @field_list(0) 
     bit<1> b;
 }
 
@@ -44,3 +44,4 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+

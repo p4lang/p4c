@@ -188,6 +188,7 @@ apply {
 	mov m.Ingress_tmp_8 h.ipv4._version0__ihl1
 	mov m.Ingress_tmp_9 m.Ingress_tmp_8
 	add m.Ingress_tmp_9 0x5
+	and m.Ingress_tmp_9 0xf
 	mov m.Ingress_tmp_10 m.Ingress_tmp_9
 	mov m.Ingress_tmp_11 m.Ingress_tmp_10
 	and m.Ingress_tmp_11 0xf

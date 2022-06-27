@@ -1,0 +1,6 @@
+psa-subtract-inst2.p4(58): [--Wwarn=mismatch] warning: 3w8: value does not fit in 3 bits
+    bit<3> var1 = 8;
+                  ^
+psa-subtract-inst2.p4(61): [--Wwarn=uninitialized_use] warning: var3 may be uninitialized
+    int<3> var4 = var3 - 3;
+                  ^^^^

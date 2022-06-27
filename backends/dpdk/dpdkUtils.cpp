@@ -63,4 +63,10 @@ bool isMetadataStruct(const IR::Type_Struct *st) {
     return false;
 }
 
+bool isEightBitAligned(const IR::Expression *e) {
+    if (e->type->width_bits() % 8 != 0)
+        return false;
+    return true;
+}
+
 }  // namespace DPDK

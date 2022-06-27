@@ -203,6 +203,7 @@ apply {
 	mov m.Ingress_tmp_12 h.ipv4._version0__ihl1
 	mov m.Ingress_tmp_13 m.Ingress_tmp_12
 	add m.Ingress_tmp_13 0x5
+	and m.Ingress_tmp_13 0xf
 	mov m.Ingress_tmp_14 m.Ingress_tmp_13
 	mov m.Ingress_tmp_15 m.Ingress_tmp_14
 	and m.Ingress_tmp_15 0xf
