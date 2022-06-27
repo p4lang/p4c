@@ -47,6 +47,19 @@ std::vector<const char*>* Util::Options::process(int argc,
     if (argc == 0 || argv == nullptr)
         throw std::logic_error("No arguments to process");
     binaryName = argv[0];
+    // collect command line args
+    if (argc > 1) {
+        for (int i = 0; i < argc; i++) {
+            compileCommand += argv[i];
+            compileCommand += " ";
+        }
+        compileCommand = compileCommand.trim();
+     }
+    // collect program compilation date
+    const time_t now = time(NULL);
+    char build_date[50];
+    strftime(build_date, 50, "%c", localtime(&now));
+    buildDate = cstring(build_date);
     for (int i = 1; i < argc; i++) {
         cstring opt = argv[i];
         const char* arg = nullptr;
@@ -98,6 +111,7 @@ std::vector<const char*>* Util::Options::process(int argc,
             }
         }
     }
+
 
     return &remainingOptions;
 }

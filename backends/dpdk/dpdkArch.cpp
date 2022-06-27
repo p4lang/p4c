@@ -2294,6 +2294,13 @@ void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
     if (use_add_on_miss) {
         for (auto action : t->getActionList()->actionList) {
             auto action_decl = refMap->getDeclaration(action->getPath())->to<IR::P4Action>();
+            // Map the compiler generated internal name of action (emitted in .spec file) with
+            // user visible name in P4 program.
+            // To get the user visible name, strip any prefixes from externalName.
+            cstring userVisibleName = action_decl->externalName();
+            userVisibleName = userVisibleName.findlast('.');
+            userVisibleName = userVisibleName.trim(".\t\n\r");
+            structure->learner_action_map.emplace(userVisibleName, action_decl->name.name);
             structure->learner_action_table.emplace(action_decl->externalName(), t);
         }
     }

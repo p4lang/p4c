@@ -1,6 +1,6 @@
 """P4 compilation rule."""
 
-load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
+load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
 
 def _extract_common_p4c_args(ctx):
     """Extract common arguments for p4c build rules."""
@@ -152,7 +152,7 @@ p4_library = rule(
         "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
     },
     incompatible_use_toolchain_transition = True,
-    toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
+    toolchains = use_cpp_toolchain(),
 )
 
 def _p4_graphs_impl(ctx):

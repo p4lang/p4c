@@ -227,7 +227,7 @@ class ActionSelectorTwoTablesSameInstancePSATest(ActionSelectorTest):
         testutils.verify_packet(self, pkt, PORT2)
 
 
-class ActionSelectorDefaultEmptyGroupActionPSATest(ActionSelectorTest):
+class ActionSelectorEmptyGroupActionPSATest(ActionSelectorTest):
     """
     Tests behaviour of default empty group action, aka table property "psa_empty_group_action".
     """
@@ -245,8 +245,8 @@ class ActionSelectorDefaultEmptyGroupActionPSATest(ActionSelectorTest):
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
 
-        cmd = "psabpf-ctl action-selector default_group_action pipe {} MyIC_as action id 1 data 6".format(TEST_PIPELINE_ID)
-        self.exec_ns_cmd(cmd, "default group action update failed")
+        cmd = "psabpf-ctl action-selector empty-group-action pipe {} MyIC_as action id 1 data 6".format(TEST_PIPELINE_ID)
+        self.exec_ns_cmd(cmd, "empty group action update failed")
 
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT2)

@@ -260,6 +260,11 @@ if (BUILD_USE_COLOR)
         message(WARNING "Colors enabled (BUILD_USE_COLOR=ON) but we don't know "
                 "how to enable them for ${CMAKE_CXX_COMPILER_ID} C++ compiler")
     endif()
+else()
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-color=never")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=never")
+  endif()
 endif()
 
 include_directories (

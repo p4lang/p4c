@@ -1013,16 +1013,17 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             } else if (boolLiteral->value == true) {
                 return false;
             }
-            IR::PathExpression *error_meta_path;
+            IR::Member *error_meta_path;
             if (structure->isPSA()) {
-                error_meta_path = new IR::PathExpression(
-                    IR::ID("m.psa_ingress_input_metadata_parser_error"));
+                error_meta_path = new IR::Member(new IR::PathExpression(
+                    IR::ID("m")), IR::ID("psa_ingress_input_metadata_parser_error"));
             } else if (structure->isPNA()) {
-                error_meta_path = new IR::PathExpression(
-                    IR::ID("m.pna_pre_input_metadata_parser_error"));
+                error_meta_path = new IR::Member( new IR::PathExpression(IR::ID("m")),
+                    IR::ID("pna_pre_input_metadata_parser_error"));
             } else {
                 BUG("Unknown architecture unexpectedly!");
             }
+
             add_instr(new IR::DpdkMovStatement(error_meta_path, error_id->expression));
             add_instr(new IR::DpdkJmpLabelStatement(
                         append_parser_name(parser, IR::ParserState::reject)));
@@ -1037,6 +1038,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             }
             auto action = a->expr->arguments->at(0)->expression;
             auto action_name = action->to<IR::StringLiteral>()->value;
+            action_name = ::get(structure->learner_action_map, action_name);
             auto param = a->expr->arguments->at(1)->expression;
             auto timeout_id = a->expr->arguments->at(2)->expression;
             if (timeout_id->is<IR::Constant>()) {

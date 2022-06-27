@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef _MIDEND_PARSERUNROLL_H_
 #define _MIDEND_PARSERUNROLL_H_
 
+#include <unordered_map>
+
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/callGraph.h"
@@ -33,6 +35,42 @@ const char outOfBoundsStateName[] = "stateOutOfBound";
 //////////////////////////////////////////////
 // The following are for a single parser
 
+// Represents a variable for storing indexes values for a header stack.
+//
+// This is a thin wrapper around a 'const IR::Member*' to (1) enforce invariants on which forms of
+// Members can represent state variables and (2) enable the use of StackVariable as map keys.
+//
+// A Member can represent a StackVariable exactly when its qualifying variable
+// (IR::Member::expr) either is a PathExpression or can represent a StackVariable.
+class StackVariable {
+ public:
+    /// Determines whether @expr can represent a StateVariable.
+    static bool repOk(const IR::Expression* expr);
+
+    // Implicit conversions to allow implementations to be treated like a Node*.
+    operator const IR::Member*() const { return member; }
+    const IR::Member& operator*() const { return *member; }
+    const IR::Member* operator->() const { return member; }
+
+    // Implements comparisons so that StateVariables can be used as map keys.
+    bool operator==(const StackVariable& other) const;
+
+ private:
+    const IR::Member* member;
+
+ public:
+    /// Implicitly converts IR::Expression* to a StackVariable.
+    StackVariable(const IR::Expression* expr);  // NOLINT(runtime/explicit)
+};
+
+/// Class with hash function for @a StackVariable.
+class StackVariableHash {
+ public:
+     size_t operator()(const StackVariable& var) const;
+};
+
+typedef std::unordered_map<StackVariable, size_t, StackVariableHash> StackVariableMap;
+
 /// Information produced for a parser state by the symbolic evaluator
 struct ParserStateInfo {
     friend class ParserStateRewriter;
@@ -44,7 +82,7 @@ struct ParserStateInfo {
     ValueMap*                       after;
     IR::ParserState*                newState;        // pointer to a new state
     size_t                          currentIndex;
-    std::map<cstring, size_t>       statesIndexes;   // global map in state indexes
+    StackVariableMap                statesIndexes;   // global map in state indexes
     // set of parsers' states names with are in current path.
     std::unordered_set<cstring>     scenarioStates;
     std::unordered_set<cstring>     scenarioHS;      // scenario header stack's operations

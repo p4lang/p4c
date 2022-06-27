@@ -203,7 +203,7 @@ const IR::Statement* DoSynthesizeActions::createAction(const IR::Statement* toAd
 
     auto annos = new IR::Annotations();
     annos->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
-    auto action = new IR::P4Action(name, annos, new IR::ParameterList(), body);
+    auto action = new IR::P4Action(toAdd->srcInfo, name, annos, new IR::ParameterList(), body);
     actions.push_back(action);
     auto actpath = new IR::PathExpression(name);
     auto repl = new IR::MethodCallExpression(toAdd->srcInfo, actpath);

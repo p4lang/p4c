@@ -30,8 +30,6 @@ class DpdkOptions : public CompilerOptions {
     cstring ctxtFile = "";
     // read from json
     bool loadIRFromJson = false;
-    // Compilation command line
-    static cstring DpdkCompCmd;
     // Enable/Disable Egress pipeline in psa
     bool enableEgress = false;
 
