@@ -26,6 +26,8 @@ class DpdkOptions : public CompilerOptions {
     cstring bfRtSchema = "";
     // file to output to
     cstring outputFile = nullptr;
+    // file to ouput TDI Json to
+    cstring tdiFile = "";
     // file to ouput context Json to
     cstring ctxtFile = "";
     // read from json
@@ -57,6 +59,9 @@ class DpdkOptions : public CompilerOptions {
         registerOption("-o", "outfile",
                 [this](const char* arg) { outputFile = arg; return true; },
                 "Write output to outfile");
+        registerOption("--tdi", "file",
+                [this](const char *arg) { tdiFile = arg; return true; },
+                "Generate and write TDI JSON to the specified file");
         registerOption("--context", "file",
                 [this](const char *arg) { ctxtFile = arg; return true; },
                 "Generate and write context JSON to the specified file");
