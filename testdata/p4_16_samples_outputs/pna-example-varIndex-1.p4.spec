@@ -59,10 +59,12 @@ action execute_1 args none {
 	jmpneq LABEL_FALSE_2 m.local_metadata_depth 0x0
 	mov m.MainControlT_tmp_1 m.local_metadata_depth
 	add m.MainControlT_tmp_1 0x3
+	and m.MainControlT_tmp_1 0x3
 	jmpneq LABEL_FALSE_3 m.MainControlT_tmp_1 0x0
 	jmp LABEL_END_3
 	LABEL_FALSE_3 :	mov m.MainControlT_tmp_0 m.local_metadata_depth
 	add m.MainControlT_tmp_0 0x3
+	and m.MainControlT_tmp_0 0x3
 	jmpneq LABEL_FALSE_4 m.MainControlT_tmp_0 0x1
 	mov m.MainControlT_tmp_5 h.vlan_tag_0.pcp_cfi_vid
 	and m.MainControlT_tmp_5 0xf
@@ -79,6 +81,7 @@ action execute_1 args none {
 	jmp LABEL_END_3
 	LABEL_FALSE_4 :	mov m.MainControlT_tmp m.local_metadata_depth
 	add m.MainControlT_tmp 0x3
+	and m.MainControlT_tmp 0x3
 	jmplt LABEL_END_3 m.MainControlT_tmp 0x1
 	mov m.MainControlT_tmp_11 h.vlan_tag_0.pcp_cfi_vid
 	and m.MainControlT_tmp_11 0xf
@@ -93,6 +96,7 @@ action execute_1 args none {
 	LABEL_FALSE_2 :	jmpneq LABEL_END_3 m.local_metadata_depth 0x1
 	mov m.MainControlT_tmp_4 m.local_metadata_depth
 	add m.MainControlT_tmp_4 0x3
+	and m.MainControlT_tmp_4 0x3
 	jmpneq LABEL_FALSE_7 m.MainControlT_tmp_4 0x0
 	mov m.MainControlT_tmp_15 h.vlan_tag_1.pcp_cfi_vid
 	and m.MainControlT_tmp_15 0xf
@@ -109,10 +113,12 @@ action execute_1 args none {
 	jmp LABEL_END_3
 	LABEL_FALSE_7 :	mov m.MainControlT_tmp_3 m.local_metadata_depth
 	add m.MainControlT_tmp_3 0x3
+	and m.MainControlT_tmp_3 0x3
 	jmpneq LABEL_FALSE_8 m.MainControlT_tmp_3 0x1
 	jmp LABEL_END_3
 	LABEL_FALSE_8 :	mov m.MainControlT_tmp_2 m.local_metadata_depth
 	add m.MainControlT_tmp_2 0x3
+	and m.MainControlT_tmp_2 0x3
 	jmplt LABEL_END_3 m.MainControlT_tmp_2 0x1
 	mov m.MainControlT_tmp_21 h.vlan_tag_1.pcp_cfi_vid
 	and m.MainControlT_tmp_21 0xf
@@ -146,10 +152,12 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_VLAN_TAG :	extract h.vlan_tag_0
 	add m.local_metadata_depth 0x3
+	and m.local_metadata_depth 0x3
 	jmpeq MAINPARSERIMPL_PARSE_VLAN_TAG1 h.vlan_tag_0.ether_type 0x8100
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_VLAN_TAG1 :	extract h.vlan_tag_1
 	add m.local_metadata_depth 0x3
+	and m.local_metadata_depth 0x3
 	jmpeq MAINPARSERIMPL_PARSE_VLAN_TAG2 h.vlan_tag_1.ether_type 0x8100
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_VLAN_TAG2 :	mov m.pna_pre_input_metadata_parser_error 0x3

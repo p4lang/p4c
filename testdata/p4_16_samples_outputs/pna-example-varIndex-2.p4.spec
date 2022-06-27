@@ -112,10 +112,12 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_VLAN_TAG :	extract h.vlan_tag_0
 	add m.local_metadata_depth 0x3
+	and m.local_metadata_depth 0x3
 	jmpeq MAINPARSERIMPL_PARSE_VLAN_TAG1 h.vlan_tag_0.ether_type 0x8100
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_VLAN_TAG1 :	extract h.vlan_tag_1
 	add m.local_metadata_depth 0x3
+	and m.local_metadata_depth 0x3
 	jmpeq MAINPARSERIMPL_PARSE_VLAN_TAG2 h.vlan_tag_1.ether_type 0x8100
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_VLAN_TAG2 :	mov m.pna_pre_input_metadata_parser_error 0x3

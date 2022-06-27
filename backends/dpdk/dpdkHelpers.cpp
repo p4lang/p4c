@@ -134,22 +134,21 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 src1Op = src1Member;
             }
         }
-        if (src2Op->is<IR::Constant>()) {
+        /* If a constant is present in binary operation and it is not 8-bit
+           aligned and it is signed, then the constant value is sign extended
+           with a width of either 32 bit if its original bit-width is less than
+           32 bit or 64 bit if the bit-width of constant is greater than 32 bit
+        */
+
+        if (!isEightBitAligned(src2Op) && src2Op->is<IR::Constant>()) {
             if (auto tb = src2Op->type->to<IR::Type_Bits>()) {
                 if (tb != nullptr && tb->isSigned) {
                     isSignExtended = true;
                     auto consOrgBitwidth = src2Op->to<IR::Constant>()->type->width_bits();
                     auto bitWidth = consOrgBitwidth < 32 ? 32 : 64;
                     auto consValue = src2Op->to<IR::Constant>()->value;
-                    auto mask = 1 << (consOrgBitwidth - 1);
-                    auto msb = (consValue & mask) >> (consOrgBitwidth - 1);
-                    auto orgMask = 0;
-                    if (msb) {
-                        for (auto i = consOrgBitwidth; i < bitWidth; i++)
-                            orgMask |= 1 << i;
-
-                        consValue |= orgMask;
-                    }
+                    auto val = consValue << (bitWidth - consOrgBitwidth);
+                    consValue = val >> (bitWidth - consOrgBitwidth);
                     src2Op = new IR::Constant(IR::Type_Bits::get(bitWidth), consValue);
                 }
             }
@@ -176,6 +175,9 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
         } else {
             BUG("%1% not implemented.", right);
         }
+        /* If there is a binary operation present which involves non 8-bit aligned
+           fields , add BAnd operation with mask value of original bit-width to
+           avoid any result overflow */
         if (!isEightBitAligned(left) && !isSignExtended) {
             if (right->is<IR::Add>() || right->is<IR::Sub>() ||
                 right->is<IR::Shl>() || right->is<IR::Shr>()) {

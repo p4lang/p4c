@@ -24,46 +24,43 @@ struct headers_t {
 
 struct user_meta_data_t {
     bit<48> addr;
-    bit<7>  depth1;
-    bit<7>  depth2;
-    bit<7>  depth3;
-    bit<7>  depth4;
+    bit<3>  depth1;
+    bit<5>  depth2;
+    bit<5>  depth3;
+    bit<5>  depth4;
 }
 
 parser MyIngressParser(packet_in pkt, out headers_t hdr, inout user_meta_data_t m, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
     state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
+        m.depth1 = m.depth1 - 1;
+        pkt.extract(hdr.ethernet);
         transition accept;
     }
 }
 
 control MyIngressControl(inout headers_t hdrs, inout user_meta_data_t meta, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @name("MyIngressControl.var") bit<7> var_0;
-    @name("MyIngressControl.nonDefAct") action nonDefAct() {
-        meta.depth1 = var_0 ^ 7w2;
-        meta.depth2 = var_0 + 7w127;
-        meta.depth3 = var_0 + 7w3;
-        meta.depth4 = var_0 + 7w125;
+    action nonDefAct() {
+        meta.depth3 = meta.depth3 - 3;
     }
-    @name("MyIngressControl.stub") table stub_0 {
+    table stub {
         key = {
         }
         actions = {
-            nonDefAct();
+            nonDefAct;
         }
-        const default_action = nonDefAct();
+        const default_action = nonDefAct;
         size = 1000000;
     }
     apply {
-        var_0 = 7w2;
-        d.egress_port = (PortId_t)((bit<32>)c.ingress_port ^ 32w1);
-        stub_0.apply();
+        meta.depth4 = meta.depth2 - 4;
+        d.egress_port = (PortId_t)((bit<32>)c.ingress_port ^ 1);
+        stub.apply();
     }
 }
 
 control MyIngressDeparser(packet_out pkt, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in user_meta_data_t e, in psa_ingress_output_metadata_t f) {
     apply {
-        pkt.emit<ethernet_t>(hdr.ethernet);
+        pkt.emit(hdr.ethernet);
     }
 }
 
@@ -83,9 +80,9 @@ control MyEgressDeparser(packet_out pkt, out EMPTY a, out EMPTY b, inout EMPTY c
     }
 }
 
-IngressPipeline<headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIngressParser(), MyIngressControl(), MyIngressDeparser()) ip;
+IngressPipeline(MyIngressParser(), MyIngressControl(), MyIngressDeparser()) ip;
 
-EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEgressParser(), MyEgressControl(), MyEgressDeparser()) ep;
+EgressPipeline(MyEgressParser(), MyEgressControl(), MyEgressDeparser()) ep;
 
-PSA_Switch<headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
 

@@ -24,28 +24,25 @@ struct headers_t {
 
 struct user_meta_data_t {
     bit<48> addr;
-    bit<7>  depth1;
-    bit<7>  depth2;
-    bit<7>  depth3;
-    bit<7>  depth4;
+    bit<3>  depth1;
+    bit<5>  depth2;
+    bit<5>  depth3;
+    bit<5>  depth4;
 }
 
 parser MyIngressParser(packet_in pkt, out headers_t hdr, inout user_meta_data_t m, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
     state start {
+        m.depth1 = m.depth1 + 3w7;
         pkt.extract<ethernet_t>(hdr.ethernet);
         transition accept;
     }
 }
 
 control MyIngressControl(inout headers_t hdrs, inout user_meta_data_t meta, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @name("MyIngressControl.var") bit<7> var_0;
-    @name("MyIngressControl.nonDefAct") action nonDefAct() {
-        meta.depth1 = var_0 ^ 7w2;
-        meta.depth2 = var_0 + 7w127;
-        meta.depth3 = var_0 + 7w3;
-        meta.depth4 = var_0 + 7w125;
+    action nonDefAct() {
+        meta.depth3 = meta.depth3 + 5w29;
     }
-    @name("MyIngressControl.stub") table stub_0 {
+    table stub {
         key = {
         }
         actions = {
@@ -54,34 +51,16 @@ control MyIngressControl(inout headers_t hdrs, inout user_meta_data_t meta, in p
         const default_action = nonDefAct();
         size = 1000000;
     }
-    @hidden action psa_substract_inst58() {
-        var_0 = 7w2;
-        d.egress_port = (bit<32>)c.ingress_port ^ 32w1;
-    }
-    @hidden table tbl_psa_substract_inst58 {
-        actions = {
-            psa_substract_inst58();
-        }
-        const default_action = psa_substract_inst58();
-    }
     apply {
-        tbl_psa_substract_inst58.apply();
-        stub_0.apply();
+        meta.depth4 = meta.depth2 + 5w28;
+        d.egress_port = (PortId_t)((bit<32>)c.ingress_port ^ 32w1);
+        stub.apply();
     }
 }
 
 control MyIngressDeparser(packet_out pkt, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in user_meta_data_t e, in psa_ingress_output_metadata_t f) {
-    @hidden action psa_substract_inst92() {
-        pkt.emit<ethernet_t>(hdr.ethernet);
-    }
-    @hidden table tbl_psa_substract_inst92 {
-        actions = {
-            psa_substract_inst92();
-        }
-        const default_action = psa_substract_inst92();
-    }
     apply {
-        tbl_psa_substract_inst92.apply();
+        pkt.emit<ethernet_t>(hdr.ethernet);
     }
 }
 
