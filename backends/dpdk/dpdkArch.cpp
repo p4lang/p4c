@@ -664,7 +664,6 @@ const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
                         width = 64;
                     fields->push_back(new IR::StructField(IR::ID(field->name),
                                       IR::Type_Bits::get(width)));
-                    structure->modifiedMdList.emplace(field->name, width);
                 } else {
                     fields->push_back(field);
                 }
