@@ -53,7 +53,6 @@ metadata instanceof user_meta_data_t
 action nonDefAct args none {
 	mov m.local_metadata_depth1 m.Ingress_var
 	xor m.local_metadata_depth1 0x2
-	and m.local_metadata_depth1 0x7
 	mov m.local_metadata_depth2 m.Ingress_var
 	add m.local_metadata_depth2 0x7
 	and m.local_metadata_depth2 0x7

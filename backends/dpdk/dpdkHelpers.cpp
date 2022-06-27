@@ -177,9 +177,12 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
             BUG("%1% not implemented.", right);
         }
         if (!isEightBitAligned(left) && !isSignExtended) {
-            auto width = left->type->width_bits();
-            auto mask = (1 << width) - 1;
-            add_instr(new IR::DpdkAndStatement(left, left, new IR::Constant(mask)));
+            if (right->is<IR::Add>() || right->is<IR::Sub>() ||
+                right->is<IR::Shl>() || right->is<IR::Shr>()) {
+                auto width = left->type->width_bits();
+                auto mask = (1 << width) - 1;
+                add_instr(new IR::DpdkAndStatement(left, left, new IR::Constant(mask)));
+            }
         }
     } else if (auto m = right->to<IR::MethodCallExpression>()) {
         auto mi = P4::MethodInstance::resolve(m, refmap, typemap);

@@ -120,8 +120,7 @@ apply {
 	mov m.Ingress_key 0x0
 	jmp LABEL_END_1
 	LABEL_TRUE :	mov m.Ingress_key 0x1
-	LABEL_END_1 :	and m.Ingress_key 0x1
-	mov m.ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
+	LABEL_END_1 :	mov m.ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
 	mov m.ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
