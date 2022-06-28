@@ -206,7 +206,8 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder* builder, const P4::ExternMet
     builder->blockStart();
     if (this->isAtomic) {
         builder->emitIndent();
-        builder->appendFormat("bpf_spin_lock((void *)(%s + 1))", readValueName);
+        builder->appendFormat("bpf_spin_lock(((%s *)%s)->lock)",
+                              this->valueTypeName, readValueName);
         builder->endOfStatement(true);
     }
     builder->emitIndent();
@@ -260,7 +261,8 @@ void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder* builder, const P4::ExternMe
     builder->endOfStatement(true);
     if (this->isAtomic) {
         builder->emitIndent();
-        builder->appendFormat("bpf_spin_unlock((void *)(%s + 1))", readValueName);
+        builder->appendFormat("bpf_spin_unlock(((%s *)%s)->lock)",
+                              this->valueTypeName, readValueName);
         builder->endOfStatement(true);
     }
     builder->blockEnd(false);
