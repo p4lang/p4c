@@ -2477,7 +2477,7 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
         }
     } else if (bl == nullptr && br != nullptr) {
         auto e = expression->clone();
-        e->left = new IR::Cast(e->left->srcInfo, rtype, e->right);
+        e->left = new IR::Cast(e->left->srcInfo, rtype, e->left);
         setCompileTimeConstant(e->left);
         expression = e;
         sameType = rtype;
