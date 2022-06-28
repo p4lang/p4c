@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef _MIDEND_PARSERUNROLL_H_
 #define _MIDEND_PARSERUNROLL_H_
 
+#include <variant>
 #include <unordered_map>
 
 #include "ir/ir.h"
@@ -43,23 +44,16 @@ const char outOfBoundsStateName[] = "stateOutOfBound";
 // A Member can represent a StackVariable exactly when its qualifying variable
 // (IR::Member::expr) either is a PathExpression or can represent a StackVariable.
 class StackVariable {
+ friend class StackVariableHash;
  public:
     /// Determines whether @expr can represent a StateVariable.
     static bool repOk(const IR::Expression* expr);
 
-    // Implicit conversions to allow implementations to be treated like a Node*.
-    operator const IR::Member*() const { return member; }
-    const IR::Member& operator*() const { return *member; }
-    const IR::Member* operator->() const { return member; }
-
     // Implements comparisons so that StateVariables can be used as map keys.
     bool operator==(const StackVariable& other) const;
 
- protected:
-    const IR::Expression* pathExprToMember(const IR::Expression* expr);
-
  private:
-    const IR::Member* member;
+    const IR::Node* variable;
 
  public:
     /// Implicitly converts IR::Expression* to a StackVariable.
