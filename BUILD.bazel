@@ -306,10 +306,21 @@ cc_proto_library(
 cc_library(
     name = "p4c_dpdk_lib",
     srcs = glob(
-        ["backends/dpdk/*.cpp", "backends/dpdk/control-plane/*.cpp", "backends/bmv2/common/lower.cpp"],
-        exclude = ["backends/dpdk/main.cpp", "backends/dpdk/spec.cpp", "backends/dpdk/printUtils.cpp", "backends/dpdk/dbprint-dpdk.cpp"],
-    ),
-    hdrs = glob(["backends/dpdk/*.h", "backends/dpdk/control-plane/*.h", "backends/bmv2/common/lower.h"]),
+        [
+            "backends/dpdk/*.cpp",
+            "backends/dpdk/control-plane/*.cpp",
+        ],
+        exclude = [
+            "backends/dpdk/main.cpp",
+            "backends/dpdk/spec.cpp",
+            "backends/dpdk/printUtils.cpp",
+            "backends/dpdk/dbprint-dpdk.cpp",
+        ],
+    ) + ["backends/bmv2/common/lower.cpp"],
+    hdrs = glob([
+        "backends/dpdk/*.h",
+        "backends/dpdk/control-plane/*.h",
+    ]) + ["backends/bmv2/common/lower.h"],
     deps = [
         ":ir_frontend_midend_control_plane",
         ":lib",

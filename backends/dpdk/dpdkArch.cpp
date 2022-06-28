@@ -954,9 +954,10 @@ const IR::Node *IfStatementUnroll::postorder(IR::SwitchStatement *sw) {
         code_block->push_back(i);
 
     auto control = findOrigCtxt<IR::P4Control>();
+    auto parser = findOrigCtxt<IR::P4Parser>();
 
     for (auto d : unroller->decl)
-        injector.collect(control, nullptr, d);
+        injector.collect(control, parser, d);
     if (unroller->root) {
         sw->expression = unroller->root;
     }
@@ -974,9 +975,9 @@ const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
         code_block->push_back(i);
 
     auto control = findOrigCtxt<IR::P4Control>();
-
+    auto parser = findOrigCtxt<IR::P4Parser>();
     for (auto d : unroller->decl)
-        injector.collect(control, nullptr, d);
+        injector.collect(control, parser, d);
     if (unroller->root) {
         i->condition = unroller->root;
     }
@@ -987,6 +988,11 @@ const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
 const IR::Node *IfStatementUnroll::postorder(IR::P4Control *a) {
     auto control = getOriginal();
     return injector.inject_control(control, a);
+}
+
+const IR::Node *IfStatementUnroll::postorder(IR::P4Parser *a) {
+    auto parser = getOriginal();
+    return injector.inject_parser(parser, a);
 }
 
 // TODO(GordonWuCn): simplify with a postorder visitor if it is a statement,
