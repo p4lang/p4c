@@ -18,7 +18,8 @@ limitations under the License.
 #include "ir/json_loader.h"
 
 #include "node.h"
-// #include <signal.h>
+// If you want to use 'raise' below to trace a node creation uncomment the next line
+#include <signal.h>
 
 void IR::Node::traceVisit(const char* visitor) const
 { LOG3("Visiting " << visitor << " " << id << ":" << node_type_name()); }
