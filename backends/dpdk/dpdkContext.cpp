@@ -109,6 +109,45 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
         }
     }
 
+    for (auto ed :  structure->externDecls) {
+        if (auto type = ed->type->to<IR::Type_Specialized>()) {
+            auto externTypeName = type->baseType->path->name.name;
+            if (externTypeName == "Counter" ||
+                externTypeName == "Register" ||
+                externTypeName == "Meter" ||
+                externTypeName == "Hash" ||
+                externTypeName == "InternetCheckSum") {
+                struct externAttributes externAttr;
+                externAttr.externalName = ed->controlPlaneName();
+                externAttr.externType = externTypeName;
+                if (externTypeName == "Counter") {
+                    if (ed->arguments->size() != 2) {
+                        ::error(ErrorType::ERR_EXPECTED,
+                                "%1%: expected number of counters and type of counter"
+                                "as arguments", ed);
+                    }
+                    auto counter_type = ed->arguments->at(1)->expression;
+                    BUG_CHECK(counter_type->is<IR::Constant>(),
+                               "Expected counter type to be constant");
+                    auto value = counter_type->to<IR::Constant>()->asUnsigned();
+                    switch (value) {
+                        case 0:
+                            externAttr.counterType = "bytes";
+                            break;
+                        case 1:
+                             externAttr.counterType = "packets";
+                            break;
+                        case 2:
+                             externAttr.counterType = "packets_and_bytes";
+                            break;
+                    }
+                }
+                externAttrMap.emplace(ed->name.name, externAttr);
+                externs.push_back(ed);
+            }
+        }
+    }
+
     // Keep the compiler generated (hidden) tables at the end
     for (auto d : selector_tables)
         tables.push_back(d);
@@ -452,9 +491,27 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray* tablesJson) {
     }
 }
 
+// Add extern information to the context json
+void DpdkContextGenerator::addExternInfo(Util::JsonArray* externsJson) {
+    for (auto t : externs) {
+        auto externAttr = ::get(externAttrMap, t->name.name);
+        auto* externJson = new Util::JsonObject();
+        externJson->emplace("name", externAttr.externalName);
+        externJson->emplace("target_name", t->name.name);
+        externJson->emplace("type", externAttr.externType);
+        auto* attrJson = new Util::JsonObject();
+        if (externAttr.externType == "Counter") {
+            attrJson->emplace("type", externAttr.counterType);
+        }
+        externJson->emplace("attributes", attrJson);
+        externsJson->append(externJson);
+    }
+}
+
 const Util::JsonObject* DpdkContextGenerator::genContextJsonObject() {
     auto* json = new Util::JsonObject();
     auto* tablesJson = new Util::JsonArray();
+    auto* externsJson = new Util::JsonArray();
     struct TopLevelCtxt tlinfo;
     tlinfo.initTopLevelCtxt(options);
     json->emplace("program_name", tlinfo.progName);
@@ -465,6 +522,8 @@ const Util::JsonObject* DpdkContextGenerator::genContextJsonObject() {
     json->emplace("target", cstring("DPDK"));
     json->emplace("tables", tablesJson);
     addMatchTables(tablesJson);
+    json->emplace("externs", externsJson);
+    addExternInfo(externsJson);
     return json;
 }
 
