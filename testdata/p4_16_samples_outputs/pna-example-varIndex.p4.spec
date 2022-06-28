@@ -54,25 +54,30 @@ regarray direction size 0x100 initval 0
 action execute_1 args none {
 	mov m.MainControlT_tmp_1 m.local_metadata_depth
 	add m.MainControlT_tmp_1 0x3
+	and m.MainControlT_tmp_1 0x3
 	jmpneq LABEL_FALSE_1 m.MainControlT_tmp_1 0x0
 	mov m.local_metadata_ethType h.vlan_tag_0.ether_type
 	jmp LABEL_END_2
 	LABEL_FALSE_1 :	mov m.MainControlT_tmp_0 m.local_metadata_depth
 	add m.MainControlT_tmp_0 0x3
+	and m.MainControlT_tmp_0 0x3
 	jmpneq LABEL_FALSE_2 m.MainControlT_tmp_0 0x1
 	mov m.local_metadata_ethType h.vlan_tag_1.ether_type
 	jmp LABEL_END_2
 	LABEL_FALSE_2 :	mov m.MainControlT_tmp m.local_metadata_depth
 	add m.MainControlT_tmp 0x3
+	and m.MainControlT_tmp 0x3
 	jmplt LABEL_END_2 m.MainControlT_tmp 0x1
 	mov m.local_metadata_ethType m.MainControlT_hsVar
 	LABEL_END_2 :	mov m.MainControlT_tmp_3 m.local_metadata_depth
 	add m.MainControlT_tmp_3 0x3
+	and m.MainControlT_tmp_3 0x3
 	jmpneq LABEL_FALSE_4 m.MainControlT_tmp_3 0x0
 	mov h.vlan_tag_0.ether_type 0x2
 	jmp LABEL_END_5
 	LABEL_FALSE_4 :	mov m.MainControlT_tmp_2 m.local_metadata_depth
 	add m.MainControlT_tmp_2 0x3
+	and m.MainControlT_tmp_2 0x3
 	jmpneq LABEL_END_5 m.MainControlT_tmp_2 0x1
 	mov h.vlan_tag_1.ether_type 0x2
 	LABEL_END_5 :	jmpneq LABEL_FALSE_6 m.local_metadata_depth 0x0
@@ -144,10 +149,12 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_VLAN_TAG :	extract h.vlan_tag_0
 	add m.local_metadata_depth 0x3
+	and m.local_metadata_depth 0x3
 	jmpeq MAINPARSERIMPL_PARSE_VLAN_TAG1 h.vlan_tag_0.ether_type 0x8100
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_VLAN_TAG1 :	extract h.vlan_tag_1
 	add m.local_metadata_depth 0x3
+	and m.local_metadata_depth 0x3
 	jmpeq MAINPARSERIMPL_PARSE_VLAN_TAG2 h.vlan_tag_1.ether_type 0x8100
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_VLAN_TAG2 :	mov m.pna_pre_input_metadata_parser_error 0x3
