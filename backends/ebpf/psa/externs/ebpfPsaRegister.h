@@ -41,7 +41,8 @@ class EBPFRegisterPSA : public EBPFTableBase {
     bool shouldUseArrayMap();
 
  public:
-    bool isAtomic = false;
+    // This flags indicates whether this register operations atomicity have to be handled
+    bool usedInAtomicBlock = false;
 
     EBPFRegisterPSA(const EBPFProgram* program, cstring instanceName,
                     const IR::Declaration_Instance* di,

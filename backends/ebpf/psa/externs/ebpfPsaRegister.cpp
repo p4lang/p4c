@@ -91,7 +91,7 @@ void EBPFRegisterPSA::emitKeyType(CodeBuilder* builder) {
 
 void EBPFRegisterPSA::emitValueType(CodeBuilder* builder) {
     builder->emitIndent();
-    if (isAtomic) {
+    if (usedInAtomicBlock) {
         builder->append("typedef struct");
         builder->spc();
         builder->blockStart();
@@ -204,7 +204,7 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder* builder, const P4::ExternMet
     builder->emitIndent();
     builder->appendFormat("if (%s != NULL) ", readValueName.c_str());
     builder->blockStart();
-    if (isAtomic) {
+    if (usedInAtomicBlock) {
         builder->emitIndent();
         builder->appendFormat("bpf_spin_lock(&((%s *)%s)->lock)",
                               valueTypeName, readValueName);
@@ -259,7 +259,7 @@ void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder* builder, const P4::ExternMe
     builder->emitIndent();
     builder->appendFormat("*%s = %s", readValueName, valueParamName);
     builder->endOfStatement(true);
-    if (isAtomic) {
+    if (usedInAtomicBlock) {
         builder->emitIndent();
         builder->appendFormat("bpf_spin_unlock(&((%s *)%s)->lock)",
                               valueTypeName, readValueName);
@@ -271,7 +271,7 @@ void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder* builder, const P4::ExternMe
     builder->blockStart();
 
     cstring valueVar = valueParamName;
-    if (isAtomic) {
+    if (usedInAtomicBlock) {
         builder->emitIndent();
         valueVar = program->refMap->newName("tmp");
         builder->appendFormat("%s %s = {0}", valueTypeName, valueVar);
