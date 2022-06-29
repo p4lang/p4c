@@ -171,6 +171,9 @@ const IR::Vector<IR::Argument> *ResolutionContext::methodArguments(cstring name)
             if (auto type = decl->type->to<IR::Type_Name>()) {
                 if (type->path->name == name)
                     return decl->arguments; }
+            if (auto ts = decl->type->to<IR::Type_Specialized>()) {
+                if (ts->baseType->path->name == name)
+                    return decl->arguments; }
             break; }
         if (ctxt->node->is<IR::Expression>() || ctxt->node->is<IR::Type>())
             ctxt = ctxt->parent;
