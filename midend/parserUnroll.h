@@ -44,7 +44,7 @@ const char outOfBoundsStateName[] = "stateOutOfBound";
 // A Member can represent a StackVariable exactly when its qualifying variable
 // (IR::Member::expr) either is a PathExpression or can represent a StackVariable.
 class StackVariable {
- friend class StackVariableHash;
+    friend class StackVariableHash;
  public:
     /// Determines whether @expr can represent a StateVariable.
     static bool repOk(const IR::Expression* expr);
@@ -53,7 +53,7 @@ class StackVariable {
     bool operator==(const StackVariable& other) const;
 
  private:
-    const IR::Node* variable;
+    const IR::Expression* variable;
 
  public:
     /// Implicitly converts IR::Expression* to a StackVariable.

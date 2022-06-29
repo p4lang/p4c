@@ -6,7 +6,7 @@
 
 namespace P4 {
 
-StackVariable::StackVariable(const IR::Expression* expr) : variable(nullptr) {
+StackVariable::StackVariable(const IR::Expression* expr) : variable(expr) {
     CHECK_NULL(expr);
     BUG_CHECK(repOk(expr), "Invalid stack variable %1%", expr);
     variable = expr;
