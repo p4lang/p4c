@@ -2231,18 +2231,14 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
         }
     } else if (bl == nullptr && br != nullptr) {
         auto e = expression->clone();
-        auto cst = expression->left->to<IR::Constant>();
-        CHECK_NULL(cst);
-        e->left = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
+        e->left = new IR::Cast(e->left->srcInfo, br, e->left);
         setType(e->left, rtype);
         expression = e;
         resultType = rtype;
         setType(expression, resultType);
     } else if (bl != nullptr && br == nullptr) {
         auto e = expression->clone();
-        auto cst = expression->right->to<IR::Constant>();
-        CHECK_NULL(cst);
-        e->right = new IR::Constant(cst->srcInfo, ltype, cst->value, cst->base);
+        e->right = new IR::Cast(e->right->srcInfo, bl, e->right);
         setType(e->right, ltype);
         expression = e;
         resultType = ltype;
@@ -2481,16 +2477,14 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
         }
     } else if (bl == nullptr && br != nullptr) {
         auto e = expression->clone();
-        auto cst = expression->left->to<IR::Constant>();
-        e->left = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
+        e->left = new IR::Cast(e->left->srcInfo, rtype, e->left);
         setCompileTimeConstant(e->left);
         expression = e;
         sameType = rtype;
         setType(e->left, sameType);
     } else if (bl != nullptr && br == nullptr) {
         auto e = expression->clone();
-        auto cst = expression->right->to<IR::Constant>();
-        e->right = new IR::Constant(cst->srcInfo, ltype, cst->value, cst->base);
+        e->right = new IR::Cast(e->right->srcInfo, ltype, e->right);
         setCompileTimeConstant(e->right);
         expression = e;
         setType(e->right, ltype);
@@ -2831,8 +2825,8 @@ const IR::Node* TypeInference::postorder(IR::Slice* expression) {
         return expression;
     }
 
-    auto msb = expression->e1->to<IR::Constant>();
-    auto lsb = expression->e2->to<IR::Constant>();
+    auto msb = expression->e1->checkedTo<IR::Constant>();
+    auto lsb = expression->e2->checkedTo<IR::Constant>();
     if (!msb->fitsInt()) {
         typeError("%1%: bit index too large", msb);
         return expression;
@@ -3767,11 +3761,9 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
             if (lt == nullptr)
                 continue;
             if (lt->is<IR::Type_InfInt>() && type->is<IR::Type_Bits>()) {
-                auto cst = c->label->to<IR::Constant>();
-                CHECK_NULL(cst);
                 c = new IR::SwitchCase(
                     c->srcInfo,
-                    new IR::Constant(cst->srcInfo, type, cst->value, cst->base), c->statement);
+                    new IR::Cast(c->label->srcInfo, type, c->label), c->statement);
                 setType(c->label, type);
                 setCompileTimeConstant(c->label);
                 continue;

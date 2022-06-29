@@ -227,6 +227,7 @@ bool ToP4::preorder(const IR::Type_Var* t) {
 
 bool ToP4::preorder(const IR::Type_Unknown*) {
     BUG("Cannot emit code for an unknown type");
+    // builder.append("*unknown type*");
     return false;
 }
 
