@@ -786,20 +786,22 @@ void ConvertToEBPFControlPSA::processAtomicAnnotation(const IR::BlockStatement* 
                                 return;
                             }
                             auto writeIndexExpr = ext->expr->arguments->at(0)->expression;
-                            if (auto readIndCnst = readIndexExpr->to<IR::Constant>()) {
-                                if (auto writeIndCnst = writeIndexExpr->to<IR::Constant>()) {
+                            if (readIndexExpr->is<IR::Constant>()) {
+                                auto readIndCnst = readIndexExpr->to<IR::Constant>();
+                                if (writeIndexExpr->is<IR::Constant>()) {
+                                    auto writeIndCnst = writeIndexExpr->to<IR::Constant>();
                                     if (writeIndCnst->asUint64() != readIndCnst->asUint64()) {
                                         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                                                 "%1%: target supports only register read and write "
                                                 "operations on the same index", mExpr);
                                         return;
                                     }
+                                } else {
+                                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                                            "%1%: target supports only register read and write "
+                                            "operations on the same index", mExpr);
+                                    return;
                                 }
-                            } else {
-                                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                                        "%1%: target supports only register read and write "
-                                        "operations on the same index", mExpr);
-                                return;
                             }
 
                             if (auto readPath = readIndexExpr->to<IR::PathExpression>()) {
