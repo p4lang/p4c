@@ -139,7 +139,15 @@ void *realloc(void *ptr, size_t size) {
         return GC_malloc(size);
     }
 }
-void *malloc(size_t size) { return realloc(nullptr, size); }
+// IMPORTANT: do not simplify this to realloc(nullptr, size)
+// As it could be optimized to malloc(size) call causing
+// infinite loops
+void *malloc(size_t size) {
+    if (!done_init)
+        return realloc(nullptr, size);
+
+    return GC_malloc(size);
+}
 void free(void *ptr) {
     if (done_init && GC_is_heap_ptr(ptr))
         GC_free(ptr);
