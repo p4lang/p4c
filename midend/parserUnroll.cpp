@@ -6,17 +6,17 @@
 
 namespace P4 {
 
-StackVariable::StackVariable(const IR::Expression* expr) : member(nullptr) {
+StackVariable::StackVariable(const IR::Expression* expr) : variable(expr) {
     CHECK_NULL(expr);
     BUG_CHECK(repOk(expr), "Invalid stack variable %1%", expr);
-    member = expr->checkedTo<IR::Member>();
+    variable = expr;
 }
 
 bool StackVariable::repOk(const IR::Expression* expr) {
-    // Only members can be stack variables.
+    // Only members and path expression can be stack variables.
     const auto* member = expr->to<IR::Member>();
     if (member == nullptr) {
-        return false;
+        return expr->is<IR::PathExpression>();
     }
 
     // A member is a stack variable if it is qualified by a PathExpression or if its qualifier is a
@@ -26,11 +26,15 @@ bool StackVariable::repOk(const IR::Expression* expr) {
 
 bool StackVariable::operator==(const StackVariable& other) const {
     // Delegate to IR's notion of equality.
-    return member->equiv(*other.member);
+    return variable->equiv(*other.variable);
 }
 
 size_t StackVariableHash::operator()(const StackVariable& var) const {
-    const IR::Member* curMember = var.operator->();
+    // hash for path expression.
+    if (const auto* path = var.variable->to<IR::PathExpression>()) {
+        return Util::Hash::fnv1a<const cstring>(path->path->name.name);
+    }
+    const IR::Member* curMember = var.variable->to<IR::Member>();
     std::vector<size_t> h;
     while (curMember) {
         h.push_back(Util::Hash::fnv1a<const cstring>(curMember->member.name));
@@ -70,7 +74,7 @@ struct VisitedKey {
             return true;
         if (name > e.name)
             return false;
-        std::map<StackVariable, std::pair<size_t, size_t> > mp;
+        std::unordered_map<StackVariable, std::pair<size_t, size_t>, StackVariableHash > mp;
         for (auto& i1 : indexes)
             mp.emplace(i1.first, std::make_pair(i1.second, -1));
         for (auto& i2 : e.indexes) {
