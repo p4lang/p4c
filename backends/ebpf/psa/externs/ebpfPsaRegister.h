@@ -28,6 +28,9 @@ class EBPFRegisterPSA : public EBPFTableBase {
  private:
     cstring readValueName;
 
+    cstring getParamName(CodeBuilder* builder, const IR::Expression *expr,
+                         ControlBodyTranslatorPSA* translator) const;
+
  protected:
     size_t size;
     // initial value for Register cells.

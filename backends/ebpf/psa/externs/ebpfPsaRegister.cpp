@@ -180,11 +180,28 @@ void EBPFRegisterPSA::emitInstance(CodeBuilder *builder) {
                                    valueTypeName, size);
 }
 
+cstring EBPFRegisterPSA::getParamName(CodeBuilder* builder, const IR::Expression *expr,
+                                      ControlBodyTranslatorPSA* translator) const {
+    cstring paramName = cstring::empty;
+    if (auto indexArg = expr->to<IR::PathExpression>()) {
+        paramName = translator->getParamName(indexArg);
+    } else if (auto cnst = expr->to<IR::Constant>()) {
+        paramName = program->refMap->newName("param");
+        builder->emitIndent();
+        keyType->declare(builder, paramName, false);
+        builder->append(" = ");
+        codeGen->visit(cnst);
+        builder->endOfStatement(true);
+    }
+
+    return paramName;
+}
+
 void EBPFRegisterPSA::emitRegisterRead(CodeBuilder* builder, const P4::ExternMethod* method,
                                        ControlBodyTranslatorPSA* translator,
                                        const IR::Expression* leftExpression) {
-    auto indexArg = method->expr->arguments->at(0)->expression->to<IR::PathExpression>();
-    cstring indexParamName = translator->getParamName(indexArg);
+    cstring indexParamName = getParamName(builder,method->expr->arguments->at(0)->expression,
+                                          translator);
     BUG_CHECK(!indexParamName.isNullOrEmpty(), "Index param cannot be empty");
 
     readValueName = program->refMap->newName("value");
@@ -242,11 +259,11 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder* builder, const P4::ExternMet
 
 void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder* builder, const P4::ExternMethod* method,
                                         ControlBodyTranslatorPSA* translator) {
-    auto indexArgExpr = method->expr->arguments->at(0)->expression->to<IR::PathExpression>();
-    cstring indexParamName = translator->getParamName(indexArgExpr);
-    auto valueArgExpr = method->expr->arguments->at(1)->expression->to<IR::PathExpression>();
-    cstring valueParamName = translator->getParamName(valueArgExpr);
+    cstring indexParamName = getParamName(builder,method->expr->arguments->at(0)->expression,
+                                          translator);
     BUG_CHECK(!indexParamName.isNullOrEmpty(), "Index param cannot be empty");
+    cstring valueParamName = getParamName(builder,method->expr->arguments->at(1)->expression,
+                                          translator);
     BUG_CHECK(!valueParamName.isNullOrEmpty(), "Value param cannot be empty");
 
     cstring msgStr = Util::printf_format("Register: writing %s",
