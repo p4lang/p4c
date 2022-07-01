@@ -373,7 +373,7 @@ enum PNA_CounterType_t {
 @noWarn("unused")
 extern Counter<W, S> {
   Counter(bit<32> n_counters, PNA_CounterType_t type);
-  void count(in S index);
+  void count(in S index, @optional in bit<32> increment);
 }
 // END:Counter_extern
 
@@ -405,12 +405,12 @@ extern Meter<S> {
   // Use this method call to perform a color aware meter update (see
   // RFC 2698). The color of the packet before the method call was
   // made is specified by the color parameter.
-  PNA_MeterColor_t execute(in S index, in PNA_MeterColor_t color);
+  PNA_MeterColor_t execute(in S index, in PNA_MeterColor_t color, @optional in bit<32> pkt_len);
 
   // Use this method call to perform a color blind meter update (see
   // RFC 2698).  It may be implemented via a call to execute(index,
   // MeterColor_t.GREEN), which has the same behavior.
-  PNA_MeterColor_t execute(in S index);
+  PNA_MeterColor_t execute(in S index, @optional in bit<32> pkt_len);
 }
 // END:Meter_extern
 
