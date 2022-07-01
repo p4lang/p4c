@@ -1,0 +1,15 @@
+issue3417.p4(3): [--Wwarn=unused] warning: 'I' is unused
+extern Register<T, I> {
+                   ^
+issue3417.p4(7): [--Wwarn=unused] warning: 'I' is unused
+extern RegisterAction<T, I, U> {
+                         ^
+issue3417.p4(17): [--Wwarn=unused] warning: regAct: unused instance
+    RegisterAction<bit<128>, bit<16>, bit<64>>(reg) regAct = {
+                                                    ^^^^^^
+issue3417.p4(18): [--Wwarn=uninitialized_out_param] warning: out parameter 'rv' may be uninitialized when 'apply' terminates
+        void apply(inout bit<128> val, out bit<64> rv) {
+                                                   ^^
+issue3417.p4(18)
+        void apply(inout bit<128> val, out bit<64> rv) {
+             ^^^^^
