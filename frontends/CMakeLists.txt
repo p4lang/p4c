@@ -64,6 +64,7 @@ set (P4_FRONTEND_SRCS
   p4/symbol_table.cpp
   p4/tableApply.cpp
   p4/tableKeyNames.cpp
+  p4/ternaryBool.cpp
   p4/toP4/toP4.cpp
   p4/typeChecking/bindVariables.cpp
   p4/typeChecking/syntacticEquivalence.cpp
@@ -135,6 +136,7 @@ set (P4_FRONTEND_HDRS
   p4/symbol_table.h
   p4/tableApply.h
   p4/tableKeyNames.h
+  p4/ternaryBool.h
   p4/toP4/toP4.h
   p4/typeChecking/bindVariables.h
   p4/typeChecking/syntacticEquivalence.h

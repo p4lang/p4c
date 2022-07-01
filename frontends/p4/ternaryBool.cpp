@@ -1,5 +1,5 @@
 /*
-Copyright 2016 VMware, Inc.
+Copyright 2022 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,20 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_TERNARYBOOL_H_
-#define _FRONTENDS_P4_TERNARYBOOL_H_
-
-#include "lib/cstring.h"
+#include "ternaryBool.h"
 
 namespace P4 {
-enum class TernaryBool {
-    Yes,
-    No,
-    Maybe
-};
 
-cstring toString(const TernaryBool& c);
+cstring toString(const TernaryBool& c) {
+    switch (c) {
+        case TernaryBool::Yes  : return "Yes";
+        case TernaryBool::No   : return "No";;
+        case TernaryBool::Maybe: return "Maybe";
+    }
+    return "";
+}
 
 }  // namespace P4
-
-#endif  /* _FRONTENDS_P4_TERNARYBOOL_H_ */

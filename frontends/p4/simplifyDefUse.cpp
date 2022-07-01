@@ -134,7 +134,7 @@ class DeclarationToExpression {
 
 DeclarationToExpression* DeclarationToExpression::instance = nullptr;
 
-class HeaderDefinitions {
+class HeaderDefinitions : public IHasDbPrint {
     ReferenceMap* refMap;
     TypeMap* typeMap;
     StorageMap* storageMap;
@@ -156,6 +156,13 @@ class HeaderDefinitions {
     HeaderDefinitions(ReferenceMap* refMap, TypeMap* typeMap, StorageMap* storageMap) :
         refMap(refMap), typeMap(typeMap), storageMap(storageMap)
         { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(storageMap); }
+
+
+
+    void dbprint(std::ostream& out) const {
+        for (auto it : defs)
+            out << *it.first << " -> " << toString(it.second) << std::endl;
+    }
 
     /// A helper function for getting a storage location from an expression.
     /// In case of accessing a header stack with non-constant index, it returns
@@ -399,7 +406,8 @@ class FindUninitialized : public Inspector {
     }
     /// 'expression' is reading the 'loc' location set
     void reads(const IR::Expression* expression, const LocationSet* loc) {
-        BUG_CHECK(!unreachable, "reached an unreachable expression in FindUninitialized");
+        BUG_CHECK(!unreachable, "reached an unreachable expression %1% in FindUninitialized",
+                  expression);
         LOG3(expression << " reads " << loc);
         CHECK_NULL(expression);
         CHECK_NULL(loc);
@@ -572,6 +580,7 @@ class FindUninitialized : public Inspector {
         headerDefs->clear();
         initHeaderParams(parser->getApplyMethodType()->parameters);
         visitVirtualMethods(parser->parserLocals);
+        unreachable = false;
 
         auto startState = parser->getDeclByName(IR::ParserState::start)->to<IR::ParserState>();
         auto acceptState = parser->getDeclByName(IR::ParserState::accept)->to<IR::ParserState>();
