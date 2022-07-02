@@ -2135,7 +2135,7 @@ const IR::Node* TypeInference::postorder(IR::ArrayIndex* expression) {
             }
         }
         type = hst->elementType;
-    } else if (auto tup = ltype->to<IR::Type_Tuple>()) {
+    } else if (auto tup = ltype->to<IR::Type_BaseList>()) {
         if (index < 0) {
             typeError("Tuple index %1% must be constant", expression->right);
             return expression;
