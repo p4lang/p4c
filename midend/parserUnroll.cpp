@@ -183,7 +183,7 @@ class ParserStateRewriter : public Transform {
     IR::Node* postorder(IR::Member* expression) {
         if (!afterExec)
             return expression;
-        auto basetype = getTypeArray(expression->expr);
+        auto basetype = getTypeArray(getOriginal<IR::Member>()->expr);
         if (basetype->is<IR::Type_Stack>()) {
             auto l = afterExec->get(expression->expr);
             BUG_CHECK(l->is<SymbolicArray>(), "%1%: expected an array", l);
@@ -393,7 +393,7 @@ class ParserSymbolicInterpreter {
     }
 
     /// Executes symbolically the specified statement.
-    /// Returns pointer to genereted statement if execution completes successfully,
+    /// Returns pointer to generated statement if execution completes successfully,
     /// and 'nullptr' if an error occurred.
     const IR::StatOrDecl* executeStatement(ParserStateInfo* state, const IR::StatOrDecl* sord,
                                            ValueMap* valueMap) {
@@ -446,7 +446,7 @@ class ParserSymbolicInterpreter {
                       "Result of %1% is not defined: %2%", sord, errorStr.str());
         }
         ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
-                                         visitedStates);
+                                     visitedStates);
         const IR::Node* node = sord->apply(rewriter);
         newSord = node->to<IR::StatOrDecl>();
         LOG2("After " << sord << " state is\n" << valueMap);
@@ -628,7 +628,7 @@ class ParserSymbolicInterpreter {
     /// @param newStates is a set of parsers' names which were genereted.
     EvaluationStateResult evaluateState(ParserStateInfo* state,
                                         std::unordered_set<cstring> &newStates) {
-        LOG1("Analyzing " << state->state);
+        LOG1("Analyzing " << dbp(state->state));
         auto valueMap = state->before->clone();
         IR::IndexedVector<IR::StatOrDecl> components;
         IR::ID newName;
