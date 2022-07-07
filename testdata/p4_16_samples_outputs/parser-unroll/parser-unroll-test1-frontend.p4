@@ -42,7 +42,7 @@ struct headers {
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("MyParser.index") int<32> index_0;
     @name("MyParser.tmp") int<32> tmp;
-    state start {
+    @name(".start") state start {
         index_0 = 32s0;
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
