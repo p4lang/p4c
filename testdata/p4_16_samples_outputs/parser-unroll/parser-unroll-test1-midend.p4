@@ -76,7 +76,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
     state parse_srcRouting3 {
         transition stateOutOfBound;
     }
-    state start {
+    @name(".start") state start {
         index_0 = 32s0;
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
