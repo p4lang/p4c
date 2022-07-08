@@ -28,7 +28,6 @@ Visitor::profile_t RemoveUnusedDeclarations::init_apply(const IR::Node* node) {
 bool RemoveUnusedDeclarations::giveWarning(const IR::Node* node) {
     if (warned == nullptr)
         return false;
-    std::cout << "wrn:" << node << std::endl;
     auto p = warned->emplace(node);
     LOG3("Warn about " << dbp(node) << " " << p.second);
     return p.second;
