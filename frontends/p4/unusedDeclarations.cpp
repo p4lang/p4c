@@ -28,6 +28,7 @@ Visitor::profile_t RemoveUnusedDeclarations::init_apply(const IR::Node* node) {
 bool RemoveUnusedDeclarations::giveWarning(const IR::Node* node) {
     if (warned == nullptr)
         return false;
+    std::cout << "wrn:" << node << std::endl;
     auto p = warned->emplace(node);
     LOG3("Warn about " << dbp(node) << " " << p.second);
     return p.second;
@@ -167,38 +168,12 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::ParserState* state) {
     return nullptr;
 }
 
-// Try to guess whether a file is a "system" file
-bool RemoveUnusedDeclarations::isSystemFile(cstring file) {
-    if (file.startsWith(p4includePath)) return true;
-    // If the backend is invoked directly with '-I p4include'
-    // In cases such as  "-I ./p4include", p4include may be within the path
-    if (file.find("p4include")) return true;
-
-    return false;
-}
-
-cstring RemoveUnusedDeclarations::ifSystemFile(const IR::Node* node) {
-    if (!node->srcInfo.isValid()) return nullptr;
-    auto sourceFile = node->srcInfo.getSourceFile();
-    LOG1("source file " << sourceFile << " " << p4includePath);
-    if (isSystemFile(sourceFile))
-        return sourceFile;
-    return nullptr;
-}
-
-// extern functions declared in "system" files should be kept,
+// extern functions declared in files should be kept,
 // even if it is not referenced in the user program. Compiler
 // backend may synthesize code to use the extern functions.
 const IR::Node* RemoveUnusedDeclarations::preorder(IR::Method* method)
 {
-    if (ifSystemFile(method->getNode()))
-        return method;
-
-    if (refMap->isUsed(getOriginal<IR::Method>()))
-        return method;
-    LOG3("Removing " << method);
-    prune();
-    return nullptr;
+    return method;
 }
 
 }  // namespace P4
