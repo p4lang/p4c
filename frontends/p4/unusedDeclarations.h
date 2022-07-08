@@ -104,7 +104,6 @@ class RemoveUnusedDeclarations : public Transform {
     const IR::Node* preorder(IR::Declaration_Variable* decl)  override;
     const IR::Node* preorder(IR::Declaration* decl) override { return process(decl); }
     const IR::Node* preorder(IR::Type_Declaration* decl) override { return process(decl); }
-    bool isSystemFile(cstring file);
     cstring ifSystemFile(const IR::Node* node);  // return file containing node if system file
 };
 

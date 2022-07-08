@@ -8,3 +8,4 @@ struct t {
     s s2;
 }
 
+extern bit<1> fct(in bit<1> a, in bit<1> b);

@@ -1,3 +1,4 @@
+extern void f<T>(in T data);
 struct S {
     bit<32> f;
 }
