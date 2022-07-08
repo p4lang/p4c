@@ -71,8 +71,7 @@ apply {
 	mov m.MainControlT_addr h.ipv4.dstAddr
 	jmp LABEL_END_0
 	LABEL_TRUE_0 :	mov m.MainControlT_addr h.ipv4.srcAddr
-	LABEL_END_0 :	mov m.local_metadata_meta m.MainControlT_addr
-	jmpneq LABEL_END m.local_metadata_meta h.ipv4.dstAddr
+	LABEL_END_0 :	jmpneq LABEL_END m.MainControlT_addr h.ipv4.dstAddr
 	table ipv4_da_lpm
 	LABEL_END :	emit h.ethernet
 	emit h.ipv4

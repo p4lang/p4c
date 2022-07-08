@@ -33,8 +33,6 @@ struct main_metadata_t {
 	bit<16> local_metadata_port
 	bit<32> pna_main_output_metadata_output_port
 	bit<32> MainParserT_parser_tmp
-	bit<32> MainControlT_tmp
-	bit<8> MainControlT_tmp_0
 }
 metadata instanceof main_metadata_t
 
@@ -63,9 +61,7 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_NOMATCH :	mov m.pna_pre_input_metadata_parser_error 0x2
 	MAINPARSERIMPL_ACCEPT :	recircid m.pna_main_input_metadata_pass
-	mov m.MainControlT_tmp m.pna_main_input_metadata_pass
-	mov m.MainControlT_tmp_0 m.MainControlT_tmp
-	jmpgt LABEL_END_1 m.MainControlT_tmp_0 0x4
+	jmpgt LABEL_END_1 m.pna_main_input_metadata_pass 0x4
 	add h.udp.src_port 0x1
 	LABEL_END_1 :	emit h.ethernet
 	emit h.ipv4

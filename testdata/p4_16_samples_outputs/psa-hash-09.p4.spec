@@ -44,8 +44,6 @@ struct user_meta_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
-	bit<48> Ingress_tmp
-	bit<16> Ingress_tmp_0
 	bit<48> user_meta_t_Ingress_tmp
 	bit<16> user_meta_t_Ingress_tmp_0
 	bit<8> ipv4_t_version_ihl
@@ -70,10 +68,8 @@ action NoAction args none {
 }
 
 action a1 args none {
-	mov m.Ingress_tmp h.ethernet.srcAddr
-	mov m.Ingress_tmp_0 h.ethernet.etherType
-	mov m.user_meta_t_Ingress_tmp m.Ingress_tmp
-	mov m.user_meta_t_Ingress_tmp_0 m.Ingress_tmp_0
+	mov m.user_meta_t_Ingress_tmp h.ethernet.srcAddr
+	mov m.user_meta_t_Ingress_tmp_0 h.ethernet.etherType
 	mov m.ipv4_t_version_ihl h.Ingress_tmp_1.version_ihl
 	mov m.ipv4_t_diffserv h.Ingress_tmp_1.diffserv
 	mov m.ipv4_t_totalLen h.Ingress_tmp_1.totalLen

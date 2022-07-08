@@ -26,14 +26,10 @@ struct main_metadata_t {
 	bit<32> MainControlT_tmp_2
 	bit<16> MainControlT_tmp_3
 	bit<16> MainControlT_tmp_4
-	bit<32> MainControlT_tmp_5
-	bit<16> MainControlT_tmp_6
 	bit<16> MainControlT_tmp_7
 	bit<16> MainControlT_tmp_8
 	bit<16> MainControlT_tmp_9
 	bit<16> MainControlT_tmp_10
-	bit<32> MainControlT_tmp_11
-	bit<16> MainControlT_tmp_12
 	bit<16> MainControlT_tmp_13
 	bit<16> MainControlT_tmp_14
 	bit<16> MainControlT_tmp_15
@@ -50,9 +46,7 @@ action execute_1 args none {
 	and m.MainControlT_tmp_3 0xf
 	mov m.MainControlT_tmp_4 h.vlan_tag_0.pcp_cfi_vid
 	shr m.MainControlT_tmp_4 0x4
-	mov m.MainControlT_tmp_5 m.MainControlT_tmp_4
-	mov m.MainControlT_tmp_6 m.MainControlT_tmp_5
-	mov m.MainControlT_tmp_7 m.MainControlT_tmp_6
+	mov m.MainControlT_tmp_7 m.MainControlT_tmp_4
 	shl m.MainControlT_tmp_7 0x4
 	mov m.MainControlT_tmp_8 m.MainControlT_tmp_7
 	and m.MainControlT_tmp_8 0xfff0
@@ -64,9 +58,7 @@ action execute_1 args none {
 	and m.MainControlT_tmp_9 0xf
 	mov m.MainControlT_tmp_10 h.vlan_tag_0.pcp_cfi_vid
 	shr m.MainControlT_tmp_10 0x4
-	mov m.MainControlT_tmp_11 m.MainControlT_tmp_10
-	mov m.MainControlT_tmp_12 m.MainControlT_tmp_11
-	mov m.MainControlT_tmp_13 m.MainControlT_tmp_12
+	mov m.MainControlT_tmp_13 m.MainControlT_tmp_10
 	shl m.MainControlT_tmp_13 0x4
 	mov m.MainControlT_tmp_14 m.MainControlT_tmp_13
 	and m.MainControlT_tmp_14 0xfff0

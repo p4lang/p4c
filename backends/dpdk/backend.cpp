@@ -137,6 +137,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     PassManager post_code_gen = {
         new EliminateUnusedAction(),
         new DpdkAsmOptimization,
+        new CopyPropagationAndElimination(typeMap),
         new CollectUsedMetadataField(used_fields),
         new RemoveUnusedMetadataFields(used_fields),
         new ValidateTableKeys(),

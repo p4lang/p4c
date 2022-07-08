@@ -53,16 +53,11 @@ struct metadata_t {
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<32> local_metadata_port_out
 	bit<32> IngressParser_parser_tmp
-	bit<32> Ingress_tmp
-	bit<32> Ingress_tmp_0
-	bit<32> Ingress_tmp_1
 	bit<8> Ingress_tmp_2
 	bit<8> Ingress_tmp_3
 	bit<8> Ingress_tmp_4
 	bit<16> Ingress_tmp_5
-	bit<32> Ingress_tmp_6
 	bit<32> Ingress_tmp_7
-	bit<16> Ingress_tmp_8
 	bit<16> Ingress_tmp_9
 	bit<32> Ingress_color_out
 	bit<32> Ingress_color_in
@@ -101,14 +96,12 @@ action execute_1 args instanceof execute_1_arg_t {
 	LABEL_FALSE_1 :	mov m.Ingress_tmp_10 0x0
 	LABEL_END_1 :	mov m.local_metadata_port_out m.Ingress_tmp_10
 	regwr reg_0 t.index m.local_metadata_port_out
-	mov m.Ingress_tmp h.ipv4.hdrChecksum
-	jmpneq LABEL_END_2 m.Ingress_tmp 0x6
+	jmpneq LABEL_END_2 h.ipv4.hdrChecksum 0x6
 	mov m.Ingress_tmp_3 h.ipv4.version_ihl
 	and m.Ingress_tmp_3 0xf
 	mov h.ipv4.version_ihl m.Ingress_tmp_3
 	or h.ipv4.version_ihl 0x50
-	LABEL_END_2 :	mov m.Ingress_tmp_0 h.ipv4.version_ihl
-	jmpneq LABEL_END_3 m.Ingress_tmp_0 0x6
+	LABEL_END_2 :	jmpneq LABEL_END_3 h.ipv4.version_ihl 0x6
 	mov m.Ingress_tmp_4 h.ipv4.version_ihl
 	and m.Ingress_tmp_4 0xf
 	mov h.ipv4.version_ihl m.Ingress_tmp_4
@@ -145,15 +138,12 @@ apply {
 	regadd counter1_0 0x200 1
 	regadd counter2_0 0x3ff 0x40
 	regrd m.local_metadata_port_out reg_0 0x1
-	mov m.Ingress_tmp_1 h.ipv4.version_ihl
-	jmpneq LABEL_END m.Ingress_tmp_1 0x4
+	jmpneq LABEL_END h.ipv4.version_ihl 0x4
 	mov m.Ingress_tmp_5 h.ipv4.hdrChecksum
 	and m.Ingress_tmp_5 0xfff0
-	mov m.Ingress_tmp_6 h.ipv4.version_ihl
-	mov m.Ingress_tmp_7 m.Ingress_tmp_6
+	mov m.Ingress_tmp_7 h.ipv4.version_ihl
 	add m.Ingress_tmp_7 0x5
-	mov m.Ingress_tmp_8 m.Ingress_tmp_7
-	mov m.Ingress_tmp_9 m.Ingress_tmp_8
+	mov m.Ingress_tmp_9 m.Ingress_tmp_7
 	and m.Ingress_tmp_9 0xf
 	mov h.ipv4.hdrChecksum m.Ingress_tmp_5
 	or h.ipv4.hdrChecksum m.Ingress_tmp_9
