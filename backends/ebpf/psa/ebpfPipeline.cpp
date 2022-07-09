@@ -27,8 +27,10 @@ bool EBPFPipeline::isEmpty() const {
     }
 
     auto startState = parser->parserBlock->container->states.at(0);
-    auto pathExpr = startState->selectExpression->to<IR::PathExpression>()->path;
-    if (!startState->components.empty() || pathExpr->name.name != IR::ParserState::accept) {
+    auto path = startState->selectExpression->to<IR::PathExpression>();
+    if (!path)
+        return false;
+    if (!startState->components.empty() || path->path->name.name != IR::ParserState::accept) {
         return false;
     }
 
