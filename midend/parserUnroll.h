@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef _MIDEND_PARSERUNROLL_H_
 #define _MIDEND_PARSERUNROLL_H_
 
-#include <variant>
 #include <unordered_map>
 
 #include "ir/ir.h"
