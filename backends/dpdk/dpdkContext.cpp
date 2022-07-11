@@ -132,10 +132,10 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                     auto value = counter_type->to<IR::Constant>()->asUnsigned();
                     switch (value) {
                         case 0:
-                            externAttr.counterType = "bytes";
+                            externAttr.counterType = "packets";
                             break;
                         case 1:
-                             externAttr.counterType = "packets";
+                             externAttr.counterType = "bytes";
                             break;
                         case 2:
                              externAttr.counterType = "packets_and_bytes";
