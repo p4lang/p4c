@@ -239,7 +239,7 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
         "when it can inline the subparser's states only once for multiple\n"
         "invocations of the same subparser instance.");
     registerOption(
-        "--noIncludes", "condition",
+        "--doNotEmitIncludes", "condition",
         [this](const char* arg) {
             noIncludes = arg;
             return true;
