@@ -234,7 +234,7 @@ class ShortenTokenLength : public Transform {
     }
 
     const IR::Node* preorder(IR::DpdkHeaderType *h) override {
-        h->name = shortenString(h->name, 30);
+        h->name = shortenString(h->name);
         IR::IndexedVector<IR::StructField> changedFields;
         for (auto field : h->fields) {
              IR::StructField *f = new IR::StructField(field->name, field->type);
@@ -280,14 +280,24 @@ class ShortenTokenLength : public Transform {
         return s;
     }
 
-    const IR::Node* preorder(IR::DpdkLearnStatement *ls) override{
+    const IR::Node* preorder(IR::DpdkLearnStatement *ls) override {
         ls->action = shortenString(ls->action);
         return ls;
     }
 
-    const IR::Node* preorder(IR::DpdkApplyStatement *as) override{
+    const IR::Node* preorder(IR::DpdkApplyStatement *as) override {
         as->table = shortenString(as->table);
         return as;
+    }
+
+    const IR::Node* preorder(IR::DpdkJmpStatement *j) override {
+        j->label = shortenString(j->label);
+        return j;
+    }
+
+    const IR::Node* preorder(IR::DpdkLabelStatement *ls) override {
+        ls->label = shortenString(ls->label);
+        return ls;
     }
 };
 
