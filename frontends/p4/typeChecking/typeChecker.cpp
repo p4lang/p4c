@@ -1811,17 +1811,13 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
         return result;
     } else if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_Bits>()) {
         auto e = expression->clone();
-        auto cst = expression->left->to<IR::Constant>();
-        CHECK_NULL(cst);
-        e->left = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
+        e->left = new IR::Cast(e->left->srcInfo, rtype, e->left);
         setType(e->left, rtype);
         ltype = rtype;
         expression = e;
     } else if (rtype->is<IR::Type_InfInt>() && ltype->is<IR::Type_Bits>()) {
         auto e = expression->clone();
-        auto cst = expression->right->to<IR::Constant>();
-        CHECK_NULL(cst);
-        e->right = new IR::Constant(cst->srcInfo, ltype, cst->value, cst->base);
+        e->right = new IR::Cast(e->right->srcInfo, ltype, e->right);
         setType(e->right, ltype);
         rtype = ltype;
         expression = e;
