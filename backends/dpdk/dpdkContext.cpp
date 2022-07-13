@@ -122,9 +122,9 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 externAttr.externType = externTypeName;
                 if (externTypeName == "Counter") {
                     if (ed->arguments->size() != 2) {
-                        ::error(ErrorType::ERR_EXPECTED,
-                                "%1%: expected number of counters and type of counter"
-                                "as arguments", ed);
+                        ::error(ErrorType::ERR_UNEXPECTED,
+                                "%1%: expected 2 arguments, number of counters and type"
+                                "of counter", ed);
                     }
                     auto counter_type = ed->arguments->at(1)->expression;
                     BUG_CHECK(counter_type->is<IR::Constant>(),
