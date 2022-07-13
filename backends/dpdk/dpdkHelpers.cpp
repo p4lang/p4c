@@ -908,37 +908,46 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         } else if (a->originalExternType->getName().name == "packet_in") {
             if (a->method->getName().name == "extract") {
                 auto args = a->expr->arguments;
-                if (args->size() == 1) {
+                if (args->size() == 1 || args->size() == 2) {
                     auto header = args->at(0);
-                    if (header->expression->is<IR::Member>() ||
+                    if (!(header->expression->is<IR::Member>() ||
                         header->expression->is<IR::PathExpression>() ||
-                        header->expression->is<IR::ArrayIndex>()) {
-                        add_instr(new IR::DpdkExtractStatement(header->expression));
-                    } else {
+                        header->expression->is<IR::ArrayIndex>())) {
                         ::error(ErrorType::ERR_UNSUPPORTED, "%1% is not supported", s);
                     }
-                } else if (args->size() == 2) {
-                    auto header = args->at(0);
-                    auto length = args->at(1);
-                    /**
-                     * Extract instruction of DPDK target expects the second argument
-                     * (size of the varbit field of the header) to be the number of bytes
-                     * to be extracted while in P4 it is the number of bits to be extracted.
-                     * We need to compute the size in bytes.
-                     *
-                     * @warning If the value is not aligned to 8 bits, the remainder after
-                     * division is dropped during runtime (this is a target limitation).
-                     */
-                    IR::ID tmpName(refmap->newName(
-                            length->expression->to<IR::Member>()->member.name + "_extract_tmp"));
-                    BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
-                    metadataStruct->fields.push_back(
-                            new IR::StructField(tmpName, length->expression->type));
-                    auto tmpMember = new IR::Member(new IR::PathExpression("m"), tmpName);
-                    add_instr(new IR::DpdkMovStatement(tmpMember, length->expression));
-                    add_instr(new IR::DpdkShrStatement(tmpMember, tmpMember,
-                            new IR::PathExpression("0x3")));
-                    add_instr(new IR::DpdkExtractStatement(header->expression, tmpMember));
+                    if (args->size() == 1) {
+                        add_instr(new IR::DpdkExtractStatement(header->expression));
+                    } else {
+                        auto header = args->at(0);
+                        auto length = args->at(1);
+                        /**
+                         * Extract instruction of DPDK target expects the second argument
+                         * (size of the varbit field of the header) to be the number of bytes
+                         * to be extracted while in P4 it is the number of bits to be extracted.
+                         * We need to compute the size in bytes.
+                         *
+                         * @warning If the value is not aligned to 8 bits, the remainder after
+                         * division is dropped during runtime (this is a target limitation).
+                         */
+                        cstring baseName = "";
+                        if (length->expression->is<IR::Constant>()) {
+                                   baseName = "varbit";
+                         } else if (length->expression->is<IR::Member>()) {
+                             baseName = length->expression->to<IR::Member>()->member.name;
+                         } else {
+                             ::error(ErrorType::ERR_UNSUPPORTED, "%1% is not supported", s);
+                         }
+
+                        IR::ID tmpName(refmap->newName(baseName + "_extract_tmp"));
+                        BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                        metadataStruct->fields.push_back(
+                                new IR::StructField(tmpName, length->expression->type));
+                        auto tmpMember = new IR::Member(new IR::PathExpression("m"), tmpName);
+                        add_instr(new IR::DpdkMovStatement(tmpMember, length->expression));
+                        add_instr(new IR::DpdkShrStatement(tmpMember, tmpMember,
+                                new IR::PathExpression("0x3")));
+                        add_instr(new IR::DpdkExtractStatement(header->expression, tmpMember));
+                    }
                 }
             }
         } else if (a->originalExternType->getName().name == "Meter") {
