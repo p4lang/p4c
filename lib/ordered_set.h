@@ -99,11 +99,11 @@ class ordered_set {
         // have a set of ordered_sets (or use ordered_set as a map key).
         auto it = a.data_map.begin();
         for (auto &el : data_map) {
-            if (it == a.data_map.end()) return true;
+            if (it == a.data_map.end()) return false;
             if (mapcmp()(el.first, it->first)) return true;
             if (mapcmp()(it->first, el.first)) return false;
             ++it; }
-        return false; }
+        return it != a.data_map.end(); }
 
     // FIXME add allocator and comparator ctors...
 
