@@ -945,7 +945,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                         auto tmpMember = new IR::Member(new IR::PathExpression("m"), tmpName);
                         add_instr(new IR::DpdkMovStatement(tmpMember, length->expression));
                         add_instr(new IR::DpdkShrStatement(tmpMember, tmpMember,
-                                new IR::PathExpression("0x3")));
+                                new IR::Constant(0x3)));
                         add_instr(new IR::DpdkExtractStatement(header->expression, tmpMember));
                     }
                 }
