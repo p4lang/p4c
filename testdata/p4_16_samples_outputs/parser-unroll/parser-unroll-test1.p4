@@ -45,7 +45,7 @@ struct headers {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     int<32> index;
-    state start {
+    @name(".start") state start {
         transition parse_ethernet;
     }
     state parse_ethernet {

@@ -36,7 +36,6 @@ struct user_meta_data_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<48> local_metadata_addr
-	bit<32> Ingress_tmp
 	bit<48> Ingress_tmp1
 }
 metadata instanceof user_meta_data_t
@@ -75,8 +74,7 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
-	mov m.Ingress_tmp m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_egress_port m.Ingress_tmp
+	mov m.psa_ingress_output_metadata_egress_port m.psa_ingress_input_metadata_ingress_port
 	xor m.psa_ingress_output_metadata_egress_port 0x1
 	table stub
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0

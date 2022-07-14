@@ -60,7 +60,7 @@ parser MyParser(packet_in packet,
     
     int<32>                 index;
 
-    state start {
+    @name (".start") state start {
         transition parse_ethernet;
     }
 

@@ -28,28 +28,18 @@ struct main_metadata_t {
 	bit<32> MainControlT_tmp_3
 	bit<16> MainControlT_tmp_4
 	bit<16> MainControlT_tmp_5
-	bit<32> MainControlT_tmp_6
-	bit<32> MainControlT_tmp_7
-	bit<16> MainControlT_tmp_8
 	bit<16> MainControlT_tmp_9
 	bit<16> MainControlT_tmp_10
 	bit<16> MainControlT_tmp_11
 	bit<16> MainControlT_tmp_12
-	bit<32> MainControlT_tmp_13
-	bit<32> MainControlT_tmp_14
-	bit<16> MainControlT_tmp_15
 	bit<16> MainControlT_tmp_16
 	bit<16> MainControlT_tmp_17
 	bit<16> MainControlT_tmp_18
 	bit<16> MainControlT_tmp_19
-	bit<32> MainControlT_tmp_20
-	bit<16> MainControlT_tmp_21
 	bit<16> MainControlT_tmp_22
 	bit<16> MainControlT_tmp_23
 	bit<16> MainControlT_tmp_24
 	bit<16> MainControlT_tmp_25
-	bit<32> MainControlT_tmp_26
-	bit<16> MainControlT_tmp_27
 	bit<16> MainControlT_tmp_28
 	bit<16> MainControlT_tmp_29
 	bit<16> MainControlT_tmp_30
@@ -90,10 +80,7 @@ action execute_1 args none {
 	and m.MainControlT_tmp_4 0xf
 	mov m.MainControlT_tmp_5 h.vlan_tag_0.pcp_cfi_vid
 	shr m.MainControlT_tmp_5 0x3
-	mov m.MainControlT_tmp_6 m.MainControlT_tmp_5
-	mov m.MainControlT_tmp_7 m.MainControlT_tmp_6
-	mov m.MainControlT_tmp_8 m.MainControlT_tmp_7
-	mov m.MainControlT_tmp_9 m.MainControlT_tmp_8
+	mov m.MainControlT_tmp_9 m.MainControlT_tmp_5
 	shl m.MainControlT_tmp_9 0x4
 	mov m.MainControlT_tmp_10 m.MainControlT_tmp_9
 	and m.MainControlT_tmp_10 0xfff0
@@ -105,10 +92,7 @@ action execute_1 args none {
 	and m.MainControlT_tmp_11 0xf
 	mov m.MainControlT_tmp_12 h.vlan_tag_1.pcp_cfi_vid
 	shr m.MainControlT_tmp_12 0x3
-	mov m.MainControlT_tmp_13 m.MainControlT_tmp_12
-	mov m.MainControlT_tmp_14 m.MainControlT_tmp_13
-	mov m.MainControlT_tmp_15 m.MainControlT_tmp_14
-	mov m.MainControlT_tmp_16 m.MainControlT_tmp_15
+	mov m.MainControlT_tmp_16 m.MainControlT_tmp_12
 	shl m.MainControlT_tmp_16 0x4
 	mov m.MainControlT_tmp_17 m.MainControlT_tmp_16
 	and m.MainControlT_tmp_17 0xfff0
@@ -119,9 +103,7 @@ action execute_1 args none {
 	and m.MainControlT_tmp_18 0xf
 	mov m.MainControlT_tmp_19 h.vlan_tag_1.pcp_cfi_vid
 	shr m.MainControlT_tmp_19 0x4
-	mov m.MainControlT_tmp_20 m.MainControlT_tmp_19
-	mov m.MainControlT_tmp_21 m.MainControlT_tmp_20
-	mov m.MainControlT_tmp_22 m.MainControlT_tmp_21
+	mov m.MainControlT_tmp_22 m.MainControlT_tmp_19
 	shl m.MainControlT_tmp_22 0x4
 	mov m.MainControlT_tmp_23 m.MainControlT_tmp_22
 	and m.MainControlT_tmp_23 0xfff0
@@ -133,9 +115,7 @@ action execute_1 args none {
 	and m.MainControlT_tmp_24 0xf
 	mov m.MainControlT_tmp_25 h.vlan_tag_1.pcp_cfi_vid
 	shr m.MainControlT_tmp_25 0x4
-	mov m.MainControlT_tmp_26 m.MainControlT_tmp_25
-	mov m.MainControlT_tmp_27 m.MainControlT_tmp_26
-	mov m.MainControlT_tmp_28 m.MainControlT_tmp_27
+	mov m.MainControlT_tmp_28 m.MainControlT_tmp_25
 	shl m.MainControlT_tmp_28 0x4
 	mov m.MainControlT_tmp_29 m.MainControlT_tmp_28
 	and m.MainControlT_tmp_29 0xfff0

@@ -56,11 +56,8 @@ struct metadata_t {
 	bit<32> local_metadata_port_out
 	bit<32> local_metadata_temp
 	bit<8> IngressParser_parser_tmp
-	bit<32> IngressParser_parser_tmp_0
 	bit<8> IngressParser_parser_tmp_1
 	bit<32> IngressParser_parser_tmp_2
-	bit<32> Ingress_tmp
-	bit<32> Ingress_tmp_0
 	bit<8> Ingress_tmp_1
 	bit<8> Ingress_tmp_2
 	bit<8> Ingress_tmp_3
@@ -68,9 +65,7 @@ struct metadata_t {
 	bit<8> Ingress_tmp_5
 	bit<8> Ingress_tmp_6
 	bit<16> Ingress_tmp_7
-	bit<32> Ingress_tmp_8
 	bit<32> Ingress_tmp_9
-	bit<16> Ingress_tmp_10
 	bit<16> Ingress_tmp_11
 	bit<32> Ingress_color_out
 	bit<32> Ingress_color_in
@@ -109,8 +104,7 @@ action execute_1 args instanceof execute_1_arg_t {
 	LABEL_FALSE_2 :	mov m.Ingress_tmp_12 0x0
 	LABEL_END_3 :	mov m.local_metadata_port_out m.Ingress_tmp_12
 	regwr reg_0 t.index m.local_metadata_port_out
-	mov m.Ingress_tmp h.ipv4._version0__ihl1
-	jmpneq LABEL_END_4 m.Ingress_tmp 0x6
+	jmpneq LABEL_END_4 h.ipv4._version0__ihl1 0x6
 	mov m.Ingress_tmp_2 h.ipv4._version0__ihl1
 	and m.Ingress_tmp_2 0xf
 	mov h.ipv4._version0__ihl1 m.Ingress_tmp_2
@@ -158,8 +152,7 @@ apply {
 	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	mov m.IngressParser_parser_tmp h.ipv4._version0__ihl1
 	shr m.IngressParser_parser_tmp 0x4
-	mov m.IngressParser_parser_tmp_0 m.IngressParser_parser_tmp
-	jmpeq LABEL_TRUE m.IngressParser_parser_tmp_0 0x5
+	jmpeq LABEL_TRUE m.IngressParser_parser_tmp 0x5
 	mov m.IngressParser_parser_tmp_1 0x0
 	jmp LABEL_END
 	LABEL_TRUE :	mov m.IngressParser_parser_tmp_1 0x1
@@ -175,15 +168,12 @@ apply {
 	regadd counter1_0 0x200 1
 	regadd counter2_0 0x3ff 0x40
 	regrd m.local_metadata_port_out reg_0 0x1
-	mov m.Ingress_tmp_0 h.ipv4._version0__ihl1
-	jmpneq LABEL_END_1 m.Ingress_tmp_0 0x4
+	jmpneq LABEL_END_1 h.ipv4._version0__ihl1 0x4
 	mov m.Ingress_tmp_7 h.ipv4._hdrChecksum9
 	and m.Ingress_tmp_7 0xfff0
-	mov m.Ingress_tmp_8 h.ipv4._version0__ihl1
-	mov m.Ingress_tmp_9 m.Ingress_tmp_8
+	mov m.Ingress_tmp_9 h.ipv4._version0__ihl1
 	add m.Ingress_tmp_9 0x5
-	mov m.Ingress_tmp_10 m.Ingress_tmp_9
-	mov m.Ingress_tmp_11 m.Ingress_tmp_10
+	mov m.Ingress_tmp_11 m.Ingress_tmp_9
 	and m.Ingress_tmp_11 0xf
 	mov h.ipv4._hdrChecksum9 m.Ingress_tmp_7
 	or h.ipv4._hdrChecksum9 m.Ingress_tmp_11

@@ -152,7 +152,7 @@ class ErrorReporter {
         msg = ::error_helper(fmt, msg, args...);
         emit_message(msg);
 
-        if (errorCount >= maxErrorCount)
+        if (errorCount > maxErrorCount)
             FATAL_ERROR("Number of errors exceeded set maximum of %1%", maxErrorCount);
     }
 

@@ -28,22 +28,16 @@ struct main_metadata_t {
 	bit<32> MainControlT_tmp_4
 	bit<16> MainControlT_tmp_5
 	bit<16> MainControlT_tmp_6
-	bit<32> MainControlT_tmp_7
-	bit<16> MainControlT_tmp_8
 	bit<16> MainControlT_tmp_9
 	bit<16> MainControlT_tmp_10
 	bit<16> MainControlT_tmp_11
-	bit<16> MainControlT_tmp_12
 	bit<16> MainControlT_tmp_13
 	bit<16> MainControlT_tmp_14
 	bit<16> MainControlT_tmp_15
 	bit<16> MainControlT_tmp_16
-	bit<32> MainControlT_tmp_17
-	bit<16> MainControlT_tmp_18
 	bit<16> MainControlT_tmp_19
 	bit<16> MainControlT_tmp_20
 	bit<16> MainControlT_tmp_21
-	bit<16> MainControlT_tmp_22
 	bit<16> MainControlT_tmp_23
 	bit<16> MainControlT_tmp_24
 	bit<16> MainControlT_tmp_25
@@ -68,9 +62,7 @@ action execute_1 args none {
 	and m.MainControlT_tmp_5 0xf
 	mov m.MainControlT_tmp_6 h.vlan_tag_1.pcp_cfi_vid
 	shr m.MainControlT_tmp_6 0x4
-	mov m.MainControlT_tmp_7 m.MainControlT_tmp_6
-	mov m.MainControlT_tmp_8 m.MainControlT_tmp_7
-	mov m.MainControlT_tmp_9 m.MainControlT_tmp_8
+	mov m.MainControlT_tmp_9 m.MainControlT_tmp_6
 	shl m.MainControlT_tmp_9 0x4
 	mov m.MainControlT_tmp_10 m.MainControlT_tmp_9
 	and m.MainControlT_tmp_10 0xfff0
@@ -82,8 +74,7 @@ action execute_1 args none {
 	jmplt LABEL_END_3 m.MainControlT_tmp 0x1
 	mov m.MainControlT_tmp_11 h.vlan_tag_0.pcp_cfi_vid
 	and m.MainControlT_tmp_11 0xf
-	mov m.MainControlT_tmp_12 m.MainControlT_hsVar
-	mov m.MainControlT_tmp_13 m.MainControlT_tmp_12
+	mov m.MainControlT_tmp_13 m.MainControlT_hsVar
 	shl m.MainControlT_tmp_13 0x4
 	mov m.MainControlT_tmp_14 m.MainControlT_tmp_13
 	and m.MainControlT_tmp_14 0xfff0
@@ -98,9 +89,7 @@ action execute_1 args none {
 	and m.MainControlT_tmp_15 0xf
 	mov m.MainControlT_tmp_16 h.vlan_tag_0.pcp_cfi_vid
 	shr m.MainControlT_tmp_16 0x4
-	mov m.MainControlT_tmp_17 m.MainControlT_tmp_16
-	mov m.MainControlT_tmp_18 m.MainControlT_tmp_17
-	mov m.MainControlT_tmp_19 m.MainControlT_tmp_18
+	mov m.MainControlT_tmp_19 m.MainControlT_tmp_16
 	shl m.MainControlT_tmp_19 0x4
 	mov m.MainControlT_tmp_20 m.MainControlT_tmp_19
 	and m.MainControlT_tmp_20 0xfff0
@@ -116,8 +105,7 @@ action execute_1 args none {
 	jmplt LABEL_END_3 m.MainControlT_tmp_2 0x1
 	mov m.MainControlT_tmp_21 h.vlan_tag_1.pcp_cfi_vid
 	and m.MainControlT_tmp_21 0xf
-	mov m.MainControlT_tmp_22 m.MainControlT_hsVar
-	mov m.MainControlT_tmp_23 m.MainControlT_tmp_22
+	mov m.MainControlT_tmp_23 m.MainControlT_hsVar
 	shl m.MainControlT_tmp_23 0x4
 	mov m.MainControlT_tmp_24 m.MainControlT_tmp_23
 	and m.MainControlT_tmp_24 0xfff0

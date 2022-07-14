@@ -38,12 +38,9 @@ struct EMPTY_M {
 	bit<32> local_metadata_depth
 	bit<16> local_metadata_ret
 	bit<16> Ingress_tmp
-	bit<32> Ingress_tmp_0
 	bit<16> Ingress_tmp_1
-	bit<32> Ingress_tmp_2
 	bit<16> Ingress_tmp_3
 	bit<16> Ingress_tmp_4
-	bit<16> Ingress_tmp_5
 	bit<16> Ingress_hsVar
 	bit<32> Ingress_hsVar_0
 	bit<32> Ingress_vid
@@ -90,14 +87,12 @@ apply {
 	MYIP_ACCEPT :	jmpneq LABEL_FALSE m.local_metadata_depth 0x0
 	mov m.Ingress_tmp h.vlan_tag_0.pcp_cfi_vid
 	shr m.Ingress_tmp 0x4
-	mov m.Ingress_tmp_0 m.Ingress_tmp
-	mov m.local_metadata_ret m.Ingress_tmp_0
+	mov m.local_metadata_ret m.Ingress_tmp
 	jmp LABEL_END_0
 	LABEL_FALSE :	jmpneq LABEL_FALSE_0 m.local_metadata_depth 0x1
 	mov m.Ingress_tmp_1 h.vlan_tag_1.pcp_cfi_vid
 	shr m.Ingress_tmp_1 0x4
-	mov m.Ingress_tmp_2 m.Ingress_tmp_1
-	mov m.local_metadata_ret m.Ingress_tmp_2
+	mov m.local_metadata_ret m.Ingress_tmp_1
 	jmp LABEL_END_0
 	LABEL_FALSE_0 :	jmplt LABEL_END_0 m.local_metadata_depth 0x1
 	mov m.local_metadata_ret m.Ingress_hsVar
@@ -115,8 +110,7 @@ apply {
 	jmp LABEL_END_4
 	LABEL_FALSE_4 :	jmplt LABEL_END_4 m.local_metadata_depth 0x1
 	mov m.Ingress_vid m.Ingress_hsVar_0
-	LABEL_END_4 :	mov m.Ingress_tmp_5 m.Ingress_vid
-	mov m.local_metadata_ret m.Ingress_tmp_5
+	LABEL_END_4 :	mov m.local_metadata_ret m.Ingress_vid
 	add m.local_metadata_ret 0x5
 	table tbl
 	LABEL_END_3 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0

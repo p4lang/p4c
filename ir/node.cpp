@@ -14,11 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// If you want to use 'raise' below to trace a node creation uncomment the next line
+// #include <signal.h>
+
 #include "ir.h"
 #include "ir/json_loader.h"
 
 #include "node.h"
-// #include <signal.h>
 
 void IR::Node::traceVisit(const char* visitor) const
 { LOG3("Visiting " << visitor << " " << id << ":" << node_type_name()); }

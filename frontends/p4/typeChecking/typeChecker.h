@@ -50,10 +50,10 @@ class ClearTypeMap : public Inspector {
     }
 };
 
-// Performs together reference resolution and type checking by calling
-// TypeInference.  If updateExpressions is true, after type checking
-// it will update all Expression objects, writing the result type into
-// the Expression::type field.
+/// Performs together reference resolution and type checking by calling
+/// TypeInference.  If updateExpressions is true, after type checking
+/// it will update all Expression objects, writing the result type into
+/// the Expression::type field.
 class TypeChecking : public PassManager {
  public:
     TypeChecking(/* out */ReferenceMap* refMap, /* out */TypeMap* typeMap,

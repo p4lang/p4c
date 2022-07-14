@@ -17,15 +17,17 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_TERNARYBOOL_H_
 #define _FRONTENDS_P4_TERNARYBOOL_H_
 
-namespace P4 {
+#include "lib/cstring.h"
 
-    enum class TernaryBool {
-        Yes,
-        No,
-        Maybe
-    };
+namespace P4 {
+enum class TernaryBool {
+    Yes,
+    No,
+    Maybe
+};
+
+cstring toString(const TernaryBool& c);
 
 }  // namespace P4
 
 #endif  /* _FRONTENDS_P4_TERNARYBOOL_H_ */
-

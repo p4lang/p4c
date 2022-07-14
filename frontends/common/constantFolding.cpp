@@ -215,7 +215,7 @@ const IR::Node* DoConstantFolding::preorder(IR::ArrayIndex* e) {
         return e;
     auto orig = getOriginal<IR::ArrayIndex>();
     auto type = typeMap->getType(orig->left, true);
-    if (type->is<IR::Type_Tuple>()) {
+    if (type->is<IR::Type_BaseList>()) {
         auto init = getConstant(e->right);
         if (init == nullptr) {
             if (typesKnown)

@@ -6,17 +6,17 @@
 
 namespace P4 {
 
-StackVariable::StackVariable(const IR::Expression* expr) : member(nullptr) {
+StackVariable::StackVariable(const IR::Expression* expr) : variable(expr) {
     CHECK_NULL(expr);
     BUG_CHECK(repOk(expr), "Invalid stack variable %1%", expr);
-    member = expr->checkedTo<IR::Member>();
+    variable = expr;
 }
 
 bool StackVariable::repOk(const IR::Expression* expr) {
-    // Only members can be stack variables.
+    // Only members and path expression can be stack variables.
     const auto* member = expr->to<IR::Member>();
     if (member == nullptr) {
-        return false;
+        return expr->is<IR::PathExpression>();
     }
 
     // A member is a stack variable if it is qualified by a PathExpression or if its qualifier is a
@@ -26,11 +26,15 @@ bool StackVariable::repOk(const IR::Expression* expr) {
 
 bool StackVariable::operator==(const StackVariable& other) const {
     // Delegate to IR's notion of equality.
-    return member->equiv(*other.member);
+    return variable->equiv(*other.variable);
 }
 
 size_t StackVariableHash::operator()(const StackVariable& var) const {
-    const IR::Member* curMember = var.operator->();
+    // hash for path expression.
+    if (const auto* path = var.variable->to<IR::PathExpression>()) {
+        return Util::Hash::fnv1a<const cstring>(path->path->name.name);
+    }
+    const IR::Member* curMember = var.variable->to<IR::Member>();
     std::vector<size_t> h;
     while (curMember) {
         h.push_back(Util::Hash::fnv1a<const cstring>(curMember->member.name));
@@ -70,7 +74,7 @@ struct VisitedKey {
             return true;
         if (name > e.name)
             return false;
-        std::map<StackVariable, std::pair<size_t, size_t> > mp;
+        std::unordered_map<StackVariable, std::pair<size_t, size_t>, StackVariableHash > mp;
         for (auto& i1 : indexes)
             mp.emplace(i1.first, std::make_pair(i1.second, -1));
         for (auto& i2 : e.indexes) {
@@ -179,7 +183,7 @@ class ParserStateRewriter : public Transform {
     IR::Node* postorder(IR::Member* expression) {
         if (!afterExec)
             return expression;
-        auto basetype = getTypeArray(expression->expr);
+        auto basetype = getTypeArray(getOriginal<IR::Member>()->expr);
         if (basetype->is<IR::Type_Stack>()) {
             auto l = afterExec->get(expression->expr);
             BUG_CHECK(l->is<SymbolicArray>(), "%1%: expected an array", l);
@@ -389,7 +393,7 @@ class ParserSymbolicInterpreter {
     }
 
     /// Executes symbolically the specified statement.
-    /// Returns pointer to genereted statement if execution completes successfully,
+    /// Returns pointer to generated statement if execution completes successfully,
     /// and 'nullptr' if an error occurred.
     const IR::StatOrDecl* executeStatement(ParserStateInfo* state, const IR::StatOrDecl* sord,
                                            ValueMap* valueMap) {
@@ -442,7 +446,7 @@ class ParserSymbolicInterpreter {
                       "Result of %1% is not defined: %2%", sord, errorStr.str());
         }
         ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
-                                         visitedStates);
+                                     visitedStates);
         const IR::Node* node = sord->apply(rewriter);
         newSord = node->to<IR::StatOrDecl>();
         LOG2("After " << sord << " state is\n" << valueMap);
@@ -624,7 +628,7 @@ class ParserSymbolicInterpreter {
     /// @param newStates is a set of parsers' names which were genereted.
     EvaluationStateResult evaluateState(ParserStateInfo* state,
                                         std::unordered_set<cstring> &newStates) {
-        LOG1("Analyzing " << state->state);
+        LOG1("Analyzing " << dbp(state->state));
         auto valueMap = state->before->clone();
         IR::IndexedVector<IR::StatOrDecl> components;
         IR::ID newName;
@@ -645,7 +649,9 @@ class ParserSymbolicInterpreter {
         auto result = evaluateSelect(state, valueMap);
         if (unroll) {
             BUG_CHECK(result.second, "Can't generate new selection %1%", state);
-            state->newState = new IR::ParserState(newName, components, result.second);
+            state->newState = new IR::ParserState(state->state->srcInfo, newName,
+                                                  state->state->annotations, components,
+                                                  result.second);
         }
         return EvaluationStateResult(result.first, true);
     }

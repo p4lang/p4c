@@ -60,7 +60,6 @@ class SimplifyDefUse : public PassManager {
         }
     };
 
-
  public:
     SimplifyDefUse(ReferenceMap* refMap, TypeMap* typeMap,
              TypeChecking* typeChecking = nullptr) {
