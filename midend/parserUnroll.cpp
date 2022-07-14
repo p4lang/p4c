@@ -200,7 +200,6 @@ class ParserStateRewriter : public Transform {
                 return new IR::Constant(IR::Type_Bits::get(32), idx);
             } else {
                 state->statesIndexes[expression->expr] = idx + offset;
-                std::cout << state->statesIndexes.size() << std::endl;
                 return new IR::ArrayIndex(expression->expr->clone(),
                                           new IR::Constant(IR::Type_Bits::get(32), idx + offset));
             }
