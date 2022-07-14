@@ -931,17 +931,17 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                          */
                         cstring baseName = "";
                         if (length->expression->is<IR::Constant>()) {
-                                   baseName = "varbit";
+                            baseName = "varbit";
                          } else if (length->expression->is<IR::Member>()) {
-                             baseName = length->expression->to<IR::Member>()->member.name;
+                            baseName = length->expression->to<IR::Member>()->member.name;
                          } else {
-                             ::error(ErrorType::ERR_UNSUPPORTED, "%1% is not supported", s);
+                            ::error(ErrorType::ERR_UNSUPPORTED, "%1% is not supported", s);
                          }
 
                         IR::ID tmpName(refmap->newName(baseName + "_extract_tmp"));
                         BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
                         metadataStruct->fields.push_back(
-                                new IR::StructField(tmpName, length->expression->type));
+                                     new IR::StructField(tmpName, length->expression->type));
                         auto tmpMember = new IR::Member(new IR::PathExpression("m"), tmpName);
                         add_instr(new IR::DpdkMovStatement(tmpMember, length->expression));
                         add_instr(new IR::DpdkShrStatement(tmpMember, tmpMember,
