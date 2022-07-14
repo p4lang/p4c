@@ -238,6 +238,13 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
         "When the optimization is enabled, compiler tries to identify the cases,\n"
         "when it can inline the subparser's states only once for multiple\n"
         "invocations of the same subparser instance.");
+    registerOption(
+        "--doNotEmitIncludes", "condition",
+        [this](const char* arg) {
+            noIncludes = arg;
+            return true;
+        },
+        "[Compiler debugging] If true do not generate #include statements\n");
     registerUsage(
         "loglevel format is: \"sourceFile:level,...,sourceFile:level\"\n"
         "where 'sourceFile' is a compiler source file and "
@@ -439,6 +446,9 @@ void ParserOptions::dumpPass(const char* manager, unsigned seq,
                 if (Log::verbose())
                     std::cerr << "Writing program to " << fileName << std::endl;
                 P4::ToP4 toP4(stream, Log::verbose(), file);
+                if (noIncludes) {
+                    toP4.setnoIncludesArg(true);
+                }
                 node->apply(toP4);
                 delete stream;  // close the file
             }

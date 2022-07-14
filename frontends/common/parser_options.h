@@ -93,6 +93,9 @@ class ParserOptions : public Util::Options {
     // list of possible relative paths.
     bool searchForIncludePath(const char*& includePathOut,
         std::vector<cstring> relativePaths, const char*);
+    /// If true do not generate #include statements.
+    /// Used for debugging.
+    bool noIncludes = false;
 };
 
 /// A compilation context which exposes compiler options and a compiler
