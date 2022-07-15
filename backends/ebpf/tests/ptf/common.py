@@ -105,9 +105,9 @@ class P4EbpfTest(BaseTest):
             self.add_port(dev=intf)
 
     def tearDown(self):
-        for intf in self.interfaces:
-            self.del_port(intf)
-        self.exec_ns_cmd("psabpf-ctl pipeline unload id {}".format(TEST_PIPELINE_ID))
+        # for intf in self.interfaces:
+        #     self.del_port(intf)
+        # self.exec_ns_cmd("psabpf-ctl pipeline unload id {}".format(TEST_PIPELINE_ID))
         super(P4EbpfTest, self).tearDown()
 
     def exec_ns_cmd(self, command='echo me', do_fail=None):

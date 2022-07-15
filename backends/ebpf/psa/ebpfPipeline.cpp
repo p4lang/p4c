@@ -568,6 +568,17 @@ void TCIngressPipeline::emitTrafficManager(CodeBuilder *builder) {
                           control->outputStandardMetadata->name.name);
     builder->newline();
 
+    builder->appendFormat("if (%s.drop == false && %s.egress_port == 0) ",
+                          control->outputStandardMetadata->name.name,
+                          control->outputStandardMetadata->name.name);
+    builder->blockStart();
+    builder->target->emitTraceMessage(builder,
+                                      "IngressTM: Sending packet up to the kernel stack");
+    builder->emitIndent();
+    builder->appendFormat("return %s", forwardReturnCode());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+
     cstring eg_port = Util::printf_format("%s.egress_port",
                                           control->outputStandardMetadata->name.name);
     cstring cos = Util::printf_format("%s.class_of_service",

@@ -592,3 +592,17 @@ class ConstEntryTernaryPSATest(P4EbpfTest):
         pkt[IP].dst = 0x11993355  # mask is 0xFF00FFFF
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
+
+
+class PassToKernelStackTest(P4EbpfTest):
+
+    p4_file_path = "p4testdata/pass-to-kernel.p4"
+
+    def runTest(self):
+        self.exec_ns_cmd("ip route add 10.0.0.1/32 dev eth1")
+        _, out, _ = self.exec_ns_cmd("ip route")
+        print(out)
+
+        pkt = testutils.simple_ip_packet(ip_dst="10.0.0.1")
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)

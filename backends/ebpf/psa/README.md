@@ -37,6 +37,12 @@ The TC-based design of PSA for eBPF is depicted in Figure below.
   
 ## Packet paths
 
+### NTK (Normal Packet To Kernel) 
+
+**WARNING!** The NTK packet path is a custom packet path used for the PSA-eBPF only! It is not a standardized PSA packet path. 
+
+The NTK packet path allows integrating P4/PSA programs for eBPF with 
+
 ### NFP (Normal Packet From Port)
 
 Packet arriving on an interface is intercepted in the XDP hook by the `xdp-helper` program. It performs pre-processing and

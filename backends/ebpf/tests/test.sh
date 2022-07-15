@@ -76,7 +76,7 @@ for i in "$@"; do
 done
 
 cleanup
-trap cleanup EXIT
+#trap cleanup EXIT
 
 # Remove any temporary files from previous run. It might be useful to
 # preserve these files after test run for inspection
