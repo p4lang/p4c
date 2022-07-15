@@ -93,4 +93,18 @@ TEST(ordered_set, set_intersect) {
     EXPECT_EQ(res, expect);
 }
 
+TEST(ordered_set, x_is_strict_prefix_of_y) {
+    ordered_set<unsigned> x;
+    x.insert(1);
+
+    ordered_set<unsigned> y;
+    y.insert(1);
+    EXPECT_FALSE(x < y);
+    EXPECT_FALSE(y < x);
+
+    y.insert(2);
+    EXPECT_TRUE(x < y);
+    EXPECT_FALSE(y < x);
+}
+
 }  // namespace Test
