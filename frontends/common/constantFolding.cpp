@@ -959,12 +959,14 @@ DoConstantFolding::setContains(const IR::Expression* keySet, const IR::Expressio
         // check if left & right == cst & right
         auto left = getConstant(mask->left);
         if (left == nullptr) {
-            ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant", left);
+            ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant",
+                    mask->left);
             return Result::DontKnow;
         }
         auto right = getConstant(mask->right);
         if (right == nullptr) {
-            ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant", right);
+            ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant",
+                    mask->right);
             return Result::DontKnow;
         }
         if ((left->to<IR::Constant>()->value & right->to<IR::Constant>()->value) ==
