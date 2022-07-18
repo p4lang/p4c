@@ -33,7 +33,7 @@ limitations under the License.
 #include "lib/json.h"
 #include "lib/log.h"
 #include "lib/null.h"
-#include "p4/config/v1/p4info.pb.h"
+#include "control-plane/p4/config/v1/p4info.pb.h"
 
 namespace p4configv1 = ::p4::config::v1;
 

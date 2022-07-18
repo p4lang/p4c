@@ -28,9 +28,9 @@ limitations under the License.
 #include <utility>
 #include <vector>
 
-#include "p4/config/v1/p4info.pb.h"
-#include "p4/config/v1/p4types.pb.h"
-#include "p4/v1/p4runtime.pb.h"
+#include "control-plane/p4/config/v1/p4info.pb.h"
+#include "control-plane/p4/config/v1/p4types.pb.h"
+#include "control-plane/p4/v1/p4runtime.pb.h"
 #pragma GCC diagnostic pop
 
 #include <boost/algorithm/string.hpp>
