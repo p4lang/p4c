@@ -649,9 +649,14 @@ class ParserSymbolicInterpreter {
         auto result = evaluateSelect(state, valueMap);
         if (unroll) {
             BUG_CHECK(result.second, "Can't generate new selection %1%", state);
-            state->newState = new IR::ParserState(state->state->srcInfo, newName,
-                                                  state->state->annotations, components,
-                                                  result.second);
+            if (state->name == newName) {
+                state->newState = new IR::ParserState(state->state->srcInfo, newName,
+                                                      state->state->annotations, components,
+                                                      result.second);
+            } else {
+                state->newState =
+                    new IR::ParserState(state->state->srcInfo, newName, components, result.second);
+            }
         }
         return EvaluationStateResult(result.first, true);
     }

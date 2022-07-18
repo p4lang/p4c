@@ -49,7 +49,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
             default: accept;
         }
     }
-    state parse_srcRouting {
+    @name(".parse_srcRouting") state parse_srcRouting {
         packet.extract<srcRoute_t>(hdr.srcRoutes[index_0]);
         index_0 = index_0 + 32s1;
         transition select(hdr.srcRoutes[index_0 + -32s1].bos) {
