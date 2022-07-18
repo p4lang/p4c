@@ -41,7 +41,10 @@ The TC-based design of PSA for eBPF is depicted in Figure below.
 
 **WARNING!** The NTK packet path is a custom packet path used for the PSA-eBPF only! It is not a standardized PSA packet path. 
 
-The NTK packet path allows integrating P4/PSA programs for eBPF with 
+The NTK packet path allows integrating P4/PSA programs for eBPF with the standard Linux kernel stack. The main use case is handling 
+ICMP/ARP requests and sending packet to the userspace process listening on a socket.
+
+The NTK path is enforced if `drop` is set to `false` and `egress_port` is left unspecified or set to 0. 
 
 ### NFP (Normal Packet From Port)
 

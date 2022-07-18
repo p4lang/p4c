@@ -76,7 +76,7 @@ for i in "$@"; do
 done
 
 cleanup
-#trap cleanup EXIT
+trap cleanup EXIT
 
 # Remove any temporary files from previous run. It might be useful to
 # preserve these files after test run for inspection
@@ -102,15 +102,19 @@ ip netns exec switch ip link add name psa_cpu type dummy
 ip netns exec switch ip link set dev psa_cpu up
 
 # Normal ports
+idx=1
 for intf in "${INTERFACES[@]}" ; do
   ip link add "s1-$intf" type veth peer name "$intf" netns switch
   ip netns exec switch ip link set "$intf" up
+  ip netns exec switch ifconfig "$intf" hw ether 00:00:00:00:00:0${idx}
   ip link set dev "s1-$intf" up
 
   # Disable trash traffic
   sysctl -w net.ipv6.conf."s1-$intf".disable_ipv6=1
   sysctl -w net.ipv6.conf."s1-$intf".autoconf=0
   sysctl -w net.ipv6.conf."s1-$intf".accept_ra=0
+
+  idx=$(expr $idx + 1)
 done
 
 # Disable trash traffic

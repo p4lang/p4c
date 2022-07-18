@@ -471,6 +471,11 @@ void EBPFEgressPipeline::emit(CodeBuilder *builder) {
 void TCIngressPipeline::emitGlobalMetadataInitializer(CodeBuilder *builder) {
     EBPFPipeline::emitGlobalMetadataInitializer(builder);
 
+    // if Traffic Manager decided to pass packet to the kernel stack earlier, send it up immediately
+    builder->emitIndent();
+    builder->append("if (compiler_meta__->pass_to_kernel == true) return TC_ACT_OK;");
+    builder->newline();
+
     // workaround to make TC protocol-independent, DO NOT REMOVE
     builder->emitIndent();
     // replace ether_type only if a packet comes from XDP
@@ -575,7 +580,18 @@ void TCIngressPipeline::emitTrafficManager(CodeBuilder *builder) {
     builder->target->emitTraceMessage(builder,
                                       "IngressTM: Sending packet up to the kernel stack");
     builder->emitIndent();
-    builder->appendFormat("return %s", forwardReturnCode());
+
+    // Since XDP helper re-writes EtherType for packets other than IPv4 (e.g., ARP)
+    // we cannot simply return TC_ACT_OK to pass the packet up to the kernel stack,
+    // because the kernel stack would receive a malformed packet (with invalid EtherType).
+    // The workaround is to send the packet back to the same interface. If we redirect,
+    // the packet will be re-written back to the original format.
+    // At the beginning of the pipeline we check if pass_to_kernel is true and, if so, return TC_ACT_OK.
+    // WARNING: this workaround may lead to packet re-ordering.
+    builder->newline();
+    builder->append("compiler_meta__->pass_to_kernel = true;");
+    builder->newline();
+    builder->append("return bpf_redirect(skb->ifindex, BPF_F_INGRESS)");
     builder->endOfStatement(true);
     builder->blockEnd(true);
 

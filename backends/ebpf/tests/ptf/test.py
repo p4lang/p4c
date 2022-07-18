@@ -19,7 +19,7 @@ from common import *
 import copy
 
 from scapy.fields import ShortField, IntField
-from scapy.layers.l2 import Ether
+from scapy.layers.l2 import Ether, ARP
 from scapy.layers.inet import IP, UDP
 from scapy.packet import Packet, bind_layers, split_layers
 from ptf.packet import MPLS
@@ -599,10 +599,33 @@ class PassToKernelStackTest(P4EbpfTest):
     p4_file_path = "p4testdata/pass-to-kernel.p4"
 
     def runTest(self):
+        # static route
         self.exec_ns_cmd("ip route add 10.0.0.1/32 dev eth1")
-        _, out, _ = self.exec_ns_cmd("ip route")
-        print(out)
+        # static ARP
+        self.exec_ns_cmd("arp -s 10.0.0.1 00:00:00:00:00:aa")
 
-        pkt = testutils.simple_ip_packet(ip_dst="10.0.0.1")
+        # simple forward
+        pkt = testutils.simple_tcp_packet(eth_dst="00:00:00:00:00:01", ip_dst="10.0.0.1")
         testutils.send_packet(self, PORT0, pkt)
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        exp_pkt = pkt.copy()
+        exp_pkt[Ether].src = "00:00:00:00:00:02" # MAC of eth1
+        exp_pkt[Ether].dst = "00:00:00:00:00:aa"
+        exp_pkt[IP].ttl = 63 # routed packet
+        testutils.verify_packet(self, exp_pkt, PORT1)
+
+        # add IP address to interface, so that it can reply with ICMP and ARP
+        self.exec_ns_cmd("ifconfig eth0 10.0.0.1 up")
+
+        pkt = testutils.simple_arp_packet(pktlen=42, ip_tgt="10.0.0.1")
+        testutils.send_packet(self, PORT0, pkt)
+        exp_pkt = pkt.copy()
+        exp_pkt[ARP].op = 2
+        exp_pkt[ARP].hwsrc = "00:00:00:00:00:01"
+        exp_pkt[ARP].hwdst = pkt[Ether].src
+        exp_pkt[ARP].psrc = pkt[ARP].pdst
+        exp_pkt[ARP].pdst = pkt[ARP].psrc
+        exp_pkt[Ether].src = "00:00:00:00:00:01"
+        exp_pkt[Ether].dst = pkt[Ether].src
+        testutils.verify_packet(self, exp_pkt, PORT0)
+
+        self.exec_cmd("ping -I s1-eth0 -c 1 -W 30 10.0.0.1")

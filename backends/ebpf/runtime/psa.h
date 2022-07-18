@@ -116,13 +116,9 @@ struct psa_egress_deparser_input_metadata_t {
  * The size of this struct must be less than 32 bytes.
  */
 struct psa_global_metadata {
-    MulticastGroup_t multicast_group;  /// set by Ingress, read by PRE
-    PortId_t         egress_port;  /// set by Ingress, read by PRE
-    CloneSessionId_t clone_session_id;  /// set by Ingress/Egress, read by PRE
-    bool             clone;  /// set by Ingress/Egress, read by PRE
-    bool             drop;   /// set by Ingress/Egress, read by PRE
     PSA_PacketPath_t packet_path;  /// set by eBPF program as helper variable, read by ingress/egress
     EgressInstance_t instance;  /// set by PRE, read by Egress
+    bool             pass_to_kernel;   /// internal metadata, forces sending packet up to kernel stack
 } __attribute__((aligned(4)));
 
 struct clone_session_entry {
