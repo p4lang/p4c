@@ -21,7 +21,7 @@ limitations under the License.
 // Set up names.
 %defines
 %define api.namespace {P4}
-%define parser_class_name {P4Parser}
+%define api.parser.class {P4Parser}
 
 // Use the C++-native variant representation of tokens.
 %define api.token.constructor
