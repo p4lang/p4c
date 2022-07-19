@@ -8,7 +8,7 @@ package(
 
 filegroup(
     name = "p4include",
-    srcs = glob(["p4include/*.p4"]),
+    srcs = glob(["p4include/**/*.p4"]),
 )
 
 genrule(
