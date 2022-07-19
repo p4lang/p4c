@@ -80,15 +80,14 @@ control ingress(inout headers hdr,
     apply {
          // Values used there are arbitrary chosen just for PTF tests
          // See PTF test description
-         PortId_t egress_port = (PortId_t)5;
          bit<32> tmp;
-         tmp = reg.read(egress_port);
+         tmp = reg.read((PortId_t)5);
          if (tmp < 5) {
              tmp = tmp + 5;
          } else {
              tmp = tmp + 10;
          }
-         reg.write(egress_port, tmp);
+         reg.write((PortId_t)5, tmp);
     }
 }
 

@@ -155,6 +155,8 @@ class ConvertToEBPFControlPSA : public Inspector {
 
     const EbpfOptions &options;
 
+    void processAtomicAnnotation(const IR::BlockStatement* b);
+
  public:
     ConvertToEBPFControlPSA(EBPF::EBPFProgram *program, const IR::Parameter* parserHeaders,
                             P4::ReferenceMap *refmap, P4::TypeMap *typemap,
@@ -169,6 +171,7 @@ class ConvertToEBPFControlPSA : public Inspector {
     bool preorder(const IR::Member *m) override;
     bool preorder(const IR::IfStatement *a) override;
     bool preorder(const IR::ExternBlock* instance) override;
+    bool preorder(const IR::BlockStatement* b) override;
 
     EBPF::EBPFControlPSA *getEBPFControl() { return control; }
 };

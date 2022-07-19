@@ -37,10 +37,10 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program,
         return;
     }
 
-    this->keyArg = ts->arguments->at(1);
-    this->valueArg = ts->arguments->at(0);
-    this->keyType = EBPFTypeFactory::instance->create(keyArg);
-    this->valueType = EBPFTypeFactory::instance->create(valueArg);
+    keyArg = ts->arguments->at(1);
+    valueArg = ts->arguments->at(0);
+    keyType = EBPFTypeFactory::instance->create(keyArg);
+    valueType = EBPFTypeFactory::instance->create(valueArg);
 
     if (di->arguments->size() < 1) {
         ::error(ErrorType::ERR_MODEL, "Expected at least 1 argument: %1%", di);
@@ -58,21 +58,21 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program,
 
     if (di->arguments->size() == 2) {
         if (auto initVal = di->arguments->at(1)->expression->to<IR::Constant>()) {
-            this->initialValue = initVal;
+            initialValue = initVal;
         }
     }
 }
 
 bool EBPFRegisterPSA::shouldUseArrayMap() {
-    CHECK_NULL(this->keyType);
-    if (auto wt = dynamic_cast<IHasWidth *>(this->keyType)) {
+    CHECK_NULL(keyType);
+    if (auto wt = dynamic_cast<IHasWidth *>(keyType)) {
         unsigned keyWidth = wt->widthInBits();
         // For keys <= 32 bit register is based on array map,
         // otherwise we use hash map
         return (keyWidth > 0 && keyWidth <= 32);
     }
 
-    ::error(ErrorType::ERR_MODEL, "Unexpected key type: %1%", this->keyType->type);
+    ::error(ErrorType::ERR_MODEL, "Unexpected key type: %1%", keyType->type);
 
     return false;
 }
@@ -85,14 +85,40 @@ void EBPFRegisterPSA::emitTypes(CodeBuilder* builder) {
 void EBPFRegisterPSA::emitKeyType(CodeBuilder* builder) {
     builder->emitIndent();
     builder->append("typedef ");
-    this->keyType->declare(builder, keyTypeName, false);
+    keyType->declare(builder, keyTypeName, false);
     builder->endOfStatement(true);
 }
 
 void EBPFRegisterPSA::emitValueType(CodeBuilder* builder) {
     builder->emitIndent();
-    builder->append("typedef ");
-    this->valueType->declare(builder, valueTypeName, false);
+    if (usedInAtomicBlock) {
+        builder->append("typedef struct");
+        builder->spc();
+        builder->blockStart();
+        if (auto type = valueType->to<EBPFTypeName>()) {
+            if (auto strType = type->toCanonical<EBPFStructType>()){
+                for (auto f : strType->fields) {
+                    auto fieldType = f->type;
+                    builder->emitIndent();
+                    fieldType->declare(builder, f->field->name, false);
+                    builder->endOfStatement(true);
+                }
+            }
+        } else {
+            builder->emitIndent();
+            valueType->declare(builder, "value", false);
+            builder->endOfStatement(true);
+        }
+        builder->emitIndent();
+        builder->append("struct bpf_spin_lock lock");
+        builder->endOfStatement(true);
+        builder->blockEnd(false);
+        builder->spc();
+        builder->append(valueTypeName);
+    } else {
+        builder->append("typedef ");
+        valueType->declare(builder, valueTypeName, false);
+    }
     builder->endOfStatement(true);
 }
 
@@ -103,7 +129,7 @@ void EBPFRegisterPSA::emitInitializer(CodeBuilder* builder) {
         return;
     }
 
-    if (this->initialValue == nullptr || this->initialValue->value.is_zero()) {
+    if (initialValue == nullptr || initialValue->value.is_zero()) {
         // for array maps, initialize only if an initial value is provided by a developer,
         // or if an initial value doesn't equal 0. Otherwise, array map is already zero-initialized.
         return;
@@ -119,11 +145,11 @@ void EBPFRegisterPSA::emitInitializer(CodeBuilder* builder) {
 
     builder->emitIndent();
     builder->appendFormat("%s %s = ", valueTypeName.c_str(), valueName.c_str());
-    builder->append(this->initialValue->value.str());
+    builder->append(initialValue->value.str());
     builder->endOfStatement(true);
 
     builder->emitIndent();
-    builder->appendFormat("for (size_t index = 0; index < %u; index++) ", this->size);
+    builder->appendFormat("for (size_t index = 0; index < %u; index++) ", size);
     builder->blockStart();
     builder->emitIndent();
     builder->appendFormat("%s = index", keyName.c_str());
@@ -150,21 +176,38 @@ void EBPFRegisterPSA::emitInitializer(CodeBuilder* builder) {
 void EBPFRegisterPSA::emitInstance(CodeBuilder *builder) {
     builder->target->emitTableDecl(builder, instanceName,
                                    shouldUseArrayMap() ? TableArray : TableHash,
-                                   this->keyTypeName,
-                                   this->valueTypeName, size);
+                                   keyTypeName,
+                                   valueTypeName, size);
+}
+
+cstring EBPFRegisterPSA::getParamName(CodeBuilder* builder, const IR::Expression *expr,
+                                      ControlBodyTranslatorPSA* translator) const {
+    cstring paramName = cstring::empty;
+    if (auto indexArg = expr->to<IR::PathExpression>()) {
+        paramName = translator->getParamName(indexArg);
+    } else if (auto cnst = expr->to<IR::Constant>()) {
+        paramName = program->refMap->newName("param");
+        builder->emitIndent();
+        keyType->declare(builder, paramName, false);
+        builder->append(" = ");
+        codeGen->visit(cnst);
+        builder->endOfStatement(true);
+    }
+
+    return paramName;
 }
 
 void EBPFRegisterPSA::emitRegisterRead(CodeBuilder* builder, const P4::ExternMethod* method,
                                        ControlBodyTranslatorPSA* translator,
                                        const IR::Expression* leftExpression) {
-    auto indexArg = method->expr->arguments->at(0)->expression->to<IR::PathExpression>();
-    cstring indexParamName = translator->getParamName(indexArg);
+    cstring indexParamName = getParamName(builder,method->expr->arguments->at(0)->expression,
+                                          translator);
     BUG_CHECK(!indexParamName.isNullOrEmpty(), "Index param cannot be empty");
 
-    cstring valueName = program->refMap->newName("value");
+    readValueName = program->refMap->newName("value");
 
     builder->emitIndent();
-    this->valueType->declare(builder, valueName, true);
+    valueType->declare(builder, readValueName, true);
     builder->endOfStatement(true);
 
     cstring msgStr = Util::printf_format("Register: reading %s",
@@ -172,16 +215,22 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder* builder, const P4::ExternMet
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->emitIndent();
-    builder->target->emitTableLookup(builder, dataMapName, indexParamName, valueName);
+    builder->target->emitTableLookup(builder, dataMapName, indexParamName, readValueName);
     builder->endOfStatement(true);
 
     builder->emitIndent();
-    builder->appendFormat("if (%s != NULL) ", valueName.c_str());
+    builder->appendFormat("if (%s != NULL) ", readValueName.c_str());
     builder->blockStart();
+    if (usedInAtomicBlock) {
+        builder->emitIndent();
+        builder->appendFormat("bpf_spin_lock(&((%s *)%s)->lock)",
+                              valueTypeName, readValueName);
+        builder->endOfStatement(true);
+    }
     builder->emitIndent();
     if (leftExpression != nullptr) {
         codeGen->visit(leftExpression);
-        builder->appendFormat(" = *%s", valueName);
+        builder->appendFormat(" = *%s", readValueName);
         builder->endOfStatement(true);
     }
     builder->target->emitTraceMessage(builder, "Register: Entry found!");
@@ -193,13 +242,13 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder* builder, const P4::ExternMet
     if (leftExpression != nullptr) {
         codeGen->visit(leftExpression);
         builder->append(" = ");
-        if (this->initialValue != nullptr) {
-            builder->append(this->initialValue->value.str());
+        if (initialValue != nullptr) {
+            builder->append(initialValue->value.str());
         } else {
             builder->append("(");
-            this->valueType->declare(builder, cstring::empty, false);
+            valueType->declare(builder, cstring::empty, false);
             builder->append(")");
-            this->valueType->emitInitializer(builder);
+            valueType->emitInitializer(builder);
         }
         builder->endOfStatement(true);
     }
@@ -210,11 +259,11 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder* builder, const P4::ExternMet
 
 void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder* builder, const P4::ExternMethod* method,
                                         ControlBodyTranslatorPSA* translator) {
-    auto indexArgExpr = method->expr->arguments->at(0)->expression->to<IR::PathExpression>();
-    cstring indexParamName = translator->getParamName(indexArgExpr);
-    auto valueArgExpr = method->expr->arguments->at(1)->expression->to<IR::PathExpression>();
-    cstring valueParamName = translator->getParamName(valueArgExpr);
+    cstring indexParamName = getParamName(builder,method->expr->arguments->at(0)->expression,
+                                          translator);
     BUG_CHECK(!indexParamName.isNullOrEmpty(), "Index param cannot be empty");
+    cstring valueParamName = getParamName(builder,method->expr->arguments->at(1)->expression,
+                                          translator);
     BUG_CHECK(!valueParamName.isNullOrEmpty(), "Value param cannot be empty");
 
     cstring msgStr = Util::printf_format("Register: writing %s",
@@ -222,9 +271,38 @@ void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder* builder, const P4::ExternMe
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->emitIndent();
+    builder->appendFormat("if (%s != NULL) ", readValueName.c_str());
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("*%s = %s", readValueName, valueParamName);
+    builder->endOfStatement(true);
+    if (usedInAtomicBlock) {
+        builder->emitIndent();
+        builder->appendFormat("bpf_spin_unlock(&((%s *)%s)->lock)",
+                              valueTypeName, readValueName);
+        builder->endOfStatement(true);
+    }
+    builder->blockEnd(false);
+    builder->spc();
+    builder->append("else ");
+    builder->blockStart();
+
+    cstring valueVar = valueParamName;
+    if (usedInAtomicBlock) {
+        builder->emitIndent();
+        valueVar = program->refMap->newName("tmp");
+        builder->appendFormat("%s %s = {0}", valueTypeName, valueVar);
+        builder->endOfStatement(true);
+        builder->emitIndent();
+        builder->appendFormat("__builtin_memcpy(&%s, &%s, sizeof(%s))", valueVar,
+                              valueParamName, valueParamName);
+        builder->endOfStatement(true);
+    }
+
+    builder->emitIndent();
     auto ret = program->refMap->newName("ret");
     builder->appendFormat("int %s = ", ret.c_str());
-    builder->target->emitTableUpdate(builder, instanceName, indexParamName, valueParamName);
+    builder->target->emitTableUpdate(builder, instanceName, indexParamName, valueVar);
     builder->newline();
 
     builder->emitIndent();
@@ -235,6 +313,7 @@ void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder* builder, const P4::ExternMe
     builder->target->emitTraceMessage(builder, msgStr,
                                       1, ret.c_str());
 
+    builder->blockEnd(true);
     builder->blockEnd(true);
 }
 

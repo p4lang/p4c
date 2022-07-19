@@ -79,8 +79,8 @@ void PSAEbpfGenerator::emitPreamble(CodeBuilder *builder) const {
     builder->newline();
 
     builder->appendLine("#ifndef PSA_PORT_RECIRCULATE\n"
-        "#define PSA_PORT_RECIRCULATE 0\n"
-        "#endif");
+                        "#define PSA_PORT_RECIRCULATE 0\n"
+                        "#endif");
     builder->appendLine("#define P4C_PSA_PORT_RECIRCULATE 0xfffffffa");
     builder->newline();
 }
@@ -90,8 +90,8 @@ void PSAEbpfGenerator::emitCommonPreamble(CodeBuilder *builder) const {
     builder->appendLine("#define EBPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)");
     builder->appendLine("#define BYTES(w) ((w) / 8)");
     builder->appendLine(
-        "#define write_partial(a, w, s, v) do { *((u8*)a) = ((*((u8*)a)) "
-        "& ~(EBPF_MASK(u8, w) << s)) | (v << s) ; } while (0)");
+            "#define write_partial(a, w, s, v) do { *((u8*)a) = ((*((u8*)a)) "
+            "& ~(EBPF_MASK(u8, w) << s)) | (v << s) ; } while (0)");
     builder->appendLine("#define write_byte(base, offset, v) do { "
                         "*(u8*)((base) + (offset)) = (v); "
                         "} while (0)");
@@ -236,7 +236,7 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
             "}";
     if (options.emitTraceMessages) {
         forEachFunc = forEachFunc.replace("%trace_msg_no_elements%",
-            "        bpf_trace_message(\"do_for_each: No elements found in list\\n\");\n");
+                                          "        bpf_trace_message(\"do_for_each: No elements found in list\\n\");\n");
     } else {
         forEachFunc = forEachFunc.replace("%trace_msg_no_elements%", "");
     }
@@ -249,13 +249,13 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
             "void do_clone(SK_BUFF *skb, void *data)\n"
             "{\n"
             "    struct clone_session_entry *entry = (struct clone_session_entry *) data;\n"
-                "%trace_msg_redirect%"
+            "%trace_msg_redirect%"
             "    bpf_clone_redirect(skb, entry->egress_port, 0);\n"
             "}";
     if (options.emitTraceMessages) {
         cloneFunction = cloneFunction.replace(cstring("%trace_msg_redirect%"),
-            "    bpf_trace_message(\"do_clone: cloning pkt, egress_port=%d, cos=%d\\n\", "
-            "entry->egress_port, entry->class_of_service);\n");
+                                              "    bpf_trace_message(\"do_clone: cloning pkt, egress_port=%d, cos=%d\\n\", "
+                                              "entry->egress_port, entry->class_of_service);\n");
     } else {
         cloneFunction = cloneFunction.replace(cstring("%trace_msg_redirect%"), "");
     }
@@ -265,9 +265,9 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
     cstring pktClonesFunc =
             "static __always_inline\n"
             "int do_packet_clones(SK_BUFF * skb, void * map, __u32 session_id, "
-                "PSA_PacketPath_t new_pkt_path, __u8 caller_id)\n"
+            "PSA_PacketPath_t new_pkt_path, __u8 caller_id)\n"
             "{\n"
-                "%trace_msg_clone_requested%"
+            "%trace_msg_clone_requested%"
             "    struct psa_global_metadata * meta = (struct psa_global_metadata *) skb->cb;\n"
             "    void * inner_map;\n"
             "    inner_map = bpf_map_lookup_elem(map, &session_id);\n"
@@ -275,27 +275,27 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
             "        PSA_PacketPath_t original_pkt_path = meta->packet_path;\n"
             "        meta->packet_path = new_pkt_path;\n"
             "        if (do_for_each(skb, inner_map, CLONE_MAX_CLONES, &do_clone) < 0) {\n"
-                        "%trace_msg_clone_failed%"
+            "%trace_msg_clone_failed%"
             "            return -1;\n"
             "        }\n"
             "        meta->packet_path = original_pkt_path;\n"
             "    } else {\n"
-                    "%trace_msg_no_session%"
+            "%trace_msg_no_session%"
             "    }\n"
-                "%trace_msg_cloning_done%"
+            "%trace_msg_cloning_done%"
             "    return 0;\n"
             " }";
     if (options.emitTraceMessages) {
         pktClonesFunc = pktClonesFunc.replace(cstring("%trace_msg_clone_requested%"),
-            "    bpf_trace_message(\"Clone#%d: pkt clone requested, session=%d\\n\", "
-            "caller_id, session_id);\n");
+                                              "    bpf_trace_message(\"Clone#%d: pkt clone requested, session=%d\\n\", "
+                                              "caller_id, session_id);\n");
         pktClonesFunc = pktClonesFunc.replace(cstring("%trace_msg_clone_failed%"),
-            "            bpf_trace_message(\"Clone#%d: failed to clone packet\", caller_id);\n");
+                                              "            bpf_trace_message(\"Clone#%d: failed to clone packet\", caller_id);\n");
         pktClonesFunc = pktClonesFunc.replace(cstring("%trace_msg_no_session%"),
-            "        bpf_trace_message(\"Clone#%d: session_id not found, "
-            "no clones created\\n\", caller_id);\n");
+                                              "        bpf_trace_message(\"Clone#%d: session_id not found, "
+                                              "no clones created\\n\", caller_id);\n");
         pktClonesFunc = pktClonesFunc.replace(cstring("%trace_msg_cloning_done%"),
-            "    bpf_trace_message(\"Clone#%d: packet cloning finished\\n\", caller_id);\n");
+                                              "    bpf_trace_message(\"Clone#%d: packet cloning finished\\n\", caller_id);\n");
     } else {
         pktClonesFunc = pktClonesFunc.replace(cstring("%trace_msg_clone_requested%"), "");
         pktClonesFunc = pktClonesFunc.replace(cstring("%trace_msg_clone_failed%"), "");
@@ -421,9 +421,9 @@ const PSAEbpfGenerator * ConvertToEbpfPSA::build(const IR::ToplevelBlock *tlb) {
     std::vector<EBPFType*> ebpfTypes;
     for (auto d : tlb->getProgram()->objects) {
         if (d->is<IR::Type>() && !d->is<IR::IContainer>() &&
-            !d->is<IR::Type_Extern>() && !d->is<IR::Type_Parser>() &&
-            !d->is<IR::Type_Control>() && !d->is<IR::Type_Typedef>() &&
-            !d->is<IR::Type_Error>()) {
+                !d->is<IR::Type_Extern>() && !d->is<IR::Type_Parser>() &&
+                !d->is<IR::Type_Control>() && !d->is<IR::Type_Typedef>() &&
+                !d->is<IR::Type_Error>()) {
             if (d->srcInfo.isValid()) {
                 auto sourceFile = d->srcInfo.getSourceFile();
                 if (sourceFile.endsWith("/psa.p4")) {
@@ -464,21 +464,21 @@ const PSAEbpfGenerator * ConvertToEbpfPSA::build(const IR::ToplevelBlock *tlb) {
     auto xdp = new XDPHelpProgram(options);
 
     auto ingress_pipeline_converter =
-        new ConvertToEbpfPipeline("tc-ingress", TC_INGRESS, options,
-            ingressParser->to<IR::ParserBlock>(),
-            ingressControl->to<IR::ControlBlock>(),
-            ingressDeparser->to<IR::ControlBlock>(),
-            refmap, typemap);
+            new ConvertToEbpfPipeline("tc-ingress", TC_INGRESS, options,
+                                      ingressParser->to<IR::ParserBlock>(),
+                                      ingressControl->to<IR::ControlBlock>(),
+                                      ingressDeparser->to<IR::ControlBlock>(),
+                                      refmap, typemap);
     ingress->apply(*ingress_pipeline_converter);
     tlb->getProgram()->apply(*ingress_pipeline_converter);
     auto tcIngress = ingress_pipeline_converter->getEbpfPipeline();
 
     auto egress_pipeline_converter =
-        new ConvertToEbpfPipeline("tc-egress", TC_EGRESS, options,
-            egressParser->to<IR::ParserBlock>(),
-            egressControl->to<IR::ControlBlock>(),
-            egressDeparser->to<IR::ControlBlock>(),
-            refmap, typemap);
+            new ConvertToEbpfPipeline("tc-egress", TC_EGRESS, options,
+                                      egressParser->to<IR::ParserBlock>(),
+                                      egressControl->to<IR::ControlBlock>(),
+                                      egressDeparser->to<IR::ControlBlock>(),
+                                      refmap, typemap);
     egress->apply(*egress_pipeline_converter);
     tlb->getProgram()->apply(*egress_pipeline_converter);
     auto tcEgress = egress_pipeline_converter->getEbpfPipeline();
@@ -634,7 +634,7 @@ bool ConvertToEBPFControlPSA::preorder(const IR::IfStatement *ifState) {
     if (ifState->condition->is<IR::Equ>()) {
         auto i = ifState->condition->to<IR::Equ>();
         if (i->right->toString().endsWith("timestamp") ||
-            i->left->toString().endsWith("timestamp")) {
+                i->left->toString().endsWith("timestamp")) {
             control->timestampIsUsed = true;
         }
     }
@@ -644,8 +644,8 @@ bool ConvertToEBPFControlPSA::preorder(const IR::IfStatement *ifState) {
 bool ConvertToEBPFControlPSA::preorder(const IR::Declaration_Variable* decl) {
     if (type == TC_INGRESS) {
         if (decl->type->is<IR::Type_Name>() &&
-            decl->type->to<IR::Type_Name>()->path->name.name == "psa_ingress_output_metadata_t") {
-                control->codeGen->useAsPointerVariable(decl->name.name);
+                decl->type->to<IR::Type_Name>()->path->name.name == "psa_ingress_output_metadata_t") {
+            control->codeGen->useAsPointerVariable(decl->name.name);
         }
     }
     return true;
@@ -688,6 +688,161 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
     }
 
     return false;
+}
+
+class IndexVisitor : public Inspector {
+    bool used = false;
+    const IR::PathExpression *readIndexExpr;
+ public:
+    explicit IndexVisitor(const IR::PathExpression *expr) {
+        readIndexExpr = expr;
+    }
+    bool preorder(const IR::AssignmentStatement* a) override;
+
+    bool readIndexChanged();
+};
+
+bool IndexVisitor::preorder(const IR::AssignmentStatement *a) {
+    if (auto expr = a->left->to<IR::PathExpression>()) {
+        if(expr->path->name.name == readIndexExpr->path->name.name)
+            used = true;
+    }
+
+    return false;
+}
+
+bool IndexVisitor::readIndexChanged() {
+    return used;
+}
+
+/*
+ * This method checks if @atomic annotation has been used properly.
+ * Due to constrained BPF environment a use of @atomic annotation is limited to cases
+ * where register.read(index) is performed at the beginning of the @atomic block
+ * and register.write(index) is performed at the end of the @atomic block.
+ * Register index must be the same in both register.read(index) and register.write(index).
+ * Also inside the @atomic block can be used only Hash extern.
+ * Atomicity in other cases simply is not possible to protect in BPF (in a reasonable way).
+ */
+void ConvertToEBPFControlPSA::processAtomicAnnotation(const IR::BlockStatement* b) {
+    auto ann = b->getAnnotation(IR::Annotation::atomicAnnotation);
+    cstring registerName = cstring::empty;
+
+    if (ann) {
+        int registerReadCounter = 0;
+        int registerWriteCounter = 0;
+        const IR::Expression *readIndexExpr = nullptr;
+        for (auto comp : b->components) {
+            const IR::MethodCallExpression *mExpr = nullptr;
+            if (auto assign = comp->to<IR::AssignmentStatement>()) {
+                mExpr = assign->right->to<IR::MethodCallExpression>();
+            } else if (auto stat = comp->to<IR::MethodCallStatement>()) {
+                mExpr = stat->methodCall;
+            }
+
+            if (mExpr) {
+                auto mi = P4::MethodInstance::resolve(mExpr,
+                                                      control->program->refMap,
+                                                      control->program->typeMap);
+                auto ext = mi->to<P4::ExternMethod>();
+                if (ext != nullptr) {
+                    auto decl = ext->object;
+                    auto declType = ext->originalExternType;
+                    if (declType->name.name == "Hash")
+                        continue;
+                    else if (declType->name.name == "Register") {
+                        if (registerName.isNullOrEmpty())
+                            registerName = EBPFObject::externalName(decl);
+
+                        if (registerName != EBPFObject::externalName(decl)) {
+                            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                                    "%1%: target supports only one register "
+                                    "in the same atomic block", mExpr);
+                            return;
+                        } else if (ext->method->name.name == "read") {
+                            readIndexExpr = ext->expr->arguments->at(0)->expression;
+                            if (auto indExpr = readIndexExpr->to<IR::PathExpression>()) {
+                                IndexVisitor indexVisitor(indExpr);
+                                b->apply(indexVisitor);
+                                if (indexVisitor.readIndexChanged()) {
+                                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                                            "%1%: target supports only register read and write "
+                                            "operations on the same index", mExpr);
+                                    return;
+                                }
+                            }
+                            if (++registerReadCounter > 1) {
+                                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                                        "%1%: target supports only one register read operation"
+                                        " in the same atomic block", mExpr);
+                                return;
+                            }
+                        } else if (ext->method->name.name == "write") {
+                            if (++registerWriteCounter > 1 && registerReadCounter > 0) {
+                                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                                        "%1%: target supports only one register write operation"
+                                        " after register read "
+                                        "in the same atomic block", mExpr);
+                                return;
+                            }
+                            auto writeIndexExpr = ext->expr->arguments->at(0)->expression;
+                            if (readIndexExpr->is<IR::Constant>()) {
+                                auto readIndCnst = readIndexExpr->to<IR::Constant>();
+                                if (writeIndexExpr->is<IR::Constant>()) {
+                                    auto writeIndCnst = writeIndexExpr->to<IR::Constant>();
+                                    if (writeIndCnst->asUint64() != readIndCnst->asUint64()) {
+                                        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                                                "%1%: target supports only register read and write "
+                                                "operations on the same index", mExpr);
+                                        return;
+                                    }
+                                } else {
+                                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                                            "%1%: target supports only register read and write "
+                                            "operations on the same index", mExpr);
+                                    return;
+                                }
+                            }
+
+                            if (auto readPath = readIndexExpr->to<IR::PathExpression>()) {
+                                if (auto writePath = writeIndexExpr->to<IR::PathExpression>()) {
+                                    if (writePath->path->name.name != readPath->path->name.name) {
+                                        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                                                "%1%: target supports only register read and write "
+                                                "operations on the same index", mExpr);
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                                "%1%: target supports only one Register or Hash "
+                                "externs in the same atomic block", mExpr);
+                        return;
+                    }
+                } else {
+                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                            "%1%: target supports only one register "
+                            "in the same atomic block", mExpr);
+                    return;
+                }
+            }
+        }
+
+        auto reg = control->getRegister(registerName);
+        if (reg)
+            reg->usedInAtomicBlock = true;
+        else {
+            BUG("No register found: %s", registerName);
+        }
+    }
+}
+
+bool ConvertToEBPFControlPSA::preorder(const IR::BlockStatement* b) {
+    auto ret = Inspector::preorder(b);
+    processAtomicAnnotation(b);
+    return ret;
 }
 
 // =====================EBPFDeparser=============================
