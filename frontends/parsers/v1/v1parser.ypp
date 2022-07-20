@@ -21,7 +21,7 @@ limitations under the License.
 // Set up names.
 %defines
 %define api.namespace {V1}
-%define api.parser.class {V1Parser}
+%define parser_class_name {V1Parser}
 
 // Use the C++-native variant representation of tokens.
 %define api.token.constructor
