@@ -32,6 +32,10 @@ const unsigned default_learner_table_timeout = 120;
 // Maximum values
 const int dpdk_max_field_width = 64;
 
+// JSON schema versions
+const cstring bfrtSchemaVersion = "1.0.0";
+const cstring tdiSchemaVersion = "0.1";
+
 // HASH Values
 #define JHASH0 0
 #define CRC1 1
