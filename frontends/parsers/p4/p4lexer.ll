@@ -1,7 +1,7 @@
 %{
 #include "frontends/common/constantParsing.h"
 #include "frontends/parsers/parserDriver.h"
-#include "frontends/parsers/p4/p4lexer_internal.hpp"
+#include "frontends/parsers/p4/p4lexer.hpp"
 #include "frontends/parsers/p4/p4parser.hpp"
 
 using Parser = P4::P4Parser;

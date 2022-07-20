@@ -49,13 +49,11 @@ struct user_meta_data_t {
 	bit<32> local_metadata_depth6
 	bit<32> local_metadata_depth7
 	bit<64> Ingress_tmp
-	bit<32> Ingress_tmp_0
 	bit<32> Ingress_var1
 	bit<32> Ingress_var2
 	bit<64> Ingress_var3
 	bit<64> Ingress_var4
 	bit<64> Ingress_var5
-	bit<33> tmp
 }
 metadata instanceof user_meta_data_t
 
@@ -104,15 +102,13 @@ apply {
 	mov m.Ingress_var5 m.Ingress_tmp
 	and m.Ingress_var3 0x100000000
 	shr m.Ingress_var3 0x20
-	mov m.tmp m.Ingress_var3
-	jmpeq LABEL_TRUE m.tmp 0x1
+	jmpeq LABEL_TRUE m.Ingress_var3 0x1
 	or m.Ingress_var3 0xfffffffe00000000
 	LABEL_TRUE :	sub m.Ingress_var5 m.Ingress_var3
 	mov m.local_metadata_depth4 m.local_metadata_depth2
 	add m.local_metadata_depth4 0x1c
 	and m.local_metadata_depth4 0x1f
-	mov m.Ingress_tmp_0 m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_egress_port m.Ingress_tmp_0
+	mov m.psa_ingress_output_metadata_egress_port m.psa_ingress_input_metadata_ingress_port
 	xor m.psa_ingress_output_metadata_egress_port 0x1
 	table stub
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0

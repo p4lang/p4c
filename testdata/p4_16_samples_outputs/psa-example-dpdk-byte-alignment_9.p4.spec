@@ -151,6 +151,7 @@ apply {
 	and m.Ingress_tmp_5 0xfff0
 	mov m.Ingress_tmp_7 h.ipv4.version_ihl
 	add m.Ingress_tmp_7 0x5
+	and m.Ingress_tmp_7 0xf
 	mov m.Ingress_tmp_9 m.Ingress_tmp_7
 	and m.Ingress_tmp_9 0xf
 	mov h.ipv4.hdrChecksum m.Ingress_tmp_5
