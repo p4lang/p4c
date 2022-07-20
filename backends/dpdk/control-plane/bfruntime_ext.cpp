@@ -227,10 +227,10 @@ BFRuntimeSchemaGenerator::genSchema() const {
         json->emplace("build_date", cstring(options.getBuildDate()));
         json->emplace("compile_command", cstring(options.getCompileCommand()));
         json->emplace("compiler_version", cstring(options.compilerVersion));
-        json->emplace("schema_version", cstring("0.1"));
+        json->emplace("schema_version", tdiSchemaVersion);
         json->emplace("target", cstring("DPDK"));
     } else {
-        json->emplace("schema_version", cstring("1.0.0"));
+        json->emplace("schema_version", bfrtSchemaVersion);
     }
 
     auto* tablesJson = new Util::JsonArray();

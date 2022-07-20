@@ -17,6 +17,7 @@ limitations under the License.
 #define DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_
 
 #include "backends/dpdk/options.h"
+#include "backends/dpdk/constants.h"
 #include "control-plane/bfruntime.h"
 #include "p4/config/dpdk/p4info.pb.h"
 namespace P4 {
