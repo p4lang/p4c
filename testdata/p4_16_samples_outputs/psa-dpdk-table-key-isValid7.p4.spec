@@ -60,6 +60,8 @@ struct metadata {
 	bit<8> ingress_tbl_ethernet_isValid
 	bit<8> ingress_tbl_tcp_isValid
 	bit<8> ingress_tbl_ipv4_isValid
+	bit<16> tmpMask
+	bit<8> tmpMask_0
 }
 metadata instanceof metadata
 

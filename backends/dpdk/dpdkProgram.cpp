@@ -292,8 +292,8 @@ void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expres
         unsigned value = right->to<IR::Constant>()->asUnsigned() &
                          left->to<IR::Constant>()->asUnsigned();
         auto tmpDecl = addNewTmpVarToMetadata("tmpMask", sv->type);
-        auto tmpMask = new IR::PathExpression(
-                           IR::ID("m." + tmpDecl->name.name));
+        auto tmpMask = new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                      IR::ID(tmpDecl->name.name));
         structure->push_variable(new IR::DpdkDeclaration(tmpDecl));
         add_instr(new IR::DpdkMovStatement(tmpMask, sv));
         add_instr(new IR::DpdkAndStatement(tmpMask, tmpMask, right));

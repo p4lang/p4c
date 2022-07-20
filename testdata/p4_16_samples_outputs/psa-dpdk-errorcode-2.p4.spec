@@ -59,6 +59,8 @@ struct metadata {
 	bit<16> local_metadata_data
 	bit<8> IngressParser_parser_tmp
 	bit<8> Ingress_err
+	bit<16> tmpMask
+	bit<8> tmpMask_0
 }
 metadata instanceof metadata
 
