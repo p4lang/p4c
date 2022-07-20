@@ -76,6 +76,7 @@ set (CONTROLPLANE_SRCS
   p4RuntimeArchHandler.cpp
   p4RuntimeArchStandard.cpp
   p4RuntimeSerializer.cpp
+  p4RuntimeSymbolTable.cpp
   typeSpecConverter.cpp
   bfruntime.cpp
   )
@@ -90,6 +91,7 @@ set (CONTROLPLANE_HDRS
   p4RuntimeArchHandler.h
   p4RuntimeArchStandard.h
   p4RuntimeSerializer.h
+  p4RuntimeSymbolTable.h
   typeSpecConverter.h
   bfruntime.h
   )

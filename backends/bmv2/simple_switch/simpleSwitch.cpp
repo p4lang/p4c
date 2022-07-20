@@ -21,10 +21,12 @@ limitations under the License.
 #include <algorithm>
 #include <cstring>
 #include <set>
+#include "backends/bmv2/common/addMissingIds.h"
 #include "backends/bmv2/common/annotations.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/cloner.h"
 #include "midend/flattenLogMsg.h"
+#include "p4/toP4/toP4.h"
 #include "simpleSwitch.h"
 #include "backends/bmv2/simple_switch/options.h"
 
@@ -1196,6 +1198,8 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     // map IR node to compile-time allocated resource blocks.
     toplevel->apply(*new BMV2::BuildResourceMap(&structure->resourceMap));
 
+
+
     // field list and learn list ids in bmv2 are not consistent with ids for
     // other objects: they need to start at 1 (not 0) since the id is also used
     // as a "flag" to indicate that a certain simple_switch primitive has been
@@ -1219,6 +1223,12 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     if (!main) return;  // no main
     main->apply(*parseV1Arch);
     program = toplevel->getProgram();
+
+    program = program->apply(
+        P4::BMV2::AddMissingIdAnnotations(refMap, typeMap, toplevel));
+    P4::ToP4 newEmitter;
+    program->apply(newEmitter);
+
     program->apply(DiscoverStructure(structure));
 
     /// generate error types
