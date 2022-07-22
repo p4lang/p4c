@@ -380,10 +380,7 @@ class P4EbpfTest(BaseTest):
 
     def digest_get(self, name):
         cmd = "psabpf-ctl digest get-all pipe {} {}".format(TEST_PIPELINE_ID, name)
-        returncode, stdout, stderr = self.exec_ns_cmd(cmd, "Digest get failed")
-        logger.info("Return code: %d", returncode)
-        logger.info("STDOUT: %s", stdout.decode("utf-8"))
-        logger.info("STDERR: %s", stderr.decode("utf-8"))
+        _, stdout, _ = self.exec_ns_cmd(cmd, "Digest get failed")
         return json.loads(stdout)[name]['digests']
 
     def counter_get(self, name, key=None):
