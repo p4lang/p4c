@@ -1910,8 +1910,6 @@ const IR::Node* TypeInference::postorder(IR::Key* key) {
     }
     LOG2("Setting key type to " << dbp(keyTuple));
     setType(key, keyTuple);
-    // installing also for the original because we cannot tell which one will survive in the ir
-    LOG2("Setting key type to " << dbp(getOriginal()));
     setType(getOriginal(), keyTuple);
     return key;
 }
@@ -1971,14 +1969,22 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
     auto entryKeyType = getType(entry->keys);
     if (entryKeyType == nullptr)
         return entry;
-    if (entryKeyType->is<IR::Type_Set>())
-        entryKeyType = entryKeyType->to<IR::Type_Set>()->elementType;
+    if (auto ts = entryKeyType->to<IR::Type_Set>())
+        entryKeyType = ts->elementType;
+    if (entry->singleton) {
+        if (auto tl = entryKeyType->to<IR::Type_BaseList>()) {
+            // An entry of _ does not have type Tuple<Type_Dontcare>, but rather Type_Dontcare
+            if (tl->getSize() == 1 && tl->components.at(0)->is<IR::Type_Dontcare>())
+                entryKeyType = tl->components.at(0);
+        }
+    }
 
     auto keyset = entry->getKeys();
     if (keyset == nullptr || !(keyset->is<IR::ListExpression>())) {
         typeError("%1%: key expression must be tuple", keyset);
         return entry;
-    } else if (keyset->components.size() < key->keyElements.size()) {
+    }
+    if (keyset->components.size() < key->keyElements.size()) {
         typeError("%1%: Size of entry keyset must match the table key set size", keyset);
         return entry;
     }
@@ -2005,7 +2011,7 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
 
     if (ks != keyset)
         entry = new IR::Entry(entry->srcInfo, entry->annotations,
-                              ks->to<IR::ListExpression>(), entry->action);
+                              ks->to<IR::ListExpression>(), entry->action, entry->singleton);
 
     auto actionRef = entry->getAction();
     auto ale = validateActionInitializer(actionRef, table);

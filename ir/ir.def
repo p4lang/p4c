@@ -257,6 +257,7 @@ class Entry : IAnnotated {
     ListExpression      keys;         /// must be a tuple expression
     Expression          action;       /// typically a MethodCallExpression.
                                       /// The action must be defined in action list
+    bool                singleton;    /// True if the entry is not a list.
 
     Annotations     getAnnotations() const override { return annotations; }
     ListExpression  getKeys() const { return keys; }
