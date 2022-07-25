@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "midend.h"
+#include "control-plane/p4RuntimeArchStandard.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -60,6 +61,7 @@ limitations under the License.
 #include "midend/midEndLast.h"
 #include "midend/fillEnumMap.h"
 #include "midend/removeAssertAssume.h"
+#include "control-plane/addMissingIds.h"
 #include "backends/bmv2/simple_switch/options.h"
 
 

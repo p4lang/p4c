@@ -13,8 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include "p4RuntimeSerializer.h"
 
-#include "control-plane/p4RuntimeAnnotations.h"
 #include <google/protobuf/text_format.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -59,7 +59,7 @@ limitations under the License.
 
 #include "bytestrings.h"
 #include "flattenHeader.h"
-#include "p4RuntimeSerializer.h"
+#include "p4RuntimeAnnotations.h"
 #include "p4RuntimeArchHandler.h"
 #include "p4RuntimeArchStandard.h"
 #include "p4RuntimeSymbolTable.h"
@@ -1356,13 +1356,13 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
 
     // Perform a first pass to collect all of the control plane visible symbols in
     // the program.
-    auto symbols = P4RuntimeSymbolTable::generateSymbols(
+    const auto *symbols = P4RuntimeSymbolTable::generateSymbols(
         program, evaluatedProgram, refMap, typeMap, archHandler);
 
-    archHandler->postCollect(symbols);
+    archHandler->postCollect(*symbols);
 
     // Construct a P4Runtime control plane API from the program.
-    P4RuntimeAnalyzer analyzer(symbols, typeMap, refMap, archHandler);
+    P4RuntimeAnalyzer analyzer(*symbols, typeMap, refMap, archHandler);
     Helpers::forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
         if (block->is<IR::ControlBlock>()) {
             analyzer.analyzeControl(block->to<IR::ControlBlock>());
@@ -1394,7 +1394,7 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
 
     analyzer.addPkgInfo(evaluatedProgram, arch);
 
-    P4RuntimeEntriesConverter entriesConverter(symbols);
+    P4RuntimeEntriesConverter entriesConverter(*symbols);
     Helpers::forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
         if (block->is<IR::TableBlock>())
             entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap,

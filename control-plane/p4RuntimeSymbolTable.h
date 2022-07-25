@@ -17,11 +17,6 @@ limitations under the License.
 #ifndef CONTROL_PLANE_P4RUNTIMESYMBOLTABLE_H_
 #define CONTROL_PLANE_P4RUNTIMESYMBOLTABLE_H_
 
-#include <boost/algorithm/string/split.hpp>
-#include <boost/range/adaptor/reversed.hpp>
-#include <iosfwd>
-#include <unordered_map>
-
 #include "lib/cstring.h"
 
 #include "p4RuntimeArchHandler.h"
@@ -111,22 +106,23 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
      * are assigned, create() enforces that only code that runs before id
      * assignment has access to a non-const reference to the symbol table.
      */
-    template <typename Func> static P4RuntimeSymbolTable create(Func function) {
+    template <typename Func>
+    static P4RuntimeSymbolTable* create(Func function) {
         // Create and initialize the symbol table. At this stage, ids aren't
         // available, because computing ids requires global knowledge of all the
         // P4Runtime symbols in the program.
-        P4RuntimeSymbolTable symbols;
-        function(symbols);
+        auto* symbols = new P4RuntimeSymbolTable();
+        function(*symbols);
 
         // Now that the symbol table is initialized, we can compute ids.
-        for (auto& table : symbols.symbolTables) {
-            symbols.computeIdsForSymbols(table.first);
+        for (auto& table : symbols->symbolTables) {
+            symbols->computeIdsForSymbols(table.first);
         }
 
         return symbols;
     }
 
-    static P4RuntimeSymbolTable
+    static P4RuntimeSymbolTable*
     generateSymbols(const IR::P4Program* program,
                     const IR::ToplevelBlock* evaluatedProgram,
                     ReferenceMap* refMap, TypeMap* typeMap,

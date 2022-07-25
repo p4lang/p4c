@@ -15,10 +15,11 @@ limitations under the License.
 */
 #include "p4RuntimeSymbolTable.h"
 
-#include <boost/algorithm/string/split.hpp>
-#include <boost/range/adaptor/reversed.hpp>
 #include <iosfwd>
 #include <unordered_map>
+
+#include <boost/algorithm/string/split.hpp>
+#include <boost/range/adaptor/reversed.hpp>
 
 #include "lib/cstring.h"
 
@@ -151,7 +152,7 @@ void collectParserSymbols(P4RuntimeSymbolTable& symbols,
     }
 }
 
-P4::ControlPlaneAPI::P4RuntimeSymbolTable
+P4::ControlPlaneAPI::P4RuntimeSymbolTable*
 P4::ControlPlaneAPI::P4RuntimeSymbolTable::generateSymbols(
     const IR::P4Program* program, const IR::ToplevelBlock* evaluatedProgram,
     ReferenceMap* refMap, TypeMap* typeMap,
