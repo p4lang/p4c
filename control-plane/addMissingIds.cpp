@@ -7,7 +7,7 @@
 namespace P4 {
 
 const IR::P4Program* MissingIdAssigner::preorder(IR::P4Program* program) {
-    auto evaluator =  P4::Evaluator(refMap, typeMap);
+    auto evaluator =  P4::EvaluatorPass(refMap, typeMap);
     program->apply(evaluator);
     auto* toplevel = evaluator.getToplevelBlock();
     CHECK_NULL(toplevel);
