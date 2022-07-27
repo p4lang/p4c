@@ -936,6 +936,17 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
     methodType = cloneWithFreshTypeVariables(methodType)->to<IR::Type_Method>();
     CHECK_NULL(methodType);
 
+    if (errorPosition->is<IR::ConstructorCallExpression>()) {
+        for (auto m : ext->methods) {
+            if (m->isAbstract) {
+                typeError("%1%: extern type %2% with abstract methods cannot be instantiated"
+                          " using a constructor call; consider using a declaration",
+                          errorPosition, ext);
+                return nullptr;
+            }
+        }
+    }
+
     auto args = new IR::Vector<IR::ArgumentInfo>();
     size_t i = 0;
     for (auto pi : *methodType->parameters->getEnumerator()) {
