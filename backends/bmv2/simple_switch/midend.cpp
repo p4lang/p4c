@@ -73,6 +73,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options, std::ostream* o
     if (BMV2::SimpleSwitchContext::get().options().loadIRFromJson == false) {
         auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits("v1model.p4"));
         addPasses({
+            new P4::AddMissingIdAnnotations(&refMap, &typeMap, new P4::ControlPlaneAPI::Standard::V1ModelArchHandlerBuilder()),
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
             new P4::CheckTableSize(),
             new P4::RemoveMiss(&refMap, &typeMap),

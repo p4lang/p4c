@@ -123,12 +123,14 @@ void collectControlSymbols(P4RuntimeSymbolTable& symbols,
             }
         });
 }
+
 void collectExternSymbols(P4RuntimeSymbolTable& symbols,
                           P4RuntimeArchHandlerIface* archHandler,
                           const IR::ExternBlock* externBlock) {
     CHECK_NULL(externBlock);
     archHandler->collectExternInstance(&symbols, externBlock);
 }
+
 void collectTableSymbols(P4RuntimeSymbolTable& symbols,
                          P4RuntimeArchHandlerIface* archHandler,
                          const IR::TableBlock* tableBlock) {
@@ -138,6 +140,7 @@ void collectTableSymbols(P4RuntimeSymbolTable& symbols,
     symbols.add(P4RuntimeSymbolType::TABLE(), name, id);
     archHandler->collectTableProperties(&symbols, tableBlock);
 }
+
 void collectParserSymbols(P4RuntimeSymbolTable& symbols,
                           const IR::ParserBlock* parserBlock) {
     CHECK_NULL(parserBlock);

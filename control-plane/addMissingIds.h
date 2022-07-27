@@ -1,4 +1,3 @@
-
 #ifndef CONTROL_PLANE_ADDMISSINGIDS_H_
 #define CONTROL_PLANE_ADDMISSINGIDS_H_
 
@@ -9,10 +8,6 @@
 
 namespace P4 {
 
-/// Scans the P4 program, run the evaluator pass, and derives the P4Runtime Ids
-/// from the top level blocks produced by the evaluator pass. The pass then
-/// computes IDs for P4Runtime nodes that are missing an ID and attaches the
-/// computed ID to the node.
 class MissingIdAssigner : public Transform {
     /// The reference map. This is needed to identify the correct references for
     /// some extern constructs.
@@ -20,7 +15,8 @@ class MissingIdAssigner : public Transform {
 
     /// The type map. This is needed to identify the correct types for some
     /// extern constructs.
-    /// The typeMap is not constant because the flattenHeader pass inserts types.
+    /// The typeMap is not constant because the flattenHeader pass inserts
+    /// types.
     TypeMap* typeMap;
 
     /// Specifies the width of the IDs.
@@ -36,14 +32,11 @@ class MissingIdAssigner : public Transform {
     const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface& archBuilder;
 
     const IR::P4Program* preorder(IR::P4Program* program) override;
-
-    const IR::P4Table* preorder(IR::P4Table* table) override;
-
-    const IR::Type_Header* preorder(IR::Type_Header* hdr) override;
-
-    const IR::P4ValueSet* preorder(IR::P4ValueSet* valueSet) override;
-
-    const IR::P4Action* preorder(IR::P4Action* action) override;
+    const IR::Property* postorder(IR::Property* property) override;
+    const IR::P4Table* postorder(IR::P4Table* table) override;
+    const IR::Type_Header* postorder(IR::Type_Header* hdr) override;
+    const IR::P4ValueSet* postorder(IR::P4ValueSet* valueSet) override;
+    const IR::P4Action* postorder(IR::P4Action* action) override;
 
  public:
     explicit MissingIdAssigner(
@@ -56,6 +49,10 @@ class MissingIdAssigner : public Transform {
         const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface& archBuilder);
 };
 
+/// Scans the P4 program, run the evaluator pass, and derives the P4Runtime Ids
+/// from the top level blocks produced by the evaluator pass. The pass then
+/// computes IDs for P4Runtime nodes that are missing an ID and attaches the
+/// computed ID to the node.
 class AddMissingIdAnnotations final : public PassManager {
  public:
     AddMissingIdAnnotations(
