@@ -8,13 +8,13 @@ namespace P4 {
 
 const IR::P4Program* MissingIdAssigner::preorder(IR::P4Program* program) {
     auto evaluator = P4::EvaluatorPass(refMap, typeMap);
-    program->apply(evaluator);
+    const auto *newProg = program->apply(evaluator);
     auto* toplevel = evaluator.getToplevelBlock();
     CHECK_NULL(toplevel);
     symbols = ControlPlaneAPI::P4RuntimeSymbolTable::generateSymbols(
         toplevel->getProgram(), toplevel, refMap, typeMap,
         archBuilder(refMap, typeMap, toplevel));
-    return program;
+    return newProg;
 }
 
 const IR::Property* MissingIdAssigner::postorder(IR::Property* property) {
@@ -163,20 +163,6 @@ MissingIdAssigner::MissingIdAssigner(
     setName("MissingIdAssigner");
 }
 
-MissingIdAssigner::MissingIdAssigner(
-    ReferenceMap* refMap, TypeMap* typeMap,
-    const ControlPlaneAPI::P4RuntimeSymbolTable* symbols,
-    const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface& archBuilder)
-    : refMap(refMap),
-      typeMap(typeMap),
-      symbols(symbols),
-      archBuilder(archBuilder) {
-    CHECK_NULL(typeMap);
-    CHECK_NULL(refMap);
-    CHECK_NULL(symbols);
-    setName("MissingIdAssigner");
-}
-
 AddMissingIdAnnotations::AddMissingIdAnnotations(
     ReferenceMap* refMap, TypeMap* typeMap,
     const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface* archBuilder) {
@@ -185,9 +171,6 @@ AddMissingIdAnnotations::AddMissingIdAnnotations(
 
     passes.push_back(new ControlPlaneAPI::ParseP4RuntimeAnnotations());
     passes.push_back(new MissingIdAssigner(refMap, typeMap, *archBuilder));
-/*    // Need to refresh types after we have updated some expressions with
-    // IDs.
-    passes.push_back(new TypeChecking(refMap, typeMap, true));*/
     setName("AddMissingIdAnnotations");
 }
 
