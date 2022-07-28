@@ -54,7 +54,6 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap),
         // TBD: implement dpdk lowering passes instead of reusing bmv2's lowering pass.
-
         new ByteAlignment(typeMap, refMap, &structure),
         new P4::SimplifyKey(
                 refMap, typeMap,
@@ -68,6 +67,11 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::ConstantFolding(refMap, typeMap, false),
         new ElimHeaderCopy(typeMap),
         new P4::TypeChecking(refMap, typeMap),
+        new FlattenHeaderUnion(refMap, typeMap),
+//        new P4::RemoveAllUnusedDeclarations(refMap),
+//        new P4::ClearTypeMap(typeMap),
+//        new P4::TypeChecking(refMap, typeMap),
+//        new P4::ResolveReferences(refMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         new ConvertActionSelectorAndProfile(refMap, typeMap, &structure),
         new CollectTableInfo(&structure),

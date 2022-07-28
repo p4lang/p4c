@@ -345,8 +345,6 @@ const IR::Node *ConvertLookahead::Replace::postorder(IR::P4Parser *parser) {
     return parser;
 }
 
-
-
 void CollectMetadataHeaderInfo::pushMetadata(const IR::ParameterList* params,
         std::list<int> indices) {
     for (auto idx : indices) {
@@ -2446,6 +2444,88 @@ const IR::Node* ElimHeaderCopy::postorder(IR::Member* m) {
         return new IR::Member(replacementMap.at(expr->path->name.name), m->member);
     }
     return m;
+}
+
+const IR::Node* DoFlattenHeaderUnion::postorder(IR::Type_Struct* s) {
+    auto fields = new IR::IndexedVector<IR::StructField>;
+    for (auto sf : s->fields) {
+        auto ftype = typeMap->getType(sf, true);
+        if (ftype->is<IR::Type_HeaderUnion>()) {
+            for (auto sfu : ftype->to<IR::Type_HeaderUnion>()->fields) {
+                cstring uName = sf->name.name + "_" + sfu->name.name;
+                auto uType = sfu->type->getP4Type();
+                fields->push_back(new IR::StructField(IR::ID(uName), uType));
+            }
+        } else {
+            fields->push_back(sf);
+        }
+    }
+    return new IR::Type_Struct(s->name, s->annotations, *fields);
+}
+
+const IR::Node* DoFlattenHeaderUnion::postorder(IR::Declaration_Variable *dv) {
+    auto ftype = typeMap->getTypeType(dv->type, true);
+    if (ftype->is<IR::Type_HeaderUnion>()) {
+        for (auto sfu : ftype->to<IR::Type_HeaderUnion>()->fields) {
+             cstring uName = dv->name.name + "_" + sfu->name.name;
+             auto uType =  sfu->type->getP4Type();
+             toInsert.push_back(new IR::Declaration_Variable(IR::ID(uName), uType));
+        }
+    }
+    return dv;
+}
+
+const IR::Node* DoFlattenHeaderUnion::postorder(IR::Member* m) {
+    if (m->expr->type->to<IR::Type_HeaderUnion>()) {
+        if (auto huf = m->expr->to<IR::Member>()) {
+            return new IR::Member(huf->expr,IR::ID(huf->member.name+"_"+m->member.name));
+        } else if (auto huf = m->expr->to<IR::PathExpression>()) {
+            return new IR::PathExpression(IR::ID(huf->path->name.name + "_" + m->member.name));
+        }
+    }
+    return m;
+}
+
+const IR::Node* DoFlattenHeaderUnion::postorder(IR::P4Action* action) {
+    if (toInsert.empty())
+        return action;
+    auto body = new IR::BlockStatement(action->body->srcInfo);
+    for (auto a : toInsert)
+        body->push_back(a);
+    for (auto s : action->body->components)
+        body->push_back(s);
+    action->body = body;
+    toInsert.clear();
+    return action;
+}
+
+const IR::Node* DoFlattenHeaderUnion::postorder(IR::Function* function) {
+    if (toInsert.empty())
+        return function;
+    auto body = new IR::BlockStatement(function->body->srcInfo);
+    for (auto a : toInsert)
+        body->push_back(a);
+    for (auto s : function->body->components)
+        body->push_back(s);
+    function->body = body;
+    toInsert.clear();
+    return function;
+}
+
+const IR::Node* DoFlattenHeaderUnion::postorder(IR::P4Parser* parser) {
+    if (toInsert.empty())
+        return parser;
+    parser->parserLocals.append(toInsert);
+    toInsert.clear();
+    return parser;
+}
+
+const IR::Node* DoFlattenHeaderUnion::postorder(IR::P4Control* control) {
+    if (toInsert.empty())
+        return control;
+    control->controlLocals.append(toInsert);
+    toInsert.clear();
+    return control;
 }
 
 }  // namespace DPDK

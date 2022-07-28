@@ -21,6 +21,7 @@ limitations under the License.
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/sideEffects.h"
+#include "frontends/p4/unusedDeclarations.h"
 #include "midend/removeLeftSlices.h"
 #include "lib/error.h"
 #include "lib/ordered_map.h"
@@ -985,6 +986,54 @@ class ElimHeaderCopy : public Transform {
     const IR::Node* preorder(IR::AssignmentStatement* as) override;
     const IR::Node* preorder(IR::MethodCallStatement *mcs) override;
     const IR::Node* postorder(IR::Member* m) override;
+};
+
+/**
+ * Flatten header union into its individual element.
+ * For ex:
+ * header_union U {
+ *     Hdr1 h1;
+ *     Hdr2 h2;
+ * }
+ *
+ * struct Headers {
+ *     Hdr1 h1;
+ *     U u;
+ * }
+ * 
+ * is replaced by 
+ * struct  Headers {
+ *     Hdr1 h1;
+ *     Hdr1 u_h1;
+ *     Hdr2 u_h2;
+ * }
+ */
+class DoFlattenHeaderUnion : public Transform {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    IR::IndexedVector<IR::Declaration> toInsert;  // temporaries
+ public:
+    DoFlattenHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) :
+                         refMap(refMap), typeMap(typeMap){}
+    const IR::Node* postorder(IR::Type_Struct* sf) override;
+    const IR::Node* postorder(IR::Declaration_Variable *dv) override;
+    const IR::Node* postorder(IR::Member* m) override;
+    const IR::Node* postorder(IR::P4Parser* parser) override;
+    const IR::Node* postorder(IR::Function* function) override;
+    const IR::Node* postorder(IR::P4Control* control) override;
+    const IR::Node* postorder(IR::P4Action* action) override;
+};
+
+class FlattenHeaderUnion : public PassManager {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+ public:
+    FlattenHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) {
+        passes.push_back(new DoFlattenHeaderUnion(refMap, typeMap));
+        passes.push_back(new P4::RemoveAllUnusedDeclarations(refMap));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.emplace_back(new P4::TypeChecking(refMap, typeMap));
+    }
 };
 
 class DpdkArchFirst : public PassManager {
