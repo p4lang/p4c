@@ -8,7 +8,7 @@ namespace P4 {
 
 const IR::P4Program* MissingIdAssigner::preorder(IR::P4Program* program) {
     auto evaluator = P4::EvaluatorPass(refMap, typeMap);
-    const auto *newProg = program->apply(evaluator);
+    const auto* newProg = program->apply(evaluator);
     auto* toplevel = evaluator.getToplevelBlock();
     CHECK_NULL(toplevel);
     symbols = ControlPlaneAPI::P4RuntimeSymbolTable::generateSymbols(
@@ -18,11 +18,11 @@ const IR::P4Program* MissingIdAssigner::preorder(IR::P4Program* program) {
 }
 
 const IR::Property* MissingIdAssigner::postorder(IR::Property* property) {
-    const IR::Key* key = nullptr;
-    if (property->name == "key") {
-        key = property->value->checkedTo<IR::Key>();
+    if (property->name != "key") {
         return property;
     }
+
+    const auto* key = property->value->checkedTo<IR::Key>();
     if (key == nullptr) {
         return property;
     }
