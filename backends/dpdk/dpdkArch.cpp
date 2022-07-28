@@ -2447,20 +2447,20 @@ const IR::Node* ElimHeaderCopy::postorder(IR::Member* m) {
 }
 
 const IR::Node* DoFlattenHeaderUnion::postorder(IR::Type_Struct* s) {
-    auto fields = new IR::IndexedVector<IR::StructField>;
+    IR::IndexedVector<IR::StructField> fields;
     for (auto sf : s->fields) {
         auto ftype = typeMap->getType(sf, true);
         if (ftype->is<IR::Type_HeaderUnion>()) {
             for (auto sfu : ftype->to<IR::Type_HeaderUnion>()->fields) {
                 cstring uName = sf->name.name + "_" + sfu->name.name;
                 auto uType = sfu->type->getP4Type();
-                fields->push_back(new IR::StructField(IR::ID(uName), uType));
+                fields.push_back(new IR::StructField(IR::ID(uName), uType));
             }
         } else {
-            fields->push_back(sf);
+            fields.push_back(sf);
         }
     }
-    return new IR::Type_Struct(s->name, s->annotations, *fields);
+    return new IR::Type_Struct(s->name, s->annotations, fields);
 }
 
 const IR::Node* DoFlattenHeaderUnion::postorder(IR::Declaration_Variable *dv) {

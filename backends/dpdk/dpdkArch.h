@@ -1000,8 +1000,8 @@ class ElimHeaderCopy : public Transform {
  *     Hdr1 h1;
  *     U u;
  * }
- * 
- * is replaced by 
+ *
+ * is replaced by
  * struct  Headers {
  *     Hdr1 h1;
  *     Hdr1 u_h1;
@@ -1012,6 +1012,7 @@ class DoFlattenHeaderUnion : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
     IR::IndexedVector<IR::Declaration> toInsert;  // temporaries
+
  public:
     DoFlattenHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) :
                          refMap(refMap), typeMap(typeMap){}
@@ -1027,6 +1028,7 @@ class DoFlattenHeaderUnion : public Transform {
 class FlattenHeaderUnion : public PassManager {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
+
  public:
     FlattenHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) {
         passes.push_back(new DoFlattenHeaderUnion(refMap, typeMap));
