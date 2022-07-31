@@ -162,12 +162,12 @@ ConversionContext::createCalculation(cstring algo, const IR::Expression* fields,
     if (sourcePositionNode != nullptr)
         calc->emplace_non_null("source_info", sourcePositionNode->sourceInfoJsonObj());
     calc->emplace("algo", algo);
-    fields = convertToList(fields, typeMap);
-    if (!fields) {
+    auto listFields = convertToList(fields, typeMap);
+    if (!listFields) {
         modelError("%1%: expected a struct", fields);
         return calcName;
     }
-    auto jright = conv->convertWithConstantWidths(fields);
+    auto jright = conv->convertWithConstantWidths(listFields);
     if (withPayload) {
         auto array = jright->to<Util::JsonArray>();
         BUG_CHECK(array, "expected a JSON array");
