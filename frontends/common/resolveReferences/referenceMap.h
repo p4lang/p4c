@@ -31,14 +31,14 @@ class NameGenerator {
 
 // replacement for ReferenceMap NameGenerator to make it easier to remove uses of refMap
 class MinimalNameGenerator : public NameGenerator, public Inspector {
-    std::set<cstring> usedNames;
+    std::unordered_map<cstring, int> usedNames;
     void postorder(const IR::Path *p) override { usedName(p->name.name); }
     void postorder(const IR::Type_Declaration *t) override { usedName(t->name.name); }
     void postorder(const IR::Declaration *d) override { usedName(d->name.name); }
 
  public:
     MinimalNameGenerator();
-    void usedName(cstring name) { usedNames.insert(name); }
+    void usedName(cstring name) { usedNames.insert({name, 0}); }
     explicit MinimalNameGenerator(const IR::Node *root) : MinimalNameGenerator() {
         root->apply(*this);
     }
@@ -72,8 +72,8 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
     /// Map from `This` to declarations (an experimental feature).
     std::map<const IR::This*, const IR::IDeclaration*> thisToDeclaration;
 
-    /// Set containing all names used in the program.
-    std::set<cstring> usedNames;
+    /// All names used in the program.
+    std::unordered_map<cstring, int> usedNames;
 
  public:
     ReferenceMap();
@@ -112,7 +112,7 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
     bool isUsed(const IR::IDeclaration* decl) const { return used.count(decl) > 0; }
 
     /// Indicate that @p name is used in the program.
-    void usedName(cstring name) { usedNames.insert(name); }
+    void usedName(cstring name) { usedNames.insert({name, 0}); }
 };
 
 }  // namespace P4
