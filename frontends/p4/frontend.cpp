@@ -191,7 +191,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new StructInitializers(&refMap, &typeMap),
         new SpecializeGenericFunctions(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
-        PassRepeated({
+        new PassRepeated({
             new ConstantFolding(&refMap, &typeMap),
             new StrengthReduction(&refMap, &typeMap),
             new Reassociation(),
