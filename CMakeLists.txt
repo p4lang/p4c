@@ -225,7 +225,8 @@ set(BUILD_LINK_WITH_LLD ON CACHE BOOL "Use LLD linker for build if available (ov
 # Build with LTO
 if (ENABLE_LTO AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   if (BUILD_LINK_WITH_LLD)
-    message(FATAL_ERROR "LLD does not work with GCC's LTO object format, set BUILD_LINK_WITH_LLD to OFF")
+    message(WARNING "LLD does not work with GCC's LTO object format, switching to Gold.")
+    set(BUILD_LINK_WITH_LLD OFF)
   endif ()
   add_cxx_compiler_option  ("-flto")
 endif ()
@@ -235,7 +236,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
     # This only works with modern versions of GCC.
     if (BUILD_STATIC_RELEASE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
         if (BUILD_LINK_WITH_LLD)
-          message(FATAL_ERROR "LLD does not work with GCC's LTO object format, set BUILD_LINK_WITH_LLD to OFF")
+          message(WARNING "LLD does not work with GCC's LTO object format, switching to Gold.")
+          set(BUILD_LINK_WITH_LLD OFF)
         endif ()
         add_cxx_compiler_option ("-flto")
     endif ()
