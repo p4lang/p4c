@@ -194,6 +194,9 @@ sudo dpkg -i /path/to/package.deb
      - `-DENABLE_MULTITHREAD=ON|OFF`. Use multithreading.  Default is
        OFF.
      - `-DENABLE_GMP=ON|OFF`. Use the GMP library.  Default is ON.
+     - `-DBUILD_LINK_WITH_GOLD=ON|OFF`. Use Gold linker for build if available.
+     - `-DBUILD_LINK_WITH_LLD=ON|OFF`. Use LLD linker for build if available (overrides BUILD_LINK_WITH_GOLD).
+     - `-DENABLE_LTO=ON|OFF`. Use Link Time Optimization (LTO).  Default is OFF.
 
     If adding new targets to this build system, please see
     [instructions](#defining-new-cmake-targets).

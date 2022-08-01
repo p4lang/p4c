@@ -40,6 +40,7 @@ OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 OPTION (ENABLE_GC "Use libgc" ON)
 OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
 OPTION (ENABLE_GMP "Use GMP library" ON)
+OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" OFF)
 OPTION (BUILD_STATIC_RELEASE "Build a statically linked release binary" OFF)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
@@ -220,10 +221,22 @@ add_cxx_compiler_option ("-Wno-deprecated-declarations")
 # If we're on GCC or Clang, use the prefer LLD or Gold linker if available.
 set(BUILD_LINK_WITH_GOLD ON CACHE BOOL "Use Gold linker for build if available")
 set(BUILD_LINK_WITH_LLD ON CACHE BOOL "Use LLD linker for build if available (overrides BUILD_LINK_WITH_GOLD)")
+
+# Build with LTO
+if (ENABLE_LTO AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  if (BUILD_LINK_WITH_LLD)
+    message(FATAL_ERROR "LLD does not work with GCC's LTO object format, set BUILD_LINK_WITH_LLD to OFF")
+  endif ()
+  add_cxx_compiler_option  ("-flto")
+endif ()
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     # We want to optimize the binary size for a static release binary.
     # This only works with modern versions of GCC.
     if (BUILD_STATIC_RELEASE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
+        if (BUILD_LINK_WITH_LLD)
+          message(FATAL_ERROR "LLD does not work with GCC's LTO object format, set BUILD_LINK_WITH_LLD to OFF")
+        endif ()
         add_cxx_compiler_option ("-flto")
     endif ()
     set(_LD_USED "default system")
