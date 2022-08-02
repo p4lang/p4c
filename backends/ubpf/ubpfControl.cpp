@@ -13,11 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
-#include "ubpfType.h"
 #include "ubpfControl.h"
+
+#include "ubpf/ubpfType.h"
 #include "lib/error.h"
-#include <frontends/p4/enumInstance.h>
+#include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/tableApply.h"
