@@ -18,7 +18,6 @@ struct ipv4_t {
 	bit<16> hdrChecksum
 	bit<32> srcAddr
 	bit<32> dstAddr
-	bit<80> newfield
 }
 
 struct tcp_t {
@@ -57,13 +56,7 @@ struct metadata {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
-	bit<48> ingress_tbl_ethernet_dstAddr
-	bit<48> ingress_tbl_ethernet_srcAddr
-	bit<8> Ingress_tmp
-	bit<8> Ingress_tmp_0
-	bit<8> Ingress_tmp_1
-	bit<8> Ingress_tmp_2
-	bit<8> Ingress_key
+	bit<16> Ingress_tmpMask
 	bit<16> tmpMask
 	bit<8> tmpMask_0
 }
@@ -78,15 +71,14 @@ action NoAction args none {
 }
 
 action execute_1 args none {
-	mov m.local_metadata_data 0x1
+	mov m.local_metadata_data m.Ingress_tmpMask
 	return
 }
 
 table tbl {
 	key {
-		m.Ingress_key wildcard
-		m.ingress_tbl_ethernet_dstAddr exact
-		m.ingress_tbl_ethernet_srcAddr exact
+		h.ethernet.srcAddr wildcard
+		h.ethernet.dstAddr exact
 	}
 	actions {
 		NoAction
@@ -104,7 +96,6 @@ apply {
 	mov m.tmpMask h.ethernet.etherType
 	and m.tmpMask 0xf00
 	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 m.tmpMask 0x800
-	jmpeq INGRESSPARSERIMPL_PARSE_TCP h.ethernet.etherType 0xd00
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	mov m.tmpMask_0 h.ipv4.protocol
@@ -112,29 +103,7 @@ apply {
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
-	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_tmp 1
-	jmpv LABEL_END h.ethernet
-	mov m.Ingress_tmp 0
-	LABEL_END :	mov m.Ingress_tmp_0 1
-	jmpv LABEL_END_0 h.ipv4
-	mov m.Ingress_tmp_0 0
-	LABEL_END_0 :	mov m.Ingress_tmp_1 m.Ingress_tmp
-	jmpeq LABEL_FALSE m.Ingress_tmp_1 0x0
-	jmpeq LABEL_FALSE m.Ingress_tmp_0 0x0
-	mov m.Ingress_tmp_1 0x1
-	jmp LABEL_END_1
-	LABEL_FALSE :	mov m.Ingress_tmp_1 0x0
-	LABEL_END_1 :	mov m.Ingress_tmp_2 1
-	jmpv LABEL_END_2 h.tcp
-	mov m.Ingress_tmp_2 0
-	LABEL_END_2 :	mov m.Ingress_key m.Ingress_tmp_1
-	jmpeq LABEL_TRUE_0 m.Ingress_key 0x1
-	jmpeq LABEL_TRUE_0 m.Ingress_tmp_2 0x1
-	mov m.Ingress_key 0x0
-	jmp LABEL_END_3
-	LABEL_TRUE_0 :	mov m.Ingress_key 0x1
-	LABEL_END_3 :	mov m.ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
-	mov m.ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_tmpMask 0x1
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
