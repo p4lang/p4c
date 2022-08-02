@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <p4/enumInstance.h>
 #include "ubpfType.h"
 #include "ubpfControl.h"
 #include "lib/error.h"
-#include "frontends/p4/tableApply.h"
-#include "frontends/p4/typeMap.h"
+#include <frontends/p4/enumInstance.h>
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
+#include "frontends/p4/tableApply.h"
+#include "frontends/p4/typeMap.h"
 
 namespace UBPF {
 
