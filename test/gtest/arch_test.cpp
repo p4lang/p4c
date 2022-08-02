@@ -22,10 +22,10 @@ limitations under the License.
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/createBuiltins.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 
-#include "p4/createBuiltins.h"
-#include "p4/typeChecking/typeChecker.h"
 
 using namespace P4;
 
