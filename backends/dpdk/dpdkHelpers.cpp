@@ -1183,32 +1183,35 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                             a->method->name);
                 return false;
             }
-            auto slot_id = a->expr->arguments->at(0)->expression;
-            auto session_id = a->expr->arguments->at(1)->expression;
-            // Frontend rejects programs which have non-constant arguments for mirror_packet()
-            BUG_CHECK(slot_id->is<IR::Constant>(), "Expected a constant for slot_id param of %1%",
-                                                   a->method->name);
-            BUG_CHECK(session_id->is<IR::Constant>(),
-                      "Expected a constant for session_id param of %1%", a->method->name);
-            unsigned value =  session_id->to<IR::Constant>()->asUnsigned();
-            if (value == 0) {
-                ::error(ErrorType::ERR_INVALID,
-                        "Mirror session ID 0 is reserved for use by Architecture");
-                return false;
+            auto slotId = a->expr->arguments->at(0)->expression;
+            auto sessionId = a->expr->arguments->at(1)->expression;
+            // If slot id and session id are not metadata fields, move these to metadata fields as
+            // DPDK expects these parameters to be in metadata
+            if (!isMetadataField(slotId)) {
+                BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                IR::ID slotName(refmap->newName("mirrorSlot"));
+                metadataStruct->fields.push_back(new IR::StructField(slotName, slotId->type));
+                auto slotMember = new IR::Member(new IR::PathExpression("m"), slotName);
+                add_instr(new IR::DpdkMovStatement(slotMember, slotId));
+                slotId = slotMember;
             }
-
-            // Move slot id and session id to metadata fields as DPDK expects these parameters
-            // to be in metadata
-            BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
-            IR::ID slotName(refmap->newName("mirrorSlot"));
-            IR::ID sessionName(refmap->newName("mirrorSession"));
-            metadataStruct->fields.push_back(new IR::StructField(slotName, slot_id->type));
-            metadataStruct->fields.push_back(new IR::StructField(sessionName, session_id->type));
-            auto slotMember = new IR::Member(new IR::PathExpression("m"), slotName);
-            auto sessionMember = new IR::Member(new IR::PathExpression("m"), sessionName);
-            add_instr(new IR::DpdkMovStatement(slotMember, slot_id));
-            add_instr(new IR::DpdkMovStatement(sessionMember, session_id));
-            add_instr(new IR::DpdkMirrorStatement(slotMember, sessionMember));
+            if (!isMetadataField(sessionId)) {
+                if (sessionId->is<IR::Constant>()) {
+                    unsigned value =  sessionId->to<IR::Constant>()->asUnsigned();
+                    if (value == 0) {
+                        ::error(ErrorType::ERR_INVALID,
+                                "Mirror session ID 0 is reserved for use by Architecture");
+                        return false;
+                    }
+                }
+                BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                IR::ID sessionName(refmap->newName("mirrorSession"));
+                metadataStruct->fields.push_back(new IR::StructField(sessionName, sessionId->type));
+                auto sessionMember = new IR::Member(new IR::PathExpression("m"), sessionName);
+                add_instr(new IR::DpdkMovStatement(sessionMember, sessionId));
+                sessionId = sessionMember;
+            }
+            add_instr(new IR::DpdkMirrorStatement(slotId, sessionId));
         } else if (a->method->name == "recirculate") {
             add_instr(new IR::DpdkRecirculateStatement());
         } else if (a->method->name == "send_to_port") {
