@@ -201,7 +201,7 @@ cc_library(
         "frontends/**/*.hpp",
         "midend/**/*.h",
         "control-plane/**/*.h",
-        "backends/**/*.h",
+        "backends/dpdk/*.h",
     ]) + [
         ":p4_parser_yacc",
         ":v1_parser_yacc",
