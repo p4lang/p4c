@@ -49,6 +49,7 @@ class OutputLogPrefix {
     static int ostream_xalloc;
     static void setup_ostream_xalloc(std::ostream &);
     friend std::ostream& operator<<(std::ostream&, const OutputLogPrefix&);
+    friend std::ostream& clearPrefix(std::ostream &out);
 #ifdef MULTITHREAD
     struct lock_t;
     mutable lock_t *lock = nullptr;
@@ -60,12 +61,16 @@ class OutputLogPrefix {
 };
 
 void addInvalidateCallback(void (*)(void));
+std::ostream& clearPrefix(std::ostream &out);
 }  // namespace Detail
 
 inline std::ostream &endl(std::ostream &out) {
     out << std::endl;
     Detail::OutputLogPrefix::indent(out);
     return out; }
+using IndentCtl::indent;
+using IndentCtl::unindent;
+using IndentCtl::TempIndent;
 
 inline bool fileLogLevelIsAtLeast(const char* file, int level) {
     // If there's no file with a log level of at least @level, we don't need to do
@@ -95,7 +100,7 @@ void increaseVerbosity();
 #define LOGN(N, X) (LOGGING(N)                                                  \
                       ? ::Log::Detail::fileLogOutput(__FILE__)                  \
                           << ::Log::Detail::OutputLogPrefix(__FILE__, N)        \
-                          << X << std::endl                                     \
+                          << X << ::Log::Detail::clearPrefix << std::endl       \
                       : std::clog)
 #define LOG1(X) LOGN(1, X)
 #define LOG2(X) LOGN(2, X)
