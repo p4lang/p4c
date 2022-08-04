@@ -107,7 +107,7 @@ p4c has package support for several Ubuntu and Debian distributions.
 
 ### Ubuntu
 
-For Ubuntu 20.04 and Ubuntu 21.04 it can be installed as follows:
+A p4c pacakge is available in the following repositories for Ubuntu 20.04 and newer.
 
 ```bash
 . /etc/os-release
