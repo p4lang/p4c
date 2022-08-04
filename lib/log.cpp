@@ -147,6 +147,11 @@ std::ostream& operator<<(std::ostream& out, const OutputLogPrefix& pfx) {
     return out;
 }
 
+std::ostream &clearPrefix(std::ostream &out) {
+    if (OutputLogPrefix::ostream_xalloc >= 0)
+        out.iword(OutputLogPrefix::ostream_xalloc) = 0;
+}
+
 static bool match(const char *pattern, const char *name) {
     const char *pend = pattern + strcspn(pattern, ",:");
     const char *pbackup = 0;
