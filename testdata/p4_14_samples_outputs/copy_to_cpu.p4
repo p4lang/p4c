@@ -63,11 +63,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             _drop;
             do_cpu_encap;
+            @defaultonly NoAction;
         }
         key = {
             standard_metadata.instance_type: exact;
         }
         size = 16;
+        default_action = NoAction();
     }
     apply {
         redirect.apply();
@@ -81,8 +83,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".copy_to_cpu") table copy_to_cpu {
         actions = {
             do_copy_to_cpu;
+            @defaultonly NoAction;
         }
         size = 1;
+        default_action = NoAction();
     }
     apply {
         copy_to_cpu.apply();

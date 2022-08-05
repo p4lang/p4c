@@ -40,7 +40,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         actions = {
             NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         if (m.b == 1w0) {

@@ -60,7 +60,7 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
             NoAction_1();
             forward();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action psadpdkbinaryoperations79() {
         b.meta = 32w1 << b.meta2;

@@ -24,7 +24,7 @@ control MyC(inout bit<2> x) {
                         2w2 : a();
                         2w3 : b();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         t_0.apply();

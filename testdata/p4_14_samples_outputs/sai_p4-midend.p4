@@ -325,8 +325,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         key = {
             standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
         }
-        counters = port_counters_0;
         default_action = NoAction_5();
+        counters = port_counters_0;
     }
     @name(".route") table route_0 {
         actions = {

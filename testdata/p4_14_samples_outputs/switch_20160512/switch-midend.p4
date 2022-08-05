@@ -2434,8 +2434,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             meta._l2_metadata_lkp_pkt_type67: exact @name("l2_metadata.lkp_pkt_type") ;
         }
         size = 1024;
-        counters = _egress_bd_stats;
         default_action = NoAction_22();
+        counters = _egress_bd_stats;
     }
     @name(".nop") action _nop_49() {
     }
@@ -3733,8 +3733,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.vlan_tag_[1].vid            : exact @name("vlan_tag_[1].vid") ;
         }
         size = 4096;
-        implementation = bd_action_profile;
         default_action = NoAction_45();
+        implementation = bd_action_profile;
     }
     @name(".set_stp_state") action _set_stp_state_0(@name("stp_state") bit<3> stp_state_1) {
         meta._l2_metadata_stp_state75 = stp_state_1;
@@ -4503,8 +4503,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta._ingress_metadata_sflow_take_sample47: ternary @name("ingress_metadata.sflow_take_sample") ;
             meta._sflow_metadata_sflow_session_id136  : exact @name("sflow_metadata.sflow_session_id") ;
         }
-        counters = _sflow_ingress_session_pkt_counter;
         default_action = NoAction_68();
+        counters = _sflow_ingress_session_pkt_counter;
     }
     @name(".sflow_ingress") table _sflow_ingress {
         actions = {
@@ -4939,8 +4939,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta._ipv4_metadata_lkp_ipv4_da57: exact @name("ipv4_metadata.lkp_ipv4_da") ;
         }
         size = 1024;
-        counters = _ipv4_multicast_route_s_g_stats_0;
         default_action = NoAction_80();
+        counters = _ipv4_multicast_route_s_g_stats_0;
     }
     @name(".multicast_route_star_g_miss") action _multicast_route_star_g_miss() {
         _ipv4_multicast_route_star_g_stats_0.count();
@@ -4972,8 +4972,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta._ipv4_metadata_lkp_ipv4_da57: exact @name("ipv4_metadata.lkp_ipv4_da") ;
         }
         size = 1024;
-        counters = _ipv4_multicast_route_star_g_stats_0;
         default_action = NoAction_81();
+        counters = _ipv4_multicast_route_star_g_stats_0;
     }
     @name(".ipv6_multicast_route_s_g_stats") direct_counter(CounterType.packets) _ipv6_multicast_route_s_g_stats_0;
     @name(".ipv6_multicast_route_star_g_stats") direct_counter(CounterType.packets) _ipv6_multicast_route_star_g_stats_0;
@@ -5038,8 +5038,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta._ipv6_metadata_lkp_ipv6_da61: exact @name("ipv6_metadata.lkp_ipv6_da") ;
         }
         size = 1024;
-        counters = _ipv6_multicast_route_s_g_stats_0;
         default_action = NoAction_84();
+        counters = _ipv6_multicast_route_s_g_stats_0;
     }
     @name(".multicast_route_star_g_miss") action _multicast_route_star_g_miss_0() {
         _ipv6_multicast_route_star_g_stats_0.count();
@@ -5071,8 +5071,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta._ipv6_metadata_lkp_ipv6_da61: exact @name("ipv6_metadata.lkp_ipv6_da") ;
         }
         size = 1024;
-        counters = _ipv6_multicast_route_star_g_stats_0;
         default_action = NoAction_85();
+        counters = _ipv6_multicast_route_star_g_stats_0;
     }
     @name(".nop") action _nop_80() {
     }
@@ -5389,8 +5389,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta._meter_metadata_meter_index107: exact @name("meter_metadata.meter_index") ;
         }
         size = 1024;
-        meters = _meter_index;
         default_action = NoAction_97();
+        meters = _meter_index;
     }
     @name(".compute_lkp_ipv4_hash") action _compute_lkp_ipv4_hash_0() {
         hash<bit<16>, bit<16>, tuple_0, bit<32>>(meta._hash_metadata_hash132, HashAlgorithm.crc16, 16w0, (tuple_0){f0 = meta._ipv4_metadata_lkp_ipv4_sa56,f1 = meta._ipv4_metadata_lkp_ipv4_da57,f2 = meta._l3_metadata_lkp_ip_proto82,f3 = meta._l3_metadata_lkp_l4_sport85,f4 = meta._l3_metadata_lkp_l4_dport86}, 32w65536);
@@ -5470,8 +5470,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta._meter_metadata_meter_index107: exact @name("meter_metadata.meter_index") ;
         }
         size = 1024;
-        counters = _meter_stats;
         default_action = NoAction_102();
+        counters = _meter_stats;
     }
     @name(".update_ingress_bd_stats") action _update_ingress_bd_stats_0() {
         ingress_bd_stats_count.count((bit<10>)meta._l2_metadata_bd_stats_idx76);
@@ -5509,8 +5509,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             standard_metadata.ingress_port     : exact @name("standard_metadata.ingress_port") ;
         }
         size = 1024;
-        counters = _storm_control_stats;
         default_action = NoAction_105();
+        counters = _storm_control_stats;
     }
     @name(".nop") action _nop_85() {
     }
@@ -5645,8 +5645,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta._hash_metadata_hash132       : selector @name("hash_metadata.hash1") ;
         }
         size = 1024;
-        implementation = ecmp_action_profile;
         default_action = NoAction_107();
+        implementation = ecmp_action_profile;
     }
     @name(".nexthop") table _nexthop {
         actions = {
@@ -5700,8 +5700,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta._hash_metadata_hash233            : selector @name("hash_metadata.hash2") ;
         }
         size = 1024;
-        implementation = lag_action_profile;
         default_action = NoAction_110();
+        implementation = lag_action_profile;
     }
     @name(".nop") action _nop_89() {
     }
@@ -5741,8 +5741,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta._fabric_metadata_dst_device29: exact @name("fabric_metadata.dst_device") ;
             meta._hash_metadata_hash233       : selector @name("hash_metadata.hash2") ;
         }
-        implementation = fabric_lag_action_profile;
         default_action = NoAction_112();
+        implementation = fabric_lag_action_profile;
     }
     @name(".drop_stats_update") action _drop_stats_update_0() {
         drop_stats_2.count((bit<10>)meta._ingress_metadata_drop_reason44);

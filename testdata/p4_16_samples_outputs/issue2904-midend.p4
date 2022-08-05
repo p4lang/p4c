@@ -47,7 +47,7 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
                         4w0x1 : A(5w1);
                         default : A(5w1);
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         X_0.apply();

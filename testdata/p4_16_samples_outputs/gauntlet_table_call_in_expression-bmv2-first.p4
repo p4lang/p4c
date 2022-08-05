@@ -44,7 +44,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             exit_action();
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         if (simple_table.apply().hit && h.eth_hdr.src_addr == h.eth_hdr.dst_addr) {

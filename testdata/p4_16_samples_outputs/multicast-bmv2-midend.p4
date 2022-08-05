@@ -74,7 +74,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
         }
         size = 256;
-        default_action = NoAction_2();
+        const default_action = NoAction_2();
     }
     apply {
         send_frame_0.apply();
@@ -111,7 +111,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         size = 1;
-        default_action = NoAction_3();
+        const default_action = NoAction_3();
     }
     @name("ingress.forward") table forward_0 {
         actions = {
@@ -123,7 +123,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta._routing_metadata_nhop_ipv40: exact @name("meta.routing_metadata.nhop_ipv4") ;
         }
         size = 512;
-        default_action = NoAction_4();
+        const default_action = NoAction_4();
     }
     @name("ingress.ipv4_lpm") table ipv4_lpm_0 {
         actions = {
@@ -135,7 +135,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
         }
         size = 1024;
-        default_action = NoAction_5();
+        const default_action = NoAction_5();
     }
     apply {
         if (hdr.ipv4.isValid()) {

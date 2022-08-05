@@ -64,11 +64,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             m_action_0;
             _nop_0;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
         size = 16384;
+        default_action = NoAction();
         counters = my_direct_counter;
     }
     apply {

@@ -63,12 +63,14 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             _nop;
             _recirculate;
             _clone_e2e;
+            @defaultonly NoAction;
         }
         key = {
             hdr.hdrA.f1                    : exact;
             standard_metadata.instance_type: ternary;
         }
         size = 128;
+        default_action = NoAction();
     }
     apply {
         t_egress.apply();
@@ -96,24 +98,28 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _nop;
             _set_port;
             _multicast;
+            @defaultonly NoAction;
         }
         key = {
             hdr.hdrA.f1  : exact;
             meta.metaA.f1: exact;
         }
         size = 128;
+        default_action = NoAction();
     }
     @name(".t_ingress_2") table t_ingress_2 {
         actions = {
             _nop;
             _resubmit;
             _clone_i2e;
+            @defaultonly NoAction;
         }
         key = {
             hdr.hdrA.f1                    : exact;
             standard_metadata.instance_type: ternary;
         }
         size = 128;
+        default_action = NoAction();
     }
     apply {
         t_ingress_1.apply();

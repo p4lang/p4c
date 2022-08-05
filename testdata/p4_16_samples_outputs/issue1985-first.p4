@@ -40,7 +40,7 @@ control c3(inout headers hdr, inout metadata meta, inout standard_metadata_t std
             a(hdr.h.isValid() || true);
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         t.apply();

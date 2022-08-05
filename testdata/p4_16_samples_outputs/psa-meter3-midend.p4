@@ -40,7 +40,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
         actions = {
             NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action act() {
         tmp = meter0_0.execute(12w0);

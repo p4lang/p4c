@@ -37,7 +37,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             do_action();
             @defaultonly NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action gauntlet_instance_overwritebmv2l23() {
         tmp.setValid();

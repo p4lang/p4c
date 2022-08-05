@@ -187,73 +187,89 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ipv6_packet;
             mpls_packet;
             mim_packet;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.etherType: exact;
         }
+        default_action = NoAction();
     }
     @name(".icmp_check") table icmp_check {
         actions = {
             nop;
             _drop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.icmp.typeCode: exact;
         }
+        default_action = NoAction();
     }
     @name(".ipv4_match") table ipv4_match {
         actions = {
             nop;
             set_egress_port;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ipv4.dstAddr: exact;
         }
+        default_action = NoAction();
     }
     @name(".ipv6_match") table ipv6_match {
         actions = {
             nop;
             set_egress_port;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ipv6.dstAddr: exact;
         }
+        default_action = NoAction();
     }
     @name(".l2_match") table l2_match {
         actions = {
             nop;
             set_egress_port;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
+        default_action = NoAction();
     }
     @name(".set_egress") table set_egress {
         actions = {
             discard;
             send_packet;
+            @defaultonly NoAction;
         }
         key = {
             meta.ing_metadata.drop: exact;
         }
+        default_action = NoAction();
     }
     @name(".tcp_check") table tcp_check {
         actions = {
             nop;
             _drop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.tcp.dstPort: exact;
         }
+        default_action = NoAction();
     }
     @name(".udp_check") table udp_check {
         actions = {
             nop;
             _drop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.udp.dstPort: exact;
         }
+        default_action = NoAction();
     }
     apply {
         switch (ethertype_match.apply().action_run) {

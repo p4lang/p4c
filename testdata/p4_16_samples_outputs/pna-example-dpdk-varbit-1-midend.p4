@@ -95,7 +95,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
             NoAction_1();
             a2();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @name("MainControlImpl.tbl2") table tbl2_0 {
         key = {
@@ -105,7 +105,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
             NoAction_2();
             a1();
         }
-        default_action = NoAction_2();
+        const default_action = NoAction_2();
     }
     @hidden action pnaexampledpdkvarbit1l124() {
         send_to_port(32w0);

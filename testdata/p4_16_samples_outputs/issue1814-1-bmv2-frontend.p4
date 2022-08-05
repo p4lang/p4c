@@ -35,7 +35,7 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
             forward();
             @defaultonly NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         testRegister_0.read(registerData_0, 32w0);

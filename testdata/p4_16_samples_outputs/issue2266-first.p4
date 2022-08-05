@@ -38,7 +38,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             simple_action(simple_function());
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         simple_table.apply();

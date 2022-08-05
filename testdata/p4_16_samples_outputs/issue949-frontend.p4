@@ -60,7 +60,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             setDest();
             @defaultonly NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         someTable_0.apply();

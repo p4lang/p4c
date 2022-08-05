@@ -22,7 +22,7 @@ control c(out B32 x) {
         key = {
             k: exact @name("k") ;
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         bit<32> b = 32w0;

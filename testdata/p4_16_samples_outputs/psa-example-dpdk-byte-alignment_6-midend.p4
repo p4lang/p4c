@@ -97,7 +97,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
             NoAction_1();
             execute_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action psaexampledpdkbytealignment_6l109() {
         counter0_0.count(12w1023, 32w20);

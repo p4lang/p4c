@@ -28,7 +28,7 @@ control ingress(inout Headers h) {
         actions = {
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         exit;

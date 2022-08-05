@@ -83,7 +83,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         actions = {
             NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action issue1049bmv2l109() {
         hdr.ethernet.dstAddr = meta._mystruct1_hash10 ++ 7w0 ++ (bit<1>)meta._mystruct1_hash_drop1 ++ 8w0 ++ 16w0xdead;

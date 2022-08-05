@@ -36,7 +36,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         actions = {
             NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         simple_action(tmp_val[7:4]);

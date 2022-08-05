@@ -210,7 +210,7 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
             set_mcast_grp();
             @defaultonly NoAction_2();
         }
-        default_action = NoAction_2();
+        const default_action = NoAction_2();
     }
     apply {
         if (hdr.ipv6.isValid()) {
@@ -234,7 +234,7 @@ control egress(inout headers hdr, inout metadata_t meta, inout standard_metadata
             set_out_bd();
             @defaultonly NoAction_3();
         }
-        default_action = NoAction_3();
+        const default_action = NoAction_3();
     }
     @name("egress.drop") action drop() {
         mark_to_drop(standard_metadata);

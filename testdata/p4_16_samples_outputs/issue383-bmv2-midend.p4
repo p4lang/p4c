@@ -86,7 +86,7 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
             do_act();
             @defaultonly NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action issue383bmv2l75() {
         s_0_col_bvh.setInvalid();

@@ -67,10 +67,12 @@ control processA(inout headers hdr, inout metadata meta, inout standard_metadata
     @name(".tabA") table tabA {
         actions = {
             act;
+            @defaultonly NoAction;
         }
         key = {
             hdr.hdrA.f1: exact;
         }
+        default_action = NoAction();
     }
     apply {
         tabA.apply();
@@ -85,10 +87,12 @@ control processB(inout headers hdr, inout metadata meta, inout standard_metadata
     @name(".tabB") table tabB {
         actions = {
             act;
+            @defaultonly NoAction;
         }
         key = {
             hdr.hdrB.f1: exact;
         }
+        default_action = NoAction();
     }
     apply {
         tabB.apply();

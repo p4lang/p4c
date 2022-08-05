@@ -46,8 +46,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ethernet_4();
             @defaultonly NoAction();
         }
-        counters = ethernet_1;
         default_action = NoAction();
+        counters = ethernet_1;
     }
     apply {
         ethernet_3.apply();

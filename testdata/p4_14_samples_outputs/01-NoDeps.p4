@@ -36,10 +36,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".e_t1") table e_t1 {
         actions = {
             nop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
+        default_action = NoAction();
     }
     apply {
         e_t1.apply();
@@ -59,19 +61,23 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             nop;
             set_egress_port;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
+        default_action = NoAction();
     }
     @name(".smac_filter") table smac_filter {
         actions = {
             nop;
             ing_drop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.srcAddr: exact;
         }
+        default_action = NoAction();
     }
     apply {
         dmac.apply();

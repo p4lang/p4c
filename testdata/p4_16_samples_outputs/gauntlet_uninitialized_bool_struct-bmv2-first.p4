@@ -41,7 +41,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             dummy_action(h.eth_hdr.eth_type, tmp);
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         switch (simple_table.apply().action_run) {

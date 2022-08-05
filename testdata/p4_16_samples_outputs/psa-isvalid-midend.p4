@@ -53,7 +53,7 @@ control MyIC(inout headers_t hdr, inout EMPTY_M b, in psa_ingress_input_metadata
         actions = {
             NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         if (hdr.ethernet.isValid()) {

@@ -44,13 +44,13 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         actions = {
             NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @name("ingress.t2") table t2_0 {
         actions = {
             NoAction_2();
         }
-        default_action = NoAction_2();
+        const default_action = NoAction_2();
     }
     apply {
         if (m.b == 1w0) {

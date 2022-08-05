@@ -84,7 +84,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             mpls_decap();
             NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @name("pipe.downstream_tbl") table downstream_tbl_0 {
         key = {
@@ -94,7 +94,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             mpls_encap();
             NoAction_2();
         }
-        default_action = NoAction_2();
+        const default_action = NoAction_2();
     }
     apply {
         if (headers.mpls.isValid()) {

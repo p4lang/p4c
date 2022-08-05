@@ -76,7 +76,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         actions = {
             NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         if (hdr.ipv4.isValid()) {

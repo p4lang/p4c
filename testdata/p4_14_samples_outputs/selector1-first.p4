@@ -50,8 +50,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.data.f4: selector @name("data.f4") ;
         }
         size = 1024;
-        implementation = sel_profile;
         default_action = NoAction();
+        implementation = sel_profile;
     }
     apply {
         test1.apply();

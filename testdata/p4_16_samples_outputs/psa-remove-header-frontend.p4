@@ -57,7 +57,7 @@ control MyIC(inout headers_t hdr, inout EMPTY_M b, in psa_ingress_input_metadata
             NoAction_1();
             remove_header();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         tbl_0.apply();

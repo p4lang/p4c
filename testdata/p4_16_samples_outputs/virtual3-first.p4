@@ -29,7 +29,7 @@ control c(inout bit<16> p) {
             final_ctr();
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         local = 16w4;

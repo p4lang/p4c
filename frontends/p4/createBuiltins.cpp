@@ -93,7 +93,7 @@ void CreateBuiltins::postorder(IR::TableProperties* properties) {
     auto prop = new IR::Property(
         IR::ID(IR::TableProperties::defaultActionPropertyName),
         new IR::ExpressionValue(methodCall),
-        /* isConstant = */ false);
+        /* isConstant = */ true);
     properties->properties.push_back(prop);
 }
 

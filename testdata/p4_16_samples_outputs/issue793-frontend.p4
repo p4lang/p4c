@@ -25,7 +25,7 @@ control c(in my_packet hdr) {
         key = {
             hdr.data.db: exact @name("hdr.data.db") ;
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         if (hdr.data.da == 32w1) {

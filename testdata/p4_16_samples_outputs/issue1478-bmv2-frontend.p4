@@ -60,7 +60,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
                         9w0 : NoAction_2();
         }
         size = 10;
-        default_action = NoAction_2();
+        const default_action = NoAction_2();
     }
     apply {
         t1_0.apply();

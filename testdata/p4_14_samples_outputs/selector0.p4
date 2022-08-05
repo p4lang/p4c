@@ -36,6 +36,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".test1") table test1 {
         actions = {
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.b1: exact;
@@ -45,6 +46,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.data.f4: selector;
         }
         size = 1024;
+        default_action = NoAction();
         implementation = sel_profile;
     }
     apply {

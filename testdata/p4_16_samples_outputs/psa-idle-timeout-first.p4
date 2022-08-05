@@ -47,7 +47,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
             a2();
         }
         psa_idle_timeout = PSA_IdleTimeout_t.NOTIFY_CONTROL;
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     table tbl_no_idle_timeout {
         key = {
@@ -59,7 +59,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
             a2();
         }
         psa_idle_timeout = PSA_IdleTimeout_t.NO_TIMEOUT;
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     table tbl_no_idle_timeout_prop {
         key = {
@@ -70,7 +70,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
             a1();
             a2();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         tbl_idle_timeout.apply();

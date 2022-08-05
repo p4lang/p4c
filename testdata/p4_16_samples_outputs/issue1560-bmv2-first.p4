@@ -109,7 +109,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
             @defaultonly NoAction();
         }
         size = 8;
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     table t1 {
         key = {
@@ -121,7 +121,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
             @defaultonly NoAction();
         }
         size = 8;
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     table t2 {
         actions = {
@@ -134,7 +134,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
             meta.hash1     : selector @name("meta.hash1") ;
         }
         size = 16;
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         t0.apply();

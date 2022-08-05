@@ -90,7 +90,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
             NoAction_1();
             execute_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action psadpdkerrorcode2l106() {
         err_0 = istd.parser_error != error.NoError;

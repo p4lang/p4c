@@ -67,7 +67,7 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
             do_act();
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         tns.apply();

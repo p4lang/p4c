@@ -111,10 +111,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".do_nothing") table do_nothing {
         actions = {
             do_noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
+        default_action = NoAction();
     }
     apply {
         do_nothing.apply();

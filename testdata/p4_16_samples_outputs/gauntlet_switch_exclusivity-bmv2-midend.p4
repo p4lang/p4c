@@ -38,7 +38,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             action_1();
             @defaultonly NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action gauntlet_switch_exclusivitybmv2l39() {
         h.eth_hdr.src_addr = 48w20;

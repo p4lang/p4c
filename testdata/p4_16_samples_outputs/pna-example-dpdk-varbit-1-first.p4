@@ -89,7 +89,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
             NoAction();
             a2();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     table tbl2 {
         key = {
@@ -99,7 +99,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
             NoAction();
             a1();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         send_to_port((PortId_t)32w0);

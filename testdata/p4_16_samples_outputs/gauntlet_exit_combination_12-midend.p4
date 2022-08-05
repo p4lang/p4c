@@ -33,7 +33,7 @@ control ingress(inout Headers h) {
             do_action();
             @defaultonly NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action gauntlet_exit_combination_12l42() {
         h.eth_hdr.eth_type = 16w0xdead;

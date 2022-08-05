@@ -17,7 +17,7 @@ control myc() {
         const entries = {
                         default : a();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         t_0.apply();

@@ -123,73 +123,89 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set1;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f1_1: exact;
         }
+        default_action = NoAction();
     }
     @name(".tbl2") table tbl2 {
         actions = {
             set2;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f2_1: exact;
         }
+        default_action = NoAction();
     }
     @name(".tbl3") table tbl3 {
         actions = {
             set3;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f3_1: exact;
         }
+        default_action = NoAction();
     }
     @name(".tbl4") table tbl4 {
         actions = {
             set4;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f4_1: exact;
         }
+        default_action = NoAction();
     }
     @name(".tbl5") table tbl5 {
         actions = {
             set5;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f5_1: exact;
         }
+        default_action = NoAction();
     }
     @name(".tbl6") table tbl6 {
         actions = {
             set6;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f6_1: exact;
         }
+        default_action = NoAction();
     }
     @name(".tbl7") table tbl7 {
         actions = {
             set7;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f7_1: exact;
         }
+        default_action = NoAction();
     }
     @name(".tbl8") table tbl8 {
         actions = {
             set8;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f8_1: exact;
         }
+        default_action = NoAction();
     }
     apply {
         tbl1.apply();

@@ -16,6 +16,7 @@ tables {
   action_refs {
     id: 21257015
   }
+  const_default_action_id: 21257015
   direct_resource_ids: 368068636
   size: 1024
 }
@@ -37,6 +38,7 @@ tables {
   action_refs {
     id: 18579058
   }
+  const_default_action_id: 21257015
   size: 1024
 }
 actions {

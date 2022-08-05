@@ -97,7 +97,7 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
             NoAction();
             execute();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         tbl.apply();

@@ -36,7 +36,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             dummy_action();
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     table simple_table_2 {
         key = {
@@ -46,7 +46,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             dummy_action();
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         switch (simple_table_1.apply().action_run) {

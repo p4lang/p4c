@@ -57,7 +57,7 @@ control pipe(inout Headers_t headers, out bool pass) {
             @defaultonly NoAction_1();
         }
         implementation = array_table(32w1);
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action valid_ebpf49() {
         counters_0.increment(headers.ipv4.dstAddr);

@@ -42,7 +42,7 @@ control EgressImpl(inout headers_t hdr, inout metadata meta, inout standard_meta
             set_true();
             @defaultonly NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         change_cond_0.apply();

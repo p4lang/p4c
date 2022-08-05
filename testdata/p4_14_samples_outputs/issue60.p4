@@ -35,11 +35,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".t1") table t1 {
         actions = {
             set_egress_port;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.dstAddr: lpm;
             hdr.ethernet.srcAddr: lpm;
         }
+        default_action = NoAction();
     }
     apply {
         t1.apply();

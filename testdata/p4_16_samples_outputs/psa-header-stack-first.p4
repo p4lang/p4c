@@ -78,7 +78,7 @@ control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t 
         actions = {
             NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         if (a.ethernet.isValid()) {

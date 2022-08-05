@@ -962,12 +962,15 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         }
         auto ale = new IR::ActionListElement(a.srcInfo, new IR::PathExpression(newname));
         actionList->push_back(ale);
-        if (table->default_action.name == action->name.name) {
+        if (default_action == action->name.name) {
             default_action = newname;
         }
     }
-    if (!table->default_action.name.isNullOrEmpty() &&
-        !actionList->getDeclaration(default_action)) {
+
+    if (default_action.isNullOrEmpty())
+        default_action = P4::P4CoreLibrary::instance.noAction.Id().name;
+
+    if (!actionList->getDeclaration(default_action)) {
         actionList->push_back(
             new IR::ActionListElement(
                 new IR::Annotations(
@@ -1041,7 +1044,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         props->push_back(prop);
     }
 
-    if (!table->default_action.name.isNullOrEmpty()) {
+    {
         auto act = new IR::PathExpression(default_action);
         auto args = new IR::Vector<IR::Argument>();
         if (table->default_action_args != nullptr) {
@@ -1053,7 +1056,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
             // Since no default action arguments are added in the p4 program we
             // add zero initialized arguments
             for (auto a : actions) {
-                if (a.second == table->default_action.name) {
+                if (a.second == default_action) {
                     for (auto aa : a.first->args) {
                         args->push_back(new IR::Argument(aa->name, new IR::Constant(0)));
                     }

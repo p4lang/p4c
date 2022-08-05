@@ -8,7 +8,7 @@ control ingress(inout bit<32> b) {
         actions = {
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     table t1 {
         key = {
@@ -17,7 +17,7 @@ control ingress(inout bit<32> b) {
         actions = {
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     table t2 {
         key = {
@@ -26,7 +26,7 @@ control ingress(inout bit<32> b) {
         actions = {
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         if (t2.apply().hit) {

@@ -58,7 +58,7 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
             forward();
             NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         tbl_0.apply();

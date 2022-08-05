@@ -97,7 +97,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
             drop();
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         if (hdr.ipv4.isValid()) {

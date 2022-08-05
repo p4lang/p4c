@@ -40,7 +40,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             dummy_action();
             @defaultonly NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @name("ingress.simple_table_2") table simple_table_0 {
         key = {
@@ -50,7 +50,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             dummy_action_1();
             @defaultonly NoAction_2();
         }
-        default_action = NoAction_2();
+        const default_action = NoAction_2();
     }
     apply {
         hasReturned = false;

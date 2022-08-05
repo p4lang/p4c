@@ -34,21 +34,25 @@ control c(inout headers hdr, inout metadata meta, inout standard_metadata_t stan
         actions = {
             send;
             discard;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
         size = 1024;
+        default_action = NoAction();
     }
     @name(".c2") table c2 {
         actions = {
             send;
             discard;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
         size = 1024;
+        default_action = NoAction();
     }
     apply {
         if (standard_metadata.ingress_port & 9w0x2 == 9w1) {
@@ -76,21 +80,25 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             send;
             discard;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
         size = 1024;
+        default_action = NoAction();
     }
     @name(".b1") table b1 {
         actions = {
             send;
             discard;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.dstAddr: exact;
         }
         size = 1024;
+        default_action = NoAction();
     }
     @name(".c") c() c_0;
     apply {

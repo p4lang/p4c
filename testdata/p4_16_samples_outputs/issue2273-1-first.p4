@@ -55,7 +55,7 @@ control ingress(inout headers hdr) {
         key = {
             hdr.data.f1: ternary @name("hdr.data.f1") ;
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     action pop() {
         hdr.data.b1 = 8w0xfe;
@@ -69,7 +69,7 @@ control ingress(inout headers hdr) {
         key = {
             hdr.data.f1: exact @name("hdr.data.f1") ;
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         if (hdr.data.b1 == 8w0) {

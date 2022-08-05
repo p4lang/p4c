@@ -70,8 +70,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
         }
         size = 16384;
-        counters = my_direct_counter;
         default_action = NoAction();
+        counters = my_direct_counter;
     }
     apply {
         m_table.apply();

@@ -87,7 +87,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
             NoAction_1();
             execute_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action psaexamplemaskrange1l91() {
         tmpMask_1 = 16w1;

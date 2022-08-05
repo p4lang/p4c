@@ -53,7 +53,7 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
             a1();
             a2();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         tbl_0.apply();

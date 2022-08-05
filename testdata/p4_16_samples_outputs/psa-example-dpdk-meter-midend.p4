@@ -68,7 +68,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
             NoAction_1();
             execute_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action psaexampledpdkmeter56() {
         color_in_0 = PSA_MeterColor_t.RED;

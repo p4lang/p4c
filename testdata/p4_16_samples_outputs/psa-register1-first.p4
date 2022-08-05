@@ -41,7 +41,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
             NoAction();
             execute_register();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         tbl.apply();

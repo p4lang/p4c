@@ -70,7 +70,7 @@ control ingress(inout headers hdr, inout test_metadata_t meta, inout standard_me
         key = {
             hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType") ;
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         acl_table.apply();

@@ -36,7 +36,7 @@ control ingress(inout Headers h) {
             do_action();
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         switch (simple_table.apply().action_run) {

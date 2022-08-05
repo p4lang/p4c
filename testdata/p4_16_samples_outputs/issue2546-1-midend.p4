@@ -31,7 +31,7 @@ control ingress(inout Headers h) {
         actions = {
             @defaultonly NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @name("ingress.simple_table_2") table simple_table_0 {
         key = {
@@ -40,7 +40,7 @@ control ingress(inout Headers h) {
         actions = {
             @defaultonly NoAction_2();
         }
-        default_action = NoAction_2();
+        const default_action = NoAction_2();
     }
     @hidden action act() {
         tmp = true;

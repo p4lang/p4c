@@ -51,7 +51,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         key = {
             h.h[h.i.index].a: exact @name("h.h[h.i.index].a") ;
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         t.apply();

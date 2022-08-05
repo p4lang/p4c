@@ -42,12 +42,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".conceptualization") table conceptualization {
         actions = {
             mooneys;
+            @defaultonly NoAction;
         }
         key = {
             hdr.kilometer.isValid()      : exact;
             48w0                         : lpm @name("kilometer.flaccidly") ;
             hdr.expressivenesss.isValid(): exact;
         }
+        default_action = NoAction();
     }
     apply {
         conceptualization.apply();

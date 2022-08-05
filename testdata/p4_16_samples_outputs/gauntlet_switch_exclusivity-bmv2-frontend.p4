@@ -39,7 +39,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             action_1();
             @defaultonly NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         val = 48w20;

@@ -42,7 +42,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         actions = {
             NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action issue986bmv2l42() {
         sm.egress_spec = 9w1;

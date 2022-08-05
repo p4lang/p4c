@@ -44,7 +44,7 @@ control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_meta
         key = {
             meta.err: exact @name("meta.err") ;
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         t.apply();

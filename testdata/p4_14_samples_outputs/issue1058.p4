@@ -49,7 +49,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".tbl0") table tbl0 {
         actions = {
             test_action;
+            @defaultonly NoAction;
         }
+        default_action = NoAction();
     }
     apply {
         tbl0.apply();

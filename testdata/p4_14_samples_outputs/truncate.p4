@@ -38,11 +38,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _nop;
             _truncate;
+            @defaultonly NoAction;
         }
         key = {
             hdr.hdrA.f1: exact;
         }
         size = 128;
+        default_action = NoAction();
     }
     apply {
         t_ingress.apply();

@@ -31,7 +31,7 @@ control c(inout Headers h, inout standard_metadata_t sm) {
             do_act();
             @defaultonly NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         tns_0.apply();

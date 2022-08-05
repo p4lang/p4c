@@ -34,10 +34,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             route_eth;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.dst_addr: lpm;
         }
+        default_action = NoAction();
     }
     apply {
         routing.apply();

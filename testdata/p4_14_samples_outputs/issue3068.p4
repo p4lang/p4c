@@ -56,21 +56,25 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _nop;
             set_port;
+            @defaultonly NoAction;
         }
         key = {
             meta.mymeta.f1: exact;
         }
         size = 128;
+        default_action = NoAction();
     }
     @name(".t_ingress_2") table t_ingress_2 {
         actions = {
             _nop;
             _resubmit;
+            @defaultonly NoAction;
         }
         key = {
             meta.mymeta.f1: exact;
         }
         size = 128;
+        default_action = NoAction();
     }
     apply {
         t_ingress_1.apply();

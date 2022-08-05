@@ -32,7 +32,7 @@ control ingress(inout Headers h) {
             NoAction();
             simple_assign();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         switch (dummy_table.apply().action_run) {

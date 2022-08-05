@@ -28,7 +28,7 @@ control ingress(inout Headers h) {
         actions = {
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     table simple_table_2 {
         key = {
@@ -37,7 +37,7 @@ control ingress(inout Headers h) {
         actions = {
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         if (simple_table_2.apply().hit) {

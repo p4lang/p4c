@@ -108,7 +108,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
             a2();
         }
         psa_implementation = ap_0;
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @name("MyIC.tbl2") table tbl2_0 {
         key = {
@@ -119,7 +119,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
             a1();
         }
         psa_implementation = ap_0;
-        default_action = NoAction_2();
+        const default_action = NoAction_2();
     }
     apply {
         send_to_port_0();

@@ -55,7 +55,7 @@ control MyIC(inout headers_t hdr, inout EMPTY_M b, in psa_ingress_input_metadata
             NoAction();
             remove_header();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     action ifHit() {
         hdr.ethernet.setInvalid();

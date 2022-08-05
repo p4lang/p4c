@@ -26,7 +26,7 @@ control c(out B32 x) {
         key = {
             k_0: exact @name("k") ;
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         b_0 = 32w0;

@@ -41,7 +41,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             exit_action_0();
             @defaultonly NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         simple_eq_0 = h.eth_hdr.eth_type == 16w1;

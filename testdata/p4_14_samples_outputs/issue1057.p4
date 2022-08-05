@@ -44,7 +44,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".ethernet") table ethernet_3 {
         actions = {
             ethernet_4;
+            @defaultonly NoAction;
         }
+        default_action = NoAction();
         counters = ethernet_1;
     }
     apply {

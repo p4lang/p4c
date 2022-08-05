@@ -27,7 +27,7 @@ control ingress(inout Headers h) {
             do_global_action(true, filler_bool);
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         simple_table.apply();

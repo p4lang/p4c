@@ -26,7 +26,9 @@ control c(inout headers hdr, inout metadata meta, inout standard_metadata_t stan
     @name(".t") table t {
         actions = {
             x;
+            @defaultonly NoAction;
         }
+        default_action = NoAction();
     }
     apply {
         t.apply();

@@ -54,7 +54,7 @@ control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_meta
         key = {
             meta.data[0].da: exact @name("meta.data[0].da") ;
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         t.apply();

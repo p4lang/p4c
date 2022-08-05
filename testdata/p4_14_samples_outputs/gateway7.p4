@@ -36,19 +36,23 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             output;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f1: exact;
         }
+        default_action = NoAction();
     }
     @name(".test2") table test2 {
         actions = {
             output;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f2: exact;
         }
+        default_action = NoAction();
     }
     apply {
         if (hdr.data.b2 > 8w49) {

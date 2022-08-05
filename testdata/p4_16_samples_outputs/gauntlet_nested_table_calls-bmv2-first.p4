@@ -40,7 +40,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             exit_action();
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         h.eth_hdr.eth_type = simple_function((exit_table.apply().hit ? 16w1 : 16w2));

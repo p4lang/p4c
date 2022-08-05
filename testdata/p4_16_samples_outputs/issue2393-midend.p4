@@ -31,7 +31,7 @@ control ingress(inout Headers h) {
             do_global_action_0();
             @defaultonly NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action issue2393l18() {
         tmp_bool_0 = false;

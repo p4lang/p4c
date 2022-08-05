@@ -101,7 +101,7 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
             a1();
             a2();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     table foo {
         key = {
@@ -114,13 +114,13 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
             a3();
             a2();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     table bar {
         actions = {
             NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         if (tbl.apply().hit) {

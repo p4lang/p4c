@@ -12,7 +12,7 @@ control c() {
         }
         const entries = {
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
     }

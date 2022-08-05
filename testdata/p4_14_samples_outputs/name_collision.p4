@@ -52,10 +52,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             A_3;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.A.A: exact;
         }
+        default_action = NoAction();
     }
     @name(".B") table B_3 {
         actions = {

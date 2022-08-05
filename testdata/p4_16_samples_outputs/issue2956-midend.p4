@@ -37,7 +37,7 @@ control ingress(inout Headers h) {
             NoAction_1();
             simple_assign();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden table tbl_simple_assign {
         actions = {

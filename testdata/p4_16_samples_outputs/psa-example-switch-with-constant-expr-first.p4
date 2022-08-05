@@ -48,7 +48,7 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
         actions = {
             NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         switch (16w2) {

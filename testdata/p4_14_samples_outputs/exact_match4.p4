@@ -64,12 +64,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb1;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data1.f1: exact;
             hdr.data2.f2: exact;
             hdr.data3.f3: exact;
         }
+        default_action = NoAction();
     }
     apply {
         test1.apply();

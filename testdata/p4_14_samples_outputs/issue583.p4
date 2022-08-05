@@ -203,18 +203,22 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             drop_pkt;
             hop_ipv4;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ipv4.dstAddr: lpm;
         }
+        default_action = NoAction();
     }
     @name(".table_2") table table_2 {
         actions = {
             act;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ipv4.dstAddr: lpm;
         }
+        default_action = NoAction();
     }
     apply {
         ipv4_routing.apply();

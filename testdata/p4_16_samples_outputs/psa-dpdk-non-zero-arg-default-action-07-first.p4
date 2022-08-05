@@ -47,7 +47,7 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
             NoAction();
         }
         size = 1000000;
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         d.egress_port = (PortId_t)((bit<32>)c.ingress_port ^ 32w1);

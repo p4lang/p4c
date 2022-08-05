@@ -99,7 +99,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
             NoAction();
             execute();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         if (user_meta.port_out == 32w1) {

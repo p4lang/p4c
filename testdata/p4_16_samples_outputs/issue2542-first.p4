@@ -16,7 +16,7 @@ control SubCtrl(bit<16> eth_type) {
         actions = {
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         dummy.apply();

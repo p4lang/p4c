@@ -100,7 +100,7 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
             NoAction_1();
             execute_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action psadpdktablekeyconsolidationmixedkeys4l119() {
         key_0 = 8w0x48;

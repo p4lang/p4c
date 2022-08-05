@@ -17,7 +17,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".empty") table empty {
         actions = {
+            @defaultonly NoAction;
         }
+        default_action = NoAction();
     }
     apply {
         empty.apply();

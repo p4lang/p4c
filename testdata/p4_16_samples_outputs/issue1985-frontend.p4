@@ -44,7 +44,7 @@ control c3(inout headers hdr, inout metadata meta, inout standard_metadata_t std
             a();
             @defaultonly NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         t_0.apply();

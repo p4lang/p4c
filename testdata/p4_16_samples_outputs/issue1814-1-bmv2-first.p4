@@ -32,7 +32,7 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
             forward();
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         bit<1> registerData;

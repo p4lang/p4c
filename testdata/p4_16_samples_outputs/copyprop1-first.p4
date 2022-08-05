@@ -34,7 +34,7 @@ control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metada
             @defaultonly NoAction();
         }
         size = 1024;
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         if (hdr.payload.y == 8w0) {

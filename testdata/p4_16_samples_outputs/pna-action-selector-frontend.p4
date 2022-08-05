@@ -75,7 +75,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
             a2();
         }
         pna_implementation = as_0;
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         tbl_0.apply();

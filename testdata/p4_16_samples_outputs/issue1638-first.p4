@@ -27,7 +27,7 @@ control MyC2(in meta_t meta={ 0, 0, 0 }) {
         actions = {
             NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         a.apply();

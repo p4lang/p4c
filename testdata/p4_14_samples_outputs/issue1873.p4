@@ -33,7 +33,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".simple_tbl") table simple_tbl {
         actions = {
             simple;
+            @defaultonly NoAction;
         }
+        default_action = NoAction();
     }
     apply {
         simple_tbl.apply();

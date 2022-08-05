@@ -86,10 +86,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             push1;
             push2;
             pop1;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f1: exact;
         }
+        default_action = NoAction();
     }
     apply {
         test1.apply();

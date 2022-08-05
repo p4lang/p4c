@@ -44,37 +44,45 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             setf1;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f2: ternary;
         }
+        default_action = NoAction();
     }
     @name(".E2") table E2 {
         actions = {
             setb4;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.b1: ternary;
         }
+        default_action = NoAction();
     }
     @name(".EA") table EA {
         actions = {
             setb1;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f3: ternary;
         }
+        default_action = NoAction();
     }
     @name(".EB") table EB {
         actions = {
             setb1;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f4: ternary;
         }
+        default_action = NoAction();
     }
     apply {
         E1.apply();
@@ -106,46 +114,56 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb1;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f1: ternary;
         }
+        default_action = NoAction();
     }
     @name(".A2") table A2 {
         actions = {
             setb3;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.b1: ternary;
         }
+        default_action = NoAction();
     }
     @name(".A3") table A3 {
         actions = {
             setb1;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.b3: ternary;
         }
+        default_action = NoAction();
     }
     @name(".B1") table B1 {
         actions = {
             setb2;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f2: ternary;
         }
+        default_action = NoAction();
     }
     @name(".B2") table B2 {
         actions = {
             setb4;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.b2: ternary;
         }
+        default_action = NoAction();
     }
     apply {
         if (hdr.data.b1 == 32w0) {

@@ -57,19 +57,19 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
             a2();
         }
         psa_implementation = as_0;
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @name("MyIC.foo") table foo_0 {
         actions = {
             NoAction_2();
         }
-        default_action = NoAction_2();
+        const default_action = NoAction_2();
     }
     @name("MyIC.bar") table bar_0 {
         actions = {
             NoAction_3();
         }
-        default_action = NoAction_3();
+        const default_action = NoAction_3();
     }
     apply {
         switch (tbl_0.apply().action_run) {

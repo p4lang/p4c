@@ -27,11 +27,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".exact") table exact_0 {
         actions = {
             nop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.h.f: ternary;
         }
         size = 256;
+        default_action = NoAction();
     }
     apply {
         exact_0.apply();

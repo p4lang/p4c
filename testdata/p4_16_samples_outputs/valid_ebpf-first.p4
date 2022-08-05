@@ -55,7 +55,7 @@ control pipe(inout Headers_t headers, out bool pass) {
             @defaultonly NoAction();
         }
         implementation = array_table(32w1);
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         if (headers.ipv4.isValid()) {

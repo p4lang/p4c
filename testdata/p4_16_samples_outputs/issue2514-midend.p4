@@ -33,7 +33,7 @@ control MyIngress(inout my_headers_t hdr, inout my_meta_t meta) {
                         16w0x101 &&& 16w0x505 : hit(16w5);
                         default : hit(16w0);
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         t_0.apply();

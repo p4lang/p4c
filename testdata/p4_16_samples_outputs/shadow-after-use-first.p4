@@ -12,7 +12,7 @@ control c(inout bit<16> x) {
             nop();
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         x.apply();

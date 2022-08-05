@@ -19,7 +19,7 @@ control ingress(inout Headers h) {
         actions = {
             @defaultonly NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action issue2542l26() {
         key_0 = 16w2;

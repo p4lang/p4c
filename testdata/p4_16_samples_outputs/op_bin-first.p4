@@ -52,7 +52,7 @@ control pipe(inout Headers_t headers, out bool xout) {
                         128w0x200204200380deadbeeff00d0d090001 : set_flowlabel(20w52);
         }
         implementation = hash_table(32w8);
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         xout = true;

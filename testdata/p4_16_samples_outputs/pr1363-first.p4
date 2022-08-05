@@ -11,7 +11,7 @@ control c() {
             NoAction();
         }
         implementation = ActionProfile(32w32);
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
     }

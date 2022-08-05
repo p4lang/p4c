@@ -45,10 +45,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".exact") table exact_0 {
         actions = {
             nop;
+            @defaultonly NoAction;
         }
         key = {
             standard_metadata.egress_spec: exact;
         }
+        default_action = NoAction();
     }
     apply {
         exact_0.apply();

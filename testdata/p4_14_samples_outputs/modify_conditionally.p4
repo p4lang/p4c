@@ -43,11 +43,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".table0") table table0 {
         actions = {
             table0_actionlist;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.etherType: ternary;
         }
         size = 2000;
+        default_action = NoAction();
     }
     apply {
         if (meta.metadata_global.goto_table_id == 8w0) {

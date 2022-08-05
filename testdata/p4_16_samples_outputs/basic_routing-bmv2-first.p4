@@ -72,7 +72,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             meta.ingress_metadata.nexthop_index: exact @name("meta.ingress_metadata.nexthop_index") ;
         }
         size = 32768;
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         rewrite_mac.apply();
@@ -104,7 +104,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.ingress_metadata.bd: exact @name("meta.ingress_metadata.bd") ;
         }
         size = 65536;
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     table ipv4_fib {
         actions = {
@@ -117,7 +117,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ipv4.dstAddr         : exact @name("hdr.ipv4.dstAddr") ;
         }
         size = 131072;
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     table ipv4_fib_lpm {
         actions = {
@@ -130,7 +130,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ipv4.dstAddr         : lpm @name("hdr.ipv4.dstAddr") ;
         }
         size = 16384;
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     table nexthop {
         actions = {
@@ -142,7 +142,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.ingress_metadata.nexthop_index: exact @name("meta.ingress_metadata.nexthop_index") ;
         }
         size = 32768;
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     table port_mapping {
         actions = {
@@ -153,7 +153,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
         }
         size = 32768;
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         if (hdr.ipv4.isValid()) {

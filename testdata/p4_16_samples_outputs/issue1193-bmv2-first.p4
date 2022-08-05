@@ -34,7 +34,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
             a();
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         t.apply();

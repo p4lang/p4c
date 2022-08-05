@@ -53,7 +53,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         key = {
             key_0: exact @name("h.h[h.i.index].a") ;
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action controlhsindextest6l48() {
         key_0 = h.h[32w0].a;

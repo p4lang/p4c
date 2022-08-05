@@ -62,7 +62,7 @@ control ingress(inout headers hdr, inout metadata user_meta, inout standard_meta
         actions = {
             NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         tmp_0 = ~hdr.ethernet.etherType;

@@ -88,7 +88,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
             NoAction();
             execute();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         tbl.apply();

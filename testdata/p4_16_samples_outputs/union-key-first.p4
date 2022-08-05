@@ -28,7 +28,7 @@ control c(in Headers h) {
             a();
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         t.apply();

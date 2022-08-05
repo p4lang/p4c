@@ -31,7 +31,7 @@ control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metad
             send_to_cpu(standard_metadata);
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         t0.apply();

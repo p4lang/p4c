@@ -155,7 +155,7 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
             set_out_bd();
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     action rewrite_mac(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;

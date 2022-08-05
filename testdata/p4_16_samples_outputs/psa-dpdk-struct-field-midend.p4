@@ -42,7 +42,7 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
             @defaultonly NoAction_1();
         }
         size = 1000000;
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action psadpdkstructfield67() {
         d.egress_port = (bit<32>)c.ingress_port ^ 32w1;

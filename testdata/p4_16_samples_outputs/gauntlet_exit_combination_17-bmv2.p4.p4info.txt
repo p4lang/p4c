@@ -21,6 +21,7 @@ tables {
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
+  const_default_action_id: 21257015
   size: 1024
 }
 tables {
@@ -43,6 +44,7 @@ tables {
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
+  const_default_action_id: 21257015
   size: 1024
 }
 actions {

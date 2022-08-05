@@ -52,7 +52,7 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
                         4w0x1 : A(TableType.TT_FWD);
                         default : A(TableType.TT_FWD);
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     apply {
         X_0.apply();

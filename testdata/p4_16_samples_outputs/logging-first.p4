@@ -12,7 +12,7 @@ control c(inout bit<32> x, inout bit<32> y) {
             a(x, y);
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         t.apply();

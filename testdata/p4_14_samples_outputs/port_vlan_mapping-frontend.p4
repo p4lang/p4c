@@ -859,8 +859,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.vlan_tag_[1].vid         : exact @name("vlan_tag_[1].vid") ;
         }
         size = 32768;
-        implementation = outer_bd_action_profile;
         default_action = NoAction_1();
+        implementation = outer_bd_action_profile;
     }
     apply {
         port_vlan_mapping_0.apply();

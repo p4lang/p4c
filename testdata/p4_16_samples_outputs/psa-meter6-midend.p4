@@ -45,7 +45,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
             NoAction_1();
         }
         psa_direct_meter = meter0_0;
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @name("MyIC.tbl2") table tbl2_0 {
         key = {
@@ -55,7 +55,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
             NoAction_2();
             execute_meter();
         }
-        default_action = NoAction_2();
+        const default_action = NoAction_2();
     }
     apply {
         tbl_0.apply();

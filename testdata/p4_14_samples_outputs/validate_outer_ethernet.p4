@@ -147,6 +147,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_valid_outer_broadcast_packet_single_tagged;
             set_valid_outer_broadcast_packet_double_tagged;
             set_valid_outer_broadcast_packet_qinq_tagged;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.dstAddr      : ternary;
@@ -154,6 +155,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.vlan_tag_[1].isValid(): exact;
         }
         size = 64;
+        default_action = NoAction();
     }
     apply {
         validate_outer_ethernet.apply();

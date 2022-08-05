@@ -130,7 +130,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
             @defaultonly NoAction_1();
         }
         size = 8;
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @name("cIngress.t1") table t1_0 {
         key = {
@@ -142,7 +142,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
             @defaultonly NoAction_2();
         }
         size = 8;
-        default_action = NoAction_2();
+        const default_action = NoAction_2();
     }
     @name("cIngress.t2") table t2_0 {
         actions = {
@@ -155,7 +155,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
             hdr.ipv4.dstAddr[15:0]: selector @name("meta.hash1") ;
         }
         size = 16;
-        default_action = NoAction_3();
+        const default_action = NoAction_3();
     }
     @hidden action issue1560bmv2l175() {
         meta._hash12 = hdr.ipv4.dstAddr[15:0];

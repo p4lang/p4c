@@ -57,7 +57,7 @@ control ingress(inout headers hdr, inout metadata user_meta, inout standard_meta
         actions = {
             NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     bit<16> tmp;
     bit<32> x1;

@@ -75,46 +75,56 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             act2;
             act3;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.extra[0].h: ternary;
         }
+        default_action = NoAction();
     }
     @name(".tbl1") table tbl1 {
         actions = {
             setb2;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f2: ternary;
         }
+        default_action = NoAction();
     }
     @name(".tbl2") table tbl2 {
         actions = {
             set1b1;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f2: ternary;
         }
+        default_action = NoAction();
     }
     @name(".tbl3") table tbl3 {
         actions = {
             set2b2;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f2: ternary;
         }
+        default_action = NoAction();
     }
     @name(".test1") table test1 {
         actions = {
             setb1;
             noop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.data.f1: ternary;
         }
+        default_action = NoAction();
     }
     apply {
         test1.apply();

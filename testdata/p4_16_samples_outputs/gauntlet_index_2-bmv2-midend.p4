@@ -48,7 +48,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             simple_action();
             NoAction_1();
         }
-        default_action = NoAction_1();
+        const default_action = NoAction_1();
     }
     @hidden action gauntlet_index_2bmv2l34() {
         dummy_val_0 = h.h[0].a;

@@ -2308,8 +2308,8 @@ control process_egress_bd_stats(inout headers hdr, inout metadata meta, inout st
             meta.l2_metadata.lkp_pkt_type: exact @name("l2_metadata.lkp_pkt_type") ;
         }
         size = 1024;
-        counters = egress_bd_stats;
         default_action = NoAction();
+        counters = egress_bd_stats;
     }
     apply {
         egress_bd_stats_0.apply();
@@ -3416,8 +3416,8 @@ control process_port_vlan_mapping(inout headers hdr, inout metadata meta, inout 
             hdr.vlan_tag_[1].vid         : exact @name("vlan_tag_[1].vid") ;
         }
         size = 4096;
-        implementation = bd_action_profile;
         default_action = NoAction();
+        implementation = bd_action_profile;
     }
     apply {
         port_vlan_mapping.apply();
@@ -4327,8 +4327,8 @@ control process_ingress_sflow(inout headers hdr, inout metadata meta, inout stan
             meta.ingress_metadata.sflow_take_sample: ternary @name("ingress_metadata.sflow_take_sample") ;
             meta.sflow_metadata.sflow_session_id   : exact @name("sflow_metadata.sflow_session_id") ;
         }
-        counters = sflow_ingress_session_pkt_counter;
         default_action = NoAction();
+        counters = sflow_ingress_session_pkt_counter;
     }
     @name(".sflow_ingress") table sflow_ingress {
         actions = {
@@ -4804,8 +4804,8 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
             meta.ipv4_metadata.lkp_ipv4_da: exact @name("ipv4_metadata.lkp_ipv4_da") ;
         }
         size = 1024;
-        counters = ipv4_multicast_route_s_g_stats;
         default_action = NoAction();
+        counters = ipv4_multicast_route_s_g_stats;
     }
     @name(".multicast_route_star_g_miss") action multicast_route_star_g_miss_0() {
         ipv4_multicast_route_star_g_stats.count();
@@ -4837,8 +4837,8 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
             meta.ipv4_metadata.lkp_ipv4_da: exact @name("ipv4_metadata.lkp_ipv4_da") ;
         }
         size = 1024;
-        counters = ipv4_multicast_route_star_g_stats;
         default_action = NoAction();
+        counters = ipv4_multicast_route_star_g_stats;
     }
     apply {
         if (meta.ingress_metadata.bypass_lookups & 16w0x1 == 16w0) {
@@ -4947,8 +4947,8 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
             meta.ipv6_metadata.lkp_ipv6_da: exact @name("ipv6_metadata.lkp_ipv6_da") ;
         }
         size = 1024;
-        counters = ipv6_multicast_route_s_g_stats;
         default_action = NoAction();
+        counters = ipv6_multicast_route_s_g_stats;
     }
     @name(".multicast_route_star_g_miss") action multicast_route_star_g_miss_1() {
         ipv6_multicast_route_star_g_stats.count();
@@ -4980,8 +4980,8 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
             meta.ipv6_metadata.lkp_ipv6_da: exact @name("ipv6_metadata.lkp_ipv6_da") ;
         }
         size = 1024;
-        counters = ipv6_multicast_route_star_g_stats;
         default_action = NoAction();
+        counters = ipv6_multicast_route_star_g_stats;
     }
     apply {
         if (meta.ingress_metadata.bypass_lookups & 16w0x1 == 16w0) {
@@ -5380,8 +5380,8 @@ control process_meter_index(inout headers hdr, inout metadata meta, inout standa
             meta.meter_metadata.meter_index: exact @name("meter_metadata.meter_index") ;
         }
         size = 1024;
-        meters = meter_index;
         default_action = NoAction();
+        meters = meter_index;
     }
     apply {
         if (meta.ingress_metadata.bypass_lookups & 16w0x10 == 16w0) {
@@ -5487,8 +5487,8 @@ control process_meter_action(inout headers hdr, inout metadata meta, inout stand
             meta.meter_metadata.meter_index: exact @name("meter_metadata.meter_index") ;
         }
         size = 1024;
-        counters = meter_stats;
         default_action = NoAction();
+        counters = meter_stats;
     }
     apply {
         if (meta.ingress_metadata.bypass_lookups & 16w0x10 == 16w0) {
@@ -5552,8 +5552,8 @@ control process_storm_control_stats(inout headers hdr, inout metadata meta, inou
             standard_metadata.ingress_port : exact @name("standard_metadata.ingress_port") ;
         }
         size = 1024;
-        counters = storm_control_stats;
         default_action = NoAction();
+        counters = storm_control_stats;
     }
     apply {
         storm_control_stats_0.apply();
@@ -5700,8 +5700,8 @@ control process_nexthop(inout headers hdr, inout metadata meta, inout standard_m
             meta.hash_metadata.hash1      : selector @name("hash_metadata.hash1") ;
         }
         size = 1024;
-        implementation = ecmp_action_profile;
         default_action = NoAction();
+        implementation = ecmp_action_profile;
     }
     @name(".nexthop") table nexthop {
         actions = {
@@ -5771,8 +5771,8 @@ control process_lag(inout headers hdr, inout metadata meta, inout standard_metad
             meta.hash_metadata.hash2            : selector @name("hash_metadata.hash2") ;
         }
         size = 1024;
-        implementation = lag_action_profile;
         default_action = NoAction();
+        implementation = lag_action_profile;
     }
     apply {
         lag_group.apply();
@@ -5832,8 +5832,8 @@ control process_fabric_lag(inout headers hdr, inout metadata meta, inout standar
             meta.fabric_metadata.dst_device: exact @name("fabric_metadata.dst_device") ;
             meta.hash_metadata.hash2       : selector @name("hash_metadata.hash2") ;
         }
-        implementation = fabric_lag_action_profile;
         default_action = NoAction();
+        implementation = fabric_lag_action_profile;
     }
     apply {
         fabric_lag.apply();
