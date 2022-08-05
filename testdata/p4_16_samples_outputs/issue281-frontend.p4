@@ -45,13 +45,9 @@ parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t 
         transition start_0;
     }
     state start_0 {
-        hdr.ether.setInvalid();
-        hdr.vlan.setInvalid();
-        hdr.ipv4.setInvalid();
         transition L2_start;
     }
     state L2_start {
-        hdr.ether.setInvalid();
         transition L2_EthernetParser_start;
     }
     state L2_EthernetParser_start {
@@ -76,7 +72,6 @@ parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t 
         }
     }
     state L3_ipv4 {
-        hdr.ipv4.setInvalid();
         transition L3_Ipv4Parser_start;
     }
     state L3_Ipv4Parser_start {
@@ -87,7 +82,6 @@ parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t 
         transition start_3;
     }
     state L3_vlan {
-        hdr.vlan.setInvalid();
         transition L3_VlanParser_start;
     }
     state L3_VlanParser_start {
@@ -129,4 +123,3 @@ control MyDeparser(packet_out b, in h hdr) {
 }
 
 V1Switch<h, m>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

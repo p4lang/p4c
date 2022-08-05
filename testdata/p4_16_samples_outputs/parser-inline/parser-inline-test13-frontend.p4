@@ -40,10 +40,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state p0 {
         phdr_0.h1.setInvalid();
         packet.extract<data_t>(phdr_0.h1);
-        hdr_0.h1.setInvalid();
-        hdr_0.h2.setInvalid();
-        hdr_0.h3.setInvalid();
-        hdr_0.h4.setInvalid();
         inout_hdr_0 = phdr_0;
         transition Subparser_start;
     }
@@ -74,10 +70,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state p1 {
         phdr_1.h1.setInvalid();
         packet.extract<data_t>(phdr_1.h1);
-        hdr_0.h1.setInvalid();
-        hdr_0.h2.setInvalid();
-        hdr_0.h3.setInvalid();
-        hdr_0.h4.setInvalid();
         inout_hdr_0 = phdr_1;
         transition Subparser_start_0;
     }
@@ -145,4 +137,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

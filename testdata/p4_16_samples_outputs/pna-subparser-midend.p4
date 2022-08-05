@@ -30,8 +30,6 @@ struct headers_t {
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t meta, in pna_main_parser_input_metadata_t istd) {
     state start {
-        hdr.ethernet.setInvalid();
-        hdr.ipv4.setInvalid();
         pkt.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x800: CommonParser_parse_ipv4;
@@ -63,4 +61,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t me
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

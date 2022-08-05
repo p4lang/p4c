@@ -270,8 +270,6 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
         }
     }
     state parse_ethernet {
-        parsed_hdr.ethernet.setInvalid();
-        parsed_hdr.ipv4.setInvalid();
         buffer.extract<ethernet_t>(parsed_hdr.ethernet);
         transition select(parsed_hdr.ethernet.etherType) {
             16w0x800: CommonParser_parse_ipv4;
@@ -338,8 +336,6 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
 
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd) {
     state start {
-        parsed_hdr.ethernet.setInvalid();
-        parsed_hdr.ipv4.setInvalid();
         buffer.extract<ethernet_t>(parsed_hdr.ethernet);
         transition select(parsed_hdr.ethernet.etherType) {
             16w0x800: CommonParser_parse_ipv4_0;
@@ -439,4 +435,3 @@ control EgressDeparserImpl(packet_out packet, inout headers hdr, in metadata met
 }
 
 PSA_Switch<headers, metadata, headers, metadata>(IngressParserImpl(), ingress(), IngressDeparserImpl(), EgressParserImpl(), egress(), EgressDeparserImpl()) main;
-

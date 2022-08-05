@@ -657,10 +657,8 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     @hidden action spgw30() {
         spgw_normalizer_hasReturned = true;
     }
-    @hidden action fabric78() {
+    @hidden action act() {
         hasExited = false;
-        hdr.gtpu_ipv4.setInvalid();
-        hdr.gtpu_udp.setInvalid();
         spgw_normalizer_hasReturned = false;
     }
     @hidden action spgw35() {
@@ -702,7 +700,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         fabric_metadata._spgw_direction17 = 2w0;
         spgw_ingress_hasReturned = true;
     }
-    @hidden action act() {
+    @hidden action act_0() {
         spgw_ingress_hasReturned = false;
     }
     @hidden action spgw175() {
@@ -714,11 +712,11 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     @hidden action port_counter34() {
         port_counters_control_ingress_port_counter.count((bit<32>)standard_metadata.ingress_port);
     }
-    @hidden table tbl_fabric78 {
+    @hidden table tbl_act {
         actions = {
-            fabric78();
+            act();
         }
-        const default_action = fabric78();
+        const default_action = act();
     }
     @hidden table tbl_spgw30 {
         actions = {
@@ -762,11 +760,11 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         }
         const default_action = filtering115();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_act_0 {
         actions = {
-            act();
+            act_0();
         }
-        const default_action = act();
+        const default_action = act_0();
     }
     @hidden table tbl_spgw149 {
         actions = {
@@ -817,7 +815,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         const default_action = port_counter34();
     }
     apply {
-        tbl_fabric78.apply();
+        tbl_act.apply();
         if (hdr.gtpu.isValid()) {
             ;
         } else {
@@ -849,7 +847,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
             }
             filtering_ingress_port_vlan.apply();
             filtering_fwd_classifier.apply();
-            tbl_act.apply();
+            tbl_act_0.apply();
             if (hdr.gtpu.isValid()) {
                 if (spgw_ingress_s1u_filter_table.apply().hit) {
                     ;
@@ -973,7 +971,7 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
     @hidden action packetio41() {
         hasExited_0 = true;
     }
-    @hidden action act_0() {
+    @hidden action act_1() {
         hasExited_0 = false;
     }
     @hidden action packetio47() {
@@ -999,11 +997,11 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
     @hidden action next330() {
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_act_1 {
         actions = {
-            act_0();
+            act_1();
         }
-        const default_action = act_0();
+        const default_action = act_1();
     }
     @hidden table tbl_packetio41 {
         actions = {
@@ -1078,7 +1076,7 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
         const default_action = spgw_egress_gtpu_encap_0();
     }
     apply {
-        tbl_act_0.apply();
+        tbl_act_1.apply();
         if (fabric_metadata._is_controller_packet_out12) {
             tbl_packetio41.apply();
         }

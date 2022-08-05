@@ -650,10 +650,6 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
             if (!initializer->expression->equiv(*arg->expression)) {
                 auto stat = new IR::AssignmentStatement(initializer->expression, arg->expression);
                 body.push_back(stat); }
-        } else if (param->direction == IR::Direction::Out) {
-            auto paramType = typeMap->getType(param, true);
-            // This is important, since this variable may be used many times.
-            DoResetHeaders::generateResets(typeMap, paramType, initializer->expression, &body);
         } else if (param->direction == IR::Direction::None) {
             // already set; the value must be the same, or else we cannot compile
             auto initializer = mi->substitution.lookup(param);
@@ -810,11 +806,6 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
                     auto stat = new IR::AssignmentStatement(arg->expression,
                                                             initializer->expression);
                     current.push_back(stat); }
-            } else if (param->direction == IR::Direction::Out) {
-                auto arg = substs->paramSubst.lookupByName(param->name);
-                auto paramType = typeMap->getType(param, true);
-                // This is important, since this variable may be used many times.
-                DoResetHeaders::generateResets(typeMap, paramType, arg->expression, &current);
             } else if (param->direction == IR::Direction::None) {
                 // already set; the value must be the same, or else we cannot compile
                 auto prev = substs->paramSubst.lookup(param);

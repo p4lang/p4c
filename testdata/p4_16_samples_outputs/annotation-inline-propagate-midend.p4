@@ -15,7 +15,6 @@ struct headers {
 
 @my_anno_2 @name("MyParser.outer_parser") @my_anno_1 parser MyParser(packet_in buffer, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        hdr.hdr.setInvalid();
         buffer.extract<hdr_t>(hdr.hdr);
         transition accept;
     }
@@ -75,4 +74,3 @@ control MyDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

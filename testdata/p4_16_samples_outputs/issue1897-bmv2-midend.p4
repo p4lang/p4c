@@ -33,8 +33,6 @@ parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name("ProtParser.addr_0") addr_t addr_0;
     state start {
         packet.extract<addr_type_t>(hdr.addr_type);
-        addr_0.ipv4.setInvalid();
-        addr_0.ipv6.setInvalid();
         transition select(hdr.addr_type.dstType) {
             8w0x1: ProtAddrParser_ipv4;
             8w0x2: ProtAddrParser_ipv6;
@@ -52,8 +50,6 @@ parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout 
     state start_0 {
         hdr.addr_dst.ipv4 = addr_0.ipv4;
         hdr.addr_dst.ipv6 = addr_0.ipv6;
-        addr_0.ipv4.setInvalid();
-        addr_0.ipv6.setInvalid();
         transition select(hdr.addr_type.srcType) {
             8w0x1: ProtAddrParser_ipv4_0;
             8w0x2: ProtAddrParser_ipv6_0;
@@ -110,4 +106,3 @@ control ProtDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(ProtParser(), ProtVerifyChecksum(), ProtIngress(), ProtEgress(), ProtComputeChecksum(), ProtDeparser()) main;
-

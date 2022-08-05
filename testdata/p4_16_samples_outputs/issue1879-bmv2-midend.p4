@@ -89,7 +89,6 @@ parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         packet.extract<prot_host_addr_padding_t>(hdr.prot_host_addr_padding, (bit<32>)(9w64 - (meta._addrLen2 & 9w63) & 9w63));
         meta._addrLen2 = meta._addrLen2 + (9w64 - (meta._addrLen2 & 9w63) & 9w63);
         meta._currPos3 = (bit<8>)(9w3 + (meta._addrLen2 >> 6));
-        inf_0.setInvalid();
         meta_0_currenti.upDirection = meta._currenti_upDirection4;
         packet.extract<prot_i_t>(inf_0);
         meta_0_currenti.upDirection = meta._currenti_upDirection4 + (bit<1>)(hdr.prot_common.curri == (bit<8>)(9w3 + (meta._addrLen2 >> 6))) * inf_0.upDirection;
@@ -118,7 +117,6 @@ parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     state parse_prot_inf_1 {
-        inf_0.setInvalid();
         meta_0_currenti.upDirection = meta._currenti_upDirection4;
         packet.extract<prot_i_t>(inf_0);
         meta_0_currenti.upDirection = meta._currenti_upDirection4 + (bit<1>)(hdr.prot_common.curri == meta._currPos3) * inf_0.upDirection;
@@ -190,4 +188,3 @@ control PROTDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(PROTParser(), PROTVerifyChecksum(), PROTIngress(), PROTEgress(), PROTComputeChecksum(), PROTDeparser()) main;
-

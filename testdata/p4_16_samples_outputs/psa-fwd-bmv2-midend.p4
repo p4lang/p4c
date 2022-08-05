@@ -23,7 +23,6 @@ struct headers {
 
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_t resubmit_meta, in empty_t recirculate_meta) {
     state start {
-        parsed_hdr.ethernet.setInvalid();
         buffer.extract<ethernet_t>(parsed_hdr.ethernet);
         transition accept;
     }
@@ -31,7 +30,6 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 
 parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_egress_parser_input_metadata_t istd, in empty_t normal_meta, in empty_t clone_i2e_meta, in empty_t clone_e2e_meta) {
     state start {
-        parsed_hdr.ethernet.setInvalid();
         buffer.extract<ethernet_t>(parsed_hdr.ethernet);
         transition accept;
     }
@@ -82,4 +80,3 @@ IngressPipeline<headers, metadata, empty_t, empty_t, empty_t, empty_t>(IngressPa
 EgressPipeline<headers, metadata, empty_t, empty_t, empty_t, empty_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
 
 PSA_Switch<headers, metadata, headers, metadata, empty_t, empty_t, empty_t, empty_t, empty_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

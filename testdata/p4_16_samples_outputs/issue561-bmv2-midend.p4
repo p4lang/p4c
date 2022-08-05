@@ -123,57 +123,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state parse_tcp {
         packet.extract<tcp_t>(hdr.tcp);
-        hdr.tcp_options_vec[0].end.setInvalid();
-        hdr.tcp_options_vec[0].nop.setInvalid();
-        hdr.tcp_options_vec[0].ss.setInvalid();
-        hdr.tcp_options_vec[0].s.setInvalid();
-        hdr.tcp_options_vec[0].sack.setInvalid();
-        hdr.tcp_options_vec[1].end.setInvalid();
-        hdr.tcp_options_vec[1].nop.setInvalid();
-        hdr.tcp_options_vec[1].ss.setInvalid();
-        hdr.tcp_options_vec[1].s.setInvalid();
-        hdr.tcp_options_vec[1].sack.setInvalid();
-        hdr.tcp_options_vec[2].end.setInvalid();
-        hdr.tcp_options_vec[2].nop.setInvalid();
-        hdr.tcp_options_vec[2].ss.setInvalid();
-        hdr.tcp_options_vec[2].s.setInvalid();
-        hdr.tcp_options_vec[2].sack.setInvalid();
-        hdr.tcp_options_vec[3].end.setInvalid();
-        hdr.tcp_options_vec[3].nop.setInvalid();
-        hdr.tcp_options_vec[3].ss.setInvalid();
-        hdr.tcp_options_vec[3].s.setInvalid();
-        hdr.tcp_options_vec[3].sack.setInvalid();
-        hdr.tcp_options_vec[4].end.setInvalid();
-        hdr.tcp_options_vec[4].nop.setInvalid();
-        hdr.tcp_options_vec[4].ss.setInvalid();
-        hdr.tcp_options_vec[4].s.setInvalid();
-        hdr.tcp_options_vec[4].sack.setInvalid();
-        hdr.tcp_options_vec[5].end.setInvalid();
-        hdr.tcp_options_vec[5].nop.setInvalid();
-        hdr.tcp_options_vec[5].ss.setInvalid();
-        hdr.tcp_options_vec[5].s.setInvalid();
-        hdr.tcp_options_vec[5].sack.setInvalid();
-        hdr.tcp_options_vec[6].end.setInvalid();
-        hdr.tcp_options_vec[6].nop.setInvalid();
-        hdr.tcp_options_vec[6].ss.setInvalid();
-        hdr.tcp_options_vec[6].s.setInvalid();
-        hdr.tcp_options_vec[6].sack.setInvalid();
-        hdr.tcp_options_vec[7].end.setInvalid();
-        hdr.tcp_options_vec[7].nop.setInvalid();
-        hdr.tcp_options_vec[7].ss.setInvalid();
-        hdr.tcp_options_vec[7].s.setInvalid();
-        hdr.tcp_options_vec[7].sack.setInvalid();
-        hdr.tcp_options_vec[8].end.setInvalid();
-        hdr.tcp_options_vec[8].nop.setInvalid();
-        hdr.tcp_options_vec[8].ss.setInvalid();
-        hdr.tcp_options_vec[8].s.setInvalid();
-        hdr.tcp_options_vec[8].sack.setInvalid();
-        hdr.tcp_options_vec[9].end.setInvalid();
-        hdr.tcp_options_vec[9].nop.setInvalid();
-        hdr.tcp_options_vec[9].ss.setInvalid();
-        hdr.tcp_options_vec[9].s.setInvalid();
-        hdr.tcp_options_vec[9].sack.setInvalid();
-        hdr.tcp_options_padding.setInvalid();
         verify(hdr.tcp.dataOffset >= 4w5, error.TcpDataOffsetTooSmall);
         Tcp_option_parser_tcp_hdr_bytes_left = (bit<7>)(hdr.tcp.dataOffset + 4w11) << 2;
         transition Tcp_option_parser_next_option;
@@ -468,4 +417,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

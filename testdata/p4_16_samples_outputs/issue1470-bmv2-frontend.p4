@@ -33,8 +33,6 @@ struct headers_t {
 
 parser OuterParser(packet_in pkt, out headers_t hdr, inout meta_t m, inout standard_metadata_t meta) {
     state start {
-        hdr.eth.setInvalid();
-        hdr.ipv4.setInvalid();
         transition InnerParser_start;
     }
     state InnerParser_start {
@@ -81,4 +79,3 @@ control SimpleDeparser(packet_out pkt, in headers_t hdr) {
 }
 
 V1Switch<headers_t, meta_t>(OuterParser(), NoVerify(), NoIngress(), NoEgress(), NoCheck(), SimpleDeparser()) main;
-

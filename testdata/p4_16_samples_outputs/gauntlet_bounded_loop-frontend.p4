@@ -16,8 +16,6 @@ struct headers {
 parser p(packet_in packet, out headers hdr) {
     @name("p.sub_parser.tracker") bit<8> sub_parser_tracker;
     state start {
-        hdr.nop.setInvalid();
-        hdr.p.setInvalid();
         transition sub_parser_start;
     }
     state sub_parser_start {
@@ -54,4 +52,3 @@ parser p(packet_in packet, out headers hdr) {
 parser Parser(packet_in b, out headers hdr);
 package top(Parser p);
 top(p()) main;
-

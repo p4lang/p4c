@@ -13,7 +13,6 @@ struct headers_t {
 
 parser MyP1(packet_in pkt, out headers_t hdr) {
     state start {
-        hdr.data.setInvalid();
         transition reject;
     }
 }
@@ -24,4 +23,3 @@ control MyC1() {
 }
 
 S<headers_t>(MyP1(), MyC1()) main;
-

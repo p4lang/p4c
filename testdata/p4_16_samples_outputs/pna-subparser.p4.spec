@@ -31,13 +31,9 @@ regarray direction size 0x100 initval 0
 
 apply {
 	rx m.pna_main_input_metadata_input_port
-	invalidate h.ethernet
-	invalidate h.ipv4
 	extract h.ethernet
 	jmpeq MAINPARSERIMPL_COMMONPARSER_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp MAINPARSERIMPL_START_0
 	MAINPARSERIMPL_COMMONPARSER_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_START_0 :	tx m.pna_main_output_metadata_output_port
 }
-
-

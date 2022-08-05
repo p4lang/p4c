@@ -18,9 +18,6 @@ parser p(packet_in packet, out headers hdr) {
     padding tmp_p;
     @name("p.tmp_0") padding tmp_0;
     state start {
-        tmp_nop.setInvalid();
-        tmp_p.setInvalid();
-        tmp_0.setInvalid();
         transition sub_parser_next;
     }
     state sub_parser_next {
@@ -44,4 +41,3 @@ parser p(packet_in packet, out headers hdr) {
 parser Parser(packet_in b, out headers hdr);
 package top(Parser p);
 top(p()) main;
-

@@ -97,7 +97,6 @@ parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         meta.addrLen = meta.addrLen + paddingLen_0;
         meta.currPos = (bit<8>)(9w3 + (meta.addrLen >> 6));
         currentISelected_0 = hdr.prot_common.curri == meta.currPos;
-        inf_0.setInvalid();
         meta_0 = meta;
         currentISelected_2 = currentISelected_0;
         currI_0 = hdr.prot_common.curri;
@@ -137,7 +136,6 @@ parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state parse_prot_inf_1 {
         currentISelected_1 = meta.currPos == hdr.prot_common.curri;
-        inf_0.setInvalid();
         meta_0 = meta;
         currentISelected_2 = currentISelected_1;
         currI_0 = hdr.prot_common.curri;
@@ -188,4 +186,3 @@ control PROTDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(PROTParser(), PROTVerifyChecksum(), PROTIngress(), PROTEgress(), PROTComputeChecksum(), PROTDeparser()) main;
-
