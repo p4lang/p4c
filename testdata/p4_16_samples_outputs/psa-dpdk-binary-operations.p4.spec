@@ -51,7 +51,7 @@ table tbl {
 		NoAction
 		forward
 	}
-	default_action NoAction args none 
+	default_action NoAction args none const
 	size 0x10000
 }
 

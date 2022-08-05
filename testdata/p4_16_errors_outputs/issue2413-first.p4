@@ -32,7 +32,7 @@ control Aux(inout H hdr, inout M meta) {
             y();
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         z.apply();

@@ -70,7 +70,7 @@ table tbl {
 		a1
 		a2
 	}
-	default_action NoAction args none 
+	default_action NoAction args none const
 	size 0x10000
 }
 

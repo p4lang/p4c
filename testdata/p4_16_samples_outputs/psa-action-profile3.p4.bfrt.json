@@ -8,7 +8,7 @@
       "annotations" : [],
       "depends_on" : [298015716],
       "table_type" : "MatchAction_Indirect",
-      "has_const_default_action" : false,
+      "has_const_default_action" : true,
       "key" : [
         {
           "id" : 1,
@@ -48,7 +48,7 @@
       "annotations" : [],
       "depends_on" : [298015716],
       "table_type" : "MatchAction_Indirect",
-      "has_const_default_action" : false,
+      "has_const_default_action" : true,
       "key" : [
         {
           "id" : 1,

@@ -103,7 +103,7 @@ table tbl_idle_timeout {
 		a1
 		a2
 	}
-	default_action NoAction args none 
+	default_action NoAction args none const
 	size 0x10000
 }
 
@@ -117,7 +117,7 @@ table tbl_no_idle_timeout {
 		a1_1
 		a2_1
 	}
-	default_action NoAction args none 
+	default_action NoAction args none const
 	size 0x10000
 }
 
@@ -131,7 +131,7 @@ table tbl_no_idle_timeout_prop {
 		a1_2
 		a2_2
 	}
-	default_action NoAction args none 
+	default_action NoAction args none const
 	size 0x10000
 }
 

@@ -6,7 +6,7 @@ control c() {
             NoAction();
         }
         size = true;
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         t.apply();

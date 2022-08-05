@@ -256,6 +256,7 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
     @name(".acl") table acl {
         actions = {
             action_drop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ipv4.srcAddr    : lpm;
@@ -264,29 +265,35 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             hdr.ethernet.dstAddr: exact;
         }
         size = 80000;
+        default_action = NoAction();
     }
     @name(".check_ipv6") table check_ipv6 {
         actions = {
             on_hit;
             on_miss;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ipv6.isValid(): exact;
         }
         size = 1;
+        default_action = NoAction();
     }
     @name(".check_ucast_ipv4") table check_ucast_ipv4 {
         actions = {
             nop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ipv4.dstAddr: exact;
         }
         size = 1;
+        default_action = NoAction();
     }
     @name(".igmp_snooping") table igmp_snooping {
         actions = {
             nop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ipv4.dstAddr              : lpm;
@@ -294,20 +301,24 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             standard_metadata.ingress_port: exact;
         }
         size = 16000;
+        default_action = NoAction();
     }
     @name(".ipv4_forwarding") table ipv4_forwarding {
         actions = {
             set_next_hop;
+            @defaultonly NoAction;
         }
         key = {
             meta.hop_metadata.vrf: exact;
             hdr.ipv4.dstAddr     : lpm;
         }
         size = 160000;
+        default_action = NoAction();
     }
     @name(".ipv4_xcast_forwarding") table ipv4_xcast_forwarding {
         actions = {
             set_multicast_replication_list;
+            @defaultonly NoAction;
         }
         key = {
             hdr.vlan_tag_[0].vid          : exact;
@@ -316,10 +327,12 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             standard_metadata.ingress_port: exact;
         }
         size = 16000;
+        default_action = NoAction();
     }
     @name(".ipv6_forwarding") table ipv6_forwarding {
         actions = {
             set_next_hop;
+            @defaultonly NoAction;
         }
         key = {
             meta.hop_metadata.vrf        : exact;
@@ -327,20 +340,24 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             hdr.ipv6.dstAddr             : lpm;
         }
         size = 5000;
+        default_action = NoAction();
     }
     @name(".ipv6_prefix") table ipv6_prefix {
         actions = {
             set_ipv6_prefix_ucast;
             set_ipv6_prefix_xcast;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ipv6.dstAddr: lpm;
         }
         size = 1000;
+        default_action = NoAction();
     }
     @name(".ipv6_xcast_forwarding") table ipv6_xcast_forwarding {
         actions = {
             set_multicast_replication_list;
+            @defaultonly NoAction;
         }
         key = {
             hdr.vlan_tag_[0].vid          : exact;
@@ -349,20 +366,24 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             standard_metadata.ingress_port: exact;
         }
         size = 1000;
+        default_action = NoAction();
     }
     @name(".next_hop") table next_hop {
         actions = {
             set_ethernet_addr;
+            @defaultonly NoAction;
         }
         key = {
             meta.hop_metadata.next_hop_index: exact;
         }
         size = 41250;
+        default_action = NoAction();
     }
     @name(".urpf_v4") table urpf_v4 {
         actions = {
             urpf_check_fail;
             nop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.vlan_tag_[0].vid          : exact;
@@ -370,11 +391,13 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             hdr.ipv4.srcAddr              : exact;
         }
         size = 160000;
+        default_action = NoAction();
     }
     @name(".urpf_v6") table urpf_v6 {
         actions = {
             urpf_check_fail;
             nop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.vlan_tag_[0].vid          : exact;
@@ -382,10 +405,12 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             hdr.ipv6.srcAddr              : exact;
         }
         size = 5000;
+        default_action = NoAction();
     }
     @name(".vrf") table vrf {
         actions = {
             set_vrf;
+            @defaultonly NoAction;
         }
         key = {
             hdr.vlan_tag_[0].isValid()    : exact;
@@ -394,6 +419,7 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             standard_metadata.ingress_port: exact;
         }
         size = 40000;
+        default_action = NoAction();
     }
     apply {
         vrf.apply();
@@ -440,6 +466,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".dmac_vlan") table dmac_vlan {
         actions = {
             set_egress_port;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.dstAddr          : exact;
@@ -447,11 +474,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             standard_metadata.ingress_port: exact;
         }
         size = 160000;
+        default_action = NoAction();
     }
     @name(".routable") table routable {
         actions = {
             on_hit;
             on_miss;
+            @defaultonly NoAction;
         }
         key = {
             hdr.vlan_tag_[0].isValid()    : exact;
@@ -461,16 +490,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ethernet.etherType        : exact;
         }
         size = 64;
+        default_action = NoAction();
     }
     @name(".smac_vlan") table smac_vlan {
         actions = {
             nop;
+            @defaultonly NoAction;
         }
         key = {
             hdr.ethernet.srcAddr          : exact;
             standard_metadata.ingress_port: exact;
         }
         size = 160000;
+        default_action = NoAction();
     }
     @name(".process_ip") process_ip() process_ip_0;
     apply {

@@ -100,7 +100,7 @@ table tbl {
 		a1
 		a2
 	}
-	default_action NoAction args none 
+	default_action NoAction args none const
 	size 0x10000
 }
 
@@ -109,7 +109,7 @@ table foo {
 	actions {
 		NoAction
 	}
-	default_action NoAction args none 
+	default_action NoAction args none const
 	size 0x10000
 }
 
@@ -118,7 +118,7 @@ table bar {
 	actions {
 		NoAction
 	}
-	default_action NoAction args none 
+	default_action NoAction args none const
 	size 0x10000
 }
 

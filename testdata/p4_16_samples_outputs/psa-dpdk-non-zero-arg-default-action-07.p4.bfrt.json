@@ -8,7 +8,7 @@
       "size" : 1000000,
       "annotations" : [],
       "depends_on" : [],
-      "has_const_default_action" : false,
+      "has_const_default_action" : true,
       "key" : [],
       "action_specs" : [
         {

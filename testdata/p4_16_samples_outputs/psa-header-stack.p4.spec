@@ -54,7 +54,7 @@ table tbl {
 	actions {
 		NoAction
 	}
-	default_action NoAction args none 
+	default_action NoAction args none const
 	size 0x10000
 }
 

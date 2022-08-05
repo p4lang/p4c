@@ -156,6 +156,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             Reject;
             NoAction;
         }
+        default_action = NoAction;
     }
 
     apply {

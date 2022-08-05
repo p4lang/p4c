@@ -8,7 +8,7 @@
       "annotations" : [],
       "depends_on" : [294316857, 2164374905],
       "table_type" : "MatchAction_Indirect_Selector",
-      "has_const_default_action" : false,
+      "has_const_default_action" : true,
       "key" : [
         {
           "id" : 1,
@@ -59,7 +59,7 @@
       "size" : 1024,
       "annotations" : [],
       "depends_on" : [],
-      "has_const_default_action" : false,
+      "has_const_default_action" : true,
       "key" : [],
       "action_specs" : [
         {
@@ -81,7 +81,7 @@
       "size" : 1024,
       "annotations" : [],
       "depends_on" : [],
-      "has_const_default_action" : false,
+      "has_const_default_action" : true,
       "key" : [],
       "action_specs" : [
         {

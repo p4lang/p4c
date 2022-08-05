@@ -34,8 +34,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".table_clean_bos") table table_clean_bos {
         actions = {
             clean_bos;
+            @defaultonly NoAction;
         }
         size = 1;
+        default_action = NoAction();
     }
     apply {
         table_clean_bos.apply();

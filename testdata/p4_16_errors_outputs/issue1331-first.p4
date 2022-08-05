@@ -23,7 +23,7 @@ control MyC(packet_in pkt, inout ethernet ether)(P p) {
             a();
             @defaultonly NoAction();
         }
-        default_action = NoAction();
+        const default_action = NoAction();
     }
     apply {
         pkt.extract<ethernet>(ether);
