@@ -1185,8 +1185,8 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             }
             auto slotId = a->expr->arguments->at(0)->expression;
             auto sessionId = a->expr->arguments->at(1)->expression;
-            // If slot id and session id are not metadata fields, move these to metadata fields as
-            // DPDK expects these parameters to be in metadata
+            // If slot id and session id are not metadata fields, move these to metadata fields
+            // as DPDK expects these parameters to be in metadata
             if (!isMetadataField(slotId)) {
                 BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
                 IR::ID slotName(refmap->newName("mirrorSlot"));
