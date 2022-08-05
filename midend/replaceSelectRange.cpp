@@ -58,7 +58,7 @@ expandRange(const IR::Range *r, std::vector<const IR::Mask *>* masks, const IR::
 
         auto valConst = new IR::Constant(maskType, min, base, true);
         auto maskConst = new IR::Constant(maskType, mask, base, true);
-        masks.push_back(new IR::Mask(r->srcInfo, valConst, maskConst));
+        masks->push_back(new IR::Mask(r->srcInfo, valConst, maskConst));
 
         range_size_remaining -= match_stride;
         min += match_stride;
