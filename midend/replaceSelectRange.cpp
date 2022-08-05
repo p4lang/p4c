@@ -22,7 +22,7 @@ namespace P4 {
 
 // expands subranges that do not cross over zero
 static void
-expandRange(const IR::Range *r, std::vector<const IR::Mask *> &masks, const IR::Type *maskType,
+expandRange(const IR::Range *r, std::vector<const IR::Mask *>* masks, const IR::Type *maskType,
             big_int min, big_int max)
 {
     int width = r->type->width_bits();
@@ -65,16 +65,14 @@ expandRange(const IR::Range *r, std::vector<const IR::Mask *> &masks, const IR::
     }
 }
 
-std::vector<const IR::Mask *>
+std::vector<const IR::Mask *>*
 DoReplaceSelectRange::rangeToMasks(const IR::Range *r, size_t keyIndex) {
-    std::vector<const IR::Mask *> masks;
-
     auto l = r->left->to<IR::Constant>();
     if (!l) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "%1%: Range boundaries must be a compile-time constants.",
                 r->left);
-        return masks;
+        return nullptr;
     }
     auto left = l->value;
 
@@ -83,17 +81,19 @@ DoReplaceSelectRange::rangeToMasks(const IR::Range *r, size_t keyIndex) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "%1%: Range boundaries must be a compile-time constants.",
                 r->right);
-        return masks;
+        return nullptr;
     }
+
+    auto masks = new std::vector<const IR::Mask *>();
     auto right = ri->value;
     if (right < left) {
-        ::error(ErrorType::ERR_INVALID, "%1%-%2%: Range end is less than start.",
-                r->left, r->right);
+        ::warning(ErrorType::WARN_INVALID, "%1%-%2%: Range with end less than start is "
+                  "treated as an empty range", r->left, r->right);
         return masks;
     }
 
     auto inType = r->left->type->to<IR::Type_Bits>();
-    BUG_CHECK(inType != nullptr, "Range type %1% isnot fixed-width integer", r->left->type);
+    BUG_CHECK(inType != nullptr, "Range type %1% is not fixed-width integer", r->left->type);
     bool isSigned = inType->isSigned;
     auto maskType = isSigned ? new IR::Type_Bits(inType->srcInfo, inType->size, false) : inType;
 
@@ -177,10 +177,10 @@ const IR::Node* DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
 
     if (auto r = keySet->to<IR::Range>()) {
         auto masks = rangeToMasks(r, 0);
-        if (masks.empty())
+        if (!masks)
             return sc;
 
-        for (auto mask : masks) {
+        for (auto mask : *masks) {
             auto c = new IR::SelectCase(sc->srcInfo, mask, sc->state);
             newCases->push_back(c);
         }
@@ -196,10 +196,10 @@ const IR::Node* DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
         for (auto key : oldList->components) {
             if (auto r = key->to<IR::Range>()) {
                 auto masks = rangeToMasks(r, idx);
-                if (masks.empty())
+                if (!masks)
                     return sc;
 
-                newVectors = cartesianAppend(newVectors, masks);
+                newVectors = cartesianAppend(newVectors, *masks);
             } else {
                 newVectors = cartesianAppend(newVectors, key);
             }
