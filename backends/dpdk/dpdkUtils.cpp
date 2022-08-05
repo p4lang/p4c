@@ -63,6 +63,14 @@ bool isMetadataStruct(const IR::Type_Struct *st) {
     return false;
 }
 
+bool isMetadataField(const IR::Expression *e) {
+    if (!e->is<IR::Member>())
+        return false;
+    if (e->to<IR::Member>()->expr->type->is<IR::Type_Struct>())
+        return isMetadataStruct(e->to<IR::Member>()->expr->type->to<IR::Type_Struct>());
+    return false;
+}
+
 bool isEightBitAligned(const IR::Expression *e) {
     if (e->type->width_bits() % 8 != 0)
         return false;
