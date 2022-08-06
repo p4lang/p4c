@@ -35,6 +35,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             fill_metadata;
             NoAction;
         }
+        default_action = NoAction;
     }
     action change_etherType() {
         headers.ethernet.etherType = 0x86dd;
@@ -47,6 +48,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             change_etherType;
             NoAction;
         }
+        default_action = NoAction;
     }
     apply {
         tbl.apply();

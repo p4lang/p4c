@@ -39,7 +39,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             fill_metadata();
             NoAction_1();
         }
-        const default_action = NoAction_1();
+        default_action = NoAction_1();
     }
     @name("pipe.change_etherType") action change_etherType() {
         headers.ethernet.etherType = 16w0x86dd;
@@ -52,7 +52,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             change_etherType();
             NoAction_2();
         }
-        const default_action = NoAction_2();
+        default_action = NoAction_2();
     }
     apply {
         tbl_0.apply();
@@ -61,17 +61,17 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 }
 
 control DeparserImpl(packet_out packet, in Headers_t headers) {
-    @hidden action metadata_ubpf87() {
+    @hidden action metadata_ubpf89() {
         packet.emit<Ethernet_h>(headers.ethernet);
     }
-    @hidden table tbl_metadata_ubpf87 {
+    @hidden table tbl_metadata_ubpf89 {
         actions = {
-            metadata_ubpf87();
+            metadata_ubpf89();
         }
-        const default_action = metadata_ubpf87();
+        const default_action = metadata_ubpf89();
     }
     apply {
-        tbl_metadata_ubpf87.apply();
+        tbl_metadata_ubpf89.apply();
     }
 }
 

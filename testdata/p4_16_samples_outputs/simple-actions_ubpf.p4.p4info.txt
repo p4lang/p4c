@@ -46,7 +46,6 @@ tables {
   action_refs {
     id: 21257015
   }
-  const_default_action_id: 21257015
   size: 1024
 }
 actions {

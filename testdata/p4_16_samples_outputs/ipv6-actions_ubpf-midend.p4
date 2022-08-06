@@ -122,7 +122,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             Reject();
             NoAction_1();
         }
-        const default_action = NoAction_1();
+        default_action = NoAction_1();
     }
     apply {
         filter_tbl_0.apply();
@@ -130,20 +130,20 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action ipv6actions_ubpf168() {
+    @hidden action ipv6actions_ubpf169() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<mpls_h>(headers.mpls);
         packet.emit<IPv6_h>(headers.ipv6);
         packet.emit<IPv4_h>(headers.ipv4);
     }
-    @hidden table tbl_ipv6actions_ubpf168 {
+    @hidden table tbl_ipv6actions_ubpf169 {
         actions = {
-            ipv6actions_ubpf168();
+            ipv6actions_ubpf169();
         }
-        const default_action = ipv6actions_ubpf168();
+        const default_action = ipv6actions_ubpf169();
     }
     apply {
-        tbl_ipv6actions_ubpf168.apply();
+        tbl_ipv6actions_ubpf169.apply();
     }
 }
 

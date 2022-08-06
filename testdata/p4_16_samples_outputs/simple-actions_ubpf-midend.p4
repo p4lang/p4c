@@ -114,7 +114,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             Reject();
             NoAction_1();
         }
-        const default_action = NoAction_1();
+        default_action = NoAction_1();
     }
     apply {
         filter_tbl_0.apply();
@@ -122,19 +122,19 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action simpleactions_ubpf158() {
+    @hidden action simpleactions_ubpf159() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<mpls_h>(headers.mpls);
         packet.emit<IPv4_h>(headers.ipv4);
     }
-    @hidden table tbl_simpleactions_ubpf158 {
+    @hidden table tbl_simpleactions_ubpf159 {
         actions = {
-            simpleactions_ubpf158();
+            simpleactions_ubpf159();
         }
-        const default_action = simpleactions_ubpf158();
+        const default_action = simpleactions_ubpf159();
     }
     apply {
-        tbl_simpleactions_ubpf158.apply();
+        tbl_simpleactions_ubpf159.apply();
     }
 }
 
