@@ -111,7 +111,7 @@ cstring ReferenceMap::newName(cstring base) {
 
     cstring name = base;
     if (usedNames.count(name))
-        name = cstring::make_unique(usedNames, base, usedNames[base], '_');
+        name = cstring::make_unique(usedNames, name, usedNames[base], '_');
     usedNames.insert({name, 0});
     return name;
 }
@@ -132,7 +132,7 @@ cstring MinimalNameGenerator::newName(cstring base) {
 
     cstring name = base;
     if (usedNames.count(name))
-        name = cstring::make_unique(usedNames, base, usedNames[base], '_');
+        name = cstring::make_unique(usedNames, name, usedNames[base], '_');
     usedNames.insert({name, 0});
     return name;
 }

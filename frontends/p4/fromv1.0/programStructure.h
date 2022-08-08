@@ -48,7 +48,9 @@ class ProgramStructure {
     // We will preserve the original name using an @name("") annotation.
     template<typename T>
     class NamedObjectInfo {
-        // If allNames is nullptr we don't check for duplicate names
+        // If allNames is nullptr we don't check for duplicate names.
+        // Key is a name, value represents how many times this name was used as a base
+        // for newly generated unique names.
         std::unordered_map<cstring, int> *allNames;
         std::map<cstring, T> nameToObject;
         std::map<T, cstring> objectToNewName;

@@ -31,6 +31,8 @@ class NameGenerator {
 
 // replacement for ReferenceMap NameGenerator to make it easier to remove uses of refMap
 class MinimalNameGenerator : public NameGenerator, public Inspector {
+    /// All names used in the program. Key is a name, value represents how many times
+    /// this name was used as a base for newly generated unique names.
     std::unordered_map<cstring, int> usedNames;
     void postorder(const IR::Path *p) override { usedName(p->name.name); }
     void postorder(const IR::Type_Declaration *t) override { usedName(t->name.name); }
@@ -72,7 +74,8 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
     /// Map from `This` to declarations (an experimental feature).
     std::map<const IR::This*, const IR::IDeclaration*> thisToDeclaration;
 
-    /// All names used in the program.
+    /// All names used in the program. Key is a name, value represents how many times
+    /// this name was used as a base for newly generated unique names.
     std::unordered_map<cstring, int> usedNames;
 
  public:
