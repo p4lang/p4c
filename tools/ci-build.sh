@@ -71,12 +71,15 @@ backends/ebpf/build_libbpf
 cd /p4c
 
 function install_ptf_ebpf_test_deps() (
+  # Install linux-tools for specified kernels and for current one
+  LINUX_TOOLS="linux-tools-`uname -r`"
+  for version in $KERNEL_VERSIONS; do
+    LINUX_TOOLS+=" linux-tools-$version-generic"
+  done
   export P4C_PTF_PACKAGES="gcc-multilib \
                            python3-six \
                            libjansson-dev \
-                           linux-tools-`uname -r`"
-  # Package "linux-tools-generic-hwe-20.04" is not required because
-  # we test under current kernel, not the newest one
+                           $LINUX_TOOLS"
   apt-get install -y --no-install-recommends ${P4C_PTF_PACKAGES}
 
   git clone --recursive https://github.com/P4-Research/psabpf.git /tmp/psabpf
