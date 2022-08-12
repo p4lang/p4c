@@ -88,6 +88,57 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
         },
         "Preprocess only, do not compile (prints program on stdout)");
     registerOption(
+        "-M", nullptr,
+        [this](const char* ) {
+            preprocessor_options += std::string(" -M");
+            doNotCompile = true;
+            return true;
+        },
+        "Output `make` dependency rule only (passed to preprocessor)");
+    registerOption(
+        "-MD", nullptr,
+        [this](const char* ) {
+            preprocessor_options += std::string(" -MD");
+            return true;
+        },
+        "Output `make` dependency rule to file as side effect (passed to preprocessor)");
+    registerOption(
+        "-MF", "file",
+        [this](const char* arg) {
+            preprocessor_options += std::string(" -MF \"") + arg + std::string("\"");
+            return true;
+        },
+        "With -M, specify output file for dependencies (passed to preprocessor)");
+    registerOption(
+        "-MG", nullptr,
+        [this](const char* ) {
+            preprocessor_options += std::string(" -MG");
+            return true;
+        },
+        "with -M, suppress errors for missing headers (passed to preprocessor)");
+    registerOption(
+        "-MP", nullptr,
+        [this](const char* ) {
+            preprocessor_options += std::string(" -MP");
+            return true;
+        },
+        "with -M, add phony target for each dependency (passed to preprocessor)");
+    registerOption(
+        "-MT", "target",
+        [this](const char* arg) {
+            preprocessor_options += std::string(" -MT \"") + arg + std::string("\"");
+            return true;
+        },
+        "With -M, override target of the output rule (passed to preprocessor)");
+    registerOption(
+        "-MQ", "target",
+        [this](const char* arg) {
+            preprocessor_options += std::string(" -MQ \"") + arg + std::string("\"");
+            return true;
+        },
+        "Like -Mt, override target but quote special characters (passed to preprocessor)");
+
+    registerOption(
         "--p4v", "{14|16}",
         [this](const char* arg) {
             if (!strcmp(arg, "1.0") || !strcmp(arg, "14")) {
