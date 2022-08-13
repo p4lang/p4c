@@ -18,10 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         unified: [ON, OFF]
-        enable_gmp: [ON, OFF]
         exclude:
           - unified: OFF
-            enable_gmp: OFF
     runs-on: ubuntu-latest
     env:
       CTEST_PARALLEL_LEVEL: 4
@@ -41,7 +39,7 @@ jobs:
         # To flush out issues with unified vs. non-unified builds,
         # do a non-unified build before continuing with the rest,
         # which produces a unified build.
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} --build-arg ENABLE_GMP=${{ matrix.enable_gmp }} .
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} .
         ./tools/export_ccache.sh
 
       # run with sudo (...) --privileged
@@ -86,10 +84,8 @@ jobs:
       fail-fast: false
       matrix:
         unified: [ON, OFF]
-        enable_gmp: [ON, OFF]
         exclude:
           - unified: OFF
-            enable_gmp: OFF
     # This job runs in Fedora container that runs in Ubuntu VM.
     runs-on: ubuntu-latest
     container:
@@ -116,7 +112,7 @@ jobs:
 
     - name: Build p4c (Fedora Linux)
       run: |
-        ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} -DENABLE_GMP=${{ matrix.enable_gmp }}
+        ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=${{ matrix.unified }}
         make -j2 -C build
 
 
@@ -131,11 +127,10 @@ jobs:
       fail-fast: false
       matrix:
         unified: [ON, OFF]
-        enable_gmp: [ON, OFF]
         exclude:
           - unified: OFF
             enable_gmp: OFF
-    runs-on: macos-11
+    runs-on: macos-10.15
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:
@@ -159,7 +154,7 @@ jobs:
           # To flush out issues with unified vs. non-unified builds,
           # do a non-unified build before continuing with the rest,
           # which produces a unified build.
-          ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} -DENABLE_GMP=${{ matrix.enable_gmp }} && cd build && make -j2
+          ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} && cd build && make -j2
 
     - name: Run tests (MacOS)
       run: |
