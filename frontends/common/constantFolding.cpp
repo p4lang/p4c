@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "constantFolding.h"
 #include "frontends/common/options.h"
 #include "frontends/p4/enumInstance.h"

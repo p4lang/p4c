@@ -22,7 +22,7 @@
 #include <iomanip>
 #include <vector>
 #include <utility>
-#include "../lib/gmputil.h"
+#include "../lib/big_int_util.h"
 
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"

@@ -17,7 +17,7 @@ limitations under the License.
 #ifndef _COMMON_CONSTANTFOLDING_H_
 #define _COMMON_CONSTANTFOLDING_H_
 
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 

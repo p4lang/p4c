@@ -10,7 +10,6 @@ $BREW update
 $BREW install autoconf automake bdw-gc bison boost ccache cmake \
       libtool openssl pkg-config python
 $BREW install protobuf
-$BREW install gmp
 
 # Prefer Homebrew's bison over the macOS-provided version
 $BREW link --force bison

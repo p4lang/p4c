@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #include <stdexcept>
-#include "gmputil.h"
+#include "big_int_util.h"
 
 namespace Util {
 

@@ -16,7 +16,6 @@ export P4C_DEPS="bison \
              libboost-iostreams1.71-dev \
              libfl-dev \
              libgc-dev \
-             libgmp-dev \
              pkg-config \
              python3 \
              python3-pip \
@@ -36,8 +35,6 @@ export P4C_RUNTIME_DEPS="cpp \
                      libboost-graph1.71.0 \
                      libboost-iostreams1.71.0 \
                      libgc1c2 \
-                     libgmp10 \
-                     libgmpxx4ldbl \
                      python3"
 
 # use scapy 2.4.5, which is the version on which ptf depends
