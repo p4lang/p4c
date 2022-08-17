@@ -42,8 +42,6 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
         hdr.ethernet.dst_addr = tmp1_0;
     }
     @name("MyIngressControl.stub") table stub_0 {
-        key = {
-        }
         actions = {
             macswp();
             nonDefAct();

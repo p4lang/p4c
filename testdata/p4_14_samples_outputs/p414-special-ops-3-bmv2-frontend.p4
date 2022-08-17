@@ -140,15 +140,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             do_clone_e2e();
         }
-        key = {
-        }
         default_action = do_clone_e2e();
     }
     @name(".t_do_recirculate") table t_do_recirculate_0 {
         actions = {
             do_recirculate();
-        }
-        key = {
         }
         default_action = do_recirculate();
     }
@@ -206,15 +202,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             egr_inc_mymeta_counts();
         }
-        key = {
-        }
         default_action = egr_inc_mymeta_counts();
     }
     @name(".t_egr_mark_resubmit_packet") table t_egr_mark_resubmit_packet_0 {
         actions = {
             mark_egr_resubmit_packet();
-        }
-        key = {
         }
         default_action = mark_egr_resubmit_packet();
     }
@@ -222,23 +214,17 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             mark_max_clone_e2e_packet();
         }
-        key = {
-        }
         default_action = mark_max_clone_e2e_packet();
     }
     @name(".t_mark_max_recirculate_packet") table t_mark_max_recirculate_packet_0 {
         actions = {
             mark_max_recirculate_packet();
         }
-        key = {
-        }
         default_action = mark_max_recirculate_packet();
     }
     @name(".t_mark_vanilla_packet") table t_mark_vanilla_packet_0 {
         actions = {
             mark_vanilla_packet();
-        }
-        key = {
         }
         default_action = mark_vanilla_packet();
     }
@@ -292,8 +278,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".t_do_resubmit") table t_do_resubmit_0 {
         actions = {
             do_resubmit();
-        }
-        key = {
         }
         default_action = do_resubmit();
     }
@@ -351,15 +335,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             ing_inc_mymeta_counts();
         }
-        key = {
-        }
         default_action = ing_inc_mymeta_counts();
     }
     @name(".t_ing_mac_da") table t_ing_mac_da_0 {
         actions = {
             set_port_to_mac_da_lsbs();
-        }
-        key = {
         }
         default_action = set_port_to_mac_da_lsbs();
     }
@@ -367,15 +347,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             mark_max_resubmit_packet();
         }
-        key = {
-        }
         default_action = mark_max_resubmit_packet();
     }
     @name(".t_save_ing_instance_type") table t_save_ing_instance_type_0 {
         actions = {
             save_ing_instance_type();
-        }
-        key = {
         }
         default_action = save_ing_instance_type();
     }

@@ -57,8 +57,6 @@ control MyIngressControl(inout headers_t hdrs, inout user_meta_data_t meta, in p
         }
     }
     table stub {
-        key = {
-        }
         actions = {
             nonDefAct();
         }

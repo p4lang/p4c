@@ -30,8 +30,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action do_action(inout bool val1, inout bool val2) {
     }
     table simple_table {
-        key = {
-        }
         actions = {
             do_action(tmp, tmp);
             @defaultonly NoAction();

@@ -19,8 +19,6 @@ action drop(inout standard_metadata_t smeta) {
 }
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     table forward {
-        key = {
-        }
         actions = {
             drop(smeta);
         }

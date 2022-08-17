@@ -77,8 +77,6 @@ action nonDefAct args none {
 }
 
 table stub {
-	key {
-	}
 	actions {
 		nonDefAct
 	}
