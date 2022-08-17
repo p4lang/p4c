@@ -28,8 +28,6 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         mark_to_drop(smeta);
     }
     @name("IngressI.indirect") table indirect_0 {
-        key = {
-        }
         actions = {
             drop();
             NoAction_1();

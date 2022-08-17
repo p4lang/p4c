@@ -35,8 +35,6 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
         }
     }
     table stub {
-        key = {
-        }
         actions = {
             macswp();
             @defaultonly NoAction();

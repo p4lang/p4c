@@ -1940,7 +1940,8 @@ const IR::Node* TypeInference::preorder(IR::EntriesList* el) {
     BUG_CHECK(table != nullptr, "%1% entries not within a table", el);
     const IR::Key* key = table->getKey();
     if (key == nullptr) {
-        typeError("Could not find key for table %1%", table);
+        if (el->size() != 0)
+            typeError("Entries cannot be specified for a table with no key %1%", table);
         prune();
         return el;
     }

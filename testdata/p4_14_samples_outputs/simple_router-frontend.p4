@@ -106,8 +106,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop_2();
         }
-        key = {
-        }
         size = 1;
         const default_action = _drop_2();
     }

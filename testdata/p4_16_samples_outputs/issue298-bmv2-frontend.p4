@@ -135,8 +135,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         registerRound_0.read(meta.local_metadata.round, hdr.myhdr.inst);
     }
     @name("ingress.round_tbl") table round_tbl_0 {
-        key = {
-        }
         actions = {
             read_round();
         }

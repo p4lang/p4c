@@ -37,8 +37,6 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
         hdr.ethernet.src_addr = m.addr;
     }
     table stub {
-        key = {
-        }
         actions = {
             macswp();
             nonDefAct();
