@@ -135,7 +135,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Type_Varbits* type) {
         if (auto cst = type->expression->to<IR::Constant>()) {
             type->size = cst->asInt();
             type->expression = nullptr;
-            if (type->width_bits() <= 0)
+            if (type->size < 0)
                 ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
         } else {
             ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", type->expression);
