@@ -319,12 +319,16 @@ class ControlConverter : public Inspector {
     // Note: the "default" label is not the default_action.
     bool hitMiss = false;
     for (auto s : node->successors.edges) {
-        if (s->isUnconditional())
+        if (s->isUnconditional()) {
             nextDestination = s->endpoint;
-        else if (s->isBool())
+            LOG3("nextDestination " << s->endpoint);
+        } else if (s->isBool()) {
             hitMiss = true;
-        else if (s->label == "default")
+            LOG3("hitmiss");
+        } else if (s->label == "default") {
             defaultLabelDestination = s->endpoint;
+            LOG3("default " << s->endpoint);
+        }
     }
 
     Util::IJson* nextLabel = nullptr;
