@@ -364,6 +364,14 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
+    bool preorder(const IR::DpdkMirrorStatement *m) override {
+        usesInfo[m->slotId->toString()]++;
+        usesInfo[m->sessionId->toString()]++;
+        dontEliminate[m->slotId->toString()] = true;
+        dontEliminate[m->sessionId->toString()] = true;
+        return false;
+    }
+
     bool preorder(const IR::DpdkEmitStatement* e) override {
         auto type = typeMap->getType(e->header)->to<IR::Type_Header>();
         if (type)
@@ -381,8 +389,10 @@ class CollectUseDefInfo : public Inspector {
                 cstring name = e->header->toString() + "." + f->name.toString();
                 defInfo[name]++;
             }
-        if (e->length)
+        if (e->length) {
             usesInfo[e->length->toString()]++;
+            dontEliminate[e->length->toString()] = true;
+        }
         return false;
     }
 
@@ -412,8 +422,10 @@ class CollectUseDefInfo : public Inspector {
     }
 
     bool preorder(const IR::DpdkRearmStatement* r) override {
-        if (r->timeout)
+        if (r->timeout) {
             usesInfo[r->timeout->toString()]++;
+            dontEliminate[r->timeout->toString()] = true;
+        }
         return false;
     }
 
@@ -429,6 +441,7 @@ class CollectUseDefInfo : public Inspector {
 
     bool preorder(const IR::DpdkGetHashStatement* c) override {
         usesInfo[c->dst->toString()]++;
+        dontEliminate[c->dst->toString()] = true;
         return false;
     }
 

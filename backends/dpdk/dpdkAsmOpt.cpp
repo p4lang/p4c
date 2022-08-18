@@ -407,52 +407,52 @@ CopyPropagationAndElimination::copyPropAndDeadCodeElim(
                     replaceIfCopy(lnot->src)));
        } else if (auto add = stmt->to<IR::DpdkAddStatement>()) {
             instr.push_back(new IR::DpdkAddStatement(replaceIfCopy(add->dst, false),
-                    replaceIfCopy(add->src1), replaceIfCopy(add->src2)));
+                    replaceIfCopy(add->src1, false), replaceIfCopy(add->src2)));
        } else if (auto shl = stmt->to<IR::DpdkShlStatement>()) {
             instr.push_back(new IR::DpdkShlStatement(replaceIfCopy(shl->dst, false),
-                    replaceIfCopy(shl->src1), replaceIfCopy(shl->src2)));
+                    replaceIfCopy(shl->src1, false), replaceIfCopy(shl->src2)));
        } else if (auto an = stmt->to<IR::DpdkAndStatement>()) {
             instr.push_back(new IR::DpdkAndStatement(replaceIfCopy(an->dst, false),
-                    replaceIfCopy(an->src1), replaceIfCopy(an->src2)));
+                    replaceIfCopy(an->src1, false), replaceIfCopy(an->src2)));
        } else if (auto shr = stmt->to<IR::DpdkShrStatement>()) {
             instr.push_back(new IR::DpdkShrStatement(replaceIfCopy(shr->dst, false),
-                    replaceIfCopy(shr->src1), replaceIfCopy(shr->src2)));
+                    replaceIfCopy(shr->src1, false), replaceIfCopy(shr->src2)));
        } else if (auto sub = stmt->to<IR::DpdkSubStatement>()) {
             instr.push_back(new IR::DpdkSubStatement(replaceIfCopy(sub->dst, false),
-                    replaceIfCopy(sub->src1), replaceIfCopy(sub->src2)));
+                    replaceIfCopy(sub->src1, false), replaceIfCopy(sub->src2)));
        } else if (auto or1 = stmt->to<IR::DpdkOrStatement>()) {
             instr.push_back(new IR::DpdkOrStatement(replaceIfCopy(or1->dst, false),
-                    replaceIfCopy(or1->src1), replaceIfCopy(or1->src2)));
+                    replaceIfCopy(or1->src1, false), replaceIfCopy(or1->src2)));
        } else if (auto eq = stmt->to<IR::DpdkEquStatement>()) {
             instr.push_back(new IR::DpdkEquStatement(replaceIfCopy(eq->dst, false),
-                    replaceIfCopy(eq->src1), replaceIfCopy(eq->src2)));
+                    replaceIfCopy(eq->src1, false), replaceIfCopy(eq->src2)));
        } else if (auto xor1 = stmt->to<IR::DpdkXorStatement>()) {
             instr.push_back(new IR::DpdkXorStatement(replaceIfCopy(xor1->dst, false),
-                    replaceIfCopy(xor1->src1), replaceIfCopy(xor1->src2)));
+                    replaceIfCopy(xor1->src1, false), replaceIfCopy(xor1->src2)));
        } else if (auto cmp = stmt->to<IR::DpdkCmpStatement>()) {
             instr.push_back(new IR::DpdkCmpStatement(replaceIfCopy(cmp->dst, false),
-                    replaceIfCopy(cmp->src1), replaceIfCopy(cmp->src2)));
+                    replaceIfCopy(cmp->src1, false), replaceIfCopy(cmp->src2)));
        } else if (auto and1 = stmt->to<IR::DpdkLAndStatement>()) {
             instr.push_back(new IR::DpdkLAndStatement(replaceIfCopy(and1->dst, false),
-                    replaceIfCopy(and1->src1), replaceIfCopy(and1->src2)));
+                    replaceIfCopy(and1->src1, false), replaceIfCopy(and1->src2)));
        } else if (auto lor = stmt->to<IR::DpdkLOrStatement>()) {
             instr.push_back(new IR::DpdkLOrStatement(replaceIfCopy(lor->dst, false),
-                    replaceIfCopy(lor->src1), replaceIfCopy(lor->src2)));
+                    replaceIfCopy(lor->src1, false), replaceIfCopy(lor->src2)));
        } else if (auto leq = stmt->to<IR::DpdkLeqStatement>()) {
             instr.push_back(new IR::DpdkLeqStatement(replaceIfCopy(leq->dst, false),
-                    replaceIfCopy(leq->src1), replaceIfCopy(leq->src2)));
+                    replaceIfCopy(leq->src1, false), replaceIfCopy(leq->src2)));
        } else if (auto lss = stmt->to<IR::DpdkLssStatement>()) {
             instr.push_back(new IR::DpdkLssStatement(replaceIfCopy(lss->dst, false),
-                    replaceIfCopy(lss->src1), replaceIfCopy(lss->src2)));
+                    replaceIfCopy(lss->src1, false), replaceIfCopy(lss->src2)));
        } else if (auto grt = stmt->to<IR::DpdkGrtStatement>()) {
             instr.push_back(new IR::DpdkGrtStatement(replaceIfCopy(grt->dst, false),
-                    replaceIfCopy(grt->src1), replaceIfCopy(grt->src2)));
+                    replaceIfCopy(grt->src1, false), replaceIfCopy(grt->src2)));
        } else if (auto geq = stmt->to<IR::DpdkGeqStatement>()) {
             instr.push_back(new IR::DpdkGeqStatement(replaceIfCopy(geq->dst, false),
-                    replaceIfCopy(geq->src1), replaceIfCopy(geq->src2)));
+                    replaceIfCopy(geq->src1, false), replaceIfCopy(geq->src2)));
        } else if (auto neq = stmt->to<IR::DpdkNeqStatement>()) {
             instr.push_back(new IR::DpdkNeqStatement(replaceIfCopy(neq->dst, false),
-                    replaceIfCopy(neq->src1), replaceIfCopy(neq->src2)));
+                    replaceIfCopy(neq->src1, false), replaceIfCopy(neq->src2)));
        } else if (auto recd = stmt->to<IR::DpdkRecircidStatement>()) {
             instr.push_back(new IR::DpdkRecircidStatement(replaceIfCopy(recd->pass, false)));
        } else if (auto rarm = stmt->to<IR::DpdkRearmStatement>()) {
