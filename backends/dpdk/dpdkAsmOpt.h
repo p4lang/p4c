@@ -313,12 +313,12 @@ class CollectUseDefInfo : public Inspector {
     std::unordered_map<cstring /*member expresion as string */, int> usesInfo;
     std::unordered_map<cstring, int> defInfo;
     std::unordered_map<cstring /*def*/, const IR::Expression* /*use*/> replacementMap;
-    std::set<cstring> dontEliminate;
+    std::unordered_map<cstring, bool> dontEliminate;
 
     explicit CollectUseDefInfo(P4::TypeMap* typeMap) : typeMap(typeMap) {
-        dontEliminate.insert("m.pna_main_output_metadata_output_port");
-        dontEliminate.insert("m.psa_ingress_output_metadata_drop");
-        dontEliminate.insert("m.psa_ingress_output_metadata_egress_port");
+        dontEliminate["m.pna_main_output_metadata_output_port"]=true;
+        dontEliminate["m.psa_ingress_output_metadata_drop"] = true;
+        dontEliminate["m.psa_ingress_output_metadata_egress_port"] = true;
     }
 
     bool preorder(const IR::DpdkJmpCondStatement *b) override {
@@ -329,8 +329,11 @@ class CollectUseDefInfo : public Inspector {
 
     bool preorder(const IR::DpdkLearnStatement *b) override {
         usesInfo[b->timeout->toString()]++;
-        if (b->argument)
+        dontEliminate[b->timeout->toString()] = true;
+        if (b->argument) {
             usesInfo[b->argument->toString()]++;
+            dontEliminate[b->argument->toString()] = true;
+        }
         return false;
     }
 
@@ -476,7 +479,7 @@ class CollectUseDefInfo : public Inspector {
         auto keys = t->match_keys;
         if (keys)
         for (auto ke : keys->keyElements) {
-            dontEliminate.insert(ke->expression->toString());
+            dontEliminate[ke->expression->toString()]=true;
         }
         return false;
     }
