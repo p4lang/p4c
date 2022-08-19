@@ -332,6 +332,8 @@ class CollectUseDefInfo : public Inspector {
         dontEliminate[b->timeout->toString()] = true;
         if (b->argument) {
             usesInfo[b->argument->toString()]++;
+            // dpdk expect all action argument to be contiguous starting from first argument
+            // passed to learner action
             dontEliminate[b->argument->toString()] = true;
         }
         return false;
@@ -340,6 +342,8 @@ class CollectUseDefInfo : public Inspector {
     bool preorder(const IR::DpdkUnaryStatement *u) override {
         usesInfo[u->src->toString()]++;
         defInfo[u->dst->toString()]++;
+        // do not eliminate the destination
+        dontEliminate[u->dst->toString()] = true;
         return false;
     }
 
@@ -347,6 +351,10 @@ class CollectUseDefInfo : public Inspector {
         usesInfo[b->src1->toString()]++;
         usesInfo[b->src2->toString()]++;
         defInfo[b->dst->toString()]++;
+        // dst and src1 can not be eliminated, because both are same
+        // and dpdk does not allow src1 to be constant
+        dontEliminate[b->dst->toString()] = true;
+        dontEliminate[b->src1->toString()] = true;
         return false;
     }
 
@@ -367,6 +375,7 @@ class CollectUseDefInfo : public Inspector {
     bool preorder(const IR::DpdkMirrorStatement *m) override {
         usesInfo[m->slotId->toString()]++;
         usesInfo[m->sessionId->toString()]++;
+        // dpdk expect it as metadata struct member
         dontEliminate[m->slotId->toString()] = true;
         dontEliminate[m->sessionId->toString()] = true;
         return false;
@@ -391,6 +400,7 @@ class CollectUseDefInfo : public Inspector {
             }
         if (e->length) {
             usesInfo[e->length->toString()]++;
+            // dpdk expect length to be metadata struct member
             dontEliminate[e->length->toString()] = true;
         }
         return false;
@@ -408,22 +418,29 @@ class CollectUseDefInfo : public Inspector {
 
     bool preorder(const IR::DpdkRxStatement* r) override {
         usesInfo[r->port->toString()]++;
+        // always required
+        dontEliminate[r->port->toString()] = true;
         return false;
     }
 
     bool preorder(const IR::DpdkTxStatement* t) override {
         usesInfo[t->port->toString()]++;
+        // always required
+        dontEliminate[t->port->toString()] = true;
         return false;
     }
 
     bool preorder(const IR::DpdkRecircidStatement* t) override {
         usesInfo[t->pass->toString()]++;
+        // uses standard metadata fields
+        dontEliminate[t->pass->toString()] = true;
         return false;
     }
 
     bool preorder(const IR::DpdkRearmStatement* r) override {
         if (r->timeout) {
             usesInfo[r->timeout->toString()]++;
+            // dpdk requires it in metadata struct
             dontEliminate[r->timeout->toString()] = true;
         }
         return false;
@@ -431,16 +448,21 @@ class CollectUseDefInfo : public Inspector {
 
     bool preorder(const IR::DpdkChecksumAddStatement* c) override {
         usesInfo[c->field->toString()]++;
+        // dpdk requires it in metadata struct
+        dontEliminate[c->field->toString()] = true;
         return false;
     }
 
     bool preorder(const IR::DpdkChecksumSubStatement* c) override {
         usesInfo[c->field->toString()]++;
+        // dpdk requires it in metadata struct
+        dontEliminate[c->field->toString()] = true;
         return false;
     }
 
     bool preorder(const IR::DpdkGetHashStatement* c) override {
         usesInfo[c->dst->toString()]++;
+        // dpdk requires it in metadata struct
         dontEliminate[c->dst->toString()] = true;
         return false;
     }
@@ -448,6 +470,9 @@ class CollectUseDefInfo : public Inspector {
     bool preorder(const IR::DpdkVerifyStatement* v) override {
         usesInfo[v->condition->toString()]++;
         usesInfo[v->error->toString()]++;
+        // dpdk requires it in metadata struct
+        dontEliminate[v->condition->toString()] = true;
+        dontEliminate[v->error->toString()] = true;
         return false;
     }
 

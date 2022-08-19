@@ -100,6 +100,8 @@ struct local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpd4 {
 	bit<32> psa_ingress_input_metadata_ingress_port
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
+	bit<16> Ingress_tmp
+	bit<16> Ingress_tmp_0
 }
 metadata instanceof local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpd4
 
@@ -127,8 +129,10 @@ action vxlan_encap_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dp5 args instanc
 	mov h.vxlan.vni t.vxlan_vni
 	mov h.vxlan.reserved2 t.vxlan_reserved2
 	mov m.psa_ingress_output_metadata_egress_port t.port_out
-	ckadd h.cksum_state.state_0 h.outer_ipv4_dpdk_dpdk_dpdk_dpd3.hdr_checksum
-	ckadd h.cksum_state.state_0 h.ipv4.total_len
+	mov m.Ingress_tmp h.outer_ipv4_dpdk_dpdk_dpdk_dpd3.hdr_checksum
+	mov m.Ingress_tmp_0 h.ipv4.total_len
+	ckadd h.cksum_state.state_0 m.Ingress_tmp
+	ckadd h.cksum_state.state_0 m.Ingress_tmp_0
 	mov h.outer_ipv4_dpdk_dpdk_dpdk_dpd3.hdr_checksum h.cksum_state.state_0
 	mov h.outer_ipv4_dpdk_dpdk_dpdk_dpd3.total_len t.ipv4_total_len
 	add h.outer_ipv4_dpdk_dpdk_dpdk_dpd3.total_len h.ipv4.total_len

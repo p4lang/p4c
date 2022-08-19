@@ -370,9 +370,6 @@ CopyPropagationAndElimination::copyPropAndDeadCodeElim(
         } else if (auto jne = stmt->to<IR::DpdkJmpNotEqualStatement>()) {
             instr.push_back(new IR::DpdkJmpNotEqualStatement(jne->label,
                         replaceIfCopy(jne->src1, false), replaceIfCopy(jne->src2)));
-       } else if (auto l = stmt->to<IR::DpdkLearnStatement>()) {
-            instr.push_back(new IR::DpdkLearnStatement(l->action,
-                        replaceIfCopy(l->timeout, false), replaceIfCopy(l->argument, false)));
        } else if (auto m = stmt->to<IR::DpdkMeterExecuteStatement>()) {
             instr.push_back(new IR::DpdkMeterExecuteStatement(m->meter,
                     replaceIfCopy(m->index), replaceIfCopy(m->length),
@@ -380,22 +377,6 @@ CopyPropagationAndElimination::copyPropAndDeadCodeElim(
        } else if (auto c = stmt->to<IR::DpdkCounterCountStatement>()) {
             instr.push_back(new IR::DpdkCounterCountStatement(c->counter,
                     replaceIfCopy(c->index), replaceIfCopy(c->incr)));
-       } else if (auto m = stmt->to<IR::DpdkMirrorStatement>()) {
-            instr.push_back(new IR::DpdkMirrorStatement(replaceIfCopy(m->slotId),
-                    replaceIfCopy(m->sessionId)));
-       } else if (auto e = stmt->to<IR::DpdkEmitStatement>()) {
-            instr.push_back(new IR::DpdkEmitStatement(replaceIfCopy(e->header)));
-       } else if (auto ext = stmt->to<IR::DpdkExtractStatement>()) {
-            instr.push_back(new IR::DpdkExtractStatement(replaceIfCopy(ext->header),
-                    replaceIfCopy(ext->length)));
-       } else if (auto lh = stmt->to<IR::DpdkLookaheadStatement>()) {
-            instr.push_back(new IR::DpdkLookaheadStatement(replaceIfCopy(lh->header)));
-       } else if (auto ji = stmt->to<IR::DpdkJmpIfInvalidStatement>()) {
-            instr.push_back(new IR::DpdkJmpIfInvalidStatement(ji->label,
-                    replaceIfCopy(ji->header)));
-       } else if (auto ji = stmt->to<IR::DpdkJmpIfValidStatement>()) {
-            instr.push_back(new IR::DpdkJmpIfValidStatement(ji->label,
-                    replaceIfCopy(ji->header)));
        } else if (auto neg = stmt->to<IR::DpdkNegStatement>()) {
             instr.push_back(new IR::DpdkNegStatement(replaceIfCopy(neg->dst, false),
                     replaceIfCopy(neg->src)));
@@ -455,24 +436,6 @@ CopyPropagationAndElimination::copyPropAndDeadCodeElim(
                     replaceIfCopy(neq->src1, false), replaceIfCopy(neq->src2)));
        } else if (auto recd = stmt->to<IR::DpdkRecircidStatement>()) {
             instr.push_back(new IR::DpdkRecircidStatement(replaceIfCopy(recd->pass, false)));
-       } else if (auto rarm = stmt->to<IR::DpdkRearmStatement>()) {
-            instr.push_back(new IR::DpdkRearmStatement(replaceIfCopy(rarm->timeout)));
-       } else if (auto csum = stmt->to<IR::DpdkChecksumAddStatement>()) {
-            instr.push_back(new IR::DpdkChecksumAddStatement(csum->csum, csum->intermediate_value,
-                    replaceIfCopy(csum->field)));
-       } else if (auto csum = stmt->to<IR::DpdkChecksumSubStatement>()) {
-            instr.push_back(new IR::DpdkChecksumSubStatement(csum->csum, csum->intermediate_value,
-                    replaceIfCopy(csum->field)));
-       } else if (auto hash = stmt->to<IR::DpdkGetHashStatement>()) {
-            instr.push_back(new IR::DpdkGetHashStatement(hash->hash, replaceIfCopy(hash->fields),
-                    replaceIfCopy(hash->dst, false)));
-       } else if (auto csum = stmt->to<IR::DpdkGetChecksumStatement>()) {
-            instr.push_back(new IR::DpdkGetChecksumStatement(
-                    replaceIfCopy(csum->dst, false), csum->checksum,
-                    csum->intermediate_value));
-       } else if (auto vrfy = stmt->to<IR::DpdkVerifyStatement>()) {
-            instr.push_back(new IR::DpdkVerifyStatement(replaceIfCopy(vrfy->condition),
-                    replaceIfCopy(vrfy->error)));
        } else if (auto mdecl = stmt->to<IR::DpdkMeterDeclStatement>()) {
             instr.push_back(new IR::DpdkMeterDeclStatement(mdecl->meter,
                     replaceIfCopy(mdecl->size)));
@@ -486,10 +449,6 @@ CopyPropagationAndElimination::copyPropAndDeadCodeElim(
        } else if (auto rrw = stmt->to<IR::DpdkRegisterWriteStatement>()) {
             instr.push_back(new IR::DpdkRegisterWriteStatement(rrw->reg, replaceIfCopy(rrw->index),
                     replaceIfCopy(rrw->src)));
-       } else if (auto vld = stmt->to<IR::DpdkValidateStatement>()) {
-            instr.push_back(new IR::DpdkValidateStatement(replaceIfCopy(vld->header)));
-       } else if (auto vld = stmt->to<IR::DpdkInvalidateStatement>()) {
-            instr.push_back(new IR::DpdkInvalidateStatement(replaceIfCopy(vld->header)));
        } else {
             instr.push_back(stmt);
         }
