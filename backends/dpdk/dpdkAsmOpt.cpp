@@ -266,7 +266,7 @@ bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
 
 const IR::Expression* CopyPropagationAndElimination::getIrreplaceableExpr(cstring str,
                                                                         bool allowConst) {
-    if (collectUseDef->dontEliminate[str])
+    if (collectUseDef->dontEliminate.count(str) != 0)
         return nullptr;
     if (!str.startsWith("m."))
         return nullptr;
@@ -278,7 +278,7 @@ const IR::Expression* CopyPropagationAndElimination::getIrreplaceableExpr(cstrin
         && (!allowConst ? expr->is<IR::Member>() : true)
         && str != exprStr
         && (!allowConst ? exprStr.startsWith("m.") : true)
-        && !collectUseDef->dontEliminate[exprStr]
+        && collectUseDef->dontEliminate.count(exprStr) == 0
         && newUsesInfo[exprStr] == 0
         && (expr->is<IR::Member>() ? collectUseDef->haveSingleUseDef(exprStr) : true)) {
         prev = expr;
@@ -323,7 +323,7 @@ const IR::DpdkAsmStatement* CopyPropagationAndElimination::elimCastOrMov(
     auto src = srcExpr->toString();
     auto dst = dstExpr->toString();
     bool dropCopy = false;
-    if (!collectUseDef->dontEliminate[dst]
+    if (collectUseDef->dontEliminate.count(dst) == 0
             && dst.startsWith("m.")
             && newUsesInfo[dst] == 0
             && collectUseDef->haveSingleUseDef(dst)) {
