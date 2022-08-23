@@ -615,8 +615,10 @@ class ParserSymbolicInterpreter {
 
     /// Gets new name for a state
     IR::ID getNewName(ParserStateInfo* state) {
-        if (state->currentIndex == 0)
+        if (state->currentIndex == 0) {
+            structure->callsIndexes.emplace(state->state->name.name, 0);
             return state->state->name;
+        }
         return IR::ID(state->state->name + std::to_string(state->currentIndex));
     }
 
