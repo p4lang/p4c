@@ -11,11 +11,10 @@
 
 #include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/core/target.h"
+#include "backends/p4tools/common/version.h"
 #include "frontends/common/parser_options.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
-
-#include "extensions/testgen/common/version.h"
 
 namespace P4Tools {
 

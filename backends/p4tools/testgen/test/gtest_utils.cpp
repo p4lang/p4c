@@ -9,7 +9,7 @@
 #include "lib/compile_context.h"
 #include "lib/exceptions.h"
 
-#include "extensions/testgen/testgen/register.h"
+#include "backends/p4tools/testgen/register.h"
 
 namespace Test {
 

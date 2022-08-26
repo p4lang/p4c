@@ -123,7 +123,7 @@ fi
 
 function build_tools_deps() {
   # This is needed for P4Testgen.
-  apt install libboost-filesystem-dev libboost-system-dev
+  apt install -y libboost-filesystem-dev libboost-system-dev wget
 
   # Install a recent version of Z3
   Z3_VERSION="z3-4.8.14"
@@ -134,8 +134,9 @@ function build_tools_deps() {
   cd z3-${Z3_VERSION}
   python3 scripts/mk_make.py --staticlib
   cd build
-  make -$MAKEFLAGS
+  make
   make install
+  cd /p4c
 }
 
 # Build the dependencies necessary for the P4Tools platform.
@@ -160,6 +161,8 @@ export CXXFLAGS="${CXXFLAGS} -O3"
 CMAKE_FLAGS+="-DENABLE_UNIFIED_COMPILATION=${ENABLE_UNIFIED_COMPILATION} "
 # Toggle static builds.
 CMAKE_FLAGS+="-DBUILD_STATIC_RELEASE=${BUILD_STATIC_RELEASE} "
+# Toggle the installation of the tools back end.
+CMAKE_FLAGS+="-DENABLE_TOOLS=${ENABLE_TOOLS} "
 # RELEASE should be default, but we want to make sure.
 CMAKE_FLAGS+="-DCMAKE_BUILD_TYPE=RELEASE"
 build ${CMAKE_FLAGS}

@@ -21,11 +21,12 @@ find_package(Boost REQUIRED COMPONENTS filesystem system iostreams)
 # Store the current git commit hash as part of version information.
 execute_process(
   COMMAND git log --pretty=format:-%h -n 1
-  OUTPUT_VARIABLE BF_P4TOOLS_VERSION_HASH
+  OUTPUT_VARIABLE P4TOOLS_VERSION_HASH
   ERROR_QUIET
 )
-if(NOT "${BF_P4TOOLS_VERSION_HASH}" STREQUAL "")
-  message(STATUS "Current git refpoint: ${BF_P4TOOLS_VERSION_HASH}")
+
+if(NOT "${P4TOOLS_VERSION_HASH}" STREQUAL "")
+  message(STATUS "Current git refpoint: ${P4TOOLS_VERSION_HASH}")
 endif()
 
 # Generate version information.
@@ -33,7 +34,7 @@ configure_file(version.h.in version.h)
 
 # Source files for p4testgen-common.
 set(
-  BF_P4C_TOOLS_COMMON_SOURCES
+  P4C_TOOLS_COMMON_SOURCES
   options.cpp
   version.cpp
 
@@ -61,7 +62,7 @@ set(
   lib/zombie.cpp
 )
 
-add_p4tools_library(p4testgen-common ${BF_P4C_TOOLS_COMMON_SOURCES})
+add_p4tools_library(p4testgen-common ${P4C_TOOLS_COMMON_SOURCES})
 
 target_link_libraries(
   p4testgen-common

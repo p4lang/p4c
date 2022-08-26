@@ -4,6 +4,7 @@
 
 #include <boost/optional/optional.hpp>
 
+#include "backends/p4tools/common/version.h"
 #include "backends/p4tools/mutate/mutate.h"
 #include "backends/p4tools/p4check/commands.h"
 #include "backends/p4tools/smith/smith.h"
@@ -12,7 +13,6 @@
 #include "lib/gc.h"
 
 #include "backends/p4tools/testgen/testgen.h"
-#include "extensions/testgen/common/version.h"
 
 int main(int argc, char** argv) {
     setup_gc_logging();

@@ -15,20 +15,20 @@ p4tools_add_xfail_reason(
   "simple_switch died with return code -6"
   # Assertion 'Default switch case should not be reachable' failed,
   # file '../../include/bm/bm_sim/actions.h' line '369'.
-  issue1607-bmv2.p4 # passed after adding of --loopsUnroll flag
-  bmv2_copy_headers.p4 # passed after adding of --loopsUnroll flag
+  issue1607-bmv2.p4
+  bmv2_copy_headers.p4
 
   # terminate called after throwing an instance of 'std::out_of_range'
   # h.array[h.h.a].index
   # It turns out that h.h.a matters more than the size of the array
-  bmv2_hs1.p4 # passed after adding HsIndexSimplifier to Simple Switch
-  control-hs-index-test1.p4 # passed after adding HsIndexSimplifier to Simple Switch
-  control-hs-index-test2.p4 # passed after adding HsIndexSimplifier to Simple Switch
+  bmv2_hs1.p4
+  control-hs-index-test1.p4
+  control-hs-index-test2.p4
 
   # terminate called after throwing an instance of 'boost::wrapexcept<std::range_error>'
   # Conversion from negative integer to an unsigned type results in undefined behaviour
-  issue2726-bmv2.p4 # passed after adding HsIndexSimplifier to Simple Switch
-  runtime-index-bmv2.p4 # passed after adding HsIndexSimplifier to Simple Switch
+  issue2726-bmv2.p4
+  runtime-index-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -36,35 +36,25 @@ p4tools_add_xfail_reason(
   "terminate called after throwing an instance of"
   # terminate called after throwing an instance of 'std::runtime_error'
   # in Json::Value::operator[](ArrayIndex)const: requires arrayValue
-  control-hs-index-test6.p4 # passed after adding HsIndexSimplifier to Simple Switch
+  control-hs-index-test6.p4
+  issue3374.p4
 
   # terminate called after throwing an instance of 'std::runtime_error'
   # Type is not convertible to string
-  control-hs-index-test3.p4 # passed after adding HsIndexSimplifier to Simple Switch
-  parser-unroll-test1.p4 # passed after adding of --loopsUnroll flag
+  control-hs-index-test3.p4
+  parser-unroll-test1.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "bad json"
-  # crashed after adding of --loopsUnroll flag
-  # bug after last HsIndexSimplifier (was bad json)
   invalid-hdr-warnings4.p4
-  control-hs-index-test5.p4 # If statement is not supported for this target after HSIndexSimplifier
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
-  "differs|Expected ([0-9]+) packets on port ([0-9]+) got ([0-9]+)"
-  # simple switch does not support .next
-  stack_complex-bmv2.p4 # passed after adding of --loopsUnroll flag
+  control-hs-index-test5.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "Exception"
-  invalid-hdr-warnings3.p4 # p4c-bm2-ss: Exception  'name'
-  issue3374.p4             # p4c-bm2-ss: Exception  'name'
   #  Running simple_switch_CLI: Exception  Unexpected key field &
   match-on-exprs2-bmv2.p4
 )
@@ -116,7 +106,8 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "is trying to match on a tainted key set"
-  invalid-hdr-warnings1.p4 # unimlemented feature (for select statement)
+  # unimlemented feature (for select statement)
+  invalid-hdr-warnings1.p4
   issue692-bmv2.p4
 )
 
@@ -181,32 +172,36 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "Checksum16.get is deprecated and not supported."
-  issue841.p4 # Not supported
+  # Not supported
+  issue841.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "Unknown or unimplemented extern method: increment"
-  issue1882-1-bmv2.p4  # user defined extern
-  issue1882-bmv2.p4  # user defined extern
+  # user defined externs
+  issue1882-1-bmv2.p4
+  issue1882-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "Unknown or unimplemented extern method: update"
-  issue2664-bmv2.p4  # user defined extern
+  issue2664-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "Unknown extern method count from type jnf_counter"
-  issue1193-bmv2.p4  # user defined extern
+  # user defined extern
+  issue1193-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "Unknown or unimplemented extern method: fn_foo"
-  issue3091.p4  # user defined extern
+   # user defined extern
+  issue3091.p4
 )
 
 p4tools_add_xfail_reason(
@@ -283,7 +278,7 @@ p4tools_add_xfail_reason(
   "uninitialized: next field read"
   # error: parsedHdr.hstack.next uninitialized: next field read
   # next not implemented in p4c/backends/bmv2/common/expression.cpp line 367
-  next-def-use.p4  # passed after adding of --loopsUnroll flag
+  next-def-use.p4
 )
 
 p4tools_add_xfail_reason(

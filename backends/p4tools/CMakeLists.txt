@@ -1,6 +1,34 @@
-# CMake file for Barefoot P4 tools.
+# In some cases, the semantic version string is not defined. Try to find it.
+if(NOT DEFINED P4C_SEM_VERSION_STRING)
+  # Semantic version numbering: <major>.<minor>.<patch>[-rcX]
+  # Examples: 0.5.1, 1.0.0-rc1, 1.0.1-alpha
+  execute_process(
+    COMMAND cat ${P4C_SOURCE_DIR}/Version.txt
+    OUTPUT_VARIABLE P4C_SEM_VERSION_STRING
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE rc
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  )
+  string(
+    REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)([-0-9a-z\\.]*).*"
+    __p4c_version ${P4C_SEM_VERSION_STRING}
+  )
+  set(P4C_VERSION_MAJOR ${CMAKE_MATCH_1})
+  set(P4C_VERSION_MINOR ${CMAKE_MATCH_2})
+  set(P4C_VERSION_PATCH ${CMAKE_MATCH_3})
+  set(P4C_VERSION_RC ${CMAKE_MATCH_4})
+  execute_process(
+    COMMAND git rev-parse --short HEAD
+    OUTPUT_VARIABLE P4C_GIT_SHA
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE rc
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  )
+  set(P4C_VERSION "${P4C_SEM_VERSION_STRING} (SHA: ${P4C_GIT_SHA} BUILD: ${CMAKE_BUILD_TYPE})")
+endif()
 
-project(BF_P4TOOLS VERSION 0.1.0)
+# CMake file for P4 tools.
+project(P4TOOLS VERSION ${P4C_SEM_VERSION_STRING})
 
 # Build options.
 option(ENABLE_IWYU "Enable checking includes with IWYU" OFF)
@@ -16,12 +44,10 @@ set(INJA_BUILD_TESTS OFF CACHE BOOL "Build unit tests when BUILD_TESTING is enab
 set(BUILD_BENCHMARK OFF CACHE BOOL "Build benchmark.")
 add_subdirectory(submodules/inja)
 
-
 # P4Tools does not support GMP
 if(ENABLE_GMP)
   message(FATAL_ERROR "P4Tools does not support compilation with GMP. Please use -DENABLE_GMP=OFF")
 endif()
-
 
 # Import common definitions.
 include(common)

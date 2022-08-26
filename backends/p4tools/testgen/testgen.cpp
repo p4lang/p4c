@@ -25,7 +25,7 @@
 #include "backends/p4tools/testgen/core/target.h"
 #include "backends/p4tools/testgen/lib/logging.h"
 #include "backends/p4tools/testgen/lib/test_backend.h"
-#include "extensions/testgen/testgen/register.h"
+#include "backends/p4tools/testgen/register.h"
 
 namespace fs = boost::filesystem;
 
