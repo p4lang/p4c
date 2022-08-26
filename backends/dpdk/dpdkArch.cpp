@@ -1692,7 +1692,14 @@ SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
 
     auto actionCall = new IR::MethodCallExpression(new IR::PathExpression(actionName));
     actionsList.push_back(new IR::ActionListElement(actionCall));
-    actionsList.push_back(new IR::ActionListElement(tbl->getDefaultAction()));
+    auto default_action = tbl->getDefaultAction();
+    if (default_action) {
+        if (auto mc = default_action->to<IR::MethodCallExpression>()) {
+            // Ignore action params of default action by creating new MethodCallExpression
+            auto defAction = new IR::MethodCallExpression(mc->method->to<IR::PathExpression>());
+            actionsList.push_back(new IR::ActionListElement(defAction));
+        }
+    }
     IR::IndexedVector<IR::Property> properties;
     properties.push_back(new IR::Property("actions", new IR::ActionList(actionsList), false));
     properties.push_back(new IR::Property("key", new IR::Key(match_keys), false));
