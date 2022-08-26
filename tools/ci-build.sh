@@ -119,6 +119,31 @@ if [ "$VALIDATION" == "ON" ]; then
 fi
 # ! ------  END VALIDATION -----------------------------------------------
 
+# ! ------  BEGIN VALIDATION -----------------------------------------------
+
+function build_tools_deps() {
+  # This is needed for P4Testgen.
+  apt install libboost-filesystem-dev libboost-system-dev
+
+  # Install a recent version of Z3
+  Z3_VERSION="z3-4.8.14"
+
+  cd /tmp
+  wget https://github.com/Z3Prover/z3/archive/refs/tags/${Z3_VERSION}.tar.gz
+  tar -xf ${Z3_VERSION}.tar.gz
+  cd z3-${Z3_VERSION}
+  python3 scripts/mk_make.py --staticlib
+  cd build
+  make -$MAKEFLAGS
+  make install
+}
+
+# Build the dependencies necessary for the P4Tools platform.
+if [ "$ENABLE_TOOLS" == "ON" ]; then
+  build_tools_deps
+fi
+# ! ------  END TOOLS -----------------------------------------------
+
 
 function build() {
   if [ -e build ]; then /bin/rm -rf build; fi
