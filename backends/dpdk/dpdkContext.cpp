@@ -242,7 +242,7 @@ void DpdkContextGenerator::setActionAttributes(const IR::P4Table *tbl) {
 
         /* DPDK target takes a structure as parameter for Actions. So, all action
            parameters are collected into a structure by an earlier pass. */
-        auto params = ::get(structure->args_struct_map, act->externalName() + "_arg_t");
+        auto params = ::get(structure->args_struct_map, act->getPath()->name.name + "_arg_t");
         if (params)
             attr.params = params->clone();
         else
