@@ -1,9 +1,9 @@
-# P4Testgen - Generating Tests for P4 Targets
+# P4Tools - Testing Tools For P4 Targets
 
-## Directory structure
+## Directory Structure
 
 ```
-testgen
+p4tools
  ├─ cmake       ── common CMake modules
  ├─ common      ── C++ source: common code for the various components of p4check
  ├─ mutate      ── C++ source: p4mutate
@@ -16,63 +16,21 @@ testgen
  └─ testgen     ── C++ source: p4testgen
 ```
 
+## P4Tools
+P4Tools is a collection of tools that make testing P4 targets and programs a little easier. So far the platform supports the following tools and projects:
+
+- [P4Testgen](https://github.com/p4lang/p4c/tree/main/backends/p4tools/testgen): An input-output test case generator for P4.
+
 ## Building
 
-P4Testgen can be built using the following CMAKE configuration in the P4C repository.
+P4Tools can be built using the following CMAKE configuration in the P4C repository.
 
 ```
 mkdir build
 cd build
-cmake .. -DENABLE_GMP=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DENABLE_P4TOOLS=ON
+cmake .. -DENABLE_GMP=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DENABLE_TOOLS=ON
 make
 ```
-
-### Running ctest
-Once compiled, run ctest in the build directory:
-```
-ctest -V -R <test_name>
-```
-Testgen tests will have the prefix `testgen-`.
-
-## Usage
-The main binary can be found in `build/p4check`.
-
-To generate tests for a particular target and P4 architecture, run `p4check testgen –target [TARGET] –arch [ARCH] –max-tests 10 –out-dir [OUT] prog.p4`
-`p4check` is an umbrella binary which delegates execution to all tools of the p4-tools repository.
-`testgen` specifies that the testgen tool should be used. In the future, other tools may be supported, for example random program generation or translation validators.
-These are the current usage flags:
-
-```bash
-./p4check: Generate packet tests for a P4 program
---help                     Shows this help message and exits
---version                  Prints version information and exits
---min-packet-size bytes    Sets the minimum allowed packet size, in bytes. Any packet shorter than this is considered to be invalid, and will be dropped if the program would otherwise send the packet on the network.
---mtu bytes                Sets the network's MTU, in bytes
---seed seed                Provides a randomization seed
--I path                    Adds the given path to the preprocessor include path
--D arg=value               Defines a preprocessor symbol
--U arg                     Undefines a preprocessor symbol
--E                         Preprocess only. Prints preprocessed program on stdout.
---nocpp                    Skips the preprocessor; assumes the input file is already preprocessed.
---std {p4-14|p4-16}        Specifies source language version.
--T loglevel                Adjusts logging level per file.
---target target            Specifies the device targeted by the program.
---arch arch                Specifies the architecture targeted by the program.
---top4 pass1[,pass2]       Dump the P4 representation after
-                           passes whose name contains one of `passX' substrings.
-                           When '-v' is used this will include the compiler IR.
---dump folder              Folder where P4 programs are dumped.
--v                         Increase verbosity level (can be repeated)
---input-packet-only        Only produce the input packet for each test
---max-tests maxTests       Sets the maximum number of tests to be generated
---out-dir outputDir        Directory for generated tests
---test-backend             Select a test back end. Available test back ends are defined by the respective target.
---packet-size packetSize   If enabled, sets all input packets to a fixed size in bits (from 1 to 12000 bits). 0 implies no packet sizing.
---pop-level                This is the fraction of unexploredBranches we select on multiPop. Defaults to 0.
---linear-enumeration       Max bound for LinearEnumeration strategy. Defaults to 0. **Experimental feature**.
-```
-
-Once P4Testgen has generated tests, the tests can be executed by either the P4Runtime or STF test back ends.
 
 ## Dependencies
 * [inja](https://github.com/pantor/inja) template engine for testcase generation.
@@ -117,9 +75,9 @@ repository depends heavily on the main P4 compiler ([P4C](https://github.com/p4l
   library of related classes. Multiple classes may be declared in a `.cpp`
   file.
 * Include headers in the following order: related header, C system headers, C++
-  system headers, other library headers, `P4Testgen` headers. Each class of
+  system headers, other library headers, `P4Tools` headers. Each class of
   headers should be sorted alphabetically and separated by a blank line. Files
-  from `P4Testgen` should be listed relative to the project root. Files from
+  from `P4Tools` should be listed relative to the project root. Files from
   `p4c` should be listed relative to the submodule's root.
 
   For example, in `testgen/lib/foo.cpp`, format your includes as follows.
@@ -143,7 +101,7 @@ repository depends heavily on the main P4 compiler ([P4C](https://github.com/p4l
   #include "gsl/gsl-lite.hpp"
   #include "ir.h"
 
-  // Headers from P4Testgen folders
+  // Headers from P4Tools folders
   #include "backends/p4tools/testgen/common/lib/model.h"
   #include "backends/p4tools/testgen/lib/symbolic_env.h"
   ```
