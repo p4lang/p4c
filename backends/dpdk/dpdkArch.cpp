@@ -1700,11 +1700,15 @@ SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
             actionsList.push_back(new IR::ActionListElement(defAction));
         }
     }
+
+    auto constDefAction = tbl->properties->getProperty("default_action");
+
     IR::IndexedVector<IR::Property> properties;
     properties.push_back(new IR::Property("actions", new IR::ActionList(actionsList), false));
     properties.push_back(new IR::Property("key", new IR::Key(match_keys), false));
     properties.push_back(new IR::Property("default_action",
-                         new IR::ExpressionValue(tbl->getDefaultAction()), false));
+                         new IR::ExpressionValue(tbl->getDefaultAction()),
+                         constDefAction->isConstant));
     if (tbl->getSizeProperty()) {
         properties.push_back(new IR::Property("size",
                              new IR::ExpressionValue(tbl->getSizeProperty()), false)); }
