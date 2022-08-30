@@ -429,8 +429,21 @@ namespace UBPF {
     }
 
     bool UBPFControlBodyTranslator::preorder(const IR::IfStatement *statement) {
+        bool isHit = P4::TableApplySolver::isHit(statement->condition, control->program->refMap,
+                                                 control->program->typeMap);
+        if (isHit) {
+            // visit first the table, and then the conditional
+            auto member = statement->condition->to<IR::Member>();
+            CHECK_NULL(member);
+            visit(member->expr);  // table application.  Sets 'hitVariable'
+            builder->emitIndent();
+        }
+
         builder->append("if (");
-        visit(statement->condition);
+        if (isHit)
+            builder->append(control->hitVariable);
+        else
+            visit(statement->condition);
         builder->append(") ");
         if (!statement->ifTrue->is<IR::BlockStatement>()) {
             builder->blockStart();
