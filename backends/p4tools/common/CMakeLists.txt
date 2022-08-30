@@ -9,8 +9,8 @@ project(p4testgen-common)
 set(Z3_MIN_VERSION "4.8.14")
 find_package(Z3 ${Z3_MIN_VERSION} REQUIRED)
 
-if(${Z3_VERSION} AND ${Z3_VERSION} VERSION_LESS ${Z3_MIN_VERSION})
-  message(FATAL_ERROR "The minimum required Z3 version is ${Z3_MIN_VERSION}.")
+if(NOT DEFINED Z3_VERSION_STRING OR ${Z3_VERSION_STRING} VERSION_LESS ${Z3_MIN_VERSION})
+  message(FATAL_ERROR "The minimum required Z3 version is ${Z3_MIN_VERSION}. Has ${Z3_VERSION_STRING}.")
 endif()
 
 # Boost filesystem is required for path handling.

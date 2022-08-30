@@ -123,20 +123,19 @@ fi
 
 function build_tools_deps() {
   # This is needed for P4Testgen.
-  apt install -y libboost-filesystem-dev libboost-system-dev wget
+  apt install -y libboost-filesystem-dev libboost-system-dev wget zip
 
   # Install a recent version of Z3
   Z3_VERSION="z3-4.8.14"
+  Z3_DIST="${Z3_VERSION}-x64-glibc-2.31"
 
   cd /tmp
-  wget https://github.com/Z3Prover/z3/archive/refs/tags/${Z3_VERSION}.tar.gz
-  tar -xf ${Z3_VERSION}.tar.gz
-  cd z3-${Z3_VERSION}
-  python3 scripts/mk_make.py --staticlib
-  cd build
-  make
-  make install
+  wget https://github.com/Z3Prover/z3/releases/download/${Z3_VERSION}/${Z3_DIST}.zip
+  unzip ${Z3_DIST}.zip
+  cp -r ${Z3_DIST}/bin/libz3.* /usr/local/lib/
+  cp -r ${Z3_DIST}/include/* /usr/local/include/
   cd /p4c
+  rm -rf /tmp/${Z3_DIST}
 }
 
 # Build the dependencies necessary for the P4Tools platform.
