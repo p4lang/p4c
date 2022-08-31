@@ -200,7 +200,6 @@ class ParserStateRewriter : public Transform {
                 return new IR::Constant(IR::Type_Bits::get(32), idx);
             } else {
                 state->statesIndexes[expression->expr] = idx + offset;
-                std::cout << state->statesIndexes.size() << std::endl;
                 return new IR::ArrayIndex(expression->expr->clone(),
                                           new IR::Constant(IR::Type_Bits::get(32), idx + offset));
             }
@@ -616,8 +615,10 @@ class ParserSymbolicInterpreter {
 
     /// Gets new name for a state
     IR::ID getNewName(ParserStateInfo* state) {
-        if (state->currentIndex == 0)
+        if (state->currentIndex == 0) {
+            structure->callsIndexes.emplace(state->state->name.name, 0);
             return state->state->name;
+        }
         return IR::ID(state->state->name + std::to_string(state->currentIndex));
     }
 
@@ -649,9 +650,14 @@ class ParserSymbolicInterpreter {
         auto result = evaluateSelect(state, valueMap);
         if (unroll) {
             BUG_CHECK(result.second, "Can't generate new selection %1%", state);
-            state->newState = new IR::ParserState(state->state->srcInfo, newName,
-                                                  state->state->annotations, components,
-                                                  result.second);
+            if (state->name == newName) {
+                state->newState = new IR::ParserState(state->state->srcInfo, newName,
+                                                      state->state->annotations, components,
+                                                      result.second);
+            } else {
+                state->newState =
+                    new IR::ParserState(state->state->srcInfo, newName, components, result.second);
+            }
         }
         return EvaluationStateResult(result.first, true);
     }

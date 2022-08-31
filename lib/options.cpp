@@ -75,11 +75,15 @@ std::vector<const char*>* Util::Options::process(int argc,
                 return nullptr;
             }
         } else if (opt.startsWith("-")) {
-            if (opt.size() > 2) {
+            // Support GCC-style long options that begin with a single '-'.
+            option = get(options, opt);
+
+            // If there's no such option, try single-character options.
+            if (option == nullptr && opt.size() > 2) {
                 arg = opt.substr(2);
                 opt = opt.substr(0, 2);
+                option = get(options, opt);
             }
-            option = get(options, opt);
             if (option == nullptr) {
                 ::error(ErrorType::ERR_UNKNOWN, "Unknown option %1%", opt);
                 usage();

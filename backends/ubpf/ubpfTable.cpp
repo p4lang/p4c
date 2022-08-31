@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <p4/enumInstance.h>
 #include "ubpfTable.h"
 #include "ubpfType.h"
 #include "ubpfParser.h"
 #include "ir/ir.h"
 #include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
 #include "ubpfControl.h"
 

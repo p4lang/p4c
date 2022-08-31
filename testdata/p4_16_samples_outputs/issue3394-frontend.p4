@@ -17,7 +17,12 @@ parser MyParser(packet_in packet, out header_t hdr, inout metadata meta, inout s
 control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("MyIngress.r") bit<8> r_0;
     apply {
-        r_0 = (bit<8>)3 + 8w1;
+        r_0 = 8w1;
+        if (r_0 == (bit<8>)3) {
+            r_0 = (bit<8>)3 + 8w1;
+        } else {
+            r_0 = (bit<8>)(1 + 3);
+        }
     }
 }
 

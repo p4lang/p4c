@@ -737,8 +737,8 @@ class InsertCompilerGeneratedStartState: public Transform {
  public:
     explicit InsertCompilerGeneratedStartState(ProgramStructure* structure) : structure(structure) {
         setName("InsertCompilerGeneratedStartState");
-        structure->allNames.emplace(IR::ParserState::start);
-        structure->allNames.emplace("InstanceType");
+        structure->allNames.insert({IR::ParserState::start, 0});
+        structure->allNames.insert({"InstanceType", 0});
         newStartState = structure->makeUniqueName(IR::ParserState::start);
         newInstanceType = structure->makeUniqueName("InstanceType");
     }

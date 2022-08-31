@@ -135,7 +135,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Type_Varbits* type) {
         if (auto cst = type->expression->to<IR::Constant>()) {
             type->size = cst->asInt();
             type->expression = nullptr;
-            if (type->width_bits() <= 0)
+            if (type->size < 0)
                 ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
         } else {
             ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", type->expression);
@@ -959,12 +959,14 @@ DoConstantFolding::setContains(const IR::Expression* keySet, const IR::Expressio
         // check if left & right == cst & right
         auto left = getConstant(mask->left);
         if (left == nullptr) {
-            ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant", left);
+            ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant",
+                    mask->left);
             return Result::DontKnow;
         }
         auto right = getConstant(mask->right);
         if (right == nullptr) {
-            ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant", right);
+            ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant",
+                    mask->right);
             return Result::DontKnow;
         }
         if ((left->to<IR::Constant>()->value & right->to<IR::Constant>()->value) ==

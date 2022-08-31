@@ -81,6 +81,28 @@ def s_and_were_or_just_was(parameter):
     return ("s were" if parameter != 1 else " was")
 
 
+class OptionMAction(argparse.Action):
+    """Special action for -M."""
+    def __init__(self, option_strings, dest, **kwargs):
+        super().__init__(option_strings, dest, nargs=0, **kwargs)
+    def __call__(self, parser, namespace, values, option_string=None):
+        # Add -M to preprocessor options
+        opts = getattr(namespace, "preprocessor_options", [])
+        setattr(namespace, "preprocessor_options", opts + [option_string])
+
+        # Also disable running the compiler (-M implies -E)
+        setattr(namespace, "run_preprocessor_only", True)
+
+
+class PassThroughAction(argparse.Action):
+    """Append both the option and its argument(s), if any, to 'dest'."""
+    def __init__(self, option_strings, dest, **kwargs):
+        super().__init__(option_strings, dest, **kwargs)
+    def __call__(self, parser, namespace, values, option_string=None):
+        opts = getattr(namespace, self.dest, [])
+        setattr(namespace, self.dest, opts + [option_string] + values)
+
+
 def main():
     parser = argparse.ArgumentParser(conflict_handler='resolve')
     parser.add_argument("-V", "--version", dest="show_version",
@@ -126,6 +148,25 @@ def main():
     parser.add_argument("-e", dest="skip_preprocessor",
                         help="Skip the preprocessor",
                         action="store_true", default=False)
+    parser.add_argument("-M", dest="preprocessor_options",
+                        help="Pass -M to preprocessor to output dependency rule only",
+                        action=OptionMAction)
+    for option, metavar, usage in (
+            ("-MD", None, "output dependencies as side effect"),
+            ("-MF", "<file>", "write dependencies to <file>"),
+            ("-MG", None, "suppress errors for missing headers"),
+            ("-MP", None, "add phony target for each dependency"),
+            ("-MT", "<target>", "override target of the output rule"),
+            ("-MQ", "<target>", "override target and quote special characters")):
+        syntax = option
+        if metavar is not None:
+            syntax += " " + metavar
+        parser.add_argument(option,
+                            dest="preprocessor_options",
+                            metavar=metavar,
+                            nargs=0 if metavar is None else 1,
+                            help="Pass {} to preprocessor to {}".format(syntax, usage),
+                            action=PassThroughAction)
     parser.add_argument("-g", dest="debug_info",
                         help="Generate debug information",
                         action="store_true", default=False)

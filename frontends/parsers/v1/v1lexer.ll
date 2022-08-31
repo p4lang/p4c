@@ -1,7 +1,7 @@
 %{
 #include "frontends/common/constantParsing.h"
 #include "frontends/parsers/parserDriver.h"
-#include "frontends/parsers/v1/v1lexer.hpp"
+#include "frontends/parsers/v1/v1lexer_internal.hpp"
 #include "frontends/parsers/v1/v1parser.hpp"
 #include "lib/stringref.h"
 

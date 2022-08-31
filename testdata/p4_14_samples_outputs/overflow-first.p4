@@ -36,8 +36,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             action_1_1();
             @defaultonly NoAction();
         }
-        key = {
-        }
         default_action = NoAction();
     }
     apply {

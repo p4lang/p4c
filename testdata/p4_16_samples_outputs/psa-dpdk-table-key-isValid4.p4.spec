@@ -64,6 +64,8 @@ struct metadata {
 	bit<8> Ingress_tmp_1
 	bit<8> Ingress_tmp_2
 	bit<8> Ingress_key
+	bit<16> tmpMask
+	bit<8> tmpMask_0
 }
 metadata instanceof metadata
 
@@ -82,7 +84,7 @@ action execute_1 args none {
 
 table tbl {
 	key {
-		m.Ingress_key optional
+		m.Ingress_key wildcard
 		m.ingress_tbl_ethernet_dstAddr exact
 		m.ingress_tbl_ethernet_srcAddr exact
 	}

@@ -122,6 +122,10 @@ class ToP4 : public Inspector {
 
     using Inspector::preorder;
 
+    void setnoIncludesArg(bool condition) {
+        noIncludes = condition;
+    }
+
     void setListTerm(const char* start, const char* end) {
         listTerminators.push_back(ListPrint(start, end));
     }

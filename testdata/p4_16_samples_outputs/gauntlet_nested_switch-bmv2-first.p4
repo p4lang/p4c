@@ -29,8 +29,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action call_action(inout bit<48> val) {
     }
     table simple_table {
-        key = {
-        }
         actions = {
             @defaultonly NoAction();
         }

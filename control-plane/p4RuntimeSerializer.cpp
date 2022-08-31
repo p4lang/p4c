@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include "p4RuntimeSerializer.h"
 
 #include <google/protobuf/text_format.h>
 #pragma GCC diagnostic push
@@ -58,9 +59,10 @@ limitations under the License.
 
 #include "bytestrings.h"
 #include "flattenHeader.h"
-#include "p4RuntimeSerializer.h"
+#include "p4RuntimeAnnotations.h"
 #include "p4RuntimeArchHandler.h"
 #include "p4RuntimeArchStandard.h"
+#include "p4RuntimeSymbolTable.h"
 #include "typeSpecConverter.h"
 
 namespace p4v1 = ::p4::v1;
@@ -78,32 +80,6 @@ namespace ControlPlaneAPI {
 using Helpers::addAnnotations;
 using Helpers::addDocumentation;
 using Helpers::setPreamble;
-
-static const p4rt_id_t INVALID_ID = p4configv1::P4Ids::UNSPECIFIED;
-
-/// @return true if @node has an @hidden annotation.
-static bool isHidden(const IR::Node* node) {
-    return node->getAnnotation("hidden") != nullptr;
-}
-
-/// @return true if @type has an @controller_header annotation.
-static bool isControllerHeader(const IR::Type_Header* type) {
-    return type->getAnnotation("controller_header") != nullptr;
-}
-
-/// @return the id allocated to the object through the @id annotation if any, or
-/// boost::none.
-static boost::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated* node) {
-    auto idAnnotation = node->getAnnotation("id");
-    if (!idAnnotation) return boost::none;
-    auto idConstant = idAnnotation->expr[0]->to<IR::Constant>();
-    CHECK_NULL(idConstant);
-    if (!idConstant->fitsUint()) {
-        ::error(ErrorType::ERR_INVALID, "%1%: @id should be an unsigned integer", node);
-        return boost::none;
-    }
-    return static_cast<p4rt_id_t>(idConstant->value);
-}
 
 /// @return the value of @item's explicit name annotation, if it has one. We use
 /// this rather than e.g. controlPlaneName() when we want to prevent any
@@ -218,346 +194,6 @@ struct ActionRef {
                                         // reference in the table declaration.
 };
 
-/// @return the value of any P4 '@id' annotation @declaration may have, and
-/// ensure that the value is correct with respect to the P4Runtime
-/// specification. The name 'externalId' is in analogy with externalName().
-static boost::optional<p4rt_id_t>
-externalId(P4RuntimeSymbolType type, const IR::IDeclaration* declaration) {
-    CHECK_NULL(declaration);
-    if (!declaration->is<IR::IAnnotated>()) {
-        return boost::none;  // Assign an id later; see below.
-    }
-
-    // If the user specified an @id annotation, use that.
-    auto idOrNone = getIdAnnotation(declaration->to<IR::IAnnotated>());
-    if (!idOrNone) return boost::none;  // the user didn't assign an id
-    auto id = *idOrNone;
-
-    // If the id already has an 8-bit type prefix, make sure it is correct for
-    // the resource type; otherwise assign the correct prefix.
-    const auto typePrefix = static_cast<p4rt_id_t>(type) << 24;
-    const auto prefixMask = static_cast<p4rt_id_t>(0xff) << 24;
-    if ((id & prefixMask) != 0 && (id & prefixMask) != typePrefix) {
-        ::error(ErrorType::ERR_INVALID, "%1%: @id has the wrong 8-bit prefix", declaration);
-        return boost::none;
-    }
-    id |= typePrefix;
-
-    return id;
-}
-
-/**
- * Stores a set of P4 symbol suffixes. Symbols consist of path components
- * separated by '.'; the suffixes this set stores consist of these components
- * rather than individual characters. The information in this set can be used
- * determine the shortest unique suffix for a P4 symbol.
- */
-struct P4SymbolSuffixSet {
-    /// Adds @symbol's suffixes to the set if it's not already present.
-    void addSymbol(const cstring& symbol) {
-        BUG_CHECK(!symbol.isNullOrEmpty(), "Null or empty symbol name?");
-
-        // Check if the symbol is already in the set. This is necessary because
-        // adding the same symbol more than once will break the algorithm below.
-        // TODO(antonin): In the future we may be able to eliminate this check,
-        // since we already check for duplicate symbols in P4RuntimeSymbolTable.
-        // There are some edge cases, though - for example, symbols of different
-        // types can have the same name, which can happen in P4-14 natively and
-        // in P4-16 due to annotations. Until we handle those cases more
-        // strictly and have tests for them, it's safest to ensure this
-        // precondition here.
-        {
-            auto result = symbols.insert(symbol);
-            if (!result.second) return;  // It was already present.
-        }
-
-        // Split the symbol name into dot-separated components.
-        std::vector<cstring> components;
-        const char* cSymbol = symbol.c_str();
-        boost::split(components, cSymbol, [](char c) { return c == '.'; });
-
-        // Insert the components into our tree of suffixes. We work
-        // right-to-left through the symbol name, since we're concerned with
-        // suffixes. The edges represent components, and the nodes track how
-        // many suffixes pass through that node. For example, if we have symbols
-        // "a.b.c", "b.c", and "a.d.c", the tree will look like this:
-        //   (root) -> "c" -> (3) -> "b" -> (2) -> "a" -> (1)
-        //                       \-> "d" -> (1) -> "a" -> (1)
-        // (Nodes are in parentheses, and edge labels are in quotes.)
-        auto* node = suffixesRoot;
-        for (auto& component : boost::adaptors::reverse(components)) {
-            if (node->edges.find(component) == node->edges.end()) {
-                node->edges[component] = new SuffixNode;
-            }
-            node = node->edges[component];
-            node->instances++;
-        }
-    }
-
-    cstring shortestUniqueSuffix(const cstring& symbol) const {
-        BUG_CHECK(!symbol.isNullOrEmpty(), "Null or empty symbol name?");
-        std::vector<cstring> components;
-        const char* cSymbol = symbol.c_str();
-        boost::split(components, cSymbol, [](char c) { return c == '.'; });
-
-        // Determine how many suffix components we need to uniquely identify
-        // this symbol. For example, if we have the symbols "d.a.c" and "e.b.c",
-        // the suffixes "a.c" and "b.c" are enough to identify the symbols
-        // uniquely, so in both cases we only need two components.
-        unsigned neededComponents = 0;
-        auto* node = suffixesRoot;
-        for (auto& component : boost::adaptors::reverse(components)) {
-            if (node->edges.find(component) == node->edges.end()) {
-                BUG("Symbol is not in suffix set: %1%", symbol);
-            }
-
-            node = node->edges[component];
-            neededComponents++;
-
-            // If there's only one suffix that passes through this node, we have
-            // a unique suffix right now, and we don't need the remaining
-            // components.
-            if (node->instances < 2) break;
-        }
-
-        // Serialize the suffix components into the final unique suffix that
-        // we'll return.
-        BUG_CHECK(neededComponents <= components.size(), "Too many components?");
-        std::string uniqueSuffix;
-        std::for_each(components.end() - neededComponents, components.end(),
-                      [&](const cstring& component) {
-            if (!uniqueSuffix.empty()) uniqueSuffix.append(".");
-            uniqueSuffix.append(component);
-        });
-
-        return uniqueSuffix;
-    }
-
- private:
-    // All symbols in the set. We store these separately to make sure that no
-    // symbol is added to the tree of suffixes more than once.
-    std::set<cstring> symbols;
-
-    // A node in the tree of suffixes. The tree of suffixes is a directed graph
-    // of path components, with the edges pointing from the each component to
-    // its predecessor, so that every suffix of every symbol corresponds to a
-    // path through the tree. For example, "foo.bar[1].baz" would be represented
-    // as "baz" -> "bar[1]" -> "foo".
-    struct SuffixNode {
-        // How many suffixes pass through this node? This includes suffixes that
-        // terminate at this node.
-        unsigned instances = 0;
-
-        // Outgoing edges from this node. The SuffixNode should never be null.
-        std::map<cstring, SuffixNode*> edges;
-    };
-
-    // The root of our tree of suffixes. Note that this is *not* the data
-    // structure known as a suffix tree.
-    SuffixNode* suffixesRoot = new SuffixNode;
-};
-
-/// A table which tracks the symbols which are visible to P4Runtime and their ids.
-class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
- public:
-    /**
-     * @return a fully constructed P4Runtime symbol table with a unique id
-     * computed for each symbol. The table is populated by @function, which can
-     * call the various add*() methods on this class.
-     *
-     * This approach of constructing the symbol table is intended to encourage
-     * correct usage. The symbol table should be used in phases: first, we collect
-     * symbols and populate the table. Then, ids are assigned. Finally, the
-     * P4Runtime serialization code can read the ids from the table as needed. To
-     * ensure that no code accidentally adds new symbols after ids are assigned,
-     * create() enforces that only code that runs before id assignment has access
-     * to a non-const reference to the symbol table.
-     */
-    template <typename Func>
-    static const P4RuntimeSymbolTable create(Func function) {
-        // Create and initialize the symbol table. At this stage, ids aren't
-        // available, because computing ids requires global knowledge of all the
-        // P4Runtime symbols in the program.
-        P4RuntimeSymbolTable symbols;
-        function(symbols);
-
-        // Now that the symbol table is initialized, we can compute ids.
-        for (auto& table : symbols.symbolTables)
-            symbols.computeIdsForSymbols(table.first);
-
-        return symbols;
-    }
-
-    /// Add a @type symbol, extracting the name and id from @declaration.
-    void add(P4RuntimeSymbolType type, const IR::IDeclaration* declaration) override {
-        CHECK_NULL(declaration);
-        add(type, declaration->controlPlaneName(), externalId(type, declaration));
-    }
-
-    /// Add a @type symbol with @name and possibly an explicit P4 '@id'.
-    void add(P4RuntimeSymbolType type, cstring name,
-             boost::optional<p4rt_id_t> id = boost::none) override {
-        auto& symbolTable = symbolTables[type];
-        if (symbolTable.find(name) != symbolTable.end()) {
-            return;  // This is a duplicate, but that's OK.
-        }
-
-        symbolTable[name] = tryToAssignId(id);
-        suffixSet.addSymbol(name);
-    }
-
-    /// @return the P4Runtime id for the symbol of @type corresponding to @declaration.
-    p4rt_id_t getId(P4RuntimeSymbolType type, const IR::IDeclaration* declaration) const override {
-        CHECK_NULL(declaration);
-        return getId(type, declaration->controlPlaneName());
-    }
-
-    /// @return the P4Runtime id for the symbol of @type with name @name.
-    p4rt_id_t getId(P4RuntimeSymbolType type, cstring name) const override {
-        const auto symbolTable = symbolTables.find(type);
-        if (symbolTable == symbolTables.end()) {
-            BUG("Invalid symbol type");
-        }
-        const auto symbolId = symbolTable->second.find(name);
-        if (symbolId == symbolTable->second.end()) {
-            BUG("Looking up symbol '%1%' without adding it to the table", name);
-        }
-        return symbolId->second;
-    }
-
-    /// @return the alias for the given fully qualified external name. P4Runtime
-    /// defines an alias for each object to make referring to objects easier.
-    /// By default, the alias is the shortest unique suffix of path components in
-    /// the name.
-    cstring getAlias(cstring name) const override {
-        return suffixSet.shortestUniqueSuffix(name);
-    }
-
- private:
-    // Rather than call this constructor, use P4RuntimeSymbolTable::create().
-    P4RuntimeSymbolTable() { }
-
-    /// @return an initial (possibly invalid) id for a resource, and if the id is
-    /// not invalid, record the assignment. An initial @id typically comes from
-    /// the P4 '@id' annotation.
-    p4rt_id_t tryToAssignId(boost::optional<p4rt_id_t> id) {
-        if (!id) {
-            // The user didn't assign an id, so return the special value INVALID_ID
-            // to indicate that computeIds() should assign one later.
-            return INVALID_ID;
-        }
-
-        if (assignedIds.find(*id) != assignedIds.end()) {
-            ::error(ErrorType::ERR_INVALID, "@id %1% is assigned to multiple declarations", *id);
-            return INVALID_ID;
-        }
-
-        assignedIds.insert(*id);
-        return *id;
-    }
-
-    /**
-     * Assign an id to each resource of @type (ACTION, TABLE, etc..)  which does
-     * not yet have an id, and update the resource in place.  Existing ids are
-     * avoided to ensure that each id is unique.
-     */
-    void computeIdsForSymbols(P4RuntimeSymbolType type) {
-        // The id for most resources follows a standard format:
-        //
-        //   [resource type] [name hash value]
-        //    \____8_b____/   \_____24_b____/
-        auto& symbolTable = symbolTables.at(type);
-        auto resourceType = static_cast<p4rt_id_t>(type);
-
-        // Extract the names of every resource in the collection that does not already
-        // have an id assigned and associate them with an iterator that we can use to
-        // access them again later.  The names are stored in a std::map to ensure that
-        // they're sorted. This is necessary to provide deterministic ids; see below
-        // for details.
-        std::map<cstring, SymbolTable::iterator> nameToIteratorMap;
-        for (auto it = symbolTable.begin(); it != symbolTable.end(); it++) {
-            if (it->second == INVALID_ID) {
-                nameToIteratorMap.emplace(std::make_pair(it->first, it));
-            }
-        }
-
-        for (const auto& mapping : nameToIteratorMap) {
-            const cstring name = mapping.first;
-            const SymbolTable::iterator iterator = mapping.second;
-            const uint32_t nameId = jenkinsOneAtATimeHash(name.c_str(), name.size());
-
-            // Hash the name and construct an id. Because linear probing is used to
-            // resolve hash collisions, the id that we select depends on the order in
-            // which the names are hashed. This is why we sort the names above.
-            boost::optional<p4rt_id_t> id = probeForId(nameId, [=](uint32_t nameId) {
-                return (resourceType << 24) | (nameId & 0xffffff);
-            });
-
-            if (!id) {
-                ::error(ErrorType::ERR_OVERLIMIT,
-                        "No available id to represent %1% in P4Runtime", name);
-                return;
-            }
-
-            // Update the resource in place with the new id.
-            assignedIds.insert(*id);
-            iterator->second = *id;
-        }
-    }
-
-    /**
-     * Construct an id from the provided @sourceValue using the provided function
-     * @constructId, which is expected to be pure. If there's a collision,
-     * @sourceValue is incremented and the id is recomputed until an available id
-     * is found. We perform linear probing of @sourceValue rather than the id
-     * itself to ensure that we don't end up affecting bits of the id that should
-     * not depend on @sourceValue.  For example, @constructId will normally set
-     * some of the bits in the id it generates to a fixed value indicating a
-     * resource type, and those bits need to remain correct.
-     */
-    template <typename ConstructIdFunc>
-    boost::optional<p4rt_id_t> probeForId(const uint32_t sourceValue,
-                                          ConstructIdFunc constructId) {
-        uint32_t value = sourceValue;
-        while (assignedIds.find(constructId(value)) != assignedIds.end()) {
-            ++value;
-            if (value == sourceValue) {
-                return boost::none;  // We wrapped around; there's no unassigned id left.
-            }
-        }
-
-        return constructId(value);
-    }
-
-    // The hash function used for resource names.
-    // Taken from: https://en.wikipedia.org/wiki/Jenkins_hash_function
-    static uint32_t jenkinsOneAtATimeHash(const char* key, size_t length) {
-        size_t i = 0;
-        uint32_t hash = 0;
-        while (i != length) {
-            hash += uint8_t(key[i++]);
-            hash += hash << 10;
-            hash ^= hash >> 6;
-        }
-        hash += hash << 3;
-        hash ^= hash >> 11;
-        hash += hash << 15;
-        return hash;
-    }
-
-    // All the ids we've assigned so far. Used to avoid id collisions; this is
-    // especially crucial since ids can be set manually via the '@id' annotation.
-    std::set<p4rt_id_t> assignedIds;
-
-    // Symbol tables, mapping symbols to P4Runtime ids.
-    using SymbolTable = std::map<cstring, p4rt_id_t>;
-    std::map<P4RuntimeSymbolType, SymbolTable> symbolTables{};
-
-    // A set which contains all the symbols in the program. It's used to compute
-    // the shortest unique suffix of each symbol, which is the default alias we
-    // use for P4Runtime objects.
-    P4SymbolSuffixSet suffixSet;
-};
 
 /// FieldIdAllocator is used to allocate ids for non top-level P4Info objects
 /// that need them (match fields, action parameters, packet IO metadata
@@ -778,32 +414,6 @@ getMatchFields(const IR::P4Table* table,
 
     return matchFields;
 }
-
-/// Parses P4Runtime-specific annotations.
-class ParseAnnotations : public P4::ParseAnnotations {
- public:
-    ParseAnnotations() : P4::ParseAnnotations("P4Runtime", false, {
-        PARSE("controller_header", StringLiteral),
-        PARSE_EMPTY("hidden"),
-        PARSE("id", Constant),
-        PARSE("brief", StringLiteral),
-        PARSE("description", StringLiteral),
-        // This annotation is architecture-specific in theory, but given that it
-        // is "reserved" by the P4Runtime specification, I don't really have any
-        // qualms about adding it here. I don't think it is possible to just run
-        // a different ParseAnnotations pass in the constructor of the
-        // architecture-specific P4RuntimeArchHandlerIface implementation, since
-        // ParseAnnotations modifies the program. I don't really like the
-        // possible alternatives either: 1) modify the P4RuntimeArchHandlerIface
-        // interface so that each implementation can provide a custom
-        // ParseAnnotations instance, or 2) run a ParseAnnotations pass
-        // "locally" (in this case on action profile instances since this
-        // annotation is for them).
-        PARSE("max_group_size", Constant),
-        {"p4runtime_translation",
-         &P4::ParseAnnotations::parseP4rtTranslationAnnotation},
-    }) {}
-};
 
 namespace {
 
@@ -1367,72 +977,6 @@ class P4RuntimeAnalyzer {
     P4RuntimeArchHandlerIface* archHandler;
 };
 
-static void collectControlSymbols(P4RuntimeSymbolTable& symbols,
-                                  P4RuntimeArchHandlerIface* archHandler,
-                                  const IR::ControlBlock* controlBlock,
-                                  ReferenceMap* refMap,
-                                  TypeMap* typeMap) {
-    CHECK_NULL(controlBlock);
-    CHECK_NULL(refMap);
-    CHECK_NULL(typeMap);
-
-    auto control = controlBlock->container;
-    CHECK_NULL(control);
-
-    forAllMatching<IR::P4Action>(&control->controlLocals,
-                                 [&](const IR::P4Action* action) {
-        // Collect the action itself.
-        symbols.add(P4RuntimeSymbolType::ACTION(), action);
-
-        // Collect any extern functions it may invoke.
-        forAllMatching<IR::MethodCallExpression>(action->body,
-                      [&](const IR::MethodCallExpression* call) {
-            auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
-            if (instance->is<P4::ExternFunction>())
-                archHandler->collectExternFunction(&symbols, instance->to<P4::ExternFunction>());
-        });
-    });
-
-    // Collect any extern function invoked directly from the control.
-    forAllMatching<IR::MethodCallExpression>(control->body,
-                                             [&](const IR::MethodCallExpression* call) {
-        auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
-        if (instance->is<P4::ExternFunction>())
-                archHandler->collectExternFunction(&symbols, instance->to<P4::ExternFunction>());
-    });
-}
-
-static void collectExternSymbols(P4RuntimeSymbolTable& symbols,
-                                 P4RuntimeArchHandlerIface* archHandler,
-                                 const IR::ExternBlock* externBlock) {
-    CHECK_NULL(externBlock);
-    archHandler->collectExternInstance(&symbols, externBlock);
-}
-
-static void collectTableSymbols(P4RuntimeSymbolTable& symbols,
-                                P4RuntimeArchHandlerIface* archHandler,
-                                const IR::TableBlock* tableBlock) {
-    CHECK_NULL(tableBlock);
-    auto name = archHandler->getControlPlaneName(tableBlock);
-    auto id = externalId(P4RuntimeSymbolType::TABLE(), tableBlock->container);
-    symbols.add(P4RuntimeSymbolType::TABLE(), name, id);
-    archHandler->collectTableProperties(&symbols, tableBlock);
-}
-
-static void collectParserSymbols(P4RuntimeSymbolTable& symbols,
-                                 const IR::ParserBlock* parserBlock) {
-    CHECK_NULL(parserBlock);
-
-    auto parser = parserBlock->container;
-    CHECK_NULL(parser);
-
-    for (auto s : parser->parserLocals) {
-        if (auto inst = s->to<IR::P4ValueSet>()) {
-            symbols.add(P4RuntimeSymbolType::VALUE_SET(), inst);
-        }
-    }
-}
-
 static void analyzeParser(P4RuntimeAnalyzer& analyzer,
                           const IR::ParserBlock* parserBlock) {
     CHECK_NULL(parserBlock);
@@ -1812,32 +1356,13 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
 
     // Perform a first pass to collect all of the control plane visible symbols in
     // the program.
-    auto symbols = P4RuntimeSymbolTable::create([=](P4RuntimeSymbolTable& symbols) {
-        Helpers::forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
-            if (block->is<IR::ControlBlock>()) {
-                collectControlSymbols(symbols, archHandler,
-                                      block->to<IR::ControlBlock>(),
-                                      refMap, typeMap);
-            } else if (block->is<IR::ExternBlock>()) {
-                collectExternSymbols(symbols, archHandler, block->to<IR::ExternBlock>());
-            } else if (block->is<IR::TableBlock>()) {
-                collectTableSymbols(symbols, archHandler, block->to<IR::TableBlock>());
-            } else if (block->is<IR::ParserBlock>()) {
-                collectParserSymbols(symbols, block->to<IR::ParserBlock>());
-            }
-        });
-        forAllMatching<IR::Type_Header>(program, [&](const IR::Type_Header* type) {
-            if (isControllerHeader(type)) {
-                symbols.add(P4RuntimeSymbolType::CONTROLLER_HEADER(), type);
-            }
-        });
-        archHandler->collectExtra(&symbols);
-    });
+    const auto *symbols = P4RuntimeSymbolTable::generateSymbols(
+        program, evaluatedProgram, refMap, typeMap, archHandler);
 
-    archHandler->postCollect(symbols);
+    archHandler->postCollect(*symbols);
 
     // Construct a P4Runtime control plane API from the program.
-    P4RuntimeAnalyzer analyzer(symbols, typeMap, refMap, archHandler);
+    P4RuntimeAnalyzer analyzer(*symbols, typeMap, refMap, archHandler);
     Helpers::forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
         if (block->is<IR::ControlBlock>()) {
             analyzer.analyzeControl(block->to<IR::ControlBlock>());
@@ -1869,7 +1394,7 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
 
     analyzer.addPkgInfo(evaluatedProgram, arch);
 
-    P4RuntimeEntriesConverter entriesConverter(symbols);
+    P4RuntimeEntriesConverter entriesConverter(*symbols);
     Helpers::forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
         if (block->is<IR::TableBlock>())
             entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap,
@@ -1901,7 +1426,7 @@ P4RuntimeSerializer::generateP4Runtime(const IR::P4Program* program, cstring arc
     P4::TypeMap typeMap;
     auto* evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     PassManager p4RuntimeFixups = {
-        new ControlPlaneAPI::ParseAnnotations(),
+        new ControlPlaneAPI::ParseP4RuntimeAnnotations(),
         // Update types and reevaluate the program.
         new P4::TypeChecking(&refMap, &typeMap, /* updateExpressions = */ true),
         evaluator

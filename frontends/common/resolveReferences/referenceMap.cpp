@@ -21,7 +21,8 @@ limitations under the License.
 namespace P4 {
 
 MinimalNameGenerator::MinimalNameGenerator() {
-    usedNames.insert(P4::reservedWords.begin(), P4::reservedWords.end());
+    for (auto &reserved : P4::reservedWords)
+        usedNames.insert({reserved, 0});
 }
 
 ReferenceMap::ReferenceMap() : ProgramMap("ReferenceMap"), isv1(false) { clear(); }
@@ -31,7 +32,8 @@ void ReferenceMap::clear() {
     usedNames.clear();
     used.clear();
     thisToDeclaration.clear();
-    usedNames.insert(P4::reservedWords.begin(), P4::reservedWords.end());
+    for (auto &reserved : P4::reservedWords)
+        usedNames.insert({reserved, 0});
 }
 
 void ReferenceMap::setDeclaration(const IR::Path* path, const IR::IDeclaration* decl) {
@@ -107,8 +109,10 @@ cstring ReferenceMap::newName(cstring base) {
     if (len > 0 && base[len - 1] == '_')
         base = base.substr(0, len - 1);
 
-    cstring name = cstring::make_unique(usedNames, base, '_');
-    usedNames.insert(name);
+    cstring name = base;
+    if (usedNames.count(name))
+        name = cstring::make_unique(usedNames, name, usedNames[base], '_');
+    usedNames.insert({name, 0});
     return name;
 }
 
@@ -126,8 +130,10 @@ cstring MinimalNameGenerator::newName(cstring base) {
     if (len > 0 && base[len - 1] == '_')
         base = base.substr(0, len - 1);
 
-    cstring name = cstring::make_unique(usedNames, base, '_');
-    usedNames.insert(name);
+    cstring name = base;
+    if (usedNames.count(name))
+        name = cstring::make_unique(usedNames, name, usedNames[base], '_');
+    usedNames.insert({name, 0});
     return name;
 }
 

@@ -107,7 +107,7 @@ p4c has package support for several Ubuntu and Debian distributions.
 
 ### Ubuntu
 
-For Ubuntu 20.04 and Ubuntu 21.04 it can be installed as follows:
+A p4c pacakge is available in the following repositories for Ubuntu 20.04 and newer.
 
 ```bash
 . /etc/os-release
@@ -273,8 +273,8 @@ work. However, all our CI testing is done with a more recent version of Protobuf
 (at the moment, 3.18.1), which we install from source. If you are experiencing
 issues with the Protobuf version shipped with your OS distribution, we recommend
 that we install Protobuf 3.18.1 from source. You can find instructions
-[here](https://github.com/google/protobuf/blob/master/src/README.md). After
-cloning Protobuf and before you build, check-out version 3.18.1:
+[here](https://github.com/protocolbuffers/protobuf/blob/v3.18.1/src/README.md).
+After cloning Protobuf and before you build, check-out version 3.18.1:
 
 `git checkout v3.18.1`
 

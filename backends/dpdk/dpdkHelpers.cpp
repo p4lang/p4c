@@ -112,7 +112,6 @@ void ConvertStatementToDpdk::process_logical_operation(const IR::Expression* dst
 bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
     auto left = a->left;
     auto right = a->right;
-
     IR::DpdkAsmStatement *i = nullptr;
 
     if (auto r = right->to<IR::Operation_Relation>()) {
@@ -120,6 +119,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
     } else if (auto r = right->to<IR::Operation_Binary>()) {
         auto src1Op = r->left;
         auto src2Op = r->right;
+        bool isSignExtended = false;
         if (r->left->is<IR::Constant>()) {
             if (isCommutativeBinaryOperation(r)) {
                 src1Op = r->right;
@@ -134,26 +134,102 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 src1Op = src1Member;
             }
         }
+        /* If a constant is present in binary operation and it is not 8-bit
+           aligned and it is signed, then the constant value is sign extended
+           with a width of either 32 bit if its original bit-width is less than
+           32 bit or 64 bit if the bit-width of constant is greater than 32 bit
+        */
+
+        if (!isEightBitAligned(src2Op)) {
+            if (auto tb = src2Op->type->to<IR::Type_Bits>()) {
+                if (tb != nullptr && tb->isSigned) {
+                    isSignExtended = true;
+                    auto consOrgBitwidth = src2Op->to<IR::Expression>()->type->width_bits();
+                    auto bitWidth = consOrgBitwidth < 32 ? 32 : 64;
+                    if (src2Op->is<IR::Constant>()) {
+                        auto consValue = src2Op->to<IR::Constant>()->value;
+                        auto val = consValue << (bitWidth - consOrgBitwidth);
+                        consValue = val >> (bitWidth - consOrgBitwidth);
+                        src2Op = new IR::Constant(IR::Type_Bits::get(bitWidth), consValue);
+                    } else {
+                        /*
+                        Below instructions perform sign-extension of non-constant value as follows:
+
+                        1. Get the MSB of variable by performing 'and' operation with mask with
+                           'msb-bit' set with same bit-length of variable and right shifting with
+                           (bit-length - 1).
+
+                           For eg :
+                                1111 (value) & 1000 (mask) = 1000
+                                1000 >> 3 (bit-length - 1) = 1
+                        2. If MSB is set, calculate the mask for sign extension and perform 'OR'
+                           operation with variable
+                           For eg , if sign-extension is done from 4 bit to 8 bit, below operation
+                           is performed.
+
+                           mask1 = (1 << 4) - 1 = 1111
+                           mask2 = (1 << 8) - 1 = 11111111
+                           Final_Mask_Value = mask1 ^ mask2 = 11111111 ^ 00001111 = 11110000
+
+                           value = value(4 bit) | Final_Mask_Value (Sign extended)
+                        */
+                        auto true_label = refmap->newName("label_true");
+                        auto tmp = new IR::Constant(1);
+                        auto m1 = (tmp->value << consOrgBitwidth) - 1;
+                        auto m2 = (tmp->value << bitWidth) - 1;
+                        auto m3 = m1 ^ m2;
+                        auto maskMsb = tmp->value << (consOrgBitwidth - 1);
+                        // Move param to metadata as DPDK expects it to be in metadata
+                        BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                        IR::ID src1(refmap->newName("tmp"));
+                        metadataStruct->fields.push_back(new IR::StructField(src1, src2Op->type));
+                        auto src1Member = new IR::Member(new IR::PathExpression("m"), src1);
+                        add_instr(new IR::DpdkAndStatement(src2Op, src2Op,
+                                                           new IR::Constant(maskMsb)));
+                        add_instr(new IR::DpdkShrStatement(src2Op, src2Op,
+                                                           new IR::Constant(consOrgBitwidth - 1)));
+                        add_instr(new IR::DpdkMovStatement(src1Member, src2Op));
+                        add_instr(new IR::DpdkJmpEqualStatement(true_label, src1Member,
+                                                                new IR::Constant(1)));
+                        add_instr(new IR::DpdkOrStatement(src2Op, src2Op, new IR::Constant(m3)));
+                        add_instr(new IR::DpdkLabelStatement(true_label));
+                    }
+                }
+            }
+        }
+
         if (right->is<IR::Add>()) {
-            i = new IR::DpdkAddStatement(left, src1Op, src2Op);
+            add_instr(new IR::DpdkAddStatement(left, src1Op, src2Op));
         } else if (right->is<IR::Sub>()) {
-            i = new IR::DpdkSubStatement(left, src1Op, src2Op);
+            add_instr(new IR::DpdkSubStatement(left, src1Op, src2Op));
         } else if (right->is<IR::Shl>()) {
-            i = new IR::DpdkShlStatement(left, src1Op, src2Op);
+            add_instr(new IR::DpdkShlStatement(left, src1Op, src2Op));
         } else if (right->is<IR::Shr>()) {
-            i = new IR::DpdkShrStatement(left, src1Op, src2Op);
+            add_instr(new IR::DpdkShrStatement(left, src1Op, src2Op));
         } else if (right->is<IR::Equ>()) {
-            i = new IR::DpdkEquStatement(left, src1Op, src2Op);
+            add_instr(new IR::DpdkEquStatement(left, src1Op, src2Op));
         } else if (right->is<IR::LOr>() || right->is<IR::LAnd>()) {
             process_logical_operation(left, r);
         } else if (right->is<IR::BOr>()) {
-            i = new IR::DpdkOrStatement(left, src1Op, src2Op);
+            add_instr(new IR::DpdkOrStatement(left, src1Op, src2Op));
         } else if (right->is<IR::BAnd>()) {
-            i = new IR::DpdkAndStatement(left, src1Op, src2Op);
+            add_instr(new IR::DpdkAndStatement(left, src1Op, src2Op));
         } else if (right->is<IR::BXor>()) {
-            i = new IR::DpdkXorStatement(left, src1Op, src2Op);
+            add_instr(new IR::DpdkXorStatement(left, src1Op, src2Op));
         } else {
             BUG("%1% not implemented.", right);
+        }
+        /* If there is a binary operation present which involves non 8-bit aligned
+           fields , add BAnd operation with mask value of original bit-width to
+           avoid any result overflow */
+        if (!isEightBitAligned(left) && !isSignExtended) {
+            if (right->is<IR::Add>() || right->is<IR::Sub>() ||
+                right->is<IR::Shl>() || right->is<IR::Shr>()) {
+                auto width = left->type->width_bits();
+                auto tmp = new IR::Constant(1);
+                auto mask = (tmp->value << width) - 1;
+                add_instr(new IR::DpdkAndStatement(left, left, new IR::Constant(mask)));
+            }
         }
     } else if (auto m = right->to<IR::MethodCallExpression>()) {
         auto mi = P4::MethodInstance::resolve(m, refmap, typemap);
@@ -908,37 +984,46 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         } else if (a->originalExternType->getName().name == "packet_in") {
             if (a->method->getName().name == "extract") {
                 auto args = a->expr->arguments;
-                if (args->size() == 1) {
+                if (args->size() == 1 || args->size() == 2) {
                     auto header = args->at(0);
-                    if (header->expression->is<IR::Member>() ||
+                    if (!(header->expression->is<IR::Member>() ||
                         header->expression->is<IR::PathExpression>() ||
-                        header->expression->is<IR::ArrayIndex>()) {
-                        add_instr(new IR::DpdkExtractStatement(header->expression));
-                    } else {
+                        header->expression->is<IR::ArrayIndex>())) {
                         ::error(ErrorType::ERR_UNSUPPORTED, "%1% is not supported", s);
                     }
-                } else if (args->size() == 2) {
-                    auto header = args->at(0);
-                    auto length = args->at(1);
-                    /**
-                     * Extract instruction of DPDK target expects the second argument
-                     * (size of the varbit field of the header) to be the number of bytes
-                     * to be extracted while in P4 it is the number of bits to be extracted.
-                     * We need to compute the size in bytes.
-                     *
-                     * @warning If the value is not aligned to 8 bits, the remainder after
-                     * division is dropped during runtime (this is a target limitation).
-                     */
-                    IR::ID tmpName(refmap->newName(
-                            length->expression->to<IR::Member>()->member.name + "_extract_tmp"));
-                    BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
-                    metadataStruct->fields.push_back(
-                            new IR::StructField(tmpName, length->expression->type));
-                    auto tmpMember = new IR::Member(new IR::PathExpression("m"), tmpName);
-                    add_instr(new IR::DpdkMovStatement(tmpMember, length->expression));
-                    add_instr(new IR::DpdkShrStatement(tmpMember, tmpMember,
-                            new IR::PathExpression("0x3")));
-                    add_instr(new IR::DpdkExtractStatement(header->expression, tmpMember));
+                    if (args->size() == 1) {
+                        add_instr(new IR::DpdkExtractStatement(header->expression));
+                    } else {
+                        auto header = args->at(0);
+                        auto length = args->at(1);
+                        /**
+                         * Extract instruction of DPDK target expects the second argument
+                         * (size of the varbit field of the header) to be the number of bytes
+                         * to be extracted while in P4 it is the number of bits to be extracted.
+                         * We need to compute the size in bytes.
+                         *
+                         * @warning If the value is not aligned to 8 bits, the remainder after
+                         * division is dropped during runtime (this is a target limitation).
+                         */
+                        cstring baseName = "";
+                        if (length->expression->is<IR::Constant>()) {
+                            baseName = "varbit";
+                         } else if (length->expression->is<IR::Member>()) {
+                            baseName = length->expression->to<IR::Member>()->member.name;
+                         } else {
+                            ::error(ErrorType::ERR_UNSUPPORTED, "%1% is not supported", s);
+                         }
+
+                        IR::ID tmpName(refmap->newName(baseName + "_extract_tmp"));
+                        BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                        metadataStruct->fields.push_back(
+                                     new IR::StructField(tmpName, length->expression->type));
+                        auto tmpMember = new IR::Member(new IR::PathExpression("m"), tmpName);
+                        add_instr(new IR::DpdkMovStatement(tmpMember, length->expression));
+                        add_instr(new IR::DpdkShrStatement(tmpMember, tmpMember,
+                                new IR::Constant(0x3)));
+                        add_instr(new IR::DpdkExtractStatement(header->expression, tmpMember));
+                    }
                 }
             }
         } else if (a->originalExternType->getName().name == "Meter") {
@@ -1098,32 +1183,35 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                             a->method->name);
                 return false;
             }
-            auto slot_id = a->expr->arguments->at(0)->expression;
-            auto session_id = a->expr->arguments->at(1)->expression;
-            // Frontend rejects programs which have non-constant arguments for mirror_packet()
-            BUG_CHECK(slot_id->is<IR::Constant>(), "Expected a constant for slot_id param of %1%",
-                                                   a->method->name);
-            BUG_CHECK(session_id->is<IR::Constant>(),
-                      "Expected a constant for session_id param of %1%", a->method->name);
-            unsigned value =  session_id->to<IR::Constant>()->asUnsigned();
-            if (value == 0) {
-                ::error(ErrorType::ERR_INVALID,
-                        "Mirror session ID 0 is reserved for use by Architecture");
-                return false;
+            auto slotId = a->expr->arguments->at(0)->expression;
+            auto sessionId = a->expr->arguments->at(1)->expression;
+            // If slot id and session id are not metadata fields, move these to metadata fields
+            // as DPDK expects these parameters to be in metadata
+            if (!isMetadataField(slotId)) {
+                BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                IR::ID slotName(refmap->newName("mirrorSlot"));
+                metadataStruct->fields.push_back(new IR::StructField(slotName, slotId->type));
+                auto slotMember = new IR::Member(new IR::PathExpression("m"), slotName);
+                add_instr(new IR::DpdkMovStatement(slotMember, slotId));
+                slotId = slotMember;
             }
-
-            // Move slot id and session id to metadata fields as DPDK expects these parameters
-            // to be in metadata
-            BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
-            IR::ID slotName(refmap->newName("mirrorSlot"));
-            IR::ID sessionName(refmap->newName("mirrorSession"));
-            metadataStruct->fields.push_back(new IR::StructField(slotName, slot_id->type));
-            metadataStruct->fields.push_back(new IR::StructField(sessionName, session_id->type));
-            auto slotMember = new IR::Member(new IR::PathExpression("m"), slotName);
-            auto sessionMember = new IR::Member(new IR::PathExpression("m"), sessionName);
-            add_instr(new IR::DpdkMovStatement(slotMember, slot_id));
-            add_instr(new IR::DpdkMovStatement(sessionMember, session_id));
-            add_instr(new IR::DpdkMirrorStatement(slotMember, sessionMember));
+            if (!isMetadataField(sessionId)) {
+                if (sessionId->is<IR::Constant>()) {
+                    unsigned value =  sessionId->to<IR::Constant>()->asUnsigned();
+                    if (value == 0) {
+                        ::error(ErrorType::ERR_INVALID,
+                                "Mirror session ID 0 is reserved for use by Architecture");
+                        return false;
+                    }
+                }
+                BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                IR::ID sessionName(refmap->newName("mirrorSession"));
+                metadataStruct->fields.push_back(new IR::StructField(sessionName, sessionId->type));
+                auto sessionMember = new IR::Member(new IR::PathExpression("m"), sessionName);
+                add_instr(new IR::DpdkMovStatement(sessionMember, sessionId));
+                sessionId = sessionMember;
+            }
+            add_instr(new IR::DpdkMirrorStatement(slotId, sessionId));
         } else if (a->method->name == "recirculate") {
             add_instr(new IR::DpdkRecirculateStatement());
         } else if (a->method->name == "send_to_port") {

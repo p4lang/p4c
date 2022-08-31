@@ -59,8 +59,6 @@ action macswp args instanceof macswp_arg_t {
 }
 
 table stub {
-	key {
-	}
 	actions {
 		macswp
 		nonDefAct

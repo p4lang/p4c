@@ -1,0 +1,6 @@
+issue3378.p4(1): [--Werror=type-error] error: package f: not supported as a tuple field
+package f();
+        ^
+issue3378.p4(2): [--Werror=type-error] error: Error while analyzing tuple<package f, package f>
+package g(tuple<f,f> b);
+          ^^^^^^^^^^

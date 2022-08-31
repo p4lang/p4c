@@ -38,8 +38,6 @@ control c3(inout headers hdr, inout metadata meta, inout standard_metadata_t std
         hdr.h.x = 8w0;
     }
     @name("c3.t") table t_0 {
-        key = {
-        }
         actions = {
             a();
             @defaultonly NoAction_1();
