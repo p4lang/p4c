@@ -46,10 +46,6 @@ find ${THIS_DIR}/../../p4check -iname '*.h' -o -iname '*.cpp' | xargs clang-form
 return_status=$(($return_status || $?))
 find ${THIS_DIR}/../../testgen -iname '*.h' -o -iname '*.cpp' | xargs clang-format $write_args -i
 return_status=$(($return_status || $?))
-find ${THIS_DIR}/../../smith -iname '*.h' -o -iname '*.cpp' | xargs clang-format $write_args -i
-return_status=$(($return_status || $?))
-find ${THIS_DIR}/../../mutate -iname '*.h' -o -iname '*.cpp' | xargs clang-format $write_args -i
-return_status=$(($return_status || $?))
 
 
 echo "********************************"

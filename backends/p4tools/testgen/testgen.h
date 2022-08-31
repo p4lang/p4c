@@ -12,18 +12,12 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-/// This is p4testgen.
+/// This is main implementation of the P4Testgen tool.
 class Testgen : public AbstractP4cTool<TestgenOptions> {
  protected:
     void registerTarget() override;
 
     int mainImpl(const IR::P4Program* program) override;
-
-    cstring getProgramName();
-
-    cstring getOutputDir();
-
-    void printTraceAndBranches(int testCount, const FinalState& state);
 };
 
 }  // namespace P4Testgen

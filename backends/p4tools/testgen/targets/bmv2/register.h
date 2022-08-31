@@ -12,8 +12,10 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
+/// Register the BMv2 compiler target with the tools framework.
 void bmv2_registerCompilerTarget() { Bmv2::BMv2_V1ModelCompilerTarget::make(); }
 
+/// Register the BMv2 testgen target with the testgen framework.
 void bmv2_registerTestgenTarget() { Bmv2::BMv2_V1ModelTestgenTarget::make(); }
 
 }  // namespace P4Testgen

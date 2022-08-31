@@ -1,14 +1,12 @@
-# XFAILS: tests that *temporarily* fail
+# XFAILS: tests that currently fail. Most of these are temporary.
 # ================================================
-# Xfails are _temporary_ failures: the tests should work but we haven't fixed p4testgen yet.
-
 
 
 ####################################################################################################
 # 1. P4C Toolchain Issues
-####################################################################################################
 # These are issues either with the P4 compiler or the behavioral model executing the code.
 # These issues needed to be tracked and fixed in P4C.
+####################################################################################################
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
@@ -67,9 +65,8 @@ p4tools_add_xfail_reason(
 
 ####################################################################################################
 # 2. P4Testgen Issues
-####################################################################################################
 # These are failures in P4Testgen that need to be fixed.
-
+####################################################################################################
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
@@ -133,8 +130,8 @@ p4tools_add_xfail_reason(
 
 ####################################################################################################
 # 3. WONTFIX
-####################################################################################################
 # These are failures that can not be solved by changing P4Testgen
+####################################################################################################
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
@@ -160,7 +157,8 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "error: exit"
-  issue2359.p4  # exit: Conditional execution in actions unsupported on this target.
+  # exit: Conditional execution in actions unsupported on this target.
+  issue2359.p4
 )
 
 p4tools_add_xfail_reason(
@@ -208,6 +206,7 @@ p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "The BMV2 architecture requires 6 pipes"
   # All of these tests are not valid bmv2 programs but import v1model.
+  # TODO: Fix up these programs so that they pass.
   logging.p4
   issue584-1.p4
   issue1806.p4

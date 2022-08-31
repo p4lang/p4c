@@ -1,1 +1,1 @@
-Contains internal utility scripts for supporting development of P4Testgen.
+Contains internal utility scripts for supporting development of P4Tools.

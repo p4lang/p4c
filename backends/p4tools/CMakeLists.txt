@@ -87,8 +87,6 @@ set(ENABLE_TESTING ON)
 add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common ${CMAKE_CURRENT_LIST_DIR}/scripts/tools)
 add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/testgen ${CMAKE_CURRENT_LIST_DIR}/scripts/tools)
 add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/p4check ${CMAKE_CURRENT_LIST_DIR}/scripts/tools)
-add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/mutate ${CMAKE_CURRENT_LIST_DIR}/scripts/tools)
-add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/smith ${CMAKE_CURRENT_LIST_DIR}/scripts/tools)
 
-# Custom IR constructs for P4Testgen.
+# Custom IR constructs for P4Tools.
 set(IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/common/testgen.def PARENT_SCOPE)

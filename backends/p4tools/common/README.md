@@ -1,1 +1,1 @@
-This directory provides shared C++ components for the various P4Testgen modules.
+This directory provides shared C++ components for the various P4Tools modules.

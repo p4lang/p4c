@@ -16,8 +16,6 @@ add_p4tools_executable(p4check main.cpp ${P4CHECK_SOURCES})
 target_link_libraries(
   p4check
   PRIVATE p4testgen
-  PRIVATE mutate
-  PRIVATE smith
 )
 
 add_custom_target(

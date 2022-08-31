@@ -6,12 +6,10 @@
 p4tools
  ├─ cmake       ── common CMake modules
  ├─ common      ── C++ source: common code for the various components of p4check
- ├─ mutate      ── C++ source: p4mutate
  ├─ p4check     ── C++ source: the main entry point for p4check
  ├─ scripts
  │   ├─ hooks   ── git hooks
  │   └─ tools   ── development-support scripts (e.g., cpplint)
- ├─ smith       ── C++ source: p4smith
  ├─ submodules  ── external dependencies
  └─ testgen     ── C++ source: p4testgen
 ```
@@ -28,7 +26,7 @@ P4Tools can be built using the following CMAKE configuration in the P4C reposito
 ```
 mkdir build
 cd build
-cmake .. -DENABLE_GMP=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DENABLE_TOOLS=ON
+cmake .. -DENABLE_GMP=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DENABLE_TEST_TOOLS=ON
 make
 ```
 

@@ -8,7 +8,7 @@
 
 namespace P4Tools {
 
-/// A P4CConfiguration implementation that doesn't limit the maximum width for a bit field or
+/// A P4CConfiguration implementation that increases the maximum width for a bit field or
 /// integer.
 class CompilerConfiguration : public DefaultP4CConfiguration {
  public:

@@ -41,7 +41,7 @@ const IR::Expression* BMv2_V1ModelTableStepper::computeTargetMatchType(
         bmv2_V1ModelProperties.actionSelectorKeys.emplace_back(keyExpr);
         return hitCondition;
     }
-    // Ranges are not yet implemented for Tofino STF tests.
+    // Ranges are not yet implemented for BMv2 STF tests.
     if (keyProperties.matchType == BMv2Constants::MATCH_KIND_RANGE &&
         TestgenOptions::get().testBackend != "STF") {
         cstring minName =

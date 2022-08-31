@@ -17,8 +17,6 @@ function run_cpplint() {
 run_cpplint $ROOT_DIR/common $ROOT_DIR
 run_cpplint $ROOT_DIR/p4check $ROOT_DIR
 run_cpplint $ROOT_DIR/testgen $ROOT_DIR
-run_cpplint $ROOT_DIR/smith $ROOT_DIR
-run_cpplint $ROOT_DIR/mutate $ROOT_DIR
 
 echo "********************************"
 if [ $return_status -eq 0 ]; then

@@ -5,13 +5,10 @@
 #include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/version.h"
-#include "backends/p4tools/mutate/mutate.h"
 #include "backends/p4tools/p4check/commands.h"
-#include "backends/p4tools/smith/smith.h"
 #include "lib/crash.h"
 #include "lib/exceptions.h"
 #include "lib/gc.h"
-
 #include "backends/p4tools/testgen/testgen.h"
 
 int main(int argc, char** argv) {
@@ -43,10 +40,10 @@ int main(int argc, char** argv) {
                     return 1;
 
                 case P4Tools::MUTATE:
-                    return P4Tools::P4Mutate::Mutate().main(args);
+                    std::cerr << "Mutate is not implemented yet." << std::endl;
 
                 case P4Tools::SMITH:
-                    return P4Tools::P4Smith::Smith().main(args);
+                    std::cerr << "Smith is not implemented yet." << std::endl;
 
                 default:
                     std::cerr << "Unknown or unimplemented command: \"" << command << "\"."

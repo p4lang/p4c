@@ -184,7 +184,7 @@ sudo dpkg -i /path/to/package.deb
        backend](backends/graphs/README.md). Default ON.
      - `-DENABLE_P4TEST=ON|OFF`. Enable [the p4test
        backend](backends/p4test/README.md). Default ON.
-     - `-DENABLE_TOOLS=ON|OFF`. Enable [the p4tools
+     - `-DENABLE_TEST_TOOLS=ON|OFF`. Enable [the p4tools
          backend](backends/p4tools/README.md). Default OFF.
      - `-DENABLE_DOCS=ON|OFF`. Build documentation. Default is OFF.
      - `-DENABLE_GC=ON|OFF`. Enable the use of the garbage collection

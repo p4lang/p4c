@@ -6,7 +6,7 @@
 
 namespace P4Tools {
 
-/// A compilation context for P4Testgen that provides a custom compiler configuration.
+/// A compilation context for P4Tools that provides a custom compiler configuration.
 template <typename OptionsType>
 class CompileContext : public virtual P4CContext {
  public:

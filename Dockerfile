@@ -27,7 +27,7 @@ ARG INSTALL_PTF_EBPF_DEPENDENCIES=OFF
 # List of kernel versions to install supporting packages for PTF-ebpf tests
 ARG KERNEL_VERSIONS
 # Whether to build the P4Tools back end and platform.
-ARG ENABLE_TOOLS=OFF
+ARG ENABLE_TEST_TOOLS=OFF
 
 # Delegate the build to tools/ci-build.
 COPY . /p4c/

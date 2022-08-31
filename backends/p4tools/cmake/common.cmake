@@ -1,4 +1,4 @@
-# Common configuration across all P4Testgen projects.
+# Common configuration across all P4Tools projects.
 
 # Use ccache if available.
 find_program(CCACHE_PROGRAM ccache)

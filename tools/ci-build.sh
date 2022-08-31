@@ -139,7 +139,7 @@ function build_tools_deps() {
 }
 
 # Build the dependencies necessary for the P4Tools platform.
-if [ "$ENABLE_TOOLS" == "ON" ]; then
+if [ "$ENABLE_TEST_TOOLS" == "ON" ]; then
   build_tools_deps
 fi
 # ! ------  END TOOLS -----------------------------------------------
@@ -163,7 +163,7 @@ CMAKE_FLAGS+="-DBUILD_STATIC_RELEASE=${BUILD_STATIC_RELEASE} "
 # Toggle whether to use GMP or boost::multiprecision
 CMAKE_FLAGS+="-DENABLE_GMP=${ENABLE_GMP} "
 # Toggle the installation of the tools back end.
-CMAKE_FLAGS+="-DENABLE_TOOLS=${ENABLE_TOOLS} "
+CMAKE_FLAGS+="-DENABLE_TEST_TOOLS=${ENABLE_TEST_TOOLS} "
 # RELEASE should be default, but we want to make sure.
 CMAKE_FLAGS+="-DCMAKE_BUILD_TYPE=RELEASE"
 

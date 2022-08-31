@@ -10,9 +10,8 @@ find_path(
 
 find_library(
   Z3_LIBRARY
-  NAMES libz3.a
+  NAMES z3
   HINTS ${PC_Z3_LIBDIR} ${PC_Z3_LIBRARY_DIRS}
-  #PATH_SUFFIXES z3 Z3
 )
 
 find_program(

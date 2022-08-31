@@ -61,7 +61,7 @@ set(
 # Testgen libraries.
 set(
   TESTGEN_LIBS
-  p4testgen-common
+  p4tools-common
   inja
 )
 

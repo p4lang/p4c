@@ -1,9 +1,9 @@
-# CMake file for common components of P4Testgen.
+# CMake file for common components of P4Tools.
 cmake_minimum_required(VERSION 3.0.2 FATAL_ERROR)
 
 include(common)
 
-project(p4testgen-common)
+project(p4tools-common)
 
 # We need a fairly recent version of Z3.
 set(Z3_MIN_VERSION "4.8.14")
@@ -32,7 +32,7 @@ endif()
 # Generate version information.
 configure_file(version.h.in version.h)
 
-# Source files for p4testgen-common.
+# Source files for p4tools-common.
 set(
   P4C_TOOLS_COMMON_SOURCES
   options.cpp
@@ -62,10 +62,10 @@ set(
   lib/zombie.cpp
 )
 
-add_p4tools_library(p4testgen-common ${P4C_TOOLS_COMMON_SOURCES})
+add_p4tools_library(p4tools-common ${P4C_TOOLS_COMMON_SOURCES})
 
 target_link_libraries(
-  p4testgen-common
+  p4tools-common
   PUBLIC gsl-lite
   PUBLIC ${Boost_SYSTEM_LIBRARY}
   PUBLIC ${Boost_FILESYSTEM_LIBRARY}
@@ -73,14 +73,14 @@ target_link_libraries(
 )
 
 target_include_directories(
-  p4testgen-common
+  p4tools-common
   PUBLIC "${CMAKE_BINARY_DIR}/common"
   PUBLIC "${P4C_SOURCE_DIR}"
   PUBLIC "${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include"
   PUBLIC "${P4C_BINARY_DIR}"
 )
 
-add_dependencies(p4testgen-common genIR frontend)
+add_dependencies(p4tools-common genIR frontend)
 if(ENABLE_IWYU)
-  set_property(TARGET p4testgen-common PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
+  set_property(TARGET p4tools-common PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
 endif()
