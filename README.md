@@ -273,8 +273,8 @@ work. However, all our CI testing is done with a more recent version of Protobuf
 (at the moment, 3.18.1), which we install from source. If you are experiencing
 issues with the Protobuf version shipped with your OS distribution, we recommend
 that we install Protobuf 3.18.1 from source. You can find instructions
-[here](https://github.com/google/protobuf/blob/master/src/README.md). After
-cloning Protobuf and before you build, check-out version 3.18.1:
+[here](https://github.com/protocolbuffers/protobuf/blob/v3.18.1/src/README.md).
+After cloning Protobuf and before you build, check-out version 3.18.1:
 
 `git checkout v3.18.1`
 
