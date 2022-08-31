@@ -1121,6 +1121,8 @@ const IR::Expression* ProgramStructure::convertHashAlgorithm(
         result = v1model.algorithm.csum16.Id();
     } else if (algorithm == "xor16") {
         result = v1model.algorithm.xor16.Id();
+    } else if (algorithm == "toeplitz") {
+        result = v1model.algorithm.toeplitz.Id();
     } else {
         ::warning(ErrorType::WARN_UNSUPPORTED, "%1%: unexpected algorithm", algorithm);
         result = algorithm;

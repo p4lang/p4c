@@ -399,7 +399,8 @@ enum HashAlgorithm {
     random,
     identity,
     csum16,
-    xor16
+    xor16,
+    toeplitz
 }
 
 @deprecated("Please use mark_to_drop(standard_metadata) instead.")
