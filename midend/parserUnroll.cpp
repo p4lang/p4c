@@ -695,8 +695,8 @@ class ParserSymbolicInterpreter {
         hasOutOfboundState = false;
     }
 
-    /// generate call OutOfBound
-    void addOutFoBound(ParserStateInfo* stateInfo, std::unordered_set<cstring>& newStates,
+    /// Creates a new state that immediately transitions to the "outOfBoundsState" state.
+    void addOutOfBound(ParserStateInfo* stateInfo, std::unordered_set<cstring>& newStates,
                        bool checkBefore = true) {
         hasOutOfboundState = true;
         IR::ID newName = getNewName(stateInfo);
@@ -743,7 +743,7 @@ class ParserSymbolicInterpreter {
             if (infLoop) {
                 // don't evaluate successors anymore
                 // generate call OutOfBound
-                addOutFoBound(stateInfo, newStates);
+                addOutOfBound(stateInfo, newStates);
                 continue;
             }
             IR::ID newName = getNewName(stateInfo);
@@ -753,7 +753,7 @@ class ParserSymbolicInterpreter {
                 if (nextStates.second && stateInfo->predecessor &&
                  newName.name !=stateInfo->predecessor->newState->name) {
                     // generate call OutOfBound
-                    addOutFoBound(stateInfo, newStates, false);
+                    addOutOfBound(stateInfo, newStates, false);
                 } else {
                     // save current state
                     if (notAdded) {
