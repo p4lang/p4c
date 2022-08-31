@@ -1,7 +1,7 @@
-# STF test for /home/vpeschax/networking.switching.barefoot.bf-p4c-tools/compilers/p4c/build/testgen/testgen-p4c-bmv2/invalid-hdr-warnings3.out/invalid-hdr-warnings3
+
 # p4testgen seed:  1000
 # Date generated: 2022-07-14-12:33:01.554
-# Current statement coverage: 0.88
+# Current statement coverage: 0.8
 
 # Traces
 # ParserI: [Parser] ParserI
