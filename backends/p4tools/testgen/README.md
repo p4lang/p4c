@@ -21,7 +21,7 @@ The main binary can be found in `build/p4check`.
 
 To generate tests for a particular target and P4 architecture, run `p4check testgen –target [TARGET] –arch [ARCH] –max-tests 10 –out-dir [OUT] prog.p4`
 `p4check` is an umbrella binary which delegates execution to all tools of the p4-tools repository.
-`testgen` specifies that the testgen tool should be used. In the future, other tools may be supported, for example random program generation or translation validators.
+`testgen` specifies that the p4testgen tool should be used. In the future, other tools may be supported, for example random program generation or translation validators.
 These are the current usage flags:
 
 ```bash

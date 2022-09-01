@@ -50,7 +50,7 @@ for where to find/put what:
 
 We generally follow the [Google C++ Style
 Guide](https://google.github.io/styleguide/cppguide.html). This is partially
-enforced by `cpplint` and `clang-format` and their respective configuration files. Both tools run in a git hook and as part of CI. To run `clang-format` on Ubuntu 16.04, install it with `pip3 install --user clang-format`.
+enforced by `cpplint` and `clang-format` and their respective configuration files. Both tools run in a git hook and as part of CI. To run `clang-format` on Ubuntu 20.04, install it with `pip3 install --user clang-format`.
 
 Some deviations from the Style Guide are highlighted below. While this
 repository depends heavily on the main P4 compiler ([P4C](https://github.com/p4lang/p4c/)), the code there doesn't always follow our style; don't follow its precedent!

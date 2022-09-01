@@ -49,6 +49,11 @@ return_status=$(($return_status || $?))
 
 
 echo "********************************"
+if [[ "${write}" -eq 1 ]] ; then
+    echo "CLANG-FORMAT APPLIED"
+    exit $return_status
+fi
+
 if [ $return_status -eq 0 ]; then
     echo "CLANG-FORMAT CHECK SUCCESS"
 else

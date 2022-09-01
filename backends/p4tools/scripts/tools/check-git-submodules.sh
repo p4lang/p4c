@@ -1,7 +1,11 @@
 #!/bin/bash
 
+
 # This checks that the refpoint for each git submodule is on the respective
 # branch that we are tracking.
+THIS_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+ROOT_DIR=$THIS_DIR/../..
 
 ### Begin configuration #######################################################
 
@@ -26,7 +30,7 @@ if [[ $# == 0 ]] ; then
 
   ${skipFetch} || git fetch --quiet origin
   git submodule --quiet foreach \
-    '${toplevel}/testgen/scripts/tools/check-git-submodules ${sm_path} ${sha1} '"${tmpfile}"
+    '${toplevel}/backends/p4tools/scripts/tools/check-git-submodules.sh ${sm_path} ${sha1} '"${tmpfile}"
 
   rm "${tmpfile}" &>/dev/null
 else
