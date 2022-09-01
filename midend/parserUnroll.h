@@ -263,7 +263,8 @@ class RewriteAllParsers : public Transform {
         for (auto& i : rewriter->current.result->states) {
             for (auto& j : *i.second)
                 if (j->newState) {
-                    if (rewriter->hasOutOfboundState && j->newState->name.name == "stateOutOfBound") {
+                    if (rewriter->hasOutOfboundState &&
+                        j->newState->name.name == "stateOutOfBound") {
                         continue;
                     }
                     newParser->states.push_back(j->newState);

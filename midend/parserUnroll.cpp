@@ -177,7 +177,7 @@ class ParserStateRewriter : public Transform {
         newExpression->right = res;
         if (!res->fitsInt64()) {
             // we need to leave expression as is.
-            ::warning(ErrorType::ERR_EXPRESSION, "Index can't be concretized : %1%", 
+            ::warning(ErrorType::ERR_EXPRESSION, "Index can't be concretized : %1%",
                       expression);
             return expression;
         }
@@ -511,7 +511,8 @@ class ParserSymbolicInterpreter {
             }
             catch (...) {
                 // Ignore throws from evaluator.
-                // If an index of a header stack is not substituted then we should leave a state as is.
+                // If an index of a header stack is not substituted then
+                // we should leave a state as is.
             }
             ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
                                          visitedStates);
