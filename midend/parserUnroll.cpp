@@ -175,7 +175,12 @@ class ParserStateRewriter : public Transform {
             return expression;
         auto* res = value->to<SymbolicInteger>()->constant->clone();
         newExpression->right = res;
-        BUG_CHECK(res->fitsInt64(), "To big integer for a header stack index %1%", res);
+        if (!res->fitsInt64()) {
+            // we need to leave expression as is.
+            ::warning(ErrorType::ERR_EXPRESSION, "Index can't be concretized : %1%", 
+                      expression);
+            return expression;
+        }
         const auto* arrayType = basetype->to<IR::Type_Stack>();
         if (res->asUnsigned() >= arrayType->getSize()) {
             wasOutOfBound = true;
@@ -481,7 +486,6 @@ class ParserSymbolicInterpreter {
             auto path = select->to<IR::PathExpression>()->path;
             auto next = refMap->getDeclaration(path);
             BUG_CHECK(next->is<IR::ParserState>(), "%1%: expected a state", path);
-
             // update call indexes
             ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, nullptr,
                                          visitedStates);
@@ -502,7 +506,13 @@ class ParserSymbolicInterpreter {
             auto se = select->to<IR::SelectExpression>();
             IR::Vector<IR::SelectCase> newSelectCases;
             ExpressionEvaluator ev(refMap, typeMap, valueMap);
-            ev.evaluate(se->select, true);
+            try {
+                ev.evaluate(se->select, true);
+            }
+            catch (...) {
+                // Ignore throws from evaluator.
+                // If an index of a header stack is not substituted then we should leave a state as is.
+            }
             ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
                                          visitedStates);
             const IR::Node* node = se->select->apply(rewriter);
@@ -695,14 +705,14 @@ class ParserSymbolicInterpreter {
         hasOutOfboundState = false;
     }
 
-    /// Creates a new state that immediately transitions to the "outOfBoundsState" state.
-    void addOutOfBound(ParserStateInfo* stateInfo, std::unordered_set<cstring>& newStates,
+    /// generate call OutOfBound
+    void addOutFoBound(ParserStateInfo* stateInfo, std::unordered_set<cstring>& newStates,
                        bool checkBefore = true) {
-        hasOutOfboundState = true;
         IR::ID newName = getNewName(stateInfo);
         if (checkBefore && newStates.count(newName)) {
             return;
         }
+        hasOutOfboundState = true;
         newStates.insert(newName);
         stateInfo->newState = new IR::ParserState(newName,
             IR::IndexedVector<IR::StatOrDecl>(),
@@ -743,7 +753,7 @@ class ParserSymbolicInterpreter {
             if (infLoop) {
                 // don't evaluate successors anymore
                 // generate call OutOfBound
-                addOutOfBound(stateInfo, newStates);
+                addOutFoBound(stateInfo, newStates);
                 continue;
             }
             IR::ID newName = getNewName(stateInfo);
@@ -753,7 +763,7 @@ class ParserSymbolicInterpreter {
                 if (nextStates.second && stateInfo->predecessor &&
                  newName.name !=stateInfo->predecessor->newState->name) {
                     // generate call OutOfBound
-                    addOutOfBound(stateInfo, newStates, false);
+                    addOutFoBound(stateInfo, newStates, false);
                 } else {
                     // save current state
                     if (notAdded) {
