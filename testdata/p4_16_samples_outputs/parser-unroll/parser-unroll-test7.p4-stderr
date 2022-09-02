@@ -1,6 +1,0 @@
-parser-unroll-test7.p4(35): [--Wwarn=ignore-prop] warning: Result of pkt.extract is not defined: Error: Reading field from invalid header union
-        pkt.extract(hdr.h[0].i1);
-        ^^^^^^^^^^^^^^^^^^^^^^^^
-parser-unroll-test7.p4(37): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header union
-        hdr.i.index = hdr.h[0].i1.index;
-                    ^
