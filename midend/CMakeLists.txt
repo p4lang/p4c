@@ -28,6 +28,7 @@ set (MIDEND_SRCS
   flattenHeaders.cpp
   flattenInterfaceStructs.cpp
   flattenLogMsg.cpp
+  flattenUnions.cpp
   hsIndexSimplify.cpp
   interpreter.cpp
   global_copyprop.cpp
@@ -74,6 +75,7 @@ set (MIDEND_HDRS
   fillEnumMap.h
   flattenHeaders.h
   flattenInterfaceStructs.h
+  flattenUnions.h
   has_side_effects.h
   interpreter.h
   global_copyprop.h
