@@ -44,6 +44,7 @@ limitations under the License.
 #include "midend/fillEnumMap.h"
 #include "midend/flattenHeaders.h"
 #include "midend/flattenInterfaceStructs.h"
+#include "midend/flattenUnions.h"
 #include "midend/hsIndexSimplify.h"
 #include "midend/local_copyprop.h"
 #include "midend/midEndLast.h"
@@ -205,6 +206,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,
             new P4::RemoveSelectBooleans(&refMap, &typeMap),
             new P4::FlattenHeaders(&refMap, &typeMap),
             new P4::FlattenInterfaceStructs(&refMap, &typeMap),
+	    new P4::FlattenHeaderUnion(&refMap, &typeMap),
             new P4::SimplifyControlFlow(&refMap, &typeMap),
             new P4::HSIndexSimplifier(&refMap, &typeMap),
             new P4::ParsersUnroll(true, &refMap, &typeMap),
