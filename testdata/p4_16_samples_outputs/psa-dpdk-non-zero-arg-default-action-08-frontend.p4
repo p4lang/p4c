@@ -16,30 +16,32 @@ struct headers_t {
 
 struct user_meta_data_t {
     bit<48> addr;
+    bit<32> flag;
 }
 
 parser MyIngressParser(packet_in pkt, out headers_t hdr, inout user_meta_data_t m, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
+        m.flag = 32w5;
         transition accept;
     }
 }
 
 control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @name("MyIngressControl.tmp1") bit<48> tmp1_0;
+    @name("MyIngressControl.tmp1") bit<32> tmp1_0;
     @name("MyIngressControl.nonDefAct") action nonDefAct() {
         m.addr = hdr.ethernet.dst_addr;
         hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
         hdr.ethernet.src_addr = m.addr;
     }
     @name("MyIngressControl.macswp") action macswp(@name("tmp2") bit<32> tmp2) {
-        tmp1_0 = hdr.ethernet.dst_addr;
-        if (tmp1_0 == 48w0x1 && tmp2 == 32w0x2) {
+        tmp1_0 = m.flag;
+        if (tmp1_0 == 32w0x1 && tmp2 == 32w0x2) {
             m.addr = hdr.ethernet.dst_addr;
             hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
             hdr.ethernet.src_addr = m.addr;
         }
-        hdr.ethernet.dst_addr = tmp1_0;
+        m.flag = tmp1_0;
     }
     @name("MyIngressControl.stub") table stub_0 {
         actions = {
