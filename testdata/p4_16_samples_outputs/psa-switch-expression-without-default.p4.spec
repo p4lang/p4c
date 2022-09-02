@@ -8,13 +8,11 @@ struct ethernet_t {
 }
 
 struct ipv4_t {
-	bit<4> version
-	bit<4> ihl
+	bit<8> version_ihl
 	bit<8> diffserv
 	bit<16> totalLen
 	bit<16> identification
-	bit<3> flags
-	bit<13> fragOffset
+	bit<16> flags_fragOffset
 	bit<8> ttl
 	bit<8> protocol
 	bit<16> hdrChecksum
@@ -28,10 +26,7 @@ struct tcp_t {
 	bit<16> dstPort
 	bit<32> seqNo
 	bit<32> ackNo
-	bit<4> dataOffset
-	bit<3> res
-	bit<3> ecn
-	bit<6> ctrl
+	bit<16> dataOffset_res_ecn_ctrl
 	bit<16> window
 	bit<16> checksum
 	bit<16> urgentPtr
@@ -70,8 +65,10 @@ struct user_meta_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
+	bit<48> MyIC_tbl_ethernet_srcAddr
 	bit<16> Ingress_tmp
-	bit<48> Ingress_tbl_ethernet_srcAddr
+	bit<16> tmpMask
+	bit<8> tmpMask_0
 }
 metadata instanceof user_meta_t
 
@@ -95,7 +92,7 @@ action a2 args instanceof a2_arg_t {
 
 table tbl {
 	key {
-		m.Ingress_tbl_ethernet_srcAddr exact
+		m.MyIC_tbl_ethernet_srcAddr exact
 		m.local_metadata_data lpm
 	}
 	actions {
@@ -143,7 +140,8 @@ apply {
 	MYIP_PARSE_TCP :	extract h.tcp
 	MYIP_ACCEPT :	mov m.Ingress_tmp 0x10
 	mov m.Ingress_tmp 0x1
-	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl
 	jmpa LABEL_SWITCH a1
 	jmpa LABEL_SWITCH_0 a2
 	jmp LABEL_ENDSWITCH

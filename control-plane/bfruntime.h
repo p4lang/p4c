@@ -239,7 +239,7 @@ static std::vector<P4Id> collectTableIds(const p4configv1::P4Info& p4info,
     for (auto it = first; it != last; it++) {
         auto* table = Standard::findTable(p4info, *it);
         if (table == nullptr) {
-            ::error("Invalid table id '%1%'", *it);
+            ::error(ErrorType::ERR_INVALID, "Invalid table id '%1%'", *it);
             continue;
         }
         tableIds.push_back(*it);

@@ -252,14 +252,21 @@ class cstring {
             if (begin != current) ss << delim;
             ss << *current; }
         return cstring(ss.str()); }
-    template<class T> static cstring make_unique(const T &inuse, cstring base, char sep = '.');
+    template <class T>
+    static cstring make_unique(const T &inuse, cstring base, char sep = '.');
+    template <class T>
+    static cstring make_unique(const T &inuse, cstring base, int &counter, char sep = '.');
 
     /// @return the total size in bytes of all interned strings. @count is set
     /// to the total number of interned strings.
     static size_t cache_size(size_t &count);
 
-    // convert the cstring to upper case
-    cstring toUpper();
+    /// convert the cstring to upper case
+    cstring toUpper() const;
+    /// capitalize the first symbol
+    cstring capitalize() const;
+    /// Append this many spaces after each newline (and before the first string).
+    cstring indent(size_t amount) const;
 };
 
 inline bool operator==(const char *a, cstring b) { return b == a; }
@@ -288,14 +295,25 @@ inline std::string& operator+=(std::string& a, cstring b) {
     a.append(b.c_str());
     return a; }
 
-template<class T> cstring cstring::make_unique(const T &inuse, cstring base, char sep) {
+template <class T>
+cstring cstring::make_unique(const T &inuse, cstring base, int &counter, char sep)
+{
+    if (!inuse.count(base))
+        return base;
+
     char suffix[12];
     cstring rv = base;
+    do
+    {
+        snprintf(suffix, sizeof(suffix) / sizeof(suffix[0]), "%c%d", sep, counter++);
+        rv = base + suffix;
+    } while (inuse.count(rv));
+    return rv;
+}
+
+template<class T> cstring cstring::make_unique(const T &inuse, cstring base, char sep) {
     int counter = 0;
-    while (inuse.count(rv)) {
-        snprintf(suffix, sizeof(suffix)/sizeof(suffix[0]), "%c%d", sep, counter++);
-        rv = base + suffix; }
-    return rv; }
+    return make_unique(inuse, base, counter, sep); }
 
 inline std::ostream &operator<<(std::ostream &out, cstring s) {
     return out << (s ? s.c_str() : "<null>"); }

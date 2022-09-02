@@ -27,6 +27,7 @@ struct empty_metadata_t {
 }
 
 struct main_metadata_t {
+    ExpireTimeProfileId_t timeout;
 }
 
 struct headers_t {
@@ -63,7 +64,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         send_to_port(vport);
     }
     @name("MainControlImpl.add_on_miss_action") action add_on_miss_action() {
-        add_entry<bit<32>>(action_name = "next_hop", action_params = 32w0);
+        add_entry<bit<32>>(action_name = "next_hop", action_params = 32w0, expire_time_profile_id = user_meta.timeout);
     }
     @name("MainControlImpl.ipv4_da") table ipv4_da_0 {
         key = {
@@ -81,7 +82,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         hdr.ipv4.srcAddr = newAddr;
     }
     @name("MainControlImpl.add_on_miss_action2") action add_on_miss_action2() {
-        add_entry<tuple_0>(action_name = "next_hop", action_params = (tuple_0){f0 = 32w0,f1 = 32w1234});
+        add_entry<tuple_0>(action_name = "next_hop2", action_params = (tuple_0){f0 = 32w0,f1 = 32w1234}, expire_time_profile_id = user_meta.timeout);
     }
     @name("MainControlImpl.ipv4_da2") table ipv4_da2_0 {
         key = {
@@ -103,18 +104,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaaddonmiss185() {
+    @hidden action pnaaddonmiss186() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnaaddonmiss185 {
+    @hidden table tbl_pnaaddonmiss186 {
         actions = {
-            pnaaddonmiss185();
+            pnaaddonmiss186();
         }
-        const default_action = pnaaddonmiss185();
+        const default_action = pnaaddonmiss186();
     }
     apply {
-        tbl_pnaaddonmiss185.apply();
+        tbl_pnaaddonmiss186.apply();
     }
 }
 

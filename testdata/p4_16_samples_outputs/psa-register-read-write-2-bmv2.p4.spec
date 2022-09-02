@@ -42,15 +42,10 @@ struct metadata_t {
 	bit<32> psa_ingress_output_metadata_multicast_group
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<48> Ingress_tmp
-	bit<8> Ingress_tmp_0
 	bit<48> Ingress_tmp_1
-	bit<8> Ingress_tmp_2
 	bit<48> Ingress_tmp_3
-	bit<8> Ingress_tmp_4
 	bit<48> Ingress_tmp_5
-	bit<8> Ingress_tmp_6
 	bit<48> Ingress_tmp_7
-	bit<8> Ingress_tmp_8
 	bit<48> Ingress_tmp_9
 	bit<8> Ingress_idx
 	bit<16> Ingress_orig_data
@@ -69,31 +64,26 @@ apply {
 	mov m.Ingress_idx h.ethernet.dstAddr
 	mov m.Ingress_tmp h.ethernet.dstAddr
 	shr m.Ingress_tmp 0x8
-	mov m.Ingress_tmp_0 m.Ingress_tmp
 	mov m.Ingress_tmp_1 h.ethernet.dstAddr
 	shr m.Ingress_tmp_1 0x8
-	mov m.Ingress_tmp_2 m.Ingress_tmp_1
-	jmplt LABEL_END_0 m.Ingress_tmp_0 0x1
-	jmpgt LABEL_END_0 m.Ingress_tmp_2 0x3
+	jmplt LABEL_END_0 m.Ingress_tmp 0x1
+	jmpgt LABEL_END_0 m.Ingress_tmp_1 0x3
 	regrd m.Ingress_orig_data reg_0 m.Ingress_idx
 	LABEL_END_0 :	mov m.Ingress_tmp_7 h.ethernet.dstAddr
 	shr m.Ingress_tmp_7 0x8
-	mov m.Ingress_tmp_8 m.Ingress_tmp_7
-	jmpneq LABEL_FALSE_1 m.Ingress_tmp_8 0x1
+	jmpneq LABEL_FALSE_1 m.Ingress_tmp_7 0x1
 	mov m.Ingress_tmp_9 h.ethernet.dstAddr
 	shr m.Ingress_tmp_9 0x20
 	mov m.Ingress_next_data m.Ingress_tmp_9
 	jmp LABEL_END_1
 	LABEL_FALSE_1 :	mov m.Ingress_tmp_5 h.ethernet.dstAddr
 	shr m.Ingress_tmp_5 0x8
-	mov m.Ingress_tmp_6 m.Ingress_tmp_5
-	jmpneq LABEL_FALSE_2 m.Ingress_tmp_6 0x2
+	jmpneq LABEL_FALSE_2 m.Ingress_tmp_5 0x2
 	mov m.Ingress_next_data m.Ingress_orig_data
 	jmp LABEL_END_1
 	LABEL_FALSE_2 :	mov m.Ingress_tmp_3 h.ethernet.dstAddr
 	shr m.Ingress_tmp_3 0x8
-	mov m.Ingress_tmp_4 m.Ingress_tmp_3
-	jmpneq LABEL_FALSE_3 m.Ingress_tmp_4 0x3
+	jmpneq LABEL_FALSE_3 m.Ingress_tmp_3 0x3
 	mov m.Ingress_next_data m.Ingress_orig_data
 	add m.Ingress_next_data 0x1
 	jmp LABEL_END_1

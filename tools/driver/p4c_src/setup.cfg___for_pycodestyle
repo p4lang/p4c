@@ -1,0 +1,23 @@
+[pycodestyle]
+count = False
+###     ^^^^^ turned off only because with the statistics enabled,
+###           enabling the count output is confusing because it does not come out with a nice prefix such as “total: ”
+
+ignore = E262,E266,E303
+### The messages corresponding to the codes for the above-disabled “errors”:
+###
+###   E262: inline comment should start with '# '
+###   E266: too many leading '#' for block comment
+###   E303: too many blank lines (3)
+###
+### Abe disabled E262 and E266 because he thinks it`s nice to use “###” for a real comment, leaving plain “# ” for commented-out code.
+###
+### Abe disabled E303 because he likes to use blank lines to visually separate conceptually-separate code.
+###   Maybe he should use comment lines instead, e.g. “### ——————————————————————————————————————————— ###”?
+
+# max-line-length = 160
+###
+### Will we allow/permit a much-longer line [in Python files] than the default for “pycodestyle” [around 79 or 80]?
+### Abe would be _very_ grateful for a large increase.  ;-)
+
+statistics = True

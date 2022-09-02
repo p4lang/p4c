@@ -13,20 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
-#include <p4/enumInstance.h>
-#include "ubpfType.h"
 #include "ubpfControl.h"
+
+#include "ubpf/ubpfType.h"
 #include "lib/error.h"
-#include "frontends/p4/tableApply.h"
-#include "frontends/p4/typeMap.h"
+#include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
+#include "frontends/p4/tableApply.h"
+#include "frontends/p4/typeMap.h"
 
 namespace UBPF {
 
     UBPFControlBodyTranslator::UBPFControlBodyTranslator(
             const UBPFControl *control) :
+            EBPF::CodeGenInspector(control->program->refMap, control->program->typeMap),
             EBPF::ControlBodyTranslator(control), control(control),
             p4lib(P4::P4CoreLibrary::instance) {
         setName("UBPFControlBodyTranslator");
@@ -428,8 +429,21 @@ namespace UBPF {
     }
 
     bool UBPFControlBodyTranslator::preorder(const IR::IfStatement *statement) {
+        bool isHit = P4::TableApplySolver::isHit(statement->condition, control->program->refMap,
+                                                 control->program->typeMap);
+        if (isHit) {
+            // visit first the table, and then the conditional
+            auto member = statement->condition->to<IR::Member>();
+            CHECK_NULL(member);
+            visit(member->expr);  // table application.  Sets 'hitVariable'
+            builder->emitIndent();
+        }
+
         builder->append("if (");
-        visit(statement->condition);
+        if (isHit)
+            builder->append(control->hitVariable);
+        else
+            visit(statement->condition);
         builder->append(") ");
         if (!statement->ifTrue->is<IR::BlockStatement>()) {
             builder->blockStart();

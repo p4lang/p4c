@@ -49,10 +49,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".copy_queueing_data") action copy_queueing_data() {
         hdr.queueing_hdr.setValid();
-        hdr.queueing_hdr.enq_timestamp = standard_metadata.enq_timestamp;
-        hdr.queueing_hdr.enq_qdepth = standard_metadata.enq_qdepth;
-        hdr.queueing_hdr.deq_timedelta = standard_metadata.deq_timedelta;
-        hdr.queueing_hdr.deq_qdepth = standard_metadata.deq_qdepth;
+        hdr.queueing_hdr.enq_timestamp = (bit<32>)standard_metadata.enq_timestamp;
+        hdr.queueing_hdr.enq_qdepth = (bit<19>)standard_metadata.enq_qdepth;
+        hdr.queueing_hdr.deq_timedelta = (bit<32>)standard_metadata.deq_timedelta;
+        hdr.queueing_hdr.deq_qdepth = (bit<19>)standard_metadata.deq_qdepth;
         hdr.queueing_hdr.pad = 2w0;
     }
     @name(".t_egress") table t_egress {

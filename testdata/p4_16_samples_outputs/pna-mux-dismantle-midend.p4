@@ -41,9 +41,10 @@ struct empty_metadata_t {
 }
 
 struct main_metadata_t {
-    bit<1> rng_result1;
-    bit<1> val1;
-    bit<1> val2;
+    bit<1>                rng_result1;
+    bit<1>                val1;
+    bit<1>                val2;
+    ExpireTimeProfileId_t timeout;
 }
 
 struct headers_t {
@@ -87,7 +88,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         send_to_port(vport);
     }
     @name("MainControlImpl.add_on_miss_action") action add_on_miss_action() {
-        add_entry<bit<32>>(action_name = "next_hop", action_params = 32w0);
+        add_entry<bit<32>>(action_name = "next_hop", action_params = 32w0, expire_time_profile_id = user_meta.timeout);
     }
     @name("MainControlImpl.do_range_checks_1") action do_range_checks_2(@name("min1") bit<16> min1_3, @name("max1") bit<16> max1_3) {
         tmp_1 = (min1_3 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= max1_3 ? (16w50 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= 16w100 ? user_meta.val1 : user_meta.val2) : tmp_1);
@@ -109,7 +110,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         hdr.ipv4.srcAddr = newAddr;
     }
     @name("MainControlImpl.add_on_miss_action2") action add_on_miss_action2() {
-        add_entry<tuple_0>(action_name = "next_hop", action_params = (tuple_0){f0 = 32w0,f1 = 32w1234});
+        add_entry<tuple_0>(action_name = "next_hop", action_params = (tuple_0){f0 = 32w0,f1 = 32w1234}, expire_time_profile_id = user_meta.timeout);
     }
     @name("MainControlImpl.ipv4_da2") table ipv4_da2_0 {
         key = {
@@ -124,17 +125,17 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         add_on_miss = true;
         const default_action = add_on_miss_action2();
     }
-    @hidden action pnamuxdismantle188() {
+    @hidden action pnamuxdismantle189() {
         user_meta.rng_result1 = (bit<1>)(16w100 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= 16w200);
     }
-    @hidden table tbl_pnamuxdismantle188 {
+    @hidden table tbl_pnamuxdismantle189 {
         actions = {
-            pnamuxdismantle188();
+            pnamuxdismantle189();
         }
-        const default_action = pnamuxdismantle188();
+        const default_action = pnamuxdismantle189();
     }
     apply {
-        tbl_pnamuxdismantle188.apply();
+        tbl_pnamuxdismantle189.apply();
         if (hdr.ipv4.isValid()) {
             ipv4_da_0.apply();
             ipv4_da2_0.apply();
@@ -143,18 +144,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnamuxdismantle203() {
+    @hidden action pnamuxdismantle204() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnamuxdismantle203 {
+    @hidden table tbl_pnamuxdismantle204 {
         actions = {
-            pnamuxdismantle203();
+            pnamuxdismantle204();
         }
-        const default_action = pnamuxdismantle203();
+        const default_action = pnamuxdismantle204();
     }
     apply {
-        tbl_pnamuxdismantle203.apply();
+        tbl_pnamuxdismantle204.apply();
     }
 }
 

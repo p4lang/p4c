@@ -66,13 +66,13 @@ class EBPFProgram : public EBPFObject {
         errorVar = EBPFModel::reserved("errorCode");
         packetStartVar = EBPFModel::reserved("packetStart");
         packetEndVar = EBPFModel::reserved("packetEnd");
+        lengthVar = EBPFModel::reserved("pkt_len");
         byteVar = EBPFModel::reserved("byte");
         endLabel = EBPFModel::reserved("end");
         errorEnum = EBPFModel::reserved("errorCodes");
     }
 
  protected:
-    virtual void emitGeneratedComment(CodeBuilder* builder);
     virtual void emitPreamble(CodeBuilder* builder);
     virtual void emitTypes(CodeBuilder* builder);
     virtual void emitHeaderInstances(CodeBuilder* builder);
@@ -80,6 +80,7 @@ class EBPFProgram : public EBPFObject {
     virtual void emitPipeline(CodeBuilder* builder);
 
  public:
+    virtual void emitGeneratedComment(CodeBuilder* builder);
     virtual void emitH(CodeBuilder* builder, cstring headerFile);  // emits C headers
     virtual void emitC(CodeBuilder* builder, cstring headerFile);  // emits C program
 };

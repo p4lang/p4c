@@ -38,7 +38,6 @@ struct metadata_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_multicast_group
 	bit<32> psa_ingress_output_metadata_egress_port
-	bit<4> Ingress_tmp
 	bit<48> Ingress_tmp_0
 	bit<32> Ingress_int_packet_path
 }
@@ -52,8 +51,7 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	extract h.output_data
-	mov m.Ingress_tmp h.ethernet.dstAddr
-	jmplt LABEL_FALSE m.Ingress_tmp 0x4
+	jmplt LABEL_FALSE h.ethernet.dstAddr 0x4
 	mov h.output_data.word1 m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0

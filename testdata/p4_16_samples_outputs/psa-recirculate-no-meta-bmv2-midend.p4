@@ -36,12 +36,12 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     @name("cIngress.int_packet_path") bit<32> int_packet_path_0;
-    @noWarnUnused @name(".send_to_port") action send_to_port_1() {
+    @noWarn("unused") @name(".send_to_port") action send_to_port_1() {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
         ostd.egress_port = (PortIdUint_t)hdr.ethernet.dstAddr;
     }
-    @noWarnUnused @name(".send_to_port") action send_to_port_2() {
+    @noWarn("unused") @name(".send_to_port") action send_to_port_2() {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
         ostd.egress_port = 32w0xfffffffa;

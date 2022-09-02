@@ -31,6 +31,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/gmputil.h"
 #include "lib/json.h"
+#include "constants.h"
 
 #define TOSTR_DECLA(NAME) std::ostream &toStr(std::ostream &, IR::NAME *)
 
@@ -152,15 +153,25 @@ class ConvertStatementToDpdk : public Inspector {
     const IR::P4Parser *parser = nullptr;
     IR::Type_Struct *metadataStruct = nullptr;
 
+ private:
+    void processHashParams(const IR::Argument* field,
+                           IR::Vector<IR::Expression>& components);
+    bool checkIfBelongToSameHdrMdStructure(const IR::Argument* field);
+    void updateMdStrAndGenInstr(const IR::Argument* field,
+                                IR::Vector<IR::Expression>& components);
+    cstring getHdrMdStrName(const IR::Member* mem);
+    bool checkIfConsecutiveHdrMdfields(const IR::Argument* field);
+
  public:
     ConvertStatementToDpdk(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkProgramStructure *structure)
-        : typemap(typemap), refmap(refmap), structure(structure) {}
+        : typemap(typemap), refmap(refmap), structure(structure) {visitDagOnce = false;}
     ConvertStatementToDpdk(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkProgramStructure *structure, IR::Type_Struct *metadataStruct)
-        : typemap(typemap), refmap(refmap), structure(structure), metadataStruct(metadataStruct) {}
+        : typemap(typemap), refmap(refmap), structure(structure),
+          metadataStruct(metadataStruct) {visitDagOnce = false;}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
         return instructions;
     }

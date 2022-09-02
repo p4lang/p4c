@@ -322,7 +322,7 @@ const IR::Node *DoGlobalCopyPropagation::preorder(IR::AssignmentStatement *stat)
         if (stat->left->is<IR::Slice>())
             return stat;
         if ((*vars)[lvalue_name(stat->left)] && lit->equiv(*((*vars)[lvalue_name(stat->left)])))
-            return new IR::EmptyStatement();
+            return new IR::EmptyStatement(stat->srcInfo);
         (*vars)[lvalue_name(stat->left)] = lit;
         LOG5("  Setting value: " << lit << ", for: " << stat->left);
     }

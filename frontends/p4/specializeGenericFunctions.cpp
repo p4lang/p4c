@@ -21,6 +21,12 @@ namespace P4 {
 bool FindFunctionSpecializations::preorder(const IR::MethodCallExpression* mce) {
     if (!mce->typeArguments->size())
         return false;
+    // We only specialize if the type arguments are not type variables
+    for (auto arg : *mce->typeArguments) {
+        auto type = specMap->typeMap->getTypeType(arg, true);
+        if (type->is<IR::ITypeVar>())
+            return false;
+    }
     MethodInstance *mi = MethodInstance::resolve(mce, specMap->refMap, specMap->typeMap);
     if (auto func = mi->to<FunctionCall>()) {
         LOG3("Will specialize " << mce);

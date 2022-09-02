@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Runs the compiler on a sample P4 V1.2 program
+# Runs the compiler on a sample P4-16 program
 
 
 from subprocess import Popen, PIPE
@@ -46,6 +46,7 @@ class Options(object):
         self.runDebugger = False
         self.runDebugger_skip = 0
         self.generateP4Runtime = False
+        self.testName = ""
 
 
 def usage(options):
@@ -345,8 +346,6 @@ def isdir(path):
         return stat.S_ISDIR(os.stat(path).st_mode)
     except OSError:
         return False
-
-# main
 
 
 def main(argv):

@@ -6,7 +6,7 @@
          "properties": {
             "name": {
                "type": "string",
-               "description": "Name of the referenced table."
+               "description": "Name of the referenced table as in the P4 file."
             },
             "handle": {
                "type": "integer",
@@ -24,7 +24,7 @@
          "properties": {
             "action_name": {
                "type": "string",
-               "description": "Name of the action"
+               "description": "Name of the action as in P4 file"
             },
             "action_handle": {
                "type": "integer",
@@ -102,6 +102,10 @@
             "name": {
                "type": "string",
                "description": "Name of this table"
+            },
+            "target_name": {
+               "type": "string",
+               "description": "Name of the table as in the spec file."
             },
             "handle": {
                "type": "integer",
@@ -221,6 +225,10 @@
                         "type": "string",
                         "description": "The P4 name of the action."
                      },
+                     "target_name": {
+                        "type": "string",
+                        "description": "Name of the action as in spec file"
+                     },
                      "handle": {
                         "type": "integer",
                         "description": "A unique identifier for this action."
@@ -317,6 +325,10 @@
                "type": "string",
                "description": "Name of this table"
             },
+            "target_name": {
+               "type": "string",
+               "description": "Name of the table as in the spec file."
+            },
             "handle": {
                "type": "integer",
                "description": "Unique reference ID for this table"
@@ -369,6 +381,10 @@
             "name": {
                "type": "string",
                "description": "Name of this table"
+            },
+            "target_name": {
+               "type": "string",
+               "description": "Name of the table as in the spec file."
             },
             "handle": {
                "type": "integer",
@@ -464,6 +480,50 @@
             "actions"
          ],
          "additionalProperties": false
+      },
+      "__main__.ExternAttributes": {
+         "type": "object",
+         "properties": {
+            "type": {
+                    "type": "string",
+                    "description": "Type of extern"
+                 }
+         },
+         "additionalProperties": false
+      },
+      "__main__.Externs": {
+         "type": "object",
+         "properties": {
+            "name": {
+               "type": "string",
+               "description": "Name of the extern as in the P4 file."
+            },
+            "target_name": {
+               "type": "string",
+               "description": "Name of the extern as in the spec file."
+            },
+            "extern_type": {
+               "type": "string",
+               "description": "Extern type",
+               "enum": [
+                  "Counter",
+                  "Register",
+                  "Meter",
+                  "Hash",
+                  "InternetChecksum"
+               ]
+            },
+            "match_attributes": {
+               "$ref": "#/definitions/__main__.ExternAttributes"
+            }
+         },
+         "required": [
+            "name",
+            "target_name",
+            "extern_type",
+            "attributes"
+         ],
+         "additionalProperties": false
       }
    },
    "type": "object",
@@ -512,6 +572,13 @@
                }
             ]
          }
+      },
+      "externs": {
+           "type": "array",
+           "description": "List of externs in this P4 program",
+           "items": {
+              "$ref": "#/definitions/__main__.Externs"
+           }
       }
    },
    "required": [
@@ -520,7 +587,8 @@
       "compiler_version",
       "schema_version",
       "target",
-      "tables"
+      "tables",
+      "externs"
    ],
    "additionalProperties": false
 }

@@ -41,7 +41,8 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info& p4info,
             auto e = fSpec.serializable_enum().name();
             auto typeEnum = enums.find(e);
             if (typeEnum == enums.end()) {
-                ::error("Enum type '%1%' not found in typeInfo for '%2%' '%3%'",
+                ::error(ErrorType::ERR_NOT_FOUND,
+                        "Enum type '%1%' not found in typeInfo for '%2%' '%3%'",
                         e, instanceType, instanceName);
                 return;
             }
@@ -60,7 +61,8 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info& p4info,
             auto typeName = fSpec.new_type().name();
             auto newType = newtypes.find(typeName);
             if (newType == newtypes.end()) {
-                ::error("New type '%1%' not found in typeInfo for '%2%' '%3%'",
+                ::error(ErrorType::ERR_NOT_FOUND,
+                        "New type '%1%' not found in typeInfo for '%2%' '%3%'",
                         typeName, instanceType, instanceName);
                 return;
             }
@@ -68,7 +70,8 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info& p4info,
         }
 
         if (!type) {
-            ::error("Error when generating BF-RT info for '%1%' '%2%': "
+            ::error(ErrorType::ERR_UNSUPPORTED,
+                    "Error when generating BF-RT info for '%1%' '%2%': "
                     "packed type is too complex",
                     instanceType, instanceName);
             return;
@@ -134,7 +137,8 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info& p4info,
             fields.push_back({prefix + member.name() + suffix, id++, type});
         }
     } else {
-        ::error("Error when generating BF-RT info for '%1%' '%2%': "
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "Error when generating BF-RT info for '%1%' '%2%': "
                 "only structs, headers, tuples, bitstrings and "
                 "serializable enums are currently supported types",
                 instanceType, instanceName);
@@ -566,7 +570,8 @@ BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table& table,
     for (const auto& action_ref : table.action_refs()) {
         auto* action = Standard::findAction(p4info, action_ref.id());
         if (action == nullptr) {
-            ::error("Invalid action id '%1%'", action_ref.id());
+            ::error(ErrorType::ERR_INVALID,
+                    "Invalid action id '%1%'", action_ref.id());
             continue;
         }
         auto* spec = new Util::JsonObject();
@@ -584,7 +589,8 @@ BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table& table,
                 spec->emplace("action_scope", "DefaultOnly");
                 break;
             default:
-                ::error("Invalid action ref scope '%1%' in P4Info", int(action_ref.scope()));
+                ::error(ErrorType::ERR_INVALID,
+                        "Invalid action ref scope '%1%' in P4Info", int(action_ref.scope()));
                 break;
         }
         auto* annotations = transformAnnotations(
@@ -595,9 +601,15 @@ BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table& table,
         for (const auto& param : action->params()) {
             auto* annotations = transformAnnotations(
                 param.annotations().begin(), param.annotations().end());
-            addActionDataField(
-                dataJson, param.id(), param.name(), true /* mandatory */,
-                false /* read_only */, makeTypeBytes(param.bitwidth()), annotations);
+            if (param.type_name().name() == "PSA_MeterColor_t") {
+                addActionDataField(
+                    dataJson, param.id(), param.name(), true /* mandatory */,
+                    false /* read_only */, makeTypeEnum({"RED","GREEN","YELLOW"}), annotations);
+            } else {
+                addActionDataField(
+                    dataJson, param.id(), param.name(), true /* mandatory */,
+                    false /* read_only */, makeTypeBytes(param.bitwidth()), annotations);
+            }
             if (param.id() > maxId) maxId = param.id();
         }
         spec->emplace("data", dataJson);
@@ -643,7 +655,8 @@ void BFRuntimeGenerator::addDirectResources(const p4configv1::Table& table,
             addMeterDataFields(dataJson, *meter);
             attributesJson->append("MeterByteCountAdjust");
         } else {
-            ::error("Unknown direct resource id '%1%'", directResId);
+            ::error(ErrorType::ERR_UNKNOWN,
+                    "Unknown direct resource id '%1%'", directResId);
             continue;
         }
     }
@@ -694,7 +707,8 @@ BFRuntimeGenerator::addMatchTables(Util::JsonArray* tablesJson) const {
                     break;
             }
             if (matchType == boost::none) {
-                ::error("Unsupported match type for BF-RT: %1%", int(mf.match_type()));
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "Unsupported match type for BF-RT: %1%", int(mf.match_type()));
                 continue;
             }
             if (*matchType == "Ternary" || *matchType == "Range" || *matchType == "Optional")
@@ -730,8 +744,9 @@ BFRuntimeGenerator::addMatchTables(Util::JsonArray* tablesJson) const {
 
             // Control plane requires there's no duplicate key in one table.
             if (dupKey.count(keyName) != 0) {
-              ::error("Key \"%s\" is duplicate in Table \"%s\". It doesn't meet BFRT's "
-              "requirements.\n" "Please using @name annotation for the duplicate key names",
+                ::error(ErrorType::ERR_DUPLICATE,
+                      "Key \"%s\" is duplicate in Table \"%s\". It doesn't meet BFRT's "
+                      "requirements.\n" "Please using @name annotation for the duplicate key names",
               keyName, pre.name());
               return;
             } else {

@@ -95,6 +95,7 @@ class ConvertToDpdkControl : public Inspector {
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;
+    IR::Type_Struct *metadataStruct;
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     IR::IndexedVector<IR::DpdkTable> tables;
     IR::IndexedVector<IR::DpdkSelector> selectors;
@@ -107,8 +108,10 @@ class ConvertToDpdkControl : public Inspector {
     ConvertToDpdkControl(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkProgramStructure *structure,
+        IR::Type_Struct *metadataStruct,
         bool deparser = false)
-        : typemap(typemap), refmap(refmap), structure(structure), deparser(deparser) {}
+        : typemap(typemap), refmap(refmap), structure(structure),
+          metadataStruct(metadataStruct), deparser(deparser) {}
 
     IR::IndexedVector<IR::DpdkTable> &getTables() { return tables; }
     IR::IndexedVector<IR::DpdkSelector> &getSelectors() { return selectors; }
@@ -129,7 +132,7 @@ class ConvertToDpdkControl : public Inspector {
     void add_table(const IR::DpdkLearner*s) { learners.push_back(s); }
     void add_action(const IR::DpdkAction *a) { actions.push_back(a); }
 
-    boost::optional<cstring> getIdFromProperty(const IR::P4Table*, cstring);
+    boost::optional<const IR::Member*> getMemExprFromProperty(const IR::P4Table*, cstring);
     boost::optional<int> getNumberFromProperty(const IR::P4Table*, cstring);
 };
 

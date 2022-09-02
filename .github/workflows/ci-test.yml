@@ -6,8 +6,13 @@ on:
   pull_request:
     branches: [ main ]
 
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: test-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
-  # Build and test p4c on Ubuntu 20.04
+  # Build and test p4c on Ubuntu 20.04.
   build-linux:
     strategy:
       fail-fast: false
@@ -25,27 +30,28 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Cancel previous runs
-      uses: styfle/cancel-workflow-action@0.9.0
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
       with:
-        access_token: ${{ github.token }}
+        key: test-${{ matrix.unified }}-${{ runner.os }}
+        max-size: 1000M
 
     - name: Build (Ubuntu Linux)
       run: |
-        tools/start_ccache
         # To flush out issues with unified vs. non-unified builds,
         # do a non-unified build before continuing with the rest,
         # which produces a unified build.
-        docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=${{matrix.unified}} --build-arg ENABLE_GMP=${{ matrix.enable_gmp }} .
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} --build-arg ENABLE_GMP=${{ matrix.enable_gmp }} .
+        ./tools/export_ccache.sh
 
       # run with sudo (...) --privileged
-      # this is needed to create network namespaces for the ebpf tests
+      # this is needed to create network namespaces for the ebpf tests.
     - name: Run tests (Ubuntu Linux)
       run: |
         sudo docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
       if: matrix.unified == 'ON'
 
-  # Build and test p4c on Fedora
+  # Build and test p4c on Fedora.
   build-fedora-linux:
     strategy:
       fail-fast: false
@@ -55,14 +61,14 @@ jobs:
         exclude:
           - unified: OFF
             enable_gmp: OFF
-    # This job runs in Fedora container that runs in Ubuntu VM
+    # This job runs in Fedora container that runs in Ubuntu VM.
     runs-on: ubuntu-latest
     container:
       image: registry.fedoraproject.org/fedora:latest
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:
-    # We need to install git here because it is not provided out of the box in Fedora container
+    # We need to install git here because it is not provided out of the box in Fedora container.
     - name: Install git
       run: dnf install -y -q git
 
@@ -73,10 +79,17 @@ jobs:
     - name: Install dependencies (Fedora Linux)
       run: tools/install_fedora_deps.sh
 
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: fedora-test-${{ runner.os }}
+        max-size: 1000M
+
     - name: Build p4c (Fedora Linux)
       run: |
-        ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=${{matrix.unified}} -DENABLE_GMP=${{ matrix.enable_gmp }}
+        ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} -DENABLE_GMP=${{ matrix.enable_gmp }}
         make -j2 -C build
+
 
     - name: Run p4c tests (Fedora Linux)
       run: ctest --output-on-failure --schedule-random
@@ -101,6 +114,12 @@ jobs:
       with:
         submodules: recursive
 
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: test-${{ runner.os }}
+        max-size: 1000M
+
     - name: Install dependencies (MacOS)
       run: |
            tools/install_mac_deps.sh
@@ -111,9 +130,7 @@ jobs:
           # To flush out issues with unified vs. non-unified builds,
           # do a non-unified build before continuing with the rest,
           # which produces a unified build.
-          # On MacOS we have noticed problems with the C++
-          # garbage-collector, so we disable it
-          ./bootstrap.sh -DENABLE_GC=OFF -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=${{matrix.unified}} -DENABLE_GMP=${{ matrix.enable_gmp }} && cd build && make -j2
+          ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} -DENABLE_GMP=${{ matrix.enable_gmp }} && cd build && make -j2
 
     - name: Run tests (MacOS)
       run: |

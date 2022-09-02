@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import shlex, subprocess
+import signal
+import shlex
+import subprocess
 import sys
+import traceback
 
 import p4c_src.util as util
 
@@ -245,13 +248,35 @@ class BackendDriver:
         try:
             p = subprocess.Popen(args)
         except:
-            import traceback
             print("error invoking {}".format(" ".join(cmd)), file=sys.stderr)
             print(traceback.format_exc(), file=sys.stderr)
             return 1
 
         if self._verbose: print('running {}'.format(' '.join(cmd)))
-        p.communicate() # now wait
+        # Wait for the process, if we get CTRL+C during that time, forward it
+        # to the process and continue waiting (leave the program to resolve
+        # it), if we get other error kill the process:
+        # - prevents unnecessary bactraces in case CTRL+C is pressed
+        # - prevents leaving the child process running of communicate error
+        # - it allows running e.g. debugger from the driver, which is useful
+        #   for development
+        try:
+            while True:
+                try:
+                    p.communicate()
+                    break  # done waiting, process ended
+                except KeyboardInterrupt:
+                    p.send_signal(signal.SIGINT)
+        except:
+            p.terminate()  # don't leave process possibly running
+            try:
+                p.communicate(timeout=0.1)
+            except:  # on timeout or other error
+                p.kill()
+            print("error running {}".format(" ".join(cmd)), file=sys.stderr)
+            print(traceback.format_exc(), file=sys.stderr)
+            return 1
+
         return p.returncode
 
 

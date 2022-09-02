@@ -1,0 +1,4 @@
+issue3379-1.p4(14): [--Wwarn=unused] warning: t4: unused instance
+mypackaget<bit>(MyParser1()) t4;
+                             ^^
+[--Wwarn=missing] warning: Program does not contain a `main' module

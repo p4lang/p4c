@@ -158,7 +158,9 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
         return false;
 
     // Below we are sure that it's the same Node class
-    if (left->is<IR::Type_Base>() || left->is<IR::Type_Newtype>())
+    if (left->is<IR::Type_Base>() || left->is<IR::Type_Newtype>() ||
+        left->is<IR::Type_Var>() || left->is<IR::Type_Name>())
+        // The last case can happen when checking generic functions
         return *left == *right;
     if (auto tt = left->to<IR::Type_Type>())
         return equivalent(tt->type, right->to<IR::Type_Type>()->type, strict);
@@ -328,9 +330,11 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
 bool TypeMap::implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to) const {
     if (equivalent(from, to))
         return true;
-    if (from->is<IR::Type_InfInt>() && to->is<IR::Type_InfInt>())
-        // this case is not caught by the equivalence check
-        return true;
+    if (from->is<IR::Type_InfInt>()) {
+        if (to->is<IR::Type_InfInt>() || to->is<IR::Type_Bits>())
+            // this case is not caught by the equivalence check
+            return true;
+    }
     if (auto rt = to->to<IR::Type_BaseList>()) {
         if (auto sl = from->to<IR::Type_StructLike>()) {
             // We allow implicit casts from list types to structs

@@ -6,13 +6,11 @@ struct ethernet_t {
 }
 
 struct ipv4_t {
-	bit<4> version
-	bit<4> ihl
+	bit<8> version_ihl
 	bit<8> diffserv
 	bit<16> totalLen
 	bit<16> identification
-	bit<3> flags
-	bit<13> fragOffset
+	bit<16> flags_fragOffset
 	bit<8> ttl
 	bit<8> protocol
 	bit<16> hdrChecksum
@@ -31,14 +29,18 @@ struct next_hop_arg_t {
 
 struct main_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
+	bit<8> local_metadata_timeout
 	bit<32> pna_main_output_metadata_output_port
 	bit<32> MainControlT_tmp
 	bit<32> MainControlT_tmp_0
+	bit<32> learnArg
 }
 metadata instanceof main_metadata_t
 
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
+
+regarray direction size 0x100 initval 0
 
 action next_hop args instanceof next_hop_arg_t {
 	mov m.pna_main_output_metadata_output_port t.vport
@@ -46,7 +48,8 @@ action next_hop args instanceof next_hop_arg_t {
 }
 
 action add_on_miss_action args none {
-	learn next_hop 0x0
+	mov m.learnArg 0x0
+	learn next_hop m.learnArg m.local_metadata_timeout
 	return
 }
 
@@ -59,7 +62,7 @@ action next_hop2 args instanceof next_hop2_arg_t {
 action add_on_miss_action2 args none {
 	mov m.MainControlT_tmp 0x0
 	mov m.MainControlT_tmp_0 0x4d2
-	learn next_hop m.MainControlT_tmp
+	learn next_hop2 m.MainControlT_tmp m.local_metadata_timeout
 	return
 }
 
@@ -72,8 +75,18 @@ learner ipv4_da {
 		add_on_miss_action @defaultonly
 	}
 	default_action add_on_miss_action args none 
-	size 65536
-	timeout 120
+	size 0x10000
+	timeout {
+		120
+		120
+		120
+		120
+		120
+		120
+		120
+		120
+
+		}
 }
 
 learner ipv4_da2 {
@@ -85,8 +98,18 @@ learner ipv4_da2 {
 		add_on_miss_action2 @defaultonly
 	}
 	default_action add_on_miss_action2 args none 
-	size 65536
-	timeout 120
+	size 0x10000
+	timeout {
+		120
+		120
+		120
+		120
+		120
+		120
+		120
+		120
+
+		}
 }
 
 apply {

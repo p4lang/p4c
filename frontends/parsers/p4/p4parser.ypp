@@ -969,12 +969,12 @@ specializedType
     ;
 
 baseType
-    : BOOL   { $$ = IR::Type_Boolean::get(); }
-    | MATCH_KIND { $$ = IR::Type_MatchKind::get(); }
+    : BOOL   { $$ = new IR::Type_Boolean(@1); }
+    | MATCH_KIND { $$ = new IR::Type_MatchKind(@1); }
     | ERROR  { $$ = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"))); }
     | BIT    { $$ = IR::Type::Bits::get(@1, 1); }
-    | STRING { $$ = IR::Type::String::get(); }
-    | INT    { $$ = new IR::Type_InfInt(); }
+    | STRING { $$ = new IR::Type::String(@1); }
+    | INT    { $$ = new IR::Type_InfInt(@1); }
     | BIT l_angle INTEGER r_angle
       { $$ = IR::Type::Bits::get(@1+@4, parseConstantChecked(@3, $3), false); }
     | INT l_angle INTEGER r_angle
@@ -1180,6 +1180,11 @@ directApplication
                                       @1 + @3, new IR::TypeNameExpression($1), IR::ID(@3, "apply"));
                                   auto mce = new IR::MethodCallExpression(@1 + @6, method, $5);
                                   $$ = new IR::MethodCallStatement(@1 + @6, mce); }
+    | specializedType "." APPLY "(" argumentList ")" ";" {
+                                  auto method = new IR::Member(
+                                      @1 + @3, new IR::TypeNameExpression($1), IR::ID(@3, "apply"));
+                                  auto mce = new IR::MethodCallExpression(@1 + @6, method, $5);
+                                  $$ = new IR::MethodCallStatement(@1 + @6, mce); }
     ;
 
 statement
@@ -1291,12 +1296,12 @@ actionRef
 entry
     : keysetExpression ":" actionRef optAnnotations ";"
         { if (auto l = $1->to<IR::ListExpression>())
-            $$ = new IR::Entry(@1+@4, $4, l, $3);
+            $$ = new IR::Entry(@1+@4, $4, l, $3, false);
           else {  // if not a tuple, make it a list of 1
             IR::Vector<IR::Expression> le($1);
             $$ = new IR::Entry(@1+@4, $4,
                    new IR::ListExpression(@1, le),
-                   $3);
+                   $3, true);
           }
         }
     ;
@@ -1364,6 +1369,7 @@ argument
     : expression                         { $$ = new IR::Argument(@1, $1); }
     | name "=" expression                { $$ = new IR::Argument(@1, *$1, $3); }
     | "_"                                { $$ = new IR::Argument(@1, new IR::DefaultExpression(@1)); }
+    | name "=" "_"                       { $$ = new IR::Argument(@1, *$1, new IR::DefaultExpression(@3)); }
     ;
 
 expressionList
@@ -1408,7 +1414,7 @@ expression
     | "!" expression %prec PREFIX        { $$ = new IR::LNot(@1 + @2, $2); }
     | "~" expression %prec PREFIX        { $$ = new IR::Cmpl(@1 + @2, $2); }
     | "-" expression %prec PREFIX        { $$ = new IR::Neg(@1 + @2, $2); }
-    | "+" expression %prec PREFIX        { $$ = $2; }
+    | "+" expression %prec PREFIX        { $$ = new IR::UPlus(@1 + @2, $2); }
     | typeName dot_name %prec DOT
         { $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression(@1, $1), *$2); }
     | ERROR "." name
@@ -1462,7 +1468,7 @@ nonBraceExpression
     | "!" expression %prec PREFIX        { $$ = new IR::LNot(@1 + @2, $2); }
     | "~" expression %prec PREFIX        { $$ = new IR::Cmpl(@1 + @2, $2); }
     | "-" expression %prec PREFIX        { $$ = new IR::Neg(@1 + @2, $2); }
-    | "+" expression %prec PREFIX        { $$ = $2; }
+    | "+" expression %prec PREFIX        { $$ = new IR::UPlus(@1 + @2, $2); }
     | typeName dot_name %prec DOT
         { $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression(@1, $1), *$2); }
     | ERROR "." name

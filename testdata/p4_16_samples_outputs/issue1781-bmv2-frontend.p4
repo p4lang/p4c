@@ -19,6 +19,8 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
     @name("IngressImpl.value") bit<32> value_3;
     @name("IngressImpl.hasReturned") bool hasReturned;
     @name("IngressImpl.retval") bit<32> retval;
+    @name("IngressImpl.hasReturned") bool hasReturned_1;
+    @name("IngressImpl.retval") bit<32> retval_1;
     @name("IngressImpl.update_value") action update_value() {
         hasReturned = false;
         hasReturned = true;
@@ -27,6 +29,9 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
         value_1 = value_3;
     }
     apply {
+        hasReturned_1 = false;
+        hasReturned_1 = true;
+        retval_1 = 32w1;
         update_value();
     }
 }

@@ -153,6 +153,13 @@ MTONLY(
 }
 
 #if HAVE_UCONTEXT_H
+
+#if defined (__CYGWIN__)
+    #define REGNAME(regname) regname
+#else
+    #define REGNAME(regname) mc_##regname
+#endif
+
 static void dumpregs(mcontext_t *mctxt) {
 #if defined(REG_EAX)
     LOG1(" eax=" << hex(mctxt->gregs[REG_EAX], 8, '0') <<
@@ -181,31 +188,31 @@ static void dumpregs(mcontext_t *mctxt) {
          " r14=" << hex(mctxt->gregs[REG_R14], 16, '0'));
     LOG1(" r15=" << hex(mctxt->gregs[REG_R15], 16, '0'));
 #elif defined(__i386__)
-    LOG1(" eax=" << hex(mctxt->mc_eax, 8, '0') <<
-         " ebx=" << hex(mctxt->mc_ebx, 8, '0') <<
-         " ecx=" << hex(mctxt->mc_ecx, 8, '0') <<
-         " edx=" << hex(mctxt->mc_edx, 8, '0'));
-    LOG1(" edi=" << hex(mctxt->mc_edi, 8, '0') <<
-         " esi=" << hex(mctxt->mc_esi, 8, '0') <<
-         " ebp=" << hex(mctxt->mc_ebp, 8, '0') <<
-         " esp=" << hex(mctxt->mc_esp, 8, '0'));
+    LOG1(" eax=" << hex(mctxt->REGNAME(eax), 8, '0') <<
+         " ebx=" << hex(mctxt->REGNAME(ebx), 8, '0') <<
+         " ecx=" << hex(mctxt->REGNAME(ecx), 8, '0') <<
+         " edx=" << hex(mctxt->REGNAME(edx), 8, '0'));
+    LOG1(" edi=" << hex(mctxt->REGNAME(edi), 8, '0') <<
+         " esi=" << hex(mctxt->REGNAME(esi), 8, '0') <<
+         " ebp=" << hex(mctxt->REGNAME(ebp), 8, '0') <<
+         " esp=" << hex(mctxt->REGNAME(esp), 8, '0'));
 #elif defined(__amd64__)
-    LOG1(" rax=" << hex(mctxt->mc_rax, 16, '0') <<
-         " rbx=" << hex(mctxt->mc_rbx, 16, '0') <<
-         " rcx=" << hex(mctxt->mc_rcx, 16, '0'));
-    LOG1(" rdx=" << hex(mctxt->mc_rdx, 16, '0') <<
-         " rdi=" << hex(mctxt->mc_rdi, 16, '0') <<
-         " rsi=" << hex(mctxt->mc_rsi, 16, '0'));
-    LOG1(" rbp=" << hex(mctxt->mc_rbp, 16, '0') <<
-         " rsp=" << hex(mctxt->mc_rsp, 16, '0') <<
-         "  r8=" << hex(mctxt->mc_r8,  16, '0'));
-    LOG1("  r9=" << hex(mctxt->mc_r9,  16, '0') <<
-         " r10=" << hex(mctxt->mc_r10, 16, '0') <<
-         " r11=" << hex(mctxt->mc_r11, 16, '0'));
-    LOG1(" r12=" << hex(mctxt->mc_r12, 16, '0') <<
-         " r13=" << hex(mctxt->mc_r13, 16, '0') <<
-         " r14=" << hex(mctxt->mc_r14, 16, '0'));
-    LOG1(" r15=" << hex(mctxt->mc_r15, 16, '0'));
+    LOG1(" rax=" << hex(mctxt->REGNAME(rax), 16, '0') <<
+         " rbx=" << hex(mctxt->REGNAME(rbx), 16, '0') <<
+         " rcx=" << hex(mctxt->REGNAME(rcx), 16, '0'));
+    LOG1(" rdx=" << hex(mctxt->REGNAME(rdx), 16, '0') <<
+         " rdi=" << hex(mctxt->REGNAME(rdi), 16, '0') <<
+         " rsi=" << hex(mctxt->REGNAME(rsi), 16, '0'));
+    LOG1(" rbp=" << hex(mctxt->REGNAME(rbp), 16, '0') <<
+         " rsp=" << hex(mctxt->REGNAME(rsp), 16, '0') <<
+         "  r8=" << hex(mctxt->REGNAME(r8),  16, '0'));
+    LOG1("  r9=" << hex(mctxt->REGNAME(r9),  16, '0') <<
+         " r10=" << hex(mctxt->REGNAME(r10), 16, '0') <<
+         " r11=" << hex(mctxt->REGNAME(r11), 16, '0'));
+    LOG1(" r12=" << hex(mctxt->REGNAME(r12), 16, '0') <<
+         " r13=" << hex(mctxt->REGNAME(r13), 16, '0') <<
+         " r14=" << hex(mctxt->REGNAME(r14), 16, '0'));
+    LOG1(" r15=" << hex(mctxt->REGNAME(r15), 16, '0'));
 #else
 #warning "unknown machine type"
 #endif

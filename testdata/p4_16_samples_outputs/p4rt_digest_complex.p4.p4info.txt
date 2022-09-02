@@ -33,6 +33,62 @@ type_info {
           }
         }
       }
+      members {
+        name: "s2"
+        type_spec {
+          struct {
+            name: "s2_t_0"
+          }
+        }
+      }
+      members {
+        name: "s3"
+        type_spec {
+          struct {
+            name: "s3_t"
+          }
+        }
+      }
+    }
+  }
+  structs {
+    key: "s2_t_0"
+    value {
+      members {
+        name: "f16"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 16
+            }
+          }
+        }
+      }
+      members {
+        name: "f"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 32
+            }
+          }
+        }
+      }
+    }
+  }
+  structs {
+    key: "s3_t"
+    value {
+      members {
+        name: "f"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 64
+            }
+          }
+        }
+      }
     }
   }
   headers {

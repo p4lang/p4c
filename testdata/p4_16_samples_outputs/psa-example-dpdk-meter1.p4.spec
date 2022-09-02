@@ -7,13 +7,11 @@ struct ethernet_t {
 }
 
 struct ipv4_t {
-	bit<4> version
-	bit<4> ihl
+	bit<8> version_ihl
 	bit<8> diffserv
 	bit<32> totalLen
 	bit<16> identification
-	bit<3> flags
-	bit<13> fragOffset
+	bit<16> flags_fragOffset
 	bit<8> ttl
 	bit<8> protocol
 	bit<16> hdrChecksum
@@ -42,7 +40,7 @@ struct psa_egress_deparser_input_metadata_t {
 }
 
 struct execute_1_arg_t {
-	bit<12> index
+	bit<32> index
 }
 
 struct metadata_t {

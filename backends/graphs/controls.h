@@ -48,8 +48,10 @@ class ControlGraphs : public Graphs {
     bool preorder(const IR::ReturnStatement *) override;
     bool preorder(const IR::ExitStatement *) override;
     bool preorder(const IR::P4Table *table) override;
+    bool preorder(const IR::Key *key) override;
+    bool preorder(const IR::P4Action *action) override;
 
-    void writeGraphToFile(const Graph &g, const cstring &name);
+    std::vector<Graph *> controlGraphsArray{};
 
  private:
     P4::ReferenceMap *refMap; P4::TypeMap *typeMap;

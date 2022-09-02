@@ -36,7 +36,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".mooneys") action mooneys() {
-        hdr.expressivenesss.breasted = hdr.expressivenesss.breasted - hdr.expressivenesss.peptides;
+        hdr.expressivenesss.breasted = hdr.expressivenesss.breasted - (bit<16>)hdr.expressivenesss.peptides;
         hdr.kilometer.sleeting = hdr.kilometer.sleeting - 16w7;
     }
     @name(".conceptualization") table conceptualization {

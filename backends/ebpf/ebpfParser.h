@@ -20,10 +20,50 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ebpfObject.h"
 #include "ebpfProgram.h"
+#include "ebpfTable.h"
+#include "frontends/p4/methodInstance.h"
 
 namespace EBPF {
 
 class EBPFParser;
+class EBPFParserState;
+
+class StateTranslationVisitor : public CodeGenInspector {
+ protected:
+    // stores the result of evaluating the select argument
+    cstring selectValue;
+
+    P4::P4CoreLibrary& p4lib;
+    const EBPFParserState* state;
+
+    void compileExtractField(const IR::Expression* expr, cstring name,
+                             unsigned alignment, EBPFType* type);
+    virtual void compileExtract(const IR::Expression* destination);
+    void compileLookahead(const IR::Expression* destination);
+    void compileAdvance(const P4::ExternMethod *ext);
+    void compileVerify(const IR::MethodCallExpression * expression);
+
+    virtual void processFunction(const P4::ExternFunction* function);
+    virtual void processMethod(const P4::ExternMethod* method);
+
+ public:
+    explicit StateTranslationVisitor(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
+            CodeGenInspector(refMap, typeMap),
+            p4lib(P4::P4CoreLibrary::instance),
+            state(nullptr) {}
+
+    void setState(const EBPFParserState* state) {
+        this->state = state;
+    }
+    bool preorder(const IR::ParserState* state) override;
+    bool preorder(const IR::SelectCase* selectCase) override;
+    bool preorder(const IR::SelectExpression* expression) override;
+    bool preorder(const IR::Member* expression) override;
+    bool preorder(const IR::MethodCallExpression* expression) override;
+    bool preorder(const IR::MethodCallStatement* stat) override
+    { visit(stat->methodCall); builder->endOfStatement(true); return false; }
+    bool preorder(const IR::AssignmentStatement* stat) override;
+};
 
 class EBPFParserState : public EBPFObject {
  public:
@@ -43,13 +83,26 @@ class EBPFParser : public EBPFObject {
     std::vector<EBPFParserState*> states;
     const IR::Parameter*          packet;
     const IR::Parameter*          headers;
+    const IR::Parameter*          user_metadata;
     EBPFType*                     headerType;
+
+    StateTranslationVisitor*      visitor;
+
+    std::map<cstring, EBPFValueSet*> valueSets;
 
     explicit EBPFParser(const EBPFProgram* program, const IR::ParserBlock* block,
                         const P4::TypeMap* typeMap);
-    void emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl);
+    virtual void emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl);
     void emit(CodeBuilder* builder);
-    bool build();
+    virtual bool build();
+
+    virtual void emitTypes(CodeBuilder* builder);
+    virtual void emitValueSetInstances(CodeBuilder* builder);
+    virtual void emitRejectState(CodeBuilder* builder);
+
+    EBPFValueSet* getValueSet(cstring name) const {
+        return ::get(valueSets, name);
+    }
 };
 
 }  // namespace EBPF

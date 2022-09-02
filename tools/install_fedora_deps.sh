@@ -13,6 +13,7 @@ sudo dnf install -y -q \
     boost-system \
     boost-test \
     boost-thread \
+    ccache \
     clang \
     cmake \
     cpp \
@@ -69,13 +70,7 @@ pushd "${tmp_dir}"
 git clone --depth=1 https://github.com/p4lang/behavioral-model
 cd behavioral-model
 ./autogen.sh
-./configure --with-pdfixed --with-thrift --with-pi --with-stress-tests --enable-debugger
-make
-make install-strip
-
-cd targets/simple_switch_grpc/
-./autogen.sh
-./configure --with-thrift
+./configure --with-pdfixed --with-thrift --with-pi --with-stress-tests --enable-debugger CC="ccache gcc" CXX="ccache g++"
 make
 make install-strip
 popd

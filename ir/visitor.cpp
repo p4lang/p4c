@@ -180,15 +180,15 @@ Visitor::profile_t Visitor::init_apply(const IR::Node *root, const Context *pare
 }
 Visitor::profile_t Modifier::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
-    visited = new ChangeTracker();
+    visited = std::make_shared<ChangeTracker>();
     return rv; }
 Visitor::profile_t Inspector::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
-    visited = new visited_t();
+    visited = std::make_shared<visited_t>();
     return rv; }
 Visitor::profile_t Transform::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
-    visited = new ChangeTracker();
+    visited = std::make_shared<ChangeTracker>();
     return rv; }
 void Visitor::end_apply() {}
 void Visitor::end_apply(const IR::Node*) {}
@@ -305,7 +305,7 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt)
         ctxt->child_index++;
     else
-        visited = nullptr;
+        visited.reset();
     return n;
 }
 
@@ -330,8 +330,9 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
             vp.first->second.done = true; } }
     if (ctxt)
         ctxt->child_index++;
-    else
-        visited = nullptr;
+    else {
+        visited.reset();
+    }
     return n;
 }
 
@@ -389,7 +390,7 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt)
         ctxt->child_index++;
     else
-        visited = nullptr;
+        visited.reset();
     return n;
 }
 

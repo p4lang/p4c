@@ -49,7 +49,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         packet.extract<ipv4_t>(hdr.ipv4);
         transition accept;
     }
-    state parse_srcRouting {
+    @name(".parse_srcRouting") state parse_srcRouting {
         packet.extract<srcRoute_t>(hdr.srcRoutes[32s0]);
         index_0 = index_0 + 32s1;
         transition select(hdr.srcRoutes[32s0].bos) {
@@ -76,7 +76,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
     state parse_srcRouting3 {
         transition stateOutOfBound;
     }
-    state start {
+    @name(".start") state start {
         index_0 = 32s0;
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {

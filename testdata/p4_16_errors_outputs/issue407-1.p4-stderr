@@ -28,3 +28,6 @@ issue407-1.p4(54): [--Werror=type-error] error: Field 'x14' of 'header H' cannot
 issue407-1.p4(44)
 typedef tuple<bit<8>, bit<16>> myTuple0;
         ^^^^^^^^^^^^^^^^^^^^^^
+issue407-1.p4(46): [--Werror=type-error] error: Error while analyzing header H
+header H {
+       ^

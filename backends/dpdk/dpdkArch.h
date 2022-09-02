@@ -17,14 +17,15 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKARCH_H_
 #define BACKENDS_DPDK_DPDKARCH_H_
 
-#include <ir/ir.h>
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/sideEffects.h"
+#include "midend/removeLeftSlices.h"
 #include "lib/error.h"
 #include "lib/ordered_map.h"
 #include "dpdkProgramStructure.h"
+#include "constants.h"
 
 namespace DPDK {
 
@@ -232,6 +233,66 @@ class InjectOutputPortMetadataField : public Transform {
     const IR::Node *preorder(IR::Type_Struct *s) override;
 };
 
+class AlignHdrMetaField : public Transform {
+    P4::TypeMap* typeMap;
+    P4::ReferenceMap *refMap;
+    DpdkProgramStructure *structure;
+
+    ordered_map<cstring, struct fieldInfo> field_name_list;
+
+ public:
+    AlignHdrMetaField(P4::TypeMap* typeMap,
+                            P4::ReferenceMap *refMap,
+                            DpdkProgramStructure* structure)
+        : typeMap(typeMap), refMap(refMap), structure(structure) {
+        CHECK_NULL(structure);
+    }
+    const IR::Node *preorder(IR::Type_StructLike *st) override;
+    const IR::Node *preorder(IR::Member *m) override;
+};
+
+struct ByteAlignment : public PassManager {
+    P4::TypeMap* typeMap;
+    P4::ReferenceMap *refMap;
+    DpdkProgramStructure *structure;
+ public:
+    ByteAlignment(P4::TypeMap* typeMap,
+                        P4::ReferenceMap *refMap,
+                        DpdkProgramStructure* structure)
+    : typeMap(typeMap), refMap(refMap), structure(structure) {
+        CHECK_NULL(structure);
+        passes.push_back(new AlignHdrMetaField(typeMap, refMap, structure));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
+        /* DoRemoveLeftSlices pass converts the slice Member (LHS in assn stm)
+           resulting from above Pass into shift operation */
+        passes.push_back(new P4::DoRemoveLeftSlices(typeMap));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
+    }
+};
+
+class ReplaceHdrMetaField : public Transform {
+    P4::TypeMap* typeMap;
+    P4::ReferenceMap *refMap;
+    DpdkProgramStructure *structure;
+ public:
+    ReplaceHdrMetaField(P4::TypeMap* typeMap,
+                            P4::ReferenceMap *refMap,
+                            DpdkProgramStructure* structure)
+        : typeMap(typeMap), refMap(refMap), structure(structure) {
+        CHECK_NULL(structure);
+    }
+    const IR::Node* postorder(IR::Type_Struct *st) override;
+};
+
+struct fieldInfo {
+    unsigned fieldWidth;
+    fieldInfo() {
+        fieldWidth = 0;
+    }
+};
+
 // This class is helpful for StatementUnroll and IfStatementUnroll. Since dpdk
 // asm is not able to process complex expression, e.g., a = b + c * d. We need
 // break it down. Therefore, we need some temporary variables to hold the
@@ -349,6 +410,7 @@ class IfStatementUnroll : public Transform {
     const IR::Node *postorder(IR::SwitchStatement *a) override;
     const IR::Node *postorder(IR::IfStatement *a) override;
     const IR::Node *postorder(IR::P4Control *a) override;
+    const IR::Node *postorder(IR::P4Parser *a) override;
 };
 
 /* Assume one logical expression looks like this: a && (b + c > d), this pass
@@ -388,9 +450,10 @@ class LogicalExpressionUnroll : public Inspector {
 // that has Binary_Operation to become two-parameter form.
 class ConvertBinaryOperationTo2Params : public Transform {
     DeclarationInjector injector;
+    P4::ReferenceMap* refMap;
 
  public:
-    ConvertBinaryOperationTo2Params() {}
+    explicit ConvertBinaryOperationTo2Params(P4::ReferenceMap* refMap) : refMap(refMap) {}
     const IR::Node *postorder(IR::AssignmentStatement *a) override;
     const IR::Node *postorder(IR::P4Control *a) override;
     const IR::Node *postorder(IR::P4Parser *a) override;
@@ -453,6 +516,25 @@ class PrependPDotToActionArgs : public Transform {
     const IR::Node *postorder(IR::P4Program *s) override;
     const IR::Node *preorder(IR::PathExpression *path) override;
     const IR::Node *preorder(IR::MethodCallExpression*) override;
+};
+
+/* This class is used to process the default action
+   and store the parameter list for each table.
+   Later, this infomation is passed and saved in table
+   properties and then used for generating instruction
+   for default action in each table.
+*/
+class DefActionValue : public Inspector {
+    P4::TypeMap* typeMap;
+    P4::ReferenceMap *refMap;
+    DpdkProgramStructure* structure;
+
+ public:
+    DefActionValue(P4::TypeMap* typeMap,
+                            P4::ReferenceMap *refMap,
+                            DpdkProgramStructure* structure)
+        : typeMap(typeMap), refMap(refMap), structure(structure) {}
+    void postorder(const IR::P4Table* t) override;
 };
 
 // dpdk does not support ternary operator so we need to translate ternary operator
@@ -574,7 +656,8 @@ class CollectExternDeclaration : public Inspector {
             auto externTypeName = type->baseType->path->name.name;
             if (externTypeName == "Meter") {
                 if (d->arguments->size() != 2) {
-                    ::error("%1%: expected number of meters and type of meter as arguments", d);
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "%1%: expected number of meters and type of meter as arguments", d);
                 } else {
                     /* Check if the meter is of PACKETS (0) type */
                     if (d->arguments->at(1)->expression->to<IR::Constant>()->asUnsigned() == 0)
@@ -584,11 +667,13 @@ class CollectExternDeclaration : public Inspector {
                 }
             } else if (externTypeName == "Counter") {
                 if (d->arguments->size() != 2) {
-                    ::error("%1%: expected number of_counters and type of counter as arguments", d);
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "%1%: expected number of counters and type of counter as arguments", d);
                 }
             } else if (externTypeName == "Register") {
                 if (d->arguments->size() != 1 && d->arguments->size() != 2) {
-                    ::error("%1%: expected size and optionally init_val as arguments", d);
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "%1%: expected size and optionally init_val as arguments", d);
                 }
             } else {
                 // unsupported extern type
@@ -721,12 +806,17 @@ class CollectTableInfo : public Inspector {
 // header/metadata struct. If the match keys are from different headers, this pass creates
 // mirror copies of the struct field into the metadata struct and updates the table to use
 // the metadata copy.
+// This pass must be called right before CollectLocalVariables pass as the temporary
+// variables created for holding copy of the table keys are inserted to Metadata by
+// CollectLocalVariables pass.
 class CopyMatchKeysToSingleStruct : public P4::KeySideEffect {
+    IR::IndexedVector<IR::Declaration> decls;
+    DpdkProgramStructure *structure;
  public:
     CopyMatchKeysToSingleStruct(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-             std::set<const IR::P4Table*>* invokedInKey)
-             : P4::KeySideEffect(refMap, typeMap, invokedInKey)
-    { setName("CopyMatchKeysToSinSgleStruct"); }
+             std::set<const IR::P4Table*>* invokedInKey, DpdkProgramStructure *structure)
+             : P4::KeySideEffect(refMap, typeMap, invokedInKey), structure(structure)
+    { setName("CopyMatchKeysToSingleStruct"); }
 
     const IR::Node* preorder(IR::Key* key) override;
     const IR::Node* postorder(IR::KeyElement* element) override;
@@ -824,6 +914,19 @@ class CollectAddOnMissTable : public Inspector {
     void postorder(const IR::MethodCallStatement*) override;
 };
 
+class ValidateAddOnMissExterns : public Inspector {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    DpdkProgramStructure* structure;
+
+ public:
+    ValidateAddOnMissExterns(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+            DpdkProgramStructure* structure) :
+    refMap(refMap), typeMap(typeMap), structure(structure) {}
+
+    void postorder(const IR::MethodCallStatement*) override;
+};
+
 class CollectErrors : public Inspector {
     DpdkProgramStructure *structure;
 
@@ -838,6 +941,50 @@ class CollectErrors : public Inspector {
             }
         }
     }
+};
+
+/**
+ * Eliminate temporary copies of header, which generally populated after inlining,
+ * if it's not temporary copy then transform direct header copy to element wise copy
+ * i.e.
+ * case 1) when header copied to temporary
+ * eth_0 = hdr.ethernet
+ * eth_1 = hdr.outer_ethernet
+ * eth_0.srcAddr = eth_1.srcAddr
+ * eth_0.dstAddr = eth_1.dstAddr
+ * eth_0.etherType = eth_1.etherType
+ * hdr.ethernet = eth_0
+ * above block will be transformed into
+ * hdr.ethernet.srcAddr = hdr.outer_ethernet.srcAddr
+ * hdr.ethernet.dstAddr = hdr.outer_ethernet.dstAddr
+ * hdr.ethernet.etherType = hdr.outer_ethernet.etherType
+ *
+ * case 2) when header copied to non temporary
+ * hdr.ethernet = hdr.outer_ethernet
+ * it will be transformed into below memberwise copy
+ * hdr.ethernet.srcAddr = hdr.outer_ethernet.srcAddr
+ * hdr.ethernet.dstAddr = hdr.outer_ethernet.dstAddr
+ * hdr.ethernet.etherType = hdr.outer_ethernet.etherType
+ *
+ */
+class ElimHeaderCopy : public Transform {
+    P4::TypeMap *typeMap;
+    /// It's for populating replacement map by keeping temporary header name as key
+    /// and source of assignment statement as value.
+    /// i.e.
+    /// for below assignment statement
+    /// eth_0 = hdr.ethernet
+    /// replacement map will be like
+    /// replacementMap["eth_0"] = hdr.ethernet;
+    /// later on all uses of eth_0 will be replace with there value in replacementMap.
+    ordered_map<cstring, const IR::Member*> replacementMap;
+
+ public:
+    explicit ElimHeaderCopy(P4::TypeMap *typeMap) : typeMap{typeMap} {}
+    bool isHeader(const IR::Expression* e);
+    const IR::Node* preorder(IR::AssignmentStatement* as) override;
+    const IR::Node* preorder(IR::MethodCallStatement *mcs) override;
+    const IR::Node* postorder(IR::Member* m) override;
 };
 
 class DpdkArchFirst : public PassManager {

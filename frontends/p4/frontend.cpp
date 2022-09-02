@@ -48,6 +48,7 @@ limitations under the License.
 #include "parseAnnotations.h"
 #include "parserControlFlow.h"
 #include "reassociation.h"
+#include "redundantParsers.h"
 #include "removeParameters.h"
 #include "removeReturns.h"
 #include "resetHeaders.h"
@@ -190,7 +191,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new StructInitializers(&refMap, &typeMap),
         new SpecializeGenericFunctions(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
-        PassRepeated({
+        new PassRepeated({
             new ConstantFolding(&refMap, &typeMap),
             new StrengthReduction(&refMap, &typeMap),
             new Reassociation(),
@@ -218,6 +219,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new RemoveDontcareArgs(&refMap, &typeMap),
         new MoveConstructors(&refMap),
         new RemoveAllUnusedDeclarations(&refMap),
+        new RemoveRedundantParsers(&refMap, &typeMap),
         new ClearTypeMap(&typeMap),
         evaluator,
         new Inline(&refMap, &typeMap, evaluator, options.optimizeParserInlining),

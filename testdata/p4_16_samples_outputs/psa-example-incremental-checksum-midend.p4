@@ -83,18 +83,14 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.drop") action drop_1() {
-        @noWarnUnused {
-            ostd.drop = true;
-        }
+        ostd.drop = true;
     }
     @name("ingress.forward") action forward(@name("port") PortId_t port, @name("srcAddr") bit<32> srcAddr_1) {
         user_meta._fwd_metadata_old_srcAddr0 = hdr.ipv4.srcAddr;
         hdr.ipv4.srcAddr = srcAddr_1;
-        @noWarnUnused {
-            ostd.drop = false;
-            ostd.multicast_group = 32w0;
-            ostd.egress_port = port;
-        }
+        ostd.drop = false;
+        ostd.multicast_group = 32w0;
+        ostd.egress_port = port;
     }
     @name("ingress.route") table route_0 {
         key = {

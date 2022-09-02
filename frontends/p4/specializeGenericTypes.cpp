@@ -107,6 +107,8 @@ void FindTypeSpecializations::postorder(const IR::Type_Specialized* type) {
     // This can be before a Parser, Control, or a toplevel instance declaration
     const IR::Node* insert = findContext<IR::P4Parser>();
     if (!insert)
+        insert = findContext<IR::Function>();
+    if (!insert)
         insert = findContext<IR::P4Control>();
     if (!insert)
         insert = findContext<IR::Type_Declaration>();

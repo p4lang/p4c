@@ -52,8 +52,6 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         smeta.priority = smeta_0.priority;
     }
     @name("IngressI.forward") table forward_0 {
-        key = {
-        }
         actions = {
             drop_0();
         }

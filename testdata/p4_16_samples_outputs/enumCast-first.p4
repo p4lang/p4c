@@ -33,7 +33,7 @@ struct O {
 parser p(packet_in packet, out O o) {
     state start {
         X x = (X)32w0;
-        bit<32> z = (bit<32>)X.One;
+        bit<32> z = 32w1;
         bit<32> z1 = X.One;
         bool bb;
         E1 a = E1.e1;

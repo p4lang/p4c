@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// If you want to use 'raise' below to trace a node creation uncomment the next line
+// #include <signal.h>
+
 #include "ir.h"
 #include "ir/json_loader.h"
 
@@ -22,7 +25,15 @@ limitations under the License.
 void IR::Node::traceVisit(const char* visitor) const
 { LOG3("Visiting " << visitor << " " << id << ":" << node_type_name()); }
 
-void IR::Node::traceCreation() const { LOG5("Created node " << id); }
+void IR::Node::traceCreation() const {
+    /*
+      You can use this to trigger a breakpoint in the debugger when a
+      specific node is created
+    if (id == 279493)
+        raise(SIGINT);
+    */
+    LOG5("Created node " << id);
+}
 
 int IR::Node::currentId = 0;
 

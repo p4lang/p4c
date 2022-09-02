@@ -6,13 +6,11 @@ struct ethernet_t {
 }
 
 struct ipv4_t {
-	bit<4> version
-	bit<4> ihl
+	bit<8> version_ihl
 	bit<8> diffserv
 	bit<16> totalLen
 	bit<16> identification
-	bit<3> flags
-	bit<13> fragOffset
+	bit<16> flags_fragOffset
 	bit<8> ttl
 	bit<8> protocol
 	bit<16> hdrChecksum
@@ -35,6 +33,8 @@ metadata instanceof main_metadata_t
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 
+regarray direction size 0x100 initval 0
+
 action next_hop args instanceof next_hop_arg_t {
 	mov m.pna_main_output_metadata_output_port t.vport
 	return
@@ -53,7 +53,7 @@ table ipv4_da_lpm {
 		next_hop
 		default_route_drop
 	}
-	default_action default_route_drop args none 
+	default_action default_route_drop args none const
 	size 0x10000
 }
 
@@ -65,6 +65,7 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
+	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
 	jmpeq LABEL_TRUE_0 m.pna_main_input_metadata_direction 0x0
 	mov m.MainControlT_key h.ipv4.dstAddr
 	jmp LABEL_END_0

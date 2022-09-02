@@ -1,4 +1,4 @@
-#include <ir/ir.h>
+#include "ir/ir.h"
 
 void IR::DpdkJmpLabelStatement::dbprint(std::ostream& out) const {
     out << "jmp " << label << std::endl;
@@ -18,6 +18,10 @@ void IR::DpdkApplyStatement::dbprint(std::ostream& out) const {
 
 void IR::DpdkLearnStatement::dbprint(std::ostream& out) const {
     out << "learn " << action << std::endl;
+}
+
+void IR::DpdkMirrorStatement::dbprint(std::ostream& out) const {
+    out << "mirror " << slotId << " " << sessionId << std::endl;
 }
 
 void IR::DpdkEmitStatement::dbprint(std::ostream& out) const {

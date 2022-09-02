@@ -25,6 +25,7 @@ limitations under the License.
 
 #include "dpdkArch.h"
 #include "dpdkHelpers.h"
+#include "dpdkUtils.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/externInstance.h"
@@ -32,34 +33,6 @@ limitations under the License.
 #include "frontends/p4/tableApply.h"
 
 namespace DPDK {
-
-bool isSimpleExpression(const IR::Expression *e) {
-    if (e->is<IR::Member>() || e->is<IR::PathExpression>() ||
-        e->is<IR::Constant>() || e->is<IR::BoolLiteral>())
-        return true;
-    return false;
-}
-bool isNonConstantSimpleExpression(const IR::Expression *e) {
-    if (e->is<IR::Member>() || e->is<IR::PathExpression>())
-        return true;
-    return false;
-}
-
-bool isStandardMetadata(cstring name) {
-    bool isStdMeta = name == "psa_ingress_parser_input_metadata_t" ||
-                     name == "psa_ingress_input_metadata_t" ||
-                     name == "psa_ingress_output_metadata_t" ||
-                     name == "psa_egress_parser_input_metadata_t" ||
-                     name == "psa_egress_input_metadata_t" ||
-                     name == "psa_egress_output_metadata_t" ||
-                     name == "psa_egress_deparser_input_metadata_t" ||
-                     name == "pna_pre_input_metadata_t" ||
-                     name == "pna_pre_output_metadata_t" ||
-                     name == "pna_main_input_metadata_t" ||
-                     name == "pna_main_output_metadata_t" ||
-                     name == "pna_main_parser_input_metadata_t";
-    return isStdMeta;
-}
 
 cstring TypeStruct2Name(const cstring s) {
     if (isStandardMetadata(s)) {
@@ -467,19 +440,260 @@ bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s) {
     return true;
 }
 
+/* This function processes each header structure and aligns each non-aligned header
+   into 8-bit aligned header.[Restricted to only contiguous non-aligned header fields]
+   For example :
+       header ipv4_t {
+            bit<4>  version;
+            bit<4>  ihl;
+            bit<8>  diffserv;
+            bit<32> totalLen;
+            bit<16> identification;
+            bit<3>  flags;
+            bit<13> fragOffset;
+            bit<8>  ttl;
+            bit<8>  protocol;
+            bit<16> hdrChecksum;
+            bit<32> srcAddr;
+            bit<32> dstAddr;
+       }
+       is converted into
+       header ipv4_t {
+            bit<8>  version_ihl;      // "version" and "ihl" combined for 8-bit alignment
+                                         resulting into 8 bit "version_ihl" field
+            bit<8>  diffserv;
+            bit<32> totalLen;
+            bit<16> identification;
+            bit<16> flags_fragOffset; // "flag" and "fragOffset" combined for 8-bit aligment
+                                         resulting into 16-bit "flags_fragOffset" field
+            bit<8>  ttl;
+            bit<8>  protocol;
+            bit<16> hdrChecksum;
+            bit<32> srcAddr;
+            bit<32> dstAddr;
+       }
+*/
+const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
+    // fields is used to create header with modified fields
+    auto fields = new IR::IndexedVector<IR::StructField>;
+    if (st->is<IR::Type_Header>()) {
+        unsigned size_sum_so_far = 0;
+        for (auto field : st->fields) {
+            if ((*field).type->is<IR::Type_Bits>()) {
+                auto t = (*field).type->to<IR::Type_Bits>();
+                auto width = t->width_bits();
+                if (width % 8 != 0) {
+                    size_sum_so_far += width;
+                    fieldInfo obj;
+                    obj.fieldWidth =  width;
+                    // Storing the non-aligned field
+                    field_name_list.emplace(field->name, obj);
+                } else {
+                    if (size_sum_so_far != 0) {
+                        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                                "Header Structure '%1%' has non-contiguous non-aligned fields"
+                                " which cannot be combined to align to 8-bit. DPDK does not"
+                                " support non 8-bit aligned header field",st->name.name);
+                        return st;
+                    }
+                    fields->push_back(field);
+                    continue;
+                }
+                cstring modifiedName = "";
+                auto size = field_name_list.size();
+                unsigned i = 0;
+                if (size_sum_so_far <= 64) {
+                    // Check if the sum of width of non-aligned field is divisble by 8.
+                    if (size_sum_so_far && (size_sum_so_far % 8 == 0)) {
+                        // Form the field with all non-aligned field stored in "field_name_list"
+                        for (auto s = field_name_list.begin(); s != field_name_list.end();
+                             s++,i++) {
+                            if ((i + 1) < (size))
+                                modifiedName += s->first + "_";
+                            else
+                                modifiedName += s->first;
+                        }
+                        unsigned offset = 0;
+                        /* Store information about each non-aligned field
+                           For eg : ModifiedName, header str, width, offset, and its
+                                    lsb and msb in modified field
+
+                                   header ipv4_t {
+                                        ...
+                                        bit<3>  flags;
+                                        bit<13> fragOffset;
+                                        ...
+                                   }
+                                   is converted into
+
+                                   header ipv4_t {
+                                        ...
+                                        bit<16>  flags_fragOffset;
+                                        ...
+                                   }
+                                    Here, for "flags", information saved are :
+                                        ModifiedName = flags_fragOffset;
+                                        header str   =  ipv4_t; [This is used if multiple headers
+                                                                 have field with same name]
+                                        width        = 16;
+                                        offset       = 3;
+                                        lsb          = 3;
+                                        msb          = 15;
+                        */
+                        for (auto s = field_name_list.begin(); s != field_name_list.end(); s++) {
+                            hdrFieldInfo fieldObj;
+                            fieldObj.modifiedName = modifiedName;
+                            fieldObj.headerStr = st->name.name;
+                            fieldObj.modifiedWidth = size_sum_so_far;
+                            fieldObj.fieldWidth = s->second.fieldWidth;
+                            fieldObj.lsb = offset;
+                            fieldObj.msb = offset + s->second.fieldWidth - 1;
+                            fieldObj.offset = offset;
+                            structure->hdrFieldInfoList[s->first].push_back(fieldObj);
+                            offset += s->second.fieldWidth;
+                        }
+                        fields->push_back(new IR::StructField(IR::ID(modifiedName),
+                                          IR::Type_Bits::get(size_sum_so_far)));
+                        size_sum_so_far = 0;
+                        modifiedName = "";
+                        field_name_list.clear();
+                    }
+                } else {
+                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                            "Combining the contiguos non 8-bit aligned fields result in a field"
+                            " with bit-width '%1%' > 64-bit in header structure '%2%'. DPDK does"
+                            " not support non 8-bit aligned and greater than 64-bit header field"
+                            ,size_sum_so_far, st->name.name);
+                    return st;
+                }
+            } else {
+                fields->push_back(field);
+            }
+        }
+        /* Throw error if there is non-aligned field present at the end in header */
+        if (size_sum_so_far != 0) {
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "8-bit Alignment for Header Structure '%1%' is not possible as no more header"
+                    " fields available in header to combine. DPDK does not support non-aligned"
+                    " header fields.", st->name.name);
+            return st;
+        }
+        return new IR::Type_Header(IR::ID(st->name), st->annotations, *fields);
+    }
+
+    return st;
+}
+
+/* This function replaces field accesses to headers that have been modified and replaces
+   them with equivalent expressions on the modified headers
+
+   For eg : If below header
+       header ipv4_t {
+            ...
+            bit<3>  flags;
+            bit<13> fragOffset;
+            ...
+       }
+       is converted into
+       header ipv4_t {
+            ...
+            bit<16>  flags_fragOffset;
+            ...
+       }
+       and there is a field used in P4 as mentioned below
+           if (hdrs.ipv4.fragOffset == 4) ....
+
+       Then, the above condition is converted into
+           if (hdrs.ipv4.flags_fragOffset[15:3] == 4) ....
+*/
+const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
+    cstring hdrStrName = "";
+
+    /* Get the member's header structure name */
+    if ((m != nullptr) && (m->expr != nullptr) &&
+        (m->expr->type != nullptr) &&
+        (m->expr->type->is<IR::Type_Header>())) {
+        auto str_type = m->expr->type->to<IR::Type_Header>();
+        hdrStrName = str_type->name.name;
+    } else {
+        return m;
+    }
+    /* Check if the member has been modified due to 8-bit header field aligment
+       and its related information is stored in "hdrFieldInfoList" data structure */
+    auto it = structure->hdrFieldInfoList.find(m->member.name);
+    if (it != structure->hdrFieldInfoList.end()) {
+        for (auto memVec : structure->hdrFieldInfoList[m->member.name]) {
+            /* header structure name is matched to handle the scenario where
+               two different headers have field with same name */
+            if (memVec.headerStr != hdrStrName)
+                continue;
+            auto mem = new IR::Member(m->expr, IR::ID(memVec.modifiedName));
+            auto sliceMem = new IR::Slice(mem->clone(), (memVec.offset + memVec.fieldWidth - 1),
+                                          memVec.offset);
+            return sliceMem;
+        }
+    }
+    return m;
+}
+
+/* This function processes the metadata structure and modify the metadata field width
+   to 32/64 bits if it is not 8-bit aligned */
+const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
+    /* Throw error if field width is greater than 64 bits */
+    for (auto field : st->fields) {
+        if ((*field).type->is<IR::Type_Bits>()) {
+            auto t = (*field).type->to<IR::Type_Bits>();
+            auto width = t->width_bits();
+            if (width > dpdk_max_field_width) {
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Unsupported bit width '%1%' for field '%2%'. DPDK "
+                     "does not support metadata/header field with width more than "
+                     "'%3%' bits", width, field, dpdk_max_field_width);
+            }
+        }
+    }
+    auto fields = new IR::IndexedVector<IR::StructField>;
+    if (st->is<IR::Type_Struct>()) {
+        for (auto field : st->fields) {
+            if (auto t = (*field).type->to<IR::Type_Bits>()) {
+                auto width = t->width_bits();
+                if (width % 8 != 0) {
+                    if (width < 32)
+                        width = 32;
+                    else
+                        width = 64;
+                    fields->push_back(new IR::StructField(IR::ID(field->name),
+                                      IR::Type_Bits::get(width)));
+                } else {
+                    fields->push_back(field);
+                }
+            } else {
+                fields->push_back(field);
+            }
+        }
+        return new IR::Type_Struct(IR::ID(st->name), st->annotations, *fields);
+    }
+    return st;
+}
+
 // This function collects the match key information of a table. This is later used for
 // generating context JSON.
 bool CollectTableInfo::preorder(const IR::Key *keys) {
-    std::vector<cstring> tableKeys;
+    std::vector<std::pair<cstring, cstring>> tableKeys;
     if (!keys || keys->keyElements.size() == 0) {
         return false;
     }
     /* Push all non-selector keys to the key_map for this table.
        Selector keys become part of the selector table */
     for (auto key : keys->keyElements) {
-        cstring keyTypeStr = key->expression->toString();
-        if (key->matchType->toString() != "selector")
-            tableKeys.push_back(keyTypeStr);
+        cstring keyName = key->expression->toString();
+        cstring keyNameAnnon = key->expression->toString();;
+        auto annon = key->getAnnotation(IR::Annotation::nameAnnotation);
+        if (key->matchType->toString() != "selector") {
+            if (annon !=  nullptr)
+                keyNameAnnon = annon->getSingleString();
+            tableKeys.push_back(std::make_pair(keyName, keyNameAnnon));
+        }
     }
 
     auto control = findOrigCtxt<IR::P4Control>();
@@ -695,9 +909,10 @@ const IR::Node *IfStatementUnroll::postorder(IR::SwitchStatement *sw) {
         code_block->push_back(i);
 
     auto control = findOrigCtxt<IR::P4Control>();
+    auto parser = findOrigCtxt<IR::P4Parser>();
 
     for (auto d : unroller->decl)
-        injector.collect(control, nullptr, d);
+        injector.collect(control, parser, d);
     if (unroller->root) {
         sw->expression = unroller->root;
     }
@@ -715,9 +930,9 @@ const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
         code_block->push_back(i);
 
     auto control = findOrigCtxt<IR::P4Control>();
-
+    auto parser = findOrigCtxt<IR::P4Parser>();
     for (auto d : unroller->decl)
-        injector.collect(control, nullptr, d);
+        injector.collect(control, parser, d);
     if (unroller->root) {
         i->condition = unroller->root;
     }
@@ -728,6 +943,11 @@ const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
 const IR::Node *IfStatementUnroll::postorder(IR::P4Control *a) {
     auto control = getOriginal();
     return injector.inject_control(control, a);
+}
+
+const IR::Node *IfStatementUnroll::postorder(IR::P4Parser *a) {
+    auto parser = getOriginal();
+    return injector.inject_parser(parser, a);
 }
 
 // TODO(GordonWuCn): simplify with a postorder visitor if it is a statement,
@@ -866,10 +1086,29 @@ ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
         } else if (left->equiv(*r->right)) {
             IR::Operation_Binary *bin_expr;
             bin_expr = r->clone();
-            bin_expr->left = r->right;
-            bin_expr->right = r->left;
-            a->right = bin_expr;
-            return a;
+            if (isCommutativeBinaryOperation(r)) {
+                bin_expr->left = r->right;
+                bin_expr->right = r->left;
+                a->right = bin_expr;
+                return a;
+            } else {
+                // Non-commutative expressions like "a = b << a" should be replaced with the
+                // following block of statments
+                // tmp = b;
+                // tmp = tmp << a;
+                // a = tmp;
+                IR::IndexedVector<IR::StatOrDecl> code_block;
+                auto control = findOrigCtxt<IR::P4Control>();
+                auto parser = findOrigCtxt<IR::P4Parser>();
+                auto tmpOp1 = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
+                injector.collect(control, parser,
+                                 new IR::Declaration_Variable(tmpOp1->path->name, left->type));
+                code_block.push_back(new IR::AssignmentStatement(tmpOp1, r->left));
+                bin_expr->left = tmpOp1;
+                code_block.push_back(new IR::AssignmentStatement(tmpOp1, bin_expr));
+                code_block.push_back(new IR::AssignmentStatement(left, tmpOp1));
+                return new IR::BlockStatement(code_block);
+            }
         } else {
             IR::IndexedVector<IR::StatOrDecl> code_block;
             const IR::Expression *src1;
@@ -878,8 +1117,13 @@ ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
                 src1 = r->left;
                 src2 = r->right;
             } else if (isNonConstantSimpleExpression(r->right)) {
-                src1 = r->right;
-                src2 = r->left;
+                if (isCommutativeBinaryOperation(r)) {
+                    src1 = r->right;
+                    src2 = r->left;
+                } else {
+                    src1 = r->left;
+                    src2 = r->right;
+                }
             } else {
                 std::cerr << r->right->node_type_name() << std::endl;
                 std::cerr << r->left->node_type_name() << std::endl;
@@ -892,7 +1136,6 @@ ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
             expr->left = left;
             expr->right = src2;
             code_block.push_back(new IR::AssignmentStatement(left, expr));
-            // code_block.push_back(new IR::AssignmentStatement(left, tmp));
             return new IR::BlockStatement(code_block);
         }
     }
@@ -929,6 +1172,9 @@ const IR::Node *CollectLocalVariables::preorder(IR::P4Program *p) {
 
 const IR::Node *CollectLocalVariables::postorder(IR::Type_Struct *s) {
     if (s->name.name == structure->local_metadata_type) {
+        for (auto sf : structure->key_fields) {
+             s->fields.push_back(sf);
+        }
         for (auto kv : localsMap) {
             auto dv = kv.first;
             auto type = typeMap->getType(dv, true);
@@ -1030,6 +1276,21 @@ const IR::Node *CollectLocalVariables::postorder(IR::P4Parser *p) {
     }
     p->parserLocals = decls;
     return p;
+}
+
+/* This function stores the information about parameters of default action
+   for each table */
+void DefActionValue::postorder(const IR::P4Table *t) {
+    auto default_action = t->properties->getProperty("default_action");
+    if (default_action != nullptr && default_action->value->is<IR::ExpressionValue>()) {
+        auto expr = default_action->value->to<IR::ExpressionValue>()->expression;
+        auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
+                refMap, typeMap);
+        BUG_CHECK(mi->is<P4::ActionCall>(),
+            "%1%: expected action in default_action", default_action);
+        structure->defActionParamList[t->toString()] =
+                   new IR::ParameterList(mi->to<P4::ActionCall>()->action->parameters->parameters);
+    }
 }
 
 const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Action *a) {
@@ -1237,25 +1498,26 @@ const IR::Node* DismantleMuxExpressions::postorder(IR::AssignmentStatement* stat
    }
 
    gets translated to
-   control ingress(inout headers h, inout metadata m) {
+   Temporary variable holding table key copies are held in ProgramStructure key_fields.
        bit<48> tbl_ethernet_srcAddr;  // These declarations are later copied to metadata struct
        bit<16> tbl_ipv4_totalLen;     // in CollectLocalVariables pass.
+
+   control ingress(inout headers h, inout metadata m) {
        ...
        table tbl {
            key = {
-               tbl_ethernet_srcAddr: lpm;
-               tbl_ipv4_totalLen   : exact;
+               m.ingress_tbl_ethernet_srcAddr: lpm;
+               m.ingress_tbl_ipv4_totalLen   : exact;
            }
            ...
        }
        apply {
-           tbl_ethernet_srcAddr = h.ethernet.srcAddr;
-           tbl_ipv4_totalLen = h.ipv4.totalLen;
+           m.ingress_tbl_ethernet_srcAddr = h.ethernet.srcAddr;
+           m.ingress_tbl_ipv4_totalLen = h.ipv4.totalLen;
            tbl_0.apply();
        }
   }
 */
-
 const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
     // If any key field is from different structure, put all keys in metadata
     LOG3("Visiting " << keys);
@@ -1316,6 +1578,7 @@ const IR::Node* CopyMatchKeysToSingleStruct::postorder(IR::KeyElement* element) 
     // If we got here we need to put the key element in metadata.
     LOG3("Extracting key element " << element);
     auto table = findOrigCtxt<IR::P4Table>();
+    auto control = findOrigCtxt<IR::P4Control>();
     CHECK_NULL(table);
     P4::TableInsertions* insertions;
     auto it = toInsert.find(table);
@@ -1331,16 +1594,18 @@ const IR::Node* CopyMatchKeysToSingleStruct::postorder(IR::KeyElement* element) 
     /* All header fields are prefixed with "h.", prefix the match field with table name */
     if (keyName.startsWith("h.")) {
         keyName = keyName.replace('.','_');
-        keyName = keyName.replace("h_",table->name.toString()+"_");
-        auto keyPathExpr = new IR::PathExpression(IR::ID(refMap->newName(keyName)));
-        auto decl = new IR::Declaration_Variable(keyPathExpr->path->name,
+        keyName = keyName.replace("h_",control->name.toString() + "_" + table->name.toString()+"_");
+        IR::ID keyNameId(refMap->newName(keyName));
+        auto decl = new IR::Declaration_Variable(keyNameId,
                                                  element->expression->type, nullptr);
-        insertions->declarations.push_back(decl);
+        // Store the compiler generated table keys in Program structure. These will be
+        // inserted to Metadata by CollectLocalVariables pass.
+        structure->key_fields.push_back(new IR::StructField(decl->name.name, decl->type));
         auto right = element->expression;
-        auto assign = new IR::AssignmentStatement(element->expression->srcInfo,
-                                                  keyPathExpr, right);
+        auto left = new IR::Member(new IR::PathExpression(IR::ID("m")), keyNameId);
+        auto assign = new IR::AssignmentStatement(element->expression->srcInfo, left, right);
         insertions->statements.push_back(assign);
-        element->expression = keyPathExpr;
+        element->expression = left;
     }
     return element;
 }
@@ -1417,8 +1682,6 @@ SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
     } else {
         BUG("Unexpected table implementation type");
     }
-    auto hidden = new IR::Annotations();
-    hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
     IR::Vector<IR::KeyElement> match_keys;
     for (auto key : tbl->getKey()->keyElements) {
         if (key->matchType->toString() != "selector") {
@@ -1429,16 +1692,28 @@ SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
 
     auto actionCall = new IR::MethodCallExpression(new IR::PathExpression(actionName));
     actionsList.push_back(new IR::ActionListElement(actionCall));
-    actionsList.push_back(new IR::ActionListElement(tbl->getDefaultAction()));
+    auto default_action = tbl->getDefaultAction();
+    if (default_action) {
+        if (auto mc = default_action->to<IR::MethodCallExpression>()) {
+            // Ignore action params of default action by creating new MethodCallExpression
+            auto defAction = new IR::MethodCallExpression(mc->method->to<IR::PathExpression>());
+            actionsList.push_back(new IR::ActionListElement(defAction));
+        }
+    }
+
+    auto constDefAction = tbl->properties->getProperty("default_action");
+
     IR::IndexedVector<IR::Property> properties;
     properties.push_back(new IR::Property("actions", new IR::ActionList(actionsList), false));
     properties.push_back(new IR::Property("key", new IR::Key(match_keys), false));
     properties.push_back(new IR::Property("default_action",
-                         new IR::ExpressionValue(tbl->getDefaultAction()), false));
+                         new IR::ExpressionValue(tbl->getDefaultAction()),
+                         constDefAction->isConstant));
     if (tbl->getSizeProperty()) {
         properties.push_back(new IR::Property("size",
                              new IR::ExpressionValue(tbl->getSizeProperty()), false)); }
-    auto match_table = new IR::P4Table(tbl->name, new IR::TableProperties(properties));
+    auto match_table = new IR::P4Table(tbl->name, tbl->annotations,
+                                       new IR::TableProperties(properties));
     return std::make_tuple(match_table, actionName);
 }
 
@@ -1466,6 +1741,10 @@ const IR::P4Table* SplitP4TableCommon::create_member_table(const IR::P4Table* tb
 
     auto hidden = new IR::Annotations();
     hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
+    auto nameAnnon = tbl->getAnnotation(IR::Annotation::nameAnnotation);
+    cstring nameA = nameAnnon->getSingleString();
+    cstring memName = nameA.replace(nameA.findlast('.'), "." + memberTableName);
+    hidden->addAnnotation(IR::Annotation::nameAnnotation, new IR::StringLiteral(memName), false);
 
     IR::IndexedVector<IR::ActionListElement> memberActionList;
     for (auto action : tbl->getActionList()->actionList)
@@ -1496,6 +1775,10 @@ const IR::P4Table* SplitP4TableCommon::create_group_table(const IR::P4Table* tbl
     }
     auto hidden = new IR::Annotations();
     hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
+    auto nameAnnon = tbl->getAnnotation(IR::Annotation::nameAnnotation);
+    cstring nameA = nameAnnon->getSingleString();
+    cstring selName = nameA.replace(nameA.findlast('.'), "." + selectorTableName);
+    hidden->addAnnotation(IR::Annotation::nameAnnotation, new IR::StringLiteral(selName), false);
     IR::IndexedVector<IR::Property> selector_properties;
     selector_properties.push_back(new IR::Property("selector", new IR::Key(selector_keys), false));
     selector_properties.push_back(new IR::Property("group_id",
@@ -1530,7 +1813,8 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
         return tbl;
 
     if (instance->arguments->size() != 3) {
-        ::error("Incorrect number of argument on action selector %1%", *instance->name);
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "Incorrect number of argument on action selector %1%", *instance->name);
         return tbl;
     }
 
@@ -1646,7 +1930,8 @@ const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
         return tbl;
 
     if (instance->arguments->size() != 1) {
-        ::error("Incorrect number of argument on action profile %1%", *instance->name);
+        ::error(ErrorType::ERR_MODEL,
+                "Incorrect number of argument on action profile %1%", *instance->name);
         return tbl;
     }
 
@@ -1744,14 +2029,16 @@ const IR::Node* SplitP4TableCommon::postorder(IR::MethodCallStatement *statement
 
         if (implementation == TableImplementation::ACTION_SELECTOR) {
             if (group_tables.count(tableName) == 0) {
-                ::error("Unable to find group table %1%", tableName);
+                ::error(ErrorType::ERR_NOT_FOUND,
+                        "Unable to find group table %1%", tableName);
                 return statement;
             }
             auto selectorTable = group_tables.at(tableName);
             decls->push_back(gen_apply(selectorTable));
         }
         if (member_tables.count(tableName) == 0) {
-            ::error("Unable to find member table %1%", tableName);
+            ::error(ErrorType::ERR_NOT_FOUND,
+                    "Unable to find member table %1%", tableName);
             return statement;
         }
 
@@ -1915,7 +2202,8 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
 
         if (implementation == TableImplementation::ACTION_SELECTOR) {
             if (group_tables.count(tableName) == 0) {
-                ::error("Unable to find group table %1%", tableName);
+                ::error(ErrorType::ERR_NOT_FOUND,
+                        "Unable to find group table %1%", tableName);
                 return statement; }
             auto selectorTable = group_tables.at(tableName);
             auto t1stat = gen_apply(selectorTable);
@@ -1923,7 +2211,8 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
         }
 
         if (member_tables.count(tableName) == 0) {
-            ::error("Unable to find member table %1%", tableName);
+            ::error(ErrorType::ERR_NOT_FOUND,
+                    "Unable to find member table %1%", tableName);
             return statement; }
         auto memberTable = member_tables.at(tableName);
         auto t2stat = gen_action_run(memberTable);
@@ -1974,6 +2263,19 @@ void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
                     default_action);
         }
     }
+    if (use_add_on_miss) {
+        for (auto action : t->getActionList()->actionList) {
+            auto action_decl = refMap->getDeclaration(action->getPath())->to<IR::P4Action>();
+            // Map the compiler generated internal name of action (emitted in .spec file) with
+            // user visible name in P4 program.
+            // To get the user visible name, strip any prefixes from externalName.
+            cstring userVisibleName = action_decl->externalName();
+            userVisibleName = userVisibleName.findlast('.');
+            userVisibleName = userVisibleName.trim(".\t\n\r");
+            structure->learner_action_map.emplace(userVisibleName, action_decl->name.name);
+            structure->learner_action_table.emplace(action_decl->externalName(), t);
+        }
+    }
 }
 
 void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
@@ -1990,12 +2292,171 @@ void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
     BUG_CHECK(ctxt != nullptr, "%1%: add_entry extern can only be used in an action", mcs);
 
     // assuming checking on number of arguments is already performed in frontend.
-    BUG_CHECK(mce->arguments->size() == 2, "%1%: expected two arguments in add_entry extern", mcs);
+    BUG_CHECK(mce->arguments->size() == 3,
+              "%1%: expected 3 arguments in add_entry extern", mcs);
     auto action = mce->arguments->at(0);
     // assuming syntax check is already performed earlier
     auto action_name = action->expression->to<IR::StringLiteral>()->value;
     structure->learner_actions.insert(action_name);
     return;
+}
+
+void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
+    bool isValidExternCall = false;
+    cstring propName = "";
+    auto mce = mcs->methodCall;
+    auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+    if (!mi->is<P4::ExternFunction>()) {
+        return;
+    }
+    auto func = mi->to<P4::ExternFunction>();
+    auto externFuncName = func->method->name;
+    if (externFuncName != "restart_expire_timer" && externFuncName != "set_entry_expire_time" &&
+        externFuncName != "add_entry")
+        return;
+    auto act = findOrigCtxt<IR::P4Action>();
+    BUG_CHECK(act != nullptr, "%1%: %2% extern can only be used in an action", mcs, externFuncName);
+    auto tbl = ::get(structure->learner_action_table,act->externalName());
+    if (externFuncName == "restart_expire_timer" || externFuncName == "set_entry_expire_time") {
+        bool use_idle_timeout_with_auto_delete = false;
+        if (tbl) {
+            auto idle_timeout_with_auto_delete =
+                 tbl->properties->getProperty("idle_timeout_with_auto_delete");
+            if (idle_timeout_with_auto_delete != nullptr) {
+                propName = "idle_timeout_with_auto_delete";
+                if (idle_timeout_with_auto_delete->value->is<IR::ExpressionValue>()) {
+                    auto expr =
+                    idle_timeout_with_auto_delete->value->to<IR::ExpressionValue>()->expression;
+                    if (!expr->is<IR::BoolLiteral>()) {
+                        ::error(ErrorType::ERR_UNEXPECTED,
+                               "%1%: expected boolean for 'idle_timeout_with_auto_delete' property",
+                               idle_timeout_with_auto_delete);
+                        return;
+                     } else {
+                         use_idle_timeout_with_auto_delete = expr->to<IR::BoolLiteral>()->value;
+                         if (use_idle_timeout_with_auto_delete)
+                             isValidExternCall = true;
+                     }
+                }
+            }
+        }
+    } else if (externFuncName == "add_entry") {
+        if (tbl) {
+            auto add_on_miss = tbl->properties->getProperty("add_on_miss");
+            if (add_on_miss != nullptr) {
+                propName = "add_on_miss";
+                if (add_on_miss->value->is<IR::ExpressionValue>()) {
+                    auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
+                    if (!expr->is<IR::BoolLiteral>()) {
+                        ::error(ErrorType::ERR_UNEXPECTED,
+                                "%1%: expected boolean for 'add_on_miss' property", add_on_miss);
+                        return;
+                    } else {
+                        auto use_add_on_miss = expr->to<IR::BoolLiteral>()->value;
+                        if (use_add_on_miss)
+                            isValidExternCall = true;
+                    }
+                }
+            }
+        }
+    }
+    if (!isValidExternCall) {
+         ::error(ErrorType::ERR_UNEXPECTED,
+                 "%1% must only be called from within an action with '%2%'"
+                 " property equal to true", externFuncName, propName);
+    }
+    return;
+}
+
+bool ElimHeaderCopy::isHeader(const IR::Expression* e) {
+    auto type = typeMap->getType(e);
+    if (type)
+        return type->is<IR::Type_Header>() && !e->is<IR::MethodCallExpression>();
+    return false;
+}
+
+const IR::Node* ElimHeaderCopy::preorder(IR::AssignmentStatement* as) {
+    if (isHeader(as->left) && isHeader(as->right)) {
+        if (auto path = as->left->to<IR::PathExpression>()) {
+            replacementMap.insert(std::make_pair(path->path->name.name,
+                                   as->right->to<IR::Member>()));
+            return new IR::EmptyStatement();
+        } else if (auto path = as->right->to<IR::PathExpression>()) {
+            replacementMap.insert(std::make_pair(path->path->name.name,
+                                  as->left->to<IR::Member>()));
+            return  new IR::EmptyStatement();
+        } else {
+            IR::ID methodName;
+            IR::IndexedVector<IR::StatOrDecl> components;
+            // copy validity flag
+            auto isValid = new IR::Member(as->right->srcInfo, as->right,
+                              IR::ID(IR::Type_Header::isValid));
+            auto result = new IR::MethodCallExpression(as->right->srcInfo, IR::Type::Boolean::get(),
+                                                   isValid);
+            typeMap->setType(isValid, new IR::Type_Method(IR::Type::Boolean::get(),
+                                          new IR::ParameterList(), IR::Type_Header::isValid));
+            auto method = new IR::Member(as->left->srcInfo, as->left,
+                                         IR::ID(IR::Type_Header::setValid));
+            auto mc = new IR::MethodCallExpression(as->left->srcInfo, method,
+                          new IR::Vector<IR::Argument>());
+            typeMap->setType(method, new IR::Type_Method(IR::Type_Void::get(),
+                                new IR::ParameterList(), IR::Type_Header::setValid));
+            components.push_back(new IR::MethodCallStatement(mc->srcInfo, mc));
+            auto ifTrue = components;
+            components.clear();
+            auto method1 = new IR::Member(as->left->srcInfo, as->left,
+                                              IR::ID(IR::Type_Header::setInvalid));
+            auto mc1 = new IR::MethodCallExpression(as->left->srcInfo, method1,
+                          new IR::Vector<IR::Argument>());
+            typeMap->setType(method1, new IR::Type_Method(IR::Type_Void::get(),
+                                new IR::ParameterList(), IR::Type_Header::setInvalid));
+            components.push_back(new IR::MethodCallStatement(mc1->srcInfo, mc1));
+            auto ifFalse = components;
+            components.clear();
+            auto ifStatement = new IR::IfStatement(
+              result, new IR::BlockStatement(ifTrue), new IR::BlockStatement(ifFalse));
+            components.push_back(ifStatement);
+            // both are non temporary header instance do element wise copy
+            for (auto field : typeMap->getType(as->left)->to<IR::Type_Header>()->fields) {
+                components.push_back(new IR::AssignmentStatement(as->srcInfo,
+                                     new IR::Member(as->left, field->name),
+                                     new IR::Member(as->right, field->name)));
+            }
+            return new IR::BlockStatement(as->srcInfo, components);
+        }
+    }
+    return as;
+}
+
+/**
+ * Replace method call expression with temporary instances
+ * like eth_0.setInvalid()
+ * with empty statement as all uses of eth_0 already replaced
+ *
+ */
+const IR::Node* ElimHeaderCopy::preorder(IR::MethodCallStatement *mcs) {
+    auto me = mcs->methodCall;
+    auto m = me->method->to<IR::Member>();
+    if (!m)
+        return mcs;
+    if (!isHeader(m->expr))
+        return mcs;
+    auto expr = m->expr->to<IR::PathExpression>();
+    if (expr && replacementMap.count(expr->path->name.name)) {
+        return new IR::EmptyStatement();
+    }
+    return mcs;
+}
+
+const IR::Node* ElimHeaderCopy::postorder(IR::Member* m) {
+    if (!isHeader(m->expr)) {
+        return m;
+    }
+    auto expr = m->expr->to<IR::PathExpression>();
+    if (expr && replacementMap.count(expr->path->name.name)) {
+        return new IR::Member(replacementMap.at(expr->path->name.name), m->member);
+    }
+    return m;
 }
 
 }  // namespace DPDK

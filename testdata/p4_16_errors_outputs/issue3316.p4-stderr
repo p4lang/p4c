@@ -1,0 +1,3 @@
+issue3316.p4(5): [--Werror=type-error] error: h: expression must be a compile-time constant
+bit f(in bit a = h(1), in bit b)
+                 ^^^^

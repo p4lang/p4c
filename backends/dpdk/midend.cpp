@@ -44,6 +44,7 @@ limitations under the License.
 #include "midend/fillEnumMap.h"
 #include "midend/flattenHeaders.h"
 #include "midend/flattenInterfaceStructs.h"
+#include "midend/hsIndexSimplify.h"
 #include "midend/local_copyprop.h"
 #include "midend/midEndLast.h"
 #include "midend/nestedStructs.h"
@@ -156,7 +157,8 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,
         if (arch == "pna") {
             return new P4::ValidateTableProperties({"pna_implementation",
                     "pna_direct_counter", "pna_direct_meter", "pna_idle_timeout", "size",
-                    "add_on_miss"});
+                    "add_on_miss", "idle_timeout_with_auto_delete",
+                    "default_idle_timeout_for_data_plane_added_entries"});
         } else if (arch == "psa") {
             return new P4::ValidateTableProperties({"psa_implementation",
                     "psa_direct_counter", "psa_direct_meter", "psa_idle_timeout", "size"});
@@ -204,10 +206,9 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,
             new P4::FlattenHeaders(&refMap, &typeMap),
             new P4::FlattenInterfaceStructs(&refMap, &typeMap),
             new P4::SimplifyControlFlow(&refMap, &typeMap),
+            new P4::HSIndexSimplifier(&refMap, &typeMap),
             new P4::ParsersUnroll(true, &refMap, &typeMap),
             new P4::ReplaceSelectRange(&refMap, &typeMap),
-            // DPDK architecture does not currently support predicated instructions
-            // new P4::Predication(&refMap),
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap, nullptr, policy),

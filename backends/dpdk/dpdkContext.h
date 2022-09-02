@@ -43,12 +43,15 @@ struct TableAttributes {
        Match table is a regular P4 table, selection table and action tables are compiler
        generated tables when psa_implementation is action_selector or action_profile */
     cstring tableType;
+    bool is_add_on_miss;
+    bool idle_timeout_with_auto_delete;
     bool isHidden;
     unsigned size;
     cstring controlName;
+    cstring externalName;
     unsigned default_action_handle;
     /* Non selector table keys from original P4 program */
-    std::vector<cstring> tableKeys;
+    std::vector<std::pair<cstring, cstring>> tableKeys;
 };
 
 /* This structure holds action attributes required for context JSON which are not
@@ -59,7 +62,14 @@ struct actionAttributes {
     bool allowed_as_hit_action;
     bool allowed_as_default_action;
     unsigned actionHandle;
+    cstring externalName;
     IR::IndexedVector<IR::Parameter> *params;
+};
+
+struct externAttributes {
+    cstring externalName;
+    cstring externType;
+    cstring counterType;
 };
 
 /* Program level information for context json */
@@ -69,14 +79,8 @@ struct TopLevelCtxt{
     cstring compileCommand;
     cstring compilerVersion;
     void initTopLevelCtxt(DpdkOptions &options) {
-        /* Fetch required information from options */
-        const time_t now = time(NULL);
-        char build_date[50];
-        strftime(build_date, 50, "%c", localtime(&now));
-        buildDate = build_date;
-        compileCommand = options.DpdkCompCmd;
-        compileCommand = compileCommand.replace("(from pragmas)", "");
-        compileCommand = compileCommand.trim();
+        buildDate = options.getBuildDate();
+        compileCommand = options.getCompileCommand();
         progName =  options.file;
         auto fileName = progName.findlast('/');
         // Handle the case when input file is in the current working directory.
@@ -125,10 +129,12 @@ class DpdkContextGenerator : public Inspector {
     DpdkOptions &options;
     // All tables are collected into this vector
     IR::IndexedVector<IR::Declaration> tables;
+    std::vector<const IR::Declaration_Instance*> externs;
 
-    // Maps holding table and action attributes needed for context JSON
+    // Maps holding table, extern and action attributes needed for context JSON
     std::map<const cstring, struct TableAttributes> tableAttrmap;
     std::map <cstring, struct actionAttributes> actionAttrMap;
+    std::map <cstring, struct externAttributes> externAttrMap;
 
     // Running unique ID for tables and actions
     static unsigned newTableHandle;
@@ -145,8 +151,9 @@ class DpdkContextGenerator : public Inspector {
     void serializeContextJson(std::ostream* destination);
     const Util::JsonObject* genContextJsonObject();
     void addMatchTables(Util::JsonArray* tablesJson);
+    void addExternInfo(Util::JsonArray* externsJson);
     Util::JsonObject* initTableCommonJson(const cstring name, const struct TableAttributes & attr);
-    void addKeyField(Util::JsonArray* keyJson, const cstring name,
+    void addKeyField(Util::JsonArray* keyJson, const cstring name, const cstring annon,
                      const IR::KeyElement *key, int position);
     Util::JsonArray* addActions(const IR::P4Table * table, const cstring ctrlName, bool isMatch);
     bool addRefTables(const cstring tbl_name, const IR::P4Table **memberTable,

@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Makefile for the EBPF P4-16 back-end.
-# To be included in the main P4C compiler makefile
+# CMakefile for the EBPF P4-16 back-end.
+# To be included in the main P4C compiler CMakefile
 
 message(STATUS "Start configuring eBPF back end")
 
@@ -26,6 +26,7 @@ set (P4C_EBPF_SRCS
   ebpfProgram.cpp
   ebpfTable.cpp
   ebpfControl.cpp
+  ebpfDeparser.cpp
   ebpfParser.cpp
   ebpfOptions.cpp
   target.cpp
@@ -34,12 +35,29 @@ set (P4C_EBPF_SRCS
   ebpfModel.cpp
   midend.cpp
   lower.cpp
-  )
+  ../bmv2/common/programStructure.cpp
+  ../bmv2/psa_switch/psaProgramStructure.cpp
+  psa/ebpfPsaGen.cpp
+  psa/ebpfPipeline.cpp
+  psa/ebpfPsaParser.cpp
+  psa/ebpfPsaDeparser.cpp
+  psa/ebpfPsaControl.cpp
+  psa/ebpfPsaTable.cpp
+  psa/backend.cpp
+  psa/externs/ebpfPsaCounter.cpp
+  psa/externs/ebpfPsaChecksum.cpp
+  psa/externs/ebpfPsaHashAlgorithm.cpp
+  psa/externs/ebpfPsaTableImplementation.cpp
+  psa/externs/ebpfPsaRandom.cpp
+  psa/externs/ebpfPsaRegister.cpp
+  psa/externs/ebpfPsaMeter.cpp
+)
 
 set (P4C_EBPF_HDRS
   codeGen.h
   ebpfBackend.h
   ebpfControl.h
+  ebpfDeparser.h
   ebpfModel.h
   ebpfObject.h
   ebpfProgram.h
@@ -50,7 +68,25 @@ set (P4C_EBPF_HDRS
   midend.h
   target.h
   lower.h
-  )
+  ../bmv2/common/programStructure.h
+  ../bmv2/psa_switch/psaProgramStructure.h
+  ../bmv2/psa_switch/psaSwitch.h
+  psa/backend.h
+  psa/ebpfPsaGen.h
+  psa/xdpHelpProgram.h
+  psa/ebpfPipeline.h
+  psa/ebpfPsaParser.h
+  psa/ebpfPsaDeparser.h
+  psa/ebpfPsaControl.h
+  psa/ebpfPsaTable.h
+  psa/externs/ebpfPsaCounter.h
+  psa/externs/ebpfPsaChecksum.h
+  psa/externs/ebpfPsaHashAlgorithm.h
+  psa/externs/ebpfPsaTableImplementation.h
+  psa/externs/ebpfPsaRegister.h
+  psa/externs/ebpfPsaRandom.h
+  psa/externs/ebpfPsaMeter.h
+)
 
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_EBPF_SRCS};${P4C_EBPF_HDRS}")
 
@@ -99,17 +135,15 @@ set(EBPF_DRIVER_KERNEL "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t kernel -
 set(EBPF_DRIVER_BCC "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t bcc -c \"${P4C_BINARY_DIR}/p4c-ebpf\"")
 set(EBPF_DRIVER_TEST "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t test -c \"${P4C_BINARY_DIR}/p4c-ebpf\"")
 
-set (XFAIL_TESTS_KERNEL
-  # Rejected by kernel verifier, likely reasons:
-  # https://github.com/xdp-project/xdp-tutorial/issues/38
-  # We are using iproute2, which has a bug.
-  # Load eBPF code directly to avoid this
-  ${P4C_SOURCE_DIR}/testdata/p4_16_samples/lpm_ebpf.p4
+set (XFAIL_TESTS_KERNEL)
+set (XFAIL_TESTS_BCC
+  # ternary not implemented for BCC
+  ${P4C_SOURCE_DIR}/testdata/p4_16_samples/ternary_ebpf.p4
   )
-set (XFAIL_TESTS_BCC)
 set (XFAIL_TESTS_TEST
-  # lpm not implemented for stf tests
+  # lpm and ternary not implemented for stf tests
   ${P4C_SOURCE_DIR}/testdata/p4_16_samples/lpm_ebpf.p4
+  ${P4C_SOURCE_DIR}/testdata/p4_16_samples/ternary_ebpf.p4
   )
 
 set (EBPF_TEST_SUITES
@@ -185,4 +219,5 @@ p4c_add_test_with_args("ebpf" ${EBPF_DRIVER_TEST} FALSE "testdata/p4_16_samples/
 # FIXME:This does not work yet
 # We do not have support for dynamic addition of tables in the test framework
 p4c_add_test_with_args("ebpf" ${EBPF_DRIVER_TEST} TRUE "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-conntrack-ebpf.c" "")
+
 message(STATUS "Done with configuring BPF back end")

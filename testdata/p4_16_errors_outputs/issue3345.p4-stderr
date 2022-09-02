@@ -1,0 +1,14 @@
+issue3345.p4(3): [--Werror=type-error] error: SelectExpression
+    transition select(t) {
+               ^
+  ---- Actual error:
+issue3345.p4(1): Cannot unify type 'bit<1>' with type 'bool'
+  parser MyParser2(in bool t) {
+                      ^^^^
+  ---- Originating from:
+issue3345.p4(4): 'match' case label '1w1' has type 'bit<1>' which does not match the expected type 'bool'
+       1w1: accept;
+       ^^^
+issue3345.p4(1)
+  parser MyParser2(in bool t) {
+                      ^^^^

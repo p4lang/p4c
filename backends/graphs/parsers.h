@@ -18,6 +18,8 @@
 #ifndef _BACKENDS_GRAPHS_PARSERS_H_
 #define _BACKENDS_GRAPHS_PARSERS_H_
 
+#include "graphs.h"
+
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
@@ -25,18 +27,9 @@
 #include "lib/path.h"
 #include "lib/safe_vector.h"
 
-namespace P4 {
-// Forward declaration to avoid includes
-class TypeMap;
-class ReferenceMap;
-}  // end namespace P4
+namespace graphs{
 
-namespace graphs {
-
-class ParserGraphs : public Inspector {
-    const P4::ReferenceMap* refMap;
-    const cstring graphsDir;
-
+class ParserGraphs : public Graphs{
  protected:
     struct TransitionEdge {
         const IR::ParserState* sourceState;
@@ -53,17 +46,22 @@ class ParserGraphs : public Inspector {
     std::map<const IR::P4Parser*, safe_vector<const IR::ParserState*>> states;
 
  public:
-    ParserGraphs(P4::ReferenceMap *refMap, P4::TypeMap *, const cstring &graphsDir) :
-            refMap(refMap), graphsDir(graphsDir) {
-        CHECK_NULL(refMap); setName("ParserGraphs");
-    }
+    ParserGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const cstring &graphsDir);
 
+    Graph *CreateSubGraph(Graph &currentSubgraph, const cstring &name);
     void postorder(const IR::P4Parser* parser) override;
     void postorder(const IR::ParserState* state) override;
     void postorder(const IR::PathExpression* expression) override;
     void postorder(const IR::SelectExpression* expression) override;
+
+    std::vector<Graph *> parserGraphsArray{};
+
+ private:
+    P4::ReferenceMap *refMap; P4::TypeMap *typeMap;
+    const cstring graphsDir;
+    boost::optional<cstring> instanceName{};
 };
 
-}  // namespace graphs
+}
 
 #endif  /* _BACKENDS_GRAPHS_PARSERS_H_ */

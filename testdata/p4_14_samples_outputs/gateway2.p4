@@ -62,7 +62,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         set_default_behavior_drop.apply();
-        if (hdr.data.b2 == hdr.data.b3 && hdr.data.b4 == 8w10) {
+        if ((bit<8>)hdr.data.b2 == hdr.data.b3 && hdr.data.b4 == 8w10) {
             test1.apply();
         } else {
             test2.apply();

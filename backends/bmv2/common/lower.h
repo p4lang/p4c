@@ -29,12 +29,13 @@ namespace BMV2 {
 */
 class LowerExpressions : public Transform {
     P4::TypeMap* typeMap;
-    // Cannot shift with a value larger than 8 bits
-    const int maxShiftWidth = 8;
+    // Maximum shift amount, defaults to 8 bits
+    int maxShiftWidth;
 
     const IR::Expression* shift(const IR::Operation_Binary* expression) const;
  public:
-    explicit LowerExpressions(P4::TypeMap* typeMap) : typeMap(typeMap)
+    explicit LowerExpressions(P4::TypeMap* typeMap, int maxShiftWidth = 8) :
+             typeMap(typeMap), maxShiftWidth(maxShiftWidth)
     { CHECK_NULL(typeMap); setName("LowerExpressions"); }
 
     const IR::Node* postorder(IR::Expression* expression) override;

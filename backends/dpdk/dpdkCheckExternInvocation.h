@@ -48,6 +48,7 @@ class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
         bitvec validInMainControl;
         validInMainControl.setbit(MAIN_CONTROL);
         setPipeConstraints("send_to_port", validInMainControl);
+        setPipeConstraints("mirror_packet", validInMainControl);
         // Add new constraints here
     }
 

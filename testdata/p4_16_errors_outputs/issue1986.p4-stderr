@@ -4,7 +4,10 @@ issue1986.p4(17): [--Werror=type-error] error: SelectExpression
   ---- Actual error:
   Cannot unify type 'bit<0>' with type 'bit<1>'
   ---- Originating from:
-issue1986.p4(18): 'match' case label type 'tuple<bit<0>>' does not match expected type 'tuple<bit<1>>'
+issue1986.p4(18): 'match' case label 'ListExpression' has type 'tuple<bit<0>>' which does not match the expected type 'tuple<bit<1>>'
+             {0w0}: accept;
+             ^^^^^
+issue1986.p4(18)
              {0w0}: accept;
              ^^^^^
 issue1986.p4(17)

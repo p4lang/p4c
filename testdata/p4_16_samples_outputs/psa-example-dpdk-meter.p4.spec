@@ -7,13 +7,11 @@ struct ethernet_t {
 }
 
 struct ipv4_t {
-	bit<4> version
-	bit<4> ihl
+	bit<8> version_ihl
 	bit<8> diffserv
 	bit<16> totalLen
 	bit<16> identification
-	bit<3> flags
-	bit<13> fragOffset
+	bit<16> flags_fragOffset
 	bit<8> ttl
 	bit<8> protocol
 	bit<16> hdrChecksum
@@ -42,7 +40,7 @@ struct psa_egress_deparser_input_metadata_t {
 }
 
 struct execute_1_arg_t {
-	bit<12> index
+	bit<32> index
 }
 
 struct metadata_t {
@@ -50,7 +48,6 @@ struct metadata_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<32> local_metadata_port_out
-	bit<32> Ingress_tmp
 	bit<32> Ingress_color_out
 	bit<32> Ingress_color_in
 	bit<32> Ingress_tmp_0
@@ -67,8 +64,7 @@ action NoAction args none {
 }
 
 action execute_1 args instanceof execute_1_arg_t {
-	mov m.Ingress_tmp h.ipv4.totalLen
-	meter meter0_0 t.index m.Ingress_tmp m.Ingress_color_in m.Ingress_color_out
+	meter meter0_0 t.index h.ipv4.totalLen m.Ingress_color_in m.Ingress_color_out
 	jmpneq LABEL_FALSE_0 m.Ingress_color_out 0x0
 	mov m.Ingress_tmp_0 0x1
 	jmp LABEL_END_0

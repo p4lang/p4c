@@ -38,7 +38,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".table0_actionlist") action table0_actionlist(bit<1> do_goto_table, bit<8> goto_table_id) {
         meta.metadata_global.do_goto_table = do_goto_table;
-        meta.metadata_global.goto_table_id = (do_goto_table != 0 ? goto_table_id : meta.metadata_global.goto_table_id);
+        meta.metadata_global.goto_table_id = ((bit<1>)do_goto_table != 0 ? goto_table_id : meta.metadata_global.goto_table_id);
     }
     @name(".table0") table table0 {
         actions = {

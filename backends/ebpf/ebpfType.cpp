@@ -46,6 +46,9 @@ EBPFType* EBPFTypeFactory::create(const IR::Type* type) {
         if (et == nullptr)
             return nullptr;
         result = new EBPFStackType(ts, et);
+    } else if (type->is<IR::Type_Error>()) {
+        // Implement error type as scalar of width 8 bits
+        result = new EBPFScalarType(new IR::Type_Bits(8, false));
     } else {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "Type %1% not supported", type);
@@ -192,9 +195,10 @@ EBPFStructType::EBPFStructType(const IR::Type_StructLike* strct) :
 void
 EBPFStructType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
     builder->append(kind);
+    builder->appendFormat(" %s ", name.c_str());
     if (asPointer)
         builder->append("*");
-    builder->appendFormat(" %s %s", name.c_str(), id.c_str());
+    builder->appendFormat("%s", id.c_str());
 }
 
 void EBPFStructType::declareInit(CodeBuilder* builder, cstring id, bool asPointer) {

@@ -41,7 +41,7 @@ struct headers {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("MyParser.index") int<32> index_0;
-    state start {
+    @name(".start") state start {
         index_0 = 32s0;
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -49,7 +49,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
             default: accept;
         }
     }
-    state parse_srcRouting {
+    @name(".parse_srcRouting") state parse_srcRouting {
         packet.extract<srcRoute_t>(hdr.srcRoutes[index_0]);
         index_0 = index_0 + 32s1;
         transition select(hdr.srcRoutes[index_0 + -32s1].bos) {

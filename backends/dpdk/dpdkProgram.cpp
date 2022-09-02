@@ -122,9 +122,9 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             BUG("Unknown parser %s", kv.second->name);
     }
     auto ingress_converter =
-        new ConvertToDpdkControl(refmap, typemap, structure);
+        new ConvertToDpdkControl(refmap, typemap, structure, metadataStruct);
     auto egress_converter =
-        new ConvertToDpdkControl(refmap, typemap, structure);
+        new ConvertToDpdkControl(refmap, typemap, structure, metadataStruct);
     for (auto kv : structure->pipelines) {
         if (kv.first == "Ingress")
             kv.second->apply(*ingress_converter);
@@ -139,9 +139,9 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             BUG("Unknown control block %s", kv.second->name);
     }
     auto ingress_deparser_converter =
-        new ConvertToDpdkControl(refmap, typemap, structure, true);
+        new ConvertToDpdkControl(refmap, typemap, structure, metadataStruct, true);
     auto egress_deparser_converter =
-        new ConvertToDpdkControl(refmap, typemap, structure);
+        new ConvertToDpdkControl(refmap, typemap, structure, metadataStruct);
     for (auto kv : structure->deparsers) {
         if (kv.first == "IngressDeparser")
             kv.second->apply(*ingress_deparser_converter);
@@ -292,8 +292,8 @@ void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expres
         unsigned value = right->to<IR::Constant>()->asUnsigned() &
                          left->to<IR::Constant>()->asUnsigned();
         auto tmpDecl = addNewTmpVarToMetadata("tmpMask", sv->type);
-        auto tmpMask = new IR::PathExpression(
-                           IR::ID("m." + tmpDecl->name.name));
+        auto tmpMask = new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                      IR::ID(tmpDecl->name.name));
         structure->push_variable(new IR::DpdkDeclaration(tmpDecl));
         add_instr(new IR::DpdkMovStatement(tmpMask, sv));
         add_instr(new IR::DpdkAndStatement(tmpMask, tmpMask, right));
@@ -501,7 +501,7 @@ bool ConvertToDpdkParser::preorder(const IR::ParserState *) { return false; }
 
 // =====================Control=============================
 bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
-    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
+    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure, metadataStruct);
     helper->setCalledBy(this);
     a->body->apply(*helper);
     auto stmt_list = new IR::IndexedVector<IR::DpdkAsmStatement>();
@@ -559,7 +559,8 @@ bool ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
     return true;
 }
 
-boost::optional<cstring> ConvertToDpdkControl::getIdFromProperty(const IR::P4Table* table,
+boost::optional<const IR::Member*>
+ConvertToDpdkControl::getMemExprFromProperty(const IR::P4Table* table,
                                                                  cstring propertyName) {
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return boost::none;
@@ -577,7 +578,7 @@ boost::optional<cstring> ConvertToDpdkControl::getIdFromProperty(const IR::P4Tab
         return boost::none;
     }
 
-    return expr->to<IR::Member>()->toString();
+    return expr->to<IR::Member>();
 }
 
 boost::optional<int> ConvertToDpdkControl::getNumberFromProperty(const IR::P4Table* table,
@@ -607,8 +608,8 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
         return false;
 
     if (t->properties->getProperty("selector") != nullptr) {
-        auto group_id = getIdFromProperty(t, "group_id");
-        auto member_id = getIdFromProperty(t, "member_id");
+        auto group_id = getMemExprFromProperty(t, "group_id");
+        auto member_id = getMemExprFromProperty(t, "member_id");
         auto selector_key = t->properties->getProperty("selector");
         auto n_groups_max = getNumberFromProperty(t, "n_groups_max");
         auto n_members_per_group_max = getNumberFromProperty(t, "n_members_per_group_max");
@@ -618,7 +619,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
             return false;
 
         auto selector = new IR::DpdkSelector(t->name,
-                *group_id, *member_id, selector_key->value->to<IR::Key>(),
+                (*group_id)->clone(), (*member_id)->clone(), selector_key->value->to<IR::Key>(),
                 *n_groups_max, *n_members_per_group_max);
 
         selectors.push_back(selector);
@@ -627,8 +628,9 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
                 t->getDefaultAction(), t->properties);
         learners.push_back(learner);
     } else {
+        auto paramList =  structure->defActionParamList[t->toString()];
         auto table = new IR::DpdkTable(t->name.toString(), t->getKey(), t->getActionList(),
-                t->getDefaultAction(), t->properties);
+                t->getDefaultAction(), t->properties, *paramList);
         tables.push_back(table);
     }
     return false;
@@ -641,7 +643,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
             structure->push_variable(new IR::DpdkDeclaration(l));
         }
     }
-    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
+    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure, metadataStruct);
     helper->setCalledBy(this);
     c->body->apply(*helper);
     if (deparser && structure->isPSA()) {

@@ -217,28 +217,57 @@ add_cxx_compiler_option ("-Wno-deprecated-declarations")
 # Enable/disable runtime exceptions on nullpointer dereferencing
 # add_cxx_compiler_option ("-fsanitize=null")
 
-# If we're on GCC, use the gold linker if available.
-if(CMAKE_COMPILER_IS_GNUCC)
+# If we're on GCC or Clang, use the prefer LLD or Gold linker if available.
+set(BUILD_LINK_WITH_GOLD ON CACHE BOOL "Use Gold linker for build if available")
+set(BUILD_LINK_WITH_LLD ON CACHE BOOL "Use LLD linker for build if available (overrides BUILD_LINK_WITH_GOLD)")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     # We want to optimize the binary size for a static release binary.
     # This only works with modern versions of GCC.
-    if (BUILD_STATIC_RELEASE AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
-      add_cxx_compiler_option ("-flto")
+    if (BUILD_STATIC_RELEASE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
+        add_cxx_compiler_option ("-flto")
     endif ()
-    execute_process(
-            COMMAND ${CMAKE_C_COMPILER} -fuse-ld=gold -Wl,--version
-            ERROR_QUIET OUTPUT_VARIABLE LD_VERSION)
-    if ("${LD_VERSION}" MATCHES "GNU gold")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fuse-ld=gold")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fuse-ld=gold")
-        message(STATUS "Using the GNU gold linker.")
-    else ()
-        message(STATUS "Using the default system linker.")
-    endif ()
+    set(_LD_USED "default system")
+    set(_LD_OPT_USED "")
+    macro(check_linker BUILD_LINK_WITH_VAR LINKER_OPT LINKER_NAME)
+        if (${BUILD_LINK_WITH_VAR})
+            execute_process(
+                    COMMAND ${CMAKE_C_COMPILER} -fuse-ld=${LINKER_OPT} -Wl,--version
+                    ERROR_QUIET OUTPUT_VARIABLE LD_VERSION)
+            if ("${LD_VERSION}" MATCHES ${LINKER_NAME})
+                set(_LD_USED "${LINKER_NAME}")
+                set(_LD_OPT_USED "-fuse-ld=${LINKER_OPT}")
+            endif()
+        endif()
+    endmacro()
+    check_linker(BUILD_LINK_WITH_GOLD "gold" "GNU gold")
+    check_linker(BUILD_LINK_WITH_LLD "lld" "LLD")
+
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${_LD_OPT_USED}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${_LD_OPT_USED}")
+    message(STATUS "Using the ${_LD_USED} linker.")
     unset(LD_VERSION)
-endif ()
+    unset(_LD_USED)
+    unset(_LD_OPT_USED)
+endif()
+
+set(BUILD_USE_COLOR OFF CACHE BOOL "Use color in C++ compiler output (even if "
+    "the compiler does not detect terminal, e.g. when using ccache/distcc)")
+if (BUILD_USE_COLOR)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-color=always")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
+    else()
+        message(WARNING "Colors enabled (BUILD_USE_COLOR=ON) but we don't know "
+                "how to enable them for ${CMAKE_CXX_COMPILER_ID} C++ compiler")
+    endif()
+else()
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-color=never")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=never")
+  endif()
+endif()
 
 include_directories (
-  ${P4C_SOURCE_DIR}/frontends
   ${P4C_SOURCE_DIR}/backends
   ${P4C_SOURCE_DIR}/extensions
   ${P4C_SOURCE_DIR}

@@ -8,7 +8,7 @@ package(
 
 filegroup(
     name = "p4include",
-    srcs = glob(["p4include/*.p4"]),
+    srcs = glob(["p4include/**/*.p4"]),
 )
 
 genrule(
@@ -17,6 +17,7 @@ genrule(
     outs = ["config.h"],
     cmd = " | ".join([
         "sed 's|cmakedefine|define|g' < $(SRCS)",
+        "sed 's|define HAVE_LIBGMP 1|undef HAVE_LIBGMP|g'",
         "sed 's|define HAVE_LIBGC 1|undef HAVE_LIBGC|g' > $(OUTS)",
     ]),
     visibility = ["//visibility:private"],
@@ -133,7 +134,6 @@ cc_library(
 cc_binary(
     name = "ir_generator",
     srcs = ["tools/ir-generator/generator.cpp"],
-    linkopts = ["-lgmp"],
     deps = [
         ":ir_generator_lib",
         ":lib",
@@ -145,6 +145,7 @@ filegroup(
     srcs = [
         "frontends/p4-14/ir-v1.def",
         "backends/bmv2/bmv2.def",
+        "backends/dpdk/dpdk.def",
         # p4c extensions may set this target to a `filegroup` containing
         # additional .def files.
         "@com_github_p4lang_p4c_extension//:ir_extensions",
@@ -190,6 +191,9 @@ cc_library(
         "frontends/parsers/p4/p4lexer.cc",
         "frontends/parsers/v1/v1lexer.cc",
         "ir/ir-generated.cpp",
+        "backends/dpdk/spec.cpp",
+        "backends/dpdk/dbprint-dpdk.cpp",
+        "backends/dpdk/printUtils.cpp",
     ],
     textual_hdrs = glob([
         "ir/**/*.h",
@@ -197,6 +201,7 @@ cc_library(
         "frontends/**/*.hpp",
         "midend/**/*.h",
         "control-plane/**/*.h",
+        "backends/**/*.h",
     ]) + [
         ":p4_parser_yacc",
         ":v1_parser_yacc",
@@ -262,10 +267,6 @@ cc_binary(
         "backends/bmv2/simple_switch/main.cpp",
         "backends/bmv2/simple_switch/version.h",
     ],
-    linkopts = [
-        "-lgmp",
-        "-lgmpxx",
-    ],
     deps = [
         ":p4c_bmv2_common_lib",
         ":p4c_bmv2_simple_lib",
@@ -275,16 +276,82 @@ cc_binary(
     data = [":p4include"],
 )
 
-# This builds the p4test backend.
+# dpdk backend
+genrule(
+    name = "dest_dir_dpdk",
+    srcs = ["backends/dpdk/control-plane/proto/p4info.proto"],
+    outs = ["p4/config/dpdk/p4info.proto"],
+    cmd = "mkdir -p p4/config/dpdk; cp $(SRCS) $(OUTS)",
+    visibility = ["//visibility:private"],
+)
 
+proto_library(
+    name = "p4info_dpdk_proto",
+    srcs = ["p4/config/dpdk/p4info.proto"],
+    deps = [
+        "@com_google_protobuf//:any_proto",
+        "@com_google_protobuf//:descriptor_proto",
+    ],
+)
+
+cc_proto_library(
+    name = "p4info_dpdk_cc_proto",
+    deps = [":p4info_dpdk_proto"],
+)
+
+cc_library(
+    name = "p4c_dpdk_lib",
+    srcs = glob(
+        [
+            "backends/dpdk/*.cpp",
+            "backends/dpdk/control-plane/*.cpp",
+        ],
+        exclude = [
+            "backends/dpdk/main.cpp",
+            "backends/dpdk/spec.cpp",
+            "backends/dpdk/printUtils.cpp",
+            "backends/dpdk/dbprint-dpdk.cpp",
+        ],
+    ) + ["backends/bmv2/common/lower.cpp"],
+    hdrs = glob([
+        "backends/dpdk/*.h",
+        "backends/dpdk/control-plane/*.h",
+    ]) + ["backends/bmv2/common/lower.h"],
+    deps = [
+        ":ir_frontend_midend_control_plane",
+        ":lib",
+        ":p4info_dpdk_cc_proto",
+    ],
+)
+
+genrule(
+    name = "p4c_dpdk_version",
+    srcs = ["backends/dpdk/version.h.cmake"],
+    outs = ["backends/dpdk/version.h"],
+    cmd = "sed 's|@P4C_VERSION@|0.0.0.0|g' $(SRCS) > $(OUTS)",
+    visibility = ["//visibility:private"],
+)
+
+cc_binary(
+    name = "p4c_dpdk",
+    srcs = [
+        "backends/dpdk/main.cpp",
+        "backends/dpdk/version.h",
+    ],
+    deps = [
+        ":p4c_dpdk_lib",
+        ":ir_frontend_midend_control_plane",
+        ":lib",
+    ],
+    data = [":p4include"],
+)
+
+
+# This builds the p4test backend.
 cc_binary(
     name = "p4c_backend_p4test",
     srcs = [
         "backends/p4test/p4test.cpp",
-    ],
-    linkopts = [
-        "-lgmp",
-        "-lgmpxx",
     ],
     deps = [
         ":ir_frontend_midend_control_plane",
@@ -323,10 +390,6 @@ cc_binary(
         "backends/graphs/p4c-graphs.cpp",
     ],
     data = [":p4include"],
-    linkopts = [
-        "-lgmp",
-        "-lgmpxx",
-    ],
     deps = [
         ":config_h",
         ":ir_frontend_midend_control_plane",
@@ -348,12 +411,14 @@ cc_library(
     srcs = [
         "backends/graphs/controls.cpp",
         "backends/graphs/graphs.cpp",
+        "backends/graphs/graph_visitor.cpp",
         "backends/graphs/p4c-graphs.cpp",
         "backends/graphs/parsers.cpp",
     ],
     hdrs = [
         "backends/graphs/controls.h",
         "backends/graphs/graphs.h",
+        "backends/graphs/graph_visitor.h",
         "backends/graphs/parsers.h",
         "backends/graphs/version.h",
     ],

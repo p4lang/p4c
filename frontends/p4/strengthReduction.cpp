@@ -84,6 +84,10 @@ const IR::Node* DoStrengthReduction::postorder(IR::Cmpl* expr) {
     return expr;
 }
 
+const IR::Node* DoStrengthReduction::postorder(IR::UPlus* expr) {
+    return expr->expr;
+}
+
 const IR::Node* DoStrengthReduction::postorder(IR::BAnd* expr) {
     if (isAllOnes(expr->left))
         return expr->right;
@@ -440,10 +444,17 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
     }
 
     while (auto cast = expr->e0->to<IR::Cast>()) {
-        if (expr->getH() < size_t(cast->expr->type->width_bits())) {
-            expr->e0 = cast->expr;
+        if (auto tb = cast->expr->type->to<IR::Type_Bits>()) {
+            if (expr->getH() < size_t(tb->width_bits())) {
+                expr->e0 = cast->expr;
+            } else {
+                break;
+            }
         } else {
-            break; } }
+            // Cast from a different type.
+            break;
+        }
+    }
 
     // out-of-bound error has been caught in type checking
     if (auto sl = expr->e0->to<IR::Slice>()) {
@@ -455,8 +466,15 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
 
     auto slice_width = expr->getH() - expr->getL() + 1;
     if (slice_width == (unsigned)expr->e0->type->width_bits() &&
-        !hasSideEffects(expr->e1))
+        !hasSideEffects(expr->e1)) {
+        // A slice implies a cast to unsigned; have to be careful not
+        // to lose those.
+        if (auto type = expr->e0->type->to<IR::Type_Bits>()) {
+            if (type->isSigned)
+                return new IR::Cast(expr->srcInfo, expr->type, expr->e0);
+        }
         return expr->e0;
+    }
 
     return expr;
 }

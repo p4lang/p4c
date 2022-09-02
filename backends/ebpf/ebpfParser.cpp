@@ -22,34 +22,6 @@ limitations under the License.
 
 namespace EBPF {
 
-namespace {
-class StateTranslationVisitor : public CodeGenInspector {
-    // stores the result of evaluating the select argument
-    cstring selectValue;
-
-    P4::P4CoreLibrary& p4lib;
-    const EBPFParserState* state;
-
-    void compileExtractField(const IR::Expression* expr, cstring name,
-                             unsigned alignment, EBPFType* type);
-    void compileExtract(const IR::Expression* destination);
-    void compileLookahead(const IR::Expression* destination);
-
- public:
-    explicit StateTranslationVisitor(const EBPFParserState* state) :
-            CodeGenInspector(state->parser->program->refMap, state->parser->program->typeMap),
-            p4lib(P4::P4CoreLibrary::instance), state(state) {}
-    bool preorder(const IR::ParserState* state) override;
-    bool preorder(const IR::SelectCase* selectCase) override;
-    bool preorder(const IR::SelectExpression* expression) override;
-    bool preorder(const IR::Member* expression) override;
-    bool preorder(const IR::MethodCallExpression* expression) override;
-    bool preorder(const IR::MethodCallStatement* stat) override
-    { visit(stat->methodCall); builder->endOfStatement(true); return false; }
-    bool preorder(const IR::AssignmentStatement* stat) override;
-};
-}  // namespace
-
 void
 StateTranslationVisitor::compileLookahead(const IR::Expression* destination) {
     cstring msgStr = Util::printf_format("Parser: lookahead for %s %s",
@@ -73,6 +45,82 @@ StateTranslationVisitor::compileLookahead(const IR::Expression* destination) {
     builder->blockEnd(true);
 }
 
+void
+StateTranslationVisitor::compileAdvance(const P4::ExternMethod* extMethod) {
+    auto argExpr = extMethod->expr->arguments->at(0)->expression;
+    if (auto cnst = argExpr->to<IR::Constant>()) {
+        cstring argStr = cstring::to_cstring(cnst->asUnsigned());
+        cstring offsetStr = Util::printf_format("BYTES(%s + %s)",
+                                                state->parser->program->offsetVar, argStr);
+        builder->target->emitTraceMessage(builder, "Parser (advance): check pkt_len=%%d < "
+                                                   "last_read_byte=%%d", 2,
+                                          state->parser->program->lengthVar.c_str(),
+                                          offsetStr.c_str());
+    } else {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "packet_in.advance() method with non-constant argument is not supported yet");
+        return;
+    }
+
+    builder->emitIndent();
+    builder->appendFormat("%s += ",
+                          state->parser->program->offsetVar.c_str());
+    visit(argExpr);
+    builder->endOfStatement(true);
+
+    builder->emitIndent();
+    builder->appendFormat("if (%s < %s + BYTES(%s)) ",
+                          state->parser->program->packetEndVar.c_str(),
+                          state->parser->program->packetStartVar.c_str(),
+                          state->parser->program->offsetVar.c_str());
+    builder->blockStart();
+
+    builder->target->emitTraceMessage(builder, "Parser: invalid packet (packet too short)");
+
+    builder->emitIndent();
+    builder->appendFormat("%s = %s;", state->parser->program->errorVar.c_str(),
+                          p4lib.packetTooShort.str());
+    builder->newline();
+
+    builder->emitIndent();
+    builder->appendFormat("goto %s;", IR::ParserState::reject.c_str());
+    builder->newline();
+    builder->blockEnd(true);
+}
+
+void StateTranslationVisitor::compileVerify(const IR::MethodCallExpression * expression) {
+    BUG_CHECK(expression->arguments->size() == 2, "Expected 2 arguments: %1%", expression);
+
+    auto errorExpr = expression->arguments->at(1)->expression;
+    auto errorMember = errorExpr->to<IR::Member>();
+    auto type = typeMap->getType(errorExpr, true);
+    if (!type->is<IR::Type_Error>() || errorMember == nullptr) {
+        ::error(ErrorType::ERR_UNEXPECTED, "%1%: not accessing a member error type", errorExpr);
+        return;
+    }
+
+    builder->emitIndent();
+    builder->append("if (!(");
+    visit(expression->arguments->at(0));
+    builder->append(")) ");
+    builder->blockStart();
+
+    builder->emitIndent();
+    builder->appendFormat("%s = %s",
+                          state->parser->program->errorVar.c_str(), errorMember->member.name);
+    builder->endOfStatement(true);
+
+    cstring msg = Util::printf_format("Verify: condition failed, parser_error=%%u (%s)",
+                                      errorMember->member.name);
+    builder->target->emitTraceMessage(builder, msg.c_str(),
+                                      1, state->parser->program->errorVar.c_str());
+
+    builder->emitIndent();
+    builder->appendFormat("goto %s", IR::ParserState::reject.c_str());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+}
+
 bool StateTranslationVisitor::preorder(const IR::AssignmentStatement* statement) {
     if (auto mce = statement->right->to<IR::MethodCallExpression>()) {
         auto mi = P4::MethodInstance::resolve(mce,
@@ -87,10 +135,10 @@ bool StateTranslationVisitor::preorder(const IR::AssignmentStatement* statement)
             if (extMethod->method->name.name == p4lib.packetIn.lookahead.name) {
                 compileLookahead(statement->left);
                 return false;
+            } else if (extMethod->method->name.name == p4lib.packetIn.length.name) {
+                return CodeGenInspector::preorder(statement);
             }
         }
-        ::error(ErrorType::ERR_UNEXPECTED,
-                "Unexpected method call in parser %1%", statement->right);
     }
 
     return CodeGenInspector::preorder(statement);
@@ -105,8 +153,10 @@ bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
     builder->spc();
     builder->blockStart();
 
-    cstring msgStr = Util::printf_format("Parser: state %s", parserState->name.name);
-    builder->target->emitTraceMessage(builder, msgStr.c_str());
+    cstring msgStr = Util::printf_format("Parser: state %s (curr_offset=%%u)",
+                                         parserState->name.name);
+    builder->target->emitTraceMessage(builder, msgStr.c_str(), 1,
+                                      state->parser->program->offsetVar);
 
     visit(parserState->components, "components");
     if (parserState->selectExpression == nullptr) {
@@ -148,6 +198,20 @@ bool StateTranslationVisitor::preorder(const IR::SelectExpression* expression) {
     builder->appendFormat("%s = ", selectValue);
     visit(expression->select);
     builder->endOfStatement(true);
+
+    // Init value_sets
+    for (auto e : expression->selectCases) {
+        if (e->keyset->is<IR::PathExpression>()) {
+            cstring pvsName = e->keyset->to<IR::PathExpression>()->path->name.name;
+            cstring pvsKeyVarName = state->parser->program->refMap->newName(pvsName + "_key");
+            auto pvs = state->parser->getValueSet(pvsName);
+            if (pvs != nullptr)
+                pvs->emitKeyInitializer(builder, expression, pvsKeyVarName);
+            else
+                ::error(ErrorType::ERR_UNKNOWN, "%1%: expected a value_set instance", e->keyset);
+        }
+    }
+
     for (auto e : expression->selectCases)
         visit(e);
 
@@ -159,7 +223,14 @@ bool StateTranslationVisitor::preorder(const IR::SelectExpression* expression) {
 
 bool StateTranslationVisitor::preorder(const IR::SelectCase* selectCase) {
     builder->emitIndent();
-    if (auto mask = selectCase->keyset->to<IR::Mask>()) {
+    if (auto pe = selectCase->keyset->to<IR::PathExpression>()) {
+        builder->append("if (");
+        cstring pvsName = pe->path->name.name;
+        auto pvs = state->parser->getValueSet(pvsName);
+        if (pvs)
+            pvs->emitLookup(builder);
+        builder->append(" != NULL)");
+    } else if (auto mask = selectCase->keyset->to<IR::Mask>()) {
         builder->appendFormat("if ((%s", selectValue);
         builder->append(" & ");
         visit(mask->right);
@@ -277,7 +348,16 @@ StateTranslationVisitor::compileExtractField(
     // eBPF can pass 64 bits of data as one argument passed in 64 bit register,
     // so value of the field is printed only when it fits into that register
     if (widthToExtract <= 64) {
-        cstring tmp = Util::printf_format("(unsigned long long) %s.%s", expr->toString(), field);
+        cstring exprStr = expr->is<IR::PathExpression>() ?
+                expr->to<IR::PathExpression>()->path->name.name : expr->toString();
+
+        if (expr->is<IR::Member>() && expr->to<IR::Member>()->expr->is<IR::PathExpression>() &&
+            isPointerVariable(
+                    expr->to<IR::Member>()->expr->to<IR::PathExpression>()->path->name.name)) {
+            exprStr = exprStr.replace(".", "->");
+        }
+        cstring tmp = Util::printf_format("(unsigned long long) %s.%s", exprStr, field);
+
         msgStr = Util::printf_format("Parser: extracted %s=0x%%llx (%u bits)",
                                      field, widthToExtract);
         builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, tmp.c_str());
@@ -305,18 +385,38 @@ StateTranslationVisitor::compileExtract(const IR::Expression* destination) {
 
     cstring offsetStr = Util::printf_format("BYTES(%s + %s)",
                                             program->offsetVar, cstring::to_cstring(width));
-    // Parser generally use difference of packet end and start, so for debug message
-    // also use that difference instead of packet length variable
-    cstring pktLenStr = Util::printf_format("%s - %s",
-                                            program->packetEndVar, program->packetStartVar);
+
     builder->target->emitTraceMessage(builder, "Parser: check pkt_len=%d >= last_read_byte=%d",
-                                      2, pktLenStr.c_str(), offsetStr.c_str());
+                                      2, program->lengthVar.c_str(), offsetStr.c_str());
+
+    // to load some fields the compiler will use larger words
+    // than actual width of a field (e.g. 48-bit field loaded using load_dword())
+    // we must ensure that the larger word is not outside of packet buffer.
+    // FIXME: this can fail if a packet does not contain additional payload after header.
+    //  However, we don't have better solution in case of using load_X functions to parse packet.
+    // TODO: consider using a collection of smaller widths.
+    unsigned curr_padding = 0;
+    for (auto f : ht->fields) {
+        auto ftype = state->parser->typeMap->getType(f);
+        auto etype = EBPFTypeFactory::instance->create(ftype);
+        if (etype->is<EBPFScalarType>()) {
+            auto scalarType = etype->to<EBPFScalarType>();
+            unsigned readWordSize = scalarType->alignment() * 8;
+            unsigned unaligned = scalarType->widthInBits() % readWordSize;
+            unsigned padding = readWordSize - unaligned;
+            if (padding == readWordSize)
+                padding = 0;
+            if (scalarType->widthInBits() + padding >= curr_padding) {
+                curr_padding = padding;
+            }
+        }
+    }
 
     builder->emitIndent();
-    builder->appendFormat("if (%s < %s + BYTES(%s + %d)) ",
+    builder->appendFormat("if (%s < %s + BYTES(%s + %d + %u)) ",
                           program->packetEndVar.c_str(),
                           program->packetStartVar.c_str(),
-                          program->offsetVar.c_str(), width);
+                          program->offsetVar.c_str(), width, curr_padding);
     builder->blockStart();
 
     builder->target->emitTraceMessage(builder, "Parser: invalid packet (packet too short)");
@@ -362,8 +462,46 @@ StateTranslationVisitor::compileExtract(const IR::Expression* destination) {
     builder->newline();
 }
 
+void StateTranslationVisitor::processFunction(const P4::ExternFunction* function) {
+    if (function->method->name.name == IR::ParserState::verify) {
+        compileVerify(function->expr);
+    } else {
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "Unexpected extern function call in parser %1%", function->expr);
+    }
+}
+
+void StateTranslationVisitor::processMethod(const P4::ExternMethod* method) {
+    auto expression = method->expr;
+
+    auto decl = method->object;
+    if (decl == state->parser->packet) {
+        if (method->method->name.name == p4lib.packetIn.extract.name) {
+            if (expression->arguments->size() != 1) {
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "Variable-sized header fields not yet supported %1%", expression);
+                return;
+            }
+            compileExtract(expression->arguments->at(0)->expression);
+            return;
+        } else if (method->method->name.name == p4lib.packetIn.length.name) {
+            builder->append(state->parser->program->lengthVar);
+            return;
+        } else if (method->method->name.name == p4lib.packetIn.advance.name) {
+            compileAdvance(method);
+            return;
+        }
+        BUG("Unhandled packet method %1%", expression->method);
+    }
+
+    ::error(ErrorType::ERR_UNEXPECTED,
+            "Unexpected extern method call in parser %1%", expression);
+}
+
 bool StateTranslationVisitor::preorder(const IR::MethodCallExpression* expression) {
-    builder->append("/* ");
+    if (commentDescriptionDepth == 0)
+        builder->append("/* ");
+    commentDescriptionDepth++;
     visit(expression->method);
     builder->append("(");
     bool first = true;
@@ -374,28 +512,33 @@ bool StateTranslationVisitor::preorder(const IR::MethodCallExpression* expressio
         visit(a);
     }
     builder->append(")");
-    builder->append("*/");
-    builder->newline();
+    if (commentDescriptionDepth == 1) {
+        builder->append(" */");
+        builder->newline();
+    }
+    commentDescriptionDepth--;
+
+    // do not process extern when comment is generated
+    if (commentDescriptionDepth != 0)
+        return false;
 
     auto mi = P4::MethodInstance::resolve(expression,
                                           state->parser->program->refMap,
                                           state->parser->program->typeMap);
-    if (auto extMethod = mi->to<P4::ExternMethod>()) {
-        auto decl = extMethod->object;
-        if (decl == state->parser->packet) {
-            if (extMethod->method->name.name == p4lib.packetIn.extract.name) {
-                if (expression->arguments->size() != 1) {
-                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                            "Variable-sized header fields not yet supported %1%", expression);
-                    return false;
-                }
-                compileExtract(expression->arguments->at(0)->expression);
-                return false;
-            }
-            BUG("Unhandled packet method %1%", expression->method);
-            return false;
-        }
-    } else if (auto bim = mi->to<P4::BuiltInMethod>()) {
+
+    auto ef = mi->to<P4::ExternFunction>();
+    if (ef != nullptr) {
+        processFunction(ef);
+        return false;
+    }
+
+    auto extMethod = mi->to<P4::ExternMethod>();
+    if (extMethod != nullptr) {
+        processMethod(extMethod);
+        return false;
+    }
+
+    if (auto bim = mi->to<P4::BuiltInMethod>()) {
         builder->emitIndent();
         if (bim->name == IR::Type_Header::isValid) {
             visit(bim->appliedTo);
@@ -427,24 +570,17 @@ bool StateTranslationVisitor::preorder(const IR::Member* expression) {
         }
     }
 
-    visit(expression->expr);
-    builder->append(".");
-    builder->append(expression->member);
-    return false;
+    return CodeGenInspector::preorder(expression);
 }
 
 //////////////////////////////////////////////////////////////////
 
-void EBPFParserState::emit(CodeBuilder* builder) {
-    StateTranslationVisitor visitor(this);
-    visitor.setBuilder(builder);
-    state->apply(visitor);
-}
-
 EBPFParser::EBPFParser(const EBPFProgram* program, const IR::ParserBlock* block,
                        const P4::TypeMap* typeMap) :
         program(program), typeMap(typeMap), parserBlock(block),
-        packet(nullptr), headers(nullptr), headerType(nullptr) {}
+        packet(nullptr), headers(nullptr), headerType(nullptr) {
+    visitor = new StateTranslationVisitor(program->refMap, program->typeMap);
+}
 
 void EBPFParser::emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) {
     if (decl->is<IR::Declaration_Variable>()) {
@@ -456,6 +592,8 @@ void EBPFParser::emitDeclaration(CodeBuilder* builder, const IR::Declaration* de
         BUG_CHECK(vd->initializer == nullptr,
                   "%1%: declarations with initializers not supported", decl);
         return;
+    } else if (decl->is<IR::P4ValueSet>()) {
+        return;
     }
     BUG("%1%: not yet handled", decl);
 }
@@ -464,8 +602,17 @@ void EBPFParser::emitDeclaration(CodeBuilder* builder, const IR::Declaration* de
 void EBPFParser::emit(CodeBuilder* builder) {
     for (auto l : parserBlock->container->parserLocals)
         emitDeclaration(builder, l);
-    for (auto s : states)
-        s->emit(builder);
+
+    builder->emitIndent();
+    builder->appendFormat("goto %s;", IR::ParserState::start.c_str());
+    builder->newline();
+
+    visitor->setBuilder(builder);
+    for (auto s : states) {
+        visitor->setState(s);
+        s->state->apply(*visitor);
+    }
+
     builder->newline();
 
     // Create a synthetic reject state
@@ -474,11 +621,10 @@ void EBPFParser::emit(CodeBuilder* builder) {
     builder->spc();
     builder->blockStart();
 
+    // This state may be called from deparser, so do not explicitly tell source of this event.
     builder->target->emitTraceMessage(builder, "Packet rejected");
 
-    builder->emitIndent();
-    builder->appendFormat("return %s;", builder->target->abortReturnCode().c_str());
-    builder->newline();
+    emitRejectState(builder);
 
     builder->blockEnd(true);
     builder->newline();
@@ -504,7 +650,35 @@ bool EBPFParser::build() {
     if (ht == nullptr)
         return false;
     headerType = EBPFTypeFactory::instance->create(ht);
+
+    for (auto decl : parserBlock->container->parserLocals) {
+        if (decl->is<IR::P4ValueSet>()) {
+            cstring extName = EBPFObject::externalName(decl);
+            auto pvs = new EBPFValueSet(program, decl->to<IR::P4ValueSet>(),
+                                        extName, visitor);
+            valueSets.emplace(decl->name.name, pvs);
+        }
+    }
+
     return true;
+}
+
+void EBPFParser::emitTypes(CodeBuilder* builder) {
+    for (auto pvs : valueSets) {
+        pvs.second->emitTypes(builder);
+    }
+}
+
+void EBPFParser::emitValueSetInstances(CodeBuilder* builder) {
+    for (auto pvs : valueSets) {
+        pvs.second->emitInstance(builder);
+    }
+}
+
+void EBPFParser::emitRejectState(CodeBuilder* builder) {
+    builder->emitIndent();
+    builder->appendFormat("return %s;", builder->target->abortReturnCode().c_str());
+    builder->newline();
 }
 
 }  // namespace EBPF

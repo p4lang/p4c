@@ -178,7 +178,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         mark_to_drop(standard_metadata);
     }
     @name(".send_packet") action send_packet() {
-        standard_metadata.egress_spec = meta.ing_metadata.egress_port;
+        standard_metadata.egress_spec = (bit<9>)meta.ing_metadata.egress_port;
     }
     @name(".ethertype_match") table ethertype_match {
         actions = {

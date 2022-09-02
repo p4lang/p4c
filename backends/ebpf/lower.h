@@ -33,7 +33,7 @@ class LowerExpressions : public Transform {
     const IR::Expression* shift(const IR::Operation_Binary* expression) const;
  public:
     explicit LowerExpressions(P4::TypeMap* typeMap) : typeMap(typeMap)
-    { CHECK_NULL(typeMap); setName("Lower"); }
+    { CHECK_NULL(typeMap); setName("LowerExpressions"); }
 
     const IR::Node* postorder(IR::Shl* expression) override
     { return shift(expression); }

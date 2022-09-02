@@ -4,7 +4,7 @@ parser p(packet_in p, out Headers h) {
 pr2918.p4(16)
 parser p(packet_in p, out Headers h) {
        ^
-pr2918.p4(19): [--Werror=type-error] error: Expression 'ListExpression' with type 'struct S' cannot be used in select
+pr2918.p4(19): [--Werror=type-error] error: Expression 'ListExpression' with a component of type 'struct S' cannot be used in 'select'
         transition select (h.h.s) {
                            ^^^^^
 pr2918.p4(3)

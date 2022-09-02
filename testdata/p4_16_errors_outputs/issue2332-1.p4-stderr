@@ -1,3 +1,0 @@
-issue2332-1.p4(2): [--Werror=expected] error: 8s1: shift amounts cannot be signed
-    const int<8> x8 = 8s1;
-                      ^^^

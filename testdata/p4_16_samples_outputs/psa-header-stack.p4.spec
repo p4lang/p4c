@@ -6,9 +6,7 @@ struct ethernet_t {
 }
 
 struct vlan_tag_h {
-	bit<3> pcp
-	bit<1> cfi
-	bit<12> vid
+	bit<16> pcp_cfi_vid
 	bit<16> ether_type
 }
 
@@ -34,6 +32,7 @@ struct psa_egress_deparser_input_metadata_t {
 
 struct EMPTY_M {
 	bit<32> psa_ingress_input_metadata_ingress_port
+	bit<16> psa_ingress_input_metadata_parser_error
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 }

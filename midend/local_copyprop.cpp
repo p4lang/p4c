@@ -97,7 +97,7 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
                 if (!self.hasSideEffects(s->condition)) {
                     return nullptr;
                 } else {
-                    s->ifTrue = new IR::EmptyStatement();
+                    s->ifTrue = new IR::EmptyStatement(s->srcInfo);
                     return s;
                 }
             }
@@ -585,8 +585,10 @@ void DoLocalCopyPropagation::apply_function(DoLocalCopyPropagation::FuncInfo *ac
 
 void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl) {
     ++tbl->apply_count;
+    std::unordered_set<cstring> remaps_seen;
     for (auto key : tbl->keyreads) {
-        forOverlapAvail(key, [key, tbl, this](cstring vname, VarInfo *var) {
+        forOverlapAvail(key, [&remaps_seen, key, tbl, this](cstring vname, VarInfo *var) {
+            remaps_seen.insert(vname);
             if (var->val && lvalue_out(var->val)->is<IR::PathExpression>()) {
                 if (tbl->apply_count > 1 &&
                     (!tbl->key_remap.count(vname) || !tbl->key_remap.at(vname)->equiv(*var->val))) {
@@ -606,6 +608,12 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl)
                 LOG4("  table using " << key << " with " <<
                      (var->val ? "value to complex for key" : "no propagated value"));
                 var->live = true; } }); }
+    for (auto it = tbl->key_remap.begin(); it != tbl->key_remap.end(); ) {
+        if (remaps_seen.count(it->first) == 0) {
+            LOG3("  no value used for some applies for key " << it->first);
+            it = tbl->key_remap.erase(it);
+        } else {
+            ++it; } }
     for (auto action : tbl->actions)
         apply_function(&actions[action]);
 }

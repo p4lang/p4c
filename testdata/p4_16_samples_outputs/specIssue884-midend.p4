@@ -35,10 +35,7 @@ control Ingress(inout headers_t hdr, inout meta_t meta) {
     @name("Ingress.hash1") Hash<bit<32>>(algo = HashAlgorithm_t.CRC32) hash1_0;
     @name("Ingress.tmp") CRCPolynomial<bit<16>>(coeff = 16w0x107) tmp;
     @name("Ingress.hash2") Hash<bit<32>>(poly = tmp) hash2_0;
-    @name("Ingress.hamming") LCGMatrix<bit<8>, bit<10>>(8w4, 10w7, "1000100
-         0100011
-         0010110
-         0001001") hamming_0;
+    @name("Ingress.hamming") LCGMatrix<bit<8>, bit<10>>(8w4, 10w7, "1000100\n         0100011\n         0010110\n         0001001") hamming_0;
     @name("Ingress.hash3") Hash<bit<32>>(matrix = hamming_0) hash3_0;
     @name("Ingress.hash4") Hash<bit<32>>(formula = "magic_formula()") hash4_0;
     apply {

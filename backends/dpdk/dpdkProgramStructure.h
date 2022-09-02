@@ -24,7 +24,9 @@ struct DpdkProgramStructure {
     // table and action info for learner tables
     ordered_set<cstring> learner_tables;
     ordered_set<cstring> learner_actions;
+    ordered_map<cstring, cstring> learner_action_map;
     ordered_map<cstring, std::vector<cstring>> learner_action_params;
+    ordered_map<cstring, const IR::P4Table *> learner_action_table;
 
     IR::IndexedVector<IR::DpdkDeclaration>       variables;
 
@@ -39,7 +41,7 @@ struct DpdkProgramStructure {
     std::map<const IR::Declaration_Instance *, cstring>         csum_map;
     std::map<cstring, int>                                      error_map;
     std::vector<const IR::Declaration_Instance *>               externDecls;
-    std::map<cstring, std::vector<cstring>>                     key_map;
+    std::map<cstring, std::vector<std::pair<cstring, cstring>>> key_map;
     std::map<cstring, const IR::P4Table *>                      group_tables;
     std::map<cstring, const IR::P4Table *>                      member_tables;
 
@@ -50,7 +52,10 @@ struct DpdkProgramStructure {
     cstring local_metadata_type;
     cstring header_type;
     IR::IndexedVector<IR::StructField> compiler_added_fields;
+    IR::IndexedVector<IR::StructField> key_fields;
     IR::Vector<IR::Type> used_metadata;
+    ordered_map<cstring, std::vector<struct hdrFieldInfo>> hdrFieldInfoList;
+    ordered_map<cstring, IR::ParameterList*> defActionParamList;
 
     void push_variable(const IR::DpdkDeclaration * d) {
         variables.push_back(d); }
@@ -89,6 +94,25 @@ struct DpdkProgramStructure {
      */
     bool isPNA(void) {
         return (p4arch == "pna") ? true : false;
+    }
+};
+
+struct hdrFieldInfo {
+    cstring modifiedName;
+    cstring headerStr;
+    unsigned modifiedWidth;
+    unsigned offset;
+    unsigned lsb;
+    unsigned msb;
+    unsigned fieldWidth;
+    hdrFieldInfo() {
+        modifiedName = "";
+        headerStr = "";
+        modifiedWidth = 0;
+        offset = 0;
+        lsb = 0;
+        msb = 0;
+        fieldWidth = 0;
     }
 };
 

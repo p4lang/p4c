@@ -1,9 +1,3 @@
-psa.p4(546): [--Wwarn=unused] warning: 'W' is unused
-extern Counter<W, S> {
-               ^
-psa.p4(575): [--Wwarn=unused] warning: 'W' is unused
-extern DirectCounter<W> {
-                     ^
 psa-counter3.p4(52): [--Wwarn=unused] warning: counter1: unused instance
     Counter<bit<10>,bit<12>>(1024, PSA_CounterType_t.PACKETS) counter1;
                                                               ^^^^^^^^

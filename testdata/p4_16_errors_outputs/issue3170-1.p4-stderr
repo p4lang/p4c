@@ -1,0 +1,9 @@
+issue3170-1.p4(8): [--Werror=type-error] error: Field 'y' of 'header t' cannot have type 'struct y'
+    tt y;
+       ^
+issue3170-1.p4(4)
+struct y {
+       ^
+issue3170-1.p4(11): [--Werror=type-error] error: Error while analyzing header t<...>
+typedef t<y> tty;
+        ^^^^

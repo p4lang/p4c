@@ -126,7 +126,12 @@ class HeaderStackItemRef : HeaderRef {
             if (auto *hr = base_->to<HeaderRef>())
                 type = hr->baseRef()->type; }
     Expression base() const { return base_; }
-    HeaderOrMetadata baseRef() const override { return base_->to<HeaderRef>()->baseRef(); }
+    /// Returns `nullptr` if the base is not `HeaderOrMetadata` (e.g. when this
+    /// is stack ref of an expression such as `lookahead`).
+    HeaderOrMetadata baseRef() const override {
+        auto hdrRef = base_->to<HeaderRef>();
+        return hdrRef ? hdrRef->baseRef() : nullptr;
+    }
     Expression index() const { return index_; }
     void set_base(Expression b) { base_ = b; }
     toString{ return base_->toString() + "[" + index_->toString() + "]"; }
@@ -159,23 +164,10 @@ class NamedCond : If {
 
 class Apply : Expression {
     optional ID                         name;
+    // We should not use a NameMap, since it does not have source position information...
     inline NameMap<Vector<Expression>, ordered_map>  actions = {};
-    visit_children {
-        auto &clone(v.flow_clone());
-        // HACK -- temp sort actions into program (source) order, so that condition names are
-        // generated in the same order as p4-hlir
-        typedef std::remove_reference<decltype(actions.at("any"))>::type action_t;
-        safe_vector<action_t *> sort_actions;
-        for (auto &p : Values(actions)) sort_actions.push_back(&p);
-        std::sort(sort_actions.begin(), sort_actions.end(),
-            [](action_t *a, action_t *b) {
-                return (*a)->srcInfo.getStart() < (*b)->srcInfo.getStart(); });
-        for (auto p : sort_actions) {
-            auto &clone2(clone.flow_clone());
-            clone2.visit(*p);
-            v.flow_merge(clone2); }
-        Expression::visit_children(v);
-    }
+    // ... we make up for it by storing the position of each label here.
+    inline NameMap<Path> position = {};
 }
 
 class Primitive : Operation {

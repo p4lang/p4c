@@ -46,7 +46,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         packet.extract<axon_head_t>(hdr.axon_head);
         meta._my_metadata_fwdHopCount0 = hdr.axon_head.fwdHopCount;
         meta._my_metadata_revHopCount1 = hdr.axon_head.revHopCount;
-        meta._my_metadata_headerLen2 = (bit<16>)(8w2 + hdr.axon_head.fwdHopCount + hdr.axon_head.revHopCount);
+        meta._my_metadata_headerLen2 = (bit<16>)(8w2 + hdr.axon_head.fwdHopCount) + (bit<16>)hdr.axon_head.revHopCount;
         transition select(hdr.axon_head.fwdHopCount) {
             8w0: accept;
             default: parse_next_fwdHop;

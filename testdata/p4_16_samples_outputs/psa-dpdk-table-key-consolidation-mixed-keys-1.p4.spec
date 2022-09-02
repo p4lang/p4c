@@ -8,13 +8,11 @@ struct ethernet_t {
 }
 
 struct ipv4_t {
-	bit<4> version
-	bit<4> ihl
+	bit<8> version_ihl
 	bit<8> diffserv
 	bit<16> totalLen
 	bit<16> identification
-	bit<3> flags
-	bit<13> fragOffset
+	bit<16> flags_fragOffset
 	bit<8> ttl
 	bit<8> protocol
 	bit<16> hdrChecksum
@@ -28,10 +26,7 @@ struct tcp_t {
 	bit<16> dstPort
 	bit<32> seqNo
 	bit<32> ackNo
-	bit<4> dataOffset
-	bit<3> res
-	bit<3> ecn
-	bit<6> ctrl
+	bit<16> dataOffset_res_ecn_ctrl
 	bit<16> window
 	bit<16> checksum
 	bit<16> urgentPtr
@@ -62,9 +57,11 @@ struct metadata {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
+	bit<48> ingress_tbl_ethernet_srcAddr
+	bit<48> ingress_tbl_ethernet_dstAddr
 	bit<8> Ingress_key
-	bit<48> Ingress_tbl_ethernet_srcAddr
-	bit<48> Ingress_tbl_ethernet_dstAddr
+	bit<16> tmpMask
+	bit<8> tmpMask_0
 }
 metadata instanceof metadata
 
@@ -85,8 +82,8 @@ table tbl {
 	key {
 		m.Ingress_key exact
 		m.local_metadata_data exact
-		m.Ingress_tbl_ethernet_srcAddr lpm
-		m.Ingress_tbl_ethernet_dstAddr exact
+		m.ingress_tbl_ethernet_srcAddr lpm
+		m.ingress_tbl_ethernet_dstAddr exact
 	}
 	actions {
 		NoAction
@@ -113,8 +110,8 @@ apply {
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
 	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_key 0x48
-	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	mov m.Ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
+	mov m.ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	mov m.ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet

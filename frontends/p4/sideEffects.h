@@ -113,18 +113,8 @@ class SideEffects : public Inspector {
                               TypeMap* typeMap) {
         // mce does not produce a side effect in few cases:
         //  * isValid()
-        //  * function with all in parameters
-        //  * extern function with noSideEffectsAnnotation
-        //  * extern method with noSideEffectsAnnotation
+        //  * function, extern function, or extern method with noSideEffects annotation
         auto mi = MethodInstance::resolve(mce, refMap, typeMap);
-        if (mi->is<FunctionCall>()) {
-            for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
-                if (p->hasOut()) {
-                    return true;
-                }
-            }
-            return false;
-        }
         if (auto em = mi->to<P4::ExternMethod>()) {
             if (em->method->getAnnotation(IR::Annotation::noSideEffectsAnnotation)) {
                 return false;
@@ -133,6 +123,12 @@ class SideEffects : public Inspector {
         }
         if (auto ef = mi->to<P4::ExternFunction>()) {
             if (ef->method->getAnnotation(IR::Annotation::noSideEffectsAnnotation)) {
+                return false;
+            }
+            return true;
+        }
+        if (auto ef = mi->to<P4::FunctionCall>()) {
+            if (ef->function->getAnnotation(IR::Annotation::noSideEffectsAnnotation)) {
                 return false;
             }
             return true;

@@ -48,8 +48,10 @@ class ProgramStructure {
     // We will preserve the original name using an @name("") annotation.
     template<typename T>
     class NamedObjectInfo {
-        // If allNames is nullptr we don't check for duplicate names
-        std::unordered_set<cstring> *allNames;
+        // If allNames is nullptr we don't check for duplicate names.
+        // Key is a name, value represents how many times this name was used as a base
+        // for newly generated unique names.
+        std::unordered_map<cstring, int> *allNames;
         std::map<cstring, T> nameToObject;
         std::map<T, cstring> objectToNewName;
 
@@ -71,7 +73,7 @@ class ProgramStructure {
         };
 
      public:
-        explicit NamedObjectInfo(std::unordered_set<cstring>* allNames) : allNames(allNames) {}
+        explicit NamedObjectInfo(std::unordered_map<cstring, int>* allNames) : allNames(allNames) {}
         void emplace(T obj) {
             if (objectToNewName.find(obj) != objectToNewName.end()) {
                 // Already done
@@ -86,10 +88,10 @@ class ProgramStructure {
                 (allNames->find(obj->name) == allNames->end())) {
                 newName = obj->name;
             } else {
-                newName = cstring::make_unique(*allNames, obj->name, '_');
+                newName = cstring::make_unique(*allNames, obj->name, allNames->at(obj->name), '_');
             }
             if (allNames != nullptr)
-                allNames->emplace(newName);
+                allNames->insert({newName, 0});
             LOG3("Discovered " << obj << " named " << newName);
             objectToNewName.emplace(obj, newName);
         }
@@ -118,7 +120,7 @@ class ProgramStructure {
     P4V1::V1Model &v1model;
     P4::P4CoreLibrary &p4lib;
 
-    std::unordered_set<cstring>                 allNames;
+    std::unordered_map<cstring, int>            allNames;
     NamedObjectInfo<const IR::Type_StructLike*> types;
     NamedObjectInfo<const IR::HeaderOrMetadata*> metadata;
     NamedObjectInfo<const IR::Header*>          headers;

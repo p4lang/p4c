@@ -1,17 +1,59 @@
 #include "parserUnroll.h"
 #include "interpreter.h"
+#include "lib/hash.h"
 #include "lib/stringify.h"
 #include "ir/ir.h"
 
 namespace P4 {
 
+StackVariable::StackVariable(const IR::Expression* expr) : variable(expr) {
+    CHECK_NULL(expr);
+    BUG_CHECK(repOk(expr), "Invalid stack variable %1%", expr);
+    variable = expr;
+}
+
+bool StackVariable::repOk(const IR::Expression* expr) {
+    // Only members and path expression can be stack variables.
+    const auto* member = expr->to<IR::Member>();
+    if (member == nullptr) {
+        return expr->is<IR::PathExpression>();
+    }
+
+    // A member is a stack variable if it is qualified by a PathExpression or if its qualifier is a
+    // stack variable.
+    return member->expr->is<IR::PathExpression>() || repOk(member->expr);
+}
+
+bool StackVariable::operator==(const StackVariable& other) const {
+    // Delegate to IR's notion of equality.
+    return variable->equiv(*other.variable);
+}
+
+size_t StackVariableHash::operator()(const StackVariable& var) const {
+    // hash for path expression.
+    if (const auto* path = var.variable->to<IR::PathExpression>()) {
+        return Util::Hash::fnv1a<const cstring>(path->path->name.name);
+    }
+    const IR::Member* curMember = var.variable->to<IR::Member>();
+    std::vector<size_t> h;
+    while (curMember) {
+        h.push_back(Util::Hash::fnv1a<const cstring>(curMember->member.name));
+        if (auto* path = curMember->expr->to<IR::PathExpression>()) {
+            h.push_back(Util::Hash::fnv1a<const cstring>(path->path->name));
+            break;
+        }
+        curMember = curMember->expr->checkedTo<IR::Member>();
+    }
+    return Util::Hash::fnv1a(h.data(), sizeof(size_t) * h.size());
+}
+
 /// The main class for parsers' states key for visited checking.
 struct VisitedKey {
-    cstring                     name;       // name of a state.
-    std::map<cstring, size_t>   indexes;    // indexes of header stacks.
+    cstring                           name;     // name of a state.
+    StackVariableMap                  indexes;  // indexes of header stacks.
 
-    VisitedKey(cstring name, std::map<cstring, size_t>& indexes) : name(name), indexes(indexes) {
-    }
+    VisitedKey(cstring name, StackVariableMap& indexes)
+        : name(name), indexes(indexes) {}
 
     explicit VisitedKey(const ParserStateInfo* stateInfo) {
         CHECK_NULL(stateInfo);
@@ -32,7 +74,7 @@ struct VisitedKey {
             return true;
         if (name > e.name)
             return false;
-        std::map<cstring, std::pair<size_t, size_t> > mp;
+        std::unordered_map<StackVariable, std::pair<size_t, size_t>, StackVariableHash > mp;
         for (auto& i1 : indexes)
             mp.emplace(i1.first, std::make_pair(i1.second, -1));
         for (auto& i2 : e.indexes) {
@@ -133,7 +175,7 @@ class ParserStateRewriter : public Transform {
         auto* res = value->to<SymbolicInteger>()->constant->clone();
         newExpression->right = res;
         BUG_CHECK(res->fitsInt64(), "To big integer for a header stack index %1%", res);
-        state->statesIndexes[expression->left->toString()] = (size_t)res->asInt64();
+        state->statesIndexes[expression->left] = (size_t)res->asInt64();
         return newExpression;
     }
 
@@ -141,25 +183,25 @@ class ParserStateRewriter : public Transform {
     IR::Node* postorder(IR::Member* expression) {
         if (!afterExec)
             return expression;
-        auto basetype = getTypeArray(expression->expr);
+        auto basetype = getTypeArray(getOriginal<IR::Member>()->expr);
         if (basetype->is<IR::Type_Stack>()) {
             auto l = afterExec->get(expression->expr);
             BUG_CHECK(l->is<SymbolicArray>(), "%1%: expected an array", l);
             auto array = l->to<SymbolicArray>();
             unsigned idx = 0;
-            for (size_t i = 0; i < array->size; i++) {
-                auto* v = array->get(expression, i);
-                if (v->hasUninitializedParts())
-                    break;
-                else
-                    idx = i;
+            unsigned offset = 0;
+            if (state->statesIndexes.count(expression->expr)) {
+                idx = state->statesIndexes.at(expression->expr);
+                if (idx + 1 < array->size && expression->member.name != IR::Type_Stack::last) {
+                    offset = 1;
+                }
             }
             if (expression->member.name == IR::Type_Stack::lastIndex) {
                 return new IR::Constant(IR::Type_Bits::get(32), idx);
             } else {
-                state->statesIndexes[expression->expr->toString()] = idx;
+                state->statesIndexes[expression->expr] = idx + offset;
                 return new IR::ArrayIndex(expression->expr->clone(),
-                                          new IR::Constant(IR::Type_Bits::get(32), idx));
+                                          new IR::Constant(IR::Type_Bits::get(32), idx + offset));
             }
         }
         return expression;
@@ -359,7 +401,7 @@ class ParserSymbolicInterpreter {
     }
 
     /// Executes symbolically the specified statement.
-    /// Returns pointer to genereted statement if execution completes successfully,
+    /// Returns pointer to generated statement if execution completes successfully,
     /// and 'nullptr' if an error occurred.
     const IR::StatOrDecl* executeStatement(ParserStateInfo* state, const IR::StatOrDecl* sord,
                                            ValueMap* valueMap) {
@@ -412,7 +454,7 @@ class ParserSymbolicInterpreter {
                       "Result of %1% is not defined: %2%", sord, errorStr.str());
         }
         ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
-                                         visitedStates);
+                                     visitedStates);
         const IR::Node* node = sord->apply(rewriter);
         newSord = node->to<IR::StatOrDecl>();
         LOG2("After " << sord << " state is\n" << valueMap);
@@ -457,9 +499,9 @@ class ParserSymbolicInterpreter {
                                          visitedStates);
             const IR::Node* node = se->select->apply(rewriter);
             const IR::ListExpression* newListSelect = node->to<IR::ListExpression>();
-            std::map<cstring, size_t> etalonStateIndexes = state->statesIndexes;
+            auto etalonStateIndexes = state->statesIndexes;
             for (auto c : se->selectCases) {
-                std::map<cstring, size_t> currentStateIndexes = etalonStateIndexes;
+                auto currentStateIndexes = etalonStateIndexes;
                 auto path = c->state->path;
                 auto next = refMap->getDeclaration(path);
                 BUG_CHECK(next->is<IR::ParserState>(), "%1%: expected a state", path);
@@ -582,8 +624,10 @@ class ParserSymbolicInterpreter {
 
     /// Gets new name for a state
     IR::ID getNewName(ParserStateInfo* state) {
-        if (state->currentIndex == 0)
+        if (state->currentIndex == 0) {
+            structure->callsIndexes.emplace(state->state->name.name, 0);
             return state->state->name;
+        }
         return IR::ID(state->state->name + std::to_string(state->currentIndex));
     }
 
@@ -594,7 +638,7 @@ class ParserSymbolicInterpreter {
     /// @param newStates is a set of parsers' names which were genereted.
     EvaluationStateResult evaluateState(ParserStateInfo* state,
                                         std::unordered_set<cstring> &newStates) {
-        LOG1("Analyzing " << state->state);
+        LOG1("Analyzing " << dbp(state->state));
         auto valueMap = state->before->clone();
         IR::IndexedVector<IR::StatOrDecl> components;
         IR::ID newName;
@@ -615,7 +659,14 @@ class ParserSymbolicInterpreter {
         auto result = evaluateSelect(state, valueMap);
         if (unroll) {
             BUG_CHECK(result.second, "Can't generate new selection %1%", state);
-            state->newState = new IR::ParserState(newName, components, result.second);
+            if (state->name == newName) {
+                state->newState = new IR::ParserState(state->state->srcInfo, newName,
+                                                      state->state->annotations, components,
+                                                      result.second);
+            } else {
+                state->newState =
+                    new IR::ParserState(state->state->srcInfo, newName, components, result.second);
+            }
         }
         return EvaluationStateResult(result.first, true);
     }
@@ -665,6 +716,7 @@ class ParserSymbolicInterpreter {
                 // don't evaluate successors anymore
                 continue;
             }
+            bool notAdded = newStates.count(getNewName(stateInfo)) == 0;
             auto nextStates = evaluateState(stateInfo, newStates);
             if (nextStates.first == nullptr) {
                 if (nextStates.second && stateInfo->predecessor &&
@@ -675,6 +727,11 @@ class ParserSymbolicInterpreter {
                         IR::IndexedVector<IR::StatOrDecl>(),
                         new IR::PathExpression(new IR::Type_State(),
                             new IR::Path(outOfBoundsStateName, false)));
+                } else {
+                    // save current state
+                    if (notAdded) {
+                        stateInfo->newState = stateInfo->state->clone();
+                    }
                 }
                 LOG1("No next states");
                 continue;

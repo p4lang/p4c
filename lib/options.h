@@ -60,6 +60,9 @@ class Options {
     };
     const char* binaryName;
     cstring message;
+    // Build date and compile command required in couple runtime files
+    cstring compileCommand;
+    cstring buildDate;
     std::ostream* outStream = &std::cerr;
 
     std::map<cstring, const Option*> options;
@@ -78,7 +81,8 @@ class Options {
                         const char* description,  // option help message
                         OptionFlags flags = OptionFlags::Default);  // additional flags
 
-    explicit Options(cstring message) : binaryName(nullptr), message(message) {}
+    explicit Options(cstring message) : binaryName(nullptr), message(message),
+                compileCommand("") {}
 
  public:
     /**
@@ -92,7 +96,9 @@ class Options {
     virtual std::vector<const char*>* process(int argc, char* const argv[]);
 
     virtual const char* getIncludePath() = 0;
-
+    cstring getCompileCommand() { return compileCommand; }
+    cstring getBuildDate() { return buildDate; }
+    cstring getBinaryName() { return cstring(binaryName); }
     void usage();
 };
 

@@ -1,0 +1,3 @@
+issue3338.p4(1): [--Werror=invalid] error: Parser parser MyParser1 has no 'start' state
+parser MyParser1(){
+       ^^^^^^^^^

@@ -18,6 +18,10 @@ class Neg : Operation_Unary {
     stringOp = "-";
 }
 
+class UPlus : Operation_Unary {
+    stringOp = "+";
+}
+
 class Cmpl : Operation_Unary {
     stringOp = "~";
 }
@@ -239,7 +243,7 @@ class BoolLiteral : Literal {
 class StringLiteral : Literal {
     cstring value;
     validate{ if (value.isNull()) BUG("null StringLiteral"); }
-    toString{ return cstring("\"") + value + "\""; }
+    toString{ return cstring("\"") + value.escapeJson() + "\""; }
     StringLiteral(ID v) : Literal(v.srcInfo), value(v.name) {}
 #emit
     operator IR::ID() const { return IR::ID(srcInfo, value); }
@@ -257,12 +261,14 @@ class PathExpression : Expression {
 // X.a
 // The 'X' portion is a TypeNameExpression
 class TypeNameExpression : Expression {
-    Type_Name typeName;
+    Type typeName;
     TypeNameExpression { if (!srcInfo && typeName) srcInfo = typeName->srcInfo; }
     TypeNameExpression(ID id) : Expression(id.srcInfo),
                                 typeName(new IR::Type_Name(new IR::Path(id))) {}
     dbprint{ out << typeName; }
     toString { return typeName->toString(); }
+    validate { BUG_CHECK(typeName->is<Type_Name>() || typeName->is<Type_Specialized>(),
+                         "%1 unexpected type in TypeNameExpression", typeName); }
 }
 
 class Slice : Operation_Ternary {
@@ -345,9 +351,10 @@ class DefaultExpression : Expression {}
 // That's why we use a hidden id field to distinguish them.
 class This : Expression {
     int id = nextId++;
+    toString { return "this"; }
  private:
     static int nextId;
-}  // experimental
+}
 
 class Cast : Operation_Unary {
     Type destType = type;
@@ -435,6 +442,16 @@ class StructExpression : Expression {
 /// A ListExpression where all the components are compile-time values.
 /// This is used by the evaluator pass.
 class ListCompileTimeValue : CompileTimeValue {
+    inline Vector<Node> components;
+    validate {
+        for (auto v : components)
+            BUG_CHECK(v->is<CompileTimeValue>(), "%1%: not a compile-time value", v); }
+#nodbprint
+}
+
+/// A StructExpression where all the components are compile-time values.
+/// This is used by the evaluator pass.
+class StructCompileTimeValue : CompileTimeValue {
     inline Vector<Node> components;
     validate {
         for (auto v : components)

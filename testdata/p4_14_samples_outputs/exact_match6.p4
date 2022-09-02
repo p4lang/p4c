@@ -36,7 +36,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".addf2") action addf2() {
-        meta.meta.sum = hdr.data.f2 + 32w100;
+        meta.meta.sum = (bit<32>)hdr.data.f2 + 32w100;
     }
     @name(".noop") action noop() {
     }

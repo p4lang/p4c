@@ -113,6 +113,7 @@ class DoConstantFolding : public Transform {
     const IR::Node* postorder(IR::PathExpression* e) override;
     const IR::Node* postorder(IR::Cmpl* e) override;
     const IR::Node* postorder(IR::Neg* e) override;
+    const IR::Node* postorder(IR::UPlus* e) override;
     const IR::Node* postorder(IR::LNot* e) override;
     const IR::Node* postorder(IR::LAnd* e) override;
     const IR::Node* postorder(IR::LOr* e) override;

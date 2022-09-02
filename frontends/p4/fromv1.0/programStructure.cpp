@@ -67,7 +67,7 @@ ProgramStructure::ProgramStructure() :
     declarations = new IR::Vector<IR::Node>();
     emptyTypeArguments = new IR::Vector<IR::Type>();
     for (auto c : P4::reservedWords)
-        allNames.emplace(c);
+        allNames.insert({c, 0});
 }
 
 const IR::Annotations*
@@ -86,7 +86,7 @@ ProgramStructure::addGlobalNameAnnotation(cstring name,
 cstring ProgramStructure::makeUniqueName(cstring base) {
     cstring name = cstring::make_unique(allNames, base, '_');
     LOG3(" make unique name " << name);
-    allNames.emplace(name);
+    allNames.insert({name, 0});
     return name;
 }
 
@@ -164,7 +164,8 @@ const IR::Vector<IR::Expression>* ProgramStructure::listIndexes(cstring type, cs
 const IR::Expression* ProgramStructure::listIndex(const IR::Expression* expression) const {
     auto pe = expression->to<IR::PathExpression>();
     if (pe == nullptr) {
-        ::error("%1%: Expected a field list", expression);
+        ::error(ErrorType::ERR_EXPECTED,
+                "%1%: Expected a field list", expression);
         return 0;
     }
 
@@ -286,6 +287,7 @@ const IR::Type_Struct* ProgramStructure::createFieldListType(const IR::Expressio
     auto annos = addNameAnnotation(nr->path->name);
     auto result = new IR::Type_Struct(expression->srcInfo, name, annos);
     std::set<cstring> fieldNames;
+    int field_id = 0;
     for (auto f : fl->fields) {
         cstring name;
         if (f->is<IR::PathExpression>())
@@ -296,7 +298,7 @@ const IR::Type_Struct* ProgramStructure::createFieldListType(const IR::Expressio
             name = f->to<IR::ConcreteHeaderRef>()->ref->name;
         else
             BUG("%1%: unexpected field list member", f);
-        name = cstring::make_unique(fieldNames, name, '_');
+        name = cstring::make_unique(fieldNames, name, field_id, '_');
         fieldNames.emplace(name);
         auto type = f->type->getP4Type();
         CHECK_NULL(type);
@@ -2721,7 +2723,7 @@ void ProgramStructure::populateOutputNames() {
         nullptr
     };
     for (const char** c = used_names; *c != nullptr; ++c)
-        allNames.emplace(*c);
+        allNames.insert({*c, 0});;
 }
 
 }  // namespace P4V1

@@ -33,8 +33,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.eth_hdr.src_addr = val_0;
     }
     @name("ingress.simple_table") table simple_table_0 {
-        key = {
-        }
         actions = {
             @defaultonly NoAction_1();
         }

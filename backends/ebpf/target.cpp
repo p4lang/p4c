@@ -40,10 +40,18 @@ void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
     builder->newline();
 }
 
+void KernelSamplesTarget::emitResizeBuffer(Util::SourceCodeBuilder *builder,
+                                           cstring buffer, cstring offsetVar) const {
+    builder->appendFormat("bpf_skb_adjust_room(%s, %s, 1, 0)",
+                          buffer, offsetVar);
+}
+
 void KernelSamplesTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
                                           cstring key, cstring value) const {
-    builder->appendFormat("%s = BPF_MAP_LOOKUP_ELEM(%s, &%s)",
-                          value.c_str(), tblName.c_str(), key.c_str());
+    if (!value.isNullOrEmpty())
+        builder->appendFormat("%s = ", value.c_str());
+    builder->appendFormat("BPF_MAP_LOOKUP_ELEM(%s, &%s)",
+                          tblName.c_str(), key.c_str());
 }
 
 void KernelSamplesTarget::emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
@@ -62,19 +70,86 @@ void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
                                         cstring tblName, TableKind tableKind,
                                         cstring keyType, cstring valueType,
                                         unsigned size) const {
-    cstring kind;
-    if (tableKind == TableHash)
-        kind = "BPF_MAP_TYPE_HASH";
-    else if (tableKind == TableArray)
-        kind = "BPF_MAP_TYPE_ARRAY";
-    else if (tableKind == TableLPMTrie)
-        kind = "BPF_MAP_TYPE_LPM_TRIE";
-    else
-        BUG("%1%: unsupported table kind", tableKind);
-    builder->appendFormat("REGISTER_TABLE(%s, %s, ", tblName.c_str(), kind.c_str());
-    builder->appendFormat("sizeof(%s), sizeof(%s), %d)",
-                          keyType.c_str(), valueType.c_str(), size);
+    cstring kind, flags;
+    cstring registerTable = "REGISTER_TABLE(%s, %s, %s, %s, %d)";
+    cstring registerTableWithFlags = "REGISTER_TABLE_FLAGS(%s, %s, %s, %s, %d, %s)";
+
+    kind = getBPFMapType(tableKind);
+
+    if (keyType != "u32" && (tableKind == TablePerCPUArray || tableKind == TableArray)) {
+        // it's more safe to overwrite user-provided key type,
+        // as array map must have u32 key type.
+        ::warning(ErrorType::WARN_INVALID,
+                  "Invalid key type (%1%) for table kind %2%, replacing with u32",
+                  keyType, kind);
+        keyType = "u32";
+    } else if (tableKind == TableProgArray && (keyType != "u32" || valueType != "u32")) {
+        ::warning(ErrorType::WARN_INVALID,
+                  "Invalid key type (%1%) or value type (%2%) for table kind %3%, "
+                  "replacing with u32",
+                  keyType, valueType, kind);
+        keyType = "u32";
+        valueType = "u32";
+    }
+
+    if (tableKind == TableLPMTrie) {
+        flags = "BPF_F_NO_PREALLOC";
+    }
+
+    if (flags.isNullOrEmpty()) {
+        builder->appendFormat(registerTable, tblName.c_str(),
+                              kind.c_str(), keyType.c_str(),
+                              valueType.c_str(), size);
+    } else {
+        builder->appendFormat(registerTableWithFlags, tblName.c_str(),
+                              kind.c_str(), keyType.c_str(),
+                              valueType.c_str(), size, flags);
+    }
     builder->newline();
+    annotateTableWithBTF(builder, tblName, keyType, valueType);
+}
+
+void KernelSamplesTarget::emitTableDeclSpinlock(Util::SourceCodeBuilder* builder,
+                                                cstring tblName, TableKind tableKind,
+                                                cstring keyType, cstring valueType,
+                                                unsigned size) const {
+    if (tableKind == TableHash || tableKind == TableArray) {
+        emitTableDecl(builder, tblName, tableKind, keyType, valueType, size);
+    } else {
+        BUG("%1%: unsupported table kind with spinlock", tableKind);
+    }
+}
+
+void
+KernelSamplesTarget::emitMapInMapDecl(Util::SourceCodeBuilder *builder, cstring innerName,
+                                      TableKind innerTableKind, cstring innerKeyType,
+                                      cstring innerValueType, unsigned int innerSize,
+                                      cstring outerName, TableKind outerTableKind,
+                                      cstring outerKeyType, unsigned int outerSize) const {
+    if (outerTableKind != TableArray && outerTableKind != TableHash) {
+        BUG("Unsupported type of outer map for map-in-map");
+    }
+
+    cstring registerOuterTable = "REGISTER_TABLE_OUTER(%s, %s_OF_MAPS, %s, %s, %d, %d, %s)";
+    cstring registerInnerTable = "REGISTER_TABLE_INNER(%s, %s, %s, %s, %d, %d, %d)";
+
+    innerMapIndex++;
+
+    cstring kind = getBPFMapType(innerTableKind);
+    builder->appendFormat(registerInnerTable, innerName,
+                          kind, innerKeyType, innerValueType,
+                          innerSize, innerMapIndex, innerMapIndex);
+    builder->newline();
+    annotateTableWithBTF(builder, innerName, innerKeyType, innerValueType);
+
+    kind = getBPFMapType(outerTableKind);
+    cstring keyType = outerTableKind == TableArray ? "__u32" : outerKeyType;
+    builder->appendFormat(registerOuterTable, outerName,
+                          kind, keyType,
+                          "__u32", outerSize, innerMapIndex,
+                          innerName);
+    builder->newline();
+    annotateTableWithBTF(builder, outerName, keyType, "__u32");
 }
 
 void KernelSamplesTarget::emitLicense(Util::SourceCodeBuilder* builder, cstring license) const {
@@ -85,7 +160,7 @@ void KernelSamplesTarget::emitLicense(Util::SourceCodeBuilder* builder, cstring 
 
 void KernelSamplesTarget::emitCodeSection(
     Util::SourceCodeBuilder* builder, cstring sectionName) const {
-    builder->appendFormat("SEC(\"prog\")\n", sectionName.c_str());
+    builder->appendFormat("SEC(\"%s\")\n", sectionName.c_str());
 }
 
 void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder* builder,
@@ -141,6 +216,13 @@ void KernelSamplesTarget::emitTraceMessage(Util::SourceCodeBuilder* builder, con
     builder->newline();
 }
 
+void KernelSamplesTarget::annotateTableWithBTF(Util::SourceCodeBuilder* builder, cstring name,
+                                               cstring keyType, cstring valueType) const {
+    builder->appendFormat("BPF_ANNOTATE_KV_PAIR(%s, %s, %s)",
+                          name.c_str(), keyType.c_str(), valueType.c_str());
+    builder->newline();
+}
+
 //////////////////////////////////////////////////////////////
 
 void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
@@ -162,8 +244,10 @@ void TestTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
 
 void BccTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
                                 cstring key, cstring value) const {
-    builder->appendFormat("%s = %s.lookup(&%s)",
-                          value.c_str(), tblName.c_str(), key.c_str());
+    if (!value.isNullOrEmpty())
+        builder->appendFormat("%s = ", value.c_str());
+    builder->appendFormat("%s.lookup(&%s)",
+                          tblName.c_str(), key.c_str());
 }
 
 void BccTarget::emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,

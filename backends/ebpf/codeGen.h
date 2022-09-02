@@ -44,6 +44,13 @@ class CodeGenInspector : public Inspector {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
     std::map<const IR::Parameter*, const IR::Parameter*> substitution;
+    // asPointerVariables stores the list of string expressions that
+    // should be emitted as pointer variables.
+    std::set<cstring> asPointerVariables;
+
+    // Since CodeGenInspector also generates C comments,
+    // this variable keeps track of the current comment depth.
+    int commentDescriptionDepth = 0;
 
  public:
     int expressionPrecedence;  /// precedence of current IR::Operation
@@ -63,6 +70,18 @@ class CodeGenInspector : public Inspector {
     void copySubstitutions(CodeGenInspector* other) {
         for (auto s : other->substitution)
             substitute(s.first, s.second);
+    }
+
+    void useAsPointerVariable(cstring name) {
+        this->asPointerVariables.insert(name);
+    }
+    void copyPointerVariables(CodeGenInspector *other) {
+        for (auto s : other->asPointerVariables) {
+            this->asPointerVariables.insert(s);
+        }
+    }
+    bool isPointerVariable(cstring name) {
+        return asPointerVariables.count(name) > 0;
     }
 
     bool notSupported(const IR::Expression* expression)
@@ -94,6 +113,7 @@ class CodeGenInspector : public Inspector {
     bool preorder(const IR::Equ* e) override { return comparison(e); }
     bool preorder(const IR::Neq* e) override { return comparison(e); }
     bool preorder(const IR::Path* path) override;
+    bool preorder(const IR::StructExpression *expr) override;
 
     bool preorder(const IR::Type_Typedef* type) override;
     bool preorder(const IR::Type_Enum* type) override;

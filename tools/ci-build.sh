@@ -46,14 +46,17 @@ export P4C_PIP_PACKAGES="ipaddr \
                           ply==3.8 \
                           scapy==2.4.5"
 
-
-
 apt-get update
 apt-get install -y --no-install-recommends \
   ${P4C_DEPS} \
   ${P4C_EBPF_DEPS} \
   ${P4C_RUNTIME_DEPS} \
   git
+
+# TODO: Remove this rm -rf line once the ccache memcache config is removed.
+rm -rf /usr/local/etc/ccache.conf
+/usr/local/bin/ccache --set-config cache_dir=/p4c/.ccache
+/usr/local/bin/ccache --set-config max_size=1G
 
 # we want to use Python as the default so change the symlinks
 ln -sf /usr/bin/python3 /usr/bin/python
@@ -65,7 +68,32 @@ pip3 install $P4C_PIP_PACKAGES
 # Build libbpf for eBPF tests.
 cd /p4c
 backends/ebpf/build_libbpf
-cd -
+cd /p4c
+
+function install_ptf_ebpf_test_deps() (
+  export P4C_PTF_PACKAGES="gcc-multilib \
+                           python3-six \
+                           libjansson-dev \
+                           linux-tools-`uname -r`"
+  # Package "linux-tools-generic-hwe-20.04" is not required because
+  # we test under current kernel, not the newest one
+  apt-get install -y --no-install-recommends ${P4C_PTF_PACKAGES}
+
+  git clone --recursive https://github.com/P4-Research/psabpf.git /tmp/psabpf
+  cd /tmp/psabpf
+  # FIXME: psabpf is under heavy development, later use git tags when it will be ready to use
+  git reset --hard 7a4a8be
+  ./build_libbpf.sh
+  mkdir build
+  cd build
+  cmake ..
+  make "-j$(nproc)"
+  make install
+)
+
+if [[ "${INSTALL_PTF_EBPF_DEPENDENCIES}" == "ON" ]] ; then
+  install_ptf_ebpf_test_deps
+fi
 
 # ! ------  BEGIN VALIDATION -----------------------------------------------
 

@@ -94,12 +94,13 @@ int main(int argc, char *const argv[]) {
     options.compilerVersion = P4C_EBPF_VERSION_STRING;
 
     if (options.process(argc, argv) != nullptr) {
-            if (options.loadIRFromJson == false)
-                    options.setInputFile();
+        if (options.loadIRFromJson == false)
+            options.setInputFile();
     }
     if (::errorCount() > 0)
         exit(1);
 
+    options.calculateXDP2TCMode();
     try {
         compile(options);
     } catch (const std::exception &bug) {

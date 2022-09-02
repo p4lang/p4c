@@ -170,6 +170,10 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Instance* decl) {
     if (findContext<IR::ParserState>())
         ::error(ErrorType::ERR_INVALID,
                 "%1%: invalid declaration. Instantiations cannot be in a parser state.", decl);
+    if (findContext<IR::Function>() || findContext<IR::Method>())
+        ::error(ErrorType::ERR_INVALID,
+                "%1%: invalid declaration. Instantiations cannot be in a function or method.",
+                decl);
     auto inAction = findContext<IR::P4Action>();
     if (inAction != nullptr)
         ::error(ErrorType::ERR_INVALID,
@@ -223,10 +227,13 @@ void ValidateParsedProgram::postorder(const IR::SwitchStatement* statement) {
 
 /// Return statements are not allowed in parsers
 void ValidateParsedProgram::postorder(const IR::ReturnStatement* statement) {
-    auto inParser = findContext<IR::P4Parser>();
-    if (inParser != nullptr)
-        ::error(ErrorType::ERR_INVALID,
-                "%1%: invalid statement. 'return' statements not allowed in parsers.", statement);
+    if (!findContext<IR::Function>()) {
+        auto inParser = findContext<IR::P4Parser>();
+        if (inParser != nullptr)
+            ::error(ErrorType::ERR_INVALID,
+                    "%1%: invalid statement. 'return' statements not allowed in parsers.",
+                    statement);
+    }
 }
 
 /// Exit statements are not allowed in parsers or functions

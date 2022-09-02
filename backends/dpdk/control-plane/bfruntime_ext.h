@@ -16,9 +16,10 @@ limitations under the License.
 #ifndef DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_
 #define DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_
 
+#include "backends/dpdk/options.h"
+#include "backends/dpdk/constants.h"
 #include "control-plane/bfruntime.h"
 #include "p4/config/dpdk/p4info.pb.h"
-
 namespace P4 {
 
 namespace BFRT {
@@ -27,13 +28,16 @@ namespace BFRT {
 /// the context of P4Runtime to the BF-RT info JSON used by the BF-RT API.
 class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
  public:
-    explicit BFRuntimeSchemaGenerator(const p4configv1::P4Info& p4info)
-        : BFRuntimeGenerator(p4info) { }
+    BFRuntimeSchemaGenerator(const p4configv1::P4Info& p4info, bool isTDI,
+        DPDK::DpdkOptions &options)
+        : BFRuntimeGenerator(p4info), isTDI(isTDI), options(options) { }
 
     /// Generates the schema as a Json object for the provided P4Info instance.
     const Util::JsonObject* genSchema() const override;
 
  private:
+    bool isTDI;
+    DPDK::DpdkOptions &options;
     // TODO(antonin): these values may need to be available to the BF-RT
     // implementation as well, if they want to expose them as enums.
 
@@ -77,7 +81,8 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
         const auto& pre = externInstance.preamble();
         p4configv1::ActionProfile actionProfile;
         if (!externInstance.info().UnpackTo(&actionProfile)) {
-            ::error("Extern instance %1% does not pack an ActionProfile object", pre.name());
+            ::error(ErrorType::ERR_NOT_FOUND,
+                    "Extern instance %1% does not pack an ActionProfile object", pre.name());
             return boost::none;
         }
         auto tableIds = collectTableIds(

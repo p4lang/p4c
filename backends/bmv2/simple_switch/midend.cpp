@@ -36,6 +36,7 @@ limitations under the License.
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
 #include "midend/eliminateSwitch.h"
+#include "midend/eliminateTypedefs.h"
 #include "midend/flattenHeaders.h"
 #include "midend/flattenInterfaceStructs.h"
 #include "midend/replaceSelectRange.h"
@@ -116,6 +117,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options, std::ostream* o
                                               "meters",
                                               "support_timeout" }),
             new P4::SimplifyControlFlow(&refMap, &typeMap),
+            new P4::EliminateTypedef(&refMap, &typeMap),
             new P4::CompileTimeOperations(),
             new P4::TableHit(&refMap, &typeMap),
             new P4::EliminateSwitch(&refMap, &typeMap),

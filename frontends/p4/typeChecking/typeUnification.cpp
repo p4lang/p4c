@@ -363,9 +363,11 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
             return true;
         }
         if (auto senum = src->to<IR::Type_SerEnum>()) {
-            if (dest->is<IR::Type_Bits>())
+            if (dest->is<IR::Type_Bits>()) {
                 // unify with enum's underlying type
-                return unify(constraint->create(senum->type, dest));
+                auto stype = typeMap->getTypeType(senum->type, true);
+                return unify(constraint->create(stype, dest));
+            }
         }
         if (!src->is<IR::Type_Base>())
             return constraint->reportError(constraints->getCurrentSubstitution());
@@ -373,6 +375,9 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
         bool success = (*src) == (*dest);
         if (!success)
             return constraint->reportError(constraints->getCurrentSubstitution());
+        return true;
+    } else if (auto se = dest->to<IR::Type_SerEnum>()) {
+        constraints->add(constraint->create(se->type, src));
         return true;
     } else if (dest->is<IR::Type_Declaration>() && src->is<IR::Type_Declaration>()) {
         bool canUnify = typeid(dest) == typeid(src) &&

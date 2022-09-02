@@ -340,4 +340,3 @@ macro(p4c_add_xfail_reason tag reason)
     endif()
   endforeach()
 endmacro(p4c_add_xfail_reason)
-

@@ -7,13 +7,11 @@ struct ethernet_t {
 }
 
 struct ipv4_t {
-	bit<4> version
-	bit<4> ihl
+	bit<8> version_ihl
 	bit<8> diffserv
 	bit<16> totalLen
 	bit<16> identification
-	bit<3> flags
-	bit<13> fragOffset
+	bit<16> flags_fragOffset
 	bit<8> ttl
 	bit<8> protocol
 	bit<16> hdrChecksum
@@ -44,6 +42,8 @@ metadata instanceof main_metadata_t
 
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
+
+regarray direction size 0x100 initval 0
 
 action NoAction args none {
 	return

@@ -22,12 +22,15 @@ metadata instanceof main_metadata_t
 
 header h1 instanceof header1_t
 header h2 instanceof header2_t
-header MainParserT_parser_lookahead_tmp instanceof lookahead_tmp_hdr
+;oldname:MainParserT_parser_lookahead_tmp
+header MainParserT_parser_lookahead_0 instanceof lookahead_tmp_hdr
+
+regarray direction size 0x100 initval 0
 
 apply {
 	rx m.pna_main_input_metadata_input_port
-	lookahead h.MainParserT_parser_lookahead_tmp
-	mov m.local_metadata_f1 h.MainParserT_parser_lookahead_tmp.f
+	lookahead h.MainParserT_parser_lookahead_0
+	mov m.local_metadata_f1 h.MainParserT_parser_lookahead_0.f
 	jmpeq MAINPARSERIMPL_PARSE_H1 m.local_metadata_f1 0x1
 	jmpeq MAINPARSERIMPL_PARSE_H2 m.local_metadata_f1 0x2
 	jmp MAINPARSERIMPL_ACCEPT

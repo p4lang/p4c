@@ -88,6 +88,57 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
         },
         "Preprocess only, do not compile (prints program on stdout)");
     registerOption(
+        "-M", nullptr,
+        [this](const char* ) {
+            preprocessor_options += std::string(" -M");
+            doNotCompile = true;
+            return true;
+        },
+        "Output `make` dependency rule only (passed to preprocessor)");
+    registerOption(
+        "-MD", nullptr,
+        [this](const char* ) {
+            preprocessor_options += std::string(" -MD");
+            return true;
+        },
+        "Output `make` dependency rule to file as side effect (passed to preprocessor)");
+    registerOption(
+        "-MF", "file",
+        [this](const char* arg) {
+            preprocessor_options += std::string(" -MF \"") + arg + std::string("\"");
+            return true;
+        },
+        "With -M, specify output file for dependencies (passed to preprocessor)");
+    registerOption(
+        "-MG", nullptr,
+        [this](const char* ) {
+            preprocessor_options += std::string(" -MG");
+            return true;
+        },
+        "with -M, suppress errors for missing headers (passed to preprocessor)");
+    registerOption(
+        "-MP", nullptr,
+        [this](const char* ) {
+            preprocessor_options += std::string(" -MP");
+            return true;
+        },
+        "with -M, add phony target for each dependency (passed to preprocessor)");
+    registerOption(
+        "-MT", "target",
+        [this](const char* arg) {
+            preprocessor_options += std::string(" -MT \"") + arg + std::string("\"");
+            return true;
+        },
+        "With -M, override target of the output rule (passed to preprocessor)");
+    registerOption(
+        "-MQ", "target",
+        [this](const char* arg) {
+            preprocessor_options += std::string(" -MQ \"") + arg + std::string("\"");
+            return true;
+        },
+        "Like -Mt, override target but quote special characters (passed to preprocessor)");
+
+    registerOption(
         "--p4v", "{14|16}",
         [this](const char* arg) {
             if (!strcmp(arg, "1.0") || !strcmp(arg, "14")) {
@@ -238,6 +289,13 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
         "When the optimization is enabled, compiler tries to identify the cases,\n"
         "when it can inline the subparser's states only once for multiple\n"
         "invocations of the same subparser instance.");
+    registerOption(
+        "--doNotEmitIncludes", "condition",
+        [this](const char* arg) {
+            noIncludes = arg;
+            return true;
+        },
+        "[Compiler debugging] If true do not generate #include statements\n");
     registerUsage(
         "loglevel format is: \"sourceFile:level,...,sourceFile:level\"\n"
         "where 'sourceFile' is a compiler source file and "
@@ -344,11 +402,14 @@ FILE* ParserOptions::preprocess() {
         std::string cmd("cpp");
 #endif
 
+        if (file == nullptr)
+            file = "";
+        if (file.find(' '))
+            file = cstring("\"") + file + "\"";
         cmd +=
             cstring(" -C -undef -nostdinc -x assembler-with-cpp") + " " +
             preprocessor_options +
-            getIncludePath() + " " +
-            (file != nullptr ? file : "");
+            getIncludePath() + " " + file;
 
         if (Log::verbose())
             std::cerr << "Invoking preprocessor " << std::endl
@@ -436,6 +497,9 @@ void ParserOptions::dumpPass(const char* manager, unsigned seq,
                 if (Log::verbose())
                     std::cerr << "Writing program to " << fileName << std::endl;
                 P4::ToP4 toP4(stream, Log::verbose(), file);
+                if (noIncludes) {
+                    toP4.setnoIncludesArg(true);
+                }
                 node->apply(toP4);
                 delete stream;  // close the file
             }

@@ -138,8 +138,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         registerRound.read(meta.local_metadata.round, hdr.myhdr.inst);
     }
     table round_tbl {
-        key = {
-        }
         actions = {
             read_round();
         }

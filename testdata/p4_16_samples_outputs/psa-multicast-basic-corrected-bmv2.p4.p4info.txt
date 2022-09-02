@@ -6,6 +6,6 @@ actions {
     id: 32077379
     name: "multicast"
     alias: "multicast"
-    annotations: "@noWarnUnused"
+    annotations: "@noWarn(\"unused\")"
   }
 }

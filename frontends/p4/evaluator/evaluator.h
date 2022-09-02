@@ -25,7 +25,7 @@ namespace P4 {
 
 class IHasBlock {
  public:
-    virtual IR::ToplevelBlock* getToplevelBlock() = 0;
+    virtual IR::ToplevelBlock* getToplevelBlock() const = 0;
 };
 
 class Evaluator final : public Inspector, public IHasBlock {
@@ -42,7 +42,7 @@ class Evaluator final : public Inspector, public IHasBlock {
     Evaluator(const ReferenceMap* refMap, const TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap), toplevelBlock(nullptr)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("Evaluator"); visitDagOnce = false; }
-    IR::ToplevelBlock* getToplevelBlock() override { return toplevelBlock; }
+    IR::ToplevelBlock* getToplevelBlock() const override { return toplevelBlock; }
 
     IR::Block* currentBlock() const;
     /// Map a node to value.  The value can be nullptr, e.g., for an
@@ -73,6 +73,7 @@ class Evaluator final : public Inspector, public IHasBlock {
     bool preorder(const IR::Property* prop) override;
     bool preorder(const IR::Member* expression) override;
     bool preorder(const IR::ListExpression* expression) override;
+    bool preorder(const IR::StructExpression* expression) override;
     bool preorder(const IR::Constant* expression) override
     { setValue(expression, expression); return false; }
     bool preorder(const IR::StringLiteral* expression) override
@@ -80,6 +81,8 @@ class Evaluator final : public Inspector, public IHasBlock {
     bool preorder(const IR::BoolLiteral* expression) override
     { setValue(expression, expression); return false; }
     bool preorder(const IR::ListCompileTimeValue* expression) override
+    { setValue(expression, expression); return false; }
+    bool preorder(const IR::StructCompileTimeValue* expression) override
     { setValue(expression, expression); return false; }
     bool preorder(const IR::Declaration_ID* expression) override
     { setValue(expression, expression); return false; }
@@ -94,7 +97,7 @@ class Evaluator final : public Inspector, public IHasBlock {
 class EvaluatorPass final : public PassManager, public IHasBlock {
     P4::Evaluator* evaluator;
  public:
-    IR::ToplevelBlock* getToplevelBlock() override { return evaluator->getToplevelBlock(); }
+    IR::ToplevelBlock* getToplevelBlock() const override { return evaluator->getToplevelBlock(); }
     EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap);
 };
 

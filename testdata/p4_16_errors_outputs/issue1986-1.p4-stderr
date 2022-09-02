@@ -4,4 +4,6 @@ issue1986-1.p4(22): [--Werror=type-error] error: SelectExpression
   ---- Actual error:
   Cannot unify type 'bit<0>' with type 'bit<2>'
   ---- Originating from:
-  'match' case label type 'bit<0>' does not match expected type 'bit<2>'
+issue1986-1.p4(23): 'match' case label '0' has type 'bit<0>' which does not match the expected type 'bit<2>'
+              0w0: parse_h2;
+              ^^^

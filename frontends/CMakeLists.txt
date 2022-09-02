@@ -44,6 +44,7 @@ set (P4_FRONTEND_SRCS
   p4/parserCallGraph.cpp
   p4/parserControlFlow.cpp
   p4/reassociation.cpp
+  p4/redundantParsers.cpp
   p4/removeParameters.cpp
   p4/removeReturns.cpp
   p4/reservedWords.cpp
@@ -63,6 +64,7 @@ set (P4_FRONTEND_SRCS
   p4/symbol_table.cpp
   p4/tableApply.cpp
   p4/tableKeyNames.cpp
+  p4/ternaryBool.cpp
   p4/toP4/toP4.cpp
   p4/typeChecking/bindVariables.cpp
   p4/typeChecking/syntacticEquivalence.cpp
@@ -114,6 +116,7 @@ set (P4_FRONTEND_HDRS
   p4/parserCallGraph.h
   p4/parserControlFlow.h
   p4/reassociation.h
+  p4/redundantParsers.h
   p4/removeParameters.h
   p4/removeReturns.h
   p4/reservedWords.h
@@ -133,6 +136,7 @@ set (P4_FRONTEND_HDRS
   p4/symbol_table.h
   p4/tableApply.h
   p4/tableKeyNames.h
+  p4/ternaryBool.h
   p4/toP4/toP4.h
   p4/typeChecking/bindVariables.h
   p4/typeChecking/syntacticEquivalence.h

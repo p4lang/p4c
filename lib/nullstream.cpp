@@ -21,7 +21,7 @@ std::ostream* openFile(cstring name, bool nullOnError) {
     if (name.isNullOrEmpty()) {
         if (nullOnError)
             return new nullstream();
-        ::error(ErrorType::ERR_INVALID, "Empty name for openFile", name);
+        ::error(ErrorType::ERR_INVALID, "Empty name for openFile");
         return nullptr;
     }
     std::ofstream *file = new std::ofstream(name);

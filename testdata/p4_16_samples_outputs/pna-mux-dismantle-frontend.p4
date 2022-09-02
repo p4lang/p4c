@@ -41,9 +41,10 @@ struct empty_metadata_t {
 }
 
 struct main_metadata_t {
-    bit<1> rng_result1;
-    bit<1> val1;
-    bit<1> val2;
+    bit<1>                rng_result1;
+    bit<1>                val1;
+    bit<1>                val2;
+    ExpireTimeProfileId_t timeout;
 }
 
 struct headers_t {
@@ -100,7 +101,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     @name("MainControlImpl.add_on_miss_action") action add_on_miss_action() {
         tmp = 32w0;
-        add_entry<bit<32>>(action_name = "next_hop", action_params = tmp);
+        add_entry<bit<32>>(action_name = "next_hop", action_params = tmp, expire_time_profile_id = user_meta.timeout);
     }
     @name("MainControlImpl.do_range_checks_1") action do_range_checks_2(@name("min1") bit<16> min1_3, @name("max1") bit<16> max1_3) {
         if (min1_3 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= max1_3) {
@@ -131,7 +132,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         hdr.ipv4.srcAddr = newAddr;
     }
     @name("MainControlImpl.add_on_miss_action2") action add_on_miss_action2() {
-        add_entry<tuple<bit<32>, bit<32>>>(action_name = "next_hop", action_params = { 32w0, 32w1234 });
+        add_entry<tuple<bit<32>, bit<32>>>(action_name = "next_hop", action_params = { 32w0, 32w1234 }, expire_time_profile_id = user_meta.timeout);
     }
     @name("MainControlImpl.ipv4_da2") table ipv4_da2_0 {
         key = {

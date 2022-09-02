@@ -232,6 +232,14 @@ cstring cstring::replace(cstring search, cstring replace) const {
     return cstring(s_str);
 }
 
+cstring cstring::indent(size_t amount) const {
+    std::string spaces = "";
+    for (size_t i = 0; i < amount; i++)
+        spaces += " ";
+    cstring spc = cstring("\n") + spaces;
+    return cstring(spaces) + replace("\n", spc);
+}
+
 // See https://stackoverflow.com/a/33799784/4538702
 cstring cstring::escapeJson() const {
     std::ostringstream o;
@@ -258,10 +266,16 @@ cstring cstring::escapeJson() const {
     return cstring(o.str());
 }
 
-cstring cstring::toUpper() {
+cstring cstring::toUpper() const {
     std::string st = str;
     std::transform(st.begin(), st.end(), st.begin(), ::toupper);
     cstring ret = cstring::to_cstring(st);
     return ret;
 }
 
+cstring cstring::capitalize() const {
+    std::string st = str;
+    st[0] = ::toupper(st[0]);
+    cstring ret = cstring::to_cstring(st);
+    return ret;
+}

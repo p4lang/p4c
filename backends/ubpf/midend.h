@@ -24,14 +24,12 @@ limitations under the License.
 namespace UBPF {
 
 class MidEnd : public EBPF::MidEnd {
-
-
-public:
-    explicit MidEnd() : EBPF::MidEnd() {}
+ public:
+    MidEnd() : EBPF::MidEnd() {}
     const IR::ToplevelBlock* run(EbpfOptions& options, const IR::P4Program* program,
                                  std::ostream* outStream = nullptr);
 };
 
-} // namespace UBPF
+}  // namespace UBPF
 
-#endif //_BACKENDS_UBPF_MIDEND_H_
+#endif  /* _BACKENDS_UBPF_MIDEND_H_ */

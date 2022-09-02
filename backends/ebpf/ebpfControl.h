@@ -25,11 +25,13 @@ namespace EBPF {
 
 class EBPFControl;
 
-class ControlBodyTranslator : public CodeGenInspector {
+class ControlBodyTranslator : public virtual CodeGenInspector {
+ protected:
     const EBPFControl* control;
     std::set<const IR::Parameter*> toDereference;
     std::vector<cstring> saveAction;
     P4::P4CoreLibrary& p4lib;
+
  public:
     explicit ControlBodyTranslator(const EBPFControl* control);
 
@@ -49,6 +51,7 @@ class ControlBodyTranslator : public CodeGenInspector {
     bool preorder(const IR::ReturnStatement*) override;
     bool preorder(const IR::IfStatement* statement) override;
     bool preorder(const IR::SwitchStatement* statement) override;
+    bool preorder(const IR::StructExpression *expr) override;
 };
 
 class EBPFControl : public EBPFObject {
@@ -70,10 +73,10 @@ class EBPFControl : public EBPFObject {
     EBPFControl(const EBPFProgram* program, const IR::ControlBlock* block,
                 const IR::Parameter* parserHeaders);
     virtual void emit(CodeBuilder* builder);
-    void emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl);
-    void emitTableTypes(CodeBuilder* builder);
-    void emitTableInitializers(CodeBuilder* builder);
-    void emitTableInstances(CodeBuilder* builder);
+    virtual void emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl);
+    virtual void emitTableTypes(CodeBuilder* builder);
+    virtual void emitTableInitializers(CodeBuilder* builder);
+    virtual void emitTableInstances(CodeBuilder* builder);
     virtual bool build();
     EBPFTable* getTable(cstring name) const {
         auto result = ::get(tables, name);
