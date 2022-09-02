@@ -84,7 +84,7 @@ action execute_1 args none {
 
 table tbl {
 	key {
-		m.Ingress_key optional
+		m.Ingress_key wildcard
 		m.ingress_tbl_ethernet_dstAddr exact
 		m.ingress_tbl_ethernet_srcAddr exact
 	}

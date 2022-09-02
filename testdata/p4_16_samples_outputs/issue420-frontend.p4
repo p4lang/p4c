@@ -49,8 +49,6 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
         }
     }
     @name("cIngress.tbl1") table tbl1_0 {
-        key = {
-        }
         actions = {
             foo();
             NoAction_1();

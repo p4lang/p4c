@@ -85,11 +85,6 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "declaration not found"
-  testdata/p4_16_samples/pna-direction-main-parser-err.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
   "All table keys together with holes in the underlying structure should fit in 64 bytes"
    testdata/p4_16_samples/psa-dpdk-table-key-error.p4
    testdata/p4_16_samples/psa-dpdk-table-key-error-1.p4

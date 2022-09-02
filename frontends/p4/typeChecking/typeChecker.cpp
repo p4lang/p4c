@@ -936,6 +936,17 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
     methodType = cloneWithFreshTypeVariables(methodType)->to<IR::Type_Method>();
     CHECK_NULL(methodType);
 
+    if (errorPosition->is<IR::ConstructorCallExpression>()) {
+        for (auto m : ext->methods) {
+            if (m->isAbstract) {
+                typeError("%1%: extern type %2% with abstract methods cannot be instantiated"
+                          " using a constructor call; consider using a declaration",
+                          errorPosition, ext);
+                return nullptr;
+            }
+        }
+    }
+
     auto args = new IR::Vector<IR::ArgumentInfo>();
     size_t i = 0;
     for (auto pi : *methodType->parameters->getEnumerator()) {
@@ -1370,6 +1381,12 @@ const IR::Node* TypeInference::postorder(IR::Type_List* type) {
 }
 
 const IR::Node* TypeInference::postorder(IR::Type_Tuple* type) {
+    for (auto field : type->components) {
+        if (field->is<IR::IContainer>()) {
+            typeError("%1%: not supported as a tuple field", field);
+            return type;
+        }
+    }
     (void)setTypeType(type);
     return type;
 }
@@ -1910,8 +1927,6 @@ const IR::Node* TypeInference::postorder(IR::Key* key) {
     }
     LOG2("Setting key type to " << dbp(keyTuple));
     setType(key, keyTuple);
-    // installing also for the original because we cannot tell which one will survive in the ir
-    LOG2("Setting key type to " << dbp(getOriginal()));
     setType(getOriginal(), keyTuple);
     return key;
 }
@@ -1925,7 +1940,8 @@ const IR::Node* TypeInference::preorder(IR::EntriesList* el) {
     BUG_CHECK(table != nullptr, "%1% entries not within a table", el);
     const IR::Key* key = table->getKey();
     if (key == nullptr) {
-        typeError("Could not find key for table %1%", table);
+        if (el->size() != 0)
+            typeError("Entries cannot be specified for a table with no key %1%", table);
         prune();
         return el;
     }
@@ -1971,14 +1987,22 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
     auto entryKeyType = getType(entry->keys);
     if (entryKeyType == nullptr)
         return entry;
-    if (entryKeyType->is<IR::Type_Set>())
-        entryKeyType = entryKeyType->to<IR::Type_Set>()->elementType;
+    if (auto ts = entryKeyType->to<IR::Type_Set>())
+        entryKeyType = ts->elementType;
+    if (entry->singleton) {
+        if (auto tl = entryKeyType->to<IR::Type_BaseList>()) {
+            // An entry of _ does not have type Tuple<Type_Dontcare>, but rather Type_Dontcare
+            if (tl->getSize() == 1 && tl->components.at(0)->is<IR::Type_Dontcare>())
+                entryKeyType = tl->components.at(0);
+        }
+    }
 
     auto keyset = entry->getKeys();
     if (keyset == nullptr || !(keyset->is<IR::ListExpression>())) {
         typeError("%1%: key expression must be tuple", keyset);
         return entry;
-    } else if (keyset->components.size() < key->keyElements.size()) {
+    }
+    if (keyset->components.size() < key->keyElements.size()) {
         typeError("%1%: Size of entry keyset must match the table key set size", keyset);
         return entry;
     }
@@ -2005,7 +2029,7 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
 
     if (ks != keyset)
         entry = new IR::Entry(entry->srcInfo, entry->annotations,
-                              ks->to<IR::ListExpression>(), entry->action);
+                              ks->to<IR::ListExpression>(), entry->action, entry->singleton);
 
     auto actionRef = entry->getAction();
     auto ale = validateActionInitializer(actionRef, table);

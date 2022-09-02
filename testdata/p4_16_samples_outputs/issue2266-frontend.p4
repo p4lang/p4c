@@ -35,8 +35,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         val_0 = retval;
     }
     @name("ingress.simple_table") table simple_table_0 {
-        key = {
-        }
         actions = {
             simple_action();
             @defaultonly NoAction_1();

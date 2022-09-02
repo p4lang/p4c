@@ -1,23 +1,19 @@
-#include <stdlib.h>
-
+#include <cstdlib>
 #include <fstream>
 
-#include "env.h"
 
+#include "test/gtest/env.h"
+#include "test/gtest/helpers.h"
 #include "gtest/gtest.h"
 #include "ir/ir.h"
-#include "helpers.h"
 #include "lib/log.h"
-
-#include "frontends/common/parseInput.h"
 
 #include "backends/p4test/version.h"
 
-#include "p4/createBuiltins.h"
-#include "p4/typeChecking/typeChecker.h"
-
 #include "frontends/common/constantFolding.h"
+#include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/createBuiltins.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/moveDeclarations.h"

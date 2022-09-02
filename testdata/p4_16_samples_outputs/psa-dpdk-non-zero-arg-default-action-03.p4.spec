@@ -50,8 +50,6 @@ action macswp args none {
 }
 
 table stub {
-	key {
-	}
 	actions {
 		macswp
 		nonDefAct

@@ -42,7 +42,7 @@ class ComplexValues final {
         Component* getComponent(cstring) override
         { return nullptr; }
         void dbprint(std::ostream& out) const override
-        { out << newName << IndentCtl::endl; }
+        { out << newName << Log::endl; }
     };
 
     struct FieldsMap : public Component {
@@ -63,10 +63,10 @@ class ComplexValues final {
         Component* getComponent(cstring name) override
         { return ::get(members, name); }
         void dbprint(std::ostream& out) const override {
-            out << IndentCtl::indent;
+            out << Log::indent;
             for (auto m : members)
                 out << m.first << "=>" << m.second;
-            out << IndentCtl::unindent;
+            out << Log::unindent;
         }
     };
 

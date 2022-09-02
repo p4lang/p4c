@@ -37,8 +37,6 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
         hdr.ethernet.src_addr = (tmp1 == 32w0x1 && tmp2 == 32w0x2 ? m.addr : hdr.ethernet.src_addr);
     }
     @name("MyIngressControl.stub") table stub_0 {
-        key = {
-        }
         actions = {
             macswp();
             nonDefAct();

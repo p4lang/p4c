@@ -19,12 +19,13 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 
 namespace P4 {
-void CreateBuiltins::postorder(IR::P4Parser* parser) {
+const IR::Node* CreateBuiltins::postorder(IR::P4Parser* parser) {
     parser->states.push_back(new IR::ParserState(IR::ParserState::accept, nullptr));
     parser->states.push_back(new IR::ParserState(IR::ParserState::reject, nullptr));
+    return parser;
 }
 
-void CreateBuiltins::postorder(IR::ActionListElement* element) {
+const IR::Node* CreateBuiltins::postorder(IR::ActionListElement* element) {
     // convert path expressions to method calls
     // actions = { a; b; }
     // becomes
@@ -33,9 +34,10 @@ void CreateBuiltins::postorder(IR::ActionListElement* element) {
         element->expression = new IR::MethodCallExpression(
             element->expression->srcInfo, element->expression,
             new IR::Vector<IR::Type>(), new IR::Vector<IR::Argument>());
+    return element;
 }
 
-void CreateBuiltins::postorder(IR::ExpressionValue* expression) {
+const IR::Node* CreateBuiltins::postorder(IR::ExpressionValue* expression) {
     // convert a default_action = a; into
     // default_action = a();
     auto prop = findContext<IR::Property>();
@@ -45,29 +47,32 @@ void CreateBuiltins::postorder(IR::ExpressionValue* expression) {
         expression->expression = new IR::MethodCallExpression(
             expression->expression->srcInfo, expression->expression,
             new IR::Vector<IR::Type>(), new IR::Vector<IR::Argument>());
+    return expression;
 }
 
-void CreateBuiltins::postorder(IR::Entry* entry) {
+const IR::Node* CreateBuiltins::postorder(IR::Entry* entry) {
   // convert a const table entry with action "a;" into "a();"
   if (entry->action->is<IR::PathExpression>())
     entry->action = new IR::MethodCallExpression(
       entry->action->srcInfo, entry->action,
       new IR::Vector<IR::Type>(), new IR::Vector<IR::Argument>());
+  return entry;
 }
 
-void CreateBuiltins::postorder(IR::ParserState* state) {
+const IR::Node* CreateBuiltins::postorder(IR::ParserState* state) {
     if (state->selectExpression == nullptr) {
         warn(ErrorType::WARN_PARSER_TRANSITION, "%1%: implicit transition to `reject'", state);
         state->selectExpression = new IR::PathExpression(IR::ParserState::reject);
     }
+    return state;
 }
 
-void CreateBuiltins::postorder(IR::ActionList* actions) {
+const IR::Node* CreateBuiltins::postorder(IR::ActionList* actions) {
     if (!addNoAction)
-        return;
+        return actions;
     auto decl = actions->getDeclaration(P4::P4CoreLibrary::instance.noAction.str());
     if (decl != nullptr)
-        return;
+        return actions;;
     actions->push_back(
         new IR::ActionListElement(
             new IR::Annotations(
@@ -75,18 +80,34 @@ void CreateBuiltins::postorder(IR::ActionList* actions) {
             new IR::MethodCallExpression(
                 new IR::PathExpression(P4::P4CoreLibrary::instance.noAction.Id(actions->srcInfo)),
                 new IR::Vector<IR::Type>(), new IR::Vector<IR::Argument>())));
+    return actions;
 }
 
-bool CreateBuiltins::preorder(IR::P4Table* table) {
+const IR::Node* CreateBuiltins::preorder(IR::P4Table* table) {
     addNoAction = false;
     if (table->getDefaultAction() == nullptr)
         addNoAction = true;
-    return true;
+    return table;
 }
 
-void CreateBuiltins::postorder(IR::TableProperties* properties) {
+const IR::Node* CreateBuiltins::postorder(IR::Property* property) {
+    // Spec: a table with an empty key is the same
+    // as a table with no key.
+    if (property->name != IR::TableProperties::keyPropertyName)
+        return property;
+    if (auto key = property->value->to<IR::Key>()) {
+        if (key->keyElements.size() == 0)
+            return nullptr;
+    } else {
+        ::error(ErrorType::ERR_INVALID, "%1%: must be a key", key);
+        return nullptr;
+    }
+    return property;
+}
+
+const IR::Node* CreateBuiltins::postorder(IR::TableProperties* properties) {
     if (!addNoAction)
-        return;
+        return properties;
     auto act = new IR::PathExpression(P4::P4CoreLibrary::instance.noAction.Id(properties->srcInfo));
     auto args = new IR::Vector<IR::Argument>();
     auto methodCall = new IR::MethodCallExpression(act, args);
@@ -95,6 +116,7 @@ void CreateBuiltins::postorder(IR::TableProperties* properties) {
         new IR::ExpressionValue(methodCall),
         /* isConstant = */ false);
     properties->properties.push_back(prop);
+    return properties;
 }
 
 }  // namespace P4

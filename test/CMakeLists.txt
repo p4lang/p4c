@@ -92,7 +92,7 @@ set (GTESTP4C_SOURCES ${GTEST_SOURCES} ${GTEST_BASE_SOURCES})
 # can also link in additional libraries, if needed, by adding them to
 # `GTEST_LDADD`.
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/test)
-configure_file(gtest/env.h.in ${CMAKE_CURRENT_BINARY_DIR}/test/env.h)
+configure_file(gtest/env.h.in ${CMAKE_CURRENT_BINARY_DIR}/gtest/env.h)
 add_executable (gtestp4c ${GTESTP4C_SOURCES})
 target_link_libraries (gtestp4c ${GTEST_LDADD} ${P4C_LIBRARIES} gtest ${P4C_LIB_DEPS})
 

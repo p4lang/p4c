@@ -1690,12 +1690,23 @@ SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
 
     auto actionCall = new IR::MethodCallExpression(new IR::PathExpression(actionName));
     actionsList.push_back(new IR::ActionListElement(actionCall));
-    actionsList.push_back(new IR::ActionListElement(tbl->getDefaultAction()));
+    auto default_action = tbl->getDefaultAction();
+    if (default_action) {
+        if (auto mc = default_action->to<IR::MethodCallExpression>()) {
+            // Ignore action params of default action by creating new MethodCallExpression
+            auto defAction = new IR::MethodCallExpression(mc->method->to<IR::PathExpression>());
+            actionsList.push_back(new IR::ActionListElement(defAction));
+        }
+    }
+
+    auto constDefAction = tbl->properties->getProperty("default_action");
+    bool isConstDefAction = constDefAction ? constDefAction->isConstant : false;
+
     IR::IndexedVector<IR::Property> properties;
     properties.push_back(new IR::Property("actions", new IR::ActionList(actionsList), false));
     properties.push_back(new IR::Property("key", new IR::Key(match_keys), false));
     properties.push_back(new IR::Property("default_action",
-                         new IR::ExpressionValue(tbl->getDefaultAction()), false));
+                         new IR::ExpressionValue(tbl->getDefaultAction()), isConstDefAction));
     if (tbl->getSizeProperty()) {
         properties.push_back(new IR::Property("size",
                              new IR::ExpressionValue(tbl->getSizeProperty()), false)); }

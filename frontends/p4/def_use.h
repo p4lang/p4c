@@ -256,7 +256,7 @@ class StorageMap : public IHasDbPrint {
     }
     void dbprint(std::ostream& out) const override {
         for (auto &it : storage)
-            out << it.first << ": " << it.second << IndentCtl::endl;
+            out << it.first << ": " << it.second << Log::endl;
     }
 };
 
@@ -382,14 +382,14 @@ class Definitions : public IHasDbPrint {
     bool operator==(const Definitions& other) const;
     void dbprint(std::ostream& out) const override {
         if (unreachable) {
-            out << "  Unreachable" << IndentCtl::endl;
+            out << "  Unreachable" << Log::endl;
         }
         if (definitions.empty())
             out << "  Empty definitions";
         bool first = true;
         for (auto d : definitions) {
             if (!first)
-                out << IndentCtl::endl;
+                out << Log::endl;
             out << "  " << *d.first << "=>" << *d.second;
             first = false;
         }
@@ -435,7 +435,7 @@ class AllDefinitions : public IHasDbPrint {
     }
     void dbprint(std::ostream& out) const override {
         for (auto e : atPoint)
-            out << e.first << " => " << e.second << IndentCtl::endl;
+            out << e.first << " => " << e.second << Log::endl;
     }
 };
 
@@ -498,7 +498,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
         if (writes.empty())
             out << "No writes";
         for (auto &it : writes)
-            out << it.first << " writes " << it.second << IndentCtl::endl;
+            out << it.first << " writes " << it.second << Log::endl;
     }
 
  public:

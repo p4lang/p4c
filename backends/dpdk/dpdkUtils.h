@@ -24,6 +24,7 @@ bool isNonConstantSimpleExpression(const IR::Expression *e);
 bool isCommutativeBinaryOperation(const IR::Operation_Binary *bin);
 bool isStandardMetadata(cstring name);
 bool isMetadataStruct(const IR::Type_Struct *st);
+bool isMetadataField(const IR::Expression *e);
 bool isEightBitAligned(const IR::Expression *e);
 }  // namespace DPDK
 #endif  /* BACKENDS_DPDK_DPDKUTILS_H_ */

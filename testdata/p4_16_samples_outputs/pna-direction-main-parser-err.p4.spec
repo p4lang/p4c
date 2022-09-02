@@ -24,22 +24,24 @@ struct next_hop_0_arg_t {
 
 struct main_metadata_t {
 	bit<32> pna_pre_input_metadata_input_port
+	bit<16> pna_pre_input_metadata_parser_error
 	bit<32> pna_pre_input_metadata_direction
 	bit<32> pna_main_parser_input_metadata_direction
 	bit<32> pna_main_parser_input_metadata_input_port
+	bit<32> pna_main_input_metadata_direction
 	bit<32> pna_main_input_metadata_input_port
 	bit<32> local_metadata_tmpDir
 	bit<32> pna_main_output_metadata_output_port
 	bit<32> MainParserT_parser_tmp
-	bit<32> reg_read_tmp
-	bit<32> left_shift_tmp
+	bit<32> MainParserT_parser_tmp_0
+	bit<32> MainControlT_tmpDir
 }
 metadata instanceof main_metadata_t
 
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 
-regarray network_port_mask size 0x1 initval 0
+regarray direction size 0x100 initval 0
 
 action next_hop_0 args instanceof next_hop_0_arg_t {
 	mov m.pna_main_output_metadata_output_port t.vport
@@ -53,13 +55,13 @@ action default_route_drop_0 args none {
 
 table ipv4_da_lpm {
 	key {
-		m.local_metadata_tmpDir lpm
+		m.MainControlT_tmpDir lpm
 	}
 	actions {
 		next_hop_0
 		default_route_drop_0
 	}
-	default_action default_route_drop_0 args none 
+	default_action default_route_drop_0 args none const
 	size 0x10000
 }
 
@@ -70,35 +72,31 @@ apply {
 	jmpeq MAINPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
-	jmpeq MAINPARSERIMPL_PARSE_IPV4_TRUE m.MainParserT_parser_tmp 0x1
-	jmpeq MAINPARSERIMPL_PARSE_IPV4_FALSE m.MainParserT_parser_tmp 0x0
-	jmp MAINPARSERIMPL_NOMATCH
-	MAINPARSERIMPL_PARSE_IPV4_TRUE :	mov m.local_metadata_tmpDir h.ipv4.srcAddr
-	jmp MAINPARSERIMPL_ACCEPT
-	MAINPARSERIMPL_PARSE_IPV4_FALSE :	regrd m.reg_read_tmp network_port_mask 0x0
-	mov m.left_shift_tmp 0x1
-	shl m.left_shift_tmp m.pna_main_parser_input_metadata_input_port
-	mov m.pna_main_parser_input_metadata_direction m.reg_read_tmp
-	and m.pna_main_parser_input_metadata_direction m.left_shift_tmp
+	regrd m.pna_main_parser_input_metadata_direction direction m.pna_main_parser_input_metadata_input_port
 	jmpneq LABEL_FALSE 0x0 m.pna_main_parser_input_metadata_direction
-	mov m.MainParserT_parser_tmp 0x1
+	mov m.MainParserT_parser_tmp_0 0x1
 	jmp LABEL_END
-	LABEL_FALSE :	mov m.MainParserT_parser_tmp 0x0
-	LABEL_END :	mov m.local_metadata_tmpDir h.ipv4.dstAddr
+	LABEL_FALSE :	mov m.MainParserT_parser_tmp_0 0x0
+	LABEL_END :	mov m.MainParserT_parser_tmp m.MainParserT_parser_tmp_0
+	jmpeq MAINPARSERIMPL_ACCEPT m.MainParserT_parser_tmp 0x1
+	jmpeq MAINPARSERIMPL_ACCEPT m.MainParserT_parser_tmp 0x0
+	jmp MAINPARSERIMPL_NOMATCH
+	jmp MAINPARSERIMPL_ACCEPT
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_NOMATCH :	mov m.pna_pre_input_metadata_parser_error 0x2
-	MAINPARSERIMPL_ACCEPT :	regrd m.reg_read_tmp network_port_mask 0x0
-	mov m.left_shift_tmp 0x1
-	shl m.left_shift_tmp m.pna_pre_input_metadata_input_port
-	mov m.pna_pre_input_metadata_direction m.reg_read_tmp
-	and m.pna_pre_input_metadata_direction m.left_shift_tmp
+	MAINPARSERIMPL_ACCEPT :	regrd m.pna_pre_input_metadata_direction direction m.pna_pre_input_metadata_input_port
 	jmpneq LABEL_FALSE_0 0x0 m.pna_pre_input_metadata_direction
 	mov m.local_metadata_tmpDir h.ipv4.srcAddr
 	jmp LABEL_END_1
 	LABEL_FALSE_0 :	mov m.local_metadata_tmpDir h.ipv4.dstAddr
-	LABEL_END_1 :	jmpnv LABEL_END_2 h.ipv4
+	LABEL_END_1 :	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
+	jmpneq LABEL_FALSE_1 0x0 m.pna_main_input_metadata_direction
+	mov m.MainControlT_tmpDir h.ipv4.srcAddr
+	jmp LABEL_END_2
+	LABEL_FALSE_1 :	mov m.MainControlT_tmpDir h.ipv4.dstAddr
+	LABEL_END_2 :	jmpnv LABEL_END_3 h.ipv4
 	table ipv4_da_lpm
-	LABEL_END_2 :	emit h.ethernet
+	LABEL_END_3 :	emit h.ethernet
 	emit h.ipv4
 	tx m.pna_main_output_metadata_output_port
 }
