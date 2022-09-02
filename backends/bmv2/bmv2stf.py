@@ -320,8 +320,10 @@ class BMV2Table(object):
         self.key = TableKey()
         self.actions = {}
         for k in jsonTable["key"]:
-            name = k["name"]
-            if name is None:
+            name = ""
+            if "name" in k:
+                name = k["name"]
+            else:
                 name = k["target"]
             if isinstance(name, list):
                 name = ""
