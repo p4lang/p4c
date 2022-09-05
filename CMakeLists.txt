@@ -265,8 +265,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
     unset(_LD_OPT_USED)
 endif()
 
-set(BUILD_USE_COLOR OFF CACHE BOOL "Use color in C++ compiler output (even if "
-    "the compiler does not detect terminal, e.g. when using ccache/distcc)")
+set(BUILD_USE_COLOR OFF CACHE BOOL "Use color in C++ compiler output (even if \
+    the compiler does not detect terminal, e.g. when using ccache/distcc)")
 if (BUILD_USE_COLOR)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-color=always")
