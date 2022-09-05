@@ -1,0 +1,11 @@
+hdr.ipv4._version0__ihl1[7:4];
+hdr.ipv4._version0__ihl1[3:0];
+hdr.ipv4._version0__ihl1[7:4];
+hdr.ipv4._version0__ihl1[3:0];
+hdr.ipv4._version0__ihl1[7:4];
+hdr.ipv4._s1_f213__s2_f114[2:0];
+hdr.ipv4._s1_f213__s2_f114[7:3];
+hdr.ipv4._s1_f213__s2_f114[2:0];
+hdr.ipv4._s1_f213__s2_f114[7:3];
+hdr.ipv4._version0__ihl1[3:0];
+hdr.ipv4._version0__ihl1[3:0];

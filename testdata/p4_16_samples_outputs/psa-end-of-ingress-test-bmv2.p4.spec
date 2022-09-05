@@ -40,8 +40,16 @@ struct metadata_t {
 	bit<32> psa_ingress_output_metadata_multicast_group
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<48> Ingress_tmp
+	bit<48> Ingress_tmp_0
 	bit<48> Ingress_tmp_1
 	bit<48> Ingress_tmp_3
+	bit<48> Ingress_tmp_4
+	bit<48> Ingress_tmp_5
+	bit<48> Ingress_tmp_7
+	bit<48> Ingress_tmp_8
+	bit<48> Ingress_tmp_9
+	bit<48> Ingress_tmp_11
+	bit<48> Ingress_tmp_12
 }
 metadata instanceof metadata_t
 
@@ -57,22 +65,38 @@ apply {
 	extract h.output_data
 	mov m.Ingress_tmp h.ethernet.dstAddr
 	shr m.Ingress_tmp 0x28
-	jmpneq LABEL_TRUE m.Ingress_tmp 0x0
+	mov m.Ingress_tmp_0 m.Ingress_tmp
+	and m.Ingress_tmp_0 0x1
+	mov m.Ingress_tmp_1 m.Ingress_tmp_0
+	and m.Ingress_tmp_1 0x1
+	jmpneq LABEL_TRUE m.Ingress_tmp_1 0x0
 	mov m.psa_ingress_output_metadata_drop 0x0
 	jmp LABEL_END
 	LABEL_TRUE :	mov m.psa_ingress_output_metadata_drop 0x1
 	LABEL_END :	jmpneq LABEL_FALSE_0 m.psa_ingress_input_metadata_packet_path 0x5
 	jmp LABEL_END_0
-	LABEL_FALSE_0 :	mov m.Ingress_tmp_1 h.ethernet.dstAddr
-	shr m.Ingress_tmp_1 0x20
-	jmpneq LABEL_TRUE_1 m.Ingress_tmp_1 0x0
+	LABEL_FALSE_0 :	mov m.Ingress_tmp_3 h.ethernet.dstAddr
+	shr m.Ingress_tmp_3 0x20
+	mov m.Ingress_tmp_4 m.Ingress_tmp_3
+	and m.Ingress_tmp_4 0x1
+	mov m.Ingress_tmp_5 m.Ingress_tmp_4
+	and m.Ingress_tmp_5 0x1
+	jmpneq LABEL_TRUE_1 m.Ingress_tmp_5 0x0
 	mov m.psa_ingress_output_metadata_resubmit 0x0
 	jmp LABEL_END_0
 	LABEL_TRUE_1 :	mov m.psa_ingress_output_metadata_resubmit 0x1
-	LABEL_END_0 :	mov m.Ingress_tmp_3 h.ethernet.dstAddr
-	shr m.Ingress_tmp_3 0x10
-	mov m.psa_ingress_output_metadata_multicast_group m.Ingress_tmp_3
-	mov m.psa_ingress_output_metadata_egress_port h.ethernet.dstAddr
+	LABEL_END_0 :	mov m.Ingress_tmp_7 h.ethernet.dstAddr
+	shr m.Ingress_tmp_7 0x10
+	mov m.Ingress_tmp_8 m.Ingress_tmp_7
+	and m.Ingress_tmp_8 0xffff
+	mov m.Ingress_tmp_9 m.Ingress_tmp_8
+	and m.Ingress_tmp_9 0xffff
+	mov m.psa_ingress_output_metadata_multicast_group m.Ingress_tmp_9
+	mov m.Ingress_tmp_11 h.ethernet.dstAddr
+	and m.Ingress_tmp_11 0xffff
+	mov m.Ingress_tmp_12 m.Ingress_tmp_11
+	and m.Ingress_tmp_12 0xffff
+	mov m.psa_ingress_output_metadata_egress_port m.Ingress_tmp_12
 	mov h.output_data.word0 0x8
 	jmpneq LABEL_FALSE_2 m.psa_ingress_input_metadata_packet_path 0x0
 	mov h.output_data.word0 0x1

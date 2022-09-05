@@ -1,1 +1,9 @@
+hdr.ipv4.version_ihl[3:0];
+hdr.ipv4.version_ihl[7:4];
+hdr.ipv4.version_ihl[7:4];
+hdr.ipv4.version_ihl[3:0];
+hdr.ipv4.version_ihl[7:4];
+hdr.ipv4.version_ihl[3:0];
+hdr.ipv4.version_ihl[3:0];
+hdr.ipv4.version_ihl[3:0];
 [--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table tbl. Copying all match fields to metadata

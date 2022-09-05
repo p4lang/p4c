@@ -474,6 +474,29 @@ bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s) {
        }
 */
 const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
+    if (st->is<IR::Type_Header>()) {
+        unsigned size_sum_so_far = 0;
+        bool all_hdr_field_aligned = true;
+        for (auto field : st->fields) {
+            if ((*field).type->is<IR::Type_Bits>()) {
+                auto t = (*field).type->to<IR::Type_Bits>();
+                auto width = t->width_bits();
+                size_sum_so_far += width;
+                if (width % 8 != 0) {
+                    all_hdr_field_aligned = false;
+                }
+            }
+        }
+        if (size_sum_so_far % 8 != 0) {
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "'%1%' is not 8-bit aligned", st->name.name);
+            return st;
+        }
+        if (all_hdr_field_aligned) {
+            return st;
+        }
+    }
+
     // fields is used to create header with modified fields
     auto fields = new IR::IndexedVector<IR::StructField>;
     if (st->is<IR::Type_Header>()) {
@@ -482,22 +505,17 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
             if ((*field).type->is<IR::Type_Bits>()) {
                 auto t = (*field).type->to<IR::Type_Bits>();
                 auto width = t->width_bits();
-                if (width % 8 != 0) {
-                    size_sum_so_far += width;
-                    fieldInfo obj;
-                    obj.fieldWidth =  width;
-                    // Storing the non-aligned field
-                    field_name_list.emplace(field->name, obj);
+                if (width % 8 == 0 && size_sum_so_far == 0) {
+                     fields->push_back(field);
+                     continue;
                 } else {
-                    if (size_sum_so_far != 0) {
-                        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                                "Header Structure '%1%' has non-contiguous non-aligned fields"
-                                " which cannot be combined to align to 8-bit. DPDK does not"
-                                " support non 8-bit aligned header field",st->name.name);
-                        return st;
+                    if (size_sum_so_far == 0 || size_sum_so_far % 8 != 0) {
+                        size_sum_so_far += width;
+                        fieldInfo obj;
+                        obj.fieldWidth = width;
+                        // Storing the non-aligned field
+                        field_name_list.emplace(field->name, obj);
                     }
-                    fields->push_back(field);
-                    continue;
                 }
                 cstring modifiedName = "";
                 auto size = field_name_list.size();
@@ -508,7 +526,7 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
                         // Form the field with all non-aligned field stored in "field_name_list"
                         for (auto s = field_name_list.begin(); s != field_name_list.end();
                              s++,i++) {
-                            if ((i + 1) < (size))
+                            if ((i+1) < (size))
                                 modifiedName += s->first + "_";
                             else
                                 modifiedName += s->first;
@@ -608,7 +626,6 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
 */
 const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
     cstring hdrStrName = "";
-
     /* Get the member's header structure name */
     if ((m != nullptr) && (m->expr != nullptr) &&
         (m->expr->type != nullptr) &&
@@ -630,6 +647,8 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
             auto mem = new IR::Member(m->expr, IR::ID(memVec.modifiedName));
             auto sliceMem = new IR::Slice(mem->clone(), (memVec.offset + memVec.fieldWidth - 1),
                                           memVec.offset);
+            sliceMem->dbprint(std::cerr);
+            std::cerr<<"\n";
             return sliceMem;
         }
     }
