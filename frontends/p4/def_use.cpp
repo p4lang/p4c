@@ -103,6 +103,8 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
         result->setLastIndexField(create(IR::Type_Bits::get(32), name + "." + indexFieldName));
         return result;
     }
+    BUG_CHECK(!type->is<IR::Type_SpecializedCanonical>(),
+              "%1%: unspecialized type in def-use", type);
     return nullptr;
 }
 
