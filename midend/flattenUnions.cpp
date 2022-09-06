@@ -17,32 +17,31 @@ limitations under the License.
 #include "flattenUnions.h"
 
 namespace P4 {
+const IR::MethodCallStatement*
+HandleValidityHeaderUnion::processValidityForStr(const IR::Statement *s, const IR::Member *m,
+                                                 cstring headerElement, cstring setValid) {
+    auto method = new IR::Member(s->srcInfo, new IR::Member(m->expr,IR::ID(headerElement)),
+                                 IR::ID(setValid));
+    auto mc = new IR::MethodCallExpression(s->srcInfo, method,
+                                           new IR::Vector<IR::Argument>());
+    typeMap->setType(method, new IR::Type_Method(IR::Type_Void::get(),
+                     new IR::ParameterList(), setValid));
+    return new IR::MethodCallStatement(mc->srcInfo, mc);
+}
+
 const IR::Node* HandleValidityHeaderUnion::setInvalidforRest(const IR::Statement *s,
-                                         const IR::Member *m, const IR::Type_HeaderUnion *hu,
-                       cstring exclude, bool setValidforCurrMem) {
+                                           const IR::Member *m, const IR::Type_HeaderUnion *hu,
+                                           cstring exclude, bool setValidforCurrMem) {
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
-    std::cout << "Header union setValid handling" << std::endl;
     code_block->push_back(s);
     if (setValidforCurrMem) {
-        auto method = new IR::Member(s->srcInfo, new IR::Member(m->expr,IR::ID(exclude)),
-                                     IR::ID(IR::Type_Header::setValid));
-        auto mc = new IR::MethodCallExpression(s->srcInfo, method,
-                                               new IR::Vector<IR::Argument>());
-        typeMap->setType(method, new IR::Type_Method(IR::Type_Void::get(),
-                         new IR::ParameterList(), IR::Type_Header::setValid));
-        code_block->push_back(new IR::MethodCallStatement(mc->srcInfo, mc));
+        code_block->push_back(processValidityForStr(s, m, exclude, IR::Type_Header::setValid));
     }
 
     for (auto sfu : hu->fields) {
-        std::cout << "setValid for" << sfu->name << std::endl;
         if (exclude != sfu->name.name) {  // setInvalid for rest of the fields
-            auto method = new IR::Member(s->srcInfo, new IR::Member(m->expr,sfu->name),
-                                         IR::ID(IR::Type_Header::setInvalid));
-            auto mc = new IR::MethodCallExpression(s->srcInfo, method,
-                                                   new IR::Vector<IR::Argument>());
-            typeMap->setType(method, new IR::Type_Method(IR::Type_Void::get(),
-                             new IR::ParameterList(), IR::Type_Header::setInvalid));
-            code_block->push_back(new IR::MethodCallStatement(mc->srcInfo, mc));
+            code_block->push_back(processValidityForStr(s, m, sfu->name,
+                                                        IR::Type_Header::setInvalid));
         }
     }
     return new IR::BlockStatement(*code_block);
@@ -50,56 +49,52 @@ const IR::Node* HandleValidityHeaderUnion::setInvalidforRest(const IR::Statement
 
 const IR::Node * HandleValidityHeaderUnion::expandIsValid(
                  const IR::Statement *a, const IR::MethodCallExpression *mce) {
-        auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
-        if (auto bim = mi->to<P4::BuiltInMethod>()) {
-            if (bim->name == "isValid") {   // hdr.u.isValid() or u.isValid
-                std::cout << "isValid" << a << std::endl;
-                if (auto huType = bim->appliedTo->type->to<IR::Type_HeaderUnion>()) {  // u or hdr.u
-                    cstring tmp = refMap->newName("tmp");
-                    IR::PathExpression *tmpVar = new IR::PathExpression(IR::ID(tmp));
-                    toInsert.push_back(new IR::Declaration_Variable(
-                                       IR::ID(tmp), IR::Type_Bits::get(32)));
-                    auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
-                    code_block->push_back(new IR::AssignmentStatement(a->srcInfo,
-                                          tmpVar, new IR::Constant(IR::Type_Bits::get(32), 0)));
-                    for (auto sfu : huType->fields) {
-                        std::cout << "isValid for" << sfu->name << std::endl;
-                        auto method = new IR::Member(a->srcInfo,
-                                                     new IR::Member(bim->appliedTo, sfu->name),
-                                                     IR::ID(IR::Type_Header::isValid));
-                        auto mc = new IR::MethodCallExpression(a->srcInfo, method,
-                                                               new IR::Vector<IR::Argument>());
-                        typeMap->setType(method, new IR::Type_Method(IR::Type_Void::get(),
-                                         new IR::ParameterList(), IR::Type_Header::isValid));
-                        auto addOp = new IR::Add(a->srcInfo, tmpVar,
-                                                 new IR::Constant(IR::Type_Bits::get(32), 1));
-                        auto assn = new IR::AssignmentStatement(a->srcInfo, tmpVar, addOp);
-                        code_block->push_back(new IR::IfStatement(a->srcInfo, mc, assn, nullptr));
-                    }
-                    auto cond = new IR::Equ(a->srcInfo, tmpVar,
-                                            new IR::Constant(IR::Type_Bits::get(32), 1));
-                    if (auto  assn = a->to<IR::AssignmentStatement>())
-                        code_block->push_back(new IR::AssignmentStatement(a->srcInfo,
-                                                                          assn->left, cond));
-                    else if (auto ifs = a->to<IR::IfStatement>())
-                        code_block->push_back(new IR::IfStatement(a->srcInfo,
-                                                                  cond, ifs->ifTrue, ifs->ifFalse));
-                    else if (auto switchs = a->to<IR::SwitchStatement>()) {
-                        code_block->push_back(new IR::SwitchStatement(a->srcInfo,
-                                                                      cond, switchs->cases));
-                    }
-                    return new IR::BlockStatement(*code_block);
+    auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+    if (auto bim = mi->to<P4::BuiltInMethod>()) {
+        if (bim->name == "isValid") {   // hdr.u.isValid() or u.isValid
+            if (auto huType = bim->appliedTo->type->to<IR::Type_HeaderUnion>()) {  // u or hdr.u
+                cstring tmp = refMap->newName("tmp");
+                IR::PathExpression *tmpVar = new IR::PathExpression(IR::ID(tmp));
+                toInsert.push_back(new IR::Declaration_Variable(
+                                   IR::ID(tmp), IR::Type_Bits::get(32)));
+                auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
+                code_block->push_back(new IR::AssignmentStatement(a->srcInfo,
+                                      tmpVar, new IR::Constant(IR::Type_Bits::get(32), 0)));
+                for (auto sfu : huType->fields) {
+                    auto method = new IR::Member(a->srcInfo,
+                                                  new IR::Member(bim->appliedTo, sfu->name),
+                                                  IR::ID(IR::Type_Header::isValid));
+                    auto mc = new IR::MethodCallExpression(a->srcInfo, method,
+                                                           new IR::Vector<IR::Argument>());
+                    typeMap->setType(method, new IR::Type_Method(IR::Type_Void::get(),
+                                     new IR::ParameterList(), IR::Type_Header::isValid));
+                    auto addOp = new IR::Add(a->srcInfo, tmpVar,
+                                             new IR::Constant(IR::Type_Bits::get(32), 1));
+                    auto assn = new IR::AssignmentStatement(a->srcInfo, tmpVar, addOp);
+                    code_block->push_back(new IR::IfStatement(a->srcInfo, mc, assn, nullptr));
                 }
+                auto cond = new IR::Equ(a->srcInfo, tmpVar,
+                                        new IR::Constant(IR::Type_Bits::get(32), 1));
+                if (auto  assn = a->to<IR::AssignmentStatement>())
+                    code_block->push_back(new IR::AssignmentStatement(a->srcInfo,
+                                                                      assn->left, cond));
+                else if (auto ifs = a->to<IR::IfStatement>())
+                    code_block->push_back(new IR::IfStatement(a->srcInfo,
+                                                              cond, ifs->ifTrue, ifs->ifFalse));
+                else if (auto switchs = a->to<IR::SwitchStatement>()) {
+                    code_block->push_back(new IR::SwitchStatement(a->srcInfo,
+                                                                  cond, switchs->cases));
+                }
+                return new IR::BlockStatement(*code_block);
             }
         }
-        return a;
+    }
+    return a;
 }
 
-// Already simplified to elementwise initialization->  u.h1 = {elem1, elem2....}
-// Already simplified to elementwise copy->  u = u1
-
+// u.h1 = {elem1, elem2....} => Already simplified to elementwise initialization
+// u = u1 => Already simplified to elementwise copy
 const IR::Node* HandleValidityHeaderUnion::postorder(IR::AssignmentStatement* a) {
-    std::cout << "Reached ASSn" << a << std::endl;
     auto left = a->left;
     auto right = a->right;
     if (auto mce = right->to<IR::MethodCallExpression>()) {
@@ -107,7 +102,7 @@ const IR::Node* HandleValidityHeaderUnion::postorder(IR::AssignmentStatement* a)
         return expandIsValid(a, mce);
     } else if (auto lhs = left->to<IR::Member>()) {
         if (auto huType = lhs->expr->type->to<IR::Type_HeaderUnion>()) {
-            if (auto hdr = right->type->to<IR::Type_Header>() && !right->is<IR::Member>()) {
+            if (right->type->is<IR::Type_Header>() && !right->is<IR::Member>()) {
             //  u.h1 = my_h1
             auto isValid = new IR::Member(right->srcInfo, right,
                               IR::ID(IR::Type_Header::isValid));
@@ -124,19 +119,11 @@ const IR::Node* HandleValidityHeaderUnion::postorder(IR::AssignmentStatement* a)
             typeMap->setType(method1, new IR::Type_Method(IR::Type_Void::get(),
                                 new IR::ParameterList(), IR::Type_Header::setInvalid));
             auto ifFalse = new IR::MethodCallStatement(mc1->srcInfo, mc1);
-/*            if (auto parser = findOrigCtxt<IR::P4Parser>()) {
-                // TODO if is not allowed within parser, find alternate way
-                return trueBlock->to<IR::BlockStatement>();
-            } else {
-*/
-                auto ifStatement = new IR::IfStatement(a->srcInfo, result,
-                                               trueBlock->to<IR::BlockStatement>(), ifFalse);
+            auto ifStatement = new IR::IfStatement(a->srcInfo, result,
+                                       trueBlock->to<IR::BlockStatement>(), ifFalse);
                 return ifStatement;
-  //          }
             } else if (auto rhs = right->to<IR::Member>()) {
-                if (auto rhsUtype = rhs->expr->type->to<IR::Type_HeaderUnion>()) {
-                    std::cout << "Handle u.h1 = u1.h1" << a << std::endl;
-                    // TODO check what can be done in parser context
+                if (rhs->expr->type->is<IR::Type_HeaderUnion>()) {
                     auto isValid = new IR::Member(right->srcInfo, right,
                                       IR::ID(IR::Type_Header::isValid));
                     auto result = new IR::MethodCallExpression(right->srcInfo,
@@ -152,33 +139,26 @@ const IR::Node* HandleValidityHeaderUnion::postorder(IR::AssignmentStatement* a)
                     typeMap->setType(method1, new IR::Type_Method(IR::Type_Void::get(),
                                         new IR::ParameterList(), IR::Type_Header::setInvalid));
                     auto ifFalse = new IR::MethodCallStatement(mc1->srcInfo, mc1);
-                    // TODO if is not allowed within parser, find alternate way
-    /*                if (auto parser = findOrigCtxt<IR::P4Parser>()) {
-                        return trueBlock->to<IR::BlockStatement>();
-                    } else {
-                    */
-                        auto ifStatement = new IR::IfStatement(a->srcInfo, result,
-                                                trueBlock->to<IR::BlockStatement>(), ifFalse);
-                        return ifStatement;
-//                    }
+                    auto ifStatement = new IR::IfStatement(a->srcInfo, result,
+                                               trueBlock->to<IR::BlockStatement>(), ifFalse);
+                    return ifStatement;
                 }
             }
         } else if (auto leftMem = lhs->expr->to<IR::Member>()) {  // hdr.u1.h1 or u1.h1
-                // Handling hdr.u1.h1.data = <constant>
-                if (auto huType = leftMem->expr->type->to<IR::Type_HeaderUnion>()) {
-                    // hdr.u1 or u1
-                    if (leftMem->type->is<IR::Type_Header>() && right->is<IR::Constant>()) {
-                        // h1.data = constant
-                        return setInvalidforRest(a, leftMem, huType, leftMem->member.name, true);
-                     }
+            // Handling hdr.u1.h1.data = <constant>
+            if (auto huType = leftMem->expr->type->to<IR::Type_HeaderUnion>()) {
+                // hdr.u1 or u1
+                if (leftMem->type->is<IR::Type_Header>() && right->is<IR::Constant>()) {
+                    // h1.data = constant
+                    return setInvalidforRest(a, leftMem, huType, leftMem->member.name, true);
                 }
+            }
         }
     }
     return a;
 }
 
 const IR::Node* HandleValidityHeaderUnion::postorder(IR::IfStatement *a) {
-    std::cout << "Reached IFS" << a << std::endl;
     if (auto mce = a->condition->to<IR::MethodCallExpression>()) {
         return expandIsValid(a, mce);
      }
@@ -186,7 +166,6 @@ const IR::Node* HandleValidityHeaderUnion::postorder(IR::IfStatement *a) {
 }
 
 const IR::Node* HandleValidityHeaderUnion::postorder(IR::SwitchStatement* a) {
-    std::cout << "Reached SWITCHS" << a << std::endl;
     if (auto mce = a->expression->to<IR::MethodCallExpression>()) {
         return expandIsValid(a, mce);
     }
@@ -195,7 +174,6 @@ const IR::Node* HandleValidityHeaderUnion::postorder(IR::SwitchStatement* a) {
 
 // Assumes nested structs are flattened before this pass
 const IR::Node* HandleValidityHeaderUnion::postorder(IR::MethodCallStatement* mcs) {
-        std::cout << "Reach MCS " << mcs << std::endl;
     auto mi = P4::MethodInstance::resolve(mcs->methodCall, refMap, typeMap);
     if (auto a = mi->to<P4::BuiltInMethod>()) {
         if (a->name == "setValid") {   // hdr.u.h1.setValid() or u.h1.setValid
@@ -205,7 +183,6 @@ const IR::Node* HandleValidityHeaderUnion::postorder(IR::MethodCallStatement* mc
             }
         }
     }
-    std::cout << "Returning MCS " << mcs << std::endl;
     return mcs;
 }
 
@@ -253,18 +230,18 @@ const IR::Node* HandleValidityHeaderUnion::postorder(IR::P4Control* control) {
 
 
 const IR::Node* DoFlattenHeaderUnion::postorder(IR::Type_Struct* s) {
-      std::cout << "Reached Type_Struct" << std::endl;
     IR::IndexedVector<IR::StructField> fields;
     for (auto sf : s->fields) {
         auto ftype = typeMap->getType(sf, true);
         if (ftype->is<IR::Type_HeaderUnion>()) {
+            std::map <cstring, cstring> fieldMap;
             for (auto sfu : ftype->to<IR::Type_HeaderUnion>()->fields) {
-//                cstring uName = refMap->newName(sf->name.name + "_" + sfu->name.name);
-                cstring uName  = sf->name.name + "_" + sfu->name.name;
-                std::cout << "Type Struct Name " << uName << std::endl;
+                cstring uName = refMap->newName(sf->name.name + "_" + sfu->name.name);
                 auto uType = sfu->type->getP4Type();
+                fieldMap.emplace(sfu->name.name, uName);
                 fields.push_back(new IR::StructField(IR::ID(uName), uType));
             }
+            replacementMap.emplace(sf->name.name, fieldMap);
         } else {
             fields.push_back(sf);
         }
@@ -273,27 +250,38 @@ const IR::Node* DoFlattenHeaderUnion::postorder(IR::Type_Struct* s) {
 }
 
 const IR::Node* DoFlattenHeaderUnion::postorder(IR::Declaration_Variable *dv) {
-      std::cout << "Reached Declaration_Variable" << std::endl;
     auto ftype = typeMap->getTypeType(dv->type, true);
     if (ftype->is<IR::Type_HeaderUnion>()) {
+        std::map <cstring, cstring> fieldMap;
         for (auto sfu : ftype->to<IR::Type_HeaderUnion>()->fields) {
-//             cstring uName = refMap->newName(dv->name.name + "_" + sfu->name.name);
-             cstring uName = dv->name.name + "_" + sfu->name.name;
-             std::cout << "New DV name " << uName << std::endl;
-             auto uType =  sfu->type->getP4Type();
-             toInsert.push_back(new IR::Declaration_Variable(IR::ID(uName), uType));
+            cstring uName = refMap->newName(dv->name.name + "_" + sfu->name.name);
+            auto uType =  sfu->type->getP4Type();
+            fieldMap.emplace(sfu->name.name, uName);
+            toInsert.push_back(new IR::Declaration_Variable(IR::ID(uName), uType));
         }
+            replacementMap.emplace(dv->name.name, fieldMap);
     }
     return dv;
 }
 
 const IR::Node* DoFlattenHeaderUnion::postorder(IR::Member* m) {
-      std::cout << "Reached Member" << std::endl;
     if (m->expr->type->to<IR::Type_HeaderUnion>()) {
         if (auto huf = m->expr->to<IR::Member>()) {
-            return new IR::Member(huf->expr,IR::ID(huf->member.name+"_"+m->member.name));
+            if (replacementMap.count(huf->member.name)) {
+                if (replacementMap.at(huf->member.name).count(m->member.name)) {
+                    auto newHuName = replacementMap.at(huf->member.name).at(m->member.name);
+                    return new IR::Member(huf->expr,IR::ID(newHuName));
+                }
+            }
+            return m;
         } else if (auto huf = m->expr->to<IR::PathExpression>()) {
-            return new IR::PathExpression(IR::ID(huf->path->name.name + "_" + m->member.name));
+            if (replacementMap.count(huf->path->name.name)) {
+                if (replacementMap.at(huf->path->name.name).count(m->member.name)) {
+                    auto newHuName = replacementMap.at(huf->path->name.name).at(m->member.name);
+                    return new IR::PathExpression(IR::ID(newHuName));
+                }
+            }
+            return m;
         }
     }
     return m;
