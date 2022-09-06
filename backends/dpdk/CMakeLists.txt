@@ -24,8 +24,9 @@ set (DPDK_P4RUNTIME_INFO_PROTO ${DPDK_P4RUNTIME_DIR}/p4info.proto)
 set (DPDK_P4RUNTIME_INFO_GEN_SRCS ${P4C_BINARY_DIR}/control-plane/p4/config/dpdk/p4info.pb.cc)
 set (DPDK_P4RUNTIME_INFO_GEN_HDRS ${P4C_BINARY_DIR}/control-plane/p4/config/dpdk/p4info.pb.h)
 # The generated code for protobuf has an excessive number of warnings
+# Silence -Warray-bounds as the root issue is out of our control: https://github.com/protocolbuffers/protobuf/issues/7140
 set_source_files_properties(${DPDK_P4RUNTIME_INFO_GEN_SRCS} PROPERTIES
-  COMPILE_FLAGS "-Wno-unused-parameter")
+  COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds")
 
 add_custom_target (dpdk_runtime_dir
   ${CMAKE_COMMAND} -E make_directory
