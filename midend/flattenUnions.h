@@ -25,7 +25,8 @@ limitations under the License.
 namespace P4 {
 
 /**
- * Flatten header union into its individual element.
+ * Flatten header union into its individual element. All occurrences of the header union
+ * variables are replaced by the new header type variables.
  * For ex:
  * header_union U {
  *     Hdr1 h1;
@@ -62,6 +63,38 @@ class DoFlattenHeaderUnion : public Transform {
     const IR::Node* postorder(IR::P4Action* action) override;
 };
 
+/** This pass handles the validity semantics of header union.
+ * 1) On assignment to any element of the header union, it is set to Valid and other elements
+ *    of the header union are set to Invalid.
+ *   a)  U u;                         |      if (my_h1.isValid()) {
+ *       H1 my_h1 = { 8w0 };          |          u_h1.setValid();
+ *       u.h1 = my_h1;                |          // all other elements set to Invalid
+ *                                    |          u_h1 = my_h1;
+ *                                    |      } else {
+ *                                    |          u_h1.setInvalid()
+ *                                    |      }
+ *   b) u.h1 = {16W1}                 | This is already transformed into individual element copy
+ *                                    | by earlier passes and individual assignment is translated
+ *                                    | as same as (a)
+ *   c) u1.h1 = u2.h1                 | same as a) with my_h1 replaced with u2_h1
+ *   d) u1 = u2                       | This is already transformed into individual element copy
+ *                                    | by earlier passes and individual assignment is translated
+ *                                    | same as (c)
+ *   e) a = u.isValid()               | tmp = 0;
+ *   Only one element should be valid | for elements in union
+ *                                    |     if (element.isvalid)
+ *                                    |         tmp += 1;
+ *                                    | a = tmp == 1
+ *
+ * 2) When isValid is used as if statement's condition or switch expression, the expression is
+ *    replaced with tmp calculated in (1e)
+ *   a) switch(u.isValid())           | switch (tmp == 1)
+ *   b) if(u.isValid())               | if (tmp == 1)
+ * 3) When setValid method is called on a header element, it is translated to setValid for the
+ *    given element and setInvalid for rest of the elements
+ * 4) Equality/inequality comparisons on unions are unrolled into element-wise comparisons by
+ *    earlier passes and hence no-action required here.
+ */
 class HandleValidityHeaderUnion : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
@@ -89,7 +122,20 @@ class HandleValidityHeaderUnion : public Transform {
     const IR::Node * expandIsValid(const IR::Statement *a, const IR::MethodCallExpression *mce);
 };
 
-
+/** Passmanager to group necessary passes for flattening header unions
+ * The SimplifyDefUse pass is used before and after the header union flattening passes
+ * to optimize some of the unnecessay assignments
+ * RemoveAllUnusedDeclarations pass is used to remove the local standalone header union
+ * variable declarations
+ * The header union flattening pass introduces if statements within parser, RemoveParserIfs
+ * pass is used to convert these if statements to transition select statements
+ * TODO
+ * 1. RemoveAllUnusedDeclarations does not remove the header union declaration, need to
+ *    write a new pass to do that
+ * 2. Calling SimplifyDefUse after header union flattening leaves some spurious setValid and
+ *    setInvalid calls corresponding to the assignment statements which are removed. Need to
+ *    write a pass to cleanup the unnecessary method calls.
+ */
 class FlattenHeaderUnion : public PassManager {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
