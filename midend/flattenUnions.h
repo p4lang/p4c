@@ -48,6 +48,7 @@ class DoFlattenHeaderUnion : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
     IR::IndexedVector<IR::Declaration> toInsert;  // temporaries
+    std::map<cstring, std::map<cstring, cstring>> replacementMap;
 
  public:
     DoFlattenHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) :
@@ -78,6 +79,10 @@ class HandleValidityHeaderUnion : public Transform {
     const IR::Node* postorder(IR::Function* function) override;
     const IR::Node* postorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::P4Action* action) override;
+    const IR::MethodCallStatement* processValidityForStr(const IR::Statement *s,
+                                                         const IR::Member *m,
+                                                         cstring headerElement,
+                                                         cstring setValid);
     const IR::Node* setInvalidforRest(const IR::Statement *s, const IR::Member *m,
                                       const IR::Type_HeaderUnion *hu, cstring exclude,
                                       bool setValidforCurrMem);
