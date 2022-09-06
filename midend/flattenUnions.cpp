@@ -124,6 +124,7 @@ const IR::Node* HandleValidityHeaderUnion::postorder(IR::AssignmentStatement* a)
                 return ifStatement;
             } else if (auto rhs = right->to<IR::Member>()) {
                 if (rhs->expr->type->is<IR::Type_HeaderUnion>()) {
+                    // u.h1 = u1.h1
                     auto isValid = new IR::Member(right->srcInfo, right,
                                       IR::ID(IR::Type_Header::isValid));
                     auto result = new IR::MethodCallExpression(right->srcInfo,
