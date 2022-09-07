@@ -190,6 +190,10 @@ const Type* Type_Tuple::getP4Type() const {
     return new IR::Type_Tuple(srcInfo, *args);
 }
 
+const Type* Type_Vector::getP4Type() const {
+    return new IR::Type_Vector(srcInfo, elementType->getP4Type());
+}
+
 const Type* Type_Specialized::getP4Type() const {
     auto args = new IR::Vector<Type>();
     for (auto a : *arguments) {

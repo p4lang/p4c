@@ -76,6 +76,7 @@ class Evaluator final : public Inspector, public IHasBlock {
     bool preorder(const IR::Property* prop) override;
     bool preorder(const IR::Member* expression) override;
     bool preorder(const IR::ListExpression* expression) override;
+    bool preorder(const IR::VectorExpression* expression) override;
     bool preorder(const IR::StructExpression* expression) override;
     bool preorder(const IR::Constant* expression) override {
         setValue(expression, expression);

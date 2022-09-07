@@ -347,7 +347,7 @@ interface Type_Indexed {
     Type at(size_t index) const;
 }
 
-/// Base class for Type_List and Type_Tuple
+/// Base class for Type_List, and Type_Tuple
 abstract Type_BaseList : Type, Type_Indexed {
     optional inline Vector<Type> components;
     validate{ components.check_null(); }
@@ -382,6 +382,16 @@ class Type_List : Type_BaseList {
 /// The type of a tuple.
 class Type_Tuple : Type_BaseList {
     const Type* getP4Type() const override;
+}
+
+/// The type of a vector.
+class Type_Vector : Type {
+    Type elementType;
+    const Type* getP4Type() const override;
+    toString{
+        std::string result = "Vector<" + elementType->toString() + ">";
+        return result;
+    }
 }
 
 /// The type of an architectural block.

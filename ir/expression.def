@@ -409,9 +409,16 @@ class ConstructorCallExpression : Expression {
         arguments->check_null(); }
 }
 
-/// Represents a list of expressions separated by commas
-class ListExpression : Expression {
+class BaseListExpression : Expression {
     inline Vector<Expression> components;
+    validate { components.check_null(); }
+    size_t size() const { return components.size(); }
+    void push_back(Expression e) { components.push_back(e); }
+#nodbprint
+}
+
+/// Represents a list of expressions separated by commas
+class ListExpression : BaseListExpression {
     ListExpression {
         validate();
         if (type->is<Type::Unknown>()) {
@@ -419,9 +426,15 @@ class ListExpression : Expression {
             for (auto e : components)
                 tuple.push_back(e->type);
             type = new Type_List(tuple); } }
-    validate { components.check_null(); }
-    size_t size() const { return components.size(); }
-    void push_back(Expression e) { components.push_back(e); }
+}
+
+/// Represents a vector literal
+class VectorExpression : BaseListExpression {
+    Type elementType;
+    VectorExpression {
+        validate();
+        if (type->is<Type::Unknown>()) {
+            type = new Type_Vector(elementType); } }
 }
 
 /// An expression that evaluates to a struct.
@@ -448,6 +461,16 @@ class InvalidHeader : Expression {
 /// A ListExpression where all the components are compile-time values.
 /// This is used by the evaluator pass.
 class ListCompileTimeValue : CompileTimeValue {
+    inline Vector<Node> components;
+    validate {
+        for (auto v : components)
+            BUG_CHECK(v->is<CompileTimeValue>(), "%1%: not a compile-time value", v); }
+#nodbprint
+}
+
+/// A VectorExpression where all the components are compile-time values.
+/// This is used by the evaluator pass.
+class VectorCompileTimeValue : CompileTimeValue {
     inline Vector<Node> components;
     validate {
         for (auto v : components)

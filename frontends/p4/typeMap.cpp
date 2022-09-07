@@ -173,6 +173,10 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
         return equivalent(ls->elementType, rs->elementType, strict) &&
                ls->getSize() == rs->getSize();
     }
+    if (auto lv = left->to<IR::Type_Vector>()) {
+        auto rv = right->to<IR::Type_Vector>();
+        return equivalent(lv->elementType, rv->elementType, strict);
+    }
     if (auto le = left->to<IR::Type_Enum>()) {
         auto re = right->to<IR::Type_Enum>();
         return le->name == re->name;
@@ -334,6 +338,8 @@ const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
         searchIn = &canonicalTuples;
     else if (type->is<IR::Type_List>())
         searchIn = &canonicalLists;
+    else if (type->is<IR::Type_Vector>())
+        searchIn = &canonicalVectors;
     else
         BUG("%1%: unexpected type", type);
 

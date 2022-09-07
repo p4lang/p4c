@@ -354,6 +354,17 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             canon = new IR::Type_Stack(stack->srcInfo, et, stack->size);
         canon = typeMap->getCanonical(canon);
         return canon;
+    } else if (auto vec = type->to<IR::Type_Vector>()) {
+        auto et = canonicalize(vec->elementType);
+        if (et == nullptr)
+            return nullptr;
+        const IR::Type* canon;
+        if (et == vec->elementType)
+            canon = type;
+        else
+            canon = new IR::Type_Vector(vec->srcInfo, et);
+        canon = typeMap->getCanonical(canon);
+        return canon;
     } else if (auto list = type->to<IR::Type_List>()) {
         auto fields = new IR::Vector<IR::Type>();
         // list<set<a>, b> = set<tuple<a, b>>
@@ -1378,6 +1389,11 @@ const IR::Node* TypeInference::postorder(IR::Type_Tuple* type) {
     return type;
 }
 
+const IR::Node* TypeInference::postorder(IR::Type_Vector* type) {
+    (void)setTypeType(type);
+    return type;
+}
+
 const IR::Node* TypeInference::postorder(IR::Type_Set* type) {
     (void)setTypeType(type);
     return type;
@@ -2043,6 +2059,45 @@ const IR::Node* TypeInference::postorder(IR::InvalidHeader* expression) {
     setType(expression, type);
     setCompileTimeConstant(expression);
     setCompileTimeConstant(getOriginal<IR::Expression>());
+    return expression;
+}
+
+const IR::Node* TypeInference::postorder(IR::VectorExpression* expression) {
+    if (done()) return expression;
+    bool constant = true;
+    auto elementType = getTypeType(expression->elementType);
+    auto vec = new IR::Vector<IR::Expression>();
+    bool changed = false;
+    for (auto c : expression->components) {
+        if (!isCompileTimeConstant(c))
+            constant = false;
+        auto type = getType(c);
+        if (type == nullptr)
+            return expression;
+        auto tvs = unify(expression, elementType, type,
+                         "Vector element type '%1%' does not match expected type '%2%'",
+                         { type, elementType });
+        if (tvs == nullptr)
+            return expression;
+        if (!tvs->isIdentity()) {
+            ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+            auto converted = cts.convert(c);
+            vec->push_back(converted);
+            changed = true;
+        } else {
+            vec->push_back(c);
+        }
+    }
+
+    if (changed)
+        expression = new IR::VectorExpression(expression->srcInfo, *vec, elementType);
+    auto type = new IR::Type_Vector(expression->srcInfo, elementType);
+    setType(getOriginal(), type);
+    setType(expression, type);
+    if (constant) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
     return expression;
 }
 

@@ -886,6 +886,30 @@ bool ToP4::preorder(const IR::ListExpression* e) {
     return false;
 }
 
+bool ToP4::preorder(const IR::VectorExpression* e) {
+    cstring start, end;
+    if (listTerminators.empty()) {
+        start = "[ ";
+        end = " ]";
+    } else {
+        start = listTerminators.back().start;
+        end = listTerminators.back().end;
+    }
+    builder.append(start);
+    visit(e->elementType);
+    builder.append("; ");
+    setVecSep(", ");
+    int prec = expressionPrecedence;
+    expressionPrecedence = DBPrint::Prec_Low;
+    setListTerm("[ ", " ]");
+    preorder(&e->components);
+    doneList();
+    expressionPrecedence = prec;
+    doneVec();
+    builder.append(end);
+    return false;
+}
+
 bool ToP4::preorder(const IR::NamedExpression* e) {
     builder.append(e->name.name);
     builder.append(" = ");

@@ -255,6 +255,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Type_Specialized* type) override;
     const IR::Node* postorder(IR::Type_SpecializedCanonical* type) override;
     const IR::Node* postorder(IR::Type_Tuple* type) override;
+    const IR::Node* postorder(IR::Type_Vector* type) override;
     const IR::Node* postorder(IR::Type_List* type) override;
     const IR::Node* postorder(IR::Type_Set* type) override;
     const IR::Node* postorder(IR::Type_ArchBlock* type) override;
@@ -304,6 +305,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::TypeNameExpression* expression) override;
     const IR::Node* postorder(IR::ListExpression* expression) override;
     const IR::Node* postorder(IR::InvalidHeader* expression) override;
+    const IR::Node* postorder(IR::VectorExpression* expression) override;
     const IR::Node* postorder(IR::StructExpression* expression) override;
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
     const IR::Node* postorder(IR::ConstructorCallExpression* expression) override;

@@ -186,6 +186,8 @@ using Parser = P4::P4Parser;
                   return makeToken(VARBIT); }
 "value_set"     { BEGIN(driver.saveState); driver.template_args = true;
                   return makeToken(VALUESET); }
+"Vector"        { BEGIN(driver.saveState); driver.template_args = true;
+                  return makeToken(VECTOR); }
 "void"          { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(VOID); }
 "_"             { BEGIN(driver.saveState); driver.template_args = false;
