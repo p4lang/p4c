@@ -1,9 +1,9 @@
 /// Signifies that a particular expression is tainted.
 /// This tainted expression must be resolved explicitly.
 class TaintExpression : Expression {
-    toString { return "TaintedExpression"; }
+    toString { return "TaintedExpression(" + type->toString() + ")"; }
 
-    dbprint { out << "TaintedExpression"; }
+    dbprint { out << "TaintedExpression(" << type << ")"; }
 }
 
 /// This type replaces Type_Varbits and can store information about the current size
