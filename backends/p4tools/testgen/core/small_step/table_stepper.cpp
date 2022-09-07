@@ -129,7 +129,7 @@ const IR::Expression* TableStepper::computeTargetMatchType(
     std::map<cstring, const FieldMatch>* matches, const IR::Expression* hitCondition) {
     const IR::Expression* keyExpr = keyProperties.key->expression;
     // Create a new zombie constant that corresponds to the key expression.
-    cstring keyName = properties.tableName + "_table_key_" + std::to_string(keyProperties.index);
+    cstring keyName = properties.tableName + "_key_" + keyProperties.name;
     const auto ctrlPlaneKey =
         nextState->createZombieConst(keyProperties.key->expression->type, keyName);
 
@@ -139,8 +139,7 @@ const IR::Expression* TableStepper::computeTargetMatchType(
         return hitCondition;
     }
     if (keyProperties.matchType == P4Constants::MATCH_KIND_TERNARY) {
-        cstring maskName =
-            properties.tableName + "_table_mask_" + std::to_string(keyProperties.index);
+        cstring maskName = properties.tableName + "_mask_" + keyProperties.name;
         const IR::Expression* ternaryMask = nullptr;
         // We can recover from taint by inserting a ternary match that is 0.
         if (keyProperties.isTainted) {
@@ -156,8 +155,7 @@ const IR::Expression* TableStepper::computeTargetMatchType(
     if (keyProperties.matchType == P4Constants::MATCH_KIND_LPM) {
         const auto* keyType = keyExpr->type->checkedTo<IR::Type_Bits>();
         auto keyWidth = keyType->width_bits();
-        cstring maskName =
-            properties.tableName + "_table_lpm_" + std::to_string(keyProperties.index);
+        cstring maskName = properties.tableName + "_lpm_prefix_" + keyProperties.name;
         const IR::Expression* maskVar = nextState->createZombieConst(keyExpr->type, maskName);
         // The maxReturn is the maximum vale for the given bit width. This value is shifted by
         // the mask variable to create a mask (and with that, a prefix).

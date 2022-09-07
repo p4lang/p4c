@@ -5,12 +5,25 @@ package p4testgen;
 
 import "third_party/p4lang_p4runtime/proto/p4/v1/p4runtime.proto";
 
+message PacketAtPort {
+  // The raw bytes of the test packet.
+  bytes packet = 1;
+  // The raw bytes of the port associated with the packet.
+  bytes port = 2;
+  // The don't care mask of the packet. Not used for input packets.
+  bytes packet_mask = 3;
+}
+
 message TestCase {
-  // The raw bytes of the test packet to be injected via `packet_input_port`.
-  bytes input_packet = 1;
-  // The ingress port at which to inject the `input_packet`.
-  bytes packet_input_port = 2;
+  // The input packet.
+  PacketAtPort input_packet = 1;
+  // The corresponding expected output packet.
+  repeated PacketAtPort expected_output_packet = 2;
   // The entities (e.g., table entries) to install on the switch before
   // injecting the `input_packet`.
   repeated p4.v1.Entity entities = 3;
+  // The trace associated with this particular test.
+  repeated string traces = 4;
+  // Additional metadata and information.
+  repeated string metadata = 5;
 }

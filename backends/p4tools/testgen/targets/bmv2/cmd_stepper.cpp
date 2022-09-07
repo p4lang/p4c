@@ -74,8 +74,8 @@ void BMv2_V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState* nextSta
 
     const auto* nineBitType = IRUtils::getBitType(9);
     const auto* oneBitType = IRUtils::getBitType(1);
-    // Set the input ingress port to 0.
-    nextState->set(programInfo.getTargetInputPortVar(), IRUtils::getConstant(nineBitType, 0));
+    nextState->set(programInfo.getTargetInputPortVar(),
+                   nextState->createZombieConst(nineBitType, "*bmv2_ingress_port"));
     // BMv2 implicitly sets the output port to 0.
     nextState->set(programInfo.getTargetOutputPortVar(), IRUtils::getConstant(nineBitType, 0));
     // Initialize parser_err with no error.

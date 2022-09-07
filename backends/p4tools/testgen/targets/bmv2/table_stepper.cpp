@@ -41,13 +41,11 @@ const IR::Expression* BMv2_V1ModelTableStepper::computeTargetMatchType(
         bmv2_V1ModelProperties.actionSelectorKeys.emplace_back(keyExpr);
         return hitCondition;
     }
-    // Ranges are not yet implemented for BMv2 STF tests.
+    // Ranges are not yet implemented for Tofino STF tests.
     if (keyProperties.matchType == BMv2Constants::MATCH_KIND_RANGE &&
         TestgenOptions::get().testBackend != "STF") {
-        cstring minName =
-            properties.tableName + "_table_range_min_" + std::to_string(keyProperties.index);
-        cstring maxName =
-            properties.tableName + "_table_range_max_" + std::to_string(keyProperties.index);
+        cstring minName = properties.tableName + "_range_min_" + keyProperties.name;
+        cstring maxName = properties.tableName + "_range_max_" + keyProperties.name;
         // We can recover from taint by matching on the entire possible range.
         const IR::Expression* minKey = nullptr;
         const IR::Expression* maxKey = nullptr;

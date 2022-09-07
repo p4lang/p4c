@@ -208,7 +208,7 @@ inja::json Protobuf::getControlPlane(const TestSpec* testSpec) {
             for (const auto& actArg : actionArgs) {
                 inja::json c;
                 c["param"] = actArg.getActionParamName().c_str();
-                c["value"] = formatOctalExpr(actArg.getEvaluatedValue()).c_str();
+                c["value"] = formatHexExpr(actArg.getEvaluatedValue()).c_str();
                 b.push_back(c);
             }
             a["action_args"] = b;
@@ -249,7 +249,7 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
             void operator()(const Exact& elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
-                j["value"] = insertOctalSeparators(formatOctalExpr(elem.getEvaluatedValue()));
+                j["value"] = formatHexExpr(elem.getEvaluatedValue());
                 auto p4RuntimeId = getIdAnnotation(elem.getKey());
                 BUG_CHECK(p4RuntimeId, "Id not present for key. Can not generate test.");
                 j["id"] = *p4RuntimeId;
@@ -258,8 +258,8 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
             void operator()(const Range& elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
-                j["lo"] = insertOctalSeparators(formatOctalExpr(elem.getEvaluatedLow()));
-                j["hi"] = insertOctalSeparators(formatOctalExpr(elem.getEvaluatedHigh()));
+                j["lo"] = formatHexExpr(elem.getEvaluatedLow());
+                j["hi"] = formatHexExpr(elem.getEvaluatedHigh());
                 auto p4RuntimeId = getIdAnnotation(elem.getKey());
                 BUG_CHECK(p4RuntimeId, "Id not present for key. Can not generate test.");
                 j["id"] = *p4RuntimeId;
@@ -268,8 +268,8 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
             void operator()(const Ternary& elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
-                j["value"] = insertOctalSeparators(formatOctalExpr(elem.getEvaluatedValue()));
-                j["mask"] = insertOctalSeparators(formatOctalExpr(elem.getEvaluatedMask()));
+                j["value"] = formatHexExpr(elem.getEvaluatedValue());
+                j["mask"] = formatHexExpr(elem.getEvaluatedMask());
                 auto p4RuntimeId = getIdAnnotation(elem.getKey());
                 BUG_CHECK(p4RuntimeId, "Id not present for key. Can not generate test.");
                 j["id"] = *p4RuntimeId;
@@ -278,7 +278,7 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
             void operator()(const LPM& elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
-                j["value"] = insertOctalSeparators(formatOctalExpr(elem.getEvaluatedValue()));
+                j["value"] = formatHexExpr(elem.getEvaluatedValue());
                 j["prefix_len"] = elem.getEvaluatedPrefixLength()->value.str();
                 auto p4RuntimeId = getIdAnnotation(elem.getKey());
                 BUG_CHECK(p4RuntimeId, "Id not present for key. Can not generate test.");
@@ -293,7 +293,7 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
     for (const auto& actArg : args) {
         inja::json j;
         j["param"] = actArg.getActionParamName().c_str();
-        j["value"] = insertOctalSeparators(formatOctalExpr(actArg.getEvaluatedValue()));
+        j["value"] = formatHexExpr(actArg.getEvaluatedValue());
         auto p4RuntimeId = getIdAnnotation(actArg.getActionParam());
         BUG_CHECK(p4RuntimeId, "Id not present for parameter. Can not generate test.");
         j["id"] = *p4RuntimeId;
@@ -308,8 +308,8 @@ inja::json Protobuf::getSend(const TestSpec* testSpec) {
     const auto* payload = iPacket->getEvaluatedPayload();
     inja::json sendJson;
     sendJson["ig_port"] = iPacket->getPort();
-    auto dataStr = formatOctalExpr(payload);
-    sendJson["pkt"] = insertOctalSeparators(dataStr);
+    auto dataStr = formatHexExpr(payload);
+    sendJson["pkt"] = dataStr;
     sendJson["pkt_size"] = payload->type->width_bits();
     return sendJson;
 }
@@ -321,10 +321,8 @@ inja::json Protobuf::getVerify(const TestSpec* testSpec) {
         verifyData["eg_port"] = packet.getPort();
         const auto* payload = packet.getEvaluatedPayload();
         const auto* payloadMask = packet.getEvaluatedPayloadMask();
-        verifyData["ignore_masks"] = getIgnoreMasks(payloadMask);
-
-        auto dataStr = formatHexExpr(payload);
-        verifyData["exp_pkt"] = insertOctalSeparators(dataStr);
+        verifyData["ignore_mask"] = formatHexExpr(payloadMask);
+        verifyData["exp_pkt"] = formatHexExpr(payload);
     }
     return verifyData;
 }
@@ -338,14 +336,27 @@ package p4testgen;
 
 import "third_party/p4lang_p4runtime/proto/p4/v1/p4runtime.proto";
 
+message PacketAtPort {
+  // The raw bytes of the test packet.
+  bytes packet = 1;
+  // The raw bytes of the port associated with the packet.
+  bytes port = 2;
+  // The don't care mask of the packet. Not used for input packets.
+  bytes packet_mask = 3;
+}
+
 message TestCase {
-  // The raw bytes of the test packet to be injected via `packet_input_port`.
-  bytes input_packet = 1;
-  // The ingress port at which to inject the `input_packet`.
-  bytes packet_input_port = 2;
+  // The input packet.
+  PacketAtPort input_packet = 1;
+  // The corresponding expected output packet.
+  repeated PacketAtPort expected_output_packet = 2;
   // The entities (e.g., table entries) to install on the switch before
   // injecting the `input_packet`.
   repeated p4.v1.Entity entities = 3;
+  // The trace associated with this particular test.
+  repeated string traces = 4;
+  // Additional metadata and information.
+  repeated string metadata = 5;
 }
 )""");
     return PREAMBLE;
@@ -364,21 +375,30 @@ void Protobuf::emitPreamble(const std::string& preamble) {
 static std::string getTestCase() {
     static std::string TEST_CASE(
         R"""(# A P4TestGen-generated test case for {{test_name}}.p4
-# p4testgen seed: '{{ default(seed, '"none"') }}'
-# Date generated: {{timestamp}}
+metadata: "p4testgen seed: '{{ default(seed, '"none"') }}'"
+metadata: "Date generated: {{timestamp}}"
 ## if length(selected_branches) > 0
-# {{selected_branches}}
+metadata: "{{selected_branches}}"
 ## endif
-# Current statement coverage: {{coverage}}
+metadata: "Current statement coverage: {{coverage}}"
 
-# Traces:
 ## for trace_item in trace
-# {{trace_item}}
+traces: "{{trace_item}}"
 ## endfor
 
-input_packet: "{{send.pkt}}"
+input_packet {
+  packet: "{{send.pkt}}"
+  port: "{{send.ig_port}}"
+  packet_mask: "{{send.pkt}}"
+}
 
-packet_input_port: "{{send.ig_port}}"
+## if verify
+expected_output_packet {
+  packet: "{{verify.exp_pkt}}"
+  port: "{{verify.eg_port}}"
+  packet_mask: "{{verify.ignore_mask}}"
+}
+## endif
 
 ## if control_plane
 entities {
