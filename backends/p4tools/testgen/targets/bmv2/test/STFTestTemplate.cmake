@@ -12,7 +12,7 @@
 #   - p4test is the name of the p4 program to test (path relative to the p4c directory)
 #   - target is the target to test against
 #   - arch is the p4 architecture
-#   - std is the p4 standard
+#   - std is the p4 language version (P4-14 or P4-16)
 #     the input packet
 #   - enable_runner is the flag to compile the p4 and run the runner
 #   - test_args is a list of arguments to pass to the test

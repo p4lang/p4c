@@ -3,7 +3,7 @@ Contains utility scripts for supporting the development of P4Tools.
 
 ## IWYU
 
-[IWYU](https://github.com/include-what-you-use/include-what-you-use) checks ensures that every symbol used in a C/C++ file has a corresponding include. Vice-versa IWYU also ensures that unnecessary includes are removed.
+[IWYU](https://github.com/include-what-you-use/include-what-you-use) checks that every symbol used in a C/C++ file has a corresponding include. Vice-versa IWYU also ensures that unnecessary includes are removed.
 
 Since it depends on clang and LLVM, it is recommended to install IWYU from scratch using the following instructions:
 https://github.com/include-what-you-use/include-what-you-use#how-to-build-standalone

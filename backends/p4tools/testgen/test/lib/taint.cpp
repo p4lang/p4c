@@ -21,12 +21,12 @@ using P4Tools::IRUtils;
 using P4Tools::Taint;
 
 /// Test whether taint propagation works at all.
-/// Input: 8w2 + taint
-/// Expected output: taint
+/// Input: 8w2 + taint<8>
+/// Expected output: taint<8>
 /// Input: 8w2 + 8w2
 /// Expected output: 8w2 (since we just collapse untainted binary values with the left side)
-/// Input: taint + taint
-/// Expected output: taint
+/// Input: taint<8> + taint<8>
+/// Expected output: taint<8>
 TEST_F(TaintTest, Taint01) {
     const auto* typeBits = IRUtils::getBitType(8);
     // Create a base state with a parameter continuation to apply the value on.
@@ -56,9 +56,9 @@ TEST_F(TaintTest, Taint01) {
 }
 
 /// Test whether taint propagation respects slices and concatenation.
-/// Input: (8w2 ++ taint)[15:8]
+/// Input: (8w2 ++ taint<8>)[15:8]
 /// Expected output: 8w0 (since we replace values with zeroes)
-/// Input: (taint ++ 8w2 )[7:0]
+/// Input: (taint<8> ++ 8w2 )[7:0]
 /// Expected output: 8w0 (since we replace values with zeroes)
 TEST_F(TaintTest, Taint02) {
     // Create a base state with a parameter continuation to apply the value on.
@@ -86,10 +86,10 @@ TEST_F(TaintTest, Taint02) {
 }
 
 /// Test whether taint propagation respects slices and concatenation.
-/// Input: (8w2 ++ taint)[7:0]
-/// Expected output: taint
-/// Input: (taint ++ 8w2 )[15:8]
-/// Expected output: taint
+/// Input: (8w2 ++ taint<8>)[7:0]
+/// Expected output: taint<8>
+/// Input: (taint<8> ++ 8w2 )[15:8]
+/// Expected output: taint<8>
 TEST_F(TaintTest, Taint03) {
     // Create a base state with a parameter continuation to apply the value on.
     auto state = ExecutionState(new IR::P4Program());
@@ -116,10 +116,10 @@ TEST_F(TaintTest, Taint03) {
 }
 
 /// Test whether taint propagation respects slices and concatenation.
-/// Input: (8w2 ++ taint)[11:4]
-/// Expected output: taint
-/// Input: (taint ++ 8w2 )[11:4]
-/// Expected output: taint
+/// Input: (8w2 ++ taint<8>)[11:4]
+/// Expected output: taint<8>
+/// Input: (taint<8> ++ 8w2 )[11:4]
+/// Expected output: taint<8>
 TEST_F(TaintTest, Taint04) {
     // Create a base state with a parameter continuation to apply the value on.
     auto state = ExecutionState(new IR::P4Program());
@@ -146,10 +146,10 @@ TEST_F(TaintTest, Taint04) {
 }
 
 /// Test whether taint propagation respects slices and concatenation.
-/// Input: (taint ++ 8w2 ++ taint) [11:4]
-/// Expected output: taint
-/// Input: (taint ++ 8w2 ++ taint)[19:12]
-/// Expected output: taint
+/// Input: (taint<8> ++ 8w2 ++ taint<8>) [11:4]
+/// Expected output: taint<8>
+/// Input: (taint<8> ++ 8w2 ++ taint<8>)[19:12]
+/// Expected output: taint<8>
 TEST_F(TaintTest, Taint05) {
     // Create a base state with a parameter continuation to apply the value on.
     auto state = ExecutionState(new IR::P4Program());
@@ -177,10 +177,10 @@ TEST_F(TaintTest, Taint05) {
 }
 
 /// Test whether taint propagation respects slices and concatenation.
-/// Input: (8w2 ++ taint ++ 8w2) [11:4]
-/// Expected output: taint
-/// Input: (8w2 ++ taint ++ 8w2)[19:12]
-/// Expected output: taint
+/// Input: (8w2 ++ taint<8> ++ 8w2) [11:4]
+/// Expected output: taint<8>
+/// Input: (8w2 ++ taint<8> ++ 8w2)[19:12]
+/// Expected output: taint<8>
 TEST_F(TaintTest, Taint06) {
     // Create a base state with a parameter continuation to apply the value on.
     auto state = ExecutionState(new IR::P4Program());
@@ -208,9 +208,9 @@ TEST_F(TaintTest, Taint06) {
 }
 
 /// Test whether taint propagation respects slices and concatenation.
-/// Input: (taint ++ 8w2 ++ taint) [11:4][9:8]
+/// Input: (taint<8> ++ 8w2 ++ taint<8>) [11:4][9:8]
 /// Expected output: 2w0
-/// Input: (8w2 ++ taint ++ taint)[19:12][7:5]
+/// Input: (8w2 ++ taint<8> ++ taint<8>)[19:12][7:5]
 /// Expected output: 2w0
 TEST_F(TaintTest, Taint07) {
     // Create a base state with a parameter continuation to apply the value on.
@@ -242,10 +242,10 @@ TEST_F(TaintTest, Taint07) {
 }
 
 /// Test whether taint propagation respects slices and concatenation.
-/// Input: (taint ++ 8w2 ++ taint) [11:4][4:3]
-/// Expected output: taint
-/// Input: (8w2 ++ taint ++ taint)[19:12][2:0]
-/// Expected output: taint
+/// Input: (taint<8> ++ 8w2 ++ taint<8>) [11:4][4:3]
+/// Expected output: taint<8>
+/// Input: (8w2 ++ taint<8> ++ taint<8>)[19:12][2:0]
+/// Expected output: taint<8>
 TEST_F(TaintTest, Taint08) {
     // Create a base state with a parameter continuation to apply the value on.
     auto state = ExecutionState(new IR::P4Program());

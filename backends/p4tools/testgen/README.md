@@ -24,7 +24,7 @@ To generate tests for a particular target and P4 architecture, run `p4check test
 `testgen` specifies that the p4testgen tool should be used. In the future, other tools may be supported, for example random program generation or translation validators.
 These are the current usage flags:
 
-```bash
+```
 ./p4check: Generate packet tests for a P4 program
 --help                     Shows this help message and exits
 --version                  Prints version information and exits
@@ -50,8 +50,8 @@ These are the current usage flags:
 --out-dir outputDir        Directory for generated tests
 --test-backend             Select a test back end. Available test back ends are defined by the respective target.
 --packet-size packetSize   If enabled, sets all input packets to a fixed size in bits (from 1 to 12000 bits). 0 implies no packet sizing.
---pop-level                This is the fraction of unexploredBranches we select on multiPop. Defaults to 0.
---linear-enumeration       Max bound for LinearEnumeration strategy. Defaults to 0. **Experimental feature**.
+--pop-level                This is the fraction of unexploredBranches we select on multiPop. Defaults to 0 (**Experimental feature**).
+--linear-enumeration       Max bound for LinearEnumeration strategy. Defaults to 0. (**Experimental feature**).
 ```
 
 Once P4Testgen has generated tests, the tests can be executed by either the P4Runtime or STF test back ends.
@@ -59,7 +59,7 @@ Once P4Testgen has generated tests, the tests can be executed by either the P4Ru
 ### Running ctest
 Once compiled, run ctest in the build directory:
 ```
-ctest -V -R testgen-
+ctest -V -R testgen
 ```
 
 ### Additional command line parameters:

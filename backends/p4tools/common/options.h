@@ -2,8 +2,7 @@
 #define COMMON_OPTIONS_H_
 
 // Boost
-#include <stdint.h>
-
+#include <cstdint>
 #include <tuple>
 #include <vector>
 

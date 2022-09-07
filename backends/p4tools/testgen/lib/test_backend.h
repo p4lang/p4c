@@ -11,12 +11,12 @@
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 
-#include "backends/p4tools/testgen/backend/tf.h"
 #include "backends/p4tools/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/testgen/core/program_info.h"
 #include "backends/p4tools/testgen/lib/execution_state.h"
 #include "backends/p4tools/testgen/lib/final_state.h"
 #include "backends/p4tools/testgen/lib/test_spec.h"
+#include "backends/p4tools/testgen/lib/tf.h"
 #include "backends/p4tools/testgen/options.h"
 
 namespace P4Tools {

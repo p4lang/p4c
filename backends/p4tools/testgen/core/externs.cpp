@@ -24,7 +24,6 @@ bool ExternMethodImpls::exec(const IR::MethodCallExpression* call, const IR::Exp
                              SmallStepEvaluator::Result& result) const {
     // We have to check the extern type here. We may receive a specialized canonical type, which we
     // need to unpack.
-    // TODO: How do we handle the arguments of this type specialized?
     const IR::Type_Extern* externType = nullptr;
     if (const auto* type = receiver->type->to<IR::Type_Extern>()) {
         externType = type;

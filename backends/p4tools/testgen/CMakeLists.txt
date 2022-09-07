@@ -12,7 +12,6 @@ set(
   options.cpp
   testgen.cpp
 
-  backend/tf.cpp
 
   core/externs.cpp
   core/program_info.cpp
@@ -38,6 +37,7 @@ set(
   lib/namespace_context.cpp
   lib/test_backend.cpp
   lib/test_spec.cpp
+  lib/tf.cpp
 )
 
 # GTest source files for p4testgen.
