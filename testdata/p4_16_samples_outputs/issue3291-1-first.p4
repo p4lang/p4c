@@ -11,8 +11,12 @@ struct h_0 {
     bit<1> f;
 }
 
+struct h_1 {
+    h_0 f;
+}
+
 bool g_0(in h_0 a) {
-    h<h_0> v;
+    h_1 v;
     v.f = a;
     return v.f == a;
 }

@@ -6,10 +6,13 @@ struct h_0 {
     bit<1> f;
 }
 
+struct h_1 {
+    h_0 f;
+}
+
 control c(out bool x) {
-    @name("c.v") h<h_0> v_0;
     @hidden action issue32911l17() {
-        x = v_0.f.f == 1w0;
+        x = true;
     }
     @hidden table tbl_issue32911l17 {
         actions = {
