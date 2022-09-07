@@ -61,6 +61,7 @@ limitations under the License.
 #include "specialize.h"
 #include "specializeGenericFunctions.h"
 #include "specializeGenericTypes.h"
+#include "staticAssert.h"
 #include "strengthReduction.h"
 #include "structInitializers.h"
 #include "switchAddDefault.h"
@@ -187,6 +188,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new TypeInference(&refMap, &typeMap, false),  // more casts may be needed
         new SetStrictStruct(&typeMap, false),
         new CheckCoreMethods(&refMap, &typeMap),
+        new StaticAssert(&refMap, &typeMap),
         new RemoveParserIfs(&refMap, &typeMap),
         new StructInitializers(&refMap, &typeMap),
         new SpecializeGenericFunctions(&refMap, &typeMap),
