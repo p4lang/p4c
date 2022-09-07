@@ -690,7 +690,8 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Variable* decl) {
     if (decl->initializer != nullptr) {
         auto init = assignment(decl, type, decl->initializer);
         if (decl->initializer != init) {
-            decl->type = type;
+            auto declType = type->getP4Type();
+            decl->type = declType;
             decl->initializer = init;
             LOG2("Created new declaration " << decl);
         }
@@ -1285,18 +1286,46 @@ const IR::Node* TypeInference::postorder(IR::Type_Package* decl) {
     return decl;
 }
 
+class ContainsType : public Inspector {
+    const IR::Type* contained;
+    const TypeMap* typeMap;
+    const IR::Type* found = nullptr;
+
+    ContainsType(const IR::Type* contained, const TypeMap* typeMap):
+            contained(contained), typeMap(typeMap) {
+        CHECK_NULL(contained); CHECK_NULL(typeMap); }
+
+    bool preorder(const IR::Type* type) override {
+        LOG3("ContainsType " << type);
+        if (typeMap->equivalent(type, contained))
+            found = type;
+        return true;
+    }
+
+ public:
+    static const IR::Type* find(
+        const IR::Type* type, const IR::Type* contained, const TypeMap* typeMap) {
+        ContainsType c(contained, typeMap);
+        LOG3("Checking if " << type << " contains " << contained);
+        type->apply(c);
+        return c.found;
+    }
+};
+
 const IR::Node* TypeInference::postorder(IR::Type_Specialized *type) {
     // Check for recursive type specializations, e.g.,
     // extern e<T> {};  e<e<bit>> x;
-    auto ctx = getContext();
-    while (ctx) {
-        if (auto ts = ctx->node->to<IR::Type_Specialized>()) {
-            if (type->baseType->path->equiv(*ts->baseType->path)) {
-                typeError("%1%: recursive type specialization", type->baseType);
-                return type;
-            }
+    auto baseType = getTypeType(type->baseType);
+    if (!baseType)
+        return type;
+    for (auto arg : *type->arguments) {
+        auto argtype = getTypeType(arg);
+        if (!argtype)
+            return type;
+        if (auto self = ContainsType::find(argtype, baseType, typeMap)) {
+            typeError("%1%: contains self '%2%' as type argument", type->baseType, self);
+            return type;
         }
-        ctx = ctx->parent;
     }
     (void)setTypeType(type);
     return type;

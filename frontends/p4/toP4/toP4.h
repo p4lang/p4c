@@ -166,6 +166,10 @@ class ToP4 : public Inspector {
         builder.append(t->toString());
         return false;
     }
+    bool preorder(const IR::Type_SpecializedCanonical* t) override {
+        BUG("%1%: specialized canonical type in IR tree", t);
+        return false;
+    }
 
     // declarations
     bool preorder(const IR::Declaration_Constant* cst) override;
