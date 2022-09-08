@@ -102,51 +102,31 @@ const IR::Node* HandleValidityHeaderUnion::postorder(IR::AssignmentStatement* a)
         return expandIsValid(a, mce);
     } else if (auto lhs = left->to<IR::Member>()) {
         if (auto huType = lhs->expr->type->to<IR::Type_HeaderUnion>()) {
-            if (right->type->is<IR::Type_Header>() && !right->is<IR::Member>()) {
-            //  u.h1 = my_h1
-            auto isValid = new IR::Member(right->srcInfo, right,
-                              IR::ID(IR::Type_Header::isValid));
-            auto result = new IR::MethodCallExpression(right->srcInfo, IR::Type::Boolean::get(),
-                                                   isValid);
-            typeMap->setType(isValid, new IR::Type_Method(IR::Type::Boolean::get(),
-                                          new IR::ParameterList(), IR::Type_Header::isValid));
+            auto rhs = right->to<IR::Member>();
+            if (right->type->is<IR::Type_Header>() ||
+                (rhs && rhs->expr->type->is<IR::Type_HeaderUnion>())) {
+                //  u.h1 = my_h1 or u.h1 = u1.h1
+                auto isValid = new IR::Member(right->srcInfo, right,
+                                  IR::ID(IR::Type_Header::isValid));
+                auto result = new IR::MethodCallExpression(right->srcInfo, IR::Type::Boolean::get(),
+                                                       isValid);
+                typeMap->setType(isValid, new IR::Type_Method(IR::Type::Boolean::get(),
+                                    new IR::ParameterList(), IR::Type_Header::isValid));
 
-            auto trueBlock = setInvalidforRest(a, lhs, huType, lhs->member.name, true);
-            auto method1 = new IR::Member(left->srcInfo, left,
-                                              IR::ID(IR::Type_Header::setInvalid));
-            auto mc1 = new IR::MethodCallExpression(left->srcInfo, method1,
-                          new IR::Vector<IR::Argument>());
-            typeMap->setType(method1, new IR::Type_Method(IR::Type_Void::get(),
-                                new IR::ParameterList(), IR::Type_Header::setInvalid));
-            auto ifFalse = new IR::MethodCallStatement(mc1->srcInfo, mc1);
-            auto ifStatement = new IR::IfStatement(a->srcInfo, result,
-                                       trueBlock->to<IR::BlockStatement>(), ifFalse);
+                auto trueBlock = setInvalidforRest(a, lhs, huType, lhs->member.name, true);
+                auto method1 = new IR::Member(left->srcInfo, left,
+                                                  IR::ID(IR::Type_Header::setInvalid));
+                auto mc1 = new IR::MethodCallExpression(left->srcInfo, method1,
+                              new IR::Vector<IR::Argument>());
+                typeMap->setType(method1, new IR::Type_Method(IR::Type_Void::get(),
+                                    new IR::ParameterList(), IR::Type_Header::setInvalid));
+                auto ifFalse = new IR::MethodCallStatement(mc1->srcInfo, mc1);
+                auto ifStatement = new IR::IfStatement(a->srcInfo, result,
+                                           trueBlock->to<IR::BlockStatement>(), ifFalse);
                 return ifStatement;
-            } else if (auto rhs = right->to<IR::Member>()) {
-                if (rhs->expr->type->is<IR::Type_HeaderUnion>()) {
-                    // u.h1 = u1.h1
-                    auto isValid = new IR::Member(right->srcInfo, right,
-                                      IR::ID(IR::Type_Header::isValid));
-                    auto result = new IR::MethodCallExpression(right->srcInfo,
-                                                               IR::Type::Boolean::get(), isValid);
-                    typeMap->setType(isValid, new IR::Type_Method(IR::Type::Boolean::get(),
-                                              new IR::ParameterList(), IR::Type_Header::isValid));
-
-                    auto trueBlock = setInvalidforRest(a, lhs, huType, lhs->member.name, true);
-                    auto method1 = new IR::Member(left->srcInfo, left,
-                                                      IR::ID(IR::Type_Header::setInvalid));
-                    auto mc1 = new IR::MethodCallExpression(left->srcInfo, method1,
-                                  new IR::Vector<IR::Argument>());
-                    typeMap->setType(method1, new IR::Type_Method(IR::Type_Void::get(),
-                                        new IR::ParameterList(), IR::Type_Header::setInvalid));
-                    auto ifFalse = new IR::MethodCallStatement(mc1->srcInfo, mc1);
-                    auto ifStatement = new IR::IfStatement(a->srcInfo, result,
-                                               trueBlock->to<IR::BlockStatement>(), ifFalse);
-                    return ifStatement;
-                }
             }
         } else if (auto leftMem = lhs->expr->to<IR::Member>()) {  // hdr.u1.h1 or u1.h1
-            // Handling hdr.u1.h1.data = <constant>
+                // Handling hdr.u1.h1.data = <constant>
             if (auto huType = leftMem->expr->type->to<IR::Type_HeaderUnion>()) {
                 // hdr.u1 or u1
                 if (leftMem->type->is<IR::Type_Header>() && right->is<IR::Constant>()) {

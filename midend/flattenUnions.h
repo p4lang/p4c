@@ -66,13 +66,13 @@ class DoFlattenHeaderUnion : public Transform {
 /** This pass handles the validity semantics of header union.
  * 1) On assignment to any element of the header union, it is set to Valid and other elements
  *    of the header union are set to Invalid.
- *   a)  U u;                         |      if (my_h1.isValid()) {
- *       H1 my_h1 = { 8w0 };          |          u_h1.setValid();
- *       u.h1 = my_h1;                |          // all other elements set to Invalid
- *                                    |          u_h1 = my_h1;
- *                                    |      } else {
- *                                    |          u_h1.setInvalid()
- *                                    |      }
+ *   a)  U u;                         | if (my_h1.isValid()) {
+ *       H1 my_h1 = { 8w0 };          |     u_h1.setValid();
+ *       u.h1 = my_h1;                |     // all other elements set to Invalid
+ *                                    |     u_h1 = my_h1;
+ *                                    | } else {
+ *                                    |     u_h1.setInvalid()
+ *                                    | }
  *   b) u.h1 = {16W1}                 | This is already transformed into individual element copy
  *                                    | by earlier passes and individual assignment is translated
  *                                    | as same as (a)
@@ -122,17 +122,24 @@ class HandleValidityHeaderUnion : public Transform {
     const IR::Node * expandIsValid(const IR::Statement *a, const IR::MethodCallExpression *mce);
 };
 
+class RemoveUnusedHUDeclarations : public Transform {
+    P4::ReferenceMap* refMap;
+ public:
+    explicit RemoveUnusedHUDeclarations(P4::ReferenceMap* refMap) : refMap(refMap) {}
+    const IR::Node* preorder(IR::Type_HeaderUnion* /*type*/) {
+        return nullptr;
+    }
+};
+
 /** Passmanager to group necessary passes for flattening header unions
- * The SimplifyDefUse pass is used before and after the header union flattening passes
- * to optimize some of the unnecessay assignments
- * RemoveAllUnusedDeclarations pass is used to remove the local standalone header union
- * variable declarations
- * The header union flattening pass introduces if statements within parser, RemoveParserIfs
- * pass is used to convert these if statements to transition select statements
+ * - The SimplifyDefUse pass is used before and after the header union flattening passes
+ *   to optimize some of the unnecessay assignments
+ * - RemoveAllUnusedDeclarations pass is used to remove the local standalone header union
+ *   variable declarations
+ * - The header union flattening pass introduces if statements within parser, RemoveParserIfs
+ *   pass is used to convert these if statements to transition select statements
  * TODO
- * 1. RemoveAllUnusedDeclarations does not remove the header union declaration, need to
- *    write a new pass to do that
- * 2. Calling SimplifyDefUse after header union flattening leaves some spurious setValid and
+ * 1. Calling SimplifyDefUse after header union flattening leaves some spurious setValid and
  *    setInvalid calls corresponding to the assignment statements which are removed. Need to
  *    write a pass to cleanup the unnecessary method calls.
  */
@@ -147,9 +154,10 @@ class FlattenHeaderUnion : public PassManager {
         passes.push_back(new HandleValidityHeaderUnion(refMap, typeMap));
         passes.push_back(new DoFlattenHeaderUnion(refMap, typeMap));
         passes.push_back(new P4::ClearTypeMap(typeMap));
-        passes.emplace_back(new P4::TypeChecking(refMap, typeMap));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap));
         passes.push_back(new P4::SimplifyDefUse(refMap, typeMap));
         passes.push_back(new P4::RemoveAllUnusedDeclarations(refMap));
+        passes.push_back(new P4::RemoveUnusedHUDeclarations(refMap));
         passes.push_back(new P4::RemoveParserIfs(refMap, typeMap));
     }
 };
