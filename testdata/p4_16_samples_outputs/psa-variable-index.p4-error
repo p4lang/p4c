@@ -1,4 +1,0 @@
-a.vlan_tag[0].pcp_cfi_vid[15:4];
-a.vlan_tag[1].pcp_cfi_vid[15:4];
-a.vlan_tag[0].pcp_cfi_vid[15:4];
-a.vlan_tag[1].pcp_cfi_vid[15:4];

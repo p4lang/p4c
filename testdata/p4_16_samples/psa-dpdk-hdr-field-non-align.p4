@@ -13,7 +13,6 @@ header ethernet_t {
     bit<48> dst_addr;
     bit<48> src_addr;
     bit<16> ether_type;
-   // bit<80> val;
 }
 
 struct headers_t {
@@ -22,10 +21,8 @@ struct headers_t {
 
 struct user_meta_data_t {
     bit<48> addr;
-   // bit<80> val;
-
     bit<8> x2;
-   
+    bit<8> flg;
 }
 
 
@@ -52,10 +49,8 @@ control MyIngressControl(
     inout user_meta_data_t m,
     in psa_ingress_input_metadata_t c,
     inout psa_ingress_output_metadata_t d) {
-    bit<8> flg;
 	action macswp() {
-		//if (m.val == 0x1 && hdr.ethernet.val == 0x2) {
-		if (flg == 0x2) {
+	    if (m.flg == 0x2) {
             m.x2= hdr.ethernet.x2;
             m.addr = hdr.ethernet.dst_addr;
 			hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
@@ -72,6 +67,7 @@ control MyIngressControl(
     }
 
     apply {
+        m.flg = 0x2;
         d.egress_port = (PortId_t) ((bit <32>) c.ingress_port ^ 1);
         stub.apply();
     }
@@ -113,6 +109,7 @@ control MyEgressControl(
     inout psa_egress_output_metadata_t d) {
     apply {}
 }
+
 control MyEgressDeparser(
     packet_out pkt,
     out EMPTY a,

@@ -482,12 +482,12 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
                 auto t = (*field).type->to<IR::Type_Bits>();
                 auto width = t->width_bits();
                 size_sum_so_far += width;
-                if (width % 8 != 0) {
+                if ((width & 0x7) != 0) {
                     all_hdr_field_aligned = false;
                 }
             }
         }
-        if (size_sum_so_far % 8 != 0) {
+        if ((size_sum_so_far & 0x7) != 0) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "'%1%' is not 8-bit aligned", st->name.name);
             return st;
@@ -505,11 +505,11 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
             if ((*field).type->is<IR::Type_Bits>()) {
                 auto t = (*field).type->to<IR::Type_Bits>();
                 auto width = t->width_bits();
-                if (width % 8 == 0 && size_sum_so_far == 0) {
+                if ((width & 0x7) == 0 && size_sum_so_far == 0) {
                      fields->push_back(field);
                      continue;
                 } else {
-                    if (size_sum_so_far == 0 || size_sum_so_far % 8 != 0) {
+                    if (size_sum_so_far == 0 || (size_sum_so_far & 0x7) != 0) {
                         size_sum_so_far += width;
                         fieldInfo obj;
                         obj.fieldWidth = width;
@@ -525,8 +525,8 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
                     if (size_sum_so_far && (size_sum_so_far % 8 == 0)) {
                         // Form the field with all non-aligned field stored in "field_name_list"
                         for (auto s = field_name_list.begin(); s != field_name_list.end();
-                             s++,i++) {
-                            if ((i+1) < (size))
+                             s++, i++) {
+                            if ((i + 1) < size)
                                 modifiedName += s->first + "_";
                             else
                                 modifiedName += s->first;
@@ -647,8 +647,6 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
             auto mem = new IR::Member(m->expr, IR::ID(memVec.modifiedName));
             auto sliceMem = new IR::Slice(mem->clone(), (memVec.offset + memVec.fieldWidth - 1),
                                           memVec.offset);
-            sliceMem->dbprint(std::cerr);
-            std::cerr<<"\n";
             return sliceMem;
         }
     }
