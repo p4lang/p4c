@@ -86,45 +86,6 @@ int StateVariable::compare(const IR::PathExpression* p1, const IR::PathExpressio
     return 0;
 }
 
-/* =============================================================================================
- *  ConcolicVariable
- * ============================================================================================= */
 
-ConcolicVariable::ConcolicVariable(const IR::Expression* expr, const IR::MethodCallExpression* call,
-                                   uint64_t instanceId)
-    : AbstractRepCheckedNode(checkedTo<IR::Member>(expr), "concolic variable"),
-      call(call),
-      instanceId(instanceId) {}
-
-bool ConcolicVariable::repOk(const IR::Expression* expr) {
-    // Only members can be state variables.
-    const auto* member = expr->to<IR::Member>();
-    if (member == nullptr) {
-        return false;
-    }
-
-    // A member is a state variable if it is qualified by a PathExpression or if its qualifier is a
-    // state variable.
-    return member->expr->is<IR::PathExpression>() || repOk(member->expr);
-}
-
-const IR::MethodCallExpression* ConcolicVariable::getCall() const { return call; }
-
-uint64_t ConcolicVariable::getInstanceId() const { return instanceId; }
-
-bool ConcolicVariable::operator<(const ConcolicVariable& other) const {
-    if (node->toString() < other.node->toString()) {
-        return true;
-    }
-    if (node->toString() > other.node->toString()) {
-        return false;
-    }
-    return instanceId < other.instanceId;
-}
-
-bool ConcolicVariable::operator==(const ConcolicVariable& other) const {
-    // Delegate to IR's notion of equality.
-    return *node == *other.node && instanceId == other.instanceId;
-}
 
 }  // namespace P4Tools

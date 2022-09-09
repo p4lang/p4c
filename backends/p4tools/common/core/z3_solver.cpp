@@ -134,8 +134,8 @@ class Z3Translator : public virtual Inspector {
     /// P4 allows shift operands to have different types: when the number being shifted is a bit
     /// vector, the shift amount can be an infinite-precision integer. This rewrites such
     /// expressions so that the shift amount is a bit vector.
-    template <class T>
-    const T* rewriteShift(const T* shift) const;
+    template <class ShiftType>
+    const ShiftType* rewriteShift(const ShiftType* shift) const;
 
     /// The output of the translation.
     z3::expr result;
@@ -165,7 +165,7 @@ std::string Z3Solver::generateName(const StateVariable& var) const {
 }
 
 void Z3Solver::generateName(std::ostringstream& ostr, const StateVariable& var) const {
-    // Output the qualifier.
+    // Recurse into the parent member expression to retrieve the full name of the variable.
     if (const auto* next = var->expr->to<IR::Member>()) {
         generateName(ostr, next);
     } else {
@@ -542,8 +542,8 @@ bool Z3Translator::preorder(const IR::Cmpl* op) { return recurseUnary(op, z3::op
 
 bool Z3Translator::preorder(const IR::LNot* op) { return recurseUnary(op, z3::operator!); }
 
-template <class T>
-const T* Z3Translator::rewriteShift(const T* shift) const {
+template <class ShiftType>
+const ShiftType* Z3Translator::rewriteShift(const ShiftType* shift) const {
     BUG_CHECK(shift->template is<IR::Shl>() || shift->template is<IR::Shr>(),
               "Not a shift operation: %1%", shift);
 
@@ -562,7 +562,7 @@ const T* Z3Translator::rewriteShift(const T* shift) const {
     BUG_CHECK(shiftAmount, "Shift amount is not a compile-time known constant: %1%", right);
     const auto* newShiftAmount = IRUtils::getConstant(left->type, shiftAmount->value);
 
-    return new T(shift->type, left, newShiftAmount);
+    return new ShiftType(shift->type, left, newShiftAmount);
 }
 
 /// general functon for unary operations

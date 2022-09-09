@@ -12,10 +12,15 @@
 
 namespace P4Tools {
 
-const IR::StringLiteral Taint::taintedStringLiteral = IR::StringLiteral(cstring("Taint"));
+const IR::StringLiteral Taint::TAINTED_STRING_LITERAL = IR::StringLiteral(cstring("Taint"));
 
-void getTaintPairs(const SymbolicMapType& varMap, const IR::Expression* expr,
-                   std::vector<std::pair<int, int>>* taintedRanges, int index) {
+/// For a given expression, this function computes the intervals of that expression that are
+/// tainted. For example, for the expression (8w2 ++ taint<8>), the interval [7;0] will have taint.
+/// @param index is used to compute the offset from the original input expression when recursing.
+/// For example, an expression such as (8w2 ++ taint<8> ++ taint<8>)[19:12] will compute that the
+/// intervals [[4:0]] are tainted.
+static void getTaintIntervals(const SymbolicMapType& varMap, const IR::Expression* expr,
+                              std::vector<std::pair<int, int>>* taintedRanges, int index) {
     CHECK_NULL(expr);
     if (const auto* member = expr->to<IR::Member>()) {
         if (SymbolicEnv::isSymbolicValue(member)) {
@@ -32,9 +37,9 @@ void getTaintPairs(const SymbolicMapType& varMap, const IR::Expression* expr,
 
     if (const auto* concatExpr = expr->to<IR::Concat>()) {
         const auto* leftExpr = concatExpr->left;
-        getTaintPairs(varMap, leftExpr, taintedRanges, index);
-        getTaintPairs(varMap, concatExpr->right, taintedRanges,
-                      index - leftExpr->type->width_bits());
+        getTaintIntervals(varMap, leftExpr, taintedRanges, index);
+        getTaintIntervals(varMap, concatExpr->right, taintedRanges,
+                          index - leftExpr->type->width_bits());
         return;
     }
     if (const auto* slice = expr->to<IR::Slice>()) {
@@ -43,7 +48,7 @@ void getTaintPairs(const SymbolicMapType& varMap, const IR::Expression* expr,
         // When we hit a concat, we need to decide whether taint is within the range of the slice.
         // We collect all the taint ranges within the concat.
         std::vector<std::pair<int, int>> taintedSubRanges;
-        getTaintPairs(varMap, slice->e0, &taintedSubRanges, slice->e0->type->width_bits());
+        getTaintIntervals(varMap, slice->e0, &taintedSubRanges, slice->e0->type->width_bits());
         // We iterate through these ranges and check whether the slice is within a tainted
         // range. If this is the case, we return taint.
         for (const auto& taintRange : taintedSubRanges) {
@@ -60,12 +65,12 @@ void getTaintPairs(const SymbolicMapType& varMap, const IR::Expression* expr,
         return;
     }
     if (const auto* binaryExpr = expr->to<IR::Operation_Binary>()) {
-        getTaintPairs(varMap, binaryExpr->left, taintedRanges, index);
-        getTaintPairs(varMap, binaryExpr->right, taintedRanges, index);
+        getTaintIntervals(varMap, binaryExpr->left, taintedRanges, index);
+        getTaintIntervals(varMap, binaryExpr->right, taintedRanges, index);
         return;
     }
     if (const auto* unaryExpr = expr->to<IR::Operation_Unary>()) {
-        getTaintPairs(varMap, unaryExpr->expr, taintedRanges, index);
+        getTaintIntervals(varMap, unaryExpr->expr, taintedRanges, index);
         return;
     }
     if (expr->is<IR::Literal>()) {
@@ -120,7 +125,7 @@ bool Taint::hasTaint(const SymbolicMapType& varMap, const IR::Expression* expr) 
         auto slRightInt = slice->e2->checkedTo<IR::Constant>()->asInt();
         // We collect all the taint ranges within the concat.
         std::vector<std::pair<int, int>> taintedRanges;
-        getTaintPairs(varMap, slice->e0, &taintedRanges, slice->e0->type->width_bits());
+        getTaintIntervals(varMap, slice->e0, &taintedRanges, slice->e0->type->width_bits());
         // We iterate through these ranges and check whether the slice is within a tainted
         // range. If this is the case, we return taint.
         for (const auto& taintRange : taintedRanges) {

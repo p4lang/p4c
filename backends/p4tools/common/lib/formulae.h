@@ -79,38 +79,6 @@ class StateVariable : private AbstractRepCheckedNode<StateVariable, IR::Member> 
     StateVariable(const IR::Expression* expr);  // NOLINT(runtime/explicit)
 };
 
-class ConcolicVariable : private AbstractRepCheckedNode<ConcolicVariable, IR::Member> {
- private:
-    /// Multiple concolic variables may be associated with a particular function call instance.
-    const IR::MethodCallExpression* call;
-
-    /// Instances IDs are used to distinguish multiple concolic variables emerging from the same
-    /// call.
-    uint64_t instanceId;
-
- public:
-    /// Determines whether @expr can represent a ConcolicVariable.
-    static bool repOk(const IR::Expression* expr);
-
-    // Implicit conversions.
-    using AbstractRepCheckedNode::operator const IR::Member*;
-    using AbstractRepCheckedNode::operator*;
-    using AbstractRepCheckedNode::operator->;
-
-    // Implements comparisons so that ConcolicVariables can be used as map keys.
-    bool operator<(const ConcolicVariable& other) const;
-    bool operator==(const ConcolicVariable& other) const;
-
-    /// @returns the concolic method call associated with this variable.
-    const IR::MethodCallExpression* getCall() const;
-
-    /// @returns the instance ID of this particular variable
-    uint64_t getInstanceId() const;
-
-    explicit ConcolicVariable(const IR::Expression* expr, const IR::MethodCallExpression* call,
-                              uint64_t instanceId);
-};
-
 /// Represents a constraint that can be shipped to and asserted within a solver.
 // TODO: This should implement AbstractRepCheckedNode<Constraint>.
 using Constraint = IR::Expression;

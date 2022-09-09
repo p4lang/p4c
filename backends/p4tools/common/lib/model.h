@@ -22,10 +22,14 @@ class Model : public SymbolicMapType {
     // Maps an expression to its value in the model.
     using ExpressionMap = std::map<const IR::Expression*, const IR::Literal*>;
 
-    /// Completes the model with the variables in the given expression.
+    /// Completes the model with the variables in the given expression. A variable needs to be
+    /// completed if it is not present in the model computed by the solver that produced the model.
+    /// This typically happens when a variable is not needed to solve a set of constraints.
     void complete(const IR::Expression* expr);
 
-    /// Completes the model with the variables in the given list of expressions.
+    /// Completes the model with the variables in the given list of expressions. A variable needs to
+    /// be completed if it is not present in the model computed by the solver that produced the
+    /// model. This typically happens when a variable is not needed to solve a set of constraints.
     void complete(const SymbolicMapType& inputMap);
 
     /// Adds the given set of variables to the model (if they do not exist already).

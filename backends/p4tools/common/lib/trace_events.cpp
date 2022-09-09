@@ -90,17 +90,17 @@ const TraceEvent::ListExpression* TraceEvent::ListExpression::apply(Transform& v
 void TraceEvent::ListExpression::complete(Model* model) const { model->complete(value); }
 
 const TraceEvent::ListExpression* TraceEvent::ListExpression::evaluate(const Model& model) const {
-    IR::Vector<IR::Expression> evalutedExpressions;
+    IR::Vector<IR::Expression> evaluatedExpressions;
     for (const auto* component : value->components) {
         BUG_CHECK(!component->is<IR::ListExpression>(),
                   "Nested ListExpressions are currently not supported.");
         if (Taint::hasTaint(model, component)) {
-            evalutedExpressions.push_back(&Taint::taintedStringLiteral);
+            evaluatedExpressions.push_back(&Taint::taintedStringLiteral);
         } else {
-            evalutedExpressions.push_back(model.evaluate(component));
+            evaluatedExpressions.push_back(model.evaluate(component));
         }
     }
-    return new ListExpression(new IR::ListExpression(evalutedExpressions), label);
+    return new ListExpression(new IR::ListExpression(evaluatedExpressions), label);
 }
 
 void TraceEvent::ListExpression::print(std::ostream& os) const {

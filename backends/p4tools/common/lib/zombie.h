@@ -7,6 +7,9 @@
 
 namespace P4Tools {
 
+/// Zombies are variables internal to P4Tools. They are variables that do not exist in the P4
+/// program itself, but are generated and added to the environment by the P4Tools tooling. These
+/// variables are also used for SMT solvers as symbolic variables.
 class Zombie {
  private:
     /// The name of the top-level struct containing all zombie state.

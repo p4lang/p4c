@@ -19,7 +19,7 @@ class Taint {
                                              const IR::Expression* programPacket);
 
     /// @returns a expression in which taint has been propagated upwards. At the end, this will
-    /// either return a literal, a member/pathexpression, or a concatenation. Any non-tainted
+    /// either return a literal, a Member/PathExpression, or a concatenation. Any non-tainted
     /// variable is replaced with a zero constant. This function is used for the generation of taint
     /// masks.
     static const IR::Expression* propagateTaint(const SymbolicMapType& varMap,

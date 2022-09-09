@@ -42,9 +42,11 @@ int main(int argc, char** argv) {
 
                 case P4Tools::MUTATE:
                     std::cerr << "Mutate is not implemented yet." << std::endl;
+                    return 1;
 
                 case P4Tools::SMITH:
                     std::cerr << "Smith is not implemented yet." << std::endl;
+                    return 1;
 
                 default:
                     std::cerr << "Unknown or unimplemented command: \"" << command << "\"."
