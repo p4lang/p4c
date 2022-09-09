@@ -3117,8 +3117,9 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         if (member == IR::Type_Stack::next ||
             member == IR::Type_Stack::last) {
             if (parser == nullptr) {
-                typeError("%1%: 'last' and 'next' for stacks can only be used in a parser",
-                          expression);
+                typeError(
+                    "%1%: 'last', and 'next' for stacks can only be used in a parser",
+                    expression);
                 return expression;
             }
             auto stack = type->to<IR::Type_Stack>();
@@ -3134,6 +3135,12 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             setType(expression, IR::Type_Bits::get(32));
             return expression;
         } else if (member == IR::Type_Stack::lastIndex) {
+            if (parser == nullptr) {
+                typeError(
+                    "%1%: 'lastIndex' for stacks can only be used in a parser",
+                    expression);
+                return expression;
+            }
             setType(getOriginal(), IR::Type_Bits::get(32, false));
             setType(expression, IR::Type_Bits::get(32, false));
             return expression;
