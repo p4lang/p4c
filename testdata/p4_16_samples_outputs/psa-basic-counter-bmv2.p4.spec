@@ -32,6 +32,8 @@ struct metadata_t {
 	bit<32> psa_ingress_output_metadata_multicast_group
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<48> Ingress_tmp
+	bit<48> Ingress_tmp_0
+	bit<48> Ingress_tmp_1
 }
 metadata instanceof metadata_t
 
@@ -61,7 +63,11 @@ apply {
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
 	mov m.Ingress_tmp h.ethernet.dstAddr
 	and m.Ingress_tmp 0xffffffff
-	mov m.psa_ingress_output_metadata_egress_port m.Ingress_tmp
+	mov m.Ingress_tmp_0 m.Ingress_tmp
+	and m.Ingress_tmp_0 0xffffffff
+	mov m.Ingress_tmp_1 m.Ingress_tmp_0
+	and m.Ingress_tmp_1 0xffffffff
+	mov m.psa_ingress_output_metadata_egress_port m.Ingress_tmp_1
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet

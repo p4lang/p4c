@@ -38,7 +38,11 @@ struct metadata_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_multicast_group
 	bit<32> psa_ingress_output_metadata_egress_port
+	bit<48> Ingress_tmp
 	bit<48> Ingress_tmp_0
+	bit<48> Ingress_tmp_2
+	bit<48> Ingress_tmp_3
+	bit<48> Ingress_tmp_4
 	bit<32> Ingress_int_packet_path
 }
 metadata instanceof metadata_t
@@ -51,13 +55,21 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	extract h.output_data
-	jmplt LABEL_FALSE h.ethernet.dstAddr 0x4
+	mov m.Ingress_tmp h.ethernet.dstAddr
+	and m.Ingress_tmp 0xf
+	mov m.Ingress_tmp_0 m.Ingress_tmp
+	and m.Ingress_tmp_0 0xf
+	jmplt LABEL_FALSE m.Ingress_tmp_0 0x4
 	mov h.output_data.word1 m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
-	mov m.Ingress_tmp_0 h.ethernet.dstAddr
-	and m.Ingress_tmp_0 0xffffffff
-	mov m.psa_ingress_output_metadata_egress_port m.Ingress_tmp_0
+	mov m.Ingress_tmp_2 h.ethernet.dstAddr
+	and m.Ingress_tmp_2 0xffffffff
+	mov m.Ingress_tmp_3 m.Ingress_tmp_2
+	and m.Ingress_tmp_3 0xffffffff
+	mov m.Ingress_tmp_4 m.Ingress_tmp_3
+	and m.Ingress_tmp_4 0xffffffff
+	mov m.psa_ingress_output_metadata_egress_port m.Ingress_tmp_4
 	jmp LABEL_END
 	LABEL_FALSE :	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
