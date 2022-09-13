@@ -231,6 +231,18 @@ using namespace P4;
 %token<Token>      QUESTION "?"
 %token<Token>      DOT "."
 %token<Token>      ASSIGN "="
+%token<Token>      ASSIGN_PLUS "+="
+%token<Token>      ASSIGN_MINUS "-="
+%token<Token>      ASSIGN_MUL "*="
+%token<Token>      ASSIGN_DIV "/="
+%token<Token>      ASSIGN_MOD "%="
+%token<Token>      ASSIGN_BIT_AND "&="
+%token<Token>      ASSIGN_BIT_OR "|="
+%token<Token>      ASSIGN_XOR "^="
+%token<Token>      ASSIGN_SHL "<<="
+%token<Token>      ASSIGN_SHR ">>="
+%token<Token>      ASSIGN_PLUS_SAT "|+|="
+%token<Token>      ASSIGN_MINUS_SAT "|-|="
 %token<Token>      SEMICOLON ";"
 %token<Token>      AT "@"
 %token<Token>      PP "++"
@@ -1270,32 +1282,32 @@ assignmentOrMethodCallStatementWithoutSemicolon
     | lvalue "=" expression
         { $$ = new IR::AssignmentStatement(@2, $1, $3); }
 
-    | lvalue "*" "=" expression
-        { $$ = new IR::MulAssign(@2+@3, $1, $4); }
-    | lvalue "/" "=" expression
-        { $$ = new IR::DivAssign(@2+@3, $1, $4); }
-    | lvalue "%" "=" expression
-        { $$ = new IR::ModAssign(@2+@3, $1, $4); }
-    | lvalue "+" "=" expression
-        { $$ = new IR::AddAssign(@2+@3, $1, $4); }
-    | lvalue "-" "=" expression
-        { $$ = new IR::SubAssign(@2+@3, $1, $4); }
-    | lvalue "|+|" "=" expression
-        { $$ = new IR::AddSatAssign(@2+@3, $1, $4); }
-    | lvalue "|-|" "=" expression
-        { $$ = new IR::SubSatAssign(@2+@3, $1, $4); }
-    | lvalue "<<" "=" expression
-        { $$ = new IR::ShlAssign(@2+@3, $1, $4); }
-    | lvalue R_ANGLE_SHIFT ">" "=" expression
-        { $$ = new IR::ShrAssign(@2+@4, $1, $5); }
+    | lvalue "*=" expression
+        { $$ = new IR::MulAssign(@2, $1, $3); }
+    | lvalue "/=" expression
+        { $$ = new IR::DivAssign(@2, $1, $3); }
+    | lvalue "%=" expression
+        { $$ = new IR::ModAssign(@2, $1, $3); }
+    | lvalue "+=" expression
+        { $$ = new IR::AddAssign(@2, $1, $3); }
+    | lvalue "-=" expression
+        { $$ = new IR::SubAssign(@2, $1, $3); }
+    | lvalue "|+|=" expression
+        { $$ = new IR::AddSatAssign(@2, $1, $3); }
+    | lvalue "|-|=" expression
+        { $$ = new IR::SubSatAssign(@2, $1, $3); }
+    | lvalue "<<=" expression
+        { $$ = new IR::ShlAssign(@2, $1, $3); }
+    | lvalue ">>=" expression
+        { $$ = new IR::ShrAssign(@2, $1, $3); }
     | lvalue R_ANGLE_SHIFT ">=" expression
         { $$ = new IR::ShrAssign(@2+@3, $1, $4); }
-    | lvalue "&" "=" expression
-        { $$ = new IR::BAndAssign(@2+@3, $1, $4); }
-    | lvalue "|" "=" expression
-        { $$ = new IR::BOrAssign(@2+@3, $1, $4); }
-    | lvalue "^" "=" expression
-        { $$ = new IR::BXorAssign(@2+@3, $1, $4); }
+    | lvalue "&=" expression
+        { $$ = new IR::BAndAssign(@2, $1, $3); }
+    | lvalue "|=" expression
+        { $$ = new IR::BOrAssign(@2, $1, $3); }
+    | lvalue "^=" expression
+        { $$ = new IR::BXorAssign(@2, $1, $3); }
     ;
 
 emptyStatement
