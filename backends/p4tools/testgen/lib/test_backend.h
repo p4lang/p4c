@@ -41,19 +41,12 @@ class TestBackEnd {
     /// The current test count. If it exceeds @var maxTests, the symbolic executor will stop.
     int testCount = 0;
 
-    /// Set of all statements in the input P4 program.
-    Coverage::CoverageSet allStatements;
-
-    /// Set of all statements executed in any testcase that has been outputted.
-    Coverage::CoverageSet visitedStatements;
-
     explicit TestBackEnd(const ProgramInfo& programInfo, ExplorationStrategy& symbex)
         : programInfo(programInfo), symbex(symbex), maxTests(TestgenOptions::get().maxTests) {
         // If we select a specific branch, the number of tests should be 1.
         if (!TestgenOptions::get().selectedBranches.empty()) {
             maxTests = 1;
         }
-        programInfo.program->apply(Coverage::CollectStatements(allStatements));
     }
 
  public:

@@ -59,7 +59,7 @@ void TraceEvent::Expression::complete(Model* model) const { model->complete(valu
 
 const TraceEvent::Expression* TraceEvent::Expression::evaluate(const Model& model) const {
     if (Taint::hasTaint(model, value)) {
-        return new Expression(&Taint::taintedStringLiteral, label);
+        return new Expression(&Taint::TAINTED_STRING_LITERAL, label);
     }
     return new Expression(model.evaluate(value), label);
 }
@@ -95,7 +95,7 @@ const TraceEvent::ListExpression* TraceEvent::ListExpression::evaluate(const Mod
         BUG_CHECK(!component->is<IR::ListExpression>(),
                   "Nested ListExpressions are currently not supported.");
         if (Taint::hasTaint(model, component)) {
-            evaluatedExpressions.push_back(&Taint::taintedStringLiteral);
+            evaluatedExpressions.push_back(&Taint::TAINTED_STRING_LITERAL);
         } else {
             evaluatedExpressions.push_back(model.evaluate(component));
         }
@@ -147,7 +147,7 @@ const TraceEvent::PreEvalExpression* TraceEvent::PreEvalExpression::evaluate(
     const Model& model) const {
     const IR::Literal* evaluatedPostVal = nullptr;
     if (Taint::hasTaint(model, postEvalVal)) {
-        evaluatedPostVal = &Taint::taintedStringLiteral;
+        evaluatedPostVal = &Taint::TAINTED_STRING_LITERAL;
     } else {
         evaluatedPostVal = model.evaluate(postEvalVal);
     }
@@ -188,7 +188,7 @@ void TraceEvent::Extract::complete(Model* model) const { model->complete(value);
 
 const TraceEvent::Extract* TraceEvent::Extract::evaluate(const Model& model) const {
     if (Taint::hasTaint(model, value)) {
-        return new Extract(fieldRef, &Taint::taintedStringLiteral, label);
+        return new Extract(fieldRef, &Taint::TAINTED_STRING_LITERAL, label);
     }
     return new Extract(fieldRef, model.evaluate(value), label);
 }
@@ -219,7 +219,7 @@ void TraceEvent::Emit::complete(Model* model) const { model->complete(value); }
 
 const TraceEvent::Emit* TraceEvent::Emit::evaluate(const Model& model) const {
     if (Taint::hasTaint(model, value)) {
-        return new Emit(fieldRef, &Taint::taintedStringLiteral, label);
+        return new Emit(fieldRef, &Taint::TAINTED_STRING_LITERAL, label);
     }
     return new Emit(fieldRef, model.evaluate(value), label);
 }
@@ -251,7 +251,7 @@ void TraceEvent::Packet::complete(Model* model) const { model->complete(packetVa
 
 const TraceEvent::Packet* TraceEvent::Packet::evaluate(const Model& model) const {
     if (Taint::hasTaint(model, packetValue)) {
-        return new Packet(direction, &Taint::taintedStringLiteral, label);
+        return new Packet(direction, &Taint::TAINTED_STRING_LITERAL, label);
     }
     return new Packet(direction, model.evaluate(packetValue), label);
 }

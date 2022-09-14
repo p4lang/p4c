@@ -100,23 +100,31 @@ const TestSpec* Bmv2TestBackend::createTestSpec(const ExecutionState* executionS
         const auto* const tableConfig = uninterpretedTableConfig->evaluate(*completedModel);
         testSpec->addTestObject("tables", tableName, tableConfig);
     }
-    // TODO: Move this to target specific test specification.
+
     const auto actionProfiles = executionState->getTestObjectCategory("action_profile");
     for (const auto& testObject : actionProfiles) {
         const auto profileName = testObject.first;
-        const auto* actionProfile = testObject.second->checkedTo<ActionProfile>();
+        const auto* actionProfile = testObject.second->checkedTo<Bmv2_V1ModelActionProfile>();
         const auto* evaluatedProfile = actionProfile->evaluate(*completedModel);
         testSpec->addTestObject("action_profiles", profileName, evaluatedProfile);
     }
 
-    // TODO: Move this to target specific test specification.
     const auto actionSelectors = executionState->getTestObjectCategory("action_selector");
     for (const auto& testObject : actionSelectors) {
         const auto selectorName = testObject.first;
-        const auto* actionSelector = testObject.second->checkedTo<ActionSelector>();
+        const auto* actionSelector = testObject.second->checkedTo<Bmv2_V1ModelActionSelector>();
         const auto* evaluatedSelector = actionSelector->evaluate(*completedModel);
         testSpec->addTestObject("action_selectors", selectorName, evaluatedSelector);
     }
+
+    const auto cloneInfos = executionState->getTestObjectCategory("clone_infos");
+    for (const auto& testObject : cloneInfos) {
+        const auto sessionId = testObject.first;
+        const auto* cloneInfo = testObject.second->checkedTo<Bmv2_CloneInfo>();
+        const auto* evaluatedInfo = cloneInfo->evaluate(*completedModel);
+        testSpec->addTestObject("clone_infos", sessionId, evaluatedInfo);
+    }
+
     return testSpec;
 }
 

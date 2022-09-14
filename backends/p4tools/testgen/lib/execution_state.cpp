@@ -494,8 +494,8 @@ const StateVariable& ExecutionState::createZombieConst(const IR::Type* type, cst
     // The zombie already existed, check its type.
     if (!result.second) {
         BUG_CHECK((*result.first)->type == type,
-                  "Inconsistent types for zombie variable %1%: previously %2%, but now %3%", zombie,
-                  (*result.first)->type, type);
+                  "Inconsistent types for zombie variable %1%: previously %2%, but now %3%",
+                  zombie->toString(), (*result.first)->type, type);
     }
     return zombie;
 }

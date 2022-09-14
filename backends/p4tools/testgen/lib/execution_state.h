@@ -215,7 +215,7 @@ class ExecutionState {
             auto val = iterator->second;
             auto* resolvedVal = boost::relaxed_get<T>(&val);
             if (resolvedVal == nullptr) {
-                BUG("Expected property value type does not correspond to value type stored in the"
+                BUG("Expected property value type does not correspond to value type stored in the "
                     "property map.");
             }
             return *resolvedVal;

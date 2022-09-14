@@ -18,7 +18,19 @@ namespace Bmv2 {
 
 class BMv2_V1ModelExprStepper : public ExprStepper {
  protected:
-    std::string getClassName() override { return "BMv2_V1ModelExprStepper"; }
+    std::string getClassName() override;
+
+ private:
+    // Helper function that checks whether the given structure filed has a 'field_list' annotation
+    // and the recirculate index matches. @returns true if that is the case.
+    static bool isPartOfFieldList(const IR::StructField* field, uint64_t recirculateIndex);
+
+    /// This is a utility function for recirculation externs. This function resets all the values
+    /// associated with @ref unless a value contained in the Type_StructLike type of ref has an
+    /// annotation associated with it. If the annotation index matches @param recirculateIndex, the
+    /// reference is not reset.
+    void resetPreservingFieldList(ExecutionState* nextState, const IR::PathExpression* ref,
+                                  uint64_t recirculateIndex) const;
 
  public:
     BMv2_V1ModelExprStepper(ExecutionState& state, AbstractSolver& solver,

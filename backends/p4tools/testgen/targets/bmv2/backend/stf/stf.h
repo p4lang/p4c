@@ -11,8 +11,8 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-#include "backends/p4tools/testgen/lib/test_spec.h"
 #include "backends/p4tools/testgen/lib/tf.h"
+#include "backends/p4tools/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools {
 
@@ -185,12 +185,29 @@ class STFTest {
 /// Extracts information from the @testSpec to assemble STF commands.
 class STF : public TF {
  private:
+    // Print all the control plane table configurations necessary for this test.
     static void add(std::ofstream& out, const TestSpec* testSpec);
+
+    // Print the "packet" command with the associated packet. This is the input packet at port X.
     static void packet(std::ofstream& out, const TestSpec* testSpec);
+
+    // Print the "expect" command with the associated packet.
+    // This represents the expected output packets at ports X, Y. Z.
     static void expect(std::ofstream& out, const TestSpec* testSpec);
+
+    // Print the wait command.
     static void wait(std::ofstream& out);
+
+    // Print additional utility comments.
     static void comment(std::ofstream& out, cstring message);
+
+    // Print the traces collected in the system.
     static void trace(std::ofstream& out, const TestSpec* testSpec);
+
+    // Print the configuration for a cloned packet configuration. This typically produces two expect
+    // calls, one of the expect calls will only expect a packet on a port.
+    static void clone(std::ofstream& stfFile, const TestSpec* testSpec,
+                      const std::map<cstring, const TestObject*>& cloneInfos);
 
  public:
     STF(cstring testName, boost::optional<unsigned int> seed);

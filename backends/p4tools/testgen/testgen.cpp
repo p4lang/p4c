@@ -18,6 +18,7 @@
 #include "lib/error.h"
 
 #include "backends/p4tools/testgen/core/exploration_strategy/exploration_strategy.h"
+#include "backends/p4tools/testgen/core/exploration_strategy/incremental_max_coverage_stack.h"
 #include "backends/p4tools/testgen/core/exploration_strategy/incremental_stack.h"
 #include "backends/p4tools/testgen/core/exploration_strategy/linear_enumeration.h"
 #include "backends/p4tools/testgen/core/exploration_strategy/random_access_stack.h"
@@ -81,17 +82,24 @@ int Testgen::mainImpl(const IR::P4Program* program) {
     Z3Solver solver;
 
     auto symExec = [&solver, &programInfo, seed]() -> ExplorationStrategy* {
-        if (TestgenOptions::get().popLevel > 1) {
-            return new RandomAccessStack(solver, *programInfo, seed,
-                                         TestgenOptions::get().popLevel);
+        std::string explorationStrategy = TestgenOptions::get().explorationStrategy;
+        if (explorationStrategy.compare("randomAccessStack") == 0) {
+            int popLevel =
+                (TestgenOptions::get().popLevel > 1) ? TestgenOptions::get().popLevel : 3;
+            return new RandomAccessStack(solver, *programInfo, seed, popLevel);
+        }
+        if (explorationStrategy.compare("linearEnumeration") == 0) {
+            int linearBound = (TestgenOptions::get().linearEnumeration > 1)
+                                  ? TestgenOptions::get().linearEnumeration
+                                  : 2;
+            return new LinearEnumeration(solver, *programInfo, seed, linearBound);
+        }
+        if (explorationStrategy.compare("maxCoverage") == 0) {
+            return new IncrementalMaxCoverageStack(solver, *programInfo, seed);
         }
         if (!TestgenOptions::get().selectedBranches.empty()) {
             std::string selectedBranchesStr = TestgenOptions::get().selectedBranches;
             return new SelectedBranches(solver, *programInfo, seed, selectedBranchesStr);
-        }
-        if (TestgenOptions::get().linearEnumeration > 1) {
-            return new LinearEnumeration(solver, *programInfo, seed,
-                                         TestgenOptions::get().linearEnumeration);
         }
         return new IncrementalStack(solver, *programInfo, seed);
     }();

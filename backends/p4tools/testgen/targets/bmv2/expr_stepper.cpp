@@ -25,6 +25,7 @@
 #include "backends/p4tools/testgen/lib/exceptions.h"
 #include "backends/p4tools/testgen/lib/execution_state.h"
 #include "backends/p4tools/testgen/lib/test_spec.h"
+#include "backends/p4tools/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/testgen/targets/bmv2/table_stepper.h"
 #include "backends/p4tools/testgen/targets/bmv2/target.h"
 #include "backends/p4tools/testgen/targets/bmv2/test_spec.h"
@@ -34,6 +35,48 @@ namespace P4Tools {
 namespace P4Testgen {
 
 namespace Bmv2 {
+
+std::string BMv2_V1ModelExprStepper::getClassName() { return "BMv2_V1ModelExprStepper"; }
+
+bool BMv2_V1ModelExprStepper::isPartOfFieldList(const IR::StructField* field,
+                                                uint64_t recirculateIndex) {
+    // Check whether the field has a "field_list" annotation associated with it.
+    const auto* annotation = field->getAnnotation("field_list");
+    if (annotation != nullptr) {
+        // Grab the index of the annotation.
+        auto annoExprs = annotation->expr;
+        auto annoExprSize = annoExprs.size();
+        BUG_CHECK(annoExprSize == 1,
+                  "The field list annotation should only have one member. Has %1%.", annoExprSize);
+        auto annoVal = annoExprs.at(0)->checkedTo<IR::Constant>()->asUint64();
+        // If the indices match of this particular annotation, skip resetting.
+        if (annoVal == recirculateIndex) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void BMv2_V1ModelExprStepper::resetPreservingFieldList(ExecutionState* nextState,
+                                                       const IR::PathExpression* ref,
+                                                       uint64_t recirculateIndex) const {
+    auto progInfo = getProgramInfo().to<BMv2_V1ModelProgramInfo>();
+    const auto* ts = ref->type->checkedTo<IR::Type_StructLike>();
+    for (const auto* field : ts->fields) {
+        // Check whether the field has a "field_list" annotation associated with it.
+        if (isPartOfFieldList(field, recirculateIndex)) {
+            continue;
+        }
+        // If there is no annotation, reset the user metadata.
+        const auto* fieldType = field->type;
+        if (const auto* tn = fieldType->to<IR::Type_Name>()) {
+            fieldType = nextState->resolveType(tn);
+        }
+        auto* fieldLabel = new IR::Member(fieldType, ref, field->name);
+        // Reset the variable.
+        setTargetUninitialized(nextState, fieldLabel, false);
+    }
+}
 
 BMv2_V1ModelExprStepper::BMv2_V1ModelExprStepper(ExecutionState& state, AbstractSolver& solver,
                                                  const ProgramInfo& programInfo)
@@ -746,13 +789,147 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          * ====================================================================================== */
         {"*method.clone_preserving_field_list",
          {"type", "session", "data"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             ::warning("clone_preserving_field_list not fully implemented.");
-             auto* nextState = new ExecutionState(state);
-             nextState->popBody();
-             result->emplace_back(nextState);
+         [this](const IR::MethodCallExpression* call, const IR::Expression* /*receiver*/,
+                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
+                const ExecutionState& state, SmallStepEvaluator::Result& result) {
+             uint64_t recirculateCount = 0;
+             // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
+             // infinite recirculation loops.
+             if (state.hasProperty("recirculate_count")) {
+                 recirculateCount = state.getProperty<uint64_t>("recirculate_count");
+                 if (recirculateCount > 1) {
+                     auto* nextState = new ExecutionState(state);
+                     ::warning("Only single recirculation supported for now. Dropping packet.");
+                     auto* dropStmt = new IR::MethodCallStatement(
+                         IRUtils::generateInternalMethodCall("drop_and_exit", {}));
+                     nextState->replaceTopBody(dropStmt);
+                     result->emplace_back(nextState);
+                     return;
+                 }
+             }
+             bool argsAreTainted = false;
+             for (size_t idx = 0; idx < args->size(); ++idx) {
+                 const auto* arg = args->at(idx);
+                 const auto* argExpr = arg->expression;
+
+                 // TODO: Frontload this in the expression stepper for method call expressions.
+                 if (!SymbolicEnv::isSymbolicValue(argExpr)) {
+                     // Evaluate the condition.
+                     stepToSubexpr(argExpr, result, state,
+                                   [call, idx](const Continuation::Parameter* v) {
+                                       auto* clonedCall = call->clone();
+                                       auto* arguments = clonedCall->arguments->clone();
+                                       auto* arg = arguments->at(idx)->clone();
+                                       arg->expression = v->param;
+                                       (*arguments)[idx] = arg;
+                                       clonedCall->arguments = arguments;
+                                       return Continuation::Return(clonedCall);
+                                   });
+                     return;
+                 }
+                 argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
+             }
+             // If any of the input arguments is tainted, the entire extern is unreliable.
+             if (argsAreTainted) {
+                 ::warning("clone args are tainted and not predictable. Skipping clone execution.");
+                 auto* nextState = new ExecutionState(state);
+                 nextState->popBody();
+                 result->emplace_back(nextState);
+                 return;
+             }
+
+             auto cloneType = args->at(0)->expression->checkedTo<IR::Constant>()->asUint64();
+             const auto* sessionIdExpr = args->at(1)->expression;
+             auto recirculateIndex = args->at(2)->expression->checkedTo<IR::Constant>()->asUint64();
+             boost::optional<const Constraint*> cond = boost::none;
+
+             if (cloneType == BMv2Constants::CLONE_TYPE_I2E) {
+                 // Pick a clone port var. For now, pick a random value from 0-511.
+                 const auto* rndConst =
+                     IRUtils::getRandConstantForWidth(TestgenTarget::getPortNumWidth_bits());
+                 const auto* clonePortVar = rndConst;
+                 // clone_preserving_field_list has a default state where the packet continues as
+                 // is.
+                 {
+                     auto* defaultState = new ExecutionState(state);
+                     const auto* cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, false);
+                     defaultState->addTestObject(
+                         "clone_infos", std::to_string(sessionIdExpr->clone_id), cloneInfo);
+                     defaultState->popBody();
+                     result->emplace_back(cond, state, defaultState);
+                 }
+                 // This is the clone state.
+                 auto* nextState = new ExecutionState(state);
+
+                 // This program segment resets the user metadata of the v1model program to 0.
+                 // However, fields in the user metadata that have the field_list annotation and the
+                 // appropriate index will not be reset.
+                 auto progInfo = getProgramInfo().to<BMv2_V1ModelProgramInfo>();
+                 // The user metadata is the second parameter of the ingress control.
+                 const auto* paramPath = progInfo.getBlockParam("Ingress", 1);
+                 resetPreservingFieldList(nextState, paramPath, recirculateIndex);
+
+                 // We need to reset everything to the state before the ingress call. We use a trick
+                 // by calling copyIn on the entire state again. We need a little bit of information
+                 // for that, including the exact parameter names of the ingress block we are in.
+                 // Just grab the ingress from the programmable blocks.
+                 const auto* programmableBlocks = progInfo.getProgrammableBlocks();
+                 const auto* typeDecl = programmableBlocks->at("Ingress");
+                 const auto* applyBlock = typeDecl->checkedTo<IR::P4Control>();
+                 const auto* params = applyBlock->getApplyParameters();
+                 auto blockIndex = 2;
+                 const auto* archSpec = TestgenTarget::getArchSpec();
+                 const auto* archMember = archSpec->getArchMember(blockIndex);
+                 std::vector<Continuation::Command> cmds;
+                 for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
+                     // Skip the second parameter (metadata) since we do want to preserve it.
+                     if (paramIdx == 1) {
+                         continue;
+                     }
+                     const auto* param = params->getParameter(paramIdx);
+                     programInfo.produceCopyInOutCall(param, paramIdx, archMember, &cmds, nullptr);
+                 }
+                 // We then exit, which will copy out all the state that we have just reset.
+                 cmds.emplace_back(new IR::ExitStatement());
+
+                 const auto* cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, true);
+                 nextState->addTestObject("clone_infos", std::to_string(sessionIdExpr->clone_id),
+                                          cloneInfo);
+                 // Reset the packet buffer, which corresponds to the output packet.
+                 nextState->resetPacketBuffer();
+                 const auto* bitType = IRUtils::getBitType(32);
+                 const auto* instanceTypeVar = new IR::Member(
+                     bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
+                 nextState->set(
+                     instanceTypeVar,
+                     IRUtils::getConstant(bitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
+                 nextState->replaceTopBody(&cmds);
+                 result->emplace_back(cond, state, nextState);
+                 return;
+             }
+
+             if (cloneType == BMv2Constants::CLONE_TYPE_E2E) {
+                 auto* nextState = new ExecutionState(state);
+                 // Increment the recirculation count.
+                 nextState->setProperty("recirculate_count", ++recirculateCount);
+                 // Recirculate is now active and "check_recirculate" will be triggered.
+                 nextState->setProperty("recirculate_active", true);
+                 // Also set clone as active, which will trigger slightly different processing.
+                 nextState->setProperty("clone_active", true);
+                 // Grab the index and save it to the execution state.
+                 nextState->setProperty("recirculate_index", recirculateIndex);
+                 // Grab the session id and save it to the execution state.
+                 nextState->setProperty("clone_session_id", sessionIdExpr);
+                 // Set the appropriate instance type, which will be processed by
+                 // "check_recirculate".
+                 nextState->setProperty("recirculate_instance_type",
+                                        BMv2Constants::PKT_INSTANCE_TYPE_EGRESS_CLONE);
+                 nextState->popBody();
+                 result->emplace_back(cond, state, nextState);
+                 return;
+             }
+
+             TESTGEN_UNIMPLEMENTED("Unsupported clone type %1%.", cloneType);
          }},
         /* ======================================================================================
          *  resubmit_preserving_field_list
@@ -819,6 +996,9 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // Resubmit actually uses the original input packet, not the deparsed packet.
              // We have to reset the packet content to the input packet in "check_recirculate".
              nextState->setProperty("recirculate_reset_pkt", true);
+             // Set the appropriate instance type, which will be processed by "check_recirculate".
+             nextState->setProperty("recirculate_instance_type",
+                                    BMv2Constants::PKT_INSTANCE_TYPE_RESUBMIT);
              nextState->popBody();
              result->emplace_back(nextState);
          }},
@@ -870,98 +1050,10 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // Grab the index and save it to the execution state.
              auto index = args->at(0)->expression->checkedTo<IR::Constant>()->asUint64();
              nextState->setProperty("recirculate_index", index);
+             // Set the appropriate instance type, which will be processed by "check_recirculate".
+             nextState->setProperty("recirculate_instance_type",
+                                    BMv2Constants::PKT_INSTANCE_TYPE_RECIRC);
              nextState->popBody();
-             result->emplace_back(nextState);
-         }},
-        /* ======================================================================================
-         *  *check_recirculate
-         * ====================================================================================== */
-        /// Helper externs that processing the parameters set by the recirculate and resubmit
-        /// externs. This extern assumes it is executed at the end of the deparser.
-        {"*.check_recirculate",
-         {},
-         [this](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             auto* nextState = new ExecutionState(state);
-
-             // Check whether recirculate is even active, if not, skip.
-             auto recirculateActive = state.hasProperty("recirculate_active") &&
-                                      state.getProperty<bool>("recirculate_active");
-             if (!recirculateActive) {
-                 nextState->popBody();
-                 result->emplace_back(nextState);
-                 return;
-             }
-             // Check whether the packet needs to be reset.
-             // If that is the case, reset the packet buffer to the calculated input packet.
-             auto recirculateReset = state.hasProperty("recirculate_reset_pkt");
-             if (recirculateReset) {
-                 // Reset the packet buffer, which corresponds to the output packet.
-                 nextState->resetPacketBuffer();
-                 // Set the packet buffer to the current calculated program packet for consistency.
-                 nextState->appendToPacketBuffer(nextState->getInputPacket());
-             }
-
-             // Get the index set by the recirculate/resubmit function. Will fail if no index is
-             // set.
-             auto recirculateIndex = nextState->getProperty<uint64_t>("recirculate_index");
-
-             // This program segment resets the user metadata of the v1model program to 0.
-             // However, fields in the user metadata that have the field_list annotation and the
-             // appropriate index will not be reset.
-             auto progInfo = getProgramInfo().to<BMv2_V1ModelProgramInfo>();
-             const auto* archSpec = TestgenTarget::getArchSpec();
-             const auto* programmableBlocks = progInfo.getProgrammableBlocks();
-             // Just grab the parser from the programmable blocks.
-             const auto* typeDecl = programmableBlocks->at("Parser");
-             const auto* archMember = archSpec->getArchMember(0);
-             const auto* blockParams = &archMember->blockParams;
-             const auto* p4parser = typeDecl->checkedTo<IR::P4Parser>();
-             const auto* params = p4parser->getApplyParameters();
-             // The user metadata is typically the second parameter.
-             const auto* param = params->getParameter(2);
-             const auto* paramType = param->type;
-             auto archRef = blockParams->at(2);
-             // We need to resolve type names.
-             if (const auto* tn = paramType->to<IR::Type_Name>()) {
-                 paramType = nextState->resolveType(tn);
-             }
-             const auto* paramPath = new IR::PathExpression(paramType, new IR::Path(archRef));
-             const auto* ts = paramType->checkedTo<IR::Type_StructLike>();
-             for (const auto* field : ts->fields) {
-                 // Check whether the field has a "field_list" annotation associated with it.
-                 const auto* annotation = field->getAnnotation("field_list");
-                 if (annotation != nullptr) {
-                     // Grab the index of the annotation.
-                     auto annoExprs = annotation->expr;
-                     auto annoExprSize = annoExprs.size();
-                     BUG_CHECK(annoExprSize == 1,
-                               "The field list annotation should only have one member. Has %1%.",
-                               annoExprSize);
-                     auto annoVal = annoExprs.at(0)->checkedTo<IR::Constant>()->asUint64();
-                     // If the indices match of this particular annotation, skip resetting.
-                     if (annoVal == recirculateIndex) {
-                         continue;
-                     }
-                 }
-                 // If there is no annotation, reset the user metadata.
-                 const auto* fieldType = field->type->getP4Type();
-                 if (const auto* tn = fieldType->to<IR::Type_Name>()) {
-                     fieldType = nextState->resolveType(tn);
-                 }
-                 auto* fieldLabel = new IR::Member(fieldType, paramPath, field->name);
-                 // Reset the variable.
-                 nextState->set(fieldLabel,
-                                programInfo.createTargetUninitialized(field->type, false));
-             }
-
-             // Set recirculate to false to avoid infinite loops.
-             nextState->setProperty("recirculate_active", false);
-             // "Recirculate" by attaching the sequence again.
-             // Do NOT attach externs or new conditions.
-             const auto* topLevelBlocks = progInfo.getPipelineSequence();
-             nextState->replaceTopBody(topLevelBlocks);
              result->emplace_back(nextState);
          }},
         /* ======================================================================================
@@ -974,13 +1066,255 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          * ====================================================================================== */
         {"*method.clone",
          {"type", "session"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             ::warning("clone not fully implemented.");
-             auto* nextState = new ExecutionState(state);
-             nextState->popBody();
-             result->emplace_back(nextState);
+         [this](const IR::MethodCallExpression* call, const IR::Expression* /*receiver*/,
+                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
+                const ExecutionState& state, SmallStepEvaluator::Result& result) {
+             uint64_t recirculateCount = 0;
+             // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
+             // infinite recirculation loops.
+             if (state.hasProperty("recirculate_count")) {
+                 recirculateCount = state.getProperty<uint64_t>("recirculate_count");
+                 if (recirculateCount > 1) {
+                     auto* nextState = new ExecutionState(state);
+                     ::warning("Only single recirculation supported for now. Dropping packet.");
+                     auto* dropStmt = new IR::MethodCallStatement(
+                         IRUtils::generateInternalMethodCall("drop_and_exit", {}));
+                     nextState->replaceTopBody(dropStmt);
+                     result->emplace_back(nextState);
+                     return;
+                 }
+             }
+             bool argsAreTainted = false;
+             for (size_t idx = 0; idx < args->size(); ++idx) {
+                 const auto* arg = args->at(idx);
+                 const auto* argExpr = arg->expression;
+
+                 // TODO: Frontload this in the expression stepper for method call expressions.
+                 if (!SymbolicEnv::isSymbolicValue(argExpr)) {
+                     // Evaluate the condition.
+                     stepToSubexpr(argExpr, result, state,
+                                   [call, idx](const Continuation::Parameter* v) {
+                                       auto* clonedCall = call->clone();
+                                       auto* arguments = clonedCall->arguments->clone();
+                                       auto* arg = arguments->at(idx)->clone();
+                                       arg->expression = v->param;
+                                       (*arguments)[idx] = arg;
+                                       clonedCall->arguments = arguments;
+                                       return Continuation::Return(clonedCall);
+                                   });
+                     return;
+                 }
+                 argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
+             }
+             // If any of the input arguments is tainted, the entire extern is unreliable.
+             if (argsAreTainted) {
+                 ::warning("clone args are tainted and not predictable. Skipping clone execution.");
+                 auto* nextState = new ExecutionState(state);
+                 nextState->popBody();
+                 result->emplace_back(nextState);
+                 return;
+             }
+
+             auto cloneType = args->at(0)->expression->checkedTo<IR::Constant>()->asUint64();
+             const auto* sessionIdExpr = args->at(1)->expression;
+             uint64_t sessionId = 0;
+             boost::optional<const Constraint*> cond = boost::none;
+
+             if (cloneType == BMv2Constants::CLONE_TYPE_I2E) {
+                 // Pick a clone port var. For now, pick a random value from 0-511.
+                 const auto* rndConst =
+                     IRUtils::getRandConstantForWidth(TestgenTarget::getPortNumWidth_bits());
+                 const auto* clonePortVar = rndConst;
+                 // clone_preserving_field_list has a default state where the packet continues as
+                 // is.
+                 {
+                     auto* defaultState = new ExecutionState(state);
+                     const auto* cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, false);
+                     defaultState->addTestObject(
+                         "clone_infos", std::to_string(sessionIdExpr->clone_id), cloneInfo);
+                     defaultState->popBody();
+                     result->emplace_back(cond, state, defaultState);
+                 }
+                 // This is the clone state.
+                 auto* nextState = new ExecutionState(state);
+                 auto progInfo = getProgramInfo().to<BMv2_V1ModelProgramInfo>();
+
+                 // We need to reset everything to the state before the ingress call. We use a trick
+                 // by calling copyIn on the entire state again. We need a little bit of information
+                 // for that, including the exact parameter names of the ingress block we are in.
+                 // Just grab the ingress from the programmable blocks.
+                 const auto* programmableBlocks = progInfo.getProgrammableBlocks();
+                 const auto* typeDecl = programmableBlocks->at("Ingress");
+                 const auto* applyBlock = typeDecl->checkedTo<IR::P4Control>();
+                 const auto* params = applyBlock->getApplyParameters();
+                 auto blockIndex = 2;
+                 const auto* archSpec = TestgenTarget::getArchSpec();
+                 const auto* archMember = archSpec->getArchMember(blockIndex);
+                 std::vector<Continuation::Command> cmds;
+                 for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
+                     // Skip the second parameter (metadata) since we do want to preserve it.
+                     if (paramIdx == 1) {
+                         continue;
+                     }
+                     const auto* param = params->getParameter(paramIdx);
+                     programInfo.produceCopyInOutCall(param, paramIdx, archMember, &cmds, nullptr);
+                 }
+
+                 // We then exit, which will copy out all the state that we have just reset.
+                 cmds.emplace_back(new IR::ExitStatement());
+
+                 const auto* cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, true);
+                 nextState->addTestObject("clone_infos", std::to_string(sessionIdExpr->clone_id),
+                                          cloneInfo);
+                 // Reset the packet buffer, which corresponds to the output packet.
+                 nextState->resetPacketBuffer();
+                 const auto* bitType = IRUtils::getBitType(32);
+                 const auto* instanceTypeVar = new IR::Member(
+                     bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
+                 nextState->set(
+                     instanceTypeVar,
+                     IRUtils::getConstant(bitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
+                 nextState->replaceTopBody(&cmds);
+                 result->emplace_back(cond, state, nextState);
+                 return;
+             }
+
+             if (cloneType == BMv2Constants::CLONE_TYPE_E2E) {
+                 auto* nextState = new ExecutionState(state);
+                 // Increment the recirculation count.
+                 nextState->setProperty("recirculate_count", ++recirculateCount);
+                 // Recirculate is now active and "check_recirculate" will be triggered.
+                 nextState->setProperty("recirculate_active", true);
+                 // Also set clone as active, which will trigger slightly different processing.
+                 nextState->setProperty("clone_active", true);
+                 // Grab the session id and save it to the execution state.
+                 nextState->setProperty("clone_session_id", sessionId);
+                 // Set the appropriate instance type, which will be processed by
+                 // "check_recirculate".
+                 nextState->setProperty("recirculate_instance_type",
+                                        BMv2Constants::PKT_INSTANCE_TYPE_EGRESS_CLONE);
+                 nextState->popBody();
+                 result->emplace_back(cond, state, nextState);
+                 return;
+             }
+             TESTGEN_UNIMPLEMENTED("Unsupported clone type %1%.", cloneType);
+         }},
+        /* ======================================================================================
+         *  *check_recirculate
+         * ====================================================================================== */
+        /// Helper externs that processing the parameters set by the recirculate and resubmit
+        /// externs. This extern assumes it is executed at the end of the deparser.
+        {"*.check_recirculate",
+         {},
+         [this](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
+                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
+                const ExecutionState& state, SmallStepEvaluator::Result& result) {
+             auto* recState = new ExecutionState(state);
+             // Check whether recirculate is even active, if not, skip.
+             if (!state.hasProperty("recirculate_active") ||
+                 !state.getProperty<bool>("recirculate_active")) {
+                 recState->popBody();
+                 result->emplace_back(recState);
+                 return;
+             }
+
+             // Check whether the packet needs to be reset.
+             // If that is the case, reset the packet buffer to the calculated input packet.
+             auto recirculateReset = state.hasProperty("recirculate_reset_pkt");
+             if (recirculateReset) {
+                 // Reset the packet buffer, which corresponds to the output packet.
+                 recState->resetPacketBuffer();
+                 // Set the packet buffer to the current calculated program packet for consistency.
+                 recState->appendToPacketBuffer(recState->getInputPacket());
+             }
+
+             // We need to update the size of the packet when recirculating. Do not forget to divide
+             // by 8.
+             const auto* pktSizeType = ExecutionState::getPacketSizeVarType();
+             const auto* packetSizeVar = new IR::Member(
+                 pktSizeType, new IR::PathExpression("*standard_metadata"), "packet_length");
+             const auto* packetSizeConst =
+                 IRUtils::getConstant(pktSizeType, recState->getPacketBufferSize() / 8);
+             recState->set(packetSizeVar, packetSizeConst);
+
+             auto progInfo = getProgramInfo().to<BMv2_V1ModelProgramInfo>();
+             if (recState->hasProperty("recirculate_index")) {
+                 // Get the index set by the recirculate/resubmit function. Will fail if no index is
+                 // set.
+                 auto recirculateIndex = recState->getProperty<uint64_t>("recirculate_index");
+                 // This program segment resets the user metadata of the v1model program to 0.
+                 // However, fields in the user metadata that have the field_list annotation and the
+                 // appropriate index will not be reset.
+                 // The user metadata is the third parameter of the parser control.
+                 const auto* paramPath = progInfo.getBlockParam("Parser", 2);
+                 resetPreservingFieldList(recState, paramPath, recirculateIndex);
+             }
+
+             // Update the metadata variable to the correct instance type as provided by
+             // recirculation.
+             auto instanceType = state.getProperty<uint64_t>("recirculate_instance_type");
+             const auto* bitType = IRUtils::getBitType(32);
+             const auto* instanceTypeVar = new IR::Member(
+                 bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
+             recState->set(instanceTypeVar, IRUtils::getConstant(bitType, instanceType));
+
+             // Set recirculate to false to avoid infinite loops.
+             recState->setProperty("recirculate_active", false);
+
+             // Check whether the clone variant is  active.
+             // Clone triggers a branch and slightly different processing.
+             auto cloneActive =
+                 state.hasProperty("clone_active") && state.getProperty<bool>("clone_active");
+             if (cloneActive) {
+                 // Pick a clone port var. For now, pick a random value from 0-511.
+                 const auto* rndConst =
+                     IRUtils::getRandConstantForWidth(TestgenTarget::getPortNumWidth_bits());
+                 const auto* clonePortVar = rndConst;
+                 const auto* sessionIdExpr =
+                     state.getProperty<const IR::Expression*>("clone_session_id");
+                 // clone_preserving_field_list has a default state where the packet continues as
+                 // is.
+                 {
+                     auto* defaultState = new ExecutionState(state);
+                     defaultState->setProperty("clone_active", false);
+                     const auto* cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, false);
+                     defaultState->addTestObject(
+                         "clone_infos", std::to_string(sessionIdExpr->clone_id), cloneInfo);
+                     defaultState->popBody();
+                     result->emplace_back(defaultState);
+                 }
+                 // In the other state, we start processing from the egress.
+                 const auto* topLevelBlocks = progInfo.getPipelineSequence();
+                 size_t egressDelim = 0;
+                 for (; egressDelim < topLevelBlocks->size(); ++egressDelim) {
+                     auto block = topLevelBlocks->at(egressDelim);
+                     const auto* p4Node = boost::get<const IR::Node*>(&block);
+                     if (p4Node == nullptr) {
+                         continue;
+                     }
+                     if (const auto* ctrl = (*p4Node)->to<IR::P4Control>()) {
+                         if (progInfo.getGress(ctrl) == BMV2_EGRESS) {
+                             break;
+                         }
+                     }
+                 }
+                 const std::vector<Continuation::Command> blocks = {
+                     topLevelBlocks->begin() + egressDelim - 2, topLevelBlocks->end()};
+                 recState->replaceTopBody(&blocks);
+                 const auto* cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, true);
+                 recState->addTestObject("clone_infos", std::to_string(sessionIdExpr->clone_id),
+                                         cloneInfo);
+                 recState->setProperty("clone_active", false);
+                 // Reset the packet buffer, which corresponds to the output packet.
+                 recState->resetPacketBuffer();
+                 result->emplace_back(recState);
+                 return;
+             }
+             // "Recirculate" by attaching the sequence again.
+             // Does NOT initialize state or adds new conditions.
+             const auto* topLevelBlocks = progInfo.getPipelineSequence();
+             recState->replaceTopBody(topLevelBlocks);
+             result->emplace_back(recState);
          }},
         /* ======================================================================================
          * Checksum16.get

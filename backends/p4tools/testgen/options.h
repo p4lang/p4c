@@ -20,17 +20,22 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// Fixed packet size in bits. Defaults to 0, which implies no sizing.
     int packetSize = 0;
 
+    /// Selects the exploration strategy for test generation
+    std::string explorationStrategy;
+
     /// Level of multiPop step. A good value is 10, namely, 10 per cent of
     /// the size of the unexploredBranches. The smaller the number,
     /// the bigger the step; e.g. unexploredBranches size == 100
     /// then this variable calculates 100/10 or 100/2 for the pop level.
-    /// Defaults to 0, so we invoke a single pop()
-    int popLevel = 0;
+    /// Defaults to 3, which maximizes exploration of exploration. Minimum
+    /// level is 2, for max randomness.
+    int popLevel = 3;
 
     /// Activates LinearEnumeration explorations trategy, and specifies
     /// the max bound of the buffer vector collecting all terminal
-    /// branches. Defaults to 0, which means this strategy is not activated.
-    int linearEnumeration = 0;
+    /// branches. Defaults to 2, which means only two terminal paths are populated
+    /// by default.
+    int linearEnumeration = 2;
 
     /// @returns the singleton instance of this class.
     static TestgenOptions& get();

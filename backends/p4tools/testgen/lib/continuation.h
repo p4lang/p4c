@@ -85,7 +85,7 @@ class Continuation {
 
     /// Alias for various property types that can be set. We restrict these to keep the feature
     /// simple.
-    using StateProperty = boost::variant<cstring, uint64_t, int64_t, bool>;
+    using StateProperty = boost::variant<cstring, uint64_t, int64_t, bool, const IR::Expression*>;
 
     struct PropertyUpdate {
         /// The name of the property that is being set.

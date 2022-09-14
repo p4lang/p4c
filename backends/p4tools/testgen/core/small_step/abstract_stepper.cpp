@@ -336,10 +336,38 @@ const Value* AbstractStepper::evaluateExpression(
     // value.
     const Value* result = nullptr;
     if (solverResult != boost::none && *solverResult) {
-        const auto* model = solver.getModel();
-        result = model->evaluate(expr);
+        auto model = *solver.getModel();
+        model.complete(expr);
+        result = model.evaluate(expr);
     }
     return result;
+}
+
+void AbstractStepper::setTargetUninitialized(ExecutionState* nextState, const IR::Member* ref,
+                                             bool forceTaint) const {
+    const auto* refType = ref->type;
+    // Resolve the type of the left-and assignment, if it is a type name.
+    if (const auto* typeName = refType->to<IR::Type_Name>()) {
+        refType = nextState->resolveType(typeName);
+    }
+    if (const auto* structType = refType->to<const IR::Type_StructLike>()) {
+        std::vector<const IR::Member*> validFields;
+        auto fields = nextState->getFlatFields(ref, structType, &validFields);
+        // We also need to initialize the validity bits of the headers. These are false.
+        for (const auto* validField : validFields) {
+            nextState->set(validField, IRUtils::getBoolLiteral(false));
+        }
+        // For each field in the undefined struct, we create a new zombie variable.
+        // If the variable does not have an initializer we need to create a new zombie for it.
+        // For now we just use the name directly.
+        for (const auto* field : fields) {
+            nextState->set(field, programInfo.createTargetUninitialized(field->type, forceTaint));
+        }
+    } else if (const auto* baseType = refType->to<const IR::Type_Base>()) {
+        nextState->set(ref, programInfo.createTargetUninitialized(baseType, forceTaint));
+    } else {
+        P4C_UNIMPLEMENTED("Unsupported uninitialization type %1%", refType->node_type_name());
+    }
 }
 
 }  // namespace P4Testgen

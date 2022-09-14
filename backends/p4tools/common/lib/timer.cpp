@@ -19,7 +19,7 @@ using Clock = std::chrono::high_resolution_clock;
 /// which are counters invoked when this counter was also active.
 struct CounterEntry {
     const char* name;
-    std::unordered_map<const char*, std::unique_ptr<CounterEntry>> counters;
+    std::unordered_map<std::string, std::unique_ptr<CounterEntry>> counters;
     Clock::duration duration;
 
     /// Lookup existing or create new child counter.

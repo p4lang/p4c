@@ -335,40 +335,6 @@ std::map<cstring, const TestObject*> TestSpec::getTestObjectCategory(cstring cat
     return {};
 }
 
-// TODO: Remove this once we have a target-specific test back end.
-/* =========================================================================================
- *  ActionProfile
- * ========================================================================================= */
-
-const std::vector<std::pair<cstring, std::vector<ActionArg>>>* ActionProfile::getActions() const {
-    return &actions;
-}
-
-ActionProfile::ActionProfile(const IR::IDeclaration* profileDecl) : profileDecl(profileDecl) {}
-
-cstring ActionProfile::getObjectName() const { return profileDecl->controlPlaneName(); }
-
-const IR::IDeclaration* ActionProfile::getProfileDecl() const { return profileDecl; }
-
-void ActionProfile::addToActionMap(cstring actionName, std::vector<ActionArg> actionArgs) {
-    actions.emplace_back(actionName, actionArgs);
-}
-size_t ActionProfile::getActionMapSize() const { return actions.size(); }
-
-/* =========================================================================================
- *  ActionSelector
- * ========================================================================================= */
-
-cstring ActionSelector::getObjectName() const { return "ActionSelector"; }
-
-const IR::IDeclaration* ActionSelector::getSelectorDecl() const { return selectorDecl; }
-
-const ActionProfile* ActionSelector::getActionProfile() const { return actionProfile; }
-
-ActionSelector::ActionSelector(const IR::IDeclaration* selectorDecl,
-                               const ActionProfile* actionProfile)
-    : selectorDecl(selectorDecl), actionProfile(actionProfile) {}
-
 }  // namespace P4Testgen
 
 }  // namespace P4Tools

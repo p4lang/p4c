@@ -8,7 +8,7 @@ namespace P4Tools {
 
 class Taint {
  public:
-    static const IR::StringLiteral taintedStringLiteral;
+    static const IR::StringLiteral TAINTED_STRING_LITERAL;
 
     /// @returns the mask for the corresponding program packet. In the first step, the packet
     /// expression is collapsed so that only concatenations remain. Any taint variable bubbles up.

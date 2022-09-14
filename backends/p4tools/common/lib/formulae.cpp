@@ -86,6 +86,4 @@ int StateVariable::compare(const IR::PathExpression* p1, const IR::PathExpressio
     return 0;
 }
 
-
-
 }  // namespace P4Tools

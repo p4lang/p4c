@@ -119,11 +119,6 @@ bool ExprStepper::preorder(const IR::MethodCallExpression* call) {
     // A method call expression represents an invocation of an action, a table, an extern, or
     // setValid/setInvalid.
 
-    if (!call->arguments->empty()) {
-        // Evaluate all arguments to directionless and `in` parameters.
-        ::warning("%1%: arguments to MethodCallExpressions not yet evaluated", call->method);
-    }
-
     // Handle method calls. These are either table invocations or extern calls.
     if (call->method->type->is<IR::Type_Method>()) {
         if (const auto* path = call->method->to<IR::PathExpression>()) {

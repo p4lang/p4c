@@ -72,7 +72,6 @@ class CmdStepper : public AbstractStepper {
                                const std::vector<cstring>* blockParams,
                                ExecutionState* nextState) const;
 
- private:
     /// This is a helper lambda function to declare structlike data structures.
     /// This also is used to declare the members of a stack. This function is primarily used by the
     /// Declaration_Variable preorder function.

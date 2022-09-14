@@ -15,6 +15,7 @@
 #include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/coverage.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "gsl/gsl-lite.hpp"
 
@@ -52,6 +53,9 @@ class ExplorationStrategy {
     /// Writes a list of the selected branches into @param out.
     void printCurrentTraceAndBranches(std::ostream& out);
 
+    /// Getter to access visitedStatements
+    const Coverage::CoverageSet& getVisitedStatements();
+
  protected:
     /// Target-specific information about the P4 program.
     const ProgramInfo& programInfo;
@@ -73,6 +77,12 @@ class ExplorationStrategy {
 
     /// The current execution state.
     ExecutionState* executionState = nullptr;
+
+    /// Set of all stetements, to be retrieved from programInfo.
+    const Coverage::CoverageSet& allStatements;
+
+    /// Set of all statements executed in any testcase that has been outputted.
+    Coverage::CoverageSet visitedStatements;
 
  private:
     SmallStepEvaluator evaluator;

@@ -69,6 +69,12 @@ uint64_t ExplorationStrategy::selectBranch(const std::vector<Branch>& branches) 
 
 bool ExplorationStrategy::handleTerminalState(const Callback& callback,
                                               const ExecutionState& terminalState) {
+    // We update the set of visitedStatements in every terminal state.
+    for (const auto& stmt : terminalState.getVisited()) {
+        if (allStatements.count(stmt) != 0U) {
+            visitedStatements.insert(stmt);
+        }
+    }
     // Check the solver for satisfiability. If it times out or reports non-satisfiability, issue
     // a warning and continue on a different path.
     auto solverResult = solver.checkSat(terminalState.getPathConstraint());
@@ -90,12 +96,19 @@ bool ExplorationStrategy::handleTerminalState(const Callback& callback,
 
 ExplorationStrategy::ExplorationStrategy(AbstractSolver& solver, const ProgramInfo& programInfo,
                                          boost::optional<uint32_t> seed)
-    : programInfo(programInfo), solver(solver), evaluator(solver, programInfo) {
+    : programInfo(programInfo),
+      solver(solver),
+      evaluator(solver, programInfo),
+      allStatements(programInfo.getAllStatements()) {
     // If there is no seed provided, do not randomize the solver.
     if (seed != boost::none) {
         this->solver.seed(*seed);
     }
     executionState = new ExecutionState(programInfo.program);
+}
+
+const Coverage::CoverageSet& ExplorationStrategy::getVisitedStatements() {
+    return visitedStatements;
 }
 
 void ExplorationStrategy::printCurrentTraceAndBranches(std::ostream& out) {

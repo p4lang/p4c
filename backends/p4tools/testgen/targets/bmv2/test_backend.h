@@ -18,7 +18,7 @@
 #include "backends/p4tools/testgen/core/program_info.h"
 #include "backends/p4tools/testgen/lib/execution_state.h"
 #include "backends/p4tools/testgen/lib/test_backend.h"
-#include "backends/p4tools/testgen/lib/test_spec.h"
+#include "backends/p4tools/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools {
 

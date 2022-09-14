@@ -32,7 +32,7 @@ class BMv2_V1ModelTableStepper : public TableStepper {
     /// BMv2 specific table properties.
     struct BMv2_V1ModelProperties {
         /// The table has an action profile associated with it.
-        const ActionProfile* actionProfile = nullptr;
+        const Bmv2_V1ModelActionProfile* actionProfile = nullptr;
 
         /// The table has an action selector associated with it.
         const Bmv2_V1ModelActionSelector* actionSelector = nullptr;

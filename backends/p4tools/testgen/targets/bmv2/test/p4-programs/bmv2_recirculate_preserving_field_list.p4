@@ -35,18 +35,16 @@ control egress(inout headers_t hdr, inout metadata_t meta, inout standard_metada
         if (!meta.is_recirculated) {
             recirculate_preserving_field_list(0);
             meta.is_recirculated = true;
+            meta.is_recirculated_without_anno = true;
             hdr.ethernet.src_addr = 0xFFFFFFFFFFFF;
-        } else {
-            hdr.ethernet.ethertype = 0xAAAA;
+            return;
         }
+        hdr.ethernet.ethertype = 0xAAAA;
 
         // This should have no effect on the ether type because we do not preserve the metadata.
-        if (!meta.is_recirculated_without_anno) {
-            recirculate_preserving_field_list(0);
-            meta.is_recirculated_without_anno = true;
-            hdr.ethernet.dst_addr = 0xEEEEEEEEEEEE;
-        } else {
+        if (meta.is_recirculated_without_anno) {
             hdr.ethernet.ethertype = 0xBBBB;
+        } else {
         }
     }
 }

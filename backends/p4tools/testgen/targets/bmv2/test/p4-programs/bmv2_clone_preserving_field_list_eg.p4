@@ -5,6 +5,11 @@ header ethernet_t {
     bit<48> dst_addr;
     bit<48> src_addr;
     bit<16> ethertype;
+    bit<32> clone_val;
+}
+
+header clone_header_t {
+    bit<32> val;
 }
 
 struct headers_t {
@@ -26,8 +31,16 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, in
 
 control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     apply {
+    }
+}
+
+control egress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
+    apply {
+        if (standard_metadata.instance_type == 2) {
+            hdr.ethernet.clone_val = 0xCCCCCCCC;
+        }
         if (!meta.is_recirculated) {
-            resubmit_preserving_field_list(0);
+            clone_preserving_field_list(CloneType.E2E, 1, 0);
             meta.is_recirculated = true;
             meta.is_recirculated_without_anno = true;
             hdr.ethernet.src_addr = 0xFFFFFFFFFFFF;
@@ -39,11 +52,6 @@ control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metad
         if (meta.is_recirculated_without_anno) {
             hdr.ethernet.ethertype = 0xBBBB;
         }
-    }
-}
-
-control egress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    apply {
     }
 }
 

@@ -87,6 +87,13 @@ void BMv2_V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState* nextSta
     const auto* checksumErrVar =
         new IR::Member(oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
     nextState->set(checksumErrVar, IRUtils::getConstant(checksumErrVar->type, 0));
+    // The packet size meta data is the testgen packet length variable divided by 8.
+    const auto* pktSizeType = ExecutionState::getPacketSizeVarType();
+    const auto* packetSizeVar =
+        new IR::Member(pktSizeType, new IR::PathExpression("*standard_metadata"), "packet_length");
+    const auto* packetSizeConst = new IR::Div(pktSizeType, ExecutionState::getInputPacketSizeVar(),
+                                              IRUtils::getConstant(pktSizeType, 8));
+    nextState->set(packetSizeVar, packetSizeConst);
 }
 
 boost::optional<const Constraint*> BMv2_V1ModelCmdStepper::startParser_impl(

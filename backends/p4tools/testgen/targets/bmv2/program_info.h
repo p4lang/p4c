@@ -33,7 +33,7 @@ class BMv2_V1ModelProgramInfo : public ProgramInfo {
 
     /// This function contains an imperative specification of the inter-pipe interaction in the
     /// target.
-    std::vector<Continuation::Command> processDeclaration(const IR::Type_Declaration* cstrType,
+    std::vector<Continuation::Command> processDeclaration(const IR::Type_Declaration* typeDecl,
                                                           size_t pipeIdx) const;
 
  public:
@@ -42,10 +42,14 @@ class BMv2_V1ModelProgramInfo : public ProgramInfo {
                             const std::map<int, int> declIdToGress);
 
     /// @returns the gress associated with the given parser.
-    int getGress(const IR::P4Parser*) const;
+    int getGress(const IR::Type_Declaration*) const;
 
     /// @returns the programmable blocks of the program. Should be 6.
-    const ordered_map<cstring, const IR::Type_Declaration*>* getProgrammableBlocks();
+    const ordered_map<cstring, const IR::Type_Declaration*>* getProgrammableBlocks() const;
+
+    /// @returns the name of the parameter for a given programmable-block label and the parameter
+    /// index. This is the name of the parameter that is used in the P4 program.
+    const IR::PathExpression* getBlockParam(cstring blockLabel, size_t paramIndex) const;
 
     const IR::Member* getTargetInputPortVar() const override;
 

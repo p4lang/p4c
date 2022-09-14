@@ -87,7 +87,7 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
         // We get the control plane name of the action we are calling.
         cstring actionName = actionType->controlPlaneName();
         // Copy the previous action profile.
-        auto* actionProfile = new ActionProfile(*bmv2_V1ModelProperties.actionProfile);
+        auto* actionProfile = new Bmv2_V1ModelActionProfile(*bmv2_V1ModelProperties.actionProfile);
         // The entry we are inserting using an index instead of the action name.
         cstring actionIndex = std::to_string(actionProfile->getActionMapSize());
         // Synthesize arguments for the call based on the action parameters.
@@ -129,7 +129,7 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
         setTableAction(nextState, tableAction);
 
         // Finally, add all the new rules to the execution state.
-        ActionCall ctrlPlaneActionCall(actionIndex, actionType, {});
+        const ActionCall ctrlPlaneActionCall(actionIndex, actionType, {});
         auto tableRule =
             TableRule(matches, TestSpec::LOW_PRIORITY, ctrlPlaneActionCall, TestSpec::TTL);
         auto* tableConfig = new TableConfig(table, {tableRule});
@@ -193,10 +193,10 @@ bool BMv2_V1ModelTableStepper::checkForActionProfile() {
         // This means, for every possible control plane entry (and with that, new execution state)
         // add the generated action profile.
         bmv2_V1ModelProperties.addProfileToState = true;
-        bmv2_V1ModelProperties.actionProfile = new ActionProfile(implDecl);
+        bmv2_V1ModelProperties.actionProfile = new Bmv2_V1ModelActionProfile(implDecl);
         return true;
     }
-    bmv2_V1ModelProperties.actionProfile = testObject->checkedTo<ActionProfile>();
+    bmv2_V1ModelProperties.actionProfile = testObject->checkedTo<Bmv2_V1ModelActionProfile>();
     bmv2_V1ModelProperties.addProfileToState = false;
     return true;
 }
@@ -242,10 +242,10 @@ bool BMv2_V1ModelTableStepper::checkForActionSelector() {
         // This means, for every possible control plane entry (and with that, new execution state)
         // add the generated action profile.
         bmv2_V1ModelProperties.addProfileToState = true;
-        bmv2_V1ModelProperties.actionProfile = new ActionProfile(selectorDecl);
+        bmv2_V1ModelProperties.actionProfile = new Bmv2_V1ModelActionProfile(selectorDecl);
         return true;
     }
-    bmv2_V1ModelProperties.actionProfile = testObject->checkedTo<ActionProfile>();
+    bmv2_V1ModelProperties.actionProfile = testObject->checkedTo<Bmv2_V1ModelActionProfile>();
     bmv2_V1ModelProperties.addProfileToState = false;
     return true;
 }

@@ -111,6 +111,15 @@ TestgenOptions::TestgenOptions()
         "deterministic replay.");
 
     registerOption(
+        "--exploration-strategy", "explorationStrategy",
+        [this](const char* arg) {
+            explorationStrategy = arg;
+            return true;
+        },
+        "Selects a specific exploration strategy for test generation. Options are: "
+        "randomAccessStack, linearEnumeration, maxCoverage. Defaults to incrementalStack.");
+
+    registerOption(
         "--linear-enumeration", "linearEnumeration",
         [this](const char* arg) {
             linearEnumeration = std::atoi(arg);

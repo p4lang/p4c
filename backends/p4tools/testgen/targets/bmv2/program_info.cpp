@@ -58,78 +58,56 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
 }
 
 const ordered_map<cstring, const IR::Type_Declaration*>*
-BMv2_V1ModelProgramInfo::getProgrammableBlocks() {
+BMv2_V1ModelProgramInfo::getProgrammableBlocks() const {
     return &programmableBlocks;
 }
 
-int BMv2_V1ModelProgramInfo::getGress(const IR::P4Parser* parser) const {
-    return declIdToGress.at(parser->declid);
+int BMv2_V1ModelProgramInfo::getGress(const IR::Type_Declaration* decl) const {
+    return declIdToGress.at(decl->declid);
 }
 
 std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
-    const IR::Type_Declaration* declType, size_t pipeIdx) const {
-    auto result = std::vector<Continuation::Command>();
+    const IR::Type_Declaration* typeDecl, size_t pipeIdx) const {
     // Get the architecture specification for this target.
     const auto* archSpec = TestgenTarget::getArchSpec();
-    const IR::ParameterList* params = nullptr;
 
     // Collect parameters.
-    if (const auto* p4parser = declType->to<IR::P4Parser>()) {
-        params = p4parser->getApplyParameters();
-    } else if (const auto* p4control = declType->to<IR::P4Control>()) {
-        params = p4control->getApplyParameters();
-    } else {
-        TESTGEN_UNIMPLEMENTED("Constructed type %s of type %s not supported.", declType,
-                              declType->node_type_name());
+    const auto* applyBlock = typeDecl->to<IR::IApply>();
+    if (applyBlock == nullptr) {
+        TESTGEN_UNIMPLEMENTED("Constructed type %s of type %s not supported.", typeDecl,
+                              typeDecl->node_type_name());
     }
-    std::vector<const IR::Statement*> copyOuts;
+    const auto* params = applyBlock->getApplyParameters();
     // Retrieve the current canonical pipe in the architecture spec using the pipe index.
     const auto* archMember = archSpec->getArchMember(pipeIdx);
+
+    std::vector<Continuation::Command> cmds;
+    // Generate all the necessary copy-in/outs.
+    std::vector<Continuation::Command> copyOuts;
     for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
         const auto* param = params->getParameter(paramIdx);
-        const auto* paramType = param->type;
-        // We need to resolve type names.
-        if (const auto* tn = paramType->to<IR::Type_Name>()) {
-            paramType = resolveProgramType(tn);
-        }
-        // Retrieve the identifier of the global architecture map using the parameter index.
-        auto archRef = archMember->blockParams.at(paramIdx);
-        // If the archRef is a nullptr or empty, we do not have a mapping for this parameter.
-        if (archRef.isNullOrEmpty()) {
-            continue;
-        }
-        const auto* archPath = new IR::PathExpression(paramType, new IR::Path(archRef));
-        const auto* paramRef = new IR::PathExpression(paramType, new IR::Path(param->name));
-        const auto* paramDir = new IR::StringLiteral(directionToString(param->direction));
-        // This mimicks the copy-in from the architecture environment.
-        const auto* copyInCall = new IR::MethodCallStatement(IRUtils::generateInternalMethodCall(
-            "copy_in", {archPath, paramRef, paramDir, new IR::BoolLiteral(false)}));
-        result.emplace_back(copyInCall);
-        // This mimicks the copy-out from the architecture environment.
-        const auto* copyOutCall = new IR::MethodCallStatement(
-            IRUtils::generateInternalMethodCall("copy_out", {archPath, paramRef, paramDir}));
-        copyOuts.emplace_back(copyOutCall);
+        produceCopyInOutCall(param, paramIdx, archMember, &cmds, &copyOuts);
     }
     // Insert the actual pipeline.
-    result.emplace_back(declType);
+    cmds.emplace_back(typeDecl);
     // Add the copy out assignments after the pipe has completed executing.
-    result.insert(result.end(), copyOuts.begin(), copyOuts.end());
+    cmds.insert(cmds.end(), copyOuts.begin(), copyOuts.end());
     // After some specific pipelines (deparsers), we have to append the remaining packet
     // payload. We use an extern call for this.
     if ((archMember->blockName == "Deparser")) {
         const auto* stmt = new IR::MethodCallStatement(
             IRUtils::generateInternalMethodCall("prepend_emit_buffer", {}));
-        result.emplace_back(stmt);
+        cmds.emplace_back(stmt);
         // Also check whether we need to drop the packet.
         auto* dropStmt =
             new IR::MethodCallStatement(IRUtils::generateInternalMethodCall("drop_and_exit", {}));
         const auto* dropCheck = new IR::IfStatement(dropIsActive(), dropStmt, nullptr);
-        result.emplace_back(dropCheck);
+        cmds.emplace_back(dropCheck);
         const auto* recirculateCheck = new IR::MethodCallStatement(
             IRUtils::generateInternalMethodCall("check_recirculate", {}));
-        result.emplace_back(recirculateCheck);
+        cmds.emplace_back(recirculateCheck);
     }
-    return result;
+    return cmds;
 }
 
 const IR::Member* BMv2_V1ModelProgramInfo::getTargetInputPortVar() const {
@@ -156,6 +134,29 @@ const IR::Expression* BMv2_V1ModelProgramInfo::createTargetUninitialized(const I
 }
 
 const IR::Type_Bits* BMv2_V1ModelProgramInfo::getParserErrorType() const { return &parserErrBits; }
+
+const IR::PathExpression* BMv2_V1ModelProgramInfo::getBlockParam(cstring blockLabel,
+                                                                 size_t paramIndex) const {
+    // Retrieve the block and get the parameter type.
+    // TODO: This should be necessary, we should be able to this using only the arch spec.
+    // TODO: Make this more general and lift it into program_info core.
+    const auto* programmableBlocks = getProgrammableBlocks();
+    const auto* typeDecl = programmableBlocks->at(blockLabel);
+    const auto* applyBlock = typeDecl->to<IR::IApply>();
+    CHECK_NULL(applyBlock);
+    const auto* params = applyBlock->getApplyParameters();
+    const auto* param = params->getParameter(paramIndex);
+    const auto* paramType = param->type;
+    // For convenience, resolve type names.
+    if (const auto* tn = paramType->to<IR::Type_Name>()) {
+        paramType = resolveProgramType(tn);
+    }
+
+    const auto* archSpec = TestgenTarget::getArchSpec();
+    auto archIndex = archSpec->getBlockIndex(blockLabel);
+    auto archRef = archSpec->getParamName(archIndex, paramIndex);
+    return new IR::PathExpression(paramType, new IR::Path(archRef));
+}
 
 const IR::Member* BMv2_V1ModelProgramInfo::getParserParamVar(const IR::P4Parser* parser,
                                                              const IR::Type* type,

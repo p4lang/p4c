@@ -127,7 +127,6 @@ void MidEnd::addDefaultPasses() {
         // Flatten nested headers and structs.
         new P4::NestedStructs(&refMap, &typeMap),
         new P4::FlattenHeaders(&refMap, &typeMap),
-        new P4::FlattenInterfaceStructs(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, true),
         // Move local declarations to the top of each control/parser.
         new P4::MoveDeclarations(),

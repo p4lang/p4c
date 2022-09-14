@@ -13,6 +13,7 @@ set(
   testgen.cpp
 
 
+  core/arch_spec.cpp
   core/externs.cpp
   core/program_info.cpp
   core/small_step/abstract_stepper.cpp
@@ -25,6 +26,7 @@ set(
   core/exploration_strategy/selected_branches.cpp
   core/exploration_strategy/random_access_stack.cpp
   core/exploration_strategy/linear_enumeration.cpp
+  core/exploration_strategy/incremental_max_coverage_stack.cpp
   core/exploration_strategy/exploration_strategy.cpp
   core/target.cpp
 

@@ -1,14 +1,15 @@
 #ifndef TESTGEN_CORE_PROGRAM_INFO_H_
 #define TESTGEN_CORE_PROGRAM_INFO_H_
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <vector>
 
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/null.h"
 
+#include "backends/p4tools/testgen/core/arch_spec.h"
+#include "backends/p4tools/common/lib/coverage.h"
 #include "backends/p4tools/testgen/lib/concolic.h"
 #include "backends/p4tools/testgen/lib/continuation.h"
 #include "backends/p4tools/testgen/lib/namespace_context.h"
@@ -28,6 +29,9 @@ class ProgramInfo {
     /// The list of concolic methods implemented by the target. This list is assembled during
     /// initialization.
     ConcolicMethodImpls concolicMethodImpls;
+
+    /// Set of all statements in the input P4 program.
+    Coverage::CoverageSet allStatements;
 
     std::vector<Continuation::Command> pipelineSequence;
 
@@ -78,6 +82,9 @@ class ProgramInfo {
     virtual const IR::Expression* createTargetUninitialized(const IR::Type* type,
                                                             bool forceTaint) const = 0;
 
+    /// Getter to access allStatements.
+    const Coverage::CoverageSet& getAllStatements() const;
+
     /// @returns the list of implemented concolic methods for this particular program.
     const ConcolicMethodImpls* getConcolicMethodImpls() const;
 
@@ -100,6 +107,17 @@ class ProgramInfo {
 
     /// Resolves a Type_Name in the current environment.
     const IR::Type_Declaration* resolveProgramType(const IR::Type_Name* type) const;
+
+    /// Helper function to produce copy-in and copy-out helper calls.
+    /// Copy-in and copy-out is needed to correctly model the value changes of data when it is
+    /// copied in and out of a programmable block. In many cases, data is reset here or not even
+    /// copied.
+    /// TODO: Find a more efficient way to implement copy-in/copy-out. These functions are very
+    /// expensive.
+    void produceCopyInOutCall(const IR::Parameter* param, size_t paramIdx,
+                              const ArchSpec::ArchMember* archMember,
+                              std::vector<Continuation::Command>* copyIns,
+                              std::vector<Continuation::Command>* copyOuts) const;
 };
 
 }  // namespace P4Testgen

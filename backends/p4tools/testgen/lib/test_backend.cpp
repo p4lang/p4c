@@ -91,6 +91,8 @@ bool TestBackEnd::run(const FinalState& state) {
         const auto* outputPacketExpr = executionState->getPacketBuffer();
         const auto* completedModel = state.getCompletedModel();
         const auto* outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
+        const auto& allStatements = programInfo.getAllStatements();
+        const Coverage::CoverageSet& visitedStatements = symbex.getVisitedStatements();
 
         auto* solver = state.getSolver()->to<Z3Solver>();
         CHECK_NULL(solver);
@@ -122,11 +124,6 @@ bool TestBackEnd::run(const FinalState& state) {
             Coverage::coverageReportFinal(allStatements, visitedStatements);
             printFinalStats();
             return testCount > maxTests - 1;
-        }
-        for (const auto& stmt : executionState->getVisited()) {
-            if (allStatements.count(stmt) != 0U) {
-                visitedStatements.insert(stmt);
-            }
         }
 
         const auto* testSpec = createTestSpec(executionState, completedModel, testInfo);
@@ -217,7 +214,9 @@ bool TestBackEnd::printTestInfo(const ExecutionState* executionState, const Test
     printTraces("=======================================");
     // We have no control over the test, if the output port is tainted. So we abort.
     if (executionState->hasTaint(outputPortExpr)) {
-        printTraces("============ Output port tainted - Aborting Test ============");
+        printFeature(
+            "test_info", 4,
+            "============ Test %1%: Output port tainted - Aborting Test ============", testCount);
         return true;
     }
     printTraces("Input packet size: %1%", inputPacketSize);

@@ -100,16 +100,16 @@ inja::json PTF::getControlPlane(const TestSpec* testSpec) {
 
         // Action Profile
         const auto* apObject = tblConfig->getProperty("action_profile", false);
-        const ActionProfile* actionProfile = nullptr;
-        const ActionSelector* actionSelector = nullptr;
+        const Bmv2_V1ModelActionProfile* actionProfile = nullptr;
+        const Bmv2_V1ModelActionSelector* actionSelector = nullptr;
         if (apObject != nullptr) {
-            actionProfile = apObject->checkedTo<ActionProfile>();
+            actionProfile = apObject->checkedTo<Bmv2_V1ModelActionProfile>();
             // Check if we have an Action Selector too.
             // TODO: Change this to check in ActionSelector with table
             // property "action_selectors".
             const auto* asObject = tblConfig->getProperty("action_selector", false);
             if (asObject != nullptr) {
-                actionSelector = asObject->checkedTo<ActionSelector>();
+                actionSelector = asObject->checkedTo<Bmv2_V1ModelActionSelector>();
                 apASMap[actionProfile->getProfileDecl()->controlPlaneName()] =
                     actionSelector->getSelectorDecl()->controlPlaneName();
             }
@@ -129,7 +129,7 @@ inja::json PTF::getControlPlane(const TestSpec* testSpec) {
         controlPlaneJson["action_profiles"] = inja::json::array();
     }
     for (auto const& testObject : actionProfiles) {
-        const auto* const actionProfile = testObject.second->checkedTo<ActionProfile>();
+        const auto* const actionProfile = testObject.second->checkedTo<Bmv2_V1ModelActionProfile>();
         const auto* actions = actionProfile->getActions();
         inja::json j;
         j["profile"] = actionProfile->getProfileDecl()->controlPlaneName();

@@ -320,13 +320,13 @@ void STF::trace(std::ofstream& out, const TestSpec* testSpec) {
 void STF::add(std::ofstream& out, const TestSpec* testSpec) {
     auto tables = testSpec->getTestObjectCategory("tables");
     for (auto const& tbl : tables) {
-        const auto* const tblConfig = tbl.second->checkedTo<TableConfig>();
+        const auto* tblConfig = tbl.second->checkedTo<TableConfig>();
         auto const* tblRules = tblConfig->getRules();
         for (const auto& tblRules : *tblRules) {
             auto const* matches = tblRules.getMatches();
             auto const* actionCall = tblRules.getActionCall();
             auto const* actionArgs = actionCall->getArgs();
-            int priority = tblRules.getPriority();
+            const int priority = tblRules.getPriority();
             auto addConfig =
                 STFTest::Add(tbl.first, matches, actionCall->getActionName(), actionArgs, priority);
             addConfig.print(out);
@@ -344,17 +344,56 @@ void STF::packet(std::ofstream& out, const TestSpec* testSpec) {
 
 void STF::expect(std::ofstream& out, const TestSpec* testSpec) {
     const auto ePacket = testSpec->getEgressPacket();
-    if (ePacket != boost::none) {
-        const auto* payload = (*ePacket)->getEvaluatedPayload();
-        const auto* payloadMask = (*ePacket)->getEvaluatedPayloadMask();
-        auto expectConfig = STFTest::Egress((*ePacket)->getPort(), payload, payloadMask);
-        expectConfig.print(out);
+    if (ePacket == boost::none) {
+        return;
     }
+    const auto* payload = (*ePacket)->getEvaluatedPayload();
+    const auto* payloadMask = (*ePacket)->getEvaluatedPayloadMask();
+    auto expectConfig = STFTest::Egress((*ePacket)->getPort(), payload, payloadMask);
+    expectConfig.print(out);
 }
 
 void STF::wait(std::ofstream& out) {
     auto waitConfig = STFTest::Wait();
     waitConfig.print(out);
+}
+
+void STF::clone(std::ofstream& stfFile, const TestSpec* testSpec,
+                const std::map<cstring, const TestObject*>& cloneInfos) {
+    const auto ePacket = testSpec->getEgressPacket();
+    for (auto cloneInfoTuple : cloneInfos) {
+        const auto* cloneInfo = cloneInfoTuple.second->checkedTo<Bmv2_CloneInfo>();
+        auto sessionId = cloneInfo->getEvaluatedSessionId()->asUint64();
+        auto clonePort = cloneInfo->getEvaluatedClonePort()->asInt();
+        // Add the mirroring configuration for this clone packet.
+        stfFile << "mirroring_add " << sessionId << " " << clonePort << std::endl;
+        // Insert the input packet.
+        packet(stfFile, testSpec);
+        if (cloneInfo->isClonedPacket()) {
+            BUG_CHECK(ePacket != boost::none, "The cloned packet must not be empty!");
+            // Expect only a dummy for the normal packet..
+            stfFile << "expect " << (*ePacket)->getPort() << std::endl;
+            // This packet is the cloned packet, so expect the cloned values as egress.
+            // Note how we use the clonePort for egress.
+            const auto* payload = (*ePacket)->getEvaluatedPayload();
+            const auto* payloadMask = (*ePacket)->getEvaluatedPayloadMask();
+            auto clonedConfig = STFTest::Egress(clonePort, payload, payloadMask);
+            clonedConfig.print(stfFile);
+            continue;
+        }
+        // If the packet is not the clone packet, insert a dummy entry for port where the cloned
+        // packet is emitted.
+        stfFile << "expect " << clonePort << std::endl;
+        // Skip generation if the egress packet was dropped.
+        if (ePacket == boost::none) {
+            continue;
+        }
+        // This is the normal packet.
+        const auto* payload = (*ePacket)->getEvaluatedPayload();
+        const auto* payloadMask = (*ePacket)->getEvaluatedPayloadMask();
+        auto expectConfig = STFTest::Egress((*ePacket)->getPort(), payload, payloadMask);
+        expectConfig.print(stfFile);
+    }
 }
 
 void STF::outputTest(const TestSpec* testSpec, cstring selectedBranches, size_t testIdx,
@@ -371,8 +410,18 @@ void STF::outputTest(const TestSpec* testSpec, cstring selectedBranches, size_t 
     comment(stfFile, coverageStr.str());
     trace(stfFile, testSpec);
     add(stfFile, testSpec);
-    packet(stfFile, testSpec);
-    expect(stfFile, testSpec);
+
+    // Check whether this test has a clone configuration.
+    // These are special because they require additional instrumentation and produce two output
+    // packets.
+    auto cloneInfos = testSpec->getTestObjectCategory("clone_infos");
+    if (!cloneInfos.empty()) {
+        clone(stfFile, testSpec, cloneInfos);
+    } else {
+        packet(stfFile, testSpec);
+        expect(stfFile, testSpec);
+    }
+
     // Temporarily disabled because of a bug in the test harness.
     // wait(stfFile);
     stfFile.flush();
