@@ -40,11 +40,6 @@ p4c_add_xfail_reason("dpdk"
 )
 
 p4c_add_xfail_reason("dpdk"
-  "Error compiling"
-  testdata/p4_16_samples/psa-dpdk-lpm-match-err3.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
   "Unknown extern function"
   testdata/p4_16_samples/psa-example-digest-bmv2.p4
   testdata/p4_16_samples/psa-example-parser-checksum.p4
@@ -91,11 +86,6 @@ p4c_add_xfail_reason("dpdk"
   "All table keys together with holes in the underlying structure should fit in 64 bytes"
    testdata/p4_16_samples/psa-dpdk-table-key-error.p4
    testdata/p4_16_samples/psa-dpdk-table-key-error-1.p4
-   )
-
-p4c_add_xfail_reason("dpdk"
-  "Unsupported bit width"
-   testdata/p4_16_samples/psa-dpdk-struct-field.p4
    )
 
 p4c_add_xfail_reason("dpdk"
