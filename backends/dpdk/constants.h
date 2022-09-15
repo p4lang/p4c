@@ -29,8 +29,6 @@ const unsigned dpdk_default_table_size = 65536;
 const unsigned dpdk_learner_max_configurable_timeout_values = 8;
 const unsigned default_learner_table_size = 0x10000;
 const unsigned default_learner_table_timeout = 120;
-// Maximum values
-const int dpdk_max_field_width = 64;
 
 // JSON schema versions
 const cstring bfrtSchemaVersion = "1.0.0";
