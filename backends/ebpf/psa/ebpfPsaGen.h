@@ -27,7 +27,7 @@ limitations under the License.
 
 namespace EBPF {
 
-enum pipeline_type { TC_INGRESS, TC_EGRESS };
+enum pipeline_type { TC_INGRESS, TC_EGRESS, XDP_INGRESS, XDP_EGRESS, TC_TRAFFIC_MANAGER };
 
 class PSAEbpfGenerator {
  public:
@@ -58,8 +58,11 @@ class PSAEbpfGenerator {
     void emitInitializer(CodeBuilder* builder) const;
     virtual void emitInitializerSection(CodeBuilder* builder) const = 0;
     void emitHelperFunctions(CodeBuilder* builder) const;
+
+    // TODO: move them to the externs/ebpfPsaHashAlgorithm.cpp file
     void emitCRC32LookupTableTypes(CodeBuilder* builder) const;
     void emitCRC32LookupTableInitializer(CodeBuilder* builder) const;
+    void emitCRC32LookupTableInstance(CodeBuilder* builder) const;
 };
 
 class PSAArchTC : public PSAEbpfGenerator {
@@ -74,7 +77,31 @@ class PSAArchTC : public PSAEbpfGenerator {
 
     void emitInstances(CodeBuilder* builder) const override;
     void emitInitializerSection(CodeBuilder* builder) const override;
-    void emitCRC32LookupTableInstance(CodeBuilder* builder) const;
+};
+
+class PSAArchXDP : public PSAEbpfGenerator {
+ public:
+    // TC Ingress program used to support packet cloning in the XDP mode.
+    EBPFPipeline* tcIngressForXDP;
+    // If the XDP mode is used, we need to have TC Egress pipeline to handle cloned packets.
+    EBPFPipeline* tcEgressForXDP;
+    static const unsigned egressDevmapSize = 256;
+
+    PSAArchXDP(const EbpfOptions& options, std::vector<EBPFType*>& ebpfTypes,
+               EBPFPipeline* xdpIngress, EBPFPipeline* xdpEgress, EBPFPipeline* tcTrafficManager,
+               EBPFPipeline* tcEgress)
+        : PSAEbpfGenerator(options, ebpfTypes, xdpIngress, xdpEgress),
+          tcIngressForXDP(tcTrafficManager),
+          tcEgressForXDP(tcEgress) {}
+
+    void emit(CodeBuilder* builder) const override;
+
+    void emitPreamble(CodeBuilder* builder) const override;
+    void emitInstances(CodeBuilder* builder) const override;
+    void emitInitializerSection(CodeBuilder* builder) const override;
+
+    void emitXDP2TCInternalStructures(CodeBuilder* builder) const;
+    void emitDummyProgram(CodeBuilder* builder) const;
 };
 
 class ConvertToEbpfPSA : public Transform {

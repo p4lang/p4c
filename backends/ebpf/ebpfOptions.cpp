@@ -91,4 +91,11 @@ EbpfOptions::EbpfOptions() {
             return true;
         },
         "[psa only] Enable caching entries for tables with lpm or ternary key");
+    registerOption(
+        "--xdp", nullptr,
+        [this](const char*) {
+            generateToXDP = true;
+            return true;
+        },
+        "[psa only] Compile and generate the P4 prog for XDP hook");
 }

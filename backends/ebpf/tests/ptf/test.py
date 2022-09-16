@@ -111,6 +111,7 @@ class EgressTrafficManagerDropPSATest(P4EbpfTest):
         testutils.verify_no_other_packets(self)
 
 
+@tc_only
 class EgressTrafficManagerClonePSATest(P4EbpfTest):
     """
     1. Send packet to interface PORT1 (bpf ifindex = 5) with destination MAC address equals to aa:bb:cc:dd:ee:ff.
@@ -140,6 +141,7 @@ class EgressTrafficManagerClonePSATest(P4EbpfTest):
         super(EgressTrafficManagerClonePSATest, self).tearDown()
 
 
+@tc_only
 @xdp2tc_head_not_supported
 class EgressTrafficManagerRecirculatePSATest(P4EbpfTest):
     """
@@ -284,6 +286,7 @@ class BridgedMetadataPSATest(P4EbpfTest):
         testutils.verify_no_other_packets(self)
 
 
+@tc_only
 class QoSPSATest(P4EbpfTest):
 
     p4_file_path = "p4testdata/cos-psa.p4"
