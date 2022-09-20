@@ -2713,6 +2713,32 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
             }
         }
     }
+    if (auto vt = concreteType->to<IR::Type_Vector>()) {
+        auto vecElementType = vt->elementType;
+        if (auto le = expression->expr->to<IR::ListExpression>()) {
+            IR::Vector<IR::Expression> vec;
+            bool isConstant = true;
+            for (size_t i = 0; i < le->size(); i++) {
+                auto compI = le->components.at(i);
+                auto src = assignment(expression, vecElementType, compI);
+                if (!isCompileTimeConstant(src))
+                    isConstant = false;
+                vec.push_back(src);
+            }
+            auto vecType = castType->getP4Type();
+            setType(vecType, new IR::Type_Type(vt));
+            auto result = new IR::VectorExpression(le->srcInfo, vec, vecElementType);
+            setType(result, vt);
+            if (isConstant) {
+                setCompileTimeConstant(result);
+                setCompileTimeConstant(getOriginal<IR::Expression>());
+            }
+            return result;
+        } else {
+            typeError("%1%: casts to vector not supported", expression);
+            return expression;
+        }
+    }
 
     if (!castType->is<IR::Type_Bits>() && !castType->is<IR::Type_Boolean>() &&
         !castType->is<IR::Type_Newtype>() && !castType->is<IR::Type_SerEnum>() &&

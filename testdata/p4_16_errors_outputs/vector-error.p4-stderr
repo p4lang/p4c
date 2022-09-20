@@ -1,20 +1,20 @@
 vector-error.p4(9): [--Werror=type-error] error: e
-    E([bit<16>; 2, 3, 4]) e;
-                          ^
+    E((Vector<bit<16>>){2, 3, 4}) e;
+                                  ^
   ---- Actual error:
 vector-error.p4(9): Cannot unify type 'Vector<bit<16>>' with type 'Vector<bit<32>>'
-      E([bit<16>; 2, 3, 4]) e;
-        ^^^^^^^^^^^^^^^^^^
+      E((Vector<bit<16>>){2, 3, 4}) e;
+         ^^^^^^^^^^^^^^^
 vector-error.p4(4)
       E(Vector<bit<32>> data);
         ^^^^^^^^^^^^^^^
   ---- Originating from:
 vector-error.p4(9): Type of argument 'VectorExpression' (Vector<bit<16>>) does not match type of parameter 'data' (Vector<bit<32>>)
-      E([bit<16>; 2, 3, 4]) e;
-        ^^^^^^^^^^^^^^^^^^
+      E((Vector<bit<16>>){2, 3, 4}) e;
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
 vector-error.p4(9)
-      E([bit<16>; 2, 3, 4]) e;
-        ^^^^^^^^^^^^^^^^^^
+      E((Vector<bit<16>>){2, 3, 4}) e;
+         ^^^^^^^^^^^^^^^
 vector-error.p4(4)
       E(Vector<bit<32>> data);
                         ^^^^
@@ -23,8 +23,8 @@ vector-error.p4(4)
         ^^^^^^^^^^^^^^^
   ---- Originating from:
 vector-error.p4(9): Constructor invocation <Method call> does not match constructor declaration E
-      E([bit<16>; 2, 3, 4]) e;
-                            ^
+      E((Vector<bit<16>>){2, 3, 4}) e;
+                                    ^
 vector-error.p4(4)
       E(Vector<bit<32>> data);
       ^

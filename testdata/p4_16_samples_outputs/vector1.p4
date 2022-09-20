@@ -11,7 +11,7 @@ extern E {
 }
 
 control c() {
-    E([S; { 2, 3 }, { 4, 5 }]) e;
+    E((Vector<S>){ { 2, 3 }, { 4, 5 } }) e;
     apply {
         e.run();
     }

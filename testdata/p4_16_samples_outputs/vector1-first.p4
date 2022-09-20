@@ -11,7 +11,7 @@ extern E {
 }
 
 control c() {
-    E([S; { 32w2, 32w3 }, { 32w4, 32w5 }]) e;
+    E((Vector<S>){(S){a = 32w2,b = 32w3},(S){a = 32w4,b = 32w5}}) e;
     apply {
         e.run();
     }

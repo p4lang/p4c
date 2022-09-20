@@ -6,7 +6,7 @@ extern E {
 }
 
 control c() {
-    E([ bit<32>; 32w2, 32w3, 32w4 ]) e;
+    E((Vector<bit<32>>){32w2,32w3,32w4}) e;
     apply {
         e.run();
     }

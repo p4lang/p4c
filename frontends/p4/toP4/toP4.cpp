@@ -887,16 +887,27 @@ bool ToP4::preorder(const IR::ListExpression* e) {
 }
 
 bool ToP4::preorder(const IR::VectorExpression* e) {
-    builder.append("[");
-    visit(e->elementType->getP4Type());
-    builder.append("; ");
-    setVecSep(", ");
+    if (expressionPrecedence > DBPrint::Prec_Prefix)
+        builder.append("(");
+    if (e->elementType != nullptr) {
+        builder.append("(Vector<");
+        visit(e->elementType->getP4Type());
+        builder.append(">)");
+    }
+    builder.append("{");
     int prec = expressionPrecedence;
     expressionPrecedence = DBPrint::Prec_Low;
-    preorder(&e->components);
+    bool first = true;
+    for (auto c : e->components) {
+        if (!first)
+            builder.append(",");
+        first = false;
+        visit(c);
+    }
     expressionPrecedence = prec;
-    doneVec();
-    builder.append("]");
+    builder.append("}");
+    if (expressionPrecedence > DBPrint::Prec_Prefix)
+        builder.append(")");
     return false;
 }
 

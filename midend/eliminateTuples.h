@@ -67,6 +67,7 @@ class ReplacementMap {
  * the tuple is left unchanged, as below:
  * struct S<T> { tuple<T> x; }
  * This decision may need to be revisited in the future.
+ * Do not replace types within vectors either.
  *
  *   @pre none
  *   @post ensure all tuples are replaced with struct.
@@ -82,6 +83,7 @@ class DoReplaceTuples final : public Transform {
         : repl(new ReplacementMap(refMap, typeMap)) {
         setName("DoReplaceTuples");
     }
+    const IR::Node* skip(const IR::Node* node) { prune(); return node; }
     const IR::Node* postorder(IR::Type_BaseList* type) override;
     const IR::Node* insertReplacements(const IR::Node* before);
     const IR::Node* postorder(IR::Type_Struct* type) override { return insertReplacements(type); }
@@ -97,13 +99,12 @@ class DoReplaceTuples final : public Transform {
     const IR::Node* postorder(IR::Declaration_Instance* decl) override {
         return insertReplacements(decl);
     }
-    const IR::Node* preorder(IR::P4ValueSet* set) override
-    // Disable substitution of type parameters for value sets.
-    // We want to keep these as tuples.
-    {
-        prune();
-        return set;
+    const IR::Node* preorder(IR::P4ValueSet* set) override {
+        // Disable substitution of type parameters for value sets.
+        // We want to keep these as tuples.
+        return skip(set);
     }
+    const IR::Node* preorder(IR::Type_Vector* vector) override { return skip(vector); }
 };
 
 class EliminateTuples final : public PassManager {

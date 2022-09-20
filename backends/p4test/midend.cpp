@@ -162,6 +162,7 @@ MidEnd::MidEnd(CompilerOptions& options, std::ostream* outStream) {
     if (options.excludeMidendPasses) {
         removePasses(options.passesToExcludeMidend);
     }
+    addDebugHooks(hooks, true);
 }
 
 }  // namespace P4Test
