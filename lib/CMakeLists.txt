@@ -38,7 +38,6 @@ set (LIBP4CTOOLKIT_SRCS
 
 set (LIBP4CTOOLKIT_HDRS
 	algorithm.h
-	alloc.h
 	bitops.h
 	bitrange.h
 	bitvec.h
