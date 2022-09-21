@@ -25,16 +25,18 @@ namespace P4 {
 
 /**
  * Evaluates static_assert invocations.
+ * A successful assertion is constant-folded to 'true'.
  */
-class DoStaticAssert : public Inspector {
+class DoStaticAssert : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
+    bool removeStatement;
 
  public:
     DoStaticAssert(ReferenceMap* refMap, TypeMap* typeMap):
-            refMap(refMap), typeMap(typeMap)
+            refMap(refMap), typeMap(typeMap), removeStatement(false)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoStaticAssert"); }
-    bool preorder(const IR::MethodCallExpression* method) override {
+    const IR::Node* postorder(IR::MethodCallExpression* method) override {
         MethodInstance* mi = MethodInstance::resolve(method, refMap, typeMap);
         if (auto ef = mi->to<ExternFunction>()) {
             if (ef->method->name == "static_assert") {
@@ -43,7 +45,7 @@ class DoStaticAssert : public Inspector {
                 if (!params->moveNext()) {
                     ::warning(ErrorType::WARN_INVALID,
                               "static_assert with no arguments: %1%", method);
-                    return false;
+                    return method;
                 }
                 auto param = params->getCurrent();
                 CHECK_NULL(param);
@@ -63,13 +65,28 @@ class DoStaticAssert : public Inspector {
                         }
                         ::error(ErrorType::ERR_EXPECTED, "%1%: %2%",
                                 method, message);
+                        return method;
                     }
                 } else {
-                    ::warning("Could not evaluate static_assert to a constant: %1%", arg);
+                    ::error(ErrorType::ERR_UNEXPECTED,
+                            "Could not evaluate static_assert to a constant: %1%", arg);
+                    return method;
                 }
             }
         }
-        return false;
+        if (getContext()->node->is<IR::MethodCallStatement>()) {
+            removeStatement = true;
+            return method;
+        }
+        return new IR::BoolLiteral(method->srcInfo, true);
+    }
+
+    const IR::Node* postorder(IR::MethodCallStatement* statement) override {
+        if (removeStatement) {
+            removeStatement = false;
+            return nullptr;
+        }
+        return statement;
     }
 };
 
