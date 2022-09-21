@@ -67,6 +67,11 @@ class DoStaticAssert : public Transform {
                                 method, message);
                         return method;
                     }
+                    if (getContext()->node->is<IR::MethodCallStatement>()) {
+                        removeStatement = true;
+                        return method;
+                    }
+                    return new IR::BoolLiteral(method->srcInfo, true);
                 } else {
                     ::error(ErrorType::ERR_UNEXPECTED,
                             "Could not evaluate static_assert to a constant: %1%", arg);
@@ -74,11 +79,7 @@ class DoStaticAssert : public Transform {
                 }
             }
         }
-        if (getContext()->node->is<IR::MethodCallStatement>()) {
-            removeStatement = true;
-            return method;
-        }
-        return new IR::BoolLiteral(method->srcInfo, true);
+        return method;
     }
 
     const IR::Node* postorder(IR::MethodCallStatement* statement) override {
