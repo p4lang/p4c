@@ -3,10 +3,7 @@
 #include <v1model.p4>
 
 control c() {
-    @name("c.hasReturned") bool hasReturned;
     @name("c.v") action v() {
-        hasReturned = false;
-        hasReturned = true;
     }
     apply {
         v();

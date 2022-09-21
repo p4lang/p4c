@@ -35,11 +35,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         } else {
             val_0 = 8w3;
         }
-        if (hasReturned) {
-            ;
-        } else {
-            hasReturned = true;
-        }
         h.h.a = val_0;
     }
     @name("ingress.simple_table") table simple_table_0 {

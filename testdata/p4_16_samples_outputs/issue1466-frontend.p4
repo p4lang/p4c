@@ -5,7 +5,6 @@ header hdr {
 control A(inout hdr _hdr) {
     apply {
         _hdr.g = 1w1;
-        _hdr.g = 1w1;
     }
 }
 

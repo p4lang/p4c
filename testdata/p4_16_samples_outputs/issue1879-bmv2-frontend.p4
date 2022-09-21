@@ -70,12 +70,9 @@ struct headers {
 
 parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("PROTParser.paddingLen") bit<9> paddingLen_0;
-    @name("PROTParser.currentISelected") bool currentISelected_0;
     @name("PROTParser.hdrLeft") bit<8> hdrLeft_0;
-    @name("PROTParser.currentISelected") bool currentISelected_1;
     @name("PROTParser.inf_0") prot_i_t inf_0;
     @name("PROTParser.meta_0") metadata meta_0;
-    @name("PROTParser.currentISelected_2") bool currentISelected_2;
     @name("PROTParser.currI_0") bit<8> currI_0;
     @name("PROTParser.subParser.currentISelected2") bool subParser_currentISelected2;
     state start {
@@ -96,10 +93,8 @@ parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         packet.extract<prot_host_addr_padding_t>(hdr.prot_host_addr_padding, (bit<32>)paddingLen_0);
         meta.addrLen = meta.addrLen + paddingLen_0;
         meta.currPos = (bit<8>)(9w3 + (meta.addrLen >> 6));
-        currentISelected_0 = hdr.prot_common.curri == meta.currPos;
         inf_0.setInvalid();
         meta_0 = meta;
-        currentISelected_2 = currentISelected_0;
         currI_0 = hdr.prot_common.curri;
         transition SubParser_start;
     }
@@ -136,10 +131,8 @@ parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     state parse_prot_inf_1 {
-        currentISelected_1 = meta.currPos == hdr.prot_common.curri;
         inf_0.setInvalid();
         meta_0 = meta;
-        currentISelected_2 = currentISelected_1;
         currI_0 = hdr.prot_common.curri;
         transition SubParser_start_0;
     }

@@ -45,13 +45,10 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name("ingressImpl.tmp_2") bool tmp_2;
     @name("ingressImpl.tmp_3") H[1] tmp_3;
     @name("ingressImpl.tmp_4") bool tmp_4;
-    @name("ingressImpl.hasReturned") bool hasReturned;
     @name("ingressImpl.retval") H retval;
     @name("ingressImpl.h") H h_0;
-    @name("ingressImpl.hasReturned_0") bool hasReturned_0;
     @name("ingressImpl.retval_0") U retval_0;
     @name("ingressImpl.u") U u_0;
-    @name("ingressImpl.hasReturned_1") bool hasReturned_1;
     @name("ingressImpl.retval_1") H[1] retval_1;
     @name("ingressImpl.s") H[1] s_0;
     apply {
@@ -60,9 +57,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         } else {
             log_msg("hdr.ethernet is invalid");
         }
-        hasReturned = false;
         h_0.setInvalid();
-        hasReturned = true;
         retval = h_0;
         tmp = retval;
         tmp_0 = tmp.isValid();
@@ -71,9 +66,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         } else {
             log_msg("f() returned an invalid header");
         }
-        hasReturned_0 = false;
         u_0.h.setInvalid();
-        hasReturned_0 = true;
         retval_0 = u_0;
         tmp_1 = retval_0;
         tmp_2 = tmp_1.h.isValid();
@@ -82,9 +75,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         } else {
             log_msg("g() returned a header_union with invalid member h");
         }
-        hasReturned_1 = false;
         s_0[0].setInvalid();
-        hasReturned_1 = true;
         retval_1 = s_0;
         tmp_3 = retval_1;
         tmp_4 = tmp_3[0].isValid();

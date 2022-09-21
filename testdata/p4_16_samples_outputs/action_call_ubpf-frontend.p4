@@ -14,13 +14,10 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    @name("pipe.hasReturned") bool hasReturned;
     @name("pipe.RejectConditional") action RejectConditional(@name("condition") bit<1> condition) {
     }
     @name("pipe.act_return") action act_return() {
-        hasReturned = false;
         mark_to_pass();
-        hasReturned = true;
     }
     @name("pipe.act_exit") action act_exit() {
         mark_to_pass();

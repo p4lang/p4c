@@ -74,7 +74,6 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    @name("pipe.hasReturned") bool hasReturned;
     @name("pipe.s") bit<32> s_0;
     @name("pipe.s") bit<32> s_1;
     @name("pipe.s") bit<32> s_7;
@@ -118,7 +117,6 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         mark_to_drop();
     }
     apply {
-        hasReturned = false;
         if (headers.tcp.isValid()) {
             if (headers.ipv4.srcAddr < headers.ipv4.dstAddr) {
                 hash<tuple<bit<32>, bit<32>>>(meta.conn_id, HashAlgorithm.lookup3, { headers.ipv4.srcAddr, headers.ipv4.dstAddr });
@@ -138,7 +136,6 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
                     }
                 } else if (meta.connInfo.s == 32w2) {
                     _drop();
-                    hasReturned = true;
                 } else if (meta.connInfo.s == 32w3) {
                     if (headers.tcp.fin == 1w1 && headers.tcp.ack == 1w1) {
                         update_conn_info_1();
@@ -146,7 +143,6 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
                 }
             } else if (meta.connInfo.s == 32w1) {
                 _drop_1();
-                hasReturned = true;
             } else if (meta.connInfo.s == 32w2) {
                 if (headers.tcp.syn == 1w0 && headers.tcp.ack == 1w1) {
                     update_conn_state_1();

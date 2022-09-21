@@ -11,7 +11,6 @@ struct Headers {
 control c(inout Headers hdr) {
     @name("c.tmp_val") bit<16> tmp_val_0;
     @name("c.do_action") action do_action() {
-        hdr.eth_hdr.eth_type = 16w3 + (tmp_val_0 > 16w2 ? 16w3 : 16w1);
     }
     @name("c.do_action") action do_action_1() {
         hdr.eth_hdr.eth_type = 16w3 + (tmp_val_0 > 16w2 ? 16w3 : 16w1);

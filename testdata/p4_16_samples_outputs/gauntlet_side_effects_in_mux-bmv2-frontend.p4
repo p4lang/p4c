@@ -34,22 +34,16 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_0") bit<16> tmp_0;
     @name("ingress.tmp_1") bit<16> tmp_1;
     @name("ingress.hPSe_0") bit<8> hPSe;
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bit<16> retval;
     @name("ingress.hPSe_1") bit<8> hPSe_2;
-    @name("ingress.hasReturned") bool hasReturned_1;
     @name("ingress.retval") bit<16> retval_1;
     apply {
         if (h.eth_hdr.src_addr == 48w5) {
-            hasReturned = false;
-            hasReturned = true;
             retval = 16w2;
             h.h.a = hPSe;
             tmp_0 = retval;
             tmp = tmp_0;
         } else {
-            hasReturned_1 = false;
-            hasReturned_1 = true;
             retval_1 = 16w2;
             h.h.b = hPSe_2;
             tmp_1 = retval_1;

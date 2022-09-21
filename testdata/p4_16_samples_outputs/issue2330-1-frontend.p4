@@ -27,7 +27,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<48> tmp;
     @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.val1_0") bit<16> val1;
-    @name("ingress.val2_0") bit<48> val2;
     @name("ingress.do_action") action do_action() {
         hasReturned = false;
         pointless_bool_0 = true;
@@ -40,9 +39,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             ;
         } else {
             val1 = h.eth_hdr.eth_type;
-            val2 = h.eth_hdr.src_addr;
             h.eth_hdr.eth_type = val1;
-            h.eth_hdr.src_addr = val2;
             if (pointless_bool_0) {
                 tmp = 48w1;
             } else {

@@ -33,7 +33,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<32> tmp;
     @name("ingress.val") bit<32> val_0;
     @name("ingress.do_something") action do_something() {
-        val_0 = h.h[0].a;
         if (h.eth_hdr.eth_type == 16w1) {
             tmp = 32w1;
         } else {

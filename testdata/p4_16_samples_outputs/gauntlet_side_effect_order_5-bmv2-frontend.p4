@@ -21,7 +21,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.val") bit<48> val_0;
     @name("ingress.val_2") bit<48> val_1;
     @name("ingress.hasReturned") bool hasReturned;
-    @name("ingress.retval") bit<48> retval;
     apply {
         tmp = h.eth_hdr.src_addr;
         val_0 = tmp;
@@ -30,7 +29,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             if (val_0 <= 48w50) {
                 val_1 = 48w3;
                 hasReturned = true;
-                retval = 48w0;
             } else {
                 val_1 = 48w12;
             }
@@ -40,13 +38,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
                 val_1 = 48w1452;
             }
         }
-        if (hasReturned) {
-            ;
-        } else {
-            hasReturned = true;
-            retval = 48w0;
-        }
-        tmp = val_0;
         tmp_0 = val_1;
         h.eth_hdr.src_addr = tmp_0;
     }

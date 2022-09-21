@@ -29,18 +29,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_action") action do_action() {
-        val_0 = h.eth_hdr.src_addr;
         val_0 = 48w2;
         h.eth_hdr.src_addr = val_0;
         exit;
-        h.eth_hdr.src_addr = val_0;
     }
     @name("ingress.do_action") action do_action_1() {
-        val_2 = h.eth_hdr.dst_addr;
         val_2 = 48w2;
         h.eth_hdr.dst_addr = val_2;
         exit;
-        h.eth_hdr.dst_addr = val_2;
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
