@@ -345,11 +345,8 @@ const Value* AbstractStepper::evaluateExpression(
 
 void AbstractStepper::setTargetUninitialized(ExecutionState* nextState, const IR::Member* ref,
                                              bool forceTaint) const {
-    const auto* refType = ref->type;
     // Resolve the type of the left-and assignment, if it is a type name.
-    if (const auto* typeName = refType->to<IR::Type_Name>()) {
-        refType = nextState->resolveType(typeName);
-    }
+    const auto* refType = nextState->resolveType(ref->type);
     if (const auto* structType = refType->to<const IR::Type_StructLike>()) {
         std::vector<const IR::Member*> validFields;
         auto fields = nextState->getFlatFields(ref, structType, &validFields);

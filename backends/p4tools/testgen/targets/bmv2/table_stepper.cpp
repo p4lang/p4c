@@ -164,18 +164,12 @@ bool BMv2_V1ModelTableStepper::checkForActionProfile() {
     const IR::IDeclaration* implDecl = nullptr;
     const IR::Type_Extern* implExtern = nullptr;
     if (const auto* implCall = implExpr->expression->to<IR::ConstructorCallExpression>()) {
-        const auto* implDeclType = implCall->constructedType;
-        if (const auto* typeName = implDeclType->to<IR::Type_Name>()) {
-            implDeclType = state->resolveType(typeName);
-        }
+        const auto* implDeclType = state->resolveType(implCall->constructedType);
         implExtern = implDeclType->checkedTo<IR::Type_Extern>();
         implDecl = implExtern;
     } else if (const auto* implPath = implExpr->expression->to<IR::PathExpression>()) {
         const auto* declInst = state->findDecl(implPath)->checkedTo<IR::Declaration_Instance>();
-        const auto* implDeclType = declInst->type;
-        if (const auto* typeName = implDeclType->to<IR::Type_Name>()) {
-            implDeclType = state->resolveType(typeName);
-        }
+        const auto* implDeclType = state->resolveType(declInst->type);
         implExtern = implDeclType->checkedTo<IR::Type_Extern>();
         implDecl = declInst;
     } else {
@@ -212,18 +206,12 @@ bool BMv2_V1ModelTableStepper::checkForActionSelector() {
     const IR::IDeclaration* selectorDecl = nullptr;
     const IR::Type_Extern* selectorExtern = nullptr;
     if (const auto* implCall = selectorExpr->expression->to<IR::ConstructorCallExpression>()) {
-        const auto* selectorDeclType = implCall->constructedType;
-        if (const auto* typeName = selectorDeclType->to<IR::Type_Name>()) {
-            selectorDeclType = state->resolveType(typeName);
-        }
+        const auto* selectorDeclType = state->resolveType(implCall->constructedType);
         selectorExtern = selectorDeclType->checkedTo<IR::Type_Extern>();
         selectorDecl = selectorExtern;
     } else if (const auto* implPath = selectorExpr->expression->to<IR::PathExpression>()) {
         const auto* declInst = state->findDecl(implPath)->checkedTo<IR::Declaration_Instance>();
-        const auto* selectorDeclType = declInst->type;
-        if (const auto* typeName = selectorDeclType->to<IR::Type_Name>()) {
-            selectorDeclType = state->resolveType(typeName);
-        }
+        const auto* selectorDeclType = state->resolveType(declInst->type);
         selectorExtern = selectorDeclType->checkedTo<IR::Type_Extern>();
         selectorDecl = declInst;
     } else {

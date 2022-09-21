@@ -32,7 +32,7 @@ BMv2_V1ModelCmdStepper::BMv2_V1ModelCmdStepper(ExecutionState& state, AbstractSo
     : CmdStepper(state, solver, programInfo) {}
 
 const BMv2_V1ModelProgramInfo& BMv2_V1ModelCmdStepper::getProgramInfo() const {
-    return CmdStepper::getProgramInfo().to<BMv2_V1ModelProgramInfo>();
+    return *CmdStepper::getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
 }
 
 void BMv2_V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState* nextState) const {

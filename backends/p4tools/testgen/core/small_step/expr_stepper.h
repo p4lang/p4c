@@ -29,7 +29,7 @@ class ExprStepper : public AbstractStepper {
  protected:
     /// Contains information that is useful for externs that advance the parser cursor.
     /// For example, advance, extract, or lookahead.
-    struct AdvanceInfo {
+    struct PacketCursorAdvanceInfo {
         /// How much the parser cursor will be advanced in a successful parsing case.
         int advanceSize;
 
@@ -46,13 +46,13 @@ class ExprStepper : public AbstractStepper {
     /// Calculates the conditions that need to be satisfied for a successful parser advance.
     /// This assumes that the advance amount is known already and a compile-time constant.
     /// Targets may override this function with custom behavior.
-    virtual AdvanceInfo calculateSuccessfulParserAdvance(const ExecutionState& state,
+    virtual PacketCursorAdvanceInfo calculateSuccessfulParserAdvance(const ExecutionState& state,
                                                          int advanceSize) const;
     /// Calculates the conditions that need to be satisfied for a successful parser advance.
     /// This assumes that the advance amount is a run-time value.
     //// We need to pick a satisfying value assignment for a reject or advance of the parser.
     /// Targets may override this function with custom behavior.
-    virtual AdvanceInfo calculateAdvanceExpression(const ExecutionState& state,
+    virtual PacketCursorAdvanceInfo calculateAdvanceExpression(const ExecutionState& state,
                                                    const IR::Expression* advanceExpr,
                                                    const IR::Expression* restrictions) const;
 

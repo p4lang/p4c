@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "ir/ir.h"
+#include "lib/castable.h"
 #include "lib/cstring.h"
 #include "lib/null.h"
 
@@ -19,7 +20,7 @@ namespace P4Tools {
 namespace P4Testgen {
 
 /// Stores target-specific information about a P4 program.
-class ProgramInfo {
+class ProgramInfo : public Castable {
  private:
     const NamespaceContext* globalNameSpaceContext;
 
@@ -50,14 +51,6 @@ class ProgramInfo {
 
     /// The P4 program from which this object is derived.
     const IR::P4Program* program;
-
-    /// Casts this object to T. Useful for casting to a concrete implementation of this class.
-    template <class T>
-    const T& to() const {
-        const auto* casted = dynamic_cast<const T*>(this);
-        CHECK_NULL(casted);
-        return *casted;
-    }
 
     /// @returns the series of nodes that has been computed by this particular target.
     const std::vector<Continuation::Command>* getPipelineSequence() const;

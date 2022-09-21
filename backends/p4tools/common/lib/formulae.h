@@ -41,7 +41,7 @@ class AbstractRepCheckedNode {
     }
 };
 
-/// Represents a variable instance in a P4 program.
+/// Represents a reference to an object in a P4 program.
 ///
 /// This is a thin wrapper around a 'const IR::Member*' to (1) enforce invariants on which forms of
 /// Members can represent state variables and (2) enable the use of StateVariables as map keys.

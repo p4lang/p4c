@@ -16,16 +16,16 @@
 #include <boost/none.hpp>
 #include <boost/optional/optional.hpp>
 
+#include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/formulae.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 
-#include "testgen/common/core/solver.h"
-#include "testgen/common/lib/formulae.h"
-#include "testgen/testgen/core/exploration_strategy/exploration_strategy.h"
-#include "testgen/testgen/core/program_info.h"
-#include "testgen/testgen/core/small_step/small_step.h"
-#include "testgen/testgen/lib/execution_state.h"
-#include "testgen/testgen/lib/final_state.h"
+#include "backends/p4tools/testgen/core/exploration_strategy/exploration_strategy.h"
+#include "backends/p4tools/testgen/core/program_info.h"
+#include "backends/p4tools/testgen/core/small_step/small_step.h"
+#include "backends/p4tools/testgen/lib/execution_state.h"
+#include "backends/p4tools/testgen/lib/final_state.h"
 
 namespace P4Tools {
 

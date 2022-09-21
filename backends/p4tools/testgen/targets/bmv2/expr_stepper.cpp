@@ -60,7 +60,6 @@ bool BMv2_V1ModelExprStepper::isPartOfFieldList(const IR::StructField* field,
 void BMv2_V1ModelExprStepper::resetPreservingFieldList(ExecutionState* nextState,
                                                        const IR::PathExpression* ref,
                                                        uint64_t recirculateIndex) const {
-    auto progInfo = getProgramInfo().to<BMv2_V1ModelProgramInfo>();
     const auto* ts = ref->type->checkedTo<IR::Type_StructLike>();
     for (const auto* field : ts->fields) {
         // Check whether the field has a "field_list" annotation associated with it.
@@ -68,10 +67,7 @@ void BMv2_V1ModelExprStepper::resetPreservingFieldList(ExecutionState* nextState
             continue;
         }
         // If there is no annotation, reset the user metadata.
-        const auto* fieldType = field->type;
-        if (const auto* tn = fieldType->to<IR::Type_Name>()) {
-            fieldType = nextState->resolveType(tn);
-        }
+        const auto* fieldType = nextState->resolveType(field->type);
         auto* fieldLabel = new IR::Member(fieldType, ref, field->name);
         // Reset the variable.
         setTargetUninitialized(nextState, fieldLabel, false);
@@ -864,16 +860,16 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  // This program segment resets the user metadata of the v1model program to 0.
                  // However, fields in the user metadata that have the field_list annotation and the
                  // appropriate index will not be reset.
-                 auto progInfo = getProgramInfo().to<BMv2_V1ModelProgramInfo>();
+                 auto progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
                  // The user metadata is the second parameter of the ingress control.
-                 const auto* paramPath = progInfo.getBlockParam("Ingress", 1);
+                 const auto* paramPath = progInfo->getBlockParam("Ingress", 1);
                  resetPreservingFieldList(nextState, paramPath, recirculateIndex);
 
                  // We need to reset everything to the state before the ingress call. We use a trick
                  // by calling copyIn on the entire state again. We need a little bit of information
                  // for that, including the exact parameter names of the ingress block we are in.
                  // Just grab the ingress from the programmable blocks.
-                 const auto* programmableBlocks = progInfo.getProgrammableBlocks();
+                 const auto* programmableBlocks = progInfo->getProgrammableBlocks();
                  const auto* typeDecl = programmableBlocks->at("Ingress");
                  const auto* applyBlock = typeDecl->checkedTo<IR::P4Control>();
                  const auto* params = applyBlock->getApplyParameters();
@@ -1137,13 +1133,13 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  }
                  // This is the clone state.
                  auto* nextState = new ExecutionState(state);
-                 auto progInfo = getProgramInfo().to<BMv2_V1ModelProgramInfo>();
+                 auto progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
 
                  // We need to reset everything to the state before the ingress call. We use a trick
                  // by calling copyIn on the entire state again. We need a little bit of information
                  // for that, including the exact parameter names of the ingress block we are in.
                  // Just grab the ingress from the programmable blocks.
-                 const auto* programmableBlocks = progInfo.getProgrammableBlocks();
+                 const auto* programmableBlocks = progInfo->getProgrammableBlocks();
                  const auto* typeDecl = programmableBlocks->at("Ingress");
                  const auto* applyBlock = typeDecl->checkedTo<IR::P4Control>();
                  const auto* params = applyBlock->getApplyParameters();
@@ -1237,7 +1233,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  IRUtils::getConstant(pktSizeType, recState->getPacketBufferSize() / 8);
              recState->set(packetSizeVar, packetSizeConst);
 
-             auto progInfo = getProgramInfo().to<BMv2_V1ModelProgramInfo>();
+             auto progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
              if (recState->hasProperty("recirculate_index")) {
                  // Get the index set by the recirculate/resubmit function. Will fail if no index is
                  // set.
@@ -1246,7 +1242,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  // However, fields in the user metadata that have the field_list annotation and the
                  // appropriate index will not be reset.
                  // The user metadata is the third parameter of the parser control.
-                 const auto* paramPath = progInfo.getBlockParam("Parser", 2);
+                 const auto* paramPath = progInfo->getBlockParam("Parser", 2);
                  resetPreservingFieldList(recState, paramPath, recirculateIndex);
              }
 
@@ -1284,7 +1280,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                      result->emplace_back(defaultState);
                  }
                  // In the other state, we start processing from the egress.
-                 const auto* topLevelBlocks = progInfo.getPipelineSequence();
+                 const auto* topLevelBlocks = progInfo->getPipelineSequence();
                  size_t egressDelim = 0;
                  for (; egressDelim < topLevelBlocks->size(); ++egressDelim) {
                      auto block = topLevelBlocks->at(egressDelim);
@@ -1293,7 +1289,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                          continue;
                      }
                      if (const auto* ctrl = (*p4Node)->to<IR::P4Control>()) {
-                         if (progInfo.getGress(ctrl) == BMV2_EGRESS) {
+                         if (progInfo->getGress(ctrl) == BMV2_EGRESS) {
                              break;
                          }
                      }
@@ -1312,7 +1308,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              }
              // "Recirculate" by attaching the sequence again.
              // Does NOT initialize state or adds new conditions.
-             const auto* topLevelBlocks = progInfo.getPipelineSequence();
+             const auto* topLevelBlocks = progInfo->getPipelineSequence();
              recState->replaceTopBody(topLevelBlocks);
              result->emplace_back(recState);
          }},

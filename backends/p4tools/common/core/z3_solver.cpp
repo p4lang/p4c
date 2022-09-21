@@ -186,7 +186,7 @@ z3::expr Z3Solver::declareVar(const StateVariable& var) {
         "DeclaredVarsById should have at least one entry! Check if push() was used correctly.");
     // Need to take the reference here to avoid accidental copies.
     auto* latestVars = &declaredVarsById.back();
-    latestVars->emplace(expr.id(), StateVariable(var));
+    latestVars->emplace(expr.id(), var);
     return expr;
 }
 

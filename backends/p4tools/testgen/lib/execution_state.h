@@ -261,8 +261,8 @@ class ExecutionState {
     /// Looks up a declaration from a path expression. A BUG occurs if no declaration is found.
     const IR::IDeclaration* findDecl(const IR::PathExpression* pathExpr) const;
 
-    /// Resolves a Type_Name in the current environment.
-    const IR::Type_Declaration* resolveType(const IR::Type_Name* type) const;
+    /// Resolves a Type in the current environment.
+    const IR::Type* resolveType(const IR::Type* type) const;
 
     /// @returns the current namespace context.
     const NamespaceContext* getNamespaceContext() const;

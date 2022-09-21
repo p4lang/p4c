@@ -72,9 +72,7 @@ void CmdStepper::initializeBlockParams(const IR::Type_Declaration* typeDecl,
             continue;
         }
         // We need to resolve type names.
-        if (const auto* tn = paramType->to<IR::Type_Name>()) {
-            paramType = nextState->resolveType(tn);
-        }
+        paramType = nextState->resolveType(paramType);
         const auto* paramPath = new IR::PathExpression(paramType, new IR::Path(archRef));
         if (const auto* ts = paramType->to<IR::Type_StructLike>()) {
             declareStructLike(nextState, paramPath, ts);
@@ -104,9 +102,7 @@ bool CmdStepper::preorder(const IR::AssignmentStatement* assign) {
     const auto* leftType = left->type;
 
     // Resolve the type of the left-and assignment, if it is a type name.
-    if (leftType->is<IR::Type_Name>()) {
-        leftType = state.resolveType(leftType->to<IR::Type_Name>());
-    }
+    leftType = state.resolveType(leftType);
     // Although we typically expand structure assignments into individual member assignments using
     // the copyHeaders pass, some extern functions may return a list or struct expression. We can
     // not always expand these return values as we do with the expandLookahead pass.
@@ -145,10 +141,7 @@ bool CmdStepper::preorder(const IR::AssignmentStatement* assign) {
 }
 
 bool CmdStepper::preorder(const IR::Declaration_Variable* decl) {
-    const auto* declType = decl->type;
-    if (declType->is<IR::Type_Name>()) {
-        declType = state.resolveType(declType->to<IR::Type_Name>());
-    }
+    const auto* declType = state.resolveType(decl->type);
     if (decl->initializer != nullptr) {
         TESTGEN_UNIMPLEMENTED("Unsupported initializer %s for declaration variable.",
                               decl->initializer);
@@ -161,9 +154,8 @@ bool CmdStepper::preorder(const IR::Declaration_Variable* decl) {
         const auto* stackSizeExpr = stackType->size;
         auto stackSize = stackSizeExpr->checkedTo<IR::Constant>()->asInt();
         const auto* stackElemType = stackType->elementType;
-        if (stackElemType->is<IR::Type_Name>()) {
-            stackElemType = state.resolveType(stackElemType->to<IR::Type_Name>());
-        }
+        stackElemType = state.resolveType(stackElemType);
+
         const auto* structType = stackElemType->checkedTo<IR::Type_StructLike>();
         for (auto idx = 0; idx < stackSize; idx++) {
             const auto* parentExpr = HSIndexToMember::produceStackIndex(
@@ -255,7 +247,7 @@ bool CmdStepper::preorder(const IR::P4Control* p4control) {
     // Remove the invocation of the control from the current body and push the resulting
     // continuation onto the continuation stack.
     nextState->popBody();
-    // Exit terminates the entire control pipeline (only the control).
+    // Exit terminates the entire control block (only the control).
     std::map<Continuation::Exception, Continuation> handlers;
     handlers.emplace(Continuation::Exception::Exit, Continuation::Body({}));
     nextState->pushCurrentContinuation(handlers);
@@ -371,12 +363,12 @@ bool CmdStepper::preorder(const IR::P4Program* /*program*/) {
     // Initialize all relevant environment variables for the respective target.
     initializeTargetEnvironment(nextState);
 
-    // We mandate all packets to conform to a fixed size. This is a temporary change.
+    // If this option is active, mandate that all packets conform to a fixed size.
     auto pktSize = TestgenOptions::get().packetSize;
     if (pktSize != 0) {
         auto maxPktLength = ExecutionState::getMaxPacketLength_bits();
         if (pktSize < 0 || pktSize > maxPktLength) {
-            ::error("Invalid input packet size. The valid range is from 1 to %s bits.",
+            ::error("Invalid input packet size. The valid range is from 1 to %1% bits.",
                     maxPktLength);
             return false;
         }
@@ -472,7 +464,6 @@ bool CmdStepper::preorder(const IR::ParserState* parserState) {
         }
         replacements.emplace_back(statOrDecl);
     }
-
     // Add the next parser state(s) to the replacements
     replacements.emplace_back(Continuation::Return(parserState->selectExpression));
 

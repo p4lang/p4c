@@ -130,8 +130,7 @@ const IR::Expression* TableStepper::computeTargetMatchType(
     const IR::Expression* keyExpr = keyProperties.key->expression;
     // Create a new zombie constant that corresponds to the key expression.
     cstring keyName = properties.tableName + "_key_" + keyProperties.name;
-    const auto ctrlPlaneKey =
-        nextState->createZombieConst(keyProperties.key->expression->type, keyName);
+    const auto ctrlPlaneKey = nextState->createZombieConst(keyExpr->type, keyName);
 
     if (keyProperties.matchType == P4Constants::MATCH_KIND_EXACT) {
         hitCondition = new IR::LAnd(hitCondition, new IR::Equ(keyExpr, ctrlPlaneKey));
@@ -269,11 +268,7 @@ const IR::Expression* TableStepper::evalTableConstEntries() {
             if (entryKey->is<IR::DefaultExpression>()) {
                 continue;
             }
-            // TODO(Fabian): This may not generalize. Find a way to handle this in z3_solver.cpp
             const IR::Expression* keyExpr = key->expression;
-            if (const auto* path = keyExpr->to<IR::PathExpression>()) {
-                keyExpr = nextState->convertPathExpr(path);
-            }
             if (const auto* rangeExpr = entryKey->to<IR::Range>()) {
                 const auto* minKey = rangeExpr->left;
                 const auto* maxKey = rangeExpr->right;
@@ -569,11 +564,9 @@ std::vector<const IR::ActionListElement*> TableStepper::buildTableActionList() {
         if (action->getAnnotation("defaultonly") != nullptr) {
             continue;
         }
+        // Check some properties of the list.
         CHECK_NULL(action->expression);
-        const auto* tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
-        BUG_CHECK(tableAction, "Invalid action '%1%' in the table '%2%'", action, table);
-        BUG_CHECK(tableAction->arguments->empty(),
-                  "Did not expect method call to have arguments in the action list.");
+        action->expression->checkedTo<IR::MethodCallExpression>();
         tableActionList.emplace_back(action);
     }
     return tableActionList;

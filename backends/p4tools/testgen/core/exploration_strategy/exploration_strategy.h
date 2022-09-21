@@ -30,9 +30,19 @@ namespace P4Testgen {
 
 /// Base abstract class for exploration strategy. It requires the implementation of
 /// the run method, and carries the base Branch struct, to be reused in inherited
-/// classes. It also holds a default termination method, which can be override.
+/// classes. It also holds a default termination method, which can be overridden.
 class ExplorationStrategy {
  public:
+    virtual ~ExplorationStrategy() = default;
+
+    ExplorationStrategy(const ExplorationStrategy&) = default;
+
+    ExplorationStrategy(ExplorationStrategy&&) = delete;
+
+    ExplorationStrategy& operator=(const ExplorationStrategy&) = default;
+
+    ExplorationStrategy& operator=(ExplorationStrategy&&) = delete;
+
     /// Callbacks are invoked when the P4 program terminates. If the callback returns true,
     /// execution halts. Otherwise, execution of the P4 program continues on a different random
     /// path.
@@ -63,7 +73,7 @@ class ExplorationStrategy {
     /// The SMT solver backing this executor.
     AbstractSolver& solver;
 
-    /// @returns a pseudorandom integer in the range of [0, max]
+    /// @returns a pseudorandom integer in the range of [0, branches.size() - 1]
     uint64_t selectBranch(const std::vector<Branch>& branches);
 
     /// Handles processing at the end of a P4 program.

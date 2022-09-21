@@ -76,8 +76,8 @@ class TableStepper {
     /// given the table.
     static const StateVariable& getTableKeyReadVar(const IR::P4Table* table, int keyIdx);
 
-    /// @returns the boolean-typed state variable that tracks whether the given table was hit. The
-    /// value of this variable is false if the table misses or is not reached.
+    /// @returns the boolean-typed state variable that tracks whether a table has resulted in a hit.
+    /// The value of this variable is false if the table misses or is not reached.
     static const StateVariable& getTableHitVar(const IR::P4Table* table);
 
     /// @returns the state variable that tracks the index of the action taken by the given table.
@@ -119,7 +119,7 @@ class TableStepper {
     /// tableMissCondition is true.
     void addDefaultAction(boost::optional<const IR::Expression*> tableMissCondition);
 
-    /// Helper function that collects the list of actin elements contained in the table.
+    /// Helper function that collects the list of actions contained in the table.
     std::vector<const IR::ActionListElement*> buildTableActionList();
 
     /// Sets the action taken by the given table. The arguments in the given MethodCallExpression

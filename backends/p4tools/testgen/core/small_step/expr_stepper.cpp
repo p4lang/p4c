@@ -92,25 +92,24 @@ void ExprStepper::evalActionCall(const IR::P4Action* action, const IR::MethodCal
     const auto* actionNameSpace = action->to<IR::INamespace>();
     BUG_CHECK(actionNameSpace, "Does not instantiate an INamespace: %1%", actionNameSpace);
     auto* nextState = new ExecutionState(state);
-    if (action->body == nullptr) {
-        // The action has no body, so there is little to do here.
-        nextState->popBody();
-    } else {
-        // If the action has arguments, these are usually directionless control plane input.
-        // We introduce a zombie variable that takes the argument value. This value is either
-        // provided by a constant entry or synthesized by us.
-        for (size_t argIdx = 0; argIdx < call->arguments->size(); ++argIdx) {
-            const auto& parameters = action->parameters;
-            const auto* param_type = parameters->getParameter(argIdx)->type;
-            const auto param_name = parameters->getParameter(argIdx)->name;
-            const auto& tableActionDataVar = IRUtils::getZombieVar(param_type, 0, param_name);
-            const auto* curArg = call->arguments->at(argIdx)->expression;
-            nextState->set(tableActionDataVar, curArg);
-        }
-        nextState->replaceTopBody(action->body);
-        // Enter the action's namespace.
-        nextState->pushNamespace(actionNameSpace);
+    // If the action has arguments, these are usually directionless control plane input.
+    // We introduce a zombie variable that takes the argument value. This value is either
+    // provided by a constant entry or synthesized by us.
+    for (size_t argIdx = 0; argIdx < call->arguments->size(); ++argIdx) {
+        const auto& parameters = action->parameters;
+        const auto* const param = parameters->getParameter(argIdx);
+        const auto* paramType = param->type;
+        const auto paramName = param->name;
+        BUG_CHECK(param->direction == IR::Direction::None,
+                  "%1%: Only directionless action parameters are supported at this point. ",
+                  action);
+        const auto& tableActionDataVar = IRUtils::getZombieVar(paramType, 0, paramName);
+        const auto* curArg = call->arguments->at(argIdx)->expression;
+        nextState->set(tableActionDataVar, curArg);
     }
+    nextState->replaceTopBody(action->body);
+    // Enter the action's namespace.
+    nextState->pushNamespace(actionNameSpace);
     result->emplace_back(nextState);
 }
 
@@ -271,9 +270,7 @@ bool ExprStepper::preorder(const IR::P4ValueSet* valueSet) {
     IR::Vector<IR::Expression> components;
     // TODO: Fill components with values when we have an API.
     const auto* pvsType = valueSet->elementType;
-    if (const auto* typeName = pvsType->to<IR::Type_Name>()) {
-        pvsType = state.resolveType(typeName);
-    }
+    pvsType = state.resolveType(pvsType);
     TESTGEN_UNIMPLEMENTED("Value Set not yet fully implemented");
 
     nextState->popBody();
@@ -449,21 +446,9 @@ bool ExprStepper::preorder(const IR::Slice* slice) {
         });
     }
 
-    if (!SymbolicEnv::isSymbolicValue(slice->e1)) {
-        return stepToSubexpr(slice->e1, result, state, [slice](const Continuation::Parameter* v) {
-            auto* result = slice->clone();
-            result->e1 = v->param;
-            return Continuation::Return(result);
-        });
-    }
-
-    if (!SymbolicEnv::isSymbolicValue(slice->e2)) {
-        return stepToSubexpr(slice->e2, result, state, [slice](const Continuation::Parameter* v) {
-            auto* result = slice->clone();
-            result->e2 = v->param;
-            return Continuation::Return(result);
-        });
-    }
+    // Check that slices values are constants.
+    slice->e1->checkedTo<IR::Constant>();
+    slice->e2->checkedTo<IR::Constant>();
 
     return stepSymbolicValue(slice);
 }

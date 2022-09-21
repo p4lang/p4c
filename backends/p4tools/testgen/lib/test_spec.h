@@ -14,6 +14,7 @@
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
+#include "lib/castable.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
@@ -25,22 +26,8 @@ namespace P4Testgen {
  *  Abstract Test Object Class
  * ========================================================================================= */
 
-class TestObject {
+class TestObject : public Castable {
  public:
-    /// Tries to convert the test object to type T. Returns a nullptr if the cast fails.
-    template <typename T>
-    const T* to() const {
-        return dynamic_cast<const T*>(this);
-    }
-
-    /// Performs a checked cast. A BUG occurs if the cast fails.
-    template <typename T>
-    const T* checkedTo() const {
-        auto* result = to<T>();
-        BUG_CHECK(result, "Cast failed: %1%. Object has label %2%", this, getObjectName());
-        return result;
-    }
-
     /// @returns the string name of this particular test object.
     virtual cstring getObjectName() const = 0;
 

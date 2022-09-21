@@ -198,7 +198,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "Unknown or unimplemented extern method: fn_foo"
-   # user defined extern
+  # user defined extern
   issue3091.p4
 )
 
@@ -219,6 +219,7 @@ p4tools_add_xfail_reason(
   pred2.p4
   register-serenum.p4
   table-key-serenum.p4
+  issue3531.p4
 )
 
 p4tools_add_xfail_reason(

@@ -43,7 +43,7 @@ void IncrementalStack::run(const Callback& callback) {
                 // branch selection fails, fall through to the roll-back code below. To help reduce
                 // calls into the solver, only guarantee viability of the selected branch if more
                 // than one branch was produced.
-                // State successors are accompanied by branch constrain which should be evaluated
+                // State successors are accompanied by branch constraint which should be evaluated
                 // in the state before the step was taken - we copy the current symbolic state.
                 StepResult successors = step(*executionState);
                 bool guaranteeViability = successors->size() > 1;

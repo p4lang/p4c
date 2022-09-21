@@ -25,10 +25,10 @@ namespace Bmv2 {
 
 class Bmv2RegisterCondition : public TestObject {
  public:
-    /// Each element is an API name paired with a match rule.
+    /// The register index.
     const IR::Expression* index;
 
-    /// The register index.
+    /// The register value.
     const IR::Expression* value;
 
     explicit Bmv2RegisterCondition(const IR::Expression* index, const IR::Expression* value);
@@ -48,7 +48,7 @@ class Bmv2RegisterCondition : public TestObject {
 
 /// This object tracks the list of writes that have been performed to a particular register. The
 /// registerConditionList represents the pair of the index that was written, and the value that
-/// was written to this index. When reading from a register, we can ravel this list starting
+/// was written to this index. When reading from a register, we can furl this list starting
 /// from the first index into a set of nested Mux expressions (e.g., "readIndex == savedIndex ?
 /// savedValue : defaultValue", where defaultValue may be another Mux expression). If the read index
 /// matches with the index that was saved in this tuple, we return the value, otherwise we unroll

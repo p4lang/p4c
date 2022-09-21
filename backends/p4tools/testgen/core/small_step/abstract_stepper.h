@@ -113,7 +113,7 @@ class AbstractStepper : public Inspector {
 
     /// @see stepToListSubexpr.IR::StructExpression differs slightly from IR::ListExpression in that
     /// the components are IR::NamedExpression instead of just IR::Expression.  To keep things
-    /// simple, and to avoid excessive type casting, these two functions are not merged.
+    /// simple, and to avoid excessive type casting, these two functions are kept separate.
     static bool stepToStructSubexpr(
         const IR::StructExpression* subexpr, SmallStepEvaluator::Result& result,
         const ExecutionState& state,

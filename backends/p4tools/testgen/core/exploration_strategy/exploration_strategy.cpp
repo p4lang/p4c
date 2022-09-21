@@ -98,8 +98,8 @@ ExplorationStrategy::ExplorationStrategy(AbstractSolver& solver, const ProgramIn
                                          boost::optional<uint32_t> seed)
     : programInfo(programInfo),
       solver(solver),
-      evaluator(solver, programInfo),
-      allStatements(programInfo.getAllStatements()) {
+      allStatements(programInfo.getAllStatements()),
+      evaluator(solver, programInfo) {
     // If there is no seed provided, do not randomize the solver.
     if (seed != boost::none) {
         this->solver.seed(*seed);

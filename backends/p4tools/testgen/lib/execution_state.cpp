@@ -202,8 +202,13 @@ const IR::IDeclaration* ExecutionState::findDecl(const IR::PathExpression* pathE
     return findDecl(pathExpr->path);
 }
 
-const IR::Type_Declaration* ExecutionState::resolveType(const IR::Type_Name* type) const {
-    const auto* path = type->path;
+const IR::Type* ExecutionState::resolveType(const IR::Type* type) const {
+    const auto* typeName = type->to<IR::Type_Name>();
+    // Nothing to resolve here. Just return.
+    if (typeName == nullptr) {
+        return type;
+    }
+    const auto* path = typeName->path;
     const auto* decl = findDecl(path)->to<IR::Type_Declaration>();
     BUG_CHECK(decl, "Not a type: %1%", path);
     return decl;
@@ -509,19 +514,13 @@ std::vector<const IR::Member*> ExecutionState::getFlatFields(
     std::vector<const IR::Member*>* validVector) const {
     std::vector<const IR::Member*> flatFields;
     for (const auto* field : ts->fields) {
-        const auto* fieldType = field->type->getP4Type();
-        if (const auto* tn = fieldType->to<IR::Type_Name>()) {
-            fieldType = resolveType(tn);
-        }
+        const auto* fieldType = resolveType(field->type);
         if (const auto* ts = fieldType->to<IR::Type_StructLike>()) {
             auto subFields =
                 getFlatFields(new IR::Member(fieldType, parent, field->name), ts, validVector);
             flatFields.insert(flatFields.end(), subFields.begin(), subFields.end());
         } else if (const auto* typeStack = fieldType->to<IR::Type_Stack>()) {
-            const auto* stackElementsType = typeStack->elementType;
-            if (stackElementsType->is<IR::Type_Name>()) {
-                stackElementsType = resolveType(stackElementsType->to<IR::Type_Name>());
-            }
+            const auto* stackElementsType = resolveType(typeStack->elementType);
             for (size_t arrayIndex = 0; arrayIndex < typeStack->getSize(); arrayIndex++) {
                 const auto* newMember = HSIndexToMember::produceStackIndex(
                     stackElementsType, new IR::Member(typeStack, parent, field->name), arrayIndex);
