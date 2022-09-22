@@ -532,13 +532,6 @@ bool ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
     }
 
     for (auto key : keys->keyElements) {
-        /* Maximum allowed key size of header/metadata field is 64 bits */
-        if (key->expression->type->width_bits() > DPDK_MAX_HEADER_METADATA_FIELD_SIZE) {
-            ::error(ErrorType::ERR_UNEXPECTED, "Key field wider than 64-bit is not permitted %1%",
-                    key->expression);
-            return false;
-        }
-
         auto matchKind = key->matchType->toString();
         if (matchKind == "lpm") {
             ++lpmCount;

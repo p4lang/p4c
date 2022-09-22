@@ -35,9 +35,6 @@ limitations under the License.
 
 namespace DPDK {
 
-/* Maximum size in bits for fields in header and metadata structures */
-#define DPDK_MAX_HEADER_METADATA_FIELD_SIZE 64
-
 class ConvertToDpdkProgram : public Transform {
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;

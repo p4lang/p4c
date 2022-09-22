@@ -1,9 +1,9 @@
 control C();
 package S(C c);
-bit<8> f_0(bit<8> x) {
+T f<T>(T x) {
     return x;
 }
-T f<T>(T x) {
+bit<8> f_0(bit<8> x) {
     return x;
 }
 control MyC() {

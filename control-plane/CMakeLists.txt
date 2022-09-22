@@ -101,7 +101,8 @@ set (CONTROLPLANE_HDRS
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${CONTROLPLANE_HDRS};${CONTROLPLANE_SRCS}")
 
 include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-set_source_files_properties (${CONTROLPLANE_SOURCES} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter")
+# Silence -Warray-bounds as the root issue is out of our control: https://github.com/protocolbuffers/protobuf/issues/7140
+set_source_files_properties (${CONTROLPLANE_SOURCES} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds")
 set_source_files_properties (${P4RUNTIME_GEN_SRCS} PROPERTIES GENERATED TRUE)
 build_unified(CONTROLPLANE_SOURCES)
 add_library (controlplane STATIC ${CONTROLPLANE_SOURCES} )
