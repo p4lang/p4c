@@ -7,7 +7,6 @@ control ctrl(out bit<32> c) {
         hasExited = true;
     }
     @hidden action exit2l31() {
-        hasExited = false;
         c = 32w2;
     }
     @hidden action exit2l41() {

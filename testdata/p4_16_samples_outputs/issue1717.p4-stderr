@@ -4,3 +4,9 @@ issue1717.p4(52): [--Wwarn=uninitialized_use] warning: h1 may not be completely 
 issue1717.p4(52): [--Wwarn=uninitialized_use] warning: h2 may not be completely initialized
         size = v(h1, h2);
                      ^^
+[--Wwarn=invalid_header] warning: accessing a field of an invalid header h2_0
+[--Wwarn=invalid_header] warning: accessing a field of an invalid header h1_0
+[--Wwarn=invalid_header] warning: accessing a field of an invalid header h2_0
+[--Wwarn=invalid_header] warning: accessing a field of an invalid header h1_0
+[--Wwarn=invalid_header] warning: accessing a field of an invalid header h2_0
+[--Wwarn=invalid_header] warning: accessing a field of an invalid header h1_0

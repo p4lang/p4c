@@ -42,8 +42,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action gauntlet_instance_overwritebmv2l23() {
         tmp.setValid();
         tmp.a = 8w3;
-        tmp.b = 8w1;
-        tmp.c = 8w1;
         val_0 = 8w3;
     }
     @hidden table tbl_gauntlet_instance_overwritebmv2l23 {

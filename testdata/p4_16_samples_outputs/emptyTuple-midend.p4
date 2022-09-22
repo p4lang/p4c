@@ -1,7 +1,6 @@
 struct tuple_0 {
 }
 
-typedef tuple_0 emptyTuple;
 control c(out bool b) {
     @hidden action emptyTuple7() {
         b = true;

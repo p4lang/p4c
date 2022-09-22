@@ -62,9 +62,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @hidden action issue5615bmv2l65() {
         hdr.u[0].short.data = 16w0xffff;
+        hdr.u[0].short.setValid();
+        hdr.u[0].byte.setInvalid();
     }
     @hidden action issue5615bmv2l68() {
         hdr.u[0].byte.data = 8w0xff;
+        hdr.u[0].byte.setValid();
+        hdr.u[0].short.setInvalid();
     }
     @hidden table tbl_issue5615bmv2l65 {
         actions = {

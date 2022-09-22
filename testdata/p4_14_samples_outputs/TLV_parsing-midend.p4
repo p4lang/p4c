@@ -113,7 +113,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name(".parse_ipv4_option_timestamp") state parse_ipv4_option_timestamp {
         tmp_2 = packet.lookahead<bit<16>>();
         tmp_hdr_0.setValid();
-        tmp_hdr_0.value = tmp_2[15:8];
         tmp_hdr_0.len = tmp_2[7:0];
         packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_2[7:0] << 3) + 32w4294967280);
         meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 - hdr.ipv4_option_timestamp.len;

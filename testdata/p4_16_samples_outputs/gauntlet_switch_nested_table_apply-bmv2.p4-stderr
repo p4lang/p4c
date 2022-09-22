@@ -10,3 +10,5 @@ gauntlet_switch_nested_table_apply-bmv2.p4(34): [--Wwarn=mismatch] warning: 128w
 gauntlet_switch_nested_table_apply-bmv2.p4(42): [--Wwarn=mismatch] warning: 48w1: Constant key field
             48w1: exact @name("qkgOtm") ;
             ^^^^
+[--Wwarn=uninitialized_use] warning: tmp_0_eth_hdr may not be completely initialized
+[--Wwarn=uninitialized_use] warning: tmp_0_eth_hdr may not be completely initialized
