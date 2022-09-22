@@ -13,14 +13,10 @@ header H {
     bit<8> x;
 }
 
-header_union U {
-    H h;
-}
-
 struct headers_t {
     ethernet_t ethernet;
     H          h1;
-    U          u1;
+    H          u1_h;
 }
 
 struct metadata_t {
@@ -40,10 +36,11 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     @name("ingressImpl.tmp") H tmp;
-    @name("ingressImpl.tmp_1") U tmp_1;
+    H tmp_1_h;
     @name("ingressImpl.tmp_3") H[1] tmp_3;
     @name("ingressImpl.h") H h_0;
-    @name("ingressImpl.u") U u_0;
+    H retval_0_h;
+    H u_0_h;
     @name("ingressImpl.s") H[1] s_0;
     @hidden action issue30011l84() {
         log_msg("hdr.ethernet is valid");
@@ -61,15 +58,26 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         h_0.setInvalid();
         tmp = h_0;
     }
+    @hidden action issue30011l46() {
+        retval_0_h.setValid();
+    }
+    @hidden action act() {
+        retval_0_h.setInvalid();
+    }
+    @hidden action issue30011l45() {
+        u_0_h.setInvalid();
+    }
+    @hidden action act_0() {
+        tmp_1_h.setValid();
+    }
+    @hidden action act_1() {
+        tmp_1_h.setInvalid();
+    }
     @hidden action issue30011l104() {
         log_msg("g() returned a header_union with valid member h");
     }
     @hidden action issue30011l106() {
         log_msg("g() returned a header_union with invalid member h");
-    }
-    @hidden action issue30011l45() {
-        u_0.h.setInvalid();
-        tmp_1.h = u_0.h;
     }
     @hidden action issue30011l109() {
         log_msg("h() returned a header stack with valid element 0");
@@ -117,6 +125,30 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         const default_action = issue30011l45();
     }
+    @hidden table tbl_issue30011l46 {
+        actions = {
+            issue30011l46();
+        }
+        const default_action = issue30011l46();
+    }
+    @hidden table tbl_act {
+        actions = {
+            act();
+        }
+        const default_action = act();
+    }
+    @hidden table tbl_act_0 {
+        actions = {
+            act_0();
+        }
+        const default_action = act_0();
+    }
+    @hidden table tbl_act_1 {
+        actions = {
+            act_1();
+        }
+        const default_action = act_1();
+    }
     @hidden table tbl_issue30011l104 {
         actions = {
             issue30011l104();
@@ -160,7 +192,17 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
             tbl_issue30011l101.apply();
         }
         tbl_issue30011l45.apply();
-        if (tmp_1.h.isValid()) {
+        if (u_0_h.isValid()) {
+            tbl_issue30011l46.apply();
+        } else {
+            tbl_act.apply();
+        }
+        if (retval_0_h.isValid()) {
+            tbl_act_0.apply();
+        } else {
+            tbl_act_1.apply();
+        }
+        if (tmp_1_h.isValid()) {
             tbl_issue30011l104.apply();
         } else {
             tbl_issue30011l106.apply();

@@ -4,7 +4,6 @@
 
 typedef bit<48> mac_addr_t;
 typedef bit<128> ipv6_addr_t;
-typedef bit<9> port_t;
 header ethernet_t {
     mac_addr_t dstAddr;
     mac_addr_t srcAddr;

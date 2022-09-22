@@ -209,38 +209,52 @@ const IR::Node* HandleValidityHeaderUnion::postorder(IR::P4Control* control) {
     return control;
 }
 
-
-const IR::Node* DoFlattenHeaderUnion::postorder(IR::Type_Struct* s) {
-    IR::IndexedVector<IR::StructField> fields;
+bool DoFlattenHeaderUnion::hasHeaderUnionField(IR::Type_Struct* s) {
     for (auto sf : s->fields) {
         auto ftype = typeMap->getType(sf, true);
         if (ftype->is<IR::Type_HeaderUnion>()) {
-            std::map <cstring, cstring> fieldMap;
-            for (auto sfu : ftype->to<IR::Type_HeaderUnion>()->fields) {
-                cstring uName = refMap->newName(sf->name.name + "_" + sfu->name.name);
-                auto uType = sfu->type->getP4Type();
-                fieldMap.emplace(sfu->name.name, uName);
-                fields.push_back(new IR::StructField(IR::ID(uName), uType));
-            }
-            replacementMap.emplace(sf->name.name, fieldMap);
-        } else {
-            fields.push_back(sf);
+            return true;
         }
     }
-    return new IR::Type_Struct(s->name, s->annotations, fields);
+    return false;
+}
+
+const IR::Node* DoFlattenHeaderUnion::postorder(IR::Type_Struct* s) {
+    if (hasHeaderUnionField(s)) {
+        IR::IndexedVector<IR::StructField> fields;
+        for (auto sf : s->fields) {
+            auto ftype = typeMap->getType(sf, true);
+            if (ftype->is<IR::Type_HeaderUnion>()) {
+                std::map <cstring, cstring> fieldMap;
+                for (auto sfu : ftype->to<IR::Type_HeaderUnion>()->fields) {
+                    cstring uName = refMap->newName(sf->name.name + "_" + sfu->name.name);
+                    auto uType = sfu->type->getP4Type();
+                    fieldMap.emplace(sfu->name.name, uName);
+                    fields.push_back(new IR::StructField(IR::ID(uName), uType));
+                }
+                replacementMap.emplace(sf->name.name, fieldMap);
+            } else {
+                fields.push_back(sf);
+            }
+        }
+        return new IR::Type_Struct(s->name, s->annotations, fields);
+    }
+    return s;
 }
 
 const IR::Node* DoFlattenHeaderUnion::postorder(IR::Declaration_Variable *dv) {
     auto ftype = typeMap->getTypeType(dv->type, true);
     if (ftype->is<IR::Type_HeaderUnion>()) {
         std::map <cstring, cstring> fieldMap;
+        IR::IndexedVector<IR::Declaration> toInsert;
         for (auto sfu : ftype->to<IR::Type_HeaderUnion>()->fields) {
             cstring uName = refMap->newName(dv->name.name + "_" + sfu->name.name);
             auto uType =  sfu->type->getP4Type();
             fieldMap.emplace(sfu->name.name, uName);
             toInsert.push_back(new IR::Declaration_Variable(IR::ID(uName), uType));
         }
-            replacementMap.emplace(dv->name.name, fieldMap);
+        replacementMap.emplace(dv->name.name, fieldMap);
+        replaceDVMap.emplace(dv, toInsert);
     }
     return dv;
 }
@@ -267,46 +281,78 @@ const IR::Node* DoFlattenHeaderUnion::postorder(IR::Member* m) {
     }
     return m;
 }
-
 const IR::Node* DoFlattenHeaderUnion::postorder(IR::P4Action* action) {
-    if (toInsert.empty())
-        return action;
+    auto actiondecls = action->body->components;
+    for (auto rdv : replaceDVMap) {
+        if (auto decl = action->getDeclByName(rdv.first->name.name)) {
+            for (auto it = actiondecls.begin();it != actiondecls.end(); it++) {
+                auto d = *it;
+                if (d->is<IR::Declaration>() && decl->is<IR::Declaration>()) {
+                    auto dName = d->to<IR::Declaration>()->name.name;
+                    auto declName = decl->to<IR::Declaration>()->name.name;
+                    if (dName == declName) {
+                        actiondecls.insert(it, rdv.second.begin(), rdv.second.end());
+                    }
+                }
+            }
+        }
+    }
     auto body = new IR::BlockStatement(action->body->srcInfo);
-    for (auto a : toInsert)
+    for (auto a : actiondecls)
         body->push_back(a);
-    for (auto s : action->body->components)
-        body->push_back(s);
     action->body = body;
-    toInsert.clear();
     return action;
 }
 
 const IR::Node* DoFlattenHeaderUnion::postorder(IR::Function* function) {
-    if (toInsert.empty())
-        return function;
+    auto functiondecls = function->body->components;
+    for (auto rdv : replaceDVMap) {
+        if (auto decl = function->getDeclByName(rdv.first->name.name)) {
+            for (auto it = functiondecls.begin();it != functiondecls.end(); it++) {
+                auto d = *it;
+                if (d->is<IR::Declaration>() && decl->is<IR::Declaration>()) {
+                    auto dName = d->to<IR::Declaration>()->name.name;
+                    auto declName = decl->to<IR::Declaration>()->name.name;
+                    if (dName == declName) {
+                        functiondecls.insert(it, rdv.second.begin(), rdv.second.end());
+                    }
+                }
+            }
+        }
+    }
     auto body = new IR::BlockStatement(function->body->srcInfo);
-    for (auto a : toInsert)
+    for (auto a : functiondecls)
         body->push_back(a);
-    for (auto s : function->body->components)
-        body->push_back(s);
     function->body = body;
-    toInsert.clear();
     return function;
 }
 
 const IR::Node* DoFlattenHeaderUnion::postorder(IR::P4Parser* parser) {
-    if (toInsert.empty())
-        return parser;
-    parser->parserLocals.append(toInsert);
-    toInsert.clear();
+    auto parserdecls = parser->parserLocals;
+    for (auto rdv : replaceDVMap) {
+        if (auto decl = parser->getDeclByName(rdv.first->name.name)) {
+            auto it = std::find(parserdecls.begin(), parserdecls.end(), decl);
+            if (it != parserdecls.end()) {
+                parserdecls.insert(it, rdv.second.begin(), rdv.second.end());
+            }
+        }
+    }
+    parser->parserLocals = parserdecls;
+
     return parser;
 }
 
 const IR::Node* DoFlattenHeaderUnion::postorder(IR::P4Control* control) {
-    if (toInsert.empty())
-        return control;
-    control->controlLocals.append(toInsert);
-    toInsert.clear();
+    auto controldecls = control->controlLocals;
+    for (auto rdv : replaceDVMap) {
+        if (auto decl = control->getDeclByName(rdv.first->name.name)) {
+            auto it = std::find(controldecls.begin(), controldecls.end(), decl);
+            if (it != controldecls.end()) {
+                controldecls.insert(it, rdv.second.begin(), rdv.second.end());
+            }
+        }
+    }
+    control->controlLocals = controldecls;
     return control;
 }
 }  // namespace P4

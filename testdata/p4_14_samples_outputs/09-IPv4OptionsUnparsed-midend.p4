@@ -76,20 +76,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name(".parse_ipv4") state parse_ipv4 {
         tmp = packet.lookahead<bit<160>>();
         tmp_hdr_0.setValid();
-        tmp_hdr_0.version = tmp[159:156];
         tmp_hdr_0.ihl = tmp[155:152];
-        tmp_hdr_0.diffserv = tmp[151:144];
-        tmp_hdr_0.totalLen = tmp[143:128];
-        tmp_hdr_0.identification = tmp[127:112];
-        tmp_hdr_0.reserved_0 = tmp[111:111];
-        tmp_hdr_0.df = tmp[110:110];
-        tmp_hdr_0.mf = tmp[109:109];
-        tmp_hdr_0.fragOffset = tmp[108:96];
-        tmp_hdr_0.ttl = tmp[95:88];
-        tmp_hdr_0.protocol = tmp[87:80];
-        tmp_hdr_0.hdrChecksum = tmp[79:64];
-        tmp_hdr_0.srcAddr = tmp[63:32];
-        tmp_hdr_0.dstAddr = tmp[31:0];
         packet.extract<ipv4_t>(hdr.ipv4, ((bit<32>)tmp[155:152] << 5) + 32w4294967136);
         transition accept;
     }

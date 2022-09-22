@@ -34,7 +34,6 @@ parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local
 
 control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     @hidden action issue562bmv2l32() {
-        local_metadata._row_alt0_valid0 = local_metadata._row_alt1_valid2;
         local_metadata._row_alt0_port1 = local_metadata._row_alt1_port3;
         local_metadata._row_alt0_valid0 = 1w1;
         local_metadata._row_alt1_port3 = local_metadata._row_alt1_port3 + 7w1;

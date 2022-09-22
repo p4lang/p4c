@@ -25,10 +25,6 @@ header prot_host_addr_ipv4_t {
     bit<32> addr;
 }
 
-header_union prot_host_addr_t {
-    prot_host_addr_ipv4_t ipv4;
-}
-
 header prot_host_addr_padding_t {
     varbit<32> padding;
 }
@@ -60,8 +56,8 @@ struct headers {
     preamble_t               preamble;
     prot_common_t            prot_common;
     prot_addr_common_t       prot_addr_common;
-    prot_host_addr_t         prot_host_addr_dst;
-    prot_host_addr_t         prot_host_addr_src;
+    prot_host_addr_ipv4_t    prot_host_addr_dst_ipv4;
+    prot_host_addr_ipv4_t    prot_host_addr_src_ipv4;
     prot_host_addr_padding_t prot_host_addr_padding;
     prot_i_t                 prot_inf_0;
     prot_h_t[10]             prot_h_0;
@@ -76,7 +72,7 @@ parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         packet.extract<prot_common_t>(hdr.prot_common);
         packet.extract<prot_addr_common_t>(hdr.prot_addr_common);
         meta._headerLen0 = hdr.prot_common.hdrLen;
-        packet.extract<prot_host_addr_ipv4_t>(hdr.prot_host_addr_dst.ipv4);
+        packet.extract<prot_host_addr_ipv4_t>(hdr.prot_host_addr_dst_ipv4);
         meta._addrLen2 = 9w32;
         transition select(hdr.prot_common.srcType) {
             6w0x1: parse_prot_host_addr_src_ipv4;
@@ -84,7 +80,7 @@ parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     state parse_prot_host_addr_src_ipv4 {
-        packet.extract<prot_host_addr_ipv4_t>(hdr.prot_host_addr_src.ipv4);
+        packet.extract<prot_host_addr_ipv4_t>(hdr.prot_host_addr_src_ipv4);
         meta._addrLen2 = meta._addrLen2 + 9w32;
         packet.extract<prot_host_addr_padding_t>(hdr.prot_host_addr_padding, (bit<32>)(9w64 - (meta._addrLen2 & 9w63) & 9w63));
         meta._addrLen2 = meta._addrLen2 + (9w64 - (meta._addrLen2 & 9w63) & 9w63);
@@ -171,8 +167,8 @@ control PROTDeparser(packet_out packet, in headers hdr) {
         packet.emit<preamble_t>(hdr.preamble);
         packet.emit<prot_common_t>(hdr.prot_common);
         packet.emit<prot_addr_common_t>(hdr.prot_addr_common);
-        packet.emit<prot_host_addr_ipv4_t>(hdr.prot_host_addr_dst.ipv4);
-        packet.emit<prot_host_addr_ipv4_t>(hdr.prot_host_addr_src.ipv4);
+        packet.emit<prot_host_addr_ipv4_t>(hdr.prot_host_addr_dst_ipv4);
+        packet.emit<prot_host_addr_ipv4_t>(hdr.prot_host_addr_src_ipv4);
         packet.emit<prot_host_addr_padding_t>(hdr.prot_host_addr_padding);
         packet.emit<prot_i_t>(hdr.prot_inf_0);
         packet.emit<prot_h_t>(hdr.prot_h_0[0]);

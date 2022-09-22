@@ -78,27 +78,18 @@ struct H3_0 {
     tuple_0 t;
 }
 
-header_union HU<T> {
-    X     xu;
-    GH<T> h3u;
-}
-
-header_union HU_0 {
-    X    xu;
-    GH_0 h3u;
-}
-
 control c(out bit<1> x) {
     @name("c.gh") GH_1 gh_0;
     @name("c.s") Stack s_0;
-    @name("c.z") HU_0 z_0;
+    X z_0_xu;
+    GH_0 z_0_h3u;
     @hidden action genericstruct90() {
         gh_0.setInvalid();
         s_0[0].setInvalid();
         s_0[1].setInvalid();
         s_0[2].setInvalid();
-        z_0.xu.setInvalid();
-        z_0.h3u.setInvalid();
+        z_0_xu.setInvalid();
+        z_0_h3u.setInvalid();
         x = 1w0;
     }
     @hidden table tbl_genericstruct90 {

@@ -10,28 +10,20 @@ header addr_ipv6_t {
     bit<128> addr;
 }
 
-header_union addr_t1 {
-    addr_ipv4_t ipv4;
-    addr_ipv6_t ipv6;
-}
-
-header_union addr_t2 {
-    addr_ipv4_t ipv4;
-    addr_ipv6_t ipv6;
-}
-
 struct metadata {
 }
 
 struct headers {
-    addr_t1 addr_src1;
-    addr_t2 addr_src2;
+    addr_ipv4_t addr_src1_ipv4;
+    addr_ipv6_t addr_src1_ipv6;
+    addr_ipv4_t addr_src2_ipv4;
+    addr_ipv6_t addr_src2_ipv6;
 }
 
 parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<addr_ipv4_t>(hdr.addr_src1.ipv4);
-        hdr.addr_src1.ipv4.addr = hdr.addr_src2.ipv4.addr;
+        packet.extract<addr_ipv4_t>(hdr.addr_src1_ipv4);
+        hdr.addr_src1_ipv4.addr = hdr.addr_src2_ipv4.addr;
         transition reject;
     }
 }
@@ -58,10 +50,10 @@ control ProtComputeChecksum(inout headers hdr, inout metadata meta) {
 
 control ProtDeparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<addr_ipv4_t>(hdr.addr_src1.ipv4);
-        packet.emit<addr_ipv6_t>(hdr.addr_src1.ipv6);
-        packet.emit<addr_ipv4_t>(hdr.addr_src2.ipv4);
-        packet.emit<addr_ipv6_t>(hdr.addr_src2.ipv6);
+        packet.emit<addr_ipv4_t>(hdr.addr_src1_ipv4);
+        packet.emit<addr_ipv6_t>(hdr.addr_src1_ipv6);
+        packet.emit<addr_ipv4_t>(hdr.addr_src2_ipv4);
+        packet.emit<addr_ipv6_t>(hdr.addr_src2_ipv6);
     }
 }
 

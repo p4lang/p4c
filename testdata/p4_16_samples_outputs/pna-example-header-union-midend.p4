@@ -13,14 +13,10 @@ header O2 {
     bit<16> data;
 }
 
-header_union U {
-    O1 byte;
-    O2 short;
-}
-
 struct headers {
-    S base;
-    U u;
+    S  base;
+    O1 u_byte;
+    O2 u_short;
 }
 
 struct metadata {
@@ -36,11 +32,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, in pna
         }
     }
     state parseO1 {
-        packet.extract<O1>(hdr.u.byte);
+        packet.extract<O1>(hdr.u_byte);
         transition accept;
     }
     state parseO2 {
-        packet.extract<O2>(hdr.u.short);
+        packet.extract<O2>(hdr.u_short);
         transition accept;
     }
 }
@@ -51,8 +47,8 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
     @name("ingress.debug_hdr") table debug_hdr_0 {
         key = {
             hdr.base.t           : exact @name("hdr.base.t") ;
-            hdr.u.short.isValid(): exact @name("hdr.u.short.$valid$") ;
-            hdr.u.byte.isValid() : exact @name("hdr.u.byte.$valid$") ;
+            hdr.u_short.isValid(): exact @name("hdr.u.short.$valid$") ;
+            hdr.u_byte.isValid() : exact @name("hdr.u.byte.$valid$") ;
         }
         actions = {
             NoAction_1();
@@ -60,10 +56,14 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
         const default_action = NoAction_1();
     }
     @hidden action pnaexampleheaderunion66() {
-        hdr.u.short.data = 16w0xffff;
+        hdr.u_short.data = 16w0xffff;
+        hdr.u_short.setValid();
+        hdr.u_byte.setInvalid();
     }
     @hidden action pnaexampleheaderunion68() {
-        hdr.u.byte.data = 8w0xff;
+        hdr.u_byte.data = 8w0xff;
+        hdr.u_byte.setValid();
+        hdr.u_short.setInvalid();
     }
     @hidden table tbl_pnaexampleheaderunion66 {
         actions = {
@@ -79,9 +79,9 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
     }
     apply {
         debug_hdr_0.apply();
-        if (hdr.u.short.isValid()) {
+        if (hdr.u_short.isValid()) {
             tbl_pnaexampleheaderunion66.apply();
-        } else if (hdr.u.byte.isValid()) {
+        } else if (hdr.u_byte.isValid()) {
             tbl_pnaexampleheaderunion68.apply();
         }
     }
@@ -90,8 +90,8 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
 control DeparserImpl(packet_out packet, in headers hdr, in metadata meta, in pna_main_output_metadata_t ostd) {
     @hidden action pnaexampleheaderunion77() {
         packet.emit<S>(hdr.base);
-        packet.emit<O1>(hdr.u.byte);
-        packet.emit<O2>(hdr.u.short);
+        packet.emit<O1>(hdr.u_byte);
+        packet.emit<O2>(hdr.u_short);
     }
     @hidden table tbl_pnaexampleheaderunion77 {
         actions = {

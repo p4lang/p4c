@@ -8,13 +8,9 @@ header H2 {
     bit<16> y;
 }
 
-header_union U {
-    H1 h1;
-    H2 h2;
-}
-
 struct Headers {
-    U u;
+    H1 u_h1;
+    H2 u_h2;
 }
 
 control c(in Headers h) {
@@ -24,7 +20,7 @@ control c(in Headers h) {
     }
     @name("c.t") table t_0 {
         key = {
-            h.u.h1.x: exact @name("h.u.h1.x") ;
+            h.u_h1.x: exact @name("h.u.h1.x") ;
         }
         actions = {
             a();

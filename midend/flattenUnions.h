@@ -48,8 +48,9 @@ namespace P4 {
 class DoFlattenHeaderUnion : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
-    IR::IndexedVector<IR::Declaration> toInsert;  // temporaries
     std::map<cstring, std::map<cstring, cstring>> replacementMap;
+    // Replacement map needed to add element-wise header declaration in right context
+    std::map <IR::Declaration_Variable*, IR::IndexedVector<IR::Declaration>> replaceDVMap;
 
  public:
     DoFlattenHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) :
@@ -61,6 +62,7 @@ class DoFlattenHeaderUnion : public Transform {
     const IR::Node* postorder(IR::Function* function) override;
     const IR::Node* postorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::P4Action* action) override;
+    bool  hasHeaderUnionField(IR::Type_Struct* s);
 };
 
 /** This pass handles the validity semantics of header union.
@@ -126,8 +128,11 @@ class RemoveUnusedHUDeclarations : public Transform {
     P4::ReferenceMap* refMap;
  public:
     explicit RemoveUnusedHUDeclarations(P4::ReferenceMap* refMap) : refMap(refMap) {}
-    const IR::Node* preorder(IR::Type_HeaderUnion* /*type*/) {
-        return nullptr;
+    const IR::Node* preorder(IR::Type_HeaderUnion* type) {
+        if (!refMap->isUsed(getOriginal<IR::IDeclaration>())) {
+            return nullptr;
+        }
+        return type;
     }
 };
 

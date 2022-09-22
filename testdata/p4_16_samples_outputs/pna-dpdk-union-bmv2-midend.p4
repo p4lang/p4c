@@ -9,14 +9,10 @@ header Hdr2 {
     bit<16> b;
 }
 
-header_union U {
-    Hdr1 h1;
-    Hdr2 h2;
-}
-
 struct Headers {
     Hdr1 h1;
-    U    u;
+    Hdr1 u_h1;
+    Hdr2 u_h2;
 }
 
 struct Meta {
@@ -31,11 +27,11 @@ parser p(packet_in b, out Headers h, inout Meta m, in pna_main_parser_input_meta
         }
     }
     state getH1 {
-        b.extract<Hdr1>(h.u.h1);
+        b.extract<Hdr1>(h.u_h1);
         transition accept;
     }
     state getH2 {
-        b.extract<Hdr2>(h.u.h2);
+        b.extract<Hdr2>(h.u_h2);
         transition accept;
     }
 }
@@ -43,8 +39,8 @@ parser p(packet_in b, out Headers h, inout Meta m, in pna_main_parser_input_meta
 control deparser(packet_out b, in Headers h, in Meta m, in pna_main_output_metadata_t ostd) {
     @hidden action pnadpdkunionbmv2l64() {
         b.emit<Hdr1>(h.h1);
-        b.emit<Hdr1>(h.u.h1);
-        b.emit<Hdr2>(h.u.h2);
+        b.emit<Hdr1>(h.u_h1);
+        b.emit<Hdr2>(h.u_h2);
     }
     @hidden table tbl_pnadpdkunionbmv2l64 {
         actions = {

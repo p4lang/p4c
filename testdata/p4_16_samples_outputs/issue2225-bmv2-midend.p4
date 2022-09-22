@@ -28,15 +28,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.eth_hdr.eth_type = 16w3;
         hasExited = true;
     }
-    @hidden action act() {
-        hasExited = false;
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
     @hidden table tbl_do_action {
         actions = {
             do_action();
@@ -44,7 +35,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = do_action();
     }
     apply {
-        tbl_act.apply();
         tbl_do_action.apply();
     }
 }

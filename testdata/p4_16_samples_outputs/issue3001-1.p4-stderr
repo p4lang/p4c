@@ -7,3 +7,6 @@ issue3001-1.p4(46): [--Wwarn=uninitialized_use] warning: u may not be completely
 issue3001-1.p4(51): [--Wwarn=uninitialized_use] warning: s may not be completely initialized
     return s;
            ^
+[--Wwarn=uninitialized_use] warning: u_0_h may not be completely initialized
+[--Wwarn=uninitialized_use] warning: retval_0_h may not be completely initialized
+[--Wwarn=uninitialized_use] warning: u_0_h may not be completely initialized

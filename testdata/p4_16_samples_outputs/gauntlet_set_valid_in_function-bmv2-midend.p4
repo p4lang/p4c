@@ -27,8 +27,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_ret") H tmp_ret_0;
     @hidden action gauntlet_set_valid_in_functionbmv2l26() {
         tmp_ret_0.setValid();
-        tmp_ret_0.a = 8w0;
-        tmp_ret_0.b = 64w0;
         tmp_ret_0.c = 16w0;
         m.t = 32w0;
     }

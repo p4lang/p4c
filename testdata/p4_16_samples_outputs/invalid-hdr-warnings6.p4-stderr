@@ -25,3 +25,27 @@ invalid-hdr-warnings6.p4(86): [--Wwarn=invalid_header] warning: accessing a fiel
 invalid-hdr-warnings6.p4(87): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u[1].h1
         u[1].h1.data = 1;
         ^^^^^^^
+invalid-hdr-warnings6.p4(61): [--Wwarn=uninitialized_use] warning: u[0].h1 may not be completely initialized
+        u[1].h1 = u[0].h1;
+                  ^^^^^^^
+invalid-hdr-warnings6.p4(66): [--Wwarn=uninitialized_use] warning: u[i].h1 may not be completely initialized
+        u[1] = u[i];
+               ^^^^
+invalid-hdr-warnings6.p4(68): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u[1].h2
+        u[1].h2.data = 1;
+        ^^^^^^^
+invalid-hdr-warnings6.p4(70): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u[1].h2
+        if (u[1].h2.data == 0) {
+            ^^^^^^^
+invalid-hdr-warnings6.p4(76): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header u[1].h2
+        if (u[1].h2.data == 0) {
+            ^^^^^^^
+invalid-hdr-warnings6.p4(34): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.u[0].h1
+        hdr.u[0].h1.data = 1;
+        ^^^^^^^^^^^
+invalid-hdr-warnings6.p4(37): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.u[0].h1
+        transition select (hdr.u[0].h1.data) {
+                           ^^^^^^^^^^^
+invalid-hdr-warnings6.p4(60): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u[0].h1
+        u[0].h1 = { 1 };
+        ^^^^^^^

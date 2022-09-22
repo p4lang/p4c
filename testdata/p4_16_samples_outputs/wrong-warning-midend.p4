@@ -44,17 +44,19 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    @name("ingressImpl.hu1") hu1_t hu1_0;
-    @name("ingressImpl.hu1b") hu1_t hu1b_0;
+    h1_t hu1_0_h1;
+    h2_t hu1_0_h2;
+    h1_t hu1b_0_h1;
+    h2_t hu1b_0_h2;
     @name("ingressImpl.a1") h1_t[2] a1_0;
     @name("ingressImpl.a1b") h1_t[2] a1b_0;
     @name("ingressImpl.au1") hu1_t[2] au1_0;
     @name("ingressImpl.au1b") hu1_t[2] au1b_0;
     @hidden action wrongwarning72() {
-        hu1_0.h1.setInvalid();
-        hu1_0.h2.setInvalid();
-        hu1b_0.h1.setInvalid();
-        hu1b_0.h2.setInvalid();
+        hu1_0_h1.setInvalid();
+        hu1_0_h2.setInvalid();
+        hu1b_0_h1.setInvalid();
+        hu1b_0_h2.setInvalid();
         a1_0[0].setInvalid();
         a1_0[1].setInvalid();
         a1b_0[0].setInvalid();

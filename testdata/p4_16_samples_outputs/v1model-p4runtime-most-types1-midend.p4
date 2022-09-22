@@ -30,7 +30,6 @@ typedef Custom00200_t Custom002001_t;
 typedef Custom00200_t Custom002002_t;
 typedef Custom002001_t Custom0020010_t;
 typedef Custom002002_t Custom0020020_t;
-typedef bit<8> serenum0_t;
 header ethernet_t {
     Eth0_t  dstAddr;
     Eth1_t  srcAddr;

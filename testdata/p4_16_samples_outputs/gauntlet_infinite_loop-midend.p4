@@ -35,7 +35,6 @@ parser p(packet_in packet, out headers hdr) {
     }
     state start_0 {
         hdr.nop = tmp_nop;
-        hdr.p = tmp_p;
         hdr.p = tmp_0;
         transition accept;
     }

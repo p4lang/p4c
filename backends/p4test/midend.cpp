@@ -36,6 +36,7 @@ limitations under the License.
 #include "midend/eliminateSwitch.h"
 #include "midend/flattenHeaders.h"
 #include "midend/flattenInterfaceStructs.h"
+#include "midend/flattenUnions.h"
 #include "midend/hsIndexSimplify.h"
 #include "midend/replaceSelectRange.h"
 #include "midend/expandEmit.h"
@@ -103,6 +104,7 @@ MidEnd::MidEnd(CompilerOptions& options, std::ostream* outStream) {
         new P4::RemoveSelectBooleans(&refMap, &typeMap),
         new P4::FlattenHeaders(&refMap, &typeMap),
         new P4::FlattenInterfaceStructs(&refMap, &typeMap),
+        new P4::FlattenHeaderUnion(&refMap, &typeMap),
         new P4::ReplaceSelectRange(&refMap, &typeMap),
         new P4::Predication(&refMap),
         new P4::MoveDeclarations(),  // more may have been introduced
