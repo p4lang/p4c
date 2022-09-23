@@ -106,7 +106,6 @@ set (P4_XFAIL_TESTS
   testdata/p4_16_samples/pna-example-tcp-connection-tracking-err-1.p4
   testdata/p4_16_samples/pna-example-tcp-connection-tracking-err.p4
   testdata/p4_16_samples/pna-example-pass-2.p4
-  testdata/p4_16_samples/invalid-hdr-warnings6.p4
   testdata/p4_16_samples/invalid-hdr-warnings7.p4
   testdata/p4_16_samples/invalid-hdr-warnings8.p4
   # These tests are added to check mirror_packet extern invocation with non-constant
