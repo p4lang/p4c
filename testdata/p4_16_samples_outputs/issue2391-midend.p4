@@ -1,13 +1,9 @@
 #include <core.p4>
 
-typedef bit<16> Base_t;
-typedef Base_t Base1_t;
-typedef Base1_t Base2_t;
-typedef Base2_t EthT;
 header Ethernet {
     bit<48> src;
     bit<48> dest;
-    EthT    type;
+    bit<16> type;
 }
 
 struct Headers {

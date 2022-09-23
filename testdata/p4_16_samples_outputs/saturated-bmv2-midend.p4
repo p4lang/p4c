@@ -2,16 +2,14 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<8> USat_t;
-typedef int<16> Sat_t;
 header hdr {
-    bit<8> op;
-    USat_t opr1_8;
-    USat_t opr2_8;
-    USat_t res_8;
-    Sat_t  opr1_16;
-    Sat_t  opr2_16;
-    Sat_t  res_16;
+    bit<8>  op;
+    bit<8>  opr1_8;
+    bit<8>  opr2_8;
+    bit<8>  res_8;
+    int<16> opr1_16;
+    int<16> opr2_16;
+    int<16> res_16;
 }
 
 struct Header_t {

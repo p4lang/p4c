@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <pna.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -55,7 +54,7 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("MainControlImpl.send_with_mirror") action send_with_mirror(@name("vport") PortId_t vport, @name("mSession") MirrorSessionId_t mSession) {
+    @name("MainControlImpl.send_with_mirror") action send_with_mirror(@name("vport") bit<32> vport, @name("mSession") bit<16> mSession) {
         send_to_port(vport);
         mirror_packet(8w3, mSession);
     }

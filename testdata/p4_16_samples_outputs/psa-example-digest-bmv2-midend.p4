@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -33,8 +32,8 @@ struct empty_metadata_t {
 }
 
 struct mac_learn_digest_t {
-    EthernetAddress srcAddr;
-    PortId_t        ingress_port;
+    bit<48> srcAddr;
+    bit<32> ingress_port;
 }
 
 struct metadata {
@@ -103,12 +102,12 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
         }
         default_action = unknown_source();
     }
-    @name("ingress.do_L2_forward") action do_L2_forward(@name("egress_port") PortId_t egress_port_3) {
+    @name("ingress.do_L2_forward") action do_L2_forward(@name("egress_port") bit<32> egress_port_3) {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
         ostd.egress_port = egress_port_3;
     }
-    @name("ingress.do_tst") action do_tst(@name("egress_port") PortId_t egress_port_4, @name("serEnumT") bit<16> serEnumT) {
+    @name("ingress.do_tst") action do_tst(@name("egress_port") bit<32> egress_port_4, @name("serEnumT") bit<16> serEnumT) {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
         ostd.egress_port = egress_port_4;

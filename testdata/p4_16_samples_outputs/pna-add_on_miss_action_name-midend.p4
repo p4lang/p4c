@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <pna.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -27,7 +26,7 @@ struct empty_metadata_t {
 }
 
 struct main_metadata_t {
-    ExpireTimeProfileId_t timeout;
+    bit<8> timeout;
 }
 
 struct headers_t {
@@ -55,7 +54,7 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @name("MainControlImpl.ct.next_hop") action ct_next_hop_0(@name("vport") PortId_t vport) {
+    @name("MainControlImpl.ct.next_hop") action ct_next_hop_0(@name("vport") bit<32> vport) {
         send_to_port(vport);
     }
     @name("MainControlImpl.ct.add_on_miss_action") action ct_add_on_miss_action_0() {
@@ -72,7 +71,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         add_on_miss = true;
         const default_action = ct_add_on_miss_action_0();
     }
-    @name("MainControlImpl.next_hop1") action next_hop1(@name("vport") PortId_t vport_2) {
+    @name("MainControlImpl.next_hop1") action next_hop1(@name("vport") bit<32> vport_2) {
         send_to_port(vport_2);
     }
     @name("MainControlImpl.add_on_miss_action") action add_on_miss_action() {

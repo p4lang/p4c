@@ -35,9 +35,8 @@ struct H2_0 {
     bit<1>   invalid;
 }
 
-typedef H2_0 R;
 struct H3<T> {
-    R           r;
+    H2_0        r;
     T           s;
     H2<T>       h2;
     H4<H2<T>>   h3;
@@ -60,7 +59,6 @@ header GH_1 {
     bit<32> _data_b0;
 }
 
-typedef GH_1[3] Stack;
 struct H4_0 {
     H2_0 x;
 }
@@ -71,7 +69,7 @@ struct tuple_0 {
 }
 
 struct H3_0 {
-    R       r;
+    H2_0    r;
     S       s;
     H2_0    h2;
     H4_0    h3;
@@ -80,7 +78,7 @@ struct H3_0 {
 
 control c(out bit<1> x) {
     @name("c.gh") GH_1 gh_0;
-    @name("c.s") Stack s_0;
+    @name("c.s") GH_1[3] s_0;
     X z_0_xu;
     GH_0 z_0_h3u;
     @hidden action genericstruct90() {

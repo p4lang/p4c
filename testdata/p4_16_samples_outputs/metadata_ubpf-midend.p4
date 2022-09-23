@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <ubpf_model.p4>
 
-@ethernetaddress typedef bit<48> EthernetAddress;
 header Ethernet_h {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 struct Headers_t {

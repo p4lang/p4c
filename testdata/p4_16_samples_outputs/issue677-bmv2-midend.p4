@@ -2,20 +2,19 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef standard_metadata_t SM;
 struct H {
 }
 
 struct M {
 }
 
-parser ParserI(packet_in pk, out H hdr, inout M meta, inout SM smeta) {
+parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t smeta) {
     state start {
         transition accept;
     }
 }
 
-control IngressI(inout H hdr, inout M meta, inout SM smeta) {
+control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @hidden action issue677bmv2l19() {
         smeta.egress_spec = 9w1;
     }
@@ -30,7 +29,7 @@ control IngressI(inout H hdr, inout M meta, inout SM smeta) {
     }
 }
 
-control EgressI(inout H hdr, inout M meta, inout SM smeta) {
+control EgressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     apply {
     }
 }

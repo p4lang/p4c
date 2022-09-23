@@ -31,3 +31,4 @@ control EgressDeparserImpl(packet_out packet, inout headers hdr, in metadata met
 issue982.p4(427)
 control EgressDeparserImpl(packet_out packet, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, out psa_egress_deparser_output_metadata_t ostd) {
         ^^^^^^^^^^^^^^^^^^
+[--Wwarn=uninitialized_use] warning: clone_md_0_data_h0 may not be completely initialized

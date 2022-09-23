@@ -2,37 +2,9 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> Eth0_t;
-typedef bit<48> Eth1_t;
-typedef bit<48> Eth2_t;
-typedef bit<8> Custom0_t;
-typedef bit<8> Custom1_t;
-typedef bit<8> Custom2_t;
-typedef Custom0_t Custom00_t;
-typedef Custom0_t Custom01_t;
-typedef Custom0_t Custom02_t;
-typedef Custom1_t Custom10_t;
-typedef Custom1_t Custom11_t;
-typedef Custom1_t Custom12_t;
-typedef Custom2_t Custom20_t;
-typedef Custom2_t Custom21_t;
-typedef Custom2_t Custom22_t;
-typedef Custom00_t Custom001_t;
-typedef Custom00_t Custom002_t;
-typedef Custom10_t Custom101_t;
-typedef Custom10_t Custom102_t;
-typedef Custom20_t Custom201_t;
-typedef Custom20_t Custom202_t;
-typedef Custom22_t Custom220_t;
-typedef Custom002_t Custom0020_t;
-typedef Custom0020_t Custom00200_t;
-typedef Custom00200_t Custom002001_t;
-typedef Custom00200_t Custom002002_t;
-typedef Custom002001_t Custom0020010_t;
-typedef Custom002002_t Custom0020020_t;
 header ethernet_t {
-    Eth0_t  dstAddr;
-    Eth1_t  srcAddr;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
     bit<16> etherType;
 }
 
@@ -78,31 +50,31 @@ header custom_t {
 }
 
 @controller_header("packet_out") header packet_out_header_t {
-    Eth0_t          addr0;
-    Eth1_t          addr1;
-    Eth2_t          addr2;
-    bit<8>          e;
-    Custom0_t       e0;
-    Custom1_t       e1;
-    Custom2_t       e2;
-    Custom00_t      e00;
-    Custom01_t      e01;
-    Custom02_t      e02;
-    Custom10_t      e10;
-    Custom11_t      e11;
-    Custom12_t      e12;
-    Custom20_t      e20;
-    Custom21_t      e21;
-    Custom22_t      e22;
-    Custom001_t     e001;
-    Custom002_t     e002;
-    Custom101_t     e101;
-    Custom102_t     e102;
-    Custom201_t     e201;
-    Custom202_t     e202;
-    Custom220_t     e220;
-    Custom0020010_t e0020010;
-    Custom0020020_t e0020020;
+    bit<48> addr0;
+    bit<48> addr1;
+    bit<48> addr2;
+    bit<8>  e;
+    bit<8>  e0;
+    bit<8>  e1;
+    bit<8>  e2;
+    bit<8>  e00;
+    bit<8>  e01;
+    bit<8>  e02;
+    bit<8>  e10;
+    bit<8>  e11;
+    bit<8>  e12;
+    bit<8>  e20;
+    bit<8>  e21;
+    bit<8>  e22;
+    bit<8>  e001;
+    bit<8>  e002;
+    bit<8>  e101;
+    bit<8>  e102;
+    bit<8>  e201;
+    bit<8>  e202;
+    bit<8>  e220;
+    bit<8>  e0020010;
+    bit<8>  e0020020;
 }
 
 struct headers_t {
@@ -113,10 +85,10 @@ struct headers_t {
 }
 
 struct valueset1_t {
-    Eth0_t     addr0;
-    bit<8>     e;
-    Custom0_t  e0;
-    Custom00_t e00;
+    bit<48> addr0;
+    bit<8>  e;
+    bit<8>  e0;
+    bit<8>  e00;
 }
 
 struct metadata_t {
@@ -154,7 +126,7 @@ control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metad
     @name("ingress.set_output") action set_output(@name("out_port") bit<9> out_port) {
         stdmeta.egress_spec = out_port;
     }
-    @name("ingress.set_headers") action set_headers(@name("addr0") Eth0_t addr0_1, @name("addr1") Eth1_t addr1_1, @name("addr2") Eth2_t addr2_1, @name("e") bit<8> e_1, @name("e0") Custom0_t e0_1, @name("e1") Custom1_t e1_1, @name("e2") Custom2_t e2_1, @name("e00") Custom00_t e00_1, @name("e01") Custom01_t e01_1, @name("e02") Custom02_t e02_1, @name("e10") Custom10_t e10_1, @name("e11") Custom11_t e11_1, @name("e12") Custom12_t e12_1, @name("e20") Custom20_t e20_1, @name("e21") Custom21_t e21_1, @name("e22") Custom22_t e22_1, @name("e001") Custom001_t e001_1, @name("e002") Custom002_t e002_1, @name("e101") Custom101_t e101_1, @name("e102") Custom102_t e102_1, @name("e201") Custom201_t e201_1, @name("e202") Custom202_t e202_1, @name("e220") Custom220_t e220_1, @name("e0020010") Custom0020010_t e0020010_1, @name("e0020020") Custom0020020_t e0020020_1, @name("s0") int<8> s0_1) {
+    @name("ingress.set_headers") action set_headers(@name("addr0") bit<48> addr0_1, @name("addr1") bit<48> addr1_1, @name("addr2") bit<48> addr2_1, @name("e") bit<8> e_1, @name("e0") bit<8> e0_1, @name("e1") bit<8> e1_1, @name("e2") bit<8> e2_1, @name("e00") bit<8> e00_1, @name("e01") bit<8> e01_1, @name("e02") bit<8> e02_1, @name("e10") bit<8> e10_1, @name("e11") bit<8> e11_1, @name("e12") bit<8> e12_1, @name("e20") bit<8> e20_1, @name("e21") bit<8> e21_1, @name("e22") bit<8> e22_1, @name("e001") bit<8> e001_1, @name("e002") bit<8> e002_1, @name("e101") bit<8> e101_1, @name("e102") bit<8> e102_1, @name("e201") bit<8> e201_1, @name("e202") bit<8> e202_1, @name("e220") bit<8> e220_1, @name("e0020010") bit<8> e0020010_1, @name("e0020020") bit<8> e0020020_1, @name("s0") int<8> s0_1) {
         hdr.custom._addr00 = addr0_1;
         hdr.custom._addr11 = addr1_1;
         hdr.custom._addr22 = addr2_1;

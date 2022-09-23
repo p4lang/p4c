@@ -43,7 +43,11 @@ p4c_add_xfail_reason("dpdk"
   "Error compiling"
   testdata/p4_16_samples/pna-dpdk-wrong-warning.p4
   testdata/p4_16_samples/pna-dpdk-invalid-hdr-warnings6.p4
-  testdata/p4_16_samples/psa-dpdk-lpm-match-err3.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "declaration not found"
+  testdata/p4_16_samples/psa-dpdk-header-union-typedef.p4
   )
 
 p4c_add_xfail_reason("dpdk"

@@ -2,23 +2,21 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> mac_addr_t;
-typedef bit<128> ipv6_addr_t;
 header ethernet_t {
-    mac_addr_t dstAddr;
-    mac_addr_t srcAddr;
-    bit<16>    etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv6_t {
-    bit<4>      version;
-    bit<8>      traffic_class;
-    bit<20>     flow_label;
-    bit<16>     payload_length;
-    bit<8>      nextHdr;
-    bit<8>      hopLimit;
-    ipv6_addr_t srcAddr;
-    ipv6_addr_t dstAddr;
+    bit<4>   version;
+    bit<8>   traffic_class;
+    bit<20>  flow_label;
+    bit<16>  payload_length;
+    bit<8>   nextHdr;
+    bit<8>   hopLimit;
+    bit<128> srcAddr;
+    bit<128> dstAddr;
 }
 
 header tcp_t {

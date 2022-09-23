@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <ebpf_model.p4>
 
-typedef bit<48> EthernetAddress;
 header Ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header Ipv4_t {

@@ -1,17 +1,15 @@
 #include <core.p4>
 
-typedef bit<9> PortIdUInt_t;
-typedef bit<9> PortId_t;
 struct M {
-    PortId_t     e;
-    PortIdUInt_t es;
+    bit<9> e;
+    bit<9> es;
 }
 
 control Ingress(inout M sm);
 package V1Switch(Ingress ig);
 control FabricIngress(inout M sm) {
     @hidden action newtype2l16() {
-        sm.es = (PortIdUInt_t)sm.e;
+        sm.es = (bit<9>)sm.e;
     }
     @hidden table tbl_newtype2l16 {
         actions = {

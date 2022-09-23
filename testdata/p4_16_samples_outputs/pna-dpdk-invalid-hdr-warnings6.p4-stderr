@@ -49,3 +49,4 @@ pna-dpdk-invalid-hdr-warnings6.p4(37): [--Wwarn=invalid_header] warning: accessi
 pna-dpdk-invalid-hdr-warnings6.p4(62): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u[0].h1
         u[0].h1 = { 1 };
         ^^^^^^^
+[--Wwarn=uninitialized_use] warning: tmp_h2 may not be completely initialized

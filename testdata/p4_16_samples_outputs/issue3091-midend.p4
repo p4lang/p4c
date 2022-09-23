@@ -25,11 +25,10 @@ extern LookupTable<M, K, V> {
 }
 
 extern bit<8> fn_foo<T>(in T data);
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 struct headers_t {
