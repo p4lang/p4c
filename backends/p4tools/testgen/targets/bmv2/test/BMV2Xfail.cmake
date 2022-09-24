@@ -70,27 +70,7 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
-  "Unknown or unimplemented extern method: recirculate_preserving_field_list"
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
-  "Unknown or unimplemented extern method: extract"
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
-  "Non-numeric, non-boolean member expression"
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
   "Computations are not supported in update_checksum"
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
-  "with type .* is not a Constant"
 )
 
 p4tools_add_xfail_reason(
@@ -111,21 +91,15 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "differs|Expected ([0-9]+) packets on port ([0-9]+) got ([0-9]+)"
-  # This test fails because we do not have the priority annotation implemented.
-  v1model-p4runtime-enumint-types1.p4 # bug in parserunroll
+   # bug in parserunroll
+  v1model-p4runtime-enumint-types1.p4
+  issue281.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "Only registers with bit or int types are currently supported"
   issue907-bmv2.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
-  "Could not find type for"
-  # Related to postorder(IR::Member* expression) in ParserUnroll,
-  # and more specifically when member is passed to getTypeArray
 )
 
 ####################################################################################################

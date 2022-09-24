@@ -126,6 +126,7 @@ p4tools_add_xfail_reason(
   pred2.p4
   register-serenum.p4
   table-key-serenum.p4
+  issue3531.p4
 )
 
 p4tools_add_xfail_reason(
