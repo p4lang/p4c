@@ -849,7 +849,8 @@ class SplitP4TableCommon : public Transform {
     const IR::Node* postorder(IR::IfStatement*) override;
     const IR::Node* postorder(IR::SwitchStatement*) override;
 
-    std::tuple<const IR::P4Table*, cstring> create_match_table(const IR::P4Table* /* tbl */);
+    std::tuple<const IR::P4Table*, cstring, cstring>
+        create_match_table(const IR::P4Table* /* tbl */);
     const IR::P4Action* create_action(cstring /* actionName */, cstring /* id */, cstring);
     const IR::P4Table* create_member_table(const IR::P4Table*, cstring, cstring);
     const IR::P4Table* create_group_table(const IR::P4Table*, cstring, cstring, cstring, int, int);

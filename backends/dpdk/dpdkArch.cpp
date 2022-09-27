@@ -1681,13 +1681,14 @@ getExternInstanceFromProperty(const IR::P4Table* table,
 // create P4Table object that represents the matching part of the original P4
 // table. This table sets the internal group_id or member_id which are used
 // for subsequent table lookup.
-std::tuple<const IR::P4Table*, cstring>
+std::tuple<const IR::P4Table*, cstring, cstring>
 SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
-    cstring actionName;
+    cstring grpActionName = "", memActionName;
     if (implementation == TableImplementation::ACTION_SELECTOR) {
-        actionName = refMap->newName(tbl->name.originalName + "_set_group_id");
+        grpActionName = refMap->newName(tbl->name.originalName + "_set_group_id");
+        memActionName = refMap->newName(tbl->name.originalName + "_set_member_id");
     } else if (implementation == TableImplementation::ACTION_PROFILE) {
-        actionName = refMap->newName(tbl->name.originalName + "_set_member_id");
+        memActionName = refMap->newName(tbl->name.originalName + "_set_member_id");
     } else {
         BUG("Unexpected table implementation type");
     }
@@ -1699,8 +1700,12 @@ SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
     }
     IR::IndexedVector<IR::ActionListElement> actionsList;
 
-    auto actionCall = new IR::MethodCallExpression(new IR::PathExpression(actionName));
-    actionsList.push_back(new IR::ActionListElement(actionCall));
+    if (implementation == TableImplementation::ACTION_SELECTOR) {
+        auto grpActionCall = new IR::MethodCallExpression(new IR::PathExpression(grpActionName));
+        actionsList.push_back(new IR::ActionListElement(grpActionCall));
+    }
+    auto memActionCall = new IR::MethodCallExpression(new IR::PathExpression(memActionName));
+    actionsList.push_back(new IR::ActionListElement(memActionCall));
     auto default_action = tbl->getDefaultAction();
     if (default_action) {
         if (auto mc = default_action->to<IR::MethodCallExpression>()) {
@@ -1723,7 +1728,7 @@ SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
                              new IR::ExpressionValue(tbl->getSizeProperty()), false)); }
     auto match_table = new IR::P4Table(tbl->name, tbl->annotations,
                                        new IR::TableProperties(properties));
-    return std::make_tuple(match_table, actionName);
+    return std::make_tuple(match_table, grpActionName, memActionName);
 }
 
 const IR::P4Action*
@@ -1877,11 +1882,13 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     }
 
     // base table matches on non-selector key and set group_id
-    cstring actionName;
+    cstring grpActionName, memActionName;
     const IR::P4Table* match_table;
-    std::tie(match_table, actionName) = create_match_table(tbl);
-    auto action = create_action(actionName, group_id, "group_id");
-    decls->push_back(action);
+    std::tie(match_table, grpActionName, memActionName) = create_match_table(tbl);
+    auto grpAction = create_action(grpActionName, group_id, "group_id");
+    auto memAction = create_action(memActionName, member_id, "member_id");
+    decls->push_back(grpAction);
+    decls->push_back(memAction);
     decls->push_back(match_table);
     cstring member_table_name = instance_name;
     cstring group_table_name = member_table_name + "_sel";
@@ -1972,9 +1979,9 @@ const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
         decls->push_back(member_id_decl);
     }
 
-    cstring actionName;
+    cstring actionName, ignoreGroup;
     const IR::P4Table* match_table;
-    std::tie(match_table, actionName) = create_match_table(tbl);
+    std::tie(match_table, ignoreGroup, actionName) = create_match_table(tbl);
     auto action = create_action(actionName, member_id, "member_id");
     decls->push_back(action);
     decls->push_back(match_table);
