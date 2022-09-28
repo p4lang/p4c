@@ -598,8 +598,8 @@ class ParserSymbolicInterpreter {
 
     /// True if both structures are equal.
     bool equStackVariableMap(const StackVariableMap& l, const StackVariableMap& r) const {
-        if (l.size() == 0) {
-            return (r.size() == 0) ? true : false;
+        if (l.empty()) {
+            return r.empty();
         }
         for (const auto& i : l) {
             const auto j = r.find(i.first);
@@ -611,7 +611,7 @@ class ParserSymbolicInterpreter {
     }
 
     /// Return true if we have detected a loop we cannot unroll
-bool checkLoops(ParserStateInfo* state) const {
+    bool checkLoops(ParserStateInfo* state) const {
         const ParserStateInfo* crt = state;
         while (true) {
             crt = crt->predecessor;
@@ -644,6 +644,9 @@ bool checkLoops(ParserStateInfo* state) const {
                         ::warning(ErrorType::ERR_INVALID,
                                   "Parser cycle without extracting any bytes:\n%1%",
                                   stateChain(state));
+                    if (equStackVariableMap(crt->statesIndexes, state->statesIndexes)) {
+                        wasError = true;
+                    }
                     return true;
                 }
 
