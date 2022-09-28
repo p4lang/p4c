@@ -137,16 +137,10 @@ class RemoveUnusedHUDeclarations : public Transform {
 };
 
 /** Passmanager to group necessary passes for flattening header unions
- * - The SimplifyDefUse pass is used before and after the header union flattening passes
- *   to optimize some of the unnecessay assignments
  * - RemoveAllUnusedDeclarations pass is used to remove the local standalone header union
  *   variable declarations
  * - The header union flattening pass introduces if statements within parser, RemoveParserIfs
  *   pass is used to convert these if statements to transition select statements
- * TODO
- * 1. Calling SimplifyDefUse after header union flattening leaves some spurious setValid and
- *    setInvalid calls corresponding to the assignment statements which are removed. Need to
- *    write a pass to cleanup the unnecessary method calls.
  */
 class FlattenHeaderUnion : public PassManager {
     P4::ReferenceMap* refMap;
@@ -155,12 +149,10 @@ class FlattenHeaderUnion : public PassManager {
  public:
     FlattenHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) {
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
-        passes.push_back(new P4::SimplifyDefUse(refMap, typeMap));
         passes.push_back(new HandleValidityHeaderUnion(refMap, typeMap));
         passes.push_back(new DoFlattenHeaderUnion(refMap, typeMap));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
-        passes.push_back(new P4::SimplifyDefUse(refMap, typeMap));
         passes.push_back(new P4::RemoveAllUnusedDeclarations(refMap));
         passes.push_back(new P4::RemoveUnusedHUDeclarations(refMap));
         passes.push_back(new P4::RemoveParserIfs(refMap, typeMap));

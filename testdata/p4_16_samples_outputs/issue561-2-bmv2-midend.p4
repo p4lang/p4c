@@ -60,14 +60,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         const default_action = NoAction_1();
     }
     @hidden action issue5612bmv2l69() {
-        hdr.u_short.data = 16w0xffff;
         hdr.u_short.setValid();
+        hdr.u_short.data = 16w0xffff;
         hdr.u_byte.setInvalid();
         hdr.u_short.setInvalid();
     }
     @hidden action issue5612bmv2l73() {
-        hdr.u_byte.data = 8w0xff;
         hdr.u_byte.setValid();
+        hdr.u_byte.data = 8w0xff;
         hdr.u_short.setInvalid();
         hdr.u_byte.setInvalid();
     }

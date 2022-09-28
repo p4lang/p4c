@@ -6,11 +6,3 @@
 [--Wwarn=uninitialized_use] warning: addr_0.ipv6 may not be completely initialized
 [--Wwarn=uninitialized_use] warning: addr_0.ipv4 may not be completely initialized
 [--Wwarn=uninitialized_use] warning: addr_0.ipv6 may not be completely initialized
-[--Wwarn=uninitialized_use] warning: addr_0_ipv4 may not be completely initialized
-[--Wwarn=uninitialized_use] warning: addr_0_ipv6 may not be completely initialized
-[--Wwarn=uninitialized_use] warning: addr_0_ipv4 may not be completely initialized
-[--Wwarn=uninitialized_use] warning: addr_0_ipv6 may not be completely initialized
-[--Wwarn=uninitialized_use] warning: addr_0_ipv4 may not be completely initialized
-[--Wwarn=uninitialized_use] warning: addr_0_ipv6 may not be completely initialized
-[--Wwarn=uninitialized_use] warning: addr_0_ipv4 may not be completely initialized
-[--Wwarn=uninitialized_use] warning: addr_0_ipv6 may not be completely initialized

@@ -22,12 +22,3 @@ issue561.p4(35): [--Wwarn=invalid_header] warning: accessing a field of an inval
 issue561.p4(35): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u.h2
         x = u.h1.f + u.h2.g;
                      ^^^^
-[--Wwarn=invalid_header] warning: accessing a field of an invalid header u_0_h1
-[--Wwarn=invalid_header] warning: accessing a field of an invalid header u_0_h2
-[--Wwarn=invalid_header] warning: accessing a field of an invalid header u_0_h2
-issue561.p4(44): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u2[0].h1
-        u2[0].h1.f = 2;
-        ^^^^^^^^
-issue561.p4(45): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u2[0].h1
-        x = x + u2[1].h2.g + u2[0].h1.f;
-                             ^^^^^^^^

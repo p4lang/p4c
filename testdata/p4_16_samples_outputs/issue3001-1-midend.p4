@@ -59,6 +59,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     @hidden action issue30011l46() {
         retval_0_h.setValid();
+        retval_0_h = u_0_h;
     }
     @hidden action act() {
         retval_0_h.setInvalid();
@@ -68,6 +69,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     @hidden action act_0() {
         tmp_1_h.setValid();
+        tmp_1_h = retval_0_h;
     }
     @hidden action act_1() {
         tmp_1_h.setInvalid();

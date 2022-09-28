@@ -24,5 +24,3 @@ equality.p4(28): [--Wwarn=uninitialized_use] warning: a2 may not be completely i
                          ^^
 [--Wwarn=uninitialized_use] warning: s1_0_a may be uninitialized
 [--Wwarn=uninitialized_use] warning: s2_0_a may be uninitialized
-[--Wwarn=uninitialized_use] warning: s1_0_a may be uninitialized
-[--Wwarn=uninitialized_use] warning: s2_0_a may be uninitialized

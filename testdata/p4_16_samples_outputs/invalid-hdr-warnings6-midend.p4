@@ -30,8 +30,8 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         hdr.u[0].h2.setInvalid();
         hdr.u[0].h3.setInvalid();
         pkt.extract<Header1>(hdr.u[0].h3);
-        hdr.u[0].h3.data = 32w1;
         hdr.u[0].h3.setValid();
+        hdr.u[0].h3.data = 32w1;
         hdr.u[0].h1.setInvalid();
         hdr.u[0].h2.setInvalid();
         transition select(hdr.u[0].h3.isValid()) {
@@ -40,8 +40,8 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         }
     }
     state start_true {
-        hdr.u[0].h1 = hdr.u[0].h3;
         hdr.u[0].h1.setValid();
+        hdr.u[0].h1 = hdr.u[0].h3;
         hdr.u[0].h2.setInvalid();
         hdr.u[0].h3.setInvalid();
         transition start_join;
@@ -51,30 +51,27 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         transition start_join;
     }
     state start_join {
-        hdr.u[0].h1.data = 32w1;
         hdr.u[0].h1.setValid();
+        hdr.u[0].h1.data = 32w1;
         hdr.u[0].h2.setInvalid();
         hdr.u[0].h3.setInvalid();
-        transition select(hdr.u[0].h1.data) {
-            32w0: next;
-            default: last;
-        }
+        transition last;
     }
     state next {
         pkt.extract<Header2>(hdr.u[0].h2);
         transition last;
     }
     state last {
-        hdr.u[0].h1.data = 32w1;
         hdr.u[0].h1.setValid();
+        hdr.u[0].h1.data = 32w1;
         hdr.u[0].h2.setInvalid();
         hdr.u[0].h3.setInvalid();
-        hdr.u[0].h2.data = 16w1;
         hdr.u[0].h2.setValid();
+        hdr.u[0].h2.data = 16w1;
         hdr.u[0].h1.setInvalid();
         hdr.u[0].h3.setInvalid();
-        hdr.u[0].h3.data = 32w1;
         hdr.u[0].h3.setValid();
+        hdr.u[0].h3.data = 32w1;
         hdr.u[0].h1.setInvalid();
         hdr.u[0].h2.setInvalid();
         transition accept;
@@ -88,6 +85,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name("IngressI.u") Union[2] u_1;
     @hidden action invalidhdrwarnings6l61() {
         u_1[1].h1.setValid();
+        u_1[1].h1 = u_1[0].h1;
         u_1[1].h2.setInvalid();
         u_1[1].h3.setInvalid();
     }
@@ -105,11 +103,13 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         u_1[0].h2.setInvalid();
         u_1[0].h3.setInvalid();
         u_1[0].h1.setValid();
+        u_1[0].h1.data = 32w1;
         u_1[0].h2.setInvalid();
         u_1[0].h3.setInvalid();
     }
     @hidden action invalidhdrwarnings6l66() {
         tmp_h2_0.setValid();
+        tmp_h2_0 = u_1[1w0].h2;
         tmp_h1_0.setInvalid();
         tmp_h3_0.setInvalid();
     }
@@ -123,6 +123,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     @hidden action invalidhdrwarnings6l66_0() {
         tmp_h3_0.setValid();
+        tmp_h3_0 = u_1[1w0].h3;
         tmp_h1_0.setInvalid();
         tmp_h2_0.setInvalid();
     }
@@ -131,34 +132,21 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     @hidden action invalidhdrwarnings6l66_1() {
         u_1[1].h2.setValid();
+        u_1[1].h2 = tmp_h2_0;
         u_1[1].h1.setInvalid();
         u_1[1].h3.setInvalid();
     }
     @hidden action invalidhdrwarnings6l66_2() {
         u_1[1].h2.setInvalid();
     }
-    @hidden action invalidhdrwarnings6l71() {
-        u_1[1w0].h2.setValid();
-        u_1[1w0].h1.setInvalid();
-        u_1[1w0].h3.setInvalid();
-    }
     @hidden action invalidhdrwarnings6l68() {
-        u_1[1].h2.data = 16w1;
         u_1[1].h2.setValid();
+        u_1[1].h2.data = 16w1;
         u_1[1].h1.setInvalid();
         u_1[1].h3.setInvalid();
-    }
-    @hidden action invalidhdrwarnings6l77() {
-        u_1[1w0].h1.setValid();
-        u_1[1w0].h2.setInvalid();
-        u_1[1w0].h3.setInvalid();
-    }
-    @hidden action invalidhdrwarnings6l79() {
         u_1[1w0].h2.setValid();
         u_1[1w0].h1.setInvalid();
         u_1[1w0].h3.setInvalid();
-    }
-    @hidden action invalidhdrwarnings6l83() {
         u_1[1].h1.setInvalid();
         u_1[1w0].h1.setInvalid();
         u_1[1w0].h1.setValid();
@@ -231,30 +219,6 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         }
         const default_action = invalidhdrwarnings6l68();
     }
-    @hidden table tbl_invalidhdrwarnings6l71 {
-        actions = {
-            invalidhdrwarnings6l71();
-        }
-        const default_action = invalidhdrwarnings6l71();
-    }
-    @hidden table tbl_invalidhdrwarnings6l77 {
-        actions = {
-            invalidhdrwarnings6l77();
-        }
-        const default_action = invalidhdrwarnings6l77();
-    }
-    @hidden table tbl_invalidhdrwarnings6l79 {
-        actions = {
-            invalidhdrwarnings6l79();
-        }
-        const default_action = invalidhdrwarnings6l79();
-    }
-    @hidden table tbl_invalidhdrwarnings6l83 {
-        actions = {
-            invalidhdrwarnings6l83();
-        }
-        const default_action = invalidhdrwarnings6l83();
-    }
     apply {
         tbl_invalidhdrwarnings6l57.apply();
         if (u_1[0].h1.isValid()) {
@@ -279,15 +243,6 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
             tbl_invalidhdrwarnings6l66_2.apply();
         }
         tbl_invalidhdrwarnings6l68.apply();
-        if (u_1[1].h2.data == 16w0) {
-            tbl_invalidhdrwarnings6l71.apply();
-        }
-        if (u_1[1].h2.data == 16w0) {
-            tbl_invalidhdrwarnings6l77.apply();
-        } else {
-            tbl_invalidhdrwarnings6l79.apply();
-        }
-        tbl_invalidhdrwarnings6l83.apply();
     }
 }
 

@@ -6,4 +6,3 @@ bit<2> set_undefined(out bit<32> val) {
        ^^^^^^^^^^^^^
 [--Wwarn=uninitialized_use] warning: val_0 may be uninitialized
 [--Wwarn=uninitialized_use] warning: val_0 may be uninitialized
-[--Wwarn=uninitialized_use] warning: val_0 may be uninitialized

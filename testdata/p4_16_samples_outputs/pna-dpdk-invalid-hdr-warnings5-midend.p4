@@ -29,6 +29,7 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_inp
         hdr.u1_h3.setInvalid();
         pkt.extract<Header1>(hdr.u1_h3);
         hdr.u1_h3.setValid();
+        hdr.u1_h3.data = 32w1;
         hdr.u1_h1.setInvalid();
         hdr.u1_h2.setInvalid();
         transition select(hdr.u1_h3.isValid()) {
@@ -38,6 +39,7 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_inp
     }
     state start_true {
         hdr.u1_h1.setValid();
+        hdr.u1_h1 = hdr.u1_h3;
         hdr.u1_h2.setInvalid();
         hdr.u1_h3.setInvalid();
         transition start_join;
@@ -47,30 +49,27 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_inp
         transition start_join;
     }
     state start_join {
-        hdr.u1_h1.data = 32w1;
         hdr.u1_h1.setValid();
+        hdr.u1_h1.data = 32w1;
         hdr.u1_h2.setInvalid();
         hdr.u1_h3.setInvalid();
-        transition select(hdr.u1_h1.data) {
-            32w0: next;
-            default: last;
-        }
+        transition last;
     }
     state next {
         pkt.extract<Header2>(hdr.u1_h2);
         transition last;
     }
     state last {
-        hdr.u1_h1.data = 32w1;
         hdr.u1_h1.setValid();
+        hdr.u1_h1.data = 32w1;
         hdr.u1_h2.setInvalid();
         hdr.u1_h3.setInvalid();
-        hdr.u1_h2.data = 16w1;
         hdr.u1_h2.setValid();
+        hdr.u1_h2.data = 16w1;
         hdr.u1_h1.setInvalid();
         hdr.u1_h3.setInvalid();
-        hdr.u1_h3.data = 32w1;
         hdr.u1_h3.setValid();
+        hdr.u1_h3.data = 32w1;
         hdr.u1_h1.setInvalid();
         hdr.u1_h2.setInvalid();
         transition accept;
@@ -86,6 +85,7 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
     @name("u2_0_h3") Header1 u2_0_h3_0;
     @hidden action pnadpdkinvalidhdrwarnings5l69() {
         u2_0_h2_0.setValid();
+        u2_0_h2_0 = u1_0_h2_0;
         u2_0_h1_0.setInvalid();
         u2_0_h3_0.setInvalid();
     }
@@ -106,23 +106,14 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         u1_0_h1_0.setInvalid();
         u1_0_h3_0.setInvalid();
     }
-    @hidden action pnadpdkinvalidhdrwarnings5l74() {
-        u1_0_h1_0.setValid();
-        u1_0_h2_0.setInvalid();
-        u1_0_h3_0.setInvalid();
-    }
-    @hidden action pnadpdkinvalidhdrwarnings5l76() {
+    @hidden action pnadpdkinvalidhdrwarnings5l71() {
+        u2_0_h2_0.setValid();
+        u2_0_h2_0.data = 16w1;
+        u2_0_h1_0.setInvalid();
+        u2_0_h3_0.setInvalid();
         u1_0_h2_0.setValid();
         u1_0_h1_0.setInvalid();
         u1_0_h3_0.setInvalid();
-    }
-    @hidden action pnadpdkinvalidhdrwarnings5l71() {
-        u2_0_h2_0.data = 16w1;
-        u2_0_h2_0.setValid();
-        u2_0_h1_0.setInvalid();
-        u2_0_h3_0.setInvalid();
-    }
-    @hidden action pnadpdkinvalidhdrwarnings5l82() {
         u1_0_h3_0.setInvalid();
     }
     @hidden table tbl_pnadpdkinvalidhdrwarnings5l60 {
@@ -149,24 +140,6 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         }
         const default_action = pnadpdkinvalidhdrwarnings5l71();
     }
-    @hidden table tbl_pnadpdkinvalidhdrwarnings5l74 {
-        actions = {
-            pnadpdkinvalidhdrwarnings5l74();
-        }
-        const default_action = pnadpdkinvalidhdrwarnings5l74();
-    }
-    @hidden table tbl_pnadpdkinvalidhdrwarnings5l76 {
-        actions = {
-            pnadpdkinvalidhdrwarnings5l76();
-        }
-        const default_action = pnadpdkinvalidhdrwarnings5l76();
-    }
-    @hidden table tbl_pnadpdkinvalidhdrwarnings5l82 {
-        actions = {
-            pnadpdkinvalidhdrwarnings5l82();
-        }
-        const default_action = pnadpdkinvalidhdrwarnings5l82();
-    }
     apply {
         tbl_pnadpdkinvalidhdrwarnings5l60.apply();
         if (u1_0_h2_0.isValid()) {
@@ -175,12 +148,6 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
             tbl_pnadpdkinvalidhdrwarnings5l69_0.apply();
         }
         tbl_pnadpdkinvalidhdrwarnings5l71.apply();
-        if (u2_0_h2_0.data == 16w0) {
-            tbl_pnadpdkinvalidhdrwarnings5l74.apply();
-        } else {
-            tbl_pnadpdkinvalidhdrwarnings5l76.apply();
-        }
-        tbl_pnadpdkinvalidhdrwarnings5l82.apply();
     }
 }
 

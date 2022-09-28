@@ -30,6 +30,7 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         hdr.u1_h3.setInvalid();
         pkt.extract<Header1>(hdr.u1_h3);
         hdr.u1_h3.setValid();
+        hdr.u1_h3.data = 32w1;
         hdr.u1_h1.setInvalid();
         hdr.u1_h2.setInvalid();
         transition select(hdr.u1_h3.isValid()) {
@@ -39,6 +40,7 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
     }
     state start_true {
         hdr.u1_h1.setValid();
+        hdr.u1_h1 = hdr.u1_h3;
         hdr.u1_h2.setInvalid();
         hdr.u1_h3.setInvalid();
         transition start_join;
@@ -48,30 +50,27 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         transition start_join;
     }
     state start_join {
-        hdr.u1_h1.data = 32w1;
         hdr.u1_h1.setValid();
+        hdr.u1_h1.data = 32w1;
         hdr.u1_h2.setInvalid();
         hdr.u1_h3.setInvalid();
-        transition select(hdr.u1_h1.data) {
-            32w0: next;
-            default: last;
-        }
+        transition last;
     }
     state next {
         pkt.extract<Header2>(hdr.u1_h2);
         transition last;
     }
     state last {
-        hdr.u1_h1.data = 32w1;
         hdr.u1_h1.setValid();
+        hdr.u1_h1.data = 32w1;
         hdr.u1_h2.setInvalid();
         hdr.u1_h3.setInvalid();
-        hdr.u1_h2.data = 16w1;
         hdr.u1_h2.setValid();
+        hdr.u1_h2.data = 16w1;
         hdr.u1_h1.setInvalid();
         hdr.u1_h3.setInvalid();
-        hdr.u1_h3.data = 32w1;
         hdr.u1_h3.setValid();
+        hdr.u1_h3.data = 32w1;
         hdr.u1_h1.setInvalid();
         hdr.u1_h2.setInvalid();
         transition accept;
@@ -87,6 +86,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name("u2_0_h3") Header1 u2_0_h3_0;
     @hidden action invalidhdrwarnings5l67() {
         u2_0_h2_0.setValid();
+        u2_0_h2_0 = u1_0_h2_0;
         u2_0_h1_0.setInvalid();
         u2_0_h3_0.setInvalid();
     }
@@ -107,23 +107,14 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         u1_0_h1_0.setInvalid();
         u1_0_h3_0.setInvalid();
     }
-    @hidden action invalidhdrwarnings5l72() {
-        u1_0_h1_0.setValid();
-        u1_0_h2_0.setInvalid();
-        u1_0_h3_0.setInvalid();
-    }
-    @hidden action invalidhdrwarnings5l74() {
+    @hidden action invalidhdrwarnings5l69() {
+        u2_0_h2_0.setValid();
+        u2_0_h2_0.data = 16w1;
+        u2_0_h1_0.setInvalid();
+        u2_0_h3_0.setInvalid();
         u1_0_h2_0.setValid();
         u1_0_h1_0.setInvalid();
         u1_0_h3_0.setInvalid();
-    }
-    @hidden action invalidhdrwarnings5l69() {
-        u2_0_h2_0.data = 16w1;
-        u2_0_h2_0.setValid();
-        u2_0_h1_0.setInvalid();
-        u2_0_h3_0.setInvalid();
-    }
-    @hidden action invalidhdrwarnings5l80() {
         u1_0_h3_0.setInvalid();
     }
     @hidden table tbl_invalidhdrwarnings5l58 {
@@ -150,24 +141,6 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         }
         const default_action = invalidhdrwarnings5l69();
     }
-    @hidden table tbl_invalidhdrwarnings5l72 {
-        actions = {
-            invalidhdrwarnings5l72();
-        }
-        const default_action = invalidhdrwarnings5l72();
-    }
-    @hidden table tbl_invalidhdrwarnings5l74 {
-        actions = {
-            invalidhdrwarnings5l74();
-        }
-        const default_action = invalidhdrwarnings5l74();
-    }
-    @hidden table tbl_invalidhdrwarnings5l80 {
-        actions = {
-            invalidhdrwarnings5l80();
-        }
-        const default_action = invalidhdrwarnings5l80();
-    }
     apply {
         tbl_invalidhdrwarnings5l58.apply();
         if (u1_0_h2_0.isValid()) {
@@ -176,12 +149,6 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
             tbl_invalidhdrwarnings5l67_0.apply();
         }
         tbl_invalidhdrwarnings5l69.apply();
-        if (u2_0_h2_0.data == 16w0) {
-            tbl_invalidhdrwarnings5l72.apply();
-        } else {
-            tbl_invalidhdrwarnings5l74.apply();
-        }
-        tbl_invalidhdrwarnings5l80.apply();
     }
 }
 

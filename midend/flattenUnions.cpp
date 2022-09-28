@@ -33,10 +33,11 @@ const IR::Node* HandleValidityHeaderUnion::setInvalidforRest(const IR::Statement
                                            const IR::Member *m, const IR::Type_HeaderUnion *hu,
                                            cstring exclude, bool setValidforCurrMem) {
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
-    code_block->push_back(s);
     if (setValidforCurrMem) {
         code_block->push_back(processValidityForStr(s, m, exclude, IR::Type_Header::setValid));
     }
+
+    code_block->push_back(s);
 
     for (auto sfu : hu->fields) {
         if (exclude != sfu->name.name) {  // setInvalid for rest of the fields

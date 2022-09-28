@@ -54,8 +54,8 @@ parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     state start_0_true {
-        hdr.addr_dst_ipv4 = addr_0_ipv4_0;
         hdr.addr_dst_ipv4.setValid();
+        hdr.addr_dst_ipv4 = addr_0_ipv4_0;
         hdr.addr_dst_ipv6.setInvalid();
         transition start_0_join;
     }
@@ -70,8 +70,8 @@ parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     state start_0_true_0 {
-        hdr.addr_dst_ipv6 = addr_0_ipv6_0;
         hdr.addr_dst_ipv6.setValid();
+        hdr.addr_dst_ipv6 = addr_0_ipv6_0;
         hdr.addr_dst_ipv4.setInvalid();
         transition start_0_join_0;
     }
@@ -103,8 +103,8 @@ parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     state start_1_true {
-        hdr.addr_src_ipv4 = addr_0_ipv4_0;
         hdr.addr_src_ipv4.setValid();
+        hdr.addr_src_ipv4 = addr_0_ipv4_0;
         hdr.addr_src_ipv6.setInvalid();
         transition start_1_join;
     }
@@ -119,8 +119,8 @@ parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     state start_1_true_0 {
-        hdr.addr_src_ipv6 = addr_0_ipv6_0;
         hdr.addr_src_ipv6.setValid();
+        hdr.addr_src_ipv6 = addr_0_ipv6_0;
         hdr.addr_src_ipv4.setInvalid();
         transition start_1_join_0;
     }

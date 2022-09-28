@@ -42,6 +42,7 @@ p4c_add_xfail_reason("dpdk"
 p4c_add_xfail_reason("dpdk"
   "Error compiling"
   testdata/p4_16_samples/pna-dpdk-wrong-warning.p4
+  testdata/p4_16_samples/pna-dpdk-invalid-hdr-warnings5.p4
   testdata/p4_16_samples/pna-dpdk-invalid-hdr-warnings6.p4
   )
 

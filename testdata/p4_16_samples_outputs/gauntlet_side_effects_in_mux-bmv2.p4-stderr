@@ -8,5 +8,3 @@ bit<16> reset(out bit<8> hPSe) {
 [--Wwarn=uninitialized_use] warning: hPSe_1 may be uninitialized
 [--Wwarn=uninitialized_use] warning: hPSe_0 may be uninitialized
 [--Wwarn=uninitialized_use] warning: hPSe_1 may be uninitialized
-[--Wwarn=uninitialized_use] warning: hPSe_0 may be uninitialized
-[--Wwarn=uninitialized_use] warning: hPSe_1 may be uninitialized

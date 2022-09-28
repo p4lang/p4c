@@ -369,8 +369,8 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
     clone_0_t clone_md_0_data_h0;
     clone_1_t clone_md_0_data_h1;
     @hidden action issue982l420() {
-        ostd.clone_metadata.data_h0 = clone_md_0_data_h0;
         ostd.clone_metadata.data_h0.setValid();
+        ostd.clone_metadata.data_h0 = clone_md_0_data_h0;
         ostd.clone_metadata.data_h1.setInvalid();
     }
     @hidden action issue982l420_0() {
@@ -380,8 +380,8 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
         ostd.clone_metadata.type = 3w0;
     }
     @hidden action issue982l420_2() {
-        ostd.clone_metadata.data_h1 = clone_md_0_data_h1;
         ostd.clone_metadata.data_h1.setValid();
+        ostd.clone_metadata.data_h1 = clone_md_0_data_h1;
         ostd.clone_metadata.data_h0.setInvalid();
     }
     @hidden action issue982l420_3() {
@@ -392,8 +392,8 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
         clone_md_0_data_h1.setInvalid();
         clone_md_0_data_h1.setValid();
         clone_md_0_data_h0.setInvalid();
-        clone_md_0_data_h1.data = 32w0;
         clone_md_0_data_h1.setValid();
+        clone_md_0_data_h1.data = 32w0;
         clone_md_0_data_h0.setInvalid();
     }
     @hidden action issue982l422() {

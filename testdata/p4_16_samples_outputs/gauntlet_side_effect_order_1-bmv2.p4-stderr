@@ -24,4 +24,3 @@ gauntlet_side_effect_order_1-bmv2.p4(33)
 [--Wwarn=uninitialized_use] warning: val_1 may be uninitialized
 [--Wwarn=uninitialized_use] warning: val_1 may be uninitialized
 [--Wwarn=uninitialized_use] warning: val_1 may be uninitialized
-[--Wwarn=uninitialized_use] warning: val_1 may be uninitialized

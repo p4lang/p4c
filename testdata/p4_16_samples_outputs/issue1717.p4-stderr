@@ -8,5 +8,3 @@ issue1717.p4(52): [--Wwarn=uninitialized_use] warning: h2 may not be completely 
 [--Wwarn=invalid_header] warning: accessing a field of an invalid header h1_0
 [--Wwarn=invalid_header] warning: accessing a field of an invalid header h2_0
 [--Wwarn=invalid_header] warning: accessing a field of an invalid header h1_0
-[--Wwarn=invalid_header] warning: accessing a field of an invalid header h2_0
-[--Wwarn=invalid_header] warning: accessing a field of an invalid header h1_0

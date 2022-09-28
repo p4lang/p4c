@@ -18,4 +18,3 @@ bit<48> do_thing(inout bit<48> val_0, out bit<48> val_1) {
         ^^^^^^^^
 [--Wwarn=uninitialized_use] warning: val_2 may be uninitialized
 [--Wwarn=uninitialized_use] warning: val_2 may be uninitialized
-[--Wwarn=uninitialized_use] warning: val_2 may be uninitialized
