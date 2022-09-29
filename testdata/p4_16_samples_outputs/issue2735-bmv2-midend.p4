@@ -2,11 +2,10 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> EthernetAddress;
 header Ethernet_h {
-    EthernetAddress dst;
-    EthernetAddress src;
-    bit<16>         type;
+    bit<48> dst;
+    bit<48> src;
+    bit<16> type;
 }
 
 struct metadata {

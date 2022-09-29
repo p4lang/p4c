@@ -16,11 +16,10 @@ control Egress<H, M>(inout H hdr, inout M meta, inout standard_metadata_t standa
 control ComputeChecksum<H, M>(inout H hdr, inout M meta);
 control Deparser<H>(packet_out b, in H hdr);
 package MySwitch<H, M>(Parser<H, M> p, VerifyChecksum<H, M> vr=EmptyVerifyChecksum<H, M>(), Ingress<H, M> ig, Egress<H, M> eg, ComputeChecksum<H, M> ck, Deparser<H> dep);
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 struct headers_t {

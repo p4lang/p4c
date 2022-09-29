@@ -4,11 +4,10 @@
 struct empty_metadata_t {
 }
 
-typedef bit<48> ethernet_addr_t;
 header ethernet_t {
-    ethernet_addr_t dst_addr;
-    ethernet_addr_t src_addr;
-    bit<16>         ether_type;
+    bit<48> dst_addr;
+    bit<48> src_addr;
+    bit<16> ether_type;
 }
 
 header ipv4_t {
@@ -49,8 +48,8 @@ struct headers_t {
 }
 
 struct local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t {
-    ethernet_addr_t dst_addr;
-    ethernet_addr_t src_addr;
+    bit<48> dst_addr;
+    bit<48> src_addr;
 }
 
 parser packet_parser(packet_in packet, out headers_t headers, inout local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t local_metadata, in psa_ingress_parser_input_metadata_t standard_metadata, in empty_metadata_t resub_meta, in empty_metadata_t recirc_meta) {

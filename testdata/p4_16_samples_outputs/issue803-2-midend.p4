@@ -1,12 +1,11 @@
 #include <core.p4>
 
-typedef bit<4> PortId;
 struct InControl {
-    PortId inputPort;
+    bit<4> inputPort;
 }
 
 struct OutControl {
-    PortId outputPort;
+    bit<4> outputPort;
 }
 
 parser Parser<IH>(packet_in b, out IH parsedHeaders);
@@ -16,11 +15,10 @@ control Deparser<OH>(in OH outputHeaders, packet_out b);
 package Ingress<T, IH, OH>(Parser<IH> p, IPipe<T, IH, OH> map, Deparser<OH> d);
 package Egress<T, IH, OH>(Parser<IH> p, EPipe<T, IH, OH> map, Deparser<OH> d);
 package Switch<T>(Ingress<T, _, _> ingress, Egress<T, _, _> egress);
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 struct ing_in_headers {
@@ -44,7 +42,7 @@ struct egr_out_headers {
 }
 
 struct ing_to_egr {
-    PortId x;
+    bit<4> x;
 }
 
 parser ing_parse(packet_in buffer, out ing_in_headers parsed_hdr) {

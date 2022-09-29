@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <pna.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_dddddddddddddddddddddddddddddddddddddddddd_t {
@@ -59,7 +58,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     @name("MainControlImpl.eth") ethernet_t eth_0;
     @name("MainControlImpl.hdr_0") ethernet_t hdr_1;
     @name("MainControlImpl.outer_hdr_0") ethernet_t outer_hdr;
-    @name("MainControlImpl.next_hop") action next_hop(@name("vport") PortId_t vport) {
+    @name("MainControlImpl.next_hop") action next_hop(@name("vport") bit<32> vport) {
         eth_0 = hdr.ethernet;
         hdr.ethernet1 = hdr.ethernet;
         send_to_port(vport);

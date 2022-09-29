@@ -2,27 +2,25 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> EthernetAddress;
-typedef bit<32> IPv4Address;
 header ethernet_t {
-    EthernetAddress dst_addr;
-    EthernetAddress src_addr;
-    bit<16>         ether_type;
+    bit<48> dst_addr;
+    bit<48> src_addr;
+    bit<16> ether_type;
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     total_len;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     frag_offset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdr_checksum;
-    IPv4Address src_addr;
-    IPv4Address dst_addr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> total_len;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> frag_offset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdr_checksum;
+    bit<32> src_addr;
+    bit<32> dst_addr;
 }
 
 struct headers_t {
@@ -31,11 +29,11 @@ struct headers_t {
 }
 
 struct metadata_t {
-    bool            dropped;
-    bit<16>         direction;
-    IPv4Address     dst_ip_addr;
-    IPv4Address     src_ip_addr;
-    EthernetAddress ethernet_addr;
+    bool    dropped;
+    bit<16> direction;
+    bit<32> dst_ip_addr;
+    bit<32> src_ip_addr;
+    bit<48> ethernet_addr;
 }
 
 parser test_parser(packet_in packet, out headers_t hd, inout metadata_t meta, inout standard_metadata_t standard_meta) {
@@ -114,7 +112,7 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         }
         default_action = NoAction_1();
     }
-    @name("test_ingress.action5") action action5(@name("neighbor_mac") EthernetAddress neighbor_mac) {
+    @name("test_ingress.action5") action action5(@name("neighbor_mac") bit<48> neighbor_mac) {
         meta.ethernet_addr = neighbor_mac;
     }
     @name("test_ingress.post_tbl3") table post_tbl3_0 {

@@ -1,0 +1,58 @@
+pna-dpdk-invalid-hdr-warnings5.p4(31): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.u1.h1
+        hdr.u1.h1.data = 1;
+        ^^^^^^^^^
+pna-dpdk-invalid-hdr-warnings5.p4(36): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.u1.h3
+        hdr.u1.h3.data = 1;
+        ^^^^^^^^^
+pna-dpdk-invalid-hdr-warnings5.p4(50): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u1.h1
+        hdr.u1.h1.data = 1;
+        ^^^^^^^^^
+pna-dpdk-invalid-hdr-warnings5.p4(51): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u1.h2
+        hdr.u1.h2.data = 1;
+        ^^^^^^^^^
+pna-dpdk-invalid-hdr-warnings5.p4(52): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.u1.h3
+        hdr.u1.h3.data = 1;
+        ^^^^^^^^^
+pna-dpdk-invalid-hdr-warnings5.p4(70): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u2.h1
+        u2.h1.data = 1;
+        ^^^^^
+pna-dpdk-invalid-hdr-warnings5.p4(79): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header u1.h1
+        u1.h1.data = 1;
+        ^^^^^
+pna-dpdk-invalid-hdr-warnings5.p4(80): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header u1.h2
+        u1.h2.data = 1;
+        ^^^^^
+pna-dpdk-invalid-hdr-warnings5.p4(84): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u1.h1
+        u1.h1.data = 1;
+        ^^^^^
+pna-dpdk-invalid-hdr-warnings5.p4(85): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u1.h2
+        u1.h2.data = 1;
+        ^^^^^
+pna-dpdk-invalid-hdr-warnings5.p4(86): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u1.h3
+        u1.h3.data = 1;
+        ^^^^^
+pna-dpdk-invalid-hdr-warnings5.p4(69): [--Wwarn=uninitialized_use] warning: u1.h1 may not be completely initialized
+        u2 = u1;
+             ^^
+pna-dpdk-invalid-hdr-warnings5.p4(71): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u2.h2
+        u2.h2.data = 1;
+        ^^^^^
+pna-dpdk-invalid-hdr-warnings5.p4(73): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u2.h2
+        if (u2.h2.data == 0) {
+            ^^^^^
+pna-dpdk-invalid-hdr-warnings5.p4(35): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u1_h1
+        hdr.u1.h1.data = 1;
+        ^^^
+[--Wwarn=uninitialized_use] warning: u1_0_h2 may not be completely initialized
+[--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header u2_0_h2
+[--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header u2_0_h2
+[--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header u2_0_h2
+pna-dpdk-invalid-hdr-warnings5.p4(35): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+        hdr.u1.h1.data = 1;
+                       ^
+pna-dpdk-invalid-hdr-warnings5.p4(51): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+        hdr.u1.h2.data = 1;
+                       ^
+pna-dpdk-invalid-hdr-warnings5.p4(52): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+        hdr.u1.h3.data = 1;
+                       ^

@@ -40,6 +40,18 @@ p4c_add_xfail_reason("dpdk"
 )
 
 p4c_add_xfail_reason("dpdk"
+  "Error compiling"
+  testdata/p4_16_samples/pna-dpdk-wrong-warning.p4
+  testdata/p4_16_samples/pna-dpdk-invalid-hdr-warnings5.p4
+  testdata/p4_16_samples/pna-dpdk-invalid-hdr-warnings6.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "declaration not found"
+  testdata/p4_16_samples/psa-dpdk-header-union-typedef.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
   "Unknown extern function"
   testdata/p4_16_samples/psa-example-digest-bmv2.p4
   testdata/p4_16_samples/psa-example-parser-checksum.p4

@@ -2,14 +2,10 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<16> PortIdUint_t;
-typedef PortIdUint_t PortId1_t;
-typedef PortIdUint_t PortId2_t;
-typedef PortIdUint_t PortId3_t;
 header ports_t {
-    PortId1_t port1;
-    PortId2_t port2;
-    PortId3_t port3;
+    bit<16> port1;
+    bit<16> port2;
+    bit<16> port3;
 }
 
 struct Headers {

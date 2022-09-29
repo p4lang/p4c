@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 struct empty_metadata_t {
@@ -30,9 +29,9 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     @noWarn("unused") @name(".send_to_port") action send_to_port_0() {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
-        ostd.egress_port = (PortIdUint_t)hdr.ethernet.dstAddr;
+        ostd.egress_port = (bit<32>)hdr.ethernet.dstAddr;
     }
-    @name("cIngress.regfile") Register<EthernetAddress, bit<32>>(32w128) regfile_0;
+    @name("cIngress.regfile") Register<bit<48>, bit<32>>(32w128) regfile_0;
     @hidden action psaregistercomplexbmv2l60() {
         regfile_0.write(32w1, 48w3);
         regfile_0.write(32w2, 48w4);

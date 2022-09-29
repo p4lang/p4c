@@ -7,7 +7,6 @@ error {
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<32> IPv4Address;
 header ethernet_t {
     bit<48> dstAddr;
     bit<48> srcAddr;
@@ -25,8 +24,8 @@ header ipv4_t {
     bit<8>      ttl;
     bit<8>      protocol;
     bit<16>     hdrChecksum;
-    IPv4Address srcAddr;
-    IPv4Address dstAddr;
+    bit<32>     srcAddr;
+    bit<32>     dstAddr;
     varbit<320> options;
 }
 

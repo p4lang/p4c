@@ -7,11 +7,10 @@ error {
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -75,7 +74,6 @@ header_union Tcp_option_h {
     Tcp_option_sack_h sack;
 }
 
-typedef Tcp_option_h[10] Tcp_option_stack;
 header Tcp_option_padding_h {
     varbit<256> padding;
 }
@@ -84,7 +82,7 @@ struct headers {
     ethernet_t           ethernet;
     ipv4_t               ipv4;
     tcp_t                tcp;
-    Tcp_option_stack     tcp_options_vec;
+    Tcp_option_h[10]     tcp_options_vec;
     Tcp_option_padding_h tcp_options_padding;
 }
 
