@@ -35,13 +35,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tmp = 1w1;
     }
     @hidden action act() {
-        h.h.a[0:0] = tmp;
+        tmp = h.h.a[0:0];
     }
-    @hidden table tbl_slice_action {
-        actions = {
-            slice_action();
-        }
-        const default_action = slice_action();
+    @hidden action act_0() {
+        h.h.a[0:0] = tmp;
     }
     @hidden table tbl_act {
         actions = {
@@ -49,9 +46,22 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = act();
     }
+    @hidden table tbl_slice_action {
+        actions = {
+            slice_action();
+        }
+        const default_action = slice_action();
+    }
+    @hidden table tbl_act_0 {
+        actions = {
+            act_0();
+        }
+        const default_action = act_0();
+    }
     apply {
-        tbl_slice_action.apply();
         tbl_act.apply();
+        tbl_slice_action.apply();
+        tbl_act_0.apply();
     }
 }
 

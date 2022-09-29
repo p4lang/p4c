@@ -53,10 +53,12 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         hasExited = true;
     }
     @hidden action gauntlet_exit_combination_15bmv2l33() {
+        hasExited = false;
         key_0 = 48w1;
     }
     @hidden action gauntlet_exit_combination_15bmv2l55() {
         h.eth_hdr.eth_type = 16w4;
+        hasExited = true;
     }
     @hidden table tbl_gauntlet_exit_combination_15bmv2l33 {
         actions = {

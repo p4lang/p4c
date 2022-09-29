@@ -13,5 +13,3 @@ invalid-hdr-warnings2.p4(69): [--Wwarn=invalid_header] warning: accessing a fiel
 invalid-hdr-warnings2.p4(70): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.h2
         hdr.h2.data = 1; //  hdr.h2 invalid at this point
         ^^^^^^
-[--Wwarn=invalid_header] warning: accessing a field of an invalid header s1_0_h1
-[--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header s1_0_h1

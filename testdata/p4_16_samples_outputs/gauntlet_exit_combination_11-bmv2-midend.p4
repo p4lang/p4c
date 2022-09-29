@@ -47,6 +47,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         hasExited = false;
         key_0 = 64w1;
     }
+    @hidden action gauntlet_exit_combination_11bmv2l51() {
+        hasExited = true;
+    }
     @hidden table tbl_gauntlet_exit_combination_11bmv2l37 {
         actions = {
             gauntlet_exit_combination_11bmv2l37();
@@ -58,6 +61,12 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             gauntlet_exit_combination_11bmv2l46();
         }
         const default_action = gauntlet_exit_combination_11bmv2l46();
+    }
+    @hidden table tbl_gauntlet_exit_combination_11bmv2l51 {
+        actions = {
+            gauntlet_exit_combination_11bmv2l51();
+        }
+        const default_action = gauntlet_exit_combination_11bmv2l51();
     }
     apply {
         tbl_gauntlet_exit_combination_11bmv2l37.apply();
@@ -71,6 +80,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             }
             default: {
             }
+        }
+        if (hasExited) {
+            ;
+        } else {
+            tbl_gauntlet_exit_combination_11bmv2l51.apply();
         }
     }
 }

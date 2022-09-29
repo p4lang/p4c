@@ -31,6 +31,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action act() {
         hasReturned = false;
     }
+    @hidden action gauntlet_side_effect_order_5bmv2l28() {
+        hasReturned = true;
+    }
     @hidden action act_0() {
         h.eth_hdr.src_addr = val_1;
     }
@@ -58,6 +61,12 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = gauntlet_side_effect_order_5bmv2l25();
     }
+    @hidden table tbl_gauntlet_side_effect_order_5bmv2l28 {
+        actions = {
+            gauntlet_side_effect_order_5bmv2l28();
+        }
+        const default_action = gauntlet_side_effect_order_5bmv2l28();
+    }
     @hidden table tbl_act_0 {
         actions = {
             act_0();
@@ -77,6 +86,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             } else if (h.eth_hdr.src_addr <= 48w25) {
                 tbl_gauntlet_side_effect_order_5bmv2l25.apply();
             }
+        }
+        if (hasReturned) {
+            ;
+        } else {
+            tbl_gauntlet_side_effect_order_5bmv2l28.apply();
         }
         tbl_act_0.apply();
     }

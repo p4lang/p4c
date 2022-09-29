@@ -46,6 +46,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         hasReturned = false;
     }
     @hidden action gauntlet_hdr_function_castbmv2l26() {
+        hasReturned = true;
         retval.setValid();
         retval.dst_addr = 48w3;
         retval.src_addr = 48w3;

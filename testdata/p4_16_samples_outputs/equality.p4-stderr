@@ -22,5 +22,3 @@ equality.p4(28): [--Wwarn=uninitialized_use] warning: a1 may not be completely i
 equality.p4(28): [--Wwarn=uninitialized_use] warning: a2 may not be completely initialized
         } else if (a1 == a2) {
                          ^^
-[--Wwarn=uninitialized_use] warning: s1_0_a may be uninitialized
-[--Wwarn=uninitialized_use] warning: s2_0_a may be uninitialized

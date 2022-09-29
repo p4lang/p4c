@@ -25,6 +25,8 @@ parser parserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
     state start {
         tmp_1 = pkt.lookahead<bit<112>>();
         tmp_0.setValid();
+        tmp_0.dstAddr = tmp_1[111:64];
+        tmp_0.srcAddr = tmp_1[63:16];
         tmp_0.etherType = tmp_1[15:0];
         transition select(tmp_1[15:0]) {
             16w0x1000 &&& 16w0x1000: accept;

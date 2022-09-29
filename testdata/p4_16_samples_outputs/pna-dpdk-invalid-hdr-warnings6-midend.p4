@@ -107,36 +107,67 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         u_1[0].h3.setInvalid();
     }
     @hidden action pnadpdkinvalidhdrwarnings6l68() {
-        tmp_h2_0.setValid();
-        tmp_h2_0 = u_1[1w0].h2;
-        tmp_h1_0.setInvalid();
+        tmp_h1_0.setValid();
+        tmp_h1_0 = u_1[1w0].h1;
+        tmp_h2_0.setInvalid();
         tmp_h3_0.setInvalid();
     }
     @hidden action act() {
-        tmp_h2_0.setInvalid();
+        tmp_h1_0.setInvalid();
     }
-    @hidden action pnadpdkinvalidhdrwarnings6l67() {
+    @hidden action pnadpdkinvalidhdrwarnings6l64() {
+        u_1[1].h1.setValid();
+        u_1[1].h1.data = 32w1;
+        u_1[1].h2.setInvalid();
+        u_1[1].h3.setInvalid();
         u_1[0].h2.setValid();
         u_1[0].h1.setInvalid();
         u_1[0].h3.setInvalid();
     }
     @hidden action pnadpdkinvalidhdrwarnings6l68_0() {
+        tmp_h2_0.setValid();
+        tmp_h2_0 = u_1[1w0].h2;
+        tmp_h1_0.setInvalid();
+        tmp_h3_0.setInvalid();
+    }
+    @hidden action act_0() {
+        tmp_h2_0.setInvalid();
+    }
+    @hidden action pnadpdkinvalidhdrwarnings6l68_1() {
         tmp_h3_0.setValid();
         tmp_h3_0 = u_1[1w0].h3;
         tmp_h1_0.setInvalid();
         tmp_h2_0.setInvalid();
     }
-    @hidden action act_0() {
+    @hidden action act_1() {
         tmp_h3_0.setInvalid();
     }
-    @hidden action pnadpdkinvalidhdrwarnings6l68_1() {
+    @hidden action pnadpdkinvalidhdrwarnings6l68_2() {
+        u_1[1].h1.setValid();
+        u_1[1].h1 = tmp_h1_0;
+        u_1[1].h2.setInvalid();
+        u_1[1].h3.setInvalid();
+    }
+    @hidden action pnadpdkinvalidhdrwarnings6l68_3() {
+        u_1[1].h1.setInvalid();
+    }
+    @hidden action pnadpdkinvalidhdrwarnings6l68_4() {
         u_1[1].h2.setValid();
         u_1[1].h2 = tmp_h2_0;
         u_1[1].h1.setInvalid();
         u_1[1].h3.setInvalid();
     }
-    @hidden action pnadpdkinvalidhdrwarnings6l68_2() {
+    @hidden action pnadpdkinvalidhdrwarnings6l68_5() {
         u_1[1].h2.setInvalid();
+    }
+    @hidden action pnadpdkinvalidhdrwarnings6l68_6() {
+        u_1[1].h3.setValid();
+        u_1[1].h3 = tmp_h3_0;
+        u_1[1].h1.setInvalid();
+        u_1[1].h2.setInvalid();
+    }
+    @hidden action pnadpdkinvalidhdrwarnings6l68_7() {
+        u_1[1].h3.setInvalid();
     }
     @hidden action pnadpdkinvalidhdrwarnings6l70() {
         u_1[1].h2.setValid();
@@ -170,11 +201,11 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         }
         const default_action = pnadpdkinvalidhdrwarnings6l63_0();
     }
-    @hidden table tbl_pnadpdkinvalidhdrwarnings6l67 {
+    @hidden table tbl_pnadpdkinvalidhdrwarnings6l64 {
         actions = {
-            pnadpdkinvalidhdrwarnings6l67();
+            pnadpdkinvalidhdrwarnings6l64();
         }
-        const default_action = pnadpdkinvalidhdrwarnings6l67();
+        const default_action = pnadpdkinvalidhdrwarnings6l64();
     }
     @hidden table tbl_pnadpdkinvalidhdrwarnings6l68 {
         actions = {
@@ -206,11 +237,47 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         }
         const default_action = pnadpdkinvalidhdrwarnings6l68_1();
     }
+    @hidden table tbl_act_1 {
+        actions = {
+            act_1();
+        }
+        const default_action = act_1();
+    }
     @hidden table tbl_pnadpdkinvalidhdrwarnings6l68_2 {
         actions = {
             pnadpdkinvalidhdrwarnings6l68_2();
         }
         const default_action = pnadpdkinvalidhdrwarnings6l68_2();
+    }
+    @hidden table tbl_pnadpdkinvalidhdrwarnings6l68_3 {
+        actions = {
+            pnadpdkinvalidhdrwarnings6l68_3();
+        }
+        const default_action = pnadpdkinvalidhdrwarnings6l68_3();
+    }
+    @hidden table tbl_pnadpdkinvalidhdrwarnings6l68_4 {
+        actions = {
+            pnadpdkinvalidhdrwarnings6l68_4();
+        }
+        const default_action = pnadpdkinvalidhdrwarnings6l68_4();
+    }
+    @hidden table tbl_pnadpdkinvalidhdrwarnings6l68_5 {
+        actions = {
+            pnadpdkinvalidhdrwarnings6l68_5();
+        }
+        const default_action = pnadpdkinvalidhdrwarnings6l68_5();
+    }
+    @hidden table tbl_pnadpdkinvalidhdrwarnings6l68_6 {
+        actions = {
+            pnadpdkinvalidhdrwarnings6l68_6();
+        }
+        const default_action = pnadpdkinvalidhdrwarnings6l68_6();
+    }
+    @hidden table tbl_pnadpdkinvalidhdrwarnings6l68_7 {
+        actions = {
+            pnadpdkinvalidhdrwarnings6l68_7();
+        }
+        const default_action = pnadpdkinvalidhdrwarnings6l68_7();
     }
     @hidden table tbl_pnadpdkinvalidhdrwarnings6l70 {
         actions = {
@@ -225,21 +292,36 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         } else {
             tbl_pnadpdkinvalidhdrwarnings6l63_0.apply();
         }
-        tbl_pnadpdkinvalidhdrwarnings6l67.apply();
-        if (u_1[1w0].h2.isValid()) {
+        tbl_pnadpdkinvalidhdrwarnings6l64.apply();
+        if (u_1[1w0].h1.isValid()) {
             tbl_pnadpdkinvalidhdrwarnings6l68.apply();
         } else {
             tbl_act.apply();
         }
-        if (u_1[1w0].h3.isValid()) {
+        if (u_1[1w0].h2.isValid()) {
             tbl_pnadpdkinvalidhdrwarnings6l68_0.apply();
         } else {
             tbl_act_0.apply();
         }
-        if (tmp_h2_0.isValid()) {
+        if (u_1[1w0].h3.isValid()) {
             tbl_pnadpdkinvalidhdrwarnings6l68_1.apply();
         } else {
+            tbl_act_1.apply();
+        }
+        if (tmp_h1_0.isValid()) {
             tbl_pnadpdkinvalidhdrwarnings6l68_2.apply();
+        } else {
+            tbl_pnadpdkinvalidhdrwarnings6l68_3.apply();
+        }
+        if (tmp_h2_0.isValid()) {
+            tbl_pnadpdkinvalidhdrwarnings6l68_4.apply();
+        } else {
+            tbl_pnadpdkinvalidhdrwarnings6l68_5.apply();
+        }
+        if (tmp_h3_0.isValid()) {
+            tbl_pnadpdkinvalidhdrwarnings6l68_6.apply();
+        } else {
+            tbl_pnadpdkinvalidhdrwarnings6l68_7.apply();
         }
         tbl_pnadpdkinvalidhdrwarnings6l70.apply();
     }

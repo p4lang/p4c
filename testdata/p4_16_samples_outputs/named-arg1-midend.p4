@@ -8,12 +8,21 @@ parser par(out bool b) {
 }
 
 control c(out bool b) {
+    @name("c.xv") bit<16> xv_0;
     @name("c.a") action a() {
+        xv_0 = 16w65533;
     }
     @name("c.a") action a_1() {
+        xv_0 = 16w0;
     }
-    @hidden action act() {
+    @hidden action namedarg1l40() {
+        b = xv_0 == 16w0;
+        b = xv_0 == 16w1;
+        xv_0 = 16w1;
+        xv_0 = 16w1;
+        b = false;
         b = true;
+        xv_0 = 16w1;
     }
     @hidden table tbl_a {
         actions = {
@@ -27,16 +36,16 @@ control c(out bool b) {
         }
         const default_action = a_1();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_namedarg1l40 {
         actions = {
-            act();
+            namedarg1l40();
         }
-        const default_action = act();
+        const default_action = namedarg1l40();
     }
     apply {
         tbl_a.apply();
         tbl_a_0.apply();
-        tbl_act.apply();
+        tbl_namedarg1l40.apply();
     }
 }
 

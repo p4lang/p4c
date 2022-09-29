@@ -21,8 +21,10 @@ control ingress(inout Headers h) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.simple_assign") action simple_assign() {
+        h.eth_hdr.eth_type = 16w1;
     }
     @name("ingress.simple_assign") action simple_assign_1() {
+        h.eth_hdr.eth_type = 16w1;
     }
     @name("ingress.simple_assign") action simple_assign_2() {
         h.eth_hdr.eth_type = 16w1;

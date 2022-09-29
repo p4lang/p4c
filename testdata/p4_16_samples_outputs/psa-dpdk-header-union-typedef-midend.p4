@@ -69,22 +69,38 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_par
         }
     }
     state start_true {
-        transition select(e.data_h1.isValid()) {
+        transition select(e.data_h0.isValid()) {
             true: start_true_true;
             false: start_true_false;
         }
     }
     state start_true_true {
-        clone_md_data_h1_0.setValid();
-        clone_md_data_h1_0 = e.data_h1;
-        clone_md_data_h0_0.setInvalid();
-        transition start_true_join;
-    }
-    state start_true_false {
+        clone_md_data_h0_0.setValid();
+        clone_md_data_h0_0 = e.data_h0;
         clone_md_data_h1_0.setInvalid();
         transition start_true_join;
     }
+    state start_true_false {
+        clone_md_data_h0_0.setInvalid();
+        transition start_true_join;
+    }
     state start_true_join {
+        transition select(e.data_h1.isValid()) {
+            true: start_true_true_0;
+            false: start_true_false_0;
+        }
+    }
+    state start_true_true_0 {
+        clone_md_data_h1_0.setValid();
+        clone_md_data_h1_0 = e.data_h1;
+        clone_md_data_h0_0.setInvalid();
+        transition start_true_join_0;
+    }
+    state start_true_false_0 {
+        clone_md_data_h1_0.setInvalid();
+        transition start_true_join_0;
+    }
+    state start_true_join_0 {
         transition start_join;
     }
     state start_join {

@@ -6,7 +6,7 @@ struct Headers {
 }
 
 control ingress(inout Headers h) {
-    @name("ingress.tmp_0") bool tmp_0;
+    @name("ingress.tmp_3") bit<8> tmp_3;
     @name("ingress.a") action a_1() {
         h.b = 8w0;
     }
@@ -20,10 +20,9 @@ control ingress(inout Headers h) {
         default_action = a_1();
     }
     @hidden action act() {
-        tmp_0 = true;
-    }
-    @hidden action act_0() {
-        tmp_0 = false;
+        tmp_3 = h.a;
+        h.a = 8w3;
+        h.a = tmp_3;
     }
     @hidden table tbl_act {
         actions = {
@@ -31,18 +30,9 @@ control ingress(inout Headers h) {
         }
         const default_action = act();
     }
-    @hidden table tbl_act_0 {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
     apply {
-        if (t_0.apply().hit) {
-            tbl_act.apply();
-        } else {
-            tbl_act_0.apply();
-        }
+        t_0.apply();
+        tbl_act.apply();
     }
 }
 

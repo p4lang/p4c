@@ -121,8 +121,6 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
             tbl_0.apply();
             tbl_psaexampledpdkbytealignment_3l100.apply();
             tbl_test.apply();
-        } else {
-            ;
         }
     }
 }

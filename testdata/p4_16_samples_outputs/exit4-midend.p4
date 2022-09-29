@@ -9,7 +9,17 @@ control ctrl() {
         }
         default_action = e();
     }
+    @hidden action act() {
+        hasExited = false;
+    }
+    @hidden table tbl_act {
+        actions = {
+            act();
+        }
+        const default_action = act();
+    }
     apply {
+        tbl_act.apply();
         if (t_0.apply().hit) {
             if (hasExited) {
                 ;

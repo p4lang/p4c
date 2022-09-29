@@ -59,7 +59,6 @@ class DoFlattenHeaderUnion : public Transform {
     const IR::Node* postorder(IR::Declaration_Variable *dv) override;
     const IR::Node* postorder(IR::Member* m) override;
     const IR::Node* postorder(IR::P4Parser* parser) override;
-    const IR::Node* postorder(IR::Function* function) override;
     const IR::Node* postorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::P4Action* action) override;
     bool  hasHeaderUnionField(IR::Type_Struct* s);
@@ -111,7 +110,6 @@ class HandleValidityHeaderUnion : public Transform {
     const IR::Node* postorder(IR::SwitchStatement* a) override;
     const IR::Node* postorder(IR::MethodCallStatement* mcs) override;
     const IR::Node* postorder(IR::P4Parser* parser) override;
-    const IR::Node* postorder(IR::Function* function) override;
     const IR::Node* postorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::P4Action* action) override;
     const IR::MethodCallStatement* processValidityForStr(const IR::Statement *s,
@@ -121,7 +119,8 @@ class HandleValidityHeaderUnion : public Transform {
     const IR::Node* setInvalidforRest(const IR::Statement *s, const IR::Member *m,
                                       const IR::Type_HeaderUnion *hu, cstring exclude,
                                       bool setValidforCurrMem);
-    const IR::Node * expandIsValid(const IR::Statement *a, const IR::MethodCallExpression *mce);
+    const IR::Node * expandIsValid(const IR::Statement *a, const IR::MethodCallExpression *mce,
+                                   IR::IndexedVector<IR::StatOrDecl> &code_block);
 };
 
 class RemoveUnusedHUDeclarations : public Transform {

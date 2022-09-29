@@ -33,6 +33,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action gauntlet_int_slicebmv2l33() {
         tmp_0.setValid();
         tmp_0.dst_addr = 48w1024;
+        tmp_0.src_addr = 48w1;
+        tmp_0.eth_type = 16w1;
         h.h.a = 8w2;
     }
     @hidden table tbl_gauntlet_int_slicebmv2l33 {

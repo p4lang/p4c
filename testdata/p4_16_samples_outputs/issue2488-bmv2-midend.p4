@@ -28,11 +28,15 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") ethernet_t tmp_0;
+    @name("ingress.tmp_1") bit<48> tmp_1;
     @hidden action issue2488bmv2l40() {
+        tmp_1 = h.eth_hdr.dst_addr;
+        h.eth_hdr.dst_addr = 48w1;
         tmp_0.setValid();
-        tmp_0.dst_addr = h.eth_hdr.dst_addr;
+        tmp_0.dst_addr = tmp_1;
         tmp_0.src_addr = 48w2;
         tmp_0.eth_type = 16w1;
+        h.eth_hdr.dst_addr = 48w1;
         h.eth_hdr = tmp_0;
     }
     @hidden table tbl_issue2488bmv2l40 {

@@ -16,6 +16,8 @@ parser p(packet_in pkt, out Headers hdr) {
     state start {
         tmp_1 = pkt.lookahead<bit<112>>();
         tmp_0.setValid();
+        tmp_0.dst_addr = tmp_1[111:64];
+        tmp_0.src_addr = tmp_1[63:16];
         tmp_0.eth_type = tmp_1[15:0];
         transition select(tmp_1[15:0]) {
             16w0xdead: parse_hdrs;

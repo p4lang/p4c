@@ -65,6 +65,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h.l = 8w1;
         h.h.m = 8w1;
         h.b.c = 8w1;
+        h.b.c = 8w1;
+        h.b.d = 8w1;
         h.b.d = 8w1;
     }
     @hidden table tbl_act {

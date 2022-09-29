@@ -30,6 +30,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     ethernet_t tmp_struct_0_eth_hdr;
     @hidden action issue2261l22() {
         tmp_struct_0_eth_hdr.setValid();
+        tmp_struct_0_eth_hdr.dst_addr = 48w0;
+        tmp_struct_0_eth_hdr.src_addr = 48w0;
         tmp_struct_0_eth_hdr.eth_type = 16w0;
         h.eth_hdr.eth_type = 16w0;
     }

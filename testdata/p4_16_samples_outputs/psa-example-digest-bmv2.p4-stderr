@@ -7,15 +7,3 @@ psa-example-digest-bmv2.p4(84): [--Wwarn=uninitialized_out_param] warning: out p
 psa-example-digest-bmv2.p4(82)
 parser CommonParser(
        ^^^^^^^^^^^^
-psa-example-digest-bmv2.p4(104): [--Wwarn=uninitialized_out_param] warning: out parameter 'parsed_hdr' may be uninitialized when 'IngressParserImpl' terminates
-                         out headers parsed_hdr,
-                                     ^^^^^^^^^^
-psa-example-digest-bmv2.p4(103)
-parser IngressParserImpl(packet_in buffer,
-       ^^^^^^^^^^^^^^^^^
-psa-example-digest-bmv2.p4(123): [--Wwarn=uninitialized_out_param] warning: out parameter 'parsed_hdr' may be uninitialized when 'EgressParserImpl' terminates
-                        out headers parsed_hdr,
-                                    ^^^^^^^^^^
-psa-example-digest-bmv2.p4(122)
-parser EgressParserImpl(packet_in buffer,
-       ^^^^^^^^^^^^^^^^

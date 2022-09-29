@@ -25,18 +25,3 @@ pna-dpdk-invalid-hdr-warnings6.p4(88): [--Wwarn=invalid_header] warning: accessi
 pna-dpdk-invalid-hdr-warnings6.p4(89): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u[1].h1
         u[1].h1.data = 1;
         ^^^^^^^
-pna-dpdk-invalid-hdr-warnings6.p4(63): [--Wwarn=uninitialized_use] warning: u[0].h1 may not be completely initialized
-        u[1].h1 = u[0].h1;
-                  ^^^^^^^
-pna-dpdk-invalid-hdr-warnings6.p4(68): [--Wwarn=uninitialized_use] warning: u[i].h1 may not be completely initialized
-        u[1] = u[i];
-               ^^^^
-pna-dpdk-invalid-hdr-warnings6.p4(70): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u[1].h2
-        u[1].h2.data = 1;
-        ^^^^^^^
-pna-dpdk-invalid-hdr-warnings6.p4(72): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u[1].h2
-        if (u[1].h2.data == 0) {
-            ^^^^^^^
-pna-dpdk-invalid-hdr-warnings6.p4(78): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header u[1].h2
-        if (u[1].h2.data == 0) {
-            ^^^^^^^

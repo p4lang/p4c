@@ -10,6 +10,7 @@ control ctrl(out bit<32> c) {
         default_action = e();
     }
     @hidden action exit3l33() {
+        hasExited = false;
         c = 32w2;
     }
     @hidden action exit3l43() {
