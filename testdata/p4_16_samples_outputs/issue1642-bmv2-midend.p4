@@ -41,6 +41,7 @@ control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata
     @hidden action issue1642bmv2l37() {
         local_metadata._s0.setValid();
         local_metadata._s0.f = 32w0;
+        local_metadata._row_alt0_valid1 = local_metadata._row_alt1_valid3;
         local_metadata._row_alt0_port2 = local_metadata._row_alt1_port4;
         local_metadata._row_alt0_valid1 = 1w1;
         local_metadata._row_alt1_port4 = local_metadata._row_alt1_port4 + 7w1;
