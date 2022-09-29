@@ -85,25 +85,25 @@ class Continuation {
 
     /// Alias for various property types that can be set. We restrict these to keep the feature
     /// simple.
-    using StateProperty = boost::variant<cstring, uint64_t, int64_t, bool, const IR::Expression*>;
+    using PropertyValue = boost::variant<cstring, uint64_t, int64_t, bool, const IR::Expression*>;
 
     struct PropertyUpdate {
         /// The name of the property that is being set.
         cstring propertyName;
         /// The value of the property.
-        StateProperty property;
+        PropertyValue property;
 
         /// Delegates to the equality of the property.
         bool operator==(const PropertyUpdate& other) const;
 
-        explicit PropertyUpdate(cstring propertyName, StateProperty property);
+        explicit PropertyUpdate(cstring propertyName, PropertyValue property);
     };
 
     /// Guards are commands that can be inserted into the continuation stack to ensure that the
     /// interpreter does not violate a given invariant. If the condition evaluates to false, the
-    /// branch is discarded. For example, specific port values are not supported in a hardware
-    /// target. Guards can enforce that only the appropriate port variables are chosen. Any other
-    /// possible branch is discarded.
+    /// path is invalid and the symbolic executor will not traverse it.
+    /// For example, specific port values are not supported in a hardware target guards can enforce
+    /// that only the appropriate port variables are chosen. Any other possible path is discarded.
     struct Guard {
         const IR::Expression* cond;
 

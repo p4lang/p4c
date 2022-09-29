@@ -146,7 +146,7 @@ const std::stack<gsl::not_null<const ExecutionState::StackFrame*>>& ExecutionSta
     return stack;
 }
 
-void ExecutionState::setProperty(cstring propertyName, Continuation::StateProperty property) {
+void ExecutionState::setProperty(cstring propertyName, Continuation::PropertyValue property) {
     stateProperties[propertyName] = std::move(property);
 }
 

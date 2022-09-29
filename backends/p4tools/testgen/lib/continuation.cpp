@@ -17,7 +17,7 @@ bool Continuation::Return::operator==(const Continuation::Return& other) const {
     return expr ? other.expr && **expr == **other.expr : !other.expr;
 }
 
-Continuation::PropertyUpdate::PropertyUpdate(cstring propertyName, StateProperty property)
+Continuation::PropertyUpdate::PropertyUpdate(cstring propertyName, PropertyValue property)
     : propertyName(propertyName), property(property) {}
 
 bool Continuation::PropertyUpdate::operator==(const Continuation::PropertyUpdate& other) const {

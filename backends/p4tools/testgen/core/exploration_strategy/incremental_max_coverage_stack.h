@@ -50,8 +50,6 @@ class IncrementalMaxCoverageStack : public ExplorationStrategy {
     /// Otherwise, execution of the P4 program continues on a different random path.
     void run(const Callback& callBack) override;
 
-    // void setAllStatementsSize(int allStatementsSize);
-
     /// Constructor for this strategy, considering inheritance.
     IncrementalMaxCoverageStack(AbstractSolver& solver, const ProgramInfo& programInfo,
                                 boost::optional<uint32_t> seed);

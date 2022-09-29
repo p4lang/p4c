@@ -22,6 +22,11 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
+/// This file defines a series of test objects which, in sum, produce an abstract test
+/// specification.
+/// This test specification is reified into a concrete test specification by the
+/// individual test back ends of a target extension.
+
 /* =========================================================================================
  *  Abstract Test Object Class
  * ========================================================================================= */
@@ -44,7 +49,7 @@ class TestObject : public Castable {
 
 class Packet : public TestObject {
  private:
-    /// The port associated with this packets.
+    /// The port associated with this packet.
     int port;
 
     /// The actual content of the packet.
@@ -247,7 +252,7 @@ using FieldMatch = boost::variant<Exact, Ternary, LPM, Range>;
 
 class TableRule : public TestObject {
  private:
-    /// Each element is an API name paired with a match rule.
+    /// Each element in the map is the control plane name of the key paired with its match rule.
     const std::map<cstring, const FieldMatch> matches;
 
     /// The priority of this entry. This is required for STF back ends when matching ternary.
@@ -324,13 +329,15 @@ class TestSpec {
     /// The input packet of the test.
     const Packet ingressPacket;
 
-    /// The expected output packet of this test.
+    /// The expected output packet of this test. Only single output packets are supported.
+    /// Additional output packets need to be encoded as test objects.
     const boost::optional<Packet> egressPacket;
 
     /// The traces that have been collected while the interpreter stepped through the program.
     const std::vector<gsl::not_null<const TraceEvent*>> traces;
 
-    /// A map of table properties. For example, tables objects or action profiles.
+    /// A map of additional properties associated with this test specification.
+    /// For example, tables, registers, or action profiles.
     std::map<cstring, std::map<cstring, const TestObject*>> testObjects;
 
  public:
@@ -338,7 +345,8 @@ class TestSpec {
              std::vector<gsl::not_null<const TraceEvent*>> traces);
 
     /// Add a test object to the test specification with @param category as the object category
-    /// ("tables", "registers") and objectLabel as the label
+    /// (for example, "tables", "registers", "action_profiles") and objectLabel as the concrete,
+    /// individual label of the object.
     void addTestObject(cstring category, cstring objectLabel, const TestObject* object);
 
     /// @returns a test object for the given category and objectlabel.

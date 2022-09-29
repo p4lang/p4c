@@ -114,7 +114,7 @@ class ExecutionState {
     /// written while this variable is active is tainted. This property must be unset manually to
     /// resume normal operation. Usually, the unset call is inserted directly after the tainted
     /// sequence of commands has executed.
-    std::map<cstring, Continuation::StateProperty> stateProperties;
+    std::map<cstring, Continuation::PropertyValue> stateProperties;
 
     // Test objects are classes of variables that influence the execution of test frameworks. They
     // are collected during interpreter execution and consumed by the respective test framework. For
@@ -201,7 +201,7 @@ class ExecutionState {
     const std::stack<gsl::not_null<const StackFrame*>>& getStack() const;
 
     /// Set the property with @arg propertyName to @arg property.
-    void setProperty(cstring propertyName, Continuation::StateProperty property);
+    void setProperty(cstring propertyName, Continuation::PropertyValue property);
 
     /// @returns whether the property with @arg propertyName exists.
     bool hasProperty(cstring propertyName) const;
