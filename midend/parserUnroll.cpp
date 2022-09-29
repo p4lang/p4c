@@ -596,6 +596,20 @@ class ParserSymbolicInterpreter {
         return false;
     }
 
+    /// True if both structures are equal.
+    bool equStackVariableMap(const StackVariableMap& l, const StackVariableMap& r) const {
+        if (l.empty()) {
+            return r.empty();
+        }
+        for (const auto& i : l) {
+            const auto j = r.find(i.first);
+            if (j == r.end() || i.second != j->second) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /// Return true if we have detected a loop we cannot unroll
     bool checkLoops(ParserStateInfo* state) const {
         const ParserStateInfo* crt = state;
@@ -630,11 +644,17 @@ class ParserSymbolicInterpreter {
                         ::warning(ErrorType::ERR_INVALID,
                                   "Parser cycle without extracting any bytes:\n%1%",
                                   stateChain(state));
+                    if (equStackVariableMap(crt->statesIndexes, state->statesIndexes)) {
+                        wasError = true;
+                    }
                     return true;
                 }
 
                 // If no header validity has changed we can't really unroll
                 if (!headerValidityChange(crt->before, state->before)) {
+                    if (equStackVariableMap(crt->statesIndexes, state->statesIndexes)) {
+                        wasError = true;
+                    }
                     return true;
                 }
                 break;
@@ -752,6 +772,10 @@ class ParserSymbolicInterpreter {
             stateInfo->scenarioStates.insert(stateInfo->name);  // add to loops detection
             bool infLoop = checkLoops(stateInfo);
             if (infLoop) {
+                // Stop unrolling if it was an error.
+                if (wasError) {
+                    break;
+                }
                 // don't evaluate successors anymore
                 // generate call OutOfBound
                 addOutFoBound(stateInfo, newStates);
