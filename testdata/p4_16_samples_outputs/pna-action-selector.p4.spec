@@ -31,6 +31,10 @@ struct tbl_set_group_id_arg_t {
 	bit<32> group_id
 }
 
+struct tbl_set_member_id_arg_t {
+	bit<32> member_id
+}
+
 struct main_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
 	bit<16> local_metadata_data
@@ -64,12 +68,18 @@ action tbl_set_group_id args instanceof tbl_set_group_id_arg_t {
 	return
 }
 
+action tbl_set_member_id args instanceof tbl_set_member_id_arg_t {
+	mov m.MainControlT_as_member_id t.member_id
+	return
+}
+
 table tbl {
 	key {
 		h.ethernet.srcAddr exact
 	}
 	actions {
 		tbl_set_group_id
+		tbl_set_member_id
 		NoAction
 	}
 	default_action NoAction args none 
