@@ -4,6 +4,7 @@
 #include <map>
 #include <ostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <boost/multiprecision/number.hpp>
@@ -51,77 +52,52 @@ const StateVariable& TableStepper::getTableReachedVar(const IR::P4Table* table) 
     return IRUtils::getZombieTableVar(IR::Type::Boolean::get(), table, "*reached");
 }
 
-// The function compares the right and left expression.
-// Returns 0 if the values are equal, 1 if the left value is greater,
-// and -1 if the right value is greater.
-// If the left value is constant entries and the right value
-// is Mask/Default then priority is given to constants.
-// For more detailed information see
-// https://github.com/p4lang/behavioral-model/blob/main/docs/simple_switch.md#longest-prefix-match-tables
-int TableStepper::compareLPMEntries(const IR::Expression* left, const IR::Expression* right) {
-    const IR::Expression* leftConst = nullptr;
-    const IR::Expression* rightConst = nullptr;
-    if (const auto* leftMask = left->to<IR::Mask>()) {
-        leftConst = leftMask->right;
-    } else {
-        leftConst = left;
-    }
-    if (const auto* rightMask = right->to<IR::Mask>()) {
-        rightConst = rightMask->right;
-    } else {
-        rightConst = right;
-    }
-    if (left->is<IR::Constant>() && right->is<IR::Mask>()) {
-        return 1;
+bool TableStepper::compareLPMEntries(const IR::Entry* leftIn, const IR::Entry* rightIn,
+                                     size_t lpmIndex) {
+    // Get the entry key that matches with provided lpm index.
+    // There should only be one and we only need to compare this precision.
+    BUG_CHECK(
+        lpmIndex < leftIn->keys->components.size() && lpmIndex < rightIn->keys->components.size(),
+        "LPM index out of range.");
+    const auto* left = leftIn->keys->components.at(lpmIndex);
+    const auto* right = rightIn->keys->components.at(lpmIndex);
+
+    // The expressions are equivalent, so no need to compare.
+    if (left->equiv(*right)) {
+        return true;
     }
 
-    if (rightConst->is<IR::DefaultExpression>()) {
-        return 1;
+    // DefaultExpression are least precise.
+    if (left->is<IR::DefaultExpression>()) {
+        return true;
     }
-    if (leftConst->is<IR::DefaultExpression>()) {
-        return -1;
+    if (right->is<IR::DefaultExpression>()) {
+        return false;
     }
-    if ((leftConst->to<IR::Constant>()->value) == (rightConst->to<IR::Constant>()->value)) {
-        return 0;
+    // Constants are implicitly more precise than masks.
+    if (left->is<IR::Constant>() && right->is<IR::Mask>()) {
+        return true;
     }
-    if ((leftConst->to<IR::Constant>()->value) > (rightConst->to<IR::Constant>()->value)) {
-        return 1;
+    if (left->is<IR::Mask>() && right->is<IR::Constant>()) {
+        return false;
     }
-    if ((leftConst->to<IR::Constant>()->value) < (rightConst->to<IR::Constant>()->value)) {
-        return -1;
+
+    const IR::Constant* leftMaskVal = nullptr;
+    const IR::Constant* rightMaskVal = nullptr;
+    if (const auto* leftMask = left->to<IR::Mask>()) {
+        leftMaskVal = leftMask->right->checkedTo<IR::Constant>();
+        // The other value must be a mask at this point.
+        if (const auto* rightMask = right->checkedTo<IR::Mask>()) {
+            rightMaskVal = rightMask->right->checkedTo<IR::Constant>();
+        }
+        if ((leftMaskVal->value) < (rightMaskVal->value)) {
+            return false;
+        }
+        return true;
     }
+
     BUG("Unhandled sort elements type: left: %1% - %2% \n right: %3% - %4% ", left,
         left->node_type_name(), right, right->node_type_name());
-}
-
-/// Sorts entries for lpm.
-IR::Vector<IR::Entry> TableStepper::sortLpmEntries(const IR::Vector<IR::Entry>& entries) {
-    const IR::Entry* currentEntry = nullptr;
-    IR::Vector<IR::Entry> entriesSorted;
-    for (const auto& entry : entries) {
-        for (const auto& entryKey : entry->keys->components) {
-            if (entryKey->is<IR::Expression>() || entryKey->is<IR::DefaultExpression>() ||
-                entryKey->is<IR::Range>() || entryKey->is<IR::Mask>()) {
-                entriesSorted.push_back(entry);
-            } else {
-                BUG("%1%: Unhandled entry key type: %2%", entryKey, entryKey->node_type_name());
-            }
-        }
-    }
-    const IR::Expression* left = nullptr;
-    const IR::Expression* right = nullptr;
-    for (size_t i = 0; i < entriesSorted.size(); i++) {
-        for (size_t j = i + 1; j < entriesSorted.size(); j++) {
-            left = entriesSorted[j]->keys->components[0];
-            right = entriesSorted[i]->keys->components[0];
-            if (compareLPMEntries(left, right) == 1) {
-                currentEntry = entriesSorted[i];
-                entriesSorted[i] = entriesSorted[j];
-                entriesSorted[j] = currentEntry;
-            }
-        }
-    }
-    return entriesSorted;
 }
 
 const IR::Expression* TableStepper::computeTargetMatchType(
@@ -234,14 +210,18 @@ const IR::Expression* TableStepper::evalTableConstEntries() {
     if (entries == nullptr) {
         return tableMissCondition;
     }
+
     auto entryVector = entries->entries;
 
-    // Sort entries.
-    for (const auto& keyElement : keys->keyElements) {
+    // Sort entries if one of the keys contains an LPM match.
+    for (size_t idx = 0; idx < keys->keyElements.size(); ++idx) {
+        const auto* keyElement = keys->keyElements.at(idx);
         if (keyElement->matchType->path->toString() == P4Constants::MATCH_KIND_LPM) {
-            // TODO: Check whether this is still necessary.
-            auto sortingResult = sortLpmEntries(entryVector);
-            entryVector = sortingResult;
+            std::sort(entryVector.begin(), entryVector.end(), [idx](auto&& PH1, auto&& PH2) {
+                return compareLPMEntries(std::forward<decltype(PH1)>(PH1),
+                                         std::forward<decltype(PH2)>(PH2), idx);
+            });
+            break;
         }
     }
 
@@ -364,9 +344,9 @@ void TableStepper::evalTableControlEntries(
             // Getting the unique name is needed to avoid generating duplicate arguments.
             const auto& actionDataVar =
                 IRUtils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
-            cstring keyName =
-                properties.tableName + "_param_" + actionName + std::to_string(argIdx);
-            const auto& actionArg = nextState->createZombieConst(parameter->type, keyName);
+            cstring paramName =
+                properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
+            const auto& actionArg = nextState->createZombieConst(parameter->type, paramName);
             nextState->set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
@@ -521,20 +501,6 @@ bool TableStepper::resolveTableKeys() {
         cstring keyMatchType = keyElement->matchType->toString();
         // We can recover from taint for some match types, which is why we track taint.
         bool keyHasTaint = state->hasTaint(keyElement->expression);
-
-        // If we match with a boolean value, replace the value with a mux that returns 0 or 1
-        // depending on the value of the boolean key.
-        // This expression is symbolic, as key->expression has already been resolved at this
-        // point.
-        if (keyElement->expression->type->is<IR::Type_Boolean>()) {
-            auto* clonedKey = keyElement->clone();
-            const auto* oneBitType = IRUtils::getBitType(1);
-            const auto* falseBit = IRUtils::getConstant(oneBitType, 0);
-            const auto* trueBit = IRUtils::getConstant(oneBitType, 1);
-            clonedKey->expression =
-                new IR::Mux(oneBitType, keyElement->expression, trueBit, falseBit);
-            keyElement = clonedKey;
-        }
 
         // Initialize the standard keyProperties.
         KeyProperties keyProperties(keyElement, fieldName, keyIdx, keyMatchType, keyHasTaint);

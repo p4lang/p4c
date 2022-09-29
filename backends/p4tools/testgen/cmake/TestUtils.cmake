@@ -1,51 +1,3 @@
-# generate all the tests specified in the tests list
-# Arguments:
-#   - template_file The path to the extension/target file that implements
-#     the logic of the target test. "p4tools_add_test_list" includes this file and then
-#     executes the logic defined "p4tools_add_test_with_args".
-#   - tag is a label for the set of test suite where this test belongs
-#     (for example, p4ctest)
-#   - driver is the script that is used to run the test and compare the results
-#   - tests is a list of test names
-#   - xfail is a set of tests that are expected to fail
-#   - target is the target to test against
-#   - arch is the p4 architecture
-#   - std is the p4 standard
-#   - enable_runner is the flag to compile the p4 and run the runner
-#
-# The macro generates the test files in a directory prefixed by tag.
-#
-macro(p4tools_add_test_list template_file tag driver tests xfail target arch std enable_runner)
-  set(__xfail_list "${xfail}")
-  set(__test_list "${tests}")
-  set(__testCounter 0)
-  set(__xfailCounter 0)
-  list(LENGTH __test_list __nTests)
-  include(${template_file})
-  foreach(t ${__test_list})
-    list(FIND __xfail_list ${t} __xfail_test)
-    get_filename_component(p4name ${t} NAME)
-    if(__xfail_test GREATER -1)
-      p4tools_add_test_with_args(
-        ${tag} ${driver} TRUE ${p4name} ${t}
-        ${target} ${arch} ${std}
-        ${enable_runner} "${ARGN}" ""
-      )
-      math(EXPR __xfailCounter "${__xfailCounter} + 1")
-    else()
-      p4tools_add_test_with_args(
-        ${tag} ${driver} FALSE ${p4name} ${t}
-        ${target} ${arch} ${std}
-        ${enable_runner} "${ARGN}" ""
-      )
-    endif() # __xfail_test
-  endforeach() # tests
-  math(EXPR __testCounter "${__testCounter} + ${__nTests}")
-  # add the tag to the list
-  set(TEST_TAGS ${TEST_TAGS} ${tag} CACHE INTERNAL "test tags")
-  message(STATUS "Added ${__testCounter} tests to '${tag}' (${__xfailCounter} xfails)")
-endmacro(p4tools_add_test_list)
-
 # generate all the tests specified in the testsuites: builds a list of tests
 # from the testsuite patterns by calling p4c_find_test_names then pass the list
 # to p4tools_add_test_list
@@ -67,16 +19,29 @@ endmacro(p4tools_add_test_list)
 #
 # The macro generates the test files in a directory prefixed by tag.
 #
-macro(p4tools_add_tests template_file tag driver testsuites xfails target arch std enable_runner)
-  set(__tests "")
-  set(__xfails "")
-  p4c_find_test_names("${testsuites}" __tests)
-  p4c_find_test_names("${xfails}" __xfails)
-  p4tools_add_test_list(
-    ${template_file}
-    ${tag} ${driver} "${__tests}" "${__xfails}"
-    ${target} ${arch} ${std} ${enable_runner} "${ARGN}"
+macro(p4tools_add_tests)
+  set(options "")
+  set(oneValueArgs TEMPLATE_FILE TAG DRIVER)
+  set(multiValueArgs TESTSUITES)
+  cmake_parse_arguments(
+    TOOLS_TESTS "${options}" "${oneValueArgs}"
+    "${multiValueArgs}" ${ARGN}
   )
+
+  set(__tests "")
+  p4c_find_test_names("${TOOLS_TESTS_TESTSUITES}" __tests)
+
+  include(${TOOLS_TESTS_TEMPLATE_FILE})
+  list(LENGTH __tests __nTests)
+  foreach(t ${__tests})
+    get_filename_component(p4name ${t} NAME)
+    p4tools_add_test_with_args(
+      TAG ${TOOLS_TESTS_TAG} DRIVER ${TOOLS_TESTS_DRIVER} ALIAS ${p4name} P4TEST ${t}
+      "${TOOLS_TESTS_UNPARSED_ARGUMENTS}"
+    )
+  endforeach() # __tests
+  set(TEST_TAGS ${TEST_TAGS} ${tag} CACHE INTERNAL "test tags")
+  message(STATUS "Added ${__nTests} tests to '${tag}'.")
 endmacro(p4tools_add_tests)
 
 # Used to add a label to the test like xfail

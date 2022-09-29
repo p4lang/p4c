@@ -677,7 +677,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
              BUG_CHECK(typeArgs->size() == 1, "Must have exactly 1 type argument for extract. %1%",
                        call);
 
-             const auto* initialType =  state.resolveType(typeArgs->at(0));
+             const auto* initialType = state.resolveType(typeArgs->at(0));
              const auto* extractedType = initialType->checkedTo<IR::Type_StructLike>();
              auto extractSize = extractedType->width_bits();
 

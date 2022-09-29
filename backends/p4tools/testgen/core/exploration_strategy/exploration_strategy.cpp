@@ -112,7 +112,9 @@ const Coverage::CoverageSet& ExplorationStrategy::getVisitedStatements() {
 }
 
 void ExplorationStrategy::printCurrentTraceAndBranches(std::ostream& out) {
-    if (executionState == nullptr) return;
+    if (executionState == nullptr) {
+        return;
+    }
     const auto& branchesList = executionState->getSelectedBranches();
     out << "Selected " << branchesList.size() << " branches : (";
     std::stringstream tmpString;

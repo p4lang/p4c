@@ -14,73 +14,67 @@ namespace P4Tools {
 
 const IR::StringLiteral Taint::TAINTED_STRING_LITERAL = IR::StringLiteral(cstring("Taint"));
 
-/// For a given expression, this function computes the intervals of that expression that are
-/// tainted. For example, for the expression (8w2 ++ taint<8>), the interval [7;0] will have taint.
-/// @param index is used to compute the offset from the original input expression when recursing.
-/// For example, an expression such as (8w2 ++ taint<8> ++ taint<8>)[19:12] will compute that the
-/// intervals [[4:0]] are tainted.
-static void getTaintIntervals(const SymbolicMapType& varMap, const IR::Expression* expr,
-                              std::vector<std::pair<int, int>>* taintedRanges, int index) {
+/// Returns a bitmask that indicates which bits of given expression are tainted given a complex
+/// expression.
+static bitvec computeTaintedBits(const SymbolicMapType& varMap, const IR::Expression* expr) {
     CHECK_NULL(expr);
     if (const auto* member = expr->to<IR::Member>()) {
         if (SymbolicEnv::isSymbolicValue(member)) {
-            return;
+            return {};
         }
         expr = varMap.at(member);
     }
 
     if (const auto* taintExpr = expr->to<IR::TaintExpression>()) {
-        taintedRanges->emplace_back(
-            std::pair<int, int>{index - 1, index - taintExpr->type->width_bits()});
-        return;
+        return {0, static_cast<size_t>(taintExpr->type->width_bits())};
     }
 
     if (const auto* concatExpr = expr->to<IR::Concat>()) {
-        const auto* leftExpr = concatExpr->left;
-        getTaintIntervals(varMap, leftExpr, taintedRanges, index);
-        getTaintIntervals(varMap, concatExpr->right, taintedRanges,
-                          index - leftExpr->type->width_bits());
-        return;
+        auto lTaint = computeTaintedBits(varMap, concatExpr->left);
+        auto rTaint = computeTaintedBits(varMap, concatExpr->right);
+        return (lTaint << concatExpr->right->type->width_bits()) | rTaint;
     }
     if (const auto* slice = expr->to<IR::Slice>()) {
         auto slLeftInt = slice->e1->checkedTo<IR::Constant>()->asInt();
         auto slRightInt = slice->e2->checkedTo<IR::Constant>()->asInt();
-        // When we hit a concat, we need to decide whether taint is within the range of the slice.
-        // We collect all the taint ranges within the concat.
-        std::vector<std::pair<int, int>> taintedSubRanges;
-        getTaintIntervals(varMap, slice->e0, &taintedSubRanges, slice->e0->type->width_bits());
-        // We iterate through these ranges and check whether the slice is within a tainted
-        // range. If this is the case, we return taint.
-        for (const auto& taintRange : taintedSubRanges) {
-            auto leftTaint = taintRange.first;
-            auto rightTaint = taintRange.second;
-            if (slRightInt <= leftTaint && rightTaint <= slLeftInt) {
-                auto marginLeft = std::min(slLeftInt, leftTaint);
-                auto marginRight = std::max(slRightInt, rightTaint);
-                auto subTaintLeft = index - 1 - (slLeftInt - marginLeft);
-                auto subTaintRight = index - 1 - (slLeftInt - marginRight);
-                taintedRanges->emplace_back(std::pair<int, int>{subTaintLeft, subTaintRight});
-            }
-        }
-        return;
+        auto subTaint = computeTaintedBits(varMap, slice->e0);
+        return (subTaint >> slRightInt) & bitvec(0, slLeftInt - slRightInt + 1);
     }
     if (const auto* binaryExpr = expr->to<IR::Operation_Binary>()) {
-        getTaintIntervals(varMap, binaryExpr->left, taintedRanges, index);
-        getTaintIntervals(varMap, binaryExpr->right, taintedRanges, index);
-        return;
+        bitvec fullmask(0, expr->type->width_bits());
+        if (const auto* shl = binaryExpr->to<IR::Shl>()) {
+            if (const auto* shiftConst = shl->right->to<IR::Constant>()) {
+                int shift = static_cast<int>(shiftConst->value);
+                return fullmask & (computeTaintedBits(varMap, shl->left) << shift);
+            }
+            return fullmask;
+        }
+        if (const auto* shr = binaryExpr->to<IR::Shr>()) {
+            if (const auto* shiftConst = shr->right->to<IR::Constant>()) {
+                int shift = static_cast<int>(shiftConst->value);
+                return computeTaintedBits(varMap, shr->left) >> shift;
+            }
+            return fullmask;
+        }
+        if (binaryExpr->is<IR::BAnd>() || binaryExpr->is<IR::BOr>() || binaryExpr->is<IR::BXor>()) {
+            // Bitwise binary operations cannot taint other bits than those tainted in either lhs or
+            // rhs.
+            return computeTaintedBits(varMap, binaryExpr->left) |
+                   computeTaintedBits(varMap, binaryExpr->right);
+        }
+        return fullmask;
     }
     if (const auto* unaryExpr = expr->to<IR::Operation_Unary>()) {
-        getTaintIntervals(varMap, unaryExpr->expr, taintedRanges, index);
-        return;
+        return computeTaintedBits(varMap, unaryExpr->expr);
     }
     if (expr->is<IR::Literal>()) {
-        return;
+        return {};
     }
     if (expr->is<IR::DefaultExpression>()) {
-        return;
+        return {};
     }
     if (expr->is<IR::ConcolicVariable>()) {
-        return;
+        return {};
     }
     BUG("Taint pair collection is unsupported for %1% of type %2%", expr, expr->node_type_name());
 }
@@ -123,19 +117,8 @@ bool Taint::hasTaint(const SymbolicMapType& varMap, const IR::Expression* expr) 
     if (const auto* slice = expr->to<IR::Slice>()) {
         auto slLeftInt = slice->e1->checkedTo<IR::Constant>()->asInt();
         auto slRightInt = slice->e2->checkedTo<IR::Constant>()->asInt();
-        // We collect all the taint ranges within the concat.
-        std::vector<std::pair<int, int>> taintedRanges;
-        getTaintIntervals(varMap, slice->e0, &taintedRanges, slice->e0->type->width_bits());
-        // We iterate through these ranges and check whether the slice is within a tainted
-        // range. If this is the case, we return taint.
-        for (const auto& taintRange : taintedRanges) {
-            auto leftTaint = taintRange.first;
-            auto rightTaint = taintRange.second;
-            if (slRightInt <= leftTaint && rightTaint <= slLeftInt) {
-                return true;
-            }
-        }
-        return false;
+        auto taint = computeTaintedBits(varMap, slice->e0);
+        return !(taint & bitvec(slRightInt, slLeftInt - slRightInt + 1)).empty();
     }
     if (expr->is<IR::DefaultExpression>()) {
         return false;
@@ -216,14 +199,13 @@ class TaintPropagator : public Transform {
         auto slLeftInt = slice->e1->checkedTo<IR::Constant>()->asInt();
         auto slRightInt = slice->e2->checkedTo<IR::Constant>()->asInt();
         auto width = 1 + slLeftInt - slRightInt;
-        const auto* slice_tb = IRUtils::getBitType(width);
+        const auto* sliceTb = IRUtils::getBitType(width);
         if (Taint::hasTaint(varMap, slice)) {
-            // TODO Make this a helper function. Ideally, taint should be like StateVariable.
-            return IRUtils::getTaintExpression(slice_tb);
+            return IRUtils::getTaintExpression(sliceTb);
         }
         // Otherwise we convert the expression to a constant of the sliced type.
         // Ultimately, the value here does not matter.
-        return IRUtils::getConstant(slice_tb, 0);
+        return IRUtils::getConstant(sliceTb, 0);
     }
 
  public:

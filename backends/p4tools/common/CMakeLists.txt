@@ -38,6 +38,7 @@ set(
   options.cpp
   version.cpp
 
+  compiler/boolean_keys.cpp
   compiler/compiler_target.cpp
   compiler/convert_errors.cpp
   compiler/convert_varbits.cpp

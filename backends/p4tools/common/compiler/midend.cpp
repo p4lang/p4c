@@ -1,5 +1,6 @@
 #include "backends/p4tools/common/compiler/midend.h"
 
+#include "backends/p4tools/common/compiler/boolean_keys.h"
 #include "backends/p4tools/common/compiler/convert_errors.h"
 #include "backends/p4tools/common/compiler/convert_varbits.h"
 #include "backends/p4tools/common/compiler/copy_headers.h"
@@ -156,6 +157,8 @@ void MidEnd::addDefaultPasses() {
         new P4::HSIndexSimplifier(&refMap, &typeMap),
         // Convert Type_Varbits into a type that contains information about the assigned width.
         new ConvertVarbits(&refMap, &typeMap),
+        // Cast all boolean table keys with a bit<1>.
+        new CastBooleanTableKeys(),
     });
 }
 

@@ -103,7 +103,7 @@ bool TestBackEnd::run(const FinalState& state) {
         if (concolicModel == nullptr) {
             testCount++;
             Coverage::coverageReportFinal(allStatements, visitedStatements);
-            printFinalStats();
+            printPerformanceReport();
             return testCount > maxTests - 1;
         }
         completedModel = concolicModel;
@@ -122,7 +122,7 @@ bool TestBackEnd::run(const FinalState& state) {
         if (abort) {
             testCount++;
             Coverage::coverageReportFinal(allStatements, visitedStatements);
-            printFinalStats();
+            printPerformanceReport();
             return testCount > maxTests - 1;
         }
 
@@ -141,7 +141,7 @@ bool TestBackEnd::run(const FinalState& state) {
         printTraces("============ End Test %1% ============\n", testCount);
         testCount++;
         Coverage::coverageReportFinal(allStatements, visitedStatements);
-        printFinalStats();
+        printPerformanceReport();
         return testCount > maxTests - 1;
     }
 }
@@ -245,7 +245,7 @@ bool TestBackEnd::printTestInfo(const ExecutionState* executionState, const Test
     return false;
 }
 
-void TestBackEnd::printFinalStats() const {
+void TestBackEnd::printPerformanceReport() {
     printFeature("performance", 4, "============ Timers ============");
     for (const auto& c : getTimers()) {
         if (c.timerName.empty()) {

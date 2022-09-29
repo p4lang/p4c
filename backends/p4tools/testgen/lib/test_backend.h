@@ -111,7 +111,8 @@ class TestBackEnd {
     /// The callback that is executed by the symbolic executor.
     virtual bool run(const FinalState& state);
 
-    void printFinalStats() const;
+    /// Print out some performance numbers if logging feature "performance" is enabled.
+    static void printPerformanceReport();
 };
 
 }  // namespace P4Testgen

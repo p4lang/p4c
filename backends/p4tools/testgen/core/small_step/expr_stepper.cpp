@@ -97,7 +97,7 @@ void ExprStepper::evalActionCall(const IR::P4Action* action, const IR::MethodCal
     // provided by a constant entry or synthesized by us.
     for (size_t argIdx = 0; argIdx < call->arguments->size(); ++argIdx) {
         const auto& parameters = action->parameters;
-        const auto* const param = parameters->getParameter(argIdx);
+        const auto* param = parameters->getParameter(argIdx);
         const auto* paramType = param->type;
         const auto paramName = param->name;
         BUG_CHECK(param->direction == IR::Direction::None,
@@ -374,19 +374,19 @@ bool ExprStepper::preorder(const IR::SelectExpression* selectExpression) {
                                  });
     }
 
+    // Handle case where the first select case matches: proceed to the next parser state,
+    // guarded by its path condition.
+    const auto* equality = GenEq::equate(selectExpression->select, selectCase->keyset);
+
     // TODO: Implement the taint case for select expressions.
     // In the worst case, this means the entire parser is tainted.
-    if (state.hasTaint(selectExpression->select) || state.hasTaint(selectCase->keyset)) {
+    if (state.hasTaint(equality)) {
         TESTGEN_UNIMPLEMENTED(
             "The SelectExpression %1% is trying to match on a tainted key set."
             " This means it is matching on uninitialized data."
             " P4Testgen currently does not support this case.",
             selectExpression);
     }
-
-    // Handle case where the first select case matches: proceed to the next parser state,
-    // guarded by its path condition.
-    const auto* equality = GenEq::equate(selectExpression->select, selectCase->keyset);
     {
         auto* nextState = new ExecutionState(state);
         nextState->replaceTopBody(Continuation::Return(selectCase->state));

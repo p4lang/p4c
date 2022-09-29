@@ -100,17 +100,15 @@ class TableStepper {
     ExprStepper::Result getResult();
 
     /// The function compares the right and left expression.
-    /// Returns 0 if the values are equal, 1 if the left value is greater,
-    /// and -1 if the right value is greater.
+    /// Returns true if the values are equal or if the left value is more precise.
     /// If the left value is constant entries and the right value
     /// is Mask/Default then priority is given to constants.
     /// For more detailed information see
     /// https://github.com/p4lang/behavioral-model/blob/main/docs/simple_switch.md#longest-prefix-match-tables
-    int compareLPMEntries(const IR::Expression* left, const IR::Expression* right);
-
-    /// Sorts entries for lpm.
-    /// TODO: Check whether we still need this
-    IR::Vector<IR::Entry> sortLpmEntries(const IR::Vector<IR::Entry>& entries);
+    /// @param lpmIndex indicates the index of the lpm entry in the list of entries.
+    /// It is used for comparison.
+    static bool compareLPMEntries(const IR::Entry* leftIn, const IR::Entry* rightIn,
+                                  size_t lpmIndex);
 
     /// @returns whether the table is immutable, meaning control plane entries can not be added.
     bool checkTableIsImmutable();

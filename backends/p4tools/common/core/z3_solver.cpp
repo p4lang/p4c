@@ -417,7 +417,7 @@ Z3Solver::Z3Solver(bool isIncremental, boost::optional<std::istream&> inOpt)
     : z3solver(z3context), isIncremental(isIncremental), z3Assertions(z3context) {
     // Add a top-level set to declaration vars that we can insert variables.
     // TODO: Think about whether this is necessary or it is not better to remove it.
-    declaredVarsById.push_back({});
+    declaredVarsById.emplace_back();
     if (inOpt == boost::none) {
         return;
     }
@@ -462,7 +462,9 @@ bool Z3Translator::preorder(const IR::Cast* cast) {
             exprSize = exprType->width_bits();
         } else if (castExtrType->is<IR::Type_Boolean>()) {
             exprSize = 1;
-            castExpr = solver->z3context.bv_val(castExpr.bool_value(), exprSize);
+            auto trueVal = solver->z3context.bv_val(1, exprSize);
+            auto falseVal = solver->z3context.bv_val(0, exprSize);
+            castExpr = z3::ite(castExpr, trueVal, falseVal);
         } else if (const auto* exprType = castExtrType->to<IR::Extracted_Varbits>()) {
             exprSize = exprType->width_bits();
         } else {
@@ -480,10 +482,12 @@ bool Z3Translator::preorder(const IR::Cast* cast) {
         if (exprSize == destSize) {
             result = castExpr;
         }
-    } else if (cast->destType->is<IR::Type_Boolean>()) {
+        return false;
+    }
+    if (cast->destType->is<IR::Type_Boolean>()) {
         if (const auto* exprType = castExtrType->to<IR::Type_Bits>()) {
             if (exprType->width_bits() == 1) {
-                castExpr = solver->z3context.bool_val(castExpr.bool_value());
+                castExpr = solver->z3context.bool_val(castExpr.bool_value() == Z3_L_TRUE);
             } else {
                 BUG("Cast expression type %1% is not bit<1> : %2%", exprType, castExpr);
             }
@@ -493,10 +497,9 @@ bool Z3Translator::preorder(const IR::Cast* cast) {
             BUG("Casting %s to a bool is not supported.", castExpr.to_string().c_str());
         }
         result = castExpr;
-    } else {
-        BUG("%1%: Unhandled cast type: %2%", cast, cast->node_type_name());
+        return false;
     }
-    return false;
+    BUG("%1%: Unhandled cast type: %2%", cast, cast->node_type_name());
 }
 
 bool Z3Translator::preorder(const IR::Constant* constant) {

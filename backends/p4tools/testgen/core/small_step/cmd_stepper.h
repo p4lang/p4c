@@ -26,7 +26,6 @@ class CmdStepper : public AbstractStepper {
     CmdStepper(ExecutionState& state, AbstractSolver& solver, const ProgramInfo& programInfo);
 
     bool preorder(const IR::AssignmentStatement* assign) override;
-    bool preorder(const IR::Declaration_Variable* decl) override;
     bool preorder(const IR::P4Parser* p4parser) override;
     bool preorder(const IR::P4Control* p4control) override;
     bool preorder(const IR::EmptyStatement* empty) override;
@@ -77,6 +76,11 @@ class CmdStepper : public AbstractStepper {
     /// Declaration_Variable preorder function.
     void declareStructLike(ExecutionState* nextState, const IR::Expression* parentExpr,
                            const IR::Type_StructLike* structType) const;
+
+    /// Add a variable to the symbolic interpreter. This looks up the full control-plane name of a
+    /// variable defined in @param decl and declares in the symbolic environment of @param
+    /// nextState.
+    void declareVariable(ExecutionState* nextState, const IR::Declaration_Variable* decl);
 };
 
 }  // namespace P4Testgen

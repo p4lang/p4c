@@ -6,7 +6,8 @@ set(P4TESTGEN_DIR ${CMAKE_SOURCE_DIR}/build/testgen)
 set(P4TESTGEN_DRIVER "${P4TOOLS_BINARY_DIR}/p4check testgen")
 
 # This file defines how we write the tests we generate.
-set(TEMPLATE_FILE ${CMAKE_CURRENT_LIST_DIR}/STFTestTemplate.cmake)
+set(TEMPLATE_FILE ${CMAKE_CURRENT_LIST_DIR}/TestTemplate.cmake)
+
 
 if(NOT P4TOOLS_BMV2_PATH)
   set(P4TOOLS_BMV2_PATH ${CMAKE_HOME_DIRECTORY}/build)
@@ -36,9 +37,9 @@ p4tools_find_tests("${BMV2_P4_16_V1_TESTS}" bmv2v1tests EXCLUDE "")
 set(P4C_V1_TEST_SUITES_P416 ${v1tests} ${bmv2v1tests})
 
 p4tools_add_tests(
-  ${TEMPLATE_FILE}
-  "testgen-p4c-bmv2" ${P4TESTGEN_DRIVER} "${P4C_V1_TEST_SUITES_P416}"
-  "" "bmv2" "v1model" "p4-16" TRUE "-I${P4C_BINARY_DIR}/p4include --test-backend STF ${EXTRA_OPTS} "
+  TESTSUITES "${P4C_V1_TEST_SUITES_P416}"
+  TAG "testgen-p4c-bmv2" DRIVER ${P4TESTGEN_DRIVER} TEMPLATE_FILE ${TEMPLATE_FILE}
+  TARGET "bmv2" ARCH "v1model" ENABLE_RUNNER TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend STF ${EXTRA_OPTS} "
 )
 
 #############################################################################
@@ -49,15 +50,15 @@ p4tools_add_tests(
 set(P4C_V1_TEST_SUITES_P416_PTF ${bmv2v1tests})
 
 p4tools_add_tests(
-  ${TEMPLATE_FILE}
-  "testgen-p4c-bmv2-ptf" ${P4TESTGEN_DRIVER} "${P4C_V1_TEST_SUITES_P416_PTF}"
-  "" "bmv2" "v1model" "p4-16" TRUE "-I${P4C_BINARY_DIR}/p4include --test-backend PTF-P4 ${EXTRA_OPTS}"
+  TESTSUITES "${P4C_V1_TEST_SUITES_P416_PTF}"
+  TAG "testgen-p4c-bmv2-ptf" DRIVER ${P4TESTGEN_DRIVER} TEMPLATE_FILE ${TEMPLATE_FILE}
+  TARGET "bmv2" ARCH "v1model" TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend PTF-P4 ${EXTRA_OPTS} "
 )
 
 p4tools_add_tests(
-  ${TEMPLATE_FILE}
-  "testgen-p4c-bmv2-protobuf" ${P4TESTGEN_DRIVER} "${P4C_V1_TEST_SUITES_P416}"
-  "" "bmv2" "v1model" "p4-16" FALSE "-I${P4C_BINARY_DIR}/p4include --test-backend Protobuf ${EXTRA_OPTS}"
+  TESTSUITES "${P4C_V1_TEST_SUITES_P416}"
+  TAG "testgen-p4c-bmv2-protobuf" DRIVER ${P4TESTGEN_DRIVER} TEMPLATE_FILE ${TEMPLATE_FILE}
+  TARGET "bmv2" ARCH "v1model" TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend PROTOBUF ${EXTRA_OPTS} "
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/BMV2Xfail.cmake)

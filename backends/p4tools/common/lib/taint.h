@@ -10,14 +10,6 @@ class Taint {
  public:
     static const IR::StringLiteral TAINTED_STRING_LITERAL;
 
-    /// @returns the mask for the corresponding program packet. In the first step, the packet
-    /// expression is collapsed so that only concatenations remain. Any taint variable bubbles up.
-    /// In the second step, taint variables are replaces with zero bit vectors, whereas any other
-    /// expression is filled with the maximum value.
-    static const IR::Literal* buildTaintMask(const SymbolicMapType& varMap,
-                                             const Model* completedModel,
-                                             const IR::Expression* programPacket);
-
     /// @returns a expression in which taint has been propagated upwards. At the end, this will
     /// either return a literal, a Member/PathExpression, or a concatenation. Any non-tainted
     /// variable is replaced with a zero constant. This function is used for the generation of taint
@@ -25,12 +17,15 @@ class Taint {
     static const IR::Expression* propagateTaint(const SymbolicMapType& varMap,
                                                 const IR::Expression* expr);
 
-    /// @returns whether the given expression is tainted. For most expressions, this just checks
-    /// whether it containts a member or path expression that has the *taint keyword. This does not
-    /// hold for slices and concatenations. Here we need to check whether the slice range overlaps
-    /// with the tainted range of the concatenation. We do this by retrieving all the tainted slices
-    /// of the concatenation expression and then checking whether the slice overlaps
+    /// @returns whether the given expression is tainted. An expression is tainted if one or more
+    /// bits of the expression are expected to evaluate to (possibly part of) IR::TaintExpression.
     static bool hasTaint(const SymbolicMapType& varMap, const IR::Expression* expr);
+
+    /// @returns the mask for the corresponding program packet, indicating bits of the expression
+    /// which are not tainted.
+    static const IR::Literal* buildTaintMask(const SymbolicMapType& varMap,
+                                             const Model* completedModel,
+                                             const IR::Expression* programPacket);
 };
 
 }  // namespace P4Tools

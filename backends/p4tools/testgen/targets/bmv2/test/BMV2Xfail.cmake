@@ -93,7 +93,6 @@ p4tools_add_xfail_reason(
   "differs|Expected ([0-9]+) packets on port ([0-9]+) got ([0-9]+)"
    # bug in parserunroll
   v1model-p4runtime-enumint-types1.p4
-  issue281.p4
 )
 
 p4tools_add_xfail_reason(
