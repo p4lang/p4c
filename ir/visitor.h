@@ -22,6 +22,7 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "ir/ir.h"
 #include "lib/exceptions.h"
+#include "lib/castable.h"
 
 // declare this outside of Visitor so it can be forward declared in node.h
 struct Visitor_Context {
@@ -36,7 +37,7 @@ struct Visitor_Context {
     int                         depth;
 };
 
-class Visitor {
+class Visitor : public ICastable {
  public:
     typedef Visitor_Context Context;
     class profile_t {
@@ -426,10 +427,6 @@ class Backtrack : public virtual Visitor {
         explicit trigger(type_t t) : type(t) {}
         virtual ~trigger();
         virtual void dbprint(std::ostream &out) const { out << demangle(typeid(*this).name()); }
-        template<class T> T *to() { return dynamic_cast<T *>(this); }
-        template<class T> const T *to() const { return dynamic_cast<const T *>(this); }
-        template<class T> bool is() { return to<T>() != nullptr; }
-        template<class T> bool is() const { return to<T>() != nullptr; }
 
      protected:
         // must call this from the constructor if a trigger subclass contains pointers

@@ -21,6 +21,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "lib/ordered_set.h"
+#include "lib/castable.h"
 
 namespace BMV2 {
 
@@ -55,7 +56,7 @@ class CFG final : public IHasDbPrint {
         bool isDestination(const CFG::Node* destination) const;
     };
 
-    class Node : public IHasDbPrint {
+    class Node : public IHasDbPrint, public ICastable {
      protected:
         friend class CFG;
 
@@ -72,9 +73,6 @@ class CFG final : public IHasDbPrint {
 
         void dbprint(std::ostream& out) const;
         void addPredecessors(const EdgeSet* set);
-        template<typename T> bool is() const { return to<T>() != nullptr; }
-        template<typename T> T* to() { return dynamic_cast<T*>(this); }
-        template<typename T> const T* to() const { return dynamic_cast<const T*>(this); }
         void computeSuccessors();
         cstring toString() const { return name; }
     };
