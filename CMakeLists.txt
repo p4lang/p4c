@@ -205,7 +205,7 @@ enable_testing ()
 # CMAKE_CXX_STANDARD was introduced in CMake 3.1, so for older versions of CMake, we use -std=gnu++11
 if (CMAKE_VERSION VERSION_LESS "3.1")
     set (CMAKE_CXX_FLAGS "-std=gnu++11 ${CMAKE_CXX_FLAGS}")
-else ()
+elseif(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 11)
     set (CMAKE_CXX_STANDARD 11)
 endif ()
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
