@@ -1,0 +1,90 @@
+# Copyright 2022-present Orange
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: "ptf-ebpf-kernels-weekly"
+
+on:
+  schedule:
+    # Every sunday at 1:17 am UTC
+    - cron: '17 1 * * 0'
+
+jobs:
+  ptf-linux:
+    # Prevent triggering by a fork because this workflow is resource intensive
+    if: ${{ github.repository == 'p4lang/p4c' && github.ref == 'refs/heads/main' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        kernels: [5.8, 5.11, 5.13, 5.15]
+        include:
+          - kernels: 5.8
+            kernel_version: 5.8.0-63
+            os: ubuntu-20.04
+          - kernels: 5.11
+            kernel_version: 5.11.0-46
+            os: ubuntu-20.04
+          - kernels: 5.13
+            kernel_version: 5.13.0-52
+            os: ubuntu-20.04
+          - kernels: 5.15
+            kernel_version: 5.15.0-48
+            os: ubuntu-20.04
+    env:
+      UNIFIED: ON
+      ENABLE_GMP: ON
+      # Used by virt-builder and virt-install, for valid values see `virt-builder --list`.
+      OS_TYPE: ${{ matrix.os }}
+      # List of kernels to use in a single job
+      KERNEL_VERSIONS: ${{ matrix.kernel_version }}
+      VM_NAME: inner
+      DISK_IMAGE: /tmp/vm_disk_image.qcow2
+      WORKING_DISK_IMAGE: /var/lib/libvirt/images/vm_disk.qcow2
+      DOCKER_VOLUME_IMAGE: /var/lib/libvirt/images/docker_disk.qcow2
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: test-${{ env.UNIFIED }}-${{ runner.os }}
+          max-size: 1000M
+
+      - name: Cache VM image
+        uses: actions/cache@v3.0.5
+        id: vm_cache
+        with:
+          path: ${{ env.DISK_IMAGE }}
+          key: ${{ env.OS_TYPE }} ${{ env.KERNEL_VERSIONS }}
+
+      - name: Prepare runner
+        run: sudo -E ./tools/ci-ptf/prepare_runner.sh
+
+      - name: Build VM
+        if: steps.vm_cache.outputs.cache-hit != 'true'
+        run: sudo -E ./tools/ci-ptf/build_vm.sh
+
+      - name: Build (Linux)
+        run: |
+          docker build --network host -t p4c --build-arg MAKEFLAGS=-j8 --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg ENABLE_GMP=$ENABLE_GMP --build-arg INSTALL_PTF_EBPF_DEPENDENCIES=ON --build-arg KERNEL_VERSIONS="$KERNEL_VERSIONS" .
+          ./tools/export_ccache.sh
+
+      - name: Install VM
+        run: sudo -E ./tools/ci-ptf/install_vm.sh
+
+      - name: Run PTF tests for eBPF backend (Linux)
+        run: |
+          sudo -E ./tools/ci-ptf/run_for_each_kernel.sh sudo docker run --privileged -v /sys/fs/bpf:/sys/fs/bpf -w /p4c/backends/ebpf/tests p4c ./test.sh

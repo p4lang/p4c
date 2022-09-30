@@ -1,0 +1,10 @@
+# guest network configuration
+
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    alleths:
+      match:
+        name: en*
+      dhcp4: true
