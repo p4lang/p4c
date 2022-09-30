@@ -118,6 +118,8 @@ void FindTypeSpecializations::postorder(const IR::Type_Specialized* type) {
         insert = findContext<IR::Declaration_Variable>();
     if (!insert)
         insert = findContext<IR::Declaration_Instance>();
+    if (!insert)
+        insert = findContext<IR::P4Action>();
     CHECK_NULL(insert);
     specMap->add(type, st, insert);
 }

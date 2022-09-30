@@ -129,6 +129,8 @@ action vxlan_encap_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dp5 args instanc
 	mov h.vxlan.vni t.vxlan_vni
 	mov h.vxlan.reserved2 t.vxlan_reserved2
 	mov m.psa_ingress_output_metadata_egress_port t.port_out
+	mov m.Ingress_tmp h.outer_ipv4_dpdk_dpdk_dpdk_dpd3.hdr_checksum
+	mov m.Ingress_tmp_0 h.ipv4.total_len
 	ckadd h.cksum_state.state_0 m.Ingress_tmp
 	ckadd h.cksum_state.state_0 m.Ingress_tmp_0
 	mov h.outer_ipv4_dpdk_dpdk_dpdk_dpd3.hdr_checksum h.cksum_state.state_0

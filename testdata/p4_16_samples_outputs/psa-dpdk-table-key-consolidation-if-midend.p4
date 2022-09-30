@@ -4,16 +4,15 @@
 struct EMPTY {
 }
 
-typedef bit<48> EthernetAddress;
 struct user_meta_t {
     bit<16> data;
     bit<16> data1;
 }
 
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {

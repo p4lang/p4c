@@ -7,7 +7,6 @@ error {
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<32> IPv4Address;
 header ethernet_t {
     bit<48> dstAddr;
     bit<48> srcAddr;
@@ -25,8 +24,8 @@ header ipv4_t {
     bit<8>      ttl;
     bit<8>      protocol;
     bit<16>     hdrChecksum;
-    IPv4Address srcAddr;
-    IPv4Address dstAddr;
+    bit<32>     srcAddr;
+    bit<32>     dstAddr;
     varbit<320> options;
 }
 
@@ -102,22 +101,22 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @name("cIngress.foo1") action foo1(@name("dstAddr") IPv4Address dstAddr_1) {
+    @name("cIngress.foo1") action foo1(@name("dstAddr") bit<32> dstAddr_1) {
         hdr.ipv4.dstAddr = dstAddr_1;
     }
-    @name("cIngress.foo1") action foo1_1(@name("dstAddr") IPv4Address dstAddr_2) {
+    @name("cIngress.foo1") action foo1_1(@name("dstAddr") bit<32> dstAddr_2) {
         hdr.ipv4.dstAddr = dstAddr_2;
     }
-    @name("cIngress.foo1") action foo1_2(@name("dstAddr") IPv4Address dstAddr_3) {
+    @name("cIngress.foo1") action foo1_2(@name("dstAddr") bit<32> dstAddr_3) {
         hdr.ipv4.dstAddr = dstAddr_3;
     }
-    @name("cIngress.foo2") action foo2(@name("srcAddr") IPv4Address srcAddr_1) {
+    @name("cIngress.foo2") action foo2(@name("srcAddr") bit<32> srcAddr_1) {
         hdr.ipv4.srcAddr = srcAddr_1;
     }
-    @name("cIngress.foo2") action foo2_1(@name("srcAddr") IPv4Address srcAddr_2) {
+    @name("cIngress.foo2") action foo2_1(@name("srcAddr") bit<32> srcAddr_2) {
         hdr.ipv4.srcAddr = srcAddr_2;
     }
-    @name("cIngress.foo2") action foo2_2(@name("srcAddr") IPv4Address srcAddr_3) {
+    @name("cIngress.foo2") action foo2_2(@name("srcAddr") bit<32> srcAddr_3) {
         hdr.ipv4.srcAddr = srcAddr_3;
     }
     @name("cIngress.t0") table t0_0 {

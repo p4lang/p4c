@@ -1,12 +1,11 @@
 #include <core.p4>
 
-typedef bit<4> PortId;
 struct InControl {
-    PortId inputPort;
+    bit<4> inputPort;
 }
 
 struct OutControl {
-    PortId outputPort;
+    bit<4> outputPort;
 }
 
 parser Parser<H>(packet_in b, out H parsedHeaders);
@@ -44,7 +43,7 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
     @name("LjPipe.Drop_1") action Drop_0() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("LjPipe.Forward") action Forward(@name("outPort") PortId outPort) {
+    @name("LjPipe.Forward") action Forward(@name("outPort") bit<4> outPort) {
         outCtrl.outputPort = outPort;
     }
     @name("LjPipe.Enet_lkup") table Enet_lkup_0 {

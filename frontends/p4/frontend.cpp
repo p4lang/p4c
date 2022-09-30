@@ -61,6 +61,7 @@ limitations under the License.
 #include "specialize.h"
 #include "specializeGenericFunctions.h"
 #include "specializeGenericTypes.h"
+#include "staticAssert.h"
 #include "strengthReduction.h"
 #include "structInitializers.h"
 #include "switchAddDefault.h"
@@ -180,16 +181,19 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SetStrictStruct(&typeMap, false),
         new ValidateMatchAnnotations(&typeMap),
         new BindTypeVariables(&refMap, &typeMap),
-        new SpecializeGenericTypes(&refMap, &typeMap),
-        new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
-        new ResolveReferences(&refMap),
-        new SetStrictStruct(&typeMap, true),  // Next pass uses strict struct checking
-        new TypeInference(&refMap, &typeMap, false),  // more casts may be needed
-        new SetStrictStruct(&typeMap, false),
+        new PassRepeated({
+            new SpecializeGenericTypes(&refMap, &typeMap),
+            new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
+            new ResolveReferences(&refMap),
+            new SetStrictStruct(&typeMap, true),  // Next pass uses strict struct checking
+            new TypeInference(&refMap, &typeMap, false),  // more casts may be needed
+            new SetStrictStruct(&typeMap, false),
+            new SpecializeGenericFunctions(&refMap, &typeMap)
+        }),
         new CheckCoreMethods(&refMap, &typeMap),
+        new StaticAssert(&refMap, &typeMap),
         new RemoveParserIfs(&refMap, &typeMap),
         new StructInitializers(&refMap, &typeMap),
-        new SpecializeGenericFunctions(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
         new PassRepeated({
             new ConstantFolding(&refMap, &typeMap),

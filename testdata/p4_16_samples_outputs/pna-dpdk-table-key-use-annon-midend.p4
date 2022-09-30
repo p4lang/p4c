@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <pna.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -27,8 +26,8 @@ struct empty_metadata_t {
 }
 
 struct main_metadata_t {
-    bit<32>               key;
-    ExpireTimeProfileId_t timeout;
+    bit<32> key;
+    bit<8>  timeout;
 }
 
 struct headers_t {
@@ -61,7 +60,7 @@ struct tuple_0 {
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @name("MainControlImpl.next_hop") action next_hop(@name("vport") PortId_t vport) {
+    @name("MainControlImpl.next_hop") action next_hop(@name("vport") bit<32> vport) {
         send_to_port(vport);
     }
     @name("MainControlImpl.add_on_miss_action") action add_on_miss_action() {
@@ -78,7 +77,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         add_on_miss = true;
         const default_action = add_on_miss_action();
     }
-    @name("MainControlImpl.next_hop2") action next_hop2(@name("vport") PortId_t vport_2, @name("newAddr") bit<32> newAddr) {
+    @name("MainControlImpl.next_hop2") action next_hop2(@name("vport") bit<32> vport_2, @name("newAddr") bit<32> newAddr) {
         send_to_port(vport_2);
         hdr.ipv4.srcAddr = newAddr;
     }

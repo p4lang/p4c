@@ -5,7 +5,6 @@ match_kind {
     exact
 }
 
-typedef bit<9> BParamType;
 struct TArg1 {
     bit<9> field1;
     bool   drop;
@@ -37,7 +36,7 @@ struct Packet_data {
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("Q_pipe.p1.thost.B_action") action p1_thost_B_action_0(@name("bData") BParamType bData) {
+    @name("Q_pipe.p1.thost.B_action") action p1_thost_B_action_0(@name("bData") bit<9> bData) {
         qArg1.field1 = bData;
     }
     @name("Q_pipe.p1.thost.C_action") action p1_thost_C_action_0(@name("cData") bit<9> cData) {

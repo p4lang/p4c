@@ -15,26 +15,24 @@ header addr_ipv6_t {
     bit<128> addr;
 }
 
-header_union addr_t {
-    addr_ipv4_t ipv4;
-    addr_ipv6_t ipv6;
-}
-
 struct metadata {
 }
 
 struct headers {
     addr_type_t addr_type;
-    addr_t      addr_dst;
-    addr_t      addr_src;
+    addr_ipv4_t addr_dst_ipv4;
+    addr_ipv6_t addr_dst_ipv6;
+    addr_ipv4_t addr_src_ipv4;
+    addr_ipv6_t addr_src_ipv6;
 }
 
 parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ProtParser.addr_0") addr_t addr_0;
+    @name("addr_0_ipv4") addr_ipv4_t addr_0_ipv4_0;
+    @name("addr_0_ipv6") addr_ipv6_t addr_0_ipv6_0;
     state start {
         packet.extract<addr_type_t>(hdr.addr_type);
-        addr_0.ipv4.setInvalid();
-        addr_0.ipv6.setInvalid();
+        addr_0_ipv4_0.setInvalid();
+        addr_0_ipv6_0.setInvalid();
         transition select(hdr.addr_type.dstType) {
             8w0x1: ProtAddrParser_ipv4;
             8w0x2: ProtAddrParser_ipv6;
@@ -42,18 +40,48 @@ parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     state ProtAddrParser_ipv4 {
-        packet.extract<addr_ipv4_t>(addr_0.ipv4);
+        packet.extract<addr_ipv4_t>(addr_0_ipv4_0);
         transition start_0;
     }
     state ProtAddrParser_ipv6 {
-        packet.extract<addr_ipv6_t>(addr_0.ipv6);
+        packet.extract<addr_ipv6_t>(addr_0_ipv6_0);
         transition start_0;
     }
     state start_0 {
-        hdr.addr_dst.ipv4 = addr_0.ipv4;
-        hdr.addr_dst.ipv6 = addr_0.ipv6;
-        addr_0.ipv4.setInvalid();
-        addr_0.ipv6.setInvalid();
+        transition select(addr_0_ipv4_0.isValid()) {
+            true: start_0_true;
+            false: start_0_false;
+        }
+    }
+    state start_0_true {
+        hdr.addr_dst_ipv4.setValid();
+        hdr.addr_dst_ipv4 = addr_0_ipv4_0;
+        hdr.addr_dst_ipv6.setInvalid();
+        transition start_0_join;
+    }
+    state start_0_false {
+        hdr.addr_dst_ipv4.setInvalid();
+        transition start_0_join;
+    }
+    state start_0_join {
+        transition select(addr_0_ipv6_0.isValid()) {
+            true: start_0_true_0;
+            false: start_0_false_0;
+        }
+    }
+    state start_0_true_0 {
+        hdr.addr_dst_ipv6.setValid();
+        hdr.addr_dst_ipv6 = addr_0_ipv6_0;
+        hdr.addr_dst_ipv4.setInvalid();
+        transition start_0_join_0;
+    }
+    state start_0_false_0 {
+        hdr.addr_dst_ipv6.setInvalid();
+        transition start_0_join_0;
+    }
+    state start_0_join_0 {
+        addr_0_ipv4_0.setInvalid();
+        addr_0_ipv6_0.setInvalid();
         transition select(hdr.addr_type.srcType) {
             8w0x1: ProtAddrParser_ipv4_0;
             8w0x2: ProtAddrParser_ipv6_0;
@@ -61,16 +89,46 @@ parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     state ProtAddrParser_ipv4_0 {
-        packet.extract<addr_ipv4_t>(addr_0.ipv4);
+        packet.extract<addr_ipv4_t>(addr_0_ipv4_0);
         transition start_1;
     }
     state ProtAddrParser_ipv6_0 {
-        packet.extract<addr_ipv6_t>(addr_0.ipv6);
+        packet.extract<addr_ipv6_t>(addr_0_ipv6_0);
         transition start_1;
     }
     state start_1 {
-        hdr.addr_src.ipv4 = addr_0.ipv4;
-        hdr.addr_src.ipv6 = addr_0.ipv6;
+        transition select(addr_0_ipv4_0.isValid()) {
+            true: start_1_true;
+            false: start_1_false;
+        }
+    }
+    state start_1_true {
+        hdr.addr_src_ipv4.setValid();
+        hdr.addr_src_ipv4 = addr_0_ipv4_0;
+        hdr.addr_src_ipv6.setInvalid();
+        transition start_1_join;
+    }
+    state start_1_false {
+        hdr.addr_src_ipv4.setInvalid();
+        transition start_1_join;
+    }
+    state start_1_join {
+        transition select(addr_0_ipv6_0.isValid()) {
+            true: start_1_true_0;
+            false: start_1_false_0;
+        }
+    }
+    state start_1_true_0 {
+        hdr.addr_src_ipv6.setValid();
+        hdr.addr_src_ipv6 = addr_0_ipv6_0;
+        hdr.addr_src_ipv4.setInvalid();
+        transition start_1_join_0;
+    }
+    state start_1_false_0 {
+        hdr.addr_src_ipv6.setInvalid();
+        transition start_1_join_0;
+    }
+    state start_1_join_0 {
         transition accept;
     }
     state noMatch {
@@ -102,10 +160,10 @@ control ProtComputeChecksum(inout headers hdr, inout metadata meta) {
 control ProtDeparser(packet_out packet, in headers hdr) {
     apply {
         packet.emit<addr_type_t>(hdr.addr_type);
-        packet.emit<addr_ipv4_t>(hdr.addr_dst.ipv4);
-        packet.emit<addr_ipv6_t>(hdr.addr_dst.ipv6);
-        packet.emit<addr_ipv4_t>(hdr.addr_src.ipv4);
-        packet.emit<addr_ipv6_t>(hdr.addr_src.ipv6);
+        packet.emit<addr_ipv4_t>(hdr.addr_dst_ipv4);
+        packet.emit<addr_ipv6_t>(hdr.addr_dst_ipv6);
+        packet.emit<addr_ipv4_t>(hdr.addr_src_ipv4);
+        packet.emit<addr_ipv6_t>(hdr.addr_src_ipv6);
     }
 }
 

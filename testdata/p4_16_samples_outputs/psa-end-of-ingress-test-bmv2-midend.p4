@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header output_data_t {
@@ -63,8 +62,8 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         hdr.output_data.word0 = 32w7;
     }
     @hidden action psaendofingresstestbmv2l54() {
-        ostd.multicast_group = (MulticastGroupUint_t)hdr.ethernet.dstAddr[31:16];
-        ostd.egress_port = (PortIdUint_t)hdr.ethernet.dstAddr[15:0];
+        ostd.multicast_group = (bit<32>)hdr.ethernet.dstAddr[31:16];
+        ostd.egress_port = (bit<32>)hdr.ethernet.dstAddr[15:0];
         hdr.output_data.word0 = 32w8;
     }
     @hidden table tbl_psaendofingresstestbmv2l96 {
@@ -195,7 +194,7 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
     }
     @hidden action psaendofingresstestbmv2l54_0() {
         hdr.output_data.word1 = (bit<32>)istd.egress_port;
-        hdr.output_data.word2 = (bit<32>)(EgressInstanceUint_t)istd.instance;
+        hdr.output_data.word2 = (bit<32>)(bit<16>)istd.instance;
         hdr.output_data.word3 = 32w8;
     }
     @hidden table tbl_psaendofingresstestbmv2l138 {

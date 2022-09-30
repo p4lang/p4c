@@ -474,113 +474,136 @@ bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s) {
        }
 */
 const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
-    // fields is used to create header with modified fields
-    auto fields = new IR::IndexedVector<IR::StructField>;
     if (st->is<IR::Type_Header>()) {
         unsigned size_sum_so_far = 0;
+        bool all_hdr_field_aligned = true;
         for (auto field : st->fields) {
-            if ((*field).type->is<IR::Type_Bits>()) {
-                auto t = (*field).type->to<IR::Type_Bits>();
-                auto width = t->width_bits();
-                if (width % 8 != 0) {
-                    size_sum_so_far += width;
-                    fieldInfo obj;
-                    obj.fieldWidth =  width;
-                    // Storing the non-aligned field
-                    field_name_list.emplace(field->name, obj);
-                } else {
-                    if (size_sum_so_far != 0) {
-                        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                                "Header Structure '%1%' has non-contiguous non-aligned fields"
-                                " which cannot be combined to align to 8-bit. DPDK does not"
-                                " support non 8-bit aligned header field",st->name.name);
-                        return st;
-                    }
-                    fields->push_back(field);
-                    continue;
-                }
-                cstring modifiedName = "";
-                auto size = field_name_list.size();
-                unsigned i = 0;
-                if (size_sum_so_far <= 64) {
-                    // Check if the sum of width of non-aligned field is divisble by 8.
-                    if (size_sum_so_far && (size_sum_so_far % 8 == 0)) {
-                        // Form the field with all non-aligned field stored in "field_name_list"
-                        for (auto s = field_name_list.begin(); s != field_name_list.end();
-                             s++,i++) {
-                            if ((i + 1) < (size))
-                                modifiedName += s->first + "_";
-                            else
-                                modifiedName += s->first;
-                        }
-                        unsigned offset = 0;
-                        /* Store information about each non-aligned field
-                           For eg : ModifiedName, header str, width, offset, and its
-                                    lsb and msb in modified field
-
-                                   header ipv4_t {
-                                        ...
-                                        bit<3>  flags;
-                                        bit<13> fragOffset;
-                                        ...
-                                   }
-                                   is converted into
-
-                                   header ipv4_t {
-                                        ...
-                                        bit<16>  flags_fragOffset;
-                                        ...
-                                   }
-                                    Here, for "flags", information saved are :
-                                        ModifiedName = flags_fragOffset;
-                                        header str   =  ipv4_t; [This is used if multiple headers
-                                                                 have field with same name]
-                                        width        = 16;
-                                        offset       = 3;
-                                        lsb          = 3;
-                                        msb          = 15;
-                        */
-                        for (auto s = field_name_list.begin(); s != field_name_list.end(); s++) {
-                            hdrFieldInfo fieldObj;
-                            fieldObj.modifiedName = modifiedName;
-                            fieldObj.headerStr = st->name.name;
-                            fieldObj.modifiedWidth = size_sum_so_far;
-                            fieldObj.fieldWidth = s->second.fieldWidth;
-                            fieldObj.lsb = offset;
-                            fieldObj.msb = offset + s->second.fieldWidth - 1;
-                            fieldObj.offset = offset;
-                            structure->hdrFieldInfoList[s->first].push_back(fieldObj);
-                            offset += s->second.fieldWidth;
-                        }
-                        fields->push_back(new IR::StructField(IR::ID(modifiedName),
-                                          IR::Type_Bits::get(size_sum_so_far)));
-                        size_sum_so_far = 0;
-                        modifiedName = "";
-                        field_name_list.clear();
-                    }
-                } else {
-                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                            "Combining the contiguos non 8-bit aligned fields result in a field"
-                            " with bit-width '%1%' > 64-bit in header structure '%2%'. DPDK does"
-                            " not support non 8-bit aligned and greater than 64-bit header field"
-                            ,size_sum_so_far, st->name.name);
-                    return st;
-                }
-            } else {
-                fields->push_back(field);
+        unsigned width;
+        if (auto type = (*field).type->to<IR::Type_Bits>())
+            width = type->width_bits();
+        else if (auto type = (*field).type->to<IR::Type_Varbits>()) {
+            width = type->width_bits();
+        } else {
+            BUG("header fields should be of type bit<> or varbit<>"
+                "found this %1%", field->toString());
+        }
+            size_sum_so_far += width;
+            if ((width & 0x7) != 0) {
+                all_hdr_field_aligned = false;
             }
         }
-        /* Throw error if there is non-aligned field present at the end in header */
-        if (size_sum_so_far != 0) {
+        if ((size_sum_so_far & 0x7) != 0) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "8-bit Alignment for Header Structure '%1%' is not possible as no more header"
-                    " fields available in header to combine. DPDK does not support non-aligned"
-                    " header fields.", st->name.name);
+                    "'%1%' is not 8-bit aligned", st->name.name);
             return st;
         }
-        return new IR::Type_Header(IR::ID(st->name), st->annotations, *fields);
+        if (all_hdr_field_aligned) {
+            return st;
+        }
+    } else {
+        return st;
     }
 
+    // fields is used to create header with modified fields
+    auto fields = new IR::IndexedVector<IR::StructField>;
+    unsigned size_sum_so_far = 0;
+    for (auto field : st->fields) {
+        unsigned width;
+        if (auto type = (*field).type->to<IR::Type_Bits>())
+            width = type->width_bits();
+        else {
+            auto type0 = (*field).type->to<IR::Type_Varbits>();
+            width = type0->width_bits();
+        }
+        if ((width & 0x7) == 0 && size_sum_so_far == 0) {
+                fields->push_back(field);
+                continue;
+        } else {
+            if (size_sum_so_far == 0 || (size_sum_so_far & 0x7) != 0) {
+                size_sum_so_far += width;
+                fieldInfo obj;
+                obj.fieldWidth = width;
+                // Storing the non-aligned field
+                field_name_list.emplace(field->name, obj);
+            }
+        }
+        cstring modifiedName = "";
+        auto size = field_name_list.size();
+        unsigned i = 0;
+        if (size_sum_so_far <= 64) {
+            // Check if the sum of width of non-aligned field is divisble by 8.
+            if (size_sum_so_far && (size_sum_so_far % 8 == 0)) {
+                // Form the field with all non-aligned field stored in "field_name_list"
+                for (auto s = field_name_list.begin(); s != field_name_list.end();
+                        s++, i++) {
+                    if ((i + 1) < size)
+                        modifiedName += s->first + "_";
+                    else
+                        modifiedName += s->first;
+                }
+                unsigned offset = 0;
+                /* Store information about each non-aligned field
+                    For eg : ModifiedName, header str, width, offset, and its
+                            lsb and msb in modified field
+
+                            header ipv4_t {
+                                ...
+                                bit<3>  flags;
+                                bit<13> fragOffset;
+                                ...
+                            }
+                            is converted into
+
+                            header ipv4_t {
+                                ...
+                                bit<16>  flags_fragOffset;
+                                ...
+                            }
+                            Here, for "flags", information saved are :
+                                ModifiedName = flags_fragOffset;
+                                header str   =  ipv4_t; [This is used if multiple headers
+                                                            have field with same name]
+                                width        = 16;
+                                offset       = 3;
+                                lsb          = 3;
+                                msb          = 15;
+                */
+                for (auto s = field_name_list.begin(); s != field_name_list.end(); s++) {
+                    hdrFieldInfo fieldObj;
+                    fieldObj.modifiedName = modifiedName;
+                    fieldObj.headerStr = st->name.name;
+                    fieldObj.modifiedWidth = size_sum_so_far;
+                    fieldObj.fieldWidth = s->second.fieldWidth;
+                    fieldObj.lsb = offset;
+                    fieldObj.msb = offset + s->second.fieldWidth - 1;
+                    fieldObj.offset = offset;
+                    structure->hdrFieldInfoList[s->first].push_back(fieldObj);
+                    offset += s->second.fieldWidth;
+                }
+                fields->push_back(new IR::StructField(IR::ID(modifiedName),
+                                    IR::Type_Bits::get(size_sum_so_far)));
+                size_sum_so_far = 0;
+                modifiedName = "";
+                field_name_list.clear();
+            }
+        } else {
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Combining the contiguos non 8-bit aligned fields result in a field"
+                    " with bit-width '%1%' > 64-bit in header structure '%2%'. DPDK does"
+                    " not support non 8-bit aligned and greater than 64-bit header field"
+                    ,size_sum_so_far, st->name.name);
+            return st;
+        }
+    }
+    /* Throw error if there is non-aligned field present at the end in header */
+    if (size_sum_so_far != 0) {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "8-bit Alignment for Header Structure '%1%' is not possible as no more header"
+                " fields available in header to combine. DPDK does not support non-aligned"
+                " header fields.", st->name.name);
+        return st;
+    }
+    return new IR::Type_Header(IR::ID(st->name), st->annotations, *fields);
     return st;
 }
 
@@ -608,7 +631,6 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
 */
 const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
     cstring hdrStrName = "";
-
     /* Get the member's header structure name */
     if ((m != nullptr) && (m->expr != nullptr) &&
         (m->expr->type != nullptr) &&
@@ -639,19 +661,6 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
 /* This function processes the metadata structure and modify the metadata field width
    to 32/64 bits if it is not 8-bit aligned */
 const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
-    /* Throw error if field width is greater than 64 bits */
-    for (auto field : st->fields) {
-        if ((*field).type->is<IR::Type_Bits>()) {
-            auto t = (*field).type->to<IR::Type_Bits>();
-            auto width = t->width_bits();
-            if (width > dpdk_max_field_width) {
-            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "Unsupported bit width '%1%' for field '%2%'. DPDK "
-                     "does not support metadata/header field with width more than "
-                     "'%3%' bits", width, field, dpdk_max_field_width);
-            }
-        }
-    }
     auto fields = new IR::IndexedVector<IR::StructField>;
     if (st->is<IR::Type_Struct>()) {
         for (auto field : st->fields) {
@@ -1672,13 +1681,14 @@ getExternInstanceFromProperty(const IR::P4Table* table,
 // create P4Table object that represents the matching part of the original P4
 // table. This table sets the internal group_id or member_id which are used
 // for subsequent table lookup.
-std::tuple<const IR::P4Table*, cstring>
+std::tuple<const IR::P4Table*, cstring, cstring>
 SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
-    cstring actionName;
+    cstring grpActionName = "", memActionName;
     if (implementation == TableImplementation::ACTION_SELECTOR) {
-        actionName = refMap->newName(tbl->name.originalName + "_set_group_id");
+        grpActionName = refMap->newName(tbl->name.originalName + "_set_group_id");
+        memActionName = refMap->newName(tbl->name.originalName + "_set_member_id");
     } else if (implementation == TableImplementation::ACTION_PROFILE) {
-        actionName = refMap->newName(tbl->name.originalName + "_set_member_id");
+        memActionName = refMap->newName(tbl->name.originalName + "_set_member_id");
     } else {
         BUG("Unexpected table implementation type");
     }
@@ -1690,8 +1700,12 @@ SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
     }
     IR::IndexedVector<IR::ActionListElement> actionsList;
 
-    auto actionCall = new IR::MethodCallExpression(new IR::PathExpression(actionName));
-    actionsList.push_back(new IR::ActionListElement(actionCall));
+    if (implementation == TableImplementation::ACTION_SELECTOR) {
+        auto grpActionCall = new IR::MethodCallExpression(new IR::PathExpression(grpActionName));
+        actionsList.push_back(new IR::ActionListElement(grpActionCall));
+    }
+    auto memActionCall = new IR::MethodCallExpression(new IR::PathExpression(memActionName));
+    actionsList.push_back(new IR::ActionListElement(memActionCall));
     auto default_action = tbl->getDefaultAction();
     if (default_action) {
         if (auto mc = default_action->to<IR::MethodCallExpression>()) {
@@ -1702,19 +1716,19 @@ SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
     }
 
     auto constDefAction = tbl->properties->getProperty("default_action");
+    bool isConstDefAction = constDefAction ? constDefAction->isConstant : false;
 
     IR::IndexedVector<IR::Property> properties;
     properties.push_back(new IR::Property("actions", new IR::ActionList(actionsList), false));
     properties.push_back(new IR::Property("key", new IR::Key(match_keys), false));
     properties.push_back(new IR::Property("default_action",
-                         new IR::ExpressionValue(tbl->getDefaultAction()),
-                         constDefAction->isConstant));
+                         new IR::ExpressionValue(tbl->getDefaultAction()), isConstDefAction));
     if (tbl->getSizeProperty()) {
         properties.push_back(new IR::Property("size",
                              new IR::ExpressionValue(tbl->getSizeProperty()), false)); }
     auto match_table = new IR::P4Table(tbl->name, tbl->annotations,
                                        new IR::TableProperties(properties));
-    return std::make_tuple(match_table, actionName);
+    return std::make_tuple(match_table, grpActionName, memActionName);
 }
 
 const IR::P4Action*
@@ -1868,11 +1882,13 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     }
 
     // base table matches on non-selector key and set group_id
-    cstring actionName;
+    cstring grpActionName, memActionName;
     const IR::P4Table* match_table;
-    std::tie(match_table, actionName) = create_match_table(tbl);
-    auto action = create_action(actionName, group_id, "group_id");
-    decls->push_back(action);
+    std::tie(match_table, grpActionName, memActionName) = create_match_table(tbl);
+    auto grpAction = create_action(grpActionName, group_id, "group_id");
+    auto memAction = create_action(memActionName, member_id, "member_id");
+    decls->push_back(grpAction);
+    decls->push_back(memAction);
     decls->push_back(match_table);
     cstring member_table_name = instance_name;
     cstring group_table_name = member_table_name + "_sel";
@@ -1963,9 +1979,9 @@ const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
         decls->push_back(member_id_decl);
     }
 
-    cstring actionName;
+    cstring actionName, ignoreGroup;
     const IR::P4Table* match_table;
-    std::tie(match_table, actionName) = create_match_table(tbl);
+    std::tie(match_table, ignoreGroup, actionName) = create_match_table(tbl);
     auto action = create_action(actionName, member_id, "member_id");
     decls->push_back(action);
     decls->push_back(match_table);

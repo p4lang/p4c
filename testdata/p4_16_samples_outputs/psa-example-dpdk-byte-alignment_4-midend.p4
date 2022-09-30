@@ -5,11 +5,10 @@ error {
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -85,7 +84,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     @name("ingress.drop") action drop_1() {
         ostd.drop = true;
     }
-    @name("ingress.forward") action forward(@name("port") PortId_t port, @name("srcAddr") bit<32> srcAddr_1) {
+    @name("ingress.forward") action forward(@name("port") bit<32> port, @name("srcAddr") bit<32> srcAddr_1) {
         user_meta._fwd_metadata_old_srcAddr0 = hdr.ipv4.srcAddr;
         hdr.ipv4.srcAddr = srcAddr_1;
         ostd.drop = false;

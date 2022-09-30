@@ -28,14 +28,16 @@ struct main_metadata_t {
 	bit<32> MainControlT_tmp_3
 	bit<16> MainControlT_tmp_4
 	bit<16> MainControlT_tmp_5
-	bit<16> MainControlT_tmp_9
-	bit<16> MainControlT_tmp_10
+	bit<16> MainControlT_tmp_6
+	bit<16> MainControlT_tmp_7
 	bit<16> MainControlT_tmp_11
 	bit<16> MainControlT_tmp_12
+	bit<16> MainControlT_tmp_13
+	bit<16> MainControlT_tmp_14
+	bit<16> MainControlT_tmp_15
 	bit<16> MainControlT_tmp_16
-	bit<16> MainControlT_tmp_17
-	bit<16> MainControlT_tmp_18
-	bit<16> MainControlT_tmp_19
+	bit<16> MainControlT_tmp_20
+	bit<16> MainControlT_tmp_21
 	bit<16> MainControlT_tmp_22
 	bit<16> MainControlT_tmp_23
 	bit<16> MainControlT_tmp_24
@@ -44,6 +46,16 @@ struct main_metadata_t {
 	bit<16> MainControlT_tmp_29
 	bit<16> MainControlT_tmp_30
 	bit<16> MainControlT_tmp_31
+	bit<16> MainControlT_tmp_32
+	bit<16> MainControlT_tmp_33
+	bit<16> MainControlT_tmp_36
+	bit<16> MainControlT_tmp_37
+	bit<16> MainControlT_tmp_38
+	bit<16> MainControlT_tmp_39
+	bit<16> MainControlT_tmp_40
+	bit<16> MainControlT_tmp_41
+	bit<16> MainControlT_tmp_42
+	bit<16> MainControlT_tmp_43
 	bit<16> MainControlT_hsVar
 	bit<32> MainControlT_key
 }
@@ -85,47 +97,63 @@ action execute_1 args none {
 	and m.MainControlT_tmp_4 0xf
 	mov m.MainControlT_tmp_5 h.vlan_tag_0.pcp_cfi_vid
 	shr m.MainControlT_tmp_5 0x3
-	mov m.MainControlT_tmp_9 m.MainControlT_tmp_5
-	shl m.MainControlT_tmp_9 0x4
-	mov m.MainControlT_tmp_10 m.MainControlT_tmp_9
-	and m.MainControlT_tmp_10 0xfff0
+	mov m.MainControlT_tmp_6 m.MainControlT_tmp_5
+	and m.MainControlT_tmp_6 0x1
+	mov m.MainControlT_tmp_7 m.MainControlT_tmp_6
+	and m.MainControlT_tmp_7 0x1
+	mov m.MainControlT_tmp_11 m.MainControlT_tmp_7
+	shl m.MainControlT_tmp_11 0x4
+	mov m.MainControlT_tmp_12 m.MainControlT_tmp_11
+	and m.MainControlT_tmp_12 0xfff0
 	mov h.vlan_tag_0.pcp_cfi_vid m.MainControlT_tmp_4
-	or h.vlan_tag_0.pcp_cfi_vid m.MainControlT_tmp_10
+	or h.vlan_tag_0.pcp_cfi_vid m.MainControlT_tmp_12
 	jmp LABEL_END_7
 	LABEL_FALSE_6 :	jmpneq LABEL_END_7 m.local_metadata_depth 0x1
-	mov m.MainControlT_tmp_11 h.vlan_tag_1.pcp_cfi_vid
-	and m.MainControlT_tmp_11 0xf
-	mov m.MainControlT_tmp_12 h.vlan_tag_1.pcp_cfi_vid
-	shr m.MainControlT_tmp_12 0x3
-	mov m.MainControlT_tmp_16 m.MainControlT_tmp_12
-	shl m.MainControlT_tmp_16 0x4
-	mov m.MainControlT_tmp_17 m.MainControlT_tmp_16
-	and m.MainControlT_tmp_17 0xfff0
-	mov h.vlan_tag_1.pcp_cfi_vid m.MainControlT_tmp_11
-	or h.vlan_tag_1.pcp_cfi_vid m.MainControlT_tmp_17
+	mov m.MainControlT_tmp_13 h.vlan_tag_1.pcp_cfi_vid
+	and m.MainControlT_tmp_13 0xf
+	mov m.MainControlT_tmp_14 h.vlan_tag_1.pcp_cfi_vid
+	shr m.MainControlT_tmp_14 0x3
+	mov m.MainControlT_tmp_15 m.MainControlT_tmp_14
+	and m.MainControlT_tmp_15 0x1
+	mov m.MainControlT_tmp_16 m.MainControlT_tmp_15
+	and m.MainControlT_tmp_16 0x1
+	mov m.MainControlT_tmp_20 m.MainControlT_tmp_16
+	shl m.MainControlT_tmp_20 0x4
+	mov m.MainControlT_tmp_21 m.MainControlT_tmp_20
+	and m.MainControlT_tmp_21 0xfff0
+	mov h.vlan_tag_1.pcp_cfi_vid m.MainControlT_tmp_13
+	or h.vlan_tag_1.pcp_cfi_vid m.MainControlT_tmp_21
 	LABEL_END_7 :	jmpneq LABEL_FALSE_8 m.local_metadata_depth 0x0
-	mov m.MainControlT_tmp_18 h.vlan_tag_0.pcp_cfi_vid
-	and m.MainControlT_tmp_18 0xf
-	mov m.MainControlT_tmp_19 h.vlan_tag_1.pcp_cfi_vid
-	shr m.MainControlT_tmp_19 0x4
-	mov m.MainControlT_tmp_22 m.MainControlT_tmp_19
-	shl m.MainControlT_tmp_22 0x4
-	mov m.MainControlT_tmp_23 m.MainControlT_tmp_22
-	and m.MainControlT_tmp_23 0xfff0
-	mov h.vlan_tag_0.pcp_cfi_vid m.MainControlT_tmp_18
-	or h.vlan_tag_0.pcp_cfi_vid m.MainControlT_tmp_23
-	jmp LABEL_END_9
-	LABEL_FALSE_8 :	jmpneq LABEL_END_9 m.local_metadata_depth 0x1
-	mov m.MainControlT_tmp_24 h.vlan_tag_1.pcp_cfi_vid
-	and m.MainControlT_tmp_24 0xf
-	mov m.MainControlT_tmp_25 h.vlan_tag_1.pcp_cfi_vid
-	shr m.MainControlT_tmp_25 0x4
+	mov m.MainControlT_tmp_22 h.vlan_tag_0.pcp_cfi_vid
+	and m.MainControlT_tmp_22 0xf
+	mov m.MainControlT_tmp_23 h.vlan_tag_1.pcp_cfi_vid
+	shr m.MainControlT_tmp_23 0x4
+	mov m.MainControlT_tmp_24 m.MainControlT_tmp_23
+	and m.MainControlT_tmp_24 0xfff
+	mov m.MainControlT_tmp_25 m.MainControlT_tmp_24
+	and m.MainControlT_tmp_25 0xfff
 	mov m.MainControlT_tmp_28 m.MainControlT_tmp_25
 	shl m.MainControlT_tmp_28 0x4
 	mov m.MainControlT_tmp_29 m.MainControlT_tmp_28
 	and m.MainControlT_tmp_29 0xfff0
-	mov h.vlan_tag_1.pcp_cfi_vid m.MainControlT_tmp_24
-	or h.vlan_tag_1.pcp_cfi_vid m.MainControlT_tmp_29
+	mov h.vlan_tag_0.pcp_cfi_vid m.MainControlT_tmp_22
+	or h.vlan_tag_0.pcp_cfi_vid m.MainControlT_tmp_29
+	jmp LABEL_END_9
+	LABEL_FALSE_8 :	jmpneq LABEL_END_9 m.local_metadata_depth 0x1
+	mov m.MainControlT_tmp_30 h.vlan_tag_1.pcp_cfi_vid
+	and m.MainControlT_tmp_30 0xf
+	mov m.MainControlT_tmp_31 h.vlan_tag_1.pcp_cfi_vid
+	shr m.MainControlT_tmp_31 0x4
+	mov m.MainControlT_tmp_32 m.MainControlT_tmp_31
+	and m.MainControlT_tmp_32 0xfff
+	mov m.MainControlT_tmp_33 m.MainControlT_tmp_32
+	and m.MainControlT_tmp_33 0xfff
+	mov m.MainControlT_tmp_36 m.MainControlT_tmp_33
+	shl m.MainControlT_tmp_36 0x4
+	mov m.MainControlT_tmp_37 m.MainControlT_tmp_36
+	and m.MainControlT_tmp_37 0xfff0
+	mov h.vlan_tag_1.pcp_cfi_vid m.MainControlT_tmp_30
+	or h.vlan_tag_1.pcp_cfi_vid m.MainControlT_tmp_37
 	LABEL_END_9 :	return
 }
 
@@ -160,16 +188,24 @@ apply {
 	MAINPARSERIMPL_PARSE_VLAN_TAG2 :	mov m.pna_pre_input_metadata_parser_error 0x3
 	MAINPARSERIMPL_ACCEPT :	jmpneq LABEL_FALSE m.local_metadata_depth 0x0
 	jmpneq LABEL_FALSE h.vlan_tag_0.ether_type h.ethernet.etherType
-	mov m.MainControlT_tmp_30 h.vlan_tag_0.pcp_cfi_vid
-	shr m.MainControlT_tmp_30 0x4
-	mov m.MainControlT_key m.MainControlT_tmp_30
+	mov m.MainControlT_tmp_38 h.vlan_tag_0.pcp_cfi_vid
+	shr m.MainControlT_tmp_38 0x4
+	mov m.MainControlT_tmp_39 m.MainControlT_tmp_38
+	and m.MainControlT_tmp_39 0xfff
+	mov m.MainControlT_tmp_40 m.MainControlT_tmp_39
+	and m.MainControlT_tmp_40 0xfff
+	mov m.MainControlT_key m.MainControlT_tmp_40
 	table stub
 	jmp LABEL_END_0
 	LABEL_FALSE :	jmpneq LABEL_END_0 m.local_metadata_depth 0x1
 	jmpneq LABEL_END_0 h.vlan_tag_1.ether_type h.ethernet.etherType
-	mov m.MainControlT_tmp_31 h.vlan_tag_1.pcp_cfi_vid
-	shr m.MainControlT_tmp_31 0x4
-	mov m.MainControlT_key m.MainControlT_tmp_31
+	mov m.MainControlT_tmp_41 h.vlan_tag_1.pcp_cfi_vid
+	shr m.MainControlT_tmp_41 0x4
+	mov m.MainControlT_tmp_42 m.MainControlT_tmp_41
+	and m.MainControlT_tmp_42 0xfff
+	mov m.MainControlT_tmp_43 m.MainControlT_tmp_42
+	and m.MainControlT_tmp_43 0xfff
+	mov m.MainControlT_key m.MainControlT_tmp_43
 	table stub
 	LABEL_END_0 :	emit h.ethernet
 	emit h.vlan_tag_0

@@ -1,34 +1,30 @@
 #include <core.p4>
 #include <pna.p4>
 
-typedef bit<48> ethernet_addr_t;
-typedef bit<32> ipv4_addr_t;
 header ethernet_t {
-    ethernet_addr_t dst_addr;
-    ethernet_addr_t src_addr;
-    bit<16>         ether_type;
+    bit<48> dst_addr;
+    bit<48> src_addr;
+    bit<16> ether_type;
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<6>      dscp;
-    bit<2>      ecn;
-    bit<16>     total_len;
-    bit<16>     identification;
-    bit<1>      reserved;
-    bit<1>      do_not_fragment;
-    bit<1>      more_fragments;
-    bit<13>     frag_offset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     header_checksum;
-    ipv4_addr_t src_addr;
-    ipv4_addr_t dst_addr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<6>  dscp;
+    bit<2>  ecn;
+    bit<16> total_len;
+    bit<16> identification;
+    bit<1>  reserved;
+    bit<1>  do_not_fragment;
+    bit<1>  more_fragments;
+    bit<13> frag_offset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> header_checksum;
+    bit<32> src_addr;
+    bit<32> dst_addr;
 }
 
-typedef bit<24> tunnel_id_t;
-typedef bit<24> vni_id_t;
 struct headers_t {
     ethernet_t outer_ethernet;
     ipv4_t     outer_ipv4;
@@ -37,10 +33,10 @@ struct headers_t {
 }
 
 struct tunnel_metadata_t {
-    tunnel_id_t id;
-    vni_id_t    vni;
-    bit<4>      tun_type;
-    bit<16>     hash;
+    bit<24> id;
+    bit<24> vni;
+    bit<4>  tun_type;
+    bit<16> hash;
 }
 
 struct local_metadata_t {
@@ -95,7 +91,7 @@ control main_control(inout headers_t hdr, inout local_metadata_t local_metadata,
     }
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @name("main_control.tunnel_decap.decap_outer_ipv4") action tunnel_decap_decap_outer_ipv4_0(@name("tunnel_id") tunnel_id_t tunnel_id) {
+    @name("main_control.tunnel_decap.decap_outer_ipv4") action tunnel_decap_decap_outer_ipv4_0(@name("tunnel_id") bit<24> tunnel_id) {
         local_metadata._tunnel_id1 = tunnel_id;
     }
     @name("main_control.tunnel_decap.ipv4_tunnel_term_table") table tunnel_decap_ipv4_tunnel_term_table {
@@ -110,7 +106,7 @@ control main_control(inout headers_t hdr, inout local_metadata_t local_metadata,
         }
         const default_action = NoAction_1();
     }
-    @name("main_control.tunnel_encap.set_tunnel") action tunnel_encap_set_tunnel_0(@name("dst_addr") ipv4_addr_t dst_addr_1) {
+    @name("main_control.tunnel_encap.set_tunnel") action tunnel_encap_set_tunnel_0(@name("dst_addr") bit<32> dst_addr_1) {
         local_metadata._outer_ipv4_dst0 = dst_addr_1;
     }
     @name("main_control.tunnel_encap.set_tunnel_encap") table tunnel_encap_set_tunnel_encap {

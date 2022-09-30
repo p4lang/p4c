@@ -28,29 +28,55 @@ struct FunctionSpecialization {
     /// Name to use for specialized function.
     cstring name;
     /// Function that is being specialized
+    const IR::Function*                original;
+    /// Result of specialization
     const IR::Function*                specialized;
     /// Invocation which causes this specialization.
     const IR::MethodCallExpression*    invocation;
+    /// Point in IR tree where to insert the function
+    const IR::Node*                    insertBefore;
 
     FunctionSpecialization(cstring name,
                            const IR::MethodCallExpression* invocation,
-                           const IR::Function* function):
-            name(name), specialized(function), invocation(invocation)
-    { CHECK_NULL(invocation); }
+                           const IR::Function* function,
+                           const IR::Node* insert):
+            name(name), original(function), specialized(nullptr),
+            invocation(invocation), insertBefore(insert)
+    { CHECK_NULL(invocation); CHECK_NULL(invocation); CHECK_NULL(insertBefore); }
 };
 
 struct FunctionSpecializationMap {
     ReferenceMap* refMap;
     TypeMap* typeMap;
     ordered_map<const IR::MethodCallExpression*, FunctionSpecialization*> map;
+    // Keep track of the values in the above map which are already
+    // inserted in the program.
+    std::set<FunctionSpecialization*> inserted;
 
-    void add(const IR::MethodCallExpression* mce, const IR::Function* func) {
+    void add(const IR::MethodCallExpression* mce, const IR::Function* func, const
+             IR::Node* insert) {
         cstring name = refMap->newName(func->name);
-        FunctionSpecialization* fs = new FunctionSpecialization(name, mce, func);
+        FunctionSpecialization* fs = new FunctionSpecialization(name, mce, func, insert);
         map.emplace(mce, fs);
     }
     FunctionSpecialization* get(const IR::MethodCallExpression* mce) const {
         return ::get(map, mce);
+    }
+    IR::Vector<IR::Node>* getInsertions(const IR::Node* insertionPoint) {
+        IR::Vector<IR::Node>* result = nullptr;
+        for (auto s : map) {
+            if (inserted.find(s.second) != inserted.end())
+                continue;
+            if (s.second->insertBefore == insertionPoint) {
+                if (result == nullptr)
+                    result = new IR::Vector<IR::Node>();
+                LOG2("Will insert " << dbp(s.second->specialized) <<
+                     " before " << dbp(insertionPoint));
+                result->push_back(s.second->specialized);
+                inserted.emplace(s.second);
+            }
+        }
+        return result;
     }
 };
 
@@ -95,6 +121,13 @@ class SpecializeFunctions : public Transform {
     { CHECK_NULL(specMap); setName("SpecializeFunctions"); }
     const IR::Node* postorder(IR::Function* function) override;
     const IR::Node* postorder(IR::MethodCallExpression*) override;
+    const IR::Node* insert(const IR::Node* before);
+    const IR::Node* preorder(IR::P4Control* control) override
+    { return insert(control); }
+    const IR::Node* preorder(IR::P4Parser* parser) override
+    { return insert(parser); }
+    const IR::Node* preorder(IR::Function* function) override
+    { return insert(function); }
 };
 
 class SpecializeGenericFunctions : public PassManager {
