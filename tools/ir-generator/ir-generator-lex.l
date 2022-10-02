@@ -10,6 +10,7 @@
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wnull-conversion"
+#pragma clang diagnostic ignored "-Wregister"
 #endif
 
 

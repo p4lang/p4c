@@ -201,12 +201,12 @@ enable_testing ()
 #   set (CPACK_PACKAGE_VERSION_PATCH ${CPACK_PACKAGE_VERSION_PATCH}-${__P4C_VERSION_RC})
 # endif ()
 
-# set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++11 rather than -std=gnu++11
-# CMAKE_CXX_STANDARD was introduced in CMake 3.1, so for older versions of CMake, we use -std=gnu++11
+# set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++17 rather than -std=gnu++17
+# CMAKE_CXX_STANDARD was introduced in CMake 3.1, so for older versions of CMake, we use -std=gnu++17
 if (CMAKE_VERSION VERSION_LESS "3.1")
-    set (CMAKE_CXX_FLAGS "-std=gnu++11 ${CMAKE_CXX_FLAGS}")
-elseif(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 11)
-    set (CMAKE_CXX_STANDARD 11)
+    set (CMAKE_CXX_FLAGS "-std=gnu++17 ${CMAKE_CXX_FLAGS}")
+elseif(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 17)
+    set (CMAKE_CXX_STANDARD 17)
 endif ()
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 

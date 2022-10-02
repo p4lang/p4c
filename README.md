@@ -224,7 +224,7 @@ Ubuntu 20.04 is the officially supported platform for p4c. There's also
 unofficial support for macOS 10.12. Other platforms are untested; you can try to
 use them, but YMMV.
 
-- A C++11 compiler. GCC 4.9 or later or Clang 3.3 or later is required.
+- A C++17 compiler. GCC 9.1 or later or Clang 6.0 or later is required.
 
 - `git` for version control
 
@@ -370,7 +370,7 @@ We recommend using `clang++` with no optimizations for speeding up
 compilation and simplifying debugging.
 
 We recommend installing a new version of [gdb](http://ftp.gnu.org/gnu/gdb).,
-because older gdb versions do not always handle C++11 correctly.
+because older gdb versions do not always handle C++11 or newer correctly.
 
 We recommend exuberant ctags for navigating source code in Emacs and vi.  `sudo
 apt-get install exuberant-ctags.` The Makefile targets `make ctags` and `make
