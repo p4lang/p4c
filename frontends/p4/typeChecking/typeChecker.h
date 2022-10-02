@@ -109,12 +109,26 @@ class TypeInference : public Transform {
     // This is needed because sometimes we invoke visitors recursively on subtrees explicitly.
     // (visitDagOnce cannot take care of this).
     bool done() const;
+
+    TypeVariableSubstitution* unifyBase(
+        bool allowCasts, const IR::Node* errorPosition, const IR::Type* destType,
+        const IR::Type* srcType,
+        cstring errorFormat, std::initializer_list<const IR::Node*> errorArgs);
+
     /// Unifies two types.  Returns nullptr if unification fails.
     /// Populates the typeMap with values for the type variables.
+    /// This allows an implicit cast from the right type to the left type.
+    TypeVariableSubstitution* unifyCast(
+        const IR::Node* errorPosition, const IR::Type* destType,
+        const IR::Type* srcType,
+        cstring errorFormat = nullptr, std::initializer_list<const IR::Node*> errorArgs = {})
+    { return unifyBase(true, errorPosition, destType, srcType, errorFormat, errorArgs); }
+    /// Same as above, not allowing casts
     TypeVariableSubstitution* unify(
         const IR::Node* errorPosition, const IR::Type* destType,
         const IR::Type* srcType,
-        cstring errorFormat = nullptr, std::initializer_list<const IR::Node*> errorArgs = {});
+        cstring errorFormat = nullptr, std::initializer_list<const IR::Node*> errorArgs = {})
+    { return unifyBase(false, errorPosition, destType, srcType, errorFormat, errorArgs); }
 
     /** Tries to assign sourceExpression to a destination with type destType.
         This may rewrite the sourceExpression, in particular converting InfInt values

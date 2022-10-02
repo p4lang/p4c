@@ -206,15 +206,20 @@ void TypeInference::addSubstitutions(const TypeVariableSubstitution* tvs) {
     typeMap->addSubstitutions(tvs);
 }
 
-TypeVariableSubstitution* TypeInference::unify(
-    const IR::Node* errorPosition, const IR::Type* destType, const IR::Type* srcType,
+TypeVariableSubstitution* TypeInference::unifyBase(
+    bool allowCasts, const IR::Node* errorPosition,
+    const IR::Type* destType, const IR::Type* srcType,
     cstring errorFormat, std::initializer_list<const IR::Node*> errorArgs) {
     CHECK_NULL(destType); CHECK_NULL(srcType);
     if (srcType == destType)
         return new TypeVariableSubstitution();
 
+    TypeConstraint* constraint;
     TypeConstraints constraints(typeMap->getSubstitutions(), typeMap);
-    auto constraint = new EqualityConstraint(destType, srcType, errorPosition);
+    if (allowCasts)
+        constraint = new CanBeImplicitlyCastConstraint(destType, srcType, errorPosition);
+    else
+        constraint = new EqualityConstraint(destType, srcType, errorPosition);
     if (!errorFormat.isNullOrEmpty())
         constraint->setError(errorFormat, errorArgs);
     constraints.add(constraint);
@@ -763,10 +768,11 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
     if (initType == nullptr)
         return sourceExpression;
 
-    auto tvs = unify(errorPosition, destType, initType,
-                     "Source expression '%1%' produces a result of type '%2%' which cannot be "
-                     "assigned to a left-value with type '%3%'",
-                     { sourceExpression, initType, destType });
+    auto tvs = unifyCast(
+        errorPosition, destType, initType,
+        "Source expression '%1%' produces a result of type '%2%' which cannot be "
+        "assigned to a left-value with type '%3%'",
+        { sourceExpression, initType, destType });
     if (tvs == nullptr)
         // error already signalled
         return sourceExpression;
@@ -3661,7 +3667,7 @@ TypeInference::matchCase(const IR::SelectExpression* select, const IR::Type_Base
         }
         useSelType = selectType->components.at(0);
     }
-    auto tvs = unify(
+    auto tvs = unifyCast(
         select, useSelType, caseType,
         "'match' case label '%1%' has type '%2%' which does not match the expected type '%3%'",
         { selectCase->keyset, caseType, useSelType });

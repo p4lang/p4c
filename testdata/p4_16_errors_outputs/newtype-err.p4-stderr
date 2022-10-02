@@ -2,7 +2,7 @@ newtype-err.p4(10): [--Werror=type-error] error: AssignmentStatement
         n = b + b;
           ^
   ---- Actual error:
-newtype-err.p4(2): Cannot unify type 'bit<32>' with type 'N32'
+newtype-err.p4(2): Cannot cast implicitly type 'bit<32>' to type 'N32'
   type bit<32> N32;
                ^^^
   ---- Originating from:
@@ -19,7 +19,7 @@ newtype-err.p4(12): [--Werror=type-error] error: AssignmentStatement
         x = n;
           ^
   ---- Actual error:
-newtype-err.p4(2): Cannot unify type 'N32' with type 'bit<32>'
+newtype-err.p4(2): Cannot cast implicitly type 'N32' to type 'bit<32>'
   type bit<32> N32;
                ^^^
   ---- Originating from:
