@@ -29,6 +29,8 @@ import logging
 import json
 import shlex
 import subprocess
+import time
+
 import ptf
 import ptf.testutils as testutils
 
@@ -141,12 +143,6 @@ class P4EbpfTest(BaseTest):
         self.exec_ns_cmd("psabpf-ctl del-port pipe {} dev {}".format(TEST_PIPELINE_ID, dev))
         if dev.startswith("eth"):
             self.exec_cmd("psabpf-ctl del-port pipe {} dev s1-{}".format(TEST_PIPELINE_ID, dev))
-
-    def update_map(self, name, key, value, map_in_map=False):
-        if map_in_map:
-            value = "pinned {}/{} any".format(PIPELINE_MAPS_MOUNT_PATH, value)
-        self.exec_ns_cmd("bpftool map update pinned {}/{} key {} value {}".format(
-            PIPELINE_MAPS_MOUNT_PATH, name, key, value))
 
     def read_map(self, name, key):
         cmd = "bpftool -j map lookup pinned {}/{} key {}".format(PIPELINE_MAPS_MOUNT_PATH, name, key)
@@ -361,24 +357,32 @@ class P4EbpfTest(BaseTest):
     def action_selector_add_action(self, selector, action, data=None):
         cmd = "psabpf-ctl action-selector add-member pipe {} {} ".format(TEST_PIPELINE_ID, selector)
         cmd = cmd + self._table_create_str_from_action(action)
-        if data:
-            cmd = cmd + " data"
-            for d in data:
-                cmd = cmd + " {}".format(d)
+        cmd = cmd + self._table_create_str_from_data(data=data, counters=None, meters=None)
         _, stdout, _ = self.exec_ns_cmd(cmd, "ActionSelector add-member failed")
-        return int(stdout)
+        return json.loads(stdout)[selector]["added_member_ref"]
 
     def action_selector_create_empty_group(self, selector):
         cmd = "psabpf-ctl action-selector create-group pipe {} {}".format(TEST_PIPELINE_ID, selector)
         _, stdout, _ = self.exec_ns_cmd(cmd, "ActionSelector create-group failed")
-        return int(stdout)
+        return json.loads(stdout)[selector]["added_group_ref"]
 
     def action_selector_add_member_to_group(self, selector, group_ref, member_ref):
         cmd = "psabpf-ctl action-selector add-to-group pipe {} {} {} to {}"\
             .format(TEST_PIPELINE_ID, selector, member_ref, group_ref)
         self.exec_ns_cmd(cmd, "ActionSelector add-to-group failed")
 
+    def action_profile_add_action(self, ap, action, data=None):
+        cmd = "psabpf-ctl action-profile add-member pipe {} {} ".format(TEST_PIPELINE_ID, ap)
+        cmd = cmd + self._table_create_str_from_action(action)
+        cmd = cmd + self._table_create_str_from_data(data=data, counters=None, meters=None)
+        _, stdout, _ = self.exec_ns_cmd(cmd, "ActionProfile add-member failed")
+        return json.loads(stdout)[ap]["added_member_ref"]
+
     def digest_get(self, name):
+        # Possible race conditions: many test cases may send packet and just
+        # after that try to read digest message. In rare case packet can be
+        # not yet processed so digest is not yet available.
+        time.sleep(0.1)
         cmd = "psabpf-ctl digest get-all pipe {} {}".format(TEST_PIPELINE_ID, name)
         _, stdout, _ = self.exec_ns_cmd(cmd, "Digest get failed")
         return json.loads(stdout)[name]['digests']
@@ -441,7 +445,7 @@ class P4EbpfTest(BaseTest):
         """
         Verifies a register value.
         :param name: Register name
-        :param key: A list of hex string
+        :param index: A list of hex string
         :param expected_value: A list of hex string
         """
         entries = self.register_get(name, index=index)
@@ -455,3 +459,8 @@ class P4EbpfTest(BaseTest):
             if field_value != expected_field_value:
                 self.fail("Invalid register value, expected {}, got {}".format(expected_field_value,
                           field_value))
+
+    def value_set_insert(self, name, value):
+        cmd = "psabpf-ctl value-set insert pipe {} {} ".format(TEST_PIPELINE_ID, name)
+        cmd = cmd + self._table_create_str_from_value(value=value)
+        self.exec_ns_cmd(cmd, "Value_set insert failed")
