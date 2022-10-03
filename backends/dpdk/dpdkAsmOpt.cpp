@@ -461,5 +461,309 @@ CopyPropagationAndElimination::copyPropAndDeadCodeElim(
     return instrr;
 }
 
+cstring EmitDpdkTableConfig::getKeyMatchType(const IR::KeyElement* ke, P4::ReferenceMap* refMap) {
+    auto path = ke->matchType->path;
+    auto mt = refMap->getDeclaration(path, true)->to<IR::Declaration_ID>();
+    BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
+    return mt->name.name;
+}
+
+int EmitDpdkTableConfig::getTypeWidth(const IR::Type* type,
+                                      P4::TypeMap* typeMap) {
+    return typeMap->widthBits(type, type->getNode(), false);
+}
+
+void EmitDpdkTableConfig::print(cstring str, cstring sep) {
+    dpdkTableConfigFile<<str<<sep;
+}
+
+void EmitDpdkTableConfig::print(big_int str, cstring sep) {
+    try {
+        dpdkTableConfigFile<<"0x"<<std::hex<<str<<sep;
+    } catch(const std::runtime_error& re) {
+        dpdkTableConfigFile<<std::dec<<str<<sep;
+    }
+}
+
+big_int EmitDpdkTableConfig::convertSimpleKeyExpressionToBigInt(
+            const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap) {
+    if (k->is<IR::Constant>()) {
+        return k->to<IR::Constant>()->value;
+    } else if (k->is<IR::BoolLiteral>()) {
+        return static_cast<big_int>(k->to<IR::BoolLiteral>()->value
+                                    ? 1 : 0);
+    } else if (k->is<IR::Member>()) {  // handle SerEnum members
+        auto mem = k->to<IR::Member>();
+        auto se = mem->type->to<IR::Type_SerEnum>();
+        auto ei = P4::EnumInstance::resolve(mem, typeMap);
+        if (!ei) return -1;
+        if (auto sei = ei->to<P4::SerEnumInstance>()) {
+            auto type = sei->value->to<IR::Constant>();
+            auto w = se->type->width_bits();
+            BUG_CHECK(w == keyWidth, "SerEnum bitwidth mismatch");
+            return type->value;
+        }
+        ::error(ErrorType::ERR_INVALID, "%1% invalid Member key expression", k);
+        return -1;
+    } else if (k->is<IR::Cast>()) {
+        return convertSimpleKeyExpressionToBigInt(k->to<IR::Cast>()->expr, keyWidth, typeMap);
+    } else {
+        ::error(ErrorType::ERR_INVALID, "%1% invalid key expression", k);
+        return -1;
+    }
+}
+
+const IR::Key *EmitDpdkTableConfig::getKey(const IR::DpdkTable* dt) {
+        auto kp = dt->properties->getProperty(IR::TableProperties::keyPropertyName);
+        if (kp == nullptr)
+            return nullptr;
+        if (!kp->value->is<IR::Key>()) {
+            ::error(ErrorType::ERR_INVALID, "%1%: must be a key", kp);
+            return nullptr;
+        }
+        return kp->value->to<IR::Key>();
+}
+
+const IR::EntriesList* EmitDpdkTableConfig::getEntries(const IR::DpdkTable* dt) {
+    auto ep = dt->properties->getProperty(IR::TableProperties::entriesPropertyName);
+    if (ep == nullptr)
+        return nullptr;
+    if (!ep->value->is<IR::EntriesList>()) {
+        ::error(ErrorType::ERR_INVALID, "%1%: must be a list of entries", ep);
+        return nullptr;
+    }
+    return ep->value->to<IR::EntriesList>();
+}
+
+void EmitDpdkTableConfig::addAction(const IR::Expression* actionRef,
+                P4::ReferenceMap* refMap,
+                P4::TypeMap* typeMap) {
+    auto actionCall = actionRef->to<IR::MethodCallExpression>();
+    auto method = actionCall->method->to<IR::PathExpression>()->path;
+    auto decl = refMap->getDeclaration(method, true);
+    auto actionDecl = decl->to<IR::P4Action>();
+    auto actionName = actionDecl->name.name;
+    print(actionName, " ");
+    if (actionDecl->parameters->parameters.size() == 1) {
+        std::vector<cstring> paramNames;
+        std::vector<big_int> argVals;
+        auto parameter = actionDecl->parameters->parameters.at(0);
+        auto type = typeMap->getType(parameter);
+        if (auto actArg = type->to<IR::Type_Struct>()) {
+            for (auto f : actArg->fields)
+                paramNames.push_back(f->name);
+        }
+        for (auto args : *actionCall->arguments) {
+            for (auto arg : args->expression->to<IR::ListExpression>()->components) {
+                auto ei = P4::EnumInstance::resolve(arg, typeMap);
+                if (arg->is<IR::Constant>()) {
+                    auto constant = arg->to<IR::Constant>();
+                    auto argValue = constant->value;
+                    argVals.push_back(argValue);
+                } else if (arg->is<IR::BoolLiteral>()) {
+                    auto constant = arg->to<IR::BoolLiteral>();
+                    auto argValue = static_cast<big_int>(constant->value ? 1 : 0);
+                    argVals.push_back(argValue);
+                } else if (ei != nullptr && ei->is<P4::SerEnumInstance>()) {
+                    auto sei = ei->to<P4::SerEnumInstance>();
+                    auto argValue = sei->value->to<IR::Constant>();
+                    argVals.push_back(argValue->value);
+                } else {
+                    ::error(ErrorType::ERR_UNSUPPORTED,
+                            "%1% unsupported argument expression", arg);
+                    continue;
+                }
+            }
+        }
+
+        for (size_t i = 0; i < argVals.size(); i++) {
+            print(paramNames[i], " ");
+            print(argVals[i], " ");
+        }
+    }
+}
+
+void EmitDpdkTableConfig::addExact(const IR::Expression* k,
+                int keyWidth, P4::TypeMap* typeMap) {
+    if (k->is<IR::DefaultExpression>()) {
+        print("0x0/0x0", " ");
+    } else {
+        auto value = convertSimpleKeyExpressionToBigInt(k, keyWidth, typeMap);
+        print(value, " ");
+    }
+}
+
+void EmitDpdkTableConfig::addLpm(const IR::Expression* k,
+            int keyWidth, P4::TypeMap *typeMap) {
+    big_int valueStr;
+    big_int mask;
+    if (k->is<IR::DefaultExpression>()) {
+        valueStr = 0x0;
+        mask = 0x0;
+    } else if (k->is<IR::Mask>()) {
+        auto km = k->to<IR::Mask>();
+        auto value = convertSimpleKeyExpressionToBigInt(km->left, keyWidth, typeMap);
+        auto trailing_zeros = [keyWidth](const big_int& n) -> int {
+            return (n == 0) ? keyWidth : boost::multiprecision::lsb(n); };
+        auto count_ones = [](const big_int& n) -> int {
+            return bitcount(n); };
+        mask = km->right->to<IR::Constant>()->value;
+        auto len = trailing_zeros(mask);
+        if (len + count_ones(mask) != keyWidth) {  // any remaining 0s in the prefix?
+            ::error(ErrorType::ERR_INVALID, "%1% invalid mask for LPM key", k);
+            return;
+        }
+        if ((value & mask) != value) {
+            ::warning(ErrorType::WARN_MISMATCH,
+                        "P4Runtime requires that LPM matches have masked-off bits set to 0, "
+                        "updating value %1% to conform to the P4Runtime specification", km->left);
+            value &= mask;
+        }
+        valueStr = value;
+    } else {
+        valueStr = convertSimpleKeyExpressionToBigInt(k, keyWidth, typeMap);
+    }
+    print(valueStr,"/");
+    print(mask," ");
+}
+
+void EmitDpdkTableConfig::addTernary(const IR::Expression* k, int keyWidth,
+                P4::TypeMap* typeMap) {
+    big_int valueStr;
+    big_int maskStr;
+    if (k->is<IR::DefaultExpression>()) {
+        valueStr = 0x0;
+        maskStr = 0x0;
+    } else if (k->is<IR::Mask>()) {
+        auto km = k->to<IR::Mask>();
+        auto value = convertSimpleKeyExpressionToBigInt(km->left, keyWidth, typeMap);
+        auto mask = convertSimpleKeyExpressionToBigInt(km->right, keyWidth, typeMap);
+        if ((value & mask) != value) {
+            ::warning(ErrorType::WARN_MISMATCH,
+                        "P4Runtime requires that Ternary matches have masked-off bits set to 0, "
+                        "updating value %1% to conform to the P4Runtime specification", km->left);
+            value &= mask;
+        }
+        valueStr = value;
+        maskStr = mask;
+    } else {
+        valueStr = convertSimpleKeyExpressionToBigInt(k, keyWidth, typeMap);
+        maskStr = Util::mask(keyWidth);
+    }
+    print(valueStr, "/");
+    print(maskStr, " ");
+}
+
+void EmitDpdkTableConfig::addRange(const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap) {
+    big_int startStr;
+    big_int endStr;
+    if (k->is<IR::DefaultExpression>()) {
+        startStr = 0x0;
+        endStr = 0x0;
+    } else if (k->is<IR::Range>()) {
+        auto kr = k->to<IR::Range>();
+        auto start = convertSimpleKeyExpressionToBigInt(kr->left, keyWidth, typeMap);
+        auto end = convertSimpleKeyExpressionToBigInt(kr->right, keyWidth, typeMap);
+        // Error on invalid range values
+        big_int maxValue = (big_int(1) << keyWidth) - 1;
+        // NOTE: If end value is > max allowed for keyWidth, value gets
+        // wrapped around. A warning is issued in this case by the frontend
+        // earlier.
+        // For e.g. 16 bit key has a max value of 65535, Range of (1..65536)
+        // will be converted to (1..0) and will fail below check.
+        if (start > end)
+            ::error(ErrorType::ERR_INVALID, "%s Invalid range for table entry", kr->srcInfo);
+        startStr = start;
+        endStr = end;
+    } else {
+        startStr = convertSimpleKeyExpressionToBigInt(k, keyWidth, typeMap);
+        endStr = startStr;
+    }
+    print(startStr,"/");
+    print(endStr," ");
+}
+
+void EmitDpdkTableConfig::addOptional(const IR::Expression* k, int keyWidth,
+                    P4::TypeMap* typeMap) {
+    if (k->is<IR::DefaultExpression>()) {
+        print("0x0/0x0"," ");
+    } else {
+        auto value = convertSimpleKeyExpressionToBigInt(k, keyWidth, typeMap);
+        print(value," ");
+    }
+}
+
+void EmitDpdkTableConfig::addMatchKey(const IR::DpdkTable* table,
+                     const IR::ListExpression* keyset,
+                     P4::TypeMap* typeMap) {
+    int keyIndex = 0;
+    for (auto k : keyset->components) {
+            auto tableKey = getKey(table)->keyElements.at(keyIndex++);
+            auto keyWidth = getTypeWidth(tableKey->expression->type, typeMap);
+            auto matchType = getKeyMatchType(tableKey, refMap);
+            if (matchType == P4::P4CoreLibrary::instance.exactMatch.name) {
+              addExact(k, keyWidth, typeMap);
+            } else if (matchType == P4::P4CoreLibrary::instance.lpmMatch.name) {
+              addLpm(k, keyWidth, typeMap);
+            } else if (matchType == P4::P4CoreLibrary::instance.ternaryMatch.name) {
+              addTernary(k, keyWidth, typeMap);
+            } else if (matchType == "range") {
+              addRange(k, keyWidth, typeMap);
+            } else if (matchType == "optional") {
+              addOptional(k, keyWidth, typeMap);
+            } else {
+                if (!k->is<IR::DefaultExpression>())
+                    ::error(ErrorType::ERR_UNSUPPORTED,
+                         "%1%: match type not supported by P4Runtime serializer", matchType);
+                continue;
+            }
+    }
+}
+
+/// Checks if the @table entries need to be assigned a priority, i.e. does
+/// the match key for the table includes a ternary, range, or optional match?
+bool EmitDpdkTableConfig::tableNeedsPriority(const IR::DpdkTable* table, P4::ReferenceMap* refMap) {
+    for (auto e : getKey(table)->keyElements) {
+        auto matchType = getKeyMatchType(e, refMap);
+        // TODO(antonin): remove dependency on v1model.
+        if (matchType == "ternary" ||
+            matchType == "range" ||
+            matchType == "optional") {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool EmitDpdkTableConfig::isAllKeysDefaultExpression(const IR::ListExpression* keyset) {
+    bool allKeyDefaultExp = true;
+    for (auto k : keyset->components) {
+            allKeyDefaultExp = allKeyDefaultExp && k->is<IR::DefaultExpression>();
+    }
+    return allKeyDefaultExp;
+}
+
+void EmitDpdkTableConfig::postorder(const IR::DpdkTable* table) {
+    auto entriesList = getEntries(table);
+    if (entriesList == nullptr) return;
+    dpdkTableConfigFile.open(table->name+".txt");
+    auto needsPriority = tableNeedsPriority(table, refMap);
+    int entryPriority = entriesList->entries.size();
+    for (auto e : entriesList->entries) {
+        if (!isAllKeysDefaultExpression(e->getKeys())) {
+            print("match"," ");
+            addMatchKey(table, e->getKeys(), typeMap);
+            if (needsPriority) {
+                print("priority", " ");
+                print(entryPriority--," ");
+            }
+            print("action"," ");
+            addAction(e->getAction(), refMap, typeMap);
+            print("", "\n");
+        }
+    }
+    dpdkTableConfigFile.close();
+}
+
 size_t ShortenTokenLength::count = 0;
 }  // namespace DPDK

@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKASMOPT_H_
 #define BACKENDS_DPDK_DPDKASMOPT_H_
 
+#include <fstream>
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
@@ -176,6 +177,8 @@ class ValidateTableKeys : public Inspector {
 // This pass shorten the Identifier length
 class ShortenTokenLength : public Transform {
     ordered_map<cstring, cstring> newNameMap;
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
     static size_t count;
     // Currently Dpdk allows Identifier of 63 char long or less
     // including dots(.) for member exp.
@@ -198,6 +201,8 @@ class ShortenTokenLength : public Transform {
     }
 
  public:
+    ShortenTokenLength(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
+        refMap(refMap), typeMap(typeMap) {}
     static ordered_map<cstring, cstring> origNameMap;
 
     const IR::Node* preorder(IR::Member *m) override {
@@ -567,6 +572,46 @@ class CopyPropagationAndElimination : public Transform {
     }
 };
 
+// This Pass emits Table config consumed by dpdk target in a text file if
+// const entries are present in p4 program.
+// Most of the code taken from control-plane/p4RuntimeSerializer.h/.cpp
+class EmitDpdkTableConfig : public Inspector {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    std::ofstream dpdkTableConfigFile;
+
+    void addExact(const IR::Expression* k,
+                int keyWidth, P4::TypeMap* typeMap);
+    void addLpm(const IR::Expression* k,
+                int keyWidth, P4::TypeMap* typeMap);
+    void addTernary(const IR::Expression* k,
+                int keyWidth, P4::TypeMap* typeMap);
+    void addRange(const IR::Expression* k,
+                int keyWidth, P4::TypeMap* typeMap);
+    void addOptional(const IR::Expression* k,
+                int keyWidth, P4::TypeMap* typeMap);
+    void addMatchKey(const IR::DpdkTable* table,
+                     const IR::ListExpression* keyset,
+                     P4::TypeMap* typeMap);
+    void addAction(const IR::Expression* actionRef,
+                   P4::ReferenceMap* refMap,
+                   P4::TypeMap* typeMap);
+    int getTypeWidth(const IR::Type* type, P4::TypeMap* typeMap);
+    cstring getKeyMatchType(const IR::KeyElement* ke, P4::ReferenceMap* refMap);
+    const IR::EntriesList* getEntries(const IR::DpdkTable* dt);
+    const IR::Key *getKey(const IR::DpdkTable* dt);
+    big_int convertSimpleKeyExpressionToBigInt(
+        const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap);
+    bool tableNeedsPriority(const IR::DpdkTable* table, P4::ReferenceMap* refMap);
+    bool isAllKeysDefaultExpression(const IR::ListExpression* keyset);
+    void print(cstring str, cstring sep="");
+    void print(big_int, cstring sep="");
+
+ public:
+    EmitDpdkTableConfig(P4::ReferenceMap* refMap,
+                        P4::TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {}
+    void postorder(const IR::DpdkTable* table) override;
+};
 
 // Instructions can only appear in actions and apply block of .spec file.
 // All these individual passes work on the actions and apply block of .spec file.
