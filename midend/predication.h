@@ -22,6 +22,27 @@ limitations under the License.
 
 namespace P4 {
 
+class PredicationPolicy {
+ public:
+    /// If true report an error when removing
+    /// all conditionals fails.
+    virtual bool errorOnFailure() = 0;
+};
+
+class NoErrorPredicationPolicy : public PredicationPolicy {
+ public:
+    virtual bool errorOnFailure() override {
+        return false;
+    }
+};
+
+class ErrorPredicationPolicy : public PredicationPolicy {
+ public:
+    virtual bool errorOnFailure() override {
+        return true;
+    }
+};
+
 /**
 This pass operates on action bodies.  It converts 'if' statements to
 '?:' expressions, if possible.  Otherwise this pass will signal an
@@ -50,8 +71,8 @@ class Predication final : public Transform {
     };
     /**
      * Private Transformer only for Predication pass.
-     * This pass operates on nested Mux expressions(?:). 
-     * It replaces then and else expressions in Mux with 
+     * This pass operates on nested Mux expressions(?:).
+     * It replaces then and else expressions in Mux with
      * the appropriate expression from assignment.
      */
     class ExpressionReplacer final : public Transform {
@@ -67,12 +88,14 @@ class Predication final : public Transform {
         unsigned currentNestingLevel = 0;
         // An indicator used to implement the logic for ArrayIndex transformation
         bool visitingIndex = false;
+        PredicationPolicy* policy;
      public:
-        explicit ExpressionReplacer(const IR::AssignmentStatement * a,
-                                    std::vector<bool>& t,
-                                    std::vector<const IR::Expression*>& c)
-        : statement(a), traversalPath(t), conditions(c)
-        { CHECK_NULL(a); }
+        ExpressionReplacer(const IR::AssignmentStatement * a,
+                           std::vector<bool>& t,
+                           std::vector<const IR::Expression*>& c,
+                           PredicationPolicy* policy)
+                : statement(a), traversalPath(t), conditions(c), policy(policy)
+        { CHECK_NULL(a); CHECK_NULL(policy); }
         const IR::Mux * preorder(IR::Mux * mux) override;
         void emplaceExpression(IR::Mux * mux);
         void visitBranch(IR::Mux * mux, bool then);
@@ -90,6 +113,8 @@ class Predication final : public Transform {
     unsigned ifNestingLevel;
     // Tracking the nesting level of dependency assignment
     unsigned depNestingLevel;
+    // Policy that controls how predication is applied
+    PredicationPolicy* policy;
     // To store dependent assignments.
     // If current statement is equal to any member of dependentNames,
     // isStatementdependent of the coresponding statement is set to true.
@@ -113,7 +138,7 @@ class Predication final : public Transform {
     // false for statements that are not dependent.
     std::map<cstring, bool> isStatementDependent;
     const IR::Statement* error(const IR::Statement* statement) const {
-        if (inside_action && ifNestingLevel > 0)
+        if (inside_action && ifNestingLevel > 0 && policy->errorOnFailure())
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "%1%: Conditional execution in actions unsupported on this target",
                     statement);
@@ -121,9 +146,10 @@ class Predication final : public Transform {
     }
 
  public:
-    explicit Predication(NameGenerator* gen) :
-        generator(gen), inside_action(false), ifNestingLevel(0), depNestingLevel(0)
-    { setName("Predication"); }
+    Predication(NameGenerator* gen, PredicationPolicy* policy = new NoErrorPredicationPolicy()) :
+            generator(gen), inside_action(false), ifNestingLevel(0), depNestingLevel(0),
+            policy(policy)
+    { setName("Predication"); CHECK_NULL(gen); CHECK_NULL(policy); }
     const IR::Expression* clone(const IR::Expression* expression);
     const IR::Node* clone(const IR::AssignmentStatement* statement);
     const IR::Node* preorder(IR::IfStatement* statement) override;

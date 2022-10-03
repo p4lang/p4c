@@ -55,8 +55,6 @@ control cIngress(inout Parsed_packet hdr,
     action foo() {
         meta.b = meta.b + 5;
         if (meta.b > 10) {
-            // Next line causes error for p4test: MethodCallStatement:
-            // Predication cannot be applied.
             mark_to_drop();
         }
     }

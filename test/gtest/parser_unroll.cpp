@@ -121,7 +121,7 @@ class MidEnd : public PassManager {
             new P4::FlattenHeaders(&refMap, &typeMap),
             new P4::FlattenInterfaceStructs(&refMap, &typeMap),
             new P4::ReplaceSelectRange(&refMap, &typeMap),
-            new P4::Predication(&refMap),
+            new P4::Predication(&refMap, new P4::ErrorPredicationPolicy()),
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap),

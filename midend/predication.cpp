@@ -95,9 +95,13 @@ void Predication::ExpressionReplacer::visitBranch(IR::Mux * mux, bool then) {
     auto elseExprName = lvalue_name(mux->e2);
 
     if (leftName.isNullOrEmpty()) {
-        ::error(ErrorType::ERR_EXPRESSION,
-                "%1%: Assignment inside if statement can't be transformed to condition expression",
-                statement);
+        if (policy->errorOnFailure()) {
+            ::error(ErrorType::ERR_EXPRESSION,
+                    "%1%: Assignment inside if statement can't be "
+                    "transformed to condition expression",
+                    statement);
+            return;
+        }
     }
 
     if (then && elseExprName == leftName && !visitingIndex) {
@@ -173,7 +177,7 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
     }
     // The expressionReplacer responsible for transforming this statement
     ExpressionReplacer replacer(clone(statement)->to<IR::AssignmentStatement>(),
-            traversalPath, conditions);
+                                traversalPath, conditions, policy);
     replacer.setCalledBy(this);
     dependencies.clear();
     visit(statement->right);
@@ -264,7 +268,7 @@ const IR::Node* Predication::preorder(IR::ArrayIndex * arrInd) {
         auto index = new IR::PathExpression(IR::ID(indexName));
         auto indexAssignment = new IR::AssignmentStatement(index, clone(arrInd->right));
         ExpressionReplacer replacer(clone(indexAssignment)->to<IR::AssignmentStatement>(),
-                traversalPath, conditions);
+                                    traversalPath, conditions, policy);
         // Creates the initial Mux expression
         replacer.setVisitingIndex(true);
         indexAssignment->right = new IR::Mux(conditions.back(),
