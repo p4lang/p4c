@@ -635,16 +635,11 @@ class ParserSymbolicInterpreter {
                             }
                         }
                     }
-
-                    if (conservative)
-                        ::warning(ErrorType::WARN_PARSER_TRANSITION,
-                                    "Potential parser cycle without extracting any bytes:\n%1%",
-                                    stateChain(state));
-                    else
-                        ::warning(ErrorType::ERR_INVALID,
-                                  "Parser cycle without extracting any bytes:\n%1%",
-                                  stateChain(state));
                     if (equStackVariableMap(crt->statesIndexes, state->statesIndexes)) {
+                        ::warning(ErrorType::ERR_INVALID,
+                                  "Parser cycle can't be unrolled, because ParserUnroll can't \
+                                   detect the number of loops iterations:\n%1%",
+                                  stateChain(state));
                         wasError = true;
                     }
                     return true;
