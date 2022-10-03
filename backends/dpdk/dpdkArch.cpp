@@ -478,15 +478,15 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
         unsigned size_sum_so_far = 0;
         bool all_hdr_field_aligned = true;
         for (auto field : st->fields) {
-        unsigned width;
-        if (auto type = (*field).type->to<IR::Type_Bits>())
-            width = type->width_bits();
-        else if (auto type = (*field).type->to<IR::Type_Varbits>()) {
-            width = type->width_bits();
-        } else {
-            BUG("header fields should be of type bit<> or varbit<>"
-                "found this %1%", field->toString());
-        }
+            unsigned width;
+            if (auto type = (*field).type->to<IR::Type_Bits>())
+                width = type->width_bits();
+            else if (auto type = (*field).type->to<IR::Type_Varbits>()) {
+                width = type->width_bits();
+            } else {
+                BUG("header fields should be of type bit<> or varbit<>"
+                    "found this %1%", field->toString());
+            }
             size_sum_so_far += width;
             if ((width & 0x7) != 0) {
                 all_hdr_field_aligned = false;
@@ -530,69 +530,60 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
         cstring modifiedName = "";
         auto size = field_name_list.size();
         unsigned i = 0;
-        if (size_sum_so_far <= 64) {
-            // Check if the sum of width of non-aligned field is divisble by 8.
-            if (size_sum_so_far && (size_sum_so_far % 8 == 0)) {
-                // Form the field with all non-aligned field stored in "field_name_list"
-                for (auto s = field_name_list.begin(); s != field_name_list.end();
-                        s++, i++) {
-                    if ((i + 1) < size)
-                        modifiedName += s->first + "_";
-                    else
-                        modifiedName += s->first;
-                }
-                unsigned offset = 0;
-                /* Store information about each non-aligned field
-                    For eg : ModifiedName, header str, width, offset, and its
-                            lsb and msb in modified field
-
-                            header ipv4_t {
-                                ...
-                                bit<3>  flags;
-                                bit<13> fragOffset;
-                                ...
-                            }
-                            is converted into
-
-                            header ipv4_t {
-                                ...
-                                bit<16>  flags_fragOffset;
-                                ...
-                            }
-                            Here, for "flags", information saved are :
-                                ModifiedName = flags_fragOffset;
-                                header str   =  ipv4_t; [This is used if multiple headers
-                                                            have field with same name]
-                                width        = 16;
-                                offset       = 3;
-                                lsb          = 3;
-                                msb          = 15;
-                */
-                for (auto s = field_name_list.begin(); s != field_name_list.end(); s++) {
-                    hdrFieldInfo fieldObj;
-                    fieldObj.modifiedName = modifiedName;
-                    fieldObj.headerStr = st->name.name;
-                    fieldObj.modifiedWidth = size_sum_so_far;
-                    fieldObj.fieldWidth = s->second.fieldWidth;
-                    fieldObj.lsb = offset;
-                    fieldObj.msb = offset + s->second.fieldWidth - 1;
-                    fieldObj.offset = offset;
-                    structure->hdrFieldInfoList[s->first].push_back(fieldObj);
-                    offset += s->second.fieldWidth;
-                }
-                fields->push_back(new IR::StructField(IR::ID(modifiedName),
-                                    IR::Type_Bits::get(size_sum_so_far)));
-                size_sum_so_far = 0;
-                modifiedName = "";
-                field_name_list.clear();
+        // Check if the sum of width of non-aligned field is divisble by 8.
+        if (size_sum_so_far && (size_sum_so_far % 8 == 0)) {
+            // Form the field with all non-aligned field stored in "field_name_list"
+            for (auto s = field_name_list.begin(); s != field_name_list.end();
+                    s++, i++) {
+                if ((i + 1) < size)
+                    modifiedName += s->first + "_";
+                else
+                    modifiedName += s->first;
             }
-        } else {
-            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "Combining the contiguous non 8-bit aligned fields result in a field"
-                    " with bit-width '%1%' > 64-bit in header structure '%2%'. DPDK does"
-                    " not support non 8-bit aligned and greater than 64-bit header field"
-                    ,size_sum_so_far, st->name.name);
-            return st;
+            unsigned offset = 0;
+            /* Store information about each non-aligned field
+                For eg : ModifiedName, header str, width, offset, and its
+                        lsb and msb in modified field
+
+                        header ipv4_t {
+                            ...
+                            bit<3>  flags;
+                            bit<13> fragOffset;
+                            ...
+                        }
+                        is converted into
+
+                        header ipv4_t {
+                            ...
+                            bit<16>  flags_fragOffset;
+                            ...
+                        }
+                        Here, for "flags", information saved are :
+                            ModifiedName = flags_fragOffset;
+                            header str   =  ipv4_t; [This is used if multiple headers
+                                                        have field with same name]
+                            width        = 16;
+                            offset       = 3;
+                            lsb          = 3;
+                            msb          = 15;
+            */
+            for (auto s = field_name_list.begin(); s != field_name_list.end(); s++) {
+                hdrFieldInfo fieldObj;
+                fieldObj.modifiedName = modifiedName;
+                fieldObj.headerStr = st->name.name;
+                fieldObj.modifiedWidth = size_sum_so_far;
+                fieldObj.fieldWidth = s->second.fieldWidth;
+                fieldObj.lsb = offset;
+                fieldObj.msb = offset + s->second.fieldWidth - 1;
+                fieldObj.offset = offset;
+                structure->hdrFieldInfoList[s->first].push_back(fieldObj);
+                offset += s->second.fieldWidth;
+            }
+            fields->push_back(new IR::StructField(IR::ID(modifiedName),
+                                IR::Type_Bits::get(size_sum_so_far)));
+            size_sum_so_far = 0;
+            modifiedName = "";
+            field_name_list.clear();
         }
     }
     /* Throw error if there is non-aligned field present at the end in header */
