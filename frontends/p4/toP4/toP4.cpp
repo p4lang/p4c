@@ -890,7 +890,7 @@ bool ToP4::preorder(const IR::VectorExpression* e) {
     if (expressionPrecedence > DBPrint::Prec_Prefix)
         builder.append("(");
     if (e->elementType != nullptr) {
-        builder.append("(Vector<");
+        builder.append("(list<");
         visit(e->elementType->getP4Type());
         builder.append(">)");
     }

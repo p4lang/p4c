@@ -360,8 +360,9 @@ abstract Type_BaseList : Type, Type_Indexed {
             rv += f->width_bits();
         }
         return rv; }
-    toString{
-        std::string result = "tuple<";
+    cstring asString(const char* name) const {
+        std::string result = name;
+        result += "<";
         bool first = true;
         for (auto t : components) {
             if (!first)
@@ -371,17 +372,26 @@ abstract Type_BaseList : Type, Type_Indexed {
         }
         return result + ">";
     }
+    toString{
+        return asString("baselist");
+    }
 }
 
 /// The type of an expressionList; can be unified with both Type_Tuple and Type_Struct
 class Type_List : Type_BaseList {
-    // In error messages this is shown as if it is a Tuple
     const Type* getP4Type() const override;
+    // shown as a tuple
+    toString{
+        return asString("tuple");
+    }
 }
 
 /// The type of a tuple.
 class Type_Tuple : Type_BaseList {
     const Type* getP4Type() const override;
+    toString{
+        return asString("tuple");
+    }
 }
 
 /// The type of a vector.
@@ -389,7 +399,7 @@ class Type_Vector : Type {
     Type elementType;
     const Type* getP4Type() const override;
     toString{
-        std::string result = "Vector<" + elementType->toString() + ">";
+        std::string result = "list<" + elementType->toString() + ">";
         return result;
     }
 }

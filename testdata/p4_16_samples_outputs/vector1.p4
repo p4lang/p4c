@@ -6,12 +6,12 @@ struct S {
 }
 
 extern E {
-    E(Vector<S> data);
+    E(list<S> data);
     void run();
 }
 
 control c() {
-    E((Vector<S>){ { 2, 3 }, { 4, 5 } }) e;
+    E((list<S>){ { 2, 3 }, { 4, 5 } }) e;
     apply {
         e.run();
     }
