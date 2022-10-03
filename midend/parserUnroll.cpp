@@ -625,20 +625,18 @@ class ParserSymbolicInterpreter {
                 auto packets = state->before->filter(filter);
                 auto prevPackets = crt->before->filter(filter);
                 if (packets->equals(prevPackets)) {
-                    bool conservative = false;
                     for (auto p : state->before->map) {
                         if (p.second->is<SymbolicPacketIn>()) {
                             auto pkt = p.second->to<SymbolicPacketIn>();
                             if (pkt->isConservative()) {
-                                conservative = true;
                                 break;
                             }
                         }
                     }
                     if (equStackVariableMap(crt->statesIndexes, state->statesIndexes)) {
                         ::warning(ErrorType::ERR_INVALID,
-                                  "Parser cycle can't be unrolled, because ParserUnroll can't \
-                                   detect the number of loop iterations:\n%1%",
+                                  "Parser cycle can't be unrolled, because ParserUnroll can't "
+                                  "detect the number of loop iterations:\n%1%",
                                   stateChain(state));
                         wasError = true;
                     }
@@ -648,6 +646,10 @@ class ParserSymbolicInterpreter {
                 // If no header validity has changed we can't really unroll
                 if (!headerValidityChange(crt->before, state->before)) {
                     if (equStackVariableMap(crt->statesIndexes, state->statesIndexes)) {
+                        ::warning(ErrorType::ERR_INVALID,
+                                  "Parser cycle can't be unrolled, because ParserUnroll can't "
+                                  "detect the number of loop iterations:\n%1%",
+                                  stateChain(state));
                         wasError = true;
                     }
                     return true;

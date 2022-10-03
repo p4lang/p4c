@@ -4,3 +4,5 @@ parser-unroll-issue3537.p4(62): [--Wwarn=ignore-prop] warning: Result of packet.
 parser-unroll-issue3537.p4(42): [--Wwarn=ignore-prop] warning: Result of packet.extract is not defined: Exception: OverwritingHeader
         packet.extract<h3_t>(hdr.h3);
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[--Wwarn=invalid] warning: Parser cycle can't be unrolled, because ParserUnroll can't detect the number of loop iterations:
+Parser ParserI state chain: start, parse_ipv6, parse_udp, parse_ipv4, parse_udp, parse_ipv4, parse_udp
