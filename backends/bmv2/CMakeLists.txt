@@ -183,6 +183,8 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/issue1882-bmv2.p4
   testdata/p4_16_samples/issue1882-1-bmv2.p4
   testdata/p4_16_samples/issue2664-bmv2.p4
+  # This test tries to hash (via the hash extern) a value that isn't a tuple - unsupported
+  testdata/p4_16_samples/hashing-non-tuple-bmv2.p4
 )
 
 set (BMV2_PARSER_INLINE_TESTS "${P4C_SOURCE_DIR}/testdata/p4_16_samples/parser-inline/*.p4")
