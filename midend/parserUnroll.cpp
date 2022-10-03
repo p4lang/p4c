@@ -235,7 +235,7 @@ class ParserStateRewriter : public Transform {
     bool isOutOfBound() {return wasOutOfBound;}
 
  protected:
-const IR::Type* getTypeArray(const IR::Node* element) {
+    const IR::Type* getTypeArray(const IR::Node* element) {
         if (element->is<IR::ArrayIndex>()) {
             const IR::Expression* left = element->to<IR::ArrayIndex>()->left;
             if (left->type->is<IR::Type_Stack>())
