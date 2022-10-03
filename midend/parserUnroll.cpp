@@ -638,7 +638,7 @@ class ParserSymbolicInterpreter {
                     if (equStackVariableMap(crt->statesIndexes, state->statesIndexes)) {
                         ::warning(ErrorType::ERR_INVALID,
                                   "Parser cycle can't be unrolled, because ParserUnroll can't \
-                                   detect the number of loops iterations:\n%1%",
+                                   detect the number of loop iterations:\n%1%",
                                   stateChain(state));
                         wasError = true;
                     }
