@@ -203,67 +203,6 @@ const IR::Node* RemoveUnusedMetadataFields::preorder(IR::DpdkAsmProgram *p) {
     return p;
 }
 
-int ValidateTableKeys::getFieldSizeBits(const IR::Type *field_type) {
-    if (auto t = field_type->to<IR::Type_Bits>()) {
-        return t->width_bits();
-    } else if (field_type->is<IR::Type_Boolean>() ||
-        field_type->is<IR::Type_Error>()) {
-        return 8;
-    } else if (auto t = field_type->to<IR::Type_Name>()) {
-        if (t->path->name == "error") {
-            return 8;
-        } else {
-            return -1;
-        }
-    }
-    return -1;
-}
-
-bool ValidateTableKeys::preorder(const IR::DpdkAsmProgram *p) {
-    const IR::DpdkStructType *metaStruct = nullptr;
-    for (auto st : p->structType) {
-        if (isMetadataStruct(st)) {
-            metaStruct = st;
-            break;
-        }
-    }
-    for (auto tbl : p->tables) {
-        int min, max, size_max_field = 0;
-        auto keys = tbl->match_keys;
-        if (!keys || keys->keyElements.size() == 0) {
-            return false;
-        }
-        min = max = -1;
-        for (auto key : keys->keyElements) {
-            BUG_CHECK(key->expression->is<IR::Member>(), "Table keys must be a structure field. "
-                                                          "%1% is not a structure field", key);
-            auto keyMem = key->expression->to<IR::Member>();
-            auto type = keyMem->expr->type;
-            if (type->is<IR::Type_Struct>()
-                && isMetadataStruct(type->to<IR::Type_Struct>())) {
-                auto offset = metaStruct->getFieldBitOffset(keyMem->member.name);
-                if (min == -1 || min > offset)
-                    min = offset;
-                if (max == -1 || max < offset) {
-                    max = offset;
-                    auto field_type = key->expression->type;
-                    size_max_field = getFieldSizeBits(field_type);
-                    if (size_max_field == -1) {
-                        BUG("Unexpected type %1%", field_type->node_type_name());
-                        return false;
-                    }
-                 }
-             }
-            if ((max + size_max_field - min) > DPDK_TABLE_MAX_KEY_SIZE) {
-                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: All table keys together with"
-                        " holes in the underlying structure should fit in 64 bytes", tbl->name);
-                return false;
-            }
-        }
-    }
-    return false;
-}
-
 const IR::Expression* CopyPropagationAndElimination::getIrreplaceableExpr(cstring str,
                                                                         bool allowConst) {
     if (collectUseDef->dontEliminate.count(str) != 0)
