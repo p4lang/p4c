@@ -2051,7 +2051,7 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
     if (nonConstantKeys)
         return entry;
 
-    TypeVariableSubstitution *tvs = unify(
+    TypeVariableSubstitution *tvs = unifyCast(
         entry, keyTuple, entryKeyType,
         "Table entry has type '%1%' which is not the expected type '%2%'",
         { keyTuple, entryKeyType });
