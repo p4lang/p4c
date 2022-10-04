@@ -241,8 +241,7 @@ class ParserStateRewriter : public Transform {
             if (left->type->is<IR::Type_Stack>())
                 return left->type->to<IR::Type_Stack>()->elementType;
         }
-        auto* currentType = typeMap->getType(element, true);
-        return currentType;
+        return typeMap->getType(element, true);
     }
 
     /// Checks if this state was called previously with the same state of header stack indexes.
