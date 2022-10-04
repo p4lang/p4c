@@ -56,24 +56,21 @@ struct metadata {
 	bit<32> psa_ingress_input_metadata_ingress_port
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
-	bit<48> local_metadata_data1
-	bit<48> local_metadata_data2
-	bit<48> local_metadata_data3
-	bit<48> local_metadata_data4
-	bit<48> local_metadata_data5
-	bit<48> local_metadata_data6
-	bit<48> local_metadata_data7
-	bit<48> local_metadata_data8
-	bit<48> local_metadata_data9
-	bit<48> local_metadata_data10
-	bit<48> local_metadata_data11
-	bit<48> local_metadata_data12
-	bit<48> local_metadata_data13
-	bit<48> local_metadata_data14
-	bit<48> local_metadata_data15
-	bit<8> ingress_tbl_ethernet_isValid
-	bit<8> ingress_tbl_tcp_isValid
-	bit<8> ingress_tbl_ipv4_isValid
+	bit<64> local_metadata_data1
+	bit<64> local_metadata_data2
+	bit<64> local_metadata_data3
+	bit<64> local_metadata_data4
+	bit<64> local_metadata_data5
+	bit<64> local_metadata_data6
+	bit<64> local_metadata_data7
+	bit<64> local_metadata_data8
+	bit<64> local_metadata_data9
+	bit<64> local_metadata_data10
+	bit<64> local_metadata_data11
+	bit<64> local_metadata_data12
+	bit<64> local_metadata_data13
+	bit<64> local_metadata_data14
+	bit<64> local_metadata_data15
 	bit<16> tmpMask
 	bit<8> tmpMask_0
 }
@@ -109,9 +106,14 @@ action execute_1 args none {
 table tbl {
 	key {
 		m.local_metadata_data1 exact
-		m.ingress_tbl_ethernet_isValid exact
-		m.ingress_tbl_tcp_isValid exact
-		m.ingress_tbl_ipv4_isValid exact
+		m.local_metadata_data2 exact
+		m.local_metadata_data3 exact
+		m.local_metadata_data4 exact
+		m.local_metadata_data5 exact
+		m.local_metadata_data6 exact
+		m.local_metadata_data7 exact
+		m.local_metadata_data8 exact
+		m.local_metadata_data9 exact
 	}
 	actions {
 		NoAction
@@ -137,16 +139,7 @@ apply {
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
-	INGRESSPARSERIMPL_ACCEPT :	mov m.ingress_tbl_ethernet_isValid 1
-	jmpv LABEL_END h.ethernet
-	mov m.ingress_tbl_ethernet_isValid 0
-	LABEL_END :	mov m.ingress_tbl_tcp_isValid 1
-	jmpv LABEL_END_0 h.tcp
-	mov m.ingress_tbl_tcp_isValid 0
-	LABEL_END_0 :	mov m.ingress_tbl_ipv4_isValid 1
-	jmpv LABEL_END_1 h.ipv4
-	mov m.ingress_tbl_ipv4_isValid 0
-	LABEL_END_1 :	table tbl
+	INGRESSPARSERIMPL_ACCEPT :	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ipv4

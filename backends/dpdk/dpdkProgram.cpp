@@ -518,7 +518,6 @@ bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
 
 /* This function checks if a table satisfies the DPDK limitations mentioned below:
      - Only one LPM match field allowed per table.
-     - Maximum allowed key size of header/metadata field is 64 bits.
      - If there is a key field with lpm match kind, the other match fields, if any,
        must all be exact match.
 */
