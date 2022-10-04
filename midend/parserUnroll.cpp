@@ -241,8 +241,7 @@ class ParserStateRewriter : public Transform {
             if (left->type->is<IR::Type_Stack>())
                 return left->type->to<IR::Type_Stack>()->elementType;
         }
-        auto* currentType = typeMap->getType(element);
-        BUG_CHECK(currentType != nullptr, "Can't detect type for %1%", element);
+        auto* currentType = typeMap->getType(element, true);
         return currentType;
     }
 
