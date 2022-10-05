@@ -1319,6 +1319,37 @@ class ContainsType : public Inspector {
 };
 
 const IR::Node* TypeInference::postorder(IR::Type_Specialized *type) {
+    // If there is no template_parameter in constructor parameters
+    // then compiler should reject instantiation
+    // because it cannot infer the type of template_parameter
+    for (auto arg : *(type->arguments)) {
+        if (arg->is<IR::Type_Dontcare>()) {
+            auto decl = refMap->getDeclaration(type->baseType->path);
+            if (auto extern_decl = decl->to<IR::Type_Extern>()) {
+                for (auto template_parameter : extern_decl->typeParameters->parameters) {
+                    for (auto meth : extern_decl->methods) {
+                        if (meth->type->returnType == nullptr) {
+                            bool found = false;
+                            for (auto meth_params : *(meth->getParameters())) {
+                                if (template_parameter->getP4Type()->equiv
+                                    (*(meth_params->type->getP4Type()))) {
+                                        found = true;
+                                        break;
+                                }
+                            }
+                            if (!found) {
+                                ::error(ErrorType::ERR_TYPE_ERROR,
+                                        "Could not infer type for %1%", arg);
+                                return type;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // Check for recursive type specializations, e.g.,
     // extern e<T> {};  e<e<bit>> x;
     auto baseType = getTypeType(type->baseType);

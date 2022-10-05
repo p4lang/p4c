@@ -1,0 +1,3 @@
+methodArgDontcare.p4(7): [--Werror=type-error] error: Could not infer type for _
+    E<_>() e;
+      ^
