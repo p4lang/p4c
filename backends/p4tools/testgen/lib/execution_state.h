@@ -112,8 +112,8 @@ class ExecutionState {
     /// execution state. They are used to influence execution along a particular continuation path.
     /// For example, we can set the "inUndefinedState" property to indicate that all state being
     /// written while this variable is active is tainted. This property must be unset manually to
-    /// resume normal operation. Usually, the unset call is inserted directly after the tainted
-    /// sequence of commands has executed.
+    /// resume normal operation by setting the property "false". Usually, this is done directly
+    /// after the tainted sequence of commands has been executed.
     std::map<cstring, Continuation::PropertyValue> stateProperties;
 
     // Test objects are classes of variables that influence the execution of test frameworks. They

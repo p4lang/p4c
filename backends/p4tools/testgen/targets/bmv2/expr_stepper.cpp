@@ -857,18 +857,11 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  // This is the clone state.
                  auto* nextState = new ExecutionState(state);
 
-                 // This program segment resets the user metadata of the v1model program to 0.
-                 // However, fields in the user metadata that have the field_list annotation and the
-                 // appropriate index will not be reset.
-                 auto progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
-                 // The user metadata is the second parameter of the ingress control.
-                 const auto* paramPath = progInfo->getBlockParam("Ingress", 1);
-                 resetPreservingFieldList(nextState, paramPath, recirculateIndex);
-
                  // We need to reset everything to the state before the ingress call. We use a trick
                  // by calling copyIn on the entire state again. We need a little bit of information
                  // for that, including the exact parameter names of the ingress block we are in.
                  // Just grab the ingress from the programmable blocks.
+                 auto progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
                  const auto* programmableBlocks = progInfo->getProgrammableBlocks();
                  const auto* typeDecl = programmableBlocks->at("Ingress");
                  const auto* applyBlock = typeDecl->checkedTo<IR::P4Control>();
@@ -878,11 +871,22 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  const auto* archMember = archSpec->getArchMember(blockIndex);
                  std::vector<Continuation::Command> cmds;
                  for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
+                     const auto* param = params->getParameter(paramIdx);
                      // Skip the second parameter (metadata) since we do want to preserve it.
                      if (paramIdx == 1) {
+                         // This program segment resets the user metadata of the v1model program to
+                         // 0. However, fields in the user metadata that have the field_list
+                         // annotation and the appropriate index will not be reset.
+                         // The user metadata is the second parameter of the ingress control.
+                         const auto* paramType = param->type;
+                         if (const auto* tn = paramType->to<IR::Type_Name>()) {
+                             paramType = nextState->resolveType(tn);
+                         }
+                         const auto* paramRef =
+                             new IR::PathExpression(paramType, new IR::Path(param->name));
+                         resetPreservingFieldList(nextState, paramRef, recirculateIndex);
                          continue;
                      }
-                     const auto* param = params->getParameter(paramIdx);
                      programInfo.produceCopyInOutCall(param, paramIdx, archMember, &cmds, nullptr);
                  }
                  // We then exit, which will copy out all the state that we have just reset.
@@ -1148,10 +1152,6 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  const auto* archMember = archSpec->getArchMember(blockIndex);
                  std::vector<Continuation::Command> cmds;
                  for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
-                     // Skip the second parameter (metadata) since we do want to preserve it.
-                     if (paramIdx == 1) {
-                         continue;
-                     }
                      const auto* param = params->getParameter(paramIdx);
                      programInfo.produceCopyInOutCall(param, paramIdx, archMember, &cmds, nullptr);
                  }

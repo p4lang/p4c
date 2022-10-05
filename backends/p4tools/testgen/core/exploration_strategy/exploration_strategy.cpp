@@ -23,6 +23,7 @@
 
 #include "backends/p4tools/testgen/lib/continuation.h"
 #include "backends/p4tools/testgen/lib/exceptions.h"
+#include "backends/p4tools/testgen/lib/logging.h"
 #include "backends/p4tools/testgen/options.h"
 
 namespace P4Tools {
@@ -116,13 +117,16 @@ void ExplorationStrategy::printCurrentTraceAndBranches(std::ostream& out) {
         return;
     }
     const auto& branchesList = executionState->getSelectedBranches();
+    printTraces("Track branches:");
     out << "Selected " << branchesList.size() << " branches : (";
+    printTraces("Selected %1% branches : (", branchesList.size());
     std::stringstream tmpString;
     std::copy(branchesList.begin(), branchesList.end(), std::ostream_iterator<int>(tmpString, ","));
     std::string strBranches = tmpString.str();
     if (!strBranches.empty()) {
         strBranches.erase(strBranches.length() - 1);
     }
+    printTraces(" %1% ) \n", strBranches);
     out << strBranches << ")";
 }
 

@@ -14,7 +14,7 @@
 #include <boost/variant/static_visitor.hpp>
 #include <inja/inja.hpp>
 
-#include "backends/p4tools/common/lib/format_bin_hex.h"
+#include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "gsl/gsl-lite.hpp"

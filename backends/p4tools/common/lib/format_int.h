@@ -1,5 +1,5 @@
-#ifndef COMMON_LIB_FORMAT_BIN_HEX_H_
-#define COMMON_LIB_FORMAT_BIN_HEX_H_
+#ifndef COMMON_LIB_FORMAT_INT_H_
+#define COMMON_LIB_FORMAT_INT_H_
 
 #include <string>
 
@@ -63,6 +63,12 @@ std::string formatOctalExpr(const IR::Expression* expr, bool useSep = false, boo
 std::string formatHexExpr(const IR::Expression* expr, bool useSep = false, bool pad = true,
                           bool usePrefix = true);
 
+/// Insert separators into @param dataStr every @param stride. If @param skipFirst is true, this
+/// will not add a separator to the beginning of the string. This function always pads to the width
+/// of @param stride.
+std::string insertSeparators(const std::string& dataStr, const std::string& separator = "\\x",
+                             size_t stride = 2, bool skipFirst = false);
+
 /// Takes an octal-formatted string as input and inserts slashes as separators.
 std::string insertOctalSeparators(const std::string& dataStr);
 
@@ -71,4 +77,4 @@ std::string insertHexSeparators(const std::string& dataStr);
 
 }  // namespace P4Tools
 
-#endif /* COMMON_LIB_FORMAT_BIN_HEX_H_ */
+#endif /* COMMON_LIB_FORMAT_INT_H_ */

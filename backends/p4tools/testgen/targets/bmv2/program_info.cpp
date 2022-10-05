@@ -92,6 +92,16 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
     cmds.emplace_back(typeDecl);
     // Add the copy out assignments after the pipe has completed executing.
     cmds.insert(cmds.end(), copyOuts.begin(), copyOuts.end());
+
+    // Update some metadata variables for egress processing after we are done with Ingress
+    // processing. For example, the egress port.
+    if ((archMember->blockName == "Ingress")) {
+        auto* egressPortVar =
+            new IR::Member(IRUtils::getBitType(TestgenTarget::getPortNumWidth_bits()),
+                           new IR::PathExpression("*standard_metadata"), "egress_port");
+        auto* portStmt = new IR::AssignmentStatement(egressPortVar, getTargetOutputPortVar());
+        cmds.emplace_back(portStmt);
+    }
     // After some specific pipelines (deparsers), we have to append the remaining packet
     // payload. We use an extern call for this.
     if ((archMember->blockName == "Deparser")) {

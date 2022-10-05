@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "backends/p4tools/common/lib/format_bin_hex.h"
+#include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/taint.h"
 #include "lib/exceptions.h"

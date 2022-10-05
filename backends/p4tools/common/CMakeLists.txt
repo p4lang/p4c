@@ -50,7 +50,7 @@ set(
   core/z3_solver.cpp
 
   lib/coverage.cpp
-  lib/format_bin_hex.cpp
+  lib/format_int.cpp
   lib/formulae.cpp
   lib/ir.cpp
   lib/model.cpp

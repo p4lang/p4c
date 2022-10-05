@@ -18,7 +18,7 @@
 #include <boost/variant/get.hpp>
 #include <boost/variant/static_visitor.hpp>
 
-#include "backends/p4tools/common/lib/format_bin_hex.h"
+#include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
@@ -38,17 +38,14 @@ struct MatchField {
     std::pair<const IR::Constant*, const IR::Constant*> range;
 
     /// The value of the field.
-    big_int value;
-
-    /// The width of the value field.
-    int width;
+    IR::Constant* val;
 
     /// The mask of the field. Often, this is zero.
     boost::optional<const IR::Constant*> mask;
 
-    explicit MatchField(std::pair<const IR::Constant*, const IR::Constant*> range, big_int value,
-                        int width, boost::optional<const IR::Constant*> mask)
-        : range(std::move(range)), value(std::move(value)), width(width), mask(mask) {}
+    explicit MatchField(std::pair<const IR::Constant*, const IR::Constant*> range,
+                        IR::Constant* val, boost::optional<const IR::Constant*> mask)
+        : range(std::move(range)), val(val), mask(mask) {}
 };
 
 void STFTest::Command::print(std::ofstream& out) const { out << getCommandName(); }
@@ -97,21 +94,17 @@ void STFTest::Add::print(std::ofstream& out) const {
             explicit GetRange(std::vector<MatchField>* matchFields) : matchFields(matchFields) {}
             void operator()(const Exact& elem) const {
                 MatchField field({elem.getEvaluatedValue(), elem.getEvaluatedValue()},
-                                 elem.getEvaluatedValue()->value,
-                                 elem.getEvaluatedValue()->type->width_bits(), boost::none);
+                                 elem.getEvaluatedValue()->clone(), boost::none);
                 matchFields->emplace_back(field);
             }
             void operator()(const Range& elem) const {
                 MatchField field({elem.getEvaluatedLow(), elem.getEvaluatedHigh()},
-                                 elem.getEvaluatedLow()->value,
-                                 elem.getEvaluatedLow()->type->width_bits(), boost::none);
+                                 elem.getEvaluatedLow()->clone(), boost::none);
                 matchFields->emplace_back(field);
             }
             void operator()(const Ternary& elem) const {
                 MatchField field({elem.getEvaluatedValue(), elem.getEvaluatedValue()},
-                                 elem.getEvaluatedValue()->value,
-                                 elem.getEvaluatedValue()->type->width_bits(),
-                                 elem.getEvaluatedMask());
+                                 elem.getEvaluatedValue()->clone(), elem.getEvaluatedMask());
                 matchFields->emplace_back(field);
             }
             void operator()(const LPM& elem) const {
@@ -122,8 +115,7 @@ void STFTest::Add::print(std::ofstream& out) const {
                 const auto* mask =
                     IRUtils::getConstant(value->type, maxVal << (fieldWidth - prefixLen));
                 MatchField field({elem.getEvaluatedValue(), elem.getEvaluatedValue()},
-                                 elem.getEvaluatedValue()->value,
-                                 elem.getEvaluatedValue()->type->width_bits(), mask);
+                                 elem.getEvaluatedValue()->clone(), mask);
                 matchFields->emplace_back(field);
             }
         };
@@ -139,16 +131,15 @@ void STFTest::Add::print(std::ofstream& out) const {
             }
             out << fields.at(fieldIndex) + ":";
             auto matchField = matchFields.at(fieldIndex);
-            const auto& dataValue = matchField.value;
-            const auto& dataWidth = matchField.width;
+            const auto& dataValue = matchField.val;
             const auto& maskFieldOpt = matchField.mask;
             if (maskFieldOpt != boost::none) {
                 const auto* maskField = *maskFieldOpt;
+                BUG_CHECK(dataValue->type->width_bits() == maskField->type->width_bits(),
+                          "Data value and its mask should have the same bit width.");
                 // Using the width from mask - should be same as data
-                auto dataStr =
-                    formatBin(dataValue, maskField->type->width_bits(), false, true, false);
-                auto maskStr =
-                    formatBin(maskField->value, maskField->type->width_bits(), false, true, false);
+                auto dataStr = formatBinExpr(dataValue, false, true, false);
+                auto maskStr = formatBinExpr(maskField, false, true, false);
                 std::string data;
                 for (size_t dataPos = 0; dataPos < dataStr.size(); ++dataPos) {
                     if (maskStr.at(dataPos) == '0') {
@@ -159,7 +150,7 @@ void STFTest::Add::print(std::ofstream& out) const {
                 }
                 out << "0b" << data;
             } else {
-                out << formatHex(dataValue, dataWidth);
+                out << formatHexExpr(dataValue);
             }
         }
 
@@ -179,18 +170,18 @@ void STFTest::Add::print(std::ofstream& out) const {
         for (int fieldIndex = static_cast<int>(fields.size()) - 1; fieldIndex >= 0; --fieldIndex) {
             auto matchField = matchFields.at(fieldIndex);
             const auto& dataRange = matchField.range;
-            const auto& dataValue = matchField.value;
+            const auto& dataValue = matchField.val->value;
 
             // Reset the matchField.value when we are done outputting the entire range.
             if (dataValue == dataRange.second->value) {
-                matchField.value = dataRange.first->value;
+                matchField.val->value = dataRange.first->value;
                 // Continue iterating until all fields are done, when we return.
                 if (fieldIndex == 0) {
                     out << ")" << std::endl;
                     return;
                 }
             } else {
-                matchField.value += 1;
+                matchField.val->value += 1;
                 break;
             }
         }
@@ -252,7 +243,7 @@ void STFTest::Packet::print(std::ofstream& out) const {
     auto maskStr = formatHexExpr(mask, false, true, false);
     std::string packetData;
     for (size_t dataPos = 0; dataPos < dataStr.size(); ++dataPos) {
-        if (maskStr.at(dataPos) != 'f') {
+        if (maskStr.at(dataPos) != 'F') {
             // TODO: We are being conservative here and adding a wildcard for any 0
             // in the 4b nibble
             packetData += "*";

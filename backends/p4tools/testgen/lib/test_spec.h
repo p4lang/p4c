@@ -31,7 +31,7 @@ namespace P4Testgen {
  *  Abstract Test Object Class
  * ========================================================================================= */
 
-class TestObject : public Castable {
+class TestObject : public ICastable {
  public:
     /// @returns the string name of this particular test object.
     virtual cstring getObjectName() const = 0;

@@ -20,7 +20,7 @@ namespace P4Tools {
 namespace P4Testgen {
 
 /// Stores target-specific information about a P4 program.
-class ProgramInfo : public Castable {
+class ProgramInfo : public ICastable {
  private:
     const NamespaceContext* globalNameSpaceContext;
 
