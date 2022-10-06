@@ -344,11 +344,11 @@ foreach (ext ${p4c_extensions})
   endif()
 endforeach(ext)
 
-# With the current implementation of ir-generator, all targets shares the
+# With the current implementation of ir-generator, all targets share the
 # same ir-generated.h and ir-generated.cpp file, which means all targets
 # share the same set of IR classes (frontend and backend). The DPDK backend
 # introduces additional IR classes and cpp sources which need to be added to
-# EXTENSION_FRONTEND_SOURCES. We need to pupulate EXTENSION_FRONTEND_SOURCES
+# EXTENSION_FRONTEND_SOURCES. We need to populate EXTENSION_FRONTEND_SOURCES
 # before it is added to libfrontend.a in frontends/CMakeList.txt
 if (ENABLE_DPDK)
     add_subdirectory (backends/dpdk)
