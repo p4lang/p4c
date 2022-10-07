@@ -42,6 +42,7 @@ OPTION (ENABLE_GC "Use libgc" ON)
 OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
 OPTION (ENABLE_GMP "Use GMP library" ON)
 OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" OFF)
+OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
 OPTION (BUILD_STATIC_RELEASE "Build a statically linked release binary" OFF)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
@@ -218,6 +219,10 @@ add_cxx_compiler_option ("-Wno-deprecated")
 add_cxx_compiler_option ("-Wno-deprecated-declarations")
 # Enable/disable runtime exceptions on nullpointer dereferencing
 # add_cxx_compiler_option ("-fsanitize=null")
+
+if (ENABLE_WERROR)
+  add_cxx_compiler_option  ("-Werror")
+endif ()
 
 # If we're on GCC or Clang, use the prefer LLD or Gold linker if available.
 set(BUILD_LINK_WITH_GOLD ON CACHE BOOL "Use Gold linker for build if available")

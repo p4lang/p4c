@@ -168,8 +168,9 @@ CMAKE_FLAGS+="-DENABLE_GMP=${ENABLE_GMP} "
 # Toggle the installation of the tools back end.
 CMAKE_FLAGS+="-DENABLE_TEST_TOOLS=${ENABLE_TEST_TOOLS} "
 # RELEASE should be default, but we want to make sure.
-CMAKE_FLAGS+="-DCMAKE_BUILD_TYPE=RELEASE"
-
+CMAKE_FLAGS+="-DCMAKE_BUILD_TYPE=RELEASE "
+# Treat warnings as errors.
+CMAKE_FLAGS+="-DENABLE_WERROR=${ENABLE_WERROR} "
 build ${CMAKE_FLAGS}
 
 make install

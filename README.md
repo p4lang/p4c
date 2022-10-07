@@ -107,7 +107,7 @@ p4c has package support for several Ubuntu and Debian distributions.
 
 ### Ubuntu
 
-A p4c pacakge is available in the following repositories for Ubuntu 20.04 and newer.
+A p4c package is available in the following repositories for Ubuntu 20.04 and newer.
 
 ```bash
 . /etc/os-release
@@ -199,6 +199,7 @@ sudo dpkg -i /path/to/package.deb
      - `-DBUILD_LINK_WITH_GOLD=ON|OFF`. Use Gold linker for build if available.
      - `-DBUILD_LINK_WITH_LLD=ON|OFF`. Use LLD linker for build if available (overrides BUILD_LINK_WITH_GOLD).
      - `-DENABLE_LTO=ON|OFF`. Use Link Time Optimization (LTO).  Default is OFF.
+     - `-DENABLE_WERROR=ON|OFF`. Treat warnings as errors.  Default is OFF.
 
     If adding new targets to this build system, please see
     [instructions](#defining-new-cmake-targets).
