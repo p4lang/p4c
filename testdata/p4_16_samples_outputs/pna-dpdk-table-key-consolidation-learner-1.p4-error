@@ -1,0 +1,7 @@
+pna-dpdk-table-key-consolidation-learner-1.p4(125): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+            8w0x48 : exact;
+            ^^^^^^
+pna-dpdk-table-key-consolidation-learner-1.p4(125): [--Wwarn=mismatch] warning: 8w0x48: Constant key field
+            8w0x48 : exact;
+            ^^^^^^
+[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table ipv4_da. Copying all match fields to metadata
