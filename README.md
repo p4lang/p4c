@@ -153,7 +153,7 @@ sudo dpkg -i /path/to/package.deb
     ```
 
 2.  Install [dependencies](#dependencies). You can find specific instructions
-    for Ubuntu 20.04 [here](#ubuntu-dependencies) and for macOS 10.12
+    for Ubuntu 20.04 [here](#ubuntu-dependencies) and for macOS 11
     [here](#macos-dependencies).  You can also look at the
     [CI installation script](tools/ci-build.sh).
 
@@ -221,7 +221,7 @@ If you plan to contribute to p4c, you'll find more useful information
 # Dependencies
 
 Ubuntu 20.04 is the officially supported platform for p4c. There's also
-unofficial support for macOS 10.12. Other platforms are untested; you can try to
+unofficial support for macOS 11. Other platforms are untested; you can try to
 use them, but YMMV.
 
 - A C++17 compiler. GCC 9.1 or later or Clang 6.0 or later is required.

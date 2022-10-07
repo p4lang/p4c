@@ -96,7 +96,7 @@ jobs:
       working-directory: ./build
       if: matrix.unified == 'ON'
 
-  # Build and test p4c on MacOS 10.15
+  # Build and test p4c on MacOS 11
   build-mac-os:
     strategy:
       fail-fast: false
@@ -106,7 +106,7 @@ jobs:
         exclude:
           - unified: OFF
             enable_gmp: OFF
-    runs-on: macos-10.15
+    runs-on: macos-11
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:
