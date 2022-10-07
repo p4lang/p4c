@@ -19,7 +19,7 @@ namespace Bmv2 {
 
 class Bmv2Concolic : public Concolic {
  private:
-    /// In the behavioral model, checksum functins have the following signature.
+    /// In the behavioral model, checksum functions have the following signature.
     using ChecksumFunction = std::function<big_int(const char* buf, size_t len)>;
 
     /// Chunk size is 8 bits, i.e., a byte.
@@ -57,8 +57,10 @@ class Bmv2Concolic : public Concolic {
     static const IR::Expression* setAndComputePayload(
         const Model& completedModel, ConcolicVariableMap* resolvedConcolicVariables,
         int payloadSize);
+
     /// Converts a big integer input into a vector of bytes. This byte vector is fed into the
     /// hash function.
+    /// This function mimics the conversion of data structures to bytes in the behavioral model.
     static std::vector<char> convertBigIntToBytes(big_int& dataInt, int targetWidthBits);
 
  public:

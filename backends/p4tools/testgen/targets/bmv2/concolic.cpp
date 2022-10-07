@@ -165,7 +165,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
              completedModel->evaluate(args->at(4)->expression, &resolvedExpressions);
          auto maxHashInt = IRUtils::getBigIntFromLiteral(maxHash);
 
-         /// Iterate through the data input and compute the byte array that will be used for
+         /// Flatten the data input and compute the byte array that will be used for
          /// checksum computation.
          // We only support struct expressions as argument input for now.
          const auto* dataList = dataExpr->checkedTo<IR::StructExpression>();
@@ -197,6 +197,8 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
          }
          // Generated equations for all the variables that were assigned a value in this iteration
          // of concolic execution.
+         // We can not use resolvedConcolic variables here because there might be multiple resolved
+         // expressions for a single concolic variable.
          for (const auto& variable : resolvedExpressions) {
              const auto* varName = variable.first;
              const auto* varExpr = variable.second;
@@ -250,6 +252,8 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
          }
          // Generated equations for all the variables that were assigned a value in this iteration
          // of concolic execution.
+         // We can not use resolvedConcolic variables here because there might be multiple resolved
+         // expressions for a single concolic variable.
          for (const auto& variable : resolvedExpressions) {
              const auto* varName = variable.first;
              const auto* varExpr = variable.second;
@@ -313,6 +317,8 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
          }
          // Generated equations for all the variables that were assigned a value in this iteration
          // of concolic execution.
+         // We can not use resolvedConcolic variables here because there might be multiple resolved
+         // expressions for a single concolic variable.
          for (const auto& variable : resolvedExpressions) {
              const auto* varName = variable.first;
              const auto* varExpr = variable.second;

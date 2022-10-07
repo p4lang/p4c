@@ -26,9 +26,6 @@ namespace Bmv2 {
 
 /// Extracts information from the @testSpec to emit a Protobuf test case.
 class Protobuf : public TF {
-    /// Has the preamble been generated already?
-    bool preambleEmitted = false;
-
     /// The output file.
     std::ofstream protobufFile;
 

@@ -37,6 +37,11 @@ namespace Bmv2 {
 using P4::ControlPlaneAPI::p4rt_id_t;
 using P4::ControlPlaneAPI::P4RuntimeSymbolType;
 
+/// Wrapper helper function that automatically inserts separators for hex strings.
+std::string formatHexExprWithSep(const IR::Expression* expr) {
+    return insertHexSeparators(formatHexExpr(expr, false, true, false));
+}
+
 Protobuf::Protobuf(cstring testName, boost::optional<unsigned int> seed = boost::none)
     : TF(testName, seed) {}
 
@@ -143,20 +148,21 @@ inja::json Protobuf::getControlPlane(const TestSpec* testSpec) {
         BUG_CHECK(p4RuntimeId, "Id not present for table %1%. Can not generate test.", table);
         tblJson["id"] = *p4RuntimeId;
 
-        auto const* tblRules = tblConfig->getRules();
+        const auto* tblRules = tblConfig->getRules();
         tblJson["rules"] = inja::json::array();
-        for (const auto& tblRules : *tblRules) {
+        for (const auto& tblRule : *tblRules) {
             inja::json rule;
-            auto const* matches = tblRules.getMatches();
-            auto const* actionCall = tblRules.getActionCall();
-            auto const* actionDecl = actionCall->getAction();
-            auto const* actionArgs = actionCall->getArgs();
+            const auto* matches = tblRule.getMatches();
+            const auto* actionCall = tblRule.getActionCall();
+            const auto* actionDecl = actionCall->getAction();
+            const auto* actionArgs = actionCall->getArgs();
             rule["action_name"] = actionCall->getActionName().c_str();
             auto p4RuntimeId = externalId(P4RuntimeSymbolType::ACTION(), actionDecl);
             BUG_CHECK(p4RuntimeId, "Id not present for action %1%. Can not generate test.",
                       actionDecl);
             rule["action_id"] = *p4RuntimeId;
             auto j = getControlPlaneForTable(*matches, *actionArgs);
+            rule["priority"] = tblRule.getPriority();
             rule["rules"] = std::move(j);
             tblJson["rules"].push_back(rule);
         }
@@ -208,7 +214,7 @@ inja::json Protobuf::getControlPlane(const TestSpec* testSpec) {
             for (const auto& actArg : actionArgs) {
                 inja::json c;
                 c["param"] = actArg.getActionParamName().c_str();
-                c["value"] = formatHexExpr(actArg.getEvaluatedValue()).c_str();
+                c["value"] = formatHexExprWithSep(actArg.getEvaluatedValue()).c_str();
                 b.push_back(c);
             }
             a["action_args"] = b;
@@ -231,8 +237,8 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
     rulesJson["range_matches"] = inja::json::array();
     rulesJson["ternary_matches"] = inja::json::array();
     rulesJson["lpm_matches"] = inja::json::array();
-
     rulesJson["act_args"] = inja::json::array();
+    rulesJson["needs_priority"] = false;
 
     for (auto const& match : matches) {
         auto const fieldName = match.first;
@@ -249,7 +255,7 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
             void operator()(const Exact& elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
-                j["value"] = formatHexExpr(elem.getEvaluatedValue());
+                j["value"] = formatHexExprWithSep(elem.getEvaluatedValue());
                 auto p4RuntimeId = getIdAnnotation(elem.getKey());
                 BUG_CHECK(p4RuntimeId, "Id not present for key. Can not generate test.");
                 j["id"] = *p4RuntimeId;
@@ -258,27 +264,31 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
             void operator()(const Range& elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
-                j["lo"] = formatHexExpr(elem.getEvaluatedLow());
-                j["hi"] = formatHexExpr(elem.getEvaluatedHigh());
+                j["lo"] = formatHexExprWithSep(elem.getEvaluatedLow());
+                j["hi"] = formatHexExprWithSep(elem.getEvaluatedHigh());
                 auto p4RuntimeId = getIdAnnotation(elem.getKey());
                 BUG_CHECK(p4RuntimeId, "Id not present for key. Can not generate test.");
                 j["id"] = *p4RuntimeId;
                 rulesJson["range_matches"].push_back(j);
+                // If the rule has a range match we need to add the priority.
+                rulesJson["needs_priority"] = true;
             }
             void operator()(const Ternary& elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
-                j["value"] = formatHexExpr(elem.getEvaluatedValue());
-                j["mask"] = formatHexExpr(elem.getEvaluatedMask());
+                j["value"] = formatHexExprWithSep(elem.getEvaluatedValue());
+                j["mask"] = formatHexExprWithSep(elem.getEvaluatedMask());
                 auto p4RuntimeId = getIdAnnotation(elem.getKey());
                 BUG_CHECK(p4RuntimeId, "Id not present for key. Can not generate test.");
                 j["id"] = *p4RuntimeId;
                 rulesJson["ternary_matches"].push_back(j);
+                // If the rule has a range match we need to add the priority.
+                rulesJson["needs_priority"] = true;
             }
             void operator()(const LPM& elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
-                j["value"] = formatHexExpr(elem.getEvaluatedValue());
+                j["value"] = formatHexExprWithSep(elem.getEvaluatedValue());
                 j["prefix_len"] = elem.getEvaluatedPrefixLength()->value.str();
                 auto p4RuntimeId = getIdAnnotation(elem.getKey());
                 BUG_CHECK(p4RuntimeId, "Id not present for key. Can not generate test.");
@@ -286,14 +296,13 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
                 rulesJson["lpm_matches"].push_back(j);
             }
         };
-
         boost::apply_visitor(GetRange(rulesJson, fieldName), fieldMatch);
     }
 
     for (const auto& actArg : args) {
         inja::json j;
         j["param"] = actArg.getActionParamName().c_str();
-        j["value"] = formatHexExpr(actArg.getEvaluatedValue());
+        j["value"] = formatHexExprWithSep(actArg.getEvaluatedValue());
         auto p4RuntimeId = getIdAnnotation(actArg.getActionParam());
         BUG_CHECK(p4RuntimeId, "Id not present for parameter. Can not generate test.");
         j["id"] = *p4RuntimeId;
@@ -308,7 +317,7 @@ inja::json Protobuf::getSend(const TestSpec* testSpec) {
     const auto* payload = iPacket->getEvaluatedPayload();
     inja::json sendJson;
     sendJson["ig_port"] = iPacket->getPort();
-    auto dataStr = formatHexExpr(payload);
+    auto dataStr = formatHexExprWithSep(payload);
     sendJson["pkt"] = dataStr;
     sendJson["pkt_size"] = payload->type->width_bits();
     return sendJson;
@@ -321,55 +330,10 @@ inja::json Protobuf::getVerify(const TestSpec* testSpec) {
         verifyData["eg_port"] = packet.getPort();
         const auto* payload = packet.getEvaluatedPayload();
         const auto* payloadMask = packet.getEvaluatedPayloadMask();
-        verifyData["ignore_mask"] = formatHexExpr(payloadMask);
-        verifyData["exp_pkt"] = formatHexExpr(payload);
+        verifyData["ignore_mask"] = formatHexExprWithSep(payloadMask);
+        verifyData["exp_pkt"] = formatHexExprWithSep(payload);
     }
     return verifyData;
-}
-
-static std::string getPreamble() {
-    static const std::string PREAMBLE(
-        R"""(// P4Testgen Protobuf template.
-syntax = "proto3";
-
-package p4testgen;
-
-import "third_party/p4lang_p4runtime/proto/p4/v1/p4runtime.proto";
-
-message PacketAtPort {
-  // The raw bytes of the test packet.
-  bytes packet = 1;
-  // The raw bytes of the port associated with the packet.
-  bytes port = 2;
-  // The don't care mask of the packet. Not used for input packets.
-  bytes packet_mask = 3;
-}
-
-message TestCase {
-  // The input packet.
-  PacketAtPort input_packet = 1;
-  // The corresponding expected output packet.
-  repeated PacketAtPort expected_output_packet = 2;
-  // The entities (e.g., table entries) to install on the switch before
-  // injecting the `input_packet`.
-  repeated p4.v1.Entity entities = 3;
-  // The trace associated with this particular test.
-  repeated string traces = 4;
-  // Additional metadata and information.
-  repeated string metadata = 5;
-}
-)""");
-    return PREAMBLE;
-}
-
-void Protobuf::emitPreamble(const std::string& preamble) {
-    boost::filesystem::path testFile(testName);
-    auto parent = testFile.parent_path();
-    auto protoFile = parent /= "p4testgen.proto";
-    auto outStream = std::ofstream(protoFile.c_str());
-    inja::json dataJson;
-    inja::render_to(outStream, preamble, dataJson);
-    outStream.flush();
 }
 
 static std::string getTestCase() {
@@ -389,7 +353,6 @@ traces: "{{trace_item}}"
 input_packet {
   packet: "{{send.pkt}}"
   port: "{{send.ig_port}}"
-  packet_mask: "{{send.pkt}}"
 }
 
 ## if verify
@@ -401,68 +364,73 @@ expected_output_packet {
 ## endif
 
 ## if control_plane
-entities {
+entities : [
 ## for table in control_plane.tables
 ## for rule in table.rules
   # Table {{table.table_name}}
-  table_entry {
-    table_id: {{table.id}}
+  {
+    table_entry {
+      table_id: {{table.id}}
+## if rule.rules.needs_priority
+      priority: {{rule.priority}}
+## endif
 ## for r in rule.rules.single_exact_matches
-    # Match field {{r.field_name}}
-    match {
-      field_id: {{r.id}}
-      exact {
-        value: "{{r.value}}"
+      # Match field {{r.field_name}}
+      match {
+        field_id: {{r.id}}
+        exact {
+          value: "{{r.value}}"
+        }
       }
-    }
 ## endfor
 ## for r in rule.rules.range_matches
-    # Match field {{r.field_name}}
-    match {
-      field_id: {{r.id}}
-      range {
-        low: "{{r.lo}}"
-        high: "{{r.hi}}"
+      # Match field {{r.field_name}}
+      match {
+        field_id: {{r.id}}
+        range {
+          low: "{{r.lo}}"
+          high: "{{r.hi}}"
+        }
       }
-    }
 ## endfor
 ## for r in rule.rules.ternary_matches
-    # Match field {{r.field_name}}
-    match {
-      field_id: {{r.id}}
-      ternary {
-        value: "{{r.value}}"
-        mask: "{{r.mask}}"
+      # Match field {{r.field_name}}
+      match {
+        field_id: {{r.id}}
+        ternary {
+          value: "{{r.value}}"
+          mask: "{{r.mask}}"
+        }
       }
-    }
 ## endfor
 ## for r in rule.rules.lpm_matches
-    # Match field {{r.field_name}}
-    match {
-      field_id: {{r.id}}
-      lpm {
-        value: "{{r.value}}"
-        prefix_len: "{{r.prefix_len}}"
-      }
-    }
-## endfor
-    # Action {{rule.action_name}}
-    action {
-      action {
-        action_id: {{rule.action_id}}
-## for act_param in rule.rules.act_args
-        # Param {{act_param.param}}
-        params {
-          param_id: {{act_param.id}}
-          value: "{{act_param.value}}"
+      # Match field {{r.field_name}}
+      match {
+        field_id: {{r.id}}
+        lpm {
+          value: "{{r.value}}"
+          prefix_len: {{r.prefix_len}}
         }
-## endfor
       }
+## endfor
+      # Action {{rule.action_name}}
+      action {
+        action {
+          action_id: {{rule.action_id}}
+## for act_param in rule.rules.act_args
+          # Param {{act_param.param}}
+          params {
+            param_id: {{act_param.id}}
+            value: "{{act_param.value}}"
+          }
+## endfor
+        }
+      }
+## endfor
     }
+  }{% if not loop.is_last %},{% endif %}
 ## endfor
-  }
-## endfor
-}
+]
 ## endif
 )""");
     return TEST_CASE;
@@ -481,7 +449,9 @@ void Protobuf::emitTestcase(const TestSpec* testSpec, cstring selectedBranches, 
     }
     dataJson["test_name"] = testNameOnly.c_str();
     dataJson["test_id"] = testId + 1;
-    dataJson["trace"] = getTrace(testSpec);
+    // TODO: Traces are disabled until we are able to escape illegal characters (e.g., '"').
+    // dataJson["trace"] = getTrace(testSpec);
+    dataJson["trace"] = inja::json::array();
     dataJson["control_plane"] = getControlPlane(testSpec);
     dataJson["send"] = getSend(testSpec);
     dataJson["verify"] = getVerify(testSpec);
@@ -498,11 +468,6 @@ void Protobuf::emitTestcase(const TestSpec* testSpec, cstring selectedBranches, 
 
 void Protobuf::outputTest(const TestSpec* testSpec, cstring selectedBranches, size_t testIdx,
                           float currentCoverage) {
-    if (!preambleEmitted) {
-        auto preamble = getPreamble();
-        emitPreamble(preamble);
-        preambleEmitted = true;
-    }
     auto incrementedTestName = testName + "_" + std::to_string(testIdx);
 
     protobufFile = std::ofstream(incrementedTestName + ".proto");

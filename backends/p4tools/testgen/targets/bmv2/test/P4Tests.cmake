@@ -58,7 +58,7 @@ p4tools_add_tests(
 p4tools_add_tests(
   TESTSUITES "${P4C_V1_TEST_SUITES_P416}"
   TAG "testgen-p4c-bmv2-protobuf" DRIVER ${P4TESTGEN_DRIVER} TEMPLATE_FILE ${TEMPLATE_FILE}
-  TARGET "bmv2" ARCH "v1model" TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend PROTOBUF ${EXTRA_OPTS} "
+  TARGET "bmv2" ARCH "v1model" VALIDATE_PROTOBUF TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend PROTOBUF ${EXTRA_OPTS} "
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/BMV2Xfail.cmake)

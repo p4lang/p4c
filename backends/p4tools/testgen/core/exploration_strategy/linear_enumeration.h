@@ -54,7 +54,7 @@ class LinearEnumeration : public ExplorationStrategy {
     std::vector<Branch> exploredBranches;
 
     /// Receives a branch and an evaluator, checks if the branch has a next state, then
-    /// recursively steps into the states, gets the sucessors and calls itself again.
+    /// recursively steps into the states, gets the successors and calls itself again.
     ///
     /// It will recursively map all terminal states, or at least fill the exploredBranches
     /// vector until it reaches the maxBoud.

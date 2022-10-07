@@ -32,7 +32,7 @@ const IR::Expression* BMv2_V1ModelTableStepper::computeTargetMatchType(
     std::map<cstring, const FieldMatch>* matches, const IR::Expression* hitCondition) {
     const IR::Expression* keyExpr = keyProperties.key->expression;
 
-    // For now, we consider optional match types to be a no-op.
+    // TODO: We consider optional match types to be a no-op, but we could make them exact matches.
     if (keyProperties.matchType == BMv2Constants::MATCH_KIND_OPT) {
         return hitCondition;
     }
@@ -41,7 +41,7 @@ const IR::Expression* BMv2_V1ModelTableStepper::computeTargetMatchType(
         bmv2_V1ModelProperties.actionSelectorKeys.emplace_back(keyExpr);
         return hitCondition;
     }
-    // Ranges are not yet implemented for Tofino STF tests.
+    // Ranges are not yet implemented for BMv2 STF tests.
     if (keyProperties.matchType == BMv2Constants::MATCH_KIND_RANGE &&
         TestgenOptions::get().testBackend != "STF") {
         cstring minName = properties.tableName + "_range_min_" + keyProperties.name;
@@ -134,7 +134,8 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
             TableRule(matches, TestSpec::LOW_PRIORITY, ctrlPlaneActionCall, TestSpec::TTL);
         auto* tableConfig = new TableConfig(table, {tableRule});
 
-        // Add the action profile to the table. This signifies a slightly different implementation.
+        // Add the action profile to the table.
+        // This implies a slightly different implementation to usual control plane table behavior.
         tableConfig->addTableProperty("action_profile", actionProfile);
         nextState->addTestObject("tableconfigs", table->controlPlaneName(), tableConfig);
 

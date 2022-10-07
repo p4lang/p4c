@@ -791,6 +791,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              uint64_t recirculateCount = 0;
              // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
              // infinite recirculation loops.
+             // TODO: Determine the exact count.
              if (state.hasProperty("recirculate_count")) {
                  recirculateCount = state.getProperty<uint64_t>("recirculate_count");
                  if (recirculateCount > 1) {
@@ -975,6 +976,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              auto* nextState = new ExecutionState(state);
              // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
              // infinite recirculation loops.
+             // TODO: Determine the exact count.
              if (state.hasProperty("recirculate_count")) {
                  recirculateCount = state.getProperty<uint64_t>("recirculate_count");
                  if (recirculateCount > 1) {
@@ -1032,6 +1034,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              auto* nextState = new ExecutionState(state);
              // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
              // infinite recirculation loops.
+             // TODO: Determine the exact count.
              if (state.hasProperty("recirculate_count")) {
                  recirculateCount = state.getProperty<uint64_t>("recirculate_count");
                  if (recirculateCount > 1) {
@@ -1072,6 +1075,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              uint64_t recirculateCount = 0;
              // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
              // infinite recirculation loops.
+             // TODO: Determine the exact count.
              if (state.hasProperty("recirculate_count")) {
                  recirculateCount = state.getProperty<uint64_t>("recirculate_count");
                  if (recirculateCount > 1) {

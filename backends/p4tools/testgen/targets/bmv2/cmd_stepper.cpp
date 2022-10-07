@@ -129,17 +129,13 @@ std::map<Continuation::Exception, Continuation> BMv2_V1ModelCmdStepper::getExcep
             result.emplace(Continuation::Exception::PacketTooShort,
                            Continuation::Body({new IR::AssignmentStatement(
                                errVar, IRUtils::getConstant(errVar->type, 1))}));
-            // NoMatch is equivalent to Reject in v1model.
+            // NoMatch will transition to the next block.
             result.emplace(Continuation::Exception::NoMatch, Continuation::Body({}));
             break;
 
         // The egress parser never drops the packet.
         case BMV2_EGRESS:
-            result.emplace(Continuation::Exception::Reject, Continuation::Body({}));
-            result.emplace(Continuation::Exception::PacketTooShort,
-                           Continuation::Body({new IR::AssignmentStatement(
-                               errVar, IRUtils::getConstant(errVar->type, 1))}));
-            // NoMatch is equivalent to Reject in v1model.
+            // NoMatch will transition to the next block.
             result.emplace(Continuation::Exception::NoMatch, Continuation::Body({}));
             break;
         default:
