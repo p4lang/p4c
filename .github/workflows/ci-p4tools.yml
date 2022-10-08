@@ -1,0 +1,42 @@
+name: "test-tools"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: tools-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  # Build and test p4tools on Ubuntu 20.04.
+  build-and-test-tools:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: test-tools-${{ matrix.unified }}-${{ runner.os }}
+        max-size: 1000M
+
+    - name: Build (Ubuntu Linux)
+      run: |
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg ENABLE_GMP=OFF --build-arg ENABLE_TEST_TOOLS=ON .
+        ./tools/export_ccache.sh
+
+      # run with sudo (...) --privileged
+      # this is needed to create network namespaces for the ebpf tests.
+    - name: Run tests (Ubuntu Linux)
+      run: |
+        sudo docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest -R testgen-p4c-bmv2 -j2 --output-on-failure --schedule-random

@@ -119,6 +119,31 @@ if [ "$VALIDATION" == "ON" ]; then
 fi
 # ! ------  END VALIDATION -----------------------------------------------
 
+# ! ------  BEGIN VALIDATION -----------------------------------------------
+
+function build_tools_deps() {
+  # This is needed for P4Testgen.
+  apt install -y libboost-filesystem-dev libboost-system-dev wget zip
+
+  # Install a recent version of Z3
+  Z3_VERSION="z3-4.8.14"
+  Z3_DIST="${Z3_VERSION}-x64-glibc-2.31"
+
+  cd /tmp
+  wget https://github.com/Z3Prover/z3/releases/download/${Z3_VERSION}/${Z3_DIST}.zip
+  unzip ${Z3_DIST}.zip
+  cp -r ${Z3_DIST}/bin/libz3.* /usr/local/lib/
+  cp -r ${Z3_DIST}/include/* /usr/local/include/
+  cd /p4c
+  rm -rf /tmp/${Z3_DIST}
+}
+
+# Build the dependencies necessary for the P4Tools platform.
+if [ "$ENABLE_TEST_TOOLS" == "ON" ]; then
+  build_tools_deps
+fi
+# ! ------  END TOOLS -----------------------------------------------
+
 
 function build() {
   if [ -e build ]; then /bin/rm -rf build; fi
@@ -135,8 +160,13 @@ export CXXFLAGS="${CXXFLAGS} -O3"
 CMAKE_FLAGS+="-DENABLE_UNIFIED_COMPILATION=${ENABLE_UNIFIED_COMPILATION} "
 # Toggle static builds.
 CMAKE_FLAGS+="-DBUILD_STATIC_RELEASE=${BUILD_STATIC_RELEASE} "
+# Toggle whether to use GMP or boost::multiprecision
+CMAKE_FLAGS+="-DENABLE_GMP=${ENABLE_GMP} "
+# Toggle the installation of the tools back end.
+CMAKE_FLAGS+="-DENABLE_TEST_TOOLS=${ENABLE_TEST_TOOLS} "
 # RELEASE should be default, but we want to make sure.
 CMAKE_FLAGS+="-DCMAKE_BUILD_TYPE=RELEASE"
+
 build ${CMAKE_FLAGS}
 
 make install

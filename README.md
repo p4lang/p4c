@@ -17,7 +17,7 @@ p4c is modular; it provides a standard frontend and midend which can be combined
 with a target-specific backend to create a complete P4 compiler. The goal is to
 make adding new backends easy.
 
-The code contains five sample backends:
+The code contains seven sample backends:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
   the BMv2 behavioral model https://github.com/p4lang/behavioral-model,
 * p4c-dpdk: can be used to target the DPDK software switch (SWX) pipeline
@@ -30,7 +30,7 @@ The code contains five sample backends:
 * p4c-graphs: can be used to generate visual representations of a P4 program;
   for now it only supports generating graphs of top-level control flows, and
 * p4c-ubpf: can be used to generate eBPF code that runs in user-space.
-
+* p4tool: a platform for P4 test utilities, including a test-case generator for P4 programs.
 Sample command lines:
 
 Compile P4_16 or P4_14 source code.  If your program successfully
@@ -184,6 +184,8 @@ sudo dpkg -i /path/to/package.deb
        backend](backends/graphs/README.md). Default ON.
      - `-DENABLE_P4TEST=ON|OFF`. Enable [the p4test
        backend](backends/p4test/README.md). Default ON.
+     - `-DENABLE_TEST_TOOLS=ON|OFF`. Enable [the p4tools
+         backend](backends/p4tools/README.md). Default OFF.
      - `-DENABLE_DOCS=ON|OFF`. Build documentation. Default is OFF.
      - `-DENABLE_GC=ON|OFF`. Enable the use of the garbage collection
        library. Default is ON.

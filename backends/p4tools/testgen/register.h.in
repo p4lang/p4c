@@ -1,0 +1,20 @@
+#ifndef P4TOOLS_TESTGEN_REGISTER_H_
+#define P4TOOLS_TESTGEN_REGISTER_H_
+
+@include_statements@
+
+namespace P4Tools {
+
+namespace P4Testgen {
+
+void registerCompilerTargets() {
+@compiler_targets@}
+
+void registerTestgenTargets() {
+@testgen_targets@}
+
+}  // namespace P4Tools
+
+}  // namespace P4Testgen
+
+#endif  /* P4TOOLS_TESTGEN_REGISTER_H_ */

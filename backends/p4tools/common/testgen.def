@@ -1,0 +1,83 @@
+/// Signifies that a particular expression is tainted.
+/// This tainted expression must be resolved explicitly.
+class TaintExpression : Expression {
+    toString { return "TaintedExpression(" + type->toString() + ")"; }
+
+    dbprint { out << "TaintedExpression(" << type << ")"; }
+}
+
+/// This type replaces Type_Varbits and can store information about the current size
+class Extracted_Varbits : Type_Bits {
+    /// The assigned size of this varbit (assigned by extract calls).
+    int assignedSize;
+
+    /// Returns the current width this variable bit type has.
+    int width_bits() const { return assignedSize; }
+
+    equiv {
+        // Ignore the current size and only check for equivalence of the assigned size.
+        return size == a.size;
+    }
+
+    operator== {
+        // Ignore the current size and only check for equivalence of the assigned size.
+        return size == a.size;
+    }
+
+    cstring baseName() const { return "SizedVarbit"; }
+
+    toString {
+        return baseName() + "<" + Util::toString(size) + ">" + "<" + Util::toString(assignedSize) +
+               ">";
+    }
+
+    dbprint { out << toString(); }
+}
+
+/// Defines a concolic variable that may be part of expressions.
+/// This variable must later be resolved and is converted in a symbolic expression.
+class ConcolicVariable : Expression {
+    /// The name of the concolic method that this variable targets.
+    cstring concolicMethodName;
+
+    /// Arguments to the concolic method.
+    Vector<Argument> arguments;
+
+    /// The unique identifier of the source the produces this concolic variable.
+    int srcIdentifier;
+
+    /// Some identifiers produce multiple concolic variables. This ID keeps track of the offsets.
+    int concolicId;
+
+    /// Nodes that are associated with this concolic variable. This may be declarations.
+    optional inline IndexedVector<Node> associatedNodes;
+
+    /// This is the member representation of this concolic variable.
+    Member concolicMember = nullptr;
+
+    toString {
+        cstring argumentStr;
+        cstring sep = "";
+        for (auto arg : *arguments) {
+            argumentStr += sep + arg->toString();
+            sep = ", ";
+        }
+        return "Concolic_" + concolicMethodName + "_" + srcIdentifier + "_" + concolicId + "(" +
+               argumentStr + ")";
+    }
+
+    dbprint {
+        out << "Concolic_" << concolicMethodName << "_" << srcIdentifier << "_" << concolicId << "("
+            << arguments << ")";
+    }
+
+    visit_children { v.visit(type, "type"); }
+
+    ConcolicVariable {
+        std::stringstream varName;
+        varName << concolicMethodName << "_" << srcIdentifier;
+        concolicMember =
+            new Member(srcInfo, type, new PathExpression(new Path(varName.str().c_str())),
+                       std::to_string(concolicId).c_str());
+    }
+}
