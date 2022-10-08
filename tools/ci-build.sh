@@ -129,6 +129,9 @@ function build_tools_deps() {
   Z3_VERSION="z3-4.8.14"
   Z3_DIST="${Z3_VERSION}-x64-glibc-2.31"
 
+  # Install clang-format for style checks.
+  pip3 install --user clang-format
+
   cd /tmp
   wget https://github.com/Z3Prover/z3/releases/download/${Z3_VERSION}/${Z3_DIST}.zip
   unzip ${Z3_DIST}.zip

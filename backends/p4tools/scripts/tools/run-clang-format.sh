@@ -40,11 +40,11 @@ return_status=0
 # Add local bin to the path in case clang-format is installed there.
 export PATH=$PATH:${HOME}/.local/bin
 
-find ${THIS_DIR}/../../common -iname '*.h' -o -iname '*.cpp' | xargs clang-format $write_args -i
+find -L ${THIS_DIR}/../../common -iname '*.h' -o -iname '*.cpp' | xargs clang-format $write_args -i
 return_status=$(($return_status || $?))
-find ${THIS_DIR}/../../p4check -iname '*.h' -o -iname '*.cpp' | xargs clang-format $write_args -i
+find -L ${THIS_DIR}/../../p4check -iname '*.h' -o -iname '*.cpp' | xargs clang-format $write_args -i
 return_status=$(($return_status || $?))
-find ${THIS_DIR}/../../testgen -iname '*.h' -o -iname '*.cpp' | xargs clang-format $write_args -i
+find -L ${THIS_DIR}/../../testgen -iname '*.h' -o -iname '*.cpp' | xargs clang-format $write_args -i
 return_status=$(($return_status || $?))
 
 

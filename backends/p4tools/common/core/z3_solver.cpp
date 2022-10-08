@@ -235,7 +235,11 @@ void Z3Solver::pop() {
     p4Assertions.resize(sz);
 }
 
-void Z3Solver::comment(cstring comment) { Z3_LOG("additional comment:%s", comment); }
+void Z3Solver::comment(cstring commentStr) {
+    // GCC complains about an unused parameter here.
+    (void)(commentStr);
+    Z3_LOG("additional comment:%s", commentStr);
+}
 
 void Z3Solver::seed(unsigned seed) {
     Z3_LOG("set a new seed:'%d'", seed);

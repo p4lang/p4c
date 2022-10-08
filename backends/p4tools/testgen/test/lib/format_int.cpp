@@ -1,13 +1,12 @@
 #include "backends/p4tools/testgen/test/lib/format_int.h"
 
+#include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/ir.h"
 #include "gtest/gtest-message.h"
 #include "gtest/gtest-test-part.h"
-
 #include "gtest/gtest.h"
 #include "ir/ir.h"
 
-#include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/testgen/lib/execution_state.h"
 #include "backends/p4tools/testgen/test/small-step/util.h"
 
