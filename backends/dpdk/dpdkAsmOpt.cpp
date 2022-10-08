@@ -540,9 +540,19 @@ void EmitDpdkTableConfig::addAction(const IR::Expression* actionRef,
                 P4::TypeMap* typeMap) {
     auto actionCall = actionRef->to<IR::MethodCallExpression>();
     auto method = actionCall->method->to<IR::PathExpression>()->path;
-    auto decl = refMap->getDeclaration(method, true);
+    const IR::Path* origMethod = nullptr;
+    if (ShortenTokenLength::origNameMap.count(method->name) > 0) {
+        origMethod = new IR::Path(ShortenTokenLength::origNameMap[method->name]);
+    } else {
+        origMethod = method;
+    }
+    auto decl = refMap->getDeclaration(origMethod, true);
     auto actionDecl = decl->to<IR::P4Action>();
-    auto actionName = actionDecl->name.name;
+    cstring actionName;
+    if (newNameMap.count(actionDecl->name.name) > 0)
+        actionName = newNameMap[actionDecl->name.name];
+    else
+        actionName = actionDecl->name.name;
     print(actionName, " ");
     if (actionDecl->parameters->parameters.size() == 1) {
         std::vector<cstring> paramNames;

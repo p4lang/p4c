@@ -176,9 +176,9 @@ class ValidateTableKeys : public Inspector {
 
 // This pass shorten the Identifier length
 class ShortenTokenLength : public Transform {
-    ordered_map<cstring, cstring> newNameMap;
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
+    ordered_map<cstring, cstring> newNameMap;
     static size_t count;
     // Currently Dpdk allows Identifier of 63 char long or less
     // including dots(.) for member exp.
@@ -201,8 +201,9 @@ class ShortenTokenLength : public Transform {
     }
 
  public:
-    ShortenTokenLength(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
-        refMap(refMap), typeMap(typeMap) {}
+    ShortenTokenLength(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+        ordered_map<cstring, cstring>& newNameMap) :
+        refMap(refMap), typeMap(typeMap) , newNameMap(newNameMap){}
     static ordered_map<cstring, cstring> origNameMap;
 
     const IR::Node* preorder(IR::Member *m) override {
@@ -260,18 +261,65 @@ class ShortenTokenLength : public Transform {
         return g;
     }
 
-    const IR::Node* preorder(IR::Path *p) override {
-        p->name = shortenString(p->name);
-        return p;
+    void shortenParamTypeName(IR::ParameterList& pl) {
+        IR::IndexedVector<IR::Parameter> new_pl;
+        for (auto p : pl.parameters) {
+            auto newType0 = p->type->to<IR::Type_Name>();
+            auto path0 = newType0->path->clone();
+            path0->name = shortenString(path0->name);
+            new_pl.push_back(new IR::Parameter(p->srcInfo, p->name,
+                            p->annotations, p->direction,
+                            new IR::Type_Name(newType0->srcInfo, path0),
+                            p->defaultValue));
+        }
+        pl = IR::ParameterList {new_pl};
     }
 
+    /// action name and args type name can be long, param name is always t
     const IR::Node* preorder(IR::DpdkAction *a) override {
         a->name = shortenString(a->name);
+        shortenParamTypeName(a->para);
         return a;
+    }
+
+    const IR::Node* preorder(IR::ActionList* al) override{
+        IR::IndexedVector<IR::ActionListElement> new_al;
+        for (auto ale : al->actionList) {
+            auto methodCallExpr = ale->expression->to<IR::MethodCallExpression>();
+            auto pathExpr = methodCallExpr->method->to<IR::PathExpression>();
+            auto path0 = pathExpr->path->clone();
+            // this for getting rid of NoAction_0 or NoAction_1
+            if (path0->name.name.find("NoAction"))
+                path0 = new IR::Path("NoAction");
+            path0->name = shortenString(path0->name);
+            new_al.push_back(new IR::ActionListElement(ale->srcInfo,
+                        ale->annotations,
+                        new IR::MethodCallExpression(methodCallExpr->srcInfo,
+                            methodCallExpr->type,
+                            new IR::PathExpression(pathExpr->srcInfo,
+                                                   pathExpr->type, path0),
+                            methodCallExpr->typeArguments,
+                            methodCallExpr->arguments)));
+        }
+        return new IR::ActionList(al->srcInfo, new_al);
     }
 
     const IR::Node* preorder(IR::DpdkTable *t) override {
         t->name = shortenString(t->name);
+        auto methodCallExpr = t->default_action->to<IR::MethodCallExpression>();
+        auto pathExpr = methodCallExpr->method->to<IR::PathExpression>();
+        auto path0 = pathExpr->path->clone();
+        // this for getting rid of NoAction_0 or NoAction_1
+        if (path0->name.name.find("NoAction"))
+            path0 = new IR::Path("NoAction");
+        path0->name = shortenString(path0->name);
+        t->default_action = new IR::MethodCallExpression(methodCallExpr->srcInfo,
+                                                         methodCallExpr->type,
+                                                         new IR::PathExpression(pathExpr->srcInfo,
+                                                                                pathExpr->type,
+                                                                                path0),
+                                                        methodCallExpr->typeArguments,
+                                                        methodCallExpr->arguments);
         return t;
     }
 
@@ -578,6 +626,7 @@ class CopyPropagationAndElimination : public Transform {
 class EmitDpdkTableConfig : public Inspector {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
+    ordered_map<cstring, cstring> newNameMap;
     std::ofstream dpdkTableConfigFile;
 
     void addExact(const IR::Expression* k,
@@ -609,7 +658,9 @@ class EmitDpdkTableConfig : public Inspector {
 
  public:
     EmitDpdkTableConfig(P4::ReferenceMap* refMap,
-                        P4::TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {}
+                        P4::TypeMap *typeMap,
+                        ordered_map<cstring, cstring>& newNameMap) : refMap(refMap),
+                        typeMap(typeMap), newNameMap(newNameMap) {}
     void postorder(const IR::DpdkTable* table) override;
 };
 
