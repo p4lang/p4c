@@ -422,7 +422,7 @@ class ControlFlowVisitor : public virtual Visitor {
 
 class Backtrack : public virtual Visitor {
  public:
-    struct trigger {
+    struct trigger : public ICastable {
         enum type_t { OK, OTHER }       type;
         explicit trigger(type_t t) : type(t) {}
         virtual ~trigger();
