@@ -37,7 +37,7 @@ struct Visitor_Context {
     int                         depth;
 };
 
-class Visitor : public ICastable {
+class Visitor  {
  public:
     typedef Visitor_Context Context;
     class profile_t {

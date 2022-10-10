@@ -4,13 +4,13 @@
 #include <cstddef>
 #include <vector>
 
+#include "backends/p4tools/common/lib/coverage.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
 #include "lib/null.h"
 
 #include "backends/p4tools/testgen/core/arch_spec.h"
-#include "backends/p4tools/common/lib/coverage.h"
 #include "backends/p4tools/testgen/lib/concolic.h"
 #include "backends/p4tools/testgen/lib/continuation.h"
 #include "backends/p4tools/testgen/lib/namespace_context.h"

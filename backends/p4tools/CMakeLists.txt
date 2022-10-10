@@ -88,5 +88,12 @@ add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common ${CMAKE_CURRENT_LIST_
 add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/testgen ${CMAKE_CURRENT_LIST_DIR}/scripts/tools)
 add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/p4check ${CMAKE_CURRENT_LIST_DIR}/scripts/tools)
 
+# Add clang-format to checks.
+add_test(
+  NAME "testgen-clang-format"
+  COMMAND sh -c "${CMAKE_CURRENT_LIST_DIR}/scripts/tools/run-clang-format.sh"
+  WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+)
+
 # Custom IR constructs for P4Tools.
 set(IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/common/testgen.def PARENT_SCOPE)

@@ -39,7 +39,7 @@ endfunction(add_p4tools_library)
 function(add_and_lint_subdirectory dir cpplint_dir)
   add_subdirectory(${dir})
   add_test(
-    NAME "cpplint-${dir}"
+    NAME "testgen-cpplint-${dir}"
     COMMAND sh -c "find '${dir}' \
         -iname \\*.h -o -iname \\*.hpp -o -iname \\*.c -o -iname \\*.cpp \
       | xargs python3 ${cpplint_dir}/cpplint.py \

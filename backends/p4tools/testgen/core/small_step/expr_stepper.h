@@ -47,14 +47,14 @@ class ExprStepper : public AbstractStepper {
     /// This assumes that the advance amount is known already and a compile-time constant.
     /// Targets may override this function with custom behavior.
     virtual PacketCursorAdvanceInfo calculateSuccessfulParserAdvance(const ExecutionState& state,
-                                                         int advanceSize) const;
+                                                                     int advanceSize) const;
     /// Calculates the conditions that need to be satisfied for a successful parser advance.
     /// This assumes that the advance amount is a run-time value.
     //// We need to pick a satisfying value assignment for a reject or advance of the parser.
     /// Targets may override this function with custom behavior.
-    virtual PacketCursorAdvanceInfo calculateAdvanceExpression(const ExecutionState& state,
-                                                   const IR::Expression* advanceExpr,
-                                                   const IR::Expression* restrictions) const;
+    virtual PacketCursorAdvanceInfo calculateAdvanceExpression(
+        const ExecutionState& state, const IR::Expression* advanceExpr,
+        const IR::Expression* restrictions) const;
 
     /// Iterate over the fields in @param flatFields and set the corresponding values in
     /// @param nextState. If there is a varbit, assign the @param varbitFieldSize as size to
