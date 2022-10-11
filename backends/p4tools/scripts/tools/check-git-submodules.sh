@@ -30,7 +30,7 @@ if [[ $# == 0 ]] ; then
 
   ${skipFetch} || git fetch --quiet origin
   git submodule --quiet foreach \
-    '${toplevel}/backends/p4tools/scripts/tools/check-git-submodules.sh ${sm_path} ${sha1} '"${tmpfile}"
+    "${THIS_DIR}"'/check-git-submodules.sh ${sm_path} ${sha1} '"${tmpfile}"
 
   rm "${tmpfile}" &>/dev/null
 else

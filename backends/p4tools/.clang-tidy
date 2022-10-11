@@ -23,6 +23,7 @@ HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
 UseColor: true
 CheckOptions:
+  - { key: misc-const-correctness.AnalyzeValues,              value: false }
   - { key: readability-identifier-naming.NamespaceCase,       value: CamelCase }
   - { key: readability-identifier-naming.ClassCase,           value: CamelCase  }
   - { key: readability-identifier-naming.StructCase,          value: CamelCase  }
