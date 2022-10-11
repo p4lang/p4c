@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef LIB_ORDERED_MAP_H_
 #define LIB_ORDERED_MAP_H_
 
+#include "util_container.h"
+
 #include <functional>
 #include <list>
 #include <map>
@@ -136,13 +138,17 @@ class ordered_map {
         auto it = find(x);
         if (it == data.end()) {
             it = data.emplace(data.end(), x, V());
-            data_map.emplace(&it->first, it); }
+            auto guard = MakeAutoEraseGuard (&data, it);
+            data_map.emplace(&it->first, it);
+            guard.dismiss (); }
         return it->second; }
     V& operator[](K &&x) {
         auto it = find(x);
         if (it == data.end()) {
             it = data.emplace(data.end(), std::move(x), V());
-            data_map.emplace(&it->first, it); }
+            auto guard = MakeAutoEraseGuard (&data, it);
+            data_map.emplace(&it->first, it);
+            guard.dismiss (); }
         return it->second; }
     V& at(const K &x) { return data_map.at(&x)->second; }
     const V& at(const K &x) const { return data_map.at(&x)->second; }
@@ -153,7 +159,9 @@ class ordered_map {
         if (it == data.end()) {
             it = data.emplace(data.end(), std::piecewise_construct_t(), std::forward_as_tuple(k),
                               std::forward_as_tuple(std::forward<VV>(v)...));
+            auto guard = MakeAutoEraseGuard (&data, it);
             data_map.emplace(&it->first, it);
+            guard.dismiss ();
             return std::make_pair(it, true); }
         return std::make_pair(it, false); }
     template<typename KK, typename... VV>
@@ -163,7 +171,9 @@ class ordered_map {
         if (it == data.end()) {
             it = data.emplace(pos, std::piecewise_construct_t(), std::forward_as_tuple(k),
                               std::forward_as_tuple(std::forward<VV>(v)...));
+            auto guard = MakeAutoEraseGuard (&data, it);
             data_map.emplace(&it->first, it);
+            guard.dismiss ();
             return std::make_pair(it, true); }
         return std::make_pair(it, false); }
 
@@ -171,7 +181,9 @@ class ordered_map {
         auto it = find(v.first);
         if (it == data.end()) {
             it = data.insert(data.end(), v);
+            auto guard = MakeAutoEraseGuard (&data, it);
             data_map.emplace(&it->first, it);
+            guard.dismiss ();
             return std::make_pair(it, true); }
         return std::make_pair(it, false); }
     std::pair<iterator, bool> insert(iterator pos, const value_type &v) {
@@ -179,7 +191,9 @@ class ordered_map {
         auto it = find(v.first);
         if (it == data.end()) {
             it = data.insert(pos, v);
+            auto guard = MakeAutoEraseGuard (&data, it);
             data_map.emplace(&it->first, it);
+            guard.dismiss ();
             return std::make_pair(it, true); }
         return std::make_pair(it, false); }
     template<class InputIterator> void insert(InputIterator b, InputIterator e) {

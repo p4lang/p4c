@@ -77,6 +77,7 @@ set (LIBP4CTOOLKIT_HDRS
 	stringify.h
 	stringref.h
 	symbitmatrix.h
+	util_container.h
 )
 
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${LIBP4CTOOLKIT_SRCS};${LIBP4CTOOLKIT_HDRS}")
