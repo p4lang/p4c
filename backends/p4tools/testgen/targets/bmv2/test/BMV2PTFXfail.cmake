@@ -6,6 +6,7 @@
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "The validity bit of .* is tainted"
+    up4.p4
 )
 
 p4tools_add_xfail_reason(
