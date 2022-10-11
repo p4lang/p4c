@@ -30,27 +30,38 @@ limitations under the License.
 #endif
 #include <unistd.h>
 #include <iostream>
+#include "azzert.h"
 #include "exename.h"
+#include "algorithm.h"
 #include "exceptions.h"
 #include "hex.h"
 #include "log.h"
 
-static const char *signames[] = {
+static const char *const signames[] = {
     "NONE", "HUP",  "INT",  "QUIT", "ILL",  "TRAP", "ABRT",   "BUS",  "FPE",   "KILL",
     "USR1", "SEGV", "USR2", "PIPE", "ALRM", "TERM", "STKFLT", "CHLD", "CONT",  "STOP",
     "TSTP", "TTIN", "TTOU", "URG",  "XCPU", "XFSZ", "VTALRM", "PROF", "WINCH", "POLL",
     "PWR",  "SYS"
 };
 
+const char *get_signame (int sig)
+{
+    if (sig >= 0 && sig < ELEMENTS (signames))
+        return signames [sig];
+    else
+        return "???";
+}
+
 #ifdef MULTITHREAD
 #include <pthread.h>
 #include <mutex>
 std::vector<pthread_t>          thread_ids;
-__thread        int             my_id;
+__thread        int             my_id = -1;
 
 void register_thread() {
     static std::mutex           lock;
     std::lock_guard<std::mutex> acquire(lock);
+    azzert (my_id < 0); // This function should only be called once.
     my_id = thread_ids.size();
     thread_ids.push_back(pthread_self());
 }
@@ -63,7 +74,7 @@ static MTONLY(__thread) int shutdown_loop = 0;   // avoid infinite loop if shutd
 
 static void sigint_shutdown(int sig, siginfo_t *, void *) {
     if (shutdown_loop++) _exit(-1);
-    LOG1("Exiting with SIG" << signames[sig]);
+    LOG1("Exiting with SIG" << get_signame (sig) << " (" << sig << ").");
     _exit(sig + 0x80);
 }
 
@@ -84,6 +95,7 @@ MTONLY(
     if (!text || !(t = strchr(text, '('))) {
         text = exename();
         t = text + strlen(text); }
+    azzert (static_cast <std::size_t> (t - text) < ELEMENTS (buffer));
     memcpy(buffer, text, t-text);
     buffer[t-text] = 0;
     if (child && strcmp(binary, buffer)) {
@@ -232,7 +244,7 @@ static void crash_shutdown(int sig, siginfo_t *info, void *uctxt) {
                 if (i != my_id-1) {
                     pthread_kill(thread_ids[i], SIGABRT); } } )
     LOG1(MTONLY("Thread #" << my_id << " " <<) "exiting with SIG" <<
-          signames[sig] << ", trace:");
+          get_signame (sig) << " (" << sig << "), trace:");
     if (sig == SIGILL || sig == SIGFPE || sig == SIGSEGV ||
         sig == SIGBUS || sig == SIGTRAP)
         LOG1("  address = " << hex(info->si_addr));
@@ -262,7 +274,7 @@ static void crash_shutdown(int sig, siginfo_t *info, void *uctxt) {
         } else {
             lock.unlock(); } )
     if (sig != SIGABRT)
-        BUG("Exiting with SIG%s", signames[sig]);
+        BUG("Exiting with SIG%s (%d).", get_signame (sig), sig);
     _exit(sig + 0x80);
 }
 

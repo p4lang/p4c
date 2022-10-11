@@ -13,6 +13,7 @@
 # limitations under the License.
 
 set (LIBP4CTOOLKIT_SRCS
+	azzert.cpp
 	backtrace.cpp
 	bitvec.cpp
 	compile_context.cpp
@@ -37,6 +38,7 @@ set (LIBP4CTOOLKIT_SRCS
 )
 
 set (LIBP4CTOOLKIT_HDRS
+	azzert.h
 	algorithm.h
 	bitops.h
 	bitrange.h
