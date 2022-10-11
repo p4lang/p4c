@@ -1,5 +1,5 @@
-#ifndef TESTGEN_TESTGEN_H_
-#define TESTGEN_TESTGEN_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_TESTGEN_H_
+#define BACKENDS_P4TOOLS_TESTGEN_TESTGEN_H_
 
 #include "backends/p4tools/common/p4ctool.h"
 #include "ir/ir.h"
@@ -24,4 +24,4 @@ class Testgen : public AbstractP4cTool<TestgenOptions> {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_TESTGEN_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_TESTGEN_H_ */

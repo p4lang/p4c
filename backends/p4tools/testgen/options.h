@@ -1,5 +1,5 @@
-#ifndef TESTGEN_OPTIONS_H_
-#define TESTGEN_OPTIONS_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_OPTIONS_H_
+#define BACKENDS_P4TOOLS_TESTGEN_OPTIONS_H_
 
 #include <string>
 
@@ -64,4 +64,4 @@ class TestgenOptions : public AbstractP4cToolOptions {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_OPTIONS_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_OPTIONS_H_ */

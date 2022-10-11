@@ -1,5 +1,5 @@
-#ifndef TESTGEN_TARGETS_BMV2_TEST_SPEC_H_
-#define TESTGEN_TARGETS_BMV2_TEST_SPEC_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_TEST_SPEC_H_
+#define BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_TEST_SPEC_H_
 
 #include <cstddef>
 #include <utility>
@@ -188,4 +188,4 @@ class Bmv2_CloneInfo : public TestObject {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_TARGETS_BMV2_TEST_SPEC_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_TEST_SPEC_H_ */

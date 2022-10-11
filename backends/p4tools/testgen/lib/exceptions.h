@@ -1,5 +1,5 @@
-#ifndef TESTGEN_LIB_EXCEPTIONS_H_
-#define TESTGEN_LIB_EXCEPTIONS_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_LIB_EXCEPTIONS_H_
+#define BACKENDS_P4TOOLS_TESTGEN_LIB_EXCEPTIONS_H_
 
 #include "lib/exceptions.h"
 
@@ -38,4 +38,4 @@ class TestgenUnimplemented final : public Util::P4CExceptionBase {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_LIB_EXCEPTIONS_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_LIB_EXCEPTIONS_H_ */

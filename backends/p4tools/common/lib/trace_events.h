@@ -1,5 +1,5 @@
-#ifndef COMMON_LIB_TRACE_EVENTS_H_
-#define COMMON_LIB_TRACE_EVENTS_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_LIB_TRACE_EVENTS_H_
+#define BACKENDS_P4TOOLS_COMMON_LIB_TRACE_EVENTS_H_
 
 #include <iosfwd>
 
@@ -208,4 +208,4 @@ class TraceEvent::ParserState : public TraceEvent {
 
 }  // namespace P4Tools
 
-#endif /* COMMON_LIB_TRACE_EVENTS_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_LIB_TRACE_EVENTS_H_ */

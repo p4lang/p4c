@@ -1,5 +1,5 @@
-#ifndef COMMON_COMPILER_CONFIGURATION_H_
-#define COMMON_COMPILER_CONFIGURATION_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_COMPILER_CONFIGURATION_H_
+#define BACKENDS_P4TOOLS_COMMON_COMPILER_CONFIGURATION_H_
 
 #include <climits>
 #include <limits>
@@ -27,4 +27,4 @@ class CompilerConfiguration : public DefaultP4CConfiguration {
 
 }  // namespace P4Tools
 
-#endif /* COMMON_COMPILER_CONFIGURATION_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_COMPILER_CONFIGURATION_H_ */

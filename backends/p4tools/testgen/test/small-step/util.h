@@ -1,5 +1,5 @@
-#ifndef TESTGEN_TEST_SMALL_STEP_UTIL_H_
-#define TESTGEN_TEST_SMALL_STEP_UTIL_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_TEST_SMALL_STEP_UTIL_H_
+#define BACKENDS_P4TOOLS_TESTGEN_TEST_SMALL_STEP_UTIL_H_
 
 #include <functional>
 #include <map>
@@ -161,4 +161,4 @@ void stepAndExamineOp(const T* op, const IR::Expression* subexpr, const IR::P4Pr
 
 }  // namespace Test
 
-#endif /* TESTGEN_TEST_SMALL_STEP_UTIL_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_TEST_SMALL_STEP_UTIL_H_ */

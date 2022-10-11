@@ -1,5 +1,5 @@
-#ifndef COMMON_CORE_TARGET_H_
-#define COMMON_CORE_TARGET_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_CORE_TARGET_H_
+#define BACKENDS_P4TOOLS_COMMON_CORE_TARGET_H_
 
 #include <map>
 #include <string>
@@ -103,4 +103,4 @@ class Target {
 
 }  // namespace P4Tools
 
-#endif /* COMMON_CORE_TARGET_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_CORE_TARGET_H_ */

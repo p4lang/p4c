@@ -1,5 +1,5 @@
-#ifndef COMMON_LIB_FORMAT_INT_H_
-#define COMMON_LIB_FORMAT_INT_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_LIB_FORMAT_INT_H_
+#define BACKENDS_P4TOOLS_COMMON_LIB_FORMAT_INT_H_
 
 #include <string>
 
@@ -77,4 +77,4 @@ std::string insertHexSeparators(const std::string& dataStr);
 
 }  // namespace P4Tools
 
-#endif /* COMMON_LIB_FORMAT_INT_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_LIB_FORMAT_INT_H_ */

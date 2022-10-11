@@ -1,5 +1,5 @@
-#ifndef TESTGEN_TEST_GTEST_UTILS_H_
-#define TESTGEN_TEST_GTEST_UTILS_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_TEST_GTEST_UTILS_H_
+#define BACKENDS_P4TOOLS_TESTGEN_TEST_GTEST_UTILS_H_
 
 #include <string>
 
@@ -42,4 +42,4 @@ class P4ToolsTest : public ::testing::Test {};
 
 }  // namespace Test
 
-#endif /* TESTGEN_TEST_GTEST_UTILS_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_TEST_GTEST_UTILS_H_ */

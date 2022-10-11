@@ -1,5 +1,5 @@
-#ifndef COMMON_LIB_MODEL_H_
-#define COMMON_LIB_MODEL_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_LIB_MODEL_H_
+#define BACKENDS_P4TOOLS_COMMON_LIB_MODEL_H_
 
 #include <map>
 #include <set>
@@ -88,4 +88,4 @@ class Model : public SymbolicMapType {
 
 }  // namespace P4Tools
 
-#endif /* COMMON_LIB_MODEL_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_LIB_MODEL_H_ */

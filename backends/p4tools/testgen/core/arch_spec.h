@@ -1,5 +1,5 @@
-#ifndef TESTGEN_CORE_ARCH_SPEC_H_
-#define TESTGEN_CORE_ARCH_SPEC_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_CORE_ARCH_SPEC_H_
+#define BACKENDS_P4TOOLS_TESTGEN_CORE_ARCH_SPEC_H_
 
 #include <map>
 #include <vector>
@@ -61,4 +61,4 @@ class ArchSpec {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_CORE_ARCH_SPEC_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_CORE_ARCH_SPEC_H_ */

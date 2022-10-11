@@ -1,5 +1,5 @@
-#ifndef TESTGEN_CORE_EXTERNS_H_
-#define TESTGEN_CORE_EXTERNS_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_CORE_EXTERNS_H_
+#define BACKENDS_P4TOOLS_TESTGEN_CORE_EXTERNS_H_
 
 #include <sys/types.h>
 
@@ -74,4 +74,4 @@ class ExternMethodImpls {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_CORE_EXTERNS_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_CORE_EXTERNS_H_ */

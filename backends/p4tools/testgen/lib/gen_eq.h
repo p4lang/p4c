@@ -1,5 +1,5 @@
-#ifndef TESTGEN_LIB_GEN_EQ_H_
-#define TESTGEN_LIB_GEN_EQ_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_LIB_GEN_EQ_H_
+#define BACKENDS_P4TOOLS_TESTGEN_LIB_GEN_EQ_H_
 
 #include "ir/ir.h"
 
@@ -37,4 +37,4 @@ class GenEq {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_LIB_GEN_EQ_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_LIB_GEN_EQ_H_ */

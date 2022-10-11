@@ -1,5 +1,5 @@
-#ifndef COMMON_LIB_COVERAGE_H_
-#define COMMON_LIB_COVERAGE_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_LIB_COVERAGE_H_
+#define BACKENDS_P4TOOLS_COMMON_LIB_COVERAGE_H_
 
 #include <set>
 #include <vector>
@@ -42,4 +42,4 @@ void logCoverage(const CoverageSet& all, const CoverageSet& visited,
 
 }  // namespace P4Tools
 
-#endif /* COMMON_LIB_COVERAGE_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_LIB_COVERAGE_H_ */

@@ -1,5 +1,5 @@
-#ifndef COMMON_LIB_TIMER_H_
-#define COMMON_LIB_TIMER_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_LIB_TIMER_H_
+#define BACKENDS_P4TOOLS_COMMON_LIB_TIMER_H_
 
 #include <functional>
 #include <memory>
@@ -51,4 +51,4 @@ class ScopedTimer {
 
 }  // namespace P4Tools
 
-#endif /* COMMON_LIB_TIMER_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_LIB_TIMER_H_ */

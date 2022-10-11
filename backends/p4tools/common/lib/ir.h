@@ -1,5 +1,5 @@
-#ifndef COMMON_LIB_IR_H_
-#define COMMON_LIB_IR_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_LIB_IR_H_
+#define BACKENDS_P4TOOLS_COMMON_LIB_IR_H_
 
 #include <vector>
 
@@ -149,4 +149,4 @@ class IRUtils {
 
 }  // namespace P4Tools
 
-#endif /* COMMON_LIB_IR_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_LIB_IR_H_ */

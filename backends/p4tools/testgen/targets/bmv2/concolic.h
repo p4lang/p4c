@@ -1,5 +1,5 @@
-#ifndef TESTGEN_TARGETS_BMV2_CONCOLIC_H_
-#define TESTGEN_TARGETS_BMV2_CONCOLIC_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_CONCOLIC_H_
+#define BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_CONCOLIC_H_
 
 #include <cstddef>
 #include <functional>
@@ -74,4 +74,4 @@ class Bmv2Concolic : public Concolic {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_TARGETS_BMV2_CONCOLIC_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_CONCOLIC_H_ */

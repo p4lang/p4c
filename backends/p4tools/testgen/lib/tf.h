@@ -1,5 +1,5 @@
-#ifndef TESTGEN_LIB_TF_H_
-#define TESTGEN_LIB_TF_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_LIB_TF_H_
+#define BACKENDS_P4TOOLS_TESTGEN_LIB_TF_H_
 
 #include <cstddef>
 
@@ -42,4 +42,4 @@ class TF {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_LIB_TF_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_LIB_TF_H_ */

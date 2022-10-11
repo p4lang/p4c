@@ -1,5 +1,5 @@
-#ifndef TESTGEN_LIB_LOGGING_H_
-#define TESTGEN_LIB_LOGGING_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_LIB_LOGGING_H_
+#define BACKENDS_P4TOOLS_TESTGEN_LIB_LOGGING_H_
 
 #include <string>
 #include <utility>
@@ -44,4 +44,4 @@ void enablePerformanceLogging();
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_LIB_LOGGING_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_LIB_LOGGING_H_ */
