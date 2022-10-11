@@ -1,5 +1,5 @@
-#ifndef TESTGEN_CORE_PROGRAM_INFO_H_
-#define TESTGEN_CORE_PROGRAM_INFO_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_CORE_PROGRAM_INFO_H_
+#define BACKENDS_P4TOOLS_TESTGEN_CORE_PROGRAM_INFO_H_
 
 #include <cstddef>
 #include <vector>
@@ -117,4 +117,4 @@ class ProgramInfo : public ICastable {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_CORE_PROGRAM_INFO_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_CORE_PROGRAM_INFO_H_ */

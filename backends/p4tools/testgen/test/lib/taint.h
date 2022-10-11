@@ -1,5 +1,5 @@
-#ifndef TESTGEN_TEST_LIB_TAINT_H_
-#define TESTGEN_TEST_LIB_TAINT_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_TEST_LIB_TAINT_H_
+#define BACKENDS_P4TOOLS_TESTGEN_TEST_LIB_TAINT_H_
 
 #include "backends/p4tools/testgen/test/gtest_utils.h"
 
@@ -10,4 +10,4 @@ class TaintTest : public P4ToolsTest {};
 
 }  // namespace Test
 
-#endif /* TESTGEN_TEST_LIB_TAINT_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_TEST_LIB_TAINT_H_ */

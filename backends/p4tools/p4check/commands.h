@@ -1,8 +1,7 @@
-#ifndef P4CHECK_COMMANDS_H_
-#define P4CHECK_COMMANDS_H_
+#ifndef BACKENDS_P4TOOLS_P4CHECK_COMMANDS_H_
+#define BACKENDS_P4TOOLS_P4CHECK_COMMANDS_H_
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <iostream>
 #include <map>
 #include <set>
@@ -78,4 +77,4 @@ class P4CheckCommands {
 
 }  // namespace P4Tools
 
-#endif /* P4CHECK_COMMANDS_H_ */
+#endif /* BACKENDS_P4TOOLS_P4CHECK_COMMANDS_H_ */

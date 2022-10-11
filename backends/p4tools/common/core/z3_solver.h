@@ -1,5 +1,5 @@
-#ifndef COMMON_CORE_Z3_SOLVER_H_
-#define COMMON_CORE_Z3_SOLVER_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_CORE_Z3_SOLVER_H_
+#define BACKENDS_P4TOOLS_COMMON_CORE_Z3_SOLVER_H_
 
 #include <stddef.h>
 #include <z3++.h>
@@ -135,4 +135,4 @@ class Z3Solver : public AbstractSolver {
 
 }  // namespace P4Tools
 
-#endif /* COMMON_CORE_Z3_SOLVER_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_CORE_Z3_SOLVER_H_ */

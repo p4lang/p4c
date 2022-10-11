@@ -1,5 +1,5 @@
-#ifndef COMMON_OPTIONS_H_
-#define COMMON_OPTIONS_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_OPTIONS_H_
+#define BACKENDS_P4TOOLS_COMMON_OPTIONS_H_
 
 // Boost
 #include <cstdint>
@@ -53,4 +53,4 @@ class AbstractP4cToolOptions : protected Util::Options {
 
 }  // namespace P4Tools
 
-#endif /* COMMON_OPTIONS_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_OPTIONS_H_ */

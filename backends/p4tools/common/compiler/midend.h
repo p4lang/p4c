@@ -1,5 +1,5 @@
-#ifndef COMMON_COMPILER_MIDEND_H_
-#define COMMON_COMPILER_MIDEND_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_COMPILER_MIDEND_H_
+#define BACKENDS_P4TOOLS_COMMON_COMPILER_MIDEND_H_
 
 #include "backends/p4tools/common/compiler/convert_errors.h"
 #include "frontends/common/options.h"
@@ -67,4 +67,4 @@ class MidEnd : public PassManager {
 
 }  // namespace P4Tools
 
-#endif /* COMMON_COMPILER_MIDEND_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_COMPILER_MIDEND_H_ */

@@ -10,7 +10,7 @@ return_status=0
 function run_cpplint() {
     # $1 is directory
     # $2 is root
-    python3 $THIS_DIR/cpplint.py --root=$2 $( find $1 -name \*.h -or -name \*.cpp )
+    python3 $THIS_DIR/../../../../tools/cpplint.py --root=$2 $( find $1 -name \*.h -or -name \*.cpp )
     return_status=$(($return_status || $?))
 }
 

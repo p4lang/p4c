@@ -1,5 +1,5 @@
-#ifndef TESTGEN_LIB_CONTINUATION_H_
-#define TESTGEN_LIB_CONTINUATION_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_LIB_CONTINUATION_H_
+#define BACKENDS_P4TOOLS_TESTGEN_LIB_CONTINUATION_H_
 
 #include <cstdint>
 #include <deque>
@@ -211,4 +211,4 @@ class Continuation {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_LIB_CONTINUATION_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_LIB_CONTINUATION_H_ */

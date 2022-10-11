@@ -1,5 +1,5 @@
-#ifndef COMMON_COMPILER_CONVERT_VARBITS_H_
-#define COMMON_COMPILER_CONVERT_VARBITS_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_COMPILER_CONVERT_VARBITS_H_
+#define BACKENDS_P4TOOLS_COMMON_COMPILER_CONVERT_VARBITS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
@@ -31,4 +31,4 @@ class ConvertVarbits : public Transform {
 
 }  // namespace P4Tools
 
-#endif /* COMMON_COMPILER_CONVERT_VARBITS_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_COMPILER_CONVERT_VARBITS_H_ */

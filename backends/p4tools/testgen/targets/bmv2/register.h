@@ -1,5 +1,5 @@
-#ifndef TESTGEN_TARGETS_BMV2_REGISTER_H_
-#define TESTGEN_TARGETS_BMV2_REGISTER_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_REGISTER_H_
+#define BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_REGISTER_H_
 
 #include "backends/p4tools/common/p4ctool.h"
 
@@ -22,4 +22,4 @@ void bmv2_registerTestgenTarget() { Bmv2::BMv2_V1ModelTestgenTarget::make(); }
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_TARGETS_BMV2_REGISTER_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_REGISTER_H_ */

@@ -1,5 +1,5 @@
-#ifndef P4TOOLS_TESTGEN_REGISTER_H_
-#define P4TOOLS_TESTGEN_REGISTER_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_REGISTER_H_
+#define BACKENDS_P4TOOLS_TESTGEN_REGISTER_H_
 
 @include_statements@
 
@@ -17,4 +17,4 @@ void registerTestgenTargets() {
 
 }  // namespace P4Testgen
 
-#endif  /* P4TOOLS_TESTGEN_REGISTER_H_ */
+#endif  /* BACKENDS_P4TOOLS_TESTGEN_REGISTER_H_ */

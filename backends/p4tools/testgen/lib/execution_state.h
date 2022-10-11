@@ -1,5 +1,5 @@
-#ifndef TESTGEN_LIB_EXECUTION_STATE_H_
-#define TESTGEN_LIB_EXECUTION_STATE_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_LIB_EXECUTION_STATE_H_
+#define BACKENDS_P4TOOLS_TESTGEN_LIB_EXECUTION_STATE_H_
 
 #include <cstdint>
 #include <initializer_list>
@@ -473,4 +473,4 @@ class ExecutionState {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_LIB_EXECUTION_STATE_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_LIB_EXECUTION_STATE_H_ */

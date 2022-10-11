@@ -1,5 +1,5 @@
-#ifndef TESTGEN_CORE_TARGET_H_
-#define TESTGEN_CORE_TARGET_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_CORE_TARGET_H_
+#define BACKENDS_P4TOOLS_TESTGEN_CORE_TARGET_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -115,4 +115,4 @@ class TestgenTarget : public Target {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_CORE_TARGET_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_CORE_TARGET_H_ */

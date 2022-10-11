@@ -1,5 +1,5 @@
-#ifndef TESTGEN_TARGETS_BMV2_BMV2_H_
-#define TESTGEN_TARGETS_BMV2_BMV2_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_BMV2_H_
+#define BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_BMV2_H_
 
 #include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/compiler/midend.h"
@@ -28,4 +28,4 @@ class BMv2_V1ModelCompilerTarget : public CompilerTarget {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_TARGETS_BMV2_BMV2_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_BMV2_H_ */

@@ -84,9 +84,9 @@ enable_testing()
 set(ENABLE_TESTING ON)
 
 # Include sub projects.
-add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common ${CMAKE_CURRENT_LIST_DIR}/scripts/tools)
-add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/testgen ${CMAKE_CURRENT_LIST_DIR}/scripts/tools)
-add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/p4check ${CMAKE_CURRENT_LIST_DIR}/scripts/tools)
+add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common ${P4C_SOURCE_DIR}/tools)
+add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/testgen ${P4C_SOURCE_DIR}/tools)
+add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/p4check ${P4C_SOURCE_DIR}/tools)
 
 # Add clang-format to checks.
 add_test(

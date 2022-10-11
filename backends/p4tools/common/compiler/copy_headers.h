@@ -1,5 +1,5 @@
-#ifndef COMMON_COMPILER_COPY_HEADERS_H_
-#define COMMON_COMPILER_COPY_HEADERS_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_COMPILER_COPY_HEADERS_H_
+#define BACKENDS_P4TOOLS_COMMON_COMPILER_COPY_HEADERS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -32,4 +32,4 @@ class CopyHeaders : public PassRepeated {
 
 }  // namespace P4Tools
 
-#endif /* COMMON_COMPILER_COPY_HEADERS_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_COMPILER_COPY_HEADERS_H_ */

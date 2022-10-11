@@ -1,5 +1,5 @@
-#ifndef TESTGEN_TARGETS_BMV2_TARGET_H_
-#define TESTGEN_TARGETS_BMV2_TARGET_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_TARGET_H_
+#define BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_TARGET_H_
 
 #include <stdint.h>
 
@@ -60,4 +60,4 @@ class BMv2_V1ModelTestgenTarget : public TestgenTarget {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_TARGETS_BMV2_TARGET_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_TARGET_H_ */

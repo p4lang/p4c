@@ -1,5 +1,5 @@
-#ifndef COMMON_LIB_SYMBOLIC_ENV_H_
-#define COMMON_LIB_SYMBOLIC_ENV_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_LIB_SYMBOLIC_ENV_H_
+#define BACKENDS_P4TOOLS_COMMON_LIB_SYMBOLIC_ENV_H_
 
 #include <map>
 
@@ -51,4 +51,4 @@ class SymbolicEnv {
 
 }  // namespace P4Tools
 
-#endif /* COMMON_LIB_SYMBOLIC_ENV_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_LIB_SYMBOLIC_ENV_H_ */

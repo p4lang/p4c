@@ -1,5 +1,5 @@
-#ifndef COMMON_LIB_TAINT_H_
-#define COMMON_LIB_TAINT_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_LIB_TAINT_H_
+#define BACKENDS_P4TOOLS_COMMON_LIB_TAINT_H_
 
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/ir.h"
@@ -30,4 +30,4 @@ class Taint {
 
 }  // namespace P4Tools
 
-#endif /* COMMON_LIB_TAINT_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_LIB_TAINT_H_ */

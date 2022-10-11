@@ -1,5 +1,5 @@
-#ifndef COMMON_LIB_UTIL_H_
-#define COMMON_LIB_UTIL_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_LIB_UTIL_H_
+#define BACKENDS_P4TOOLS_COMMON_LIB_UTIL_H_
 
 #include <stdint.h>
 
@@ -68,4 +68,4 @@ class TestgenUtils {
 
 }  // namespace P4Tools
 
-#endif /* COMMON_LIB_UTIL_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_LIB_UTIL_H_ */

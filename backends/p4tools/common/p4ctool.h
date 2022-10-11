@@ -1,5 +1,5 @@
-#ifndef COMMON_P4CTOOL_H_
-#define COMMON_P4CTOOL_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_P4CTOOL_H_
+#define BACKENDS_P4TOOLS_COMMON_P4CTOOL_H_
 
 #include <vector>
 
@@ -51,4 +51,4 @@ class AbstractP4cTool {
 
 }  // namespace P4Tools
 
-#endif /* COMMON_P4CTOOL_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_P4CTOOL_H_ */

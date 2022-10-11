@@ -1,5 +1,5 @@
-#ifndef COMMON_CORE_SOLVER_H_
-#define COMMON_CORE_SOLVER_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_CORE_SOLVER_H_
+#define BACKENDS_P4TOOLS_COMMON_CORE_SOLVER_H_
 
 #include <vector>
 
@@ -57,4 +57,4 @@ class AbstractSolver {
 
 }  // namespace P4Tools
 
-#endif /* COMMON_CORE_SOLVER_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_CORE_SOLVER_H_ */

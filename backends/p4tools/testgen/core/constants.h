@@ -1,5 +1,5 @@
-#ifndef TESTGEN_CORE_CONSTANTS_H_
-#define TESTGEN_CORE_CONSTANTS_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_CORE_CONSTANTS_H_
+#define BACKENDS_P4TOOLS_TESTGEN_CORE_CONSTANTS_H_
 
 #include "ir/ir.h"
 
@@ -37,4 +37,4 @@ class P4Constants {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_CORE_CONSTANTS_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_CORE_CONSTANTS_H_ */
