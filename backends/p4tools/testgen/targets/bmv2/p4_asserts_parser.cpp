@@ -3,10 +3,9 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/optional/optional_io.hpp>
 
-#include "lib/error.h"
-
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/ir.h"
+#include "lib/error.h"
 
 namespace P4Tools {
 
