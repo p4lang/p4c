@@ -16,11 +16,11 @@
 #include <boost/none.hpp>
 #include <boost/optional/optional.hpp>
 
+#include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/formulae.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 
-#include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/testgen/core/exploration_strategy/incremental_max_coverage_stack.h"
 #include "backends/p4tools/testgen/core/program_info.h"

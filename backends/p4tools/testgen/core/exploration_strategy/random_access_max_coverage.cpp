@@ -12,16 +12,16 @@
 #include <boost/random/uniform_int_distribution.hpp>
 #include <boost/variant/get.hpp>
 
-#include "lib/cstring.h"
-#include "lib/error.h"
-#include "lib/exceptions.h"
-#include "lib/log.h"
-
 #include "backends/p4tools/common/lib/coverage.h"
 #include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+
 #include "backends/p4tools/testgen/core/small_step/small_step.h"
 #include "backends/p4tools/testgen/lib/continuation.h"
 #include "backends/p4tools/testgen/lib/exceptions.h"

@@ -50,7 +50,8 @@ TestgenOptions::TestgenOptions()
             popLevel = std::atoi(arg);
             return true;
         },
-        "Sets the fraction for multiPop exploration; default is 3 when meaningful strategy is activated.");
+        "Sets the fraction for multiPop exploration; default is 3 when meaningful strategy is "
+        "activated.");
 
     registerOption(
         "--out-dir", "outputDir",
