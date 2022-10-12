@@ -126,7 +126,7 @@ TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInAction) {
     Restrictions parsingResult = loadExample(
         "backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_2.p4", false);
     ASSERT_EQ(parsingResult.size(), 2);
-        auto expr1 = P4Tools::IRUtils::getZombieConst(IR::Type_Bits::get(8), 0,
+    auto expr1 = P4Tools::IRUtils::getZombieConst(IR::Type_Bits::get(8), 0,
                                                   "ingress.table_1_param_ingress.MyAction10");
     auto expr2 = P4Tools::IRUtils::getZombieConst(IR::Type_Bits::get(8), 0,
                                                   "ingress.table_1_key_h.h.a");
