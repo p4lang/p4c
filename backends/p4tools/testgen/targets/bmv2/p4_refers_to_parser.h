@@ -1,0 +1,35 @@
+#ifndef TESTGEN_TARGETS_BMV2_P4_REFERS_TO_PARSER_H_
+#define TESTGEN_TARGETS_BMV2_P4_REFERS_TO_PARSER_H_
+
+#include <iomanip>
+#include <iostream>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
+
+#include "ir/ir.h"
+
+namespace P4Tools {
+namespace RefersToParser {
+
+class RefersToParser : public Transform {
+    std::vector<std::vector<const IR::Expression*>>& restrictionsVec;
+    std::vector<const IR::P4Action*> actionVector;
+    const IR::P4Action* findAction(const IR::ActionListElement* input);
+    void createRefersToConstraint(IR::Vector<IR::Annotation> annotations, const IR::Type* inputType,
+                                  cstring controlPlaneName, int id, bool isParameter,
+                                  cstring inputName);
+
+ public:
+    explicit RefersToParser(std::vector<std::vector<const IR::Expression*>>& output);
+    const IR::Node* postorder(IR::ActionListElement* action) override;
+    const IR::Node* postorder(IR::Annotation* annotation) override;
+    void createConstraint(bool table, cstring currentName, cstring currentKeyName,
+                          cstring destKeyName, cstring destTableName, const IR::Type* type);
+};
+
+}  // namespace RefersToParser
+}  // namespace P4Tools
+
+#endif /* TESTGEN_TARGETS_BMV2_P4_REFERS_TO_PARSER_H_ */

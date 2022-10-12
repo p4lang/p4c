@@ -14,6 +14,8 @@
 #include "backends/p4tools/testgen/core/target.h"
 #include "backends/p4tools/testgen/lib/concolic.h"
 #include "backends/p4tools/testgen/targets/bmv2/concolic.h"
+#include "backends/p4tools/testgen/targets/bmv2/p4_asserts_parser.h"
+#include "backends/p4tools/testgen/targets/bmv2/p4_refers_to_parser.h"
 
 namespace P4Tools {
 
@@ -52,9 +54,17 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     }
     // Sending a too short packet in BMV2 produces nonsense, so we require the packet size to be
     // larger than 32 bits
-    targetConstraints =
+    const IR::Operation_Binary* constraint =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
                     IRUtils::getConstant(ExecutionState::getPacketSizeVarType(), 32));
+    program->apply(AssertsParser::AssertsParser(restrictionsVec));
+    program->apply(RefersToParser::RefersToParser(restrictionsVec));
+    for (auto element : restrictionsVec) {
+        for (auto restriction : element) {
+            constraint = new IR::LAnd(constraint, restriction);
+        }
+    }
+    targetConstraints = constraint;
 }
 
 const ordered_map<cstring, const IR::Type_Declaration*>*
