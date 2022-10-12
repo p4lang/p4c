@@ -38,6 +38,7 @@ set (MIDEND_SRCS
   orderArguments.cpp
   parserUnroll.cpp
   predication.cpp
+  reachability.cpp
   removeAssertAssume.cpp
   removeComplexExpressions.cpp
   removeExits.cpp
