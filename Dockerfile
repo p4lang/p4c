@@ -28,6 +28,8 @@ ARG INSTALL_PTF_EBPF_DEPENDENCIES=OFF
 ARG KERNEL_VERSIONS
 # Whether to build the P4Tools back end and platform.
 ARG ENABLE_TEST_TOOLS=OFF
+# Whether to treat warnings as errors.
+ARG ENABLE_WERROR=ON
 
 # Delegate the build to tools/ci-build.
 COPY . /p4c/
