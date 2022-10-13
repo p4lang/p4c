@@ -6,6 +6,18 @@ class TaintExpression : Expression {
     dbprint { out << "TaintedExpression(" << type << ")"; }
 }
 
+class StatementList : Statement, ISimpleNamespace {
+    optional inline IndexedVector<Node>   components;
+    IDeclaration getDeclByName(cstring name) const override {
+        return components.getDeclaration(name); }
+    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return components.getDeclarations(); }
+    void push_back(Node stmt) { components.push_back(stmt); }
+    toString { return "StatementList"; }
+
+    dbprint { out << "StatementList"; }
+}
+
 /// This type replaces Type_Varbits and can store information about the current size
 class Extracted_Varbits : Type_Bits {
     /// The assigned size of this varbit (assigned by extract calls).

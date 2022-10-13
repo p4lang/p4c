@@ -18,6 +18,31 @@ macro(check_with_bmv2 testfile testfolder p4test)
   file(APPEND ${testfile} "done\n")
 endmacro(check_with_bmv2)
 
+macro(check_with_bmv2_emi testfile testfolder p4test)
+  set(__p4cbmv2path "${P4C_BINARY_DIR}")
+  set(__bmv2runner "${CMAKE_BINARY_DIR}/run-bmv2-test.py")
+  # Find all the stf tests generated for this p4 and copy them to the path where the p4 is, and test them with bmv2 model
+  file(APPEND ${__testfile} "stffiles=($(find ${__testfolder} -name \"*.stf\"  | sort -n ))\n")
+  file(APPEND ${__testfile} "for item in \${stffiles[@]}\n")
+  file(APPEND ${__testfile} "do\n")
+  file(APPEND ${__testfile} "\techo \"Found \${item}\"\n")
+  file(APPEND ${__testfile} "\tpython3 ${__bmv2runner} . -v -b -tf \${item} -bd ${__p4cbmv2path} ${P4C_SOURCE_DIR}/${p4test} \n")
+  file(APPEND ${__testfile} "\tfullpath=\"${p4test}\"\n")
+  file(APPEND ${__testfile} "\tnamePart=($(echo \"\${item}\" | sed -r \"s/.+\\/(.+)\\..+/\\1/\"))\n")
+  file(APPEND ${__testfile} "\tsubstring=\"${alias}\"\n")
+  file(APPEND ${__testfile} "\tresultString=($(echo \${fullpath} | sed -e \"s/\${substring}$//\")) \n")
+  file(APPEND ${__testfile} "\tsrcfiles=($(find ${P4C_SOURCE_DIR}/\${resultString} -name \"*\${namePart}_stf.p4\"  | sort -n ))\n")
+  file(APPEND ${__testfile} "\tfor sourceTest in \${srcfiles[@]}\n")
+  file(APPEND ${__testfile} "\tdo\n")
+  file(APPEND ${__testfile} "\t\tif [[ \"\${sourceTest}\" != \"${P4C_SOURCE_DIR}/\${resultString}${alias}\" ]]\n")
+  file(APPEND ${__testfile} "\t\tthen\n")
+  file(APPEND ${__testfile} "\t\t\techo \"Found source test \${sourceTest}\"\n")
+  file(APPEND ${__testfile} "\t\t\tpython3 ${__bmv2runner} . -v -b -tf \${item} -bd ${__p4cbmv2path} \${sourceTest} \n")
+  file(APPEND ${__testfile} "\t\tfi\n")
+  file(APPEND ${__testfile} "\tdone\n")
+  file(APPEND ${__testfile} "done\n")
+endmacro(check_with_bmv2_emi)
+
 # Write the script to validate whether a given protobuf file has a valid format.
 # Arguments:
 #   - testfile is the testing script that this script is written to.
@@ -54,7 +79,7 @@ endmacro(validate_protobuf)
 # Sets the timeout on tests at 300s. For the slow CI machines.
 macro(p4tools_add_test_with_args)
   # Parse arguments.
-  set(options ENABLE_RUNNER VALIDATE_PROTOBUF)
+  set(options ENABLE_RUNNER VALIDATE_PROTOBUF EMI_TESTS)
   set(oneValueArgs TAG DRIVER ALIAS P4TEST TARGET ARCH)
   set(multiValueArgs TEST_ARGS CMAKE_ARGS)
   cmake_parse_arguments(
@@ -81,10 +106,20 @@ macro(p4tools_add_test_with_args)
   file(APPEND ${__testfile} "# Generated file, modify with care\n\n")
   file(APPEND ${__testfile} "set -e\n")
   file(APPEND ${__testfile} "cd ${P4TOOLS_BINARY_DIR}\n")
-  file(
-    APPEND ${__testfile} "${driver} --target ${target} --arch ${arch} "
-    "--std p4-16 ${test_args} --out-dir ${__testfolder} \"$@\" ${P4C_SOURCE_DIR}/${p4test}\n"
-  )
+  # If EMI_TESTS is active, run the BMv2 runner.
+  if(${TOOLS_BMV2_TESTS_EMI_TESTS})
+    file(
+      APPEND ${__testfile} "${driver} --target ${target} --arch ${arch} "
+      "--std p4-16 ${test_args} --generateSources 100 --out-dir ${__testfolder} \"$@\" ${P4C_SOURCE_DIR}/${p4test}\n"
+    )
+    set(${tag}_timeout 4000)
+    check_with_bmv2_emi(${__testfile} ${__testfolder} ${p4test})
+  else()
+    file(
+      APPEND ${__testfile} "${driver} --target ${target} --arch ${arch} "
+      "--std p4-16 ${test_args} --out-dir ${__testfolder} \"$@\" ${P4C_SOURCE_DIR}/${p4test}\n"
+    )
+  endif()
 
   # If ENABLE_RUNNER is active, run the BMv2 runner.
   if(${TOOLS_BMV2_TESTS_ENABLE_RUNNER})

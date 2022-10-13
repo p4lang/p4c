@@ -43,6 +43,16 @@ p4tools_add_tests(
 )
 
 #############################################################################
+# EMI TEST PROPERTIES
+#############################################################################
+
+p4tools_add_tests(
+  TESTSUITES "${P4C_V1_TEST_SUITES_P416}"
+  TAG "testgen-p4c-bmv2-emi" DRIVER ${P4TESTGEN_DRIVER} TEMPLATE_FILE ${TEMPLATE_FILE}
+  TARGET "bmv2" ARCH "v1model" EMI_TESTS TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend STF ${EXTRA_OPTS} "
+)
+
+#############################################################################
 # TEST PROPERTIES
 #############################################################################
 
@@ -64,3 +74,4 @@ p4tools_add_tests(
 include(${CMAKE_CURRENT_LIST_DIR}/BMV2Xfail.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/BMV2PTFXfail.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/BMV2ProtobufXfail.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/BMV2EMIXfail.cmake)

@@ -29,6 +29,7 @@ set(
   core/exploration_strategy/incremental_max_coverage_stack.cpp
   core/exploration_strategy/exploration_strategy.cpp
   core/target.cpp
+  core/exploration_strategy/sourceTest_generation.cpp
 
   lib/concolic.cpp
   lib/continuation.cpp

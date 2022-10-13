@@ -8,6 +8,7 @@
 #include "backends/p4tools/common/lib/coverage.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/unused_statements.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 
@@ -38,6 +39,9 @@ class TestBackEnd {
     /// Test maximum number of tests that are to be produced.
     int maxTests;
 
+    /// Set of all statements,tables,selects in the input P4 program.
+    IR::StatementList statementsList;
+
     /// The current test count. If it exceeds @var maxTests, the symbolic executor will stop.
     int testCount = 0;
 
@@ -47,6 +51,7 @@ class TestBackEnd {
         if (!TestgenOptions::get().selectedBranches.empty()) {
             maxTests = 1;
         }
+        programInfo.program->apply(UnusedStatements::CollectStatements(statementsList));
     }
 
  public:

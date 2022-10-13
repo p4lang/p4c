@@ -52,6 +52,9 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// String of selected branches separated by comma.
     std::string selectedBranches;
 
+    /// The count of sorce tests.
+    int countOfSourceTests = 0;
+
     /// Track the branches that are executed in the symbolic executor. This can be used for
     /// deterministic replay of an execution trace.
     bool trackBranches = false;

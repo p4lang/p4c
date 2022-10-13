@@ -16,6 +16,7 @@ class TraceEvent {
     friend std::ostream& operator<<(std::ostream& os, const TraceEvent& event);
 
  public:
+    class SourceInfo;
     class Generic;
     class Extract;
     class PreEvalExpression;
@@ -43,6 +44,8 @@ class TraceEvent {
     /// Evaluates expressions in the body of this trace event for their concrete value in the given
     /// model. A BUG occurs if there are any variables that are unbound by the given model.
     virtual const TraceEvent* evaluate(const Model& model) const;
+    virtual const IR::Node* getNode() const { return nullptr; }
+    virtual int getIdx() const { return 0; }
 
  protected:
     // An optional label that can be prefixed to the trace event.
@@ -76,6 +79,20 @@ class TraceEvent::Expression : public TraceEvent {
     const Expression* evaluate(const Model& model) const override;
 
     explicit Expression(const IR::Expression* value, cstring label = "");
+
+ protected:
+    void print(std::ostream& /*out*/) const override;
+};
+
+/// A source information of the test.
+class TraceEvent::SourceInfo : public TraceEvent {
+    const IR::Node* node;
+    int idx;
+
+ public:
+    explicit SourceInfo(const IR::Node* node = nullptr, int idx = 0);
+    const IR::Node* getNode() const;
+    int getIdx() const;
 
  protected:
     void print(std::ostream& /*out*/) const override;

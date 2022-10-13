@@ -37,6 +37,14 @@ TestgenOptions::TestgenOptions()
         "Only produce the input packet for each test");
 
     registerOption(
+        "--generateSources", "count",
+        [this](const char* arg) {
+            countOfSourceTests = std::stoul(arg);
+            return true;
+        },
+        "Generate a source tests.");
+
+    registerOption(
         "--max-tests", "maxTests",
         [this](const char* arg) {
             maxTests = std::atoi(arg);

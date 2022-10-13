@@ -23,6 +23,7 @@
 #include "backends/p4tools/testgen/core/exploration_strategy/linear_enumeration.h"
 #include "backends/p4tools/testgen/core/exploration_strategy/random_access_stack.h"
 #include "backends/p4tools/testgen/core/exploration_strategy/selected_branches.h"
+#include "backends/p4tools/testgen/core/exploration_strategy/sourceTest_generation.h"
 #include "backends/p4tools/testgen/core/target.h"
 #include "backends/p4tools/testgen/lib/logging.h"
 #include "backends/p4tools/testgen/lib/test_backend.h"
@@ -83,6 +84,9 @@ int Testgen::mainImpl(const IR::P4Program* program) {
 
     auto symExec = [&solver, &programInfo, seed]() -> ExplorationStrategy* {
         std::string explorationStrategy = TestgenOptions::get().explorationStrategy;
+        if (TestgenOptions::get().countOfSourceTests > 0) {
+            return new SourceTest(solver, *programInfo, seed);
+        }
         if (explorationStrategy.compare("randomAccessStack") == 0) {
             int popLevel =
                 (TestgenOptions::get().popLevel > 1) ? TestgenOptions::get().popLevel : 3;

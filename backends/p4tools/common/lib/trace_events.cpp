@@ -73,6 +73,17 @@ void TraceEvent::Expression::print(std::ostream& os) const {
 }
 
 /* =============================================================================================
+ *   SourceInfo
+ * ============================================================================================= */
+TraceEvent::SourceInfo::SourceInfo(const IR::Node* node, int idx)
+    : TraceEvent(""), node(node), idx(idx) {}
+
+const IR::Node* TraceEvent::SourceInfo::getNode() const { return node; }
+int TraceEvent::SourceInfo::getIdx() const { return idx; }
+
+void TraceEvent::SourceInfo::print(std::ostream& os) const { os << ""; }
+
+/* =============================================================================================
  *   ListExpression
  * ============================================================================================= */
 

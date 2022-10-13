@@ -139,8 +139,19 @@ bool TestBackEnd::run(const FinalState& state) {
                   [&] { testWriter->outputTest(testSpec, selectedBranches, testCount, coverage); });
 
         printTraces("============ End Test %1% ============\n", testCount);
-        testCount++;
         Coverage::coverageReportFinal(allStatements, visitedStatements);
+        if (TestgenOptions::get().countOfSourceTests > 0) {
+            auto unusedStmtList = UnusedStatements::getUnusedStatements(
+                executionState->getTrace(), statementsList, visitedStatements);
+            if (unusedStmtList.size() == 0) {
+                printTraces("============ Dead code not found ============\n");
+            } else {
+                UnusedStatements::generateTests(
+                    unusedStmtList, TestgenOptions::get().countOfSourceTests, testCount);
+            }
+            printTraces("============ End Source Tests Generation ============\n");
+        }
+        testCount++;
         printPerformanceReport();
         return testCount > maxTests - 1;
     }
