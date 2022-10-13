@@ -54,8 +54,7 @@ class GenerateBranches : public Inspector {
     explicit GenerateBranches(
         std::vector<std::tuple<const IR::Node*, size_t, bool>>& output,
         std::vector<std::pair<const IR::Node*, IR::Vector<IR::Node>>>& branches, int testCount);
-    std::vector<IR::Vector<IR::Node>> genAllPathes(const IR::Node* node,
-                                                   IR::Vector<IR::Node> initialPath);
+    std::vector<IR::Vector<IR::Node>> genAllPathes(IR::Vector<IR::Node> initialPath);
     std::vector<IR::Vector<IR::Node>> genPathChains();
     bool preorder(const IR::Statement* stmt) override;
     bool preorder(const IR::P4Table* table) override;

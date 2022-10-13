@@ -34,12 +34,12 @@ std::vector<IR::Vector<IR::Node>> GenerateBranches::genPathChains() {
         }
     }
     IR::Vector<IR::Node> tmp;
-    int i = 0;
+    long unsigned int i = 0;
     auto s = pathVec.size();
     while (i < s) {
-        int k = i;
+        long unsigned int k = i;
         while (k < s) {
-            int j = k;
+            long unsigned int j = k;
             while (j <= s) {
                 if ((j - k) > 1) {
                     tmp.push_back(pathVec[i]);
@@ -64,7 +64,7 @@ std::vector<IR::Vector<IR::Node>> GenerateBranches::genPathChains() {
     }
 
     std::vector<IR::Vector<IR::Node>> result;
-    for (int i = 0; i < pathChains.size(); i++) {
+    for (long unsigned int i = 0; i < pathChains.size(); i++) {
         if ((pathChains[i].size() == 1) && (branches.size() > 1)) {
             continue;
         }
@@ -77,9 +77,8 @@ std::vector<IR::Vector<IR::Node>> GenerateBranches::genPathChains() {
 
     return result;
 }
-std::vector<IR::Vector<IR::Node>> GenerateBranches::genAllPathes(const IR::Node* node,
-                                                                 IR::Vector<IR::Node> initialPath) {
-    int i = 0;
+std::vector<IR::Vector<IR::Node>> GenerateBranches::genAllPathes(IR::Vector<IR::Node> initialPath) {
+    long unsigned int i = 0;
     auto s = initialPath.size();
     std::vector<IR::Vector<IR::Node>> sortedVec;
     IR::Vector<IR::Node> tmp;
@@ -87,9 +86,9 @@ std::vector<IR::Vector<IR::Node>> GenerateBranches::genAllPathes(const IR::Node*
         tmp.push_back(initialPath[i]);
         sortedVec.push_back(tmp);
         tmp.clear();
-        int k = i;
+        long unsigned int k = i;
         while (k < s) {
-            int j = k;
+            long unsigned int j = k;
             while (j <= s) {
                 if ((j - k) > 1) {
                     tmp.push_back(initialPath[i]);
@@ -110,11 +109,11 @@ std::vector<IR::Vector<IR::Node>> GenerateBranches::genAllPathes(const IR::Node*
     }
 
     std::vector<IR::Vector<IR::Node>> result;
-    int size = sortedVec.size();
-    if (sortedVec.size() > testCount) {
+    long unsigned int size = sortedVec.size();
+    if (size > static_cast<long unsigned int>(testCount)) {
         size = testCount;
     }
-    for (int i = 0; i < size; i++) {
+    for (long unsigned int i = 0; i < size; i++) {
         auto randInt = static_cast<int>(TestgenUtils::getRandBigInt(sortedVec.size()));
         int idx = 0;
         if (randInt != 0) idx = randInt - 1;
@@ -141,7 +140,7 @@ bool GenerateBranches::preorder(const IR::Statement* stmt) {
             } else if (auto switchStmt = stmt->to<IR::SwitchStatement>()) {
                 if (std::get<0>(tuple)->is<IR::SwitchStatement>()) continue;
                 IR::Vector<IR::Node> cases;
-                int caseIndex = 0;
+                long unsigned int caseIndex = 0;
                 const IR::SwitchCase* selectedCase = nullptr;
                 for (auto switchCase : switchStmt->cases) {
                     if ((std::get<1>(tuple) - 1) != caseIndex) {
@@ -152,7 +151,7 @@ bool GenerateBranches::preorder(const IR::Statement* stmt) {
 
                     caseIndex += 1;
                 }
-                auto pathes = genAllPathes(switchStmt, cases);
+                auto pathes = genAllPathes(cases);
                 IR::Vector<IR::Node> stmts;
                 for (auto element : pathes) {
                     auto clone = switchStmt->clone();
@@ -236,7 +235,7 @@ bool GenerateBranches::preorder(const IR::SelectExpression* expr) {
             }
             if (!selectExpr->select->srcInfo) continue;
             if (selectExpr->select->srcInfo == expr->select->srcInfo) {
-                auto caseIndex = 0;
+                long unsigned int caseIndex = 0;
                 const IR::SelectCase* selectedCase = nullptr;
                 IR::Vector<IR::Node> cases;
                 for (auto selectCase : expr->selectCases) {
@@ -248,7 +247,7 @@ bool GenerateBranches::preorder(const IR::SelectExpression* expr) {
                     }
                     caseIndex += 1;
                 }
-                auto pathes = genAllPathes(expr, cases);
+                auto pathes = genAllPathes(cases);
                 IR::Vector<IR::Node> stmts;
                 for (auto element : pathes) {
                     auto clone = expr->clone();
@@ -287,7 +286,7 @@ bool GenerateBranches::preorder(const IR::P4Table* table) {
                     newEntries.push_back(entry);
                 }
             } else {
-                int entryIndex = 0;
+                long unsigned int entryIndex = 0;
                 for (auto entry : entries->entries) {
                     if ((std::get<1>(tuple) - 1) != entryIndex) {
                         newEntries.push_back(entry);
@@ -297,7 +296,7 @@ bool GenerateBranches::preorder(const IR::P4Table* table) {
                     entryIndex += 1;
                 }
             }
-            auto pathes = genAllPathes(table, newEntries);
+            auto pathes = genAllPathes(newEntries);
             IR::Vector<IR::Node> tables;
             for (auto entry : pathes) {
                 auto clone = table->clone();
