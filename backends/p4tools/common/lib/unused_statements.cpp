@@ -167,7 +167,7 @@ bool GenerateBranches::preorder(const IR::Statement* stmt) {
                 branches.push_back(std::make_pair(switchStmt, stmts));
             } else if (auto ifStmt = stmt->to<IR::IfStatement>()) {
                 bool condition = std::get<1>(tuple);
-                if (auto srcStmt = std::get<0>(tuple)->to<IR::IfStatement>()) {
+                if (std::get<0>(tuple)->is<IR::IfStatement>()) {
                     if (ifStmt->condition->is<IR::LNot>()) {
                         if (condition) {
                             condition = false;
@@ -503,7 +503,7 @@ std::vector<std::tuple<const IR::Node*, size_t, bool>> getUnusedStatements(
             std::tuple<const IR::Node*, size_t, bool> ifStmsResult;
             ifStmsResult = std::make_tuple(node, 0, false);
             for (auto srcInfo : sourceInfoNodeList) {
-                if (auto srcStmt = srcInfo.first->to<IR::IfStatement>()) {
+                if (srcInfo.first->is<IR::IfStatement>()) {
                     if (ifstmt->srcInfo == srcInfo.first->srcInfo) {
                         ifStmsResult = std::make_tuple(node, srcInfo.second, true);
                     }
@@ -582,7 +582,6 @@ void generateTests(std::vector<std::tuple<const IR::Node*, size_t, bool>> unused
 
     program->apply(genBranch);
     auto chains = genBranch.genPathChains();
-    int chainsCount = chains.size();
 
     for (int i = 0; i < testCount; i++) {
         if (chains.size() == 0) {
@@ -603,7 +602,7 @@ void generateTests(std::vector<std::tuple<const IR::Node*, size_t, bool>> unused
             if (Log::verbose())
                 std::cerr << "Writing program to " << result.toString() << std::endl;
             P4::ToP4 toP4(stream, Log::verbose(), options.file);
-            auto resultProgram = newProgram->apply(toP4);
+            newProgram->apply(toP4);
             delete stream;  // close the file
         }
     }
