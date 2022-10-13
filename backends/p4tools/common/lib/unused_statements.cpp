@@ -237,7 +237,7 @@ bool GenerateBranches::preorder(const IR::SelectExpression* expr) {
             if (!selectExpr->select->srcInfo) continue;
             if (selectExpr->select->srcInfo == expr->select->srcInfo) {
                 auto caseIndex = 0;
-                const IR::SelectCase* selectedCase;
+                const IR::SelectCase* selectedCase = nullptr;
                 IR::Vector<IR::Node> cases;
                 for (auto selectCase : expr->selectCases) {
                     if (caseIndex == (std::get<1>(tuple) - 1)) {
