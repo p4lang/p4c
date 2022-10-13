@@ -159,15 +159,6 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(messag
             return true;
         },
         "Provides a randomization seed");
-    
-    registerOption(
-        "--dcg", "DCG",
-        [this](const char*) {
-            dcg = true;
-            return true;
-        },
-        R"(Build a DCG for input graph. This control flow graph directed cyclic graph can be used
-        for statement reachability analysis.)");
 
     // Inherit some compiler options, setting them up to be forwarded to the compiler.
     std::vector<InheritedCompilerOptionSpec> inheritedCompilerOptions = {

@@ -29,10 +29,6 @@ class AbstractP4cToolOptions : protected Util::Options {
     /// A seed for the PRNG.
     boost::optional<uint32_t> seed = boost::none;
 
-    /// Build a DCG for input program. This control flow graph directed cyclic graph can be used
-    /// for statement reachability analysis.
-    bool dcg = false; 
-
     /// Processes options.
     ///
     /// @returns a compilation context on success, boost::none on error.

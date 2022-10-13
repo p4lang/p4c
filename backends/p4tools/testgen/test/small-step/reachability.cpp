@@ -173,8 +173,8 @@ const IR::Node* getFromHash(const P4Tools::ReachabilityHashType& hash, const cha
 }
 
 TEST_F(P4CReachability, testTableAndActions) {
-    auto result =
-        loadExampleForReachability("../../backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_hit.p4");
+    auto result = loadExampleForReachability(
+        "../../backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_hit.p4)");
     const auto* program = get<0>(result);
     ASSERT_TRUE(program);
     const auto* dcg = std::get<1>(result);
@@ -243,8 +243,8 @@ TEST_F(P4CReachability, testSwitchStatement) {
 
 TEST_F(P4CReachability, testIfStatement) {
     // Example for IsStatement checking.
-    auto result =
-        loadExampleForReachability("../../backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4");
+    auto result = loadExampleForReachability(
+        "../../backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4");
     const auto* program = get<0>(result);
     ASSERT_TRUE(program);
     const auto* dcg = std::get<1>(result);
