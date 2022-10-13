@@ -16,14 +16,14 @@
 #include "frontends/p4/callGraph.h"
 #include "frontends/p4/typeMap.h"
 
-namespace P4 {
+namespace P4Tools {
 
 using DCGVertexType = const IR::Node;
 using DCGVertexTypeSet = std::unordered_set<const DCGVertexType*>;
 using ReachabilityHashType = std::unordered_map<cstring, std::unordered_set<const DCGVertexType*>>;
 
 template <class T>
-class ExtendedCallGraph : public CallGraph<T> {
+class ExtendedCallGraph : public P4::CallGraph<T> {
     friend class P4ProgramDCGCreator;
     ReachabilityHashType hash;
 
@@ -90,11 +90,12 @@ class P4ProgramDCGCreator : public Inspector {
     NodesCallGraph* dcg;
     DCGVertexTypeSet prev;
     P4::TypeMap* typeMap;
+    P4::ReferenceMap* refMap;
     std::unordered_set<const DCGVertexType*> visited;
     const IR::P4Program* p4program;
 
  public:
-    P4ProgramDCGCreator(P4::TypeMap* typeMap, NodesCallGraph* dcg);
+    P4ProgramDCGCreator(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, NodesCallGraph* dcg);
 
     bool preorder(const IR::Annotation* annotation) override;
     bool preorder(const IR::ConstructorCallExpression* callExpr) override;
@@ -118,6 +119,6 @@ class P4ProgramDCGCreator : public Inspector {
     void addEdge(const DCGVertexType* vertex, IR::ID vertexName = IR::ID());
 };
 
-}  // namespace P4
+}  // namespace P4Tools
 
 #endif /* COMMON_COMPILER_REACHABILITY_H_ */

@@ -4,8 +4,23 @@ namespace P4 {
 
 /// Convert an expression into a string that uniqely identifies the lvalue referenced.
 /// Return null cstring if not a reference to a lvalue.
-/// Defined in prediction.cpp.
-static cstring lvalue_name(const IR::Expression *exp);
+static cstring lvalue_name(const IR::Expression *exp) {
+    if (auto p = exp->to<IR::PathExpression>())
+        return p->path->name;
+    if (auto m = exp->to<IR::Member>()) {
+        if (auto base = lvalue_name(m->expr))
+            return base + "." + m->member;
+    } else if (auto a = exp->to<IR::ArrayIndex>()) {
+        if (auto k = a->right->to<IR::Constant>()) {
+            if (auto base = lvalue_name(a->left))
+                return base + "[" + std::to_string(k->asInt()) + "]";
+        }
+    } else if (auto sl = exp->to<IR::Slice>()) {
+        if (auto e0 = lvalue_name(sl->e0))
+            return e0;
+    }
+    return cstring();
+}
 
 /// Test to see if names denote overlapping locations.
 bool names_overlap(cstring name1, cstring name2) {

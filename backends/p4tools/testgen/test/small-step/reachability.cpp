@@ -4,19 +4,14 @@
 
 #include "backends/p4test/version.h"
 #include "backends/p4tools/common/compiler/midend.h"
+#include "backends/p4tools/common/compiler/reachability.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
 #include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "ir/node.h"
 #include "lib/log.h"
-
-
-// Already included in parser_unroll.cpp
-extern const char* sourcePath;
-extern const char* buildPath;
-
-#include "midend/reachability.h"
+#include "test/gtest/env.h"
 
 namespace Test {
 
@@ -44,8 +39,8 @@ std::vector<const IR::IDeclaration*>* getNodeByType(const IR::P4Program* program
 }
 
 /// Loads example from a file
-using ReturnedInfo = std::tuple<const IR::P4Program*, const P4::NodesCallGraph*,
-                                const P4::ReachabilityHashType>;
+using ReturnedInfo = std::tuple<const IR::P4Program*, const P4Tools::NodesCallGraph*,
+                                const P4Tools::ReachabilityHashType>;
 
 ReturnedInfo loadExampleForReachability(const char* curFile) {
     AutoCompileContext autoP4TestContext(new P4ReachabilityContext());
@@ -72,10 +67,10 @@ ReturnedInfo loadExampleForReachability(const char* curFile) {
     CHECK_NULL(program);
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
-    //P4Tools::MidEnd* midEnd = new P4Tools::MidEnd(options);
-    //program = program->apply(*midEnd);
-    auto* currentDCG = new P4::NodesCallGraph("NodesCallGraph");
-    P4::P4ProgramDCGCreator dcgCreator(&typeMap, currentDCG);
+    P4Tools::MidEnd midEnd(options);
+    program = program->apply(midEnd);
+    auto* currentDCG = new P4Tools::NodesCallGraph("NodesCallGraph");
+    P4Tools::P4ProgramDCGCreator dcgCreator(&refMap, &typeMap, currentDCG);
     program->apply(dcgCreator);
     return std::make_tuple(program, currentDCG, currentDCG->getHash());
 }
@@ -163,7 +158,7 @@ TEST_F(P4CReachability, testLoops) {
     ASSERT_TRUE(dcg);
 }
 
-const IR::Node* getFromHash(const P4::ReachabilityHashType& hash, const char* name) {
+const IR::Node* getFromHash(const P4Tools::ReachabilityHashType& hash, const char* name) {
     CHECK_NULL(name);
     auto s = hash.find(name);
     if (s == hash.end()) {

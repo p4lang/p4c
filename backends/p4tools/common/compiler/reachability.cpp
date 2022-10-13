@@ -1,4 +1,4 @@
-#include "midend/reachability.h"
+#include "backends/p4tools/common/compiler/reachability.h"
 
 #include <iostream>
 #include <list>
@@ -6,10 +6,11 @@
 #include <utility>
 #include <vector>
 
-namespace P4 {
+namespace P4Tools {
 
-P4ProgramDCGCreator::P4ProgramDCGCreator(P4::TypeMap* typeMap, NodesCallGraph* dcg)
-    : dcg(dcg), typeMap(typeMap), p4program(nullptr) {
+P4ProgramDCGCreator::P4ProgramDCGCreator(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                                         NodesCallGraph* dcg)
+    : dcg(dcg), typeMap(typeMap), refMap(refMap), p4program(nullptr) {
     CHECK_NULL(dcg);
     setName("P4ProgramDCGCreator");
     visitDagOnce = false;
@@ -323,4 +324,4 @@ void P4ProgramDCGCreator::addEdge(const DCGVertexType* vertex, IR::ID vertexName
     dcg->addToHash(vertex, vertexName);
 }
 
-}  // namespace P4
+}  // namespace P4Tools

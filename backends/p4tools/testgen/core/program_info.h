@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <vector>
 
+#include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/coverage.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
@@ -51,6 +52,9 @@ class ProgramInfo : public ICastable {
 
     /// The P4 program from which this object is derived.
     const IR::P4Program* program;
+
+    /// The generated dcg.
+    const NodesCallGraph* dcg;
 
     /// @returns the series of nodes that has been computed by this particular target.
     const std::vector<Continuation::Command>* getPipelineSequence() const;

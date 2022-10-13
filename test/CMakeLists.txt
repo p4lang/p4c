@@ -56,7 +56,6 @@ set (GTEST_UNITTEST_SOURCES
   gtest/parser_unroll.cpp
   gtest/path_test.cpp
   gtest/p4runtime.cpp
-  gtest/reachability.cpp
   gtest/source_file_test.cpp
   gtest/transforms.cpp
   gtest/stringify.cpp
