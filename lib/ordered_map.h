@@ -18,6 +18,7 @@ limitations under the License.
 #define LIB_ORDERED_MAP_H_
 
 #include <functional>
+#include <initializer_list>
 #include <list>
 #include <map>
 #include <utility>
@@ -96,7 +97,7 @@ class ordered_map {
             init_data_map(); }
         return *this; }
     ordered_map &operator=(ordered_map &&a) = default; /* move is ok? */
-    ordered_map(const std::initializer_list<value_type> &il) : data(il) { init_data_map(); }
+    ordered_map(std::initializer_list<value_type> il) : data(il) { init_data_map(); }
     // FIXME add allocator and comparator ctors...
 
     iterator                    begin() noexcept { return data.begin(); }
