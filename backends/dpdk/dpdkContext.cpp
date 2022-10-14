@@ -46,7 +46,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
         auto control = kv.second->to<IR::P4Control>();
         for (auto d : control->controlLocals) {
             if (auto tbl = d->to<IR::P4Table>()) {
-                struct TableAttributes tblAttr;
+                struct TableAttributes tblAttr = {};
                 tblAttr.direction = direction;
                 tblAttr.controlName = control->name.originalName;
                 tblAttr.externalName = tbl->controlPlaneName();
