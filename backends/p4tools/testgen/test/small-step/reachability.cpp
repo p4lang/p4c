@@ -1,10 +1,11 @@
+#include "backends/p4tools/common/compiler/reachability.h"
+
 #include <stdlib.h>
 
 #include <fstream>
 
 #include "backends/p4test/version.h"
 #include "backends/p4tools/common/compiler/midend.h"
-#include "backends/p4tools/common/compiler/reachability.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
 #include "gtest/gtest.h"

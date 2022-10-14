@@ -1,5 +1,5 @@
-#ifndef BACKENDS_P4TOOLS_COMMON_COMPILER_REACHABILITY_H_
-#define BACKENDS_P4TOOLS_COMMON_COMPILER_REACHABILITY_H_
+#ifndef COMMON_COMPILER_REACHABILITY_H_
+#define COMMON_COMPILER_REACHABILITY_H_
 
 #include <list>
 #include <set>
@@ -9,12 +9,11 @@
 #include <utility>
 #include <variant>
 
-#include "ir/ir.h"
-#include "ir/node.h"
-
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/callGraph.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
+#include "ir/node.h"
 
 namespace P4Tools {
 
@@ -121,4 +120,4 @@ class P4ProgramDCGCreator : public Inspector {
 
 }  // namespace P4Tools
 
-#endif /* BACKENDS_P4TOOLS_COMMON_COMPILER_REACHABILITY_H_ */
+#endif /* COMMON_COMPILER_REACHABILITY_H_ */

@@ -1,8 +1,9 @@
 #include "backends/p4tools/testgen/core/program_info.h"
 
 #include "backends/p4tools/common/lib/ir.h"
-#include "backends/p4tools/testgen/options.h"
 #include "lib/exceptions.h"
+
+#include "backends/p4tools/testgen/options.h"
 
 namespace P4Tools {
 
