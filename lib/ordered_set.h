@@ -43,7 +43,11 @@ class ordered_set {
     list_type                   data;
 
  public:
-    typedef typename list_type::iterator                iterator;
+    // This is a set, so we can't provide any iterator that would make it
+    // possible to modify the values in the set and therefore possibly make the
+    // set contain duplicate values. Therefore we base all our iterators on
+    // list's const_iterator.
+    typedef typename list_type::const_iterator          iterator;
     typedef typename list_type::const_iterator          const_iterator;
     typedef std::reverse_iterator<iterator>             reverse_iterator;
     typedef std::reverse_iterator<const_iterator>       const_reverse_iterator;
