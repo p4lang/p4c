@@ -10,6 +10,7 @@
 #include <boost/optional/optional.hpp>
 #include <boost/random/mersenne_twister.hpp>
 
+#include "ir/ir.h"
 #include "lib/gmputil.h"
 
 namespace P4Tools {
@@ -64,6 +65,20 @@ class TestgenUtils {
     /// @returns a random big integer in the range [0, @param max]. Always return 0 if no seed is
     /// set.
     static big_int getRandBigInt(big_int max);
+
+    /// Shuffles the given iterable @param inp
+    template <typename T>
+    static void shuffle(T* inp) {
+        std::shuffle(inp->begin(), inp->end(), rng);
+    }
+
+    /// @returns a random element from the given range between @param start and @param end.
+    template <typename Iter>
+    static Iter pickRandom(Iter start, Iter end) {
+        int random = getRandInt(std::distance(start, end) - 1);
+        std::advance(start, random);
+        return start;
+    }
 };
 
 }  // namespace P4Tools

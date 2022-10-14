@@ -44,6 +44,11 @@ boost::optional<const IR::P4Program*> CompilerTarget::runCompiler(const std::str
 }
 
 boost::optional<const IR::P4Program*> CompilerTarget::runCompiler(const IR::P4Program* program) {
+    return get().runCompiler_impl(program);
+}
+
+boost::optional<const IR::P4Program*> CompilerTarget::runCompiler_impl(
+    const IR::P4Program* program) const {
     const auto& self = get();
 
     program = self.runFrontend(program);

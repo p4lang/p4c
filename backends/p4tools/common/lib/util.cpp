@@ -7,6 +7,7 @@
 #include <lib/null.h>
 
 #include <chrono>  // NOLINT cpplint throws a warning because Google has a similar library...
+#include <cstdint>
 #include <ctime>
 #include <iomanip>
 #include <sstream>
@@ -56,6 +57,8 @@ uint64_t TestgenUtils::getRandInt(uint64_t max) {
     boost::random::uniform_int_distribution<uint64_t> dist(0, max);
     return dist(rng);
 }
+
+uint64_t TestgenUtils::getRandPct() { return getRandInt(100); }
 
 big_int TestgenUtils::getRandBigInt(big_int max) {
     if (!currentSeed) {

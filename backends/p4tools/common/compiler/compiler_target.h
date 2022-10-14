@@ -46,6 +46,9 @@ class CompilerTarget : public Target {
     /// @see @makeContext.
     virtual ICompileContext* makeContext_impl() const;
 
+    /// @see runCompiler.
+    virtual boost::optional<const IR::P4Program*> runCompiler_impl(const IR::P4Program*) const;
+
     /// This implementation just forwards the given arguments to the compiler.
     ///
     /// @see @initCompiler.
