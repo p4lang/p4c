@@ -30,7 +30,7 @@ void RefersToParser::createConstraint(bool table, cstring currentName, cstring c
         elems.push_back(item);
     }
     str = "";
-    for (auto i = 0; i < elems.size() - 1; i++) {
+    for (long unsigned int i = 0; i < elems.size() - 1; i++) {
         str += elems[i] + ".";
     }
     tmp = str + destTableName + "_key_" + destKeyName;
@@ -78,7 +78,7 @@ const IR::P4Action* RefersToParser::findAction(const IR::ActionListElement* inpu
 // The build starts at index 2 because 0 is the table name and 1 is ",".
 cstring buildName(IR::Vector<IR::AnnotationToken> input) {
     cstring result = "";
-    for (auto i = 2; i < input.size(); i++) {
+    for (long unsigned int i = 2; i < input.size(); i++) {
         result += input[i]->text;
     }
     return result;

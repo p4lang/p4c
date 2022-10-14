@@ -44,12 +44,12 @@ std::ostream& operator<<(std::ostream& os, const Token::Kind& kind) {
 
 const IR::Expression* makeExpr(std::vector<const IR::Expression*> input) {
     const IR::Expression* expr = nullptr;
-    for (int i = 0; i < input.size(); i++) {
+    for (long unsigned int i = 0; i < input.size(); i++) {
         if (auto lOr = input[i]->to<IR::LOr>()) {
             if (expr == nullptr) {
                 if (lOr->right->toString() == "(tmp") {
                     std::vector<const IR::Expression*> tmp;
-                    int idx = i;
+                    long unsigned int idx = i;
                     i++;
                     if (i + 1 == input.size()) {
                         expr = new IR::LOr(input[idx - 1], input[i]);
@@ -101,7 +101,7 @@ const IR::Expression* getIR(std::vector<Token> tokens, IR::Vector<IR::KeyElement
     std::vector<const IR::Expression*> exprVec;
     const IR::Type_Base* type = nullptr;
 
-    for (int i = 0; i < tokens.size(); i++) {
+    for (long unsigned int i = 0; i < tokens.size(); i++) {
         if (tokens[i].kind() == Token::Kind::Minus || tokens[i].kind() == Token::Kind::Plus ||
             tokens[i].kind() == Token::Kind::Equal || tokens[i].kind() == Token::Kind::NotEqual ||
             tokens[i].kind() == Token::Kind::GreaterThan ||
@@ -302,7 +302,7 @@ const IR::Expression* getIR(std::vector<Token> tokens, IR::Vector<IR::KeyElement
         }
     }
     std::vector<const IR::Expression*> tmp;
-    for (int i = 0; i < exprVec.size(); i++) {
+    for (long unsigned int i = 0; i < exprVec.size(); i++) {
         if (auto lNot = exprVec[i]->to<IR::LNot>()) {
             i++;
             auto lNotStr = lNot->expr->toString();
@@ -371,7 +371,7 @@ std::vector<const IR::Expression*> AssertsParser::genIRStructs(cstring str) {
     }
     std::vector<Token> tokens;
     prevToken = Token(Token::Kind::Unknown, " ", 1);
-    for (int i = 0; i < tmp.size(); i++) {
+    for (long unsigned int i = 0; i < tmp.size(); i++) {
         if (tmp[i].kind() == Token::Kind::Text) {
             auto str = static_cast<std::string>(tmp[i].lexeme());
 
@@ -445,7 +445,7 @@ std::vector<const IR::Expression*> AssertsParser::genIRStructs(cstring str) {
     }
     tmp.clear();
     bool flag = true;
-    for (int i = 0; i < tokens.size(); i++) {
+    for (long unsigned int i = 0; i < tokens.size(); i++) {
         if (tokens[i].kind() == Token::Kind::Comment) {
             flag = false;
             continue;
@@ -460,7 +460,7 @@ std::vector<const IR::Expression*> AssertsParser::genIRStructs(cstring str) {
     }
     tokens.clear();
 
-    for (int i = 0; i < tmp.size(); i++) {
+    for (long unsigned int i = 0; i < tmp.size(); i++) {
         if (tmp[i].kind() == Token::Kind::Semicolon) {
             auto expr = getIR(tokens, keyElements);
             result.push_back(expr);
