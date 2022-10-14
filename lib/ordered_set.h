@@ -94,6 +94,8 @@ class ordered_set {
     ordered_set() {}
     ordered_set(const ordered_set &a) : data(a.data) { init_data_map(); }
     ordered_set(std::initializer_list<T> init) : data(init) { init_data_map(); }
+    template<typename InputIt>
+    ordered_set(InputIt first, InputIt last) : data(first, last) { init_data_map(); }
     ordered_set(ordered_set &&a) = default; /* move is ok? */
     ordered_set &operator=(const ordered_set &a) { data = a.data; init_data_map(); return *this; }
     ordered_set &operator=(ordered_set &&a) = default; /* move is ok? */

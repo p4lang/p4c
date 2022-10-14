@@ -84,6 +84,8 @@ class ordered_map {
  public:
     ordered_map() {}
     ordered_map(const ordered_map &a) : data(a.data) { init_data_map(); }
+    template<typename InputIt>
+    ordered_map(InputIt first, InputIt last) : data(first, last) { init_data_map(); }
     ordered_map(ordered_map &&a) = default; /* move is ok? */
     ordered_map &operator=(const ordered_map &a) {
         /* std::list assignment broken by spec if elements are const... */
