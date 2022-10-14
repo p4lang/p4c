@@ -41,7 +41,6 @@ p4tools_add_xfail_reason(
 
     # terminate called after throwing an instance of 'std::runtime_error'
     # Type is not convertible to string
-    control-hs-index-test3.p4 # passed after adding HsIndexSimplifier to Simple Switch
     parser-unroll-test1.p4 # passed after adding of --loopsUnroll flag
 )
 
@@ -52,7 +51,6 @@ p4tools_add_xfail_reason(
     # crashed after adding of --loopsUnroll flag
     # bug after last HsIndexSimplifier (was bad json)
     invalid-hdr-warnings4.p4
-    control-hs-index-test5.p4 # If statement is not supported for this target after HSIndexSimplifier
 )
 
 p4tools_add_xfail_reason(
@@ -61,7 +59,7 @@ p4tools_add_xfail_reason(
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-emi"
   "expected a struct"
   hashing-non-tuple-bmv2.p4
 )
@@ -298,7 +296,7 @@ p4tools_add_xfail_reason(
 
 # TODO: For these test we should add the --permissive flag.
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-emi"
   "The validity bit of .* is tainted"
   control-hs-index-test3.p4
   control-hs-index-test5.p4
