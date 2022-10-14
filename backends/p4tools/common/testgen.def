@@ -25,6 +25,7 @@ class Extracted_Varbits : Type_Bits {
     }
 
     cstring baseName() const { return "SizedVarbit"; }
+
     toString {
         return baseName() + "<" + Util::toString(size) + ">" + "<" + Util::toString(assignedSize) +
                ">";
