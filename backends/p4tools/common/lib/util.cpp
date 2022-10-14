@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <chrono>  // NOLINT cpplint throws a warning because Google has a similar library...
+#include <cstdint>
 #include <ctime>
 #include <iomanip>
 #include <map>
@@ -76,6 +77,8 @@ big_int Utils::getRandBigInt(big_int max) {
     boost::random::uniform_int_distribution<big_int> dist(0, max);
     return dist(rng);
 }
+
+uint64_t TestgenUtils::getRandPct() { return getRandInt(100); }
 
 const IR::Constant* Utils::getRandConstantForWidth(int bitWidth) {
     auto maxVal = IR::getMaxBvVal(bitWidth);
