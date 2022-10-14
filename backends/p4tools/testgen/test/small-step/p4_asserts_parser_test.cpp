@@ -83,14 +83,14 @@ Restrictions loadExample(const char* curFile, bool flag) {
 TEST_F(P4AssertsParserTest, RestrictionCount) {
     Restrictions parsingResult = loadExample(
         "backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions.p4", true);
-    ASSERT_EQ(parsingResult.size(), 1);
-    ASSERT_EQ(parsingResult[0].size(), 3);
+    ASSERT_EQ(parsingResult.size(), (unsigned long)1);
+    ASSERT_EQ(parsingResult[0].size(), (unsigned long)3);
 }
 
 TEST_F(P4AssertsParserTest, Restrictions) {
     Restrictions parsingResult = loadExample(
         "backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions.p4", true);
-    ASSERT_EQ(parsingResult.size(), 1);
+    ASSERT_EQ(parsingResult.size(), (unsigned long)1);
     auto expr1 = P4Tools::IRUtils::getZombieConst(IR::Type_Bits::get(8), 0,
                                                   "ingress.ternary_table_mask_h.h.a1");
     auto expr2 = P4Tools::IRUtils::getZombieConst(IR::Type_Bits::get(8), 0,
@@ -113,7 +113,7 @@ TEST_F(P4AssertsParserTest, Restrictions) {
 TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInTable) {
     Restrictions parsingResult = loadExample(
         "backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_2.p4", false);
-    ASSERT_EQ(parsingResult.size(), 2);
+    ASSERT_EQ(parsingResult.size(), (unsigned long)2);
     auto expr1 =
         P4Tools::IRUtils::getZombieConst(IR::Type_Bits::get(8), 0, "ingress.table_1_key_h.h.a");
     auto expr2 =
@@ -125,7 +125,7 @@ TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInTable) {
 TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInAction) {
     Restrictions parsingResult = loadExample(
         "backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_2.p4", false);
-    ASSERT_EQ(parsingResult.size(), 2);
+    ASSERT_EQ(parsingResult.size(), (unsigned long)2);
     auto expr1 = P4Tools::IRUtils::getZombieConst(IR::Type_Bits::get(8), 0,
                                                   "ingress.table_1_param_ingress.MyAction10");
     auto expr2 =
