@@ -58,8 +58,12 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
     "testgen-p4c-bmv2-emi"
     "differs|Expected ([0-9]+) packets on port ([0-9]+) got ([0-9]+)"
-      # This test fails because we do not have the priority annotation implemented.
-    issue281.p4 # bug in parserunroll
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2"
+  "expected a struct"
+  hashing-non-tuple-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -294,14 +298,15 @@ p4tools_add_xfail_reason(
 
 # TODO: For these test we should add the --permissive flag.
 p4tools_add_xfail_reason(
-    "testgen-p4c-bmv2-emi"
-    "The validity bit of .* is tainted"
-    control-hs-index-test3.p4
-    control-hs-index-test5.p4
-    gauntlet_hdr_function_cast-bmv2.p4
-    issue2345-1.p4
-    issue2345-2.p4
-    issue2345-multiple_dependencies.p4
-    issue2345-with_nested_if.p4
-    issue2345.p4
+  "testgen-p4c-bmv2"
+  "The validity bit of .* is tainted"
+  control-hs-index-test3.p4
+  control-hs-index-test5.p4
+  gauntlet_hdr_function_cast-bmv2.p4
+  issue2345-1.p4
+  issue2345-2.p4
+  issue2345-multiple_dependencies.p4
+  issue2345-with_nested_if.p4
+  issue2345.p4
+  up4.p4
 )
