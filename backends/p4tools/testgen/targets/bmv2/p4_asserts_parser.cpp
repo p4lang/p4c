@@ -101,7 +101,7 @@ const IR::Expression* getIR(std::vector<Token> tokens, IR::Vector<IR::KeyElement
     std::vector<const IR::Expression*> exprVec;
     const IR::Type_Base* type = nullptr;
 
-    for (long unsigned int i = 0; i < tokens.size(); i++) {
+    for (int i = 0; i < (int)tokens.size(); i++) {
         if (tokens[i].kind() == Token::Kind::Minus || tokens[i].kind() == Token::Kind::Plus ||
             tokens[i].kind() == Token::Kind::Equal || tokens[i].kind() == Token::Kind::NotEqual ||
             tokens[i].kind() == Token::Kind::GreaterThan ||
@@ -170,7 +170,7 @@ const IR::Expression* getIR(std::vector<Token> tokens, IR::Vector<IR::KeyElement
             i++;
             i++;
             i++;
-            if (i == tokens.size() || tokens[i].kind() == Token::Kind::Conjunction ||
+            if (i == (int)tokens.size() || tokens[i].kind() == Token::Kind::Conjunction ||
                 tokens[i].kind() == Token::Kind::Disjunction ||
                 tokens[i].kind() == Token::Kind::RightParen ||
                 tokens[i].kind() == Token::Kind::Implication) {
@@ -225,7 +225,7 @@ const IR::Expression* getIR(std::vector<Token> tokens, IR::Vector<IR::KeyElement
                 bool flag = true;
                 while (flag) {
                     i++;
-                    if (i == tokens.size() || tokens[i].kind() == Token::Kind::Conjunction ||
+                    if (i == (int)tokens.size() || tokens[i].kind() == Token::Kind::Conjunction ||
                         tokens[i].kind() == Token::Kind::Disjunction ||
                         tokens[i].kind() == Token::Kind::RightParen) {
                         endIdx = i;
