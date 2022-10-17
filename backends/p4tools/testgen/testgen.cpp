@@ -85,12 +85,15 @@ int Testgen::mainImpl(const IR::P4Program* program) {
     auto symExec = [&solver, &programInfo, seed]() -> ExplorationStrategy* {
         std::string explorationStrategy = TestgenOptions::get().explorationStrategy;
         if (explorationStrategy.compare("randomAccessStack") == 0) {
+            ::warning("Exploration strategy randomAccessStack requires --pop-level flag.\n");
             // If the user mistakenly specifies an invalid popLevel, we set it to 3.
             int popLevel =
                 (TestgenOptions::get().popLevel > 1) ? TestgenOptions::get().popLevel : 3;
             return new RandomAccessStack(solver, *programInfo, seed, popLevel);
         }
         if (explorationStrategy.compare("linearEnumeration") == 0) {
+            ::warning(
+                "Exploration strategy linearEnumeration requires --linear-enumeration flag.\n");
             // If the user mistakenly specifies an invalid bound, we set it to 2
             // to generate at least 2 tests.
             int linearBound = (TestgenOptions::get().linearEnumeration > 1)
@@ -103,6 +106,8 @@ int Testgen::mainImpl(const IR::P4Program* program) {
         }
         if (explorationStrategy.compare("randomAccessMaxCoverage") == 0) {
             // If the user mistakenly sets and invalid saddlePoint, we set it to 5.
+            ::warning(
+                "Exploration strategy randomAccessMaxCoverage requires --saddle-point flag.\n");
             int saddlePoint =
                 (TestgenOptions::get().saddlePoint > 1) ? TestgenOptions::get().saddlePoint : 5;
             return new RandomAccessMaxCoverage(solver, *programInfo, seed, saddlePoint);
