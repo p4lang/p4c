@@ -3,6 +3,8 @@
 #include "backends/p4tools/common/lib/ir.h"
 #include "lib/exceptions.h"
 
+#include "backends/p4tools/testgen/options.h"
+
 namespace P4Tools {
 
 namespace P4Testgen {
@@ -12,6 +14,15 @@ ProgramInfo::ProgramInfo(const IR::P4Program* program)
       concolicMethodImpls({}),
       program(program) {
     concolicMethodImpls.add(*Concolic::getCoreConcolicMethodImpls());
+    if (TestgenOptions::get().dcg) {
+        // Create DCG.
+        P4::ReferenceMap refMap;
+        P4::TypeMap typeMap;
+        auto* currentDCG = new NodesCallGraph("NodesCallGraph");
+        P4ProgramDCGCreator dcgCreator(&refMap, &typeMap, currentDCG);
+        program->apply(dcgCreator);
+        dcg = currentDCG;
+    }
     program->apply(Coverage::CollectStatements(allStatements));
 }
 
