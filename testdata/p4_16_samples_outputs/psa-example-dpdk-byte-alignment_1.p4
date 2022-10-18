@@ -95,7 +95,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
         if (user_meta.port_out == 1) {
             tbl.apply();
             counter0.count(1023, 20);
-            counter1.count(512);
+            counter1.count(512, 32);
             counter2.count(1023, 64);
             user_meta.port_out = reg.read(1);
             test(hdr.ipv4.version);

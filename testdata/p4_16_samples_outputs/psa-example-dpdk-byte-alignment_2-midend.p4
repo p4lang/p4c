@@ -88,7 +88,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     }
     @hidden action psaexampledpdkbytealignment_2l98() {
         counter0_0.count(12w1023, 32w20);
-        counter1_0.count(12w512);
+        counter1_0.count(12w512, 32w32);
         counter2_0.count(12w1023, 32w64);
         user_meta.port_out = reg_0.read(12w1);
     }
