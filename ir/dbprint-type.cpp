@@ -108,7 +108,7 @@ void IR::Type_Tuple::dbprint(std::ostream& out) const {
 
 void IR::Type_Vector::dbprint(std::ostream& out) const {
     int flags = dbgetflags(out);
-    out << Brief << "Vector<" << elementType << ">";
+    out << Brief << "List<" << elementType << ">";
     dbsetflags(out, flags);
 }
 
