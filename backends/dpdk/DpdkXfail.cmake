@@ -1,9 +1,4 @@
 p4c_add_xfail_reason("dpdk"
-  "shift amount limited to 64 bits on this target"
-  testdata/p4_16_samples/psa-example-register2-bmv2.p4
-)
-
-p4c_add_xfail_reason("dpdk"
   "Expected packet length argument for count method of indirect counter"
   testdata/p4_16_samples/psa-example-counters-bmv2.p4
   )
@@ -93,12 +88,6 @@ p4c_add_xfail_reason("dpdk"
   "No argument supplied for parameter"
   testdata/p4_16_samples/pna-example-mirror-packet-error3.p4
   )
-
-p4c_add_xfail_reason("dpdk"
-  "All table keys together with holes in the underlying structure should fit in 64 bytes"
-   testdata/p4_16_samples/psa-dpdk-table-key-error.p4
-   testdata/p4_16_samples/psa-dpdk-table-key-error-1.p4
-   )
 
 p4c_add_xfail_reason("dpdk"
   "must only be called from within an action"

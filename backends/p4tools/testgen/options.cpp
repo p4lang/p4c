@@ -160,6 +160,15 @@ TestgenOptions::TestgenOptions()
             return true;
         },
         "Print timing report summary at the end of the program.");
+
+    registerOption(
+        "--dcg", "DCG",
+        [this](const char*) {
+            dcg = true;
+            return true;
+        },
+        R"(Build a DCG for input graph. This control flow graph directed cyclic graph can be used
+        for statement reachability analysis.)");
 }
 
 }  // namespace P4Tools
