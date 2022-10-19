@@ -20,6 +20,10 @@ class AssertsParser : public Transform {
 
  public:
     explicit AssertsParser(std::vector<std::vector<const IR::Expression*>>& output);
+    /// A function that calls the beginning of the transformation of restrictions from a string into
+    /// an IR::Expression. Internally calls all other necessary functions, for example
+    /// combineTokensToNames and the like, to eventually get an IR expression that meets the string
+    /// constraint
     std::vector<const IR::Expression*> genIRStructs(cstring str);
     const IR::Node* postorder(IR::P4Table* node) override;
 };
@@ -73,24 +77,22 @@ class Token {
     Token(Kind kind, const char* beg, const char* end) noexcept
         : m_kind{kind}, m_lexeme(beg, std::distance(beg, end)) {}
 
-    Kind kind() const noexcept { return m_kind; }
+    Kind kind() const noexcept;
 
-    void kind(Kind kind) noexcept { m_kind = kind; }
+    void kind(Kind kind) noexcept;
 
-    bool is(Kind kind) const noexcept { return m_kind == kind; }
+    bool is(Kind kind) const noexcept;
 
-    bool is_not(Kind kind) const noexcept { return m_kind != kind; }
+    bool is_not(Kind kind) const noexcept;
 
-    bool is_one_of(Kind k1, Kind k2) const noexcept { return is(k1) || is(k2); }
+    bool is_one_of(Kind k1, Kind k2) const noexcept;
 
     template <typename... Ts>
-    bool is_one_of(Kind k1, Kind k2, Ts... ks) const noexcept {
-        return is(k1) || is_one_of(k2, ks...);
-    }
+    bool is_one_of(Kind k1, Kind k2, Ts... ks) const noexcept;
 
-    std::string_view lexeme() const noexcept { return m_lexeme; }
+    std::string_view lexeme() const noexcept;
 
-    void lexeme(std::string_view lexeme) noexcept { m_lexeme = std::move(lexeme); }
+    void lexeme(std::string_view lexeme) noexcept;
 };
 
 class Lexer {
@@ -103,9 +105,9 @@ class Lexer {
  private:
     Token atom(Token::Kind) noexcept;
 
-    char peek() const noexcept { return *m_beg; }
-    char prev() noexcept { return *m_beg--; }
-    char get() noexcept { return *m_beg++; }
+    char peek() const noexcept;
+    char prev() noexcept;
+    char get() noexcept;
 };
 }  // namespace AssertsParser
 }  // namespace P4Tools

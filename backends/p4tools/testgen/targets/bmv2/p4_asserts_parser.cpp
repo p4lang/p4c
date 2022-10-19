@@ -16,6 +16,36 @@ AssertsParser::AssertsParser(std::vector<std::vector<const IR::Expression*>>& ou
     setName("Restrictions");
 }
 
+/// The function to get kind from token
+Token::Kind Token::kind() const noexcept { return m_kind; }
+/// The function to replace the token kind with another kind
+void Token::kind(Token::Kind kind) noexcept { m_kind = kind; }
+/// Kind comparison function. Allows you to compare token kind with the specified kind and return
+/// bool values, replacement for ==
+bool Token::is(Token::Kind kind) const noexcept { return m_kind == kind; }
+/// Kind comparison function. Allows you to compare token kind with the specified kind and return
+/// bool values, replacement for !=
+bool Token::is_not(Token::Kind kind) const noexcept { return m_kind != kind; }
+/// Functions for multiple comparison kind
+bool Token::is_one_of(Token::Kind k1, Token::Kind k2) const noexcept { return is(k1) || is(k2); }
+template <typename... Ts>
+bool Token::is_one_of(Token::Kind k1, Token::Kind k2, Ts... ks) const noexcept {
+    return is(k1) || is_one_of(k2, ks...);
+}
+/// The function to get lexeme from token
+std::string_view Token::lexeme() const noexcept { return m_lexeme; }
+/// The function to replace the token lexeme with another lexeme
+void Token::lexeme(std::string_view lexeme) noexcept { m_lexeme = std::move(lexeme); }
+
+/// Function to get the current character
+char Lexer::peek() const noexcept { return *m_beg; }
+/// The function advances the iterator one index back and returns the character corresponding to the
+/// position of the iterator
+char Lexer::prev() noexcept { return *m_beg--; }
+/// The function advances the iterator one index forward and returns the character corresponding to
+/// the position of the iterator
+char Lexer::get() noexcept { return *m_beg++; }
+
 bool is_space(char c) noexcept {
     switch (c) {
         case ' ':
@@ -42,126 +72,121 @@ std::ostream& operator<<(std::ostream& os, const Token::Kind& kind) {
     return os << names[static_cast<int>(kind)];
 }
 
-const IR::Expression* makeExpr(std::vector<const IR::Expression*> input) {
+/// The function combines IR expressions separated by the "or" ,"and" operators
+/// and also by the implication which is indicated by "(tmp" ,inside the algorithm,
+/// for the convenience of determining the order of expressions. At the output, we get one
+/// expression. For example, at the input we have a vector of expressions: [IR::Expression, IR::LOr
+/// with name "(tmp", IR::Expression, IR::LAnd, IR::Expression] The result will be an IR::Expression
+/// equal to !IR::Expression || (IR::Expression && IR::Expression)
+const IR::Expression* makeSingleExpr(std::vector<const IR::Expression*> input) {
     const IR::Expression* expr = nullptr;
     for (long unsigned int i = 0; i < input.size(); i++) {
         if (auto lOr = input[i]->to<IR::LOr>()) {
-            if (expr == nullptr) {
-                if (lOr->right->toString() == "(tmp") {
-                    std::vector<const IR::Expression*> tmp;
-                    long unsigned int idx = i;
-                    i++;
-                    if (i + 1 == input.size()) {
-                        expr = new IR::LOr(input[idx - 1], input[i]);
-                        break;
-                    }
-                    while (i < input.size()) {
-                        tmp.push_back(input[i]);
-                        i++;
-                    }
-                    expr = new IR::LOr(input[idx - 1], makeExpr(tmp));
+            if (lOr->right->toString() == "(tmp") {
+                if (i + 1 == input.size()) break;
+                std::vector<const IR::Expression*> tmp;
+                long unsigned int idx = i;
+                i++;
+                if (i + 1 == input.size()) {
+                    expr = new IR::LOr(input[idx - 1], input[i]);
                     break;
                 }
-                expr = new IR::LOr(input[i - 1], input[i + 1]);
-                continue;
-            } else if (lOr->right->toString() == "(tmp") {
-                if (i + 1 != input.size()) {
-                    std::vector<const IR::Expression*> tmp;
+                while (i < input.size()) {
+                    tmp.push_back(input[i]);
                     i++;
-                    if (i + 1 == input.size()) {
-                        expr = new IR::LOr(input[i - 2], input[i]);
-                    }
-                    while (i < input.size()) {
-                        tmp.push_back(input[i]);
-                        i++;
-                    }
-                    expr = new IR::LOr(expr, makeExpr(tmp));
                 }
-
+                if (expr == nullptr)
+                    expr = new IR::LOr(input[idx - 1], makeSingleExpr(tmp));
+                else
+                    expr = new IR::LOr(expr, makeSingleExpr(tmp));
+                break;
             } else {
-                if (i + 1 != input.size()) {
+                if (i + 1 == input.size()) break;
+                if (expr == nullptr)
+                    expr = new IR::LOr(input[i - 1], input[i + 1]);
+                else
                     expr = new IR::LOr(expr, input[i + 1]);
-                }
             }
         }
         if (input[i]->is<IR::LAnd>()) {
-            if (expr == nullptr) {
+            if (i + 1 == input.size()) break;
+            if (expr == nullptr)
                 expr = new IR::LAnd(input[i - 1], input[i + 1]);
-                continue;
-            } else {
-                if (i + 1 != input.size()) expr = new IR::LAnd(expr, input[i + 1]);
-            }
+            else
+                expr = new IR::LAnd(expr, input[i + 1]);
         }
     }
 
     return expr;
 }
+
+/// Determines the token type according to the table key and generates a zombie constant for it.
+const IR::Expression* makeConstant(Token input, IR::Vector<IR::KeyElement> keyElements) {
+    const IR::Type_Base* type = nullptr;
+    const IR::Expression* result = nullptr;
+    std::string str = static_cast<std::string>(input.lexeme());
+    if (input.is(Token::Kind::Text)) {
+        for (auto key : keyElements) {
+            cstring annotationName = "";
+            for (auto annotation : key->annotations->annotations) {
+                if (annotation->name.name == "name") {
+                    if (annotation->body.size() > 0) annotationName = annotation->body[0]->text;
+                }
+            }
+            if (str.find(key->expression->toString()) != std::string::npos ||
+                (annotationName.size() > 0 && str.find(annotationName) != std::string::npos)) {
+                if (auto bit = key->expression->type->to<IR::Type_Bits>()) {
+                    type = bit;
+                } else if (auto varbit = key->expression->type->to<IR::Extracted_Varbits>()) {
+                    type = varbit;
+                } else if (key->expression->type->to<IR::Type_Unknown>()) {
+                    type = IR::Type_Bits::get(32);
+                } else {
+                    type = IR::Type_Bits::get(1);
+                }
+                result = IRUtils::getZombieConst(type, 0, str);
+                break;
+            }
+        }
+        if (!result) {
+            type = IR::Type_Bits::get(8);
+            result = IRUtils::getZombieConst(type, 0, str);
+        }
+
+    } else if (input.is(Token::Kind::Number)) {
+        if (!type) {
+            type = IR::Type_Bits::get(8);
+        }
+        result = IRUtils::getConstant(type, static_cast<big_int>(str));
+    }
+
+    return result;
+}
+
+/// Converts a vector of tokens into a single IR:Expression
+/// For example, at the input we have a vector of tokens:
+/// [key1(Text), ->(Implication), key2(Text), &&(Conjunction), key3(Text)] The result will be an
+/// IR::Expression equal to !IR::Expression || (IR::Expression && IR::Expression)
 const IR::Expression* getIR(std::vector<Token> tokens, IR::Vector<IR::KeyElement> keyElements) {
     const IR::Expression* expr = nullptr;
     std::vector<const IR::Expression*> exprVec;
-    const IR::Type_Base* type = nullptr;
 
     for (int i = 0; i < (int)tokens.size(); i++) {
-        if (tokens[i].kind() == Token::Kind::Minus || tokens[i].kind() == Token::Kind::Plus ||
-            tokens[i].kind() == Token::Kind::Equal || tokens[i].kind() == Token::Kind::NotEqual ||
-            tokens[i].kind() == Token::Kind::GreaterThan ||
-            tokens[i].kind() == Token::Kind::GreaterEqual ||
-            tokens[i].kind() == Token::Kind::LessThan ||
-            tokens[i].kind() == Token::Kind::LessEqual || tokens[i].kind() == Token::Kind::Slash ||
-            tokens[i].kind() == Token::Kind::Percent || tokens[i].kind() == Token::Kind::Shr ||
-            tokens[i].kind() == Token::Kind::Shl || tokens[i].kind() == Token::Kind::Mul ||
-            tokens[i].kind() == Token::Kind::NotEqual) {
+        if (tokens[i].is_one_of(
+                Token::Kind::Minus, Token::Kind::Plus, Token::Kind::Equal, Token::Kind::NotEqual,
+                Token::Kind::GreaterThan, Token::Kind::GreaterEqual, Token::Kind::LessThan,
+                Token::Kind::LessEqual, Token::Kind::Slash, Token::Kind::Percent, Token::Kind::Shr,
+                Token::Kind::Shl, Token::Kind::Mul, Token::Kind::NotEqual)) {
             const IR::Expression* leftL = nullptr;
             const IR::Expression* rightL = nullptr;
             if (i != 0) {
                 i--;
                 i--;
             }
-            if (i <= 0 || tokens[i].kind() == Token::Kind::Conjunction ||
-                tokens[i].kind() == Token::Kind::Disjunction ||
-                tokens[i].kind() == Token::Kind::LeftParen ||
-                tokens[i].kind() == Token::Kind::Implication) {
+            if (i <= 0 || tokens[i].is_one_of(Token::Kind::Conjunction, Token::Kind::Disjunction,
+                                              Token::Kind::LeftParen, Token::Kind::Implication)) {
                 i++;
-
-                if (tokens[i].kind() == Token::Kind::Text) {
-                    std::string str = static_cast<std::string>(tokens[i].lexeme());
-                    for (auto key : keyElements) {
-                        cstring annotationName = "";
-                        for (auto annotation : key->annotations->annotations) {
-                            if (annotation->name.name == "name") {
-                                if (annotation->body.size() > 0)
-                                    annotationName = annotation->body[0]->text;
-                            }
-                        }
-                        if (str.find(key->expression->toString()) != std::string::npos ||
-                            (annotationName.size() > 0 &&
-                             str.find(annotationName) != std::string::npos)) {
-                            if (auto bit = key->expression->type->to<IR::Type_Bits>()) {
-                                type = bit;
-                            } else if (auto varbit =
-                                           key->expression->type->to<IR::Extracted_Varbits>()) {
-                                type = varbit;
-                            } else if (key->expression->type->to<IR::Type_Unknown>()) {
-                                type = IR::Type_Bits::get(32);
-                            } else {
-                                type = IR::Type_Bits::get(1);
-                            }
-                            leftL = IRUtils::getZombieConst(type, 0, str);
-                            break;
-                        }
-                    }
-                    if (!leftL) {
-                        type = IR::Type_Bits::get(8);
-                        leftL = IRUtils::getZombieConst(type, 0, str);
-                    }
-
-                } else if (tokens[i].kind() == Token::Kind::Number) {
-                    if (!type) {
-                        type = IR::Type_Bits::get(8);
-                    }
-                    std::string str = static_cast<std::string>(tokens[i].lexeme());
-                    leftL = IRUtils::getConstant(type, static_cast<big_int>(str));
-                }
+                leftL = makeConstant(tokens[i], keyElements);
             } else {
                 leftL = exprVec[exprVec.size() - 1];
                 exprVec.pop_back();
@@ -170,53 +195,15 @@ const IR::Expression* getIR(std::vector<Token> tokens, IR::Vector<IR::KeyElement
             i++;
             i++;
             i++;
-            if (i == (int)tokens.size() || tokens[i].kind() == Token::Kind::Conjunction ||
-                tokens[i].kind() == Token::Kind::Disjunction ||
-                tokens[i].kind() == Token::Kind::RightParen ||
-                tokens[i].kind() == Token::Kind::Implication) {
+            if (i == (int)tokens.size() ||
+                tokens[i].is_one_of(Token::Kind::Conjunction, Token::Kind::Disjunction,
+                                    Token::Kind::RightParen, Token::Kind::Implication)) {
                 i--;
-                if (tokens[i].kind() == Token::Kind::Text) {
-                    std::string str = static_cast<std::string>(tokens[i].lexeme());
-                    for (auto key : keyElements) {
-                        cstring annotationName = "";
-                        for (auto annotation : key->annotations->annotations) {
-                            if (annotation->name.name == "name") {
-                                if (annotation->body.size() > 0)
-                                    annotationName = annotation->body[0]->text;
-                            }
-                        }
-                        if (str.find(key->expression->toString()) != std::string::npos ||
-                            (annotationName.size() > 0 &&
-                             str.find(annotationName) != std::string::npos)) {
-                            if (auto bit = key->expression->type->to<IR::Type_Bits>()) {
-                                type = bit;
-                            } else if (auto varbit =
-                                           key->expression->type->to<IR::Extracted_Varbits>()) {
-                                type = varbit;
-                            } else if (key->expression->type->to<IR::Type_Unknown>()) {
-                                type = IR::Type_Bits::get(32);
-                            } else {
-                                type = IR::Type_Bits::get(1);
-                            }
-                            if (auto constant = leftL->to<IR::Constant>()) {
-                                auto clone = constant->clone();
-                                clone->type = type;
-                                leftL = clone;
-                            }
-                            rightL = IRUtils::getZombieConst(type, 0, str);
-                            break;
-                        }
-                    }
-                    if (!rightL) {
-                        type = IR::Type_Bits::get(8);
-                        rightL = IRUtils::getZombieConst(type, 0, str);
-                    }
-                } else if (tokens[i].kind() == Token::Kind::Number) {
-                    if (!type) {
-                        type = IR::Type_Bits::get(8);
-                    }
-                    std::string str = static_cast<std::string>(tokens[i].lexeme());
-                    rightL = IRUtils::getConstant(type, static_cast<big_int>(str));
+                rightL = makeConstant(tokens[i], keyElements);
+                if (auto constant = leftL->to<IR::Constant>()) {
+                    auto clone = constant->clone();
+                    clone->type = rightL->type;
+                    leftL = clone;
                 }
             } else {
                 i--;
@@ -225,15 +212,14 @@ const IR::Expression* getIR(std::vector<Token> tokens, IR::Vector<IR::KeyElement
                 bool flag = true;
                 while (flag) {
                     i++;
-                    if (i == (int)tokens.size() || tokens[i].kind() == Token::Kind::Conjunction ||
-                        tokens[i].kind() == Token::Kind::Disjunction ||
-                        tokens[i].kind() == Token::Kind::RightParen) {
+                    if (i == (int)tokens.size() ||
+                        tokens[i].is_one_of(Token::Kind::Conjunction, Token::Kind::Disjunction,
+                                            Token::Kind::RightParen)) {
                         endIdx = i;
                         flag = false;
                         i = idx;
                     }
                 }
-
                 std::vector<Token> rightTokens;
                 for (int j = idx; j < endIdx + 1; j++) {
                     rightTokens.push_back(tokens[j]);
@@ -242,36 +228,36 @@ const IR::Expression* getIR(std::vector<Token> tokens, IR::Vector<IR::KeyElement
                 rightL = getIR(rightTokens, keyElements);
             }
             i--;
-            if (tokens[i].kind() == Token::Kind::Minus) expr = new IR::Sub(leftL, rightL);
-            if (tokens[i].kind() == Token::Kind::Plus) expr = new IR::Add(leftL, rightL);
-            if (tokens[i].kind() == Token::Kind::Equal) expr = new IR::Equ(leftL, rightL);
-            if (tokens[i].kind() == Token::Kind::NotEqual) expr = new IR::Neq(leftL, rightL);
-            if (tokens[i].kind() == Token::Kind::GreaterThan) expr = new IR::Grt(leftL, rightL);
-            if (tokens[i].kind() == Token::Kind::GreaterEqual) expr = new IR::Geq(leftL, rightL);
-            if (tokens[i].kind() == Token::Kind::LessThan) expr = new IR::Lss(leftL, rightL);
-            if (tokens[i].kind() == Token::Kind::LessEqual) expr = new IR::Leq(leftL, rightL);
-            if (tokens[i].kind() == Token::Kind::Slash) expr = new IR::Div(leftL, rightL);
-            if (tokens[i].kind() == Token::Kind::Percent) expr = new IR::Mod(leftL, rightL);
-            if (tokens[i].kind() == Token::Kind::Shr) expr = new IR::Shr(leftL, rightL);
-            if (tokens[i].kind() == Token::Kind::Shl) expr = new IR::Shl(leftL, rightL);
-            if (tokens[i].kind() == Token::Kind::Mul) expr = new IR::Mul(leftL, rightL);
-            if (tokens[i].kind() == Token::Kind::NotEqual) expr = new IR::Neq(leftL, rightL);
+            if (tokens[i].is(Token::Kind::Minus)) expr = new IR::Sub(leftL, rightL);
+            if (tokens[i].is(Token::Kind::Plus)) expr = new IR::Add(leftL, rightL);
+            if (tokens[i].is(Token::Kind::Equal)) expr = new IR::Equ(leftL, rightL);
+            if (tokens[i].is(Token::Kind::NotEqual)) expr = new IR::Neq(leftL, rightL);
+            if (tokens[i].is(Token::Kind::GreaterThan)) expr = new IR::Grt(leftL, rightL);
+            if (tokens[i].is(Token::Kind::GreaterEqual)) expr = new IR::Geq(leftL, rightL);
+            if (tokens[i].is(Token::Kind::LessThan)) expr = new IR::Lss(leftL, rightL);
+            if (tokens[i].is(Token::Kind::LessEqual)) expr = new IR::Leq(leftL, rightL);
+            if (tokens[i].is(Token::Kind::Slash)) expr = new IR::Div(leftL, rightL);
+            if (tokens[i].is(Token::Kind::Percent)) expr = new IR::Mod(leftL, rightL);
+            if (tokens[i].is(Token::Kind::Shr)) expr = new IR::Shr(leftL, rightL);
+            if (tokens[i].is(Token::Kind::Shl)) expr = new IR::Shl(leftL, rightL);
+            if (tokens[i].is(Token::Kind::Mul)) expr = new IR::Mul(leftL, rightL);
+            if (tokens[i].is(Token::Kind::NotEqual)) expr = new IR::Neq(leftL, rightL);
             exprVec.push_back(expr);
 
-        } else if (tokens[i].kind() == Token::Kind::LNot) {
+        } else if (tokens[i].is(Token::Kind::LNot)) {
             auto flag = true;
             int idx = i;
             cstring str = "";
             auto first = true;
             while (flag) {
                 i++;
-                if (tokens[i].kind() == Token::Kind::LeftParen) {
+                if (tokens[i].is(Token::Kind::LeftParen)) {
                     first = false;
                     continue;
                 } else if (first) {
                     break;
                 }
-                if (tokens[i].kind() != Token::Kind::RightParen) {
+                if (tokens[i].is_not(Token::Kind::RightParen)) {
                     str += static_cast<std::string>(tokens[i].lexeme());
                 } else {
                     flag = false;
@@ -283,7 +269,7 @@ const IR::Expression* getIR(std::vector<Token> tokens, IR::Vector<IR::KeyElement
             }
             const IR::Expression* expr1 = new IR::PathExpression(new IR::Path(IR::ID(str)));
             exprVec.push_back(new IR::LNot(expr1));
-        } else if (tokens[i].kind() == Token::Kind::Implication) {
+        } else if (tokens[i].is(Token::Kind::Implication)) {
             auto tmp = exprVec[exprVec.size() - 1];
             exprVec.pop_back();
             const IR::Expression* expr1 = new IR::PathExpression(new IR::Path(IR::ID("tmp")));
@@ -291,11 +277,11 @@ const IR::Expression* getIR(std::vector<Token> tokens, IR::Vector<IR::KeyElement
             exprVec.push_back(tmp);
             const IR::Expression* expr2 = new IR::PathExpression(new IR::Path(IR::ID("(tmp")));
             exprVec.push_back(new IR::LOr(expr1, expr2));
-        } else if (tokens[i].kind() == Token::Kind::Disjunction) {
+        } else if (tokens[i].is(Token::Kind::Disjunction)) {
             const IR::Expression* expr1 = new IR::PathExpression(new IR::Path(IR::ID("tmp")));
             const IR::Expression* expr2 = new IR::PathExpression(new IR::Path(IR::ID("tmp")));
             exprVec.push_back(new IR::LOr(expr1, expr2));
-        } else if (tokens[i].kind() == Token::Kind::Conjunction) {
+        } else if (tokens[i].is(Token::Kind::Conjunction)) {
             const IR::Expression* expr1 = new IR::PathExpression(new IR::Path(IR::ID("tmp")));
             const IR::Expression* expr2 = new IR::PathExpression(new IR::Path(IR::ID("tmp")));
             exprVec.push_back(new IR::LAnd(expr1, expr2));
@@ -329,139 +315,200 @@ const IR::Expression* getIR(std::vector<Token> tokens, IR::Vector<IR::KeyElement
         return expr;
     }
 
-    expr = makeExpr(tmp);
+    expr = makeSingleExpr(tmp);
 
     return expr;
 }
-
-std::vector<const IR::Expression*> AssertsParser::genIRStructs(cstring str) {
-    Lexer lex(str);
-    std::vector<Token> tmp;
-    std::vector<const IR::Expression*> result;
+/// Combines successive tokens into variable names.
+/// Returns a vector with tokens combined into names.
+/// For example, at the input we have a vector of tokens:
+/// [a(Text),c(Text),b(text), +(Plus), 1(Number),2(number)]
+/// The result will be [acb(Text), +(Plus), 1(Number),2(number)]
+std::vector<Token> combineTokensToNames(std::vector<Token> input) {
+    std::vector<Token> result;
     Token prevToken = Token(Token::Kind::Unknown, " ", 1);
     cstring txt = "";
-    cstring numb = "";
-    for (auto token = lex.next(); !token.is_one_of(Token::Kind::End, Token::Kind::Unknown);
-         token = lex.next()) {
-        if (prevToken.kind() == Token::Kind::Text && token.kind() == Token::Kind::Number) {
-            txt += static_cast<std::string>(token.lexeme());
+    for (long unsigned int i = 0; i < input.size(); i++) {
+        if (prevToken.is(Token::Kind::Text) && input[i].is(Token::Kind::Number)) {
+            txt += static_cast<std::string>(input[i].lexeme());
             continue;
         }
-        if (token.kind() == Token::Kind::Text) {
-            auto strtmp = static_cast<std::string>(token.lexeme());
-            if (strtmp == "." && prevToken.kind() == Token::Kind::Number) {
+        if (input[i].is(Token::Kind::Text)) {
+            auto strtmp = static_cast<std::string>(input[i].lexeme());
+            if (strtmp == "." && prevToken.is(Token::Kind::Number)) {
                 ::error(
                     "Syntax error, unexpected INTEGER. P4 does not support floating point values. "
                     "Exiting");
             }
             txt += strtmp;
-            if (prevToken.kind() == Token::Kind::Number) {
+            if (prevToken.is(Token::Kind::Number)) {
                 txt = static_cast<std::string>(prevToken.lexeme()) + txt;
-                tmp.pop_back();
+                result.pop_back();
             }
         } else {
             if (txt.size() > 0) {
-                tmp.push_back(Token(Token::Kind::Text, txt, txt.size()));
+                result.push_back(Token(Token::Kind::Text, txt, txt.size()));
                 txt = "";
             }
-            tmp.push_back(token);
+            result.push_back(input[i]);
         }
 
-        prevToken = token;
+        prevToken = input[i];
     }
-    std::vector<Token> tokens;
-    prevToken = Token(Token::Kind::Unknown, " ", 1);
-    for (long unsigned int i = 0; i < tmp.size(); i++) {
-        if (tmp[i].kind() == Token::Kind::Text) {
-            auto str = static_cast<std::string>(tmp[i].lexeme());
+    return result;
+}
+
+/// Combines successive tokens into numbers. For converting boolean or Hex, Octal values ​​to
+/// numbers we must first use combineTokensToNames. Returns a vector with tokens combined into
+/// numbers. For example, at the input we have a vector of tokens: [a(Text),c(Text),b(text),
+/// +(Plus), 1(Number),2(number)] The result will be [a(Text),c(Text),b(text), +(Plus), 12(number)]
+/// Other examples :
+/// [acb(text), ||(Disjunction), true(text)] -> [acb(text), ||(Disjunction), 1(number)] - This
+/// example is possible only after executing combineTokensToNames, since to convert bool values,
+/// they must first be collected from text tokens in the combineTokensToNames function
+/// [2(Number), 5(number), 5(number), ==(Equal), 0xff(Text)] -> [255(number), ==(Equal),
+/// 0xff(Number)] - This example is possible only after executing combineTokensToNames
+std::vector<Token> combineTokensToNumbers(std::vector<Token> input) {
+    cstring numb = "";
+    std::vector<Token> result;
+    for (long unsigned int i = 0; i < input.size(); i++) {
+        if (input[i].is(Token::Kind::Text)) {
+            auto str = static_cast<std::string>(input[i].lexeme());
 
             if (str.rfind("0x", 0) == 0 || str.rfind("0X", 0) == 0) {
                 cstring cstr = str;
-                tokens.push_back(Token(Token::Kind::Number, cstr, cstr.size()));
+                result.push_back(Token(Token::Kind::Number, cstr, cstr.size()));
                 continue;
             }
+
+            if (str == "true") {
+                result.push_back(Token(Token::Kind::Number, "1", 1));
+                continue;
+            }
+
+            if (str == "false") {
+                result.push_back(Token(Token::Kind::Number, "0", 1));
+                continue;
+            }
+        }
+        if (input[i].is(Token::Kind::Number)) {
+            numb += static_cast<std::string>(input[i].lexeme());
+            if (i + 1 == input.size()) {
+                result.push_back(Token(Token::Kind::Number, numb, numb.size()));
+                numb = "";
+                continue;
+            }
+        } else {
+            if (numb.size() > 0) {
+                result.push_back(Token(Token::Kind::Number, numb, numb.size()));
+                numb = "";
+            }
+            result.push_back(input[i]);
+        }
+    }
+    return result;
+}
+/// Convert access tokens or keys into table keys. For converting access tokens or keys ​​to
+/// table keys we must first use combineTokensToNames. Returns a vector with tokens converted into
+/// table keys.
+/// For example, at the input we have a vector of tokens:
+/// [key::mask(Text), ==(Equal) , 0(Number)] The result will be [tableName_mask_key(Text), ==(Equal)
+/// , 0(Number)] Other examples : [key::prefix_length(Text), ==(Equal) , 0(Number)] ->
+/// [tableName_lpm_prefix_key(Text), ==(Equal) , 0(Number)] [key::priority(Text), ==(Equal) ,
+/// 0(Number)] -> [tableName_priority_key(Text), ==(Equal) , 0(Number)] [Name01(Text), ==(Equal) ,
+/// 0(Number)] -> [tableName_key_Name01(Text), ==(Equal) , 0(Number)]
+std::vector<Token> combineTokensToTableKeys(std::vector<Token> input, cstring tableName) {
+    std::vector<Token> result;
+    for (long unsigned int i = 0; i < input.size(); i++) {
+        if (input[i].is(Token::Kind::Text)) {
+            auto str = static_cast<std::string>(input[i].lexeme());
+
             auto substr = str.substr(0, str.find("::mask"));
             if (substr != str) {
                 cstring cstr = tableName + "_mask_" + substr;
-                tokens.push_back(Token(Token::Kind::Text, cstr, cstr.size()));
+                result.push_back(Token(Token::Kind::Text, cstr, cstr.size()));
                 continue;
             }
             substr = str.substr(0, str.find("::prefix_length"));
             if (substr != str) {
                 cstring cstr = tableName + "_lpm_prefix_" + substr;
-                tokens.push_back(Token(Token::Kind::Text, cstr, cstr.size()));
+                result.push_back(Token(Token::Kind::Text, cstr, cstr.size()));
                 continue;
             }
 
             substr = str.substr(0, str.find("::priority"));
             if (substr != str) {
                 cstring cstr = tableName + "_priority";
-                tokens.push_back(Token(Token::Kind::Text, cstr, cstr.size()));
-                continue;
-            }
-
-            if (str == "true") {
-                tokens.push_back(Token(Token::Kind::Number, "1", 1));
-                continue;
-            }
-
-            if (str == "false") {
-                tokens.push_back(Token(Token::Kind::Number, "0", 1));
+                result.push_back(Token(Token::Kind::Text, cstr, cstr.size()));
                 continue;
             }
 
             if (str.find("isValid") != std::string::npos) {
                 i++;
-                cstring cString = str + static_cast<std::string>(tmp[i].lexeme());
-                if (tmp[i + 1].kind() == Token::Kind::Text) {
-                    cString += static_cast<std::string>(tmp[i + 1].lexeme());
+                cstring cString = str + static_cast<std::string>(input[i].lexeme());
+                if (input[i + 1].is(Token::Kind::Text)) {
+                    cString += static_cast<std::string>(input[i + 1].lexeme());
                     i++;
                 }
-                cString += static_cast<std::string>(tmp[i + 1].lexeme());
+                cString += static_cast<std::string>(input[i + 1].lexeme());
                 i++;
                 cString = tableName + "_key_" + cString;
-                tokens.push_back(Token(Token::Kind::Text, cString, cString.size()));
+                result.push_back(Token(Token::Kind::Text, cString, cString.size()));
                 continue;
             }
 
             cstring cstr = tableName + "_key_" + str;
-            tokens.push_back(Token(Token::Kind::Text, cstr, cstr.size()));
+            result.push_back(Token(Token::Kind::Text, cstr, cstr.size()));
             continue;
-        }
-        if (tmp[i].kind() == Token::Kind::Number) {
-            numb += static_cast<std::string>(tmp[i].lexeme());
-            if (i + 1 == tmp.size()) {
-                tokens.push_back(Token(Token::Kind::Number, numb, numb.size()));
-                numb = "";
-                continue;
-            }
         } else {
-            if (numb.size() > 0) {
-                tokens.push_back(Token(Token::Kind::Number, numb, numb.size()));
-                numb = "";
-            }
-            tokens.push_back(tmp[i]);
+            result.push_back(input[i]);
         }
     }
-    tmp.clear();
+    return result;
+}
+
+/// Removes comment lines from the input array.
+/// For example, at the input we have a vector of tokens:
+/// [//(Comment), CommentText(Text) , (EndString) , 28(Number), .....] -> [28(Number), .....]
+std::vector<Token> removeComments(std::vector<Token> input) {
+    std::vector<Token> result;
     bool flag = true;
-    for (long unsigned int i = 0; i < tokens.size(); i++) {
-        if (tokens[i].kind() == Token::Kind::Comment) {
+    for (long unsigned int i = 0; i < input.size(); i++) {
+        if (input[i].is(Token::Kind::Comment)) {
             flag = false;
             continue;
         }
-        if (tokens[i].kind() == Token::Kind::EndString) {
+        if (input[i].is(Token::Kind::EndString)) {
             flag = true;
             continue;
         }
         if (flag) {
-            tmp.push_back(tokens[i]);
+            result.push_back(input[i]);
         }
     }
-    tokens.clear();
+    return result;
+}
 
+/// A function that calls the beginning of the transformation of restrictions from a string into an
+/// IR::Expression. Internally calls all other necessary functions, for example combineTokensToNames
+/// and the like, to eventually get an IR expression that meets the string constraint
+std::vector<const IR::Expression*> AssertsParser::genIRStructs(cstring str) {
+    Lexer lex(str);
+    std::vector<Token> tmp;
+    for (auto token = lex.next(); !token.is_one_of(Token::Kind::End, Token::Kind::Unknown);
+         token = lex.next()) {
+        tmp.push_back(token);
+    }
+
+    std::vector<const IR::Expression*> result;
+
+    tmp = combineTokensToNames(tmp);
+    tmp = combineTokensToNumbers(tmp);
+    tmp = combineTokensToTableKeys(tmp, tableName);
+    tmp = removeComments(tmp);
+    std::vector<Token> tokens;
     for (long unsigned int i = 0; i < tmp.size(); i++) {
-        if (tmp[i].kind() == Token::Kind::Semicolon) {
+        if (tmp[i].is(Token::Kind::Semicolon)) {
             auto expr = getIR(tokens, keyElements);
             result.push_back(expr);
             tokens.clear();
@@ -486,6 +533,9 @@ const IR::Node* AssertsParser::postorder(IR::P4Table* node) {
             if (annotation->name.name == "entry_restriction") {
                 for (auto restrStr : annotation->body) {
                     auto restrictions = genIRStructs(restrStr->text);
+                    /// Using Z3Solver, we check the feasibility of restrictions, if they are not
+                    /// feasible, we delete keys and entries from the table to execute
+                    /// default_action
                     Z3Solver solver;
                     if (solver.checkSat(restrictions) == true) {
                         restrictionsVec.push_back(restrictions);

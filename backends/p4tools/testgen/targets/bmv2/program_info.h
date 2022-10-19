@@ -1,5 +1,5 @@
-#ifndef TESTGEN_TARGETS_BMV2_PROGRAM_INFO_H_
-#define TESTGEN_TARGETS_BMV2_PROGRAM_INFO_H_
+#ifndef BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_PROGRAM_INFO_H_
+#define BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_PROGRAM_INFO_H_
 
 #include <stddef.h>
 
@@ -30,9 +30,6 @@ class BMv2_V1ModelProgramInfo : public ProgramInfo {
 
     /// The bit width of standard_metadata.parser_error.
     static const IR::Type_Bits parserErrBits;
-
-    /// Vector containing pairs of restrictions and nodes to which these restrictions apply.
-    std::vector<std::vector<const IR::Expression*>> restrictionsVec;
 
     /// This function contains an imperative specification of the inter-pipe interaction in the
     /// target.
@@ -75,4 +72,4 @@ class BMv2_V1ModelProgramInfo : public ProgramInfo {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_TARGETS_BMV2_PROGRAM_INFO_H_ */
+#endif /* BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_PROGRAM_INFO_H_ */

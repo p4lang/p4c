@@ -52,12 +52,18 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
         pipelineSequence.insert(pipelineSequence.end(), subResult.begin(), subResult.end());
         ++pipeIdx;
     }
-    // Sending a too short packet in BMV2 produces nonsense, so we require the packet size to be
-    // larger than 32 bits
+    /// Sending a too short packet in BMV2 produces nonsense, so we require the packet size to be
+    /// larger than 32 bits
     const IR::Operation_Binary* constraint =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
                     IRUtils::getConstant(ExecutionState::getPacketSizeVarType(), 32));
+    /// Vector containing pairs of restrictions and nodes to which these restrictions apply.
+    std::vector<std::vector<const IR::Expression*>> restrictionsVec;
+    /// Defines all "entry_restriction" and then converts restrictions from string to IR
+    /// expressions, and stores them in restrictionsVec to move targetConstraints further.
     program->apply(AssertsParser::AssertsParser(restrictionsVec));
+    /// Defines all "refers_to" and then converts restrictions from string to IR expressions,
+    /// and stores them in restrictionsVec to move targetConstraints further.
     program->apply(RefersToParser::RefersToParser(restrictionsVec));
     for (auto element : restrictionsVec) {
         for (auto restriction : element) {

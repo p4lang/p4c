@@ -13,6 +13,8 @@ RefersToParser::RefersToParser(std::vector<std::vector<const IR::Expression*>>& 
     setName("RefersToParser");
 }
 
+/// Builds names for the zombie constant and then creates a zombie constant and builds the refers_to
+/// constraints based on them
 void RefersToParser::createConstraint(bool table, cstring currentName, cstring currentKeyName,
                                       cstring destKeyName, cstring destTableName,
                                       const IR::Type* type) {
@@ -40,6 +42,7 @@ void RefersToParser::createConstraint(bool table, cstring currentName, cstring c
     constraint.push_back(expr);
     restrictionsVec.push_back(constraint);
 }
+
 const IR::Node* RefersToParser::postorder(IR::Annotation* annotation) {
     const IR::P4Action* prevAction = nullptr;
     if (annotation->name.name == "refers_to") {
@@ -64,7 +67,8 @@ const IR::Node* RefersToParser::postorder(IR::Annotation* annotation) {
     }
     return annotation;
 }
-
+// Finds a P4Action in the actionVector according
+/// to the specified input argument which is an ActionListElement
 const IR::P4Action* RefersToParser::findAction(const IR::ActionListElement* input) {
     for (auto element : actionVector) {
         if (input->getName().name == element->name.name) {
@@ -84,6 +88,9 @@ cstring buildName(IR::Vector<IR::AnnotationToken> input) {
     return result;
 }
 
+/// An intermediate function that determines the type for future variables and partially
+/// collects their names for them, after which it calls the createConstraint function,
+/// which completes the construction of the constraint
 void RefersToParser::createRefersToConstraint(IR::Vector<IR::Annotation> annotations,
                                               const IR::Type* inputType, cstring controlPlaneName,
                                               int id, bool isParameter, cstring inputName) {
