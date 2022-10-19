@@ -94,22 +94,12 @@ cstring buildName(IR::Vector<IR::AnnotationToken> input) {
 void RefersToParser::createRefersToConstraint(IR::Vector<IR::Annotation> annotations,
                                               const IR::Type* inputType, cstring controlPlaneName,
                                               int id, bool isParameter, cstring inputName) {
-    cstring destTableName = "";
-    cstring destKeyName = "";
     cstring currentKeyName = inputName;
     const IR::Type* type = nullptr;
     for (auto annotation : annotations) {
         if (annotation->name.name == "refers_to") {
-            destTableName = annotation->body[0]->text;
-            destKeyName = buildName(annotation->body);
-        }
-        if (!isParameter) {
-            if (annotation->name.name == "name") {
-                if (annotation->body.size() > 0) currentKeyName = annotation->body[0]->text;
-            }
-        }
-
-        if (destTableName.size() > 0 && destKeyName.size() > 0) {
+            cstring destTableName = annotation->body[0]->text;
+            cstring destKeyName = buildName(annotation->body);
             if (auto bit = inputType->to<IR::Type_Bits>()) {
                 type = bit;
             } else if (auto varbit = inputType->to<IR::Extracted_Varbits>()) {
@@ -128,8 +118,6 @@ void RefersToParser::createRefersToConstraint(IR::Vector<IR::Annotation> annotat
                                  type);
             }
         }
-        destTableName = "";
-        destKeyName = "";
     }
 }
 
