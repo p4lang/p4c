@@ -20,11 +20,14 @@
 #include "ir/ir.h"
 #include "ir/node.h"
 #include "lib/log.h"
-#include "test/gtest/env.h"
 
 #include "backends/p4tools/testgen/targets/bmv2/p4_refers_to_parser.h"
 #include "backends/p4tools/testgen/test/gtest_utils.h"
 #include "backends/p4tools/testgen/test/small-step/util.h"
+
+/// Variables are declared in "test/gtest/env.h" which is already included in reachablity.cpp
+extern const char* sourcePath;
+extern const char* buildPath;
 
 namespace Test {
 class P4AssertsParserTest : public P4ToolsTest {};
