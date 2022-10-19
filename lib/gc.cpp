@@ -118,21 +118,10 @@ void raw_free(void *ptr) {
 
 }  // namespace
 
-void *realloc(void *ptr, size_t size) {
-    if (!done_init) {
-        if (started_init) {
-            // called from within GC_INIT, so we can't call it again.  Fall back to using
-            // mmap.
-            void *rv = raw_alloc(size);
-            if (ptr) {
-                size_t max = raw_size(ptr);
-                memcpy(rv, ptr, max < size ? max : size);
-                raw_free(ptr); }
-            return rv;
-        } else {
-            started_init = true;
-            GC_INIT();
-            done_init = true; } }
+// Compilers tend to perform lots of libcall optimizations
+// The implementations below were crafted to inhibit these
+// optimizations in order to prevent infinite loops
+static void *realloc_impl(void *ptr, size_t size) {
     if (ptr) {
         if (GC_is_heap_ptr(ptr))
             return GC_realloc(ptr, size);
@@ -141,16 +130,49 @@ void *realloc(void *ptr, size_t size) {
         memcpy(rv, ptr, max < size ? max : size);
         raw_free(ptr);
         return rv;
+    }
+
+    return GC_malloc(size);
+}
+
+static void *early_realloc(void *ptr, size_t size) {
+    if (done_init)
+        return nullptr;
+
+    if (started_init) {
+        // called from within GC_INIT, so we can't call it again.  Fall back to using
+        // mmap.
+        void *rv = raw_alloc(size);
+        if (ptr) {
+            size_t max = raw_size(ptr);
+            memcpy(rv, ptr, max < size ? max : size);
+            raw_free(ptr);
+        }
+
+        return rv;
     } else {
-        return GC_malloc(size);
+        started_init = true;
+        GC_INIT();
+        done_init = true;
+
+        return realloc_impl(ptr, size);
     }
 }
+
+
+void *realloc(void *ptr, size_t size) {
+    if (!done_init)
+        return early_realloc(ptr, size);
+
+    return realloc_impl(ptr, size);
+}
+
 // IMPORTANT: do not simplify this to realloc(nullptr, size)
 // As it could be optimized to malloc(size) call causing
 // infinite loops
 void *malloc(size_t size) {
     if (!done_init)
-        return realloc(nullptr, size);
+        return early_realloc(nullptr, size);
 
     return GC_malloc(size);
 }
