@@ -7,20 +7,21 @@ extern E {
 
 control c() {
     @name("c.e") E((list<bit<32>>){32w2,32w3,32w4}) e_0;
-    @hidden action vector11() {
+    @hidden action list11() {
         e_0.run();
     }
-    @hidden table tbl_vector11 {
+    @hidden table tbl_list11 {
         actions = {
-            vector11();
+            list11();
         }
-        const default_action = vector11();
+        const default_action = list11();
     }
     apply {
-        tbl_vector11.apply();
+        tbl_list11.apply();
     }
 }
 
 control C();
 package top(C _c);
 top(c()) main;
+

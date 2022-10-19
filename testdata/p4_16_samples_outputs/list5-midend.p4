@@ -7,17 +7,17 @@ extern E<K, V> {
 
 control c() {
     @name("c.e") E<bit<32>, bit<16>>((list<tuple<bit<32>, tuple<bit<32>, bit<32>>, bit<16>>>){{ 32w10, { 32w2, 32w0xf }, 16w3 },{ 32w5, { 32w0xdeadbeef, 32w0xff00ffff }, 16w5 }}) e_0;
-    @hidden action vector5l18() {
+    @hidden action list5l18() {
         e_0.run();
     }
-    @hidden table tbl_vector5l18 {
+    @hidden table tbl_list5l18 {
         actions = {
-            vector5l18();
+            list5l18();
         }
-        const default_action = vector5l18();
+        const default_action = list5l18();
     }
     apply {
-        tbl_vector5l18.apply();
+        tbl_list5l18.apply();
     }
 }
 
