@@ -15,8 +15,8 @@ const IR::Node* HSIndexToMember::postorder(IR::ArrayIndex* curArrayIndex) {
 
 const IR::Member* HSIndexToMember::produceStackIndex(const IR::Type* type,
                                                      const IR::Expression* expression,
-                                                     int arrayIndex) {
-    return new IR::Member(type, expression, cstring(std::to_string(arrayIndex)));
+                                                     size_t arrayIndex) {
+    return new IR::Member(type, expression, IR::ID(std::to_string(arrayIndex)));
 }
 
 }  // namespace P4Tools

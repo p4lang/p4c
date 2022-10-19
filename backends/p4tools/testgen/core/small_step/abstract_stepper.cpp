@@ -267,13 +267,12 @@ void generateStackAssigmentStatement(ExecutionState* state,
                                      std::vector<Continuation::Command>& replacements,
                                      const IR::Expression* stackRef, int leftIndex,
                                      int rightIndex) {
-    const auto* leftArrayIndex = HSIndexToMember::produceStackIndex(
-        stackRef->type->checkedTo<IR::Type_Stack>()->elementType, stackRef, leftIndex);
-    const auto* rightArrayIndex = HSIndexToMember::produceStackIndex(
-        stackRef->type->checkedTo<IR::Type_Stack>()->elementType, stackRef, rightIndex);
+    const auto* elemType = stackRef->type->checkedTo<IR::Type_Stack>()->elementType;
+    const auto* leftArIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, leftIndex);
+    const auto* rightArrIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, rightIndex);
 
     // Check right header validity.
-    const auto* value = state->getSymbolicEnv().get(IRUtils::getHeaderValidity(rightArrayIndex));
+    const auto* value = state->getSymbolicEnv().get(IRUtils::getHeaderValidity(rightArrIndex));
     if (!value->checkedTo<IR::BoolLiteral>()->value) {
         replacements.emplace_back(generateStacksetValid(stackRef, leftIndex, false));
         return;
@@ -281,10 +280,9 @@ void generateStackAssigmentStatement(ExecutionState* state,
     replacements.emplace_back(generateStacksetValid(stackRef, leftIndex, true));
 
     // Unfold fields.
-    auto leftVector = state->getFlatFields(leftArrayIndex,
-                                           leftArrayIndex->type->checkedTo<IR::Type_StructLike>());
-    auto rightVector = state->getFlatFields(
-        rightArrayIndex, rightArrayIndex->type->checkedTo<IR::Type_StructLike>());
+    const auto* structType = elemType->checkedTo<IR::Type_StructLike>();
+    auto leftVector = state->getFlatFields(leftArIndex, structType);
+    auto rightVector = state->getFlatFields(rightArrIndex, structType);
     for (size_t i = 0; i < leftVector.size(); i++) {
         replacements.emplace_back(new IR::AssignmentStatement(leftVector[i], rightVector[i]));
     }

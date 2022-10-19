@@ -89,7 +89,9 @@ void CmdStepper::initializeBlockParams(const IR::Type_Declaration* typeDecl,
     const auto* iApply = typeDecl->to<IR::IApply>();
     BUG_CHECK(iApply != nullptr, "Constructed type %s of type %s not supported.", typeDecl,
               typeDecl->node_type_name());
-
+    // Also push the namespace of the respective parameter.
+    nextState->pushNamespace(typeDecl->to<IR::INamespace>());
+    // Collect parameters.
     const auto* params = iApply->getApplyParameters();
     for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
         const auto* param = params->getParameter(paramIdx);
@@ -106,8 +108,8 @@ void CmdStepper::initializeBlockParams(const IR::Type_Declaration* typeDecl,
         if (const auto* ts = paramType->to<IR::Type_StructLike>()) {
             declareStructLike(nextState, paramPath, ts);
         } else if (paramType->is<IR::Type_Base>()) {
-            auto paramRef = nextState->convertPathExpr(paramPath);
-            nextState->set(paramRef, programInfo.createTargetUninitialized(paramRef->type, false));
+            const auto* paramRef = new IR::Member(paramType, paramPath, "*");
+            nextState->set(paramRef, programInfo.createTargetUninitialized(paramType, false));
         } else {
             P4C_UNIMPLEMENTED("Unsupported initialization type %1%", paramType->node_type_name());
         }

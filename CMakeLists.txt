@@ -189,7 +189,11 @@ find_python_module (re REQUIRED)
 # other packages
 find_package (Doxygen)
 find_package (BMV2)
-
+# If we have found simple switch or psa switch, we also need scapy and ipaddr.
+if(SIMPLE_SWITCH OR PSA_SWITCH)
+    find_python_module (scapy REQUIRED)
+    find_python_module (ipaddr REQUIRED)
+endif()
 # enable CTest
 enable_testing ()
 

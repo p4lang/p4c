@@ -13,7 +13,7 @@ class HSIndexToMember : public Transform {
     /// Convert a parent expression and an index into a member expression with that
     /// particular index as string member. The type is used to specify the member type.
     static const IR::Member* produceStackIndex(const IR::Type* type,
-                                               const IR::Expression* expression, int arrayIndex);
+                                               const IR::Expression* expression, size_t arrayIndex);
 };
 
 }  // namespace P4Tools

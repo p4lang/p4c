@@ -5,7 +5,6 @@ include(common)
 
 project(p4testgen)
 
-
 # Source files for p4testgen.
 set(
   TESTGEN_SOURCES

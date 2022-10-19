@@ -31,6 +31,7 @@ find_package_handle_standard_args(
 )
 
 if(Z3_FOUND)
+  message(STATUS "Found Z3 includes at ${Z3_INCLUDE_DIR}.")
   file(READ "${Z3_INCLUDE_DIR}/z3_version.h" Z3_VERSION_FILE)
 
   # Major
