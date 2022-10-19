@@ -21,6 +21,7 @@
 #include "backends/p4tools/testgen/core/exploration_strategy/incremental_max_coverage_stack.h"
 #include "backends/p4tools/testgen/core/exploration_strategy/incremental_stack.h"
 #include "backends/p4tools/testgen/core/exploration_strategy/linear_enumeration.h"
+#include "backends/p4tools/testgen/core/exploration_strategy/random_access_max_coverage.h"
 #include "backends/p4tools/testgen/core/exploration_strategy/random_access_stack.h"
 #include "backends/p4tools/testgen/core/exploration_strategy/selected_branches.h"
 #include "backends/p4tools/testgen/core/target.h"
@@ -84,18 +85,36 @@ int Testgen::mainImpl(const IR::P4Program* program) {
     auto symExec = [&solver, &programInfo, seed]() -> ExplorationStrategy* {
         std::string explorationStrategy = TestgenOptions::get().explorationStrategy;
         if (explorationStrategy.compare("randomAccessStack") == 0) {
-            int popLevel =
-                (TestgenOptions::get().popLevel > 1) ? TestgenOptions::get().popLevel : 3;
+            // If the user mistakenly specifies an invalid popLevel, we set it to 3.
+            int popLevel = TestgenOptions::get().popLevel;
+            if (popLevel <= 1) {
+                ::warning("--pop-level must be greater than 1; using default value of 3.\n");
+                popLevel = 3;
+            }
             return new RandomAccessStack(solver, *programInfo, seed, popLevel);
         }
         if (explorationStrategy.compare("linearEnumeration") == 0) {
-            int linearBound = (TestgenOptions::get().linearEnumeration > 1)
-                                  ? TestgenOptions::get().linearEnumeration
-                                  : 2;
+            // If the user mistakenly specifies an invalid bound, we set it to 2
+            // to generate at least 2 tests.
+            int linearBound = TestgenOptions::get().linearEnumeration;
+            if (linearBound <= 1) {
+                ::warning(
+                    "--linear-enumeration must be greater than 1; using default value of 2.\n");
+                linearBound = 2;
+            }
             return new LinearEnumeration(solver, *programInfo, seed, linearBound);
         }
         if (explorationStrategy.compare("maxCoverage") == 0) {
             return new IncrementalMaxCoverageStack(solver, *programInfo, seed);
+        }
+        if (explorationStrategy.compare("randomAccessMaxCoverage") == 0) {
+            // If the user mistakenly sets an invalid saddlePoint, we set it to 5.
+            int saddlePoint = TestgenOptions::get().saddlePoint;
+            if (saddlePoint <= 1) {
+                ::warning("--saddle-point must be greater than 1; using default value of 5.\n");
+                saddlePoint = 5;
+            }
+            return new RandomAccessMaxCoverage(solver, *programInfo, seed, saddlePoint);
         }
         if (!TestgenOptions::get().selectedBranches.empty()) {
             std::string selectedBranchesStr = TestgenOptions::get().selectedBranches;

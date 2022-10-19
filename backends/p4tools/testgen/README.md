@@ -50,8 +50,10 @@ These are the current usage flags:
 --out-dir outputDir        Directory for generated tests
 --test-backend             Select a test back end. Available test back ends are defined by the respective target.
 --packet-size packetSize   If enabled, sets all input packets to a fixed size in bits (from 1 to 12000 bits). 0 implies no packet sizing.
---pop-level                This is the fraction of unexploredBranches we select on multiPop. Defaults to 0 (**Experimental feature**).
---linear-enumeration       Max bound for LinearEnumeration strategy. Defaults to 0. (**Experimental feature**).
+--exploration-strategy     Selects a specific exploration strategy for test generation. Options are: randomAccessStack, linearEnumeration, maxCoverage. Defaults to incrementalStack.
+--pop-level                This is the fraction of unexploredBranches we select on randomAccessStack. Defaults to 3.
+--linear-enumeration       Max bound for LinearEnumeration strategy. Defaults to 2. **Experimental feature**.
+--saddle-point             To be used with randomAccessMaxCoverage. Specifies when to randomly explore the map after a saddle point in the coverage of the test generation.
 ```
 
 Once P4Testgen has generated tests, the tests can be executed by either the P4Runtime or STF test back ends.
