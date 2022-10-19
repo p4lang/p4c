@@ -29,6 +29,9 @@ header ipv4 instanceof ipv4_t
 struct main_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
 	bit<32> pna_main_output_metadata_output_port
+	bit<32> MainControlImpl_flowTable_ipv4_srcAddr
+	bit<32> MainControlImpl_flowTable_ipv4_dstAddr
+	bit<8> MainControlImpl_flowTable_ipv4_protocol
 	bit<8> mirrorSlot
 	bit<16> mirrorSession
 	bit<8> mirrorSlot_0
@@ -60,9 +63,9 @@ action drop_with_mirror args none {
 
 table flowTable {
 	key {
-		h.ipv4.srcAddr exact
-		h.ipv4.dstAddr exact
-		h.ipv4.protocol exact
+		m.MainControlImpl_flowTable_ipv4_srcAddr exact
+		m.MainControlImpl_flowTable_ipv4_dstAddr exact
+		m.MainControlImpl_flowTable_ipv4_protocol exact
 	}
 	actions {
 		send_with_mirror
@@ -80,7 +83,10 @@ apply {
 	jmpeq MAINPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
-	MAINPARSERIMPL_ACCEPT :	table flowTable
+	MAINPARSERIMPL_ACCEPT :	mov m.MainControlImpl_flowTable_ipv4_srcAddr h.ipv4.srcAddr
+	mov m.MainControlImpl_flowTable_ipv4_dstAddr h.ipv4.dstAddr
+	mov m.MainControlImpl_flowTable_ipv4_protocol h.ipv4.protocol
+	table flowTable
 	emit h.ethernet
 	emit h.ipv4
 	tx m.pna_main_output_metadata_output_port

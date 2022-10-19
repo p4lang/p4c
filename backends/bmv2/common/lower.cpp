@@ -83,13 +83,13 @@ const IR::Node* LowerExpressions::postorder(IR::Cast* expression) {
     } else if (destType->width_bits() < srcType->width_bits()) {
         // explicitly discard un needed bits from src
         auto one = new IR::Constant(srcType, 1);
-        auto shift_value = new IR::Constant(srcType, destType->width_bits());
+        auto shift_value = new IR::Constant(new IR::Type_InfInt(), destType->width_bits());
         auto shl = new IR::Shl(one->srcInfo, one, shift_value);
         auto mask = new IR::Sub(shl->srcInfo, shl, one);
         auto and0 = new IR::BAnd(expression->srcInfo, expression->expr, mask);
         auto cast0 = new IR::Cast(expression->srcInfo, destType, and0);
         typeMap->setType(one, srcType);
-        typeMap->setType(shift_value, srcType);
+        typeMap->setType(shift_value, shift_value->type);
         typeMap->setType(shl, srcType);
         typeMap->setType(mask, srcType);
         typeMap->setType(and0, srcType);
@@ -117,10 +117,10 @@ const IR::Node* LowerExpressions::postorder(IR::Slice* expression) {
     BUG_CHECK(e0type->is<IR::Type_Bits>(), "%1%: expected a bit<> type", e0type);
     const IR::Expression* expr;
     if (l != 0) {
-        auto one = new IR::Constant(l);
+        auto one = new IR::Constant(new IR::Type_InfInt(), l);
         expr = new IR::Shr(expression->e0->srcInfo, expression->e0, one);
         typeMap->setType(expr, e0type);
-        typeMap->setType(one, e0type);
+        typeMap->setType(one, one->type);
     } else {
         expr = expression->e0;
     }
@@ -152,7 +152,7 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
     unsigned sizeofb = type->to<IR::Type_Bits>()->size;
     auto cast0 = new IR::Cast(expression->left->srcInfo, resulttype, expression->left);
     auto cast1 = new IR::Cast(expression->right->srcInfo, resulttype, expression->right);
-    auto sizefb0 = new IR::Constant(sizeofb);
+    auto sizefb0 = new IR::Constant(new IR::Type_InfInt(), sizeofb);
     auto sh = new IR::Shl(cast0->srcInfo, cast0, sizefb0);
     big_int m = Util::maskFromSlice(sizeofb, 0);
     auto mask = new IR::Constant(expression->right->srcInfo,
@@ -165,7 +165,7 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
     typeMap->setType(sh, resulttype);
     typeMap->setType(and0, resulttype);
     typeMap->setType(mask, resulttype);
-    typeMap->setType(sizefb0, resulttype);
+    typeMap->setType(sizefb0, sizefb0->type);
     LOG3("Replaced " << expression << " with " << result);
     return result;
 }

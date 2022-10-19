@@ -45,6 +45,7 @@ set(
   compiler/copy_headers.cpp
   compiler/hs_index_simplify.cpp
   compiler/midend.cpp
+  compiler/reachability.cpp
 
   core/target.cpp
   core/z3_solver.cpp

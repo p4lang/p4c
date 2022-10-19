@@ -24,7 +24,7 @@ class Extracted_Varbits : Type_Bits {
     int assignedSize;
 
     /// Returns the current width this variable bit type has.
-    int width_bits() const { return assignedSize; }
+    int width_bits() const override { return assignedSize; }
 
     equiv {
         // Ignore the current size and only check for equivalence of the assigned size.

@@ -59,6 +59,10 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// deterministic replay of an execution trace.
     bool trackBranches = false;
 
+    /// Build a DCG for input program. This control flow graph directed cyclic graph can be used
+    /// for statement reachability analysis.
+    bool dcg = false;
+
     const char* getIncludePath() override;
 
  private:
