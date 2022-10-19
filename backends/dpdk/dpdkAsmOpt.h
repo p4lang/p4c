@@ -164,15 +164,6 @@ class RemoveUnusedMetadataFields : public Transform {
     bool isByteSizeField(const IR::Type *field_type);
 };
 
-// This pass validates that the table keys from Metadata struct fit within 64 bytes including any
-// holes between the key fields in metadata.
-class ValidateTableKeys : public Inspector {
- public:
-    ValidateTableKeys() {}
-    bool preorder(const IR::DpdkAsmProgram *p) override;
-    int getFieldSizeBits(const IR::Type *field_type);
-};
-
 // This pass shorten the Identifier length
 class ShortenTokenLength : public Transform {
     ordered_map<cstring, cstring> newNameMap;
