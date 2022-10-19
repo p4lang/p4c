@@ -40,7 +40,7 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// tests (saddle point) we should randomly explore the program and pick
     /// a random branch ranked by how many unique non-visited statements it
     /// has.
-    int saddlePoint = 2;
+    int saddlePoint = 5;
 
     /// @returns the singleton instance of this class.
     static TestgenOptions& get();

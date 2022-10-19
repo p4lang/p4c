@@ -196,7 +196,7 @@ void RandomAccessMaxCoverage::sortBranchesByCoverage(std::vector<Branch>& branch
         }
 
         // If there's no element in bufferUnexploredBranches with the particular coverage
-        // we calculate, we'll insert a new key at bufferUnexploredBranches
+        // we calculate, we'll insert a new key at bufferUnexploredBranches.
         auto rankedBranches = bufferUnexploredBranches.find(coverage);
         if (rankedBranches != bufferUnexploredBranches.end()) {
             auto& localBranches = rankedBranches->second;
