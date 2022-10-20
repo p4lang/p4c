@@ -50,7 +50,7 @@ control MyIC(
 
     DirectCounter<bit<12>>(PSA_CounterType_t.PACKETS) counter0;
     action execute() {
-        counter0.count(64);
+        counter0.count();
     }
     table tbl {
         key = {

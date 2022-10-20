@@ -598,7 +598,8 @@ enum PSA_CounterType_t {
 @noWarn("unused")
 extern Counter<W, S> {
   Counter(bit<32> n_counters, PSA_CounterType_t type);
-  void count(in S index, in bit<32> increment);
+  void count(in S index);
+  void count(in S index, in bit<32> pkt_len);
 
   /*
   /// The control plane API uses 64-bit wide counter values.  It is
@@ -628,7 +629,8 @@ extern Counter<W, S> {
 @noWarn("unused")
 extern DirectCounter<W> {
   DirectCounter(PSA_CounterType_t type);
-  void count(in bit<32> increment);
+  void count();
+  void count(in bit<32> pkt_len);
 
   /*
   @ControlPlaneAPI
@@ -664,12 +666,14 @@ extern Meter<S> {
   // Use this method call to perform a color aware meter update (see
   // RFC 2698). The color of the packet before the method call was
   // made is specified by the color parameter.
+  PSA_MeterColor_t execute(in S index, in PSA_MeterColor_t color);
   PSA_MeterColor_t execute(in S index, in PSA_MeterColor_t color, in bit<32> pkt_len);
 
   // Use this method call to perform a color blind meter update (see
   // RFC 2698).  It may be implemented via a call to execute(index,
   // MeterColor_t.GREEN), which has the same behavior.
-  PSA_MeterColor_t execute(in S index, in bit<32> pkt_len);
+  PSA_MeterColor_t execute(in S index);
+  PSA_MeterColor_t dpdk_execute(in S index, in bit<32> pkt_len);
 
   /*
   @ControlPlaneAPI
@@ -687,7 +691,9 @@ extern DirectMeter {
   DirectMeter(PSA_MeterType_t type);
   // See the corresponding methods for extern Meter.
   PSA_MeterColor_t execute(in PSA_MeterColor_t color);
-  PSA_MeterColor_t execute(in bit<32> pkt_len);
+  PSA_MeterColor_t execute(in PSA_MeterColor_t color, in bit<32> pkt_len);
+  PSA_MeterColor_t execute();
+  PSA_MeterColor_t dpdk_execute(in bit<32> pkt_len);
 
   /*
   @ControlPlaneAPI
