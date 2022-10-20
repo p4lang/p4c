@@ -224,11 +224,11 @@ class InjectJumboStruct : public Transform {
 // into the single metadata struct.
 // This pass has to be applied after CollectMetadataHeaderInfo fills
 // local_metadata_type field in DpdkProgramStructure which is passed to the constructor.
-class InjectOutputPortMetadataField : public Transform {
+class InjectFixedMetadataField : public Transform {
     DpdkProgramStructure *structure;
 
  public:
-    explicit InjectOutputPortMetadataField(DpdkProgramStructure *structure) :
+    explicit InjectFixedMetadataField(DpdkProgramStructure *structure) :
         structure(structure) {}
     const IR::Node *preorder(IR::Type_Struct *s) override;
 };
@@ -673,6 +673,11 @@ class CollectExternDeclaration : public Inspector {
                     ::error(ErrorType::ERR_EXPECTED,
                             "%1%: expected number of counters and type of counter as arguments", d);
                 }
+            } else if (externTypeName == "DirectCounter") {
+                if (d->arguments->size() != 1) {
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "%1%: expected type of counter as arguments", d);
+                }
             } else if (externTypeName == "Register") {
                 if (d->arguments->size() != 1 && d->arguments->size() != 2) {
                     ::error(ErrorType::ERR_EXPECTED,
@@ -921,6 +926,22 @@ class ConvertActionSelectorAndProfile : public PassManager {
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.emplace_back(new P4::TypeChecking(refMap, typeMap, true));
     }
+};
+
+/* Collect size information from the owner table for direct counter and meter extern objects */
+class CollectDirectCounterMeter : public Inspector {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    DpdkProgramStructure* structure;
+ public:
+    static ordered_map<cstring, int> directMeterCounterSizeMap;
+//    CollectDirectCounterMeter() {setName("CollectDirectCounterMeter");}
+    CollectDirectCounterMeter(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                DpdkProgramStructure* structure) :
+    refMap(refMap), typeMap(typeMap), structure(structure) {}
+
+    int getTableSize(const IR::P4Table * tbl);
+    void postorder(const IR::P4Table* t) override;
 };
 
 class CollectAddOnMissTable : public Inspector {

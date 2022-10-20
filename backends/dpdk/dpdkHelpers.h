@@ -48,6 +48,7 @@ namespace DPDK {
  * - use this metadata field with 'tx' instruction
  */
 const char PnaMainOutputMetadataOutputPortName[] = "pna_main_output_metadata_output_port";
+const char DirectResourceTableEntryIndex[] = "table_entry_index";
 
 /* This class will generate a optimized jmp and label control flow.
  * Couple of examples here

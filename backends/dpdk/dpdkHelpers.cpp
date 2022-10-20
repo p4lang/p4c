@@ -1030,6 +1030,48 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             if (a->method->getName().name != "execute") {
                 BUG("Meter function not implemented.");
             }
+        } else if (a->originalExternType->getName().name == "DirectCounter") {
+            auto di = a->object->to<IR::Declaration_Instance>();
+            auto declArgs = di->arguments;
+            unsigned value = 0;
+            auto counter_type = declArgs->at(0)->expression;
+            if (counter_type->is<IR::Constant>())
+                value = counter_type->to<IR::Constant>()->asUnsigned();
+            if (a->method->getName().name == "count") {
+                auto args = a->expr->arguments;
+                if (args->size() > 1){
+                    ::error(ErrorType::ERR_UNEXPECTED, "Expected at most 1 argument for %1%," \
+                            "provided %2%", a->method->getName(), args->size());
+                } else {
+                    const IR::Expression *incr = nullptr;
+                    auto counter = a->object->getName();
+                    if (args->size() == 1)
+                        incr = args->at(0)->expression;
+                    if (!incr && value > 0) {
+                        ::error(ErrorType::ERR_UNEXPECTED,
+                                "Expected packet length argument for %1% " \
+                                "method of direct counter",
+                                a->method->getName());
+                        return false;
+                    }
+                    auto metaIndex = new IR::Member(new IR::PathExpression(
+                                                    IR::ID("m")), DirectResourceTableEntryIndex);
+                    add_instr(new IR::DpdkGetTableEntryIndex(metaIndex));
+                    if (value == 2) {
+                        add_instr(new IR::DpdkCounterCountStatement(counter+"_packets", metaIndex));
+                        add_instr(new IR::DpdkCounterCountStatement(counter+"_bytes", metaIndex,
+                                                                    incr));
+                    } else {
+                         if (value == 1)
+                             add_instr(new IR::DpdkCounterCountStatement(counter, metaIndex,
+                                                                               incr));
+                         else
+                             add_instr(new IR::DpdkCounterCountStatement(counter, metaIndex));
+                    }
+                }
+            } else {
+                BUG("Direct Counter function not implemented");
+            }
         } else if (a->originalExternType->getName().name == "Counter") {
             auto di = a->object->to<IR::Declaration_Instance>();
             auto declArgs = di->arguments;

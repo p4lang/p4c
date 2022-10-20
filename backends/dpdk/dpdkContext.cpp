@@ -113,6 +113,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
         if (auto type = ed->type->to<IR::Type_Specialized>()) {
             auto externTypeName = type->baseType->path->name.name;
             if (externTypeName == "Counter" ||
+                externTypeName == "DirectCounter" ||
                 externTypeName == "Register" ||
                 externTypeName == "Meter" ||
                 externTypeName == "Hash" ||
@@ -120,15 +121,17 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 struct externAttributes externAttr;
                 externAttr.externalName = ed->controlPlaneName();
                 externAttr.externType = externTypeName;
-                if (externTypeName == "Counter") {
-                    if (ed->arguments->size() != 2) {
+                if (externTypeName == "Counter" || "DirectCounter") {
+                    int maxArgNum = externTypeName == "Counter"? 2 : 1;
+                    int typeArgNum = maxArgNum - 1;
+                    if (ed->arguments->size() != maxArgNum) {
                         ::error(ErrorType::ERR_UNEXPECTED,
-                                "%1%: expected 2 arguments, number of counters and type"
-                                "of counter", ed);
+                                "%1%: expected %2% arguments, number of counters and type"
+                                "of counter", ed, maxArgNum);
                     }
-                    auto counter_type = ed->arguments->at(1)->expression;
+                    auto counter_type = ed->arguments->at(typeArgNum)->expression;
                     BUG_CHECK(counter_type->is<IR::Constant>(),
-                               "Expected counter type to be constant");
+                              "Expected counter type to be constant");
                     auto value = counter_type->to<IR::Constant>()->asUnsigned();
                     switch (value) {
                         case 0:
@@ -500,7 +503,7 @@ void DpdkContextGenerator::addExternInfo(Util::JsonArray* externsJson) {
         externJson->emplace("target_name", t->name.name);
         externJson->emplace("type", externAttr.externType);
         auto* attrJson = new Util::JsonObject();
-        if (externAttr.externType == "Counter") {
+        if (externAttr.externType == "Counter" || externAttr.externType == "DirectCounter") {
             attrJson->emplace("type", externAttr.counterType);
         }
         externJson->emplace("attributes", attrJson);

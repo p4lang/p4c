@@ -718,11 +718,15 @@ const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct *s) {
     return s;
 }
 
-const IR::Node *InjectOutputPortMetadataField::preorder(IR::Type_Struct *s) {
-    if (structure->isPNA() && s->name.name == structure->local_metadata_type) {
-        s->fields.push_back(new IR::StructField(
-            IR::ID(PnaMainOutputMetadataOutputPortName), IR::Type_Bits::get(32)));
-        LOG3("Metadata structure after injecting output port:" << std::endl << s);
+const IR::Node *InjectFixedMetadataField::preorder(IR::Type_Struct *s) {
+    if  (s->name.name == structure->local_metadata_type) {
+         if (structure->isPNA()) {
+             s->fields.push_back(new IR::StructField(
+                  IR::ID(PnaMainOutputMetadataOutputPortName), IR::Type_Bits::get(32)));
+          }
+          s->fields.push_back(new IR::StructField(
+               IR::ID(DirectResourceTableEntryIndex), IR::Type_Bits::get(32)));
+        LOG3("Metadata structure after injecting Fixed metadata fields:" << std::endl << s);
     }
     return s;
 }
@@ -1778,7 +1782,7 @@ getExternInstanceFromProperty(const IR::P4Table* table,
                               const cstring& propertyName,
                               P4::ReferenceMap* refMap,
                               P4::TypeMap* typeMap,
-                              bool *isConstructedInPlace) {
+                              bool *isConstructedInPlace, cstring &externName) {
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return boost::none;
     if (!property->value->is<IR::ExpressionValue>()) {
@@ -1789,6 +1793,7 @@ getExternInstanceFromProperty(const IR::P4Table* table,
     }
 
     auto expr = property->value->to<IR::ExpressionValue>()->expression;
+    externName = expr->to<IR::PathExpression>()->path->name.name;
     if (isConstructedInPlace) *isConstructedInPlace = expr->is<IR::ConstructorCallExpression>();
     if (expr->is<IR::ConstructorCallExpression>()
         && property->getAnnotation(IR::Annotation::nameAnnotation) == nullptr) {
@@ -1806,7 +1811,6 @@ getExternInstanceFromProperty(const IR::P4Table* table,
                 property);
         return boost::none;
     }
-
     return externInstance;
 }
 
@@ -1947,6 +1951,7 @@ const IR::P4Table* SplitP4TableCommon::create_group_table(const IR::P4Table* tbl
 const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     bool isConstructedInPlace = false;
     bool isAsInstanceShared = false;
+    cstring externName = "";
     cstring implementation = "psa_implementation";
 
     if (structure->isPNA()) {
@@ -1954,7 +1959,8 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     }
 
     auto instance = Helpers::getExternInstanceFromProperty(tbl, implementation,
-                                                           refMap, typeMap, &isConstructedInPlace);
+                                                           refMap, typeMap, &isConstructedInPlace,
+                                                           externName);
     if (!instance)
         return tbl;
     if (instance->type->name != "ActionSelector")
@@ -2068,13 +2074,14 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
 const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
     bool isConstructedInPlace = false;
     bool isApInstanceShared = false;
+    cstring externName = "";
     cstring implementation = "psa_implementation";
 
     if (structure->isPNA())
         implementation = "pna_implementation";
 
     auto instance = Helpers::getExternInstanceFromProperty(tbl, implementation,
-            refMap, typeMap, &isConstructedInPlace);
+                            refMap, typeMap, &isConstructedInPlace, externName);
 
     if (!instance || instance->type->name != "ActionProfile")
         return tbl;
@@ -2372,6 +2379,77 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
         return new IR::BlockStatement(*decls);
     }
     return statement;
+}
+
+/* For regular tables, the direct counter array size is same as table size
+ * For learner tables, the direct counter/meter array size is 4 times the table size */
+int CollectDirectCounterMeter::getTableSize(const IR::P4Table * tbl) {
+    int tableSize = dpdk_default_table_size;
+    auto size = tbl->getSizeProperty();
+    if (size)
+        tableSize = size->asUnsigned();
+    bool is_add_on_miss = false;
+    auto add_on_miss = tbl->properties->getProperty("add_on_miss");
+    if (add_on_miss != nullptr) {
+        if (add_on_miss->value->is<IR::ExpressionValue>()) {
+            auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
+            if (!expr->is<IR::BoolLiteral>()) {
+                ::error(ErrorType::ERR_UNEXPECTED,
+                       "%1%: expected boolean for 'add_on_miss' property", add_on_miss);
+                return -1;
+            } else {
+                is_add_on_miss = expr->to<IR::BoolLiteral>()->value;
+            }
+        }
+    }
+   if (is_add_on_miss) tableSize = tableSize * 4;
+   return tableSize;
+}
+
+void CollectDirectCounterMeter::postorder(const IR::P4Table* tbl) {
+    bool isConstructedInPlace = false;
+    cstring implementation = "psa_implementation";
+    cstring counterExternName = "";
+    cstring meterExternName = "";
+    cstring direct_counter = "psa_direct_counter";
+    cstring direct_meter = "psa_direct_meter";
+
+    if (structure->isPNA()) {
+        implementation = "pna_implementation";
+        direct_counter = "pna_direct_counter";
+        direct_meter = "pna_direct_meter";
+    }
+
+    auto counterInstance = Helpers::getExternInstanceFromProperty(tbl, direct_counter,
+                                                           refMap, typeMap, &isConstructedInPlace,
+                                                           counterExternName);
+    auto meterInstance = Helpers::getExternInstanceFromProperty(tbl, direct_meter,
+                                                           refMap, typeMap, &isConstructedInPlace,
+                                                           meterExternName);
+    auto property = tbl->properties->getProperty(implementation);
+    auto counterProperty = tbl->properties->getProperty(direct_counter);
+    auto meterProperty = tbl->properties->getProperty(direct_meter);
+    if (property != nullptr && (counterProperty != nullptr || meterProperty != nullptr)) {
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "implementation property cannot co-exist with direct counter and direct meter "
+                "property for table %1%", tbl->name);
+        return;
+    }
+    int table_size = getTableSize(tbl);
+    if (table_size == -1) {
+        ::error(ErrorType::ERR_UNEXPECTED,
+               "Table size could not be found, please check if the add_on_miss property "
+               "is correctly set for table %1%", tbl->name);
+        return;
+    }
+
+    if (counterInstance && counterInstance->type->name == "DirectCounter") {
+        directMeterCounterSizeMap.emplace(counterExternName, table_size + 1);
+    }
+    if (meterInstance && meterInstance->type->name == "DirectMeter") {
+        directMeterCounterSizeMap.emplace(meterExternName, table_size + 1);
+    }
+    return;
 }
 
 void CollectAddOnMissTable::postorder(const IR::P4Table* t) {

@@ -3,7 +3,11 @@
 #include "printUtils.h"
 #include "dpdkAsmOpt.h"
 #include "constants.h"
+#include "dpdkArch.h"
 using namespace DBPrint;
+
+ordered_map<cstring, int> DPDK::CollectDirectCounterMeter::directMeterCounterSizeMap = {};
+auto& directMeterCounterSizeMap =  DPDK::CollectDirectCounterMeter::directMeterCounterSizeMap;
 
 ordered_map<cstring, cstring> DPDK::ShortenTokenLength::origNameMap = {};
 auto& origNameMap =  DPDK::ShortenTokenLength::origNameMap;
@@ -89,6 +93,38 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
         } else {
             auto n_counters = args->at(0)->expression;
             auto counter_type = args->at(1)->expression;
+            if (counter_type->is<IR::Constant>())
+                value = counter_type->to<IR::Constant>()->asUnsigned();
+            if (value == 2) {
+                /* For PACKETS_AND_BYTES counter type, two regarray declarations are emitted and
+                   the counter name is suffixed with _packets and _bytes */
+                auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name() + "_packets",
+                                   n_counters, new IR::Constant(0));
+                regDecl->toSpec(out) << std::endl << std::endl;
+                regDecl = new IR::DpdkRegisterDeclStatement(this->Name() + "_bytes", n_counters,
+                                                            new IR::Constant(0));
+                regDecl->toSpec(out) << std::endl;
+            } else {
+                auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name(), n_counters,
+                                                                 new IR::Constant(0));
+                regDecl->toSpec(out) << std::endl;
+            }
+        }
+    } else if (DPDK::toStr(this->getType()) == "DirectCounter") {
+        auto args = this->arguments;
+        unsigned value = 0;
+        if (args->size() != 1) {
+            ::error(ErrorType::ERR_INVALID,
+                    "Counter extern declaration %1% must contain 1 parameters\n", this->Name());
+        } else {
+            IR::Expression *n_counters =nullptr;
+            if (directMeterCounterSizeMap.count(this->Name())) {
+                n_counters = new IR::Constant(directMeterCounterSizeMap.at(this->Name()));
+            } else {
+                BUG("Direct Counter size is not populated");
+            }
+
+            auto counter_type = args->at(0)->expression;
             if (counter_type->is<IR::Constant>())
                 value = counter_type->to<IR::Constant>()->asUnsigned();
             if (value == 2) {
@@ -567,6 +603,11 @@ std::ostream &IR::DpdkCounterCountStatement::toSpec(std::ostream &out) const {
         out << DPDK::toStr(incr);
     else
         out << "1";
+    return out;
+}
+
+std::ostream &IR::DpdkGetTableEntryIndex::toSpec(std::ostream &out) const {
+    out << "entryid " << DPDK::toStr(index) << " ";
     return out;
 }
 

@@ -374,7 +374,7 @@ enum PNA_CounterType_t {
 @noWarn("unused")
 extern Counter<W, S> {
   Counter(bit<32> n_counters, PNA_CounterType_t type);
-  void count(in S index);
+  void count(in S index, @optional in bit<32> increment);
 }
 // END:Counter_extern
 
@@ -382,7 +382,7 @@ extern Counter<W, S> {
 @noWarn("unused")
 extern DirectCounter<W> {
   DirectCounter(PNA_CounterType_t type);
-  void count();
+  void count(@optional in bit<32> increment);
 }
 // END:DirectCounter_extern
 
