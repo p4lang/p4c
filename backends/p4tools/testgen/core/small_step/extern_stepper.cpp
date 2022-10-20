@@ -346,9 +346,9 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression* c
                      const auto* fieldargRef = flatParamFields[idx];
                      generateCopyIn(nextState, fieldargRef, fieldGlobalRef, dir, forceTaint->value);
                  }
-             } else if (assignType->is<IR::Type_Base>()) {
-                 // If the type is a flat Type_Base, convert it to a member with a "*" prefix.
-                 globalRef = new IR::Member(assignType, globalRef, "*");
+             } else if (const auto* tb = assignType->to<IR::Type_Base>()) {
+                 // If the type is a flat Type_Base, postfix it with a "*".
+                 globalRef = IRUtils::addZombiePostfix(globalRef, tb);
                  if (const auto* argPath = argRef->to<IR::PathExpression>()) {
                      argRef = nextState->convertPathExpr(argPath);
                  }
@@ -418,9 +418,9 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression* c
                          nextState->set(fieldGlobalRef, nextState->get(fieldargRef));
                      }
                  }
-             } else if (assignType->is<IR::Type_Base>()) {
-                 // If the type is a flat Type_Base, convert it to a member with a "*" prefix.
-                 globalRef = new IR::Member(assignType, globalRef, "*");
+             } else if (const auto* tb = assignType->to<IR::Type_Base>()) {
+                 // If the type is a flat Type_Base, postfix it with a "*".
+                 globalRef = IRUtils::addZombiePostfix(globalRef, tb);
                  if (const auto* argPath = argRef->to<IR::PathExpression>()) {
                      argRef = nextState->convertPathExpr(argPath);
                  }
@@ -798,8 +798,6 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
             IR::ID& /*name*/, const IR::Vector<IR::Argument>* /*args*/, const ExecutionState& state,
             SmallStepEvaluator::Result& result) {
              auto* nextState = new ExecutionState(state);
-             // TODO: Which packet length do we actually get here?
-             // The length of the packet when it has entered the parser? The length after parsing?
              const auto& lengthVar = ExecutionState::getInputPacketSizeVar();
              const auto* divVar =
                  new IR::Div(lengthVar->type, ExecutionState::getInputPacketSizeVar(),

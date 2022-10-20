@@ -25,6 +25,7 @@ class EBPFTableStepper : public TableStepper {
     /// standard: standard implementation - use normal control plane entries.
     /// constant: The table is constant - no control entries are possible.
     /// skip: Skip the implementation and just use the default entry (no entry at all).
+    /// TODO: Do we need to include an array and hash implementation of the eBPF tables?
     enum class TableImplementation { standard, constant, skip };
 
     /// eBPF-specific table properties.

@@ -46,6 +46,10 @@ EBPFProgramInfo::EBPFProgramInfo(const IR::P4Program* program,
         pipelineSequence.insert(pipelineSequence.end(), subResult.begin(), subResult.end());
         ++blockIdx;
     }
+    // The input packet should be larger than 0.
+    targetConstraints =
+        new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
+                    IRUtils::getConstant(ExecutionState::getPacketSizeVarType(), 0));
 }
 
 const ordered_map<cstring, const IR::Type_Declaration*>* EBPFProgramInfo::getProgrammableBlocks()

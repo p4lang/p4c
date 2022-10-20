@@ -365,6 +365,27 @@ void AbstractStepper::setTargetUninitialized(ExecutionState* nextState, const IR
     }
 }
 
+void AbstractStepper::declareStructLike(ExecutionState* nextState, const IR::Expression* parentExpr,
+                                        const IR::Type_StructLike* structType) const {
+    std::vector<const IR::Member*> validFields;
+    auto fields = nextState->getFlatFields(parentExpr, structType, &validFields);
+    // We also need to initialize the validity bits of the headers. These are false.
+    for (const auto* validField : validFields) {
+        nextState->set(validField, IRUtils::getBoolLiteral(false));
+    }
+    // For each field in the undefined struct, we create a new zombie variable.
+    // If the variable does not have an initializer we need to create a new zombie for it.
+    // For now we just use the name directly.
+    for (const auto* field : fields) {
+        nextState->set(field, programInfo.createTargetUninitialized(field->type, false));
+    }
+}
+
+void AbstractStepper::declareBaseType(ExecutionState* nextState, const IR::Expression* paramPath,
+                                      const IR::Type_Base* baseType) const {
+    nextState->set(paramPath, programInfo.createTargetUninitialized(baseType, false));
+}
+
 }  // namespace P4Testgen
 
 }  // namespace P4Tools

@@ -1,7 +1,6 @@
 #include "backends/p4tools/testgen/targets/ebpf/cmd_stepper.h"
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <list>
 #include <map>
 #include <utility>

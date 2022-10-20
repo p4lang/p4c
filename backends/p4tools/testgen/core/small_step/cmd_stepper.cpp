@@ -32,22 +32,6 @@ CmdStepper::CmdStepper(ExecutionState& state, AbstractSolver& solver,
                        const ProgramInfo& programInfo)
     : AbstractStepper(state, solver, programInfo) {}
 
-void CmdStepper::declareStructLike(ExecutionState* nextState, const IR::Expression* parentExpr,
-                                   const IR::Type_StructLike* structType) const {
-    std::vector<const IR::Member*> validFields;
-    auto fields = nextState->getFlatFields(parentExpr, structType, &validFields);
-    // We also need to initialize the validity bits of the headers. These are false.
-    for (const auto* validField : validFields) {
-        nextState->set(validField, IRUtils::getBoolLiteral(false));
-    }
-    // For each field in the undefined struct, we create a new zombie variable.
-    // If the variable does not have an initializer we need to create a new zombie for it.
-    // For now we just use the name directly.
-    for (const auto* field : fields) {
-        nextState->set(field, programInfo.createTargetUninitialized(field->type, false));
-    }
-}
-
 void CmdStepper::declareVariable(ExecutionState* nextState, const IR::Declaration_Variable* decl) {
     if (decl->initializer != nullptr) {
         TESTGEN_UNIMPLEMENTED("Unsupported initializer %s for declaration variable.",
@@ -107,9 +91,9 @@ void CmdStepper::initializeBlockParams(const IR::Type_Declaration* typeDecl,
         const auto* paramPath = new IR::PathExpression(paramType, new IR::Path(archRef));
         if (const auto* ts = paramType->to<IR::Type_StructLike>()) {
             declareStructLike(nextState, paramPath, ts);
-        } else if (paramType->is<IR::Type_Base>()) {
-            // If the type is a flat Type_BAse, convert it to a member with a "*" prefix.
-            const auto* paramRef = new IR::Member(paramType, paramPath, "*");
+        } else if (const auto* tb = paramType->to<IR::Type_Base>()) {
+            // If the type is a flat Type_Base, postfix it with a "*".
+            const auto& paramRef = IRUtils::addZombiePostfix(paramPath, tb);
             nextState->set(paramRef, programInfo.createTargetUninitialized(paramType, false));
         } else {
             P4C_UNIMPLEMENTED("Unsupported initialization type %1%", paramType->node_type_name());
