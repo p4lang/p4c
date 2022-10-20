@@ -428,13 +428,14 @@ class ListExpression : BaseListExpression {
             type = new Type_List(tuple); } }
 }
 
-/// Represents a vector literal
-class VectorExpression : BaseListExpression {
+/// Represents P4 list expression, not to be confused with
+/// ListExpression from above.
+class P4ListExpression : BaseListExpression {
     Type elementType;
-    VectorExpression {
+    P4ListExpression {
         validate();
         if (type->is<Type::Unknown>()) {
-            type = new Type_Vector(elementType); } }
+            type = new Type_P4List(elementType); } }
 }
 
 /// An expression that evaluates to a struct.
@@ -468,9 +469,9 @@ class ListCompileTimeValue : CompileTimeValue {
 #nodbprint
 }
 
-/// A VectorExpression where all the components are compile-time values.
+/// A P4ListExpression where all the components are compile-time values.
 /// This is used by the evaluator pass.
-class VectorCompileTimeValue : CompileTimeValue {
+class P4ListCompileTimeValue : CompileTimeValue {
     inline Vector<Node> components;
     validate {
         for (auto v : components)

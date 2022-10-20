@@ -354,7 +354,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             canon = new IR::Type_Stack(stack->srcInfo, et, stack->size);
         canon = typeMap->getCanonical(canon);
         return canon;
-    } else if (auto vec = type->to<IR::Type_Vector>()) {
+    } else if (auto vec = type->to<IR::Type_P4List>()) {
         auto et = canonicalize(vec->elementType);
         if (et == nullptr)
             return nullptr;
@@ -362,7 +362,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         if (et == vec->elementType)
             canon = type;
         else
-            canon = new IR::Type_Vector(vec->srcInfo, et);
+            canon = new IR::Type_P4List(vec->srcInfo, et);
         canon = typeMap->getCanonical(canon);
         return canon;
     } else if (auto list = type->to<IR::Type_List>()) {
@@ -1389,7 +1389,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Tuple* type) {
     return type;
 }
 
-const IR::Node* TypeInference::postorder(IR::Type_Vector* type) {
+const IR::Node* TypeInference::postorder(IR::Type_P4List* type) {
     (void)setTypeType(type);
     return type;
 }
@@ -2090,8 +2090,8 @@ const IR::Node* TypeInference::postorder(IR::VectorExpression* expression) {
     }
 
     if (changed)
-        expression = new IR::VectorExpression(expression->srcInfo, *vec, elementType);
-    auto type = new IR::Type_Vector(expression->srcInfo, elementType);
+        expression = new IR::P4ListExpression(expression->srcInfo, *vec, elementType);
+    auto type = new IR::Type_P4List(expression->srcInfo, elementType);
     setType(getOriginal(), type);
     setType(expression, type);
     if (constant) {
@@ -2713,7 +2713,7 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
             }
         }
     }
-    if (auto vt = concreteType->to<IR::Type_Vector>()) {
+    if (auto vt = concreteType->to<IR::Type_P4List>()) {
         auto vecElementType = vt->elementType;
         if (auto le = expression->expr->to<IR::ListExpression>()) {
             IR::Vector<IR::Expression> vec;
@@ -2727,7 +2727,7 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
             }
             auto vecType = castType->getP4Type();
             setType(vecType, new IR::Type_Type(vt));
-            auto result = new IR::VectorExpression(le->srcInfo, vec, vecElementType);
+            auto result = new IR::P4ListExpression(le->srcInfo, vec, vecElementType);
             setType(result, vt);
             if (isConstant) {
                 setCompileTimeConstant(result);

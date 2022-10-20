@@ -4,7 +4,7 @@ list-error.p4(9): [--Werror=type-error] error: e
   ---- Actual error:
   Cannot cast implicitly type 'bit<16>' to type 'bit<32>'
   ---- Originating from:
-list-error.p4(9): Type of argument 'VectorExpression' (list<bit<16>>) does not match type of parameter 'data' (list<bit<32>>)
+list-error.p4(9): Type of argument 'P4ListExpression' (list<bit<16>>) does not match type of parameter 'data' (list<bit<32>>)
       E((list<bit<16>>){2, 3, 4}) e;
         ^^^^^^^^^^^^^^^^^^^^^^^^
 list-error.p4(9)

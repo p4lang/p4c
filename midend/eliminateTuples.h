@@ -67,7 +67,7 @@ class ReplacementMap {
  * the tuple is left unchanged, as below:
  * struct S<T> { tuple<T> x; }
  * This decision may need to be revisited in the future.
- * Do not replace types within vectors either.
+ * Do not replace types within P4Lists either.
  *
  *   @pre none
  *   @post ensure all tuples are replaced with struct.
@@ -104,7 +104,8 @@ class DoReplaceTuples final : public Transform {
         // We want to keep these as tuples.
         return skip(set);
     }
-    const IR::Node* preorder(IR::Type_Vector* vector) override { return skip(vector); }
+    const IR::Node* preorder(IR::Type_P4List* list) override
+    { return skip(list); }
 };
 
 class EliminateTuples final : public PassManager {

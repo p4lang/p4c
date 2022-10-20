@@ -236,7 +236,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
                             p4rtControllerType reducedSimpleKeysetExpression
                             nonBraceExpression
 %type<ConstType*>           baseType typeOrVoid specializedType headerStackType
-                            typeRef tupleType typeArg realTypeArg namedType vectorType
+                            typeRef tupleType typeArg realTypeArg namedType p4listType
 %type<IR::Type_Name*>       typeName
 %type<IR::Argument*>        argument
 %type<IR::Vector<IR::Argument>*>  argumentList nonEmptyArgList
@@ -954,7 +954,7 @@ typeRef
     | typeName                         { $$ = $1; }
     | specializedType                  { $$ = $1; }
     | headerStackType                  { $$ = $1; }
-    | vectorType                       { $$ = $1; }
+    | p4listType                       { $$ = $1; }
     | tupleType                        { $$ = $1; }
     ;
 
@@ -973,8 +973,8 @@ typeName
     : prefixedType                     { $$ = new IR::Type_Name(@1, $1); }
     ;
 
-vectorType
-    : LIST l_angle typeArg r_angle   { $$ = new IR::Type_Vector(@1+@4, $3); }
+p4listType
+    : LIST l_angle typeArg r_angle   { $$ = new IR::Type_P4List(@1+@4, $3); }
     ;
 
 tupleType

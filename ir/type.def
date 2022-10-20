@@ -394,8 +394,8 @@ class Type_Tuple : Type_BaseList {
     }
 }
 
-/// The type of a vector.
-class Type_Vector : Type {
+/// The type of a P4ListExpression.
+class Type_P4List : Type {
     Type elementType;
     const Type* getP4Type() const override;
     toString{

@@ -886,7 +886,7 @@ bool ToP4::preorder(const IR::ListExpression* e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::VectorExpression* e) {
+bool ToP4::preorder(const IR::P4ListExpression* e) {
     if (expressionPrecedence > DBPrint::Prec_Prefix)
         builder.append("(");
     if (e->elementType != nullptr) {
