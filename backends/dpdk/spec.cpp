@@ -153,6 +153,22 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
             auto metDecl = new IR::DpdkMeterDeclStatement(this->Name(), n_meters);
             metDecl->toSpec(out) << std::endl;
         }
+    } else if (DPDK::toStr(this->getType()) == "DirectMeter") {
+        auto args = this->arguments;
+        if (args->size() < 1) {
+            ::error(ErrorType::ERR_INVALID,
+                    "Meter extern declaration %1% must have "
+                    "meter type parameter", this->Name());
+        } else {
+            IR::Expression *n_meters =nullptr;
+            if (directMeterCounterSizeMap.count(this->Name())) {
+                n_meters = new IR::Constant(directMeterCounterSizeMap.at(this->Name()));
+            } else {
+                BUG("Direct Meter size is not populated");
+            }
+            auto metDecl = new IR::DpdkMeterDeclStatement(this->Name(), n_meters);
+            metDecl->toSpec(out) << std::endl;
+        }
     }
     return out;
 }

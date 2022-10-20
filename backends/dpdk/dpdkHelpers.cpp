@@ -368,6 +368,31 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     i = new IR::DpdkMeterExecuteStatement(
                          e->object->getName(), index, length, color_in, left);
                 }
+            } else if (e->originalExternType->getName().name == "DirectMeter") {
+                if (e->method->getName().name == "execute") {
+                    auto argSize = e->expr->arguments->size();
+
+                    // DPDK target needs packet length as mandatory parameters
+                    if (argSize < 1) {
+                        ::error(ErrorType::ERR_UNEXPECTED, "Expected atleast 1 argument "
+                                "(packet length) for %1%", e->object->getName());
+                        return false;
+                    }
+                    const IR::Expression *color_in = nullptr;
+                    const IR::Expression *length = nullptr;
+                    if (argSize == 1) {
+                        length = e->expr->arguments->at(0)->expression;
+                        color_in = new IR::Constant(1);
+                    } else if (argSize == 2) {
+                        length = e->expr->arguments->at(1)->expression;
+                        color_in = e->expr->arguments->at(0)->expression;
+                    }
+                    auto metaIndex = new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                                    DirectResourceTableEntryIndex);
+                    add_instr(new IR::DpdkGetTableEntryIndex(metaIndex));
+                    i = new IR::DpdkMeterExecuteStatement(
+                         e->object->getName(), metaIndex, length, color_in, left);
+                }
             } else if (e->originalExternType->getName().name == "Register") {
                 if (e->method->getName().name == "read") {
                     auto index = (*e->expr->arguments)[0]->expression;
@@ -1029,6 +1054,10 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         } else if (a->originalExternType->getName().name == "Meter") {
             if (a->method->getName().name != "execute") {
                 BUG("Meter function not implemented.");
+            }
+        } else if (a->originalExternType->getName().name == "DirectMeter") {
+            if (a->method->getName().name != "execute") {
+                BUG("Direct Meter function %1% not implemented.", a->method->getName().name);
             }
         } else if (a->originalExternType->getName().name == "DirectCounter") {
             auto di = a->object->to<IR::Declaration_Instance>();

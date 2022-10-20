@@ -115,6 +115,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
             if (externTypeName == "Counter" ||
                 externTypeName == "DirectCounter" ||
                 externTypeName == "Register" ||
+                externTypeName == "DirectMeter" ||
                 externTypeName == "Meter" ||
                 externTypeName == "Hash" ||
                 externTypeName == "InternetCheckSum") {

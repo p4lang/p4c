@@ -419,8 +419,8 @@ extern Meter<S> {
 extern DirectMeter {
   DirectMeter(PNA_MeterType_t type);
   // See the corresponding methods for extern Meter.
-  PNA_MeterColor_t execute(in PNA_MeterColor_t color);
-  PNA_MeterColor_t execute();
+  PNA_MeterColor_t execute(in PNA_MeterColor_t color, @optional in bit<32> pkt_len);
+  PNA_MeterColor_t execute(@optional in bit<32> pkt_len);
 }
 // END:DirectMeter_extern
 

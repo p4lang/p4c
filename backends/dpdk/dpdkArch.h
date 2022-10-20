@@ -655,7 +655,25 @@ class CollectExternDeclaration : public Inspector {
     explicit CollectExternDeclaration(DpdkProgramStructure *structure) :
         structure(structure) {}
     bool preorder(const IR::Declaration_Instance *d) override {
-        if (auto type = d->type->to<IR::Type_Specialized>()) {
+        if (auto type = d->type->to<IR::Type_Name>()) {
+            auto externTypeName = type->path->name.name;
+            if (externTypeName == "DirectMeter") {
+                if (d->arguments->size() != 1) {
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "%1%: expected type of meter as the only argument", d);
+                } else {
+                    /* Check if the Direct meter is of PACKETS (0) type */
+                    if (d->arguments->at(0)->expression->to<IR::Constant>()->asUnsigned() == 0)
+                        warn(ErrorType::WARN_UNSUPPORTED,
+                             "%1%: Packet metering is not supported."
+                             " Falling back to byte metering.", d);
+                }
+            } else {
+                // unsupported extern type
+                return false;
+            }
+            structure->externDecls.push_back(d);
+        } else if (auto type = d->type->to<IR::Type_Specialized>()) {
             auto externTypeName = type->baseType->path->name.name;
             if (externTypeName == "Meter") {
                 if (d->arguments->size() != 2) {
@@ -676,7 +694,7 @@ class CollectExternDeclaration : public Inspector {
             } else if (externTypeName == "DirectCounter") {
                 if (d->arguments->size() != 1) {
                     ::error(ErrorType::ERR_EXPECTED,
-                            "%1%: expected type of counter as argument", d);
+                            "%1%: expected type of counter as the only argument", d);
                 }
             } else if (externTypeName == "Register") {
                 if (d->arguments->size() != 1 && d->arguments->size() != 2) {

@@ -41,6 +41,10 @@ action NoAction args none {
 	return
 }
 
+action execute_meter args none {
+	return
+}
+
 table tbl {
 	key {
 		h.ethernet.srcAddr exact
@@ -53,11 +57,25 @@ table tbl {
 }
 
 
+table tbl2 {
+	key {
+		h.ethernet.srcAddr exact
+	}
+	actions {
+		NoAction
+		execute_meter
+	}
+	default_action NoAction args none 
+	size 0x10000
+}
+
+
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	table tbl
+	table tbl2
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop
