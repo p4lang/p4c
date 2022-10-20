@@ -676,7 +676,7 @@ class CollectExternDeclaration : public Inspector {
             } else if (externTypeName == "DirectCounter") {
                 if (d->arguments->size() != 1) {
                     ::error(ErrorType::ERR_EXPECTED,
-                            "%1%: expected type of counter as arguments", d);
+                            "%1%: expected type of counter as argument", d);
                 }
             } else if (externTypeName == "Register") {
                 if (d->arguments->size() != 1 && d->arguments->size() != 2) {
@@ -933,14 +933,13 @@ class CollectDirectCounterMeter : public Inspector {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
     DpdkProgramStructure* structure;
+    int getTableSize(const IR::P4Table * tbl);
  public:
     static ordered_map<cstring, int> directMeterCounterSizeMap;
-//    CollectDirectCounterMeter() {setName("CollectDirectCounterMeter");}
     CollectDirectCounterMeter(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                 DpdkProgramStructure* structure) :
-    refMap(refMap), typeMap(typeMap), structure(structure) {}
+    refMap(refMap), typeMap(typeMap), structure(structure) {setName("CollectDirectCounterMeter");}
 
-    int getTableSize(const IR::P4Table * tbl);
     void postorder(const IR::P4Table* t) override;
 };
 

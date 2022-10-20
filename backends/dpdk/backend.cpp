@@ -69,7 +69,6 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         new CollectDirectCounterMeter(refMap, typeMap, &structure),
-//        new CollectDirectCounterMeter(),
         new ConvertActionSelectorAndProfile(refMap, typeMap, &structure),
         new CollectTableInfo(&structure),
         new CollectAddOnMissTable(refMap, typeMap, &structure),

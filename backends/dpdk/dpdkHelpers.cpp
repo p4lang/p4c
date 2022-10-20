@@ -1070,7 +1070,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                     }
                 }
             } else {
-                BUG("Direct Counter function not implemented");
+                BUG("Direct Counter function %1% not implemented", a->method->getName());
             }
         } else if (a->originalExternType->getName().name == "Counter") {
             auto di = a->object->to<IR::Declaration_Instance>();
