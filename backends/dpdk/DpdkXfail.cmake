@@ -49,7 +49,6 @@ p4c_add_xfail_reason("dpdk"
 p4c_add_xfail_reason("dpdk"
   "Unknown extern function"
   testdata/p4_16_samples/psa-example-digest-bmv2.p4
-  testdata/p4_16_samples/psa-example-parser-checksum.p4
   testdata/p4_16_samples/psa-meter6.p4
   )
 
@@ -109,4 +108,9 @@ p4c_add_xfail_reason("dpdk"
 p4c_add_xfail_reason("dpdk"
   "must be a compile-time constant"
   testdata/p4_16_samples/psa-example-mask-range-err.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "implementation property cannot co-exist with direct counter"
+  testdata/p4_16_samples/pna-dpdk-direct-counter-err.p4
   )

@@ -122,7 +122,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 externAttr.externalName = ed->controlPlaneName();
                 externAttr.externType = externTypeName;
                 if (externTypeName == "Counter" || "DirectCounter") {
-                    int maxArgNum = externTypeName == "Counter"? 2 : 1;
+                    unsigned maxArgNum = externTypeName == "Counter"? 2 : 1;
                     int typeArgNum = maxArgNum - 1;
                     if (ed->arguments->size() != maxArgNum) {
                         ::error(ErrorType::ERR_UNEXPECTED,

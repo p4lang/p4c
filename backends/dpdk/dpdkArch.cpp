@@ -2402,8 +2402,8 @@ int CollectDirectCounterMeter::getTableSize(const IR::P4Table * tbl) {
             }
         }
     }
-   if (is_add_on_miss) tableSize = tableSize * 4;
-   return tableSize;
+    if (is_add_on_miss) tableSize = tableSize * 4;
+    return tableSize;
 }
 
 void CollectDirectCounterMeter::postorder(const IR::P4Table* tbl) {
