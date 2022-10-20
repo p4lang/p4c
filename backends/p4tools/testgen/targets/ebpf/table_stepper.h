@@ -27,7 +27,7 @@ class EBPFTableStepper : public TableStepper {
     /// skip: Skip the implementation and just use the default entry (no entry at all).
     enum class TableImplementation { standard, constant, skip };
 
-    /// eBPF specific table properties.
+    /// eBPF-specific table properties.
     struct EBPFProperties {
         /// The type of the table implementation.
         TableImplementation implementaton;

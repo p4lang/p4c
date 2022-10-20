@@ -67,7 +67,7 @@ int BMv2_V1ModelProgramInfo::getGress(const IR::Type_Declaration* decl) const {
 }
 
 std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
-    const IR::Type_Declaration* typeDecl, size_t pipeIdx) const {
+    const IR::Type_Declaration* typeDecl, size_t blockIdx) const {
     // Get the architecture specification for this target.
     const auto* archSpec = TestgenTarget::getArchSpec();
 
@@ -79,7 +79,7 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
     }
     const auto* params = applyBlock->getApplyParameters();
     // Retrieve the current canonical pipe in the architecture spec using the pipe index.
-    const auto* archMember = archSpec->getArchMember(pipeIdx);
+    const auto* archMember = archSpec->getArchMember(blockIdx);
 
     std::vector<Continuation::Command> cmds;
     // Generate all the necessary copy-in/outs.

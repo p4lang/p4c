@@ -34,7 +34,7 @@ class BMv2_V1ModelProgramInfo : public ProgramInfo {
     /// This function contains an imperative specification of the inter-pipe interaction in the
     /// target.
     std::vector<Continuation::Command> processDeclaration(const IR::Type_Declaration* typeDecl,
-                                                          size_t pipeIdx) const;
+                                                          size_t blockIdx) const;
 
  public:
     BMv2_V1ModelProgramInfo(const IR::P4Program* program,

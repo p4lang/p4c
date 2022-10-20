@@ -46,11 +46,6 @@ EBPFProgramInfo::EBPFProgramInfo(const IR::P4Program* program,
         pipelineSequence.insert(pipelineSequence.end(), subResult.begin(), subResult.end());
         ++blockIdx;
     }
-    // Sending a too short packet eBPF produces nonsense, so we require the packet size to be
-    // larger than 32 bits
-    targetConstraints =
-        new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                    IRUtils::getConstant(ExecutionState::getPacketSizeVarType(), 32));
 }
 
 const ordered_map<cstring, const IR::Type_Declaration*>* EBPFProgramInfo::getProgrammableBlocks()
@@ -59,72 +54,51 @@ const ordered_map<cstring, const IR::Type_Declaration*>* EBPFProgramInfo::getPro
 }
 
 std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
-    const IR::Type_Declaration* declType, size_t blockIdx) const {
-    auto result = std::vector<Continuation::Command>();
+    const IR::Type_Declaration* typeDecl, size_t blockIdx) const {
     // Get the architecture specification for this target.
     const auto* archSpec = TestgenTarget::getArchSpec();
-    const IR::ParameterList* params = nullptr;
 
     // Collect parameters.
-    if (const auto* p4parser = declType->to<IR::P4Parser>()) {
-        params = p4parser->getApplyParameters();
-    } else if (const auto* p4control = declType->to<IR::P4Control>()) {
-        params = p4control->getApplyParameters();
-    } else {
-        TESTGEN_UNIMPLEMENTED("Constructed type %s of type %s not supported.", declType,
-                              declType->node_type_name());
+    const auto* applyBlock = typeDecl->to<IR::IApply>();
+    if (applyBlock == nullptr) {
+        TESTGEN_UNIMPLEMENTED("Constructed type %s of type %s not supported.", typeDecl,
+                              typeDecl->node_type_name());
     }
-    std::vector<const IR::Statement*> copyOuts;
+    const auto* params = applyBlock->getApplyParameters();
     // Retrieve the current canonical pipe in the architecture spec using the pipe index.
     const auto* archMember = archSpec->getArchMember(blockIdx);
+
+    std::vector<Continuation::Command> cmds;
+    // Generate all the necessary copy-in/outs.
+    std::vector<Continuation::Command> copyOuts;
     for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
         const auto* param = params->getParameter(paramIdx);
-        const auto* paramType = param->type;
-        // We need to resolve type names.
-        if (const auto* tn = paramType->to<IR::Type_Name>()) {
-            paramType = resolveProgramType(tn);
-        }
-        // Retrieve the identifier of the global architecture map using the parameter index.
-        auto archRef = archMember->blockParams.at(paramIdx);
-        // If the archRef is a nullptr or empty, we do not have a mapping for this parameter.
-        if (archRef.isNullOrEmpty()) {
-            continue;
-        }
-        const auto* archPath = new IR::PathExpression(paramType, new IR::Path(archRef));
-        const auto* paramRef = new IR::PathExpression(paramType, new IR::Path(param->name));
-        const auto* paramDir = new IR::StringLiteral(directionToString(param->direction));
-        // This mimicks the copy-in from the architecture environment.
-        const auto* copyInCall = new IR::MethodCallStatement(IRUtils::generateInternalMethodCall(
-            "copy_in", {archPath, paramRef, paramDir, new IR::BoolLiteral(false)}));
-        result.emplace_back(copyInCall);
-        // This mimicks the copy-out from the architecture environment.
-        const auto* copyOutCall = new IR::MethodCallStatement(
-            IRUtils::generateInternalMethodCall("copy_out", {archPath, paramRef, paramDir}));
-        copyOuts.emplace_back(copyOutCall);
+        produceCopyInOutCall(param, paramIdx, archMember, &cmds, &copyOuts);
     }
     // Insert the actual pipeline.
-    result.emplace_back(declType);
+    cmds.emplace_back(typeDecl);
     // Add the copy out assignments after the pipe has completed executing.
-    result.insert(result.end(), copyOuts.begin(), copyOuts.end());
+    cmds.insert(cmds.end(), copyOuts.begin(), copyOuts.end());
+
     // After some specific pipelines (filter), we check whether the packet has been dropped.
+    // eBPF can not modify the packet, so we do not append any emit buffer here.
     if ((archMember->blockName == "filter")) {
-        // Also check whether we need to drop the packet.
         auto* dropStmt =
             new IR::MethodCallStatement(IRUtils::generateInternalMethodCall("drop_and_exit", {}));
         const auto* dropCheck = new IR::IfStatement(dropIsActive(), dropStmt, nullptr);
-        result.emplace_back(dropCheck);
+        cmds.emplace_back(dropCheck);
     }
-    return result;
+    return cmds;
 }
 
 const IR::Member* EBPFProgramInfo::getTargetInputPortVar() const {
     return new IR::Member(IRUtils::getBitType(TestgenTarget::getPortNumWidth_bits()),
-                          new IR::PathExpression("*standard_metadata"), "ingress_port");
+                          new IR::PathExpression("*"), "input_port");
 }
 
 const IR::Member* EBPFProgramInfo::getTargetOutputPortVar() const {
     return new IR::Member(IRUtils::getBitType(TestgenTarget::getPortNumWidth_bits()),
-                          new IR::PathExpression("*standard_metadata"), "egress_spec");
+                          new IR::PathExpression("*"), "output_port");
 }
 
 const IR::Expression* EBPFProgramInfo::dropIsActive() const {

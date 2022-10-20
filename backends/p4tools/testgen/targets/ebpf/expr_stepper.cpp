@@ -119,6 +119,7 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
                  result->emplace_back(nextState);
                  return;
              }
+             // Define a series of short-hand variables. These are hardcoded just like the extern.
              const auto* version = state.get(new IR::Member(ipHdrRef, "version"));
              const auto* ihl = state.get(new IR::Member(ipHdrRef, "ihl"));
              const auto* diffserv = state.get(new IR::Member(ipHdrRef, "diffserv"));
@@ -131,10 +132,13 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
              const auto* hdrChecksum = state.get(new IR::Member(ipHdrRef, "hdrChecksum"));
              const auto* srcAddr = state.get(new IR::Member(ipHdrRef, "srcAddr"));
              const auto* dstAddr = state.get(new IR::Member(ipHdrRef, "dstAddr"));
-
              const auto* bt8 = IRUtils::getBitType(8);
              const auto* bt16 = IRUtils::getBitType(16);
              const auto* bt32 = IRUtils::getBitType(32);
+
+             // The checksum is computed as a series of 16-bit additions.
+             // We need to widen to 32 bits to handle overflows.
+             // These overflows are added to the checksum at the end.
              const IR::Expression* checksum = new IR::Cast(
                  bt32, new IR::Concat(bt16, new IR::Concat(bt8, version, ihl), diffserv));
              checksum = new IR::Add(bt32, checksum, new IR::Cast(bt32, totalLen));
@@ -187,7 +191,7 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
 
              // Implement the simple conntrack case since we do not support multiple packets here
              // yet.
-             // TODO: We need
+             // TODO: We need custom test objects to implement richer, stateful testing here.
              auto* nextState = new ExecutionState(state);
              const auto* cond = new IR::LAnd(new IR::Equ(syn, IRUtils::getConstant(syn->type, 1)),
                                              new IR::Equ(ack, IRUtils::getConstant(ack->type, 0)));

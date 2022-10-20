@@ -108,6 +108,7 @@ void CmdStepper::initializeBlockParams(const IR::Type_Declaration* typeDecl,
         if (const auto* ts = paramType->to<IR::Type_StructLike>()) {
             declareStructLike(nextState, paramPath, ts);
         } else if (paramType->is<IR::Type_Base>()) {
+            // If the type is a flat Type_BAse, convert it to a member with a "*" prefix.
             const auto* paramRef = new IR::Member(paramType, paramPath, "*");
             nextState->set(paramRef, programInfo.createTargetUninitialized(paramType, false));
         } else {

@@ -31,7 +31,7 @@ class EBPFProgramInfo : public ProgramInfo {
     /// This function contains an imperative specification of the inter-pipe interaction in the
     /// target.
     std::vector<Continuation::Command> processDeclaration(const IR::Type_Declaration* cstrType,
-                                                          size_t pipeIdx) const;
+                                                          size_t blockIdx) const;
 
  public:
     EBPFProgramInfo(const IR::P4Program* program,
