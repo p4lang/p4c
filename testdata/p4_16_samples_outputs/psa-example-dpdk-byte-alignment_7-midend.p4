@@ -83,7 +83,11 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     @name("ingress.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.BYTES) meter0_0;
     @name("ingress.execute") action execute_1(@name("index") bit<12> index_1) {
         hdr.ipv4._ihl1 = 4w5;
+<<<<<<< HEAD
         color_out_0 = meter0_0.execute(index_1, color_in_0, (bit<32>)hdr.ipv4._totalLen3);
+=======
+        color_out_0 = meter0_0.dpdk_execute(index_1, color_in_0, hdr.ipv4._totalLen3);
+>>>>>>> rename execute to dpdk_execute
         user_meta.port_out = (color_out_0 == PSA_MeterColor_t.GREEN ? 32w1 : 32w0);
         reg_0.write(index_1, (color_out_0 == PSA_MeterColor_t.GREEN ? 32w1 : 32w0));
         hdr.ipv4._ihl1 = (hdr.ipv4._version0 == 4w6 ? 4w6 : 4w5);

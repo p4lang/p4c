@@ -667,7 +667,7 @@ extern Meter<S> {
   // RFC 2698). The color of the packet before the method call was
   // made is specified by the color parameter.
   PSA_MeterColor_t execute(in S index, in PSA_MeterColor_t color);
-  PSA_MeterColor_t execute(in S index, in PSA_MeterColor_t color, in bit<32> pkt_len);
+  PSA_MeterColor_t dpdk_execute(in S index, in PSA_MeterColor_t color, in bit<32> pkt_len);
 
   // Use this method call to perform a color blind meter update (see
   // RFC 2698).  It may be implemented via a call to execute(index,
@@ -691,7 +691,7 @@ extern DirectMeter {
   DirectMeter(PSA_MeterType_t type);
   // See the corresponding methods for extern Meter.
   PSA_MeterColor_t execute(in PSA_MeterColor_t color);
-  PSA_MeterColor_t execute(in PSA_MeterColor_t color, in bit<32> pkt_len);
+  PSA_MeterColor_t dpdk_execute(in PSA_MeterColor_t color, in bit<32> pkt_len);
   PSA_MeterColor_t execute();
   PSA_MeterColor_t dpdk_execute(in bit<32> pkt_len);
 

@@ -407,7 +407,7 @@ extern Meter<S> {
   // RFC 2698). The color of the packet before the method call was
   // made is specified by the color parameter.
   PNA_MeterColor_t execute(in S index, in PNA_MeterColor_t color);
-  PNA_MeterColor_t execute(in S index, in PNA_MeterColor_t color, in bit<32> pkt_len);
+  PNA_MeterColor_t dpdk_execute(in S index, in PNA_MeterColor_t color, in bit<32> pkt_len);
 
   // Use this method call to perform a color blind meter update (see
   // RFC 2698).  It may be implemented via a call to execute(index,
@@ -423,7 +423,7 @@ extern DirectMeter {
   // See the corresponding methods for extern Meter.
   PNA_MeterColor_t execute(in PNA_MeterColor_t color);
   PNA_MeterColor_t execute();
-  PNA_MeterColor_t execute(in PNA_MeterColor_t color, in bit<32> pkt_len);
+  PNA_MeterColor_t dpdk_execute(in PNA_MeterColor_t color, in bit<32> pkt_len);
   PNA_MeterColor_t dpdk_execute(in bit<32> pkt_len);
 }
 // END:DirectMeter_extern
