@@ -73,6 +73,11 @@ class IRUtils {
     /// @param headerRef a header instance. This is either a Member or a PathExpression.
     static StateVariable getHeaderValidity(const IR::Expression* headerRef);
 
+    /// @returns a StateVariable that is postfixed with "*". This is used for PathExpressions with
+    /// are not yet members.
+    static StateVariable addZombiePostfix(const IR::Expression* paramPath,
+                                          const IR::Type_Base* baseType);
+
     /* =========================================================================================
      *  Expressions
      * ========================================================================================= */

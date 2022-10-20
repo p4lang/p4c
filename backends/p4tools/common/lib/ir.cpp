@@ -71,6 +71,10 @@ StateVariable IRUtils::getHeaderValidity(const IR::Expression* headerRef) {
     return new IR::Member(IR::Type::Boolean::get(), headerRef, Valid);
 }
 
+StateVariable IRUtils::addZombiePostfix(const IR::Expression* paramPath,
+                                        const IR::Type_Base* baseType) {
+    return new IR::Member(baseType, paramPath, "*");
+}
 /* =============================================================================================
  *  Expressions
  * ============================================================================================= */

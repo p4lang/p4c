@@ -164,6 +164,17 @@ class AbstractStepper : public Inspector {
     /// mechanism is used.
     void setTargetUninitialized(ExecutionState* nextState, const IR::Member* ref,
                                 bool forceTaint) const;
+
+    /// This is a helper function to declare structlike data structures.
+    /// This also is used to declare the members of a stack. This function is primarily used by the
+    /// Declaration_Variable preorder function.
+    void declareStructLike(ExecutionState* nextState, const IR::Expression* parentExpr,
+                           const IR::Type_StructLike* structType) const;
+
+    /// This is a helper function to declare base type variables. Because all variables need to be a
+    /// member in the execution state environment, this helper function suffixes a "*".
+    void declareBaseType(ExecutionState* nextState, const IR::Expression* paramPath,
+                         const IR::Type_Base* baseType) const;
 };
 
 }  // namespace P4Testgen

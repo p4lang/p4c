@@ -283,11 +283,11 @@ TEST_F(TaintTest, Taint08) {
 /// Expected output: taint in most upper and lower 32 bits, taint in middle 64 bits
 TEST_F(TaintTest, Taint09) {
     // Taint64b
-    auto* taint64b = IRUtils::getTaintExpression(IRUtils::getBitType(64));
+    const auto* taint64b = IRUtils::getTaintExpression(IRUtils::getBitType(64));
     ASSERT_TRUE(Taint::hasTaint({}, taint64b));
 
     // 64w0 ++ taint<64>
-    auto* taint128bLowerQ = new IR::Cast(IRUtils::getBitType(128), taint64b);
+    const auto* taint128bLowerQ = new IR::Cast(IRUtils::getBitType(128), taint64b);
     ASSERT_TRUE(Taint::hasTaint({}, taint128bLowerQ));
     ASSERT_TRUE(!Taint::hasTaint({}, new IR::Slice(taint128bLowerQ, 71, 64)));
 
@@ -295,14 +295,14 @@ TEST_F(TaintTest, Taint09) {
     ASSERT_TRUE(!Taint::hasTaint({}, new IR::Slice(taint128bLowerQ, 127, 64)));
 
     // 32w0 ++ taint<64> ++ 32w0
-    auto* taint128bMiddleQ = new IR::Shl(taint128bLowerQ, new IR::Constant(32));
+    const auto* taint128bMiddleQ = new IR::Shl(taint128bLowerQ, new IR::Constant(32));
     ASSERT_TRUE(!Taint::hasTaint({}, new IR::Slice(taint128bMiddleQ, 127, 96)));
     ASSERT_TRUE(Taint::hasTaint({}, new IR::Slice(taint128bMiddleQ, 95, 32)));
     ASSERT_TRUE(!Taint::hasTaint({}, new IR::Slice(taint128bMiddleQ, 31, 0)));
 
     // (32w0 ++ Taint64b ++ 32w0) & 128w0
     // The bitwise and should not have any effect on taint.
-    auto* taint128bMiddleQ2 = new IR::BAnd(taint128bMiddleQ, new IR::Constant(128));
+    const auto* taint128bMiddleQ2 = new IR::BAnd(taint128bMiddleQ, new IR::Constant(128));
     ASSERT_TRUE(!Taint::hasTaint({}, new IR::Slice(taint128bMiddleQ2, 127, 96)));
     ASSERT_TRUE(Taint::hasTaint({}, new IR::Slice(taint128bMiddleQ2, 95, 32)));
     ASSERT_TRUE(!Taint::hasTaint({}, new IR::Slice(taint128bMiddleQ2, 31, 0)));

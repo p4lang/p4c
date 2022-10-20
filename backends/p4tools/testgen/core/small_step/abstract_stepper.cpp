@@ -267,13 +267,12 @@ void generateStackAssigmentStatement(ExecutionState* state,
                                      std::vector<Continuation::Command>& replacements,
                                      const IR::Expression* stackRef, int leftIndex,
                                      int rightIndex) {
-    const auto* leftArrayIndex = HSIndexToMember::produceStackIndex(
-        stackRef->type->checkedTo<IR::Type_Stack>()->elementType, stackRef, leftIndex);
-    const auto* rightArrayIndex = HSIndexToMember::produceStackIndex(
-        stackRef->type->checkedTo<IR::Type_Stack>()->elementType, stackRef, rightIndex);
+    const auto* elemType = stackRef->type->checkedTo<IR::Type_Stack>()->elementType;
+    const auto* leftArIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, leftIndex);
+    const auto* rightArrIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, rightIndex);
 
     // Check right header validity.
-    const auto* value = state->getSymbolicEnv().get(IRUtils::getHeaderValidity(rightArrayIndex));
+    const auto* value = state->getSymbolicEnv().get(IRUtils::getHeaderValidity(rightArrIndex));
     if (!value->checkedTo<IR::BoolLiteral>()->value) {
         replacements.emplace_back(generateStacksetValid(stackRef, leftIndex, false));
         return;
@@ -281,10 +280,9 @@ void generateStackAssigmentStatement(ExecutionState* state,
     replacements.emplace_back(generateStacksetValid(stackRef, leftIndex, true));
 
     // Unfold fields.
-    auto leftVector = state->getFlatFields(leftArrayIndex,
-                                           leftArrayIndex->type->checkedTo<IR::Type_StructLike>());
-    auto rightVector = state->getFlatFields(
-        rightArrayIndex, rightArrayIndex->type->checkedTo<IR::Type_StructLike>());
+    const auto* structType = elemType->checkedTo<IR::Type_StructLike>();
+    auto leftVector = state->getFlatFields(leftArIndex, structType);
+    auto rightVector = state->getFlatFields(rightArrIndex, structType);
     for (size_t i = 0; i < leftVector.size(); i++) {
         replacements.emplace_back(new IR::AssignmentStatement(leftVector[i], rightVector[i]));
     }
@@ -365,6 +363,27 @@ void AbstractStepper::setTargetUninitialized(ExecutionState* nextState, const IR
     } else {
         P4C_UNIMPLEMENTED("Unsupported uninitialization type %1%", refType->node_type_name());
     }
+}
+
+void AbstractStepper::declareStructLike(ExecutionState* nextState, const IR::Expression* parentExpr,
+                                        const IR::Type_StructLike* structType) const {
+    std::vector<const IR::Member*> validFields;
+    auto fields = nextState->getFlatFields(parentExpr, structType, &validFields);
+    // We also need to initialize the validity bits of the headers. These are false.
+    for (const auto* validField : validFields) {
+        nextState->set(validField, IRUtils::getBoolLiteral(false));
+    }
+    // For each field in the undefined struct, we create a new zombie variable.
+    // If the variable does not have an initializer we need to create a new zombie for it.
+    // For now we just use the name directly.
+    for (const auto* field : fields) {
+        nextState->set(field, programInfo.createTargetUninitialized(field->type, false));
+    }
+}
+
+void AbstractStepper::declareBaseType(ExecutionState* nextState, const IR::Expression* paramPath,
+                                      const IR::Type_Base* baseType) const {
+    nextState->set(paramPath, programInfo.createTargetUninitialized(baseType, false));
 }
 
 }  // namespace P4Testgen

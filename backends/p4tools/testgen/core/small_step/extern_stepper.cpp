@@ -346,7 +346,12 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression* c
                      const auto* fieldargRef = flatParamFields[idx];
                      generateCopyIn(nextState, fieldargRef, fieldGlobalRef, dir, forceTaint->value);
                  }
-             } else if (assignType->is<IR::Type_Base>()) {
+             } else if (const auto* tb = assignType->to<IR::Type_Base>()) {
+                 // If the type is a flat Type_Base, postfix it with a "*".
+                 globalRef = IRUtils::addZombiePostfix(globalRef, tb);
+                 if (const auto* argPath = argRef->to<IR::PathExpression>()) {
+                     argRef = nextState->convertPathExpr(argPath);
+                 }
                  generateCopyIn(nextState, argRef, globalRef, dir, forceTaint->value);
              } else {
                  P4C_UNIMPLEMENTED("Unsupported copy_out type %1%", assignType->node_type_name());
@@ -413,7 +418,12 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression* c
                          nextState->set(fieldGlobalRef, nextState->get(fieldargRef));
                      }
                  }
-             } else if (assignType->is<IR::Type_Base>()) {
+             } else if (const auto* tb = assignType->to<IR::Type_Base>()) {
+                 // If the type is a flat Type_Base, postfix it with a "*".
+                 globalRef = IRUtils::addZombiePostfix(globalRef, tb);
+                 if (const auto* argPath = argRef->to<IR::PathExpression>()) {
+                     argRef = nextState->convertPathExpr(argPath);
+                 }
                  if (dir == "inout" || dir == "out") {
                      nextState->set(globalRef, nextState->get(argRef));
                  }
@@ -775,6 +785,26 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
                  rejectState->replaceTopBody(Continuation::Exception::PacketTooShort);
                  result->emplace_back(condInfo.advanceFailCond, state, rejectState);
              }
+         }},
+        /* ======================================================================================
+         *  packet_in.length
+         *  @return packet length in bytes.  This method may be unavailable on
+         *  some target architectures.
+         * ======================================================================================
+         */
+        {"packet_in.length",
+         {},
+         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
+            IR::ID& /*name*/, const IR::Vector<IR::Argument>* /*args*/, const ExecutionState& state,
+            SmallStepEvaluator::Result& result) {
+             auto* nextState = new ExecutionState(state);
+             const auto& lengthVar = ExecutionState::getInputPacketSizeVar();
+             const auto* divVar =
+                 new IR::Div(lengthVar->type, ExecutionState::getInputPacketSizeVar(),
+                             IRUtils::getConstant(lengthVar->type, 8));
+             nextState->add(new TraceEvent::Expression(divVar, "Return packet length"));
+             nextState->replaceTopBody(Continuation::Return(divVar));
+             result->emplace_back(boost::none, state, nextState);
          }},
         /* ======================================================================================
          *  packet_out.emit

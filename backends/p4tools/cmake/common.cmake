@@ -38,8 +38,9 @@ endfunction(add_p4tools_library)
 # Helper for adding a subproject and configuring it for linting.
 function(add_and_lint_subdirectory dir cpplint_dir)
   add_subdirectory(${dir})
+  get_filename_component(basedir ${dir} NAME_WE)
   add_test(
-    NAME "testgen-cpplint-${dir}"
+    NAME "testgen-cpplint-${basedir}"
     COMMAND sh -c "find '${dir}' \
         -iname \\*.h -o -iname \\*.hpp -o -iname \\*.c -o -iname \\*.cpp \
       | xargs python3 ${cpplint_dir}/cpplint.py \
