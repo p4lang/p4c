@@ -277,7 +277,7 @@ inja::json Protobuf::getVerify(const TestSpec *testSpec) {
     return verifyData;
 }
 
-static std::string getTestCase() {
+std::string Protobuf::getTestCaseTemplate() {
     static std::string TEST_CASE(
         R"""(# A P4TestGen-generated test case for {{test_name}}.p4
 metadata: "p4testgen seed: {{ default(seed, "none") }}"
@@ -429,7 +429,7 @@ void Protobuf::outputTest(const TestSpec *testSpec, cstring selectedBranches, si
     auto incrementedTestName = testName + "_" + std::to_string(testIdx);
 
     protobufFile = std::ofstream(incrementedTestName + ".proto");
-    std::string testCase = getTestCase();
+    std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
 }
 

@@ -282,7 +282,7 @@ void PTF::emitPreamble(const std::string &preamble) {
     ptfFile.flush();
 }
 
-static std::string getTestCase() {
+std::string PTF::getTestCaseTemplate() {
     static std::string TEST_CASE(
         R"""(
 class Test{{test_id}}(AbstractTest):
@@ -419,7 +419,7 @@ void PTF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t 
         emitPreamble(preamble);
         preambleEmitted = true;
     }
-    std::string testCase = getTestCase();
+    std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
 }
 

@@ -20,7 +20,7 @@ jobs:
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
-      ENABLE_UNIFIED_COMPILATION: ON
+      CMAKE_UNITY_BUILD: ON
       ENABLE_TEST_TOOLS: ON
     steps:
     - uses: actions/checkout@v3
@@ -30,7 +30,7 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1
       with:
-        key: test-tools-${{ matrix.unified }}-${{ runner.os }}
+        key: test-tools-${{ runner.os }}
         max-size: 1000M
 
     - name: Build (Ubuntu 20.04)

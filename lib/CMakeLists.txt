@@ -81,7 +81,7 @@ set (LIBP4CTOOLKIT_HDRS
     timer.h
 )
 
-build_unified(LIBP4CTOOLKIT_SRCS ALL)
+
 add_library(p4ctoolkit STATIC ${LIBP4CTOOLKIT_SRCS})
 
 # Disable libcall (realloc, malloc) optimizations which may cause infinite loops.

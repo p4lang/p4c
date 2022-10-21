@@ -18,7 +18,7 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 # removed from the image.
 : "${IMAGE_TYPE:=build}"
 # Whether to do a unified build.
-: "${ENABLE_UNIFIED_COMPILATION:=ON}"
+: "${CMAKE_UNITY_BUILD:=ON}"
 # Whether to enable translation validation
 : "${VALIDATION:=OFF}"
 # This creates a release build that includes link time optimization and links
@@ -231,7 +231,7 @@ fi
 # Strong optimization.
 export CXXFLAGS="${CXXFLAGS} -O3"
 # Toggle unified compilation.
-CMAKE_FLAGS+="-DENABLE_UNIFIED_COMPILATION=${ENABLE_UNIFIED_COMPILATION} "
+CMAKE_FLAGS+="-DCMAKE_UNITY_BUILD=${CMAKE_UNITY_BUILD} "
 # Toggle static builds.
 CMAKE_FLAGS+="-DBUILD_STATIC_RELEASE=${BUILD_STATIC_RELEASE} "
 # Toggle the installation of the tools back end.

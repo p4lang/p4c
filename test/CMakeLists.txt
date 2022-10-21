@@ -74,7 +74,6 @@ set (GTEST_BASE_SOURCES
   gtest/gtestp4c.cpp
   ${GTEST_UNITTEST_SOURCES}
 )
-build_unified(GTEST_BASE_SOURCES)
 
 # Merge the base sources with the tests added to GTEST_SOURCES by specific
 # backends or by extensions. We can't assume that one extension's GTests can be

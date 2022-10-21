@@ -112,6 +112,6 @@ set (MIDEND_HDRS
   validateProperties.h
   )
 
-build_unified(MIDEND_SRCS)
+
 add_library (midend STATIC ${MIDEND_SRCS})
 add_dependencies(midend genIR)

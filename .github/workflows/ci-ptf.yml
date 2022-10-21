@@ -34,7 +34,7 @@ jobs:
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
-      ENABLE_UNIFIED_COMPILATION: ON
+      CMAKE_UNITY_BUILD: ON
       MAKEFLAGS: -j8
       INSTALL_PTF_EBPF_DEPENDENCIES: ON
     steps:

@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       IMAGE_TYPE: test
-      ENABLE_UNIFIED_COMPILATION: ON
+      CMAKE_UNITY_BUILD: ON
       BUILD_STATIC_RELEASE: ON
     steps:
     - uses: actions/checkout@v3

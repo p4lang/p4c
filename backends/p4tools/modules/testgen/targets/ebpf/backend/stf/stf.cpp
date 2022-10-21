@@ -219,7 +219,7 @@ inja::json STF::getVerify(const TestSpec *testSpec) {
     return verifyData;
 }
 
-static std::string getTestCase() {
+std::string STF::getTestCaseTemplate() {
     static std::string TEST_CASE(
         R"""(# p4testgen seed: {{ default(seed, "none") }}
 # Date generated: {{timestamp}}
@@ -280,7 +280,7 @@ void STF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t 
     auto incrementedTestName = testName + "_" + std::to_string(testIdx);
 
     stfFile = std::ofstream(incrementedTestName + ".stf");
-    std::string testCase = getTestCase();
+    std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
 }
 

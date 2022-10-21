@@ -83,13 +83,17 @@ else()
   set (P4C_VERSION "${P4C_SEM_VERSION_STRING} (SHA: ${P4C_GIT_SHA} BUILD: ${CMAKE_BUILD_TYPE})")
 endif()
 include(P4CUtils)
-include(UnifiedBuild)
 
 # # search in /usr/local first
 # set (CMAKE_FIND_ROOT_PATH "/usr/local/bin" "${CMAKE_FIND_ROOT_PATH}")
 set (P4C_CXX_FLAGS "")
 set (P4C_LIB_DEPS)
 
+
+# If unity builds are enable, choose an aggressive batch size.
+if (CMAKE_UNITY_BUILD)
+  set(CMAKE_UNITY_BUILD_BATCH_SIZE 16 CACHE UNINITIALIZED "Set the unity build batch size.")
+endif ()
 # set the required options for a static release build
 if (BUILD_STATIC_RELEASE)
   message(STATUS "Building static release binaries")

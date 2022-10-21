@@ -14,7 +14,7 @@ ARG IN_DOCKER=TRUE
 # removed from the image.
 ARG IMAGE_TYPE=build
 # Whether to do a unified build.
-ARG ENABLE_UNIFIED_COMPILATION=ON
+ARG CMAKE_UNITY_BUILD=ON
 # Whether to enable translation validation
 ARG VALIDATION=OFF
 # This creates a release build that includes link time optimization and links

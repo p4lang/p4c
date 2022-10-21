@@ -7,10 +7,10 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-void registerCompilerTargets() {
+inline void registerCompilerTargets() {
 @compiler_targets_var@}
 
-void registerTestgenTargets() {
+inline void registerTestgenTargets() {
 @testgen_targets_var@}
 
 }  // namespace P4Tools

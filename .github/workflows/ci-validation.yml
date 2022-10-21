@@ -19,7 +19,6 @@ jobs:
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
-      ENABLE_UNIFIED_COMPILATION: ON
       VALIDATION: ON
     runs-on: ubuntu-20.04
     steps:
