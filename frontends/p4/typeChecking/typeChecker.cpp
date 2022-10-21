@@ -1727,7 +1727,7 @@ const IR::Node* TypeInference::postorder(IR::BoolLiteral* expression) {
     return expression;
 }
 
-// Returns nullptr on error
+// Returns false on error
 bool TypeInference::compare(const IR::Node* errorPosition,
                             const IR::Type* ltype,
                             const IR::Type* rtype,
@@ -1735,6 +1735,10 @@ bool TypeInference::compare(const IR::Node* errorPosition,
     if (ltype->is<IR::Type_Action>() || rtype->is<IR::Type_Action>()) {
         // Actions return Type_Action instead of void.
         typeError("%1%: cannot be applied to action results", errorPosition);
+        return false;
+    }
+    if (ltype->is<IR::Type_Table>() || rtype->is<IR::Type_Table>()) {
+        typeError("%1%: tables cannot be compared", errorPosition);
         return false;
     }
 
