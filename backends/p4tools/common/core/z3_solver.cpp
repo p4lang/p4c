@@ -19,8 +19,8 @@
 #include "ir/ir.h"
 #include "ir/json_loader.h"  // IWYU pragma: keep
 #include "ir/json_parser.h"  // IWYU pragma: keep
+#include "lib/big_int_util.h"
 #include "lib/exceptions.h"
-#include "lib/gmputil.h"
 #include "lib/indent.h"
 #include "lib/log.h"
 

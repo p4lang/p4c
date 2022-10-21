@@ -10,9 +10,9 @@
 #include "backends/p4tools/common/lib/ir.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
+#include "lib/big_int_util.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
-#include "lib/gmputil.h"
 
 #include "backends/p4tools/testgen/options.h"
 #include "backends/p4tools/testgen/targets/ebpf/backend/stf/stf.h"
