@@ -129,7 +129,6 @@ jobs:
         unified: [ON, OFF]
         exclude:
           - unified: OFF
-            enable_gmp: OFF
     runs-on: macos-10.15
     env:
       CTEST_PARALLEL_LEVEL: 4
