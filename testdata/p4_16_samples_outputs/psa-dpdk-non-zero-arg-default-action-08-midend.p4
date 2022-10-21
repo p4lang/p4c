@@ -34,8 +34,9 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
         hdr.ethernet.src_addr = m.addr;
     }
     @name("MyIngressControl.macswp") action macswp(@name("tmp2") bit<32> tmp2) {
-        m.addr = (hdr.ethernet.dst_addr == 48w0x1 && tmp2 == 32w0x2 ? hdr.ethernet.dst_addr : m.addr);
-        hdr.ethernet.src_addr = (hdr.ethernet.dst_addr == 48w0x1 && tmp2 == 32w0x2 ? m.addr : hdr.ethernet.src_addr);
+        m.addr = (m.flag == 32w0x1 && tmp2 == 32w0x2 ? hdr.ethernet.dst_addr : m.addr);
+        hdr.ethernet.dst_addr = (m.flag == 32w0x1 && tmp2 == 32w0x2 ? hdr.ethernet.src_addr : hdr.ethernet.dst_addr);
+        hdr.ethernet.src_addr = (m.flag == 32w0x1 && tmp2 == 32w0x2 ? m.addr : hdr.ethernet.src_addr);
     }
     @name("MyIngressControl.stub") table stub_0 {
         actions = {
@@ -96,3 +97,4 @@ IngressPipeline<headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIngre
 EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEgressParser(), MyEgressControl(), MyEgressDeparser()) ep;
 
 PSA_Switch<headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+

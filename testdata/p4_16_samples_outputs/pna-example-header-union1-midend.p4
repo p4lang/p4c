@@ -87,7 +87,6 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
         hasReturned = false;
     }
     @hidden action pnaexampleheaderunion1l52() {
-        hasReturned = true;
         retval = false;
     }
     @hidden action pnaexampleheaderunion1l73() {

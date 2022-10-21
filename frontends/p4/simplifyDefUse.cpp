@@ -1443,6 +1443,10 @@ class FindUninitialized : public Inspector {
         return false;
     }
 
+    void postorder(const IR::StructExpression* expression) override {
+        otherExpression(expression);
+    }
+
     void postorder(const IR::Operation_Unary* expression) override {
         otherExpression(expression);
     }

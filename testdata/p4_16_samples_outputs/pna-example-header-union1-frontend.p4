@@ -74,7 +74,6 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
         if (hasReturned) {
             ;
         } else {
-            hasReturned = true;
             retval = false;
         }
         tmp = retval;

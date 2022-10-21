@@ -36,6 +36,7 @@ struct user_meta_data_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<48> local_metadata_addr
+	bit<32> local_metadata_flag
 }
 metadata instanceof user_meta_data_t
 
@@ -47,10 +48,11 @@ action nonDefAct args none {
 }
 
 action macswp args instanceof macswp_arg_t {
-	jmpneq LABEL_END h.ethernet.dst_addr 0x1
+	jmpneq LABEL_END m.local_metadata_flag 0x1
 	jmpneq LABEL_END t.tmp2 0x2
 	mov m.local_metadata_addr h.ethernet.dst_addr
-	mov h.ethernet.src_addr h.ethernet.dst_addr
+	mov h.ethernet.dst_addr h.ethernet.src_addr
+	mov h.ethernet.src_addr m.local_metadata_addr
 	LABEL_END :	return
 }
 
@@ -59,7 +61,7 @@ table stub {
 		macswp
 		nonDefAct
 	}
-	default_action macswp args tmp2 0x3
+	default_action macswp args tmp2 0x3 
 	size 0xf4240
 }
 
@@ -77,3 +79,5 @@ apply {
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop
 }
+
+
