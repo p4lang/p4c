@@ -31,11 +31,16 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// level is 2, for max randomness.
     int popLevel = 3;
 
-    /// Activates LinearEnumeration explorations trategy, and specifies
-    /// the max bound of the buffer vector collecting all terminal
-    /// branches. Defaults to 2, which means only two terminal paths are populated
+    /// Max bound of the buffer vector collecting all terminal branches.
+    /// Defaults to 2, which means only two terminal paths are populated
     /// by default.
     int linearEnumeration = 2;
+
+    /// To be used with randomAccessMaxCoverage. It specifies after how many
+    /// tests (saddle point) we should randomly explore the program and pick
+    /// a random branch ranked by how many unique non-visited statements it
+    /// has.
+    int saddlePoint = 5;
 
     /// @returns the singleton instance of this class.
     static TestgenOptions& get();

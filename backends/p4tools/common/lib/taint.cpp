@@ -38,7 +38,7 @@ static bitvec computeTaintedBits(const SymbolicMapType& varMap, const IR::Expres
         auto slLeftInt = slice->e1->checkedTo<IR::Constant>()->asInt();
         auto slRightInt = slice->e2->checkedTo<IR::Constant>()->asInt();
         auto subTaint = computeTaintedBits(varMap, slice->e0);
-        return (subTaint >> slRightInt) & bitvec(0, slLeftInt - slRightInt + 1);
+        return subTaint.getslice(slRightInt, slLeftInt - slRightInt);
     }
     if (const auto* binaryExpr = expr->to<IR::Operation_Binary>()) {
         bitvec fullmask(0, expr->type->width_bits());
@@ -61,6 +61,14 @@ static bitvec computeTaintedBits(const SymbolicMapType& varMap, const IR::Expres
             // rhs.
             return computeTaintedBits(varMap, binaryExpr->left) |
                    computeTaintedBits(varMap, binaryExpr->right);
+        }
+        // Be conservative here. If either of the expressions contain even a single tainted bit, the
+        // entire operation is tainted. The reason is that we need to account for overflow. A
+        // tainted MSB or LSB can cause an expression to overflow and underflow.
+        auto taintLeft = computeTaintedBits(varMap, binaryExpr->left);
+        auto taintRight = computeTaintedBits(varMap, binaryExpr->right);
+        if (taintLeft.empty() && taintRight.empty()) {
+            return {};
         }
         return fullmask;
     }
