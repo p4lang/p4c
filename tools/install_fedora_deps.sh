@@ -22,6 +22,7 @@ sudo dnf install -y -q \
     g++ \
     gc-devel \
     git \
+    gmp-devel \
     grpc-devel \
     grpc-plugins \
     iproute \
