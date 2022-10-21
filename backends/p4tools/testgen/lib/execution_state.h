@@ -437,11 +437,11 @@ class ExecutionState {
     /// type to the provided vector @flatFields. The result is a vector of all in the bit and bool
     /// members in canonical representation (e.g., {"prefix.h.ethernet.dst_address",
     /// "prefix.h.ethernet.src_address", ...}).
-    /// If @arg valid_vector is provided, this function also collects the validity bits of the
+    /// If @arg validVector is provided, this function also collects the validity bits of the
     /// headers.
     std::vector<const IR::Member*> getFlatFields(
         const IR::Expression* parent, const IR::Type_StructLike* ts,
-        std::vector<const IR::Member*>* valid_vector = nullptr) const;
+        std::vector<const IR::Member*>* validVector = nullptr) const;
 
     /// Gets table type from a member.
     /// @returns nullptr is member type is not a IR::P4Table.

@@ -71,12 +71,6 @@ class CmdStepper : public AbstractStepper {
                                const std::vector<cstring>* blockParams,
                                ExecutionState* nextState) const;
 
-    /// This is a helper function to declare structlike data structures.
-    /// This also is used to declare the members of a stack. This function is primarily used by the
-    /// Declaration_Variable preorder function.
-    void declareStructLike(ExecutionState* nextState, const IR::Expression* parentExpr,
-                           const IR::Type_StructLike* structType) const;
-
     /// Add a variable to the symbolic interpreter. This looks up the full control-plane name of a
     /// variable defined in @param decl and declares in the symbolic environment of @param
     /// nextState.

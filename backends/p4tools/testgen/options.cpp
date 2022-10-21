@@ -50,7 +50,8 @@ TestgenOptions::TestgenOptions()
             popLevel = std::atoi(arg);
             return true;
         },
-        "Sets the fraction for multiPop exploration; default is 0 for a single pop.");
+        "Sets the fraction for multiPop exploration; default is 3 when meaningful strategy is "
+        "activated.");
 
     registerOption(
         "--out-dir", "outputDir",
@@ -125,7 +126,15 @@ TestgenOptions::TestgenOptions()
             linearEnumeration = std::atoi(arg);
             return true;
         },
-        "Performs linear exploration of the program paths; expects max bound for vector size.");
+        "Max bound for vector size in linearEnumeration; defaults to 2.");
+
+    registerOption(
+        "--saddle-point", "saddlePoint",
+        [this](const char* arg) {
+            saddlePoint = std::atoi(arg);
+            return true;
+        },
+        "Threshold to invoke multiPop on randomAccessMaxCoverage.");
 
     registerOption(
         "--print-traces", nullptr,
