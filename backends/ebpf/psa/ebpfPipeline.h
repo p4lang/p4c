@@ -47,6 +47,8 @@ class EBPFPipeline : public EBPFProgram {
     cstring compilerGlobalMetadata;
     // A variable name storing "1" value. Used to access BPF array map index.
     cstring oneKey;
+    // A unique mark used to differentiate packets processed by P4/eBPF from others.
+    unsigned packetMark;
 
     EBPFControlPSA* control;
     EBPFDeparserPSA* deparser;
@@ -69,6 +71,7 @@ class EBPFPipeline : public EBPFProgram {
         pktInstanceVar = compilerGlobalMetadata + cstring("->instance");
         priorityVar = cstring("skb->priority");
         oneKey = EBPFModel::reserved("one");
+        packetMark = 0x99;
     }
 
     /* Check if pipeline does any processing.

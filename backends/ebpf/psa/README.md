@@ -46,6 +46,10 @@ ICMP/ARP requests and sending packet to the userspace process listening on a soc
 
 The NTK path is enforced if `drop` is set to `false` and `egress_port` is left unspecified or set to 0. 
 
+**NOTE!** There is no symmetric packet path *from kernel* - once a packet enters the kernel network stack, it is further processed exclusively by the kernel. 
+As a consequence, all packets that have not been processed by the PSA Ingress pipeline (e.g., packets sent from userspace application) will not be handled by the PSA Egress pipeline!
+
+
 ### NFP (Normal Packet From Port)
 
 Packet arriving on an interface is intercepted in the XDP hook by the `xdp-helper` program. It performs pre-processing and
