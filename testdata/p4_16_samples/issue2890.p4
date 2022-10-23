@@ -14,21 +14,7 @@ struct Headers {
     H h;
 }
 
-struct Meta {
-}
-
-parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
-    state start {
-        transition parse_hdrs;
-    }
-    state parse_hdrs {
-        pkt.extract(hdr.e);
-        pkt.extract(hdr.h);
-        transition accept;
-    }
-}
-
-control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+control ingress(inout Headers h) {
     H x;
 
     apply {
@@ -38,26 +24,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) {
-    apply {
-    }
-}
+control I(inout Headers h);
+package top(I i);
 
-control update(inout Headers h, inout Meta m) {
-    apply {
-    }
-}
-
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    apply {
-    }
-}
-
-control deparser(packet_out pkt, in Headers h) {
-    apply {
-        pkt.emit(h);
-    }
-}
-
-
-V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+top(ingress()) main;

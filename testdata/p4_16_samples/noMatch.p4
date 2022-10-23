@@ -13,16 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 #include <core.p4>
 #include <v1model.p4>
 
-struct Headers {
-}
-
-struct Meta {
-}
-
-parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
+parser p() {
     state start {
         bit<32> x;
         transition select(x) {
@@ -31,31 +26,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
     }
 }
 
-control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    apply {
-    }
-}
+parser e();
+package top(e e);
 
-control vrfy(inout Headers h, inout Meta m) {
-    apply {
-    }
-}
-
-control update(inout Headers h, inout Meta m) {
-    apply {
-    }
-}
-
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    apply {
-    }
-}
-
-control deparser(packet_out pkt, in Headers h) {
-    apply {
-        pkt.emit(h);
-    }
-}
-
-
-V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+top(p()) main;
