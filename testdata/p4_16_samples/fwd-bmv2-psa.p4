@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <bmv2/psa.p4>
+#include <psa.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -24,7 +24,7 @@ struct headers {
 
 parser CommonParser(packet_in buffer, out headers parsed_hdr, inout metadata user_meta) {
     state start {
-        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
+        buffer.extract(parsed_hdr.ethernet);
         transition accept;
     }
 }
@@ -57,7 +57,7 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
 
 control CommonDeparserImpl(packet_out packet, inout headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit(hdr.ethernet);
     }
 }
 
@@ -75,9 +75,9 @@ control EgressDeparserImpl(packet_out buffer, out empty_t clone_e2e_meta, out em
     }
 }
 
-IngressPipeline<headers, metadata, empty_t, empty_t, empty_t, empty_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
+IngressPipeline(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
 
-EgressPipeline<headers, metadata, empty_t, empty_t, empty_t, empty_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
+EgressPipeline(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
 
-PSA_Switch<headers, metadata, headers, metadata, empty_t, empty_t, empty_t, empty_t, empty_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
 
