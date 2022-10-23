@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  # Build and test p4c on Ubuntu 20.04.
+  # Build with gcc and test p4c on Ubuntu 20.04.
   build-linux:
     strategy:
       fail-fast: false
@@ -33,10 +33,10 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1
       with:
-        key: test-${{ matrix.unified }}-${{ runner.os }}
+        key: test-${{ matrix.unified }}-${{ runner.os }}-gcc
         max-size: 1000M
 
-    - name: Build (Ubuntu Linux)
+    - name: Build (Ubuntu Linux, GCC)
       run: |
         # To flush out issues with unified vs. non-unified builds,
         # do a non-unified build before continuing with the rest,
@@ -51,6 +51,35 @@ jobs:
         sudo docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
       if: matrix.unified == 'ON'
 
+  # Build with clang and test p4c on Ubuntu 20.04.
+  build-linux-clang:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: test-${{ runner.os }}-clang
+        max-size: 1000M
+
+    - name: Build (Ubuntu Linux, Clang)
+      run: |
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg ENABLE_GMP=ON --build-arg ENABLE_WERROR=OFF --build-arg COMPILE_WITH_CLANG=ON .
+        ./tools/export_ccache.sh
+
+      # run with sudo (...) --privileged
+      # this is needed to create network namespaces for the ebpf tests.
+    - name: Run tests (Ubuntu Linux)
+      run: |
+        sudo docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
+  
   # Build and test p4c on Fedora.
   build-fedora-linux:
     strategy:
