@@ -24,7 +24,7 @@ control c(out B32 x) {
             NoAction_1();
         }
         key = {
-            k_0: exact @name("k") ;
+            k_0: exact @name("k");
         }
         default_action = NoAction_1();
     }

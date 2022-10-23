@@ -54,7 +54,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     @name("ingress.t_range") table t_range_0 {
         key = {
-            h.h.r: range @name("h.h.r") ;
+            h.h.r: range @name("h.h.r");
         }
         actions = {
             a();

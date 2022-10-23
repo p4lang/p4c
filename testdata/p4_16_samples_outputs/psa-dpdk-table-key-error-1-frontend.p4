@@ -109,15 +109,15 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @name("ingress.tbl") table tbl_0 {
         key = {
-            user_meta.data1: exact @name("user_meta.data1") ;
-            user_meta.data2: exact @name("user_meta.data2") ;
-            user_meta.data3: exact @name("user_meta.data3") ;
-            user_meta.data4: exact @name("user_meta.data4") ;
-            user_meta.data5: exact @name("user_meta.data5") ;
-            user_meta.data6: exact @name("user_meta.data6") ;
-            user_meta.data7: exact @name("user_meta.data7") ;
-            user_meta.data8: exact @name("user_meta.data8") ;
-            user_meta.data9: exact @name("user_meta.data9") ;
+            user_meta.data1: exact @name("user_meta.data1");
+            user_meta.data2: exact @name("user_meta.data2");
+            user_meta.data3: exact @name("user_meta.data3");
+            user_meta.data4: exact @name("user_meta.data4");
+            user_meta.data5: exact @name("user_meta.data5");
+            user_meta.data6: exact @name("user_meta.data6");
+            user_meta.data7: exact @name("user_meta.data7");
+            user_meta.data8: exact @name("user_meta.data8");
+            user_meta.data9: exact @name("user_meta.data9");
         }
         actions = {
             NoAction_1();

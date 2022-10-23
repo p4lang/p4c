@@ -30,7 +30,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table BfyXpa {
         key = {
-            val: exact @name("eJPEfW") ;
+            val: exact @name("eJPEfW");
         }
         actions = {
             do_action();

@@ -56,11 +56,11 @@ struct metadata {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name("ipv4")
     ipv4_t     ipv4;
-    @name("tcp") 
+    @name("tcp")
     tcp_t      tcp;
 }
 
@@ -104,7 +104,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             NoAction_2();
         }
         key = {
-            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port");
         }
         size = 256;
         default_action = NoAction_2();
@@ -183,7 +183,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             NoAction_3();
         }
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         size = 1024;
         default_action = NoAction_3();
@@ -195,7 +195,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             NoAction_4();
         }
         key = {
-            meta._ingress_metadata_ecmp_offset4: exact @name("meta.ingress_metadata.ecmp_offset") ;
+            meta._ingress_metadata_ecmp_offset4: exact @name("meta.ingress_metadata.ecmp_offset");
         }
         size = 16384;
         default_action = NoAction_4();
@@ -214,7 +214,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             NoAction_6();
         }
         key = {
-            meta._ingress_metadata_nhop_ipv45: exact @name("meta.ingress_metadata.nhop_ipv4") ;
+            meta._ingress_metadata_nhop_ipv45: exact @name("meta.ingress_metadata.nhop_ipv4");
         }
         size = 512;
         default_action = NoAction_6();

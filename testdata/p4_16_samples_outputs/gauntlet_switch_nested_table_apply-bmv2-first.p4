@@ -33,7 +33,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table_1 {
         key = {
-            128w1: exact @name("JGOUaj") ;
+            128w1: exact @name("JGOUaj");
         }
         actions = {
             set_valid_action(h);
@@ -43,7 +43,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table_2 {
         key = {
-            48w1: exact @name("qkgOtm") ;
+            48w1: exact @name("qkgOtm");
         }
         actions = {
             NoAction();

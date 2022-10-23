@@ -31,7 +31,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table tbl {
         key = {
-            h.eth_hdr.src_addr: exact @name("fbgPij") ;
+            h.eth_hdr.src_addr: exact @name("fbgPij");
         }
         actions = {
             exit_action();

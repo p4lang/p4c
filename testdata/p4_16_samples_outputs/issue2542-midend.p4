@@ -14,7 +14,7 @@ control ingress(inout Headers h) {
     }
     @name("ingress.sub.dummy") table sub_dummy {
         key = {
-            key_0: exact @name("dummy_key") ;
+            key_0: exact @name("dummy_key");
         }
         actions = {
             @defaultonly NoAction_1();

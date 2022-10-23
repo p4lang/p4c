@@ -81,8 +81,8 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @name("ingress.tbl") table tbl_0 {
         key = {
-            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
-            8w0x48         : exact @name("0x48") ;
+            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort");
+            8w0x48         : exact @name("0x48");
         }
         actions = {
             NoAction_1();

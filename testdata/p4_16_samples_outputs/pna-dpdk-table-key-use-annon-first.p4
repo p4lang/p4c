@@ -69,7 +69,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     table ipv4_da {
         key = {
-            hdr.ipv4.dstAddr: exact @name("ipv4_addr_0") ;
+            hdr.ipv4.dstAddr: exact @name("ipv4_addr_0");
         }
         actions = {
             @tableonly next_hop();
@@ -87,7 +87,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     table ipv4_da2 {
         key = {
-            user_meta.key: exact @name("user_meta.key") ;
+            user_meta.key: exact @name("user_meta.key");
         }
         actions = {
             @tableonly next_hop2();

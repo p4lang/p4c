@@ -30,7 +30,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            8w255: exact @name("QIqvRY") ;
+            8w255: exact @name("QIqvRY");
         }
         actions = {
             dummy_action();

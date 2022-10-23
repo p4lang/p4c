@@ -211,7 +211,7 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
     }
     table ipv6_tbl {
         key = {
-            hdr.ipv6.dstAddr[127:120] == 8w0xff: exact @name("mcast_key") ;
+            hdr.ipv6.dstAddr[127:120] == 8w0xff: exact @name("mcast_key");
         }
         actions = {
             set_mcast_grp();
@@ -232,8 +232,8 @@ control egress(inout headers hdr, inout metadata_t meta, inout standard_metadata
     }
     table get_multicast_copy_out_bd {
         key = {
-            standard_metadata.mcast_grp : exact @name("standard_metadata.mcast_grp") ;
-            standard_metadata.egress_rid: exact @name("standard_metadata.egress_rid") ;
+            standard_metadata.mcast_grp : exact @name("standard_metadata.mcast_grp");
+            standard_metadata.egress_rid: exact @name("standard_metadata.egress_rid");
         }
         actions = {
             set_out_bd();
@@ -249,7 +249,7 @@ control egress(inout headers hdr, inout metadata_t meta, inout standard_metadata
     }
     table send_frame {
         key = {
-            meta.fwd.out_bd: exact @name("meta.fwd.out_bd") ;
+            meta.fwd.out_bd: exact @name("meta.fwd.out_bd");
         }
         actions = {
             rewrite_mac();

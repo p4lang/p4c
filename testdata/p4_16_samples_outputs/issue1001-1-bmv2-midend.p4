@@ -6,7 +6,7 @@ struct Headers {
 }
 
 struct Meta {
-    @field_list(8w1) 
+    @field_list(8w1)
     bit<1> b;
 }
 

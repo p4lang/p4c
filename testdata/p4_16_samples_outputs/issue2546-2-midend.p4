@@ -13,7 +13,7 @@ control ingress(inout bit<32> b) {
     }
     @name("ingress.t0") table t0_0 {
         key = {
-            b: exact @name("b") ;
+            b: exact @name("b");
         }
         actions = {
             @defaultonly NoAction_1();
@@ -22,7 +22,7 @@ control ingress(inout bit<32> b) {
     }
     @name("ingress.t1") table t1_0 {
         key = {
-            tmp_2: exact @name("key") ;
+            tmp_2: exact @name("key");
         }
         actions = {
             @defaultonly NoAction_2();
@@ -31,7 +31,7 @@ control ingress(inout bit<32> b) {
     }
     @name("ingress.t2") table t2_0 {
         key = {
-            tmp_0: exact @name("key") ;
+            tmp_0: exact @name("key");
         }
         actions = {
             @defaultonly NoAction_3();

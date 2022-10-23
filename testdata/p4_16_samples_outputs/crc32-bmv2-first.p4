@@ -98,7 +98,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table calculate {
         key = {
-            hdr.p4calc.op: exact @name("hdr.p4calc.op") ;
+            hdr.p4calc.op: exact @name("hdr.p4calc.op");
         }
         actions = {
             operation_add();

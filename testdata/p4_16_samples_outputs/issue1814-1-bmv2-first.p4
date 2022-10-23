@@ -25,7 +25,7 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
     }
     table debug_table {
         key = {
-            meta.test: exact @name("meta.test") ;
+            meta.test: exact @name("meta.test");
         }
         actions = {
             drop();

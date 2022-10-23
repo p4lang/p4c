@@ -27,7 +27,7 @@ control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metada
     }
     table t1 {
         key = {
-            hdr.payload.x: exact @name("hdr.payload.x") ;
+            hdr.payload.x: exact @name("hdr.payload.x");
         }
         actions = {
             a1();

@@ -101,7 +101,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table forward {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             set_dmac();
@@ -117,7 +117,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table ipv4_lpm {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             set_nhop();
@@ -152,7 +152,7 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     table send_frame {
         key = {
-            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port");
         }
         actions = {
             rewrite_mac();

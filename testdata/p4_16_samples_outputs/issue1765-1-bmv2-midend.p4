@@ -93,15 +93,15 @@ struct headers {
 }
 
 struct metadata {
-    @field_list(0) 
+    @field_list(0)
     bit<9>  ingress_port;
-    @field_list(0) 
+    @field_list(0)
     bit<16> task;
-    @field_list(0) 
+    @field_list(0)
     bit<16> tcp_length;
-    @field_list(0) 
+    @field_list(0)
     bit<32> cast_length;
-    @field_list(0) 
+    @field_list(0)
     bit<1>  do_cksum;
 }
 
@@ -231,7 +231,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name("MyIngress.v6_addresses") table v6_addresses_0 {
         key = {
-            hdr.ipv6.dst_addr: exact @name("hdr.ipv6.dst_addr") ;
+            hdr.ipv6.dst_addr: exact @name("hdr.ipv6.dst_addr");
         }
         actions = {
             controller_debug();
@@ -244,7 +244,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name("MyIngress.v6_networks") table v6_networks_0 {
         key = {
-            hdr.ipv6.dst_addr: lpm @name("hdr.ipv6.dst_addr") ;
+            hdr.ipv6.dst_addr: lpm @name("hdr.ipv6.dst_addr");
         }
         actions = {
             set_egress_port();
@@ -257,7 +257,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name("MyIngress.v4_networks") table v4_networks_0 {
         key = {
-            hdr.ipv4.dst_addr: lpm @name("hdr.ipv4.dst_addr") ;
+            hdr.ipv4.dst_addr: lpm @name("hdr.ipv4.dst_addr");
         }
         actions = {
             set_egress_port_1();

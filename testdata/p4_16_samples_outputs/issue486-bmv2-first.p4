@@ -38,10 +38,10 @@ control cIngress(inout Parsed_packet hdr, inout metadata m, inout standard_metad
     }
     table t {
         key = {
-            hdr.x.add1: exact @name("hdr.x.add1") ;
-            m.x.add2  : exact @name("m.x.add2") ;
-            m.z       : exact @name("m.z") ;
-            z         : exact @name("z") ;
+            hdr.x.add1: exact @name("hdr.x.add1");
+            m.x.add2  : exact @name("m.x.add2");
+            m.z       : exact @name("m.z");
+            z         : exact @name("z");
         }
         actions = {
             foo();

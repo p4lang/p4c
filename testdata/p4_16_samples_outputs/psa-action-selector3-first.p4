@@ -42,9 +42,9 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
-            b.data1             : selector @name("b.data1") ;
-            b.data2             : selector @name("b.data2") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            b.data1             : selector @name("b.data1");
+            b.data2             : selector @name("b.data2");
         }
         actions = {
             NoAction();

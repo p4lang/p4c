@@ -37,7 +37,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            h.eth_hdr.eth_type: exact @name("dummy_name") ;
+            h.eth_hdr.eth_type: exact @name("dummy_name");
         }
         actions = {
             simple_action();

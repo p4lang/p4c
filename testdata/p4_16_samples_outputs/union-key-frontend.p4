@@ -24,7 +24,7 @@ control c(in Headers h) {
     }
     @name("c.t") table t_0 {
         key = {
-            h.u.h1.x: exact @name("h.u.h1.x") ;
+            h.u.h1.x: exact @name("h.u.h1.x");
         }
         actions = {
             a();

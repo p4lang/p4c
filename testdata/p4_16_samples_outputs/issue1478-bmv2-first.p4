@@ -47,7 +47,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table t2 {
         key = {
-            sm.ingress_port: exact @name("sm.ingress_port") ;
+            sm.ingress_port: exact @name("sm.ingress_port");
         }
         actions = {
             NoAction();

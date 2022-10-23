@@ -92,8 +92,8 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
     }
     @name("egress.tbl") table tbl_0 {
         key = {
-            user_meta.data: exact @name("user_meta.data") ;
-            8w0x48        : exact @name("0x48") ;
+            user_meta.data: exact @name("user_meta.data");
+            8w0x48        : exact @name("0x48");
         }
         actions = {
             NoAction_1();

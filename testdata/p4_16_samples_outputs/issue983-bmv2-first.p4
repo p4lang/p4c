@@ -40,19 +40,19 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
 control ingress(inout headers hdr, inout metadata user_meta, inout standard_metadata_t standard_metadata) {
     table debug_table_cksum1 {
         key = {
-            hdr.ethernet.srcAddr            : exact @name("hdr.ethernet.srcAddr") ;
-            hdr.ethernet.dstAddr            : exact @name("hdr.ethernet.dstAddr") ;
-            hdr.ethernet.etherType          : exact @name("hdr.ethernet.etherType") ;
-            user_meta.fwd_meta.exp_etherType: exact @name("user_meta.fwd_meta.exp_etherType") ;
-            user_meta.fwd_meta.tmp          : exact @name("user_meta.fwd_meta.tmp") ;
-            user_meta.fwd_meta.exp_x1       : exact @name("user_meta.fwd_meta.exp_x1") ;
-            user_meta.fwd_meta.x1           : exact @name("user_meta.fwd_meta.x1") ;
-            user_meta.fwd_meta.exp_x2       : exact @name("user_meta.fwd_meta.exp_x2") ;
-            user_meta.fwd_meta.x2           : exact @name("user_meta.fwd_meta.x2") ;
-            user_meta.fwd_meta.exp_x3       : exact @name("user_meta.fwd_meta.exp_x3") ;
-            user_meta.fwd_meta.x3           : exact @name("user_meta.fwd_meta.x3") ;
-            user_meta.fwd_meta.exp_x4       : exact @name("user_meta.fwd_meta.exp_x4") ;
-            user_meta.fwd_meta.x4           : exact @name("user_meta.fwd_meta.x4") ;
+            hdr.ethernet.srcAddr            : exact @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.dstAddr            : exact @name("hdr.ethernet.dstAddr");
+            hdr.ethernet.etherType          : exact @name("hdr.ethernet.etherType");
+            user_meta.fwd_meta.exp_etherType: exact @name("user_meta.fwd_meta.exp_etherType");
+            user_meta.fwd_meta.tmp          : exact @name("user_meta.fwd_meta.tmp");
+            user_meta.fwd_meta.exp_x1       : exact @name("user_meta.fwd_meta.exp_x1");
+            user_meta.fwd_meta.x1           : exact @name("user_meta.fwd_meta.x1");
+            user_meta.fwd_meta.exp_x2       : exact @name("user_meta.fwd_meta.exp_x2");
+            user_meta.fwd_meta.x2           : exact @name("user_meta.fwd_meta.x2");
+            user_meta.fwd_meta.exp_x3       : exact @name("user_meta.fwd_meta.exp_x3");
+            user_meta.fwd_meta.x3           : exact @name("user_meta.fwd_meta.x3");
+            user_meta.fwd_meta.exp_x4       : exact @name("user_meta.fwd_meta.exp_x4");
+            user_meta.fwd_meta.x4           : exact @name("user_meta.fwd_meta.x4");
         }
         actions = {
             NoAction();

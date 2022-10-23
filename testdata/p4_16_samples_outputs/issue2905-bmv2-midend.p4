@@ -54,7 +54,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     @name("ingress.t_exact") table t_exact_0 {
         key = {
-            h.h.e: exact @name("h.h.e") ;
+            h.h.e: exact @name("h.h.e");
         }
         actions = {
             a();

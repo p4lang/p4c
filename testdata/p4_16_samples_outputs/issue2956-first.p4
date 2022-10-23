@@ -26,7 +26,7 @@ control ingress(inout Headers h) {
     }
     table dummy_table {
         key = {
-            h.eth_hdr.src_addr: exact @name("key") ;
+            h.eth_hdr.src_addr: exact @name("key");
         }
         actions = {
             NoAction();

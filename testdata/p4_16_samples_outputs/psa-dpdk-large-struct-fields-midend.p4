@@ -45,7 +45,7 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
     }
     @name("MyIngressControl.MyIngressControl.stub") table stub {
         key = {
-            m.k1: exact @name("m.k1") ;
+            m.k1: exact @name("m.k1");
         }
         actions = {
             macswp();

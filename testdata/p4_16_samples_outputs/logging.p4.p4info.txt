@@ -3,12 +3,12 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 38772905
-    name: "c.t"
+    id: 34728461
+    name: "ingress.t"
     alias: "t"
   }
   action_refs {
-    id: 23991058
+    id: 21186165
   }
   action_refs {
     id: 21257015
@@ -27,8 +27,8 @@ actions {
 }
 actions {
   preamble {
-    id: 23991058
-    name: "c.a"
+    id: 21186165
+    name: "ingress.a"
     alias: "a"
   }
 }

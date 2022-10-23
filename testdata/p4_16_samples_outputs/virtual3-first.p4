@@ -22,7 +22,7 @@ control c(inout bit<16> p) {
     }
     table run_ctr {
         key = {
-            p: exact @name("p") ;
+            p: exact @name("p");
         }
         actions = {
             add_ctr();

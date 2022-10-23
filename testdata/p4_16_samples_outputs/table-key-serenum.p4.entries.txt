@@ -2,7 +2,7 @@ updates {
   type: INSERT
   entity {
     table_entry {
-      table_id: 48497513
+      table_id: 46138463
       match {
         field_id: 1
         exact {
@@ -11,7 +11,7 @@ updates {
       }
       action {
         action {
-          action_id: 22922986
+          action_id: 22708368
           params {
             param_id: 1
             value: "\000\000\010\000"
@@ -25,7 +25,7 @@ updates {
   type: INSERT
   entity {
     table_entry {
-      table_id: 48497513
+      table_id: 46138463
       match {
         field_id: 1
         exact {
@@ -34,7 +34,7 @@ updates {
       }
       action {
         action {
-          action_id: 22922986
+          action_id: 22708368
           params {
             param_id: 1
             value: "\000\000\201\000"

@@ -22,7 +22,7 @@ control ingress(inout Headers h) {
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            16w1: exact @name("key") ;
+            16w1: exact @name("key");
         }
         actions = {
             @defaultonly NoAction_1();

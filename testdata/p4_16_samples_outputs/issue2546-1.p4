@@ -23,14 +23,14 @@ parser p(packet_in pkt, out Headers hdr) {
 control ingress(inout Headers h) {
     table simple_table_1 {
         key = {
-            h.eth_hdr.eth_type: exact @name("KOXpQP") ;
+            h.eth_hdr.eth_type: exact @name("KOXpQP");
         }
         actions = {
         }
     }
     table simple_table_2 {
         key = {
-            (simple_table_1.apply().hit ? 8w1 : 8w2): exact @name("key") ;
+            (simple_table_1.apply().hit ? 8w1 : 8w2): exact @name("key");
         }
         actions = {
         }

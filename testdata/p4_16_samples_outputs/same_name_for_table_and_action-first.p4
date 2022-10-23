@@ -23,7 +23,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     @name("do_something") table do_something {
         key = {
-            smeta.ingress_port: exact @name("smeta.ingress_port") ;
+            smeta.ingress_port: exact @name("smeta.ingress_port");
         }
         actions = {
             do_something_0();

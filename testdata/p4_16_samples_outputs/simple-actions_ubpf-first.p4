@@ -96,7 +96,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     table filter_tbl {
         key = {
-            headers.ipv4.dstAddr: exact @name("headers.ipv4.dstAddr") ;
+            headers.ipv4.dstAddr: exact @name("headers.ipv4.dstAddr");
         }
         actions = {
             mpls_decrement_ttl();

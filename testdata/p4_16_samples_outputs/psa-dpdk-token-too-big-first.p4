@@ -113,7 +113,7 @@ control ingress(inout headers_t headers, inout local_metadata__dpdk_dpdk_dpdk_dp
     }
     table vxlan_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk {
         key = {
-            headers.ethernet.dst_addr: exact @name("headers.ethernet.dst_addr") ;
+            headers.ethernet.dst_addr: exact @name("headers.ethernet.dst_addr");
         }
         actions = {
             vxlan_encap_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk();

@@ -29,7 +29,7 @@ control ingress(inout Headers h) {
     }
     @name("ingress.dummy_table") table dummy_table_0 {
         key = {
-            h.eth_hdr.src_addr: exact @name("key") ;
+            h.eth_hdr.src_addr: exact @name("key");
         }
         actions = {
             NoAction_1();

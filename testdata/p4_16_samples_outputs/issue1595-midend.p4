@@ -47,7 +47,7 @@ control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_
     }
     @name("cIngress.t1") table t1_0 {
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
         }
         actions = {
             a1();

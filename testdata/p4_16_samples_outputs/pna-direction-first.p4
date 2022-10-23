@@ -72,7 +72,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     table ipv4_da_lpm {
         key = {
-            tmpDir: lpm @name("ipv4_addr") ;
+            tmpDir: lpm @name("ipv4_addr");
         }
         actions = {
             next_hop();

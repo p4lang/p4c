@@ -30,7 +30,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            tmp_val_0: exact @name("dummy") ;
+            tmp_val_0: exact @name("dummy");
         }
         actions = {
             NoAction_1();

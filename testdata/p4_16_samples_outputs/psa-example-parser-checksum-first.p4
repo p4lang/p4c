@@ -95,7 +95,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     table parser_error_count_and_convert {
         key = {
-            istd.parser_error: exact @name("istd.parser_error") ;
+            istd.parser_error: exact @name("istd.parser_error");
         }
         actions = {
             set_error_idx();

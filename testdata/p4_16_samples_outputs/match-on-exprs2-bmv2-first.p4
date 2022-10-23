@@ -38,9 +38,9 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     table t1 {
         key = {
-            hdr.ethernet.srcAddr[22:18]            : exact @name("hdr.ethernet.srcAddr[22:18]") ;
-            hdr.ethernet.dstAddr & 48w0x10101010101: exact @name("hdr.ethernet.dstAddr & 0x10101010101") ;
-            hdr.ethernet.etherType + 16w65526      : exact @name("etherType_less_10") ;
+            hdr.ethernet.srcAddr[22:18]            : exact @name("hdr.ethernet.srcAddr[22:18]");
+            hdr.ethernet.dstAddr & 48w0x10101010101: exact @name("hdr.ethernet.dstAddr & 0x10101010101");
+            hdr.ethernet.etherType + 16w65526      : exact @name("etherType_less_10");
         }
         actions = {
             foo();

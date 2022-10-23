@@ -12,22 +12,25 @@ enum bit<16> EthTypes {
     IPv6 = 16w0x86dd
 }
 
-header Ethernet {
-    bit<48>  src;
-    bit<48>  dest;
-    EthTypes type;
+header ethernet_t {
+    bit<48>  dst_addr;
+    bit<48>  src_addr;
+    EthTypes eth_type;
 }
 
 struct Headers {
-    Ethernet eth;
+    ethernet_t eth_hdr;
 }
 
-parser prs(packet_in p, out Headers h) {
-    @name("prs.e") Ethernet e_0;
+struct Meta {
+}
+
+parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
+    @name("p.e") ethernet_t e_0;
     state start {
         e_0.setInvalid();
-        p.extract<Ethernet>(e_0);
-        transition select(e_0.type) {
+        pkt.extract<ethernet_t>(e_0);
+        transition select(e_0.eth_type) {
             EthTypes.IPv4: accept;
             EthTypes.ARP: accept;
             default: reject;
@@ -35,15 +38,15 @@ parser prs(packet_in p, out Headers h) {
     }
 }
 
-control c(inout Headers h, inout standard_metadata_t sm) {
+control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("c.do_act") action do_act(@name("type") bit<32> type_1) {
+    @name("ingress.do_act") action do_act(@name("type") bit<32> type_1) {
         sm.instance_type = type_1;
     }
-    @name("c.tns") table tns_0 {
+    @name("ingress.tns") table tns_0 {
         key = {
-            h.eth.type: exact @name("h.eth.type") ;
+            h.eth_hdr.eth_type: exact @name("h.eth_hdr.eth_type");
         }
         actions = {
             do_act();
@@ -60,8 +63,26 @@ control c(inout Headers h, inout standard_metadata_t sm) {
     }
 }
 
-parser p<H>(packet_in _p, out H h);
-control ctr<H, SM>(inout H h, inout SM sm);
-package top<H, SM>(p<H> _p, ctr<H, SM> _c);
-top<Headers, standard_metadata_t>(prs(), c()) main;
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
+
+control deparser(packet_out pkt, in Headers h) {
+    apply {
+        pkt.emit<Headers>(h);
+    }
+}
+
+V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
 

@@ -65,8 +65,8 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     @name("MainControlImpl.tbl") table tbl_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
-            user_meta.data      : selector @name("user_meta.data") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            user_meta.data      : selector @name("user_meta.data");
         }
         actions = {
             NoAction_1();

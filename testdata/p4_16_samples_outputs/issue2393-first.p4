@@ -20,7 +20,7 @@ control ingress(inout Headers h) {
     }
     table simple_table {
         key = {
-            h.eth_hdr.src_addr: exact @name("h.eth_hdr.src_addr") ;
+            h.eth_hdr.src_addr: exact @name("h.eth_hdr.src_addr");
         }
         actions = {
             do_action();

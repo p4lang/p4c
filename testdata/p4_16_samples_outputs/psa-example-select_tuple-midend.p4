@@ -79,7 +79,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @name("ingress.tbl") table tbl_0 {
         key = {
-            hdr.ethernet.srcAddr: ternary @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: ternary @name("hdr.ethernet.srcAddr");
         }
         actions = {
             NoAction_1();

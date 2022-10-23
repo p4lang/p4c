@@ -80,8 +80,8 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @name("ingress.tbl") table tbl_0 {
         key = {
-            hdr.ipv4.totalLen: lpm @name("hdr.ipv4.totalLen") ;
-            hdr.ipv4.newfield: exact @name("hdr.ipv4.newfield") ;
+            hdr.ipv4.totalLen: lpm @name("hdr.ipv4.totalLen");
+            hdr.ipv4.newfield: exact @name("hdr.ipv4.newfield");
         }
         actions = {
             NoAction_1();

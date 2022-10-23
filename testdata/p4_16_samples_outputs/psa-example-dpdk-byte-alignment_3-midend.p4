@@ -78,9 +78,9 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     }
     @name("ingress.tbl") table tbl_0 {
         key = {
-            hdr.ethernet.srcAddr     : exact @name("hdr.ethernet.srcAddr") ;
-            hdr.ipv4.hdrChecksum[4:0]: exact @name("hdr.ipv4.hdrChecksum[4:0]") ;
-            hdr.ipv4.version         : exact @name("hdr.ipv4.version") ;
+            hdr.ethernet.srcAddr     : exact @name("hdr.ethernet.srcAddr");
+            hdr.ipv4.hdrChecksum[4:0]: exact @name("hdr.ipv4.hdrChecksum[4:0]");
+            hdr.ipv4.version         : exact @name("hdr.ipv4.version");
         }
         actions = {
             NoAction_1();

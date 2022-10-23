@@ -49,7 +49,7 @@ control Check(in IPv4Address address, inout bool pass) {
     }
     table Check_ip {
         key = {
-            address: exact @name("address") ;
+            address: exact @name("address");
         }
         actions = {
             Reject();

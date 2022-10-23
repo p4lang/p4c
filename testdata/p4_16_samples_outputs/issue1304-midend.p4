@@ -38,7 +38,7 @@ control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_meta
             @defaultonly NoAction_1();
         }
         key = {
-            meta.err: exact @name("meta.err") ;
+            meta.err: exact @name("meta.err");
         }
         default_action = NoAction_1();
     }

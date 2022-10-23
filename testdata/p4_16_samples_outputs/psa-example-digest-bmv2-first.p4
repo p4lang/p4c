@@ -99,7 +99,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     table learned_sources {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
         }
         actions = {
             NoAction();
@@ -115,7 +115,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     table l2_tbl {
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
         }
         actions = {
             do_L2_forward();
@@ -125,7 +125,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     table tst_tbl {
         key = {
-            meta.mac_learn_msg.ingress_port: exact @name("meta.mac_learn_msg.ingress_port") ;
+            meta.mac_learn_msg.ingress_port: exact @name("meta.mac_learn_msg.ingress_port");
         }
         actions = {
             do_tst();

@@ -106,7 +106,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     table t1 {
         key = {
-            hdr.andycustom.srcAddr: exact @name("hdr.andycustom.srcAddr") ;
+            hdr.andycustom.srcAddr: exact @name("hdr.andycustom.srcAddr");
         }
         actions = {
             set_addr();

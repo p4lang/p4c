@@ -79,7 +79,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     table tbl {
         key = {
-            !hdr.ethernet.isValid() || hdr.ipv4.isValid(): exact @name("hdrValid") ;
+            !hdr.ethernet.isValid() || hdr.ipv4.isValid(): exact @name("hdrValid");
             hdr.ethernet.dstAddr                         : exact;
             hdr.ethernet.srcAddr                         : exact;
         }

@@ -88,13 +88,13 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     table tbl {
         key = {
-            hdr.ethernet.isValid(): exact @name("hdr.ethernet.$valid$") ;
-            hdr.ethernet.dstAddr  : exact @name("hdr.ethernet.dstAddr") ;
-            hdr.ethernet.srcAddr  : exact @name("hdr.ethernet.srcAddr") ;
-            hdr.ipv4.protocol     : exact @name("hdr.ipv4.protocol") ;
-            user_meta.key1        : ternary @name("user_meta.key1") ;
-            user_meta.key2        : range @name("user_meta.key2") ;
-            user_meta.key4        : optional @name("user_meta.key4") ;
+            hdr.ethernet.isValid(): exact @name("hdr.ethernet.$valid$");
+            hdr.ethernet.dstAddr  : exact @name("hdr.ethernet.dstAddr");
+            hdr.ethernet.srcAddr  : exact @name("hdr.ethernet.srcAddr");
+            hdr.ipv4.protocol     : exact @name("hdr.ipv4.protocol");
+            user_meta.key1        : ternary @name("user_meta.key1");
+            user_meta.key2        : range @name("user_meta.key2");
+            user_meta.key4        : optional @name("user_meta.key4");
         }
         actions = {
             NoAction();
@@ -109,10 +109,10 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     table tbl1 {
         key = {
-            hdr.ethernet.isValid(): exact @name("hdr.ethernet.$valid$") ;
-            hdr.ethernet.dstAddr  : exact @name("hdr.ethernet.dstAddr") ;
-            hdr.ethernet.srcAddr  : exact @name("hdr.ethernet.srcAddr") ;
-            user_meta.key3        : lpm @name("user_meta.key3") ;
+            hdr.ethernet.isValid(): exact @name("hdr.ethernet.$valid$");
+            hdr.ethernet.dstAddr  : exact @name("hdr.ethernet.dstAddr");
+            hdr.ethernet.srcAddr  : exact @name("hdr.ethernet.srcAddr");
+            user_meta.key3        : lpm @name("user_meta.key3");
         }
         actions = {
             NoAction();

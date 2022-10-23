@@ -64,9 +64,9 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t meta, in pna_
     }
     @name("MainControlImpl.flowTable") table flowTable_0 {
         key = {
-            hdr.ipv4.srcAddr : exact @name("hdr.ipv4.srcAddr") ;
-            hdr.ipv4.dstAddr : exact @name("hdr.ipv4.dstAddr") ;
-            hdr.ipv4.protocol: exact @name("hdr.ipv4.protocol") ;
+            hdr.ipv4.srcAddr : exact @name("hdr.ipv4.srcAddr");
+            hdr.ipv4.dstAddr : exact @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.protocol: exact @name("hdr.ipv4.protocol");
         }
         actions = {
             send_with_mirror();

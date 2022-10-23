@@ -48,7 +48,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
             @defaultonly NoAction_1();
         }
         key = {
-            h.h[h.i.index].a: exact @name("h.h[h.i.index].a") ;
+            h.h[h.i.index].a: exact @name("h.h[h.i.index].a");
         }
         default_action = NoAction_1();
     }

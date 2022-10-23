@@ -53,7 +53,7 @@ control ingress(inout headers hdr) {
             @defaultonly NoAction();
         }
         key = {
-            hdr.data.f1: ternary @name("hdr.data.f1") ;
+            hdr.data.f1: ternary @name("hdr.data.f1");
         }
         default_action = NoAction();
     }
@@ -67,7 +67,7 @@ control ingress(inout headers hdr) {
             @defaultonly NoAction();
         }
         key = {
-            hdr.data.f1: exact @name("hdr.data.f1") ;
+            hdr.data.f1: exact @name("hdr.data.f1");
         }
         default_action = NoAction();
     }

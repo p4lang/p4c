@@ -26,7 +26,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     @name("pipe.tbl") table tbl_0 {
         key = {
-            headers.ethernet.protocol: exact @name("headers.ethernet.protocol") ;
+            headers.ethernet.protocol: exact @name("headers.ethernet.protocol");
         }
         actions = {
             match();

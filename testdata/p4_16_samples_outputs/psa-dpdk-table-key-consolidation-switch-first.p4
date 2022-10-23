@@ -89,8 +89,8 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
-            b.data              : lpm @name("b.data") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            b.data              : lpm @name("b.data");
         }
         actions = {
             NoAction();

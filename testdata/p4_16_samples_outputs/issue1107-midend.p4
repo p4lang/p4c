@@ -24,8 +24,8 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     @name("IngressI.myc.myt") table myc_myt {
         key = {
-            meta.f1: exact @name("meta.f1") ;
-            meta.f2: exact @name("meta.f2") ;
+            meta.f1: exact @name("meta.f1");
+            meta.f2: exact @name("meta.f2");
         }
         actions = {
             myc_set_eg_0();

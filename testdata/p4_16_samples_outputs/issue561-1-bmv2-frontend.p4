@@ -51,9 +51,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ingress.debug_hdr") table debug_hdr_0 {
         key = {
-            hdr.base.t           : exact @name("hdr.base.t") ;
-            hdr.u.short.isValid(): exact @name("hdr.u.short.$valid$") ;
-            hdr.u.byte.isValid() : exact @name("hdr.u.byte.$valid$") ;
+            hdr.base.t           : exact @name("hdr.base.t");
+            hdr.u.short.isValid(): exact @name("hdr.u.short.$valid$");
+            hdr.u.byte.isValid() : exact @name("hdr.u.byte.$valid$");
         }
         actions = {
             NoAction_1();

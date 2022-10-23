@@ -13,7 +13,7 @@ control compute(inout hdr h) {
     }
     table t {
         key = {
-            h.a + 1: exact @name("e") ;
+            h.a + 1: exact @name("e");
         }
         actions = {
             a;

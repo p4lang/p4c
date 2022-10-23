@@ -16,7 +16,7 @@ control ingress(inout Headers h) {
     }
     @name("ingress.t") table t_0 {
         key = {
-            h.b: exact @name("h.b") ;
+            h.b: exact @name("h.b");
         }
         actions = {
             a_1();

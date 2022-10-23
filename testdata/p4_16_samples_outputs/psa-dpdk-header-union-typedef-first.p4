@@ -85,7 +85,7 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
     }
     @name("tbl") table tbl_0 {
         key = {
-            a.srcAddr: exact @name("a.srcAddr") ;
+            a.srcAddr: exact @name("a.srcAddr");
         }
         actions = {
             NoAction();

@@ -52,7 +52,7 @@ control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_meta
             @defaultonly NoAction();
         }
         key = {
-            meta.data[0].da: exact @name("meta.data[0].da") ;
+            meta.data[0].da: exact @name("meta.data[0].da");
         }
         default_action = NoAction();
     }

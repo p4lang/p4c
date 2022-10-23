@@ -20,7 +20,7 @@ control c(out B32 x) {
             NoAction();
         }
         key = {
-            k: exact @name("k") ;
+            k: exact @name("k");
         }
         default_action = NoAction();
     }

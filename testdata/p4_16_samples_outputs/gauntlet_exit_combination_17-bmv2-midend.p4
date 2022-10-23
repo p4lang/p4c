@@ -37,7 +37,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.simple_table_1") table simple_table {
         key = {
-            key_0: exact @name("key") ;
+            key_0: exact @name("key");
         }
         actions = {
             dummy_action();
@@ -47,7 +47,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.simple_table_2") table simple_table_0 {
         key = {
-            key_1: exact @name("key") ;
+            key_1: exact @name("key");
         }
         actions = {
             dummy_action_1();

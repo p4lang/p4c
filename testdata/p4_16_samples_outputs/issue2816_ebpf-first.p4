@@ -54,10 +54,10 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     table t {
         key = {
-            headers.ipv4.srcAddr    : exact @name("headers.ipv4.srcAddr") ;
-            headers.ipv4.dstAddr    : exact @name("headers.ipv4.dstAddr") ;
-            headers.ethernet.dstAddr: exact @name("headers.ethernet.dstAddr") ;
-            headers.ethernet.srcAddr: exact @name("headers.ethernet.srcAddr") ;
+            headers.ipv4.srcAddr    : exact @name("headers.ipv4.srcAddr");
+            headers.ipv4.dstAddr    : exact @name("headers.ipv4.dstAddr");
+            headers.ethernet.dstAddr: exact @name("headers.ethernet.dstAddr");
+            headers.ethernet.srcAddr: exact @name("headers.ethernet.srcAddr");
         }
         actions = {
             invalidate();

@@ -21,7 +21,7 @@ struct col_t {
 }
 
 struct local_metadata_t {
-    @field_list(0) 
+    @field_list(0)
     row_t      row0;
     row_t      row1;
     col_t      col;
@@ -61,8 +61,8 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     @name("ingress.tns") table tns_0 {
         key = {
-            h.bvh1.row.alt1.valid                : exact @name("h.bvh1.row.alt1.valid") ;
-            local_metadata.col.bvh.row.alt0.valid: exact @name("local_metadata.col.bvh.row.alt0.valid") ;
+            h.bvh1.row.alt1.valid                : exact @name("h.bvh1.row.alt1.valid");
+            local_metadata.col.bvh.row.alt0.valid: exact @name("local_metadata.col.bvh.row.alt0.valid");
         }
         actions = {
             do_act();

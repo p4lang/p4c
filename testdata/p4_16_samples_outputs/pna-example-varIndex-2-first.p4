@@ -64,7 +64,7 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
     }
     table stub {
         key = {
-            hdrs.vlan_tag[meta.depth].vid: exact @name("hdrs.vlan_tag[meta.depth].vid") ;
+            hdrs.vlan_tag[meta.depth].vid: exact @name("hdrs.vlan_tag[meta.depth].vid");
         }
         actions = {
             execute();
@@ -74,7 +74,7 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
     }
     table stub1 {
         key = {
-            hdrs.ethernet.etherType: exact @name("hdrs.ethernet.etherType") ;
+            hdrs.ethernet.etherType: exact @name("hdrs.ethernet.etherType");
         }
         actions = {
             execute_1();

@@ -110,7 +110,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             drop_with_count();
         }
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         default_action = drop_with_count();
         counters = ipv4_da_lpm_stats_0;
@@ -121,7 +121,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             my_drop_1();
         }
         key = {
-            meta._fwd_metadata_l2ptr0: exact @name("meta.fwd_metadata.l2ptr") ;
+            meta._fwd_metadata_l2ptr0: exact @name("meta.fwd_metadata.l2ptr");
         }
         default_action = my_drop_1();
     }
@@ -177,7 +177,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             my_drop_2();
         }
         key = {
-            meta._fwd_metadata_out_bd1: exact @name("meta.fwd_metadata.out_bd") ;
+            meta._fwd_metadata_out_bd1: exact @name("meta.fwd_metadata.out_bd");
         }
         default_action = my_drop_2();
     }

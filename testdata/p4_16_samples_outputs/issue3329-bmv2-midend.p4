@@ -7,7 +7,7 @@ struct s {
 }
 
 header packet_out_header_t {
-    @controller_header("packet_out") 
+    @controller_header("packet_out")
     bit<32> _b_b0;
 }
 

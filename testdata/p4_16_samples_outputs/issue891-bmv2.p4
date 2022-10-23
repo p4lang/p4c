@@ -7,7 +7,7 @@ header mpls {
 }
 
 struct my_packet {
-    @name("mpls_data") 
+    @name("mpls_data")
     mpls[8] data;
 }
 

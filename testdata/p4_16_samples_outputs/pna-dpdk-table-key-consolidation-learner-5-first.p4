@@ -71,9 +71,9 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     table ipv4_da {
         key = {
-            hdr.ipv4.srcAddr : exact @name("hdr.ipv4.srcAddr") ;
-            hdr.ipv4.dstAddr : exact @name("hdr.ipv4.dstAddr") ;
-            hdr.ipv4.totalLen: exact @name("hdr.ipv4.totalLen") ;
+            hdr.ipv4.srcAddr : exact @name("hdr.ipv4.srcAddr");
+            hdr.ipv4.dstAddr : exact @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.totalLen: exact @name("hdr.ipv4.totalLen");
         }
         actions = {
             @tableonly next_hop();
@@ -91,7 +91,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     table ipv4_da2 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             @tableonly next_hop2();

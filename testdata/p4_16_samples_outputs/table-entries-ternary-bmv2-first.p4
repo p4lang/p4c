@@ -54,7 +54,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     table t_ternary {
         key = {
-            h.h.t: ternary @name("h.h.t") ;
+            h.h.t: ternary @name("h.h.t");
         }
         actions = {
             a();

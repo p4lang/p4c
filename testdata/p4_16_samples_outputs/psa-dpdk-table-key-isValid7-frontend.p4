@@ -81,9 +81,9 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @name("ingress.tbl") table tbl_0 {
         key = {
-            hdr.ethernet.isValid(): exact @name("hdr.ethernet.$valid$") ;
-            hdr.tcp.isValid()     : exact @name("hdr.tcp.$valid$") ;
-            hdr.ipv4.isValid()    : exact @name("hdr.ipv4.$valid$") ;
+            hdr.ethernet.isValid(): exact @name("hdr.ethernet.$valid$");
+            hdr.tcp.isValid()     : exact @name("hdr.tcp.$valid$");
+            hdr.ipv4.isValid()    : exact @name("hdr.ipv4.$valid$");
         }
         actions = {
             NoAction_1();

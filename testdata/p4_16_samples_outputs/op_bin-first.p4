@@ -42,7 +42,7 @@ control pipe(inout Headers_t headers, out bool xout) {
     }
     table filter_tbl {
         key = {
-            headers.ipv6.src_address: exact @name("headers.ipv6.src_address") ;
+            headers.ipv6.src_address: exact @name("headers.ipv6.src_address");
         }
         actions = {
             set_flowlabel();

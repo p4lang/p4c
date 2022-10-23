@@ -65,7 +65,7 @@ control ingress(inout headers hdr, inout test_metadata_t meta, inout standard_me
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType") ;
+            hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType");
         }
         default_action = NoAction_1();
     }

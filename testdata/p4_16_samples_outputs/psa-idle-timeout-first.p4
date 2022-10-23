@@ -39,7 +39,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     }
     table tbl_idle_timeout {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
         }
         actions = {
             NoAction();
@@ -51,7 +51,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     }
     table tbl_no_idle_timeout {
         key = {
-            hdr.ethernet.srcAddr2: exact @name("hdr.ethernet.srcAddr2") ;
+            hdr.ethernet.srcAddr2: exact @name("hdr.ethernet.srcAddr2");
         }
         actions = {
             NoAction();
@@ -63,7 +63,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     }
     table tbl_no_idle_timeout_prop {
         key = {
-            hdr.ethernet.srcAddr2: exact @name("hdr.ethernet.srcAddr2") ;
+            hdr.ethernet.srcAddr2: exact @name("hdr.ethernet.srcAddr2");
         }
         actions = {
             NoAction();

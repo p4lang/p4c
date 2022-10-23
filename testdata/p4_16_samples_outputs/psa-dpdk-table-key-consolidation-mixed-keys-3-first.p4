@@ -79,8 +79,8 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     table tbl {
         key = {
-            user_meta.data: exact @name("user_meta.data") ;
-            8w0x48        : exact @name("0x48") ;
+            user_meta.data: exact @name("user_meta.data");
+            8w0x48        : exact @name("0x48");
         }
         actions = {
             NoAction();

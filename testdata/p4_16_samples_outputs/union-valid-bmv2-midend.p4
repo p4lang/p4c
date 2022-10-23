@@ -63,7 +63,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.t") table t_0 {
         key = {
-            key_0: exact @name("h.u.$valid$") ;
+            key_0: exact @name("h.u.$valid$");
         }
         actions = {
             a_1();

@@ -57,9 +57,9 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t meta, in pna_
     }
     @name("MainControlImpl.clb_pinned_flows") table clb_pinned_flows_0 {
         key = {
-            key_0            : exact @name("ipv4_addr_0") ;
-            key_1            : exact @name("ipv4_addr_1") ;
-            hdr.ipv4.protocol: exact @name("hdr.ipv4.protocol") ;
+            key_0            : exact @name("ipv4_addr_0");
+            key_1            : exact @name("ipv4_addr_1");
+            hdr.ipv4.protocol: exact @name("hdr.ipv4.protocol");
         }
         actions = {
             NoAction_1();

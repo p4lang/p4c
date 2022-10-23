@@ -79,9 +79,9 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: lpm @name("hdr.ethernet.srcAddr") ;
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
-            8w0x48              : exact @name("0x48") ;
+            hdr.ethernet.srcAddr: lpm @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
+            8w0x48              : exact @name("0x48");
         }
         actions = {
             NoAction();

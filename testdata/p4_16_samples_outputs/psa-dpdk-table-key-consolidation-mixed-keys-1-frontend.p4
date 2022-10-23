@@ -81,10 +81,10 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @name("ingress.tbl") table tbl_0 {
         key = {
-            8w0x48              : exact @name("0x48") ;
-            user_meta.data      : exact @name("user_meta.data") ;
-            hdr.ethernet.srcAddr: lpm @name("hdr.ethernet.srcAddr") ;
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
+            8w0x48              : exact @name("0x48");
+            user_meta.data      : exact @name("user_meta.data");
+            hdr.ethernet.srcAddr: lpm @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
         }
         actions = {
             NoAction_1();

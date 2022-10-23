@@ -31,7 +31,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            8w1: exact @name("bblsPX") ;
+            8w1: exact @name("bblsPX");
         }
         actions = {
             simple_action();

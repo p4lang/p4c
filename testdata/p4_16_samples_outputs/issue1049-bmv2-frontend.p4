@@ -61,7 +61,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("cIngress.guh") table guh_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             hash_drop_decision();
@@ -70,8 +70,8 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("cIngress.debug_table") table debug_table_0 {
         key = {
-            meta.mystruct1.hash1    : exact @name("meta.mystruct1.hash1") ;
-            meta.mystruct1.hash_drop: exact @name("meta.mystruct1.hash_drop") ;
+            meta.mystruct1.hash1    : exact @name("meta.mystruct1.hash1");
+            meta.mystruct1.hash_drop: exact @name("meta.mystruct1.hash_drop");
         }
         actions = {
             NoAction_1();

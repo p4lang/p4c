@@ -3,8 +3,8 @@ pkg_info {
 }
 registers {
   preamble {
-    id: 384009802
-    name: "c.reg"
+    id: 382856063
+    name: "ingress.reg"
     alias: "reg"
   }
   type_spec {

@@ -12,21 +12,24 @@ enum bit<16> EthTypes {
     IPv6 = 16w0x86dd
 }
 
-header Ethernet {
-    bit<48>  src;
-    bit<48>  dest;
-    EthTypes type;
+header ethernet_t {
+    bit<48>  dst_addr;
+    bit<48>  src_addr;
+    EthTypes eth_type;
 }
 
 struct Headers {
-    Ethernet eth;
+    ethernet_t eth_hdr;
 }
 
-parser prs(packet_in p, out Headers h) {
-    Ethernet e;
+struct Meta {
+}
+
+parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
+    ethernet_t e;
     state start {
-        p.extract<Ethernet>(e);
-        transition select(e.type) {
+        pkt.extract<ethernet_t>(e);
+        transition select(e.eth_type) {
             EthTypes.IPv4: accept;
             EthTypes.ARP: accept;
             default: reject;
@@ -34,15 +37,33 @@ parser prs(packet_in p, out Headers h) {
     }
 }
 
-control c(inout Headers h, inout standard_metadata_t sm) {
+control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     register<EthTypes>(32w1) reg;
     apply {
-        reg.write(32w0, h.eth.type);
+        reg.write(32w0, h.eth_hdr.eth_type);
     }
 }
 
-parser p<H>(packet_in _p, out H h);
-control ctr<H, SM>(inout H h, inout SM sm);
-package top<H, SM>(p<H> _p, ctr<H, SM> _c);
-top<Headers, standard_metadata_t>(prs(), c()) main;
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
+
+control deparser(packet_out pkt, in Headers h) {
+    apply {
+        pkt.emit<Headers>(h);
+    }
+}
+
+V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
 

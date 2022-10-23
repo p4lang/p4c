@@ -62,7 +62,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     table ipv4_da_lpm {
         key = {
-            SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr): lpm @name("ipv4_addr") ;
+            SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr): lpm @name("ipv4_addr");
         }
         actions = {
             next_hop();

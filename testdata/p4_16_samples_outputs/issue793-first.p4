@@ -21,7 +21,7 @@ control c(in my_packet hdr) {
             @defaultonly NoAction();
         }
         key = {
-            hdr.data.db: exact @name("hdr.data.db") ;
+            hdr.data.db: exact @name("hdr.data.db");
         }
         default_action = NoAction();
     }

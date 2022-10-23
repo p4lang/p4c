@@ -211,7 +211,7 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
     }
     table ipv6_tbl {
         key = {
-            hdr.ipv6.dstAddr[127:120] == 8w0xff: exact @name("mcast_key") ;
+            hdr.ipv6.dstAddr[127:120] == 8w0xff: exact @name("mcast_key");
         }
         actions = {
             set_mcast_grp;

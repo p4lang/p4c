@@ -84,7 +84,7 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata1,
     }
     @name("ingress.table1") table table1_0 {
         key = {
-            headers.ethernet.dst_addr: exact @name("headers.ethernet.dst_addr") ;
+            headers.ethernet.dst_addr: exact @name("headers.ethernet.dst_addr");
         }
         actions = {
             action1();

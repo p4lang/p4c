@@ -43,7 +43,7 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_par
 control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     table tbl {
         key = {
-            a.srcAddr: exact @name("a.srcAddr") ;
+            a.srcAddr: exact @name("a.srcAddr");
         }
         actions = {
             NoAction();

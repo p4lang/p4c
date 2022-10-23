@@ -35,7 +35,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            64w1: exact @name("key") ;
+            64w1: exact @name("key");
         }
         actions = {
             simple_action();

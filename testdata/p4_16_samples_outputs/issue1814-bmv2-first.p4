@@ -19,7 +19,7 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
     register<bit<1>>(32w1) testRegister;
     table debug_table {
         key = {
-            meta.test: exact @name("meta.test") ;
+            meta.test: exact @name("meta.test");
         }
         actions = {
             NoAction();

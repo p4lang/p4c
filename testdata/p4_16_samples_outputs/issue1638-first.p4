@@ -22,7 +22,7 @@ struct meta_t {
 control MyC2(in meta_t meta={ 0, 0, 0 }) {
     table a {
         key = {
-            meta.f0: exact @name("meta.f0") ;
+            meta.f0: exact @name("meta.f0");
         }
         actions = {
             NoAction();

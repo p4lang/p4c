@@ -10,7 +10,7 @@ enum bit<8> PreservedFieldList {
 }
 
 struct Meta {
-    @field_list(PreservedFieldList.Field) 
+    @field_list(PreservedFieldList.Field)
     bit<1> b;
 }
 

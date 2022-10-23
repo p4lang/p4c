@@ -41,13 +41,13 @@ header myhdr_t {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name("ipv4")
     ipv4_t     ipv4;
-    @name("udp") 
+    @name("udp")
     udp_t      udp;
-    @name("myhdr") 
+    @name("myhdr")
     myhdr_t    myhdr;
 }
 
@@ -57,7 +57,7 @@ struct ingress_metadata_t {
 }
 
 struct metadata {
-    @name("ingress_metadata") 
+    @name("ingress_metadata")
     ingress_metadata_t local_metadata;
 }
 

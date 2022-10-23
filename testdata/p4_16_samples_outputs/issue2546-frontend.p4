@@ -27,7 +27,7 @@ control ingress(inout Headers h) {
     }
     @name("ingress.simple_table_1") table simple_table {
         key = {
-            48w1: exact @name("KOXpQP") ;
+            48w1: exact @name("KOXpQP");
         }
         actions = {
             @defaultonly NoAction_1();
@@ -36,7 +36,7 @@ control ingress(inout Headers h) {
     }
     @name("ingress.simple_table_2") table simple_table_0 {
         key = {
-            key_0: exact @name("key") ;
+            key_0: exact @name("key");
         }
         actions = {
             @defaultonly NoAction_2();

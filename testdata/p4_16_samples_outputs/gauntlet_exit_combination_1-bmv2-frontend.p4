@@ -34,7 +34,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            32w1: exact @name("akSTMF") ;
+            32w1: exact @name("akSTMF");
         }
         actions = {
             dummy();

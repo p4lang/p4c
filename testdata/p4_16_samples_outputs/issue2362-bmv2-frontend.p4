@@ -30,7 +30,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.sub_table") table sub_table_0 {
         key = {
-            h.eth_hdr.eth_type: exact @name("dummy_name") ;
+            h.eth_hdr.eth_type: exact @name("dummy_name");
         }
         actions = {
             @defaultonly NoAction_1();
@@ -39,7 +39,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            key_0: exact @name("dummy_name") ;
+            key_0: exact @name("dummy_name");
         }
         actions = {
             @defaultonly NoAction_2();

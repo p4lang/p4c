@@ -34,7 +34,7 @@ control EgressImpl(inout headers_t hdr, inout metadata meta, inout standard_meta
     }
     table change_cond {
         key = {
-            ostd.egress_spec: exact @name("ostd.egress_spec") ;
+            ostd.egress_spec: exact @name("ostd.egress_spec");
         }
         actions = {
             set_true();

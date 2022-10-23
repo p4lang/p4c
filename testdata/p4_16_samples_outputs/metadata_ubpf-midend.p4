@@ -32,7 +32,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     @name("pipe.tbl") table tbl_0 {
         key = {
-            headers.ethernet.etherType: exact @name("headers.ethernet.etherType") ;
+            headers.ethernet.etherType: exact @name("headers.ethernet.etherType");
         }
         actions = {
             fill_metadata();
@@ -45,7 +45,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     @name("pipe.meta_based_tbl") table meta_based_tbl_0 {
         key = {
-            meta.etherType: exact @name("meta.etherType") ;
+            meta.etherType: exact @name("meta.etherType");
         }
         actions = {
             change_etherType();

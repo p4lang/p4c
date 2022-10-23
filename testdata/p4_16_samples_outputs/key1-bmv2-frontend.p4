@@ -50,7 +50,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.c.t") table c_t {
         key = {
-            h.h.a + 32w1: exact @name("e") ;
+            h.h.a + 32w1: exact @name("e");
         }
         actions = {
             c_a_0();

@@ -107,7 +107,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     @name("pipe.filter_tbl") table filter_tbl_0 {
         key = {
-            headers.ipv6.srcAddr: exact @name("headers.ipv6.srcAddr") ;
+            headers.ipv6.srcAddr: exact @name("headers.ipv6.srcAddr");
         }
         actions = {
             ipv6_modify_dstAddr();

@@ -44,7 +44,7 @@ control foo2(inout headers_t my_headers, inout metadata_t meta, register<bit<8>>
     }
     table foo2_table {
         key = {
-            my_headers.ethernet.srcAddr: exact @name("my_headers.ethernet.srcAddr") ;
+            my_headers.ethernet.srcAddr: exact @name("my_headers.ethernet.srcAddr");
         }
         actions = {
             foo2_action();

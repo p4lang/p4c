@@ -49,7 +49,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     table Check_src_ip {
         key = {
-            headers.ipv4.srcAddr: ternary @name("headers.ipv4.srcAddr") ;
+            headers.ipv4.srcAddr: ternary @name("headers.ipv4.srcAddr");
         }
         actions = {
             act_pass();

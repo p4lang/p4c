@@ -2,30 +2,34 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-header Ethernet {
-    bit<48> src;
-    bit<48> dest;
-    bit<16> tst;
+header ethernet_t {
+    bit<48> dst_addr;
+    bit<48> src_addr;
+    bit<16> eth_type;
 }
 
 struct Headers {
-    Ethernet eth;
+    ethernet_t eth_hdr;
 }
 
-parser prs(packet_in p, out Headers h) {
+struct Meta {
+}
+
+parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
+        pkt.extract<ethernet_t>(hdr.eth_hdr);
         transition accept;
     }
 }
 
-control c(inout Headers h, inout standard_metadata_t sm) {
+control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("c.do_act") action do_act() {
+    @name("ingress.do_act") action do_act() {
     }
-    @name("c.tns") table tns_0 {
+    @name("ingress.tns") table tns_0 {
         key = {
-            h.eth.tst[13:4]: exact @name("h.eth.tst[13:4]") ;
+            h.eth_hdr.eth_type[13:4]: exact @name("h.eth_hdr.eth_type[13:4]");
         }
         actions = {
             do_act();
@@ -38,8 +42,26 @@ control c(inout Headers h, inout standard_metadata_t sm) {
     }
 }
 
-parser p<H>(packet_in _p, out H h);
-control ctr<H, SM>(inout H h, inout SM sm);
-package top<H, SM>(p<H> _p, ctr<H, SM> _c);
-top<Headers, standard_metadata_t>(prs(), c()) main;
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
+
+control deparser(packet_out pkt, in Headers h) {
+    apply {
+        pkt.emit<ethernet_t>(h.eth_hdr);
+    }
+}
+
+V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
 

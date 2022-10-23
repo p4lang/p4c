@@ -51,8 +51,8 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     @name("ingress.t_ternary") table t_ternary_0 {
         key = {
-            h.h.f1: exact @name("h.h.f1") ;
-            h.h.f2: ternary @name("h.h.f2") ;
+            h.h.f1: exact @name("h.h.f1");
+            h.h.f2: ternary @name("h.h.f2");
         }
         actions = {
             a();

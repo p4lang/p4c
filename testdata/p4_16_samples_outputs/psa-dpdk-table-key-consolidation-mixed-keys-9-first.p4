@@ -87,14 +87,14 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     table tbl {
         key = {
-            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
-            8w0x48         : exact @name("0x48") ;
-            user_meta.data : exact @name("user_meta.data") ;
-            user_meta.data2: exact @name("user_meta.data2") ;
-            user_meta.data4: exact @name("user_meta.data4") ;
-            user_meta.data5: exact @name("user_meta.data5") ;
-            user_meta.data6: exact @name("user_meta.data6") ;
-            user_meta.data3: exact @name("user_meta.data3") ;
+            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort");
+            8w0x48         : exact @name("0x48");
+            user_meta.data : exact @name("user_meta.data");
+            user_meta.data2: exact @name("user_meta.data2");
+            user_meta.data4: exact @name("user_meta.data4");
+            user_meta.data5: exact @name("user_meta.data5");
+            user_meta.data6: exact @name("user_meta.data6");
+            user_meta.data3: exact @name("user_meta.data3");
         }
         actions = {
             NoAction();

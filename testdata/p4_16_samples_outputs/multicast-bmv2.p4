@@ -28,14 +28,14 @@ header ipv4_t {
 }
 
 struct metadata {
-    @name("routing_metadata") 
+    @name("routing_metadata")
     routing_metadata_t routing_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name("ipv4")
     ipv4_t     ipv4;
 }
 

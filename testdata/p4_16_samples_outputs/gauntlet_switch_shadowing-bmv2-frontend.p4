@@ -34,7 +34,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            h.eth_hdr.src_addr: exact @name("aiiIgQ") ;
+            h.eth_hdr.src_addr: exact @name("aiiIgQ");
         }
         actions = {
             action_1();

@@ -100,9 +100,9 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
-            b.data              : exact @name("b.data") ;
-            b.data1             : lpm @name("b.data1") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            b.data              : exact @name("b.data");
+            b.data1             : lpm @name("b.data1");
         }
         actions = {
             NoAction_1();
@@ -113,9 +113,9 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     @name("MyIC.foo") table foo_0 {
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
-            b.data              : exact @name("b.data") ;
-            b.data1             : lpm @name("b.data1") ;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
+            b.data              : exact @name("b.data");
+            b.data1             : lpm @name("b.data1");
         }
         actions = {
             NoAction_2();

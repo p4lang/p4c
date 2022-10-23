@@ -2,22 +2,25 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-header Ethernet {
-    bit<48> src;
-    bit<48> dest;
-    bit<16> type;
+header ethernet_t {
+    bit<48> dst_addr;
+    bit<48> src_addr;
+    bit<16> eth_type;
 }
 
 struct Headers {
-    Ethernet eth;
+    ethernet_t eth_hdr;
 }
 
-parser prs(packet_in p, out Headers h) {
-    @name("prs.e") Ethernet e_0;
+struct Meta {
+}
+
+parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
+    @name("p.e") ethernet_t e_0;
     state start {
         e_0.setInvalid();
-        p.extract<Ethernet>(e_0);
-        transition select(e_0.type) {
+        pkt.extract<ethernet_t>(e_0);
+        transition select(e_0.eth_type) {
             16w0x800: accept;
             16w0x806: accept;
             default: reject;
@@ -25,24 +28,42 @@ parser prs(packet_in p, out Headers h) {
     }
 }
 
-control c(inout Headers h, inout standard_metadata_t sm) {
-    @name("c.reg") register<bit<16>>(32w1) reg_0;
-    @hidden action registerserenum40() {
-        reg_0.write(32w0, h.eth.type);
+control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @name("ingress.reg") register<bit<16>>(32w1) reg_0;
+    @hidden action registerserenum44() {
+        reg_0.write(32w0, h.eth_hdr.eth_type);
     }
-    @hidden table tbl_registerserenum40 {
+    @hidden table tbl_registerserenum44 {
         actions = {
-            registerserenum40();
+            registerserenum44();
         }
-        const default_action = registerserenum40();
+        const default_action = registerserenum44();
     }
     apply {
-        tbl_registerserenum40.apply();
+        tbl_registerserenum44.apply();
     }
 }
 
-parser p<H>(packet_in _p, out H h);
-control ctr<H, SM>(inout H h, inout SM sm);
-package top<H, SM>(p<H> _p, ctr<H, SM> _c);
-top<Headers, standard_metadata_t>(prs(), c()) main;
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
+
+control deparser(packet_out pkt, in Headers h) {
+    apply {
+        pkt.emit<ethernet_t>(h.eth_hdr);
+    }
+}
+
+V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
 

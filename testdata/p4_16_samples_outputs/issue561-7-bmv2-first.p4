@@ -49,9 +49,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     table debug_hdr {
         key = {
-            hdr.base.t              : exact @name("hdr.base.t") ;
-            hdr.u[0].short.isValid(): exact @name("hdr.u[0].short.$valid$") ;
-            hdr.u[0].byte.isValid() : exact @name("hdr.u[0].byte.$valid$") ;
+            hdr.base.t              : exact @name("hdr.base.t");
+            hdr.u[0].short.isValid(): exact @name("hdr.u[0].short.$valid$");
+            hdr.u[0].byte.isValid() : exact @name("hdr.u[0].byte.$valid$");
         }
         actions = {
             NoAction();

@@ -27,7 +27,7 @@ control ingress(inout Headers h) {
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            h.eth_hdr.eth_type: exact @name("tyhSfv") ;
+            h.eth_hdr.eth_type: exact @name("tyhSfv");
         }
         actions = {
             do_action();

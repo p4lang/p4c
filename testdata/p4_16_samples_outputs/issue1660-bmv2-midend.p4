@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 struct HasBool {
-    @field_list(0) 
+    @field_list(0)
     bool x;
 }
 

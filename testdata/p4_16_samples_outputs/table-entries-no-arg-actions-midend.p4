@@ -11,7 +11,7 @@ control MyC(inout bit<2> x) {
     }
     @name("MyC.t") table t_0 {
         key = {
-            x: exact @name("x") ;
+            x: exact @name("x");
         }
         actions = {
             a();

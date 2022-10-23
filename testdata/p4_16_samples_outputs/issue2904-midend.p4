@@ -36,7 +36,7 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     }
     @name("ingress.X") table X_0 {
         key = {
-            y_0: ternary @name("y") ;
+            y_0: ternary @name("y");
         }
         actions = {
             A();

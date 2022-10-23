@@ -36,7 +36,7 @@ control MyIngress(inout my_headers_t hdr, inout my_meta_t meta) {
     }
     table t {
         key = {
-            hdr.h.f1: ternary @name("hdr.h.f1") ;
+            hdr.h.f1: ternary @name("hdr.h.f1");
         }
         actions = {
             hit();

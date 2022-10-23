@@ -54,8 +54,8 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     table t_optional {
         key = {
-            h.h.e: optional @name("h.h.e") ;
-            h.h.t: optional @name("h.h.t") ;
+            h.h.e: optional @name("h.h.e");
+            h.h.t: optional @name("h.h.t");
         }
         actions = {
             a();

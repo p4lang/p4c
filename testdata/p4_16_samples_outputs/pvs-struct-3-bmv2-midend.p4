@@ -16,13 +16,13 @@ struct my_metadata {
 }
 
 struct value_set_t {
-    @match(ternary) 
+    @match(ternary)
     bit<16> field1;
-    @match(lpm) 
+    @match(lpm)
     bit<3>  field2;
-    @match(exact) 
+    @match(exact)
     bit<6>  field3;
-    @match(range) 
+    @match(range)
     bit<5>  field4;
 }
 
@@ -64,7 +64,7 @@ control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_meta
             @defaultonly NoAction_1();
         }
         key = {
-            meta.data[0].da: exact @name("meta.data[0].da") ;
+            meta.data[0].da: exact @name("meta.data[0].da");
         }
         default_action = NoAction_1();
     }
