@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 
+#include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/core/solver.h"
 
 #include "backends/p4tools/testgen/core/program_info.h"
@@ -48,6 +49,9 @@ class SmallStepEvaluator {
 
     /// The number of times a guard was not satisfiable.
     uint64_t violatedGuardConditions = 0;
+
+   /// Reachability engine.
+    ReachabilityEngine* reachabilityEngine = nullptr;
 
  public:
     Result step(ExecutionState& state);

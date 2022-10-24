@@ -324,4 +324,230 @@ void P4ProgramDCGCreator::addEdge(const DCGVertexType* vertex, IR::ID vertexName
     dcg->addToHash(vertex, vertexName);
 }
 
+ReachabilityEngineState* ReachabilityEngineState::getInitial() {
+    auto* newState = new ReachabilityEngineState();
+    newState->prevNode = nullptr;
+    newState->state.push_back(nullptr);
+    return newState;
+}
+
+ReachabilityEngineState* ReachabilityEngineState::copy() {
+    auto* newState = new ReachabilityEngineState();
+    newState->prevNode = prevNode;
+    newState->state = state;
+    return newState;
+}
+
+std::list<const DCGVertexType*> ReachabilityEngineState::getState() { return state; }
+
+ReachabilityEngine::ReachabilityEngine(gsl::not_null<const NodesCallGraph*> dcg,
+                                       std::string reachabilityExpression,
+                                       bool eliminateAnnotations)
+    : dcg(dcg), hash(dcg->getHash()) {
+    std::list<const DCGVertexType*> start;
+    start.push_back(nullptr);
+    size_t i = 0;
+    size_t j = 0;
+    reachabilityExpression += ";";
+    while ((i = reachabilityExpression.find(';')) != std::string::npos) {
+        auto addSubExpr = reachabilityExpression.substr(0, i);
+        addSubExpr += "+";
+        std::list<const DCGVertexType*> newStart;
+        while ((j = addSubExpr.find('+')) != std::string::npos) {
+            auto dotSubExpr = addSubExpr.substr(0, j);
+            while (dotSubExpr[0] == ' ') {
+                dotSubExpr.erase(0, 1);
+            }
+            bool isForbidden = dotSubExpr[0] == '!';
+            if (isForbidden) {
+                dotSubExpr.erase(0, 1);
+            }
+            auto currentNames = getName(dotSubExpr);
+            if (eliminateAnnotations) {
+                std::unordered_set<const DCGVertexType*> result;
+                for (auto i : currentNames) {
+                    if (!i->is<IR::Annotation>()) {
+                        result.insert(i);
+                        continue;
+                    }
+                    annotationToStatements(i, result);
+                }
+                currentNames = result;
+            }
+            if (isForbidden) {
+                forbiddenVertexes.insert(currentNames.begin(), currentNames.end());
+                newStart.insert(newStart.end(), start.begin(), start.end());
+            } else {
+                for (const auto* l : start) {
+                    addTransition(l, currentNames);
+                }
+                newStart.insert(newStart.end(), currentNames.begin(), currentNames.end());
+            }
+            addSubExpr = addSubExpr.substr(j + 1);
+        }
+        start = newStart;
+        reachabilityExpression = reachabilityExpression.substr(i + 1);
+    }
+}
+
+void ReachabilityEngine::annotationToStatements(const DCGVertexType* node,
+                                                std::unordered_set<const DCGVertexType*>& s) {
+    std::list<const DCGVertexType*> l = {node};
+    while (l.size()) {
+        const auto* nd = l.front();
+        l.pop_front();
+        if (nd->is<IR::Statement>() || nd->is<IR::P4Program>() || nd->is<IR::P4Control>() ||
+            nd->is<IR::ParserState>()) {
+            s.insert(nd);
+            continue;
+        }
+        const auto* v = const_cast<NodesCallGraph*>(dcg.operator->())->getCallers(nd);
+        if (v != nullptr) {
+            if (!(*v->begin())->is<IR::MethodCallStatement>() &&
+                nd->is<IR::MethodCallExpression>()) {
+                s.insert(nd);
+                continue;
+            }
+            l.insert(l.begin(), v->begin(), v->end());
+        }
+    }
+}
+
+void ReachabilityEngine::addTransition(const DCGVertexType* left,
+                                       const std::unordered_set<const DCGVertexType*>& rightSet) {
+    for (const auto* right : rightSet) {
+        auto i = userTransitions.find(left);
+        if (i == userTransitions.end()) {
+            std::list<const DCGVertexType*> l;
+            l.push_back(right);
+            userTransitions.emplace(left, l);
+        } else {
+            i->second.push_back(right);
+        }
+    }
+}
+
+const IR::Expression* ReachabilityEngine::addCondition(const IR::Expression* prev,
+                                                       const DCGVertexType* currentState) {
+    const auto* newCond = getCondition(currentState);
+    if (newCond == nullptr) {
+        return prev;
+    }
+    return new IR::BOr(IR::Type_Boolean::get(), newCond, prev);
+}
+
+std::unordered_set<const DCGVertexType*> ReachabilityEngine::getName(std::string name) {
+    std::string params;
+    if ((name.length() != 0U) && name[name.length() - 1] == ')') {
+        size_t n = name.find('(');
+        BUG_CHECK(n != std::string::npos, "Invalid format : %1%", name);
+        params = name.substr(n + 1, name.length() - n - 2);
+        name = name.substr(0, n);
+    }
+    size_t n;
+    while ((n = name.find(" ")) != std::string::npos) {
+        name.erase(n, 1);
+    }
+    auto i = hash.find(name);
+    if (i == hash.end()) {
+        name += "_table";
+        i = hash.find(name);
+    }
+    BUG_CHECK(i != hash.end(), "Can't find name %1% in hash of the program", name);
+    if (params.length() != 0U) {
+        // Add condition to a point.
+        const auto* expr = stringToNode(params);
+        for (const auto* j : i->second) {
+            auto k = conditions.find(j);
+            if (k == conditions.end()) {
+                conditions.emplace(j, expr);
+            } else {
+                k->second = new IR::LAnd(IR::Type_Boolean::get(), expr, k->second);
+            }
+        }
+    }
+    return i->second;
+}
+
+ReachabilityResult ReachabilityEngine::next(ReachabilityEngineState* state,
+                                            const DCGVertexType* next) {
+    CHECK_NULL(state);
+    CHECK_NULL(next);
+    if (forbiddenVertexes.count(next)) {
+        return std::make_pair(false, nullptr);
+    }
+    if (state->state.empty()) {
+        return std::make_pair(true, nullptr);
+    }
+    if (state->prevNode == nullptr) {
+        state->prevNode = next;
+    } else if (dcg->isReachable(state->prevNode, next)) {
+        // Check to move in the same direction.
+        state->prevNode = next;
+    } else {
+        return std::make_pair(false, nullptr);
+    }
+    const IR::Expression* expr = nullptr;
+    std::list<const DCGVertexType*> newState;
+    for (const auto* i : state->state) {
+        if (i == nullptr) {
+            // Start from intial.
+            auto j = userTransitions.find(i);
+            if (j == userTransitions.end()) {
+                // No user's transitions were found.
+                state->state.clear();
+                return std::make_pair(true, nullptr);
+            }
+            for (const auto* k : j->second) {
+                if (next == k) {
+                    // Checking next states.
+                    auto m = userTransitions.find(k);
+                    if (m == userTransitions.end()) {
+                        // No next state found.
+                        state->state.clear();
+                        return std::make_pair(true, getCondition(k));
+                    }
+                    for (const auto* n : m->second) {
+                        expr = addCondition(expr, n);
+                        newState.push_back(n);
+                    }
+                } else if (dcg->isReachable(next, k)) {
+                    expr = addCondition(expr, k);
+                    newState.push_back(k);
+                }
+            }
+        } else if (i == next) {
+            auto m = userTransitions.find(i);
+            if (m == userTransitions.end()) {
+                // No next state found.
+                state->state.clear();
+                return std::make_pair(true, getCondition(i));
+            }
+            for (const auto* n : m->second) {
+                expr = addCondition(expr, n);
+                newState.push_back(n);
+            }
+        } else if (dcg->isReachable(next, i)) {
+            expr = addCondition(expr, i);
+            newState.push_back(i);
+        }
+    }
+    state->state = newState;
+    return std::make_pair(state->state.begin() != state->state.end(), expr);
+}
+
+gsl::not_null<const NodesCallGraph*> ReachabilityEngine::getDCG() { return dcg; }
+
+const IR::Expression* ReachabilityEngine::getCondition(const DCGVertexType* n) {
+    auto i = conditions.find(n);
+    if (i != conditions.end()) {
+        return i->second;
+    }
+    return nullptr;
+}
+
+const IR::Expression* ReachabilityEngine::stringToNode(std::string /*name*/) {
+    BUG("Non implemented feature: convertion string into IR::Expression");
+}
+
 }  // namespace P4Tools

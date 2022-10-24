@@ -12,6 +12,7 @@
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/callGraph.h"
 #include "frontends/p4/typeMap.h"
+#include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/node.h"
 
@@ -111,6 +112,61 @@ class P4ProgramDCGCreator : public Inspector {
     bool preorder(const IR::IfStatement* ifStatement) override;
     bool preorder(const IR::SwitchStatement* switchStatement) override;
     bool preorder(const IR::StatOrDecl* statOrDecl) override;
+
+ protected:
+    /// Function add edge to current @vertex in DCG.
+    /// The edge is a pair (@prev, @vertex).
+    void addEdge(const DCGVertexType* vertex, IR::ID vertexName = IR::ID());
+};
+
+/// The main data for reachability engine.
+class ReachabilityEngineState {
+    friend class ReachabilityEngine;
+    const DCGVertexType* prevNode = nullptr;
+    std::list<const DCGVertexType*> state;
+
+ public:
+    static ReachabilityEngineState* getInitial();
+    ReachabilityEngineState* copy();
+    std::list<const DCGVertexType*> getState();
+};
+
+using ReachabilityResult = std::pair<bool, const IR::Expression*>;
+
+/// The main class to support user input patterns.
+/// This class allows to move step-by-step via user's input expression.
+/// Syntax for the user's input expressions
+/// <behavior> ::= <behavior> ; <behavior> |
+///                <behavior> + <behavior> |
+///                <name> | <forbidden name>
+/// <name> ::= <p4c node name> ['(' <condition> ')']
+/// <forbidden name> ::= ! <p4c node name>
+/// <p4c node name> - the name of the MethodCallStatement, P4Action, P4Parser,
+///                   P4Table, ParserState, P4Control, ParserValueSet, Declaration.
+/// <p4c condition> - any conditions p4c in syntax, whcih should be returned by the
+//                    Engine if corresponded <p4c node name> was reached.
+class ReachabilityEngine {
+    gsl::not_null<const NodesCallGraph*> dcg;
+    const ReachabilityHashType& hash;
+    std::unordered_map<const DCGVertexType*, std::list<const DCGVertexType*>> userTransitions;
+    std::unordered_map<const DCGVertexType*, const IR::Expression*> conditions;
+    std::unordered_set<const DCGVertexType*> forbiddenVertexes;
+
+ public:
+    ReachabilityEngine(gsl::not_null<const NodesCallGraph*> dcg, std::string reachabilityExpression,
+                       bool eliminateAnnotations = false);
+    ReachabilityResult next(ReachabilityEngineState*, const DCGVertexType*);
+    gsl::not_null<const NodesCallGraph*> getDCG();
+
+ protected:
+    void annotationToStatements(const DCGVertexType* node,
+                                std::unordered_set<const DCGVertexType*>& s);
+    void addTransition(const DCGVertexType*, const std::unordered_set<const DCGVertexType*>&);
+    std::unordered_set<const DCGVertexType*> getName(std::string name);
+    const IR::Expression* getCondition(const DCGVertexType*);
+    const IR::Expression* addCondition(const IR::Expression* prev,
+                                       const DCGVertexType* currentState);
+    static const IR::Expression* stringToNode(std::string name);
 
  protected:
     /// Function add edge to current @vertex in DCG.

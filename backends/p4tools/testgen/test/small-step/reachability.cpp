@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 
+#include <filesystem>
 #include <fstream>
 
 #include "backends/p4test/version.h"
@@ -292,6 +293,159 @@ TEST_F(P4CReachability, testParserValueSet) {
     ASSERT_TRUE(!dcg->isReachable(parseIpv4, ethtypeKinds));
     // ethtype_kinds isn't reachable from parse_trill.
     ASSERT_TRUE(!dcg->isReachable(parseTrill, ethtypeKinds));
+}
+
+
+bool listEqu(std::list<const IR::Node*>& left, std::list<const IR::Node*> right) {
+    if (left.size() != right.size()) {
+        return false;
+    }
+    auto i = left.begin();
+    auto j = right.begin();
+    while (i != left.end() && j != right.end()) {
+        if (*i != *j) {
+            return false;
+        }
+        i++;
+        j++;
+    }
+    return true;
+}
+
+TEST_F(P4CReachability, testReacabilityEngine) {
+    auto result = loadExampleForReachability(
+        "../../backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4");;
+    const auto* program = get<0>(result);
+    ASSERT_TRUE(program);
+    const auto* dcg = std::get<1>(result);
+    ASSERT_TRUE(dcg);
+    const auto hash = std::get<2>(result);
+    std::string strBehavior = "ingress.MyAction1 + ingress.MyAction2;";
+    strBehavior += "ingress.table2";
+    P4Tools::ReachabilityEngine engine(dcg, strBehavior);
+    auto* engineState = P4Tools::ReachabilityEngineState::getInitial();
+    // Initialize engine.
+    const auto* ingress = getFromHash(hash, "ingress");
+    ASSERT_TRUE(ingress);
+    const auto* myAction1 = getFromHash(hash, "ingress.MyAction1");
+    ASSERT_TRUE(myAction1);
+    const auto* myAction2 = getFromHash(hash, "ingress.MyAction2");
+    ASSERT_TRUE(myAction2);
+    const auto* table2 = getFromHash(hash, "ingress.table2");
+    ASSERT_TRUE(table2);
+    const auto* p = getFromHash(hash, "p");
+    ASSERT_TRUE(p);
+    const auto* deparser = getFromHash(hash, "deparser");
+    ASSERT_TRUE(deparser);
+    // Move to p (engine state the same).
+    // First it moves state to first user states.
+    ASSERT_TRUE(engine.next(engineState, p).first);
+    auto currentList = engineState->getState();
+    // Move to ingress (engine state the same).
+    ASSERT_TRUE(engine.next(engineState, ingress).first);
+    ASSERT_TRUE(listEqu(currentList, engineState->getState()));
+    // Move to MyAction1 (engine state should be changed).
+    ASSERT_TRUE(engine.next(engineState, myAction1).first);
+    ASSERT_TRUE(!listEqu(currentList, engineState->getState()));
+    currentList = engineState->getState();
+    // Can't move to MyAction2 after.
+    ASSERT_TRUE(!engine.next(engineState, myAction2).first);
+    ASSERT_TRUE(listEqu(currentList, engineState->getState()));
+    // Move to table2 (engine sate should be changed).
+    ASSERT_TRUE(engine.next(engineState, table2).first);
+    ASSERT_TRUE(!listEqu(currentList, engineState->getState()));
+    currentList = engineState->getState();
+    // Any reachable next vertex should be accepted, move to mirroring_clone.
+    ASSERT_TRUE(engine.next(engineState, deparser).first);
+    ASSERT_TRUE(listEqu(currentList, engineState->getState()));
+}
+
+void callTestgen(const char* inputFile, const char* behavior, const char* path, int maxTests) {
+    std::ostringstream mkDir;
+    std::string prefix = "", fullPath = sourcePath;
+    fullPath += inputFile;
+    if (access(fullPath.c_str(), 0)) {
+        prefix = "../";
+    }
+    mkDir << "mkdir -p " << buildPath << path << " && rm -f " << buildPath << path << "/*.stf";
+    system(mkDir.str().c_str());
+    std::ostringstream cmdTestgen;
+    cmdTestgen << buildPath << "extensions/testgen/p4check/p4check testgen ";
+    cmdTestgen << "-I \"" << buildPath << "p4include\" --target bmv2  --std p4-16 ";
+    cmdTestgen << "--test-backend STF --arch v1model --seed 1000 --max-tests " << maxTests << "  ";
+    cmdTestgen << "--pattern \"" << behavior << "\" ";
+    cmdTestgen << "--out-dir \"" << buildPath << path << "\" \"" << sourcePath << prefix;
+    cmdTestgen << inputFile << "\"";
+    system(cmdTestgen.str().c_str());
+}
+
+bool checkResultingSTF(std::list<std::list<std::string>> identifiersList, std::string path) {
+    std::ostringstream resDir;
+    resDir << buildPath << path;
+    for (const auto& f : std::filesystem::directory_iterator(resDir.str())) {
+        std::string fpath = f.path().c_str();
+        if (fpath.rfind(".stf") == std::string::npos) {
+            // Not a STF file.
+            continue;
+        }
+        // Each STF file should contain all identifiers from identifiersList.
+        auto lIds = identifiersList;
+        std::ifstream ifile(f.path());
+        while (!ifile.eof() && lIds.size()) {
+            std::string line;
+            std::getline(ifile, line);
+            for (auto lid = lIds.begin(); lid != lIds.end(); lid++) {
+                if (lid->size() == 0) {
+                    continue;
+                }
+                if (line.find(*lid->begin()) != std::string::npos) {
+                    lid->pop_front();
+                }
+            }
+        }
+        ifile.close();
+        bool hasEmptyList = false;
+        for (auto& l : lIds) {
+            if (l.size() == 0) {
+                hasEmptyList = true;
+                break;
+            }
+        }
+        if (!hasEmptyList) {
+            return false;
+        }
+    }
+    return true;
+}
+
+TEST_F(P4CReachability, testReacabilityEngineActions) {
+    callTestgen("../../testgen/testgen/targets/bmv2/test/p4-programs/bmv2_mis.p4",
+                "ingress.MyAction2", "tmp", 10);
+    std::list<std::list<std::string>> ids = {{"MyAction2"}};
+    ASSERT_TRUE(checkResultingSTF(ids, "tmp"));
+    ids = {{"MyAction1"}};
+    ASSERT_TRUE(!checkResultingSTF(ids, "tmp"));
+}
+
+TEST_F(P4CReachability, testReacabilityEngineTables) {
+    callTestgen("../../testgen/testgen/targets/bmv2/test/p4-programs/bmv2_action_run.p4",
+                "ingress.MyAction2", "tmp", 10);
+    std::list<std::list<std::string>> ids = {{" MyAction2"}};
+    ASSERT_TRUE(checkResultingSTF(ids, "tmp"));
+}
+
+TEST_F(P4CReachability, testReacabilityEngineTable2) {
+    callTestgen("../../testgen/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4",
+                "ingress.MyAction1;ingress.table2", "tmp", 10);
+    std::list<std::list<std::string>> ids = {{"ingress.table2"}};
+    ASSERT_TRUE(checkResultingSTF(ids, "tmp"));
+}
+
+TEST_F(P4CReachability, testReacabilityEngineNegTable2) {
+    callTestgen("../../testgen/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4",
+                "!ingress.MyAction1;!ingress.table2", "tmp", 10);
+    std::list<std::list<std::string>> ids = {{"table2"}};
+    ASSERT_TRUE(!checkResultingSTF(ids, "tmp"));
 }
 
 }  // namespace Test

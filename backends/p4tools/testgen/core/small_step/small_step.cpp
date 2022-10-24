@@ -29,7 +29,12 @@ namespace P4Tools {
 namespace P4Testgen {
 
 SmallStepEvaluator::SmallStepEvaluator(AbstractSolver& solver, const ProgramInfo& programInfo)
-    : programInfo(programInfo), solver(solver) {}
+    : programInfo(programInfo), solver(solver) {
+    if (!TestgenOptions::get().pattern.empty()) {
+        reachabilityEngine =
+            new ReachabilityEngine(programInfo.dcg, TestgenOptions::get().pattern, true);
+    }
+}
 
 SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
     BUG_CHECK(!state.isTerminal(), "Tried to step from a terminal state.");
@@ -41,11 +46,58 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
             ExecutionState& state;
 
          public:
+            using REngineType = std::pair<ReachabilityResult, std::vector<Branch>*>;
+            REngineType renginePreprocessing(const IR::Node* node) {
+                ReachabilityResult rresult = std::make_pair(true, nullptr);
+                std::vector<Branch>* branches = nullptr;
+                // Current node should be inside DCG.
+                if (self.reachabilityEngine->getDCG()->isCaller(node)) {
+                    // Move reachability engine to next state.
+                    rresult = self.reachabilityEngine->next(state.reachabilityEngineState, node);
+                    if (!rresult.first) {
+                        // Reachability property was failed.
+                        const IR::Expression* cond = IRUtils::getBoolLiteral(false);
+                        branches = new std::vector<Branch>({Branch(cond, state, &state)});
+                    }
+                } else if (const auto* method = node->to<IR::MethodCallStatement>()) {
+                    return renginePreprocessing(method->methodCall);
+                }
+                return std::make_pair(rresult, branches);
+            }
+
+            void renginePostporcessing(ReachabilityResult& result, std::vector<Branch>* branches) {
+                // All Reachability engine state for branch should be copied.
+                if (branches->size() > 1 || result.second != nullptr) {
+                    for (auto& n : *branches) {
+                        if (result.second != nullptr) {
+                            n.constraint =
+                                new IR::BAnd(IR::Type_Boolean::get(), n.constraint, result.second);
+                        }
+                        if (branches->size() > 1) {
+                            // Copy reachability engine state
+                            n.nextState->reachabilityEngineState =
+                                n.nextState->reachabilityEngineState->copy();
+                        }
+                    }
+                }
+            }
+
             Result operator()(const IR::Node* node) {
                 // Step on the given node as a command.
                 BUG_CHECK(node, "Attempted to evaluate null node.");
+                REngineType r;
+                if (self.reachabilityEngine) {
+                    r = renginePreprocessing(node);
+                    if (r.second != nullptr) {
+                        return r.second;
+                    }
+                }
                 auto* stepper = TestgenTarget::getCmdStepper(state, self.solver, self.programInfo);
-                return stepper->step(node);
+                auto* result = stepper->step(node);
+                if (self.reachabilityEngine) {
+                    renginePostporcessing(r.first, result);
+                }
+                return result;
             }
 
             Result operator()(const TraceEvent* event) {
@@ -69,7 +121,13 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                     }
                     auto* stepper =
                         TestgenTarget::getExprStepper(state, self.solver, self.programInfo);
-                    return stepper->step(expr);
+                    auto* result = stepper->step(expr);
+                    if (self.reachabilityEngine) {
+                        if (expr->is<IR::SelectExpression>()) std::cout << expr << std::endl;
+                        ReachabilityResult rresult = std::make_pair(true, nullptr);
+                        renginePostporcessing(rresult, result);
+                    }
+                    return result;
                 }
 
                 // Step on valueless return.
