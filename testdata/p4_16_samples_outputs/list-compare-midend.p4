@@ -27,4 +27,3 @@ control test(out bool zout) {
 }
 
 top(test()) main;
-

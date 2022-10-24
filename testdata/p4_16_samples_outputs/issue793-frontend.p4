@@ -37,4 +37,3 @@ control c(in my_packet hdr) {
 control C(in my_packet hdr);
 package V1Switch(C vr);
 V1Switch(c()) main;
-

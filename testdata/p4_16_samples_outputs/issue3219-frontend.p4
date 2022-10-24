@@ -11,4 +11,3 @@ control c(out bit<4> result) {
 control _c(out bit<4> r);
 package top(_c _c);
 top(c()) main;
-

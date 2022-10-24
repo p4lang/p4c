@@ -40,4 +40,3 @@ control ce(out bool b);
 parser pe(out bool b);
 package top(pe _p, ce _e, @optional ce _e1);
 top(_e = c(), _p = par()) main;
-

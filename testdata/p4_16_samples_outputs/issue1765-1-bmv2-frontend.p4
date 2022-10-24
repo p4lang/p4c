@@ -287,4 +287,3 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
 }
 
 V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

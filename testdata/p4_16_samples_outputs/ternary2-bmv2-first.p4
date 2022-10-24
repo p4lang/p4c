@@ -151,4 +151,3 @@ control deparser(packet_out b, in packet_t hdrs) {
 }
 
 V1Switch<packet_t, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

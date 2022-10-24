@@ -87,4 +87,3 @@ parser my_parser(bs b, out Packet_data p) {
 }
 
 myswitch(my_parser(), Q_pipe()) main;
-

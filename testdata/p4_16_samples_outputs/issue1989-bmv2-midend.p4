@@ -84,4 +84,3 @@ control ingress(inout headers hdr, inout test_metadata_t meta, inout standard_me
 }
 
 V1Switch<headers, test_metadata_t>(parser_stub(), verify_checksum_stub(), ingress(), egress_stub(), compute_checksum_stub(), deparser_stub()) main;
-

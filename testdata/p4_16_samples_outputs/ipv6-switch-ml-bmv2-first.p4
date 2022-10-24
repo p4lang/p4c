@@ -285,4 +285,3 @@ control MyComputeChecksum(inout headers hdr, inout metadata_t meta) {
 }
 
 V1Switch<headers, metadata_t>(MyParser(), MyVerifyChecksum(), ingress(), egress(), MyComputeChecksum(), MyDeparser()) main;
-

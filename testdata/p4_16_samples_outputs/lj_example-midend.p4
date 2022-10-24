@@ -90,4 +90,3 @@ control LJdeparse(inout Parsed_rep p, packet_out b) {
 }
 
 VSS<Parsed_rep>(LJparse(), LjPipe(), LJdeparse()) main;
-

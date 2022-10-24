@@ -95,4 +95,3 @@ control pipe(inout Headers_t headers, out bool xout) {
 }
 
 ebpfFilter<Headers_t>(prs(), pipe()) main;
-

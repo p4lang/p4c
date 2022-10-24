@@ -38,4 +38,3 @@ control ingress(inout bit<32> b) {
 control Ingress(inout bit<32> b);
 package top(Ingress ig);
 top(ingress()) main;
-

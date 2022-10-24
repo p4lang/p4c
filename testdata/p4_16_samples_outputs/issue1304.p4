@@ -65,6 +65,4 @@ control MyDeparser(packet_out b, in my_packet p) {
 }
 
 Pipeline(MyParser(), MyIngress(), MyEgress(), MyDeparser()) p0;
-
 Switch<my_packet, my_metadata, _, _>(p0) main;
-

@@ -37,4 +37,3 @@ control MyC(inout hdr_t hdr, inout meta_t meta, in intrinsic_metadata_t intr_md)
 }
 
 P<hdr_t, meta_t>(MyC()) main;
-

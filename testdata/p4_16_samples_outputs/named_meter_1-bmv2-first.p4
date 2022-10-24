@@ -38,7 +38,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 @name("namedmeter") direct_meter<bit<32>>(MeterType.packets) my_meter;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("_drop") action _drop() {
         mark_to_drop(standard_metadata);
@@ -104,4 +103,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

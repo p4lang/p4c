@@ -150,4 +150,3 @@ control main_control(inout headers_t hdr, inout local_metadata_t local_metadata,
 }
 
 PNA_NIC(packet_parser(), PreControlImpl(), main_control(), packet_deparser()) main;
-

@@ -6,4 +6,3 @@ control MyD() {
 }
 
 P(MyD()) main;
-

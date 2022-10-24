@@ -55,4 +55,3 @@ control EgressI(inout H hdr, inout M meta, inout standard_metadata_t std_meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

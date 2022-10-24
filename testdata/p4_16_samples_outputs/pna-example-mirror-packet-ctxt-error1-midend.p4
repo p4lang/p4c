@@ -98,4 +98,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

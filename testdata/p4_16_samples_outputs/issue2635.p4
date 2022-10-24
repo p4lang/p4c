@@ -13,4 +13,3 @@ control c(out S<bit<32>, bit<32>> t) {
 }
 
 top(c()) main;
-

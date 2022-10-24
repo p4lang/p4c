@@ -125,4 +125,3 @@ control Ingress(inout headers hdr, out bool xout) {
 }
 
 ebpfFilter<headers>(Parser(), Ingress()) main;
-

@@ -677,7 +677,7 @@ bool ToP4::preorder(const IR::Declaration_Instance* i) {
         builder.append(" = ");
         visit(i->initializer);
     }
-    builder.endOfStatement(getParent<IR::P4Program>() != nullptr);
+    builder.endOfStatement();
     return false;
 }
 

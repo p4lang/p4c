@@ -138,4 +138,3 @@ control DeparserI(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(parserI(), verifyChecksum(), cIngress(), cEgress(), updateChecksum(), DeparserI()) main;
-

@@ -98,4 +98,3 @@ control PreControlImpl(in Headers hdr, inout Meta meta, in pna_pre_input_metadat
 }
 
 PNA_NIC<Headers, Meta, Headers, Meta>(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;
-

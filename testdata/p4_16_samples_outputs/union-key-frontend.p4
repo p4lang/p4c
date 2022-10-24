@@ -40,4 +40,3 @@ control c(in Headers h) {
 control _c(in Headers h);
 package top(_c c);
 top(c()) main;
-

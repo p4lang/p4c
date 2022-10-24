@@ -69,4 +69,3 @@ control uc(inout Parsed_packet hdr, inout metadata m) {
 }
 
 V1Switch<Parsed_packet, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

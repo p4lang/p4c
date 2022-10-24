@@ -176,4 +176,3 @@ control TopDeparser(inout Parsed_packet p, packet_out b) {
 }
 
 VSS<Parsed_packet>(TopParser(), TopPipe(), TopDeparser()) main;
-

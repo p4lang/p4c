@@ -75,4 +75,3 @@ control DP(packet_out b, in H p) {
 }
 
 V1Switch<H, M>(P(), VerifyChecksumI(), Ing(), Eg(), ComputeChecksumI(), DP()) main;
-

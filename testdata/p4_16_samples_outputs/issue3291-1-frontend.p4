@@ -31,4 +31,3 @@ control c(out bool x) {
 control C(out bool b);
 package top(C _c);
 top(c()) main;
-

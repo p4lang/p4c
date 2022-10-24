@@ -55,4 +55,3 @@ control MyIngress(inout my_headers_t hdr, inout my_meta_t meta) {
 }
 
 test<my_headers_t, my_meta_t>(MyIngress()) main;
-

@@ -24,4 +24,3 @@ parser p(out bit<32> z) {
 parser _p(out bit<32> z);
 package top(_p _pa);
 top(p()) main;
-

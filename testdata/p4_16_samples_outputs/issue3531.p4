@@ -15,4 +15,3 @@ control c() {
 control ct();
 package pt(ct c);
 pt(c()) main;
-

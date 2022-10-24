@@ -58,4 +58,3 @@ control deparser_impl(packet_out packet, in headers_t hdr) {
 }
 
 V1Switch<my_headers_t, local_metadata_t>(parser_impl(), verify_checksum_impl(), ingress_impl(), egress_impl(), compute_checksum_impl(), deparser_impl()) main;
-

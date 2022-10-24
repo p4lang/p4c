@@ -39,4 +39,3 @@ control c(out bit<32> x, out bit<32> y) {
 }
 
 top(c()) main;
-

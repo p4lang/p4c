@@ -956,4 +956,3 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
 }
 
 V1Switch(FabricParser(), FabricVerifyChecksum(), FabricIngress(), FabricEgress(), FabricComputeChecksum(), FabricDeparser()) main;
-

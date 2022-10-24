@@ -138,8 +138,5 @@ control egress_deparser(packet_out packet, out empty_metadata_t clone_e2e_meta, 
 }
 
 IngressPipeline<headers_t, local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(packet_parser(), ingress(), packet_deparser()) ip;
-
 EgressPipeline<headers_t, local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(egress_parser(), egress(), egress_deparser()) ep;
-
 PSA_Switch<headers_t, local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t, headers_t, local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

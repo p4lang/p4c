@@ -20,4 +20,3 @@ control c(inout bit<32> b) {
 control empty(inout bit<32> b);
 package top(empty _e);
 top(c()) main;
-
