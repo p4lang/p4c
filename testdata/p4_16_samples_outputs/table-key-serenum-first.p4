@@ -40,7 +40,7 @@ control c(inout Headers h, inout standard_metadata_t sm) {
     }
     table tns {
         key = {
-            h.eth.type: exact @name("h.eth.type") ;
+            h.eth.type: exact @name("h.eth.type");
         }
         actions = {
             do_act();
@@ -61,4 +61,3 @@ parser p<H>(packet_in _p, out H h);
 control ctr<H, SM>(inout H h, inout SM sm);
 package top<H, SM>(p<H> _p, ctr<H, SM> _c);
 top<Headers, standard_metadata_t>(prs(), c()) main;
-

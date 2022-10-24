@@ -26,4 +26,3 @@ control ingress(inout headers hdr) {
 control ctr<H>(inout H hdr);
 package top<H1, H2, H3>(ctr<H1> ctrl1, @optional ctr<H2> ctrl2, @optional ctr<H3> ctrl3);
 top<headers, _, _>(ingress()) main;
-

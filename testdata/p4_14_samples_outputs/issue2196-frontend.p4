@@ -19,14 +19,14 @@ header my_header_t {
 }
 
 struct metadata {
-    @name(".my_meta") 
+    @name(".my_meta")
     my_meta_t my_meta;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t  ethernet;
-    @name(".my_header") 
+    @name(".my_header")
     my_header_t my_header;
 }
 
@@ -73,7 +73,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.ethernet.dst_addr: lpm @name("ethernet.dst_addr") ;
+            hdr.ethernet.dst_addr: lpm @name("ethernet.dst_addr");
         }
         default_action = NoAction_1();
     }
@@ -105,4 +105,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

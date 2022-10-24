@@ -37,4 +37,3 @@ control ingress(inout Headers h) {
 control I(inout Headers h);
 package top(I i);
 top(ingress()) main;
-

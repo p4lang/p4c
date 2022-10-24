@@ -62,9 +62,9 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t meta, in pna_
     }
     @name("MainControlImpl.clb_pinned_flows") table clb_pinned_flows_0 {
         key = {
-            key_0: exact @name("ipv4_addr_0") ;
-            key_1: exact @name("ipv4_addr_1") ;
-            key_2: exact @name("hdr.ipv4.protocol") ;
+            key_0: exact @name("ipv4_addr_0");
+            key_1: exact @name("ipv4_addr_1");
+            key_2: exact @name("hdr.ipv4.protocol");
         }
         actions = {
             NoAction_1();
@@ -97,4 +97,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

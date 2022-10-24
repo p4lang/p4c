@@ -32,9 +32,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t ipv4;
-    @name(".tcp") 
+    @name(".tcp")
     tcp_t  tcp;
 }
 
@@ -70,4 +70,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

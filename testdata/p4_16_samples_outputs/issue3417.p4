@@ -24,4 +24,3 @@ parser p() {
 parser simple();
 package top(simple s);
 top(p()) main;
-

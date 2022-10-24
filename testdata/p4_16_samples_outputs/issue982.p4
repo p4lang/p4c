@@ -415,4 +415,3 @@ control EgressDeparserImpl(packet_out packet, inout headers hdr, in metadata met
 }
 
 PSA_Switch(IngressParserImpl(), ingress(), IngressDeparserImpl(), EgressParserImpl(), egress(), EgressDeparserImpl()) main;
-

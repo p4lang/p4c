@@ -26,4 +26,3 @@ control c(inout Headers hdr) {
 control proto(inout Headers hdr);
 package top(proto _p);
 top(c()) main;
-

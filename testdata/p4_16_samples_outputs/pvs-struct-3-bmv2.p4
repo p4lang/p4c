@@ -16,13 +16,13 @@ struct my_metadata {
 }
 
 struct value_set_t {
-    @match(ternary) 
+    @match(ternary)
     bit<16> field1;
-    @match(lpm) 
+    @match(lpm)
     bit<3>  field2;
-    @match(exact) 
+    @match(exact)
     bit<6>  field3;
-    @match(range) 
+    @match(range)
     bit<5>  field4;
 }
 
@@ -77,4 +77,3 @@ control MyDeparser(packet_out b, in my_packet p) {
 }
 
 V1Switch(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

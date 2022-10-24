@@ -22,4 +22,3 @@ control ingressImpl(inout metadata_t meta) {
 control c(inout metadata_t meta);
 package top(c _c);
 top(ingressImpl()) main;
-

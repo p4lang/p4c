@@ -128,8 +128,6 @@ std::string serializeOneAnnotation(const IR::Annotation* annotation) {
     ToP4 top4(&oss, false);
     annotation->apply(top4);
     auto serializedAnnnotation = oss.str();
-    // remove the whitespace added by ToP4.
-    serializedAnnnotation.pop_back();
     return serializedAnnnotation;
 }
 

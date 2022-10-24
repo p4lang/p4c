@@ -20,4 +20,3 @@ control MyC(inout hdr_t hdr, inout meta_t meta) {
 }
 
 P<hdr_t, meta_t>(MyC()) main;
-

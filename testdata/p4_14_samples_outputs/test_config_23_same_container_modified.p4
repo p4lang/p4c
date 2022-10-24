@@ -34,11 +34,11 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t     ipv4;
-    @name(".vlan") 
+    @name(".vlan")
     vlan_t     vlan;
 }
 
@@ -111,4 +111,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

@@ -95,8 +95,5 @@ control MyEgressDeparser(packet_out pkt, out EMPTY a, out EMPTY b, inout EMPTY c
 }
 
 IngressPipeline(MyIngressParser(), MyIngressControl(), MyIngressDeparser()) ip;
-
 EgressPipeline(MyEgressParser(), MyEgressControl(), MyEgressDeparser()) ep;
-
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

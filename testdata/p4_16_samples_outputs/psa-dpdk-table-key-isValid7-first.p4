@@ -79,9 +79,9 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     table tbl {
         key = {
-            hdr.ethernet.isValid(): exact @name("hdr.ethernet.$valid$") ;
-            hdr.tcp.isValid()     : exact @name("hdr.tcp.$valid$") ;
-            hdr.ipv4.isValid()    : exact @name("hdr.ipv4.$valid$") ;
+            hdr.ethernet.isValid(): exact @name("hdr.ethernet.$valid$");
+            hdr.tcp.isValid()     : exact @name("hdr.tcp.$valid$");
+            hdr.ipv4.isValid()    : exact @name("hdr.ipv4.$valid$");
         }
         actions = {
             NoAction();
@@ -122,8 +122,5 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

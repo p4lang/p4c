@@ -236,12 +236,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".m") 
+    @name(".m")
     m_t m;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -513,4 +513,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

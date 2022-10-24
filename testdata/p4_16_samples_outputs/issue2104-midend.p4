@@ -19,4 +19,3 @@ control c() {
 control e();
 package top(e e);
 top(c()) main;
-

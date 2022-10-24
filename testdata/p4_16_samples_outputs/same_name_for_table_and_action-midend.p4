@@ -23,7 +23,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     @name("IngressI.do_something") table do_something_2 {
         key = {
-            smeta.ingress_port: exact @name("smeta.ingress_port") ;
+            smeta.ingress_port: exact @name("smeta.ingress_port");
         }
         actions = {
             do_something();
@@ -57,4 +57,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

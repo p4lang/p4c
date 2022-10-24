@@ -54,8 +54,8 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table ipv4_lpm {
         key = {
-            hdr.ipv4.dstAddr: ternary @name("hdr.ipv4.dstAddr") ;
-            hdr.ipv4.srcAddr: lpm @name("hdr.ipv4.srcAddr") ;
+            hdr.ipv4.dstAddr: ternary @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.srcAddr: lpm @name("hdr.ipv4.srcAddr");
         }
         actions = {
             ipv4_forward();
@@ -87,4 +87,3 @@ control MyDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

@@ -29,4 +29,3 @@ control c() {
 control proto();
 package top(proto p);
 top(p = c()) main;
-

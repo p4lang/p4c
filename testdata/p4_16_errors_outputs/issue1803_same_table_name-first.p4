@@ -23,7 +23,7 @@ control MyC(inout standard_metadata_t smeta) {
     }
     @name(".t0") table t0 {
         key = {
-            smeta.ingress_port: exact @name("smeta.ingress_port") ;
+            smeta.ingress_port: exact @name("smeta.ingress_port");
         }
         actions = {
             drop();
@@ -66,4 +66,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

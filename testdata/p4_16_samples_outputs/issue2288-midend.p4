@@ -11,7 +11,7 @@ control ingress(inout Headers h) {
     }
     @name("ingress.t") table t_0 {
         key = {
-            h.b: exact @name("h.b") ;
+            h.b: exact @name("h.b");
         }
         actions = {
             a_1();
@@ -26,4 +26,3 @@ control ingress(inout Headers h) {
 control c<T>(inout T d);
 package top<T>(c<T> _c);
 top<Headers>(ingress()) main;
-

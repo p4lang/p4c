@@ -17,7 +17,7 @@ control ingress(inout Headers h) {
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            h.eth_hdr.src_addr: exact @name("h.eth_hdr.src_addr") ;
+            h.eth_hdr.src_addr: exact @name("h.eth_hdr.src_addr");
         }
         actions = {
             do_action();
@@ -34,4 +34,3 @@ control ingress(inout Headers h) {
 control c<H>(inout H h);
 package top<H>(c<H> _c);
 top<Headers>(ingress()) main;
-

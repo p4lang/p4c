@@ -17,4 +17,3 @@ control c(out s<p<bit<1>>> v) {
 control _C<T>(out T t);
 package top<T>(_C<T> c);
 top(c()) main;
-

@@ -59,4 +59,3 @@ parser p<H>(packet_in _p, out H h);
 control ctr<H, SM>(inout H h, inout SM sm);
 package top<H, SM>(p<H> _p, ctr<H, SM> _c);
 top(prs(), c()) main;
-

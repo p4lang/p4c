@@ -32,9 +32,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.t") table t_0 {
         key = {
-            h.ports.port1: exact @name("h.ports.port1") ;
-            h.ports.port2: exact @name("h.ports.port2") ;
-            h.ports.port3: exact @name("h.ports.port3") ;
+            h.ports.port1: exact @name("h.ports.port1");
+            h.ports.port2: exact @name("h.ports.port2");
+            h.ports.port3: exact @name("h.ports.port3");
         }
         actions = {
             NoAction_1();
@@ -63,4 +63,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

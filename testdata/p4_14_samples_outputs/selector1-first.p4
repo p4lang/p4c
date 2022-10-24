@@ -17,7 +17,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
 }
 
@@ -29,7 +29,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 @name(".sel_profile") @mode("fair") action_selector(HashAlgorithm.crc16, 32w16384, 32w14) sel_profile;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".noop") action noop() {
     }
@@ -43,11 +42,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.data.b1: exact @name("data.b1") ;
-            hdr.data.f1: selector @name("data.f1") ;
-            hdr.data.f2: selector @name("data.f2") ;
-            hdr.data.f3: selector @name("data.f3") ;
-            hdr.data.f4: selector @name("data.f4") ;
+            hdr.data.b1: exact @name("data.b1");
+            hdr.data.f1: selector @name("data.f1");
+            hdr.data.f2: selector @name("data.f2");
+            hdr.data.f3: selector @name("data.f3");
+            hdr.data.f4: selector @name("data.f4");
         }
         size = 1024;
         implementation = sel_profile;
@@ -80,4 +79,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

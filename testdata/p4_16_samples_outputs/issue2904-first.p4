@@ -41,7 +41,7 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     bit<4> y;
     table X {
         key = {
-            y: ternary @name("y") ;
+            y: ternary @name("y");
         }
         actions = {
             A();
@@ -66,4 +66,3 @@ parser packet_parser(packet_in pkt, out headers_t hdrs, inout local_metadata_t l
 }
 
 V1Switch<headers_t, local_metadata_t>(packet_parser(), verify_ck(), ingress(), egress(), compute_ck(), deparser()) main;
-

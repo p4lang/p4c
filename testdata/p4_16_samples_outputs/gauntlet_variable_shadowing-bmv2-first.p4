@@ -29,7 +29,7 @@ control compute(inout H h) {
     }
     @name("t") table t_0 {
         key = {
-            h.a + h.a: exact @name("e") ;
+            h.a + h.a: exact @name("e");
         }
         actions = {
             a_0();
@@ -85,4 +85,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

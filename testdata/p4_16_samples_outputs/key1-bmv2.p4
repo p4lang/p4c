@@ -13,7 +13,7 @@ control compute(inout hdr h) {
     }
     table t {
         key = {
-            h.a + 1: exact @name("e") ;
+            h.a + 1: exact @name("e");
         }
         actions = {
             a;
@@ -70,4 +70,3 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

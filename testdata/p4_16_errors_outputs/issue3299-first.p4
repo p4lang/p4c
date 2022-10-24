@@ -55,4 +55,3 @@ control C(inout H h, inout M m) {
 }
 
 V1Switch<H, M>(P(), V(), I(), E(), C(), D()) main;
-

@@ -21,4 +21,3 @@ control Ing() {
 }
 
 top(Ing()) main;
-
