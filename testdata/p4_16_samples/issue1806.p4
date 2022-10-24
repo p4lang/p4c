@@ -1,6 +1,3 @@
-#include <v1model.p4>
-
-
 header Ethernet {
     bit<48> src;
     bit<48> dest;
