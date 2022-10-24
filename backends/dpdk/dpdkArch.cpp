@@ -2414,6 +2414,9 @@ void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
         }
     }
     if (use_add_on_miss) {
+        auto act = t->getDefaultAction();
+        BUG_CHECK(act != nullptr, "%1%: default action does not exist", t);
+        structure->defActs.emplace(act->toString(), t);
         for (auto action : t->getActionList()->actionList) {
             auto action_decl = refMap->getDeclaration(action->getPath())->to<IR::P4Action>();
             // Map the compiler generated internal name of action (emitted in .spec file) with
@@ -2428,7 +2431,8 @@ void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
     }
 }
 
-void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
+void CollectAddOnMissAdd::postorder(const IR::MethodCallStatement *mcs) {
+    bool use_add_on_miss = false;
     auto mce = mcs->methodCall;
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
     if (!mi->is<P4::ExternFunction>()) {
@@ -2440,7 +2444,26 @@ void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
     }
     auto ctxt = findContext<IR::P4Action>();
     BUG_CHECK(ctxt != nullptr, "%1%: add_entry extern can only be used in an action", mcs);
-
+    auto it = structure->defActs.find(ctxt->name.name);
+    auto add_on_miss = it->second->properties->getProperty("add_on_miss");
+    if (add_on_miss == nullptr) return;
+    if (add_on_miss->value->is<IR::ExpressionValue>()) {
+        auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
+        if (!expr->is<IR::BoolLiteral>()) {
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "%1%: expected boolean for 'add_on_miss' property", add_on_miss);
+            return;
+        } else {
+            use_add_on_miss = expr->to<IR::BoolLiteral>()->value;
+        }
+    }
+    if (use_add_on_miss) {
+        if (it == structure->defActs.end()) {
+            ::error(ErrorType::ERR_UNEXPECTED, "%1% is not inside a miss action: %2%:",
+                    mcs, ctxt->name.name);
+            return;
+        }
+    }
     // assuming checking on number of arguments is already performed in frontend.
     BUG_CHECK(mce->arguments->size() == 3,
               "%1%: expected 3 arguments in add_entry extern", mcs);

@@ -1123,6 +1123,12 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             }
             auto action = a->expr->arguments->at(0)->expression;
             auto action_name = action->to<IR::StringLiteral>()->value;
+            auto it = structure->defActs.find(action_name);
+            if (it != structure->defActs.end()) {
+                  ::error(ErrorType::ERR_UNEXPECTED, "%1%: action cannot be default action: %2%:",
+                          a->method->name, action_name);
+                   return false;
+            }
             action_name = ::get(structure->learner_action_map, action_name);
             auto param = a->expr->arguments->at(1)->expression;
             auto timeout_id = a->expr->arguments->at(2)->expression;
