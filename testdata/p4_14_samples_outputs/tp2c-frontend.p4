@@ -17,7 +17,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
 }
 
@@ -76,7 +76,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.data.f1: ternary @name("data.f1") ;
+            hdr.data.f1: ternary @name("data.f1");
         }
         default_action = NoAction_1();
     }
@@ -87,7 +87,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_2();
         }
         key = {
-            hdr.data.b1: ternary @name("data.b1") ;
+            hdr.data.b1: ternary @name("data.b1");
         }
         default_action = NoAction_2();
     }
@@ -98,7 +98,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            hdr.data.f2: ternary @name("data.f2") ;
+            hdr.data.f2: ternary @name("data.f2");
         }
         default_action = NoAction_3();
     }
@@ -109,7 +109,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_4();
         }
         key = {
-            hdr.data.f2: ternary @name("data.f2") ;
+            hdr.data.f2: ternary @name("data.f2");
         }
         default_action = NoAction_4();
     }
@@ -120,7 +120,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_5();
         }
         key = {
-            hdr.data.f2: ternary @name("data.f2") ;
+            hdr.data.f2: ternary @name("data.f2");
         }
         default_action = NoAction_5();
     }
@@ -131,7 +131,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_6();
         }
         key = {
-            hdr.data.b2: ternary @name("data.b2") ;
+            hdr.data.b2: ternary @name("data.b2");
         }
         default_action = NoAction_6();
     }
@@ -176,4 +176,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

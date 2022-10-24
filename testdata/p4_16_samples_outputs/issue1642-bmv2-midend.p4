@@ -21,13 +21,13 @@ struct parsed_packet_t {
 
 struct local_metadata_t {
     short  _s0;
-    @field_list(0) 
+    @field_list(0)
     bit<1> _row_alt0_valid1;
-    @field_list(0) 
+    @field_list(0)
     bit<7> _row_alt0_port2;
-    @field_list(0) 
+    @field_list(0)
     bit<1> _row_alt1_valid3;
-    @field_list(0) 
+    @field_list(0)
     bit<7> _row_alt1_port4;
 }
 

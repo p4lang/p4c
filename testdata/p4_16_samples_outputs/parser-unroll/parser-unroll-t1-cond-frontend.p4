@@ -130,4 +130,3 @@ parser MyParser_0(packet_in pkt, out headers hdr, inout metadata meta, inout sta
 }
 
 V1Switch<headers, metadata>(MyParser_0(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

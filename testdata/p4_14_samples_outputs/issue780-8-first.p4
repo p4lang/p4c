@@ -10,7 +10,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".h") 
+    @name(".h")
     h_t h;
 }
 
@@ -30,7 +30,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.h.f: ternary @name("h.f") ;
+            hdr.h.f: ternary @name("h.f");
         }
         size = 256;
         default_action = NoAction();
@@ -62,4 +62,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

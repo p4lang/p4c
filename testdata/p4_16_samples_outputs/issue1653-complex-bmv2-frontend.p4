@@ -31,7 +31,7 @@ header bitvec_hdr {
 }
 
 struct local_metadata_t {
-    @field_list(0) 
+    @field_list(0)
     row_t      row0;
     row_t      row1;
     bitvec_hdr bvh0;

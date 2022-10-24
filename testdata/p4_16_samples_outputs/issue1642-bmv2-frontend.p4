@@ -21,7 +21,7 @@ struct parsed_packet_t {
 
 struct local_metadata_t {
     short s;
-    @field_list(0) 
+    @field_list(0)
     row_t row;
 }
 

@@ -37,7 +37,7 @@
           "action_scope" : "DefaultOnly",
           "annotations" : [
             {
-              "name" : "@defaultonl"
+              "name" : "@defaultonly"
             }
           ],
           "data" : []

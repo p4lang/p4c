@@ -3,18 +3,18 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 46138463
-    name: "ingress.tns"
+    id: 48497513
+    name: "c.tns"
     alias: "tns"
   }
   match_fields {
     id: 1
-    name: "h.eth_hdr.eth_type[13:4]"
+    name: "h.eth.tst[13:4]"
     bitwidth: 10
     match_type: EXACT
   }
   action_refs {
-    id: 22708368
+    id: 22922986
   }
   action_refs {
     id: 21257015
@@ -33,8 +33,8 @@ actions {
 }
 actions {
   preamble {
-    id: 22708368
-    name: "ingress.do_act"
+    id: 22922986
+    name: "c.do_act"
     alias: "do_act"
   }
 }

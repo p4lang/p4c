@@ -15,56 +15,25 @@ struct Headers {
     H h;
 }
 
-struct Meta {
-}
-
-parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
-    state start {
-        pkt.extract<E>(hdr.e);
-        pkt.extract<H>(hdr.h);
-        transition accept;
-    }
-}
-
-control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+control ingress(inout Headers h) {
     @name("ingress.x") H x_0;
-    @hidden action issue2890l32() {
+    @hidden action issue2890l18() {
         x_0.setInvalid();
         x_0 = h.h;
         x_0.a = 16w2;
         h.e.e = 16w2;
     }
-    @hidden table tbl_issue2890l32 {
+    @hidden table tbl_issue2890l18 {
         actions = {
-            issue2890l32();
+            issue2890l18();
         }
-        const default_action = issue2890l32();
+        const default_action = issue2890l18();
     }
     apply {
-        tbl_issue2890l32.apply();
+        tbl_issue2890l18.apply();
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) {
-    apply {
-    }
-}
-
-control update(inout Headers h, inout Meta m) {
-    apply {
-    }
-}
-
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    apply {
-    }
-}
-
-control deparser(packet_out pkt, in Headers h) {
-    apply {
-        pkt.emit<E>(h.e);
-        pkt.emit<H>(h.h);
-    }
-}
-
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+control I(inout Headers h);
+package top(I i);
+top(ingress()) main;

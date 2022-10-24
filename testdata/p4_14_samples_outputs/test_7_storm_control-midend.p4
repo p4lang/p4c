@@ -159,7 +159,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -188,8 +188,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            meta._ingress_metadata_bd0: exact @name("ingress_metadata.bd") ;
-            hdr.ethernet.dstAddr      : ternary @name("ethernet.dstAddr") ;
+            meta._ingress_metadata_bd0: exact @name("ingress_metadata.bd");
+            hdr.ethernet.dstAddr      : ternary @name("ethernet.dstAddr");
         }
         size = 8192;
         default_action = NoAction_1();
@@ -221,4 +221,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

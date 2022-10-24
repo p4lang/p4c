@@ -18,11 +18,11 @@ struct metadata {
 }
 
 struct headers {
-    @name(".len_or_type") 
+    @name(".len_or_type")
     len_or_type_t len_or_type;
-    @name(".mac_da") 
+    @name(".mac_da")
     mac_da_t      mac_da;
-    @name(".mac_sa") 
+    @name(".mac_sa")
     mac_sa_t      mac_sa;
 }
 
@@ -55,7 +55,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction_2();
         }
         key = {
-            hdr.mac_sa.mac: exact @name("mac_sa.mac") ;
+            hdr.mac_sa.mac: exact @name("mac_sa.mac");
         }
         default_action = NoAction_2();
     }
@@ -75,8 +75,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            hdr.mac_da.mac       : exact @name("mac_da.mac") ;
-            hdr.len_or_type.value: exact @name("len_or_type.value") ;
+            hdr.mac_da.mac       : exact @name("mac_da.mac");
+            hdr.len_or_type.value: exact @name("len_or_type.value");
         }
         default_action = NoAction_3();
     }
@@ -104,4 +104,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

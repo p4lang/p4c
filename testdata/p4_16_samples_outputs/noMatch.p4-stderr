@@ -1,9 +1,9 @@
-noMatch.p4(25): [--Wwarn=parser-transition] warning: accept state in parser p is unreachable
-parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
+noMatch.p4(20): [--Wwarn=parser-transition] warning: accept state in parser p is unreachable
+parser p() {
        ^
-noMatch.p4(28): [--Wwarn=uninitialized_use] warning: x may be uninitialized
+noMatch.p4(23): [--Wwarn=uninitialized_use] warning: x may be uninitialized
         transition select(x) {
                           ^
-noMatch.p4(25): [--Wwarn=parser-transition] warning: accept state in parser p is unreachable
-parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
+noMatch.p4(20): [--Wwarn=parser-transition] warning: accept state in parser p is unreachable
+parser p() {
        ^
