@@ -82,6 +82,8 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
         tbl_psaexampledpdkmeter56.apply();
         if (user_meta.port_out == 32w1) {
             tbl_0.apply();
+        } else {
+            ;
         }
     }
 }

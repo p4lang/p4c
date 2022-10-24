@@ -74,7 +74,6 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout EMPTY_M b, in psa_egress_pars
 control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     @name("MyIC.tmp") bit<2> tmp;
     @name("MyIC.vid_0") bit<12> vid_1;
-    @name("MyIC.hasReturned") bool hasReturned;
     @name("MyIC.retval") bit<16> retval;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -94,8 +93,6 @@ control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t 
         } else {
             tmp = b.depth;
             vid_1 = a.vlan_tag[tmp].vid;
-            hasReturned = false;
-            hasReturned = true;
             retval = (bit<16>)vid_1 + 16w5;
             b.ret = retval;
             tbl_0.apply();

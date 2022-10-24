@@ -14,7 +14,6 @@ control c(out bit<16> b) {
         if (hasReturned) {
             ;
         } else {
-            hasReturned = true;
             retval = right;
         }
         b = retval;

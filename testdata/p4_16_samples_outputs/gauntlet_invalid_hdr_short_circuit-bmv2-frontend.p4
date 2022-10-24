@@ -30,16 +30,9 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.dummy") bool dummy;
     @name("ingress.dummy_0") H dummy_2;
-    @name("ingress.hasReturned") bool hasReturned;
-    @name("ingress.retval") bool retval;
     apply {
-        hasReturned = false;
-        hasReturned = true;
-        retval = true;
         h.h = dummy_2;
-        dummy = retval;
     }
 }
 

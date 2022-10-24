@@ -23,11 +23,8 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bit<16> retval;
     apply {
-        hasReturned = false;
-        hasReturned = true;
         retval = ((Headers){eth_hdr = (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1}}).eth_hdr.eth_type + 16w1;
         h.eth_hdr.eth_type = retval;
     }

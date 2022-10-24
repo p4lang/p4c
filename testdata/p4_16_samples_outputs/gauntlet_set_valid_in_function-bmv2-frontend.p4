@@ -25,14 +25,11 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<16> tmp;
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bit<16> retval;
     @name("ingress.tmp_ret") H tmp_ret_0;
     apply {
-        hasReturned = false;
         tmp_ret_0.setValid();
         tmp_ret_0 = (H){a = 8w0,b = 64w0,c = 16w0};
-        hasReturned = true;
         retval = tmp_ret_0.c;
         tmp = retval;
         m.t = (bit<32>)tmp;

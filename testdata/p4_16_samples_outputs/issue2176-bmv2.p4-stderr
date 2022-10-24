@@ -6,13 +6,13 @@ issue2176-bmv2.p4(43): [--Wwarn=ordering] warning: h.h.b: 'out' argument has fie
                     ^^^^^
 issue2176-bmv2.p4(43)
         do_action_2(h.h.b, h.h.b, h.h.b);
-                           ^^^^^
+                                  ^^^^^
 issue2176-bmv2.p4(43): [--Wwarn=ordering] warning: h.h.b: 'out' argument has fields in common with h.h.b
         do_action_2(h.h.b, h.h.b, h.h.b);
                            ^^^^^
 issue2176-bmv2.p4(43)
         do_action_2(h.h.b, h.h.b, h.h.b);
-                    ^^^^^
+                                  ^^^^^
 issue2176-bmv2.p4(43): [--Wwarn=ordering] warning: h.h.b: 'out' argument has fields in common with h.h.b
         do_action_2(h.h.b, h.h.b, h.h.b);
                                   ^^^^^

@@ -18,11 +18,6 @@ control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metada
     @name("MyIngress.r") bit<8> r_0;
     apply {
         r_0 = 8w1;
-        if (r_0 == (bit<8>)3) {
-            r_0 = (bit<8>)3 + 8w1;
-        } else {
-            r_0 = (bit<8>)(1 + 3);
-        }
     }
 }
 

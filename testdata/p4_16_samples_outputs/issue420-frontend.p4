@@ -33,7 +33,6 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout
 
 control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
     @name("cIngress.hasReturned") bool hasReturned;
-    @name("cIngress.hasReturned_0") bool hasReturned_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("cIngress.foo") action foo(@name("bar") bit<16> bar) {
@@ -56,9 +55,7 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
         default_action = NoAction_1();
     }
     apply {
-        hasReturned_0 = false;
         tbl1_0.apply();
-        hasReturned_0 = true;
     }
 }
 

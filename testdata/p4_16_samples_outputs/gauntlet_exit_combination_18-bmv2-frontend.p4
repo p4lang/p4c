@@ -28,7 +28,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         dummy_0 = h.eth_hdr.src_addr;
         h.eth_hdr.src_addr = dummy_0;
         exit;
-        h.eth_hdr.src_addr = dummy_0;
     }
     apply {
         simple_action();

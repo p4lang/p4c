@@ -36,7 +36,6 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
         tmp1_0 = hdr.ethernet.dst_addr;
         if (tmp1_0 == 48w0x1 && tmp2 == 32w0x2) {
             m.addr = hdr.ethernet.dst_addr;
-            hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
             hdr.ethernet.src_addr = m.addr;
         }
         hdr.ethernet.dst_addr = tmp1_0;

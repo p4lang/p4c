@@ -54,7 +54,6 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     @name("ingress.color_out") PSA_MeterColor_t color_out_0;
     @name("ingress.color_in") PSA_MeterColor_t color_in_0;
     @name("ingress.tmp") bit<32> tmp;
-    @name("ingress.hasReturned") bool hasReturned;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.counter0") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS_AND_BYTES) counter0_0;
@@ -83,7 +82,6 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
         default_action = NoAction_1();
     }
     apply {
-        hasReturned = false;
         color_in_0 = PSA_MeterColor_t.RED;
         if (user_meta.port_out == 32w1) {
             tbl_0.apply();
@@ -92,7 +90,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
             counter2_0.count(12w1023, 32w64);
             user_meta.port_out = reg_0.read(12w1);
         } else {
-            hasReturned = true;
+            ;
         }
     }
 }

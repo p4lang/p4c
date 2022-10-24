@@ -23,10 +23,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.simple_action") action simple_action() {
-        hasReturned = false;
-        hasReturned = true;
     }
     apply {
         simple_action();

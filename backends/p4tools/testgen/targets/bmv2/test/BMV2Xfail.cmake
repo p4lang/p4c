@@ -46,7 +46,6 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "bad json"
-  invalid-hdr-warnings4.p4
   control-hs-index-test5.p4
 )
 

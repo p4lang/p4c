@@ -31,12 +31,10 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<8> tmp_1;
     @name("ingress.tmp_1") bit<8> tmp_2;
-    @name("ingress.tmp") bit<8> tmp_4;
     @name("ingress.val_1") bit<8> val;
     @name("ingress.do_thing") action do_thing() {
         val = tmp_2;
         h.h.a = val;
-        tmp_1 = tmp_4;
     }
     apply {
         tmp_1 = 8w3;

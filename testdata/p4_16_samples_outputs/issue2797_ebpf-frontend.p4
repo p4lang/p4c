@@ -21,15 +21,12 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @name("pipe.hasReturned") bool hasReturned;
     apply {
-        hasReturned = false;
         pass = true;
         if (headers.x.isValid()) {
             ;
         } else {
             pass = false;
-            hasReturned = true;
         }
     }
 }

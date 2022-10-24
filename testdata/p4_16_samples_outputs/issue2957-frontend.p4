@@ -23,19 +23,16 @@ parser p(packet_in pkt, out Headers hdr) {
     @name("p.tmp_5") bit<8> tmp_4;
     @name("p.val_0") bit<3> val_1;
     @name("p.bound_0") bit<3> bound;
-    @name("p.hasReturned") bool hasReturned;
     @name("p.retval") bit<3> retval;
     @name("p.tmp") bit<3> tmp_5;
     state start {
         val_1 = 3w1;
         bound = 3w2;
-        hasReturned = false;
         if (val_1 < bound) {
             tmp_5 = val_1;
         } else {
             tmp_5 = bound;
         }
-        hasReturned = true;
         retval = tmp_5;
         tmp = retval;
         tmp_2 = tmp;

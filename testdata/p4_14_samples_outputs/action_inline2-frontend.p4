@@ -34,9 +34,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".setb1") action setb1(@name("port") bit<9> port) {
-        dest = hdr.data.b1;
-        dest_3 = dest;
-        dest_4 = dest_3;
         dest_4 = hdr.data.b2;
         dest_3 = dest_4;
         dest = dest_3;

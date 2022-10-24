@@ -57,7 +57,6 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t meta, in pna_
     @name("MainControlImpl.key_2") bit<8> key_2;
     @name("MainControlImpl.tmp") bool tmp;
     @name("MainControlImpl.istd_0") pna_main_input_metadata_t istd_1;
-    @name("MainControlImpl.hasReturned") bool hasReturned;
     @name("MainControlImpl.retval") bool retval;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -74,8 +73,6 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t meta, in pna_
     }
     apply {
         istd_1 = istd;
-        hasReturned = false;
-        hasReturned = true;
         retval = istd_1.direction == PNA_Direction_t.HOST_TO_NET;
         tmp = retval;
         if (tmp) {

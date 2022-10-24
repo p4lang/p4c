@@ -31,7 +31,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     data_t16 hdr_0_h2;
     data_t hdr_0_h3;
     data_t hdr_0_h4;
-    data_t inout_hdr_0_h1;
     data_t p_shdr_h1;
     state start {
         transition select(standard_metadata.ingress_port) {
@@ -47,7 +46,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         hdr_0_h2.setInvalid();
         hdr_0_h3.setInvalid();
         hdr_0_h4.setInvalid();
-        inout_hdr_0_h1 = phdr_0_h1;
         p_shdr_h1.setInvalid();
         packet.extract<data_t>(hdr_0_h1);
         transition select(hdr_0_h1.f) {
@@ -59,7 +57,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state Subparser_sp1 {
         packet.extract<data_t>(hdr_0_h3);
         packet.extract<data_t>(p_shdr_h1);
-        inout_hdr_0_h1 = p_shdr_h1;
         transition p0_0;
     }
     state Subparser_sp2 {
@@ -71,7 +68,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         hdr.h2 = hdr_0_h2;
         hdr.h3 = hdr_0_h3;
         hdr.h4 = hdr_0_h4;
-        phdr_0_h1 = inout_hdr_0_h1;
         transition p2;
     }
     state p1 {
@@ -81,7 +77,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         hdr_0_h2.setInvalid();
         hdr_0_h3.setInvalid();
         hdr_0_h4.setInvalid();
-        inout_hdr_0_h1 = phdr_1_h1;
         p_shdr_h1.setInvalid();
         packet.extract<data_t>(hdr_0_h1);
         transition select(hdr_0_h1.f) {
@@ -93,7 +88,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state Subparser_sp1_0 {
         packet.extract<data_t>(hdr_0_h3);
         packet.extract<data_t>(p_shdr_h1);
-        inout_hdr_0_h1 = p_shdr_h1;
         transition p1_0;
     }
     state Subparser_sp2_0 {
@@ -105,7 +99,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         hdr.h2 = hdr_0_h2;
         hdr.h3 = hdr_0_h3;
         hdr.h4 = hdr_0_h4;
-        phdr_1_h1 = inout_hdr_0_h1;
         transition p2;
     }
     state p2 {

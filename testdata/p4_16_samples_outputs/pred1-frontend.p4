@@ -5,13 +5,9 @@
 control empty();
 package top(empty e);
 control Ing() {
-    @name("Ing.b") bool b_0;
-    @name("Ing.a") bit<32> a_0;
     @name("Ing.cond") action cond() {
-        b_0 = true;
     }
     apply {
-        a_0 = 32w2;
         cond();
     }
 }

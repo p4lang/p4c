@@ -10,7 +10,6 @@ struct Headers {
 
 control c(inout Headers hdr) {
     @name("c.do_action") action do_action() {
-        hdr.eth_hdr.eth_type = 16w4;
     }
     @name("c.do_action") action do_action_1() {
         hdr.eth_hdr.eth_type = 16w6;

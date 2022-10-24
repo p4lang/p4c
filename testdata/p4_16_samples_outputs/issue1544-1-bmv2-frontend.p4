@@ -25,7 +25,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("ingress.smeta") standard_metadata_t smeta_0;
     @name("ingress.x_0") bit<16> x;
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bit<16> retval;
     @name("ingress.tmp") bit<16> tmp_0;
     @name(".my_drop") action my_drop_0() {
@@ -49,13 +48,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         mac_da_0.apply();
         x = hdr.ethernet.srcAddr[15:0];
-        hasReturned = false;
         if (x > 16w5) {
             tmp_0 = x + 16w65535;
         } else {
             tmp_0 = x;
         }
-        hasReturned = true;
         retval = tmp_0;
         hdr.ethernet.srcAddr[15:0] = retval;
     }

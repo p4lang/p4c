@@ -25,8 +25,6 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action act() {
         h.eth_hdr.eth_type = 16w0x806;
-        h.eth_hdr.eth_type = 16w0x806;
-        h.eth_hdr.eth_type = 16w0x806;
     }
     @hidden table tbl_act {
         actions = {

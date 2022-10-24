@@ -26,13 +26,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<16> tmp;
     @name("ingress.tmp_0") bit<16> tmp_0;
     @name("ingress.val_0") bit<48> val;
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bit<16> retval;
     apply {
-        val = h.eth_hdr.dst_addr;
-        hasReturned = false;
         val = 48w1;
-        hasReturned = true;
         retval = 16w1;
         h.eth_hdr.dst_addr = val;
         tmp = retval;

@@ -11,27 +11,21 @@ struct Headers {
 }
 
 control ingress(inout Headers h) {
-    @name("ingress.hasReturned_0") bool hasReturned;
     @name("ingress.retval_0") Headers retval;
     @name("ingress.tmp") ethernet_t tmp;
     @name("ingress.tmp_0") bit<48> tmp_0;
     @name("ingress.tmp_1") bit<48> tmp_1;
     @name("ingress.tmp_2") bit<16> tmp_2;
     @name("ingress.tmp_3") bit<16> tmp_3;
-    @name("ingress.hasReturned") bool hasReturned_0;
     @name("ingress.retval") bit<16> retval_0;
     apply {
-        hasReturned = false;
         tmp_0 = 48w1;
         tmp_1 = 48w1;
-        hasReturned_0 = false;
-        hasReturned_0 = true;
         retval_0 = 16w9;
         tmp_3 = retval_0;
         tmp_2 = tmp_3;
         tmp.setValid();
         tmp = (ethernet_t){dst_addr = tmp_0,src_addr = tmp_1,eth_type = tmp_2};
-        hasReturned = true;
         retval = (Headers){eth_hdr = tmp};
         h = retval;
     }

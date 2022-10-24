@@ -32,20 +32,9 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.random_val_0") bit<8> random_val;
-    @name("ingress.val_0") bit<8> val;
-    @name("ingress.hasReturned") bool hasReturned;
-    @name("ingress.retval") bit<8> retval;
     @name("ingress.val_1") bit<8> val_2;
-    @name("ingress.hasReturned") bool hasReturned_1;
     @name("ingress.retval") bit<8> retval_1;
     apply {
-        hasReturned = false;
-        hasReturned = true;
-        retval = 8w1;
-        random_val = val;
-        hasReturned_1 = false;
-        hasReturned_1 = true;
         retval_1 = 8w1;
         m.tmp = val_2;
         h.h.a = retval_1;

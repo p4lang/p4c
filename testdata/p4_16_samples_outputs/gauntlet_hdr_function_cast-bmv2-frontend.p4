@@ -28,7 +28,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.val_0") bit<16> val;
     @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") ethernet_t retval;
-    @name("ingress.hasReturned_0") bool hasReturned_0;
     @name("ingress.retval_0") ethernet_t retval_0;
     apply {
         val = h.eth_hdr1.eth_type;
@@ -45,14 +44,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         if (hasReturned) {
             ;
         } else {
-            hasReturned = true;
             retval.setValid();
             retval = (ethernet_t){dst_addr = 48w3,src_addr = 48w3,eth_type = 16w3};
         }
-        h.eth_hdr1.eth_type = val;
         h.eth_hdr1 = retval;
-        hasReturned_0 = false;
-        hasReturned_0 = true;
         retval_0.setValid();
         retval_0 = (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};
         h.eth_hdr2 = retval_0;

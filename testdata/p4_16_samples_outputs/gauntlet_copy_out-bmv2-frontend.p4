@@ -27,13 +27,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.inout_c") bit<8> inout_c_2;
     @name("ingress.do_thing") action do_thing() {
         inout_c_0 = c_0;
-        h.h.a = inout_c_0;
         c_0 = inout_c_0;
     }
     @name("ingress.do_thing") action do_thing_1() {
         inout_c_2 = c_0;
         h.h.a = inout_c_2;
-        c_0 = inout_c_2;
     }
     apply {
         c_0 = 8w12;

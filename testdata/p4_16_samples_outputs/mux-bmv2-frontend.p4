@@ -20,26 +20,11 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 }
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    @name("Eg._sub") bit<32> _sub_0;
-    @name("Eg.res") bit<64> res_0;
-    @name("Eg.tmp") bit<32> tmp;
     @name("Eg.p") bool p_0;
-    @name("Eg.val") bit<64> val_0;
     @name("Eg.update") action update() {
         p_0 = true;
-        val_0 = res_0;
-        _sub_0 = val_0[31:0];
-        if (p_0) {
-            tmp = _sub_0;
-        } else {
-            tmp = 32w1;
-        }
-        _sub_0 = tmp;
-        val_0[31:0] = _sub_0;
-        res_0 = val_0;
     }
     apply {
-        res_0 = 64w0;
         update();
     }
 }
