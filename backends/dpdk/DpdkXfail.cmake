@@ -95,3 +95,8 @@ p4c_add_xfail_reason("dpdk"
   testdata/p4_16_samples/pna-example-tcp-connection-tracking-err-1.p4
   testdata/p4_16_samples/pna-example-tcp-connection-tracking-err.p4
   )
+
+p4c_add_xfail_reason("dpdk"
+  "must be a compile-time constant"
+  testdata/p4_16_samples/psa-example-mask-range-err.p4
+  )
