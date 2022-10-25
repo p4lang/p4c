@@ -222,6 +222,7 @@ p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "expected a struct"
   hashing-non-tuple-bmv2.p4
+  issue584-1-bmv2.p4
 )
 
 ####################################################################################################

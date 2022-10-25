@@ -1,6 +1,7 @@
 #include <core.p4>
-#define V1MODEL_VERSION 20180101
-#include <v1model.p4>
+
+struct standard_metadata_t {
+}
 
 header Ethernet {
     bit<48> src;

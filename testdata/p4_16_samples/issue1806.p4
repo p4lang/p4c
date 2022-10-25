@@ -1,3 +1,7 @@
+#include <core.p4>
+
+struct standard_metadata_t {}
+
 header Ethernet {
     bit<48> src;
     bit<48> dest;
