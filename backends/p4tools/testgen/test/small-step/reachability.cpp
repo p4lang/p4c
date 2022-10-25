@@ -295,7 +295,6 @@ TEST_F(P4CReachability, testParserValueSet) {
     ASSERT_TRUE(!dcg->isReachable(parseTrill, ethtypeKinds));
 }
 
-
 bool listEqu(std::list<const IR::Node*>& left, std::list<const IR::Node*> right) {
     if (left.size() != right.size()) {
         return false;
@@ -314,7 +313,7 @@ bool listEqu(std::list<const IR::Node*>& left, std::list<const IR::Node*> right)
 
 TEST_F(P4CReachability, testReacabilityEngine) {
     auto result = loadExampleForReachability(
-        "../../backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4");;
+        "../../backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4");
     const auto* program = get<0>(result);
     ASSERT_TRUE(program);
     const auto* dcg = std::get<1>(result);

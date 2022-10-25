@@ -50,7 +50,7 @@ class SmallStepEvaluator {
     /// The number of times a guard was not satisfiable.
     uint64_t violatedGuardConditions = 0;
 
-   /// Reachability engine.
+    /// Reachability engine.
     ReachabilityEngine* reachabilityEngine = nullptr;
 
  public:
