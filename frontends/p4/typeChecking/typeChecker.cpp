@@ -3800,18 +3800,27 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
 
     if (auto ae = type->to<IR::Type_ActionEnum>()) {
         // switch (table.apply(...))
-        std::set<cstring> foundLabels;
+        std::map<cstring, const IR::Node*> foundLabels;
+        const IR::Node* foundDefault = nullptr;
         for (auto c : stat->cases) {
-            if (c->label->is<IR::DefaultExpression>())
+            if (c->label->is<IR::DefaultExpression>()) {
+                if (foundDefault)
+                    typeError("%1%: multiple 'default' labels %2%", c->label, foundDefault);
+                foundDefault = c->label;
                 continue;
-            auto pe = c->label->to<IR::PathExpression>();
-            CHECK_NULL(pe);
-            cstring label = pe->path->name.name;
-            if (foundLabels.find(label) != foundLabels.end())
-                typeError("%1%: duplicate switch label", c->label);
-            foundLabels.emplace(label);
-            if (!ae->contains(label))
-                typeError("%1% is not a legal label (action name)", c->label);
+            } else if (auto pe = c->label->to<IR::PathExpression>()) {
+                cstring label = pe->path->name.name;
+                auto it = foundLabels.find(label);
+                if (it != foundLabels.end())
+                    typeError("%1%: 'switch' label duplicates %2%", c->label,
+                              it->second);
+                foundLabels.emplace(label, c->label);
+                if (!ae->contains(label))
+                    typeError("%1% is not a legal label (action name)", c->label);
+            } else {
+                typeError("%1%: 'switch' label must be an action name or 'default'",
+                          c->label);
+            }
         }
     } else {
         // switch (expression)
