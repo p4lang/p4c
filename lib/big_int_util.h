@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_big_int_util_H_
-#define _LIB_big_int_util_H_
+#ifndef _LIB_BIG_INT_UTIL_H
+#define _LIB_BIG_INT_UTIL_H
 
 #include "config.h"
 
@@ -85,4 +85,4 @@ static inline int ceil_log2(big_int v) {
     return v ? floor_log2(v-1) + 1 : -1;
 }
 
-#endif /* _LIB_big_int_util_H_ */
+#endif /* _LIB_BIG_INT_UTIL_H */

@@ -35,6 +35,7 @@ export P4C_RUNTIME_DEPS="cpp \
                      libboost-graph1.71.0 \
                      libboost-iostreams1.71.0 \
                      libgc1c2 \
+                     libgmp-dev \
                      python3"
 
 # use scapy 2.4.5, which is the version on which ptf depends
