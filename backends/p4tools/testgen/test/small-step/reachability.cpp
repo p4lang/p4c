@@ -368,15 +368,19 @@ void callTestgen(const char* inputFile, const char* behavior, const char* path, 
         prefix = "../";
     }
     mkDir << "mkdir -p " << buildPath << path << " && rm -f " << buildPath << path << "/*.stf";
-    system(mkDir.str().c_str());
+    if (system(mkDir.str().c_str()) != -1) {
+        BUG("Can't create folder - %1%", mkDir.str());
+    }
     std::ostringstream cmdTestgen;
-    cmdTestgen << buildPath << "extensions/testgen/p4check/p4check testgen ";
+    cmdTestgen << buildPath << "backends/p4tools/p4check/p4check testgen ";
     cmdTestgen << "-I \"" << buildPath << "p4include\" --target bmv2  --std p4-16 ";
     cmdTestgen << "--test-backend STF --arch v1model --seed 1000 --max-tests " << maxTests << "  ";
     cmdTestgen << "--pattern \"" << behavior << "\" ";
     cmdTestgen << "--out-dir \"" << buildPath << path << "\" \"" << sourcePath << prefix;
     cmdTestgen << inputFile << "\"";
-    system(cmdTestgen.str().c_str());
+    if (system(cmdTestgen.str().c_str()) != -1) {
+        BUG("p4check failed to run - %1%", cmdTestgen.str());
+    }
 }
 
 bool checkResultingSTF(std::list<std::list<std::string>> identifiersList, std::string path) {
