@@ -530,32 +530,11 @@ enum PSA_CounterType_t {
 // BEGIN:Counter_extern
 /// Indirect counter with n_counters independent counter values, where
 /// every counter value has a data plane size specified by type W.
+
 @noWarn("unused")
 extern Counter<W, S> {
   Counter(bit<32> n_counters, PSA_CounterType_t type);
   void count(in S index, @optional in bit<32> increment);
-
-  /*
-  /// The control plane API uses 64-bit wide counter values.  It is
-  /// not intended to represent the size of counters as they are
-  /// stored in the data plane.  It is expected that control plane
-  /// software will periodically read the data plane counter values,
-  /// and accumulate them into larger counters that are large enough
-  /// to avoid reaching their maximum values for a suitably long
-  /// operational time.  A 64-bit byte counter increased at maximum
-  /// line rate for a 100 gigabit port would take over 46 years to
-  /// wrap.
-
-  @ControlPlaneAPI
-  {
-    bit<64> read      (in S index);
-    bit<64> sync_read (in S index);
-    void set          (in S index, in bit<64> seed);
-    void reset        (in S index);
-    void start        (in S index);
-    void stop         (in S index);
-  }
-  */
 }
 // END:Counter_extern
 
@@ -564,18 +543,6 @@ extern Counter<W, S> {
 extern DirectCounter<W> {
   DirectCounter(PSA_CounterType_t type);
   void count();
-
-  /*
-  @ControlPlaneAPI
-  {
-    W    read<W>      (in TableEntry key);
-    W    sync_read<W> (in TableEntry key);
-    void set          (in TableEntry key, in W seed);
-    void reset        (in TableEntry key);
-    void start        (in TableEntry key);
-    void stop         (in TableEntry key);
-  }
-  */
 }
 // END:DirectCounter_extern
 
@@ -605,15 +572,6 @@ extern Meter<S> {
   // RFC 2698).  It may be implemented via a call to execute(index,
   // MeterColor_t.GREEN), which has the same behavior.
   PSA_MeterColor_t execute(in S index, @optional in bit<32> pkt_len);
-
-  /*
-  @ControlPlaneAPI
-  {
-    reset(in MeterColor_t color);
-    setParams(in S index, in MeterConfig config);
-    getParams(in S index, out MeterConfig config);
-  }
-  */
 }
 // END:Meter_extern
 
@@ -623,15 +581,6 @@ extern DirectMeter {
   // See the corresponding methods for extern Meter.
   PSA_MeterColor_t execute(in PSA_MeterColor_t color);
   PSA_MeterColor_t execute();
-
-  /*
-  @ControlPlaneAPI
-  {
-    reset(in TableEntry entry, in MeterColor_t color);
-    void setConfig(in TableEntry entry, in MeterConfig config);
-    void getConfig(in TableEntry entry, out MeterConfig config);
-  }
-  */
 }
 // END:DirectMeter_extern
 
@@ -647,15 +596,6 @@ extern Register<T, S> {
   @noSideEffects
   T    read  (in S index);
   void write (in S index, in T value);
-
-  /*
-  @ControlPlaneAPI
-  {
-    T    read<T>      (in S index);
-    void set          (in S index, in T seed);
-    void reset        (in S index);
-  }
-  */
 }
 // END:Register_extern
 
@@ -669,14 +609,6 @@ extern Random<T> {
 
   Random(T min, T max);
   T read();
-
-  /*
-  @ControlPlaneAPI
-  {
-    void reset();
-    void setSeed(in T seed);
-  }
-  */
 }
 // END:Random_extern
 
@@ -684,15 +616,6 @@ extern Random<T> {
 extern ActionProfile {
   /// Construct an action profile of 'size' entries
   ActionProfile(bit<32> size);
-
-  /*
-  @ControlPlaneAPI
-  {
-     entry_handle add_member    (action_ref, action_data);
-     void         delete_member (entry_handle);
-     entry_handle modify_member (entry_handle, action_ref, action_data);
-  }
-  */
 }
 // END:ActionProfile_extern
 
@@ -703,19 +626,6 @@ extern ActionSelector {
   /// @param size number of entries in the action selector
   /// @param outputWidth size of the key
   ActionSelector(PSA_HashAlgorithm_t algo, bit<32> size, bit<32> outputWidth);
-
-  /*
-  @ControlPlaneAPI
-  {
-     entry_handle add_member        (action_ref, action_data);
-     void         delete_member     (entry_handle);
-     entry_handle modify_member     (entry_handle, action_ref, action_data);
-     group_handle create_group      ();
-     void         delete_group      (group_handle);
-     void         add_to_group      (group_handle, entry_handle);
-     void         delete_from_group (group_handle, entry_handle);
-  }
-  */
 }
 // END:ActionSelector_extern
 
@@ -723,14 +633,6 @@ extern ActionSelector {
 extern Digest<T> {
   Digest();                       /// define a digest stream to the control plane
   void pack(in T data);           /// emit data into the stream
-
-  /*
-  @ControlPlaneAPI
-  {
-  T data;                           /// If T is a list, control plane generates a struct.
-  int unpack(T& data);              /// unpacked data is in T&, int return status code.
-  }
-  */
 }
 // END:Digest_extern
 
