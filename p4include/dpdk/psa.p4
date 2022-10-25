@@ -332,7 +332,67 @@ extern bool psa_recirculate(in psa_egress_output_metadata_t istd,
                             in psa_egress_deparser_input_metadata_t edstd);
 
 
+/***
+ * Calling assert when the argument is true has no effect, except any
+ * effect that might occur due to evaluation of the argument (but see
+ * below).  If the argument is false, the precise behavior is
+ * target-specific, but the intent is to record or log which assert
+ * statement failed, and optionally other information about the
+ * failure.
+ *
+ * For example, on the simple_switch_psa target, executing an assert
+ * statement with a false argument causes a log message with the file
+ * name and line number of the assert statement to be printed, and
+ * then the simple_switch_psa process exits.  It is still to be
+ * determined, implemented, and documented precisely how assert will
+ * behave for the P4 DPDK target.
+ *
+ * If you provide the --ndebug command line option to p4c when
+ * compiling, the compiled program behaves as if all assert statements
+ * were not present in the source code.
+ *
+ * We strongly recommend that you avoid using expressions as an
+ * argument to an assert call that can have side effects, e.g. an
+ * extern method or function call that has side effects.  p4c will
+ * allow you to do this with no warning given.  We recommend this
+ * because, if you follow this advice, your program will behave the
+ * same way when assert statements are removed.
+ */
 extern void assert(in bool check);
+
+/***
+ * For the purposes of compiling and executing P4 programs on a target
+ * device, assert and assume are identical, including the use of the
+ * --ndebug p4c option to elide them.  See documentation for assert.
+ *
+ * The reason that assume exists as a separate function from assert is
+ * because they are expected to be used differently by formal
+ * verification tools.  For some formal tools, the goal is to try to
+ * find example packets and sets of installed table entries that cause
+ * an assert statement condition to be false.
+ *
+ * Suppose you run such a tool on your program, and the example packet
+ * given is an MPLS packet, i.e. hdr.ethernet.etherType == 0x8847.
+ * You look at the example, and indeed it does cause an assert
+ * condition to be false.  However, your plan is to deploy your P4
+ * program in a network in places where no MPLS packets can occur.
+ * You could add extra conditions to your P4 program to handle the
+ * processing of such a packet cleanly, without assertions failing,
+ * but you would prefer to tell the tool "such example packets are not
+ * applicable in my scenario -- never show them to me".  By adding a
+ * statement:
+ *
+ *     assume(hdr.ethernet.etherType != 0x8847);
+ *
+ * at an appropriate place in your program, the formal tool should
+ * never show you such examples -- only ones that make all such assume
+ * conditions true.
+ *
+ * The reason that assume statements behave the same as assert
+ * statements when compiled to a target device is that if the
+ * condition ever evaluates to false when operating in a network, it
+ * is likely that your assumption was wrong, and should be reexamined.
+ */
 extern void assume(in bool check);
 
 // BEGIN:Match_kinds
