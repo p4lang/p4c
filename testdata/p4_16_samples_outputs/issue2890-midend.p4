@@ -1,6 +1,4 @@
 #include <core.p4>
-#define V1MODEL_VERSION 20180101
-#include <v1model.p4>
 
 header E {
     bit<16> e;
@@ -17,20 +15,20 @@ struct Headers {
 
 control ingress(inout Headers h) {
     @name("ingress.x") H x_0;
-    @hidden action issue2890l18() {
+    @hidden action issue2890l17() {
         x_0.setInvalid();
         x_0 = h.h;
         x_0.a = 16w2;
         h.e.e = 16w2;
     }
-    @hidden table tbl_issue2890l18 {
+    @hidden table tbl_issue2890l17 {
         actions = {
-            issue2890l18();
+            issue2890l17();
         }
-        const default_action = issue2890l18();
+        const default_action = issue2890l17();
     }
     apply {
-        tbl_issue2890l18.apply();
+        tbl_issue2890l17.apply();
     }
 }
 

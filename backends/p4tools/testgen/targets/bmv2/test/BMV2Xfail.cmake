@@ -174,26 +174,6 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
-  "The BMV2 architecture requires 6 pipes"
-  # All of these tests are not valid bmv2 programs but import v1model.
-  # TODO: Fix up these programs so that they pass.
-  logging.p4
-  issue584-1.p4
-  issue1806.p4
-  issue2104.p4
-  issue2105.p4
-  issue2890.p4
-  noMatch.p4
-  pred.p4
-  pred1.p4
-  pred2.p4
-  register-serenum.p4
-  table-key-serenum.p4
-  issue3531.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
   "BMv2 target only supports headers with fields totaling a multiple of 8 bits"
   custom-type-restricted-fields.p4
   issue3225.p4
@@ -242,6 +222,7 @@ p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "expected a struct"
   hashing-non-tuple-bmv2.p4
+  issue584-1-bmv2.p4
 )
 
 ####################################################################################################
