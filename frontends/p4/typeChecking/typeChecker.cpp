@@ -1386,11 +1386,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Enum* type) {
     return type;
 }
 
-const IR::Node* TypeInference::postorder(IR::Type_SerEnum* type) {
-    if (::errorCount())
-        // If we failed to typecheck a SerEnumMember we do not
-        // want to set the type for the SerEnum either.
-        return type;
+const IR::Node* TypeInference::preorder(IR::Type_SerEnum* type) {
     auto canon = setTypeType(type);
     for (auto e : *type->getDeclarations())
         setType(e->getNode(), canon);
@@ -1432,8 +1428,11 @@ const IR::Node* TypeInference::postorder(IR::Type_Set* type) {
 }
 
 const IR::Node* TypeInference::postorder(IR::SerEnumMember* member) {
-    if (done())
-        return member;
+    /*
+      The type of the member is initially set in the Type_SerEnum preorder visitor.
+      Here we check additional constraints and we may correct the member.
+      if (done()) return member;
+    */
     auto serEnum = findContext<IR::Type_SerEnum>();
     CHECK_NULL(serEnum);
     auto type = getTypeType(serEnum->type);
@@ -1442,9 +1441,9 @@ const IR::Node* TypeInference::postorder(IR::SerEnumMember* member) {
         return member;
     }
     auto exprType = getType(member->value);
-    auto tvs = unify(member, type, exprType,
-                     "Enum member '%1%' has type '%2%' and not the expected type '%2%'",
-                     { member, exprType, type });
+    auto tvs = unifyCast(member, type, exprType,
+                         "Enum member '%1%' has type '%2%' and not the expected type '%3%'",
+                         { member, exprType, type });
     if (tvs == nullptr)
         // error already signalled
         return member;
@@ -1453,6 +1452,8 @@ const IR::Node* TypeInference::postorder(IR::SerEnumMember* member) {
 
     ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
     member->value = cts.convert(member->value);  // sets type
+    if (!typeMap->getType(member))
+        setType(member, getTypeType(serEnum));
     return member;
 }
 
