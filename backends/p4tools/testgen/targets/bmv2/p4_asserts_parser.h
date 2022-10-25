@@ -15,8 +15,6 @@ namespace AssertsParser {
 
 class AssertsParser : public Transform {
     std::vector<std::vector<const IR::Expression*>>& restrictionsVec;
-    IR::Vector<IR::KeyElement> keyElements;
-    cstring tableName;
 
  public:
     explicit AssertsParser(std::vector<std::vector<const IR::Expression*>>& output);
@@ -24,13 +22,16 @@ class AssertsParser : public Transform {
     /// an IR::Expression. Internally calls all other necessary functions, for example
     /// combineTokensToNames and the like, to eventually get an IR expression that meets the string
     /// constraint
-    std::vector<const IR::Expression*> genIRStructs(cstring str);
+    static std::vector<const IR::Expression*> genIRStructs(
+        cstring tableName, cstring restrictionString,
+        const IR::Vector<IR::KeyElement>& keyElements);
     const IR::Node* postorder(IR::P4Table* node) override;
 };
 
 class Token {
  public:
     enum class Kind {
+        Priority,
         Text,
         True,
         False,
