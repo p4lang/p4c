@@ -1,4 +1,4 @@
-/* Copyright 2021 Intel Corporation
+/* Copyright 2021-2022 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -357,9 +357,12 @@ extern bool psa_recirculate(in psa_egress_output_metadata_t istd,
  * name and line number of the assert statement to be printed, and
  * then the simple_switch_psa process exits.
  *
- * If you provide the --ndebug command line option to p4c when
- * compiling, the compiled program behaves as if all assert statements
- * were not present in the source code.
+ * If you use a P4 compiler whose front end is based on the open
+ * source p4c front end, then providing the --ndebug command line
+ * option to p4c causes the compiled program to behave as if all
+ * assert statements were not present in the source code.  Consult the
+ * documentation of your device's P4 compiler for information on how
+ * it handles assert statements, and if it supports a similar option.
  *
  * We strongly recommend that you avoid using expressions as an
  * argument to an assert call that can have side effects, e.g. an
@@ -373,7 +376,8 @@ extern void assert(in bool check);
 /***
  * For the purposes of compiling and executing P4 programs on a target
  * device, assert and assume are identical, including the use of the
- * --ndebug p4c option to elide them.  See documentation for assert.
+ * --ndebug option to compilers based on the open source p4c front end
+ * to elide them.  See documentation for assert.
  *
  * The reason that assume exists as a separate function from assert is
  * because they are expected to be used differently by formal
