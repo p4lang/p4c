@@ -2416,7 +2416,10 @@ void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
     if (use_add_on_miss) {
         auto act = t->getDefaultAction();
         BUG_CHECK(act != nullptr, "%1%: default action does not exist", t);
-        structure->defActs.emplace(act->toString(), t);
+        if (auto mc = act->to<IR::MethodCallExpression>()) {
+            auto method = mc->method->to<IR::PathExpression>();
+            structure->defActs.emplace(method->path->name, t);
+        }
         for (auto action : t->getActionList()->actionList) {
             auto action_decl = refMap->getDeclaration(action->getPath())->to<IR::P4Action>();
             // Map the compiler generated internal name of action (emitted in .spec file) with
@@ -2442,7 +2445,7 @@ void CollectAddOnMissAdd::postorder(const IR::MethodCallStatement *mcs) {
         return;
     }
     auto ctxt = findContext<IR::P4Action>();
-    BUG_CHECK(ctxt != nullptr, "%1%: add_entry extern can only be used in an action", mcs);
+    BUG_CHECK(ctxt != nullptr, "%1% add_entry extern can only be used in an action", mcs);
     auto it = structure->defActs.find(ctxt->name.name);
     if (it == structure->defActs.end()) {
         ::error(ErrorType::ERR_UNEXPECTED, "%1% is not called from a default action:"

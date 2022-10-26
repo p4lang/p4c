@@ -1125,7 +1125,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             auto action_name = action->to<IR::StringLiteral>()->value;
             auto it = structure->defActs.find(action_name);
             if (it != structure->defActs.end()) {
-                  ::error(ErrorType::ERR_UNEXPECTED, "%1%: action cannot be default action: %2%:",
+                  ::error(ErrorType::ERR_UNEXPECTED, "%1% action cannot be default action: %2%:",
                           a->method->name, action_name);
                    return false;
             }
