@@ -226,6 +226,10 @@ const IR::Expression* getIR(std::vector<Token> tokens,
                 i = idx;
             }
 
+            if (i - 2 > 0 && tokens[i - 2].is(Token::Kind::LNot)) {
+                leftL = new IR::LNot(leftL);
+            }
+
             if (tokens[i].is(Token::Kind::Minus)) expr = new IR::Sub(leftL, rightL);
 
             if (tokens[i].is(Token::Kind::Plus)) expr = new IR::Add(leftL, rightL);
@@ -257,37 +261,35 @@ const IR::Expression* getIR(std::vector<Token> tokens,
             exprVec.push_back(expr);
 
         } else if (token.is(Token::Kind::LNot)) {
-            auto flag = true;
-            int idx = i;
-            cstring str = "";
-            auto first = true;
-            while (flag) {
-                i++;
-                if (tokens[i].is(Token::Kind::LeftParen)) {
-                    first = false;
-                    continue;
+            if (!tokens[i + 1].is_one_of(Token::Kind::Text, Token::Kind::Number)) {
+                const IR::Expression* exprLNot = nullptr;
+                int idx = i + 1;
+                int endIdx = 0;
+                bool flag = true;
+                while (flag) {
+                    if (idx == (int)tokens.size() ||
+                        tokens[idx].is_one_of(Token::Kind::Conjunction, Token::Kind::Disjunction,
+                                              Token::Kind::RightParen)) {
+                        endIdx = idx;
+                        flag = false;
+                    }
+                    idx++;
                 }
-                if (first) {
-                    break;
+
+                std::vector<Token> lNotTokens;
+                for (int j = i + 1; j < endIdx; j++) {
+                    lNotTokens.push_back(tokens[j]);
                 }
-                if (tokens[i].is_not(Token::Kind::RightParen)) {
-                    str += std::string(tokens[i].lexeme());
-                } else {
-                    flag = false;
-                }
+
+                exprLNot = getIR(lNotTokens, keyElements);
+                i = idx;
+                exprVec.push_back(new IR::LNot(exprLNot));
             }
-            i = idx;
-            if (str.size() == 0) {
-                str = "tmp";
-            }
-            const IR::Expression* expr1 = new IR::PathExpression(new IR::Path(IR::ID(str)));
-            exprVec.push_back(new IR::LNot(expr1));
         } else if (tokens[i].is(Token::Kind::Implication)) {
             auto tmp = exprVec[exprVec.size() - 1];
             exprVec.pop_back();
             const IR::Expression* expr1 = new IR::PathExpression(new IR::Path(IR::ID("tmp")));
-            exprVec.push_back(new IR::LNot(expr1));
-            exprVec.push_back(tmp);
+            exprVec.push_back(new IR::LNot(tmp));
             const IR::Expression* expr2 = new IR::PathExpression(new IR::Path(IR::ID("(tmp")));
             exprVec.push_back(new IR::LOr(expr1, expr2));
         } else if (tokens[i].is(Token::Kind::Disjunction)) {
@@ -300,34 +302,12 @@ const IR::Expression* getIR(std::vector<Token> tokens,
             exprVec.push_back(new IR::LAnd(expr1, expr2));
         }
     }
-    std::vector<const IR::Expression*> tmp;
-    for (uint64_t i = 0; i < exprVec.size(); i++) {
-        if (const auto* lNot = exprVec[i]->to<IR::LNot>()) {
-            i++;
-            auto lNotStr = lNot->expr->toString();
 
-            auto* binary = exprVec[i]->checkedTo<IR::Operation_Binary>()->clone();
-            if (const auto* subBin = binary->left->to<IR::Operation_Binary>()) {
-                cstring str = subBin->getStringOp();
-                str.replace(" ", "");
-
-                if (lNotStr.find(str) != nullptr) {
-                    binary->left = new IR::LNot(binary->left);
-                    tmp.push_back(binary);
-                    continue;
-                }
-            }
-
-            tmp.push_back(new IR::LNot(exprVec[i]));
-            continue;
-        }
-        tmp.push_back(exprVec[i]);
-    }
-    if (tmp.size() == 1) {
-        return expr;
+    if (exprVec.size() == 1) {
+        return exprVec[0];
     }
 
-    expr = makeSingleExpr(tmp);
+    expr = makeSingleExpr(exprVec);
 
     return expr;
 }
@@ -614,6 +594,7 @@ Token Lexer::next() noexcept {
                 get();
                 return {Token::Kind::NotEqual, "!=", 2};
             }
+            prev();
             prev();
             return atom(Token::Kind::LNot);
         case '-':
