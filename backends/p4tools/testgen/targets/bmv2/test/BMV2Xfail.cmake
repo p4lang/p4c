@@ -113,6 +113,12 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
+  "Key does not have a name annotation."
+  bmv2_restrictions.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2"
   "simple_switch died with return code -6"
   # Assert/Assume error: assert/assume(false).
   bmv2_assume.p4

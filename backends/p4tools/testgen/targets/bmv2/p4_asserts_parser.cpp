@@ -136,16 +136,16 @@ const IR::Expression* makeConstant(Token input, const IR::Vector<IR::KeyElement>
     auto inputStr = input.lexeme();
     if (input.is(Token::Kind::Text)) {
         for (const auto* key : keyElements) {
-            cstring annotationName = "";
+            cstring annotationName;
             if (const auto* annotation = key->getAnnotation("name")) {
                 if (!annotation->body.empty()) {
                     annotationName = annotation->body[0]->text;
                 }
             }
+            BUG_CHECK(annotationName.size() > 0, "Key does not have a name annotation.");
             auto annoSize = annotationName.size();
             auto tokenLength = inputStr.length();
-            if (!inputStr.find(key->expression->toString()) ||
-                inputStr.find(annotationName, tokenLength - annoSize) == std::string::npos) {
+            if (inputStr.find(annotationName, tokenLength - annoSize) == std::string::npos) {
                 continue;
             }
             const auto* keyType = key->expression->type;
