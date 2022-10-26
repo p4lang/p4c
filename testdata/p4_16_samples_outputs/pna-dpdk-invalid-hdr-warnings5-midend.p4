@@ -218,4 +218,3 @@ control PreControlImpl(in H hdr, inout M meta, in pna_pre_input_metadata_t istd,
 }
 
 PNA_NIC<H, M, H, M>(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;
-

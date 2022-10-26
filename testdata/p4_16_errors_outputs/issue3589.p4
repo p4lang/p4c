@@ -25,4 +25,3 @@ control ne0() {
 control c();
 package top(c c1, c c2);
 top(eq0(), ne0()) main;
-

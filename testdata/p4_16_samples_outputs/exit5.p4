@@ -37,4 +37,3 @@ control ctrl() {
 control noop();
 package p(noop _n);
 p(ctrl()) main;
-

@@ -44,7 +44,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            standard_metadata.egress_spec: exact @name("standard_metadata.egress_spec") ;
+            standard_metadata.egress_spec: exact @name("standard_metadata.egress_spec");
         }
         default_action = NoAction_1();
     }
@@ -74,4 +74,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

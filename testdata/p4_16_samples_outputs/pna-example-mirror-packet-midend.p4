@@ -64,9 +64,9 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t meta, in pna_
     }
     @name("MainControlImpl.flowTable") table flowTable_0 {
         key = {
-            hdr.ipv4.srcAddr : exact @name("hdr.ipv4.srcAddr") ;
-            hdr.ipv4.dstAddr : exact @name("hdr.ipv4.dstAddr") ;
-            hdr.ipv4.protocol: exact @name("hdr.ipv4.protocol") ;
+            hdr.ipv4.srcAddr : exact @name("hdr.ipv4.srcAddr");
+            hdr.ipv4.dstAddr : exact @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.protocol: exact @name("hdr.ipv4.protocol");
         }
         actions = {
             send_with_mirror();
@@ -97,4 +97,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

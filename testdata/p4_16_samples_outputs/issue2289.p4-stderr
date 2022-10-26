@@ -7,3 +7,6 @@ issue2289.p4(44): [--Wwarn=uninitialized_out_param] warning: out parameter 'byaA
 issue2289.p4(44)
     action simple_action(out bit<16> byaA) {
            ^^^^^^^^^^^^^
+issue2289.p4(44): [--Wwarn=uninitialized_use] warning: byaA may be uninitialized
+    action simple_action(out bit<16> byaA) {
+                                     ^^^^

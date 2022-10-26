@@ -59,4 +59,3 @@ control update(inout Parsed_packet hdr, inout Metadata meta) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

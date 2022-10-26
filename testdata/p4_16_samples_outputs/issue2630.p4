@@ -10,6 +10,4 @@ control MyC(inout header_t h) {
 }
 
 Pipeline(MyC()) pipe;
-
 Switch(pipe) main;
-

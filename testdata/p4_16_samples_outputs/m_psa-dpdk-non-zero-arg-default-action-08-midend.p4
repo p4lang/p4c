@@ -26,20 +26,14 @@ parser MyIngressParser(packet_in pkt, out headers_t hdr, inout user_meta_data_t 
 }
 
 control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @name("MyIngressControl.tmp1") bit<48> tmp1_0;
-    bool cond;
     @name("MyIngressControl.nonDefAct") action nonDefAct() {
         m.addr = hdr.ethernet.dst_addr;
         hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
         hdr.ethernet.src_addr = m.addr;
     }
     @name("MyIngressControl.macswp") action macswp(@name("tmp2") bit<32> tmp2) {
-        tmp1_0 = hdr.ethernet.dst_addr;
-        cond = hdr.ethernet.dst_addr == 48w0x1 && tmp2 == 32w0x2;
         m.addr = (hdr.ethernet.dst_addr == 48w0x1 && tmp2 == 32w0x2 ? hdr.ethernet.dst_addr : m.addr);
-        hdr.ethernet.dst_addr = (hdr.ethernet.dst_addr == 48w0x1 && tmp2 == 32w0x2 ? hdr.ethernet.src_addr : hdr.ethernet.dst_addr);
-        hdr.ethernet.src_addr = (cond ? m.addr : hdr.ethernet.src_addr);
-        hdr.ethernet.dst_addr = tmp1_0;
+        hdr.ethernet.src_addr = (hdr.ethernet.dst_addr == 48w0x1 && tmp2 == 32w0x2 ? m.addr : hdr.ethernet.src_addr);
     }
     @name("MyIngressControl.stub") table stub_0 {
         actions = {
@@ -96,8 +90,5 @@ control MyEgressDeparser(packet_out pkt, out EMPTY a, out EMPTY b, inout EMPTY c
 }
 
 IngressPipeline<headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIngressParser(), MyIngressControl(), MyIngressDeparser()) ip;
-
 EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEgressParser(), MyEgressControl(), MyEgressDeparser()) ep;
-
 PSA_Switch<headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

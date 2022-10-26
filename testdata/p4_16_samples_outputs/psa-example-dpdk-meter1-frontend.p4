@@ -54,7 +54,6 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     @name("ingress.color_out") PSA_MeterColor_t color_out_0;
     @name("ingress.color_in") PSA_MeterColor_t color_in_0;
     @name("ingress.tmp") bit<32> tmp;
-    @name("ingress.hasReturned") bool hasReturned;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.PACKETS) meter0_0;
@@ -69,7 +68,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     }
     @name("ingress.tbl") table tbl_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
         }
         actions = {
             NoAction_1();
@@ -78,12 +77,11 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
         default_action = NoAction_1();
     }
     apply {
-        hasReturned = false;
         color_in_0 = PSA_MeterColor_t.RED;
         if (user_meta.port_out == 32w1) {
             tbl_0.apply();
         } else {
-            hasReturned = true;
+            ;
         }
     }
 }
@@ -112,8 +110,5 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers, metadata_t, headers, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

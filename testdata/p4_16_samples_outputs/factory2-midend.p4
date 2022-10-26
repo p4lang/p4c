@@ -13,4 +13,3 @@ parser p1()(widget<bit<8>> w) {
 
 package sw0(P p);
 sw0(p1(createWidget<bit<8>, bit<16>>(16w0, 8w0))) main;
-

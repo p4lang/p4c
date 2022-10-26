@@ -51,7 +51,8 @@ apt-get install -y --no-install-recommends \
   ${P4C_DEPS} \
   ${P4C_EBPF_DEPS} \
   ${P4C_RUNTIME_DEPS} \
-  git
+  git \
+  lld
 
 # TODO: Remove this rm -rf line once the ccache memcache config is removed.
 rm -rf /usr/local/etc/ccache.conf
@@ -156,6 +157,11 @@ function build() {
   cmake "$@" ..
   make
 }
+
+if [ "$COMPILE_WITH_CLANG" == "ON" ]; then
+  export CC=clang
+  export CXX=clang++
+fi
 
 # Strong optimization.
 export CXXFLAGS="${CXXFLAGS} -O3"

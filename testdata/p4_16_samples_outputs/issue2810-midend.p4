@@ -29,4 +29,3 @@ control match_action_unit(inout parsed_header_t hdr) {
 }
 
 Switch<parsed_header_t>(match_action_unit()) main;
-

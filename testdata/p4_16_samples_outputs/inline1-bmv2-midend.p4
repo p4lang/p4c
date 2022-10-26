@@ -33,7 +33,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t std_meta) 
     }
     @name("IngressI.do_aux.adjust_lkp_fields") table do_aux_adjust_lkp_fields {
         key = {
-            hdr.ipv4.isValid(): exact @name("hdr.ipv4.$valid$") ;
+            hdr.ipv4.isValid(): exact @name("hdr.ipv4.$valid$");
         }
         actions = {
             NoAction_1();
@@ -56,4 +56,3 @@ control DeparserI(packet_out b, in H hdr) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

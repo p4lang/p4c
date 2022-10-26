@@ -17,20 +17,15 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.val") bit<16> val_0;
-    @name("ingress.hasReturned") bool hasReturned;
-    @name("ingress.retval") bit<16> retval;
     @name("ingress.tmp") bit<16> tmp;
     apply {
         val_0 = h.eth_hdr.eth_type;
-        hasReturned = false;
         if (val_0 < 16w6) {
             tmp = 16w0;
         } else {
             tmp = 16w3;
         }
         val_0 = tmp;
-        hasReturned = true;
-        retval = 16w2;
         h.eth_hdr.eth_type = val_0;
     }
 }
@@ -64,4 +59,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

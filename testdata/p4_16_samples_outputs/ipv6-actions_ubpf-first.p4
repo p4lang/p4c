@@ -109,7 +109,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     table filter_tbl {
         key = {
-            headers.ipv6.srcAddr: exact @name("headers.ipv6.srcAddr") ;
+            headers.ipv6.srcAddr: exact @name("headers.ipv6.srcAddr");
         }
         actions = {
             ipv6_modify_dstAddr();
@@ -139,4 +139,3 @@ control dprs(packet_out packet, in Headers_t headers) {
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
-

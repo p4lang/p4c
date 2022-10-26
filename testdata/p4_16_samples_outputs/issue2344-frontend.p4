@@ -15,24 +15,21 @@ struct Meta {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bit<32> retval;
     @name("ingress.tmp1") H tmp1_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.simple_action") action simple_action() {
-        hasReturned = false;
         tmp1_0.setInvalid();
         if (tmp1_0.a != 32w10) {
             tmp1_0.a = tmp1_0.a + 32w10;
         }
-        hasReturned = true;
         retval = tmp1_0.a;
         h.h.a = retval;
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            h.h.b: exact @name("key") ;
+            h.h.b: exact @name("key");
         }
         actions = {
             simple_action();
@@ -73,4 +70,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

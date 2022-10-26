@@ -379,98 +379,98 @@ header vlan_tag_5b_t {
 }
 
 struct metadata {
-    @name(".ingress_metadata") 
+    @name(".ingress_metadata")
     ingress_metadata_t ingress_metadata;
 }
 
 struct headers {
-    @name(".arp_rarp") 
+    @name(".arp_rarp")
     arp_rarp_t           arp_rarp;
-    @name(".arp_rarp_ipv4") 
+    @name(".arp_rarp_ipv4")
     arp_rarp_ipv4_t      arp_rarp_ipv4;
-    @name(".cpu_header") 
+    @name(".cpu_header")
     cpu_header_t         cpu_header;
-    @name(".eompls") 
+    @name(".eompls")
     eompls_t             eompls;
-    @name(".erspan_v1_header") 
+    @name(".erspan_v1_header")
     erspan_header_v1_t_0 erspan_v1_header;
-    @name(".erspan_v2_header") 
+    @name(".erspan_v2_header")
     erspan_header_v2_t_0 erspan_v2_header;
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t           ethernet;
-    @name(".fcoe") 
+    @name(".fcoe")
     fcoe_header_t        fcoe;
-    @name(".genv") 
+    @name(".genv")
     genv_t               genv;
-    @name(".genv_opt_A") 
+    @name(".genv_opt_A")
     genv_opt_A_t         genv_opt_A;
-    @name(".genv_opt_B") 
+    @name(".genv_opt_B")
     genv_opt_B_t         genv_opt_B;
-    @name(".genv_opt_C") 
+    @name(".genv_opt_C")
     genv_opt_C_t         genv_opt_C;
-    @name(".gre") 
+    @name(".gre")
     gre_t                gre;
-    @name(".icmp") 
+    @name(".icmp")
     icmp_t               icmp;
-    @name(".icmpv6") 
+    @name(".icmpv6")
     icmpv6_t             icmpv6;
-    @name(".inner_ethernet") 
+    @name(".inner_ethernet")
     ethernet_t           inner_ethernet;
-    @name(".inner_icmp") 
+    @name(".inner_icmp")
     icmp_t               inner_icmp;
-    @name(".inner_icmpv6") 
+    @name(".inner_icmpv6")
     icmpv6_t             inner_icmpv6;
-    @name(".inner_ipv4") 
+    @name(".inner_ipv4")
     ipv4_t               inner_ipv4;
-    @name(".inner_ipv6") 
+    @name(".inner_ipv6")
     ipv6_t               inner_ipv6;
-    @name(".inner_sctp") 
+    @name(".inner_sctp")
     sctp_t               inner_sctp;
-    @name(".inner_tcp") 
+    @name(".inner_tcp")
     tcp_t                inner_tcp;
-    @name(".inner_udp") 
+    @name(".inner_udp")
     udp_t                inner_udp;
-    @name(".input_port_hdr") 
+    @name(".input_port_hdr")
     input_port_hdr_t     input_port_hdr;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t               ipv4;
-    @name(".ipv6") 
+    @name(".ipv6")
     ipv6_t               ipv6;
-    @name(".mpls_bos") 
+    @name(".mpls_bos")
     mpls_t               mpls_bos;
-    @name(".nsh") 
+    @name(".nsh")
     nsh_t                nsh;
-    @name(".nsh_context") 
+    @name(".nsh_context")
     nsh_context_t        nsh_context;
-    @name(".nvgre") 
+    @name(".nvgre")
     nvgre_t              nvgre;
-    @name(".outer_ipv4") 
+    @name(".outer_ipv4")
     ipv4_t               outer_ipv4;
-    @name(".outer_ipv6") 
+    @name(".outer_ipv6")
     ipv6_t               outer_ipv6;
-    @name(".outer_udp") 
+    @name(".outer_udp")
     udp_t                outer_udp;
-    @name(".roce") 
+    @name(".roce")
     roce_header_t        roce;
-    @name(".roce_v2") 
+    @name(".roce_v2")
     roce_v2_header_t     roce_v2;
-    @name(".sctp") 
+    @name(".sctp")
     sctp_t               sctp;
-    @name(".snap_header") 
+    @name(".snap_header")
     snap_header_t        snap_header;
-    @name(".tcp") 
+    @name(".tcp")
     tcp_t                tcp;
-    @name(".udp") 
+    @name(".udp")
     udp_t                udp;
-    @name(".vxlan") 
+    @name(".vxlan")
     vxlan_t              vxlan;
-    @name(".mpls") 
+    @name(".mpls")
     mpls_t[3]            mpls;
-    @name(".vlan_tag_") 
+    @name(".vlan_tag_")
     vlan_tag_t[2]        vlan_tag_;
-    @name(".vlan_tag_3b") 
+    @name(".vlan_tag_3b")
     vlan_tag_3b_t[2]     vlan_tag_3b;
-    @name(".vlan_tag_5b") 
+    @name(".vlan_tag_5b")
     vlan_tag_5b_t[2]     vlan_tag_5b;
 }
 
@@ -730,7 +730,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 @name(".outer_bd_action_profile") action_profile(32w256) outer_bd_action_profile;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -852,11 +851,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            meta.ingress_metadata.ifindex: exact @name("ingress_metadata.ifindex") ;
-            hdr.vlan_tag_[0].isValid()   : exact @name("vlan_tag_[0].$valid$") ;
-            hdr.vlan_tag_[0].vid         : exact @name("vlan_tag_[0].vid") ;
-            hdr.vlan_tag_[1].isValid()   : exact @name("vlan_tag_[1].$valid$") ;
-            hdr.vlan_tag_[1].vid         : exact @name("vlan_tag_[1].vid") ;
+            meta.ingress_metadata.ifindex: exact @name("ingress_metadata.ifindex");
+            hdr.vlan_tag_[0].isValid()   : exact @name("vlan_tag_[0].$valid$");
+            hdr.vlan_tag_[0].vid         : exact @name("vlan_tag_[0].vid");
+            hdr.vlan_tag_[1].isValid()   : exact @name("vlan_tag_[1].$valid$");
+            hdr.vlan_tag_[1].vid         : exact @name("vlan_tag_[1].vid");
         }
         size = 32768;
         implementation = outer_bd_action_profile;
@@ -926,4 +925,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

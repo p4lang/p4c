@@ -158,32 +158,32 @@ control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metad
     }
     @name("ingress.custom_table") table custom_table_0 {
         key = {
-            hdr.custom._addr00    : exact @name("hdr.custom.addr0") ;
-            hdr.custom._addr11    : exact @name("hdr.custom.addr1") ;
-            hdr.custom._addr22    : exact @name("hdr.custom.addr2") ;
-            hdr.custom._e3        : exact @name("hdr.custom.e") ;
-            hdr.custom._e04       : exact @name("hdr.custom.e0") ;
-            hdr.custom._e15       : exact @name("hdr.custom.e1") ;
-            hdr.custom._e26       : exact @name("hdr.custom.e2") ;
-            hdr.custom._e007      : exact @name("hdr.custom.e00") ;
-            hdr.custom._e018      : exact @name("hdr.custom.e01") ;
-            hdr.custom._e029      : exact @name("hdr.custom.e02") ;
-            hdr.custom._e1010     : exact @name("hdr.custom.e10") ;
-            hdr.custom._e1111     : exact @name("hdr.custom.e11") ;
-            hdr.custom._e1212     : exact @name("hdr.custom.e12") ;
-            hdr.custom._e2013     : exact @name("hdr.custom.e20") ;
-            hdr.custom._e2114     : exact @name("hdr.custom.e21") ;
-            hdr.custom._e2215     : exact @name("hdr.custom.e22") ;
-            hdr.custom._e00116    : exact @name("hdr.custom.e001") ;
-            hdr.custom._e00217    : exact @name("hdr.custom.e002") ;
-            hdr.custom._e10118    : exact @name("hdr.custom.e101") ;
-            hdr.custom._e10219    : exact @name("hdr.custom.e102") ;
-            hdr.custom._e20120    : exact @name("hdr.custom.e201") ;
-            hdr.custom._e20221    : exact @name("hdr.custom.e202") ;
-            hdr.custom._e22022    : exact @name("hdr.custom.e220") ;
-            hdr.custom._e002001023: exact @name("hdr.custom.e0020010") ;
-            hdr.custom._e002002024: exact @name("hdr.custom.e0020020") ;
-            hdr.custom._s028      : exact @name("hdr.custom.s0") ;
+            hdr.custom._addr00    : exact @name("hdr.custom.addr0");
+            hdr.custom._addr11    : exact @name("hdr.custom.addr1");
+            hdr.custom._addr22    : exact @name("hdr.custom.addr2");
+            hdr.custom._e3        : exact @name("hdr.custom.e");
+            hdr.custom._e04       : exact @name("hdr.custom.e0");
+            hdr.custom._e15       : exact @name("hdr.custom.e1");
+            hdr.custom._e26       : exact @name("hdr.custom.e2");
+            hdr.custom._e007      : exact @name("hdr.custom.e00");
+            hdr.custom._e018      : exact @name("hdr.custom.e01");
+            hdr.custom._e029      : exact @name("hdr.custom.e02");
+            hdr.custom._e1010     : exact @name("hdr.custom.e10");
+            hdr.custom._e1111     : exact @name("hdr.custom.e11");
+            hdr.custom._e1212     : exact @name("hdr.custom.e12");
+            hdr.custom._e2013     : exact @name("hdr.custom.e20");
+            hdr.custom._e2114     : exact @name("hdr.custom.e21");
+            hdr.custom._e2215     : exact @name("hdr.custom.e22");
+            hdr.custom._e00116    : exact @name("hdr.custom.e001");
+            hdr.custom._e00217    : exact @name("hdr.custom.e002");
+            hdr.custom._e10118    : exact @name("hdr.custom.e101");
+            hdr.custom._e10219    : exact @name("hdr.custom.e102");
+            hdr.custom._e20120    : exact @name("hdr.custom.e201");
+            hdr.custom._e20221    : exact @name("hdr.custom.e202");
+            hdr.custom._e22022    : exact @name("hdr.custom.e220");
+            hdr.custom._e002001023: exact @name("hdr.custom.e0020010");
+            hdr.custom._e002002024: exact @name("hdr.custom.e0020020");
+            hdr.custom._s028      : exact @name("hdr.custom.s0");
         }
         actions = {
             set_output();
@@ -253,4 +253,3 @@ control computeChecksum(inout headers_t hdr, inout metadata_t meta) {
 }
 
 V1Switch<headers_t, metadata_t>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

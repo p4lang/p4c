@@ -58,4 +58,3 @@ control ProtDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(ProtParser(), ProtVerifyChecksum(), ProtIngress(), ProtEgress(), ProtComputeChecksum(), ProtDeparser()) main;
-

@@ -16,4 +16,3 @@ parser p0(packet_in p, out Header h) {
 parser proto(packet_in p, out Header h);
 package top(proto p);
 top(p0()) main;
-

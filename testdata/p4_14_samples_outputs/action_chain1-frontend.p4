@@ -20,9 +20,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t     data;
-    @name(".extra") 
+    @name(".extra")
     extra_t[4] extra;
 }
 
@@ -96,7 +96,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.extra[0].h: ternary @name("extra[0].h") ;
+            hdr.extra[0].h: ternary @name("extra[0].h");
         }
         default_action = NoAction_1();
     }
@@ -107,7 +107,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_2();
         }
         key = {
-            hdr.data.f2: ternary @name("data.f2") ;
+            hdr.data.f2: ternary @name("data.f2");
         }
         default_action = NoAction_2();
     }
@@ -118,7 +118,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            hdr.data.f2: ternary @name("data.f2") ;
+            hdr.data.f2: ternary @name("data.f2");
         }
         default_action = NoAction_3();
     }
@@ -129,7 +129,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_4();
         }
         key = {
-            hdr.data.f2: ternary @name("data.f2") ;
+            hdr.data.f2: ternary @name("data.f2");
         }
         default_action = NoAction_4();
     }
@@ -140,7 +140,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_5();
         }
         key = {
-            hdr.data.f1: ternary @name("data.f1") ;
+            hdr.data.f1: ternary @name("data.f1");
         }
         default_action = NoAction_5();
     }
@@ -185,4 +185,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

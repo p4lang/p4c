@@ -40,4 +40,3 @@ control deparser(packet_out b, in Header_t h) {
 }
 
 V1Switch(p(), c(), ingress(), egress(), c(), deparser()) main;
-

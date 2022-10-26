@@ -22,4 +22,3 @@ control c(out bit<1> arun) {
 control proto(out bit<1> run);
 package top(proto _p);
 top(c()) main;
-

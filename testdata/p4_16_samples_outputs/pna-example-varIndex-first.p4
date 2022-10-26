@@ -67,7 +67,7 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
     }
     table stub {
         key = {
-            hdrs.vlan_tag[meta.depth].vid: exact @name("hdrs.vlan_tag[meta.depth].vid") ;
+            hdrs.vlan_tag[meta.depth].vid: exact @name("hdrs.vlan_tag[meta.depth].vid");
         }
         actions = {
             execute();
@@ -91,4 +91,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

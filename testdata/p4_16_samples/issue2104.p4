@@ -1,5 +1,4 @@
 #include <core.p4>
-#include <v1model.p4>
 
 control c() {
     bit<16> F = 0;

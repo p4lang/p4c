@@ -1,6 +1,4 @@
 #include <core.p4>
-#define V1MODEL_VERSION 20180101
-#include <v1model.p4>
 
 header E {
     bit<16> e;
@@ -27,4 +25,3 @@ control ingress(inout Headers h) {
 control I(inout Headers h);
 package top(I i);
 top(ingress()) main;
-
