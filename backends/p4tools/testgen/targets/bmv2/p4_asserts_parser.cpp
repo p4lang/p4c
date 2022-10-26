@@ -140,9 +140,15 @@ const IR::Expression* makeConstant(Token input, const IR::Vector<IR::KeyElement>
             if (const auto* annotation = key->getAnnotation("name")) {
                 if (!annotation->body.empty()) {
                     annotationName = annotation->body[0]->text;
+                } else if (!annotation->expr.empty()) {
+                    annotationName = annotation->expr[0]->toString();
                 }
             }
             BUG_CHECK(annotationName.size() > 0, "Key does not have a name annotation.");
+            cstring separator = "\"";
+            if (annotationName.startsWith(separator) && annotationName.endsWith(separator)) {
+                annotationName = annotationName.substr(1, annotationName.size() - 2);
+            }
             auto annoSize = annotationName.size();
             auto tokenLength = inputStr.length();
             if (inputStr.find(annotationName, tokenLength - annoSize) == std::string::npos) {
