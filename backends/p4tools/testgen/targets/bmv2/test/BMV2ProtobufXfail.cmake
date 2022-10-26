@@ -72,12 +72,6 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-protobuf"
-  "Key does not have a name annotation."
-  bmv2_restrictions.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-protobuf"
   "Computations are not supported in update_checksum"
 )
 
