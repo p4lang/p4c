@@ -69,9 +69,9 @@ jobs:
         key: test-${{ runner.os }}-clang
         max-size: 1000M
 
-    - name: Build (Ubuntu Linux, Clang)
+    - name: Build (Ubuntu Linux, Clang, Sanitizers)
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg ENABLE_GMP=OFF --build-arg ENABLE_WERROR=OFF --build-arg COMPILE_WITH_CLANG=ON .
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg ENABLE_GMP=OFF --build-arg ENABLE_SANITIZERS=ON --build-arg ENABLE_WERROR=OFF --build-arg COMPILE_WITH_CLANG=ON .
         ./tools/export_ccache.sh
 
       # run with sudo (...) --privileged

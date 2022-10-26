@@ -32,6 +32,8 @@ ARG ENABLE_TEST_TOOLS=OFF
 ARG ENABLE_WERROR=ON
 # Compile with Clang compiler
 ARG COMPILE_WITH_CLANG=OFF
+# Compile with sanitizers (UBSan, ASan)
+ARG ENABLE_SANITIZERS=OFF
 
 # Delegate the build to tools/ci-build.
 COPY . /p4c/
