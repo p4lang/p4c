@@ -177,6 +177,30 @@ const IR::Expression* makeConstant(Token input, const IR::Vector<IR::KeyElement>
     return nullptr;
 }
 
+/// Determines the right side of the expression starting from the original position and returns a
+/// slice of tokens related to the right side and the index of the end of the right side.
+/// Returning the end index is necessary so that after moving from the end of the right side
+std::pair<std::vector<Token>, int> findRightPart(std::vector<Token> tokens, int index) {
+    int idx = index + 1;
+    int endIdx = 0;
+    bool flag = true;
+    while (flag) {
+        if (idx == (int)tokens.size() ||
+            tokens[idx].is_one_of(Token::Kind::Conjunction, Token::Kind::Disjunction,
+                                  Token::Kind::RightParen)) {
+            endIdx = idx;
+            flag = false;
+        }
+        idx++;
+    }
+
+    std::vector<Token> rightTokens;
+    for (int j = index + 1; j < endIdx; j++) {
+        rightTokens.push_back(tokens[j]);
+    }
+    return std::make_pair(rightTokens, idx);
+}
+
 /// Converts a vector of tokens into a single IR:Expression
 /// For example, at the input we have a vector of tokens:
 /// [key1(Text), ->(Implication), key2(Text), &&(Conjunction), key3(Text)] The result will be an
@@ -204,26 +228,9 @@ const IR::Expression* getIR(std::vector<Token> tokens,
                     leftL = clone;
                 }
             } else {
-                int idx = i + 1;
-                int endIdx = 0;
-                bool flag = true;
-                while (flag) {
-                    if (idx == (int)tokens.size() ||
-                        tokens[idx].is_one_of(Token::Kind::Conjunction, Token::Kind::Disjunction,
-                                              Token::Kind::RightParen)) {
-                        endIdx = idx;
-                        flag = false;
-                    }
-                    idx++;
-                }
-
-                std::vector<Token> rightTokens;
-                for (int j = i + 1; j < endIdx; j++) {
-                    rightTokens.push_back(tokens[j]);
-                }
-
-                rightL = getIR(rightTokens, keyElements);
-                i = idx;
+                auto rightPart = findRightPart(tokens, i);
+                rightL = getIR(rightPart.first, keyElements);
+                i = rightPart.second;
             }
 
             if (i - 2 > 0 && tokens[i - 2].is(Token::Kind::LNot)) {
@@ -262,27 +269,9 @@ const IR::Expression* getIR(std::vector<Token> tokens,
 
         } else if (token.is(Token::Kind::LNot)) {
             if (!tokens[i + 1].is_one_of(Token::Kind::Text, Token::Kind::Number)) {
-                const IR::Expression* exprLNot = nullptr;
-                int idx = i + 1;
-                int endIdx = 0;
-                bool flag = true;
-                while (flag) {
-                    if (idx == (int)tokens.size() ||
-                        tokens[idx].is_one_of(Token::Kind::Conjunction, Token::Kind::Disjunction,
-                                              Token::Kind::RightParen)) {
-                        endIdx = idx;
-                        flag = false;
-                    }
-                    idx++;
-                }
-
-                std::vector<Token> lNotTokens;
-                for (int j = i + 1; j < endIdx; j++) {
-                    lNotTokens.push_back(tokens[j]);
-                }
-
-                exprLNot = getIR(lNotTokens, keyElements);
-                i = idx;
+                auto rightPart = findRightPart(tokens, i);
+                const IR::Expression* exprLNot = getIR(rightPart.first, keyElements);
+                i = rightPart.second;
                 exprVec.push_back(new IR::LNot(exprLNot));
             }
         } else if (tokens[i].is(Token::Kind::Implication)) {
