@@ -31,4 +31,3 @@ control c(inout bit<8> v) {
 control e(inout bit<8> _v);
 package top(e _e);
 top(c()) main;
-

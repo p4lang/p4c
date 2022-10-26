@@ -23,4 +23,3 @@ control myc() {
 }
 
 p(myc()) main;
-

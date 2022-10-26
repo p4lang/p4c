@@ -28,4 +28,3 @@ parser p1(packet_in p, out Header h) {
 parser proto(packet_in p, out Header h);
 package top(proto _p);
 top(p1()) main;
-

@@ -24,4 +24,3 @@ parser E() {
 }
 
 S(E()) main;
-

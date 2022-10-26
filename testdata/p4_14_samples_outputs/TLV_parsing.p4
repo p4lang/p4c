@@ -58,22 +58,22 @@ header ipv4_option_NOP_t {
 }
 
 struct metadata {
-    @name(".my_metadata") 
+    @name(".my_metadata")
     my_metadata_t my_metadata;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t              ethernet;
-    @name(".ipv4_base") 
+    @name(".ipv4_base")
     ipv4_base_t             ipv4_base;
-    @name(".ipv4_option_security") 
+    @name(".ipv4_option_security")
     ipv4_option_security_t  ipv4_option_security;
-    @name(".ipv4_option_timestamp") 
+    @name(".ipv4_option_timestamp")
     ipv4_option_timestamp_t ipv4_option_timestamp;
-    @name(".ipv4_option_EOL") 
+    @name(".ipv4_option_EOL")
     ipv4_option_EOL_t[3]    ipv4_option_EOL;
-    @name(".ipv4_option_NOP") 
+    @name(".ipv4_option_NOP")
     ipv4_option_NOP_t[3]    ipv4_option_NOP;
 }
 
@@ -202,4 +202,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

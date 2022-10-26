@@ -16,4 +16,3 @@ control ingress(inout bit<8> a) {
 control i(inout bit<8> a);
 package top(i _i);
 top(ingress()) main;
-

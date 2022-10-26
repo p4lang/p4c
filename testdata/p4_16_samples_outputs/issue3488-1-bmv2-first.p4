@@ -96,7 +96,7 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     }
     table pre_tbl1 {
         key = {
-            hdr.ipv4.dst_addr: exact @name("hdr.ipv4.dst_addr") ;
+            hdr.ipv4.dst_addr: exact @name("hdr.ipv4.dst_addr");
         }
         actions = {
             action1();
@@ -111,7 +111,7 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     }
     table in_tbl2 {
         key = {
-            hdr.ipv4.protocol: exact @name("hdr.ipv4.protocol") ;
+            hdr.ipv4.protocol: exact @name("hdr.ipv4.protocol");
         }
         actions = {
             action4();
@@ -124,7 +124,7 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     }
     table post_tbl3 {
         key = {
-            hdr.ipv4.src_addr: exact @name("hdr.ipv4.src_addr") ;
+            hdr.ipv4.src_addr: exact @name("hdr.ipv4.src_addr");
         }
         actions = {
             action5();
@@ -156,4 +156,3 @@ control test_egress(inout headers_t hdr, inout metadata_t meta, inout standard_m
 }
 
 V1Switch<headers_t, metadata_t>(test_parser(), test_verify_checksum(), test_ingress(), test_egress(), test_compute_checksum(), test_deparser()) main;
-

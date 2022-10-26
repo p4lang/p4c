@@ -37,13 +37,13 @@ header myhdr_t {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name("ipv4")
     ipv4_t     ipv4;
-    @name("udp") 
+    @name("udp")
     udp_t      udp;
-    @name("myhdr") 
+    @name("myhdr")
     myhdr_t    myhdr;
 }
 
@@ -132,7 +132,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("egress.drop_tbl") table drop_tbl_0 {
         key = {
-            meta._local_metadata_set_drop1: exact @name("meta.ingress_metadata.set_drop") ;
+            meta._local_metadata_set_drop1: exact @name("meta.ingress_metadata.set_drop");
         }
         actions = {
             _drop();
@@ -168,4 +168,3 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 }
 
 V1Switch<headers, metadata>(TopParser(), verifyChecksum(), ingress(), egress(), computeChecksum(), TopDeparser()) main;
-

@@ -7,7 +7,7 @@ struct ht {
 }
 
 struct metadata {
-    @name(".md") 
+    @name(".md")
     ht md;
 }
 
@@ -59,4 +59,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

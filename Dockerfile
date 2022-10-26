@@ -30,6 +30,8 @@ ARG KERNEL_VERSIONS
 ARG ENABLE_TEST_TOOLS=OFF
 # Whether to treat warnings as errors.
 ARG ENABLE_WERROR=ON
+# Compile with Clang compiler
+ARG COMPILE_WITH_CLANG=OFF
 
 # Delegate the build to tools/ci-build.
 COPY . /p4c/

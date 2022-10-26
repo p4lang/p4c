@@ -35,4 +35,3 @@ parser P(packet_in p, out H[2] h) {
 parser Simple<T>(packet_in p, out T t);
 package top<T>(Simple<T> prs);
 top<H[2]>(P()) main;
-

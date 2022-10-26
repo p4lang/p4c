@@ -13,4 +13,3 @@ control MyC() {
 }
 
 S(MyC()) main;
-

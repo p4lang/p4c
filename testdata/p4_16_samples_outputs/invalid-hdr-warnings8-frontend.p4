@@ -32,12 +32,6 @@ control c(inout bit<32> x) {
     @name("c.us1") U[2] us1_6;
     @name("c.result") bit<32> result_0;
     @name("c.inout_action2") action inout_action2() {
-        u1_5 = u_0;
-        hs1_5 = hs_0;
-        us1_5 = us_0;
-        u1_2 = u1_5;
-        hs1_2 = hs1_5;
-        us1_2 = us1_5;
         u1_3.h1.a = 32w1;
         u1_3.h2.a = 32w1;
         hs1_3[0].a = 32w1;

@@ -11,7 +11,7 @@ struct Headers {
 control SubCtrl(bit<16> eth_type) {
     table dummy {
         key = {
-            eth_type: exact @name("dummy_key") ;
+            eth_type: exact @name("dummy_key");
         }
         actions = {
         }
@@ -31,4 +31,3 @@ control ingress(inout Headers h) {
 control Ingress(inout Headers hdr);
 package top(Ingress ig);
 top(ingress()) main;
-

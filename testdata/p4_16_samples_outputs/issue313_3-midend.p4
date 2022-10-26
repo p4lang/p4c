@@ -55,4 +55,3 @@ control ctrl(inout struct_t input, out bit<8> out1, out header_h out2) {
 control MyControl<S, H>(inout S i, out bit<8> o1, out H o2);
 package MyPackage<S, H>(MyControl<S, H> c);
 MyPackage<struct_t, header_h>(ctrl()) main;
-

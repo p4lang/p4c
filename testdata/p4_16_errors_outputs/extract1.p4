@@ -14,4 +14,3 @@ parser P(packet_in p, out H h) {
 parser Simple(packet_in p, out H h);
 package top(Simple prs);
 top(P()) main;
-

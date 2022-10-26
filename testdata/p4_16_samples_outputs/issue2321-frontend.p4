@@ -33,10 +33,8 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name("ingressImpl.y") bit<16> y_0;
     @name("ingressImpl.z") bit<16> z_0;
     @name("ingressImpl.x_0") bit<16> x_3;
-    @name("ingressImpl.hasReturned") bool hasReturned;
     @name("ingressImpl.retval") bit<16> retval;
     @name("ingressImpl.x_2") bit<16> x_4;
-    @name("ingressImpl.hasReturned") bool hasReturned_1;
     @name("ingressImpl.retval") bit<16> retval_1;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -51,16 +49,12 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     @name("ingressImpl.a2") action a2() {
         x_3 = hdr.ethernet.etherType;
-        hasReturned = false;
         x_3 = x_3 | 16w7;
-        hasReturned = true;
         retval = x_3 >> 1;
         hdr.ethernet.etherType = x_3;
         y_0 = retval;
         x_4 = hdr.ethernet.etherType;
-        hasReturned_1 = false;
         x_4 = x_4 | 16w7;
-        hasReturned_1 = true;
         retval_1 = x_4 >> 1;
         hdr.ethernet.etherType = x_4;
         z_0 = retval_1;
@@ -68,7 +62,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     @name("ingressImpl.t1") table t1_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
         }
         actions = {
             a1();
@@ -100,4 +94,3 @@ control deparserImpl(packet_out packet, in headers_t hdr) {
 }
 
 V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
-

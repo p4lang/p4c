@@ -21,14 +21,12 @@ struct Meta {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bit<32> retval;
     @name("ingress.tmp1") H[2] tmp1_0;
     @name("ingress.tmp2") H[2] tmp2_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.simple_action") action simple_action() {
-        hasReturned = false;
         tmp1_0[0].setInvalid();
         tmp1_0[1].setInvalid();
         tmp2_0[0].setInvalid();
@@ -36,13 +34,12 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         if (tmp2_0[0].a <= 32w3) {
             tmp1_0[0] = tmp2_0[1];
         }
-        hasReturned = true;
         retval = tmp1_0[0].a;
         h.h.a = retval;
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            sm.egress_spec: exact @name("key") ;
+            sm.egress_spec: exact @name("key");
         }
         actions = {
             simple_action();
@@ -85,4 +82,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

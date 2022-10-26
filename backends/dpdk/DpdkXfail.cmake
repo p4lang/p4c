@@ -104,4 +104,9 @@ p4c_add_xfail_reason("dpdk"
 p4c_add_xfail_reason("dpdk"
   "add_entry action cannot be default action"
    testdata/p4_16_samples/pna-example-miss.p4
+   )
+
+p4c_add_xfail_reason("dpdk"
+  "must be a compile-time constant"
+  testdata/p4_16_samples/psa-example-mask-range-err.p4
   )

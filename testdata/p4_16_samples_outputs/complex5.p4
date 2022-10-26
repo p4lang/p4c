@@ -12,4 +12,3 @@ control c(inout bit<32> r) {
 control simple(inout bit<32> r);
 package top(simple e);
 top(c()) main;
-

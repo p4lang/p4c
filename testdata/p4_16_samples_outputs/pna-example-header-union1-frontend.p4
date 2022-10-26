@@ -54,9 +54,9 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
     }
     @name("ingress.debug_hdr") table debug_hdr_0 {
         key = {
-            hdr.base.t           : exact @name("hdr.base.t") ;
-            hdr.u.short.isValid(): exact @name("hdr.u.short.$valid$") ;
-            hdr.u.byte.isValid() : exact @name("hdr.u.byte.$valid$") ;
+            hdr.base.t           : exact @name("hdr.base.t");
+            hdr.u.short.isValid(): exact @name("hdr.u.short.$valid$");
+            hdr.u.byte.isValid() : exact @name("hdr.u.byte.$valid$");
         }
         actions = {
             NoAction_1();
@@ -74,7 +74,6 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
         if (hasReturned) {
             ;
         } else {
-            hasReturned = true;
             retval = false;
         }
         tmp = retval;
@@ -101,4 +100,3 @@ control PreControlImpl(in headers hdr, inout metadata meta, in pna_pre_input_met
 }
 
 PNA_NIC<headers, metadata, headers, metadata>(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;
-

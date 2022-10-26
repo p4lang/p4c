@@ -21,7 +21,6 @@ control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
 }
 
 control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    @name("EgressI.hasReturned") bool hasReturned;
     @name("EgressI.a") action a() {
     }
     @name("EgressI.t") table t_0 {
@@ -31,10 +30,8 @@ control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
         default_action = a();
     }
     apply {
-        hasReturned = false;
         switch (t_0.apply().action_run) {
             a: {
-                hasReturned = true;
             }
             default: {
             }
@@ -58,4 +55,3 @@ control DeparserI(packet_out b, in H hdr) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

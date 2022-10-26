@@ -32,11 +32,11 @@ struct metadata {
 }
 
 struct headers {
-    @name(".h1") 
+    @name(".h1")
     h1_t    h1;
-    @name(".h3") 
+    @name(".h3")
     h3_t    h3;
-    @name(".h2") 
+    @name(".h2")
     h2_t[5] h2;
 }
 
@@ -1150,4 +1150,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

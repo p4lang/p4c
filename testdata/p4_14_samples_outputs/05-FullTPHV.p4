@@ -289,12 +289,12 @@ header h_t {
 }
 
 struct metadata {
-    @name(".m") 
+    @name(".m")
     m_t m;
 }
 
 struct headers {
-    @name(".h") 
+    @name(".h")
     h_t h;
 }
 
@@ -830,4 +830,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

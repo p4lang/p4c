@@ -30,7 +30,7 @@ control ingress(inout Headers h) {
     }
     table simple_table {
         key = {
-            h.eth_hdr.eth_type: exact @name("tyhSfv") ;
+            h.eth_hdr.eth_type: exact @name("tyhSfv");
         }
         actions = {
             do_action();
@@ -53,4 +53,3 @@ parser Parser(packet_in b, out Headers hdr);
 control Ingress(inout Headers hdr);
 package top(Parser p, Ingress ig);
 top(p(), ingress()) main;
-

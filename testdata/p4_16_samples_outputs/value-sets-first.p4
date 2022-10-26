@@ -53,4 +53,3 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 parser proto<T>(packet_in p, out T h);
 package top<T>(proto<T> _p);
 top<Parsed_packet>(TopParser()) main;
-

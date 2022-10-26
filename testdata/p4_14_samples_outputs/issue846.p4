@@ -15,12 +15,12 @@ header hdr0_t {
 }
 
 struct metadata {
-    @name(".meta") 
+    @name(".meta")
     meta_t meta;
 }
 
 struct headers {
-    @name(".hdr0") 
+    @name(".hdr0")
     hdr0_t hdr0;
 }
 
@@ -126,4 +126,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

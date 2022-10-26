@@ -222,6 +222,7 @@ class TypeInference : public Transform {
     const IR::Node* preorder(IR::Declaration_Instance* decl) override;
     // check invariants for entire list before checking the entries
     const IR::Node* preorder(IR::EntriesList* el) override;
+    const IR::Node* preorder(IR::Type_SerEnum* type) override;
 
     const IR::Node* postorder(IR::Declaration_MatchKind* decl) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
@@ -239,7 +240,6 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Type_Base* type) override;
     const IR::Node* postorder(IR::Type_Var* type) override;
     const IR::Node* postorder(IR::Type_Enum* type) override;
-    const IR::Node* postorder(IR::Type_SerEnum* type) override;
     const IR::Node* postorder(IR::Type_Extern* type) override;
     const IR::Node* postorder(IR::StructField* field) override;
     const IR::Node* postorder(IR::Type_Header* type) override;

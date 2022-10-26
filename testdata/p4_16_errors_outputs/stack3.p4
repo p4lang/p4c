@@ -21,4 +21,3 @@ parser Simple();
 control Simpler();
 package top(Simple par, Simpler ctr);
 top(p(), c(32w1)) main;
-

@@ -65,8 +65,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h.l = 8w1;
         h.h.m = 8w1;
         h.b.c = 8w1;
-        h.b.c = 8w1;
-        h.b.d = 8w1;
         h.b.d = 8w1;
     }
     @hidden table tbl_act {
@@ -104,4 +102,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-
