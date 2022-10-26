@@ -81,15 +81,12 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     @name("MainControlImpl.user_meta") main_metadata_t user_meta_2;
     @name("MainControlImpl.hdr_0") headers_t hdr_3;
     @name("MainControlImpl.user_meta_0") main_metadata_t user_meta_3;
-    @name("MainControlImpl.hasReturned") bool hasReturned;
     @name("MainControlImpl.retval") bit<1> retval;
     @name(".do_range_checks_0") action do_range_checks_1(@name("min1") bit<16> min1_2, @name("max1") bit<16> max1_2) {
         hdr_2 = hdr;
         user_meta_2 = user_meta;
         hdr_3 = hdr_2;
         user_meta_3 = user_meta_2;
-        hasReturned = false;
-        hasReturned = true;
         retval = (bit<1>)(min1_2 <= hdr_3.tcp.srcPort && hdr_3.tcp.srcPort <= max1_2);
         hdr_2 = hdr_3;
         user_meta_2 = user_meta_3;
