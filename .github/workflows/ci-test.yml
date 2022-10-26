@@ -18,8 +18,6 @@ jobs:
       fail-fast: false
       matrix:
         unified: [ON, OFF]
-        exclude:
-          - unified: OFF
     runs-on: ubuntu-latest
     env:
       CTEST_PARALLEL_LEVEL: 4
@@ -36,9 +34,6 @@ jobs:
 
     - name: Build (Ubuntu Linux, GCC)
       run: |
-        # To flush out issues with unified vs. non-unified builds,
-        # do a non-unified build before continuing with the rest,
-        # which produces a unified build.
         docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} .
         ./tools/export_ccache.sh
 
@@ -69,7 +64,7 @@ jobs:
 
     - name: Build (Ubuntu Linux, Clang)
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg ENABLE_GMP=OFF --build-arg ENABLE_WERROR=OFF --build-arg COMPILE_WITH_CLANG=ON .
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg ENABLE_WERROR=OFF --build-arg COMPILE_WITH_CLANG=ON .
         ./tools/export_ccache.sh
 
       # run with sudo (...) --privileged
@@ -82,10 +77,6 @@ jobs:
   build-fedora-linux:
     strategy:
       fail-fast: false
-      matrix:
-        unified: [ON, OFF]
-        exclude:
-          - unified: OFF
     # This job runs in Fedora container that runs in Ubuntu VM.
     runs-on: ubuntu-latest
     container:
@@ -112,24 +103,19 @@ jobs:
 
     - name: Build p4c (Fedora Linux)
       run: |
-        ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=${{ matrix.unified }}
-        make -j2 -C build
+        ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=ON
+         make -j2 -C build
 
 
     - name: Run p4c tests (Fedora Linux)
       run: ctest --output-on-failure --schedule-random
       working-directory: ./build
-      if: matrix.unified == 'ON'
 
   # Build and test p4c on MacOS 11
   build-mac-os:
     strategy:
       fail-fast: false
-      matrix:
-        unified: [ON, OFF]
-        exclude:
-          - unified: OFF
-    runs-on: macos-10.15
+    runs-on: macos-11
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:
@@ -150,12 +136,8 @@ jobs:
 
     - name: Build (MacOS)
       run: |
-          # To flush out issues with unified vs. non-unified builds,
-          # do a non-unified build before continuing with the rest,
-          # which produces a unified build.
-          ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} && cd build && make -j2
+          ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=ON && cd build && make -j2
 
     - name: Run tests (MacOS)
       run: |
         ctest --output-on-failure -j 2 --schedule-random -LE "bpf$"
-      if: matrix.unified == 'ON'
