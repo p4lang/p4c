@@ -34,7 +34,6 @@ class MissingIdAssigner : public Transform {
     const IR::P4Program* preorder(IR::P4Program* program) override;
     const IR::Property* postorder(IR::Property* property) override;
     const IR::P4Table* postorder(IR::P4Table* table) override;
-    // const IR::Type_Extern* postorder(IR::Type_Extern* ext) override;
     const IR::Type_Header* postorder(IR::Type_Header* hdr) override;
     const IR::P4ValueSet* postorder(IR::P4ValueSet* valueSet) override;
     const IR::P4Action* postorder(IR::P4Action* action) override;
@@ -56,9 +55,8 @@ class MissingIdAssigner : public Transform {
 /// computed ID to the node.
 class AddMissingIdAnnotations final : public PassManager {
  public:
-    AddMissingIdAnnotations(
-        ReferenceMap* refMap, TypeMap* typeMap,
-        const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface* archBuilder);
+    AddMissingIdAnnotations(ReferenceMap* refMap, TypeMap* typeMap,
+                            const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface* archBuilder);
 };
 
 }  // namespace P4
