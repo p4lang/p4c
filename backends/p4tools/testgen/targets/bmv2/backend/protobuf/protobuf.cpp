@@ -17,7 +17,7 @@
 #include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
-#include "control-plane/p4RuntimeArchHandler.h"
+#include "control-plane/p4RuntimeArchStandard.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
@@ -36,6 +36,7 @@ namespace Bmv2 {
 
 using P4::ControlPlaneAPI::p4rt_id_t;
 using P4::ControlPlaneAPI::P4RuntimeSymbolType;
+using P4::ControlPlaneAPI::Standard::SymbolType;
 
 /// Wrapper helper function that automatically inserts separators for hex strings.
 std::string formatHexExprWithSep(const IR::Expression* expr) {
@@ -144,7 +145,7 @@ inja::json Protobuf::getControlPlane(const TestSpec* testSpec) {
         const auto* const tblConfig = testObject.second->checkedTo<TableConfig>();
         const auto* table = tblConfig->getTable();
 
-        auto p4RuntimeId = externalId(P4RuntimeSymbolType::TABLE(), table);
+        auto p4RuntimeId = externalId(SymbolType::TABLE(), table);
         BUG_CHECK(p4RuntimeId, "Id not present for table %1%. Can not generate test.", table);
         tblJson["id"] = *p4RuntimeId;
 
@@ -157,7 +158,7 @@ inja::json Protobuf::getControlPlane(const TestSpec* testSpec) {
             const auto* actionDecl = actionCall->getAction();
             const auto* actionArgs = actionCall->getArgs();
             rule["action_name"] = actionCall->getActionName().c_str();
-            auto p4RuntimeId = externalId(P4RuntimeSymbolType::ACTION(), actionDecl);
+            auto p4RuntimeId = externalId(SymbolType::ACTION(), actionDecl);
             BUG_CHECK(p4RuntimeId, "Id not present for action %1%. Can not generate test.",
                       actionDecl);
             rule["action_id"] = *p4RuntimeId;
@@ -201,7 +202,8 @@ inja::json Protobuf::getControlPlane(const TestSpec* testSpec) {
         const auto* const actionProfile = testObject.second->checkedTo<Bmv2_V1ModelActionProfile>();
         const auto* actions = actionProfile->getActions();
         inja::json j;
-        j["profile"] = actionProfile->getProfileDecl()->controlPlaneName();
+        const auto* profileDecl = actionProfile->getProfileDecl();
+        j["profile"] = profileDecl->controlPlaneName();
         j["actions"] = inja::json::array();
         for (size_t idx = 0; idx < actions->size(); ++idx) {
             const auto& action = actions->at(idx);
@@ -415,6 +417,22 @@ entities : [
 ## endfor
       # Action {{rule.action_name}}
       action {
+## if existsIn(table, '"has_ap"')
+        action_profile_action_set {
+          action_profile_actions {
+            action {
+              action_id: {{rule.action_id}}
+## for act_param in rule.rules.act_args
+              # Param {{act_param.param}}
+              params {
+                param_id: {{act_param.id}}
+                value: "{{act_param.value}}"
+              }
+## endfor
+            }
+          }
+        }
+## else
         action {
           action_id: {{rule.action_id}}
 ## for act_param in rule.rules.act_args
@@ -425,6 +443,7 @@ entities : [
           }
 ## endfor
         }
+## endif
       }
 ## endfor
     }
