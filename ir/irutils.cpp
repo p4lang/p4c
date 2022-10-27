@@ -6,6 +6,8 @@
 #include <ostream>
 #include <string>
 #include <tuple>
+#include <typeindex>
+#include <typeinfo>
 #include <vector>
 
 #include "lib/safe_vector.h"
@@ -32,20 +34,16 @@ const Type_Bits* IRUtils::getBitTypeToFit(int value) {
  * ============================================================================================= */
 
 const Constant* IRUtils::getConstant(const Type* type, big_int v) {
-    // Do not cache varbits.
-    if (const auto* varbit = type->to<Extracted_Varbits>()) {
-        return new Constant(varbit, v);
-    }
     // Only cache bits with width lower than 16 bit to restrict the size of the cache.
     const auto* tb = type->to<Type_Bits>();
     if (type->width_bits() > 16 || tb == nullptr) {
         return new Constant(type, v);
     }
     // Constants are interned. Keys in the intern map are pairs of types and values.
-    using key_t = std::tuple<int, bool, big_int>;
+    using key_t = std::tuple<int, std::type_index, bool, big_int>;
     static std::map<key_t, const Constant*> constants;
 
-    auto*& result = constants[{tb->width_bits(), tb->isSigned, v}];
+    auto*& result = constants[{tb->width_bits(), typeid(type), tb->isSigned, v}];
     if (result == nullptr) {
         result = new Constant(tb, v);
     }
