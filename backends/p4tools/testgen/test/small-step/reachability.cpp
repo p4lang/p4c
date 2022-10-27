@@ -47,7 +47,7 @@ ReturnedInfo loadExampleForReachability(const char* curFile) {
     AutoCompileContext autoP4TestContext(new P4ReachabilityContext());
     auto& options = P4ReachabilityContext::get().options();
     const char* argv = "./p4testgen";
-    options.process(1, (char* const*)&argv);
+    options.process(1, const_cast<char* const*>(&argv));
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     std::string includeDir = std::string(buildPath) + std::string("p4include");
     auto* originalEnv = getenv("P4C_16_INCLUDE_PATH");
@@ -175,7 +175,7 @@ const IR::Node* getFromHash(const P4Tools::ReachabilityHashType& hash, const cha
 
 TEST_F(P4CReachability, testTableAndActions) {
     auto result = loadExampleForReachability(
-        "../../backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_hit.p4)");
+        "../../backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_hit.p4");
     const auto* program = get<0>(result);
     ASSERT_TRUE(program);
     const auto* dcg = std::get<1>(result);
