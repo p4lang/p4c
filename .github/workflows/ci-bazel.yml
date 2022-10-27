@@ -38,8 +38,8 @@ jobs:
         chmod +x $BAZEL
         sudo mv $BAZEL /usr/local/bin/bazel
 
-    - name: Install Flex, Bison, and GMP
-      run: sudo apt-get update && sudo apt-get install bison flex libfl-dev libgmp-dev
+    - name: Install Flex and Bison
+      run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
 
     - name: Build p4c
       run: bazel build //... --verbose_failures --distinct_host_configuration=false
@@ -70,8 +70,8 @@ jobs:
         chmod +x $BAZEL
         sudo mv $BAZEL /usr/local/bin/bazel
 
-    - name: Install Flex, Bison, and GMP
-      run: sudo apt-get update && sudo apt-get install bison flex libfl-dev libgmp-dev
+    - name: Install Flex and Bison
+      run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
 
     - name: Build bazel/example
       run: cd ./bazel/example && bazel build //... --verbose_failures --distinct_host_configuration=false
