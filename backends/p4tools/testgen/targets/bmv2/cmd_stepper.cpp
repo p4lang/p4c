@@ -10,8 +10,8 @@
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/ir.h"
 #include "ir/ir.h"
+#include "ir/irutils.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
@@ -72,27 +72,27 @@ void BMv2_V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState* nextSta
         blockIdx++;
     }
 
-    const auto* nineBitType = IRUtils::getBitType(9);
-    const auto* oneBitType = IRUtils::getBitType(1);
+    const auto* nineBitType = IR::IRUtils::getBitType(9);
+    const auto* oneBitType = IR::IRUtils::getBitType(1);
     nextState->set(programInfo.getTargetInputPortVar(),
                    nextState->createZombieConst(nineBitType, "*bmv2_ingress_port"));
     // BMv2 implicitly sets the output port to 0.
-    nextState->set(programInfo.getTargetOutputPortVar(), IRUtils::getConstant(nineBitType, 0));
+    nextState->set(programInfo.getTargetOutputPortVar(), IR::IRUtils::getConstant(nineBitType, 0));
     // Initialize parser_err with no error.
     const auto* parserErrVar =
         new IR::Member(programInfo.getParserErrorType(),
                        new IR::PathExpression("*standard_metadata"), "parser_error");
-    nextState->set(parserErrVar, IRUtils::getConstant(parserErrVar->type, 0));
+    nextState->set(parserErrVar, IR::IRUtils::getConstant(parserErrVar->type, 0));
     // Initialize checksum_error with no error.
     const auto* checksumErrVar =
         new IR::Member(oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
-    nextState->set(checksumErrVar, IRUtils::getConstant(checksumErrVar->type, 0));
+    nextState->set(checksumErrVar, IR::IRUtils::getConstant(checksumErrVar->type, 0));
     // The packet size meta data is the testgen packet length variable divided by 8.
     const auto* pktSizeType = ExecutionState::getPacketSizeVarType();
     const auto* packetSizeVar =
         new IR::Member(pktSizeType, new IR::PathExpression("*standard_metadata"), "packet_length");
     const auto* packetSizeConst = new IR::Div(pktSizeType, ExecutionState::getInputPacketSizeVar(),
-                                              IRUtils::getConstant(pktSizeType, 8));
+                                              IR::IRUtils::getConstant(pktSizeType, 8));
     nextState->set(packetSizeVar, packetSizeConst);
 }
 
@@ -128,7 +128,7 @@ std::map<Continuation::Exception, Continuation> BMv2_V1ModelCmdStepper::getExcep
             result.emplace(Continuation::Exception::Reject, Continuation::Body({}));
             result.emplace(Continuation::Exception::PacketTooShort,
                            Continuation::Body({new IR::AssignmentStatement(
-                               errVar, IRUtils::getConstant(errVar->type, 1))}));
+                               errVar, IR::IRUtils::getConstant(errVar->type, 1))}));
             // NoMatch will transition to the next block.
             result.emplace(Continuation::Exception::NoMatch, Continuation::Body({}));
             break;

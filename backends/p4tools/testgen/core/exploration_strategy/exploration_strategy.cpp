@@ -10,12 +10,12 @@
 #include <boost/none.hpp>
 #include <boost/variant/get.hpp>
 
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/timer.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
+#include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
@@ -31,18 +31,18 @@ namespace P4Tools {
 namespace P4Testgen {
 
 ExplorationStrategy::Branch::Branch(gsl::not_null<ExecutionState*> nextState)
-    : constraint(IRUtils::getBoolLiteral(true)), nextState(std::move(nextState)) {}
+    : constraint(IR::IRUtils::getBoolLiteral(true)), nextState(std::move(nextState)) {}
 
 ExplorationStrategy::Branch::Branch(boost::optional<const Constraint*> c,
                                     const ExecutionState& prevState,
                                     gsl::not_null<ExecutionState*> nextState)
-    : constraint(IRUtils::getBoolLiteral(true)), nextState(nextState) {
+    : constraint(IR::IRUtils::getBoolLiteral(true)), nextState(nextState) {
     if (c) {
         // Evaluate the branch constraint in the current state of symbolic environment.
         // Substitutes all variables to their symbolic value (expression on the program's initial
         // state).
         constraint = prevState.getSymbolicEnv().subst(*c);
-        constraint = IRUtils::optimizeExpression(constraint);
+        constraint = IR::IRUtils::optimizeExpression(constraint);
         // Append the evaluated and optimized constraint to the next execution state's list of
         // path constraints.
         nextState->pushPathConstraint(constraint);
@@ -65,7 +65,7 @@ ExplorationStrategy::StepResult ExplorationStrategy::step(ExecutionState& state)
 
 uint64_t ExplorationStrategy::selectBranch(const std::vector<Branch>& branches) {
     // Pick a branch at random.
-    return TestgenUtils::getRandInt(branches.size() - 1);
+    return Utils::getRandInt(branches.size() - 1);
 }
 
 bool ExplorationStrategy::handleTerminalState(const Callback& callback,

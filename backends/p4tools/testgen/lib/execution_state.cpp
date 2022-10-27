@@ -11,8 +11,9 @@
 #include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/compiler/hs_index_simplify.h"
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/taint.h"
+#include "backends/p4tools/common/lib/util.h"
+#include "ir/irutils.h"
 #include "lib/log.h"
 #include "lib/null.h"
 
@@ -44,8 +45,8 @@ ExecutionState::ExecutionState(const IR::P4Program* program)
     // Insert the default zombies of the execution state.
     // This also makes the zombies present in the state explicit.
     allocatedZombies.insert(getInputPacketSizeVar());
-    env.set(&inputPacketLabel, IRUtils::getConstant(IRUtils::getBitType(0), 0));
-    env.set(&packetBufferLabel, IRUtils::getConstant(IRUtils::getBitType(0), 0));
+    env.set(&inputPacketLabel, IR::IRUtils::getConstant(IR::IRUtils::getBitType(0), 0));
+    env.set(&packetBufferLabel, IR::IRUtils::getConstant(IR::IRUtils::getBitType(0), 0));
     // We also add the taint property and set it to false.
     setProperty("inUndefinedState", false);
     // Drop is initialized to false, too.
@@ -80,14 +81,14 @@ boost::optional<const Continuation::Command> ExecutionState::getNextCmd() const 
 
 const IR::Expression* ExecutionState::get(const StateVariable& var) const {
     const auto* expr = env.get(var);
-    if (var->expr->type->is<IR::Type_Header>() && var->member != IRUtils::Valid) {
+    if (var->expr->type->is<IR::Type_Header>() && var->member != Utils::Valid) {
         // If we are setting the member of a header, we need to check whether the
         // header is valid.
         // If the header is invalid, the get returns a tainted expression.
         // The member could have any value.
         // TODO: This is a convoluted check. We should be using runtime objects instead of flat
         // assignments.
-        auto validity = IRUtils::getHeaderValidity(var->expr);
+        auto validity = Utils::getHeaderValidity(var->expr);
         const auto* validVar = env.get(validity);
         // The validity bit could already be tainted or the validity bit is false.
         // Both outcomes lead to a tainted write.
@@ -96,7 +97,7 @@ const IR::Expression* ExecutionState::get(const StateVariable& var) const {
             isTainted = !validBool->value;
         }
         if (isTainted) {
-            return IRUtils::getTaintExpression(expr->type);
+            return Utils::getTaintExpression(expr->type);
         }
     }
     return expr;
@@ -117,7 +118,7 @@ bool ExecutionState::exists(const StateVariable& var) const { return env.exists(
 void ExecutionState::set(const StateVariable& var, const IR::Expression* value) {
     if (getProperty<bool>("inUndefinedState")) {
         // If we are in an undefined state, the variable we set is tainted.
-        value = IRUtils::getTaintExpression(value->type);
+        value = Utils::getTaintExpression(value->type);
     }
     env.set(var, value);
 }
@@ -309,7 +310,7 @@ void ExecutionState::pushBranchDecision(uint64_t bIdx) { selectedBranches.push_b
 const IR::Type_Bits* ExecutionState::getPacketSizeVarType() { return &packetSizeVarType; }
 
 const StateVariable& ExecutionState::getInputPacketSizeVar() {
-    return IRUtils::getZombieConst(getPacketSizeVarType(), 0, "*packetLen_bits");
+    return Utils::getZombieConst(getPacketSizeVarType(), 0, "*packetLen_bits");
 }
 
 int ExecutionState::getMaxPacketLength_bits() {
@@ -326,7 +327,7 @@ int ExecutionState::getInputPacketSize() const {
 void ExecutionState::appendToInputPacket(const IR::Expression* expr) {
     const auto* inputPkt = getInputPacket();
     const auto* width =
-        IRUtils::getBitType(expr->type->width_bits() + inputPkt->type->width_bits());
+        IR::IRUtils::getBitType(expr->type->width_bits() + inputPkt->type->width_bits());
     const auto* concat = new IR::Concat(width, inputPkt, expr);
     env.set(&inputPacketLabel, concat);
 }
@@ -334,7 +335,7 @@ void ExecutionState::appendToInputPacket(const IR::Expression* expr) {
 void ExecutionState::prependToInputPacket(const IR::Expression* expr) {
     const auto* inputPkt = getInputPacket();
     const auto* width =
-        IRUtils::getBitType(expr->type->width_bits() + inputPkt->type->width_bits());
+        IR::IRUtils::getBitType(expr->type->width_bits() + inputPkt->type->width_bits());
     const auto* concat = new IR::Concat(width, expr, inputPkt);
     env.set(&inputPacketLabel, concat);
 }
@@ -357,19 +358,19 @@ const IR::Expression* ExecutionState::peekPacketBuffer(int amount) {
     auto bufferSize = buffer->type->width_bits();
 
     auto diff = amount - bufferSize;
-    const auto* amountType = IRUtils::getBitType(amount);
+    const auto* amountType = IR::IRUtils::getBitType(amount);
     // We are running off the available buffer, we need to generate new packet content.
     if (diff > 0) {
         // We need to enlarge the input packet by the amount we are exceeding the buffer.
         // TODO: How should we perform accounting here?
         const IR::Expression* newVar =
-            createZombieConst(IRUtils::getBitType(diff), "pktVar", allocatedZombies.size());
+            createZombieConst(IR::IRUtils::getBitType(diff), "pktVar", allocatedZombies.size());
         appendToInputPacket(newVar);
         // If the buffer was not empty, append the data we have consumed to the newly generated
         // content and reset the buffer.
         if (bufferSize > 0) {
             auto* slice = new IR::Slice(buffer, bufferSize - 1, 0);
-            slice->type = IRUtils::getBitType(amount);
+            slice->type = IR::IRUtils::getBitType(amount);
             newVar = new IR::Concat(amountType, slice, newVar);
             resetPacketBuffer();
         }
@@ -400,19 +401,19 @@ const IR::Expression* ExecutionState::slicePacketBuffer(int amount) {
 
     // Compute the difference between what we have in the buffer and what we want to slice.
     auto diff = amount - bufferSize;
-    const auto* amountType = IRUtils::getBitType(amount);
+    const auto* amountType = IR::IRUtils::getBitType(amount);
     // We are running off the available buffer, we need to generate new packet content.
     if (diff > 0) {
         // We need to enlarge the input packet by the amount we are exceeding the buffer.
         // TODO: How should we perform accounting here?
         const IR::Expression* newVar =
-            createZombieConst(IRUtils::getBitType(diff), "pktVar", allocatedZombies.size());
+            createZombieConst(IR::IRUtils::getBitType(diff), "pktVar", allocatedZombies.size());
         appendToInputPacket(newVar);
         // If the buffer was not empty, append the data we have consumed to the newly generated
         // content and reset the buffer.
         if (bufferSize > 0) {
             auto* slice = new IR::Slice(buffer, bufferSize - 1, 0);
-            slice->type = IRUtils::getBitType(amount);
+            slice->type = IR::IRUtils::getBitType(amount);
             newVar = new IR::Concat(amountType, slice, newVar);
             resetPacketBuffer();
         }
@@ -426,7 +427,7 @@ const IR::Expression* ExecutionState::slicePacketBuffer(int amount) {
     // If the buffer is larger, update the buffer with its remainder.
     if (diff < 0) {
         auto* remainder = new IR::Slice(buffer, bufferSize - amount - 1, 0);
-        remainder->type = IRUtils::getBitType(bufferSize - amount);
+        remainder->type = IR::IRUtils::getBitType(bufferSize - amount);
         env.set(&packetBufferLabel, remainder);
     }
     // The amount we slice is equal to what is in the buffer. Just set the buffer to zero.
@@ -438,31 +439,34 @@ const IR::Expression* ExecutionState::slicePacketBuffer(int amount) {
 
 void ExecutionState::appendToPacketBuffer(const IR::Expression* expr) {
     const auto* buffer = getPacketBuffer();
-    const auto* width = IRUtils::getBitType(expr->type->width_bits() + buffer->type->width_bits());
+    const auto* width =
+        IR::IRUtils::getBitType(expr->type->width_bits() + buffer->type->width_bits());
     const auto* concat = new IR::Concat(width, buffer, expr);
     env.set(&packetBufferLabel, concat);
 }
 
 void ExecutionState::prependToPacketBuffer(const IR::Expression* expr) {
     const auto* buffer = getPacketBuffer();
-    const auto* width = IRUtils::getBitType(expr->type->width_bits() + buffer->type->width_bits());
+    const auto* width =
+        IR::IRUtils::getBitType(expr->type->width_bits() + buffer->type->width_bits());
     const auto* concat = new IR::Concat(width, expr, buffer);
     env.set(&packetBufferLabel, concat);
 }
 
 void ExecutionState::resetPacketBuffer() {
-    env.set(&packetBufferLabel, IRUtils::getConstant(IRUtils::getBitType(0), 0));
+    env.set(&packetBufferLabel, IR::IRUtils::getConstant(IR::IRUtils::getBitType(0), 0));
 }
 
 const IR::Expression* ExecutionState::getEmitBuffer() const { return env.get(&emitBufferLabel); }
 
 void ExecutionState::resetEmitBuffer() {
-    env.set(&emitBufferLabel, IRUtils::getConstant(IRUtils::getBitType(0), 0));
+    env.set(&emitBufferLabel, IR::IRUtils::getConstant(IR::IRUtils::getBitType(0), 0));
 }
 
 void ExecutionState::appendToEmitBuffer(const IR::Expression* expr) {
     const auto* buffer = getEmitBuffer();
-    const auto* width = IRUtils::getBitType(expr->type->width_bits() + buffer->type->width_bits());
+    const auto* width =
+        IR::IRUtils::getBitType(expr->type->width_bits() + buffer->type->width_bits());
     const auto* concat = new IR::Concat(width, buffer, expr);
     env.set(&emitBufferLabel, concat);
 }
@@ -494,7 +498,7 @@ const std::set<StateVariable>& ExecutionState::getZombies() const { return alloc
 
 const StateVariable& ExecutionState::createZombieConst(const IR::Type* type, cstring name,
                                                        uint64_t instanceId) {
-    const auto& zombie = IRUtils::getZombieConst(type, instanceId, name);
+    const auto& zombie = Utils::getZombieConst(type, instanceId, name);
     const auto& result = allocatedZombies.insert(zombie);
     // The zombie already existed, check its type.
     if (!result.second) {
@@ -538,7 +542,7 @@ std::vector<const IR::Member*> ExecutionState::getFlatFields(
     // If we are dealing with a header we also include the validity bit in the list of
     // fields.
     if (validVector != nullptr && ts->is<IR::Type_Header>()) {
-        validVector->push_back(IRUtils::getHeaderValidity(parent));
+        validVector->push_back(Utils::getHeaderValidity(parent));
     }
     return flatFields;
 }
@@ -575,13 +579,13 @@ const StateVariable& ExecutionState::convertPathExpr(const IR::PathExpression* p
     const auto* decl = findDecl(path)->getNode();
     // Local variable.
     if (const auto* declVar = decl->to<IR::Declaration_Variable>()) {
-        return IRUtils::getZombieVar(path->type, 0, declVar->name.name);
+        return Utils::getZombieVar(path->type, 0, declVar->name.name);
     }
     if (const auto* declInst = decl->to<IR::Declaration_Instance>()) {
-        return IRUtils::getZombieVar(path->type, 0, declInst->name.name);
+        return Utils::getZombieVar(path->type, 0, declInst->name.name);
     }
     if (const auto* param = decl->to<IR::Parameter>()) {
-        return IRUtils::getZombieVar(path->type, 0, param->name.name);
+        return Utils::getZombieVar(path->type, 0, param->name.name);
     }
     BUG("Unsupported declaration %1% of type %2%.", decl, decl->node_type_name());
 }

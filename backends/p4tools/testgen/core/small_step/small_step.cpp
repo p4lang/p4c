@@ -9,12 +9,12 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/timer.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
+#include "ir/irutils.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
@@ -109,7 +109,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                 // If the guard condition is tainted, treat it equivalent to an invalid state.
                 if (!state.hasTaint(cond)) {
                     cond = state.getSymbolicEnv().subst(cond);
-                    cond = IRUtils::optimizeExpression(cond);
+                    cond = IR::IRUtils::optimizeExpression(cond);
                     // Check whether the condition is satisfiable in the current execution state.
                     auto pathConstraints = state.getPathConstraint();
                     pathConstraints.push_back(cond);
@@ -130,7 +130,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                         condStream.str().c_str());
                     self.violatedGuardConditions++;
                     return new std::vector<Branch>(
-                        {{IRUtils::getBoolLiteral(false), state, nextState}});
+                        {{IR::IRUtils::getBoolLiteral(false), state, nextState}});
                 }
                 // Otherwise, we proceed as usual.
                 return new std::vector<Branch>({{cond, state, nextState}});

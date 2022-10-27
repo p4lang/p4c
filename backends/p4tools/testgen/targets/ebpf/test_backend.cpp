@@ -7,10 +7,9 @@
 
 #include <boost/none.hpp>
 
-#include "backends/p4tools/common/lib/ir.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
-#include "lib/big_int_util.h"
+#include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
@@ -61,16 +60,16 @@ TestBackEnd::TestInfo EBPFTestBackend::produceTestInfo(
     // Packets that are too small are truncated to 02000000 (in hex) with width 32 bit.
     if (testInfo.outputPacket->type->width_bits() == 0) {
         int outPktSize = ZERO_PKT_WIDTH;
-        testInfo.outputPacket =
-            IRUtils::getConstant(IRUtils::getBitType(outPktSize), EBPFTestBackend::ZERO_PKT_VAL);
-        testInfo.packetTaintMask =
-            IRUtils::getConstant(IRUtils::getBitType(outPktSize), EBPFTestBackend::ZERO_PKT_MAX);
+        testInfo.outputPacket = IR::IRUtils::getConstant(IR::IRUtils::getBitType(outPktSize),
+                                                         EBPFTestBackend::ZERO_PKT_VAL);
+        testInfo.packetTaintMask = IR::IRUtils::getConstant(IR::IRUtils::getBitType(outPktSize),
+                                                            EBPFTestBackend::ZERO_PKT_MAX);
     }
     // eBPF actually can not modify the input packet. It can only filter. Thus we reuse our input
     // packet here.
     testInfo.outputPacket = testInfo.inputPacket;
-    testInfo.packetTaintMask = IRUtils::getConstant(
-        testInfo.inputPacket->type, IRUtils::getMaxBvVal(testInfo.inputPacket->type));
+    testInfo.packetTaintMask = IR::IRUtils::getConstant(
+        testInfo.inputPacket->type, IR::IRUtils::getMaxBvVal(testInfo.inputPacket->type));
     return testInfo;
 }
 
@@ -81,7 +80,7 @@ const TestSpec* EBPFTestBackend::createTestSpec(const ExecutionState* executionS
     TestSpec* testSpec = nullptr;
 
     const auto* ingressPayload = testInfo.inputPacket;
-    const auto* ingressPayloadMask = IRUtils::getConstant(IRUtils::getBitType(1), 1);
+    const auto* ingressPayloadMask = IR::IRUtils::getConstant(IR::IRUtils::getBitType(1), 1);
     const auto ingressPacket = Packet(testInfo.inputPort, ingressPayload, ingressPayloadMask);
 
     boost::optional<Packet> egressPacket = boost::none;

@@ -14,7 +14,8 @@
 #include <boost/multiprecision/traits/explicit_conversion.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/ir.h"
+#include "backends/p4tools/common/lib/util.h"
+#include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
@@ -47,7 +48,7 @@ std::vector<char> Bmv2Concolic::convertBigIntToBytes(big_int& dataInt, int targe
 
 const IR::Expression* Bmv2Concolic::setAndComputePayload(
     const Model& completedModel, ConcolicVariableMap* resolvedConcolicVariables, int payloadSize) {
-    const auto* payloadType = IRUtils::getBitType(payloadSize);
+    const auto* payloadType = IR::IRUtils::getBitType(payloadSize);
     const auto& payLoadVar = StateVariable(ExecutionState::getPayloadLabel(payloadType));
     const auto* payloadExpr = completedModel.get(payLoadVar, false);
     // If the variable already has been fixed, return it
@@ -55,7 +56,7 @@ const IR::Expression* Bmv2Concolic::setAndComputePayload(
     if (it != resolvedConcolicVariables->end()) {
         return it->second;
     }
-    payloadExpr = IRUtils::getRandConstantForType(payloadType);
+    payloadExpr = Utils::getRandConstantForType(payloadType);
     BUG_CHECK(payloadExpr->type->width_bits() == payloadSize,
               "The width (%1%) of the payload expression should match the calculated payload "
               "size %2%.",
@@ -106,7 +107,7 @@ big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression*>& 
         for (size_t idx = 1; idx < exprList.size(); idx++) {
             const auto* expr = exprList.at(idx);
             const auto* newWidth =
-                IRUtils::getBitType(concatExpr->type->width_bits() + expr->type->width_bits());
+                IR::IRUtils::getBitType(concatExpr->type->width_bits() + expr->type->width_bits());
             concatExpr = new IR::Concat(newWidth, concatExpr, expr);
         }
 
@@ -117,11 +118,12 @@ big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression*>& 
         if (remainder != 0) {
             auto fillWidth = CHUNK_SIZE - remainder;
             concatWidth += fillWidth;
-            const auto* remainderExpr = IRUtils::getConstant(IRUtils::getBitType(fillWidth), 0);
+            const auto* remainderExpr =
+                IR::IRUtils::getConstant(IR::IRUtils::getBitType(fillWidth), 0);
             concatExpr =
-                new IR::Concat(IRUtils::getBitType(concatWidth), concatExpr, remainderExpr);
+                new IR::Concat(IR::IRUtils::getBitType(concatWidth), concatExpr, remainderExpr);
         }
-        auto dataInt = IRUtils::getBigIntFromLiteral(
+        auto dataInt = IR::IRUtils::getBigIntFromLiteral(
             completedModel->evaluate(concatExpr, resolvedExpressions));
         bytes = convertBigIntToBytes(dataInt, concatWidth);
     }
@@ -159,17 +161,17 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
          auto algo = args->at(1)->expression->checkedTo<IR::Constant>()->asInt();
          Model::ExpressionMap resolvedExpressions;
          const auto* base = completedModel->evaluate(args->at(2)->expression, &resolvedExpressions);
-         auto baseInt = IRUtils::getBigIntFromLiteral(base);
+         auto baseInt = IR::IRUtils::getBigIntFromLiteral(base);
          const auto* dataExpr = args->at(3)->expression;
          const auto* maxHash =
              completedModel->evaluate(args->at(4)->expression, &resolvedExpressions);
-         auto maxHashInt = IRUtils::getBigIntFromLiteral(maxHash);
+         auto maxHashInt = IR::IRUtils::getBigIntFromLiteral(maxHash);
 
          /// Flatten the data input and compute the byte array that will be used for
          /// checksum computation.
          // We only support struct expressions as argument input for now.
          const auto* dataList = dataExpr->checkedTo<IR::StructExpression>();
-         const auto exprList = IRUtils::flattenStructExpression(dataList);
+         const auto exprList = IR::IRUtils::flattenStructExpression(dataList);
          if (exprList.empty()) {
              TESTGEN_UNIMPLEMENTED("Data input is empty. This case is not implemented.");
          }
@@ -186,10 +188,10 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
 
          // Assign a value to the @param result using the computed result
          if (const auto* checksumVarType = checksumVar->type->to<IR::Type_Bits>()) {
-             auto concolicMember = IRUtils::getConcolicMember(var, 0);
+             auto concolicMember = Utils::getConcolicMember(var, 0);
              // Overwrite any previous assignment or result.
              (*resolvedConcolicVariables)[concolicMember] =
-                 IRUtils::getConstant(checksumVarType, computedResult);
+                 IR::IRUtils::getConstant(checksumVarType, computedResult);
 
          } else {
              TESTGEN_UNIMPLEMENTED("Checksum output %1% of type %2% not supported", checksumVar,
@@ -222,14 +224,14 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
          const auto* dataExpr = args->at(2)->expression;
          const auto* checksumVarType = checksumVar->type;
          // This is the maximum value this checksum can have.
-         auto maxHashInt = IRUtils::getMaxBvVal(checksumVarType);
+         auto maxHashInt = IR::IRUtils::getMaxBvVal(checksumVarType);
 
          /// Iterate through the data input and compute the byte array that will be used for
          /// checksum computation.
          // We only support struct expressions as argument input for now.
          const auto* dataList = dataExpr->checkedTo<IR::StructExpression>();
          const std::vector<const IR::Expression*> exprList =
-             IRUtils::flattenStructExpression(dataList);
+             IR::IRUtils::flattenStructExpression(dataList);
          if (exprList.empty()) {
              TESTGEN_UNIMPLEMENTED("Data input is empty. This case is not implemented.");
          }
@@ -242,10 +244,10 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
          computedResult = std::min(computedResult, maxHashInt);
          // Assign a value to the @param result using the computed result
          if (checksumVarType->is<IR::Type_Bits>()) {
-             auto concolicMember = IRUtils::getConcolicMember(var, 0);
+             auto concolicMember = Utils::getConcolicMember(var, 0);
              // Overwrite any previous assignment or result.
              (*resolvedConcolicVariables)[concolicMember] =
-                 IRUtils::getConstant(checksumVarType, computedResult);
+                 IR::IRUtils::getConstant(checksumVarType, computedResult);
          } else {
              TESTGEN_UNIMPLEMENTED("Checksum output %1% of type %2% not supported", checksumVar,
                                    checksumVarType);
@@ -278,16 +280,16 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
          /// checksum computation.
          // We only support struct expressions as argument input for now.
          const auto* data = dataExpr->checkedTo<IR::StructExpression>();
-         auto exprList = IRUtils::flattenStructExpression(data);
+         auto exprList = IR::IRUtils::flattenStructExpression(data);
          if (exprList.empty()) {
              TESTGEN_UNIMPLEMENTED("Data input is empty. This case is not implemented.");
          }
 
          // This is the maximum value this checksum can have.
-         auto maxHashInt = IRUtils::getMaxBvVal(checksumVarType);
+         auto maxHashInt = IR::IRUtils::getMaxBvVal(checksumVarType);
          const auto& packetBitSizeVar = ExecutionState::getInputPacketSizeVar();
          const auto* payloadSizeConst = completedModel->evaluate(packetBitSizeVar);
-         int calculatedPacketSize = IRUtils::getIntFromLiteral(payloadSizeConst);
+         int calculatedPacketSize = IR::IRUtils::getIntFromLiteral(payloadSizeConst);
 
          const auto* inputPacketExpr = state.getInputPacket();
          int payloadSize = calculatedPacketSize - inputPacketExpr->type->width_bits();
@@ -307,10 +309,10 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
          computedResult = std::min(computedResult, maxHashInt);
          // Assign a value to the @param result using the computed result
          if (checksumVarType->is<IR::Type_Bits>()) {
-             auto concolicMember = IRUtils::getConcolicMember(var, 0);
+             auto concolicMember = Utils::getConcolicMember(var, 0);
              // Overwrite any previous assignment or result.
              (*resolvedConcolicVariables)[concolicMember] =
-                 IRUtils::getConstant(checksumVarType, computedResult);
+                 IR::IRUtils::getConstant(checksumVarType, computedResult);
          } else {
              TESTGEN_UNIMPLEMENTED("Checksum output %1% of type %2% not supported", checksumVar,
                                    checksumVarType);

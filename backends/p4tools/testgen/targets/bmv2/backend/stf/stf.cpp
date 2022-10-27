@@ -15,12 +15,12 @@
 #include <inja/inja.hpp>
 
 #include "backends/p4tools/common/lib/format_int.h"
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
-#include "lib/big_int_util.h"
+#include "ir/irutils.h"
+#include "lib/gmputil.h"
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
 
@@ -197,9 +197,9 @@ inja::json STF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
                 const auto* dataValue = elem.getEvaluatedValue();
                 auto prefixLen = elem.getEvaluatedPrefixLength()->asInt();
                 auto fieldWidth = dataValue->type->width_bits();
-                auto maxVal = IRUtils::getMaxBvVal(prefixLen);
+                auto maxVal = IR::IRUtils::getMaxBvVal(prefixLen);
                 const auto* maskField =
-                    IRUtils::getConstant(dataValue->type, maxVal << (fieldWidth - prefixLen));
+                    IR::IRUtils::getConstant(dataValue->type, maxVal << (fieldWidth - prefixLen));
                 BUG_CHECK(dataValue->type->width_bits() == maskField->type->width_bits(),
                           "Data value and its mask should have the same bit width.");
                 // Using the width from mask - should be same as data
@@ -350,7 +350,7 @@ void STF::emitTestcase(const TestSpec* testSpec, cstring selectedBranches, size_
     dataJson["control_plane"] = getControlPlane(testSpec);
     dataJson["send"] = getSend(testSpec);
     dataJson["verify"] = getVerify(testSpec);
-    dataJson["timestamp"] = TestgenUtils::getTimeStamp();
+    dataJson["timestamp"] = Utils::getTimeStamp();
     std::stringstream coverageStr;
     coverageStr << std::setprecision(2) << currentCoverage;
     dataJson["coverage"] = coverageStr.str();
