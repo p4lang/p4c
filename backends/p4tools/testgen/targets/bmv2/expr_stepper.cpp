@@ -585,12 +585,68 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
         // TODO: Count currently has no effect in the symbolic interpreter.
         {"counter.count",
          {"index"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             ::warning("counter.count not fully implemented.");
+         [this](const IR::MethodCallExpression* call, const IR::Expression* receiver,
+                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
+                const ExecutionState& state, SmallStepEvaluator::Result& result) {
+             const auto* arg = args->at(0);
+             const auto* index = arg->expression;
+             // TODO: Frontload this in the expression stepper for method call expressions.
+             if (!SymbolicEnv::isSymbolicValue(index)) {
+                 // Evaluate the condition.
+                 stepToSubexpr(index, result, state, [call](const Continuation::Parameter* v) {
+                     auto* clonedCall = call->clone();
+                     auto* arguments = clonedCall->arguments->clone();
+                     auto* arg = arguments->at(0)->clone();
+                     arg->expression = v->param;
+                     (*arguments)[0] = arg;
+                     clonedCall->arguments = arguments;
+                     return Continuation::Return(clonedCall);
+                 });
+                 return;
+             }
              auto* nextState = new ExecutionState(state);
-             nextState->popBody();
+             std::vector<Continuation::Command> replacements;
+
+             const auto* receiverPath = receiver->checkedTo<IR::PathExpression>();
+             const auto& externInstance = state.convertPathExpr(receiverPath);
+             auto counterSizeConstant = state.findDecl(receiverPath)
+                                            ->checkedTo<IR::Declaration_Instance>()
+                                            ->arguments[0]
+                                            .at(0)
+                                            ->expression;
+             auto counterSize = counterSizeConstant->checkedTo<IR::Constant>()->value;
+             BUG_CHECK(index->checkedTo<IR::Constant>()->value < counterSize,
+                       "The specified index is greater than the size of counter");
+
+             // Retrieve the counter state from the object store. If it is already present, just
+             // cast the object to the correct class and retrieve the current value according to the
+             // index. If the counter has not been added had, create a new counter object.
+             const auto* counterState =
+                 state.getTestObject("countervalues", externInstance->toString(), false);
+
+             Bmv2RegisterValue* counterValue = nullptr;
+             if (counterState != nullptr) {
+                 counterValue =
+                     new Bmv2RegisterValue(*counterState->checkedTo<Bmv2RegisterValue>());
+
+             } else {
+                 const auto* inputValue =
+                     programInfo.createTargetUninitialized(IR::Type::Bits::get(32), false);
+                 counterValue = new Bmv2RegisterValue(inputValue);
+                 nextState->addTestObject("countervalues", externInstance->toString(),
+                                          counterValue);
+             }
+             const IR::Expression* baseExpr = counterValue->getCurrentValue(index);
+             auto clone = baseExpr->checkedTo<IR::Constant>()->clone();
+             clone->value += 1;
+             counterValue->addRegisterCondition(Bmv2RegisterCondition{index, clone});
+             nextState->addTestObject("countervalues", externInstance->toString(), counterValue);
+             // TODO: Find a better way to model a trace of this event.
+             std::stringstream counterStream;
+             counterStream << "CounterRead: Index ";
+             index->dbprint(counterStream);
+             nextState->add(new TraceEvent::Generic(counterStream.str()));
+             nextState->replaceTopBody(Continuation::Return(baseExpr));
              result->emplace_back(nextState);
          }},
         /* ======================================================================================
