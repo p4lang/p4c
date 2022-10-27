@@ -91,13 +91,13 @@ p4c_add_xfail_reason("dpdk"
 
 p4c_add_xfail_reason("dpdk"
   "must only be called from within an action"
+  testdata/p4_16_samples/pna-add-on-miss-err.p4
   testdata/p4_16_samples/pna-example-tcp-connection-tracking-err-1.p4
   testdata/p4_16_samples/pna-example-tcp-connection-tracking-err.p4
   )
 
 p4c_add_xfail_reason("dpdk"
   "add_entry is not called from a default action"
-  testdata/p4_16_samples/pna-add-on-miss-err.p4
   testdata/p4_16_samples/pna-example-addhit.p4
   )
 

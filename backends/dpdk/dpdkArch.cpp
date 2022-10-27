@@ -2434,7 +2434,7 @@ void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
     }
 }
 
-void CollectAddOnMissAdd::postorder(const IR::MethodCallStatement *mcs) {
+void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
     auto mce = mcs->methodCall;
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
     if (!mi->is<P4::ExternFunction>()) {
@@ -2446,14 +2446,7 @@ void CollectAddOnMissAdd::postorder(const IR::MethodCallStatement *mcs) {
     }
     auto ctxt = findContext<IR::P4Action>();
     BUG_CHECK(ctxt != nullptr, "%1% add_entry extern can only be used in an action", mcs);
-    auto it = structure->defActs.find(ctxt->name.name);
-    if (it == structure->defActs.end()) {
-        ::error(ErrorType::ERR_UNEXPECTED, "%1% is not called from a default action:"
-                " %2% or add-on-miss is not configured on table:",
-                mcs, ctxt->name.name);
-        return;
-    }
-    // assuming checking on number of arguments is already performed in frontend.
+    // In p4c, by design, only  backend checks args of an extern.
     BUG_CHECK(mce->arguments->size() == 3,
               "%1%: expected 3 arguments in add_entry extern", mcs);
     auto action = mce->arguments->at(0);
@@ -2515,8 +2508,16 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
                         return;
                     } else {
                         auto use_add_on_miss = expr->to<IR::BoolLiteral>()->value;
-                        if (use_add_on_miss)
+                        if (use_add_on_miss) {
                             isValidExternCall = true;
+                            auto it = structure->defActs.find(act->name.name);
+                            if (it == structure->defActs.end()) {
+                                ::error(ErrorType::ERR_UNEXPECTED,
+                                "%1% is not called from a default action: %2% ",
+                                mcs, act->name.name);
+                                return;
+                            }
+                        }
                     }
                 }
             }

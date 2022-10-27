@@ -934,18 +934,6 @@ class CollectAddOnMissTable : public Inspector {
     refMap(refMap), typeMap(typeMap), structure(structure) {}
 
     void postorder(const IR::P4Table* t) override;
-};
-
-class CollectAddOnMissAdd : public Inspector {
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
-    DpdkProgramStructure* structure;
-
- public:
-    CollectAddOnMissAdd(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-            DpdkProgramStructure* structure) :
-    refMap(refMap), typeMap(typeMap), structure(structure) {}
-
     void postorder(const IR::MethodCallStatement*) override;
 };
 
