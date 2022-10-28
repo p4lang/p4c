@@ -76,52 +76,61 @@ Restrictions loadExample(const char* curFile, bool flag) {
     P4Tools::MidEnd midEnd(options);
     program = program->apply(midEnd);
     Restrictions result;
-    if (flag)
+    if (flag) {
         program->apply(P4Tools::AssertsParser::AssertsParser(result));
-    else
+    } else {
         program->apply(P4Tools::RefersToParser::RefersToParser(result));
+    }
     return result;
 }
 
 TEST_F(P4AssertsParserTest, RestrictionCount) {
     Restrictions parsingResult = loadExample(
-        "backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions.p4", true);
+        "backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_1.p4", true);
     ASSERT_EQ(parsingResult.size(), (unsigned long)1);
     ASSERT_EQ(parsingResult[0].size(), (unsigned long)3);
 }
 
 TEST_F(P4AssertsParserTest, Restrictions) {
     Restrictions parsingResult = loadExample(
-        "backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions.p4", true);
+        "backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_1.p4", true);
     ASSERT_EQ(parsingResult.size(), (unsigned long)1);
-    auto expr1 = P4Tools::IRUtils::getZombieConst(IR::Type_Bits::get(8), 0,
-                                                  "ingress.ternary_table_mask_h.h.a1");
-    auto expr2 = P4Tools::IRUtils::getZombieConst(IR::Type_Bits::get(8), 0,
-                                                  "ingress.ternary_table_lpm_prefix_h.h.a1");
-    auto const1 = P4Tools::IRUtils::getConstant(IR::Type_Bits::get(8), 0);
-    auto const2 = P4Tools::IRUtils::getConstant(IR::Type_Bits::get(8), 64);
-    auto operation = new IR::LAnd(new IR::Neq(expr1, const1), new IR::Neq(expr2, const2));
-    expr1 = P4Tools::IRUtils::getZombieConst(IR::Type_Bits::get(8), 0,
-                                             "ingress.ternary_table_key_h.h.a1");
-    auto operation1 = new IR::Neq(expr1, const1);
-    expr1 = P4Tools::IRUtils::getZombieConst(IR::Type_Bits::get(8), 0,
-                                             "ingress.ternary_table_key_h.h.a");
-    const2 = P4Tools::IRUtils::getConstant(IR::Type_Bits::get(8), 255);
-    auto operation2 = new IR::Neq(expr1, const2);
-    ASSERT_TRUE(parsingResult[0][0]->equiv(*operation));
-    ASSERT_TRUE(parsingResult[0][1]->equiv(*operation1));
-    ASSERT_TRUE(parsingResult[0][2]->equiv(*operation2));
+    {
+        const auto& expr1 = P4Tools::IRUtils::getZombieConst(IR::Type_Bits::get(8), 0,
+                                                             "ingress.ternary_table_mask_h.h.a1");
+        const auto& expr2 = P4Tools::IRUtils::getZombieConst(
+            IR::Type_Bits::get(8), 0, "ingress.ternary_table_lpm_prefix_h.h.a1");
+        const auto* const1 = P4Tools::IRUtils::getConstant(IR::Type_Bits::get(8), 0);
+        const auto* const2 = P4Tools::IRUtils::getConstant(IR::Type_Bits::get(8), 64);
+        const auto* operation =
+            new IR::LAnd(new IR::Neq(expr1, const1), new IR::Neq(expr2, const2));
+        ASSERT_TRUE(parsingResult[0][0]->equiv(*operation));
+    }
+    {
+        const auto& expr1 = P4Tools::IRUtils::getZombieConst(IR::Type_Bits::get(8), 0,
+                                                             "ingress.ternary_table_key_h.h.a1");
+        const auto* const1 = P4Tools::IRUtils::getConstant(IR::Type_Bits::get(8), 0);
+        const auto* operation1 = new IR::Neq(expr1, const1);
+        ASSERT_TRUE(parsingResult[0][1]->equiv(*operation1));
+    }
+    {
+        const auto& expr1 = P4Tools::IRUtils::getZombieConst(IR::Type_Bits::get(8), 0,
+                                                             "ingress.ternary_table_key_h.h.a");
+        const auto* const2 = P4Tools::IRUtils::getConstant(IR::Type_Bits::get(8), 255);
+        const auto* operation2 = new IR::Neq(expr1, const2);
+        ASSERT_TRUE(parsingResult[0][2]->equiv(*operation2));
+    }
 }
 
 TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInTable) {
     Restrictions parsingResult = loadExample(
         "backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_2.p4", false);
     ASSERT_EQ(parsingResult.size(), (unsigned long)2);
-    auto expr1 =
+    const auto& expr1 =
         P4Tools::IRUtils::getZombieConst(IR::Type_Bits::get(8), 0, "ingress.table_1_key_h.h.a");
-    auto expr2 =
+    const auto& expr2 =
         P4Tools::IRUtils::getZombieConst(IR::Type_Bits::get(8), 0, "ingress.table_2_key_h.h.a");
-    auto operation = new IR::Equ(expr1, expr2);
+    const auto* operation = new IR::Equ(expr1, expr2);
     ASSERT_TRUE(parsingResult[0][0]->equiv(*operation));
 }
 

@@ -37,8 +37,8 @@ control vrfy(inout Headers h, inout Meta meta) {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
 
-    action MyAction1(@refers_to(table_1 , h.h.a) bit<8> input ) {
-        h.h.b = 1;
+    action MyAction1(@refers_to(table_1 , h.h.a) bit<8> input_val) {
+        h.h.b = input_val;
     }
 
     action MyAction2() {
