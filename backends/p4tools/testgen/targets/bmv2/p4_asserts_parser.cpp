@@ -431,12 +431,12 @@ std::vector<Token> combineTokensToNumbers(std::vector<Token> input) {
 /// 0(Number)] -> [tableName_key_Name01(Text), ==(Equal) , 0(Number)]
 std::vector<Token> combineTokensToTableKeys(std::vector<Token> input, cstring tableName) {
     std::vector<Token> result;
-    for (uint64_t i = 0; i < input.size(); i++) {
-        if (!input[i].is(Token::Kind::Text)) {
-            result.push_back(input[i]);
+    for (uint64_t idx = 0; idx < input.size(); idx++) {
+        if (!input[idx].is(Token::Kind::Text)) {
+            result.push_back(input[idx]);
             continue;
         }
-        auto str = std::string(input[i].lexeme());
+        auto str = std::string(input[idx].lexeme());
 
         auto substr = str.substr(0, str.find("::mask"));
         if (substr != str) {
@@ -459,16 +459,9 @@ std::vector<Token> combineTokensToTableKeys(std::vector<Token> input, cstring ta
         }
 
         if (str.find("isValid") != std::string::npos) {
-            i++;
-            cstring cString = str + std::string(input[i].lexeme());
-            if (input[i + 1].is(Token::Kind::Text)) {
-                cString += std::string(input[i + 1].lexeme());
-                i++;
-            }
-            cString += std::string(input[i + 1].lexeme());
-            i++;
-            cString = tableName + "_key_" + cString;
-            result.emplace_back(Token::Kind::Text, cString, cString.size());
+            cstring cstr = tableName + "_key_" + str;
+            result.emplace_back(Token::Kind::Text, cstr, cstr.size());
+            idx += 2;
             continue;
         }
 
