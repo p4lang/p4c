@@ -590,6 +590,14 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                 const ExecutionState& state, SmallStepEvaluator::Result& result) {
              const auto* arg = args->at(0);
              const auto* index = arg->expression;
+             if (state.hasTaint(index)) {
+                 ::warning(
+                     "Count index arg are tainted and not predictable. Skipping count execution.");
+                 auto* nextState = new ExecutionState(state);
+                 nextState->popBody();
+                 result->emplace_back(nextState);
+                 return;
+             }
              // TODO: Frontload this in the expression stepper for method call expressions.
              if (!SymbolicEnv::isSymbolicValue(index)) {
                  // Evaluate the condition.
