@@ -604,23 +604,22 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  });
                  return;
              }
-             auto* nextState = new ExecutionState(state);
-             std::vector<Continuation::Command> replacements;
 
              const auto* receiverPath = receiver->checkedTo<IR::PathExpression>();
              const auto& externInstance = state.convertPathExpr(receiverPath);
-             auto counterSizeConstant = state.findDecl(receiverPath)
-                                            ->checkedTo<IR::Declaration_Instance>()
-                                            ->arguments[0]
-                                            .at(0)
-                                            ->expression;
-             auto counterSize = counterSizeConstant->checkedTo<IR::Constant>()->value;
-             BUG_CHECK(index->checkedTo<IR::Constant>()->value < counterSize,
-                       "The specified index is greater than the size of counter");
-
+             auto counterSizeExpr = state.findDecl(receiverPath)
+                                        ->checkedTo<IR::Declaration_Instance>()
+                                        ->arguments[0]
+                                        .at(0)
+                                        ->expression;
+             auto cond = new IR::Lss(index, counterSizeExpr);
+             auto* nextState = new ExecutionState(state);
+             nextState->popBody();
              // Retrieve the counter state from the object store. If it is already present, just
              // cast the object to the correct class and retrieve the current value according to the
              // index. If the counter has not been added had, create a new counter object.
+             // "Count" increment an entry by one. If index >= size, no counter state will be
+             // updated.
              const auto* counterState =
                  state.getTestObject("countervalues", externInstance->toString(), false);
 
@@ -637,17 +636,18 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                                           counterValue);
              }
              const IR::Expression* baseExpr = counterValue->getCurrentValue(index);
-             auto clone = baseExpr->checkedTo<IR::Constant>()->clone();
-             clone->value += 1;
-             counterValue->addRegisterCondition(Bmv2RegisterCondition{index, clone});
+
+             const IR::Expression* increasedExpr =
+                 new IR::Add(baseExpr, IRUtils::getConstant(IR::Type::Bits::get(32), 1));
+             counterValue->addRegisterCondition(Bmv2RegisterCondition{index, increasedExpr});
              nextState->addTestObject("countervalues", externInstance->toString(), counterValue);
+
              // TODO: Find a better way to model a trace of this event.
              std::stringstream counterStream;
-             counterStream << "CounterRead: Index ";
+             counterStream << "CounterCount: Index ";
              index->dbprint(counterStream);
              nextState->add(new TraceEvent::Generic(counterStream.str()));
-             nextState->replaceTopBody(Continuation::Return(baseExpr));
-             result->emplace_back(nextState);
+             result->emplace_back(cond, state, nextState);
          }},
         /* ======================================================================================
          *  direct_counter.count
