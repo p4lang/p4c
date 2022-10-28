@@ -140,7 +140,7 @@ function install_ptf_ebpf_test_deps() (
     apt-get install -y --no-install-recommends ${LINUX_TOOLS}
   fi
 
-  git clone --depth 1 --recursive --branch v0.2.0 https://github.com/NIKSS-vSwitch/nikss /tmp/nikss
+  git clone --depth 1 --recursive --branch v0.3.0 https://github.com/NIKSS-vSwitch/nikss /tmp/nikss
   cd /tmp/nikss
   ./build_libbpf.sh
   mkdir build
