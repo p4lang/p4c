@@ -751,6 +751,9 @@ const IR::Node* DoConstantFolding::postorder(IR::LNot* e) {
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Mux* e) {
+    if (!typesKnown)
+        // We want the typechecker to look at the expression first
+        return e;
     auto cond = getConstant(e->e0);
     if (cond == nullptr)
         return e;
