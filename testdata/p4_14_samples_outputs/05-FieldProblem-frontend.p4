@@ -15,12 +15,12 @@ header vag_t {
 }
 
 struct metadata {
-    @name(".ing_metadata") 
+    @name(".ing_metadata")
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name(".vag") 
+    @name(".vag")
     vag_t vag;
 }
 
@@ -42,7 +42,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction_2();
         }
         key = {
-            hdr.vag.f1: exact @name("vag.f1") ;
+            hdr.vag.f1: exact @name("vag.f1");
         }
         default_action = NoAction_2();
     }
@@ -66,7 +66,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            hdr.vag.f1: exact @name("vag.f1") ;
+            hdr.vag.f1: exact @name("vag.f1");
         }
         size = 1024;
         default_action = NoAction_3();
@@ -93,4 +93,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

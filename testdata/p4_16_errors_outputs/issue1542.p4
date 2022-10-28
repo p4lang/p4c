@@ -30,4 +30,3 @@ control c() {
 control empty();
 package top(empty _e);
 top(c()) main;
-

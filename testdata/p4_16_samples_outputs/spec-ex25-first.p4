@@ -14,7 +14,7 @@ control c(bit<32> x) {
     }
     table unit {
         key = {
-            x: exact @name("x") ;
+            x: exact @name("x");
         }
         actions = {
             Set_dmac();

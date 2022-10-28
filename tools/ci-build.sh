@@ -16,7 +16,6 @@ export P4C_DEPS="bison \
              libboost-iostreams1.71-dev \
              libfl-dev \
              libgc-dev \
-             libgmp-dev \
              pkg-config \
              python3 \
              python3-pip \
@@ -36,8 +35,7 @@ export P4C_RUNTIME_DEPS="cpp \
                      libboost-graph1.71.0 \
                      libboost-iostreams1.71.0 \
                      libgc1c2 \
-                     libgmp10 \
-                     libgmpxx4ldbl \
+                     libgmp-dev \
                      python3"
 
 # use scapy 2.4.5, which is the version on which ptf depends
@@ -51,7 +49,8 @@ apt-get install -y --no-install-recommends \
   ${P4C_DEPS} \
   ${P4C_EBPF_DEPS} \
   ${P4C_RUNTIME_DEPS} \
-  git
+  git \
+  lld
 
 # TODO: Remove this rm -rf line once the ccache memcache config is removed.
 rm -rf /usr/local/etc/ccache.conf
@@ -78,6 +77,7 @@ function install_ptf_ebpf_test_deps() (
   done
   export P4C_PTF_PACKAGES="gcc-multilib \
                            python3-six \
+                           libgmp-dev \
                            libjansson-dev \
                            $LINUX_TOOLS"
   apt-get install -y --no-install-recommends ${P4C_PTF_PACKAGES}
@@ -157,14 +157,17 @@ function build() {
   make
 }
 
+if [ "$COMPILE_WITH_CLANG" == "ON" ]; then
+  export CC=clang
+  export CXX=clang++
+fi
+
 # Strong optimization.
 export CXXFLAGS="${CXXFLAGS} -O3"
 # Toggle unified compilation.
 CMAKE_FLAGS+="-DENABLE_UNIFIED_COMPILATION=${ENABLE_UNIFIED_COMPILATION} "
 # Toggle static builds.
 CMAKE_FLAGS+="-DBUILD_STATIC_RELEASE=${BUILD_STATIC_RELEASE} "
-# Toggle whether to use GMP or boost::multiprecision
-CMAKE_FLAGS+="-DENABLE_GMP=${ENABLE_GMP} "
 # Toggle the installation of the tools back end.
 CMAKE_FLAGS+="-DENABLE_TEST_TOOLS=${ENABLE_TEST_TOOLS} "
 # RELEASE should be default, but we want to make sure.

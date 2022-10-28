@@ -7,4 +7,3 @@ control c(in bit<32> x) {
 control proto(in bit<32> x);
 package top(proto _p);
 top(c()) main;
-

@@ -56,4 +56,3 @@ control TopDeparser(packet_out b, in Parsed_packet hdr) {
 }
 
 V1Switch(TopParser(), VeryChecksum(), IngressP(), EgressP(), ChecksumComputer(), TopDeparser()) main;
-

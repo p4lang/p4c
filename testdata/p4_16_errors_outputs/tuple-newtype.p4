@@ -18,4 +18,3 @@ control c(out bit<32> x) {
 control e(out bit<32> x);
 package top(e _e);
 top(c()) main;
-

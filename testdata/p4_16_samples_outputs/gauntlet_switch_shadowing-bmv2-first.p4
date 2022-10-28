@@ -33,7 +33,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            h.eth_hdr.src_addr: exact @name("aiiIgQ") ;
+            h.eth_hdr.src_addr: exact @name("aiiIgQ");
         }
         actions = {
             action_1();
@@ -78,4 +78,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

@@ -50,7 +50,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     table Check_src_ip {
         key = {
-            headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr") ;
+            headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr");
         }
         actions = {
             Reject();
@@ -74,4 +74,3 @@ control pipe(inout Headers_t headers, out bool pass) {
 }
 
 ebpfFilter<Headers_t>(prs(), pipe()) main;
-

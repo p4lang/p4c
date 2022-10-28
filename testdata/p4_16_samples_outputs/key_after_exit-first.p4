@@ -23,7 +23,7 @@ parser p(packet_in pkt, out Headers hdr) {
 control ingress(inout Headers h) {
     table simple_table {
         key = {
-            16w1: exact @name("key") ;
+            16w1: exact @name("key");
         }
         actions = {
             @defaultonly NoAction();
@@ -40,4 +40,3 @@ parser Parser(packet_in b, out Headers hdr);
 control Ingress(inout Headers hdr);
 package top(Parser p, Ingress ig);
 top(p(), ingress()) main;
-

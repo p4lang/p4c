@@ -18,7 +18,7 @@ control c(out bit<32> x) {
             NoAction_1();
         }
         key = {
-            k_0: exact @name("k") ;
+            k_0: exact @name("k");
         }
         default_action = NoAction_1();
     }
@@ -51,4 +51,3 @@ control c(out bit<32> x) {
 control e(out bit<32> x);
 package top(e _e);
 top(c()) main;
-

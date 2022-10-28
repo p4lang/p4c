@@ -82,18 +82,18 @@ header vlan_t {
 }
 
 struct metadata {
-    @name(".egress_metadata") 
+    @name(".egress_metadata")
     egress_metadata_t  egress_metadata;
-    @name(".ingress_metadata") 
+    @name(".ingress_metadata")
     ingress_metadata_t ingress_metadata;
 }
 
 struct headers {
-    @name(".eth") 
+    @name(".eth")
     ethernet_t eth;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t     ipv4;
-    @name(".vlan") 
+    @name(".vlan")
     vlan_t     vlan;
 }
 
@@ -120,9 +120,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 @name(".next_hop_group") action_selector(HashAlgorithm.crc16, 32w0, 32w16) next_hop_group;
-
 @name(".vlan") action_profile(32w0) vlan;
-
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
         if (meta.ingress_metadata.oper_status == 2w1) {
@@ -364,4 +362,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

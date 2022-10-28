@@ -95,8 +95,8 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     @name("ingress.tns") table tns_0 {
         key = {
-            h.bvh1._row_alt1_valid6         : exact @name("h.bvh1.row.alt1.valid") ;
-            local_metadata._row0_alt0_valid0: exact @name("local_metadata.row0.alt0.valid") ;
+            h.bvh1._row_alt1_valid6         : exact @name("h.bvh1.row.alt1.valid");
+            local_metadata._row0_alt0_valid0: exact @name("local_metadata.row0.alt0.valid");
         }
         actions = {
             do_act();

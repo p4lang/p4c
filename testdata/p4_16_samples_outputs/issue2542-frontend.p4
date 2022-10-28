@@ -13,7 +13,7 @@ control ingress(inout Headers h) {
     }
     @name("ingress.sub.dummy") table sub_dummy {
         key = {
-            16w2: exact @name("dummy_key") ;
+            16w2: exact @name("dummy_key");
         }
         actions = {
             @defaultonly NoAction_1();
@@ -28,4 +28,3 @@ control ingress(inout Headers h) {
 control Ingress(inout Headers hdr);
 package top(Ingress ig);
 top(ingress()) main;
-

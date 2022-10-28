@@ -43,4 +43,3 @@ control MyDeparser(packet_out b, in h hdr) {
 }
 
 V1Switch(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

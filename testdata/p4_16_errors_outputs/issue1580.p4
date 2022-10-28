@@ -73,4 +73,3 @@ control computeChecksum(inout headers_t hdr, inout user_metadata_t meta) {
 }
 
 V1Switch(myParser(), verifyChecksum(), ingress(), egress(), computeChecksum(), MyDeparser()) main;
-

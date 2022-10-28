@@ -57,6 +57,10 @@ class BMv2_V1ModelTableStepper : public TableStepper {
     /// accordingly. Entries will use indices to refer to actions instead of their labels.
     void evalTableActionProfile(const std::vector<const IR::ActionListElement*>& tableActionList);
 
+    /// If the table has an action selector implementation, evaluate the match-action list
+    /// accordingly. Entries will use indices to refer to actions instead of their labels.
+    void evalTableActionSelector(const std::vector<const IR::ActionListElement*>& tableActionList);
+
  protected:
     const IR::Expression* computeTargetMatchType(ExecutionState* nextState,
                                                  const KeyProperties& keyProperties,

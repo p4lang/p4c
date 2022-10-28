@@ -17,7 +17,6 @@ genrule(
     outs = ["config.h"],
     cmd = " | ".join([
         "sed 's|cmakedefine|define|g' < $(SRCS)",
-        "sed 's|define HAVE_LIBGMP 1|undef HAVE_LIBGMP|g'",
         "sed 's|define HAVE_LIBGC 1|undef HAVE_LIBGC|g' > $(OUTS)",
     ]),
     visibility = ["//visibility:private"],

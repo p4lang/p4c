@@ -53,16 +53,16 @@ header tcp_t {
 }
 
 struct metadata {
-    @name(".ingress_metadata") 
+    @name(".ingress_metadata")
     ingress_metadata_t ingress_metadata;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t     ipv4;
-    @name(".tcp") 
+    @name(".tcp")
     tcp_t      tcp;
 }
 
@@ -104,7 +104,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction();
         }
         key = {
-            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port");
         }
         size = 256;
         default_action = NoAction();
@@ -115,9 +115,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 @name(".flowlet_id") register<bit<16>, bit<13>>(32w8192) flowlet_id;
-
 @name(".flowlet_lasttime") register<bit<32>, bit<13>>(32w8192) flowlet_lasttime;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("._drop") action _drop() {
         mark_to_drop(standard_metadata);
@@ -152,7 +150,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr");
         }
         size = 1024;
         default_action = NoAction();
@@ -164,7 +162,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.ecmp_offset: exact @name("ingress_metadata.ecmp_offset") ;
+            meta.ingress_metadata.ecmp_offset: exact @name("ingress_metadata.ecmp_offset");
         }
         size = 16384;
         default_action = NoAction();
@@ -183,7 +181,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.nhop_ipv4: exact @name("ingress_metadata.nhop_ipv4") ;
+            meta.ingress_metadata.nhop_ipv4: exact @name("ingress_metadata.nhop_ipv4");
         }
         size = 512;
         default_action = NoAction();
@@ -227,4 +225,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-
