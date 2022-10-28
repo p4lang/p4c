@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "simplify.h"
 #include "sideEffects.h"
+#include "tableApply.h"
 
 namespace P4 {
 
@@ -94,12 +95,15 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::SwitchStatement* statement)
     if (statement->cases.empty()) {
         // If this is a table application remove the switch altogether but keep
         // the table application.  Otherwise remove the switch altogether.
-        if (auto mem = statement->expression->to<IR::Member>()) {
-            if (auto mce = mem->expr->to<IR::MethodCallExpression>()) {
-                LOG2("Removing switch statement " << statement << " keeping " << mce);
-                return new IR::MethodCallStatement(mce->srcInfo, mce);
-            }
+        if (TableApplySolver::isActionRun(statement->expression, refMap, typeMap)) {
+            auto mce = statement->expression->checkedTo<IR::Member>()->
+                    expr->checkedTo<IR::MethodCallExpression>();
+            LOG2("Removing switch statement " << statement << " keeping " << mce);
+            return new IR::MethodCallStatement(statement->srcInfo, mce);
         }
+        if (SideEffects::check(statement->expression, this, refMap, typeMap))
+            // This can happen if this pass is run before SideEffectOrdering.
+            return statement;
         LOG2("Removing switch statement " << statement);
         return nullptr;
     }
