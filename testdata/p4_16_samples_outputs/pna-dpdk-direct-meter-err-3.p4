@@ -82,7 +82,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         user_meta.port_out = (out1 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
         drop_packet();
     }
-    table ipv4_da_lpm1 {
+    table ipv4_da1 {
         key = {
             hdr.ipv4.dstAddr: exact;
         }
@@ -93,7 +93,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         default_action = default_route_drop;
         pna_direct_meter = meter0;
     }
-    table ipv4_da_lpm {
+    table ipv4_da {
         key = {
             hdr.ipv4.dstAddr: exact;
         }
@@ -106,8 +106,8 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     apply {
         if (hdr.ipv4.isValid()) {
-            ipv4_da_lpm.apply();
-            ipv4_da_lpm1.apply();
+            ipv4_da.apply();
+            ipv4_da1.apply();
         }
     }
 }
@@ -120,4 +120,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

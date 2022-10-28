@@ -65,8 +65,8 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     @name("MainControlImpl.ipv4_host") table ipv4_host_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
-            user_meta.data  : selector @name("user_meta.data") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
+            user_meta.data  : selector @name("user_meta.data");
         }
         actions = {
             drop();
@@ -99,4 +99,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

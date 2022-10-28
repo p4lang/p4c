@@ -75,9 +75,9 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         per_prefix_pkt_byte_count1_0.count();
         drop_packet();
     }
-    @name("MainControlImpl.ipv4_da_lpm1") table ipv4_da_lpm1_0 {
+    @name("MainControlImpl.ipv4_tbl1") table ipv4_tbl1_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             next_hop();
@@ -86,9 +86,9 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         default_action = default_route_drop();
         pna_direct_counter = per_prefix_pkt_byte_count1_0;
     }
-    @name("MainControlImpl.ipv4_da_lpm") table ipv4_da_lpm_0 {
+    @name("MainControlImpl.ipv4_tbl") table ipv4_tbl_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             next_hop_1();
@@ -100,27 +100,26 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     apply {
         if (hdr.ipv4.isValid()) {
-            ipv4_da_lpm_0.apply();
-            ipv4_da_lpm1_0.apply();
+            ipv4_tbl_0.apply();
+            ipv4_tbl1_0.apply();
         }
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkdirectcountererr4l150() {
+    @hidden action pnadpdkdirectcountererr4l131() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadpdkdirectcountererr4l150 {
+    @hidden table tbl_pnadpdkdirectcountererr4l131 {
         actions = {
-            pnadpdkdirectcountererr4l150();
+            pnadpdkdirectcountererr4l131();
         }
-        const default_action = pnadpdkdirectcountererr4l150();
+        const default_action = pnadpdkdirectcountererr4l131();
     }
     apply {
-        tbl_pnadpdkdirectcountererr4l150.apply();
+        tbl_pnadpdkdirectcountererr4l131.apply();
     }
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

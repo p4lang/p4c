@@ -131,9 +131,9 @@ apply {
 	mov m.IngressParser_parser_tmp h.ipv4.version_ihl
 	shr m.IngressParser_parser_tmp 0x4
 	mov m.IngressParser_parser_tmp_0 m.IngressParser_parser_tmp
-	and m.IngressParser_parser_tmp_0 0xf
+	and m.IngressParser_parser_tmp_0 0xF
 	mov m.IngressParser_parser_tmp_1 m.IngressParser_parser_tmp_0
-	and m.IngressParser_parser_tmp_1 0xf
+	and m.IngressParser_parser_tmp_1 0xF
 	jmpeq LABEL_TRUE m.IngressParser_parser_tmp_1 0x5
 	mov m.IngressParser_parser_tmp_14 0x0
 	jmp LABEL_END
@@ -143,16 +143,16 @@ apply {
 	jmp INGRESSPARSERIMPL_ACCEPT
 	LABEL_END_0 :	mov h.cksum_state.state_0 0x0
 	mov m.IngressParser_parser_tmp_3 h.ipv4.version_ihl
-	and m.IngressParser_parser_tmp_3 0xf
+	and m.IngressParser_parser_tmp_3 0xF
 	mov m.IngressParser_parser_tmp_4 m.IngressParser_parser_tmp_3
-	and m.IngressParser_parser_tmp_4 0xf
+	and m.IngressParser_parser_tmp_4 0xF
 	mov m.IngressParser_parser_tmp_15 m.IngressParser_parser_tmp_4
 	mov m.IngressParser_parser_tmp_5 h.ipv4.version_ihl
 	shr m.IngressParser_parser_tmp_5 0x4
 	mov m.IngressParser_parser_tmp_6 m.IngressParser_parser_tmp_5
-	and m.IngressParser_parser_tmp_6 0xf
+	and m.IngressParser_parser_tmp_6 0xF
 	mov m.IngressParser_parser_tmp_7 m.IngressParser_parser_tmp_6
-	and m.IngressParser_parser_tmp_7 0xf
+	and m.IngressParser_parser_tmp_7 0xF
 	mov m.IngressParser_parser_tmp_16 m.IngressParser_parser_tmp_7
 	mov m.IngressParser_parser_tmp_17 h.ipv4.diffserv
 	mov m.IngressParser_parser_tmp_18 h.ipv4.totalLen
@@ -165,9 +165,9 @@ apply {
 	mov m.IngressParser_parser_tmp_10 h.ipv4.flags_fragOffset
 	shr m.IngressParser_parser_tmp_10 0x3
 	mov m.IngressParser_parser_tmp_11 m.IngressParser_parser_tmp_10
-	and m.IngressParser_parser_tmp_11 0x1fff
+	and m.IngressParser_parser_tmp_11 0x1FFF
 	mov m.IngressParser_parser_tmp_12 m.IngressParser_parser_tmp_11
-	and m.IngressParser_parser_tmp_12 0x1fff
+	and m.IngressParser_parser_tmp_12 0x1FFF
 	mov m.IngressParser_parser_tmp_21 m.IngressParser_parser_tmp_12
 	mov m.IngressParser_parser_tmp_22 h.ipv4.ttl
 	mov m.IngressParser_parser_tmp_23 h.ipv4.protocol

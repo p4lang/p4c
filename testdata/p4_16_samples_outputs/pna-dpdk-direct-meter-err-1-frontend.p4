@@ -84,12 +84,6 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     @name("MainControlImpl.next_hop") action next_hop_1(@name("oport") PortId_t oport_1) {
         out1_0 = meter0_0.execute(color_in_0, 32w1024);
-        if (out1_0 == PNA_MeterColor_t.GREEN) {
-            tmp = 32w1;
-        } else {
-            tmp = 32w0;
-        }
-        user_meta.port_out = tmp;
         color_out_0 = meter1_0.execute(color_in_0, 32w1024);
         if (color_out_0 == PNA_MeterColor_t.GREEN) {
             tmp_0 = 32w1;
@@ -111,17 +105,11 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     @name("MainControlImpl.default_route_drop") action default_route_drop_1() {
         out1_0 = meter0_0.execute(color_in_0, 32w1024);
-        if (out1_0 == PNA_MeterColor_t.GREEN) {
-            tmp_1 = 32w1;
-        } else {
-            tmp_1 = 32w0;
-        }
-        user_meta.port_out = tmp_1;
         drop_packet();
     }
-    @name("MainControlImpl.ipv4_da_lpm1") table ipv4_da_lpm1_0 {
+    @name("MainControlImpl.ipv4_da") table ipv4_da_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             next_hop();
@@ -132,7 +120,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     @name("MainControlImpl.ipv4_da_lpm") table ipv4_da_lpm_0 {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             next_hop_1();
@@ -152,7 +140,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
             }
             user_meta.port_out1 = tmp_2;
             ipv4_da_lpm_0.apply();
-            ipv4_da_lpm1_0.apply();
+            ipv4_da_0.apply();
         }
     }
 }
@@ -165,4 +153,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

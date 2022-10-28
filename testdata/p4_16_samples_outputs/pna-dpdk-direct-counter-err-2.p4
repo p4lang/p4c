@@ -60,9 +60,7 @@ control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    DirectCounter<ByteCounter_t>(PNA_CounterType_t.BYTES) per_prefix_bytes_count;
     DirectCounter<PacketByteCounter_t>(PNA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_bytes_count;
-    DirectCounter<PacketCounter_t>(PNA_CounterType_t.PACKETS) per_prefix_pkt_count;
     action send_pktbytecount() {
         per_prefix_pkt_bytes_count.count(1024);
     }
@@ -91,4 +89,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

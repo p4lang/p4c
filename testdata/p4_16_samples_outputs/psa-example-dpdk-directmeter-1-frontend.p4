@@ -53,8 +53,8 @@ control MyIC(inout headers_t hdr, inout metadata_t b, in psa_ingress_input_metad
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
-            b.data              : selector @name("b.data") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            b.data              : selector @name("b.data");
         }
         actions = {
             NoAction_1();
@@ -86,8 +86,5 @@ control MyED(packet_out buffer, out EMPTY a, out EMPTY b, inout EMPTY c, in meta
 }
 
 IngressPipeline<headers_t, metadata_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIP(), MyIC(), MyID()) ip;
-
 EgressPipeline<EMPTY, metadata_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyEP(), MyEC(), MyED()) ep;
-
 PSA_Switch<headers_t, metadata_t, EMPTY, metadata_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

@@ -55,7 +55,6 @@ control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @name("MainControlImpl.color_out") PNA_MeterColor_t color_out_0;
     @name("MainControlImpl.out1") PNA_MeterColor_t out1_0;
     @name("MainControlImpl.color_in") PNA_MeterColor_t color_in_0;
     @name("MainControlImpl.tmp") bit<32> tmp;
@@ -71,7 +70,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     @name("MainControlImpl.ipv4_host") table ipv4_host_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             send();
@@ -82,7 +81,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     apply {
         color_in_0 = PNA_MeterColor_t.RED;
-        color_out_0 = meter0_0.execute(color_in_0, 32w1024);
+        meter0_0.execute(color_in_0, 32w1024);
         ipv4_host_0.apply();
     }
 }
@@ -95,4 +94,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

@@ -34,8 +34,6 @@ struct headers_t {
     ipv4_t     ipv4;
 }
 
-typedef bit<48> ByteCounter_t;
-typedef bit<32> PacketCounter_t;
 typedef bit<80> PacketByteCounter_t;
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t main_meta, in pna_main_parser_input_metadata_t istd) {
     state start {
@@ -57,15 +55,13 @@ control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @name("MainControlImpl.per_prefix_bytes_count") DirectCounter<ByteCounter_t>(PNA_CounterType_t.BYTES) per_prefix_bytes_count_0;
     @name("MainControlImpl.per_prefix_pkt_bytes_count") DirectCounter<PacketByteCounter_t>(PNA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_bytes_count_0;
-    @name("MainControlImpl.per_prefix_pkt_count") DirectCounter<PacketCounter_t>(PNA_CounterType_t.PACKETS) per_prefix_pkt_count_0;
     @name("MainControlImpl.send_pktbytecount") action send_pktbytecount() {
         per_prefix_pkt_bytes_count_0.count(32w1024);
     }
     @name("MainControlImpl.ipv4_host_pkt_byte_count") table ipv4_host_pkt_byte_count_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             send_pktbytecount();
@@ -88,4 +84,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

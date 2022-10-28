@@ -69,7 +69,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         per_prefix_pkt_byte_count1.count();
         drop_packet();
     }
-    table ipv4_da_lpm1 {
+    table ipv4_tbl1 {
         key = {
             hdr.ipv4.dstAddr: exact;
         }
@@ -80,7 +80,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         default_action = default_route_drop;
         pna_direct_counter = per_prefix_pkt_byte_count1;
     }
-    table ipv4_da_lpm {
+    table ipv4_tbl {
         key = {
             hdr.ipv4.dstAddr: exact;
         }
@@ -92,8 +92,8 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     apply {
         if (hdr.ipv4.isValid()) {
-            ipv4_da_lpm.apply();
-            ipv4_da_lpm1.apply();
+            ipv4_tbl.apply();
+            ipv4_tbl1.apply();
         }
     }
 }
@@ -106,4 +106,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

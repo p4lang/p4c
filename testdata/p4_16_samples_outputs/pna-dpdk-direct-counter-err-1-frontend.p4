@@ -59,13 +59,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     @name("MainControlImpl.per_prefix_pkt_byte_count1") DirectCounter<PacketByteCounter_t>(PNA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_byte_count1_0;
     @name("MainControlImpl.next_hop") action next_hop(@name("oport") PortId_t oport) {
         per_prefix_pkt_byte_count_0.count();
-        per_prefix_pkt_byte_count1_0.count();
         send_to_port(oport);
-    }
-    @name("MainControlImpl.next_hop") action next_hop_1(@name("oport") PortId_t oport_1) {
-        per_prefix_pkt_byte_count_0.count();
-        per_prefix_pkt_byte_count1_0.count();
-        send_to_port(oport_1);
     }
     @name("MainControlImpl.default_route_drop") action default_route_drop() {
         per_prefix_pkt_byte_count_0.count();
@@ -75,23 +69,22 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         per_prefix_pkt_byte_count_0.count();
         drop_packet();
     }
-    @name("MainControlImpl.ipv4_da_lpm1") table ipv4_da_lpm1_0 {
+    @name("MainControlImpl.ipv4_tbl1") table ipv4_tbl1_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
-            next_hop();
             default_route_drop();
         }
         default_action = default_route_drop();
         pna_direct_counter = per_prefix_pkt_byte_count1_0;
     }
-    @name("MainControlImpl.ipv4_da_lpm") table ipv4_da_lpm_0 {
+    @name("MainControlImpl.ipv4_tbl") table ipv4_tbl_0 {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
-            next_hop_1();
+            next_hop();
             default_route_drop_1();
         }
         default_action = default_route_drop_1();
@@ -100,8 +93,8 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     apply {
         if (hdr.ipv4.isValid()) {
             per_prefix_pkt_byte_count_0.count();
-            ipv4_da_lpm_0.apply();
-            ipv4_da_lpm1_0.apply();
+            ipv4_tbl_0.apply();
+            ipv4_tbl1_0.apply();
         }
     }
 }
@@ -114,4 +107,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

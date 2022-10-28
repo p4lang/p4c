@@ -63,7 +63,6 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     @name("MainControlImpl.meter1") DirectMeter(PNA_MeterType_t.BYTES) meter1_0;
     @name("MainControlImpl.next_hop") action next_hop(@name("oport") bit<32> oport) {
         out1_0 = meter0_0.execute(color_in_0, 32w1024);
-        user_meta.port_out = (out1_0 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
         color_out_0 = meter1_0.execute(color_in_0, 32w1024);
         user_meta.port_out1 = (color_out_0 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
         send_to_port(oport);
@@ -77,7 +76,6 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     @name("MainControlImpl.default_route_drop") action default_route_drop() {
         out1_0 = meter0_0.execute(color_in_0, 32w1024);
-        user_meta.port_out = (out1_0 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
         drop_packet();
     }
     @name("MainControlImpl.default_route_drop") action default_route_drop_1() {
@@ -87,7 +85,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     @name("MainControlImpl.ipv4_da_1") table ipv4_da {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             next_hop();
@@ -98,7 +96,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     @name("MainControlImpl.ipv4_da_2") table ipv4_da_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             next_hop_1();
@@ -107,16 +105,16 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         default_action = default_route_drop_1();
         pna_direct_meter = meter1_0;
     }
-    @hidden action pnadpdkdirectmetererr4l144() {
+    @hidden action pnadpdkdirectmetererr4l149() {
         tmp_2 = 32w1;
     }
-    @hidden action pnadpdkdirectmetererr4l144_0() {
+    @hidden action pnadpdkdirectmetererr4l149_0() {
         tmp_2 = 32w0;
     }
-    @hidden action pnadpdkdirectmetererr4l143() {
+    @hidden action pnadpdkdirectmetererr4l148() {
         color_out_0 = meter1_0.execute(PNA_MeterColor_t.RED, 32w1024);
     }
-    @hidden action pnadpdkdirectmetererr4l144_1() {
+    @hidden action pnadpdkdirectmetererr4l149_1() {
         user_meta.port_out1 = tmp_2;
     }
     @hidden action pnadpdkdirectmetererr4l106() {
@@ -128,40 +126,40 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
         const default_action = pnadpdkdirectmetererr4l106();
     }
-    @hidden table tbl_pnadpdkdirectmetererr4l143 {
+    @hidden table tbl_pnadpdkdirectmetererr4l148 {
         actions = {
-            pnadpdkdirectmetererr4l143();
+            pnadpdkdirectmetererr4l148();
         }
-        const default_action = pnadpdkdirectmetererr4l143();
+        const default_action = pnadpdkdirectmetererr4l148();
     }
-    @hidden table tbl_pnadpdkdirectmetererr4l144 {
+    @hidden table tbl_pnadpdkdirectmetererr4l149 {
         actions = {
-            pnadpdkdirectmetererr4l144();
+            pnadpdkdirectmetererr4l149();
         }
-        const default_action = pnadpdkdirectmetererr4l144();
+        const default_action = pnadpdkdirectmetererr4l149();
     }
-    @hidden table tbl_pnadpdkdirectmetererr4l144_0 {
+    @hidden table tbl_pnadpdkdirectmetererr4l149_0 {
         actions = {
-            pnadpdkdirectmetererr4l144_0();
+            pnadpdkdirectmetererr4l149_0();
         }
-        const default_action = pnadpdkdirectmetererr4l144_0();
+        const default_action = pnadpdkdirectmetererr4l149_0();
     }
-    @hidden table tbl_pnadpdkdirectmetererr4l144_1 {
+    @hidden table tbl_pnadpdkdirectmetererr4l149_1 {
         actions = {
-            pnadpdkdirectmetererr4l144_1();
+            pnadpdkdirectmetererr4l149_1();
         }
-        const default_action = pnadpdkdirectmetererr4l144_1();
+        const default_action = pnadpdkdirectmetererr4l149_1();
     }
     apply {
         tbl_pnadpdkdirectmetererr4l106.apply();
         if (hdr.ipv4.isValid()) {
-            tbl_pnadpdkdirectmetererr4l143.apply();
+            tbl_pnadpdkdirectmetererr4l148.apply();
             if (color_out_0 == PNA_MeterColor_t.GREEN) {
-                tbl_pnadpdkdirectmetererr4l144.apply();
+                tbl_pnadpdkdirectmetererr4l149.apply();
             } else {
-                tbl_pnadpdkdirectmetererr4l144_0.apply();
+                tbl_pnadpdkdirectmetererr4l149_0.apply();
             }
-            tbl_pnadpdkdirectmetererr4l144_1.apply();
+            tbl_pnadpdkdirectmetererr4l149_1.apply();
             ipv4_da.apply();
             ipv4_da_0.apply();
         }
@@ -169,20 +167,19 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkdirectmetererr4l157() {
+    @hidden action pnadpdkdirectmetererr4l163() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadpdkdirectmetererr4l157 {
+    @hidden table tbl_pnadpdkdirectmetererr4l163 {
         actions = {
-            pnadpdkdirectmetererr4l157();
+            pnadpdkdirectmetererr4l163();
         }
-        const default_action = pnadpdkdirectmetererr4l157();
+        const default_action = pnadpdkdirectmetererr4l163();
     }
     apply {
-        tbl_pnadpdkdirectmetererr4l157.apply();
+        tbl_pnadpdkdirectmetererr4l163.apply();
     }
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

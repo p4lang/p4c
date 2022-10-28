@@ -53,15 +53,13 @@ control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @name("MainControlImpl.per_prefix_bytes_count") DirectCounter<bit<48>>(PNA_CounterType_t.BYTES) per_prefix_bytes_count_0;
     @name("MainControlImpl.per_prefix_pkt_bytes_count") DirectCounter<bit<80>>(PNA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_bytes_count_0;
-    @name("MainControlImpl.per_prefix_pkt_count") DirectCounter<bit<32>>(PNA_CounterType_t.PACKETS) per_prefix_pkt_count_0;
     @name("MainControlImpl.send_pktbytecount") action send_pktbytecount() {
         per_prefix_pkt_bytes_count_0.count(32w1024);
     }
     @name("MainControlImpl.ipv4_host_pkt_byte_count") table ipv4_host_pkt_byte_count_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             send_pktbytecount();
@@ -70,36 +68,35 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         size = 32w1024;
         pna_direct_counter = per_prefix_pkt_bytes_count_0;
     }
-    @hidden action pnadpdkdirectcountererr2l106() {
+    @hidden action pnadpdkdirectcountererr2l104() {
         per_prefix_pkt_bytes_count_0.count(32w1024);
     }
-    @hidden table tbl_pnadpdkdirectcountererr2l106 {
+    @hidden table tbl_pnadpdkdirectcountererr2l104 {
         actions = {
-            pnadpdkdirectcountererr2l106();
+            pnadpdkdirectcountererr2l104();
         }
-        const default_action = pnadpdkdirectcountererr2l106();
+        const default_action = pnadpdkdirectcountererr2l104();
     }
     apply {
-        tbl_pnadpdkdirectcountererr2l106.apply();
+        tbl_pnadpdkdirectcountererr2l104.apply();
         ipv4_host_pkt_byte_count_0.apply();
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkdirectcountererr2l118() {
+    @hidden action pnadpdkdirectcountererr2l116() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadpdkdirectcountererr2l118 {
+    @hidden table tbl_pnadpdkdirectcountererr2l116 {
         actions = {
-            pnadpdkdirectcountererr2l118();
+            pnadpdkdirectcountererr2l116();
         }
-        const default_action = pnadpdkdirectcountererr2l118();
+        const default_action = pnadpdkdirectcountererr2l116();
     }
     apply {
-        tbl_pnadpdkdirectcountererr2l118.apply();
+        tbl_pnadpdkdirectcountererr2l116.apply();
     }
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-
