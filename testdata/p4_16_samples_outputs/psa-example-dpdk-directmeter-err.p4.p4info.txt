@@ -61,7 +61,7 @@ direct_meters {
     alias: "meter0"
   }
   spec {
-    unit: PACKETS
+    unit: BYTES
   }
   direct_table_id: 39967501
 }

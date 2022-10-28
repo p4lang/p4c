@@ -17,6 +17,7 @@ struct headers_t {
 struct metadata_t {
     bit<32> port_in;
     bit<32> port_out;
+    bit<32> data;
 }
 
 parser MyIP(packet_in buffer, out headers_t hdr, inout metadata_t b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
@@ -37,6 +38,7 @@ control MyIC(inout headers_t hdr, inout metadata_t b, in psa_ingress_input_metad
     @name("MyIC.color_in") PSA_MeterColor_t color_in_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
+    @name("MyIC.as") ActionSelector(PSA_HashAlgorithm_t.CRC32, 32w1024, 32w16) as_0;
     @name("MyIC.meter0") DirectMeter(PSA_MeterType_t.BYTES) meter0_0;
     @name("MyIC.execute_meter") action execute_meter() {
         color_out_0 = meter0_0.execute(color_in_0, 32w1024);
@@ -45,25 +47,27 @@ control MyIC(inout headers_t hdr, inout metadata_t b, in psa_ingress_input_metad
     @name("MyIC.tbl") table tbl_0 {
         key = {
             hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            b.data              : selector @name("b.data") ;
         }
         actions = {
             NoAction_1();
             execute_meter();
         }
         psa_direct_meter = meter0_0;
+        psa_implementation = as_0;
         default_action = NoAction_1();
     }
-    @hidden action psaexampledpdkdirectmeter1l57() {
+    @hidden action psaexampledpdkdirectmeter1l59() {
         color_in_0 = PSA_MeterColor_t.RED;
     }
-    @hidden table tbl_psaexampledpdkdirectmeter1l57 {
+    @hidden table tbl_psaexampledpdkdirectmeter1l59 {
         actions = {
-            psaexampledpdkdirectmeter1l57();
+            psaexampledpdkdirectmeter1l59();
         }
-        const default_action = psaexampledpdkdirectmeter1l57();
+        const default_action = psaexampledpdkdirectmeter1l59();
     }
     apply {
-        tbl_psaexampledpdkdirectmeter1l57.apply();
+        tbl_psaexampledpdkdirectmeter1l59.apply();
         tbl_0.apply();
     }
 }

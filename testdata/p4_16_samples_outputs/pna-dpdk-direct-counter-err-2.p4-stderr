@@ -1,0 +1,6 @@
+pna-dpdk-direct-counter-err-2.p4(83): [--Wwarn=unused] warning: per_prefix_bytes_count: unused instance
+    DirectCounter<ByteCounter_t>(PNA_CounterType_t.BYTES) per_prefix_bytes_count;
+                                                          ^^^^^^^^^^^^^^^^^^^^^^
+pna-dpdk-direct-counter-err-2.p4(85): [--Wwarn=unused] warning: per_prefix_pkt_count: unused instance
+    DirectCounter<PacketCounter_t>(PNA_CounterType_t.PACKETS) per_prefix_pkt_count;
+                                                              ^^^^^^^^^^^^^^^^^^^^

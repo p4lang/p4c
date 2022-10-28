@@ -952,14 +952,32 @@ class CollectDirectCounterMeter : public Inspector {
     P4::TypeMap* typeMap;
     DpdkProgramStructure* structure;
     int getTableSize(const IR::P4Table * tbl);
+    bool ifMethodFound(const IR::P4Action *a, cstring method, cstring instancename = "");
+    bool checkMethodCallInAction(const P4::ExternMethod *, cstring, cstring &, cstring);
  public:
     static ordered_map<cstring, int> directMeterCounterSizeMap;
     CollectDirectCounterMeter(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                 DpdkProgramStructure* structure) :
     refMap(refMap), typeMap(typeMap), structure(structure) {setName("CollectDirectCounterMeter");}
 
+    void postorder(const IR::P4Action* a) override;
     void postorder(const IR::P4Table* t) override;
 };
+
+class ValidateDirectCounterMeter : public Inspector {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    DpdkProgramStructure* structure;
+    void validateMethodInvocation(P4::ExternMethod *);
+ public:
+    ValidateDirectCounterMeter(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+            DpdkProgramStructure* structure) :
+    refMap(refMap), typeMap(typeMap), structure(structure) {}
+
+    void postorder(const IR::AssignmentStatement*) override;
+    void postorder(const IR::MethodCallStatement*) override;
+};
+
 
 class CollectAddOnMissTable : public Inspector {
     P4::ReferenceMap* refMap;

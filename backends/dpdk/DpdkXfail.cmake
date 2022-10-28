@@ -92,6 +92,8 @@ p4c_add_xfail_reason("dpdk"
   testdata/p4_16_samples/pna-add-on-miss-err.p4
   testdata/p4_16_samples/pna-example-tcp-connection-tracking-err-1.p4
   testdata/p4_16_samples/pna-example-tcp-connection-tracking-err.p4
+  testdata/p4_16_samples/pna-dpdk-direct-meter-err-2.p4
+  testdata/p4_16_samples/pna-dpdk-direct-counter-err-2.p4
   )
 
 p4c_add_xfail_reason("dpdk"
@@ -111,5 +113,32 @@ p4c_add_xfail_reason("dpdk"
 
 p4c_add_xfail_reason("dpdk"
   "implementation property cannot co-exist with direct counter"
+  testdata/p4_16_samples/psa-example-dpdk-directmeter-1.p4
   testdata/p4_16_samples/pna-dpdk-direct-counter-err.p4
+  testdata/p4_16_samples/pna-dpdk-direct-meter-err.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Direct counters and direct meters are unsupported for wildcard match"
+  testdata/p4_16_samples/psa-example-counters-bmv2.p4
+  testdata/p4_16_samples/pna-dpdk-direct-meter-err-1.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "can only be invoked from within action of ownertable"
+  testdata/p4_16_samples/psa-example-dpdk-directmeter-err.p4
+  testdata/p4_16_samples/pna-dpdk-direct-counter-err-3.p4
+  testdata/p4_16_samples/psa-meter6.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Expected default action .* to have .* method call for .* extern instance"
+   testdata/p4_16_samples/pna-dpdk-direct-counter-err-1.p4
+   testdata/p4_16_samples/pna-dpdk-direct-meter-err-4.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  ".* method for different .* instances (.*) called within same action"
+  testdata/p4_16_samples/pna-dpdk-direct-counter-err-4.p4
+  testdata/p4_16_samples/pna-dpdk-direct-meter-err-3.p4
   )

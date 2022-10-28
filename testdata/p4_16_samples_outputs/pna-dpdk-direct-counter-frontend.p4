@@ -60,25 +60,13 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     @name("MainControlImpl.per_prefix_bytes_count") DirectCounter<ByteCounter_t>(PNA_CounterType_t.BYTES) per_prefix_bytes_count_0;
     @name("MainControlImpl.per_prefix_pkt_bytes_count") DirectCounter<PacketByteCounter_t>(PNA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_bytes_count_0;
     @name("MainControlImpl.per_prefix_pkt_count") DirectCounter<PacketCounter_t>(PNA_CounterType_t.PACKETS) per_prefix_pkt_count_0;
-    @name("MainControlImpl.drop") action drop() {
-        drop_packet();
-    }
-    @name("MainControlImpl.drop") action drop_1() {
-        drop_packet();
-    }
-    @name("MainControlImpl.drop") action drop_2() {
-        drop_packet();
-    }
-    @name("MainControlImpl.send") action send(@name("port") PortId_t port) {
-        send_to_port(port);
+    @name("MainControlImpl.count") action count_1() {
         per_prefix_pkt_count_0.count();
     }
-    @name("MainControlImpl.send_bytecount") action send_bytecount(@name("port") PortId_t port_3) {
-        send_to_port(port_3);
+    @name("MainControlImpl.bytecount") action bytecount() {
         per_prefix_bytes_count_0.count(32w1024);
     }
-    @name("MainControlImpl.send_pktbytecount") action send_pktbytecount(@name("port") PortId_t port_4) {
-        send_to_port(port_4);
+    @name("MainControlImpl.pktbytecount") action pktbytecount() {
         per_prefix_pkt_bytes_count_0.count(32w1024);
     }
     @name("MainControlImpl.ipv4_host") table ipv4_host_0 {
@@ -86,10 +74,9 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
             hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
-            drop();
-            send();
+            count_1();
         }
-        const default_action = drop();
+        const default_action = count_1();
         size = 32w1024;
         pna_direct_counter = per_prefix_pkt_count_0;
     }
@@ -98,10 +85,9 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
             hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
-            drop_1();
-            send_bytecount();
+            bytecount();
         }
-        const default_action = drop_1();
+        const default_action = bytecount();
         size = 32w1024;
         pna_direct_counter = per_prefix_bytes_count_0;
     }
@@ -110,10 +96,9 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
             hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
-            drop_2();
-            send_pktbytecount();
+            pktbytecount();
         }
-        const default_action = drop_2();
+        const default_action = pktbytecount();
         size = 32w1024;
         pna_direct_counter = per_prefix_pkt_bytes_count_0;
     }

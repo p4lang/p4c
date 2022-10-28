@@ -29,7 +29,7 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 }
 
 control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    DirectMeter(PSA_MeterType_t.PACKETS) meter0;
+    DirectMeter(PSA_MeterType_t.BYTES) meter0;
     action execute_meter() {
         meter0.execute();
     }

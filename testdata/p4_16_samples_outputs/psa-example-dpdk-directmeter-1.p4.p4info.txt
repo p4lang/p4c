@@ -19,6 +19,7 @@ tables {
   action_refs {
     id: 18579058
   }
+  implementation_id: 294316857
   direct_resource_ids: 368068636
   size: 1024
 }
@@ -36,6 +37,16 @@ actions {
     name: "MyIC.execute_meter"
     alias: "execute_meter"
   }
+}
+action_profiles {
+  preamble {
+    id: 294316857
+    name: "MyIC.as"
+    alias: "as"
+  }
+  table_ids: 39967501
+  with_selector: true
+  size: 1024
 }
 direct_meters {
   preamble {

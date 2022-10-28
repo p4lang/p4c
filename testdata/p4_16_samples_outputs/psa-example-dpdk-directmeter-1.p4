@@ -18,6 +18,7 @@ struct headers_t {
 struct metadata_t {
     bit<32> port_in;
     bit<32> port_out;
+    bit<32> data;
 }
 
 parser MyIP(packet_in buffer, out headers_t hdr, inout metadata_t b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
@@ -34,6 +35,7 @@ parser MyEP(packet_in buffer, out EMPTY a, inout metadata_t b, in psa_egress_par
 }
 
 control MyIC(inout headers_t hdr, inout metadata_t b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
+    ActionSelector(PSA_HashAlgorithm_t.CRC32, 32w1024, 32w16) as;
     PSA_MeterColor_t color_out;
     PSA_MeterColor_t color_in = PSA_MeterColor_t.RED;
     DirectMeter(PSA_MeterType_t.BYTES) meter0;
@@ -44,12 +46,14 @@ control MyIC(inout headers_t hdr, inout metadata_t b, in psa_ingress_input_metad
     table tbl {
         key = {
             hdr.ethernet.srcAddr: exact;
+            b.data              : selector;
         }
         actions = {
             NoAction;
             execute_meter;
         }
         psa_direct_meter = meter0;
+        psa_implementation = as;
     }
     apply {
         tbl.apply();

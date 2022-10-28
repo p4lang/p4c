@@ -83,20 +83,14 @@ control MainControlImpl(
     DirectCounter<ByteCounter_t>(PNA_CounterType_t.BYTES) per_prefix_bytes_count;
     DirectCounter<PacketByteCounter_t>(PNA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_bytes_count;
     DirectCounter<PacketCounter_t>(PNA_CounterType_t.PACKETS) per_prefix_pkt_count;
-    action drop() {
-        drop_packet();
-    }
 
-    action send(PortId_t port) {
-        send_to_port(port);
+    action count() {
 	per_prefix_pkt_count.count();
     }
-    action send_bytecount(PortId_t port) {
-        send_to_port(port);
+    action bytecount() {
 	per_prefix_bytes_count.count(1024);
     }
-    action send_pktbytecount(PortId_t port) {
-        send_to_port(port);
+    action pktbytecount() {
 	per_prefix_pkt_bytes_count.count(1024);
     }
 
@@ -106,11 +100,10 @@ control MainControlImpl(
         }
 
         actions = {
-            drop;
-            send;
+            count;
         }
 
-        const default_action = drop;
+        const default_action = count;
         size = IPV4_HOST_TABLE_MAX_ENTRIES;
 	pna_direct_counter = per_prefix_pkt_count;
     }
@@ -121,11 +114,10 @@ control MainControlImpl(
         }
 
         actions = {
-            drop;
-            send_bytecount;
+            bytecount;
         }
 
-        const default_action = drop;
+        const default_action = bytecount;
         size = IPV4_HOST_TABLE_MAX_ENTRIES;
 	pna_direct_counter = per_prefix_bytes_count;
     }
@@ -136,11 +128,10 @@ control MainControlImpl(
         }
 
         actions = {
-            drop;
-            send_pktbytecount;
+            pktbytecount;
         }
 
-        const default_action = drop;
+        const default_action = pktbytecount;
         size = IPV4_HOST_TABLE_MAX_ENTRIES;
 	pna_direct_counter = per_prefix_pkt_bytes_count;
     }

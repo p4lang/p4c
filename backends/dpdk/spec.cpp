@@ -121,7 +121,7 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
             if (directMeterCounterSizeMap.count(this->Name())) {
                 n_counters = new IR::Constant(directMeterCounterSizeMap.at(this->Name()));
             } else {
-                BUG("Direct Counter size is not populated");
+                BUG("%1%: Direct Counter size is not populated", this->Name());
             }
 
             auto counter_type = args->at(0)->expression;
@@ -164,7 +164,7 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
             if (directMeterCounterSizeMap.count(this->Name())) {
                 n_meters = new IR::Constant(directMeterCounterSizeMap.at(this->Name()));
             } else {
-                BUG("Direct Meter size is not populated");
+                BUG("%1%, Direct Meter size is not populated", this->Name());
             }
             auto metDecl = new IR::DpdkMeterDeclStatement(this->Name(), n_meters);
             metDecl->toSpec(out) << std::endl;

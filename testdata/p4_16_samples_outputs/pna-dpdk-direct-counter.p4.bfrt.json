@@ -25,31 +25,11 @@
       ],
       "action_specs" : [
         {
-          "id" : 24740121,
-          "name" : "MainControlImpl.drop",
+          "id" : 17422248,
+          "name" : "MainControlImpl.count",
           "action_scope" : "TableAndDefault",
           "annotations" : [],
           "data" : []
-        },
-        {
-          "id" : 22742608,
-          "name" : "MainControlImpl.send",
-          "action_scope" : "TableAndDefault",
-          "annotations" : [],
-          "data" : [
-            {
-              "id" : 1,
-              "name" : "port",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bytes",
-                "width" : 32
-              }
-            }
-          ]
         }
       ],
       "data" : [
@@ -95,31 +75,11 @@
       ],
       "action_specs" : [
         {
-          "id" : 24740121,
-          "name" : "MainControlImpl.drop",
+          "id" : 31760578,
+          "name" : "MainControlImpl.bytecount",
           "action_scope" : "TableAndDefault",
           "annotations" : [],
           "data" : []
-        },
-        {
-          "id" : 19872628,
-          "name" : "MainControlImpl.send_bytecount",
-          "action_scope" : "TableAndDefault",
-          "annotations" : [],
-          "data" : [
-            {
-              "id" : 1,
-              "name" : "port",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bytes",
-                "width" : 32
-              }
-            }
-          ]
         }
       ],
       "data" : [
@@ -165,31 +125,11 @@
       ],
       "action_specs" : [
         {
-          "id" : 24740121,
-          "name" : "MainControlImpl.drop",
+          "id" : 20899529,
+          "name" : "MainControlImpl.pktbytecount",
           "action_scope" : "TableAndDefault",
           "annotations" : [],
           "data" : []
-        },
-        {
-          "id" : 27074912,
-          "name" : "MainControlImpl.send_pktbytecount",
-          "action_scope" : "TableAndDefault",
-          "annotations" : [],
-          "data" : [
-            {
-              "id" : 1,
-              "name" : "port",
-              "repeated" : false,
-              "mandatory" : true,
-              "read_only" : false,
-              "annotations" : [],
-              "type" : {
-                "type" : "bytes",
-                "width" : 32
-              }
-            }
-          ]
         }
       ],
       "data" : [
