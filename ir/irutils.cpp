@@ -43,7 +43,7 @@ const Constant* IRUtils::getConstant(const Type* type, big_int v) {
     using key_t = std::tuple<int, std::type_index, bool, big_int>;
     static std::map<key_t, const Constant*> constants;
 
-    auto*& result = constants[{tb->width_bits(), typeid(type), tb->isSigned, v}];
+    auto*& result = constants[{tb->width_bits(), typeid(*type), tb->isSigned, v}];
     if (result == nullptr) {
         result = new Constant(tb, v);
     }

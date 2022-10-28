@@ -1,5 +1,5 @@
-#ifndef _LIB_IRUTILS_H_
-#define _LIB_IRUTILS_H_
+#ifndef IR_IRUTILS_H_
+#define IR_IRUTILS_H_
 
 #include <vector>
 
@@ -95,4 +95,4 @@ class IRUtils {
 
 }  // namespace IR
 
-#endif /* _LIB_IRUTILS_H_ */
+#endif /* IR_IRUTILS_H_ */

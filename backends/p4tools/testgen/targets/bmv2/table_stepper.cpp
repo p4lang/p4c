@@ -192,7 +192,7 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
             const auto& actionDataVar =
-                IRUtils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
+                Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
             const auto& actionArg = nextState->createZombieConst(parameter->type, keyName);
@@ -244,8 +244,8 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
         std::vector<Continuation::Command> replacements;
         replacements.emplace_back(new IR::MethodCallStatement(synthesizedAction));
 
-        nextState->set(getTableHitVar(table), IRUtils::getBoolLiteral(true));
-        nextState->set(getTableReachedVar(table), IRUtils::getBoolLiteral(true));
+        nextState->set(getTableHitVar(table), IR::IRUtils::getBoolLiteral(true));
+        nextState->set(getTableReachedVar(table), IR::IRUtils::getBoolLiteral(true));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << " Chosen action: " << actionName;

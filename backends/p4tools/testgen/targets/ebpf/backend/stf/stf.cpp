@@ -21,7 +21,7 @@
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/irutils.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
 
