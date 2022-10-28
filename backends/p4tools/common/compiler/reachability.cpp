@@ -340,6 +340,16 @@ ReachabilityEngineState* ReachabilityEngineState::copy() {
 
 std::list<const DCGVertexType*> ReachabilityEngineState::getState() { return state; }
 
+void ReachabilityEngineState::setState(std::list<const DCGVertexType*> ls) { state = ls; }
+
+const DCGVertexType* ReachabilityEngineState::getPrevNode() { return prevNode; }
+
+void ReachabilityEngineState::setPrevNode(const DCGVertexType* n) { prevNode = n; };
+
+bool ReachabilityEngineState::isEmpty() { return state.empty(); }
+
+void ReachabilityEngineState::clear() { state.clear(); }
+
 ReachabilityEngine::ReachabilityEngine(gsl::not_null<const NodesCallGraph*> dcg,
                                        std::string reachabilityExpression,
                                        bool eliminateAnnotations)
@@ -476,26 +486,27 @@ ReachabilityResult ReachabilityEngine::next(ReachabilityEngineState* state,
     if (forbiddenVertexes.count(next)) {
         return std::make_pair(false, nullptr);
     }
-    if (state->state.empty()) {
+    if (state->isEmpty()) {
         return std::make_pair(true, nullptr);
     }
-    if (state->prevNode == nullptr) {
-        state->prevNode = next;
-    } else if (dcg->isReachable(state->prevNode, next)) {
+    if (state->getPrevNode() == nullptr) {
+        state->setPrevNode(next);
+    } else if (dcg->isReachable(state->getPrevNode(), next)) {
         // Check to move in the same direction.
-        state->prevNode = next;
+        state->setPrevNode(next);
     } else {
         return std::make_pair(false, nullptr);
     }
     const IR::Expression* expr = nullptr;
     std::list<const DCGVertexType*> newState;
-    for (const auto* i : state->state) {
+    std::list<const DCGVertexType*> currentState = state->getState();
+    for (const auto* i : currentState) {
         if (i == nullptr) {
             // Start from intial.
             auto j = userTransitions.find(i);
             if (j == userTransitions.end()) {
                 // No user's transitions were found.
-                state->state.clear();
+                state->clear();
                 return std::make_pair(true, nullptr);
             }
             for (const auto* k : j->second) {
@@ -504,7 +515,7 @@ ReachabilityResult ReachabilityEngine::next(ReachabilityEngineState* state,
                     auto m = userTransitions.find(k);
                     if (m == userTransitions.end()) {
                         // No next state found.
-                        state->state.clear();
+                        state->clear();
                         return std::make_pair(true, getCondition(k));
                     }
                     for (const auto* n : m->second) {
@@ -520,7 +531,7 @@ ReachabilityResult ReachabilityEngine::next(ReachabilityEngineState* state,
             auto m = userTransitions.find(i);
             if (m == userTransitions.end()) {
                 // No next state found.
-                state->state.clear();
+                state->clear();
                 return std::make_pair(true, getCondition(i));
             }
             for (const auto* n : m->second) {
@@ -532,8 +543,8 @@ ReachabilityResult ReachabilityEngine::next(ReachabilityEngineState* state,
             newState.push_back(i);
         }
     }
-    state->state = newState;
-    return std::make_pair(state->state.begin() != state->state.end(), expr);
+    state->setState(newState);
+    return std::make_pair(!state->isEmpty(), expr);
 }
 
 gsl::not_null<const NodesCallGraph*> ReachabilityEngine::getDCG() { return dcg; }

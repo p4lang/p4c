@@ -121,14 +121,26 @@ class P4ProgramDCGCreator : public Inspector {
 
 /// The main data for reachability engine.
 class ReachabilityEngineState {
-    friend class ReachabilityEngine;
     const DCGVertexType* prevNode = nullptr;
     std::list<const DCGVertexType*> state;
 
  public:
+    /// Gets initial state.
     static ReachabilityEngineState* getInitial();
+    /// Copies a state.
     ReachabilityEngineState* copy();
+    /// Gets current state.
     std::list<const DCGVertexType*> getState();
+    /// Sets current state.
+    void setState(std::list<const DCGVertexType*>);
+    /// Gets previous node.
+    const DCGVertexType* getPrevNode();
+    /// Sets previous node.
+    void setPrevNode(const DCGVertexType*);
+    /// Retuns true if state is empty.
+    bool isEmpty();
+    /// Clears state.
+    void clear();
 };
 
 using ReachabilityResult = std::pair<bool, const IR::Expression*>;
@@ -153,19 +165,36 @@ class ReachabilityEngine {
     std::unordered_set<const DCGVertexType*> forbiddenVertexes;
 
  public:
+    /// Default constructor, where dcg is a control flow graph builded by P4ProgramDCGCreator,
+    /// reachabilityExpression is a user's pattern wrote in the syntax presented above,
+    /// eliminateAnnotations is true if after detection of the annotations it should to store
+    /// coresponded parent IR::Node in a  reachability engine state.
     ReachabilityEngine(gsl::not_null<const NodesCallGraph*> dcg, std::string reachabilityExpression,
                        bool eliminateAnnotations = false);
+    /// Moves the next statement in a engine state. It returns a pair where the first argument
+    /// is a flag for posiblity of such movement and the second arguemnt is an condition
+    /// which should be checked additionally. If engine state is reachable from current node
+    /// then it returns true. If engine state contain such node then it returns additional condition
+    /// in case if it was inputed by user and moves engine state to the next state.
     ReachabilityResult next(ReachabilityEngineState*, const DCGVertexType*);
+    /// Returns current control flow graph.
     gsl::not_null<const NodesCallGraph*> getDCG();
 
  protected:
+    /// Translates current annotation into set of the parent nodes.
     void annotationToStatements(const DCGVertexType* node,
                                 std::unordered_set<const DCGVertexType*>& s);
+    /// Adds transition to engine control flow graph.
     void addTransition(const DCGVertexType*, const std::unordered_set<const DCGVertexType*>&);
+    /// Translates string to the coresponded nodes.
     std::unordered_set<const DCGVertexType*> getName(std::string name);
+    /// Gets user's condition from a node.
     const IR::Expression* getCondition(const DCGVertexType*);
+    /// Adds user's condition the a node.
     const IR::Expression* addCondition(const IR::Expression* prev,
                                        const DCGVertexType* currentState);
+    /// Translates string representation into IR::Expression.
+    /// Not implemented yet.
     static const IR::Expression* stringToNode(std::string name);
 
  protected:

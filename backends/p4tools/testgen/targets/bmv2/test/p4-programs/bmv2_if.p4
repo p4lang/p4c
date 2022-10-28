@@ -111,6 +111,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
         } else {
             table1.apply();
         }
+        table2.apply();
     }
 }
 
