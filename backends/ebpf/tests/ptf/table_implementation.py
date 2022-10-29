@@ -149,8 +149,8 @@ class ActionSelectorTest(P4EbpfTest):
 
     def create_actions(self, selector):
         for i in range(1, 7):
-            # i: member reference; 3+i: output port
-            ref = self.action_selector_add_action(selector, action=1, data=[i+3])
+            # i: member reference; output port from DP_PORTS
+            ref = self.action_selector_add_action(selector, action=1, data=[DP_PORTS[i-1]])
             if i != ref:
                 self.fail("Invalid member reference: expected {}, got {}".format(i, ref))
 
@@ -161,7 +161,7 @@ class ActionSelectorTest(P4EbpfTest):
     def create_default_rule_set(self, table, selector):
         self.create_actions(selector=selector)
         self.group_id = self.action_selector_create_empty_group(selector=selector)
-        self.group_add_members(selector=selector, gid=self.group_id, member_refs=[DP_PORTS[0], DP_PORTS[1], DP_PORTS[2]])
+        self.group_add_members(selector=selector, gid=self.group_id, member_refs=[4, 5, 6])
         self.default_group_ports = [PORT3, PORT4, PORT5]
 
         if table:
@@ -244,7 +244,7 @@ class ActionSelectorEmptyGroupActionPSATest(ActionSelectorTest):
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
 
-        cmd = "psabpf-ctl action-selector empty-group-action pipe {} MyIC_as action id 1 data 6".format(TEST_PIPELINE_ID)
+        cmd = "psabpf-ctl action-selector empty-group-action pipe {} MyIC_as action id 1 data {}".format(TEST_PIPELINE_ID, DP_PORTS[2])
         self.exec_ns_cmd(cmd, "empty group action update failed")
 
         testutils.send_packet(self, PORT0, pkt)
