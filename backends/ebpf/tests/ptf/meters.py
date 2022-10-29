@@ -236,7 +236,7 @@ class DirectMeterPSATest(P4EbpfTest):
         meter_value = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
                                         pbs_left=6150, cbs=6250, cbs_left=6150)
         expected_value = "hex 01 00 00 00 05 00 00 00 " + meter_value
-        self.verify_map_entry(name="ingress_tbl_fwd", key="hex 04 00 00 00",
+        self.verify_map_entry(name="ingress_tbl_fwd", key="hex {:02x} 00 00 00".format(DP_PORTS[0]),
                               expected_value=expected_value,
                               mask=get_meter_value_mask())
 
@@ -262,7 +262,7 @@ class DirectMeterColorAwarePSATest(P4EbpfTest):
         meter_value = build_meter_value(pir=1250000, cir=1250000, pbs=6250,
                                         pbs_left=6150, cbs=6250, cbs_left=6250)
         expected_value = "hex 01 00 00 00 05 00 00 00 " + meter_value
-        self.verify_map_entry(name="ingress_tbl_fwd", key="hex 04 00 00 00",
+        self.verify_map_entry(name="ingress_tbl_fwd", key="hex {:02x} 00 00 00".format(DP_PORTS[0]),
                               expected_value=expected_value,
                               mask=get_meter_value_mask())
 
@@ -279,7 +279,7 @@ class DirectAndIndirectMeterPSATest(P4EbpfTest):
         pkt = testutils.simple_ip_packet()
 
         # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B
-        self.table_add(table="ingress_tbl_fwd", key=[4], action=1, data="5",
+        self.table_add(table="ingress_tbl_fwd", key=[DP_PORTS[0]], action=1, data=[DP_PORTS[1]],
                        meters={"ingress_direct_meter": {"pir": 1250000, "pbs": 6250, "cir": 1250000, "cbs": 6250}})
 
         # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B
@@ -292,7 +292,7 @@ class DirectAndIndirectMeterPSATest(P4EbpfTest):
                                         pbs_left=6150, cbs=6250, cbs_left=6150)
         # action id | egress_port | meter_value
         expected_value = "hex 01 00 00 00 05 00 00 00 " + meter_value
-        self.verify_map_entry(name="ingress_tbl_fwd", key="hex 04 00 00 00",
+        self.verify_map_entry(name="ingress_tbl_fwd", key="hex {:02x} 00 00 00".format(DP_PORTS[0]),
                               expected_value=expected_value,
                               mask=get_meter_value_mask())
 
@@ -326,7 +326,7 @@ class DirectTwoMetersPSATest(P4EbpfTest):
         pkt = testutils.simple_ip_packet()
 
         # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B
-        self.table_add(table="ingress_tbl_fwd", key=[4], action=1, data=[5],
+        self.table_add(table="ingress_tbl_fwd", key=[DP_PORTS[0]], action=1, data=[DP_PORTS[1]],
                        meters={"ingress_meter1": {"pir": 1250000, "pbs": 6250, "cir": 1250000, "cbs": 6250},
                                "ingress_meter2": {"pir": 1250000, "pbs": 6250, "cir": 1250000, "cbs": 6250}})
 
@@ -340,7 +340,7 @@ class DirectTwoMetersPSATest(P4EbpfTest):
                                           pbs_left=6150, cbs=6250, cbs_left=6150,
                                           add_spin_lock=True)
         expected_value = "hex 01 00 00 00 05 00 00 00 " + meter_1_value + meter_2_value
-        self.verify_map_entry(name="ingress_tbl_fwd", key="hex 04 00 00 00",
+        self.verify_map_entry(name="ingress_tbl_fwd", key="hex {:02x} 00 00 00".format(DP_PORTS[0]),
                               expected_value=expected_value,
                               mask=get_meter_value_mask(with_spin_lock=False) +
                                    get_meter_value_mask(add_hex_prefix=False))
@@ -358,7 +358,7 @@ class DirectAndCounterMeterPSATest(P4EbpfTest):
         pkt = testutils.simple_ip_packet()
 
         # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B
-        self.table_add(table="ingress_tbl_fwd", key=[4], action=1, data=[5],
+        self.table_add(table="ingress_tbl_fwd", key=[DP_PORTS[0]], action=1, data=[DP_PORTS[1]],
                        counters={"ingress_counter1": {"packets": 1}},
                        meters={"ingress_meter1": {"pir": 1250000, "pbs": 6250, "cir": 1250000, "cbs": 6250}})
 
@@ -369,6 +369,6 @@ class DirectAndCounterMeterPSATest(P4EbpfTest):
                                         pbs_left=6150, cbs=6250, cbs_left=6150)
         # action id | egress_port | counter packets and padding | meter_value
         expected_value = "hex 01 00 00 00 05 00 00 00 02 00 00 00 00 00 00 00 " + meter_value
-        self.verify_map_entry(name="ingress_tbl_fwd", key="hex 04 00 00 00",
+        self.verify_map_entry(name="ingress_tbl_fwd", key="hex {:02x} 00 00 00".format(DP_PORTS[0]),
                               expected_value=expected_value,
                               mask=get_meter_value_mask())
