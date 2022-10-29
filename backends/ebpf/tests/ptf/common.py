@@ -103,6 +103,7 @@ class P4EbpfTest(BaseTest):
         p4args = "--Wdisable=unused --max-ternary-masks 3"
         for idx, dp_port in DP_PORTS.items():
             p4args += " -DPORT{}={}".format(idx, dp_port)
+        p4args += " -DPSA_RECIRC={}".format(self.get_dataplane_port_number("psa_recirc"))
         if self.is_trace_logs_enabled():
             p4args += " --trace"
 
@@ -114,7 +115,7 @@ class P4EbpfTest(BaseTest):
                       "ARGS=\"{cargs}\" P4C=p4c-ebpf P4ARGS=\"{p4args}\" psa".format(
                             output=self.test_prog_image,
                             p4file=self.p4_file_path,
-                            cargs="-DPSA_PORT_RECIRCULATE=2",
+                            cargs="-DPSA_PORT_RECIRCULATE={}".format(self.get_dataplane_port_number("psa_recirc")),
                             p4args=p4args),
                       "Compilation error")
 
