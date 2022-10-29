@@ -78,6 +78,9 @@ done
 cleanup
 trap cleanup EXIT
 
+# Make sure BPFFS is mounted
+mount bpffs /sys/fs/bpf -t bpf
+
 # Remove any temporary files from previous run. It might be useful to
 # preserve these files after test run for inspection
 rm -rf ptf_out/*
