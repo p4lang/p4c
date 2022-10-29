@@ -39,7 +39,7 @@ class SimpleActionProfilePSATest(P4EbpfTest):
     def runTest(self):
         pkt = testutils.simple_ip_packet(eth_src="11:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
         # FIXME: API/CLI for ActionProfile is not done yet, we are using table API/CLI for now
         self.table_add(table="MyIC_ap", key=[0x10], action=2, data=[0x1122])
@@ -47,7 +47,7 @@ class SimpleActionProfilePSATest(P4EbpfTest):
 
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
 
 class ActionProfileTwoTablesSameInstancePSATest(P4EbpfTest):
@@ -64,12 +64,12 @@ class ActionProfileTwoTablesSameInstancePSATest(P4EbpfTest):
         pkt = testutils.simple_ip_packet(eth_src="11:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
         pkt = testutils.simple_ip_packet(eth_src="AA:BB:CC:DD:EE:FF", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
 
 class ActionProfileLPMTablePSATest(P4EbpfTest):
@@ -85,12 +85,12 @@ class ActionProfileLPMTablePSATest(P4EbpfTest):
 
         pkt = testutils.simple_ip_packet(eth_src="AA:BB:CC:DD:EE:FF", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
         pkt[Ether].src = "11:22:33:44:55:66"
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
 
 # TODO: add test with ternary table
@@ -137,7 +137,7 @@ class ActionProfileHitPSATest(P4EbpfTest):
 
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
 
 # ----------------------------- Action Selector -----------------------------
@@ -162,7 +162,7 @@ class ActionSelectorTest(P4EbpfTest):
     def create_default_rule_set(self, table, selector):
         self.create_actions(selector=selector)
         self.group_id = self.action_selector_create_empty_group(selector=selector)
-        self.group_add_members(selector=selector, gid=self.group_id, member_refs=[4, 5, 6])
+        self.group_add_members(selector=selector, gid=self.group_id, member_refs=[DP_PORTS[0], DP_PORTS[1], DP_PORTS[2]])
         self.default_group_ports = [PORT3, PORT4, PORT5]
 
         if table:
@@ -343,7 +343,7 @@ class ActionSelectorActionRunPSATest(ActionSelectorTest):
 
         pkt = testutils.simple_ip_packet(eth_src="02:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
         pkt[Ether].src = "03:22:33:44:55:66"
         testutils.send_packet(self, PORT0, pkt)

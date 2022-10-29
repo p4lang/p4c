@@ -95,7 +95,7 @@ class RegisterDefaultPSATest(P4EbpfTest):
         pkt = testutils.simple_ip_packet()
 
         testutils.send_packet(self, PORT0, pkt)
-        self.register_verify(name="ingress_reg", index=["0x5"], expected_value=["0x10"])
+        self.register_verify(name="ingress_reg", index=["{}".format(hex(DP_PORTS[1]))], expected_value=["0x10"])
 
 
 class RegisterBigKeyPSATest(P4EbpfTest):

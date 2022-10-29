@@ -31,6 +31,8 @@ import shlex
 import subprocess
 import ptf
 import ptf.testutils as testutils
+import pyroute2
+from pyroute2 import NetNS
 
 from ptf.base_tests import BaseTest
 
@@ -42,6 +44,14 @@ TEST_PIPELINE_ID = 1
 TEST_PIPELINE_MOUNT_PATH = "/sys/fs/bpf/pipeline{}".format(TEST_PIPELINE_ID)
 PIPELINE_MAPS_MOUNT_PATH = "{}/maps".format(TEST_PIPELINE_MOUNT_PATH)
 
+PORT0 = 0
+PORT1 = 1
+PORT2 = 2
+PTF_PORTS = [PORT0, PORT1, PORT2]
+
+# stores real interface numbers retrieved from OS
+# DP_PORTS are used as data plane port numbers in P4 programs
+DP_PORTS = dict()
 
 def xdp2tc_head_not_supported(cls):
     if cls.xdp2tc_mode(cls) == 'head':
@@ -75,8 +85,22 @@ class P4EbpfTest(BaseTest):
         head, tail = os.path.split(self.p4_file_path)
         filename = tail.split(".")[0]
         self.test_prog_image = os.path.join("ptf_out", filename + ".o")
+        logger.info("\nUsing test params: %s", testutils.test_params_get())
+        if "namespace" in testutils.test_params_get():
+            self.switch_ns = testutils.test_param_get("namespace")
+        self.interfaces = testutils.test_param_get("interfaces").split(",")
+
+        # fetch data plane ports from network namespace
+        global DP_PORTS
+        next_idx = 0
+        for intf in self.interfaces:
+            if intf != "psa_recirc":
+                DP_PORTS[next_idx] = self.get_dataplane_port_number(intf)
+                next_idx += 1
 
         p4args = "--Wdisable=unused --max-ternary-masks 3"
+        for idx, dp_port in DP_PORTS.items():
+            p4args += " -DPORT{}={}".format(idx, dp_port)
         if self.is_trace_logs_enabled():
             p4args += " --trace"
 
@@ -94,10 +118,6 @@ class P4EbpfTest(BaseTest):
 
         self.dataplane = ptf.dataplane_instance
         self.dataplane.flush()
-        logger.info("\nUsing test params: %s", testutils.test_params_get())
-        if "namespace" in testutils.test_params_get():
-            self.switch_ns = testutils.test_param_get("namespace")
-        self.interfaces = testutils.test_param_get("interfaces").split(",")
 
         self.exec_ns_cmd("psabpf-ctl pipeline load id {} {}".format(TEST_PIPELINE_ID, self.test_prog_image), "Can't load programs into eBPF subsystem")
 
@@ -109,6 +129,11 @@ class P4EbpfTest(BaseTest):
             self.del_port(intf)
         self.exec_ns_cmd("psabpf-ctl pipeline unload id {}".format(TEST_PIPELINE_ID))
         super(P4EbpfTest, self).tearDown()
+
+    def get_dataplane_port_number(self, name):
+        with pyroute2.NetNS(self.switch_ns) as netns:
+            idx = netns.link_lookup(ifname=name)
+            return idx[0]
 
     def exec_ns_cmd(self, command='echo me', do_fail=None):
         command = "nsenter --net=/var/run/netns/" + self.switch_ns + " " + command
@@ -145,7 +170,7 @@ class P4EbpfTest(BaseTest):
     def update_map(self, name, key, value, map_in_map=False):
         if map_in_map:
             value = "pinned {}/{} any".format(PIPELINE_MAPS_MOUNT_PATH, value)
-        self.exec_ns_cmd("bpftool map update pinned {}/{} key {} value {}".format(
+        return self.exec_ns_cmd("bpftool map update pinned {}/{} key {} value {}".format(
             PIPELINE_MAPS_MOUNT_PATH, name, key, value))
 
     def read_map(self, name, key):

@@ -180,7 +180,7 @@ class MeterActionPSATest(P4EbpfTest):
         # cir, pir -> 10 Mb/s -> 1,25 MB/s, cbs, pbs -> bs (10 ms) -> 6250 B
         self.meter_update(name="ingress_meter1", index=0,
                           pir=1250000, pbs=6250, cir=1250000, cbs=6250)
-        self.table_add(table="ingress_tbl_fwd", key=[4], action=1, data=[5])
+        self.table_add(table="ingress_tbl_fwd", key=[DP_PORTS[0]], action=1, data=[DP_PORTS[1]])
 
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
@@ -227,7 +227,7 @@ class DirectMeterPSATest(P4EbpfTest):
         pkt = testutils.simple_ip_packet()
 
         # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B
-        self.table_add(table="ingress_tbl_fwd", key=[4], action=1, data="5",
+        self.table_add(table="ingress_tbl_fwd", key=[DP_PORTS[0]], action=1, data=[DP_PORTS[1]],
                        meters={"ingress_meter1": {"pir": 1250000, "pbs": 6250, "cir": 1250000, "cbs": 6250}})
 
         testutils.send_packet(self, PORT0, pkt)
@@ -253,7 +253,7 @@ class DirectMeterColorAwarePSATest(P4EbpfTest):
         pkt = testutils.simple_ip_packet()
 
         # cir, pir -> 10 Mb/s, cbs, pbs -> bs (10 ms) -> 6250 B
-        self.table_add(table="ingress_tbl_fwd", key=[4], action=1, data="5",
+        self.table_add(table="ingress_tbl_fwd", key=[DP_PORTS[0]], action=1, data=[DP_PORTS[1]],
                        meters={"ingress_meter1": {"pir": 1250000, "pbs": 6250, "cir": 1250000, "cbs": 6250}})
 
         testutils.send_packet(self, PORT0, pkt)

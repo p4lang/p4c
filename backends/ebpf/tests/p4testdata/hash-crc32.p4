@@ -71,7 +71,7 @@ control ingress(inout headers hdr,
     Hash<bit<32>>(PSA_HashAlgorithm_t.CRC32) h;
 
     apply {
-        send_to_port(ostd, (PortId_t) 5);
+        send_to_port(ostd, (PortId_t) PORT1);
 
         hdr.crc.crc = h.get_hash({hdr.crc.f1, hdr.crc.f2, hdr.crc.f3, hdr.crc.f4});
     }
