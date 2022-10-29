@@ -17,5 +17,4 @@ control c() {
 }
 
 c() ctr;
-
 const int ce = ctr.minWidthInBits();

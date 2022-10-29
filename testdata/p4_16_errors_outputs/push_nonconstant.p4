@@ -15,4 +15,3 @@ control c() {
 control proto();
 package top(proto _p);
 top(c()) main;
-

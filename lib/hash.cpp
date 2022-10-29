@@ -59,10 +59,10 @@ std::uint32_t murmur32(const void* data, std::uint32_t size) {
     switch (size) {
     case 3:
         result ^= static_cast<unsigned char>(raw[2]) << 16;
-        // fallthrough
+        [[fallthrough]];
     case 2:
         result ^= static_cast<unsigned char>(raw[1]) << 8;
-        // fallthrough
+        [[fallthrough]];
     case 1:
         result ^= static_cast<unsigned char>(raw[0]);
         result *= m;

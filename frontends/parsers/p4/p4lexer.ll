@@ -26,6 +26,7 @@ using Parser = P4::P4Parser;
 #pragma GCC diagnostic ignored "-Wtautological-undefined-compare"
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wnull-conversion"
+#pragma clang diagnostic ignored "-Wregister"
 #endif
 
 %}

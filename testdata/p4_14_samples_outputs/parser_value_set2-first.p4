@@ -27,11 +27,11 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".inner_ethernet") 
+    @name(".inner_ethernet")
     ethernet_t inner_ethernet;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t     ipv4;
 }
 
@@ -67,7 +67,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr");
         }
         size = 512;
         default_action = NoAction();
@@ -100,4 +100,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

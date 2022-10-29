@@ -15,7 +15,6 @@ control I(inout metadata_t meta) {
     @hidden action struct_init1l15() {
         meta._foo__v0 = meta._foo__v0 + 9w1;
         h_0.setValid();
-        h_0.b = 32w2;
     }
     @hidden table tbl_struct_init1l15 {
         actions = {
@@ -33,4 +32,3 @@ control I(inout metadata_t meta) {
 control C<M>(inout M m);
 package top<M>(C<M> c);
 top<metadata_t>(I()) main;
-

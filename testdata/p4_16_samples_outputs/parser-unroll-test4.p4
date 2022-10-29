@@ -98,4 +98,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(MyParser(), verifyChecksum(), mau(), mau(), computeChecksum(), deparse()) main;
-

@@ -66,7 +66,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     @name("MainControlImpl.ipv4_da") table ipv4_da_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("ipv4_addr_0") ;
+            hdr.ipv4.dstAddr: exact @name("ipv4_addr_0");
         }
         actions = {
             @tableonly next_hop();
@@ -84,7 +84,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     @name("MainControlImpl.ipv4_da2") table ipv4_da2_0 {
         key = {
-            user_meta.key: exact @name("user_meta.key") ;
+            user_meta.key: exact @name("user_meta.key");
         }
         actions = {
             @tableonly next_hop2();
@@ -109,4 +109,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

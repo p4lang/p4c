@@ -206,15 +206,20 @@ void TypeInference::addSubstitutions(const TypeVariableSubstitution* tvs) {
     typeMap->addSubstitutions(tvs);
 }
 
-TypeVariableSubstitution* TypeInference::unify(
-    const IR::Node* errorPosition, const IR::Type* destType, const IR::Type* srcType,
+TypeVariableSubstitution* TypeInference::unifyBase(
+    bool allowCasts, const IR::Node* errorPosition,
+    const IR::Type* destType, const IR::Type* srcType,
     cstring errorFormat, std::initializer_list<const IR::Node*> errorArgs) {
     CHECK_NULL(destType); CHECK_NULL(srcType);
     if (srcType == destType)
         return new TypeVariableSubstitution();
 
+    TypeConstraint* constraint;
     TypeConstraints constraints(typeMap->getSubstitutions(), typeMap);
-    auto constraint = new EqualityConstraint(destType, srcType, errorPosition);
+    if (allowCasts)
+        constraint = new CanBeImplicitlyCastConstraint(destType, srcType, errorPosition);
+    else
+        constraint = new EqualityConstraint(destType, srcType, errorPosition);
     if (!errorFormat.isNullOrEmpty())
         constraint->setError(errorFormat, errorArgs);
     constraints.add(constraint);
@@ -763,10 +768,11 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
     if (initType == nullptr)
         return sourceExpression;
 
-    auto tvs = unify(errorPosition, destType, initType,
-                     "Source expression '%1%' produces a result of type '%2%' which cannot be "
-                     "assigned to a left-value with type '%3%'",
-                     { sourceExpression, initType, destType });
+    auto tvs = unifyCast(
+        errorPosition, destType, initType,
+        "Source expression '%1%' produces a result of type '%2%' which cannot be "
+        "assigned to a left-value with type '%3%'",
+        { sourceExpression, initType, destType });
     if (tvs == nullptr)
         // error already signalled
         return sourceExpression;
@@ -1380,11 +1386,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Enum* type) {
     return type;
 }
 
-const IR::Node* TypeInference::postorder(IR::Type_SerEnum* type) {
-    if (::errorCount())
-        // If we failed to typecheck a SerEnumMember we do not
-        // want to set the type for the SerEnum either.
-        return type;
+const IR::Node* TypeInference::preorder(IR::Type_SerEnum* type) {
     auto canon = setTypeType(type);
     for (auto e : *type->getDeclarations())
         setType(e->getNode(), canon);
@@ -1426,8 +1428,11 @@ const IR::Node* TypeInference::postorder(IR::Type_Set* type) {
 }
 
 const IR::Node* TypeInference::postorder(IR::SerEnumMember* member) {
-    if (done())
-        return member;
+    /*
+      The type of the member is initially set in the Type_SerEnum preorder visitor.
+      Here we check additional constraints and we may correct the member.
+      if (done()) return member;
+    */
     auto serEnum = findContext<IR::Type_SerEnum>();
     CHECK_NULL(serEnum);
     auto type = getTypeType(serEnum->type);
@@ -1436,9 +1441,9 @@ const IR::Node* TypeInference::postorder(IR::SerEnumMember* member) {
         return member;
     }
     auto exprType = getType(member->value);
-    auto tvs = unify(member, type, exprType,
-                     "Enum member '%1%' has type '%2%' and not the expected type '%2%'",
-                     { member, exprType, type });
+    auto tvs = unifyCast(member, type, exprType,
+                         "Enum member '%1%' has type '%2%' and not the expected type '%3%'",
+                         { member, exprType, type });
     if (tvs == nullptr)
         // error already signalled
         return member;
@@ -1447,6 +1452,8 @@ const IR::Node* TypeInference::postorder(IR::SerEnumMember* member) {
 
     ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
     member->value = cts.convert(member->value);  // sets type
+    if (!typeMap->getType(member))
+        setType(member, getTypeType(serEnum));
     return member;
 }
 
@@ -1721,7 +1728,7 @@ const IR::Node* TypeInference::postorder(IR::BoolLiteral* expression) {
     return expression;
 }
 
-// Returns nullptr on error
+// Returns false on error
 bool TypeInference::compare(const IR::Node* errorPosition,
                             const IR::Type* ltype,
                             const IR::Type* rtype,
@@ -1729,6 +1736,10 @@ bool TypeInference::compare(const IR::Node* errorPosition,
     if (ltype->is<IR::Type_Action>() || rtype->is<IR::Type_Action>()) {
         // Actions return Type_Action instead of void.
         typeError("%1%: cannot be applied to action results", errorPosition);
+        return false;
+    }
+    if (ltype->is<IR::Type_Table>() || rtype->is<IR::Type_Table>()) {
+        typeError("%1%: tables cannot be compared", errorPosition);
         return false;
     }
 
@@ -2045,7 +2056,7 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
     if (nonConstantKeys)
         return entry;
 
-    TypeVariableSubstitution *tvs = unify(
+    TypeVariableSubstitution *tvs = unifyCast(
         entry, keyTuple, entryKeyType,
         "Table entry has type '%1%' which is not the expected type '%2%'",
         { keyTuple, entryKeyType });
@@ -3661,7 +3672,7 @@ TypeInference::matchCase(const IR::SelectExpression* select, const IR::Type_Base
         }
         useSelType = selectType->components.at(0);
     }
-    auto tvs = unify(
+    auto tvs = unifyCast(
         select, useSelType, caseType,
         "'match' case label '%1%' has type '%2%' which does not match the expected type '%3%'",
         { selectCase->keyset, caseType, useSelType });
@@ -3789,18 +3800,27 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
 
     if (auto ae = type->to<IR::Type_ActionEnum>()) {
         // switch (table.apply(...))
-        std::set<cstring> foundLabels;
+        std::map<cstring, const IR::Node*> foundLabels;
+        const IR::Node* foundDefault = nullptr;
         for (auto c : stat->cases) {
-            if (c->label->is<IR::DefaultExpression>())
+            if (c->label->is<IR::DefaultExpression>()) {
+                if (foundDefault)
+                    typeError("%1%: multiple 'default' labels %2%", c->label, foundDefault);
+                foundDefault = c->label;
                 continue;
-            auto pe = c->label->to<IR::PathExpression>();
-            CHECK_NULL(pe);
-            cstring label = pe->path->name.name;
-            if (foundLabels.find(label) != foundLabels.end())
-                typeError("%1%: duplicate switch label", c->label);
-            foundLabels.emplace(label);
-            if (!ae->contains(label))
-                typeError("%1% is not a legal label (action name)", c->label);
+            } else if (auto pe = c->label->to<IR::PathExpression>()) {
+                cstring label = pe->path->name.name;
+                auto it = foundLabels.find(label);
+                if (it != foundLabels.end())
+                    typeError("%1%: 'switch' label duplicates %2%", c->label,
+                              it->second);
+                foundLabels.emplace(label, c->label);
+                if (!ae->contains(label))
+                    typeError("%1% is not a legal label (action name)", c->label);
+            } else {
+                typeError("%1%: 'switch' label must be an action name or 'default'",
+                          c->label);
+            }
         }
     } else {
         // switch (expression)

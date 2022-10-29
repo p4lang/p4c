@@ -87,7 +87,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name("MyIngress.ipv4_lpm") table ipv4_lpm_0 {
         key = {
-            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
+            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port");
         }
         actions = {
             forward_and_do_something();
@@ -101,14 +101,14 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name("MyIngress.debug") table debug_0 {
         key = {
-            meta.before1: exact @name("meta.before1") ;
-            meta.after1 : exact @name("meta.after1") ;
-            meta.before2: exact @name("meta.before2") ;
-            meta.after2 : exact @name("meta.after2") ;
-            meta.before3: exact @name("meta.before3") ;
-            meta.after3 : exact @name("meta.after3") ;
-            meta.before4: exact @name("meta.before4") ;
-            meta.after4 : exact @name("meta.after4") ;
+            meta.before1: exact @name("meta.before1");
+            meta.after1 : exact @name("meta.after1");
+            meta.before2: exact @name("meta.before2");
+            meta.after2 : exact @name("meta.after2");
+            meta.before3: exact @name("meta.before3");
+            meta.after3 : exact @name("meta.after3");
+            meta.before4: exact @name("meta.before4");
+            meta.after4 : exact @name("meta.after4");
         }
         actions = {
             NoAction_2();
@@ -154,4 +154,3 @@ control MyDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

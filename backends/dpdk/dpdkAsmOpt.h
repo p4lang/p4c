@@ -27,7 +27,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/unusedDeclarations.h"
 #include "ir/ir.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "lib/json.h"
 #include "dpdkUtils.h"
 
@@ -162,15 +162,6 @@ class RemoveUnusedMetadataFields : public Transform {
         : used_fields(used_fields) {}
     const IR::Node* preorder(IR::DpdkAsmProgram *p) override;
     bool isByteSizeField(const IR::Type *field_type);
-};
-
-// This pass validates that the table keys from Metadata struct fit within 64 bytes including any
-// holes between the key fields in metadata.
-class ValidateTableKeys : public Inspector {
- public:
-    ValidateTableKeys() {}
-    bool preorder(const IR::DpdkAsmProgram *p) override;
-    int getFieldSizeBits(const IR::Type *field_type);
 };
 
 // This pass shorten the Identifier length

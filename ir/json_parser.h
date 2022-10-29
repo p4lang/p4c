@@ -5,19 +5,18 @@
 #include <vector>
 
 #include "lib/cstring.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "lib/ordered_map.h"
 #include "lib/source_file.h"
+#include "lib/castable.h"
 
-class JsonData {
+class JsonData : public ICastable {
  public:
     JsonData() {}
     JsonData(const JsonData&) = default;
     JsonData(JsonData&&) = default;
     JsonData &operator=(const JsonData &) & = default;
     JsonData &operator=(JsonData &&) & = default;
-    template<typename T> bool is() const { return to<T>() != nullptr; }
-    template<typename T> const T* to() const { return dynamic_cast<const T*>(this); }
     virtual ~JsonData() {}
 };
 

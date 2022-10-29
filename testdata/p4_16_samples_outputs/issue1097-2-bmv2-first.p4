@@ -23,7 +23,6 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 }
 
 register<bit<8>>(32w256) r;
-
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         bit<8> x;
@@ -59,4 +58,3 @@ control update(inout Headers h, inout Meta m) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

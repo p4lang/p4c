@@ -2,7 +2,7 @@ issue3045.p4(16): [--Werror=type-error] error: f
         f(r, 8w2);
         ^^^^^^^^^
   ---- Actual error:
-issue3045.p4(13): Cannot unify type 'bool' with type 'bit<8>'
+issue3045.p4(13): Cannot cast implicitly type 'bool' to type 'bit<8>'
       register<bool>(1) r;
                ^^^^
   ---- Originating from:

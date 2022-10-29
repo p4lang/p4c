@@ -19,4 +19,3 @@ control A(inout hdr _hdr) {
 control proto(inout hdr _hdr);
 package top(proto p);
 top(A()) main;
-

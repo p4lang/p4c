@@ -478,7 +478,7 @@ class FindUninitialized : public Inspector {
                             const IR::ParameterList* parameters,
                             Definitions* defs) {
         LOG2("Checking output parameters of " << block <<
-             "; definitions are " << Log::endl << defs);
+             "; definitions are " << IndentCtl::endl << defs);
         for (auto p : parameters->parameters) {
             if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
                 auto storage = definitions->storageMap->getStorage(p);
@@ -1443,6 +1443,10 @@ class FindUninitialized : public Inspector {
         return false;
     }
 
+    void postorder(const IR::StructExpression* expression) override {
+        otherExpression(expression);
+    }
+
     void postorder(const IR::Operation_Unary* expression) override {
         otherExpression(expression);
     }
@@ -1490,7 +1494,7 @@ class RemoveUnused : public Transform {
                 return mcs;
             }
             // removing
-            LOG3("Removing statement " << getOriginal());
+            LOG3("Removing statement " << getOriginal() << IndentCtl::indent);
             return new IR::EmptyStatement(mcs->srcInfo);
         }
         return mcs;

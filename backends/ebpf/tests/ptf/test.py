@@ -423,7 +423,7 @@ class ParserValueSetPSATest(P4EbpfTest):
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_no_other_packets(self)
 
-        self.update_map("IngressParserImpl_pvs", '1 0 0 10', '0 0 0 0')
+        self.value_set_insert(name="IngressParserImpl_pvs", value=["10.0.0.1"])
 
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
@@ -542,9 +542,9 @@ class PSATernaryTest(P4EbpfTest):
 
         # flow rules 'tbl_ternary_4':
         # 2. hdr.ethernet.srcAddr=00:00:33:44:55:00^00:00:FF:FF:FF:00 => action 1 priority 10
-        self.table_add(table="ingress_ap", key=[0x10], action=1, data=[])
+        ref3 = self.action_profile_add_action(ap="ingress_ap", action=1, data=[])
         self.table_add(table="ingress_tbl_ternary_4", key=["00:00:33:44:55:00^00:00:FF:FF:FF:00"],
-                       references=["0x10"], priority=10)
+                       references=[ref3], priority=10)
 
         pkt = testutils.simple_udp_packet(eth_src="11:22:33:44:55:66", ip_src='1.2.3.4', ip_dst='192.168.2.1')
         testutils.send_packet(self, PORT0, pkt)

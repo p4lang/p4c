@@ -2,7 +2,7 @@ issue3045-2.p4(16): [--Werror=type-error] error: f
         f(r, exact);
         ^^^^^^^^^^^
   ---- Actual error:
-issue3045-2.p4(12): Cannot unify type 'T' with type 'match_kind'
+issue3045-2.p4(12): Cannot cast implicitly type 'T' to type 'match_kind'
   control c<T>()() {
             ^
   ---- Originating from:

@@ -28,4 +28,3 @@ control MyC(inout bit<2> x) {
 }
 
 S(MyC()) main;
-

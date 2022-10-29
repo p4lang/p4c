@@ -25,7 +25,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     @name(".t0") table _t0 {
         key = {
-            smeta.ingress_port: exact @name("smeta.ingress_port") ;
+            smeta.ingress_port: exact @name("smeta.ingress_port");
         }
         actions = {
             c1_drop_0();
@@ -38,7 +38,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     @name(".t0") table _t0_0 {
         key = {
-            smeta.ingress_port: exact @name("smeta.ingress_port") ;
+            smeta.ingress_port: exact @name("smeta.ingress_port");
         }
         actions = {
             c2_drop_0();
@@ -73,4 +73,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

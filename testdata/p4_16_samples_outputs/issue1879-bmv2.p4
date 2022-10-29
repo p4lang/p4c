@@ -172,4 +172,3 @@ control PROTDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch(PROTParser(), PROTVerifyChecksum(), PROTIngress(), PROTEgress(), PROTComputeChecksum(), PROTDeparser()) main;
-

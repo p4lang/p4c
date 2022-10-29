@@ -25,4 +25,3 @@ BFD_Offload(16w32768) bfd_session_liveness_tracker = {
         }
     }
 };
-

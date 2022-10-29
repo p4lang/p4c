@@ -30,4 +30,3 @@ control computeChecksum(inout headers hdr) {
 
 package top(ComputeChecksum<headers> _c);
 top(computeChecksum()) main;
-

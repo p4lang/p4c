@@ -22,4 +22,3 @@ parser p() {
 parser empty();
 package top(empty e);
 top(p()) main;
-

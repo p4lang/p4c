@@ -22,7 +22,7 @@ set (LIBP4CTOOLKIT_SRCS
 		error_message.cpp
         exename.cpp
 	gc.cpp
-	gmputil.cpp
+	big_int_util.cpp
 	hash.cpp
 	hex.cpp
 	indent.cpp
@@ -53,7 +53,7 @@ set (LIBP4CTOOLKIT_HDRS
 	exceptions.h
         exename.h
 	gc.h
-	gmputil.h
+	big_int_util.h
 	hash.h
 	hex.h
 	indent.h
@@ -82,3 +82,6 @@ set (LIBP4CTOOLKIT_HDRS
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${LIBP4CTOOLKIT_SRCS};${LIBP4CTOOLKIT_HDRS}")
 build_unified(LIBP4CTOOLKIT_SRCS ALL)
 add_library(p4ctoolkit STATIC ${LIBP4CTOOLKIT_SRCS})
+
+# Disable libcall (realloc, malloc) optimizations which may cause infinite loops.
+set_target_properties(p4ctoolkit PROPERTIES COMPILE_FLAGS -fno-builtin)

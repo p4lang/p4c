@@ -32,7 +32,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     Meter<bit<12>>(32w1024, PSA_MeterType_t.PACKETS) meter0;
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
         }
         actions = {
             NoAction();
@@ -62,8 +62,5 @@ control MyED(packet_out buffer, out EMPTY a, out EMPTY b, inout EMPTY c, in EMPT
 }
 
 IngressPipeline<headers_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyIP(), MyIC(), MyID()) ip;
-
 EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEP(), MyEC(), MyED()) ep;
-
 PSA_Switch<headers_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

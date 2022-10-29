@@ -1,0 +1,3 @@
+issue3550.p4(100): [--Wwarn=unused] warning: 'x' is unused
+    action execute(bit<48> x) {
+                           ^

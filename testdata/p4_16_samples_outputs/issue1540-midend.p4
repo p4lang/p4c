@@ -21,8 +21,5 @@ control SwitchIngressDeparser(packet_out pkt, inout header_t h) {
 }
 
 Pipeline<header_t, metadata_t>(SwitchIngress(), SwitchIngressDeparser()) p0;
-
 Pipeline<header_t, metadata_t>(SwitchIngress(), SwitchIngressDeparser()) p1;
-
 Top<header_t, metadata_t, header_t, metadata_t>(p0, p1) main;
-

@@ -12,4 +12,3 @@ control c(out bit<16> b) {
 control ctrl(out bit<16> b);
 package top(ctrl _c);
 top(c()) main;
-

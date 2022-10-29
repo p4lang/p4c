@@ -15,4 +15,3 @@ control MyC() {
 }
 
 V1Switch(MyP(), MyC()) main;
-

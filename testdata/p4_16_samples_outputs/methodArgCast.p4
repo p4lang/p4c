@@ -13,4 +13,3 @@ control c() {
 control proto();
 package top(proto p);
 top(c()) main;
-

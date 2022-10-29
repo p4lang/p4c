@@ -53,4 +53,3 @@ control ComputeChecksumImpl(inout parsed_headers_t hdr, inout metadata_t meta) {
 }
 
 V1Switch(ParserImpl(), VerifyChecksumImpl(), IngressImpl(), EgressImpl(), ComputeChecksumImpl(), DeparserImpl()) main;
-

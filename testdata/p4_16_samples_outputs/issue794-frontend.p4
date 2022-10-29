@@ -30,4 +30,3 @@ control ingress() {
 }
 
 Top(ingress(), caller()) main;
-

@@ -32,13 +32,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<1> tmp;
     @name("ingress.sliced_val") bit<1> sliced_val_0;
     @name("ingress.slice_action") action slice_action() {
-        sliced_val_0 = tmp;
         h.h.a = 8w2;
         sliced_val_0 = 1w1;
         tmp = sliced_val_0;
     }
     apply {
-        tmp = h.h.a[0:0];
         slice_action();
         h.h.a[0:0] = tmp;
     }
@@ -66,4 +64,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

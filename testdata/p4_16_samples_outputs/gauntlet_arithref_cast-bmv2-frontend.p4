@@ -26,13 +26,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<48> tmp;
     @name("ingress.tmp_0") bit<8> tmp_0;
     @name("ingress.tmp_1") bit<48> tmp_1;
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bit<8> retval;
     apply {
         if (h.eth_hdr.src_addr < 48w10) {
             tmp = h.eth_hdr.dst_addr;
-            hasReturned = false;
-            hasReturned = true;
             retval = 8w2;
             tmp_0 = retval;
             tmp_1 = tmp << tmp_0;
@@ -63,4 +60,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

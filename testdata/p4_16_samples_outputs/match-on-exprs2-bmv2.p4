@@ -40,7 +40,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         key = {
             hdr.ethernet.srcAddr[22:18]         : exact;
             hdr.ethernet.dstAddr & 0x10101010101: exact;
-            hdr.ethernet.etherType - 10         : exact @name("etherType_less_10") ;
+            hdr.ethernet.etherType - 10         : exact @name("etherType_less_10");
         }
         actions = {
             foo;
@@ -71,4 +71,3 @@ control deparserImpl(packet_out packet, in headers_t hdr) {
 }
 
 V1Switch(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
-

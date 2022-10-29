@@ -24,4 +24,3 @@ control c(inout bit<16> x) {
 control C(inout bit<16> x);
 package top(C _c);
 top(c()) main;
-

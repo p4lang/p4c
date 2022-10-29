@@ -35,6 +35,4 @@ control MyC3()(E e, C1 c1, C2 c2) {
 }
 
 E() e;
-
 S(MyC3(e, MyC1(e), MyC2(e))) main;
-

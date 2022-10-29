@@ -11,7 +11,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".extirpations") 
+    @name(".extirpations")
     inboxes extirpations;
 }
 
@@ -54,4 +54,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-
