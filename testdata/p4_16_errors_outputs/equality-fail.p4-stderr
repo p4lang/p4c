@@ -1,18 +1,36 @@
-equality-fail.p4(23): [--Werror=type-error] error: ==: not defined on varbit<32> and header H
+equality-fail.p4(23): [--Werror=type-error] error: a with type h1 cannot be compared to varbit<32> with type header H
         if (a == h1) {
-            ^^^^^^^
-equality-fail.p4(25): [--Werror=type-error] error: ==: not defined on header H and struct S
+            ^
+equality-fail.p4(23)
+        if (a == h1) {
+                 ^^
+equality-fail.p4(25): [--Werror=type-error] error: h1 with type s2 cannot be compared to header H with type struct S
         } else if (h1 == s2) {
-                   ^^^^^^^^
-equality-fail.p4(27): [--Werror=type-error] error: ==: not defined on struct S and header H[2]
+                   ^^
+equality-fail.p4(25)
+        } else if (h1 == s2) {
+                         ^^
+equality-fail.p4(27): [--Werror=type-error] error: s1 with type a2 cannot be compared to struct S with type header H[2]
         } else if (s1 == a2) {
-                   ^^^^^^^^
-equality-fail.p4(29): [--Werror=type-error] error: ==: not defined on header H[2] and bit<32>
+                   ^^
+equality-fail.p4(27)
+        } else if (s1 == a2) {
+                         ^^
+equality-fail.p4(29): [--Werror=type-error] error: a1 with type h1.a cannot be compared to header H[2] with type bit<32>
         } else if (a1 == h1.a) {
-                   ^^^^^^^^^^
-equality-fail.p4(31): [--Werror=type-error] error: ==: not defined on varbit<32> and bit<32>
+                   ^^
+equality-fail.p4(29)
+        } else if (a1 == h1.a) {
+                         ^^^^
+equality-fail.p4(31): [--Werror=type-error] error: a with type h1.a cannot be compared to varbit<32> with type bit<32>
         } else if (a == h1.a) {
-                   ^^^^^^^^^
-equality-fail.p4(33): [--Werror=type-error] error: ==: not defined on header H[2] and header H[3]
+                   ^
+equality-fail.p4(31)
+        } else if (a == h1.a) {
+                        ^^^^
+equality-fail.p4(33): [--Werror=type-error] error: a1 with type a3 cannot be compared to header H[2] with type header H[3]
         } else if (a1 == a3) {
-                   ^^^^^^^^
+                   ^^
+equality-fail.p4(33)
+        } else if (a1 == a3) {
+                         ^^
