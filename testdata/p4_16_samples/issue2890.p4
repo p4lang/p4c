@@ -1,5 +1,4 @@
 #include <core.p4>
-#include <v1model.p4>
 
 header E {
     bit<16> e;

@@ -478,15 +478,15 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
         unsigned size_sum_so_far = 0;
         bool all_hdr_field_aligned = true;
         for (auto field : st->fields) {
-        unsigned width;
-        if (auto type = (*field).type->to<IR::Type_Bits>())
-            width = type->width_bits();
-        else if (auto type = (*field).type->to<IR::Type_Varbits>()) {
-            width = type->width_bits();
-        } else {
-            BUG("header fields should be of type bit<> or varbit<>"
-                "found this %1%", field->toString());
-        }
+            unsigned width;
+            if (auto type = (*field).type->to<IR::Type_Bits>())
+                width = type->width_bits();
+            else if (auto type = (*field).type->to<IR::Type_Varbits>()) {
+                width = type->width_bits();
+            } else {
+                BUG("header fields should be of type bit<> or varbit<>"
+                    "found this %1%", field->toString());
+            }
             size_sum_so_far += width;
             if ((width & 0x7) != 0) {
                 all_hdr_field_aligned = false;
@@ -530,69 +530,60 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
         cstring modifiedName = "";
         auto size = field_name_list.size();
         unsigned i = 0;
-        if (size_sum_so_far <= 64) {
-            // Check if the sum of width of non-aligned field is divisble by 8.
-            if (size_sum_so_far && (size_sum_so_far % 8 == 0)) {
-                // Form the field with all non-aligned field stored in "field_name_list"
-                for (auto s = field_name_list.begin(); s != field_name_list.end();
-                        s++, i++) {
-                    if ((i + 1) < size)
-                        modifiedName += s->first + "_";
-                    else
-                        modifiedName += s->first;
-                }
-                unsigned offset = 0;
-                /* Store information about each non-aligned field
-                    For eg : ModifiedName, header str, width, offset, and its
-                            lsb and msb in modified field
-
-                            header ipv4_t {
-                                ...
-                                bit<3>  flags;
-                                bit<13> fragOffset;
-                                ...
-                            }
-                            is converted into
-
-                            header ipv4_t {
-                                ...
-                                bit<16>  flags_fragOffset;
-                                ...
-                            }
-                            Here, for "flags", information saved are :
-                                ModifiedName = flags_fragOffset;
-                                header str   =  ipv4_t; [This is used if multiple headers
-                                                            have field with same name]
-                                width        = 16;
-                                offset       = 3;
-                                lsb          = 3;
-                                msb          = 15;
-                */
-                for (auto s = field_name_list.begin(); s != field_name_list.end(); s++) {
-                    hdrFieldInfo fieldObj;
-                    fieldObj.modifiedName = modifiedName;
-                    fieldObj.headerStr = st->name.name;
-                    fieldObj.modifiedWidth = size_sum_so_far;
-                    fieldObj.fieldWidth = s->second.fieldWidth;
-                    fieldObj.lsb = offset;
-                    fieldObj.msb = offset + s->second.fieldWidth - 1;
-                    fieldObj.offset = offset;
-                    structure->hdrFieldInfoList[s->first].push_back(fieldObj);
-                    offset += s->second.fieldWidth;
-                }
-                fields->push_back(new IR::StructField(IR::ID(modifiedName),
-                                    IR::Type_Bits::get(size_sum_so_far)));
-                size_sum_so_far = 0;
-                modifiedName = "";
-                field_name_list.clear();
+        // Check if the sum of width of non-aligned field is divisble by 8.
+        if (size_sum_so_far && (size_sum_so_far % 8 == 0)) {
+            // Form the field with all non-aligned field stored in "field_name_list"
+            for (auto s = field_name_list.begin(); s != field_name_list.end();
+                    s++, i++) {
+                if ((i + 1) < size)
+                    modifiedName += s->first + "_";
+                else
+                    modifiedName += s->first;
             }
-        } else {
-            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "Combining the contiguos non 8-bit aligned fields result in a field"
-                    " with bit-width '%1%' > 64-bit in header structure '%2%'. DPDK does"
-                    " not support non 8-bit aligned and greater than 64-bit header field"
-                    ,size_sum_so_far, st->name.name);
-            return st;
+            unsigned offset = 0;
+            /* Store information about each non-aligned field
+                For eg : ModifiedName, header str, width, offset, and its
+                        lsb and msb in modified field
+
+                        header ipv4_t {
+                            ...
+                            bit<3>  flags;
+                            bit<13> fragOffset;
+                            ...
+                        }
+                        is converted into
+
+                        header ipv4_t {
+                            ...
+                            bit<16>  flags_fragOffset;
+                            ...
+                        }
+                        Here, for "flags", information saved are :
+                            ModifiedName = flags_fragOffset;
+                            header str   =  ipv4_t; [This is used if multiple headers
+                                                        have field with same name]
+                            width        = 16;
+                            offset       = 3;
+                            lsb          = 3;
+                            msb          = 15;
+            */
+            for (auto s = field_name_list.begin(); s != field_name_list.end(); s++) {
+                hdrFieldInfo fieldObj;
+                fieldObj.modifiedName = modifiedName;
+                fieldObj.headerStr = st->name.name;
+                fieldObj.modifiedWidth = size_sum_so_far;
+                fieldObj.fieldWidth = s->second.fieldWidth;
+                fieldObj.lsb = offset;
+                fieldObj.msb = offset + s->second.fieldWidth - 1;
+                fieldObj.offset = offset;
+                structure->hdrFieldInfoList[s->first].push_back(fieldObj);
+                offset += s->second.fieldWidth;
+            }
+            fields->push_back(new IR::StructField(IR::ID(modifiedName),
+                                IR::Type_Bits::get(size_sum_so_far)));
+            size_sum_so_far = 0;
+            modifiedName = "";
+            field_name_list.clear();
         }
     }
     /* Throw error if there is non-aligned field present at the end in header */
@@ -1487,9 +1478,23 @@ const IR::Node* DismantleMuxExpressions::postorder(IR::AssignmentStatement* stat
     return block;
 }
 
-/* This function transforms the table so that all match keys come from the same struct.
+/* This function transforms the table so that all match keys come from the same struct and satisfy
+   the constraints imposed by the target.
    Mirror copies of match fields are created in metadata struct and table is updated to
    use the metadata fields.
+   The decision of whether a mirror copy is to be created is based on the following conditions:
+   1) If all the table key fields are part of the same structure (either header or metadata),
+      copy of fields to metadata should be done when
+      a) all keys have exact matchkind and are not contiguous in the underlying structure.
+   2) When the table keys have a mix of header and existing metadata fields(A)
+      a) copy of header fields should always be done
+      b) copy of metadata fields(A) should be done when all keys have exact matchkind and the
+         number of (A) keys are less than 5. These heuristics are chosen to obtain optimal
+         performance.
+   3) For learner table, the match kind of all keys should always be exact and hence if the keys
+      are non-exact, error should be thrown and if the keys are non-contiguous, copy of the key
+      fields should be done.
+
 
    control ingress(inout headers h, inout metadata m) {
    {
@@ -1527,6 +1532,87 @@ const IR::Node* DismantleMuxExpressions::postorder(IR::AssignmentStatement* stat
        }
   }
 */
+
+bool CopyMatchKeysToSingleStruct::isLearnerTable(const IR::P4Table* t) {
+    bool use_add_on_miss = false;
+    auto add_on_miss = t->properties->getProperty("add_on_miss");
+    if (add_on_miss == nullptr) return false;
+    if (add_on_miss->value->is<IR::ExpressionValue>()) {
+        auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
+        if (!expr->is<IR::BoolLiteral>()) {
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "%1%: expected boolean for 'add_on_miss' property", add_on_miss);
+            return false;
+        } else {
+            use_add_on_miss = expr->to<IR::BoolLiteral>()->value;
+        }
+    }
+    return use_add_on_miss;
+}
+
+int CopyMatchKeysToSingleStruct::getFieldSizeBits(const IR::Type *field_type) {
+    if (auto t = field_type->to<IR::Type_Bits>()) {
+        return t->width_bits();
+    } else if (field_type->is<IR::Type_Boolean>() || field_type->is<IR::Type_Error>()) {
+        return 8;
+    } else if (auto t = field_type->to<IR::Type_Name>()) {
+        if (t->path->name == "error") {
+            return 8;
+        } else {
+            return -1;
+        }
+    }
+    return -1;
+}
+
+struct keyInfo *CopyMatchKeysToSingleStruct::getKeyInfo(IR::Key* keys) {
+    auto oneKey = new struct keyInfo();
+    oneKey->numElements = keys->keyElements.size();
+    int size = 0;
+    int numExistingMetaFields = 0;
+    int nonExact = 0;
+    for (auto key : keys->keyElements) {
+        auto matchKind = key->matchType->toString();
+        if (matchKind != "exact") {
+            nonExact++;
+        }
+
+        auto keyName =  key->expression->toString();
+        if (keyName.startsWith("m."))
+            numExistingMetaFields++;
+
+        auto elem = new struct keyElementInfo();
+        elem->offsetInMetadata = -1;
+        if (key->expression->is<IR::Member>()) {
+            auto keyMem = key->expression->to<IR::Member>();
+            auto type = keyMem->expr->type;
+
+            if (auto baseStruct = type->to<IR::Type_StructLike>()) {
+                elem->offsetInMetadata = baseStruct->getFieldBitOffset(keyMem->member.name);
+            }
+        }
+        auto field_type = key->expression->type;
+        elem->size = getFieldSizeBits(field_type);
+        if (elem->size == -1) {
+            BUG("Unexpected type %1%", field_type->node_type_name());
+            return nullptr;
+        }
+        // These are complex expressions
+        if (elem->offsetInMetadata == -1)
+            numExistingMetaFields++;
+        size += elem->size;
+        oneKey->elements.push_back(elem);
+    }
+
+    auto table = findOrigCtxt<IR::P4Table>();
+    CHECK_NULL(table);
+    oneKey->isLearner = isLearnerTable(table);
+    oneKey->size  = size;
+    oneKey->numExistingMetaFields = numExistingMetaFields;
+    oneKey->isExact = nonExact ? false : true;
+    return oneKey;
+}
+
 const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
     // If any key field is from different structure, put all keys in metadata
     LOG3("Visiting " << keys);
@@ -1543,7 +1629,7 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
     if (auto firstKeyField = keys->keyElements.at(0)->expression->to<IR::Member>()) {
         firstKeyStr = firstKeyField->expr->toString();
         /* ReplaceMetadataHeaderName pass converts all header fields to the form
-          "h.<header_name>.<field_name> and similarly metadata fields are prefixed with "m.".
+           "h.<header_name>.<field_name> and similarly metadata fields are prefixed with "m.".
            Check if the match key is part of a header by checking the "h" prefix. */
         if (firstKeyStr.startsWith("h"))
             firstKeyHdr = true;
@@ -1557,18 +1643,57 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
         } else if (auto m = key->expression->to<IR::MethodCallExpression>()) {
             /* When isValid is present as table key, it should be moved to metadata */
             auto mi = P4::MethodInstance::resolve(m, refMap, typeMap);
-            if (auto b = mi->to<P4::BuiltInMethod>())
+            if (auto b = mi->to<P4::BuiltInMethod>()) {
                 if (b->name == "isValid") {
                     copyNeeded = true;
                     break;
                 }
+            }
         }
         if (firstKeyStr != keyTypeStr) {
             if (firstKeyHdr || keyTypeStr.startsWith("h")) {
                 copyNeeded = true;
                 break;
-             }
-         }
+            }
+        }
+    }
+
+    auto keyInfoInstance = getKeyInfo(keys);
+    BUG_CHECK(keyInfoInstance, "Failed to collect key information");
+    bool contiguous = true;
+
+    for (int i = 0; i < keyInfoInstance->numElements ; i++) {
+        for (int j = 0; j < keyInfoInstance->numElements; j++) {
+            auto keyI = keyInfoInstance->elements.at(i);
+            auto keyJ = keyInfoInstance->elements.at(j);
+            int startI = keyI->offsetInMetadata;
+            int endI = startI + keyI->size;
+            int startJ = keyJ->offsetInMetadata;
+            int endJ = startJ + keyJ->size;
+            if (endJ - startI > keyInfoInstance->size) {
+                contiguous = false;
+                break;
+            } else if (endI - startJ > keyInfoInstance->size) {
+                contiguous = false;
+                break;
+            }
+        }
+        if (!contiguous) break;
+    }
+
+    /* If copyNeeded is false at this point, it means the keys are from same struct.
+     * Check remaining conditions to see if the copy is needed or not */
+    metaCopyNeeded = false;
+    if (!copyNeeded) {
+        if (keyInfoInstance->isLearner && !keyInfoInstance->isExact) {
+            ::error(ErrorType::ERR_EXPECTED,"Learner table must have all exact match keys");
+            return keys;
+        }
+        if (!contiguous && ((keyInfoInstance->isLearner) || (keyInfoInstance->isExact
+                        && keyInfoInstance->numExistingMetaFields <= 5))) {
+            metaCopyNeeded = true;
+            copyNeeded = true;
+        }
     }
 
     if (!copyNeeded) {
@@ -1599,11 +1724,19 @@ const IR::Node* CopyMatchKeysToSingleStruct::postorder(IR::KeyElement* element) 
     }
 
     auto keyName =  element->expression->toString();
-
-    /* All header fields are prefixed with "h.", prefix the match field with table name */
+    bool isHeader = false;
+    /* All header fields are prefixed with "h." and metadata fields are prefixed with "m."
+     * Prefix the match field with control and table name */
     if (keyName.startsWith("h.")) {
+        isHeader = true;
         keyName = keyName.replace('.','_');
         keyName = keyName.replace("h_",control->name.toString() + "_" + table->name.toString()+"_");
+    } else if (keyName.startsWith("m.") && metaCopyNeeded) {
+        keyName = keyName.replace('.','_');
+        keyName = keyName.replace("m_",control->name.toString() + "_" + table->name.toString()+"_");
+    }
+
+    if (isHeader || metaCopyNeeded) {
         IR::ID keyNameId(refMap->newName(keyName));
         auto decl = new IR::Declaration_Variable(keyNameId,
                                                  element->expression->type, nullptr);
@@ -1618,6 +1751,7 @@ const IR::Node* CopyMatchKeysToSingleStruct::postorder(IR::KeyElement* element) 
     }
     return element;
 }
+
 const IR::Node* CopyMatchKeysToSingleStruct::doStatement(const IR::Statement* statement,
                                            const IR::Expression *expression) {
     LOG3("Visiting " << getOriginal());

@@ -30,4 +30,3 @@ control c(out bool x) {
 control proto(out bool x);
 package top(proto p);
 top(c()) main;
-

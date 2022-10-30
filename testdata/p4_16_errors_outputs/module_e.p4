@@ -7,4 +7,3 @@ parser g(in bit<1> x) {
 }
 
 top(g()) main;
-

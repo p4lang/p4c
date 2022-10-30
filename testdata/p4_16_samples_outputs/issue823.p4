@@ -31,4 +31,3 @@ control MyC1() {
 }
 
 S(MyP1(), MyC1()) main;
-

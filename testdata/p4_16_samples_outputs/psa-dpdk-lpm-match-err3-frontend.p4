@@ -81,8 +81,8 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @name("ingress.tbl") table tbl_0 {
         key = {
-            hdr.ipv4.totalLen: lpm @name("hdr.ipv4.totalLen") ;
-            hdr.ipv4.newfield: exact @name("hdr.ipv4.newfield") ;
+            hdr.ipv4.totalLen: lpm @name("hdr.ipv4.totalLen");
+            hdr.ipv4.newfield: exact @name("hdr.ipv4.newfield");
         }
         actions = {
             NoAction_1();
@@ -123,8 +123,5 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

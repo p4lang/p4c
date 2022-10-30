@@ -27,7 +27,7 @@ control ingress(inout Headers h) {
     }
     @name("ingress.simple_table_1") table simple_table {
         key = {
-            h.eth_hdr.eth_type: exact @name("KOXpQP") ;
+            h.eth_hdr.eth_type: exact @name("KOXpQP");
         }
         actions = {
             @defaultonly NoAction_1();
@@ -36,7 +36,7 @@ control ingress(inout Headers h) {
     }
     @name("ingress.simple_table_2") table simple_table_0 {
         key = {
-            key_0: exact @name("key") ;
+            key_0: exact @name("key");
         }
         actions = {
             @defaultonly NoAction_2();
@@ -61,4 +61,3 @@ parser Parser(packet_in b, out Headers hdr);
 control Ingress(inout Headers hdr);
 package top(Parser p, Ingress ig);
 top(p(), ingress()) main;
-

@@ -20,7 +20,6 @@ BFD_Offload(16w32768) bfd_session_liveness_tracker = {
         }
     }
 };
-
 control for_rx_bfd_packets() {
     apply {
         bit<16> index;

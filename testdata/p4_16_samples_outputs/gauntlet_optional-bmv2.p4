@@ -59,4 +59,3 @@ control Egress(inout Headers hdr);
 control Deparser(packet_out b, in Headers hdr);
 package top(Parser p, Ingress ig, Egress eg, Deparser dep);
 top(p(), ingress(), egress(), deparser()) main;
-

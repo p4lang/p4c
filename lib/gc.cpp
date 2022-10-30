@@ -68,9 +68,15 @@ void operator delete(void *p) _GLIBCXX_USE_NOEXCEPT {
     gc::operator delete(p);
 }
 
+void operator delete(void *p, std::size_t) _GLIBCXX_USE_NOEXCEPT {
+    if (p >= emergency_pool && p < emergency_pool + sizeof(emergency_pool))
+        return;
+    gc::operator delete(p);
+}
+
 void *operator new[](std::size_t size) { return ::operator new(size); }
 void operator delete[](void *p) _GLIBCXX_USE_NOEXCEPT { ::operator delete(p); }
-
+void operator delete[](void *p, std::size_t) _GLIBCXX_USE_NOEXCEPT { ::operator delete(p); }
 
 namespace {
 

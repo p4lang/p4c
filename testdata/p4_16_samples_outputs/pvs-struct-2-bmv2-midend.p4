@@ -55,7 +55,7 @@ control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_meta
             @defaultonly NoAction_1();
         }
         key = {
-            meta.data[0].da: exact @name("meta.data[0].da") ;
+            meta.data[0].da: exact @name("meta.data[0].da");
         }
         default_action = NoAction_1();
     }
@@ -80,4 +80,3 @@ control MyDeparser(packet_out b, in my_packet p) {
 }
 
 V1Switch<my_packet, my_metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

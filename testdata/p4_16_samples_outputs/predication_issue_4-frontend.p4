@@ -36,20 +36,17 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_1") bit<1> tmp_0;
     @name("ingress.val_0") bit<1> val;
     @name("ingress.bound_0") bit<1> bound;
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bit<1> retval;
     @name("ingress.tmp") bit<1> tmp_1;
     @name("ingress.perform_action") action perform_action() {
         if (bool_val_0) {
             val = 1w0;
             bound = 1w1;
-            hasReturned = false;
             if (val < bound) {
                 tmp_1 = val;
             } else {
                 tmp_1 = bound;
             }
-            hasReturned = true;
             retval = tmp_1;
             tmp = retval;
             tmp_0 = tmp;
@@ -84,4 +81,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

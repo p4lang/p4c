@@ -24,21 +24,21 @@ struct col_t {
 }
 
 struct local_metadata_t {
-    @MNK_annotation("(test flatten)") @field_list(0) 
+    @MNK_annotation("(test flatten)") @field_list(0)
     bit<1>     _row0_alt0_valid0;
-    @MNK_annotation("(test flatten)") @field_list(0) 
+    @MNK_annotation("(test flatten)") @field_list(0)
     bit<7>     _row0_alt0_port1;
-    @MNK_annotation("(test flatten)") @field_list(0) 
+    @MNK_annotation("(test flatten)") @field_list(0)
     bit<1>     _row0_alt1_valid2;
-    @MNK_annotation("(test flatten)") @field_list(0) 
+    @MNK_annotation("(test flatten)") @field_list(0)
     bit<7>     _row0_alt1_port3;
-    @MNK_annotation("(test flatten)") 
+    @MNK_annotation("(test flatten)")
     bit<1>     _row1_alt0_valid4;
-    @MNK_annotation("(test flatten)") 
+    @MNK_annotation("(test flatten)")
     bit<7>     _row1_alt0_port5;
-    @MNK_annotation("(test flatten)") 
+    @MNK_annotation("(test flatten)")
     bit<1>     _row1_alt1_valid6;
-    @MNK_annotation("(test flatten)") 
+    @MNK_annotation("(test flatten)")
     bit<7>     _row1_alt1_port7;
     bitvec_hdr _col_bvh8;
     bitvec_hdr _bvh09;
@@ -79,8 +79,8 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     @name("ingress.tns") table tns_0 {
         key = {
-            h.bvh1._row_alt1_valid2                  : exact @name("h.bvh1.row.alt1.valid") ;
-            local_metadata._col_bvh8._row_alt0_valid0: exact @name("local_metadata.col.bvh.row.alt0.valid") ;
+            h.bvh1._row_alt1_valid2                  : exact @name("h.bvh1.row.alt1.valid");
+            local_metadata._col_bvh8._row_alt0_valid0: exact @name("local_metadata.col.bvh.row.alt0.valid");
         }
         actions = {
             do_act();
@@ -144,4 +144,3 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
 }
 
 V1Switch<parsed_packet_t, local_metadata_t>(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;
-

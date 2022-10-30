@@ -80,7 +80,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             drop_with_count();
         }
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         default_action = drop_with_count();
         counters = ipv4_da_lpm_stats;
@@ -91,7 +91,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             my_drop(standard_metadata);
         }
         key = {
-            meta.fwd_metadata.l2ptr: exact @name("meta.fwd_metadata.l2ptr") ;
+            meta.fwd_metadata.l2ptr: exact @name("meta.fwd_metadata.l2ptr");
         }
         default_action = my_drop(standard_metadata);
     }
@@ -111,7 +111,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             my_drop(standard_metadata);
         }
         key = {
-            meta.fwd_metadata.out_bd: exact @name("meta.fwd_metadata.out_bd") ;
+            meta.fwd_metadata.out_bd: exact @name("meta.fwd_metadata.out_bd");
         }
         default_action = my_drop(standard_metadata);
     }
@@ -140,4 +140,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

@@ -233,6 +233,9 @@ class InjectOutputPortMetadataField : public Transform {
     const IR::Node *preorder(IR::Type_Struct *s) override;
 };
 
+/// This pass replaces unaligned header fields with aligned header fields
+/// by combining few contiguous header fields and replaces uses with slices
+/// to preserve the behavior
 class AlignHdrMetaField : public Transform {
     P4::TypeMap* typeMap;
     P4::ReferenceMap *refMap;
@@ -809,9 +812,25 @@ class CollectTableInfo : public Inspector {
 // This pass must be called right before CollectLocalVariables pass as the temporary
 // variables created for holding copy of the table keys are inserted to Metadata by
 // CollectLocalVariables pass.
+struct keyElementInfo {
+    int offsetInMetadata;
+    int size;
+};
+
+struct keyInfo {
+    int numElements;
+    int numExistingMetaFields;
+    bool isLearner;
+    bool isExact;
+    int size;
+    std::vector<struct keyElementInfo *> elements;
+};
+
 class CopyMatchKeysToSingleStruct : public P4::KeySideEffect {
     IR::IndexedVector<IR::Declaration> decls;
     DpdkProgramStructure *structure;
+    bool metaCopyNeeded;
+
  public:
     CopyMatchKeysToSingleStruct(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
              std::set<const IR::P4Table*>* invokedInKey, DpdkProgramStructure *structure)
@@ -822,6 +841,9 @@ class CopyMatchKeysToSingleStruct : public P4::KeySideEffect {
     const IR::Node* postorder(IR::KeyElement* element) override;
     const IR::Node* doStatement(const IR::Statement* statement,
                                 const IR::Expression* expression) override;
+    struct keyInfo *getKeyInfo(IR::Key* keys);
+    int getFieldSizeBits(const IR::Type *field_type);
+    bool isLearnerTable(const IR::P4Table *t);
 };
 
 /**

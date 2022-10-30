@@ -7,4 +7,3 @@ control c(out bit<32> o) {
 }
 
 top(c(), true) main;
-

@@ -24,7 +24,7 @@ control c(inout bit<16> p) {
     }
     @name("c.run_ctr") table run_ctr_0 {
         key = {
-            p: exact @name("p") ;
+            p: exact @name("p");
         }
         actions = {
             add_ctr();
@@ -51,4 +51,3 @@ control c(inout bit<16> p) {
 control ctr(inout bit<16> x);
 package top(ctr ctrl);
 top(c()) main;
-

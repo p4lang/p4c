@@ -44,7 +44,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     @name("ingressImpl.foo2_inst.foo2_table") table foo2_inst_foo2_table {
         key = {
-            hdr.ethernet.srcAddr: exact @name("my_headers.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("my_headers.ethernet.srcAddr");
         }
         actions = {
             foo2_inst_foo2_action_0();
@@ -84,4 +84,3 @@ control deparserImpl(packet_out packet, in headers_t hdr) {
 }
 
 V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
-

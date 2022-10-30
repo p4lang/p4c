@@ -20,4 +20,3 @@ control match_action_unit(inout parsed_header_t hdr) {
 }
 
 Switch(match_action_unit()) main;
-

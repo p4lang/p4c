@@ -20,9 +20,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".expressivenesss") 
+    @name(".expressivenesss")
     backs_0   expressivenesss;
-    @name(".kilometer") 
+    @name(".kilometer")
     affairs_0 kilometer;
 }
 
@@ -45,7 +45,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         key = {
             hdr.kilometer.isValid()      : exact;
-            48w0                         : lpm @name("kilometer.flaccidly") ;
+            48w0                         : lpm @name("kilometer.flaccidly");
             hdr.expressivenesss.isValid(): exact;
         }
     }
@@ -77,4 +77,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

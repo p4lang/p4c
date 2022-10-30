@@ -3,9 +3,7 @@
 #include <v1model.p4>
 
 register<bit<32>>(32w100) debug;
-
 register<bit<32>>(32w1) reg;
-
 header ethernet_t {
     bit<48> dstAddr;
     bit<48> srcAddr;
@@ -108,4 +106,3 @@ control Compute(inout Headers hdr, inout Metadata meta) {
 }
 
 V1Switch<Headers, Metadata>(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;
-

@@ -71,7 +71,7 @@ control ingressImpl(inout headers_t hdrs, inout main_metadata_t meta, inout stan
     }
     table stub {
         key = {
-            hdrs.vlan_tag[meta.depth].vid: exact @name("hdrs.vlan_tag[meta.depth].vid") ;
+            hdrs.vlan_tag[meta.depth].vid: exact @name("hdrs.vlan_tag[meta.depth].vid");
         }
         actions = {
             execute();
@@ -81,7 +81,7 @@ control ingressImpl(inout headers_t hdrs, inout main_metadata_t meta, inout stan
     }
     table stub1 {
         key = {
-            hdrs.ethernet.etherType: exact @name("hdrs.ethernet.etherType") ;
+            hdrs.ethernet.etherType: exact @name("hdrs.ethernet.etherType");
         }
         actions = {
             execute_1();
@@ -120,4 +120,3 @@ control deparserImpl(packet_out pkt, in headers_t hdr) {
 }
 
 V1Switch<headers_t, main_metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
-

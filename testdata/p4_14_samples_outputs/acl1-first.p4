@@ -93,7 +93,7 @@ struct l3_metadata_t {
     bit<1>  routed;
     bit<1>  outer_routed;
     bit<8>  mtu_index;
-    @saturating 
+    @saturating
     bit<16> l3_mtu_check;
 }
 
@@ -134,28 +134,28 @@ header data_t {
 }
 
 struct metadata {
-    @pa_solitary("ingress", "acl_metadata.if_label") @name(".acl_metadata") 
+    @pa_solitary("ingress", "acl_metadata.if_label") @name(".acl_metadata")
     acl_metadata_t      acl_metadata;
-    @name(".fabric_metadata") 
+    @name(".fabric_metadata")
     fabric_metadata_t   fabric_metadata;
-    @name(".ingress_metadata") 
+    @name(".ingress_metadata")
     ingress_metadata_t  ingress_metadata;
-    @name(".ipv4_metadata") 
+    @name(".ipv4_metadata")
     ipv4_metadata_t     ipv4_metadata;
-    @name(".ipv6_metadata") 
+    @name(".ipv6_metadata")
     ipv6_metadata_t     ipv6_metadata;
-    @name(".l2_metadata") 
+    @name(".l2_metadata")
     l2_metadata_t       l2_metadata;
-    @name(".l3_metadata") 
+    @name(".l3_metadata")
     l3_metadata_t       l3_metadata;
-    @name(".security_metadata") 
+    @name(".security_metadata")
     security_metadata_t security_metadata;
-    @name(".tunnel_metadata") 
+    @name(".tunnel_metadata")
     tunnel_metadata_t   tunnel_metadata;
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
 }
 
@@ -167,9 +167,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 @name(".drop_stats") counter<bit<8>>(32w256, CounterType.packets) drop_stats;
-
 @name(".drop_stats_2") counter<bit<8>>(32w256, CounterType.packets) drop_stats_2;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".drop_stats_update") action drop_stats_update() {
         drop_stats_2.count(meta.ingress_metadata.drop_reason);
@@ -211,33 +209,33 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.acl_metadata.if_label               : ternary @name("acl_metadata.if_label") ;
-            meta.acl_metadata.bd_label               : ternary @name("acl_metadata.bd_label") ;
-            meta.ipv4_metadata.lkp_ipv4_sa           : ternary @name("ipv4_metadata.lkp_ipv4_sa") ;
-            meta.ipv4_metadata.lkp_ipv4_da           : ternary @name("ipv4_metadata.lkp_ipv4_da") ;
-            meta.l3_metadata.lkp_ip_proto            : ternary @name("l3_metadata.lkp_ip_proto") ;
-            meta.l2_metadata.lkp_mac_sa              : ternary @name("l2_metadata.lkp_mac_sa") ;
-            meta.l2_metadata.lkp_mac_da              : ternary @name("l2_metadata.lkp_mac_da") ;
-            meta.l2_metadata.lkp_mac_type            : ternary @name("l2_metadata.lkp_mac_type") ;
-            meta.ingress_metadata.ifindex            : ternary @name("ingress_metadata.ifindex") ;
-            meta.l2_metadata.port_vlan_mapping_miss  : ternary @name("l2_metadata.port_vlan_mapping_miss") ;
-            meta.security_metadata.ipsg_check_fail   : ternary @name("security_metadata.ipsg_check_fail") ;
-            meta.acl_metadata.acl_deny               : ternary @name("acl_metadata.acl_deny") ;
-            meta.acl_metadata.racl_deny              : ternary @name("acl_metadata.racl_deny") ;
-            meta.l3_metadata.urpf_check_fail         : ternary @name("l3_metadata.urpf_check_fail") ;
-            meta.ingress_metadata.drop_flag          : ternary @name("ingress_metadata.drop_flag") ;
-            meta.l3_metadata.rmac_hit                : ternary @name("l3_metadata.rmac_hit") ;
-            meta.l3_metadata.routed                  : ternary @name("l3_metadata.routed") ;
-            meta.ipv6_metadata.ipv6_src_is_link_local: ternary @name("ipv6_metadata.ipv6_src_is_link_local") ;
-            meta.l2_metadata.same_if_check           : ternary @name("l2_metadata.same_if_check") ;
-            meta.tunnel_metadata.tunnel_if_check     : ternary @name("tunnel_metadata.tunnel_if_check") ;
-            meta.l3_metadata.same_bd_check           : ternary @name("l3_metadata.same_bd_check") ;
-            meta.l3_metadata.lkp_ip_ttl              : ternary @name("l3_metadata.lkp_ip_ttl") ;
-            meta.l2_metadata.stp_state               : ternary @name("l2_metadata.stp_state") ;
-            meta.ingress_metadata.control_frame      : ternary @name("ingress_metadata.control_frame") ;
-            meta.ipv4_metadata.ipv4_unicast_enabled  : ternary @name("ipv4_metadata.ipv4_unicast_enabled") ;
-            meta.ingress_metadata.egress_ifindex     : ternary @name("ingress_metadata.egress_ifindex") ;
-            meta.ingress_metadata.enable_dod         : ternary @name("ingress_metadata.enable_dod") ;
+            meta.acl_metadata.if_label               : ternary @name("acl_metadata.if_label");
+            meta.acl_metadata.bd_label               : ternary @name("acl_metadata.bd_label");
+            meta.ipv4_metadata.lkp_ipv4_sa           : ternary @name("ipv4_metadata.lkp_ipv4_sa");
+            meta.ipv4_metadata.lkp_ipv4_da           : ternary @name("ipv4_metadata.lkp_ipv4_da");
+            meta.l3_metadata.lkp_ip_proto            : ternary @name("l3_metadata.lkp_ip_proto");
+            meta.l2_metadata.lkp_mac_sa              : ternary @name("l2_metadata.lkp_mac_sa");
+            meta.l2_metadata.lkp_mac_da              : ternary @name("l2_metadata.lkp_mac_da");
+            meta.l2_metadata.lkp_mac_type            : ternary @name("l2_metadata.lkp_mac_type");
+            meta.ingress_metadata.ifindex            : ternary @name("ingress_metadata.ifindex");
+            meta.l2_metadata.port_vlan_mapping_miss  : ternary @name("l2_metadata.port_vlan_mapping_miss");
+            meta.security_metadata.ipsg_check_fail   : ternary @name("security_metadata.ipsg_check_fail");
+            meta.acl_metadata.acl_deny               : ternary @name("acl_metadata.acl_deny");
+            meta.acl_metadata.racl_deny              : ternary @name("acl_metadata.racl_deny");
+            meta.l3_metadata.urpf_check_fail         : ternary @name("l3_metadata.urpf_check_fail");
+            meta.ingress_metadata.drop_flag          : ternary @name("ingress_metadata.drop_flag");
+            meta.l3_metadata.rmac_hit                : ternary @name("l3_metadata.rmac_hit");
+            meta.l3_metadata.routed                  : ternary @name("l3_metadata.routed");
+            meta.ipv6_metadata.ipv6_src_is_link_local: ternary @name("ipv6_metadata.ipv6_src_is_link_local");
+            meta.l2_metadata.same_if_check           : ternary @name("l2_metadata.same_if_check");
+            meta.tunnel_metadata.tunnel_if_check     : ternary @name("tunnel_metadata.tunnel_if_check");
+            meta.l3_metadata.same_bd_check           : ternary @name("l3_metadata.same_bd_check");
+            meta.l3_metadata.lkp_ip_ttl              : ternary @name("l3_metadata.lkp_ip_ttl");
+            meta.l2_metadata.stp_state               : ternary @name("l2_metadata.stp_state");
+            meta.ingress_metadata.control_frame      : ternary @name("ingress_metadata.control_frame");
+            meta.ipv4_metadata.ipv4_unicast_enabled  : ternary @name("ipv4_metadata.ipv4_unicast_enabled");
+            meta.ingress_metadata.egress_ifindex     : ternary @name("ingress_metadata.egress_ifindex");
+            meta.ingress_metadata.enable_dod         : ternary @name("ingress_metadata.enable_dod");
         }
         size = 512;
         default_action = NoAction();
@@ -272,4 +270,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

@@ -45,7 +45,7 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
     }
     @name("MyIngressControl.MyIngressControl.stub") table stub {
         key = {
-            m.k1: exact @name("m.k1") ;
+            m.k1: exact @name("m.k1");
         }
         actions = {
             macswp();
@@ -101,8 +101,5 @@ control MyEgressDeparser(packet_out pkt, out EMPTY a, out EMPTY b, inout EMPTY c
 }
 
 IngressPipeline<headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIngressParser(), MyIngressControl(), MyIngressDeparser()) ip;
-
 EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEgressParser(), MyEgressControl(), MyEgressDeparser()) ep;
-
 PSA_Switch<headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

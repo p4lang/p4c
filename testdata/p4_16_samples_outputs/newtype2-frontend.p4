@@ -16,4 +16,3 @@ control FabricIngress(inout M sm) {
 }
 
 V1Switch(FabricIngress()) main;
-

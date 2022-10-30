@@ -15,7 +15,6 @@ limitations under the License.
 */
 
 #include <core.p4>
-#include <v1model.p4>
 
 control empty();
 package top(empty e);

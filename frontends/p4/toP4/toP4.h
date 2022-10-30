@@ -233,6 +233,7 @@ class ToP4 : public Inspector {
     bool preorder(const IR::Argument* arg) override;
     bool preorder(const IR::Path* p) override;
     bool preorder(const IR::Parameter* p) override;
+    bool preorder(const IR::Annotations* a) override;
     bool preorder(const IR::Annotation* a) override;
     bool preorder(const IR::P4Program* program) override;
     bool preorder(const IR::P4Control* c) override;

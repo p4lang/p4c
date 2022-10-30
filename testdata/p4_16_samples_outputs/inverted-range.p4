@@ -18,4 +18,3 @@ parser p(in bit<16> x) {
 parser P(in bit<16> x);
 package top(P _p);
 top(p()) main;
-

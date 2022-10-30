@@ -1,0 +1,3 @@
+gauntlet_action_mux-bmv2.p4(25): [--Wwarn=unused] warning: 'val_0' is unused
+    action do_thing(inout bit<8> val_0) {
+                                 ^^^^^

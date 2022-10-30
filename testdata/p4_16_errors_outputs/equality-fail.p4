@@ -40,4 +40,3 @@ control c(out bit<1> x) {
 control ctrl(out bit<1> x);
 package top(ctrl _c);
 top(c()) main;
-

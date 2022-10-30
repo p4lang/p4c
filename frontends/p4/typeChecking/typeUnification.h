@@ -23,7 +23,7 @@ limitations under the License.
 namespace P4 {
 
 class TypeConstraints;
-class EqualityConstraint;
+class BinaryConstraint;
 
 /**
 Hindley-Milner type unification algorithm
@@ -39,10 +39,10 @@ class TypeUnification final {
     TypeConstraints*  constraints;
     const TypeMap* typeMap;
 
-    bool unifyCall(const EqualityConstraint* constraint);
-    bool unifyFunctions(const EqualityConstraint* constraint,
+    bool unifyCall(const BinaryConstraint* constraint);
+    bool unifyFunctions(const BinaryConstraint* constraint,
                         bool skipReturnValues = false);
-    bool unifyBlocks(const EqualityConstraint* constraint);
+    bool unifyBlocks(const BinaryConstraint* constraint);
  public:
     TypeUnification(TypeConstraints* constraints, const P4::TypeMap* typeMap) :
             constraints(constraints), typeMap(typeMap) {}
@@ -52,7 +52,7 @@ class TypeUnification final {
      * If it returns true unification could still fail later.
      * @return     False if unification fails immediately.
      */
-    bool unify(const EqualityConstraint* constraint);
+    bool unify(const BinaryConstraint* constraint);
 };
 
 }  // namespace P4

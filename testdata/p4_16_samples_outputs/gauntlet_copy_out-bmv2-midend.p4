@@ -23,9 +23,9 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.do_thing") action do_thing() {
-        h.h.a = 8w12;
     }
     @name("ingress.do_thing") action do_thing_1() {
+        h.h.a = 8w12;
     }
     @hidden table tbl_do_thing {
         actions = {
@@ -76,4 +76,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

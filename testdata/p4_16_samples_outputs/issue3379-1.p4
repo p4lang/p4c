@@ -11,4 +11,3 @@ parser MyParser1(in bit<1> tt) {
 package mypackaget<t>(mypt<t> t2);
 package mypackaget<t>(mypt<t> t1, mypt<t> t2);
 mypackaget<bit<1>>(MyParser1()) t4;
-

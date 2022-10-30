@@ -33,5 +33,5 @@ jobs:
 
     - name: Build (Linux)
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg BUILD_STATIC_RELEASE=ON --build-arg ENABLE_GMP=ON  .
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg BUILD_STATIC_RELEASE=ON  .
         ./tools/export_ccache.sh

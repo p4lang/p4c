@@ -15,12 +15,12 @@ header data_t {
 }
 
 struct metadata {
-    @name(".meta") 
+    @name(".meta")
     metadata_t meta;
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
 }
 
@@ -93,4 +93,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

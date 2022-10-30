@@ -22,4 +22,3 @@ parser p(packet_in pk) {
 parser ps(packet_in p);
 package top(ps _p);
 top(p()) main;
-

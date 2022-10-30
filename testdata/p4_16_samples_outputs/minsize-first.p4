@@ -14,4 +14,3 @@ const int w = 32;
 control cproto(out bit<32> v);
 package top(cproto _c);
 top(c()) main;
-

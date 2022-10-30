@@ -49,4 +49,3 @@ control d(packet_out b, in Headers hdr) {
 }
 
 V1Switch<Headers, M>(prs(), vc(), i(), e(), cc(), d()) main;
-

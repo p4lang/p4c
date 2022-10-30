@@ -33,4 +33,3 @@ control ingress(inout Headers h) {
 control Ingress(inout Headers hdr);
 package top(Ingress ig);
 top(ingress()) main;
-

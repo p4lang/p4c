@@ -18,7 +18,6 @@ jobs:
   validate:
     env:
       UNIFIED: ON
-      ENABLE_GMP: ON
       BUILD_SUCCESS: true
       CTEST_PARALLEL_LEVEL: 4
     runs-on: ubuntu-latest
@@ -35,7 +34,7 @@ jobs:
 
     - name: Build (Linux)
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg ENABLE_GMP=$ENABLE_GMP --build-arg VALIDATION=ON . || echo "BUILD_SUCCESS=false" >> $GITHUB_ENV
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg VALIDATION=ON . || echo "BUILD_SUCCESS=false" >> $GITHUB_ENV
         ./tools/export_ccache.sh || echo "BUILD_SUCCESS=false" >> $GITHUB_ENV
 
     - name: Validate

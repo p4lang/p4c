@@ -16,7 +16,6 @@ export P4C_DEPS="bison \
              libboost-iostreams1.71-dev \
              libfl-dev \
              libgc-dev \
-             libgmp-dev \
              pkg-config \
              python3 \
              python3-pip \
@@ -36,8 +35,7 @@ export P4C_RUNTIME_DEPS="cpp \
                      libboost-graph1.71.0 \
                      libboost-iostreams1.71.0 \
                      libgc1c2 \
-                     libgmp10 \
-                     libgmpxx4ldbl \
+                     libgmp-dev \
                      python3"
 
 # use scapy 2.4.5, which is the version on which ptf depends
@@ -51,7 +49,8 @@ apt-get install -y --no-install-recommends \
   ${P4C_DEPS} \
   ${P4C_EBPF_DEPS} \
   ${P4C_RUNTIME_DEPS} \
-  git
+  git \
+  lld
 
 # TODO: Remove this rm -rf line once the ccache memcache config is removed.
 rm -rf /usr/local/etc/ccache.conf
@@ -78,6 +77,7 @@ function install_ptf_ebpf_test_deps() (
   done
   export P4C_PTF_PACKAGES="gcc-multilib \
                            python3-six \
+                           libgmp-dev \
                            libjansson-dev"
   apt-get install -y --no-install-recommends ${P4C_PTF_PACKAGES}
 
@@ -88,7 +88,7 @@ function install_ptf_ebpf_test_deps() (
   git clone --recursive https://github.com/P4-Research/psabpf.git /tmp/psabpf
   cd /tmp/psabpf
   # FIXME: psabpf is under heavy development, later use git tags when it will be ready to use
-  git reset --hard 7a4a8be
+  git reset --hard edacd0d
   ./build_libbpf.sh
   mkdir build
   cd build
@@ -128,6 +128,34 @@ if [ "$VALIDATION" == "ON" ]; then
 fi
 # ! ------  END VALIDATION -----------------------------------------------
 
+# ! ------  BEGIN VALIDATION -----------------------------------------------
+
+function build_tools_deps() {
+  # This is needed for P4Testgen.
+  apt install -y libboost-filesystem-dev libboost-system-dev wget zip
+
+  # Install a recent version of Z3
+  Z3_VERSION="z3-4.8.14"
+  Z3_DIST="${Z3_VERSION}-x64-glibc-2.31"
+
+  # Install clang-format for style checks.
+  pip3 install --user clang-format
+
+  cd /tmp
+  wget https://github.com/Z3Prover/z3/releases/download/${Z3_VERSION}/${Z3_DIST}.zip
+  unzip ${Z3_DIST}.zip
+  cp -r ${Z3_DIST}/bin/libz3.* /usr/local/lib/
+  cp -r ${Z3_DIST}/include/* /usr/local/include/
+  cd /p4c
+  rm -rf /tmp/${Z3_DIST}
+}
+
+# Build the dependencies necessary for the P4Tools platform.
+if [ "$ENABLE_TEST_TOOLS" == "ON" ]; then
+  build_tools_deps
+fi
+# ! ------  END TOOLS -----------------------------------------------
+
 
 function build() {
   if [ -e build ]; then /bin/rm -rf build; fi
@@ -138,14 +166,23 @@ function build() {
   make
 }
 
+if [ "$COMPILE_WITH_CLANG" == "ON" ]; then
+  export CC=clang
+  export CXX=clang++
+fi
+
 # Strong optimization.
 export CXXFLAGS="${CXXFLAGS} -O3"
 # Toggle unified compilation.
 CMAKE_FLAGS+="-DENABLE_UNIFIED_COMPILATION=${ENABLE_UNIFIED_COMPILATION} "
 # Toggle static builds.
 CMAKE_FLAGS+="-DBUILD_STATIC_RELEASE=${BUILD_STATIC_RELEASE} "
+# Toggle the installation of the tools back end.
+CMAKE_FLAGS+="-DENABLE_TEST_TOOLS=${ENABLE_TEST_TOOLS} "
 # RELEASE should be default, but we want to make sure.
-CMAKE_FLAGS+="-DCMAKE_BUILD_TYPE=RELEASE"
+CMAKE_FLAGS+="-DCMAKE_BUILD_TYPE=RELEASE "
+# Treat warnings as errors.
+CMAKE_FLAGS+="-DENABLE_WERROR=${ENABLE_WERROR} "
 build ${CMAKE_FLAGS}
 
 make install

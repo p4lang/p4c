@@ -28,6 +28,7 @@ limitations under the License.
 #include "typeSubstitution.h"
 #include "typeSubstitutionVisitor.h"
 #include "lib/error_helper.h"
+#include "lib/castable.h"
 
 namespace P4 {
 
@@ -57,9 +58,7 @@ class Explain : public Inspector {
     }
 };
 
-// Currently we only have one kind of constraint, EqualityConstraint,
-// but perhaps someday we'll support other constraints as well.
-class TypeConstraint : public IHasDbPrint {
+class TypeConstraint : public IHasDbPrint, public ICastable {
     int id;  // for debugging
     static int crtid;
     /// The following are used when reporting errors.
@@ -170,37 +169,70 @@ class TypeConstraint : public IHasDbPrint {
     virtual bool reportError(const TypeVariableSubstitution* subst) const = 0;
 };
 
-/// Requires two types to be equal.
-class EqualityConstraint : public TypeConstraint {
+/// Base class for EqualityConstraint and CanBeImplicitlyCastConstraint
+class BinaryConstraint : public TypeConstraint {
  public:
     const IR::Type* left;
     const IR::Type* right;
 
- private:
-    EqualityConstraint(const IR::Type* left, const IR::Type* right,
-                       const TypeConstraint* derivedFrom)
+ protected:
+    BinaryConstraint(const IR::Type* left, const IR::Type* right,
+                     const TypeConstraint* derivedFrom)
             : TypeConstraint(derivedFrom), left(left), right(right)
-    { check(); }
-
- public:
-    EqualityConstraint(const IR::Type* left, const IR::Type* right,
-                       const IR::Node* origin)
+    { validate(); }
+    BinaryConstraint(const IR::Type* left, const IR::Type* right,
+                     const IR::Node* origin)
             : TypeConstraint(origin), left(left), right(right)
-    { check(); }
-    void check() const {
+    { validate(); }
+    void validate() const {
         CHECK_NULL(left); CHECK_NULL(right);
         if (left->is<IR::Type_Name>() || right->is<IR::Type_Name>())
-            BUG("Unifying type names %1% and %2%", left, right);
+            BUG("type names should not appear in unification: %1% and %2%", left, right);
         LOG3(this);
     }
+
+ public:
+    virtual void dbprint(std::ostream& out) const = 0;
+    virtual BinaryConstraint* create(const IR::Type* left, const IR::Type* right) const = 0;
+};
+
+/// Requires two types to be equal.
+class EqualityConstraint : public BinaryConstraint {
+ public:
+    EqualityConstraint(const IR::Type* left, const IR::Type* right,
+                       const TypeConstraint* derivedFrom)
+            : BinaryConstraint(left, right, derivedFrom) {}
+    EqualityConstraint(const IR::Type* left, const IR::Type* right,
+                       const IR::Node* origin)
+            : BinaryConstraint(left, right, origin) {}
     void dbprint(std::ostream& out) const override
     { out << "Constraint:" << dbp(left) << " = " << dbp(right); }
     using TypeConstraint::reportError;
     bool reportError(const TypeVariableSubstitution* subst) const override {
         return reportError(subst, "Cannot unify type '%1%' with type '%2%'", right, left);
     }
-    EqualityConstraint* create(const IR::Type* left, const IR::Type* right) const {
+    BinaryConstraint* create(const IR::Type* left, const IR::Type* right) const override {
         return new EqualityConstraint(left, right, this);
+    }
+};
+
+/// The right type can be implicitly cast to the left type.
+class CanBeImplicitlyCastConstraint : public BinaryConstraint {
+ public:
+    CanBeImplicitlyCastConstraint(const IR::Type* left, const IR::Type* right,
+                                  const TypeConstraint* derivedFrom)
+            : BinaryConstraint(left, right, derivedFrom) {}
+    CanBeImplicitlyCastConstraint(const IR::Type* left, const IR::Type* right,
+                                  const IR::Node* origin)
+            : BinaryConstraint(left, right, origin) {}
+    void dbprint(std::ostream& out) const override
+    { out << "Constraint:" << dbp(left) << " := " << dbp(right); }
+    using TypeConstraint::reportError;
+    bool reportError(const TypeVariableSubstitution* subst) const override {
+        return reportError(subst, "Cannot cast implicitly type '%1%' to type '%2%'", right, left);
+    }
+    BinaryConstraint* create(const IR::Type* left, const IR::Type* right) const {
+        return new CanBeImplicitlyCastConstraint(left, right, this);
     }
 };
 
@@ -251,7 +283,7 @@ class TypeConstraints final {
      * @param constraint Constraint to solve.
      * @return           True on success.  Does not report error on failure.
      */
-    bool solve(const EqualityConstraint *constraint);
+    bool solve(const BinaryConstraint *constraint);
     TypeVariableSubstitution* solve();
     void dbprint(std::ostream& out) const;
     const TypeVariableSubstitution* getCurrentSubstitution() const { return currentSubstitution; }

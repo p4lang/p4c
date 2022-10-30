@@ -19,4 +19,3 @@ control p() {
 control empty();
 package m(empty e);
 m(p()) main;
-

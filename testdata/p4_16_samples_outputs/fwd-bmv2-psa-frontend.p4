@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -23,39 +23,29 @@ struct headers {
 }
 
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_t resubmit_meta, in empty_t recirculate_meta) {
-    headers parsed_hdr_2;
-    metadata user_meta_2;
     state start {
-        parsed_hdr_2.ethernet.setInvalid();
-        user_meta_2 = user_meta;
+        parsed_hdr.ethernet.setInvalid();
         transition CommonParser_start;
     }
     state CommonParser_start {
-        buffer.extract<ethernet_t>(parsed_hdr_2.ethernet);
+        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
         transition start_0;
     }
     state start_0 {
-        parsed_hdr = parsed_hdr_2;
-        user_meta = user_meta_2;
         transition accept;
     }
 }
 
 parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_egress_parser_input_metadata_t istd, in empty_t normal_meta, in empty_t clone_i2e_meta, in empty_t clone_e2e_meta) {
-    headers parsed_hdr_3;
-    metadata user_meta_3;
     state start {
-        parsed_hdr_3.ethernet.setInvalid();
-        user_meta_3 = user_meta;
+        parsed_hdr.ethernet.setInvalid();
         transition CommonParser_start_0;
     }
     state CommonParser_start_0 {
-        buffer.extract<ethernet_t>(parsed_hdr_3.ethernet);
+        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
         transition start_1;
     }
     state start_1 {
-        parsed_hdr = parsed_hdr_3;
-        user_meta = user_meta_3;
         transition accept;
     }
 }
@@ -83,8 +73,5 @@ control EgressDeparserImpl(packet_out buffer, out empty_t clone_e2e_meta, out em
 }
 
 IngressPipeline<headers, metadata, empty_t, empty_t, empty_t, empty_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers, metadata, empty_t, empty_t, empty_t, empty_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers, metadata, headers, metadata, empty_t, empty_t, empty_t, empty_t, empty_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

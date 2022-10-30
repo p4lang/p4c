@@ -144,4 +144,3 @@ control test_egress(inout headers_t hdr, inout metadata_t meta, inout standard_m
 }
 
 V1Switch(test_parser(), test_verify_checksum(), test_ingress(), test_egress(), test_compute_checksum(), test_deparser()) main;
-
