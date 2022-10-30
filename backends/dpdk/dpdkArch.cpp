@@ -2526,7 +2526,7 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
     if (!isValidExternCall) {
          ::error(ErrorType::ERR_UNEXPECTED,
                  "%1% must only be called from within an action with '%2%'"
-                 " property equal to true", externFuncName, propName);
+                 " property equal to true", mcs, propName);
     }
     return;
 }
