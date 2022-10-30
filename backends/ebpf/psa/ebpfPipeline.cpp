@@ -403,6 +403,14 @@ void EBPFEgressPipeline::emit(CodeBuilder *builder) {
     builder->blockStart();
 
     emitGlobalMetadataInitializer(builder);
+    builder->appendFormat("compiler_meta__->mark = %u", packetMark);
+    builder->appendFormat("if (compiler_meta__->mark != %u) ", packetMark);
+    builder->blockStart();
+    builder->emitIndent();
+    builder->append("return TC_ACT_OK");
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+
     emitLocalVariables(builder);
     emitUserMetadataInstance(builder);
     builder->newline();
@@ -482,6 +490,9 @@ void TCIngressPipeline::emitGlobalMetadataInitializer(CodeBuilder *builder) {
     builder->appendFormat("if (%s->packet_path == NORMAL) ",
                           compilerGlobalMetadata);
     builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("compiler_meta__->mark = %u", packetMark);
+    builder->endOfStatement(true);
     builder->emitIndent();
     if (options.xdp2tcMode == XDP2TC_META) {
         emitTCWorkaroundUsingMeta(builder);
