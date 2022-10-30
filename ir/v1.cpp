@@ -18,7 +18,7 @@ limitations under the License.
 
 #include "ir.h"
 #include "dbprint.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "lib/bitops.h"
 
 #define SINGLETON_TYPE(NAME)                                    \

@@ -14,18 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_GMPUTIL_H_
-#define _LIB_GMPUTIL_H_
+#ifndef LIB_BIG_INT_UTIL_H_
+#define LIB_BIG_INT_UTIL_H_
 
 #include "config.h"
 
-#if HAVE_LIBGMP
-#include <boost/multiprecision/gmp.hpp>
-typedef boost::multiprecision::mpz_int big_int;
-#else
 #include <boost/multiprecision/cpp_int.hpp>
 typedef boost::multiprecision::cpp_int big_int;
-#endif
 
 namespace Util {
 
@@ -50,12 +45,6 @@ big_int shift_right(const big_int &v, unsigned bits);
 big_int maskFromSlice(unsigned m, unsigned l);
 big_int mask(unsigned bits);
 
-#if HAVE_LIBGMP
-inline unsigned scan0(const boost::multiprecision::mpz_int &val, unsigned pos) {
-    return mpz_scan0(val.backend().data(), pos); }
-inline unsigned scan1(const boost::multiprecision::mpz_int &val, unsigned pos) {
-    return mpz_scan1(val.backend().data(), pos); }
-#else
 inline unsigned scan0_positive(const boost::multiprecision::cpp_int &val, unsigned pos) {
     while (boost::multiprecision::bit_test(val, pos)) ++pos;
     return pos; }
@@ -71,8 +60,6 @@ inline unsigned scan0(const boost::multiprecision::cpp_int &val, unsigned pos) {
 inline unsigned scan1(const boost::multiprecision::cpp_int &val, unsigned pos) {
     if (val < 0) return scan0_positive(-val - 1, pos);
     return scan1_positive(val, pos); }
-#endif
-
 
 }  // namespace Util
 
@@ -98,4 +85,4 @@ static inline int ceil_log2(big_int v) {
     return v ? floor_log2(v-1) + 1 : -1;
 }
 
-#endif /* _LIB_GMPUTIL_H_ */
+#endif /* LIB_BIG_INT_UTIL_H_ */

@@ -30,7 +30,6 @@ jobs:
   ptf-linux:
     env:
       UNIFIED: ON
-      ENABLE_GMP: ON
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -45,7 +44,7 @@ jobs:
 
       - name: Build (Linux)
         run: |
-          docker build --network host -t p4c --build-arg MAKEFLAGS=-j8 --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg ENABLE_GMP=$ENABLE_GMP --build-arg INSTALL_PTF_EBPF_DEPENDENCIES=ON .
+          docker build --network host -t p4c --build-arg MAKEFLAGS=-j8 --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg INSTALL_PTF_EBPF_DEPENDENCIES=ON .
           ./tools/export_ccache.sh
 
       - name: Run PTF tests for eBPF backend (Linux)

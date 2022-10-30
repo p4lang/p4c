@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "constantFolding.h"
 #include "frontends/common/options.h"
 #include "frontends/p4/enumInstance.h"
@@ -751,6 +751,9 @@ const IR::Node* DoConstantFolding::postorder(IR::LNot* e) {
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Mux* e) {
+    if (!typesKnown)
+        // We want the typechecker to look at the expression first
+        return e;
     auto cond = getConstant(e->e0);
     if (cond == nullptr)
         return e;

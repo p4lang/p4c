@@ -17,7 +17,7 @@ limitations under the License.
 #include "converters.h"
 #include "programStructure.h"
 #include "v1model.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
