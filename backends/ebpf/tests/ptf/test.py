@@ -598,7 +598,8 @@ class PassToKernelStackTest(P4EbpfTest):
 
     p4_file_path = "p4testdata/pass-to-kernel.p4"
 
-    def runTest(self):
+    def setUp(self):
+        super(PassToKernelStackTest, self).setUp()
         # static route
         self.exec_ns_cmd("ip route add 20.0.0.15/32 dev eth1")
         # add IP address to interface, so that it can reply with ICMP and ARP
@@ -607,7 +608,16 @@ class PassToKernelStackTest(P4EbpfTest):
         self.exec_ns_cmd("arp -s 20.0.0.15 00:00:00:00:00:aa")
         self.exec_ns_cmd("arp -s 10.0.0.2 00:00:00:00:00:cc")
 
-        # simple forward
+    def tearDown(self):
+        self.exec_ns_cmd("arp -d 20.0.0.15")
+        self.exec_ns_cmd("arp -d 10.0.0.2")
+        self.exec_ns_cmd("ip route del 20.0.0.15/32")
+
+        super(PassToKernelStackTest, self).tearDown()
+
+
+    def runTest(self):
+        # simple forward by Linux routing
         pkt = testutils.simple_tcp_packet(eth_dst="00:00:00:00:00:01", ip_src="10.0.0.2", ip_dst="20.0.0.15")
         testutils.send_packet(self, PORT0, pkt)
         exp_pkt = pkt.copy()
@@ -616,6 +626,7 @@ class PassToKernelStackTest(P4EbpfTest):
         exp_pkt[IP].ttl = 63 # routed packet
         testutils.verify_packet(self, exp_pkt, PORT1)
 
+        # ARP handling
         pkt = testutils.simple_arp_packet(pktlen=21, eth_dst="00:00:00:00:00:01", ip_snd="10.0.0.2", ip_tgt="10.0.0.1")
         testutils.send_packet(self, PORT0, pkt)
         exp_pkt = pkt.copy()

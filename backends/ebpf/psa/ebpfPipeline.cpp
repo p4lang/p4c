@@ -403,7 +403,6 @@ void EBPFEgressPipeline::emit(CodeBuilder *builder) {
     builder->blockStart();
 
     emitGlobalMetadataInitializer(builder);
-    builder->appendFormat("compiler_meta__->mark = %u", packetMark);
     builder->appendFormat("if (compiler_meta__->mark != %u) ", packetMark);
     builder->blockStart();
     builder->emitIndent();
