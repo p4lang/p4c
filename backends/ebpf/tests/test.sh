@@ -78,7 +78,7 @@ done
 cleanup
 trap cleanup EXIT
 
-# Make sure BPFFS is mounted
+# Make sure BPF file system is mounted
 mount bpffs /sys/fs/bpf -t bpf
 
 # Remove any temporary files from previous run. It might be useful to
