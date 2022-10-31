@@ -377,14 +377,14 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
                     auto val = earg->to<IR::ListExpression>()->
                                components.at(i)->to<IR::Constant>()->asUnsigned();
                     out << default_action_paraList.parameters.at(i)->toString() << " ";
-                    out << "0x" << std::hex << val << " ";
+                    out << "0x" << std::hex << std::uppercase << val << " ";
                 } else if (earg->to<IR::ListExpression>()->components.at(i)->
                            is<IR::BoolLiteral>()) {
                     earg->dbprint(std::cout);
                     auto val = earg->to<IR::ListExpression>()->
                                components.at(i)->to<IR::BoolLiteral>()->value;
                     out << default_action_paraList.parameters.at(i)->toString() << " ";
-                    out << "0x" << std::hex << val << " ";
+                    out << "0x" << std::hex << std::uppercase << val << " ";
                 } else {
                     BUG("Unsupported parameter type in default action in DPDK Target");
                 }
@@ -457,7 +457,7 @@ std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
     if (auto size = properties->getProperty("size")) {
         out << "\tsize " << DPDK::toStr(size->value) << "" << std::endl;
     } else {
-        out << "\tsize 0x" << std::hex << default_learner_table_size << std::endl;
+        out << "\tsize 0x" << std::hex << std::uppercase << default_learner_table_size << std::endl;
     }
 
     // The initial timeout values

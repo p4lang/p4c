@@ -55,33 +55,33 @@ regarray direction size 0x100 initval 0
 action execute_1 args none {
 	jmpneq LABEL_FALSE_1 m.local_metadata_depth 0x0
 	mov m.MainControlT_tmp_7 h.vlan_tag_0.pcp_cfi_vid
-	and m.MainControlT_tmp_7 0xf
+	and m.MainControlT_tmp_7 0xF
 	mov m.MainControlT_tmp_8 h.vlan_tag_0.pcp_cfi_vid
 	shr m.MainControlT_tmp_8 0x4
 	mov m.MainControlT_tmp_9 m.MainControlT_tmp_8
-	and m.MainControlT_tmp_9 0xfff
+	and m.MainControlT_tmp_9 0xFFF
 	mov m.MainControlT_tmp_10 m.MainControlT_tmp_9
-	and m.MainControlT_tmp_10 0xfff
+	and m.MainControlT_tmp_10 0xFFF
 	mov m.MainControlT_tmp_13 m.MainControlT_tmp_10
 	shl m.MainControlT_tmp_13 0x4
 	mov m.MainControlT_tmp_14 m.MainControlT_tmp_13
-	and m.MainControlT_tmp_14 0xfff0
+	and m.MainControlT_tmp_14 0xFFF0
 	mov h.vlan_tag_0.pcp_cfi_vid m.MainControlT_tmp_7
 	or h.vlan_tag_0.pcp_cfi_vid m.MainControlT_tmp_14
 	jmp LABEL_END_2
 	LABEL_FALSE_1 :	jmpneq LABEL_END_2 m.local_metadata_depth 0x1
 	mov m.MainControlT_tmp_15 h.vlan_tag_1.pcp_cfi_vid
-	and m.MainControlT_tmp_15 0xf
+	and m.MainControlT_tmp_15 0xF
 	mov m.MainControlT_tmp_16 h.vlan_tag_0.pcp_cfi_vid
 	shr m.MainControlT_tmp_16 0x4
 	mov m.MainControlT_tmp_17 m.MainControlT_tmp_16
-	and m.MainControlT_tmp_17 0xfff
+	and m.MainControlT_tmp_17 0xFFF
 	mov m.MainControlT_tmp_18 m.MainControlT_tmp_17
-	and m.MainControlT_tmp_18 0xfff
+	and m.MainControlT_tmp_18 0xFFF
 	mov m.MainControlT_tmp_21 m.MainControlT_tmp_18
 	shl m.MainControlT_tmp_21 0x4
 	mov m.MainControlT_tmp_22 m.MainControlT_tmp_21
-	and m.MainControlT_tmp_22 0xfff0
+	and m.MainControlT_tmp_22 0xFFF0
 	mov h.vlan_tag_1.pcp_cfi_vid m.MainControlT_tmp_15
 	or h.vlan_tag_1.pcp_cfi_vid m.MainControlT_tmp_22
 	LABEL_END_2 :	return
@@ -100,7 +100,7 @@ table stub {
 		execute_1
 	}
 	default_action execute_1 args none const
-	size 0xf4240
+	size 0xF4240
 }
 
 
@@ -112,7 +112,7 @@ table stub1 {
 		execute_3
 	}
 	default_action execute_3 args none const
-	size 0xf4240
+	size 0xF4240
 }
 
 
@@ -137,9 +137,9 @@ apply {
 	mov m.MainControlT_tmp h.vlan_tag_0.pcp_cfi_vid
 	shr m.MainControlT_tmp 0x4
 	mov m.MainControlT_tmp_0 m.MainControlT_tmp
-	and m.MainControlT_tmp_0 0xfff
+	and m.MainControlT_tmp_0 0xFFF
 	mov m.MainControlT_tmp_1 m.MainControlT_tmp_0
-	and m.MainControlT_tmp_1 0xfff
+	and m.MainControlT_tmp_1 0xFFF
 	mov m.MainControlT_tmp_2 m.MainControlT_tmp_1
 	jmpeq LABEL_SWITCH m.MainControlT_tmp_2 0x1
 	jmpeq LABEL_SWITCH_0 m.MainControlT_tmp_2 0x2
@@ -147,9 +147,9 @@ apply {
 	LABEL_SWITCH :	mov m.MainControlT_tmp_23 h.vlan_tag_0.pcp_cfi_vid
 	shr m.MainControlT_tmp_23 0x4
 	mov m.MainControlT_tmp_24 m.MainControlT_tmp_23
-	and m.MainControlT_tmp_24 0xfff
+	and m.MainControlT_tmp_24 0xFFF
 	mov m.MainControlT_tmp_25 m.MainControlT_tmp_24
-	and m.MainControlT_tmp_25 0xfff
+	and m.MainControlT_tmp_25 0xFFF
 	mov m.MainControlT_key m.MainControlT_tmp_25
 	table stub
 	jmp LABEL_END_0
@@ -159,9 +159,9 @@ apply {
 	mov m.MainControlT_tmp_3 h.vlan_tag_1.pcp_cfi_vid
 	shr m.MainControlT_tmp_3 0x4
 	mov m.MainControlT_tmp_4 m.MainControlT_tmp_3
-	and m.MainControlT_tmp_4 0xfff
+	and m.MainControlT_tmp_4 0xFFF
 	mov m.MainControlT_tmp_5 m.MainControlT_tmp_4
-	and m.MainControlT_tmp_5 0xfff
+	and m.MainControlT_tmp_5 0xFFF
 	mov m.MainControlT_tmp_6 m.MainControlT_tmp_5
 	jmpeq LABEL_SWITCH_1 m.MainControlT_tmp_6 0x1
 	jmpeq LABEL_SWITCH_2 m.MainControlT_tmp_6 0x2
@@ -169,9 +169,9 @@ apply {
 	LABEL_SWITCH_1 :	mov m.MainControlT_tmp_26 h.vlan_tag_1.pcp_cfi_vid
 	shr m.MainControlT_tmp_26 0x4
 	mov m.MainControlT_tmp_27 m.MainControlT_tmp_26
-	and m.MainControlT_tmp_27 0xfff
+	and m.MainControlT_tmp_27 0xFFF
 	mov m.MainControlT_tmp_28 m.MainControlT_tmp_27
-	and m.MainControlT_tmp_28 0xfff
+	and m.MainControlT_tmp_28 0xFFF
 	mov m.MainControlT_key m.MainControlT_tmp_28
 	table stub
 	jmp LABEL_END_0

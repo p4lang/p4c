@@ -47,9 +47,9 @@ apply {
 	mov m.MainParserT_parser_tmp_6 h.MainParserT_parser_lookahead_1.f
 	shr m.MainParserT_parser_tmp_6 0x8
 	mov m.MainParserT_parser_tmp_7 m.MainParserT_parser_tmp_6
-	and m.MainParserT_parser_tmp_7 0xffff
+	and m.MainParserT_parser_tmp_7 0xFFFF
 	mov m.MainParserT_parser_tmp_8 m.MainParserT_parser_tmp_7
-	and m.MainParserT_parser_tmp_8 0xffff
+	and m.MainParserT_parser_tmp_8 0xFFFF
 	jmpeq MAINPARSERIMPL_PARSE_H1 m.MainParserT_parser_tmp_8 0x1234
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_H1 :	extract h.h1
@@ -58,19 +58,19 @@ apply {
 	mov m.MainParserT_parser_tmp m.MainParserT_parser_tmp_12
 	shr m.MainParserT_parser_tmp 0x8
 	mov m.MainParserT_parser_tmp_0 m.MainParserT_parser_tmp
-	and m.MainParserT_parser_tmp_0 0xffff
+	and m.MainParserT_parser_tmp_0 0xFFFF
 	mov m.MainParserT_parser_tmp_1 m.MainParserT_parser_tmp_0
-	and m.MainParserT_parser_tmp_1 0xffff
+	and m.MainParserT_parser_tmp_1 0xFFFF
 	mov m.local_metadata__s1_type10 m.MainParserT_parser_tmp_1
 	mov m.MainParserT_parser_tmp_2 m.MainParserT_parser_tmp_12
-	and m.MainParserT_parser_tmp_2 0xff
+	and m.MainParserT_parser_tmp_2 0xFF
 	mov m.MainParserT_parser_tmp_3 m.MainParserT_parser_tmp_2
-	and m.MainParserT_parser_tmp_3 0xff
+	and m.MainParserT_parser_tmp_3 0xFF
 	mov m.local_metadata__s1_type21 m.MainParserT_parser_tmp_3
 	mov m.MainParserT_parser_tmp_4 m.MainParserT_parser_tmp_12
-	and m.MainParserT_parser_tmp_4 0xff
+	and m.MainParserT_parser_tmp_4 0xFF
 	mov m.MainParserT_parser_tmp_5 m.MainParserT_parser_tmp_4
-	and m.MainParserT_parser_tmp_5 0xff
+	and m.MainParserT_parser_tmp_5 0xFF
 	jmpeq MAINPARSERIMPL_PARSE_H2 m.MainParserT_parser_tmp_5 0x1
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_H2 :	extract h.h2
