@@ -9,10 +9,10 @@
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
-#include "lib/big_int_util.h"
+#include "backends/p4tools/common/lib/util.h"
+#include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
@@ -143,7 +143,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
             const ExecutionState& state, SmallStepEvaluator::Result& result) {
              auto* nextState = new ExecutionState(state);
              const auto* nineBitType =
-                 IRUtils::getBitType(BMv2_V1ModelTestgenTarget::getPortNumWidth_bits());
+                 IR::getBitType(BMv2_V1ModelTestgenTarget::getPortNumWidth_bits());
              const auto* metadataLabel = args->at(0)->expression;
              if (!(metadataLabel->is<IR::Member>() || metadataLabel->is<IR::PathExpression>())) {
                  TESTGEN_UNIMPLEMENTED("Drop input %1% of type %2% not supported", metadataLabel,
@@ -152,7 +152,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // Use an assignment to set egress_spec to true.
              // This variable will be processed in the deparser.
              const auto* portVar = new IR::Member(nineBitType, metadataLabel, "egress_spec");
-             nextState->set(portVar, IRUtils::getConstant(nineBitType, 511));
+             nextState->set(portVar, IR::getConstant(nineBitType, 511));
              nextState->add(new TraceEvent::Generic("mark_to_drop executed."));
              nextState->popBody();
              result->emplace_back(nextState);
@@ -798,7 +798,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                      auto* nextState = new ExecutionState(state);
                      ::warning("Only single recirculation supported for now. Dropping packet.");
                      auto* dropStmt = new IR::MethodCallStatement(
-                         IRUtils::generateInternalMethodCall("drop_and_exit", {}));
+                         Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState->replaceTopBody(dropStmt);
                      result->emplace_back(nextState);
                      return;
@@ -843,7 +843,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              if (cloneType == BMv2Constants::CLONE_TYPE_I2E) {
                  // Pick a clone port var. For now, pick a random value from 0-511.
                  const auto* rndConst =
-                     IRUtils::getRandConstantForWidth(TestgenTarget::getPortNumWidth_bits());
+                     Utils::getRandConstantForWidth(TestgenTarget::getPortNumWidth_bits());
                  const auto* clonePortVar = rndConst;
                  // clone_preserving_field_list has a default state where the packet continues as
                  // is.
@@ -898,12 +898,12 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                                           cloneInfo);
                  // Reset the packet buffer, which corresponds to the output packet.
                  nextState->resetPacketBuffer();
-                 const auto* bitType = IRUtils::getBitType(32);
+                 const auto* bitType = IR::getBitType(32);
                  const auto* instanceTypeVar = new IR::Member(
                      bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
                  nextState->set(
                      instanceTypeVar,
-                     IRUtils::getConstant(bitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
+                     IR::getConstant(bitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
                  nextState->replaceTopBody(&cmds);
                  result->emplace_back(cond, state, nextState);
                  return;
@@ -982,7 +982,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  if (recirculateCount > 1) {
                      ::warning("Only single resubmit supported for now. Dropping packet.");
                      auto* dropStmt = new IR::MethodCallStatement(
-                         IRUtils::generateInternalMethodCall("drop_and_exit", {}));
+                         Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState->replaceTopBody(dropStmt);
                      result->emplace_back(nextState);
                      return;
@@ -1040,7 +1040,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  if (recirculateCount > 1) {
                      ::warning("Only single recirculation supported for now. Dropping packet.");
                      auto* dropStmt = new IR::MethodCallStatement(
-                         IRUtils::generateInternalMethodCall("drop_and_exit", {}));
+                         Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState->replaceTopBody(dropStmt);
                      result->emplace_back(nextState);
                      return;
@@ -1082,7 +1082,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                      auto* nextState = new ExecutionState(state);
                      ::warning("Only single recirculation supported for now. Dropping packet.");
                      auto* dropStmt = new IR::MethodCallStatement(
-                         IRUtils::generateInternalMethodCall("drop_and_exit", {}));
+                         Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState->replaceTopBody(dropStmt);
                      result->emplace_back(nextState);
                      return;
@@ -1127,7 +1127,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              if (cloneType == BMv2Constants::CLONE_TYPE_I2E) {
                  // Pick a clone port var. For now, pick a random value from 0-511.
                  const auto* rndConst =
-                     IRUtils::getRandConstantForWidth(TestgenTarget::getPortNumWidth_bits());
+                     Utils::getRandConstantForWidth(TestgenTarget::getPortNumWidth_bits());
                  const auto* clonePortVar = rndConst;
                  // clone_preserving_field_list has a default state where the packet continues as
                  // is.
@@ -1168,12 +1168,12 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                                           cloneInfo);
                  // Reset the packet buffer, which corresponds to the output packet.
                  nextState->resetPacketBuffer();
-                 const auto* bitType = IRUtils::getBitType(32);
+                 const auto* bitType = IR::getBitType(32);
                  const auto* instanceTypeVar = new IR::Member(
                      bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
                  nextState->set(
                      instanceTypeVar,
-                     IRUtils::getConstant(bitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
+                     IR::getConstant(bitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
                  nextState->replaceTopBody(&cmds);
                  result->emplace_back(cond, state, nextState);
                  return;
@@ -1234,7 +1234,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              const auto* packetSizeVar = new IR::Member(
                  pktSizeType, new IR::PathExpression("*standard_metadata"), "packet_length");
              const auto* packetSizeConst =
-                 IRUtils::getConstant(pktSizeType, recState->getPacketBufferSize() / 8);
+                 IR::getConstant(pktSizeType, recState->getPacketBufferSize() / 8);
              recState->set(packetSizeVar, packetSizeConst);
 
              auto progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
@@ -1253,10 +1253,10 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // Update the metadata variable to the correct instance type as provided by
              // recirculation.
              auto instanceType = state.getProperty<uint64_t>("recirculate_instance_type");
-             const auto* bitType = IRUtils::getBitType(32);
+             const auto* bitType = IR::getBitType(32);
              const auto* instanceTypeVar = new IR::Member(
                  bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
-             recState->set(instanceTypeVar, IRUtils::getConstant(bitType, instanceType));
+             recState->set(instanceTypeVar, IR::getConstant(bitType, instanceType));
 
              // Set recirculate to false to avoid infinite loops.
              recState->setProperty("recirculate_active", false);
@@ -1268,7 +1268,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              if (cloneActive) {
                  // Pick a clone port var. For now, pick a random value from 0-511.
                  const auto* rndConst =
-                     IRUtils::getRandConstantForWidth(TestgenTarget::getPortNumWidth_bits());
+                     Utils::getRandConstantForWidth(TestgenTarget::getPortNumWidth_bits());
                  const auto* clonePortVar = rndConst;
                  const auto* sessionIdExpr =
                      state.getProperty<const IR::Expression*>("clone_session_id");
@@ -1384,7 +1384,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              const auto* checksumValue = args->at(2)->expression;
              const auto* checksumValueType = checksumValue->type;
              const auto* algo = args->at(3)->expression;
-             const auto* oneBitType = IRUtils::getBitType(1);
+             const auto* oneBitType = IR::getBitType(1);
 
              // If the condition is tainted or the input data is tainted, the checksum error will
              // not be reliable.
@@ -1432,7 +1432,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  const auto* checksumErr = new IR::Member(
                      oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
                  const auto* assign =
-                     new IR::AssignmentStatement(checksumErr, IRUtils::getConstant(oneBitType, 1));
+                     new IR::AssignmentStatement(checksumErr, IR::getConstant(oneBitType, 1));
                  auto* errorCond = new IR::LAnd(verifyCond, checksumMatchCond);
                  replacements.emplace_back(assign);
                  nextState->replaceTopBody(&replacements);
@@ -1665,7 +1665,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              const auto* checksumValue = args->at(2)->expression;
              const auto* checksumValueType = checksumValue->type;
              const auto* algo = args->at(3)->expression;
-             const auto* oneBitType = IRUtils::getBitType(1);
+             const auto* oneBitType = IR::getBitType(1);
              // If the condition is tainted or the input data is tainted, the checksum error will
              // not be reliable.
              if (argsAreTainted) {
@@ -1711,7 +1711,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  const auto* checksumErr = new IR::Member(
                      oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
                  const auto* assign =
-                     new IR::AssignmentStatement(checksumErr, IRUtils::getConstant(oneBitType, 1));
+                     new IR::AssignmentStatement(checksumErr, IR::getConstant(oneBitType, 1));
                  auto* errorCond = new IR::LAnd(verifyCond, checksumMatchCond);
                  replacements.emplace_back(assign);
                  nextState->replaceTopBody(&replacements);

@@ -474,7 +474,7 @@ void Protobuf::emitTestcase(const TestSpec* testSpec, cstring selectedBranches, 
     dataJson["control_plane"] = getControlPlane(testSpec);
     dataJson["send"] = getSend(testSpec);
     dataJson["verify"] = getVerify(testSpec);
-    dataJson["timestamp"] = TestgenUtils::getTimeStamp();
+    dataJson["timestamp"] = Utils::getTimeStamp();
     std::stringstream coverageStr;
     coverageStr << std::setprecision(2) << currentCoverage;
     dataJson["coverage"] = coverageStr.str();
