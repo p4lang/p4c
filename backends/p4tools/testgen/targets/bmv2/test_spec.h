@@ -85,6 +85,69 @@ class Bmv2RegisterValue : public TestObject {
 };
 
 /* =========================================================================================
+ *  Bmv2Counter
+ * ========================================================================================= */
+
+class Bmv2CounterCondition : public TestObject {
+ public:
+    /// The register index.
+    const IR::Expression* index;
+
+    /// The register value.
+    const IR::Expression* value;
+
+    explicit Bmv2CounterCondition(const IR::Expression* index, const IR::Expression* value);
+
+    /// @returns the evaluated register index. This means it must be a constant.
+    /// The function will throw a bug if this is not the case.
+    const IR::Constant* getEvaluatedIndex() const;
+
+    /// @returns the evaluated condition of the register. This means it must be a constant.
+    /// The function will throw a bug if this is not the case.
+    const IR::Constant* getEvaluatedValue() const;
+
+    const Bmv2CounterCondition* evaluate(const Model& model) const override;
+
+    cstring getObjectName() const override;
+};
+
+/// This object tracks the list of writes that have been performed to a particular counter. The
+/// counterConditionList represents the pair of the index that was update, and the value that
+/// was update to this index. If the update index
+/// matches with the index that was saved in this tuple, we return the value, otherwise we unroll
+/// the nested MUX expressions. This implicitly handles overwrites too, as the latest writes to a
+/// particular index appear the earliest in this unraveling phase..
+class Bmv2CounterValue : public TestObject {
+ private:
+    /// A new Bmv2CounterValue always requires an initial value. This can be a constant or taint.
+    const IR::Expression* initialValue;
+
+    /// Each element is an API name paired with a match rule.
+    std::vector<Bmv2CounterCondition> counterConditions;
+
+ public:
+    explicit Bmv2CounterValue(const IR::Expression* initialValue);
+
+    cstring getObjectName() const override;
+
+    /// Each element is an API name paired with a match rule.
+    void addCounterCondition(Bmv2CounterCondition cond);
+
+    /// @returns the value with which this counter has been initialized.
+    const IR::Expression* getInitialValue() const;
+
+    /// @returns the current value of this counter after writes have been performed according to a
+    /// provided index.
+    const IR::Expression* getCurrentValue(const IR::Expression* index) const;
+
+    /// @returns the evaluated counter value. This means it must be a constant.
+    /// The function will throw a bug if this is not the case.
+    const IR::Constant* getEvaluatedValue() const;
+
+    const Bmv2CounterValue* evaluate(const Model& model) const override;
+};
+
+/* =========================================================================================
  *  Bmv2_V1ModelActionProfile
  * ========================================================================================= */
 class Bmv2_V1ModelActionProfile : public TestObject {

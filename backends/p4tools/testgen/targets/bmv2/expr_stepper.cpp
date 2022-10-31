@@ -631,15 +631,14 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              const auto* counterState =
                  state.getTestObject("countervalues", externInstance->toString(), false);
 
-             Bmv2RegisterValue* counterValue = nullptr;
+             Bmv2CounterValue* counterValue = nullptr;
              if (counterState != nullptr) {
-                 counterValue =
-                     new Bmv2RegisterValue(*counterState->checkedTo<Bmv2RegisterValue>());
+                 counterValue = new Bmv2CounterValue(*counterState->checkedTo<Bmv2CounterValue>());
 
              } else {
                  const auto* inputValue =
                      programInfo.createTargetUninitialized(IR::Type::Bits::get(32), false);
-                 counterValue = new Bmv2RegisterValue(inputValue);
+                 counterValue = new Bmv2CounterValue(inputValue);
                  nextState->addTestObject("countervalues", externInstance->toString(),
                                           counterValue);
              }
@@ -647,7 +646,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
 
              const IR::Expression* increasedExpr =
                  new IR::Add(baseExpr, IRUtils::getConstant(IR::Type::Bits::get(32), 1));
-             counterValue->addRegisterCondition(Bmv2RegisterCondition{index, increasedExpr});
+             counterValue->addCounterCondition(Bmv2CounterCondition{index, increasedExpr});
              nextState->addTestObject("countervalues", externInstance->toString(), counterValue);
 
              // TODO: Find a better way to model a trace of this event.
