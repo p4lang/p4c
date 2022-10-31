@@ -56,12 +56,7 @@ ReturnedInfo loadExampleForReachability(const char* curFile) {
     options.compilerVersion = P4TEST_VERSION_STRING;
     const IR::P4Program* program = nullptr;
     options.file = sourcePath;
-    options.file += "testdata/p4_16_samples/";
     options.file += curFile;
-    if (access(options.file, F_OK) != 0) {
-        options.file = sourcePath;
-        options.file += curFile;
-    }
     program = P4::parseP4File(options);
     if (originalEnv == nullptr) {
         unsetenv("P4C_16_INCLUDE_PATH");
@@ -104,7 +99,7 @@ class NodeFinder : public Inspector {
 };
 
 TEST_F(P4CReachability, testParserStatesAndAnnotations) {
-    auto result = loadExampleForReachability("action_profile-bmv2.p4");
+    auto result = loadExampleForReachability("testdata/p4_16_samples/action_profile-bmv2.p4");
     const auto* program = std::get<0>(result);
     ASSERT_TRUE(program);
     const auto* dcg = std::get<1>(result);
@@ -157,7 +152,7 @@ TEST_F(P4CReachability, testParserStatesAndAnnotations) {
 }
 
 TEST_F(P4CReachability, testLoops) {
-    auto result = loadExampleForReachability("stack_complex-bmv2.p4");
+    auto result = loadExampleForReachability("testdata/p4_16_samples/stack_complex-bmv2.p4");
     const auto* program = std::get<0>(result);
     ASSERT_TRUE(program);
     const auto* dcg = std::get<1>(result);
@@ -221,7 +216,7 @@ TEST_F(P4CReachability, testTableAndActions) {
 }
 
 TEST_F(P4CReachability, testSwitchStatement) {
-    auto result = loadExampleForReachability("basic_routing-bmv2.p4");
+    auto result = loadExampleForReachability("testdata/p4_16_samples/basic_routing-bmv2.p4");
     const auto* program = get<0>(result);
     ASSERT_TRUE(program);
     const auto* dcg = std::get<1>(result);
@@ -273,7 +268,7 @@ TEST_F(P4CReachability, testIfStatement) {
 }
 
 TEST_F(P4CReachability, testParserValueSet) {
-    auto result = loadExampleForReachability("value-sets.p4");
+    auto result = loadExampleForReachability("testdata/p4_16_samples/value-sets.p4");
     const auto* program = get<0>(result);
     ASSERT_TRUE(program);
     const auto* dcg = std::get<1>(result);

@@ -558,7 +558,7 @@ const IR::Expression* ReachabilityEngine::getCondition(const DCGVertexType* n) {
 }
 
 const IR::Expression* ReachabilityEngine::stringToNode(std::string /*name*/) {
-    BUG("Non implemented feature: convertion string into IR::Expression");
+    P4C_UNIMPLEMENTED("Converting a string into an IR::Expression");
 }
 
 }  // namespace P4Tools

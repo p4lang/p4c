@@ -168,11 +168,11 @@ class ReachabilityEngine {
     /// Default constructor, where dcg is a control flow graph builded by P4ProgramDCGCreator,
     /// reachabilityExpression is a user's pattern wrote in the syntax presented above,
     /// eliminateAnnotations is true if after detection of the annotations it should to store
-    /// coresponded parent IR::Node in a  reachability engine state.
+    /// corresponding parent IR::Node in a  reachability engine state.
     ReachabilityEngine(gsl::not_null<const NodesCallGraph*> dcg, std::string reachabilityExpression,
                        bool eliminateAnnotations = false);
     /// Moves the next statement in a engine state. It returns a pair where the first argument
-    /// is a flag for posiblity of such movement and the second arguemnt is an condition
+    /// is a flag for the possibility of such a movement and the second argument is an condition
     /// which should be checked additionally. If engine state is reachable from current node
     /// then it returns true. If engine state contain such node then it returns additional condition
     /// in case if it was inputed by user and moves engine state to the next state.
@@ -186,19 +186,19 @@ class ReachabilityEngine {
                                 std::unordered_set<const DCGVertexType*>& s);
     /// Adds transition to engine control flow graph.
     void addTransition(const DCGVertexType*, const std::unordered_set<const DCGVertexType*>&);
-    /// Translates string to the coresponded nodes.
+    /// Translates string into the corresponding nodes.
     std::unordered_set<const DCGVertexType*> getName(std::string name);
-    /// Gets user's condition from a node.
+    /// Gets a user's condition from a node.
     const IR::Expression* getCondition(const DCGVertexType*);
     /// Adds user's condition the a node.
     const IR::Expression* addCondition(const IR::Expression* prev,
                                        const DCGVertexType* currentState);
-    /// Translates string representation into IR::Expression.
+    /// Translates a string representation into an IR::Expression.
     /// Not implemented yet.
     static const IR::Expression* stringToNode(std::string name);
 
  protected:
-    /// Function add edge to current @vertex in DCG.
+    /// Adds an edge to the current @vertex in DCG.
     /// The edge is a pair (@prev, @vertex).
     void addEdge(const DCGVertexType* vertex, IR::ID vertexName = IR::ID());
 };

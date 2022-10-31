@@ -123,7 +123,6 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                         TestgenTarget::getExprStepper(state, self.solver, self.programInfo);
                     auto* result = stepper->step(expr);
                     if (self.reachabilityEngine) {
-                        if (expr->is<IR::SelectExpression>()) std::cout << expr << std::endl;
                         ReachabilityResult rresult = std::make_pair(true, nullptr);
                         renginePostporcessing(rresult, result);
                     }
