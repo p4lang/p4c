@@ -14,4 +14,3 @@ control c(out bit<1> b) {
 control e<T>(out T t);
 package top<T>(e<T> e);
 top(c()) main;
-

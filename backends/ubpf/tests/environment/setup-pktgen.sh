@@ -19,7 +19,7 @@ set -ex
 # Dependencies
 sudo apt-get -y install libnuma-dev clang-6.0 libc6-dev-i386 python python-pip python-dev libffi-dev tcpdump
 sudo apt-get -y install flex bison
-sudo apt-get -y install cmake g++ git automake libtool libgc-dev bison flex libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev libboost-graph-dev llvm pkg-config python python-scapy python-ipaddr python-ply tcpdump
+sudo apt-get -y install cmake g++ git automake libtool libgc-dev bison flex libfl-dev libboost-dev libboost-iostreams-dev libboost-graph-dev llvm pkg-config python python-scapy python-ipaddr python-ply tcpdump
 
 # Install scapy
 if ! type "scapy" > /dev/null; then

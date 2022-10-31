@@ -267,9 +267,9 @@ control Filtering(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_met
     }
     table ingress_port_vlan {
         key = {
-            standard_metadata.ingress_port: exact @name("ig_port") ;
-            hdr.vlan_tag.isValid()        : exact @name("vlan_is_valid") ;
-            hdr.vlan_tag.vlan_id          : ternary @name("vlan_id") ;
+            standard_metadata.ingress_port: exact @name("ig_port");
+            hdr.vlan_tag.isValid()        : exact @name("vlan_is_valid");
+            hdr.vlan_tag.vlan_id          : ternary @name("vlan_id");
         }
         actions = {
             deny();
@@ -287,9 +287,9 @@ control Filtering(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_met
     }
     table fwd_classifier {
         key = {
-            standard_metadata.ingress_port: exact @name("ig_port") ;
-            hdr.ethernet.dst_addr         : ternary @name("eth_dst") ;
-            fabric_metadata.eth_type      : exact @name("eth_type") ;
+            standard_metadata.ingress_port: exact @name("ig_port");
+            hdr.ethernet.dst_addr         : ternary @name("eth_dst");
+            fabric_metadata.eth_type      : exact @name("eth_type");
         }
         actions = {
             set_forwarding_type;
@@ -324,8 +324,8 @@ control Forwarding(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_me
     }
     table bridging {
         key = {
-            fabric_metadata.vlan_id: exact @name("vlan_id") ;
-            hdr.ethernet.dst_addr  : ternary @name("eth_dst") ;
+            fabric_metadata.vlan_id: exact @name("vlan_id");
+            hdr.ethernet.dst_addr  : ternary @name("eth_dst");
         }
         actions = {
             set_next_id_bridging;
@@ -343,7 +343,7 @@ control Forwarding(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_me
     }
     table mpls {
         key = {
-            fabric_metadata.mpls_label: exact @name("mpls_label") ;
+            fabric_metadata.mpls_label: exact @name("mpls_label");
         }
         actions = {
             pop_mpls_and_next;
@@ -363,7 +363,7 @@ control Forwarding(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_me
     }
     table routing_v4 {
         key = {
-            hdr.ipv4.dst_addr: lpm @name("ipv4_dst") ;
+            hdr.ipv4.dst_addr: lpm @name("ipv4_dst");
         }
         actions = {
             set_next_id_routing_v4;
@@ -410,18 +410,18 @@ control Acl(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata,
     }
     table acl {
         key = {
-            standard_metadata.ingress_port: ternary @name("ig_port") ;
-            fabric_metadata.ip_proto      : ternary @name("ip_proto") ;
-            fabric_metadata.l4_sport      : ternary @name("l4_sport") ;
-            fabric_metadata.l4_dport      : ternary @name("l4_dport") ;
-            hdr.ethernet.dst_addr         : ternary @name("eth_src") ;
-            hdr.ethernet.src_addr         : ternary @name("eth_dst") ;
-            hdr.vlan_tag.vlan_id          : ternary @name("vlan_id") ;
-            fabric_metadata.eth_type      : ternary @name("eth_type") ;
-            hdr.ipv4.src_addr             : ternary @name("ipv4_src") ;
-            hdr.ipv4.dst_addr             : ternary @name("ipv4_dst") ;
-            hdr.icmp.icmp_type            : ternary @name("icmp_type") ;
-            hdr.icmp.icmp_code            : ternary @name("icmp_code") ;
+            standard_metadata.ingress_port: ternary @name("ig_port");
+            fabric_metadata.ip_proto      : ternary @name("ip_proto");
+            fabric_metadata.l4_sport      : ternary @name("l4_sport");
+            fabric_metadata.l4_dport      : ternary @name("l4_dport");
+            hdr.ethernet.dst_addr         : ternary @name("eth_src");
+            hdr.ethernet.src_addr         : ternary @name("eth_dst");
+            hdr.vlan_tag.vlan_id          : ternary @name("vlan_id");
+            fabric_metadata.eth_type      : ternary @name("eth_type");
+            hdr.ipv4.src_addr             : ternary @name("ipv4_src");
+            hdr.ipv4.dst_addr             : ternary @name("ipv4_dst");
+            hdr.icmp.icmp_type            : ternary @name("icmp_type");
+            hdr.icmp.icmp_code            : ternary @name("icmp_code");
         }
         actions = {
             set_next_id_acl;
@@ -468,7 +468,7 @@ control Next(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata
     }
     table next_vlan {
         key = {
-            fabric_metadata.next_id: exact @name("next_id") ;
+            fabric_metadata.next_id: exact @name("next_id");
         }
         actions = {
             set_vlan;
@@ -489,8 +489,8 @@ control Next(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata
     }
     table xconnect {
         key = {
-            standard_metadata.ingress_port: exact @name("ig_port") ;
-            fabric_metadata.next_id       : exact @name("next_id") ;
+            standard_metadata.ingress_port: exact @name("ig_port");
+            fabric_metadata.next_id       : exact @name("next_id");
         }
         actions = {
             output_xconnect;
@@ -517,7 +517,7 @@ control Next(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata
     }
     table hashed {
         key = {
-            fabric_metadata.next_id : exact @name("next_id") ;
+            fabric_metadata.next_id : exact @name("next_id");
             hdr.ipv4.dst_addr       : selector;
             hdr.ipv4.src_addr       : selector;
             fabric_metadata.ip_proto: selector;
@@ -543,7 +543,7 @@ control Next(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata
     }
     table multicast {
         key = {
-            fabric_metadata.next_id: exact @name("next_id") ;
+            fabric_metadata.next_id: exact @name("next_id");
         }
         actions = {
             set_mcast_group_id;
@@ -590,8 +590,8 @@ control EgressNextControl(inout parsed_headers_t hdr, inout fabric_metadata_t fa
     }
     table egress_vlan {
         key = {
-            fabric_metadata.vlan_id      : exact @name("vlan_id") ;
-            standard_metadata.egress_port: exact @name("eg_port") ;
+            fabric_metadata.vlan_id      : exact @name("vlan_id");
+            standard_metadata.egress_port: exact @name("eg_port");
         }
         actions = {
             pop_vlan;
@@ -691,7 +691,7 @@ control spgw_ingress(inout ipv4_t gtpu_ipv4, inout udp_t gtpu_udp, inout gtpu_t 
     }
     table dl_sess_lookup {
         key = {
-            ipv4.dst_addr: exact @name("ipv4_dst") ;
+            ipv4.dst_addr: exact @name("ipv4_dst");
         }
         actions = {
             set_dl_sess_info();
@@ -702,7 +702,7 @@ control spgw_ingress(inout ipv4_t gtpu_ipv4, inout udp_t gtpu_udp, inout gtpu_t 
     }
     table s1u_filter_table {
         key = {
-            gtpu_ipv4.dst_addr: exact @name("gtp_ipv4_dst") ;
+            gtpu_ipv4.dst_addr: exact @name("gtp_ipv4_dst");
         }
         actions = {
             nop();
@@ -956,4 +956,3 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
 }
 
 V1Switch(FabricParser(), FabricVerifyChecksum(), FabricIngress(), FabricEgress(), FabricComputeChecksum(), FabricDeparser()) main;
-

@@ -154,6 +154,105 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
     }
 }
 
+void BMv2_V1ModelTableStepper::evalTableActionSelector(
+    const std::vector<const IR::ActionListElement*>& tableActionList) {
+    const auto* keys = table->getKey();
+    // If we have no keys, there is nothing to match.
+    if (keys == nullptr) {
+        return;
+    }
+    const auto* state = getExecutionState();
+
+    for (size_t idx = 0; idx < tableActionList.size(); idx++) {
+        const auto* action = tableActionList.at(idx);
+        // Grab the path from the method call.
+        const auto* tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
+        // Try to find the action declaration corresponding to the path reference in the table.
+        const auto* actionType = state->getActionDecl(tableAction->method);
+        CHECK_NULL(actionType);
+
+        auto* nextState = new ExecutionState(*state);
+        // We get the control plane name of the action we are calling.
+        cstring actionName = actionType->controlPlaneName();
+
+        // Copy the previous action profile.
+        auto* actionProfile = new Bmv2_V1ModelActionProfile(
+            bmv2_V1ModelProperties.actionSelector->getActionProfile()->getProfileDecl());
+        // The entry we are inserting using an index instead of the action name.
+        cstring actionIndex = std::to_string(actionProfile->getActionMapSize());
+        // Synthesize arguments for the call based on the action parameters.
+        const auto& parameters = actionType->parameters;
+        auto* arguments = new IR::Vector<IR::Argument>();
+        std::vector<ActionArg> ctrlPlaneArgs;
+        for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
+            const auto* parameter = parameters->getParameter(argIdx);
+            // Synthesize a zombie constant here that corresponds to a control plane argument.
+            // We get the unique name of the table coupled with the unique name of the action.
+            // Getting the unique name is needed to avoid generating duplicate arguments.
+            const auto& actionDataVar =
+                IRUtils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
+            cstring keyName =
+                properties.tableName + "_param_" + actionName + std::to_string(argIdx);
+            const auto& actionArg = nextState->createZombieConst(parameter->type, keyName);
+            nextState->set(actionDataVar, actionArg);
+            arguments->push_back(new IR::Argument(actionArg));
+            // We also track the argument we synthesize for the control plane.
+            // Note how we use the control plane name for the parameter here.
+            ctrlPlaneArgs.emplace_back(parameter, actionArg);
+        }
+        // Add the chosen action to the profile (it will create a new index.)
+        // TODO: Should we check if we exceed the maximum number of possible profile entries?
+        actionProfile->addToActionMap(actionName, ctrlPlaneArgs);
+
+        auto* actionSelector = new Bmv2_V1ModelActionSelector(
+            bmv2_V1ModelProperties.actionSelector->getSelectorDecl(), actionProfile);
+
+        // Update the action profile in the execution state.
+        nextState->addTestObject("action_profile", actionProfile->getObjectName(), actionProfile);
+        // Update the action selector in the execution state.
+        nextState->addTestObject("action_selector", actionSelector->getObjectName(),
+                                 actionSelector);
+
+        // We add the arguments to our action call, effectively creating a const entry call.
+        auto* synthesizedAction = tableAction->clone();
+        synthesizedAction->arguments = arguments;
+
+        // Now we compute the hit condition to trigger this particular action call.
+        std::map<cstring, const FieldMatch> matches;
+        const auto* hitCondition = computeHit(nextState, table, &matches);
+
+        // We need to set the table action in the state for eventual switch action_run hits.
+        // We also will need it for control plane table entries.
+        setTableAction(nextState, tableAction);
+
+        // Finally, add all the new rules to the execution state.
+        ActionCall ctrlPlaneActionCall(actionIndex, actionType, {});
+        auto tableRule =
+            TableRule(matches, TestSpec::LOW_PRIORITY, ctrlPlaneActionCall, TestSpec::TTL);
+        auto* tableConfig = new TableConfig(table, {tableRule});
+
+        // Add the action profile to the table. This signifies a slightly different implementation.
+        tableConfig->addTableProperty("action_profile", actionProfile);
+        // Add the action selector to the table. This signifies a slightly different implementation.
+        tableConfig->addTableProperty("action_selector", actionSelector);
+
+        nextState->addTestObject("tableconfigs", table->controlPlaneName(), tableConfig);
+
+        // Update all the tracking variables for tables.
+        std::vector<Continuation::Command> replacements;
+        replacements.emplace_back(new IR::MethodCallStatement(synthesizedAction));
+
+        nextState->set(getTableHitVar(table), IRUtils::getBoolLiteral(true));
+        nextState->set(getTableReachedVar(table), IRUtils::getBoolLiteral(true));
+        std::stringstream tableStream;
+        tableStream << "Table Branch: " << properties.tableName;
+        tableStream << " Chosen action: " << actionName;
+        nextState->add(new TraceEvent::Generic(tableStream.str()));
+        nextState->replaceTopBody(&replacements);
+        getResult()->emplace_back(hitCondition, *state, nextState);
+    }
+}
+
 bool BMv2_V1ModelTableStepper::checkForActionProfile() {
     const auto* impl = table->properties->getProperty("implementation");
     if (impl == nullptr) {
@@ -282,16 +381,25 @@ void BMv2_V1ModelTableStepper::evalTargetTable(
 
     switch (bmv2_V1ModelProperties.implementaton) {
         case TableImplementation::selector: {
-            TESTGEN_UNIMPLEMENTED("Selectors are not fully implemented for BMv2.");
+            // If an action selector is attached to the table, do not assume normal control plane
+            // behavior.
+            if (TestgenOptions::get().testBackend != "STF") {
+                evalTableActionSelector(tableActionList);
+            } else {
+                // We can only generate profile entries for PTF and Protobuf tests.
+                ::warning(
+                    "Action selector control plane entries are not implemented. Using default "
+                    "action.");
+            }
             break;
         }
         case TableImplementation::profile: {
             // If an action profile is attached to the table, do not assume normal control plane
             // behavior.
-            if (TestgenOptions::get().testBackend == "PTF-P4") {
+            if (TestgenOptions::get().testBackend != "STF") {
                 evalTableActionProfile(tableActionList);
             } else {
-                // We can only generate profile entries for PTF tests.
+                // We can only generate profile entries for PTF and Protobuf tests.
                 ::warning(
                     "Action profile control plane entries are not implemented. Using default "
                     "action.");

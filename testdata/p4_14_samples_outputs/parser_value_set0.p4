@@ -12,9 +12,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".inner_ethernet") 
+    @name(".inner_ethernet")
     ethernet_t inner_ethernet;
 }
 
@@ -79,4 +79,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

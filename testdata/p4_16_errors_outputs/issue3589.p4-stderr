@@ -1,0 +1,6 @@
+issue3589.p4(8): [--Werror=type-error] error: ==: tables cannot be compared
+    bool b = t == t; // { dg-error "" }
+             ^^^^^^
+issue3589.p4(17): [--Werror=type-error] error: !=: tables cannot be compared
+    bool b = t != t; // { dg-error "" }
+             ^^^^^^

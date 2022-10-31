@@ -20,7 +20,7 @@ control c(in Headers h) {
     }
     @name("c.t") table t_0 {
         key = {
-            h.u_h1.x: exact @name("h.u.h1.x") ;
+            h.u_h1.x: exact @name("h.u.h1.x");
         }
         actions = {
             a();
@@ -36,4 +36,3 @@ control c(in Headers h) {
 control _c(in Headers h);
 package top(_c c);
 top(c()) main;
-

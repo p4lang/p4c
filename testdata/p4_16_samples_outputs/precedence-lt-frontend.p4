@@ -1,3 +1,4 @@
+extern T f<T>(T x);
 extern Object {
     T foo<T>();
 }

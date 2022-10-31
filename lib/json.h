@@ -23,7 +23,7 @@ limitations under the License.
 #include <type_traits>
 
 #include "gtest/gtest_prod.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
 #include "lib/castable.h"

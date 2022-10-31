@@ -44,7 +44,7 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
     }
     table simple_table {
         key = {
-            hdr.h.b: exact @name("hdr.h.b") ;
+            hdr.h.b: exact @name("hdr.h.b");
         }
         actions = {
             NoAction();
@@ -81,4 +81,3 @@ control update(inout Parsed_packet hdr, inout Metadata meta) {
 }
 
 V1Switch<Parsed_packet, Metadata>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

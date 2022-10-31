@@ -11,4 +11,3 @@ const bit<1> bv = 1w0;
 parser nothing();
 package m(nothing n);
 m(p(1w0, 1w1)) main;
-

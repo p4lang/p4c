@@ -1,6 +1,7 @@
 #include <core.p4>
-#define V1MODEL_VERSION 20180101
-#include <v1model.p4>
+
+struct standard_metadata_t {
+}
 
 header Ethernet {
     bit<48> src;
@@ -38,4 +39,3 @@ parser p<H>(packet_in _p, out H h);
 control ctr<H, SM>(inout H h, inout SM sm);
 package top<H, SM>(p<H> _p, ctr<H, SM> _c);
 top(prs(), c()) main;
-

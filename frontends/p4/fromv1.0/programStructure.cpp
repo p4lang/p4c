@@ -25,7 +25,7 @@ limitations under the License.
 
 #include "lib/path.h"
 #include "lib/bitops.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "converters.h"
 
 #include "frontends/common/options.h"

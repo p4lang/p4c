@@ -26,11 +26,11 @@ struct metadata {
 }
 
 struct headers {
-    @name(".hdrA") 
+    @name(".hdrA")
     A_t_0  hdrA;
-    @name(".hdrB") 
+    @name(".hdrB")
     B_t_0  hdrB;
-    @name(".packet_type") 
+    @name(".packet_type")
     type_t packet_type;
 }
 
@@ -58,7 +58,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 @name(".cntDum") @min_width(64) counter<bit<12>>(32w4096, CounterType.packets) cntDum;
-
 control processA(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".act") action act(bit<9> port, bit<12> idx) {
         standard_metadata.egress_spec = port;
@@ -70,7 +69,7 @@ control processA(inout headers hdr, inout metadata meta, inout standard_metadata
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdrA.f1: exact @name("hdrA.f1") ;
+            hdr.hdrA.f1: exact @name("hdrA.f1");
         }
         default_action = NoAction();
     }
@@ -90,7 +89,7 @@ control processB(inout headers hdr, inout metadata meta, inout standard_metadata
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdrB.f1: exact @name("hdrB.f1") ;
+            hdr.hdrB.f1: exact @name("hdrB.f1");
         }
         default_action = NoAction();
     }
@@ -130,4 +129,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

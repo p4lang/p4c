@@ -34,11 +34,11 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t    ethernet;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t        ipv4;
-    @name(".vlan_tag") 
+    @name(".vlan_tag")
     vlan_tag_t[2] vlan_tag;
 }
 
@@ -79,7 +79,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction_2();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr");
         }
         default_action = NoAction_2();
     }
@@ -99,7 +99,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr");
         }
         default_action = NoAction_3();
     }
@@ -128,4 +128,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

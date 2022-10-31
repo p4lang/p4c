@@ -15,9 +15,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".easyroute_head") 
+    @name(".easyroute_head")
     easyroute_head_t easyroute_head;
-    @name(".easyroute_port") 
+    @name(".easyroute_port")
     easyroute_port_t easyroute_port;
 }
 
@@ -62,7 +62,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.easyroute_port.isValid(): exact @name("easyroute_port.$valid$") ;
+            hdr.easyroute_port.isValid(): exact @name("easyroute_port.$valid$");
         }
         size = 1;
         default_action = NoAction();
@@ -90,4 +90,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

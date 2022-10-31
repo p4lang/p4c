@@ -28,7 +28,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name("ParserImpl.phdr") headers2 phdr_0;
     @name("ParserImpl.phdr") headers2 phdr_1;
     @name("ParserImpl.hdr_0") headers hdr_0;
-    @name("ParserImpl.inout_hdr_0") headers2 inout_hdr_0;
     @name("ParserImpl.p.shdr") headers2 p_shdr;
     state start {
         transition select(standard_metadata.ingress_port) {
@@ -44,7 +43,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         hdr_0.h2.setInvalid();
         hdr_0.h3.setInvalid();
         hdr_0.h4.setInvalid();
-        inout_hdr_0 = phdr_0;
         transition Subparser_start;
     }
     state Subparser_start {
@@ -59,7 +57,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state Subparser_sp1 {
         packet.extract<data_t>(hdr_0.h3);
         packet.extract<data_t>(p_shdr.h1);
-        inout_hdr_0.h1 = p_shdr.h1;
         transition p0_0;
     }
     state Subparser_sp2 {
@@ -68,7 +65,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state p0_0 {
         hdr = hdr_0;
-        phdr_0 = inout_hdr_0;
         transition p2;
     }
     state p1 {
@@ -78,7 +74,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         hdr_0.h2.setInvalid();
         hdr_0.h3.setInvalid();
         hdr_0.h4.setInvalid();
-        inout_hdr_0 = phdr_1;
         transition Subparser_start_0;
     }
     state Subparser_start_0 {
@@ -93,7 +88,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state Subparser_sp1_0 {
         packet.extract<data_t>(hdr_0.h3);
         packet.extract<data_t>(p_shdr.h1);
-        inout_hdr_0.h1 = p_shdr.h1;
         transition p1_0;
     }
     state Subparser_sp2_0 {
@@ -102,7 +96,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state p1_0 {
         hdr = hdr_0;
-        phdr_1 = inout_hdr_0;
         transition p2;
     }
     state p2 {
@@ -145,4 +138,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

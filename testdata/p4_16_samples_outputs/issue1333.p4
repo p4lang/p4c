@@ -17,4 +17,3 @@ control c()(bit<32> binit=4) {
 control ctrl();
 package top(ctrl _c);
 top(c()) main;
-

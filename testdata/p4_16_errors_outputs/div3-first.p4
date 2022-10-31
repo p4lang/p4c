@@ -8,4 +8,3 @@ control c(inout bit<8> a) {
 control proto(inout bit<8> _a);
 package top(proto _p);
 top(c()) main;
-

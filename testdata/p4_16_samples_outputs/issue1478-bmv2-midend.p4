@@ -51,7 +51,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.t2") table t2_0 {
         key = {
-            sm.ingress_port: exact @name("sm.ingress_port") ;
+            sm.ingress_port: exact @name("sm.ingress_port");
         }
         actions = {
             NoAction_2();
@@ -69,4 +69,3 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

@@ -26,4 +26,3 @@ control I(inout metadata_t meta) {
 control C<M>(inout M m);
 package top<M>(C<M> c);
 top<metadata_t>(I()) main;
-

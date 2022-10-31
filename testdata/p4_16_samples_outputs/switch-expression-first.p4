@@ -21,4 +21,3 @@ control c(inout bit<32> b) {
 control ct(inout bit<32> b);
 package top(ct _c);
 top(c()) main;
-

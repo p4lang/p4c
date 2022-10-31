@@ -12,7 +12,7 @@
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 
 #include "backends/p4tools/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/testgen/core/program_info.h"

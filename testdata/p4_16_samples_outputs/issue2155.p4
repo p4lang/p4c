@@ -31,4 +31,3 @@ parser ParserImpl(packet_in b, out headers p, inout metadata m) {
 parser P<H, M>(packet_in b, out H h, inout M m);
 package top<H, M>(P<H, M> p);
 top(ParserImpl()) main;
-

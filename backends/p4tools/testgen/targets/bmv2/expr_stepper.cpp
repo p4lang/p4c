@@ -12,10 +12,10 @@
 #include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
+#include "lib/big_int_util.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
-#include "lib/gmputil.h"
 #include "lib/ordered_map.h"
 #include "lib/safe_vector.h"
 

@@ -79,4 +79,3 @@ control ingress(inout headers hdr) {
 control ctr<H>(inout H hdr);
 package top<H>(ctr<H> ctrl);
 top(ingress()) main;
-

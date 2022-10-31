@@ -64,4 +64,3 @@ parser packet_parser(packet_in pkt, out headers_t hdrs, inout local_metadata_t l
 }
 
 V1Switch(packet_parser(), verify_ck(), ingress(), egress(), compute_ck(), deparser()) main;
-

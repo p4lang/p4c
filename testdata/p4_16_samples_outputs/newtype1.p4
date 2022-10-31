@@ -14,4 +14,3 @@ control c(out bool b) {
 control ctrl(out bool b);
 package top(ctrl _c);
 top(c()) main;
-

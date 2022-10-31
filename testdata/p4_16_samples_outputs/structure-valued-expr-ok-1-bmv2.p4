@@ -105,4 +105,3 @@ control deparserImpl(packet_out pkt, in headers_t hdr) {
 }
 
 V1Switch(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
-

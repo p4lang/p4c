@@ -14,9 +14,9 @@
 #include "gtest/gtest-test-part.h"
 #include "gtest/gtest.h"
 #include "ir/ir.h"
+#include "lib/big_int_util.h"
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
-#include "lib/gmputil.h"
 #include "test/gtest/helpers.h"
 
 #include "backends/p4tools/testgen/core/target.h"
