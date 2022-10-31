@@ -124,9 +124,7 @@ const IR::Expression* makeConstant(Token input, const IR::Vector<IR::KeyElement>
         for (const auto* key : keyElements) {
             cstring keyName;
             if (const auto* annotation = key->getAnnotation(IR::Annotation::nameAnnotation)) {
-                if (!annotation->body.empty()) {
-                    keyName = annotation->getName();
-                }
+                keyName = annotation->getName();
             }
             BUG_CHECK(keyName.size() > 0, "Key does not have a name annotation.");
             auto annoSize = keyName.size();
