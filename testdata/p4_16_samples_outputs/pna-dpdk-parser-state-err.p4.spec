@@ -111,7 +111,7 @@ action next_hop2 args instanceof next_hop2_arg_t {
 action add_on_miss_action2 args none {
 	mov m.MainControlT_tmp 0x0
 	mov m.MainControlT_tmp_0 0x4D2
-	learn next_hop m.MainControlT_tmp m.local_metadata_timeout
+	learn next_hop2 m.MainControlT_tmp m.local_metadata_timeout
 	return
 }
 

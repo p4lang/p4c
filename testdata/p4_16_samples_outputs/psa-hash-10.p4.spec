@@ -9,7 +9,7 @@ struct ethernet_t {
 struct ipv4_t {
 	bit<8> version_ihl
 	bit<8> diffserv
-	bit<32> totalLen
+	bit<16> totalLen
 	bit<16> identification
 	bit<16> flags_fragOffset
 	bit<8> ttl
@@ -49,7 +49,7 @@ struct user_meta_t {
 	bit<16> ethernet_t_etherType
 	bit<8> ipv4_t_version_ihl
 	bit<8> ipv4_t_diffserv
-	bit<32> ipv4_t_totalLen
+	bit<16> ipv4_t_totalLen
 	bit<16> ipv4_t_identification
 	bit<16> ipv4_t_flags_fragOffset
 	bit<8> ipv4_t_ttl
