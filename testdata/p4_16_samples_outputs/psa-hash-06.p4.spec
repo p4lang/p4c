@@ -46,7 +46,7 @@ action a1 args none {
 	mov m.Ingress_tmp h.ethernet.srcAddr
 	mov m.Ingress_tmp_0 h.ethernet.etherType
 	hash crc32 m.local_metadata_data  m.Ingress_tmp m.Ingress_tmp_0
-	and m.local_metadata_data 0x1f
+	and m.local_metadata_data 0x1F
 	add m.local_metadata_data 0x2
 	return
 }

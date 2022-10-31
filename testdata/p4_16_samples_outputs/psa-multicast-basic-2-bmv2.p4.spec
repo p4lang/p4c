@@ -56,11 +56,11 @@ apply {
 	extract h.output_data
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.Ingress_tmp h.ethernet.dstAddr
-	and m.Ingress_tmp 0xffffffff
+	and m.Ingress_tmp 0xFFFFFFFF
 	mov m.Ingress_tmp_0 m.Ingress_tmp
-	and m.Ingress_tmp_0 0xffffffff
+	and m.Ingress_tmp_0 0xFFFFFFFF
 	mov m.Ingress_tmp_1 m.Ingress_tmp_0
-	and m.Ingress_tmp_1 0xffffffff
+	and m.Ingress_tmp_1 0xFFFFFFFF
 	mov m.psa_ingress_output_metadata_multicast_group m.Ingress_tmp_1
 	mov m.Ingress_tmp_2 h.ethernet.srcAddr
 	and m.Ingress_tmp_2 0x1

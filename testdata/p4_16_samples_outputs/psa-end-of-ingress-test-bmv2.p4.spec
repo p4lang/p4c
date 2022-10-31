@@ -88,14 +88,14 @@ apply {
 	LABEL_END_0 :	mov m.Ingress_tmp_7 h.ethernet.dstAddr
 	shr m.Ingress_tmp_7 0x10
 	mov m.Ingress_tmp_8 m.Ingress_tmp_7
-	and m.Ingress_tmp_8 0xffff
+	and m.Ingress_tmp_8 0xFFFF
 	mov m.Ingress_tmp_9 m.Ingress_tmp_8
-	and m.Ingress_tmp_9 0xffff
+	and m.Ingress_tmp_9 0xFFFF
 	mov m.psa_ingress_output_metadata_multicast_group m.Ingress_tmp_9
 	mov m.Ingress_tmp_11 h.ethernet.dstAddr
-	and m.Ingress_tmp_11 0xffff
+	and m.Ingress_tmp_11 0xFFFF
 	mov m.Ingress_tmp_12 m.Ingress_tmp_11
-	and m.Ingress_tmp_12 0xffff
+	and m.Ingress_tmp_12 0xFFFF
 	mov m.psa_ingress_output_metadata_egress_port m.Ingress_tmp_12
 	mov h.output_data.word0 0x8
 	jmpneq LABEL_FALSE_2 m.psa_ingress_input_metadata_packet_path 0x0

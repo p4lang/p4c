@@ -69,17 +69,17 @@ action execute_1 args none {
 	and m.MainControlT_tmp_0 0x3
 	jmpneq LABEL_FALSE_4 m.MainControlT_tmp_0 0x1
 	mov m.MainControlT_tmp_5 h.vlan_tag_0.pcp_cfi_vid
-	and m.MainControlT_tmp_5 0xf
+	and m.MainControlT_tmp_5 0xF
 	mov m.MainControlT_tmp_6 h.vlan_tag_1.pcp_cfi_vid
 	shr m.MainControlT_tmp_6 0x4
 	mov m.MainControlT_tmp_7 m.MainControlT_tmp_6
-	and m.MainControlT_tmp_7 0xfff
+	and m.MainControlT_tmp_7 0xFFF
 	mov m.MainControlT_tmp_8 m.MainControlT_tmp_7
-	and m.MainControlT_tmp_8 0xfff
+	and m.MainControlT_tmp_8 0xFFF
 	mov m.MainControlT_tmp_11 m.MainControlT_tmp_8
 	shl m.MainControlT_tmp_11 0x4
 	mov m.MainControlT_tmp_12 m.MainControlT_tmp_11
-	and m.MainControlT_tmp_12 0xfff0
+	and m.MainControlT_tmp_12 0xFFF0
 	mov h.vlan_tag_0.pcp_cfi_vid m.MainControlT_tmp_5
 	or h.vlan_tag_0.pcp_cfi_vid m.MainControlT_tmp_12
 	jmp LABEL_END_3
@@ -88,11 +88,11 @@ action execute_1 args none {
 	and m.MainControlT_tmp 0x3
 	jmplt LABEL_END_3 m.MainControlT_tmp 0x1
 	mov m.MainControlT_tmp_13 h.vlan_tag_0.pcp_cfi_vid
-	and m.MainControlT_tmp_13 0xf
+	and m.MainControlT_tmp_13 0xF
 	mov m.MainControlT_tmp_15 m.MainControlT_hsVar
 	shl m.MainControlT_tmp_15 0x4
 	mov m.MainControlT_tmp_16 m.MainControlT_tmp_15
-	and m.MainControlT_tmp_16 0xfff0
+	and m.MainControlT_tmp_16 0xFFF0
 	mov h.vlan_tag_0.pcp_cfi_vid m.MainControlT_tmp_13
 	or h.vlan_tag_0.pcp_cfi_vid m.MainControlT_tmp_16
 	jmp LABEL_END_3
@@ -102,17 +102,17 @@ action execute_1 args none {
 	and m.MainControlT_tmp_4 0x3
 	jmpneq LABEL_FALSE_7 m.MainControlT_tmp_4 0x0
 	mov m.MainControlT_tmp_17 h.vlan_tag_1.pcp_cfi_vid
-	and m.MainControlT_tmp_17 0xf
+	and m.MainControlT_tmp_17 0xF
 	mov m.MainControlT_tmp_18 h.vlan_tag_0.pcp_cfi_vid
 	shr m.MainControlT_tmp_18 0x4
 	mov m.MainControlT_tmp_19 m.MainControlT_tmp_18
-	and m.MainControlT_tmp_19 0xfff
+	and m.MainControlT_tmp_19 0xFFF
 	mov m.MainControlT_tmp_20 m.MainControlT_tmp_19
-	and m.MainControlT_tmp_20 0xfff
+	and m.MainControlT_tmp_20 0xFFF
 	mov m.MainControlT_tmp_23 m.MainControlT_tmp_20
 	shl m.MainControlT_tmp_23 0x4
 	mov m.MainControlT_tmp_24 m.MainControlT_tmp_23
-	and m.MainControlT_tmp_24 0xfff0
+	and m.MainControlT_tmp_24 0xFFF0
 	mov h.vlan_tag_1.pcp_cfi_vid m.MainControlT_tmp_17
 	or h.vlan_tag_1.pcp_cfi_vid m.MainControlT_tmp_24
 	jmp LABEL_END_3
@@ -126,11 +126,11 @@ action execute_1 args none {
 	and m.MainControlT_tmp_2 0x3
 	jmplt LABEL_END_3 m.MainControlT_tmp_2 0x1
 	mov m.MainControlT_tmp_25 h.vlan_tag_1.pcp_cfi_vid
-	and m.MainControlT_tmp_25 0xf
+	and m.MainControlT_tmp_25 0xF
 	mov m.MainControlT_tmp_27 m.MainControlT_hsVar
 	shl m.MainControlT_tmp_27 0x4
 	mov m.MainControlT_tmp_28 m.MainControlT_tmp_27
-	and m.MainControlT_tmp_28 0xfff0
+	and m.MainControlT_tmp_28 0xFFF0
 	mov h.vlan_tag_1.pcp_cfi_vid m.MainControlT_tmp_25
 	or h.vlan_tag_1.pcp_cfi_vid m.MainControlT_tmp_28
 	LABEL_END_3 :	return
@@ -144,7 +144,7 @@ table stub {
 		execute_1
 	}
 	default_action execute_1 args none const
-	size 0xf4240
+	size 0xF4240
 }
 
 
@@ -169,18 +169,18 @@ apply {
 	mov m.MainControlT_tmp_29 h.vlan_tag_0.pcp_cfi_vid
 	shr m.MainControlT_tmp_29 0x4
 	mov m.MainControlT_tmp_30 m.MainControlT_tmp_29
-	and m.MainControlT_tmp_30 0xfff
+	and m.MainControlT_tmp_30 0xFFF
 	mov m.MainControlT_tmp_31 m.MainControlT_tmp_30
-	and m.MainControlT_tmp_31 0xfff
+	and m.MainControlT_tmp_31 0xFFF
 	mov m.MainControlT_key m.MainControlT_tmp_31
 	jmp LABEL_END_0
 	LABEL_FALSE :	jmpneq LABEL_FALSE_0 m.local_metadata_depth 0x1
 	mov m.MainControlT_tmp_32 h.vlan_tag_1.pcp_cfi_vid
 	shr m.MainControlT_tmp_32 0x4
 	mov m.MainControlT_tmp_33 m.MainControlT_tmp_32
-	and m.MainControlT_tmp_33 0xfff
+	and m.MainControlT_tmp_33 0xFFF
 	mov m.MainControlT_tmp_34 m.MainControlT_tmp_33
-	and m.MainControlT_tmp_34 0xfff
+	and m.MainControlT_tmp_34 0xFFF
 	mov m.MainControlT_key m.MainControlT_tmp_34
 	jmp LABEL_END_0
 	LABEL_FALSE_0 :	jmplt LABEL_END_0 m.local_metadata_depth 0x1
