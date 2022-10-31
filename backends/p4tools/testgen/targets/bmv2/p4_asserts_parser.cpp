@@ -89,38 +89,14 @@ std::ostream& operator<<(std::ostream& os, const Token::Kind& kind) {
 const IR::Expression* makeSingleExpr(std::vector<const IR::Expression*> input) {
     const IR::Expression* expr = nullptr;
     for (uint64_t idx = 0; idx < input.size(); idx++) {
-        if (const auto* lOr = input[idx]->to<IR::LOr>()) {
-            if (lOr->right->toString() == "(tmp") {
-                if (idx + 1 == input.size()) {
-                    break;
-                }
-                std::vector<const IR::Expression*> tmp;
-                uint64_t jdx = idx;
-                idx++;
-                if (idx + 1 == input.size()) {
-                    expr = new IR::LOr(input[jdx - 1], input[idx]);
-                    break;
-                }
-                while (idx < input.size()) {
-                    tmp.push_back(input[idx]);
-                    idx++;
-                }
-                if (expr == nullptr) {
-                    expr = new IR::LOr(input[jdx - 1], makeSingleExpr(tmp));
-                } else {
-                    expr = new IR::LOr(expr, makeSingleExpr(tmp));
-                }
+        if (input[idx]->is<IR::LOr>()) {
+            if (idx + 1 == input.size()) {
                 break;
             }
-            {
-                if (idx + 1 == input.size()) {
-                    break;
-                }
-                if (expr == nullptr) {
-                    expr = new IR::LOr(input[idx - 1], input[idx + 1]);
-                } else {
-                    expr = new IR::LOr(expr, input[idx + 1]);
-                }
+            if (expr == nullptr) {
+                expr = new IR::LOr(input[idx - 1], input[idx + 1]);
+            } else {
+                expr = new IR::LOr(expr, input[idx + 1]);
             }
         }
         if (input[idx]->is<IR::LAnd>()) {
@@ -146,22 +122,16 @@ const IR::Expression* makeConstant(Token input, const IR::Vector<IR::KeyElement>
     auto inputStr = input.lexeme();
     if (input.is(Token::Kind::Text)) {
         for (const auto* key : keyElements) {
-            cstring annotationName;
-            if (const auto* annotation = key->getAnnotation("name")) {
+            cstring keyName;
+            if (const auto* annotation = key->getAnnotation(IR::Annotation::nameAnnotation)) {
                 if (!annotation->body.empty()) {
-                    annotationName = annotation->body[0]->text;
-                } else if (!annotation->expr.empty()) {
-                    annotationName = annotation->expr[0]->toString();
+                    keyName = annotation->getName();
                 }
             }
-            BUG_CHECK(annotationName.size() > 0, "Key does not have a name annotation.");
-            cstring separator = "\"";
-            if (annotationName.startsWith(separator) && annotationName.endsWith(separator)) {
-                annotationName = annotationName.substr(1, annotationName.size() - 2);
-            }
-            auto annoSize = annotationName.size();
+            BUG_CHECK(keyName.size() > 0, "Key does not have a name annotation.");
+            auto annoSize = keyName.size();
             auto tokenLength = inputStr.length();
-            if (inputStr.find(annotationName, tokenLength - annoSize) == std::string::npos) {
+            if (inputStr.find(keyName, tokenLength - annoSize) == std::string::npos) {
                 continue;
             }
             const auto* keyType = key->expression->type;
@@ -307,14 +277,12 @@ const IR::Expression* getIR(std::vector<Token> tokens,
                 idx = rightPart.second;
                 exprVec.push_back(new IR::LNot(exprLNot));
             }
-        } else if (token.is(Token::Kind::Implication)) {
-            const auto* tmp = exprVec[exprVec.size() - 1];
-            exprVec.pop_back();
-            const IR::Expression* expr1 = new IR::PathExpression(new IR::Path("tmp"));
-            exprVec.push_back(new IR::LNot(tmp));
-            const IR::Expression* expr2 = new IR::PathExpression(new IR::Path("(tmp"));
-            exprVec.push_back(new IR::LOr(expr1, expr2));
-        } else if (token.is(Token::Kind::Disjunction)) {
+        } else if (token.is_one_of(Token::Kind::Disjunction, Token::Kind::Implication)) {
+            if (token.is(Token::Kind::Implication)) {
+                const auto* tmp = exprVec[exprVec.size() - 1];
+                exprVec.pop_back();
+                exprVec.push_back(new IR::LNot(tmp));
+            }
             const IR::Expression* expr1 = new IR::PathExpression(new IR::Path("tmp"));
             const IR::Expression* expr2 = new IR::PathExpression(new IR::Path("tmp"));
             exprVec.push_back(new IR::LOr(expr1, expr2));
