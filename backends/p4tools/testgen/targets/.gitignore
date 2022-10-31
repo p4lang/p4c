@@ -1,3 +1,0 @@
-# This .gitignore trick specifies that only folders are track within this folder. Files etc must be added with the git add -f flag. The intention is to prevent unintentional tracking of symlinks.
-/*
-!/*/
