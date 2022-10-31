@@ -31,18 +31,18 @@ namespace P4Tools {
 namespace P4Testgen {
 
 ExplorationStrategy::Branch::Branch(gsl::not_null<ExecutionState*> nextState)
-    : constraint(IR::IRUtils::getBoolLiteral(true)), nextState(std::move(nextState)) {}
+    : constraint(IR::getBoolLiteral(true)), nextState(std::move(nextState)) {}
 
 ExplorationStrategy::Branch::Branch(boost::optional<const Constraint*> c,
                                     const ExecutionState& prevState,
                                     gsl::not_null<ExecutionState*> nextState)
-    : constraint(IR::IRUtils::getBoolLiteral(true)), nextState(nextState) {
+    : constraint(IR::getBoolLiteral(true)), nextState(nextState) {
     if (c) {
         // Evaluate the branch constraint in the current state of symbolic environment.
         // Substitutes all variables to their symbolic value (expression on the program's initial
         // state).
         constraint = prevState.getSymbolicEnv().subst(*c);
-        constraint = IR::IRUtils::optimizeExpression(constraint);
+        constraint = IR::optimizeExpression(constraint);
         // Append the evaluated and optimized constraint to the next execution state's list of
         // path constraints.
         nextState->pushPathConstraint(constraint);

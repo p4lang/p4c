@@ -60,16 +60,16 @@ TestBackEnd::TestInfo EBPFTestBackend::produceTestInfo(
     // Packets that are too small are truncated to 02000000 (in hex) with width 32 bit.
     if (testInfo.outputPacket->type->width_bits() == 0) {
         int outPktSize = ZERO_PKT_WIDTH;
-        testInfo.outputPacket = IR::IRUtils::getConstant(IR::IRUtils::getBitType(outPktSize),
-                                                         EBPFTestBackend::ZERO_PKT_VAL);
-        testInfo.packetTaintMask = IR::IRUtils::getConstant(IR::IRUtils::getBitType(outPktSize),
-                                                            EBPFTestBackend::ZERO_PKT_MAX);
+        testInfo.outputPacket =
+            IR::getConstant(IR::getBitType(outPktSize), EBPFTestBackend::ZERO_PKT_VAL);
+        testInfo.packetTaintMask =
+            IR::getConstant(IR::getBitType(outPktSize), EBPFTestBackend::ZERO_PKT_MAX);
     }
     // eBPF actually can not modify the input packet. It can only filter. Thus we reuse our input
     // packet here.
     testInfo.outputPacket = testInfo.inputPacket;
-    testInfo.packetTaintMask = IR::IRUtils::getConstant(
-        testInfo.inputPacket->type, IR::IRUtils::getMaxBvVal(testInfo.inputPacket->type));
+    testInfo.packetTaintMask =
+        IR::getConstant(testInfo.inputPacket->type, IR::getMaxBvVal(testInfo.inputPacket->type));
     return testInfo;
 }
 
@@ -80,7 +80,7 @@ const TestSpec* EBPFTestBackend::createTestSpec(const ExecutionState* executionS
     TestSpec* testSpec = nullptr;
 
     const auto* ingressPayload = testInfo.inputPacket;
-    const auto* ingressPayloadMask = IR::IRUtils::getConstant(IR::IRUtils::getBitType(1), 1);
+    const auto* ingressPayloadMask = IR::getConstant(IR::getBitType(1), 1);
     const auto ingressPacket = Packet(testInfo.inputPort, ingressPayload, ingressPayloadMask);
 
     boost::optional<Packet> egressPacket = boost::none;

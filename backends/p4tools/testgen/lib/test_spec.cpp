@@ -62,7 +62,7 @@ cstring ActionArg::getActionParamName() const { return param->controlPlaneName()
 
 const IR::Constant* ActionArg::getEvaluatedValue() const {
     if (const auto* boolVal = value->to<IR::BoolLiteral>()) {
-        return IR::IRUtils::getConstant(IR::IRUtils::getBitType(1), boolVal->value ? 1 : 0);
+        return IR::getConstant(IR::getBitType(1), boolVal->value ? 1 : 0);
     }
     const auto* constant = value->to<IR::Constant>();
     BUG_CHECK(constant,

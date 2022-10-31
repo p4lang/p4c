@@ -71,16 +71,16 @@ big_int Utils::getRandBigInt(big_int max) {
 }
 
 const IR::Constant* Utils::getRandConstantForWidth(int bitWidth) {
-    auto maxVal = IR::IRUtils::getMaxBvVal(bitWidth);
+    auto maxVal = IR::getMaxBvVal(bitWidth);
     auto randInt = Utils::getRandBigInt(maxVal);
-    const auto* constType = IR::IRUtils::getBitType(bitWidth);
-    return IR::IRUtils::getConstant(constType, randInt);
+    const auto* constType = IR::getBitType(bitWidth);
+    return IR::getConstant(constType, randInt);
 }
 
 const IR::Constant* Utils::getRandConstantForType(const IR::Type_Bits* type) {
-    auto maxVal = IR::IRUtils::getMaxBvVal(type->width_bits());
+    auto maxVal = IR::getMaxBvVal(type->width_bits());
     auto randInt = Utils::getRandBigInt(maxVal);
-    return IR::IRUtils::getConstant(type, randInt);
+    return IR::getConstant(type, randInt);
 }
 
 /* =========================================================================================

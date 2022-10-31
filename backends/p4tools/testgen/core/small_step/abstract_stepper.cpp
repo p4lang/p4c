@@ -210,7 +210,7 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression* headerRef) {
 void AbstractStepper::setHeaderValidity(const IR::Expression* expr, bool validity,
                                         ExecutionState* nextState) {
     auto headerRefValidity = Utils::getHeaderValidity(expr);
-    nextState->set(headerRefValidity, IR::IRUtils::getBoolLiteral(validity));
+    nextState->set(headerRefValidity, IR::getBoolLiteral(validity));
 
     // In some cases, the header may be part of a union.
     if (validity) {
@@ -325,7 +325,7 @@ const Value* AbstractStepper::evaluateExpression(
               "Currently, expression valuation only supports an incremental solver.");
     auto constraints = state.getPathConstraint();
     expr = state.getSymbolicEnv().subst(expr);
-    expr = IR::IRUtils::optimizeExpression(expr);
+    expr = IR::optimizeExpression(expr);
     // Assert the path constraint to the solver and check whether it is satisfiable.
     if (cond) {
         constraints.push_back(*cond);
@@ -351,7 +351,7 @@ void AbstractStepper::setTargetUninitialized(ExecutionState* nextState, const IR
         auto fields = nextState->getFlatFields(ref, structType, &validFields);
         // We also need to initialize the validity bits of the headers. These are false.
         for (const auto* validField : validFields) {
-            nextState->set(validField, IR::IRUtils::getBoolLiteral(false));
+            nextState->set(validField, IR::getBoolLiteral(false));
         }
         // For each field in the undefined struct, we create a new zombie variable.
         // If the variable does not have an initializer we need to create a new zombie for it.
@@ -372,7 +372,7 @@ void AbstractStepper::declareStructLike(ExecutionState* nextState, const IR::Exp
     auto fields = nextState->getFlatFields(parentExpr, structType, &validFields);
     // We also need to initialize the validity bits of the headers. These are false.
     for (const auto* validField : validFields) {
-        nextState->set(validField, IR::IRUtils::getBoolLiteral(false));
+        nextState->set(validField, IR::getBoolLiteral(false));
     }
     // For each field in the undefined struct, we create a new zombie variable.
     // If the variable does not have an initializer we need to create a new zombie for it.

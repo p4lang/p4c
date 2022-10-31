@@ -20,16 +20,14 @@ const IR::Mux* SaturationElim::eliminate(const IR::Operation_Binary* binary) {
 
     // overflowNumber is the largest value that can be represented before overflowing.
     // This is 2^(bits->size) - 1 for unsigned and 2^(bits->size - 1) - 1 for signed.
-    const auto* overflowNumber =
-        IR::IRUtils::getConstant(bitType, IR::IRUtils::getMaxBvVal(bitType));
+    const auto* overflowNumber = IR::getConstant(bitType, IR::getMaxBvVal(bitType));
 
-    const IR::Constant* zero = IR::IRUtils::getConstant(bitType, 0);
+    const IR::Constant* zero = IR::getConstant(bitType, 0);
 
     // underflowNumber is the smallest value that can be represented before underflowing.
     // This is 0 for unsigned and -(2^(bits->size - 1)) for signed.
     const auto* underflowNumber =
-        (bitType->isSigned) ? IR::IRUtils::getConstant(bitType, IR::IRUtils::getMinBvVal(bitType))
-                            : zero;
+        (bitType->isSigned) ? IR::getConstant(bitType, IR::getMinBvVal(bitType)) : zero;
 
     const auto* boolType = IR::Type::Boolean::get();
     const IR::Expression* expr = nullptr;
@@ -72,7 +70,7 @@ const IR::Mux* SaturationElim::eliminate(const IR::Operation_Binary* binary) {
                                             new IR::Sub(bitType, overflowNumber, binary->right));
 
             // Unsigned addition never underflows.
-            underflowCondition = IR::IRUtils::getBoolLiteral(false);
+            underflowCondition = IR::getBoolLiteral(false);
         }
     } else if (binary->is<IR::SubSat>()) {
         expr = new IR::Sub(bitType, binary->left, binary->right);
@@ -103,7 +101,7 @@ const IR::Mux* SaturationElim::eliminate(const IR::Operation_Binary* binary) {
                 boolType, leftNegative, new IR::LAnd(boolType, rightNonNegative, exprNonNegative));
         } else {
             // Unsigned subtraction never overflows.
-            overflowCondition = IR::IRUtils::getBoolLiteral(false);
+            overflowCondition = IR::getBoolLiteral(false);
 
             // An unsigned subtraction, x - y, underflows exactly when x < y.
             underflowCondition = new IR::Lss(boolType, binary->left, binary->right);

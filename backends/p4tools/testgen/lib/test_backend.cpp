@@ -65,7 +65,7 @@ const Model* TestBackEnd::computeConcolicVariables(const ExecutionState* executi
             }
             CHECK_NULL(pathConstraint);
             pathConstraint = executionState->getSymbolicEnv().subst(pathConstraint);
-            pathConstraint = IR::IRUtils::optimizeExpression(pathConstraint);
+            pathConstraint = IR::optimizeExpression(pathConstraint);
             asserts.push_back(pathConstraint);
         }
         auto solverResult = solver->checkSat(asserts);
@@ -152,14 +152,14 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
     const std::vector<gsl::not_null<const TraceEvent*>>* programTraces) {
     // Evaluate all the important expressions necessary for program execution by using the
     // completed model.
-    int calculatedPacketSize = IR::IRUtils::getIntFromLiteral(
-        completedModel->evaluate(ExecutionState::getInputPacketSizeVar()));
+    int calculatedPacketSize =
+        IR::getIntFromLiteral(completedModel->evaluate(ExecutionState::getInputPacketSizeVar()));
     const auto* inputPacketExpr = executionState->getInputPacket();
     // The payload fills the space between the minimum input size needed and the symbolically
     // calculated packet size.
     int payloadSize = calculatedPacketSize - inputPacketExpr->type->width_bits();
     if (payloadSize > 0) {
-        const auto* payloadType = IR::IRUtils::getBitType(payloadSize);
+        const auto* payloadType = IR::getBitType(payloadSize);
         const auto* payloadExpr =
             completedModel->get(ExecutionState::getPayloadLabel(payloadType), false);
         if (payloadExpr == nullptr) {
@@ -169,11 +169,11 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
                   "The width (%1%) of the payload expression should match the calculated payload "
                   "size %2%.",
                   payloadExpr->type->width_bits(), payloadSize);
-        inputPacketExpr = new IR::Concat(IR::IRUtils::getBitType(calculatedPacketSize),
-                                         inputPacketExpr, payloadExpr);
-        outputPacketExpr = new IR::Concat(
-            IR::IRUtils::getBitType(outputPacketExpr->type->width_bits() + payloadSize),
-            outputPacketExpr, payloadExpr);
+        inputPacketExpr =
+            new IR::Concat(IR::getBitType(calculatedPacketSize), inputPacketExpr, payloadExpr);
+        outputPacketExpr =
+            new IR::Concat(IR::getBitType(outputPacketExpr->type->width_bits() + payloadSize),
+                           outputPacketExpr, payloadExpr);
     }
     const auto* inputPacket = completedModel->evaluate(inputPacketExpr);
     const auto* outputPacket = completedModel->evaluate(outputPacketExpr);
@@ -185,8 +185,8 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
                                                  completedModel, outputPacketExpr);
 
     // Get the input/output port integers.
-    auto inputPortInt = IR::IRUtils::getIntFromLiteral(inputPort);
-    auto outputPortInt = IR::IRUtils::getIntFromLiteral(outputPortVar);
+    auto inputPortInt = IR::getIntFromLiteral(inputPort);
+    auto outputPortInt = IR::getIntFromLiteral(outputPortVar);
 
     return {inputPacket->checkedTo<IR::Constant>(),   inputPortInt,
             outputPacket->checkedTo<IR::Constant>(),  outputPortInt,

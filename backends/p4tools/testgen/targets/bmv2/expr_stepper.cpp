@@ -143,7 +143,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
             const ExecutionState& state, SmallStepEvaluator::Result& result) {
              auto* nextState = new ExecutionState(state);
              const auto* nineBitType =
-                 IR::IRUtils::getBitType(BMv2_V1ModelTestgenTarget::getPortNumWidth_bits());
+                 IR::getBitType(BMv2_V1ModelTestgenTarget::getPortNumWidth_bits());
              const auto* metadataLabel = args->at(0)->expression;
              if (!(metadataLabel->is<IR::Member>() || metadataLabel->is<IR::PathExpression>())) {
                  TESTGEN_UNIMPLEMENTED("Drop input %1% of type %2% not supported", metadataLabel,
@@ -152,7 +152,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // Use an assignment to set egress_spec to true.
              // This variable will be processed in the deparser.
              const auto* portVar = new IR::Member(nineBitType, metadataLabel, "egress_spec");
-             nextState->set(portVar, IR::IRUtils::getConstant(nineBitType, 511));
+             nextState->set(portVar, IR::getConstant(nineBitType, 511));
              nextState->add(new TraceEvent::Generic("mark_to_drop executed."));
              nextState->popBody();
              result->emplace_back(nextState);
@@ -898,12 +898,12 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                                           cloneInfo);
                  // Reset the packet buffer, which corresponds to the output packet.
                  nextState->resetPacketBuffer();
-                 const auto* bitType = IR::IRUtils::getBitType(32);
+                 const auto* bitType = IR::getBitType(32);
                  const auto* instanceTypeVar = new IR::Member(
                      bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
-                 nextState->set(instanceTypeVar,
-                                IR::IRUtils::getConstant(
-                                    bitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
+                 nextState->set(
+                     instanceTypeVar,
+                     IR::getConstant(bitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
                  nextState->replaceTopBody(&cmds);
                  result->emplace_back(cond, state, nextState);
                  return;
@@ -1168,12 +1168,12 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                                           cloneInfo);
                  // Reset the packet buffer, which corresponds to the output packet.
                  nextState->resetPacketBuffer();
-                 const auto* bitType = IR::IRUtils::getBitType(32);
+                 const auto* bitType = IR::getBitType(32);
                  const auto* instanceTypeVar = new IR::Member(
                      bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
-                 nextState->set(instanceTypeVar,
-                                IR::IRUtils::getConstant(
-                                    bitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
+                 nextState->set(
+                     instanceTypeVar,
+                     IR::getConstant(bitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
                  nextState->replaceTopBody(&cmds);
                  result->emplace_back(cond, state, nextState);
                  return;
@@ -1234,7 +1234,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              const auto* packetSizeVar = new IR::Member(
                  pktSizeType, new IR::PathExpression("*standard_metadata"), "packet_length");
              const auto* packetSizeConst =
-                 IR::IRUtils::getConstant(pktSizeType, recState->getPacketBufferSize() / 8);
+                 IR::getConstant(pktSizeType, recState->getPacketBufferSize() / 8);
              recState->set(packetSizeVar, packetSizeConst);
 
              auto progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
@@ -1253,10 +1253,10 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // Update the metadata variable to the correct instance type as provided by
              // recirculation.
              auto instanceType = state.getProperty<uint64_t>("recirculate_instance_type");
-             const auto* bitType = IR::IRUtils::getBitType(32);
+             const auto* bitType = IR::getBitType(32);
              const auto* instanceTypeVar = new IR::Member(
                  bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
-             recState->set(instanceTypeVar, IR::IRUtils::getConstant(bitType, instanceType));
+             recState->set(instanceTypeVar, IR::getConstant(bitType, instanceType));
 
              // Set recirculate to false to avoid infinite loops.
              recState->setProperty("recirculate_active", false);
@@ -1384,7 +1384,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              const auto* checksumValue = args->at(2)->expression;
              const auto* checksumValueType = checksumValue->type;
              const auto* algo = args->at(3)->expression;
-             const auto* oneBitType = IR::IRUtils::getBitType(1);
+             const auto* oneBitType = IR::getBitType(1);
 
              // If the condition is tainted or the input data is tainted, the checksum error will
              // not be reliable.
@@ -1431,8 +1431,8 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
 
                  const auto* checksumErr = new IR::Member(
                      oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
-                 const auto* assign = new IR::AssignmentStatement(
-                     checksumErr, IR::IRUtils::getConstant(oneBitType, 1));
+                 const auto* assign =
+                     new IR::AssignmentStatement(checksumErr, IR::getConstant(oneBitType, 1));
                  auto* errorCond = new IR::LAnd(verifyCond, checksumMatchCond);
                  replacements.emplace_back(assign);
                  nextState->replaceTopBody(&replacements);
@@ -1665,7 +1665,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              const auto* checksumValue = args->at(2)->expression;
              const auto* checksumValueType = checksumValue->type;
              const auto* algo = args->at(3)->expression;
-             const auto* oneBitType = IR::IRUtils::getBitType(1);
+             const auto* oneBitType = IR::getBitType(1);
              // If the condition is tainted or the input data is tainted, the checksum error will
              // not be reliable.
              if (argsAreTainted) {
@@ -1710,8 +1710,8 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
 
                  const auto* checksumErr = new IR::Member(
                      oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
-                 const auto* assign = new IR::AssignmentStatement(
-                     checksumErr, IR::IRUtils::getConstant(oneBitType, 1));
+                 const auto* assign =
+                     new IR::AssignmentStatement(checksumErr, IR::getConstant(oneBitType, 1));
                  auto* errorCond = new IR::LAnd(verifyCond, checksumMatchCond);
                  replacements.emplace_back(assign);
                  nextState->replaceTopBody(&replacements);

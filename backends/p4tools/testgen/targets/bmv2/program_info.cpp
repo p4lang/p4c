@@ -55,7 +55,7 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     // larger than 32 bits
     targetConstraints =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                    IR::IRUtils::getConstant(ExecutionState::getPacketSizeVarType(), 32));
+                    IR::getConstant(ExecutionState::getPacketSizeVarType(), 32));
 }
 
 const ordered_map<cstring, const IR::Type_Declaration*>*
@@ -98,7 +98,7 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
     // processing. For example, the egress port.
     if ((archMember->blockName == "Ingress")) {
         auto* egressPortVar =
-            new IR::Member(IR::IRUtils::getBitType(TestgenTarget::getPortNumWidth_bits()),
+            new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                            new IR::PathExpression("*standard_metadata"), "egress_port");
         auto* portStmt = new IR::AssignmentStatement(egressPortVar, getTargetOutputPortVar());
         cmds.emplace_back(portStmt);
@@ -122,18 +122,18 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
 }
 
 const IR::Member* BMv2_V1ModelProgramInfo::getTargetInputPortVar() const {
-    return new IR::Member(IR::IRUtils::getBitType(TestgenTarget::getPortNumWidth_bits()),
+    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                           new IR::PathExpression("*standard_metadata"), "ingress_port");
 }
 
 const IR::Member* BMv2_V1ModelProgramInfo::getTargetOutputPortVar() const {
-    return new IR::Member(IR::IRUtils::getBitType(TestgenTarget::getPortNumWidth_bits()),
+    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                           new IR::PathExpression("*standard_metadata"), "egress_spec");
 }
 
 const IR::Expression* BMv2_V1ModelProgramInfo::dropIsActive() const {
     const auto* egressPortVar = getTargetOutputPortVar();
-    return new IR::Equ(IR::IRUtils::getConstant(egressPortVar->type, 511), egressPortVar);
+    return new IR::Equ(IR::getConstant(egressPortVar->type, 511), egressPortVar);
 }
 
 const IR::Expression* BMv2_V1ModelProgramInfo::createTargetUninitialized(const IR::Type* type,
@@ -141,7 +141,7 @@ const IR::Expression* BMv2_V1ModelProgramInfo::createTargetUninitialized(const I
     if (forceTaint) {
         return Utils::getTaintExpression(type);
     }
-    return IR::IRUtils::getDefaultValue(type);
+    return IR::getDefaultValue(type);
 }
 
 const IR::Type_Bits* BMv2_V1ModelProgramInfo::getParserErrorType() const { return &parserErrBits; }

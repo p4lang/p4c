@@ -137,7 +137,7 @@ bool CmdStepper::preorder(const IR::AssignmentStatement* assign) {
         }
         // In case of a header, we also need to set the validity bits to true.
         for (const auto* headerValid : flatRefValids) {
-            state.set(headerValid, IR::IRUtils::getBoolLiteral(true));
+            state.set(headerValid, IR::getBoolLiteral(true));
         }
     } else if (leftType->is<IR::Type_Base>()) {
         // Convert a path expression into the respective member.
@@ -354,7 +354,7 @@ bool CmdStepper::preorder(const IR::P4Program* /*program*/) {
         }
         const auto* fixedSizeEqu =
             new IR::Equ(ExecutionState::getInputPacketSizeVar(),
-                        IR::IRUtils::getConstant(ExecutionState::getPacketSizeVarType(), pktSize));
+                        IR::getConstant(ExecutionState::getPacketSizeVarType(), pktSize));
         if (cond == boost::none) {
             cond = fixedSizeEqu;
         } else {
@@ -503,7 +503,7 @@ const Constraint* CmdStepper::startParser(const IR::P4Parser* parser, ExecutionS
     const auto* boolType = IR::Type::Boolean::get();
     const Constraint* result = new IR::Leq(
         boolType, ExecutionState::getInputPacketSizeVar(),
-        IR::IRUtils::getConstant(parserCursorVarType, ExecutionState::getMaxPacketLength_bits()));
+        IR::getConstant(parserCursorVarType, ExecutionState::getMaxPacketLength_bits()));
 
     // Constrain the input packet size to be a multiple of 8 bits. Do this by constraining the
     // lowest three bits of the packet size to 0.
@@ -512,9 +512,9 @@ const Constraint* CmdStepper::startParser(const IR::P4Parser* parser, ExecutionS
         boolType, result,
         new IR::Equ(boolType,
                     new IR::Slice(threeBitType, ExecutionState::getInputPacketSizeVar(),
-                                  IR::IRUtils::getConstant(parserCursorVarType, 2),
-                                  IR::IRUtils::getConstant(parserCursorVarType, 0)),
-                    IR::IRUtils::getConstant(threeBitType, 0)));
+                                  IR::getConstant(parserCursorVarType, 2),
+                                  IR::getConstant(parserCursorVarType, 0)),
+                    IR::getConstant(threeBitType, 0)));
 
     // Call the implementation for the specific target.
     // If we get a constraint back, add it to the result.
@@ -546,8 +546,8 @@ IR::SwitchStatement* CmdStepper::replaceSwitchLabels(const IR::SwitchStatement* 
         auto* newSwitchCase = switchCase->clone();
         // Do not replace default expression labels.
         if (!newSwitchCase->label->is<IR::DefaultExpression>()) {
-            newSwitchCase->label = IR::IRUtils::getConstant(
-                actionVar->type, actionsIds[switchCase->label->toString()]);
+            newSwitchCase->label =
+                IR::getConstant(actionVar->type, actionsIds[switchCase->label->toString()]);
         }
         newCases.push_back(newSwitchCase);
     }

@@ -27,14 +27,14 @@ class CompleteVisitor : public Inspector {
                 "common", 5,
                 "***** Did not find a binding for " << member << ". Autocompleting." << std::endl);
             const auto* type = member->type;
-            model->emplace(member, IR::IRUtils::getDefaultValue(type));
+            model->emplace(member, IR::getDefaultValue(type));
         }
         return false;
     }
 
     bool preorder(const IR::ConcolicVariable* var) override {
         auto stateVar = StateVariable(var->concolicMember);
-        model->emplace(stateVar, IR::IRUtils::getDefaultValue(var->type));
+        model->emplace(stateVar, IR::getDefaultValue(var->type));
         return false;
     }
 
@@ -101,7 +101,7 @@ const Value* Model::evaluate(const IR::Expression* expr, ExpressionMap* resolved
         }
 
         const IR::Literal* preorder(IR::TaintExpression* var) override {
-            return IR::IRUtils::getDefaultValue(var->type);
+            return IR::getDefaultValue(var->type);
         }
 
         const IR::Literal* preorder(IR::ConcolicVariable* var) override {
@@ -114,7 +114,7 @@ const Value* Model::evaluate(const IR::Expression* expr, ExpressionMap* resolved
         explicit SubstVisitor(const Model& model) : self(model) {}
     };
     const auto* substituted = expr->apply(SubstVisitor(*this));
-    const auto* evaluated = IR::IRUtils::optimizeExpression(substituted);
+    const auto* evaluated = IR::optimizeExpression(substituted);
     const auto* literal = evaluated->checkedTo<IR::Literal>();
     // Add the variable to the resolvedExpressions list, if the list is not null.
     if (resolvedExpressions != nullptr) {

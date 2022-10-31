@@ -50,7 +50,7 @@ EBPFProgramInfo::EBPFProgramInfo(const IR::P4Program* program,
     // The input packet should be larger than 0.
     targetConstraints =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                    IR::IRUtils::getConstant(ExecutionState::getPacketSizeVarType(), 0));
+                    IR::getConstant(ExecutionState::getPacketSizeVarType(), 0));
 }
 
 const ordered_map<cstring, const IR::Type_Declaration*>* EBPFProgramInfo::getProgrammableBlocks()
@@ -97,12 +97,12 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
 }
 
 const IR::Member* EBPFProgramInfo::getTargetInputPortVar() const {
-    return new IR::Member(IR::IRUtils::getBitType(TestgenTarget::getPortNumWidth_bits()),
+    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                           new IR::PathExpression("*"), "input_port");
 }
 
 const IR::Member* EBPFProgramInfo::getTargetOutputPortVar() const {
-    return new IR::Member(IR::IRUtils::getBitType(TestgenTarget::getPortNumWidth_bits()),
+    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                           new IR::PathExpression("*"), "output_port");
 }
 
@@ -116,7 +116,7 @@ const IR::Expression* EBPFProgramInfo::createTargetUninitialized(const IR::Type*
     if (forceTaint) {
         return Utils::getTaintExpression(type);
     }
-    return IR::IRUtils::getDefaultValue(type);
+    return IR::getDefaultValue(type);
 }
 
 const IR::Type_Bits* EBPFProgramInfo::getParserErrorType() const { return &parserErrBits; }

@@ -51,9 +51,8 @@ const IR::Expression* BMv2_V1ModelTableStepper::computeTargetMatchType(
         const IR::Expression* minKey = nullptr;
         const IR::Expression* maxKey = nullptr;
         if (keyProperties.isTainted) {
-            minKey = IR::IRUtils::getConstant(keyExpr->type, 0);
-            maxKey =
-                IR::IRUtils::getConstant(keyExpr->type, IR::IRUtils::getMaxBvVal(keyExpr->type));
+            minKey = IR::getConstant(keyExpr->type, 0);
+            maxKey = IR::getConstant(keyExpr->type, IR::getMaxBvVal(keyExpr->type));
             keyExpr = minKey;
         } else {
             minKey = nextState->createZombieConst(keyExpr->type, minName);
@@ -145,8 +144,8 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
         std::vector<Continuation::Command> replacements;
         replacements.emplace_back(new IR::MethodCallStatement(synthesizedAction));
 
-        nextState->set(getTableHitVar(table), IR::IRUtils::getBoolLiteral(true));
-        nextState->set(getTableReachedVar(table), IR::IRUtils::getBoolLiteral(true));
+        nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
+        nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << " Chosen action: " << actionName;
@@ -244,8 +243,8 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
         std::vector<Continuation::Command> replacements;
         replacements.emplace_back(new IR::MethodCallStatement(synthesizedAction));
 
-        nextState->set(getTableHitVar(table), IR::IRUtils::getBoolLiteral(true));
-        nextState->set(getTableReachedVar(table), IR::IRUtils::getBoolLiteral(true));
+        nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
+        nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << " Chosen action: " << actionName;

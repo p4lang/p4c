@@ -382,7 +382,7 @@ const Value* Z3Solver::toValue(const z3::expr& e, const IR::Type* type) {
         strNum.erase(remove(strNum.begin(), strNum.end(), ' '), strNum.end());
     }
     big_int bigint(strNum.c_str());
-    return IR::IRUtils::getConstant(type, bigint);
+    return IR::getConstant(type, bigint);
 }
 
 void Z3Solver::toJSON(JSONGenerator& json) const {
@@ -567,7 +567,7 @@ const ShiftType* Z3Translator::rewriteShift(const ShiftType* shift) const {
     // vector.
     const auto* shiftAmount = right->to<IR::Constant>();
     BUG_CHECK(shiftAmount, "Shift amount is not a compile-time known constant: %1%", right);
-    const auto* newShiftAmount = IR::IRUtils::getConstant(left->type, shiftAmount->value);
+    const auto* newShiftAmount = IR::getConstant(left->type, shiftAmount->value);
 
     return new ShiftType(shift->type, left, newShiftAmount);
 }

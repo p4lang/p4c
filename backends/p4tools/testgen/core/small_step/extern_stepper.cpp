@@ -80,9 +80,8 @@ ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateSuccessfulParserAdvan
     // advancing into the packet minus whatever has been buffered in the current buffer.
     auto minSize =
         std::max(0, state.getInputPacketCursor() + advanceSize - state.getPacketBufferSize());
-    auto* cond =
-        new IR::Geq(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                    IR::IRUtils::getConstant(ExecutionState::getPacketSizeVarType(), minSize));
+    auto* cond = new IR::Geq(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
+                             IR::getConstant(ExecutionState::getPacketSizeVarType(), minSize));
     return {advanceSize, cond, advanceSize, new IR::LNot(cond)};
 }
 
@@ -91,10 +90,8 @@ ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateAdvanceExpression(
     const IR::Expression* restrictions) const {
     const auto* packetSizeVarType = ExecutionState::getPacketSizeVarType();
 
-    const auto* cursorConst =
-        IR::IRUtils::getConstant(packetSizeVarType, state.getInputPacketCursor());
-    const auto* bufferSizeConst =
-        IR::IRUtils::getConstant(packetSizeVarType, state.getPacketBufferSize());
+    const auto* cursorConst = IR::getConstant(packetSizeVarType, state.getInputPacketCursor());
+    const auto* bufferSizeConst = IR::getConstant(packetSizeVarType, state.getPacketBufferSize());
     auto* minSize =
         new IR::Sub(packetSizeVarType, new IR::Add(packetSizeVarType, cursorConst, advanceExpr),
                     bufferSizeConst);
@@ -334,11 +331,11 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression* c
                      const auto* fieldParamValid = flatParamValids[idx];
                      // If the validity bit did not exist before, initialize it to be false.
                      if (!nextState->exists(fieldGlobalValid)) {
-                         nextState->set(fieldGlobalValid, IR::IRUtils::getBoolLiteral(false));
+                         nextState->set(fieldGlobalValid, IR::getBoolLiteral(false));
                      }
                      // Set them false in case of an out copy-in.
                      if (dir == "out") {
-                         nextState->set(fieldParamValid, IR::IRUtils::getBoolLiteral(false));
+                         nextState->set(fieldParamValid, IR::getBoolLiteral(false));
                      } else {
                          nextState->set(fieldParamValid, nextState->get(fieldGlobalValid));
                      }
@@ -550,14 +547,13 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
                  // invoke the solver.
                  // The size of the advance expression should be smaller than the maximum packet
                  // size.
-                 auto* sizeRestriction =
-                     new IR::Leq(advanceExpr,
-                                 IR::IRUtils::getConstant(
-                                     advanceExpr->type, ExecutionState::getMaxPacketLength_bits()));
+                 auto* sizeRestriction = new IR::Leq(
+                     advanceExpr,
+                     IR::getConstant(advanceExpr->type, ExecutionState::getMaxPacketLength_bits()));
                  // The advance expression should ideally have a size that is a multiple of 8 bits.
-                 auto* bytesRestriction = new IR::Equ(
-                     new IR::Mod(advanceExpr, IR::IRUtils::getConstant(advanceExpr->type, 8)),
-                     IR::IRUtils::getConstant(advanceExpr->type, 0));
+                 auto* bytesRestriction =
+                     new IR::Equ(new IR::Mod(advanceExpr, IR::getConstant(advanceExpr->type, 8)),
+                                 IR::getConstant(advanceExpr->type, 0));
                  auto* restrictions = new IR::LAnd(sizeRestriction, bytesRestriction);
                  condInfo = calculateAdvanceExpression(state, advanceExpr, restrictions);
              }
@@ -724,21 +720,18 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
                  // The size of the advance expression should be smaller than the maximum packet
                  // size.
                  auto maxVarbit = std::min(ExecutionState::getMaxPacketLength_bits(), varbit->size);
-                 auto* sizeRestriction =
-                     new IR::Leq(varbitExtractExpr,
-                                 IR::IRUtils::getConstant(varbitExtractExpr->type, maxVarbit));
+                 auto* sizeRestriction = new IR::Leq(
+                     varbitExtractExpr, IR::getConstant(varbitExtractExpr->type, maxVarbit));
                  // The advance expression should ideally fit into a multiple of 8 bits.
-                 auto* bytesRestriction =
-                     new IR::Equ(new IR::Mod(varbitExtractExpr,
-                                             IR::IRUtils::getConstant(varbitExtractExpr->type, 8)),
-                                 IR::IRUtils::getConstant(varbitExtractExpr->type, 0));
+                 auto* bytesRestriction = new IR::Equ(
+                     new IR::Mod(varbitExtractExpr, IR::getConstant(varbitExtractExpr->type, 8)),
+                     IR::getConstant(varbitExtractExpr->type, 0));
                  // The advance expression should not be larger than the varbit maximum width.
                  auto* restrictions = new IR::LAnd(sizeRestriction, bytesRestriction);
                  // In the second case, where the advance amount is a runtime expression, we need to
                  // invoke the solver.
-                 varbitExtractExpr =
-                     new IR::Add(varbitExtractExpr,
-                                 IR::IRUtils::getConstant(varbitExtractExpr->type, extractSize));
+                 varbitExtractExpr = new IR::Add(
+                     varbitExtractExpr, IR::getConstant(varbitExtractExpr->type, extractSize));
                  condInfo = calculateAdvanceExpression(state, varbitExtractExpr, restrictions);
                  varBitFieldSize = std::max(0, condInfo.advanceSize - extractSize);
              }
@@ -748,7 +741,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
                  if (varbit->size < varBitFieldSize) {
                      auto* nextState = new ExecutionState(state);
                      nextState->set(state.getCurrentParserErrorLabel(),
-                                    IR::IRUtils::getConstant(programInfo.getParserErrorType(), 4));
+                                    IR::getConstant(programInfo.getParserErrorType(), 4));
                      nextState->replaceTopBody(Continuation::Exception::Reject);
                      result->emplace_back(condInfo.advanceCond, state, nextState);
                      return;
@@ -807,7 +800,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
              const auto& lengthVar = ExecutionState::getInputPacketSizeVar();
              const auto* divVar =
                  new IR::Div(lengthVar->type, ExecutionState::getInputPacketSizeVar(),
-                             IR::IRUtils::getConstant(lengthVar->type, 8));
+                             IR::getConstant(lengthVar->type, 8));
              nextState->add(new TraceEvent::Expression(divVar, "Return packet length"));
              nextState->replaceTopBody(Continuation::Return(divVar));
              result->emplace_back(boost::none, state, nextState);
@@ -854,7 +847,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
                      const IR::Expression* fieldExpr = nextState->get(fieldRef);
                      fieldType = fieldExpr->type;
                      if (const auto* varbits = fieldType->to<IR::Extracted_Varbits>()) {
-                         fieldType = IR::IRUtils::getBitType(varbits->assignedSize);
+                         fieldType = IR::getBitType(varbits->assignedSize);
                      }
 
                      auto fieldWidth = fieldType->width_bits();
@@ -952,8 +945,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
              // Handle the case where the condition is false.
              auto* falseState = new ExecutionState(state);
              const auto* errVar = state.getCurrentParserErrorLabel();
-             falseState->set(
-                 errVar, IR::IRUtils::getConstant(programInfo.getParserErrorType(), error->value));
+             falseState->set(errVar,
+                             IR::getConstant(programInfo.getParserErrorType(), error->value));
              falseState->replaceTopBody(Continuation::Exception::Reject);
              result->emplace_back(new IR::LNot(IR::Type::Boolean::get(), cond), state, falseState);
          }},

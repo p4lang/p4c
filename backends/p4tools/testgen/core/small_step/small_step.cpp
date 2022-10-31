@@ -109,7 +109,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                 // If the guard condition is tainted, treat it equivalent to an invalid state.
                 if (!state.hasTaint(cond)) {
                     cond = state.getSymbolicEnv().subst(cond);
-                    cond = IR::IRUtils::optimizeExpression(cond);
+                    cond = IR::optimizeExpression(cond);
                     // Check whether the condition is satisfiable in the current execution state.
                     auto pathConstraints = state.getPathConstraint();
                     pathConstraints.push_back(cond);
@@ -129,8 +129,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                         " Incrementing number of guard violations.",
                         condStream.str().c_str());
                     self.violatedGuardConditions++;
-                    return new std::vector<Branch>(
-                        {{IR::IRUtils::getBoolLiteral(false), state, nextState}});
+                    return new std::vector<Branch>({{IR::getBoolLiteral(false), state, nextState}});
                 }
                 // Otherwise, we proceed as usual.
                 return new std::vector<Branch>({{cond, state, nextState}});

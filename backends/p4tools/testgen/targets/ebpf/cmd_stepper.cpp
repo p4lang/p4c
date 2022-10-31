@@ -50,11 +50,11 @@ void EBPFCmdStepper::initializeTargetEnvironment(ExecutionState* nextState) cons
         blockIdx++;
     }
 
-    const auto* nineBitType = IR::IRUtils::getBitType(9);
+    const auto* nineBitType = IR::getBitType(9);
     // Set the input ingress port to 0.
-    nextState->set(programInfo.getTargetInputPortVar(), IR::IRUtils::getConstant(nineBitType, 0));
+    nextState->set(programInfo.getTargetInputPortVar(), IR::getConstant(nineBitType, 0));
     // eBPF implicitly sets the output port to 0. In reality, there is no output port.
-    nextState->set(programInfo.getTargetOutputPortVar(), IR::IRUtils::getConstant(nineBitType, 0));
+    nextState->set(programInfo.getTargetOutputPortVar(), IR::getConstant(nineBitType, 0));
     // We need to explicitly set the parser error. There is no eBPF metadata.
     const auto* errVar = new IR::Member(new IR::PathExpression("*"), "parser_err");
     nextState->setParserErrorLabel(errVar);

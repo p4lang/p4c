@@ -148,9 +148,9 @@ inja::json STF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
                 const auto* dataValue = elem.getEvaluatedValue();
                 auto prefixLen = elem.getEvaluatedPrefixLength()->asInt();
                 auto fieldWidth = dataValue->type->width_bits();
-                auto maxVal = IR::IRUtils::getMaxBvVal(prefixLen);
+                auto maxVal = IR::getMaxBvVal(prefixLen);
                 const auto* maskField =
-                    IR::IRUtils::getConstant(dataValue->type, maxVal << (fieldWidth - prefixLen));
+                    IR::getConstant(dataValue->type, maxVal << (fieldWidth - prefixLen));
                 BUG_CHECK(dataValue->type->width_bits() == maskField->type->width_bits(),
                           "Data value and its mask should have the same bit width.");
                 // Using the width from mask - should be same as data
