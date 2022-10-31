@@ -28,7 +28,7 @@ control c(in hdr h, inout standard_metadata_t standard_meta) {
     }
     table t {
         key = {
-            h.e: exact @name("h.e") ;
+            h.e: exact @name("h.e");
         }
         actions = {
             a();

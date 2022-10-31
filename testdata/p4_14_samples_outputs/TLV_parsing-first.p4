@@ -58,22 +58,22 @@ header ipv4_option_NOP_t {
 }
 
 struct metadata {
-    @name(".my_metadata") 
+    @name(".my_metadata")
     my_metadata_t my_metadata;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t              ethernet;
-    @name(".ipv4_base") 
+    @name(".ipv4_base")
     ipv4_base_t             ipv4_base;
-    @name(".ipv4_option_security") 
+    @name(".ipv4_option_security")
     ipv4_option_security_t  ipv4_option_security;
-    @name(".ipv4_option_timestamp") 
+    @name(".ipv4_option_timestamp")
     ipv4_option_timestamp_t ipv4_option_timestamp;
-    @name(".ipv4_option_EOL") 
+    @name(".ipv4_option_EOL")
     ipv4_option_EOL_t[3]    ipv4_option_EOL;
-    @name(".ipv4_option_NOP") 
+    @name(".ipv4_option_NOP")
     ipv4_option_NOP_t[3]    ipv4_option_NOP;
 }
 
@@ -161,8 +161,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction();
         }
         key = {
-            hdr.ipv4_option_security.isValid() : exact @name("ipv4_option_security.$valid$") ;
-            hdr.ipv4_option_timestamp.isValid(): exact @name("ipv4_option_timestamp.$valid$") ;
+            hdr.ipv4_option_security.isValid() : exact @name("ipv4_option_security.$valid$");
+            hdr.ipv4_option_timestamp.isValid(): exact @name("ipv4_option_timestamp.$valid$");
         }
         size = 4;
         default_action = NoAction();
@@ -200,4 +200,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

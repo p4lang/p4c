@@ -25,7 +25,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("ingress.smeta") standard_metadata_t smeta_0;
     @name("ingress.x_0") bit<16> x;
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bit<16> retval;
     @name(".my_drop") action my_drop_0() {
         smeta_0 = standard_metadata;
@@ -37,7 +36,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ingress.mac_da") table mac_da_0 {
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
         }
         actions = {
             set_port();
@@ -48,12 +47,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         mac_da_0.apply();
         x = hdr.ethernet.srcAddr[15:0];
-        hasReturned = false;
         if (x > 16w5) {
-            hasReturned = true;
             retval = x + 16w65535;
         } else {
-            hasReturned = true;
             retval = x;
         }
         hdr.ethernet.srcAddr[15:0] = retval;
@@ -82,4 +78,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

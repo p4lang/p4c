@@ -23,16 +23,9 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.val") bit<16> val_0;
-    @name("ingress.hasReturned") bool hasReturned;
-    @name("ingress.retval") bit<16> retval;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.simple_action") action simple_action() {
-        hasReturned = false;
-        hasReturned = true;
-        retval = 16w1;
-        val_0 = retval;
     }
     @name("ingress.simple_table") table simple_table_0 {
         actions = {
@@ -68,4 +61,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

@@ -56,4 +56,3 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
 }
 
 V1Switch(parse(), verify_checks(), ingress(), egress(), compute_checksum(), deparser()) main;
-

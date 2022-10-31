@@ -55,4 +55,3 @@ control c(out bit<32> size) {
 control _c(out bit<32> s);
 package top(_c c);
 top(c()) main;
-

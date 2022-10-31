@@ -48,7 +48,7 @@ ReturnedInfo loadExampleForReachability(const char* curFile) {
     AutoCompileContext autoP4TestContext(new P4ReachabilityContext());
     auto& options = P4ReachabilityContext::get().options();
     const char* argv = "./p4testgen";
-    options.process(1, (char* const*)&argv);
+    options.process(1, const_cast<char* const*>(&argv));
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     std::string includeDir = std::string(buildPath) + std::string("p4include");
     auto* originalEnv = getenv("P4C_16_INCLUDE_PATH");

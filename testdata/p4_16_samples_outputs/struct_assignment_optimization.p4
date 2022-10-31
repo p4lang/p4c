@@ -62,4 +62,3 @@ control update(inout Headers hdr, inout Metadata meta) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

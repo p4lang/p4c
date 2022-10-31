@@ -22,7 +22,7 @@ set (LIBP4CTOOLKIT_SRCS
 		error_message.cpp
         exename.cpp
 	gc.cpp
-	gmputil.cpp
+	big_int_util.cpp
 	hash.cpp
 	hex.cpp
 	indent.cpp
@@ -53,7 +53,7 @@ set (LIBP4CTOOLKIT_HDRS
 	exceptions.h
         exename.h
 	gc.h
-	gmputil.h
+	big_int_util.h
 	hash.h
 	hex.h
 	indent.h

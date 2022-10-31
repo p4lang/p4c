@@ -18,7 +18,7 @@ limitations under the License.
 #include <sstream>
 #include "json.h"
 #include "indent.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 
 namespace Util {
 

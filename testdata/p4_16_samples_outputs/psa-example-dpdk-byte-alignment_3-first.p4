@@ -83,9 +83,9 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr     : exact @name("hdr.ethernet.srcAddr") ;
-            hdr.ipv4.hdrChecksum[4:0]: exact @name("hdr.ipv4.hdrChecksum[4:0]") ;
-            hdr.ipv4.version         : exact @name("hdr.ipv4.version") ;
+            hdr.ethernet.srcAddr     : exact @name("hdr.ethernet.srcAddr");
+            hdr.ipv4.hdrChecksum[4:0]: exact @name("hdr.ipv4.hdrChecksum[4:0]");
+            hdr.ipv4.version         : exact @name("hdr.ipv4.version");
         }
         actions = {
             NoAction();
@@ -132,8 +132,5 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers, metadata_t, headers, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

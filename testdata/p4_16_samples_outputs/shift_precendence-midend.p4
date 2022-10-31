@@ -17,4 +17,3 @@ control i(out bit<4> a, out bit<16> x) {
 control c(out bit<4> a, out bit<16> x);
 package top(c _c);
 top(i()) main;
-

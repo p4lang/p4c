@@ -121,7 +121,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("cIngress.t0") table t0_0 {
         key = {
-            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
+            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort");
         }
         actions = {
             foo1();
@@ -133,7 +133,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("cIngress.t1") table t1_0 {
         key = {
-            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
+            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort");
         }
         actions = {
             foo1_1();
@@ -150,8 +150,8 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
             @defaultonly NoAction_3();
         }
         key = {
-            hdr.tcp.srcPort       : exact @name("hdr.tcp.srcPort") ;
-            hdr.ipv4.dstAddr[15:0]: selector @name("meta.hash1") ;
+            hdr.tcp.srcPort       : exact @name("hdr.tcp.srcPort");
+            hdr.ipv4.dstAddr[15:0]: selector @name("meta.hash1");
         }
         size = 16;
         default_action = NoAction_3();
@@ -197,4 +197,3 @@ control DeparserI(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

@@ -24,4 +24,3 @@ parser Parser(packet_in b, out Parsed_Packet p) {
 
 package Switch();
 Switch() main;
-

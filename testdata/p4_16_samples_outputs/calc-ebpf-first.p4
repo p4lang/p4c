@@ -79,7 +79,7 @@ control Ingress(inout headers hdr, out bool xout) {
     }
     table calculate {
         key = {
-            hdr.p4calc.op: exact @name("hdr.p4calc.op") ;
+            hdr.p4calc.op: exact @name("hdr.p4calc.op");
         }
         actions = {
             operation_add();
@@ -110,4 +110,3 @@ control Ingress(inout headers hdr, out bool xout) {
 }
 
 ebpfFilter<headers>(Parser(), Ingress()) main;
-

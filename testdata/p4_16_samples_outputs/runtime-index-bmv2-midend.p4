@@ -285,4 +285,3 @@ control MyDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata_t>(MyParser(), MyVerifyChecksum(), ingress(), egress(), MyComputeChecksum(), MyDeparser()) main;
-

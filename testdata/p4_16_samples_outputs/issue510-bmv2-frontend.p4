@@ -52,4 +52,3 @@ control MyDeparser(packet_out packet, in my_headers_t hdr) {
 }
 
 V1Switch<my_headers_t, my_metadata_t>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

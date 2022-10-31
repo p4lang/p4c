@@ -73,4 +73,3 @@ control deparser(packet_out pkt, in headers h) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

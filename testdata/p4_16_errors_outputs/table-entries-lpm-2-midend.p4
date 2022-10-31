@@ -54,7 +54,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     @name("ingress.t_lpm") table t_lpm_0 {
         key = {
-            h.h.l: lpm @name("h.h.l") ;
+            h.h.l: lpm @name("h.h.l");
         }
         actions = {
             a();
@@ -75,4 +75,3 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 }
 
 V1Switch<Header_t, Meta_t>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

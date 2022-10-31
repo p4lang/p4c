@@ -195,7 +195,6 @@ sudo dpkg -i /path/to/package.deb
        protobuf libraries. Default is ON.
      - `-DENABLE_MULTITHREAD=ON|OFF`. Use multithreading.  Default is
        OFF.
-     - `-DENABLE_GMP=ON|OFF`. Use the GMP library.  Default is ON.
      - `-DBUILD_LINK_WITH_GOLD=ON|OFF`. Use Gold linker for build if available.
      - `-DBUILD_LINK_WITH_LLD=ON|OFF`. Use LLD linker for build if available (overrides BUILD_LINK_WITH_GOLD).
      - `-DENABLE_LTO=ON|OFF`. Use Link Time Optimization (LTO).  Default is OFF.
@@ -241,8 +240,6 @@ use them, but YMMV.
 
 - Google Protocol Buffers 3.0 or higher for control plane API generation
 
-- GNU multiple precision library GMP
-
 - C++ boost library (minimally used)
 
 - Python 3 for scripting and running tests
@@ -263,7 +260,7 @@ Most dependencies can be installed using `apt-get install`:
 
 ```bash
 sudo apt-get install cmake g++ git automake libtool libgc-dev bison flex \
-libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev \
+libfl-dev libboost-dev libboost-iostreams-dev \
 libboost-graph-dev llvm pkg-config python3 python3-pip \
 tcpdump
 
@@ -325,11 +322,6 @@ Installing on macOS:
 - Install dependencies using Homebrew:
   ```
   brew install autoconf automake libtool bdw-gc boost bison pkg-config
-  ```
-
-  Install GMP built in C++11 mode:
-  ```
-  brew install gmp --c++11
   ```
 
   By default, Homebrew doesn't link programs into `/usr/local/bin` if

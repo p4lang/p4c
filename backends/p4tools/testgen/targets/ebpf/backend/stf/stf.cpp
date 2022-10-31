@@ -21,7 +21,7 @@
 #include "backends/p4tools/common/lib/util.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
 

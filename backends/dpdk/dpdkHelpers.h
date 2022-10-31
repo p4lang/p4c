@@ -29,7 +29,7 @@ limitations under the License.
 #include "frontends/p4/unusedDeclarations.h"
 #include "midend/removeComplexExpressions.h"
 #include "ir/ir.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "lib/json.h"
 #include "constants.h"
 

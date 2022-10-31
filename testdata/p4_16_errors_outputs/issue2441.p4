@@ -20,4 +20,3 @@ struct meta_t {
 }
 
 P() main;
-

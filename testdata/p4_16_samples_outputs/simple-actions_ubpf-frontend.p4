@@ -99,7 +99,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     @name("pipe.filter_tbl") table filter_tbl_0 {
         key = {
-            headers.ipv4.dstAddr: exact @name("headers.ipv4.dstAddr") ;
+            headers.ipv4.dstAddr: exact @name("headers.ipv4.dstAddr");
         }
         actions = {
             mpls_decrement_ttl();
@@ -130,4 +130,3 @@ control dprs(packet_out packet, in Headers_t headers) {
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
-

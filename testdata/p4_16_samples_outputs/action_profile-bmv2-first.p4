@@ -31,7 +31,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     table indirect_ws {
         key = {
-            meta.hash1: selector @name("meta.hash1") ;
+            meta.hash1: selector @name("meta.hash1");
         }
         actions = {
             drop();
@@ -67,4 +67,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

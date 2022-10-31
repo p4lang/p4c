@@ -36,9 +36,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t     ipv4;
 }
 
@@ -75,7 +75,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction_2();
         }
         key = {
-            meta._ingress_metadata_nexthop_index2: exact @name("ingress_metadata.nexthop_index") ;
+            meta._ingress_metadata_nexthop_index2: exact @name("ingress_metadata.nexthop_index");
         }
         size = 32768;
         default_action = NoAction_2();
@@ -125,7 +125,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            meta._ingress_metadata_bd1: exact @name("ingress_metadata.bd") ;
+            meta._ingress_metadata_bd1: exact @name("ingress_metadata.bd");
         }
         size = 65536;
         default_action = NoAction_3();
@@ -137,8 +137,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_4();
         }
         key = {
-            meta._ingress_metadata_vrf0: exact @name("ingress_metadata.vrf") ;
-            hdr.ipv4.dstAddr           : exact @name("ipv4.dstAddr") ;
+            meta._ingress_metadata_vrf0: exact @name("ingress_metadata.vrf");
+            hdr.ipv4.dstAddr           : exact @name("ipv4.dstAddr");
         }
         size = 131072;
         default_action = NoAction_4();
@@ -150,8 +150,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_5();
         }
         key = {
-            meta._ingress_metadata_vrf0: exact @name("ingress_metadata.vrf") ;
-            hdr.ipv4.dstAddr           : lpm @name("ipv4.dstAddr") ;
+            meta._ingress_metadata_vrf0: exact @name("ingress_metadata.vrf");
+            hdr.ipv4.dstAddr           : lpm @name("ipv4.dstAddr");
         }
         size = 16384;
         default_action = NoAction_5();
@@ -163,7 +163,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_6();
         }
         key = {
-            meta._ingress_metadata_nexthop_index2: exact @name("ingress_metadata.nexthop_index") ;
+            meta._ingress_metadata_nexthop_index2: exact @name("ingress_metadata.nexthop_index");
         }
         size = 32768;
         default_action = NoAction_6();
@@ -174,7 +174,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_7();
         }
         key = {
-            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
+            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port");
         }
         size = 32768;
         default_action = NoAction_7();
@@ -229,4 +229,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

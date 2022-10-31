@@ -35,4 +35,3 @@ parser Parser(packet_in b, out Headers hdr);
 control Ingress(inout Headers hdr);
 package top(Parser p, Ingress ig);
 top(p(), ingress()) main;
-

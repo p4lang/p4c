@@ -5,4 +5,3 @@ extern g {
 
 package p(g a);
 p(g()) main;
-

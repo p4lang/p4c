@@ -45,7 +45,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.t") table t_0 {
         key = {
-            h.h.b: exact @name("h.h.b") ;
+            h.h.b: exact @name("h.h.b");
         }
         actions = {
             NoAction_1();
@@ -60,4 +60,3 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

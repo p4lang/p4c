@@ -36,7 +36,7 @@ control EgressImpl(inout headers_t hdr, inout metadata meta, inout standard_meta
     }
     @name("EgressImpl.change_cond") table change_cond_0 {
         key = {
-            ostd.egress_spec: exact @name("ostd.egress_spec") ;
+            ostd.egress_spec: exact @name("ostd.egress_spec");
         }
         actions = {
             set_true();
@@ -60,4 +60,3 @@ control DeparserImpl(packet_out buffer, in headers_t hdr) {
 }
 
 V1Switch<headers_t, metadata>(ParserImpl(), VerifyChecksumImpl(), IngressImpl(), EgressImpl(), ComputeChecksumImpl(), DeparserImpl()) main;
-

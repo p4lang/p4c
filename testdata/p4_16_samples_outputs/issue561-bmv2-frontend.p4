@@ -254,7 +254,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             set_l2ptr();
@@ -270,7 +270,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ingress.mac_da") table mac_da_0 {
         key = {
-            meta.fwd_metadata.l2ptr: exact @name("meta.fwd_metadata.l2ptr") ;
+            meta.fwd_metadata.l2ptr: exact @name("meta.fwd_metadata.l2ptr");
         }
         actions = {
             set_bd_dmac_intf();
@@ -296,7 +296,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("egress.send_frame") table send_frame_0 {
         key = {
-            meta.fwd_metadata.out_bd: exact @name("meta.fwd_metadata.out_bd") ;
+            meta.fwd_metadata.out_bd: exact @name("meta.fwd_metadata.out_bd");
         }
         actions = {
             rewrite_mac();
@@ -330,4 +330,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

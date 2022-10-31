@@ -94,7 +94,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     @name("ingress.learned_sources") table learned_sources_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
         }
         actions = {
             NoAction_1();
@@ -114,7 +114,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     @name("ingress.l2_tbl") table l2_tbl_0 {
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
         }
         actions = {
             do_L2_forward();
@@ -124,7 +124,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     @name("ingress.tst_tbl") table tst_tbl_0 {
         key = {
-            meta._mac_learn_msg_ingress_port2: exact @name("meta.mac_learn_msg.ingress_port") ;
+            meta._mac_learn_msg_ingress_port2: exact @name("meta.mac_learn_msg.ingress_port");
         }
         actions = {
             do_tst();
@@ -200,8 +200,5 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

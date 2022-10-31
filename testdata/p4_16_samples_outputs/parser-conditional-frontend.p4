@@ -62,4 +62,3 @@ parser p(out bit<32> b) {
 parser proto(out bit<32> b);
 package top(proto _p);
 top(p()) main;
-

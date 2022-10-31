@@ -31,4 +31,3 @@ control MyC(packet_in pkt, inout ethernet ether)(P p) {
 }
 
 S(MyC(MyP())) main;
-

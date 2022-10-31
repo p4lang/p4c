@@ -68,7 +68,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table t {
         key = {
-            h.u.isValid(): exact @name("h.u.$valid$") ;
+            h.u.isValid(): exact @name("h.u.$valid$");
         }
         actions = {
             a();
@@ -81,4 +81,3 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-
