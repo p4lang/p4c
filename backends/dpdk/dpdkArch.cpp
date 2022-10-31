@@ -2414,12 +2414,6 @@ void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
         }
     }
     if (use_add_on_miss) {
-        auto act = t->getDefaultAction();
-        BUG_CHECK(act != nullptr, "%1%: default action does not exist", t);
-        if (auto mc = act->to<IR::MethodCallExpression>()) {
-            auto method = mc->method->to<IR::PathExpression>();
-            structure->defActs.emplace(method->path->name, t);
-        }
         for (auto action : t->getActionList()->actionList) {
             auto action_decl = refMap->getDeclaration(action->getPath())->to<IR::P4Action>();
             // Map the compiler generated internal name of action (emitted in .spec file) with
@@ -2471,7 +2465,7 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
         return;
     auto act = findOrigCtxt<IR::P4Action>();
     BUG_CHECK(act != nullptr, "%1%: %2% extern can only be used in an action", mcs, externFuncName);
-    auto tbl = ::get(structure->learner_action_table,act->externalName());
+    auto tbl = ::get(structure->learner_action_table, act->externalName());
     if (externFuncName == "restart_expire_timer" || externFuncName == "set_entry_expire_time") {
         bool use_idle_timeout_with_auto_delete = false;
         if (tbl) {
@@ -2496,7 +2490,12 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
             }
         }
     } else if (externFuncName == "add_entry") {
+        bool found = false;
         if (tbl) {
+            auto mce = mcs->methodCall;
+            auto args = mce->arguments;
+            auto at = args->at(0)->expression;
+            auto an = at->to<IR::StringLiteral>()->value;
             auto add_on_miss = tbl->properties->getProperty("add_on_miss");
             if (add_on_miss != nullptr) {
                 propName = "add_on_miss";
@@ -2510,11 +2509,26 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
                         auto use_add_on_miss = expr->to<IR::BoolLiteral>()->value;
                         if (use_add_on_miss) {
                             isValidExternCall = true;
-                            auto it = structure->defActs.find(act->name.name);
-                            if (it == structure->defActs.end()) {
+                            cstring st = getDefActionName(tbl);
+                            if (st != act->name.name) {  // checks caller
                                 ::error(ErrorType::ERR_UNEXPECTED,
                                 "%1% is not called from a default action: %2% ",
                                 mcs, act->name.name);
+                                return;
+                            } else if (st == an) {  // checks arg0
+                                ::error(ErrorType::ERR_UNEXPECTED,
+                                "%1% action cannot be default action: %2%:",
+                                mcs, an);
+                                return;
+                            }
+                            for (auto action : tbl->getActionList()->actionList) {
+                                if (action->getName().originalName == an)
+                                    found = true;
+                            }
+                            if (!found) {
+                                ::error(ErrorType::ERR_UNEXPECTED,
+                                "%1% first arg action name %2% is not any action in table %3%",
+                                mcs, an, tbl->name.name);
                                 return;
                             }
                         }
@@ -2525,8 +2539,8 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
     }
     if (!isValidExternCall) {
          ::error(ErrorType::ERR_UNEXPECTED,
-                 "%1% must only be called from within an action with '%2%'"
-                 " property equal to true", mcs, propName);
+                 "%1% must only be called from within an action with '%2% %3%'"
+                 " property equal to true", mcs, propName, act->name.name);
     }
     return;
 }

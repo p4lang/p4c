@@ -8,7 +8,6 @@
 /* Collect information related to P4 programs targeting dpdk */
 struct DpdkProgramStructure {
     cstring p4arch;  // 'pna' or 'psa'
-    ordered_map<cstring, const IR::P4Table*> defActs;
     ordered_map<cstring, const IR::Declaration_Variable*> scalars;
     unsigned                            scalars_width = 0;
 
