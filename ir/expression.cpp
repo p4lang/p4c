@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "ir.h"
 #include "dbprint.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 
 const IR::Expression *IR::Slice::make(const IR::Expression *e, unsigned lo, unsigned hi) {
     if (auto k = e->to<IR::Constant>()) {

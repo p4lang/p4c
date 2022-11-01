@@ -76,61 +76,61 @@ apply {
 	extract h.output_data
 	jmpnv LABEL_END h.ethernet
 	mov m.Ingress_tmp_19 h.ethernet.dstAddr
-	and m.Ingress_tmp_19 0xff
+	and m.Ingress_tmp_19 0xFF
 	mov m.Ingress_tmp_20 m.Ingress_tmp_19
-	and m.Ingress_tmp_20 0xff
+	and m.Ingress_tmp_20 0xFF
 	mov m.Ingress_idx m.Ingress_tmp_20
 	mov m.Ingress_tmp h.ethernet.dstAddr
 	shr m.Ingress_tmp 0x8
 	mov m.Ingress_tmp_0 m.Ingress_tmp
-	and m.Ingress_tmp_0 0xff
+	and m.Ingress_tmp_0 0xFF
 	mov m.Ingress_tmp_1 m.Ingress_tmp_0
-	and m.Ingress_tmp_1 0xff
+	and m.Ingress_tmp_1 0xFF
 	mov m.Ingress_tmp_3 h.ethernet.dstAddr
 	shr m.Ingress_tmp_3 0x8
 	mov m.Ingress_tmp_4 m.Ingress_tmp_3
-	and m.Ingress_tmp_4 0xff
+	and m.Ingress_tmp_4 0xFF
 	mov m.Ingress_tmp_5 m.Ingress_tmp_4
-	and m.Ingress_tmp_5 0xff
+	and m.Ingress_tmp_5 0xFF
 	jmplt LABEL_END_0 m.Ingress_tmp_1 0x1
 	jmpgt LABEL_END_0 m.Ingress_tmp_5 0x3
 	regrd m.Ingress_orig_data reg_0 m.Ingress_idx
 	LABEL_END_0 :	mov m.Ingress_tmp_15 h.ethernet.dstAddr
 	shr m.Ingress_tmp_15 0x8
 	mov m.Ingress_tmp_16 m.Ingress_tmp_15
-	and m.Ingress_tmp_16 0xff
+	and m.Ingress_tmp_16 0xFF
 	mov m.Ingress_tmp_17 m.Ingress_tmp_16
-	and m.Ingress_tmp_17 0xff
+	and m.Ingress_tmp_17 0xFF
 	jmpneq LABEL_FALSE_1 m.Ingress_tmp_17 0x1
 	mov m.Ingress_tmp_21 h.ethernet.dstAddr
 	shr m.Ingress_tmp_21 0x20
 	mov m.Ingress_tmp_22 m.Ingress_tmp_21
-	and m.Ingress_tmp_22 0xffff
+	and m.Ingress_tmp_22 0xFFFF
 	mov m.Ingress_tmp_23 m.Ingress_tmp_22
-	and m.Ingress_tmp_23 0xffff
+	and m.Ingress_tmp_23 0xFFFF
 	mov m.Ingress_next_data m.Ingress_tmp_23
 	jmp LABEL_END_1
 	LABEL_FALSE_1 :	mov m.Ingress_tmp_11 h.ethernet.dstAddr
 	shr m.Ingress_tmp_11 0x8
 	mov m.Ingress_tmp_12 m.Ingress_tmp_11
-	and m.Ingress_tmp_12 0xff
+	and m.Ingress_tmp_12 0xFF
 	mov m.Ingress_tmp_13 m.Ingress_tmp_12
-	and m.Ingress_tmp_13 0xff
+	and m.Ingress_tmp_13 0xFF
 	jmpneq LABEL_FALSE_2 m.Ingress_tmp_13 0x2
 	mov m.Ingress_next_data m.Ingress_orig_data
 	jmp LABEL_END_1
 	LABEL_FALSE_2 :	mov m.Ingress_tmp_7 h.ethernet.dstAddr
 	shr m.Ingress_tmp_7 0x8
 	mov m.Ingress_tmp_8 m.Ingress_tmp_7
-	and m.Ingress_tmp_8 0xff
+	and m.Ingress_tmp_8 0xFF
 	mov m.Ingress_tmp_9 m.Ingress_tmp_8
-	and m.Ingress_tmp_9 0xff
+	and m.Ingress_tmp_9 0xFF
 	jmpneq LABEL_FALSE_3 m.Ingress_tmp_9 0x3
 	mov m.Ingress_next_data m.Ingress_orig_data
 	add m.Ingress_next_data 0x1
 	jmp LABEL_END_1
-	LABEL_FALSE_3 :	mov m.Ingress_orig_data 0xdead
-	mov m.Ingress_next_data 0xbeef
+	LABEL_FALSE_3 :	mov m.Ingress_orig_data 0xDEAD
+	mov m.Ingress_next_data 0xBEEF
 	LABEL_END_1 :	regwr reg_0 m.Ingress_idx m.Ingress_next_data
 	mov h.output_data.word0 m.Ingress_orig_data
 	mov h.output_data.word1 m.Ingress_next_data

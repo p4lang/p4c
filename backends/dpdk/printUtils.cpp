@@ -33,7 +33,7 @@ bool ConvertToString::preorder(const IR::PropertyValue *p) {
 }
 
 bool ConvertToString::preorder(const IR::Constant *e) {
-    out << "0x" << std::hex << e->value;
+    out << "0x" << std::hex << std::uppercase << e->value;
     return false;
 }
 

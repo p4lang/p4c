@@ -56,7 +56,7 @@ action send_with_mirror args instanceof send_with_mirror_arg_t {
 action drop_with_mirror args none {
 	drop
 	mov m.mirrorSlot_0 0x3
-	mov m.mirrorSession_0 0x3e
+	mov m.mirrorSession_0 0x3E
 	mirror m.mirrorSlot_0 m.mirrorSession_0
 	return
 }

@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "lib/cstring.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "lib/ordered_map.h"
 #include "lib/source_file.h"
 #include "lib/castable.h"

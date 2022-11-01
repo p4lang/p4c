@@ -44,11 +44,6 @@ set(INJA_BUILD_TESTS OFF CACHE BOOL "Build unit tests when BUILD_TESTING is enab
 set(BUILD_BENCHMARK OFF CACHE BOOL "Build benchmark.")
 add_subdirectory(submodules/inja)
 
-# P4Tools does not support GMP
-if(ENABLE_GMP)
-  message(FATAL_ERROR "P4Tools does not support compilation with GMP. Please use -DENABLE_GMP=OFF")
-endif()
-
 # Import common definitions.
 include(common)
 

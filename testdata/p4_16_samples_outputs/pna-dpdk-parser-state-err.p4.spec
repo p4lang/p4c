@@ -110,8 +110,8 @@ action next_hop2 args instanceof next_hop2_arg_t {
 
 action add_on_miss_action2 args none {
 	mov m.MainControlT_tmp 0x0
-	mov m.MainControlT_tmp_0 0x4d2
-	learn next_hop2 m.MainControlT_tmp m.local_metadata_timeout
+	mov m.MainControlT_tmp_0 0x4D2
+	learn next_hop m.MainControlT_tmp m.local_metadata_timeout
 	return
 }
 
@@ -177,7 +177,7 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	jmpgt LABEL_FALSE_0 0x64 h.tcp.srcPort
-	jmpgt LABEL_FALSE_0 h.tcp.srcPort 0xc8
+	jmpgt LABEL_FALSE_0 h.tcp.srcPort 0xC8
 	mov m.MainControlT_tmp_3 0x1
 	jmp LABEL_END_0
 	LABEL_FALSE_0 :	mov m.MainControlT_tmp_3 0x0

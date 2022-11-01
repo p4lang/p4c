@@ -424,7 +424,7 @@ class ExecutionState {
     /// @returns the zombies that were allocated in this state
     const std::set<StateVariable>& getZombies() const;
 
-    /// @see IRUtils::getZombieConst.
+    /// @see Utils::getZombieConst.
     /// We also place the zombies in the set of allocated zombies of this state.
     const StateVariable& createZombieConst(const IR::Type* type, cstring name,
                                            uint64_t instanceID = 0);

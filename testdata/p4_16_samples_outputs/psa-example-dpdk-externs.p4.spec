@@ -111,10 +111,10 @@ apply {
 	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_color_in 0x2
 	jmpneq LABEL_END m.local_metadata_port_out 0x1
 	table tbl
-	regadd counter0_0_packets 0x3ff 1
-	regadd counter0_0_bytes 0x3ff 0x14
+	regadd counter0_0_packets 0x3FF 1
+	regadd counter0_0_bytes 0x3FF 0x14
 	regadd counter1_0 0x200 1
-	regadd counter2_0 0x3ff 0x40
+	regadd counter2_0 0x3FF 0x40
 	regrd m.local_metadata_port_out reg_0 0x1
 	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet

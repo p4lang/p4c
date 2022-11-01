@@ -9,8 +9,24 @@ header ethernet_t {
     bit<16>         etherType;
 }
 
+header ipv4_t {
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
+}
+
 struct headers_t {
     ethernet_t ethernet;
+    ipv4_t     ipv4;
 }
 
 struct metadata_t {
@@ -19,6 +35,13 @@ struct metadata_t {
 parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
         packet.extract(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            0x800: parse_ipv4;
+            default: accept;
+        }
+    }
+    state parse_ipv4 {
+        packet.extract(hdr.ipv4);
         transition accept;
     }
 }
@@ -48,18 +71,20 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     int<8> signed1;
     bit<8> unsigned1;
     apply {
+        log_msg("GREPME Packet ingress begin");
         bool1 = (bool)hdr.ethernet.dstAddr[0:0];
-        log_msg("bool1={}", { bool1 });
-        log_msg("(bit<1>) bool1={}", { (bit<1>)bool1 });
-        log_msg("(bit<1>) (!bool1)={}", { (bit<1>)!bool1 });
+        log_msg("GREPME bool1={}", { bool1 });
+        log_msg("GREPME (bit<1>) bool1={}", { (bit<1>)bool1 });
+        log_msg("GREPME (bit<1>) (!bool1)={}", { (bit<1>)!bool1 });
         bit1 = hdr.ethernet.dstAddr[0:0];
-        log_msg("bit1={}", { bit1 });
+        log_msg("GREPME bit1={}", { bit1 });
         signed1 = 127;
         signed1 = signed1 + 1;
-        log_msg("signed1={}", { signed1 });
+        log_msg("GREPME signed1={}", { signed1 });
         unsigned1 = 127;
         unsigned1 = unsigned1 + 1;
-        log_msg("unsigned1={}", { unsigned1 });
+        log_msg("GREPME unsigned1={}", { unsigned1 });
+        log_msg("GREPME hdr.ethernet.dstAddr[1:0]={}", { hdr.ethernet.dstAddr[1:0] });
         if (hdr.ethernet.dstAddr[1:0] == 0) {
             enum1 = MyEnum_t.VAL1;
         } else if (hdr.ethernet.dstAddr[1:0] == 1) {
@@ -67,7 +92,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         } else {
             enum1 = MyEnum_t.VAL3;
         }
-        log_msg("enum1={}", { enum1 });
+        log_msg("GREPME enum1={}", { enum1 });
         if (hdr.ethernet.dstAddr[1:0] == 0) {
             serenum1 = MySerializableEnum_t.VAL17;
         } else if (hdr.ethernet.dstAddr[1:0] == 1) {
@@ -75,10 +100,13 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         } else {
             serenum1 = MySerializableEnum_t.VAL19;
         }
-        log_msg("serenum1={}", { serenum1 });
-        log_msg("hdr.ethernet={}", { hdr.ethernet });
-        log_msg("stdmeta={}", { stdmeta });
-        log_msg("error.PacketTooShort={}", { error.PacketTooShort });
+        log_msg("GREPME serenum1={}", { serenum1 });
+        log_msg("GREPME hdr.ethernet.isValid()={}", { hdr.ethernet.isValid() });
+        log_msg("GREPME hdr.ethernet={}", { hdr.ethernet });
+        log_msg("GREPME hdr.ipv4.isValid()={}", { hdr.ipv4.isValid() });
+        log_msg("GREPME hdr.ipv4={}", { hdr.ipv4 });
+        log_msg("GREPME stdmeta={}", { stdmeta });
+        log_msg("GREPME error.PacketTooShort={}", { error.PacketTooShort });
     }
 }
 
