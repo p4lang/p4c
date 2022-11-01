@@ -259,8 +259,8 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
                             directApplication
 %type<IR::BlockStatement*>  blockStatement parserBlockStatement controlBody
                             objInitializer
-%type<IR::StatOrDecl*>      statementOrDeclaration parserStatement
-%type<IR::IndexedVector<IR::StatOrDecl>*>  objDeclarations statOrDeclList
+%type<IR::Node*>            statementOrDeclaration parserStatement
+%type<IR::IndexedVector<IR::Node>*>  objDeclarations statOrDeclList
                                            parserStatements
 %type<IR::SwitchCase*>      switchCase
 %type<IR::Vector<IR::SwitchCase>*>  switchCases
@@ -274,7 +274,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %type<IR::Type_Declaration*>  headerTypeDeclaration structTypeDeclaration
                               headerUnionDeclaration derivedTypeDeclaration
                               parserDeclaration controlDeclaration enumDeclaration
-                              typedefDeclaration packageTypeDeclaration typeDeclaration
+                              typedefDeclaration newtypeDeclaration packageTypeDeclaration typeDeclaration
 %type<IR::Type_Error*>      errorDeclaration
 %type<IR::Node*>            fragment
 %type<IR::Node*>            declaration externDeclaration matchKindDeclaration
@@ -1042,6 +1042,7 @@ realTypeArgumentList
 typeDeclaration
     : derivedTypeDeclaration     { $$ = $1; }
     | typedefDeclaration ";"     { $$ = $1; }
+    | newtypeDeclaration ";"     { $$ = $1; }
     | parserTypeDeclaration ";"  { driver.structure->pop(); $$ = $1; }
     | controlTypeDeclaration ";" { driver.structure->pop(); $$ = $1; }
     | packageTypeDeclaration ";" { driver.structure->pop(); $$ = $1; }
@@ -1128,7 +1129,10 @@ typedefDeclaration
           $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
     | optAnnotations TYPEDEF derivedTypeDeclaration name   { driver.structure->declareType(*$4);
                         $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
-    | optAnnotations TYPE typeRef name   { driver.structure->declareType(*$4);
+    ;
+
+newtypeDeclaration
+    : optAnnotations TYPE typeRef name   { driver.structure->declareType(*$4);
           $$ = new IR::Type_Newtype(@4, *$4, new IR::Annotations(*$1), $3); }
     | optAnnotations TYPE derivedTypeDeclaration name   { driver.structure->declareType(*$4);
                         $$ = new IR::Type_Newtype(@4, *$4, new IR::Annotations(*$1), $3); }
@@ -1231,6 +1235,7 @@ switchLabel
 
 statementOrDeclaration
     : variableDeclaration      { $$ = $1; }
+    | typedefDeclaration       { $$ = $1; }
     | constantDeclaration      { $$ = $1; }
     | statement                { $$ = $1; }
     | instantiation            { $$ = $1; }

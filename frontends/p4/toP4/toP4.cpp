@@ -784,7 +784,6 @@ VECTOR_VISIT(IndexedVector, Declaration)
 VECTOR_VISIT(IndexedVector, Declaration_ID)
 VECTOR_VISIT(IndexedVector, Node)
 VECTOR_VISIT(IndexedVector, ParserState)
-VECTOR_VISIT(IndexedVector, StatOrDecl)
 
 #undef VECTOR_VISIT
 

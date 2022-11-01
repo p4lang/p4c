@@ -95,8 +95,10 @@ bool P4WriteContext::isRead(bool root_value) {
                 return true; }
             auto param = type->parameters->getParameter(ctxt->parent->child_index);
             return param->direction != IR::Direction::Out; } }
+    /* We have changed StatOrDecl to be the same as Node
     if (ctxt->node->is<IR::IndexedVector<IR::StatOrDecl>>())
         return false;
+    */
     if (ctxt->node->is<IR::IfStatement>())
         return ctxt->child_index == 0;
     return true;

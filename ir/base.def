@@ -125,12 +125,15 @@ class Type_Unknown : Type_Base {
     toString{ return "Unknown type"; }
 }
 
-/// A statement or a declaration
-abstract StatOrDecl {}
+#emit
+// This used to be an abstract class used for a statement or a declaration.
+// We keep this for backward compatibility.
+#define StatOrDecl Node
+#end
 
 /// Two declarations with the same name are not necessarily the same declaration.
 /// That's why declid is used to distinguish them.
-abstract Declaration : StatOrDecl, IDeclaration {
+abstract Declaration : IDeclaration {
     ID          name;
     int declid = nextId++;
     ID getName() const override { return name; }

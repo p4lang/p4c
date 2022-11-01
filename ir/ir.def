@@ -57,7 +57,7 @@
 
 class ParserState : ISimpleNamespace, Declaration, IAnnotated {
     optional Annotations                        annotations = Annotations::empty;
-    optional inline IndexedVector<StatOrDecl>   components;
+    optional inline IndexedVector<Node>         components;
     // selectExpression can be a SelectExpression, or a PathExpression representing a state
     NullOK Expression                   selectExpression;
 
@@ -418,7 +418,7 @@ class P4Program : IGeneralNamespace {
 
 ///////////////////////////// Statements //////////////////////////
 
-abstract Statement : StatOrDecl {}
+abstract Statement {}
 
 class ExitStatement : Statement {
     toString{ return "exit"; }
@@ -455,12 +455,12 @@ class IfStatement : Statement {
 
 class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
     optional Annotations                        annotations = Annotations::empty;
-    optional inline IndexedVector<StatOrDecl>   components;
+    optional inline IndexedVector<Node>         components;
     IDeclaration getDeclByName(cstring name) const override {
         return components.getDeclaration(name); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return components.getDeclarations(); }
-    void push_back(StatOrDecl st) { components.push_back(st); }
+    void push_back(Node st) { components.push_back(st); }
     Annotations getAnnotations() const override { return annotations; }
 }
 

@@ -1,0 +1,6 @@
+localTypedef.p4(6): [--Wwarn=shadow] warning: 'T' shadows 'T'
+            typedef bit<16> T;
+                            ^
+localTypedef.p4(3)
+        typedef bit<32> T;
+                        ^
