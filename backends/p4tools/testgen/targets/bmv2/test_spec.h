@@ -90,19 +90,19 @@ class Bmv2RegisterValue : public TestObject {
 
 class Bmv2CounterCondition : public TestObject {
  public:
-    /// The register index.
+    /// The counter index.
     const IR::Expression* index;
 
-    /// The register value.
+    /// The counter value.
     const IR::Expression* value;
 
     explicit Bmv2CounterCondition(const IR::Expression* index, const IR::Expression* value);
 
-    /// @returns the evaluated register index. This means it must be a constant.
+    /// @returns the evaluated counter index. This means it must be a constant.
     /// The function will throw a bug if this is not the case.
     const IR::Constant* getEvaluatedIndex() const;
 
-    /// @returns the evaluated condition of the register. This means it must be a constant.
+    /// @returns the evaluated condition of the counter. This means it must be a constant.
     /// The function will throw a bug if this is not the case.
     const IR::Constant* getEvaluatedValue() const;
 
@@ -119,14 +119,29 @@ class Bmv2CounterCondition : public TestObject {
 /// particular index appear the earliest in this unraveling phase..
 class Bmv2CounterValue : public TestObject {
  private:
+    enum CounterType {
+        PACKETS,
+        BYTES,
+        PACKETS_AND_BYTES,
+    };
+
     /// A new Bmv2CounterValue always requires an initial value. This can be a constant or taint.
     const IR::Expression* initialValue;
+
+    /// A new Bmv2CounterValue always requires an size value. This can be a constant or taint.
+    const IR::Expression* size;
+
+    /// A new Bmv2CounterValue always requires an type value. This can be a constant or taint.
+    CounterType type;
 
     /// Each element is an API name paired with a match rule.
     std::vector<Bmv2CounterCondition> counterConditions;
 
  public:
-    explicit Bmv2CounterValue(const IR::Expression* initialValue);
+    CounterType getCounterTypeByIndex(big_int index);
+
+    explicit Bmv2CounterValue(const IR::Expression* initialValue, const IR::Expression* size,
+                              CounterType type);
 
     cstring getObjectName() const override;
 
@@ -135,6 +150,16 @@ class Bmv2CounterValue : public TestObject {
 
     /// @returns the value with which this counter has been initialized.
     const IR::Expression* getInitialValue() const;
+
+    /// @returns the type with which this counterhas been initialized.
+    CounterType getType() const;
+
+    /// @returns the counter conditions.
+    const std::vector<Bmv2CounterCondition> getCounterConditions() const;
+
+    /// @returns the evaluated size of the counter. This means it must be a constant.
+    /// The function will throw a bug if this is not the case.
+    const IR::Constant* getEvaluatedSize() const;
 
     /// @returns the current value of this counter after writes have been performed according to a
     /// provided index.

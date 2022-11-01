@@ -50,6 +50,32 @@ inja::json STF::getTrace(const TestSpec* testSpec) {
     return traceList;
 }
 
+inja::json STF::getCounters(const TestSpec* testSpec) {
+    inja::json counterList = inja::json::object();
+
+    auto counters = testSpec->getTestObjectCategory("countervalues");
+    if (!counters.empty()) {
+        counterList["counter_arrays"] = inja::json::array();
+    }
+    for (auto const& testObject : counters) {
+        const auto* const counter = testObject.second->checkedTo<Bmv2CounterValue>();
+        inja::json j;
+        j["name"] = testObject.first;
+        j["action"] = "count";
+        j["size"] = static_cast<int>(counter->getEvaluatedSize()->value);
+        j["type"] = std::to_string(counter->getType());
+        j["conditions"] = inja::json::array();
+        for (auto const condition : counter->getCounterConditions()) {
+            inja::json a;
+            a["index"] = static_cast<int>(condition.getEvaluatedIndex()->value);
+            a["value"] = static_cast<int>(condition.getEvaluatedValue()->value);
+            j["conditions"].push_back(a);
+        }
+        counterList["counter_arrays"].push_back(j);
+    }
+    return counterList;
+}
+
 inja::json STF::getControlPlane(const TestSpec* testSpec) {
     inja::json controlPlaneJson = inja::json::object();
 
@@ -308,6 +334,17 @@ add {{table.table_name}} {% if rule.rules.needs_priority %}{{rule.priority}} {% 
 ## endfor
 ## endif
 
+## if counters
+## for counter in counters.counter_arrays
+# Counter: {{counter.name}} , size {{counter.size}} , type {{counter.type}}
+## if counter.conditions
+## for condition in counter.conditions
+# {{condition.index}} : {{condition.value}}
+## endfor
+## endif
+## endfor
+## endif
+
 ## if exists("clone_infos")
 ## for clone_info in clone_infos
 mirroring_add {{clone_info.session_id}} {{clone_info.clone_port}}
@@ -348,6 +385,7 @@ void STF::emitTestcase(const TestSpec* testSpec, cstring selectedBranches, size_
     dataJson["test_id"] = testId + 1;
     dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
+    dataJson["counters"] = getCounters(testSpec);
     dataJson["send"] = getSend(testSpec);
     dataJson["verify"] = getVerify(testSpec);
     dataJson["timestamp"] = TestgenUtils::getTimeStamp();

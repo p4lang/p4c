@@ -615,11 +615,17 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
 
              const auto* receiverPath = receiver->checkedTo<IR::PathExpression>();
              const auto& externInstance = state.convertPathExpr(receiverPath);
-             auto counterSizeExpr = state.findDecl(receiverPath)
-                                        ->checkedTo<IR::Declaration_Instance>()
-                                        ->arguments[0]
-                                        .at(0)
-                                        ->expression;
+             const IR::Expression* counterSizeExpr = state.findDecl(receiverPath)
+                                                         ->checkedTo<IR::Declaration_Instance>()
+                                                         ->arguments[0]
+                                                         .at(0)
+                                                         ->expression;
+             const IR::Expression* counterTypeExpr = state.findDecl(receiverPath)
+                                                         ->checkedTo<IR::Declaration_Instance>()
+                                                         ->arguments[0]
+                                                         .at(1)
+                                                         ->expression;
+             big_int countertype = counterTypeExpr->checkedTo<IR::Constant>()->value;
              auto cond = new IR::Lss(index, counterSizeExpr);
              auto* nextState = new ExecutionState(state);
              nextState->popBody();
@@ -638,7 +644,8 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              } else {
                  const auto* inputValue =
                      programInfo.createTargetUninitialized(IR::Type::Bits::get(32), false);
-                 counterValue = new Bmv2CounterValue(inputValue);
+                 counterValue = new Bmv2CounterValue(
+                     inputValue, counterSizeExpr, counterValue->getCounterTypeByIndex(countertype));
                  nextState->addTestObject("countervalues", externInstance->toString(),
                                           counterValue);
              }

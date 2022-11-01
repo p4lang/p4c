@@ -79,14 +79,26 @@ cstring Bmv2RegisterCondition::getObjectName() const { return "Bmv2RegisterCondi
  *  Bmv2Counter
  * ========================================================================================= */
 
-Bmv2CounterValue::Bmv2CounterValue(const IR::Expression* initialValue)
-    : initialValue(initialValue) {}
+Bmv2CounterValue::Bmv2CounterValue(const IR::Expression* initialValue, const IR::Expression* size,
+                                   CounterType type)
+    : initialValue(initialValue), size(size), type(type) {}
 
 void Bmv2CounterValue::addCounterCondition(Bmv2CounterCondition cond) {
     counterConditions.push_back(cond);
 }
 
 const IR::Expression* Bmv2CounterValue::getInitialValue() const { return initialValue; }
+
+const IR::Constant* Bmv2CounterValue::getEvaluatedSize() const {
+    const auto* constant = size->to<IR::Constant>();
+    BUG_CHECK(constant, "Variable is not a constant, has the test object %1% been evaluated?",
+              getObjectName());
+    return constant;
+}
+
+const std::vector<Bmv2CounterCondition> Bmv2CounterValue::getCounterConditions() const {
+    return counterConditions;
+}
 
 cstring Bmv2CounterValue::getObjectName() const { return "Bmv2CounterValue"; }
 
@@ -95,8 +107,9 @@ const IR::Expression* Bmv2CounterValue::getCurrentValue(const IR::Expression* in
     for (const auto& bmv2counterValue : counterConditions) {
         const auto* storedIndex = bmv2counterValue.index;
         const auto* storedVal = bmv2counterValue.value;
-        baseExpr =
-            new IR::Mux(baseExpr->type, new IR::Equ(storedIndex, index), storedVal, baseExpr);
+        baseExpr = new IR::Mux(
+            baseExpr->type, new IR::LAnd(new IR::Lss(index, size), new IR::Equ(storedIndex, index)),
+            storedVal, baseExpr);
     }
     return baseExpr;
 }
@@ -108,9 +121,18 @@ const IR::Constant* Bmv2CounterValue::getEvaluatedValue() const {
     return constant;
 }
 
+Bmv2CounterValue::CounterType Bmv2CounterValue::getCounterTypeByIndex(big_int index) {
+    if (index == 0) return CounterType::PACKETS;
+    if (index == 1) return CounterType::BYTES;
+    if (index == 2) return CounterType::PACKETS_AND_BYTES;
+    BUG("Unknown counter type %1%", type);
+}
+
+Bmv2CounterValue::CounterType Bmv2CounterValue::getType() const { return type; }
+
 const Bmv2CounterValue* Bmv2CounterValue::evaluate(const Model& model) const {
     const auto* evaluatedValue = model.evaluate(initialValue);
-    auto* evaluatedCounterValue = new Bmv2CounterValue(evaluatedValue);
+    auto* evaluatedCounterValue = new Bmv2CounterValue(evaluatedValue, size, type);
     const std::vector<ActionArg> evaluatedConditions;
     for (const auto& cond : counterConditions) {
         evaluatedCounterValue->addCounterCondition(*cond.evaluate(model));
