@@ -65,7 +65,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                 return std::make_pair(rresult, branches);
             }
 
-            static void renginePostporcessing(ReachabilityResult& result,
+            static void renginePostprocessing(ReachabilityResult& result,
                                               std::vector<Branch>* branches) {
                 // All Reachability engine state for branch should be copied.
                 if (branches->size() > 1 || result.second != nullptr) {
@@ -96,7 +96,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                 auto* stepper = TestgenTarget::getCmdStepper(state, self.solver, self.programInfo);
                 auto* result = stepper->step(node);
                 if (self.reachabilityEngine != nullptr) {
-                    renginePostporcessing(r.first, result);
+                    renginePostprocessing(r.first, result);
                 }
                 return result;
             }
@@ -125,7 +125,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                     auto* result = stepper->step(expr);
                     if (self.reachabilityEngine != nullptr) {
                         ReachabilityResult rresult = std::make_pair(true, nullptr);
-                        renginePostporcessing(rresult, result);
+                        renginePostprocessing(rresult, result);
                     }
                     return result;
                 }
