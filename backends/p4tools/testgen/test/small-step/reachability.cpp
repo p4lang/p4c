@@ -1,7 +1,6 @@
 #include "backends/p4tools/common/compiler/reachability.h"
 
-#include <stdlib.h>
-
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 
@@ -187,10 +186,10 @@ TEST_F(P4CReachability, testTableAndActions) {
     ASSERT_TRUE(egress);
     const auto* hitTable = getFromHash(hash, "ingress.hit_table");
     ASSERT_TRUE(hitTable);
-    const auto* MyAction3 = getFromHash(hash, "ingress.MyAction3");
-    ASSERT_TRUE(MyAction3);
-    const auto* MyAction7 = getFromHash(hash, "ingress.MyAction7");
-    ASSERT_TRUE(MyAction7);
+    const auto* myAction3 = getFromHash(hash, "ingress.MyAction3");
+    ASSERT_TRUE(myAction3);
+    const auto* myAction7 = getFromHash(hash, "ingress.MyAction7");
+    ASSERT_TRUE(myAction7);
     // egress is reachable from ingress.
     ASSERT_TRUE(dcg->isReachable(ingress, egress));
     // igress isn't reachable from egress.
@@ -201,18 +200,18 @@ TEST_F(P4CReachability, testTableAndActions) {
     ASSERT_TRUE(!dcg->isReachable(hitTable, ingress));
     // egress is reachable from hit_table.
     ASSERT_TRUE(dcg->isReachable(hitTable, egress));
-    // MyAction7 is reachable from hit_table
-    ASSERT_TRUE(dcg->isReachable(hitTable, MyAction7));
-    // MyAction3 is reachable from hit_table
-    ASSERT_TRUE(dcg->isReachable(hitTable, MyAction3));
-    // MyAction3 is reachable from MyAction7
-    ASSERT_TRUE(dcg->isReachable(MyAction7, MyAction3));
-    // MyAction7 isn't reachable from MyAction3
-    ASSERT_TRUE(!dcg->isReachable(MyAction3, MyAction7));
-    // egress is reachable from MyAction3
-    ASSERT_TRUE(dcg->isReachable(MyAction3, egress));
-    // MyAction7 isn't reachable from egress
-    ASSERT_TRUE(!dcg->isReachable(egress, MyAction7));
+    // myAction7 is reachable from hit_table
+    ASSERT_TRUE(dcg->isReachable(hitTable, myAction7));
+    // myAction3 is reachable from hit_table
+    ASSERT_TRUE(dcg->isReachable(hitTable, myAction3));
+    // myAction3 is reachable from myAction7
+    ASSERT_TRUE(dcg->isReachable(myAction7, myAction3));
+    // myAction7 isn't reachable from myAction3
+    ASSERT_TRUE(!dcg->isReachable(myAction3, myAction7));
+    // egress is reachable from myAction3
+    ASSERT_TRUE(dcg->isReachable(myAction3, egress));
+    // myAction7 isn't reachable from egress
+    ASSERT_TRUE(!dcg->isReachable(egress, myAction7));
 }
 
 TEST_F(P4CReachability, testSwitchStatement) {
@@ -360,7 +359,8 @@ TEST_F(P4CReachability, testReacabilityEngine) {
 
 void callTestgen(const char* inputFile, const char* behavior, const char* path, int maxTests) {
     std::ostringstream mkDir;
-    std::string prefix = "", fullPath = sourcePath;
+    std::string prefix;
+    std::string fullPath = sourcePath;
     fullPath += inputFile;
     mkDir << "mkdir -p " << buildPath << path << " && rm -f " << buildPath << path << "/*.stf";
     if (system(mkDir.str().c_str()) != 0) {
@@ -390,22 +390,22 @@ bool checkResultingSTF(std::list<std::list<std::string>> identifiersList, std::s
         // Each STF file should contain all identifiers from identifiersList.
         auto lIds = identifiersList;
         std::ifstream ifile(f.path());
-        while (!ifile.eof() && lIds.size()) {
+        while (!ifile.eof() && !lIds.empty()) {
             std::string line;
             std::getline(ifile, line);
-            for (auto lid = lIds.begin(); lid != lIds.end(); lid++) {
-                if (lid->size() == 0) {
+            for (auto& lId : lIds) {
+                if (lId.empty()) {
                     continue;
                 }
-                if (line.find(*lid->begin()) != std::string::npos) {
-                    lid->pop_front();
+                if (line.find(*lId.begin()) != std::string::npos) {
+                    lId.pop_front();
                 }
             }
         }
         ifile.close();
         bool hasEmptyList = false;
         for (auto& l : lIds) {
-            if (l.size() == 0) {
+            if (l.empty()) {
                 hasEmptyList = true;
                 break;
             }
