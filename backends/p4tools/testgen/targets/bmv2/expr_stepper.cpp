@@ -652,7 +652,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              const IR::Expression* baseExpr = counterValue->getCurrentValue(index);
 
              const IR::Expression* increasedExpr =
-                 new IR::Add(baseExpr, IRUtils::getConstant(IR::Type::Bits::get(32), 1));
+                 new IR::Add(baseExpr, IR::getConstant(IR::Type::Bits::get(32), 1));
              counterValue->addCounterCondition(Bmv2CounterCondition{index, increasedExpr});
              nextState->addTestObject("countervalues", externInstance->toString(), counterValue);
 
