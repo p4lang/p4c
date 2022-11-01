@@ -56,7 +56,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                     rresult = self.reachabilityEngine->next(state.reachabilityEngineState, node);
                     if (!rresult.first) {
                         // Reachability property was failed.
-                        const IR::Expression* cond = IRUtils::getBoolLiteral(false);
+                        const IR::Expression* cond = IR::getBoolLiteral(false);
                         branches = new std::vector<Branch>({Branch(cond, state, &state)});
                     }
                 } else if (const auto* method = node->to<IR::MethodCallStatement>()) {
@@ -65,7 +65,8 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                 return std::make_pair(rresult, branches);
             }
 
-            void renginePostporcessing(ReachabilityResult& result, std::vector<Branch>* branches) {
+            static void renginePostprocessing(ReachabilityResult& result,
+                                              std::vector<Branch>* branches) {
                 // All Reachability engine state for branch should be copied.
                 if (branches->size() > 1 || result.second != nullptr) {
                     for (auto& n : *branches) {
@@ -86,7 +87,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                 // Step on the given node as a command.
                 BUG_CHECK(node, "Attempted to evaluate null node.");
                 REngineType r;
-                if (self.reachabilityEngine) {
+                if (self.reachabilityEngine != nullptr) {
                     r = renginePreprocessing(node);
                     if (r.second != nullptr) {
                         return r.second;
@@ -94,8 +95,8 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                 }
                 auto* stepper = TestgenTarget::getCmdStepper(state, self.solver, self.programInfo);
                 auto* result = stepper->step(node);
-                if (self.reachabilityEngine) {
-                    renginePostporcessing(r.first, result);
+                if (self.reachabilityEngine != nullptr) {
+                    renginePostprocessing(r.first, result);
                 }
                 return result;
             }
@@ -122,9 +123,9 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                     auto* stepper =
                         TestgenTarget::getExprStepper(state, self.solver, self.programInfo);
                     auto* result = stepper->step(expr);
-                    if (self.reachabilityEngine) {
+                    if (self.reachabilityEngine != nullptr) {
                         ReachabilityResult rresult = std::make_pair(true, nullptr);
-                        renginePostporcessing(rresult, result);
+                        renginePostprocessing(rresult, result);
                     }
                     return result;
                 }
