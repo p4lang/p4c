@@ -4,7 +4,9 @@
 #include <boost/optional/optional_io.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
-#include "backends/p4tools/common/lib/ir.h"
+#include "backends/p4tools/common/lib/util.h"
+#include "ir/ir.h"
+#include "ir/irutils.h"
 #include "lib/error.h"
 
 namespace P4Tools {
@@ -142,18 +144,18 @@ const IR::Expression* makeConstant(Token input, const IR::Vector<IR::KeyElement>
             } else {
                 BUG("Unexpected key type %s.", keyType->node_type_name());
             }
-            return IRUtils::getZombieConst(type, 0, std::string(inputStr));
+            return Utils::getZombieConst(type, 0, std::string(inputStr));
         }
     }
     if (input.is(Token::Kind::Number)) {
         if (leftType == nullptr) {
-            return IRUtils::getConstant(IR::Type_Bits::get(32), static_cast<big_int>(inputStr));
+            return IR::getConstant(IR::Type_Bits::get(32), static_cast<big_int>(inputStr));
         }
-        return IRUtils::getConstant(leftType, static_cast<big_int>(inputStr));
+        return IR::getConstant(leftType, static_cast<big_int>(inputStr));
     }
     // TODO: Is this the right solution for priorities?
     if (input.is(Token::Kind::Priority)) {
-        return IRUtils::getZombieConst(IR::Type_Bits::get(32), 0, std::string(inputStr));
+        return Utils::getZombieConst(IR::Type_Bits::get(32), 0, std::string(inputStr));
     }
     BUG_CHECK(result != nullptr,
               "Could not match restriction key label %s was not found in key list.",

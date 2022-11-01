@@ -2,7 +2,9 @@
 
 #include <boost/optional/optional_io.hpp>
 
-#include "backends/p4tools/common/lib/ir.h"
+#include "backends/p4tools/common/lib/util.h"
+#include "ir/ir.h"
+#include "ir/irutils.h"
 
 namespace P4Tools {
 
@@ -24,7 +26,7 @@ void RefersToParser::createConstraint(bool table, cstring currentName, cstring c
     } else {
         tmp = currentName + currentKeyName;
     }
-    auto left = IRUtils::getZombieConst(type, 0, tmp);
+    auto left = Utils::getZombieConst(type, 0, tmp);
     std::string str = currentName.c_str();
     std::vector<std::string> elems;
     std::stringstream ss(str);
@@ -37,7 +39,7 @@ void RefersToParser::createConstraint(bool table, cstring currentName, cstring c
         str += elems[i] + ".";
     }
     tmp = str + destTableName + "_key_" + destKeyName;
-    auto right = IRUtils::getZombieConst(type, 0, tmp);
+    auto right = Utils::getZombieConst(type, 0, tmp);
     auto* expr = new IR::Equ(left, right);
     std::vector<const IR::Expression*> constraint;
     constraint.push_back(expr);
