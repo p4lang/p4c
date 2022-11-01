@@ -109,7 +109,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         hdr.ipv4.srcAddr = newAddr;
     }
     action add_on_miss_action2() {
-        add_entry(action_name = "next_hop", action_params = { 32w0, 32w1234 }, expire_time_profile_id = user_meta.timeout);
+        add_entry(action_name = "next_hop2", action_params = { 32w0, 32w1234 }, expire_time_profile_id = user_meta.timeout);
     }
     table ipv4_da2 {
         key = {

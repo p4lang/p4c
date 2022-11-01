@@ -78,9 +78,12 @@ function install_ptf_ebpf_test_deps() (
   export P4C_PTF_PACKAGES="gcc-multilib \
                            python3-six \
                            libgmp-dev \
-                           libjansson-dev \
-                           $LINUX_TOOLS"
+                           libjansson-dev"
   apt-get install -y --no-install-recommends ${P4C_PTF_PACKAGES}
+
+  if apt-cache show ${LINUX_TOOLS}; then
+    apt-get install -y --no-install-recommends ${LINUX_TOOLS}
+  fi
 
   git clone --recursive https://github.com/P4-Research/psabpf.git /tmp/psabpf
   cd /tmp/psabpf
@@ -90,6 +93,12 @@ function install_ptf_ebpf_test_deps() (
   mkdir build
   cd build
   cmake ..
+  make "-j$(nproc)"
+  make install
+
+  # install bpftool
+  git clone --recurse-submodules https://github.com/libbpf/bpftool.git /tmp/bpftool
+  cd /tmp/bpftool/src
   make "-j$(nproc)"
   make install
 )

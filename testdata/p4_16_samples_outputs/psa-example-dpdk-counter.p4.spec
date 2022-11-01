@@ -49,10 +49,10 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
-	regadd counter0_0_packets 0x3ff 1
-	regadd counter0_0_bytes 0x3ff 0x14
+	regadd counter0_0_packets 0x3FF 1
+	regadd counter0_0_bytes 0x3FF 0x14
 	regadd counter1_0 0x200 1
-	regadd counter2_0 0x3ff 0x40
+	regadd counter2_0 0x3FF 0x40
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop

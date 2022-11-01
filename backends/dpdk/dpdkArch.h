@@ -948,6 +948,15 @@ class ValidateAddOnMissExterns : public Inspector {
     refMap(refMap), typeMap(typeMap), structure(structure) {}
 
     void postorder(const IR::MethodCallStatement*) override;
+    cstring getDefActionName(const IR::P4Table* t) {
+        auto act = t->getDefaultAction();
+        BUG_CHECK(act != nullptr, "%1%: default action does not exist", t);
+        if (auto mc = act->to<IR::MethodCallExpression>()) {
+            auto method = mc->method->to<IR::PathExpression>();
+            return method->path->name;
+        }
+        return NULL;
+    }
 };
 
 class CollectErrors : public Inspector {

@@ -82,12 +82,12 @@ apply {
 	mov h.base.t 0x3
 	LABEL_END_5 :	jmpnv LABEL_FALSE_4 h.u_short
 	validate h.u_short
-	mov h.u_short.data 0xffff
+	mov h.u_short.data 0xFFFF
 	invalidate h.u_byte
 	jmp LABEL_END_6
 	LABEL_FALSE_4 :	jmpnv LABEL_END_6 h.u_byte
 	validate h.u_byte
-	mov h.u_byte.data 0xff
+	mov h.u_byte.data 0xFF
 	invalidate h.u_short
 	LABEL_END_6 :	emit h.base
 	emit h.u_byte

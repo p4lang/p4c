@@ -10,9 +10,10 @@
 
 #include "backends/p4tools/common/compiler/hs_index_simplify.h"
 #include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
+#include "backends/p4tools/common/lib/util.h"
+#include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
@@ -180,7 +181,7 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression* headerRef) {
     if (const auto* headerUnion = headerRef->type->to<IR::Type_HeaderUnion>()) {
         for (const auto* field : headerUnion->fields) {
             auto* fieldRef = new IR::Member(field->type, headerRef, field->name);
-            auto variable = IRUtils::getHeaderValidity(fieldRef);
+            auto variable = Utils::getHeaderValidity(fieldRef);
             BUG_CHECK(state.exists(variable),
                       "At this point, the header validity bit should be initialized.");
             const auto* value = state.getSymbolicEnv().get(variable);
@@ -198,7 +199,7 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression* headerRef) {
         result->emplace_back(&state);
         return false;
     }
-    auto variable = IRUtils::getHeaderValidity(headerRef);
+    auto variable = Utils::getHeaderValidity(headerRef);
     BUG_CHECK(state.exists(variable),
               "At this point, the header validity bit should be initialized.");
     state.replaceTopBody(Continuation::Return(variable));
@@ -208,8 +209,8 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression* headerRef) {
 
 void AbstractStepper::setHeaderValidity(const IR::Expression* expr, bool validity,
                                         ExecutionState* nextState) {
-    auto headerRefValidity = IRUtils::getHeaderValidity(expr);
-    nextState->set(headerRefValidity, IRUtils::getBoolLiteral(validity));
+    auto headerRefValidity = Utils::getHeaderValidity(expr);
+    nextState->set(headerRefValidity, IR::getBoolLiteral(validity));
 
     // In some cases, the header may be part of a union.
     if (validity) {
@@ -272,7 +273,7 @@ void generateStackAssigmentStatement(ExecutionState* state,
     const auto* rightArrIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, rightIndex);
 
     // Check right header validity.
-    const auto* value = state->getSymbolicEnv().get(IRUtils::getHeaderValidity(rightArrIndex));
+    const auto* value = state->getSymbolicEnv().get(Utils::getHeaderValidity(rightArrIndex));
     if (!value->checkedTo<IR::BoolLiteral>()->value) {
         replacements.emplace_back(generateStacksetValid(stackRef, leftIndex, false));
         return;
@@ -324,7 +325,7 @@ const Value* AbstractStepper::evaluateExpression(
               "Currently, expression valuation only supports an incremental solver.");
     auto constraints = state.getPathConstraint();
     expr = state.getSymbolicEnv().subst(expr);
-    expr = IRUtils::optimizeExpression(expr);
+    expr = IR::optimizeExpression(expr);
     // Assert the path constraint to the solver and check whether it is satisfiable.
     if (cond) {
         constraints.push_back(*cond);
@@ -350,7 +351,7 @@ void AbstractStepper::setTargetUninitialized(ExecutionState* nextState, const IR
         auto fields = nextState->getFlatFields(ref, structType, &validFields);
         // We also need to initialize the validity bits of the headers. These are false.
         for (const auto* validField : validFields) {
-            nextState->set(validField, IRUtils::getBoolLiteral(false));
+            nextState->set(validField, IR::getBoolLiteral(false));
         }
         // For each field in the undefined struct, we create a new zombie variable.
         // If the variable does not have an initializer we need to create a new zombie for it.
@@ -371,7 +372,7 @@ void AbstractStepper::declareStructLike(ExecutionState* nextState, const IR::Exp
     auto fields = nextState->getFlatFields(parentExpr, structType, &validFields);
     // We also need to initialize the validity bits of the headers. These are false.
     for (const auto* validField : validFields) {
-        nextState->set(validField, IRUtils::getBoolLiteral(false));
+        nextState->set(validField, IR::getBoolLiteral(false));
     }
     // For each field in the undefined struct, we create a new zombie variable.
     // If the variable does not have an initializer we need to create a new zombie for it.

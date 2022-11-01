@@ -62,7 +62,7 @@ table stub {
 		nonDefAct
 	}
 	default_action macswp args tmp2 0x3 
-	size 0xf4240
+	size 0xF4240
 }
 
 
