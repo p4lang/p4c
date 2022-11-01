@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   # Build with gcc and test p4c on Ubuntu 20.04.
-  build-linux:
+  build-linux-sanitizers:
     strategy:
       fail-fast: false
       matrix:
@@ -32,9 +32,9 @@ jobs:
         key: test-${{ matrix.unified }}-${{ runner.os }}-gcc
         max-size: 1000M
 
-    - name: Build (Ubuntu Linux, GCC)
+    - name: Build (Ubuntu Linux, GCC, Sanitizers)
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} .
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} --build-arg ENABLE_SANITIZERS=ON .
         ./tools/export_ccache.sh
 
       # run with sudo (...) --privileged
@@ -43,37 +43,6 @@ jobs:
       run: |
         sudo docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
       if: matrix.unified == 'ON'
-
-  # Build with gcc and sanitizers, test p4c on Ubuntu 20.04.
-  build-linux-sanitizers:
-    strategy:
-      fail-fast: false
-    runs-on: ubuntu-latest
-    env:
-      CTEST_PARALLEL_LEVEL: 4
-      UBSAN_OPTIONS: 'print_stacktrace=true'
-      ASAN_OPTIONS: 'print_stacktrace=true:detect_leaks=false'
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: recursive
-
-    - name: ccache
-      uses: hendrikmuhs/ccache-action@v1
-      with:
-        key: test-${{ runner.os }}-sanitizers
-        max-size: 1000M
-
-    - name: Build (Ubuntu Linux, GCC, Sanitizers)
-      run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg ENABLE_WERROR=OFF --build-arg ENABLE_SANITIZERS=ON .
-        ./tools/export_ccache.sh
-
-      # run with sudo (...) --privileged
-      # this is needed to create network namespaces for the ebpf tests.
-    - name: Run tests (Ubuntu Linux)
-      run: |
-        sudo docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL -e $UBSAN_OPTIONS -e $ASAN_OPTIONS p4c ctest --output-on-failure --schedule-random
 
   # Build with clang and test p4c on Ubuntu 20.04.
   build-linux-clang:

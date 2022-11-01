@@ -221,6 +221,11 @@ endif ()
 
 if (ENABLE_WERROR)
   add_cxx_compiler_option  ("-Werror")
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # GCC's -Waybe-uninitialized warnings are quite noisy and unlikely to catch
+    # real issues - do not treat them as build errors.
+    add_cxx_compiler_option ("-Wno-error=maybe-uninitialized")
+  endif ()
 endif ()
 
 # If we're on GCC or Clang, use the prefer LLD or Gold linker if available.
