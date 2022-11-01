@@ -40,10 +40,6 @@ header tcp_t {
 struct empty_metadata_t {
 }
 
-typedef bit<48> ByteCounter_t;
-typedef bit<32> PacketCounter_t;
-typedef bit<80> PacketByteCounter_t;
-const bit<32> NUM_PORTS = 32w4;
 struct main_metadata_t {
     bit<1>                rng_result1;
     bit<1>                val1;
@@ -76,26 +72,53 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
     }
 }
 
-bit<1> dummy_func(inout headers_t hdr, bit<16> min1, bit<16> max1, inout main_metadata_t user_meta) {
-    return (bit<1>)(min1 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= max1);
-}
-action do_range_checks_0(inout headers_t hdr, inout main_metadata_t user_meta, bit<16> min1, bit<16> max1) {
-    user_meta.rng_result1 = dummy_func(hdr, min1, max1, user_meta);
-}
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    action next_hop(PortId_t vport) {
+    @name("MainControlImpl.tmp") bit<32> tmp;
+    @name("MainControlImpl.tmp") bit<32> tmp_0;
+    @name("MainControlImpl.tmp") bit<1> tmp_1;
+    @name("MainControlImpl.tmp_2") bit<1> tmp_2;
+    @name("MainControlImpl.hdr") headers_t hdr_2;
+    @name("MainControlImpl.user_meta") main_metadata_t user_meta_2;
+    @name("MainControlImpl.hdr_0") headers_t hdr_3;
+    @name("MainControlImpl.user_meta_0") main_metadata_t user_meta_3;
+    @name("MainControlImpl.retval") bit<1> retval;
+    @name(".do_range_checks_0") action do_range_checks_1(@name("min1") bit<16> min1_2, @name("max1") bit<16> max1_2) {
+        hdr_2 = hdr;
+        user_meta_2 = user_meta;
+        hdr_3 = hdr_2;
+        user_meta_3 = user_meta_2;
+        retval = (bit<1>)(min1_2 <= hdr_3.tcp.srcPort && hdr_3.tcp.srcPort <= max1_2);
+        hdr_2 = hdr_3;
+        user_meta_2 = user_meta_3;
+        user_meta_2.rng_result1 = retval;
+        hdr = hdr_2;
+        user_meta = user_meta_2;
+    }
+    @name("MainControlImpl.next_hop") action next_hop(@name("vport") PortId_t vport) {
+        tmp = 32w0;
+        add_entry<bit<32>>(action_name = "next_hop", action_params = tmp, expire_time_profile_id = user_meta.timeout);
         send_to_port(vport);
     }
-    action add_on_miss_action() {
-        bit<32> tmp = 32w0;
-        add_entry<bit<32>>(action_name = "next_hop", action_params = tmp, expire_time_profile_id = user_meta.timeout);
+    @name("MainControlImpl.add_on_miss_action") action add_on_miss_action() {
+        tmp_0 = 32w0;
+        add_entry<bit<32>>(action_name = "next_hop", action_params = tmp_0, expire_time_profile_id = user_meta.timeout);
     }
-    action do_range_checks_1(bit<16> min1, bit<16> max1) {
-        user_meta.rng_result1 = (min1 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= max1 ? (16w50 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= 16w100 ? user_meta.val1 : user_meta.val2) : user_meta.val1);
+    @name("MainControlImpl.do_range_checks_1") action do_range_checks_2(@name("min1") bit<16> min1_3, @name("max1") bit<16> max1_3) {
+        if (min1_3 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= max1_3) {
+            if (16w50 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= 16w100) {
+                tmp_2 = user_meta.val1;
+            } else {
+                tmp_2 = user_meta.val2;
+            }
+            tmp_1 = tmp_2;
+        } else {
+            tmp_1 = user_meta.val1;
+        }
+        user_meta.rng_result1 = tmp_1;
     }
-    table ipv4_da {
+    @name("MainControlImpl.ipv4_da") table ipv4_da_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
             @tableonly next_hop();
@@ -104,22 +127,22 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         add_on_miss = true;
         const default_action = add_on_miss_action();
     }
-    action next_hop2(PortId_t vport, bit<32> newAddr) {
-        send_to_port(vport);
+    @name("MainControlImpl.next_hop2") action next_hop2(@name("vport") PortId_t vport_2, @name("newAddr") bit<32> newAddr) {
+        send_to_port(vport_2);
         hdr.ipv4.srcAddr = newAddr;
     }
-    action add_on_miss_action2() {
-        add_entry<tuple<bit<32>, bit<32>>>(action_name = "next_hop2", action_params = { 32w0, 32w1234 }, expire_time_profile_id = user_meta.timeout);
+    @name("MainControlImpl.add_on_miss_action2") action add_on_miss_action2() {
+        add_entry<tuple<bit<32>, bit<32>>>(action_name = "next_hop", action_params = { 32w0, 32w1234 }, expire_time_profile_id = user_meta.timeout);
     }
-    table ipv4_da2 {
+    @name("MainControlImpl.ipv4_da2") table ipv4_da2_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
             @tableonly next_hop2();
             @defaultonly add_on_miss_action2();
+            do_range_checks_2();
             do_range_checks_1();
-            do_range_checks_0(hdr, user_meta);
         }
         add_on_miss = true;
         const default_action = add_on_miss_action2();
@@ -127,8 +150,8 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     apply {
         user_meta.rng_result1 = (bit<1>)(16w100 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= 16w200);
         if (hdr.ipv4.isValid()) {
-            ipv4_da.apply();
-            ipv4_da2.apply();
+            ipv4_da_0.apply();
+            ipv4_da2_0.apply();
         }
     }
 }
@@ -141,3 +164,4 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+

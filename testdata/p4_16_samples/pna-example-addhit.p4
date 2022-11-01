@@ -41,16 +41,29 @@ header ipv4_t {
     bit<32> dstAddr;
 }
 
+header tcp_t {
+    bit<16> srcPort;
+    bit<16> dstPort;
+    bit<32> seqNo;
+    bit<32> ackNo;
+    bit<4>  dataOffset;
+    bit<3>  res;
+    bit<3>  ecn;
+    bit<6>  flags;
+    bit<16> window;
+    bit<16> checksum;
+    bit<16> urgentPtr;
+}
+
+
 struct empty_metadata_t {
 }
 
-// BEGIN:Counter_Example_Part1
 typedef bit<48> ByteCounter_t;
 typedef bit<32> PacketCounter_t;
 typedef bit<80> PacketByteCounter_t;
 
 const bit<32> NUM_PORTS = 4;
-// END:Counter_Example_Part1
 
 
 //////////////////////////////////////////////////////////////////////
@@ -65,7 +78,9 @@ const bit<32> NUM_PORTS = 4;
 //////////////////////////////////////////////////////////////////////
 
 struct main_metadata_t {
-bit<32> key;
+    bit<1> rng_result1;
+    bit<1> val1;
+    bit<1> val2;
     ExpireTimeProfileId_t timeout;
 }
 
@@ -74,6 +89,7 @@ bit<32> key;
 struct headers_t {
     ethernet_t ethernet;
     ipv4_t ipv4;
+    tcp_t tcp;
 }
 
 control PreControlImpl(
@@ -83,25 +99,6 @@ control PreControlImpl(
     inout pna_pre_output_metadata_t ostd)
 {
     apply {
-        // Note: This program does not demonstrate all of the code
-        // that would be necessary if you were implementing IPsec
-        // packet decryption.
-
-        // If it did, then this pre control implementation would do
-        // one or more table lookups in order to determine whether the
-        // packet was IPsec encapsulated, and if so, whether it is
-        // part of a security association that was established by the
-        // control plane software.
-
-        // It would also likely perform anti-replay attack detection
-        // on the IPsec sequence number, which is in the unencrypted
-        // part of the packet.
-
-        // Any headers parsed by the pre parser in pre_hdr will be
-        // forgotten after this point.  The main parser will start
-        // parsing over from the beginning, either on the same packet
-        // if the inline extern block did nothing, or on the packet as
-        // modified by the inline extern block.
     }
 }
 
@@ -124,7 +121,17 @@ parser MainParserImpl(
     }
 }
 
-// BEGIN:Counter_Example_Part2
+bit<1> dummy_func(inout headers_t hdr,   bit<16> min1,
+        bit<16> max1,inout main_metadata_t user_meta){
+    return  (bit<1>) ((min1 <= hdr.tcp.srcPort) && (hdr.tcp.srcPort <= max1));
+}
+
+action do_range_checks_0 (inout headers_t hdr,inout main_metadata_t user_meta,
+        bit<16> min1,
+        bit<16> max1) {
+    user_meta.rng_result1  = dummy_func(hdr,min1, max1, user_meta );
+}
+
 control MainControlImpl(
     inout headers_t       hdr,           // from main parser
     inout main_metadata_t user_meta,     // from main parser, to "next block"
@@ -132,15 +139,26 @@ control MainControlImpl(
     inout pna_main_output_metadata_t ostd)
 {
     action next_hop(PortId_t vport) {
+        bit<32> tmp = 0;
+        add_entry(action_name="next_hop", action_params = tmp, expire_time_profile_id = user_meta.timeout);
         send_to_port(vport);
     }
     action add_on_miss_action() {
         bit<32> tmp = 0;
         add_entry(action_name="next_hop", action_params = tmp, expire_time_profile_id = user_meta.timeout);
     }
+
+    action do_range_checks_1 (
+        bit<16> min1,
+        bit<16> max1)
+    {
+        user_meta.rng_result1 = ((min1 <= hdr.tcp.srcPort) && (hdr.tcp.srcPort <= max1)) ? ((16w50 <= hdr.tcp.srcPort) && (hdr.tcp.srcPort <= 16w100)) ? user_meta.val1 : user_meta.val2 : user_meta.val1;
+    }
+
     table ipv4_da {
         key = {
-            hdr.ipv4.dstAddr: exact @name("ipv4_addr_0");
+            hdr.ipv4.dstAddr: exact;
+
         }
         actions = {
             @tableonly next_hop;
@@ -154,29 +172,29 @@ control MainControlImpl(
         hdr.ipv4.srcAddr = newAddr;
     }
     action add_on_miss_action2() {
-        add_entry(action_name="next_hop2", action_params = {32w0, 32w1234}, expire_time_profile_id = user_meta.timeout);
+        add_entry(action_name="next_hop", action_params = {32w0, 32w1234}, expire_time_profile_id = user_meta.timeout);
     }
     table ipv4_da2 {
         key = {
-
-user_meta.key:
-                exact;
+            hdr.ipv4.dstAddr: exact;
         }
         actions = {
             @tableonly next_hop2;
             @defaultonly add_on_miss_action2;
+            do_range_checks_1;
+            do_range_checks_0(hdr,user_meta);
         }
         add_on_miss = true;
         const default_action = add_on_miss_action2;
     }
     apply {
+        user_meta.rng_result1  = (bit<1>) ((100 <= hdr.tcp.srcPort) && (hdr.tcp.srcPort <= 200));
         if (hdr.ipv4.isValid()) {
             ipv4_da.apply();
             ipv4_da2.apply();
         }
     }
 }
-// END:Counter_Example_Part2
 
 control MainDeparserImpl(
     packet_out pkt,

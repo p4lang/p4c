@@ -43,7 +43,7 @@ struct empty_metadata_t {
 typedef bit<48> ByteCounter_t;
 typedef bit<32> PacketCounter_t;
 typedef bit<80> PacketByteCounter_t;
-const bit<32> NUM_PORTS = 32w4;
+const bit<32> NUM_PORTS = 4;
 struct main_metadata_t {
     bit<1>                rng_result1;
     bit<1>                val1;
@@ -64,14 +64,14 @@ control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t main_meta, in pna_main_parser_input_metadata_t istd) {
     state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
+        pkt.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
+            0x800: parse_ipv4;
             default: accept;
         }
     }
     state parse_ipv4 {
-        pkt.extract<ipv4_t>(hdr.ipv4);
+        pkt.extract(hdr.ipv4);
         transition accept;
     }
 }
@@ -87,45 +87,46 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         send_to_port(vport);
     }
     action add_on_miss_action() {
-        bit<32> tmp = 32w0;
-        add_entry<bit<32>>(action_name = "next_hop", action_params = tmp, expire_time_profile_id = user_meta.timeout);
+        bit<32> tmp = 0;
+        bool res;
+        res = add_entry(action_name = "add_on_miss_action", action_params = tmp, expire_time_profile_id = user_meta.timeout);
     }
     action do_range_checks_1(bit<16> min1, bit<16> max1) {
         user_meta.rng_result1 = (min1 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= max1 ? (16w50 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= 16w100 ? user_meta.val1 : user_meta.val2) : user_meta.val1);
     }
     table ipv4_da {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.dstAddr: exact;
         }
         actions = {
-            @tableonly next_hop();
-            @defaultonly add_on_miss_action();
+            @tableonly next_hop;
+            @defaultonly add_on_miss_action;
         }
         add_on_miss = true;
-        const default_action = add_on_miss_action();
+        const default_action = add_on_miss_action;
     }
     action next_hop2(PortId_t vport, bit<32> newAddr) {
         send_to_port(vport);
         hdr.ipv4.srcAddr = newAddr;
     }
     action add_on_miss_action2() {
-        add_entry<tuple<bit<32>, bit<32>>>(action_name = "next_hop2", action_params = { 32w0, 32w1234 }, expire_time_profile_id = user_meta.timeout);
+        add_entry(action_name = "next_hop", action_params = { 32w0, 32w1234 }, expire_time_profile_id = user_meta.timeout);
     }
     table ipv4_da2 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.dstAddr: exact;
         }
         actions = {
-            @tableonly next_hop2();
-            @defaultonly add_on_miss_action2();
-            do_range_checks_1();
+            @tableonly next_hop2;
+            @defaultonly add_on_miss_action2;
+            do_range_checks_1;
             do_range_checks_0(hdr, user_meta);
         }
         add_on_miss = true;
-        const default_action = add_on_miss_action2();
+        const default_action = add_on_miss_action2;
     }
     apply {
-        user_meta.rng_result1 = (bit<1>)(16w100 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= 16w200);
+        user_meta.rng_result1 = (bit<1>)(100 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= 200);
         if (hdr.ipv4.isValid()) {
             ipv4_da.apply();
             ipv4_da2.apply();
@@ -135,9 +136,10 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
     apply {
-        pkt.emit<ethernet_t>(hdr.ethernet);
-        pkt.emit<ipv4_t>(hdr.ipv4);
+        pkt.emit(hdr.ethernet);
+        pkt.emit(hdr.ipv4);
     }
 }
 
-PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+PNA_NIC(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+
