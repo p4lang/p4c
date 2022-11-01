@@ -18,4 +18,3 @@ control Wrapper(inout bit<8> value) {
 control c(inout bit<8> v);
 package top(c _c);
 top(Wrapper()) main;
-

@@ -1,0 +1,3 @@
+issue3622.p4(10): [--Werror=type-error] error: ?:: 'switch' label must be an action name or 'default'
+            true ? a : b : {}
+            ^^^^^^^^^^^^

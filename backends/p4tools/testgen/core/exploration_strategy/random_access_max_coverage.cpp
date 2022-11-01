@@ -13,10 +13,10 @@
 #include <boost/variant/get.hpp>
 
 #include "backends/p4tools/common/lib/coverage.h"
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
@@ -153,7 +153,7 @@ uint64_t RandomAccessMaxCoverage::getRandomUnexploredMapEntry() {
         unexploredCoverageKeys.push_back(unexplored.first);
     }
     size_t unexploredRange = unexploredCoverageKeys.size() - 1;
-    uint64_t exploreLevels = TestgenUtils::getRandInt(unexploredRange);
+    uint64_t exploreLevels = Utils::getRandInt(unexploredRange);
     uint64_t coverageKey = unexploredCoverageKeys.at(exploreLevels);
 
     return coverageKey;

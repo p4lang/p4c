@@ -85,7 +85,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state Subparser_sp1_0 {
         packet.extract<data_t>(hdr.h3);
         packet.extract<data_t>(p_shdr.h1);
-        phdr_0.h1 = p_shdr.h1;
         transition p1_0;
     }
     state Subparser_sp2_0 {
@@ -131,4 +130,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

@@ -45,7 +45,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     table t_two {
         key = {
-            hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType") ;
+            hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType");
         }
         actions = {
             a_one(hdr.ethernet.dstAddr);
@@ -56,7 +56,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     table t_one {
         key = {
-            hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType") ;
+            hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType");
         }
         actions = {
             a_one(hdr.ethernet.dstAddr);
@@ -89,4 +89,3 @@ control deparserImpl(packet_out packet, in headers_t hdr) {
 }
 
 V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
-

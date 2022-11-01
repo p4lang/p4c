@@ -6,9 +6,10 @@
 #include <vector>
 
 #include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/saturation_elim.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
+#include "backends/p4tools/common/lib/util.h"
+#include "ir/irutils.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
@@ -103,7 +104,7 @@ void ExprStepper::evalActionCall(const IR::P4Action* action, const IR::MethodCal
         BUG_CHECK(param->direction == IR::Direction::None,
                   "%1%: Only directionless action parameters are supported at this point. ",
                   action);
-        const auto& tableActionDataVar = IRUtils::getZombieVar(paramType, 0, paramName);
+        const auto& tableActionDataVar = Utils::getZombieVar(paramType, 0, paramName);
         const auto* curArg = call->arguments->at(argIdx)->expression;
         nextState->set(tableActionDataVar, curArg);
     }

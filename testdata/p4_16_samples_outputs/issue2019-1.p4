@@ -15,4 +15,3 @@ control EmptyV<H>(inout H hdr) {
 
 package S<H1>(C<H1> s, V<H1> vr=EmptyV<H1>());
 S<E>(Some()) main;
-

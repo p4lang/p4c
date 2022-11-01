@@ -98,21 +98,21 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t    ethernet;
-    @name(".icmp") 
+    @name(".icmp")
     icmp_t        icmp;
-    @name(".icmpv6") 
+    @name(".icmpv6")
     icmpv6_t      icmpv6;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t        ipv4;
-    @name(".ipv6") 
+    @name(".ipv6")
     ipv6_t        ipv6;
-    @name(".tcp") 
+    @name(".tcp")
     tcp_t         tcp;
-    @name(".udp") 
+    @name(".udp")
     udp_t         udp;
-    @name(".vlan_tag_") 
+    @name(".vlan_tag_")
     vlan_tag_t[4] vlan_tag_;
 }
 
@@ -191,7 +191,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 @name(".cnt1") counter<bit<5>>(32w32, CounterType.packets) cnt1;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -214,7 +213,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr");
         }
         default_action = NoAction_1();
     }
@@ -224,7 +223,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_2();
         }
         key = {
-            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr");
         }
         default_action = NoAction_2();
     }
@@ -261,4 +260,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

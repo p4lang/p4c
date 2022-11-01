@@ -10,7 +10,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".stack") 
+    @name(".stack")
     stack_t[4] stack;
 }
 
@@ -63,4 +63,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

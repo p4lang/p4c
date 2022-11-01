@@ -9,8 +9,9 @@
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/ir.h"
+#include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
+#include "ir/irutils.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
@@ -49,11 +50,11 @@ void EBPFCmdStepper::initializeTargetEnvironment(ExecutionState* nextState) cons
         blockIdx++;
     }
 
-    const auto* nineBitType = IRUtils::getBitType(9);
+    const auto* nineBitType = IR::getBitType(9);
     // Set the input ingress port to 0.
-    nextState->set(programInfo.getTargetInputPortVar(), IRUtils::getConstant(nineBitType, 0));
+    nextState->set(programInfo.getTargetInputPortVar(), IR::getConstant(nineBitType, 0));
     // eBPF implicitly sets the output port to 0. In reality, there is no output port.
-    nextState->set(programInfo.getTargetOutputPortVar(), IRUtils::getConstant(nineBitType, 0));
+    nextState->set(programInfo.getTargetOutputPortVar(), IR::getConstant(nineBitType, 0));
     // We need to explicitly set the parser error. There is no eBPF metadata.
     const auto* errVar = new IR::Member(new IR::PathExpression("*"), "parser_err");
     nextState->setParserErrorLabel(errVar);
@@ -71,7 +72,7 @@ std::map<Continuation::Exception, Continuation> EBPFCmdStepper::getExceptionHand
     auto programInfo = getProgramInfo();
 
     auto* exitCall =
-        new IR::MethodCallStatement(IRUtils::generateInternalMethodCall("drop_and_exit", {}));
+        new IR::MethodCallStatement(Utils::generateInternalMethodCall("drop_and_exit", {}));
     result.emplace(Continuation::Exception::Reject, Continuation::Body({exitCall}));
     result.emplace(Continuation::Exception::PacketTooShort, Continuation::Body({exitCall}));
     // NoMatch is equivalent to Reject in ebpf_model.

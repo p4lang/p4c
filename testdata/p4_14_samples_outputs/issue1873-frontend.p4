@@ -11,12 +11,12 @@ struct test_t {
 }
 
 struct metadata {
-    @name(".test") 
+    @name(".test")
     test_t test;
 }
 
 struct headers {
-    @name(".test") 
+    @name(".test")
     test_t_0 test;
 }
 
@@ -65,4 +65,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

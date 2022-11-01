@@ -53,7 +53,6 @@ set(
   lib/coverage.cpp
   lib/format_int.cpp
   lib/formulae.cpp
-  lib/ir.cpp
   lib/model.cpp
   lib/saturation_elim.cpp
   lib/symbolic_env.cpp

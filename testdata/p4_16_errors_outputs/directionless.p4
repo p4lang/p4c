@@ -18,4 +18,3 @@ control p() {
 control Simple();
 package m(Simple pipe);
 m(p()) main;
-

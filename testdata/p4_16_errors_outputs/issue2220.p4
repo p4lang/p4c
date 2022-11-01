@@ -18,4 +18,3 @@ control c(out S s) {
 control simple<T>(out T t);
 package top<T>(simple<T> e);
 top(c()) main;
-

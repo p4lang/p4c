@@ -7,4 +7,3 @@ control empty() {
 }
 
 q(p(empty())) main;
-

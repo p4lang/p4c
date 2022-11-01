@@ -99,7 +99,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     table ipv4_da_lpm {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             set_l2ptr();
@@ -118,7 +118,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     table mac_da {
         key = {
-            meta.fwd.l2ptr: exact @name("meta.fwd.l2ptr") ;
+            meta.fwd.l2ptr: exact @name("meta.fwd.l2ptr");
         }
         actions = {
             set_bd_dmac_intf();
@@ -148,8 +148,8 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
     }
     table get_multicast_copy_out_bd {
         key = {
-            standard_metadata.mcast_grp : exact @name("standard_metadata.mcast_grp") ;
-            standard_metadata.egress_rid: exact @name("standard_metadata.egress_rid") ;
+            standard_metadata.mcast_grp : exact @name("standard_metadata.mcast_grp");
+            standard_metadata.egress_rid: exact @name("standard_metadata.egress_rid");
         }
         actions = {
             set_out_bd();
@@ -170,7 +170,7 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
     }
     table send_frame {
         key = {
-            meta.fwd.out_bd: exact @name("meta.fwd.out_bd") ;
+            meta.fwd.out_bd: exact @name("meta.fwd.out_bd");
         }
         actions = {
             rewrite_mac();
@@ -219,4 +219,3 @@ control computeChecksum(inout headers_t hdr, inout meta_t meta) {
 }
 
 V1Switch<headers_t, meta_t>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

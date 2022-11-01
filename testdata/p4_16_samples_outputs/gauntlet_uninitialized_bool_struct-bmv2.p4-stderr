@@ -16,3 +16,9 @@ gauntlet_uninitialized_bool_struct-bmv2.p4(33): [--Wwarn=uninitialized_out_param
 gauntlet_uninitialized_bool_struct-bmv2.p4(33)
     action dummy_action(out bit<16> dummy_bit, out bool_struct dummy_struct) {
            ^^^^^^^^^^^^
+gauntlet_uninitialized_bool_struct-bmv2.p4(33): [--Wwarn=uninitialized_use] warning: dummy_bit may be uninitialized
+    action dummy_action(out bit<16> dummy_bit, out bool_struct dummy_struct) {
+                                    ^^^^^^^^^
+gauntlet_uninitialized_bool_struct-bmv2.p4(33): [--Wwarn=uninitialized_use] warning: dummy_struct may not be completely initialized
+    action dummy_action(out bit<16> dummy_bit, out bool_struct dummy_struct) {
+                                                               ^^^^^^^^^^^^

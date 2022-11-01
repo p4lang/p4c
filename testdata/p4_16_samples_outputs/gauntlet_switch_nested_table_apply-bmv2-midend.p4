@@ -38,7 +38,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.simple_table_1") table simple_table {
         key = {
-            key_0: exact @name("JGOUaj") ;
+            key_0: exact @name("JGOUaj");
         }
         actions = {
             set_valid_action();
@@ -48,7 +48,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.simple_table_2") table simple_table_0 {
         key = {
-            key_1: exact @name("qkgOtm") ;
+            key_1: exact @name("qkgOtm");
         }
         actions = {
             NoAction_2();
@@ -106,4 +106,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

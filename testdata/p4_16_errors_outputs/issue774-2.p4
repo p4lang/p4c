@@ -46,4 +46,3 @@ control ComputeChecksumI(inout Header hdr, inout M meta) {
 }
 
 V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

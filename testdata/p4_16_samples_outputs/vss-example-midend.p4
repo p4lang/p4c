@@ -100,7 +100,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     @name("TopPipe.ipv4_match") table ipv4_match_0 {
         key = {
-            headers.ip.dstAddr: lpm @name("headers.ip.dstAddr") ;
+            headers.ip.dstAddr: lpm @name("headers.ip.dstAddr");
         }
         actions = {
             Drop_action();
@@ -114,7 +114,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     @name("TopPipe.check_ttl") table check_ttl_0 {
         key = {
-            headers.ip.ttl: exact @name("headers.ip.ttl") ;
+            headers.ip.ttl: exact @name("headers.ip.ttl");
         }
         actions = {
             Send_to_cpu();
@@ -127,7 +127,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     @name("TopPipe.dmac") table dmac_1 {
         key = {
-            nextHop_0: exact @name("nextHop") ;
+            nextHop_0: exact @name("nextHop");
         }
         actions = {
             Drop_action_1();
@@ -141,7 +141,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     @name("TopPipe.smac") table smac_1 {
         key = {
-            outCtrl.outputPort: exact @name("outCtrl.outputPort") ;
+            outCtrl.outputPort: exact @name("outCtrl.outputPort");
         }
         actions = {
             Drop_action_2();
@@ -281,4 +281,3 @@ control TopDeparser(inout Parsed_packet p, packet_out b) {
 }
 
 VSS<Parsed_packet>(TopParser(), TopPipe(), TopDeparser()) main;
-

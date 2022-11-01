@@ -27,4 +27,3 @@ control c(out S_0 t) {
 }
 
 top<S_0>(c()) main;
-

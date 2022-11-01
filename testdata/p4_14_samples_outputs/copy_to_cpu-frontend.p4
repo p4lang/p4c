@@ -22,9 +22,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".cpu_header") 
+    @name(".cpu_header")
     cpu_header_t cpu_header;
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t   ethernet;
 }
 
@@ -67,7 +67,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction_2();
         }
         key = {
-            standard_metadata.instance_type: exact @name("standard_metadata.instance_type") ;
+            standard_metadata.instance_type: exact @name("standard_metadata.instance_type");
         }
         size = 16;
         default_action = NoAction_2();
@@ -114,4 +114,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

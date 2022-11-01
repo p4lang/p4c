@@ -76,7 +76,7 @@ int Testgen::mainImpl(const IR::P4Program* program) {
 
     if (seed != boost::none) {
         // Initialize the global seed for randomness.
-        TestgenUtils::setRandomSeed(*seed);
+        Utils::setRandomSeed(*seed);
         printFeature("test_info", 4, "============ Program seed %1% =============\n", *seed);
     }
 

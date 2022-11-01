@@ -33,4 +33,3 @@ parser SimpleParser();
 control SimpleControl();
 package top(SimpleParser prs, SimpleControl ctrl);
 top(P(), C()) main;
-

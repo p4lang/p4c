@@ -70,4 +70,3 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

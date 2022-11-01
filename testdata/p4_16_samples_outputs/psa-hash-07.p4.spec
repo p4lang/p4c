@@ -9,7 +9,7 @@ struct ethernet_t {
 struct ipv4_t {
 	bit<8> version_ihl
 	bit<8> diffserv
-	bit<32> totalLen
+	bit<16> totalLen
 	bit<16> identification
 	bit<16> flags_fragOffset
 	bit<8> ttl
@@ -56,7 +56,7 @@ action NoAction args none {
 
 action a1 args none {
 	hash crc32 m.local_metadata_data  h.ethernet.dstAddr h.ethernet.etherType
-	and m.local_metadata_data 0x1f
+	and m.local_metadata_data 0x1F
 	add m.local_metadata_data 0x2
 	return
 }

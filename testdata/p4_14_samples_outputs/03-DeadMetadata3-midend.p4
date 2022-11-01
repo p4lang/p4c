@@ -50,7 +50,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_2();
         }
         key = {
-            meta._m_f10: exact @name("m.f1") ;
+            meta._m_f10: exact @name("m.f1");
         }
         default_action = NoAction_2();
     }
@@ -76,4 +76,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

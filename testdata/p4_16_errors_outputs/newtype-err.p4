@@ -14,4 +14,3 @@ control c(out B32 x) {
 control e(out B32 x);
 package top(e _e);
 top(c()) main;
-

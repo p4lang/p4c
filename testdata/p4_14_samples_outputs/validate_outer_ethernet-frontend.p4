@@ -23,14 +23,14 @@ header vlan_tag_t {
 }
 
 struct metadata {
-    @name(".ingress_metadata") 
+    @name(".ingress_metadata")
     ingress_metadata_t ingress_metadata;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t    ethernet;
-    @name(".vlan_tag_") 
+    @name(".vlan_tag_")
     vlan_tag_t[2] vlan_tag_;
 }
 
@@ -152,9 +152,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.ethernet.dstAddr      : ternary @name("ethernet.dstAddr") ;
-            hdr.vlan_tag_[0].isValid(): exact @name("vlan_tag_[0].$valid$") ;
-            hdr.vlan_tag_[1].isValid(): exact @name("vlan_tag_[1].$valid$") ;
+            hdr.ethernet.dstAddr      : ternary @name("ethernet.dstAddr");
+            hdr.vlan_tag_[0].isValid(): exact @name("vlan_tag_[0].$valid$");
+            hdr.vlan_tag_[1].isValid(): exact @name("vlan_tag_[1].$valid$");
         }
         size = 64;
         default_action = NoAction_1();
@@ -187,4 +187,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

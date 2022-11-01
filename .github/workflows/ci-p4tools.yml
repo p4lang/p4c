@@ -32,7 +32,7 @@ jobs:
 
     - name: Build (Ubuntu Linux)
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg ENABLE_GMP=OFF --build-arg ENABLE_TEST_TOOLS=ON .
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg ENABLE_TEST_TOOLS=ON .
         ./tools/export_ccache.sh
 
       # run with sudo (...) --privileged

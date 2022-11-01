@@ -309,7 +309,7 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
     }
     @name("egress.t") table t_0 {
         key = {
-            user_meta._custom_clone_id1: exact @name("user_meta.custom_clone_id") ;
+            user_meta._custom_clone_id1: exact @name("user_meta.custom_clone_id");
         }
         actions = {
             process_clone_h0();
@@ -352,7 +352,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @name("ingress.t") table t_1 {
         key = {
-            user_meta._fwd_metadata_outport0: exact @name("user_meta.fwd_metadata.outport") ;
+            user_meta._fwd_metadata_outport0: exact @name("user_meta.fwd_metadata.outport");
         }
         actions = {
             do_clone();
@@ -478,4 +478,3 @@ control EgressDeparserImpl(packet_out packet, inout headers hdr, in metadata met
 }
 
 PSA_Switch<headers, metadata, headers, metadata>(IngressParserImpl(), ingress(), IngressDeparserImpl(), EgressParserImpl(), egress(), EgressDeparserImpl()) main;
-

@@ -14,7 +14,7 @@
 #include <boost/multiprecision/traits/explicit_conversion.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/ir.h"
+#include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 

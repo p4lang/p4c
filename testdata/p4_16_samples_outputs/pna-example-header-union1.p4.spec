@@ -77,18 +77,17 @@ apply {
 	mov m.MainControlT_retval 1
 	LABEL_END_3 :	jmpneq LABEL_FALSE_2 m.MainControlT_hasReturned 0x1
 	jmp LABEL_END_4
-	LABEL_FALSE_2 :	mov m.MainControlT_hasReturned 1
-	mov m.MainControlT_retval 0
+	LABEL_FALSE_2 :	mov m.MainControlT_retval 0
 	LABEL_END_4 :	jmpneq LABEL_END_5 m.MainControlT_retval 0x1
 	mov h.base.t 0x3
 	LABEL_END_5 :	jmpnv LABEL_FALSE_4 h.u_short
 	validate h.u_short
-	mov h.u_short.data 0xffff
+	mov h.u_short.data 0xFFFF
 	invalidate h.u_byte
 	jmp LABEL_END_6
 	LABEL_FALSE_4 :	jmpnv LABEL_END_6 h.u_byte
 	validate h.u_byte
-	mov h.u_byte.data 0xff
+	mov h.u_byte.data 0xFF
 	invalidate h.u_short
 	LABEL_END_6 :	emit h.base
 	emit h.u_byte

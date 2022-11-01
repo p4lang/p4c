@@ -53,8 +53,8 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     table Check_src_ip {
         key = {
-            headers.ipv4.srcAddr : lpm @name("headers.ipv4.srcAddr") ;
-            headers.ipv4.protocol: exact @name("headers.ipv4.protocol") ;
+            headers.ipv4.srcAddr : lpm @name("headers.ipv4.srcAddr");
+            headers.ipv4.protocol: exact @name("headers.ipv4.protocol");
         }
         actions = {
             Reject();
@@ -83,4 +83,3 @@ control dprs(packet_out packet, in Headers_t headers) {
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
-

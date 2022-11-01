@@ -20,4 +20,3 @@ control c(out bit<32> r) {
 control _c(out bit<32> r);
 package top(_c _c);
 top(c()) main;
-

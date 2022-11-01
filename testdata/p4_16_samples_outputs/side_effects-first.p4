@@ -19,4 +19,3 @@ control my(inout H[2] s) {
 }
 
 top<H[2]>(my()) main;
-

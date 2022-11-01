@@ -4,3 +4,4 @@ bit<8> do_thing(out bit<32> d) {
 gauntlet_function_return-bmv2.p4(15)
 bit<8> do_thing(out bit<32> d) {
        ^^^^^^^^
+[--Wwarn=uninitialized_use] warning: d_0 may be uninitialized

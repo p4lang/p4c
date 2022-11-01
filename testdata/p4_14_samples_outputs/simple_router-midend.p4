@@ -32,9 +32,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t     ipv4;
 }
 
@@ -71,7 +71,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction_2();
         }
         key = {
-            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port");
         }
         size = 256;
         default_action = NoAction_2();
@@ -115,7 +115,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            meta._routing_metadata_nhop_ipv40: exact @name("routing_metadata.nhop_ipv4") ;
+            meta._routing_metadata_nhop_ipv40: exact @name("routing_metadata.nhop_ipv4");
         }
         size = 512;
         default_action = NoAction_3();
@@ -126,7 +126,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _drop_4();
         }
         key = {
-            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr");
         }
         size = 1024;
         const default_action = _drop_4();
@@ -175,4 +175,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

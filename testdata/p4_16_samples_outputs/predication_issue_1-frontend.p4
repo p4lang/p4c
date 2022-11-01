@@ -28,15 +28,12 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.eth_t") bit<16> eth_t_0;
     @name("ingress.target_addr") bit<48> target_addr_0;
     @name("ingress.check_bool") bool check_bool_0;
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bool retval;
     @name(".assign") action assign_0() {
         eth_t_0 = h.eth_hdr.eth_type;
         target_addr_0 = h.eth_hdr.dst_addr;
         check_bool_0 = true;
         if (check_bool_0) {
-            hasReturned = false;
-            hasReturned = true;
             retval = true;
             tmp = retval;
             if (tmp) {
@@ -78,4 +75,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

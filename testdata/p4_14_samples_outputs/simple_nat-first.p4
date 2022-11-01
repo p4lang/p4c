@@ -68,18 +68,18 @@ header tcp_t {
 }
 
 struct metadata {
-    @name(".meta") 
+    @name(".meta")
     meta_t meta;
 }
 
 struct headers {
-    @name(".cpu_header") 
+    @name(".cpu_header")
     cpu_header_t cpu_header;
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t   ethernet;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t       ipv4;
-    @name(".tcp") 
+    @name(".tcp")
     tcp_t        tcp;
 }
 
@@ -147,7 +147,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction();
         }
         key = {
-            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port");
         }
         size = 256;
         default_action = NoAction();
@@ -212,7 +212,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.meta.nhop_ipv4: exact @name("meta.nhop_ipv4") ;
+            meta.meta.nhop_ipv4: exact @name("meta.nhop_ipv4");
         }
         size = 512;
         default_action = NoAction();
@@ -224,7 +224,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.meta.if_index: exact @name("meta.if_index") ;
+            meta.meta.if_index: exact @name("meta.if_index");
         }
         default_action = NoAction();
     }
@@ -235,7 +235,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.meta.ipv4_da: lpm @name("meta.ipv4_da") ;
+            meta.meta.ipv4_da: lpm @name("meta.ipv4_da");
         }
         size = 1024;
         default_action = NoAction();
@@ -251,13 +251,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.meta.is_ext_if: exact @name("meta.is_ext_if") ;
-            hdr.ipv4.isValid() : exact @name("ipv4.$valid$") ;
-            hdr.tcp.isValid()  : exact @name("tcp.$valid$") ;
-            hdr.ipv4.srcAddr   : ternary @name("ipv4.srcAddr") ;
-            hdr.ipv4.dstAddr   : ternary @name("ipv4.dstAddr") ;
-            hdr.tcp.srcPort    : ternary @name("tcp.srcPort") ;
-            hdr.tcp.dstPort    : ternary @name("tcp.dstPort") ;
+            meta.meta.is_ext_if: exact @name("meta.is_ext_if");
+            hdr.ipv4.isValid() : exact @name("ipv4.$valid$");
+            hdr.tcp.isValid()  : exact @name("tcp.$valid$");
+            hdr.ipv4.srcAddr   : ternary @name("ipv4.srcAddr");
+            hdr.ipv4.dstAddr   : ternary @name("ipv4.dstAddr");
+            hdr.tcp.srcPort    : ternary @name("tcp.srcPort");
+            hdr.tcp.dstPort    : ternary @name("tcp.dstPort");
         }
         size = 128;
         default_action = NoAction();
@@ -296,4 +296,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

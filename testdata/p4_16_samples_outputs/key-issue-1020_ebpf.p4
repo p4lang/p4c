@@ -54,8 +54,8 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     table t {
         key = {
-            headers.ipv4.srcAddr + 1: exact @name(" headers.ipv4.srcAddr") ;
-            headers.ipv4.dstAddr + 1: exact @name("headers.ipv4.dstAddr") ;
+            headers.ipv4.srcAddr + 1: exact @name(" headers.ipv4.srcAddr");
+            headers.ipv4.dstAddr + 1: exact @name("headers.ipv4.dstAddr");
             headers.ethernet.dstAddr: exact;
             headers.ethernet.srcAddr: exact;
         }
@@ -73,4 +73,3 @@ control pipe(inout Headers_t headers, out bool pass) {
 }
 
 ebpfFilter(prs(), pipe()) main;
-

@@ -12,4 +12,3 @@ control MyDeparser(packet_out packet, in headers hdr) {
 }
 
 Switch(MyDeparser()) main;
-

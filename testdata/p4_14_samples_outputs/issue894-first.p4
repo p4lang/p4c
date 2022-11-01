@@ -46,16 +46,16 @@ header tcp_t {
 }
 
 struct metadata {
-    @name(".custom_metadata") 
+    @name(".custom_metadata")
     custom_metadata_t custom_metadata;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t     ipv4;
-    @name(".tcp") 
+    @name(".tcp")
     tcp_t      tcp;
 }
 
@@ -97,7 +97,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction();
         }
         key = {
-            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port");
         }
         size = 256;
         default_action = NoAction();
@@ -108,9 +108,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 @name(".heavy_hitter_counter1") register<bit<16>, bit<4>>(32w16) heavy_hitter_counter1;
-
 @name(".heavy_hitter_counter2") register<bit<16>, bit<4>>(32w16) heavy_hitter_counter2;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("._drop") action _drop() {
         mark_to_drop(standard_metadata);
@@ -148,7 +146,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.custom_metadata.nhop_ipv4: exact @name("custom_metadata.nhop_ipv4") ;
+            meta.custom_metadata.nhop_ipv4: exact @name("custom_metadata.nhop_ipv4");
         }
         size = 512;
         default_action = NoAction();
@@ -160,7 +158,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr");
         }
         size = 1024;
         default_action = NoAction();
@@ -205,4 +203,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-
