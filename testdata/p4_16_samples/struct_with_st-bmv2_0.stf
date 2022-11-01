@@ -1,0 +1,12 @@
+# STF test for /home/vpeschax/networking.switching.barefoot.bf-p4c-tools/res/struct_with_st-bmv2
+# p4testgen seed:  1000
+
+# Traces
+# MyParser: [Parser] MyParser
+# [State] start
+# [Event]: Extract PacketTooShort
+# [Event]: Extract Cond: p4t*zombie.const.0.*packetLen_bits >= 24;
+# [Event]: Prepending the emit buffer to the program packet.
+
+packet 0 00
+expect 0 00$

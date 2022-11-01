@@ -1136,18 +1136,6 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
                     "%1%: expected type to be a struct", headersParam->type);
             return;
         }
-        LOG2("Headers type is " << st);
-        for (auto f : st->fields) {
-            auto t = typeMap->getType(f, true);
-            if (!t->is<IR::Type_Header>() &&
-                !t->is<IR::Type_Stack>() &&
-                !t->is<IR::Type_HeaderUnion>()) {
-                ::error(ErrorType::ERR_EXPECTED,
-                        "%1%: the type should be a struct of headers, stacks, or unions",
-                        headersParam->type);
-                return;
-            }
-        }
     }
 
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
