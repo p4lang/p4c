@@ -67,7 +67,7 @@ table stub {
 		NoAction
 	}
 	default_action NoAction args none 
-	size 0xf4240
+	size 0xF4240
 }
 
 

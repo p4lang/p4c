@@ -102,13 +102,13 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	mov m.tmpMask h.ethernet.etherType
-	and m.tmpMask 0xf00
+	and m.tmpMask 0xF00
 	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 m.tmpMask 0x800
-	jmpeq INGRESSPARSERIMPL_PARSE_TCP h.ethernet.etherType 0xd00
+	jmpeq INGRESSPARSERIMPL_PARSE_TCP h.ethernet.etherType 0xD00
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	mov m.tmpMask_0 h.ipv4.protocol
-	and m.tmpMask_0 0xfc
+	and m.tmpMask_0 0xFC
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp

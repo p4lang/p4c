@@ -55,7 +55,7 @@ table stub {
 		nonDefAct
 	}
 	default_action macswp args none const
-	size 0xf4240
+	size 0xF4240
 }
 
 

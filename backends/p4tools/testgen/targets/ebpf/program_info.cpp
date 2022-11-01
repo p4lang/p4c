@@ -5,8 +5,9 @@
 #include <utility>
 #include <vector>
 
-#include "backends/p4tools/common/lib/ir.h"
+#include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
+#include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
@@ -49,7 +50,7 @@ EBPFProgramInfo::EBPFProgramInfo(const IR::P4Program* program,
     // The input packet should be larger than 0.
     targetConstraints =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                    IRUtils::getConstant(ExecutionState::getPacketSizeVarType(), 0));
+                    IR::getConstant(ExecutionState::getPacketSizeVarType(), 0));
 }
 
 const ordered_map<cstring, const IR::Type_Declaration*>* EBPFProgramInfo::getProgrammableBlocks()
@@ -88,7 +89,7 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
     // eBPF can not modify the packet, so we do not append any emit buffer here.
     if ((archMember->blockName == "filter")) {
         auto* dropStmt =
-            new IR::MethodCallStatement(IRUtils::generateInternalMethodCall("drop_and_exit", {}));
+            new IR::MethodCallStatement(Utils::generateInternalMethodCall("drop_and_exit", {}));
         const auto* dropCheck = new IR::IfStatement(dropIsActive(), dropStmt, nullptr);
         cmds.emplace_back(dropCheck);
     }
@@ -96,12 +97,12 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
 }
 
 const IR::Member* EBPFProgramInfo::getTargetInputPortVar() const {
-    return new IR::Member(IRUtils::getBitType(TestgenTarget::getPortNumWidth_bits()),
+    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                           new IR::PathExpression("*"), "input_port");
 }
 
 const IR::Member* EBPFProgramInfo::getTargetOutputPortVar() const {
-    return new IR::Member(IRUtils::getBitType(TestgenTarget::getPortNumWidth_bits()),
+    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                           new IR::PathExpression("*"), "output_port");
 }
 
@@ -113,9 +114,9 @@ const IR::Expression* EBPFProgramInfo::dropIsActive() const {
 const IR::Expression* EBPFProgramInfo::createTargetUninitialized(const IR::Type* type,
                                                                  bool forceTaint) const {
     if (forceTaint) {
-        return IRUtils::getTaintExpression(type);
+        return Utils::getTaintExpression(type);
     }
-    return IRUtils::getDefaultValue(type);
+    return IR::getDefaultValue(type);
 }
 
 const IR::Type_Bits* EBPFProgramInfo::getParserErrorType() const { return &parserErrBits; }

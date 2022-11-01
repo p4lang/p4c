@@ -12,8 +12,7 @@ const IR::P4Program* MissingIdAssigner::preorder(IR::P4Program* program) {
     auto* toplevel = evaluator.getToplevelBlock();
     CHECK_NULL(toplevel);
     symbols = ControlPlaneAPI::P4RuntimeSymbolTable::generateSymbols(
-        toplevel->getProgram(), toplevel, refMap, typeMap,
-        archBuilder(refMap, typeMap, toplevel));
+        toplevel->getProgram(), toplevel, refMap, typeMap, archBuilder(refMap, typeMap, toplevel));
     return newProg;
 }
 
@@ -36,8 +35,8 @@ const IR::Property* MissingIdAssigner::postorder(IR::Property* property) {
             const auto* annos = keyElement->getAnnotations();
             auto* newAnnos = annos->clone();
             IR::Vector<IR::Expression> annoExprs;
-            const auto* idConst = new IR::Constant(
-                new IR::Type_Bits(ID_BIT_WIDTH, false), symbolId + 1);
+            const auto* idConst =
+                new IR::Constant(new IR::Type_Bits(ID_BIT_WIDTH, false), symbolId + 1);
             annoExprs.push_back(idConst);
             newAnnos->add(new IR::Annotation("id", annoExprs));
             keyElement->annotations = newAnnos;
@@ -60,10 +59,8 @@ const IR::P4Table* MissingIdAssigner::postorder(IR::P4Table* table) {
         const auto* annos = table->getAnnotations();
         auto* newAnnos = annos->clone();
         IR::Vector<IR::Expression> annoExprs;
-        auto symbolId = symbols->getId(
-            ControlPlaneAPI::P4RuntimeSymbolType::TABLE(), table);
-        const auto* idConst =
-            new IR::Constant(new IR::Type_Bits(ID_BIT_WIDTH, false), symbolId);
+        auto symbolId = symbols->getId(ControlPlaneAPI::P4RuntimeSymbolType::TABLE(), table);
+        const auto* idConst = new IR::Constant(new IR::Type_Bits(ID_BIT_WIDTH, false), symbolId);
         annoExprs.push_back(idConst);
         newAnnos->add(new IR::Annotation("id", annoExprs));
         table->annotations = newAnnos;
@@ -72,8 +69,7 @@ const IR::P4Table* MissingIdAssigner::postorder(IR::P4Table* table) {
 }
 
 const IR::Type_Header* MissingIdAssigner::postorder(IR::Type_Header* hdr) {
-    if (!ControlPlaneAPI::isControllerHeader(hdr) ||
-        ControlPlaneAPI::isHidden(hdr)) {
+    if (!ControlPlaneAPI::isControllerHeader(hdr) || ControlPlaneAPI::isHidden(hdr)) {
         return hdr;
     }
     CHECK_NULL(symbols);
@@ -82,10 +78,9 @@ const IR::Type_Header* MissingIdAssigner::postorder(IR::Type_Header* hdr) {
         const auto* annos = hdr->getAnnotations();
         auto* newAnnos = annos->clone();
         IR::Vector<IR::Expression> annoExprs;
-        auto symbolId = symbols->getId(
-            ControlPlaneAPI::P4RuntimeSymbolType::CONTROLLER_HEADER(), hdr);
-        const auto* idConst =
-            new IR::Constant(new IR::Type_Bits(ID_BIT_WIDTH, false), symbolId);
+        auto symbolId =
+            symbols->getId(ControlPlaneAPI::P4RuntimeSymbolType::CONTROLLER_HEADER(), hdr);
+        const auto* idConst = new IR::Constant(new IR::Type_Bits(ID_BIT_WIDTH, false), symbolId);
         annoExprs.push_back(idConst);
         newAnnos->add(new IR::Annotation("id", annoExprs));
         hdr->annotations = newAnnos;
@@ -104,10 +99,8 @@ const IR::P4ValueSet* MissingIdAssigner::postorder(IR::P4ValueSet* valueSet) {
         const auto* annos = valueSet->getAnnotations();
         auto* newAnnos = annos->clone();
         IR::Vector<IR::Expression> annoExprs;
-        auto symbolId = symbols->getId(
-            ControlPlaneAPI::P4RuntimeSymbolType::VALUE_SET(), valueSet);
-        const auto* idConst =
-            new IR::Constant(new IR::Type_Bits(ID_BIT_WIDTH, false), symbolId);
+        auto symbolId = symbols->getId(ControlPlaneAPI::P4RuntimeSymbolType::VALUE_SET(), valueSet);
+        const auto* idConst = new IR::Constant(new IR::Type_Bits(ID_BIT_WIDTH, false), symbolId);
         annoExprs.push_back(idConst);
         newAnnos->add(new IR::Annotation("id", annoExprs));
         valueSet->annotations = newAnnos;
@@ -125,26 +118,23 @@ const IR::P4Action* MissingIdAssigner::postorder(IR::P4Action* action) {
         const auto* annos = action->getAnnotations();
         auto* newAnnos = annos->clone();
         IR::Vector<IR::Expression> annoExprs;
-        auto symbolId = symbols->getId(
-            ControlPlaneAPI::P4RuntimeSymbolType::ACTION(), action);
-        const auto* idConst =
-            new IR::Constant(new IR::Type_Bits(ID_BIT_WIDTH, false), symbolId);
+        auto symbolId = symbols->getId(ControlPlaneAPI::P4RuntimeSymbolType::ACTION(), action);
+        const auto* idConst = new IR::Constant(new IR::Type_Bits(ID_BIT_WIDTH, false), symbolId);
         annoExprs.push_back(idConst);
         newAnnos->add(new IR::Annotation("id", annoExprs));
         action->annotations = newAnnos;
     }
 
     auto* paramList = new IR::ParameterList();
-    for (size_t symbolId = 0; symbolId < action->parameters->size();
-         ++symbolId) {
+    for (size_t symbolId = 0; symbolId < action->parameters->size(); ++symbolId) {
         auto* param = action->parameters->getParameter(symbolId)->clone();
         auto anno = ControlPlaneAPI::getIdAnnotation(param);
         if (!anno) {
             const auto* annos = param->getAnnotations();
             auto* newAnnos = annos->clone();
             IR::Vector<IR::Expression> annoExprs;
-            const auto* idConst = new IR::Constant(
-                new IR::Type_Bits(ID_BIT_WIDTH, false), symbolId + 1);
+            const auto* idConst =
+                new IR::Constant(new IR::Type_Bits(ID_BIT_WIDTH, false), symbolId + 1);
             annoExprs.push_back(idConst);
             newAnnos->add(new IR::Annotation("id", annoExprs));
             param->annotations = newAnnos;

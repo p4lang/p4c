@@ -51,11 +51,11 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
 	mov m.Ingress_tmp_0 h.ethernet.dstAddr
-	and m.Ingress_tmp_0 0xffffffff
+	and m.Ingress_tmp_0 0xFFFFFFFF
 	mov m.Ingress_tmp_1 m.Ingress_tmp_0
-	and m.Ingress_tmp_1 0xffffffff
+	and m.Ingress_tmp_1 0xFFFFFFFF
 	mov m.Ingress_tmp_2 m.Ingress_tmp_1
-	and m.Ingress_tmp_2 0xffffffff
+	and m.Ingress_tmp_2 0xFFFFFFFF
 	mov m.psa_ingress_output_metadata_egress_port m.Ingress_tmp_2
 	regrd m.Ingress_tmp regfile_0 0x1
 	jmpneq LABEL_END m.Ingress_tmp 0x0

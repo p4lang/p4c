@@ -16,7 +16,6 @@ export P4C_DEPS="bison \
              libboost-iostreams1.71-dev \
              libfl-dev \
              libgc-dev \
-             libgmp-dev \
              pkg-config \
              python3 \
              python3-pip \
@@ -36,8 +35,7 @@ export P4C_RUNTIME_DEPS="cpp \
                      libboost-graph1.71.0 \
                      libboost-iostreams1.71.0 \
                      libgc1c2 \
-                     libgmp10 \
-                     libgmpxx4ldbl \
+                     libgmp-dev \
                      python3"
 
 # use scapy 2.4.5, which is the version on which ptf depends
@@ -79,9 +77,13 @@ function install_ptf_ebpf_test_deps() (
   done
   export P4C_PTF_PACKAGES="gcc-multilib \
                            python3-six \
-                           libjansson-dev \
-                           $LINUX_TOOLS"
+                           libgmp-dev \
+                           libjansson-dev"
   apt-get install -y --no-install-recommends ${P4C_PTF_PACKAGES}
+
+  if apt-cache show ${LINUX_TOOLS}; then
+    apt-get install -y --no-install-recommends ${LINUX_TOOLS}
+  fi
 
   git clone --recursive https://github.com/P4-Research/psabpf.git /tmp/psabpf
   cd /tmp/psabpf
@@ -91,6 +93,12 @@ function install_ptf_ebpf_test_deps() (
   mkdir build
   cd build
   cmake ..
+  make "-j$(nproc)"
+  make install
+
+  # install bpftool
+  git clone --recurse-submodules https://github.com/libbpf/bpftool.git /tmp/bpftool
+  cd /tmp/bpftool/src
   make "-j$(nproc)"
   make install
 )
@@ -169,8 +177,6 @@ export CXXFLAGS="${CXXFLAGS} -O3"
 CMAKE_FLAGS+="-DENABLE_UNIFIED_COMPILATION=${ENABLE_UNIFIED_COMPILATION} "
 # Toggle static builds.
 CMAKE_FLAGS+="-DBUILD_STATIC_RELEASE=${BUILD_STATIC_RELEASE} "
-# Toggle whether to use GMP or boost::multiprecision
-CMAKE_FLAGS+="-DENABLE_GMP=${ENABLE_GMP} "
 # Toggle the installation of the tools back end.
 CMAKE_FLAGS+="-DENABLE_TEST_TOOLS=${ENABLE_TEST_TOOLS} "
 # RELEASE should be default, but we want to make sure.

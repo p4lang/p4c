@@ -18,8 +18,6 @@ ARG VALIDATION=OFF
 # This creates a release build that includes link time optimization and links
 # all libraries statically.
 ARG BUILD_STATIC_RELEASE=OFF
-# Toggle usage of the GNU Multiple Precision Arithmetic Library.
-ARG ENABLE_GMP=ON
 # No questions asked during package installation.
 ARG DEBIAN_FRONTEND=noninteractive
 # Whether to install dependencies required to run PTF-ebpf tests

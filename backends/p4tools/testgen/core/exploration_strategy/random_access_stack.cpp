@@ -12,10 +12,10 @@
 #include <boost/random/uniform_int_distribution.hpp>
 #include <boost/variant/get.hpp>
 
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
@@ -101,7 +101,7 @@ RandomAccessStack::StepResult RandomAccessStack::multiPop(
     IncrementalStack::UnexploredBranches& unexploredBranches) {
     // A good spot seems to be 10 per cent of the paths. Needs better stats.
     size_t unexploredRange = unexploredBranches.size() / popLevel;
-    uint64_t popLevels = TestgenUtils::getRandInt(unexploredRange) + 1;
+    uint64_t popLevels = Utils::getRandInt(unexploredRange) + 1;
     // Saves unexploredBranches in the buffer if we are popping more
     // than one level to revist them later.
     if (popLevels == 1) {

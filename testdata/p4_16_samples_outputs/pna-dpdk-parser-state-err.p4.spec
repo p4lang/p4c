@@ -177,7 +177,7 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	jmpgt LABEL_FALSE_0 0x64 h.tcp.srcPort
-	jmpgt LABEL_FALSE_0 h.tcp.srcPort 0xc8
+	jmpgt LABEL_FALSE_0 h.tcp.srcPort 0xC8
 	mov m.MainControlT_tmp_3 0x1
 	jmp LABEL_END_0
 	LABEL_FALSE_0 :	mov m.MainControlT_tmp_3 0x0

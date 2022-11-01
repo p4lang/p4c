@@ -79,8 +79,8 @@ action a1 args none {
 	mov m.ipv4_t_srcAddr h.Ingress_tmp_0.srcAddr
 	mov m.ipv4_t_dstAddr h.Ingress_tmp_0.dstAddr
 	hash crc32 m.local_metadata_data  m.user_meta_t_Ingress_tmp m.ipv4_t_dstAddr
-	and m.local_metadata_data 0x1f
-	add m.local_metadata_data 0xf
+	and m.local_metadata_data 0x1F
+	add m.local_metadata_data 0xF
 	return
 }
 
