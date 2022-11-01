@@ -48,8 +48,8 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
         // or perhaps it can be done as a common case above or below
         // for all of them?
 
-        IR::MethodCallExpression *mce2 = nullptr;
-        auto isR = false;
+        IR::MethodCallExpression *mce2;
+        auto isPsaExtern = false;
         if (s->is<IR::AssignmentStatement>()) {
             auto assign = s->to<IR::AssignmentStatement>();
             const IR::Expression *l, *r;
@@ -60,17 +60,18 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                 auto mi = P4::MethodInstance::resolve(mce, ctxt->refMap, ctxt->typeMap);
                 auto em = mi->to<P4::ExternMethod>();
                 if (em != nullptr) {
-                    if ((em->originalExternType->name.name == "Register" ||
-                                                em->method->name.name == "read") ||
-                        (em->originalExternType->name.name == "Meter" &&
-                                                em->method->name.name == "execute")) {
-                        isR = true;
-                        // l = l->to<IR::PathExpression>();
-                        // BUG_CHECK(l != nullptr, "register_read dest cast failed");
+                    auto externName = em->originalExternType->name.name;
+                    auto methodName = em->method->name.name;
+                    if ((externName == "Register" && methodName == "read") ||
+                        (externName == "Meter" && methodName == "execute") ||
+                        (externName == "Random" && methodName == "read")) {
+                        isPsaExtern = true;
+
                         auto dest = new IR::Argument(l);
                         auto args = new IR::Vector<IR::Argument>();
                         args->push_back(dest);  // dest
-                        args->push_back(mce->arguments->at(0));  // index
+                        if (externName == "Register" || externName == "Meter")
+                            args->push_back(mce->arguments->at(0));  // index
                         mce2 = new IR::MethodCallExpression(mce->method, mce->typeArguments);
                         mce2->arguments = args;
                         s = new IR::MethodCallStatement(mce);
@@ -172,7 +173,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                 auto em = mi->to<P4::ExternMethod>();
                 LOG3("P4V1:: convert " << s);
                 Util::IJson* json;
-                if (isR) {
+                if (isPsaExtern) {
                     json = ExternConverter::cvtExternObject(ctxt, em, mce2, s, emitExterns);
                 } else {
                     json = ExternConverter::cvtExternObject(ctxt, em, mc, s, emitExterns);

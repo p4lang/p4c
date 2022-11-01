@@ -577,21 +577,22 @@ Util::IJson* ExternConverter_Random::convertExternObject(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
-    if (mc->arguments->size() != 3) {
-        modelError("Expected 3 arguments for %1%", mc);
+
+    if (mc->arguments->size() != 1) {
+        modelError("Expected 1 arguments for %1%", mc);
         return nullptr;
     }
-    auto primitive =
-        mkPrimitive("modify_field_rng_uniform");
-    auto params = mkParameters(primitive);
-    primitive->emplace_non_null("source_info", em->method->sourceInfoJsonObj());
+
+    auto primitive = mkPrimitive("_" + em->originalExternType->name +
+                                 "_" + em->method->name);
+    auto parameters = mkParameters(primitive);
+    primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    auto rnd = new Util::JsonObject();
+    rnd->emplace("type", "extern");
+    rnd->emplace("value", em->object->controlPlaneName());
+    parameters->append(rnd);
     auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
-    /* TODO */
-    // auto lo = ctxt->conv->convert(mc->arguments->at(1)->expression);
-    // auto hi = ctxt->conv->convert(mc->arguments->at(2)->expression);
-    params->append(dest);
-    // params->append(lo);
-    // params->append(hi);
+    parameters->append(dest);
     return primitive;
 }
 
@@ -971,8 +972,67 @@ void ExternConverter_Register::convertExternInstance(
 
 void ExternConverter_Random::convertExternInstance(
     UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns)
-{ /* TODO */ }
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+
+    if (eb->getConstructorParameters()->size() != 2) {
+      modelError("%1%: expected two parameters", eb);
+      return;
+    }
+
+    auto inst = c->to<IR::Declaration_Instance>();
+    cstring name = inst->controlPlaneName();
+
+    // make sure max > min
+    auto min = eb->findParameterValue("min");
+    CHECK_NULL(min);
+    auto min_c = min->to<IR::Constant>();
+    auto max = eb->findParameterValue("max");
+    CHECK_NULL(max);
+    auto max_c = max->to<IR::Constant>();
+
+    if (max_c->asInt() < min_c->asInt()) {
+        ::error(ErrorType::ERR_INVALID, "%1%: Invalid range (min > max) for Random.", name);
+    }
+
+    // adding random instance into extern_instances
+    auto jext_mtr = new Util::JsonObject();
+    jext_mtr->emplace("name", name);
+    jext_mtr->emplace("id", nextId("extern_instances"));
+    jext_mtr->emplace("type", eb->getName());
+    jext_mtr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+    ctxt->json->externs->append(jext_mtr);
+
+    // adding attributes to random extern_instance
+    Util::JsonArray *arr = ctxt->json->insert_array_field(jext_mtr, "attribute_values");
+
+    // range min
+    if (!min->is<IR::Constant>()) {
+        modelError("%1%: expected a constant", min->getNode());
+        return;
+    }
+    auto attr0 = eb->getConstructorParameters()->getParameter(0);
+    auto bitwidth0 = ctxt->typeMap->minWidthBits(min_c->type, min->getNode());
+    cstring val0 = BMV2::stringRepr(min_c->value, ROUNDUP(bitwidth0, 8));
+    auto rmin = new Util::JsonObject();
+    rmin->emplace("name", attr0->toString());
+    rmin->emplace("type", "hexstr");
+    rmin->emplace("value", val0);
+    arr->append(rmin);
+
+    // range max
+    if (!max->is<IR::Constant>()) {
+        modelError("%1%: expected a constant", max->getNode());
+        return;
+    }
+    auto attr1 = eb->getConstructorParameters()->getParameter(1);
+    auto bitwidth1 = ctxt->typeMap->minWidthBits(max_c->type, max->getNode());
+    cstring val1 = BMV2::stringRepr(max_c->value, ROUNDUP(bitwidth1, 8));
+    auto rmax = new Util::JsonObject();
+    rmax->emplace("name", attr1->toString());
+    rmax->emplace("type", "hexstr");
+    rmax->emplace("value", val1);
+    arr->append(rmax);
+}
 
 void ExternConverter_ActionProfile::convertExternInstance(
     UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
