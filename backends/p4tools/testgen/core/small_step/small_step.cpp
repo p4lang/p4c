@@ -56,7 +56,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                     rresult = self.reachabilityEngine->next(state.reachabilityEngineState, node);
                     if (!rresult.first) {
                         // Reachability property was failed.
-                        const IR::Expression* cond = IRUtils::getBoolLiteral(false);
+                        const IR::Expression* cond = IR::getBoolLiteral(false);
                         branches = new std::vector<Branch>({Branch(cond, state, &state)});
                     }
                 } else if (const auto* method = node->to<IR::MethodCallStatement>()) {
