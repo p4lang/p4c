@@ -1,3 +1,1 @@
-missing_match.p4(20): [--Werror=not-found] error: noSuchMatch: declaration not found
-        key = { b : noSuchMatch; }
-                    ^^^^^^^^^^^
+[--Werror=Target model error] error: Declaration of the action NoAction not found; did you include core.p4?

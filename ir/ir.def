@@ -462,6 +462,7 @@ class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
         return components.getDeclarations(); }
     void push_back(StatOrDecl st) { components.push_back(st); }
     Annotations getAnnotations() const override { return annotations; }
+    bool isEmpty() const { return components.size() == 0; }
 }
 
 class MethodCallStatement : Statement {

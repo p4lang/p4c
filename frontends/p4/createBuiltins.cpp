@@ -19,6 +19,59 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 
 namespace P4 {
+
+const IR::Node* CreateBuiltins::preorder(IR::P4Program* program) {
+    auto decls = program->getDeclsByName(P4::P4CoreLibrary::instance.noAction.str());
+    auto vec = decls->toVector();
+    if (vec->empty())
+        return program;
+    if (vec->size() > 1) {
+        ::error(ErrorType::ERR_MODEL,
+                "Multiple declarations of %1%: %2% %3%",
+                P4::P4CoreLibrary::instance.noAction.str(),
+                vec->at(0), vec->at(1));
+    }
+    globalNoAction = vec->at(0);
+    return program;
+}
+
+void CreateBuiltins::checkGlobalAction() {
+    // Check some invariants expected from NoAction.
+    // The check is done lazily, only if NoAction invocations are
+    // inserted by the compiler.  This allows for example simple test
+    // programs that do not really need NoAction to skip including
+    // core.p4.
+    static bool checked = false;
+    if (checked)
+        return;
+    checked = true;
+    if (globalNoAction == nullptr) {
+        ::error(ErrorType::ERR_MODEL,
+                "Declaration of the action %1% not found; did you include core.p4?",
+                P4::P4CoreLibrary::instance.noAction.str());
+        return;
+    }
+    if (auto action = globalNoAction->to<IR::P4Action>()) {
+        if (!action->parameters->empty()) {
+            ::error(ErrorType::ERR_MODEL,
+                    "%1%: Expected an action with no parameters; did you include core.p4?",
+                    globalNoAction);
+            return;
+        }
+        if (!action->body->isEmpty()) {
+            ::error(ErrorType::ERR_MODEL,
+                    "%1%: Expected an action with no body; did you include core.p4?",
+                    globalNoAction);
+            return;
+        }
+    } else {
+        ::error(ErrorType::ERR_MODEL,
+                "%1%: expected to be an action; did you include core.p4?",
+                globalNoAction);
+        return;
+    }
+}
+
 const IR::Node* CreateBuiltins::postorder(IR::P4Parser* parser) {
     parser->states.push_back(new IR::ParserState(IR::ParserState::accept, nullptr));
     parser->states.push_back(new IR::ParserState(IR::ParserState::reject, nullptr));
@@ -72,7 +125,8 @@ const IR::Node* CreateBuiltins::postorder(IR::ActionList* actions) {
         return actions;
     auto decl = actions->getDeclaration(P4::P4CoreLibrary::instance.noAction.str());
     if (decl != nullptr)
-        return actions;;
+        return actions;
+    checkGlobalAction();
     actions->push_back(
         new IR::ActionListElement(
             new IR::Annotations(
@@ -108,6 +162,7 @@ const IR::Node* CreateBuiltins::postorder(IR::Property* property) {
 const IR::Node* CreateBuiltins::postorder(IR::TableProperties* properties) {
     if (!addNoAction)
         return properties;
+    checkGlobalAction();
     auto act = new IR::PathExpression(P4::P4CoreLibrary::instance.noAction.Id(properties->srcInfo));
     auto args = new IR::Vector<IR::Argument>();
     auto methodCall = new IR::MethodCallExpression(act, args);
