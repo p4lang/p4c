@@ -107,9 +107,8 @@ const IR::Expression* Bmv2CounterValue::getCurrentValue(const IR::Expression* in
     for (const auto& bmv2counterValue : counterConditions) {
         const auto* storedIndex = bmv2counterValue.index;
         const auto* storedVal = bmv2counterValue.value;
-        baseExpr = new IR::Mux(
-            baseExpr->type, new IR::LAnd(new IR::Lss(index, size), new IR::Equ(storedIndex, index)),
-            storedVal, baseExpr);
+        baseExpr =
+            new IR::Mux(baseExpr->type, new IR::Equ(storedIndex, index), storedVal, baseExpr);
     }
     return baseExpr;
 }
