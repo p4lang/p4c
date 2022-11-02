@@ -58,7 +58,7 @@ void CreateBuiltins::checkGlobalAction() {
                     globalNoAction);
             return;
         }
-        if (!action->body->isEmpty()) {
+        if (!action->body->empty()) {
             ::error(ErrorType::ERR_MODEL,
                     "%1%: Expected an action with no body; did you include core.p4?",
                     globalNoAction);
