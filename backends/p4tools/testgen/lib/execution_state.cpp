@@ -51,9 +51,8 @@ ExecutionState::ExecutionState(const IR::P4Program* program)
     setProperty("inUndefinedState", false);
     // Drop is initialized to false, too.
     setProperty("drop", false);
-    if (TestgenOptions::get().pattern.empty()) {
-        reachabilityEngineState = nullptr;
-    } else {
+    // If a user-pattern is provided, initialize the reachability engine state.
+    if (!TestgenOptions::get().pattern.empty()) {
         reachabilityEngineState = ReachabilityEngineState::getInitial();
     }
 }
@@ -69,6 +68,10 @@ ExecutionState::ExecutionState(Continuation::Body body)
     setProperty("inUndefinedState", false);
     // Drop is initialized to false, too.
     setProperty("drop", false);
+    // If a user-pattern is provided, initialize the reachability engine state.
+    if (!TestgenOptions::get().pattern.empty()) {
+        reachabilityEngineState = ReachabilityEngineState::getInitial();
+    }
 }
 
 /* =============================================================================================

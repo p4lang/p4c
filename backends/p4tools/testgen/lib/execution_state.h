@@ -143,8 +143,8 @@ class ExecutionState {
     /// List of branch decisions leading into this state.
     std::vector<uint64_t> selectedBranches;
 
-    /// Reachability engine state.
-    ReachabilityEngineState* reachabilityEngineState;
+    /// State that is needed to track reachability of statements given a query.
+    ReachabilityEngineState* reachabilityEngineState = nullptr;
 
     /* =========================================================================================
      *  Accessors
