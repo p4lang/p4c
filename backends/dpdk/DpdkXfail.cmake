@@ -1,4 +1,24 @@
 p4c_add_xfail_reason("dpdk"
+  "use dpdk specific `dpdk_execute` method"
+  testdata/p4_16_samples/psa-example-dpdk-meter-execute-err.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Expected packet length argument for count method of indirect counter"
+  testdata/p4_16_samples/psa-example-counters-bmv2.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "error: Name .* is used for multiple direct counter objects in the P4Info message"
+  testdata/p4_16_samples/psa-counter6.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Expected psa_implementation property value for table.* to resolve to an extern instance"
+  testdata/p4_16_samples/psa-action-profile2.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
   "not implemented"
   testdata/p4_16_samples/psa-example-dpdk-byte-alignment_4.p4
   )
