@@ -48,7 +48,7 @@ class RegisterActionPSATest(P4EbpfTest):
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)  # Checks action run
 
-        self.register_verify(name="ingress_reg", index=["{}".format(hex(DP_PORTS[1]))], expected_value=["0x5"])
+        self.register_verify(name="ingress_reg", index=[DP_PORTS[1]], expected_value=["0x5"])
 
         # After next action run in register should be stored a new value - 15
         testutils.send_packet(self, PORT0, pkt)
