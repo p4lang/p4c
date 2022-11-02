@@ -178,6 +178,14 @@ TestgenOptions::TestgenOptions()
         },
         R"(Build a DCG for input graph. This control flow graph directed cyclic graph can be used
         for statement reachability analysis.)");
+
+    registerOption(
+        "--pattern", "pattern",
+        [this](const char* arg) {
+            pattern = arg;
+            return true;
+        },
+        "List of the selected branches which should be chosen for selection.");
 }
 
 }  // namespace P4Tools

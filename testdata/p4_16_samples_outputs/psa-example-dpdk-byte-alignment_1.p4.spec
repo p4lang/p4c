@@ -13,7 +13,7 @@ struct ethernet_t {
 struct ipv4_t {
 	bit<8> version_ihl
 	bit<8> diffserv
-	bit<32> totalLen
+	bit<16> totalLen
 	bit<16> identification
 	bit<16> flags_fragOffset
 	bit<8> ttl
@@ -76,7 +76,7 @@ struct metadata_t {
 	bit<16> Ingress_tmp_17
 	bit<32> Ingress_color_out
 	bit<32> Ingress_color_in
-	bit<32> Ingress_tmp_18
+	bit<32> Ingress_tmp_19
 }
 metadata instanceof metadata_t
 
@@ -106,10 +106,10 @@ action execute_1 args instanceof execute_1_arg_t {
 	or h.ipv4.version_ihl 0x50
 	meter meter0_0 t.index h.ipv4.totalLen m.Ingress_color_in m.Ingress_color_out
 	jmpneq LABEL_FALSE_2 m.Ingress_color_out 0x0
-	mov m.Ingress_tmp_18 0x1
+	mov m.Ingress_tmp_19 0x1
 	jmp LABEL_END_3
-	LABEL_FALSE_2 :	mov m.Ingress_tmp_18 0x0
-	LABEL_END_3 :	mov m.local_metadata_port_out m.Ingress_tmp_18
+	LABEL_FALSE_2 :	mov m.Ingress_tmp_19 0x0
+	LABEL_END_3 :	mov m.local_metadata_port_out m.Ingress_tmp_19
 	regwr reg_0 t.index m.local_metadata_port_out
 	mov m.Ingress_tmp h.ipv4.hdrChecksum
 	and m.Ingress_tmp 0x3F

@@ -1,7 +1,7 @@
 #include "backends/p4tools/common/compiler/reachability.h"
 
-#include <stdlib.h>
-
+#include <cstdlib>
+#include <filesystem>
 #include <fstream>
 
 #include "backends/p4test/version.h"
@@ -55,7 +55,6 @@ ReturnedInfo loadExampleForReachability(const char* curFile) {
     options.compilerVersion = P4TEST_VERSION_STRING;
     const IR::P4Program* program = nullptr;
     options.file = sourcePath;
-    options.file += "testdata/p4_16_samples/";
     options.file += curFile;
     program = P4::parseP4File(options);
     if (originalEnv == nullptr) {
@@ -99,7 +98,7 @@ class NodeFinder : public Inspector {
 };
 
 TEST_F(P4CReachability, testParserStatesAndAnnotations) {
-    auto result = loadExampleForReachability("action_profile-bmv2.p4");
+    auto result = loadExampleForReachability("testdata/p4_16_samples/action_profile-bmv2.p4");
     const auto* program = std::get<0>(result);
     ASSERT_TRUE(program);
     const auto* dcg = std::get<1>(result);
@@ -152,7 +151,7 @@ TEST_F(P4CReachability, testParserStatesAndAnnotations) {
 }
 
 TEST_F(P4CReachability, testLoops) {
-    auto result = loadExampleForReachability("stack_complex-bmv2.p4");
+    auto result = loadExampleForReachability("testdata/p4_16_samples/stack_complex-bmv2.p4");
     const auto* program = std::get<0>(result);
     ASSERT_TRUE(program);
     const auto* dcg = std::get<1>(result);
@@ -175,7 +174,7 @@ const IR::Node* getFromHash(const P4Tools::ReachabilityHashType& hash, const cha
 
 TEST_F(P4CReachability, testTableAndActions) {
     auto result = loadExampleForReachability(
-        "../../backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_hit.p4");
+        "backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_hit.p4");
     const auto* program = get<0>(result);
     ASSERT_TRUE(program);
     const auto* dcg = std::get<1>(result);
@@ -187,10 +186,10 @@ TEST_F(P4CReachability, testTableAndActions) {
     ASSERT_TRUE(egress);
     const auto* hitTable = getFromHash(hash, "ingress.hit_table");
     ASSERT_TRUE(hitTable);
-    const auto* MyAction3 = getFromHash(hash, "ingress.MyAction3");
-    ASSERT_TRUE(MyAction3);
-    const auto* MyAction7 = getFromHash(hash, "ingress.MyAction7");
-    ASSERT_TRUE(MyAction7);
+    const auto* myAction3 = getFromHash(hash, "ingress.MyAction3");
+    ASSERT_TRUE(myAction3);
+    const auto* myAction7 = getFromHash(hash, "ingress.MyAction7");
+    ASSERT_TRUE(myAction7);
     // egress is reachable from ingress.
     ASSERT_TRUE(dcg->isReachable(ingress, egress));
     // igress isn't reachable from egress.
@@ -201,22 +200,22 @@ TEST_F(P4CReachability, testTableAndActions) {
     ASSERT_TRUE(!dcg->isReachable(hitTable, ingress));
     // egress is reachable from hit_table.
     ASSERT_TRUE(dcg->isReachable(hitTable, egress));
-    // MyAction7 is reachable from hit_table
-    ASSERT_TRUE(dcg->isReachable(hitTable, MyAction7));
-    // MyAction3 is reachable from hit_table
-    ASSERT_TRUE(dcg->isReachable(hitTable, MyAction3));
-    // MyAction3 is reachable from MyAction7
-    ASSERT_TRUE(dcg->isReachable(MyAction7, MyAction3));
-    // MyAction7 isn't reachable from MyAction3
-    ASSERT_TRUE(!dcg->isReachable(MyAction3, MyAction7));
-    // egress is reachable from MyAction3
-    ASSERT_TRUE(dcg->isReachable(MyAction3, egress));
-    // MyAction7 isn't reachable from egress
-    ASSERT_TRUE(!dcg->isReachable(egress, MyAction7));
+    // myAction7 is reachable from hit_table
+    ASSERT_TRUE(dcg->isReachable(hitTable, myAction7));
+    // myAction3 is reachable from hit_table
+    ASSERT_TRUE(dcg->isReachable(hitTable, myAction3));
+    // myAction3 is reachable from myAction7
+    ASSERT_TRUE(dcg->isReachable(myAction7, myAction3));
+    // myAction7 isn't reachable from myAction3
+    ASSERT_TRUE(!dcg->isReachable(myAction3, myAction7));
+    // egress is reachable from myAction3
+    ASSERT_TRUE(dcg->isReachable(myAction3, egress));
+    // myAction7 isn't reachable from egress
+    ASSERT_TRUE(!dcg->isReachable(egress, myAction7));
 }
 
 TEST_F(P4CReachability, testSwitchStatement) {
-    auto result = loadExampleForReachability("basic_routing-bmv2.p4");
+    auto result = loadExampleForReachability("testdata/p4_16_samples/basic_routing-bmv2.p4");
     const auto* program = get<0>(result);
     ASSERT_TRUE(program);
     const auto* dcg = std::get<1>(result);
@@ -245,7 +244,7 @@ TEST_F(P4CReachability, testSwitchStatement) {
 TEST_F(P4CReachability, testIfStatement) {
     // Example for IsStatement checking.
     auto result = loadExampleForReachability(
-        "../../backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4");
+        "backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4");
     const auto* program = get<0>(result);
     ASSERT_TRUE(program);
     const auto* dcg = std::get<1>(result);
@@ -268,7 +267,7 @@ TEST_F(P4CReachability, testIfStatement) {
 }
 
 TEST_F(P4CReachability, testParserValueSet) {
-    auto result = loadExampleForReachability("value-sets.p4");
+    auto result = loadExampleForReachability("testdata/p4_16_samples/value-sets.p4");
     const auto* program = get<0>(result);
     ASSERT_TRUE(program);
     const auto* dcg = std::get<1>(result);
@@ -292,6 +291,160 @@ TEST_F(P4CReachability, testParserValueSet) {
     ASSERT_TRUE(!dcg->isReachable(parseIpv4, ethtypeKinds));
     // ethtype_kinds isn't reachable from parse_trill.
     ASSERT_TRUE(!dcg->isReachable(parseTrill, ethtypeKinds));
+}
+
+bool listEqu(std::list<const IR::Node*>& left, std::list<const IR::Node*> right) {
+    if (left.size() != right.size()) {
+        return false;
+    }
+    auto i = left.begin();
+    auto j = right.begin();
+    while (i != left.end() && j != right.end()) {
+        if (*i != *j) {
+            return false;
+        }
+        i++;
+        j++;
+    }
+    return true;
+}
+
+TEST_F(P4CReachability, testReacabilityEngine) {
+    auto result = loadExampleForReachability(
+        "backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4");
+    const auto* program = get<0>(result);
+    ASSERT_TRUE(program);
+    const auto* dcg = std::get<1>(result);
+    ASSERT_TRUE(dcg);
+    const auto hash = std::get<2>(result);
+    std::string strBehavior = "ingress.MyAction1 + ingress.MyAction2;";
+    strBehavior += "ingress.table2";
+    P4Tools::ReachabilityEngine engine(dcg, strBehavior);
+    auto* engineState = P4Tools::ReachabilityEngineState::getInitial();
+    // Initialize engine.
+    const auto* ingress = getFromHash(hash, "ingress");
+    ASSERT_TRUE(ingress);
+    const auto* myAction1 = getFromHash(hash, "ingress.MyAction1");
+    ASSERT_TRUE(myAction1);
+    const auto* myAction2 = getFromHash(hash, "ingress.MyAction2");
+    ASSERT_TRUE(myAction2);
+    const auto* table2 = getFromHash(hash, "ingress.table2");
+    ASSERT_TRUE(table2);
+    const auto* p = getFromHash(hash, "p");
+    ASSERT_TRUE(p);
+    const auto* deparser = getFromHash(hash, "deparser");
+    ASSERT_TRUE(deparser);
+    // Move to p (engine state the same).
+    // First it moves state to first user states.
+    ASSERT_TRUE(engine.next(engineState, p).first);
+    auto currentList = engineState->getState();
+    // Move to ingress (engine state the same).
+    ASSERT_TRUE(engine.next(engineState, ingress).first);
+    ASSERT_TRUE(listEqu(currentList, engineState->getState()));
+    // Move to MyAction1 (engine state should be changed).
+    ASSERT_TRUE(engine.next(engineState, myAction1).first);
+    ASSERT_TRUE(!listEqu(currentList, engineState->getState()));
+    currentList = engineState->getState();
+    // Can't move to MyAction2 after.
+    ASSERT_TRUE(!engine.next(engineState, myAction2).first);
+    ASSERT_TRUE(listEqu(currentList, engineState->getState()));
+    // Move to table2 (engine sate should be changed).
+    ASSERT_TRUE(engine.next(engineState, table2).first);
+    ASSERT_TRUE(!listEqu(currentList, engineState->getState()));
+    currentList = engineState->getState();
+    // Any reachable next vertex should be accepted, move to mirroring_clone.
+    ASSERT_TRUE(engine.next(engineState, deparser).first);
+    ASSERT_TRUE(listEqu(currentList, engineState->getState()));
+}
+
+void callTestgen(const char* inputFile, const char* behavior, const char* path, int maxTests) {
+    std::ostringstream mkDir;
+    std::string prefix;
+    std::string fullPath = sourcePath;
+    fullPath += inputFile;
+    mkDir << "mkdir -p " << buildPath << path << " && rm -f " << buildPath << path << "/*.stf";
+    if (system(mkDir.str().c_str()) != 0) {
+        BUG("Can't create folder - %1%", mkDir.str());
+    }
+    std::ostringstream cmdTestgen;
+    cmdTestgen << buildPath << "backends/p4tools/p4check/p4check testgen ";
+    cmdTestgen << "-I \"" << buildPath << "p4include\" --target bmv2  --std p4-16 ";
+    cmdTestgen << "--test-backend STF --arch v1model --seed 1000 --max-tests " << maxTests << "  ";
+    cmdTestgen << "--pattern \"" << behavior << "\" ";
+    cmdTestgen << "--out-dir \"" << buildPath << path << "\" \"" << sourcePath << prefix;
+    cmdTestgen << inputFile << "\"";
+    if (system(cmdTestgen.str().c_str()) != 0) {
+        BUG("p4check failed to run - %1%", cmdTestgen.str());
+    }
+}
+
+bool checkResultingSTF(std::list<std::list<std::string>> identifiersList, std::string path) {
+    std::ostringstream resDir;
+    resDir << buildPath << path;
+    for (const auto& f : std::filesystem::directory_iterator(resDir.str())) {
+        std::string fpath = f.path().c_str();
+        if (fpath.rfind(".stf") == std::string::npos) {
+            // Not a STF file.
+            continue;
+        }
+        // Each STF file should contain all identifiers from identifiersList.
+        auto lIds = identifiersList;
+        std::ifstream ifile(f.path());
+        while (!ifile.eof() && !lIds.empty()) {
+            std::string line;
+            std::getline(ifile, line);
+            for (auto& lId : lIds) {
+                if (lId.empty()) {
+                    continue;
+                }
+                if (line.find(*lId.begin()) != std::string::npos) {
+                    lId.pop_front();
+                }
+            }
+        }
+        ifile.close();
+        bool hasEmptyList = false;
+        for (auto& l : lIds) {
+            if (l.empty()) {
+                hasEmptyList = true;
+                break;
+            }
+        }
+        if (!hasEmptyList) {
+            return false;
+        }
+    }
+    return true;
+}
+
+TEST_F(P4CReachability, testReachabilityEngineActions) {
+    callTestgen("backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_miss.p4",
+                "ingress.MyAction2", "tmp", 10);
+    std::list<std::list<std::string>> ids = {{"MyAction2"}};
+    ASSERT_TRUE(checkResultingSTF(ids, "tmp"));
+    ids = {{"MyAction1"}};
+    ASSERT_TRUE(!checkResultingSTF(ids, "tmp"));
+}
+
+TEST_F(P4CReachability, testReacabilityEngineTables) {
+    callTestgen("backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_action_run.p4",
+                "ingress.MyAction2", "tmp", 10);
+    std::list<std::list<std::string>> ids = {{" MyAction2"}};
+    ASSERT_TRUE(checkResultingSTF(ids, "tmp"));
+}
+
+TEST_F(P4CReachability, testReacabilityEngineTable2) {
+    callTestgen("backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4",
+                "ingress.MyAction1;ingress.table2", "tmp", 10);
+    std::list<std::list<std::string>> ids = {{"ingress.table2"}};
+    ASSERT_TRUE(checkResultingSTF(ids, "tmp"));
+}
+
+TEST_F(P4CReachability, testReacabilityEngineNegTable2) {
+    callTestgen("backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4",
+                "!ingress.MyAction1;!ingress.table2", "tmp", 10);
+    std::list<std::list<std::string>> ids = {{"table2"}};
+    ASSERT_TRUE(!checkResultingSTF(ids, "tmp"));
 }
 
 }  // namespace Test
