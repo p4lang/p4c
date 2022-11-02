@@ -1842,7 +1842,7 @@ bool TypeInference::compare(const IR::Node* errorPosition,
 
     if (!defined) {
         typeError("'%1%' with type '%2%' cannot be compared to '%3%' with type '%4%'",
-                  compare->left, ltype->toString(), compare->right, rtype->toString());
+                  compare->left, ltype, compare->right, rtype);
         return false;
     }
     return true;
