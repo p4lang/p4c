@@ -1,8 +1,13 @@
 p4c_add_xfail_reason("dpdk"
   "use dpdk specific `dpdk_execute` method"
   testdata/p4_16_samples/psa-example-dpdk-meter-execute-err.p4
+  testdata/p4_16_samples/psa-meter3.p4
+  testdata/p4_16_samples/psa-meter7-bmv2.p4
   )
-
+p4c_add_xfail_reason("dpdk"
+  "Meter function execute not implemented, use dpdk_execute"
+  testdata/p4_16_samples/psa-meter1.p4
+  )
 p4c_add_xfail_reason("dpdk"
   "Expected packet length argument for count method of indirect counter"
   testdata/p4_16_samples/psa-example-counters-bmv2.p4

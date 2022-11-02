@@ -76,8 +76,6 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
         default_action = NoAction_1();
     }
     apply {
-        color_in_0 = PSA_MeterColor_t.RED;
-        hasReturned = false;
         if (user_meta.port_out == 32w1) {
             tbl_0.apply();
         } else {

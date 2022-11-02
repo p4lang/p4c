@@ -59,7 +59,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     PSA_MeterColor_t color_out;
     PSA_MeterColor_t color_in = PSA_MeterColor_t.RED;
     action execute(bit<12> index) {
-        color_out = meter0.execute(index, color_in, (bit <32>) hdr.ipv4.totalLen);
+        color_out = meter0.dpdk_execute(index, color_in, (bit <32>) hdr.ipv4.totalLen);
         user_meta.port_out = (color_out == PSA_MeterColor_t.GREEN ? 32w1 : 32w0);
         reg.write(index, user_meta.port_out);
     }
