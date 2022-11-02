@@ -78,7 +78,7 @@ jobs:
 
       - name: Build (Linux)
         run: |
-          docker build --network host -t p4c --build-arg MAKEFLAGS=-j8 --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg --build-arg INSTALL_PTF_EBPF_DEPENDENCIES=ON --build-arg KERNEL_VERSIONS="$KERNEL_VERSIONS" .
+          docker build --network host -t p4c --build-arg MAKEFLAGS=-j8 --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg INSTALL_PTF_EBPF_DEPENDENCIES=ON --build-arg KERNEL_VERSIONS="$KERNEL_VERSIONS" .
           ./tools/export_ccache.sh
 
       - name: Install VM

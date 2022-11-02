@@ -56,11 +56,11 @@ action macswp args none {
 	mov m.Ingress_tmp h.ethernet.ether_type
 	shr m.Ingress_tmp 0x2
 	mov m.Ingress_tmp_0 m.Ingress_tmp
-	and m.Ingress_tmp_0 0xff
+	and m.Ingress_tmp_0 0xFF
 	mov m.Ingress_tmp_1 m.Ingress_tmp_0
-	and m.Ingress_tmp_1 0xff
+	and m.Ingress_tmp_1 0xFF
 	mov m.Ingress_tmp_2 m.Ingress_tmp_1
-	and m.Ingress_tmp_2 0xff
+	and m.Ingress_tmp_2 0xFF
 	mov m.local_metadata_x2 m.Ingress_tmp_2
 	mov m.local_metadata_addr h.ethernet.dst_addr
 	mov h.ethernet.dst_addr h.ethernet.src_addr
@@ -77,7 +77,7 @@ table stub_0 {
 		NoAction_1
 	}
 	default_action NoAction_1 args none 
-	size 0xf4240
+	size 0xF4240
 }
 
 

@@ -105,9 +105,9 @@ apply {
 	mov m.MainParserT_parser_tmp h.ipv4_base.version_ihl
 	shr m.MainParserT_parser_tmp 0x4
 	mov m.MainParserT_parser_tmp_0 m.MainParserT_parser_tmp
-	and m.MainParserT_parser_tmp_0 0xf
+	and m.MainParserT_parser_tmp_0 0xF
 	mov m.MainParserT_parser_tmp_1 m.MainParserT_parser_tmp_0
-	and m.MainParserT_parser_tmp_1 0xf
+	and m.MainParserT_parser_tmp_1 0xF
 	jmpeq MAINPARSERIMPL_ACCEPT m.MainParserT_parser_tmp_1 0x5
 	lookahead h.option
 	jmpeq MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP h.option.type 0x44
@@ -115,7 +115,7 @@ apply {
 	MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP :	mov m.MainParserT_parser_tmp_3 h.option.len
 	shl m.MainParserT_parser_tmp_3 0x3
 	mov m.MainParserT_parser_tmp_5 m.MainParserT_parser_tmp_3
-	add m.MainParserT_parser_tmp_5 0xfffffff0
+	add m.MainParserT_parser_tmp_5 0xFFFFFFF0
 	mov m.MainParserT_parser_tmp_5_extract_tmp m.MainParserT_parser_tmp_5
 	shr m.MainParserT_parser_tmp_5_extract_tmp 0x3
 	extract h.ipv4_option_timestamp m.MainParserT_parser_tmp_5_extract_tmp

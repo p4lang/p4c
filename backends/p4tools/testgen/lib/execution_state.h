@@ -14,6 +14,7 @@
 #include <boost/optional/optional.hpp>
 #include <boost/variant/get.hpp>
 
+#include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
@@ -32,6 +33,7 @@ namespace P4Testgen {
 
 /// Represents state of execution after having reached a program point.
 class ExecutionState {
+    friend class SmallStepEvaluator;
     friend class Test::SmallStepTest;
 
     /// Specifies the type of the packet size variable.
@@ -140,6 +142,9 @@ class ExecutionState {
 
     /// List of branch decisions leading into this state.
     std::vector<uint64_t> selectedBranches;
+
+    /// State that is needed to track reachability of statements given a query.
+    ReachabilityEngineState* reachabilityEngineState = nullptr;
 
     /* =========================================================================================
      *  Accessors
@@ -424,7 +429,7 @@ class ExecutionState {
     /// @returns the zombies that were allocated in this state
     const std::set<StateVariable>& getZombies() const;
 
-    /// @see IRUtils::getZombieConst.
+    /// @see Utils::getZombieConst.
     /// We also place the zombies in the set of allocated zombies of this state.
     const StateVariable& createZombieConst(const IR::Type* type, cstring name,
                                            uint64_t instanceID = 0);

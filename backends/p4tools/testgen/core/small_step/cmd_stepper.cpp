@@ -11,9 +11,10 @@
 #include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/compiler/hs_index_simplify.h"
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/util.h"
+#include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
@@ -93,7 +94,7 @@ void CmdStepper::initializeBlockParams(const IR::Type_Declaration* typeDecl,
             declareStructLike(nextState, paramPath, ts);
         } else if (const auto* tb = paramType->to<IR::Type_Base>()) {
             // If the type is a flat Type_Base, postfix it with a "*".
-            const auto& paramRef = IRUtils::addZombiePostfix(paramPath, tb);
+            const auto& paramRef = Utils::addZombiePostfix(paramPath, tb);
             nextState->set(paramRef, programInfo.createTargetUninitialized(paramType, false));
         } else {
             P4C_UNIMPLEMENTED("Unsupported initialization type %1%", paramType->node_type_name());
@@ -136,7 +137,7 @@ bool CmdStepper::preorder(const IR::AssignmentStatement* assign) {
         }
         // In case of a header, we also need to set the validity bits to true.
         for (const auto* headerValid : flatRefValids) {
-            state.set(headerValid, IRUtils::getBoolLiteral(true));
+            state.set(headerValid, IR::getBoolLiteral(true));
         }
     } else if (leftType->is<IR::Type_Base>()) {
         // Convert a path expression into the respective member.
@@ -353,7 +354,7 @@ bool CmdStepper::preorder(const IR::P4Program* /*program*/) {
         }
         const auto* fixedSizeEqu =
             new IR::Equ(ExecutionState::getInputPacketSizeVar(),
-                        IRUtils::getConstant(ExecutionState::getPacketSizeVarType(), pktSize));
+                        IR::getConstant(ExecutionState::getPacketSizeVarType(), pktSize));
         if (cond == boost::none) {
             cond = fixedSizeEqu;
         } else {
@@ -502,7 +503,7 @@ const Constraint* CmdStepper::startParser(const IR::P4Parser* parser, ExecutionS
     const auto* boolType = IR::Type::Boolean::get();
     const Constraint* result = new IR::Leq(
         boolType, ExecutionState::getInputPacketSizeVar(),
-        IRUtils::getConstant(parserCursorVarType, ExecutionState::getMaxPacketLength_bits()));
+        IR::getConstant(parserCursorVarType, ExecutionState::getMaxPacketLength_bits()));
 
     // Constrain the input packet size to be a multiple of 8 bits. Do this by constraining the
     // lowest three bits of the packet size to 0.
@@ -511,9 +512,9 @@ const Constraint* CmdStepper::startParser(const IR::P4Parser* parser, ExecutionS
         boolType, result,
         new IR::Equ(boolType,
                     new IR::Slice(threeBitType, ExecutionState::getInputPacketSizeVar(),
-                                  IRUtils::getConstant(parserCursorVarType, 2),
-                                  IRUtils::getConstant(parserCursorVarType, 0)),
-                    IRUtils::getConstant(threeBitType, 0)));
+                                  IR::getConstant(parserCursorVarType, 2),
+                                  IR::getConstant(parserCursorVarType, 0)),
+                    IR::getConstant(threeBitType, 0)));
 
     // Call the implementation for the specific target.
     // If we get a constraint back, add it to the result.
@@ -546,7 +547,7 @@ IR::SwitchStatement* CmdStepper::replaceSwitchLabels(const IR::SwitchStatement* 
         // Do not replace default expression labels.
         if (!newSwitchCase->label->is<IR::DefaultExpression>()) {
             newSwitchCase->label =
-                IRUtils::getConstant(actionVar->type, actionsIds[switchCase->label->toString()]);
+                IR::getConstant(actionVar->type, actionsIds[switchCase->label->toString()]);
         }
         newCases.push_back(newSwitchCase);
     }

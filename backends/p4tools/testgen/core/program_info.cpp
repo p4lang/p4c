@@ -1,6 +1,7 @@
 #include "backends/p4tools/testgen/core/program_info.h"
 
-#include "backends/p4tools/common/lib/ir.h"
+#include "backends/p4tools/common/lib/util.h"
+#include "ir/irutils.h"
 #include "lib/exceptions.h"
 
 #include "backends/p4tools/testgen/options.h"
@@ -85,14 +86,14 @@ void ProgramInfo::produceCopyInOutCall(const IR::Parameter* param, size_t paramI
     const auto* paramDir = new IR::StringLiteral(directionToString(param->direction));
     if (copyIns != nullptr) {
         // This mimicks the copy-in from the architecture environment.
-        const auto* copyInCall = new IR::MethodCallStatement(IRUtils::generateInternalMethodCall(
+        const auto* copyInCall = new IR::MethodCallStatement(Utils::generateInternalMethodCall(
             "copy_in", {archPath, paramRef, paramDir, new IR::BoolLiteral(false)}));
         copyIns->emplace_back(copyInCall);
     }
     if (copyOuts != nullptr) {
         // This mimicks the copy-out from the architecture environment.
         const auto* copyOutCall = new IR::MethodCallStatement(
-            IRUtils::generateInternalMethodCall("copy_out", {archPath, paramRef, paramDir}));
+            Utils::generateInternalMethodCall("copy_out", {archPath, paramRef, paramDir}));
         copyOuts->emplace_back(copyOutCall);
     }
 }

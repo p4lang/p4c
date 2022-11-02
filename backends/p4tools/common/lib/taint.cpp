@@ -4,8 +4,9 @@
 #include <utility>
 #include <vector>
 
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
+#include "backends/p4tools/common/lib/util.h"
+#include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
@@ -164,7 +165,7 @@ class TaintPropagator : public Transform {
     const IR::Node* postorder(IR::TaintExpression* expr) override { return expr; }
 
     const IR::Node* postorder(IR::ConcolicVariable* var) override {
-        return new IR::Constant(var->type, IRUtils::getMaxBvVal(var->type));
+        return new IR::Constant(var->type, IR::getMaxBvVal(var->type));
     }
     const IR::Node* postorder(IR::Operation_Unary* unary_op) override { return unary_op->expr; }
 
@@ -182,7 +183,7 @@ class TaintPropagator : public Transform {
         }
         // Otherwise we convert the expression to a constant of the cast type.
         // Ultimately, the value here does not matter.
-        return IRUtils::getDefaultValue(cast->destType);
+        return IR::getDefaultValue(cast->destType);
     }
 
     const IR::Node* postorder(IR::Operation_Binary* bin_op) override {
@@ -207,13 +208,13 @@ class TaintPropagator : public Transform {
         auto slLeftInt = slice->e1->checkedTo<IR::Constant>()->asInt();
         auto slRightInt = slice->e2->checkedTo<IR::Constant>()->asInt();
         auto width = 1 + slLeftInt - slRightInt;
-        const auto* sliceTb = IRUtils::getBitType(width);
+        const auto* sliceTb = IR::getBitType(width);
         if (Taint::hasTaint(varMap, slice)) {
-            return IRUtils::getTaintExpression(sliceTb);
+            return Utils::getTaintExpression(sliceTb);
         }
         // Otherwise we convert the expression to a constant of the sliced type.
         // Ultimately, the value here does not matter.
-        return IRUtils::getConstant(sliceTb, 0);
+        return IR::getConstant(sliceTb, 0);
     }
 
  public:
@@ -226,18 +227,18 @@ class MaskBuilder : public Transform {
  private:
     const IR::Node* preorder(IR::Member* member) override {
         // Non-tainted members just return the max value, which corresponds to a mask of all zeroes.
-        return IRUtils::getConstant(member->type, IRUtils::getMaxBvVal(member->type));
+        return IR::getConstant(member->type, IR::getMaxBvVal(member->type));
     }
 
     const IR::Node* preorder(IR::TaintExpression* taintExpr) override {
         // If the member is tainted, we set the mask to ones corresponding to the width of the
         // value.
-        return IRUtils::getDefaultValue(taintExpr->type);
+        return IR::getDefaultValue(taintExpr->type);
     }
 
     const IR::Node* preorder(IR::Literal* lit) override {
         // Fill out a literal with zeroes.
-        const auto* maxConst = IRUtils::getConstant(lit->type, IRUtils::getMaxBvVal(lit->type));
+        const auto* maxConst = IR::getConstant(lit->type, IR::getMaxBvVal(lit->type));
         // If the literal would have been zero anyway, just return it.
         if (lit->equiv(*maxConst)) {
             return lit;

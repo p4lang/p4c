@@ -62,9 +62,9 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     @name("MainControlImpl.ipv4_tbl") table ipv4_tbl_0 {
         key = {
-            hdr.ipv4.dstAddr : exact @name("hdr.ipv4.dstAddr") ;
-            hdr.ipv4.srcAddr : optional @name("hdr.ipv4.srcAddr") ;
-            hdr.ipv4.protocol: exact @name("hdr.ipv4.protocol") ;
+            hdr.ipv4.dstAddr : exact @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.srcAddr : optional @name("hdr.ipv4.srcAddr");
+            hdr.ipv4.protocol: exact @name("hdr.ipv4.protocol");
         }
         actions = {
             next_hop();
@@ -87,4 +87,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-
