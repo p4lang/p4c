@@ -115,5 +115,38 @@ TEST(ordered_map, map_not_equal) {
     EXPECT_TRUE(a != b);
 }
 
+TEST(ordered_map, insert_emplace_erase) {
+    ordered_map<unsigned, unsigned> om;
+    std::map<unsigned, unsigned> sm;
+
+    typename ordered_map<unsigned, unsigned>::const_iterator it = om.end();
+    for (auto v : {0, 1, 2, 3, 4, 5, 6, 7, 8}) {
+        sm.emplace(v, 2 * v);
+        std::pair<unsigned, unsigned> pair {v, 2 * v};
+        if (v % 2 == 0) {
+            if ((v / 2) % 2 == 0) {
+                it = om.insert(pair).first;
+            } else {
+                it = om.emplace(v, pair.second).first;
+            }
+        } else {
+            if ((v / 2) % 2 == 0) {
+                it = om.insert(std::move(pair)).first;
+            } else {
+                it = om.emplace(std::move(v), v * 2).first;
+            }
+        }
+    }
+
+    EXPECT_TRUE(std::equal(om.begin(), om.end(), sm.begin(), sm.end()));
+
+    it = std::next(om.begin(), 2);
+    om.erase(it);
+    sm.erase(std::next(sm.begin(), 2));
+
+    EXPECT_TRUE(om.size() == sm.size());
+    EXPECT_TRUE(std::equal(om.begin(), om.end(), sm.begin(), sm.end()));
+}
+
 
 }  // namespace Test
