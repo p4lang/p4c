@@ -49,10 +49,12 @@ PIPELINE_MAPS_MOUNT_PATH = "{}/maps".format(TEST_PIPELINE_MOUNT_PATH)
 PORT0 = 0
 PORT1 = 1
 PORT2 = 2
+# PTF_PORTS stores port numbers used by PTF test cases to send packets to the test switch.
+# PTF_PORTS should only be used in PTF test cases to send/receive packets.
 PTF_PORTS = [PORT0, PORT1, PORT2]
 
-# stores real interface numbers retrieved from OS
-# DP_PORTS are used as data plane port numbers in P4 programs
+# DP_PORTS stores real interface numbers retrieved from OS.
+# DP_PORTS corresponds to switch interfaces and are used as data plane port numbers inside P4 programs.
 DP_PORTS = dict()
 
 def xdp2tc_head_not_supported(cls):
