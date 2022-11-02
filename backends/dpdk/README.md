@@ -74,7 +74,7 @@ In P4 the second argument of the extract method is the number of bits.
 Compiler generates instructions which compute the size in bytes from the value in bits.
 If the value in bits is not a multiple of 8, the value is rounded down to the lower
 multiple of 8 bits.
-- Currently dpdk target does not support standard count and execute as defined in PSA and PNA, it requires packet length in methods count and execute which are part of Counter and Meter externs. Adding param ``` in bit<32> pkt_len``` to execute (part of Meter extern) leads to overload resolution failure due to ambiguous candidates, as p4c do overload resolution based on number of parameter and does not consider types. To workaround this we introduced new method in Meter extern `dpdk_execute` which has extra param.
+- Currently dpdk target does not support standard count and execute methods for Counter and Meter externs as defined in PSA and PNA specifications. It requires packet length as parameter in count and execute methods.
 ```Meter
 PNA_MeterColor_t dpdk_execute(in S index, in PNA_MeterColor_t color, in bit<32> pkt_len);
 ```

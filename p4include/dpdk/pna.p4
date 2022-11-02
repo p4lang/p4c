@@ -407,6 +407,11 @@ extern Meter<S> {
   // RFC 2698). The color of the packet before the method call was
   // made is specified by the color parameter.
   PNA_MeterColor_t execute(in S index, in PNA_MeterColor_t color);
+  // Adding param `in bit<32> pkt_len` to execute (part of Meter extern)
+  // leads to overload resolution failure due to ambiguous candidates,
+  // as p4c do overload resolution based on number of parameter and does
+  // not consider types. To workaround this we introduced new method in
+  // Meter extern `dpdk_execute` which has extra param.
   PNA_MeterColor_t dpdk_execute(in S index, in PNA_MeterColor_t color, in bit<32> pkt_len);
 
   // Use this method call to perform a color blind meter update (see
