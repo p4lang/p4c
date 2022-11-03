@@ -3233,9 +3233,16 @@ TypeInference::actionCall(bool inActionList,
     BUG_CHECK(method->is<IR::PathExpression>(), "%1%: unexpected call", method);
     BUG_CHECK(baseType->returnType == nullptr,
               "%1%: action with return type?", baseType->returnType);
-    if (!baseType->typeParameters->empty())
-        typeError("%1%: Cannot supply type parameters for an action invocation",
+    if (!baseType->typeParameters->empty()) {
+        typeError("%1%: Actions cannot be generic",
                   baseType->typeParameters);
+        return actionCall;
+    }
+    if (!actionCall->typeArguments->empty()) {
+        typeError("%1%: Cannot supply type parameters for an action invocation",
+                  actionCall->typeArguments);
+        return actionCall;
+    }
 
     bool inTable = findContext<IR::P4Table>() != nullptr;
 
