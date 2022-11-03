@@ -66,7 +66,7 @@ control ingress(inout headers hdr,
             istd.ingress_port : exact;
         }
         actions = { do_forward; do_forward_2; NoAction; }
-        default_action = do_forward((PortId_t) 5);
+        default_action = do_forward((PortId_t) PORT1);
         size = 100;
     }
 
