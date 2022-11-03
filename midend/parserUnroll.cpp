@@ -258,6 +258,23 @@ class ParserStateRewriter : public Transform {
         return true;
     }
 
+    /// Returns true for current id if indexes of the headers stack
+    /// are the same before previous call of the same parser state.
+    bool calledWithNoChanges(IR::ID id, const ParserStateInfo* state) {
+        CHECK_NULL(state);
+        const auto* prevState = state; 
+        while (prevState->state->name.name != id.name) {
+            prevState = prevState->predecessor;
+            if (prevState == nullptr) {
+                return false;
+            }
+        }
+        if (prevState->predecessor != nullptr) {
+            prevState = prevState->predecessor;
+        }
+        return prevState->statesIndexes == state->statesIndexes;
+    }
+
     /// Generated new state name
     IR::ID genNewName(IR::ID id) {
         if (isTerminalState(id))
@@ -266,13 +283,25 @@ class ParserStateRewriter : public Transform {
         cstring name = id.name;
         if (parserStructure->callsIndexes.count(id.name) && (state->scenarioStates.count(id.name)
             || parserStructure->reachableHSUsage(id, state))) {
+            // or self called with no extraction...
+            // in this case we need to use the same name as it was in previous call
             if (was_called(name, id))
                 return id;
-            index = parserStructure->callsIndexes[id.name];
-            parserStructure->callsIndexes[id.name] = index + 1;
-            if (index + 1 > 0) {
-                index++;
-                id = IR::ID(id.name + std::to_string(index));
+            if (calledWithNoChanges(id, state)) {
+                index = 0;
+                if (parserStructure->callsIndexes.count(id.name)) {
+                    index = parserStructure->callsIndexes[id.name];
+                }
+                if (index > 0) {
+                    id = IR::ID(id.name + std::to_string(index));
+                }
+            } else {
+                index = parserStructure->callsIndexes[id.name];
+                parserStructure->callsIndexes[id.name] = index + 1;
+                if (index + 1 > 0) {
+                    index++;
+                    id = IR::ID(id.name + std::to_string(index));
+                }
             }
         } else if (!parserStructure->callsIndexes.count(id.name)) {
             index = 0;
@@ -771,7 +800,13 @@ class ParserSymbolicInterpreter {
             if (infLoop) {
                 // Stop unrolling if it was an error.
                 if (wasError) {
-                    break;
+                    IR::ID newName = getNewName(stateInfo);
+                    if (newStates.count(newName) != 0) {
+                        evaluateState(stateInfo, newStates);
+                    }
+                    wasError  = false;
+                    continue;
+                    //break;
                 }
                 // don't evaluate successors anymore
                 // generate call OutOfBound
