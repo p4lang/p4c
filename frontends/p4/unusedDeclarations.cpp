@@ -52,8 +52,9 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Type_SerEnum* type) {
 }
 
 const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Control* cont) {
-    if (!refMap->isUsed(getOriginal<IR::IDeclaration>())) {
-        LOG3("Removing " << cont);
+    auto orig = getOriginal<IR::P4Control>();
+    if (!refMap->isUsed(orig)) {
+        LOG3("Removing " << cont << dbp(orig));
         prune();
         return nullptr;
     }
@@ -64,17 +65,18 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Control* cont) {
     return cont;
 }
 
-const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Parser* cont) {
-    if (!refMap->isUsed(getOriginal<IR::IDeclaration>())) {
-        LOG3("Removing " << cont);
+const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Parser* parser) {
+    auto orig = getOriginal<IR::P4Parser>();
+    if (!refMap->isUsed(orig)) {
+        LOG3("Removing " << parser << dbp(orig));
         prune();
         return nullptr;
     }
 
-    visit(cont->parserLocals, "parserLocals");
-    visit(cont->states, "states");
+    visit(parser->parserLocals, "parserLocals");
+    visit(parser->states, "states");
     prune();
-    return cont;
+    return parser;
 }
 
 const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Table* table) {

@@ -64,12 +64,14 @@ class RemoveUnusedDeclarations : public Transform {
     const IR::Node* process(const IR::IDeclaration* decl);
     const IR::Node* warnIfUnused(const IR::Node* node);
 
- public:
-    explicit RemoveUnusedDeclarations(const ReferenceMap* refMap,
-                                      std::set<const IR::Node*>* warned = nullptr) :
+    // Prevent direct instantiations of this class.
+    friend class RemoveAllUnusedDeclarations;
+    RemoveUnusedDeclarations(const ReferenceMap* refMap,
+                             std::set<const IR::Node*>* warned = nullptr) :
             refMap(refMap), warned(warned)
     { CHECK_NULL(refMap); setName("RemoveUnusedDeclarations"); }
 
+ public:
     using Transform::postorder;
     using Transform::preorder;
     using Transform::init_apply;
@@ -124,6 +126,7 @@ class RemoveAllUnusedDeclarations : public PassManager {
         if (warn)
             warned = new std::set<const IR::Node*>();
 
+        refMap->clear();
         passes.emplace_back(
             new PassRepeated {
                 new ResolveReferences(refMap),
