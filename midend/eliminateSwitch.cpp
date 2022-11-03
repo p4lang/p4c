@@ -19,6 +19,21 @@ limitations under the License.
 
 namespace P4 {
 
+const IR::Node* DoEliminateSwitch::postorder(IR::P4Program* program) {
+    if (!exactNeeded)
+        return program;
+    for (auto *obj : program->objects) {
+        if (auto *match_kind = obj->to<IR::Declaration_MatchKind>()) {
+            if (match_kind->getDeclByName(P4CoreLibrary::instance.exactMatch.Id()))
+                return program;
+        }
+    }
+    ::error(ErrorType::ERR_NOT_FOUND,
+            "Could not find declaration for 'match_kind.exact', which is needed to implement "
+            "switch statements; did you include core.p4?");
+    return program;
+}
+
 const IR::Node* DoEliminateSwitch::postorder(IR::P4Control* control) {
     for (auto a : toInsert)
         control->controlLocals.push_back(a);
@@ -54,6 +69,7 @@ const IR::Node* DoEliminateSwitch::postorder(IR::SwitchStatement* statement) {
     auto tableKeyEl = new IR::KeyElement(
         src, new IR::PathExpression(key),
         new IR::PathExpression(P4CoreLibrary::instance.exactMatch.Id()));
+    exactNeeded = true;
     IR::IndexedVector<IR::ActionListElement> actionsList;
     IR::IndexedVector<IR::Property> properties;
     IR::Vector<IR::SwitchCase> cases;
