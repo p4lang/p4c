@@ -1,3 +1,3 @@
-missing_match.p4(20): [--Werror=not-found] error: noSuchMatch: declaration not found
+missing_match.p4(21): [--Werror=not-found] error: noSuchMatch: declaration not found
         key = { b : noSuchMatch; }
                     ^^^^^^^^^^^
