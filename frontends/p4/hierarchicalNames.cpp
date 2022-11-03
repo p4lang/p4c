@@ -27,14 +27,25 @@ const IR::Node* HierarchicalNames::postorder(IR::Annotation* annotation) {
         return annotation;
 
     cstring name = annotation->getName();
-    if (name.startsWith("."))
-        return annotation;
-    cstring newName = "";
-    for (cstring s : stack)
-        newName += s + ".";
-    newName += name;
-    LOG2("Changing " << name << " to " << newName);
-    annotation = new IR::Annotation(annotation->name, newName);
+    if (!name.startsWith(".")) {
+        cstring newName = "";
+        for (cstring s : stack)
+            newName += s + ".";
+        newName += name;
+        LOG2("Changing " << name << " to " << newName);
+        annotation = new IR::Annotation(annotation->name, newName);
+        name = newName;
+    }
+    // The node the annotation belongs to
+    CHECK_NULL(getContext()->parent);
+    auto *annotatedNode = getContext()->parent->node;
+    CHECK_NULL(annotatedNode);
+    if (annotatedNodes.count(name)) {
+        error(ErrorType::ERR_DUPLICATE, "%1%: " ERR_STR_DUPLICATED_NAME ": %2%",
+            annotatedNode, annotatedNodes[name]);
+    } else {
+        annotatedNodes[name] = annotatedNode;
+    }
     return annotation;
 }
 

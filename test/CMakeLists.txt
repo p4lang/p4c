@@ -50,6 +50,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/helpers.cpp
   gtest/json_test.cpp
   gtest/midend_test.cpp
+  gtest/name_duplicated.cpp
   gtest/opeq_test.cpp
   gtest/ordered_map.cpp
   gtest/ordered_set.cpp
