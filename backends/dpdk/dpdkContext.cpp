@@ -110,41 +110,53 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
     }
 
     for (auto ed :  structure->externDecls) {
-        if (auto type = ed->type->to<IR::Type_Specialized>()) {
-            auto externTypeName = type->baseType->path->name.name;
-            if (externTypeName == "Counter" ||
-                externTypeName == "Register" ||
-                externTypeName == "Meter" ||
-                externTypeName == "Hash" ||
-                externTypeName == "InternetCheckSum") {
-                struct externAttributes externAttr;
-                externAttr.externalName = ed->controlPlaneName();
-                externAttr.externType = externTypeName;
-                if (externTypeName == "Counter") {
-                    if (ed->arguments->size() != 2) {
-                        ::error(ErrorType::ERR_UNEXPECTED,
-                                "%1%: expected 2 arguments, number of counters and type"
-                                "of counter", ed);
-                    }
-                    auto counter_type = ed->arguments->at(1)->expression;
-                    BUG_CHECK(counter_type->is<IR::Constant>(),
-                               "Expected counter type to be constant");
-                    auto value = counter_type->to<IR::Constant>()->asUnsigned();
-                    switch (value) {
-                        case 0:
-                            externAttr.counterType = "packets";
-                            break;
-                        case 1:
-                             externAttr.counterType = "bytes";
-                            break;
-                        case 2:
-                             externAttr.counterType = "packets_and_bytes";
-                            break;
-                    }
+        cstring externTypeName = "";
+        if (auto type = ed->type->to<IR::Type_Name>()) {
+            externTypeName = type->path->name.name;
+        } else if (auto type = ed->type->to<IR::Type_Specialized>()) {
+            externTypeName = type->baseType->path->name.name;
+        }
+        if (externTypeName == "Counter" ||
+            externTypeName == "DirectCounter" ||
+            externTypeName == "Register" ||
+            externTypeName == "DirectMeter" ||
+            externTypeName == "Meter" ||
+            externTypeName == "Hash" ||
+            externTypeName == "InternetCheckSum") {
+            struct externAttributes externAttr;
+            externAttr.externalName = ed->controlPlaneName();
+            externAttr.externType = externTypeName;
+            if (externTypeName == "Counter" || "DirectCounter") {
+                unsigned maxArgNum = externTypeName == "Counter"? 2 : 1;
+                int typeArgNum = maxArgNum - 1;
+                if (ed->arguments->size() != maxArgNum) {
+                    ::error(ErrorType::ERR_UNEXPECTED,
+                            "%1%: expected %2% arguments, number of counters and type"
+                            "of counter", ed, maxArgNum);
                 }
-                externAttrMap.emplace(ed->name.name, externAttr);
-                externs.push_back(ed);
+                auto counter_type = ed->arguments->at(typeArgNum)->expression;
+                BUG_CHECK(counter_type->is<IR::Constant>(),
+                          "Expected counter type to be constant");
+                auto value = counter_type->to<IR::Constant>()->asUnsigned();
+                switch (value) {
+                    case 0:
+                        externAttr.counterType = "packets";
+                        break;
+                    case 1:
+                         externAttr.counterType = "bytes";
+                        break;
+                    case 2:
+                         externAttr.counterType = "packets_and_bytes";
+                        break;
+                }
             }
+            if (externTypeName == "DirectMeter" || "DirectCounter") {
+                auto ownerTable = ::get(structure->direct_resource_map, ed->name.name);
+                auto tableAttr = ::get(tableAttrmap, ownerTable->name.originalName);
+                externAttr.table_id = tableAttr.tableHandle;
+            }
+            externAttrMap.emplace(ed->name.name, externAttr);
+            externs.push_back(ed);
         }
     }
 
@@ -500,8 +512,11 @@ void DpdkContextGenerator::addExternInfo(Util::JsonArray* externsJson) {
         externJson->emplace("target_name", t->name.name);
         externJson->emplace("type", externAttr.externType);
         auto* attrJson = new Util::JsonObject();
-        if (externAttr.externType == "Counter") {
+        if (externAttr.externType == "Counter" || externAttr.externType == "DirectCounter") {
             attrJson->emplace("type", externAttr.counterType);
+        }
+        if (externAttr.externType == "DirectCounter" || externAttr.externType == "DirectMeter") {
+            attrJson->emplace("table_id", externAttr.table_id);
         }
         externJson->emplace("attributes", attrJson);
         externsJson->append(externJson);

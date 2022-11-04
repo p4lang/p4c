@@ -224,11 +224,11 @@ class InjectJumboStruct : public Transform {
 // into the single metadata struct.
 // This pass has to be applied after CollectMetadataHeaderInfo fills
 // local_metadata_type field in DpdkProgramStructure which is passed to the constructor.
-class InjectOutputPortMetadataField : public Transform {
+class InjectFixedMetadataField : public Transform {
     DpdkProgramStructure *structure;
 
  public:
-    explicit InjectOutputPortMetadataField(DpdkProgramStructure *structure) :
+    explicit InjectFixedMetadataField(DpdkProgramStructure *structure) :
         structure(structure) {}
     const IR::Node *preorder(IR::Type_Struct *s) override;
 };
@@ -655,7 +655,25 @@ class CollectExternDeclaration : public Inspector {
     explicit CollectExternDeclaration(DpdkProgramStructure *structure) :
         structure(structure) {}
     bool preorder(const IR::Declaration_Instance *d) override {
-        if (auto type = d->type->to<IR::Type_Specialized>()) {
+        if (auto type = d->type->to<IR::Type_Name>()) {
+            auto externTypeName = type->path->name.name;
+            if (externTypeName == "DirectMeter") {
+                if (d->arguments->size() != 1) {
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "%1%: expected type of meter as the only argument", d);
+                } else {
+                    /* Check if the Direct meter is of PACKETS (0) type */
+                    if (d->arguments->at(0)->expression->to<IR::Constant>()->asUnsigned() == 0)
+                        warn(ErrorType::WARN_UNSUPPORTED,
+                             "%1%: Packet metering is not supported."
+                             " Falling back to byte metering.", d);
+                }
+            } else {
+                // unsupported extern type
+                return false;
+            }
+            structure->externDecls.push_back(d);
+        } else if (auto type = d->type->to<IR::Type_Specialized>()) {
             auto externTypeName = type->baseType->path->name.name;
             if (externTypeName == "Meter") {
                 if (d->arguments->size() != 2) {
@@ -672,6 +690,11 @@ class CollectExternDeclaration : public Inspector {
                 if (d->arguments->size() != 2) {
                     ::error(ErrorType::ERR_EXPECTED,
                             "%1%: expected number of counters and type of counter as arguments", d);
+                }
+            } else if (externTypeName == "DirectCounter") {
+                if (d->arguments->size() != 1) {
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "%1%: expected type of counter as the only argument", d);
                 }
             } else if (externTypeName == "Register") {
                 if (d->arguments->size() != 1 && d->arguments->size() != 2) {
@@ -922,6 +945,58 @@ class ConvertActionSelectorAndProfile : public PassManager {
         passes.emplace_back(new P4::TypeChecking(refMap, typeMap, true));
     }
 };
+
+/* Collect size information from the owner table for direct counter and meter extern objects
+ * and validate some of the constraints on usage of Direct Meter and Direct Counter extern
+ * methods */
+class CollectDirectCounterMeter : public Inspector {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    DpdkProgramStructure* structure;
+    // To validate presence of specified method call for instancename within given action
+    cstring method;
+    cstring instancename;
+    // To validate that same method call for different direct meter/counter instance does not exist
+    // in any action
+    cstring oneInstance;
+    bool methodCallFound;
+    int getTableSize(const IR::P4Table * tbl);
+    bool ifMethodFound(const IR::P4Action *a, cstring method, cstring instancename = "");
+    void checkMethodCallInAction(const P4::ExternMethod *);
+
+ public:
+    static ordered_map<cstring, int> directMeterCounterSizeMap;
+    CollectDirectCounterMeter(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                DpdkProgramStructure* structure) :
+                refMap(refMap), typeMap(typeMap), structure(structure) {
+        setName("CollectDirectCounterMeter");
+        visitDagOnce = false;
+        method = "";
+        instancename = "";
+        oneInstance = "";
+        methodCallFound = false;
+    }
+
+    bool preorder(const IR::MethodCallStatement* mcs) override;
+    bool preorder(const IR::AssignmentStatement* assn) override;
+    bool preorder(const IR::P4Action* a) override;
+    bool preorder(const IR::P4Table* t) override;
+};
+
+class ValidateDirectCounterMeter : public Inspector {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    DpdkProgramStructure* structure;
+    void validateMethodInvocation(P4::ExternMethod *);
+ public:
+    ValidateDirectCounterMeter(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+            DpdkProgramStructure* structure) :
+    refMap(refMap), typeMap(typeMap), structure(structure) {}
+
+    void postorder(const IR::AssignmentStatement*) override;
+    void postorder(const IR::MethodCallStatement*) override;
+};
+
 
 class CollectAddOnMissTable : public Inspector {
     P4::ReferenceMap* refMap;
