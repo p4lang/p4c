@@ -40,11 +40,8 @@ return_status=0
 # Add local bin to the path in case clang-format is installed there.
 export PATH=$PATH:${HOME}/.local/bin
 
-find -L ${THIS_DIR}/../../common -iname '*.h' -o -iname '*.cpp' | xargs clang-format $write_args -i
-return_status=$(($return_status || $?))
-find -L ${THIS_DIR}/../../p4check -iname '*.h' -o -iname '*.cpp' | xargs clang-format $write_args -i
-return_status=$(($return_status || $?))
-find -L ${THIS_DIR}/../../testgen -iname '*.h' -o -iname '*.cpp' | xargs clang-format $write_args -i
+# For now, just run this on the tools back end.
+find -L ${THIS_DIR}/../backends/p4tools -iname '*.h' -o  -path "${THIS_DIR}/../backends/p4tools/submodules" -prune -iname '*.cpp' -path "${THIS_DIR}/../backends/p4tools/submodules" -prune | xargs clang-format $write_args -i
 return_status=$(($return_status || $?))
 
 
