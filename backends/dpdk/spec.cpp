@@ -72,24 +72,24 @@ std::ostream &IR::DpdkDeclaration::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
-    if (DPDK::toStr(this->getType()) == "Register") {
-        auto args = this->arguments;
+    if (DPDK::toStr(getType()) == "Register") {
+        auto args = arguments;
         if (args->size() == 0) {
             ::error(ErrorType::ERR_INVALID,
                     "Register extern declaration %1% must contain a size parameter\n",
-                this->Name());
+                Name());
         } else {
             auto size = args->at(0)->expression;
             auto init_val = args->size() == 2? args->at(1)->expression: nullptr;
-            auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name(), size, init_val);
+            auto regDecl = new IR::DpdkRegisterDeclStatement(Name(), size, init_val);
             regDecl->toSpec(out) << std::endl;
         }
-    } else if (DPDK::toStr(this->getType()) == "Counter") {
-        auto args = this->arguments;
+    } else if (DPDK::toStr(getType()) == "Counter") {
+        auto args = arguments;
         unsigned value = 0;
         if (args->size() < 2) {
             ::error(ErrorType::ERR_INVALID,
-                    "Counter extern declaration %1% must contain 2 parameters\n", this->Name());
+                    "Counter extern declaration %1% must contain 2 parameters\n", Name());
         } else {
             auto n_counters = args->at(0)->expression;
             auto counter_type = args->at(1)->expression;
@@ -98,30 +98,30 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
             if (value == 2) {
                 /* For PACKETS_AND_BYTES counter type, two regarray declarations are emitted and
                    the counter name is suffixed with _packets and _bytes */
-                auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name() + "_packets",
+                auto regDecl = new IR::DpdkRegisterDeclStatement(Name() + "_packets",
                                    n_counters, new IR::Constant(0));
                 regDecl->toSpec(out) << std::endl << std::endl;
-                regDecl = new IR::DpdkRegisterDeclStatement(this->Name() + "_bytes", n_counters,
+                regDecl = new IR::DpdkRegisterDeclStatement(Name() + "_bytes", n_counters,
                                                             new IR::Constant(0));
                 regDecl->toSpec(out) << std::endl;
             } else {
-                auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name(), n_counters,
+                auto regDecl = new IR::DpdkRegisterDeclStatement(Name(), n_counters,
                                                                  new IR::Constant(0));
                 regDecl->toSpec(out) << std::endl;
             }
         }
-    } else if (DPDK::toStr(this->getType()) == "DirectCounter") {
-        auto args = this->arguments;
+    } else if (DPDK::toStr(getType()) == "DirectCounter") {
+        auto args = arguments;
         unsigned value = 0;
         if (args->size() != 1) {
             ::error(ErrorType::ERR_INVALID,
-                    "Counter extern declaration %1% must contain 1 parameters\n", this->Name());
+                    "Counter extern declaration %1% must contain 1 parameters\n", Name());
         } else {
             IR::Expression *n_counters =nullptr;
-            if (directMeterCounterSizeMap.count(this->Name())) {
-                n_counters = new IR::Constant(directMeterCounterSizeMap.at(this->Name()));
+            if (directMeterCounterSizeMap.count(Name())) {
+                n_counters = new IR::Constant(directMeterCounterSizeMap.at(Name()));
             } else {
-                BUG("%1%: Direct Counter size is not populated", this->Name());
+                BUG("%1%: Direct Counter size is not populated", Name());
             }
 
             auto counter_type = args->at(0)->expression;
@@ -130,43 +130,43 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
             if (value == 2) {
                 /* For PACKETS_AND_BYTES counter type, two regarray declarations are emitted and
                    the counter name is suffixed with _packets and _bytes */
-                auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name() + "_packets",
+                auto regDecl = new IR::DpdkRegisterDeclStatement(Name() + "_packets",
                                    n_counters, new IR::Constant(0));
                 regDecl->toSpec(out) << std::endl << std::endl;
-                regDecl = new IR::DpdkRegisterDeclStatement(this->Name() + "_bytes", n_counters,
+                regDecl = new IR::DpdkRegisterDeclStatement(Name() + "_bytes", n_counters,
                                                             new IR::Constant(0));
                 regDecl->toSpec(out) << std::endl;
             } else {
-                auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name(), n_counters,
+                auto regDecl = new IR::DpdkRegisterDeclStatement(Name(), n_counters,
                                                                  new IR::Constant(0));
                 regDecl->toSpec(out) << std::endl;
             }
         }
-    } else if (DPDK::toStr(this->getType()) == "Meter") {
-        auto args = this->arguments;
+    } else if (DPDK::toStr(getType()) == "Meter") {
+        auto args = arguments;
         if (args->size() < 2) {
             ::error(ErrorType::ERR_INVALID,
                     "Meter extern declaration %1% must contain a size parameter"
-                    " and meter type parameter", this->Name());
+                    " and meter type parameter", Name());
         } else {
             auto n_meters = args->at(0)->expression;
-            auto metDecl = new IR::DpdkMeterDeclStatement(this->Name(), n_meters);
+            auto metDecl = new IR::DpdkMeterDeclStatement(Name(), n_meters);
             metDecl->toSpec(out) << std::endl;
         }
-    } else if (DPDK::toStr(this->getType()) == "DirectMeter") {
-        auto args = this->arguments;
+    } else if (DPDK::toStr(getType()) == "DirectMeter") {
+        auto args = arguments;
         if (args->size() < 1) {
             ::error(ErrorType::ERR_INVALID,
                     "Meter extern declaration %1% must have "
-                    "meter type parameter", this->Name());
+                    "meter type parameter", Name());
         } else {
             IR::Expression *n_meters =nullptr;
-            if (directMeterCounterSizeMap.count(this->Name())) {
-                n_meters = new IR::Constant(directMeterCounterSizeMap.at(this->Name()));
+            if (directMeterCounterSizeMap.count(Name())) {
+                n_meters = new IR::Constant(directMeterCounterSizeMap.at(Name()));
             } else {
-                BUG("%1%, Direct Meter size is not populated", this->Name());
+                BUG("%1%, Direct Meter size is not populated", Name());
             }
-            auto metDecl = new IR::DpdkMeterDeclStatement(this->Name(), n_meters);
+            auto metDecl = new IR::DpdkMeterDeclStatement(Name(), n_meters);
             metDecl->toSpec(out) << std::endl;
         }
     }

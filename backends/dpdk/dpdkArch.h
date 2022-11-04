@@ -946,22 +946,41 @@ class ConvertActionSelectorAndProfile : public PassManager {
     }
 };
 
-/* Collect size information from the owner table for direct counter and meter extern objects */
+/* Collect size information from the owner table for direct counter and meter extern objects
+ * and validate some of the constraints on usage of Direct Meter and Direct Counter extern
+ * methods */
 class CollectDirectCounterMeter : public Inspector {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
     DpdkProgramStructure* structure;
+    // To validate presence of specified method call for instancename within given action
+    cstring method;
+    cstring instancename;
+    // To validate that same method call for different direct meter/counter instance does not exist
+    // in any action
+    cstring oneInstance;
+    bool methodCallFound;
     int getTableSize(const IR::P4Table * tbl);
     bool ifMethodFound(const IR::P4Action *a, cstring method, cstring instancename = "");
-    bool checkMethodCallInAction(const P4::ExternMethod *, cstring, cstring &, cstring);
+    void checkMethodCallInAction(const P4::ExternMethod *);
+
  public:
     static ordered_map<cstring, int> directMeterCounterSizeMap;
     CollectDirectCounterMeter(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                 DpdkProgramStructure* structure) :
-    refMap(refMap), typeMap(typeMap), structure(structure) {setName("CollectDirectCounterMeter");}
+                refMap(refMap), typeMap(typeMap), structure(structure) {
+        setName("CollectDirectCounterMeter");
+        visitDagOnce = false;
+        method = "";
+        instancename = "";
+        oneInstance = "";
+        methodCallFound = false;
+    }
 
-    void postorder(const IR::P4Action* a) override;
-    void postorder(const IR::P4Table* t) override;
+    bool preorder(const IR::MethodCallStatement* mcs) override;
+    bool preorder(const IR::AssignmentStatement* assn) override;
+    bool preorder(const IR::P4Action* a) override;
+    bool preorder(const IR::P4Table* t) override;
 };
 
 class ValidateDirectCounterMeter : public Inspector {

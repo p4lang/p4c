@@ -1064,11 +1064,10 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             auto declArgs = di->arguments;
             unsigned value = 0;
             auto counter_type = declArgs->at(0)->expression;
-            if (counter_type->is<IR::Constant>())
-                value = counter_type->to<IR::Constant>()->asUnsigned();
+            if (auto c = counter_type->to<IR::Constant>()) value = c->asUnsigned();
             if (a->method->getName().name == "count") {
                 auto args = a->expr->arguments;
-                if (args->size() > 1){
+                if (args->size() > 1) {
                     ::error(ErrorType::ERR_UNEXPECTED, "Expected at most 1 argument for %1%," \
                             "provided %2%", a->method->getName(), args->size());
                 } else {

@@ -23,6 +23,7 @@ struct ipv4_t {
 
 struct main_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
+	bit<32> local_metadata_data
 	bit<32> pna_main_output_metadata_output_port
 	bit<32> table_entry_index
 }
@@ -42,9 +43,10 @@ regarray per_prefix_pkt_count_0 size 0x401 initval 0x0
 regarray direction size 0x100 initval 0
 
 action count_1 args none {
+	jmpneq LABEL_END m.local_metadata_data 0x8
 	entryid m.table_entry_index 
 	regadd per_prefix_pkt_count_0 m.table_entry_index 1
-	return
+	LABEL_END :	return
 }
 
 action bytecount args none {
