@@ -12,4 +12,9 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - uses: actions/setup-python@v1
-    - run: ./tools/run-cpplint.sh
+    - name: Check submodule ref points.
+      run: |
+        ./tools/check-git-submodules.sh
+    - name: Run cpplint.
+      run: |
+        ./tools/run-cpplint.sh
