@@ -35,14 +35,43 @@ fi
 # This runs clang-format across the entire repository and the relevant source folders.
 THIS_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
+ROOT_DIR=$THIS_DIR/..
+
 return_status=0
 
 # Add local bin to the path in case clang-format is installed there.
 export PATH=$PATH:${HOME}/.local/bin
 
 # For now, just run this on the tools back end.
-find -L ${THIS_DIR}/../backends/p4tools -iname '*.h' -o  -path "${THIS_DIR}/../backends/p4tools/submodules" -prune -iname '*.cpp' -path "${THIS_DIR}/../backends/p4tools/submodules" -prune | xargs clang-format $write_args -i
+
+
+EXCLUDE_DIRS="-path ${THIS_DIR}/../backends/p4tools/submodules\
+             -o -path ${THIS_DIR}/../backends/ebpf/runtime\
+             -o -path ${THIS_DIR}/../backends/ubpf/runtime\
+             -o -path ${THIS_DIR}/../control-plane/p4runtime\
+"
+
+function run-clang-format() {
+    # $1 is directory
+    # $2 is root
 return_status=$(($return_status || $?))
+    lint_files=$(find $1 -type d \( ${EXCLUDE_DIRS} \) -prune -or -type f \( -iname \*.h -o -iname \*.cpp \))
+    if [[ $lint_files ]]; then
+        clang-format ${write_args} ${lint_files}
+    fi
+    return_status=$(($return_status || $?))
+}
+
+run-clang-format $ROOT_DIR/backends
+run-clang-format $ROOT_DIR/control-plane
+run-clang-format $ROOT_DIR/frontends
+run-clang-format $ROOT_DIR/ir
+run-clang-format $ROOT_DIR/lib
+run-clang-format $ROOT_DIR/midend
+if [ -d "$DIRECTORY" ]; then
+run-clang-format $ROOT_DIR/extensions
+fi
+run-clang-format $ROOT_DIR/tools
 
 
 echo "********************************"

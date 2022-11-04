@@ -16,7 +16,7 @@ EXCLUDE_DIRS="-path ${THIS_DIR}/../backends/p4tools/submodules\
 function run_cpplint() {
     # $1 is directory
     # $2 is root
-    lint_files=$( find $1 -type d \( ${EXCLUDE_DIRS} \) -prune -or -type f \( -iname \*.h -o -iname \*.cpp \))
+    lint_files=$(find $1 -type d \( ${EXCLUDE_DIRS} \) -prune -or -type f \( -iname \*.h -o -iname \*.cpp \))
     if [[ $lint_files ]]; then
         python3 $THIS_DIR/cpplint.py --root=$2 ${lint_files}
     fi
