@@ -55,7 +55,8 @@ function run-clang-format() {
     # $1 is directory
     # $2 is root
 return_status=$(($return_status || $?))
-    lint_files=$(find $1 -type d \( ${EXCLUDE_DIRS} \) -prune -or -type f \( -iname \*.h -o -iname \*.cpp \))
+    lint_files=$(find $1 -type d \( ${EXCLUDE_DIRS} \) -prune -or -type f \( -iname \*.h -o -iname \*.cpp \) -print )
+    echo $lint_files
     if [[ $lint_files ]]; then
         clang-format ${write_args} -i ${lint_files}
     fi
