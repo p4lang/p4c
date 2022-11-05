@@ -184,6 +184,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token<Token>      PLUS_SAT "|+|"
 %token<Token>      MINUS_SAT "|-|"
 %token<Token>      MUL "*"
+%token<Token>      SHARP "#"
 %token<Token>      DIV "/"
 %token<Token>      MOD "%"
 %token<Token>      BIT_OR "|"
@@ -1422,6 +1423,8 @@ expression
     | expression "[" expression "]"      { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
     | expression "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     | "{" expressionList "}"             { $$ = new IR::ListExpression(@1 + @3, *$2); }
+    | "{" SHARP "}"                      { $$ = new IR::InvalidHeader(
+                                                  @1 + @3, IR::Type::Unknown::get(), nullptr); }
     | "{" kvList "}"                     { $$ = new IR::StructExpression(
                                                   @1 + @3, IR::Type::Unknown::get(), (IR::Type_Name*)nullptr, *$2); }
     | "(" expression ")"                 { $$ = $2; }

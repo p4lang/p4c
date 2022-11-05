@@ -439,6 +439,12 @@ class StructExpression : Expression {
     size_t size() const { return components.size(); }
 }
 
+/// An expression that evaluates to an invalid header with the specified type.
+class InvalidHeader : Expression {
+    /// May only be known after type checking; so it can be nullptr.
+    NullOK Type headerType;
+}
+
 /// A ListExpression where all the components are compile-time values.
 /// This is used by the evaluator pass.
 class ListCompileTimeValue : CompileTimeValue {

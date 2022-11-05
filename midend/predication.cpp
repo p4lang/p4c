@@ -19,22 +19,22 @@ namespace P4 {
 
 /// convert an expression into a string that uniqely identifies the lvalue referenced
 /// return null cstring if not a reference to a lvalue.
-static cstring lvalue_name(const IR::Expression *exp) {
+static cstring predication_lvalue_name(const IR::Expression *exp) {
     if (auto p = exp->to<IR::PathExpression>())
         return p->path->name;
     if (auto m = exp->to<IR::Member>()) {
-        if (auto base = lvalue_name(m->expr))
+        if (auto base = predication_lvalue_name(m->expr))
             return base + "." + m->member;
     } else if (auto a = exp->to<IR::ArrayIndex>()) {
         if (auto k = a->right->to<IR::Constant>()) {
-            if (auto base = lvalue_name(a->left))
+            if (auto base = predication_lvalue_name(a->left))
                 return base + "[" + std::to_string(k->asInt()) + "]";
-        } else if (auto index = lvalue_name(a->right)) {
-            if (auto base = lvalue_name(a->left))
+        } else if (auto index = predication_lvalue_name(a->right)) {
+            if (auto base = predication_lvalue_name(a->left))
                 return base + "[" + index + "]";
         }
     } else if (auto s = exp->to<IR::Slice>()) {
-        if (auto base = lvalue_name(s->e0))
+        if (auto base = predication_lvalue_name(s->e0))
             if (auto h = s->e1->to<IR::Constant>())
                 if (auto l = s->e2->to<IR::Constant>())
                     return base + "." +
@@ -90,9 +90,9 @@ void Predication::ExpressionReplacer::emplaceExpression(IR::Mux * mux) {
 /// according to the current nesting level and also the structure of the 'mux' variable
 void Predication::ExpressionReplacer::visitBranch(IR::Mux * mux, bool then) {
     auto condition = conditions[conditions.size() - currentNestingLevel - 1];
-    auto leftName = lvalue_name(statement->left);
-    auto thenExprName = lvalue_name(mux->e1);
-    auto elseExprName = lvalue_name(mux->e2);
+    auto leftName = predication_lvalue_name(statement->left);
+    auto thenExprName = predication_lvalue_name(mux->e1);
+    auto elseExprName = predication_lvalue_name(mux->e2);
 
     if (leftName.isNullOrEmpty()) {
         ::error(ErrorType::ERR_EXPRESSION,
@@ -183,13 +183,13 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
     for (auto dependency : dependencies) {
         if (liveAssignments.find(dependency) != liveAssignments.end()) {
             // Save statement's name if it is dependent
-            dependentNames.push_back(lvalue_name(statement->left));
+            dependentNames.push_back(predication_lvalue_name(statement->left));
             // remove dependency from liveAssignments to not duplicate
             liveAssignments.erase(dependency);
             depNestingLevel = ifNestingLevel;
         }
     }
-    auto statementName = lvalue_name(statement->left);
+    auto statementName = predication_lvalue_name(statement->left);
     // Set value to true in isStatementDependent map
     // if the name of a current statement is the same as
     // the name of any in dependentNames.
@@ -220,7 +220,7 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
         // Remove statement for 'then' if there is a statement
         // with the same statement name in the else branch.
         if (liveAssigns.size() > 0 && !isStatementDependent[statementName] &&
-            lvalue_name(liveAssigns.back()->left) == lvalue_name(statement->left)) {
+            predication_lvalue_name(liveAssigns.back()->left) == predication_lvalue_name(statement->left)) {
             liveAssigns.pop_back();
         }
     }
@@ -238,12 +238,12 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
 }
 
 const IR::Node* Predication::preorder(IR::PathExpression * pathExpr) {
-    dependencies.push_back(lvalue_name(pathExpr));
+    dependencies.push_back(predication_lvalue_name(pathExpr));
     return pathExpr;
 }
 const IR::Node* Predication::preorder(IR::Member * member) {
     visit(member->expr);
-    dependencies.push_back(lvalue_name(member));
+    dependencies.push_back(predication_lvalue_name(member));
     return member;
 }
 const IR::Node* Predication::preorder(IR::ArrayIndex * arrInd) {
@@ -278,7 +278,7 @@ const IR::Node* Predication::preorder(IR::ArrayIndex * arrInd) {
 
         arrInd->right = index;
     }
-    dependencies.push_back(lvalue_name(arrInd));
+    dependencies.push_back(predication_lvalue_name(arrInd));
     return arrInd;
 }
 
