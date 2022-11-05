@@ -103,8 +103,6 @@ set (MIDEND_HDRS
   validateProperties.h
   )
 
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${MIDEND_SRCS};${MIDEND_HDRS}")
-
 build_unified(MIDEND_SRCS)
 add_library (midend STATIC ${MIDEND_SRCS})
 add_dependencies(midend genIR)
