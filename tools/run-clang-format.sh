@@ -57,21 +57,24 @@ function run-clang-format() {
 return_status=$(($return_status || $?))
     lint_files=$(find $1 -type d \( ${EXCLUDE_DIRS} \) -prune -or -type f \( -iname \*.h -o -iname \*.cpp \))
     if [[ $lint_files ]]; then
-        clang-format ${write_args} ${lint_files}
+        clang-format ${write_args} -i ${lint_files}
     fi
     return_status=$(($return_status || $?))
 }
 
-run-clang-format $ROOT_DIR/backends
-run-clang-format $ROOT_DIR/control-plane
-run-clang-format $ROOT_DIR/frontends
-run-clang-format $ROOT_DIR/ir
-run-clang-format $ROOT_DIR/lib
-run-clang-format $ROOT_DIR/midend
-if [ -d "$DIRECTORY" ]; then
-run-clang-format $ROOT_DIR/extensions
-fi
-run-clang-format $ROOT_DIR/tools
+# TODO: Apply clang-format to all of these folders?
+
+run-clang-format $ROOT_DIR/backends/p4tools
+# run-clang-format $ROOT_DIR/backends
+# run-clang-format $ROOT_DIR/control-plane
+# run-clang-format $ROOT_DIR/frontends
+# run-clang-format $ROOT_DIR/ir
+# run-clang-format $ROOT_DIR/lib
+# run-clang-format $ROOT_DIR/midend
+# if [ -d "$DIRECTORY" ]; then
+# run-clang-format $ROOT_DIR/extensions
+# fi
+# run-clang-format $ROOT_DIR/tools
 
 
 echo "********************************"

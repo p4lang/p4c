@@ -30,13 +30,13 @@ class Pattern {
      public:
         virtual bool match(const IR::Node *) = 0;
     } *pattern;
-    Pattern(Base *p) : pattern(p) {}
+    explicit Pattern(Base *p) : pattern(p) {}
 
     template<class T> class MatchExt : public Base {
         const T *&m;
      public:
         bool match(const IR::Node *n) override { return (m = n->to<T>()); }
-        MatchExt(const T *&m) : m(m) {}
+        explicit MatchExt(const T *&m) : m(m) {}
     };
 
     class Const : public Base {
@@ -46,8 +46,8 @@ class Pattern {
             if (auto k = n->to<IR::Constant>())
                 return k->value == value;
             return false; }
-        Const(big_int v) : value(v) {}
-        Const(int v) : value(v) {}
+        explicit Const(big_int v) : value(v) {}
+        explicit Const(int v) : value(v) {}
     };
     template<class T> class Unary : public Base {
         Base *expr;
@@ -56,7 +56,7 @@ class Pattern {
             if (auto b = n->to<T>())
                 return expr->match(b->expr);
             return false; }
-        Unary(Base *e) : expr(e) {}
+        explicit Unary(Base *e) : expr(e) {}
     };
     template<class T> class Binary : public Base {
         Base    *left, *right;
@@ -73,14 +73,14 @@ class Pattern {
     };
 
  public:
-
     template<class T> class Match : public Base {
         const T *m;
+
      public:
         bool match(const IR::Node *n) override { return (m = n->to<T>()); }
         Match() : m(nullptr) {}
         const T *operator->() const { return m; }
-        operator const T *() const { return m; }
+        explicit operator const T *() const { return m; }
         Pattern operator*(const Pattern &a) { return Pattern(*this) * a; }
         Pattern operator/(const Pattern &a) { return Pattern(*this) / a; }
         Pattern operator%(const Pattern &a) { return Pattern(*this) % a; }
@@ -106,10 +106,10 @@ class Pattern {
         Pattern operator!=(int a) { return Pattern(*this) != Pattern(a); }
     };
 
-    template <class T> Pattern(const T*&m) : pattern(new MatchExt<T>(m)) {}
-    template <class T>Pattern(Match<T> &m) : pattern(&m) {}
-    Pattern(big_int v) : pattern(new Const(v)) {}     // NOLINT(runtime/explicit)
-    Pattern(int v) : pattern(new Const(v)) {}           // NOLINT(runtime/explicit)
+    template <class T> explicit Pattern(const T*&m) : pattern(new MatchExt<T>(m)) {}
+    template <class T> explicit Pattern(Match<T> &m) : pattern(&m) {}
+    explicit Pattern(big_int v) : pattern(new Const(v)) {}     // NOLINT(runtime/explicit)
+    explicit Pattern(int v) : pattern(new Const(v)) {}           // NOLINT(runtime/explicit)
     Pattern operator-() const { return Pattern(new Unary<IR::Neg>(pattern)); }
     Pattern operator~() const { return Pattern(new Unary<IR::Cmpl>(pattern)); }
     Pattern operator!() const { return Pattern(new Unary<IR::LNot>(pattern)); }

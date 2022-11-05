@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef MIDEND_REMOVE_COMPLEX_EXPRESSIONS_H_
-#define MIDEND_REMOVE_COMPLEX_EXPRESSIONS_H_
+#ifndef BACKENDS_COMMON_REMOVECOMPLEXEXPRESSIONS_H_
+#define BACKENDS_COMMON_REMOVECOMPLEXEXPRESSIONS_H_
 
 #include "ir/ir.h"
 #include "frontends/p4/typeMap.h"
@@ -100,4 +100,4 @@ class RemoveComplexExpressions : public Transform {
 
 }
 
-#endif  /* MIDEND_REMOVE_COMPLEX_EXPRESSIONS_H_ */
+#endif  /* BACKENDS_COMMON_REMOVECOMPLEXEXPRESSIONS_H_ */
