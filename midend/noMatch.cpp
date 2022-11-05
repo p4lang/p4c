@@ -49,6 +49,7 @@ const IR::Node* DoHandleNoMatch::postorder(IR::SelectExpression* expression) {
 const IR::Node* DoHandleNoMatch::postorder(IR::P4Parser* parser) {
     if (noMatch)
         parser->states.push_back(noMatch);
+    noMatch = nullptr;
     return parser;
 }
 
