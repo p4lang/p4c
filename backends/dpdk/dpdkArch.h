@@ -575,19 +575,21 @@ class DismantleMuxExpressions : public Transform {
 class CollectInternetChecksumInstance : public Inspector {
     P4::TypeMap* typeMap;
     DpdkProgramStructure *structure;
+    std::vector<cstring> *csum_vec;
     int index = 0;
 
  public:
-    CollectInternetChecksumInstance(
-            P4::TypeMap *typeMap,
-            DpdkProgramStructure *structure)
-        : typeMap(typeMap), structure(structure) {}
+    CollectInternetChecksumInstance(P4::TypeMap *typeMap,
+             DpdkProgramStructure *structure,
+             std::vector<cstring> *csum_vec)
+             : typeMap(typeMap), structure(structure), csum_vec(csum_vec) {}
     bool preorder(const IR::Declaration_Instance *d) override {
         auto type = typeMap->getType(d, true);
         if (auto extn = type->to<IR::Type_Extern>()) {
             if (extn->name == "InternetChecksum") {
                 std::ostringstream s;
                 s << "state_" << index++;
+                csum_vec->push_back(s.str());
                 structure->csum_map.emplace(d, s.str());
             }
         }
@@ -600,10 +602,12 @@ class CollectInternetChecksumInstance : public Inspector {
 // side(a question related to endianness)
 class InjectInternetChecksumIntermediateValue : public Transform {
     DpdkProgramStructure *structure;
+    std::vector<cstring> *csum_vec;
 
  public:
-    explicit InjectInternetChecksumIntermediateValue(DpdkProgramStructure *structure) :
-        structure(structure) {}
+    explicit InjectInternetChecksumIntermediateValue(DpdkProgramStructure *structure,
+                    std::vector<cstring> *csum_vec) :
+        structure(structure), csum_vec(csum_vec) {}
 
     const IR::Node *postorder(IR::P4Program *p) override {
         auto new_objs = new IR::Vector<IR::Node>;
@@ -611,14 +615,14 @@ class InjectInternetChecksumIntermediateValue : public Transform {
         for (auto obj : p->objects) {
             if (obj->to<IR::Type_Header>() && !inserted) {
                 inserted = true;
-                if (structure->csum_map.size() > 0) {
+                if (csum_vec->size() > 0) {
                     auto fields = new IR::IndexedVector<IR::StructField>;
-                    for (auto kv : structure->csum_map) {
+                    for (auto fld : *csum_vec) {
                         fields->push_back(new IR::StructField(
-                            IR::ID(kv.second), new IR::Type_Bits(16, false)));
+                                          IR::ID(fld), new IR::Type_Bits(16, false)));
                     }
                     new_objs->push_back(
-                        new IR::Type_Header(IR::ID("cksum_state_t"), *fields));
+                    new IR::Type_Header(IR::ID("cksum_state_t"), *fields));
                 }
             }
             new_objs->push_back(obj);
@@ -639,10 +643,11 @@ class InjectInternetChecksumIntermediateValue : public Transform {
 };
 
 class ConvertInternetChecksum : public PassManager {
+  std::vector<cstring> csum_vec;
  public:
     ConvertInternetChecksum(P4::TypeMap *typeMap, DpdkProgramStructure *structure) {
-        passes.push_back(new CollectInternetChecksumInstance(typeMap, structure));
-        passes.push_back(new InjectInternetChecksumIntermediateValue(structure));
+        passes.push_back(new CollectInternetChecksumInstance(typeMap, structure, &csum_vec));
+        passes.push_back(new InjectInternetChecksumIntermediateValue(structure, &csum_vec));
     }
 };
 

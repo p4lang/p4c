@@ -338,9 +338,11 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 if (e->method->getName().name == "get") {
                     auto res = structure->csum_map.find(
                         e->object->to<IR::Declaration_Instance>());
-                    cstring intermediate;
+                    cstring intermediate = "";
                     if (res != structure->csum_map.end()) {
                         intermediate = res->second;
+                    } else {
+                        BUG("checksum map does not collect all checksum def.");
                     }
                     i = new IR::DpdkGetChecksumStatement(
                         left, e->object->getName(), intermediate);
@@ -949,7 +951,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         if (a->originalExternType->getName().name == "InternetChecksum") {
             auto res =
                 structure->csum_map.find(a->object->to<IR::Declaration_Instance>());
-            cstring intermediate;
+            cstring intermediate = "";
             if (res != structure->csum_map.end()) {
                 intermediate = res->second;
             } else {
