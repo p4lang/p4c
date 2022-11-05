@@ -32,8 +32,8 @@ struct tcp_t {
 }
 
 struct cksum_state_t {
-	bit<16> state_1
 	bit<16> state_0
+	bit<16> state_1
 }
 
 struct psa_ingress_output_metadata_t {
