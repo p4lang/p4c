@@ -220,7 +220,8 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
         // Remove statement for 'then' if there is a statement
         // with the same statement name in the else branch.
         if (liveAssigns.size() > 0 && !isStatementDependent[statementName] &&
-            predication_lvalue_name(liveAssigns.back()->left) == predication_lvalue_name(statement->left)) {
+            predication_lvalue_name(liveAssigns.back()->left) ==
+            predication_lvalue_name(statement->left)) {
             liveAssigns.pop_back();
         }
     }
