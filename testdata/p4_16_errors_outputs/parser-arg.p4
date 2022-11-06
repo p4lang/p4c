@@ -16,8 +16,5 @@ parser Parser2(Parser p) {
 }
 
 Parser1() p1;
-
 Parser2() p2;
-
 Package(p1, p2) main;
-

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "constantFolding.h"
 #include "frontends/common/options.h"
 #include "frontends/p4/enumInstance.h"
@@ -135,7 +135,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Type_Varbits* type) {
         if (auto cst = type->expression->to<IR::Constant>()) {
             type->size = cst->asInt();
             type->expression = nullptr;
-            if (type->width_bits() <= 0)
+            if (type->size < 0)
                 ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
         } else {
             ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", type->expression);
@@ -751,6 +751,9 @@ const IR::Node* DoConstantFolding::postorder(IR::LNot* e) {
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Mux* e) {
+    if (!typesKnown)
+        // We want the typechecker to look at the expression first
+        return e;
     auto cond = getConstant(e->e0);
     if (cond == nullptr)
         return e;

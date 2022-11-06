@@ -62,8 +62,8 @@ action next_hop2 args instanceof next_hop2_arg_t {
 
 action add_on_miss_action2 args none {
 	mov m.MainControlT_tmp 0x0
-	mov m.MainControlT_tmp_0 0x4d2
-	learn next_hop m.MainControlT_tmp m.local_metadata_timeout
+	mov m.MainControlT_tmp_0 0x4D2
+	learn next_hop2 m.MainControlT_tmp m.local_metadata_timeout
 	return
 }
 
@@ -78,12 +78,12 @@ learner ipv4_da {
 	default_action add_on_miss_action args none 
 	size 0x10000
 	timeout {
+		10
+		30
+		60
 		120
-		120
-		120
-		120
-		120
-		120
+		300
+		43200
 		120
 		120
 
@@ -101,12 +101,12 @@ learner ipv4_da2 {
 	default_action add_on_miss_action2 args none 
 	size 0x10000
 	timeout {
+		10
+		30
+		60
 		120
-		120
-		120
-		120
-		120
-		120
+		300
+		43200
 		120
 		120
 

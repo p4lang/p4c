@@ -4,17 +4,17 @@
 
 @name("hdr") header hdr_0 {
     bit<8>  op;
-    @saturating 
+    @saturating
     bit<8>  opr1_8;
-    @saturating 
+    @saturating
     bit<8>  opr2_8;
-    @saturating 
+    @saturating
     bit<8>  res_8;
-    @saturating 
+    @saturating
     int<16> opr1_16;
-    @saturating 
+    @saturating
     int<16> opr2_16;
-    @saturating 
+    @saturating
     int<16> res_16;
 }
 
@@ -22,7 +22,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     hdr_0 data;
 }
 
@@ -95,4 +95,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

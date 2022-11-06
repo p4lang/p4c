@@ -2,30 +2,25 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> EthernetAddressUint_t;
-typedef EthernetAddressUint_t EthernetAddress_t;
-typedef bit<32> IPv4AddressUint_t;
-typedef IPv4AddressUint_t IPv4Address_t;
-typedef IPv4Address_t IPv4Address2_t;
 header ethernet_t {
-    EthernetAddress_t dstAddr;
-    EthernetAddress_t srcAddr;
-    bit<16>           etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>         version;
-    bit<4>         ihl;
-    bit<8>         diffserv;
-    bit<16>        totalLen;
-    bit<16>        identification;
-    bit<3>         flags;
-    bit<13>        fragOffset;
-    bit<8>         ttl;
-    bit<8>         protocol;
-    bit<16>        hdrChecksum;
-    IPv4Address2_t srcAddr;
-    IPv4Address_t  dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 struct meta_t {
@@ -130,7 +125,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             set_output();
@@ -140,7 +135,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     @name("ingress.ipv4_sa_filter") table ipv4_sa_filter_0 {
         key = {
-            hdr.ipv4.srcAddr: ternary @name("hdr.ipv4.srcAddr") ;
+            hdr.ipv4.srcAddr: ternary @name("hdr.ipv4.srcAddr");
         }
         actions = {
             my_drop_2();
@@ -195,4 +190,3 @@ control computeChecksum(inout headers_t hdr, inout meta_t meta) {
 }
 
 V1Switch<headers_t, meta_t>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

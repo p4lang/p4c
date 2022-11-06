@@ -2,28 +2,25 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<9> egressSpec_t;
-typedef bit<48> macAddr_t;
-typedef bit<32> ip4Addr_t;
 header ethernet_t {
-    macAddr_t dstAddr;
-    macAddr_t srcAddr;
-    bit<16>   etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
-    ip4Addr_t srcAddr;
-    ip4Addr_t dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 struct metadata {
@@ -71,7 +68,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @name("MyIngress.forward_and_do_something") action forward_and_do_something(@name("port") egressSpec_t port) {
+    @name("MyIngress.forward_and_do_something") action forward_and_do_something(@name("port") bit<9> port) {
         standard_metadata.egress_spec = port;
         meta.before1 = (hdr.ipv4.isValid() ? hdr.ipv4.srcAddr : meta.before1);
         hdr.ipv4.srcAddr = (hdr.ipv4.isValid() ? hdr.ipv4.srcAddr ^ 32w0x12345678 : hdr.ipv4.srcAddr);
@@ -90,7 +87,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name("MyIngress.ipv4_lpm") table ipv4_lpm_0 {
         key = {
-            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
+            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port");
         }
         actions = {
             forward_and_do_something();
@@ -104,14 +101,14 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name("MyIngress.debug") table debug_0 {
         key = {
-            meta.before1: exact @name("meta.before1") ;
-            meta.after1 : exact @name("meta.after1") ;
-            meta.before2: exact @name("meta.before2") ;
-            meta.after2 : exact @name("meta.after2") ;
-            meta.before3: exact @name("meta.before3") ;
-            meta.after3 : exact @name("meta.after3") ;
-            meta.before4: exact @name("meta.before4") ;
-            meta.after4 : exact @name("meta.after4") ;
+            meta.before1: exact @name("meta.before1");
+            meta.after1 : exact @name("meta.after1");
+            meta.before2: exact @name("meta.before2");
+            meta.after2 : exact @name("meta.after2");
+            meta.before3: exact @name("meta.before3");
+            meta.after3 : exact @name("meta.after3");
+            meta.before4: exact @name("meta.before4");
+            meta.after4 : exact @name("meta.after4");
         }
         actions = {
             NoAction_2();
@@ -157,4 +154,3 @@ control MyDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

@@ -23,12 +23,6 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.val") ethernet_t val_0;
-    @name(".do_action") action do_action_0() {
-        val_0 = h.eth_hdr;
-        val_0.eth_type = 16w0xdead;
-        h.eth_hdr = val_0;
-    }
     apply {
     }
 }
@@ -55,4 +49,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

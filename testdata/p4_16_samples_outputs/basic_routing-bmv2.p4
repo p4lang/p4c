@@ -177,4 +177,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(p = ParserImpl(), ig = ingress(), vr = verifyChecksum(), eg = egress(), ck = computeChecksum(), dep = DeparserImpl()) main;
-

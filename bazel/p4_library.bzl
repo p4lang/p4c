@@ -33,9 +33,9 @@ def _run_shell_cmd_with_p4c(ctx, command, **run_shell_kwargs):
        `run_shell`.
     """
 
-    if not hasattr(ctx.executable, "_p4c"):
-        fail("The build rule does not specify the p4c executable via `_p4c` attribute.")
-    p4c = ctx.executable._p4c
+    if not hasattr(ctx.executable, "p4c_backend"):
+        fail("The build rule does not specify the p4c backend executable via `p4c_backend` attribute.")
+    p4c = ctx.executable.p4c_backend
 
     cpp_toolchain = find_cpp_toolchain(ctx)
     ctx.actions.run_shell(
@@ -58,7 +58,7 @@ def _run_shell_cmd_with_p4c(ctx, command, **run_shell_kwargs):
     )
 
 def _p4_library_impl(ctx):
-    p4c = ctx.executable._p4c
+    p4c = ctx.executable.p4c_backend
     p4file = ctx.file.src
     target = ctx.attr.target
     args = _extract_common_p4c_args(ctx)
@@ -68,6 +68,18 @@ def _p4_library_impl(ctx):
         args.append(ctx.attr.extra_args)
 
     outputs = []
+
+    if ctx.outputs.bf_rt_schema_out:
+        if target != "dpdk":
+            fail('Must use `target = "dpdk"` when specifying bf_rt_schema_out.')
+        args += ["--bf-rt-schema", ctx.outputs.bf_rt_schema_out.path]
+        outputs.append(ctx.outputs.bf_rt_schema_out)
+
+    if ctx.outputs.context_out:
+        if target != "dpdk":
+            fail('Must use `target = "dpdk"` when specifying context_out.')
+        args += ["--context", ctx.outputs.context_out.path]
+        outputs.append(ctx.outputs.context_out)
 
     if ctx.outputs.p4info_out:
         if target != "" and target != "bmv2":
@@ -112,6 +124,14 @@ p4_library = rule(
             allow_files = [".p4", ".h"],
             default = [],
         ),
+        "bf_rt_schema_out": attr.output(
+            mandatory = False,
+            doc = "The name of the dpdk bf rt schema output file.",
+        ),
+        "context_out": attr.output(
+            mandatory = False,
+            doc = "The name of the dpdk context output file.",
+        ),
         "p4info_out": attr.output(
             mandatory = False,
             doc = "The name of the p4info output file.",
@@ -140,7 +160,7 @@ p4_library = rule(
             mandatory = False,
             default = "",
         ),
-        "_p4c": attr.label(
+        "p4c_backend": attr.label(
             default = Label("@com_github_p4lang_p4c//:p4c_bmv2"),
             executable = True,
             cfg = "host",
@@ -156,7 +176,7 @@ p4_library = rule(
 )
 
 def _p4_graphs_impl(ctx):
-    p4c = ctx.executable._p4c
+    p4c = ctx.executable.p4c_backend
     p4file = ctx.file.src
     output_file = ctx.outputs.out
 
@@ -221,7 +241,7 @@ p4_graphs = rule(
             mandatory = False,
             default = "",
         ),
-        "_p4c": attr.label(
+        "p4c_backend": attr.label(
             default = Label("@com_github_p4lang_p4c//:p4c_graphs"),
             executable = True,
             cfg = "host",

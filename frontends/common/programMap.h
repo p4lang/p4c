@@ -26,6 +26,7 @@ namespace P4 {
 // If the program has not changed, the map is up-to-date.
 class ProgramMap : public IHasDbPrint {
  protected:
+    const IR::P4Program* fake = new IR::P4Program();
     const IR::P4Program* program = nullptr;
     cstring mapKind;
     explicit ProgramMap(cstring kind) : mapKind(kind) {}
@@ -55,6 +56,11 @@ class ProgramMap : public IHasDbPrint {
             return;
         program = node->to<IR::P4Program>();
         LOG2(mapKind << " updated to " << dbp(node));
+    }
+    void clear() {
+        // This ensures that a clear map is never up-to-date,
+        // since the 'fake' node cannot appear in a program.
+        program = fake;
     }
 };
 

@@ -39,15 +39,14 @@ class SimpleActionProfilePSATest(P4EbpfTest):
     def runTest(self):
         pkt = testutils.simple_ip_packet(eth_src="11:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
-        # FIXME: API/CLI for ActionProfile is not done yet, we are using table API/CLI for now
-        self.table_add(table="MyIC_ap", key=[0x10], action=2, data=[0x1122])
-        self.table_add(table="MyIC_tbl", key=["11:22:33:44:55:66"], references=[0x10])
+        ref = self.action_profile_add_action(ap="MyIC_ap", action=2, data=[0x1122])
+        self.table_add(table="MyIC_tbl", key=["11:22:33:44:55:66"], references=[ref])
 
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
 
 class ActionProfileTwoTablesSameInstancePSATest(P4EbpfTest):
@@ -57,19 +56,19 @@ class ActionProfileTwoTablesSameInstancePSATest(P4EbpfTest):
     p4_file_path = "p4testdata/action-profile2.p4"
 
     def runTest(self):
-        self.table_add(table="MyIC_ap", key=[0x10], action=2, data=[0x1122])
-        self.table_add(table="MyIC_tbl", key=["11:22:33:44:55:66"], references=[0x10])
-        self.table_add(table="MyIC_tbl2", key=["AA:BB:CC:DD:EE:FF"], references=[0x10])
+        ref = self.action_profile_add_action(ap="MyIC_ap", action=2, data=[0x1122])
+        self.table_add(table="MyIC_tbl", key=["11:22:33:44:55:66"], references=[ref])
+        self.table_add(table="MyIC_tbl2", key=["AA:BB:CC:DD:EE:FF"], references=[ref])
 
         pkt = testutils.simple_ip_packet(eth_src="11:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
         pkt = testutils.simple_ip_packet(eth_src="AA:BB:CC:DD:EE:FF", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
 
 class ActionProfileLPMTablePSATest(P4EbpfTest):
@@ -80,17 +79,17 @@ class ActionProfileLPMTablePSATest(P4EbpfTest):
 
     def runTest(self):
         # Match all 11:22:33:44:55:xx MAC addresses
-        self.table_add(table="MyIC_tbl", key=["0x112233445500/40"], references=[0x10])
-        self.table_add(table="MyIC_ap", key=[0x10], action=2, data=[0x1122])
+        ref = self.action_profile_add_action(ap="MyIC_ap", action=2, data=[0x1122])
+        self.table_add(table="MyIC_tbl", key=["0x112233445500/40"], references=[ref])
 
         pkt = testutils.simple_ip_packet(eth_src="AA:BB:CC:DD:EE:FF", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
         pkt[Ether].src = "11:22:33:44:55:66"
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
 
 # TODO: add test with ternary table
@@ -103,10 +102,10 @@ class ActionProfileActionRunPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/action-profile-action-run.p4"
 
     def runTest(self):
-        self.table_add(table="MyIC_ap", key=[0x10], action=2, data=[0x1122])
-        self.table_add(table="MyIC_ap", key=[0x20], action=1, data=["AA:BB:CC:DD:EE:FF"])
-        self.table_add(table="MyIC_tbl", key=["11:22:33:44:55:66"], references=[0x10])
-        self.table_add(table="MyIC_tbl", key=["AA:BB:CC:DD:EE:FF"], references=[0x20])
+        ref1 = self.action_profile_add_action(ap="MyIC_ap", action=2, data=[0x1122])
+        ref2 = self.action_profile_add_action(ap="MyIC_ap", action=1, data=["AA:BB:CC:DD:EE:FF"])
+        self.table_add(table="MyIC_tbl", key=["11:22:33:44:55:66"], references=[ref1])
+        self.table_add(table="MyIC_tbl", key=["AA:BB:CC:DD:EE:FF"], references=[ref2])
 
         # action MyIC_a1
         pkt = testutils.simple_ip_packet(eth_src="AA:BB:CC:DD:EE:FF", eth_dst="22:33:44:55:66:77")
@@ -132,12 +131,12 @@ class ActionProfileHitPSATest(P4EbpfTest):
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_no_other_packets(self)
 
-        self.table_add(table="MyIC_ap", key=[0x10], action=2, data=[0x1122])
-        self.table_add(table="MyIC_tbl", key=["11:22:33:44:55:66"], references=[0x10])
+        ref = self.action_profile_add_action(ap="MyIC_ap", action=2, data=[0x1122])
+        self.table_add(table="MyIC_tbl", key=["11:22:33:44:55:66"], references=[ref])
 
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
 
 # ----------------------------- Action Selector -----------------------------
@@ -150,8 +149,8 @@ class ActionSelectorTest(P4EbpfTest):
 
     def create_actions(self, selector):
         for i in range(1, 7):
-            # i: member reference; 3+i: output port
-            ref = self.action_selector_add_action(selector, action=1, data=[i+3])
+            # i: member reference; output port from DP_PORTS
+            ref = self.action_selector_add_action(selector, action=1, data=[DP_PORTS[i-1]])
             if i != ref:
                 self.fail("Invalid member reference: expected {}, got {}".format(i, ref))
 
@@ -245,7 +244,7 @@ class ActionSelectorEmptyGroupActionPSATest(ActionSelectorTest):
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
 
-        cmd = "psabpf-ctl action-selector empty-group-action pipe {} MyIC_as action id 1 data 6".format(TEST_PIPELINE_ID)
+        cmd = "psabpf-ctl action-selector empty-group-action pipe {} MyIC_as action id 1 data {}".format(TEST_PIPELINE_ID, DP_PORTS[2])
         self.exec_ns_cmd(cmd, "empty group action update failed")
 
         testutils.send_packet(self, PORT0, pkt)
@@ -343,7 +342,7 @@ class ActionSelectorActionRunPSATest(ActionSelectorTest):
 
         pkt = testutils.simple_ip_packet(eth_src="02:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
         pkt[Ether].src = "03:22:33:44:55:66"
         testutils.send_packet(self, PORT0, pkt)

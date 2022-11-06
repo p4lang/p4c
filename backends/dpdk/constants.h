@@ -28,9 +28,13 @@ const unsigned dpdk_default_table_size = 65536;
 // Maximum number of configurable timeout values
 const unsigned dpdk_learner_max_configurable_timeout_values = 8;
 const unsigned default_learner_table_size = 0x10000;
-const unsigned default_learner_table_timeout = 120;
-// Maximum values
-const int dpdk_max_field_width = 64;
+// default timeout values for learner table to support common protocol states
+const unsigned default_learner_table_timeout[dpdk_learner_max_configurable_timeout_values] =
+                                            {10, 30, 60, 120, 300, 43200, 120, 120};
+
+// JSON schema versions
+const cstring bfrtSchemaVersion = "1.0.0";
+const cstring tdiSchemaVersion = "0.1";
 
 // HASH Values
 #define JHASH0 0

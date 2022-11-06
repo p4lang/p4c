@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -32,8 +31,6 @@ struct fwd_metadata_t {
 struct metadata {
 }
 
-typedef bit<48> ByteCounter_t;
-typedef bit<64> PacketByteCounter_t;
 struct headers {
     ethernet_t ethernet;
     ipv4_t     ipv4;
@@ -78,9 +75,9 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @name("ingress.port_bytes_in") Counter<ByteCounter_t, PortId_t>(32w512, PSA_CounterType_t.BYTES) port_bytes_in_0;
-    @name("ingress.per_prefix_pkt_byte_count") DirectCounter<PacketByteCounter_t>(PSA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_byte_count_0;
-    @name("ingress.next_hop") action next_hop(@name("oport") PortId_t oport) {
+    @name("ingress.port_bytes_in") Counter<bit<48>, bit<32>>(32w512, PSA_CounterType_t.BYTES) port_bytes_in_0;
+    @name("ingress.per_prefix_pkt_byte_count") DirectCounter<bit<64>>(PSA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_byte_count_0;
+    @name("ingress.next_hop") action next_hop(@name("oport") bit<32> oport) {
         per_prefix_pkt_byte_count_0.count();
         ostd.drop = false;
         ostd.multicast_group = 32w0;
@@ -92,7 +89,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             next_hop();
@@ -119,7 +116,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
 }
 
 control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    @name("egress.port_bytes_out") Counter<ByteCounter_t, PortId_t>(32w512, PSA_CounterType_t.BYTES) port_bytes_out_0;
+    @name("egress.port_bytes_out") Counter<bit<48>, bit<32>>(32w512, PSA_CounterType_t.BYTES) port_bytes_out_0;
     @hidden action psaexamplecountersbmv2l169() {
         port_bytes_out_0.count(istd.egress_port);
     }
@@ -167,8 +164,5 @@ control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

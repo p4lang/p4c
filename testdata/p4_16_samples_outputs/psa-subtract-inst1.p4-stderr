@@ -1,0 +1,6 @@
+psa-subtract-inst1.p4(65): [--Wwarn=uninitialized_use] warning: var3 may be uninitialized
+    int<33> var4 = var3 - 3;
+                   ^^^^
+psa-subtract-inst1.p4(66): [--Wwarn=uninitialized_use] warning: var3 may be uninitialized
+    int<33> var5 = var4 - var3;
+                          ^^^^

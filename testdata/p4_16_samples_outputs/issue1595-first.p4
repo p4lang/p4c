@@ -46,7 +46,7 @@ control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_
     }
     table t1 {
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
         }
         actions = {
             a1();
@@ -93,4 +93,3 @@ control uc(inout Parsed_packet hdr, inout metadata_t meta) {
 }
 
 V1Switch<Parsed_packet, metadata_t>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

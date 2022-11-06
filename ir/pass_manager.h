@@ -112,8 +112,8 @@ class PassRepeated : virtual public PassManager {
     unsigned            repeats;  // 0 = until convergence
  public:
     PassRepeated() : repeats(0) {}
-    PassRepeated(const std::initializer_list<VisitorRef> &init) :
-            PassManager(init), repeats(0) {}
+    PassRepeated(const std::initializer_list<VisitorRef> &init, unsigned repeats = 0) :
+            PassManager(init), repeats(repeats) {}
     const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
     PassRepeated *setRepeats(unsigned repeats) { this->repeats = repeats; return this; }
     PassRepeated *clone() const override { return new PassRepeated(*this); }

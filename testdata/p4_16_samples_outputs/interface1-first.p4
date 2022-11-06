@@ -19,4 +19,3 @@ parser p() {
 parser empty();
 package sw(empty e);
 sw(p()) main;
-

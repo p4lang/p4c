@@ -23,7 +23,6 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 }
 
 register<bit<8>>(32w256) r;
-
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action issue10972bmv2l52() {
         r.write((bit<32>)h.myhdr.reg_idx_to_update, 8w0x2a);
@@ -75,4 +74,3 @@ control update(inout Headers h, inout Meta m) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

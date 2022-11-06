@@ -10,7 +10,7 @@ control c(out bool x) {
     }
     @name("c.t1") table t1_0 {
         key = {
-            x: exact @name("x") ;
+            x: exact @name("x");
         }
         actions = {
             NoAction_1();
@@ -19,7 +19,7 @@ control c(out bool x) {
     }
     @name("c.t2") table t2_0 {
         key = {
-            x: exact @name("x") ;
+            x: exact @name("x");
         }
         actions = {
             NoAction_2();
@@ -44,4 +44,3 @@ control c(out bool x) {
 control proto(out bool x);
 package top(proto p);
 top(c()) main;
-

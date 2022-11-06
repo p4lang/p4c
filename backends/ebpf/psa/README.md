@@ -290,9 +290,6 @@ member reference to be returned. Next, the eBPF programs uses the obtained membe
 map to retrieve the action specification. Hence, the eBPF program does one additional lookup to the additional BPF map,
 if the ActionProfile is specified for a P4 table.
 
-**Note:** As of April 2022, support for ActionProfile extern in `psabpf-ctl` CLI/API is not implemented yet. As a workaround
-you can use `psabpf-ctl table` command for this extern.
-
 ### ActionSelector
 
 [ActionSelector](https://p4.org/p4-spec/docs/PSA-v1.1.0.html#sec-action-selector) is a table implementation similar to
@@ -399,8 +396,7 @@ $ psabpf-ctl meter update pipe "$PIPELINE" DemoIngress_meter index 0 132000:1000
 
 #### Direct Meter
 [Direct Meter](https://p4.org/p4-spec/docs/PSA.html#sec-direct-meters) is always associated with the table entry that matched. 
-The Direct Meter state is stored within the table entry value.  
-**Note:** For now we don't support Direct Meters in `psabpf-ctl` tool, but we will add it soon.
+The Direct Meter state is stored within the table entry value.
 
 ### value_set
 
@@ -408,9 +404,6 @@ The Direct Meter state is stored within the table entry value.
 parser state based on runtime values. The P4-eBPF compiler generates additional hash map for each `ValueSet` instance. In
 select case expression each `select()` on `ValueSet` is translated into a lookup into the BPF hash map to check if an entry
 for a given key exists. A value of the BPF map is ignored.
-
-**Note:** As of April 2022, support for value_set in `psabpf-ctl` CLI/API is not implemented yet. As a workaround you can
-use the `bpftool` command.
 
 ### Random 
 

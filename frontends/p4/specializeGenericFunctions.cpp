@@ -27,18 +27,39 @@ bool FindFunctionSpecializations::preorder(const IR::MethodCallExpression* mce) 
         if (type->is<IR::ITypeVar>())
             return false;
     }
+
+    const IR::Node* insert = findContext<IR::P4Parser>();
+    if (!insert)
+        insert = findContext<IR::Function>();
+    if (!insert)
+        insert = findContext<IR::P4Control>();
+    if (!insert)
+        insert = findContext<IR::Declaration_Constant>();
+    if (!insert)
+        insert = findContext<IR::Declaration_Instance>();
+    if (!insert)
+        insert = findContext<IR::P4Action>();
+    CHECK_NULL(insert);
     MethodInstance *mi = MethodInstance::resolve(mce, specMap->refMap, specMap->typeMap);
     if (auto func = mi->to<FunctionCall>()) {
         LOG3("Will specialize " << mce);
-        specMap->add(mce, func->function);
+        specMap->add(mce, func->function, insert);
     }
     return false;
 }
 
+const IR::Node* SpecializeFunctions::insert(const IR::Node* before) {
+    auto specs = specMap->getInsertions(getOriginal());
+    if (specs == nullptr)
+        return before;
+    LOG2(specs->size() << " instantiations before " << dbp(before));
+    specs->push_back(before);
+    return specs;
+}
+
 const IR::Node* SpecializeFunctions::postorder(IR::Function* function) {
-    auto result = new IR::Vector<IR::Node>();
     for (auto it : specMap->map) {
-        if (it.second->specialized == getOriginal()) {
+        if (it.second->original == getOriginal()) {
             auto methodCall = it.first;
             TypeVariableSubstitution ts;
             ts.setBindings(function, function->type->typeParameters, methodCall->typeArguments);
@@ -51,14 +72,11 @@ const IR::Node* SpecializeFunctions::postorder(IR::Function* function) {
                 it.second->name,
                 specialized->type,
                 specialized->body);
-            result->push_back(renamed);
+            it.second->specialized = renamed;
             LOG3("Specializing " << function << " as " << renamed);
         }
     }
-    if (!result->size())
-        return function;
-    result->push_back(function);
-    return result;
+    return function;
 }
 
 const IR::Node* SpecializeFunctions::postorder(IR::MethodCallExpression* mce) {

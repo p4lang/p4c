@@ -6,4 +6,3 @@ control C<H>() {
 control cproto();
 package top(cproto _c);
 top(C<_>()) c;
-

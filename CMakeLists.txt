@@ -35,11 +35,14 @@ OPTION (ENABLE_EBPF "Build the EBPF backend (required for the full test suite)" 
 OPTION (ENABLE_UBPF "Build the uBPF backend (required for the full test suite)" ON)
 OPTION (ENABLE_DPDK "Build the DPDK backend (required for the full test suite)" ON)
 OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suite)" ON)
+OPTION (ENABLE_TEST_TOOLS "Build the P4Tools development platform" OFF)
 OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
 OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 OPTION (ENABLE_GC "Use libgc" ON)
 OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
-OPTION (ENABLE_GMP "Use GMP library" ON)
+OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" OFF)
+OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
+OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
 OPTION (BUILD_STATIC_RELEASE "Build a statically linked release binary" OFF)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
@@ -138,13 +141,6 @@ include_directories(${PROTOBUF_INCLUDE_DIRS})
 include_directories(${LIBGC_INCLUDE_DIR})
 set (HAVE_LIBBOOST_IOSTREAMS 1)
 set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_LIBRARIES}")
-if (ENABLE_GMP)
-  find_package (LibGmp REQUIRED)
-  include_directories(${LIBGMP_INCLUDE_DIR})
-  set (HAVE_LIBGMP 1)
-  set (HAVE_LIBGMPXX 1)
-  set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${LIBGMP_LIBRARIES}")
-endif ()
 if (ENABLE_GC)
   set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${LIBGC_LIBRARIES}")
 endif ()
@@ -186,7 +182,11 @@ find_python_module (re REQUIRED)
 # other packages
 find_package (Doxygen)
 find_package (BMV2)
-
+# If we have found simple switch or psa switch, we also need scapy and ipaddr.
+if(SIMPLE_SWITCH OR PSA_SWITCH)
+    find_python_module (scapy REQUIRED)
+    find_python_module (ipaddr REQUIRED)
+endif()
 # enable CTest
 enable_testing ()
 
@@ -200,12 +200,12 @@ enable_testing ()
 #   set (CPACK_PACKAGE_VERSION_PATCH ${CPACK_PACKAGE_VERSION_PATCH}-${__P4C_VERSION_RC})
 # endif ()
 
-# set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++11 rather than -std=gnu++11
-# CMAKE_CXX_STANDARD was introduced in CMake 3.1, so for older versions of CMake, we use -std=gnu++11
+# set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++17 rather than -std=gnu++17
+# CMAKE_CXX_STANDARD was introduced in CMake 3.1, so for older versions of CMake, we use -std=gnu++17
 if (CMAKE_VERSION VERSION_LESS "3.1")
-    set (CMAKE_CXX_FLAGS "-std=gnu++11 ${CMAKE_CXX_FLAGS}")
-else ()
-    set (CMAKE_CXX_STANDARD 11)
+    set (CMAKE_CXX_FLAGS "-std=gnu++17 ${CMAKE_CXX_FLAGS}")
+elseif(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 17)
+    set (CMAKE_CXX_STANDARD 17)
 endif ()
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -214,16 +214,41 @@ add_cxx_compiler_option ("-Wextra")
 add_cxx_compiler_option ("-Wno-overloaded-virtual")
 add_cxx_compiler_option ("-Wno-deprecated")
 add_cxx_compiler_option ("-Wno-deprecated-declarations")
-# Enable/disable runtime exceptions on nullpointer dereferencing
-# add_cxx_compiler_option ("-fsanitize=null")
+
+if (ENABLE_SANITIZERS)
+  add_cxx_compiler_option  ("-fsanitize=undefined,address")
+endif ()
+
+if (ENABLE_WERROR)
+  add_cxx_compiler_option  ("-Werror")
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # GCC's -Waybe-uninitialized warnings are quite noisy and unlikely to catch
+    # real issues - do not treat them as build errors.
+    add_cxx_compiler_option ("-Wno-error=maybe-uninitialized")
+  endif ()
+endif ()
 
 # If we're on GCC or Clang, use the prefer LLD or Gold linker if available.
 set(BUILD_LINK_WITH_GOLD ON CACHE BOOL "Use Gold linker for build if available")
 set(BUILD_LINK_WITH_LLD ON CACHE BOOL "Use LLD linker for build if available (overrides BUILD_LINK_WITH_GOLD)")
+
+# Build with LTO
+if (ENABLE_LTO AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  if (BUILD_LINK_WITH_LLD)
+    message(WARNING "LLD does not work with GCC's LTO object format, switching to Gold.")
+    set(BUILD_LINK_WITH_LLD OFF)
+  endif ()
+  add_cxx_compiler_option  ("-flto")
+endif ()
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     # We want to optimize the binary size for a static release binary.
     # This only works with modern versions of GCC.
     if (BUILD_STATIC_RELEASE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
+        if (BUILD_LINK_WITH_LLD)
+          message(WARNING "LLD does not work with GCC's LTO object format, switching to Gold.")
+          set(BUILD_LINK_WITH_LLD OFF)
+        endif ()
         add_cxx_compiler_option ("-flto")
     endif ()
     set(_LD_USED "default system")
@@ -250,8 +275,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
     unset(_LD_OPT_USED)
 endif()
 
-set(BUILD_USE_COLOR OFF CACHE BOOL "Use color in C++ compiler output (even if "
-    "the compiler does not detect terminal, e.g. when using ccache/distcc)")
+set(BUILD_USE_COLOR OFF CACHE BOOL "Use color in C++ compiler output (even if \
+    the compiler does not detect terminal, e.g. when using ccache/distcc)")
 if (BUILD_USE_COLOR)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-color=always")
@@ -268,7 +293,6 @@ else()
 endif()
 
 include_directories (
-  ${P4C_SOURCE_DIR}/frontends
   ${P4C_SOURCE_DIR}/backends
   ${P4C_SOURCE_DIR}/extensions
   ${P4C_SOURCE_DIR}
@@ -330,11 +354,11 @@ foreach (ext ${p4c_extensions})
   endif()
 endforeach(ext)
 
-# With the current implementation of ir-generator, all targets shares the
+# With the current implementation of ir-generator, all targets share the
 # same ir-generated.h and ir-generated.cpp file, which means all targets
 # share the same set of IR classes (frontend and backend). The DPDK backend
 # introduces additional IR classes and cpp sources which need to be added to
-# EXTENSION_FRONTEND_SOURCES. We need to pupulate EXTENSION_FRONTEND_SOURCES
+# EXTENSION_FRONTEND_SOURCES. We need to populate EXTENSION_FRONTEND_SOURCES
 # before it is added to libfrontend.a in frontends/CMakeList.txt
 if (ENABLE_DPDK)
     add_subdirectory (backends/dpdk)
@@ -355,6 +379,9 @@ if (ENABLE_UBPF)
 endif ()
 if (ENABLE_P4TEST)
     add_subdirectory (backends/p4test)
+endif ()
+if (ENABLE_TEST_TOOLS)
+    add_subdirectory (backends/p4tools)
 endif ()
 if (ENABLE_P4C_GRAPHS AND HAVE_LIBBOOST_GRAPH EQUAL 1)
   add_subdirectory (backends/graphs)

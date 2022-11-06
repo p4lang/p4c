@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header output_data_t {
@@ -39,7 +38,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     @noWarn("unused") @name(".send_to_port") action send_to_port_1() {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
-        ostd.egress_port = (PortIdUint_t)hdr.ethernet.dstAddr;
+        ostd.egress_port = (bit<32>)hdr.ethernet.dstAddr;
     }
     @noWarn("unused") @name(".send_to_port") action send_to_port_2() {
         ostd.drop = false;
@@ -47,7 +46,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         ostd.egress_port = 32w0xfffffffa;
     }
     @name("cIngress.record_ingress_ports_in_pkt") action record_ingress_ports_in_pkt() {
-        hdr.output_data.word1 = (PortIdUint_t)istd.ingress_port;
+        hdr.output_data.word1 = (bit<32>)istd.ingress_port;
     }
     @hidden action psarecirculatenometabmv2l56() {
         int_packet_path_0 = 32w1;
@@ -334,8 +333,5 @@ control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), cIngress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), cEgress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers_t, metadata_t, headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

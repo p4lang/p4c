@@ -23,4 +23,3 @@ control ctrl(inout struct_t input, out header_h output) {
 control MyControl<S, H>(inout S data, out H output);
 package MyPackage<S, H>(MyControl<S, H> ctrl);
 MyPackage(ctrl()) main;
-

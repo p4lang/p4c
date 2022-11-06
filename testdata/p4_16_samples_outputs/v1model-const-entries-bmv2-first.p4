@@ -37,7 +37,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     table lpm1 {
         key = {
-            hdr.ethernet.dstAddr: lpm @name("hdr.ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: lpm @name("hdr.ethernet.dstAddr");
         }
         actions = {
             act_miss();
@@ -73,4 +73,3 @@ control deparserImpl(packet_out packet, in headers_t hdr) {
 }
 
 V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
-

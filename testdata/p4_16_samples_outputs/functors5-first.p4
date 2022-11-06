@@ -18,4 +18,3 @@ parser p2(out bit<2> w)(bit<2> a) {
 parser simple(out bit<2> w);
 package m(simple n);
 m(p2(2w1)) main;
-

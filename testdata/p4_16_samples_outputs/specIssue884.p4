@@ -42,4 +42,3 @@ control Ingress(inout headers_t hdr, inout meta_t meta) {
 }
 
 Switch(Ingress()) main;
-

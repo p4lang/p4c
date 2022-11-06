@@ -118,13 +118,13 @@ type    bool       boolT_t;
 type    enum1_t    enum1T_t;  // error
 type    serializable_enum1_t serializable_enum1T_t;  // error
 type    h1_t       H1T_t;  // error
-type    header h2b_t { bit<16> f2; bit<8> f3; } H2bT_t;  // error
-type    h1_t[3]    h1StackT_t;  // error
+//type    header h2b_t { bit<16> f2; bit<8> f3; } H2bT_t;  // error
+//type    h1_t[3]    h1StackT_t;  // error
 type    hu1_t      hu1T_t;  // error
 type    s1_t       s1T_t;  // error
-type    struct PointB_t { int<32> x; int<32> y; } PointBD_t;  // error
-type    tuple<bit<8>, bit<17> > Tuple1T_t;  // error
-type    tuple<bit<8>, varbit<17> > Tuple2T_t;  // error
+//type    struct PointB_t { int<32> x; int<32> y; } PointBD_t;  // error
+//type    tuple<bit<8>, bit<17> > Tuple1T_t;  // error
+//type    tuple<bit<8>, varbit<17> > Tuple2T_t;  // error
 
 
 // typedef on top of another typedef or type are allowed

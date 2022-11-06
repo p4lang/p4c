@@ -39,6 +39,27 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 
+void generateTDIBfrtJson(bool isTDI, const IR::P4Program *program, DPDK::DpdkOptions &options) {
+    auto p4RuntimeSerializer = P4::P4RuntimeSerializer::get();
+    if (options.arch == "psa")
+        p4RuntimeSerializer->registerArch("psa",
+            new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilderForDPDK());
+    if (options.arch == "pna")
+        p4RuntimeSerializer->registerArch("pna",
+            new P4::ControlPlaneAPI::Standard::PNAArchHandlerBuilderForDPDK());
+    auto p4Runtime = P4::generateP4Runtime(program, options.arch);
+
+    cstring filename = isTDI ? options.tdiFile : options.bfRtSchema;
+    auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info, isTDI, options);
+    std::ostream* out = openFile(filename, false);
+    if (!out) {
+        ::error(ErrorType::ERR_IO,
+                "Could not open file: %1%", filename);
+        return;
+    }
+    p4rt->serializeBFRuntimeSchema(out);
+}
+
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
@@ -99,23 +120,14 @@ int main(int argc, char *const argv[]) {
         return 1;
 
     if (!options.bfRtSchema.isNullOrEmpty()) {
-        auto p4RuntimeSerializer = P4::P4RuntimeSerializer::get();
-        if (options.arch == "psa")
-            p4RuntimeSerializer->registerArch("psa",
-                new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilderForDPDK());
-        if (options.arch == "pna")
-            p4RuntimeSerializer->registerArch("pna",
-                new P4::ControlPlaneAPI::Standard::PNAArchHandlerBuilderForDPDK());
-        auto p4Runtime = P4::generateP4Runtime(program, options.arch);
-        auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info);
-        std::ostream* out = openFile(options.bfRtSchema, false);
-        if (!out) {
-            ::error(ErrorType::ERR_IO,
-                    "Could not open BF-RT schema file: %1%", options.bfRtSchema);
-            return 1;
-        }
-        p4rt->serializeBFRuntimeSchema(out);
+        generateTDIBfrtJson(false, program, options);
     }
+    if (!options.tdiFile.isNullOrEmpty()) {
+        generateTDIBfrtJson(true, program, options);
+    }
+
+    if (::errorCount() > 0)
+        return 1;
 
     DPDK::DpdkMidEnd midEnd(options);
     midEnd.addDebugHook(hook);

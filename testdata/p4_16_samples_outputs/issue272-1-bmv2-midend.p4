@@ -2,7 +2,6 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef standard_metadata_t std_meta_t;
 struct some_meta_t {
     bool flag;
 }
@@ -19,7 +18,7 @@ control DeparserI(packet_out packet, in H hdr) {
     }
 }
 
-parser ParserI(packet_in pk, out H hdr, inout M meta, inout std_meta_t std_meta) {
+parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t std_meta) {
     state start {
         transition accept;
     }
@@ -35,7 +34,7 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
     }
 }
 
-control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
+control IngressI(inout H hdr, inout M meta, inout standard_metadata_t std_meta) {
     @hidden action issue2721bmv2l46() {
         meta._some_meta_flag0 = true;
     }
@@ -50,10 +49,9 @@ control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
     }
 }
 
-control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
+control EgressI(inout H hdr, inout M meta, inout standard_metadata_t std_meta) {
     apply {
     }
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

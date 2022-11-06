@@ -14,16 +14,20 @@ parser MyParser(packet_in packet, out header_t hdr, inout metadata meta, inout s
     }
 }
 
-control C1(int a, out bit<8> b) {
+control C1(int a, inout bit<8> b) {
     apply {
-        b = (bit<8>)a + 8w1;
+        if (b == (bit<8>)a) {
+            b = (bit<8>)a + 8w1;
+        } else {
+            b = (bit<8>)(1 + a);
+        }
     }
 }
 
 control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("C1") C1() C1_inst;
     apply {
-        bit<8> r;
+        bit<8> r = 8w1;
         C1_inst.apply(3, r);
     }
 }
@@ -49,4 +53,3 @@ control MyComputeChecksum(inout header_t hdr, inout metadata meta) {
 }
 
 V1Switch<header_t, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

@@ -61,15 +61,13 @@ action macswp args instanceof macswp_arg_t {
 }
 
 table stub {
-	key {
-	}
 	actions {
 		macswp
 		nonDefAct
 		NoAction
 	}
 	default_action NoAction args none const
-	size 0xf4240
+	size 0xF4240
 }
 
 

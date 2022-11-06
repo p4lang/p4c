@@ -86,7 +86,7 @@ control ingress(inout headers hdr,
          color1 = meter1.execute((bit<7>) 0);
 
          if (color1 != PSA_MeterColor_t.RED) {
-             send_to_port(ostd, (PortId_t) 5);
+             send_to_port(ostd, (PortId_t) PORT1);
          } else {
              ingress_drop(ostd);
          }

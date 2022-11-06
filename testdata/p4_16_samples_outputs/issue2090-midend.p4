@@ -39,7 +39,6 @@ header_union Tcp_option_h {
     Tcp_option_sack_h sack;
 }
 
-typedef Tcp_option_h[10] Tcp_option_stack;
 struct Tcp_option_sack_top {
     int<8> kind;
     bit<8> length;
@@ -47,7 +46,7 @@ struct Tcp_option_sack_top {
     bit<7> padding;
 }
 
-parser Tcp_option_parser(packet_in b, out Tcp_option_stack vec) {
+parser Tcp_option_parser(packet_in b, out Tcp_option_h[10] vec) {
     @name("Tcp_option_parser.tmp_0") bit<8> tmp_0;
     bit<24> tmp_5;
     state start {
@@ -91,4 +90,3 @@ parser Tcp_option_parser(packet_in b, out Tcp_option_stack vec) {
 parser pr<H>(packet_in b, out H h);
 package top<H>(pr<H> p);
 top<Tcp_option_h[10]>(Tcp_option_parser()) main;
-

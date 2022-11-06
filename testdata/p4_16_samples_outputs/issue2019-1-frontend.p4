@@ -20,4 +20,3 @@ control EmptyV_0(inout E hdr) {
 }
 
 S<E>(s = Some(), vr = EmptyV_0()) main;
-

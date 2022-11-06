@@ -23,18 +23,14 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "codeGen.h"
+#include "lib/castable.h"
 
 namespace EBPF {
 
 // Base class for EBPF objects
-class EBPFObject {
+class EBPFObject : public ICastable {
  public:
     virtual ~EBPFObject() {}
-    template<typename T> bool is() const { return to<T>() != nullptr; }
-    template<typename T> const T* to() const {
-        return dynamic_cast<const T*>(this); }
-    template<typename T> T* to() {
-        return dynamic_cast<T*>(this); }
 
     static cstring externalName(const IR::IDeclaration* declaration) {
         cstring name = declaration->externalName();

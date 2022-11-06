@@ -1,6 +1,6 @@
+#include <core.p4>
+
 control c(in bit<1> b) {
-    action NoAction() {
-    }
     table t {
         key = {
             b: noSuchMatch;

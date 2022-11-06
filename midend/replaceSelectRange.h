@@ -22,7 +22,7 @@
 #include <iomanip>
 #include <vector>
 #include <utility>
-#include "../lib/gmputil.h"
+#include "../lib/big_int_util.h"
 
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -52,7 +52,7 @@ class DoReplaceSelectRange : public Transform {
     const IR::Node *postorder(IR::SelectExpression *e) override;
     const IR::Node *postorder(IR::SelectCase *p) override;
 
-    std::vector<const IR::Mask *> rangeToMasks(const IR::Range *, size_t);
+    std::vector<const IR::Mask*>* rangeToMasks(const IR::Range *, size_t);
     std::vector<IR::Vector<IR::Expression>> cartesianAppend(
                const std::vector<IR::Vector<IR::Expression>>& vecs,
                const std::vector<const IR::Mask *>& masks);

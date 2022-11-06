@@ -18,8 +18,6 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("IngressI.t") table t_0 {
-        key = {
-        }
         actions = {
             NoAction_1();
         }
@@ -52,4 +50,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

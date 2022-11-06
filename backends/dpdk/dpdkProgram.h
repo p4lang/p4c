@@ -29,14 +29,11 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/unusedDeclarations.h"
 #include "ir/ir.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "lib/json.h"
 #include "options.h"
 
 namespace DPDK {
-
-/* Maximum size in bits for fields in header and metadata structures */
-#define DPDK_MAX_HEADER_METADATA_FIELD_SIZE 64
 
 class ConvertToDpdkProgram : public Transform {
     P4::TypeMap *typemap;

@@ -14,4 +14,3 @@ control c(inout H h) {
 control C(inout H h);
 package top(C c);
 top(c()) main;
-

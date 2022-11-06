@@ -67,4 +67,3 @@ control computeChecksum(inout pkt_t pkt, inout meta_t meta) {
 }
 
 V1Switch<pkt_t, meta_t>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

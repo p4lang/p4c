@@ -16,34 +16,29 @@ struct headers_t {
 
 struct user_meta_data_t {
     bit<48> addr;
+    bit<32> flag;
 }
 
 parser MyIngressParser(packet_in pkt, out headers_t hdr, inout user_meta_data_t m, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
+        m.flag = 32w5;
         transition accept;
     }
 }
 
 control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @name("MyIngressControl.tmp1") bit<48> tmp1_0;
-    bool cond;
     @name("MyIngressControl.nonDefAct") action nonDefAct() {
         m.addr = hdr.ethernet.dst_addr;
         hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
         hdr.ethernet.src_addr = m.addr;
     }
     @name("MyIngressControl.macswp") action macswp(@name("tmp2") bit<32> tmp2) {
-        tmp1_0 = hdr.ethernet.dst_addr;
-        cond = hdr.ethernet.dst_addr == 48w0x1 && tmp2 == 32w0x2;
-        m.addr = (hdr.ethernet.dst_addr == 48w0x1 && tmp2 == 32w0x2 ? hdr.ethernet.dst_addr : m.addr);
-        hdr.ethernet.dst_addr = (hdr.ethernet.dst_addr == 48w0x1 && tmp2 == 32w0x2 ? hdr.ethernet.src_addr : hdr.ethernet.dst_addr);
-        hdr.ethernet.src_addr = (cond ? m.addr : hdr.ethernet.src_addr);
-        hdr.ethernet.dst_addr = tmp1_0;
+        m.addr = (m.flag == 32w0x1 && tmp2 == 32w0x2 ? hdr.ethernet.dst_addr : m.addr);
+        hdr.ethernet.dst_addr = (m.flag == 32w0x1 && tmp2 == 32w0x2 ? hdr.ethernet.src_addr : hdr.ethernet.dst_addr);
+        hdr.ethernet.src_addr = (m.flag == 32w0x1 && tmp2 == 32w0x2 ? m.addr : hdr.ethernet.src_addr);
     }
     @name("MyIngressControl.stub") table stub_0 {
-        key = {
-        }
         actions = {
             macswp();
             nonDefAct();
@@ -51,33 +46,33 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
         default_action = macswp(32w3);
         size = 1000000;
     }
-    @hidden action psadpdknonzeroargdefaultaction08l68() {
+    @hidden action psadpdknonzeroargdefaultaction08l70() {
         d.egress_port = (bit<32>)c.ingress_port ^ 32w1;
     }
-    @hidden table tbl_psadpdknonzeroargdefaultaction08l68 {
+    @hidden table tbl_psadpdknonzeroargdefaultaction08l70 {
         actions = {
-            psadpdknonzeroargdefaultaction08l68();
+            psadpdknonzeroargdefaultaction08l70();
         }
-        const default_action = psadpdknonzeroargdefaultaction08l68();
+        const default_action = psadpdknonzeroargdefaultaction08l70();
     }
     apply {
-        tbl_psadpdknonzeroargdefaultaction08l68.apply();
+        tbl_psadpdknonzeroargdefaultaction08l70.apply();
         stub_0.apply();
     }
 }
 
 control MyIngressDeparser(packet_out pkt, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in user_meta_data_t e, in psa_ingress_output_metadata_t f) {
-    @hidden action psadpdknonzeroargdefaultaction08l83() {
+    @hidden action psadpdknonzeroargdefaultaction08l85() {
         pkt.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psadpdknonzeroargdefaultaction08l83 {
+    @hidden table tbl_psadpdknonzeroargdefaultaction08l85 {
         actions = {
-            psadpdknonzeroargdefaultaction08l83();
+            psadpdknonzeroargdefaultaction08l85();
         }
-        const default_action = psadpdknonzeroargdefaultaction08l83();
+        const default_action = psadpdknonzeroargdefaultaction08l85();
     }
     apply {
-        tbl_psadpdknonzeroargdefaultaction08l83.apply();
+        tbl_psadpdknonzeroargdefaultaction08l85.apply();
     }
 }
 
@@ -98,8 +93,5 @@ control MyEgressDeparser(packet_out pkt, out EMPTY a, out EMPTY b, inout EMPTY c
 }
 
 IngressPipeline<headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIngressParser(), MyIngressControl(), MyIngressDeparser()) ip;
-
 EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEgressParser(), MyEgressControl(), MyEgressDeparser()) ep;
-
 PSA_Switch<headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

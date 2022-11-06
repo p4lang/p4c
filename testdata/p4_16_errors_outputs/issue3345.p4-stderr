@@ -2,7 +2,7 @@ issue3345.p4(3): [--Werror=type-error] error: SelectExpression
     transition select(t) {
                ^
   ---- Actual error:
-issue3345.p4(1): Cannot unify type 'bit<1>' with type 'bool'
+issue3345.p4(1): Cannot cast implicitly type 'bit<1>' to type 'bool'
   parser MyParser2(in bool t) {
                       ^^^^
   ---- Originating from:

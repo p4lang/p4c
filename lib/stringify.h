@@ -20,7 +20,8 @@ limitations under the License.
 #define _LIB_STRINGIFY_H_
 
 #include <stdint.h>
-#include "gmputil.h"
+#include <cstdarg>
+#include "big_int_util.h"
 #include "cstring.h"
 #include "stringref.h"
 

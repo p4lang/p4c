@@ -59,6 +59,8 @@ struct metadata {
 	bit<16> local_metadata_data
 	bit<8> IngressParser_parser_tmp
 	bit<8> Ingress_err
+	bit<16> tmpMask
+	bit<8> tmpMask_0
 }
 metadata instanceof metadata
 
@@ -102,12 +104,12 @@ apply {
 	mov m.psa_ingress_input_metadata_parser_error 0x7
 	jmp INGRESSPARSERIMPL_ACCEPT
 	LABEL_END_0 :	mov m.tmpMask h.ethernet.etherType
-	and m.tmpMask 0xf00
+	and m.tmpMask 0xF00
 	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 m.tmpMask 0x800
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	mov m.tmpMask_0 h.ipv4.protocol
-	and m.tmpMask_0 0xfc
+	and m.tmpMask_0 0xFC
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp

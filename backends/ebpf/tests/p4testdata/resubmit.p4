@@ -81,7 +81,7 @@ control ingress(inout headers hdr,
              // part of the code _should_ affect the output packet
              // contents, because we are not resubmitting it again.
              hdr.ethernet.dstAddr = user_meta.dst_addr;
-             send_to_port(ostdx, (PortId_t) 5);
+             send_to_port(ostdx, (PortId_t) PORT1);
          }
     }
 }

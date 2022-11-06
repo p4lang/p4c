@@ -37,8 +37,6 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
     @name("cIngress.foo") action foo() {
     }
     @name("cIngress.tbl1") table tbl1_0 {
-        key = {
-        }
         actions = {
             foo();
             NoAction_1();
@@ -66,4 +64,3 @@ control uc(inout Parsed_packet hdr, inout mystruct1 meta) {
 }
 
 V1Switch<Parsed_packet, mystruct1>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

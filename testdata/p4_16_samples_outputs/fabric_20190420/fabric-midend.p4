@@ -2,14 +2,6 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<3> fwd_type_t;
-typedef bit<32> next_id_t;
-typedef bit<20> mpls_label_t;
-typedef bit<9> port_num_t;
-typedef bit<48> mac_addr_t;
-typedef bit<16> mcast_group_id_t;
-typedef bit<12> vlan_id_t;
-typedef bit<2> direction_t;
 struct int_metadata_t {
     bool    source;
     bool    transit;
@@ -52,26 +44,26 @@ header intl4_tail_t {
 }
 
 @controller_header("packet_in") header packet_in_header_t {
-    port_num_t ingress_port;
-    bit<7>     _pad;
+    bit<9> ingress_port;
+    bit<7> _pad;
 }
 
 @controller_header("packet_out") header packet_out_header_t {
-    port_num_t egress_port;
-    bit<7>     _pad;
+    bit<9> egress_port;
+    bit<7> _pad;
 }
 
 header ethernet_t {
-    mac_addr_t dst_addr;
-    mac_addr_t src_addr;
-    bit<16>    eth_type;
+    bit<48> dst_addr;
+    bit<48> src_addr;
+    bit<16> eth_type;
 }
 
 header vlan_tag_t {
-    bit<3>    pri;
-    bit<1>    cfi;
-    vlan_id_t vlan_id;
-    bit<16>   eth_type;
+    bit<3>  pri;
+    bit<1>  cfi;
+    bit<12> vlan_id;
+    bit<16> eth_type;
 }
 
 header mpls_t {
@@ -151,11 +143,11 @@ header gtpu_t {
 }
 
 struct spgw_meta_t {
-    direction_t direction;
-    bit<16>     ipv4_len;
-    bit<32>     teid;
-    bit<32>     s1u_enb_addr;
-    bit<32>     s1u_sgw_addr;
+    bit<2>  direction;
+    bit<16> ipv4_len;
+    bit<32> teid;
+    bit<32> s1u_enb_addr;
+    bit<32> s1u_sgw_addr;
 }
 
 struct fabric_metadata_t {
@@ -386,7 +378,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.spgw_ingress.dl_sess_lookup") table spgw_ingress_dl_sess_lookup {
         key = {
-            hdr.ipv4.dst_addr: exact @name("ipv4_dst") ;
+            hdr.ipv4.dst_addr: exact @name("ipv4_dst");
         }
         actions = {
             spgw_ingress_set_dl_sess_info_0();
@@ -397,7 +389,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.spgw_ingress.s1u_filter_table") table spgw_ingress_s1u_filter_table {
         key = {
-            hdr.gtpu_ipv4.dst_addr: exact @name("gtp_ipv4_dst") ;
+            hdr.gtpu_ipv4.dst_addr: exact @name("gtp_ipv4_dst");
         }
         actions = {
             nop_3();
@@ -413,15 +405,15 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     @name("FabricIngress.filtering.permit") action filtering_permit_0() {
         filtering_ingress_port_vlan_counter.count();
     }
-    @name("FabricIngress.filtering.permit_with_internal_vlan") action filtering_permit_with_internal_vlan_0(@name("vlan_id") vlan_id_t vlan_id_2) {
+    @name("FabricIngress.filtering.permit_with_internal_vlan") action filtering_permit_with_internal_vlan_0(@name("vlan_id") bit<12> vlan_id_2) {
         fabric_metadata._vlan_id2 = vlan_id_2;
         filtering_ingress_port_vlan_counter.count();
     }
     @name("FabricIngress.filtering.ingress_port_vlan") table filtering_ingress_port_vlan {
         key = {
-            standard_metadata.ingress_port: exact @name("ig_port") ;
-            hdr.vlan_tag.isValid()        : exact @name("vlan_is_valid") ;
-            hdr.vlan_tag.vlan_id          : ternary @name("vlan_id") ;
+            standard_metadata.ingress_port: exact @name("ig_port");
+            hdr.vlan_tag.isValid()        : exact @name("vlan_is_valid");
+            hdr.vlan_tag.vlan_id          : ternary @name("vlan_id");
         }
         actions = {
             filtering_deny_0();
@@ -433,15 +425,15 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         size = 1024;
     }
     @name("FabricIngress.filtering.fwd_classifier_counter") direct_counter(CounterType.packets_and_bytes) filtering_fwd_classifier_counter;
-    @name("FabricIngress.filtering.set_forwarding_type") action filtering_set_forwarding_type_0(@name("fwd_type") fwd_type_t fwd_type_1) {
+    @name("FabricIngress.filtering.set_forwarding_type") action filtering_set_forwarding_type_0(@name("fwd_type") bit<3> fwd_type_1) {
         fabric_metadata._fwd_type9 = fwd_type_1;
         filtering_fwd_classifier_counter.count();
     }
     @name("FabricIngress.filtering.fwd_classifier") table filtering_fwd_classifier {
         key = {
-            standard_metadata.ingress_port: exact @name("ig_port") ;
-            hdr.ethernet.dst_addr         : ternary @name("eth_dst") ;
-            fabric_metadata._eth_type0    : exact @name("eth_type") ;
+            standard_metadata.ingress_port: exact @name("ig_port");
+            hdr.ethernet.dst_addr         : ternary @name("eth_dst");
+            fabric_metadata._eth_type0    : exact @name("eth_type");
         }
         actions = {
             filtering_set_forwarding_type_0();
@@ -451,14 +443,14 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         size = 1024;
     }
     @name("FabricIngress.forwarding.bridging_counter") direct_counter(CounterType.packets_and_bytes) forwarding_bridging_counter;
-    @name("FabricIngress.forwarding.set_next_id_bridging") action forwarding_set_next_id_bridging_0(@name("next_id") next_id_t next_id_0) {
+    @name("FabricIngress.forwarding.set_next_id_bridging") action forwarding_set_next_id_bridging_0(@name("next_id") bit<32> next_id_0) {
         fabric_metadata._next_id10 = next_id_0;
         forwarding_bridging_counter.count();
     }
     @name("FabricIngress.forwarding.bridging") table forwarding_bridging {
         key = {
-            fabric_metadata._vlan_id2: exact @name("vlan_id") ;
-            hdr.ethernet.dst_addr    : ternary @name("eth_dst") ;
+            fabric_metadata._vlan_id2: exact @name("vlan_id");
+            hdr.ethernet.dst_addr    : ternary @name("eth_dst");
         }
         actions = {
             forwarding_set_next_id_bridging_0();
@@ -469,14 +461,14 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         size = 1024;
     }
     @name("FabricIngress.forwarding.mpls_counter") direct_counter(CounterType.packets_and_bytes) forwarding_mpls_counter;
-    @name("FabricIngress.forwarding.pop_mpls_and_next") action forwarding_pop_mpls_and_next_0(@name("next_id") next_id_t next_id_6) {
+    @name("FabricIngress.forwarding.pop_mpls_and_next") action forwarding_pop_mpls_and_next_0(@name("next_id") bit<32> next_id_6) {
         fabric_metadata._mpls_label5 = 20w0;
         fabric_metadata._next_id10 = next_id_6;
         forwarding_mpls_counter.count();
     }
     @name("FabricIngress.forwarding.mpls") table forwarding_mpls {
         key = {
-            fabric_metadata._mpls_label5: exact @name("mpls_label") ;
+            fabric_metadata._mpls_label5: exact @name("mpls_label");
         }
         actions = {
             forwarding_pop_mpls_and_next_0();
@@ -487,7 +479,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         size = 1024;
     }
     @name("FabricIngress.forwarding.routing_v4_counter") direct_counter(CounterType.packets_and_bytes) forwarding_routing_v4_counter;
-    @name("FabricIngress.forwarding.set_next_id_routing_v4") action forwarding_set_next_id_routing_v4_0(@name("next_id") next_id_t next_id_7) {
+    @name("FabricIngress.forwarding.set_next_id_routing_v4") action forwarding_set_next_id_routing_v4_0(@name("next_id") bit<32> next_id_7) {
         fabric_metadata._next_id10 = next_id_7;
         forwarding_routing_v4_counter.count();
     }
@@ -496,7 +488,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.forwarding.routing_v4") table forwarding_routing_v4 {
         key = {
-            hdr.ipv4.dst_addr: lpm @name("ipv4_dst") ;
+            hdr.ipv4.dst_addr: lpm @name("ipv4_dst");
         }
         actions = {
             forwarding_set_next_id_routing_v4_0();
@@ -508,7 +500,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         size = 1024;
     }
     @name("FabricIngress.acl.acl_counter") direct_counter(CounterType.packets_and_bytes) acl_acl_counter;
-    @name("FabricIngress.acl.set_next_id_acl") action acl_set_next_id_acl_0(@name("next_id") next_id_t next_id_8) {
+    @name("FabricIngress.acl.set_next_id_acl") action acl_set_next_id_acl_0(@name("next_id") bit<32> next_id_8) {
         fabric_metadata._next_id10 = next_id_8;
         acl_acl_counter.count();
     }
@@ -531,18 +523,18 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.acl.acl") table acl_acl {
         key = {
-            standard_metadata.ingress_port: ternary @name("ig_port") ;
-            fabric_metadata._ip_proto14   : ternary @name("ip_proto") ;
-            fabric_metadata._l4_sport15   : ternary @name("l4_sport") ;
-            fabric_metadata._l4_dport16   : ternary @name("l4_dport") ;
-            hdr.ethernet.dst_addr         : ternary @name("eth_src") ;
-            hdr.ethernet.src_addr         : ternary @name("eth_dst") ;
-            hdr.vlan_tag.vlan_id          : ternary @name("vlan_id") ;
-            fabric_metadata._eth_type0    : ternary @name("eth_type") ;
-            hdr.ipv4.src_addr             : ternary @name("ipv4_src") ;
-            hdr.ipv4.dst_addr             : ternary @name("ipv4_dst") ;
-            hdr.icmp.icmp_type            : ternary @name("icmp_type") ;
-            hdr.icmp.icmp_code            : ternary @name("icmp_code") ;
+            standard_metadata.ingress_port: ternary @name("ig_port");
+            fabric_metadata._ip_proto14   : ternary @name("ip_proto");
+            fabric_metadata._l4_sport15   : ternary @name("l4_sport");
+            fabric_metadata._l4_dport16   : ternary @name("l4_dport");
+            hdr.ethernet.dst_addr         : ternary @name("eth_src");
+            hdr.ethernet.src_addr         : ternary @name("eth_dst");
+            hdr.vlan_tag.vlan_id          : ternary @name("vlan_id");
+            fabric_metadata._eth_type0    : ternary @name("eth_type");
+            hdr.ipv4.src_addr             : ternary @name("ipv4_src");
+            hdr.ipv4.dst_addr             : ternary @name("ipv4_dst");
+            hdr.icmp.icmp_type            : ternary @name("icmp_type");
+            hdr.icmp.icmp_code            : ternary @name("icmp_code");
         }
         actions = {
             acl_set_next_id_acl_0();
@@ -556,13 +548,13 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         counters = acl_acl_counter;
     }
     @name("FabricIngress.next.next_vlan_counter") direct_counter(CounterType.packets_and_bytes) next_next_vlan_counter;
-    @name("FabricIngress.next.set_vlan") action next_set_vlan_0(@name("vlan_id") vlan_id_t vlan_id_3) {
+    @name("FabricIngress.next.set_vlan") action next_set_vlan_0(@name("vlan_id") bit<12> vlan_id_3) {
         fabric_metadata._vlan_id2 = vlan_id_3;
         next_next_vlan_counter.count();
     }
     @name("FabricIngress.next.next_vlan") table next_next_vlan {
         key = {
-            fabric_metadata._next_id10: exact @name("next_id") ;
+            fabric_metadata._next_id10: exact @name("next_id");
         }
         actions = {
             next_set_vlan_0();
@@ -573,18 +565,18 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         size = 1024;
     }
     @name("FabricIngress.next.xconnect_counter") direct_counter(CounterType.packets_and_bytes) next_xconnect_counter;
-    @name("FabricIngress.next.output_xconnect") action next_output_xconnect_0(@name("port_num") port_num_t port_num) {
+    @name("FabricIngress.next.output_xconnect") action next_output_xconnect_0(@name("port_num") bit<9> port_num) {
         standard_metadata.egress_spec = port_num;
         next_xconnect_counter.count();
     }
-    @name("FabricIngress.next.set_next_id_xconnect") action next_set_next_id_xconnect_0(@name("next_id") next_id_t next_id_9) {
+    @name("FabricIngress.next.set_next_id_xconnect") action next_set_next_id_xconnect_0(@name("next_id") bit<32> next_id_9) {
         fabric_metadata._next_id10 = next_id_9;
         next_xconnect_counter.count();
     }
     @name("FabricIngress.next.xconnect") table next_xconnect {
         key = {
-            standard_metadata.ingress_port: exact @name("ig_port") ;
-            fabric_metadata._next_id10    : exact @name("next_id") ;
+            standard_metadata.ingress_port: exact @name("ig_port");
+            fabric_metadata._next_id10    : exact @name("next_id");
         }
         actions = {
             next_output_xconnect_0();
@@ -597,17 +589,17 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @max_group_size(16) @name("FabricIngress.next.hashed_selector") action_selector(HashAlgorithm.crc16, 32w1024, 32w16) next_hashed_selector;
     @name("FabricIngress.next.hashed_counter") direct_counter(CounterType.packets_and_bytes) next_hashed_counter;
-    @name("FabricIngress.next.output_hashed") action next_output_hashed_0(@name("port_num") port_num_t port_num_0) {
+    @name("FabricIngress.next.output_hashed") action next_output_hashed_0(@name("port_num") bit<9> port_num_0) {
         standard_metadata.egress_spec = port_num_0;
         next_hashed_counter.count();
     }
-    @name("FabricIngress.next.routing_hashed") action next_routing_hashed_0(@name("port_num") port_num_t port_num_1, @name("smac") mac_addr_t smac, @name("dmac") mac_addr_t dmac) {
+    @name("FabricIngress.next.routing_hashed") action next_routing_hashed_0(@name("port_num") bit<9> port_num_1, @name("smac") bit<48> smac, @name("dmac") bit<48> dmac) {
         hdr.ethernet.src_addr = smac;
         hdr.ethernet.dst_addr = dmac;
         standard_metadata.egress_spec = port_num_1;
         next_hashed_counter.count();
     }
-    @name("FabricIngress.next.mpls_routing_hashed") action next_mpls_routing_hashed_0(@name("port_num") port_num_t port_num_2, @name("smac") mac_addr_t smac_0, @name("dmac") mac_addr_t dmac_0, @name("label") mpls_label_t label_0) {
+    @name("FabricIngress.next.mpls_routing_hashed") action next_mpls_routing_hashed_0(@name("port_num") bit<9> port_num_2, @name("smac") bit<48> smac_0, @name("dmac") bit<48> dmac_0, @name("label") bit<20> label_0) {
         fabric_metadata._mpls_label5 = label_0;
         hdr.ethernet.src_addr = smac_0;
         hdr.ethernet.dst_addr = dmac_0;
@@ -616,12 +608,12 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.next.hashed") table next_hashed {
         key = {
-            fabric_metadata._next_id10 : exact @name("next_id") ;
-            hdr.ipv4.dst_addr          : selector @name("hdr.ipv4.dst_addr") ;
-            hdr.ipv4.src_addr          : selector @name("hdr.ipv4.src_addr") ;
-            fabric_metadata._ip_proto14: selector @name("fabric_metadata.ip_proto") ;
-            fabric_metadata._l4_sport15: selector @name("fabric_metadata.l4_sport") ;
-            fabric_metadata._l4_dport16: selector @name("fabric_metadata.l4_dport") ;
+            fabric_metadata._next_id10 : exact @name("next_id");
+            hdr.ipv4.dst_addr          : selector @name("hdr.ipv4.dst_addr");
+            hdr.ipv4.src_addr          : selector @name("hdr.ipv4.src_addr");
+            fabric_metadata._ip_proto14: selector @name("fabric_metadata.ip_proto");
+            fabric_metadata._l4_sport15: selector @name("fabric_metadata.l4_sport");
+            fabric_metadata._l4_dport16: selector @name("fabric_metadata.l4_dport");
         }
         actions = {
             next_output_hashed_0();
@@ -635,14 +627,14 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         size = 1024;
     }
     @name("FabricIngress.next.multicast_counter") direct_counter(CounterType.packets_and_bytes) next_multicast_counter;
-    @name("FabricIngress.next.set_mcast_group_id") action next_set_mcast_group_id_0(@name("group_id") mcast_group_id_t group_id) {
+    @name("FabricIngress.next.set_mcast_group_id") action next_set_mcast_group_id_0(@name("group_id") bit<16> group_id) {
         standard_metadata.mcast_grp = group_id;
         fabric_metadata._is_multicast11 = true;
         next_multicast_counter.count();
     }
     @name("FabricIngress.next.multicast") table next_multicast {
         key = {
-            fabric_metadata._next_id10: exact @name("next_id") ;
+            fabric_metadata._next_id10: exact @name("next_id");
         }
         actions = {
             next_set_mcast_group_id_0();
@@ -959,8 +951,8 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
     }
     @name("FabricEgress.egress_next.egress_vlan") table egress_next_egress_vlan {
         key = {
-            fabric_metadata._vlan_id2    : exact @name("vlan_id") ;
-            standard_metadata.egress_port: exact @name("eg_port") ;
+            fabric_metadata._vlan_id2    : exact @name("vlan_id");
+            standard_metadata.egress_port: exact @name("eg_port");
         }
         actions = {
             egress_next_pop_vlan_0();
@@ -1127,4 +1119,3 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
 }
 
 V1Switch<parsed_headers_t, fabric_metadata_t>(FabricParser(), FabricVerifyChecksum(), FabricIngress(), FabricEgress(), FabricComputeChecksum(), FabricDeparser()) main;
-

@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "psaProgramStructure.h"
 #include "ir/ir.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "lib/json.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/constantFolding.h"

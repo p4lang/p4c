@@ -14,9 +14,9 @@ struct intrinsic_metadata_t {
 }
 
 struct metaA_t {
-    @field_list(FieldLists.redirect_FL) 
+    @field_list(FieldLists.redirect_FL)
     bit<8> f1;
-    @field_list(FieldLists.redirect_FL) 
+    @field_list(FieldLists.redirect_FL)
     bit<8> f2;
 }
 
@@ -31,14 +31,14 @@ header hdrA_t {
 }
 
 struct metadata {
-    @name(".metaA") 
+    @name(".metaA")
     metaA_t metaA;
-    @name(".metaB") 
+    @name(".metaB")
     metaB_t metaB;
 }
 
 struct headers {
-    @name(".hdrA") 
+    @name(".hdrA")
     hdrA_t hdrA;
 }
 
@@ -66,8 +66,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdrA.f1                    : exact @name("hdrA.f1") ;
-            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
+            hdr.hdrA.f1                    : exact @name("hdrA.f1");
+            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type");
         }
         size = 128;
         default_action = NoAction();
@@ -101,8 +101,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdrA.f1  : exact @name("hdrA.f1") ;
-            meta.metaA.f1: exact @name("metaA.f1") ;
+            hdr.hdrA.f1  : exact @name("hdrA.f1");
+            meta.metaA.f1: exact @name("metaA.f1");
         }
         size = 128;
         default_action = NoAction();
@@ -115,8 +115,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdrA.f1                    : exact @name("hdrA.f1") ;
-            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
+            hdr.hdrA.f1                    : exact @name("hdrA.f1");
+            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type");
         }
         size = 128;
         default_action = NoAction();
@@ -144,4 +144,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

@@ -1,6 +1,14 @@
 serenum-typedef.p4(8): [--Werror=type-error] error: EthT: Illegal type for enum; only bit<> and int<> are allowed
 enum EthT EthTypes {
      ^^^^
-serenum-typedef.p4(57): [--Werror=type-error] error: prs: cannot evaluate to a compile-time constant
-top(prs(), c()) main;
-    ^^^^^
+serenum-typedef.p4(49): [--Werror=type-error] error: cast
+            h.eth.type = (EthTypes)(bit<16>)0;
+                         ^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+serenum-typedef.p4(8): Cannot unify type 'bit<16>' with type 'EthTypes'
+  enum EthT EthTypes {
+            ^^^^^^^^
+  ---- Originating from:
+serenum-typedef.p4(8): Cannot cast from 'bit<16>' to 'EthTypes'
+  enum EthT EthTypes {
+            ^^^^^^^^

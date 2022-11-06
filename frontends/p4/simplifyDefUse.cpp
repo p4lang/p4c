@@ -416,7 +416,6 @@ class FindUninitialized : public Inspector {
     }
     bool setCurrent(const IR::Statement* statement) {
         currentPoint = ProgramPoint(context, statement);
-        LOG3(IndentCtl::unindent);
         return false;
     }
     profile_t init_apply(const IR::Node *root) override {
@@ -459,7 +458,7 @@ class FindUninitialized : public Inspector {
     Definitions* getCurrentDefinitions() const {
         auto defs = definitions->getDefinitions(currentPoint, true);
         LOG3("FU Current point is (after) " << currentPoint <<
-                " definitions are " << IndentCtl::endl << defs);
+                " definitions are " << Log::endl << defs);
         return defs;
     }
 
@@ -824,7 +823,8 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::AssignmentStatement* statement) override {
-        LOG3("FU Visiting " << dbp(statement) << " " << statement << IndentCtl::indent);
+        Log::TempIndent indent;
+        LOG3("FU Visiting " << dbp(statement) << " " << statement << indent);
         if (!unreachable) {
             lhs = true;
             visit(statement->left);
@@ -844,7 +844,8 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::ReturnStatement* statement) override {
-        LOG3("FU Visiting " << statement);
+        Log::TempIndent indent;
+        LOG3("FU Visiting " << statement << indent);
         if (!unreachable && statement->expression != nullptr)
             visit(statement->expression);
         else
@@ -854,14 +855,16 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::ExitStatement* statement) override {
-        LOG3("FU Visiting " << statement);
+        Log::TempIndent indent;
+        LOG3("FU Visiting " << statement << indent);
         unreachable = true;
         LOG3("Unreachable");
         return setCurrent(statement);
     }
 
     bool preorder(const IR::MethodCallStatement* statement) override {
-        LOG3("FU Visiting " << statement);
+        Log::TempIndent indent;
+        LOG3("FU Visiting " << statement << indent);
         if (!unreachable)
             visit(statement->methodCall);
         else
@@ -871,7 +874,8 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::BlockStatement* statement) override {
-        LOG3("FU Visiting " << statement);
+        Log::TempIndent indent;
+        LOG3("FU Visiting " << statement << indent);
         if (!unreachable) {
             visit(statement->components, "components");
         } else {
@@ -881,7 +885,8 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::IfStatement* statement) override {
-        LOG3("FU Visiting " << statement);
+        Log::TempIndent indent;
+        LOG3("FU Visiting " << statement << indent);
         if (!unreachable) {
             auto saveHeaderDefsBeforeCondition = headerDefs->clone();
             visit(statement->condition);
@@ -907,7 +912,8 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::SwitchStatement* statement) override {
-        LOG3("FU Visiting " << statement);
+        Log::TempIndent indent;
+        LOG3("FU Visiting " << statement << indent);
         if (!unreachable) {
             bool finalUnreachable = true;
             bool hasDefault = false;
@@ -1100,8 +1106,7 @@ class FindUninitialized : public Inspector {
         }
         auto decl = refMap->getDeclaration(expression->path, true);
         LOG4("Declaration for path '" << expression->path << "' is "
-            << IndentCtl::indent << IndentCtl::endl << decl
-            << IndentCtl::unindent);
+            << Log::indent << Log::endl << decl << Log::unindent);
 
         auto storage = definitions->storageMap->getStorage(decl);
         const LocationSet* result;
@@ -1110,8 +1115,8 @@ class FindUninitialized : public Inspector {
         else
             result = LocationSet::empty;
 
-        LOG4("LocationSet for declaration " << IndentCtl::indent << IndentCtl::endl << decl
-            << IndentCtl::unindent << IndentCtl::endl << "is <<" << result << ">>");
+        LOG4("LocationSet for declaration " << Log::indent << Log::endl << decl
+            << Log::unindent << Log::endl << "is <<" << result << ">>");
         reads(expression, result);
         registerUses(expression);
         return false;
@@ -1211,7 +1216,7 @@ class FindUninitialized : public Inspector {
         }
 
         // The effect of copy-in: in arguments are read
-        LOG3("Summarizing call effect on in arguments; definitions are " << IndentCtl::endl <<
+        LOG3("Summarizing call effect on in arguments; definitions are " << Log::endl <<
              getCurrentDefinitions());
 
         bool isControlOrParserApply = false;
@@ -1277,7 +1282,8 @@ class FindUninitialized : public Inspector {
         // side effects.
 
         if (!callee.empty()) {
-            LOG3("Analyzing " << callee << IndentCtl::indent);
+            Log::TempIndent indent;
+            LOG3("Analyzing " << callee << indent);
             ProgramPoint pt(context, expression);
             FindUninitialized fu(this, pt);
             fu.setCalledBy(this);
@@ -1437,6 +1443,10 @@ class FindUninitialized : public Inspector {
         return false;
     }
 
+    void postorder(const IR::StructExpression* expression) override {
+        otherExpression(expression);
+    }
+
     void postorder(const IR::Operation_Unary* expression) override {
         otherExpression(expression);
     }
@@ -1457,7 +1467,8 @@ class RemoveUnused : public Transform {
     { CHECK_NULL(hasUses);  CHECK_NULL(refMap);  CHECK_NULL(typeMap); setName("RemoveUnused"); }
     const IR::Node* postorder(IR::AssignmentStatement* statement) override {
         if (!hasUses->hasUses(getOriginal())) {
-            LOG3("Removing statement " << getOriginal() << " " << statement << IndentCtl::indent);
+            Log::TempIndent indent;
+            LOG3("Removing statement " << getOriginal() << " " << statement << indent);
             SideEffects se(refMap, typeMap);
             se.setCalledBy(this);
             (void)statement->right->apply(se);
@@ -1508,7 +1519,7 @@ class ProcessDefUse : public PassManager {
 const IR::Node* DoSimplifyDefUse::process(const IR::Node* node) {
     ProcessDefUse process(refMap, typeMap);
     process.setCalledBy(this);
-    LOG5("ProcessDefUse of:" << IndentCtl::endl << node);
+    LOG5("ProcessDefUse of:" << Log::endl << node);
     return node->apply(process);
 }
 

@@ -21,16 +21,16 @@ header axon_hop_t {
 }
 
 struct metadata {
-    @name(".my_metadata") 
+    @name(".my_metadata")
     my_metadata_t my_metadata;
 }
 
 struct headers {
-    @name(".axon_head") 
+    @name(".axon_head")
     axon_head_t    axon_head;
-    @name(".axon_fwdHop") 
+    @name(".axon_fwdHop")
     axon_hop_t[64] axon_fwdHop;
-    @name(".axon_revHop") 
+    @name(".axon_revHop")
     axon_hop_t[64] axon_revHop;
 }
 
@@ -140,4 +140,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

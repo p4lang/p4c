@@ -15,4 +15,3 @@ control c() {
 control none();
 package top(none n);
 top(c()) main;
-

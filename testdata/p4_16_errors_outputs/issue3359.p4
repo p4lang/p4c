@@ -33,4 +33,3 @@ parser MyParser2(in bit<1> tt) {
 }
 
 mypack(MyParser1()) main;
-

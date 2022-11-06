@@ -25,6 +25,7 @@ limitations under the License.
 #include "ir-tree-macros.h"
 #include "lib/log.h"
 #include "lib/json.h"
+#include "lib/castable.h"
 
 class Visitor;
 struct Visitor_Context;
@@ -42,7 +43,7 @@ class Annotation;
 template<class T> class Vector;
 template<class T> class IndexedVector;
 // node interface
-class INode : public Util::IHasSourceInfo, public IHasDbPrint {
+class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable {
  public:
     virtual ~INode() {}
     virtual const Node* getNode() const = 0;
@@ -53,10 +54,6 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint {
     virtual cstring node_type_name() const = 0;
     virtual void validate() const {}
     virtual const Annotation *getAnnotation(cstring) const { return nullptr; }
-    template<typename T> bool is() const { return to<T>() != nullptr; }
-    template<typename T> const T *to() const { return dynamic_cast<const T*>(this); }
-    template<typename T> const T &as() const { return dynamic_cast<const T&>(*this); }
-
     /// A checked version of INode::to. A BUG occurs if the cast fails.
     ///
     /// A similar effect can be achieved with `&as<T>()`, but this method
@@ -122,9 +119,6 @@ class Node : public virtual INode {
     cstring node_type_name() const override { return "Node"; }
     static cstring static_type_name() { return "Node"; }
     virtual int num_children() { return 0; }
-    template<typename T> bool is() const { return to<T>() != nullptr; }
-    template<typename T> const T *to() const { return dynamic_cast<const T*>(this); }
-    template<typename T> const T &as() const { return dynamic_cast<const T&>(*this); }
     explicit Node(JSONLoader &json);
     cstring toString() const override { return node_type_name(); }
     void toJSON(JSONGenerator &json) const override;

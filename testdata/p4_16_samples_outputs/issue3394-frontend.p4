@@ -17,7 +17,7 @@ parser MyParser(packet_in packet, out header_t hdr, inout metadata meta, inout s
 control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("MyIngress.r") bit<8> r_0;
     apply {
-        r_0 = (bit<8>)3 + 8w1;
+        r_0 = 8w1;
     }
 }
 
@@ -42,4 +42,3 @@ control MyComputeChecksum(inout header_t hdr, inout metadata meta) {
 }
 
 V1Switch<header_t, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

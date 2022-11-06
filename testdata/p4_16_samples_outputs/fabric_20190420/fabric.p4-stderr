@@ -1,0 +1,3 @@
+fabric.p4(84): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.gtpu_ipv4
+        spgw_ingress.apply(hdr.gtpu_ipv4, hdr.gtpu_udp, hdr.gtpu,
+                           ^^^^^^^^^^^^^

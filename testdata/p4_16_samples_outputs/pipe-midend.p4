@@ -5,7 +5,6 @@ match_kind {
     exact
 }
 
-typedef bit<9> BParamType;
 struct TArg1 {
     bit<9> field1;
     bool   drop;
@@ -37,7 +36,7 @@ struct Packet_data {
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("Q_pipe.p1.thost.B_action") action p1_thost_B_action_0(@name("bData") BParamType bData) {
+    @name("Q_pipe.p1.thost.B_action") action p1_thost_B_action_0(@name("bData") bit<9> bData) {
         qArg1.field1 = bData;
     }
     @name("Q_pipe.p1.thost.C_action") action p1_thost_C_action_0(@name("cData") bit<9> cData) {
@@ -45,8 +44,8 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     }
     @name("Q_pipe.p1.thost.T") table p1_thost_T {
         key = {
-            qArg1.field1: ternary @name("tArg1.field1") ;
-            qArg2.field2: exact @name("aArg2.field2") ;
+            qArg1.field1: ternary @name("tArg1.field1");
+            qArg2.field2: exact @name("aArg2.field2");
         }
         actions = {
             p1_thost_B_action_0();
@@ -60,7 +59,7 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     }
     @name("Q_pipe.p1.Tinner") table p1_Tinner {
         key = {
-            qArg1.field1: ternary @name("pArg1.field1") ;
+            qArg1.field1: ternary @name("pArg1.field1");
         }
         actions = {
             p1_Drop_0();
@@ -85,4 +84,3 @@ parser my_parser(bs b, out Packet_data p) {
 }
 
 myswitch(my_parser(), Q_pipe()) main;
-

@@ -442,8 +442,7 @@ void ComputeWriteSet::enterScope(const IR::ParameterList* parameters,
     }
     allDefinitions->setDefinitionsAt(entryPoint, defs, false);
     currentDefinitions = defs;
-    LOG3("CWS Entered scope " << entryPoint << " definitions are " <<
-         IndentCtl::endl << defs);
+    LOG3("CWS Entered scope " << entryPoint << " definitions are " << Log::endl << defs);
 }
 
 void ComputeWriteSet::exitScope(const IR::ParameterList* parameters,
@@ -496,7 +495,7 @@ bool ComputeWriteSet::setDefinitions(Definitions* defs, const IR::Node* node, bo
     if (findContext<IR::ParserState>())
         overwrite = true;
     allDefinitions->setDefinitionsAt(point, currentDefinitions, overwrite);
-    LOG3("CWS Definitions at " << point << " are " << IndentCtl::endl << defs);
+    LOG3("CWS Definitions at " << point << " are " << Log::endl << defs);
     return false;  // always returns false
 }
 
@@ -703,8 +702,9 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
         // symbolically call all the methods that might be called via this extern method
         callees = em->mayCall(); }
     if (!callees.empty()) {
+        Log::TempIndent indent;
         LOG3("Analyzing callees of " << expression << DBPrint::Brief << callees <<
-             DBPrint::Reset << IndentCtl::indent);
+             DBPrint::Reset << indent);
         ProgramPoint pt(callingContext, expression);
         ComputeWriteSet cw(this, pt, currentDefinitions);
         cw.setCalledBy(this);
@@ -713,7 +713,7 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
         currentDefinitions = cw.currentDefinitions;
         exitDefinitions = exitDefinitions->joinDefinitions(cw.exitDefinitions);
         LOG3("Definitions after call of " << DBPrint::Brief << expression << ":" <<
-             IndentCtl::endl << currentDefinitions << DBPrint::Reset << IndentCtl::unindent);
+             Log::endl << currentDefinitions << DBPrint::Reset);
     }
 
     auto result = LocationSet::empty;
@@ -1007,12 +1007,12 @@ bool ComputeWriteSet::preorder(const IR::MethodCallStatement* statement) {
 }  // namespace P4
 
 // functions for calling from gdb
-void dump(const P4::StorageLocation *s) { std::cout << *s << IndentCtl::endl; }
-void dump(const P4::StorageMap *s) { std::cout << *s << IndentCtl::endl; }
-void dump(const P4::LocationSet *s) { std::cout << *s << IndentCtl::endl; }
-void dump(const P4::ProgramPoint *p) { std::cout << *p << IndentCtl::endl; }
-void dump(const P4::ProgramPoint &p) { std::cout << p << IndentCtl::endl; }
-void dump(const P4::ProgramPoints *p) { std::cout << *p << IndentCtl::endl; }
-void dump(const P4::ProgramPoints &p) { std::cout << p << IndentCtl::endl; }
-void dump(const P4::Definitions *d) { std::cout << *d << IndentCtl::endl; }
-void dump(const P4::AllDefinitions *d) { std::cout << *d << IndentCtl::endl; }
+void dump(const P4::StorageLocation *s) { std::cout << *s << Log::endl; }
+void dump(const P4::StorageMap *s) { std::cout << *s << Log::endl; }
+void dump(const P4::LocationSet *s) { std::cout << *s << Log::endl; }
+void dump(const P4::ProgramPoint *p) { std::cout << *p << Log::endl; }
+void dump(const P4::ProgramPoint &p) { std::cout << p << Log::endl; }
+void dump(const P4::ProgramPoints *p) { std::cout << *p << Log::endl; }
+void dump(const P4::ProgramPoints &p) { std::cout << p << Log::endl; }
+void dump(const P4::Definitions *d) { std::cout << *d << Log::endl; }
+void dump(const P4::AllDefinitions *d) { std::cout << *d << Log::endl; }

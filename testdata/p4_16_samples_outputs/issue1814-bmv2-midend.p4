@@ -22,7 +22,7 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
     @name("IngressImpl.testRegister") register<bit<1>>(32w1) testRegister_0;
     @name("IngressImpl.debug_table") table debug_table_0 {
         key = {
-            meta.test: exact @name("meta.test") ;
+            meta.test: exact @name("meta.test");
         }
         actions = {
             NoAction_1();
@@ -66,4 +66,3 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), VerifyChecksumImpl(), IngressImpl(), EgressImpl(), ComputeChecksumImpl(), DeparserImpl()) main;
-

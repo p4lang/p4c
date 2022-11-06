@@ -56,7 +56,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
             default: accept;
         }
     }
-    state parse_srcRouting {
+    @name(".parse_srcRouting") state parse_srcRouting {
         packet.extract(hdr.srcRoutes[index]);
         index = index + 1;
         transition select(hdr.srcRoutes[index - 1].bos) {
@@ -91,4 +91,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(MyParser(), verifyChecksum(), mau(), mau(), computeChecksum(), deparse()) main;
-

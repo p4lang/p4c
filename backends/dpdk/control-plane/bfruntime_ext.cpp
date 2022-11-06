@@ -213,7 +213,25 @@ const Util::JsonObject*
 BFRuntimeSchemaGenerator::genSchema() const {
     auto* json = new Util::JsonObject();
 
-    json->emplace("schema_version", cstring("1.0.0"));
+    if (isTDI) {
+        cstring progName =  options.file;
+        auto fileName = progName.findlast('/');
+        // Handle the case when input file is in the current working directory.
+        // fileName would be null in that case, hence progName should remain unchanged.
+        if (fileName)
+            progName = fileName;
+        auto fileext = progName.find(".");
+        progName = progName.replace(fileext, "");
+        progName = progName.trim("/\t\n\r");
+        json->emplace("program_name", progName);
+        json->emplace("build_date", cstring(options.getBuildDate()));
+        json->emplace("compile_command", cstring(options.getCompileCommand()));
+        json->emplace("compiler_version", cstring(options.compilerVersion));
+        json->emplace("schema_version", tdiSchemaVersion);
+        json->emplace("target", cstring("DPDK"));
+    } else {
+        json->emplace("schema_version", bfrtSchemaVersion);
+    }
 
     auto* tablesJson = new Util::JsonArray();
     json->emplace("tables", tablesJson);

@@ -16,4 +16,3 @@ parser p1<T>(out T a) {
 parser simple(out bit<2> a);
 package m(simple n);
 m(p1()) main;
-

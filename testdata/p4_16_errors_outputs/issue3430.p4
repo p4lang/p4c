@@ -13,4 +13,3 @@ parser myp() {
 }
 
 s(myp()) main;
-

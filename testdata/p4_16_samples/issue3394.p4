@@ -13,9 +13,13 @@ parser MyParser(packet_in packet,
     }
 }
 
-control C1(int a, out bit<8> b) {
+control C1(int a, inout bit<8> b) {
     apply {
-        b = a+8w1;
+        if (b == a) {
+            b = a+8w1;
+        } else {
+            b = 1+a;
+        }
     }
 }
 
@@ -23,7 +27,7 @@ control MyIngress(inout header_t hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
     apply {
-        bit<8> r;
+        bit<8> r = 1;
         C1.apply(3, r);
     }
 }

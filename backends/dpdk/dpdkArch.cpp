@@ -474,113 +474,127 @@ bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s) {
        }
 */
 const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
-    // fields is used to create header with modified fields
-    auto fields = new IR::IndexedVector<IR::StructField>;
     if (st->is<IR::Type_Header>()) {
         unsigned size_sum_so_far = 0;
+        bool all_hdr_field_aligned = true;
         for (auto field : st->fields) {
-            if ((*field).type->is<IR::Type_Bits>()) {
-                auto t = (*field).type->to<IR::Type_Bits>();
-                auto width = t->width_bits();
-                if (width % 8 != 0) {
-                    size_sum_so_far += width;
-                    fieldInfo obj;
-                    obj.fieldWidth =  width;
-                    // Storing the non-aligned field
-                    field_name_list.emplace(field->name, obj);
-                } else {
-                    if (size_sum_so_far != 0) {
-                        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                                "Header Structure '%1%' has non-contiguous non-aligned fields"
-                                " which cannot be combined to align to 8-bit. DPDK does not"
-                                " support non 8-bit aligned header field",st->name.name);
-                        return st;
-                    }
-                    fields->push_back(field);
-                    continue;
-                }
-                cstring modifiedName = "";
-                auto size = field_name_list.size();
-                unsigned i = 0;
-                if (size_sum_so_far <= 64) {
-                    // Check if the sum of width of non-aligned field is divisble by 8.
-                    if (size_sum_so_far && (size_sum_so_far % 8 == 0)) {
-                        // Form the field with all non-aligned field stored in "field_name_list"
-                        for (auto s = field_name_list.begin(); s != field_name_list.end();
-                             s++,i++) {
-                            if ((i + 1) < (size))
-                                modifiedName += s->first + "_";
-                            else
-                                modifiedName += s->first;
-                        }
-                        unsigned offset = 0;
-                        /* Store information about each non-aligned field
-                           For eg : ModifiedName, header str, width, offset, and its
-                                    lsb and msb in modified field
-
-                                   header ipv4_t {
-                                        ...
-                                        bit<3>  flags;
-                                        bit<13> fragOffset;
-                                        ...
-                                   }
-                                   is converted into
-
-                                   header ipv4_t {
-                                        ...
-                                        bit<16>  flags_fragOffset;
-                                        ...
-                                   }
-                                    Here, for "flags", information saved are :
-                                        ModifiedName = flags_fragOffset;
-                                        header str   =  ipv4_t; [This is used if multiple headers
-                                                                 have field with same name]
-                                        width        = 16;
-                                        offset       = 3;
-                                        lsb          = 3;
-                                        msb          = 15;
-                        */
-                        for (auto s = field_name_list.begin(); s != field_name_list.end(); s++) {
-                            hdrFieldInfo fieldObj;
-                            fieldObj.modifiedName = modifiedName;
-                            fieldObj.headerStr = st->name.name;
-                            fieldObj.modifiedWidth = size_sum_so_far;
-                            fieldObj.fieldWidth = s->second.fieldWidth;
-                            fieldObj.lsb = offset;
-                            fieldObj.msb = offset + s->second.fieldWidth - 1;
-                            fieldObj.offset = offset;
-                            structure->hdrFieldInfoList[s->first].push_back(fieldObj);
-                            offset += s->second.fieldWidth;
-                        }
-                        fields->push_back(new IR::StructField(IR::ID(modifiedName),
-                                          IR::Type_Bits::get(size_sum_so_far)));
-                        size_sum_so_far = 0;
-                        modifiedName = "";
-                        field_name_list.clear();
-                    }
-                } else {
-                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                            "Combining the contiguos non 8-bit aligned fields result in a field"
-                            " with bit-width '%1%' > 64-bit in header structure '%2%'. DPDK does"
-                            " not support non 8-bit aligned and greater than 64-bit header field"
-                            ,size_sum_so_far, st->name.name);
-                    return st;
-                }
+            unsigned width;
+            if (auto type = (*field).type->to<IR::Type_Bits>())
+                width = type->width_bits();
+            else if (auto type = (*field).type->to<IR::Type_Varbits>()) {
+                width = type->width_bits();
             } else {
-                fields->push_back(field);
+                BUG("header fields should be of type bit<> or varbit<>"
+                    "found this %1%", field->toString());
+            }
+            size_sum_so_far += width;
+            if ((width & 0x7) != 0) {
+                all_hdr_field_aligned = false;
             }
         }
-        /* Throw error if there is non-aligned field present at the end in header */
-        if (size_sum_so_far != 0) {
+        if ((size_sum_so_far & 0x7) != 0) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "8-bit Alignment for Header Structure '%1%' is not possible as no more header"
-                    " fields available in header to combine. DPDK does not support non-aligned"
-                    " header fields.", st->name.name);
+                    "'%1%' is not 8-bit aligned", st->name.name);
             return st;
         }
-        return new IR::Type_Header(IR::ID(st->name), st->annotations, *fields);
+        if (all_hdr_field_aligned) {
+            return st;
+        }
+    } else {
+        return st;
     }
 
+    // fields is used to create header with modified fields
+    auto fields = new IR::IndexedVector<IR::StructField>;
+    unsigned size_sum_so_far = 0;
+    for (auto field : st->fields) {
+        unsigned width;
+        if (auto type = (*field).type->to<IR::Type_Bits>())
+            width = type->width_bits();
+        else {
+            auto type0 = (*field).type->to<IR::Type_Varbits>();
+            width = type0->width_bits();
+        }
+        if ((width & 0x7) == 0 && size_sum_so_far == 0) {
+                fields->push_back(field);
+                continue;
+        } else {
+            if (size_sum_so_far == 0 || (size_sum_so_far & 0x7) != 0) {
+                size_sum_so_far += width;
+                fieldInfo obj;
+                obj.fieldWidth = width;
+                // Storing the non-aligned field
+                field_name_list.emplace(field->name, obj);
+            }
+        }
+        cstring modifiedName = "";
+        auto size = field_name_list.size();
+        unsigned i = 0;
+        // Check if the sum of width of non-aligned field is divisble by 8.
+        if (size_sum_so_far && (size_sum_so_far % 8 == 0)) {
+            // Form the field with all non-aligned field stored in "field_name_list"
+            for (auto s = field_name_list.begin(); s != field_name_list.end();
+                    s++, i++) {
+                if ((i + 1) < size)
+                    modifiedName += s->first + "_";
+                else
+                    modifiedName += s->first;
+            }
+            unsigned offset = 0;
+            /* Store information about each non-aligned field
+                For eg : ModifiedName, header str, width, offset, and its
+                        lsb and msb in modified field
+
+                        header ipv4_t {
+                            ...
+                            bit<3>  flags;
+                            bit<13> fragOffset;
+                            ...
+                        }
+                        is converted into
+
+                        header ipv4_t {
+                            ...
+                            bit<16>  flags_fragOffset;
+                            ...
+                        }
+                        Here, for "flags", information saved are :
+                            ModifiedName = flags_fragOffset;
+                            header str   =  ipv4_t; [This is used if multiple headers
+                                                        have field with same name]
+                            width        = 16;
+                            offset       = 3;
+                            lsb          = 3;
+                            msb          = 15;
+            */
+            for (auto s = field_name_list.begin(); s != field_name_list.end(); s++) {
+                hdrFieldInfo fieldObj;
+                fieldObj.modifiedName = modifiedName;
+                fieldObj.headerStr = st->name.name;
+                fieldObj.modifiedWidth = size_sum_so_far;
+                fieldObj.fieldWidth = s->second.fieldWidth;
+                fieldObj.lsb = offset;
+                fieldObj.msb = offset + s->second.fieldWidth - 1;
+                fieldObj.offset = offset;
+                structure->hdrFieldInfoList[s->first].push_back(fieldObj);
+                offset += s->second.fieldWidth;
+            }
+            fields->push_back(new IR::StructField(IR::ID(modifiedName),
+                                IR::Type_Bits::get(size_sum_so_far)));
+            size_sum_so_far = 0;
+            modifiedName = "";
+            field_name_list.clear();
+        }
+    }
+    /* Throw error if there is non-aligned field present at the end in header */
+    if (size_sum_so_far != 0) {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "8-bit Alignment for Header Structure '%1%' is not possible as no more header"
+                " fields available in header to combine. DPDK does not support non-aligned"
+                " header fields.", st->name.name);
+        return st;
+    }
+    return new IR::Type_Header(IR::ID(st->name), st->annotations, *fields);
     return st;
 }
 
@@ -608,7 +622,6 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
 */
 const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
     cstring hdrStrName = "";
-
     /* Get the member's header structure name */
     if ((m != nullptr) && (m->expr != nullptr) &&
         (m->expr->type != nullptr) &&
@@ -639,19 +652,6 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
 /* This function processes the metadata structure and modify the metadata field width
    to 32/64 bits if it is not 8-bit aligned */
 const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
-    /* Throw error if field width is greater than 64 bits */
-    for (auto field : st->fields) {
-        if ((*field).type->is<IR::Type_Bits>()) {
-            auto t = (*field).type->to<IR::Type_Bits>();
-            auto width = t->width_bits();
-            if (width > dpdk_max_field_width) {
-            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "Unsupported bit width '%1%' for field '%2%'. DPDK "
-                     "does not support metadata/header field with width more than "
-                     "'%3%' bits", width, field, dpdk_max_field_width);
-            }
-        }
-    }
     auto fields = new IR::IndexedVector<IR::StructField>;
     if (st->is<IR::Type_Struct>()) {
         for (auto field : st->fields) {
@@ -718,11 +718,15 @@ const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct *s) {
     return s;
 }
 
-const IR::Node *InjectOutputPortMetadataField::preorder(IR::Type_Struct *s) {
-    if (structure->isPNA() && s->name.name == structure->local_metadata_type) {
-        s->fields.push_back(new IR::StructField(
-            IR::ID(PnaMainOutputMetadataOutputPortName), IR::Type_Bits::get(32)));
-        LOG3("Metadata structure after injecting output port:" << std::endl << s);
+const IR::Node *InjectFixedMetadataField::preorder(IR::Type_Struct *s) {
+    if  (s->name.name == structure->local_metadata_type) {
+         if (structure->isPNA()) {
+             s->fields.push_back(new IR::StructField(
+                  IR::ID(PnaMainOutputMetadataOutputPortName), IR::Type_Bits::get(32)));
+          }
+          s->fields.push_back(new IR::StructField(
+               IR::ID(DirectResourceTableEntryIndex), IR::Type_Bits::get(32)));
+        LOG3("Metadata structure after injecting Fixed metadata fields:" << std::endl << s);
     }
     return s;
 }
@@ -1478,9 +1482,23 @@ const IR::Node* DismantleMuxExpressions::postorder(IR::AssignmentStatement* stat
     return block;
 }
 
-/* This function transforms the table so that all match keys come from the same struct.
+/* This function transforms the table so that all match keys come from the same struct and satisfy
+   the constraints imposed by the target.
    Mirror copies of match fields are created in metadata struct and table is updated to
    use the metadata fields.
+   The decision of whether a mirror copy is to be created is based on the following conditions:
+   1) If all the table key fields are part of the same structure (either header or metadata),
+      copy of fields to metadata should be done when
+      a) all keys have exact matchkind and are not contiguous in the underlying structure.
+   2) When the table keys have a mix of header and existing metadata fields(A)
+      a) copy of header fields should always be done
+      b) copy of metadata fields(A) should be done when all keys have exact matchkind and the
+         number of (A) keys are less than 5. These heuristics are chosen to obtain optimal
+         performance.
+   3) For learner table, the match kind of all keys should always be exact and hence if the keys
+      are non-exact, error should be thrown and if the keys are non-contiguous, copy of the key
+      fields should be done.
+
 
    control ingress(inout headers h, inout metadata m) {
    {
@@ -1518,6 +1536,87 @@ const IR::Node* DismantleMuxExpressions::postorder(IR::AssignmentStatement* stat
        }
   }
 */
+
+bool CopyMatchKeysToSingleStruct::isLearnerTable(const IR::P4Table* t) {
+    bool use_add_on_miss = false;
+    auto add_on_miss = t->properties->getProperty("add_on_miss");
+    if (add_on_miss == nullptr) return false;
+    if (add_on_miss->value->is<IR::ExpressionValue>()) {
+        auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
+        if (!expr->is<IR::BoolLiteral>()) {
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "%1%: expected boolean for 'add_on_miss' property", add_on_miss);
+            return false;
+        } else {
+            use_add_on_miss = expr->to<IR::BoolLiteral>()->value;
+        }
+    }
+    return use_add_on_miss;
+}
+
+int CopyMatchKeysToSingleStruct::getFieldSizeBits(const IR::Type *field_type) {
+    if (auto t = field_type->to<IR::Type_Bits>()) {
+        return t->width_bits();
+    } else if (field_type->is<IR::Type_Boolean>() || field_type->is<IR::Type_Error>()) {
+        return 8;
+    } else if (auto t = field_type->to<IR::Type_Name>()) {
+        if (t->path->name == "error") {
+            return 8;
+        } else {
+            return -1;
+        }
+    }
+    return -1;
+}
+
+struct keyInfo *CopyMatchKeysToSingleStruct::getKeyInfo(IR::Key* keys) {
+    auto oneKey = new struct keyInfo();
+    oneKey->numElements = keys->keyElements.size();
+    int size = 0;
+    int numExistingMetaFields = 0;
+    int nonExact = 0;
+    for (auto key : keys->keyElements) {
+        auto matchKind = key->matchType->toString();
+        if (matchKind != "exact") {
+            nonExact++;
+        }
+
+        auto keyName =  key->expression->toString();
+        if (keyName.startsWith("m."))
+            numExistingMetaFields++;
+
+        auto elem = new struct keyElementInfo();
+        elem->offsetInMetadata = -1;
+        if (key->expression->is<IR::Member>()) {
+            auto keyMem = key->expression->to<IR::Member>();
+            auto type = keyMem->expr->type;
+
+            if (auto baseStruct = type->to<IR::Type_StructLike>()) {
+                elem->offsetInMetadata = baseStruct->getFieldBitOffset(keyMem->member.name);
+            }
+        }
+        auto field_type = key->expression->type;
+        elem->size = getFieldSizeBits(field_type);
+        if (elem->size == -1) {
+            BUG("Unexpected type %1%", field_type->node_type_name());
+            return nullptr;
+        }
+        // These are complex expressions
+        if (elem->offsetInMetadata == -1)
+            numExistingMetaFields++;
+        size += elem->size;
+        oneKey->elements.push_back(elem);
+    }
+
+    auto table = findOrigCtxt<IR::P4Table>();
+    CHECK_NULL(table);
+    oneKey->isLearner = isLearnerTable(table);
+    oneKey->size  = size;
+    oneKey->numExistingMetaFields = numExistingMetaFields;
+    oneKey->isExact = nonExact ? false : true;
+    return oneKey;
+}
+
 const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
     // If any key field is from different structure, put all keys in metadata
     LOG3("Visiting " << keys);
@@ -1534,7 +1633,7 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
     if (auto firstKeyField = keys->keyElements.at(0)->expression->to<IR::Member>()) {
         firstKeyStr = firstKeyField->expr->toString();
         /* ReplaceMetadataHeaderName pass converts all header fields to the form
-          "h.<header_name>.<field_name> and similarly metadata fields are prefixed with "m.".
+           "h.<header_name>.<field_name> and similarly metadata fields are prefixed with "m.".
            Check if the match key is part of a header by checking the "h" prefix. */
         if (firstKeyStr.startsWith("h"))
             firstKeyHdr = true;
@@ -1548,18 +1647,67 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
         } else if (auto m = key->expression->to<IR::MethodCallExpression>()) {
             /* When isValid is present as table key, it should be moved to metadata */
             auto mi = P4::MethodInstance::resolve(m, refMap, typeMap);
-            if (auto b = mi->to<P4::BuiltInMethod>())
+            if (auto b = mi->to<P4::BuiltInMethod>()) {
                 if (b->name == "isValid") {
                     copyNeeded = true;
                     break;
                 }
+            }
         }
         if (firstKeyStr != keyTypeStr) {
             if (firstKeyHdr || keyTypeStr.startsWith("h")) {
                 copyNeeded = true;
                 break;
-             }
-         }
+            }
+        }
+    }
+
+    auto keyInfoInstance = getKeyInfo(keys);
+    BUG_CHECK(keyInfoInstance, "Failed to collect key information");
+    bool contiguous = true;
+
+    for (int i = 0; i < keyInfoInstance->numElements ; i++) {
+        for (int j = 0; j < keyInfoInstance->numElements; j++) {
+            auto keyI = keyInfoInstance->elements.at(i);
+            auto keyJ = keyInfoInstance->elements.at(j);
+            int startI = keyI->offsetInMetadata;
+            int endI = startI + keyI->size;
+            int startJ = keyJ->offsetInMetadata;
+            int endJ = startJ + keyJ->size;
+            if (endJ - startI > keyInfoInstance->size) {
+                contiguous = false;
+                break;
+            } else if (endI - startJ > keyInfoInstance->size) {
+                contiguous = false;
+                break;
+            }
+        }
+        if (!contiguous) break;
+    }
+
+    auto table = findOrigCtxt<IR::P4Table>();
+    CHECK_NULL(table);
+
+    if (keyInfoInstance->isLearner) {
+        structure->table_type_map.emplace(table->name.name, InternalTableType::LEARNER);
+    } else if (contiguous && keyInfoInstance->isExact){
+        structure->table_type_map.emplace(table->name.name, InternalTableType::REGULAR_EXACT);
+    } else {
+        structure->table_type_map.emplace(table->name.name, InternalTableType::WILDCARD);
+    }
+    /* If copyNeeded is false at this point, it means the keys are from same struct.
+     * Check remaining conditions to see if the copy is needed or not */
+    metaCopyNeeded = false;
+    if (!copyNeeded) {
+        if (keyInfoInstance->isLearner && !keyInfoInstance->isExact) {
+            ::error(ErrorType::ERR_EXPECTED,"Learner table must have all exact match keys");
+            return keys;
+        }
+        if (!contiguous && ((keyInfoInstance->isLearner) || (keyInfoInstance->isExact
+                        && keyInfoInstance->numExistingMetaFields <= 5))) {
+            metaCopyNeeded = true;
+            copyNeeded = true;
+        }
     }
 
     if (!copyNeeded) {
@@ -1590,11 +1738,19 @@ const IR::Node* CopyMatchKeysToSingleStruct::postorder(IR::KeyElement* element) 
     }
 
     auto keyName =  element->expression->toString();
-
-    /* All header fields are prefixed with "h.", prefix the match field with table name */
+    bool isHeader = false;
+    /* All header fields are prefixed with "h." and metadata fields are prefixed with "m."
+     * Prefix the match field with control and table name */
     if (keyName.startsWith("h.")) {
+        isHeader = true;
         keyName = keyName.replace('.','_');
         keyName = keyName.replace("h_",control->name.toString() + "_" + table->name.toString()+"_");
+    } else if (keyName.startsWith("m.") && metaCopyNeeded) {
+        keyName = keyName.replace('.','_');
+        keyName = keyName.replace("m_",control->name.toString() + "_" + table->name.toString()+"_");
+    }
+
+    if (isHeader || metaCopyNeeded) {
         IR::ID keyNameId(refMap->newName(keyName));
         auto decl = new IR::Declaration_Variable(keyNameId,
                                                  element->expression->type, nullptr);
@@ -1609,6 +1765,7 @@ const IR::Node* CopyMatchKeysToSingleStruct::postorder(IR::KeyElement* element) 
     }
     return element;
 }
+
 const IR::Node* CopyMatchKeysToSingleStruct::doStatement(const IR::Statement* statement,
                                            const IR::Expression *expression) {
     LOG3("Visiting " << getOriginal());
@@ -1635,7 +1792,7 @@ getExternInstanceFromProperty(const IR::P4Table* table,
                               const cstring& propertyName,
                               P4::ReferenceMap* refMap,
                               P4::TypeMap* typeMap,
-                              bool *isConstructedInPlace) {
+                              bool *isConstructedInPlace, cstring &externName) {
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return boost::none;
     if (!property->value->is<IR::ExpressionValue>()) {
@@ -1646,6 +1803,7 @@ getExternInstanceFromProperty(const IR::P4Table* table,
     }
 
     auto expr = property->value->to<IR::ExpressionValue>()->expression;
+    externName = expr->to<IR::PathExpression>()->path->name.name;
     if (isConstructedInPlace) *isConstructedInPlace = expr->is<IR::ConstructorCallExpression>();
     if (expr->is<IR::ConstructorCallExpression>()
         && property->getAnnotation(IR::Annotation::nameAnnotation) == nullptr) {
@@ -1663,7 +1821,6 @@ getExternInstanceFromProperty(const IR::P4Table* table,
                 property);
         return boost::none;
     }
-
     return externInstance;
 }
 
@@ -1672,13 +1829,14 @@ getExternInstanceFromProperty(const IR::P4Table* table,
 // create P4Table object that represents the matching part of the original P4
 // table. This table sets the internal group_id or member_id which are used
 // for subsequent table lookup.
-std::tuple<const IR::P4Table*, cstring>
+std::tuple<const IR::P4Table*, cstring, cstring>
 SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
-    cstring actionName;
+    cstring grpActionName = "", memActionName;
     if (implementation == TableImplementation::ACTION_SELECTOR) {
-        actionName = refMap->newName(tbl->name.originalName + "_set_group_id");
+        grpActionName = refMap->newName(tbl->name.originalName + "_set_group_id");
+        memActionName = refMap->newName(tbl->name.originalName + "_set_member_id");
     } else if (implementation == TableImplementation::ACTION_PROFILE) {
-        actionName = refMap->newName(tbl->name.originalName + "_set_member_id");
+        memActionName = refMap->newName(tbl->name.originalName + "_set_member_id");
     } else {
         BUG("Unexpected table implementation type");
     }
@@ -1690,20 +1848,35 @@ SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
     }
     IR::IndexedVector<IR::ActionListElement> actionsList;
 
-    auto actionCall = new IR::MethodCallExpression(new IR::PathExpression(actionName));
-    actionsList.push_back(new IR::ActionListElement(actionCall));
-    actionsList.push_back(new IR::ActionListElement(tbl->getDefaultAction()));
+    if (implementation == TableImplementation::ACTION_SELECTOR) {
+        auto grpActionCall = new IR::MethodCallExpression(new IR::PathExpression(grpActionName));
+        actionsList.push_back(new IR::ActionListElement(grpActionCall));
+    }
+    auto memActionCall = new IR::MethodCallExpression(new IR::PathExpression(memActionName));
+    actionsList.push_back(new IR::ActionListElement(memActionCall));
+    auto default_action = tbl->getDefaultAction();
+    if (default_action) {
+        if (auto mc = default_action->to<IR::MethodCallExpression>()) {
+            // Ignore action params of default action by creating new MethodCallExpression
+            auto defAction = new IR::MethodCallExpression(mc->method->to<IR::PathExpression>());
+            actionsList.push_back(new IR::ActionListElement(defAction));
+        }
+    }
+
+    auto constDefAction = tbl->properties->getProperty("default_action");
+    bool isConstDefAction = constDefAction ? constDefAction->isConstant : false;
+
     IR::IndexedVector<IR::Property> properties;
     properties.push_back(new IR::Property("actions", new IR::ActionList(actionsList), false));
     properties.push_back(new IR::Property("key", new IR::Key(match_keys), false));
     properties.push_back(new IR::Property("default_action",
-                         new IR::ExpressionValue(tbl->getDefaultAction()), false));
+                         new IR::ExpressionValue(tbl->getDefaultAction()), isConstDefAction));
     if (tbl->getSizeProperty()) {
         properties.push_back(new IR::Property("size",
                              new IR::ExpressionValue(tbl->getSizeProperty()), false)); }
     auto match_table = new IR::P4Table(tbl->name, tbl->annotations,
                                        new IR::TableProperties(properties));
-    return std::make_tuple(match_table, actionName);
+    return std::make_tuple(match_table, grpActionName, memActionName);
 }
 
 const IR::P4Action*
@@ -1788,14 +1961,27 @@ const IR::P4Table* SplitP4TableCommon::create_group_table(const IR::P4Table* tbl
 const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     bool isConstructedInPlace = false;
     bool isAsInstanceShared = false;
-    cstring implementation = "psa_implementation";
+    cstring externName = "";
+    cstring prefix = "psa_";
 
     if (structure->isPNA()) {
-        implementation = "pna_implementation";
+       prefix = "pna_";
     }
 
-    auto instance = Helpers::getExternInstanceFromProperty(tbl, implementation,
-                                                           refMap, typeMap, &isConstructedInPlace);
+    auto property = tbl->properties->getProperty(prefix + "implementation");
+    auto counterProperty = tbl->properties->getProperty(prefix + "direct_counter");
+    auto meterProperty = tbl->properties->getProperty(prefix + "direct_meter");
+
+    if (property != nullptr && (counterProperty != nullptr || meterProperty != nullptr)) {
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "implementation property cannot co-exist with direct counter and direct meter "
+                "property for table %1%", tbl->name);
+        return tbl;
+    }
+
+    auto instance = Helpers::getExternInstanceFromProperty(tbl, prefix + "implementation",
+                                                           refMap, typeMap, &isConstructedInPlace,
+                                                           externName);
     if (!instance)
         return tbl;
     if (instance->type->name != "ActionSelector")
@@ -1857,11 +2043,13 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     }
 
     // base table matches on non-selector key and set group_id
-    cstring actionName;
+    cstring grpActionName, memActionName;
     const IR::P4Table* match_table;
-    std::tie(match_table, actionName) = create_match_table(tbl);
-    auto action = create_action(actionName, group_id, "group_id");
-    decls->push_back(action);
+    std::tie(match_table, grpActionName, memActionName) = create_match_table(tbl);
+    auto grpAction = create_action(grpActionName, group_id, "group_id");
+    auto memAction = create_action(memActionName, member_id, "member_id");
+    decls->push_back(grpAction);
+    decls->push_back(memAction);
     decls->push_back(match_table);
     cstring member_table_name = instance_name;
     cstring group_table_name = member_table_name + "_sel";
@@ -1907,13 +2095,14 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
 const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
     bool isConstructedInPlace = false;
     bool isApInstanceShared = false;
+    cstring externName = "";
     cstring implementation = "psa_implementation";
 
     if (structure->isPNA())
         implementation = "pna_implementation";
 
     auto instance = Helpers::getExternInstanceFromProperty(tbl, implementation,
-            refMap, typeMap, &isConstructedInPlace);
+                            refMap, typeMap, &isConstructedInPlace, externName);
 
     if (!instance || instance->type->name != "ActionProfile")
         return tbl;
@@ -1952,9 +2141,9 @@ const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
         decls->push_back(member_id_decl);
     }
 
-    cstring actionName;
+    cstring actionName, ignoreGroup;
     const IR::P4Table* match_table;
-    std::tie(match_table, actionName) = create_match_table(tbl);
+    std::tie(match_table, ignoreGroup, actionName) = create_match_table(tbl);
     auto action = create_action(actionName, member_id, "member_id");
     decls->push_back(action);
     decls->push_back(match_table);
@@ -2213,6 +2402,211 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
     return statement;
 }
 
+/* For regular tables, the direct counter array size is same as table size
+ * For learner tables, the direct counter/meter array size is 4 times the table size */
+int CollectDirectCounterMeter::getTableSize(const IR::P4Table * tbl) {
+    int tableSize = dpdk_default_table_size;
+    auto size = tbl->getSizeProperty();
+    if (size)
+        tableSize = size->asUnsigned();
+    return tableSize;
+}
+
+void CollectDirectCounterMeter::checkMethodCallInAction(const P4::ExternMethod *a) {
+    cstring externName = a->originalExternType->getName().name;
+    if (externName == "DirectMeter" || externName == "DirectCounter") {
+        auto di = a->object->to<IR::Declaration_Instance>();
+        cstring instanceName = di->name.name;
+        if (a->method->getName().name == method) {
+            if (instancename != "" && instanceName == instancename) {
+                methodCallFound = true;
+            }
+
+            if (oneInstance == "")
+                oneInstance = instanceName;
+
+            // error if more than one count method found with different instance name
+            if (oneInstance != instanceName) {
+                ::error(ErrorType::ERR_UNEXPECTED, "%1% method for different %2% "
+                         "instances (%3% and %4%) called within same action",
+                         method, externName, oneInstance, instanceName);
+                return;
+            }
+        }
+    }
+}
+
+bool CollectDirectCounterMeter::preorder(const IR::MethodCallStatement* mcs) {
+    auto mi = P4::MethodInstance::resolve(mcs->methodCall, refMap, typeMap);
+    if (auto a = mi->to<P4::ExternMethod>()) {
+        checkMethodCallInAction(a);
+    }
+    return false;
+}
+
+bool CollectDirectCounterMeter::preorder(const IR::AssignmentStatement* assn) {
+    if (auto m = assn->right->to<IR::MethodCallExpression>()) {
+        auto mi = P4::MethodInstance::resolve(m, refMap, typeMap);
+        if (auto a = mi->to<P4::ExternMethod>()) {
+            checkMethodCallInAction(a);
+        }
+    }
+    return false;
+}
+
+bool CollectDirectCounterMeter::ifMethodFound(const IR::P4Action *a,
+                             cstring methodName, cstring instance) {
+    oneInstance = "";
+    instancename = instance;
+    method = methodName;
+    methodCallFound = false;
+    visit(a->body->components);
+    return methodCallFound;
+}
+
+/* ifMethodFound() is called from here to make sure that an action only contains count/execute
+ * method calls for only one Direct counter/meter instance. The error for the same is emitted
+ * in the ifMethodFound function itself and return value is not required to be checked here.
+ */
+bool CollectDirectCounterMeter::preorder(const IR::P4Action* a) {
+    ifMethodFound(a, "count");
+    ifMethodFound(a, "execute");
+    return false;
+}
+
+bool CollectDirectCounterMeter::preorder(const IR::P4Table* tbl) {
+    bool isConstructedInPlace = false;
+    cstring implementation = "psa_implementation";
+    cstring counterExternName = "";
+    cstring meterExternName = "";
+    cstring direct_counter = "psa_direct_counter";
+    cstring direct_meter = "psa_direct_meter";
+
+    if (structure->isPNA()) {
+        implementation = "pna_implementation";
+        direct_counter = "pna_direct_counter";
+        direct_meter = "pna_direct_meter";
+    }
+
+    auto counterInstance = Helpers::getExternInstanceFromProperty(tbl, direct_counter,
+                                                           refMap, typeMap, &isConstructedInPlace,
+                                                           counterExternName);
+    auto meterInstance = Helpers::getExternInstanceFromProperty(tbl, direct_meter,
+                                                           refMap, typeMap, &isConstructedInPlace,
+                                                           meterExternName);
+    int table_size = getTableSize(tbl);
+    auto table_type = ::get(structure->table_type_map, tbl->name.name);
+
+    // Direct Counter and Meter are not supported with Wildcard match tables
+    if (table_type == InternalTableType::WILDCARD && (counterInstance || meterInstance)) {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Direct counters and direct meters are"
+                " unsupported for wildcard match table %1%", tbl->name);
+        return false;
+    }
+
+    if (table_type == InternalTableType::LEARNER)
+        table_size *= 4;
+
+    auto default_action = tbl->getDefaultAction();
+    if (default_action) {
+        if (auto mc = default_action->to<IR::MethodCallExpression>()) {
+            default_action = mc->method;
+        }
+
+        auto path = default_action->to<IR::PathExpression>();
+        BUG_CHECK(path, "Default action path %s cannot be found", default_action);
+        if (auto defaultActionDecl = refMap->getDeclaration(path->path)->to<IR::P4Action>()) {
+            if (defaultActionDecl->name.originalName != "NoAction") {
+                if (!ifMethodFound(defaultActionDecl, "count", counterExternName)) {
+                    if (counterInstance) {
+                        ::error(ErrorType::ERR_EXPECTED, "Expected default action %1% to have "
+                                "'count' method call for DirectCounter extern instance %2%",
+                                defaultActionDecl->name, *counterInstance->name);
+                        return false;
+                    }
+                }
+                if (!ifMethodFound(defaultActionDecl, "execute", meterExternName)) {
+                    if (meterInstance) {
+                        ::error(ErrorType::ERR_EXPECTED, "Expected default action %1% to have "
+                                "'execute' method call for DirectMeter extern instance %2%",
+                                 defaultActionDecl->name, *meterInstance->name);
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+
+    if (counterInstance && counterInstance->type->name == "DirectCounter") {
+        directMeterCounterSizeMap.emplace(counterExternName, table_size + 1);
+        structure->direct_resource_map.emplace(counterExternName, tbl);
+    }
+    if (meterInstance && meterInstance->type->name == "DirectMeter") {
+        directMeterCounterSizeMap.emplace(meterExternName, table_size + 1);
+        structure->direct_resource_map.emplace(meterExternName, tbl);
+    }
+    return false;
+}
+
+void ValidateDirectCounterMeter::validateMethodInvocation(P4::ExternMethod *a) {
+    cstring externName = a->originalExternType->getName().name;
+    cstring methodName = a->method->getName().name;
+    if (externName != "DirectCounter" && externName != "DirectMeter") {
+        return;
+    }
+
+    if ((externName == "DirectCounter" && methodName != "count") ||
+        (externName == "DirectMeter" && methodName != "execute")) {
+        ::error(ErrorType::ERR_UNEXPECTED, "%1% method not supported for %2% extern",
+                                           methodName, externName);
+        return;
+    }
+
+    if (auto di = a->object->to<IR::Declaration_Instance>()) {
+        auto ownerTable = ::get(structure->direct_resource_map, di->name.name);
+        bool invokedFromOwnerTable = false;
+        auto act = findOrigCtxt<IR::P4Action>();
+        if (!act) {
+            ::error(ErrorType::ERR_UNEXPECTED,"%1% method of %2% extern "
+            "must only be called from within an action", a->method->getName().name,
+            di->name.originalName);
+            return;
+        }
+
+        for (auto action : ownerTable->getActionList()->actionList) {
+            auto action_decl = refMap->getDeclaration(action->getPath())->to<IR::P4Action>();
+            if (act->name.name == action_decl->name.name) {
+                invokedFromOwnerTable = true;
+                break;
+            }
+        }
+
+        if (!invokedFromOwnerTable) {
+            ::error(ErrorType::ERR_UNEXPECTED,"%1% method of %2% extern "
+             "can only be invoked from within action of ownertable", a->method->getName(),
+              di->name.originalName);
+            return;
+        }
+    }
+}
+
+
+void ValidateDirectCounterMeter::postorder(const IR::AssignmentStatement *assn) {
+    if (auto m = assn->right->to<IR::MethodCallExpression>()) {
+        auto mi = P4::MethodInstance::resolve(m, refMap, typeMap);
+        if (auto a = mi->to<P4::ExternMethod>()) {
+            return validateMethodInvocation(a);
+        }
+    }
+}
+
+void ValidateDirectCounterMeter::postorder(const IR::MethodCallStatement *mcs) {
+    auto mi = P4::MethodInstance::resolve(mcs->methodCall, refMap, typeMap);
+    if (auto a = mi->to<P4::ExternMethod>()) {
+        return validateMethodInvocation(a);
+    }
+}
+
 void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
     bool use_add_on_miss = false;
     auto add_on_miss = t->properties->getProperty("add_on_miss");
@@ -2278,9 +2672,8 @@ void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
         return;
     }
     auto ctxt = findContext<IR::P4Action>();
-    BUG_CHECK(ctxt != nullptr, "%1%: add_entry extern can only be used in an action", mcs);
-
-    // assuming checking on number of arguments is already performed in frontend.
+    BUG_CHECK(ctxt != nullptr, "%1% add_entry extern can only be used in an action", mcs);
+    // In p4c, by design, only  backend checks args of an extern.
     BUG_CHECK(mce->arguments->size() == 3,
               "%1%: expected 3 arguments in add_entry extern", mcs);
     auto action = mce->arguments->at(0);
@@ -2305,7 +2698,7 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
         return;
     auto act = findOrigCtxt<IR::P4Action>();
     BUG_CHECK(act != nullptr, "%1%: %2% extern can only be used in an action", mcs, externFuncName);
-    auto tbl = ::get(structure->learner_action_table,act->externalName());
+    auto tbl = ::get(structure->learner_action_table, act->externalName());
     if (externFuncName == "restart_expire_timer" || externFuncName == "set_entry_expire_time") {
         bool use_idle_timeout_with_auto_delete = false;
         if (tbl) {
@@ -2330,7 +2723,12 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
             }
         }
     } else if (externFuncName == "add_entry") {
+        bool found = false;
         if (tbl) {
+            auto mce = mcs->methodCall;
+            auto args = mce->arguments;
+            auto at = args->at(0)->expression;
+            auto an = at->to<IR::StringLiteral>()->value;
             auto add_on_miss = tbl->properties->getProperty("add_on_miss");
             if (add_on_miss != nullptr) {
                 propName = "add_on_miss";
@@ -2342,8 +2740,31 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
                         return;
                     } else {
                         auto use_add_on_miss = expr->to<IR::BoolLiteral>()->value;
-                        if (use_add_on_miss)
+                        if (use_add_on_miss) {
                             isValidExternCall = true;
+                            cstring st = getDefActionName(tbl);
+                            if (st != act->name.name) {  // checks caller
+                                ::error(ErrorType::ERR_UNEXPECTED,
+                                "%1% is not called from a default action: %2% ",
+                                mcs, act->name.name);
+                                return;
+                            } else if (st == an) {  // checks arg0
+                                ::error(ErrorType::ERR_UNEXPECTED,
+                                "%1% action cannot be default action: %2%:",
+                                mcs, an);
+                                return;
+                            }
+                            for (auto action : tbl->getActionList()->actionList) {
+                                if (action->getName().originalName == an)
+                                    found = true;
+                            }
+                            if (!found) {
+                                ::error(ErrorType::ERR_UNEXPECTED,
+                                "%1% first arg action name %2% is not any action in table %3%",
+                                mcs, an, tbl->name.name);
+                                return;
+                            }
+                        }
                     }
                 }
             }
@@ -2351,8 +2772,8 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
     }
     if (!isValidExternCall) {
          ::error(ErrorType::ERR_UNEXPECTED,
-                 "%1% must only be called from within an action with '%2%'"
-                 " property equal to true", externFuncName, propName);
+                 "%1% must only be called from within an action with '%2% %3%'"
+                 " property equal to true", mcs, propName, act->name.name);
     }
     return;
 }

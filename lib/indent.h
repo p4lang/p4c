@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <iostream>
 #include <iomanip>
+#include <vector>
 
 class indent_t {
     int         indent;
@@ -48,6 +49,20 @@ inline std::ostream &endl(std::ostream &out) {
     return out << std::endl << indent_t::getindent(out); }
 inline std::ostream &indent(std::ostream &out) { ++indent_t::getindent(out); return out; }
 inline std::ostream &unindent(std::ostream &out) { --indent_t::getindent(out); return out; }
+
+class TempIndent {
+    // an indent that can be added to any stream and unrolls when the object is destroyed
+    std::vector<std::ostream *> streams;        // streams that have been indented
+    TempIndent(const TempIndent &) = delete;    // not copyable
+
+ public:
+    TempIndent() = default;
+    friend std::ostream &operator<<(std::ostream &out, TempIndent &ti) {
+        ti.streams.push_back(&out);
+        return out << indent; }
+    ~TempIndent() { for (auto *out : streams) *out << unindent; }
+};
+
 }  // end namespace IndentCtl
 
 #endif /* _LIB_INDENT_H_ */

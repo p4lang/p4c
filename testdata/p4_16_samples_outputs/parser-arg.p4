@@ -23,4 +23,3 @@ parser Inside() {
 }
 
 Package(Parser1(Inside()), Parser2(Inside())) main;
-

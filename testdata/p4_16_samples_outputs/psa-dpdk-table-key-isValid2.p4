@@ -79,7 +79,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     table tbl {
         key = {
-            hdr.ethernet.isValid() || hdr.ipv4.isValid(): exact @name("hdrValid") ;
+            hdr.ethernet.isValid() || hdr.ipv4.isValid(): exact @name("hdrValid");
             hdr.ethernet.dstAddr                        : exact;
             hdr.ethernet.srcAddr                        : exact;
         }
@@ -121,8 +121,5 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

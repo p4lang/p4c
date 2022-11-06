@@ -8,7 +8,7 @@ package(
 
 filegroup(
     name = "p4include",
-    srcs = glob(["p4include/*.p4"]),
+    srcs = glob(["p4include/**/*.p4"]),
 )
 
 genrule(
@@ -133,7 +133,6 @@ cc_library(
 cc_binary(
     name = "ir_generator",
     srcs = ["tools/ir-generator/generator.cpp"],
-    linkopts = ["-lgmp"],
     deps = [
         ":ir_generator_lib",
         ":lib",
@@ -201,7 +200,7 @@ cc_library(
         "frontends/**/*.hpp",
         "midend/**/*.h",
         "control-plane/**/*.h",
-        "backends/dpdk/*.h",
+        "backends/**/*.h",
     ]) + [
         ":p4_parser_yacc",
         ":v1_parser_yacc",
@@ -266,10 +265,6 @@ cc_binary(
     srcs = [
         "backends/bmv2/simple_switch/main.cpp",
         "backends/bmv2/simple_switch/version.h",
-    ],
-    linkopts = [
-        "-lgmp",
-        "-lgmpxx",
     ],
     deps = [
         ":p4c_bmv2_common_lib",
@@ -342,10 +337,6 @@ cc_binary(
         "backends/dpdk/main.cpp",
         "backends/dpdk/version.h",
     ],
-    linkopts = [
-        "-lgmp",
-        "-lgmpxx",
-    ],
     deps = [
         ":p4c_dpdk_lib",
         ":ir_frontend_midend_control_plane",
@@ -360,10 +351,6 @@ cc_binary(
     name = "p4c_backend_p4test",
     srcs = [
         "backends/p4test/p4test.cpp",
-    ],
-    linkopts = [
-        "-lgmp",
-        "-lgmpxx",
     ],
     deps = [
         ":ir_frontend_midend_control_plane",
@@ -402,10 +389,6 @@ cc_binary(
         "backends/graphs/p4c-graphs.cpp",
     ],
     data = [":p4include"],
-    linkopts = [
-        "-lgmp",
-        "-lgmpxx",
-    ],
     deps = [
         ":config_h",
         ":ir_frontend_midend_control_plane",

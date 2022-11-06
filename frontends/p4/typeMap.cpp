@@ -96,6 +96,7 @@ void TypeMap::clear() {
     LOG3("Clearing typeMap");
     typeMap.clear(); leftValues.clear(); constants.clear(); allTypeVariables.clear();
     program = nullptr;
+    ProgramMap::clear();
 }
 
 void TypeMap::checkPrecondition(const IR::Node* element, const IR::Type* type) const {
@@ -330,9 +331,11 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
 bool TypeMap::implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to) const {
     if (equivalent(from, to))
         return true;
-    if (from->is<IR::Type_InfInt>() && to->is<IR::Type_InfInt>())
-        // this case is not caught by the equivalence check
-        return true;
+    if (from->is<IR::Type_InfInt>()) {
+        if (to->is<IR::Type_InfInt>() || to->is<IR::Type_Bits>())
+            // this case is not caught by the equivalence check
+            return true;
+    }
     if (auto rt = to->to<IR::Type_BaseList>()) {
         if (auto sl = from->to<IR::Type_StructLike>()) {
             // We allow implicit casts from list types to structs

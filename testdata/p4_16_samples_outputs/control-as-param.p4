@@ -32,4 +32,3 @@ control Ingress(out bit<1> b) {
 
 package top(E _e);
 top(Ingress()) main;
-

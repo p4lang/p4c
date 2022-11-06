@@ -119,7 +119,8 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
             });
         } else {
             midEnd.addPasses({
-                new P4::ValidateTableProperties({"implementation"})
+                new P4::ValidateTableProperties({ "size",
+                                                  "implementation" })
             });
         }
 

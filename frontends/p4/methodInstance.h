@@ -25,11 +25,7 @@ limitations under the License.
 
 namespace P4 {
 
-class InstanceBase {
- public:
-    template<typename T> bool is() const { return to<T>() != nullptr; }
-    template<typename T> const T* to() const { return dynamic_cast<const T*>(this); }
-
+class InstanceBase : public ICastable {
  protected:
     virtual ~InstanceBase() {}
 

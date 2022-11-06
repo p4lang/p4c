@@ -257,6 +257,7 @@ class Entry : IAnnotated {
     ListExpression      keys;         /// must be a tuple expression
     Expression          action;       /// typically a MethodCallExpression.
                                       /// The action must be defined in action list
+    bool                singleton;    /// True if the entry is not a list.
 
     Annotations     getAnnotations() const override { return annotations; }
     ListExpression  getKeys() const { return keys; }
@@ -461,6 +462,7 @@ class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
         return components.getDeclarations(); }
     void push_back(StatOrDecl st) { components.push_back(st); }
     Annotations getAnnotations() const override { return annotations; }
+    bool empty() const { return components.empty(); }
 }
 
 class MethodCallStatement : Statement {

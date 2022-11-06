@@ -20,6 +20,4 @@ control Map2(in bit<8> d) {
 }
 
 Switch(P(), Map1()) main;
-
 Switch<bit<32>>(P(), Map1()) main1;
-

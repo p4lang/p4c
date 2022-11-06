@@ -2,10 +2,8 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<7> FooUint_t;
-typedef FooUint_t Foo_t;
 struct metadata {
-    Foo_t x;
+    bit<7> x;
 }
 
 header ethernet_t {
@@ -52,4 +50,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

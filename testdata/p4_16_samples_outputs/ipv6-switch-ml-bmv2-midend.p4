@@ -2,24 +2,21 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> mac_addr_t;
-typedef bit<128> ipv6_addr_t;
-typedef bit<9> port_t;
 header ethernet_t {
-    mac_addr_t dstAddr;
-    mac_addr_t srcAddr;
-    bit<16>    etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv6_t {
-    bit<4>      version;
-    bit<8>      traffic_class;
-    bit<20>     flow_label;
-    bit<16>     payload_length;
-    bit<8>      nextHdr;
-    bit<8>      hopLimit;
-    ipv6_addr_t srcAddr;
-    ipv6_addr_t dstAddr;
+    bit<4>   version;
+    bit<8>   traffic_class;
+    bit<20>  flow_label;
+    bit<16>  payload_length;
+    bit<8>   nextHdr;
+    bit<8>   hopLimit;
+    bit<128> srcAddr;
+    bit<128> dstAddr;
 }
 
 header tcp_t {
@@ -265,7 +262,7 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
     }
     @name("ingress.ipv6_tbl") table ipv6_tbl_0 {
         key = {
-            key_0: exact @name("mcast_key") ;
+            key_0: exact @name("mcast_key");
         }
         actions = {
             set_mcast_grp();
@@ -298,8 +295,8 @@ control egress(inout headers hdr, inout metadata_t meta, inout standard_metadata
     }
     @name("egress.get_multicast_copy_out_bd") table get_multicast_copy_out_bd_0 {
         key = {
-            standard_metadata.mcast_grp : exact @name("standard_metadata.mcast_grp") ;
-            standard_metadata.egress_rid: exact @name("standard_metadata.egress_rid") ;
+            standard_metadata.mcast_grp : exact @name("standard_metadata.mcast_grp");
+            standard_metadata.egress_rid: exact @name("standard_metadata.egress_rid");
         }
         actions = {
             set_out_bd();
@@ -315,7 +312,7 @@ control egress(inout headers hdr, inout metadata_t meta, inout standard_metadata
     }
     @name("egress.send_frame") table send_frame_0 {
         key = {
-            meta._fwd_out_bd69: exact @name("meta.fwd.out_bd") ;
+            meta._fwd_out_bd69: exact @name("meta.fwd.out_bd");
         }
         actions = {
             rewrite_mac();
@@ -351,4 +348,3 @@ control MyComputeChecksum(inout headers hdr, inout metadata_t meta) {
 }
 
 V1Switch<headers, metadata_t>(MyParser(), MyVerifyChecksum(), ingress(), egress(), MyComputeChecksum(), MyDeparser()) main;
-

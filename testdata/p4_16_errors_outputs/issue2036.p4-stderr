@@ -2,7 +2,7 @@ issue2036.p4(23): [--Werror=type-error] error: d.apply
     d.apply(a);
     ^^^^^^^^^^
   ---- Actual error:
-issue2036.p4(19): Cannot unify type 'tuple<bit<8>>' with type 'struct s'
+issue2036.p4(19): Cannot cast implicitly type 'tuple<bit<8>>' to type 'struct s'
     tuple<bit<8>> a = { 0 };
     ^^^^^^^^^^^^^
 issue2036.p4(8)

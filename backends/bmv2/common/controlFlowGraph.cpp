@@ -273,6 +273,7 @@ class CFGBuilder : public Inspector {
         node->addPredecessors(live);
         auto result = new CFG::EdgeSet(new CFG::Edge(node));  // In case no label matches
         auto labels = new CFG::EdgeSet();
+        live = new CFG::EdgeSet();
         for (auto sw : statement->cases) {
             cstring label;
             if (sw->label->is<IR::DefaultExpression>()) {

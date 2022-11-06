@@ -51,7 +51,10 @@ PARSER.add_argument("-t", "--target", dest="target", default="test",
                     "default is test")
 PARSER.add_argument("-e", "--extern-file", dest="extern", default="",
                     help="Specify path additional file with C extern function definition")
-
+PARSER.add_argument("-tf", "--testfile", dest="testfile",
+                    help="Provide the path for the stf file for this test. "
+                    "If no path is provided, the script will search for an"
+                    " stf file in the same folder.")
 
 def import_from(module, name):
     """ Try to import a module and class directly instead of the typical
@@ -83,6 +86,7 @@ class Options(object):
         self.cleanupTmp = True          # Remove tmp folder?
         self.compiler = ""              # Path to the P4 compiler binary
         self.p4Filename = ""            # File that is being compiled
+        self.testfile = ""              # path to stf test file that is used
         self.verbose = False            # Enable verbose output
         self.replace = False            # Replace previous outputs
         self.target = "test"            # The name of the target compiler
@@ -91,8 +95,8 @@ class Options(object):
         self.extern = ""                # Path to C file with extern definition
 
 
-def run_model(ebpf, stffile):
-    result = ebpf.generate_model_inputs(stffile)
+def run_model(ebpf, testfile):
+    result = ebpf.generate_model_inputs(testfile)
     if result != SUCCESS:
         return result
 
@@ -121,13 +125,16 @@ def run_test(options, argv):
     base, ext = os.path.splitext(basename)           # Name without the type
     dirname = os.path.dirname(options.p4filename)    # Directory of the file
 
-    # We can do this if an *.stf file is present
-    stffile = dirname + "/" + base + ".stf"
-    if options.verbose:
-        print("Checking for ", stffile)
-    if not os.path.isfile(stffile):
-        # If no stf file is present just use the empty file
-        stffile = dirname + "/empty.stf"
+    testfile = options.testfile
+    # If no test file is provided, try to find it in the folder.
+    if not testfile:
+        # We can do this if an *.stf file is present
+        testfile = dirname + "/" + base + ".stf"
+        if options.verbose:
+            print("Checking for ", testfile)
+        if not os.path.isfile(testfile):
+            # If no stf file is present just use the empty file
+            testfile = dirname + "/empty.stf"
 
     template = tmpdir + "/" + "test"
     output = {}
@@ -149,13 +156,13 @@ def run_test(options, argv):
     # Compile and run the generated output
     if result == SUCCESS and not expected_error:
         # If no empty.stf present, don't try to run the model at all
-        if not os.path.isfile(stffile):
+        if not os.path.isfile(testfile):
             msg = "No stf file present!"
             report_output(output["stdout"],
                           options.verbose, msg)
             result = SUCCESS
         else:
-            result = run_model(ebpf, stffile)
+            result = run_model(ebpf, testfile)
     # Only if we did not expect it to fail
     if result != SUCCESS:
         return result
@@ -178,6 +185,8 @@ if __name__ == '__main__':
     options.verbose = args.verbose
     options.replace = args.replace
     options.cleanupTmp = args.nocleanup
+    if args.testfile:
+        options.testfile = check_if_file(args.testfile)
     options.target = args.target
     options.extern = args.extern
 

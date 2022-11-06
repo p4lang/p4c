@@ -28,8 +28,5 @@ control SwitchIngressDeparser(packet_out pkt, inout header_t h) {
 }
 
 Pipeline(SwitchIngress(), SwitchIngressDeparser()) p0;
-
 Pipeline(SwitchIngress(), SwitchIngressDeparser()) p1;
-
 Top(p0, p1) main;
-

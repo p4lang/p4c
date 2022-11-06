@@ -2,7 +2,6 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> mac_addr_t;
 header aggregator_t {
     bit<8> base0;
     bit<8> base1;
@@ -20,9 +19,9 @@ header ml_hdr_t {
 }
 
 header ethernet_t {
-    mac_addr_t dstAddr;
-    mac_addr_t srcAddr;
-    bit<16>    etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 struct headers {
@@ -286,4 +285,3 @@ control MyDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata_t>(MyParser(), MyVerifyChecksum(), ingress(), egress(), MyComputeChecksum(), MyDeparser()) main;
-
