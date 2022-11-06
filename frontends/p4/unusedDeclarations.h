@@ -64,7 +64,7 @@ class RemoveUnusedDeclarations : public Transform {
     const IR::Node* process(const IR::IDeclaration* decl);
     const IR::Node* warnIfUnused(const IR::Node* node);
 
-protected:
+ protected:
     // Prevent direct instantiations of this class.
     friend class RemoveAllUnusedDeclarations;
     explicit RemoveUnusedDeclarations(const ReferenceMap* refMap,
