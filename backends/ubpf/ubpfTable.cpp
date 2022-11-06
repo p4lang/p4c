@@ -144,7 +144,6 @@ void UBPFTableBase::emitInstance(EBPF::CodeBuilder* builder, EBPF::TableKind tab
         keyTypeStr = scalar->getAsString();
     } else if (keyType->is<IR::Type_StructLike>()) {
         keyTypeStr = cstring("struct ") + keyTypeName.c_str();
-        ;
     }
     // Key type is not null, but we didn't handle it
     BUG_CHECK(!keyTypeStr.isNullOrEmpty(), "Key type %1% not supported", keyType->toString());
