@@ -620,6 +620,7 @@ class PassToKernelStackTest(P4EbpfTest):
         exp_pkt[Ether].dst = "00:00:00:00:00:aa"
         exp_pkt[IP].ttl = 63 # routed packet
         testutils.verify_packet(self, exp_pkt, PORT1)
+        self.counter_verify(name="egress_eg_packets", key=[0], packets=0)
 
         # ARP handling
         pkt = testutils.simple_arp_packet(pktlen=21, eth_dst="00:00:00:00:00:01", ip_snd="10.0.0.2", ip_tgt="10.0.0.1")
@@ -633,11 +634,19 @@ class PassToKernelStackTest(P4EbpfTest):
         exp_pkt[Ether].src = "00:00:00:00:00:01"
         exp_pkt[Ether].dst = pkt[Ether].src
         testutils.verify_packet(self, exp_pkt, PORT0)
+        self.counter_verify(name="egress_eg_packets", key=[0], packets=0)
 
         pkt = testutils.simple_icmp_packet(eth_dst="00:00:00:00:00:01", ip_src="10.0.0.2", ip_dst="10.0.0.1")
         testutils.send_packet(self, PORT0, pkt)
-        exp_pkt = pkt.copy()
-        exp_pkt[Ether].src = "00:00:00:00:00:01" # MAC of eth1
-        exp_pkt[Ether].dst = "00:00:00:00:00:cc"
-        exp_pkt[ICMP].type = 0
-        # testutils.verify_packet(self, exp_pkt, PORT0)
+        exp_pkt = testutils.simple_icmp_packet(eth_src="00:00:00:00:00:01", # MAC of eth1
+                                               eth_dst="00:00:00:00:00:cc",
+                                               ip_src="10.0.0.1",
+                                               ip_dst="10.0.0.2",
+                                               icmp_type=0)
+        mask = Mask(exp_pkt)
+        # Linux can generate random IP identification number,
+        # ignore ID and checksum in the validation
+        mask.set_do_not_care_scapy(IP, "id")
+        mask.set_do_not_care_scapy(IP, "chksum")
+        testutils.verify_packet(self, mask, PORT0)
+        self.counter_verify(name="egress_eg_packets", key=[0], packets=0)

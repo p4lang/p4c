@@ -53,7 +53,11 @@ control egress(inout headers hdr,
                in  psa_egress_input_metadata_t  istd,
                inout psa_egress_output_metadata_t ostd)
 {
+    Counter<bit<32>, bit<32>>(1024, PSA_CounterType_t.PACKETS) eg_packets;
+
     apply {
+        // this counter should not be incremented if packets are not coming from PSA ingress.
+        eg_packets.count(0);
     }
 }
 

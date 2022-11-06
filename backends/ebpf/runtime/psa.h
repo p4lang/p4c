@@ -116,9 +116,9 @@ struct psa_egress_deparser_input_metadata_t {
  * The size of this struct must be less than 32 bytes.
  */
 struct psa_global_metadata {
-    __u8             mark;         /// packet mark set by PSA/eBPF programs. Used to differentiate between packets processed by PSA/eBPF from other packets.
     PSA_PacketPath_t packet_path;  /// set by eBPF program as helper variable, read by ingress/egress
     EgressInstance_t instance;  /// set by PRE, read by Egress
+    __u8             mark;         /// packet mark set by PSA/eBPF programs. Used to differentiate between packets processed by PSA/eBPF from other packets.
     bool             pass_to_kernel;   /// internal metadata, forces sending packet up to kernel stack
 } __attribute__((aligned(4)));
 

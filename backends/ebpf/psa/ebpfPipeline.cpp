@@ -242,11 +242,11 @@ void EBPFIngressPipeline::emit(CodeBuilder *builder) {
     emitMetadataFromCPUMAP(builder);
     builder->newline();
 
-    msgStr = Util::printf_format("%s parser: parsing new packet, path=%%d, pkt_len=%%d",
+    msgStr = Util::printf_format("%s parser: parsing new packet, input_port=%%d, path=%%d, pkt_len=%%d",
                                  sectionName);
     varStr = Util::printf_format("%s->packet_path", compilerGlobalMetadata);
-    builder->target->emitTraceMessage(builder, msgStr.c_str(), 2,
-                                      varStr, lengthVar.c_str());
+    builder->target->emitTraceMessage(builder, msgStr.c_str(), 3,
+                                      ifindexVar.c_str(), varStr, lengthVar.c_str());
 
     // PARSER
     parser->emit(builder);
@@ -427,11 +427,11 @@ void EBPFEgressPipeline::emit(CodeBuilder *builder) {
     emitPSAControlOutputMetadata(builder);
     emitPSAControlInputMetadata(builder);
 
-    msgStr = Util::printf_format("%s parser: parsing new packet, path=%%d, pkt_len=%%d",
+    msgStr = Util::printf_format("%s parser: parsing new packet, input_port=%%d, path=%%d, pkt_len=%%d",
                                  sectionName);
     varStr = Util::printf_format("%s->packet_path", compilerGlobalMetadata);
-    builder->target->emitTraceMessage(builder, msgStr.c_str(), 2,
-                                      varStr, lengthVar.c_str());
+    builder->target->emitTraceMessage(builder, msgStr.c_str(), 3,
+                                      ifindexVar.c_str(), varStr, lengthVar.c_str());
 
     // PARSER
     parser->emit(builder);
