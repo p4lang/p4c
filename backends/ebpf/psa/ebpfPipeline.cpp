@@ -242,8 +242,8 @@ void EBPFIngressPipeline::emit(CodeBuilder *builder) {
     emitMetadataFromCPUMAP(builder);
     builder->newline();
 
-    msgStr = Util::printf_format("%s parser: parsing new packet, input_port=%%d, path=%%d, pkt_len=%%d",
-                                 sectionName);
+    msgStr = Util::printf_format("%s parser: parsing new packet, input_port=%%d, path=%%d, "
+                                 "pkt_len=%%d", sectionName);
     varStr = Util::printf_format("%s->packet_path", compilerGlobalMetadata);
     builder->target->emitTraceMessage(builder, msgStr.c_str(), 3,
                                       ifindexVar.c_str(), varStr, lengthVar.c_str());
@@ -427,8 +427,8 @@ void EBPFEgressPipeline::emit(CodeBuilder *builder) {
     emitPSAControlOutputMetadata(builder);
     emitPSAControlInputMetadata(builder);
 
-    msgStr = Util::printf_format("%s parser: parsing new packet, input_port=%%d, path=%%d, pkt_len=%%d",
-                                 sectionName);
+    msgStr = Util::printf_format("%s parser: parsing new packet, input_port=%%d, path=%%d, "
+                                 "pkt_len=%%d", sectionName);
     varStr = Util::printf_format("%s->packet_path", compilerGlobalMetadata);
     builder->target->emitTraceMessage(builder, msgStr.c_str(), 3,
                                       ifindexVar.c_str(), varStr, lengthVar.c_str());
@@ -593,11 +593,11 @@ void TCIngressPipeline::emitTrafficManager(CodeBuilder *builder) {
 
     // Since XDP helper re-writes EtherType for packets other than IPv4 (e.g., ARP)
     // we cannot simply return TC_ACT_OK to pass the packet up to the kernel stack,
-    // because the kernel stack would receive a malformed packet (with invalid EtherType).
+    // because the kernel stack would receive a malformed packet (with invalid skb->protocol).
     // The workaround is to send the packet back to the same interface. If we redirect,
     // the packet will be re-written back to the original format.
-    // At the beginning of the pipeline we check if pass_to_kernel is true and, if so, return TC_ACT_OK.
-    // WARNING: this workaround may lead to packet re-ordering.
+    // At the beginning of the pipeline we check if pass_to_kernel is true and,
+    // if so, the program returns TC_ACT_OK.
     builder->newline();
     builder->append("compiler_meta__->pass_to_kernel = true;");
     builder->newline();
