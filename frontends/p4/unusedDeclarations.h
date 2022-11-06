@@ -64,9 +64,10 @@ class RemoveUnusedDeclarations : public Transform {
     const IR::Node* process(const IR::IDeclaration* decl);
     const IR::Node* warnIfUnused(const IR::Node* node);
 
+protected:
     // Prevent direct instantiations of this class.
     friend class RemoveAllUnusedDeclarations;
-    RemoveUnusedDeclarations(const ReferenceMap* refMap,
+    explicit RemoveUnusedDeclarations(const ReferenceMap* refMap,
                              std::set<const IR::Node*>* warned = nullptr) :
             refMap(refMap), warned(warned)
     { CHECK_NULL(refMap); setName("RemoveUnusedDeclarations"); }
