@@ -61,15 +61,15 @@ if(ENABLE_IWYU)
     -Xiwyu
     --no_fwd_decls
     -Xiwyu
-    --mapping_file=${CMAKE_CURRENT_LIST_DIR}/scripts/tools/iwyu_mappings/p4c.imp
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/p4c.imp
     -Xiwyu
-    --mapping_file=${CMAKE_CURRENT_LIST_DIR}/scripts/tools/iwyu_mappings/boost-1.75-all.imp
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/boost-1.75-all.imp
     -Xiwyu
-    --mapping_file=${CMAKE_CURRENT_LIST_DIR}/scripts/tools/iwyu_mappings/libcxx.imp
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/libcxx.imp
     -Xiwyu
-    --mapping_file=${CMAKE_CURRENT_LIST_DIR}/scripts/tools/iwyu_mappings/gcc.libc.imp
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.libc.imp
     -Xiwyu
-    --mapping_file=${CMAKE_CURRENT_LIST_DIR}/scripts/tools/iwyu_mappings/stl.c.headers.imp
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/stl.c.headers.imp
   )
   message("IWYU command: ${iwyu_path}")
 endif()

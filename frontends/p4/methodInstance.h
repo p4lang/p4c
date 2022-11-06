@@ -21,7 +21,6 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/parameterSubstitution.h"
-#include "frontends/p4/methodInstance.h"
 
 namespace P4 {
 
