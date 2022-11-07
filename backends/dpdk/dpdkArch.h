@@ -605,7 +605,7 @@ class InjectInternetChecksumIntermediateValue : public Transform {
     std::vector<cstring> *csum_vec;
 
  public:
-    explicit InjectInternetChecksumIntermediateValue(DpdkProgramStructure *structure,
+    InjectInternetChecksumIntermediateValue(DpdkProgramStructure *structure,
                     std::vector<cstring> *csum_vec) :
         structure(structure), csum_vec(csum_vec) {}
 
