@@ -15,7 +15,7 @@ ProgramInfo::ProgramInfo(const IR::P4Program* program)
       concolicMethodImpls({}),
       program(program) {
     concolicMethodImpls.add(*Concolic::getCoreConcolicMethodImpls());
-    if (TestgenOptions::get().dcg || TestgenOptions::get().pattern.length()) {
+    if (TestgenOptions::get().dcg || !TestgenOptions::get().pattern.empty()) {
         // Create DCG.
         P4::ReferenceMap refMap;
         P4::TypeMap typeMap;
