@@ -39,4 +39,4 @@ jobs:
       # this is needed to create network namespaces for the ebpf tests.
     - name: Run tests (Ubuntu Linux)
       run: |
-        sudo docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest -R gtest-p4testgen|testgen- -j2 --output-on-failure --schedule-random
+        sudo docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest -R testgen- -j2 --output-on-failure --schedule-random

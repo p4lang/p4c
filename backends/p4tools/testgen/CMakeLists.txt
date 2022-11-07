@@ -102,14 +102,14 @@ target_link_libraries(
 )
 
 if(ENABLE_GTESTS)
-  add_executable(gtest-p4testgen ${TESTGEN_GTEST_SOURCES})
+  add_executable(testgen-gtest ${TESTGEN_GTEST_SOURCES})
   target_include_directories(
-    gtest-p4testgen
+    testgen-gtest
     PRIVATE ${P4C_SOURCE_DIR}/test/frameworks/gtest/googlemock/include
     PRIVATE ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include
   )
   target_link_libraries(
-    gtest-p4testgen
+    testgen-gtest
     PRIVATE p4testgen
     PRIVATE gtest
   )
