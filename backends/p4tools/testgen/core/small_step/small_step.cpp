@@ -9,12 +9,12 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/timer.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
+#include "ir/irutils.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
@@ -29,7 +29,12 @@ namespace P4Tools {
 namespace P4Testgen {
 
 SmallStepEvaluator::SmallStepEvaluator(AbstractSolver& solver, const ProgramInfo& programInfo)
-    : programInfo(programInfo), solver(solver) {}
+    : programInfo(programInfo), solver(solver) {
+    if (!TestgenOptions::get().pattern.empty()) {
+        reachabilityEngine =
+            new ReachabilityEngine(programInfo.dcg, TestgenOptions::get().pattern, true);
+    }
+}
 
 SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
     BUG_CHECK(!state.isTerminal(), "Tried to step from a terminal state.");
@@ -41,11 +46,59 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
             ExecutionState& state;
 
          public:
+            using REngineType = std::pair<ReachabilityResult, std::vector<Branch>*>;
+            REngineType renginePreprocessing(const IR::Node* node) {
+                ReachabilityResult rresult = std::make_pair(true, nullptr);
+                std::vector<Branch>* branches = nullptr;
+                // Current node should be inside DCG.
+                if (self.reachabilityEngine->getDCG()->isCaller(node)) {
+                    // Move reachability engine to next state.
+                    rresult = self.reachabilityEngine->next(state.reachabilityEngineState, node);
+                    if (!rresult.first) {
+                        // Reachability property was failed.
+                        const IR::Expression* cond = IR::getBoolLiteral(false);
+                        branches = new std::vector<Branch>({Branch(cond, state, &state)});
+                    }
+                } else if (const auto* method = node->to<IR::MethodCallStatement>()) {
+                    return renginePreprocessing(method->methodCall);
+                }
+                return std::make_pair(rresult, branches);
+            }
+
+            static void renginePostprocessing(ReachabilityResult& result,
+                                              std::vector<Branch>* branches) {
+                // All Reachability engine state for branch should be copied.
+                if (branches->size() > 1 || result.second != nullptr) {
+                    for (auto& n : *branches) {
+                        if (result.second != nullptr) {
+                            n.constraint =
+                                new IR::BAnd(IR::Type_Boolean::get(), n.constraint, result.second);
+                        }
+                        if (branches->size() > 1) {
+                            // Copy reachability engine state
+                            n.nextState->reachabilityEngineState =
+                                n.nextState->reachabilityEngineState->copy();
+                        }
+                    }
+                }
+            }
+
             Result operator()(const IR::Node* node) {
                 // Step on the given node as a command.
                 BUG_CHECK(node, "Attempted to evaluate null node.");
+                REngineType r;
+                if (self.reachabilityEngine != nullptr) {
+                    r = renginePreprocessing(node);
+                    if (r.second != nullptr) {
+                        return r.second;
+                    }
+                }
                 auto* stepper = TestgenTarget::getCmdStepper(state, self.solver, self.programInfo);
-                return stepper->step(node);
+                auto* result = stepper->step(node);
+                if (self.reachabilityEngine != nullptr) {
+                    renginePostprocessing(r.first, result);
+                }
+                return result;
             }
 
             Result operator()(const TraceEvent* event) {
@@ -69,7 +122,12 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                     }
                     auto* stepper =
                         TestgenTarget::getExprStepper(state, self.solver, self.programInfo);
-                    return stepper->step(expr);
+                    auto* result = stepper->step(expr);
+                    if (self.reachabilityEngine != nullptr) {
+                        ReachabilityResult rresult = std::make_pair(true, nullptr);
+                        renginePostprocessing(rresult, result);
+                    }
+                    return result;
                 }
 
                 // Step on valueless return.
@@ -109,7 +167,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                 // If the guard condition is tainted, treat it equivalent to an invalid state.
                 if (!state.hasTaint(cond)) {
                     cond = state.getSymbolicEnv().subst(cond);
-                    cond = IRUtils::optimizeExpression(cond);
+                    cond = IR::optimizeExpression(cond);
                     // Check whether the condition is satisfiable in the current execution state.
                     auto pathConstraints = state.getPathConstraint();
                     pathConstraints.push_back(cond);
@@ -129,8 +187,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                         " Incrementing number of guard violations.",
                         condStream.str().c_str());
                     self.violatedGuardConditions++;
-                    return new std::vector<Branch>(
-                        {{IRUtils::getBoolLiteral(false), state, nextState}});
+                    return new std::vector<Branch>({{IR::getBoolLiteral(false), state, nextState}});
                 }
                 // Otherwise, we proceed as usual.
                 return new std::vector<Branch>({{cond, state, nextState}});

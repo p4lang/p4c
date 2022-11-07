@@ -72,8 +72,8 @@ control ingress(inout headers hdr,
         }
         actions = { do_forward; NoAction; }
         const entries = {
-            (0x5555555555 &&& 0x000000000000, 0x11223300 &&& 0xFFFF00FF, 0x33333333 &&& 0xFFFFFFFF, 0x00) : do_forward((PortId_t) 6);
-            (0x7777777777 &&& 0x000000000000, 0x11223355 &&& 0xFF00FFFF, 0x33333333 &&& 0xFFFFFFFF, 0x00) : do_forward((PortId_t) 5);
+            (0x5555555555 &&& 0x000000000000, 0x11223300 &&& 0xFFFF00FF, 0x33333333 &&& 0xFFFFFFFF, 0x00) : do_forward((PortId_t) PORT2);
+            (0x7777777777 &&& 0x000000000000, 0x11223355 &&& 0xFF00FFFF, 0x33333333 &&& 0xFFFFFFFF, 0x00) : do_forward((PortId_t) PORT1);
         }
     }
 

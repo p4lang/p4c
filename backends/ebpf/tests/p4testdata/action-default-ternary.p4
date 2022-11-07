@@ -97,7 +97,7 @@ control ingress(inout headers hdr,
             hdr.ipv4.dstAddr : ternary;
         }
         actions = { do_forward; NoAction; }
-        const default_action = do_forward((PortId_t) 5);
+        const default_action = do_forward((PortId_t) PORT1);
     }
 
     apply {

@@ -79,11 +79,11 @@ control ingress(inout headers hdr,
 
     apply {
         ostd.drop = false;
-        ostd.egress_port = (PortId_t) 5;
+        ostd.egress_port = (PortId_t) PORT1;
 
         if (istd.packet_path == PSA_PacketPath_t.NORMAL) {
             if (hdr.ethernet.dstAddr[15:0] == 0xfef0) {
-                ostd.egress_port = (PortId_t) 2;
+                ostd.egress_port = (PortId_t) PSA_RECIRC;
             }
         } else if (istd.packet_path == PSA_PacketPath_t.RECIRCULATE) {
         } else {

@@ -10,8 +10,9 @@
 #include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/util.h"
+#include "ir/irutils.h"
 #include "lib/error.h"
 #include "lib/null.h"
 #include "lib/safe_vector.h"
@@ -50,8 +51,8 @@ const IR::Expression* BMv2_V1ModelTableStepper::computeTargetMatchType(
         const IR::Expression* minKey = nullptr;
         const IR::Expression* maxKey = nullptr;
         if (keyProperties.isTainted) {
-            minKey = IRUtils::getConstant(keyExpr->type, 0);
-            maxKey = IRUtils::getConstant(keyExpr->type, IRUtils::getMaxBvVal(keyExpr->type));
+            minKey = IR::getConstant(keyExpr->type, 0);
+            maxKey = IR::getConstant(keyExpr->type, IR::getMaxBvVal(keyExpr->type));
             keyExpr = minKey;
         } else {
             minKey = nextState->createZombieConst(keyExpr->type, minName);
@@ -100,7 +101,7 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
             const auto& actionDataVar =
-                IRUtils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
+                Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
             const auto& actionArg = nextState->createZombieConst(parameter->type, keyName);
@@ -143,8 +144,8 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
         std::vector<Continuation::Command> replacements;
         replacements.emplace_back(new IR::MethodCallStatement(synthesizedAction));
 
-        nextState->set(getTableHitVar(table), IRUtils::getBoolLiteral(true));
-        nextState->set(getTableReachedVar(table), IRUtils::getBoolLiteral(true));
+        nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
+        nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << " Chosen action: " << actionName;
@@ -190,7 +191,7 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
             const auto& actionDataVar =
-                IRUtils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
+                Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
             const auto& actionArg = nextState->createZombieConst(parameter->type, keyName);
@@ -242,8 +243,8 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
         std::vector<Continuation::Command> replacements;
         replacements.emplace_back(new IR::MethodCallStatement(synthesizedAction));
 
-        nextState->set(getTableHitVar(table), IRUtils::getBoolLiteral(true));
-        nextState->set(getTableReachedVar(table), IRUtils::getBoolLiteral(true));
+        nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
+        nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << " Chosen action: " << actionName;

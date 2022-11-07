@@ -10,10 +10,10 @@
 #include <boost/multiprecision/number.hpp>
 #include <boost/none.hpp>
 
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
-#include "lib/big_int_util.h"
+#include "backends/p4tools/common/lib/util.h"
+#include "ir/irutils.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/null.h"
@@ -35,21 +35,21 @@ ExprStepper::Result TableStepper::getResult() { return stepper->result; }
 
 const StateVariable& TableStepper::getTableActionVar(const IR::P4Table* table) {
     auto numActions = table->getActionList()->size();
-    const auto* type = IRUtils::getBitTypeToFit(numActions);
-    return IRUtils::getZombieTableVar(type, table, "*action");
+    const auto* type = IR::getBitTypeToFit(numActions);
+    return Utils::getZombieTableVar(type, table, "*action");
 }
 
 const StateVariable& TableStepper::getTableHitVar(const IR::P4Table* table) {
-    return IRUtils::getZombieTableVar(IR::Type::Boolean::get(), table, "*hit");
+    return Utils::getZombieTableVar(IR::Type::Boolean::get(), table, "*hit");
 }
 
 const StateVariable& TableStepper::getTableKeyReadVar(const IR::P4Table* table, int keyIdx) {
     const auto* key = table->getKey()->keyElements.at(keyIdx);
-    return IRUtils::getZombieTableVar(key->expression->type, table, "*keyRead", keyIdx);
+    return Utils::getZombieTableVar(key->expression->type, table, "*keyRead", keyIdx);
 }
 
 const StateVariable& TableStepper::getTableReachedVar(const IR::P4Table* table) {
-    return IRUtils::getZombieTableVar(IR::Type::Boolean::get(), table, "*reached");
+    return Utils::getZombieTableVar(IR::Type::Boolean::get(), table, "*reached");
 }
 
 bool TableStepper::compareLPMEntries(const IR::Entry* leftIn, const IR::Entry* rightIn,
@@ -118,7 +118,7 @@ const IR::Expression* TableStepper::computeTargetMatchType(
         const IR::Expression* ternaryMask = nullptr;
         // We can recover from taint by inserting a ternary match that is 0.
         if (keyProperties.isTainted) {
-            ternaryMask = IRUtils::getConstant(keyExpr->type, 0);
+            ternaryMask = IR::getConstant(keyExpr->type, 0);
             keyExpr = ternaryMask;
         } else {
             ternaryMask = nextState->createZombieConst(keyExpr->type, maskName);
@@ -134,23 +134,23 @@ const IR::Expression* TableStepper::computeTargetMatchType(
         const IR::Expression* maskVar = nextState->createZombieConst(keyExpr->type, maskName);
         // The maxReturn is the maximum vale for the given bit width. This value is shifted by
         // the mask variable to create a mask (and with that, a prefix).
-        auto maxReturn = IRUtils::getMaxBvVal(keyWidth);
-        auto* prefix = new IR::Sub(IRUtils::getConstant(keyType, keyWidth), maskVar);
+        auto maxReturn = IR::getMaxBvVal(keyWidth);
+        auto* prefix = new IR::Sub(IR::getConstant(keyType, keyWidth), maskVar);
         const IR::Expression* lpmMask = nullptr;
         // We can recover from taint by inserting a ternary match that is 0.
         if (keyProperties.isTainted) {
-            lpmMask = IRUtils::getConstant(keyExpr->type, 0);
+            lpmMask = IR::getConstant(keyExpr->type, 0);
             maskVar = lpmMask;
             keyExpr = lpmMask;
         } else {
-            lpmMask = new IR::Shl(IRUtils::getConstant(keyType, maxReturn), prefix);
+            lpmMask = new IR::Shl(IR::getConstant(keyType, maxReturn), prefix);
         }
         matches->emplace(keyProperties.name, LPM(keyProperties.key, ctrlPlaneKey, maskVar));
         return new IR::LAnd(
             hitCondition,
             new IR::LAnd(
                 // This is the actual LPM match under the shifted mask (the prefix).
-                new IR::Leq(maskVar, IRUtils::getConstant(keyType, keyWidth)),
+                new IR::Leq(maskVar, IR::getConstant(keyType, keyWidth)),
                 // The mask variable shift should not be larger than the key width.
                 new IR::Equ(new IR::BAnd(keyExpr, lpmMask), new IR::BAnd(ctrlPlaneKey, lpmMask))));
     }
@@ -162,7 +162,7 @@ const IR::Expression* TableStepper::computeHit(ExecutionState* nextState, const 
                                                std::map<cstring, const FieldMatch>* matches) {
     const auto* key = table->getKey();
     CHECK_NULL(key);
-    const IR::Expression* hitCondition = IRUtils::getBoolLiteral(!properties.resolvedKeys.empty());
+    const IR::Expression* hitCondition = IR::getBoolLiteral(!properties.resolvedKeys.empty());
     for (auto keyProperties : properties.resolvedKeys) {
         hitCondition = computeTargetMatchType(nextState, keyProperties, matches, hitCondition);
     }
@@ -193,11 +193,11 @@ void TableStepper::setTableAction(ExecutionState* nextState,
               table);
     // Store the selected action.
     const auto& tableActionVar = getTableActionVar(table);
-    nextState->set(tableActionVar, IRUtils::getConstant(tableActionVar->type, actionIdx));
+    nextState->set(tableActionVar, IR::getConstant(tableActionVar->type, actionIdx));
 }
 
 const IR::Expression* TableStepper::evalTableConstEntries() {
-    const IR::Expression* tableMissCondition = IRUtils::getBoolLiteral(true);
+    const IR::Expression* tableMissCondition = IR::getBoolLiteral(true);
 
     const auto* keys = table->getKey();
     if (keys == nullptr) {
@@ -238,7 +238,7 @@ const IR::Expression* TableStepper::evalTableConstEntries() {
         // Compute the table key for a constant entry
         BUG_CHECK(keys->keyElements.size() == entry->keys->size(),
                   "The entry key list and key match list must be equal in size.");
-        const IR::Expression* hitCondition = IRUtils::getBoolLiteral(true);
+        const IR::Expression* hitCondition = IR::getBoolLiteral(true);
         for (size_t idx = 0; idx < keys->keyElements.size(); ++idx) {
             const auto* key = keys->keyElements.at(idx);
             const auto* entryKey = entry->keys->components.at(idx);
@@ -267,8 +267,8 @@ const IR::Expression* TableStepper::evalTableConstEntries() {
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
         replacements.emplace_back(new IR::MethodCallStatement(tableAction));
-        nextState->set(getTableHitVar(table), IRUtils::getBoolLiteral(true));
-        nextState->set(getTableReachedVar(table), IRUtils::getBoolLiteral(true));
+        nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
+        nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
 
         // Add some tracing information.
         std::stringstream tableStream;
@@ -343,7 +343,7 @@ void TableStepper::evalTableControlEntries(
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
             const auto& actionDataVar =
-                IRUtils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
+                Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
             cstring paramName =
                 properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
             const auto& actionArg = nextState->createZombieConst(parameter->type, paramName);
@@ -373,8 +373,8 @@ void TableStepper::evalTableControlEntries(
         std::vector<Continuation::Command> replacements;
         replacements.emplace_back(new IR::MethodCallStatement(synthesizedAction));
 
-        nextState->set(getTableHitVar(table), IRUtils::getBoolLiteral(true));
-        nextState->set(getTableReachedVar(table), IRUtils::getBoolLiteral(true));
+        nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
+        nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         bool isFirstKey = true;
@@ -558,8 +558,8 @@ void TableStepper::addDefaultAction(boost::optional<const IR::Expression*> table
     tableStream << " Choosing default action: " << actionPath;
     nextState->add(new TraceEvent::Generic(tableStream.str()));
     replacements.emplace_back(new IR::MethodCallStatement(tableAction));
-    nextState->set(getTableHitVar(table), IRUtils::getBoolLiteral(false));
-    nextState->set(getTableReachedVar(table), IRUtils::getBoolLiteral(true));
+    nextState->set(getTableHitVar(table), IR::getBoolLiteral(false));
+    nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
     nextState->replaceTopBody(&replacements);
     stepper->result->emplace_back(tableMissCondition, stepper->state, nextState);
 }

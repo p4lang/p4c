@@ -1735,11 +1735,11 @@ bool TypeInference::compare(const IR::Node* errorPosition,
                             Comparison* compare) {
     if (ltype->is<IR::Type_Action>() || rtype->is<IR::Type_Action>()) {
         // Actions return Type_Action instead of void.
-        typeError("%1%: cannot be applied to action results", errorPosition);
+        typeError("%1% and %2% cannot be compared", compare->left, compare->right);
         return false;
     }
     if (ltype->is<IR::Type_Table>() || rtype->is<IR::Type_Table>()) {
-        typeError("%1%: tables cannot be compared", errorPosition);
+        typeError("%1% and %2%: tables cannot be compared", compare->left, compare->right);
         return false;
     }
 
@@ -1761,6 +1761,11 @@ bool TypeInference::compare(const IR::Node* errorPosition,
             compare->right = cts.convert(compare->right);
         }
         defined = true;
+    } else if (auto se = rtype->to<IR::Type_SerEnum>()) {
+        // This can only happen in a switch statement, other comparisons
+        // eliminate SerEnums before calling here.
+        if (typeMap->equivalent(ltype, se->type))
+            defined = true;
     } else {
         auto ls = ltype->to<IR::Type_UnknownStruct>();
         auto rs = rtype->to<IR::Type_UnknownStruct>();
@@ -1836,8 +1841,8 @@ bool TypeInference::compare(const IR::Node* errorPosition,
     }
 
     if (!defined) {
-        typeError("%1%: not defined on %2% and %3%",
-                  errorPosition, ltype->toString(), rtype->toString());
+        typeError("'%1%' with type '%2%' cannot be compared to '%3%' with type '%4%'",
+                  compare->left, ltype, compare->right, rtype);
         return false;
     }
     return true;
@@ -3228,9 +3233,16 @@ TypeInference::actionCall(bool inActionList,
     BUG_CHECK(method->is<IR::PathExpression>(), "%1%: unexpected call", method);
     BUG_CHECK(baseType->returnType == nullptr,
               "%1%: action with return type?", baseType->returnType);
-    if (!baseType->typeParameters->empty())
-        typeError("%1%: Cannot supply type parameters for an action invocation",
+    if (!baseType->typeParameters->empty()) {
+        typeError("%1%: Actions cannot be generic",
                   baseType->typeParameters);
+        return actionCall;
+    }
+    if (!actionCall->typeArguments->empty()) {
+        typeError("%1%: Cannot supply type parameters for an action invocation",
+                  actionCall->typeArguments);
+        return actionCall;
+    }
 
     bool inTable = findContext<IR::P4Table>() != nullptr;
 

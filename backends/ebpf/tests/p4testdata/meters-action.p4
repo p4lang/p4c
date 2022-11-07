@@ -82,7 +82,7 @@ control ingress(inout headers hdr,
     Meter<bit<7>>(1, PSA_MeterType_t.BYTES) meter1;
     bit<7> idx;
     PSA_MeterColor_t color1 = PSA_MeterColor_t.RED;
-    PortId_t port = (PortId_t)5;
+    PortId_t port = (PortId_t)PORT1;
 
     action do_forward(PortId_t egress_port) {
         color1 = meter1.execute((bit<7>) 0);
@@ -94,7 +94,7 @@ control ingress(inout headers hdr,
             istd.ingress_port : exact;
         }
         actions = { do_forward; NoAction; }
-        default_action = do_forward((PortId_t) 6);
+        default_action = do_forward((PortId_t) PORT2);
         size = 100;
     }
 

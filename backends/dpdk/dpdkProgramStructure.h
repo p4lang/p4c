@@ -5,6 +5,15 @@
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 
+// DPDK target implementation treats tables with keys lying non-contiguous in underlying
+// structure as wildcard even if all keys are exact match keys.
+// Learner tables are special table with contiguous and exact match keys.
+enum InternalTableType {
+    REGULAR_EXACT,
+    LEARNER,
+    WILDCARD
+};
+
 /* Collect information related to P4 programs targeting dpdk */
 struct DpdkProgramStructure {
     cstring p4arch;  // 'pna' or 'psa'
@@ -27,6 +36,8 @@ struct DpdkProgramStructure {
     ordered_map<cstring, cstring> learner_action_map;
     ordered_map<cstring, std::vector<cstring>> learner_action_params;
     ordered_map<cstring, const IR::P4Table *> learner_action_table;
+    ordered_map<cstring, enum InternalTableType> table_type_map;
+    ordered_map<cstring, const IR::P4Table *> direct_resource_map;
 
     IR::IndexedVector<IR::DpdkDeclaration>       variables;
 

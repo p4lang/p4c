@@ -1,0 +1,1 @@
+[--Werror=not-found] error: Could not find declaration for 'match_kind.exact', which is needed to implement switch statements; did you include core.p4?

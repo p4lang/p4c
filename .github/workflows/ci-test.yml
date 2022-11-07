@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   # Build with gcc and test p4c on Ubuntu 20.04.
-  build-linux:
+  build-linux-sanitizers:
     strategy:
       fail-fast: false
       matrix:
@@ -32,9 +32,9 @@ jobs:
         key: test-${{ matrix.unified }}-${{ runner.os }}-gcc
         max-size: 1000M
 
-    - name: Build (Ubuntu Linux, GCC)
+    - name: Build (Ubuntu Linux, GCC, Sanitizers)
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} .
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} --build-arg ENABLE_SANITIZERS=ON .
         ./tools/export_ccache.sh
 
       # run with sudo (...) --privileged

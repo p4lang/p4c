@@ -2,13 +2,14 @@
 
 #include <memory>
 
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/taint.h"
+#include "backends/p4tools/common/lib/util.h"
 #include "gtest/gtest-message.h"
 #include "gtest/gtest-test-part.h"
 #include "gtest/gtest.h"
 #include "ir/ir.h"
+#include "ir/irutils.h"
 
 #include "backends/p4tools/testgen/lib/execution_state.h"
 #include "backends/p4tools/testgen/test/small-step/util.h"
@@ -17,8 +18,8 @@ namespace Test {
 
 namespace {
 
-using P4Tools::IRUtils;
 using P4Tools::Taint;
+using P4Tools::Utils;
 
 /// Test whether taint propagation works at all.
 /// Input: 8w2 + taint<8>
@@ -28,28 +29,28 @@ using P4Tools::Taint;
 /// Input: taint<8> + taint<8>
 /// Expected output: taint<8>
 TEST_F(TaintTest, Taint01) {
-    const auto* typeBits = IRUtils::getBitType(8);
+    const auto* typeBits = IR::getBitType(8);
     // Create a base state with a parameter continuation to apply the value on.
     auto state = ExecutionState(new IR::P4Program());
     const auto& env = state.getSymbolicEnv();
     {
-        const auto* taintExpression = IRUtils::getTaintExpression(typeBits);
-        const auto* constantVar = IRUtils::getConstant(typeBits, 2);
+        const auto* taintExpression = Utils::getTaintExpression(typeBits);
+        const auto* constantVar = IR::getConstant(typeBits, 2);
         const auto* expr = new IR::Add(constantVar, taintExpression);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), expr);
         const auto* expectedExpr = taintExpression;
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
     {
-        const auto* constantVar1 = IRUtils::getConstant(typeBits, 2);
-        const auto* constantVar2 = IRUtils::getConstant(typeBits, 2);
+        const auto* constantVar1 = IR::getConstant(typeBits, 2);
+        const auto* constantVar2 = IR::getConstant(typeBits, 2);
         const auto* expr = new IR::Add(constantVar1, constantVar2);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), expr);
-        const auto* expectedExpr = IRUtils::getConstant(typeBits, 2);
+        const auto* expectedExpr = IR::getConstant(typeBits, 2);
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
     {
-        const auto* taintExpression = IRUtils::getTaintExpression(typeBits);
+        const auto* taintExpression = Utils::getTaintExpression(typeBits);
         const auto* expectedExpr = taintExpression;
         ASSERT_TRUE(taintExpression->equiv(*expectedExpr));
     }
@@ -65,22 +66,22 @@ TEST_F(TaintTest, Taint02) {
     auto state = ExecutionState(new IR::P4Program());
     const auto& env = state.getSymbolicEnv();
 
-    const auto* typeBits = IRUtils::getBitType(8);
-    const auto* taintExpression = IRUtils::getTaintExpression(typeBits);
+    const auto* typeBits = IR::getBitType(8);
+    const auto* taintExpression = Utils::getTaintExpression(typeBits);
     {
-        const auto* expr = new IR::Concat(IRUtils::getBitType(16),
-                                          IRUtils::getConstant(typeBits, 2), taintExpression);
+        const auto* expr =
+            new IR::Concat(IR::getBitType(16), IR::getConstant(typeBits, 2), taintExpression);
         const auto* slicedExpr = new IR::Slice(expr, 15, 8);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), slicedExpr);
-        const auto* expectedExpr = IRUtils::getConstant(typeBits, 0);
+        const auto* expectedExpr = IR::getConstant(typeBits, 0);
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
     {
-        const auto* expr = new IR::Concat(IRUtils::getBitType(16), taintExpression,
-                                          IRUtils::getConstant(typeBits, 2));
+        const auto* expr =
+            new IR::Concat(IR::getBitType(16), taintExpression, IR::getConstant(typeBits, 2));
         const auto* slicedExpr = new IR::Slice(expr, 7, 0);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), slicedExpr);
-        const auto* expectedExpr = IRUtils::getConstant(typeBits, 0);
+        const auto* expectedExpr = IR::getConstant(typeBits, 0);
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
 }
@@ -95,19 +96,19 @@ TEST_F(TaintTest, Taint03) {
     auto state = ExecutionState(new IR::P4Program());
     const auto& env = state.getSymbolicEnv();
 
-    const auto* typeBits = IRUtils::getBitType(8);
-    const auto* taintExpression = IRUtils::getTaintExpression(typeBits);
+    const auto* typeBits = IR::getBitType(8);
+    const auto* taintExpression = Utils::getTaintExpression(typeBits);
     {
-        const auto* expr = new IR::Concat(IRUtils::getBitType(16),
-                                          IRUtils::getConstant(typeBits, 2), taintExpression);
+        const auto* expr =
+            new IR::Concat(IR::getBitType(16), IR::getConstant(typeBits, 2), taintExpression);
         const auto* slicedExpr = new IR::Slice(expr, 7, 0);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), slicedExpr);
         const auto* expectedExpr = taintExpression;
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
     {
-        const auto* expr = new IR::Concat(IRUtils::getBitType(16), taintExpression,
-                                          IRUtils::getConstant(typeBits, 2));
+        const auto* expr =
+            new IR::Concat(IR::getBitType(16), taintExpression, IR::getConstant(typeBits, 2));
         const auto* slicedExpr = new IR::Slice(expr, 15, 8);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), slicedExpr);
         const auto* expectedExpr = taintExpression;
@@ -125,19 +126,19 @@ TEST_F(TaintTest, Taint04) {
     auto state = ExecutionState(new IR::P4Program());
     const auto& env = state.getSymbolicEnv();
 
-    const auto* typeBits = IRUtils::getBitType(8);
-    const auto* taintExpression = IRUtils::getTaintExpression(typeBits);
+    const auto* typeBits = IR::getBitType(8);
+    const auto* taintExpression = Utils::getTaintExpression(typeBits);
     {
-        const auto* expr = new IR::Concat(IRUtils::getBitType(16),
-                                          IRUtils::getConstant(typeBits, 2), taintExpression);
+        const auto* expr =
+            new IR::Concat(IR::getBitType(16), IR::getConstant(typeBits, 2), taintExpression);
         const auto* slicedExpr = new IR::Slice(expr, 11, 4);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), slicedExpr);
         const auto* expectedExpr = taintExpression;
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
     {
-        const auto* expr = new IR::Concat(IRUtils::getBitType(16), taintExpression,
-                                          IRUtils::getConstant(typeBits, 2));
+        const auto* expr =
+            new IR::Concat(IR::getBitType(16), taintExpression, IR::getConstant(typeBits, 2));
         const auto* slicedExpr = new IR::Slice(expr, 11, 4);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), slicedExpr);
         const auto* expectedExpr = taintExpression;
@@ -155,20 +156,20 @@ TEST_F(TaintTest, Taint05) {
     auto state = ExecutionState(new IR::P4Program());
     const auto& env = state.getSymbolicEnv();
 
-    const auto* typeBits = IRUtils::getBitType(8);
-    const auto* taintExpression = IRUtils::getTaintExpression(typeBits);
-    const auto* constantVar = IRUtils::getConstant(typeBits, 2);
+    const auto* typeBits = IR::getBitType(8);
+    const auto* taintExpression = Utils::getTaintExpression(typeBits);
+    const auto* constantVar = IR::getConstant(typeBits, 2);
     {
-        const auto* expr = new IR::Concat(IRUtils::getBitType(16), taintExpression, constantVar);
-        expr = new IR::Concat(IRUtils::getBitType(24), taintExpression, expr);
+        const auto* expr = new IR::Concat(IR::getBitType(16), taintExpression, constantVar);
+        expr = new IR::Concat(IR::getBitType(24), taintExpression, expr);
         const auto* slicedExpr = new IR::Slice(expr, 11, 4);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), slicedExpr);
         const auto* expectedExpr = taintExpression;
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
     {
-        const auto* expr = new IR::Concat(IRUtils::getBitType(16), taintExpression, constantVar);
-        expr = new IR::Concat(IRUtils::getBitType(24), taintExpression, expr);
+        const auto* expr = new IR::Concat(IR::getBitType(16), taintExpression, constantVar);
+        expr = new IR::Concat(IR::getBitType(24), taintExpression, expr);
         const auto* slicedExpr = new IR::Slice(expr, 19, 12);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), slicedExpr);
         const auto* expectedExpr = taintExpression;
@@ -186,20 +187,20 @@ TEST_F(TaintTest, Taint06) {
     auto state = ExecutionState(new IR::P4Program());
     const auto& env = state.getSymbolicEnv();
 
-    const auto* typeBits = IRUtils::getBitType(8);
-    const auto* taintExpression = IRUtils::getTaintExpression(typeBits);
-    const auto* constantVar = IRUtils::getConstant(typeBits, 2);
+    const auto* typeBits = IR::getBitType(8);
+    const auto* taintExpression = Utils::getTaintExpression(typeBits);
+    const auto* constantVar = IR::getConstant(typeBits, 2);
     {
-        const auto* expr = new IR::Concat(IRUtils::getBitType(16), constantVar, taintExpression);
-        expr = new IR::Concat(IRUtils::getBitType(24), expr, constantVar);
+        const auto* expr = new IR::Concat(IR::getBitType(16), constantVar, taintExpression);
+        expr = new IR::Concat(IR::getBitType(24), expr, constantVar);
         const auto* slicedExpr = new IR::Slice(expr, 11, 4);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), slicedExpr);
         const auto* expectedExpr = taintExpression;
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
     {
-        const auto* expr = new IR::Concat(IRUtils::getBitType(16), constantVar, taintExpression);
-        expr = new IR::Concat(IRUtils::getBitType(24), expr, constantVar);
+        const auto* expr = new IR::Concat(IR::getBitType(16), constantVar, taintExpression);
+        expr = new IR::Concat(IR::getBitType(24), expr, constantVar);
         const auto* slicedExpr = new IR::Slice(expr, 19, 12);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), slicedExpr);
         const auto* expectedExpr = taintExpression;
@@ -217,26 +218,26 @@ TEST_F(TaintTest, Taint07) {
     auto state = ExecutionState(new IR::P4Program());
     const auto& env = state.getSymbolicEnv();
 
-    const auto* typeBits = IRUtils::getBitType(8);
-    const auto* taintExpression = IRUtils::getTaintExpression(typeBits);
-    const auto* constantVar = IRUtils::getConstant(typeBits, 2);
+    const auto* typeBits = IR::getBitType(8);
+    const auto* taintExpression = Utils::getTaintExpression(typeBits);
+    const auto* constantVar = IR::getConstant(typeBits, 2);
 
     {
-        const auto* expr = new IR::Concat(IRUtils::getBitType(16), taintExpression, constantVar);
-        expr = new IR::Concat(IRUtils::getBitType(24), expr, taintExpression);
+        const auto* expr = new IR::Concat(IR::getBitType(16), taintExpression, constantVar);
+        expr = new IR::Concat(IR::getBitType(24), expr, taintExpression);
         const auto* slicedExpr = new IR::Slice(expr, 11, 4);
         slicedExpr = new IR::Slice(slicedExpr, 9, 8);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), slicedExpr);
-        const auto* expectedExpr = IRUtils::getConstant(IRUtils::getBitType(2), 0);
+        const auto* expectedExpr = IR::getConstant(IR::getBitType(2), 0);
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
     {
-        const auto* expr = new IR::Concat(IRUtils::getBitType(16), constantVar, taintExpression);
-        expr = new IR::Concat(IRUtils::getBitType(24), expr, taintExpression);
+        const auto* expr = new IR::Concat(IR::getBitType(16), constantVar, taintExpression);
+        expr = new IR::Concat(IR::getBitType(24), expr, taintExpression);
         const auto* slicedExpr = new IR::Slice(expr, 19, 12);
         slicedExpr = new IR::Slice(slicedExpr, 7, 5);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), slicedExpr);
-        const auto* expectedExpr = IRUtils::getConstant(IRUtils::getBitType(3), 0);
+        const auto* expectedExpr = IR::getConstant(IR::getBitType(3), 0);
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
 }
@@ -250,26 +251,26 @@ TEST_F(TaintTest, Taint08) {
     auto state = ExecutionState(new IR::P4Program());
     const auto& env = state.getSymbolicEnv();
 
-    const auto* typeBits = IRUtils::getBitType(8);
-    const auto* taintExpression = IRUtils::getTaintExpression(typeBits);
-    const auto* constantVar = IRUtils::getConstant(typeBits, 2);
+    const auto* typeBits = IR::getBitType(8);
+    const auto* taintExpression = Utils::getTaintExpression(typeBits);
+    const auto* constantVar = IR::getConstant(typeBits, 2);
 
     {
-        const auto* expr = new IR::Concat(IRUtils::getBitType(16), taintExpression, constantVar);
-        expr = new IR::Concat(IRUtils::getBitType(24), expr, taintExpression);
+        const auto* expr = new IR::Concat(IR::getBitType(16), taintExpression, constantVar);
+        expr = new IR::Concat(IR::getBitType(24), expr, taintExpression);
         const auto* slicedExpr = new IR::Slice(expr, 11, 4);
         slicedExpr = new IR::Slice(slicedExpr, 4, 3);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), slicedExpr);
-        const auto* expectedExpr = IRUtils::getTaintExpression(IRUtils::getBitType(2));
+        const auto* expectedExpr = Utils::getTaintExpression(IR::getBitType(2));
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
     {
-        const auto* expr = new IR::Concat(IRUtils::getBitType(16), constantVar, taintExpression);
-        expr = new IR::Concat(IRUtils::getBitType(24), expr, taintExpression);
+        const auto* expr = new IR::Concat(IR::getBitType(16), constantVar, taintExpression);
+        expr = new IR::Concat(IR::getBitType(24), expr, taintExpression);
         const auto* slicedExpr = new IR::Slice(expr, 19, 12);
         slicedExpr = new IR::Slice(slicedExpr, 2, 0);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), slicedExpr);
-        const auto* expectedExpr = IRUtils::getTaintExpression(IRUtils::getBitType(3));
+        const auto* expectedExpr = Utils::getTaintExpression(IR::getBitType(3));
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
 }
@@ -283,11 +284,11 @@ TEST_F(TaintTest, Taint08) {
 /// Expected output: taint in most upper and lower 32 bits, taint in middle 64 bits
 TEST_F(TaintTest, Taint09) {
     // Taint64b
-    const auto* taint64b = IRUtils::getTaintExpression(IRUtils::getBitType(64));
+    const auto* taint64b = Utils::getTaintExpression(IR::getBitType(64));
     ASSERT_TRUE(Taint::hasTaint({}, taint64b));
 
     // 64w0 ++ taint<64>
-    const auto* taint128bLowerQ = new IR::Cast(IRUtils::getBitType(128), taint64b);
+    const auto* taint128bLowerQ = new IR::Cast(IR::getBitType(128), taint64b);
     ASSERT_TRUE(Taint::hasTaint({}, taint128bLowerQ));
     ASSERT_TRUE(!Taint::hasTaint({}, new IR::Slice(taint128bLowerQ, 71, 64)));
 
@@ -312,16 +313,16 @@ TEST_F(TaintTest, Taint09) {
 /// Input: (8w2 + 8w2)[3:0]
 /// Expected output: 8w2 (slicing should not cause this expression to be tainted.)
 TEST_F(TaintTest, Taint10) {
-    const auto* typeBits = IRUtils::getBitType(8);
+    const auto* typeBits = IR::getBitType(8);
     // Create a base state with a parameter continuation to apply the value on.
     auto state = ExecutionState(new IR::P4Program());
     const auto& env = state.getSymbolicEnv();
     {
-        const auto* constantVar1 = IRUtils::getConstant(typeBits, 2);
-        const auto* constantVar2 = IRUtils::getConstant(typeBits, 2);
+        const auto* constantVar1 = IR::getConstant(typeBits, 2);
+        const auto* constantVar2 = IR::getConstant(typeBits, 2);
         const auto* expr = new IR::Slice(new IR::Add(constantVar1, constantVar2), 3, 0);
         const auto* taintedExpr = Taint::propagateTaint(env.getInternalMap(), expr);
-        const auto* expectedExpr = IRUtils::getConstant(IRUtils::getBitType(4), 0);
+        const auto* expectedExpr = IR::getConstant(IR::getBitType(4), 0);
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
 }

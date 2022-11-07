@@ -10,10 +10,10 @@
 #include "backends/p4tools/common/compiler/hs_index_simplify.h"
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
-#include "lib/big_int_util.h"
+#include "backends/p4tools/common/lib/util.h"
+#include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
@@ -109,13 +109,13 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
              // Input must be an IPv4 header.
              ipHdrRef->type->checkedTo<IR::Type_Header>();
 
-             const auto& validVar = state.get(IRUtils::getHeaderValidity(ipHdrRef));
+             const auto& validVar = state.get(Utils::getHeaderValidity(ipHdrRef));
              // Check whether the validity bit of the header is false.
              // If yes, do not bother evaluating the checksum.
              auto emitIsTainted = state.hasTaint(validVar);
              if (emitIsTainted || !validVar->checkedTo<IR::BoolLiteral>()->value) {
                  auto* nextState = new ExecutionState(state);
-                 nextState->replaceTopBody(Continuation::Return(IRUtils::getBoolLiteral(false)));
+                 nextState->replaceTopBody(Continuation::Return(IR::getBoolLiteral(false)));
                  result->emplace_back(nextState);
                  return;
              }
@@ -132,9 +132,9 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
              const auto* hdrChecksum = state.get(new IR::Member(ipHdrRef, "hdrChecksum"));
              const auto* srcAddr = state.get(new IR::Member(ipHdrRef, "srcAddr"));
              const auto* dstAddr = state.get(new IR::Member(ipHdrRef, "dstAddr"));
-             const auto* bt8 = IRUtils::getBitType(8);
-             const auto* bt16 = IRUtils::getBitType(16);
-             const auto* bt32 = IRUtils::getBitType(32);
+             const auto* bt8 = IR::getBitType(8);
+             const auto* bt16 = IR::getBitType(16);
+             const auto* bt32 = IR::getBitType(32);
 
              // The checksum is computed as a series of 16-bit additions.
              // We need to widen to 32 bits to handle overflows.
@@ -159,7 +159,7 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
              checksum =
                  new IR::Add(bt16, new IR::Slice(checksum, 31, 16), new IR::Slice(checksum, 15, 0));
              const auto* calcResult = new IR::Cmpl(bt16, checksum);
-             const auto* comparison = new IR::Equ(calcResult, IRUtils::getConstant(bt16, 0));
+             const auto* comparison = new IR::Equ(calcResult, IR::getConstant(bt16, 0));
              auto* nextState = new ExecutionState(state);
              nextState->replaceTopBody(Continuation::Return(comparison));
              result->emplace_back(nextState);
@@ -193,8 +193,8 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
              // yet.
              // TODO: We need custom test objects to implement richer, stateful testing here.
              auto* nextState = new ExecutionState(state);
-             const auto* cond = new IR::LAnd(new IR::Equ(syn, IRUtils::getConstant(syn->type, 1)),
-                                             new IR::Equ(ack, IRUtils::getConstant(ack->type, 0)));
+             const auto* cond = new IR::LAnd(new IR::Equ(syn, IR::getConstant(syn->type, 1)),
+                                             new IR::Equ(ack, IR::getConstant(ack->type, 0)));
              nextState->replaceTopBody(Continuation::Return(cond));
              result->emplace_back(nextState);
          }},

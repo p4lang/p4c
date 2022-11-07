@@ -10,8 +10,8 @@
 #include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/ir.h"
 #include "backends/p4tools/common/lib/trace_events.h"
+#include "ir/irutils.h"
 #include "lib/error.h"
 #include "lib/null.h"
 #include "lib/safe_vector.h"

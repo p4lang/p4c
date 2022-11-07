@@ -68,10 +68,6 @@ line_id = 99
 pppoe_session_id = 0xbeac
 core_router_mac = HOST1_MAC
 
-PORT0 = 0
-PORT1 = 1
-
-
 def pkt_route(pkt, mac_dst):
     new_pkt = pkt.copy()
     new_pkt[Ether].src = pkt[Ether].dst
@@ -244,14 +240,14 @@ class PPPoEUpstreamTest(BNGTest):
             pppoe_session_id=pppoe_session_id, enabled=True)
         self.session_installed = True
         # Setup port 1: packets on this port are double tagged packets
-        self.setup_port(4, vlan_id=s_tag, port_type=PORT_TYPE_EDGE, double_tagged=True, inner_vlan_id=c_tag)
+        self.setup_port(DP_PORTS[0], vlan_id=s_tag, port_type=PORT_TYPE_EDGE, double_tagged=True, inner_vlan_id=c_tag)
         # Setup port 2
-        self.setup_port(5, vlan_id=s_tag, port_type=PORT_TYPE_INFRA)
+        self.setup_port(DP_PORTS[1], vlan_id=s_tag, port_type=PORT_TYPE_INFRA)
 
-        self.set_forwarding_type(4, SWITCH_MAC, ETH_TYPE_PPPOE,
+        self.set_forwarding_type(DP_PORTS[0], SWITCH_MAC, ETH_TYPE_PPPOE,
                                  FORWARDING_TYPE_UNICAST_IPV4)
-        self.add_forwarding_routing_v4_entry(SERVER_IP, 24, 5, SWITCH_MAC, HOST1_MAC)
-        self.add_next_vlan(5, s_tag)
+        self.add_forwarding_routing_v4_entry(SERVER_IP, 24, DP_PORTS[1], SWITCH_MAC, HOST1_MAC)
+        self.add_next_vlan(DP_PORTS[1], s_tag)
         print("")
         for pkt_type in ["tcp", "udp", "icmp"]:
             print("Testing %s packet..." \
@@ -280,13 +276,13 @@ class PPPoEDownstreamTest(BNGTest):
 
     def runTest(self):
         # Setup port 1: packets on this port are double tagged packets
-        self.setup_port(4, vlan_id=VLAN_ID_3, port_type=PORT_TYPE_EDGE, double_tagged=True, inner_vlan_id=c_tag)
+        self.setup_port(DP_PORTS[0], vlan_id=VLAN_ID_3, port_type=PORT_TYPE_EDGE, double_tagged=True, inner_vlan_id=c_tag)
         # Setup port 2
-        self.setup_port(5, vlan_id=s_tag, port_type=PORT_TYPE_INFRA)
-        self.set_forwarding_type(5, SWITCH_MAC, ETH_TYPE_IPV4,
+        self.setup_port(DP_PORTS[1], vlan_id=s_tag, port_type=PORT_TYPE_INFRA)
+        self.set_forwarding_type(DP_PORTS[1], SWITCH_MAC, ETH_TYPE_IPV4,
                                  FORWARDING_TYPE_UNICAST_IPV4)
-        self.add_forwarding_routing_v4_entry(CLIENT_IP, 24, 4, SWITCH_MAC, HOST1_MAC)
-        self.add_next_double_vlan(4, s_tag, c_tag)
+        self.add_forwarding_routing_v4_entry(CLIENT_IP, 24, DP_PORTS[0], SWITCH_MAC, HOST1_MAC)
+        self.add_next_double_vlan(DP_PORTS[0], s_tag, c_tag)
         self.setup_line_v4(
             s_tag=s_tag, c_tag=c_tag, line_id=line_id, ipv4_addr=CLIENT_IP,
             pppoe_session_id=pppoe_session_id, enabled=True)
