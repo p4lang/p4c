@@ -13,7 +13,7 @@
 namespace P4Tools {
 namespace RefersToParser {
 
-class RefersToParser : public Transform {
+class RefersToParser : public Inspector {
     std::vector<std::vector<const IR::Expression*>>& restrictionsVec;
 
     std::vector<const IR::P4Action*> actionVector;
@@ -32,9 +32,9 @@ class RefersToParser : public Transform {
  public:
     explicit RefersToParser(std::vector<std::vector<const IR::Expression*>>& output);
 
-    const IR::Node* postorder(IR::ActionListElement* action) override;
+    void postorder(const IR::ActionListElement* action) override;
 
-    const IR::Node* postorder(IR::Annotation* annotation) override;
+    void postorder(const IR::Annotation* annotation) override;
 
     /// Builds names for the zombie constant and then creates a zombie constant and builds the
     /// refers_to constraints based on them

@@ -168,7 +168,7 @@ const IR::Expression* makeConstant(Token input, const IR::Vector<IR::KeyElement>
 /// Returning the end index is necessary so that after moving from the end of the right side
 std::pair<std::vector<Token>, size_t> findRightPart(std::vector<Token> tokens, size_t index) {
     size_t idx = index + 1;
-    int endIdx = 0;
+    size_t endIdx = 0;
     bool flag = true;
     while (flag) {
         if (idx == tokens.size() ||
@@ -181,7 +181,7 @@ std::pair<std::vector<Token>, size_t> findRightPart(std::vector<Token> tokens, s
     }
 
     std::vector<Token> rightTokens;
-    for (int j = index + 1; j < endIdx; j++) {
+    for (size_t j = index + 1; j < endIdx; j++) {
         rightTokens.push_back(tokens[j]);
     }
     return std::make_pair(rightTokens, idx);

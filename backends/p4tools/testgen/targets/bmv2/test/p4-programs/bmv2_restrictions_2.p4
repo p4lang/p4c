@@ -50,7 +50,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
     }
     table table_1 {
         key = {
-            h.h.a : exact @refers_to(table_2 , h.h.a);
+            h.h.a : exact @refers_to(table_2 , h.h.b);
         }
 
         actions = {
@@ -66,7 +66,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
 
     table table_2 {
         key = {
-            h.h.a : exact;
+            h.h.b : exact;
         }
 
         actions = {
@@ -81,8 +81,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
     }
 
     apply {
-      table_2.apply();
+
       table_1.apply();
+      if (h.h.a == 2) {
+        table_2.apply();
+      }
     }
 }
 

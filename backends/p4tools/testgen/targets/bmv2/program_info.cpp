@@ -66,8 +66,8 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     /// Defines all "refers_to" and then converts restrictions from string to IR expressions,
     /// and stores them in restrictionsVec to move targetConstraints further.
     program->apply(RefersToParser::RefersToParser(restrictionsVec));
-    for (auto element : restrictionsVec) {
-        for (auto restriction : element) {
+    for (const auto& element : restrictionsVec) {
+        for (const auto* restriction : element) {
             constraint = new IR::LAnd(constraint, restriction);
         }
     }
