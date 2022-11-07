@@ -373,6 +373,7 @@ void callTestgen(const char* inputFile, const char* behavior, const char* path, 
     cmdTestgen << "--pattern \"" << behavior << "\" ";
     cmdTestgen << "--out-dir \"" << buildPath << path << "\" \"" << sourcePath << prefix;
     cmdTestgen << inputFile << "\"";
+    std::cout << cmdTestgen.str() << std::endl;
     if (system(cmdTestgen.str().c_str()) != 0) {
         BUG("p4check failed to run - %1%", cmdTestgen.str());
     }
