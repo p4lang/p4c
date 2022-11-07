@@ -630,11 +630,11 @@ const IR::Node* TypeInference::postorder(IR::Declaration_MatchKind* decl) {
 }
 
 const IR::Node* TypeInference::postorder(IR::P4Table* table) {
+    currentActionList = nullptr;
     if (done()) return table;
     auto type = new IR::Type_Table(table);
     setType(getOriginal(), type);
     setType(table, type);
-    currentActionList = nullptr;
     return table;
 }
 
