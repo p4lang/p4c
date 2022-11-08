@@ -3999,7 +3999,7 @@ const IR::ActionListElement* TypeInference::validateActionInitializer(
     if (al == nullptr) {
         auto table = findContext<IR::P4Table>();
         BUG_CHECK(table, "%1%: not within a table", actionCall);
-        typeError("%1% has no action list, so it cannot have %2%",
+        typeError("%1% has no action list, so it cannot invoke '%2%'",
                   table, actionCall);
         return nullptr;
     }
