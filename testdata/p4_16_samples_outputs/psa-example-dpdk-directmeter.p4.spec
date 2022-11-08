@@ -33,7 +33,6 @@ struct metadata_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<32> local_metadata_port_out
-	bit<32> table_entry_index
 	bit<32> Ingress_color_out
 	bit<32> Ingress_color_in
 	bit<32> Ingress_tmp
@@ -47,8 +46,6 @@ action NoAction args none {
 }
 
 action execute_meter args none {
-	entryid m.table_entry_index 
-	meter meter0_0 m.table_entry_index 0x400 m.Ingress_color_in m.Ingress_color_out
 	jmpneq LABEL_FALSE m.Ingress_color_out 0x0
 	mov m.Ingress_tmp 0x1
 	jmp LABEL_END

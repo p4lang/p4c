@@ -60,7 +60,7 @@ control MyIC(
 
     DirectMeter(PSA_MeterType_t.BYTES) meter0;
     action execute_meter () {
-        color_out = meter0.execute(color_in, 32w1024);
+        color_out = meter0.dpdk_execute(color_in, 32w1024);
         b.port_out = (color_out == PSA_MeterColor_t.GREEN ? 32w1 : 32w0);
     }
     table tbl {

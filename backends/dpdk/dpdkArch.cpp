@@ -2557,7 +2557,7 @@ void ValidateDirectCounterMeter::validateMethodInvocation(P4::ExternMethod *a) {
     }
 
     if ((externName == "DirectCounter" && methodName != "count") ||
-        (externName == "DirectMeter" && methodName != "execute")) {
+        (externName == "DirectMeter" && methodName != "dpdk_execute")) {
         ::error(ErrorType::ERR_UNEXPECTED, "%1% method not supported for %2% extern",
                                            methodName, externName);
         return;
