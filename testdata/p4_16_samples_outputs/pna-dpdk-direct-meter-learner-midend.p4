@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <pna.p4>
+#include <dpdk/pna.p4>
 
 header ethernet_t {
     bit<48> dstAddr;
@@ -67,7 +67,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         send_to_port(vport);
     }
     @name("MainControlImpl.add_on_miss_action") action add_on_miss_action() {
-        color_out_0 = meter0_0.execute(color_in_0, 32w1024);
+        color_out_0 = meter0_0.dpdk_execute(color_in_0, 32w1024);
         user_meta.port_out = (color_out_0 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
         add_entry<bit<32>>(action_name = "next_hop", action_params = 32w0, expire_time_profile_id = user_meta.timeout);
     }

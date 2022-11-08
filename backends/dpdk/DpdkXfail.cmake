@@ -66,7 +66,29 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "Expected atleast 2 arguments"
-  testdata/p4_16_samples/psa-meter3.p4
-  testdata/p4_16_samples/psa-meter7-bmv2.p4
+  "can only be invoked from within action of ownertable"
+  testdata/p4_16_samples/psa-example-dpdk-directmeter-err.p4
+  testdata/p4_16_samples/pna-dpdk-direct-counter-err-3.p4
+  )
+p4c_add_xfail_reason("dpdk"
+  "execute method not supported"
+  testdata/p4_16_samples/psa-meter6.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Expected default action .* to have .* method call for .* extern instance"
+   testdata/p4_16_samples/pna-dpdk-direct-counter-err-1.p4
+   testdata/p4_16_samples/pna-dpdk-direct-meter-err-4.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  ".* method for different .* instances (.*) called within same action"
+  testdata/p4_16_samples/pna-dpdk-direct-counter-err-4.p4
+  testdata/p4_16_samples/pna-dpdk-direct-meter-err-3.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+   "Learner table .* must have all exact match keys"
+   testdata/p4_16_samples/pna-add-on-miss-err1.p4
+   testdata/p4_16_samples/pna-dpdk-table-key-consolidation-learner-2.p4
   )

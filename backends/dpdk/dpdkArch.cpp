@@ -2526,7 +2526,7 @@ bool CollectDirectCounterMeter::preorder(const IR::P4Table* tbl) {
                         return false;
                     }
                 }
-                if (!ifMethodFound(defaultActionDecl, "execute", meterExternName)) {
+                if (!ifMethodFound(defaultActionDecl, "dpdk_execute", meterExternName)) {
                     if (meterInstance) {
                         ::error(ErrorType::ERR_EXPECTED, "Expected default action %1% to have "
                                 "'execute' method call for DirectMeter extern instance %2%",

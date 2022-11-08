@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #include <core.p4>
-#include "pna.p4"
+#include "dpdk/pna.p4"
 
 
 typedef bit<48>  EthernetAddress;
@@ -103,7 +103,7 @@ control MainControlImpl(
 
     action add_on_miss_action() {
         bit<32> tmp = 0;
-        color_out = meter0.execute(color_in, 32w1024);
+        color_out = meter0.dpdk_execute(color_in, 32w1024);
         user_meta.port_out = (color_out == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
         add_entry(action_name="next_hop", action_params = tmp, expire_time_profile_id = user_meta.timeout);
     }

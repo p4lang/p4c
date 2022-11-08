@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <bmv2/psa.p4>
+#include <dpdk/psa.p4>
 
 struct EMPTY {
 }
@@ -31,7 +31,7 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     DirectMeter(PSA_MeterType_t.BYTES) meter0;
     action execute_meter() {
-        meter0.execute();
+        meter0.dpdk_execute(32w0);
     }
     table tbl {
         key = {
