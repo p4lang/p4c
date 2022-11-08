@@ -598,7 +598,10 @@ enum PSA_CounterType_t {
 @noWarn("unused")
 extern Counter<W, S> {
   Counter(bit<32> n_counters, PSA_CounterType_t type);
+  // dpdk does not support this overload currently if used with
+  // BYTES counter type
   void count(in S index);
+  // Dpdk support this overload and requires packet length
   void count(in S index, in bit<32> pkt_len);
 
   /*
@@ -629,9 +632,11 @@ extern Counter<W, S> {
 @noWarn("unused")
 extern DirectCounter<W> {
   DirectCounter(PSA_CounterType_t type);
-  void count();
+  // dpdk does not support this overload currently if used with
+  // BYTES counter type
+  void count(); 
+  // Dpdk support this overload and requires packet length
   void count(in bit<32> pkt_len);
-
   /*
   @ControlPlaneAPI
   {
@@ -663,21 +668,24 @@ enum PSA_MeterColor_t { RED, GREEN, YELLOW }
 extern Meter<S> {
   Meter(bit<32> n_meters, PSA_MeterType_t type);
 
+  // dpdk does not support below two execute overload, using it
+  // result in compilation failure and suggest using `dpdk_execute`
+
   // Use this method call to perform a color aware meter update (see
   // RFC 2698). The color of the packet before the method call was
   // made is specified by the color parameter.
   PSA_MeterColor_t execute(in S index, in PSA_MeterColor_t color);
+  // Use this method call to perform a color blind meter update (see
+  // RFC 2698).  It may be implemented via a call to execute(index,
+  // MeterColor_t.GREEN), which has the same behavior.
+  PSA_MeterColor_t execute(in S index);
+  
   // Adding param `in bit<32> pkt_len` to execute (part of Meter extern)
   // leads to overload resolution failure due to ambiguous candidates,
   // as p4c do overload resolution based on number of parameter and does
   // not consider types. To workaround this we introduced new method in
   // Meter extern `dpdk_execute` which has extra param.  
-  PSA_MeterColor_t dpdk_execute(in S index, in PSA_MeterColor_t color, in bit<32> pkt_len);
-
-  // Use this method call to perform a color blind meter update (see
-  // RFC 2698).  It may be implemented via a call to execute(index,
-  // MeterColor_t.GREEN), which has the same behavior.
-  PSA_MeterColor_t execute(in S index);
+  PSA_MeterColor_t dpdk_execute(in S index, in PSA_MeterColor_t color, in bit<32> pkt_len);  
   PSA_MeterColor_t dpdk_execute(in S index, in bit<32> pkt_len);
 
   /*
@@ -695,9 +703,12 @@ extern Meter<S> {
 extern DirectMeter {
   DirectMeter(PSA_MeterType_t type);
   // See the corresponding methods for extern Meter.
+  // dpdk does not support below two execute overload, using it
+  // result in compilation failure and suggest using `dpdk_execute`
   PSA_MeterColor_t execute(in PSA_MeterColor_t color);
-  PSA_MeterColor_t dpdk_execute(in PSA_MeterColor_t color, in bit<32> pkt_len);
   PSA_MeterColor_t execute();
+
+  PSA_MeterColor_t dpdk_execute(in PSA_MeterColor_t color, in bit<32> pkt_len);
   PSA_MeterColor_t dpdk_execute(in bit<32> pkt_len);
 
   /*
