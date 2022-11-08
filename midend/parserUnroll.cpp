@@ -262,7 +262,7 @@ class ParserStateRewriter : public Transform {
     /// are the same before previous call of the same parser state.
     bool calledWithNoChanges(IR::ID id, const ParserStateInfo* state) {
         CHECK_NULL(state);
-        const auto* prevState = state; 
+        const auto* prevState = state;
         while (prevState->state->name.name != id.name) {
             prevState = prevState->predecessor;
             if (prevState == nullptr) {
@@ -806,7 +806,6 @@ class ParserSymbolicInterpreter {
                     }
                     wasError  = false;
                     continue;
-                    //break;
                 }
                 // don't evaluate successors anymore
                 // generate call OutOfBound
