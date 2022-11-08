@@ -1,0 +1,3 @@
+pna.p4(385): [--Werror=unexpected] error: count method of per_prefix_pkt_bytes_count extern can only be invoked from within action of ownertable
+  void count(@optional in bit<32> increment);
+       ^^^^^

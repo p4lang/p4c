@@ -1,0 +1,2 @@
+[--Werror=unexpected] error: count method for different DirectCounter instances (per_prefix_pkt_byte_count_0 and per_prefix_pkt_byte_count1_0) called within same action
+[--Werror=unexpected] error: count method for different DirectCounter instances (per_prefix_pkt_byte_count_0 and per_prefix_pkt_byte_count1_0) called within same action

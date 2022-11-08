@@ -1,0 +1,3 @@
+psa-example-mask-range-err.p4(67): [--Werror=invalid] error: user_meta.data: must be a compile-time constant
+            user_meta.data &&& 0x0F00: parse_ipv4;
+            ^^^^^^^^^^^^^^

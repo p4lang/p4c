@@ -1,0 +1,1 @@
+[--Werror=unexpected] error: Non 'exact' match kind not permitted in table (tbl) with 'lpm' match kind

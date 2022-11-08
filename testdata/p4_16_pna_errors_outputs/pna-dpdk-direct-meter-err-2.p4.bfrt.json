@@ -1,0 +1,98 @@
+{
+  "schema_version" : "1.0.0",
+  "tables" : [
+    {
+      "name" : "pipe.MainControlImpl.ipv4_host",
+      "id" : 47903772,
+      "table_type" : "MatchAction_Direct",
+      "size" : 1024,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : true,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "hdr.ipv4.dstAddr",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 32
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 22742608,
+          "name" : "MainControlImpl.send",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        }
+      ],
+      "data" : [
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65549,
+            "name" : "$METER_SPEC_CIR_PPS",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 18446744073709551615
+            }
+          }
+        },
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65550,
+            "name" : "$METER_SPEC_PIR_PPS",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 18446744073709551615
+            }
+          }
+        },
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65551,
+            "name" : "$METER_SPEC_CBS_PKTS",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 18446744073709551615
+            }
+          }
+        },
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65552,
+            "name" : "$METER_SPEC_PBS_PKTS",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 18446744073709551615
+            }
+          }
+        }
+      ],
+      "supported_operations" : [],
+      "attributes" : ["MeterByteCountAdjust", "EntryScope"]
+    }
+  ],
+  "learn_filters" : []
+}
