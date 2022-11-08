@@ -134,15 +134,16 @@ control Ingress(inout headers hdr, out bool xout) {
                         8w0x5e : operation_xor();
         }
         implementation = hash_table(32w8);
+        size = 100;
     }
-    @hidden action calcebpf152() {
+    @hidden action calcebpf153() {
         xout = true;
     }
-    @hidden table tbl_calcebpf152 {
+    @hidden table tbl_calcebpf153 {
         actions = {
-            calcebpf152();
+            calcebpf153();
         }
-        const default_action = calcebpf152();
+        const default_action = calcebpf153();
     }
     @hidden table tbl_operation_drop {
         actions = {
@@ -151,7 +152,7 @@ control Ingress(inout headers hdr, out bool xout) {
         const default_action = operation_drop_1();
     }
     apply {
-        tbl_calcebpf152.apply();
+        tbl_calcebpf153.apply();
         if (hdr.p4calc.isValid()) {
             calculate_0.apply();
         } else {

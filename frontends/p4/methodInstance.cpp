@@ -85,9 +85,9 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, DeclarationLookup* 
                 type = typeMap ? typeMap->getTypeType(cce->constructedType, true) : cce->type;
             } else {
                 BUG("unexpected expression %1% resolving method instance", mem->expr); }
+            BUG_CHECK(type != nullptr, "Could not resolve type for %1%", decl);
             if (type->is<IR::Type_SpecializedCanonical>())
                 type = type->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
-            BUG_CHECK(type != nullptr, "Could not resolve type for %1%", decl);
             if (type->is<IR::IApply>() &&
                 mem->member == IR::IApply::applyMethodName) {
                 return new ApplyMethod(mce, decl, type->to<IR::IApply>());

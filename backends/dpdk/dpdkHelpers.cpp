@@ -338,9 +338,11 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 if (e->method->getName().name == "get") {
                     auto res = structure->csum_map.find(
                         e->object->to<IR::Declaration_Instance>());
-                    cstring intermediate;
+                    cstring intermediate = "";
                     if (res != structure->csum_map.end()) {
                         intermediate = res->second;
+                    } else {
+                        BUG("checksum map does not collect all checksum def.");
                     }
                     i = new IR::DpdkGetChecksumStatement(
                         left, e->object->getName(), intermediate);
@@ -367,6 +369,31 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     }
                     i = new IR::DpdkMeterExecuteStatement(
                          e->object->getName(), index, length, color_in, left);
+                }
+            } else if (e->originalExternType->getName().name == "DirectMeter") {
+                if (e->method->getName().name == "execute") {
+                    auto argSize = e->expr->arguments->size();
+
+                    // DPDK target needs packet length as mandatory parameters
+                    if (argSize < 1) {
+                        ::error(ErrorType::ERR_UNEXPECTED, "Expected atleast 1 argument "
+                                "(packet length) for %1%", e->object->getName());
+                        return false;
+                    }
+                    const IR::Expression *color_in = nullptr;
+                    const IR::Expression *length = nullptr;
+                    if (argSize == 1) {
+                        length = e->expr->arguments->at(0)->expression;
+                        color_in = new IR::Constant(1);
+                    } else if (argSize == 2) {
+                        length = e->expr->arguments->at(1)->expression;
+                        color_in = e->expr->arguments->at(0)->expression;
+                    }
+                    auto metaIndex = new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                                    DirectResourceTableEntryIndex);
+                    add_instr(new IR::DpdkGetTableEntryIndex(metaIndex));
+                    i = new IR::DpdkMeterExecuteStatement(
+                         e->object->getName(), metaIndex, length, color_in, left);
                 }
             } else if (e->originalExternType->getName().name == "Register") {
                 if (e->method->getName().name == "read") {
@@ -924,7 +951,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         if (a->originalExternType->getName().name == "InternetChecksum") {
             auto res =
                 structure->csum_map.find(a->object->to<IR::Declaration_Instance>());
-            cstring intermediate;
+            cstring intermediate = "";
             if (res != structure->csum_map.end()) {
                 intermediate = res->second;
             } else {
@@ -1029,6 +1056,51 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         } else if (a->originalExternType->getName().name == "Meter") {
             if (a->method->getName().name != "execute") {
                 BUG("Meter function not implemented.");
+            }
+        } else if (a->originalExternType->getName().name == "DirectMeter") {
+            if (a->method->getName().name != "execute") {
+                BUG("Direct Meter function %1% not implemented.", a->method->getName().name);
+            }
+        } else if (a->originalExternType->getName().name == "DirectCounter") {
+            auto di = a->object->to<IR::Declaration_Instance>();
+            auto declArgs = di->arguments;
+            unsigned value = 0;
+            auto counter_type = declArgs->at(0)->expression;
+            if (auto c = counter_type->to<IR::Constant>()) value = c->asUnsigned();
+            if (a->method->getName().name == "count") {
+                auto args = a->expr->arguments;
+                if (args->size() > 1) {
+                    ::error(ErrorType::ERR_UNEXPECTED, "Expected at most 1 argument for %1%," \
+                            "provided %2%", a->method->getName(), args->size());
+                } else {
+                    const IR::Expression *incr = nullptr;
+                    auto counter = a->object->getName();
+                    if (args->size() == 1)
+                        incr = args->at(0)->expression;
+                    if (!incr && value > 0) {
+                        ::error(ErrorType::ERR_UNEXPECTED,
+                                "Expected packet length argument for %1% " \
+                                "method of direct counter",
+                                a->method->getName());
+                        return false;
+                    }
+                    auto metaIndex = new IR::Member(new IR::PathExpression(
+                                                    IR::ID("m")), DirectResourceTableEntryIndex);
+                    add_instr(new IR::DpdkGetTableEntryIndex(metaIndex));
+                    if (value == 2) {
+                        add_instr(new IR::DpdkCounterCountStatement(counter+"_packets", metaIndex));
+                        add_instr(new IR::DpdkCounterCountStatement(counter+"_bytes", metaIndex,
+                                                                    incr));
+                    } else {
+                         if (value == 1)
+                             add_instr(new IR::DpdkCounterCountStatement(counter, metaIndex,
+                                                                               incr));
+                         else
+                             add_instr(new IR::DpdkCounterCountStatement(counter, metaIndex));
+                    }
+                }
+            } else {
+                BUG("Direct Counter function %1% not implemented", a->method->getName());
             }
         } else if (a->originalExternType->getName().name == "Counter") {
             auto di = a->object->to<IR::Declaration_Instance>();

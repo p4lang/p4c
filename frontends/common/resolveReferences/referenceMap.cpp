@@ -28,12 +28,14 @@ MinimalNameGenerator::MinimalNameGenerator() {
 ReferenceMap::ReferenceMap() : ProgramMap("ReferenceMap"), isv1(false) { clear(); }
 
 void ReferenceMap::clear() {
+    LOG2("Clearing reference map");
     pathToDeclaration.clear();
     usedNames.clear();
     used.clear();
     thisToDeclaration.clear();
     for (auto &reserved : P4::reservedWords)
         usedNames.insert({reserved, 0});
+    ProgramMap::clear();
 }
 
 void ReferenceMap::setDeclaration(const IR::Path* path, const IR::IDeclaration* decl) {

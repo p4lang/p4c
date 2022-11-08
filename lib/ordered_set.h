@@ -23,6 +23,7 @@ limitations under the License.
 #include <map>
 #include <set>
 #include <utility>
+#include <cassert>
 
 // Remembers items in insertion order
 template <class T, class COMP = std::less<T>, class ALLOC = std::allocator<T>>
@@ -38,10 +39,15 @@ class ordered_set {
 
  private:
     typedef std::list<T, ALLOC> list_type;
+    typedef typename list_type::iterator list_iterator;
     list_type                   data;
 
  public:
-    typedef typename list_type::iterator                iterator;
+    // This is a set, so we can't provide any iterator that would make it
+    // possible to modify the values in the set and therefore possibly make the
+    // set contain duplicate values. Therefore we base all our iterators on
+    // list's const_iterator.
+    typedef typename list_type::const_iterator          iterator;
     typedef typename list_type::const_iterator          const_iterator;
     typedef std::reverse_iterator<iterator>             reverse_iterator;
     typedef std::reverse_iterator<const_iterator>       const_reverse_iterator;
@@ -50,9 +56,10 @@ class ordered_set {
     struct mapcmp : std::binary_function<const T *, const T *, bool> {
         COMP    comp;
         bool operator()(const T *a, const T *b) const { return comp(*a, *b); } };
-    using map_alloc = typename ALLOC::template rebind<std::pair<const T * const, iterator>>::other;
-    typedef std::map<const T *, iterator, mapcmp, map_alloc>    map_type;
-    map_type                            data_map;
+    using map_alloc = typename ALLOC::template rebind<std::pair<const T * const, list_iterator>>
+                                    ::other;
+    using map_type = std::map<const T *, list_iterator, mapcmp, map_alloc>;
+    map_type data_map;
     void init_data_map() {
         data_map.clear();
         for (auto it = data.begin(); it != data.end(); it++)
@@ -87,6 +94,8 @@ class ordered_set {
     ordered_set() {}
     ordered_set(const ordered_set &a) : data(a.data) { init_data_map(); }
     ordered_set(std::initializer_list<T> init) : data(init) { init_data_map(); }
+    template<typename InputIt>
+    ordered_set(InputIt first, InputIt last) : data(first, last) { init_data_map(); }
     ordered_set(ordered_set &&a) = default; /* move is ok? */
     ordered_set &operator=(const ordered_set &a) { data = a.data; init_data_map(); return *this; }
     ordered_set &operator=(ordered_set &&a) = default; /* move is ok? */
@@ -139,16 +148,16 @@ class ordered_set {
     const_iterator  lower_bound(const T &a) const { return tr_iter(data_map.lower_bound(&a)); }
 
     std::pair<iterator, bool> insert(const T &v) {
-        auto it = find(v);
+        iterator it = find(v);
         if (it == data.end()) {
-            it = data.insert(data.end(), v);
+            list_iterator it = data.insert(data.end(), v);
             data_map.emplace(&*it, it);
             return std::make_pair(it, true); }
         return std::make_pair(it, false); }
     std::pair<iterator, bool> insert(T &&v) {
-        auto it = find(v);
+        iterator it = find(v);
         if (it == data.end()) {
-            it = data.insert(data.end(), std::move(v));
+            list_iterator it = data.insert(data.end(), std::move(v));
             data_map.emplace(&*it, it);
             return std::make_pair(it, true); }
         return std::make_pair(it, false); }
@@ -157,33 +166,33 @@ class ordered_set {
             insert(*it);
     }
     iterator insert(const_iterator pos, const T &v) {
-        auto it = find(v);
+        iterator it = find(v);
         if (it == data.end()) {
-            it = data.insert(pos, v);
+            list_iterator it = data.insert(pos, v);
             data_map.emplace(&*it, it);
             return it; }
         return it;
     }
     iterator insert(const_iterator pos, T &&v) {
-        auto it = find(v);
+        iterator it = find(v);
         if (it == data.end()) {
-            it = data.insert(pos, std::move(v));
+            list_iterator it = data.insert(pos, std::move(v));
             data_map.emplace(&*it, it);
             return it; }
         return it;
     }
 
     void push_back(const T &v) {
-        auto it = find(v);
+        iterator it = find(v);
         if (it == data.end()) {
-            it = data.insert(data.end(), v);
+            list_iterator it = data.insert(data.end(), v);
             data_map.emplace(&*it, it);
         } else {
             data.splice(data.end(), data, it); } }
     void push_back(T &&v) {
-        auto it = find(v);
+        iterator it = find(v);
         if (it == data.end()) {
-            it = data.insert(data.end(), std::move(v));
+            list_iterator it = data.insert(data.end(), std::move(v));
             data_map.emplace(&*it, it);
         } else {
             data.splice(data.end(), data, it); } }
@@ -208,10 +217,14 @@ class ordered_set {
         data_map.emplace(&*it, it);
         return std::make_pair(it, true); }
 
-    /* should be erase(const_iterator), but glibc++ std::list::erase is broken */
-    iterator erase(iterator pos) {
-        data_map.erase(&*pos);
-        return data.erase(pos); }
+    iterator erase(const_iterator pos) {
+        auto it = data_map.find(&*pos);
+        assert(it != data_map.end());
+        // get the non-const std::list iterator -- libstdc++ is missing
+        // std::list::erase(const_iterator) overload
+        auto list_it = it->second;
+        data_map.erase(it);
+        return data.erase(list_it); }
     size_type erase(const T &v) {
         auto it = find(v);
         if (it != data.end()) {

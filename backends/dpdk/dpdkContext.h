@@ -70,6 +70,7 @@ struct externAttributes {
     cstring externalName;
     cstring externType;
     cstring counterType;
+    unsigned table_id;
 };
 
 /* Program level information for context json */

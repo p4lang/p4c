@@ -87,7 +87,7 @@ control ingress(inout headers hdr,
         }
         actions = { do_forward; NoAction; }
         const entries = {
-            (PortId_t)4 : do_forward((PortId_t) 5);
+            (PortId_t)PORT0 : do_forward((PortId_t) PORT1);
         }
         size = 100;
     }

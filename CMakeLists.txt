@@ -42,6 +42,7 @@ OPTION (ENABLE_GC "Use libgc" ON)
 OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
 OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" OFF)
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
+OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
 OPTION (BUILD_STATIC_RELEASE "Build a statically linked release binary" OFF)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
@@ -213,11 +214,18 @@ add_cxx_compiler_option ("-Wextra")
 add_cxx_compiler_option ("-Wno-overloaded-virtual")
 add_cxx_compiler_option ("-Wno-deprecated")
 add_cxx_compiler_option ("-Wno-deprecated-declarations")
-# Enable/disable runtime exceptions on nullpointer dereferencing
-# add_cxx_compiler_option ("-fsanitize=null")
+
+if (ENABLE_SANITIZERS)
+  add_cxx_compiler_option  ("-fsanitize=undefined,address")
+endif ()
 
 if (ENABLE_WERROR)
   add_cxx_compiler_option  ("-Werror")
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # GCC's -Waybe-uninitialized warnings are quite noisy and unlikely to catch
+    # real issues - do not treat them as build errors.
+    add_cxx_compiler_option ("-Wno-error=maybe-uninitialized")
+  endif ()
 endif ()
 
 # If we're on GCC or Clang, use the prefer LLD or Gold linker if available.

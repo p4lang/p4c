@@ -18,9 +18,11 @@ limitations under the License.
 #define LIB_ORDERED_MAP_H_
 
 #include <functional>
+#include <initializer_list>
 #include <list>
 #include <map>
 #include <utility>
+#include <cassert>
 
 // Map is ordered by order of element insertion.
 template <class K, class V, class COMP = std::less<K>,
@@ -37,6 +39,7 @@ class ordered_map {
 
  private:
     typedef std::list<value_type, ALLOC>                list_type;
+    typedef typename list_type::iterator                list_iterator;
     list_type                                           data;
 
  public:
@@ -59,9 +62,10 @@ class ordered_map {
     struct mapcmp : std::binary_function<const K*, const K*, bool> {
         COMP    comp;
         bool operator()(const K *a, const K *b) const { return comp(*a, *b); } };
-    using map_alloc = typename ALLOC::template rebind<std::pair<const K * const, iterator>>::other;
-    typedef std::map<const K *, iterator, mapcmp, map_alloc> map_type;
-    map_type                            data_map;
+    using map_alloc = typename ALLOC::template rebind<std::pair<const K * const, list_iterator>>
+                                    ::other;
+    using map_type = std::map<const K *, list_iterator, mapcmp, map_alloc>;
+    map_type data_map;
     void init_data_map() {
         data_map.clear();
         for (auto it = data.begin(); it != data.end(); it++)
@@ -81,6 +85,8 @@ class ordered_map {
  public:
     ordered_map() {}
     ordered_map(const ordered_map &a) : data(a.data) { init_data_map(); }
+    template<typename InputIt>
+    ordered_map(InputIt first, InputIt last) : data(first, last) { init_data_map(); }
     ordered_map(ordered_map &&a) = default; /* move is ok? */
     ordered_map &operator=(const ordered_map &a) {
         /* std::list assignment broken by spec if elements are const... */
@@ -91,7 +97,7 @@ class ordered_map {
             init_data_map(); }
         return *this; }
     ordered_map &operator=(ordered_map &&a) = default; /* move is ok? */
-    ordered_map(const std::initializer_list<value_type> &il) : data(il) { init_data_map(); }
+    ordered_map(std::initializer_list<value_type> il) : data(il) { init_data_map(); }
     // FIXME add allocator and comparator ctors...
 
     iterator                    begin() noexcept { return data.begin(); }
@@ -174,6 +180,9 @@ class ordered_map {
             data_map.emplace(&it->first, it);
             return std::make_pair(it, true); }
         return std::make_pair(it, false); }
+
+    /* TODO: should not exist, does not make sense for map that preserves
+     * insertion order. This function does not preserve it. */
     std::pair<iterator, bool> insert(iterator pos, const value_type &v) {
         /* should be const_iterator pos, but glibc++ std::list is broken */
         auto it = find(v.first);
@@ -184,15 +193,22 @@ class ordered_map {
         return std::make_pair(it, false); }
     template<class InputIterator> void insert(InputIterator b, InputIterator e) {
         while (b != e) insert(*b++); }
+
+    /* TODO: should not exist, does not make sense for map that preserves
+     * insertion order. This function does not preserve it. */
     template<class InputIterator>
     void insert(iterator pos, InputIterator b, InputIterator e) {
         /* should be const_iterator pos, but glibc++ std::list is broken */
         while (b != e) insert(pos, *b++); }
 
-    /* should be erase(const_iterator), but glibc++ std::list::erase is broken */
-    iterator erase(iterator pos) {
-        data_map.erase(&pos->first);
-        return data.erase(pos); }
+    iterator erase(const_iterator pos) {
+        auto it = data_map.find(&pos->first);
+        assert(it != data_map.end());
+        // get the non-const std::list iterator -- libstdc++ is missing
+        // std::list::erase(const_iterator) overload
+        auto list_it = it->second;
+        data_map.erase(it);
+        return data.erase(list_it); }
     size_type erase(const K &k) {
         auto it = find(k);
         if (it != data.end()) {

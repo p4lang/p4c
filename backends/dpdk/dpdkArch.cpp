@@ -718,11 +718,15 @@ const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct *s) {
     return s;
 }
 
-const IR::Node *InjectOutputPortMetadataField::preorder(IR::Type_Struct *s) {
-    if (structure->isPNA() && s->name.name == structure->local_metadata_type) {
-        s->fields.push_back(new IR::StructField(
-            IR::ID(PnaMainOutputMetadataOutputPortName), IR::Type_Bits::get(32)));
-        LOG3("Metadata structure after injecting output port:" << std::endl << s);
+const IR::Node *InjectFixedMetadataField::preorder(IR::Type_Struct *s) {
+    if  (s->name.name == structure->local_metadata_type) {
+         if (structure->isPNA()) {
+             s->fields.push_back(new IR::StructField(
+                  IR::ID(PnaMainOutputMetadataOutputPortName), IR::Type_Bits::get(32)));
+          }
+          s->fields.push_back(new IR::StructField(
+               IR::ID(DirectResourceTableEntryIndex), IR::Type_Bits::get(32)));
+        LOG3("Metadata structure after injecting Fixed metadata fields:" << std::endl << s);
     }
     return s;
 }
@@ -1681,14 +1685,25 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
         if (!contiguous) break;
     }
 
+    auto table = findOrigCtxt<IR::P4Table>();
+    CHECK_NULL(table);
+
+    if (keyInfoInstance->isLearner) {
+        if (!keyInfoInstance->isExact) {
+            ::error(ErrorType::ERR_EXPECTED,"Learner table %1% must have all exact match keys",
+                    table->name);
+            return keys;
+        }
+        structure->table_type_map.emplace(table->name.name, InternalTableType::LEARNER);
+    } else if (contiguous && keyInfoInstance->isExact){
+        structure->table_type_map.emplace(table->name.name, InternalTableType::REGULAR_EXACT);
+    } else {
+        structure->table_type_map.emplace(table->name.name, InternalTableType::WILDCARD);
+    }
     /* If copyNeeded is false at this point, it means the keys are from same struct.
      * Check remaining conditions to see if the copy is needed or not */
     metaCopyNeeded = false;
     if (!copyNeeded) {
-        if (keyInfoInstance->isLearner && !keyInfoInstance->isExact) {
-            ::error(ErrorType::ERR_EXPECTED,"Learner table must have all exact match keys");
-            return keys;
-        }
         if (!contiguous && ((keyInfoInstance->isLearner) || (keyInfoInstance->isExact
                         && keyInfoInstance->numExistingMetaFields <= 5))) {
             metaCopyNeeded = true;
@@ -1778,7 +1793,7 @@ getExternInstanceFromProperty(const IR::P4Table* table,
                               const cstring& propertyName,
                               P4::ReferenceMap* refMap,
                               P4::TypeMap* typeMap,
-                              bool *isConstructedInPlace) {
+                              bool *isConstructedInPlace, cstring &externName) {
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return boost::none;
     if (!property->value->is<IR::ExpressionValue>()) {
@@ -1789,6 +1804,7 @@ getExternInstanceFromProperty(const IR::P4Table* table,
     }
 
     auto expr = property->value->to<IR::ExpressionValue>()->expression;
+    externName = expr->to<IR::PathExpression>()->path->name.name;
     if (isConstructedInPlace) *isConstructedInPlace = expr->is<IR::ConstructorCallExpression>();
     if (expr->is<IR::ConstructorCallExpression>()
         && property->getAnnotation(IR::Annotation::nameAnnotation) == nullptr) {
@@ -1806,7 +1822,6 @@ getExternInstanceFromProperty(const IR::P4Table* table,
                 property);
         return boost::none;
     }
-
     return externInstance;
 }
 
@@ -1947,14 +1962,27 @@ const IR::P4Table* SplitP4TableCommon::create_group_table(const IR::P4Table* tbl
 const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     bool isConstructedInPlace = false;
     bool isAsInstanceShared = false;
-    cstring implementation = "psa_implementation";
+    cstring externName = "";
+    cstring prefix = "psa_";
 
     if (structure->isPNA()) {
-        implementation = "pna_implementation";
+       prefix = "pna_";
     }
 
-    auto instance = Helpers::getExternInstanceFromProperty(tbl, implementation,
-                                                           refMap, typeMap, &isConstructedInPlace);
+    auto property = tbl->properties->getProperty(prefix + "implementation");
+    auto counterProperty = tbl->properties->getProperty(prefix + "direct_counter");
+    auto meterProperty = tbl->properties->getProperty(prefix + "direct_meter");
+
+    if (property != nullptr && (counterProperty != nullptr || meterProperty != nullptr)) {
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "implementation property cannot co-exist with direct counter and direct meter "
+                "property for table %1%", tbl->name);
+        return tbl;
+    }
+
+    auto instance = Helpers::getExternInstanceFromProperty(tbl, prefix + "implementation",
+                                                           refMap, typeMap, &isConstructedInPlace,
+                                                           externName);
     if (!instance)
         return tbl;
     if (instance->type->name != "ActionSelector")
@@ -2068,13 +2096,14 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
 const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
     bool isConstructedInPlace = false;
     bool isApInstanceShared = false;
+    cstring externName = "";
     cstring implementation = "psa_implementation";
 
     if (structure->isPNA())
         implementation = "pna_implementation";
 
     auto instance = Helpers::getExternInstanceFromProperty(tbl, implementation,
-            refMap, typeMap, &isConstructedInPlace);
+                            refMap, typeMap, &isConstructedInPlace, externName);
 
     if (!instance || instance->type->name != "ActionProfile")
         return tbl;
@@ -2372,6 +2401,211 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
         return new IR::BlockStatement(*decls);
     }
     return statement;
+}
+
+/* For regular tables, the direct counter array size is same as table size
+ * For learner tables, the direct counter/meter array size is 4 times the table size */
+int CollectDirectCounterMeter::getTableSize(const IR::P4Table * tbl) {
+    int tableSize = dpdk_default_table_size;
+    auto size = tbl->getSizeProperty();
+    if (size)
+        tableSize = size->asUnsigned();
+    return tableSize;
+}
+
+void CollectDirectCounterMeter::checkMethodCallInAction(const P4::ExternMethod *a) {
+    cstring externName = a->originalExternType->getName().name;
+    if (externName == "DirectMeter" || externName == "DirectCounter") {
+        auto di = a->object->to<IR::Declaration_Instance>();
+        cstring instanceName = di->name.name;
+        if (a->method->getName().name == method) {
+            if (instancename != "" && instanceName == instancename) {
+                methodCallFound = true;
+            }
+
+            if (oneInstance == "")
+                oneInstance = instanceName;
+
+            // error if more than one count method found with different instance name
+            if (oneInstance != instanceName) {
+                ::error(ErrorType::ERR_UNEXPECTED, "%1% method for different %2% "
+                         "instances (%3% and %4%) called within same action",
+                         method, externName, oneInstance, instanceName);
+                return;
+            }
+        }
+    }
+}
+
+bool CollectDirectCounterMeter::preorder(const IR::MethodCallStatement* mcs) {
+    auto mi = P4::MethodInstance::resolve(mcs->methodCall, refMap, typeMap);
+    if (auto a = mi->to<P4::ExternMethod>()) {
+        checkMethodCallInAction(a);
+    }
+    return false;
+}
+
+bool CollectDirectCounterMeter::preorder(const IR::AssignmentStatement* assn) {
+    if (auto m = assn->right->to<IR::MethodCallExpression>()) {
+        auto mi = P4::MethodInstance::resolve(m, refMap, typeMap);
+        if (auto a = mi->to<P4::ExternMethod>()) {
+            checkMethodCallInAction(a);
+        }
+    }
+    return false;
+}
+
+bool CollectDirectCounterMeter::ifMethodFound(const IR::P4Action *a,
+                             cstring methodName, cstring instance) {
+    oneInstance = "";
+    instancename = instance;
+    method = methodName;
+    methodCallFound = false;
+    visit(a->body->components);
+    return methodCallFound;
+}
+
+/* ifMethodFound() is called from here to make sure that an action only contains count/execute
+ * method calls for only one Direct counter/meter instance. The error for the same is emitted
+ * in the ifMethodFound function itself and return value is not required to be checked here.
+ */
+bool CollectDirectCounterMeter::preorder(const IR::P4Action* a) {
+    ifMethodFound(a, "count");
+    ifMethodFound(a, "execute");
+    return false;
+}
+
+bool CollectDirectCounterMeter::preorder(const IR::P4Table* tbl) {
+    bool isConstructedInPlace = false;
+    cstring implementation = "psa_implementation";
+    cstring counterExternName = "";
+    cstring meterExternName = "";
+    cstring direct_counter = "psa_direct_counter";
+    cstring direct_meter = "psa_direct_meter";
+
+    if (structure->isPNA()) {
+        implementation = "pna_implementation";
+        direct_counter = "pna_direct_counter";
+        direct_meter = "pna_direct_meter";
+    }
+
+    auto counterInstance = Helpers::getExternInstanceFromProperty(tbl, direct_counter,
+                                                           refMap, typeMap, &isConstructedInPlace,
+                                                           counterExternName);
+    auto meterInstance = Helpers::getExternInstanceFromProperty(tbl, direct_meter,
+                                                           refMap, typeMap, &isConstructedInPlace,
+                                                           meterExternName);
+    int table_size = getTableSize(tbl);
+    auto table_type = ::get(structure->table_type_map, tbl->name.name);
+
+    // Direct Counter and Meter are not supported with Wildcard match tables
+    if (table_type == InternalTableType::WILDCARD && (counterInstance || meterInstance)) {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Direct counters and direct meters are"
+                " unsupported for wildcard match table %1%", tbl->name);
+        return false;
+    }
+
+    if (table_type == InternalTableType::LEARNER)
+        table_size *= 4;
+
+    auto default_action = tbl->getDefaultAction();
+    if (default_action) {
+        if (auto mc = default_action->to<IR::MethodCallExpression>()) {
+            default_action = mc->method;
+        }
+
+        auto path = default_action->to<IR::PathExpression>();
+        BUG_CHECK(path, "Default action path %s cannot be found", default_action);
+        if (auto defaultActionDecl = refMap->getDeclaration(path->path)->to<IR::P4Action>()) {
+            if (defaultActionDecl->name.originalName != "NoAction") {
+                if (!ifMethodFound(defaultActionDecl, "count", counterExternName)) {
+                    if (counterInstance) {
+                        ::error(ErrorType::ERR_EXPECTED, "Expected default action %1% to have "
+                                "'count' method call for DirectCounter extern instance %2%",
+                                defaultActionDecl->name, *counterInstance->name);
+                        return false;
+                    }
+                }
+                if (!ifMethodFound(defaultActionDecl, "execute", meterExternName)) {
+                    if (meterInstance) {
+                        ::error(ErrorType::ERR_EXPECTED, "Expected default action %1% to have "
+                                "'execute' method call for DirectMeter extern instance %2%",
+                                 defaultActionDecl->name, *meterInstance->name);
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+
+    if (counterInstance && counterInstance->type->name == "DirectCounter") {
+        directMeterCounterSizeMap.emplace(counterExternName, table_size + 1);
+        structure->direct_resource_map.emplace(counterExternName, tbl);
+    }
+    if (meterInstance && meterInstance->type->name == "DirectMeter") {
+        directMeterCounterSizeMap.emplace(meterExternName, table_size + 1);
+        structure->direct_resource_map.emplace(meterExternName, tbl);
+    }
+    return false;
+}
+
+void ValidateDirectCounterMeter::validateMethodInvocation(P4::ExternMethod *a) {
+    cstring externName = a->originalExternType->getName().name;
+    cstring methodName = a->method->getName().name;
+    if (externName != "DirectCounter" && externName != "DirectMeter") {
+        return;
+    }
+
+    if ((externName == "DirectCounter" && methodName != "count") ||
+        (externName == "DirectMeter" && methodName != "execute")) {
+        ::error(ErrorType::ERR_UNEXPECTED, "%1% method not supported for %2% extern",
+                                           methodName, externName);
+        return;
+    }
+
+    if (auto di = a->object->to<IR::Declaration_Instance>()) {
+        auto ownerTable = ::get(structure->direct_resource_map, di->name.name);
+        bool invokedFromOwnerTable = false;
+        auto act = findOrigCtxt<IR::P4Action>();
+        if (!act) {
+            ::error(ErrorType::ERR_UNEXPECTED,"%1% method of %2% extern "
+            "must only be called from within an action", a->method->getName().name,
+            di->name.originalName);
+            return;
+        }
+
+        for (auto action : ownerTable->getActionList()->actionList) {
+            auto action_decl = refMap->getDeclaration(action->getPath())->to<IR::P4Action>();
+            if (act->name.name == action_decl->name.name) {
+                invokedFromOwnerTable = true;
+                break;
+            }
+        }
+
+        if (!invokedFromOwnerTable) {
+            ::error(ErrorType::ERR_UNEXPECTED,"%1% method of %2% extern "
+             "can only be invoked from within action of ownertable", a->method->getName(),
+              di->name.originalName);
+            return;
+        }
+    }
+}
+
+
+void ValidateDirectCounterMeter::postorder(const IR::AssignmentStatement *assn) {
+    if (auto m = assn->right->to<IR::MethodCallExpression>()) {
+        auto mi = P4::MethodInstance::resolve(m, refMap, typeMap);
+        if (auto a = mi->to<P4::ExternMethod>()) {
+            return validateMethodInvocation(a);
+        }
+    }
+}
+
+void ValidateDirectCounterMeter::postorder(const IR::MethodCallStatement *mcs) {
+    auto mi = P4::MethodInstance::resolve(mcs->methodCall, refMap, typeMap);
+    if (auto a = mi->to<P4::ExternMethod>()) {
+        return validateMethodInvocation(a);
+    }
 }
 
 void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
