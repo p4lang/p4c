@@ -1,13 +1,10 @@
 #!/bin/bash
 
-
 # This checks that the refpoint for each git submodule is on the respective
 # branch that we are tracking.
-THIS_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-
-ROOT_DIR=$THIS_DIR/../..
 
 ### Begin configuration #######################################################
+THIS_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 declare -A branchOverrides=(
 )
@@ -31,13 +28,12 @@ if [[ $# == 0 ]] ; then
   ${skipFetch} || git fetch --quiet origin
   git submodule --quiet foreach \
     "${THIS_DIR}"'/check-git-submodules.sh ${sm_path} ${sha1} '"${tmpfile}"
-
   rm "${tmpfile}" &>/dev/null
 else
   sm_path="$1"
   sha1="$2"
   tmpfile="$3"
-
+  echo "Checking submodule ${sm_path} with sha ${sha1}"
   # Figure out what branch we are tracking (e.g., "origin/main") and derive a
   # simple name for that branch (e.g., "main").
   trackingBranch="${branchOverrides["${sm_path}"]}"

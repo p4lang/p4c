@@ -67,9 +67,6 @@ set (GTEST_UNITTEST_HEADERS
   gtest/helpers.h
   )
 
-# Add the non-backend-specific unit tests to cpplint.
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${GTEST_UNITTEST_SOURCES};${GTEST_UNITTEST_HEADERS}")
-
 # Combine the executable and the non-backend-specific unit tests into a single
 # unified compilation group.
 set (GTEST_BASE_SOURCES

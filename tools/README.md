@@ -1,5 +1,5 @@
 # Tools
-Contains utility scripts for supporting the development of P4Tools.
+Contains utility scripts for supporting the development of P4C.
 
 ## IWYU
 
