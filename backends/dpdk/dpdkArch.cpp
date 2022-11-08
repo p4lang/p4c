@@ -1689,6 +1689,11 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
     CHECK_NULL(table);
 
     if (keyInfoInstance->isLearner) {
+        if (!keyInfoInstance->isExact) {
+            ::error(ErrorType::ERR_EXPECTED,"Learner table %1% must have all exact match keys",
+                    table->name);
+            return keys;
+        }
         structure->table_type_map.emplace(table->name.name, InternalTableType::LEARNER);
     } else if (contiguous && keyInfoInstance->isExact){
         structure->table_type_map.emplace(table->name.name, InternalTableType::REGULAR_EXACT);
@@ -1699,10 +1704,6 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
      * Check remaining conditions to see if the copy is needed or not */
     metaCopyNeeded = false;
     if (!copyNeeded) {
-        if (keyInfoInstance->isLearner && !keyInfoInstance->isExact) {
-            ::error(ErrorType::ERR_EXPECTED,"Learner table must have all exact match keys");
-            return keys;
-        }
         if (!contiguous && ((keyInfoInstance->isLearner) || (keyInfoInstance->isExact
                         && keyInfoInstance->numExistingMetaFields <= 5))) {
             metaCopyNeeded = true;
