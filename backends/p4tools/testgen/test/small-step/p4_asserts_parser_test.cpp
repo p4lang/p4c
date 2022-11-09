@@ -130,7 +130,7 @@ TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInTable) {
     const auto& expr1 =
         P4Tools::Utils::getZombieConst(IR::Type_Bits::get(8), 0, "ingress.table_1_key_h.h.a");
     const auto& expr2 =
-        P4Tools::Utils::getZombieConst(IR::Type_Bits::get(8), 0, "ingress.table_2_key_h.h.a");
+        P4Tools::Utils::getZombieConst(IR::Type_Bits::get(8), 0, "ingress.table_2_key_h.h.b");
     const auto* operation = new IR::Equ(expr1, expr2);
     ASSERT_TRUE(parsingResult[0][0]->equiv(*operation));
 }
@@ -140,7 +140,7 @@ TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInAction) {
         "backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_2.p4", false);
     ASSERT_EQ(parsingResult.size(), (unsigned long)2);
     auto expr1 = P4Tools::Utils::getZombieConst(IR::Type_Bits::get(8), 0,
-                                                "ingress.table_1_param_ingress.MyAction10");
+                                                "ingress.table_1_arg_ingress.MyAction10");
     auto expr2 =
         P4Tools::Utils::getZombieConst(IR::Type_Bits::get(8), 0, "ingress.table_1_key_h.h.a");
     auto operation = new IR::Equ(expr1, expr2);
