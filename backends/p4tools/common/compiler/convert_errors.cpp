@@ -5,6 +5,8 @@
 #include <vector>
 
 #include "frontends/p4/typeMap.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "lib/big_int_util.h"
 #include "lib/exceptions.h"
 #include "lib/map.h"

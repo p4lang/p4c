@@ -1,10 +1,21 @@
 #include "backends/p4tools/common/compiler/reachability.h"
 
+#include <stddef.h>
+
+#include <functional>
 #include <iostream>
 #include <list>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
+
+#include "ir/declaration.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/enumerator.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
 
 namespace P4Tools {
 

@@ -16,7 +16,7 @@
 #include "lib/cstring.h"
 
 #include "backends/p4tools/testgen/lib/tf.h"
-#include "backends/p4tools/testgen/targets/bmv2/test_spec.h"
+#include "p4tools/testgen/lib/test_spec.h"
 
 namespace P4Tools {
 

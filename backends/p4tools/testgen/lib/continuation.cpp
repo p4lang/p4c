@@ -5,7 +5,12 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 
+#include "ir/id.h"
+#include "ir/visitor.h"
 #include "lib/exceptions.h"
+#include "p4tools/common/lib/trace_events.h"
+
+#include "p4tools/testgen/lib/namespace_context.h"
 
 namespace P4Tools {
 

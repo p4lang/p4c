@@ -1,14 +1,16 @@
 #ifndef TESTGEN_TARGETS_BMV2_P4_ASSERTS_PARSER_H_
 #define TESTGEN_TARGETS_BMV2_P4_ASSERTS_PARSER_H_
 
-#include <iomanip>
-#include <iostream>
-#include <string>
+#include <cstddef>
+#include <iterator>
 #include <string_view>
-#include <utility>
 #include <vector>
 
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
 
 namespace P4Tools {
 namespace AssertsParser {

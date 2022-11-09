@@ -1,6 +1,5 @@
 #include "backends/p4tools/testgen/targets/bmv2/backend/ptf/ptf.h"
 
-#include <algorithm>
 #include <iomanip>
 #include <map>
 #include <stdexcept>
@@ -18,10 +17,14 @@
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "gsl/gsl-lite.hpp"
+#include "ir/declaration.h"
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
+
+#include "p4tools/testgen/lib/tf.h"
+#include "p4tools/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools {
 

@@ -2,20 +2,32 @@
 
 #include <cstddef>
 #include <functional>
+#include <list>
 #include <ostream>
 #include <vector>
 
+#include <boost/cstdint.hpp>
+#include <boost/format.hpp>
 #include <boost/multiprecision/number.hpp>
+#include <boost/none.hpp>
+#include <boost/optional/optional.hpp>
+#include <boost/variant/get.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "ir/declaration.h"
+#include "ir/indexed_vector.h"
+#include "ir/ir-inline.h"
 #include "ir/irutils.h"
+#include "ir/node.h"
+#include "lib/big_int_util.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
+#include "lib/log.h"
 #include "lib/ordered_map.h"
 #include "lib/safe_vector.h"
 
@@ -29,6 +41,11 @@
 #include "backends/p4tools/testgen/targets/bmv2/table_stepper.h"
 #include "backends/p4tools/testgen/targets/bmv2/target.h"
 #include "backends/p4tools/testgen/targets/bmv2/test_spec.h"
+#include "p4tools/testgen/core/arch_spec.h"
+#include "p4tools/testgen/core/program_info.h"
+#include "p4tools/testgen/core/small_step/expr_stepper.h"
+#include "p4tools/testgen/core/target.h"
+#include "p4tools/testgen/targets/bmv2/program_info.h"
 
 namespace P4Tools {
 

@@ -15,6 +15,7 @@
 #include "backends/p4tools/testgen/core/small_step/expr_stepper.h"
 #include "backends/p4tools/testgen/lib/execution_state.h"
 #include "backends/p4tools/testgen/lib/test_spec.h"
+#include "p4tools/testgen/core/small_step/abstract_stepper.h"
 
 namespace P4Tools {
 

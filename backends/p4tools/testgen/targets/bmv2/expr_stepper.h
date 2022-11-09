@@ -1,10 +1,14 @@
 #ifndef BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_EXPR_STEPPER_H_
 #define BACKENDS_P4TOOLS_TESTGEN_TARGETS_BMV2_EXPR_STEPPER_H_
 
+#include <stdint.h>
+
 #include <string>
 
 #include "backends/p4tools/common/core/solver.h"
+#include "ir/id.h"
 #include "ir/ir.h"
+#include "ir/vector.h"
 
 #include "backends/p4tools/testgen/core/program_info.h"
 #include "backends/p4tools/testgen/core/small_step/expr_stepper.h"

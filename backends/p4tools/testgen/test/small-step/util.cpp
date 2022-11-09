@@ -6,6 +6,8 @@
 
 #include "test/gtest/helpers.h"
 
+#include "p4tools/testgen/test/gtest_utils.h"
+
 namespace Test {
 
 namespace SmallStepUtil {

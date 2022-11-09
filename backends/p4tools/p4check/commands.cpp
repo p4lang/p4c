@@ -2,7 +2,6 @@
 
 #include <string.h>
 
-#include <algorithm>
 #include <climits>
 #include <map>
 #include <string>

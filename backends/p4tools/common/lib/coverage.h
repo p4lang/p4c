@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "ir/ir.h"
+#include "ir/visitor.h"
 #include "lib/source_file.h"
 
 namespace P4Tools {

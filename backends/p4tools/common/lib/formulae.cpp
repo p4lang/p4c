@@ -1,5 +1,6 @@
 #include "backends/p4tools/common/lib/formulae.h"
 
+#include "ir/id.h"
 #include "lib/cstring.h"
 
 namespace P4Tools {

@@ -83,9 +83,10 @@ class Linter:
         (rc, out) = self.runCmd(args, self._basedir)
         # git-clang-format only returns an exit code in later version.
         # We need to check for diff patterns.
-        if rc != 0 or "+++" in out:
+        if rc != 0 and ("+++" in out or "---" in out):
             print(out)
-            print("Found formatting issues. Run git clang-format, then commit.")
+            print(
+                f"Return code {rc}. Found formatting issues. Run make clang-format-fix-errors, then commit.")
             return 1
         else:
             return 0

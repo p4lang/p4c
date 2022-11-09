@@ -2,6 +2,7 @@
 
 #include <cstddef>
 
+#include "ir/vector.h"
 #include "lib/exceptions.h"
 
 namespace P4Tools {

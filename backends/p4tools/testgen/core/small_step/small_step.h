@@ -4,8 +4,12 @@
 #include <cstdint>
 #include <vector>
 
+#include <boost/optional/optional.hpp>
+
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/core/solver.h"
+#include "gsl/gsl-lite.hpp"
+#include "p4tools/common/lib/formulae.h"
 
 #include "backends/p4tools/testgen/core/program_info.h"
 #include "backends/p4tools/testgen/lib/execution_state.h"

@@ -10,6 +10,7 @@
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
+#include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/error.h"
@@ -20,6 +21,10 @@
 #include "backends/p4tools/testgen/lib/execution_state.h"
 #include "backends/p4tools/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/testgen/targets/bmv2/program_info.h"
+#include "p4tools/testgen/core/arch_spec.h"
+#include "p4tools/testgen/core/program_info.h"
+#include "p4tools/testgen/core/small_step/cmd_stepper.h"
+#include "p4tools/testgen/lib/continuation.h"
 
 namespace P4Tools {
 

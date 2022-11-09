@@ -4,7 +4,9 @@
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"
+#include "ir/id.h"
 #include "ir/ir.h"
+#include "ir/vector.h"
 #include "lib/cstring.h"
 
 #include "backends/p4tools/testgen/core/program_info.h"
@@ -14,8 +16,6 @@
 namespace P4Tools {
 
 namespace P4Testgen {
-
-class ExprStepper;
 
 /// Implements small-step operational semantics for expressions.
 class ExprStepper : public AbstractStepper {

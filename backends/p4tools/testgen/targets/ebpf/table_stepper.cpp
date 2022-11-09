@@ -1,25 +1,18 @@
 #include "backends/p4tools/testgen/targets/ebpf/table_stepper.h"
 
-#include <cstddef>
 #include <map>
-#include <ostream>
-#include <string>
 #include <vector>
 
+#include <boost/format.hpp>
 #include <boost/none.hpp>
 #include <boost/optional/optional.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/trace_events.h"
-#include "ir/irutils.h"
 #include "lib/error.h"
-#include "lib/null.h"
-#include "lib/safe_vector.h"
 
-#include "backends/p4tools/testgen/lib/continuation.h"
-#include "backends/p4tools/testgen/lib/exceptions.h"
-#include "backends/p4tools/testgen/options.h"
-#include "backends/p4tools/testgen/targets/ebpf/constants.h"
+#include "p4tools/testgen/core/small_step/table_stepper.h"
+#include "p4tools/testgen/lib/execution_state.h"
+#include "p4tools/testgen/lib/test_spec.h"
+#include "p4tools/testgen/targets/ebpf/expr_stepper.h"
 
 namespace P4Tools {
 

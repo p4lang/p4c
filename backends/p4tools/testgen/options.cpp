@@ -5,6 +5,7 @@
 #include <string>
 
 #include "lib/exceptions.h"
+#include "p4tools/common/options.h"
 
 #include "backends/p4tools/testgen/lib/logging.h"
 

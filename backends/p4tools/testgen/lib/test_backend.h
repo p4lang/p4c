@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "backends/p4tools/common/core/z3_solver.h"
-#include "backends/p4tools/common/lib/coverage.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "gsl/gsl-lite.hpp"

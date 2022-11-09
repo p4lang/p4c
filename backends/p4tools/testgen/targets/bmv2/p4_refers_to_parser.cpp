@@ -1,10 +1,19 @@
 #include "backends/p4tools/testgen/targets/bmv2/p4_refers_to_parser.h"
 
-#include <boost/optional/optional_io.hpp>
+#include <stdint.h>
+
+#include <algorithm>
+#include <iostream>
+#include <string>
 
 #include "backends/p4tools/common/lib/util.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
-#include "ir/irutils.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
+#include "lib/safe_vector.h"
+#include "p4tools/common/lib/formulae.h"
 
 namespace P4Tools {
 

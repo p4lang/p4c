@@ -1,5 +1,8 @@
 #include "backends/p4tools/testgen/core/arch_spec.h"
 
+#include <memory>
+#include <utility>
+
 #include "lib/exceptions.h"
 
 namespace P4Tools {

@@ -6,7 +6,9 @@
 #include "control-plane/addMissingIds.h"
 #include "control-plane/p4RuntimeArchStandard.h"
 #include "frontends/common/options.h"
-#include "ir/ir.h"
+#include "lib/cstring.h"
+#include "p4tools/common/compiler/compiler_target.h"
+#include "p4tools/common/compiler/midend.h"
 
 #include "backends/p4tools/testgen/options.h"
 

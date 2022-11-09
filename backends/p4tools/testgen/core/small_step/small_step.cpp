@@ -2,6 +2,8 @@
 
 #include <iosfwd>
 #include <string>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <boost/none.hpp>
@@ -10,19 +12,24 @@
 #include <boost/variant/static_visitor.hpp>
 
 #include "backends/p4tools/common/lib/symbolic_env.h"
-#include "backends/p4tools/common/lib/timer.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/irutils.h"
+#include "ir/node.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
+#include "p4tools/common/compiler/reachability.h"
+#include "p4tools/common/core/solver.h"
 
 #include "backends/p4tools/testgen/core/small_step/cmd_stepper.h"
 #include "backends/p4tools/testgen/core/small_step/expr_stepper.h"
 #include "backends/p4tools/testgen/core/target.h"
 #include "backends/p4tools/testgen/lib/continuation.h"
+#include "p4tools/testgen/core/program_info.h"
+#include "p4tools/testgen/lib/execution_state.h"
+#include "p4tools/testgen/options.h"
 
 namespace P4Tools {
 

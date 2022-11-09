@@ -4,14 +4,18 @@
 #include <cstdint>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <boost/format.hpp>
+#include <boost/none.hpp>
 #include <boost/optional/optional.hpp>
 #include <boost/random/mersenne_twister.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
+#include "lib/cstring.h"
+#include "lib/log.h"
 
 namespace P4Tools {
 

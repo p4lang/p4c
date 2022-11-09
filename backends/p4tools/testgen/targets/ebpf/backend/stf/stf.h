@@ -5,18 +5,15 @@
 #include <fstream>
 #include <map>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <boost/optional/optional.hpp>
 #include <inja/inja.hpp>
 
-/// Inja
-#include "ir/ir.h"
 #include "lib/cstring.h"
 
 #include "backends/p4tools/testgen/lib/tf.h"
-#include "backends/p4tools/testgen/targets/ebpf/test_spec.h"
+#include "p4tools/testgen/lib/test_spec.h"
 
 namespace P4Tools {
 
