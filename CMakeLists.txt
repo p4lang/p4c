@@ -453,7 +453,7 @@ install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 
 # cpplint
-if (${CPPLINT_FILES})
+if(DEFINED CPPLINT_FILES)
   list ( SORT CPPLINT_FILES )
   set (CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
   set (CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
