@@ -138,7 +138,7 @@ table tbl_no_idle_timeout_prop {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	table tbl_idle_timeout
 	table tbl_no_idle_timeout

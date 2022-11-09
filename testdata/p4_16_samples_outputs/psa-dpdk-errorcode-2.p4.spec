@@ -94,7 +94,7 @@ table tbl {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	jmplt LABEL_FALSE h.ethernet.etherType 0x800
 	mov m.IngressParser_parser_tmp 0x1
