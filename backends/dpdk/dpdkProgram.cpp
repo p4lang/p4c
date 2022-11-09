@@ -71,7 +71,7 @@ IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_preambl
         new IR::Member(new IR::PathExpression("m"), "psa_ingress_input_metadata_ingress_port")));
     instr.push_back(new IR::DpdkMovStatement(
         new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
-        new IR::Constant(0)));
+        new IR::Constant(1)));
     return instr;
 }
 

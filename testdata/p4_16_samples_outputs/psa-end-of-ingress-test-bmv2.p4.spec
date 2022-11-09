@@ -60,7 +60,7 @@ regarray egress_pkt_seen_0 size 0x100 initval 0
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	extract h.output_data
 	mov m.Ingress_tmp h.ethernet.dstAddr

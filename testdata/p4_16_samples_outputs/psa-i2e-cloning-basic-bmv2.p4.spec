@@ -42,7 +42,7 @@ header ethernet instanceof ethernet_t
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	mov m.psa_ingress_output_metadata_clone 1
 	mov m.psa_ingress_output_metadata_clone_session_id 0x8
