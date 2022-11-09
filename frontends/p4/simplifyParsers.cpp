@@ -161,11 +161,13 @@ class CollapseChains : public Transform {
             if (chainStart.find(s) != chainStart.end()) {
                 // collapse chain
                 auto components = new IR::IndexedVector<IR::StatOrDecl>();
+                std::vector<const IR::ParserState*> collapsedChain;
                 auto crt = s;
                 LOG1("Chaining states into " << dbp(crt));
                 const IR::Expression *select = nullptr;
                 while (true) {
                     components->append(crt->components);
+                    collapsedChain.push_back(crt);
                     select = crt->selectExpression;
                     crt = ::get(chain, crt);
                     if (crt == nullptr)
@@ -173,7 +175,7 @@ class CollapseChains : public Transform {
                     LOG1("Adding " << dbp(crt) << " to chain");
                 }
                 s = new IR::ParserState(s->srcInfo, s->name, s->annotations,
-                                        *components, select);
+                                        *components, select, collapsedChain);
             }
             states->push_back(s);
         }

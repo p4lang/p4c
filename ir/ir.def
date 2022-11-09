@@ -60,6 +60,7 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
     optional inline IndexedVector<StatOrDecl>   components;
     // selectExpression can be a SelectExpression, or a PathExpression representing a state
     NullOK Expression                   selectExpression;
+    optional std::vector<ParserState> collapsedChain;
 
     Annotations getAnnotations() const override { return annotations; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
