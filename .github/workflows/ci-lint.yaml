@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  cpplint:
+  p4c-lint:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
