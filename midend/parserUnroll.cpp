@@ -262,7 +262,7 @@ class ParserStateRewriter : public Transform {
     /// are the same before previous call of the same parser state.
     bool calledWithNoChanges(IR::ID id, const ParserStateInfo* state) {
         CHECK_NULL(state);
-        const auto* prevState = state;
+        const auto* prevState = state; 
         while (prevState->state->name.name != id.name) {
             prevState = prevState->predecessor;
             if (prevState == nullptr) {
@@ -271,6 +271,9 @@ class ParserStateRewriter : public Transform {
         }
         if (prevState->predecessor != nullptr) {
             prevState = prevState->predecessor;
+        } else if (prevState == state) {
+            // The map should be empty if no next operators in a start.
+            return state->statesIndexes.empty();
         }
         return prevState->statesIndexes == state->statesIndexes;
     }
