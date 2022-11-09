@@ -16,7 +16,13 @@ limitations under the License.
 
 #include "ir/json_parser.h"
 
+#include <ctype.h>
+
 #include <iostream>
+#include <list>
+#include <utility>
+
+#include <boost/multiprecision/number.hpp>
 
 int JsonObject::get_id() const {
     if (find("Node_ID") == end())
@@ -75,18 +81,18 @@ static thread_local int level = 0;
 
 std::string getIndent(int l) {
     std::stringstream ss;
-    for (int i = 0; i < l*4; i++) ss << " ";
+    for (int i = 0; i < l * 4; i++) ss << " ";
     return ss.str();
 }
 
-std::ostream& operator<<(std::ostream &out, JsonData* json) {
+std::ostream& operator<<(std::ostream& out, JsonData* json) {
     if (dynamic_cast<JsonObject*>(json)) {
         auto obj = dynamic_cast<ordered_map<std::string, JsonData*>*>(json);
         out << "{";
         if (obj->size() > 0) {
             level++;
             out << std::endl;
-            for (auto &e : *obj)
+            for (auto& e : *obj)
                 out << getIndent(level) << e.first << " : " << e.second << "," << std::endl;
             out << getIndent(--level);
         }
@@ -97,7 +103,7 @@ std::ostream& operator<<(std::ostream &out, JsonData* json) {
         if (vec->size() > 0) {
             level++;
             out << std::endl;
-            for (auto &e : *vec) {
+            for (auto& e : *vec) {
                 out << getIndent(level) << e << "," << std::endl;
             }
             out << getIndent(--level);
@@ -112,7 +118,7 @@ std::ostream& operator<<(std::ostream &out, JsonData* json) {
         out << num->val;
 
     } else if (dynamic_cast<JsonBoolean*>(json)) {
-        JsonBoolean *b = dynamic_cast<JsonBoolean*>(json);
+        JsonBoolean* b = dynamic_cast<JsonBoolean*>(json);
         out << (b->val ? "true" : "false");
     } else if (dynamic_cast<JsonNull*>(json)) {
         out << "null";
@@ -120,90 +126,100 @@ std::ostream& operator<<(std::ostream &out, JsonData* json) {
     return out;
 }
 
-
-std::istream& operator>>(std::istream &in, JsonData*& json) {
+std::istream& operator>>(std::istream& in, JsonData*& json) {
     while (in) {
         char ch;
         in >> ch;
         switch (ch) {
-        case '{': {
-            ordered_map<std::string, JsonData*> obj;
-            do {
-                in >> std::ws >> ch;
-                if (ch == '}')
-                    break;
+            case '{': {
+                ordered_map<std::string, JsonData*> obj;
+                do {
+                    in >> std::ws >> ch;
+                    if (ch == '}') break;
+                    in.unget();
+
+                    JsonData *key, *val;
+                    in >> key >> std::ws >> ch >> std::ws >> val;
+                    obj[*(dynamic_cast<std::string*>(key))] = val;
+
+                    in >> std::ws >> ch;
+                } while (in && ch != '}');
+
+                json = new JsonObject(obj);
+                return in;
+            }
+            case '[': {
+                std::vector<JsonData*> vec;
+                do {
+                    in >> std::ws >> ch;
+                    if (ch == ']') break;
+                    in.unget();
+
+                    JsonData* elem;
+                    in >> elem;
+                    vec.push_back(elem);
+
+                    in >> std::ws >> ch;
+                } while (in && ch != ']');
+
+                json = new JsonVector(vec);
+                return in;
+            }
+            case '"': {
+                std::string s;
+                getline(in, s, '"');
+                while (!s.empty() && s.back() == '\\') {
+                    int bscount = 0;  // odd number of '\' chars mean the quote is escaped
+                    for (auto t = s.rbegin(); t != s.rend() && *t == '\\'; ++t) bscount++;
+                    if ((bscount & 1) == 0) break;
+                    s += '"';
+                    std::string more;
+                    getline(in, more, '"');
+                    s += more;
+                }
+                json = new JsonString(s);
+                return in;
+            }
+            case '-':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9': {
+                // operator>>(istream, big_int) is broken and throws exceptions if the
+                // number is not followed by whitespace, so we need to manually extract all
+                // the digits into a buffer and convert that to big_int
+                std::string num;
+                do {
+                    num += ch;
+                    in >> ch;
+                } while (isdigit(ch));
                 in.unget();
-
-                JsonData *key, *val;
-                in >> key >> std::ws >> ch >> std::ws >> val;
-                obj[*(dynamic_cast<std::string*>(key))] = val;
-
-                in >> std::ws >> ch;
-            } while (in && ch != '}');
-
-            json = new JsonObject(obj);
-            return in;
-        }
-        case '[': {
-            std::vector<JsonData*> vec;
-            do {
-                in >> std::ws >> ch;
-                if (ch == ']')
-                    break;
-                in.unget();
-
-                JsonData *elem;
-                in >> elem;
-                vec.push_back(elem);
-
-                in >> std::ws >> ch;
-            } while (in && ch != ']');
-
-            json = new JsonVector(vec);
-            return in;
-        }
-        case '"': {
-            std::string s;
-            getline(in, s, '"');
-            while (!s.empty() && s.back() == '\\') {
-                int bscount = 0;  // odd number of '\' chars mean the quote is escaped
-                for (auto t = s.rbegin(); t != s.rend() && *t == '\\'; ++t) bscount++;
-                if ((bscount & 1) == 0) break;
-                s += '"';
-                std::string more;
-                getline(in, more, '"');
-                s += more; }
-            json = new JsonString(s);
-            return in;
-        }
-        case '-': case '0': case '1': case '2': case '3':
-        case '4': case '5': case '6': case '7': case '8': case '9': {
-            // operator>>(istream, big_int) is broken and throws exceptions if the
-            // number is not followed by whitespace, so we need to manually extract all
-            // the digits into a buffer and convert that to big_int
-            std::string num;
-            do {
-                num += ch;
-                in >> ch;
-            } while (isdigit(ch));
-            in.unget();
-            json = new JsonNumber(big_int(num));
-            return in;
-        }
-        case 't': case 'T':
-            in.ignore(3);
-            json = new JsonBoolean(true);
-            return in;
-        case 'f': case 'F':
-            in.ignore(4);
-            json = new JsonBoolean(false);
-            return in;
-        case 'n': case 'N':
-            in.ignore(3);
-            json = new JsonNull();
-            return in;
-        default:
-            return in;
+                json = new JsonNumber(big_int(num));
+                return in;
+            }
+            case 't':
+            case 'T':
+                in.ignore(3);
+                json = new JsonBoolean(true);
+                return in;
+            case 'f':
+            case 'F':
+                in.ignore(4);
+                json = new JsonBoolean(false);
+                return in;
+            case 'n':
+            case 'N':
+                in.ignore(3);
+                json = new JsonNull();
+                return in;
+            default:
+                return in;
         }
     }
     return in;

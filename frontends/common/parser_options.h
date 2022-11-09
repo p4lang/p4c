@@ -23,7 +23,7 @@ limitations under the License.
 #include <unordered_map>
 
 #include "ir/configuration.h"
-#include "ir/ir.h"  // for DebugHook definition
+#include "ir/pass_manager.h"  // for DebugHook definition
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/options.h"

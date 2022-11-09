@@ -3,18 +3,17 @@
 
 #include <vector>
 
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
-
-#include "frontends/common/constantFolding.h"
-#include "frontends/p4/strengthReduction.h"
-#include "ir/ir.h"
 #include "lib/big_int_util.h"
-#include "lib/cstring.h"
-#include "lib/error.h"
-#include "lib/exceptions.h"
 
 namespace IR {
+class BoolLiteral;
+class Constant;
+class Expression;
+class ListExpression;
+class Literal;
+class StructExpression;
+class Type;
+class Type_Bits;
 
 /// Utility functions for generating IR nodes.
 //
@@ -40,18 +39,18 @@ const Constant* getConstant(const Type* type, big_int v);
 /// @returns a bool literal. The value is cached.
 const BoolLiteral* getBoolLiteral(bool value);
 
-/// Applies expression optimizations to the input node.
-/// Currently, performs constant folding and strength reduction.
-template <class T>
-const T* optimizeExpression(const T* node) {
-    auto pass = PassRepeated({
-        new P4::StrengthReduction(nullptr, nullptr, nullptr),
-        new P4::ConstantFolding(nullptr, nullptr, false),
-    });
-    node = node->apply(pass);
-    BUG_CHECK(::errorCount() == 0, "Encountered errors while trying to optimize expressions.");
-    return node;
-}
+// /// Applies expression optimizations to the input node.
+// /// Currently, performs constant folding and strength reduction.
+// template <class T>
+// const T* optimizeExpression(const T* node) {
+//     auto pass = PassRepeated({
+//         new P4::StrengthReduction(nullptr, nullptr, nullptr),
+//         new P4::ConstantFolding(nullptr, nullptr, false),
+//     });
+//     node = node->apply(pass);
+//     BUG_CHECK(::errorCount() == 0, "Encountered errors while trying to optimize expressions.");
+//     return node;
+// }
 
 /// @returns the "default" value for a given type. The current mapping is
 /// Type_Bits       0
