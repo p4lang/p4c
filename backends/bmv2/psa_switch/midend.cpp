@@ -31,6 +31,7 @@ limitations under the License.
 #include "midend/complexComparison.h"
 #include "midend/convertEnums.h"
 #include "midend/copyStructures.h"
+#include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateTuples.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
@@ -116,6 +117,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options, std::ostream* outStre
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
             new P4::RemoveMiss(&refMap, &typeMap),
             new P4::EliminateNewtype(&refMap, &typeMap),
+            new P4::EliminateInvalidHeaders(&refMap, &typeMap),
             new P4::EliminateSerEnums(&refMap, &typeMap),
             convertEnums,
             [this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); },

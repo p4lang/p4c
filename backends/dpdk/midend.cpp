@@ -35,6 +35,7 @@ limitations under the License.
 #include "midend/convertEnums.h"
 #include "midend/convertErrors.h"
 #include "midend/copyStructures.h"
+#include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
 #include "midend/eliminateTuples.h"
@@ -176,6 +177,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,
             new P4::RemoveMiss(&refMap, &typeMap),
             new P4::EliminateNewtype(&refMap, &typeMap),
             new P4::EliminateSerEnums(&refMap, &typeMap),
+            new P4::EliminateInvalidHeaders(&refMap, &typeMap),
             convertEnums,
             new VisitFunctor([this, convertEnums]() {
                 enumMap = convertEnums->getEnumMapping();

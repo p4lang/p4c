@@ -946,6 +946,20 @@ bool ToP4::preorder(const IR::StructExpression* e) {
     return false;
 }
 
+bool ToP4::preorder(const IR::InvalidHeader* e) {
+    if (expressionPrecedence > DBPrint::Prec_Prefix)
+        builder.append("(");
+    if (e->headerType != nullptr) {
+        builder.append("(");
+        visit(e->headerType);
+        builder.append(")");
+    }
+    builder.append("{#}");
+    if (expressionPrecedence > DBPrint::Prec_Prefix)
+        builder.append(")");
+    return false;
+}
+
 bool ToP4::preorder(const IR::MethodCallExpression* e) {
     int prec = expressionPrecedence;
     bool useParens = (prec > DBPrint::Prec_Postfix) ||

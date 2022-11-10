@@ -270,6 +270,7 @@ using Parser = P4::P4Parser;
 "++"    { BEGIN(driver.saveState); driver.template_args = false; return makeToken(PP); }
 
 "+"     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(PLUS); }
+"#"     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(SHARP); }
 "|+|"   { BEGIN(driver.saveState); driver.template_args = false; return makeToken(PLUS_SAT); }
 "-"     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(MINUS); }
 "|-|"   { BEGIN(driver.saveState); driver.template_args = false; return makeToken(MINUS_SAT); }

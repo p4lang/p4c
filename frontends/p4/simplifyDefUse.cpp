@@ -708,7 +708,9 @@ class FindUninitialized : public Inspector {
             return;
 
         if (dst_type->is<IR::Type_Header>()) {
-            if (src->is<IR::StructExpression>() || src->is<IR::MethodCallExpression>()) {
+            if (src->is<IR::InvalidHeader>()) {
+                headerDefs->update(dst, TernaryBool::No);
+            } else if (src->is<IR::StructExpression>() || src->is<IR::MethodCallExpression>()) {
                 headerDefs->update(dst, TernaryBool::Yes);
             } else if (src_type->is<IR::Type_Header>()) {
                 auto valid = headerDefs->find(src);
