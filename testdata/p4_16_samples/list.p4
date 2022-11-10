@@ -7,6 +7,7 @@ extern E {
 
 control c() {
     E((list<bit<32>>){2, 3, 4}) e;
+    bit<32> list;  // check that 'list' identifier is allowed
     apply {
         e.run();
     }

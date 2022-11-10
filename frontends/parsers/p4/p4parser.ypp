@@ -464,6 +464,7 @@ nonTypeName
 
 name
     : nonTypeName { $$ = $1; }
+    | LIST { $$ = new IR::ID(@1, "list"); }
     | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
     ;
 
@@ -579,7 +580,7 @@ annotationToken
     | TYPEDEF          { $$ = $1; }
     | VARBIT           { $$ = $1; }
     | VALUESET         { $$ = $1; }
-    | LIST           { $$ = $1; }
+    | LIST             { $$ = $1; }
     | VOID             { $$ = $1; }
     | "_"              { $$ = $1; }
 
