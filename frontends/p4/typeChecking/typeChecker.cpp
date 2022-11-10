@@ -930,6 +930,21 @@ std::pair<const IR::Type*, const IR::Vector<IR::Argument>*> TypeInference::check
     BUG_CHECK(functionType != nullptr, "Method type is %1%", specMethodType);
     if (!functionType->is<IR::Type_Method>()) BUG("Unexpected type for function %1%", functionType);
 
+    LOG2("Constructor type before specialization " << methodType << " with " << tvs);
+    TypeVariableSubstitutionVisitor substVisitor(tvs);
+    substVisitor.setCalledBy(this);
+    auto specMethodType = methodType->apply(substVisitor);
+    LOG2("Constructor type after specialization " << specMethodType);
+    learn(specMethodType, this);
+    auto canon = getType(specMethodType);
+    if (canon == nullptr)
+        return nullptr;
+
+    auto functionType = specMethodType->to<IR::Type_MethodBase>();
+    BUG_CHECK(functionType != nullptr, "Method type is %1%", specMethodType);
+    if (!functionType->is<IR::Type_Method>())
+        BUG("Unexpected type for function %1%", functionType);
+
     ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
     // Arguments may need to be cast, e.g., list expression to a
     // header type.
