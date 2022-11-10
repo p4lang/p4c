@@ -55,13 +55,13 @@ table stub {
 		nonDefAct
 	}
 	default_action macswp args none const
-	size 0xf4240
+	size 0xF4240
 }
 
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	mov m.psa_ingress_output_metadata_egress_port m.psa_ingress_input_metadata_ingress_port
 	xor m.psa_ingress_output_metadata_egress_port 0x1

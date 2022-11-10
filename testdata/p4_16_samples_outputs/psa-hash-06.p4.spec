@@ -46,7 +46,7 @@ action a1 args none {
 	mov m.Ingress_tmp h.ethernet.srcAddr
 	mov m.Ingress_tmp_0 h.ethernet.etherType
 	hash crc32 m.local_metadata_data  m.Ingress_tmp m.Ingress_tmp_0
-	and m.local_metadata_data 0x1f
+	and m.local_metadata_data 0x1F
 	add m.local_metadata_data 0x2
 	return
 }
@@ -66,7 +66,7 @@ table tbl {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0

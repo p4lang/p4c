@@ -1,3 +1,0 @@
-[
-    { include: ["@\"ir/.*\"", "private", "\"ir/ir.h\"", "public"] },
-]

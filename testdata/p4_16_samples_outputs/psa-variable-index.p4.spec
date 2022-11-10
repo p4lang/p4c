@@ -78,7 +78,7 @@ table tbl {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	mov m.local_metadata_depth 0x1
 	extract h.ethernet
 	jmpeq MYIP_PARSE_VLAN_TAG h.ethernet.etherType 0x8100
@@ -98,18 +98,18 @@ apply {
 	mov m.Ingress_tmp h.vlan_tag_0.pcp_cfi_vid
 	shr m.Ingress_tmp 0x4
 	mov m.Ingress_tmp_0 m.Ingress_tmp
-	and m.Ingress_tmp_0 0xfff
+	and m.Ingress_tmp_0 0xFFF
 	mov m.Ingress_tmp_1 m.Ingress_tmp_0
-	and m.Ingress_tmp_1 0xfff
+	and m.Ingress_tmp_1 0xFFF
 	mov m.local_metadata_ret m.Ingress_tmp_1
 	jmp LABEL_END_0
 	LABEL_FALSE :	jmpneq LABEL_FALSE_0 m.local_metadata_depth 0x1
 	mov m.Ingress_tmp_3 h.vlan_tag_1.pcp_cfi_vid
 	shr m.Ingress_tmp_3 0x4
 	mov m.Ingress_tmp_4 m.Ingress_tmp_3
-	and m.Ingress_tmp_4 0xfff
+	and m.Ingress_tmp_4 0xFFF
 	mov m.Ingress_tmp_5 m.Ingress_tmp_4
-	and m.Ingress_tmp_5 0xfff
+	and m.Ingress_tmp_5 0xFFF
 	mov m.local_metadata_ret m.Ingress_tmp_5
 	jmp LABEL_END_0
 	LABEL_FALSE_0 :	jmplt LABEL_END_0 m.local_metadata_depth 0x1
@@ -120,18 +120,18 @@ apply {
 	mov m.Ingress_tmp_7 h.vlan_tag_0.pcp_cfi_vid
 	shr m.Ingress_tmp_7 0x4
 	mov m.Ingress_tmp_8 m.Ingress_tmp_7
-	and m.Ingress_tmp_8 0xfff
+	and m.Ingress_tmp_8 0xFFF
 	mov m.Ingress_tmp_9 m.Ingress_tmp_8
-	and m.Ingress_tmp_9 0xfff
+	and m.Ingress_tmp_9 0xFFF
 	mov m.Ingress_vid m.Ingress_tmp_9
 	jmp LABEL_END_4
 	LABEL_FALSE_3 :	jmpneq LABEL_FALSE_4 m.local_metadata_depth 0x1
 	mov m.Ingress_tmp_10 h.vlan_tag_1.pcp_cfi_vid
 	shr m.Ingress_tmp_10 0x4
 	mov m.Ingress_tmp_11 m.Ingress_tmp_10
-	and m.Ingress_tmp_11 0xfff
+	and m.Ingress_tmp_11 0xFFF
 	mov m.Ingress_tmp_12 m.Ingress_tmp_11
-	and m.Ingress_tmp_12 0xfff
+	and m.Ingress_tmp_12 0xFFF
 	mov m.Ingress_vid m.Ingress_tmp_12
 	jmp LABEL_END_4
 	LABEL_FALSE_4 :	jmplt LABEL_END_4 m.local_metadata_depth 0x1

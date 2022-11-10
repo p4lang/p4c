@@ -67,43 +67,43 @@ regarray port_pkt_ip_bytes_in_0 size 0x200 initval 0
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	INGRESSPARSERIMPL_ACCEPT :	mov m.psa_ingress_output_metadata_egress_port 0x0
 	validate h.ipv4
-	mov h.ipv4.totalLen 0xe
+	mov h.ipv4.totalLen 0xE
 	jmpnv LABEL_END h.ipv4
 	regrd m.Ingress_tmp_16 port_pkt_ip_bytes_in_0 m.psa_ingress_input_metadata_ingress_port
 	mov m.Ingress_s m.Ingress_tmp_16
 	mov m.Ingress_tmp m.Ingress_s
-	and m.Ingress_tmp 0xffffffffffff
+	and m.Ingress_tmp 0xFFFFFFFFFFFF
 	mov m.Ingress_tmp_0 m.Ingress_tmp_16
 	shr m.Ingress_tmp_0 0x30
 	mov m.Ingress_tmp_1 m.Ingress_tmp_0
-	and m.Ingress_tmp_1 0xffffffff
+	and m.Ingress_tmp_1 0xFFFFFFFF
 	mov m.Ingress_tmp_2 m.Ingress_tmp_1
-	and m.Ingress_tmp_2 0xffffffff
+	and m.Ingress_tmp_2 0xFFFFFFFF
 	mov m.Ingress_tmp_4 m.Ingress_tmp_2
 	add m.Ingress_tmp_4 0x1
 	mov m.Ingress_tmp_6 m.Ingress_tmp_4
 	shl m.Ingress_tmp_6 0x30
 	mov m.Ingress_tmp_7 m.Ingress_tmp_6
-	and m.Ingress_tmp_7 0xffffffff000000000000
+	and m.Ingress_tmp_7 0xFFFFFFFF000000000000
 	mov m.Ingress_s m.Ingress_tmp
 	or m.Ingress_s m.Ingress_tmp_7
 	mov m.Ingress_tmp_8 m.Ingress_s
-	and m.Ingress_tmp_8 0xffffffff000000000000
+	and m.Ingress_tmp_8 0xFFFFFFFF000000000000
 	mov m.Ingress_tmp_9 m.Ingress_s
-	and m.Ingress_tmp_9 0xffffffffffff
+	and m.Ingress_tmp_9 0xFFFFFFFFFFFF
 	mov m.Ingress_tmp_10 m.Ingress_tmp_9
-	and m.Ingress_tmp_10 0xffffffffffff
+	and m.Ingress_tmp_10 0xFFFFFFFFFFFF
 	mov m.Ingress_tmp_13 m.Ingress_tmp_10
 	add m.Ingress_tmp_13 h.ipv4.totalLen
 	mov m.Ingress_tmp_15 m.Ingress_tmp_13
-	and m.Ingress_tmp_15 0xffffffffffff
+	and m.Ingress_tmp_15 0xFFFFFFFFFFFF
 	mov m.Ingress_s m.Ingress_tmp_8
 	or m.Ingress_s m.Ingress_tmp_15
 	mov m.Ingress_tmp_16 m.Ingress_s

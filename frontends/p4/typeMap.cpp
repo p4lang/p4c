@@ -96,6 +96,7 @@ void TypeMap::clear() {
     LOG3("Clearing typeMap");
     typeMap.clear(); leftValues.clear(); constants.clear(); allTypeVariables.clear();
     program = nullptr;
+    ProgramMap::clear();
 }
 
 void TypeMap::checkPrecondition(const IR::Node* element, const IR::Type* type) const {

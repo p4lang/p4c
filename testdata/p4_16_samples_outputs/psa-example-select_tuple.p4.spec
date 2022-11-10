@@ -87,18 +87,18 @@ table tbl {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	jmpneq INGRESSPARSERIMPL_START_0 h.ethernet.etherType 0x800
-	jmpneq INGRESSPARSERIMPL_START_0 h.ethernet.srcAddr 0xf00
+	jmpneq INGRESSPARSERIMPL_START_0 h.ethernet.srcAddr 0xF00
 	jmp INGRESSPARSERIMPL_PARSE_IPV4
-	INGRESSPARSERIMPL_START_0 :	jmpneq INGRESSPARSERIMPL_ACCEPT h.ethernet.etherType 0xd00
+	INGRESSPARSERIMPL_START_0 :	jmpneq INGRESSPARSERIMPL_ACCEPT h.ethernet.etherType 0xD00
 	jmpneq INGRESSPARSERIMPL_ACCEPT h.ethernet.srcAddr 0x200
 	jmp INGRESSPARSERIMPL_PARSE_TCP
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	mov m.tmpMask h.ipv4.protocol
-	and m.tmpMask 0xfc
+	and m.tmpMask 0xFC
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp

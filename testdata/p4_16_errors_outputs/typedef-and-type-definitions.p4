@@ -60,21 +60,8 @@ type bool boolT_t;
 type enum1_t enum1T_t;
 type serializable_enum1_t serializable_enum1T_t;
 type h1_t H1T_t;
-type header h2b_t {
-    bit<16> f2;
-    bit<8>  f3;
-}
-H2bT_t;
-type h1_t[3] h1StackT_t;
 type hu1_t hu1T_t;
 type s1_t s1T_t;
-type struct PointB_t {
-    int<32> x;
-    int<32> y;
-}
-PointBD_t;
-type tuple<bit<8>, bit<17>> Tuple1T_t;
-type tuple<bit<8>, varbit<17>> Tuple2T_t;
 typedef bD_t bDD_t;
 typedef bT_t bTD_t;
 type bD_t bDT_t;

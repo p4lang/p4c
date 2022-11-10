@@ -18,8 +18,6 @@ ARG VALIDATION=OFF
 # This creates a release build that includes link time optimization and links
 # all libraries statically.
 ARG BUILD_STATIC_RELEASE=OFF
-# Toggle usage of the GNU Multiple Precision Arithmetic Library.
-ARG ENABLE_GMP=ON
 # No questions asked during package installation.
 ARG DEBIAN_FRONTEND=noninteractive
 # Whether to install dependencies required to run PTF-ebpf tests
@@ -30,6 +28,10 @@ ARG KERNEL_VERSIONS
 ARG ENABLE_TEST_TOOLS=OFF
 # Whether to treat warnings as errors.
 ARG ENABLE_WERROR=ON
+# Compile with Clang compiler
+ARG COMPILE_WITH_CLANG=OFF
+# Compile with sanitizers (UBSan, ASan)
+ARG ENABLE_SANITIZERS=OFF
 
 # Delegate the build to tools/ci-build.
 COPY . /p4c/

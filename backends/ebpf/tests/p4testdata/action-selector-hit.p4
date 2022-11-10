@@ -56,7 +56,7 @@ control MyIC(inout headers a, inout empty_t bc,
 
     apply {
         if (tbl.apply().hit)
-            send_to_port(ostd, (PortId_t) 5);
+            send_to_port(ostd, (PortId_t) PORT1);
     }
 }
 

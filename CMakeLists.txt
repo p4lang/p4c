@@ -40,9 +40,9 @@ OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
 OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 OPTION (ENABLE_GC "Use libgc" ON)
 OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
-OPTION (ENABLE_GMP "Use GMP library" ON)
 OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" OFF)
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
+OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
 OPTION (BUILD_STATIC_RELEASE "Build a statically linked release binary" OFF)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
@@ -141,13 +141,6 @@ include_directories(${PROTOBUF_INCLUDE_DIRS})
 include_directories(${LIBGC_INCLUDE_DIR})
 set (HAVE_LIBBOOST_IOSTREAMS 1)
 set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_LIBRARIES}")
-if (ENABLE_GMP)
-  find_package (LibGmp REQUIRED)
-  include_directories(${LIBGMP_INCLUDE_DIR})
-  set (HAVE_LIBGMP 1)
-  set (HAVE_LIBGMPXX 1)
-  set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${LIBGMP_LIBRARIES}")
-endif ()
 if (ENABLE_GC)
   set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${LIBGC_LIBRARIES}")
 endif ()
@@ -221,11 +214,18 @@ add_cxx_compiler_option ("-Wextra")
 add_cxx_compiler_option ("-Wno-overloaded-virtual")
 add_cxx_compiler_option ("-Wno-deprecated")
 add_cxx_compiler_option ("-Wno-deprecated-declarations")
-# Enable/disable runtime exceptions on nullpointer dereferencing
-# add_cxx_compiler_option ("-fsanitize=null")
+
+if (ENABLE_SANITIZERS)
+  add_cxx_compiler_option  ("-fsanitize=undefined,address")
+endif ()
 
 if (ENABLE_WERROR)
   add_cxx_compiler_option  ("-Werror")
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # GCC's -Waybe-uninitialized warnings are quite noisy and unlikely to catch
+    # real issues - do not treat them as build errors.
+    add_cxx_compiler_option ("-Wno-error=maybe-uninitialized")
+  endif ()
 endif ()
 
 # If we're on GCC or Clang, use the prefer LLD or Gold linker if available.
@@ -453,22 +453,19 @@ install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 
 # cpplint
-list ( SORT CPPLINT_FILES )
-set (CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
-set (CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
-add_custom_target(cpplint
-  COMMAND ${CPPLINT_CMD} ${CPPLINT_ARGS} ${CPPLINT_FILES}
-  WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-  COMMENT "cpplint")
-add_custom_target(cpplint-quiet
-  COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
-  WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-  COMMENT "cpplint quietly")
-# add cpplint as a test so that make check can proceed in parallel
-add_test(NAME cpplint
-  COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
-  WORKING_DIRECTORY ${P4C_SOURCE_DIR})
-set_tests_properties(cpplint PROPERTIES LABELS cpplint)
+if(DEFINED CPPLINT_FILES)
+  list ( SORT CPPLINT_FILES )
+  set (CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
+  set (CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
+  add_custom_target(cpplint
+    COMMAND ${CPPLINT_CMD} ${CPPLINT_ARGS} ${CPPLINT_FILES}
+    WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+    COMMENT "cpplint")
+  add_custom_target(cpplint-quiet
+    COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
+    WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+    COMMENT "cpplint quietly")
+endif()
 
 # tags, etags
 set (CTAGS_DIRS backends extensions frontends ir lib tools midend)

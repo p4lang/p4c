@@ -28,8 +28,6 @@ set (IRGENERATOR_HDRS
   type.h
   )
 
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${IRGENERATOR_SRCS};${IRGENERATOR_HDRS}")
-
 BISON_TARGET(IRgenParser ir-generator.ypp ${CMAKE_CURRENT_BINARY_DIR}/ir-generator.cpp)
 FLEX_TARGET(IRgenLexer ir-generator-lex.l  ${CMAKE_CURRENT_BINARY_DIR}/ir-generator-lex.c)
 ADD_FLEX_BISON_DEPENDENCY(IRgenLexer IRgenParser)

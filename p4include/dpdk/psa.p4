@@ -606,7 +606,7 @@ extern Counter<W, S> {
 @noWarn("unused")
 extern DirectCounter<W> {
   DirectCounter(PSA_CounterType_t type);
-  void count();
+  void count(@optional in bit<32> increment);
 }
 // END:DirectCounter_extern
 
@@ -643,8 +643,8 @@ extern Meter<S> {
 extern DirectMeter {
   DirectMeter(PSA_MeterType_t type);
   // See the corresponding methods for extern Meter.
-  PSA_MeterColor_t execute(in PSA_MeterColor_t color);
-  PSA_MeterColor_t execute();
+  PSA_MeterColor_t execute(in PSA_MeterColor_t color, @optional in bit<32> pkt_len);
+  PSA_MeterColor_t execute(@optional in bit<32> pkt_len);
 }
 // END:DirectMeter_extern
 

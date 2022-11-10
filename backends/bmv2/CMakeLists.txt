@@ -29,7 +29,6 @@ set (BMV2_SIMPLE_SWITCH_SRCS
     simple_switch/simpleSwitch.h
     simple_switch/options.h
     )
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_SIMPLE_SWITCH_SRCS}")
 
 set (BMV2_PSA_SWITCH_SRCS
     psa_switch/main.cpp
@@ -42,7 +41,6 @@ set (BMV2_PSA_SWITCH_SRCS
     psa_switch/options.cpp
     psa_switch/options.h
     )
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_PSA_SWITCH_SRCS}")
 
 set (BMV2_BACKEND_COMMON_SRCS
   common/JsonObjects.cpp
@@ -83,7 +81,6 @@ set (BMV2_BACKEND_COMMON_HDRS
   )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SCOPE)
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_BACKEND_COMMON_SRCS};${BMV2_BACKEND_COMMON_HDRS}")
 
 build_unified(BMV2_BACKEND_COMMON_SRCS)
 add_library(bmv2backend ${P4C_STATIC_BUILD} ${BMV2_BACKEND_COMMON_SRCS})
@@ -185,6 +182,8 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/issue2664-bmv2.p4
   # This test tries to hash (via the hash extern) a value that isn't a tuple - unsupported
   testdata/p4_16_samples/hashing-non-tuple-bmv2.p4
+  # Similarly, this test hashes on a bit input.
+  testdata/p4_16_samples/issue584-1-bmv2.p4
 )
 
 set (BMV2_PARSER_INLINE_TESTS "${P4C_SOURCE_DIR}/testdata/p4_16_samples/parser-inline/*.p4")

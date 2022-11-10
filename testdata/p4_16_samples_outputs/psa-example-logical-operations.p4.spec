@@ -60,15 +60,15 @@ table tbl {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h
 	table tbl
 	mov h.dstAddr m.local_metadata_meta
 	mov h.srcAddr m.local_metadata_meta2
 	mov m.Ingress_tmp m.local_metadata_meta3
-	and m.Ingress_tmp 0xffff
+	and m.Ingress_tmp 0xFFFF
 	mov m.Ingress_tmp_0 m.Ingress_tmp
-	and m.Ingress_tmp_0 0xffff
+	and m.Ingress_tmp_0 0xFFFF
 	mov h.etherType m.Ingress_tmp_0
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port

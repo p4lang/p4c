@@ -16,7 +16,7 @@ header ipv4_t {
     bit<4>  version;
     bit<4>  ihl;
     bit<8>  diffserv;
-    bit<32> totalLen;
+    bit<16> totalLen;
     bit<16> identification;
     bit<3>  flags;
     bit<13> fragOffset;
@@ -71,7 +71,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     @name("ingress.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.BYTES) meter0_0;
     @name("ingress.execute") action execute_1(@name("index") bit<12> index_1) {
         hdr.ipv4.ihl = 4w5;
-        color_out_0 = meter0_0.execute(index_1, color_in_0, hdr.ipv4.totalLen);
+        color_out_0 = meter0_0.execute(index_1, color_in_0, (bit<32>)hdr.ipv4.totalLen);
         if (color_out_0 == PSA_MeterColor_t.GREEN) {
             tmp = 32w1;
         } else {

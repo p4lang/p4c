@@ -98,6 +98,7 @@ control Ingress(inout headers hdr, out bool xout) {
                         P4CALC_CARET : operation_xor();
         }
         implementation = hash_table(8);
+        size = 100;
     }
     apply {
         xout = true;

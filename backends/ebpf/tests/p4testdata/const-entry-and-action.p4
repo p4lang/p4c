@@ -86,9 +86,9 @@ control ingress(inout headers hdr,
             istd.ingress_port : exact;
         }
         actions = { do_forward; NoAction; }
-        const default_action = do_forward((PortId_t) 5);
+        const default_action = do_forward((PortId_t) PORT1);
         const entries = {
-            (PortId_t)6 : do_forward((PortId_t) 4);
+            (PortId_t)PORT2 : do_forward((PortId_t) PORT0);
         }
         size = 100;
     }
@@ -99,8 +99,8 @@ control ingress(inout headers hdr,
         }
         actions = { do_forward; NoAction; }
         const entries = {
-            0x11223300 &&& 0xFFFFFF00 : do_forward((PortId_t) 6);
-            0x11223355 &&& 0xFFFFFFFF : do_forward((PortId_t) 4);
+            0x11223300 &&& 0xFFFFFF00 : do_forward((PortId_t) PORT2);
+            0x11223355 &&& 0xFFFFFFFF : do_forward((PortId_t) PORT0);
         }
     }
 

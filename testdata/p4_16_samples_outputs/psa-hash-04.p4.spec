@@ -10,7 +10,7 @@ struct ethernet_t {
 struct ipv4_t {
 	bit<8> version_ihl
 	bit<8> diffserv
-	bit<32> totalLen
+	bit<16> totalLen
 	bit<16> identification
 	bit<16> flags_fragOffset
 	bit<8> ttl
@@ -89,7 +89,7 @@ table tbl {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0

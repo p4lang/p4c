@@ -4,7 +4,7 @@
 #include <string>
 
 #include "ir/ir.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 
 namespace P4Tools {
 

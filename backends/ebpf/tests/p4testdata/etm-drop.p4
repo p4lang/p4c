@@ -76,7 +76,7 @@ control ingress(inout headers hdr,
 
     apply {
         ostd.drop = false;
-        ostd.egress_port = (PortId_t) 5;
+        ostd.egress_port = (PortId_t) PORT1;
     }
 }
 

@@ -151,7 +151,7 @@ table tbl2 {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	jmpeq MYIP_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp MYIP_ACCEPT
@@ -162,13 +162,13 @@ apply {
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead h.IngressParser_parser_lookahea0
 	mov m.IngressParser_parser_tmp h.IngressParser_parser_lookahea0.f
-	and m.IngressParser_parser_tmp 0xff
+	and m.IngressParser_parser_tmp 0xFF
 	mov m.IngressParser_parser_tmp_0 m.IngressParser_parser_tmp
-	and m.IngressParser_parser_tmp_0 0xff
+	and m.IngressParser_parser_tmp_0 0xFF
 	mov m.IngressParser_parser_tmp_3 m.IngressParser_parser_tmp_0
 	shl m.IngressParser_parser_tmp_3 0x3
 	mov m.IngressParser_parser_tmp_4 m.IngressParser_parser_tmp_3
-	add m.IngressParser_parser_tmp_4 0xfffffff0
+	add m.IngressParser_parser_tmp_4 0xFFFFFFF0
 	mov m.IngressParser_parser_tmp_4_extract_tmp m.IngressParser_parser_tmp_4
 	shr m.IngressParser_parser_tmp_4_extract_tmp 0x3
 	extract h.ipv4_option_timestamp m.IngressParser_parser_tmp_4_extract_tmp

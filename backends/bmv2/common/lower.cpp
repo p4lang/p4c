@@ -18,7 +18,7 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/fromv1.0/v1model.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 
 namespace BMV2 {
 

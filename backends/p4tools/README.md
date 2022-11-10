@@ -26,7 +26,7 @@ P4Tools can be built using the following CMAKE configuration in the P4C reposito
 ```
 mkdir build
 cd build
-cmake .. -DENABLE_GMP=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DENABLE_TEST_TOOLS=ON
+cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DENABLE_TEST_TOOLS=ON
 make
 ```
 

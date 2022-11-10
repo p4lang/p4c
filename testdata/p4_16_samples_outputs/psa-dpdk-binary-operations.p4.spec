@@ -58,14 +58,14 @@ table tbl {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h
 	table tbl
 	mov m.local_metadata_meta 0x1
 	shl m.local_metadata_meta m.local_metadata_meta2
 	mov m.local_metadata_meta1 0x800
 	shr m.local_metadata_meta1 m.local_metadata_meta2
-	mov m.Ingress_tmp 0xf0
+	mov m.Ingress_tmp 0xF0
 	sub m.Ingress_tmp m.local_metadata_meta2
 	mov m.local_metadata_meta2 m.Ingress_tmp
 	mov m.local_metadata_meta4 0x808
@@ -74,8 +74,8 @@ apply {
 	sub m.local_metadata_meta6 m.local_metadata_meta3
 	add m.local_metadata_meta3 0x1
 	mov m.local_metadata_meta5 m.local_metadata_meta7
-	add m.local_metadata_meta5 0xf0
-	mov m.local_metadata_meta7 0xf0
+	add m.local_metadata_meta5 0xF0
+	mov m.local_metadata_meta7 0xF0
 	add m.local_metadata_meta7 m.local_metadata_meta2
 	mov h.dstAddr m.local_metadata_meta
 	mov h.srcAddr m.local_metadata_meta1

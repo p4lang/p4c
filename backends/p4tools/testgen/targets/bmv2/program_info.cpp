@@ -5,8 +5,9 @@
 #include <utility>
 #include <vector>
 
-#include "backends/p4tools/common/lib/ir.h"
+#include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
+#include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
@@ -54,7 +55,7 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     // larger than 32 bits
     targetConstraints =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                    IRUtils::getConstant(ExecutionState::getPacketSizeVarType(), 32));
+                    IR::getConstant(ExecutionState::getPacketSizeVarType(), 32));
 }
 
 const ordered_map<cstring, const IR::Type_Declaration*>*
@@ -97,7 +98,7 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
     // processing. For example, the egress port.
     if ((archMember->blockName == "Ingress")) {
         auto* egressPortVar =
-            new IR::Member(IRUtils::getBitType(TestgenTarget::getPortNumWidth_bits()),
+            new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                            new IR::PathExpression("*standard_metadata"), "egress_port");
         auto* portStmt = new IR::AssignmentStatement(egressPortVar, getTargetOutputPortVar());
         cmds.emplace_back(portStmt);
@@ -106,41 +107,41 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
     // payload. We use an extern call for this.
     if ((archMember->blockName == "Deparser")) {
         const auto* stmt = new IR::MethodCallStatement(
-            IRUtils::generateInternalMethodCall("prepend_emit_buffer", {}));
+            Utils::generateInternalMethodCall("prepend_emit_buffer", {}));
         cmds.emplace_back(stmt);
         // Also check whether we need to drop the packet.
         auto* dropStmt =
-            new IR::MethodCallStatement(IRUtils::generateInternalMethodCall("drop_and_exit", {}));
+            new IR::MethodCallStatement(Utils::generateInternalMethodCall("drop_and_exit", {}));
         const auto* dropCheck = new IR::IfStatement(dropIsActive(), dropStmt, nullptr);
         cmds.emplace_back(dropCheck);
-        const auto* recirculateCheck = new IR::MethodCallStatement(
-            IRUtils::generateInternalMethodCall("check_recirculate", {}));
+        const auto* recirculateCheck =
+            new IR::MethodCallStatement(Utils::generateInternalMethodCall("check_recirculate", {}));
         cmds.emplace_back(recirculateCheck);
     }
     return cmds;
 }
 
 const IR::Member* BMv2_V1ModelProgramInfo::getTargetInputPortVar() const {
-    return new IR::Member(IRUtils::getBitType(TestgenTarget::getPortNumWidth_bits()),
+    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                           new IR::PathExpression("*standard_metadata"), "ingress_port");
 }
 
 const IR::Member* BMv2_V1ModelProgramInfo::getTargetOutputPortVar() const {
-    return new IR::Member(IRUtils::getBitType(TestgenTarget::getPortNumWidth_bits()),
+    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                           new IR::PathExpression("*standard_metadata"), "egress_spec");
 }
 
 const IR::Expression* BMv2_V1ModelProgramInfo::dropIsActive() const {
     const auto* egressPortVar = getTargetOutputPortVar();
-    return new IR::Equ(IRUtils::getConstant(egressPortVar->type, 511), egressPortVar);
+    return new IR::Equ(IR::getConstant(egressPortVar->type, 511), egressPortVar);
 }
 
 const IR::Expression* BMv2_V1ModelProgramInfo::createTargetUninitialized(const IR::Type* type,
                                                                          bool forceTaint) const {
     if (forceTaint) {
-        return IRUtils::getTaintExpression(type);
+        return Utils::getTaintExpression(type);
     }
-    return IRUtils::getDefaultValue(type);
+    return IR::getDefaultValue(type);
 }
 
 const IR::Type_Bits* BMv2_V1ModelProgramInfo::getParserErrorType() const { return &parserErrBits; }

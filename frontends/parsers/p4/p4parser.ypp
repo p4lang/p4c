@@ -368,16 +368,19 @@ fragment
         { auto* result = new IR::Vector<IR::Expression>();
           result->push_back($2);
           result->push_back($4);
+          result->srcInfo = @2 + @4;
           $$ = result; }
     | START_INTEGER_PAIR INTEGER "," INTEGER
         { auto* result = new IR::Vector<IR::Expression>();
           result->push_back(parseConstant(@2, $2, 0));
           result->push_back(parseConstant(@4, $4, 0));
+          result->srcInfo = @2 + @4;
           $$ = result; }
     | START_STRING_LITERAL_PAIR STRING_LITERAL "," STRING_LITERAL
         { auto* result = new IR::Vector<IR::Expression>();
           result->push_back(new IR::StringLiteral(@2, $2));
           result->push_back(new IR::StringLiteral(@4, $4));
+          result->srcInfo = @2 + @4;
           $$ = result; }
 
       // Triples
@@ -386,12 +389,14 @@ fragment
           result->push_back($2);
           result->push_back($4);
           result->push_back($6);
+          result->srcInfo = @2 + @6;
           $$ = result; }
     | START_INTEGER_TRIPLE INTEGER "," INTEGER "," INTEGER
         { auto* result = new IR::Vector<IR::Expression>();
           result->push_back(parseConstant(@2, $2, 0));
           result->push_back(parseConstant(@4, $4, 0));
           result->push_back(parseConstant(@6, $6, 0));
+          result->srcInfo = @2 + @6;
           $$ = result; }
     | START_STRING_LITERAL_TRIPLE STRING_LITERAL "," STRING_LITERAL ","
       STRING_LITERAL
@@ -399,6 +404,7 @@ fragment
           result->push_back(new IR::StringLiteral(@2, $2));
           result->push_back(new IR::StringLiteral(@4, $4));
           result->push_back(new IR::StringLiteral(@6, $6));
+          result->srcInfo = @2 + @6;
           $$ = result; }
 
       // P4Runtime annotations
@@ -406,6 +412,7 @@ fragment
         { auto* result = new IR::Vector<IR::Expression>();
           result->push_back(new IR::StringLiteral(@2, $2));
           result->push_back($4);
+          result->srcInfo = @2 + @4;
           $$ = result; }
     ;
 
@@ -480,12 +487,16 @@ optAnnotations
 annotations
     : annotation  {
        $$ = new IR::Vector<IR::Annotation>();
-       if (! P4CContext::get().options().isAnnotationDisabled($1))
-         $$->push_back($1); }
+       if (! P4CContext::get().options().isAnnotationDisabled($1)) {
+         $$->push_back($1);
+         $$->srcInfo = @1;
+       }}
     | annotations annotation {
        $$ = $1;
-       if (! P4CContext::get().options().isAnnotationDisabled($2))
-          $$->push_back($2); }
+       if (! P4CContext::get().options().isAnnotationDisabled($2)) {
+          $$->push_back($2);
+          $$->srcInfo = @1 + @2;
+       }}
     ;
 
 annotation
@@ -512,10 +523,14 @@ annotationBody
         { $$ = $1;
           $$->push_back(new IR::AnnotationToken(@2, $2.type, $2.text));
           $$->append(*$3);
-          $$->push_back(new IR::AnnotationToken(@4, $4.type, $4.text)); }
+          $$->push_back(new IR::AnnotationToken(@4, $4.type, $4.text));
+          $$->srcInfo = @1 + @4;
+        }
     | annotationBody annotationToken
         { $$ = $1;
-          $$->push_back(new IR::AnnotationToken(@2, $2.type, $2.text, $2.unparsedConstant)); }
+          $$->push_back(new IR::AnnotationToken(@2, $2.type, $2.text, $2.unparsedConstant));
+          $$->srcInfo = @1 + @2;
+        }
     ;
 
 annotationToken
@@ -620,8 +635,8 @@ annotationToken
     ;
 
 kvList
-    : kvPair                          { $$ = new IR::IndexedVector<IR::NamedExpression>; $$->push_back($1); }
-    | kvList "," kvPair               { $$ = $1; $$->push_back($3); }
+    : kvPair                          { $$ = new IR::IndexedVector<IR::NamedExpression>; $$->push_back($1); $$->srcInfo = @1; }
+    | kvList "," kvPair               { $$ = $1; $$->push_back($3); $$->srcInfo = @1 + @3;}
     ;
 
 kvPair
@@ -635,8 +650,8 @@ parameterList
 
 nonEmptyParameterList
     : parameter                           { $$ = new IR::IndexedVector<IR::Parameter>();
-                                            $$->push_back($1); }
-    | nonEmptyParameterList "," parameter { $$ = $1; $$->push_back($3); }
+                                            $$->push_back($1); $$->srcInfo = @1; }
+    | nonEmptyParameterList "," parameter { $$ = $1; $$->push_back($3); $$->srcInfo = @1 + @3; }
     ;
 
 parameter
@@ -687,7 +702,7 @@ objInitializer
 
 objDeclarations
     : %empty                         { $$ = new IR::IndexedVector<IR::StatOrDecl>(); }
-    | objDeclarations objDeclaration { $$ = $1; $1->push_back($2); }
+    | objDeclarations objDeclaration { $$ = $1; $1->push_back($2); $$->srcInfo = @1 + @2;}
     ;
 
 objDeclaration
@@ -717,7 +732,7 @@ parserDeclaration
 
 parserLocalElements
     : %empty                                 { $$ = new IR::IndexedVector<IR::Declaration>(); }
-    | parserLocalElements parserLocalElement { $$ = $1; $$->push_back($2); }
+    | parserLocalElements parserLocalElement { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2; }
     ;
 
 parserLocalElement
@@ -739,8 +754,8 @@ parserTypeDeclaration
 
 parserStates
     : parserState                     { $$ = new IR::IndexedVector<IR::ParserState>();
-                                        $$->push_back($1); }
-    | parserStates parserState        { $$ = $1; $$->push_back($2); }
+                                        $$->push_back($1); $$->srcInfo = @1; }
+    | parserStates parserState        { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2; }
     ;
 
 parserState
@@ -752,7 +767,7 @@ parserState
 
 parserStatements
     : %empty                           { $$ = new IR::IndexedVector<IR::StatOrDecl>(); }
-    | parserStatements parserStatement { $$ = $1; $1->push_back($2); }
+    | parserStatements parserStatement { $$ = $1; $1->push_back($2); $$->srcInfo = @1 + @2; }
     ;
 
 parserStatement
@@ -788,7 +803,7 @@ selectExpression
 
 selectCaseList
     : %empty                     { $$ = new IR::Vector<IR::SelectCase>(); }
-    | selectCaseList selectCase  { $$ = $1; $$->push_back($2); }
+    | selectCaseList selectCase  { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2;}
     ;
 
 selectCase
@@ -804,13 +819,13 @@ keysetExpression
 
 tupleKeysetExpression
     : "(" simpleKeysetExpression "," simpleExpressionList ")"
-                                { $$ = $4; $4->insert($4->begin(), $2); }
-    | "(" reducedSimpleKeysetExpression ")" { $$ = new IR::Vector<IR::Expression>(); $$->push_back($2); }
+                                            { $$ = $4; $4->insert($4->begin(), $2); $$->srcInfo = @2 + @4; }
+    | "(" reducedSimpleKeysetExpression ")" { $$ = new IR::Vector<IR::Expression>(); $$->push_back($2); $$->srcInfo = @2; }
     ;
 
 simpleExpressionList
-    : simpleKeysetExpression { $$ = new IR::Vector<IR::Expression>(); $$->push_back($1); }
-    | simpleExpressionList "," simpleKeysetExpression { $$ = $1; $$->push_back($3); }
+    : simpleKeysetExpression { $$ = new IR::Vector<IR::Expression>(); $$->push_back($1); $$->srcInfo = @1; }
+    | simpleExpressionList "," simpleKeysetExpression { $$ = $1; $$->push_back($3); $$->srcInfo = @1 + @3; }
     ;
 
 reducedSimpleKeysetExpression
@@ -863,7 +878,7 @@ controlTypeDeclaration
 
 controlLocalDeclarations
     : %empty { $$ = new IR::IndexedVector<IR::Declaration>(); }
-    | controlLocalDeclarations controlLocalDeclaration { $$ = $1; $$->push_back($2); }
+    | controlLocalDeclarations controlLocalDeclaration { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2; }
     ;
 
 controlLocalDeclaration
@@ -900,7 +915,7 @@ externDeclaration
 
 methodPrototypes
     : %empty                           { $$ = new IR::Vector<IR::Method>(); }
-    | methodPrototypes methodPrototype { $$ = $1; $1->push_back($2); }
+    | methodPrototypes methodPrototype { $$ = $1; $1->push_back($2); $$->srcInfo = @1 + @2; }
     ;
 
 functionPrototype
@@ -1008,8 +1023,8 @@ typeParameters
 
 typeParameterList
     : name                           { $$ = new IR::IndexedVector<IR::Type_Var>();
-                                       $$->push_back(new IR::Type_Var(@1, *$1)); }
-    | typeParameterList "," name     { ($$=$1)->push_back(new IR::Type_Var(@3, *$3)); }
+                                       $$->push_back(new IR::Type_Var(@1, *$1)); $$->srcInfo = @1; }
+    | typeParameterList "," name     { ($$=$1)->push_back(new IR::Type_Var(@3, *$3)); $$->srcInfo = @1 + @3; }
     ;
 
 typeArg
@@ -1022,8 +1037,8 @@ typeArg
 
 typeArgumentList
     : %empty                         { $$ = new IR::Vector<IR::Type>(); }
-    | typeArg                        { $$ = new IR::Vector<IR::Type>(); $$->push_back($1); }
-    | typeArgumentList "," typeArg   { $$ = $1; $$->push_back($3); }
+    | typeArg                        { $$ = new IR::Vector<IR::Type>(); $$->push_back($1); $$->srcInfo = @1; }
+    | typeArgumentList "," typeArg   { $$ = $1; $$->push_back($3); $$->srcInfo = @1 + @3; }
     ;
 
 realTypeArg
@@ -1035,8 +1050,8 @@ realTypeArg
 // For use in contexts where the `<` might be a less-than rather than introducing a type
 // argument list -- we only allow the token after `<` to be a TYPE_IDENTIFIER, not an ID
 realTypeArgumentList
-    : realTypeArg                        { $$ = new IR::Vector<IR::Type>(); $$->push_back($1); }
-    | realTypeArgumentList "," typeArg   { $$ = $1; $$->push_back($3); }
+    : realTypeArg                        { $$ = new IR::Vector<IR::Type>(); $$->push_back($1); $$->srcInfo = @1; }
+    | realTypeArgumentList "," typeArg   { $$ = $1; $$->push_back($3); $$->srcInfo = @1 + @3; }
     ;
 
 typeDeclaration
@@ -1080,7 +1095,7 @@ headerUnionDeclaration
 
 structFieldList
     : %empty                           { $$ = new IR::IndexedVector<IR::StructField>(); }
-    | structFieldList structField      { $$ = $1; $1->push_back($2); }
+    | structFieldList structField      { $$ = $1; $1->push_back($2); $$->srcInfo = @1 + @2; }
     ;
 
 structField
@@ -1099,8 +1114,8 @@ enumDeclaration
     ;
 
 specifiedIdentifierList
-    : specifiedIdentifier     { $$ = new IR::IndexedVector<IR::SerEnumMember>(); $$->push_back($1); }
-    | specifiedIdentifierList "," specifiedIdentifier { $$ = $1; $1->push_back($3); }
+    : specifiedIdentifier     { $$ = new IR::IndexedVector<IR::SerEnumMember>(); $$->push_back($1); $$->srcInfo = @1; }
+    | specifiedIdentifierList "," specifiedIdentifier { $$ = $1; $1->push_back($3); $$->srcInfo = @1 + @3; }
     ;
 
 specifiedIdentifier
@@ -1119,8 +1134,8 @@ matchKindDeclaration
 
 identifierList
     : name                    { $$ = new IR::IndexedVector<IR::Declaration_ID>();
-                                $$->push_back(new IR::Declaration_ID(@1, *$1));}
-    | identifierList "," name { $$ = $1; $$->push_back(new IR::Declaration_ID(@3, *$3)); }
+                                $$->push_back(new IR::Declaration_ID(@1, *$1)); $$->srcInfo = @1; }
+    | identifierList "," name { $$ = $1; $$->push_back(new IR::Declaration_ID(@3, *$3)); $$->srcInfo = @1 + @3; }
     ;
 
 typedefDeclaration
@@ -1130,8 +1145,6 @@ typedefDeclaration
                         $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
     | optAnnotations TYPE typeRef name   { driver.structure->declareType(*$4);
           $$ = new IR::Type_Newtype(@4, *$4, new IR::Annotations(*$1), $3); }
-    | optAnnotations TYPE derivedTypeDeclaration name   { driver.structure->declareType(*$4);
-                        $$ = new IR::Type_Newtype(@4, *$4, new IR::Annotations(*$1), $3); }
     ;
 
 /*************************** STATEMENTS *************************/
@@ -1206,7 +1219,7 @@ blockStatement
 
 statOrDeclList
     : %empty                                { $$ = new IR::IndexedVector<IR::StatOrDecl>(); }
-    | statOrDeclList statementOrDeclaration { $$ = $1; $$->push_back($2); }
+    | statOrDeclList statementOrDeclaration { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2; }
     ;
 
 switchStatement
@@ -1216,7 +1229,7 @@ switchStatement
 
 switchCases
     : %empty                   { $$ = new IR::Vector<IR::SwitchCase>(); }
-    | switchCases switchCase   { $$ = $1; $$->push_back($2); }
+    | switchCases switchCase   { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2; }
     ;
 
 switchCase
@@ -1246,8 +1259,8 @@ tableDeclaration
 
 tablePropertyList
     : tableProperty                      { $$ = new IR::IndexedVector<IR::Property>();
-                                           $$->push_back($1); }
-    | tablePropertyList tableProperty    { $$ = $1; $$->push_back($2); }
+                                           $$->push_back($1); $$->srcInfo = @1; }
+    | tablePropertyList tableProperty    { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2; }
     ;
 
 tableProperty
@@ -1271,7 +1284,7 @@ tableProperty
 
 keyElementList
     : %empty                             { $$ = new IR::Vector<IR::KeyElement>(); }
-    | keyElementList keyElement          { $$ = $1; $$->push_back($2); }
+    | keyElementList keyElement          { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2; }
     ;
 
 keyElement
@@ -1283,7 +1296,7 @@ keyElement
 actionList
     : %empty { $$ = new IR::IndexedVector<IR::ActionListElement>(); }
     | actionList optAnnotations actionRef ";"
-        { $$ = $1; $$->push_back(new IR::ActionListElement(@3, $2, $3)); }
+             { $$ = $1; $$->push_back(new IR::ActionListElement(@3, $2, $3)); $$->srcInfo = @1 + @3; }
     ;
 
 actionRef
@@ -1308,7 +1321,7 @@ entry
 
 entriesList
     : %empty                         { $$ = new IR::Vector<IR::Entry>(); }
-    | entriesList entry              { $$ = $1; $$->push_back($2); }
+    | entriesList entry              { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2; }
     ;
 
 /************************* ACTION ********************************/
@@ -1361,8 +1374,8 @@ argumentList
 
 nonEmptyArgList
     : argument                           { $$ = new IR::Vector<IR::Argument>();
-                                           $$->push_back($1); }
-    | nonEmptyArgList "," argument       { $$ = $1; $$->push_back($3); }
+                                           $$->push_back($1); $$->srcInfo = @1; }
+    | nonEmptyArgList "," argument       { $$ = $1; $$->push_back($3); $$->srcInfo = @1 + @3; }
     ;
 
 argument
@@ -1375,8 +1388,8 @@ argument
 expressionList
     : %empty                             { $$ = new IR::Vector<IR::Expression>(); }
     | expression                         { $$ = new IR::Vector<IR::Expression>();
-                                           $$->push_back($1); }
-    | expressionList "," expression      { $$ = $1; $$->push_back($3); }
+                                           $$->push_back($1); $$->srcInfo = @1; }
+    | expressionList "," expression      { $$ = $1; $$->push_back($3); $$->srcInfo = @1 + @3; }
     ;
 
 prefixedNonTypeName
@@ -1513,23 +1526,29 @@ intOrStr
 
 intList
     : INTEGER                    { $$ = new IR::Vector<IR::Expression>();
-                                   $$->push_back(parseConstant(@1, $1, 0)); }
+                                   $$->push_back(parseConstant(@1, $1, 0));
+                                   $$->srcInfo = @1; }
     | intList "," INTEGER        { $$ = $1;
-                                   $$->push_back(parseConstant(@3, $3, 0)); }
+                                   $$->push_back(parseConstant(@3, $3, 0));
+                                   $$->srcInfo = @1 + @3; }
     ;
 
 intOrStrList
     : intOrStr                   { $$ = new IR::Vector<IR::Expression>();
-                                   $$->push_back($1); }
+                                   $$->push_back($1);
+                                   $$->srcInfo = @1; }
     | intOrStrList "," intOrStr  { $$ = $1;
-                                   $$->push_back($3); }
+                                   $$->push_back($3);
+                                   $$->srcInfo = @1 + @3; }
     ;
 
 strList
     : STRING_LITERAL             { $$ = new IR::Vector<IR::Expression>();
-                                   $$->push_back(new IR::StringLiteral(@1, $1)); }
+                                   $$->push_back(new IR::StringLiteral(@1, $1));
+                                   $$->srcInfo = @1; }
     | strList "," STRING_LITERAL { $$ = $1;
-                                   $$->push_back(new IR::StringLiteral(@3, $3)); }
+                                   $$->push_back(new IR::StringLiteral(@3, $3));
+                                   $$->srcInfo = @1 + @3; }
     ;
 
 l_angle : "<" | L_ANGLE_ARGS ;

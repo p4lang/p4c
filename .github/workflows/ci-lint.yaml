@@ -1,0 +1,23 @@
+name: "p4c-lint"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  p4c-lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-python@v1
+    - name: Check submodule ref points.
+      run: |
+        ./tools/check-git-submodules.sh
+    - name: Run cpplint.
+      run: |
+        ./tools/run-cpplint.sh
+    - name: Run clang-format.
+      run: |
+        ./tools/run-clang-format.sh

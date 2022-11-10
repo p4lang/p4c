@@ -22,11 +22,6 @@ from scapy.layers.l2 import Ether
 
 GTPU_UDP_PORT=2152
 
-#link number
-N3_PORT=4
-N6_PORT=5
-N9_PORT=6
-
 #PTF
 N3_PTF_PORT=0
 N6_PTF_PORT=1
@@ -84,6 +79,10 @@ class UPFTest(P4EbpfTest):
         self.table_add(table="ingress_upf_ingress_session_lookup_by_ue_ip", key=[ue_ip], action=1,data=[seid])
 
     def runTest(self):
+        #link number
+        N3_PORT=DP_PORTS[0]
+        N6_PORT=DP_PORTS[1]
+        N9_PORT=DP_PORTS[2]
         self.table_add(table="ingress_upf_ingress_source_interface_lookup_by_port", key=[N3_PORT], action=1, data=[ACCESS])
         self.table_add(table="ingress_upf_ingress_source_interface_lookup_by_port", key=[N9_PORT], action=1, data=[CORE])
         self.table_add(table="ingress_upf_ingress_source_interface_lookup_by_port", key=[N6_PORT], action=1, data=[SGi_LAN])
