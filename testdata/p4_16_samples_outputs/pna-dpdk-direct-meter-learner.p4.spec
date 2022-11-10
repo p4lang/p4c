@@ -33,6 +33,7 @@ struct main_metadata_t {
 	bit<8> local_metadata_timeout
 	bit<32> local_metadata_port_out
 	bit<32> pna_main_output_metadata_output_port
+	bit<32> table_entry_index
 	bit<32> MainControlT_tmp
 	bit<32> MainControlT_tmp_0
 	bit<32> MainControlT_color_out
@@ -55,6 +56,8 @@ action next_hop args instanceof next_hop_arg_t {
 }
 
 action add_on_miss_action args none {
+	entryid m.table_entry_index 
+	meter meter0_0 m.table_entry_index 0x400 m.MainControlT_color_in m.MainControlT_color_out
 	jmpneq LABEL_FALSE_0 m.MainControlT_color_out 0x1
 	mov m.MainControlT_tmp_1 0x1
 	jmp LABEL_END_0

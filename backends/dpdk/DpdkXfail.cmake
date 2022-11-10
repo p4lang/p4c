@@ -79,12 +79,12 @@ p4c_add_xfail_reason("dpdk"
   "Expected default action .* to have .* method call for .* extern instance"
    testdata/p4_16_samples/pna-dpdk-direct-counter-err-1.p4
    testdata/p4_16_samples/pna-dpdk-direct-meter-err-4.p4
+   testdata/p4_16_samples/pna-dpdk-direct-meter-err-3.p4
   )
 
 p4c_add_xfail_reason("dpdk"
   ".* method for different .* instances (.*) called within same action"
   testdata/p4_16_samples/pna-dpdk-direct-counter-err-4.p4
-  testdata/p4_16_samples/pna-dpdk-direct-meter-err-3.p4
   )
 
 p4c_add_xfail_reason("dpdk"

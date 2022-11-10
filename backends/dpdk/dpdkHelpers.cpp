@@ -378,7 +378,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                          e->object->getName(), index, length, color_in, left);
                 }
             } else if (e->originalExternType->getName().name == "DirectMeter") {
-                if (e->method->getName().name == "execute") {
+                if (e->method->getName().name == "dpdk_execute") {
                     auto argSize = e->expr->arguments->size();
 
                     // DPDK target needs packet length as mandatory parameters
@@ -1066,7 +1066,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                     a->method->getName());
             }
         } else if (a->originalExternType->getName().name == "DirectMeter") {
-            if (a->method->getName().name != "execute") {
+            if (a->method->getName().name != "dpdk_execute") {
                 BUG("Direct Meter function %1% not implemented.", a->method->getName().name);
             }
         } else if (a->originalExternType->getName().name == "DirectCounter") {
