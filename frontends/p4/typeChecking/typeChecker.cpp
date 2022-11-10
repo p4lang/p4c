@@ -2062,7 +2062,7 @@ const IR::Node* TypeInference::postorder(IR::InvalidHeader* expression) {
     return expression;
 }
 
-const IR::Node* TypeInference::postorder(IR::VectorExpression* expression) {
+const IR::Node* TypeInference::postorder(IR::P4ListExpression* expression) {
     if (done()) return expression;
     bool constant = true;
     auto elementType = getTypeType(expression->elementType);
