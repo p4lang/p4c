@@ -603,28 +603,6 @@ extern Counter<W, S> {
   void count(in S index);
   // Dpdk support this overload and requires packet length
   void count(in S index, in bit<32> pkt_len);
-
-  /*
-  /// The control plane API uses 64-bit wide counter values.  It is
-  /// not intended to represent the size of counters as they are
-  /// stored in the data plane.  It is expected that control plane
-  /// software will periodically read the data plane counter values,
-  /// and accumulate them into larger counters that are large enough
-  /// to avoid reaching their maximum values for a suitably long
-  /// operational time.  A 64-bit byte counter increased at maximum
-  /// line rate for a 100 gigabit port would take over 46 years to
-  /// wrap.
-
-  @ControlPlaneAPI
-  {
-    bit<64> read      (in S index);
-    bit<64> sync_read (in S index);
-    void set          (in S index, in bit<64> seed);
-    void reset        (in S index);
-    void start        (in S index);
-    void stop         (in S index);
-  }
-  */
 }
 // END:Counter_extern
 
@@ -637,17 +615,6 @@ extern DirectCounter<W> {
   void count(); 
   // Dpdk support this overload and requires packet length
   void count(in bit<32> pkt_len);
-  /*
-  @ControlPlaneAPI
-  {
-    W    read<W>      (in TableEntry key);
-    W    sync_read<W> (in TableEntry key);
-    void set          (in TableEntry key, in W seed);
-    void reset        (in TableEntry key);
-    void start        (in TableEntry key);
-    void stop         (in TableEntry key);
-  }
-  */
 }
 // END:DirectCounter_extern
 
@@ -687,15 +654,6 @@ extern Meter<S> {
   // Meter extern `dpdk_execute` which has extra param.  
   PSA_MeterColor_t dpdk_execute(in S index, in PSA_MeterColor_t color, in bit<32> pkt_len);  
   PSA_MeterColor_t dpdk_execute(in S index, in bit<32> pkt_len);
-
-  /*
-  @ControlPlaneAPI
-  {
-    reset(in MeterColor_t color);
-    setParams(in S index, in MeterConfig config);
-    getParams(in S index, out MeterConfig config);
-  }
-  */
 }
 // END:Meter_extern
 
@@ -710,15 +668,6 @@ extern DirectMeter {
 
   PSA_MeterColor_t dpdk_execute(in PSA_MeterColor_t color, in bit<32> pkt_len);
   PSA_MeterColor_t dpdk_execute(in bit<32> pkt_len);
-
-  /*
-  @ControlPlaneAPI
-  {
-    reset(in TableEntry entry, in MeterColor_t color);
-    void setConfig(in TableEntry entry, in MeterConfig config);
-    void getConfig(in TableEntry entry, out MeterConfig config);
-  }
-  */
 }
 // END:DirectMeter_extern
 
