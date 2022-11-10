@@ -71,8 +71,8 @@ struct metadata {
 	bit<64> local_metadata_data13
 	bit<64> local_metadata_data14
 	bit<64> local_metadata_data15
-	bit<16> tmpMask
-	bit<8> tmpMask_0
+	bit<24> tmpMask
+	bit<16> tmpMask_0
 }
 metadata instanceof metadata
 

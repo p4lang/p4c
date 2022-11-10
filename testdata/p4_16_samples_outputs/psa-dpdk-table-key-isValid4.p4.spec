@@ -64,8 +64,8 @@ struct metadata {
 	bit<8> Ingress_tmp_1
 	bit<8> Ingress_tmp_2
 	bit<8> Ingress_key
-	bit<16> tmpMask
-	bit<8> tmpMask_0
+	bit<24> tmpMask
+	bit<16> tmpMask_0
 }
 metadata instanceof metadata
 

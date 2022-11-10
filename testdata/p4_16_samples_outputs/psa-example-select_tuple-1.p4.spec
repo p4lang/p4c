@@ -55,7 +55,7 @@ struct metadata {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
-	bit<16> tmpMask
+	bit<24> tmpMask
 }
 metadata instanceof metadata
 
