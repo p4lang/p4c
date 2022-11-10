@@ -188,7 +188,6 @@ class BinaryConstraint : public TypeConstraint {
         CHECK_NULL(left); CHECK_NULL(right);
         if (left->is<IR::Type_Name>() || right->is<IR::Type_Name>())
             BUG("type names should not appear in unification: %1% and %2%", left, right);
-        LOG3(this);
     }
 
  public:

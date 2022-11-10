@@ -607,6 +607,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
 ///////////////////////////////////// Visitor methods
 
 const IR::Node* TypeInference::preorder(IR::P4Program* program) {
+    currentActionList = nullptr;
     if (typeMap->checkMap(getOriginal()) && readOnly) {
         LOG2("No need to typecheck");
         prune();
@@ -629,6 +630,7 @@ const IR::Node* TypeInference::postorder(IR::Declaration_MatchKind* decl) {
 }
 
 const IR::Node* TypeInference::postorder(IR::P4Table* table) {
+    currentActionList = nullptr;
     if (done()) return table;
     auto type = new IR::Type_Table(table);
     setType(getOriginal(), type);
@@ -801,6 +803,7 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
     if (auto ts = concreteType->to<IR::Type_StructLike>()) {
         auto si = sourceExpression->to<IR::StructExpression>();
         auto type = destType->getP4Type();
+        setType(type, new IR::Type_Type(destType));
         if (initType->is<IR::Type_UnknownStruct>() ||
             (si != nullptr && initType->is<IR::Type_Struct>())) {
             // Even if the structure is a struct expression with the right type,
@@ -2077,7 +2080,7 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
                               ks->to<IR::ListExpression>(), entry->action, entry->singleton);
 
     auto actionRef = entry->getAction();
-    auto ale = validateActionInitializer(actionRef, table);
+    auto ale = validateActionInitializer(actionRef);
     if (ale != nullptr) {
         auto anno = ale->getAnnotation(IR::Annotation::defaultOnlyAnnotation);
         if (anno != nullptr) {
@@ -3291,10 +3294,13 @@ TypeInference::actionCall(bool inActionList,
         left.emplace(p->name, p);
 
     auto paramIt = baseType->parameters->parameters.begin();
+    auto newArgs = new IR::Vector<IR::Argument>();
+    bool changed = false;
     for (auto arg : *actionCall->arguments) {
         cstring argName = arg->name.name;
         bool named = !argName.isNullOrEmpty();
         const IR::Parameter* param;
+        auto newExpr = arg->expression;
 
         if (named) {
             param = baseType->parameters->getParameter(argName);
@@ -3312,7 +3318,7 @@ TypeInference::actionCall(bool inActionList,
 
         LOG2("Action parameter " << dbp(param));
         auto leftIt = left.find(param->name.name);
-        // This shold have been checked by the CheckNamedArgs pass.
+        // This should have been checked by the CheckNamedArgs pass.
         BUG_CHECK(leftIt != left.end(), "%1%: Duplicate argument name?", param->name);
         left.erase(leftIt);
 
@@ -3341,10 +3347,26 @@ TypeInference::actionCall(bool inActionList,
                    param->direction == IR::Direction::InOut) {
             if (!isLeftValue(arg->expression))
                 typeError("%1%: must be a left-value", arg->expression);
+        } else {
+            // This is like an assignment; may make additional conversions.
+            newExpr = assignment(arg, param->type, arg->expression);
+        }
+        if (::errorCount() > 0)
+            return actionCall;
+        if (newExpr != arg->expression) {
+            LOG2("Changing action argument to " << newExpr);
+            changed = true;
+            newArgs->push_back(new IR::Argument(arg->srcInfo, arg->name, newExpr));
+        } else {
+            newArgs->push_back(arg);
         }
         if (!named)
             ++paramIt;
     }
+    if (changed)
+        actionCall = new IR::MethodCallExpression(
+            actionCall->srcInfo, actionCall->type, actionCall->method,
+            actionCall->typeArguments, newArgs);
 
     // Check remaining parameters: they must be all non-directional
     bool error = false;
@@ -3996,13 +4018,24 @@ const IR::Node* TypeInference::postorder(IR::KeyElement* elem) {
     return elem;
 }
 
-const IR::ActionListElement* TypeInference::validateActionInitializer(
-    const IR::Expression* actionCall,
-    const IR::P4Table* table) {
+const IR::Node* TypeInference::postorder(IR::ActionList* al) {
+    LOG3("TI Visited " << dbp(al));
+    BUG_CHECK(currentActionList == nullptr, "%1%: nested action list?", al);
+    currentActionList = al;
+    return al;
+}
 
-    auto al = table->getActionList();
+const IR::ActionListElement* TypeInference::validateActionInitializer(
+    const IR::Expression* actionCall) {
+
+    // We cannot retrieve the action list from the table, because the
+    // table has not been modified yet.  We want the latest version of
+    // the action list, as it has been already typechecked.
+    auto al = currentActionList;
     if (al == nullptr) {
-        typeError("%1% has no action list, so it cannot have %2%",
+        auto table = findContext<IR::P4Table>();
+        BUG_CHECK(table, "%1%: not within a table", actionCall);
+        typeError("%1% has no action list, so it cannot invoke '%2%'",
                   table, actionCall);
         return nullptr;
     }
@@ -4102,12 +4135,10 @@ const IR::Node* TypeInference::postorder(IR::Property* prop) {
                 return prop;
             }
 
-            auto table = findContext<IR::P4Table>();
-            BUG_CHECK(table != nullptr, "%1%: property not within a table?", prop);
             // Check that the default action appears in the list of actions.
             BUG_CHECK(prop->value->is<IR::ExpressionValue>(), "%1% not an expression", prop);
             auto def = prop->value->to<IR::ExpressionValue>()->expression;
-            auto ale = validateActionInitializer(def, table);
+            auto ale = validateActionInitializer(def);
             if (ale != nullptr) {
                 auto anno = ale->getAnnotation(IR::Annotation::tableOnlyAnnotation);
                 if (anno != nullptr) {
