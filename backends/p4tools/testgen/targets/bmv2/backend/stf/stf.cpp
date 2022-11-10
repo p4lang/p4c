@@ -56,60 +56,27 @@ inja::json STF::getTrace(const TestSpec* testSpec) {
     return traceList;
 }
 
-inja::json STF::getControlPlane(const TestSpec* testSpec) {
-    inja::json controlPlaneJson = inja::json::object();
-
-    // Map of actionProfiles and actionSelectors for easy reference.
-    std::map<cstring, cstring> apASMap;
-
-    auto tables = testSpec->getTestObjectCategory("tables");
-    if (!tables.empty()) {
-        controlPlaneJson["tables"] = inja::json::array();
-    }
-    for (auto const& testObject : tables) {
-        inja::json tblJson;
-        tblJson["table_name"] = testObject.first.c_str();
-        const auto* const tblConfig = testObject.second->checkedTo<TableConfig>();
-        auto const* tblRules = tblConfig->getRules();
-        tblJson["rules"] = inja::json::array();
-        for (const auto& tblRule : *tblRules) {
-            inja::json rule;
-            auto const* matches = tblRule.getMatches();
-            auto const* actionCall = tblRule.getActionCall();
-            auto const* actionArgs = actionCall->getArgs();
-            rule["action_name"] = actionCall->getActionName().c_str();
-            auto j = getControlPlaneForTable(*matches, *actionArgs);
-            rule["rules"] = std::move(j);
-            rule["priority"] = tblRule.getPriority();
-            tblJson["rules"].push_back(rule);
-        }
-
-        // Action Profile
-        const auto* apObject = tblConfig->getProperty("action_profile", false);
-        const Bmv2_V1ModelActionProfile* actionProfile = nullptr;
-        const Bmv2_V1ModelActionSelector* actionSelector = nullptr;
-        if (apObject != nullptr) {
-            actionProfile = apObject->checkedTo<Bmv2_V1ModelActionProfile>();
-            // Check if we have an Action Selector too.
-            // TODO: Change this to check in ActionSelector with table
-            // property "action_selectors".
-            const auto* asObject = tblConfig->getProperty("action_selector", false);
-            if (asObject != nullptr) {
-                actionSelector = asObject->checkedTo<Bmv2_V1ModelActionSelector>();
-                apASMap[actionProfile->getProfileDecl()->controlPlaneName()] =
-                    actionSelector->getSelectorDecl()->controlPlaneName();
-            }
-        }
-        if (actionProfile != nullptr) {
-            tblJson["has_ap"] = true;
-        }
-
-        if (actionSelector != nullptr) {
+void checkForTableActionProfile(inja::json& tblJson, std::map<cstring, cstring>& apAsMap,
+                                const TableConfig* tblConfig) {
+    const auto* apObject = tblConfig->getProperty("action_profile", false);
+    if (apObject != nullptr) {
+        const auto* actionProfile = apObject->checkedTo<Bmv2_V1ModelActionProfile>();
+        tblJson["has_ap"] = true;
+        // Check if we have an Action Selector too.
+        // TODO: Change this to check in ActionSelector with table
+        // property "action_selectors".
+        const auto* asObject = tblConfig->getProperty("action_selector", false);
+        if (asObject != nullptr) {
+            const auto* actionSelector = asObject->checkedTo<Bmv2_V1ModelActionSelector>();
+            apAsMap[actionProfile->getProfileDecl()->controlPlaneName()] =
+                actionSelector->getSelectorDecl()->controlPlaneName();
             tblJson["has_as"] = true;
         }
-
-        controlPlaneJson["tables"].push_back(tblJson);
     }
+}
+
+void collectActionProfiles(const TestSpec* testSpec, inja::json& controlPlaneJson,
+                           std::map<cstring, cstring>& apAsMap) {
     auto actionProfiles = testSpec->getTestObjectCategory("action_profiles");
     if (!actionProfiles.empty()) {
         controlPlaneJson["action_profiles"] = inja::json::array();
@@ -134,14 +101,69 @@ inja::json STF::getControlPlane(const TestSpec* testSpec) {
                 c["value"] = formatHexExpr(actArg.getEvaluatedValue()).c_str();
                 b.push_back(c);
             }
-            a["action_args"] = b;
+            a["act_args"] = b;
             j["actions"].push_back(a);
         }
-        if (apASMap.find(actionProfile->getProfileDecl()->controlPlaneName()) != apASMap.end()) {
-            j["selector"] = apASMap[actionProfile->getProfileDecl()->controlPlaneName()];
+        if (apAsMap.find(actionProfile->getProfileDecl()->controlPlaneName()) != apAsMap.end()) {
+            j["selector"] = apAsMap[actionProfile->getProfileDecl()->controlPlaneName()];
         }
         controlPlaneJson["action_profiles"].push_back(j);
     }
+}
+
+inja::json STF::getControlPlane(const TestSpec* testSpec) {
+    inja::json controlPlaneJson = inja::json::object();
+
+    // Map of actionProfiles and actionSelectors for easy reference.
+    std::map<cstring, cstring> apAsMap;
+
+    auto tables = testSpec->getTestObjectCategory("tables");
+    if (!tables.empty()) {
+        controlPlaneJson["tables"] = inja::json::array();
+    }
+    for (auto const& testObject : tables) {
+        inja::json tblJson;
+        tblJson["table_name"] = testObject.first.c_str();
+        const auto* const tblConfig = testObject.second->checkedTo<TableConfig>();
+        auto const* tblRules = tblConfig->getRules();
+        tblJson["rules"] = inja::json::array();
+        for (const auto& tblRule : *tblRules) {
+            inja::json rule;
+            auto const* matches = tblRule.getMatches();
+            auto const* actionCall = tblRule.getActionCall();
+            auto const* actionArgs = actionCall->getArgs();
+            rule["action_name"] = actionCall->getActionName().c_str();
+            auto j = getControlPlaneForTable(*matches, *actionArgs);
+            rule["rules"] = std::move(j);
+            rule["priority"] = tblRule.getPriority();
+            tblJson["rules"].push_back(rule);
+        }
+
+        // Action Profile
+        checkForTableActionProfile(tblJson, apAsMap, tblConfig);
+
+        const auto* defaultOverrideObj = tblConfig->getProperty("overriden_default_action", false);
+        if (defaultOverrideObj != nullptr) {
+            const auto* defaultAction = defaultOverrideObj->checkedTo<ActionCall>();
+            inja::json a;
+            a["action_name"] = defaultAction->getActionName();
+            auto const* actionArgs = defaultAction->getArgs();
+            inja::json b = inja::json::array();
+            for (const auto& actArg : *actionArgs) {
+                inja::json j;
+                j["param"] = actArg.getActionParamName().c_str();
+                j["value"] = formatHexExpr(actArg.getEvaluatedValue());
+                b.push_back(j);
+            }
+            a["act_args"] = b;
+            tblJson["default_override"] = a;
+        }
+
+        controlPlaneJson["tables"].push_back(tblJson);
+    }
+
+    collectActionProfiles(testSpec, controlPlaneJson, apAsMap);
+
     return controlPlaneJson;
 }
 
@@ -308,9 +330,14 @@ static std::string getTestCase() {
 ## if control_plane
 ## for table in control_plane.tables
 # Table {{table.table_name}}
+## if existsIn(table, "default_override")
+setdefault {{table.table_name}} {{table.default_override.action_name}}({% for a in table.default_override.act_args %}{{a.param}}:{{a.value}}{% if not loop.is_last %},{% endif %}{% endfor %})
+## else
 ## for rule in table.rules
 add {{table.table_name}} {% if rule.rules.needs_priority %}{{rule.priority}} {% endif %}{% for r in rule.rules.matches %}{{r.field_name}}:{{r.value}} {% endfor %}{{rule.action_name}}({% for a in rule.rules.act_args %}{{a.param}}:{{a.value}}{% if not loop.is_last %},{% endif %}{% endfor %})
 ## endfor
+## endif
+
 ## endfor
 ## endif
 

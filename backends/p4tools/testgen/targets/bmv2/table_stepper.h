@@ -44,7 +44,7 @@ class BMv2_V1ModelTableStepper : public TableStepper {
         bool addProfileToState = false;
 
         /// The type of the table implementation.
-        TableImplementation implementaton;
+        TableImplementation implementaton = TableImplementation::standard;
     } bmv2_V1ModelProperties;
 
     /// Check whether the table has an action profile implementation.

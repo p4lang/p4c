@@ -30,7 +30,7 @@ class EBPFTableStepper : public TableStepper {
     /// eBPF-specific table properties.
     struct EBPFProperties {
         /// The type of the table implementation.
-        TableImplementation implementaton;
+        TableImplementation implementaton = TableImplementation::standard;
     } EBPFProperties;
 
  protected:

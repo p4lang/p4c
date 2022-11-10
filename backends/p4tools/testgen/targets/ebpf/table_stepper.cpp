@@ -46,6 +46,13 @@ void EBPFTableStepper::checkTargetProperties(
 
 void EBPFTableStepper::evalTargetTable(
     const std::vector<const IR::ActionListElement*>& tableActionList) {
+    const auto* keys = table->getKey();
+    // If we have no keys, there is nothing to match.
+    if (keys == nullptr) {
+        addDefaultAction(boost::none);
+        return;
+    }
+
     // If the table is not constant, the default action can always be executed.
     // This is because we can simply not enter any table entry.
     boost::optional<const IR::Expression*> tableMissCondition = boost::none;

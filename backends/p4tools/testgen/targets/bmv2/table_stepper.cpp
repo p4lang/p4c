@@ -78,11 +78,6 @@ const IR::Expression* BMv2_V1ModelTableStepper::computeTargetMatchType(
 
 void BMv2_V1ModelTableStepper::evalTableActionProfile(
     const std::vector<const IR::ActionListElement*>& tableActionList) {
-    const auto* keys = table->getKey();
-    // If we have no keys, there is nothing to match.
-    if (keys == nullptr) {
-        return;
-    }
     const auto* state = getExecutionState();
 
     for (size_t idx = 0; idx < tableActionList.size(); idx++) {
@@ -132,7 +127,7 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
 
         // Now we compute the hit condition to trigger this particular action call.
         std::map<cstring, const FieldMatch> matches;
-        const auto* hitCondition = computeHit(nextState, table, &matches);
+        const auto* hitCondition = computeHit(nextState, &matches);
 
         // We need to set the table action in the state for eventual switch action_run hits.
         // We also will need it for control plane table entries.
@@ -166,11 +161,6 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
 
 void BMv2_V1ModelTableStepper::evalTableActionSelector(
     const std::vector<const IR::ActionListElement*>& tableActionList) {
-    const auto* keys = table->getKey();
-    // If we have no keys, there is nothing to match.
-    if (keys == nullptr) {
-        return;
-    }
     const auto* state = getExecutionState();
 
     for (size_t idx = 0; idx < tableActionList.size(); idx++) {
@@ -229,7 +219,7 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
 
         // Now we compute the hit condition to trigger this particular action call.
         std::map<cstring, const FieldMatch> matches;
-        const auto* hitCondition = computeHit(nextState, table, &matches);
+        const auto* hitCondition = computeHit(nextState, &matches);
 
         // We need to set the table action in the state for eventual switch action_run hits.
         // We also will need it for control plane table entries.
@@ -380,6 +370,23 @@ void BMv2_V1ModelTableStepper::checkTargetProperties(
 
 void BMv2_V1ModelTableStepper::evalTargetTable(
     const std::vector<const IR::ActionListElement*>& tableActionList) {
+    const auto* keys = table->getKey();
+    // If we have no keys, there is nothing to match.
+    if (keys == nullptr) {
+        // Either override the default action or fall back to executing it.
+        auto testBackend = TestgenOptions::get().testBackend;
+        if (testBackend == "STF" && !properties.defaultIsImmutable) {
+            setTableDefaultEntries(tableActionList);
+        } else {
+            ::warning(
+                "Overriding default actions not supported for test back end %1%. Choosing default "
+                "action",
+                testBackend);
+            addDefaultAction(boost::none);
+        }
+        return;
+    }
+
     // If the table is not constant, the default action can always be executed.
     // This is because we can simply not enter any table entry.
     boost::optional<const IR::Expression*> tableMissCondition = boost::none;
