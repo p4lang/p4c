@@ -739,6 +739,8 @@ void EBPFTable::emitInitializer(CodeBuilder* builder) {
 }
 
 void EBPFTable::emitLookup(CodeBuilder* builder, cstring key, cstring value) {
+    if (cacheEnabled()) emitCacheLookup(builder, key, value);
+
     if (!isTernaryTable()) {
         builder->target->emitTableLookup(builder, dataMapName, key, value);
         builder->endOfStatement(true);

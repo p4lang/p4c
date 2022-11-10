@@ -57,6 +57,7 @@ PTF_PORTS = [PORT0, PORT1, PORT2]
 # DP_PORTS corresponds to switch interfaces and are used as data plane port numbers inside P4 programs.
 DP_PORTS = dict()
 
+
 def xdp2tc_head_not_supported(cls):
     if cls.xdp2tc_mode(cls) == 'head':
         cls.skip = True
@@ -73,6 +74,7 @@ class P4EbpfTest(BaseTest):
     skip_reason = ''
     switch_ns = 'test'
     p4_file_path = ""
+    p4c_additional_args = ""
 
     def setUp(self):
         super(P4EbpfTest, self).setUp()
@@ -94,6 +96,13 @@ class P4EbpfTest(BaseTest):
             self.switch_ns = testutils.test_param_get("namespace")
         self.interfaces = testutils.test_param_get("interfaces").split(",")
 
+        # force rebuild *.o file if compiler option has been changed for the same P4 file
+        try:
+            os.remove(os.path.join("ptf_out", filename + ".c"))
+            os.remove(self.test_prog_image)
+        except OSError:
+            pass
+
         # fetch data plane ports from network namespace
         global DP_PORTS
         next_idx = 0
@@ -111,6 +120,8 @@ class P4EbpfTest(BaseTest):
 
         if "xdp2tc" in testutils.test_params_get():
             p4args += " --xdp2tc=" + self.xdp2tc_mode()
+
+        p4args = p4args + " " + self.p4c_additional_args
 
         logger.info("P4ARGS=" + p4args)
         self.exec_cmd("make -f ../runtime/kernel.mk BPFOBJ={output} P4FILE={p4file} "
@@ -334,7 +345,7 @@ class P4EbpfTest(BaseTest):
         cmd = cmd + self._table_create_str_from_data(data=data, counters=counters, meters=meters)
         self.exec_ns_cmd(cmd, "Table set default entry failed")
 
-    def table_get(self, table, key, indirect=False):
+    def table_get(self, table, key=None, indirect=False):
         """ Returns JSON containing parsed table entry - action data, meters, counters.
             If table has an implementation, set param `indirect` to True.
         """
@@ -342,7 +353,8 @@ class P4EbpfTest(BaseTest):
         if indirect:
             # TODO: cmd = cmd + "ref "
             self.fail("support for indirect table is not implemented yet")
-        cmd = cmd + self._table_create_str_from_key(key=key)
+        if key:
+            cmd = cmd + self._table_create_str_from_key(key=key)
         _, stdout, _ = self.exec_ns_cmd(cmd, "Table get entry failed")
         return json.loads(stdout)[table]
 

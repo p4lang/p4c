@@ -33,6 +33,7 @@ void EBPFTableImplementationPSA::emitTypes(CodeBuilder* builder) {
     if (table == nullptr) return;
     // key is u32, so do not emit type for it
     emitValueType(builder);
+    emitCacheTypes(builder);
 }
 
 void EBPFTableImplementationPSA::emitInitializer(CodeBuilder* builder) { (void)builder; }
@@ -247,6 +248,11 @@ EBPFActionSelectorPSA::EBPFActionSelectorPSA(const EBPFProgram* program, CodeGen
     isGroupEntryName = instanceName + "_is_group_ref";
 
     groupsMapSize = 0;
+
+    if (program->options.enableTableCache) {
+        tableCacheEnabled = true;
+        createCacheTypeNames(true, false);
+    }
 }
 
 void EBPFActionSelectorPSA::emitInitializer(CodeBuilder* builder) {
@@ -308,6 +314,8 @@ void EBPFActionSelectorPSA::emitInstance(CodeBuilder* builder) {
     // action map (ref -> action)
     builder->target->emitTableDecl(builder, actionsMapName, TableHash, "u32",
                                    cstring("struct ") + valueTypeName, size);
+
+    emitCacheInstance(builder);
 }
 
 void EBPFActionSelectorPSA::emitReferenceEntry(CodeBuilder* builder) {
@@ -334,6 +342,8 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder* builder, cstring ta
     cstring checksumValName = "as_checksum_val";
     cstring mapEntryName = "as_map_entry";
 
+    emitCacheVariables(builder);
+
     builder->emitIndent();
     builder->appendFormat("struct %s * %s = NULL", valueTypeName.c_str(), asValueName.c_str());
     builder->endOfStatement(true);
@@ -352,6 +362,8 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder* builder, cstring ta
     builder->blockStart();
     builder->target->emitTraceMessage(builder, "ActionSelector: group reference %u", 1,
                                       effectiveActionRefName.c_str());
+
+    emitCacheLookup(builder, tableValueName, asValueName);
 
     builder->emitIndent();
     builder->append("void * ");
@@ -454,6 +466,10 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder* builder, cstring ta
 
     builder->blockEnd(true);  // is group reference
 
+    if (tableCacheEnabled) {
+        builder->blockEnd(true);
+    }
+
     // 4. Use group state and action ref to get an action data.
 
     builder->emitIndent();
@@ -474,6 +490,8 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder* builder, cstring ta
                                      asValueName);
     builder->endOfStatement(true);
     builder->blockEnd(true);
+
+    emitCacheUpdate(builder, cacheKeyVar, asValueName);
 
     // 5. Execute action.
 
@@ -634,6 +652,139 @@ void EBPFActionSelectorPSA::verifyTableEmptyGroupAction(const EBPFTablePSA* inst
                 "previous table %3% (tables use the same implementation %4%)%5%",
                 rev, lev, table->container->toString(), declaration, additionalNote);
     }
+}
+
+void EBPFActionSelectorPSA::emitCacheTypes(CodeBuilder* builder) {
+    if (!tableCacheEnabled) return;
+
+    CodeGenInspector commentGen(program->refMap, program->typeMap);
+    commentGen.setBuilder(builder);
+
+    // construct cache key type - we need group reference and selector keys
+    builder->emitIndent();
+    builder->appendFormat("struct %s ", cacheKeyTypeName.c_str());
+    builder->blockStart();
+
+    builder->emitIndent();
+    builder->appendFormat("u32 group_ref");
+    builder->endOfStatement(true);
+
+    unsigned int fieldNumber = 0;
+    for (auto s : selectors) {
+        auto type = program->typeMap->getType(s->expression);
+        auto ebpfType = EBPFTypeFactory::instance->create(type);
+        cstring fieldName = Util::printf_format("field%u", fieldNumber++);
+
+        builder->emitIndent();
+        ebpfType->declare(builder, fieldName, false);
+        builder->endOfStatement(false);
+        builder->append(" /* ");
+        s->expression->apply(commentGen);
+        builder->append(" */");
+        builder->newline();
+    }
+
+    builder->blockEnd(false);
+    builder->append(" __attribute__((aligned(4)))");
+    builder->endOfStatement(true);
+
+    // value can be used from Action Selector because there is no need to cache hit variable
+}
+
+void EBPFActionSelectorPSA::emitCacheVariables(CodeBuilder* builder) {
+    if (!tableCacheEnabled) return;
+
+    cacheKeyVar = program->refMap->newName("key_cache");
+    cacheDoUpdateVar = program->refMap->newName("do_update_cache");
+
+    builder->emitIndent();
+    builder->appendFormat("struct %s %s = {0}", cacheKeyTypeName.c_str(), cacheKeyVar.c_str());
+    builder->endOfStatement(true);
+
+    builder->emitIndent();
+    builder->appendFormat("u8 %s = 0", cacheDoUpdateVar.c_str());
+    builder->endOfStatement(true);
+}
+
+void EBPFActionSelectorPSA::emitCacheLookup(CodeBuilder* builder, cstring key, cstring value) {
+    if (!tableCacheEnabled) return;
+
+    builder->emitIndent();
+    builder->appendFormat("%s.group_ref = %s->%s", cacheKeyVar.c_str(), key.c_str(),
+                          referenceName.c_str());
+    builder->endOfStatement(true);
+
+    unsigned int fieldNumber = 0;
+    for (auto s : selectors) {
+        auto type = program->typeMap->getType(s->expression);
+        auto ebpfType = EBPFTypeFactory::instance->create(type);
+        cstring fieldName = Util::printf_format("field%u", fieldNumber++);
+
+        bool memcpy = false;
+        auto scalar = ebpfType->to<EBPFScalarType>();
+        unsigned width = 0;
+        if (scalar != nullptr) {
+            width = scalar->implementationWidthInBits();
+            memcpy = !EBPFScalarType::generatesScalar(width);
+        }
+
+        builder->emitIndent();
+        if (memcpy) {
+            builder->appendFormat("memcpy(&%s.%s, &", cacheKeyVar.c_str(), fieldName.c_str());
+            codeGen->visit(s->expression);
+            builder->appendFormat(", %d)", scalar->bytesRequired());
+        } else {
+            builder->appendFormat("%s.%s = ", cacheKeyVar.c_str(), fieldName.c_str());
+            codeGen->visit(s->expression);
+        }
+        builder->endOfStatement(true);
+    }
+
+    builder->target->emitTraceMessage(builder, "ActionSelector: trying cache...");
+
+    builder->emitIndent();
+    builder->target->emitTableLookup(builder, cacheTableName, cacheKeyVar, value);
+    builder->endOfStatement(true);
+
+    builder->emitIndent();
+    builder->appendFormat("if (%s != NULL) ", value.c_str());
+    builder->blockStart();
+
+    builder->target->emitTraceMessage(builder,
+                                      "ActionSelector: cache hit, skipping later lookup(s)");
+
+    builder->emitIndent();
+    builder->appendFormat("%s = 2", groupStateVarName.c_str());
+    builder->endOfStatement(true);
+
+    builder->blockEnd(false);
+    builder->append(" else ");
+    builder->blockStart();
+
+    builder->target->emitTraceMessage(builder, "ActionSelector: cache miss, nevermind");
+
+    builder->emitIndent();
+    builder->appendFormat("%s = 1", cacheDoUpdateVar.c_str());
+    builder->endOfStatement(true);
+
+    // do normal lookup at this indent level and then end block
+}
+
+void EBPFActionSelectorPSA::emitCacheUpdate(CodeBuilder* builder, cstring key, cstring value) {
+    if (!tableCacheEnabled) return;
+
+    builder->emitIndent();
+    builder->appendFormat("if (%s != NULL && %s != 0) ", value.c_str(), cacheDoUpdateVar.c_str());
+    builder->blockStart();
+
+    builder->emitIndent();
+    builder->appendFormat("BPF_MAP_UPDATE_ELEM(%s, &%s, %s, BPF_ANY);", cacheTableName.c_str(),
+                          key.c_str(), value.c_str());
+    builder->newline();
+
+    builder->target->emitTraceMessage(builder, "ActionSelector: cache updated");
+
+    builder->blockEnd(true);
 }
 
 }  // namespace EBPF

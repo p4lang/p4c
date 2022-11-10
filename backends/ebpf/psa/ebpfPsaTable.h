@@ -43,6 +43,13 @@ class EBPFTablePSA : public EBPFTable {
     void initDirectMeters();
     void initImplementation();
 
+    bool tableCacheEnabled = false;
+    cstring cacheValueTypeName;
+    cstring cacheTableName;
+    cstring cacheKeyTypeName;
+    void tryEnableTableCache();
+    void createCacheTypeNames(bool isCacheKeyType, bool isCacheValueType);
+
     void emitTableValue(CodeBuilder* builder, const IR::MethodCallExpression* actionMce,
                         cstring valueName);
     void emitDefaultActionInitializer(CodeBuilder* builder);
@@ -80,6 +87,12 @@ class EBPFTablePSA : public EBPFTable {
                            cstring actionRunVariable) override;
     bool dropOnNoMatchingEntryFound() const override;
     static cstring addPrefixFunc(bool trace);
+
+    virtual void emitCacheTypes(CodeBuilder* builder);
+    void emitCacheInstance(CodeBuilder* builder);
+    void emitCacheLookup(CodeBuilder* builder, cstring key, cstring value) override;
+    void emitCacheUpdate(CodeBuilder* builder, cstring key, cstring value) override;
+    bool cacheEnabled() override { return tableCacheEnabled; }
 
     EBPFCounterPSA* getDirectCounter(cstring name) const {
         auto result = std::find_if(counters.begin(), counters.end(),
