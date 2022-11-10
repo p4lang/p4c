@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/random_access_max_coverage.h"
+#include "backends/p4tools/modules/testgen/core/exploration_strategy/rnd_access_max_coverage.h"
 
 #include <ctime>
 #include <iterator>

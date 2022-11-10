@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/incremental_max_coverage_stack.h"
+#include "backends/p4tools/modules/testgen/core/exploration_strategy/inc_max_coverage_stack.h"
 
 #include <iterator>
 #include <type_traits>
