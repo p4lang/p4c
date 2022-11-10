@@ -76,8 +76,8 @@ struct user_meta_t {
 	bit<16> local_metadata_data1
 	bit<48> MyIC_tbl_ethernet_srcAddr
 	bit<48> MyIC_foo_ethernet_dstAddr
-	bit<24> tmpMask
-	bit<16> tmpMask_0
+	bit<16> tmpMask
+	bit<8> tmpMask_0
 }
 metadata instanceof user_meta_t
 

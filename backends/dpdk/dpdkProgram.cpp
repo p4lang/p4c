@@ -287,7 +287,7 @@ void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expres
         return;
     }
     auto width = sv->type->width_bits();
-    unsigned byteAlignedWidth = width + 8 - width % 8;
+    auto byteAlignedWidth = (width + 7) & (~ 7);
     if (auto maskexpr = ce->to<IR::Mask>()) {
         auto left = maskexpr->left;
         auto right = maskexpr->right;

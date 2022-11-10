@@ -59,8 +59,8 @@ struct metadata {
 	bit<16> local_metadata_data
 	bit<48> ingress_tbl_ethernet_srcAddr
 	bit<16> ingress_tbl_ipv4_totalLen
-	bit<24> tmpMask
-	bit<16> tmpMask_0
+	bit<16> tmpMask
+	bit<8> tmpMask_0
 }
 metadata instanceof metadata
 

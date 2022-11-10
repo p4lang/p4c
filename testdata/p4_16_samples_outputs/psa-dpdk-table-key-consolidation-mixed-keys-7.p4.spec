@@ -59,8 +59,8 @@ struct metadata {
 	bit<16> local_metadata_data
 	bit<16> ingress_tbl_tcp_dstPort
 	bit<8> Ingress_key
-	bit<24> tmpMask
-	bit<16> tmpMask_0
+	bit<16> tmpMask
+	bit<8> tmpMask_0
 }
 metadata instanceof metadata
 
