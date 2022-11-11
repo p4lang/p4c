@@ -115,7 +115,6 @@ control ingress(inout headers_t headers, inout local_metadata__dpdk_dpdk_dpdk_dp
             drop_1();
         }
         const default_action = drop_1();
-        action_run = vxlan_encap_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk;
         size = 1048576;
     }
     apply {
