@@ -349,6 +349,13 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 }
             } else if (e->originalExternType->getName().name == "Meter") {
                 if (e->method->getName().name == "execute") {
+                    ::error(ErrorType::ERR_UNEXPECTED,
+                            "use dpdk specific `dpdk_execute` method, `%1%`"
+                            " not supported by dpdk",
+                            e->method->getName());
+                    return false;
+                }
+                if (e->method->getName().name == "dpdk_execute") {
                     auto argSize = e->expr->arguments->size();
 
                     // DPDK target needs index and packet length as mandatory parameters
@@ -371,7 +378,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                          e->object->getName(), index, length, color_in, left);
                 }
             } else if (e->originalExternType->getName().name == "DirectMeter") {
-                if (e->method->getName().name == "execute") {
+                if (e->method->getName().name == "dpdk_execute") {
                     auto argSize = e->expr->arguments->size();
 
                     // DPDK target needs packet length as mandatory parameters
@@ -1054,11 +1061,12 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 }
             }
         } else if (a->originalExternType->getName().name == "Meter") {
-            if (a->method->getName().name != "execute") {
-                BUG("Meter function not implemented.");
+            if (a->method->getName().name != "dpdk_execute") {
+                BUG("Meter function %1% not implemented, use dpdk_execute",
+                    a->method->getName());
             }
         } else if (a->originalExternType->getName().name == "DirectMeter") {
-            if (a->method->getName().name != "execute") {
+            if (a->method->getName().name != "dpdk_execute") {
                 BUG("Direct Meter function %1% not implemented.", a->method->getName().name);
             }
         } else if (a->originalExternType->getName().name == "DirectCounter") {

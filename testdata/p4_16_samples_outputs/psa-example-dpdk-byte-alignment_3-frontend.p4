@@ -70,7 +70,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     @name("ingress.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.BYTES) meter0_0;
     @name("ingress.execute") action execute_1(@name("index") bit<12> index_1) {
         hdr.ipv4.ihl = 4w5;
-        color_out_0 = meter0_0.execute(index_1, color_in_0, (bit<32>)hdr.ipv4.totalLen);
+        color_out_0 = meter0_0.dpdk_execute(index_1, color_in_0, (bit<32>)hdr.ipv4.totalLen);
         if (color_out_0 == PSA_MeterColor_t.GREEN) {
             tmp = 32w1;
         } else {
@@ -108,7 +108,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
         if (user_meta.port_out == 32w1) {
             tbl_0.apply();
             counter0_0.count(12w1023, 32w20);
-            counter1_0.count(12w512);
+            counter1_0.count(12w512, 32w32);
             counter2_0.count(12w1023, 32w64);
             user_meta.port_out = reg_0.read(12w1);
             test();

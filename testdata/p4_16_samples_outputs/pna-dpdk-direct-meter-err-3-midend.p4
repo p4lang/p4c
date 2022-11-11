@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <pna.p4>
+#include <dpdk/pna.p4>
 
 header ethernet_t {
     bit<48> dstAddr;
@@ -61,25 +61,25 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     @name("MainControlImpl.meter0") DirectMeter(PNA_MeterType_t.BYTES) meter0_0;
     @name("MainControlImpl.meter1") DirectMeter(PNA_MeterType_t.BYTES) meter1_0;
     @name("MainControlImpl.next_hop") action next_hop(@name("oport") bit<32> oport) {
-        out1_0 = meter0_0.execute(color_in_0, 32w1024);
+        out1_0 = meter0_0.dpdk_execute(color_in_0, 32w1024);
         user_meta.port_out = (out1_0 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
-        color_out_0 = meter1_0.execute(color_in_0, 32w1024);
+        color_out_0 = meter1_0.dpdk_execute(color_in_0, 32w1024);
         user_meta.port_out1 = (color_out_0 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
         send_to_port(oport);
     }
     @name("MainControlImpl.next_hop") action next_hop_1(@name("oport") bit<32> oport_1) {
-        out1_0 = meter0_0.execute(color_in_0, 32w1024);
-        color_out_0 = meter1_0.execute(color_in_0, 32w1024);
+        out1_0 = meter0_0.dpdk_execute(color_in_0, 32w1024);
+        color_out_0 = meter1_0.dpdk_execute(color_in_0, 32w1024);
         user_meta.port_out1 = (color_out_0 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
         send_to_port(oport_1);
     }
     @name("MainControlImpl.default_route_drop") action default_route_drop() {
-        out1_0 = meter0_0.execute(color_in_0, 32w1024);
+        out1_0 = meter0_0.dpdk_execute(color_in_0, 32w1024);
         user_meta.port_out = (out1_0 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
         drop_packet();
     }
     @name("MainControlImpl.default_route_drop1") action default_route_drop1() {
-        meter1_0.execute(color_in_0, 32w1024);
+        meter1_0.dpdk_execute(color_in_0, 32w1024);
         drop_packet();
     }
     @name("MainControlImpl.ipv4_da1") table ipv4_da1_0 {

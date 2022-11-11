@@ -33,7 +33,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     @name("MyIC.counter2") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.BYTES) counter2_0;
     @hidden action psaexampledpdkcounter36() {
         counter0_0.count(12w1023, 32w20);
-        counter1_0.count(12w512);
+        counter1_0.count(12w512, 32w32);
         counter2_0.count(12w1023, 32w64);
     }
     @hidden table tbl_psaexampledpdkcounter36 {

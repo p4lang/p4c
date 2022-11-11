@@ -2465,13 +2465,13 @@ bool CollectDirectCounterMeter::ifMethodFound(const IR::P4Action *a,
     return methodCallFound;
 }
 
-/* ifMethodFound() is called from here to make sure that an action only contains count/execute
+/* ifMethodFound() is called from here to make sure that an action only contains count/dpdk_execute
  * method calls for only one Direct counter/meter instance. The error for the same is emitted
  * in the ifMethodFound function itself and return value is not required to be checked here.
  */
 bool CollectDirectCounterMeter::preorder(const IR::P4Action* a) {
     ifMethodFound(a, "count");
-    ifMethodFound(a, "execute");
+    ifMethodFound(a, "dpdk_execute");
     return false;
 }
 
@@ -2526,10 +2526,10 @@ bool CollectDirectCounterMeter::preorder(const IR::P4Table* tbl) {
                         return false;
                     }
                 }
-                if (!ifMethodFound(defaultActionDecl, "execute", meterExternName)) {
+                if (!ifMethodFound(defaultActionDecl, "dpdk_execute", meterExternName)) {
                     if (meterInstance) {
                         ::error(ErrorType::ERR_EXPECTED, "Expected default action %1% to have "
-                                "'execute' method call for DirectMeter extern instance %2%",
+                                "'dpdk_execute' method call for DirectMeter extern instance %2%",
                                  defaultActionDecl->name, *meterInstance->name);
                         return false;
                     }
@@ -2557,7 +2557,7 @@ void ValidateDirectCounterMeter::validateMethodInvocation(P4::ExternMethod *a) {
     }
 
     if ((externName == "DirectCounter" && methodName != "count") ||
-        (externName == "DirectMeter" && methodName != "execute")) {
+        (externName == "DirectMeter" && methodName != "dpdk_execute")) {
         ::error(ErrorType::ERR_UNEXPECTED, "%1% method not supported for %2% extern",
                                            methodName, externName);
         return;
