@@ -52,7 +52,7 @@ class hexvec {
     hexvec(I* d, size_t l, int w = 0, char f = ' ')
         : data(d), elsize(sizeof(I)), len(l), width(w), fill(f) {}
     template <typename T>
-    hexvec(std::vector<T>& d, int w = 0, char f = ' ')
+    explicit hexvec(std::vector<T>& d, int w = 0, char f = ' ')
         : data(d.data()), elsize(sizeof(T)), len(d.size()), width(w), fill(f) {}
     friend std::ostream& operator<<(std::ostream& os, const hexvec& h);
 };

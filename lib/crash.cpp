@@ -98,15 +98,15 @@ const char* addr2line(void* addr, const char* text) {
         int pfd1[2], pfd2[2];
         char* p = buffer;
         const char* argv[4] = {"/bin/sh", "-c", buffer, 0};
-        strcpy(p, "addr2line ");
-        p += strlen(p);  // NOLINT
-        strcpy(p, " -Cfspe ");
-        p += strlen(p);  // NOLINT
+        strcpy(p, "addr2line ");  // NOLINT
+        p += strlen(p);
+        strcpy(p, " -Cfspe ");  // NOLINT
+        p += strlen(p);
         t = text + strlen(text);
         if (!memchr(text, '/', t - text)) {
-            strcpy(p, "$(which ");
+            strcpy(p, "$(which ");  // NOLINT
             p += strlen(p);
-        }  // NOLINT
+        }
         memcpy(p, text, t - text);
         p += t - text;
         if (!memchr(text, '/', t - text)) *p++ = ')';

@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_CONSTANTS_H_
 #define BACKENDS_DPDK_CONSTANTS_H_
 
+#include "lib/cstring.h"
+
 /* Unique handle for action and table */
 const unsigned table_handle_prefix = 0x00010000;
 const unsigned action_handle_prefix = 0x00020000;

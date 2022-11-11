@@ -104,7 +104,7 @@ class IterKeys {
 
  public:
     template <class U>
-    IterKeys(U& map) : b(map.begin()), e(map.end()) {}
+    explicit IterKeys(U& map) : b(map.begin()), e(map.end()) {}
     IterKeys(PairIter b, PairIter e) : b(b), e(e) {}
     iterator begin() const { return b; }
     iterator end() const { return e; }
@@ -164,7 +164,7 @@ class IterValues {
 
  public:
     template <class U>
-    IterValues(U& map) : b(map.begin()), e(map.end()) {}
+    explicit IterValues(U& map) : b(map.begin()), e(map.end()) {}
     IterValues(PairIter b, PairIter e) : b(b), e(e) {}
     iterator begin() const { return b; }
     iterator end() const { return e; }
