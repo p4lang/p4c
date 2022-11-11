@@ -120,6 +120,9 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
     // Add the copy out assignments after the pipe has completed executing.
     cmds.insert(cmds.end(), copyOuts.begin(), copyOuts.end());
 
+    auto* dropStmt =
+        new IR::MethodCallStatement(Utils::generateInternalMethodCall("drop_and_exit", {}));
+
     // Update some metadata variables for egress processing after we are done with Ingress
     // processing. For example, the egress port.
     if ((archMember->blockName == "Ingress")) {
@@ -128,6 +131,13 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
                            new IR::PathExpression("*standard_metadata"), "egress_port");
         auto* portStmt = new IR::AssignmentStatement(egressPortVar, getTargetOutputPortVar());
         cmds.emplace_back(portStmt);
+        // TODO: We have not implemented multi cast yet.
+        // Drop the packet if the multicast group is set.
+        const IR::Expression* mcastGroupVar = new IR::Member(
+            IR::getBitType(16), new IR::PathExpression("*standard_metadata"), "mcast_grp");
+        mcastGroupVar = new IR::Neq(mcastGroupVar, IR::getConstant(IR::getBitType(16), 0));
+        auto* mcastStmt = new IR::IfStatement(mcastGroupVar, dropStmt, nullptr);
+        cmds.emplace_back(mcastStmt);
     }
     // After some specific pipelines (deparsers), we have to append the remaining packet
     // payload. We use an extern call for this.
@@ -136,8 +146,6 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
             Utils::generateInternalMethodCall("prepend_emit_buffer", {}));
         cmds.emplace_back(stmt);
         // Also check whether we need to drop the packet.
-        auto* dropStmt =
-            new IR::MethodCallStatement(Utils::generateInternalMethodCall("drop_and_exit", {}));
         const auto* dropCheck = new IR::IfStatement(dropIsActive(), dropStmt, nullptr);
         cmds.emplace_back(dropCheck);
         const auto* recirculateCheck =
