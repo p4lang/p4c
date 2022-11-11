@@ -102,14 +102,14 @@ target_link_libraries(
 )
 
 if(ENABLE_GTESTS)
-  add_executable(gtest-p4testgen ${TESTGEN_GTEST_SOURCES})
+  add_executable(testgen-gtest ${TESTGEN_GTEST_SOURCES})
   target_include_directories(
-    gtest-p4testgen
+    testgen-gtest
     PRIVATE ${P4C_SOURCE_DIR}/test/frameworks/gtest/googlemock/include
     PRIVATE ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include
   )
   target_link_libraries(
-    gtest-p4testgen
+    testgen-gtest
     PRIVATE p4testgen
     PRIVATE gtest
   )
@@ -123,16 +123,16 @@ if(ENABLE_GTESTS)
     ${P4C_BINARY_DIR}/\$$incl ${CMAKE_CURRENT_BINARY_DIR}/\$$incl \;
     done
   )
-  add_dependencies(gtest-p4testgen linkgtest)
+  add_dependencies(testgen-gtest linkgtest)
 
   if(ENABLE_TESTING)
     add_definitions("-DGTEST_HAS_PTHREAD=0")
-    add_test(NAME gtest-p4testgen COMMAND gtest-p4testgen)
-    set_tests_properties(gtest-p4testgen PROPERTIES LABELS "gtest-testgen")
+    add_test(NAME testgen-gtest COMMAND testgen-gtest)
+    set_tests_properties(testgen-gtest PROPERTIES LABELS "gtest-testgen")
   endif()
 
   if(ENABLE_IWYU)
-    set_property(TARGET gtest-p4testgen PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
+    set_property(TARGET testgen-gtest PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
   endif()
 endif()
 

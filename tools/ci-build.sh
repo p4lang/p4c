@@ -85,14 +85,12 @@ function install_ptf_ebpf_test_deps() (
     apt-get install -y --no-install-recommends ${LINUX_TOOLS}
   fi
 
-  git clone --recursive https://github.com/P4-Research/psabpf.git /tmp/psabpf
-  cd /tmp/psabpf
-  # FIXME: psabpf is under heavy development, later use git tags when it will be ready to use
-  git reset --hard edacd0d
+  git clone --depth 1 --recursive --branch v0.2.0 https://github.com/NIKSS-vSwitch/nikss /tmp/nikss
+  cd /tmp/nikss
   ./build_libbpf.sh
   mkdir build
   cd build
-  cmake ..
+  cmake -DCMAKE_BUILD_TYPE=Release ..
   make "-j$(nproc)"
   make install
 

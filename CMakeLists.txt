@@ -453,22 +453,19 @@ install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 
 # cpplint
-list ( SORT CPPLINT_FILES )
-set (CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
-set (CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
-add_custom_target(cpplint
-  COMMAND ${CPPLINT_CMD} ${CPPLINT_ARGS} ${CPPLINT_FILES}
-  WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-  COMMENT "cpplint")
-add_custom_target(cpplint-quiet
-  COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
-  WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-  COMMENT "cpplint quietly")
-# add cpplint as a test so that make check can proceed in parallel
-add_test(NAME cpplint
-  COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
-  WORKING_DIRECTORY ${P4C_SOURCE_DIR})
-set_tests_properties(cpplint PROPERTIES LABELS cpplint)
+if(DEFINED CPPLINT_FILES)
+  list ( SORT CPPLINT_FILES )
+  set (CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
+  set (CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
+  add_custom_target(cpplint
+    COMMAND ${CPPLINT_CMD} ${CPPLINT_ARGS} ${CPPLINT_FILES}
+    WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+    COMMENT "cpplint")
+  add_custom_target(cpplint-quiet
+    COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
+    WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+    COMMENT "cpplint quietly")
+endif()
 
 # tags, etags
 set (CTAGS_DIRS backends extensions frontends ir lib tools midend)

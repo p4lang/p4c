@@ -15,7 +15,7 @@ from pathlib import Path
 
 # This is the path of the pre-commit file.
 FILE_DIR = Path(__file__).resolve().parent
-TESTGEN_DIR = FILE_DIR.parent.parent
+TOOLS_DIR = FILE_DIR.parent
 
 # The githook is executed from this location.
 repo = os.getcwd()
@@ -61,7 +61,7 @@ class Linter:
         if len(files) == 0:
             return 0
 
-        linter = [os.path.join(TESTGEN_DIR, 'scripts', 'tools', 'cpplint.py'),
+        linter = [os.path.join(TOOLS_DIR, 'cpplint.py'),
                   '--quiet', '--root', self._basedir]
         args = linter + files
         if self._verbose:

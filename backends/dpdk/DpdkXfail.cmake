@@ -142,3 +142,9 @@ p4c_add_xfail_reason("dpdk"
   testdata/p4_16_samples/pna-dpdk-direct-counter-err-4.p4
   testdata/p4_16_samples/pna-dpdk-direct-meter-err-3.p4
   )
+
+p4c_add_xfail_reason("dpdk"
+   "Learner table .* must have all exact match keys"
+   testdata/p4_16_samples/pna-add-on-miss-err1.p4
+   testdata/p4_16_samples/pna-dpdk-table-key-consolidation-learner-2.p4
+  )

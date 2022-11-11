@@ -244,7 +244,7 @@ class ActionSelectorEmptyGroupActionPSATest(ActionSelectorTest):
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
 
-        cmd = "psabpf-ctl action-selector empty-group-action pipe {} MyIC_as action id 1 data {}".format(TEST_PIPELINE_ID, DP_PORTS[2])
+        cmd = "nikss-ctl action-selector empty-group-action pipe {} MyIC_as action id 1 data {}".format(TEST_PIPELINE_ID, DP_PORTS[2])
         self.exec_ns_cmd(cmd, "empty group action update failed")
 
         testutils.send_packet(self, PORT0, pkt)

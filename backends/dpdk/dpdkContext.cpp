@@ -126,7 +126,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
             struct externAttributes externAttr;
             externAttr.externalName = ed->controlPlaneName();
             externAttr.externType = externTypeName;
-            if (externTypeName == "Counter" || "DirectCounter") {
+            if (externTypeName == "Counter" || externTypeName == "DirectCounter") {
                 unsigned maxArgNum = externTypeName == "Counter"? 2 : 1;
                 int typeArgNum = maxArgNum - 1;
                 if (ed->arguments->size() != maxArgNum) {
@@ -150,7 +150,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                         break;
                 }
             }
-            if (externTypeName == "DirectMeter" || "DirectCounter") {
+            if (externTypeName == "DirectMeter" || externTypeName == "DirectCounter") {
                 auto ownerTable = ::get(structure->direct_resource_map, ed->name.name);
                 auto tableAttr = ::get(tableAttrmap, ownerTable->name.originalName);
                 externAttr.table_id = tableAttr.tableHandle;
