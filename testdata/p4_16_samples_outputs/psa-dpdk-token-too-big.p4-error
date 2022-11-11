@@ -1,0 +1,3 @@
+psa-dpdk-token-too-big.p4(149): [--Wwarn=ignore-prop] warning: Unknown table property: action_run
+        action_run = vxlan_encap_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk;
+        ^^^^^^^^^^

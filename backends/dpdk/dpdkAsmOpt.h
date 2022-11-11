@@ -290,6 +290,11 @@ class ShortenTokenLength : public Transform {
         ls->label = shortenString(ls->label);
         return ls;
     }
+
+    const IR::Node* preorder(IR::DpdkJmpActionStatement* jas) override {
+        jas->action = shortenString(jas->action);
+        return jas;
+    }
 };
 
 /// This pass collect use def info by analysing all possible
