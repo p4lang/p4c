@@ -186,6 +186,7 @@ class ParserStateRewriter : public Transform {
             wasOutOfBound = true;
             return expression;
         }
+        state->substitutedIndexes[newExpression->left] = res;
         return newExpression;
     }
 
@@ -258,11 +259,28 @@ class ParserStateRewriter : public Transform {
         return true;
     }
 
+    /// Checks values of the headers stacks which were evaluated.
+    bool checkIndexes(const StackVariableIndexMap& prev, const StackVariableIndexMap& cur) {
+        if (prev.size() != cur.size()) {
+            return false;
+        }
+        for (auto& i : prev) {
+            auto j = cur.find(i.first);
+            if (j == cur.end()) {
+                return false;
+            }
+            if (!i.second->equiv(*j->second)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /// Returns true for current id if indexes of the headers stack
     /// are the same before previous call of the same parser state.
     bool calledWithNoChanges(IR::ID id, const ParserStateInfo* state) {
         CHECK_NULL(state);
-        const auto* prevState = state; 
+        const auto* prevState = state;
         while (prevState->state->name.name != id.name) {
             prevState = prevState->predecessor;
             if (prevState == nullptr) {
@@ -271,11 +289,12 @@ class ParserStateRewriter : public Transform {
         }
         if (prevState->predecessor != nullptr) {
             prevState = prevState->predecessor;
-        } else if (prevState == state) {
+        } else if (prevState == state && state->predecessor == nullptr) {
             // The map should be empty if no next operators in a start.
             return state->statesIndexes.empty();
         }
-        return prevState->statesIndexes == state->statesIndexes;
+        return prevState->statesIndexes == state->statesIndexes &&
+               checkIndexes(prevState->substitutedIndexes, state->substitutedIndexes);
     }
 
     /// Generated new state name
