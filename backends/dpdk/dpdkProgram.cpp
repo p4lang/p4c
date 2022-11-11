@@ -286,12 +286,15 @@ void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expres
                 "%1%, Select expression wider than 64-bit is not permitted", sv);
         return;
     }
+    auto width = sv->type->width_bits();
+    auto byteAlignedWidth = (width + 7) & (~ 7);
     if (auto maskexpr = ce->to<IR::Mask>()) {
         auto left = maskexpr->left;
         auto right = maskexpr->right;
         unsigned value = right->to<IR::Constant>()->asUnsigned() &
                          left->to<IR::Constant>()->asUnsigned();
-        auto tmpDecl = addNewTmpVarToMetadata("tmpMask", sv->type);
+        auto tmpDecl = addNewTmpVarToMetadata("tmpMask",
+                            IR::Type_Bits::get(byteAlignedWidth));
         auto tmpMask = new IR::Member(new IR::PathExpression(IR::ID("m")),
                                       IR::ID(tmpDecl->name.name));
         structure->push_variable(new IR::DpdkDeclaration(tmpDecl));
