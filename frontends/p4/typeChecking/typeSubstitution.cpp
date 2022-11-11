@@ -119,6 +119,17 @@ bool TypeVariableSubstitution::setBindings(const IR::Node* errorLocation,
     return true;
 }
 
+TypeVariableSubstitution* TypeVariableSubstitution::trim() const {
+    TypeVariableSubstitution* result = new TypeVariableSubstitution();
+    for (auto it : binding) {
+        if (it.first->is<IR::Type_InfInt>() &&
+            it.second->is<IR::Type_InfInt>())
+            continue;
+        result->setBinding(it.first, it.second);
+    }
+    return result;
+}
+
 // to call from gdb
 void dump(P4::TypeVariableSubstitution &tvs) { std::cout << tvs << std::endl; }
 void dump(P4::TypeVariableSubstitution *tvs) { std::cout << *tvs << std::endl; }

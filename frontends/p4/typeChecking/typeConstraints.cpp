@@ -38,7 +38,7 @@ TypeVariableSubstitution* TypeConstraints::solve() {
             return nullptr;
     }
     LOG3("Constraint solution:\n" << currentSubstitution);
-    return currentSubstitution;
+    return currentSubstitution->trim();
 }
 
 bool TypeConstraints::isUnifiableTypeVariable(const IR::Type* type) {

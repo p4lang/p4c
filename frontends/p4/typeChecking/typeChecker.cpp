@@ -927,20 +927,22 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Constant* decl) {
     return decl;
 }
 
-// Returns new arguments for constructor, which may have inserted casts
-const IR::Vector<IR::Argument> *
+// Returns the type of the constructed object and
+// new arguments for constructor, which may have inserted casts.
+std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>
 TypeInference::checkExternConstructor(const IR::Node* errorPosition,
                                       const IR::Type_Extern* ext,
                                       const IR::Vector<IR::Argument> *arguments) {
+    auto none = std::pair(nullptr, nullptr);
     auto constructor = ext->lookupConstructor(arguments);
     if (constructor == nullptr) {
         typeError("%1%: type %2% has no matching constructor",
                   errorPosition, ext);
-        return nullptr;
+        return none;
     }
     auto mt = getType(constructor);
     if (mt == nullptr)
-        return nullptr;
+        return none;
     auto methodType = mt->to<IR::Type_Method>();
     BUG_CHECK(methodType != nullptr, "Constructor does not have a method type, but %1%", mt);
     methodType = cloneWithFreshTypeVariables(methodType)->to<IR::Type_Method>();
@@ -952,7 +954,7 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
                 typeError("%1%: extern type %2% with abstract methods cannot be instantiated"
                           " using a constructor call; consider using a declaration",
                           errorPosition, ext);
-                return nullptr;
+                return none;
             }
         }
     }
@@ -970,7 +972,7 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
         auto argType = getType(arg->expression);
         auto paramType = getType(pi);
         if (argType == nullptr || paramType == nullptr)
-            return nullptr;
+            return none;
 
         if (paramType->is<IR::Type_Control>() ||
             paramType->is<IR::Type_Parser>() ||
@@ -983,19 +985,74 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
         args->push_back(argInfo);
     }
 
+    // will always be bound to Type_Void.
     auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), "<returned type>"));
     auto callType = new IR::Type_MethodCall(
         errorPosition->srcInfo, new IR::Vector<IR::Type>(), rettype, args);
-    auto tvs = unify(errorPosition, mt, callType,
+    auto tvs = unify(errorPosition, methodType, callType,
                      "Constructor invocation %1% does not match constructor declaration %2%",
                      { callType, constructor });
     BUG_CHECK(tvs != nullptr || ::errorCount(), "Unification failed with no error");
     if (tvs == nullptr)
-        return nullptr;
+        return none;
+
+    LOG2("Constructor type before specialization " << methodType << " with " << tvs);
+    TypeVariableSubstitutionVisitor substVisitor(tvs);
+    substVisitor.setCalledBy(this);
+    auto specMethodType = methodType->apply(substVisitor);
+    LOG2("Constructor type after specialization " << specMethodType);
+    learn(specMethodType, this);
+    auto canon = getType(specMethodType);
+    if (canon == nullptr)
+        return none;
+
+    auto functionType = specMethodType->to<IR::Type_MethodBase>();
+    BUG_CHECK(functionType != nullptr, "Method type is %1%", specMethodType);
+    if (!functionType->is<IR::Type_Method>())
+        BUG("Unexpected type for function %1%", functionType);
 
     ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-    auto newArgs = cts.convert(arguments);
-    return newArgs;
+    // Arguments may need to be cast, e.g., list expression to a
+    // header type.
+    auto paramIt = functionType->parameters->begin();
+    auto newArgs = new IR::Vector<IR::Argument>();
+    bool changed = false;
+    for (auto arg : *arguments) {
+        cstring argName = arg->name.name;
+        bool named = !argName.isNullOrEmpty();
+        const IR::Parameter* param;
+
+        if (named) {
+            param = functionType->parameters->getParameter(argName);
+        } else {
+            param = *paramIt;
+        }
+
+        auto newExpr = arg->expression;
+        if (param->direction == IR::Direction::In || param->direction == IR::Direction::None) {
+            // This is like an assignment; may make additional conversions.
+            newExpr = assignment(arg, param->type, arg->expression);
+        } else {
+            // Insert casts for 'int' values.
+            newExpr = cts.convert(newExpr)->to<IR::Expression>();
+       }
+        if (::errorCount() > 0)
+            return none;
+        if (newExpr != arg->expression) {
+            LOG2("Changing method argument to " << newExpr);
+            changed = true;
+            newArgs->push_back(new IR::Argument(arg->srcInfo, arg->name, newExpr));
+        } else {
+            newArgs->push_back(arg);
+        }
+        if (!named)
+            ++paramIt;
+    }
+    if (changed)
+        arguments = newArgs;
+    auto objectType = new IR::Type_Extern(ext->srcInfo, ext->name, methodType->typeParameters,
+                                          ext->methods);
+    return std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>(objectType, arguments);
 }
 
 // Return true on success
@@ -1073,6 +1130,14 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
         simpleType = type->to<IR::Type_SpecializedCanonical>()->substituted;
 
     if (auto et = simpleType->to<IR::Type_Extern>()) {
+        auto typeAndArgs = checkExternConstructor(decl, et, decl->arguments);
+        auto newArgs = typeAndArgs.second;
+        type = typeAndArgs.first;
+        if (newArgs == nullptr) {
+            prune();
+            return decl;
+        }
+        decl->arguments = newArgs;
         setType(orig, type);
         setType(decl, type);
 
@@ -1084,14 +1149,6 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
             prune();
             return decl;
         }
-
-        auto args = checkExternConstructor(decl, et, decl->arguments);
-        if (args == nullptr) {
-            prune();
-            return decl;
-        }
-        if (args != decl->arguments)
-            decl->arguments = args;
     } else if (simpleType->is<IR::IContainer>()) {
         if (decl->initializer != nullptr) {
             typeError("%1%: initializers only allowed for extern instances", decl->initializer);
@@ -2737,6 +2794,10 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
                     se->srcInfo, type, se->components);
                 auto result = postorder(sie);  // may insert casts
                 setType(result, st);
+                if (isCompileTimeConstant(se)) {
+                    setCompileTimeConstant(result->to<IR::Expression>());
+                    setCompileTimeConstant(getOriginal<IR::Expression>());
+                }
                 return result;
             } else {
                 typeError("%1%: cast not supported", expression->destType);
@@ -2744,11 +2805,14 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
             }
         } else if (auto le = expression->expr->to<IR::ListExpression>()) {
             if (st->fields.size() == le->size()) {
+                bool isConstant = true;
                 IR::IndexedVector<IR::NamedExpression> vec;
                 for (size_t i = 0; i < st->fields.size(); i++) {
                     auto fieldI = st->fields.at(i);
                     auto compI = le->components.at(i);
                     auto src = assignment(expression, fieldI->type, compI);
+                    if (!isCompileTimeConstant(src))
+                        isConstant = false;
                     vec.push_back(new IR::NamedExpression(fieldI->name, src));
                 }
                 auto setype = castType->getP4Type();
@@ -2756,6 +2820,10 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
                 auto result = new IR::StructExpression(
                     le->srcInfo, setype, setype, vec);
                 setType(result, st);
+                if (isConstant) {
+                    setCompileTimeConstant(result);
+                    setCompileTimeConstant(getOriginal<IR::Expression>());
+                }
                 return result;
             } else {
                 typeError("%1%: destination type expects %2% fields, but source only has %3%",
@@ -3385,7 +3453,7 @@ TypeInference::actionCall(bool inActionList,
     setType(getOriginal(), resultType);
     setType(actionCall, resultType);
     auto tvs = constraints.solve();
-    if (tvs == nullptr)
+    if (tvs == nullptr || errorCount() > 0)
         return actionCall;
     addSubstitutions(tvs);
 
@@ -3668,31 +3736,30 @@ const IR::Node* TypeInference::postorder(IR::ConstructorCallExpression* expressi
         simpleType = type->to<IR::Type_SpecializedCanonical>()->substituted;
 
     if (simpleType->is<IR::Type_Extern>()) {
-        auto args = checkExternConstructor(expression, simpleType->to<IR::Type_Extern>(),
-                                           expression->arguments);
-        if (args == nullptr)
+        auto typeAndArgs = checkExternConstructor(expression, simpleType->to<IR::Type_Extern>(),
+                                                  expression->arguments);
+        auto contType = typeAndArgs.first;
+        auto newArgs = typeAndArgs.second;
+        if (newArgs == nullptr)
             return expression;
-        if (args != expression->arguments)
-            expression = new IR::ConstructorCallExpression(expression->srcInfo,
-                                                           expression->constructedType, args);
-        setType(getOriginal(), type);
-        setType(expression, type);
+        expression->arguments = newArgs;
+        setType(getOriginal(), contType);
+        setType(expression, contType);
     } else if (simpleType->is<IR::IContainer>()) {
         auto typeAndArgs = containerInstantiation(expression, expression->arguments,
                                                   simpleType->to<IR::IContainer>());
-        auto conttype = typeAndArgs.first;
+        auto contType = typeAndArgs.first;
         auto args = typeAndArgs.second;
-        if (conttype == nullptr || args == nullptr)
+        if (contType == nullptr || args == nullptr)
             return expression;
         if (type->is<IR::Type_SpecializedCanonical>()) {
             auto st = type->to<IR::Type_SpecializedCanonical>();
-            conttype = new IR::Type_SpecializedCanonical(
-                type->srcInfo, st->baseType, st->arguments, conttype);
+            contType = new IR::Type_SpecializedCanonical(
+                type->srcInfo, st->baseType, st->arguments, contType);
         }
-        if (args != expression->arguments)
-            expression->arguments = args;
-        setType(expression, conttype);
-        setType(getOriginal(), conttype);
+        expression->arguments = args;
+        setType(expression, contType);
+        setType(getOriginal(), contType);
     } else {
         typeError("%1%: Cannot invoke a constructor on type %2%",
                   expression, type->toString());
