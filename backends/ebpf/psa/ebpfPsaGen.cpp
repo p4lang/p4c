@@ -432,7 +432,8 @@ void PSAEbpfGenerator::emitCRC32LookupTableInitializer(CodeBuilder *builder) con
     builder->appendFormat("u32 %s = 0", keyName.c_str());
     builder->endOfStatement(true);
     builder->emitIndent();
-    builder->appendFormat("struct lookup_tbl_val* %s = BPF_MAP_LOOKUP_ELEM(crc_lookup_tbl, &%s)", valueName.c_str(), keyName.c_str());
+    builder->appendFormat("struct lookup_tbl_val* %s = BPF_MAP_LOOKUP_ELEM(%s, &%s)",
+                          valueName.c_str(), instanceName.c_str(), keyName.c_str());
     builder->endOfStatement(true);
     builder->emitIndent();
     builder->appendFormat("if (%s != NULL)", valueName.c_str());
@@ -458,25 +459,46 @@ void PSAEbpfGenerator::emitCRC32LookupTableInitializer(CodeBuilder *builder) con
     builder->appendFormat("for (u16 i = 0; i <= 255; i++)");
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat("%s->table[256+i] = (%s->table[0+i] >> 8) ^ %s->table[(%s->table[0+i] & 0xFF)]", valueName.c_str(), valueName.c_str(), valueName.c_str(), valueName.c_str());
+    builder->appendFormat("%s->table[256+i] = "
+                          "(%s->table[0+i] >> 8) ^ %s->table[(%s->table[0+i] & 0xFF)]",
+                          valueName.c_str(), valueName.c_str(), valueName.c_str(),
+                          valueName.c_str());
     builder->endOfStatement(true);
     builder->emitIndent();
-    builder->appendFormat("%s->table[512+i] = (%s->table[256+i] >> 8) ^ %s->table[(%s->table[256+i] & 0xFF)]", valueName.c_str(), valueName.c_str(), valueName.c_str(), valueName.c_str());
+    builder->appendFormat("%s->table[512+i] = "
+                          "(%s->table[256+i] >> 8) ^ %s->table[(%s->table[256+i] & 0xFF)]",
+                          valueName.c_str(), valueName.c_str(), valueName.c_str(),
+                          valueName.c_str());
     builder->endOfStatement(true);
     builder->emitIndent();
-    builder->appendFormat("%s->table[768+i] = (%s->table[512+i] >> 8) ^ %s->table[(%s->table[512+i] & 0xFF)]", valueName.c_str(), valueName.c_str(), valueName.c_str(), valueName.c_str());
+    builder->appendFormat("%s->table[768+i] = "
+                          "(%s->table[512+i] >> 8) ^ %s->table[(%s->table[512+i] & 0xFF)]",
+                          valueName.c_str(), valueName.c_str(), valueName.c_str(),
+                          valueName.c_str());
     builder->endOfStatement(true);
     builder->emitIndent();
-    builder->appendFormat("%s->table[1024+i] = (%s->table[768+i] >> 8) ^ %s->table[(%s->table[768+i] & 0xFF)]", valueName.c_str(), valueName.c_str(), valueName.c_str(), valueName.c_str());
+    builder->appendFormat("%s->table[1024+i] = "
+                          "(%s->table[768+i] >> 8) ^ %s->table[(%s->table[768+i] & 0xFF)]",
+                          valueName.c_str(), valueName.c_str(), valueName.c_str(),
+                          valueName.c_str());
     builder->endOfStatement(true);
     builder->emitIndent();
-    builder->appendFormat("%s->table[1280+i] = (%s->table[1024+i] >> 8) ^ %s->table[(%s->table[1024+i] & 0xFF)]", valueName.c_str(), valueName.c_str(), valueName.c_str(), valueName.c_str());
+    builder->appendFormat("%s->table[1280+i] = "
+                          "(%s->table[1024+i] >> 8) ^ %s->table[(%s->table[1024+i] & 0xFF)]",
+                          valueName.c_str(), valueName.c_str(), valueName.c_str(),
+                          valueName.c_str());
     builder->endOfStatement(true);
     builder->emitIndent();
-    builder->appendFormat("%s->table[1536+i] = (%s->table[1280+i] >> 8) ^ %s->table[(%s->table[1280+i] & 0xFF)]", valueName.c_str(), valueName.c_str(), valueName.c_str(), valueName.c_str());
+    builder->appendFormat("%s->table[1536+i] = "
+                          "(%s->table[1280+i] >> 8) ^ %s->table[(%s->table[1280+i] & 0xFF)]",
+                          valueName.c_str(), valueName.c_str(), valueName.c_str(),
+                          valueName.c_str());
     builder->endOfStatement(true);
     builder->emitIndent();
-    builder->appendFormat("%s->table[1792+i] = (%s->table[1536+i] >> 8) ^ %s->table[(%s->table[1536+i] & 0xFF)]", valueName.c_str(), valueName.c_str(), valueName.c_str(), valueName.c_str());
+    builder->appendFormat("%s->table[1792+i] = "
+                          "(%s->table[1536+i] >> 8) ^ %s->table[(%s->table[1536+i] & 0xFF)]",
+                          valueName.c_str(), valueName.c_str(), valueName.c_str(),
+                          valueName.c_str());
     builder->endOfStatement(true);
     builder->blockEnd(true);
     builder->blockEnd(true);
