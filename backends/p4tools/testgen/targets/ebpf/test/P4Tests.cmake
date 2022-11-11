@@ -13,9 +13,9 @@ if(NOT P4TOOLS_EBPF_PATH)
 endif()
 
 if(NOT NIGHTLY)
-  set(EXTRA_OPTS "--print-traces --seed 1000 --max-tests 10")
+  set(EXTRA_OPTS "--strict --print-traces --seed 1000 --max-tests 10")
 else()
-  set(EXTRA_OPTS "--print-traces --max-tests 10")
+  set(EXTRA_OPTS "--strict --print-traces --max-tests 10")
 endif()
 
 set(
