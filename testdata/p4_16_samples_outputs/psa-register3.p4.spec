@@ -42,6 +42,7 @@ header ethernet instanceof ethernet_t
 
 regarray reg_0 size 0x200 initval 0
 
+;oldname:NoAction_1
 action NoAction args none {
 	return
 }

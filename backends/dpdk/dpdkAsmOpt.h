@@ -174,18 +174,23 @@ class ShortenTokenLength : public Transform {
     // 1.30.30 => 63(including dot(.))
     // if id name less than allowedLength keep it same
     cstring shortenString(cstring str, size_t allowedLength = 60) {
-        if (str.size() <= allowedLength)
+        // this for getting rid of suffixes in NoAction_0 or NoAction_1
+        if (str.size() > 8 && str.substr(0, 8) == "NoAction") {
+            newNameMap.insert(std::pair<cstring, cstring>(str, "NoAction"));
+            origNameMap.insert(std::pair<cstring, cstring>("NoAction", str));
+            return "NoAction";
+        } else if (str.size() <= allowedLength)
             return str;
-         auto itr = newNameMap.find(str);
-         if (itr != newNameMap.end())
-             return itr->second;
-         // make sure new string length less or equal allowedLength
-         cstring newStr = str.substr(0, allowedLength - std::to_string(count).size());
-         newStr += std::to_string(count);
-         count++;
-         newNameMap.insert(std::pair<cstring, cstring>(str, newStr));
-         origNameMap.insert(std::pair<cstring, cstring>(newStr, str));
-         return newStr;
+        auto itr = newNameMap.find(str);
+        if (itr != newNameMap.end())
+            return itr->second;
+        // make sure new string length less or equal allowedLength
+        cstring newStr = str.substr(0, allowedLength - std::to_string(count).size());
+        newStr += std::to_string(count);
+        count++;
+        newNameMap.insert(std::pair<cstring, cstring>(str, newStr));
+        origNameMap.insert(std::pair<cstring, cstring>(newStr, str));
+        return newStr;
     }
 
  public:
@@ -272,9 +277,6 @@ class ShortenTokenLength : public Transform {
             auto methodCallExpr = ale->expression->to<IR::MethodCallExpression>();
             auto pathExpr = methodCallExpr->method->to<IR::PathExpression>();
             auto path0 = pathExpr->path->clone();
-            // this for getting rid of NoAction_0 or NoAction_1
-            if (path0->name.name.find("NoAction"))
-                path0 = new IR::Path("NoAction");
             path0->name = shortenString(path0->name);
             new_al.push_back(new IR::ActionListElement(ale->srcInfo,
                         ale->annotations,
@@ -293,9 +295,6 @@ class ShortenTokenLength : public Transform {
         auto methodCallExpr = t->default_action->to<IR::MethodCallExpression>();
         auto pathExpr = methodCallExpr->method->to<IR::PathExpression>();
         auto path0 = pathExpr->path->clone();
-        // this for getting rid of NoAction_0 or NoAction_1
-        if (path0->name.name.find("NoAction"))
-            path0 = new IR::Path("NoAction");
         path0->name = shortenString(path0->name);
         t->default_action = new IR::MethodCallExpression(
                                 methodCallExpr->srcInfo,

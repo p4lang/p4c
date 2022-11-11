@@ -36,6 +36,7 @@ struct user_meta_data_t {
 }
 metadata instanceof user_meta_data_t
 
+;oldname:NoAction_1
 action NoAction args none {
 	return
 }

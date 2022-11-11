@@ -90,6 +90,7 @@ regarray reg_0 size 0x400 initval 0
 
 metarray meter0_0 size 0x400
 
+;oldname:NoAction_1
 action NoAction args none {
 	return
 }
