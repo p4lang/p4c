@@ -44,6 +44,8 @@ class PTF : public TF {
     PTF& operator=(PTF&&) = delete;
 
     PTF(cstring testName, boost::optional<unsigned int> seed);
+
+    /// Produce a PTF test.
     void outputTest(const TestSpec* spec, cstring selectedBranches, size_t testIdx,
                     float currentCoverage) override;
 
@@ -59,9 +61,6 @@ class PTF : public TF {
     /// preceding tests.
     void emitTestcase(const TestSpec* testSpec, cstring selectedBranches, size_t testId,
                       const std::string& testCase, float currentCoverage);
-
-    /// Converts the traces of this test into a string representation and Inja object.
-    static inja::json getTrace(const TestSpec* testSpec);
 
     /// Converts all the control plane objects into Inja format.
     static inja::json getControlPlane(const TestSpec* testSpec);

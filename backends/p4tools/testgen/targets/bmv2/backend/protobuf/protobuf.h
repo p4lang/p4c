@@ -11,7 +11,7 @@
 #include <boost/optional/optional.hpp>
 #include <inja/inja.hpp>
 
-/// Inja
+#include "control-plane/p4RuntimeArchStandard.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
@@ -23,6 +23,10 @@ namespace P4Tools {
 namespace P4Testgen {
 
 namespace Bmv2 {
+
+using P4::ControlPlaneAPI::p4rt_id_t;
+using P4::ControlPlaneAPI::P4RuntimeSymbolType;
+using P4::ControlPlaneAPI::Standard::SymbolType;
 
 /// Extracts information from the @testSpec to emit a Protobuf test case.
 class Protobuf : public TF {
@@ -42,6 +46,7 @@ class Protobuf : public TF {
 
     Protobuf(cstring testName, boost::optional<unsigned int> seed);
 
+    /// Produce a Protobuf test.
     void outputTest(const TestSpec* spec, cstring selectedBranches, size_t testIdx,
                     float currentCoverage) override;
 
@@ -57,9 +62,6 @@ class Protobuf : public TF {
     /// preceding tests.
     void emitTestcase(const TestSpec* testSpec, cstring selectedBranches, size_t testId,
                       const std::string& testCase, float currentCoverage);
-
-    /// Converts the traces of this test into a string representation and Inja object.
-    static inja::json getTrace(const TestSpec* testSpec);
 
     /// Converts all the control plane objects into Inja format.
     static inja::json getControlPlane(const TestSpec* testSpec);
@@ -77,6 +79,16 @@ class Protobuf : public TF {
     /// Helper function for the control plane table inja objects.
     static inja::json getControlPlaneForTable(const std::map<cstring, const FieldMatch>& matches,
                                               const std::vector<ActionArg>& args);
+
+    /// @return the id allocated to the object through the @id annotation if any, or
+    /// boost::none.
+    static boost::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated* node);
+
+    /// @return the value of any P4 '@id' annotation @declaration may have, and
+    /// ensure that the value is correct with respect to the P4Runtime
+    /// specification. The name 'externalId' is in analogy with externalName().
+    static boost::optional<p4rt_id_t> externalId(const P4RuntimeSymbolType& type,
+                                                 const IR::IDeclaration* declaration);
 };
 
 }  // namespace Bmv2

@@ -43,37 +43,27 @@ STF::STF(cstring testName, boost::optional<unsigned int> seed = boost::none) : T
     cstring testNameOnly(testFile.stem().c_str());
 }
 
-inja::json STF::getTrace(const TestSpec* testSpec) {
-    inja::json traceList = inja::json::array();
-    const auto* traces = testSpec->getTraces();
-    if ((traces != nullptr) && !traces->empty()) {
-        for (const auto& trace : *traces) {
-            std::stringstream ss;
-            ss << *trace;
-            traceList.push_back(ss.str());
-        }
-    }
-    return traceList;
-}
-
 inja::json STF::getControlPlane(const TestSpec* testSpec) {
     inja::json controlPlaneJson = inja::json::object();
+
+    // Map of actionProfiles and actionSelectors for easy reference.
+    std::map<cstring, cstring> apAsMap;
 
     auto tables = testSpec->getTestObjectCategory("tables");
     if (!tables.empty()) {
         controlPlaneJson["tables"] = inja::json::array();
     }
-    for (auto const& testObject : tables) {
+    for (const auto& testObject : tables) {
         inja::json tblJson;
         tblJson["table_name"] = testObject.first.c_str();
         const auto* const tblConfig = testObject.second->checkedTo<TableConfig>();
-        auto const* tblRules = tblConfig->getRules();
+        const auto* tblRules = tblConfig->getRules();
         tblJson["rules"] = inja::json::array();
         for (const auto& tblRule : *tblRules) {
             inja::json rule;
-            auto const* matches = tblRule.getMatches();
-            auto const* actionCall = tblRule.getActionCall();
-            auto const* actionArgs = actionCall->getArgs();
+            const auto* matches = tblRule.getMatches();
+            const auto* actionCall = tblRule.getActionCall();
+            const auto* actionArgs = actionCall->getArgs();
             rule["action_name"] = actionCall->getActionName().c_str();
             auto j = getControlPlaneForTable(*matches, *actionArgs);
             rule["rules"] = std::move(j);
@@ -95,9 +85,9 @@ inja::json STF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
     rulesJson["act_args"] = inja::json::array();
     rulesJson["needs_priority"] = false;
 
-    for (auto const& match : matches) {
+    for (const auto& match : matches) {
         auto fieldName = match.first;
-        auto const& fieldMatch = match.second;
+        const auto& fieldMatch = match.second;
 
         // Replace header stack indices hdr[<index>] with hdr$<index>.
         // TODO: This is a limitation of the stf parser. We should fix this.
