@@ -44,11 +44,12 @@ The TC-based design of PSA for eBPF is depicted in Figure below.
 The NTK packet path allows integrating P4/PSA programs for eBPF with the standard Linux kernel stack. The main use case is handling 
 ICMP/ARP requests and sending packet to the userspace process listening on a socket.
 
-The NTK path is enforced if `drop` is set to `false` and `egress_port` is left unspecified or set to 0. 
+The NTK path is enforced if `drop` is set to `false` and `egress_port` is left unspecified or set to 0 (it's a special implicit port number that forwards packets to the kernel stack).
+Since packets can be modified in the PSA ingress pipeline before they are sent to the kernel stack, a P4 programmer should make sure that packets use standard headers and are properly formatted.
+Otherwise, the kernel stack will drop them. 
 
 **NOTE!** There is no symmetric packet path *from kernel* - once a packet enters the kernel network stack, it is further processed exclusively by the kernel. 
 As a consequence, all packets that have not been processed by the PSA Ingress pipeline (e.g., packets sent from userspace application) will not be handled by the PSA Egress pipeline!
-
 
 ### NFP (Normal Packet From Port)
 
