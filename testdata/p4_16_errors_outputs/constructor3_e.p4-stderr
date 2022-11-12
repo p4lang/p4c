@@ -2,7 +2,7 @@ constructor3_e.p4(22): [--Werror=type-error] error: e
     E(true) e;
             ^
   ---- Actual error:
-  Cannot unify type 'bool' with type 'bit<1>'
+  Cannot cast implicitly type 'bool' to type 'bit<1>'
   ---- Originating from:
 constructor3_e.p4(22): Type of argument 'true' (bool) does not match type of parameter 'x' (bit<1>)
       E(true) e;

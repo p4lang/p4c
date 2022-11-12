@@ -55,9 +55,8 @@ class MissingIdAssigner : public Transform {
 /// computed ID to the node.
 class AddMissingIdAnnotations final : public PassManager {
  public:
-    AddMissingIdAnnotations(
-        ReferenceMap* refMap, TypeMap* typeMap,
-        const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface* archBuilder);
+    AddMissingIdAnnotations(ReferenceMap* refMap, TypeMap* typeMap,
+                            const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface* archBuilder);
 };
 
 }  // namespace P4

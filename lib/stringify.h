@@ -21,7 +21,7 @@ limitations under the License.
 
 #include <stdint.h>
 #include <cstdarg>
-#include "gmputil.h"
+#include "big_int_util.h"
 #include "cstring.h"
 #include "stringref.h"
 

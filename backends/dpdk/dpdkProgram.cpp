@@ -518,7 +518,6 @@ bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
 
 /* This function checks if a table satisfies the DPDK limitations mentioned below:
      - Only one LPM match field allowed per table.
-     - Maximum allowed key size of header/metadata field is 64 bits.
      - If there is a key field with lpm match kind, the other match fields, if any,
        must all be exact match.
 */
@@ -532,13 +531,6 @@ bool ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
     }
 
     for (auto key : keys->keyElements) {
-        /* Maximum allowed key size of header/metadata field is 64 bits */
-        if (key->expression->type->width_bits() > DPDK_MAX_HEADER_METADATA_FIELD_SIZE) {
-            ::error(ErrorType::ERR_UNEXPECTED, "Key field wider than 64-bit is not permitted %1%",
-                    key->expression);
-            return false;
-        }
-
         auto matchKind = key->matchType->toString();
         if (matchKind == "lpm") {
             ++lpmCount;

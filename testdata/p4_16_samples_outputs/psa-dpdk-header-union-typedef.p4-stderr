@@ -1,0 +1,12 @@
+psa-dpdk-header-union-typedef.p4(118): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyID' terminates
+    out clone_t a,
+                ^
+psa-dpdk-header-union-typedef.p4(116)
+control MyID(
+        ^^^^
+psa-dpdk-header-union-typedef.p4(131): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyED' terminates
+    out clone_t a,
+                ^
+psa-dpdk-header-union-typedef.p4(129)
+control MyED(
+        ^^^^

@@ -52,9 +52,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".h") 
+    @name(".h")
     ipv4_t[2]       h;
-    @name(".sh") 
+    @name(".sh")
     simpleipv4_t[2] sh;
 }
 
@@ -102,4 +102,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

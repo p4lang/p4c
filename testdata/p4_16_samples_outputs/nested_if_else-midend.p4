@@ -2,27 +2,25 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> macAddr_t;
-typedef bit<32> ip4Addr_t;
 header ethernet_t {
-    macAddr_t dstAddr;
-    macAddr_t srcAddr;
-    bit<16>   etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
-    ip4Addr_t srcAddr;
-    ip4Addr_t dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 struct metadata {
@@ -64,7 +62,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name("MyIngress.ipv4_lpm") table ipv4_lpm_0 {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             ipv4_forward();
@@ -97,4 +95,3 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

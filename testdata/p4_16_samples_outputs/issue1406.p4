@@ -46,4 +46,3 @@ control TestDeparser(packet_out b, in headers_t hdr) {
 }
 
 V1Switch(TestParser(), TestVerifyChecksum(), TestIngress(), TestEgress(), TestComputeChecksum(), TestDeparser()) main;
-

@@ -18,7 +18,7 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/fromv1.0/v1model.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 
 namespace BMV2 {
 
@@ -66,23 +66,30 @@ const IR::Node* LowerExpressions::postorder(IR::Cast* expression) {
         auto zero = new IR::Constant(srcType, 0);
         auto cmp = new IR::Neq(expression->srcInfo, expression->expr, zero);
         typeMap->setType(cmp, destType);
+        typeMap->setType(zero, srcType);
         LOG3("Replaced " << expression << " with " << cmp);
         return cmp;
     } else if (destType->is<IR::Type_Bits>() && srcType->is<IR::Type_Boolean>()) {
+        auto one = new IR::Constant(destType, 1);
+        auto zero = new IR::Constant(destType, 0);
         auto mux = new IR::Mux(expression->srcInfo, expression->expr,
-                               new IR::Constant(destType, 1),
-                               new IR::Constant(destType, 0));
+                               one,
+                               zero);
         typeMap->setType(mux, destType);
+        typeMap->setType(one, destType);
+        typeMap->setType(zero, destType);
         LOG3("Replaced " << expression << " with " << mux);
         return mux;
     } else if (destType->width_bits() < srcType->width_bits()) {
         // explicitly discard un needed bits from src
         auto one = new IR::Constant(srcType, 1);
-        auto shl = new IR::Shl(one->srcInfo, one, new IR::Constant(destType->width_bits()));
-        auto mask = new IR::Sub(shl->srcInfo, shl, new IR::Constant(1));
+        auto shift_value = new IR::Constant(new IR::Type_InfInt(), destType->width_bits());
+        auto shl = new IR::Shl(one->srcInfo, one, shift_value);
+        auto mask = new IR::Sub(shl->srcInfo, shl, one);
         auto and0 = new IR::BAnd(expression->srcInfo, expression->expr, mask);
         auto cast0 = new IR::Cast(expression->srcInfo, destType, and0);
         typeMap->setType(one, srcType);
+        typeMap->setType(shift_value, shift_value->type);
         typeMap->setType(shl, srcType);
         typeMap->setType(mask, srcType);
         typeMap->setType(and0, srcType);
@@ -110,8 +117,10 @@ const IR::Node* LowerExpressions::postorder(IR::Slice* expression) {
     BUG_CHECK(e0type->is<IR::Type_Bits>(), "%1%: expected a bit<> type", e0type);
     const IR::Expression* expr;
     if (l != 0) {
-        expr = new IR::Shr(expression->e0->srcInfo, expression->e0, new IR::Constant(l));
+        auto one = new IR::Constant(new IR::Type_InfInt(), l);
+        expr = new IR::Shr(expression->e0->srcInfo, expression->e0, one);
         typeMap->setType(expr, e0type);
+        typeMap->setType(one, one->type);
     } else {
         expr = expression->e0;
     }
@@ -143,8 +152,8 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
     unsigned sizeofb = type->to<IR::Type_Bits>()->size;
     auto cast0 = new IR::Cast(expression->left->srcInfo, resulttype, expression->left);
     auto cast1 = new IR::Cast(expression->right->srcInfo, resulttype, expression->right);
-
-    auto sh = new IR::Shl(cast0->srcInfo, cast0, new IR::Constant(sizeofb));
+    auto sizefb0 = new IR::Constant(new IR::Type_InfInt(), sizeofb);
+    auto sh = new IR::Shl(cast0->srcInfo, cast0, sizefb0);
     big_int m = Util::maskFromSlice(sizeofb, 0);
     auto mask = new IR::Constant(expression->right->srcInfo,
                                  resulttype, m, 16);
@@ -155,6 +164,8 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
     typeMap->setType(result, resulttype);
     typeMap->setType(sh, resulttype);
     typeMap->setType(and0, resulttype);
+    typeMap->setType(mask, resulttype);
+    typeMap->setType(sizefb0, sizefb0->type);
     LOG3("Replaced " << expression << " with " << result);
     return result;
 }

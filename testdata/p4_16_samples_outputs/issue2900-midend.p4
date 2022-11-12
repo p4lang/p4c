@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <pna.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -29,7 +28,7 @@ struct headers_t {
 }
 
 struct main_metadata_t {
-    PortId_t dst_port;
+    bit<32> dst_port;
 }
 
 control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_input_metadata_t istd, inout pna_pre_output_metadata_t ostd) {
@@ -58,9 +57,9 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t meta, in pna_
     }
     @name("MainControlImpl.clb_pinned_flows") table clb_pinned_flows_0 {
         key = {
-            key_0            : exact @name("ipv4_addr_0") ;
-            key_1            : exact @name("ipv4_addr_1") ;
-            hdr.ipv4.protocol: exact @name("hdr.ipv4.protocol") ;
+            key_0            : exact @name("ipv4_addr_0");
+            key_1            : exact @name("ipv4_addr_1");
+            hdr.ipv4.protocol: exact @name("hdr.ipv4.protocol");
         }
         actions = {
             NoAction_1();
@@ -115,4 +114,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

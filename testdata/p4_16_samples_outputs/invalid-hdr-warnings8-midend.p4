@@ -14,91 +14,169 @@ header_union U {
 control ct(inout bit<32> param);
 package top(ct _ct);
 control c(inout bit<32> x) {
-    @name("c.u") U u_0;
+    H1 u_0_h1;
+    H2 u_0_h2;
     @name("c.hs") H1[2] hs_0;
     @name("c.us") U[2] us_0;
-    @name("c.u1") U u1_2;
+    H1 u1_2_h1;
+    H2 u1_2_h2;
     @name("c.hs1") H1[2] hs1_2;
     @name("c.us1") U[2] us1_2;
-    @name("c.u1") U u1_3;
+    H1 u1_3_h1;
+    H2 u1_3_h2;
     @name("c.hs1") H1[2] hs1_3;
     @name("c.us1") U[2] us1_3;
-    @name("c.u1") U u1_5;
+    H1 u1_5_h1;
+    H2 u1_5_h2;
     @name("c.hs1") H1[2] hs1_5;
     @name("c.us1") U[2] us1_5;
-    @name("c.u1") U u1_6;
+    H1 u1_6_h1;
+    H2 u1_6_h2;
     @name("c.hs1") H1[2] hs1_6;
     @name("c.us1") U[2] us1_6;
     @name("c.inout_action2") action inout_action2() {
-        u1_5.h1 = u_0.h1;
-        u1_5.h2 = u_0.h2;
-        hs1_5 = hs_0;
-        us1_5 = us_0;
-        u1_2.h1 = u_0.h1;
-        u1_2.h2 = u_0.h2;
-        hs1_2 = hs_0;
-        us1_2 = us_0;
-        u1_3.h1.a = 32w1;
-        u1_3.h2.a = 32w1;
+        u1_3_h1.setValid();
+        u1_3_h1.a = 32w1;
+        u1_3_h2.setInvalid();
+        u1_3_h2.setValid();
+        u1_3_h2.a = 32w1;
+        u1_3_h1.setInvalid();
         hs1_3[0].a = 32w1;
         hs1_3[1].a = 32w1;
+        us1_3[0].h1.setValid();
         us1_3[0].h1.a = 32w1;
+        us1_3[0].h2.setInvalid();
+        us1_3[0].h2.setValid();
         us1_3[0].h2.a = 32w1;
-        u1_3.h1.setValid();
-        u1_3.h2.setValid();
+        us1_3[0].h1.setInvalid();
+        u1_3_h1.setValid();
+        u1_3_h2.setInvalid();
+        u1_3_h2.setValid();
+        u1_3_h1.setInvalid();
         hs1_3[0].setValid();
         hs1_3[1].setValid();
         us1_3[0].h1.setValid();
+        us1_3[0].h2.setInvalid();
         us1_3[0].h2.setValid();
-        u1_2.h1 = u1_3.h1;
-        u1_2.h2 = u1_3.h2;
+        us1_3[0].h1.setInvalid();
+        if (u1_3_h1.isValid()) {
+            u1_2_h1.setValid();
+            u1_2_h1 = u1_3_h1;
+            u1_2_h2.setInvalid();
+        } else {
+            u1_2_h1.setInvalid();
+        }
+        if (u1_3_h2.isValid()) {
+            u1_2_h2.setValid();
+            u1_2_h2 = u1_3_h2;
+            u1_2_h1.setInvalid();
+        } else {
+            u1_2_h2.setInvalid();
+        }
         hs1_2 = hs1_3;
         us1_2 = us1_3;
-        u1_2.h1.a = 32w1;
-        u1_2.h2.a = 32w1;
+        u1_2_h1.setValid();
+        u1_2_h1.a = 32w1;
+        u1_2_h2.setInvalid();
+        u1_2_h2.setValid();
+        u1_2_h2.a = 32w1;
+        u1_2_h1.setInvalid();
         hs1_2[0].a = 32w1;
         hs1_2[1].a = 32w1;
-        us1_2[0].h1.a = 32w1;
-        us1_2[0].h2.a = 32w1;
-        hs1_2[0].setInvalid();
-        u1_2.h1.setValid();
         us1_2[0].h1.setValid();
-        u1_5.h1 = u1_2.h1;
-        u1_5.h2 = u1_2.h2;
+        us1_2[0].h1.a = 32w1;
+        us1_2[0].h2.setInvalid();
+        us1_2[0].h2.setValid();
+        us1_2[0].h2.a = 32w1;
+        us1_2[0].h1.setInvalid();
+        hs1_2[0].setInvalid();
+        u1_2_h1.setValid();
+        u1_2_h2.setInvalid();
+        us1_2[0].h1.setValid();
+        us1_2[0].h2.setInvalid();
+        if (u1_2_h1.isValid()) {
+            u1_5_h1.setValid();
+            u1_5_h1 = u1_2_h1;
+            u1_5_h2.setInvalid();
+        } else {
+            u1_5_h1.setInvalid();
+        }
+        if (u1_2_h2.isValid()) {
+            u1_5_h2.setValid();
+            u1_5_h2 = u1_2_h2;
+            u1_5_h1.setInvalid();
+        } else {
+            u1_5_h2.setInvalid();
+        }
         hs1_5 = hs1_2;
         us1_5 = us1_2;
-        u1_5.h1.a = 32w1;
-        u1_5.h2.a = 32w1;
+        u1_5_h1.setValid();
+        u1_5_h1.a = 32w1;
+        u1_5_h2.setInvalid();
+        u1_5_h2.setValid();
+        u1_5_h2.a = 32w1;
+        u1_5_h1.setInvalid();
         hs1_5[0].a = 32w1;
         hs1_5[1].a = 32w1;
+        us1_5[0].h1.setValid();
         us1_5[0].h1.a = 32w1;
+        us1_5[0].h2.setInvalid();
+        us1_5[0].h2.setValid();
         us1_5[0].h2.a = 32w1;
+        us1_5[0].h1.setInvalid();
         us1_5[1w1].h1.setInvalid();
         us1_5[1w1].h2.setValid();
-        u_0.h1 = u1_5.h1;
-        u_0.h2 = u1_5.h2;
+        us1_5[1w1].h1.setInvalid();
+        if (u1_5_h1.isValid()) {
+            u_0_h1.setValid();
+            u_0_h1 = u1_5_h1;
+            u_0_h2.setInvalid();
+        } else {
+            u_0_h1.setInvalid();
+        }
+        if (u1_5_h2.isValid()) {
+            u_0_h2.setValid();
+            u_0_h2 = u1_5_h2;
+            u_0_h1.setInvalid();
+        } else {
+            u_0_h2.setInvalid();
+        }
         hs_0 = hs1_5;
         us_0 = us1_5;
     }
     @name("c.xor") action xor() {
-        u1_6.h1 = u_0.h1;
-        u1_6.h2 = u_0.h2;
+        if (u_0_h1.isValid()) {
+            u1_6_h1.setValid();
+            u1_6_h1 = u_0_h1;
+            u1_6_h2.setInvalid();
+        } else {
+            u1_6_h1.setInvalid();
+        }
+        if (u_0_h2.isValid()) {
+            u1_6_h2.setValid();
+            u1_6_h2 = u_0_h2;
+            u1_6_h1.setInvalid();
+        } else {
+            u1_6_h2.setInvalid();
+        }
         hs1_6 = hs_0;
         us1_6 = us_0;
-        x = u1_6.h1.a ^ u1_6.h2.a ^ hs1_6[0].a ^ hs1_6[1].a ^ us1_6[0].h1.a ^ us1_6[0].h2.a ^ us1_6[1].h1.a ^ us1_6[1].h2.a;
+        x = u1_6_h1.a ^ u1_6_h2.a ^ hs1_6[0].a ^ hs1_6[1].a ^ us1_6[0].h1.a ^ us1_6[0].h2.a ^ us1_6[1].h1.a ^ us1_6[1].h2.a;
     }
     @hidden action invalidhdrwarnings8l13() {
-        u_0.h1.setInvalid();
-        u_0.h2.setInvalid();
+        u_0_h1.setInvalid();
+        u_0_h2.setInvalid();
         hs_0[0].setInvalid();
         hs_0[1].setInvalid();
         us_0[0].h1.setInvalid();
         us_0[0].h2.setInvalid();
         us_0[1].h1.setInvalid();
         us_0[1].h2.setInvalid();
-        u_0.h1.setValid();
+        u_0_h1.setValid();
+        u_0_h2.setInvalid();
         hs_0[0].setValid();
         us_0[0].h1.setValid();
+        us_0[0].h2.setInvalid();
     }
     @hidden table tbl_invalidhdrwarnings8l13 {
         actions = {
@@ -126,4 +204,3 @@ control c(inout bit<32> x) {
 }
 
 top(c()) main;
-

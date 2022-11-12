@@ -21,4 +21,3 @@ control c(out bit<32> x) {
 control Simpler(out bit<32> x);
 package top(Simpler ctr);
 top(c()) main;
-

@@ -81,7 +81,6 @@ control PreControlImpl(in headers_t hdr, inout local_metadata_t meta, in pna_pre
 control main_control(inout headers_t hdr, inout local_metadata_t local_metadata, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     @name("main_control.tmp") bool tmp;
     @name("main_control.istd_0") pna_main_input_metadata_t istd_1;
-    @name("main_control.hasReturned") bool hasReturned;
     @name("main_control.retval") bool retval;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -92,9 +91,9 @@ control main_control(inout headers_t hdr, inout local_metadata_t local_metadata,
     }
     @name("main_control.tunnel_decap.ipv4_tunnel_term_table") table tunnel_decap_ipv4_tunnel_term_table {
         key = {
-            hdr.outer_ipv4.src_addr       : exact @name("ipv4_src") ;
-            hdr.outer_ipv4.dst_addr       : exact @name("ipv4_dst") ;
-            local_metadata.tunnel.tun_type: exact @name("local_metadata.tunnel.tun_type") ;
+            hdr.outer_ipv4.src_addr       : exact @name("ipv4_src");
+            hdr.outer_ipv4.dst_addr       : exact @name("ipv4_dst");
+            local_metadata.tunnel.tun_type: exact @name("local_metadata.tunnel.tun_type");
         }
         actions = {
             tunnel_decap_decap_outer_ipv4_0();
@@ -107,7 +106,7 @@ control main_control(inout headers_t hdr, inout local_metadata_t local_metadata,
     }
     @name("main_control.tunnel_encap.set_tunnel_encap") table tunnel_encap_set_tunnel_encap {
         key = {
-            istd.input_port: exact @name("istd.input_port") ;
+            istd.input_port: exact @name("istd.input_port");
         }
         actions = {
             tunnel_encap_set_tunnel_0();
@@ -118,8 +117,6 @@ control main_control(inout headers_t hdr, inout local_metadata_t local_metadata,
     }
     apply {
         istd_1 = istd;
-        hasReturned = false;
-        hasReturned = true;
         retval = istd_1.direction == PNA_Direction_t.NET_TO_HOST;
         tmp = retval;
         if (tmp) {
@@ -131,4 +128,3 @@ control main_control(inout headers_t hdr, inout local_metadata_t local_metadata,
 }
 
 PNA_NIC<headers_t, local_metadata_t, headers_t, local_metadata_t>(packet_parser(), PreControlImpl(), main_control(), packet_deparser()) main;
-

@@ -35,6 +35,8 @@ metadata instanceof EMPTY
 
 header ethernet instanceof ethernet_t
 
+regarray counter0_0 size 0x10001 initval 0x0
+
 action NoAction args none {
 	return
 }

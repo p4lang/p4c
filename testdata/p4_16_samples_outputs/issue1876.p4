@@ -30,4 +30,3 @@ control D(packet_out pkt, in H h) {
 }
 
 V1Switch(P(), C(), G(), G(), C(), D()) main;
-

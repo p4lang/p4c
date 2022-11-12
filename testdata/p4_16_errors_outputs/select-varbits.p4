@@ -23,4 +23,3 @@ parser prs(packet_in p, out Headers h) {
 parser P(packet_in p, out Headers h);
 package top(P _p);
 top(prs()) main;
-

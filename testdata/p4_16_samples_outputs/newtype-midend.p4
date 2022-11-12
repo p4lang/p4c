@@ -1,18 +1,16 @@
 #include <core.p4>
 
-typedef bit<32> B32;
-typedef bit<32> N32;
 struct S {
-    B32 b;
-    N32 n;
+    bit<32> b;
+    bit<32> n;
 }
 
 header H {
-    N32 field;
+    bit<32> field;
 }
 
-control c(out B32 x) {
-    @name("c.k") N32 k_0;
+control c(out bit<32> x) {
+    @name("c.k") bit<32> k_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.t") table t_0 {
@@ -20,7 +18,7 @@ control c(out B32 x) {
             NoAction_1();
         }
         key = {
-            k_0: exact @name("k") ;
+            k_0: exact @name("k");
         }
         default_action = NoAction_1();
     }
@@ -50,7 +48,6 @@ control c(out B32 x) {
     }
 }
 
-control e(out B32 x);
+control e(out bit<32> x);
 package top(e _e);
 top(c()) main;
-

@@ -83,4 +83,3 @@ control SimpleDeparser(packet_out pkt, in headers_t hdr) {
 }
 
 V1Switch(OuterParser(), NoVerify(), NoIngress(), NoEgress(), NoCheck(), SimpleDeparser()) main;
-

@@ -38,6 +38,10 @@ struct tbl_set_group_id_arg_t {
 	bit<32> group_id
 }
 
+struct tbl_set_member_id_arg_t {
+	bit<32> member_id
+}
+
 struct user_meta_t {
 	bit<32> psa_ingress_input_metadata_ingress_port
 	bit<8> psa_ingress_output_metadata_drop
@@ -70,12 +74,18 @@ action tbl_set_group_id args instanceof tbl_set_group_id_arg_t {
 	return
 }
 
+action tbl_set_member_id args instanceof tbl_set_member_id_arg_t {
+	mov m.Ingress_as_member_id t.member_id
+	return
+}
+
 table tbl {
 	key {
 		h.ethernet.srcAddr exact
 	}
 	actions {
 		tbl_set_group_id
+		tbl_set_member_id
 		NoAction
 	}
 	default_action NoAction args none 

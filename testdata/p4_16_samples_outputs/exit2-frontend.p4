@@ -21,4 +21,3 @@ control ctrl(out bit<32> c) {
 control noop(out bit<32> c);
 package p(noop _n);
 p(ctrl()) main;
-

@@ -1,27 +1,25 @@
 #include <core.p4>
 #include <ubpf_model.p4>
 
-typedef bit<48> EthernetAddress;
-typedef bit<32> IPv4Address;
 header Ethernet_h {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header IPv4_h {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
-    IPv4Address srcAddr;
-    IPv4Address dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 header mpls_h {
@@ -78,7 +76,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     @name("pipe.upstream_tbl") table upstream_tbl_0 {
         key = {
-            headers.mpls.label: exact @name("headers.mpls.label") ;
+            headers.mpls.label: exact @name("headers.mpls.label");
         }
         actions = {
             mpls_decap();
@@ -88,7 +86,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     @name("pipe.downstream_tbl") table downstream_tbl_0 {
         key = {
-            headers.ipv4.dstAddr: exact @name("headers.ipv4.dstAddr") ;
+            headers.ipv4.dstAddr: exact @name("headers.ipv4.dstAddr");
         }
         actions = {
             mpls_encap();
@@ -123,4 +121,3 @@ control dprs(packet_out packet, in Headers_t headers) {
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
-

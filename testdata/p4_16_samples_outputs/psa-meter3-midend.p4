@@ -4,11 +4,10 @@
 struct EMPTY {
 }
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -35,7 +34,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     @name("MyIC.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.PACKETS) meter0_0;
     @name("MyIC.tbl") table tbl_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
         }
         actions = {
             NoAction_1();
@@ -75,8 +74,5 @@ control MyED(packet_out buffer, out EMPTY a, out EMPTY b, inout EMPTY c, in EMPT
 }
 
 IngressPipeline<headers_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyIP(), MyIC(), MyID()) ip;
-
 EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEP(), MyEC(), MyED()) ep;
-
 PSA_Switch<headers_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

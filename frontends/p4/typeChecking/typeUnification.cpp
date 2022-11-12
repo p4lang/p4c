@@ -23,7 +23,7 @@ namespace P4 {
 
 
 /// Unifies a call with a prototype.
-bool TypeUnification::unifyCall(const EqualityConstraint* constraint) {
+bool TypeUnification::unifyCall(const BinaryConstraint* constraint) {
     // These are canonical types.
     auto dest = constraint->left->to<IR::Type_MethodBase>();
     auto src = constraint->right->to<IR::Type_MethodCall>();
@@ -104,7 +104,11 @@ bool TypeUnification::unifyCall(const EqualityConstraint* constraint) {
                 "%1%: extern values cannot be passed in/out/inout", param);
         }
 
-        auto c = constraint->create(param->type, arg->type);
+        P4::BinaryConstraint* c;
+        if (!param->hasOut())
+            c = new CanBeImplicitlyCastConstraint(param->type, arg->type, constraint);
+        else
+            c = constraint->create(param->type, arg->type);
         c->setError("Type of argument '%1%' (%2%) does not match type of parameter '%3%' (%4%)",
                     { arg, arg->type, param, param->type });
         constraints->add(c);
@@ -145,7 +149,7 @@ bool TypeUnification::unifyCall(const EqualityConstraint* constraint) {
 
 // skipReturnValues is needed because the return type of a package
 // is the package itself, so checking it gets into an infinite loop.
-bool TypeUnification::unifyFunctions(const EqualityConstraint* constraint,
+bool TypeUnification::unifyFunctions(const BinaryConstraint* constraint,
                                      bool skipReturnValues) {
     auto dest = constraint->left->to<IR::Type_MethodBase>();
     auto src = constraint->right->to<IR::Type_MethodBase>();
@@ -200,7 +204,7 @@ bool TypeUnification::unifyFunctions(const EqualityConstraint* constraint,
     return true;
 }
 
-bool TypeUnification::unifyBlocks(const EqualityConstraint* constraint) {
+bool TypeUnification::unifyBlocks(const BinaryConstraint* constraint) {
     // These are canonical types.
     auto dest = constraint->left->to<IR::Type_ArchBlock>();
     auto src = constraint->right->to<IR::Type_ArchBlock>();
@@ -231,7 +235,7 @@ bool TypeUnification::unifyBlocks(const EqualityConstraint* constraint) {
     return constraint->reportError(constraints->getCurrentSubstitution());
 }
 
-bool TypeUnification::unify(const EqualityConstraint* constraint) {
+bool TypeUnification::unify(const BinaryConstraint* constraint) {
     auto dest = constraint->left;
     auto src = constraint->right;
     // These are canonical types.
@@ -363,10 +367,12 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
             return true;
         }
         if (auto senum = src->to<IR::Type_SerEnum>()) {
-            if (dest->is<IR::Type_Bits>()) {
-                // unify with enum's underlying type
-                auto stype = typeMap->getTypeType(senum->type, true);
-                return unify(constraint->create(stype, dest));
+            if (constraint->is<P4::CanBeImplicitlyCastConstraint>()) {
+                if (dest->is<IR::Type_Bits>()) {
+                    // unify with enum's underlying type
+                    auto stype = typeMap->getTypeType(senum->type, true);
+                    return unify(constraint->create(stype, dest));
+                }
             }
         }
         if (!src->is<IR::Type_Base>())
@@ -377,8 +383,11 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
             return constraint->reportError(constraints->getCurrentSubstitution());
         return true;
     } else if (auto se = dest->to<IR::Type_SerEnum>()) {
-        constraints->add(constraint->create(se->type, src));
-        return true;
+        if (constraint->is<P4::CanBeImplicitlyCastConstraint>()) {
+            constraints->add(constraint->create(se->type, src));
+            return true;
+        }
+        return constraint->reportError(constraints->getCurrentSubstitution());
     } else if (dest->is<IR::Type_Declaration>() && src->is<IR::Type_Declaration>()) {
         bool canUnify = typeid(dest) == typeid(src) &&
             dest->to<IR::Type_Declaration>()->name == src->to<IR::Type_Declaration>()->name;

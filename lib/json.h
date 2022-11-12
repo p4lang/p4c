@@ -23,22 +23,20 @@ limitations under the License.
 #include <type_traits>
 
 #include "gtest/gtest_prod.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
+#include "lib/castable.h"
 
 namespace Test { class TestJson; }
 
 namespace Util {
 
-class IJson {
+class IJson : public ICastable {
  public:
     virtual ~IJson() {}
     virtual void serialize(std::ostream& out) const = 0;
     cstring toString() const;
-    template<typename T> bool is() const { return to<T>() != nullptr; }
-    template<typename T> T* to() { return dynamic_cast<T*>(this); }
-    template<typename T> const T* to() const { return dynamic_cast<const T*>(this); }
     void dump() const;
 };
 

@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <pna.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -55,7 +54,7 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     @name("MainControlImpl.key_0") bit<32> key_0;
-    @name("MainControlImpl.next_hop") action next_hop(@name("vport") PortId_t vport) {
+    @name("MainControlImpl.next_hop") action next_hop(@name("vport") bit<32> vport) {
         send_to_port(vport);
     }
     @name("MainControlImpl.default_route_drop") action default_route_drop() {
@@ -63,7 +62,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     @name("MainControlImpl.ipv4_da_lpm") table ipv4_da_lpm_0 {
         key = {
-            key_0: lpm @name("ipv4_addr") ;
+            key_0: lpm @name("ipv4_addr");
         }
         actions = {
             next_hop();
@@ -105,4 +104,3 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

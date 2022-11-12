@@ -51,9 +51,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ingress.debug_hdr") table debug_hdr_0 {
         key = {
-            hdr.base.t              : exact @name("hdr.base.t") ;
-            hdr.u[0].short.isValid(): exact @name("hdr.u[0].short.$valid$") ;
-            hdr.u[0].byte.isValid() : exact @name("hdr.u[0].byte.$valid$") ;
+            hdr.base.t              : exact @name("hdr.base.t");
+            hdr.u[0].short.isValid(): exact @name("hdr.u[0].short.$valid$");
+            hdr.u[0].byte.isValid() : exact @name("hdr.u[0].byte.$valid$");
         }
         actions = {
             NoAction_1();
@@ -94,4 +94,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

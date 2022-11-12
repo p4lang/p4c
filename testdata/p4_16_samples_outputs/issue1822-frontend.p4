@@ -6,4 +6,3 @@ control MyC() {
 }
 
 S<bool>(MyC(), MyC()) main;
-

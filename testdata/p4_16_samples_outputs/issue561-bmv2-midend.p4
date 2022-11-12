@@ -7,11 +7,10 @@ error {
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -75,7 +74,6 @@ header_union Tcp_option_h {
     Tcp_option_sack_h sack;
 }
 
-typedef Tcp_option_h[10] Tcp_option_stack;
 header Tcp_option_padding_h {
     varbit<256> padding;
 }
@@ -84,7 +82,7 @@ struct headers {
     ethernet_t           ethernet;
     ipv4_t               ipv4;
     tcp_t                tcp;
-    Tcp_option_stack     tcp_options_vec;
+    Tcp_option_h[10]     tcp_options_vec;
     Tcp_option_padding_h tcp_options_padding;
 }
 
@@ -313,7 +311,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             set_l2ptr();
@@ -329,7 +327,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ingress.mac_da") table mac_da_0 {
         key = {
-            meta._fwd_metadata_l2ptr0: exact @name("meta.fwd_metadata.l2ptr") ;
+            meta._fwd_metadata_l2ptr0: exact @name("meta.fwd_metadata.l2ptr");
         }
         actions = {
             set_bd_dmac_intf();
@@ -385,7 +383,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("egress.send_frame") table send_frame_0 {
         key = {
-            meta._fwd_metadata_out_bd1: exact @name("meta.fwd_metadata.out_bd") ;
+            meta._fwd_metadata_out_bd1: exact @name("meta.fwd_metadata.out_bd");
         }
         actions = {
             rewrite_mac();
@@ -468,4 +466,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

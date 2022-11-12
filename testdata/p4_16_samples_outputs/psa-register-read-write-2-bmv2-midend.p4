@@ -4,11 +4,10 @@
 struct EMPTY {
 }
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header output_data_t {
@@ -159,8 +158,5 @@ control MyED(packet_out pkt, out EMPTY clone_e2e_meta, out EMPTY recirculate_met
 }
 
 IngressPipeline<headers_t, metadata_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIP(), MyIC(), MyID()) ip;
-
 EgressPipeline<headers_t, metadata_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyEP(), MyEC(), MyED()) ep;
-
 PSA_Switch<headers_t, metadata_t, headers_t, metadata_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

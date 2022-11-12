@@ -10,4 +10,3 @@ parser p00() {
 parser nothing();
 package m(nothing n);
 m(p00()) main;
-

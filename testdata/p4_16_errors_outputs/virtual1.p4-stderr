@@ -2,7 +2,7 @@ virtual1.p4(23): [--Werror=type-error] error: return +
             return (ix + 1);
             ^^^^^^
   ---- Actual error:
-virtual1.p4(22): Cannot unify type 'bit<16>' with type 'bool'
+virtual1.p4(22): Cannot cast implicitly type 'bit<16>' to type 'bool'
           bool f(in bit<16> ix) {
           ^^^^
   ---- Originating from:

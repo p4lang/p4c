@@ -36,4 +36,3 @@ parser p(packet_in packet, out Headers hdr) {
 parser Parser(packet_in b, out Headers hdr);
 package top(Parser p);
 top(p()) main;
-

@@ -2,11 +2,10 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header vlan_tag_h {
@@ -103,7 +102,7 @@ control ingressImpl(inout headers_t hdrs, inout main_metadata_t meta, inout stan
     bit<12> key_0;
     @name("ingressImpl.stub") table stub_0 {
         key = {
-            key_0: exact @name("hdrs.vlan_tag[meta.depth].vid") ;
+            key_0: exact @name("hdrs.vlan_tag[meta.depth].vid");
         }
         actions = {
             execute();
@@ -113,7 +112,7 @@ control ingressImpl(inout headers_t hdrs, inout main_metadata_t meta, inout stan
     }
     @name("ingressImpl.stub1") table stub1_0 {
         key = {
-            hdrs.ethernet.etherType: exact @name("hdrs.ethernet.etherType") ;
+            hdrs.ethernet.etherType: exact @name("hdrs.ethernet.etherType");
         }
         actions = {
             execute_1();
@@ -276,4 +275,3 @@ control deparserImpl(packet_out pkt, in headers_t hdr) {
 }
 
 V1Switch<headers_t, main_metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
-

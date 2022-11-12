@@ -36,6 +36,10 @@ enum class DiagnosticAction {
 // Some compatibility for printf-style arguments is also supported.
 class ErrorReporter {
  protected:
+    unsigned int errorCount;
+    unsigned int warningCount;
+    unsigned int maxErrorCount;  /// the maximum number of errors that we print before fail
+
     std::ostream* outputstream;
 
     /// Track errors or warnings that have already been issued for a particular source location
@@ -242,10 +246,6 @@ class ErrorReporter {
     }
 
  private:
-    unsigned errorCount;
-    unsigned warningCount;
-    unsigned maxErrorCount;  /// the maximum number of errors that we print before fail
-
     /// The default diagnostic action for calls to `::warning()`.
     DiagnosticAction defaultWarningDiagnosticAction;
 

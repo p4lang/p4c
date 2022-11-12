@@ -1,0 +1,170 @@
+{
+  "schema_version" : "1.0.0",
+  "tables" : [
+    {
+      "name" : "pipe.MainControlImpl.ipv4_host",
+      "id" : 47903772,
+      "table_type" : "MatchAction_Direct",
+      "size" : 1024,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : true,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "hdr.ipv4.dstAddr",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 32
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 17422248,
+          "name" : "MainControlImpl.count",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        }
+      ],
+      "data" : [
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65554,
+            "name" : "$COUNTER_SPEC_PKTS",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 0
+            }
+          }
+        }
+      ],
+      "supported_operations" : ["SyncCounters"],
+      "attributes" : ["EntryScope"]
+    },
+    {
+      "name" : "pipe.MainControlImpl.ipv4_host_byte_count",
+      "id" : 45522242,
+      "table_type" : "MatchAction_Direct",
+      "size" : 1024,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : true,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "hdr.ipv4.dstAddr",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 32
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 31760578,
+          "name" : "MainControlImpl.bytecount",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        }
+      ],
+      "data" : [
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65553,
+            "name" : "$COUNTER_SPEC_BYTES",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 0
+            }
+          }
+        }
+      ],
+      "supported_operations" : ["SyncCounters"],
+      "attributes" : ["EntryScope"]
+    },
+    {
+      "name" : "pipe.MainControlImpl.ipv4_host_pkt_byte_count",
+      "id" : 40464130,
+      "table_type" : "MatchAction_Direct",
+      "size" : 1024,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : true,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "hdr.ipv4.dstAddr",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 32
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 20899529,
+          "name" : "MainControlImpl.pktbytecount",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        }
+      ],
+      "data" : [
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65553,
+            "name" : "$COUNTER_SPEC_BYTES",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 0
+            }
+          }
+        },
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65554,
+            "name" : "$COUNTER_SPEC_PKTS",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 0
+            }
+          }
+        }
+      ],
+      "supported_operations" : ["SyncCounters"],
+      "attributes" : ["EntryScope"]
+    }
+  ],
+  "learn_filters" : []
+}

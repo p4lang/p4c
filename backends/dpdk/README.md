@@ -35,6 +35,10 @@ To load the 'spec' file in dpdk follow the instructions in the
 - Parser Value Sets
 
 ### Unsupported PSA externs and features
+- egress parser, control, and deparser are not implemented, only
+  ingress parser, control, and deparser.  There is no packet
+  replication engine or packet buffer (the combination of which is
+  sometimes called a traffic manager).
 - Packet Digest
 - Random
 - Hash

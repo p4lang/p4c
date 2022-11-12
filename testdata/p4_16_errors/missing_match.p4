@@ -13,9 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-control c(in bit b) {
-    action NoAction() {}
 
+#include <core.p4>
+
+control c(in bit b) {
     table t {
         key = { b : noSuchMatch; }
         actions = { NoAction; }

@@ -60,7 +60,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
                                  new P4::IsMask())),
         new P4::TypeChecking(refMap, typeMap),
         // TBD: implement dpdk lowering passes instead of reusing bmv2's lowering pass.
-        new BMV2::LowerExpressions(typeMap, DPDK_MAX_SHIFT_AMOUNT),
+        new PassRepeated({new BMV2::LowerExpressions(typeMap, DPDK_MAX_SHIFT_AMOUNT)}, 2),
         new P4::RemoveComplexExpressions(refMap, typeMap,
                 new DPDK::ProcessControls(&structure.pipeline_controls)),
         new DismantleMuxExpressions(typeMap, refMap),
@@ -79,7 +79,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap),
         new ConvertToDpdkArch(refMap, &structure),
         new InjectJumboStruct(&structure),
-        new InjectOutputPortMetadataField(&structure),
+        new InjectFixedMetadataField(&structure),
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap, true),
         new P4::ResolveReferences(refMap),
@@ -100,6 +100,8 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new CollectExternDeclaration(&structure),
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap, true),
+        new CollectDirectCounterMeter(refMap, typeMap, &structure),
+        new ValidateDirectCounterMeter(refMap, typeMap, &structure),
         new CollectProgramStructure(refMap, typeMap, &structure),
         new InspectDpdkProgram(refMap, typeMap, &structure),
         new CheckExternInvocation(refMap, typeMap, &structure),
@@ -139,7 +141,6 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new CopyPropagationAndElimination(typeMap),
         new CollectUsedMetadataField(used_fields),
         new RemoveUnusedMetadataFields(used_fields),
-        new ValidateTableKeys(),
         new ShortenTokenLength(),
     };
 

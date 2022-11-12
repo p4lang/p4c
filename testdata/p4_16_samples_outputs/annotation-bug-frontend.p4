@@ -5,7 +5,7 @@ struct standard_metadata_t {
 
 header ipv4_option_timestamp_t {
     bit<8>      len;
-    @length((bit<32>)len) 
+    @length((bit<32>)len)
     varbit<304> data;
 }
 
@@ -31,4 +31,3 @@ control cc() {
 control C();
 package top(C ck);
 top(cc()) main;
-

@@ -21,7 +21,7 @@ limitations under the License.
 
 #include <boost/optional.hpp>
 
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 
 namespace IR {
 

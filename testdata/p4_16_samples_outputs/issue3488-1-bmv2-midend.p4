@@ -2,27 +2,25 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> EthernetAddress;
-typedef bit<32> IPv4Address;
 header ethernet_t {
-    EthernetAddress dst_addr;
-    EthernetAddress src_addr;
-    bit<16>         ether_type;
+    bit<48> dst_addr;
+    bit<48> src_addr;
+    bit<16> ether_type;
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     total_len;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     frag_offset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdr_checksum;
-    IPv4Address src_addr;
-    IPv4Address dst_addr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> total_len;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> frag_offset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdr_checksum;
+    bit<32> src_addr;
+    bit<32> dst_addr;
 }
 
 struct headers_t {
@@ -31,11 +29,11 @@ struct headers_t {
 }
 
 struct metadata_t {
-    bool            dropped;
-    bit<16>         direction;
-    IPv4Address     dst_ip_addr;
-    IPv4Address     src_ip_addr;
-    EthernetAddress ethernet_addr;
+    bool    dropped;
+    bit<16> direction;
+    bit<32> dst_ip_addr;
+    bit<32> src_ip_addr;
+    bit<48> ethernet_addr;
 }
 
 parser test_parser(packet_in packet, out headers_t hd, inout metadata_t meta, inout standard_metadata_t standard_meta) {
@@ -91,7 +89,7 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     }
     @name("test_ingress.pre_tbl1") table pre_tbl1_0 {
         key = {
-            hdr.ipv4.dst_addr: exact @name("hdr.ipv4.dst_addr") ;
+            hdr.ipv4.dst_addr: exact @name("hdr.ipv4.dst_addr");
         }
         actions = {
             action1();
@@ -106,7 +104,7 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     }
     @name("test_ingress.in_tbl2") table in_tbl2_0 {
         key = {
-            hdr.ipv4.protocol: exact @name("hdr.ipv4.protocol") ;
+            hdr.ipv4.protocol: exact @name("hdr.ipv4.protocol");
         }
         actions = {
             action4();
@@ -114,12 +112,12 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         }
         default_action = NoAction_1();
     }
-    @name("test_ingress.action5") action action5(@name("neighbor_mac") EthernetAddress neighbor_mac) {
+    @name("test_ingress.action5") action action5(@name("neighbor_mac") bit<48> neighbor_mac) {
         meta.ethernet_addr = neighbor_mac;
     }
     @name("test_ingress.post_tbl3") table post_tbl3_0 {
         key = {
-            hdr.ipv4.src_addr: exact @name("hdr.ipv4.src_addr") ;
+            hdr.ipv4.src_addr: exact @name("hdr.ipv4.src_addr");
         }
         actions = {
             action5();
@@ -166,4 +164,3 @@ control test_egress(inout headers_t hdr, inout metadata_t meta, inout standard_m
 }
 
 V1Switch<headers_t, metadata_t>(test_parser(), test_verify_checksum(), test_ingress(), test_egress(), test_compute_checksum(), test_deparser()) main;
-

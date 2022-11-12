@@ -36,14 +36,19 @@ p4c_add_xfail_reason("dpdk"
 
 p4c_add_xfail_reason("dpdk"
   "Error compiling"
-  testdata/p4_16_samples/psa-dpdk-lpm-match-err3.p4
+  testdata/p4_16_samples/pna-dpdk-wrong-warning.p4
+  testdata/p4_16_samples/pna-dpdk-invalid-hdr-warnings5.p4
+  testdata/p4_16_samples/pna-dpdk-invalid-hdr-warnings6.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "declaration not found"
+  testdata/p4_16_samples/psa-dpdk-header-union-typedef.p4
   )
 
 p4c_add_xfail_reason("dpdk"
   "Unknown extern function"
   testdata/p4_16_samples/psa-example-digest-bmv2.p4
-  testdata/p4_16_samples/psa-example-parser-checksum.p4
-  testdata/p4_16_samples/psa-meter6.p4
   )
 
 p4c_add_xfail_reason("dpdk"
@@ -83,20 +88,57 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "All table keys together with holes in the underlying structure should fit in 64 bytes"
-   testdata/p4_16_samples/psa-dpdk-table-key-error.p4
-   testdata/p4_16_samples/psa-dpdk-table-key-error-1.p4
-   )
-
-p4c_add_xfail_reason("dpdk"
-  "Unsupported bit width"
-   testdata/p4_16_samples/psa-dpdk-struct-field.p4
-   testdata/p4_16_samples/psa-example-register2-bmv2.p4
-   )
-
-p4c_add_xfail_reason("dpdk"
   "must only be called from within an action"
   testdata/p4_16_samples/pna-add-on-miss-err.p4
   testdata/p4_16_samples/pna-example-tcp-connection-tracking-err-1.p4
   testdata/p4_16_samples/pna-example-tcp-connection-tracking-err.p4
+  testdata/p4_16_samples/pna-dpdk-direct-meter-err-2.p4
+  testdata/p4_16_samples/pna-dpdk-direct-counter-err-2.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "add_entry is not called from a default action"
+  testdata/p4_16_samples/pna-example-addhit.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "add_entry action cannot be default action"
+   testdata/p4_16_samples/pna-example-miss.p4
+   )
+
+p4c_add_xfail_reason("dpdk"
+  "must be a compile-time constant"
+  testdata/p4_16_samples/psa-example-mask-range-err.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "implementation property cannot co-exist with direct counter"
+  testdata/p4_16_samples/psa-example-dpdk-directmeter-1.p4
+  testdata/p4_16_samples/pna-dpdk-direct-counter-err.p4
+  testdata/p4_16_samples/pna-dpdk-direct-meter-err.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Direct counters and direct meters are unsupported for wildcard match"
+  testdata/p4_16_samples/psa-example-counters-bmv2.p4
+  testdata/p4_16_samples/pna-dpdk-direct-meter-err-1.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "can only be invoked from within action of ownertable"
+  testdata/p4_16_samples/psa-example-dpdk-directmeter-err.p4
+  testdata/p4_16_samples/pna-dpdk-direct-counter-err-3.p4
+  testdata/p4_16_samples/psa-meter6.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Expected default action .* to have .* method call for .* extern instance"
+   testdata/p4_16_samples/pna-dpdk-direct-counter-err-1.p4
+   testdata/p4_16_samples/pna-dpdk-direct-meter-err-4.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  ".* method for different .* instances (.*) called within same action"
+  testdata/p4_16_samples/pna-dpdk-direct-counter-err-4.p4
+  testdata/p4_16_samples/pna-dpdk-direct-meter-err-3.p4
   )

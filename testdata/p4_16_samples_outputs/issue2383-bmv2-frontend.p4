@@ -23,11 +23,8 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") ethernet_t retval;
     apply {
-        hasReturned = false;
-        hasReturned = true;
         retval.setValid();
         retval = (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};
         h.eth_hdr = retval;
@@ -56,4 +53,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

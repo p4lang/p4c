@@ -2,11 +2,10 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> EthernetAddress;
 header Ethernet_h {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 struct Parsed_packet {
@@ -68,4 +67,3 @@ control uc(inout Parsed_packet hdr, inout metadata_t meta) {
 }
 
 V1Switch<Parsed_packet, metadata_t>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

@@ -1,0 +1,3 @@
+next-def-use.p4(26): [--Wwarn=uninitialized] warning: hdr.hs.next: reading uninitialized value
+        hdr.hs.next = {8w0};
+        ^^^^^^^^^^^

@@ -5,11 +5,10 @@ error {
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -56,8 +55,6 @@ struct headers {
     tcp_t      tcp;
 }
 
-typedef bit<32> PacketCounter_t;
-typedef bit<8> ErrorIndex_t;
 struct tuple_0 {
     bit<4>  f0;
     bit<4>  f1;
@@ -103,13 +100,13 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     @noWarn("unused") @name(".ingress_drop") action ingress_drop_0() {
         ostd.drop = true;
     }
-    @name("ingress.parser_error_counts") DirectCounter<PacketCounter_t>(PSA_CounterType_t.PACKETS) parser_error_counts_0;
-    @name("ingress.set_error_idx") action set_error_idx(@name("idx") ErrorIndex_t idx) {
+    @name("ingress.parser_error_counts") DirectCounter<bit<32>>(PSA_CounterType_t.PACKETS) parser_error_counts_0;
+    @name("ingress.set_error_idx") action set_error_idx(@name("idx") bit<8> idx) {
         parser_error_counts_0.count();
     }
     @name("ingress.parser_error_count_and_convert") table parser_error_count_and_convert_0 {
         key = {
-            istd.parser_error: exact @name("istd.parser_error") ;
+            istd.parser_error: exact @name("istd.parser_error");
         }
         actions = {
             set_error_idx();
@@ -211,8 +208,5 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

@@ -38,7 +38,7 @@ control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_meta
             @defaultonly NoAction_1();
         }
         key = {
-            meta.err: exact @name("meta.err") ;
+            meta.err: exact @name("meta.err");
         }
         default_action = NoAction_1();
     }
@@ -58,6 +58,4 @@ control MyDeparser(packet_out b, in my_packet p) {
 }
 
 Pipeline<my_packet, my_metadata>(MyParser(), MyIngress(), MyEgress(), MyDeparser()) p0;
-
 Switch<my_packet, my_metadata, _, _>(p0) main;
-

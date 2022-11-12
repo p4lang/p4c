@@ -17,7 +17,7 @@ p4c is modular; it provides a standard frontend and midend which can be combined
 with a target-specific backend to create a complete P4 compiler. The goal is to
 make adding new backends easy.
 
-The code contains five sample backends:
+The code contains seven sample backends:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
   the BMv2 behavioral model https://github.com/p4lang/behavioral-model,
 * p4c-dpdk: can be used to target the DPDK software switch (SWX) pipeline
@@ -30,7 +30,7 @@ The code contains five sample backends:
 * p4c-graphs: can be used to generate visual representations of a P4 program;
   for now it only supports generating graphs of top-level control flows, and
 * p4c-ubpf: can be used to generate eBPF code that runs in user-space.
-
+* p4tool: a platform for P4 test utilities, including a test-case generator for P4 programs.
 Sample command lines:
 
 Compile P4_16 or P4_14 source code.  If your program successfully
@@ -107,7 +107,7 @@ p4c has package support for several Ubuntu and Debian distributions.
 
 ### Ubuntu
 
-A p4c pacakge is available in the following repositories for Ubuntu 20.04 and newer.
+A p4c package is available in the following repositories for Ubuntu 20.04 and newer.
 
 ```bash
 . /etc/os-release
@@ -153,7 +153,7 @@ sudo dpkg -i /path/to/package.deb
     ```
 
 2.  Install [dependencies](#dependencies). You can find specific instructions
-    for Ubuntu 20.04 [here](#ubuntu-dependencies) and for macOS 10.12
+    for Ubuntu 20.04 [here](#ubuntu-dependencies) and for macOS 11
     [here](#macos-dependencies).  You can also look at the
     [CI installation script](tools/ci-build.sh).
 
@@ -184,6 +184,8 @@ sudo dpkg -i /path/to/package.deb
        backend](backends/graphs/README.md). Default ON.
      - `-DENABLE_P4TEST=ON|OFF`. Enable [the p4test
        backend](backends/p4test/README.md). Default ON.
+     - `-DENABLE_TEST_TOOLS=ON|OFF`. Enable [the p4tools
+         backend](backends/p4tools/README.md). Default OFF.
      - `-DENABLE_DOCS=ON|OFF`. Build documentation. Default is OFF.
      - `-DENABLE_GC=ON|OFF`. Enable the use of the garbage collection
        library. Default is ON.
@@ -193,7 +195,10 @@ sudo dpkg -i /path/to/package.deb
        protobuf libraries. Default is ON.
      - `-DENABLE_MULTITHREAD=ON|OFF`. Use multithreading.  Default is
        OFF.
-     - `-DENABLE_GMP=ON|OFF`. Use the GMP library.  Default is ON.
+     - `-DBUILD_LINK_WITH_GOLD=ON|OFF`. Use Gold linker for build if available.
+     - `-DBUILD_LINK_WITH_LLD=ON|OFF`. Use LLD linker for build if available (overrides BUILD_LINK_WITH_GOLD).
+     - `-DENABLE_LTO=ON|OFF`. Use Link Time Optimization (LTO).  Default is OFF.
+     - `-DENABLE_WERROR=ON|OFF`. Treat warnings as errors.  Default is OFF.
 
     If adding new targets to this build system, please see
     [instructions](#defining-new-cmake-targets).
@@ -218,10 +223,10 @@ If you plan to contribute to p4c, you'll find more useful information
 # Dependencies
 
 Ubuntu 20.04 is the officially supported platform for p4c. There's also
-unofficial support for macOS 10.12. Other platforms are untested; you can try to
+unofficial support for macOS 11. Other platforms are untested; you can try to
 use them, but YMMV.
 
-- A C++11 compiler. GCC 4.9 or later or Clang 3.3 or later is required.
+- A C++17 compiler. GCC 9.1 or later or Clang 6.0 or later is required.
 
 - `git` for version control
 
@@ -234,8 +239,6 @@ use them, but YMMV.
 - GNU Bison and Flex for the parser and lexical analyzer generators.
 
 - Google Protocol Buffers 3.0 or higher for control plane API generation
-
-- GNU multiple precision library GMP
 
 - C++ boost library (minimally used)
 
@@ -257,7 +260,7 @@ Most dependencies can be installed using `apt-get install`:
 
 ```bash
 sudo apt-get install cmake g++ git automake libtool libgc-dev bison flex \
-libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev \
+libfl-dev libboost-dev libboost-iostreams-dev \
 libboost-graph-dev llvm pkg-config python3 python3-pip \
 tcpdump
 
@@ -273,8 +276,8 @@ work. However, all our CI testing is done with a more recent version of Protobuf
 (at the moment, 3.18.1), which we install from source. If you are experiencing
 issues with the Protobuf version shipped with your OS distribution, we recommend
 that we install Protobuf 3.18.1 from source. You can find instructions
-[here](https://github.com/google/protobuf/blob/master/src/README.md). After
-cloning Protobuf and before you build, check-out version 3.18.1:
+[here](https://github.com/protocolbuffers/protobuf/blob/v3.18.1/src/README.md).
+After cloning Protobuf and before you build, check-out version 3.18.1:
 
 `git checkout v3.18.1`
 
@@ -321,11 +324,6 @@ Installing on macOS:
   brew install autoconf automake libtool bdw-gc boost bison pkg-config
   ```
 
-  Install GMP built in C++11 mode:
-  ```
-  brew install gmp --c++11
-  ```
-
   By default, Homebrew doesn't link programs into `/usr/local/bin` if
   they would conflict with a version provided by the base system. This
   includes Bison, since an older version ships with macOS. `make
@@ -367,7 +365,7 @@ We recommend using `clang++` with no optimizations for speeding up
 compilation and simplifying debugging.
 
 We recommend installing a new version of [gdb](http://ftp.gnu.org/gnu/gdb).,
-because older gdb versions do not always handle C++11 correctly.
+because older gdb versions do not always handle C++11 or newer correctly.
 
 We recommend exuberant ctags for navigating source code in Emacs and vi.  `sudo
 apt-get install exuberant-ctags.` The Makefile targets `make ctags` and `make

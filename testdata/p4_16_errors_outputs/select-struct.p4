@@ -18,4 +18,3 @@ parser prs(packet_in p) {
 parser P(packet_in p);
 package top(P _p);
 top(prs()) main;
-

@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <ebpf_model.p4>
 
-typedef bit<48> EthernetAddress;
 header Ethernet_h {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header IPv6_h {
@@ -44,7 +43,7 @@ control pipe(inout Headers_t headers, out bool xout) {
     }
     @name("pipe.filter_tbl") table filter_tbl_0 {
         key = {
-            headers.ipv6.src_address: exact @name("headers.ipv6.src_address") ;
+            headers.ipv6.src_address: exact @name("headers.ipv6.src_address");
         }
         actions = {
             set_flowlabel();
@@ -96,4 +95,3 @@ control pipe(inout Headers_t headers, out bool xout) {
 }
 
 ebpfFilter<Headers_t>(prs(), pipe()) main;
-

@@ -22,6 +22,7 @@ set (IR_SRCS
   dump.cpp
   expression.cpp
   ir.cpp
+  irutils.cpp
   json_parser.cpp
   node.cpp
   pass_manager.cpp
@@ -40,6 +41,7 @@ set (IR_HDRS
   ir-inline.h
   ir-tree-macros.h
   ir.h
+  irutils.h
   json_generator.h
   json_loader.h
   json_parser.h

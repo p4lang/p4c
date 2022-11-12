@@ -55,4 +55,3 @@ control EmptyDeparser(packet_out b, in headers_t hdr) {
 }
 
 V1Switch(EmptyParser(), EmptyVerify(), EmptyIngress(), EmptyEgress(), EmptyCompute(), EmptyDeparser()) main;
-
