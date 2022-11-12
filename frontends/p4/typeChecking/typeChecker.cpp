@@ -933,7 +933,7 @@ std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>
 TypeInference::checkExternConstructor(const IR::Node* errorPosition,
                                       const IR::Type_Extern* ext,
                                       const IR::Vector<IR::Argument> *arguments) {
-    auto none = std::pair(nullptr, nullptr);
+    auto none = std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>(nullptr, nullptr);
     auto constructor = ext->lookupConstructor(arguments);
     if (constructor == nullptr) {
         typeError("%1%: type %2% has no matching constructor",
@@ -1052,7 +1052,8 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
         arguments = newArgs;
     auto objectType = new IR::Type_Extern(ext->srcInfo, ext->name, methodType->typeParameters,
                                           ext->methods);
-    return std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>(objectType, arguments);
+    learn(objectType, this);
+    return { objectType, arguments };
 }
 
 // Return true on success
@@ -1130,13 +1131,17 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
         simpleType = type->to<IR::Type_SpecializedCanonical>()->substituted;
 
     if (auto et = simpleType->to<IR::Type_Extern>()) {
-        auto typeAndArgs = checkExternConstructor(decl, et, decl->arguments);
-        auto newArgs = typeAndArgs.second;
-        type = typeAndArgs.first;
+        auto [newType, newArgs] = checkExternConstructor(decl, et, decl->arguments);
         if (newArgs == nullptr) {
             prune();
             return decl;
         }
+        // type can be Type_Extern or Type_SpecializedCanonical.  If it is already
+        // specialized, the type arguments were specified explicitly.
+        // Otherwise, we use the type received from checkExternConstructor, which
+        // has substituted the type variables with fresh ones.
+        if (type->is<IR::Type_Extern>())
+            type = newType;
         decl->arguments = newArgs;
         setType(orig, type);
         setType(decl, type);
@@ -3736,10 +3741,8 @@ const IR::Node* TypeInference::postorder(IR::ConstructorCallExpression* expressi
         simpleType = type->to<IR::Type_SpecializedCanonical>()->substituted;
 
     if (simpleType->is<IR::Type_Extern>()) {
-        auto typeAndArgs = checkExternConstructor(expression, simpleType->to<IR::Type_Extern>(),
-                                                  expression->arguments);
-        auto contType = typeAndArgs.first;
-        auto newArgs = typeAndArgs.second;
+        auto [contType, newArgs] = checkExternConstructor(
+            expression, simpleType->to<IR::Type_Extern>(), expression->arguments);
         if (newArgs == nullptr)
             return expression;
         expression->arguments = newArgs;
