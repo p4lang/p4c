@@ -79,7 +79,6 @@ class PSAArchTC : public PSAEbpfGenerator {
     void emitInstances(CodeBuilder *builder) const override;
     void emitInitializerSection(CodeBuilder *builder) const override;
     void emitCRC32LookupTableInstance(CodeBuilder *builder) const;
-
 };
 
 class ConvertToEbpfPSA : public Transform {
