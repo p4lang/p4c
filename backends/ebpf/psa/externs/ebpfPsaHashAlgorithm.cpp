@@ -56,14 +56,12 @@ void CRCChecksumAlgorithm::emitUpdateMethod(CodeBuilder* builder, int crcWidth) 
     if (crcWidth == 16){
         cstring code = "static __always_inline\n"
                        "void crc%w%_update(u%w% * reg, const u8 * data, u16 data_size, const u%w% poly) {\n"
-                       "    data += data_size - 1;\n"
-                       "    for (u16 i = 0; i < data_size; i++) {\n"
-                       "        bpf_trace_message(\"CRC%w%: data byte: %x\\n\", *data);\n"
-                       "        *reg ^= *data;\n"
+                       "    for (u16 i = data_size; i > 0; i--) {\n"
+                       "        bpf_trace_message(\"CRC%w%: data byte: %x\\n\", data[i-1]);\n"
+                       "        *reg ^= (u16) data[i-1];\n"
                        "        for (u8 bit = 0; bit < 8; bit++) {\n"
                        "            *reg = (*reg) & 1 ? ((*reg) >> 1) ^ poly : (*reg) >> 1;\n"
                        "        }\n"
-                       "        data--;\n"
                        "    }\n"
                        "}";
         code = code.replace("%w%", Util::printf_format("%d", crcWidth));
