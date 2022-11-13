@@ -75,7 +75,7 @@ class ReplaceLogMsg : public Transform, P4WriteContext {
         CHECK_NULL(findTypesInLogMsgInvocationToReplace);
         setName("ReplaceLogMsg");
     }
-    const IR::Node* preorder(IR::P4Program* program);
+    const IR::Node* preorder(IR::P4Program* program) override;
     const IR::Node* postorder(IR::MethodCallStatement* methodCallStatement) override;
     const IR::Node* postorder(IR::Type_Struct* typeStruct) override;
 };

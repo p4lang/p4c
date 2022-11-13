@@ -266,9 +266,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
     endmacro()
     check_linker(BUILD_LINK_WITH_GOLD "gold" "GNU gold")
     check_linker(BUILD_LINK_WITH_LLD "lld" "LLD")
-
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${_LD_OPT_USED}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${_LD_OPT_USED}")
+    append("${_LD_OPT_USED}" CMAKE_EXE_LINKER_FLAGS CMAKE_SHARED_LINKER_FLAGS CMAKE_MODULE_LINKER_FLAGS)
     message(STATUS "Using the ${_LD_USED} linker.")
     unset(LD_VERSION)
     unset(_LD_USED)

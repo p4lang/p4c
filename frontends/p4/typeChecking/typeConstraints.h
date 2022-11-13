@@ -230,7 +230,7 @@ class CanBeImplicitlyCastConstraint : public BinaryConstraint {
     bool reportError(const TypeVariableSubstitution* subst) const override {
         return reportError(subst, "Cannot cast implicitly type '%1%' to type '%2%'", right, left);
     }
-    BinaryConstraint* create(const IR::Type* left, const IR::Type* right) const {
+    BinaryConstraint* create(const IR::Type* left, const IR::Type* right) const override {
         return new CanBeImplicitlyCastConstraint(left, right, this);
     }
 };

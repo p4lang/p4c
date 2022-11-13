@@ -29,13 +29,11 @@ namespace P4 {
  */
 class DoEliminateInvalidHeaders final : public Transform {
     ReferenceMap* refMap;
-    const TypeMap* typeMap;
     IR::IndexedVector<IR::StatOrDecl> statements;
     std::vector<const IR::Declaration_Variable*> variables;
  public:
-    DoEliminateInvalidHeaders(ReferenceMap* refMap, const TypeMap* typeMap):
-            refMap(refMap), typeMap(typeMap)
-    { setName("DoEliminateInvalidHeaders"); CHECK_NULL(refMap); CHECK_NULL(typeMap); }
+    DoEliminateInvalidHeaders(ReferenceMap* refMap): refMap(refMap)
+    { setName("DoEliminateInvalidHeaders"); CHECK_NULL(refMap); }
     const IR::Node* postorder(IR::InvalidHeader* expression) override;
     const IR::Node* postorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::ParserState* parser) override;
@@ -49,7 +47,7 @@ class EliminateInvalidHeaders final : public PassManager {
         if (!typeChecking)
             typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new DoEliminateInvalidHeaders(refMap, typeMap));
+        passes.push_back(new DoEliminateInvalidHeaders(refMap));
         setName("EliminateInvalidHeaders");
     }
 };

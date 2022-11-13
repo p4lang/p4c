@@ -237,17 +237,13 @@ class InjectFixedMetadataField : public Transform {
 /// by combining few contiguous header fields and replaces uses with slices
 /// to preserve the behavior
 class AlignHdrMetaField : public Transform {
-    P4::TypeMap* typeMap;
-    P4::ReferenceMap *refMap;
     DpdkProgramStructure *structure;
 
     ordered_map<cstring, struct fieldInfo> field_name_list;
 
  public:
-    AlignHdrMetaField(P4::TypeMap* typeMap,
-                            P4::ReferenceMap *refMap,
-                            DpdkProgramStructure* structure)
-        : typeMap(typeMap), refMap(refMap), structure(structure) {
+    explicit AlignHdrMetaField(DpdkProgramStructure* structure)
+        : structure(structure) {
         CHECK_NULL(structure);
     }
     const IR::Node *preorder(IR::Type_StructLike *st) override;
@@ -264,7 +260,7 @@ struct ByteAlignment : public PassManager {
                         DpdkProgramStructure* structure)
     : typeMap(typeMap), refMap(refMap), structure(structure) {
         CHECK_NULL(structure);
-        passes.push_back(new AlignHdrMetaField(typeMap, refMap, structure));
+        passes.push_back(new AlignHdrMetaField(structure));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         /* DoRemoveLeftSlices pass converts the slice Member (LHS in assn stm)
@@ -276,16 +272,7 @@ struct ByteAlignment : public PassManager {
 };
 
 class ReplaceHdrMetaField : public Transform {
-    P4::TypeMap* typeMap;
-    P4::ReferenceMap *refMap;
-    DpdkProgramStructure *structure;
  public:
-    ReplaceHdrMetaField(P4::TypeMap* typeMap,
-                            P4::ReferenceMap *refMap,
-                            DpdkProgramStructure* structure)
-        : typeMap(typeMap), refMap(refMap), structure(structure) {
-        CHECK_NULL(structure);
-    }
     const IR::Node* postorder(IR::Type_Struct *st) override;
 };
 
@@ -402,12 +389,11 @@ class ExpressionUnroll : public Inspector {
 class IfStatementUnroll : public Transform {
  private:
     P4::ReferenceMap *refMap;
-    DpdkProgramStructure *structure;
     DeclarationInjector injector;
 
  public:
-    IfStatementUnroll(P4::ReferenceMap* refMap, DpdkProgramStructure *structure) :
-        refMap(refMap), structure(structure) {
+    explicit IfStatementUnroll(P4::ReferenceMap* refMap) :
+        refMap(refMap) {
         setName("IfStatementUnroll");
     }
     const IR::Node *postorder(IR::SwitchStatement *a) override;
@@ -422,7 +408,6 @@ class IfStatementUnroll : public Transform {
  */
 class LogicalExpressionUnroll : public Inspector {
     P4::ReferenceMap* refMap;
-    DpdkProgramStructure *structure;
 
  public:
     IR::IndexedVector<IR::StatOrDecl> stmt;
@@ -437,8 +422,8 @@ class LogicalExpressionUnroll : public Inspector {
             return false;
     }
 
-    LogicalExpressionUnroll(P4::ReferenceMap* refMap, DpdkProgramStructure *structure)
-        : refMap(refMap), structure(structure) {visitDagOnce = false;}
+    explicit LogicalExpressionUnroll(P4::ReferenceMap* refMap)
+        : refMap(refMap) {visitDagOnce = false;}
     bool preorder(const IR::Operation_Unary *a) override;
     bool preorder(const IR::Operation_Binary *a) override;
     bool preorder(const IR::MethodCallExpression *a) override;
@@ -937,7 +922,6 @@ class SplitActionProfileTable : public SplitP4TableCommon {
  * Handle ActionSelector and ActionProfile extern in PSA
  */
 class ConvertActionSelectorAndProfile : public PassManager {
-    DpdkProgramStructure *structure;
  public:
     ConvertActionSelectorAndProfile(P4::ReferenceMap *refMap, P4::TypeMap* typeMap,
                                     DpdkProgramStructure *structure) {

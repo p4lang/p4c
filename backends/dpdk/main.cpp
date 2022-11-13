@@ -146,8 +146,7 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         return 1;
 
-    auto backend = new DPDK::DpdkBackend(options, &midEnd.refMap,
-                                         &midEnd.typeMap, &midEnd.enumMap);
+    auto backend = new DPDK::DpdkBackend(options, &midEnd.refMap, &midEnd.typeMap);
 
     backend->convert(toplevel);
     if (::errorCount() > 0)

@@ -167,7 +167,7 @@ class SimpleSwitchBackend : public Backend {
 };
 
 EXTERN_CONVERTER_W_FUNCTION(clone)
-EXTERN_CONVERTER_W_FUNCTION_AND_MODEL(clone_preserving_field_list, P4V1::V1Model, v1model)
+EXTERN_CONVERTER_W_FUNCTION(clone_preserving_field_list)
 EXTERN_CONVERTER_W_FUNCTION_AND_MODEL(hash, P4V1::V1Model, v1model)
 EXTERN_CONVERTER_W_FUNCTION(digest)
 EXTERN_CONVERTER_W_FUNCTION(resubmit_preserving_field_list)

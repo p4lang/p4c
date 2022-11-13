@@ -69,7 +69,7 @@ class PrependPassRecircId : public Transform {
  public:
     PrependPassRecircId() {}
     bool isPass(const IR::Member *m);
-    const IR::Node *postorder(IR::DpdkAction *a);
+    const IR::Node *postorder(IR::DpdkAction *a) override;
     const IR::Node *postorder(IR::DpdkListStatement *l) override;
     IR::IndexedVector<IR::DpdkAsmStatement>
     prependPassWithRecircid(IR::IndexedVector<IR::DpdkAsmStatement> stmts);
