@@ -1,5 +1,6 @@
 extern Random<T> {
     Random(T min);
+    T read();
 }
 
 struct S {
@@ -7,13 +8,10 @@ struct S {
 }
 
 control c() {
-    Random<bit<16>>(1) r0;
     Random(16w256) r2;
-    Random(true) r3;
-    Random<bit<16>>(16w100) r1;
-    Random<S>({ f = 2 }) r4;
-    Random<S>({ 2 }) r5;
-    apply {}
+    apply {
+        bit<16> v = r2.read();
+    }
 }
 
 control C();

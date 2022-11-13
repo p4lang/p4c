@@ -934,7 +934,8 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
                                       const IR::Type_Extern* ext,
                                       const IR::Vector<IR::Argument> *arguments) {
     auto none = std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>(nullptr, nullptr);
-    auto constructor = ext->lookupConstructor(arguments);
+    auto freshExtern = cloneWithFreshTypeVariables(ext)->to<IR::Type_Extern>();
+    auto constructor = freshExtern->lookupConstructor(arguments);
     if (constructor == nullptr) {
         typeError("%1%: type %2% has no matching constructor",
                   errorPosition, ext);
@@ -945,8 +946,6 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
         return none;
     auto methodType = mt->to<IR::Type_Method>();
     BUG_CHECK(methodType != nullptr, "Constructor does not have a method type, but %1%", mt);
-    methodType = cloneWithFreshTypeVariables(methodType)->to<IR::Type_Method>();
-    CHECK_NULL(methodType);
 
     if (errorPosition->is<IR::ConstructorCallExpression>()) {
         for (auto m : ext->methods) {
@@ -1051,7 +1050,7 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
     if (changed)
         arguments = newArgs;
     auto objectType = new IR::Type_Extern(ext->srcInfo, ext->name, methodType->typeParameters,
-                                          ext->methods);
+                                          freshExtern->methods);
     learn(objectType, this);
     return { objectType, arguments };
 }
@@ -1567,7 +1566,8 @@ const IR::Node* TypeInference::postorder(IR::Type_Method* type) {
                 typeError("%1%: illegal return type for method", method->type->returnType);
             if (name == extName) {
                 // This is a constructor.
-                if (method->type->typeParameters != nullptr &&
+                if (this->called_by == nullptr && // not learning; canonical types violate this rule
+                    method->type->typeParameters != nullptr &&
                     method->type->typeParameters->size() > 0) {
                     typeError("%1%: Constructors cannot have type parameters",
                               method->type->typeParameters);

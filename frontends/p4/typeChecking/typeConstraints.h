@@ -236,7 +236,7 @@ class CanBeImplicitlyCastConstraint : public BinaryConstraint {
 };
 
 // A list of equality constraints on types.
-class TypeConstraints final {
+class TypeConstraints final : public IHasDbPrint {
  private:
     /*
      * Not all type variables that appear in unification can be bound:

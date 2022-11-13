@@ -590,29 +590,28 @@ void ExternConverter_register::convertExternInstance(
         error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
               "%1%: direct registers are not supported in bmv2", inst);
     jreg->emplace("size", sz->to<IR::Constant>()->value);
-    if (!eb->instanceType->is<IR::Type_SpecializedCanonical>()) {
+    if (auto st = eb->instanceType->to<IR::Type_SpecializedCanonical>()) {
+        if (st->arguments->size() < 1 || st->arguments->size() > 2) {
+            modelError("%1%: expected 1 or 2 type arguments", st);
+            return;
+        }
+        auto regType = st->arguments->at(0);
+        if (!regType->is<IR::Type_Bits>()) {
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "%1%: Only registers with bit or int types are currently supported", eb);
+            return;
+        }
+        unsigned width = regType->width_bits();
+        if (width == 0) {
+            ::error(ErrorType::ERR_EXPRESSION,
+                    "%1%: unknown width", st->arguments->at(0));
+            return;
+        }
+        jreg->emplace("bitwidth", width);
+        ctxt->json->register_arrays->append(jreg);
+    } else {
         modelError("%1%: Expected a generic specialized type", eb->instanceType);
-        return;
     }
-    auto st = eb->instanceType->to<IR::Type_SpecializedCanonical>();
-    if (st->arguments->size() < 1 || st->arguments->size() > 2) {
-        modelError("%1%: expected 1 or 2 type arguments", st);
-        return;
-    }
-    auto regType = st->arguments->at(0);
-    if (!regType->is<IR::Type_Bits>()) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: Only registers with bit or int types are currently supported", eb);
-        return;
-    }
-    unsigned width = regType->width_bits();
-    if (width == 0) {
-        ::error(ErrorType::ERR_EXPRESSION,
-                "%1%: unknown width", st->arguments->at(0));
-        return;
-    }
-    jreg->emplace("bitwidth", width);
-    ctxt->json->register_arrays->append(jreg);
 }
 
 Util::IJson* ExternConverter_direct_counter::convertExternObject(
