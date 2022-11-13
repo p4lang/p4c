@@ -1,8 +1,8 @@
 #include "backends/p4tools/common/options.h"
 
-#include <string.h>
-
+#include <algorithm>
 #include <cstdlib>
+#include <cstring>
 #include <functional>
 #include <string>
 #include <tuple>
@@ -124,32 +124,14 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(messag
         "Prints version information and exits");
 
     registerOption(
-        "--min-packet-size", "bytes",
-        [this](const char* arg) {
-            int minLen_bytes = std::atoi(arg);
-            if (minLen_bytes <= 0) {
-                ::error("Invalid minimum packet length: %1%", arg);
-                return false;
-            }
-            minPacketSize_bytes = minLen_bytes;
+        "--packet-size-range", "packetSizeRange",
+        [](const char* /*arg*/) {
+            // packetSize = std::atoi(arg);
             return true;
         },
-        "Sets the minimum allowed packet size, in bytes. Any packet shorter than this is "
-        "considered to be invalid, and will be dropped if the program would otherwise send the "
-        "packet on the network.");
-
-    registerOption(
-        "--mtu", "bytes",
-        [this](const char* arg) {
-            int maxLen_bytes = std::atoi(arg);
-            if (maxLen_bytes <= 0) {
-                ::error("Invalid network MTU: %1%", arg);
-                return false;
-            }
-            networkMtu_bytes = maxLen_bytes;
-            return true;
-        },
-        "Sets the network's MTU, in bytes");
+        "Specify the possible range of the input packet size in bits. The format is [min]:[max]. "
+        "The default values are \"0:72000\". This also is the widest possible range (0 to jumbo "
+        "frame size).");
 
     registerOption(
         "--seed", "seed",

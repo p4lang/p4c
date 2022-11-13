@@ -333,9 +333,7 @@ const StateVariable& ExecutionState::getInputPacketSizeVar() {
     return Utils::getZombieConst(getPacketSizeVarType(), 0, "*packetLen_bits");
 }
 
-int ExecutionState::getMaxPacketLength_bits() {
-    return 8 * (TestgenOptions::get().networkMtu_bytes);
-}
+int ExecutionState::getMaxPacketLength() { return TestgenOptions::get().maxPktSize; }
 
 const IR::Expression* ExecutionState::getInputPacket() const { return env.get(&inputPacketLabel); }
 

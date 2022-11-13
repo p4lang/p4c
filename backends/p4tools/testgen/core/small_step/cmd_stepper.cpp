@@ -356,9 +356,9 @@ bool CmdStepper::preorder(const IR::P4Program* /*program*/) {
     initializeTargetEnvironment(nextState);
 
     // If this option is active, mandate that all packets conform to a fixed size.
-    auto pktSize = TestgenOptions::get().packetSize;
+    auto pktSize = TestgenOptions::get().minPktSize;
     if (pktSize != 0) {
-        auto maxPktLength = ExecutionState::getMaxPacketLength_bits();
+        auto maxPktLength = ExecutionState::getMaxPacketLength();
         if (pktSize < 0 || pktSize > maxPktLength) {
             ::error("Invalid input packet size. The valid range is from 1 to %1% bits.",
                     maxPktLength);
@@ -513,9 +513,9 @@ const Constraint* CmdStepper::startParser(const IR::P4Parser* parser, ExecutionS
 
     // Constrain the input packet size to its maximum.
     const auto* boolType = IR::Type::Boolean::get();
-    const Constraint* result = new IR::Leq(
-        boolType, ExecutionState::getInputPacketSizeVar(),
-        IR::getConstant(parserCursorVarType, ExecutionState::getMaxPacketLength_bits()));
+    const Constraint* result =
+        new IR::Leq(boolType, ExecutionState::getInputPacketSizeVar(),
+                    IR::getConstant(parserCursorVarType, ExecutionState::getMaxPacketLength()));
 
     // Constrain the input packet size to be a multiple of 8 bits. Do this by constraining the
     // lowest three bits of the packet size to 0.
