@@ -93,6 +93,7 @@ struct ParserStateInfo {
         if (predecessor) {
             statesIndexes = predecessor->statesIndexes;
             scenarioHS = predecessor->scenarioHS;
+            substitutedIndexes = predecessor->substitutedIndexes;
         }
     }
 };
