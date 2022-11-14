@@ -125,13 +125,36 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(messag
 
     registerOption(
         "--packet-size-range", "packetSizeRange",
-        [](const char* /*arg*/) {
-            // packetSize = std::atoi(arg);
+        [this](const char* arg) {
+            auto rangeStr = std::string(arg);
+            size_t packetLenStr = rangeStr.find_first_of(':');
+            try {
+                auto minPacketLenStr = rangeStr.substr(0, packetLenStr);
+                minPktSize = std::stoi(minPacketLenStr);
+                if (minPktSize < 0) {
+                    ::error(
+                        "Invalid minimum packet size %1%. Minimum packet size must be at least 0.",
+                        minPktSize);
+                }
+                auto maxPacketLenStr = rangeStr.substr(packetLenStr + 1);
+                maxPktSize = std::stoi(maxPacketLenStr);
+                if (maxPktSize < minPktSize) {
+                    ::error(
+                        "Invalid packet size range %1%:%2%.  The maximum packet size must be at "
+                        "least the size of the minimum packet size.",
+                        minPktSize, maxPktSize);
+                }
+            } catch (std::invalid_argument&) {
+                ::error(
+                    "Invalid packet size range %1%. Expected format is [min]:[max], where [min] "
+                    "and [max] are integers.",
+                    arg);
+                return false;
+            }
             return true;
         },
         "Specify the possible range of the input packet size in bits. The format is [min]:[max]. "
-        "The default values are \"0:72000\". This also is the widest possible range (0 to jumbo "
-        "frame size).");
+        "The default values are \"0:72000\". The maximum is set to jumbo frame size (9000 bytes).");
 
     registerOption(
         "--seed", "seed",

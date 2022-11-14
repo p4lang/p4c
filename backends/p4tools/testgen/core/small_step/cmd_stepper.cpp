@@ -358,12 +358,6 @@ bool CmdStepper::preorder(const IR::P4Program* /*program*/) {
     // If this option is active, mandate that all packets conform to a fixed size.
     auto pktSize = TestgenOptions::get().minPktSize;
     if (pktSize != 0) {
-        auto maxPktLength = ExecutionState::getMaxPacketLength();
-        if (pktSize < 0 || pktSize > maxPktLength) {
-            ::error("Invalid input packet size. The valid range is from 1 to %1% bits.",
-                    maxPktLength);
-            return false;
-        }
         const auto* fixedSizeEqu =
             new IR::Equ(ExecutionState::getInputPacketSizeVar(),
                         IR::getConstant(ExecutionState::getPacketSizeVarType(), pktSize));

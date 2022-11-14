@@ -44,7 +44,7 @@ These are the current usage flags:
 --dump folder              Folder where P4 programs are dumped.
 -v                         Increase verbosity level (can be repeated)
 --input-packet-only        Only produce the input packet for each test
--- packet-size-range       Specify the possible range of the input packet size in bits. The format is [min]:[max]. The default values are "0:72000". This also is the widest possible range (0 to jumbo frame size).
+-- packet-size-range       Specify the possible range of the input packet size in bits. The format is [min]:[max]. The default values are "0:72000". The maximum is set to jumbo frame size (9000 bytes).
 --max-tests maxTests       Sets the maximum number of tests to be generated
 --out-dir outputDir        Directory for generated tests
 --test-backend             Select a test back end. Available test back ends are defined by the respective target.
