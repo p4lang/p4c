@@ -1566,7 +1566,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Method* type) {
                 typeError("%1%: illegal return type for method", method->type->returnType);
             if (name == extName) {
                 // This is a constructor.
-                if (this->called_by == nullptr && // not learning; canonical types violate this rule
+                if (this->called_by == nullptr &&  // canonical types violate this rule
                     method->type->typeParameters != nullptr &&
                     method->type->typeParameters->size() > 0) {
                     typeError("%1%: Constructors cannot have type parameters",
