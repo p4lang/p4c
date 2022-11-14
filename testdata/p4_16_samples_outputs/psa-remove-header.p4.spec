@@ -34,7 +34,6 @@ metadata instanceof EMPTY_M
 
 header ethernet instanceof ethernet_t
 
-;oldname:NoAction_1
 action NoAction args none {
 	return
 }

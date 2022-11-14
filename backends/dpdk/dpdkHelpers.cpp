@@ -1355,7 +1355,7 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
         label = refmap->newName("label_switch");
         if (tc != nullptr) {
             auto pe = caseLabel->label->checkedTo<IR::PathExpression>();
-            add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
+            add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name));
         } else {
             add_instr(new IR::DpdkJmpEqualStatement(label, s->expression, caseLabel->label));
         }
@@ -1370,7 +1370,7 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
         label = refmap->newName("label_switch");
         if (tc != nullptr) {
             auto pe = s->cases.at(size-1)->label->checkedTo<IR::PathExpression>();
-            add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
+            add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name));
         } else {
             add_instr(new IR::DpdkJmpEqualStatement(label, s->expression,
                                                     s->cases.at(size-1)->label));

@@ -40,7 +40,6 @@ regarray counter0_0 size 0x400 initval 0x0
 
 regarray counter1_0 size 0x400 initval 0x0
 
-;oldname:NoAction_1
 action NoAction args none {
 	return
 }

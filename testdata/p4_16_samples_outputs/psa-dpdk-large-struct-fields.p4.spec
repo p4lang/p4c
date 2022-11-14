@@ -45,8 +45,7 @@ struct user_meta_data_t {
 }
 metadata instanceof user_meta_data_t
 
-;oldname:NoAction_1
-action NoAction args none {
+action NoAction_1 args none {
 	return
 }
 
@@ -75,9 +74,9 @@ table stub_0 {
 	}
 	actions {
 		macswp
-		NoAction
+		NoAction_1
 	}
-	default_action NoAction args none 
+	default_action NoAction_1 args none 
 	size 0xF4240
 }
 

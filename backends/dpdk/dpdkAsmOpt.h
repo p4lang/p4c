@@ -174,12 +174,7 @@ class ShortenTokenLength : public Transform {
     // 1.30.30 => 63(including dot(.))
     // if id name less than allowedLength keep it same
     cstring shortenString(cstring str, size_t allowedLength = 60) {
-        // this for getting rid of suffixes in NoAction_0 or NoAction_1
-        if (str.size() > 8 && str.substr(0, 8) == "NoAction") {
-            newNameMap.insert(std::pair<cstring, cstring>(str, "NoAction"));
-            origNameMap.insert(std::pair<cstring, cstring>("NoAction", str));
-            return "NoAction";
-        } else if (str.size() <= allowedLength)
+        if (str.size() <= allowedLength)
             return str;
         auto itr = newNameMap.find(str);
         if (itr != newNameMap.end())
@@ -191,6 +186,12 @@ class ShortenTokenLength : public Transform {
         newNameMap.insert(std::pair<cstring, cstring>(str, newStr));
         origNameMap.insert(std::pair<cstring, cstring>(newStr, str));
         return newStr;
+    }
+
+    cstring dropSuffixIfNoAction(IR::ID name) {
+        if (name.originalName == "NoAction")
+            return name.originalName;
+         return name.name;
     }
 
  public:
@@ -266,7 +267,7 @@ class ShortenTokenLength : public Transform {
     }
 
     const IR::Node* preorder(IR::DpdkAction *a) override {
-        a->name = shortenString(a->name);
+        a->name = shortenString(dropSuffixIfNoAction(a->name));
         shortenParamTypeName(a->para);
         return a;
     }
@@ -277,7 +278,7 @@ class ShortenTokenLength : public Transform {
             auto methodCallExpr = ale->expression->to<IR::MethodCallExpression>();
             auto pathExpr = methodCallExpr->method->to<IR::PathExpression>();
             auto path0 = pathExpr->path->clone();
-            path0->name = shortenString(path0->name);
+            path0->name = shortenString(dropSuffixIfNoAction(path0->name));
             new_al.push_back(new IR::ActionListElement(ale->srcInfo,
                         ale->annotations,
                         new IR::MethodCallExpression(methodCallExpr->srcInfo,
@@ -295,7 +296,7 @@ class ShortenTokenLength : public Transform {
         auto methodCallExpr = t->default_action->to<IR::MethodCallExpression>();
         auto pathExpr = methodCallExpr->method->to<IR::PathExpression>();
         auto path0 = pathExpr->path->clone();
-        path0->name = shortenString(path0->name);
+        path0->name = shortenString(dropSuffixIfNoAction(path0->name));
         t->default_action = new IR::MethodCallExpression(
                                 methodCallExpr->srcInfo,
                                 methodCallExpr->type,
@@ -318,7 +319,7 @@ class ShortenTokenLength : public Transform {
     }
 
     const IR::Node* preorder(IR::DpdkLearnStatement *ls) override {
-        ls->action = shortenString(ls->action);
+        ls->action = shortenString(dropSuffixIfNoAction(ls->action));
         return ls;
     }
 
@@ -338,7 +339,7 @@ class ShortenTokenLength : public Transform {
     }
 
     const IR::Node* preorder(IR::DpdkJmpActionStatement* jas) override {
-        jas->action = shortenString(jas->action);
+        jas->action = shortenString(dropSuffixIfNoAction(jas->action));
         return jas;
     }
 };

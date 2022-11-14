@@ -91,7 +91,6 @@ struct EMPTY {
 }
 metadata instanceof EMPTY
 
-;oldname:NoAction_1
 action NoAction args none {
 	return
 }

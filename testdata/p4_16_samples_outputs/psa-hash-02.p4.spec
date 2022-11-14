@@ -37,7 +37,6 @@ metadata instanceof user_meta_t
 header ethernet instanceof ethernet_t
 header ethernet1 instanceof ethernet_t
 
-;oldname:NoAction_1
 action NoAction args none {
 	return
 }

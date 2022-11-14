@@ -141,7 +141,7 @@ class CollectActionUses : public Inspector {
     bool preorder(const IR::ActionListElement* ale) {
         if (auto mce = ale->expression->to<IR::MethodCallExpression>()) {
             if (auto path = mce->method->to<IR::PathExpression>()) {
-                if (path->path->name.toString() == "NoAction")
+                if (path->path->name.originalName == "NoAction")
                     actions.insert("NoAction");
                 else
                     actions.insert(path->path->name.name);

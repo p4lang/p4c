@@ -72,7 +72,6 @@ header ipv4 instanceof ipv4_t
 header tcp instanceof tcp_t
 header cksum_state instanceof cksum_state_t
 
-;oldname:NoAction_1
 action NoAction args none {
 	return
 }

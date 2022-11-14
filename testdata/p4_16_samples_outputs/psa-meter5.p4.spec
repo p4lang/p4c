@@ -37,7 +37,6 @@ header ethernet instanceof ethernet_t
 
 metarray meter0_0 size 0x10001
 
-;oldname:NoAction_1
 action NoAction args none {
 	return
 }

@@ -27,7 +27,6 @@ struct metadata {
 }
 metadata instanceof metadata
 
-;oldname:NoAction_1
 action NoAction args none {
 	return
 }
