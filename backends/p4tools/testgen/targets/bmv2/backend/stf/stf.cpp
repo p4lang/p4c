@@ -334,17 +334,6 @@ add {{table.table_name}} {% if rule.rules.needs_priority %}{{rule.priority}} {% 
 ## endfor
 ## endif
 
-## if counters
-## for counter in counters.counter_arrays
-# Counter: {{counter.name}} , size {{counter.size}} , type {{counter.type}}
-## if counter.conditions
-## for condition in counter.conditions
-# {{condition.index}} : {{condition.value}}
-## endfor
-## endif
-## endfor
-## endif
-
 ## if exists("clone_infos")
 ## for clone_info in clone_infos
 mirroring_add {{clone_info.session_id}} {{clone_info.clone_port}}
@@ -366,6 +355,17 @@ packet {{send.ig_port}} {{send.pkt}}
 ## if verify
 expect {{verify.eg_port}} {{verify.exp_pkt}}$
 ## endif
+## endif
+
+## if counters
+## for counter in counters.counter_arrays
+## if counter.conditions
+## for condition in counter.conditions
+p4toolCounter {{counter.name}} {{condition.index}} {{condition.value}}
+counter_read {{counter.name}} {{condition.index}}
+## endfor
+## endif
+## endfor
 ## endif
 
 )""");

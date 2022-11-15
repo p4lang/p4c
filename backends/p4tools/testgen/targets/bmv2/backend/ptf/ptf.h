@@ -63,6 +63,9 @@ class PTF : public TF {
     /// Converts the traces of this test into a string representation and Inja object.
     static inja::json getTrace(const TestSpec* testSpec);
 
+    /// Converts all the counter objects into Inja format.
+    inja::json getCounters(const TestSpec* testSpec);
+
     /// Converts all the control plane objects into Inja format.
     static inja::json getControlPlane(const TestSpec* testSpec);
 

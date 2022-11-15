@@ -614,17 +614,11 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              }
 
              const auto* receiverPath = receiver->checkedTo<IR::PathExpression>();
-             const auto& externInstance = state.convertPathExpr(receiverPath);
-             const IR::Expression* counterSizeExpr = state.findDecl(receiverPath)
-                                                         ->checkedTo<IR::Declaration_Instance>()
-                                                         ->arguments[0]
-                                                         .at(0)
-                                                         ->expression;
-             const IR::Expression* counterTypeExpr = state.findDecl(receiverPath)
-                                                         ->checkedTo<IR::Declaration_Instance>()
-                                                         ->arguments[0]
-                                                         .at(1)
-                                                         ->expression;
+             const IR::Declaration_Instance* decl =
+                 state.findDecl(receiverPath)->checkedTo<IR::Declaration_Instance>();
+             const auto& externInstance = decl->controlPlaneName();
+             const IR::Expression* counterSizeExpr = decl->arguments[0].at(0)->expression;
+             const IR::Expression* counterTypeExpr = decl->arguments[0].at(1)->expression;
              big_int countertype = counterTypeExpr->checkedTo<IR::Constant>()->value;
              auto cond = new IR::Lss(index, counterSizeExpr);
              auto* nextState = new ExecutionState(state);
@@ -634,8 +628,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // index. If the counter has not been added had, create a new counter object.
              // "Count" increment an entry by one. If index >= size, no counter state will be
              // updated.
-             const auto* counterState =
-                 state.getTestObject("countervalues", externInstance->toString(), false);
+             const auto* counterState = state.getTestObject("countervalues", externInstance, false);
 
              Bmv2CounterValue* counterValue = nullptr;
              if (counterState != nullptr) {
@@ -646,15 +639,15 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                      programInfo.createTargetUninitialized(IR::Type::Bits::get(32), false);
                  counterValue = new Bmv2CounterValue(
                      inputValue, counterSizeExpr, counterValue->getCounterTypeByIndex(countertype));
-                 nextState->addTestObject("countervalues", externInstance->toString(),
-                                          counterValue);
+                 nextState->addTestObject("countervalues", externInstance, counterValue);
              }
              const IR::Expression* baseExpr = counterValue->getCurrentValue(index);
 
              const IR::Expression* increasedExpr =
                  new IR::Add(baseExpr, IR::getConstant(IR::Type::Bits::get(32), 1));
              counterValue->addCounterCondition(Bmv2CounterCondition{index, increasedExpr});
-             nextState->addTestObject("countervalues", externInstance->toString(), counterValue);
+
+             nextState->addTestObject("countervalues", externInstance, counterValue);
 
              // TODO: Find a better way to model a trace of this event.
              std::stringstream counterStream;
