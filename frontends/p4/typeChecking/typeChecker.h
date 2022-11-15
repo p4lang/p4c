@@ -174,10 +174,10 @@ class TypeInference : public Transform {
     const IR::Expression* actionCall(
         bool inActionList,   // if true this "call" is in the action list of a table
         const IR::MethodCallExpression* actionCall);
-    const IR::Vector<IR::Argument>*
-            checkExternConstructor(const IR::Node* errorPosition,
-                                   const IR::Type_Extern* ext,
-                                   const IR::Vector<IR::Argument> *arguments);
+    std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>
+    checkExternConstructor(const IR::Node* errorPosition,
+                           const IR::Type_Extern* ext,
+                           const IR::Vector<IR::Argument> *arguments);
 
     static constexpr bool forbidModules = true;
     static constexpr bool forbidPackages = true;

@@ -55,7 +55,7 @@ struct tuple_0 {
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    @name("ingressImpl.lut3") ValueLookupTable<tuple_0, bit<8>, bit<16>>({ exact }, 1024) lut3_0;
+    @name("ingressImpl.lut3") ValueLookupTable<tuple_0, bit<8>, bit<16>>((tuple_0){f0 = exact}, 1024) lut3_0;
     @hidden action issue3091l229() {
         hdr.ethernet.dstAddr[47:40] = 8w5;
         hdr.ethernet.etherType[7:0] = fn_foo<match_kind>(ternary);

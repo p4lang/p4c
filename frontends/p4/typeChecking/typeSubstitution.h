@@ -87,6 +87,8 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVa
     // In this variant of compose all variables in 'other' that are
     // assigned to are disjoint from all variables already in 'this'.
     void simpleCompose(const TypeVariableSubstitution* other);
+    // Remove substitutions of the form int->int.
+    TypeVariableSubstitution* trim() const;
 };
 
 }  // namespace P4
