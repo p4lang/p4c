@@ -466,6 +466,17 @@ if(DEFINED CPPLINT_FILES)
     COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
     WORKING_DIRECTORY ${P4C_SOURCE_DIR}
     COMMENT "cpplint quietly")
+else()
+  # If no cpplint files are specified in CMake, set the target to run across the entire code base.
+  set (CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/run-cpplint.sh)
+  add_custom_target(cpplint
+    COMMAND ${CPPLINT_CMD}
+    WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+    COMMENT "cpplint")
+  add_custom_target(cpplint-quiet
+    COMMAND ${CPPLINT_CMD} --quiet
+    WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+    COMMENT "cpplint quietly")
 endif()
 
 # tags, etags
