@@ -18,6 +18,7 @@ limitations under the License.
 #define FRONTENDS_P4_14_HEADER_TYPE_H_
 
 #include "ir/ir.h"
+#include "ir/visitor.h"
 
 class CheckHeaderTypes : public Modifier {
     const IR::V1Program* global = nullptr;

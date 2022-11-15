@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "hierarchicalNames.h"
 
+#include "lib/log.h"
+
 namespace P4 {
 
 cstring HierarchicalNames::getName(const IR::IDeclaration* decl) { return decl->getName(); }

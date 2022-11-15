@@ -23,6 +23,7 @@ limitations under the License.
 #include "frontends/common/options.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/parsers/p4/p4parser.hpp"
+#include "ir/dump.h"
 
 namespace P4 {
 

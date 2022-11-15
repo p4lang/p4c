@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "../common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
+#include "ir/pass_manager.h"
 
 namespace P4 {
 

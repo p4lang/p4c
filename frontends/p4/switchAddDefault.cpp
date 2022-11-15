@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "switchAddDefault.h"
 
+#include "lib/ordered_set.h"
+
 namespace P4 {
 
 void SwitchAddDefault::postorder(IR::SwitchStatement* sw) {

@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "frontends/common/programMap.h"
 #include "frontends/p4/typeChecking/typeSubstitution.h"
-#include "ir/ir.h"
+#include "lib/ordered_set.h"
 
 namespace P4 {
 /**

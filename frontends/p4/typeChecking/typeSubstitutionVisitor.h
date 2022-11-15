@@ -19,6 +19,8 @@ limitations under the License.
 
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "ir/visitor.h"
+#include "lib/log.h"
 #include "typeSubstitution.h"
 
 namespace P4 {

@@ -18,6 +18,7 @@ limitations under the License.
 #define _FRONTENDS_P4_MOVECONSTRUCTORS_H_
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "ir/pass_manager.h"
 
 namespace P4 {
 

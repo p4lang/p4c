@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "frontends/common/programMap.h"
 #include "ir/ir.h"
+#include "ir/visitor.h"
 #include "lib/cstring.h"
 #include "lib/map.h"
 

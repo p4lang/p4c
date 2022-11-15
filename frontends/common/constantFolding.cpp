@@ -19,6 +19,7 @@ limitations under the License.
 #include "frontends/common/options.h"
 #include "frontends/p4/enumInstance.h"
 #include "lib/big_int_util.h"
+#include "lib/log.h"
 
 namespace P4 {
 

@@ -22,6 +22,7 @@ limitations under the License.
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/toP4/toP4.h"
+#include "lib/algorithm.h"
 #include "lib/log.h"
 #include "syntacticEquivalence.h"
 #include "typeConstraints.h"

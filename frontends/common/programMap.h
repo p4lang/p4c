@@ -18,6 +18,7 @@ limitations under the License.
 #define _FRONTENDS_COMMON_PROGRAMMAP_H_
 
 #include "ir/ir.h"
+#include "lib/log.h"
 
 namespace P4 {
 

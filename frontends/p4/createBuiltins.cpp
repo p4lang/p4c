@@ -18,6 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/coreLibrary.h"
 #include "ir/ir.h"
+#include "lib/error.h"
 
 namespace P4 {
 
