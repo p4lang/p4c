@@ -273,6 +273,7 @@ bool ToP4::preorder(const IR::Type_Specialized* t) {
 }
 
 bool ToP4::preorder(const IR::Argument* arg) {
+    dump(2);
     if (!arg->name.name.isNullOrEmpty()) {
         builder.append(arg->name.name);
         builder.append(" = ");
@@ -941,6 +942,20 @@ bool ToP4::preorder(const IR::StructExpression* e) {
     }
     expressionPrecedence = prec;
     builder.append("}");
+    if (expressionPrecedence > DBPrint::Prec_Prefix)
+        builder.append(")");
+    return false;
+}
+
+bool ToP4::preorder(const IR::InvalidHeader* e) {
+    if (expressionPrecedence > DBPrint::Prec_Prefix)
+        builder.append("(");
+    if (e->headerType != nullptr) {
+        builder.append("(");
+        visit(e->headerType);
+        builder.append(")");
+    }
+    builder.append("{#}");
     if (expressionPrecedence > DBPrint::Prec_Prefix)
         builder.append(")");
     return false;

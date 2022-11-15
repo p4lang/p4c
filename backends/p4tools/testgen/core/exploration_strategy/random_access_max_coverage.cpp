@@ -66,8 +66,8 @@ void RandomAccessMaxCoverage::run(const Callback& callback) {
                 }
             }
         } catch (TestgenUnimplemented& e) {
-            // If permissive is not enable, we just throw the exception.
-            if (!TestgenOptions::get().permissive) {
+            // If strict is enabled, bubble the exception up.
+            if (TestgenOptions::get().strict) {
                 throw;
             }
             // Otherwise we try to roll back as we typically do.

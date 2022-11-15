@@ -61,7 +61,7 @@ table tbl {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	jmpeq MYIP_PARSE_VLAN_TAG h.ethernet.etherType 0x8100
 	jmp MYIP_ACCEPT

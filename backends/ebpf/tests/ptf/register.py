@@ -44,17 +44,17 @@ class RegisterActionPSATest(P4EbpfTest):
     def runTest(self):
         pkt = testutils.simple_ip_packet()
 
-        self.table_add(table="ingress_tbl_fwd", key=[4], action=1, data=[5])
+        self.table_add(table="ingress_tbl_fwd", key=[DP_PORTS[0]], action=1, data=[DP_PORTS[1]])
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)  # Checks action run
 
-        self.register_verify(name="ingress_reg", index=["0x5"], expected_value=["0x5"])
+        self.register_verify(name="ingress_reg", index=[DP_PORTS[1]], expected_value=["0x5"])
 
         # After next action run in register should be stored a new value - 15
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
 
-        self.register_verify(name="ingress_reg", index=["0x5"], expected_value=["0xf"])
+        self.register_verify(name="ingress_reg", index=["{}".format(hex(DP_PORTS[1]))], expected_value=["0xf"])
 
 
 class RegisterApplyPSATest(P4EbpfTest):
@@ -95,7 +95,7 @@ class RegisterDefaultPSATest(P4EbpfTest):
         pkt = testutils.simple_ip_packet()
 
         testutils.send_packet(self, PORT0, pkt)
-        self.register_verify(name="ingress_reg", index=["0x5"], expected_value=["0x10"])
+        self.register_verify(name="ingress_reg", index=["{}".format(hex(DP_PORTS[1]))], expected_value=["0x10"])
 
 
 class RegisterBigKeyPSATest(P4EbpfTest):

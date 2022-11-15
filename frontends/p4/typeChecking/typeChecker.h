@@ -185,11 +185,12 @@ class TypeInference : public Transform {
                          bool forbidModules = false, bool forbidPackage = false) const;
     virtual const IR::Type* setTypeType(const IR::Type* type, bool learn = true);
 
+    /// Action list of the current table.
+    const IR::ActionList* currentActionList;
     /// This is used to validate the initializer for the default_action
     /// or for actions in the entries list.  Returns the action list element
     /// on success.
-    const IR::ActionListElement* validateActionInitializer(const IR::Expression* actionCall,
-                                                           const IR::P4Table* table);
+    const IR::ActionListElement* validateActionInitializer(const IR::Expression* actionCall);
 
     //////////////////////////////////////////////////////////////
 
@@ -298,6 +299,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Member* expression) override;
     const IR::Node* postorder(IR::TypeNameExpression* expression) override;
     const IR::Node* postorder(IR::ListExpression* expression) override;
+    const IR::Node* postorder(IR::InvalidHeader* expression) override;
     const IR::Node* postorder(IR::StructExpression* expression) override;
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
     const IR::Node* postorder(IR::ConstructorCallExpression* expression) override;
@@ -305,6 +307,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::DefaultExpression* expression) override;
     const IR::Node* postorder(IR::This* expression) override;
     const IR::Node* postorder(IR::AttribLocal* local) override;
+    const IR::Node* postorder(IR::ActionList* al) override;
 
     const IR::Node* postorder(IR::ReturnStatement* stat) override;
     const IR::Node* postorder(IR::IfStatement* stat) override;

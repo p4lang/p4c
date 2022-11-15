@@ -42,7 +42,7 @@ regarray counter1_0 size 0x400 initval 0x0
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	regadd counter0_0 0x400 1
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0

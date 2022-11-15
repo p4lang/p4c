@@ -79,11 +79,14 @@ class DoEliminateSwitch final : public Transform {
     const TypeMap* typeMap;
     std::vector<const IR::Declaration*> toInsert;
  public:
-    explicit DoEliminateSwitch(ReferenceMap* refMap, const TypeMap* typeMap):
+    bool exactNeeded = false;
+
+    DoEliminateSwitch(ReferenceMap* refMap, const TypeMap* typeMap):
             refMap(refMap), typeMap(typeMap)
     { setName("DoEliminateSwitch"); CHECK_NULL(refMap); CHECK_NULL(typeMap); }
     const IR::Node* postorder(IR::SwitchStatement* statement) override;
     const IR::Node* postorder(IR::P4Control* control) override;
+    const IR::Node* postorder(IR::P4Program* program) override;
 };
 
 class EliminateSwitch final : public PassManager {

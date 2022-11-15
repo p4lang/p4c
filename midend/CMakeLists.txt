@@ -17,6 +17,7 @@ set (MIDEND_SRCS
   complexComparison.cpp
   convertEnums.cpp
   copyStructures.cpp
+  eliminateInvalidHeaders.cpp
   eliminateNewtype.cpp
   eliminateSerEnums.cpp
   eliminateSwitch.cpp
@@ -64,6 +65,7 @@ set (MIDEND_HDRS
   convertEnums.h
   convertErrors.h
   copyStructures.h
+  eliminateInvalidHeaders.h
   eliminateNewtype.h
   eliminateSerEnums.h
   eliminateSwitch.h
@@ -102,8 +104,6 @@ set (MIDEND_HDRS
   tableHit.h
   validateProperties.h
   )
-
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${MIDEND_SRCS};${MIDEND_HDRS}")
 
 build_unified(MIDEND_SRCS)
 add_library (midend STATIC ${MIDEND_SRCS})

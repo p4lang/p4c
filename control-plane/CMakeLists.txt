@@ -98,8 +98,6 @@ set (CONTROLPLANE_HDRS
   bfruntime.h
   )
 
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${CONTROLPLANE_HDRS};${CONTROLPLANE_SRCS}")
-
 include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 # Silence -Warray-bounds as the root issue is out of our control: https://github.com/protocolbuffers/protobuf/issues/7140
 set_source_files_properties (${CONTROLPLANE_SOURCES} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds")

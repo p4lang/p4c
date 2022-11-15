@@ -71,7 +71,7 @@ IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_preambl
         new IR::Member(new IR::PathExpression("m"), "psa_ingress_input_metadata_ingress_port")));
     instr.push_back(new IR::DpdkMovStatement(
         new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
-        new IR::Constant(0)));
+        new IR::Constant(1)));
     return instr;
 }
 
@@ -286,12 +286,15 @@ void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expres
                 "%1%, Select expression wider than 64-bit is not permitted", sv);
         return;
     }
+    auto width = sv->type->width_bits();
+    auto byteAlignedWidth = (width + 7) & (~ 7);
     if (auto maskexpr = ce->to<IR::Mask>()) {
         auto left = maskexpr->left;
         auto right = maskexpr->right;
         unsigned value = right->to<IR::Constant>()->asUnsigned() &
                          left->to<IR::Constant>()->asUnsigned();
-        auto tmpDecl = addNewTmpVarToMetadata("tmpMask", sv->type);
+        auto tmpDecl = addNewTmpVarToMetadata("tmpMask",
+                            IR::Type_Bits::get(byteAlignedWidth));
         auto tmpMask = new IR::Member(new IR::PathExpression(IR::ID("m")),
                                       IR::ID(tmpDecl->name.name));
         structure->push_variable(new IR::DpdkDeclaration(tmpDecl));

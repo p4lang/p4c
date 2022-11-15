@@ -244,7 +244,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new UniqueNames(&refMap),  // needed again after inlining
         new MoveDeclarations(),  // needed again after inlining
         new SimplifyDefUse(&refMap, &typeMap),
-        new RemoveUnusedDeclarations(&refMap),
+        new RemoveAllUnusedDeclarations(&refMap),
         new SimplifyControlFlow(&refMap, &typeMap),
         new HierarchicalNames(),
         new FrontEndLast(),

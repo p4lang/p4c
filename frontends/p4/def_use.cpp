@@ -514,6 +514,11 @@ bool ComputeWriteSet::preorder(const IR::DefaultExpression* expression) {
     return false;
 }
 
+bool ComputeWriteSet::preorder(const IR::InvalidHeader* expression) {
+    expressionWrites(expression, LocationSet::empty);
+    return false;
+}
+
 bool ComputeWriteSet::preorder(const IR::Literal* expression) {
     expressionWrites(expression, LocationSet::empty);
     return false;

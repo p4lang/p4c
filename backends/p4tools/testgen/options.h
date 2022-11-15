@@ -48,8 +48,8 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// Directory for generated tests. Defaults to PWD.
     cstring outputDir = nullptr;
 
-    /// Do not fail on unimplemented features. Instead, try the next branch.
-    bool permissive = false;
+    /// Fail on unimplemented features instead of trying the next branch
+    bool strict = false;
 
     /// The test back end that P4Testgen will generate test for. Examples, STF, PTF or Protobuf.
     cstring testBackend;

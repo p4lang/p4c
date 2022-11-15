@@ -61,7 +61,7 @@ control MyIC(inout headers a, inout empty_t bc,
             istd.ingress_port : exact;
         }
         actions = { do_forward; NoAction; }
-        default_action = do_forward((PortId_t) 5);
+        default_action = do_forward((PortId_t) PORT1);
         size = 100;
     }
 

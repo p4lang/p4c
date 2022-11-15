@@ -228,6 +228,10 @@ void IR::ConstructorCallExpression::dbprint(std::ostream &out) const {
     dbsetflags(out, flags);
 }
 
+void IR::InvalidHeader::dbprint(std::ostream &out) const {
+    out << "(" << type << "){#}" << ";";
+}
+
 void IR::ListExpression::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     if (prec > Prec_Postfix) out << '(';

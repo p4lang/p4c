@@ -1,8 +1,8 @@
-#ifndef _MIDEND_FLATTENILOGMSG_H_
-#define _MIDEND_FLATTENILOGMSG_H_
+#ifndef MIDEND_FLATTENLOGMSG_H_
+#define MIDEND_FLATTENLOGMSG_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -12,34 +12,35 @@ using TypeLogMsgParams = std::pair<IR::IndexedVector<IR::NamedExpression>, std::
    Find types in log_msg function for replace.
 */
 class FindTypesInLogMsgInvocationToReplace : public Inspector {
-   P4::TypeMap* typeMap;
-   ordered_map<cstring, const IR::Type_StructLike*> replacement;
-   // Map with new log_msg methods where is each key is a original identifier of IR::Node.
-   ordered_map<unsigned, const IR::MethodCallStatement* > logMsgReplacement;
-   size_t index;
+    P4::TypeMap* typeMap;
+    ordered_map<cstring, const IR::Type_StructLike*> replacement;
+    // Map with new log_msg methods where is each key is a original identifier of IR::Node.
+    ordered_map<unsigned, const IR::MethodCallStatement*> logMsgReplacement;
+    size_t index;
 
  public:
-    explicit FindTypesInLogMsgInvocationToReplace(P4::TypeMap *typeMap) : typeMap(typeMap) {
+    explicit FindTypesInLogMsgInvocationToReplace(P4::TypeMap* typeMap) : typeMap(typeMap) {
         setName("FindTypesInLogMsgInvocationToReplace");
         CHECK_NULL(typeMap);
     }
     bool preorder(const IR::MethodCallStatement* methodCallStatement) override;
     void createReplacement(const IR::Type_StructLike* type);
     const IR::MethodCallStatement* prepareLogMsgStatement(
-         const IR::MethodCallStatement* methodCallStatement);
+        const IR::MethodCallStatement* methodCallStatement);
     const IR::Type_StructLike* getReplacement(const cstring name) const {
-         return ::get(replacement, name); }
+        return ::get(replacement, name);
+    }
     const IR::MethodCallStatement* getReplacementMethodCall(unsigned id) const {
-       return ::get(logMsgReplacement, id);
+        return ::get(logMsgReplacement, id);
     }
     bool empty() const { return replacement.empty(); }
     bool hasStructInParameter(const IR::MethodCallStatement* methodCallStatement);
 
  protected:
     TypeLogMsgParams unfoldStruct(const IR::Expression* expr, std::string strParam,
-      std::string curName = "");
+                                  std::string curName = "");
     const IR::Type_StructLike* generateNewStructType(const IR::Type_StructLike* structType,
-      IR::IndexedVector<IR::NamedExpression> &v);
+                                                     IR::IndexedVector<IR::NamedExpression>& v);
     IR::ID newName();
 };
 
@@ -63,13 +64,16 @@ log_msg("t=(valid:{},port:{})", {t.valid, t.port});
 class ReplaceLogMsg : public Transform, P4WriteContext {
     P4::TypeMap* typeMap;
     FindTypesInLogMsgInvocationToReplace* findTypesInLogMsgInvocationToReplace;
+
  public:
-    explicit ReplaceLogMsg(P4::TypeMap* typeMap,
-         FindTypesInLogMsgInvocationToReplace* findTypesInLogMsgInvocationToReplace)
-         : typeMap(typeMap),
-         findTypesInLogMsgInvocationToReplace(findTypesInLogMsgInvocationToReplace) {
-       CHECK_NULL(typeMap); CHECK_NULL(findTypesInLogMsgInvocationToReplace);
-       setName("ReplaceLogMsg");
+    explicit ReplaceLogMsg(
+        P4::TypeMap* typeMap,
+        FindTypesInLogMsgInvocationToReplace* findTypesInLogMsgInvocationToReplace)
+        : typeMap(typeMap),
+          findTypesInLogMsgInvocationToReplace(findTypesInLogMsgInvocationToReplace) {
+        CHECK_NULL(typeMap);
+        CHECK_NULL(findTypesInLogMsgInvocationToReplace);
+        setName("ReplaceLogMsg");
     }
     const IR::Node* preorder(IR::P4Program* program);
     const IR::Node* postorder(IR::MethodCallStatement* methodCallStatement) override;
@@ -91,4 +95,4 @@ class FlattenLogMsg final : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_FLATTENILOGMSG_H_ */
+#endif /* MIDEND_FLATTENLOGMSG_H_ */

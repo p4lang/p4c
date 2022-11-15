@@ -31,6 +31,7 @@ limitations under the License.
 #include "midend/complexComparison.h"
 #include "midend/copyStructures.h"
 #include "midend/convertEnums.h"
+#include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateTuples.h"
 #include "midend/local_copyprop.h"
@@ -79,6 +80,7 @@ MidEnd::run(EbpfOptions& options, const IR::P4Program* program, std::ostream* ou
                 new P4::RemoveMiss(&refMap, &typeMap),
                 new P4::ClearTypeMap(&typeMap),
                 new P4::EliminateNewtype(&refMap, &typeMap),
+                new P4::EliminateInvalidHeaders(&refMap, &typeMap),
                 new P4::SimplifyControlFlow(&refMap, &typeMap),
                 new P4::SimplifyKey(&refMap, &typeMap,
                                     new P4::OrPolicy(

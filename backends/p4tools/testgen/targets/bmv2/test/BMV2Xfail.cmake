@@ -62,12 +62,6 @@ p4tools_add_xfail_reason(
   extract_for_header_union.p4
 )
 
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
-  "Duplicate objects of type '.*' with name '.*'"
-  gauntlet_action_mux-bmv2.p4
-)
-
 ####################################################################################################
 # 2. P4Testgen Issues
 # These are failures in P4Testgen that need to be fixed.

@@ -15,6 +15,8 @@
 #include "backends/p4tools/testgen/core/target.h"
 #include "backends/p4tools/testgen/lib/concolic.h"
 #include "backends/p4tools/testgen/targets/bmv2/concolic.h"
+#include "backends/p4tools/testgen/targets/bmv2/p4_asserts_parser.h"
+#include "backends/p4tools/testgen/targets/bmv2/p4_refers_to_parser.h"
 
 namespace P4Tools {
 
@@ -51,11 +53,25 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
         pipelineSequence.insert(pipelineSequence.end(), subResult.begin(), subResult.end());
         ++pipeIdx;
     }
-    // Sending a too short packet in BMV2 produces nonsense, so we require the packet size to be
-    // larger than 32 bits
-    targetConstraints =
+    /// Sending a too short packet in BMV2 produces nonsense, so we require the packet size to be
+    /// larger than 32 bits
+    const IR::Operation_Binary* constraint =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
                     IR::getConstant(ExecutionState::getPacketSizeVarType(), 32));
+    /// Vector containing pairs of restrictions and nodes to which these restrictions apply.
+    std::vector<std::vector<const IR::Expression*>> restrictionsVec;
+    /// Defines all "entry_restriction" and then converts restrictions from string to IR
+    /// expressions, and stores them in restrictionsVec to move targetConstraints further.
+    program->apply(AssertsParser::AssertsParser(restrictionsVec));
+    /// Defines all "refers_to" and then converts restrictions from string to IR expressions,
+    /// and stores them in restrictionsVec to move targetConstraints further.
+    program->apply(RefersToParser::RefersToParser(restrictionsVec));
+    for (const auto& element : restrictionsVec) {
+        for (const auto* restriction : element) {
+            constraint = new IR::LAnd(constraint, restriction);
+        }
+    }
+    targetConstraints = constraint;
 }
 
 const ordered_map<cstring, const IR::Type_Declaration*>*

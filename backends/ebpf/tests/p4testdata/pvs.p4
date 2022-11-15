@@ -72,7 +72,7 @@ control ingress(inout headers hdr,
         if (hdr.udp.isValid()) {
             if (hdr.udp.dstPort == 80) {
                 ostd.drop = false;
-                ostd.egress_port = (PortId_t) 5;
+                ostd.egress_port = (PortId_t) PORT1;
             }
         }
     }

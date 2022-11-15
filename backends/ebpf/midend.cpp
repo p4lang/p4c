@@ -30,6 +30,7 @@ limitations under the License.
 #include "midend/complexComparison.h"
 #include "midend/copyStructures.h"
 #include "midend/convertEnums.h"
+#include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateTuples.h"
 #include "midend/expandEmit.h"
@@ -80,6 +81,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
             new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
             new P4::ClearTypeMap(&typeMap),
             new P4::RemoveMiss(&refMap, &typeMap),
+            new P4::EliminateInvalidHeaders(&refMap, &typeMap),
             new P4::EliminateNewtype(&refMap, &typeMap),
             new P4::SimplifyControlFlow(&refMap, &typeMap),
             new P4::SimplifyKey(&refMap, &typeMap,
@@ -119,7 +121,8 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
             });
         } else {
             midEnd.addPasses({
-                new P4::ValidateTableProperties({"implementation"})
+                new P4::ValidateTableProperties({ "size",
+                                                  "implementation" })
             });
         }
 

@@ -1,0 +1,6 @@
+pna-example-miss.p4(147): [--Werror=unexpected] error: add_entry action cannot be default action: add_on_miss_action:
+        res = add_entry(action_name="add_on_miss_action", action_params = tmp, expire_time_profile_id = user_meta.timeout);
+            ^
+pna-example-miss.p4(174): [--Werror=unexpected] error: add_entry first arg action name next_hop is not any action in table ipv4_da2_0
+        add_entry(action_name="next_hop", action_params = {32w0, 32w1234}, expire_time_profile_id = user_meta.timeout);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

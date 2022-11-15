@@ -1,0 +1,6 @@
+[--Werror=unexpected] error: execute method for different DirectMeter instances (meter0_0 and meter1_0) called within same action
+[--Werror=unexpected] error: execute method for different DirectMeter instances (meter0_0 and meter1_0) called within same action
+pna-dpdk-direct-meter-err-4.p4(118): [--Werror=expected] error: Expected default action default_route_drop to have 'execute' method call for DirectMeter extern instance MainControlImpl.meter1
+    action default_route_drop() {
+           ^^^^^^^^^^^^^^^^^^
+[--Werror=unexpected] error: execute method for different DirectMeter instances (meter0_0 and meter1_0) called within same action

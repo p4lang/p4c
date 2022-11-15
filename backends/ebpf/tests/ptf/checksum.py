@@ -19,7 +19,7 @@ class ChecksumCRC32MultipleUpdatesPSATest(P4EbpfTest):
         pkt = Ether() / "1234567890000"
         exp_pkt = Ether() / bytes.fromhex('313233343536373839 cbf43926')
         testutils.send_packet(self, PORT0, pkt)
-        testutils.verify_packet_any_port(self, exp_pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)
 
 
 @xdp2tc_head_not_supported
@@ -30,7 +30,7 @@ class ChecksumCRC16MultipleUpdatesPSATest(P4EbpfTest):
         pkt = Ether() / "1234567890000"
         exp_pkt = Ether() / bytes.fromhex('313233343536373839 BB3D')
         testutils.send_packet(self, PORT0, pkt)
-        testutils.verify_packet_any_port(self, exp_pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)
 
 
 class InternetChecksumPSATest(P4EbpfTest):
@@ -63,7 +63,7 @@ class InternetChecksumPSATest(P4EbpfTest):
             pkt[IP].src = '10.0.0.1'
             pkt[IP].chksum = None
             pkt[UDP].chksum = None
-            testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+            testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
 
 @xdp2tc_head_not_supported
@@ -74,7 +74,7 @@ class HashCRC16PSATest(P4EbpfTest):
         pkt = Ether() / "12345678900"
         exp_pkt = Ether() / bytes.fromhex('313233343536373839 bb3d')
         testutils.send_packet(self, PORT0, pkt)
-        testutils.verify_packet_any_port(self, exp_pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)
 
 
 @xdp2tc_head_not_supported
@@ -85,7 +85,7 @@ class HashInActionPSATest(P4EbpfTest):
         pkt = Ether() / "12345678900"
         exp_pkt = Ether() / bytes.fromhex('313233343536373839 bb3d')
         testutils.send_packet(self, PORT0, pkt)
-        testutils.verify_packet_any_port(self, exp_pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)
 
 
 @xdp2tc_head_not_supported
@@ -96,7 +96,7 @@ class HashCRC32PSATest(P4EbpfTest):
         pkt = Ether() / "1234567890000"
         exp_pkt = Ether() / bytes.fromhex('313233343536373839 cbf43926')
         testutils.send_packet(self, PORT0, pkt)
-        testutils.verify_packet_any_port(self, exp_pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)
 
 
 @xdp2tc_head_not_supported
@@ -108,4 +108,4 @@ class HashRangePSATest(P4EbpfTest):
         pkt = Ether() / "1234567890"
         exp_pkt = Ether() / bytes.fromhex('313233343536373839 {}'.format(format(res, 'x')))
         testutils.send_packet(self, PORT0, pkt)
-        testutils.verify_packet_any_port(self, exp_pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)

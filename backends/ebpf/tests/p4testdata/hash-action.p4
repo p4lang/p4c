@@ -82,7 +82,7 @@ control ingress(inout headers hdr,
 
     apply {
         t1.apply();
-        send_to_port(ostd, (PortId_t) 5);
+        send_to_port(ostd, (PortId_t) PORT1);
     }
 }
 

@@ -523,6 +523,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     bool preorder(const IR::MethodCallExpression* expression) override;
     bool preorder(const IR::DefaultExpression* expression) override;
     bool preorder(const IR::Expression* expression) override;
+    bool preorder(const IR::InvalidHeader* expression) override;
     // statements
     bool preorder(const IR::P4Parser* parser) override;
     bool preorder(const IR::P4Control* control) override;

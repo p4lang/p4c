@@ -106,7 +106,7 @@ table route {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp INGRESSPARSERIMPL_ACCEPT
