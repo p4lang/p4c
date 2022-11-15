@@ -176,16 +176,22 @@ class ShortenTokenLength : public Transform {
     cstring shortenString(cstring str, size_t allowedLength = 60) {
         if (str.size() <= allowedLength)
             return str;
-         auto itr = newNameMap.find(str);
-         if (itr != newNameMap.end())
-             return itr->second;
-         // make sure new string length less or equal allowedLength
-         cstring newStr = str.substr(0, allowedLength - std::to_string(count).size());
-         newStr += std::to_string(count);
-         count++;
-         newNameMap.insert(std::pair<cstring, cstring>(str, newStr));
-         origNameMap.insert(std::pair<cstring, cstring>(newStr, str));
-         return newStr;
+        auto itr = newNameMap.find(str);
+        if (itr != newNameMap.end())
+            return itr->second;
+        // make sure new string length less or equal allowedLength
+        cstring newStr = str.substr(0, allowedLength - std::to_string(count).size());
+        newStr += std::to_string(count);
+        count++;
+        newNameMap.insert(std::pair<cstring, cstring>(str, newStr));
+        origNameMap.insert(std::pair<cstring, cstring>(newStr, str));
+        return newStr;
+    }
+
+    cstring dropSuffixIfNoAction(IR::ID name) {
+        if (name.originalName == "NoAction")
+            return name.originalName;
+         return name.name;
     }
 
  public:
@@ -246,18 +252,59 @@ class ShortenTokenLength : public Transform {
         return g;
     }
 
-    const IR::Node* preorder(IR::Path *p) override {
-        p->name = shortenString(p->name);
-        return p;
+    void shortenParamTypeName(IR::ParameterList& pl) {
+        IR::IndexedVector<IR::Parameter> new_pl;
+        for (auto p : pl.parameters) {
+            auto newType0 = p->type->to<IR::Type_Name>();
+            auto path0 = newType0->path->clone();
+            path0->name = shortenString(path0->name);
+            new_pl.push_back(new IR::Parameter(p->srcInfo, p->name,
+                            p->annotations, p->direction,
+                            new IR::Type_Name(newType0->srcInfo, path0),
+                            p->defaultValue));
+        }
+        pl = IR::ParameterList {new_pl};
     }
 
     const IR::Node* preorder(IR::DpdkAction *a) override {
-        a->name = shortenString(a->name);
+        a->name = shortenString(dropSuffixIfNoAction(a->name));
+        shortenParamTypeName(a->para);
         return a;
+    }
+
+    const IR::Node* preorder(IR::ActionList* al) override {
+        IR::IndexedVector<IR::ActionListElement> new_al;
+        for (auto ale : al->actionList) {
+            auto methodCallExpr = ale->expression->to<IR::MethodCallExpression>();
+            auto pathExpr = methodCallExpr->method->to<IR::PathExpression>();
+            auto path0 = pathExpr->path->clone();
+            path0->name = shortenString(dropSuffixIfNoAction(path0->name));
+            new_al.push_back(new IR::ActionListElement(ale->srcInfo,
+                        ale->annotations,
+                        new IR::MethodCallExpression(methodCallExpr->srcInfo,
+                            methodCallExpr->type,
+                            new IR::PathExpression(pathExpr->srcInfo,
+                                                   pathExpr->type, path0),
+                            methodCallExpr->typeArguments,
+                            methodCallExpr->arguments)));
+        }
+        return new IR::ActionList(al->srcInfo, new_al);
     }
 
     const IR::Node* preorder(IR::DpdkTable *t) override {
         t->name = shortenString(t->name);
+        auto methodCallExpr = t->default_action->to<IR::MethodCallExpression>();
+        auto pathExpr = methodCallExpr->method->to<IR::PathExpression>();
+        auto path0 = pathExpr->path->clone();
+        path0->name = shortenString(dropSuffixIfNoAction(path0->name));
+        t->default_action = new IR::MethodCallExpression(
+                                methodCallExpr->srcInfo,
+                                methodCallExpr->type,
+                                new IR::PathExpression(pathExpr->srcInfo,
+                                                       pathExpr->type,
+                                                       path0),
+                                methodCallExpr->typeArguments,
+                                methodCallExpr->arguments);
         return t;
     }
 
@@ -272,7 +319,7 @@ class ShortenTokenLength : public Transform {
     }
 
     const IR::Node* preorder(IR::DpdkLearnStatement *ls) override {
-        ls->action = shortenString(ls->action);
+        ls->action = shortenString(dropSuffixIfNoAction(ls->action));
         return ls;
     }
 
@@ -289,6 +336,11 @@ class ShortenTokenLength : public Transform {
     const IR::Node* preorder(IR::DpdkLabelStatement *ls) override {
         ls->label = shortenString(ls->label);
         return ls;
+    }
+
+    const IR::Node* preorder(IR::DpdkJmpActionStatement* jas) override {
+        jas->action = shortenString(dropSuffixIfNoAction(jas->action));
+        return jas;
     }
 };
 
