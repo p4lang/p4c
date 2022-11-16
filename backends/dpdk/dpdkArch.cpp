@@ -906,7 +906,7 @@ bool ExpressionUnroll::preorder(const IR::BoolLiteral *) {
 const IR::Node *IfStatementUnroll::postorder(IR::SwitchStatement *sw) {
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
     expressionUnrollSanityCheck(sw->expression);
-    auto unroller = new LogicalExpressionUnroll(refMap, structure);
+    auto unroller = new LogicalExpressionUnroll(refMap);
     unroller->setCalledBy(this);
     sw->expression->apply(*unroller);
     for (auto i : unroller->stmt)
@@ -927,7 +927,7 @@ const IR::Node *IfStatementUnroll::postorder(IR::SwitchStatement *sw) {
 const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
     expressionUnrollSanityCheck(i->condition);
-    auto unroller = new LogicalExpressionUnroll(refMap, structure);
+    auto unroller = new LogicalExpressionUnroll(refMap);
     unroller->setCalledBy(this);
     i->condition->apply(*unroller);
     for (auto i : unroller->stmt)

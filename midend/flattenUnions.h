@@ -142,9 +142,6 @@ class RemoveUnusedHUDeclarations : public Transform {
  *   pass is used to convert these if statements to transition select statements
  */
 class FlattenHeaderUnion : public PassManager {
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
-
  public:
     FlattenHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) {
         passes.push_back(new P4::TypeChecking(refMap, typeMap));

@@ -125,7 +125,6 @@ struct SelectionTable {
 // This pass generates context JSON into user specified file
 class DpdkContextGenerator : public Inspector {
     P4::ReferenceMap *refmap;
-    P4::TypeMap *typemap;
     DpdkProgramStructure *structure;
     DpdkOptions &options;
     // All tables are collected into this vector
@@ -142,10 +141,9 @@ class DpdkContextGenerator : public Inspector {
     static unsigned newActionHandle;
 
  public:
-    DpdkContextGenerator(P4::ReferenceMap *refmap, P4::TypeMap *typemap,
+    DpdkContextGenerator(P4::ReferenceMap *refmap,
                          DpdkProgramStructure *structure, DpdkOptions &options) :
-                         refmap(refmap), typemap(typemap),
-                         structure(structure), options(options) {}
+                         refmap(refmap), structure(structure), options(options) {}
 
     unsigned int getNewTableHandle();
     unsigned int getNewActionHandle();

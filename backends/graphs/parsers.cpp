@@ -43,9 +43,8 @@ Graph *ParserGraphs::CreateSubGraph(Graph &currentSubgraph, const cstring &name 
     return &newSubgraph;
 }
 
-ParserGraphs::ParserGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                             const cstring &graphsDir)
-    : refMap(refMap), typeMap(typeMap), graphsDir(graphsDir) {
+ParserGraphs::ParserGraphs(P4::ReferenceMap *refMap, const cstring &graphsDir)
+    : refMap(refMap), graphsDir(graphsDir) {
     visitDagOnce = false;
 }
 

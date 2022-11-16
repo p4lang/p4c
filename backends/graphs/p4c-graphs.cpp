@@ -175,7 +175,7 @@ int main(int argc, char *const argv[]) {
     graphs::ControlGraphs cgen(&midEnd.refMap, &midEnd.typeMap, options.graphsDir);
     top->getMain()->apply(cgen);
     LOG2("Generating parser graphs");
-    graphs::ParserGraphs pgg(&midEnd.refMap, &midEnd.typeMap, options.graphsDir);
+    graphs::ParserGraphs pgg(&midEnd.refMap, options.graphsDir);
     program->apply(pgg);
 
     graphs::Graph_visitor gvs(options.graphsDir, options.graphs, options.fullGraph,

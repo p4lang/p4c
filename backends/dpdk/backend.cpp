@@ -46,7 +46,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
 
     std::set<const IR::P4Table*> invokedInKey;
     auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure, options);
-    auto genContextJson = new DpdkContextGenerator(refMap, typeMap, &structure, options);
+    auto genContextJson = new DpdkContextGenerator(refMap, &structure, options);
 
     PassManager simplify = {
         new DpdkArchFirst(),
@@ -84,7 +84,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap, true),
         new P4::ResolveReferences(refMap),
         new StatementUnroll(refMap, &structure),
-        new IfStatementUnroll(refMap, &structure),
+        new IfStatementUnroll(refMap),
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap, true),
         new ConvertBinaryOperationTo2Params(refMap),
@@ -117,7 +117,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
                 out->flush();
             }
         }),
-        new ReplaceHdrMetaField(typeMap, refMap, &structure),
+        new ReplaceHdrMetaField(),
         // convert to assembly program
         convertToDpdk,
     };

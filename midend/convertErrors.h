@@ -75,11 +75,9 @@ class DoConvertErrors : public Transform {
     friend class ConvertErrors;
 
     ChooseErrorRepresentation* policy;
-    TypeMap* typeMap;
  public:
-    DoConvertErrors(ChooseErrorRepresentation* policy, TypeMap* typeMap)
-            : policy(policy), typeMap(typeMap)
-    { CHECK_NULL(policy); CHECK_NULL(typeMap); setName("DoConvertErrors"); }
+    explicit DoConvertErrors(ChooseErrorRepresentation* policy) : policy(policy)
+    { CHECK_NULL(policy); setName("DoConvertErrors"); }
 
     const IR::Node* preorder(IR::Type_Error* type) {
         bool convert = policy->convert(type);
@@ -99,7 +97,7 @@ class ConvertErrors : public PassManager {
     ConvertErrors(ReferenceMap* refMap, TypeMap* typeMap,
                  ChooseErrorRepresentation* policy,
                  TypeChecking* typeChecking = nullptr)
-        : convertErrors(new DoConvertErrors(policy, typeMap)) {
+        : convertErrors(new DoConvertErrors(policy)) {
         if (!typeChecking)
             typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);

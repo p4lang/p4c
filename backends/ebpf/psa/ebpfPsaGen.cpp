@@ -600,14 +600,14 @@ bool ConvertToEbpfPipeline::preorder(const IR::PackageBlock *block) {
         return false;
     }
 
-    auto parser_converter = new ConvertToEBPFParserPSA(pipeline, refmap, typemap, options, type);
+    auto parser_converter = new ConvertToEBPFParserPSA(pipeline, typemap, type);
     parserBlock->apply(*parser_converter);
     pipeline->parser = parser_converter->getEBPFParser();
     CHECK_NULL(pipeline->parser);
 
     auto control_converter = new ConvertToEBPFControlPSA(pipeline,
                                                          pipeline->parser->headers,
-                                                         refmap, typemap, options, type);
+                                                         refmap, type);
     controlBlock->apply(*control_converter);
     pipeline->control = control_converter->getEBPFControl();
     CHECK_NULL(pipeline->control);
@@ -615,7 +615,7 @@ bool ConvertToEbpfPipeline::preorder(const IR::PackageBlock *block) {
     auto deparser_converter = new ConvertToEBPFDeparserPSA(
             pipeline,
             pipeline->parser->headers, pipeline->control->outputStandardMetadata,
-            refmap, typemap, options, type);
+            typemap, type);
     deparserBlock->apply(*deparser_converter);
     pipeline->deparser = deparser_converter->getEBPFDeparser();
     CHECK_NULL(pipeline->deparser);
