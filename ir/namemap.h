@@ -21,6 +21,7 @@ limitations under the License.
 
 #include "ir/node.h"
 #include "lib/cstring.h"
+#include "lib/enumerator.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 

@@ -24,9 +24,11 @@ limitations under the License.
 #include <vector>
 
 #include "cstring.h"
-#include "gtest/gtest_prod.h"
 #include "map.h"
 #include "stringref.h"
+
+// GTest
+#include "gtest/gtest_prod.h"
 
 namespace Test {
 class UtilSourceFile;
@@ -201,6 +203,8 @@ class SourceInfo final {
     inline bool operator<=(const SourceInfo& rhs) const { return !this->operator>(rhs); }
     inline bool operator>=(const SourceInfo& rhs) const { return !this->operator<(rhs); }
 
+    friend std::ostream& operator<<(std::ostream&, const SourceInfo&);
+
  private:
     const InputSources* sources = nullptr;
     SourcePosition start = SourcePosition();
@@ -310,6 +314,11 @@ class InputSources final {
     /// The commends found in the file.
     std::vector<Comment*> comments;
 };
+
+inline std::ostream& operator<<(std::ostream& out, const SourceInfo& obj) {
+    obj.dbprint(out);
+    return out;
+}
 
 }  // namespace Util
 

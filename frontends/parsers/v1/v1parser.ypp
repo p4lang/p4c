@@ -35,6 +35,8 @@ limitations under the License.
 
 // Declare dependencies.
 %code requires {
+#include "ir/ir.h"
+
 namespace V1 {
 class V1Lexer;
 class V1ParserDriver;
@@ -73,8 +75,19 @@ inline std::ostream& operator<<(std::ostream& out, const V1::HeaderType& headerT
 }
 
 inline std::ostream& operator<<(std::ostream& out, const V1::Attributes& a) {
-    return out << "Attributes(" << (a.signed_ ? "signed," : "") <<
-                  (a.saturating ? "saturating," : "") << a.annotations << ')'; }
+    out << "Attributes(" << (a.signed_ ? "signed," : "") << (a.saturating ? "saturating," : "");
+    bool isFirst = true;
+    for (const auto& a : a.annotations) {
+        if (isFirst) {
+            isFirst = false;
+        } else {
+            out << ", ";
+        }
+        out << a;
+    }
+    out << ')';
+    return out;
+}
 
 typedef std::pair<const IR::Expression*, const IR::Constant*> CaseValue;
 

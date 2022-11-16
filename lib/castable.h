@@ -19,6 +19,8 @@ limitations under the License.
 
 #include <typeinfo>
 
+#include "lib/exceptions.h"
+
 /// Handy type conversion methods that can be inherited by various base classes.
 class ICastable {
  public:

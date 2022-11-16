@@ -337,7 +337,18 @@ class NameList {
     safe_vector<ID>  names = {};
     NameList(Util::SourceInfo si, cstring n) { names.emplace_back(si, n); }
     NameList(Util::SourceInfo si, ID n) { names.emplace_back(si, n); }
-    dump_fields { out << "names=" << names; }
+    dump_fields {
+        out << "names=";
+        bool isFirst = true;
+        for (const auto& i : names) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                out << ", ";
+            }
+            out << i;
+        }
+    }
 }
 
 class ActionArg : Expression {

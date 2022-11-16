@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_
 #define BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_
 
+#include "ir/visitor.h"
+#include "lib/ordered_set.h"
 #include "metermap.h"
 
 namespace BMV2 {

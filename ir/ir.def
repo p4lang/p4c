@@ -269,7 +269,19 @@ class Entry : IAnnotated {
 class EntriesList : PropertyValue {
     inline Vector<Entry> entries;
     size_t size() const { return entries.size(); }
-    dbprint { out << "{ " << entries << "}"; }
+    dbprint {
+    out << "{";
+    bool isFirst = true;
+    for (const auto& e : entries) {
+        if (isFirst) {
+            isFirst = false;
+        } else {
+            out << ", ";
+        }
+        out << e;
+    }
+    out << '}';
+}
 }
 
 class Property : Declaration, IAnnotated {
@@ -368,7 +380,11 @@ class Declaration_Variable : Declaration, IAnnotated {
     Annotations getAnnotations() const override { return annotations; }
     dbprint {
         out << annotations << type << ' ' << name;
-        if (initializer) out << " = " << *initializer; }
+        if (initializer)  {
+            out << " = ";
+            initializer->dbprint(out);
+        }
+    }
 }
 
 class Declaration_Constant : Declaration, IAnnotated {
@@ -378,7 +394,10 @@ class Declaration_Constant : Declaration, IAnnotated {
 
     Annotations getAnnotations() const override { return annotations; }
     toString { return Declaration::toString(); }
-    dbprint { out << annotations << type << ' ' << name << " = " << *initializer; }
+    dbprint {
+        out << annotations << type << ' ' << name << " = ";
+        initializer->dbprint(out);
+    }
 }
 
 /// Like a variable, but for a statically allocated instance.

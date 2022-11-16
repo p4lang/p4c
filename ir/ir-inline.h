@@ -19,8 +19,9 @@ limitations under the License.
 
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
-#include "ir/ir.h"
 #include "ir/json_generator.h"
+#include "ir/namemap.h"
+#include "ir/nodemap.h"
 #include "ir/visitor.h"
 
 #define DEFINE_APPLY_FUNCTIONS(CLASS, TEMPLATE, TT, INLINE)                                       \

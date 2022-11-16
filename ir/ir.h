@@ -17,16 +17,8 @@ limitations under the License.
 #ifndef _IR_IR_H_
 #define _IR_IR_H_
 
-// Special IR classes and types
-#include "dbprint.h"         // IWYU pragma: keep
-#include "id.h"              // IWYU pragma: keep
-#include "indexed_vector.h"  // IWYU pragma: keep
-#include "namemap.h"         // IWYU pragma: keep
-#include "node.h"            // IWYU pragma: keep
-#include "nodemap.h"         // IWYU pragma: keep
-#include "vector.h"          // IWYU pragma: keep
-
 // generated ir file
 #include "ir/ir-generated.h"  // IWYU pragma: keep
+#include "ir/ir-inline.h"     // IWYU pragma: keep
 
 #endif /* _IR_IR_H_*/

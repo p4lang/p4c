@@ -109,13 +109,24 @@ void IrDefinitions::generate(std::ostream& t, std::ostream& out, std::ostream& i
         << "#define " << macroname << "\n"
         << std::endl;
 
-    impl << "#include \"ir/ir.h\"\n"
-         << "#include \"ir/visitor.h\"\n"
+    impl << "#include \"ir/ir-generated.h\"\n\n"
+         << "#include \"ir/ir-inline.h\"\n"
+         << "#include \"ir/json_generator.h\"\n"
          << "#include \"ir/json_loader.h\"\n"
+         << "#include \"ir/visitor.h\"\n"
+         << "#include \"lib/algorithm.h\"\n"
          << std::endl;
 
-    out << "#include <map>\n"
-        << "#include <functional>\n"
+    out << "#include <functional>\n"
+        << "#include <map>\n\n"
+        << "// Special IR classes and types\n"
+        << "#include \"ir/dbprint.h\"         // IWYU pragma: keep\n"
+        << "#include \"ir/id.h\"              // IWYU pragma: keep\n"
+        << "#include \"ir/indexed_vector.h\"  // IWYU pragma: keep\n"
+        << "#include \"ir/namemap.h\"         // IWYU pragma: keep\n"
+        << "#include \"ir/node.h\"            // IWYU pragma: keep\n"
+        << "#include \"ir/nodemap.h\"         // IWYU pragma: keep\n"
+        << "#include \"ir/vector.h\"          // IWYU pragma: keep\n"
         << std::endl
         << "class JSONLoader;\n"
         << "using NodeFactoryFn = IR::Node*(*)(JSONLoader&);\n"

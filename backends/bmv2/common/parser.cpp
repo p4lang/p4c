@@ -21,6 +21,7 @@ limitations under the License.
 #include "extern.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "lib/algorithm.h"
 
 namespace BMV2 {
 
