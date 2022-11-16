@@ -25,16 +25,17 @@ limitations under the License.
 namespace EBPF {
 
 struct TableImpl_Model : public ::Model::Extern_Model {
-    explicit TableImpl_Model(cstring name) :
-            Extern_Model(name),
-            size("size") {}
+    explicit TableImpl_Model(cstring name) : Extern_Model(name), size("size") {}
     ::Model::Elem size;
 };
 
 struct CounterArray_Model : public ::Model::Extern_Model {
-    CounterArray_Model() : Extern_Model("CounterArray"),
-                           increment("increment"), add("add"),
-                           max_index("max_index"), sparse("sparse")  {}
+    CounterArray_Model()
+        : Extern_Model("CounterArray"),
+          increment("increment"),
+          add("add"),
+          max_index("max_index"),
+          sparse("sparse") {}
     ::Model::Elem increment;
     ::Model::Elem add;
     ::Model::Elem max_index;
@@ -42,8 +43,7 @@ struct CounterArray_Model : public ::Model::Extern_Model {
 };
 
 struct Filter_Model : public ::Model::Elem {
-    Filter_Model() : Elem("ebpf_filter"),
-                     parser("prs"), filter("filt") {}
+    Filter_Model() : Elem("ebpf_filter"), parser("prs"), filter("filt") {}
     ::Model::Elem parser;
     ::Model::Elem filter;
 };
@@ -51,32 +51,33 @@ struct Filter_Model : public ::Model::Elem {
 // Keep this in sync with ebpf_model.p4
 class EBPFModel : public ::Model::Model {
  protected:
-    EBPFModel() : counterArray(),
-                  array_table("array_table"),
-                  hash_table("hash_table"),
-                  tableImplProperty("implementation"),
-                  CPacketName("skb"),
-                  packet("packet", P4::P4CoreLibrary::instance.packetIn, 0),
-                  filter(), counterIndexType("u32"), counterValueType("u32")
-    {}
+    EBPFModel()
+        : counterArray(),
+          array_table("array_table"),
+          hash_table("hash_table"),
+          tableImplProperty("implementation"),
+          CPacketName("skb"),
+          packet("packet", P4::P4CoreLibrary::instance.packetIn, 0),
+          filter(),
+          counterIndexType("u32"),
+          counterValueType("u32") {}
 
  public:
     static EBPFModel instance;
     static cstring reservedPrefix;
 
-    CounterArray_Model     counterArray;
-    TableImpl_Model        array_table;
-    TableImpl_Model        hash_table;
-    ::Model::Elem          tableImplProperty;
-    ::Model::Elem          CPacketName;
-    ::Model::Param_Model   packet;
-    Filter_Model           filter;
+    CounterArray_Model counterArray;
+    TableImpl_Model array_table;
+    TableImpl_Model hash_table;
+    ::Model::Elem tableImplProperty;
+    ::Model::Elem CPacketName;
+    ::Model::Param_Model packet;
+    Filter_Model filter;
 
     cstring counterIndexType;
     cstring counterValueType;
 
-    static cstring reserved(cstring name)
-    { return reservedPrefix + name; }
+    static cstring reserved(cstring name) { return reservedPrefix + name; }
 };
 
 }  // namespace EBPF

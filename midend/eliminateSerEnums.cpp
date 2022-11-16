@@ -14,22 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "frontends/p4/enumInstance.h"
-
 #include "eliminateSerEnums.h"
+
+#include "frontends/p4/enumInstance.h"
 
 namespace P4 {
 
 const IR::Node* DoEliminateSerEnums::preorder(IR::Type_SerEnum* serEnum) {
-    if (getParent<IR::P4Program>())
-        return nullptr;  // delete the declaration
+    if (getParent<IR::P4Program>()) return nullptr;  // delete the declaration
     return serEnum->type;
 }
 
 const IR::Node* DoEliminateSerEnums::postorder(IR::Type_Name* type) {
     auto canontype = typeMap->getTypeType(getOriginal(), true);
-    if (!canontype->is<IR::Type_SerEnum>())
-        return type;
+    if (!canontype->is<IR::Type_SerEnum>()) return type;
     if (findContext<IR::TypeNameExpression>() != nullptr)
         // This will be resolved by the caller.
         return type;

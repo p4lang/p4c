@@ -15,27 +15,29 @@ limitations under the License.
 */
 
 #include "ebpfControl.h"
-#include "ebpfType.h"
+
 #include "ebpfTable.h"
-#include "lib/error.h"
-#include "frontends/p4/tableApply.h"
-#include "frontends/p4/typeMap.h"
+#include "ebpfType.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
+#include "frontends/p4/tableApply.h"
+#include "frontends/p4/typeMap.h"
+#include "lib/error.h"
 
 namespace EBPF {
 
-ControlBodyTranslator::ControlBodyTranslator(const EBPFControl* control) :
-        CodeGenInspector(control->program->refMap, control->program->typeMap), control(control),
-        p4lib(P4::P4CoreLibrary::instance)
-{ setName("ControlBodyTranslator"); }
+ControlBodyTranslator::ControlBodyTranslator(const EBPFControl* control)
+    : CodeGenInspector(control->program->refMap, control->program->typeMap),
+      control(control),
+      p4lib(P4::P4CoreLibrary::instance) {
+    setName("ControlBodyTranslator");
+}
 
 bool ControlBodyTranslator::preorder(const IR::PathExpression* expression) {
     auto decl = control->program->refMap->getDeclaration(expression->path, true);
     auto param = decl->getNode()->to<IR::Parameter>();
     if (param != nullptr) {
-        if (toDereference.count(param) > 0)
-            builder->append("*");
+        if (toDereference.count(param) > 0) builder->append("*");
         auto subst = ::get(substitution, param);
         if (subst != nullptr) {
             builder->append(subst->name);
@@ -47,7 +49,7 @@ bool ControlBodyTranslator::preorder(const IR::PathExpression* expression) {
 }
 
 void ControlBodyTranslator::processCustomExternFunction(const P4::ExternFunction* function,
-                                                        EBPFTypeFactory *typeFactory) {
+                                                        EBPFTypeFactory* typeFactory) {
     if (!control->emitExterns)
         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Not supported", function->method);
 
@@ -56,8 +58,7 @@ void ControlBodyTranslator::processCustomExternFunction(const P4::ExternFunction
     bool first = true;
 
     for (auto p : *function->substitution.getParametersInArgumentOrder()) {
-        if (!first)
-            builder->append(", ");
+        if (!first) builder->append(", ");
         first = false;
         auto arg = function->substitution.lookup(p);
         if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
@@ -81,15 +82,13 @@ void ControlBodyTranslator::processFunction(const P4::ExternFunction* function) 
 }
 
 bool ControlBodyTranslator::preorder(const IR::MethodCallExpression* expression) {
-    if (commentDescriptionDepth == 0)
-        builder->append("/* ");
+    if (commentDescriptionDepth == 0) builder->append("/* ");
     commentDescriptionDepth++;
     visit(expression->method);
     builder->append("(");
     bool first = true;
-    for (auto a  : *expression->arguments) {
-        if (!first)
-            builder->append(", ");
+    for (auto a : *expression->arguments) {
+        if (!first) builder->append(", ");
         first = false;
         visit(a);
     }
@@ -101,11 +100,9 @@ bool ControlBodyTranslator::preorder(const IR::MethodCallExpression* expression)
     commentDescriptionDepth--;
 
     // do not process extern when comment is generated
-    if (commentDescriptionDepth != 0)
-        return false;
+    if (commentDescriptionDepth != 0) return false;
 
-    auto mi = P4::MethodInstance::resolve(expression,
-                                          control->program->refMap,
+    auto mi = P4::MethodInstance::resolve(expression, control->program->refMap,
                                           control->program->typeMap);
     auto apply = mi->to<P4::ApplyMethod>();
     if (apply != nullptr) {
@@ -142,10 +139,10 @@ bool ControlBodyTranslator::preorder(const IR::MethodCallExpression* expression)
     auto ac = mi->to<P4::ActionCall>();
     if (ac != nullptr) {
         // Action arguments have been eliminated by the mid-end.
-        BUG_CHECK(expression->arguments->size() == 0,
-                  "%1%: unexpected arguments for action call", expression);
-        cstring msg = Util::printf_format("Control: explicit calling action %s()",
-                                          ac->action->name.name);
+        BUG_CHECK(expression->arguments->size() == 0, "%1%: unexpected arguments for action call",
+                  expression);
+        cstring msg =
+            Util::printf_format("Control: explicit calling action %s()", ac->action->name.name);
         builder->target->emitTraceMessage(builder, msg.c_str());
         visit(ac->action->body);
         return false;
@@ -178,7 +175,7 @@ void ControlBodyTranslator::compileEmitField(const IR::Expression* expr, cstring
     unsigned bitsInCurrentByte = bitsInFirstByte;
     unsigned left = widthToEmit;
 
-    for (unsigned i=0; i < (widthToEmit + 7) / 8; i++) {
+    for (unsigned i = 0; i < (widthToEmit + 7) / 8; i++) {
         builder->emitIndent();
         builder->appendFormat("%s = ((char*)(&", program->byteVar.c_str());
         visit(expr);
@@ -197,18 +194,16 @@ void ControlBodyTranslator::compileEmitField(const IR::Expression* expr, cstring
         else
             builder->appendFormat("write_partial(%s + BYTES(%s) + %d, %d, (%s) << %d)",
                                   program->packetStartVar.c_str(), program->offsetVar.c_str(), i,
-                                  alignment,
-                                  program->byteVar.c_str(), 8 - bitsToWrite);
+                                  alignment, program->byteVar.c_str(), 8 - bitsToWrite);
         builder->endOfStatement(true);
         left -= bitsToWrite;
         bitsInCurrentByte -= bitsToWrite;
 
         if (bitsInCurrentByte > 0) {
             builder->emitIndent();
-            builder->appendFormat(
-                "write_byte(%s, BYTES(%s) + %d + 1, (%s << %d))",
-                program->packetStartVar.c_str(),
-                program->offsetVar.c_str(), i, program->byteVar.c_str(), 8 - alignment % 8);
+            builder->appendFormat("write_byte(%s, BYTES(%s) + %d + 1, (%s << %d))",
+                                  program->packetStartVar.c_str(), program->offsetVar.c_str(), i,
+                                  program->byteVar.c_str(), 8 - alignment % 8);
             builder->endOfStatement(true);
             left -= bitsInCurrentByte;
         }
@@ -242,15 +237,12 @@ void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument>* args) {
 
     unsigned width = ht->width_bits();
     builder->emitIndent();
-    builder->appendFormat("if (%s < %s + BYTES(%s + %d)) ",
-                          program->packetEndVar.c_str(),
-                          program->packetStartVar.c_str(),
-                          program->offsetVar.c_str(), width);
+    builder->appendFormat("if (%s < %s + BYTES(%s + %d)) ", program->packetEndVar.c_str(),
+                          program->packetStartVar.c_str(), program->offsetVar.c_str(), width);
     builder->blockStart();
 
     builder->emitIndent();
-    builder->appendFormat("%s = %s;", program->errorVar.c_str(),
-                          p4lib.packetTooShort.str());
+    builder->appendFormat("%s = %s;", program->errorVar.c_str(), p4lib.packetTooShort.str());
     builder->newline();
 
     builder->emitIndent();
@@ -294,8 +286,7 @@ void ControlBodyTranslator::processMethod(const P4::ExternMethod* method) {
             return;
         }
     }
-    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-            "%1%: Unexpected method call", method->expr);
+    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Unexpected method call", method->expr);
 }
 
 void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
@@ -420,20 +411,16 @@ bool ControlBodyTranslator::preorder(const IR::IfStatement* statement) {
     else
         visit(statement->condition);
     builder->append(") ");
-    if (!statement->ifTrue->is<IR::BlockStatement>())
-        builder->blockStart();
+    if (!statement->ifTrue->is<IR::BlockStatement>()) builder->blockStart();
     visit(statement->ifTrue);
-    if (!statement->ifTrue->is<IR::BlockStatement>())
-        builder->blockEnd(true);
+    if (!statement->ifTrue->is<IR::BlockStatement>()) builder->blockEnd(true);
     if (statement->ifFalse != nullptr) {
         builder->newline();
         builder->emitIndent();
         builder->append("else ");
-        if (!statement->ifFalse->is<IR::BlockStatement>())
-            builder->blockStart();
+        if (!statement->ifFalse->is<IR::BlockStatement>()) builder->blockStart();
         visit(statement->ifFalse);
-        if (!statement->ifFalse->is<IR::BlockStatement>())
-            builder->blockEnd(true);
+        if (!statement->ifFalse->is<IR::BlockStatement>()) builder->blockEnd(true);
     }
     return false;
 }
@@ -443,8 +430,8 @@ bool ControlBodyTranslator::preorder(const IR::SwitchStatement* statement) {
     saveAction.push_back(newName);
     // This must be a table.apply().action_run
     auto mem = statement->expression->to<IR::Member>();
-    BUG_CHECK(mem != nullptr,
-              "%1%: Unexpected expression in switch statement", statement->expression);
+    BUG_CHECK(mem != nullptr, "%1%: Unexpected expression in switch statement",
+              statement->expression);
     visit(mem->expr);
     saveAction.pop_back();
     saveAction.push_back(nullptr);
@@ -454,8 +441,8 @@ bool ControlBodyTranslator::preorder(const IR::SwitchStatement* statement) {
     builder->append(") ");
     builder->blockStart();
 
-    BUG_CHECK(mem->expr->type->is<IR::Type_Declaration>(),
-              "%1%: expected table with name", mem->expr);
+    BUG_CHECK(mem->expr->type->is<IR::Type_Declaration>(), "%1%: expected table with name",
+              mem->expr);
     cstring tableName = mem->expr->type->to<IR::Type_Declaration>()->name.name;
     auto table = control->getTable(tableName);
 
@@ -485,16 +472,14 @@ bool ControlBodyTranslator::preorder(const IR::SwitchStatement* statement) {
     return false;
 }
 
-bool ControlBodyTranslator::preorder(const IR::StructExpression *expr) {
-    if (commentDescriptionDepth == 0)
-        return CodeGenInspector::preorder(expr);
+bool ControlBodyTranslator::preorder(const IR::StructExpression* expr) {
+    if (commentDescriptionDepth == 0) return CodeGenInspector::preorder(expr);
 
     // Dump structure for helper comment
     builder->append("{");
     bool first = true;
     for (auto c : expr->components) {
-        if (!first)
-            builder->append(", ");
+        if (!first) builder->append(", ");
         visit(c->expression);
         first = false;
     }
@@ -506,10 +491,14 @@ bool ControlBodyTranslator::preorder(const IR::StructExpression *expr) {
 /////////////////////////////////////////////////
 
 EBPFControl::EBPFControl(const EBPFProgram* program, const IR::ControlBlock* block,
-                         const IR::Parameter* parserHeaders) :
-        program(program), controlBlock(block), headers(nullptr),
-        accept(nullptr), parserHeaders(parserHeaders), codeGen(nullptr),
-        emitExterns(program->options.emitExterns) {}
+                         const IR::Parameter* parserHeaders)
+    : program(program),
+      controlBlock(block),
+      headers(nullptr),
+      accept(nullptr),
+      parserHeaders(parserHeaders),
+      codeGen(nullptr),
+      emitExterns(program->options.emitExterns) {}
 
 void EBPFControl::scanConstants() {
     for (auto c : controlBlock->constantValue) {
@@ -529,8 +518,8 @@ void EBPFControl::scanConstants() {
                 counters.emplace(name, ctr);
             }
         } else {
-            ::error(ErrorType::ERR_UNEXPECTED,
-                    "Unexpected block %s nested within control", b->toString());
+            ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
+                    b->toString());
         }
     }
 }
@@ -539,8 +528,7 @@ bool EBPFControl::build() {
     hitVariable = program->refMap->newName("hit");
     auto pl = controlBlock->container->type->applyParams;
     if (pl->size() != 2) {
-        ::error(ErrorType::ERR_EXPECTED,
-                "Expected control block to have exactly 2 parameters");
+        ::error(ErrorType::ERR_EXPECTED, "Expected control block to have exactly 2 parameters");
         return false;
     }
 
@@ -585,11 +573,10 @@ void EBPFControl::emitDeclaration(CodeBuilder* builder, const IR::Declaration* d
             }
         }
 
-        BUG_CHECK(vd->initializer == nullptr,
-                  "%1%: declarations with initializers not supported", decl);
+        BUG_CHECK(vd->initializer == nullptr, "%1%: declarations with initializers not supported",
+                  decl);
         return;
-    } else if (decl->is<IR::P4Table>() ||
-               decl->is<IR::P4Action>() ||
+    } else if (decl->is<IR::P4Table>() || decl->is<IR::P4Action>() ||
                decl->is<IR::Declaration_Instance>()) {
         return;
     }
@@ -601,8 +588,7 @@ void EBPFControl::emit(CodeBuilder* builder) {
     builder->emitIndent();
     hitType->declare(builder, hitVariable, false);
     builder->endOfStatement(true);
-    for (auto a : controlBlock->container->controlLocals)
-        emitDeclaration(builder, a);
+    for (auto a : controlBlock->container->controlLocals) emitDeclaration(builder, a);
     builder->emitIndent();
     codeGen->setBuilder(builder);
     controlBlock->container->body->apply(*codeGen);
@@ -610,22 +596,17 @@ void EBPFControl::emit(CodeBuilder* builder) {
 }
 
 void EBPFControl::emitTableTypes(CodeBuilder* builder) {
-    for (auto it : tables)
-        it.second->emitTypes(builder);
-    for (auto it : counters)
-        it.second->emitTypes(builder);
+    for (auto it : tables) it.second->emitTypes(builder);
+    for (auto it : counters) it.second->emitTypes(builder);
 }
 
 void EBPFControl::emitTableInstances(CodeBuilder* builder) {
-    for (auto it : tables)
-        it.second->emitInstance(builder);
-    for (auto it : counters)
-        it.second->emitInstance(builder);
+    for (auto it : tables) it.second->emitInstance(builder);
+    for (auto it : counters) it.second->emitInstance(builder);
 }
 
 void EBPFControl::emitTableInitializers(CodeBuilder* builder) {
-    for (auto it : tables)
-        it.second->emitInitializer(builder);
+    for (auto it : tables) it.second->emitInitializer(builder);
 }
 
 }  // namespace EBPF

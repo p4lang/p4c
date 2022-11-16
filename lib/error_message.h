@@ -16,8 +16,8 @@ limitations under the License.
 #ifndef _LIB_ERROR_MESSAGE_H_
 #define _LIB_ERROR_MESSAGE_H_
 
-#include <vector>
 #include <cstring>
+#include <vector>
 
 #include "lib/source_file.h"
 
@@ -37,20 +37,20 @@ struct ErrorMessage {
     enum class MessageType : std::size_t { None, Error, Warning };
 
     MessageType type = MessageType::None;
-    std::string prefix = "";  /// Typically error/warning type from catalog
-    std::string message = "";  /// Particular formatted message
+    std::string prefix = "";                       /// Typically error/warning type from catalog
+    std::string message = "";                      /// Particular formatted message
     std::vector<Util::SourceInfo> locations = {};  /// Relevant source locations for this error
-    std::string suffix = "";  /// Used by errorWithSuffix
+    std::string suffix = "";                       /// Used by errorWithSuffix
 
     ErrorMessage() {}
     // Invoked from backwards compatible error_helper
-    ErrorMessage(const std::string &prefix, const Util::SourceInfo &info, const std::string &suffix)
+    ErrorMessage(const std::string& prefix, const Util::SourceInfo& info, const std::string& suffix)
         : prefix(prefix), locations({info}), suffix(suffix) {}
     // Invoked from error_reporter
-    ErrorMessage(MessageType type, const std::string &prefix, const std::string &suffix)
+    ErrorMessage(MessageType type, const std::string& prefix, const std::string& suffix)
         : type(type), prefix(prefix), suffix(suffix) {}
-    ErrorMessage(MessageType type, const std::string &prefix, const std::string &message,
-                 const std::vector<Util::SourceInfo> &locations, const std::string &suffix)
+    ErrorMessage(MessageType type, const std::string& prefix, const std::string& message,
+                 const std::vector<Util::SourceInfo>& locations, const std::string& suffix)
         : type(type), prefix(prefix), message(message), locations(locations), suffix(suffix) {}
 
     std::string getPrefix() const;
@@ -65,10 +65,10 @@ struct ParserErrorMessage {
     Util::SourceInfo location;
     cstring message;
 
-    ParserErrorMessage(const Util::SourceInfo &loc, const cstring &msg)
+    ParserErrorMessage(const Util::SourceInfo& loc, const cstring& msg)
         : location(loc), message(msg) {}
 
     std::string toString() const;
 };
 
-#endif  /* _LIB_ERROR_MESSAGE_H_ */
+#endif /* _LIB_ERROR_MESSAGE_H_ */

@@ -15,9 +15,10 @@ limitations under the License.
 */
 
 #include "lower.h"
+
 #include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/methodInstance.h"
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "frontends/p4/methodInstance.h"
 #include "lib/big_int_util.h"
 
 namespace BMV2 {
@@ -40,8 +41,8 @@ const IR::Expression* LowerExpressions::shift(const IR::Operation_Binary* expres
         auto bs = rhstype->to<IR::Type_Bits>();
         if (bs->size > LowerExpressions::maxShiftWidth)
             ::error(ErrorType::ERR_OVERLIMIT,
-                    "%1%: shift amount limited to %2% bits on this target",
-                    expression, LowerExpressions::maxShiftWidth);
+                    "%1%: shift amount limited to %2% bits on this target", expression,
+                    LowerExpressions::maxShiftWidth);
     }
     auto ltype = typeMap->getType(getOriginal(), true);
     typeMap->setType(expression, ltype);
@@ -72,9 +73,7 @@ const IR::Node* LowerExpressions::postorder(IR::Cast* expression) {
     } else if (destType->is<IR::Type_Bits>() && srcType->is<IR::Type_Boolean>()) {
         auto one = new IR::Constant(destType, 1);
         auto zero = new IR::Constant(destType, 0);
-        auto mux = new IR::Mux(expression->srcInfo, expression->expr,
-                               one,
-                               zero);
+        auto mux = new IR::Mux(expression->srcInfo, expression->expr, one, zero);
         typeMap->setType(mux, destType);
         typeMap->setType(one, destType);
         typeMap->setType(zero, destType);
@@ -145,8 +144,8 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
     // a ++ b  -> ((cast)a << sizeof(b)) | ((cast)b & mask)
     auto type = typeMap->getType(expression->right, true);
     auto resulttype = typeMap->getType(getOriginal(), true);
-    BUG_CHECK(type->is<IR::Type_Bits>(), "%1%: expected a bitstring got a %2%",
-              expression->right, type);
+    BUG_CHECK(type->is<IR::Type_Bits>(), "%1%: expected a bitstring got a %2%", expression->right,
+              type);
     BUG_CHECK(resulttype->is<IR::Type_Bits>(), "%1%: expected a bitstring got a %2%",
               expression->right, type);
     unsigned sizeofb = type->to<IR::Type_Bits>()->size;
@@ -155,8 +154,7 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
     auto sizefb0 = new IR::Constant(new IR::Type_InfInt(), sizeofb);
     auto sh = new IR::Shl(cast0->srcInfo, cast0, sizefb0);
     big_int m = Util::maskFromSlice(sizeofb, 0);
-    auto mask = new IR::Constant(expression->right->srcInfo,
-                                 resulttype, m, 16);
+    auto mask = new IR::Constant(expression->right->srcInfo, resulttype, m, 16);
     auto and0 = new IR::BAnd(expression->right->srcInfo, cast1, mask);
     auto result = new IR::BOr(expression->srcInfo, sh, and0);
     typeMap->setType(cast0, resulttype);
@@ -172,13 +170,10 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
 
 /////////////////////////////////////////////////////////////
 
-const IR::Node*
-RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
-    if (expression->arguments->size() == 0)
-        return expression;
+const IR::Node* RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
+    if (expression->arguments->size() == 0) return expression;
     auto mi = P4::MethodInstance::resolve(expression, refMap, typeMap);
-    if (mi->isApply() || mi->is<P4::BuiltInMethod>())
-        return expression;
+    if (mi->isApply() || mi->is<P4::BuiltInMethod>()) return expression;
 
     if (auto ef = mi->to<P4::ExternFunction>()) {
         if (ef->method->name == P4V1::V1Model::instance.digest_receiver.name) {
@@ -206,13 +201,12 @@ RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
                 vec->push_back(new IR::Argument(arg1));
             } else if (auto si = arg1->to<IR::StructExpression>()) {
                 auto list = simplifyExpressions(&si->components);
-                arg1 = new IR::StructExpression(
-                    si->srcInfo, si->structType, si->structType, *list);
+                arg1 = new IR::StructExpression(si->srcInfo, si->structType, si->structType, *list);
                 vec->push_back(new IR::Argument(arg1));
             } else {
-                auto tmp = new IR::Argument(
-                    expression->arguments->at(1)->srcInfo,
-                    createTemporary(expression->arguments->at(1)->expression));
+                auto tmp =
+                    new IR::Argument(expression->arguments->at(1)->srcInfo,
+                                     createTemporary(expression->arguments->at(1)->expression));
                 vec->push_back(tmp);
             }
             expression->arguments = vec;
@@ -221,11 +215,8 @@ RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
     }
 
     auto vec = simplifyExpressions(expression->arguments);
-    if (vec != expression->arguments)
-        expression->arguments = vec;
+    if (vec != expression->arguments) expression->arguments = vec;
     return expression;
 }
-
-
 
 }  // namespace BMV2

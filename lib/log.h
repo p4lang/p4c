@@ -21,9 +21,9 @@ limitations under the License.
 #include <iostream>
 #include <set>
 #include <vector>
-#include "indent.h"
 
 #include "config.h"
+#include "indent.h"
 
 #ifndef __GNUC__
 #define __attribute__(X)
@@ -39,7 +39,7 @@ extern int maximumLogLevel;
 
 // Look up the log level of @file.
 int fileLogLevel(const char* file);
-std::ostream &fileLogOutput(const char *file);
+std::ostream& fileLogOutput(const char* file);
 
 // A utility class used to prepend file and log level information to logging output.
 // also controls indent control and locking for multithreaded use
@@ -47,30 +47,31 @@ class OutputLogPrefix {
     const char* fn;
     int level;
     static int ostream_xalloc;
-    static void setup_ostream_xalloc(std::ostream &);
+    static void setup_ostream_xalloc(std::ostream&);
     friend std::ostream& operator<<(std::ostream&, const OutputLogPrefix&);
-    friend std::ostream& clearPrefix(std::ostream &out);
+    friend std::ostream& clearPrefix(std::ostream& out);
 #ifdef MULTITHREAD
     struct lock_t;
-    mutable lock_t *lock = nullptr;
+    mutable lock_t* lock = nullptr;
 #endif  // MULTITHREAD
  public:
     OutputLogPrefix(const char* f, int l) : fn(f), level(l) {}
     ~OutputLogPrefix();
-    static void indent(std::ostream &out);
+    static void indent(std::ostream& out);
 };
 
 void addInvalidateCallback(void (*)(void));
-std::ostream& clearPrefix(std::ostream &out);
+std::ostream& clearPrefix(std::ostream& out);
 }  // namespace Detail
 
-inline std::ostream &endl(std::ostream &out) {
+inline std::ostream& endl(std::ostream& out) {
     out << std::endl;
     Detail::OutputLogPrefix::indent(out);
-    return out; }
+    return out;
+}
 using IndentCtl::indent;
-using IndentCtl::unindent;
 using IndentCtl::TempIndent;
+using IndentCtl::unindent;
 
 inline bool fileLogLevelIsAtLeast(const char* file, int level) {
     // If there's no file with a log level of at least @level, we don't need to do
@@ -97,11 +98,11 @@ void increaseVerbosity();
 #endif
 
 #define LOGGING(N) ((N) <= MAX_LOGGING_LEVEL && ::Log::fileLogLevelIsAtLeast(__FILE__, N))
-#define LOGN(N, X) (LOGGING(N)                                                  \
-                      ? ::Log::Detail::fileLogOutput(__FILE__)                  \
-                          << ::Log::Detail::OutputLogPrefix(__FILE__, N)        \
-                          << X << ::Log::Detail::clearPrefix << std::endl       \
-                      : std::clog)
+#define LOGN(N, X)                                                        \
+    (LOGGING(N) ? ::Log::Detail::fileLogOutput(__FILE__)                  \
+                      << ::Log::Detail::OutputLogPrefix(__FILE__, N) << X \
+                      << ::Log::Detail::clearPrefix << std::endl          \
+                : std::clog)
 #define LOG1(X) LOGN(1, X)
 #define LOG2(X) LOGN(2, X)
 #define LOG3(X) LOGN(3, X)
@@ -112,62 +113,70 @@ void increaseVerbosity();
 #define LOG8(X) LOGN(8, X)
 #define LOG9(X) LOGN(9, X)
 
-#define LOGN_UNINDENT(N) (LOGGING(N) ? ::Log::Detail::fileLogOutput(__FILE__)   \
-                                        << IndentCtl::unindent : std::clog)
-#define LOG1_UNINDENT   LOGN_UNINDENT(1)
-#define LOG2_UNINDENT   LOGN_UNINDENT(2)
-#define LOG3_UNINDENT   LOGN_UNINDENT(3)
-#define LOG4_UNINDENT   LOGN_UNINDENT(4)
-#define LOG5_UNINDENT   LOGN_UNINDENT(5)
-#define LOG6_UNINDENT   LOGN_UNINDENT(6)
-#define LOG7_UNINDENT   LOGN_UNINDENT(7)
-#define LOG8_UNINDENT   LOGN_UNINDENT(8)
-#define LOG9_UNINDENT   LOGN_UNINDENT(9)
+#define LOGN_UNINDENT(N) \
+    (LOGGING(N) ? ::Log::Detail::fileLogOutput(__FILE__) << IndentCtl::unindent : std::clog)
+#define LOG1_UNINDENT LOGN_UNINDENT(1)
+#define LOG2_UNINDENT LOGN_UNINDENT(2)
+#define LOG3_UNINDENT LOGN_UNINDENT(3)
+#define LOG4_UNINDENT LOGN_UNINDENT(4)
+#define LOG5_UNINDENT LOGN_UNINDENT(5)
+#define LOG6_UNINDENT LOGN_UNINDENT(6)
+#define LOG7_UNINDENT LOGN_UNINDENT(7)
+#define LOG8_UNINDENT LOGN_UNINDENT(8)
+#define LOG9_UNINDENT LOGN_UNINDENT(9)
 
-#define LOG_FEATURE(TAG, N, X) ((N) <= MAX_LOGGING_LEVEL && ::Log::fileLogLevelIsAtLeast(TAG, N) \
-                      ? ::Log::Detail::fileLogOutput(TAG)                       \
-                          << ::Log::Detail::OutputLogPrefix(TAG, N)             \
-                          << X << std::endl                                     \
-                      : std::clog)
+#define LOG_FEATURE(TAG, N, X)                                             \
+    ((N) <= MAX_LOGGING_LEVEL && ::Log::fileLogLevelIsAtLeast(TAG, N)      \
+         ? ::Log::Detail::fileLogOutput(TAG)                               \
+               << ::Log::Detail::OutputLogPrefix(TAG, N) << X << std::endl \
+         : std::clog)
 
 #define P4C_ERROR(X) (std::clog << "ERROR: " << X << std::endl)
-#define P4C_WARNING(X) (::Log::verbose()                               \
-                      ? std::clog << "WARNING: " << X << std::endl \
-                      : std::clog)
+#define P4C_WARNING(X) (::Log::verbose() ? std::clog << "WARNING: " << X << std::endl : std::clog)
 #define ERRWARN(C, X) ((C) ? P4C_ERROR(X) : P4C_WARNING(X))
 
-static inline std::ostream &operator<<(std::ostream &out,
-                                       std::function<std::ostream &(std::ostream&)> fn) {
-    return fn(out); }
+static inline std::ostream& operator<<(std::ostream& out,
+                                       std::function<std::ostream&(std::ostream&)> fn) {
+    return fn(out);
+}
 
-template<class T> inline auto operator<<(std::ostream &out, const T &obj) ->
-        decltype((void)obj.dbprint(out), out)
-{ obj.dbprint(out); return out; }
+template <class T>
+inline auto operator<<(std::ostream& out, const T& obj) -> decltype((void)obj.dbprint(out), out) {
+    obj.dbprint(out);
+    return out;
+}
 
-template<class T> inline auto operator<<(std::ostream &out, const T *obj) ->
-        decltype((void)obj->dbprint(out), out) {
+template <class T>
+inline auto operator<<(std::ostream& out, const T* obj) -> decltype((void)obj->dbprint(out), out) {
     if (obj)
         obj->dbprint(out);
     else
         out << "<null>";
-    return out; }
+    return out;
+}
 
-template<class T> std::ostream &operator<<(std::ostream &out, const std::vector<T> &vec) {
-    const char *sep = " ";
+template <class T>
+std::ostream& operator<<(std::ostream& out, const std::vector<T>& vec) {
+    const char* sep = " ";
     out << '[';
-    for (auto &el : vec) {
+    for (auto& el : vec) {
         out << sep << el;
-        sep = ", "; }
-    out << (sep+1) << ']';
-    return out; }
+        sep = ", ";
+    }
+    out << (sep + 1) << ']';
+    return out;
+}
 
-template<class T> std::ostream &operator<<(std::ostream &out, const std::set<T> &vec) {
-    const char *sep = " ";
+template <class T>
+std::ostream& operator<<(std::ostream& out, const std::set<T>& vec) {
+    const char* sep = " ";
     out << '(';
-    for (auto &el : vec) {
+    for (auto& el : vec) {
         out << sep << el;
-        sep = ", "; }
-    out << (sep+1) << ')';
-    return out; }
+        sep = ", ";
+    }
+    out << (sep + 1) << ')';
+    return out;
+}
 
 #endif /* _LIB_LOG_H_ */

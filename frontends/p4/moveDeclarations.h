@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_MOVEDECLARATIONS_H_
 #define _FRONTENDS_P4_MOVEDECLARATIONS_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -37,17 +37,22 @@ class MoveDeclarations : public Transform {
     /// control/parser/action.
     std::vector<IR::Vector<IR::Declaration>*> toMove;
     void push() { toMove.push_back(new IR::Vector<IR::Declaration>()); }
-    void pop() { BUG_CHECK(!toMove.empty(), "Empty move stack"); toMove.pop_back(); }
-    IR::Vector<IR::Declaration> *getMoves() const
-    { BUG_CHECK(!toMove.empty(), "Empty move stack"); return toMove.back(); }
-    void addMove(const IR::Declaration* decl)
-    { getMoves()->push_back(decl); }
+    void pop() {
+        BUG_CHECK(!toMove.empty(), "Empty move stack");
+        toMove.pop_back();
+    }
+    IR::Vector<IR::Declaration>* getMoves() const {
+        BUG_CHECK(!toMove.empty(), "Empty move stack");
+        return toMove.back();
+    }
+    void addMove(const IR::Declaration* decl) { getMoves()->push_back(decl); }
 
  public:
-    explicit MoveDeclarations(bool parsersOnly = false): parsersOnly(parsersOnly) {
-        setName("MoveDeclarations"); visitDagOnce = false; }
-    void end_apply(const IR::Node*) override
-    { BUG_CHECK(toMove.empty(), "Non empty move stack"); }
+    explicit MoveDeclarations(bool parsersOnly = false) : parsersOnly(parsersOnly) {
+        setName("MoveDeclarations");
+        visitDagOnce = false;
+    }
+    void end_apply(const IR::Node*) override { BUG_CHECK(toMove.empty(), "Non empty move stack"); }
     const IR::Node* preorder(IR::P4Action* action) override {
         if (parsersOnly) {
             prune();
@@ -57,7 +62,8 @@ class MoveDeclarations : public Transform {
             // If we are not in a control, move to the beginning of the action.
             // Otherwise move to the control's beginning.
             push();
-        return action; }
+        return action;
+    }
     const IR::Node* preorder(IR::P4Control* control) override {
         if (parsersOnly) {
             prune();
@@ -66,8 +72,10 @@ class MoveDeclarations : public Transform {
         push();
         return control;
     }
-    const IR::Node* preorder(IR::P4Parser* parser) override
-    { push(); return parser; }
+    const IR::Node* preorder(IR::P4Parser* parser) override {
+        push();
+        return parser;
+    }
     const IR::Node* preorder(IR::Function* function) override {
         if (parsersOnly) {
             prune();
@@ -92,15 +100,17 @@ class MoveDeclarations : public Transform {
  */
 class MoveInitializers : public Transform {
     ReferenceMap* refMap;
-    IR::IndexedVector<IR::StatOrDecl> *toMove;  // This contains just IR::AssignmentStatement
+    IR::IndexedVector<IR::StatOrDecl>* toMove;  // This contains just IR::AssignmentStatement
     const IR::ParserState* oldStart;  // nullptr if we do not want to rename the start state
-    cstring newStartName;  // name allocated to the old start state
+    cstring newStartName;             // name allocated to the old start state
 
  public:
-    explicit MoveInitializers(ReferenceMap* refMap):
-            refMap(refMap), oldStart(nullptr), newStartName("") {
-        setName("MoveInitializers"); CHECK_NULL(refMap);
-        toMove = new IR::IndexedVector<IR::StatOrDecl>(); }
+    explicit MoveInitializers(ReferenceMap* refMap)
+        : refMap(refMap), oldStart(nullptr), newStartName("") {
+        setName("MoveInitializers");
+        CHECK_NULL(refMap);
+        toMove = new IR::IndexedVector<IR::StatOrDecl>();
+    }
     const IR::Node* preorder(IR::P4Parser* parser) override;
     const IR::Node* postorder(IR::P4Parser* parser) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;

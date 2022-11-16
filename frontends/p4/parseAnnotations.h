@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _P4_PARSEANNOTATIONS_H_
 #define _P4_PARSEANNOTATIONS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/parsers/parserDriver.h"
+#include "ir/ir.h"
 
 /*
  * Parses known/predefined annotations used by the compiler.
@@ -35,56 +35,55 @@ namespace P4 {
     { aname, &P4::ParseAnnotations::parseEmpty }
 
 // Parses an annotation with a single-element body.
-#define PARSE(aname, tname)                                             \
-    { aname, [](IR::Annotation* annotation) {                           \
-            const IR::tname* parsed =                                   \
-                P4::P4ParserDriver::parse ## tname(annotation->srcInfo, \
-                                                   annotation->body);   \
-            if (parsed != nullptr) {                                    \
-                annotation->expr.push_back(parsed);                     \
-            }                                                           \
-            return parsed != nullptr;                                   \
-        }                                                               \
+#define PARSE(aname, tname)                                                              \
+    {                                                                                    \
+        aname, [](IR::Annotation* annotation) {                                          \
+            const IR::tname* parsed =                                                    \
+                P4::P4ParserDriver::parse##tname(annotation->srcInfo, annotation->body); \
+            if (parsed != nullptr) {                                                     \
+                annotation->expr.push_back(parsed);                                      \
+            }                                                                            \
+            return parsed != nullptr;                                                    \
+        }                                                                                \
     }
 
 // Parses an annotation that is either an integer constant or a string literal.
-#define PARSE_CONSTANT_OR_STRING_LITERAL(aname)                                       \
-    { aname, [](IR::Annotation* annotation) {                                         \
-            const IR::Expression* parsed =                                            \
-                P4::P4ParserDriver::parseConstantOrStringLiteral(annotation->srcInfo, \
-                                                                 annotation->body);   \
-            if (parsed != nullptr) {                                                  \
-                annotation->expr.push_back(parsed);                                   \
-            }                                                                         \
-            return parsed != nullptr;                                                 \
-        }                                                                             \
+#define PARSE_CONSTANT_OR_STRING_LITERAL(aname)                                              \
+    {                                                                                        \
+        aname, [](IR::Annotation* annotation) {                                              \
+            const IR::Expression* parsed = P4::P4ParserDriver::parseConstantOrStringLiteral( \
+                annotation->srcInfo, annotation->body);                                      \
+            if (parsed != nullptr) {                                                         \
+                annotation->expr.push_back(parsed);                                          \
+            }                                                                                \
+            return parsed != nullptr;                                                        \
+        }                                                                                    \
     }
 
 // Parses an annotation whose body is a pair.
-#define PARSE_PAIR(aname, tname)                                   \
-    { aname, [](IR::Annotation* annotation) {                      \
-            const IR::Vector<IR::Expression>* parsed =             \
-                P4::P4ParserDriver::parse ## tname ## Pair(        \
-                    annotation->srcInfo,                           \
-                    annotation->body);                             \
-            if (parsed != nullptr) {                               \
-                annotation->expr.append(*parsed);                  \
-            }                                                      \
-            return parsed != nullptr;                              \
-        }                                                          \
+#define PARSE_PAIR(aname, tname)                                                               \
+    {                                                                                          \
+        aname, [](IR::Annotation* annotation) {                                                \
+            const IR::Vector<IR::Expression>* parsed =                                         \
+                P4::P4ParserDriver::parse##tname##Pair(annotation->srcInfo, annotation->body); \
+            if (parsed != nullptr) {                                                           \
+                annotation->expr.append(*parsed);                                              \
+            }                                                                                  \
+            return parsed != nullptr;                                                          \
+        }                                                                                      \
     }
 
 // Parses an annotation whose body is a triple.
-#define PARSE_TRIPLE(aname, tname)                                 \
-    { aname, [](IR::Annotation* annotation) {                      \
-            const IR::Vector<IR::Expression>* parsed =             \
-                P4::P4ParserDriver::parse ## tname ## Triple(      \
-                    annotation->srcInfo, annotation->body);        \
-            if (parsed != nullptr) {                               \
-                annotation->expr.append(*parsed);                  \
-            }                                                      \
-            return parsed != nullptr;                              \
-        }                                                          \
+#define PARSE_TRIPLE(aname, tname)                                                               \
+    {                                                                                            \
+        aname, [](IR::Annotation* annotation) {                                                  \
+            const IR::Vector<IR::Expression>* parsed =                                           \
+                P4::P4ParserDriver::parse##tname##Triple(annotation->srcInfo, annotation->body); \
+            if (parsed != nullptr) {                                                             \
+                annotation->expr.append(*parsed);                                                \
+            }                                                                                    \
+            return parsed != nullptr;                                                            \
+        }                                                                                        \
     }
 
 // Parses an annotation whose body is a list of expressions.
@@ -120,16 +119,14 @@ class ParseAnnotations : public Modifier {
     typedef std::unordered_map<cstring, Handler> HandlerMap;
 
     /// Produces a pass that rewrites the spec-defined annotations.
-    explicit ParseAnnotations(bool warn = false)
-            : warnUnknown(warn), handlers(standardHandlers()) {
+    explicit ParseAnnotations(bool warn = false) : warnUnknown(warn), handlers(standardHandlers()) {
         setName("ParseAnnotations");
     }
 
     /// Produces a pass that rewrites a custom set of annotations.
-    ParseAnnotations(const char* targetName, bool includeStandard,
-                     HandlerMap handlers,
+    ParseAnnotations(const char* targetName, bool includeStandard, HandlerMap handlers,
                      bool warn = false)
-            : warnUnknown(warn) {
+        : warnUnknown(warn) {
         std::string buf = targetName;
         buf += "__ParseAnnotations";
         setName(buf.c_str());

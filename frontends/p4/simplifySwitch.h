@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_SIMPLIFYSWITCH_H_
 #define _FRONTENDS_P4_SIMPLIFYSWITCH_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -29,9 +29,11 @@ class DoSimplifySwitch : public Transform {
     TypeMap* typeMap;
 
     bool matches(const IR::Expression* left, const IR::Expression* right) const;
+
  public:
-    explicit DoSimplifySwitch(TypeMap* typeMap): typeMap(typeMap) {
-        setName("DoSimplifySwitch"); CHECK_NULL(typeMap);
+    explicit DoSimplifySwitch(TypeMap* typeMap) : typeMap(typeMap) {
+        setName("DoSimplifySwitch");
+        CHECK_NULL(typeMap);
     }
 
     const IR::Node* postorder(IR::SwitchStatement* stat) override;

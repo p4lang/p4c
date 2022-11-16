@@ -69,8 +69,8 @@ class EBPFDeparser : public EBPFControl {
     cstring returnCode;
 
     EBPFDeparser(const EBPFProgram* program, const IR::ControlBlock* control,
-                 const IR::Parameter* parserHeaders) :
-            EBPFControl(program, control, parserHeaders) {
+                 const IR::Parameter* parserHeaders)
+        : EBPFControl(program, control, parserHeaders) {
         codeGen = new DeparserBodyTranslator(this);
         outerHdrOffsetVar = cstring("outHeaderOffset");
         outerHdrLengthVar = cstring("outHeaderLength");
@@ -81,16 +81,14 @@ class EBPFDeparser : public EBPFControl {
     // A "PreDeparser" is emitted just before a sequence of hdr.emit() functions.
     // It is useful in the case of resubmit or clone operation, as these operations
     // require to have an original packet.
-    virtual void emitPreDeparser(CodeBuilder *builder) {
-        (void) builder;
-    }
+    virtual void emitPreDeparser(CodeBuilder* builder) { (void)builder; }
 
     virtual void emitDeparserExternCalls(CodeBuilder* builder) {
         controlBlock->container->body->apply(*codeGen);
         builder->newline();
     }
 
-    void emitBufferAdjusts(CodeBuilder *builder) const;
+    void emitBufferAdjusts(CodeBuilder* builder) const;
 };
 
 }  // namespace EBPF

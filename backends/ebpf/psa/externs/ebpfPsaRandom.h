@@ -14,14 +14,15 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_EXTERNS_EBPFPSARANDOM_H_
 #define BACKENDS_EBPF_PSA_EXTERNS_EBPFPSARANDOM_H_
 
-#include "frontends/p4/methodInstance.h"
 #include "backends/ebpf/ebpfObject.h"
+#include "frontends/p4/methodInstance.h"
 
 namespace EBPF {
 
 class EBPFRandomPSA : public EBPFObject {
     unsigned int minValue, maxValue;
     long range;
+
  public:
     explicit EBPFRandomPSA(const IR::Declaration_Instance* di);
 

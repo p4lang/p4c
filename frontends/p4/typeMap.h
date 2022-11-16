@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_TYPEMAP_H_
 #define _FRONTENDS_P4_TYPEMAP_H_
 
-#include "ir/ir.h"
 #include "frontends/common/programMap.h"
 #include "frontends/p4/typeChecking/typeSubstitution.h"
+#include "ir/ir.h"
 
 namespace P4 {
 /**
@@ -74,19 +74,19 @@ class TypeMap final : public ProgramMap {
     const IR::Type* getTypeType(const IR::Node* element, bool notNull) const;
     void dbprint(std::ostream& out) const;
     void clear();
-    bool isLeftValue(const IR::Expression* expression) const
-    { return leftValues.count(expression) > 0; }
+    bool isLeftValue(const IR::Expression* expression) const {
+        return leftValues.count(expression) > 0;
+    }
     bool isCompileTimeConstant(const IR::Expression* expression) const;
-    size_t size() const
-    { return typeMap.size(); }
+    size_t size() const { return typeMap.size(); }
 
     void setLeftValue(const IR::Expression* expression);
-    void cloneExpressionProperties(const IR::Expression* to,
-                                   const IR::Expression* from);
+    void cloneExpressionProperties(const IR::Expression* to, const IR::Expression* from);
     void setCompileTimeConstant(const IR::Expression* expression);
     void addSubstitutions(const TypeVariableSubstitution* tvs);
-    const IR::Type* getSubstitution(const IR::Type_Var* var)
-    { return allTypeVariables.lookup(var); }
+    const IR::Type* getSubstitution(const IR::Type_Var* var) {
+        return allTypeVariables.lookup(var);
+    }
     const TypeVariableSubstitution* getSubstitutions() const { return &allTypeVariables; }
 
     /// Check deep structural equivalence; defined between canonical types only.

@@ -15,10 +15,11 @@ limitations under the License.
 */
 
 #include "lib/compile_context.h"
+
 #include "lib/error.h"
 #include "lib/exceptions.h"
 
-ICompileContext::~ICompileContext() { }
+ICompileContext::~ICompileContext() {}
 
 /* static */ void CompileContextStack::push(ICompileContext* context) {
     BUG_CHECK(context != nullptr, "Pushing a null CompileContext");
@@ -26,8 +27,7 @@ ICompileContext::~ICompileContext() { }
 }
 
 /* static */ void CompileContextStack::pop() {
-    BUG_CHECK(!getStack().empty(),
-              "Popping an empty CompileContextStack");
+    BUG_CHECK(!getStack().empty(), "Popping an empty CompileContextStack");
     getStack().pop_back();
 }
 
@@ -35,8 +35,7 @@ ICompileContext::~ICompileContext() { }
     BUG("CompileContextStack has an empty CompileContext stack");
 }
 
-/* static */ void
-CompileContextStack::reportContextMismatch(const char* desiredContextType) {
+/* static */ void CompileContextStack::reportContextMismatch(const char* desiredContextType) {
     BUG_CHECK(!getStack().empty(),
               "Reporting a CompileContext type mismatch, but the "
               "CompileContext stack is empty");
@@ -55,22 +54,18 @@ AutoCompileContext::AutoCompileContext(ICompileContext* context) {
     CompileContextStack::push(context);
 }
 
-AutoCompileContext::~AutoCompileContext() {
-    CompileContextStack::pop();
-}
+AutoCompileContext::~AutoCompileContext() { CompileContextStack::pop(); }
 
-BaseCompileContext::BaseCompileContext() { }
+BaseCompileContext::BaseCompileContext() {}
 
 BaseCompileContext::BaseCompileContext(const BaseCompileContext& other)
-    : errorReporterInstance(other.errorReporterInstance) { }
+    : errorReporterInstance(other.errorReporterInstance) {}
 
 /* static */ BaseCompileContext& BaseCompileContext::get() {
     return CompileContextStack::top<BaseCompileContext>();
 }
 
-ErrorReporter& BaseCompileContext::errorReporter() {
-    return errorReporterInstance;
-}
+ErrorReporter& BaseCompileContext::errorReporter() { return errorReporterInstance; }
 
 DiagnosticAction BaseCompileContext::getDefaultWarningDiagnosticAction() {
     return DiagnosticAction::Warn;
@@ -80,8 +75,7 @@ DiagnosticAction BaseCompileContext::getDefaultErrorDiagnosticAction() {
     return DiagnosticAction::Error;
 }
 
-DiagnosticAction
-BaseCompileContext::getDiagnosticAction(cstring /* diagnostic */,
-                                        DiagnosticAction defaultAction) {
+DiagnosticAction BaseCompileContext::getDiagnosticAction(cstring /* diagnostic */,
+                                                         DiagnosticAction defaultAction) {
     return defaultAction;
 }

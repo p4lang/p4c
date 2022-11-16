@@ -16,8 +16,8 @@ limitations under the License.
 #ifndef DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_
 #define DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_
 
-#include "backends/dpdk/options.h"
 #include "backends/dpdk/constants.h"
+#include "backends/dpdk/options.h"
 #include "control-plane/bfruntime.h"
 #include "p4/config/dpdk/p4info.pb.h"
 namespace P4 {
@@ -29,15 +29,15 @@ namespace BFRT {
 class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
  public:
     BFRuntimeSchemaGenerator(const p4configv1::P4Info& p4info, bool isTDI,
-        DPDK::DpdkOptions &options)
-        : BFRuntimeGenerator(p4info), isTDI(isTDI), options(options) { }
+                             DPDK::DpdkOptions& options)
+        : BFRuntimeGenerator(p4info), isTDI(isTDI), options(options) {}
 
     /// Generates the schema as a Json object for the provided P4Info instance.
     const Util::JsonObject* genSchema() const override;
 
  private:
     bool isTDI;
-    DPDK::DpdkOptions &options;
+    DPDK::DpdkOptions& options;
     // TODO(antonin): these values may need to be available to the BF-RT
     // implementation as well, if they want to expose them as enums.
 
@@ -69,15 +69,13 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
     void addActionProfs(Util::JsonArray* tablesJson) const override;
     bool addActionProfIds(const p4configv1::Table& table,
                           Util::JsonObject* tableJson) const override;
-    void addMatchActionData(const p4configv1::Table& table,
-            Util::JsonObject* tableJson, Util::JsonArray* dataJson,
-            P4Id maxActionParamId) const ;
+    void addMatchActionData(const p4configv1::Table& table, Util::JsonObject* tableJson,
+                            Util::JsonArray* dataJson, P4Id maxActionParamId) const;
 
     boost::optional<bool> actProfHasSelector(P4Id actProfId) const override;
 
-    static boost::optional<ActionProf>
-    fromDPDKActionProfile(const p4configv1::P4Info& p4info,
-            const p4configv1::ExternInstance& externInstance) {
+    static boost::optional<ActionProf> fromDPDKActionProfile(
+        const p4configv1::P4Info& p4info, const p4configv1::ExternInstance& externInstance) {
         const auto& pre = externInstance.preamble();
         p4configv1::ActionProfile actionProfile;
         if (!externInstance.info().UnpackTo(&actionProfile)) {
@@ -85,8 +83,8 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
                     "Extern instance %1% does not pack an ActionProfile object", pre.name());
             return boost::none;
         }
-        auto tableIds = collectTableIds(
-            p4info, actionProfile.table_ids().begin(), actionProfile.table_ids().end());
+        auto tableIds = collectTableIds(p4info, actionProfile.table_ids().begin(),
+                                        actionProfile.table_ids().end());
         return ActionProf{pre.name(), pre.id(), actionProfile.size(), tableIds,
                           transformAnnotations(pre)};
     };

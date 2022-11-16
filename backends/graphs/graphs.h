@@ -29,14 +29,14 @@ limitations under the License.
 #include <utility>  // std::pair
 #include <vector>
 
-#include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graph_traits.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/optional.hpp>
 
+#include "frontends/p4/parserCallGraph.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
-#include "frontends/p4/parserCallGraph.h"
 
 namespace P4 {
 
@@ -49,7 +49,7 @@ namespace graphs {
 
 class EdgeTypeIface {
  public:
-    virtual ~EdgeTypeIface() { }
+    virtual ~EdgeTypeIface() {}
     virtual cstring label() const = 0;
 };
 
@@ -62,13 +62,13 @@ class EdgeUnconditional : public EdgeTypeIface {
 class EdgeIf : public EdgeTypeIface {
  public:
     enum class Branch { TRUE, FALSE };
-    explicit EdgeIf(Branch branch) : branch(branch) { }
+    explicit EdgeIf(Branch branch) : branch(branch) {}
     cstring label() const override {
         switch (branch) {
-          case Branch::TRUE:
-              return "TRUE";
-          case Branch::FALSE:
-              return "FALSE";
+            case Branch::TRUE:
+                return "TRUE";
+            case Branch::FALSE:
+                return "FALSE";
         }
         BUG("unreachable");
         return "";
@@ -80,8 +80,7 @@ class EdgeIf : public EdgeTypeIface {
 
 class EdgeSwitch : public EdgeTypeIface {
  public:
-    explicit EdgeSwitch(const IR::Expression *labelExpr)
-        : labelExpr(labelExpr) { }
+    explicit EdgeSwitch(const IR::Expression* labelExpr) : labelExpr(labelExpr) {}
     cstring label() const override {
         std::stringstream sstream;
         labelExpr->dbprint(sstream);
@@ -89,7 +88,7 @@ class EdgeSwitch : public EdgeTypeIface {
     };
 
  private:
-    const IR::Expression *labelExpr;
+    const IR::Expression* labelExpr;
 };
 
 class Graphs : public Inspector {
@@ -117,49 +116,46 @@ class Graphs : public Inspector {
     // https://stackoverflow.com/questions/29312444/how-to-write-graphviz-subgraphs-with-boostwrite-graphviz
     // for more information.
     using GraphvizAttributes = std::map<cstring, cstring>;
-    using vertexProperties =
-        boost::property<boost::vertex_attribute_t, GraphvizAttributes,
-        Vertex>;
-    using edgeProperties =
-        boost::property<boost::edge_attribute_t, GraphvizAttributes,
-        boost::property<boost::edge_name_t, cstring,
-        boost::property<boost::edge_index_t, int> > >;
-    using graphProperties =
-        boost::property<boost::graph_name_t, cstring,
+    using vertexProperties = boost::property<boost::vertex_attribute_t, GraphvizAttributes, Vertex>;
+    using edgeProperties = boost::property<
+        boost::edge_attribute_t, GraphvizAttributes,
+        boost::property<boost::edge_name_t, cstring, boost::property<boost::edge_index_t, int> > >;
+    using graphProperties = boost::property<
+        boost::graph_name_t, cstring,
         boost::property<boost::graph_graph_attribute_t, GraphvizAttributes,
-        boost::property<boost::graph_vertex_attribute_t, GraphvizAttributes,
-        boost::property<boost::graph_edge_attribute_t, GraphvizAttributes> > > >;
+                        boost::property<boost::graph_vertex_attribute_t, GraphvizAttributes,
+                                        boost::property<boost::graph_edge_attribute_t,
+                                                        GraphvizAttributes> > > >;
     using Graph_ = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
-                                         vertexProperties, edgeProperties,
-                                         graphProperties>;
+                                         vertexProperties, edgeProperties, graphProperties>;
     using Graph = boost::subgraph<Graph_>;
     using vertex_t = boost::graph_traits<Graph>::vertex_descriptor;
 
-    using Parents = std::vector<std::pair<vertex_t, EdgeTypeIface *> >;
+    using Parents = std::vector<std::pair<vertex_t, EdgeTypeIface*> >;
 
     // merge misc control statements (action calls, extern method calls,
     // assignments) into a single vertex to reduce graph complexity
     boost::optional<vertex_t> merge_other_statements_into_vertex();
 
-    vertex_t add_vertex(const cstring &name, VertexType type);
-    vertex_t add_and_connect_vertex(const cstring &name, VertexType type);
-    void add_edge(const vertex_t &from, const vertex_t &to, const cstring &name);
-    /** 
+    vertex_t add_vertex(const cstring& name, VertexType type);
+    vertex_t add_and_connect_vertex(const cstring& name, VertexType type);
+    void add_edge(const vertex_t& from, const vertex_t& to, const cstring& name);
+    /**
      * @brief used to connect subgraphs
      * @param from node from wich edge will start
      * @param to node where edge will end
      * @param name used as edge label
      * @param cluster_id id of cluster, that will be connected to previous cluster
      */
-    void add_edge(const vertex_t &from, const vertex_t &to, const cstring &name,
+    void add_edge(const vertex_t& from, const vertex_t& to, const cstring& name,
                   unsigned cluster_id);
 
     class GraphAttributeSetter {
      public:
-        void operator()(Graph &g) const {
+        void operator()(Graph& g) const {
             auto vertices = boost::vertices(g);
-            for (auto &vit = vertices.first; vit != vertices.second; ++vit) {
-                const auto &vinfo = g[*vit];
+            for (auto& vit = vertices.first; vit != vertices.second; ++vit) {
+                const auto& vinfo = g[*vit];
                 auto attrs = boost::get(boost::vertex_attribute, g);
                 attrs[*vit]["label"] = vinfo.name;
                 attrs[*vit]["style"] = vertexTypeGetStyle(vinfo.type);
@@ -167,7 +163,7 @@ class Graphs : public Inspector {
                 attrs[*vit]["margin"] = vertexTypeGetMargin(vinfo.type);
             }
             auto edges = boost::edges(g);
-            for (auto &eit = edges.first; eit != edges.second; ++eit) {
+            for (auto& eit = edges.first; eit != edges.second; ++eit) {
                 auto attrs = boost::get(boost::edge_attribute, g);
                 attrs[*eit]["label"] = boost::get(boost::edge_name, g, *eit);
             }
@@ -176,11 +172,11 @@ class Graphs : public Inspector {
      private:
         static cstring vertexTypeGetShape(VertexType type) {
             switch (type) {
-            case VertexType::TABLE:
-            case VertexType::ACTION:
-                return "ellipse";
-            default:
-                return "rectangle";
+                case VertexType::TABLE:
+                case VertexType::ACTION:
+                    return "ellipse";
+                default:
+                    return "rectangle";
             }
             BUG("unreachable");
             return "";
@@ -188,16 +184,16 @@ class Graphs : public Inspector {
 
         static cstring vertexTypeGetStyle(VertexType type) {
             switch (type) {
-            case VertexType::CONTROL:
-                return "dashed";
-            case VertexType::EMPTY:
-                return "invis";
-            case VertexType::KEY:
-            case VertexType::CONDITION:
-            case VertexType::SWITCH:
-                return "rounded";
-            default:
-                return "solid";
+                case VertexType::CONTROL:
+                    return "dashed";
+                case VertexType::EMPTY:
+                    return "invis";
+                case VertexType::KEY:
+                case VertexType::CONDITION:
+                case VertexType::SWITCH:
+                    return "rounded";
+                default:
+                    return "solid";
             }
             BUG("unreachable");
             return "";
@@ -205,18 +201,18 @@ class Graphs : public Inspector {
 
         static cstring vertexTypeGetMargin(VertexType type) {
             switch (type) {
-            default:
-                return "";
+                default:
+                    return "";
             }
         }
     };  // end class GraphAttributeSetter
 
  protected:
-    Graph *g{nullptr};
+    Graph* g{nullptr};
     vertex_t start_v{};
     vertex_t exit_v{};
     Parents parents{};
-    std::vector<const IR::Statement *> statementsStack{};
+    std::vector<const IR::Statement*> statementsStack{};
 
  private:
     /**
@@ -224,7 +220,7 @@ class Graphs : public Inspector {
      * @param[out] sstream stringstream where trimmed string is stored
      * @param helper_sstream contains string, which will be trimmed
      */
-    void limitStringSize(std::stringstream &sstream, std::stringstream &helper_sstream);
+    void limitStringSize(std::stringstream& sstream, std::stringstream& helper_sstream);
 };
 
 }  // namespace graphs

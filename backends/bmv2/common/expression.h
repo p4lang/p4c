@@ -17,15 +17,15 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_EXPRESSION_H_
 #define BACKENDS_BMV2_COMMON_EXPRESSION_H_
 
-#include "ir/ir.h"
-#include "lower.h"
-#include "lib/big_int_util.h"
-#include "lib/json.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
+#include "lib/big_int_util.h"
+#include "lib/json.h"
+#include "lower.h"
 #include "programStructure.h"
 
 namespace BMV2 {
@@ -38,6 +38,7 @@ namespace BMV2 {
  */
 class ArithmeticFixup : public Transform {
     P4::TypeMap* typeMap;
+
  public:
     const IR::Expression* fix(const IR::Expression* expr, const IR::Type_Bits* type);
     const IR::Node* updateType(const IR::Expression* expression);
@@ -46,16 +47,15 @@ class ArithmeticFixup : public Transform {
     const IR::Node* postorder(IR::Neg* expression) override;
     const IR::Node* postorder(IR::Cmpl* expression) override;
     const IR::Node* postorder(IR::Cast* expression) override;
-    explicit ArithmeticFixup(P4::TypeMap* typeMap) : typeMap(typeMap)
-    { CHECK_NULL(typeMap); }
+    explicit ArithmeticFixup(P4::TypeMap* typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
 };
 
 class ExpressionConverter : public Inspector {
-    P4::ReferenceMap*    refMap;
-    P4::TypeMap*         typeMap;
-    ProgramStructure*    structure;
-    P4::P4CoreLibrary&   corelib;
-    cstring              scalarsName;
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    ProgramStructure* structure;
+    P4::P4CoreLibrary& corelib;
+    cstring scalarsName;
 
     /// After translating an Expression to JSON, save the result to 'map'.
     /// WARNING: this assumes that each IR node has the same
@@ -70,11 +70,15 @@ class ExpressionConverter : public Inspector {
     bool withConstantWidths{false};
 
  public:
-    ExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                        ProgramStructure* structure, cstring scalarsName) :
-            refMap(refMap), typeMap(typeMap), structure(structure),
-            corelib(P4::P4CoreLibrary::instance),
-            scalarsName(scalarsName), leftValue(false), simpleExpressionsOnly(false) {}
+    ExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, ProgramStructure* structure,
+                        cstring scalarsName)
+        : refMap(refMap),
+          typeMap(typeMap),
+          structure(structure),
+          corelib(P4::P4CoreLibrary::instance),
+          scalarsName(scalarsName),
+          leftValue(false),
+          simpleExpressionsOnly(false) {}
     /// If this is 'true' we fail to convert complex expressions.
     /// This is used for table key expressions, for example.
     bool simpleExpressionsOnly;
@@ -102,8 +106,8 @@ class ExpressionConverter : public Inspector {
      *                 See the BMv2 JSON spec.
      * @param convertBool  Wrap the result into a cast from boolean to data (b2d JSON).
      */
-    Util::IJson* convert(const IR::Expression* e, bool doFixup = true,
-                         bool wrap = true, bool convertBool = false);
+    Util::IJson* convert(const IR::Expression* e, bool doFixup = true, bool wrap = true,
+                         bool convertBool = false);
     Util::IJson* convertLeftValue(const IR::Expression* e);
     Util::IJson* convertWithConstantWidths(const IR::Expression* e);
     bool isArrayIndexRuntime(const IR::Expression* e);

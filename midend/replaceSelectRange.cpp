@@ -1,37 +1,34 @@
 /*
-* Copyright 2020, MNK Labs & Consulting
-* http://mnkcg.com
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-*/
+ * Copyright 2020, MNK Labs & Consulting
+ * http://mnkcg.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
 
 #include "replaceSelectRange.h"
 
 namespace P4 {
 
 // expands subranges that do not cross over zero
-static void
-expandRange(const IR::Range *r, std::vector<const IR::Mask *>* masks, const IR::Type *maskType,
-            big_int min, big_int max)
-{
+static void expandRange(const IR::Range* r, std::vector<const IR::Mask*>* masks,
+                        const IR::Type* maskType, big_int min, big_int max) {
     int width = r->type->width_bits();
     BUG_CHECK(width > 0, "zero-width range is not allowed %1%", r->type);
-    big_int size_mask = ((((big_int) 1) << width) - 1);
+    big_int size_mask = ((((big_int)1) << width) - 1);
     auto base = r->left->to<IR::Constant>()->base;
 
-    BUG_CHECK((min >= 0) == (max >= 0),
-              "Wrong subrange %1%..%2% (going over zero)", min, max);
+    BUG_CHECK((min >= 0) == (max >= 0), "Wrong subrange %1%..%2% (going over zero)", min, max);
     if (min < 0) {
         // convert negative range to bit-corresponding positive range
         min = size_mask + min + 1;
@@ -49,10 +46,9 @@ expandRange(const IR::Range *r, std::vector<const IR::Mask *>* masks, const IR::
         //              with one mask entry.
         // - M..M+2^N - 1 to cover remaining entries with masks that fix a bit
         //                prefix and leave the last N bits arbitrary.
-        big_int match_stride = ((big_int) 1) << ((min == 0) ? floor_log2(max + 1) : ffs(min));
+        big_int match_stride = ((big_int)1) << ((min == 0) ? floor_log2(max + 1) : ffs(min));
 
-        while (match_stride > range_size_remaining)
-            match_stride >>= 1;
+        while (match_stride > range_size_remaining) match_stride >>= 1;
 
         big_int mask = ~(match_stride - 1) & size_mask;
 
@@ -65,13 +61,12 @@ expandRange(const IR::Range *r, std::vector<const IR::Mask *>* masks, const IR::
     }
 }
 
-std::vector<const IR::Mask *>*
-DoReplaceSelectRange::rangeToMasks(const IR::Range *r, size_t keyIndex) {
+std::vector<const IR::Mask*>* DoReplaceSelectRange::rangeToMasks(const IR::Range* r,
+                                                                 size_t keyIndex) {
     auto l = r->left->to<IR::Constant>();
     if (!l) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: Range boundaries must be a compile-time constants.",
-                r->left);
+                "%1%: Range boundaries must be a compile-time constants.", r->left);
         return nullptr;
     }
     auto left = l->value;
@@ -79,16 +74,17 @@ DoReplaceSelectRange::rangeToMasks(const IR::Range *r, size_t keyIndex) {
     auto ri = r->right->to<IR::Constant>();
     if (!ri) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: Range boundaries must be a compile-time constants.",
-                r->right);
+                "%1%: Range boundaries must be a compile-time constants.", r->right);
         return nullptr;
     }
 
-    auto masks = new std::vector<const IR::Mask *>();
+    auto masks = new std::vector<const IR::Mask*>();
     auto right = ri->value;
     if (right < left) {
-        ::warning(ErrorType::WARN_INVALID, "%1%-%2%: Range with end less than start is "
-                  "treated as an empty range", r->left, r->right);
+        ::warning(ErrorType::WARN_INVALID,
+                  "%1%-%2%: Range with end less than start is "
+                  "treated as an empty range",
+                  r->left, r->right);
         return masks;
     }
 
@@ -111,9 +107,9 @@ DoReplaceSelectRange::rangeToMasks(const IR::Range *r, size_t keyIndex) {
     return masks;
 }
 
-std::vector<IR::Vector<IR::Expression>>
-DoReplaceSelectRange::cartesianAppend(const std::vector<IR::Vector<IR::Expression>>& vecs,
-                                      const std::vector<const IR::Mask *>& masks) {
+std::vector<IR::Vector<IR::Expression>> DoReplaceSelectRange::cartesianAppend(
+    const std::vector<IR::Vector<IR::Expression>>& vecs,
+    const std::vector<const IR::Mask*>& masks) {
     std::vector<IR::Vector<IR::Expression>> newVecs;
 
     for (auto v : vecs) {
@@ -128,9 +124,8 @@ DoReplaceSelectRange::cartesianAppend(const std::vector<IR::Vector<IR::Expressio
     return newVecs;
 }
 
-std::vector<IR::Vector<IR::Expression>>
-DoReplaceSelectRange::cartesianAppend(const std::vector<IR::Vector<IR::Expression>>& vecs,
-                                      const IR::Expression *e) {
+std::vector<IR::Vector<IR::Expression>> DoReplaceSelectRange::cartesianAppend(
+    const std::vector<IR::Vector<IR::Expression>>& vecs, const IR::Expression* e) {
     std::vector<IR::Vector<IR::Expression>> newVecs;
 
     for (auto v : vecs) {
@@ -143,16 +138,18 @@ DoReplaceSelectRange::cartesianAppend(const std::vector<IR::Vector<IR::Expressio
     return newVecs;
 }
 
-const IR::Node *DoReplaceSelectRange::postorder(IR::SelectExpression *e) {
+const IR::Node* DoReplaceSelectRange::postorder(IR::SelectExpression* e) {
     BUG_CHECK(findContext<IR::SelectExpression>() == nullptr, "A select nested in select: %1%", e);
     if (!signedIndicesToReplace.empty()) {
         IR::Vector<IR::Expression> newSelectList;
         size_t idx = 0;
-        for (auto *expr : e->select->components) {
+        for (auto* expr : e->select->components) {
             if (signedIndicesToReplace.count(idx)) {
                 auto eType = expr->type->to<IR::Type_Bits>();
-                BUG_CHECK(eType, "Cannot handle select on types other then fixed-width integeral "
-                          "types: %1%", expr->type);
+                BUG_CHECK(eType,
+                          "Cannot handle select on types other then fixed-width integeral "
+                          "types: %1%",
+                          expr->type);
                 auto unsignedType = new IR::Type_Bits(eType->srcInfo, eType->size, false);
 
                 newSelectList.push_back(new IR::Cast(expr->srcInfo, unsignedType, expr));
@@ -163,7 +160,8 @@ const IR::Node *DoReplaceSelectRange::postorder(IR::SelectExpression *e) {
         }
         signedIndicesToReplace.clear();
         return new IR::SelectExpression(e->srcInfo, e->type,
-            new IR::ListExpression(e->select->srcInfo, newSelectList), e->selectCases);
+                                        new IR::ListExpression(e->select->srcInfo, newSelectList),
+                                        e->selectCases);
     }
     return e;
 }
@@ -177,8 +175,7 @@ const IR::Node* DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
 
     if (auto r = keySet->to<IR::Range>()) {
         auto masks = rangeToMasks(r, 0);
-        if (!masks)
-            return sc;
+        if (!masks) return sc;
 
         for (auto mask : *masks) {
             auto c = new IR::SelectCase(sc->srcInfo, mask, sc->state);
@@ -196,8 +193,7 @@ const IR::Node* DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
         for (auto key : oldList->components) {
             if (auto r = key->to<IR::Range>()) {
                 auto masks = rangeToMasks(r, idx);
-                if (!masks)
-                    return sc;
+                if (!masks) return sc;
 
                 newVectors = cartesianAppend(newVectors, *masks);
             } else {
@@ -215,7 +211,8 @@ const IR::Node* DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
                  "select key set expression with a range expands into %2% "
                  "ternary key set expressions, which may lead to run-time "
                  "performance or parser configuration space issues in some"
-                 " targets.", sc, newCases->size());
+                 " targets.",
+                 sc, newCases->size());
         }
 
         return newCases;
@@ -224,4 +221,4 @@ const IR::Node* DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
     return sc;
 }
 
-}   // namespace P4
+}  // namespace P4

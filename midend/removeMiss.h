@@ -17,10 +17,10 @@ limitations under the License.
 #ifndef _MIDEND_REMOVEMISS_H_
 #define _MIDEND_REMOVEMISS_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -31,20 +31,21 @@ namespace P4 {
 class DoRemoveMiss : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
+
  public:
-    DoRemoveMiss(ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap)
-    { visitDagOnce = false; CHECK_NULL(typeMap); setName("DoRemoveMiss"); }
+    DoRemoveMiss(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
+        visitDagOnce = false;
+        CHECK_NULL(typeMap);
+        setName("DoRemoveMiss");
+    }
     const IR::Node* preorder(IR::Member* expression) override;
     const IR::Node* preorder(IR::IfStatement* statement) override;
 };
 
 class RemoveMiss : public PassManager {
  public:
-    RemoveMiss(ReferenceMap* refMap, TypeMap* typeMap,
-               TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+    RemoveMiss(ReferenceMap* refMap, TypeMap* typeMap, TypeChecking* typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoRemoveMiss(refMap, typeMap));
         setName("RemoveMiss");

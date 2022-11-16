@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _BACKENDS_UBPF_MIDEND_H_
 #define _BACKENDS_UBPF_MIDEND_H_
 
-#include "ir/ir.h"
-#include "backends/ebpf/midend.h"
 #include "backends/ebpf/ebpfOptions.h"
+#include "backends/ebpf/midend.h"
+#include "ir/ir.h"
 
 namespace UBPF {
 
@@ -32,4 +32,4 @@ class MidEnd : public EBPF::MidEnd {
 
 }  // namespace UBPF
 
-#endif  /* _BACKENDS_UBPF_MIDEND_H_ */
+#endif /* _BACKENDS_UBPF_MIDEND_H_ */

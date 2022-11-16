@@ -19,22 +19,20 @@ limitations under the License.
 
 namespace EBPF {
 
-ControlBodyTranslatorPSA::ControlBodyTranslatorPSA(const EBPFControlPSA* control) :
-        CodeGenInspector(control->program->refMap, control->program->typeMap),
-        ControlBodyTranslator(control) {}
+ControlBodyTranslatorPSA::ControlBodyTranslatorPSA(const EBPFControlPSA* control)
+    : CodeGenInspector(control->program->refMap, control->program->typeMap),
+      ControlBodyTranslator(control) {}
 
 bool ControlBodyTranslatorPSA::preorder(const IR::AssignmentStatement* a) {
     if (auto methodCallExpr = a->right->to<IR::MethodCallExpression>()) {
-        auto mi = P4::MethodInstance::resolve(methodCallExpr,
-                                              control->program->refMap,
+        auto mi = P4::MethodInstance::resolve(methodCallExpr, control->program->refMap,
                                               control->program->typeMap);
         auto ext = mi->to<P4::ExternMethod>();
         if (ext == nullptr) {
             return false;
         }
 
-        if (ext->originalExternType->name.name == "Register" &&
-            ext->method->type->name == "read") {
+        if (ext->originalExternType->name.name == "Register" && ext->method->type->name == "read") {
             cstring name = EBPFObject::externalName(ext->object);
             auto reg = control->to<EBPFControlPSA>()->getRegister(name);
             reg->emitRegisterRead(builder, ext, this, a->left);
@@ -89,28 +87,24 @@ void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod* method) {
         }
         return;
     } else {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: Unexpected method call", method->expr);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Unexpected method call", method->expr);
     }
 }
 
-cstring ControlBodyTranslatorPSA::getParamName(const IR::PathExpression *expr) {
+cstring ControlBodyTranslatorPSA::getParamName(const IR::PathExpression* expr) {
     return expr->path->name.name;
 }
 
-void EBPFControlPSA::emit(CodeBuilder *builder) {
-    for (auto h : hashes)
-        h.second->emitVariables(builder);
+void EBPFControlPSA::emit(CodeBuilder* builder) {
+    for (auto h : hashes) h.second->emitVariables(builder);
     EBPFControl::emit(builder);
 }
 
-void EBPFControlPSA::emitTableTypes(CodeBuilder *builder) {
+void EBPFControlPSA::emitTableTypes(CodeBuilder* builder) {
     EBPFControl::emitTableTypes(builder);
 
-    for (auto it : registers)
-        it.second->emitTypes(builder);
-    for (auto it : meters)
-        it.second->emitKeyType(builder);
+    for (auto it : registers) it.second->emitTypes(builder);
+    for (auto it : meters) it.second->emitKeyType(builder);
 
     //  Value type for any indirect meter is the same
     if (!meters.empty()) {
@@ -119,14 +113,10 @@ void EBPFControlPSA::emitTableTypes(CodeBuilder *builder) {
 }
 
 void EBPFControlPSA::emitTableInstances(CodeBuilder* builder) {
-    for (auto it : tables)
-        it.second->emitInstance(builder);
-    for (auto it : counters)
-        it.second->emitInstance(builder);
-    for (auto it : registers)
-        it.second->emitInstance(builder);
-    for (auto it : meters)
-        it.second->emitInstance(builder);
+    for (auto it : tables) it.second->emitInstance(builder);
+    for (auto it : counters) it.second->emitInstance(builder);
+    for (auto it : registers) it.second->emitInstance(builder);
+    for (auto it : meters) it.second->emitInstance(builder);
 }
 
 void EBPFControlPSA::emitTableInitializers(CodeBuilder* builder) {
@@ -138,4 +128,4 @@ void EBPFControlPSA::emitTableInitializers(CodeBuilder* builder) {
     }
 }
 
-}
+}  // namespace EBPF

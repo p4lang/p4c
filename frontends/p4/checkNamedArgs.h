@@ -26,15 +26,15 @@ namespace P4 {
 /// We also check that no optional parameter has a default value.
 class CheckNamedArgs : public Inspector {
  public:
-    CheckNamedArgs() {
-        setName("CheckNamedArgs");
-    }
+    CheckNamedArgs() { setName("CheckNamedArgs"); }
 
-    bool checkArguments(const IR::Vector<IR::Argument> *arguments);
-    bool preorder(const IR::MethodCallExpression* call) override
-    { return checkArguments(call->arguments); }
-    bool preorder(const IR::Declaration_Instance* call) override
-    { return checkArguments(call->arguments); }
+    bool checkArguments(const IR::Vector<IR::Argument>* arguments);
+    bool preorder(const IR::MethodCallExpression* call) override {
+        return checkArguments(call->arguments);
+    }
+    bool preorder(const IR::Declaration_Instance* call) override {
+        return checkArguments(call->arguments);
+    }
     bool preorder(const IR::Parameter* parameter) override;
 };
 

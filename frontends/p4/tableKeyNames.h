@@ -34,8 +34,9 @@ class KeyNameGenerator : public Inspector {
     const TypeMap* typeMap;  // can be nullptr
 
  public:
-    explicit KeyNameGenerator(const TypeMap* typeMap) : typeMap(typeMap)
-    { setName("KeyNameGenerator"); }
+    explicit KeyNameGenerator(const TypeMap* typeMap) : typeMap(typeMap) {
+        setName("KeyNameGenerator");
+    }
     void error(const IR::Expression* expression);
     void postorder(const IR::Expression* expression) override;
     void postorder(const IR::PathExpression* expression) override;
@@ -45,9 +46,7 @@ class KeyNameGenerator : public Inspector {
     void postorder(const IR::Slice* expression) override;
     void postorder(const IR::BAnd* expression) override;
     void postorder(const IR::MethodCallExpression* expression) override;
-    cstring getName(const IR::Expression* expression) {
-        return ::get(name, expression);
-    }
+    cstring getName(const IR::Expression* expression) { return ::get(name, expression); }
 };
 
 /** Adds a "@name" annotation to each table key that does not have a name.
@@ -79,9 +78,12 @@ class KeyNameGenerator : public Inspector {
  */
 class DoTableKeyNames final : public Transform {
     const TypeMap* typeMap;
+
  public:
-    explicit DoTableKeyNames(const TypeMap* typeMap) :typeMap(typeMap)
-    { CHECK_NULL(typeMap); setName("DoTableKeyNames"); }
+    explicit DoTableKeyNames(const TypeMap* typeMap) : typeMap(typeMap) {
+        CHECK_NULL(typeMap);
+        setName("DoTableKeyNames");
+    }
     const IR::Node* postorder(IR::KeyElement* keyElement) override;
 };
 

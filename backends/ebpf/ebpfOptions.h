@@ -18,14 +18,10 @@ limitations under the License.
 #define _BACKENDS_EBPF_EBPFOPTIONS_H_
 
 #include <getopt.h>
+
 #include "frontends/common/options.h"
 
-enum XDP2TC {
-    XDP2TC_NONE,
-    XDP2TC_META,
-    XDP2TC_HEAD,
-    XDP2TC_CPUMAP
-};
+enum XDP2TC { XDP2TC_NONE, XDP2TC_META, XDP2TC_HEAD, XDP2TC_CPUMAP };
 
 class EbpfOptions : public CompilerOptions {
  public:

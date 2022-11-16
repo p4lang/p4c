@@ -35,6 +35,7 @@ class DirectMeterMap final {
     // key is declaration of direct meter
     std::map<const IR::IDeclaration*, DirectMeterInfo*> directMeter;
     DirectMeterInfo* createInfo(const IR::IDeclaration* meter);
+
  public:
     DirectMeterInfo* getInfo(const IR::IDeclaration* meter);
     void setDestination(const IR::IDeclaration* meter, const IR::Expression* destination);
@@ -44,4 +45,4 @@ class DirectMeterMap final {
 
 }  // namespace BMV2
 
-#endif  /* BACKENDS_BMV2_COMMON_METERMAP_H_ */
+#endif /* BACKENDS_BMV2_COMMON_METERMAP_H_ */

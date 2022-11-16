@@ -14,23 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <stdexcept>
 #include "big_int_util.h"
+
+#include <stdexcept>
 
 namespace Util {
 
 using namespace boost::multiprecision;
 
-big_int shift_left(const big_int &v, unsigned bits) {
-    return v << bits;
-}
-big_int shift_right(const big_int &v, unsigned bits) {
-    return v >> bits;
-}
+big_int shift_left(const big_int& v, unsigned bits) { return v << bits; }
+big_int shift_right(const big_int& v, unsigned bits) { return v >> bits; }
 
 // Returns last 'bits' of value
 // value is shifted right by this many bits
-big_int ripBits(big_int &value, int bits) {
+big_int ripBits(big_int& value, int bits) {
     big_int rv = 1;
     rv <<= bits;
     rv -= 1;
@@ -46,14 +43,13 @@ big_int mask(unsigned bits) {
 }
 
 big_int maskFromSlice(unsigned m, unsigned l) {
-    if (m < l)
-        throw std::logic_error("wrong argument order in maskFromSlice");
-    big_int result = mask(m+1) - mask(l);
+    if (m < l) throw std::logic_error("wrong argument order in maskFromSlice");
+    big_int result = mask(m + 1) - mask(l);
     return result;
 }
 
 /// Find a consecutive scan of 1 bits
-BitRange findOnes(const big_int &value) {
+BitRange findOnes(const big_int& value) {
     BitRange result;
     if (value != 0) {
         result.lowIndex = scan1(value, 0);
@@ -67,28 +63,46 @@ BitRange findOnes(const big_int &value) {
     return result;
 }
 
-big_int cvtInt(const char *s, unsigned base) {
+big_int cvtInt(const char* s, unsigned base) {
     big_int rv;
 
     while (*s) {
         switch (*s) {
-        case '0': case '1': case '2': case '3': case '4':
-        case '5': case '6': case '7': case '8': case '9':
-            rv *= base;
-            rv += *s - '0';
-            break;
-        case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
-            rv *= base;
-            rv += *s - 'a' + 10;
-            break;
-        case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
-            rv *= base;
-            rv += *s - 'A' + 10;
-            break;
-        case '_':
-            break;
-        default:
-            throw std::logic_error(std::string("Unexpected character ") + *s);
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                rv *= base;
+                rv += *s - '0';
+                break;
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+            case 'e':
+            case 'f':
+                rv *= base;
+                rv += *s - 'a' + 10;
+                break;
+            case 'A':
+            case 'B':
+            case 'C':
+            case 'D':
+            case 'E':
+            case 'F':
+                rv *= base;
+                rv += *s - 'A' + 10;
+                break;
+            case '_':
+                break;
+            default:
+                throw std::logic_error(std::string("Unexpected character ") + *s);
         }
         s++;
     }

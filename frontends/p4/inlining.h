@@ -17,14 +17,14 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_INLINING_H_
 #define _FRONTENDS_P4_INLINING_H_
 
-#include "lib/ordered_map.h"
-#include "ir/ir.h"
+#include "commonInlining.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/evaluator/substituteParameters.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/unusedDeclarations.h"
-#include "commonInlining.h"
+#include "ir/ir.h"
+#include "lib/ordered_map.h"
 
 // These are various data structures needed by the parser/parser and control/control inliners.
 // This only works correctly after local variable initializers have been removed,
@@ -41,14 +41,17 @@ struct CallInfo : public IHasDbPrint {
     std::set<const IR::MethodCallStatement*> invocations;  // all invocations within the caller
 
     CallInfo(const IR::IContainer* caller, const IR::IContainer* callee,
-             const IR::Declaration_Instance* instantiation) :
-            caller(caller), callee(callee), instantiation(instantiation)
-    { CHECK_NULL(caller); CHECK_NULL(callee); CHECK_NULL(instantiation); }
-    void addInvocation(const IR::MethodCallStatement* statement)
-    { invocations.emplace(statement); }
-    void dbprint(std::ostream& out) const
-    { out << "Inline " << callee << " into " << caller <<
-                " with " << invocations.size() << " invocations"; }
+             const IR::Declaration_Instance* instantiation)
+        : caller(caller), callee(callee), instantiation(instantiation) {
+        CHECK_NULL(caller);
+        CHECK_NULL(callee);
+        CHECK_NULL(instantiation);
+    }
+    void addInvocation(const IR::MethodCallStatement* statement) { invocations.emplace(statement); }
+    void dbprint(std::ostream& out) const {
+        out << "Inline " << callee << " into " << caller << " with " << invocations.size()
+            << " invocations";
+    }
 };
 
 class SymRenameMap {
@@ -60,8 +63,7 @@ class SymRenameMap {
         CHECK_NULL(decl);
         BUG_CHECK(!name.isNullOrEmpty() && !extName.isNullOrEmpty(), "Empty name");
         LOG3("setNewName " << dbp(decl) << " to " << name);
-        if (internalName.find(decl) != internalName.end())
-            BUG("%1%: already renamed", decl);
+        if (internalName.find(decl) != internalName.end()) BUG("%1%: already renamed", decl);
         internalName.emplace(decl, name);
         externalName.emplace(decl, extName);
     }
@@ -88,11 +90,9 @@ struct PerInstanceSubstitutions {
     TypeVariableSubstitution tvs;
     SymRenameMap renameMap;
     PerInstanceSubstitutions() = default;
-    PerInstanceSubstitutions(const PerInstanceSubstitutions &other) :
-            paramSubst(other.paramSubst),
-            tvs(other.tvs),
-            renameMap(other.renameMap) {}
-    template<class T>
+    PerInstanceSubstitutions(const PerInstanceSubstitutions& other)
+        : paramSubst(other.paramSubst), tvs(other.tvs), renameMap(other.renameMap) {}
+    template <class T>
     const T* rename(ReferenceMap* refMap, const IR::Node* node);
 };
 
@@ -128,8 +128,8 @@ struct InlineSummary : public IHasDbPrint {
          *
          * @see field invocationToState
          */
-        typedef std::pair<const IR::MethodCallStatement*,
-                           const IR::PathExpression*> InlinedInvocationInfo;
+        typedef std::pair<const IR::MethodCallStatement*, const IR::PathExpression*>
+            InlinedInvocationInfo;
 
         /**
          * Hash for InlinedInvocationInfo used as a key for unordered_map
@@ -137,7 +137,7 @@ struct InlineSummary : public IHasDbPrint {
          * @see field invocationToState
          */
         struct key_hash {
-            std::size_t operator() (const InlinedInvocationInfo &k) const {
+            std::size_t operator()(const InlinedInvocationInfo& k) const {
                 std::ostringstream oss;
                 std::get<0>(k)->dbprint(oss);
                 std::get<1>(k)->dbprint(oss);
@@ -151,10 +151,10 @@ struct InlineSummary : public IHasDbPrint {
          * @see field invocationToState
          */
         struct key_equal {
-            bool operator() (const InlinedInvocationInfo &v0,
-                    const InlinedInvocationInfo &v1) const {
+            bool operator()(const InlinedInvocationInfo& v0,
+                            const InlinedInvocationInfo& v1) const {
                 return std::get<0>(v0)->equiv(*std::get<0>(v1)) &&
-                        std::get<1>(v0)->equiv(*std::get<1>(v1));
+                       std::get<1>(v0)->equiv(*std::get<1>(v1));
             }
         };
 
@@ -215,11 +215,9 @@ struct InlineSummary : public IHasDbPrint {
          *
          * Parser after Inline pass without optimization:
          * @code{.p4}
-         * parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-         *     state start {
-         *         transition select(standard_metadata.ingress_port) {
-         *             9w0: p0;
-         *             default: p1;
+         * parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout
+         * standard_metadata_t standard_metadata) { state start { transition
+         * select(standard_metadata.ingress_port) { 9w0: p0; default: p1;
          *         }
          *     }
          *     state p0 {
@@ -247,11 +245,9 @@ struct InlineSummary : public IHasDbPrint {
          *
          * Parser after Inline pass with optimization:
          * @code{.p4}
-         * parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-         *     state start {
-         *         transition select(standard_metadata.ingress_port) {
-         *             9w0: p0;
-         *             default: p1;
+         * parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout
+         * standard_metadata_t standard_metadata) { state start { transition
+         * select(standard_metadata.ingress_port) { 9w0: p0; default: p1;
          *         }
          *     }
          *     state p0 {
@@ -278,7 +274,7 @@ struct InlineSummary : public IHasDbPrint {
          * --parser-inline-opt.
          */
         std::unordered_map<const InlinedInvocationInfo, const IR::ID, key_hash, key_equal>
-                invocationToState;
+            invocationToState;
 
         /// @returns nullptr if there isn't exactly one caller,
         /// otherwise the single caller of this instance.
@@ -298,13 +294,14 @@ struct InlineSummary : public IHasDbPrint {
     };
     std::map<const IR::IContainer*, PerCaller> callerToWork;
 
-    void add(const CallInfo *cci) {
+    void add(const CallInfo* cci) {
         callerToWork[cci->caller].declToCallee[cci->instantiation] = cci->callee;
         for (auto mcs : cci->invocations)
             callerToWork[cci->caller].callToInstance[mcs] = cci->instantiation;
     }
-    void dbprint(std::ostream& out) const
-    { out << "Inline " << callerToWork.size() << " call sites"; }
+    void dbprint(std::ostream& out) const {
+        out << "Inline " << callerToWork.size() << " call sites";
+    }
 };
 
 // Inling information constructed here.
@@ -317,19 +314,20 @@ class InlineList {
  public:
     void addInstantiation(const IR::IContainer* caller, const IR::IContainer* callee,
                           const IR::Declaration_Instance* instantiation) {
-        CHECK_NULL(caller); CHECK_NULL(callee); CHECK_NULL(instantiation);
+        CHECK_NULL(caller);
+        CHECK_NULL(callee);
+        CHECK_NULL(instantiation);
         LOG3("Inline instantiation " << dbp(instantiation));
         auto inst = new CallInfo(caller, callee, instantiation);
         inlineMap[instantiation] = inst;
     }
 
-    size_t size() const {
-        return inlineMap.size();
-    }
+    size_t size() const { return inlineMap.size(); }
 
     void addInvocation(const IR::Declaration_Instance* instance,
                        const IR::MethodCallStatement* statement) {
-        CHECK_NULL(instance); CHECK_NULL(statement);
+        CHECK_NULL(instance);
+        CHECK_NULL(statement);
         LOG3("Inline invocation " << dbp(instance) << " at " << dbp(statement));
         auto info = inlineMap[instance];
         BUG_CHECK(info, "Could not locate instance %1% invoked by %2%", instance, statement);
@@ -337,13 +335,12 @@ class InlineList {
     }
 
     void replace(const IR::IContainer* container, const IR::IContainer* replacement) {
-        CHECK_NULL(container); CHECK_NULL(replacement);
+        CHECK_NULL(container);
+        CHECK_NULL(replacement);
         LOG3("Replacing " << dbp(container) << " with " << dbp(replacement));
         for (auto e : toInline) {
-            if (e->callee == container)
-                e->callee = replacement;
-            if (e->caller == container)
-                e->caller = replacement;
+            if (e->callee == container) e->callee = replacement;
+            if (e->caller == container) e->caller = replacement;
         }
     }
 
@@ -353,36 +350,48 @@ class InlineList {
 
 /// Must be run after an evaluator; uses the blocks to discover caller/callee relationships.
 class DiscoverInlining : public Inspector {
-    InlineList*         inlineList;  // output: result is here
-    ReferenceMap*       refMap;      // input
-    TypeMap*            typeMap;     // input
-    IHasBlock*          evaluator;   // used to obtain the toplevel block
-    IR::ToplevelBlock*  toplevel;
+    InlineList* inlineList;  // output: result is here
+    ReferenceMap* refMap;    // input
+    TypeMap* typeMap;        // input
+    IHasBlock* evaluator;    // used to obtain the toplevel block
+    IR::ToplevelBlock* toplevel;
 
  public:
     bool allowParsers = true;
     bool allowControls = true;
 
-    DiscoverInlining(InlineList* inlineList, ReferenceMap* refMap,
-                     TypeMap* typeMap, IHasBlock* evaluator) :
-            inlineList(inlineList), refMap(refMap), typeMap(typeMap),
-            evaluator(evaluator), toplevel(nullptr) {
-        CHECK_NULL(inlineList); CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(evaluator);
-        setName("DiscoverInlining"); visitDagOnce = false;
+    DiscoverInlining(InlineList* inlineList, ReferenceMap* refMap, TypeMap* typeMap,
+                     IHasBlock* evaluator)
+        : inlineList(inlineList),
+          refMap(refMap),
+          typeMap(typeMap),
+          evaluator(evaluator),
+          toplevel(nullptr) {
+        CHECK_NULL(inlineList);
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        CHECK_NULL(evaluator);
+        setName("DiscoverInlining");
+        visitDagOnce = false;
     }
     Visitor::profile_t init_apply(const IR::Node* node) override {
         toplevel = evaluator->getToplevelBlock();
         CHECK_NULL(toplevel);
-        return Inspector::init_apply(node); }
+        return Inspector::init_apply(node);
+    }
     void visit_all(const IR::Block* block);
-    bool preorder(const IR::Block* block) override
-    { visit_all(block); return false; }
+    bool preorder(const IR::Block* block) override {
+        visit_all(block);
+        return false;
+    }
     bool preorder(const IR::ControlBlock* block) override;
     bool preorder(const IR::ParserBlock* block) override;
     void postorder(const IR::MethodCallStatement* statement) override;
     // We don't care to visit the program, we just visit the blocks.
-    bool preorder(const IR::P4Program*) override
-    { visit_all(toplevel); return false; }
+    bool preorder(const IR::P4Program*) override {
+        visit_all(toplevel);
+        return false;
+    }
 };
 
 /// Performs actual inlining work
@@ -393,9 +402,11 @@ class GeneralInliner : public AbstractInliner<InlineList, InlineSummary> {
     bool optimizeParserInlining;
 
  public:
-    explicit GeneralInliner(bool isv1, bool _optimizeParserInlining) :
-            refMap(new ReferenceMap()), typeMap(new TypeMap()), workToDo(nullptr),
-            optimizeParserInlining(_optimizeParserInlining) {
+    explicit GeneralInliner(bool isv1, bool _optimizeParserInlining)
+        : refMap(new ReferenceMap()),
+          typeMap(new TypeMap()),
+          workToDo(nullptr),
+          optimizeParserInlining(_optimizeParserInlining) {
         setName("GeneralInliner");
         refMap->setIsV1(isv1);
         visitDagOnce = false;
@@ -403,13 +414,12 @@ class GeneralInliner : public AbstractInliner<InlineList, InlineSummary> {
     // controlled visiting order
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
     /** Build the substitutions needed for args and locals of the thing being inlined.
-      * P4Block here should be either P4Control or P4Parser.
-      * P4BlockType should be either Type_Control or Type_Parser to match the P4Block.
-      */
-    template<class P4Block, class P4BlockType>
-    void inline_subst(P4Block *caller,
-                      IR::IndexedVector<IR::Declaration> P4Block::*blockLocals,
-                      const P4BlockType *P4Block::*blockType);
+     * P4Block here should be either P4Control or P4Parser.
+     * P4BlockType should be either Type_Control or Type_Parser to match the P4Block.
+     */
+    template <class P4Block, class P4BlockType>
+    void inline_subst(P4Block* caller, IR::IndexedVector<IR::Declaration> P4Block::*blockLocals,
+                      const P4BlockType* P4Block::*blockType);
     const IR::Node* preorder(IR::P4Control* caller) override;
     const IR::Node* preorder(IR::P4Parser* caller) override;
     const IR::Node* preorder(IR::ParserState* state) override;
@@ -422,13 +432,14 @@ class InlinePass : public PassManager {
 
  public:
     InlinePass(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator,
-            bool optimizeParserInlining)
-    : PassManager({
-        new TypeChecking(refMap, typeMap),
-        new DiscoverInlining(&toInline, refMap, typeMap, evaluator),
-        new InlineDriver<InlineList, InlineSummary>(&toInline, new GeneralInliner(refMap->isV1(),
-            optimizeParserInlining)),
-        new RemoveAllUnusedDeclarations(refMap) }) { setName("InlinePass"); }
+               bool optimizeParserInlining)
+        : PassManager({new TypeChecking(refMap, typeMap),
+                       new DiscoverInlining(&toInline, refMap, typeMap, evaluator),
+                       new InlineDriver<InlineList, InlineSummary>(
+                           &toInline, new GeneralInliner(refMap->isV1(), optimizeParserInlining)),
+                       new RemoveAllUnusedDeclarations(refMap)}) {
+        setName("InlinePass");
+    }
 };
 
 /**
@@ -441,22 +452,19 @@ class Inline : public PassRepeated {
 
  public:
     Inline(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator,
-            bool optimizeParserInlining)
-    : PassManager({
-        new InlinePass(refMap, typeMap, evaluator, optimizeParserInlining),
-        // After inlining the output of the evaluator changes, so
-        // we have to run it again
-        evaluator }) { setName("Inline"); }
+           bool optimizeParserInlining)
+        : PassManager({new InlinePass(refMap, typeMap, evaluator, optimizeParserInlining),
+                       // After inlining the output of the evaluator changes, so
+                       // we have to run it again
+                       evaluator}) {
+        setName("Inline");
+    }
 
     /// Do not propagate annotation \p name during inlining
-    static void setAnnotationNoPropagate(cstring name) {
-        noPropagateAnnotations.emplace(name);
-    }
+    static void setAnnotationNoPropagate(cstring name) { noPropagateAnnotations.emplace(name); }
 
     /// Is annotation \p name excluded from inline propagation?
-    static bool isAnnotationNoPropagate(cstring name) {
-        return noPropagateAnnotations.count(name);
-    }
+    static bool isAnnotationNoPropagate(cstring name) { return noPropagateAnnotations.count(name); }
 };
 
 }  // namespace P4

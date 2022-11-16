@@ -16,13 +16,12 @@ limitations under the License.
 
 #include "controlFlowGraph.h"
 
-#include "ir/ir.h"
-#include "frontends/p4/fromv1.0/v1model.h"
-#include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
-
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 
@@ -31,8 +30,7 @@ namespace BMV2 {
 unsigned CFG::Node::crtId = 0;
 
 void CFG::EdgeSet::dbprint(std::ostream& out) const {
-    for (auto s : edges)
-        out << " " << s;
+    for (auto s : edges) out << " " << s;
 }
 
 void CFG::Edge::dbprint(std::ostream& out) const {
@@ -52,59 +50,49 @@ void CFG::Edge::dbprint(std::ostream& out) const {
     }
 }
 
-void CFG::Node::dbprint(std::ostream& out) const
-{ out << name << " =>" << successors; }
+void CFG::Node::dbprint(std::ostream& out) const { out << name << " =>" << successors; }
 
-void CFG::dbprint(std::ostream& out, CFG::Node* node, std::set<CFG::Node*> &done) const {
-    if (done.find(node) != done.end())
-        return;
-    for (auto p : node->predecessors.edges)
-        dbprint(out, p->endpoint, done);
+void CFG::dbprint(std::ostream& out, CFG::Node* node, std::set<CFG::Node*>& done) const {
+    if (done.find(node) != done.end()) return;
+    for (auto p : node->predecessors.edges) dbprint(out, p->endpoint, done);
     out << std::endl << node;
     done.emplace(node);
 }
 
 void CFG::Node::addPredecessors(const EdgeSet* set) {
     LOG2("Add to predecessors of " << name << ":" << set);
-    if (set != nullptr)
-        predecessors.mergeWith(set);
+    if (set != nullptr) predecessors.mergeWith(set);
 }
-
 
 void CFG::dbprint(std::ostream& out) const {
     out << "CFG for " << dbp(container);
     std::set<CFG::Node*> done;
-    for (auto n : allNodes)
-        dbprint(out, n, done);
+    for (auto n : allNodes) dbprint(out, n, done);
 }
 
 void CFG::Node::computeSuccessors() {
-    for (auto e : predecessors.edges)
-        e->getNode()->successors.emplace(e->clone(this));
+    for (auto e : predecessors.edges) e->getNode()->successors.emplace(e->clone(this));
 }
 
-bool CFG::dfs(Node* node, std::set<Node*> &visited,
-              std::set<const IR::P4Table*> &stack) const {
+bool CFG::dfs(Node* node, std::set<Node*>& visited, std::set<const IR::P4Table*>& stack) const {
     const IR::P4Table* table = nullptr;
     if (node->is<TableNode>()) {
         table = node->to<TableNode>()->table;
         if (stack.find(table) != stack.end()) {
             ::error(ErrorType::ERR_INVALID,
                     "Program can not be implemented on this target since it contains a path from "
-                    "table %1% back to itself", table);
+                    "table %1% back to itself",
+                    table);
             return false;
         }
     }
-    if (visited.find(node) != visited.end())
-        return true;
-    if (table != nullptr)
-        stack.emplace(table);
+    if (visited.find(node) != visited.end()) return true;
+    if (table != nullptr) stack.emplace(table);
     for (auto e : node->successors.edges) {
         bool success = dfs(e->endpoint, visited, stack);
         if (!success) return false;
     }
-    if (table != nullptr)
-        stack.erase(table);
+    if (table != nullptr) stack.erase(table);
     visited.emplace(node);
     return true;
 }
@@ -115,25 +103,20 @@ bool CFG::EdgeSet::isDestination(const CFG::Node* node) const {
         if (dest == node) return true;
         auto td = dest->to<TableNode>();
         auto tn = node->to<TableNode>();
-        if (td != nullptr && tn != nullptr &&
-            td->table == tn->table)
-            return true;
+        if (td != nullptr && tn != nullptr && td->table == tn->table) return true;
     }
 
     return false;
 }
 
 bool CFG::EdgeSet::checkSame(const CFG::EdgeSet& other) const {
-    if (size() != other.size())
-        return false;
+    if (size() != other.size()) return false;
     // This algorithm is quadratic, but we expect these graphs to be very small
     for (auto e : edges) {
-        if (!other.isDestination(e->endpoint))
-            return false;
+        if (!other.isDestination(e->endpoint)) return false;
     }
     for (auto e : other.edges) {
-        if (!isDestination(e->endpoint))
-            return false;
+        if (!isDestination(e->endpoint)) return false;
     }
     return true;
 }
@@ -149,8 +132,10 @@ bool CFG::checkMergeable(std::set<TableNode*> nodes) const {
         }
         bool same = first->successors.checkSame(tn->successors);
         if (!same) {
-            ::error(ErrorType::ERR_INVALID, "Program is not supported by this target, because "
-                    "table %1% has multiple successors", tn->table);
+            ::error(ErrorType::ERR_INVALID,
+                    "Program is not supported by this target, because "
+                    "table %1% has multiple successors",
+                    tn->table);
             return false;
         }
     }
@@ -167,15 +152,12 @@ bool CFG::checkImplementable() const {
 
     std::map<const IR::P4Table*, std::set<TableNode*>> tableNodes;
     for (auto n : allNodes) {
-        if (auto tn = n->to<TableNode>())
-            tableNodes[tn->table].emplace(tn);
+        if (auto tn = n->to<TableNode>()) tableNodes[tn->table].emplace(tn);
     }
     for (auto it : tableNodes) {
-        if (it.second.size() == 1)
-            continue;
+        if (it.second.size() == 1) continue;
         bool success = checkMergeable(it.second);
-        if (!success)
-            return false;
+        if (!success) return false;
     }
 
     return true;
@@ -183,11 +165,11 @@ bool CFG::checkImplementable() const {
 
 namespace {
 class CFGBuilder : public Inspector {
-    CFG*                    cfg;
+    CFG* cfg;
     /// predecessors of current CFG node
-    const CFG::EdgeSet*     live;
-    P4::ReferenceMap*       refMap;
-    P4::TypeMap*            typeMap;
+    const CFG::EdgeSet* live;
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
 
     bool preorder(const IR::ReturnStatement*) override {
         cfg->exitPoint->addPredecessors(live);
@@ -205,8 +187,7 @@ class CFGBuilder : public Inspector {
     }
     bool preorder(const IR::MethodCallStatement* statement) override {
         auto instance = P4::MethodInstance::resolve(statement->methodCall, refMap, typeMap);
-        if (!instance->is<P4::ApplyMethod>())
-            return false;
+        if (!instance->is<P4::ApplyMethod>()) return false;
         auto am = instance->to<P4::ApplyMethod>();
         if (!am->object->is<IR::P4Table>()) {
             ::error(ErrorType::ERR_INVALID, "%1%: apply method must be on a table", statement);
@@ -224,9 +205,11 @@ class CFGBuilder : public Inspector {
         // simplified by prior passes.
         auto tc = P4::TableApplySolver::isHit(statement->condition, refMap, typeMap);
         bool condition = true;
-        if (auto *lnot = statement->condition->to<IR::LNot>()) {
+        if (auto* lnot = statement->condition->to<IR::LNot>()) {
             if ((tc = P4::TableApplySolver::isHit(lnot->expr, refMap, typeMap))) {
-                condition = false; } }
+                condition = false;
+            }
+        }
         CFG::Node* node;
         if (tc != nullptr) {
             // hit-miss case.
@@ -296,10 +279,11 @@ class CFGBuilder : public Inspector {
     }
 
  public:
-    CFGBuilder(CFG* cfg, P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
-            cfg(cfg), live(nullptr), refMap(refMap), typeMap(typeMap) {}
+    CFGBuilder(CFG* cfg, P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
+        : cfg(cfg), live(nullptr), refMap(refMap), typeMap(typeMap) {}
     const CFG::EdgeSet* run(const IR::Statement* body, const CFG::EdgeSet* predecessors) {
-        CHECK_NULL(body); CHECK_NULL(predecessors);
+        CHECK_NULL(body);
+        CHECK_NULL(predecessors);
         live = predecessors;
         body->apply(*this);
         return live;

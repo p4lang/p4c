@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,26 +17,26 @@ limitations under the License.
 #ifndef _LIB_NULLSTREAM_H_
 #define _LIB_NULLSTREAM_H_
 
-#include <streambuf>
-#include <ostream>
 #include <iostream>
+#include <ostream>
+#include <streambuf>
+
 #include "cstring.h"
 #include "error.h"
 
 template <class cT, class traits = std::char_traits<cT> >
-class basic_nullbuf final: public std::basic_streambuf<cT, traits> {
+class basic_nullbuf final : public std::basic_streambuf<cT, traits> {
     typename traits::int_type overflow(typename traits::int_type c) {
         return traits::not_eof(c);  // indicate success
     }
 };
 
 template <class cT, class traits = std::char_traits<cT> >
-class onullstream final: public std::basic_ostream<cT, traits> {
+class onullstream final : public std::basic_ostream<cT, traits> {
  public:
-    onullstream():
-        std::basic_ios<cT, traits>(&m_sbuf),
-        std::basic_ostream<cT, traits>(&m_sbuf)
-    { this->init(&m_sbuf); }
+    onullstream() : std::basic_ios<cT, traits>(&m_sbuf), std::basic_ostream<cT, traits>(&m_sbuf) {
+        this->init(&m_sbuf);
+    }
 
  private:
     basic_nullbuf<cT, traits> m_sbuf;

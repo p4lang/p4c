@@ -36,10 +36,14 @@ class DoRemoveExits : public DoRemoveReturns {
     // In this class "Return" (inherited from RemoveReturns) should be read as "Exit"
     std::set<const IR::Node*> callsExit;  // actions, tables
     void callExit(const IR::Node* node);
+
  public:
-    DoRemoveExits(ReferenceMap* refMap, TypeMap* typeMap) :
-            DoRemoveReturns(refMap, "hasExited"), typeMap(typeMap)
-    { visitDagOnce = false; CHECK_NULL(typeMap); setName("DoRemoveExits"); }
+    DoRemoveExits(ReferenceMap* refMap, TypeMap* typeMap)
+        : DoRemoveReturns(refMap, "hasExited"), typeMap(typeMap) {
+        visitDagOnce = false;
+        CHECK_NULL(typeMap);
+        setName("DoRemoveExits");
+    }
 
     const IR::Node* preorder(IR::ExitStatement* action) override;
     const IR::Node* preorder(IR::P4Table* table) override;
@@ -56,10 +60,8 @@ class DoRemoveExits : public DoRemoveReturns {
 
 class RemoveExits : public PassManager {
  public:
-    RemoveExits(ReferenceMap* refMap, TypeMap* typeMap,
-                TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+    RemoveExits(ReferenceMap* refMap, TypeMap* typeMap, TypeChecking* typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoRemoveExits(refMap, typeMap));
         setName("RemoveExits");

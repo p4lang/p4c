@@ -33,8 +33,7 @@ class IOptionPragmaParser {
  public:
     using CommandLineOptions = std::vector<const char*>;
 
-    virtual boost::optional<CommandLineOptions>
-    tryToParse(const IR::Annotation* annotation) = 0;
+    virtual boost::optional<CommandLineOptions> tryToParse(const IR::Annotation* annotation) = 0;
 };
 
 /**
@@ -79,12 +78,10 @@ class ApplyOptionsPragmas : public Inspector {
  */
 class P4COptionPragmaParser : public IOptionPragmaParser {
  public:
-    boost::optional<CommandLineOptions>
-    tryToParse(const IR::Annotation* annotation) override;
+    boost::optional<CommandLineOptions> tryToParse(const IR::Annotation* annotation) override;
 
  private:
-    boost::optional<CommandLineOptions>
-    parseDiagnostic(const IR::Annotation* annotation);
+    boost::optional<CommandLineOptions> parseDiagnostic(const IR::Annotation* annotation);
 };
 
 }  // namespace P4

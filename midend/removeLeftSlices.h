@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _MIDEND_REMOVELEFTSLICES_H_
 #define _MIDEND_REMOVELEFTSLICES_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -34,9 +34,12 @@ namespace P4 {
  */
 class DoRemoveLeftSlices : public Transform {
     P4::TypeMap* typeMap;
+
  public:
-    explicit DoRemoveLeftSlices(P4::TypeMap* typeMap) : typeMap(typeMap)
-    { CHECK_NULL(typeMap); setName("DoRemoveLeftSlices"); }
+    explicit DoRemoveLeftSlices(P4::TypeMap* typeMap) : typeMap(typeMap) {
+        CHECK_NULL(typeMap);
+        setName("DoRemoveLeftSlices");
+    }
     const IR::Node* postorder(IR::AssignmentStatement* stat) override;
 };
 

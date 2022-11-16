@@ -1,4 +1,5 @@
 #include "midend/removeAssertAssume.h"
+
 #include "frontends/p4/methodInstance.h"
 
 namespace P4 {

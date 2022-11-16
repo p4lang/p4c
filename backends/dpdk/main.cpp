@@ -19,13 +19,13 @@ limitations under the License.
 #include <iostream>
 #include <string>
 
-#include "backends/dpdk/version.h"
 #include "backends/dpdk/backend.h"
+#include "backends/dpdk/control-plane/bfruntime_arch_handler.h"
 #include "backends/dpdk/midend.h"
 #include "backends/dpdk/options.h"
-#include "backends/dpdk/control-plane/bfruntime_arch_handler.h"
-#include "control-plane/p4RuntimeSerializer.h"
+#include "backends/dpdk/version.h"
 #include "control-plane/bfruntime_ext.h"
+#include "control-plane/p4RuntimeSerializer.h"
 #include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/parser_options.h"
@@ -39,52 +39,48 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 
-void generateTDIBfrtJson(bool isTDI, const IR::P4Program *program, DPDK::DpdkOptions &options) {
+void generateTDIBfrtJson(bool isTDI, const IR::P4Program* program, DPDK::DpdkOptions& options) {
     auto p4RuntimeSerializer = P4::P4RuntimeSerializer::get();
     if (options.arch == "psa")
-        p4RuntimeSerializer->registerArch("psa",
-            new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilderForDPDK());
+        p4RuntimeSerializer->registerArch(
+            "psa", new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilderForDPDK());
     if (options.arch == "pna")
-        p4RuntimeSerializer->registerArch("pna",
-            new P4::ControlPlaneAPI::Standard::PNAArchHandlerBuilderForDPDK());
+        p4RuntimeSerializer->registerArch(
+            "pna", new P4::ControlPlaneAPI::Standard::PNAArchHandlerBuilderForDPDK());
     auto p4Runtime = P4::generateP4Runtime(program, options.arch);
 
     cstring filename = isTDI ? options.tdiFile : options.bfRtSchema;
     auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info, isTDI, options);
     std::ostream* out = openFile(filename, false);
     if (!out) {
-        ::error(ErrorType::ERR_IO,
-                "Could not open file: %1%", filename);
+        ::error(ErrorType::ERR_IO, "Could not open file: %1%", filename);
         return;
     }
     p4rt->serializeBFRuntimeSchema(out);
 }
 
-int main(int argc, char *const argv[]) {
+int main(int argc, char* const argv[]) {
     setup_gc_logging();
 
     AutoCompileContext autoDpdkContext(new DPDK::DpdkContext);
-    auto &options = DPDK::DpdkContext::get().options();
+    auto& options = DPDK::DpdkContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = DPDK_VERSION_STRING;
 
     if (options.process(argc, argv) != nullptr) {
-        if (options.loadIRFromJson == false)
-            options.setInputFile();
+        if (options.loadIRFromJson == false) options.setInputFile();
     }
-    if (::errorCount() > 0)
-        return 1;
+    if (::errorCount() > 0) return 1;
 
     auto hook = options.getDebugHook();
 
-    const IR::P4Program *program = nullptr;
-    const IR::ToplevelBlock *toplevel = nullptr;
+    const IR::P4Program* program = nullptr;
+    const IR::ToplevelBlock* toplevel = nullptr;
 
     if (options.loadIRFromJson == false) {
         program = P4::parseP4File(options);
 
-        if (program == nullptr || ::errorCount() > 0)
-            return 1;
+        if (program == nullptr || ::errorCount() > 0) return 1;
         try {
             P4::P4COptionPragmaParser optionsPragmaParser;
             program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
@@ -92,17 +88,15 @@ int main(int argc, char *const argv[]) {
             P4::FrontEnd frontend;
             frontend.addDebugHook(hook);
             program = frontend.run(options, program);
-        } catch (const std::exception &bug) {
+        } catch (const std::exception& bug) {
             std::cerr << bug.what() << std::endl;
             return 1;
         }
-        if (program == nullptr || ::errorCount() > 0)
-            return 1;
+        if (program == nullptr || ::errorCount() > 0) return 1;
     } else {
         std::filebuf fb;
         if (fb.open(options.file, std::ios::in) == nullptr) {
-            ::error(ErrorType::ERR_NOT_FOUND,
-                    "%s: No such file or directory.", options.file);
+            ::error(ErrorType::ERR_NOT_FOUND, "%s: No such file or directory.", options.file);
             return 1;
         }
         std::istream inJson(&fb);
@@ -116,8 +110,7 @@ int main(int argc, char *const argv[]) {
     }
 
     P4::serializeP4RuntimeIfRequired(program, options);
-    if (::errorCount() > 0)
-        return 1;
+    if (::errorCount() > 0) return 1;
 
     if (!options.bfRtSchema.isNullOrEmpty()) {
         generateTDIBfrtJson(false, program, options);
@@ -126,34 +119,28 @@ int main(int argc, char *const argv[]) {
         generateTDIBfrtJson(true, program, options);
     }
 
-    if (::errorCount() > 0)
-        return 1;
+    if (::errorCount() > 0) return 1;
 
     DPDK::DpdkMidEnd midEnd(options);
     midEnd.addDebugHook(hook);
     try {
         toplevel = midEnd.process(program);
-        if (::errorCount() > 1 || toplevel == nullptr ||
-            toplevel->getMain() == nullptr)
-            return 1;
+        if (::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr) return 1;
         if (options.dumpJsonFile)
-            JSONGenerator(*openFile(options.dumpJsonFile, true), true)
-                << program << std::endl;
-    } catch (const std::exception &bug) {
+            JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
+    } catch (const std::exception& bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
-    if (::errorCount() > 0)
-        return 1;
+    if (::errorCount() > 0) return 1;
 
     auto backend = new DPDK::DpdkBackend(options, &midEnd.refMap, &midEnd.typeMap);
 
     backend->convert(toplevel);
-    if (::errorCount() > 0)
-        return 1;
+    if (::errorCount() > 0) return 1;
 
     if (!options.outputFile.isNullOrEmpty()) {
-        std::ostream *out = openFile(options.outputFile, false);
+        std::ostream* out = openFile(options.outputFile, false);
         if (out != nullptr) {
             backend->codegen(*out);
             out->flush();

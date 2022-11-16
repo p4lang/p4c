@@ -23,8 +23,7 @@ static const IR::Type_Struct* isNestedStruct(const P4::TypeMap* typeMap, const I
     if (auto st = type->to<IR::Type_Struct>()) {
         for (auto f : st->fields) {
             auto ft = typeMap->getType(f, true);
-            if (ft->is<IR::Type_Struct>())
-                return st;
+            if (ft->is<IR::Type_Struct>()) return st;
         }
     }
     return nullptr;
@@ -33,10 +32,9 @@ static const IR::Type_Struct* isNestedStruct(const P4::TypeMap* typeMap, const I
 
 void NestedStructMap::createReplacement(const IR::Type_Struct* type) {
     auto repl = ::get(replacement, type);
-    if (repl != nullptr)
-        return;
-    repl = new StructTypeReplacement<IR::Type_Struct>(
-        typeMap, type, new AnnotationSelectionPolicy());
+    if (repl != nullptr) return;
+    repl =
+        new StructTypeReplacement<IR::Type_Struct>(typeMap, type, new AnnotationSelectionPolicy());
     LOG3("Replacement for " << type << " is " << repl);
     replacement.emplace(type, repl);
 }
@@ -44,13 +42,10 @@ void NestedStructMap::createReplacement(const IR::Type_Struct* type) {
 bool FindTypesToReplace::preorder(const IR::Declaration_Instance* inst) {
     auto type = map->typeMap->getTypeType(inst->type, true);
     auto ts = type->to<IR::Type_SpecializedCanonical>();
-    if (ts == nullptr)
-        return false;
-    if (!ts->baseType->is<IR::Type_Package>())
-        return false;
+    if (ts == nullptr) return false;
+    if (!ts->baseType->is<IR::Type_Package>()) return false;
     for (auto t : *ts->arguments) {
-        if (auto st = isNestedStruct(map->typeMap, t))
-            map->createReplacement(st);
+        if (auto st = isNestedStruct(map->typeMap, t)) map->createReplacement(st);
     }
     return false;
 }
@@ -68,8 +63,7 @@ const IR::Node* ReplaceStructs::preorder(IR::P4Program* program) {
 const IR::Node* ReplaceStructs::postorder(IR::Type_Struct* type) {
     auto canon = replacementMap->typeMap->getTypeType(getOriginal(), true);
     auto repl = replacementMap->getReplacement(canon);
-    if (repl != nullptr)
-        return repl->replacementType;
+    if (repl != nullptr) return repl->replacementType;
     return type;
 }
 
@@ -82,24 +76,20 @@ const IR::Node* ReplaceStructs::postorder(IR::Member* expression) {
         prefix = cstring(".") + mem->member + prefix;
     }
     auto pe = e->to<IR::PathExpression>();
-    if (pe == nullptr)
-        return expression;
+    if (pe == nullptr) return expression;
     // At this point we know that pe is an expression of the form
     // param.field1.etc.fieldN, where param has a type that needs to be replaced.
     auto decl = replacementMap->refMap->getDeclaration(pe->path, true);
     auto param = decl->to<IR::Parameter>();
-    if (param == nullptr)
-        return expression;
+    if (param == nullptr) return expression;
     auto repl = ::get(toReplace, param);
-    if (repl == nullptr)
-        return expression;
+    if (repl == nullptr) return expression;
     auto newFieldName = ::get(repl->fieldNameRemap, prefix);
     const IR::Expression* result;
     if (newFieldName.isNullOrEmpty()) {
         auto type = replacementMap->typeMap->getType(getOriginal(), true);
         // This could be, for example, a method like setValid.
-        if (!type->is<IR::Type_Struct>())
-            return expression;
+        if (!type->is<IR::Type_Struct>()) return expression;
         if (getParent<IR::Member>() != nullptr)
             // We only want to process the outermost Member
             return expression;

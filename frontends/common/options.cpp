@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "options.h"
+
 #include "frontends/p4/frontend.h"
 
 CompilerOptions::CompilerOptions() : ParserOptions() {
@@ -23,8 +24,7 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
         [this](const char* arg) {
             excludeFrontendPasses = true;
             auto copy = strdup(arg);
-            while (auto pass = strsep(&copy, ","))
-                passesToExcludeFrontend.push_back(pass);
+            while (auto pass = strsep(&copy, ",")) passesToExcludeFrontend.push_back(pass);
             return true;
         },
         "Exclude passes from frontend passes whose name is equal\n"
@@ -44,8 +44,7 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
         [this](const char* arg) {
             excludeMidendPasses = true;
             auto copy = strdup(arg);
-            while (auto pass = strsep(&copy, ","))
-                passesToExcludeMidend.push_back(pass);
+            while (auto pass = strsep(&copy, ",")) passesToExcludeMidend.push_back(pass);
             return true;
         },
         "Exclude passes from midend passes whose name is equal\n"
@@ -124,8 +123,7 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
             } else if (!strcmp(arg, "text")) {
                 p4RuntimeFormat = P4::P4RuntimeFormat::TEXT;
             } else {
-                ::error(ErrorType::ERR_INVALID, "Illegal P4Runtime format %1%",
-                        arg);
+                ::error(ErrorType::ERR_INVALID, "Illegal P4Runtime format %1%", arg);
                 return false;
             }
             return true;

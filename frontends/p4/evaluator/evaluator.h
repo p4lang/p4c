@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _EVALUATOR_EVALUATOR_H_
 #define _EVALUATOR_EVALUATOR_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -29,19 +29,23 @@ class IHasBlock {
 };
 
 class Evaluator final : public Inspector, public IHasBlock {
-    const ReferenceMap*      refMap;
-    const TypeMap*           typeMap;
-    std::vector<IR::Block*>  blockStack;
-    IR::ToplevelBlock*       toplevelBlock;
+    const ReferenceMap* refMap;
+    const TypeMap* typeMap;
+    std::vector<IR::Block*> blockStack;
+    IR::ToplevelBlock* toplevelBlock;
 
  protected:
     void pushBlock(IR::Block* block);
     void popBlock(IR::Block* block);
 
  public:
-    Evaluator(const ReferenceMap* refMap, const TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap), toplevelBlock(nullptr)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("Evaluator"); visitDagOnce = false; }
+    Evaluator(const ReferenceMap* refMap, const TypeMap* typeMap)
+        : refMap(refMap), typeMap(typeMap), toplevelBlock(nullptr) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        setName("Evaluator");
+        visitDagOnce = false;
+    }
     IR::ToplevelBlock* getToplevelBlock() const override { return toplevelBlock; }
 
     IR::Block* currentBlock() const;
@@ -55,10 +59,9 @@ class Evaluator final : public Inspector, public IHasBlock {
 
     /// Evaluates the arguments and returns a vector of parameter values
     /// ordered in the parameter order.
-    std::vector<const IR::CompileTimeValue*>*
-            evaluateArguments(const IR::ParameterList* parameters,
-                              const IR::Vector<IR::Argument>* arguments,
-                              IR::Block* context);
+    std::vector<const IR::CompileTimeValue*>* evaluateArguments(
+        const IR::ParameterList* parameters, const IR::Vector<IR::Argument>* arguments,
+        IR::Block* context);
 
     profile_t init_apply(const IR::Node* node) override;
 
@@ -74,21 +77,33 @@ class Evaluator final : public Inspector, public IHasBlock {
     bool preorder(const IR::Member* expression) override;
     bool preorder(const IR::ListExpression* expression) override;
     bool preorder(const IR::StructExpression* expression) override;
-    bool preorder(const IR::Constant* expression) override
-    { setValue(expression, expression); return false; }
-    bool preorder(const IR::StringLiteral* expression) override
-    { setValue(expression, expression); return false; }
-    bool preorder(const IR::BoolLiteral* expression) override
-    { setValue(expression, expression); return false; }
-    bool preorder(const IR::ListCompileTimeValue* expression) override
-    { setValue(expression, expression); return false; }
-    bool preorder(const IR::StructCompileTimeValue* expression) override
-    { setValue(expression, expression); return false; }
-    bool preorder(const IR::Declaration_ID* expression) override
-    { setValue(expression, expression); return false; }
+    bool preorder(const IR::Constant* expression) override {
+        setValue(expression, expression);
+        return false;
+    }
+    bool preorder(const IR::StringLiteral* expression) override {
+        setValue(expression, expression);
+        return false;
+    }
+    bool preorder(const IR::BoolLiteral* expression) override {
+        setValue(expression, expression);
+        return false;
+    }
+    bool preorder(const IR::ListCompileTimeValue* expression) override {
+        setValue(expression, expression);
+        return false;
+    }
+    bool preorder(const IR::StructCompileTimeValue* expression) override {
+        setValue(expression, expression);
+        return false;
+    }
+    bool preorder(const IR::Declaration_ID* expression) override {
+        setValue(expression, expression);
+        return false;
+    }
 
-    const IR::Block* processConstructor(const IR::Node* node,
-                                        const IR::Type* type, const IR::Type* instanceType,
+    const IR::Block* processConstructor(const IR::Node* node, const IR::Type* type,
+                                        const IR::Type* instanceType,
                                         const IR::Vector<IR::Argument>* arguments);
 };
 
@@ -96,6 +111,7 @@ class Evaluator final : public Inspector, public IHasBlock {
 /// high-level constructs.
 class EvaluatorPass final : public PassManager, public IHasBlock {
     P4::Evaluator* evaluator;
+
  public:
     IR::ToplevelBlock* getToplevelBlock() const override { return evaluator->getToplevelBlock(); }
     EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap);

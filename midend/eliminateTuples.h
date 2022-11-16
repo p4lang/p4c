@@ -17,26 +17,29 @@ limitations under the License.
 #ifndef _MIDEND_ELIMINATETUPLES_H_
 #define _MIDEND_ELIMINATETUPLES_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
 /**
  * Maintains for each type that may contain a tuple (or is a tuple) the
  * corresponding struct replacement.
-*/
+ */
 class ReplacementMap {
     ordered_map<const IR::Type*, const IR::Type_Struct*> replacement;
     std::set<const IR::Type_Struct*> inserted;
     const IR::Type* convertType(const IR::Type* type);
+
  public:
     P4::NameGenerator* ng;
     P4::TypeMap* typeMap;
 
-    ReplacementMap(NameGenerator* ng, TypeMap* typeMap) : ng(ng), typeMap(typeMap)
-    { CHECK_NULL(ng); CHECK_NULL(typeMap); }
+    ReplacementMap(NameGenerator* ng, TypeMap* typeMap) : ng(ng), typeMap(typeMap) {
+        CHECK_NULL(ng);
+        CHECK_NULL(typeMap);
+    }
     const IR::Type_Struct* getReplacement(const IR::Type_BaseList* tt);
     IR::IndexedVector<IR::Node>* getNewReplacements();
 };
@@ -70,46 +73,44 @@ class ReplacementMap {
  *         Notice that ListExpressions are not converted
  *         to StructExpressions; a subsequent type checking
  *         is needed for that.
-*/
+ */
 class DoReplaceTuples final : public Transform {
     ReplacementMap* repl;
 
  public:
-    DoReplaceTuples(ReferenceMap* refMap, TypeMap* typeMap) :
-            repl(new ReplacementMap(refMap, typeMap))
-    { setName("DoReplaceTuples"); }
+    DoReplaceTuples(ReferenceMap* refMap, TypeMap* typeMap)
+        : repl(new ReplacementMap(refMap, typeMap)) {
+        setName("DoReplaceTuples");
+    }
     const IR::Node* postorder(IR::Type_BaseList* type) override;
     const IR::Node* insertReplacements(const IR::Node* before);
-    const IR::Node* postorder(IR::Type_Struct* type) override
-    { return insertReplacements(type); }
+    const IR::Node* postorder(IR::Type_Struct* type) override { return insertReplacements(type); }
     const IR::Node* postorder(IR::ArrayIndex* expression) override;
-    const IR::Node* postorder(IR::Type_Typedef* type) override
-    { return insertReplacements(type); }
-    const IR::Node* postorder(IR::Type_Newtype* type) override
-    { return insertReplacements(type); }
-    const IR::Node* postorder(IR::P4Parser* parser) override
-    { return insertReplacements(parser); }
-    const IR::Node* postorder(IR::P4Control* control) override
-    { return insertReplacements(control); }
-    const IR::Node* postorder(IR::Method* method) override
-    { return insertReplacements(method); }
-    const IR::Node* postorder(IR::Type_Extern* ext) override
-    { return insertReplacements(ext); }
-    const IR::Node* postorder(IR::Declaration_Instance* decl) override
-    { return insertReplacements(decl); }
+    const IR::Node* postorder(IR::Type_Typedef* type) override { return insertReplacements(type); }
+    const IR::Node* postorder(IR::Type_Newtype* type) override { return insertReplacements(type); }
+    const IR::Node* postorder(IR::P4Parser* parser) override { return insertReplacements(parser); }
+    const IR::Node* postorder(IR::P4Control* control) override {
+        return insertReplacements(control);
+    }
+    const IR::Node* postorder(IR::Method* method) override { return insertReplacements(method); }
+    const IR::Node* postorder(IR::Type_Extern* ext) override { return insertReplacements(ext); }
+    const IR::Node* postorder(IR::Declaration_Instance* decl) override {
+        return insertReplacements(decl);
+    }
     const IR::Node* preorder(IR::P4ValueSet* set) override
     // Disable substitution of type parameters for value sets.
     // We want to keep these as tuples.
-    { prune(); return set; }
+    {
+        prune();
+        return set;
+    }
 };
 
 class EliminateTuples final : public PassManager {
  public:
-    EliminateTuples(ReferenceMap* refMap, TypeMap* typeMap,
-            TypeChecking* typeChecking = nullptr,
-            TypeInference* typeInference = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+    EliminateTuples(ReferenceMap* refMap, TypeMap* typeMap, TypeChecking* typeChecking = nullptr,
+                    TypeInference* typeInference = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoReplaceTuples(refMap, typeMap));
         passes.push_back(new ClearTypeMap(typeMap));
@@ -118,8 +119,7 @@ class EliminateTuples final : public PassManager {
         // into StructExpression where tuples were converted
         // to structs.
         passes.push_back(new ResolveReferences(refMap));
-        if (!typeInference)
-            typeInference = new TypeInference(refMap, typeMap, false);
+        if (!typeInference) typeInference = new TypeInference(refMap, typeMap, false);
         passes.push_back(typeInference);
         setName("EliminateTuples");
     }

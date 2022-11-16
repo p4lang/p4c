@@ -14,19 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <iostream>
-#include <fstream>
-
-#include "ir/ir.h"
-#include "../common/options.h"
-#include "lib/nullstream.h"
-#include "lib/path.h"
 #include "frontend.h"
 
-#include "frontends/p4/typeMap.h"
-#include "frontends/p4/typeChecking/bindVariables.h"
+#include <fstream>
+#include <iostream>
+
+#include "../common/options.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "frontends/p4/typeChecking/bindVariables.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
+#include "lib/nullstream.h"
+#include "lib/path.h"
 // Passes
 #include "actionsInlining.h"
 #include "checkConstants.h"
@@ -92,6 +92,7 @@ class PrettyPrint : public Inspector {
     cstring ppfile;
     /// The file that is being compiled.  This used
     cstring inputfile;
+
  public:
     explicit PrettyPrint(const CompilerOptions& options) {
         setName("PrettyPrint");
@@ -101,7 +102,7 @@ class PrettyPrint : public Inspector {
     bool preorder(const IR::P4Program* program) override {
         if (!ppfile.isNullOrEmpty()) {
             Util::PathName path(ppfile);
-            std::ostream *ppStream = openFile(path.toString(), true);
+            std::ostream* ppStream = openFile(path.toString(), true);
             P4::ToP4 top4(ppStream, false, inputfile);
             (void)program->apply(top4);
         }
@@ -132,9 +133,9 @@ class FrontEndDump : public NoVisit {
 class SetStrictStruct : public NoVisit {
     TypeMap* typeMap;
     bool strictStruct;
+
  public:
-    SetStrictStruct(TypeMap* typeMap, bool strict):
-            typeMap(typeMap), strictStruct(strict) {}
+    SetStrictStruct(TypeMap* typeMap, bool strict) : typeMap(typeMap), strictStruct(strict) {}
     Visitor::profile_t init_apply(const IR::Node* node) override {
         typeMap->setStrictStruct(strictStruct);
         return Inspector::init_apply(node);
@@ -144,14 +145,13 @@ class SetStrictStruct : public NoVisit {
 }  // namespace
 
 // TODO: remove skipSideEffectOrdering flag
-const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program,
+const IR::P4Program* FrontEnd::run(const CompilerOptions& options, const IR::P4Program* program,
                                    bool skipSideEffectOrdering, std::ostream* outStream) {
-    if (program == nullptr && options.listFrontendPasses == 0)
-        return nullptr;
+    if (program == nullptr && options.listFrontendPasses == 0) return nullptr;
 
     bool isv1 = options.isv1();
-    ReferenceMap  refMap;
-    TypeMap       typeMap;
+    ReferenceMap refMap;
+    TypeMap typeMap;
     refMap.setIsV1(isv1);
 
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
@@ -181,26 +181,22 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SetStrictStruct(&typeMap, false),
         new ValidateMatchAnnotations(&typeMap),
         new BindTypeVariables(&refMap, &typeMap),
-        new PassRepeated({
-            new SpecializeGenericTypes(&refMap, &typeMap),
-            new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
-            new ResolveReferences(&refMap),
-            new SetStrictStruct(&typeMap, true),  // Next pass uses strict struct checking
-            new TypeInference(&refMap, &typeMap, false),  // more casts may be needed
-            new SetStrictStruct(&typeMap, false),
-            new SpecializeGenericFunctions(&refMap, &typeMap)
-        }),
+        new PassRepeated(
+            {new SpecializeGenericTypes(&refMap, &typeMap),
+             new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
+             new ResolveReferences(&refMap),
+             new SetStrictStruct(&typeMap, true),          // Next pass uses strict struct checking
+             new TypeInference(&refMap, &typeMap, false),  // more casts may be needed
+             new SetStrictStruct(&typeMap, false),
+             new SpecializeGenericFunctions(&refMap, &typeMap)}),
         new CheckCoreMethods(&refMap, &typeMap),
         new StaticAssert(&refMap, &typeMap),
         new RemoveParserIfs(&refMap, &typeMap),
         new StructInitializers(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
-        new PassRepeated({
-            new ConstantFolding(&refMap, &typeMap),
-            new StrengthReduction(&refMap, &typeMap),
-            new Reassociation(),
-            new UselessCasts(&refMap, &typeMap)
-        }),
+        new PassRepeated({new ConstantFolding(&refMap, &typeMap),
+                          new StrengthReduction(&refMap, &typeMap), new Reassociation(),
+                          new UselessCasts(&refMap, &typeMap)}),
         new SimplifyControlFlow(&refMap, &typeMap),
         new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point
@@ -208,7 +204,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SimplifyParsers(&refMap),
         new ResetHeaders(&refMap, &typeMap),
         new UniqueNames(&refMap),  // Give each local declaration a unique internal name
-        new MoveDeclarations(),  // Move all local declarations to the beginning
+        new MoveDeclarations(),    // Move all local declarations to the beginning
         new MoveInitializers(&refMap),
         new SideEffectOrdering(&refMap, &typeMap, skipSideEffectOrdering),
         new SimplifyControlFlow(&refMap, &typeMap),
@@ -241,8 +237,8 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new CheckConstants(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
         new RemoveParserControlFlow(&refMap, &typeMap),  // more ifs may have been added to parsers
-        new UniqueNames(&refMap),  // needed again after inlining
-        new MoveDeclarations(),  // needed again after inlining
+        new UniqueNames(&refMap),                        // needed again after inlining
+        new MoveDeclarations(),                          // needed again after inlining
         new SimplifyDefUse(&refMap, &typeMap),
         new RemoveAllUnusedDeclarations(&refMap),
         new SimplifyControlFlow(&refMap, &typeMap),
@@ -256,7 +252,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     }
 
     if (options.excludeFrontendPasses) {
-       passes.removePasses(options.passesToExcludeFrontend);
+        passes.removePasses(options.passesToExcludeFrontend);
     }
 
     passes.setName("FrontEnd");

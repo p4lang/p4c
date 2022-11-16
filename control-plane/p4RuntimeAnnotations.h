@@ -50,8 +50,7 @@ class ParseP4RuntimeAnnotations : public ParseAnnotations {
                   // pass "locally" (in this case on action profile instances
                   // since this annotation is for them).
                   PARSE("max_group_size", Constant),
-                  {"p4runtime_translation",
-                   &ParseAnnotations::parseP4rtTranslationAnnotation},
+                  {"p4runtime_translation", &ParseAnnotations::parseP4rtTranslationAnnotation},
               }) {}
 };
 

@@ -15,28 +15,29 @@ limitations under the License.
 */
 
 #include <stdio.h>
-#include <string>
-#include <iostream>
 
-#include "ir/ir.h"
+#include <iostream>
+#include <string>
+
+#include "backends/bmv2/common/JsonObjects.h"
+#include "backends/bmv2/simple_switch/midend.h"
+#include "backends/bmv2/simple_switch/options.h"
+#include "backends/bmv2/simple_switch/simpleSwitch.h"
+#include "backends/bmv2/simple_switch/version.h"
 #include "control-plane/p4RuntimeSerializer.h"
 #include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
+#include "fstream"
+#include "ir/ir.h"
+#include "ir/json_loader.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/gc.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
-#include "backends/bmv2/common/JsonObjects.h"
-#include "backends/bmv2/simple_switch/midend.h"
-#include "backends/bmv2/simple_switch/simpleSwitch.h"
-#include "backends/bmv2/simple_switch/version.h"
-#include "backends/bmv2/simple_switch/options.h"
-#include "ir/json_loader.h"
-#include "fstream"
 
-int main(int argc, char *const argv[]) {
+int main(int argc, char* const argv[]) {
     setup_gc_logging();
 
     AutoCompileContext autoBMV2Context(new BMV2::SimpleSwitchContext);
@@ -45,26 +46,22 @@ int main(int argc, char *const argv[]) {
     options.compilerVersion = BMV2_SIMPLESWITCH_VERSION_STRING;
 
     if (options.process(argc, argv) != nullptr) {
-            if (options.loadIRFromJson == false)
-                    options.setInputFile();
+        if (options.loadIRFromJson == false) options.setInputFile();
     }
-    if (::errorCount() > 0)
-        return 1;
+    if (::errorCount() > 0) return 1;
 
     auto hook = options.getDebugHook();
 
     // BMV2 is required for compatibility with the previous compiler.
     options.preprocessor_options += " -D__TARGET_BMV2__";
 
-    const IR::P4Program *program = nullptr;
+    const IR::P4Program* program = nullptr;
     const IR::ToplevelBlock* toplevel = nullptr;
-
 
     if (options.loadIRFromJson == false) {
         program = P4::parseP4File(options);
 
-        if (program == nullptr || ::errorCount() > 0)
-            return 1;
+        if (program == nullptr || ::errorCount() > 0) return 1;
         try {
             P4::P4COptionPragmaParser optionsPragmaParser;
             program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
@@ -72,12 +69,11 @@ int main(int argc, char *const argv[]) {
             P4::FrontEnd frontend;
             frontend.addDebugHook(hook);
             program = frontend.run(options, program);
-        } catch (const std::exception &bug) {
+        } catch (const std::exception& bug) {
             std::cerr << bug.what() << std::endl;
             return 1;
         }
-        if (program == nullptr || ::errorCount() > 0)
-            return 1;
+        if (program == nullptr || ::errorCount() > 0) return 1;
     } else {
         std::filebuf fb;
         if (fb.open(options.file, std::ios::in) == nullptr) {
@@ -95,38 +91,33 @@ int main(int argc, char *const argv[]) {
     }
 
     P4::serializeP4RuntimeIfRequired(program, options);
-    if (::errorCount() > 0)
-        return 1;
+    if (::errorCount() > 0) return 1;
 
     BMV2::SimpleSwitchMidEnd midEnd(options);
     midEnd.addDebugHook(hook);
     try {
         toplevel = midEnd.process(program);
-        if (::errorCount() > 1 || toplevel == nullptr ||
-            toplevel->getMain() == nullptr)
-            return 1;
+        if (::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr) return 1;
         if (options.dumpJsonFile && !options.loadIRFromJson)
             JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
-    } catch (const std::exception &bug) {
+    } catch (const std::exception& bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
-    if (::errorCount() > 0)
-        return 1;
+    if (::errorCount() > 0) return 1;
 
-    auto backend = new BMV2::SimpleSwitchBackend(options, &midEnd.refMap,
-                                                 &midEnd.typeMap, &midEnd.enumMap);
+    auto backend =
+        new BMV2::SimpleSwitchBackend(options, &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
 
     // Necessary because BMV2Context is expected at the top of stack in further processing
     AutoCompileContext autoContext(new BMV2::BMV2Context(BMV2::SimpleSwitchContext::get()));
     try {
         backend->convert(toplevel);
-    } catch (const std::exception &bug) {
+    } catch (const std::exception& bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
-    if (::errorCount() > 0)
-        return 1;
+    if (::errorCount() > 0) return 1;
 
     if (!options.outputFile.isNullOrEmpty()) {
         std::ostream* out = openFile(options.outputFile, false);

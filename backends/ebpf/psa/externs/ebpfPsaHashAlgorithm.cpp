@@ -15,21 +15,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 #include "ebpfPsaHashAlgorithm.h"
+
 #include "backends/ebpf/ebpfProgram.h"
 #include "backends/ebpf/ebpfType.h"
 
 namespace EBPF {
 
 EBPFHashAlgorithmPSA::ArgumentsList EBPFHashAlgorithmPSA::unpackArguments(
-        const IR::MethodCallExpression * expr, int dataPos) {
-    BUG_CHECK(expr->arguments->size() > ((size_t) dataPos),
+    const IR::MethodCallExpression* expr, int dataPos) {
+    BUG_CHECK(expr->arguments->size() > ((size_t)dataPos),
               "Data position %1% is outside of the arguments: %2%", dataPos, expr);
 
-    std::vector<const IR::Expression *> arguments;
+    std::vector<const IR::Expression*> arguments;
 
     if (auto argList = expr->arguments->at(dataPos)->expression->to<IR::StructExpression>()) {
-        for (auto field : argList->components)
-            arguments.push_back(field->expression);
+        for (auto field : argList->components) arguments.push_back(field->expression);
     } else {
         arguments.push_back(expr->arguments->at(dataPos)->expression);
     }
@@ -37,13 +37,13 @@ EBPFHashAlgorithmPSA::ArgumentsList EBPFHashAlgorithmPSA::unpackArguments(
     return arguments;
 }
 
-void EBPFHashAlgorithmPSA::emitSubtractData(CodeBuilder *builder, int dataPos,
-                                            const IR::MethodCallExpression *expr) {
+void EBPFHashAlgorithmPSA::emitSubtractData(CodeBuilder* builder, int dataPos,
+                                            const IR::MethodCallExpression* expr) {
     emitSubtractData(builder, unpackArguments(expr, dataPos));
 }
 
-void EBPFHashAlgorithmPSA::emitAddData(CodeBuilder *builder, int dataPos,
-                                       const IR::MethodCallExpression *expr) {
+void EBPFHashAlgorithmPSA::emitAddData(CodeBuilder* builder, int dataPos,
+                                       const IR::MethodCallExpression* expr) {
     emitAddData(builder, unpackArguments(expr, dataPos));
 }
 
@@ -53,7 +53,7 @@ void CRCChecksumAlgorithm::emitUpdateMethod(CodeBuilder* builder, int crcWidth) 
     // Note that this update method is optimized for our CRC16 and CRC32, custom
     // version may require other method of update. To deal with byte order data
     // is read from the end of buffer.
-    if (crcWidth == 16){
+    if (crcWidth == 16) {
         cstring code =
             "static __always_inline\n"
             "void crc%w%_update(u%w% * reg, const u8 * data, u16 data_size, const u%w% poly) {\n"
@@ -190,8 +190,7 @@ void CRCChecksumAlgorithm::emitClear(CodeBuilder* builder) {
  * 5 - a field size in bytes
  * 0xEDB88320 - a polynomial in a reflected bit order.
  */
-void CRCChecksumAlgorithm::emitAddData(CodeBuilder* builder,
-                                       const ArgumentsList & arguments) {
+void CRCChecksumAlgorithm::emitAddData(CodeBuilder* builder, const ArgumentsList& arguments) {
     cstring tmpVar = program->refMap->newName(baseName + "_tmp");
 
     builder->emitIndent();
@@ -262,32 +261,32 @@ void CRCChecksumAlgorithm::emitAddData(CodeBuilder* builder,
     cstring varStr = Util::printf_format("(u64) %s", registerVar.c_str());
     builder->target->emitTraceMessage(builder, "CRC: checksum state: %llx", 1, varStr.c_str());
 
-    cstring final_crc = Util::printf_format("(u64) %s(%s)", finalizeMethod.c_str(),
-                                            registerVar.c_str());
+    cstring final_crc =
+        Util::printf_format("(u64) %s(%s)", finalizeMethod.c_str(), registerVar.c_str());
     builder->target->emitTraceMessage(builder, "CRC: final checksum: %llx", 1, final_crc.c_str());
 
     builder->blockEnd(true);
 }
 
 void CRCChecksumAlgorithm::emitGet(CodeBuilder* builder) {
-    builder->appendFormat("%s(%s)", finalizeMethod.c_str(),
-                          registerVar.c_str());
+    builder->appendFormat("%s(%s)", finalizeMethod.c_str(), registerVar.c_str());
 }
 
-void CRCChecksumAlgorithm::emitSubtractData(CodeBuilder* builder,
-                                            const ArgumentsList & arguments) {
-    (void) builder; (void) arguments;
+void CRCChecksumAlgorithm::emitSubtractData(CodeBuilder* builder, const ArgumentsList& arguments) {
+    (void)builder;
+    (void)arguments;
     BUG("Not implementable");
 }
 
 void CRCChecksumAlgorithm::emitGetInternalState(CodeBuilder* builder) {
-    (void) builder;
+    (void)builder;
     BUG("Not implemented");
 }
 
 void CRCChecksumAlgorithm::emitSetInternalState(CodeBuilder* builder,
-                                                const IR::MethodCallExpression * expr) {
-    (void) builder; (void) expr;
+                                                const IR::MethodCallExpression* expr) {
+    (void)builder;
+    (void)expr;
     BUG("Not implemented");
 }
 
@@ -296,10 +295,11 @@ void CRCChecksumAlgorithm::emitSetInternalState(CodeBuilder* builder,
 void CRC16ChecksumAlgorithm::emitGlobals(CodeBuilder* builder) {
     CRCChecksumAlgorithm::emitUpdateMethod(builder, 16);
 
-    cstring code ="static __always_inline "
-                  "u16 crc16_finalize(u16 reg) {\n"
-                  "    return reg;\n"
-                  "}";
+    cstring code =
+        "static __always_inline "
+        "u16 crc16_finalize(u16 reg) {\n"
+        "    return reg;\n"
+        "}";
     builder->appendLine(code);
 }
 
@@ -308,17 +308,17 @@ void CRC16ChecksumAlgorithm::emitGlobals(CodeBuilder* builder) {
 void CRC32ChecksumAlgorithm::emitGlobals(CodeBuilder* builder) {
     CRCChecksumAlgorithm::emitUpdateMethod(builder, 32);
 
-    cstring code = "static __always_inline "
-                   "u32 crc32_finalize(u32 reg) {\n"
-                   "    return reg ^ 0xFFFFFFFF;\n"
-                   "}";
+    cstring code =
+        "static __always_inline "
+        "u32 crc32_finalize(u32 reg) {\n"
+        "    return reg ^ 0xFFFFFFFF;\n"
+        "}";
     builder->appendLine(code);
 }
 
 // ===========================InternetChecksumAlgorithm===========================
 
-void InternetChecksumAlgorithm::updateChecksum(CodeBuilder* builder,
-                                               const ArgumentsList & arguments,
+void InternetChecksumAlgorithm::updateChecksum(CodeBuilder* builder, const ArgumentsList& arguments,
                                                bool addData) {
     cstring tmpVar = program->refMap->newName(baseName + "_tmp");
 
@@ -375,8 +375,8 @@ void InternetChecksumAlgorithm::updateChecksum(CodeBuilder* builder,
                 builder->endOfStatement(true);
 
                 // update checksum
-                builder->target->emitTraceMessage(builder, "InternetChecksum: word=0x%llx",
-                                                  1, tmpVar.c_str());
+                builder->target->emitTraceMessage(builder, "InternetChecksum: word=0x%llx", 1,
+                                                  tmpVar.c_str());
                 builder->emitIndent();
                 if (addData) {
                     builder->appendFormat("%s = csum16_add(%s, %s)", stateVar.c_str(),
@@ -390,25 +390,26 @@ void InternetChecksumAlgorithm::updateChecksum(CodeBuilder* builder,
         }
     }
 
-    builder->target->emitTraceMessage(builder, "InternetChecksum: new state=0x%llx",
-                                      1, stateVar.c_str());
+    builder->target->emitTraceMessage(builder, "InternetChecksum: new state=0x%llx", 1,
+                                      stateVar.c_str());
     builder->blockEnd(true);
 }
 
 void InternetChecksumAlgorithm::emitGlobals(CodeBuilder* builder) {
-    builder->appendLine("inline u16 csum16_add(u16 csum, u16 addend) {\n"
-                        "    u16 res = csum;\n"
-                        "    res += addend;\n"
-                        "    return (res + (res < addend));\n"
-                        "}\n"
-                        "inline u16 csum16_sub(u16 csum, u16 addend) {\n"
-                        "    return csum16_add(csum, ~addend);\n"
-                        "}");
+    builder->appendLine(
+        "inline u16 csum16_add(u16 csum, u16 addend) {\n"
+        "    u16 res = csum;\n"
+        "    res += addend;\n"
+        "    return (res + (res < addend));\n"
+        "}\n"
+        "inline u16 csum16_sub(u16 csum, u16 addend) {\n"
+        "    return csum16_add(csum, ~addend);\n"
+        "}");
 }
 
 void InternetChecksumAlgorithm::emitVariables(CodeBuilder* builder,
                                               const IR::Declaration_Instance* decl) {
-    (void) decl;
+    (void)decl;
     stateVar = program->refMap->newName(baseName + "_state");
     builder->emitIndent();
     builder->appendFormat("u16 %s = 0", stateVar.c_str());
@@ -421,8 +422,7 @@ void InternetChecksumAlgorithm::emitClear(CodeBuilder* builder) {
     builder->endOfStatement(true);
 }
 
-void InternetChecksumAlgorithm::emitAddData(CodeBuilder* builder,
-                                            const ArgumentsList & arguments) {
+void InternetChecksumAlgorithm::emitAddData(CodeBuilder* builder, const ArgumentsList& arguments) {
     updateChecksum(builder, arguments, true);
 }
 
@@ -431,7 +431,7 @@ void InternetChecksumAlgorithm::emitGet(CodeBuilder* builder) {
 }
 
 void InternetChecksumAlgorithm::emitSubtractData(CodeBuilder* builder,
-                                                 const ArgumentsList & arguments) {
+                                                 const ArgumentsList& arguments) {
     updateChecksum(builder, arguments, false);
 }
 
@@ -440,7 +440,7 @@ void InternetChecksumAlgorithm::emitGetInternalState(CodeBuilder* builder) {
 }
 
 void InternetChecksumAlgorithm::emitSetInternalState(CodeBuilder* builder,
-                                                     const IR::MethodCallExpression * expr) {
+                                                     const IR::MethodCallExpression* expr) {
     if (expr->arguments->size() != 1) {
         ::error(ErrorType::ERR_UNEXPECTED, "Expected exactly 1 argument %1%", expr);
         return;

@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _MIDEND_COPYSTRUCTURES_H_
 #define _MIDEND_COPYSTRUCTURES_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -59,10 +59,13 @@ class DoCopyStructures : public Transform {
      * errorOnMethodCall flag will produce an error message if such a
      * method is encountered. */
     bool errorOnMethodCall;
+
  public:
-    explicit DoCopyStructures(TypeMap* typeMap, bool errorOnMethodCall) :
-            typeMap(typeMap), errorOnMethodCall(errorOnMethodCall)
-    { CHECK_NULL(typeMap); setName("DoCopyStructures"); }
+    explicit DoCopyStructures(TypeMap* typeMap, bool errorOnMethodCall)
+        : typeMap(typeMap), errorOnMethodCall(errorOnMethodCall) {
+        CHECK_NULL(typeMap);
+        setName("DoCopyStructures");
+    }
     const IR::Node* postorder(IR::AssignmentStatement* statement) override;
 };
 
@@ -90,10 +93,11 @@ class RemoveAliases : public Transform {
     TypeMap* typeMap;
 
     IR::IndexedVector<IR::Declaration> declarations;
+
  public:
-    RemoveAliases(ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap);
+    RemoveAliases(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
         setName("RemoveAliases");
     }
 
@@ -104,13 +108,13 @@ class RemoveAliases : public Transform {
 
 class CopyStructures : public PassRepeated {
  public:
-    CopyStructures(ReferenceMap* refMap, TypeMap* typeMap,
-                   bool errorOnMethodCall = true,
-                   TypeChecking* typeChecking = nullptr) :
-            PassManager({}) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("CopyStructures");
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+    CopyStructures(ReferenceMap* refMap, TypeMap* typeMap, bool errorOnMethodCall = true,
+                   TypeChecking* typeChecking = nullptr)
+        : PassManager({}) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        setName("CopyStructures");
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.emplace_back(typeChecking);
         passes.emplace_back(new RemoveAliases(refMap, typeMap));
         passes.emplace_back(typeChecking);

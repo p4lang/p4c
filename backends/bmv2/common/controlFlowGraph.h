@@ -17,11 +17,11 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_CONTROLFLOWGRAPH_H_
 #define BACKENDS_BMV2_COMMON_CONTROLFLOWGRAPH_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "lib/ordered_set.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 #include "lib/castable.h"
+#include "lib/ordered_set.h"
 
 namespace BMV2 {
 
@@ -40,8 +40,9 @@ class CFG final : public IHasDbPrint {
         explicit EdgeSet(CFG::Edge* edge) { edges.emplace(edge); }
         explicit EdgeSet(const EdgeSet* other) { mergeWith(other); }
 
-        void mergeWith(const EdgeSet* other)
-        { edges.insert(other->edges.begin(), other->edges.end()); }
+        void mergeWith(const EdgeSet* other) {
+            edges.insert(other->edges.begin(), other->edges.end());
+        }
         void dbprint(std::ostream& out) const;
         void emplace(CFG::Edge* edge) { edges.emplace(edge); }
         size_t size() const { return edges.size(); }
@@ -61,15 +62,15 @@ class CFG final : public IHasDbPrint {
         friend class CFG;
 
         static unsigned crtId;
-        EdgeSet         predecessors;
+        EdgeSet predecessors;
         explicit Node(cstring name) : id(crtId++), name(name) {}
         Node() : id(crtId++), name("node_" + Util::toString(id)) {}
         virtual ~Node() {}
 
      public:
         const unsigned id;
-        const cstring  name;
-        EdgeSet        successors;
+        const cstring name;
+        EdgeSet successors;
 
         void dbprint(std::ostream& out) const;
         void addPredecessors(const EdgeSet* set);
@@ -81,17 +82,20 @@ class CFG final : public IHasDbPrint {
     class TableNode final : public Node {
      public:
         const IR::P4Table* table;
-        const IR::Expression*      invocation;
+        const IR::Expression* invocation;
         explicit TableNode(const IR::P4Table* table, const IR::Expression* invocation)
-        : Node(table->controlPlaneName()), table(table), invocation(invocation)
-        { CHECK_NULL(table); CHECK_NULL(invocation); }
+            : Node(table->controlPlaneName()), table(table), invocation(invocation) {
+            CHECK_NULL(table);
+            CHECK_NULL(invocation);
+        }
     };
 
     class IfNode final : public Node {
      public:
         const IR::IfStatement* statement;
-        explicit IfNode(const IR::IfStatement* statement) : statement(statement)
-        { CHECK_NULL(statement); }
+        explicit IfNode(const IR::IfStatement* statement) : statement(statement) {
+            CHECK_NULL(statement);
+        }
     };
 
     class DummyNode final : public Node {
@@ -100,12 +104,7 @@ class CFG final : public IHasDbPrint {
     };
 
  protected:
-    enum class EdgeType {
-        Unconditional,
-        True,
-        False,
-        Label
-    };
+    enum class EdgeType { Unconditional, True, False, Label };
 
  public:
     /**
@@ -120,22 +119,22 @@ class CFG final : public IHasDbPrint {
         /**
          * The destination node of the edge.  The source node is not known by the edge
          */
-        Node*    endpoint;
-        cstring  label;  // only present if type == Label
+        Node* endpoint;
+        cstring label;  // only present if type == Label
 
-        explicit Edge(Node* node) : type(EdgeType::Unconditional), endpoint(node)
-        { CHECK_NULL(node); }
-        Edge(Node* node, bool b) :
-                type(b ? EdgeType::True : EdgeType::False), endpoint(node)
-        { CHECK_NULL(node); }
-        Edge(Node* node, cstring label) :
-                type(EdgeType::Label), endpoint(node), label(label)
-        { CHECK_NULL(node); }
+        explicit Edge(Node* node) : type(EdgeType::Unconditional), endpoint(node) {
+            CHECK_NULL(node);
+        }
+        Edge(Node* node, bool b) : type(b ? EdgeType::True : EdgeType::False), endpoint(node) {
+            CHECK_NULL(node);
+        }
+        Edge(Node* node, cstring label) : type(EdgeType::Label), endpoint(node), label(label) {
+            CHECK_NULL(node);
+        }
         void dbprint(std::ostream& out) const;
-        Edge* clone(Node* node) const
-        { return new Edge(node, type, label); }
+        Edge* clone(Node* node) const { return new Edge(node, type, label); }
         Node* getNode() { return endpoint; }
-        bool  getBool() {
+        bool getBool() {
             BUG_CHECK(isBool(), "Edge is not Boolean");
             return type == EdgeType::True;
         }
@@ -165,23 +164,22 @@ class CFG final : public IHasDbPrint {
         allNodes.emplace(result);
         return result;
     }
-    void build(const IR::P4Control* cc,
-               P4::ReferenceMap* refMap, P4::TypeMap* typeMap);
+    void build(const IR::P4Control* cc, P4::ReferenceMap* refMap, P4::TypeMap* typeMap);
     void setEntry(Node* entry) {
         BUG_CHECK(entryPoint == nullptr, "Entry already set");
         entryPoint = entry;
     }
-    void dbprint(std::ostream& out, Node* node, std::set<Node*> &done) const;  // helper
+    void dbprint(std::ostream& out, Node* node, std::set<Node*>& done) const;  // helper
     void dbprint(std::ostream& out) const;
-    void computeSuccessors()
-    { for (auto n : allNodes) n->computeSuccessors(); }
+    void computeSuccessors() {
+        for (auto n : allNodes) n->computeSuccessors();
+    }
     /// BMv2 is very restricted in the kinds of graphs it supports.
     /// Thie method checks whether a CFG is implementable.
     bool checkImplementable() const;
 
  private:
-    bool dfs(Node* node, std::set<Node*> &visited,
-             std::set<const IR::P4Table*> &stack) const;
+    bool dfs(Node* node, std::set<Node*>& visited, std::set<const IR::P4Table*>& stack) const;
     /// This is a set of table nodes that all represent the same
     /// table.  Check whether they could logically be merged into
     /// a single table node from a control-flow point of view.

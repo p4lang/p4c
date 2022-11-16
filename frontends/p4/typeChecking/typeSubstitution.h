@@ -37,21 +37,19 @@ class TypeSubstitution : public IHasDbPrint {
 
     /** True if this is the empty substitution, which does not replace anything. */
     bool isIdentity() const { return binding.size() == 0; }
-    const IR::Type* lookup(T t) const
-    { return ::get(binding, t); }
-    const IR::Type* get(T t) const
-    { return ::get(binding, t); }
+    const IR::Type* lookup(T t) const { return ::get(binding, t); }
+    const IR::Type* get(T t) const { return ::get(binding, t); }
 
     bool containsKey(T key) const { return binding.find(key) != binding.end(); }
 
     /* This can fail if id is already bound.
      * @return true on success. */
     bool setBinding(T id, const IR::Type* type) {
-        CHECK_NULL(id); CHECK_NULL(type);
+        CHECK_NULL(id);
+        CHECK_NULL(type);
         auto it = binding.find(id);
         if (it != binding.end()) {
-            if (it->second != type)
-                return false;
+            if (it->second != type) return false;
             return true;
         }
         binding.emplace(id, type);
@@ -59,12 +57,10 @@ class TypeSubstitution : public IHasDbPrint {
     }
 
     void dbprint(std::ostream& out) const {
-        if (isIdentity())
-            out << "Empty substitution";
+        if (isIdentity()) out << "Empty substitution";
         bool first = true;
         for (auto it : binding) {
-            if (!first)
-                out << std::endl;
+            if (!first) out << std::endl;
             out << it.first << " -> " << dbp(it.second);
             first = false;
         }
@@ -77,8 +73,7 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVa
  public:
     TypeVariableSubstitution() = default;
     TypeVariableSubstitution(const TypeVariableSubstitution& other) = default;
-    bool setBindings(const IR::Node* errorLocation,
-                     const IR::TypeParameters* params,
+    bool setBindings(const IR::Node* errorLocation, const IR::TypeParameters* params,
                      const IR::Vector<IR::Type>* args);
     /// Returns an empyty string on error, or an error message format otherwise.
     /// The error message should be used with 'var' and 'substitution' as arguments when
