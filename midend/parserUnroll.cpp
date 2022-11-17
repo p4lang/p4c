@@ -777,7 +777,7 @@ class ParserSymbolicInterpreter {
 
     /// generate call OutOfBound
     void addOutOfBound(ParserStateInfo* stateInfo, std::unordered_set<cstring>& newStates,
-                       bool checkBefore = true, IR::IndexedVector<IR::StatOrDecl> components = 
+                       bool checkBefore = true, IR::IndexedVector<IR::StatOrDecl> components =
                        IR::IndexedVector<IR::StatOrDecl>()) {
         IR::ID newName = getNewName(stateInfo);
         if (checkBefore && newStates.count(newName)) {
