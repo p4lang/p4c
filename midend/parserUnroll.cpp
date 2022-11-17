@@ -719,7 +719,8 @@ class ParserSymbolicInterpreter {
         return IR::ID(state->state->name + std::to_string(state->currentIndex));
     }
 
-    using EvaluationStateResult = std::pair<std::vector<ParserStateInfo*>*, bool>;
+    using EvaluationStateResult = std::tuple<std::vector<ParserStateInfo*>*, bool,
+                                            IR::IndexedVector<IR::StatOrDecl>>;
 
     /// Generates new state with the help of symbolic execution.
     /// If corresponded state was generated previously then it returns @a nullptr and false.
@@ -733,13 +734,13 @@ class ParserSymbolicInterpreter {
         if (unroll) {
             newName = getNewName(state);
             if (newStates.count(newName))
-                return EvaluationStateResult(nullptr, false);
+                return EvaluationStateResult(nullptr, false, components);
             newStates.insert(newName);
         }
         for (auto s : state->state->components) {
             auto* newComponent = executeStatement(state, s, valueMap);
             if (!newComponent)
-                return EvaluationStateResult(nullptr, true);
+                return EvaluationStateResult(nullptr, true, components);
             if (unroll)
                 components.push_back(newComponent);
         }
@@ -747,7 +748,7 @@ class ParserSymbolicInterpreter {
         auto result = evaluateSelect(state, valueMap);
         if (unroll) {
             if (result.second == nullptr) {
-                return EvaluationStateResult(nullptr, true);
+                return EvaluationStateResult(nullptr, true, components);
             }
             if (state->name == newName) {
                 state->newState = new IR::ParserState(state->state->srcInfo, newName,
@@ -758,7 +759,7 @@ class ParserSymbolicInterpreter {
                     new IR::ParserState(state->state->srcInfo, newName, components, result.second);
             }
         }
-        return EvaluationStateResult(result.first, true);
+        return EvaluationStateResult(result.first, true, components);
     }
 
  public:
@@ -775,8 +776,9 @@ class ParserSymbolicInterpreter {
     }
 
     /// generate call OutOfBound
-    void addOutFoBound(ParserStateInfo* stateInfo, std::unordered_set<cstring>& newStates,
-                       bool checkBefore = true) {
+    void addOutOfBound(ParserStateInfo* stateInfo, std::unordered_set<cstring>& newStates,
+                       bool checkBefore = true, IR::IndexedVector<IR::StatOrDecl> components = 
+                       IR::IndexedVector<IR::StatOrDecl>()) {
         IR::ID newName = getNewName(stateInfo);
         if (checkBefore && newStates.count(newName)) {
             return;
@@ -784,8 +786,7 @@ class ParserSymbolicInterpreter {
         hasOutOfboundState = true;
         newStates.insert(newName);
         stateInfo->newState = new IR::ParserState(newName,
-            IR::IndexedVector<IR::StatOrDecl>(),
-            new IR::PathExpression(new IR::Type_State(),
+            components, new IR::PathExpression(new IR::Type_State(),
             new IR::Path(outOfBoundsStateName, false)));
     }
 
@@ -831,17 +832,17 @@ class ParserSymbolicInterpreter {
                 }
                 // don't evaluate successors anymore
                 // generate call OutOfBound
-                addOutFoBound(stateInfo, newStates);
+                addOutOfBound(stateInfo, newStates);
                 continue;
             }
             IR::ID newName = getNewName(stateInfo);
             bool notAdded = newStates.count(newName) == 0;
             auto nextStates = evaluateState(stateInfo, newStates);
-            if (nextStates.first == nullptr) {
-                if (nextStates.second && stateInfo->predecessor &&
+            if (get<0>(nextStates) == nullptr) {
+                if (get<1>(nextStates) && stateInfo->predecessor &&
                  newName.name !=stateInfo->predecessor->newState->name) {
                     // generate call OutOfBound
-                    addOutFoBound(stateInfo, newStates, false);
+                    addOutOfBound(stateInfo, newStates, false, get<2>(nextStates));
                 } else {
                     // save current state
                     if (notAdded) {
@@ -851,7 +852,7 @@ class ParserSymbolicInterpreter {
                 LOG1("No next states");
                 continue;
             }
-            toRun.insert(toRun.end(), nextStates.first->begin(), nextStates.first->end());
+            toRun.insert(toRun.end(), get<0>(nextStates)->begin(), get<0>(nextStates)->end());
         }
 
         return synthesizedParser;

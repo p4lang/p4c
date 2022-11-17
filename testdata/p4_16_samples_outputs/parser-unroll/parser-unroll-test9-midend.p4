@@ -42,6 +42,7 @@ parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t
         }
     }
     state finite_loop2 {
+        hdr.i.counter = hdr.i.counter + 8w1;
         transition stateOutOfBound;
     }
     state infinite_loop {
