@@ -7,6 +7,7 @@ extern E {
 
 control c() {
     E((list<bit<32>>){32w2,32w3,32w4}) e;
+    bit<32> list;
     apply {
         e.run();
     }
@@ -15,4 +16,3 @@ control c() {
 control C();
 package top(C _c);
 top(c()) main;
-
