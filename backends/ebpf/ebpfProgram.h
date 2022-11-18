@@ -17,15 +17,15 @@ limitations under the License.
 #ifndef _BACKENDS_EBPF_EBPFPROGRAM_H_
 #define _BACKENDS_EBPF_EBPFPROGRAM_H_
 
-#include "target.h"
+#include "codeGen.h"
 #include "ebpfModel.h"
 #include "ebpfObject.h"
 #include "ebpfOptions.h"
-#include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/common/options.h"
-#include "codeGen.h"
+#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
+#include "target.h"
 
 namespace EBPF {
 
@@ -39,12 +39,12 @@ class EBPFProgram : public EBPFObject {
  public:
     const EbpfOptions& options;
     const IR::P4Program* program;
-    const IR::ToplevelBlock*  toplevel;
-    P4::ReferenceMap*    refMap;
-    P4::TypeMap*         typeMap;
-    EBPFParser*          parser;
-    EBPFControl*         control;
-    EBPFModel           &model;
+    const IR::ToplevelBlock* toplevel;
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    EBPFParser* parser;
+    EBPFControl* control;
+    EBPFModel& model;
 
     cstring endLabel, offsetVar, lengthVar;
     cstring zeroKey, functionName, errorVar;
@@ -55,11 +55,16 @@ class EBPFProgram : public EBPFObject {
 
     virtual bool build();  // return 'true' on success
 
-    EBPFProgram(const EbpfOptions &options, const IR::P4Program* program,
-                P4::ReferenceMap* refMap, P4::TypeMap* typeMap, const IR::ToplevelBlock* toplevel) :
-            options(options), program(program), toplevel(toplevel),
-            refMap(refMap), typeMap(typeMap),
-            parser(nullptr), control(nullptr), model(EBPFModel::instance) {
+    EBPFProgram(const EbpfOptions& options, const IR::P4Program* program, P4::ReferenceMap* refMap,
+                P4::TypeMap* typeMap, const IR::ToplevelBlock* toplevel)
+        : options(options),
+          program(program),
+          toplevel(toplevel),
+          refMap(refMap),
+          typeMap(typeMap),
+          parser(nullptr),
+          control(nullptr),
+          model(EBPFModel::instance) {
         offsetVar = EBPFModel::reserved("packetOffsetInBits");
         zeroKey = EBPFModel::reserved("zero");
         functionName = EBPFModel::reserved("filter");

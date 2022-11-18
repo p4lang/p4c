@@ -15,20 +15,20 @@ limitations under the License.
 */
 
 #include "methodInstance.h"
-#include "ir/ir.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
+
 #include "frontends/p4/evaluator/substituteParameters.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
 // If useExpressionType is true trust the type in mce->type
-MethodInstance*
-MethodInstance::resolve(const IR::MethodCallExpression* mce, DeclarationLookup* refMap,
-                        TypeMap* typeMap, bool useExpressionType, const Visitor::Context *ctxt,
-                        bool incomplete) {
+MethodInstance* MethodInstance::resolve(const IR::MethodCallExpression* mce,
+                                        DeclarationLookup* refMap, TypeMap* typeMap,
+                                        bool useExpressionType, const Visitor::Context* ctxt,
+                                        bool incomplete) {
     auto mt = typeMap ? typeMap->getType(mce->method) : nullptr;
-    if (mt == nullptr && useExpressionType)
-        mt = mce->method->type;
+    if (mt == nullptr && useExpressionType) mt = mce->method->type;
     BUG_CHECK(mt, "%1%: unknown type", mce->method);
     BUG_CHECK(mt->is<IR::Type_MethodBase>(), "%1%: expected a MethodBase type", mt);
     auto originalType = mt->to<IR::Type_MethodBase>();
@@ -52,8 +52,7 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, DeclarationLookup* 
             else
                 BUG("Could not find type for %1%", mem->expr);
         }
-        if (auto sc = basetype->to<IR::Type_SpecializedCanonical>())
-            basetype = sc->baseType;
+        if (auto sc = basetype->to<IR::Type_SpecializedCanonical>()) basetype = sc->baseType;
         if (basetype->is<IR::Type_HeaderUnion>()) {
             if (mem->member == IR::Type_Header::isValid)
                 return new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>());
@@ -67,8 +66,8 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, DeclarationLookup* 
                 mem->member == IR::Type_Stack::pop_front)
                 return new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>());
         } else {
-            const IR::IDeclaration *decl = nullptr;
-            const IR::Type *type = nullptr;
+            const IR::IDeclaration* decl = nullptr;
+            const IR::Type* type = nullptr;
             if (auto th = mem->expr->to<IR::This>()) {
                 type = basetype;
                 decl = refMap->getDeclaration(th, true);
@@ -84,20 +83,19 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, DeclarationLookup* 
                 decl = cc->to<ExternConstructorCall>()->type;
                 type = typeMap ? typeMap->getTypeType(cce->constructedType, true) : cce->type;
             } else {
-                BUG("unexpected expression %1% resolving method instance", mem->expr); }
+                BUG("unexpected expression %1% resolving method instance", mem->expr);
+            }
             BUG_CHECK(type != nullptr, "Could not resolve type for %1%", decl);
             if (type->is<IR::Type_SpecializedCanonical>())
                 type = type->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
-            if (type->is<IR::IApply>() &&
-                mem->member == IR::IApply::applyMethodName) {
+            if (type->is<IR::IApply>() && mem->member == IR::IApply::applyMethodName) {
                 return new ApplyMethod(mce, decl, type->to<IR::IApply>());
             } else if (type->is<IR::Type_Extern>()) {
                 auto et = type->to<IR::Type_Extern>();
                 auto methodType = mt->to<IR::Type_Method>();
                 CHECK_NULL(methodType);
                 auto method = et->lookupMethod(mem->member, mce->arguments);
-                if (method == nullptr)
-                    return nullptr;
+                if (method == nullptr) return nullptr;
                 return new ExternMethod(mce, decl, method, et, methodType,
                                         type->to<IR::Type_Extern>(),
                                         actualType->to<IR::Type_Method>(), incomplete);
@@ -109,15 +107,15 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, DeclarationLookup* 
         if (auto meth = decl->to<IR::Method>()) {
             auto methodType = mt->to<IR::Type_Method>();
             CHECK_NULL(methodType);
-            return new ExternFunction(mce, meth, methodType,
-                                      actualType->to<IR::Type_Method>(), incomplete);
+            return new ExternFunction(mce, meth, methodType, actualType->to<IR::Type_Method>(),
+                                      incomplete);
         } else if (auto act = decl->to<IR::P4Action>()) {
             return new ActionCall(mce, act, mt->to<IR::Type_Action>());
         } else if (auto func = decl->to<IR::Function>()) {
             auto methodType = mt->to<IR::Type_Method>();
             CHECK_NULL(methodType);
-            return new FunctionCall(mce, func, methodType,
-                                    actualType->to<IR::Type_Method>(), incomplete);
+            return new FunctionCall(mce, func, methodType, actualType->to<IR::Type_Method>(),
+                                    incomplete);
         }
     }
 
@@ -131,9 +129,8 @@ const IR::P4Action* ActionCall::specialize(ReferenceMap* refMap) const {
     return result->to<IR::P4Action>();
 }
 
-ConstructorCall*
-ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
-                         DeclarationLookup* refMap, TypeMap* typeMap) {
+ConstructorCall* ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
+                                          DeclarationLookup* refMap, TypeMap* typeMap) {
     auto ct = typeMap ? typeMap->getTypeType(cce->constructedType, true) : cce->type;
     ConstructorCall* result;
     const IR::Vector<IR::Type>* typeArguments;
@@ -176,8 +173,7 @@ ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
     return result;
 }
 
-Instantiation* Instantiation::resolve(const IR::Declaration_Instance* instance,
-                                      DeclarationLookup* ,
+Instantiation* Instantiation::resolve(const IR::Declaration_Instance* instance, DeclarationLookup*,
                                       TypeMap* typeMap) {
     auto type = typeMap ? typeMap->getTypeType(instance->type, true) : instance->type;
     auto simpleType = type;
@@ -203,13 +199,13 @@ Instantiation* Instantiation::resolve(const IR::Declaration_Instance* instance,
     return nullptr;  // unreachable
 }
 
-std::vector<const IR::IDeclaration *> ExternMethod::mayCall() const {
-    std::vector<const IR::IDeclaration *> rv;
-    auto *di = object->to<IR::Declaration_Instance>();
+std::vector<const IR::IDeclaration*> ExternMethod::mayCall() const {
+    std::vector<const IR::IDeclaration*> rv;
+    auto* di = object->to<IR::Declaration_Instance>();
     if (!di || !di->initializer) {
         rv.push_back(method);
-    } else if (auto *em_decl = di->initializer->components
-                                .getDeclaration<IR::IDeclaration>(method->name)) {
+    } else if (auto* em_decl =
+                   di->initializer->components.getDeclaration<IR::IDeclaration>(method->name)) {
         rv.push_back(em_decl);
     } else {
         for (auto meth : originalExternType->methods) {
@@ -217,15 +213,18 @@ std::vector<const IR::IDeclaration *> ExternMethod::mayCall() const {
             if (!sync) continue;
             for (auto m : sync->expr) {
                 auto mname = m->to<IR::PathExpression>();
-                if (!mname ||  method->name != mname->path->name)
-                    continue;
-                if (auto *am = di->initializer->components
-                                .getDeclaration<IR::IDeclaration>(meth->name)) {
+                if (!mname || method->name != mname->path->name) continue;
+                if (auto* am =
+                        di->initializer->components.getDeclaration<IR::IDeclaration>(meth->name)) {
                     rv.push_back(am);
                 } else if (!meth->getAnnotation(IR::Annotation::optionalAnnotation)) {
                     error(ErrorType::ERR_INVALID,
-                          "No implementation for abstract %s in %s called via %s",
-                          meth, di, method); } } } }
+                          "No implementation for abstract %s in %s called via %s", meth, di,
+                          method);
+                }
+            }
+        }
+    }
     return rv;
 }
 

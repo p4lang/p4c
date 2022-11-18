@@ -15,26 +15,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 #include "ebpfPsaDeparser.h"
+
 #include "ebpfPipeline.h"
 
 namespace EBPF {
 
-DeparserBodyTranslatorPSA::DeparserBodyTranslatorPSA(const EBPFDeparserPSA *deparser) :
-        CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
-        DeparserBodyTranslator(deparser) {
+DeparserBodyTranslatorPSA::DeparserBodyTranslatorPSA(const EBPFDeparserPSA* deparser)
+    : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
+      DeparserBodyTranslator(deparser) {
     setName("DeparserBodyTranslatorPSA");
 }
 
-void DeparserBodyTranslatorPSA::processFunction(const P4::ExternFunction *function) {
+void DeparserBodyTranslatorPSA::processFunction(const P4::ExternFunction* function) {
     auto dprs = deparser->to<EBPFDeparserPSA>();
     CHECK_NULL(dprs);
     if (function->method->name.name == "psa_resubmit") {
-        builder->appendFormat("(!%s->drop && %s->resubmit)",
-                              dprs->istd->name.name, dprs->istd->name.name);
+        builder->appendFormat("(!%s->drop && %s->resubmit)", dprs->istd->name.name,
+                              dprs->istd->name.name);
     }
 }
 
-void DeparserBodyTranslatorPSA::processMethod(const P4::ExternMethod *method) {
+void DeparserBodyTranslatorPSA::processMethod(const P4::ExternMethod* method) {
     auto dprs = deparser->to<EBPFDeparserPSA>();
     CHECK_NULL(dprs);
     auto externName = method->originalExternType->name.name;
@@ -60,8 +61,8 @@ void DeparserBodyTranslatorPSA::processMethod(const P4::ExternMethod *method) {
 
 void EBPFDeparserPSA::emitDigestInstances(CodeBuilder* builder) const {
     for (auto digest : digests) {
-        builder->appendFormat("REGISTER_TABLE_NO_KEY_TYPE(%s, %s, 0, ",
-                              digest.first, "BPF_MAP_TYPE_QUEUE");
+        builder->appendFormat("REGISTER_TABLE_NO_KEY_TYPE(%s, %s, 0, ", digest.first,
+                              "BPF_MAP_TYPE_QUEUE");
         auto type = EBPFTypeFactory::instance->create(digest.second->to<IR::Type_Type>()->type);
         type->declare(builder, "", false);
         builder->appendFormat(", %d)", maxDigestQueueSize);
@@ -94,8 +95,7 @@ bool IngressDeparserPSA::build() {
     auto pl = controlBlock->container->type->applyParams;
 
     if (pl->size() != 7) {
-        ::error(ErrorType::ERR_EXPECTED,
-                "Expected ingress deparser to have exactly 7 parameters");
+        ::error(ErrorType::ERR_EXPECTED, "Expected ingress deparser to have exactly 7 parameters");
         return false;
     }
 
@@ -137,7 +137,7 @@ bool EgressDeparserPSA::build() {
  * - early packet drop
  * - resubmission
  */
-void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
+void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder* builder) {
     builder->emitIndent();
 
     builder->newline();
@@ -147,8 +147,10 @@ void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     builder->appendFormat("if (%s->clone) ", istd->name.name);
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat("do_packet_clones(%s, &clone_session_tbl, %s->clone_session_id,"
-                          " CLONE_I2E, 1);", program->model.CPacketName.str(), istd->name.name);
+    builder->appendFormat(
+        "do_packet_clones(%s, &clone_session_tbl, %s->clone_session_id,"
+        " CLONE_I2E, 1);",
+        program->model.CPacketName.str(), istd->name.name);
     builder->newline();
     builder->blockEnd(true);
 
@@ -165,13 +167,13 @@ void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat("if (%s->resubmit) ", istd->name.name);
     builder->blockStart();
-    builder->target->emitTraceMessage(builder, "PreDeparser: resubmitting packet, "
-                                               "skipping deparser..");
+    builder->target->emitTraceMessage(builder,
+                                      "PreDeparser: resubmitting packet, "
+                                      "skipping deparser..");
     builder->emitIndent();
     CHECK_NULL(program);
     auto pipeline = dynamic_cast<const EBPFPipeline*>(program);
-    builder->appendFormat("%s->packet_path = RESUBMIT;",
-                          pipeline->compilerGlobalMetadata);
+    builder->appendFormat("%s->packet_path = RESUBMIT;", pipeline->compilerGlobalMetadata);
     builder->newline();
     builder->emitIndent();
     builder->appendLine("return TC_ACT_UNSPEC;");

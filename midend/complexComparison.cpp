@@ -18,11 +18,11 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Expression* RemoveComplexComparisons::explode(
-    Util::SourceInfo srcInfo,
-    const IR::Type* leftType, const IR::Expression* left,
-    const IR::Type* rightType, const IR::Expression* right) {
-
+const IR::Expression* RemoveComplexComparisons::explode(Util::SourceInfo srcInfo,
+                                                        const IR::Type* leftType,
+                                                        const IR::Expression* left,
+                                                        const IR::Type* rightType,
+                                                        const IR::Expression* right) {
     // we allow several cases
     // header == header
     // header == list
@@ -121,9 +121,9 @@ const IR::Expression* RemoveComplexComparisons::explode(
     } else if (auto at = leftType->to<IR::Type_Stack>()) {
         auto size = at->getSize();
         const IR::Expression* result = new IR::BoolLiteral(true);
-        BUG_CHECK(rightType->is<IR::Type_Stack>(),
-                  "%1%: comparing stack with %1%", left, rightType);
-        for (unsigned i=0; i < size; i++) {
+        BUG_CHECK(rightType->is<IR::Type_Stack>(), "%1%: comparing stack with %1%", left,
+                  rightType);
+        for (unsigned i = 0; i < size; i++) {
             auto index = new IR::Constant(i);
             auto lelem = new IR::ArrayIndex(srcInfo, left, index);
             auto relem = new IR::ArrayIndex(srcInfo, right, index);
@@ -150,16 +150,14 @@ const IR::Expression* RemoveComplexComparisons::explode(
 }
 
 const IR::Node* RemoveComplexComparisons::postorder(IR::Operation_Binary* expression) {
-    if (!expression->is<IR::Neq>() && !expression->is<IR::Equ>())
-        return expression;
+    if (!expression->is<IR::Neq>() && !expression->is<IR::Equ>()) return expression;
     auto ltype = typeMap->getType(expression->left, true);
     auto rtype = typeMap->getType(expression->right, true);
     if (!ltype->is<IR::Type_StructLike>() && !ltype->is<IR::Type_Stack>() &&
         !ltype->is<IR::Type_BaseList>())
         return expression;
     auto result = explode(expression->srcInfo, ltype, expression->left, rtype, expression->right);
-    if (expression->is<IR::Neq>())
-        result = new IR::LNot(expression->srcInfo, result);
+    if (expression->is<IR::Neq>()) result = new IR::LNot(expression->srcInfo, result);
     return result;
 }
 

@@ -1,7 +1,8 @@
+#include "midend/hsIndexSimplify.h"
+
 #include <iostream>
 #include <sstream>
 
-#include "midend/hsIndexSimplify.h"
 #include "midend/simplifyKey.h"
 
 namespace P4 {
@@ -52,8 +53,8 @@ const IR::Node* HSIndexTransform::postorder(IR::ArrayIndex* curArrayIndex) {
 }
 
 IR::Node* HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder& aiFinder,
-                                                   IR::Statement* statement,
-                                                   const IR::Expression* expr) {
+                                                    IR::Statement* statement,
+                                                    const IR::Expression* expr) {
     if (aiFinder.arrayIndex == nullptr) {
         return statement;
     }

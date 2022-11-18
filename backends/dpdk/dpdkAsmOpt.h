@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKASMOPT_H_
 #define BACKENDS_DPDK_DPDKASMOPT_H_
 
+#include "dpdkUtils.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
@@ -29,26 +30,25 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
 #include "lib/json.h"
-#include "dpdkUtils.h"
 
-#define DPDK_TABLE_MAX_KEY_SIZE 64*8
+#define DPDK_TABLE_MAX_KEY_SIZE 64 * 8
 
 namespace DPDK {
 // This pass removes label that no jmps jump to
 class RemoveRedundantLabel : public Transform {
  public:
-    const IR::IndexedVector<IR::DpdkAsmStatement> *removeRedundantLabel(
-                      const IR::IndexedVector<IR::DpdkAsmStatement> &s);
+    const IR::IndexedVector<IR::DpdkAsmStatement>* removeRedundantLabel(
+        const IR::IndexedVector<IR::DpdkAsmStatement>& s);
 
-    const IR::Node *postorder(IR::DpdkListStatement *l) override {
-        const IR::IndexedVector<IR::DpdkAsmStatement> *newStmts;
+    const IR::Node* postorder(IR::DpdkListStatement* l) override {
+        const IR::IndexedVector<IR::DpdkAsmStatement>* newStmts;
         newStmts = removeRedundantLabel(l->statements);
         l->statements = *newStmts;
         return l;
     }
 
-    const IR::Node *postorder(IR::DpdkAction *l) override {
-        const IR::IndexedVector<IR::DpdkAsmStatement> *newStmts;
+    const IR::Node* postorder(IR::DpdkAction* l) override {
+        const IR::IndexedVector<IR::DpdkAsmStatement>* newStmts;
         newStmts = removeRedundantLabel(l->statements);
         l->statements = *newStmts;
         return l;
@@ -64,17 +64,17 @@ class RemoveRedundantLabel : public Transform {
 
 class RemoveConsecutiveJmpAndLabel : public Transform {
  public:
-    const IR::IndexedVector<IR::DpdkAsmStatement> *removeJmpAndLabel(
-                   const IR::IndexedVector<IR::DpdkAsmStatement> &s);
-    const IR::Node *postorder(IR::DpdkListStatement *l) override {
-        const IR::IndexedVector<IR::DpdkAsmStatement> *newStmts;
+    const IR::IndexedVector<IR::DpdkAsmStatement>* removeJmpAndLabel(
+        const IR::IndexedVector<IR::DpdkAsmStatement>& s);
+    const IR::Node* postorder(IR::DpdkListStatement* l) override {
+        const IR::IndexedVector<IR::DpdkAsmStatement>* newStmts;
         newStmts = removeJmpAndLabel(l->statements);
         l->statements = *newStmts;
         return l;
     }
 
-    const IR::Node *postorder(IR::DpdkAction *l) override {
-        const IR::IndexedVector<IR::DpdkAsmStatement> *newStmts;
+    const IR::Node* postorder(IR::DpdkAction* l) override {
+        const IR::IndexedVector<IR::DpdkAsmStatement>* newStmts;
         newStmts = removeJmpAndLabel(l->statements);
         l->statements = *newStmts;
         return l;
@@ -98,18 +98,18 @@ class RemoveConsecutiveJmpAndLabel : public Transform {
 
 class ThreadJumps : public Transform {
  public:
-    const IR::IndexedVector<IR::DpdkAsmStatement> *threadJumps(
-             const IR::IndexedVector<IR::DpdkAsmStatement> &s);
+    const IR::IndexedVector<IR::DpdkAsmStatement>* threadJumps(
+        const IR::IndexedVector<IR::DpdkAsmStatement>& s);
 
-    const IR::Node *postorder(IR::DpdkListStatement *l) override {
-        const IR::IndexedVector<IR::DpdkAsmStatement> *newStmts;
+    const IR::Node* postorder(IR::DpdkListStatement* l) override {
+        const IR::IndexedVector<IR::DpdkAsmStatement>* newStmts;
         newStmts = threadJumps(l->statements);
         l->statements = *newStmts;
         return l;
     }
 
-    const IR::Node *postorder(IR::DpdkAction *l) override {
-        const IR::IndexedVector<IR::DpdkAsmStatement> *newStmts;
+    const IR::Node* postorder(IR::DpdkAction* l) override {
+        const IR::IndexedVector<IR::DpdkAsmStatement>* newStmts;
         newStmts = threadJumps(l->statements);
         l->statements = *newStmts;
         return l;
@@ -121,35 +121,34 @@ class ThreadJumps : public Transform {
 
 class RemoveLabelAfterLabel : public Transform {
  public:
-    const IR::IndexedVector<IR::DpdkAsmStatement> *removeLabelAfterLabel(
-                  const IR::IndexedVector<IR::DpdkAsmStatement> &s);
+    const IR::IndexedVector<IR::DpdkAsmStatement>* removeLabelAfterLabel(
+        const IR::IndexedVector<IR::DpdkAsmStatement>& s);
 
-    const IR::Node *postorder(IR::DpdkListStatement *l) override {
-        const IR::IndexedVector<IR::DpdkAsmStatement> *newStmts;
+    const IR::Node* postorder(IR::DpdkListStatement* l) override {
+        const IR::IndexedVector<IR::DpdkAsmStatement>* newStmts;
         newStmts = removeLabelAfterLabel(l->statements);
         l->statements = *newStmts;
         return l;
     }
 
-    const IR::Node *postorder(IR::DpdkAction *l) override {
-        const IR::IndexedVector<IR::DpdkAsmStatement> *newStmts;
+    const IR::Node* postorder(IR::DpdkAction* l) override {
+        const IR::IndexedVector<IR::DpdkAsmStatement>* newStmts;
         newStmts = removeLabelAfterLabel(l->statements);
         l->statements = *newStmts;
         return l;
     }
 };
 
-
 // This pass Collects all metadata struct member used in program
 class CollectUsedMetadataField : public Inspector {
     ordered_set<cstring>& used_fields;
+
  public:
     explicit CollectUsedMetadataField(ordered_set<cstring>& used_fields)
         : used_fields(used_fields) {}
-    bool preorder(const IR::Member *m) override {
+    bool preorder(const IR::Member* m) override {
         // metadata struct field used like m.<field_name> in expressions
-        if (m->expr->toString() == "m")
-            used_fields.insert(m->member.toString());
+        if (m->expr->toString() == "m") used_fields.insert(m->member.toString());
         return true;
     }
 };
@@ -157,11 +156,12 @@ class CollectUsedMetadataField : public Inspector {
 // This pass removes all unused fields from metadata struct
 class RemoveUnusedMetadataFields : public Transform {
     ordered_set<cstring>& used_fields;
+
  public:
     explicit RemoveUnusedMetadataFields(ordered_set<cstring>& used_fields)
         : used_fields(used_fields) {}
-    const IR::Node* preorder(IR::DpdkAsmProgram *p) override;
-    bool isByteSizeField(const IR::Type *field_type);
+    const IR::Node* preorder(IR::DpdkAsmProgram* p) override;
+    bool isByteSizeField(const IR::Type* field_type);
 };
 
 // This pass shorten the Identifier length
@@ -174,11 +174,9 @@ class ShortenTokenLength : public Transform {
     // 1.30.30 => 63(including dot(.))
     // if id name less than allowedLength keep it same
     cstring shortenString(cstring str, size_t allowedLength = 60) {
-        if (str.size() <= allowedLength)
-            return str;
+        if (str.size() <= allowedLength) return str;
         auto itr = newNameMap.find(str);
-        if (itr != newNameMap.end())
-            return itr->second;
+        if (itr != newNameMap.end()) return itr->second;
         // make sure new string length less or equal allowedLength
         cstring newStr = str.substr(0, allowedLength - std::to_string(count).size());
         newStr += std::to_string(count);
@@ -189,15 +187,14 @@ class ShortenTokenLength : public Transform {
     }
 
     cstring dropSuffixIfNoAction(IR::ID name) {
-        if (name.originalName == "NoAction")
-            return name.originalName;
-         return name.name;
+        if (name.originalName == "NoAction") return name.originalName;
+        return name.name;
     }
 
  public:
     static ordered_map<cstring, cstring> origNameMap;
 
-    const IR::Node* preorder(IR::Member *m) override {
+    const IR::Node* preorder(IR::Member* m) override {
         if (m->toString().startsWith("m."))
             m->member = shortenString(m->member);
         else
@@ -205,49 +202,46 @@ class ShortenTokenLength : public Transform {
         return m;
     }
 
-    const IR::Node* preorder(IR::DpdkStructType *s) override {
+    const IR::Node* preorder(IR::DpdkStructType* s) override {
         if (s->getAnnotations()->getSingle("__packet_data__")) {
             s->name = shortenString(s->name);
             IR::IndexedVector<IR::StructField> changedFields;
             for (auto field : s->fields) {
-                IR::StructField *f = new IR::StructField(field->name, field->type);
+                IR::StructField* f = new IR::StructField(field->name, field->type);
                 f->name = shortenString(f->name, 30);
                 changedFields.push_back(f);
             }
-            return new IR::DpdkStructType(s->srcInfo, s->name,
-                                          s->annotations, changedFields);
+            return new IR::DpdkStructType(s->srcInfo, s->name, s->annotations, changedFields);
         } else {
             s->name = shortenString(s->name);
             IR::IndexedVector<IR::StructField> changedFields;
             for (auto field : s->fields) {
-                IR::StructField *f = new IR::StructField(field->name, field->type);
+                IR::StructField* f = new IR::StructField(field->name, field->type);
                 f->name = shortenString(f->name);
                 changedFields.push_back(f);
             }
-            return new IR::DpdkStructType(s->srcInfo, s->name,
-                                          s->annotations, changedFields);
+            return new IR::DpdkStructType(s->srcInfo, s->name, s->annotations, changedFields);
         }
         return s;
     }
 
-    const IR::Node* preorder(IR::DpdkHeaderType *h) override {
+    const IR::Node* preorder(IR::DpdkHeaderType* h) override {
         h->name = shortenString(h->name);
         IR::IndexedVector<IR::StructField> changedFields;
         for (auto field : h->fields) {
-             IR::StructField *f = new IR::StructField(field->name, field->type);
-             f->name = shortenString(f->name, 30);
-             changedFields.push_back(f);
+            IR::StructField* f = new IR::StructField(field->name, field->type);
+            f->name = shortenString(f->name, 30);
+            changedFields.push_back(f);
         }
-        return new IR::DpdkHeaderType(h->srcInfo, h->name,
-                                      h->annotations, changedFields);
+        return new IR::DpdkHeaderType(h->srcInfo, h->name, h->annotations, changedFields);
     }
 
-    const IR::Node* preorder(IR::DpdkExternDeclaration *e) override {
+    const IR::Node* preorder(IR::DpdkExternDeclaration* e) override {
         e->name = shortenString(e->name);
         return e;
     }
 
-    const IR::Node* preorder(IR::Declaration *g) override {
+    const IR::Node* preorder(IR::Declaration* g) override {
         g->name = shortenString(g->name);
         return g;
     }
@@ -258,15 +252,14 @@ class ShortenTokenLength : public Transform {
             auto newType0 = p->type->to<IR::Type_Name>();
             auto path0 = newType0->path->clone();
             path0->name = shortenString(path0->name);
-            new_pl.push_back(new IR::Parameter(p->srcInfo, p->name,
-                            p->annotations, p->direction,
-                            new IR::Type_Name(newType0->srcInfo, path0),
-                            p->defaultValue));
+            new_pl.push_back(new IR::Parameter(p->srcInfo, p->name, p->annotations, p->direction,
+                                               new IR::Type_Name(newType0->srcInfo, path0),
+                                               p->defaultValue));
         }
-        pl = IR::ParameterList {new_pl};
+        pl = IR::ParameterList{new_pl};
     }
 
-    const IR::Node* preorder(IR::DpdkAction *a) override {
+    const IR::Node* preorder(IR::DpdkAction* a) override {
         a->name = shortenString(dropSuffixIfNoAction(a->name));
         shortenParamTypeName(a->para);
         return a;
@@ -279,61 +272,55 @@ class ShortenTokenLength : public Transform {
             auto pathExpr = methodCallExpr->method->to<IR::PathExpression>();
             auto path0 = pathExpr->path->clone();
             path0->name = shortenString(dropSuffixIfNoAction(path0->name));
-            new_al.push_back(new IR::ActionListElement(ale->srcInfo,
-                        ale->annotations,
-                        new IR::MethodCallExpression(methodCallExpr->srcInfo,
-                            methodCallExpr->type,
-                            new IR::PathExpression(pathExpr->srcInfo,
-                                                   pathExpr->type, path0),
-                            methodCallExpr->typeArguments,
-                            methodCallExpr->arguments)));
+            new_al.push_back(new IR::ActionListElement(
+                ale->srcInfo, ale->annotations,
+                new IR::MethodCallExpression(
+                    methodCallExpr->srcInfo, methodCallExpr->type,
+                    new IR::PathExpression(pathExpr->srcInfo, pathExpr->type, path0),
+                    methodCallExpr->typeArguments, methodCallExpr->arguments)));
         }
         return new IR::ActionList(al->srcInfo, new_al);
     }
 
-    const IR::Node* preorder(IR::DpdkTable *t) override {
+    const IR::Node* preorder(IR::DpdkTable* t) override {
         t->name = shortenString(t->name);
         auto methodCallExpr = t->default_action->to<IR::MethodCallExpression>();
         auto pathExpr = methodCallExpr->method->to<IR::PathExpression>();
         auto path0 = pathExpr->path->clone();
         path0->name = shortenString(dropSuffixIfNoAction(path0->name));
         t->default_action = new IR::MethodCallExpression(
-                                methodCallExpr->srcInfo,
-                                methodCallExpr->type,
-                                new IR::PathExpression(pathExpr->srcInfo,
-                                                       pathExpr->type,
-                                                       path0),
-                                methodCallExpr->typeArguments,
-                                methodCallExpr->arguments);
+            methodCallExpr->srcInfo, methodCallExpr->type,
+            new IR::PathExpression(pathExpr->srcInfo, pathExpr->type, path0),
+            methodCallExpr->typeArguments, methodCallExpr->arguments);
         return t;
     }
 
-    const IR::Node* preorder(IR::DpdkLearner *l) override {
+    const IR::Node* preorder(IR::DpdkLearner* l) override {
         l->name = shortenString(l->name);
         return l;
     }
 
-    const IR::Node* preorder(IR::DpdkSelector *s) override {
+    const IR::Node* preorder(IR::DpdkSelector* s) override {
         s->name = shortenString(s->name);
         return s;
     }
 
-    const IR::Node* preorder(IR::DpdkLearnStatement *ls) override {
+    const IR::Node* preorder(IR::DpdkLearnStatement* ls) override {
         ls->action = shortenString(dropSuffixIfNoAction(ls->action));
         return ls;
     }
 
-    const IR::Node* preorder(IR::DpdkApplyStatement *as) override {
+    const IR::Node* preorder(IR::DpdkApplyStatement* as) override {
         as->table = shortenString(as->table);
         return as;
     }
 
-    const IR::Node* preorder(IR::DpdkJmpStatement *j) override {
+    const IR::Node* preorder(IR::DpdkJmpStatement* j) override {
         j->label = shortenString(j->label);
         return j;
     }
 
-    const IR::Node* preorder(IR::DpdkLabelStatement *ls) override {
+    const IR::Node* preorder(IR::DpdkLabelStatement* ls) override {
         ls->label = shortenString(ls->label);
         return ls;
     }
@@ -359,18 +346,18 @@ class CollectUseDefInfo : public Inspector {
     std::unordered_map<cstring, bool> dontEliminate;
 
     explicit CollectUseDefInfo(P4::TypeMap* typeMap) : typeMap(typeMap) {
-        dontEliminate["m.pna_main_output_metadata_output_port"]=true;
+        dontEliminate["m.pna_main_output_metadata_output_port"] = true;
         dontEliminate["m.psa_ingress_output_metadata_drop"] = true;
         dontEliminate["m.psa_ingress_output_metadata_egress_port"] = true;
     }
 
-    bool preorder(const IR::DpdkJmpCondStatement *b) override {
+    bool preorder(const IR::DpdkJmpCondStatement* b) override {
         usesInfo[b->src1->toString()]++;
         usesInfo[b->src2->toString()]++;
         return false;
     }
 
-    bool preorder(const IR::DpdkLearnStatement *b) override {
+    bool preorder(const IR::DpdkLearnStatement* b) override {
         usesInfo[b->timeout->toString()]++;
         dontEliminate[b->timeout->toString()] = true;
         if (b->argument) {
@@ -382,7 +369,7 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::DpdkUnaryStatement *u) override {
+    bool preorder(const IR::DpdkUnaryStatement* u) override {
         usesInfo[u->src->toString()]++;
         defInfo[u->dst->toString()]++;
         // do not eliminate the destination
@@ -390,7 +377,7 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::DpdkBinaryStatement *b) override {
+    bool preorder(const IR::DpdkBinaryStatement* b) override {
         usesInfo[b->src1->toString()]++;
         usesInfo[b->src2->toString()]++;
         defInfo[b->dst->toString()]++;
@@ -401,21 +388,21 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::DpdkMovStatement *mv) override{
+    bool preorder(const IR::DpdkMovStatement* mv) override {
         defInfo[mv->dst->toString()]++;
         usesInfo[mv->src->toString()]++;
         replacementMap[mv->dst->toString()] = mv->src;
         return false;
     }
 
-    bool preorder(const IR::DpdkCastStatement *c) override {
+    bool preorder(const IR::DpdkCastStatement* c) override {
         usesInfo[c->src->toString()]++;
         defInfo[c->dst->toString()]++;
         replacementMap[c->dst->toString()] = c->src;
         return false;
     }
 
-    bool preorder(const IR::DpdkMirrorStatement *m) override {
+    bool preorder(const IR::DpdkMirrorStatement* m) override {
         usesInfo[m->slotId->toString()]++;
         usesInfo[m->sessionId->toString()]++;
         // dpdk expect it as metadata struct member
@@ -453,7 +440,7 @@ class CollectUseDefInfo : public Inspector {
         auto type = typeMap->getType(l->header)->to<IR::Type_Header>();
         if (type)
             for (auto f : type->fields) {
-                cstring name = l->header->toString() + "." +f->name.toString();
+                cstring name = l->header->toString() + "." + f->name.toString();
                 defInfo[name]++;
             }
         return false;
@@ -526,8 +513,7 @@ class CollectUseDefInfo : public Inspector {
 
     bool preorder(const IR::DpdkMeterExecuteStatement* e) override {
         usesInfo[e->index->toString()]++;
-        if (e->length)
-            usesInfo[e->length->toString()]++;
+        if (e->length) usesInfo[e->length->toString()]++;
         usesInfo[e->color_in->toString()]++;
         usesInfo[e->color_out->toString()]++;
         return false;
@@ -535,8 +521,7 @@ class CollectUseDefInfo : public Inspector {
 
     bool preorder(const IR::DpdkCounterCountStatement* c) override {
         usesInfo[c->index->toString()]++;
-        if (c->incr)
-            usesInfo[c->incr->toString()]++;
+        if (c->incr) usesInfo[c->incr->toString()]++;
         return false;
     }
 
@@ -556,18 +541,16 @@ class CollectUseDefInfo : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::DpdkTable *t) override {
+    bool preorder(const IR::DpdkTable* t) override {
         auto keys = t->match_keys;
         if (keys)
-        for (auto ke : keys->keyElements) {
-            dontEliminate[ke->expression->toString()]=true;
-        }
+            for (auto ke : keys->keyElements) {
+                dontEliminate[ke->expression->toString()] = true;
+            }
         return false;
     }
 
-    bool haveSingleUseDef(cstring str) {
-        return defInfo[str] == 1 && usesInfo[str] == 1;
-    }
+    bool haveSingleUseDef(cstring str) { return defInfo[str] == 1 && usesInfo[str] == 1; }
 };
 
 // This pass identifies redundant copies/moves and eliminates them.
@@ -577,14 +560,13 @@ class CopyPropagationAndElimination : public Transform {
     CollectUseDefInfo* collectUseDef;
 
  public:
-    explicit CopyPropagationAndElimination(P4::TypeMap* typeMap) : typeMap(typeMap) {
-    }
+    explicit CopyPropagationAndElimination(P4::TypeMap* typeMap) : typeMap(typeMap) {}
 
     const IR::Expression* getIrreplaceableExpr(cstring str, bool allowConst);
-    const IR::Expression* replaceIfCopy(const IR::Expression *expr, bool allowConst = true);
+    const IR::Expression* replaceIfCopy(const IR::Expression* expr, bool allowConst = true);
     const IR::DpdkAsmStatement* elimCastOrMov(const IR::DpdkAsmStatement* stmt);
     IR::IndexedVector<IR::DpdkAsmStatement> copyPropAndDeadCodeElim(
-                                                IR::IndexedVector<IR::DpdkAsmStatement> stmts);
+        IR::IndexedVector<IR::DpdkAsmStatement> stmts);
 
     const IR::Node* preorder(IR::DpdkAction* a) override {
         collectUseDef = new CollectUseDefInfo(typeMap);
@@ -593,7 +575,7 @@ class CopyPropagationAndElimination : public Transform {
         return a;
     }
 
-    const IR::Node* preorder(IR::DpdkListStatement *l) override {
+    const IR::Node* preorder(IR::DpdkListStatement* l) override {
         collectUseDef = new CollectUseDefInfo(typeMap);
         collectUseDef->setCalledBy(this);
         l->apply(*collectUseDef);
@@ -605,11 +587,10 @@ class CopyPropagationAndElimination : public Transform {
         return a;
     }
 
-    const IR::Node* postorder(IR::DpdkListStatement *l) override {
+    const IR::Node* postorder(IR::DpdkListStatement* l) override {
         return new IR::DpdkListStatement(copyPropAndDeadCodeElim(l->statements));
     }
 };
-
 
 // Instructions can only appear in actions and apply block of .spec file.
 // All these individual passes work on the actions and apply block of .spec file.
@@ -628,4 +609,4 @@ class DpdkAsmOptimization : public PassRepeated {
 };
 
 }  // namespace DPDK
-#endif  /* BACKENDS_DPDK_DPDKASMOPT_H_ */
+#endif /* BACKENDS_DPDK_DPDKASMOPT_H_ */

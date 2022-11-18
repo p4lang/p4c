@@ -74,8 +74,8 @@ class HSIndexContretizer : public Transform {
 
  public:
     HSIndexContretizer(ReferenceMap* refMap, TypeMap* typeMap,
-                      IR::IndexedVector<IR::Declaration>* locals = nullptr,
-                      GeneratedVariablesMap* generatedVariables = nullptr)
+                       IR::IndexedVector<IR::Declaration>* locals = nullptr,
+                       GeneratedVariablesMap* generatedVariables = nullptr)
         : refMap(refMap), typeMap(typeMap), locals(locals), generatedVariables(generatedVariables) {
         if (generatedVariables == nullptr) generatedVariables = new GeneratedVariablesMap();
     }
@@ -101,7 +101,6 @@ class HSIndexSimplifier : public PassManager {
         setName("HSIndexSimplifier");
     }
 };
-
 
 }  // namespace P4
 

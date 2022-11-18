@@ -63,19 +63,17 @@ return_status=$(($return_status || $?))
     return_status=$(($return_status || $?))
 }
 
-# TODO: Apply clang-format to all of these folders?
-
 run-clang-format $ROOT_DIR/backends/p4tools
-# run-clang-format $ROOT_DIR/backends
-# run-clang-format $ROOT_DIR/control-plane
-# run-clang-format $ROOT_DIR/frontends
+run-clang-format $ROOT_DIR/backends
+run-clang-format $ROOT_DIR/control-plane
+run-clang-format $ROOT_DIR/frontends
 # run-clang-format $ROOT_DIR/ir
-# run-clang-format $ROOT_DIR/lib
-# run-clang-format $ROOT_DIR/midend
-# if [ -d "$DIRECTORY" ]; then
-# run-clang-format $ROOT_DIR/extensions
-# fi
-# run-clang-format $ROOT_DIR/tools
+run-clang-format $ROOT_DIR/lib
+run-clang-format $ROOT_DIR/midend
+if [ -d "$DIRECTORY" ]; then
+run-clang-format $ROOT_DIR/extensions
+fi
+run-clang-format $ROOT_DIR/tools
 
 
 echo "********************************"

@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _MIDEND_PREDICATION_H_
 #define _MIDEND_PREDICATION_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -50,14 +50,14 @@ class Predication final : public Transform {
     };
     /**
      * Private Transformer only for Predication pass.
-     * This pass operates on nested Mux expressions(?:). 
-     * It replaces then and else expressions in Mux with 
+     * This pass operates on nested Mux expressions(?:).
+     * It replaces then and else expressions in Mux with
      * the appropriate expression from assignment.
      */
     class ExpressionReplacer final : public Transform {
      private:
         // Original assignment that the replacer works on
-        const IR::AssignmentStatement * statement;
+        const IR::AssignmentStatement* statement;
         // To keep track of the path used while traversing nested if-else statements:
         //      IF - true / ELSE - false
         const std::vector<bool>& traversalPath;
@@ -67,15 +67,16 @@ class Predication final : public Transform {
         unsigned currentNestingLevel = 0;
         // An indicator used to implement the logic for ArrayIndex transformation
         bool visitingIndex = false;
+
      public:
-        explicit ExpressionReplacer(const IR::AssignmentStatement * a,
-                                    std::vector<bool>& t,
+        explicit ExpressionReplacer(const IR::AssignmentStatement* a, std::vector<bool>& t,
                                     std::vector<const IR::Expression*>& c)
-        : statement(a), traversalPath(t), conditions(c)
-        { CHECK_NULL(a); }
-        const IR::Mux * preorder(IR::Mux * mux) override;
-        void emplaceExpression(IR::Mux * mux);
-        void visitBranch(IR::Mux * mux, bool then);
+            : statement(a), traversalPath(t), conditions(c) {
+            CHECK_NULL(a);
+        }
+        const IR::Mux* preorder(IR::Mux* mux) override;
+        void emplaceExpression(IR::Mux* mux);
+        void visitBranch(IR::Mux* mux, bool then);
         void setVisitingIndex(bool val);
     };
 
@@ -100,7 +101,7 @@ class Predication final : public Transform {
     std::vector<cstring> dependencies;
     // Collects assignment statements with transformed right expression.
     // liveAssignments are pushed at the back of liveAssigns vector.
-    std::map<cstring, const IR::AssignmentStatement *> liveAssignments;
+    std::map<cstring, const IR::AssignmentStatement*> liveAssignments;
     // Vector of assignment statements which collects assignments from
     // liveAssignments and dependencies in adequate order. In preorder
     // of if statements assignments from liveAssigns are pushed on rv block.
@@ -115,15 +116,15 @@ class Predication final : public Transform {
     const IR::Statement* error(const IR::Statement* statement) const {
         if (inside_action && ifNestingLevel > 0)
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "%1%: Conditional execution in actions unsupported on this target",
-                    statement);
+                    "%1%: Conditional execution in actions unsupported on this target", statement);
         return statement;
     }
 
  public:
-    explicit Predication(NameGenerator* gen) :
-        generator(gen), inside_action(false), ifNestingLevel(0), depNestingLevel(0)
-    { setName("Predication"); }
+    explicit Predication(NameGenerator* gen)
+        : generator(gen), inside_action(false), ifNestingLevel(0), depNestingLevel(0) {
+        setName("Predication");
+    }
     const IR::Expression* clone(const IR::Expression* expression);
     const IR::Node* clone(const IR::AssignmentStatement* statement);
     const IR::Node* preorder(IR::IfStatement* statement) override;
@@ -135,12 +136,11 @@ class Predication final : public Transform {
     const IR::Node* preorder(IR::Member* member) override;
     const IR::Node* preorder(IR::ArrayIndex* arrInd) override;
     // The presence of other statements makes predication impossible to apply
-    const IR::Node* postorder(IR::MethodCallStatement* statement) override
-    { return error(statement); }
-    const IR::Node* postorder(IR::ReturnStatement* statement) override
-    { return error(statement); }
-    const IR::Node* postorder(IR::ExitStatement* statement) override
-    { return error(statement); }
+    const IR::Node* postorder(IR::MethodCallStatement* statement) override {
+        return error(statement);
+    }
+    const IR::Node* postorder(IR::ReturnStatement* statement) override { return error(statement); }
+    const IR::Node* postorder(IR::ExitStatement* statement) override { return error(statement); }
 };
 
 }  // namespace P4

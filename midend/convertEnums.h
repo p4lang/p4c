@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _MIDEND_CONVERTENUMS_H_
 #define _MIDEND_CONVERTENUMS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -33,7 +33,7 @@ class ChooseEnumRepresentation {
     virtual bool convert(const IR::Type_Enum* type) const = 0;
     // Returns the value to be assigned to the enum Constant.
     // Maps to the index of member in the enum by default.
-    virtual unsigned encoding(const IR::Type_Enum *, unsigned n) const { return n; }
+    virtual unsigned encoding(const IR::Type_Enum*, unsigned n) const { return n; }
     // enumCount is the number of different enum values.
     // The returned value is the width of Type_Bits used
     // to represent the enum.  Obviously, we must have
@@ -43,15 +43,15 @@ class ChooseEnumRepresentation {
 
 class EnumRepresentation {
     std::map<cstring, unsigned> repr;
+
  public:
     const IR::Type_Bits* type;
 
-    EnumRepresentation(Util::SourceInfo srcInfo, unsigned width)
-    { type = new IR::Type_Bits(srcInfo, width, false); }
-    void add(cstring decl)
-    { repr.emplace(decl, repr.size()); }
-    unsigned get(cstring decl) const
-    { return ::get(repr, decl); }
+    EnumRepresentation(Util::SourceInfo srcInfo, unsigned width) {
+        type = new IR::Type_Bits(srcInfo, width, false);
+    }
+    void add(cstring decl) { repr.emplace(decl, repr.size()); }
+    unsigned get(cstring decl) const { return ::get(repr, decl); }
 
     using iterator = decltype(repr)::iterator;
     using const_iterator = decltype(repr)::const_iterator;
@@ -98,25 +98,28 @@ class DoConvertEnums : public Transform {
     std::map<const IR::Type_Enum*, EnumRepresentation*> repr;
     ChooseEnumRepresentation* policy;
     TypeMap* typeMap;
+
  public:
     DoConvertEnums(ChooseEnumRepresentation* policy, TypeMap* typeMap)
-            : policy(policy), typeMap(typeMap)
-    { CHECK_NULL(policy); CHECK_NULL(typeMap); setName("DoConvertEnums"); }
+        : policy(policy), typeMap(typeMap) {
+        CHECK_NULL(policy);
+        CHECK_NULL(typeMap);
+        setName("DoConvertEnums");
+    }
     const IR::Node* preorder(IR::Type_Enum* type) override;
     const IR::Node* postorder(IR::Type_Name* type) override;
     const IR::Node* postorder(IR::Member* expression) override;
 };
 
 class ConvertEnums : public PassManager {
-  DoConvertEnums *convertEnums{nullptr};
+    DoConvertEnums* convertEnums{nullptr};
+
  public:
     using EnumMapping = decltype(DoConvertEnums::repr);
-    ConvertEnums(ReferenceMap* refMap, TypeMap* typeMap,
-                 ChooseEnumRepresentation* policy,
+    ConvertEnums(ReferenceMap* refMap, TypeMap* typeMap, ChooseEnumRepresentation* policy,
                  TypeChecking* typeChecking = nullptr)
         : convertEnums(new DoConvertEnums(policy, typeMap)) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(convertEnums);
         passes.push_back(new ClearTypeMap(typeMap));

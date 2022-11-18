@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _COMMON_CONSTANTFOLDING_H_
 #define _COMMON_CONSTANTFOLDING_H_
 
-#include "lib/big_int_util.h"
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
+#include "lib/big_int_util.h"
 
 namespace P4 {
 
@@ -70,13 +70,12 @@ class DoConstantFolding : public Transform {
     const IR::Expression* getConstant(const IR::Expression* expr) const;
 
     /// Statically cast constant @p node to @p type represented in the specified @p base.
-    const IR::Constant* cast(
-        const IR::Constant* node, unsigned base, const IR::Type_Bits* type) const;
+    const IR::Constant* cast(const IR::Constant* node, unsigned base,
+                             const IR::Type_Bits* type) const;
 
     /// Statically evaluate binary operation @p e implemented by @p func.
     const IR::Node* binary(const IR::Operation_Binary* op,
-                           std::function<big_int(big_int, big_int)> func,
-                           bool saturating = false);
+                           std::function<big_int(big_int, big_int)> func, bool saturating = false);
     /// Statically evaluate comparison operation @p e.
     /// Note that this only handles the case where @p e represents `==` or `!=`.
     const IR::Node* compare(const IR::Operation_Binary* op);
@@ -85,11 +84,7 @@ class DoConstantFolding : public Transform {
     const IR::Node* shift(const IR::Operation_Binary* op);
 
     /// Result type for @ref setContains.
-    enum class Result {
-        Yes,
-        No,
-        DontKnow
-    };
+    enum class Result { Yes, No, DontKnow };
 
     /** Statically evaluate case in select expression.
      *
@@ -103,9 +98,10 @@ class DoConstantFolding : public Transform {
     Result setContains(const IR::Expression* keySet, const IR::Expression* constant) const;
 
  public:
-    DoConstantFolding(const ReferenceMap* refMap, TypeMap* typeMap, bool warnings = true) :
-            refMap(refMap), typeMap(typeMap), typesKnown(typeMap != nullptr), warnings(warnings) {
-        visitDagOnce = true; setName("DoConstantFolding");
+    DoConstantFolding(const ReferenceMap* refMap, TypeMap* typeMap, bool warnings = true)
+        : refMap(refMap), typeMap(typeMap), typesKnown(typeMap != nullptr), warnings(warnings) {
+        visitDagOnce = true;
+        setName("DoConstantFolding");
         assignmentTarget = false;
     }
 
@@ -146,10 +142,10 @@ class DoConstantFolding : public Transform {
     const IR::Node* postorder(IR::IfStatement* statement) override;
     const IR::Node* preorder(IR::AssignmentStatement* statement) override;
     const IR::Node* preorder(IR::ArrayIndex* e) override;
-    const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {
-        if (bs->annotations->getSingle("disable_optimization"))
-            prune();
-        return bs; }
+    const IR::BlockStatement* preorder(IR::BlockStatement* bs) override {
+        if (bs->annotations->getSingle("disable_optimization")) prune();
+        return bs;
+    }
 };
 
 /** Optionally runs @ref TypeChecking if @p typeMap is not
@@ -158,14 +154,13 @@ class DoConstantFolding : public Transform {
 class ConstantFolding : public PassManager {
  public:
     ConstantFolding(ReferenceMap* refMap, TypeMap* typeMap, bool warnings = true,
-            TypeChecking* typeChecking = nullptr) {
+                    TypeChecking* typeChecking = nullptr) {
         if (typeMap != nullptr) {
-            if (!typeChecking)
-                typeChecking = new TypeChecking(refMap, typeMap);
-            passes.push_back(typeChecking); }
+            if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+            passes.push_back(typeChecking);
+        }
         passes.push_back(new DoConstantFolding(refMap, typeMap, warnings));
-        if (typeMap != nullptr)
-            passes.push_back(new ClearTypeMap(typeMap));
+        if (typeMap != nullptr) passes.push_back(new ClearTypeMap(typeMap));
         setName("ConstantFolding");
     }
 };

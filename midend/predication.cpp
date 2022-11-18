@@ -14,31 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 #include "predication.h"
+
 #include "frontends/p4/cloner.h"
 namespace P4 {
 
 /// convert an expression into a string that uniqely identifies the lvalue referenced
 /// return null cstring if not a reference to a lvalue.
-static cstring predication_lvalue_name(const IR::Expression *exp) {
-    if (auto p = exp->to<IR::PathExpression>())
-        return p->path->name;
+static cstring predication_lvalue_name(const IR::Expression* exp) {
+    if (auto p = exp->to<IR::PathExpression>()) return p->path->name;
     if (auto m = exp->to<IR::Member>()) {
-        if (auto base = predication_lvalue_name(m->expr))
-            return base + "." + m->member;
+        if (auto base = predication_lvalue_name(m->expr)) return base + "." + m->member;
     } else if (auto a = exp->to<IR::ArrayIndex>()) {
         if (auto k = a->right->to<IR::Constant>()) {
             if (auto base = predication_lvalue_name(a->left))
                 return base + "[" + std::to_string(k->asInt()) + "]";
         } else if (auto index = predication_lvalue_name(a->right)) {
-            if (auto base = predication_lvalue_name(a->left))
-                return base + "[" + index + "]";
+            if (auto base = predication_lvalue_name(a->left)) return base + "[" + index + "]";
         }
     } else if (auto s = exp->to<IR::Slice>()) {
         if (auto base = predication_lvalue_name(s->e0))
             if (auto h = s->e1->to<IR::Constant>())
                 if (auto l = s->e2->to<IR::Constant>())
-                    return base + "." +
-                        std::to_string(h->asInt()) + ":" + std::to_string(l->asInt());
+                    return base + "." + std::to_string(h->asInt()) + ":" +
+                           std::to_string(l->asInt());
     }
     return cstring();
 }
@@ -53,7 +51,7 @@ const IR::Node* Predication::EmptyStatementRemover::postorder(IR::BlockStatement
 }
 
 /// Allows nesting of Mux expressions
-const IR::Mux * Predication::ExpressionReplacer::preorder(IR::Mux * mux) {
+const IR::Mux* Predication::ExpressionReplacer::preorder(IR::Mux* mux) {
     ++currentNestingLevel;
     LOG1("Visiting Mux expression: " << *mux << " on level: " << currentNestingLevel);
     bool thenElsePass = traversalPath[currentNestingLevel - 1];
@@ -69,13 +67,11 @@ const IR::Mux * Predication::ExpressionReplacer::preorder(IR::Mux * mux) {
     return mux;
 }
 
-void Predication::ExpressionReplacer::setVisitingIndex(bool val) {
-    visitingIndex = val;
-}
+void Predication::ExpressionReplacer::setVisitingIndex(bool val) { visitingIndex = val; }
 
 /// Right side of the statement is emplaced into the appropriate part of
 /// the Mux expression, according to the IF/ELSE branch currently visited
-void Predication::ExpressionReplacer::emplaceExpression(IR::Mux * mux) {
+void Predication::ExpressionReplacer::emplaceExpression(IR::Mux* mux) {
     auto condition = conditions[conditions.size() - currentNestingLevel];
     bool thenElsePass = traversalPath[currentNestingLevel - 1];
     mux->e0 = condition;
@@ -88,7 +84,7 @@ void Predication::ExpressionReplacer::emplaceExpression(IR::Mux * mux) {
 
 /// Here "visit" is recursively called on nested Mux expressions,
 /// according to the current nesting level and also the structure of the 'mux' variable
-void Predication::ExpressionReplacer::visitBranch(IR::Mux * mux, bool then) {
+void Predication::ExpressionReplacer::visitBranch(IR::Mux* mux, bool then) {
     auto condition = conditions[conditions.size() - currentNestingLevel - 1];
     auto leftName = predication_lvalue_name(statement->left);
     auto thenExprName = predication_lvalue_name(mux->e1);
@@ -111,8 +107,8 @@ void Predication::ExpressionReplacer::visitBranch(IR::Mux * mux, bool then) {
             if (!mux->e1->is<IR::Mux>()) {
                 if (visitingIndex) {
                     mux->e1 = new IR::Mux(condition,
-                                        new IR::Constant(statement->right->type->getP4Type(), 0),
-                                        new IR::Constant(statement->right->type->getP4Type(), 0));
+                                          new IR::Constant(statement->right->type->getP4Type(), 0),
+                                          new IR::Constant(statement->right->type->getP4Type(), 0));
                 } else {
                     mux->e1 = new IR::Mux(condition, statement->left, statement->left);
                 }
@@ -124,8 +120,8 @@ void Predication::ExpressionReplacer::visitBranch(IR::Mux * mux, bool then) {
             if (!mux->e2->is<IR::Mux>()) {
                 if (visitingIndex) {
                     mux->e2 = new IR::Mux(condition,
-                                        new IR::Constant(statement->right->type->getP4Type(), 0),
-                                        new IR::Constant(statement->right->type->getP4Type(), 0));
+                                          new IR::Constant(statement->right->type->getP4Type(), 0),
+                                          new IR::Constant(statement->right->type->getP4Type(), 0));
                 } else {
                     mux->e2 = new IR::Mux(condition, statement->left, statement->left);
                 }
@@ -160,7 +156,7 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
         return statement;
     }
     LOG1("In preorder for statement: " << *statement);
-    const Context * ctxt = nullptr;
+    const Context* ctxt = nullptr;
     std::vector<const IR::Expression*> conditions;
     while (auto ifs = findContext<IR::IfStatement>(ctxt)) {
         conditions.push_back(ifs->condition);
@@ -172,8 +168,8 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
         modifyIndex = false;
     }
     // The expressionReplacer responsible for transforming this statement
-    ExpressionReplacer replacer(clone(statement)->to<IR::AssignmentStatement>(),
-            traversalPath, conditions);
+    ExpressionReplacer replacer(clone(statement)->to<IR::AssignmentStatement>(), traversalPath,
+                                conditions);
     replacer.setCalledBy(this);
     dependencies.clear();
     visit(statement->right);
@@ -221,7 +217,7 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
         // with the same statement name in the else branch.
         if (liveAssigns.size() > 0 && !isStatementDependent[statementName] &&
             predication_lvalue_name(liveAssigns.back()->left) ==
-            predication_lvalue_name(statement->left)) {
+                predication_lvalue_name(statement->left)) {
             liveAssigns.pop_back();
         }
     }
@@ -238,19 +234,19 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
     return new IR::EmptyStatement();
 }
 
-const IR::Node* Predication::preorder(IR::PathExpression * pathExpr) {
+const IR::Node* Predication::preorder(IR::PathExpression* pathExpr) {
     dependencies.push_back(predication_lvalue_name(pathExpr));
     return pathExpr;
 }
-const IR::Node* Predication::preorder(IR::Member * member) {
+const IR::Node* Predication::preorder(IR::Member* member) {
     visit(member->expr);
     dependencies.push_back(predication_lvalue_name(member));
     return member;
 }
-const IR::Node* Predication::preorder(IR::ArrayIndex * arrInd) {
+const IR::Node* Predication::preorder(IR::ArrayIndex* arrInd) {
     visit(arrInd->left);
     // Collect conditions from IF-ELSE blocks surrounding this ArrayIndex
-    const Context * ctxt = nullptr;
+    const Context* ctxt = nullptr;
     std::vector<const IR::Expression*> conditions;
     while (auto ifs = findContext<IR::IfStatement>(ctxt)) {
         conditions.push_back(ifs->condition);
@@ -260,21 +256,20 @@ const IR::Node* Predication::preorder(IR::ArrayIndex * arrInd) {
         // Creates a new variable that has the value of the original index when the
         // condition is fulfilled, and in any other case it has a default value of '1w0'
         cstring indexName = generator->newName("index");
-        auto indexDecl = new IR::Declaration_Variable(indexName,
-                                        arrInd->right->type->getP4Type());
+        auto indexDecl = new IR::Declaration_Variable(indexName, arrInd->right->type->getP4Type());
         auto index = new IR::PathExpression(IR::ID(indexName));
         auto indexAssignment = new IR::AssignmentStatement(index, clone(arrInd->right));
         ExpressionReplacer replacer(clone(indexAssignment)->to<IR::AssignmentStatement>(),
-                traversalPath, conditions);
+                                    traversalPath, conditions);
         // Creates the initial Mux expression
         replacer.setVisitingIndex(true);
-        indexAssignment->right = new IR::Mux(conditions.back(),
-                                        new IR::Constant(arrInd->right->type->getP4Type(), 0),
-                                        new IR::Constant(arrInd->right->type->getP4Type(), 0));
+        indexAssignment->right =
+            new IR::Mux(conditions.back(), new IR::Constant(arrInd->right->type->getP4Type(), 0),
+                        new IR::Constant(arrInd->right->type->getP4Type(), 0));
         // Applies the replacer and adds the declaration and assignment to vectors
         indexDeclarations.push_back(indexDecl);
-        liveAssignments[indexName] = new IR::AssignmentStatement(indexAssignment->left,
-                                                indexAssignment->right->apply(replacer));
+        liveAssignments[indexName] = new IR::AssignmentStatement(
+            indexAssignment->left, indexAssignment->right->apply(replacer));
         liveAssigns.push_back(liveAssignments[indexName]);
 
         arrInd->right = index;

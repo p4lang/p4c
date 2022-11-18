@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_STRUCTINITIALIZERS_H_
 #define _FRONTENDS_P4_STRUCTINITIALIZERS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -26,11 +26,13 @@ namespace P4 {
 class CreateStructInitializers : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
+
  public:
-    CreateStructInitializers(ReferenceMap* refMap, TypeMap* typeMap):
-            refMap(refMap), typeMap(typeMap) {
+    CreateStructInitializers(ReferenceMap* refMap, TypeMap* typeMap)
+        : refMap(refMap), typeMap(typeMap) {
         setName("CreateStructInitializers");
-        CHECK_NULL(refMap); CHECK_NULL(typeMap);
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
     }
 
     const IR::Node* postorder(IR::AssignmentStatement* statement) override;

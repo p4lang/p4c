@@ -31,10 +31,13 @@ namespace P4 {
 class DoOrderArguments : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
+
  public:
-    DoOrderArguments(ReferenceMap* refMap, TypeMap* typeMap):
-            refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoOrderArguments"); }
+    DoOrderArguments(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        setName("DoOrderArguments");
+    }
 
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
     const IR::Node* postorder(IR::ConstructorCallExpression* expression) override;
@@ -43,10 +46,8 @@ class DoOrderArguments : public Transform {
 
 class OrderArguments : public PassManager {
  public:
-    OrderArguments(ReferenceMap* refMap, TypeMap* typeMap,
-            TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+    OrderArguments(ReferenceMap* refMap, TypeMap* typeMap, TypeChecking* typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoOrderArguments(refMap, typeMap));
         setName("OrderArguments");

@@ -43,30 +43,25 @@ EBPFType* EBPFTypeFactory::create(const IR::Type* type) {
         result = new EBPFEnumType(te);
     } else if (auto ts = type->to<IR::Type_Stack>()) {
         auto et = create(ts->elementType);
-        if (et == nullptr)
-            return nullptr;
+        if (et == nullptr) return nullptr;
         result = new EBPFStackType(ts, et);
     } else if (type->is<IR::Type_Error>()) {
         // Implement error type as scalar of width 8 bits
         result = new EBPFScalarType(new IR::Type_Bits(8, false));
     } else {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "Type %1% not supported", type);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Type %1% not supported", type);
     }
 
     return result;
 }
 
-void
-EBPFBoolType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
+void EBPFBoolType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
     emit(builder);
-    if (asPointer)
-        builder->append("*");
+    if (asPointer) builder->append("*");
     builder->appendFormat(" %s", id.c_str());
 }
 
-void
-EBPFBoolType::declareInit(CodeBuilder* builder, cstring id, bool asPointer) {
+void EBPFBoolType::declareInit(CodeBuilder* builder, cstring id, bool asPointer) {
     declare(builder, id, asPointer);
 }
 
@@ -83,16 +78,13 @@ void EBPFStackType::declareInit(CodeBuilder* builder, cstring id, bool) {
 void EBPFStackType::emitInitializer(CodeBuilder* builder) {
     builder->append("{");
     for (unsigned i = 0; i < size; i++) {
-        if (i > 0)
-            builder->append(", ");
+        if (i > 0) builder->append(", ");
         elementType->emitInitializer(builder);
     }
     builder->append(" }");
 }
 
-unsigned EBPFStackType::widthInBits() {
-    return size * elementType->to<IHasWidth>()->widthInBits();
-}
+unsigned EBPFStackType::widthInBits() { return size * elementType->to<IHasWidth>()->widthInBits(); }
 
 unsigned EBPFStackType::implementationWidthInBits() {
     return size * elementType->to<IHasWidth>()->implementationWidthInBits();
@@ -129,12 +121,10 @@ void EBPFScalarType::emit(CodeBuilder* builder) {
         builder->appendFormat("u8*");
 }
 
-void
-EBPFScalarType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
+void EBPFScalarType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
     if (EBPFScalarType::generatesScalar(width)) {
         emit(builder);
-        if (asPointer)
-            builder->append("*");
+        if (asPointer) builder->append("*");
         builder->spc();
         builder->append(id);
     } else {
@@ -145,12 +135,10 @@ EBPFScalarType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
     }
 }
 
-void
-EBPFScalarType::declareInit(CodeBuilder* builder, cstring id, bool asPointer) {
+void EBPFScalarType::declareInit(CodeBuilder* builder, cstring id, bool asPointer) {
     if (EBPFScalarType::generatesScalar(width)) {
         emit(builder);
-        if (asPointer)
-            builder->append("*");
+        if (asPointer) builder->append("*");
         builder->spc();
         id = id + cstring(" = 0");
         builder->append(id);
@@ -164,8 +152,7 @@ EBPFScalarType::declareInit(CodeBuilder* builder, cstring id, bool asPointer) {
 
 //////////////////////////////////////////////////////////
 
-EBPFStructType::EBPFStructType(const IR::Type_StructLike* strct) :
-        EBPFType(strct) {
+EBPFStructType::EBPFStructType(const IR::Type_StructLike* strct) : EBPFType(strct) {
     if (strct->is<IR::Type_Struct>())
         kind = "struct";
     else if (strct->is<IR::Type_Header>())
@@ -182,8 +169,8 @@ EBPFStructType::EBPFStructType(const IR::Type_StructLike* strct) :
         auto type = EBPFTypeFactory::instance->create(f->type);
         auto wt = dynamic_cast<IHasWidth*>(type);
         if (wt == nullptr) {
-            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "EBPF: Unsupported type in struct: %s", f->type);
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "EBPF: Unsupported type in struct: %s",
+                    f->type);
         } else {
             width += wt->widthInBits();
             implWidth += wt->implementationWidthInBits();
@@ -192,12 +179,10 @@ EBPFStructType::EBPFStructType(const IR::Type_StructLike* strct) :
     }
 }
 
-void
-EBPFStructType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
+void EBPFStructType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
     builder->append(kind);
     builder->appendFormat(" %s ", name.c_str());
-    if (asPointer)
-        builder->append("*");
+    if (asPointer) builder->append("*");
     builder->appendFormat("%s", id.c_str());
 }
 
@@ -261,16 +246,14 @@ void EBPFStructType::emit(CodeBuilder* builder) {
     builder->endOfStatement(true);
 }
 
-void
-EBPFStructType::declareArray(CodeBuilder* builder, cstring id, unsigned size) {
+void EBPFStructType::declareArray(CodeBuilder* builder, cstring id, unsigned size) {
     builder->appendFormat("%s %s[%d]", name.c_str(), id.c_str(), size);
 }
 
 ///////////////////////////////////////////////////////////////
 
 void EBPFTypeName::declare(CodeBuilder* builder, cstring id, bool asPointer) {
-    if (canonical != nullptr)
-        canonical->declare(builder, id, asPointer);
+    if (canonical != nullptr) canonical->declare(builder, id, asPointer);
 }
 
 void EBPFTypeName::declareInit(CodeBuilder* builder, cstring id, bool asPointer) {
@@ -278,15 +261,13 @@ void EBPFTypeName::declareInit(CodeBuilder* builder, cstring id, bool asPointer)
 }
 
 void EBPFTypeName::emitInitializer(CodeBuilder* builder) {
-    if (canonical != nullptr)
-        canonical->emitInitializer(builder);
+    if (canonical != nullptr) canonical->emitInitializer(builder);
 }
 
 unsigned EBPFTypeName::widthInBits() {
     auto wt = dynamic_cast<IHasWidth*>(canonical);
     if (wt == nullptr) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "Type %1% does not have a fixed witdh", type);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Type %1% does not have a fixed witdh", type);
         return 0;
     }
     return wt->widthInBits();
@@ -295,15 +276,13 @@ unsigned EBPFTypeName::widthInBits() {
 unsigned EBPFTypeName::implementationWidthInBits() {
     auto wt = dynamic_cast<IHasWidth*>(canonical);
     if (wt == nullptr) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "Type %1% does not have a fixed witdh", type);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Type %1% does not have a fixed witdh", type);
         return 0;
     }
     return wt->implementationWidthInBits();
 }
 
-void
-EBPFTypeName::declareArray(CodeBuilder* builder, cstring id, unsigned size) {
+void EBPFTypeName::declareArray(CodeBuilder* builder, cstring id, unsigned size) {
     declare(builder, id, false);
     builder->appendFormat("[%d]", size);
 }
@@ -313,8 +292,7 @@ EBPFTypeName::declareArray(CodeBuilder* builder, cstring id, unsigned size) {
 void EBPFEnumType::declare(EBPF::CodeBuilder* builder, cstring id, bool asPointer) {
     builder->append("enum ");
     builder->append(getType()->name);
-    if (asPointer)
-        builder->append("*");
+    if (asPointer) builder->append("*");
     builder->append(" ");
     builder->append(id);
 }

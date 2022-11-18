@@ -14,6 +14,7 @@ limitations under the License.
 */
 
 #include "expression.h"
+
 #include "helpers.h"
 
 namespace BMV2 {
@@ -50,34 +51,29 @@ const IR::Node* ArithmeticFixup::postorder(IR::Expression* expression) {
 
 const IR::Node* ArithmeticFixup::postorder(IR::Operation_Binary* expression) {
     auto type = typeMap->getType(getOriginal(), true);
-    if (expression->is<IR::BAnd>() || expression->is<IR::BOr>() ||
-        expression->is<IR::BXor>() ||
+    if (expression->is<IR::BAnd>() || expression->is<IR::BOr>() || expression->is<IR::BXor>() ||
         expression->is<IR::AddSat>() || expression->is<IR::SubSat>())
         // no need to clamp these
         return updateType(expression);
-    if (type->is<IR::Type_Bits>())
-        return fix(expression, type->to<IR::Type_Bits>());
+    if (type->is<IR::Type_Bits>()) return fix(expression, type->to<IR::Type_Bits>());
     return updateType(expression);
 }
 
 const IR::Node* ArithmeticFixup::postorder(IR::Neg* expression) {
     auto type = typeMap->getType(getOriginal(), true);
-    if (type->is<IR::Type_Bits>())
-        return fix(expression, type->to<IR::Type_Bits>());
+    if (type->is<IR::Type_Bits>()) return fix(expression, type->to<IR::Type_Bits>());
     return updateType(expression);
 }
 
 const IR::Node* ArithmeticFixup::postorder(IR::Cmpl* expression) {
     auto type = typeMap->getType(getOriginal(), true);
-    if (type->is<IR::Type_Bits>())
-        return fix(expression, type->to<IR::Type_Bits>());
+    if (type->is<IR::Type_Bits>()) return fix(expression, type->to<IR::Type_Bits>());
     return updateType(expression);
 }
 
 const IR::Node* ArithmeticFixup::postorder(IR::Cast* expression) {
     auto type = typeMap->getType(getOriginal(), true);
-    if (type->is<IR::Type_Bits>())
-        return fix(expression, type->to<IR::Type_Bits>());
+    if (type->is<IR::Type_Bits>()) return fix(expression, type->to<IR::Type_Bits>());
     return updateType(expression);
 }
 
@@ -95,19 +91,19 @@ Util::IJson* ExpressionConverter::get(const IR::Expression* expression) const {
         }
     }
     if (result == nullptr)
-        ::error(ErrorType::ERR_UNSUPPORTED,
-                "%1%: could not convert expression to Json", expression);
+        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: could not convert expression to Json",
+                expression);
     return result;
 }
 
-void ExpressionConverter::postorder(const IR::BoolLiteral* expression)  {
+void ExpressionConverter::postorder(const IR::BoolLiteral* expression) {
     auto result = new Util::JsonObject();
     result->emplace("type", "bool");
     result->emplace("value", expression->value);
     mapExpression(expression, result);
 }
 
-void ExpressionConverter::postorder(const IR::MethodCallExpression* expression)  {
+void ExpressionConverter::postorder(const IR::MethodCallExpression* expression) {
     auto instance = P4::MethodInstance::resolve(expression, refMap, typeMap);
     if (auto em = instance->to<P4::ExternMethod>()) {
         if (em->originalExternType->name == corelib.packetIn.name &&
@@ -131,8 +127,7 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression* expression) 
             auto type = typeMap->getType(bim->appliedTo, true);
             auto result = new Util::JsonObject();
             auto l = get(bim->appliedTo);
-            if (!l)
-                return;
+            if (!l) return;
             if (type->is<IR::Type_HeaderUnion>()) {
                 result->emplace("type", "expression");
                 auto e = new Util::JsonObject();
@@ -170,15 +165,14 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression* expression) 
     ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: not supported", expression);
 }
 
-void ExpressionConverter::postorder(const IR::Cast* expression)  {
+void ExpressionConverter::postorder(const IR::Cast* expression) {
     // nothing to do for casts - the ArithmeticFixup pass should have handled them already
     auto j = get(expression->expr);
-    if (!j)
-        return;
+    if (!j) return;
     mapExpression(expression, j);
 }
 
-void ExpressionConverter::postorder(const IR::Constant* expression)  {
+void ExpressionConverter::postorder(const IR::Constant* expression) {
     auto result = new Util::JsonObject();
     result->emplace("type", "hexstr");
     auto bitwidth = expression->type->width_bits();
@@ -188,7 +182,7 @@ void ExpressionConverter::postorder(const IR::Constant* expression)  {
     mapExpression(expression, result);
 }
 
-void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
+void ExpressionConverter::postorder(const IR::ArrayIndex* expression) {
     auto result = new Util::JsonObject();
     cstring elementAccess;
 
@@ -238,23 +232,20 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
 }
 
 /// Non-null if the expression refers to a parameter from the enclosing control
-const IR::Parameter*
-ExpressionConverter::enclosingParamReference(const IR::Expression* expression) {
+const IR::Parameter* ExpressionConverter::enclosingParamReference(
+    const IR::Expression* expression) {
     CHECK_NULL(expression);
-    if (!expression->is<IR::PathExpression>())
-        return nullptr;
+    if (!expression->is<IR::PathExpression>()) return nullptr;
 
     auto pe = expression->to<IR::PathExpression>();
     auto decl = refMap->getDeclaration(pe->path, true);
     auto param = decl->to<IR::Parameter>();
-    if (param == nullptr)
-        return param;
-    if (structure->nonActionParameters.count(param) > 0)
-        return param;
+    if (param == nullptr) return param;
+    if (structure->nonActionParameters.count(param) > 0) return param;
     return nullptr;
 }
 
-void ExpressionConverter::postorder(const IR::Member* expression)  {
+void ExpressionConverter::postorder(const IR::Member* expression) {
     auto result = new Util::JsonObject();
     int index_pos = 0;
 
@@ -304,8 +295,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             result->emplace("value", fieldName);
         } else if (parentType->is<IR::Type_HeaderUnion>()) {
             auto l = get(expression->expr);
-            if (!l)
-                return;
+            if (!l) return;
             cstring nestedField = fieldName;
             if (auto lv = l->to<Util::JsonObject>()) {
                 lv->get("value");
@@ -320,14 +310,13 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         } else if (parentType->is<IR::Type_StructLike>() &&
                    (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() ||
                     type->is<IR::Type_Boolean>())) {
-            auto field = parentType->to<IR::Type_StructLike>()->getField(
-                expression->member);
+            auto field = parentType->to<IR::Type_StructLike>()->getField(expression->member);
             LOG3("looking up field " << field);
             CHECK_NULL(field);
             auto name = ::get(structure->scalarMetadataFields, field);
             BUG_CHECK((name != nullptr), "NULL name: %1%", field->name);
-            if (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() ||
-                leftValue || simpleExpressionsOnly) {
+            if (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() || leftValue ||
+                simpleExpressionsOnly) {
                 result->emplace("type", "field");
                 auto e = mkArrayField(result, "value");
                 e->append(scalarsName);
@@ -368,8 +357,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         // array.last.field => type: "stack_field", value: [ array, field ]
         if (memtype->is<IR::Type_Stack>() && mem->member == IR::Type_Stack::last) {
             auto l = get(mem->expr);
-            if (!l)
-                return;
+            if (!l) return;
             result->emplace("type", "stack_field");
             auto e = mkArrayField(result, "value");
             if (l->is<Util::JsonObject>())
@@ -383,8 +371,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
 
     if (!done) {
         auto l = get(expression->expr);
-        if (!l)
-            return;
+        if (!l) return;
         if (parentType->is<IR::Type_HeaderUnion>()) {
             BUG_CHECK(l->is<Util::JsonObject>(), "Not a JsonObject");
             auto lv = l->to<Util::JsonObject>()->get("value");
@@ -405,8 +392,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         } else if (parentType->is<IR::Type_Stack>() &&
                    expression->member == IR::Type_Stack::lastIndex) {
             auto l = get(expression->expr);
-            if (!l)
-                return;
+            if (!l) return;
             result->emplace("type", "expression");
             auto e = new Util::JsonObject();
             result->emplace("value", e);
@@ -444,8 +430,10 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 } else if (auto jo = l->to<Util::JsonObject>()) {
                     if (st) {
                         if (index_pos < 0) {
-                            ::error(ErrorType::ERR_INVALID, "BMV2: Struct has no field "
-                            "for runtime index computation %1%", st);
+                            ::error(ErrorType::ERR_INVALID,
+                                    "BMV2: Struct has no field "
+                                    "for runtime index computation %1%",
+                                    st);
                         }
                         result->emplace("type", "expression");
                         auto e = new Util::JsonObject();
@@ -478,8 +466,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
 }
 
 Util::IJson* ExpressionConverter::fixLocal(Util::IJson* json) {
-    if (!json)
-        return new Util::JsonValue();  // null
+    if (!json) return new Util::JsonValue();  // null
     if (auto jo = json->to<Util::JsonObject>()) {
         auto to = jo->get("type");
         if (to != nullptr && to->to<Util::JsonValue>() != nullptr &&
@@ -493,12 +480,12 @@ Util::IJson* ExpressionConverter::fixLocal(Util::IJson* json) {
     return json;
 }
 
-void ExpressionConverter::postorder(const IR::Mux* expression)  {
+void ExpressionConverter::postorder(const IR::Mux* expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: expression too complex for this target", expression);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: expression too complex for this target",
+                expression);
         return;
     }
 
@@ -507,20 +494,17 @@ void ExpressionConverter::postorder(const IR::Mux* expression)  {
     result->emplace("value", e);
     e->emplace("op", "?");
     auto l = get(expression->e1);
-    if (!l)
-        return;
+    if (!l) return;
     e->emplace("left", fixLocal(l));
     auto r = get(expression->e2);
-    if (!r)
-        return;
+    if (!r) return;
     e->emplace("right", fixLocal(r));
     auto c = get(expression->e0);
-    if (!c)
-        return;
+    if (!c) return;
     e->emplace("cond", fixLocal(c));
 }
 
-void ExpressionConverter::postorder(const IR::IntMod* expression)  {
+void ExpressionConverter::postorder(const IR::IntMod* expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     result->emplace("type", "expression");
@@ -528,8 +512,7 @@ void ExpressionConverter::postorder(const IR::IntMod* expression)  {
     result->emplace("value", e);
     e->emplace("op", "two_comp_mod");
     auto l = get(expression->expr);
-    if (!l)
-        return;
+    if (!l) return;
     e->emplace("left", fixLocal(l));
     auto r = new Util::JsonObject();
     r->emplace("type", "hexstr");
@@ -538,16 +521,14 @@ void ExpressionConverter::postorder(const IR::IntMod* expression)  {
     e->emplace("right", r);
 }
 
-void ExpressionConverter::postorder(const IR::Operation_Binary* expression)  {
-    binary(expression);
-}
+void ExpressionConverter::postorder(const IR::Operation_Binary* expression) { binary(expression); }
 
 void ExpressionConverter::binary(const IR::Operation_Binary* expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: expression too complex for this target", expression);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: expression too complex for this target",
+                expression);
         return;
     }
 
@@ -561,12 +542,10 @@ void ExpressionConverter::binary(const IR::Operation_Binary* expression) {
         op = "or";
     e->emplace("op", op);
     auto l = get(expression->left);
-    if (!l)
-        return;
+    if (!l) return;
     e->emplace("left", fixLocal(l));
     auto r = get(expression->right);
-    if (!r)
-        return;
+    if (!r) return;
     e->emplace("right", fixLocal(r));
 }
 
@@ -602,47 +581,45 @@ void ExpressionConverter::saturated_binary(const IR::Operation_Binary* expressio
     e->emplace("right", r);
 }
 
-void ExpressionConverter::postorder(const IR::ListExpression* expression)  {
+void ExpressionConverter::postorder(const IR::ListExpression* expression) {
     auto result = new Util::JsonArray();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: expression too complex for this target", expression);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: expression too complex for this target",
+                expression);
         return;
     }
 
     for (auto e : expression->components) {
         auto t = get(e);
-        if (!t)
-            return;
+        if (!t) return;
         result->append(t);
     }
 }
 
-void ExpressionConverter::postorder(const IR::StructExpression* expression)  {
+void ExpressionConverter::postorder(const IR::StructExpression* expression) {
     // Handle like a ListExpression
     auto result = new Util::JsonArray();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: expression too complex for this target", expression);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: expression too complex for this target",
+                expression);
         return;
     }
 
     for (auto e : expression->components) {
         auto t = get(e->expression);
-        if (!t)
-            return;
+        if (!t) return;
         result->append(t);
     }
 }
 
-void ExpressionConverter::postorder(const IR::Operation_Unary* expression)  {
+void ExpressionConverter::postorder(const IR::Operation_Unary* expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: expression too complex for this target", expression);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: expression too complex for this target",
+                expression);
         return;
     }
 
@@ -650,22 +627,19 @@ void ExpressionConverter::postorder(const IR::Operation_Unary* expression)  {
     auto e = new Util::JsonObject();
     result->emplace("value", e);
     cstring op = expression->getStringOp();
-    if (op == "!")
-        op = "not";
+    if (op == "!") op = "not";
     e->emplace("op", op);
     e->emplace("left", Util::JsonValue::null);
     auto r = get(expression->expr);
-    if (!r)
-        return;
+    if (!r) return;
     e->emplace("right", fixLocal(r));
 }
 
-void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
+void ExpressionConverter::postorder(const IR::PathExpression* expression) {
     // This is useful for action bodies mostly
     auto decl = refMap->getDeclaration(expression->path, true);
     if (auto param = decl->to<IR::Parameter>()) {
-        if (structure->nonActionParameters.find(param) !=
-            structure->nonActionParameters.end()) {
+        if (structure->nonActionParameters.find(param) != structure->nonActionParameters.end()) {
             auto type = typeMap->getType(param, true);
             if (type->is<IR::Type_StructLike>()) {
                 auto result = convertParam(param, "");
@@ -741,18 +715,16 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
     }
 }
 
-void ExpressionConverter::postorder(const IR::StringLiteral* expression)   {
+void ExpressionConverter::postorder(const IR::StringLiteral* expression) {
     auto result = new Util::JsonObject();
     result->emplace("type", "string");
     result->emplace("value", expression->value);
     mapExpression(expression, result);
 }
 
-void ExpressionConverter::postorder(const IR::TypeNameExpression* expression)  {
-    (void)expression;
-}
+void ExpressionConverter::postorder(const IR::TypeNameExpression* expression) { (void)expression; }
 
-void ExpressionConverter::postorder(const IR::Slice *expression) {
+void ExpressionConverter::postorder(const IR::Slice* expression) {
     auto result = new Util::JsonObject();
     auto expr = expression->e0;
     int h = expression->getH();
@@ -767,14 +739,13 @@ void ExpressionConverter::postorder(const IR::Slice *expression) {
     right->emplace("type", "hexstr");
     right->emplace("value", stringRepr(mask, ROUNDUP(bitwidth, 8)));
     auto le = get(expr);
-    if (!le)
-        return;
+    if (!le) return;
     band->emplace("left", le);
     band->emplace("right", right);
     mapExpression(expression, result);
 }
 
-void ExpressionConverter::postorder(const IR::Expression* expression)  {
+void ExpressionConverter::postorder(const IR::Expression* expression) {
     BUG("%1%: Unhandled case", expression);
 }
 
@@ -792,9 +763,9 @@ bool ExpressionConverter::isArrayIndexRuntime(const IR::Expression* e) {
 
 // doFixup = true -> insert masking operations for proper arithmetic implementation
 // see below for wrap
-Util::IJson*
-ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap, bool convertBool) {
-    const IR::Expression *expr = e;
+Util::IJson* ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap,
+                                          bool convertBool) {
+    const IR::Expression* expr = e;
     if (doFixup) {
         ArithmeticFixup af(typeMap);
         auto r = e->apply(af);
@@ -805,8 +776,8 @@ ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap, b
     expr->apply(*this);
     auto result = ::get(map, expr->to<IR::Expression>());
     if (result == nullptr) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: Could not generate code for expression", e);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Could not generate code for expression",
+                e);
         return new Util::JsonValue();
     }
 
@@ -845,7 +816,7 @@ ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap, b
 
 Util::IJson* ExpressionConverter::convertLeftValue(const IR::Expression* e) {
     leftValue = true;
-    const IR::Expression *expr = e;
+    const IR::Expression* expr = e;
     ArithmeticFixup af(typeMap);
     auto r = e->apply(af);
     CHECK_NULL(r);
@@ -853,8 +824,7 @@ Util::IJson* ExpressionConverter::convertLeftValue(const IR::Expression* e) {
     CHECK_NULL(expr);
     expr->apply(*this);
     auto result = ::get(map, expr->to<IR::Expression>());
-    if (result == nullptr)
-        BUG("%1%: Could not convert expression", e);
+    if (result == nullptr) BUG("%1%: Could not convert expression", e);
     leftValue = false;
     return result;
 }

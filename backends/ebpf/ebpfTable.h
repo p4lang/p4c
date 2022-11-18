@@ -25,21 +25,24 @@ namespace EBPF {
 
 class ActionTranslationVisitor : public virtual CodeGenInspector {
  protected:
-    const EBPFProgram*  program;
+    const EBPFProgram* program;
     const IR::P4Action* action;
-    cstring             valueName;
+    cstring valueName;
 
  public:
-    ActionTranslationVisitor(cstring valueName, const EBPFProgram* program):
-            CodeGenInspector(program->refMap, program->typeMap), program(program),
-            action(nullptr), valueName(valueName)
-    { CHECK_NULL(program); }
+    ActionTranslationVisitor(cstring valueName, const EBPFProgram* program)
+        : CodeGenInspector(program->refMap, program->typeMap),
+          program(program),
+          action(nullptr),
+          valueName(valueName) {
+        CHECK_NULL(program);
+    }
 
     bool preorder(const IR::PathExpression* expression);
 
     bool preorder(const IR::P4Action* act);
-    virtual cstring getParamInstanceName(const IR::Expression *expression) const;
-    bool isActionParameter(const IR::PathExpression *expression) const;
+    virtual cstring getParamInstanceName(const IR::Expression* expression) const;
+    bool isActionParameter(const IR::PathExpression* expression) const;
 };  // ActionTranslationVisitor
 
 // Also used to represent counters
@@ -54,10 +57,10 @@ class EBPFTableBase : public EBPFObject {
     CodeGenInspector* codeGen;
 
  protected:
-    EBPFTableBase(const EBPFProgram* program, cstring instanceName,
-                  CodeGenInspector* codeGen) :
-            program(program), instanceName(instanceName), codeGen(codeGen) {
-        CHECK_NULL(codeGen); CHECK_NULL(program);
+    EBPFTableBase(const EBPFProgram* program, cstring instanceName, CodeGenInspector* codeGen)
+        : program(program), instanceName(instanceName), codeGen(codeGen) {
+        CHECK_NULL(codeGen);
+        CHECK_NULL(program);
         keyTypeName = instanceName + "_key";
         valueTypeName = instanceName + "_value";
         dataMapName = instanceName;
@@ -78,16 +81,16 @@ class EBPFTable : public EBPFTableBase {
     void emitTernaryInstance(CodeBuilder* builder);
 
     virtual void validateKeys() const;
-    virtual ActionTranslationVisitor*
-    createActionTranslationVisitor(cstring valueName, const EBPFProgram* program) const {
+    virtual ActionTranslationVisitor* createActionTranslationVisitor(
+        cstring valueName, const EBPFProgram* program) const {
         return new ActionTranslationVisitor(valueName, program);
     }
 
  public:
-    const IR::Key*            keyGenerator;
-    const IR::ActionList*     actionList;
-    const IR::TableBlock*     table;
-    cstring               defaultActionMapName;
+    const IR::Key* keyGenerator;
+    const IR::ActionList* actionList;
+    const IR::TableBlock* table;
+    cstring defaultActionMapName;
     std::map<const IR::KeyElement*, cstring> keyFieldNames;
     std::map<const IR::KeyElement*, EBPFType*> keyTypes;
     // Use 1024 by default.
@@ -97,7 +100,7 @@ class EBPFTable : public EBPFTableBase {
     EBPFTable(const EBPFProgram* program, const IR::TableBlock* table, CodeGenInspector* codeGen);
     EBPFTable(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name);
 
-    cstring p4ActionToActionIDName(const IR::P4Action * action) const;
+    cstring p4ActionToActionIDName(const IR::P4Action* action) const;
     void emitActionArguments(CodeBuilder* builder, const IR::P4Action* action, cstring name);
     void emitKey(CodeBuilder* builder, cstring keyName);
 
@@ -108,13 +111,13 @@ class EBPFTable : public EBPFTableBase {
     virtual void emitValueActionIDNames(CodeBuilder* builder);
     virtual void emitValueStructStructure(CodeBuilder* builder);
     // Emits value types used by direct externs.
-    virtual void emitDirectValueTypes(CodeBuilder* builder) { (void) builder; }
+    virtual void emitDirectValueTypes(CodeBuilder* builder) { (void)builder; }
     virtual void emitAction(CodeBuilder* builder, cstring valueName, cstring actionRunVariable);
     virtual void emitInitializer(CodeBuilder* builder);
     virtual void emitLookup(CodeBuilder* builder, cstring key, cstring value);
     virtual void emitLookupDefault(CodeBuilder* builder, cstring key, cstring value,
                                    cstring actionRunVariable) {
-        (void) actionRunVariable;
+        (void)actionRunVariable;
         builder->target->emitTableLookup(builder, defaultActionMapName, key, value);
         builder->endOfStatement(true);
     }
@@ -130,15 +133,15 @@ class EBPFTable : public EBPFTableBase {
 
 class EBPFCounterTable : public EBPFTableBase {
  protected:
-    size_t    size;
-    bool      isHash;
+    size_t size;
+    bool isHash;
 
  public:
-    EBPFCounterTable(const EBPFProgram* program, const IR::ExternBlock* block,
-                     cstring name, CodeGenInspector* codeGen);
+    EBPFCounterTable(const EBPFProgram* program, const IR::ExternBlock* block, cstring name,
+                     CodeGenInspector* codeGen);
     EBPFCounterTable(const EBPFProgram* program, cstring name, CodeGenInspector* codeGen,
-                     size_t size, bool isHash) :
-            EBPFTableBase(program, name, codeGen), size(size), isHash(isHash) { }
+                     size_t size, bool isHash)
+        : EBPFTableBase(program, name, codeGen), size(size), isHash(isHash) {}
     virtual void emitTypes(CodeBuilder*);
     virtual void emitInstance(CodeBuilder* builder);
     virtual void emitCounterIncrement(CodeBuilder* builder,
@@ -155,8 +158,8 @@ class EBPFValueSet : public EBPFTableBase {
     cstring keyVarName;
 
  public:
-    EBPFValueSet(const EBPFProgram* program, const IR::P4ValueSet* p4vs,
-                 cstring instanceName, CodeGenInspector* codeGen);
+    EBPFValueSet(const EBPFProgram* program, const IR::P4ValueSet* p4vs, cstring instanceName,
+                 CodeGenInspector* codeGen);
 
     void emitTypes(CodeBuilder* builder);
     void emitInstance(CodeBuilder* builder);

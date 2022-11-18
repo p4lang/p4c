@@ -17,10 +17,10 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_EBPFPSATABLE_H_
 #define BACKENDS_EBPF_PSA_EBPFPSATABLE_H_
 
-#include "frontends/p4/methodInstance.h"
 #include "backends/ebpf/ebpfTable.h"
 #include "backends/ebpf/psa/externs/ebpfPsaCounter.h"
 #include "backends/ebpf/psa/externs/ebpfPsaMeter.h"
+#include "frontends/p4/methodInstance.h"
 
 namespace EBPF {
 
@@ -30,14 +30,14 @@ class EBPFTablePSA : public EBPFTable {
  private:
     std::vector<std::vector<const IR::Entry*>> getConstEntriesGroupedByPrefix();
     bool hasConstEntries();
-    void emitMaskForExactMatch(CodeBuilder *builder, cstring &fieldName, EBPFType *ebpfType) const;
+    void emitMaskForExactMatch(CodeBuilder* builder, cstring& fieldName, EBPFType* ebpfType) const;
     const cstring addPrefixFunctionName = "add_prefix_and_entries";
     const cstring tuplesMapName = instanceName + "_tuples_map";
     const cstring prefixesMapName = instanceName + "_prefixes";
 
  protected:
     ActionTranslationVisitor* createActionTranslationVisitor(
-            cstring valueName, const EBPFProgram* program) const override;
+        cstring valueName, const EBPFProgram* program) const override;
 
     void initDirectCounters();
     void initDirectMeters();
@@ -45,28 +45,25 @@ class EBPFTablePSA : public EBPFTable {
 
     void emitTableValue(CodeBuilder* builder, const IR::MethodCallExpression* actionMce,
                         cstring valueName);
-    void emitDefaultActionInitializer(CodeBuilder *builder);
-    void emitConstEntriesInitializer(CodeBuilder *builder);
-    void emitTernaryConstEntriesInitializer(CodeBuilder *builder);
-    void emitMapUpdateTraceMsg(CodeBuilder *builder, cstring mapName,
-                               cstring returnCode) const;
-    void emitValueMask(CodeBuilder *builder, cstring valueMask,
-                       cstring nextMask, int tupleId) const;
-    void emitKeyMasks(CodeBuilder *builder,
-                      std::vector<std::vector<const IR::Entry *>> &entriesGrpedByPrefix,
-                      std::vector<cstring> &keyMasksNames);
-    void emitKeysAndValues(CodeBuilder *builder,
-                           std::vector<const IR::Entry *> &samePrefixEntries,
-                           std::vector<cstring> &keyNames,
-                           std::vector<cstring> &valueNames);
+    void emitDefaultActionInitializer(CodeBuilder* builder);
+    void emitConstEntriesInitializer(CodeBuilder* builder);
+    void emitTernaryConstEntriesInitializer(CodeBuilder* builder);
+    void emitMapUpdateTraceMsg(CodeBuilder* builder, cstring mapName, cstring returnCode) const;
+    void emitValueMask(CodeBuilder* builder, cstring valueMask, cstring nextMask,
+                       int tupleId) const;
+    void emitKeyMasks(CodeBuilder* builder,
+                      std::vector<std::vector<const IR::Entry*>>& entriesGrpedByPrefix,
+                      std::vector<cstring>& keyMasksNames);
+    void emitKeysAndValues(CodeBuilder* builder, std::vector<const IR::Entry*>& samePrefixEntries,
+                           std::vector<cstring>& keyNames, std::vector<cstring>& valueNames);
 
     const IR::PathExpression* getActionNameExpression(const IR::Expression* expr) const;
 
  public:
     // We use vectors to keep an order of Direct Meters or Counters from a P4 program.
     // This order is important from CLI tool point of view.
-    std::vector<std::pair<cstring, EBPFCounterPSA *>> counters;
-    std::vector<std::pair<cstring, EBPFMeterPSA *>> meters;
+    std::vector<std::pair<cstring, EBPFCounterPSA*>> counters;
+    std::vector<std::pair<cstring, EBPFMeterPSA*>> meters;
     EBPFTableImplementationPSA* implementation;
 
     EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* table,
@@ -86,27 +83,23 @@ class EBPFTablePSA : public EBPFTable {
 
     EBPFCounterPSA* getDirectCounter(cstring name) const {
         auto result = std::find_if(counters.begin(), counters.end(),
-            [name](std::pair<cstring, EBPFCounterPSA *> elem)->bool {
-                return name == elem.first;
-            });
-        if (result != counters.end())
-            return result->second;
+                                   [name](std::pair<cstring, EBPFCounterPSA*> elem) -> bool {
+                                       return name == elem.first;
+                                   });
+        if (result != counters.end()) return result->second;
         return nullptr;
     }
 
     EBPFMeterPSA* getMeter(cstring name) const {
-        auto result = std::find_if(meters.begin(), meters.end(),
-                                   [name](std::pair<cstring, EBPFMeterPSA *> elem)->bool {
-                                       return name == elem.first;
-                                   });
-        if (result != meters.end())
-            return result->second;
+        auto result = std::find_if(
+            meters.begin(), meters.end(),
+            [name](std::pair<cstring, EBPFMeterPSA*> elem) -> bool { return name == elem.first; });
+        if (result != meters.end()) return result->second;
         return nullptr;
     }
 
     bool isMatchTypeSupported(const IR::Declaration_ID* matchType) override {
-        return EBPFTable::isMatchTypeSupported(matchType) ||
-               matchType->name.name == "selector";
+        return EBPFTable::isMatchTypeSupported(matchType) || matchType->name.name == "selector";
     }
 };
 

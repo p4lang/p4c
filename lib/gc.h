@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,6 @@ limitations under the License.
 #include <cstddef>
 
 void setup_gc_logging();
-size_t gc_mem_inuse(size_t *max = 0);  // trigger GC, return inuse after
+size_t gc_mem_inuse(size_t* max = 0);  // trigger GC, return inuse after
 
 #endif /* LIB_GC_H_ */

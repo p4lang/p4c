@@ -14,29 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "controls.h"
+
 #include <iostream>
 
 #include <boost/graph/graphviz.hpp>
 
-#include "graphs.h"
-
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
+#include "graphs.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
-#include "controls.h"
 
 namespace graphs {
 
 using Graph = ControlGraphs::Graph;
 
-Graph *ControlGraphs::ControlStack::pushBack(Graph &currentSubgraph, const cstring &name) {
-    auto &newSubgraph = currentSubgraph.create_subgraph();
+Graph* ControlGraphs::ControlStack::pushBack(Graph& currentSubgraph, const cstring& name) {
+    auto& newSubgraph = currentSubgraph.create_subgraph();
     auto fullName = getName(name);
     boost::get_property(newSubgraph, boost::graph_name) = "cluster" + fullName;
     boost::get_property(newSubgraph, boost::graph_graph_attribute)["label"] =
-                    boost::get_property(currentSubgraph, boost::graph_name) +
-                    (fullName != "" ? "." + fullName : fullName);
+        boost::get_property(currentSubgraph, boost::graph_name) +
+        (fullName != "" ? "." + fullName : fullName);
     boost::get_property(newSubgraph, boost::graph_graph_attribute)["fontsize"] = "22pt";
     boost::get_property(newSubgraph, boost::graph_graph_attribute)["style"] = "bold";
     names.push_back(name);
@@ -44,45 +44,43 @@ Graph *ControlGraphs::ControlStack::pushBack(Graph &currentSubgraph, const cstri
     return getSubgraph();
 }
 
-Graph *ControlGraphs::ControlStack::popBack() {
+Graph* ControlGraphs::ControlStack::popBack() {
     names.pop_back();
     subgraphs.pop_back();
     return getSubgraph();
 }
 
-Graph *ControlGraphs::ControlStack::getSubgraph() const {
+Graph* ControlGraphs::ControlStack::getSubgraph() const {
     return subgraphs.empty() ? nullptr : subgraphs.back();
 }
 
-cstring ControlGraphs::ControlStack::getName(const cstring &name) const {
+cstring ControlGraphs::ControlStack::getName(const cstring& name) const {
     std::stringstream sstream;
-    for (auto &n : names) {
-      if (n != "") sstream << n << ".";
+    for (auto& n : names) {
+        if (n != "") sstream << n << ".";
     }
     sstream << name;
     return cstring(sstream);
 }
 
-bool ControlGraphs::ControlStack::isEmpty() const {
-    return subgraphs.empty();
-}
+bool ControlGraphs::ControlStack::isEmpty() const { return subgraphs.empty(); }
 
 using vertex_t = ControlGraphs::vertex_t;
 
-ControlGraphs::ControlGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                             const cstring &graphsDir)
+ControlGraphs::ControlGraphs(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                             const cstring& graphsDir)
     : refMap(refMap), typeMap(typeMap), graphsDir(graphsDir) {
     visitDagOnce = false;
 }
 
-bool ControlGraphs::preorder(const IR::PackageBlock *block) {
+bool ControlGraphs::preorder(const IR::PackageBlock* block) {
     for (auto it : block->constantValue) {
         if (!it.second) continue;
         if (it.second->is<IR::ControlBlock>()) {
             auto name = it.second->to<IR::ControlBlock>()->container->name;
             LOG1("Generating graph for top-level control " << name);
 
-            Graph *g_ = new Graph();
+            Graph* g_ = new Graph();
             g = g_;
             instanceName = boost::none;
             boost::get_property(*g_, boost::graph_name) = name;
@@ -106,12 +104,12 @@ bool ControlGraphs::preorder(const IR::PackageBlock *block) {
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::ControlBlock *block) {
+bool ControlGraphs::preorder(const IR::ControlBlock* block) {
     visit(block->container);
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::P4Control *cont) {
+bool ControlGraphs::preorder(const IR::P4Control* cont) {
     bool doPop = false;
     // instanceName == boost::none <=> top level
     if (instanceName != boost::none) {
@@ -128,15 +126,14 @@ bool ControlGraphs::preorder(const IR::P4Control *cont) {
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::BlockStatement *statement) {
-    for (const auto component : statement->components)
-        visit(component);
+bool ControlGraphs::preorder(const IR::BlockStatement* statement) {
+    for (const auto component : statement->components) visit(component);
     merge_other_statements_into_vertex();
 
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::IfStatement *statement) {
+bool ControlGraphs::preorder(const IR::IfStatement* statement) {
     std::stringstream sstream;
     statement->condition->dbprint(sstream);
     auto v = add_and_connect_vertex(cstring(sstream), VertexType::CONDITION);
@@ -157,7 +154,7 @@ bool ControlGraphs::preorder(const IR::IfStatement *statement) {
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::SwitchStatement *statement) {
+bool ControlGraphs::preorder(const IR::SwitchStatement* statement) {
     auto tbl = P4::TableApplySolver::isActionRun(statement->expression, refMap, typeMap);
     vertex_t v;
     // special case for action_run
@@ -196,7 +193,7 @@ bool ControlGraphs::preorder(const IR::SwitchStatement *statement) {
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::MethodCallStatement *statement) {
+bool ControlGraphs::preorder(const IR::MethodCallStatement* statement) {
     auto instance = P4::MethodInstance::resolve(statement->methodCall, refMap, typeMap);
 
     if (instance->is<P4::ApplyMethod>()) {
@@ -206,9 +203,8 @@ bool ControlGraphs::preorder(const IR::MethodCallStatement *statement) {
         } else if (am->applyObject->is<IR::Type_Control>()) {
             if (am->object->is<IR::Parameter>()) {
                 ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                        "%1%: control parameters are not supported by this target",
-                        am->object);
-              return false;
+                        "%1%: control parameters are not supported by this target", am->object);
+                return false;
             }
             BUG_CHECK(am->object->is<IR::Declaration_Instance>(),
                       "Unsupported control invocation: %1%", am->object);
@@ -229,12 +225,12 @@ bool ControlGraphs::preorder(const IR::MethodCallStatement *statement) {
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::AssignmentStatement *statement) {
+bool ControlGraphs::preorder(const IR::AssignmentStatement* statement) {
     statementsStack.push_back(statement);
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::ReturnStatement *) {
+bool ControlGraphs::preorder(const IR::ReturnStatement*) {
     merge_other_statements_into_vertex();
 
     return_parents.insert(return_parents.end(), parents.begin(), parents.end());
@@ -242,16 +238,15 @@ bool ControlGraphs::preorder(const IR::ReturnStatement *) {
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::ExitStatement *) {
+bool ControlGraphs::preorder(const IR::ExitStatement*) {
     merge_other_statements_into_vertex();
 
-    for (auto parent : parents)
-        add_edge(parent.first, exit_v, parent.second->label());
+    for (auto parent : parents) add_edge(parent.first, exit_v, parent.second->label());
     parents.clear();
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::Key *key) {
+bool ControlGraphs::preorder(const IR::Key* key) {
     std::stringstream sstream;
 
     // Build key
@@ -265,8 +260,7 @@ bool ControlGraphs::preorder(const IR::Key *key) {
                 break;
             }
         }
-        if (!has_name)
-            sstream << elVec->expression->toString();
+        if (!has_name) sstream << elVec->expression->toString();
         sstream << "\\n";
     }
 
@@ -277,12 +271,12 @@ bool ControlGraphs::preorder(const IR::Key *key) {
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::P4Action *action) {
+bool ControlGraphs::preorder(const IR::P4Action* action) {
     visit(action->body);
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::P4Table *table) {
+bool ControlGraphs::preorder(const IR::P4Table* table) {
     auto name = table->getName();
 
     auto v = add_and_connect_vertex(name, VertexType::TABLE);
@@ -300,7 +294,7 @@ bool ControlGraphs::preorder(const IR::P4Table *table) {
     auto actList = table->getActionList();
     if (actList) {
         auto actions = actList->actionList;
-        for (auto action : actions){
+        for (auto action : actions) {
             parents = keyNode;
 
             auto v = add_and_connect_vertex(action->getName(), VertexType::ACTION);

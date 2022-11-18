@@ -61,8 +61,9 @@ cstring stringRepr(big_int value, unsigned bytes) {
     std::stringstream r;
     cstring filler = "";
     if (value < 0) {
-        value =- value;
-        sign = "-"; }
+        value = -value;
+        sign = "-";
+    }
     r << std::hex << value;
 
     if (bytes > 0) {
@@ -78,8 +79,7 @@ unsigned nextId(cstring group) {
     return counters[group]++;
 }
 
-void
-ConversionContext::addToFieldList(const IR::Expression* expr, Util::JsonArray* fl) {
+void ConversionContext::addToFieldList(const IR::Expression* expr, Util::JsonArray* fl) {
     if (auto le = expr->to<IR::ListExpression>()) {
         for (auto e : le->components) {
             addToFieldList(e, fl);
@@ -124,9 +124,7 @@ ConversionContext::addToFieldList(const IR::Expression* expr, Util::JsonArray* f
     fl->append(j);
 }
 
-int
-ConversionContext::createFieldList(
-    const IR::Expression* expr, cstring listName, bool learn) {
+int ConversionContext::createFieldList(const IR::Expression* expr, cstring listName, bool learn) {
     cstring group;
     auto fl = new Util::JsonObject();
     if (learn) {
@@ -145,16 +143,14 @@ ConversionContext::createFieldList(
     return id;
 }
 
-void
-ConversionContext::modelError(const char* format, const IR::Node* node) {
+void ConversionContext::modelError(const char* format, const IR::Node* node) {
     ::error(format, node);
     ::error("Are you using an up-to-date v1model.p4?");
 }
 
-cstring
-ConversionContext::createCalculation(cstring algo, const IR::Expression* fields,
-                                     Util::JsonArray* calculations, bool withPayload,
-                                     const IR::Node* sourcePositionNode = nullptr) {
+cstring ConversionContext::createCalculation(cstring algo, const IR::Expression* fields,
+                                             Util::JsonArray* calculations, bool withPayload,
+                                             const IR::Node* sourcePositionNode = nullptr) {
     cstring calcName = refMap->newName("calc_");
     auto calc = new Util::JsonObject();
     calc->emplace("name", calcName);
@@ -184,8 +180,7 @@ ConversionContext::createCalculation(cstring algo, const IR::Expression* fields,
 /// Converts expr into a ListExpression or returns nullptr if not
 /// possible
 const IR::ListExpression* convertToList(const IR::Expression* expr, P4::TypeMap* typeMap) {
-    if (auto l = expr->to<IR::ListExpression>())
-        return l;
+    if (auto l = expr->to<IR::ListExpression>()) return l;
 
     // expand it into a list
     auto list = new IR::ListExpression({});
@@ -195,8 +190,7 @@ const IR::ListExpression* convertToList(const IR::Expression* expr, P4::TypeMap*
         return nullptr;
     }
     if (auto se = expr->to<IR::StructExpression>()) {
-        for (auto f : se->components)
-            list->push_back(f->expression);
+        for (auto f : se->components) list->push_back(f->expression);
     } else {
         for (auto f : st->fields) {
             auto e = new IR::Member(expr, f->name);

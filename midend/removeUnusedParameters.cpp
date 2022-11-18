@@ -17,6 +17,7 @@ limitations under the License.
 #include "removeUnusedParameters.h"
 
 #include <algorithm>
+
 #include "lib/enumerator.h"
 
 namespace P4 {
@@ -30,8 +31,7 @@ const IR::Node* RemoveUnusedActionParameters::postorder(IR::P4Action* action) {
 
     // Some parameters are unused; filter them out.
     auto newParams = new IR::ParameterList;
-    for (auto param : *params->getEnumerator()->where(isUsed))
-        newParams->push_back(param);
+    for (auto param : *params->getEnumerator()->where(isUsed)) newParams->push_back(param);
 
     action->parameters = newParams;
     return action;

@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_TABLEAPPLY_H_
 #define _FRONTENDS_P4_TABLEAPPLY_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 // helps resolve complex expressions involving a table apply
 // such as table.apply().action_run
@@ -34,12 +34,12 @@ namespace P4 {
 // table.apply().action_run
 class TableApplySolver {
  public:
-    static const IR::P4Table* isHit(const IR::Expression* expression,
-                                    ReferenceMap* refMap, TypeMap* typeMap);
-    static const IR::P4Table* isMiss(const IR::Expression* expression,
-                                     ReferenceMap* refMap, TypeMap* typeMap);
-    static const IR::P4Table* isActionRun(const IR::Expression* expression,
-                                          ReferenceMap* refMap, TypeMap* typeMap);
+    static const IR::P4Table* isHit(const IR::Expression* expression, ReferenceMap* refMap,
+                                    TypeMap* typeMap);
+    static const IR::P4Table* isMiss(const IR::Expression* expression, ReferenceMap* refMap,
+                                     TypeMap* typeMap);
+    static const IR::P4Table* isActionRun(const IR::Expression* expression, ReferenceMap* refMap,
+                                          TypeMap* typeMap);
 };
 
 }  // namespace P4

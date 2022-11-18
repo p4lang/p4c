@@ -23,13 +23,13 @@ class ControlBodyTranslatorPSA;
 class EBPFMeterPSA : public EBPFTableBase {
  private:
     static IR::IndexedVector<IR::StructField> getValueFields();
-    static IR::Type_Struct *createSpinlockStruct();
-    static EBPFType *getBaseValueType(P4::ReferenceMap* refMap);
-    EBPFType *getIndirectValueType() const;
+    static IR::Type_Struct* createSpinlockStruct();
+    static EBPFType* getBaseValueType(P4::ReferenceMap* refMap);
+    EBPFType* getIndirectValueType() const;
     static cstring getBaseStructName(P4::ReferenceMap* refMap);
     cstring getIndirectStructName() const;
 
-    void emitIndex(CodeBuilder* builder, const P4::ExternMethod *method,
+    void emitIndex(CodeBuilder* builder, const P4::ExternMethod* method,
                    ControlBodyTranslatorPSA* translator) const;
 
  protected:
@@ -37,19 +37,15 @@ class EBPFMeterPSA : public EBPFTableBase {
     const cstring spinlockField = "lock";
 
     size_t size{};
-    EBPFType *keyType{};
+    EBPFType* keyType{};
     bool isDirect;
 
  public:
-    enum MeterType {
-        PACKETS,
-        BYTES
-    };
+    enum MeterType { PACKETS, BYTES };
     MeterType type;
 
     EBPFMeterPSA(const EBPFProgram* program, cstring instanceName,
-                 const IR::Declaration_Instance* di,
-                 CodeGenInspector* codeGen);
+                 const IR::Declaration_Instance* di, CodeGenInspector* codeGen);
 
     static MeterType toType(const int typeCode);
 

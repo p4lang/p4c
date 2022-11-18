@@ -15,6 +15,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 #include "ebpfPsaParser.h"
+
 #include "backends/ebpf/ebpfType.h"
 #include "frontends/p4/enumInstance.h"
 
@@ -35,7 +36,8 @@ void PsaStateTranslationVisitor::processMethod(const P4::ExternMethod* ext) {
 
 // =====================EBPFPsaParser=============================
 EBPFPsaParser::EBPFPsaParser(const EBPFProgram* program, const IR::ParserBlock* block,
-                             const P4::TypeMap* typeMap) : EBPFParser(program, block, typeMap) {
+                             const P4::TypeMap* typeMap)
+    : EBPFParser(program, block, typeMap) {
     visitor = new PsaStateTranslationVisitor(program->refMap, program->typeMap, this);
 }
 
@@ -62,8 +64,8 @@ void EBPFPsaParser::emitRejectState(CodeBuilder* builder) {
     builder->emitIndent();
     builder->appendFormat("if (%s == 0) ", program->errorVar.c_str());
     builder->blockStart();
-    builder->target->emitTraceMessage(builder,
-        "Parser: Explicit transition to reject state, dropping packet..");
+    builder->target->emitTraceMessage(
+        builder, "Parser: Explicit transition to reject state, dropping packet..");
     builder->emitIndent();
     builder->appendFormat("return %s", builder->target->abortReturnCode().c_str());
     builder->endOfStatement(true);

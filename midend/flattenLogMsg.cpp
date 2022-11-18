@@ -1,10 +1,11 @@
 #include "midend/flattenLogMsg.h"
+
 #include "flattenLogMsg.h"
 
 namespace P4 {
 
 bool FindTypesInLogMsgInvocationToReplace::hasStructInParameter(
-        const IR::MethodCallStatement* methodCallStatement) {
+    const IR::MethodCallStatement* methodCallStatement) {
     if (auto* path = methodCallStatement->methodCall->method->to<IR::PathExpression>()) {
         if (methodCallStatement->methodCall->arguments->size() == 2 &&
             path->path->name.name == "log_msg") {
@@ -28,7 +29,7 @@ bool FindTypesInLogMsgInvocationToReplace::hasStructInParameter(
 }
 
 const IR::MethodCallStatement* FindTypesInLogMsgInvocationToReplace::prepareLogMsgStatement(
-        const IR::MethodCallStatement* methodCallStatement) {
+    const IR::MethodCallStatement* methodCallStatement) {
     if (auto* newMethod = getReplacementMethodCall(methodCallStatement->id)) {
         return newMethod;
     }
@@ -54,8 +55,9 @@ const IR::MethodCallStatement* FindTypesInLogMsgInvocationToReplace::prepareLogM
     newArguments->at(0) = newArgument;
     newArgument = newMethodCall->arguments->at(1)->clone();
     auto* oldType = newArgument->expression->to<IR::StructExpression>()->structType;
-    auto newStructExpression =new IR::StructExpression(oldType->srcInfo, structType,
-        structType->getP4Type()->template to<IR::Type_Name>(), exprVector.first);
+    auto newStructExpression = new IR::StructExpression(
+        oldType->srcInfo, structType, structType->getP4Type()->template to<IR::Type_Name>(),
+        exprVector.first);
     newStructExpression->components = exprVector.first;
     newArgument->expression = newStructExpression;
     newArguments->at(1) = newArgument;
@@ -66,7 +68,6 @@ const IR::MethodCallStatement* FindTypesInLogMsgInvocationToReplace::prepareLogM
     return newMethodCallStatement;
 }
 
-
 IR::ID FindTypesInLogMsgInvocationToReplace::newName() {
     std::ostringstream ostr;
     ostr << "f" << index++;
@@ -74,11 +75,11 @@ IR::ID FindTypesInLogMsgInvocationToReplace::newName() {
 }
 
 const IR::Type_StructLike* FindTypesInLogMsgInvocationToReplace::generateNewStructType(
-    const IR::Type_StructLike* structType, IR::IndexedVector<IR::NamedExpression> &v) {
+    const IR::Type_StructLike* structType, IR::IndexedVector<IR::NamedExpression>& v) {
     IR::IndexedVector<IR::StructField> fields;
     for (auto namedExpr : v) {
-        auto* structField = new IR::StructField(namedExpr->srcInfo, namedExpr->name,
-                                                namedExpr->expression->type);
+        auto* structField =
+            new IR::StructField(namedExpr->srcInfo, namedExpr->name, namedExpr->expression->type);
         typeMap->setType(structField, structField->type);
         fields.push_back(structField);
     }
@@ -88,7 +89,8 @@ const IR::Type_StructLike* FindTypesInLogMsgInvocationToReplace::generateNewStru
 }
 
 TypeLogMsgParams FindTypesInLogMsgInvocationToReplace::unfoldStruct(const IR::Expression* expr,
-        std::string strParam, std::string curName) {
+                                                                    std::string strParam,
+                                                                    std::string curName) {
     TypeLogMsgParams result;
     auto* exprType = typeMap->getType(expr, true);
     if (!expr->is<IR::StructExpression>()) {
@@ -103,12 +105,11 @@ TypeLogMsgParams FindTypesInLogMsgInvocationToReplace::unfoldStruct(const IR::Ex
                     result.first.insert(result.first.end(), curResult.first.begin(),
                                         curResult.first.end());
                 } else {
-                    result.first.push_back(new IR::NamedExpression(expr->srcInfo, newName(),
-                                                                   newMember));
+                    result.first.push_back(
+                        new IR::NamedExpression(expr->srcInfo, newName(), newMember));
                     nm += std::string("{}");
                 }
-                if (result.second.length() > 1)
-                    result.second += ",";
+                if (result.second.length() > 1) result.second += ",";
                 result.second += nm;
             }
             result.second += std::string(")");
@@ -151,8 +152,7 @@ bool FindTypesInLogMsgInvocationToReplace::preorder(
     const IR::MethodCallStatement* methodCallStatement) {
     if (hasStructInParameter(methodCallStatement)) {
         auto* newMethodCall = prepareLogMsgStatement(methodCallStatement);
-        createReplacement(newMethodCall->methodCall->typeArguments->at(0)->
-                          to<IR::Type_Struct>());
+        createReplacement(newMethodCall->methodCall->typeArguments->at(0)->to<IR::Type_Struct>());
     }
     return false;
 }
@@ -187,8 +187,8 @@ const IR::Node* ReplaceLogMsg::postorder(IR::Type_Struct* typeStruct) {
 }
 
 const IR::Node* ReplaceLogMsg::postorder(IR::MethodCallStatement* methodCallStatement) {
-    if (auto* newMethod = findTypesInLogMsgInvocationToReplace->
-        getReplacementMethodCall(getOriginal()->id)) {
+    if (auto* newMethod =
+            findTypesInLogMsgInvocationToReplace->getReplacementMethodCall(getOriginal()->id)) {
         return newMethod;
     }
     return methodCallStatement;

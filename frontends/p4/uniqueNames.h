@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_UNIQUENAMES_H_
 #define _FRONTENDS_P4_UNIQUENAMES_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -50,7 +50,8 @@ class RenameMap {
 /// move declarations around.
 class UniqueNames : public PassManager {
  private:
-    RenameMap    *renameMap;
+    RenameMap* renameMap;
+
  public:
     explicit UniqueNames(ReferenceMap* refMap);
 };
@@ -59,52 +60,56 @@ class UniqueNames : public PassManager {
 /// Declaration_Variable, Declaration_Constant, Declaration_Instance,
 /// P4Table, P4Action.
 class FindSymbols : public Inspector {
-    ReferenceMap *refMap;  // used to generate new names
-    RenameMap    *renameMap;
+    ReferenceMap* refMap;  // used to generate new names
+    RenameMap* renameMap;
 
  public:
     bool isTopLevel() const {
-        return findContext<IR::P4Parser>() == nullptr &&
-                findContext<IR::P4Control>() == nullptr;
+        return findContext<IR::P4Parser>() == nullptr && findContext<IR::P4Control>() == nullptr;
     }
-    FindSymbols(ReferenceMap *refMap, RenameMap *renameMap) :
-            refMap(refMap), renameMap(renameMap)
-    { CHECK_NULL(refMap); CHECK_NULL(renameMap); setName("FindSymbols"); }
+    FindSymbols(ReferenceMap* refMap, RenameMap* renameMap) : refMap(refMap), renameMap(renameMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(renameMap);
+        setName("FindSymbols");
+    }
     void doDecl(const IR::Declaration* decl) {
         cstring newName = refMap->newName(decl->getName());
         renameMap->setNewName(decl, newName);
     }
-    void postorder(const IR::Declaration_Variable* decl) override
-    { doDecl(decl); }
+    void postorder(const IR::Declaration_Variable* decl) override { doDecl(decl); }
     void postorder(const IR::Declaration_Constant* decl) override {
         // Skip toplevel constants with names like __
         // We assume that these do not clash and no new symbols with
         // these names will be added.
-        if (decl->getName().name.startsWith("__") && getParent<IR::P4Program>())
-            return;
+        if (decl->getName().name.startsWith("__") && getParent<IR::P4Program>()) return;
         doDecl(decl);
     }
-    void postorder(const IR::Declaration_Instance* decl) override
-    { if (!isTopLevel()) doDecl(decl); }
-    void postorder(const IR::P4Table* decl) override
-    { doDecl(decl); }
-    void postorder(const IR::P4Action* decl) override
-    { if (!isTopLevel()) doDecl(decl); }
-    void postorder(const IR::P4ValueSet* decl) override
-    { if (!isTopLevel()) doDecl(decl); }
+    void postorder(const IR::Declaration_Instance* decl) override {
+        if (!isTopLevel()) doDecl(decl);
+    }
+    void postorder(const IR::P4Table* decl) override { doDecl(decl); }
+    void postorder(const IR::P4Action* decl) override {
+        if (!isTopLevel()) doDecl(decl);
+    }
+    void postorder(const IR::P4ValueSet* decl) override {
+        if (!isTopLevel()) doDecl(decl);
+    }
 };
 
 class RenameSymbols : public Transform {
-    ReferenceMap *refMap;
-    RenameMap    *renameMap;
+    ReferenceMap* refMap;
+    RenameMap* renameMap;
 
     IR::ID* getName() const;
+
  public:
-    RenameSymbols(ReferenceMap *refMap, RenameMap *renameMap) :
-            refMap(refMap), renameMap(renameMap) {
-        CHECK_NULL(refMap); CHECK_NULL(renameMap);
+    RenameSymbols(ReferenceMap* refMap, RenameMap* renameMap)
+        : refMap(refMap), renameMap(renameMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(renameMap);
         visitDagOnce = false;
-        setName("RenameSymbols"); }
+        setName("RenameSymbols");
+    }
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
     const IR::Node* postorder(IR::Declaration_Constant* decl) override;
     const IR::Node* postorder(IR::PathExpression* expression) override;
@@ -119,7 +124,7 @@ class RenameSymbols : public Transform {
 /// Finds parameters for actions that will be given unique names
 class FindParameters : public Inspector {
     ReferenceMap* refMap;  // used to generate new names
-    RenameMap*    renameMap;
+    RenameMap* renameMap;
 
     void doParameters(const IR::ParameterList* pl) {
         for (auto p : pl->parameters) {
@@ -127,20 +132,23 @@ class FindParameters : public Inspector {
             renameMap->setNewName(p, newName);
         }
     }
+
  public:
-    FindParameters(ReferenceMap* refMap, RenameMap* renameMap) :
-            refMap(refMap), renameMap(renameMap)
-    { CHECK_NULL(refMap); CHECK_NULL(renameMap); setName("FindParameters"); }
-    void postorder(const IR::P4Action* action) override {
-        doParameters(action->parameters);
+    FindParameters(ReferenceMap* refMap, RenameMap* renameMap)
+        : refMap(refMap), renameMap(renameMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(renameMap);
+        setName("FindParameters");
     }
+    void postorder(const IR::P4Action* action) override { doParameters(action->parameters); }
 };
 
 /// Give each parameter of an action a new unique name
 /// This must also rename named arguments
 class UniqueParameters : public PassManager {
  private:
-    RenameMap    *renameMap;
+    RenameMap* renameMap;
+
  public:
     UniqueParameters(ReferenceMap* refMap, TypeMap* typeMap);
 };

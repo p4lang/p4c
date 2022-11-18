@@ -15,14 +15,15 @@ limitations under the License.
 */
 
 #include "extern.h"
+
 #include "frontends/p4/fromv1.0/v1model.h"
 
 namespace BMV2 {
 
-std::map<cstring, ExternConverter *> *ExternConverter::cvtForType = nullptr;
+std::map<cstring, ExternConverter*>* ExternConverter::cvtForType = nullptr;
 
 void ExternConverter::registerExternConverter(cstring name, ExternConverter* cvt) {
-    static std::map<cstring, ExternConverter *> map;
+    static std::map<cstring, ExternConverter*> map;
     cvtForType = &map;
     LOG3("registered extern " << name);
     map[name] = cvt;
@@ -30,46 +31,34 @@ void ExternConverter::registerExternConverter(cstring name, ExternConverter* cvt
 
 ExternConverter* ExternConverter::get(cstring type) {
     static ExternConverter defaultCvt;
-    if (cvtForType && cvtForType->count(type))
-        return cvtForType->at(type);
+    if (cvtForType && cvtForType->count(type)) return cvtForType->at(type);
     return &defaultCvt;
 }
 
-Util::IJson*
-ExternConverter::cvtExternObject(ConversionContext* ctxt,
-                                 const P4::ExternMethod* em,
-                                 const IR::MethodCallExpression* mc,
-                                 const IR::StatOrDecl* s,
-                                 const bool& emitExterns) {
+Util::IJson* ExternConverter::cvtExternObject(ConversionContext* ctxt, const P4::ExternMethod* em,
+                                              const IR::MethodCallExpression* mc,
+                                              const IR::StatOrDecl* s, const bool& emitExterns) {
     return get(em)->convertExternObject(ctxt, em, mc, s, emitExterns);
 }
 
-void
-ExternConverter::cvtExternInstance(ConversionContext* ctxt,
-                                   const IR::Declaration* c,
-                                   const IR::ExternBlock* eb,
-                                   const bool& emitExterns) {
+void ExternConverter::cvtExternInstance(ConversionContext* ctxt, const IR::Declaration* c,
+                                        const IR::ExternBlock* eb, const bool& emitExterns) {
     get(eb)->convertExternInstance(ctxt, c, eb, emitExterns);
 }
 
-Util::IJson*
-ExternConverter::cvtExternFunction(ConversionContext* ctxt,
-                                   const P4::ExternFunction* ef,
-                                   const IR::MethodCallExpression* mc,
-                                   const IR::StatOrDecl* s,
-                                   const bool emitExterns) {
+Util::IJson* ExternConverter::cvtExternFunction(ConversionContext* ctxt,
+                                                const P4::ExternFunction* ef,
+                                                const IR::MethodCallExpression* mc,
+                                                const IR::StatOrDecl* s, const bool emitExterns) {
     return get(ef)->convertExternFunction(ctxt, ef, mc, s, emitExterns);
 }
 
-Util::IJson*
-ExternConverter::convertExternObject(ConversionContext* ctxt,
-                                     const P4::ExternMethod* em,
-                                     const IR::MethodCallExpression* mc,
-                                     const IR::StatOrDecl*,
-                                     const bool& emitExterns) {
+Util::IJson* ExternConverter::convertExternObject(ConversionContext* ctxt,
+                                                  const P4::ExternMethod* em,
+                                                  const IR::MethodCallExpression* mc,
+                                                  const IR::StatOrDecl*, const bool& emitExterns) {
     if (emitExterns) {
-        auto primitive = mkPrimitive("_" + em->originalExternType->name +
-                                         "_" + em->method->name);
+        auto primitive = mkPrimitive("_" + em->originalExternType->name + "_" + em->method->name);
         auto parameters = mkParameters(primitive);
         primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
         auto etr = new Util::JsonObject();
@@ -82,19 +71,16 @@ ExternConverter::convertExternObject(ConversionContext* ctxt,
         }
         return primitive;
     } else {
-        ::error(ErrorType::ERR_UNKNOWN, "Unknown extern method %1% from type %2%",
-                em->method->name, em->originalExternType->name);
+        ::error(ErrorType::ERR_UNKNOWN, "Unknown extern method %1% from type %2%", em->method->name,
+                em->originalExternType->name);
         return nullptr;
     }
 }
 
 /// This method is invoked for all externs that do not have a registered
 /// conversion, i.e., unknown by the architecture.
-void
-ExternConverter::convertExternInstance(ConversionContext* ctxt,
-                                       const IR::Declaration* decl,
-                                       const IR::ExternBlock* eb,
-                                       const bool& emitExterns) {
+void ExternConverter::convertExternInstance(ConversionContext* ctxt, const IR::Declaration* decl,
+                                            const IR::ExternBlock* eb, const bool& emitExterns) {
     if (!emitExterns) {
         ::error(ErrorType::ERR_UNKNOWN, "%1%: unknown extern instance", eb->type->name);
         return;
@@ -120,12 +106,11 @@ ExternConverter::convertExternInstance(ConversionContext* ctxt,
     ctxt->json->add_extern(decl->controlPlaneName(), eb->type->getName(), attrs);
 }
 
-Util::IJson*
-ExternConverter::convertExternFunction(ConversionContext* ctxt,
-                                       const P4::ExternFunction* ef,
-                                       const IR::MethodCallExpression* mc,
-                                       const IR::StatOrDecl* s,
-                                       const bool emitExterns) {
+Util::IJson* ExternConverter::convertExternFunction(ConversionContext* ctxt,
+                                                    const P4::ExternFunction* ef,
+                                                    const IR::MethodCallExpression* mc,
+                                                    const IR::StatOrDecl* s,
+                                                    const bool emitExterns) {
     if (!emitExterns) {
         ::error(ErrorType::ERR_UNKNOWN, "%1%: unknown extern function", ef->method->name);
         return nullptr;
@@ -140,16 +125,13 @@ ExternConverter::convertExternFunction(ConversionContext* ctxt,
     return primitive;
 }
 
-void
-ExternConverter::modelError(const char* format, const IR::Node* node) const {
-    cstring errMsg = cstring(format) +
-                     ". Are you using an up-to-date v1model.p4?";
+void ExternConverter::modelError(const char* format, const IR::Node* node) const {
+    cstring errMsg = cstring(format) + ". Are you using an up-to-date v1model.p4?";
     ::error(ErrorType::ERR_MODEL, errMsg.c_str(), node);
 }
 
-void
-ExternConverter::addToFieldList(ConversionContext* ctxt,
-                                const IR::Expression* expr, Util::JsonArray* fl) {
+void ExternConverter::addToFieldList(ConversionContext* ctxt, const IR::Expression* expr,
+                                     Util::JsonArray* fl) {
     if (auto le = expr->to<IR::ListExpression>()) {
         for (auto e : le->components) {
             addToFieldList(ctxt, e, fl);
@@ -194,10 +176,9 @@ ExternConverter::addToFieldList(ConversionContext* ctxt,
     fl->append(j);
 }
 
-int
-ExternConverter::createFieldList(ConversionContext* ctxt,
-                                 const IR::Expression* expr, cstring group,
-                                 cstring listName, Util::JsonArray* field_lists) {
+int ExternConverter::createFieldList(ConversionContext* ctxt, const IR::Expression* expr,
+                                     cstring group, cstring listName,
+                                     Util::JsonArray* field_lists) {
     auto fl = new Util::JsonObject();
     field_lists->append(fl);
     int id = nextId(group);
@@ -209,11 +190,10 @@ ExternConverter::createFieldList(ConversionContext* ctxt,
     return id;
 }
 
-cstring
-ExternConverter::createCalculation(ConversionContext* ctxt,
-                                   cstring algo, const IR::Expression* fields,
-                                   Util::JsonArray* calculations, bool withPayload,
-                                   const IR::Node* sourcePositionNode = nullptr) {
+cstring ExternConverter::createCalculation(ConversionContext* ctxt, cstring algo,
+                                           const IR::Expression* fields,
+                                           Util::JsonArray* calculations, bool withPayload,
+                                           const IR::Node* sourcePositionNode = nullptr) {
     cstring calcName = ctxt->refMap->newName("calc_");
     auto calc = new Util::JsonObject();
     calc->emplace("name", calcName);
@@ -240,8 +220,7 @@ ExternConverter::createCalculation(ConversionContext* ctxt,
     return calcName;
 }
 
-cstring
-ExternConverter::convertHashAlgorithm(cstring algorithm) {
+cstring ExternConverter::convertHashAlgorithm(cstring algorithm) {
     cstring result;
     if (algorithm == P4V1::V1Model::instance.algorithm.crc32.name)
         result = "crc32";
@@ -267,9 +246,9 @@ ExternConverter::convertHashAlgorithm(cstring algorithm) {
 ExternConverter_assert ExternConverter_assert::singleton;
 ExternConverter_assume ExternConverter_assume::singleton;
 
-Util::IJson*
-ExternConverter::convertAssertAssume(ConversionContext* ctxt,
-    const IR::MethodCallExpression* methodCall, const P4::ExternFunction* ef) {
+Util::IJson* ExternConverter::convertAssertAssume(ConversionContext* ctxt,
+                                                  const IR::MethodCallExpression* methodCall,
+                                                  const P4::ExternFunction* ef) {
     if (methodCall->arguments->size() != 1) {
         ::error(ErrorType::ERR_EXPECTED, "Expected 1 arguments for %1%", methodCall);
         return nullptr;

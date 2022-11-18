@@ -15,8 +15,8 @@ limitations under the License.
 
 namespace EBPF {
 
-EBPFRandomPSA::EBPFRandomPSA(const IR::Declaration_Instance* di) :
-        minValue(0), maxValue(0), range(0) {
+EBPFRandomPSA::EBPFRandomPSA(const IR::Declaration_Instance* di)
+    : minValue(0), maxValue(0), range(0) {
     CHECK_NULL(di);
 
     // verify type
@@ -31,7 +31,7 @@ EBPFRandomPSA::EBPFRandomPSA(const IR::Declaration_Instance* di) :
         ::error(ErrorType::ERR_UNSUPPORTED, "Must be bit or int type: %1%", ts);
         return;
     }
-    if (type->width_bits()  > 32) {
+    if (type->width_bits() > 32) {
         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: up to 32 bits width is supported", ts);
     }
 
@@ -57,7 +57,7 @@ EBPFRandomPSA::EBPFRandomPSA(const IR::Declaration_Instance* di) :
 
     minValue = tmp[0];
     maxValue = tmp[1];
-    range = (long) maxValue - minValue + 1;
+    range = (long)maxValue - minValue + 1;
 
     // verify constructor parameters
     if (minValue > maxValue) {
@@ -66,7 +66,8 @@ EBPFRandomPSA::EBPFRandomPSA(const IR::Declaration_Instance* di) :
     if (minValue == maxValue) {
         ::warning(ErrorType::WARN_IGNORE,
                   "%1%: No randomness, will always return the same value "
-                  "due to that the min value is equal to the max value", di);
+                  "due to that the min value is equal to the max value",
+                  di);
     }
 }
 
@@ -86,8 +87,7 @@ void EBPFRandomPSA::emitRead(CodeBuilder* builder) const {
 
     bool rangeIsPowerOf2 = (range & (range - 1)) == 0;
 
-    if (minValue != 0)
-        builder->appendFormat("(%uu + ", minValue);
+    if (minValue != 0) builder->appendFormat("(%uu + ", minValue);
 
     builder->append("(bpf_get_prandom_u32() ");
     if (rangeIsPowerOf2) {
@@ -97,8 +97,7 @@ void EBPFRandomPSA::emitRead(CodeBuilder* builder) const {
     }
     builder->append(")");
 
-    if (minValue != 0)
-        builder->append(")");
+    if (minValue != 0) builder->append(")");
 }
 
 }  // namespace EBPF

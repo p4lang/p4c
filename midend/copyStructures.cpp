@@ -1,11 +1,11 @@
- /*
+/*
 Copyright 2016 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+   http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,26 +15,25 @@ limitations under the License.
 */
 
 #include "copyStructures.h"
+
 #include "frontends/p4/alias.h"
 
 namespace P4 {
 
 const IR::Node* RemoveAliases::postorder(IR::AssignmentStatement* statement) {
     auto type = typeMap->getType(statement->left);
-    if (!type->is<IR::Type_StructLike>())
-        return statement;
+    if (!type->is<IR::Type_StructLike>()) return statement;
 
     ReadsWrites rw(refMap);
-    if (!rw.mayAlias(statement->left, statement->right))
-        return statement;
+    if (!rw.mayAlias(statement->left, statement->right)) return statement;
     auto tmp = refMap->newName("tmp");
     auto decl = new IR::Declaration_Variable(IR::ID(tmp), type->getP4Type(), nullptr);
     declarations.push_back(decl);
     auto result = new IR::IndexedVector<IR::StatOrDecl>();
-    result->push_back(new IR::AssignmentStatement(
-        statement->srcInfo, new IR::PathExpression(tmp), statement->right));
-    result->push_back(new IR::AssignmentStatement(
-        statement->srcInfo, statement->left, new IR::PathExpression(tmp)));
+    result->push_back(new IR::AssignmentStatement(statement->srcInfo, new IR::PathExpression(tmp),
+                                                  statement->right));
+    result->push_back(new IR::AssignmentStatement(statement->srcInfo, statement->left,
+                                                  new IR::PathExpression(tmp)));
     LOG3("Inserted temporary " << decl << " for " << statement);
     return new IR::BlockStatement(statement->srcInfo, *result);
 }
@@ -83,19 +82,18 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
             for (auto f : strct->fields) {
                 auto right = si->components.getDeclaration<IR::NamedExpression>(f->name);
                 auto left = new IR::Member(statement->left, f->name);
-                retval->push_back(new IR::AssignmentStatement(
-                    statement->srcInfo, left, right->expression));
+                retval->push_back(
+                    new IR::AssignmentStatement(statement->srcInfo, left, right->expression));
             }
         } else {
             if (ltype->is<IR::Type_Header>())
                 // Leave headers as they are -- copy_header will also copy the valid bit
                 return statement;
 
-            BUG_CHECK(statement->right->is<IR::PathExpression>() ||
-                      statement->right->is<IR::Member>() ||
-                      statement->right->is<IR::ArrayIndex>(),
-                      "%1%: Unexpected operation when eliminating struct copying",
-                      statement->right);
+            BUG_CHECK(
+                statement->right->is<IR::PathExpression>() || statement->right->is<IR::Member>() ||
+                    statement->right->is<IR::ArrayIndex>(),
+                "%1%: Unexpected operation when eliminating struct copying", statement->right);
             for (auto f : strct->fields) {
                 auto right = new IR::Member(statement->right, f->name);
                 auto left = new IR::Member(statement->left, f->name);
