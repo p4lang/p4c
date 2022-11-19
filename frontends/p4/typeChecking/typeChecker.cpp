@@ -356,8 +356,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         return canon;
     } else if (auto vec = type->to<IR::Type_P4List>()) {
         auto et = canonicalize(vec->elementType);
-        if (et == nullptr)
-            return nullptr;
+        if (et == nullptr) return nullptr;
         const IR::Type* canon;
         if (et == vec->elementType)
             canon = type;
@@ -2069,16 +2068,13 @@ const IR::Node* TypeInference::postorder(IR::P4ListExpression* expression) {
     auto vec = new IR::Vector<IR::Expression>();
     bool changed = false;
     for (auto c : expression->components) {
-        if (!isCompileTimeConstant(c))
-            constant = false;
+        if (!isCompileTimeConstant(c)) constant = false;
         auto type = getType(c);
-        if (type == nullptr)
-            return expression;
+        if (type == nullptr) return expression;
         auto tvs = unify(expression, elementType, type,
                          "Vector element type '%1%' does not match expected type '%2%'",
-                         { type, elementType });
-        if (tvs == nullptr)
-            return expression;
+                         {type, elementType});
+        if (tvs == nullptr) return expression;
         if (!tvs->isIdentity()) {
             ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
             auto converted = cts.convert(c);
@@ -2721,8 +2717,7 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
             for (size_t i = 0; i < le->size(); i++) {
                 auto compI = le->components.at(i);
                 auto src = assignment(expression, listElementType, compI);
-                if (!isCompileTimeConstant(src))
-                    isConstant = false;
+                if (!isCompileTimeConstant(src)) isConstant = false;
                 vec.push_back(src);
             }
             auto vecType = castType->getP4Type();

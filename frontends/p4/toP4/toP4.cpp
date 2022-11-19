@@ -887,8 +887,7 @@ bool ToP4::preorder(const IR::ListExpression* e) {
 }
 
 bool ToP4::preorder(const IR::P4ListExpression* e) {
-    if (expressionPrecedence > DBPrint::Prec_Prefix)
-        builder.append("(");
+    if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append("(");
     if (e->elementType != nullptr) {
         builder.append("(list<");
         visit(e->elementType->getP4Type());
@@ -899,15 +898,13 @@ bool ToP4::preorder(const IR::P4ListExpression* e) {
     expressionPrecedence = DBPrint::Prec_Low;
     bool first = true;
     for (auto c : e->components) {
-        if (!first)
-            builder.append(",");
+        if (!first) builder.append(",");
         first = false;
         visit(c);
     }
     expressionPrecedence = prec;
     builder.append("}");
-    if (expressionPrecedence > DBPrint::Prec_Prefix)
-        builder.append(")");
+    if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append(")");
     return false;
 }
 

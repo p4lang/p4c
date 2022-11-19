@@ -83,7 +83,10 @@ class DoReplaceTuples final : public Transform {
         : repl(new ReplacementMap(refMap, typeMap)) {
         setName("DoReplaceTuples");
     }
-    const IR::Node* skip(const IR::Node* node) { prune(); return node; }
+    const IR::Node* skip(const IR::Node* node) {
+        prune();
+        return node;
+    }
     const IR::Node* postorder(IR::Type_BaseList* type) override;
     const IR::Node* insertReplacements(const IR::Node* before);
     const IR::Node* postorder(IR::Type_Struct* type) override { return insertReplacements(type); }
@@ -104,12 +107,8 @@ class DoReplaceTuples final : public Transform {
         // We want to keep these as tuples.
         return skip(set);
     }
-    const IR::Node* preorder(IR::P4ListExpression* expression) override {
-        return skip(expression);
-    }
-    const IR::Node* preorder(IR::Type_P4List* list) override {
-        return skip(list);
-    }
+    const IR::Node* preorder(IR::P4ListExpression* expression) override { return skip(expression); }
+    const IR::Node* preorder(IR::Type_P4List* list) override { return skip(list); }
 };
 
 class EliminateTuples final : public PassManager {

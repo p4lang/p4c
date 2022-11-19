@@ -25,6 +25,7 @@ namespace P4Test {
 
 class MidEnd : public PassManager {
     std::vector<DebugHook> hooks;
+
  public:
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;

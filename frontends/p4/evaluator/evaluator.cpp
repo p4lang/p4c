@@ -306,7 +306,7 @@ bool Evaluator::preorder(const IR::ListExpression* list) {
     return false;
 }
 
-bool Evaluator::preorder(const IR::P4ListExpression *list) {
+bool Evaluator::preorder(const IR::P4ListExpression* list) {
     LOG2("Evaluating " << list);
     visit(list->components);
     IR::Vector<IR::Node> comp;
@@ -322,7 +322,7 @@ bool Evaluator::preorder(const IR::P4ListExpression *list) {
     return false;
 }
 
-bool Evaluator::preorder(const IR::StructExpression *se) {
+bool Evaluator::preorder(const IR::StructExpression* se) {
     LOG2("Evaluating " << se);
     visit(se->components);
     IR::Vector<IR::Node> comp;
