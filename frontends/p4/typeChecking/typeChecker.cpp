@@ -2090,7 +2090,7 @@ const IR::Node* TypeInference::postorder(IR::P4ListExpression* expression) {
     }
 
     if (changed)
-        expression = new IR::P4ListExpression(expression->srcInfo, *vec, elementType);
+        expression = new IR::P4ListExpression(expression->srcInfo, *vec, elementType->getP4Type());
     auto type = new IR::Type_P4List(expression->srcInfo, elementType);
     setType(getOriginal(), type);
     setType(expression, type);
@@ -2713,22 +2713,22 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
             }
         }
     }
-    if (auto vt = concreteType->to<IR::Type_P4List>()) {
-        auto vecElementType = vt->elementType;
+    if (auto lt = concreteType->to<IR::Type_P4List>()) {
+        auto listElementType = lt->elementType;
         if (auto le = expression->expr->to<IR::ListExpression>()) {
             IR::Vector<IR::Expression> vec;
             bool isConstant = true;
             for (size_t i = 0; i < le->size(); i++) {
                 auto compI = le->components.at(i);
-                auto src = assignment(expression, vecElementType, compI);
+                auto src = assignment(expression, listElementType, compI);
                 if (!isCompileTimeConstant(src))
                     isConstant = false;
                 vec.push_back(src);
             }
             auto vecType = castType->getP4Type();
-            setType(vecType, new IR::Type_Type(vt));
-            auto result = new IR::P4ListExpression(le->srcInfo, vec, vecElementType);
-            setType(result, vt);
+            setType(vecType, new IR::Type_Type(lt));
+            auto result = new IR::P4ListExpression(le->srcInfo, vec, listElementType->getP4Type());
+            setType(result, lt);
             if (isConstant) {
                 setCompileTimeConstant(result);
                 setCompileTimeConstant(getOriginal<IR::Expression>());

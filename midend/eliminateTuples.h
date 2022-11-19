@@ -104,8 +104,12 @@ class DoReplaceTuples final : public Transform {
         // We want to keep these as tuples.
         return skip(set);
     }
-    const IR::Node* preorder(IR::Type_P4List* list) override
-    { return skip(list); }
+    const IR::Node* preorder(IR::P4ListExpression* expression) override {
+        return skip(expression);
+    }
+    const IR::Node* preorder(IR::Type_P4List* list) override {
+        return skip(list);
+    }
 };
 
 class EliminateTuples final : public PassManager {
