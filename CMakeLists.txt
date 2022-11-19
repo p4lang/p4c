@@ -45,6 +45,7 @@ OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
 OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
 OPTION (BUILD_STATIC_RELEASE "Build a statically linked release binary" OFF)
 OPTION (BUILD_AUTO_VAR_INIT_PATTERN "Initialize variables with pattern during build" OFF)
+OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
 
@@ -323,6 +324,36 @@ set (IR_GENERATED_SRCS
 # of the irgenerator target to the matching path
 set (IR_GENERATOR_DIRECTORY ${P4C_BINARY_DIR}/tools/ir-generator)
 set (IR_GENERATOR ${IR_GENERATOR_DIRECTORY}/irgenerator)
+
+# Set up IWYU for P4C. Each CMake target needs to manually add IWYU to its checks.
+if(ENABLE_IWYU)
+  message("Enabling IWYU checks.")
+  find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
+  set(
+    iwyu_path
+    ${iwyu_path}
+    -Xiwyu
+    --max_line_length=100
+    -Xiwyu
+    --no_fwd_decls
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/p4c.imp
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/boost-1.75-all.imp
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/libcxx.imp
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.libc.imp
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.symbols.imp
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.stl.headers.imp
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/stl.c.headers.imp
+  )
+  message("IWYU command: ${iwyu_path}")
+endif()
+
 
 # the order of adding subdirectories matters because of target dependencies
 add_subdirectory (tools/driver)

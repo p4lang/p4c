@@ -29,7 +29,7 @@ class Pattern {
     class Base {
      public:
         virtual bool match(const IR::Node*) = 0;
-    } * pattern;
+    }* pattern;
     Pattern(Base* p) : pattern(p) {}  // NOLINT(runtime/explicit)
 
     template <class T>

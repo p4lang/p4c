@@ -28,6 +28,9 @@ limitations under the License.
  * table below */
 #include "ir/gen-tree-macro.h"
 
+// Need to skip section for clang-format. The reason is that cpplint wants the bracket on the same
+// line, even though it looks ugly.
+// clang-format off
 #define IRNODE_ALL_TEMPLATES_AND_DIRECT_AND_INDIRECT_BASES(M, D, B, TDA, ...)                 \
     M(Vector, D(Node), template <class T>, <T>, ##__VA_ARGS__)                                \
     M(IndexedVector, D(Vector<T>) B(Node), template <class T>, <T>, ##__VA_ARGS__)            \
@@ -35,9 +38,9 @@ limitations under the License.
       IR_TREE_COPY(                                                                           \
           template <class T, template <class, class, class, class> class MAP TDA(= std::map), \
                     class COMP TDA(= std::less<cstring>),                                     \
-                    class ALLOC TDA(= std::allocator<std::pair<cstring, const T*>>)>          \
-          ),                                                                                  \
+                    class ALLOC TDA(= std::allocator<std::pair<cstring, const T*>>)>),        \
       IR_TREE_COPY(<T, MAP, COMP, ALLOC>), ##__VA_ARGS__)
+// clang-format on
 
 #define IR_TREE_COPY(...) __VA_ARGS__
 #define IR_TREE_IGNORE(...)

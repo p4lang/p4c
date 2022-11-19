@@ -67,31 +67,6 @@ build_unified(IR_SRCS)
 add_library (ir STATIC ${IR_SRCS})
 add_dependencies(ir genIR)
 
-
-if(ENABLE_IWYU)
-  message("Enabling IWYU checks.")
-  find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
-  set(
-    iwyu_path
-    ${iwyu_path}
-    -Xiwyu
-    --max_line_length=100
-    -Xiwyu
-    --no_fwd_decls
-    -Xiwyu
-    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/p4c.imp
-    -Xiwyu
-    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/boost-1.75-all.imp
-    -Xiwyu
-    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/libcxx.imp
-    -Xiwyu
-    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.libc.imp
-    -Xiwyu
-    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/stl.c.headers.imp
-  )
-  message("IWYU command: ${iwyu_path}")
-endif()
-
 if(ENABLE_IWYU)
   set_property(TARGET ir PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
 endif()
