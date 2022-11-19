@@ -18,6 +18,7 @@ limitations under the License.
 #define BACKENDS_DPDK_DPDKASMOPT_H_
 
 #include <fstream>
+
 #include "dpdkUtils.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
@@ -193,8 +194,8 @@ class ShortenTokenLength : public Transform {
     }
 
  public:
-    explicit ShortenTokenLength(ordered_map<cstring, cstring>& newNameMap) :
-        newNameMap(newNameMap){}
+    explicit ShortenTokenLength(ordered_map<cstring, cstring>& newNameMap)
+        : newNameMap(newNameMap) {}
     static ordered_map<cstring, cstring> origNameMap;
 
     const IR::Node* preorder(IR::Member* m) override {
@@ -604,38 +605,29 @@ class EmitDpdkTableConfig : public Inspector {
     ordered_map<cstring, cstring>& newNameMap;
     std::ofstream dpdkTableConfigFile;
 
-    void addExact(const IR::Expression* k,
-                int keyWidth, P4::TypeMap* typeMap);
-    void addLpm(const IR::Expression* k,
-                int keyWidth, P4::TypeMap* typeMap);
-    void addTernary(const IR::Expression* k,
-                int keyWidth, P4::TypeMap* typeMap);
-    void addRange(const IR::Expression* k,
-                int keyWidth, P4::TypeMap* typeMap);
-    void addOptional(const IR::Expression* k,
-                int keyWidth, P4::TypeMap* typeMap);
-    void addMatchKey(const IR::DpdkTable* table,
-                     const IR::ListExpression* keyset,
+    void addExact(const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap);
+    void addLpm(const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap);
+    void addTernary(const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap);
+    void addRange(const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap);
+    void addOptional(const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap);
+    void addMatchKey(const IR::DpdkTable* table, const IR::ListExpression* keyset,
                      P4::TypeMap* typeMap);
-    void addAction(const IR::Expression* actionRef,
-                   P4::ReferenceMap* refMap,
-                   P4::TypeMap* typeMap);
+    void addAction(const IR::Expression* actionRef, P4::ReferenceMap* refMap, P4::TypeMap* typeMap);
     int getTypeWidth(const IR::Type* type, P4::TypeMap* typeMap);
     cstring getKeyMatchType(const IR::KeyElement* ke, P4::ReferenceMap* refMap);
     const IR::EntriesList* getEntries(const IR::DpdkTable* dt);
-    const IR::Key *getKey(const IR::DpdkTable* dt);
-    big_int convertSimpleKeyExpressionToBigInt(
-        const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap);
+    const IR::Key* getKey(const IR::DpdkTable* dt);
+    big_int convertSimpleKeyExpressionToBigInt(const IR::Expression* k, int keyWidth,
+                                               P4::TypeMap* typeMap);
     bool tableNeedsPriority(const IR::DpdkTable* table, P4::ReferenceMap* refMap);
     bool isAllKeysDefaultExpression(const IR::ListExpression* keyset);
-    void print(cstring str, cstring sep="");
-    void print(big_int, cstring sep="");
+    void print(cstring str, cstring sep = "");
+    void print(big_int, cstring sep = "");
 
  public:
-    EmitDpdkTableConfig(P4::ReferenceMap* refMap,
-                        P4::TypeMap *typeMap,
-                        ordered_map<cstring, cstring>& newNameMap) : refMap(refMap),
-                        typeMap(typeMap), newNameMap(newNameMap) {}
+    EmitDpdkTableConfig(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                        ordered_map<cstring, cstring>& newNameMap)
+        : refMap(refMap), typeMap(typeMap), newNameMap(newNameMap) {}
     void postorder(const IR::DpdkTable* table) override;
 };
 
