@@ -212,7 +212,8 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions& options, std::ostream* outStream) {
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap, nullptr, policy),
-            new P4::ConstantFolding(&refMap, &typeMap),
+            new PassRepeated({new P4::ConstantFolding(&refMap, &typeMap),
+                              new P4::StrengthReduction(&refMap, &typeMap)}),
             new P4::MoveDeclarations(),
             validateTableProperties(options.arch),
             new P4::SimplifyControlFlow(&refMap, &typeMap),
