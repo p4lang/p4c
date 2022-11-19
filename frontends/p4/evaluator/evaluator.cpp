@@ -306,6 +306,22 @@ bool Evaluator::preorder(const IR::ListExpression* list) {
     return false;
 }
 
+bool Evaluator::preorder(const IR::P4ListExpression* list) {
+    LOG2("Evaluating " << list);
+    visit(list->components);
+    IR::Vector<IR::Node> comp;
+    for (auto e : list->components) {
+        if (auto value = getValue(e)) {
+            CHECK_NULL(value);
+            comp.push_back(value->getNode());
+        } else {
+            return false;
+        }
+    }
+    setValue(list, new IR::P4ListCompileTimeValue(std::move(comp)));
+    return false;
+}
+
 bool Evaluator::preorder(const IR::StructExpression* se) {
     LOG2("Evaluating " << se);
     visit(se->components);

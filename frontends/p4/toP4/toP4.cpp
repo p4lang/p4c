@@ -886,6 +886,28 @@ bool ToP4::preorder(const IR::ListExpression* e) {
     return false;
 }
 
+bool ToP4::preorder(const IR::P4ListExpression* e) {
+    if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append("(");
+    if (e->elementType != nullptr) {
+        builder.append("(list<");
+        visit(e->elementType->getP4Type());
+        builder.append(">)");
+    }
+    builder.append("{");
+    int prec = expressionPrecedence;
+    expressionPrecedence = DBPrint::Prec_Low;
+    bool first = true;
+    for (auto c : e->components) {
+        if (!first) builder.append(",");
+        first = false;
+        visit(c);
+    }
+    expressionPrecedence = prec;
+    builder.append("}");
+    if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append(")");
+    return false;
+}
+
 bool ToP4::preorder(const IR::NamedExpression* e) {
     builder.append(e->name.name);
     builder.append(" = ");

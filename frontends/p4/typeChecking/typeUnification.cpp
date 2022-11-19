@@ -386,6 +386,11 @@ bool TypeUnification::unify(const BinaryConstraint* constraint) {
                 sstack);
         constraints->add(constraint->create(dstack->elementType, sstack->elementType));
         return true;
+    } else if (dest->is<IR::Type_P4List>() && src->is<IR::Type_P4List>()) {
+        auto dvec = dest->to<IR::Type_P4List>();
+        auto svec = src->to<IR::Type_P4List>();
+        constraints->add(constraint->create(dvec->elementType, svec->elementType));
+        return true;
     }
 
     return constraint->reportError(constraints->getCurrentSubstitution());

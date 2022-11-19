@@ -354,6 +354,16 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             canon = new IR::Type_Stack(stack->srcInfo, et, stack->size);
         canon = typeMap->getCanonical(canon);
         return canon;
+    } else if (auto vec = type->to<IR::Type_P4List>()) {
+        auto et = canonicalize(vec->elementType);
+        if (et == nullptr) return nullptr;
+        const IR::Type* canon;
+        if (et == vec->elementType)
+            canon = type;
+        else
+            canon = new IR::Type_P4List(vec->srcInfo, et);
+        canon = typeMap->getCanonical(canon);
+        return canon;
     } else if (auto list = type->to<IR::Type_List>()) {
         auto fields = new IR::Vector<IR::Type>();
         // list<set<a>, b> = set<tuple<a, b>>
@@ -1378,6 +1388,11 @@ const IR::Node* TypeInference::postorder(IR::Type_Tuple* type) {
     return type;
 }
 
+const IR::Node* TypeInference::postorder(IR::Type_P4List* type) {
+    (void)setTypeType(type);
+    return type;
+}
+
 const IR::Node* TypeInference::postorder(IR::Type_Set* type) {
     (void)setTypeType(type);
     return type;
@@ -2046,6 +2061,42 @@ const IR::Node* TypeInference::postorder(IR::InvalidHeader* expression) {
     return expression;
 }
 
+const IR::Node* TypeInference::postorder(IR::P4ListExpression* expression) {
+    if (done()) return expression;
+    bool constant = true;
+    auto elementType = getTypeType(expression->elementType);
+    auto vec = new IR::Vector<IR::Expression>();
+    bool changed = false;
+    for (auto c : expression->components) {
+        if (!isCompileTimeConstant(c)) constant = false;
+        auto type = getType(c);
+        if (type == nullptr) return expression;
+        auto tvs = unify(expression, elementType, type,
+                         "Vector element type '%1%' does not match expected type '%2%'",
+                         {type, elementType});
+        if (tvs == nullptr) return expression;
+        if (!tvs->isIdentity()) {
+            ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+            auto converted = cts.convert(c);
+            vec->push_back(converted);
+            changed = true;
+        } else {
+            vec->push_back(c);
+        }
+    }
+
+    if (changed)
+        expression = new IR::P4ListExpression(expression->srcInfo, *vec, elementType->getP4Type());
+    auto type = new IR::Type_P4List(expression->srcInfo, elementType);
+    setType(getOriginal(), type);
+    setType(expression, type);
+    if (constant) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
+    return expression;
+}
+
 const IR::Node* TypeInference::postorder(IR::StructExpression* expression) {
     if (done()) return expression;
     bool constant = true;
@@ -2656,6 +2707,31 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
                 setType(result, castType);
                 return result;
             }
+        }
+    }
+    if (auto lt = concreteType->to<IR::Type_P4List>()) {
+        auto listElementType = lt->elementType;
+        if (auto le = expression->expr->to<IR::ListExpression>()) {
+            IR::Vector<IR::Expression> vec;
+            bool isConstant = true;
+            for (size_t i = 0; i < le->size(); i++) {
+                auto compI = le->components.at(i);
+                auto src = assignment(expression, listElementType, compI);
+                if (!isCompileTimeConstant(src)) isConstant = false;
+                vec.push_back(src);
+            }
+            auto vecType = castType->getP4Type();
+            setType(vecType, new IR::Type_Type(lt));
+            auto result = new IR::P4ListExpression(le->srcInfo, vec, listElementType->getP4Type());
+            setType(result, lt);
+            if (isConstant) {
+                setCompileTimeConstant(result);
+                setCompileTimeConstant(getOriginal<IR::Expression>());
+            }
+            return result;
+        } else {
+            typeError("%1%: casts to vector not supported", expression);
+            return expression;
         }
     }
 
