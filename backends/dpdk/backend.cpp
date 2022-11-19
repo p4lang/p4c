@@ -140,7 +140,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
         new CopyPropagationAndElimination(typeMap),
         new CollectUsedMetadataField(used_fields),
         new RemoveUnusedMetadataFields(used_fields),
-        new ShortenTokenLength(refMap, typeMap, newNameMap),
+        new ShortenTokenLength(newNameMap),
         new EmitDpdkTableConfig(refMap, typeMap, newNameMap),
     };
 

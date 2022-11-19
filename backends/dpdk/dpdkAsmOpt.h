@@ -167,8 +167,6 @@ class RemoveUnusedMetadataFields : public Transform {
 
 // This pass shorten the Identifier length
 class ShortenTokenLength : public Transform {
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
     ordered_map<cstring, cstring>& newNameMap;
     static size_t count;
     // Currently Dpdk allows Identifier of 63 char long or less
@@ -195,9 +193,8 @@ class ShortenTokenLength : public Transform {
     }
 
  public:
-    ShortenTokenLength(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-        ordered_map<cstring, cstring>& newNameMap) :
-        refMap(refMap), typeMap(typeMap) , newNameMap(newNameMap){}
+    explicit ShortenTokenLength(ordered_map<cstring, cstring>& newNameMap) :
+        newNameMap(newNameMap){}
     static ordered_map<cstring, cstring> origNameMap;
 
     const IR::Node* preorder(IR::Member* m) override {
