@@ -583,7 +583,7 @@ void TCIngressPipeline::emitTrafficManager(CodeBuilder *builder) {
                           control->outputStandardMetadata->name.name);
     builder->newline();
 
-    builder->appendFormat("if (%s.drop == false && %s.egress_port == 0) ",
+    builder->appendFormat("if (!%s.drop && %s.egress_port == 0) ",
                           control->outputStandardMetadata->name.name,
                           control->outputStandardMetadata->name.name);
     builder->blockStart();
