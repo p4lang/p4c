@@ -11,6 +11,8 @@ export P4C_DEPS="bison \
              curl \
              flex \
              g++ \
+             git \
+             lld \
              libboost-dev \
              libboost-graph-dev \
              libboost-iostreams1.71-dev \
@@ -45,15 +47,13 @@ export P4C_PIP_PACKAGES="ipaddr \
                           scapy==2.4.5 \
                           clang-format"
 
-apt-get update
-apt-get install -y --no-install-recommends \
+apt update
+apt install -y --no-install-recommends \
   ${P4C_DEPS} \
   ${P4C_EBPF_DEPS} \
-  ${P4C_RUNTIME_DEPS} \
-  git \
-  lld
+  ${P4C_RUNTIME_DEPS}
 
-# TODO: Remove this rm -rf line once the ccache memcache config is removed.
+# TODO: Remove this rm -rf line once the ccache memcache config (https://github.com/p4lang/third-party/blob/main/Dockerfile#L72) is removed.
 rm -rf /usr/local/etc/ccache.conf
 /usr/local/bin/ccache --set-config cache_dir=/p4c/.ccache
 /usr/local/bin/ccache --set-config max_size=1G
@@ -70,6 +70,7 @@ cd /p4c
 backends/ebpf/build_libbpf
 cd /p4c
 
+# ! ------  BEGIN PTF_EBPF -----------------------------------------------
 function install_ptf_ebpf_test_deps() (
   # Install linux-tools for specified kernels and for current one
   LINUX_TOOLS="linux-tools-`uname -r`"
@@ -80,10 +81,10 @@ function install_ptf_ebpf_test_deps() (
                            python3-six \
                            libgmp-dev \
                            libjansson-dev"
-  apt-get install -y --no-install-recommends ${P4C_PTF_PACKAGES}
+  apt install -y --no-install-recommends ${P4C_PTF_PACKAGES}
 
   if apt-cache show ${LINUX_TOOLS}; then
-    apt-get install -y --no-install-recommends ${LINUX_TOOLS}
+    apt install -y --no-install-recommends ${LINUX_TOOLS}
   fi
 
   git clone --depth 1 --recursive --branch v0.2.0 https://github.com/NIKSS-vSwitch/nikss /tmp/nikss
@@ -101,16 +102,16 @@ function install_ptf_ebpf_test_deps() (
   make "-j$(nproc)"
   make install
 )
+# ! ------  END PTF_EBPF -----------------------------------------------
 
 if [[ "${INSTALL_PTF_EBPF_DEPENDENCIES}" == "ON" ]] ; then
   install_ptf_ebpf_test_deps
 fi
 
 # ! ------  BEGIN VALIDATION -----------------------------------------------
-
 function build_gauntlet() {
   # For add-apt-repository.
-  apt-get install -y software-properties-common
+  apt install -y software-properties-common
   # Symlink the toz3 extension for the p4 compiler.
   mkdir -p /p4c/extensions
   git clone -b stable https://github.com/p4gauntlet/toz3 /p4c/extensions/toz3
@@ -127,8 +128,7 @@ if [ "$VALIDATION" == "ON" ]; then
 fi
 # ! ------  END VALIDATION -----------------------------------------------
 
-# ! ------  BEGIN VALIDATION -----------------------------------------------
-
+# ! ------  BEGIN P4TESTGEN -----------------------------------------------
 function build_tools_deps() {
   # This is needed for P4Testgen.
   apt install -y libboost-filesystem-dev libboost-system-dev wget zip
@@ -145,6 +145,8 @@ function build_tools_deps() {
   cd /p4c
   rm -rf /tmp/${Z3_DIST}
 }
+# ! ------  END P4TESTGEN -----------------------------------------------
+
 
 # Build the dependencies necessary for the P4Tools platform.
 if [ "$ENABLE_TEST_TOOLS" == "ON" ]; then
@@ -152,16 +154,7 @@ if [ "$ENABLE_TEST_TOOLS" == "ON" ]; then
 fi
 # ! ------  END TOOLS -----------------------------------------------
 
-
-function build() {
-  if [ -e build ]; then /bin/rm -rf build; fi
-  mkdir -p build
-  cd build
-
-  cmake "$@" ..
-  make
-}
-
+# Build with Clang instead of GCC.
 if [ "$COMPILE_WITH_CLANG" == "ON" ]; then
   export CC=clang
   export CXX=clang++
@@ -181,14 +174,25 @@ CMAKE_FLAGS+="-DCMAKE_BUILD_TYPE=RELEASE "
 CMAKE_FLAGS+="-DENABLE_WERROR=${ENABLE_WERROR} "
 # Enable sanitizers.
 CMAKE_FLAGS+="-DENABLE_SANITIZERS=${ENABLE_SANITIZERS} "
-build ${CMAKE_FLAGS}
 
-make install
-/usr/local/bin/ccache -p -s
+# Run CMake in the build folder.
+if [ -e build ]; then /bin/rm -rf build; fi
+mkdir -p build
+cd build
+cmake ${CMAKE_FLAGS} ..
+
+# If CMAKE_ONLY is active, only run CMake. Do not build.
+if [ "$CMAKE_ONLY" == "OFF" ]; then
+  make
+  make install
+  # Print ccache statistics after building
+  /usr/local/bin/ccache -p -s
+fi
+
 
 if [[ "${IMAGE_TYPE}" == "build" ]] ; then
-  apt-get purge -y ${P4C_DEPS} git
-  apt-get autoremove --purge -y
+  apt purge -y ${P4C_DEPS} git
+  apt autoremove --purge -y
   rm -rf /p4c /var/cache/apt/* /var/lib/apt/lists/*
   echo 'Build image ready'
 

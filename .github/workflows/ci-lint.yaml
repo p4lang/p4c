@@ -27,8 +27,7 @@ jobs:
 
     - name: Build
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON .
-        ./tools/export_ccache.sh
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg CMAKE_ONLY=ON .
 
     - name: Run cpplint.
       run: |
