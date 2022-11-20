@@ -10,19 +10,30 @@ jobs:
   p4c-lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/setup-python@v1
-    - name: Initialize linters with CMake.
-      run: |
-        mkdir build
-        cd build
-        cmake ..
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - uses: actions/setup-python@v4
+
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: apply-linters
+        max-size: 1000M
+
     - name: Check submodule ref points.
       run: |
         ./tools/check-git-submodules.sh
+
+    - name: Build
+      run: |
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON .
+        ./tools/export_ccache.sh
+
     - name: Run cpplint.
       run: |
-        make cpplint -C build
+        docker run p4c make cpplint -C build
+
     - name: Run clang-format.
       run: |
-        make clang-format -C build
+        docker run p4c make clang-format -C build
