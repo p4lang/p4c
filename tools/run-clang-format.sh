@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Check if clang-format is installed.
+if ! command -v clang-format &> /dev/null; then
+    echo "clang-format is not installed. Please install it using \"pip3 install --user clang-format\"."
+    exit 1
+fi
 
 args=$(getopt -l "write" -o "wh" -- "$@")
 
@@ -42,9 +47,6 @@ return_status=0
 # Add local bin to the path in case clang-format is installed there.
 export PATH=$PATH:${HOME}/.local/bin
 
-# For now, just run this on the tools back end.
-
-
 EXCLUDE_DIRS="-path ${THIS_DIR}/../backends/p4tools/submodules\
              -o -path ${THIS_DIR}/../backends/ebpf/runtime\
              -o -path ${THIS_DIR}/../backends/ubpf/runtime\
@@ -56,21 +58,19 @@ function run-clang-format() {
     # $2 is root
 return_status=$(($return_status || $?))
     lint_files=$(find $1 -type d \( ${EXCLUDE_DIRS} \) -prune -or -type f \( -iname \*.h -o -iname \*.cpp \) -print )
-    echo $lint_files
     if [[ $lint_files ]]; then
         clang-format ${write_args} -i ${lint_files}
     fi
     return_status=$(($return_status || $?))
 }
 
-run-clang-format $ROOT_DIR/backends/p4tools
 run-clang-format $ROOT_DIR/backends
 run-clang-format $ROOT_DIR/control-plane
 run-clang-format $ROOT_DIR/frontends
 # run-clang-format $ROOT_DIR/ir
 run-clang-format $ROOT_DIR/lib
 run-clang-format $ROOT_DIR/midend
-if [ -d "$DIRECTORY" ]; then
+if [ -d "$ROOT_DIR/extensions" ]; then
 run-clang-format $ROOT_DIR/extensions
 fi
 run-clang-format $ROOT_DIR/tools

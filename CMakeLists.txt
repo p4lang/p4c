@@ -451,7 +451,17 @@ endif ()
 install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 
+#### Linters
+
+file(GLOB_RECURSE P4C_LINT_LIST backends/*.cpp control-plane/*.cpp frontends/*.cpp ir/*.cpp extensions/*.cpp tools/*.cpp backends/*.h control-plane/*.h frontends/*.h ir/*.h extensions/*.h tools/*.h)
+list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/p4tools/submodules")
+list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ebpf/runtime")
+list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ubpf/runtime")
+list(FILTER P4C_LINT_LIST EXCLUDE REGEX "control-plane/p4runtime")
+
 # cpplint
+add_cpplint_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
+
 if(DEFINED CPPLINT_FILES)
   list ( SORT CPPLINT_FILES )
   set (CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
@@ -464,17 +474,34 @@ if(DEFINED CPPLINT_FILES)
     COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
     WORKING_DIRECTORY ${P4C_SOURCE_DIR}
     COMMENT "cpplint quietly")
+endif()
+
+# clang-format
+# Temporarily disable clang-format linting for the IR folder.
+list(FILTER P4C_LINT_LIST EXCLUDE REGEX "${P4C_SOURCE_DIR}/ir/")
+add_clang_format_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
+
+find_program(CLANG_FORMAT_CMD clang-format)
+
+if(NOT ${CLANG_FORMAT_CMD})
+  if(DEFINED CLANG_FORMAT_FILES)
+    list(SORT CLANG_FORMAT_FILES)
+    set(CLANG_FORMAT_CMD clang-format)
+    add_custom_target(
+      clang-format
+      COMMAND ${CLANG_FORMAT_CMD} --Werror --dry-run -i ${CLANG_FORMAT_FILES}
+      WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+      COMMENT "Checking files for correct clang-format formatting."
+    )
+    add_custom_target(
+      clang-format-write
+      COMMAND ${CLANG_FORMAT_CMD} -i ${CLANG_FORMAT_FILES}
+      WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+      COMMENT "Formatting files using clang-format."
+    )
+  endif()
 else()
-  # If no cpplint files are specified in CMake, set the target to run across the entire code base.
-  set (CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/run-cpplint.sh)
-  add_custom_target(cpplint
-    COMMAND ${CPPLINT_CMD}
-    WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-    COMMENT "cpplint")
-  add_custom_target(cpplint-quiet
-    COMMAND ${CPPLINT_CMD} --quiet
-    WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-    COMMENT "cpplint quietly")
+  message(WARNING "clang-format executable not found. Disabling clang-format checks. clang-format can be installed with \"pip3 install --user --upgrade clang-format\"")
 endif()
 
 # tags, etags
