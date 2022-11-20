@@ -453,7 +453,22 @@ install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
 
 ################################ Linters Begin ################################
 
-file(GLOB_RECURSE P4C_LINT_LIST backends/*.cpp control-plane/*.cpp frontends/*.cpp ir/*.cpp extensions/*.cpp tools/*.cpp backends/*.h control-plane/*.h frontends/*.h ir/*.h extensions/*.h tools/*.h)
+file(
+  GLOB_RECURSE P4C_LINT_LIST
+  backends/*.cpp
+  backends/*.h
+  control-plane/*.cpp
+  control-plane/*.h
+  frontends/*.cpp
+  frontends/*.h
+  extensions/*.cpp
+  extensions/*.h
+  ir/*.cpp
+  ir/*.h
+  tools/*.cpp
+  tools/*.h
+)
+# Filter some folders from the CI checks.
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/p4tools/submodules")
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ebpf/runtime")
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ubpf/runtime")
@@ -477,7 +492,8 @@ if(DEFINED CPPLINT_FILES)
 endif()
 
 # clang-format
-# Temporarily disable clang-format linting for the IR folder.
+# Temporarily disable clang-format linting for the ir folder.
+#TODO: Fix up the IR include system.
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "${P4C_SOURCE_DIR}/ir/")
 add_clang_format_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
 
@@ -494,7 +510,7 @@ if(NOT ${CLANG_FORMAT_CMD})
       COMMENT "Checking files for correct clang-format formatting."
     )
     add_custom_target(
-      clang-format-write
+      clang-format-fix-errors
       COMMAND ${CLANG_FORMAT_CMD} -i ${CLANG_FORMAT_FILES}
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Formatting files using clang-format."

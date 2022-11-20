@@ -21,6 +21,7 @@ jobs:
         key: apply-linters
         max-size: 1000M
 
+    # TODO: This check is disabled because git on the Github serves behaves differently. Unclear why.
     # - name: Check submodule ref points.
     #   run: |
     #     ./tools/check-git-submodules.sh
