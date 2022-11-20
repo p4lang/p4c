@@ -451,7 +451,7 @@ endif ()
 install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 
-#### Linters
+################################ Linters Begin ################################
 
 file(GLOB_RECURSE P4C_LINT_LIST backends/*.cpp control-plane/*.cpp frontends/*.cpp ir/*.cpp extensions/*.cpp tools/*.cpp backends/*.h control-plane/*.h frontends/*.h ir/*.h extensions/*.h tools/*.h)
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/p4tools/submodules")
@@ -503,6 +503,9 @@ if(NOT ${CLANG_FORMAT_CMD})
 else()
   message(WARNING "clang-format executable not found. Disabling clang-format checks. clang-format can be installed with \"pip3 install --user --upgrade clang-format\"")
 endif()
+
+################################ Linters End ################################
+
 
 # tags, etags
 set (CTAGS_DIRS backends extensions frontends ir lib tools midend)
