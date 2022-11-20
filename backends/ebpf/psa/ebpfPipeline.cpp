@@ -419,7 +419,7 @@ void EBPFEgressPipeline::emit(CodeBuilder* builder) {
 
     emitPSAControlOutputMetadata(builder);
     emitPSAControlInputMetadata(builder);
-    
+
     msgStr = Util::printf_format("%s parser: parsing new packet, input_port=%%d, path=%%d, "
                                  "pkt_len=%%d", sectionName);
     varStr = Util::printf_format("%s->packet_path", compilerGlobalMetadata);
