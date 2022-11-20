@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_SETHEADERS_H_
 #define _FRONTENDS_P4_SETHEADERS_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 /**
@@ -50,13 +50,15 @@ class DoSetHeaders final : public Transform {
     TypeMap* typeMap;
 
     bool containsHeaderType(const IR::Type* type);
-    void generateSetValid(
-        const IR::Expression* dest, const IR::Expression* src,
-        const IR::Type* destType, IR::Vector<IR::StatOrDecl>* insert);
+    void generateSetValid(const IR::Expression* dest, const IR::Expression* src,
+                          const IR::Type* destType, IR::Vector<IR::StatOrDecl>* insert);
 
  public:
-    DoSetHeaders(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoSetHeaders"); }
+    DoSetHeaders(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        setName("DoSetHeaders");
+    }
     const IR::Node* postorder(IR::AssignmentStatement* assign) override;
 };
 

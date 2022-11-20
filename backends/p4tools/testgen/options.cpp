@@ -22,12 +22,12 @@ const char* TestgenOptions::getIncludePath() {
 TestgenOptions::TestgenOptions()
     : AbstractP4cToolOptions("Generate packet tests for a P4 program") {
     registerOption(
-        "--permissive", nullptr,
+        "--strict", nullptr,
         [this](const char*) {
-            permissive = true;
+            strict = true;
             return true;
         },
-        "Do not fail on unimplemented features. Instead, try the next branch.");
+        "Fail on unimplemented features instead of trying the next branch.");
     registerOption(
         "--input-packet-only", nullptr,
         [this](const char*) {

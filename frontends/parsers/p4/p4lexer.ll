@@ -186,6 +186,8 @@ using Parser = P4::P4Parser;
                   return makeToken(VARBIT); }
 "value_set"     { BEGIN(driver.saveState); driver.template_args = true;
                   return makeToken(VALUESET); }
+"list"          { BEGIN(driver.saveState); driver.template_args = true;
+                  return makeToken(LIST); }
 "void"          { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(VOID); }
 "_"             { BEGIN(driver.saveState); driver.template_args = false;
@@ -270,6 +272,7 @@ using Parser = P4::P4Parser;
 "++"    { BEGIN(driver.saveState); driver.template_args = false; return makeToken(PP); }
 
 "+"     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(PLUS); }
+"#"     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(SHARP); }
 "|+|"   { BEGIN(driver.saveState); driver.template_args = false; return makeToken(PLUS_SAT); }
 "-"     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(MINUS); }
 "|-|"   { BEGIN(driver.saveState); driver.template_args = false; return makeToken(MINUS_SAT); }

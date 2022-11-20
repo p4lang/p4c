@@ -14,46 +14,45 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "ebpfProgram.h"
+
 #include <chrono>
 #include <ctime>
 
-#include "ebpfProgram.h"
-#include "ebpfType.h"
 #include "ebpfControl.h"
 #include "ebpfParser.h"
 #include "ebpfTable.h"
-#include "frontends/p4/coreLibrary.h"
+#include "ebpfType.h"
 #include "frontends/common/options.h"
+#include "frontends/p4/coreLibrary.h"
 
 namespace EBPF {
 
 bool EBPFProgram::build() {
     auto pack = toplevel->getMain();
     if (pack->type->name != "ebpfFilter")
-        ::warning(ErrorType::WARN_INVALID, "%1%: the main ebpf package should be called ebpfFilter"
-                  "; are you using the wrong architecture?", pack->type->name);
+        ::warning(ErrorType::WARN_INVALID,
+                  "%1%: the main ebpf package should be called ebpfFilter"
+                  "; are you using the wrong architecture?",
+                  pack->type->name);
 
     if (pack->getConstructorParameters()->size() != 2) {
-        ::error(ErrorType::ERR_EXPECTED,
-                "Expected toplevel package %1% to have 2 parameters", pack->type);
+        ::error(ErrorType::ERR_EXPECTED, "Expected toplevel package %1% to have 2 parameters",
+                pack->type);
         return false;
     }
 
-    auto pb = pack->getParameterValue(model.filter.parser.name)
-                      ->to<IR::ParserBlock>();
+    auto pb = pack->getParameterValue(model.filter.parser.name)->to<IR::ParserBlock>();
     BUG_CHECK(pb != nullptr, "No parser block found");
     parser = new EBPFParser(this, pb, typeMap);
     bool success = parser->build();
-    if (!success)
-        return success;
+    if (!success) return success;
 
-    auto cb = pack->getParameterValue(model.filter.filter.name)
-                      ->to<IR::ControlBlock>();
+    auto cb = pack->getParameterValue(model.filter.filter.name)->to<IR::ControlBlock>();
     BUG_CHECK(cb != nullptr, "No control block found");
     control = new EBPFControl(this, cb, parser->headers);
     success = control->build();
-    if (!success)
-        return success;
+    if (!success) return success;
 
     return true;
 }
@@ -154,13 +153,11 @@ void EBPFProgram::emitH(CodeBuilder* builder, cstring) {
 
 void EBPFProgram::emitTypes(CodeBuilder* builder) {
     for (auto d : program->objects) {
-        if (d->is<IR::Type>() && !d->is<IR::IContainer>() &&
-            !d->is<IR::Type_Extern>() && !d->is<IR::Type_Parser>() &&
-            !d->is<IR::Type_Control>() && !d->is<IR::Type_Typedef>() &&
+        if (d->is<IR::Type>() && !d->is<IR::IContainer>() && !d->is<IR::Type_Extern>() &&
+            !d->is<IR::Type_Parser>() && !d->is<IR::Type_Control>() && !d->is<IR::Type_Typedef>() &&
             !d->is<IR::Type_Error>()) {
             auto type = EBPFTypeFactory::instance->create(d->to<IR::Type>());
-            if (type == nullptr)
-                continue;
+            if (type == nullptr) continue;
             type->emit(builder);
             builder->newline();
         }
@@ -170,6 +167,7 @@ void EBPFProgram::emitTypes(CodeBuilder* builder) {
 namespace {
 class ErrorCodesVisitor : public Inspector {
     CodeBuilder* builder;
+
  public:
     explicit ErrorCodesVisitor(CodeBuilder* builder) : builder(builder) {}
     bool preorder(const IR::Type_Error* errors) override {
@@ -200,9 +198,10 @@ void EBPFProgram::emitPreamble(CodeBuilder* builder) {
         "{ u8 mask = EBPF_MASK(u8, s); "
         "*((u8*)a) = ((*((u8*)a)) & ~mask) | (((v) >> (8 - (s))) & mask); "
         "} while (0)");
-    builder->appendLine("#define write_byte(base, offset, v) do { "
-                        "*(u8*)((base) + (offset)) = (v); "
-                        "} while (0)");
+    builder->appendLine(
+        "#define write_byte(base, offset, v) do { "
+        "*(u8*)((base) + (offset)) = (v); "
+        "} while (0)");
     builder->newline();
     builder->appendLine("void* memcpy(void* dest, const void* src, size_t num);");
     builder->newline();
@@ -222,13 +221,11 @@ void EBPFProgram::emitLocalVariables(CodeBuilder* builder) {
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat("void* %s = %s;",
-                          packetStartVar.c_str(),
+    builder->appendFormat("void* %s = %s;", packetStartVar.c_str(),
                           builder->target->dataOffset(model.CPacketName.str()).c_str());
     builder->newline();
     builder->emitIndent();
-    builder->appendFormat("void* %s = %s;",
-                          packetEndVar.c_str(),
+    builder->appendFormat("void* %s = %s;", packetEndVar.c_str(),
                           builder->target->dataEnd(model.CPacketName.str()).c_str());
     builder->newline();
 
@@ -245,9 +242,7 @@ void EBPFProgram::emitLocalVariables(CodeBuilder* builder) {
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat("u32 %s = %s - %s",
-                          lengthVar.c_str(),
-                          packetEndVar.c_str(),
+    builder->appendFormat("u32 %s = %s - %s", lengthVar.c_str(), packetEndVar.c_str(),
                           packetStartVar.c_str());
     builder->endOfStatement(true);
 }
@@ -267,8 +262,8 @@ void EBPFProgram::emitPipeline(CodeBuilder* builder) {
     builder->target->emitTraceMessage(builder, "Control: packet processing started");
     control->emit(builder);
     builder->blockEnd(true);
-    builder->target->emitTraceMessage(builder, "Control: packet processing finished, pass=%d",
-                                      1, control->accept->name.name.c_str());
+    builder->target->emitTraceMessage(builder, "Control: packet processing finished, pass=%d", 1,
+                                      control->accept->name.name.c_str());
 }
 
 }  // namespace EBPF

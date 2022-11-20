@@ -109,9 +109,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
         if (h.h.c > 0) {
             table1.apply();
         } else {
-            table1.apply();
+            table2.apply();
         }
-        table2.apply();
     }
 }
 

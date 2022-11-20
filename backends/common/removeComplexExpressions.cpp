@@ -15,9 +15,10 @@ limitations under the License.
 */
 
 #include "removeComplexExpressions.h"
+
 #include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/methodInstance.h"
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "frontends/p4/methodInstance.h"
 
 namespace P4 {
 
@@ -43,21 +44,21 @@ class ComplexExpression : public Inspector {
 
 }  // namespace
 
-const IR::PathExpression*
-RemoveComplexExpressions::createTemporary(const IR::Expression* expression) {
+const IR::PathExpression* RemoveComplexExpressions::createTemporary(
+    const IR::Expression* expression) {
     auto type = typeMap->getType(expression, true);
     auto name = refMap->newName("tmp");
     auto decl = new IR::Declaration_Variable(IR::ID(name), type->getP4Type());
     newDecls.push_back(decl);
     typeMap->setType(decl, type);
-    auto assign = new IR::AssignmentStatement(
-        expression->srcInfo, new IR::PathExpression(name), expression);
+    auto assign =
+        new IR::AssignmentStatement(expression->srcInfo, new IR::PathExpression(name), expression);
     assignments.push_back(assign);
     return new IR::PathExpression(expression->srcInfo, new IR::Path(name));
 }
 
-const IR::Vector<IR::Argument>*
-RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Argument>* args) {
+const IR::Vector<IR::Argument>* RemoveComplexExpressions::simplifyExpressions(
+    const IR::Vector<IR::Argument>* args) {
     bool changes = true;
     auto result = new IR::Vector<IR::Argument>();
     for (auto arg : *args) {
@@ -69,24 +70,21 @@ RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Argument>* ar
             result->push_back(arg);
         }
     }
-    if (changes)
-        return result;
+    if (changes) return result;
     return args;
 }
 
-const IR::Expression*
-RemoveComplexExpressions::simplifyExpression(const IR::Expression* expression, bool force) {
+const IR::Expression* RemoveComplexExpressions::simplifyExpression(const IR::Expression* expression,
+                                                                   bool force) {
     // Note that 'force' is not applied recursively
     if (auto list = expression->to<IR::ListExpression>()) {
         auto simpl = simplifyExpressions(&list->components);
-        if (simpl != &list->components)
-            return new IR::ListExpression(expression->srcInfo, *simpl);
+        if (simpl != &list->components) return new IR::ListExpression(expression->srcInfo, *simpl);
         return expression;
     } else if (auto si = expression->to<IR::StructExpression>()) {
         auto simpl = simplifyExpressions(&si->components);
         if (simpl != &si->components)
-            return new IR::StructExpression(
-                si->srcInfo, si->structType, si->structType, *simpl);
+            return new IR::StructExpression(si->srcInfo, si->structType, si->structType, *simpl);
         return expression;
     } else {
         ComplexExpression ce;
@@ -100,8 +98,8 @@ RemoveComplexExpressions::simplifyExpression(const IR::Expression* expression, b
     }
 }
 
-const IR::Vector<IR::Expression>*
-RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Expression>* vec, bool force) {
+const IR::Vector<IR::Expression>* RemoveComplexExpressions::simplifyExpressions(
+    const IR::Vector<IR::Expression>* vec, bool force) {
     // This is more complicated than I'd like.  If an expression is
     // a list expression, then we actually simplify the elements
     // of the list.  Otherwise we simplify the argument itself.
@@ -111,17 +109,14 @@ RemoveComplexExpressions::simplifyExpressions(const IR::Vector<IR::Expression>* 
     auto result = new IR::Vector<IR::Expression>();
     for (auto e : *vec) {
         auto r = simplifyExpression(e, force);
-        if (r != e)
-            changes = true;
+        if (r != e) changes = true;
         result->push_back(r);
     }
-    if (changes)
-        return result;
+    if (changes) return result;
     return vec;
 }
 
-const IR::IndexedVector<IR::NamedExpression>*
-RemoveComplexExpressions::simplifyExpressions(
+const IR::IndexedVector<IR::NamedExpression>* RemoveComplexExpressions::simplifyExpressions(
     const IR::IndexedVector<IR::NamedExpression>* vec) {
     auto result = new IR::IndexedVector<IR::NamedExpression>();
     bool changes = false;
@@ -134,21 +129,18 @@ RemoveComplexExpressions::simplifyExpressions(
             result->push_back(e);
         }
     }
-    if (changes)
-        return result;
+    if (changes) return result;
     return vec;
 }
 
-const IR::Node*
-RemoveComplexExpressions::postorder(IR::SelectExpression* expression) {
+const IR::Node* RemoveComplexExpressions::postorder(IR::SelectExpression* expression) {
     auto vec = simplifyExpressions(&expression->select->components);
     if (vec != &expression->select->components)
         expression->select = new IR::ListExpression(expression->select->srcInfo, *vec);
     return expression;
 }
 
-const IR::Node*
-RemoveComplexExpressions::preorder(IR::P4Control* control) {
+const IR::Node* RemoveComplexExpressions::preorder(IR::P4Control* control) {
     if (policy != nullptr && !policy->convert(control)) {
         prune();
         return control;
@@ -157,13 +149,10 @@ RemoveComplexExpressions::preorder(IR::P4Control* control) {
     return control;
 }
 
-const IR::Node*
-RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
-    if (expression->arguments->size() == 0)
-        return expression;
+const IR::Node* RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
+    if (expression->arguments->size() == 0) return expression;
     auto mi = P4::MethodInstance::resolve(expression, refMap, typeMap);
-    if (mi->isApply() || mi->is<P4::BuiltInMethod>())
-        return expression;
+    if (mi->isApply() || mi->is<P4::BuiltInMethod>()) return expression;
 
     if (auto ef = mi->to<P4::ExternFunction>()) {
         if (ef->method->name == P4V1::V1Model::instance.digest_receiver.name) {
@@ -191,13 +180,12 @@ RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
                 vec->push_back(new IR::Argument(arg1));
             } else if (auto si = arg1->to<IR::StructExpression>()) {
                 auto list = simplifyExpressions(&si->components);
-                arg1 = new IR::StructExpression(
-                    si->srcInfo, si->structType, si->structType, *list);
+                arg1 = new IR::StructExpression(si->srcInfo, si->structType, si->structType, *list);
                 vec->push_back(new IR::Argument(arg1));
             } else {
-                auto tmp = new IR::Argument(
-                    expression->arguments->at(1)->srcInfo,
-                    createTemporary(expression->arguments->at(1)->expression));
+                auto tmp =
+                    new IR::Argument(expression->arguments->at(1)->srcInfo,
+                                     createTemporary(expression->arguments->at(1)->expression));
                 vec->push_back(tmp);
             }
             expression->arguments = vec;
@@ -206,28 +194,23 @@ RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
     }
 
     auto vec = simplifyExpressions(expression->arguments);
-    if (vec != expression->arguments)
-        expression->arguments = vec;
+    if (vec != expression->arguments) expression->arguments = vec;
     return expression;
 }
 
-const IR::Node*
-RemoveComplexExpressions::simpleStatement(IR::Statement* statement) {
-    if (assignments.empty())
-        return statement;
+const IR::Node* RemoveComplexExpressions::simpleStatement(IR::Statement* statement) {
+    if (assignments.empty()) return statement;
     auto block = new IR::BlockStatement(assignments);
     block->push_back(statement);
     assignments.clear();
     return block;
 }
 
-const IR::Node*
-RemoveComplexExpressions::postorder(IR::Statement* statement) {
+const IR::Node* RemoveComplexExpressions::postorder(IR::Statement* statement) {
     return simpleStatement(statement);
 }
 
-const IR::Node*
-RemoveComplexExpressions::postorder(IR::MethodCallStatement* statement) {
+const IR::Node* RemoveComplexExpressions::postorder(IR::MethodCallStatement* statement) {
     auto mi = P4::MethodInstance::resolve(statement, refMap, typeMap);
     if (auto em = mi->to<P4::ExternMethod>()) {
         if (em->originalExternType->name != P4::P4CoreLibrary::instance.packetIn.name ||
@@ -239,8 +222,8 @@ RemoveComplexExpressions::postorder(IR::MethodCallStatement* statement) {
         auto decl = new IR::Declaration_Variable(IR::ID(name), type->getP4Type());
         newDecls.push_back(decl);
         typeMap->setType(decl, typeMap->getTypeType(type, true));
-        auto assign = new IR::AssignmentStatement(
-            statement->srcInfo, new IR::PathExpression(name), statement->methodCall);
+        auto assign = new IR::AssignmentStatement(statement->srcInfo, new IR::PathExpression(name),
+                                                  statement->methodCall);
         return simpleStatement(assign);
     }
     return simpleStatement(statement);

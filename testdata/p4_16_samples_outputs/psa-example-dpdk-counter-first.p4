@@ -34,7 +34,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.BYTES) counter2;
     apply {
         counter0.count(12w1023, 32w20);
-        counter1.count(12w512);
+        counter1.count(12w512, 32w32);
         counter2.count(12w1023, 32w64);
     }
 }

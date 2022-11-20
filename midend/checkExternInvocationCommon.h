@@ -17,10 +17,10 @@ limitations under the License.
 #ifndef MIDEND_CHECKEXTERNINVOCATIONCOMMON_H_
 #define MIDEND_CHECKEXTERNINVOCATIONCOMMON_H_
 
+#include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
 #include "lib/bitvec.h"
-#include "frontends/p4/methodInstance.h"
 
 namespace P4 {
 
@@ -40,8 +40,8 @@ class TypeMap;
  */
 class CheckExternInvocationCommon : public Inspector {
  protected:
-    ReferenceMap *refMap;
-    TypeMap *typeMap;
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
     std::map<cstring /* extType */, bitvec> pipeConstraints;
 
     /**
@@ -72,8 +72,10 @@ class CheckExternInvocationCommon : public Inspector {
      * @param extMethod Pointer to object representing extern method.
      * @param expr Pointer to method call expression.
      */
-    virtual void checkExtern(const ExternMethod *extMethod,
-            const IR::MethodCallExpression *expr) { (void)extMethod; (void)expr; }
+    virtual void checkExtern(const ExternMethod* extMethod, const IR::MethodCallExpression* expr) {
+        (void)extMethod;
+        (void)expr;
+    }
 
     /**
      * @brief Method for checking constraints of extern functions given by parameters.
@@ -84,8 +86,11 @@ class CheckExternInvocationCommon : public Inspector {
      * @param extMethod Pointer to object representing extern function.
      * @param expr Pointer to function call expression.
      */
-    virtual void checkExtern(const ExternFunction *extFunction,
-            const IR::MethodCallExpression *expr) { (void)extFunction; (void)expr; }
+    virtual void checkExtern(const ExternFunction* extFunction,
+                             const IR::MethodCallExpression* expr) {
+        (void)extFunction;
+        (void)expr;
+    }
 
     /**
      * @brief Get the name of the block which is represented by bit set in the bitvec.
@@ -112,7 +117,7 @@ class CheckExternInvocationCommon : public Inspector {
         if (!pipeConstraints.count(extType)) {
             pipeConstraints.emplace(extType, vec);
         } else {
-            auto &cons = pipeConstraints.at(extType);
+            auto& cons = pipeConstraints.at(extType);
             cons |= vec;
         }
     }
@@ -130,28 +135,25 @@ class CheckExternInvocationCommon : public Inspector {
      * @param pipe Name of the parser or control block in which the method or the function
      *             is invoked.
      */
-    void checkPipeConstraints(cstring extType, bitvec bv,
-            const IR::MethodCallExpression *expr, cstring extName, cstring pipe) {
-        BUG_CHECK(pipeConstraints.count(extType), "pipe constraints not defined for %1%",
-            extType);
+    void checkPipeConstraints(cstring extType, bitvec bv, const IR::MethodCallExpression* expr,
+                              cstring extName, cstring pipe) {
+        BUG_CHECK(pipeConstraints.count(extType), "pipe constraints not defined for %1%", extType);
         auto constraint = pipeConstraints.at(extType) & bv;
         if (!bv.empty() && constraint.empty()) {
             if (extName != "")
-                ::error(ErrorType::ERR_UNSUPPORTED,
-                        "%s %s %s cannot be used in the %s %s", expr->srcInfo,
-                        extType, extName, pipe, extractBlock(bv));
+                ::error(ErrorType::ERR_UNSUPPORTED, "%s %s %s cannot be used in the %s %s",
+                        expr->srcInfo, extType, extName, pipe, extractBlock(bv));
             else
-                ::error(ErrorType::ERR_UNSUPPORTED,
-                        "%s %s cannot be used in the %s %s", expr->srcInfo,
-                        extType, pipe, extractBlock(bv));
+                ::error(ErrorType::ERR_UNSUPPORTED, "%s %s cannot be used in the %s %s",
+                        expr->srcInfo, extType, pipe, extractBlock(bv));
         }
     }
 
-    CheckExternInvocationCommon(ReferenceMap *refMap, TypeMap *typeMap) :
-        refMap(refMap), typeMap(typeMap) {}
+    CheckExternInvocationCommon(ReferenceMap* refMap, TypeMap* typeMap)
+        : refMap(refMap), typeMap(typeMap) {}
 
  public:
-    bool preorder(const IR::MethodCallExpression *expr) override {
+    bool preorder(const IR::MethodCallExpression* expr) override {
         auto mi = MethodInstance::resolve(expr, refMap, typeMap);
         if (auto extMethod = mi->to<ExternMethod>()) {
             checkExtern(extMethod, expr);

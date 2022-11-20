@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef MIDEND_REMOVE_COMPLEX_EXPRESSIONS_H_
-#define MIDEND_REMOVE_COMPLEX_EXPRESSIONS_H_
+#ifndef BACKENDS_COMMON_REMOVECOMPLEXEXPRESSIONS_H_
+#define BACKENDS_COMMON_REMOVECOMPLEXEXPRESSIONS_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -47,14 +47,13 @@ class RemoveComplexExpressions : public Transform {
     P4::TypeMap* typeMap;
     RemoveComplexExpressionsPolicy* policy;
     IR::IndexedVector<IR::Declaration> newDecls;
-    IR::IndexedVector<IR::StatOrDecl>  assignments;
+    IR::IndexedVector<IR::StatOrDecl> assignments;
 
     const IR::PathExpression* createTemporary(const IR::Expression* expression);
     const IR::Expression* simplifyExpression(const IR::Expression* expression, bool force);
-    const IR::Vector<IR::Expression>* simplifyExpressions(
-        const IR::Vector<IR::Expression>* vec, bool force = false);
-    const IR::Vector<IR::Argument>* simplifyExpressions(
-        const IR::Vector<IR::Argument>* vec);
+    const IR::Vector<IR::Expression>* simplifyExpressions(const IR::Vector<IR::Expression>* vec,
+                                                          bool force = false);
+    const IR::Vector<IR::Argument>* simplifyExpressions(const IR::Vector<IR::Argument>* vec);
     const IR::IndexedVector<IR::NamedExpression>* simplifyExpressions(
         const IR::IndexedVector<IR::NamedExpression>* vec);
 
@@ -62,20 +61,26 @@ class RemoveComplexExpressions : public Transform {
 
  public:
     RemoveComplexExpressions(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                             RemoveComplexExpressionsPolicy* policy = nullptr) :
-            refMap(refMap), typeMap(typeMap), policy(policy) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap);
-        setName("RemoveComplexExpressions"); }
+                             RemoveComplexExpressionsPolicy* policy = nullptr)
+        : refMap(refMap), typeMap(typeMap), policy(policy) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        setName("RemoveComplexExpressions");
+    }
     const IR::Node* postorder(IR::SelectExpression* expression) override;
-    const IR::Node* preorder(IR::ParserState* state) override
-    { assignments.clear(); return state; }
+    const IR::Node* preorder(IR::ParserState* state) override {
+        assignments.clear();
+        return state;
+    }
     const IR::Node* postorder(IR::ParserState* state) override {
         state->components.append(assignments);
         return state;
     }
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
-    const IR::Node* preorder(IR::P4Parser* parser) override
-    { newDecls.clear(); return parser; }
+    const IR::Node* preorder(IR::P4Parser* parser) override {
+        newDecls.clear();
+        return parser;
+    }
     const IR::Node* postorder(IR::P4Parser* parser) override {
         if (newDecls.size() != 0) {
             // prepend declarations
@@ -97,7 +102,6 @@ class RemoveComplexExpressions : public Transform {
     const IR::Node* postorder(IR::MethodCallStatement* statement) override;
 };
 
+}  // namespace P4
 
-}
-
-#endif  /* MIDEND_REMOVE_COMPLEX_EXPRESSIONS_H_ */
+#endif /* BACKENDS_COMMON_REMOVECOMPLEXEXPRESSIONS_H_ */

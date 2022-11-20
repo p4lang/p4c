@@ -228,10 +228,30 @@ void IR::ConstructorCallExpression::dbprint(std::ostream &out) const {
     dbsetflags(out, flags);
 }
 
+void IR::InvalidHeader::dbprint(std::ostream &out) const {
+    out << "(" << type << "){#}" << ";";
+}
+
 void IR::ListExpression::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     if (prec > Prec_Postfix) out << '(';
     out << setprec(Prec_Postfix) << "{" << setprec(Prec_Low);
+    bool first = true;
+    for (auto a : components) {
+        if (!first) out << ", ";
+        out << setprec(Prec_Low) << a;
+        first = false;
+    }
+    out << "}" << setprec(prec);
+    if (prec > Prec_Postfix) out << ')';
+    if (prec == 0) out << ';';
+}
+
+void IR::P4ListExpression::dbprint(std::ostream &out) const {
+    int prec = getprec(out);
+    if (prec > Prec_Postfix) out << '(';
+    out << setprec(Prec_Postfix) << "list<" << elementType <<
+            ">{" << setprec(Prec_Low);
     bool first = true;
     for (auto a : components) {
         if (!first) out << ", ";

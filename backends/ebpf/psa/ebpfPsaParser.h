@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_EBPFPSAPARSER_H_
 #define BACKENDS_EBPF_PSA_EBPFPSAPARSER_H_
 
-#include "backends/ebpf/ebpfType.h"
 #include "backends/ebpf/ebpfParser.h"
+#include "backends/ebpf/ebpfType.h"
 #include "backends/ebpf/psa/ebpfPsaTable.h"
 #include "backends/ebpf/psa/externs/ebpfPsaChecksum.h"
 
@@ -28,11 +28,11 @@ class EBPFPsaParser;
 
 class PsaStateTranslationVisitor : public StateTranslationVisitor {
  public:
-    EBPFPsaParser * parser;
+    EBPFPsaParser* parser;
 
     explicit PsaStateTranslationVisitor(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                                        EBPFPsaParser * prsr) :
-        StateTranslationVisitor(refMap, typeMap), parser(prsr) {}
+                                        EBPFPsaParser* prsr)
+        : StateTranslationVisitor(refMap, typeMap), parser(prsr) {}
 
     void processMethod(const P4::ExternMethod* ext) override;
 };
@@ -56,4 +56,4 @@ class EBPFPsaParser : public EBPFParser {
 
 }  // namespace EBPF
 
-#endif  /* BACKENDS_EBPF_PSA_EBPFPSAPARSER_H_ */
+#endif /* BACKENDS_EBPF_PSA_EBPFPSAPARSER_H_ */

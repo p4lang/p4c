@@ -21,7 +21,7 @@ limitations under the License.
 
 /// An enhanced version of std::vector that performs bounds checking for
 /// operator[].
-template<class T, class _Alloc = std::allocator<T>>
+template <class T, class _Alloc = std::allocator<T>>
 class safe_vector : public std::vector<T, _Alloc> {
  public:
     using std::vector<T, _Alloc>::vector;

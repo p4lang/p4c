@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   # Build with gcc and test p4c on Ubuntu 20.04.
-  build-linux-sanitizers:
+  test-linux-sanitizers:
     strategy:
       fail-fast: false
       matrix:
@@ -45,7 +45,7 @@ jobs:
       if: matrix.unified == 'ON'
 
   # Build with clang and test p4c on Ubuntu 20.04.
-  build-linux-clang:
+  test-linux-clang:
     strategy:
       fail-fast: false
     runs-on: ubuntu-latest
@@ -64,7 +64,7 @@ jobs:
 
     - name: Build (Ubuntu Linux, Clang)
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg ENABLE_WERROR=OFF --build-arg COMPILE_WITH_CLANG=ON .
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg COMPILE_WITH_CLANG=ON .
         ./tools/export_ccache.sh
 
       # run with sudo (...) --privileged
@@ -74,7 +74,7 @@ jobs:
         sudo docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
   
   # Build and test p4c on Fedora.
-  build-fedora-linux:
+  test-fedora-linux:
     strategy:
       fail-fast: false
     # This job runs in Fedora container that runs in Ubuntu VM.
@@ -112,7 +112,7 @@ jobs:
       working-directory: ./build
 
   # Build and test p4c on MacOS 11
-  build-mac-os:
+  test-mac-os:
     strategy:
       fail-fast: false
     runs-on: macos-11

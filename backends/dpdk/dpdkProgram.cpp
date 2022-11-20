@@ -14,8 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <unordered_map>
 #include "dpdkProgram.h"
+
+#include <unordered_map>
+
 #include "backend.h"
 #include "dpdkHelpers.h"
 #include "ir/dbprint.h"
@@ -26,26 +28,26 @@ namespace DPDK {
 /* Insert the metadata structure updated with tmp variables created during parser conversion
    Add all the structures to DPDK structtype.
 */
-IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata
-                                      (IR::P4Program *prog, IR::Type_Struct *metadata) {
+IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata(
+    IR::P4Program* prog, IR::Type_Struct* metadata) {
     IR::IndexedVector<IR::DpdkStructType> structType;
     auto new_objs = new IR::Vector<IR::Node>;
     for (auto obj : prog->objects) {
         if (auto s = obj->to<IR::Type_Struct>()) {
             if (s->name.name == structure->local_metadata_type) {
                 new_objs->push_back(metadata);
-                auto st = new IR::DpdkStructType(s->srcInfo, s->name,
-                                                 s->annotations, metadata->fields);
+                auto st =
+                    new IR::DpdkStructType(s->srcInfo, s->name, s->annotations, metadata->fields);
                 structType.push_back(st);
             } else {
                 if (structure->args_struct_map.find(s->name.name) !=
-                         structure->args_struct_map.end()) {
-                    auto st = new IR::DpdkStructType(s->srcInfo, s->name,
-                            s->annotations, s->fields);
+                    structure->args_struct_map.end()) {
+                    auto st =
+                        new IR::DpdkStructType(s->srcInfo, s->name, s->annotations, s->fields);
                     structType.push_back(st);
                 } else if (s->name.name == structure->header_type) {
-                    auto st = new IR::DpdkStructType(s->srcInfo, s->name,
-                                                 s->annotations, s->fields);
+                    auto st =
+                        new IR::DpdkStructType(s->srcInfo, s->name, s->annotations, s->fields);
                     structType.push_back(st);
                 }
                 new_objs->push_back(s);
@@ -71,7 +73,7 @@ IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_preambl
         new IR::Member(new IR::PathExpression("m"), "psa_ingress_input_metadata_ingress_port")));
     instr.push_back(new IR::DpdkMovStatement(
         new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
-        new IR::Constant(0)));
+        new IR::Constant(1)));
     return instr;
 }
 
@@ -91,9 +93,8 @@ IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_postamb
     return instr;
 }
 
-
-const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
-    IR::Type_Struct *metadataStruct = nullptr;
+const IR::DpdkAsmProgram* ConvertToDpdkProgram::create(IR::P4Program* prog) {
+    IR::Type_Struct* metadataStruct = nullptr;
 
     for (auto obj : prog->objects) {
         if (auto s = obj->to<IR::Type_Struct>()) {
@@ -114,23 +115,19 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
         if (kv.first == "IngressParser")
             kv.second->apply(*ingress_parser_converter);
         else if (kv.first == "EgressParser") {
-            if (options.enableEgress)
-                kv.second->apply(*egress_parser_converter);
+            if (options.enableEgress) kv.second->apply(*egress_parser_converter);
         } else if (kv.first == "MainParserT")
             kv.second->apply(*ingress_parser_converter);
         else
             BUG("Unknown parser %s", kv.second->name);
     }
-    auto ingress_converter =
-        new ConvertToDpdkControl(refmap, typemap, structure, metadataStruct);
-    auto egress_converter =
-        new ConvertToDpdkControl(refmap, typemap, structure, metadataStruct);
+    auto ingress_converter = new ConvertToDpdkControl(refmap, typemap, structure, metadataStruct);
+    auto egress_converter = new ConvertToDpdkControl(refmap, typemap, structure, metadataStruct);
     for (auto kv : structure->pipelines) {
         if (kv.first == "Ingress")
             kv.second->apply(*ingress_converter);
         else if (kv.first == "Egress") {
-            if (options.enableEgress)
-                kv.second->apply(*egress_converter);
+            if (options.enableEgress) kv.second->apply(*egress_converter);
         } else if (kv.first == "PreControlT")
             kv.second->apply(*ingress_converter);
         else if (kv.first == "MainControlT")
@@ -146,8 +143,7 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
         if (kv.first == "IngressDeparser")
             kv.second->apply(*ingress_deparser_converter);
         else if (kv.first == "EgressDeparser") {
-            if (options.enableEgress)
-                kv.second->apply(*egress_deparser_converter);
+            if (options.enableEgress) kv.second->apply(*egress_deparser_converter);
         } else if (kv.first == "MainDeparserT")
             kv.second->apply(*ingress_deparser_converter);
         else
@@ -179,14 +175,13 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     IR::IndexedVector<IR::DpdkHeaderType> headerType;
     for (auto kv : structure->header_types) {
         auto h = kv.second;
-        auto ht = new IR::DpdkHeaderType(h->srcInfo, h->name, h->annotations,
-                                         h->fields);
+        auto ht = new IR::DpdkHeaderType(h->srcInfo, h->name, h->annotations, h->fields);
         headerType.push_back(ht);
     }
 
     IR::IndexedVector<IR::DpdkStructType> structType;
     IR::IndexedVector<IR::DpdkStructType> updatedHeaderMetadataStructs =
-            UpdateHeaderMetadata(prog, metadataStruct);
+        UpdateHeaderMetadata(prog, metadataStruct);
     for (auto kv : structure->metadata_types) {
         auto s = kv.second;
         auto structTypeName = s->getName().name;
@@ -216,10 +211,11 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
              * InspectDpdkProgram adds there only the structures which contain some field
              * with structure type.
              */
-            LOG3("Struct type already added to DpdkStructType vector: " << s << std::endl <<
-                    "Main metadata structure is: " << structure->local_metadata_type);
+            LOG3("Struct type already added to DpdkStructType vector: "
+                 << s << std::endl
+                 << "Main metadata structure is: " << structure->local_metadata_type);
             BUG_CHECK(structTypeName == structure->local_metadata_type,
-                    "Unexpectedly duplicating declaration of: %1%", structTypeName);
+                      "Unexpectedly duplicating declaration of: %1%", structTypeName);
         } else {
             LOG3("Adding DpdkStructType: " << s);
             auto st = new IR::DpdkStructType(s->srcInfo, s->name, s->annotations, s->fields);
@@ -245,26 +241,24 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
         learners.append(egress_converter->getLearners());
     }
 
-    return new IR::DpdkAsmProgram(
-        headerType, structType, dpdkExternDecls, actions, tables, selectors, learners,
-        statements, structure->get_globals());
+    return new IR::DpdkAsmProgram(headerType, structType, dpdkExternDecls, actions, tables,
+                                  selectors, learners, statements, structure->get_globals());
 }
 
-const IR::Node *ConvertToDpdkProgram::preorder(IR::P4Program *prog) {
+const IR::Node* ConvertToDpdkProgram::preorder(IR::P4Program* prog) {
     dpdk_program = create(prog);
     return prog;
 }
 
-cstring ConvertToDpdkParser::append_parser_name(const IR::P4Parser *p, cstring label) {
+cstring ConvertToDpdkParser::append_parser_name(const IR::P4Parser* p, cstring label) {
     return p->name + "_" + label;
 }
 
-IR::Declaration_Variable *ConvertToDpdkParser::addNewTmpVarToMetadata(cstring name,
-                                                                       const IR::Type* type) {
-    auto newTmpVar =  new IR::Declaration_Variable(IR::ID(
-                                               refmap->newName(name)), type);
-    metadataStruct->fields.push_back(new IR::StructField(IR::ID(newTmpVar->name.name),
-                                                         newTmpVar->type));
+IR::Declaration_Variable* ConvertToDpdkParser::addNewTmpVarToMetadata(cstring name,
+                                                                      const IR::Type* type) {
+    auto newTmpVar = new IR::Declaration_Variable(IR::ID(refmap->newName(name)), type);
+    metadataStruct->fields.push_back(
+        new IR::StructField(IR::ID(newTmpVar->name.name), newTmpVar->type));
     return newTmpVar;
 }
 
@@ -274,8 +268,8 @@ IR::Declaration_Variable *ConvertToDpdkParser::addNewTmpVarToMetadata(cstring na
    expressions. When the keyset is Mask expression "a &&& b", it inserts temporary variables in
    Metadata structure and populates the left and right operands of comparison with
    "input & b" and "a & b" */
-void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expression *ce,
-                                      IR::Expression **leftExpr, IR::Expression **rightExpr) {
+void ConvertToDpdkParser::getCondVars(const IR::Expression* sv, const IR::Expression* ce,
+                                      IR::Expression** leftExpr, IR::Expression** rightExpr) {
     if (sv->is<IR::Constant>() && sv->type->width_bits() > 32) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "%1%, Constant expression wider than 32-bit is not permitted", sv);
@@ -286,14 +280,16 @@ void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expres
                 "%1%, Select expression wider than 64-bit is not permitted", sv);
         return;
     }
+    auto width = sv->type->width_bits();
+    auto byteAlignedWidth = (width + 7) & (~7);
     if (auto maskexpr = ce->to<IR::Mask>()) {
         auto left = maskexpr->left;
         auto right = maskexpr->right;
-        unsigned value = right->to<IR::Constant>()->asUnsigned() &
-                         left->to<IR::Constant>()->asUnsigned();
-        auto tmpDecl = addNewTmpVarToMetadata("tmpMask", sv->type);
-        auto tmpMask = new IR::Member(new IR::PathExpression(IR::ID("m")),
-                                      IR::ID(tmpDecl->name.name));
+        unsigned value =
+            right->to<IR::Constant>()->asUnsigned() & left->to<IR::Constant>()->asUnsigned();
+        auto tmpDecl = addNewTmpVarToMetadata("tmpMask", IR::Type_Bits::get(byteAlignedWidth));
+        auto tmpMask =
+            new IR::Member(new IR::PathExpression(IR::ID("m")), IR::ID(tmpDecl->name.name));
         structure->push_variable(new IR::DpdkDeclaration(tmpDecl));
         add_instr(new IR::DpdkMovStatement(tmpMask, sv));
         add_instr(new IR::DpdkAndStatement(tmpMask, tmpMask, right));
@@ -324,11 +320,11 @@ void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expres
                                          ....
     This function emits a series of jmps for each keyset.
 */
-void ConvertToDpdkParser::handleTupleExpression(const IR::ListExpression *cl,
-                                                const IR::ListExpression *input, int inputSize,
+void ConvertToDpdkParser::handleTupleExpression(const IR::ListExpression* cl,
+                                                const IR::ListExpression* input, int inputSize,
                                                 cstring trueLabel, cstring falseLabel) {
-    IR::Expression *left;
-    IR::Expression *right;
+    IR::Expression* left;
+    IR::Expression* right;
     /* Compare each element in the input tuple with the keyset tuple */
     for (auto i = 0; i < inputSize; i++) {
         auto switch_var = input->components.at(i);
@@ -341,7 +337,7 @@ void ConvertToDpdkParser::handleTupleExpression(const IR::ListExpression *cl,
     add_instr(new IR::DpdkJmpLabelStatement(trueLabel));
 }
 
-bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
+bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
     for (auto l : p->parserLocals) {
         structure->push_variable(new IR::DpdkDeclaration(l));
     }
@@ -349,8 +345,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
     ordered_map<cstring, const IR::ParserState*> state_map;
     std::vector<const IR::ParserState*> stack;
     for (auto state : p->states) {
-        if (state->name == "start")
-            stack.push_back(state);
+        if (state->name == "start") stack.push_back(state);
         degree_map.insert({state->name, 0});
         state_map.insert({state->name, state});
     }
@@ -388,18 +383,17 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
             DPDK::ConvertStatementToDpdk h(refmap, typemap, structure, metadataStruct);
             h.set_parser(p);
             stat->apply(h);
-            for (auto i : h.get_instr())
-                add_instr(i);
+            for (auto i : h.get_instr()) add_instr(i);
         }
 
         // Handle transition select statement
         if (state->selectExpression) {
             if (auto e = state->selectExpression->to<IR::SelectExpression>()) {
                 auto caseList = e->selectCases;
-                const IR::Expression *switch_var;
-                const IR::Expression *caseExpr;
-                IR::Expression *left;
-                IR::Expression *right;
+                const IR::Expression* switch_var;
+                const IR::Expression* caseExpr;
+                IR::Expression* left;
+                IR::Expression* right;
 
                 /* Handling single expression in keyset as special case because :
                    - for tuple expression we emit a series of jmpneq followed by an unconditional
@@ -413,13 +407,13 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
                     switch_var = e->select->components.at(0);
                     for (auto sc : caseList) {
                         caseExpr = sc->keyset;
-                        if (!sc->keyset->is<IR::DefaultExpression>()){
+                        if (!sc->keyset->is<IR::DefaultExpression>()) {
                             getCondVars(switch_var, caseExpr, &left, &right);
                             add_instr(new IR::DpdkJmpEqualStatement(
-                                      append_parser_name(p, sc->state->path->name), left, right));
+                                append_parser_name(p, sc->state->path->name), left, right));
                         } else {
                             add_instr(new IR::DpdkJmpLabelStatement(
-                                      append_parser_name(p, sc->state->path->name)));
+                                append_parser_name(p, sc->state->path->name)));
                         }
                     }
                 } else {
@@ -435,19 +429,19 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
                             falseLabel = refmap->newName(state->name);
                             trueLabel = sc->state->path->name;
                             handleTupleExpression(sc->keyset->to<IR::ListExpression>(),
-                                                  tupleInputExpr, inputSize, append_parser_name(p,
-                                                  trueLabel), append_parser_name(p, falseLabel));
-                            add_instr(new IR::DpdkLabelStatement(
-                                      append_parser_name(p, falseLabel)));
+                                                  tupleInputExpr, inputSize,
+                                                  append_parser_name(p, trueLabel),
+                                                  append_parser_name(p, falseLabel));
+                            add_instr(
+                                new IR::DpdkLabelStatement(append_parser_name(p, falseLabel)));
                         } else {
                             add_instr(new IR::DpdkJmpLabelStatement(
-                                      append_parser_name(p, sc->state->path->name)));
+                                append_parser_name(p, sc->state->path->name)));
                         }
                     }
                 }
             } else if (auto path = state->selectExpression->to<IR::PathExpression>()) {
-                auto i = new IR::DpdkJmpLabelStatement(
-                        append_parser_name(p, path->path->name));
+                auto i = new IR::DpdkJmpLabelStatement(append_parser_name(p, path->path->name));
                 add_instr(i);
             } else {
                 BUG("P4 Parser switch statement has other situations.");
@@ -485,11 +479,9 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
             degree_map.erase(node);
         }
 
-        if (degree_map.size() > 0 && stack.size() == 0)
-            BUG("Unsupported parser loop");
+        if (degree_map.size() > 0 && stack.size() == 0) BUG("Unsupported parser loop");
 
-        if (state->name == "start")
-            continue;
+        if (state->name == "start") continue;
     }
 
     add_instr(new IR::DpdkLabelStatement(append_parser_name(p, IR::ParserState::reject)));
@@ -497,20 +489,18 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
     return false;
 }
 
-bool ConvertToDpdkParser::preorder(const IR::ParserState *) { return false; }
+bool ConvertToDpdkParser::preorder(const IR::ParserState*) { return false; }
 
 // =====================Control=============================
-bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
+bool ConvertToDpdkControl::preorder(const IR::P4Action* a) {
     auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure, metadataStruct);
     helper->setCalledBy(this);
     a->body->apply(*helper);
     auto stmt_list = new IR::IndexedVector<IR::DpdkAsmStatement>();
-    for (auto i : helper->get_instr())
-        stmt_list->push_back(i);
+    for (auto i : helper->get_instr()) stmt_list->push_back(i);
 
     auto actName = a->name.name;
-    if (a->name.originalName == "NoAction")
-        actName = "NoAction";
+    if (a->name.originalName == "NoAction") actName = "NoAction";
     auto action = new IR::DpdkAction(*stmt_list, actName, *a->parameters);
     actions.push_back(action);
     return false;
@@ -521,7 +511,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
      - If there is a key field with lpm match kind, the other match fields, if any,
        must all be exact match.
 */
-bool ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
+bool ConvertToDpdkControl::checkTableValid(const IR::P4Table* a) {
     auto keys = a->getKey();
     auto lpmCount = 0;
     auto nonExactCount = 0;
@@ -540,33 +530,36 @@ bool ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
     }
 
     if (lpmCount > 1) {
-        ::error(ErrorType::ERR_UNEXPECTED, "Only one LPM match field is permitted per table, "
-                "more than one lpm field found in table (%1%)", a->name.toString());
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "Only one LPM match field is permitted per table, "
+                "more than one lpm field found in table (%1%)",
+                a->name.toString());
         return false;
     } else if (lpmCount == 1 && nonExactCount > 0) {
-        ::error(ErrorType::ERR_UNEXPECTED, "Non 'exact' match kind not permitted in table (%1%) "
-                "with 'lpm' match kind", a->name.toString());
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "Non 'exact' match kind not permitted in table (%1%) "
+                "with 'lpm' match kind",
+                a->name.toString());
         return false;
     }
     return true;
 }
 
-boost::optional<const IR::Member*>
-ConvertToDpdkControl::getMemExprFromProperty(const IR::P4Table* table,
-                                                                 cstring propertyName) {
+boost::optional<const IR::Member*> ConvertToDpdkControl::getMemExprFromProperty(
+    const IR::P4Table* table, cstring propertyName) {
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return boost::none;
     if (!property->value->is<IR::ExpressionValue>()) {
         ::error(ErrorType::ERR_EXPECTED,
-                "Expected %1% property value for table %2% to be an expression: %3%",
-                propertyName, table->controlPlaneName(), property);
+                "Expected %1% property value for table %2% to be an expression: %3%", propertyName,
+                table->controlPlaneName(), property);
         return boost::none;
     }
     auto expr = property->value->to<IR::ExpressionValue>()->expression;
     if (!expr->is<IR::Member>()) {
         ::error(ErrorType::ERR_EXPECTED,
-                "Exprected %1% property value for table %2% to be a member",
-                propertyName, table->controlPlaneName());
+                "Exprected %1% property value for table %2% to be a member", propertyName,
+                table->controlPlaneName());
         return boost::none;
     }
 
@@ -579,25 +572,23 @@ boost::optional<int> ConvertToDpdkControl::getNumberFromProperty(const IR::P4Tab
     if (property == nullptr) return boost::none;
     if (!property->value->is<IR::ExpressionValue>()) {
         ::error(ErrorType::ERR_EXPECTED,
-                "Expected %1% property value for table %2% to be an expression: %3%",
-                propertyName, table->controlPlaneName(), property);
+                "Expected %1% property value for table %2% to be an expression: %3%", propertyName,
+                table->controlPlaneName(), property);
         return boost::none;
     }
     auto expr = property->value->to<IR::ExpressionValue>()->expression;
     if (!expr->is<IR::Constant>()) {
         ::error(ErrorType::ERR_EXPECTED,
-                "Exprected %1% property value for table %2% to be a constant",
-                propertyName, table->controlPlaneName());
+                "Exprected %1% property value for table %2% to be a constant", propertyName,
+                table->controlPlaneName());
         return boost::none;
     }
 
     return expr->to<IR::Constant>()->asInt();
 }
 
-
-bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
-    if (!checkTableValid(t))
-        return false;
+bool ConvertToDpdkControl::preorder(const IR::P4Table* t) {
+    if (!checkTableValid(t)) return false;
 
     if (t->properties->getProperty("selector") != nullptr) {
         auto group_id = getMemExprFromProperty(t, "group_id");
@@ -606,29 +597,29 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
         auto n_groups_max = getNumberFromProperty(t, "n_groups_max");
         auto n_members_per_group_max = getNumberFromProperty(t, "n_members_per_group_max");
 
-        if (group_id == boost::none || member_id == boost::none ||
-                n_groups_max == boost::none || n_members_per_group_max == boost::none)
+        if (group_id == boost::none || member_id == boost::none || n_groups_max == boost::none ||
+            n_members_per_group_max == boost::none)
             return false;
 
-        auto selector = new IR::DpdkSelector(t->name,
-                (*group_id)->clone(), (*member_id)->clone(), selector_key->value->to<IR::Key>(),
-                *n_groups_max, *n_members_per_group_max);
+        auto selector = new IR::DpdkSelector(t->name, (*group_id)->clone(), (*member_id)->clone(),
+                                             selector_key->value->to<IR::Key>(), *n_groups_max,
+                                             *n_members_per_group_max);
 
         selectors.push_back(selector);
     } else if (structure->learner_tables.count(t->name.name) != 0) {
         auto learner = new IR::DpdkLearner(t->name.toString(), t->getKey(), t->getActionList(),
-                t->getDefaultAction(), t->properties);
+                                           t->getDefaultAction(), t->properties);
         learners.push_back(learner);
     } else {
-        auto paramList =  structure->defActionParamList[t->toString()];
+        auto paramList = structure->defActionParamList[t->toString()];
         auto table = new IR::DpdkTable(t->name.toString(), t->getKey(), t->getActionList(),
-                t->getDefaultAction(), t->properties, *paramList);
+                                       t->getDefaultAction(), t->properties, *paramList);
         tables.push_back(table);
     }
     return false;
 }
 
-bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
+bool ConvertToDpdkControl::preorder(const IR::P4Control* c) {
     LOG3("P4Control: " << dbp(c) << std::endl << c);
     for (auto l : c->controlLocals) {
         if (!l->is<IR::P4Action>() && !l->is<IR::P4Table>()) {
@@ -639,9 +630,11 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
     helper->setCalledBy(this);
     c->body->apply(*helper);
     if (deparser && structure->isPSA()) {
-        add_inst(new IR::DpdkJmpNotEqualStatement("LABEL_DROP",
+        add_inst(new IR::DpdkJmpNotEqualStatement(
+            "LABEL_DROP",
             new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
-            new IR::Constant(0))); }
+            new IR::Constant(0)));
+    }
 
     for (auto i : helper->get_instr()) {
         add_inst(i);

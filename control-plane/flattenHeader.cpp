@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "flattenHeader.h"
+
 #include "frontends/p4/typeMap.h"
 
 namespace P4 {
@@ -22,7 +23,7 @@ namespace P4 {
 namespace ControlPlaneAPI {
 
 FlattenHeader::FlattenHeader(P4::TypeMap* typeMap, IR::Type_Header* flattenedHeader)
-    : typeMap(typeMap), flattenedHeader(flattenedHeader) { }
+    : typeMap(typeMap), flattenedHeader(flattenedHeader) {}
 
 void FlattenHeader::doFlatten(const IR::Type* type) {
     if (type->is<IR::Type_Struct>()) needsFlattening = true;
@@ -40,8 +41,8 @@ void FlattenHeader::doFlatten(const IR::Type* type) {
         // preserve the original name using an annotation
         auto originalName = makeName(".");
         auto annotations = mergeAnnotations();
-        annotations = annotations->addOrReplace(
-            IR::Annotation::nameAnnotation, new IR::StringLiteral(originalName));
+        annotations = annotations->addOrReplace(IR::Annotation::nameAnnotation,
+                                                new IR::StringLiteral(originalName));
         auto field = new IR::StructField(IR::ID(newName), annotations, type);
         newFields.push_back(field);
         auto ftype = typeMap->getTypeType(type, true);
@@ -71,8 +72,8 @@ const IR::Annotations* FlattenHeader::mergeAnnotations() const {
 }
 
 /* static */
-const IR::Type_Header* FlattenHeader::flatten(
-    P4::TypeMap* typeMap, const IR::Type_Header* headerType) {
+const IR::Type_Header* FlattenHeader::flatten(P4::TypeMap* typeMap,
+                                              const IR::Type_Header* headerType) {
     auto flattenedHeader = headerType->clone();
     flattenedHeader->fields.clear();
     FlattenHeader flattener(typeMap, flattenedHeader);

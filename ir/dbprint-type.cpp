@@ -106,6 +106,12 @@ void IR::Type_Tuple::dbprint(std::ostream& out) const {
     dbsetflags(out, flags);
 }
 
+void IR::Type_P4List::dbprint(std::ostream& out) const {
+    int flags = dbgetflags(out);
+    out << Brief << "list<" << elementType << ">";
+    dbsetflags(out, flags);
+}
+
 void IR::Type_List::dbprint(std::ostream& out) const {
     int flags = dbgetflags(out);
     out << Brief << "list<";

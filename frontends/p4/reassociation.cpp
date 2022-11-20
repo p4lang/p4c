@@ -20,15 +20,11 @@ namespace P4 {
 
 const IR::Node* Reassociation::reassociate(IR::Operation_Binary* root) {
     auto right = root->right->to<IR::Constant>();
-    if (!right)
-        return root;
+    if (!right) return root;
     auto leftBin = root->left->to<IR::Operation_Binary>();
-    if (!leftBin)
-        return root;
-    if (leftBin->getStringOp() != root->getStringOp())
-        return root;
-    if (!leftBin->right->is<IR::Constant>())
-        return root;
+    if (!leftBin) return root;
+    if (leftBin->getStringOp() != root->getStringOp()) return root;
+    if (!leftBin->right->is<IR::Constant>()) return root;
     auto c = dynamic_cast<IR::Operation_Binary*>(root->clone());
     c->left = leftBin->right;
     c->right = root->right;

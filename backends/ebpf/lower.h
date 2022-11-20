@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _BACKENDS_EBPF_LOWER_H_
 #define _BACKENDS_EBPF_LOWER_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace EBPF {
 
@@ -31,14 +31,15 @@ class LowerExpressions : public Transform {
     // Cannot shift with a value larger than 5 bits
     const int maxShiftWidth = 5;
     const IR::Expression* shift(const IR::Operation_Binary* expression) const;
- public:
-    explicit LowerExpressions(P4::TypeMap* typeMap) : typeMap(typeMap)
-    { CHECK_NULL(typeMap); setName("LowerExpressions"); }
 
-    const IR::Node* postorder(IR::Shl* expression) override
-    { return shift(expression); }
-    const IR::Node* postorder(IR::Shr* expression) override
-    { return shift(expression); }
+ public:
+    explicit LowerExpressions(P4::TypeMap* typeMap) : typeMap(typeMap) {
+        CHECK_NULL(typeMap);
+        setName("LowerExpressions");
+    }
+
+    const IR::Node* postorder(IR::Shl* expression) override { return shift(expression); }
+    const IR::Node* postorder(IR::Shr* expression) override { return shift(expression); }
     const IR::Node* postorder(IR::Expression* expression) override;
     const IR::Node* postorder(IR::Slice* expression) override;
     const IR::Node* postorder(IR::Concat* expression) override;
@@ -56,4 +57,4 @@ class Lower : public PassManager {
 
 }  // namespace EBPF
 
-#endif  /* _BACKENDS_EBPF_LOWER_H_ */
+#endif /* _BACKENDS_EBPF_LOWER_H_ */

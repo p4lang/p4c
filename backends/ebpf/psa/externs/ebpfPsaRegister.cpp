@@ -16,15 +16,14 @@ limitations under the License.
 */
 
 #include "ebpfPsaRegister.h"
+
 #include "backends/ebpf/psa/ebpfPsaControl.h"
 
 namespace EBPF {
 
-EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program,
-                                 cstring instanceName, const IR::Declaration_Instance *di,
-                                 CodeGenInspector *codeGen) : EBPFTableBase(program,
-                                                                            instanceName,
-                                                                            codeGen) {
+EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram* program, cstring instanceName,
+                                 const IR::Declaration_Instance* di, CodeGenInspector* codeGen)
+    : EBPFTableBase(program, instanceName, codeGen) {
     CHECK_NULL(di);
     if (!di->type->is<IR::Type_Specialized>()) {
         ::error(ErrorType::ERR_MODEL, "Missing specialization: %1%", di);
@@ -65,7 +64,7 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program,
 
 bool EBPFRegisterPSA::shouldUseArrayMap() {
     CHECK_NULL(this->keyType);
-    if (auto wt = dynamic_cast<IHasWidth *>(this->keyType)) {
+    if (auto wt = dynamic_cast<IHasWidth*>(this->keyType)) {
         unsigned keyWidth = wt->widthInBits();
         // For keys <= 32 bit register is based on array map,
         // otherwise we use hash map
@@ -130,27 +129,24 @@ void EBPFRegisterPSA::emitInitializer(CodeBuilder* builder) {
     builder->endOfStatement(true);
     builder->emitIndent();
     builder->appendFormat("int %s = ", ret.c_str());
-    builder->target->emitTableUpdate(builder, instanceName,
-                                     keyName, valueName);
+    builder->target->emitTableUpdate(builder, instanceName, keyName, valueName);
     builder->newline();
 
     builder->emitIndent();
     builder->appendFormat("if (%s) ", ret.c_str());
     builder->blockStart();
-    cstring msgStr = Util::printf_format(
-            "Map initializer: Error while map (%s) update, code: %s", instanceName, "%d");
-    builder->target->emitTraceMessage(builder, msgStr,
-                                      1, ret.c_str());
+    cstring msgStr = Util::printf_format("Map initializer: Error while map (%s) update, code: %s",
+                                         instanceName, "%d");
+    builder->target->emitTraceMessage(builder, msgStr, 1, ret.c_str());
 
     builder->blockEnd(true);
 
     builder->blockEnd(true);
 }
 
-void EBPFRegisterPSA::emitInstance(CodeBuilder *builder) {
+void EBPFRegisterPSA::emitInstance(CodeBuilder* builder) {
     builder->target->emitTableDecl(builder, instanceName,
-                                   shouldUseArrayMap() ? TableArray : TableHash,
-                                   this->keyTypeName,
+                                   shouldUseArrayMap() ? TableArray : TableHash, this->keyTypeName,
                                    this->valueTypeName, size);
 }
 
@@ -167,8 +163,7 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder* builder, const P4::ExternMet
     this->valueType->declare(builder, valueName, true);
     builder->endOfStatement(true);
 
-    cstring msgStr = Util::printf_format("Register: reading %s",
-                                 instanceName.c_str());
+    cstring msgStr = Util::printf_format("Register: reading %s", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->emitIndent();
@@ -217,8 +212,7 @@ void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder* builder, const P4::ExternMe
     BUG_CHECK(!indexParamName.isNullOrEmpty(), "Index param cannot be empty");
     BUG_CHECK(!valueParamName.isNullOrEmpty(), "Value param cannot be empty");
 
-    cstring msgStr = Util::printf_format("Register: writing %s",
-                                 instanceName.c_str());
+    cstring msgStr = Util::printf_format("Register: writing %s", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->emitIndent();
@@ -230,10 +224,9 @@ void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder* builder, const P4::ExternMe
     builder->emitIndent();
     builder->appendFormat("if (%s) ", ret.c_str());
     builder->blockStart();
-    msgStr = Util::printf_format(
-            "Register: Error while map (%s) update, code: %s", instanceName, "%d");
-    builder->target->emitTraceMessage(builder, msgStr,
-                                      1, ret.c_str());
+    msgStr =
+        Util::printf_format("Register: Error while map (%s) update, code: %s", instanceName, "%d");
+    builder->target->emitTraceMessage(builder, msgStr, 1, ret.c_str());
 
     builder->blockEnd(true);
 }

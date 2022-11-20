@@ -100,6 +100,7 @@ struct local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpd4 {
 	bit<32> psa_ingress_input_metadata_ingress_port
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
+	bit<8> local_metadata_tmp
 	bit<16> Ingress_tmp
 	bit<16> Ingress_tmp_0
 }
@@ -162,11 +163,14 @@ table vxlan_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpd6 {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	extract h.ipv4
 	table vxlan_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpd6
-	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	jmpa LABEL_SWITCH vxlan_encap_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dp5
+	jmp LABEL_ENDSWITCH
+	LABEL_SWITCH :	mov m.local_metadata_tmp 0x0
+	LABEL_ENDSWITCH :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.outer_ethernet
 	emit h.outer_ipv4_dpdk_dpdk_dpdk_dpd3
 	emit h.outer_udp

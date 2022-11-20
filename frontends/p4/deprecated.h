@@ -28,9 +28,12 @@ namespace P4 {
  */
 class CheckDeprecated : public Inspector {
     const ReferenceMap* refMap;
+
  public:
-    explicit CheckDeprecated(const ReferenceMap* refMap): refMap(refMap)
-    { CHECK_NULL(refMap); setName("CheckDeprecated"); }
+    explicit CheckDeprecated(const ReferenceMap* refMap) : refMap(refMap) {
+        CHECK_NULL(refMap);
+        setName("CheckDeprecated");
+    }
 
     void warnIfDeprecated(const IR::IAnnotated* declaration, const IR::Node* errorNode);
 

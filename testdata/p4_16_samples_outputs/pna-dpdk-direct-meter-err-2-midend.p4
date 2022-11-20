@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <pna.p4>
+#include <dpdk/pna.p4>
 
 header ethernet_t {
     bit<48> dstAddr;
@@ -58,7 +58,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     @name("MainControlImpl.color_in") PNA_MeterColor_t color_in_0;
     @name("MainControlImpl.meter0") DirectMeter(PNA_MeterType_t.PACKETS) meter0_0;
     @name("MainControlImpl.send") action send() {
-        out1_0 = meter0_0.execute(color_in_0, 32w1024);
+        out1_0 = meter0_0.dpdk_execute(color_in_0, 32w1024);
         user_meta.port_out = (out1_0 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
     }
     @name("MainControlImpl.ipv4_host") table ipv4_host_0 {
@@ -74,7 +74,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     @hidden action pnadpdkdirectmetererr2l80() {
         color_in_0 = PNA_MeterColor_t.RED;
-        meter0_0.execute(PNA_MeterColor_t.RED, 32w1024);
+        meter0_0.dpdk_execute(PNA_MeterColor_t.RED, 32w1024);
     }
     @hidden table tbl_pnadpdkdirectmetererr2l80 {
         actions = {

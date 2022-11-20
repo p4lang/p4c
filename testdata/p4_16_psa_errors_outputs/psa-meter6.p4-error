@@ -1,0 +1,4 @@
+psa-meter6.p4(51): [--Wwarn=unsupported] warning: MyIC.meter0: Packet metering is not supported. Falling back to byte metering.
+    DirectMeter(PSA_MeterType_t.PACKETS) meter0;
+                                         ^^^^^^
+[--Werror=unexpected] error: execute method not supported for DirectMeter extern

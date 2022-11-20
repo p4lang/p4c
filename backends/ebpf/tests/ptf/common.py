@@ -16,7 +16,7 @@
 """ This file implements a PTF test case abstraction for eBPF.
     Before each test case, the following steps are performed:
     1. Compile P4/PSA program to eBPF bytecode using 'make psa'.
-    2. Load compiled eBPF programs to eBPF subsystem (psabpf-ctl load).
+    2. Load compiled eBPF programs to eBPF subsystem (nikss-ctl load).
     3. Attach eBPF programs to interfaces used by PTF framework.
 
     After each test case, eBPF programs are detached from interfaces and removed from eBPF subsystem.
@@ -124,7 +124,7 @@ class P4EbpfTest(BaseTest):
         self.dataplane = ptf.dataplane_instance
         self.dataplane.flush()
 
-        self.exec_ns_cmd("psabpf-ctl pipeline load id {} {}".format(TEST_PIPELINE_ID, self.test_prog_image), "Can't load programs into eBPF subsystem")
+        self.exec_ns_cmd("nikss-ctl pipeline load id {} {}".format(TEST_PIPELINE_ID, self.test_prog_image), "Can't load programs into eBPF subsystem")
 
         for intf in self.interfaces:
             self.add_port(dev=intf)
@@ -132,7 +132,7 @@ class P4EbpfTest(BaseTest):
     def tearDown(self):
         for intf in self.interfaces:
             self.del_port(intf)
-        self.exec_ns_cmd("psabpf-ctl pipeline unload id {}".format(TEST_PIPELINE_ID))
+        self.exec_ns_cmd("nikss-ctl pipeline unload id {}".format(TEST_PIPELINE_ID))
         super(P4EbpfTest, self).tearDown()
 
     def get_dataplane_port_number(self, name):
@@ -165,12 +165,12 @@ class P4EbpfTest(BaseTest):
         return process.returncode, stdout_data, stderr_data
 
     def add_port(self, dev):
-        self.exec_ns_cmd("psabpf-ctl add-port pipe {} dev {}".format(TEST_PIPELINE_ID, dev))
+        self.exec_ns_cmd("nikss-ctl add-port pipe {} dev {}".format(TEST_PIPELINE_ID, dev))
 
     def del_port(self, dev):
-        self.exec_ns_cmd("psabpf-ctl del-port pipe {} dev {}".format(TEST_PIPELINE_ID, dev))
+        self.exec_ns_cmd("nikss-ctl del-port pipe {} dev {}".format(TEST_PIPELINE_ID, dev))
         if dev.startswith("eth"):
-            self.exec_cmd("psabpf-ctl del-port pipe {} dev s1-{}".format(TEST_PIPELINE_ID, dev))
+            self.exec_cmd("nikss-ctl del-port pipe {} dev s1-{}".format(TEST_PIPELINE_ID, dev))
 
     def read_map(self, name, key):
         cmd = "bpftool -j map lookup pinned {}/{} key {}".format(PIPELINE_MAPS_MOUNT_PATH, name, key)
@@ -204,28 +204,28 @@ class P4EbpfTest(BaseTest):
         return testutils.test_param_get('trace') == 'True'
 
     def clone_session_create(self, id):
-        self.exec_ns_cmd("psabpf-ctl clone-session create pipe {} id {}".format(TEST_PIPELINE_ID, id))
+        self.exec_ns_cmd("nikss-ctl clone-session create pipe {} id {}".format(TEST_PIPELINE_ID, id))
 
     def clone_session_add_member(self, clone_session, egress_port, instance=1, cos=0):
-        self.exec_ns_cmd("psabpf-ctl clone-session add-member pipe {} id {} egress-port {} instance {} cos {}".format(
+        self.exec_ns_cmd("nikss-ctl clone-session add-member pipe {} id {} egress-port {} instance {} cos {}".format(
             TEST_PIPELINE_ID, clone_session, egress_port, instance, cos))
 
     def clone_session_delete(self, id):
-        self.exec_ns_cmd("psabpf-ctl clone-session delete pipe {} id {}".format(TEST_PIPELINE_ID, id))
+        self.exec_ns_cmd("nikss-ctl clone-session delete pipe {} id {}".format(TEST_PIPELINE_ID, id))
 
     def multicast_group_create(self, group):
-        self.exec_ns_cmd("psabpf-ctl multicast-group create pipe {} id {}".format(TEST_PIPELINE_ID, group))
+        self.exec_ns_cmd("nikss-ctl multicast-group create pipe {} id {}".format(TEST_PIPELINE_ID, group))
 
     def multicast_group_add_member(self, group, egress_port, instance=1):
-        self.exec_ns_cmd("psabpf-ctl multicast-group add-member pipe {} id {} egress-port {} instance {}".format(
+        self.exec_ns_cmd("nikss-ctl multicast-group add-member pipe {} id {} egress-port {} instance {}".format(
             TEST_PIPELINE_ID, group, egress_port, instance))
 
     def multicast_group_delete(self, group):
-        self.exec_ns_cmd("psabpf-ctl multicast-group delete pipe {} id {}".format(TEST_PIPELINE_ID, group))
+        self.exec_ns_cmd("nikss-ctl multicast-group delete pipe {} id {}".format(TEST_PIPELINE_ID, group))
 
     def _table_create_str_from_data(self, data, counters, meters):
         """ Creates string from action data, direct counters and direct meters
-            which can be passed to the psabpf-cli as an argument.
+            which can be passed to the nikss-cli as an argument.
         """
         s = ""
         if data or counters or meters:
@@ -253,7 +253,7 @@ class P4EbpfTest(BaseTest):
     def _table_create_str_from_(self, name="key", value=None):
         """
         Creates a string from value (a list of fields)
-        which can be passed to the psabpf-cli as an argument.
+        which can be passed to the nikss-cli as an argument.
         """
         s = name + " none"
         if value:
@@ -282,7 +282,7 @@ class P4EbpfTest(BaseTest):
         """
         Use table_add or table_update instead of this method.
         """
-        cmd = "psabpf-ctl table {} pipe {} {} ".format(method, TEST_PIPELINE_ID, table)
+        cmd = "nikss-ctl table {} pipe {} {} ".format(method, TEST_PIPELINE_ID, table)
         if references:
             data = references
             cmd = cmd + "ref "
@@ -321,7 +321,7 @@ class P4EbpfTest(BaseTest):
     def table_delete(self, table, key=None):
         """ Deletes existing table entry
         """
-        cmd = "psabpf-ctl table delete pipe {} {} ".format(TEST_PIPELINE_ID, table)
+        cmd = "nikss-ctl table delete pipe {} {} ".format(TEST_PIPELINE_ID, table)
         if key:
             cmd = cmd + self._table_create_str_from_key(key)
         self.exec_ns_cmd(cmd, "Table delete failed")
@@ -329,7 +329,7 @@ class P4EbpfTest(BaseTest):
     def table_set_default(self, table, action=0, data=None, counters=None, meters=None):
         """ Sets default action for table. For parameters documentation see `table_add` method.
         """
-        cmd = "psabpf-ctl table default set pipe {} {} ".format(TEST_PIPELINE_ID, table)
+        cmd = "nikss-ctl table default set pipe {} {} ".format(TEST_PIPELINE_ID, table)
         cmd = cmd + self._table_create_str_from_action(action)
         cmd = cmd + self._table_create_str_from_data(data=data, counters=counters, meters=meters)
         self.exec_ns_cmd(cmd, "Table set default entry failed")
@@ -338,7 +338,7 @@ class P4EbpfTest(BaseTest):
         """ Returns JSON containing parsed table entry - action data, meters, counters.
             If table has an implementation, set param `indirect` to True.
         """
-        cmd = "psabpf-ctl table get pipe {} {} ".format(TEST_PIPELINE_ID, table)
+        cmd = "nikss-ctl table get pipe {} {} ".format(TEST_PIPELINE_ID, table)
         if indirect:
             # TODO: cmd = cmd + "ref "
             self.fail("support for indirect table is not implemented yet")
@@ -380,27 +380,27 @@ class P4EbpfTest(BaseTest):
                 self._do_counter_verify(bytes=v.get("bytes", None), packets=v.get("packets", None),
                                         entry_value=entry_value, counter_type=type)
         if meters:
-            self.fail("Support for DirectMeter is not implemented yet (psabpf doesn't return internal state of meter if you need it)")
+            self.fail("Support for DirectMeter is not implemented yet (nikss doesn't return internal state of meter if you need it)")
 
     def action_selector_add_action(self, selector, action, data=None):
-        cmd = "psabpf-ctl action-selector add-member pipe {} {} ".format(TEST_PIPELINE_ID, selector)
+        cmd = "nikss-ctl action-selector add-member pipe {} {} ".format(TEST_PIPELINE_ID, selector)
         cmd = cmd + self._table_create_str_from_action(action)
         cmd = cmd + self._table_create_str_from_data(data=data, counters=None, meters=None)
         _, stdout, _ = self.exec_ns_cmd(cmd, "ActionSelector add-member failed")
         return json.loads(stdout)[selector]["added_member_ref"]
 
     def action_selector_create_empty_group(self, selector):
-        cmd = "psabpf-ctl action-selector create-group pipe {} {}".format(TEST_PIPELINE_ID, selector)
+        cmd = "nikss-ctl action-selector create-group pipe {} {}".format(TEST_PIPELINE_ID, selector)
         _, stdout, _ = self.exec_ns_cmd(cmd, "ActionSelector create-group failed")
         return json.loads(stdout)[selector]["added_group_ref"]
 
     def action_selector_add_member_to_group(self, selector, group_ref, member_ref):
-        cmd = "psabpf-ctl action-selector add-to-group pipe {} {} {} to {}"\
+        cmd = "nikss-ctl action-selector add-to-group pipe {} {} {} to {}"\
             .format(TEST_PIPELINE_ID, selector, member_ref, group_ref)
         self.exec_ns_cmd(cmd, "ActionSelector add-to-group failed")
 
     def action_profile_add_action(self, ap, action, data=None):
-        cmd = "psabpf-ctl action-profile add-member pipe {} {} ".format(TEST_PIPELINE_ID, ap)
+        cmd = "nikss-ctl action-profile add-member pipe {} {} ".format(TEST_PIPELINE_ID, ap)
         cmd = cmd + self._table_create_str_from_action(action)
         cmd = cmd + self._table_create_str_from_data(data=data, counters=None, meters=None)
         _, stdout, _ = self.exec_ns_cmd(cmd, "ActionProfile add-member failed")
@@ -411,13 +411,13 @@ class P4EbpfTest(BaseTest):
         # after that try to read digest message. In rare case packet can be
         # not yet processed so digest is not yet available.
         time.sleep(0.1)
-        cmd = "psabpf-ctl digest get-all pipe {} {}".format(TEST_PIPELINE_ID, name)
+        cmd = "nikss-ctl digest get-all pipe {} {}".format(TEST_PIPELINE_ID, name)
         _, stdout, _ = self.exec_ns_cmd(cmd, "Digest get failed")
         return json.loads(stdout)[name]['digests']
 
     def counter_get(self, name, key=None):
         key_str = self._table_create_str_from_key(key=key)
-        cmd = "psabpf-ctl counter get pipe {} {} {}".format(TEST_PIPELINE_ID, name, key_str)
+        cmd = "nikss-ctl counter get pipe {} {} {}".format(TEST_PIPELINE_ID, name, key_str)
         _, stdout, _ = self.exec_ns_cmd(cmd, "Counter get failed")
         return json.loads(stdout)[name]
 
@@ -451,21 +451,21 @@ class P4EbpfTest(BaseTest):
         self._do_counter_verify(bytes=bytes, packets=packets, entry_value=entry["value"], counter_type=counter["type"])
 
     def meter_update(self, name, index, pir, pbs, cir, cbs):
-        cmd = "psabpf-ctl meter update pipe {} {} " \
+        cmd = "nikss-ctl meter update pipe {} {} " \
               "index {} {}:{} {}:{}".format(TEST_PIPELINE_ID, name,
                                             index, pir, pbs, cir, cbs)
         self.exec_ns_cmd(cmd, "Meter update failed")
 
     def register_get(self, name, index=None):
         index_str = self._table_create_str_from_index(index=index)
-        cmd = "psabpf-ctl register get pipe {} {} {}".format(TEST_PIPELINE_ID, name, index_str)
+        cmd = "nikss-ctl register get pipe {} {} {}".format(TEST_PIPELINE_ID, name, index_str)
         _, stdout, _ = self.exec_ns_cmd(cmd, "Register get failed")
         return json.loads(stdout)[name]
 
     def register_set(self, name, index=None, value=None):
         index_str = self._table_create_str_from_index(index=index)
         value_str = self._table_create_str_from_value(value=value)
-        cmd = "psabpf-ctl register set pipe {} {} {} {}".format(TEST_PIPELINE_ID, name,
+        cmd = "nikss-ctl register set pipe {} {} {} {}".format(TEST_PIPELINE_ID, name,
                                                                 index_str, value_str)
         _, stdout, _ = self.exec_ns_cmd(cmd, "Register set failed")
 
@@ -489,6 +489,6 @@ class P4EbpfTest(BaseTest):
                           field_value))
 
     def value_set_insert(self, name, value):
-        cmd = "psabpf-ctl value-set insert pipe {} {} ".format(TEST_PIPELINE_ID, name)
+        cmd = "nikss-ctl value-set insert pipe {} {} ".format(TEST_PIPELINE_ID, name)
         cmd = cmd + self._table_create_str_from_value(value=value)
         self.exec_ns_cmd(cmd, "Value_set insert failed")

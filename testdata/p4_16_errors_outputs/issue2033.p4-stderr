@@ -1,3 +1,6 @@
-issue2033.p4(10): [--Werror=type-error] error: nop: action invocation should be after the `actions` list
+issue2033.p4(9): [--Werror=type-error] error: badtable has no action list, so it cannot invoke 'nop'
+    table badtable {
+          ^^^^^^^^
+issue2033.p4(10)
      default_action = nop;
                       ^^^

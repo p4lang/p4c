@@ -27,8 +27,11 @@ class FillEnumMap : public Transform {
     ChooseEnumRepresentation* policy;
     TypeMap* typeMap;
     FillEnumMap(ChooseEnumRepresentation* policy, TypeMap* typeMap)
-            : policy(policy), typeMap(typeMap)
-    { CHECK_NULL(policy); CHECK_NULL(typeMap); setName("FillEnumMap"); }
+        : policy(policy), typeMap(typeMap) {
+        CHECK_NULL(policy);
+        CHECK_NULL(typeMap);
+        setName("FillEnumMap");
+    }
     const IR::Node* preorder(IR::Type_Enum* type) override;
 };
 

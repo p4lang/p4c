@@ -61,15 +61,15 @@ if(ENABLE_IWYU)
     -Xiwyu
     --no_fwd_decls
     -Xiwyu
-    --mapping_file=${CMAKE_CURRENT_LIST_DIR}/scripts/tools/iwyu_mappings/p4c.imp
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/p4c.imp
     -Xiwyu
-    --mapping_file=${CMAKE_CURRENT_LIST_DIR}/scripts/tools/iwyu_mappings/boost-1.75-all.imp
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/boost-1.75-all.imp
     -Xiwyu
-    --mapping_file=${CMAKE_CURRENT_LIST_DIR}/scripts/tools/iwyu_mappings/libcxx.imp
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/libcxx.imp
     -Xiwyu
-    --mapping_file=${CMAKE_CURRENT_LIST_DIR}/scripts/tools/iwyu_mappings/gcc.libc.imp
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.libc.imp
     -Xiwyu
-    --mapping_file=${CMAKE_CURRENT_LIST_DIR}/scripts/tools/iwyu_mappings/stl.c.headers.imp
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/stl.c.headers.imp
   )
   message("IWYU command: ${iwyu_path}")
 endif()
@@ -79,16 +79,9 @@ enable_testing()
 set(ENABLE_TESTING ON)
 
 # Include sub projects.
-add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common ${P4C_SOURCE_DIR}/tools)
-add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/testgen ${P4C_SOURCE_DIR}/tools)
-add_and_lint_subdirectory(${CMAKE_CURRENT_LIST_DIR}/p4check ${P4C_SOURCE_DIR}/tools)
-
-# Add clang-format to checks.
-add_test(
-  NAME "testgen-clang-format"
-  COMMAND sh -c "${CMAKE_CURRENT_LIST_DIR}/scripts/tools/run-clang-format.sh"
-  WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/testgen)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/p4check)
 
 # Custom IR constructs for P4Tools.
 set(IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/common/testgen.def PARENT_SCOPE)

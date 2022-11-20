@@ -99,7 +99,6 @@ foreach(src IN LISTS DPDK_IR_SRCS)
 endforeach()
 set(EXTENSION_FRONTEND_SOURCES ${EXTENSION_FRONTEND_SOURCES} ${QUAL_DPDK_IR_SRCS} PARENT_SCOPE)
 
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_DPDK_SOURCES};${P4C_DPDK_HEADERS};${DPDK_IR_SRCS}")
 add_executable(p4c-dpdk ${P4C_DPDK_SOURCES})
 target_link_libraries (p4c-dpdk dpdk_runtime ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 add_dependencies(p4c-dpdk dpdk_runtime genIR frontend)
@@ -117,7 +116,10 @@ set(DPDK_COMPILER_DRIVER "${CMAKE_CURRENT_SOURCE_DIR}/run-dpdk-test.py")
 
 set (P4_16_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/psa-*.p4"
-  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-*.p4")
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-*.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_psa_errors/*.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_dpdk_errors/*.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_pna_errors/*.p4")
 p4c_add_tests("dpdk" ${DPDK_COMPILER_DRIVER} "${P4_16_SUITES}" "" "--bfrt")
 
 include(DpdkXfail.cmake)

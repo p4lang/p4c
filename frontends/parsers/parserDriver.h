@@ -67,9 +67,7 @@ class AbstractParserDriver {
 
     /// Notify that an error was encountered during parsing at @location.
     /// @message is a Bison-provided human-readable explanation of the error.
-    void onParseError(const Util::SourceInfo& location,
-                      const std::string& message);
-
+    void onParseError(const Util::SourceInfo& location, const std::string& message);
 
     ////////////////////////////////////////////////////////////////////////////
     // Shared state manipulated directly by the lexer and parser.
@@ -113,8 +111,7 @@ class P4ParserDriver final : public AbstractParserDriver {
      */
     static const IR::P4Program* parse(std::istream& in, const char* sourceFile,
                                       unsigned sourceLine = 1);
-    static const IR::P4Program* parse(FILE* in, const char* sourceFile,
-                                      unsigned sourceLine = 1);
+    static const IR::P4Program* parse(FILE* in, const char* sourceFile, unsigned sourceLine = 1);
 
     /**
      * Parses a P4-16 annotation body.
@@ -124,72 +121,56 @@ class P4ParserDriver final : public AbstractParserDriver {
      */
     // Lists /////////////////////////////////////////////////////////////////
     static const IR::Vector<IR::Expression>* parseExpressionList(
-        const Util::SourceInfo& srcInfo,
-        const IR::Vector<IR::AnnotationToken>& body);
+        const Util::SourceInfo& srcInfo, const IR::Vector<IR::AnnotationToken>& body);
 
     static const IR::IndexedVector<IR::NamedExpression>* parseKvList(
-        const Util::SourceInfo& srcInfo,
-        const IR::Vector<IR::AnnotationToken>& body);
+        const Util::SourceInfo& srcInfo, const IR::Vector<IR::AnnotationToken>& body);
 
     static const IR::Vector<IR::Expression>* parseConstantList(
-        const Util::SourceInfo& srcInfo,
-        const IR::Vector<IR::AnnotationToken>& body);
+        const Util::SourceInfo& srcInfo, const IR::Vector<IR::AnnotationToken>& body);
 
     static const IR::Vector<IR::Expression>* parseConstantOrStringLiteralList(
-        const Util::SourceInfo& srcInfo,
-        const IR::Vector<IR::AnnotationToken>& body);
+        const Util::SourceInfo& srcInfo, const IR::Vector<IR::AnnotationToken>& body);
 
     static const IR::Vector<IR::Expression>* parseStringLiteralList(
-        const Util::SourceInfo& srcInfo,
-        const IR::Vector<IR::AnnotationToken>& body);
+        const Util::SourceInfo& srcInfo, const IR::Vector<IR::AnnotationToken>& body);
 
     // Singletons ////////////////////////////////////////////////////////////
-    static const IR::Expression* parseExpression(
-        const Util::SourceInfo& srcInfo,
-        const IR::Vector<IR::AnnotationToken>& body);
+    static const IR::Expression* parseExpression(const Util::SourceInfo& srcInfo,
+                                                 const IR::Vector<IR::AnnotationToken>& body);
 
-    static const IR::Constant* parseConstant(
-        const Util::SourceInfo& srcInfo,
-        const IR::Vector<IR::AnnotationToken>& body);
+    static const IR::Constant* parseConstant(const Util::SourceInfo& srcInfo,
+                                             const IR::Vector<IR::AnnotationToken>& body);
 
     static const IR::Expression* parseConstantOrStringLiteral(
-        const Util::SourceInfo& srcInfo,
-        const IR::Vector<IR::AnnotationToken>& body);
+        const Util::SourceInfo& srcInfo, const IR::Vector<IR::AnnotationToken>& body);
 
-    static const IR::StringLiteral* parseStringLiteral(
-        const Util::SourceInfo& srcInfo,
-        const IR::Vector<IR::AnnotationToken>& body);
+    static const IR::StringLiteral* parseStringLiteral(const Util::SourceInfo& srcInfo,
+                                                       const IR::Vector<IR::AnnotationToken>& body);
 
     // Pairs /////////////////////////////////////////////////////////////////
     static const IR::Vector<IR::Expression>* parseExpressionPair(
-        const Util::SourceInfo& srcInfo,
-        const IR::Vector<IR::AnnotationToken>& body);
+        const Util::SourceInfo& srcInfo, const IR::Vector<IR::AnnotationToken>& body);
 
     static const IR::Vector<IR::Expression>* parseConstantPair(
-        const Util::SourceInfo& srcInfo,
-        const IR::Vector<IR::AnnotationToken>& body);
+        const Util::SourceInfo& srcInfo, const IR::Vector<IR::AnnotationToken>& body);
 
     static const IR::Vector<IR::Expression>* parseStringLiteralPair(
-        const Util::SourceInfo& srcInfo,
-        const IR::Vector<IR::AnnotationToken>& body);
+        const Util::SourceInfo& srcInfo, const IR::Vector<IR::AnnotationToken>& body);
 
     // Triples ///////////////////////////////////////////////////////////////
     static const IR::Vector<IR::Expression>* parseExpressionTriple(
-        const Util::SourceInfo& srcInfo,
-        const IR::Vector<IR::AnnotationToken>& body);
+        const Util::SourceInfo& srcInfo, const IR::Vector<IR::AnnotationToken>& body);
 
     static const IR::Vector<IR::Expression>* parseConstantTriple(
-        const Util::SourceInfo& srcInfo,
-        const IR::Vector<IR::AnnotationToken>& body);
+        const Util::SourceInfo& srcInfo, const IR::Vector<IR::AnnotationToken>& body);
 
     static const IR::Vector<IR::Expression>* parseStringLiteralTriple(
-        const Util::SourceInfo& srcInfo,
-        const IR::Vector<IR::AnnotationToken>& body);
+        const Util::SourceInfo& srcInfo, const IR::Vector<IR::AnnotationToken>& body);
 
     // P4Runtime Annotations /////////////////////////////////////////////////
     static const IR::Vector<IR::Expression>* parseP4rtTranslationAnnotation(
-        const Util::SourceInfo& srcInfo,
-        const IR::Vector<IR::AnnotationToken>& body);
+        const Util::SourceInfo& srcInfo, const IR::Vector<IR::AnnotationToken>& body);
 
  protected:
     friend class P4::P4Lexer;
@@ -221,13 +202,12 @@ class P4ParserDriver final : public AbstractParserDriver {
     P4ParserDriver();
 
     /// Common functionality for parsing.
-    bool parse(AbstractP4Lexer& lexer, const char* sourceFile,
-               unsigned sourceLine = 1);
+    bool parse(AbstractP4Lexer& lexer, const char* sourceFile, unsigned sourceLine = 1);
 
     /// Common functionality for parsing annotation bodies.
-    template<typename T> const T* parse(P4AnnotationLexer::Type type,
-                                        const Util::SourceInfo& srcInfo,
-                                        const IR::Vector<IR::AnnotationToken>& body);
+    template <typename T>
+    const T* parse(P4AnnotationLexer::Type type, const Util::SourceInfo& srcInfo,
+                   const IR::Vector<IR::AnnotationToken>& body);
 
     /// All P4 `error` declarations are merged together in the node, which is
     /// lazily created the first time we see an `error` declaration. (This node
@@ -260,8 +240,7 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
      */
     static const IR::V1Program* parse(std::istream& in, const char* sourceFile,
                                       unsigned sourceLine = 1);
-    static const IR::V1Program* parse(FILE* in, const char* sourceFile,
-                                      unsigned sourceLine = 1);
+    static const IR::V1Program* parse(FILE* in, const char* sourceFile, unsigned sourceLine = 1);
 
  protected:
     friend class V1::V1Lexer;
@@ -293,7 +272,6 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
     /// @return an IR::Annotations object containing the active pragmas, and
     /// clear the list.
     const IR::Annotations* takePragmasAsAnnotations();
-
 
     ////////////////////////////////////////////////////////////////////////////
     // Shared state manipulated directly by the lexer and parser.

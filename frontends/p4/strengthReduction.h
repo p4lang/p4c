@@ -17,31 +17,31 @@ limitations under the License.
 #ifndef _P4_STRENGTHREDUCTION_H_
 #define _P4_STRENGTHREDUCTION_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/sideEffects.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
-#include "frontends/p4/sideEffects.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
 /** Implements a pass that replaces expensive arithmetic and boolean
-  * operations with cheaper ones -- i.e., strength reduction
-  *
-  * Specifically, it provides:
-  *
-  * 1. A collection of helper methods that determine whether a given
-  * expression is `0`, `1`, `true`, or `false`, or a power of `2`
-  *
-  * 2. A visitor that transforms arithmetic and boolean expressions
-  *
-  * @pre: None
-  *
-  * @post: Ensure that
-  *   - most arithmetic and boolean expressions are simplified
-  *   - division and modulus by `0`
-  *
-  */
+ * operations with cheaper ones -- i.e., strength reduction
+ *
+ * Specifically, it provides:
+ *
+ * 1. A collection of helper methods that determine whether a given
+ * expression is `0`, `1`, `true`, or `false`, or a power of `2`
+ *
+ * 2. A visitor that transforms arithmetic and boolean expressions
+ *
+ * @pre: None
+ *
+ * @post: Ensure that
+ *   - most arithmetic and boolean expressions are simplified
+ *   - division and modulus by `0`
+ *
+ */
 class DoStrengthReduction final : public Transform {
     /// @returns `true` if @p expr is the constant `1`.
     bool isOne(const IR::Expression* expr) const;
@@ -65,7 +65,10 @@ class DoStrengthReduction final : public Transform {
     }
 
  public:
-    DoStrengthReduction() { visitDagOnce = true; setName("StrengthReduction"); }
+    DoStrengthReduction() {
+        visitDagOnce = true;
+        setName("StrengthReduction");
+    }
 
     using Transform::postorder;
 
@@ -92,20 +95,20 @@ class DoStrengthReduction final : public Transform {
     const IR::Node* postorder(IR::Range* expr) override;
     const IR::Node* postorder(IR::Concat* expr) override;
 
-    const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {
-        if (bs->annotations->getSingle("disable_optimization"))
-            prune();
-        return bs; }
+    const IR::BlockStatement* preorder(IR::BlockStatement* bs) override {
+        if (bs->annotations->getSingle("disable_optimization")) prune();
+        return bs;
+    }
 };
 
 class StrengthReduction : public PassManager {
  public:
     StrengthReduction(ReferenceMap* refMap, TypeMap* typeMap,
-            TypeChecking* typeChecking = nullptr) {
+                      TypeChecking* typeChecking = nullptr) {
         if (typeMap != nullptr) {
-            if (!typeChecking)
-                typeChecking = new TypeChecking(refMap, typeMap, true);
-            passes.push_back(typeChecking); }
+            if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap, true);
+            passes.push_back(typeChecking);
+        }
         passes.push_back(new DoStrengthReduction());
     }
 };

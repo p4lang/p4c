@@ -184,6 +184,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token<Token>      PLUS_SAT "|+|"
 %token<Token>      MINUS_SAT "|-|"
 %token<Token>      MUL "*"
+%token<Token>      SHARP "#"
 %token<Token>      DIV "/"
 %token<Token>      MOD "%"
 %token<Token>      BIT_OR "|"
@@ -215,7 +216,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token<Token>      TRUE FALSE THIS
 %token<Token>      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT
                    ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
-                   INT KEY SELECT MATCH_KIND TYPE OUT PACKAGE PARSER PRAGMA RETURN STATE
+                   INT KEY  LIST SELECT MATCH_KIND TYPE OUT PACKAGE PARSER PRAGMA RETURN STATE
                    STRING STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
 
 %token<cstring> IDENTIFIER TYPE_IDENTIFIER STRING_LITERAL
@@ -235,7 +236,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
                             p4rtControllerType reducedSimpleKeysetExpression
                             nonBraceExpression
 %type<ConstType*>           baseType typeOrVoid specializedType headerStackType
-                            typeRef tupleType typeArg realTypeArg namedType
+                            typeRef tupleType typeArg realTypeArg namedType p4listType
 %type<IR::Type_Name*>       typeName
 %type<IR::Argument*>        argument
 %type<IR::Vector<IR::Argument>*>  argumentList nonEmptyArgList
@@ -463,6 +464,7 @@ nonTypeName
 
 name
     : nonTypeName { $$ = $1; }
+    | LIST { $$ = new IR::ID(@1, "list"); }
     | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
     ;
 
@@ -578,6 +580,7 @@ annotationToken
     | TYPEDEF          { $$ = $1; }
     | VARBIT           { $$ = $1; }
     | VALUESET         { $$ = $1; }
+    | LIST             { $$ = $1; }
     | VOID             { $$ = $1; }
     | "_"              { $$ = $1; }
 
@@ -952,6 +955,7 @@ typeRef
     | typeName                         { $$ = $1; }
     | specializedType                  { $$ = $1; }
     | headerStackType                  { $$ = $1; }
+    | p4listType                       { $$ = $1; }
     | tupleType                        { $$ = $1; }
     ;
 
@@ -968,6 +972,10 @@ prefixedType
 
 typeName
     : prefixedType                     { $$ = new IR::Type_Name(@1, $1); }
+    ;
+
+p4listType
+    : LIST l_angle typeArg r_angle   { $$ = new IR::Type_P4List(@1+@4, $3); }
     ;
 
 tupleType
@@ -1420,6 +1428,8 @@ expression
     | expression "[" expression "]"      { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
     | expression "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     | "{" expressionList "}"             { $$ = new IR::ListExpression(@1 + @3, *$2); }
+    | "{" SHARP "}"                      { $$ = new IR::InvalidHeader(
+                                                  @1 + @3, IR::Type::Unknown::get(), nullptr); }
     | "{" kvList "}"                     { $$ = new IR::StructExpression(
                                                   @1 + @3, IR::Type::Unknown::get(), (IR::Type_Name*)nullptr, *$2); }
     | "(" expression ")"                 { $$ = $2; }

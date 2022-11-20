@@ -14,9 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "psaSwitch.h"
+
 #include "frontends/common/model.h"
 #include "frontends/p4/cloner.h"
-#include "psaSwitch.h"
 
 namespace BMV2 {
 
@@ -96,10 +97,8 @@ void PsaCodeGenerator::createStructLike(ConversionContext* ctxt, const IR::Type_
 }
 
 void PsaCodeGenerator::createTypes(ConversionContext* ctxt) {
-    for (auto kv : header_types)
-        createStructLike(ctxt, kv.second);
-    for (auto kv : metadata_types)
-        createStructLike(ctxt, kv.second);
+    for (auto kv : header_types) createStructLike(ctxt, kv.second);
+    for (auto kv : metadata_types) createStructLike(ctxt, kv.second);
     for (auto kv : header_union_types) {
         auto st = kv.second;
         auto fields = new Util::JsonArray();
@@ -257,8 +256,10 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     if (!main) return;
 
     if (main->type->name != "PSA_Switch")
-        ::warning(ErrorType::WARN_INVALID, "%1%: the main package should be called PSA_Switch"
-                  "; are you using the wrong architecture?", main->type->name);
+        ::warning(ErrorType::WARN_INVALID,
+                  "%1%: the main package should be called PSA_Switch"
+                  "; are you using the wrong architecture?",
+                  main->type->name);
 
     main->apply(*parsePsaArch);
 
@@ -269,15 +270,16 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         // new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
         new P4::SynthesizeActions(refMap, typeMap,
-                new SkipControls(&structure.non_pipeline_controls)),
+                                  new SkipControls(&structure.non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new LowerExpressions(typeMap),
-        new P4::ConstantFolding(refMap, typeMap, false),
+        new PassRepeated(
+            {new P4::ConstantFolding(refMap, typeMap), new P4::StrengthReduction(refMap, typeMap)}),
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveComplexExpressions(refMap, typeMap,
-                new ProcessControls(&structure.pipeline_controls)),
+                                         new ProcessControls(&structure.pipeline_controls)),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         // Converts the DAG into a TREE (at least for expressions)
@@ -297,20 +299,17 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     main = toplevel->getMain();
     if (!main) return;  // no main
     main->apply(*parsePsaArch);
-    if (::errorCount() > 0)
-        return;
+    if (::errorCount() > 0) return;
     program = toplevel->getProgram();
 
-    PassManager toJson = {
-        new DiscoverStructure(&structure),
-        new InspectPsaProgram(refMap, typeMap, &structure),
-        new ConvertPsaToJson(refMap, typeMap, toplevel, json, &structure)
-    };
-    for (const auto &pEnum : *enumMap) {
-      auto name = pEnum.first->getName();
-      for (const auto &pEntry : *pEnum.second) {
-        json->add_enum(name, pEntry.first, pEntry.second);
-      }
+    PassManager toJson = {new DiscoverStructure(&structure),
+                          new InspectPsaProgram(refMap, typeMap, &structure),
+                          new ConvertPsaToJson(refMap, typeMap, toplevel, json, &structure)};
+    for (const auto& pEnum : *enumMap) {
+        auto name = pEnum.first->getName();
+        for (const auto& pEntry : *pEnum.second) {
+            json->add_enum(name, pEntry.first, pEntry.second);
+        }
     }
     program->apply(toJson);
     json->add_program_info(options.file);
@@ -329,7 +328,7 @@ cstring PsaCodeGenerator::convertHashAlgorithm(cstring algo) {
     } else if (algo == "CRC32_CUSTOM") {
         result = "crc32_custom";
     } else if (algo == "IDENTITY") {
-        result  = "identity";
+        result = "identity";
     }
 
     return result;
@@ -348,17 +347,16 @@ ExternConverter_ActionProfile ExternConverter_ActionProfile::singleton;
 ExternConverter_ActionSelector ExternConverter_ActionSelector::singleton;
 ExternConverter_Digest ExternConverter_Digest::singleton;
 
-Util::IJson* ExternConverter_Hash::convertExternObject(
-    UNUSED ConversionContext* ctxt, const P4::ExternMethod* em,
-    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
-    UNUSED const bool& emitExterns) {
+Util::IJson* ExternConverter_Hash::convertExternObject(UNUSED ConversionContext* ctxt,
+                                                       const P4::ExternMethod* em,
+                                                       const IR::MethodCallExpression* mc,
+                                                       UNUSED const IR::StatOrDecl* s,
+                                                       UNUSED const bool& emitExterns) {
     Util::JsonObject* primitive = nullptr;
     if (mc->arguments->size() == 2)
-        primitive = mkPrimitive("_" + em->originalExternType->name +
-                                "_" + em->method->name);
+        primitive = mkPrimitive("_" + em->originalExternType->name + "_" + em->method->name);
     else if (mc->arguments->size() == 4)
-        primitive = mkPrimitive("_" + em->originalExternType->name +
-                                "_" + "get_hash_mod");
+        primitive = mkPrimitive("_" + em->originalExternType->name + "_" + "get_hash_mod");
     else {
         modelError("Expected 1 or 3 arguments for %1%", mc);
         return nullptr;
@@ -395,7 +393,7 @@ Util::IJson* ExternConverter_Hash::convertExternObject(
 
 Util::IJson* ExternConverter_Checksum::convertExternObject(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool& emitExterns) {
     auto primitive = mkPrimitive("Checksum");
     return primitive;
@@ -403,7 +401,7 @@ Util::IJson* ExternConverter_Checksum::convertExternObject(
 
 Util::IJson* ExternConverter_InternetChecksum::convertExternObject(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool& emitExterns) {
     Util::JsonObject* primitive = nullptr;
     if (em->method->name == "add" || em->method->name == "subtract" ||
@@ -412,15 +410,12 @@ Util::IJson* ExternConverter_InternetChecksum::convertExternObject(
             modelError("Expected 1 argument for %1%", mc);
             return nullptr;
         } else
-            primitive = mkPrimitive("_" + em->originalExternType->name +
-                                    "_" + em->method->name);
+            primitive = mkPrimitive("_" + em->originalExternType->name + "_" + em->method->name);
     } else if (em->method->name == "get") {
         if (mc->arguments->size() == 1)
-            primitive = mkPrimitive("_" + em->originalExternType->name +
-                                    "_" + em->method->name);
+            primitive = mkPrimitive("_" + em->originalExternType->name + "_" + em->method->name);
         else if (mc->arguments->size() == 2)
-            primitive = mkPrimitive("_" + em->originalExternType->name +
-                                    "_" + "get_verify");
+            primitive = mkPrimitive("_" + em->originalExternType->name + "_" + "get_verify");
         else {
             modelError("Unexpected number of arguments for %1%", mc);
             return nullptr;
@@ -430,8 +425,7 @@ Util::IJson* ExternConverter_InternetChecksum::convertExternObject(
             modelError("Expected 0 argument for %1%", mc);
             return nullptr;
         } else
-            primitive = mkPrimitive("_" + em->originalExternType->name +
-                                    "_" + em->method->name);
+            primitive = mkPrimitive("_" + em->originalExternType->name + "_" + em->method->name);
     }
     auto parameters = mkParameters(primitive);
     primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
@@ -440,10 +434,10 @@ Util::IJson* ExternConverter_InternetChecksum::convertExternObject(
     cksum->emplace("value", em->object->controlPlaneName());
     parameters->append(cksum);
     if (em->method->name == "add" || em->method->name == "subtract") {
-        auto fieldList=new Util::JsonObject();
-        fieldList->emplace("type","field_list");
+        auto fieldList = new Util::JsonObject();
+        fieldList->emplace("type", "field_list");
         auto fieldsJson = ctxt->conv->convert(mc->arguments->at(0)->expression, true, false);
-        fieldList->emplace("value",fieldsJson);
+        fieldList->emplace("value", fieldsJson);
         parameters->append(fieldList);
     } else if (em->method->name != "clear") {
         if (mc->arguments->size() == 2) {  // get_verify
@@ -459,16 +453,16 @@ Util::IJson* ExternConverter_InternetChecksum::convertExternObject(
     return primitive;
 }
 
-Util::IJson* ExternConverter_Counter::convertExternObject(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
-    UNUSED const bool& emitExterns) {
+Util::IJson* ExternConverter_Counter::convertExternObject(UNUSED ConversionContext* ctxt,
+                                                          UNUSED const P4::ExternMethod* em,
+                                                          UNUSED const IR::MethodCallExpression* mc,
+                                                          UNUSED const IR::StatOrDecl* s,
+                                                          UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 1) {
         modelError("Expected 1 argument for %1%", mc);
         return nullptr;
     }
-    auto primitive = mkPrimitive("_" + em->originalExternType->name +
-                                 "_" + em->method->name);
+    auto primitive = mkPrimitive("_" + em->originalExternType->name + "_" + em->method->name);
     auto parameters = mkParameters(primitive);
     primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
     auto ctr = new Util::JsonObject();
@@ -482,7 +476,7 @@ Util::IJson* ExternConverter_Counter::convertExternObject(
 
 Util::IJson* ExternConverter_DirectCounter::convertExternObject(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 0) {
         modelError("Expected 0 argument for %1%", mc);
@@ -492,16 +486,16 @@ Util::IJson* ExternConverter_DirectCounter::convertExternObject(
     return nullptr;
 }
 
-Util::IJson* ExternConverter_Meter::convertExternObject(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
-    UNUSED const bool& emitExterns) {
+Util::IJson* ExternConverter_Meter::convertExternObject(UNUSED ConversionContext* ctxt,
+                                                        UNUSED const P4::ExternMethod* em,
+                                                        UNUSED const IR::MethodCallExpression* mc,
+                                                        UNUSED const IR::StatOrDecl* s,
+                                                        UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 1 && mc->arguments->size() != 2) {
         modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
     }
-    auto primitive = mkPrimitive("_" + em->originalExternType->name +
-                                 "_" + em->method->name);
+    auto primitive = mkPrimitive("_" + em->originalExternType->name + "_" + em->method->name);
     auto parameters = mkParameters(primitive);
     primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
     auto mtr = new Util::JsonObject();
@@ -519,7 +513,7 @@ Util::IJson* ExternConverter_Meter::convertExternObject(
 
 Util::IJson* ExternConverter_DirectMeter::convertExternObject(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 1) {
         modelError("Expected 1 argument for %1%", mc);
@@ -533,7 +527,7 @@ Util::IJson* ExternConverter_DirectMeter::convertExternObject(
 
 Util::IJson* ExternConverter_Register::convertExternObject(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool& emitExterns) {
     if (em->method->name != "write" && em->method->name != "read") {
         modelError("Unsupported register method %1%", mc);
@@ -573,16 +567,16 @@ Util::IJson* ExternConverter_Register::convertExternObject(
     return nullptr;
 }
 
-Util::IJson* ExternConverter_Random::convertExternObject(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
-    UNUSED const bool& emitExterns) {
+Util::IJson* ExternConverter_Random::convertExternObject(UNUSED ConversionContext* ctxt,
+                                                         UNUSED const P4::ExternMethod* em,
+                                                         UNUSED const IR::MethodCallExpression* mc,
+                                                         UNUSED const IR::StatOrDecl* s,
+                                                         UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 3) {
         modelError("Expected 3 arguments for %1%", mc);
         return nullptr;
     }
-    auto primitive =
-        mkPrimitive("modify_field_rng_uniform");
+    auto primitive = mkPrimitive("modify_field_rng_uniform");
     auto params = mkParameters(primitive);
     primitive->emplace_non_null("source_info", em->method->sourceInfoJsonObj());
     auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
@@ -595,10 +589,11 @@ Util::IJson* ExternConverter_Random::convertExternObject(
     return primitive;
 }
 
-Util::IJson* ExternConverter_Digest::convertExternObject(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
-    UNUSED const bool& emitExterns) {
+Util::IJson* ExternConverter_Digest::convertExternObject(UNUSED ConversionContext* ctxt,
+                                                         UNUSED const P4::ExternMethod* em,
+                                                         UNUSED const IR::MethodCallExpression* mc,
+                                                         UNUSED const IR::StatOrDecl* s,
+                                                         UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 1) {
         modelError("Expected 1 arguments for %1%", mc);
         return nullptr;
@@ -612,8 +607,7 @@ Util::IJson* ExternConverter_Digest::convertExternObject(
     if (mc->typeArguments->size() == 1) {
         auto typeArg = mc->typeArguments->at(0);
         if (typeArg->is<IR::Type_Name>()) {
-            auto origType = ctxt->refMap->getDeclaration(
-                typeArg->to<IR::Type_Name>()->path, true);
+            auto origType = ctxt->refMap->getDeclaration(typeArg->to<IR::Type_Name>()->path, true);
             if (!origType->is<IR::Type_Struct>()) {
                 modelError("%1%: expected a struct type", origType->getNode());
                 return nullptr;
@@ -630,28 +624,28 @@ Util::IJson* ExternConverter_Digest::convertExternObject(
     return primitive;
 }
 
-void ExternConverter_Hash::convertExternInstance(
-    ConversionContext* ctxt, const IR::Declaration* c,
-    const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+void ExternConverter_Hash::convertExternInstance(ConversionContext* ctxt, const IR::Declaration* c,
+                                                 const IR::ExternBlock* eb,
+                                                 UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto psaStructure = static_cast<PsaCodeGenerator*>(ctxt->structure);
 
     // add hash instance
-    auto jhash=new Util::JsonObject();
+    auto jhash = new Util::JsonObject();
     jhash->emplace("name", name);
     jhash->emplace("id", nextId("extern_instances"));
     jhash->emplace("type", eb->getName());
     jhash->emplace_non_null("source_info", inst->sourceInfoJsonObj());
     ctxt->json->externs->append(jhash);
 
-        // add attributes
+    // add attributes
     if (eb->getConstructorParameters()->size() != 1) {
-      modelError("%1%: expected one parameter", eb);
-      return;
+        modelError("%1%: expected one parameter", eb);
+        return;
     }
 
-    Util::JsonArray *arr = ctxt->json->insert_array_field(jhash, "attribute_values");
+    Util::JsonArray* arr = ctxt->json->insert_array_field(jhash, "attribute_values");
 
     auto algo = eb->findParameterValue("algo");
     CHECK_NULL(algo);
@@ -668,25 +662,27 @@ void ExternConverter_Hash::convertExternInstance(
     arr->append(k);
 }
 
-void ExternConverter_Checksum::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns)
-{ /* TODO */ }
+void ExternConverter_Checksum::convertExternInstance(UNUSED ConversionContext* ctxt,
+                                                     UNUSED const IR::Declaration* c,
+                                                     UNUSED const IR::ExternBlock* eb,
+                                                     UNUSED const bool& emitExterns) { /* TODO */
+}
 
-void ExternConverter_InternetChecksum::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+void ExternConverter_InternetChecksum::convertExternInstance(UNUSED ConversionContext* ctxt,
+                                                             UNUSED const IR::Declaration* c,
+                                                             UNUSED const IR::ExternBlock* eb,
+                                                             UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto trim = inst->controlPlaneName().find(".");
     auto block = inst->controlPlaneName().trim(trim);
-    auto psaStructure = static_cast<PsaProgramStructure *>(ctxt->structure);
+    auto psaStructure = static_cast<PsaProgramStructure*>(ctxt->structure);
     auto ingressParser = psaStructure->parsers.at("ingress")->controlPlaneName();
     auto ingressDeparser = psaStructure->deparsers.at("ingress")->controlPlaneName();
     auto egressParser = psaStructure->parsers.at("egress")->controlPlaneName();
     auto egressDeparser = psaStructure->deparsers.at("egress")->controlPlaneName();
-        if (block != ingressParser && block!=ingressDeparser
-                                && block!=egressParser && block!=egressDeparser) {
+    if (block != ingressParser && block != ingressDeparser && block != egressParser &&
+        block != egressDeparser) {
         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in pipeline on this target", eb);
     }
     // add checksum instance
@@ -698,9 +694,10 @@ void ExternConverter_InternetChecksum::convertExternInstance(
     ctxt->json->externs->append(jcksum);
 }
 
-void ExternConverter_Counter::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+void ExternConverter_Counter::convertExternInstance(UNUSED ConversionContext* ctxt,
+                                                    UNUSED const IR::Declaration* c,
+                                                    UNUSED const IR::ExternBlock* eb,
+                                                    UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto sz = eb->findParameterValue("n_counters");
@@ -726,11 +723,11 @@ void ExternConverter_Counter::convertExternInstance(
     extern_obj->emplace("type", eb->getName());
     extern_obj->emplace("source_info", inst->sourceInfoJsonObj());
     ctxt->json->externs->append(extern_obj);
-    Util::JsonArray *arr = ctxt->json->insert_array_field(extern_obj, "attribute_values");
+    Util::JsonArray* arr = ctxt->json->insert_array_field(extern_obj, "attribute_values");
 
     if (eb->getConstructorParameters()->size() != 2) {
-      modelError("%1%: expected two parameters", eb);
-      return;
+        modelError("%1%: expected two parameters", eb);
+        return;
     }
     // first argument to create a counter is just a number, convert and dump to json
     // we get a name from param, type and value from the arguments
@@ -748,8 +745,8 @@ void ExternConverter_Counter::convertExternInstance(
     // in conversion context will handle that for us
     auto tp = eb->findParameterValue("type");
     if (!tp || !tp->is<IR::Declaration_ID>()) {
-      modelError("%1%: expected a declaration_id", tp ? tp->getNode() : eb->getNode());
-      return;
+        modelError("%1%: expected a declaration_id", tp ? tp->getNode() : eb->getNode());
+        return;
     }
     auto arg2 = tp->to<IR::Declaration_ID>();
     auto param2 = eb->getConstructorParameters()->getParameter(1);
@@ -759,9 +756,10 @@ void ExternConverter_Counter::convertExternInstance(
     arr->append(jsn);
 }
 
-void ExternConverter_DirectCounter::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+void ExternConverter_DirectCounter::convertExternInstance(UNUSED ConversionContext* ctxt,
+                                                          UNUSED const IR::Declaration* c,
+                                                          UNUSED const IR::ExternBlock* eb,
+                                                          UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto it = ctxt->structure->directCounterMap.find(name);
@@ -784,35 +782,35 @@ void ExternConverter_DirectCounter::convertExternInstance(
         extern_obj->emplace("type", eb->getName());
         extern_obj->emplace("source_info", inst->sourceInfoJsonObj());
         ctxt->json->externs->append(extern_obj);
-        Util::JsonArray *arr = ctxt->json->insert_array_field(extern_obj, "attribute_values");
+        Util::JsonArray* arr = ctxt->json->insert_array_field(extern_obj, "attribute_values");
 
         // Direct Counter only has a single argument, which is psa metadata
         // converter in conversion context will handle this for us
         auto tp = eb->findParameterValue("type");
         if (!tp || !tp->is<IR::Declaration_ID>()) {
-          modelError("%1%: expected a declaration_id", tp ? tp->getNode() : eb->getNode());
-          return;
+            modelError("%1%: expected a declaration_id", tp ? tp->getNode() : eb->getNode());
+            return;
         }
         if (eb->getConstructorParameters()->size() < 2) {
-          modelError("%1%: expected 2 parameters", eb);
-          return;
+            modelError("%1%: expected 2 parameters", eb);
+            return;
         }
         auto arg = tp->to<IR::Declaration_ID>();
         auto param = eb->getConstructorParameters()->getParameter(1);
         auto mem = arg->toString();
-        LOG5("In convertParam with param " << param->toString()
-          << " and mem " << mem);
+        LOG5("In convertParam with param " << param->toString() << " and mem " << mem);
         auto jsn = ctxt->conv->convertParam(param, mem);
         arr->append(jsn);
     }
 }
 
-void ExternConverter_Meter::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+void ExternConverter_Meter::convertExternInstance(UNUSED ConversionContext* ctxt,
+                                                  UNUSED const IR::Declaration* c,
+                                                  UNUSED const IR::ExternBlock* eb,
+                                                  UNUSED const bool& emitExterns) {
     if (eb->getConstructorParameters()->size() != 2) {
-      modelError("%1%: expected two parameters", eb);
-      return;
+        modelError("%1%: expected two parameters", eb);
+        return;
     }
 
     auto inst = c->to<IR::Declaration_Instance>();
@@ -827,7 +825,7 @@ void ExternConverter_Meter::convertExternInstance(
     ctxt->json->externs->append(jext_mtr);
 
     // adding attributes to meter extern_instance
-    Util::JsonArray *arr = ctxt->json->insert_array_field(jext_mtr, "attribute_values");
+    Util::JsonArray* arr = ctxt->json->insert_array_field(jext_mtr, "attribute_values");
 
     // is_direct
     auto is_direct = new Util::JsonObject();
@@ -882,9 +880,10 @@ void ExternConverter_Meter::convertExternInstance(
     arr->append(k);
 }
 
-void ExternConverter_DirectMeter::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+void ExternConverter_DirectMeter::convertExternInstance(UNUSED ConversionContext* ctxt,
+                                                        UNUSED const IR::Declaration* c,
+                                                        UNUSED const IR::ExternBlock* eb,
+                                                        UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto info = ctxt->structure->directMeterMap.getInfo(c);
@@ -923,9 +922,10 @@ void ExternConverter_DirectMeter::convertExternInstance(
     ctxt->json->meter_arrays->append(jmtr);
 }
 
-void ExternConverter_Register::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+void ExternConverter_Register::convertExternInstance(UNUSED ConversionContext* ctxt,
+                                                     UNUSED const IR::Declaration* c,
+                                                     UNUSED const IR::ExternBlock* eb,
+                                                     UNUSED const bool& emitExterns) {
     size_t paramSize = eb->getConstructorParameters()->size();
     if (paramSize == 2) {
         modelError("%1%: Expecting 1 parameter. Initial value not supported", eb->constructor);
@@ -969,20 +969,21 @@ void ExternConverter_Register::convertExternInstance(
     ctxt->json->register_arrays->append(jreg);
 }
 
-void ExternConverter_Random::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns)
-{ /* TODO */ }
+void ExternConverter_Random::convertExternInstance(UNUSED ConversionContext* ctxt,
+                                                   UNUSED const IR::Declaration* c,
+                                                   UNUSED const IR::ExternBlock* eb,
+                                                   UNUSED const bool& emitExterns) { /* TODO */
+}
 
-void ExternConverter_ActionProfile::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+void ExternConverter_ActionProfile::convertExternInstance(UNUSED ConversionContext* ctxt,
+                                                          UNUSED const IR::Declaration* c,
+                                                          UNUSED const IR::ExternBlock* eb,
+                                                          UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     // Might call this multiple times if the selector/profile is used more than
     // once in a pipeline, so only add it to the action_profiles once
-    if (BMV2::JsonObjects::find_object_by_name(ctxt->action_profiles, name))
-        return;
+    if (BMV2::JsonObjects::find_object_by_name(ctxt->action_profiles, name)) return;
     auto action_profile = new Util::JsonObject();
     action_profile->emplace("name", name);
     action_profile->emplace("id", nextId("action_profiles"));
@@ -1000,15 +1001,15 @@ void ExternConverter_ActionProfile::convertExternInstance(
     ctxt->action_profiles->append(action_profile);
 }
 
-void ExternConverter_ActionSelector::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+void ExternConverter_ActionSelector::convertExternInstance(UNUSED ConversionContext* ctxt,
+                                                           UNUSED const IR::Declaration* c,
+                                                           UNUSED const IR::ExternBlock* eb,
+                                                           UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     // Might call this multiple times if the selector/profile is used more than
     // once in a pipeline, so only add it to the action_profiles once
-    if (BMV2::JsonObjects::find_object_by_name(ctxt->action_profiles, name))
-        return;
+    if (BMV2::JsonObjects::find_object_by_name(ctxt->action_profiles, name)) return;
     auto action_profile = new Util::JsonObject();
     action_profile->emplace("name", name);
     action_profile->emplace("id", nextId("action_profiles"));
@@ -1032,13 +1033,14 @@ void ExternConverter_ActionSelector::convertExternInstance(
     }
     auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
     selector->emplace("algo", algo);
-    auto input = ctxt->get_selector_input(
-        c->to<IR::Declaration_Instance>());
+    auto input = ctxt->get_selector_input(c->to<IR::Declaration_Instance>());
     if (input == nullptr) {
         // the selector is never used by any table, we cannot figure out its
         // input and therefore cannot include it in the JSON
-        ::warning(ErrorType::WARN_UNUSED, "Action selector '%1%' is never referenced by a table "
-                  "and cannot be included in bmv2 JSON", c);
+        ::warning(ErrorType::WARN_UNUSED,
+                  "Action selector '%1%' is never referenced by a table "
+                  "and cannot be included in bmv2 JSON",
+                  c);
         return;
     }
     auto j_input = mkArrayField(selector, "input");
@@ -1051,9 +1053,10 @@ void ExternConverter_ActionSelector::convertExternInstance(
     ctxt->action_profiles->append(action_profile);
 }
 
-void ExternConverter_Digest::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns)
-{ /* TODO */ }
+void ExternConverter_Digest::convertExternInstance(UNUSED ConversionContext* ctxt,
+                                                   UNUSED const IR::Declaration* c,
+                                                   UNUSED const IR::ExternBlock* eb,
+                                                   UNUSED const bool& emitExterns) { /* TODO */
+}
 
 }  // namespace BMV2

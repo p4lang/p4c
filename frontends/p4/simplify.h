@@ -17,10 +17,10 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_SIMPLIFY_H_
 #define _FRONTENDS_P4_SIMPLIFY_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
-#include "frontends/p4/methodInstance.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/methodInstance.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -50,11 +50,13 @@ namespace P4 {
  */
 class DoSimplifyControlFlow : public Transform {
     ReferenceMap* refMap;
-    TypeMap*      typeMap;
+    TypeMap* typeMap;
+
  public:
-    DoSimplifyControlFlow(ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap);
+    DoSimplifyControlFlow(ReferenceMap* refMap, TypeMap* typeMap)
+        : refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
         setName("DoSimplifyControlFlow");
         // We may want to replace the same statement with different things
         // in different places.
@@ -71,9 +73,8 @@ class DoSimplifyControlFlow : public Transform {
 class SimplifyControlFlow : public PassRepeated {
  public:
     SimplifyControlFlow(ReferenceMap* refMap, TypeMap* typeMap,
-            TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+                        TypeChecking* typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoSimplifyControlFlow(refMap, typeMap));
         setName("SimplifyControlFlow");

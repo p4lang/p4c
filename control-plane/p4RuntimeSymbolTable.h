@@ -18,7 +18,6 @@ limitations under the License.
 #define CONTROL_PLANE_P4RUNTIMESYMBOLTABLE_H_
 
 #include "lib/cstring.h"
-
 #include "p4RuntimeArchHandler.h"
 #include "typeSpecConverter.h"
 
@@ -122,15 +121,13 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
         return symbols;
     }
 
-    static P4RuntimeSymbolTable*
-    generateSymbols(const IR::P4Program* program,
-                    const IR::ToplevelBlock* evaluatedProgram,
-                    ReferenceMap* refMap, TypeMap* typeMap,
-                    P4RuntimeArchHandlerIface* archHandler);
+    static P4RuntimeSymbolTable* generateSymbols(const IR::P4Program* program,
+                                                 const IR::ToplevelBlock* evaluatedProgram,
+                                                 ReferenceMap* refMap, TypeMap* typeMap,
+                                                 P4RuntimeArchHandlerIface* archHandler);
 
     /// Add a @type symbol, extracting the name and id from @declaration.
-    void add(P4RuntimeSymbolType type,
-             const IR::IDeclaration* declaration) override;
+    void add(P4RuntimeSymbolType type, const IR::IDeclaration* declaration) override;
 
     /// Add a @type symbol with @name and possibly an explicit P4 '@id'.
     void add(P4RuntimeSymbolType type, cstring name,
@@ -138,8 +135,7 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
 
     /// @return the P4Runtime id for the symbol of @type corresponding to
     /// @declaration.
-    p4rt_id_t getId(P4RuntimeSymbolType type,
-                    const IR::IDeclaration* declaration) const override;
+    p4rt_id_t getId(P4RuntimeSymbolType type, const IR::IDeclaration* declaration) const override;
 
     /// @return the P4Runtime id for the symbol of @type with name @name.
     p4rt_id_t getId(P4RuntimeSymbolType type, cstring name) const override;
@@ -178,8 +174,7 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
      * indicating a resource type, and those bits need to remain correct.
      */
     template <typename ConstructIdFunc>
-    boost::optional<p4rt_id_t> probeForId(const uint32_t sourceValue,
-                                          ConstructIdFunc constructId) {
+    boost::optional<p4rt_id_t> probeForId(const uint32_t sourceValue, ConstructIdFunc constructId) {
         uint32_t value = sourceValue;
         while (assignedIds.find(constructId(value)) != assignedIds.end()) {
             ++value;
@@ -211,21 +206,17 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
     P4SymbolSuffixSet suffixSet;
 };
 
-void collectControlSymbols(P4RuntimeSymbolTable& symbols,
-                           P4RuntimeArchHandlerIface* archHandler,
-                           const IR::ControlBlock* controlBlock,
-                           ReferenceMap* refMap, TypeMap* typeMap);
+void collectControlSymbols(P4RuntimeSymbolTable& symbols, P4RuntimeArchHandlerIface* archHandler,
+                           const IR::ControlBlock* controlBlock, ReferenceMap* refMap,
+                           TypeMap* typeMap);
 
-void collectExternSymbols(P4RuntimeSymbolTable& symbols,
-                          P4RuntimeArchHandlerIface* archHandler,
+void collectExternSymbols(P4RuntimeSymbolTable& symbols, P4RuntimeArchHandlerIface* archHandler,
                           const IR::ExternBlock* externBlock);
 
-void collectTableSymbols(P4RuntimeSymbolTable& symbols,
-                         P4RuntimeArchHandlerIface* archHandler,
+void collectTableSymbols(P4RuntimeSymbolTable& symbols, P4RuntimeArchHandlerIface* archHandler,
                          const IR::TableBlock* tableBlock);
 
-void collectParserSymbols(P4RuntimeSymbolTable& symbols,
-                          const IR::ParserBlock* parserBlock);
+void collectParserSymbols(P4RuntimeSymbolTable& symbols, const IR::ParserBlock* parserBlock);
 
 }  // namespace ControlPlaneAPI
 

@@ -15,16 +15,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 #include "ebpfPsaGen.h"
-#include "ebpfPsaParser.h"
-#include "ebpfPsaDeparser.h"
-#include "ebpfPsaTable.h"
+
 #include "ebpfPsaControl.h"
-#include "xdpHelpProgram.h"
+#include "ebpfPsaDeparser.h"
+#include "ebpfPsaParser.h"
+#include "ebpfPsaTable.h"
 #include "externs/ebpfPsaCounter.h"
 #include "externs/ebpfPsaHashAlgorithm.h"
-#include "externs/ebpfPsaTableImplementation.h"
-#include "externs/ebpfPsaRandom.h"
 #include "externs/ebpfPsaMeter.h"
+#include "externs/ebpfPsaRandom.h"
+#include "externs/ebpfPsaTableImplementation.h"
+#include "xdpHelpProgram.h"
 
 namespace EBPF {
 
@@ -41,8 +42,7 @@ class PSAErrorCodesGen : public Inspector {
             if (decl->srcInfo.isValid()) {
                 auto sourceFile = decl->srcInfo.getSourceFile();
                 // all the error codes are located in core.p4 file, they are defined in psa.h
-                if (sourceFile.endsWith("p4include/core.p4"))
-                    continue;
+                if (sourceFile.endsWith("p4include/core.p4")) continue;
             }
 
             builder->emitIndent();
@@ -51,8 +51,8 @@ class PSAErrorCodesGen : public Inspector {
 
             // type ParserError_t is u8, which can have values from 0 to 255
             if (id > 255) {
-                ::error(ErrorType::ERR_OVERLIMIT,
-                        "%1%: Reached maximum number of possible errors", decl);
+                ::error(ErrorType::ERR_OVERLIMIT, "%1%: Reached maximum number of possible errors",
+                        decl);
             }
         }
         builder->newline();
@@ -61,13 +61,13 @@ class PSAErrorCodesGen : public Inspector {
 };
 
 // =====================PSAEbpfGenerator=============================
-void PSAEbpfGenerator::emitPSAIncludes(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitPSAIncludes(CodeBuilder* builder) const {
     builder->appendLine("#include <stdbool.h>");
     builder->appendLine("#include <linux/if_ether.h>");
     builder->appendLine("#include \"psa.h\"");
 }
 
-void PSAEbpfGenerator::emitPreamble(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitPreamble(CodeBuilder* builder) const {
     emitCommonPreamble(builder);
     builder->newline();
 
@@ -78,48 +78,52 @@ void PSAEbpfGenerator::emitPreamble(CodeBuilder *builder) const {
     builder->appendLine("#define CLONE_MAX_SESSIONS 1024");
     builder->newline();
 
-    builder->appendLine("#ifndef PSA_PORT_RECIRCULATE\n"
+    builder->appendLine(
+        "#ifndef PSA_PORT_RECIRCULATE\n"
         "#define PSA_PORT_RECIRCULATE 0\n"
         "#endif");
     builder->appendLine("#define P4C_PSA_PORT_RECIRCULATE 0xfffffffa");
     builder->newline();
 }
 
-void PSAEbpfGenerator::emitCommonPreamble(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitCommonPreamble(CodeBuilder* builder) const {
     builder->newline();
     builder->appendLine("#define EBPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)");
     builder->appendLine("#define BYTES(w) ((w) / 8)");
     builder->appendLine(
         "#define write_partial(a, w, s, v) do { *((u8*)a) = ((*((u8*)a)) "
         "& ~(EBPF_MASK(u8, w) << s)) | (v << s) ; } while (0)");
-    builder->appendLine("#define write_byte(base, offset, v) do { "
-                        "*(u8*)((base) + (offset)) = (v); "
-                        "} while (0)");
+    builder->appendLine(
+        "#define write_byte(base, offset, v) do { "
+        "*(u8*)((base) + (offset)) = (v); "
+        "} while (0)");
     builder->target->emitPreamble(builder);
 }
 
-void PSAEbpfGenerator::emitInternalStructures(CodeBuilder *builder) const {
-    builder->appendLine("struct internal_metadata {\n"
-                        "    __u16 pkt_ether_type;\n"
-                        "} __attribute__((aligned(4)));");
+void PSAEbpfGenerator::emitInternalStructures(CodeBuilder* builder) const {
+    builder->appendLine(
+        "struct internal_metadata {\n"
+        "    __u16 pkt_ether_type;\n"
+        "} __attribute__((aligned(4)));");
     builder->newline();
 
     // emit helper struct for clone sessions
-    builder->appendLine("struct list_key_t {\n"
-                        "    __u32 port;\n"
-                        "    __u16 instance;\n"
-                        "};\n"
-                        "typedef struct list_key_t elem_t;\n"
-                        "\n"
-                        "struct element {\n"
-                        "    struct clone_session_entry entry;\n"
-                        "    elem_t next_id;\n"
-                        "} __attribute__((aligned(4)));");
+    builder->appendLine(
+        "struct list_key_t {\n"
+        "    __u32 port;\n"
+        "    __u16 instance;\n"
+        "};\n"
+        "typedef struct list_key_t elem_t;\n"
+        "\n"
+        "struct element {\n"
+        "    struct clone_session_entry entry;\n"
+        "    elem_t next_id;\n"
+        "} __attribute__((aligned(4)));");
     builder->newline();
 }
 
 /* Generate headers and structs in p4 prog */
-void PSAEbpfGenerator::emitTypes(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitTypes(CodeBuilder* builder) const {
     PSAErrorCodesGen errorGen(builder);
     ingress->program->apply(errorGen);
 
@@ -135,9 +139,19 @@ void PSAEbpfGenerator::emitTypes(CodeBuilder *builder) const {
     egress->parser->emitTypes(builder);
     egress->control->emitTableTypes(builder);
     builder->newline();
+    emitCRC32LookupTableTypes(builder);
+    builder->newline();
 }
-
-void PSAEbpfGenerator::emitGlobalHeadersMetadata(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitCRC32LookupTableTypes(CodeBuilder* builder) const {
+    builder->append("struct lookup_tbl_val ");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->append("u32 table[2048]");
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+    builder->endOfStatement(true);
+}
+void PSAEbpfGenerator::emitGlobalHeadersMetadata(CodeBuilder* builder) const {
     builder->append("struct hdr_md ");
     builder->blockStart();
     builder->emitIndent();
@@ -161,18 +175,16 @@ void PSAEbpfGenerator::emitGlobalHeadersMetadata(CodeBuilder *builder) const {
     builder->newline();
 }
 
-void PSAEbpfGenerator::emitPacketReplicationTables(CodeBuilder *builder) const {
-    builder->target->emitMapInMapDecl(builder, "clone_session_tbl_inner",
-                                      TableHash, "elem_t",
-                                      "struct element", MaxClones, "clone_session_tbl",
-                                      TableArray, "__u32", MaxCloneSessions);
-    builder->target->emitMapInMapDecl(builder, "multicast_grp_tbl_inner",
-                                      TableHash, "elem_t",
-                                      "struct element", MaxClones, "multicast_grp_tbl",
-                                      TableArray, "__u32", MaxCloneSessions);
+void PSAEbpfGenerator::emitPacketReplicationTables(CodeBuilder* builder) const {
+    builder->target->emitMapInMapDecl(builder, "clone_session_tbl_inner", TableHash, "elem_t",
+                                      "struct element", MaxClones, "clone_session_tbl", TableArray,
+                                      "__u32", MaxCloneSessions);
+    builder->target->emitMapInMapDecl(builder, "multicast_grp_tbl_inner", TableHash, "elem_t",
+                                      "struct element", MaxClones, "multicast_grp_tbl", TableArray,
+                                      "__u32", MaxCloneSessions);
 }
 
-void PSAEbpfGenerator::emitPipelineInstances(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitPipelineInstances(CodeBuilder* builder) const {
     ingress->parser->emitValueSetInstances(builder);
     ingress->control->emitTableInstances(builder);
     ingress->deparser->emitDigestInstances(builder);
@@ -180,15 +192,13 @@ void PSAEbpfGenerator::emitPipelineInstances(CodeBuilder *builder) const {
     egress->parser->emitValueSetInstances(builder);
     egress->control->emitTableInstances(builder);
 
-    builder->target->emitTableDecl(builder, "hdr_md_cpumap",
-                                   TablePerCPUArray, "u32",
+    builder->target->emitTableDecl(builder, "hdr_md_cpumap", TablePerCPUArray, "u32",
                                    "struct hdr_md", 2);
 }
 
-void PSAEbpfGenerator::emitInitializer(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitInitializer(CodeBuilder* builder) const {
     emitInitializerSection(builder);
-    builder->appendFormat("int %s()",
-                          "map_initializer");
+    builder->appendFormat("int %s()", "map_initializer");
     builder->spc();
     builder->blockStart();
     builder->emitIndent();
@@ -197,45 +207,47 @@ void PSAEbpfGenerator::emitInitializer(CodeBuilder *builder) const {
     ingress->control->emitTableInitializers(builder);
     egress->control->emitTableInitializers(builder);
     builder->newline();
+    emitCRC32LookupTableInitializer(builder);
     builder->emitIndent();
     builder->appendLine("return 0;");
     builder->blockEnd(true);
 }
 
-void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
+void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder* builder) const {
     EBPFHashAlgorithmTypeFactoryPSA::instance()->emitGlobals(builder);
 
     cstring forEachFunc =
-            "static __always_inline\n"
-            "int do_for_each(SK_BUFF *skb, void *map, "
-            "unsigned int max_iter, "
-            "void (*a)(SK_BUFF *, void *))\n"
-            "{\n"
-            "    elem_t head_idx = {0, 0};\n"
-            "    struct element *elem = bpf_map_lookup_elem(map, &head_idx);\n"
-            "    if (!elem) {\n"
-            "        return -1;\n"
-            "    }\n"
-            "    if (elem->next_id.port == 0 && elem->next_id.instance == 0) {\n"
-            "       %trace_msg_no_elements%"
-            "        return 0;\n"
-            "    }\n"
-            "    elem_t next_id = elem->next_id;\n"
-            "    for (unsigned int i = 0; i < max_iter; i++) {\n"
-            "        struct element *elem = bpf_map_lookup_elem(map, &next_id);\n"
-            "        if (!elem) {\n"
-            "            break;\n"
-            "        }\n"
-            "        a(skb, &elem->entry);\n"
-            "        if (elem->next_id.port == 0 && elem->next_id.instance == 0) {\n"
-            "            break;\n"
-            "        }\n"
-            "        next_id = elem->next_id;\n"
-            "    }\n"
-            "    return 0;\n"
-            "}";
+        "static __always_inline\n"
+        "int do_for_each(SK_BUFF *skb, void *map, "
+        "unsigned int max_iter, "
+        "void (*a)(SK_BUFF *, void *))\n"
+        "{\n"
+        "    elem_t head_idx = {0, 0};\n"
+        "    struct element *elem = bpf_map_lookup_elem(map, &head_idx);\n"
+        "    if (!elem) {\n"
+        "        return -1;\n"
+        "    }\n"
+        "    if (elem->next_id.port == 0 && elem->next_id.instance == 0) {\n"
+        "       %trace_msg_no_elements%"
+        "        return 0;\n"
+        "    }\n"
+        "    elem_t next_id = elem->next_id;\n"
+        "    for (unsigned int i = 0; i < max_iter; i++) {\n"
+        "        struct element *elem = bpf_map_lookup_elem(map, &next_id);\n"
+        "        if (!elem) {\n"
+        "            break;\n"
+        "        }\n"
+        "        a(skb, &elem->entry);\n"
+        "        if (elem->next_id.port == 0 && elem->next_id.instance == 0) {\n"
+        "            break;\n"
+        "        }\n"
+        "        next_id = elem->next_id;\n"
+        "    }\n"
+        "    return 0;\n"
+        "}";
     if (options.emitTraceMessages) {
-        forEachFunc = forEachFunc.replace("%trace_msg_no_elements%",
+        forEachFunc = forEachFunc.replace(
+            "%trace_msg_no_elements%",
             "        bpf_trace_message(\"do_for_each: No elements found in list\\n\");\n");
     } else {
         forEachFunc = forEachFunc.replace("%trace_msg_no_elements%", "");
@@ -245,15 +257,16 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
 
     // Function to perform cloning, common for ingress and egress
     cstring cloneFunction =
-            "static __always_inline\n"
-            "void do_clone(SK_BUFF *skb, void *data)\n"
-            "{\n"
-            "    struct clone_session_entry *entry = (struct clone_session_entry *) data;\n"
-                "%trace_msg_redirect%"
-            "    bpf_clone_redirect(skb, entry->egress_port, 0);\n"
-            "}";
+        "static __always_inline\n"
+        "void do_clone(SK_BUFF *skb, void *data)\n"
+        "{\n"
+        "    struct clone_session_entry *entry = (struct clone_session_entry *) data;\n"
+        "%trace_msg_redirect%"
+        "    bpf_clone_redirect(skb, entry->egress_port, 0);\n"
+        "}";
     if (options.emitTraceMessages) {
-        cloneFunction = cloneFunction.replace(cstring("%trace_msg_redirect%"),
+        cloneFunction = cloneFunction.replace(
+            cstring("%trace_msg_redirect%"),
             "    bpf_trace_message(\"do_clone: cloning pkt, egress_port=%d, cos=%d\\n\", "
             "entry->egress_port, entry->class_of_service);\n");
     } else {
@@ -263,38 +276,42 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
     builder->newline();
 
     cstring pktClonesFunc =
-            "static __always_inline\n"
-            "int do_packet_clones(SK_BUFF * skb, void * map, __u32 session_id, "
-                "PSA_PacketPath_t new_pkt_path, __u8 caller_id)\n"
-            "{\n"
-                "%trace_msg_clone_requested%"
-            "    struct psa_global_metadata * meta = (struct psa_global_metadata *) skb->cb;\n"
-            "    void * inner_map;\n"
-            "    inner_map = bpf_map_lookup_elem(map, &session_id);\n"
-            "    if (inner_map != NULL) {\n"
-            "        PSA_PacketPath_t original_pkt_path = meta->packet_path;\n"
-            "        meta->packet_path = new_pkt_path;\n"
-            "        if (do_for_each(skb, inner_map, CLONE_MAX_CLONES, &do_clone) < 0) {\n"
-                        "%trace_msg_clone_failed%"
-            "            return -1;\n"
-            "        }\n"
-            "        meta->packet_path = original_pkt_path;\n"
-            "    } else {\n"
-                    "%trace_msg_no_session%"
-            "    }\n"
-                "%trace_msg_cloning_done%"
-            "    return 0;\n"
-            " }";
+        "static __always_inline\n"
+        "int do_packet_clones(SK_BUFF * skb, void * map, __u32 session_id, "
+        "PSA_PacketPath_t new_pkt_path, __u8 caller_id)\n"
+        "{\n"
+        "%trace_msg_clone_requested%"
+        "    struct psa_global_metadata * meta = (struct psa_global_metadata *) skb->cb;\n"
+        "    void * inner_map;\n"
+        "    inner_map = bpf_map_lookup_elem(map, &session_id);\n"
+        "    if (inner_map != NULL) {\n"
+        "        PSA_PacketPath_t original_pkt_path = meta->packet_path;\n"
+        "        meta->packet_path = new_pkt_path;\n"
+        "        if (do_for_each(skb, inner_map, CLONE_MAX_CLONES, &do_clone) < 0) {\n"
+        "%trace_msg_clone_failed%"
+        "            return -1;\n"
+        "        }\n"
+        "        meta->packet_path = original_pkt_path;\n"
+        "    } else {\n"
+        "%trace_msg_no_session%"
+        "    }\n"
+        "%trace_msg_cloning_done%"
+        "    return 0;\n"
+        " }";
     if (options.emitTraceMessages) {
-        pktClonesFunc = pktClonesFunc.replace(cstring("%trace_msg_clone_requested%"),
+        pktClonesFunc = pktClonesFunc.replace(
+            cstring("%trace_msg_clone_requested%"),
             "    bpf_trace_message(\"Clone#%d: pkt clone requested, session=%d\\n\", "
             "caller_id, session_id);\n");
-        pktClonesFunc = pktClonesFunc.replace(cstring("%trace_msg_clone_failed%"),
+        pktClonesFunc = pktClonesFunc.replace(
+            cstring("%trace_msg_clone_failed%"),
             "            bpf_trace_message(\"Clone#%d: failed to clone packet\", caller_id);\n");
-        pktClonesFunc = pktClonesFunc.replace(cstring("%trace_msg_no_session%"),
-            "        bpf_trace_message(\"Clone#%d: session_id not found, "
-            "no clones created\\n\", caller_id);\n");
-        pktClonesFunc = pktClonesFunc.replace(cstring("%trace_msg_cloning_done%"),
+        pktClonesFunc =
+            pktClonesFunc.replace(cstring("%trace_msg_no_session%"),
+                                  "        bpf_trace_message(\"Clone#%d: session_id not found, "
+                                  "no clones created\\n\", caller_id);\n");
+        pktClonesFunc = pktClonesFunc.replace(
+            cstring("%trace_msg_cloning_done%"),
             "    bpf_trace_message(\"Clone#%d: packet cloning finished\\n\", caller_id);\n");
     } else {
         pktClonesFunc = pktClonesFunc.replace(cstring("%trace_msg_clone_requested%"), "");
@@ -308,7 +325,7 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
 
     if (ingress->hasAnyMeter() || egress->hasAnyMeter()) {
         cstring meterExecuteFunc =
-                EBPFMeterPSA::meterExecuteFunc(options.emitTraceMessages, ingress->refMap);
+            EBPFMeterPSA::meterExecuteFunc(options.emitTraceMessages, ingress->refMap);
         builder->appendLine(meterExecuteFunc);
         builder->newline();
     }
@@ -319,7 +336,7 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
 }
 
 // =====================PSAArchTC=============================
-void PSAArchTC::emit(CodeBuilder *builder) const {
+void PSAArchTC::emit(CodeBuilder* builder) const {
     /**
      * How the structure of a single C program for PSA should look like?
      * 1. Automatically generated comment
@@ -393,36 +410,117 @@ void PSAArchTC::emit(CodeBuilder *builder) const {
     builder->target->emitLicense(builder, ingress->license);
 }
 
-void PSAArchTC::emitInstances(CodeBuilder *builder) const {
+void PSAArchTC::emitInstances(CodeBuilder* builder) const {
     builder->appendLine("REGISTER_START()");
 
     if (options.xdp2tcMode == XDP2TC_CPUMAP) {
-        builder->target->emitTableDecl(builder, "xdp2tc_cpumap",
-                                       TablePerCPUArray, "u32",
-                                       "u16", 1);
+        builder->target->emitTableDecl(builder, "xdp2tc_cpumap", TablePerCPUArray, "u32", "u16", 1);
     }
 
     emitPacketReplicationTables(builder);
     emitPipelineInstances(builder);
-
+    emitCRC32LookupTableInstance(builder);
     builder->appendLine("REGISTER_END()");
     builder->newline();
 }
+void PSAArchTC::emitCRC32LookupTableInstance(CodeBuilder* builder) const {
+    builder->target->emitTableDecl(builder, cstring("crc_lookup_tbl"), TableArray, "u32",
+                                   cstring("struct lookup_tbl_val"), 1);
+}
+void PSAEbpfGenerator::emitCRC32LookupTableInitializer(CodeBuilder* builder) const {
+    cstring keyName = "lookup_tbl_key";
+    cstring valueName = "lookup_tbl_value";
+    cstring instanceName = "crc_lookup_tbl";
 
-void PSAArchTC::emitInitializerSection(CodeBuilder *builder) const {
+    builder->emitIndent();
+    builder->appendFormat("u32 %s = 0", keyName.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("struct lookup_tbl_val* %s = BPF_MAP_LOOKUP_ELEM(%s, &%s)",
+                          valueName.c_str(), instanceName.c_str(), keyName.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("if (%s != NULL)", valueName.c_str());
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("for (u16 i = 0; i <= 255; i++)");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("u32 crc = i");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("for (u16 j = 0; j < 8; j++)");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("crc = (crc >> 1) ^ ((crc & 1) * 3988292384)");
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+    builder->emitIndent();
+    builder->appendFormat("%s->table[i] = crc", valueName.c_str());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+    builder->emitIndent();
+    builder->appendFormat("for (u16 i = 0; i <= 255; i++)");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat(
+        "%s->table[256+i] = "
+        "(%s->table[0+i] >> 8) ^ %s->table[(%s->table[0+i] & 0xFF)]",
+        valueName.c_str(), valueName.c_str(), valueName.c_str(), valueName.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat(
+        "%s->table[512+i] = "
+        "(%s->table[256+i] >> 8) ^ %s->table[(%s->table[256+i] & 0xFF)]",
+        valueName.c_str(), valueName.c_str(), valueName.c_str(), valueName.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat(
+        "%s->table[768+i] = "
+        "(%s->table[512+i] >> 8) ^ %s->table[(%s->table[512+i] & 0xFF)]",
+        valueName.c_str(), valueName.c_str(), valueName.c_str(), valueName.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat(
+        "%s->table[1024+i] = "
+        "(%s->table[768+i] >> 8) ^ %s->table[(%s->table[768+i] & 0xFF)]",
+        valueName.c_str(), valueName.c_str(), valueName.c_str(), valueName.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat(
+        "%s->table[1280+i] = "
+        "(%s->table[1024+i] >> 8) ^ %s->table[(%s->table[1024+i] & 0xFF)]",
+        valueName.c_str(), valueName.c_str(), valueName.c_str(), valueName.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat(
+        "%s->table[1536+i] = "
+        "(%s->table[1280+i] >> 8) ^ %s->table[(%s->table[1280+i] & 0xFF)]",
+        valueName.c_str(), valueName.c_str(), valueName.c_str(), valueName.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat(
+        "%s->table[1792+i] = "
+        "(%s->table[1536+i] >> 8) ^ %s->table[(%s->table[1536+i] & 0xFF)]",
+        valueName.c_str(), valueName.c_str(), valueName.c_str(), valueName.c_str());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+    builder->blockEnd(true);
+}
+
+void PSAArchTC::emitInitializerSection(CodeBuilder* builder) const {
     builder->appendLine("SEC(\"classifier/map-initializer\")");
 }
 
 // =====================ConvertToEbpfPSA=============================
-const PSAEbpfGenerator * ConvertToEbpfPSA::build(const IR::ToplevelBlock *tlb) {
+const PSAEbpfGenerator* ConvertToEbpfPSA::build(const IR::ToplevelBlock* tlb) {
     /*
      * TYPES
      */
     std::vector<EBPFType*> ebpfTypes;
     for (auto d : tlb->getProgram()->objects) {
-        if (d->is<IR::Type>() && !d->is<IR::IContainer>() &&
-            !d->is<IR::Type_Extern>() && !d->is<IR::Type_Parser>() &&
-            !d->is<IR::Type_Control>() && !d->is<IR::Type_Typedef>() &&
+        if (d->is<IR::Type>() && !d->is<IR::IContainer>() && !d->is<IR::Type_Extern>() &&
+            !d->is<IR::Type_Parser>() && !d->is<IR::Type_Control>() && !d->is<IR::Type_Typedef>() &&
             !d->is<IR::Type_Error>()) {
             if (d->srcInfo.isValid()) {
                 auto sourceFile = d->srcInfo.getSourceFile();
@@ -433,15 +531,14 @@ const PSAEbpfGenerator * ConvertToEbpfPSA::build(const IR::ToplevelBlock *tlb) {
             }
 
             auto type = EBPFTypeFactory::instance->create(d->to<IR::Type>());
-            if (type == nullptr)
-                continue;
+            if (type == nullptr) continue;
             ebpfTypes.push_back(type);
         }
     }
 
     /*
-    * INGRESS
-    */
+     * INGRESS
+     */
     auto ingress = tlb->getMain()->getParameterValue("ingress")->to<IR::PackageBlock>();
     auto ingressParser = ingress->getParameterValue("ip");
     BUG_CHECK(ingressParser != nullptr, "No ingress parser block found");
@@ -451,8 +548,8 @@ const PSAEbpfGenerator * ConvertToEbpfPSA::build(const IR::ToplevelBlock *tlb) {
     BUG_CHECK(ingressDeparser != nullptr, "No ingress deparser block found");
 
     /*
-    * EGRESS
-    */
+     * EGRESS
+     */
     auto egress = tlb->getMain()->getParameterValue("egress")->to<IR::PackageBlock>();
     auto egressParser = egress->getParameterValue("ep");
     BUG_CHECK(egressParser != nullptr, "No egress parser block found");
@@ -463,22 +560,18 @@ const PSAEbpfGenerator * ConvertToEbpfPSA::build(const IR::ToplevelBlock *tlb) {
 
     auto xdp = new XDPHelpProgram(options);
 
-    auto ingress_pipeline_converter =
-        new ConvertToEbpfPipeline("tc-ingress", TC_INGRESS, options,
-            ingressParser->to<IR::ParserBlock>(),
-            ingressControl->to<IR::ControlBlock>(),
-            ingressDeparser->to<IR::ControlBlock>(),
-            refmap, typemap);
+    auto ingress_pipeline_converter = new ConvertToEbpfPipeline(
+        "tc-ingress", TC_INGRESS, options, ingressParser->to<IR::ParserBlock>(),
+        ingressControl->to<IR::ControlBlock>(), ingressDeparser->to<IR::ControlBlock>(), refmap,
+        typemap);
     ingress->apply(*ingress_pipeline_converter);
     tlb->getProgram()->apply(*ingress_pipeline_converter);
     auto tcIngress = ingress_pipeline_converter->getEbpfPipeline();
 
-    auto egress_pipeline_converter =
-        new ConvertToEbpfPipeline("tc-egress", TC_EGRESS, options,
-            egressParser->to<IR::ParserBlock>(),
-            egressControl->to<IR::ControlBlock>(),
-            egressDeparser->to<IR::ControlBlock>(),
-            refmap, typemap);
+    auto egress_pipeline_converter = new ConvertToEbpfPipeline(
+        "tc-egress", TC_EGRESS, options, egressParser->to<IR::ParserBlock>(),
+        egressControl->to<IR::ControlBlock>(), egressDeparser->to<IR::ControlBlock>(), refmap,
+        typemap);
     egress->apply(*egress_pipeline_converter);
     tlb->getProgram()->apply(*egress_pipeline_converter);
     auto tcEgress = egress_pipeline_converter->getEbpfPipeline();
@@ -486,7 +579,7 @@ const PSAEbpfGenerator * ConvertToEbpfPSA::build(const IR::ToplevelBlock *tlb) {
     return new PSAArchTC(options, ebpfTypes, xdp, tcIngress, tcEgress);
 }
 
-const IR::Node *ConvertToEbpfPSA::preorder(IR::ToplevelBlock *tlb) {
+const IR::Node* ConvertToEbpfPSA::preorder(IR::ToplevelBlock* tlb) {
     ebpf_psa_arch = build(tlb);
     ebpf_psa_arch->ingress->program = tlb->getProgram();
     ebpf_psa_arch->egress->program = tlb->getProgram();
@@ -494,8 +587,8 @@ const IR::Node *ConvertToEbpfPSA::preorder(IR::ToplevelBlock *tlb) {
 }
 
 // =====================EbpfPipeline=============================
-bool ConvertToEbpfPipeline::preorder(const IR::PackageBlock *block) {
-    (void) block;
+bool ConvertToEbpfPipeline::preorder(const IR::PackageBlock* block) {
+    (void)block;
     if (type == TC_INGRESS) {
         pipeline = new TCIngressPipeline(name, options, refmap, typemap);
     } else if (type == TC_EGRESS) {
@@ -505,22 +598,20 @@ bool ConvertToEbpfPipeline::preorder(const IR::PackageBlock *block) {
         return false;
     }
 
-    auto parser_converter = new ConvertToEBPFParserPSA(pipeline, refmap, typemap, options, type);
+    auto parser_converter = new ConvertToEBPFParserPSA(pipeline, typemap, type);
     parserBlock->apply(*parser_converter);
     pipeline->parser = parser_converter->getEBPFParser();
     CHECK_NULL(pipeline->parser);
 
-    auto control_converter = new ConvertToEBPFControlPSA(pipeline,
-                                                         pipeline->parser->headers,
-                                                         refmap, typemap, options, type);
+    auto control_converter =
+        new ConvertToEBPFControlPSA(pipeline, pipeline->parser->headers, refmap, type);
     controlBlock->apply(*control_converter);
     pipeline->control = control_converter->getEBPFControl();
     CHECK_NULL(pipeline->control);
 
-    auto deparser_converter = new ConvertToEBPFDeparserPSA(
-            pipeline,
-            pipeline->parser->headers, pipeline->control->outputStandardMetadata,
-            refmap, typemap, options, type);
+    auto deparser_converter =
+        new ConvertToEBPFDeparserPSA(pipeline, pipeline->parser->headers,
+                                     pipeline->control->outputStandardMetadata, typemap, type);
     deparserBlock->apply(*deparser_converter);
     pipeline->deparser = deparser_converter->getEBPFDeparser();
     CHECK_NULL(pipeline->deparser);
@@ -529,7 +620,7 @@ bool ConvertToEbpfPipeline::preorder(const IR::PackageBlock *block) {
 }
 
 // =====================EBPFParser=============================
-bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock *prsr) {
+bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock* prsr) {
     auto pl = prsr->container->type->applyParams;
 
     parser = new EBPFPsaParser(program, prsr, typemap);
@@ -542,15 +633,16 @@ bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock *prsr) {
     }
 
     if (pl->size() != numOfParams) {
-        ::error(ErrorType::ERR_EXPECTED,
-                "Expected parser to have exactly %1% parameters",
+        ::error(ErrorType::ERR_EXPECTED, "Expected parser to have exactly %1% parameters",
                 numOfParams);
         return false;
     }
 
     auto it = pl->parameters.begin();
-    parser->packet = *it; ++it;
-    parser->headers = *it; ++it;
+    parser->packet = *it;
+    ++it;
+    parser->headers = *it;
+    ++it;
     parser->user_metadata = *it;
     auto resubmit_meta = *(it + 2);
 
@@ -560,8 +652,7 @@ bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock *prsr) {
     }
 
     auto ht = typemap->getType(parser->headers);
-    if (ht == nullptr)
-        return false;
+    if (ht == nullptr) return false;
     parser->headerType = EBPFTypeFactory::instance->create(ht);
 
     parser->visitor->useAsPointerVariable(resubmit_meta->name.name);
@@ -580,18 +671,19 @@ bool ConvertToEBPFParserPSA::preorder(const IR::P4ValueSet* pvs) {
 }
 
 // =====================EBPFControl=============================
-bool ConvertToEBPFControlPSA::preorder(const IR::ControlBlock *ctrl) {
-    control = new EBPFControlPSA(program,
-                                 ctrl,
-                                 parserHeaders);
+bool ConvertToEBPFControlPSA::preorder(const IR::ControlBlock* ctrl) {
+    control = new EBPFControlPSA(program, ctrl, parserHeaders);
     program->control = control;
     program->to<EBPFPipeline>()->control = control;
     control->hitVariable = refmap->newName("hit");
     auto pl = ctrl->container->type->applyParams;
     auto it = pl->parameters.begin();
-    control->headers = *it; ++it;
-    control->user_metadata = *it; ++it;
-    control->inputStandardMetadata = *it; ++it;
+    control->headers = *it;
+    ++it;
+    control->user_metadata = *it;
+    ++it;
+    control->inputStandardMetadata = *it;
+    ++it;
     control->outputStandardMetadata = *it;
 
     auto codegen = new ControlBodyTranslatorPSA(control);
@@ -615,13 +707,13 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ControlBlock *ctrl) {
     return true;
 }
 
-bool ConvertToEBPFControlPSA::preorder(const IR::TableBlock *tblblk) {
-    EBPFTablePSA *table = new EBPFTablePSA(program, tblblk, control->codeGen);
+bool ConvertToEBPFControlPSA::preorder(const IR::TableBlock* tblblk) {
+    EBPFTablePSA* table = new EBPFTablePSA(program, tblblk, control->codeGen);
     control->tables.emplace(tblblk->container->name, table);
     return true;
 }
 
-bool ConvertToEBPFControlPSA::preorder(const IR::Member *m) {
+bool ConvertToEBPFControlPSA::preorder(const IR::Member* m) {
     // the condition covers both ingress and egress timestamp
     if (m->member.name.endsWith("timestamp")) {
         control->timestampIsUsed = true;
@@ -630,7 +722,7 @@ bool ConvertToEBPFControlPSA::preorder(const IR::Member *m) {
     return true;
 }
 
-bool ConvertToEBPFControlPSA::preorder(const IR::IfStatement *ifState) {
+bool ConvertToEBPFControlPSA::preorder(const IR::IfStatement* ifState) {
     if (ifState->condition->is<IR::Equ>()) {
         auto i = ifState->condition->to<IR::Equ>();
         if (i->right->toString().endsWith("timestamp") ||
@@ -645,7 +737,7 @@ bool ConvertToEBPFControlPSA::preorder(const IR::Declaration_Variable* decl) {
     if (type == TC_INGRESS) {
         if (decl->type->is<IR::Type_Name>() &&
             decl->type->to<IR::Type_Name>()->path->name.name == "psa_ingress_output_metadata_t") {
-                control->codeGen->useAsPointerVariable(decl->name.name);
+            control->codeGen->useAsPointerVariable(decl->name.name);
         }
     }
     return true;
@@ -653,8 +745,7 @@ bool ConvertToEBPFControlPSA::preorder(const IR::Declaration_Variable* decl) {
 
 bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
     auto di = instance->node->to<IR::Declaration_Instance>();
-    if (di == nullptr)
-        return false;
+    if (di == nullptr) return false;
     cstring name = EBPFObject::externalName(di);
     cstring typeName = instance->type->getName().name;
 
@@ -683,15 +774,14 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
         auto met = new EBPFMeterPSA(program, name, di, control->codeGen);
         control->meters.emplace(name, met);
     } else {
-        ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
-                instance);
+        ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control", instance);
     }
 
     return false;
 }
 
 // =====================EBPFDeparser=============================
-bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock *ctrl) {
+bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock* ctrl) {
     if (pipelineType == TC_INGRESS) {
         deparser = new TCIngressDeparserPSA(program, ctrl, parserHeaders, istd);
     } else if (pipelineType == TC_EGRESS) {
@@ -717,7 +807,7 @@ bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock *ctrl) {
     return false;
 }
 
-bool ConvertToEBPFDeparserPSA::preorder(const IR::Declaration_Instance *di) {
+bool ConvertToEBPFDeparserPSA::preorder(const IR::Declaration_Instance* di) {
     if (auto typeSpec = di->type->to<IR::Type_Specialized>()) {
         auto baseType = typeSpec->baseType;
         auto typeName = baseType->to<IR::Type_Name>();

@@ -49,9 +49,7 @@ struct CompileContextStack final {
         return *current;
     }
 
-    static bool isEmpty() {
-        return getStack().empty();
-    }
+    static bool isEmpty() { return getStack().empty(); }
 
  private:
     friend struct AutoCompileContext;
@@ -103,8 +101,8 @@ class BaseCompileContext : public ICompileContext {
 
     /// @return the diagnostic action to use for @diagnosticName, or
     /// @defaultAction if no diagnostic action was found.
-    virtual DiagnosticAction
-    getDiagnosticAction(cstring diagnostic, DiagnosticAction defaultAction);
+    virtual DiagnosticAction getDiagnosticAction(cstring diagnostic,
+                                                 DiagnosticAction defaultAction);
 
  private:
     /// Error and warning tracking facilities for this compilation context.

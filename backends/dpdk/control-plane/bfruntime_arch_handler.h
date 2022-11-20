@@ -22,21 +22,17 @@ limitations under the License.
 
 #include <boost/optional.hpp>
 
-#include "p4/config/dpdk/p4info.pb.h"
-
 #include "control-plane/bfruntime.h"
-
 #include "control-plane/p4RuntimeArchHandler.h"
 #include "control-plane/p4RuntimeArchStandard.h"
 #include "control-plane/p4RuntimeSerializer.h"
 #include "control-plane/typeSpecConverter.h"
-
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
-
 #include "midend/eliminateTypedefs.h"
+#include "p4/config/dpdk/p4info.pb.h"
 
 using P4::ReferenceMap;
 using P4::TypeMap;
@@ -55,9 +51,7 @@ namespace ControlPlaneAPI {
 /// Declarations specific to standard architectures (v1model & PSA).
 namespace Standard {
 
-cstring prefix(cstring p, cstring str) {
-    return p.isNullOrEmpty() ? str : p + "." + str;
-}
+cstring prefix(cstring p, cstring str) { return p.isNullOrEmpty() ? str : p + "." + str; }
 
 /// Extends P4RuntimeSymbolType for the DPDK extern types.
 class SymbolTypeDPDK final : public SymbolType {
@@ -89,23 +83,20 @@ struct ActionSelector {
 template <Arch arch>
 class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
  protected:
-    std::unordered_map<const IR::Block *, cstring> blockNamePrefixMap;
+    std::unordered_map<const IR::Block*, cstring> blockNamePrefixMap;
 
  public:
     template <typename Func>
     void forAllPipeBlocks(const IR::ToplevelBlock* evaluatedProgram, Func function) {
         auto main = evaluatedProgram->getMain();
-        if (!main)
-            ::error(ErrorType::ERR_NOT_FOUND,
-                    "Program does not contain a `main` module");
+        if (!main) ::error(ErrorType::ERR_NOT_FOUND, "Program does not contain a `main` module");
         auto cparams = main->getConstructorParameters();
         int index = -1;
         for (auto param : main->constantValue) {
             index++;
             if (!param.second) continue;
             auto pipe = param.second;
-            if (!pipe->is<IR::PackageBlock>())
-                continue;
+            if (!pipe->is<IR::PackageBlock>()) continue;
             auto idxParam = cparams->getParameter(index);
             auto pipeName = idxParam->name;
             function(pipeName, pipe->to<IR::PackageBlock>());
@@ -123,7 +114,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
     using MeterSpec = p4configv1::MeterSpec;
 
     BFRuntimeArchHandler(ReferenceMap* refMap, TypeMap* typeMap,
-                            const IR::ToplevelBlock* evaluatedProgram)
+                         const IR::ToplevelBlock* evaluatedProgram)
         : P4RuntimeArchHandlerCommon<arch>(refMap, typeMap, evaluatedProgram) {
         // Create a map of all blocks to their pipe names. This map will
         // be used during collect and post processing to prefix
@@ -134,25 +125,21 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
             Helpers::forAllEvaluatedBlocks(pkg, [&](const IR::Block* block) {
                 auto decl = pkg->node->to<IR::Declaration_Instance>();
                 cstring blockNamePrefix = pipeName;
-                if (decl)
-                    blockNamePrefix = decl->controlPlaneName();
+                if (decl) blockNamePrefix = decl->controlPlaneName();
                 blockNamePrefixMap[block] = blockNamePrefix;
             });
         });
     }
 
     cstring getBlockNamePrefix(const IR::Block* blk) {
-        if (blockNamePrefixMap.count(blk) > 0)
-            return blockNamePrefixMap[blk];
+        if (blockNamePrefixMap.count(blk) > 0) return blockNamePrefixMap[blk];
         return "pipe";
     }
 
-    static p4configv1::Extern* getP4InfoExtern(P4RuntimeSymbolType typeId,
-                                               cstring typeName,
+    static p4configv1::Extern* getP4InfoExtern(P4RuntimeSymbolType typeId, cstring typeName,
                                                p4configv1::P4Info* p4info) {
         for (auto& externType : *p4info->mutable_externs()) {
-            if (externType.extern_type_id() == static_cast<p4rt_id_t>(typeId))
-                return &externType;
+            if (externType.extern_type_id() == static_cast<p4rt_id_t>(typeId)) return &externType;
         }
         auto* externType = p4info->add_externs();
         externType->set_extern_type_id(static_cast<p4rt_id_t>(typeId));
@@ -161,8 +148,8 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
     }
 
     static void addP4InfoExternInstance(const P4RuntimeSymbolTableIface& symbols,
-                                        P4RuntimeSymbolType typeId, cstring typeName,
-                                        cstring name, const IR::IAnnotated* annotations,
+                                        P4RuntimeSymbolType typeId, cstring typeName, cstring name,
+                                        const IR::IAnnotated* annotations,
                                         const ::google::protobuf::Message& message,
                                         p4configv1::P4Info* p4info, cstring pipeName = "") {
         auto* externType = getP4InfoExtern(typeId, typeName, p4info);
@@ -176,22 +163,19 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
         externInstance->mutable_info()->PackFrom(message);
     }
 
-    boost::optional<ActionSelector>
-    getActionSelector(const IR::ExternBlock* instance) {
+    boost::optional<ActionSelector> getActionSelector(const IR::ExternBlock* instance) {
         auto actionSelDecl = instance->node->to<IR::IDeclaration>();
         // to be deleted, used to support deprecated ActionSelector constructor.
         auto size = instance->getParameterValue("size");
         BUG_CHECK(size->is<IR::Constant>(), "Non-constant size");
-        return ActionSelector{actionSelDecl->controlPlaneName(),
-                              size->to<IR::Constant>()->asInt(),
+        return ActionSelector{actionSelDecl->controlPlaneName(), size->to<IR::Constant>()->asInt(),
                               ActionSelector::defaultMaxGroupSize,
                               size->to<IR::Constant>()->asInt(),
                               actionSelDecl->to<IR::IAnnotated>()};
     }
 
-    void addActionSelector(const P4RuntimeSymbolTableIface& symbols,
-                          p4configv1::P4Info* p4Info,
-                          const ActionSelector& actionSelector, cstring pipeName = "") {
+    void addActionSelector(const P4RuntimeSymbolTableIface& symbols, p4configv1::P4Info* p4Info,
+                           const ActionSelector& actionSelector, cstring pipeName = "") {
         ::dpdk::ActionSelector selector;
         selector.set_max_group_size(actionSelector.maxGroupSize);
         selector.set_num_groups(actionSelector.numGroups);
@@ -207,12 +191,11 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
         // We use the ActionSelector name for the action profile, and add a "_sel" suffix for
         // the action selector.
         cstring profileName = actionSelector.name;
-        selector.set_action_profile_id(symbols.getId(
-                    SymbolType::ACTION_PROFILE(), profileName));
+        selector.set_action_profile_id(symbols.getId(SymbolType::ACTION_PROFILE(), profileName));
         cstring selectorName = profileName + "_sel";
-        addP4InfoExternInstance(symbols, SymbolTypeDPDK::ACTION_SELECTOR(),
-                "ActionSelector", selectorName, actionSelector.annotations,
-                selector, p4Info, pipeName);
+        addP4InfoExternInstance(symbols, SymbolTypeDPDK::ACTION_SELECTOR(), "ActionSelector",
+                                selectorName, actionSelector.annotations, selector, p4Info,
+                                pipeName);
     }
 
     void collectExternInstance(P4RuntimeSymbolTableIface* symbols,
@@ -223,7 +206,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
         if (decl == nullptr) return;
         if (externBlock->type->name == "Digest") {
             symbols->add(SymbolType::DIGEST(), decl);
-         } else if (externBlock->type->name == ActionSelectorTraits<arch>::typeName()) {
+        } else if (externBlock->type->name == ActionSelectorTraits<arch>::typeName()) {
             auto selName = decl->controlPlaneName() + "_sel";
             auto profName = decl->controlPlaneName();
             symbols->add(SymbolTypeDPDK::ACTION_SELECTOR(), selName);
@@ -231,12 +214,9 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
         }
     }
 
-    void addTableProperties(const P4RuntimeSymbolTableIface& symbols,
-                            p4configv1::P4Info* p4info,
-                            p4configv1::Table* table,
-                            const IR::TableBlock* tableBlock) override {
-        P4RuntimeArchHandlerCommon<arch>::addTableProperties(
-            symbols, p4info, table, tableBlock);
+    void addTableProperties(const P4RuntimeSymbolTableIface& symbols, p4configv1::P4Info* p4info,
+                            p4configv1::Table* table, const IR::TableBlock* tableBlock) override {
+        P4RuntimeArchHandlerCommon<arch>::addTableProperties(symbols, p4info, table, tableBlock);
 
         auto tableDeclaration = tableBlock->container;
         bool supportsTimeout = getSupportsTimeout(tableDeclaration);
@@ -253,11 +233,9 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
             pre->set_name(prefix(pipeName, pre->name()));
     }
 
-    void addExternInstance(const P4RuntimeSymbolTableIface& symbols,
-                           p4configv1::P4Info* p4info,
+    void addExternInstance(const P4RuntimeSymbolTableIface& symbols, p4configv1::P4Info* p4info,
                            const IR::ExternBlock* externBlock) override {
-        P4RuntimeArchHandlerCommon<arch>::addExternInstance(
-            symbols, p4info, externBlock);
+        P4RuntimeArchHandlerCommon<arch>::addExternInstance(symbols, p4info, externBlock);
 
         auto decl = externBlock->node->to<IR::Declaration_Instance>();
         if (decl == nullptr) return;
@@ -310,13 +288,13 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
     /// @return serialization information for the Digest extern instacne @decl
     boost::optional<Digest> getDigest(const IR::Declaration_Instance* decl,
                                       p4configv1::P4TypeInfo* p4RtTypeInfo) {
-        BUG_CHECK(decl->type->is<IR::Type_Specialized>(),
-                  "%1%: expected Type_Specialized", decl->type);
+        BUG_CHECK(decl->type->is<IR::Type_Specialized>(), "%1%: expected Type_Specialized",
+                  decl->type);
         auto type = decl->type->to<IR::Type_Specialized>();
         BUG_CHECK(type->arguments->size() == 1, "%1%: expected one type argument", decl);
         auto typeArg = type->arguments->at(0);
-        auto typeSpec = TypeSpecConverter::convert(this->refMap, this->typeMap,
-                                                   typeArg, p4RtTypeInfo);
+        auto typeSpec =
+            TypeSpecConverter::convert(this->refMap, this->typeMap, typeArg, p4RtTypeInfo);
         BUG_CHECK(typeSpec != nullptr,
                   "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
 
@@ -340,9 +318,10 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
                     }
                 } else if (expr->is<IR::PathExpression>()) {
                     ::error(ErrorType::ERR_UNEXPECTED,
-                        "Unresolved value %1% for psa_idle_timeout "
-                        "property on table %2%. Must be a constant and one of "
-                        "{ NOTIFY_CONTROL, NO_TIMEOUT }", timeout, table);
+                            "Unresolved value %1% for psa_idle_timeout "
+                            "property on table %2%. Must be a constant and one of "
+                            "{ NOTIFY_CONTROL, NO_TIMEOUT }",
+                            timeout, table);
                     return false;
                 }
             }
@@ -351,19 +330,20 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
         ::error(ErrorType::ERR_UNEXPECTED,
                 "Unexpected value %1% for psa_idle_timeout "
                 "property on table %2%. Supported values are "
-                "{ NOTIFY_CONTROL, NO_TIMEOUT }", timeout, table);
+                "{ NOTIFY_CONTROL, NO_TIMEOUT }",
+                timeout, table);
         return false;
     }
 };
 
-class BFRuntimeArchHandlerPSA final :  public BFRuntimeArchHandler<Arch::PSA> {
+class BFRuntimeArchHandlerPSA final : public BFRuntimeArchHandler<Arch::PSA> {
  public:
     BFRuntimeArchHandlerPSA(ReferenceMap* refMap, TypeMap* typeMap,
                             const IR::ToplevelBlock* evaluatedProgram)
         : BFRuntimeArchHandler(refMap, typeMap, evaluatedProgram) {}
 };
 
-class BFRuntimeArchHandlerPNA final :  public BFRuntimeArchHandler<Arch::PNA> {
+class BFRuntimeArchHandlerPNA final : public BFRuntimeArchHandler<Arch::PNA> {
  public:
     BFRuntimeArchHandlerPNA(ReferenceMap* refMap, TypeMap* typeMap,
                             const IR::ToplevelBlock* evaluatedProgram)
@@ -373,19 +353,17 @@ class BFRuntimeArchHandlerPNA final :  public BFRuntimeArchHandler<Arch::PNA> {
 /// The architecture handler builder implementation for PSA.
 struct PSAArchHandlerBuilderForDPDK : public P4::ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface {
     P4::ControlPlaneAPI::P4RuntimeArchHandlerIface* operator()(
-        ReferenceMap* refMap,
-        TypeMap* typeMap,
+        ReferenceMap* refMap, TypeMap* typeMap,
         const IR::ToplevelBlock* evaluatedProgram) const override {
         return new P4::ControlPlaneAPI::Standard::BFRuntimeArchHandlerPSA(refMap, typeMap,
-            evaluatedProgram);
+                                                                          evaluatedProgram);
     }
 };
 
 /// The architecture handler builder implementation for PNA.
 struct PNAArchHandlerBuilderForDPDK : public P4::ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface {
     P4::ControlPlaneAPI::P4RuntimeArchHandlerIface* operator()(
-        ReferenceMap* refMap,
-        TypeMap* typeMap,
+        ReferenceMap* refMap, TypeMap* typeMap,
         const IR::ToplevelBlock* evaluatedProgram) const override {
         return new P4::ControlPlaneAPI::Standard::BFRuntimeArchHandlerPNA(refMap, typeMap,
                                                                           evaluatedProgram);
@@ -396,7 +374,7 @@ struct PNAArchHandlerBuilderForDPDK : public P4::ControlPlaneAPI::P4RuntimeArchH
 
 }  // namespace ControlPlaneAPI
 
-/** @} */  /* end group control_plane */
+/** @} */ /* end group control_plane */
 }  // namespace P4
 
-#endif  /* DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_ */
+#endif /* DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_ */

@@ -17,32 +17,32 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_FUNCTIONSINLINING_H_
 #define _FRONTENDS_P4_FUNCTIONSINLINING_H_
 
-#include "ir/ir.h"
+#include "commonInlining.h"
+#include "frontends/p4/cloner.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/unusedDeclarations.h"
-#include "frontends/p4/cloner.h"
-#include "commonInlining.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
 typedef SimpleCallInfo<IR::Node, IR::Statement> FunctionCallInfo;
-typedef SimpleInlineWorkList<
-    IR::Node, IR::Statement, FunctionCallInfo> FunctionsInlineWorkList;
-typedef SimpleInlineList<
-    IR::Node, FunctionCallInfo, FunctionsInlineWorkList> FunctionsInlineList;
+typedef SimpleInlineWorkList<IR::Node, IR::Statement, FunctionCallInfo> FunctionsInlineWorkList;
+typedef SimpleInlineList<IR::Node, FunctionCallInfo, FunctionsInlineWorkList> FunctionsInlineList;
 
 class DiscoverFunctionsInlining : public Inspector {
     FunctionsInlineList* toInline;  // output
-    P4::ReferenceMap*  refMap;    // input
-    P4::TypeMap*       typeMap;   // input
+    P4::ReferenceMap* refMap;       // input
+    P4::TypeMap* typeMap;           // input
 
  public:
-    DiscoverFunctionsInlining(FunctionsInlineList* toInline,
-                              P4::ReferenceMap* refMap,
-                              P4::TypeMap* typeMap) :
-            toInline(toInline), refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(toInline); CHECK_NULL(refMap); CHECK_NULL(typeMap);
-        setName("DiscoverFunctionsInlining"); }
+    DiscoverFunctionsInlining(FunctionsInlineList* toInline, P4::ReferenceMap* refMap,
+                              P4::TypeMap* typeMap)
+        : toInline(toInline), refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(toInline);
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        setName("DiscoverFunctionsInlining");
+    }
     void postorder(const IR::MethodCallExpression* mce) override;
 };
 
@@ -64,17 +64,15 @@ class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsIn
     const IR::Expression* cloneBody(const IR::IndexedVector<IR::StatOrDecl>& src,
                                     IR::IndexedVector<IR::StatOrDecl>& dest);
     /// Returns a block statement that will replace the statement
-    const IR::Node* inlineBefore(
-        const IR::Node* calleeNode, const IR::MethodCallExpression* call,
-        const IR::Statement* before);
+    const IR::Node* inlineBefore(const IR::Node* calleeNode, const IR::MethodCallExpression* call,
+                                 const IR::Statement* before);
     bool preCaller();
     const IR::Node* postCaller(const IR::Node* caller);
     const ReplacementMap* getReplacementMap() const;
     void dumpReplacementMap() const;
 
  public:
-    explicit FunctionsInliner(bool isv1) : refMap(new P4::ReferenceMap())
-    { refMap->setIsV1(isv1); }
+    explicit FunctionsInliner(bool isv1) : refMap(new P4::ReferenceMap()) { refMap->setIsV1(isv1); }
     Visitor::profile_t init_apply(const IR::Node* node) override;
     void end_apply(const IR::Node* node) override;
     const IR::Node* preorder(IR::Function* function) override;
@@ -97,9 +95,9 @@ class CloneVariableDeclarations : public Transform {
     }
     const IR::Node* postorder(IR::Declaration_Variable* declaration) override {
         // this will have a different declid
-        auto result = new IR::Declaration_Variable(
-            declaration->srcInfo, declaration->getName(), declaration->annotations,
-            declaration->type, declaration->initializer);
+        auto result = new IR::Declaration_Variable(declaration->srcInfo, declaration->getName(),
+                                                   declaration->annotations, declaration->type,
+                                                   declaration->initializer);
         LOG3("Cloned " << dbp(result));
         return result;
     }
@@ -110,12 +108,11 @@ class InlineFunctions : public PassManager {
 
  public:
     InlineFunctions(ReferenceMap* refMap, TypeMap* typeMap) {
-        passes.push_back(new PassRepeated({
-                    new TypeChecking(refMap, typeMap),
-                    new DiscoverFunctionsInlining(&functionsToInline, refMap, typeMap),
-                    new InlineFunctionsDriver(&functionsToInline,
-                                              new FunctionsInliner(refMap->isV1())),
-                    new RemoveAllUnusedDeclarations(refMap)}));
+        passes.push_back(new PassRepeated(
+            {new TypeChecking(refMap, typeMap),
+             new DiscoverFunctionsInlining(&functionsToInline, refMap, typeMap),
+             new InlineFunctionsDriver(&functionsToInline, new FunctionsInliner(refMap->isV1())),
+             new RemoveAllUnusedDeclarations(refMap)}));
         passes.push_back(new CloneVariableDeclarations());
         setName("InlineFunctions");
     }

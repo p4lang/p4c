@@ -23,12 +23,14 @@ limitations under the License.
 
 #include <vector>
 
-#include "gtest/gtest_prod.h"
 #include "cstring.h"
-#include "stringref.h"
+#include "gtest/gtest_prod.h"
 #include "map.h"
+#include "stringref.h"
 
-namespace Test { class UtilSourceFile; }
+namespace Test {
+class UtilSourceFile;
+}
 
 class IHasDbPrint {
  public:
@@ -51,40 +53,30 @@ position are the "smallest", which is a reasonable choice.
 class SourcePosition final {
  public:
     /// Creates an invalid source position
-    SourcePosition()
-            : lineNumber(0),
-              columnNumber(0) {}
+    SourcePosition() : lineNumber(0), columnNumber(0) {}
 
     SourcePosition(unsigned lineNumber, unsigned columnNumber);
     SourcePosition& operator=(const SourcePosition&) = default;
 
     SourcePosition(const SourcePosition& other)
-            : lineNumber(other.lineNumber),
-              columnNumber(other.columnNumber) {}
+        : lineNumber(other.lineNumber), columnNumber(other.columnNumber) {}
 
     inline bool operator==(const SourcePosition& rhs) const {
-        return columnNumber == rhs.columnNumber &&
-                lineNumber == rhs.lineNumber;
+        return columnNumber == rhs.columnNumber && lineNumber == rhs.lineNumber;
     }
-    inline bool operator!=(const SourcePosition& rhs) const
-    {return !this->operator==(rhs);}
+    inline bool operator!=(const SourcePosition& rhs) const { return !this->operator==(rhs); }
 
-    inline bool operator< (const SourcePosition& rhs) const {
+    inline bool operator<(const SourcePosition& rhs) const {
         return (lineNumber < rhs.lineNumber) ||
-                (lineNumber == rhs.lineNumber &&
-                 columnNumber < rhs.columnNumber);
+               (lineNumber == rhs.lineNumber && columnNumber < rhs.columnNumber);
     }
-    inline bool operator> (const SourcePosition& rhs) const
-    {return rhs.operator< (*this);}
-    inline bool operator<=(const SourcePosition& rhs) const
-    {return !this->operator> (rhs);}
-    inline bool operator>=(const SourcePosition& rhs) const
-    {return !this->operator< (rhs);}
+    inline bool operator>(const SourcePosition& rhs) const { return rhs.operator<(*this); }
+    inline bool operator<=(const SourcePosition& rhs) const { return !this->operator>(rhs); }
+    inline bool operator>=(const SourcePosition& rhs) const { return !this->operator<(rhs); }
 
     /// Move one column back.  This never moves one line back.
     SourcePosition& operator--() {
-        if (columnNumber > 0)
-            columnNumber--;
+        if (columnNumber > 0) columnNumber--;
         return *this;
     }
     SourcePosition operator--(int) {
@@ -94,35 +86,27 @@ class SourcePosition final {
     }
 
     inline const SourcePosition& min(const SourcePosition& rhs) const {
-        if (this->operator<(rhs))
-            return *this;
+        if (this->operator<(rhs)) return *this;
         return rhs;
     }
 
     inline const SourcePosition& max(const SourcePosition& rhs) const {
-        if (this->operator>(rhs))
-            return *this;
+        if (this->operator>(rhs)) return *this;
         return rhs;
     }
 
     cstring toString() const;
 
-    bool isValid() const {
-        return lineNumber != 0;
-    }
+    bool isValid() const { return lineNumber != 0; }
 
-    unsigned getLineNumber() const {
-        return lineNumber;
-    }
+    unsigned getLineNumber() const { return lineNumber; }
 
-    unsigned getColumnNumber() const {
-        return columnNumber;
-    }
+    unsigned getColumnNumber() const { return columnNumber; }
 
  private:
     // Input sources where this character position is interpreted.
-    unsigned      lineNumber;
-    unsigned      columnNumber;
+    unsigned lineNumber;
+    unsigned columnNumber;
 };
 
 class InputSources;
@@ -150,15 +134,13 @@ class SourceInfo final {
         this->srcBrief = srcBrief;
     }
     /// Creates an "invalid" SourceInfo
-    SourceInfo()
-        : sources(nullptr), start(SourcePosition()), end(SourcePosition()) {}
+    SourceInfo() : sources(nullptr), start(SourcePosition()), end(SourcePosition()) {}
 
     /// Creates a SourceInfo for a 'point' in the source, or invalid
     SourceInfo(const InputSources* sources, SourcePosition point)
         : sources(sources), start(point), end(point) {}
 
-    SourceInfo(const InputSources* sources, SourcePosition start,
-               SourcePosition end);
+    SourceInfo(const InputSources* sources, SourcePosition start, SourcePosition end);
 
     SourceInfo(const SourceInfo& other) = default;
     ~SourceInfo() = default;
@@ -168,15 +150,13 @@ class SourceInfo final {
         A SourceInfo that spans both this and rhs.
         However, if this or rhs is invalid, it is not taken into account */
     const SourceInfo operator+(const SourceInfo& rhs) const {
-        if (!this->isValid())
-            return rhs;
-        if (!rhs.isValid())
-            return *this;
+        if (!this->isValid()) return rhs;
+        if (!rhs.isValid()) return *this;
         SourcePosition s = start.min(rhs.start);
         SourcePosition e = end.max(rhs.end);
         return SourceInfo(sources, s, e);
     }
-    SourceInfo &operator+=(const SourceInfo& rhs) {
+    SourceInfo& operator+=(const SourceInfo& rhs) {
         if (!isValid()) {
             *this = rhs;
         } else if (rhs.isValid()) {
@@ -186,49 +166,40 @@ class SourceInfo final {
         return *this;
     }
 
-    bool operator==(const SourceInfo &rhs) const
-    { return start == rhs.start && end == rhs.end; }
+    bool operator==(const SourceInfo& rhs) const { return start == rhs.start && end == rhs.end; }
 
     cstring toDebugString() const;
 
-    void dbprint(std::ostream& out) const
-    { out << this->toDebugString(); }
+    void dbprint(std::ostream& out) const { out << this->toDebugString(); }
 
     cstring toSourceFragment() const;
     cstring toBriefSourceFragment() const;
     cstring toPositionString() const;
-    cstring toSourcePositionData(unsigned *outLineNumber,
-                                 unsigned *outColumnNumber) const;
+    cstring toSourcePositionData(unsigned* outLineNumber, unsigned* outColumnNumber) const;
     SourceFileLine toPosition() const;
 
-    bool isValid() const
-    { return this->start.isValid(); }
+    bool isValid() const { return this->start.isValid(); }
     explicit operator bool() const { return isValid(); }
 
     cstring getSourceFile() const;
 
-    const SourcePosition& getStart() const
-    { return this->start; }
+    const SourcePosition& getStart() const { return this->start; }
 
-    const SourcePosition& getEnd() const
-    { return this->end; }
+    const SourcePosition& getEnd() const { return this->end; }
 
     /**
        True if this comes 'before' this source position.
        'invalid' source positions come first.
        This is true if the start of other is strictly before
        the start of this. */
-    bool operator< (const SourceInfo& rhs) const {
+    bool operator<(const SourceInfo& rhs) const {
         if (!rhs.isValid()) return false;
         if (!isValid()) return true;
         return this->start < rhs.start;
     }
-    inline bool operator> (const SourceInfo& rhs) const
-    { return rhs.operator< (*this); }
-    inline bool operator<=(const SourceInfo& rhs) const
-    { return !this->operator> (rhs); }
-    inline bool operator>=(const SourceInfo& rhs) const
-    { return !this->operator< (rhs); }
+    inline bool operator>(const SourceInfo& rhs) const { return rhs.operator<(*this); }
+    inline bool operator<=(const SourceInfo& rhs) const { return !this->operator>(rhs); }
+    inline bool operator>=(const SourceInfo& rhs) const { return !this->operator<(rhs); }
 
  private:
     const InputSources* sources = nullptr;
@@ -246,12 +217,10 @@ class IHasSourceInfo {
 /** A line in a source file */
 struct SourceFileLine {
     /// an empty filename indicates stdin
-    cstring   fileName;
-    unsigned  sourceLine;
+    cstring fileName;
+    unsigned sourceLine;
 
-    SourceFileLine(cstring file, unsigned line) :
-            fileName(file),
-            sourceLine(line) {}
+    SourceFileLine(cstring file, unsigned line) : fileName(file), sourceLine(line) {}
 
     cstring toString() const;
 };
@@ -263,8 +232,8 @@ class Comment final : IHasDbPrint {
     cstring body;
 
  public:
-    Comment(SourceInfo srcInfo, bool singleLine, cstring body):
-            srcInfo(srcInfo), singleLine(singleLine), body(body) {}
+    Comment(SourceInfo srcInfo, bool singleLine, cstring body)
+        : srcInfo(srcInfo), singleLine(singleLine), body(body) {}
     cstring toString() const {
         std::string result;
         if (singleLine)
@@ -272,13 +241,10 @@ class Comment final : IHasDbPrint {
         else
             result = "/*";
         result += body;
-        if (!singleLine)
-            result += "*/";
+        if (!singleLine) result += "*/";
         return result;
     }
-    void dbprint(std::ostream& out) const {
-        out << toString();
-    }
+    void dbprint(std::ostream& out) const { out << toString(); }
 };
 
 /**
@@ -321,9 +287,9 @@ class InputSources final {
        string describing a position in the sources, e.g.:
        int<32> variable;
                ^^^^^^^^ */
-    cstring getSourceFragment(const SourcePosition &position) const;
-    cstring getSourceFragment(const SourceInfo &position) const;
-    cstring getBriefSourceFragment(const SourceInfo &position) const;
+    cstring getSourceFragment(const SourcePosition& position) const;
+    cstring getSourceFragment(const SourceInfo& position) const;
+    cstring getBriefSourceFragment(const SourceInfo& position) const;
 
     cstring toDebugString() const;
     void addComment(SourceInfo srcInfo, bool singleLine, cstring body);
@@ -347,7 +313,6 @@ class InputSources final {
 
 }  // namespace Util
 
-inline void dbprint(const IHasDbPrint* o)
-{ o->dbprint(std::cout); }
+inline void dbprint(const IHasDbPrint* o) { o->dbprint(std::cout); }
 
 #endif /* _LIB_SOURCE_FILE_H_ */

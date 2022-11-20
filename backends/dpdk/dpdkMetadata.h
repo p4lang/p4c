@@ -35,29 +35,28 @@ class DirectionToRegRead : public Transform {
 
  public:
     DirectionToRegRead() {
-    // direction to input metadata field name mapping
-    dirToInput.insert(std::make_pair(cstring("pna_main_input_metadata_direction"),
-                                     cstring("pna_main_input_metadata_input_port")));
-    dirToInput.insert(std::make_pair(cstring("pna_pre_input_metadata_direction"),
-                                     cstring("pna_pre_input_metadata_input_port")));
-    dirToInput.insert(std::make_pair(cstring("pna_main_parser_input_metadata_direction"),
-                                     cstring("pna_main_parser_input_metadata_input_port")));
-    isInitialized.insert(std::make_pair(cstring("pna_main_input_metadata_direction"), false));
-    isInitialized.insert(std::make_pair(cstring("pna_pre_input_metadata_direction"), false));
-    isInitialized.insert(std::make_pair(cstring("pna_main_parser_input_metadata_direction"),
-                                        false));
+        // direction to input metadata field name mapping
+        dirToInput.insert(std::make_pair(cstring("pna_main_input_metadata_direction"),
+                                         cstring("pna_main_input_metadata_input_port")));
+        dirToInput.insert(std::make_pair(cstring("pna_pre_input_metadata_direction"),
+                                         cstring("pna_pre_input_metadata_input_port")));
+        dirToInput.insert(std::make_pair(cstring("pna_main_parser_input_metadata_direction"),
+                                         cstring("pna_main_parser_input_metadata_input_port")));
+        isInitialized.insert(std::make_pair(cstring("pna_main_input_metadata_direction"), false));
+        isInitialized.insert(std::make_pair(cstring("pna_pre_input_metadata_direction"), false));
+        isInitialized.insert(
+            std::make_pair(cstring("pna_main_parser_input_metadata_direction"), false));
     }
-    const IR::Node* preorder(IR::DpdkAsmProgram *p) override;
-    const IR::Node *postorder(IR::DpdkAction *l) override;
+    const IR::Node* preorder(IR::DpdkAsmProgram* p) override;
+    const IR::Node* postorder(IR::DpdkAction* l) override;
 
-    void uniqueNames(IR::DpdkAsmProgram *p);
-    IR::DpdkExternDeclaration*
-    addRegDeclInstance(cstring instanceName);
-    bool isDirection(const IR::Member *m);
-    IR::DpdkListStatement* replaceDirection(IR::DpdkListStatement *l);
-    void replaceDirection(const IR::Member *m);
-    IR::IndexedVector<IR::DpdkAsmStatement>
-    replaceDirectionWithRegRead(IR::IndexedVector<IR::DpdkAsmStatement> stmts);
+    void uniqueNames(IR::DpdkAsmProgram* p);
+    IR::DpdkExternDeclaration* addRegDeclInstance(cstring instanceName);
+    bool isDirection(const IR::Member* m);
+    IR::DpdkListStatement* replaceDirection(IR::DpdkListStatement* l);
+    void replaceDirection(const IR::Member* m);
+    IR::IndexedVector<IR::DpdkAsmStatement> replaceDirectionWithRegRead(
+        IR::IndexedVector<IR::DpdkAsmStatement> stmts);
 };
 
 // DPDK implements pass metadata using "recircid" instruction.
@@ -68,11 +67,11 @@ class PrependPassRecircId : public Transform {
 
  public:
     PrependPassRecircId() {}
-    bool isPass(const IR::Member *m);
-    const IR::Node *postorder(IR::DpdkAction *a);
-    const IR::Node *postorder(IR::DpdkListStatement *l) override;
-    IR::IndexedVector<IR::DpdkAsmStatement>
-    prependPassWithRecircid(IR::IndexedVector<IR::DpdkAsmStatement> stmts);
+    bool isPass(const IR::Member* m);
+    const IR::Node* postorder(IR::DpdkAction* a) override;
+    const IR::Node* postorder(IR::DpdkListStatement* l) override;
+    IR::IndexedVector<IR::DpdkAsmStatement> prependPassWithRecircid(
+        IR::IndexedVector<IR::DpdkAsmStatement> stmts);
 };
 
 }  // namespace DPDK

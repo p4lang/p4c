@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _P4_VALIDATEMATCHANNOTATIONS_H_
 #define _P4_VALIDATEMATCHANNOTATIONS_H_
 
-#include "lib/error.h"
-#include "ir/ir.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
+#include "lib/error.h"
 
 namespace P4 {
 
@@ -28,21 +28,20 @@ namespace P4 {
  */
 class ValidateMatchAnnotations final : public Inspector {
     TypeMap* typeMap;
+
  public:
-    explicit ValidateMatchAnnotations(TypeMap* typeMap): typeMap(typeMap)
-    { setName("ValidateMatchAnnotations"); }
+    explicit ValidateMatchAnnotations(TypeMap* typeMap) : typeMap(typeMap) {
+        setName("ValidateMatchAnnotations");
+    }
     void postorder(const IR::Annotation* annotation) override {
-        if (annotation->name != IR::Annotation::matchAnnotation)
-            return;
-        if (!findContext<IR::StructField>())
-            return;
+        if (annotation->name != IR::Annotation::matchAnnotation) return;
+        if (!findContext<IR::StructField>()) return;
         if (annotation->expr.size() != 1)
-            ::error(ErrorType::ERR_INVALID,
-                    "%1%: annotation must have exactly 1 argument", annotation);
+            ::error(ErrorType::ERR_INVALID, "%1%: annotation must have exactly 1 argument",
+                    annotation);
         auto e0 = annotation->expr.at(0);
         auto type = typeMap->getType(e0, true);
-        if (type == nullptr)
-            return;
+        if (type == nullptr) return;
         if (!type->is<IR::Type_MatchKind>())
             ::error(ErrorType::ERR_TYPE_ERROR, "%1%: value must be a match_kind", e0);
     }

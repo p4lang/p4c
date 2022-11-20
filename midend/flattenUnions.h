@@ -17,11 +17,11 @@ limitations under the License.
 #ifndef _MIDEND_FLATTENUNIONS_H_
 #define _MIDEND_FLATTENUNIONS_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
+#include "./frontends/p4/parserControlFlow.h"
 #include "./frontends/p4/simplifyDefUse.h"
 #include "./frontends/p4/unusedDeclarations.h"
-#include "./frontends/p4/parserControlFlow.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 namespace P4 {
 
 /**
@@ -50,18 +50,18 @@ class DoFlattenHeaderUnion : public Transform {
     P4::TypeMap* typeMap;
     std::map<cstring, std::map<cstring, cstring>> replacementMap;
     // Replacement map needed to add element-wise header declaration in right context
-    std::map <IR::Declaration_Variable*, IR::IndexedVector<IR::Declaration>> replaceDVMap;
+    std::map<IR::Declaration_Variable*, IR::IndexedVector<IR::Declaration>> replaceDVMap;
 
  public:
-    DoFlattenHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) :
-                         refMap(refMap), typeMap(typeMap){}
+    DoFlattenHeaderUnion(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
+        : refMap(refMap), typeMap(typeMap) {}
     const IR::Node* postorder(IR::Type_Struct* sf) override;
-    const IR::Node* postorder(IR::Declaration_Variable *dv) override;
+    const IR::Node* postorder(IR::Declaration_Variable* dv) override;
     const IR::Node* postorder(IR::Member* m) override;
     const IR::Node* postorder(IR::P4Parser* parser) override;
     const IR::Node* postorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::P4Action* action) override;
-    bool  hasHeaderUnionField(IR::Type_Struct* s);
+    bool hasHeaderUnionField(IR::Type_Struct* s);
 };
 
 /** This pass handles the validity semantics of header union.
@@ -101,30 +101,29 @@ class HandleValidityHeaderUnion : public Transform {
     P4::TypeMap* typeMap;
     IR::IndexedVector<IR::Declaration> toInsert;  // temporaries
 
-
  public:
-    HandleValidityHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) :
-                         refMap(refMap), typeMap(typeMap){}
+    HandleValidityHeaderUnion(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
+        : refMap(refMap), typeMap(typeMap) {}
     const IR::Node* postorder(IR::AssignmentStatement* assn) override;
-    const IR::Node* postorder(IR::IfStatement *a) override;
+    const IR::Node* postorder(IR::IfStatement* a) override;
     const IR::Node* postorder(IR::SwitchStatement* a) override;
     const IR::Node* postorder(IR::MethodCallStatement* mcs) override;
     const IR::Node* postorder(IR::P4Parser* parser) override;
     const IR::Node* postorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::P4Action* action) override;
-    const IR::MethodCallStatement* processValidityForStr(const IR::Statement *s,
-                                                         const IR::Member *m,
-                                                         cstring headerElement,
+    const IR::MethodCallStatement* processValidityForStr(const IR::Statement* s,
+                                                         const IR::Member* m, cstring headerElement,
                                                          cstring setValid);
-    const IR::Node* setInvalidforRest(const IR::Statement *s, const IR::Member *m,
-                                      const IR::Type_HeaderUnion *hu, cstring exclude,
+    const IR::Node* setInvalidforRest(const IR::Statement* s, const IR::Member* m,
+                                      const IR::Type_HeaderUnion* hu, cstring exclude,
                                       bool setValidforCurrMem);
-    const IR::Node * expandIsValid(const IR::Statement *a, const IR::MethodCallExpression *mce,
-                                   IR::IndexedVector<IR::StatOrDecl> &code_block);
+    const IR::Node* expandIsValid(const IR::Statement* a, const IR::MethodCallExpression* mce,
+                                  IR::IndexedVector<IR::StatOrDecl>& code_block);
 };
 
 class RemoveUnusedHUDeclarations : public Transform {
     P4::ReferenceMap* refMap;
+
  public:
     explicit RemoveUnusedHUDeclarations(P4::ReferenceMap* refMap) : refMap(refMap) {}
     const IR::Node* preorder(IR::Type_HeaderUnion* type) {
@@ -142,11 +141,8 @@ class RemoveUnusedHUDeclarations : public Transform {
  *   pass is used to convert these if statements to transition select statements
  */
 class FlattenHeaderUnion : public PassManager {
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
-
  public:
-    FlattenHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) {
+    FlattenHeaderUnion(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
         passes.push_back(new HandleValidityHeaderUnion(refMap, typeMap));
         passes.push_back(new DoFlattenHeaderUnion(refMap, typeMap));

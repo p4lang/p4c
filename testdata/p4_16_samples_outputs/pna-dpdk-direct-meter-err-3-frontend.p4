@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <pna.p4>
+#include <dpdk/pna.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -65,14 +65,14 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     @name("MainControlImpl.meter0") DirectMeter(PNA_MeterType_t.BYTES) meter0_0;
     @name("MainControlImpl.meter1") DirectMeter(PNA_MeterType_t.BYTES) meter1_0;
     @name("MainControlImpl.next_hop") action next_hop(@name("oport") PortId_t oport) {
-        out1_0 = meter0_0.execute(color_in_0, 32w1024);
+        out1_0 = meter0_0.dpdk_execute(color_in_0, 32w1024);
         if (out1_0 == PNA_MeterColor_t.GREEN) {
             tmp = 32w1;
         } else {
             tmp = 32w0;
         }
         user_meta.port_out = tmp;
-        color_out_0 = meter1_0.execute(color_in_0, 32w1024);
+        color_out_0 = meter1_0.dpdk_execute(color_in_0, 32w1024);
         if (color_out_0 == PNA_MeterColor_t.GREEN) {
             tmp_0 = 32w1;
         } else {
@@ -82,8 +82,8 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         send_to_port(oport);
     }
     @name("MainControlImpl.next_hop") action next_hop_1(@name("oport") PortId_t oport_1) {
-        out1_0 = meter0_0.execute(color_in_0, 32w1024);
-        color_out_0 = meter1_0.execute(color_in_0, 32w1024);
+        out1_0 = meter0_0.dpdk_execute(color_in_0, 32w1024);
+        color_out_0 = meter1_0.dpdk_execute(color_in_0, 32w1024);
         if (color_out_0 == PNA_MeterColor_t.GREEN) {
             tmp_0 = 32w1;
         } else {
@@ -93,7 +93,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         send_to_port(oport_1);
     }
     @name("MainControlImpl.default_route_drop") action default_route_drop() {
-        out1_0 = meter0_0.execute(color_in_0, 32w1024);
+        out1_0 = meter0_0.dpdk_execute(color_in_0, 32w1024);
         if (out1_0 == PNA_MeterColor_t.GREEN) {
             tmp_1 = 32w1;
         } else {
@@ -103,7 +103,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         drop_packet();
     }
     @name("MainControlImpl.default_route_drop1") action default_route_drop1() {
-        meter1_0.execute(color_in_0, 32w1024);
+        meter1_0.dpdk_execute(color_in_0, 32w1024);
         drop_packet();
     }
     @name("MainControlImpl.ipv4_da1") table ipv4_da1_0 {

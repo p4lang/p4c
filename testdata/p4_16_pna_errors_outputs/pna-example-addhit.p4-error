@@ -1,0 +1,6 @@
+pna-example-addhit.p4(143): [--Werror=unexpected] error: add_entry is not called from a default action: next_hop 
+        add_entry(action_name="next_hop", action_params = tmp, expire_time_profile_id = user_meta.timeout);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pna-example-addhit.p4(175): [--Werror=unexpected] error: add_entry first arg action name next_hop is not any action in table ipv4_da2_0
+        add_entry(action_name="next_hop", action_params = {32w0, 32w1234}, expire_time_profile_id = user_meta.timeout);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

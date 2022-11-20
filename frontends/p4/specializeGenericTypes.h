@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_SPECIALIZEGENERICTYPES_H_
 #define _FRONTENDS_P4_SPECIALIZEGENERICTYPES_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -36,18 +36,26 @@ struct TypeSpecialization : public IHasDbPrint {
     const IR::Node* insertion;
     /// Save here the canonical types of the type arguments of 'specialized'.
     /// The typeMap will be cleared, so we cannot look them up later.
-    const IR::Vector<IR::Type> *argumentTypes;
+    const IR::Vector<IR::Type>* argumentTypes;
 
     TypeSpecialization(cstring name, const IR::Type_Specialized* specialized,
                        const IR::Type_Declaration* decl, const IR::Node* insertion,
-                       const IR::Vector<IR::Type>* argTypes):
-            name(name), specialized(specialized), declaration(decl), replacement(nullptr),
-            insertion(insertion), argumentTypes(argTypes) {
-        CHECK_NULL(specialized); CHECK_NULL(decl); CHECK_NULL(insertion); CHECK_NULL(argTypes);
+                       const IR::Vector<IR::Type>* argTypes)
+        : name(name),
+          specialized(specialized),
+          declaration(decl),
+          replacement(nullptr),
+          insertion(insertion),
+          argumentTypes(argTypes) {
+        CHECK_NULL(specialized);
+        CHECK_NULL(decl);
+        CHECK_NULL(insertion);
+        CHECK_NULL(argTypes);
     }
-    void dbprint(std::ostream& out) const override
-    { out << "Specializing:" << dbp(specialized) << " from " << dbp(declaration)
-          << " as " << dbp(replacement) << " inserted at " << dbp(insertion); }
+    void dbprint(std::ostream& out) const override {
+        out << "Specializing:" << dbp(specialized) << " from " << dbp(declaration) << " as "
+            << dbp(replacement) << " inserted at " << dbp(insertion);
+    }
 };
 
 struct TypeSpecializationMap : public IHasDbPrint {
@@ -64,18 +72,18 @@ struct TypeSpecializationMap : public IHasDbPrint {
     TypeSpecialization* get(const IR::Type_Specialized* t) const;
     bool same(const TypeSpecialization* left, const IR::Type_Specialized* right) const;
     void dbprint(std::ostream& out) const override {
-        for (auto it : map) { out << dbp(it.first) << " => " << it.second << std::endl; } }
-    IR::Vector<IR::Node>*
-    getSpecializations(const IR::Node* insertionPoint) {
+        for (auto it : map) {
+            out << dbp(it.first) << " => " << it.second << std::endl;
+        }
+    }
+    IR::Vector<IR::Node>* getSpecializations(const IR::Node* insertionPoint) {
         IR::Vector<IR::Node>* result = nullptr;
         for (auto s : map) {
-            if (inserted.find(s.second) != inserted.end())
-                continue;
+            if (inserted.find(s.second) != inserted.end()) continue;
             if (s.second->insertion == insertionPoint) {
-                if (result == nullptr)
-                    result = new IR::Vector<IR::Node>();
-                LOG2("Will insert " << dbp(s.second->replacement) <<
-                     " before " << dbp(insertionPoint));
+                if (result == nullptr) result = new IR::Vector<IR::Node>();
+                LOG2("Will insert " << dbp(s.second->replacement) << " before "
+                                    << dbp(insertionPoint));
                 result->push_back(s.second->replacement);
                 inserted.emplace(s.second);
             }
@@ -89,9 +97,9 @@ struct TypeSpecializationMap : public IHasDbPrint {
  */
 class FindTypeSpecializations : public Inspector {
     TypeSpecializationMap* specMap;
+
  public:
-    explicit FindTypeSpecializations(TypeSpecializationMap* specMap) :
-            specMap(specMap) {
+    explicit FindTypeSpecializations(TypeSpecializationMap* specMap) : specMap(specMap) {
         CHECK_NULL(specMap);
         setName("FindTypeSpecializations");
     }
@@ -105,17 +113,16 @@ class FindTypeSpecializations : public Inspector {
  */
 class CreateSpecializedTypes : public Transform {
     TypeSpecializationMap* specMap;
+
  public:
-    explicit CreateSpecializedTypes(TypeSpecializationMap* specMap) :
-            specMap(specMap) {
+    explicit CreateSpecializedTypes(TypeSpecializationMap* specMap) : specMap(specMap) {
         CHECK_NULL(specMap);
         setName("CreateSpecializedTypes");
     }
 
     const IR::Node* insert(const IR::Node* before);
     const IR::Node* postorder(IR::Type_Declaration* type) override;
-    const IR::Node* postorder(IR::Declaration* decl) override
-    { return insert(decl); }
+    const IR::Node* postorder(IR::Declaration* decl) override { return insert(decl); }
 };
 
 /**
@@ -126,8 +133,10 @@ class ReplaceTypeUses : public Transform {
     TypeSpecializationMap* specMap;
 
  public:
-    explicit ReplaceTypeUses(TypeSpecializationMap* specMap): specMap(specMap) {
-        setName("ReplaceTypeUses"); CHECK_NULL(specMap); }
+    explicit ReplaceTypeUses(TypeSpecializationMap* specMap) : specMap(specMap) {
+        setName("ReplaceTypeUses");
+        CHECK_NULL(specMap);
+    }
     const IR::Node* postorder(IR::Type_Specialized* type) override;
     const IR::Node* postorder(IR::StructExpression* expresison) override;
 };
@@ -151,15 +160,16 @@ S0 s;
  */
 class SpecializeGenericTypes : public PassRepeated {
     TypeSpecializationMap specMap;
+
  public:
     SpecializeGenericTypes(ReferenceMap* refMap, TypeMap* typeMap) {
         passes.emplace_back(new PassRepeated({
-                    new TypeChecking(refMap, typeMap),
-                    new FindTypeSpecializations(&specMap),
-                    new CreateSpecializedTypes(&specMap),
-                    // The previous pass has mutated some struct types
-                    new ClearTypeMap(typeMap, true),
-                }));
+            new TypeChecking(refMap, typeMap),
+            new FindTypeSpecializations(&specMap),
+            new CreateSpecializedTypes(&specMap),
+            // The previous pass has mutated some struct types
+            new ClearTypeMap(typeMap, true),
+        }));
         passes.emplace_back(new TypeChecking(refMap, typeMap));
         passes.emplace_back(new ReplaceTypeUses(&specMap));
         // The previous pass has invalidated the types of struct expressions

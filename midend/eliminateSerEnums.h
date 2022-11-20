@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _MIDEND_ELIMINATESERENUMS_H_
 #define _MIDEND_ELIMINATESERENUMS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -27,10 +27,12 @@ namespace P4 {
  */
 class DoEliminateSerEnums final : public Transform {
     const TypeMap* typeMap;
+
  public:
-    explicit DoEliminateSerEnums(const TypeMap* typeMap): typeMap(typeMap) {
+    explicit DoEliminateSerEnums(const TypeMap* typeMap) : typeMap(typeMap) {
         setName("DoEliminateSerEnums");
-        visitDagOnce = false; }
+        visitDagOnce = false;
+    }
     const IR::Node* preorder(IR::Type_SerEnum* type) override;
     const IR::Node* postorder(IR::Type_Name* type) override;
     const IR::Node* postorder(IR::Member* expression) override;
@@ -40,8 +42,7 @@ class EliminateSerEnums final : public PassManager {
  public:
     EliminateSerEnums(ReferenceMap* refMap, TypeMap* typeMap,
                       TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoEliminateSerEnums(typeMap));
         passes.push_back(new ClearTypeMap(typeMap));
