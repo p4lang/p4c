@@ -181,12 +181,12 @@ boost::optional<BFRuntimeGenerator::Meter> BFRuntimeGenerator::Meter::fromDirect
 }
 
 // Register
-boost::optional<BFRuntimeGenerator::Register>
-BFRuntimeGenerator::Register::from(const p4configv1::Register& regInstance) {
+boost::optional<BFRuntimeGenerator::Register> BFRuntimeGenerator::Register::from(
+    const p4configv1::Register& regInstance) {
     const auto& pre = regInstance.preamble();
     auto id = makeBFRuntimeId(pre.id(), p4configv1::P4Ids::REGISTER);
-    return Register{pre.name(), "$REGISTER_INDEX", id, regInstance.size(), regInstance.type_spec(),
-                    transformAnnotations(pre)};
+    return Register{pre.name(),         "$REGISTER_INDEX",       id,
+                    regInstance.size(), regInstance.type_spec(), transformAnnotations(pre)};
 }
 
 // ActionProfile
@@ -403,25 +403,25 @@ void BFRuntimeGenerator::transformTypeSpecToDataFields(Util::JsonArray* fieldsJs
     }
 }
 
-void
-BFRuntimeGenerator::addRegisterDataFields(Util::JsonArray* dataJson,
-        const BFRuntimeGenerator::Register& register_, P4Id idOffset) const {
-    auto parser = TypeSpecParser::make(
-        p4info, register_.typeSpec, "Register", register_.name, nullptr, "", "", idOffset);
+void BFRuntimeGenerator::addRegisterDataFields(Util::JsonArray* dataJson,
+                                               const BFRuntimeGenerator::Register& register_,
+                                               P4Id idOffset) const {
+    auto parser = TypeSpecParser::make(p4info, register_.typeSpec, "Register", register_.name,
+                                       nullptr, "", "", idOffset);
 
     BUG_CHECK(parser.size() == 1, "Expected only one data field for Register extern %1%",
-		                  register_.name);
-    for (const auto &f : parser) {
-        auto* fJson = makeCommonDataField(idOffset, "$REGISTER_INDEX", f.type, false /* repeated */);
+              register_.name);
+    for (const auto& f : parser) {
+        auto* fJson =
+            makeCommonDataField(idOffset, "$REGISTER_INDEX", f.type, false /* repeated */);
         addSingleton(dataJson, fJson, false /* mandatory */, false /* read-only */);
     }
 }
 
-void
-BFRuntimeGenerator::addRegisterCommon(Util::JsonArray* tablesJson,
-        const BFRuntimeGenerator::Register& register_) const {
+void BFRuntimeGenerator::addRegisterCommon(Util::JsonArray* tablesJson,
+                                           const BFRuntimeGenerator::Register& register_) const {
     auto* tableJson = initTableJson(register_.name, register_.id, "Register", register_.size,
-		                    register_.annotations);
+                                    register_.annotations);
     auto* keyJson = new Util::JsonArray();
     addKeyField(keyJson, TD_DATA_REGISTER_INDEX, "$REGISTER_INDEX", true /* mandatory */, "Exact",
                 makeType("uint32"));
@@ -825,8 +825,7 @@ void BFRuntimeGenerator::addMeters(Util::JsonArray* tablesJson) const {
     }
 }
 
-void
-BFRuntimeGenerator::addRegisters(Util::JsonArray* tablesJson) const {
+void BFRuntimeGenerator::addRegisters(Util::JsonArray* tablesJson) const {
     for (const auto& reg : p4info.registers()) {
         auto regInstance = Register::from(reg);
         if (regInstance == boost::none) continue;
@@ -834,8 +833,7 @@ BFRuntimeGenerator::addRegisters(Util::JsonArray* tablesJson) const {
     }
 }
 
-const Util::JsonObject*
-BFRuntimeGenerator::genSchema() const {
+const Util::JsonObject* BFRuntimeGenerator::genSchema() const {
     auto* json = new Util::JsonObject();
 
     json->emplace("schema_version", cstring("1.0.0"));

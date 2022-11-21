@@ -25,7 +25,6 @@ limitations under the License.
 namespace P4 {
 
 class ReferenceMap;
-
 }
 
 namespace EBPF {

@@ -25,16 +25,15 @@ namespace BMV2 {
 class SimpleSwitchOptions : public BMV2Options {
  public:
     SimpleSwitchOptions() {
-        registerOption(
-            "--listMidendPasses", nullptr,
-            [this](const char*) {
-                listMidendPasses = true;
-                loadIRFromJson = false;
-                SimpleSwitchMidEnd midEnd(*this, outStream);
-                exit(0);
-                return false;
-            },
-            "[SimpleSwitch back-end] Lists exact name of all midend passes.\n");
+        registerOption("--listMidendPasses", nullptr,
+                       [this](const char*) {
+                           listMidendPasses = true;
+                           loadIRFromJson = false;
+                           SimpleSwitchMidEnd midEnd(*this, outStream);
+                           exit(0);
+                           return false;
+                       },
+                       "[SimpleSwitch back-end] Lists exact name of all midend passes.\n");
     }
 };
 

@@ -262,7 +262,7 @@ class TypeSpecParser {
     const_iterator cbegin() { return fields.cbegin(); }
     iterator end() { return fields.end(); }
     const_iterator cend() { return fields.cend(); }
-    size_t size() {return fields.size();}
+    size_t size() { return fields.size(); }
 
  private:
     explicit TypeSpecParser(Fields&& fields) : fields(std::move(fields)) {}

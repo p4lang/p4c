@@ -139,11 +139,11 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
 
 class LocalCopyPropagation : public PassManager {
  public:
-    LocalCopyPropagation(
-        ReferenceMap* refMap, TypeMap* typeMap, TypeChecking* typeChecking = nullptr,
-        std::function<bool(const Context*, const IR::Expression*)> policy =
-            [](const Context*, const IR::Expression*) -> bool { return true; },
-        bool elimUnusedTables = false) {
+    LocalCopyPropagation(ReferenceMap* refMap, TypeMap* typeMap,
+                         TypeChecking* typeChecking = nullptr,
+                         std::function<bool(const Context*, const IR::Expression*)> policy =
+                             [](const Context*, const IR::Expression*) -> bool { return true; },
+                         bool elimUnusedTables = false) {
         if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap, true);
         passes.push_back(typeChecking);
         passes.push_back(new DoLocalCopyPropagation(refMap, typeMap, policy, elimUnusedTables));

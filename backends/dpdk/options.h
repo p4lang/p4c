@@ -36,60 +36,53 @@ class DpdkOptions : public CompilerOptions {
     bool enableEgress = false;
 
     DpdkOptions() {
-        registerOption(
-            "--listMidendPasses", nullptr,
-            [this](const char*) {
-                listMidendPasses = true;
-                DPDK::DpdkMidEnd midEnd(*this, outStream);
-                exit(0);
-                return false;
-            },
-            "[Dpdk back-end] Lists exact name of all midend passes.\n");
-        registerOption(
-            "--enableEgress", nullptr,
-            [this](const char*) {
-                enableEgress = true;
-                return true;
-            },
-            "[Dpdk back-end] Enable egress pipeline's codegen\n", OptionFlags::Hide);
+        registerOption("--listMidendPasses", nullptr,
+                       [this](const char*) {
+                           listMidendPasses = true;
+                           DPDK::DpdkMidEnd midEnd(*this, outStream);
+                           exit(0);
+                           return false;
+                       },
+                       "[Dpdk back-end] Lists exact name of all midend passes.\n");
+        registerOption("--enableEgress", nullptr,
+                       [this](const char*) {
+                           enableEgress = true;
+                           return true;
+                       },
+                       "[Dpdk back-end] Enable egress pipeline's codegen\n", OptionFlags::Hide);
 
-        registerOption(
-            "--bf-rt-schema", "file",
-            [this](const char* arg) {
-                bfRtSchema = arg;
-                return true;
-            },
-            "Generate and write BF-RT JSON schema to the specified file");
-        registerOption(
-            "-o", "outfile",
-            [this](const char* arg) {
-                outputFile = arg;
-                return true;
-            },
-            "Write output to outfile");
-        registerOption(
-            "--tdi", "file",
-            [this](const char* arg) {
-                tdiFile = arg;
-                return true;
-            },
-            "Generate and write TDI JSON to the specified file");
-        registerOption(
-            "--context", "file",
-            [this](const char* arg) {
-                ctxtFile = arg;
-                return true;
-            },
-            "Generate and write context JSON to the specified file");
-        registerOption(
-            "--fromJSON", "file",
-            [this](const char* arg) {
-                loadIRFromJson = true;
-                file = arg;
-                return true;
-            },
-            "Use IR representation from JsonFile dumped previously,"
-            "the compilation starts with reduced midEnd.");
+        registerOption("--bf-rt-schema", "file",
+                       [this](const char* arg) {
+                           bfRtSchema = arg;
+                           return true;
+                       },
+                       "Generate and write BF-RT JSON schema to the specified file");
+        registerOption("-o", "outfile",
+                       [this](const char* arg) {
+                           outputFile = arg;
+                           return true;
+                       },
+                       "Write output to outfile");
+        registerOption("--tdi", "file",
+                       [this](const char* arg) {
+                           tdiFile = arg;
+                           return true;
+                       },
+                       "Generate and write TDI JSON to the specified file");
+        registerOption("--context", "file",
+                       [this](const char* arg) {
+                           ctxtFile = arg;
+                           return true;
+                       },
+                       "Generate and write context JSON to the specified file");
+        registerOption("--fromJSON", "file",
+                       [this](const char* arg) {
+                           loadIRFromJson = true;
+                           file = arg;
+                           return true;
+                       },
+                       "Use IR representation from JsonFile dumped previously,"
+                       "the compilation starts with reduced midEnd.");
     }
 
     /// Process the command line arguments and set options accordingly.

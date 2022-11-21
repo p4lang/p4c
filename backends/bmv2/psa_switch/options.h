@@ -25,16 +25,15 @@ namespace BMV2 {
 class PsaSwitchOptions : public BMV2Options {
  public:
     PsaSwitchOptions() {
-        registerOption(
-            "--listMidendPasses", nullptr,
-            [this](const char*) {
-                listMidendPasses = true;
-                loadIRFromJson = false;
-                PsaSwitchMidEnd midEnd(*this, outStream);
-                exit(0);
-                return false;
-            },
-            "[PsaSwitch back-end] Lists exact name of all midend passes.\n");
+        registerOption("--listMidendPasses", nullptr,
+                       [this](const char*) {
+                           listMidendPasses = true;
+                           loadIRFromJson = false;
+                           PsaSwitchMidEnd midEnd(*this, outStream);
+                           exit(0);
+                           return false;
+                       },
+                       "[PsaSwitch back-end] Lists exact name of all midend passes.\n");
     }
 
     /// Process the command line arguments and set options accordingly.

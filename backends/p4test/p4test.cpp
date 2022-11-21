@@ -40,38 +40,34 @@ class P4TestOptions : public CompilerOptions {
     bool validateOnly = false;
     bool loadIRFromJson = false;
     P4TestOptions() {
-        registerOption(
-            "--listMidendPasses", nullptr,
-            [this](const char*) {
-                listMidendPasses = true;
-                loadIRFromJson = false;
-                P4Test::MidEnd MidEnd(*this, outStream);
-                exit(0);
-                return false;
-            },
-            "[p4test] Lists exact name of all midend passes.\n");
-        registerOption(
-            "--parse-only", nullptr,
-            [this](const char*) {
-                parseOnly = true;
-                return true;
-            },
-            "only parse the P4 input, without any further processing");
-        registerOption(
-            "--validate", nullptr,
-            [this](const char*) {
-                validateOnly = true;
-                return true;
-            },
-            "Validate the P4 input, running just the front-end");
-        registerOption(
-            "--fromJSON", "file",
-            [this](const char* arg) {
-                loadIRFromJson = true;
-                file = arg;
-                return true;
-            },
-            "read previously dumped json instead of P4 source code");
+        registerOption("--listMidendPasses", nullptr,
+                       [this](const char*) {
+                           listMidendPasses = true;
+                           loadIRFromJson = false;
+                           P4Test::MidEnd MidEnd(*this, outStream);
+                           exit(0);
+                           return false;
+                       },
+                       "[p4test] Lists exact name of all midend passes.\n");
+        registerOption("--parse-only", nullptr,
+                       [this](const char*) {
+                           parseOnly = true;
+                           return true;
+                       },
+                       "only parse the P4 input, without any further processing");
+        registerOption("--validate", nullptr,
+                       [this](const char*) {
+                           validateOnly = true;
+                           return true;
+                       },
+                       "Validate the P4 input, running just the front-end");
+        registerOption("--fromJSON", "file",
+                       [this](const char* arg) {
+                           loadIRFromJson = true;
+                           file = arg;
+                           return true;
+                       },
+                       "read previously dumped json instead of P4 source code");
     }
 };
 
