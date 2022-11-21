@@ -29,33 +29,31 @@ It can optionally emit as comments a representation of the program IR.
 */
 class ToP4 : public Inspector {
     int expressionPrecedence;  /// precedence of current IR::Operation
-    bool isDeclaration;  /// current type is a declaration
-    bool showIR;  /// if true dump IR as comments
-    bool withinArgument;  /// if true we are within a method call argument
-    bool noIncludes = false;  /// If true do not generate #include statements.
-                              /// Used for debugging.
+    bool isDeclaration;        /// current type is a declaration
+    bool showIR;               /// if true dump IR as comments
+    bool withinArgument;       /// if true we are within a method call argument
+    bool noIncludes = false;   /// If true do not generate #include statements.
+                               /// Used for debugging.
 
     struct VecPrint {
         cstring separator;
         cstring terminator;
 
-        VecPrint(const char* sep, const char* term) :
-                separator(sep), terminator(term) {}
+        VecPrint(const char* sep, const char* term) : separator(sep), terminator(term) {}
     };
 
     struct ListPrint {
         cstring start;
         cstring end;
 
-        ListPrint(const char* start, const char* end) :
-                start(start), end(end) {}
+        ListPrint(const char* start, const char* end) : start(start), end(end) {}
     };
 
     // maintained as stacks
     std::vector<VecPrint> vectorSeparator;
-    size_t      vectorSeparator_init_apply_size;
+    size_t vectorSeparator_init_apply_size;
     std::vector<ListPrint> listTerminators;
-    size_t      listTerminators_init_apply_size;
+    size_t listTerminators_init_apply_size;
 
     void setVecSep(const char* sep, const char* term = nullptr) {
         vectorSeparator.push_back(VecPrint(sep, term));
@@ -92,39 +90,44 @@ class ToP4 : public Inspector {
         emitted. */
     cstring mainFile;
 
-    ToP4(Util::SourceCodeBuilder& builder, bool showIR, cstring mainFile = nullptr) :
-            expressionPrecedence(DBPrint::Prec_Low),
-            isDeclaration(true),
-            showIR(showIR),
-            withinArgument(false),
-            builder(builder),
-            outStream(nullptr),
-            mainFile(mainFile)
-    { visitDagOnce = false; setName("ToP4"); }
-    ToP4(std::ostream* outStream, bool showIR, cstring mainFile = nullptr) :
-            expressionPrecedence(DBPrint::Prec_Low),
-            isDeclaration(true),
-            showIR(showIR),
-            withinArgument(false),
-            builder(* new Util::SourceCodeBuilder()),
-            outStream(outStream),
-            mainFile(mainFile)
-    { visitDagOnce = false; setName("ToP4"); }
-    ToP4() :  // this is useful for debugging
-            expressionPrecedence(DBPrint::Prec_Low),
-            isDeclaration(true),
-            showIR(false),
-            withinArgument(false),
-            builder(* new Util::SourceCodeBuilder()),
-            outStream(&std::cout),
-            mainFile(nullptr)
-    { visitDagOnce = false; setName("ToP4"); }
+    ToP4(Util::SourceCodeBuilder& builder, bool showIR, cstring mainFile = nullptr)
+        : expressionPrecedence(DBPrint::Prec_Low),
+          isDeclaration(true),
+          showIR(showIR),
+          withinArgument(false),
+          builder(builder),
+          outStream(nullptr),
+          mainFile(mainFile) {
+        visitDagOnce = false;
+        setName("ToP4");
+    }
+    ToP4(std::ostream* outStream, bool showIR, cstring mainFile = nullptr)
+        : expressionPrecedence(DBPrint::Prec_Low),
+          isDeclaration(true),
+          showIR(showIR),
+          withinArgument(false),
+          builder(*new Util::SourceCodeBuilder()),
+          outStream(outStream),
+          mainFile(mainFile) {
+        visitDagOnce = false;
+        setName("ToP4");
+    }
+    ToP4()
+        :  // this is useful for debugging
+          expressionPrecedence(DBPrint::Prec_Low),
+          isDeclaration(true),
+          showIR(false),
+          withinArgument(false),
+          builder(*new Util::SourceCodeBuilder()),
+          outStream(&std::cout),
+          mainFile(nullptr) {
+        visitDagOnce = false;
+        setName("ToP4");
+    }
 
     using Inspector::preorder;
 
-    void setnoIncludesArg(bool condition) {
-        noIncludes = condition;
-    }
+    void setnoIncludesArg(bool condition) { noIncludes = condition; }
 
     void setListTerm(const char* start, const char* end) {
         listTerminators.push_back(ListPrint(start, end));
@@ -143,12 +146,9 @@ class ToP4 : public Inspector {
     bool preorder(const IR::Type_Dontcare* t) override;
     bool preorder(const IR::Type_Void* t) override;
     bool preorder(const IR::Type_Error* t) override;
-    bool preorder(const IR::Type_Struct* t) override
-    { return process(t, "struct"); }
-    bool preorder(const IR::Type_Header* t) override
-    { return process(t, "header"); }
-    bool preorder(const IR::Type_HeaderUnion* t) override
-    { return process(t, "header_union"); }
+    bool preorder(const IR::Type_Struct* t) override { return process(t, "struct"); }
+    bool preorder(const IR::Type_Header* t) override { return process(t, "header"); }
+    bool preorder(const IR::Type_HeaderUnion* t) override { return process(t, "header_union"); }
     bool preorder(const IR::Type_Package* t) override;
     bool preorder(const IR::Type_Parser* t) override;
     bool preorder(const IR::Type_Control* t) override;
@@ -194,7 +194,9 @@ class ToP4 : public Inspector {
     bool preorder(const IR::SelectCase* e) override;
     bool preorder(const IR::SelectExpression* e) override;
     bool preorder(const IR::ListExpression* e) override;
+    bool preorder(const IR::P4ListExpression* e) override;
     bool preorder(const IR::StructExpression* e) override;
+    bool preorder(const IR::InvalidHeader* e) override;
     bool preorder(const IR::MethodCallExpression* e) override;
     bool preorder(const IR::DefaultExpression* e) override;
     bool preorder(const IR::This* e) override;
@@ -251,8 +253,8 @@ class ToP4 : public Inspector {
     bool preorder(const IR::Key* v) override;
     bool preorder(const IR::Property* p) override;
     bool preorder(const IR::TableProperties* t) override;
-    bool preorder(const IR::EntriesList *l) override;
-    bool preorder(const IR::Entry *e) override;
+    bool preorder(const IR::EntriesList* l) override;
+    bool preorder(const IR::Entry* e) override;
     bool preorder(const IR::P4Table* c) override;
     bool preorder(const IR::P4ValueSet* c) override;
 

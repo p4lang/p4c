@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _TYPECHECKING_TYPESUBSTITUTIONVISITOR_H_
 #define _TYPECHECKING_TYPESUBSTITUTIONVISITOR_H_
 
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "typeSubstitution.h"
-#include "frontends/p4/typeMap.h"
 
 namespace P4 {
 
@@ -32,8 +32,9 @@ class TypeOccursVisitor : public Inspector {
     const IR::ITypeVar* toFind;
     bool occurs;
 
-    explicit TypeOccursVisitor(const IR::ITypeVar* toFind) : toFind(toFind), occurs(false)
-    { setName("TypeOccurs"); }
+    explicit TypeOccursVisitor(const IR::ITypeVar* toFind) : toFind(toFind), occurs(false) {
+        setName("TypeOccurs");
+    }
     bool preorder(const IR::Type_Var* typeVariable) override;
     bool preorder(const IR::Type_InfInt* infint) override;
 };
@@ -42,32 +43,40 @@ class TypeOccursVisitor : public Inspector {
 class TypeVariableSubstitutionVisitor : public Transform {
  protected:
     const TypeVariableSubstitution* bindings;
-    bool  replace;  // If true variables that map to variables are just replaced
-                    // in the TypeParameterList of the replaced object; else they
-                    // are removed.
+    bool replace;  // If true variables that map to variables are just replaced
+                   // in the TypeParameterList of the replaced object; else they
+                   // are removed.
     const IR::Node* replacement(const IR::ITypeVar* original, const IR::Node* node);
- public:
-    explicit TypeVariableSubstitutionVisitor(const TypeVariableSubstitution *bindings,
-                                             bool replace = false)
-            : bindings(bindings), replace(replace) { setName("TypeVariableSubstitution"); }
 
-    const IR::Node* preorder(IR::TypeParameters *tps) override;
-    const IR::Node* preorder(IR::Type_Var* tv) override
-    { return replacement(getOriginal<IR::Type_Var>(), tv); }
-    const IR::Node* preorder(IR::Type_InfInt* ti) override
-    { return replacement(getOriginal<IR::Type_InfInt>(), ti); }
+ public:
+    explicit TypeVariableSubstitutionVisitor(const TypeVariableSubstitution* bindings,
+                                             bool replace = false)
+        : bindings(bindings), replace(replace) {
+        setName("TypeVariableSubstitution");
+    }
+
+    const IR::Node* preorder(IR::TypeParameters* tps) override;
+    const IR::Node* preorder(IR::Type_Var* tv) override {
+        return replacement(getOriginal<IR::Type_Var>(), tv);
+    }
+    const IR::Node* preorder(IR::Type_InfInt* ti) override {
+        return replacement(getOriginal<IR::Type_InfInt>(), ti);
+    }
 };
 
 class TypeSubstitutionVisitor : public TypeVariableSubstitutionVisitor {
     TypeMap* typeMap;
 
  public:
-    TypeSubstitutionVisitor(TypeMap* typeMap, TypeVariableSubstitution* ts) :
-            TypeVariableSubstitutionVisitor(ts), typeMap(typeMap) {
-        CHECK_NULL(typeMap); setName("TypeSubstitutionVisitor"); }
+    TypeSubstitutionVisitor(TypeMap* typeMap, TypeVariableSubstitution* ts)
+        : TypeVariableSubstitutionVisitor(ts), typeMap(typeMap) {
+        CHECK_NULL(typeMap);
+        setName("TypeSubstitutionVisitor");
+    }
     const IR::Node* postorder(IR::PathExpression* path) override {
         // We want fresh nodes for variables, etc.
-        return new IR::PathExpression(path->path->clone()); }
+        return new IR::PathExpression(path->path->clone());
+    }
     const IR::Node* postorder(IR::Type_Name* type) override {
         auto actual = typeMap->getTypeType(getOriginal<IR::Type_Name>(), true);
         if (auto tv = actual->to<IR::ITypeVar>()) {

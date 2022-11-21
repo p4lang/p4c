@@ -65,7 +65,7 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_par
         transition select((bit<1>)(b.meta == 32w1)) {
             1w1: start_true;
             1w0: start_join;
-            default: noMatch_0;
+            default: noMatch;
         }
     }
     state start_true {
@@ -107,7 +107,7 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_par
         b.meta1 = clone_md_data_h1_0.data;
         transition accept;
     }
-    state noMatch_0 {
+    state noMatch {
         verify(false, error.NoMatch);
         transition reject;
     }

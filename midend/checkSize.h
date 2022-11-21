@@ -27,15 +27,14 @@ class CheckTableSize : public Modifier {
     CheckTableSize() { setName("CheckTableSize"); }
     bool preorder(IR::P4Table* table) override {
         auto size = table->getSizeProperty();
-        if (size == nullptr)
-            return false;
+        if (size == nullptr) return false;
 
         bool deleteSize = false;
         auto key = table->getKey();
         if (key == nullptr) {
             if (size->value != 1) {
-                warn(ErrorType::WARN_MISMATCH,
-                     "%1%: size %2% specified for table without keys", table, size);
+                warn(ErrorType::WARN_MISMATCH, "%1%: size %2% specified for table without keys",
+                     table, size);
                 deleteSize = true;
             }
         }

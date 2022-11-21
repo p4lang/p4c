@@ -1,0 +1,267 @@
+{
+  "schema_version" : "1.0.0",
+  "tables" : [
+    {
+      "name" : "ip.MyIC.tbl",
+      "id" : 39967501,
+      "size" : 1024,
+      "annotations" : [],
+      "depends_on" : [294316857, 2164374905],
+      "table_type" : "MatchAction_Indirect_Selector",
+      "has_const_default_action" : false,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "hdr.ethernet.srcAddr",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 48
+          }
+        }
+      ],
+      "data" : [
+        {
+          "mandatory" : true,
+          "read_only" : false,
+          "oneof" : [
+            {
+              "id" : 65539,
+              "name" : "$ACTION_MEMBER_ID",
+              "repeated" : false,
+              "annotations" : [],
+              "type" : {
+                "type" : "uint32"
+              }
+            },
+            {
+              "id" : 65540,
+              "name" : "$SELECTOR_GROUP_ID",
+              "repeated" : false,
+              "annotations" : [],
+              "type" : {
+                "type" : "uint32"
+              }
+            }
+          ]
+        },
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65545,
+            "name" : "$METER_SPEC_CIR_KBPS",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 18446744073709551615
+            }
+          }
+        },
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65546,
+            "name" : "$METER_SPEC_PIR_KBPS",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 18446744073709551615
+            }
+          }
+        },
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65547,
+            "name" : "$METER_SPEC_CBS_KBITS",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 18446744073709551615
+            }
+          }
+        },
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65548,
+            "name" : "$METER_SPEC_PBS_KBITS",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 18446744073709551615
+            }
+          }
+        }
+      ],
+      "supported_operations" : [],
+      "attributes" : ["MeterByteCountAdjust", "EntryScope"]
+    },
+    {
+      "name" : "ip.MyIC.as",
+      "id" : 294316857,
+      "table_type" : "Action",
+      "size" : 1024,
+      "annotations" : [],
+      "depends_on" : [],
+      "key" : [
+        {
+          "id" : 65539,
+          "name" : "$ACTION_MEMBER_ID",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : true,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "uint32"
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 21257015,
+          "name" : "NoAction",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 18579058,
+          "name" : "MyIC.execute_meter",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        }
+      ],
+      "data" : [],
+      "supported_operations" : [],
+      "attributes" : []
+    },
+    {
+      "name" : "ip.MyIC.as_sel",
+      "id" : 2164374905,
+      "table_type" : "Selector",
+      "size" : 1024,
+      "annotations" : [],
+      "depends_on" : [294316857],
+      "key" : [
+        {
+          "id" : 65560,
+          "name" : "$SELECTOR_GROUP_ID",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : true,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "uint32"
+          }
+        }
+      ],
+      "data" : [
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65559,
+            "name" : "$ACTION_MEMBER_ID",
+            "repeated" : true,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint32"
+            }
+          }
+        },
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65561,
+            "name" : "$ACTION_MEMBER_STATUS",
+            "repeated" : true,
+            "annotations" : [],
+            "type" : {
+              "type" : "bool"
+            }
+          }
+        },
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65562,
+            "name" : "$MAX_GROUP_SIZE",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint32",
+              "default_value" : 120
+            }
+          }
+        }
+      ],
+      "supported_operations" : [],
+      "attributes" : []
+    },
+    {
+      "name" : "ip.MyIC.as_sel_get_member",
+      "id" : 2181152121,
+      "table_type" : "SelectorGetMember",
+      "size" : 1,
+      "annotations" : [],
+      "depends_on" : [2164374905],
+      "key" : [
+        {
+          "id" : 65560,
+          "name" : "$SELECTOR_GROUP_ID",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : true,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "uint64"
+          }
+        },
+        {
+          "id" : 65563,
+          "name" : "hash_value",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : true,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "uint64"
+          }
+        }
+      ],
+      "data" : [
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65559,
+            "name" : "$ACTION_MEMBER_ID",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64"
+            }
+          }
+        }
+      ],
+      "supported_operations" : [],
+      "attributes" : []
+    }
+  ],
+  "learn_filters" : []
+}

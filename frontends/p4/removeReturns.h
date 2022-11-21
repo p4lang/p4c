@@ -17,10 +17,10 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_REMOVERETURNS_H_
 #define _FRONTENDS_P4_REMOVERETURNS_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/ternaryBool.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/ternaryBool.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -35,10 +35,8 @@ class HasExits : public Inspector {
     bool hasReturns;
     HasExits() : hasExits(false), hasReturns(false) { setName("HasExits"); }
 
-    void postorder(const IR::ExitStatement*) override
-    { hasExits = true; }
-    void postorder(const IR::ReturnStatement*) override
-    { hasReturns = true; }
+    void postorder(const IR::ExitStatement*) override { hasExits = true; }
+    void postorder(const IR::ReturnStatement*) override { hasReturns = true; }
 };
 
 /**
@@ -61,23 +59,31 @@ control c(inout bit x) {
 class DoRemoveReturns : public Transform {
  protected:
     P4::ReferenceMap* refMap;
-    IR::ID            returnVar;  // one for each context
-    IR::ID            returnedValue;  // only for functions that return expressions
-    cstring           variableName;
-    cstring           retValName;
+    IR::ID returnVar;      // one for each context
+    IR::ID returnedValue;  // only for functions that return expressions
+    cstring variableName;
+    cstring retValName;
 
     std::vector<TernaryBool> stack;
     void push() { stack.push_back(TernaryBool::No); }
     void pop() { stack.pop_back(); }
-    void set(TernaryBool r) { BUG_CHECK(!stack.empty(), "Empty stack"); stack.back() = r; }
-    TernaryBool hasReturned() { BUG_CHECK(!stack.empty(), "Empty stack"); return stack.back(); }
+    void set(TernaryBool r) {
+        BUG_CHECK(!stack.empty(), "Empty stack");
+        stack.back() = r;
+    }
+    TernaryBool hasReturned() {
+        BUG_CHECK(!stack.empty(), "Empty stack");
+        return stack.back();
+    }
 
  public:
-    explicit DoRemoveReturns(P4::ReferenceMap* refMap,
-                             cstring varName = "hasReturned",
-                             cstring retValName = "retval") :
-            refMap(refMap), variableName(varName), retValName(retValName)
-    { visitDagOnce = false; CHECK_NULL(refMap); setName("DoRemoveReturns"); }
+    explicit DoRemoveReturns(P4::ReferenceMap* refMap, cstring varName = "hasReturned",
+                             cstring retValName = "retval")
+        : refMap(refMap), variableName(varName), retValName(retValName) {
+        visitDagOnce = false;
+        CHECK_NULL(refMap);
+        setName("DoRemoveReturns");
+    }
 
     const IR::Node* preorder(IR::Function* function) override;
     const IR::Node* preorder(IR::BlockStatement* statement) override;
@@ -88,8 +94,10 @@ class DoRemoveReturns : public Transform {
 
     const IR::Node* preorder(IR::P4Action* action) override;
     const IR::Node* preorder(IR::P4Control* control) override;
-    const IR::Node* preorder(IR::P4Parser* parser) override
-    { prune(); return parser; }
+    const IR::Node* preorder(IR::P4Parser* parser) override {
+        prune();
+        return parser;
+    }
 };
 
 class RemoveReturns : public PassManager {

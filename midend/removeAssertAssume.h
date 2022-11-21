@@ -2,8 +2,8 @@
 #define _MIDEND_REMOVEASSERTASSUME_H_
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/typeMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
 namespace P4 {
@@ -11,9 +11,10 @@ namespace P4 {
 class DoRemoveAssertAssume : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
+
  public:
     explicit DoRemoveAssertAssume(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
-             : refMap(refMap), typeMap(typeMap) {
+        : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("DoRemoveAssertAssume");
@@ -25,9 +26,8 @@ class DoRemoveAssertAssume : public Transform {
 class RemoveAssertAssume final : public PassManager {
  public:
     RemoveAssertAssume(ReferenceMap* refMap, TypeMap* typeMap,
-                     TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+                       TypeChecking* typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoRemoveAssertAssume(refMap, typeMap));
         setName("RemoveAssertAssume");
@@ -36,4 +36,4 @@ class RemoveAssertAssume final : public PassManager {
 
 }  // namespace P4
 
-#endif  /* _MIDEND_REMOVEASSERTASSUME_H_*/
+#endif /* _MIDEND_REMOVEASSERTASSUME_H_*/

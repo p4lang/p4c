@@ -34,9 +34,10 @@ class RemoveUnreachableStates : public Transform {
     std::set<const IR::ParserState*> reachable;
 
  public:
-    explicit RemoveUnreachableStates(ParserCallGraph* transitions) :
-            transitions(transitions)
-    { CHECK_NULL(transitions); setName("RemoveUnreachableStates"); }
+    explicit RemoveUnreachableStates(ParserCallGraph* transitions) : transitions(transitions) {
+        CHECK_NULL(transitions);
+        setName("RemoveUnreachableStates");
+    }
 
     const IR::Node* preorder(IR::P4Parser* parser) override {
         auto start = parser->getDeclByName(IR::ParserState::start);
@@ -66,17 +67,16 @@ class RemoveUnreachableStates : public Transform {
     }
 
     const IR::Node* preorder(IR::ParserState* state) override {
-        if (state->name == IR::ParserState::start ||
-            state->name == IR::ParserState::reject)
+        if (state->name == IR::ParserState::start || state->name == IR::ParserState::reject)
             return state;
 
         auto orig = getOriginal<IR::ParserState>();
         if (reachable.find(orig) == reachable.end()) {
             if (state->name == IR::ParserState::accept) {
-                warn(ErrorType::WARN_UNREACHABLE,
-                     "%1% state in %2% is unreachable", state, findContext<IR::P4Parser>());
+                warn(ErrorType::WARN_UNREACHABLE, "%1% state in %2% is unreachable", state,
+                     findContext<IR::P4Parser>());
                 return state;
-            } else  {
+            } else {
                 LOG1("Removing unreachable state " << dbp(state));
                 return nullptr;
             }
@@ -101,8 +101,10 @@ class CollapseChains : public Transform {
     ordered_set<const IR::ParserState*> chainStart;
 
  public:
-    explicit CollapseChains(ParserCallGraph* transitions) : transitions(transitions)
-    { CHECK_NULL(transitions); setName("CollapseChains"); }
+    explicit CollapseChains(ParserCallGraph* transitions) : transitions(transitions) {
+        CHECK_NULL(transitions);
+        setName("CollapseChains");
+    }
 
     const IR::Node* preorder(IR::P4Parser* parser) override {
         // pred[s2] = s1 if there is exactly one outgoing edge from s1, it goes
@@ -115,21 +117,17 @@ class CollapseChains : public Transform {
             auto node = oe.first;
             // Avoid merging in case of state annotation
             if (!node->annotations->annotations.empty()) {
-                if (!node->getAnnotation("name") ||
-                    node->annotations->annotations.size() != 1)
+                if (!node->getAnnotation("name") || node->annotations->annotations.size() != 1)
                     continue;
             }
             auto outedges = oe.second;
-            if (outedges->size() != 1)
-                continue;
+            if (outedges->size() != 1) continue;
             auto next = *outedges->begin();
-            if (next->name == IR::ParserState::accept ||
-                next->name == IR::ParserState::reject ||
+            if (next->name == IR::ParserState::accept || next->name == IR::ParserState::reject ||
                 next->name == IR::ParserState::start)
                 continue;
             auto callers = transitions->getCallers(next);
-            if (callers->size() != 1)
-                continue;
+            if (callers->size() != 1) continue;
             // Avoid merging in case of state annotation
             if (!next->annotations->annotations.empty())
                 // we are not sure what to do with the annotations
@@ -137,8 +135,7 @@ class CollapseChains : public Transform {
             chain.emplace(node, next);
             pred.emplace(next, node);
         }
-        if (chain.empty())
-            return parser;
+        if (chain.empty()) return parser;
 
         // Find the head of each chain.
         for (auto e : pred) {
@@ -156,24 +153,21 @@ class CollapseChains : public Transform {
         // annotations of the chain's head state.
         auto states = new IR::IndexedVector<IR::ParserState>();
         for (auto s : parser->states) {
-            if (pred.find(s) != pred.end())
-                continue;
+            if (pred.find(s) != pred.end()) continue;
             if (chainStart.find(s) != chainStart.end()) {
                 // collapse chain
                 auto components = new IR::IndexedVector<IR::StatOrDecl>();
                 auto crt = s;
                 LOG1("Chaining states into " << dbp(crt));
-                const IR::Expression *select = nullptr;
+                const IR::Expression* select = nullptr;
                 while (true) {
                     components->append(crt->components);
                     select = crt->selectExpression;
                     crt = ::get(chain, crt);
-                    if (crt == nullptr)
-                        break;
+                    if (crt == nullptr) break;
                     LOG1("Adding " << dbp(crt) << " to chain");
                 }
-                s = new IR::ParserState(s->srcInfo, s->name, s->annotations,
-                                        *components, select);
+                s = new IR::ParserState(s->srcInfo, s->name, s->annotations, *components, select);
             }
             states->push_back(s);
         }
@@ -187,6 +181,7 @@ class CollapseChains : public Transform {
 // This is invoked on each parser separately
 class SimplifyParser : public PassManager {
     ParserCallGraph transitions;
+
  public:
     explicit SimplifyParser(ReferenceMap* refMap) : transitions("transitions") {
         passes.push_back(new ComputeParserCG(refMap, &transitions));

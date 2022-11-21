@@ -18,8 +18,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node*
-RemoveUselessCasts::postorder(IR::Cast* cast) {
+const IR::Node* RemoveUselessCasts::postorder(IR::Cast* cast) {
     auto orig = getOriginal<IR::Cast>();
     auto argType = typeMap->getType(orig->expr, true);
     auto castType = typeMap->getTypeType(orig->destType, true);

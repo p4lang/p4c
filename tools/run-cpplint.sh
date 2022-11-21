@@ -13,12 +13,15 @@ EXCLUDE_DIRS="-path ${THIS_DIR}/../backends/p4tools/submodules\
              -o -path ${THIS_DIR}/../control-plane/p4runtime\
 "
 
+# Forward arguments to cpplint
+EXTRA_ARGS=$@
+
 function run_cpplint() {
     # $1 is directory
     # $2 is root
     lint_files=$(find $1 -type d \( ${EXCLUDE_DIRS} \) -prune -or -type f \( -iname \*.h -o -iname \*.cpp \) -print )
     if [[ $lint_files ]]; then
-        python3 $THIS_DIR/cpplint.py --root=$2 ${lint_files}
+        python3 $THIS_DIR/cpplint.py $EXTRA_ARGS --root=$2 ${lint_files}
     fi
     return_status=$(($return_status || $?))
 }

@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <pna.p4>
+#include <dpdk/pna.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -60,7 +60,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     @name("MainControlImpl.tmp") bit<32> tmp;
     @name("MainControlImpl.meter0") DirectMeter(PNA_MeterType_t.PACKETS) meter0_0;
     @name("MainControlImpl.send") action send() {
-        out1_0 = meter0_0.execute(color_in_0, 32w1024);
+        out1_0 = meter0_0.dpdk_execute(color_in_0, 32w1024);
         if (out1_0 == PNA_MeterColor_t.GREEN) {
             tmp = 32w1;
         } else {
@@ -81,7 +81,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     apply {
         color_in_0 = PNA_MeterColor_t.RED;
-        meter0_0.execute(color_in_0, 32w1024);
+        meter0_0.dpdk_execute(color_in_0, 32w1024);
         ipv4_host_0.apply();
     }
 }

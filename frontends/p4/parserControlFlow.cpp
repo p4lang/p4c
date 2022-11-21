@@ -45,7 +45,7 @@ const IR::Node* DoRemoveParserControlFlow::postorder(IR::ParserState* state) {
             auto trueComponents = new IR::IndexedVector<IR::StatOrDecl>();
             trueComponents->push_back(ifstat->ifTrue);
             auto trueState = new IR::ParserState(trueName, *trueComponents,
-                new IR::PathExpression(IR::ID(joinName, nullptr)));
+                                                 new IR::PathExpression(IR::ID(joinName, nullptr)));
             states->push_back(trueState);
 
             // s_false
@@ -54,8 +54,8 @@ const IR::Node* DoRemoveParserControlFlow::postorder(IR::ParserState* state) {
                 falseName = refMap->newName(state->name.name + "_false");
                 auto falseComponents = new IR::IndexedVector<IR::StatOrDecl>();
                 falseComponents->push_back(ifstat->ifFalse);
-                auto falseState = new IR::ParserState(falseName, *falseComponents,
-                    new IR::PathExpression(IR::ID(joinName, nullptr)));
+                auto falseState = new IR::ParserState(
+                    falseName, *falseComponents, new IR::PathExpression(IR::ID(joinName, nullptr)));
                 states->push_back(falseState);
             }
 
@@ -63,15 +63,14 @@ const IR::Node* DoRemoveParserControlFlow::postorder(IR::ParserState* state) {
             auto vec = new IR::Vector<IR::Expression>();
             vec->push_back(ifstat->condition);
             auto trueCase = new IR::SelectCase(new IR::BoolLiteral(true),
-                new IR::PathExpression(IR::ID(trueName, nullptr)));
-            auto falseCase = new IR::SelectCase(
-                new IR::BoolLiteral(false),
-                new IR::PathExpression(IR::ID(falseName, nullptr)));
+                                               new IR::PathExpression(IR::ID(trueName, nullptr)));
+            auto falseCase = new IR::SelectCase(new IR::BoolLiteral(false),
+                                                new IR::PathExpression(IR::ID(falseName, nullptr)));
             auto cases = new IR::Vector<IR::SelectCase>();
             cases->push_back(trueCase);
             cases->push_back(falseCase);
-            currentState->selectExpression = new IR::SelectExpression(
-                new IR::ListExpression(*vec), std::move(*cases));
+            currentState->selectExpression =
+                new IR::SelectExpression(new IR::ListExpression(*vec), std::move(*cases));
 
             currentState->components = *currentComponents;
             currentComponents = new IR::IndexedVector<IR::StatOrDecl>();
@@ -82,8 +81,7 @@ const IR::Node* DoRemoveParserControlFlow::postorder(IR::ParserState* state) {
     }
     currentState->components = *currentComponents;
 
-    if (states->empty())
-        return state;
+    if (states->empty()) return state;
     states->push_back(currentState);
     return states;
 }

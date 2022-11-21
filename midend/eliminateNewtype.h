@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _MIDEND_ELIMINATENEWTYPE_H_
 #define _MIDEND_ELIMINATENEWTYPE_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -30,9 +30,11 @@ namespace P4 {
  */
 class DoReplaceNewtype final : public Transform {
     const TypeMap* typeMap;
+
  public:
-    explicit DoReplaceNewtype(const TypeMap* typeMap): typeMap(typeMap)
-    { setName("DoReplaceNewtype"); }
+    explicit DoReplaceNewtype(const TypeMap* typeMap) : typeMap(typeMap) {
+        setName("DoReplaceNewtype");
+    }
     const IR::Node* postorder(IR::Type_Newtype* type) override {
         return new IR::Type_Typedef(type->srcInfo, type->name, type->type);
     }
@@ -41,10 +43,8 @@ class DoReplaceNewtype final : public Transform {
 
 class EliminateNewtype final : public PassManager {
  public:
-    EliminateNewtype(ReferenceMap* refMap, TypeMap* typeMap,
-                     TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+    EliminateNewtype(ReferenceMap* refMap, TypeMap* typeMap, TypeChecking* typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoReplaceNewtype(typeMap));
         passes.push_back(new ClearTypeMap(typeMap));

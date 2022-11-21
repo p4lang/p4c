@@ -20,10 +20,9 @@ limitations under the License.
 #include <map>
 #include <string>
 
-#include "p4/config/v1/p4types.pb.h"
-
 #include "ir/ir.h"
 #include "ir/visitor.h"
+#include "p4/config/v1/p4types.pb.h"
 
 namespace p4 {
 
@@ -51,8 +50,7 @@ class TypeSpecConverter : public Inspector {
     /// 'map'.
     std::map<const IR::Type*, ::p4::config::v1::P4DataTypeSpec*> map;
 
-    TypeSpecConverter(const P4::ReferenceMap* refMap,
-                      P4::TypeMap* typeMap,
+    TypeSpecConverter(const P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                       ::p4::config::v1::P4TypeInfo* p4RtTypeInfo);
 
     // fallback for unsupported types, should be unreachable
@@ -81,9 +79,10 @@ class TypeSpecConverter : public Inspector {
     /// Generates the appropriate p4.P4DataTypeSpec message for @type. If
     /// @typeInfo is nullptr, then the relevant information is not generated for
     /// named types.
-    static const ::p4::config::v1::P4DataTypeSpec* convert(
-        const P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-        const IR::Type* type, ::p4::config::v1::P4TypeInfo* typeInfo);
+    static const ::p4::config::v1::P4DataTypeSpec* convert(const P4::ReferenceMap* refMap,
+                                                           P4::TypeMap* typeMap,
+                                                           const IR::Type* type,
+                                                           ::p4::config::v1::P4TypeInfo* typeInfo);
 };
 
 /// See section "User-defined types" in P4RT specification.
@@ -102,8 +101,7 @@ struct TranslationAnnotation {
 /// hasTranslationAnnotation returns true iff the type is annotated by a *valid*
 /// p4runtime_translation annotation, in which case it populates the given
 /// TranslationAnnotation with the values parsed from the annotation.
-bool hasTranslationAnnotation(const IR::Type* type,
-                              TranslationAnnotation* payload);
+bool hasTranslationAnnotation(const IR::Type* type, TranslationAnnotation* payload);
 
 /// getTypeName returns a cstring for use as type_name for a Type_Newtype. It
 /// returns nullptr if @type is not a Type_Newtype.

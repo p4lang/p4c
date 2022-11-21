@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "dpdkContext.h"
+
 #include "backend.h"
 #include "printUtils.h"
 namespace DPDK {
@@ -53,8 +54,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 tblAttr.tableHandle = getNewTableHandle();
                 auto size = tbl->getSizeProperty();
                 tblAttr.size = dpdk_default_table_size;
-                if (size)
-                   tblAttr.size = size->asUnsigned();
+                if (size) tblAttr.size = size->asUnsigned();
                 auto hidden = tbl->annotations->getSingle(IR::Annotation::hiddenAnnotation);
                 auto selector = tbl->properties->getProperty("selector");
                 tblAttr.is_add_on_miss = false;
@@ -65,7 +65,8 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                         auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
                         if (!expr->is<IR::BoolLiteral>()) {
                             ::error(ErrorType::ERR_UNEXPECTED,
-                                   "%1%: expected boolean for 'add_on_miss' property", add_on_miss);
+                                    "%1%: expected boolean for 'add_on_miss' property",
+                                    add_on_miss);
                             return;
                         } else {
                             tblAttr.is_add_on_miss = expr->to<IR::BoolLiteral>()->value;
@@ -73,20 +74,21 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                     }
                 }
                 auto idle_timeout_with_auto_delete =
-                     tbl->properties->getProperty("idle_timeout_with_auto_delete");
+                    tbl->properties->getProperty("idle_timeout_with_auto_delete");
                 if (idle_timeout_with_auto_delete != nullptr) {
                     if (idle_timeout_with_auto_delete->value->is<IR::ExpressionValue>()) {
-                        auto expr =
-                        idle_timeout_with_auto_delete->value->to<IR::ExpressionValue>()->expression;
+                        auto expr = idle_timeout_with_auto_delete->value->to<IR::ExpressionValue>()
+                                        ->expression;
                         if (!expr->is<IR::BoolLiteral>()) {
                             ::error(ErrorType::ERR_UNEXPECTED,
-                            "%1%: expected boolean for 'idle_timeout_with_auto_delete' property",
-                            idle_timeout_with_auto_delete);
+                                    "%1%: expected boolean for 'idle_timeout_with_auto_delete' "
+                                    "property",
+                                    idle_timeout_with_auto_delete);
                             return;
-                         } else {
-                             tblAttr.idle_timeout_with_auto_delete =
-                                      expr->to<IR::BoolLiteral>()->value;
-                         }
+                        } else {
+                            tblAttr.idle_timeout_with_auto_delete =
+                                expr->to<IR::BoolLiteral>()->value;
+                        }
                     }
                 }
                 if (hidden) {
@@ -95,8 +97,8 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 } else {
                     tblAttr.isHidden = false;
                     tblAttr.tableType = "match";
-                    tblAttr.tableKeys = ::get(structure->key_map, kv.second->name.originalName
-                                               + "_" + tbl->name.originalName);
+                    tblAttr.tableKeys = ::get(structure->key_map, kv.second->name.originalName +
+                                                                      "_" + tbl->name.originalName);
                 }
                 if (!hidden)
                     tables.push_back(d);
@@ -109,44 +111,41 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
         }
     }
 
-    for (auto ed :  structure->externDecls) {
+    for (auto ed : structure->externDecls) {
         cstring externTypeName = "";
         if (auto type = ed->type->to<IR::Type_Name>()) {
             externTypeName = type->path->name.name;
         } else if (auto type = ed->type->to<IR::Type_Specialized>()) {
             externTypeName = type->baseType->path->name.name;
         }
-        if (externTypeName == "Counter" ||
-            externTypeName == "DirectCounter" ||
-            externTypeName == "Register" ||
-            externTypeName == "DirectMeter" ||
-            externTypeName == "Meter" ||
-            externTypeName == "Hash" ||
+        if (externTypeName == "Counter" || externTypeName == "DirectCounter" ||
+            externTypeName == "Register" || externTypeName == "DirectMeter" ||
+            externTypeName == "Meter" || externTypeName == "Hash" ||
             externTypeName == "InternetCheckSum") {
             struct externAttributes externAttr;
             externAttr.externalName = ed->controlPlaneName();
             externAttr.externType = externTypeName;
             if (externTypeName == "Counter" || externTypeName == "DirectCounter") {
-                unsigned maxArgNum = externTypeName == "Counter"? 2 : 1;
+                unsigned maxArgNum = externTypeName == "Counter" ? 2 : 1;
                 int typeArgNum = maxArgNum - 1;
                 if (ed->arguments->size() != maxArgNum) {
                     ::error(ErrorType::ERR_UNEXPECTED,
                             "%1%: expected %2% arguments, number of counters and type"
-                            "of counter", ed, maxArgNum);
+                            "of counter",
+                            ed, maxArgNum);
                 }
                 auto counter_type = ed->arguments->at(typeArgNum)->expression;
-                BUG_CHECK(counter_type->is<IR::Constant>(),
-                          "Expected counter type to be constant");
+                BUG_CHECK(counter_type->is<IR::Constant>(), "Expected counter type to be constant");
                 auto value = counter_type->to<IR::Constant>()->asUnsigned();
                 switch (value) {
                     case 0:
                         externAttr.counterType = "packets";
                         break;
                     case 1:
-                         externAttr.counterType = "bytes";
+                        externAttr.counterType = "bytes";
                         break;
                     case 2:
-                         externAttr.counterType = "packets_and_bytes";
+                        externAttr.counterType = "packets_and_bytes";
                         break;
                 }
             }
@@ -161,16 +160,14 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
     }
 
     // Keep the compiler generated (hidden) tables at the end
-    for (auto d : selector_tables)
-        tables.push_back(d);
-    for (auto d : action_data_tables)
-        tables.push_back(d);
+    for (auto d : selector_tables) tables.push_back(d);
+    for (auto d : action_data_tables) tables.push_back(d);
 }
 
 // This functions insert a single key field in the match keys array
-void DpdkContextGenerator::addKeyField(
-Util::JsonArray* keyJson, const cstring name, const cstring nameAnnotation,
-    const IR::KeyElement *key, int position) {
+void DpdkContextGenerator::addKeyField(Util::JsonArray* keyJson, const cstring name,
+                                       const cstring nameAnnotation, const IR::KeyElement* key,
+                                       int position) {
     auto* keyField = new Util::JsonObject();
     cstring fieldName = name.findlast('.');
     auto instanceName = name.replace(fieldName, "");
@@ -187,8 +184,8 @@ Util::JsonArray* keyJson, const cstring name, const cstring nameAnnotation,
 }
 
 // This function sets the common table properties
-Util::JsonObject* DpdkContextGenerator::initTableCommonJson(
-    const cstring name, const struct TableAttributes & attr) {
+Util::JsonObject* DpdkContextGenerator::initTableCommonJson(const cstring name,
+                                                            const struct TableAttributes& attr) {
     auto* tableJson = new Util::JsonObject();
     cstring tableName = attr.controlName + "." + name;
     tableJson->emplace("name", attr.externalName);
@@ -199,19 +196,18 @@ Util::JsonObject* DpdkContextGenerator::initTableCommonJson(
     tableJson->emplace("size", attr.size);
     tableJson->emplace("p4_hidden", attr.isHidden);
     tableJson->emplace("add_on_miss", attr.is_add_on_miss);
-    tableJson->emplace("idle_timeout_with_auto_delete",  attr.idle_timeout_with_auto_delete);
+    tableJson->emplace("idle_timeout_with_auto_delete", attr.idle_timeout_with_auto_delete);
     return tableJson;
 }
 
 // This function sets action attributes for actions in a table.
-void DpdkContextGenerator::setActionAttributes(const IR::P4Table *tbl) {
+void DpdkContextGenerator::setActionAttributes(const IR::P4Table* tbl) {
     for (auto act : tbl->getActionList()->actionList) {
         struct actionAttributes attr;
         auto action_decl = refmap->getDeclaration(act->getPath())->to<IR::P4Action>();
         bool has_constant_default_action = false;
         auto prop = tbl->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
-        if (prop && prop->isConstant)
-            has_constant_default_action = true;
+        if (prop && prop->isConstant) has_constant_default_action = true;
         bool is_const_default_action = false;
         bool can_be_hit_action = true;
         bool is_compiler_added_action = false;
@@ -272,10 +268,9 @@ void DpdkContextGenerator::setActionAttributes(const IR::P4Table *tbl) {
 
 // This functions updates the table attribute map entry with default action handle
 // for the specified table.
-void DpdkContextGenerator::setDefaultActionHandle(const IR::P4Table *table) {
+void DpdkContextGenerator::setDefaultActionHandle(const IR::P4Table* table) {
     cstring default_action_name = "";
-    if (table->getDefaultAction())
-        default_action_name = toStr(table->getDefaultAction());
+    if (table->getDefaultAction()) default_action_name = toStr(table->getDefaultAction());
 
     auto tableAttr = ::get(tableAttrmap, table->name.originalName);
     for (auto action : table->getActionList()->actionList) {
@@ -290,8 +285,8 @@ void DpdkContextGenerator::setDefaultActionHandle(const IR::P4Table *table) {
 }
 
 // This functions creates JSON object for immediate fields (action parameters)
-void DpdkContextGenerator::addImmediateField(
-Util::JsonArray* paramJson, const cstring name, int dest_start, int dest_width) {
+void DpdkContextGenerator::addImmediateField(Util::JsonArray* paramJson, const cstring name,
+                                             int dest_start, int dest_width) {
     auto* oneParam = new Util::JsonObject();
     oneParam->emplace("param_name", name);
     oneParam->emplace("dest_start", dest_start);
@@ -300,8 +295,8 @@ Util::JsonArray* paramJson, const cstring name, int dest_start, int dest_width) 
 }
 
 // This functions creates JSON object for match attributes of a table.
-Util::JsonObject*
-DpdkContextGenerator::addMatchAttributes(const IR::P4Table* table, const cstring ctrlName) {
+Util::JsonObject* DpdkContextGenerator::addMatchAttributes(const IR::P4Table* table,
+                                                           const cstring ctrlName) {
     auto tableAttr = ::get(tableAttrmap, table->name.originalName);
     auto* match_attributes = new Util::JsonObject();
     auto* actFmtArray = new Util::JsonArray();
@@ -320,20 +315,19 @@ DpdkContextGenerator::addMatchAttributes(const IR::P4Table* table, const cstring
         if (attr.params) {
             int index = 0;
             int position = 0;
-            int param_width = 8;   // Minimum width for dpdk action params
+            int param_width = 8;  // Minimum width for dpdk action params
             for (auto param : *(attr.params)) {
                 if (param->type->is<IR::Type_Bits>()) {
                     param_width = param->type->width_bits();
                 } else if (!param->type->is<IR::Type_Boolean>()) {
                     BUG("Unsupported parameter type %1%", param->type);
                 }
-                addImmediateField(immFldArray, param->name.originalName,
-                                  index/8, param_width);
+                addImmediateField(immFldArray, param->name.originalName, index / 8, param_width);
                 index += param_width;
                 position++;
             }
         }
-        oneAction->emplace("immediate_fields",immFldArray);
+        oneAction->emplace("immediate_fields", immFldArray);
         actFmtArray->append(oneAction);
     }
     oneStageTbl->emplace("action_format", actFmtArray);
@@ -344,7 +338,7 @@ DpdkContextGenerator::addMatchAttributes(const IR::P4Table* table, const cstring
 
 // This function adds a single parameter to the parameters array.
 void DpdkContextGenerator::addActionParam(Util::JsonArray* paramJson, const cstring name,
-     int bitWidth, int position, int byte_array_index) {
+                                          int bitWidth, int position, int byte_array_index) {
     auto* oneParam = new Util::JsonObject();
     oneParam->emplace("name", name);
     oneParam->emplace("start_bit", 0);
@@ -355,14 +349,14 @@ void DpdkContextGenerator::addActionParam(Util::JsonArray* paramJson, const cstr
 }
 
 // This function creates JSON objects for  actions within a table.
-Util::JsonArray* DpdkContextGenerator::addActions(
-const IR::P4Table * table, const cstring controlName, bool isMatch) {
+Util::JsonArray* DpdkContextGenerator::addActions(const IR::P4Table* table,
+                                                  const cstring controlName, bool isMatch) {
     auto* actArray = new Util::JsonArray();
     for (auto action : table->getActionList()->actionList) {
         struct actionAttributes attr = ::get(actionAttrMap, action->getName());
         // Printing compiler added actions is curently not required
         if (!attr.is_compiler_added_action) {
-            auto *act = new Util::JsonObject();
+            auto* act = new Util::JsonObject();
             auto actName = toStr(action->expression);
             auto name = action->externalName();
             if (name != "NoAction") {
@@ -370,17 +364,18 @@ const IR::P4Table * table, const cstring controlName, bool isMatch) {
             } else {
                 actName = name;
             }
-           act->emplace("name", attr.externalName);
-           act->emplace("target_name", actName);
-           act->emplace("handle", attr.actionHandle);
-           if (isMatch) {
-               act->emplace("constant_default_action", attr.constant_default_action);
-               act->emplace("is_compiler_added_action", attr.is_compiler_added_action);
-               act->emplace("allowed_as_hit_action", attr.allowed_as_hit_action);
-               act->emplace("allowed_as_default_action", attr.allowed_as_default_action);;
-           }
-           auto* paramJson = new Util::JsonArray();
-           if (attr.params) {
+            act->emplace("name", attr.externalName);
+            act->emplace("target_name", actName);
+            act->emplace("handle", attr.actionHandle);
+            if (isMatch) {
+                act->emplace("constant_default_action", attr.constant_default_action);
+                act->emplace("is_compiler_added_action", attr.is_compiler_added_action);
+                act->emplace("allowed_as_hit_action", attr.allowed_as_hit_action);
+                act->emplace("allowed_as_default_action", attr.allowed_as_default_action);
+                ;
+            }
+            auto* paramJson = new Util::JsonArray();
+            if (attr.params) {
                 int index = 0;
                 int position = 0;
                 int param_width = 8;
@@ -390,8 +385,8 @@ const IR::P4Table * table, const cstring controlName, bool isMatch) {
                     } else if (!param->type->is<IR::Type_Boolean>()) {
                         BUG("Unsupported parameter type %1%", param->type);
                     }
-                    addActionParam(paramJson, param->name.originalName,
-                                   param_width, position, index/8);
+                    addActionParam(paramJson, param->name.originalName, param_width, position,
+                                   index / 8);
                     index += param_width;
                     position++;
                 }
@@ -404,8 +399,8 @@ const IR::P4Table * table, const cstring controlName, bool isMatch) {
 }
 
 // This function adds the tables referred by this table.
-bool DpdkContextGenerator::addRefTables(
-    const cstring tbl_name, const IR::P4Table **memberTable, Util::JsonObject* tableJson) {
+bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Table** memberTable,
+                                        Util::JsonObject* tableJson) {
     bool hasActionProfileSelector = false;
 
     // Below empty arrays are currently required by the control plane software.
@@ -456,7 +451,7 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray* tablesJson) {
         auto* tableJson = initTableCommonJson(tbl->name.originalName, tableAttr);
         bool hasActionProfileSelector = false;
         bool isMatchTable = tableAttr.tableType == "match";
-        const IR::P4Table *memberTable = nullptr;
+        const IR::P4Table* memberTable = nullptr;
         if (tableAttr.tableType != "selection") {
             if (isMatchTable) {
                 hasActionProfileSelector = addRefTables(tbl->name, &memberTable, tableJson);
@@ -466,7 +461,7 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray* tablesJson) {
                     int position = 0;
                     for (auto matchKeyFromPrg : tableAttr.tableKeys) {
                         addKeyField(keyJson, matchKeyFromPrg.first, matchKeyFromPrg.second,
-                                    match_keys->keyElements.at(position),position);
+                                    match_keys->keyElements.at(position), position);
                         position++;
                     }
                     tableJson->emplace("match_key_fields", keyJson);
@@ -474,7 +469,7 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray* tablesJson) {
             }
             // If table implementation is action profile or action selector, all actions from member
             // table should be output for the base table.
-            const IR::P4Table *table = nullptr;
+            const IR::P4Table* table = nullptr;
             if (hasActionProfileSelector) {
                 table = memberTable;
             } else {
@@ -488,7 +483,7 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray* tablesJson) {
             tableJson->emplace("actions", addActions(table, tableAttr.controlName, isMatchTable));
             if (isMatchTable) {
                 tableJson->emplace("match_attributes",
-                                    addMatchAttributes(table, tableAttr.controlName));
+                                   addMatchAttributes(table, tableAttr.controlName));
             }
             tableJson->emplace("default_action_handle", tableAttr.default_action_handle);
         } else {
@@ -499,7 +494,7 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray* tablesJson) {
             tableJson->emplace("bound_to_action_data_table_handle",
                                sel.bound_to_action_data_table_handle);
         }
-      tablesJson->append(tableJson);
+        tablesJson->append(tableJson);
     }
 }
 

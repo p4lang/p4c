@@ -33,21 +33,17 @@ limitations under the License.
 
 namespace DPDK {
 class DpdkBackend {
-    DpdkOptions &options;
-    P4::ReferenceMap *refMap;
+    DpdkOptions& options;
+    P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
-    P4::ConvertEnums::EnumMapping *enumMap;
 
-    const IR::DpdkAsmProgram *dpdk_program = nullptr;
-    const IR::ToplevelBlock* toplevel = nullptr;
+    const IR::DpdkAsmProgram* dpdk_program = nullptr;
 
  public:
-    void convert(const IR::ToplevelBlock *tlb);
-    DpdkBackend(DpdkOptions &options, P4::ReferenceMap *refMap,
-                     P4::TypeMap *typeMap,
-                     P4::ConvertEnums::EnumMapping *enumMap)
-        : options(options), refMap(refMap), typeMap(typeMap), enumMap(enumMap) {}
-    void codegen(std::ostream &) const;
+    void convert(const IR::ToplevelBlock* tlb);
+    DpdkBackend(DpdkOptions& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
+        : options(options), refMap(refMap), typeMap(typeMap) {}
+    void codegen(std::ostream&) const;
 };
 
 }  // namespace DPDK

@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_CHECKCONSTANTS_H_
 #define _FRONTENDS_P4_CHECKCONSTANTS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -26,12 +26,13 @@ namespace P4 {
 /// arguments have constant arguments (e.g., push_front).
 /// Checks that table sizes are constant integers.
 class DoCheckConstants : public Inspector {
-    ReferenceMap*  refMap;
-    TypeMap*       typeMap;
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
+
  public:
-    DoCheckConstants(ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap);
+    DoCheckConstants(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
         setName("DoCheckConstants");
     }
 

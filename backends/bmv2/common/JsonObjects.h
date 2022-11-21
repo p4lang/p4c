@@ -18,6 +18,7 @@ limitations under the License.
 #define BACKENDS_BMV2_COMMON_JSONOBJECTS_H_
 
 #include <map>
+
 #include "lib/json.h"
 #include "lib/ordered_map.h"
 
@@ -25,8 +26,7 @@ namespace BMV2 {
 
 class JsonObjects {
  public:
-    static Util::JsonObject* find_object_by_name(Util::JsonArray* array,
-                                                 const cstring& name);
+    static Util::JsonObject* find_object_by_name(Util::JsonArray* array, const cstring& name);
 
     void add_program_info(const cstring& name);
     void add_meta_info();
@@ -37,23 +37,21 @@ class JsonObjects {
     void add_header_field(const cstring& name, Util::JsonArray*& field);
     unsigned add_header(const cstring& type, const cstring& name);
     unsigned add_metadata(const cstring& type, const cstring& name);
-    void add_header_stack(const cstring& type, const cstring& name,
-                          const unsigned size, const std::vector<unsigned>& header_ids);
-    void add_header_union_stack(const cstring& type, const cstring& name,
-                                const unsigned size, const std::vector<unsigned>& header_ids);
+    void add_header_stack(const cstring& type, const cstring& name, const unsigned size,
+                          const std::vector<unsigned>& header_ids);
+    void add_header_union_stack(const cstring& type, const cstring& name, const unsigned size,
+                                const std::vector<unsigned>& header_ids);
     void add_error(const cstring& name, const unsigned type);
-    void add_enum(const cstring& enum_name, const cstring& entry_name,
-                  const unsigned entry_value);
+    void add_enum(const cstring& enum_name, const cstring& entry_name, const unsigned entry_value);
     unsigned add_parser(const cstring& name);
     unsigned add_parser_state(const unsigned id, const cstring& state_name);
     void add_parser_transition(const unsigned id, Util::IJson* transition);
     void add_parser_op(const unsigned id, Util::IJson* op);
     void add_parser_transition_key(const unsigned id, Util::IJson* key);
-    void add_parse_vset(const cstring& name, const unsigned bitwidth,
-                        const big_int& size);
+    void add_parse_vset(const cstring& name, const unsigned bitwidth, const big_int& size);
     unsigned add_action(const cstring& name, Util::JsonArray*& params, Util::JsonArray*& body);
-    void add_extern_attribute(const cstring& name, const cstring& type,
-                              const cstring& value, Util::JsonArray* attributes);
+    void add_extern_attribute(const cstring& name, const cstring& type, const cstring& value,
+                              Util::JsonArray* attributes);
     void add_extern(const cstring& name, const cstring& type, Util::JsonArray* attributes);
     JsonObjects();
     Util::JsonArray* insert_array_field(Util::JsonObject* parent, cstring name);

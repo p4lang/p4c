@@ -17,6 +17,7 @@ set (MIDEND_SRCS
   complexComparison.cpp
   convertEnums.cpp
   copyStructures.cpp
+  eliminateInvalidHeaders.cpp
   eliminateNewtype.cpp
   eliminateSerEnums.cpp
   eliminateSwitch.cpp
@@ -64,6 +65,7 @@ set (MIDEND_HDRS
   convertEnums.h
   convertErrors.h
   copyStructures.h
+  eliminateInvalidHeaders.h
   eliminateNewtype.h
   eliminateSerEnums.h
   eliminateSwitch.h

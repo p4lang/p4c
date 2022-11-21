@@ -26,49 +26,59 @@ limitations under the License.
 /// array indexes for fields of headers or structs or unions or elements of stacks.
 class exprUses : public Inspector {
     cstring look_for;
-    const char *search_tail = nullptr;  // pointer into look_for for partial match
+    const char* search_tail = nullptr;  // pointer into look_for for partial match
     bool result = false;
-    bool preorder(const IR::Path *p) override {
+    bool preorder(const IR::Path* p) override {
         if (look_for.startsWith(p->name)) {
             search_tail = look_for.c_str() + p->name.name.size();
-            if (*search_tail == 0 || *search_tail == '.' || *search_tail == '[')
-                result = true; }
-        return !result; }
-    bool preorder(const IR::Primitive *p) override {
+            if (*search_tail == 0 || *search_tail == '.' || *search_tail == '[') result = true;
+        }
+        return !result;
+    }
+    bool preorder(const IR::Primitive* p) override {
         if (p->name == look_for) result = true;
-        return !result; }
-    bool preorder(const IR::Expression *) override { return !result; }
+        return !result;
+    }
+    bool preorder(const IR::Expression*) override { return !result; }
 
-    void postorder(const IR::Member *m) override {
+    void postorder(const IR::Member* m) override {
         if (result && search_tail && *search_tail) {
             if (*search_tail == '.') search_tail++;
             if (cstring(search_tail).startsWith(m->member)) {
                 search_tail += m->member.name.size();
-                if (*search_tail == 0 || *search_tail == '.' || *search_tail == '[')
-                    return; }
+                if (*search_tail == 0 || *search_tail == '.' || *search_tail == '[') return;
+            }
             search_tail = nullptr;
             if (!m->expr->type->is<IR::Type_HeaderUnion>()) {
-                result = false; } } }
-    void postorder(const IR::ArrayIndex *m) override {
+                result = false;
+            }
+        }
+    }
+    void postorder(const IR::ArrayIndex* m) override {
         if (result && search_tail && *search_tail) {
             if (*search_tail == '.' || *search_tail == '[') search_tail++;
             if (isdigit(*search_tail)) {
-                int idx = strtol(search_tail, const_cast<char **>(&search_tail), 10);
+                int idx = strtol(search_tail, const_cast<char**>(&search_tail), 10);
                 if (*search_tail == ']') search_tail++;
                 if (auto k = m->right->to<IR::Constant>()) {
                     if (k->asInt() == idx) return;
                 } else {
-                    return; } }
+                    return;
+                }
+            }
             result = false;
-            search_tail = nullptr; } }
-    void postorder(const IR::PathExpression *) override {}
-    void postorder(const IR::Expression *) override { search_tail = nullptr; }
+            search_tail = nullptr;
+        }
+    }
+    void postorder(const IR::PathExpression*) override {}
+    void postorder(const IR::Expression*) override { search_tail = nullptr; }
 
  public:
-    exprUses(const IR::Expression *e, cstring n) : look_for(n) {
-        visitDagOnce = false; e->apply(*this); }
-    explicit operator bool () const { return result; }
+    exprUses(const IR::Expression* e, cstring n) : look_for(n) {
+        visitDagOnce = false;
+        e->apply(*this);
+    }
+    explicit operator bool() const { return result; }
 };
-
 
 #endif /* MIDEND_EXPR_USES_H_ */

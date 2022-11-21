@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _MIDEND_SIMPLIFYSELECTCASES_H_
 #define _MIDEND_SIMPLIFYSELECTCASES_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -42,18 +42,18 @@ class DoSimplifySelectCases : public Transform {
     void checkSimpleConstant(const IR::Expression* expr) const;
 
  public:
-    DoSimplifySelectCases(const TypeMap* typeMap, bool requireConstants) :
-            typeMap(typeMap), requireConstants(requireConstants)
-    { setName("DoSimplifySelectCases"); }
+    DoSimplifySelectCases(const TypeMap* typeMap, bool requireConstants)
+        : typeMap(typeMap), requireConstants(requireConstants) {
+        setName("DoSimplifySelectCases");
+    }
     const IR::Node* preorder(IR::SelectExpression* expression) override;
 };
 
 class SimplifySelectCases : public PassManager {
  public:
     SimplifySelectCases(ReferenceMap* refMap, TypeMap* typeMap, bool requireConstants,
-            TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+                        TypeChecking* typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoSimplifySelectCases(typeMap, requireConstants));
         setName("SimplifySelectCases");

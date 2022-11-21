@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_DIRECTCALLS_H_
 #define _FRONTENDS_P4_DIRECTCALLS_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -38,6 +38,7 @@ class DoInstantiateCalls : public Transform {
     ReferenceMap* refMap;
 
     IR::IndexedVector<IR::Declaration> insert;
+
  public:
     explicit DoInstantiateCalls(ReferenceMap* refMap) : refMap(refMap) {
         CHECK_NULL(refMap);
@@ -59,4 +60,4 @@ class InstantiateDirectCalls : public PassManager {
 
 }  // namespace P4
 
-#endif  /* _FRONTENDS_P4_DIRECTCALLS_H_ */
+#endif /* _FRONTENDS_P4_DIRECTCALLS_H_ */

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -42,9 +42,9 @@ class PathName final {
 #endif
     }
 
-    PathName(cstring str) : str(str)  {}             // NOLINT(runtime/explicit)
-    PathName(const char* str) : str(str) {}          // NOLINT(runtime/explicit)
-    PathName(const std::string &str) : str(str) {}   // NOLINT(runtime/explicit)
+    PathName(cstring str) : str(str) {}             // NOLINT(runtime/explicit)
+    PathName(const char* str) : str(str) {}         // NOLINT(runtime/explicit)
+    PathName(const std::string& str) : str(str) {}  // NOLINT(runtime/explicit)
     // get the file name extension.  It starts at the last dot.
     // e.g, exe
     cstring getExtension() const;
@@ -59,8 +59,8 @@ class PathName final {
     PathName getFolder() const;
     cstring toString() const { return str; }
     bool isNullOrEmpty() const { return str.isNullOrEmpty(); }
-    bool operator==(const PathName &other) const { return str == other.str; }
-    bool operator!=(const PathName &other) const { return str != other.str; }
+    bool operator==(const PathName& other) const { return str == other.str; }
+    bool operator!=(const PathName& other) const { return str != other.str; }
     PathName join(cstring component) const;
 
     static PathName empty;

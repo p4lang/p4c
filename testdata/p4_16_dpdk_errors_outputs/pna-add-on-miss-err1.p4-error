@@ -1,0 +1,3 @@
+pna-add-on-miss-err1.p4(141): [--Werror=expected] error: Learner table ipv4_da must have all exact match keys
+    table ipv4_da {
+          ^^^^^^^

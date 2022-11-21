@@ -18,11 +18,9 @@ limitations under the License.
 
 namespace P4 {
 
-void DoResetHeaders::generateResets(
-    const TypeMap* typeMap,
-    const IR::Type* type,
-    const IR::Expression* expr,
-    IR::Vector<IR::StatOrDecl>* resets) {
+void DoResetHeaders::generateResets(const TypeMap* typeMap, const IR::Type* type,
+                                    const IR::Expression* expr,
+                                    IR::Vector<IR::StatOrDecl>* resets) {
     if (type->is<IR::Type_Struct>() || type->is<IR::Type_HeaderUnion>()) {
         auto sl = type->to<IR::Type_StructLike>();
         for (auto f : sl->fields) {
@@ -40,8 +38,8 @@ void DoResetHeaders::generateResets(
     } else if (type->is<IR::Type_Stack>()) {
         auto tstack = type->to<IR::Type_Stack>();
         if (!tstack->sizeKnown()) {
-            ::error(ErrorType::ERR_UNSUPPORTED,
-                    "%1%: stack size is not a compile-time constant", tstack);
+            ::error(ErrorType::ERR_UNSUPPORTED, "%1%: stack size is not a compile-time constant",
+                    tstack);
             return;
         }
         for (unsigned i = 0; i < tstack->getSize(); i++) {
@@ -53,8 +51,7 @@ void DoResetHeaders::generateResets(
 }
 
 const IR::Node* DoResetHeaders::postorder(IR::Declaration_Variable* decl) {
-    if (decl->initializer != nullptr)
-        return decl;
+    if (decl->initializer != nullptr) return decl;
     LOG3("DoResetHeaders context " << dbp(getContext()->node));
     auto type = typeMap->getType(getOriginal(), true);
     auto path = new IR::PathExpression(decl->getName());
@@ -66,8 +63,7 @@ const IR::Node* DoResetHeaders::postorder(IR::Declaration_Variable* decl) {
         auto resets = new IR::Vector<IR::StatOrDecl>();
         resets->push_back(decl);
         generateResets(typeMap, type, path, resets);
-        if (resets->size() == 1)
-            return decl;
+        if (resets->size() == 1) return decl;
         return resets;
     } else {
         generateResets(typeMap, type, path, &insert);
@@ -77,17 +73,14 @@ const IR::Node* DoResetHeaders::postorder(IR::Declaration_Variable* decl) {
 
 const IR::Node* DoResetHeaders::postorder(IR::P4Control* control) {
     insert.append(control->body->components);
-    control->body = new IR::BlockStatement(
-        control->body->srcInfo,
-        control->body->annotations,
-        insert);
+    control->body =
+        new IR::BlockStatement(control->body->srcInfo, control->body->annotations, insert);
     insert.clear();
     return control;
 }
 
 const IR::Node* DoResetHeaders::postorder(IR::ParserState* state) {
-    if (state->name != IR::ParserState::start)
-        return state;
+    if (state->name != IR::ParserState::start) return state;
     insert.append(state->components);
     state->components = insert;
     insert.clear();

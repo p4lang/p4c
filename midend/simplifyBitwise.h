@@ -23,13 +23,13 @@ namespace P4 {
  * @todo: Extend the optimization to handle multiple combinations of masks
  */
 class SimplifyBitwise : public Transform {
-    IR::Vector<IR::StatOrDecl> *slice_statements;
-    const IR::AssignmentStatement *changing_as;
+    IR::Vector<IR::StatOrDecl>* slice_statements;
+    const IR::AssignmentStatement* changing_as;
 
-    void assignSlices(const IR::Expression *expr, big_int mask);
+    void assignSlices(const IR::Expression* expr, big_int mask);
 
  public:
-    const IR::Node *preorder(IR::AssignmentStatement *as) override;
+    const IR::Node* preorder(IR::AssignmentStatement* as) override;
 };
 
 }  // namespace P4

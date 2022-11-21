@@ -50,6 +50,7 @@ struct headers_t {
 struct local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t {
     bit<48> dst_addr;
     bit<48> src_addr;
+    bit<8>  tmp;
 }
 
 parser packet_parser(packet_in packet, out headers_t headers, inout local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t local_metadata, in psa_ingress_parser_input_metadata_t standard_metadata, in empty_metadata_t resub_meta, in empty_metadata_t recirc_meta) {
@@ -61,7 +62,7 @@ parser packet_parser(packet_in packet, out headers_t headers, inout local_metada
 }
 
 control packet_deparser(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t headers, in local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t local_metadata, in psa_ingress_output_metadata_t istd) {
-    @hidden action psadpdktokentoobig73() {
+    @hidden action psadpdktokentoobig74() {
         packet.emit<ethernet_t>(headers.outer_ethernet);
         packet.emit<ipv4_t>(headers.outer_ipv4_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk);
         packet.emit<udp_t>(headers.outer_udp);
@@ -69,14 +70,14 @@ control packet_deparser(packet_out packet, out empty_metadata_t clone_i2e_meta, 
         packet.emit<ethernet_t>(headers.ethernet);
         packet.emit<ipv4_t>(headers.ipv4);
     }
-    @hidden table tbl_psadpdktokentoobig73 {
+    @hidden table tbl_psadpdktokentoobig74 {
         actions = {
-            psadpdktokentoobig73();
+            psadpdktokentoobig74();
         }
-        const default_action = psadpdktokentoobig73();
+        const default_action = psadpdktokentoobig74();
     }
     apply {
-        tbl_psadpdktokentoobig73.apply();
+        tbl_psadpdktokentoobig74.apply();
     }
 }
 
@@ -129,8 +130,23 @@ control ingress(inout headers_t headers, inout local_metadata__dpdk_dpdk_dpdk_dp
         const default_action = drop_1();
         size = 1048576;
     }
+    @hidden action psadpdktokentoobig154() {
+        local_metadata1.tmp = 8w0;
+    }
+    @hidden table tbl_psadpdktokentoobig154 {
+        actions = {
+            psadpdktokentoobig154();
+        }
+        const default_action = psadpdktokentoobig154();
+    }
     apply {
-        vxlan_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_0.apply();
+        switch (vxlan_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_0.apply().action_run) {
+            vxlan_encap_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk: {
+                tbl_psadpdktokentoobig154.apply();
+            }
+            default: {
+            }
+        }
     }
 }
 

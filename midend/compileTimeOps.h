@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _MIDEND_COMPILETIMEOPS_H_
 #define _MIDEND_COMPILETIMEOPS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -32,13 +32,12 @@ namespace P4 {
 class CompileTimeOperations : public Inspector {
  public:
     CompileTimeOperations() { setName("CompileTimeOperations"); }
-    void err(const IR::Node* expression)
-    { ::error(ErrorType::ERR_INVALID,
-              "%1%: could not evaluate expression at compilation time", expression); }
-    void postorder(const IR::Mod* expression) override
-    { err(expression); }
-    void postorder(const IR::Div* expression) override
-    { err(expression); }
+    void err(const IR::Node* expression) {
+        ::error(ErrorType::ERR_INVALID, "%1%: could not evaluate expression at compilation time",
+                expression);
+    }
+    void postorder(const IR::Mod* expression) override { err(expression); }
+    void postorder(const IR::Div* expression) override { err(expression); }
 };
 
 }  // namespace P4

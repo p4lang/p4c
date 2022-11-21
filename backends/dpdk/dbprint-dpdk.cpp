@@ -4,9 +4,7 @@ void IR::DpdkJmpLabelStatement::dbprint(std::ostream& out) const {
     out << "jmp " << label << std::endl;
 }
 
-void IR::DpdkLabelStatement::dbprint(std::ostream& out) const {
-    out << label << std::endl;
-}
+void IR::DpdkLabelStatement::dbprint(std::ostream& out) const { out << label << std::endl; }
 
 void IR::DpdkJmpIfInvalidStatement::dbprint(std::ostream& out) const {
     out << "jmpnv " << label << " " << header << std::endl;
@@ -40,18 +38,14 @@ void IR::DpdkInvalidateStatement::dbprint(std::ostream& out) const {
     out << "invalidate " << header << std::endl;
 }
 
-void IR::DpdkDropStatement::dbprint(std::ostream& out) const {
-    out << "drop" << std::endl;
-}
+void IR::DpdkDropStatement::dbprint(std::ostream& out) const { out << "drop" << std::endl; }
 
 void IR::DpdkAsmProgram::dbprint(std::ostream& out) const {
-    for (auto h : headerType)
-        out << h;
+    for (auto h : headerType) out << h;
 }
 
 void IR::DpdkListStatement::dbprint(std::ostream& out) const {
-    for (auto s : statements)
-        out << s;
+    for (auto s : statements) out << s;
 }
 
 void IR::DpdkExtractStatement::dbprint(std::ostream& out) const {
@@ -65,7 +59,6 @@ void IR::DpdkExtractStatement::dbprint(std::ostream& out) const {
 void IR::DpdkLookaheadStatement::dbprint(std::ostream& out) const {
     out << "lookahead " << header << std::endl;
 }
-
 
 void IR::DpdkJmpEqualStatement::dbprint(std::ostream& out) const {
     out << "jmpeq " << label << " " << src1 << " " << src2 << std::endl;

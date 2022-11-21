@@ -17,10 +17,10 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_REMOVEPARAMETERS_H_
 #define _FRONTENDS_P4_REMOVEPARAMETERS_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -40,11 +40,10 @@ class ActionInvocation {
     void bind(const IR::P4Action* action, const IR::MethodCallExpression* invocation,
               bool allParams) {
         CHECK_NULL(action);
-        BUG_CHECK(invocations.find(action) == invocations.end(),
-                  "%1%: action called twice", action);
+        BUG_CHECK(invocations.find(action) == invocations.end(), "%1%: action called twice",
+                  action);
         invocations.emplace(action, invocation);
-        if (allParams)
-            all.emplace(action);
+        if (allParams) all.emplace(action);
         calls.emplace(invocation);
     }
     void bindDefaultAction(const IR::P4Action* action,
@@ -66,22 +65,24 @@ class ActionInvocation {
         return calls.find(expression) != calls.end();
     }
     unsigned argsToRemove(const IR::MethodCallExpression* defaultCall) const {
-        if (defaultActions.find(defaultCall) == defaultActions.end())
-            return 0;
+        if (defaultActions.find(defaultCall) == defaultActions.end()) return 0;
         return ::get(defaultActions, defaultCall);
     }
 };
 
 class FindActionParameters : public Inspector {
-    ReferenceMap*     refMap;
-    TypeMap*          typeMap;
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
     ActionInvocation* invocations;
+
  public:
-    FindActionParameters(ReferenceMap* refMap,
-                         TypeMap* typeMap, ActionInvocation* invocations) :
-            refMap(refMap), typeMap(typeMap), invocations(invocations) {
-        CHECK_NULL(refMap); CHECK_NULL(invocations); CHECK_NULL(typeMap);
-        setName("FindActionParameters"); }
+    FindActionParameters(ReferenceMap* refMap, TypeMap* typeMap, ActionInvocation* invocations)
+        : refMap(refMap), typeMap(typeMap), invocations(invocations) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(invocations);
+        CHECK_NULL(typeMap);
+        setName("FindActionParameters");
+    }
 
     void postorder(const IR::ActionListElement* element) override;
     void postorder(const IR::MethodCallExpression* expression) override;
@@ -115,17 +116,17 @@ class FindActionParameters : public Inspector {
  */
 class DoRemoveActionParameters : public Transform {
     ActionInvocation* invocations;
+
  public:
-    explicit DoRemoveActionParameters(ActionInvocation* invocations) :
-            invocations(invocations)
-    { CHECK_NULL(invocations); setName("DoRemoveActionParameters"); }
+    explicit DoRemoveActionParameters(ActionInvocation* invocations) : invocations(invocations) {
+        CHECK_NULL(invocations);
+        setName("DoRemoveActionParameters");
+    }
 
     const IR::Node* postorder(IR::P4Action* table) override;
     const IR::Node* postorder(IR::ActionListElement* element) override;
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
-    ActionInvocation* getInvocations() {
-        return invocations;
-    }
+    ActionInvocation* getInvocations() { return invocations; }
 };
 
 class RemoveActionParameters : public PassManager {

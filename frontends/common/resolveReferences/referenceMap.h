@@ -17,10 +17,10 @@ limitations under the License.
 #ifndef _COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_
 #define _COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_
 
+#include "frontends/common/programMap.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/map.h"
-#include "frontends/common/programMap.h"
 
 namespace P4 {
 
@@ -34,14 +34,14 @@ class MinimalNameGenerator : public NameGenerator, public Inspector {
     /// All names used in the program. Key is a name, value represents how many times
     /// this name was used as a base for newly generated unique names.
     std::unordered_map<cstring, int> usedNames;
-    void postorder(const IR::Path *p) override { usedName(p->name.name); }
-    void postorder(const IR::Type_Declaration *t) override { usedName(t->name.name); }
-    void postorder(const IR::Declaration *d) override { usedName(d->name.name); }
+    void postorder(const IR::Path* p) override { usedName(p->name.name); }
+    void postorder(const IR::Type_Declaration* t) override { usedName(t->name.name); }
+    void postorder(const IR::Declaration* d) override { usedName(d->name.name); }
 
  public:
     MinimalNameGenerator();
     void usedName(cstring name) { usedNames.insert({name, 0}); }
-    explicit MinimalNameGenerator(const IR::Node *root) : MinimalNameGenerator() {
+    explicit MinimalNameGenerator(const IR::Node* root) : MinimalNameGenerator() {
         root->apply(*this);
     }
 
@@ -53,10 +53,8 @@ class MinimalNameGenerator : public NameGenerator, public Inspector {
 // interchangeably when looking up declarations.  This should go away once the refMap does
 class DeclarationLookup {
  public:
-    virtual const IR::IDeclaration *
-    getDeclaration(const IR::Path *, bool notNull = false) const = 0;
-    virtual const IR::IDeclaration *
-    getDeclaration(const IR::This *, bool notNull = false) const = 0;
+    virtual const IR::IDeclaration* getDeclaration(const IR::Path*, bool notNull = false) const = 0;
+    virtual const IR::IDeclaration* getDeclaration(const IR::This*, bool notNull = false) const = 0;
 };
 
 /// Class used to encode maps from paths to declarations.
@@ -82,16 +80,16 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
     ReferenceMap();
     /// Looks up declaration for @p path. If @p notNull is false, then
     /// failure to find a declaration is an error.
-    const IR::IDeclaration* getDeclaration(const IR::Path* path, bool notNull = false)
-        const override;
+    const IR::IDeclaration* getDeclaration(const IR::Path* path,
+                                           bool notNull = false) const override;
 
     /// Sets declaration for @p path to @p decl.
     void setDeclaration(const IR::Path* path, const IR::IDeclaration* decl);
 
     /// Looks up declaration for @p pointer. If @p notNull is false,
     /// then failure to find a declaration is an error.
-    const IR::IDeclaration* getDeclaration(const IR::This* pointer, bool notNull = false)
-        const override;
+    const IR::IDeclaration* getDeclaration(const IR::This* pointer,
+                                           bool notNull = false) const override;
 
     /// Sets declaration for @p pointer to @p decl.
     void setDeclaration(const IR::This* pointer, const IR::IDeclaration* decl);

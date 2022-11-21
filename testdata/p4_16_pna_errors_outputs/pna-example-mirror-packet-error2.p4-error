@@ -1,0 +1,34 @@
+pna-example-mirror-packet-error2.p4(83): [--Werror=type-error] error: mirror_packet
+ mirror_packet(mirror_slot, mirror_session);
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+pna-example-mirror-packet-error2.p4(83): mirror_slot: argument used for directionless parameter 'mirror_slot_id' must be a compile-time constant
+   mirror_packet(mirror_slot, mirror_session);
+                 ^^^^^^^^^^^
+pna.p4(582)
+  extern void mirror_packet(MirrorSlotId_t mirror_slot_id,
+                                           ^^^^^^^^^^^^^^
+  ---- Originating from:
+pna.p4(582): Function type 'mirror_packet' does not match invocation type '<Method call>'
+  extern void mirror_packet(MirrorSlotId_t mirror_slot_id,
+              ^^^^^^^^^^^^^
+pna-example-mirror-packet-error2.p4(83)
+   mirror_packet(mirror_slot, mirror_session);
+   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pna-example-mirror-packet-error2.p4(88): [--Werror=type-error] error: mirror_packet
+ mirror_packet(mirror_slot, mirror_session);
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+pna-example-mirror-packet-error2.p4(88): mirror_slot: argument used for directionless parameter 'mirror_slot_id' must be a compile-time constant
+   mirror_packet(mirror_slot, mirror_session);
+                 ^^^^^^^^^^^
+pna.p4(582)
+  extern void mirror_packet(MirrorSlotId_t mirror_slot_id,
+                                           ^^^^^^^^^^^^^^
+  ---- Originating from:
+pna.p4(582): Function type 'mirror_packet' does not match invocation type '<Method call>'
+  extern void mirror_packet(MirrorSlotId_t mirror_slot_id,
+              ^^^^^^^^^^^^^
+pna-example-mirror-packet-error2.p4(88)
+   mirror_packet(mirror_slot, mirror_session);
+   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -266,9 +266,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
     endmacro()
     check_linker(BUILD_LINK_WITH_GOLD "gold" "GNU gold")
     check_linker(BUILD_LINK_WITH_LLD "lld" "LLD")
-
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${_LD_OPT_USED}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${_LD_OPT_USED}")
+    append("${_LD_OPT_USED}" CMAKE_EXE_LINKER_FLAGS CMAKE_SHARED_LINKER_FLAGS CMAKE_MODULE_LINKER_FLAGS)
     message(STATUS "Using the ${_LD_USED} linker.")
     unset(LD_VERSION)
     unset(_LD_USED)
@@ -444,7 +442,8 @@ add_custom_target(update_includes ALL
 if (ENABLE_DPDK)
 add_custom_target(dpdk_includes ALL
   COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include/dpdk
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/psa.p4 ${P4C_BINARY_DIR}/p4include/dpdk)
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/psa.p4 ${P4C_BINARY_DIR}/p4include/dpdk
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/pna.p4 ${P4C_BINARY_DIR}/p4include/dpdk)
 endif ()
 
 # Installation
@@ -463,6 +462,17 @@ if(DEFINED CPPLINT_FILES)
     COMMENT "cpplint")
   add_custom_target(cpplint-quiet
     COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
+    WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+    COMMENT "cpplint quietly")
+else()
+  # If no cpplint files are specified in CMake, set the target to run across the entire code base.
+  set (CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/run-cpplint.sh)
+  add_custom_target(cpplint
+    COMMAND ${CPPLINT_CMD}
+    WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+    COMMENT "cpplint")
+  add_custom_target(cpplint-quiet
+    COMMAND ${CPPLINT_CMD} --quiet
     WORKING_DIRECTORY ${P4C_SOURCE_DIR}
     COMMENT "cpplint quietly")
 endif()

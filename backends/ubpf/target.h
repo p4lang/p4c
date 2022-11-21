@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef BACKENDS_UBPF_TARGET_H_
 #define BACKENDS_UBPF_TARGET_H_
 
-#include "backends/ebpf/target.h"
 #include "backends/ebpf/ebpfObject.h"
+#include "backends/ebpf/target.h"
 #include "ubpfHelpers.h"
 
 namespace UBPF {
@@ -29,33 +29,28 @@ class UbpfTarget : public EBPF::Target {
  public:
     UbpfTarget() : EBPF::Target("UBPF") {}
 
-    void emitLicense(Util::SourceCodeBuilder *, cstring) const override {};
-    void emitCodeSection(Util::SourceCodeBuilder *, cstring) const override {};
-    void emitIncludes(Util::SourceCodeBuilder *builder) const override;
-    void emitResizeBuffer(Util::SourceCodeBuilder* builder,
-                          cstring buffer, cstring offsetVar) const override;
-    void emitTableLookup(Util::SourceCodeBuilder *builder, cstring tblName,
-                         cstring key, cstring value) const override;
-    void emitTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName,
-                         cstring key, cstring value) const override;
-    void emitGetPacketData(Util::SourceCodeBuilder *builder,
-                           cstring ctxVar) const;
-    void emitGetFromStandardMetadata(Util::SourceCodeBuilder *builder,
-                                     cstring stdMetadataVar, cstring metadataField) const;
-    void emitUserTableUpdate(UNUSED Util::SourceCodeBuilder *builder, UNUSED cstring tblName,
-                             UNUSED cstring key, UNUSED cstring value) const override {};
-    void emitTableDecl(Util::SourceCodeBuilder *builder,
-                       cstring tblName, EBPF::TableKind tableKind,
+    void emitLicense(Util::SourceCodeBuilder*, cstring) const override{};
+    void emitCodeSection(Util::SourceCodeBuilder*, cstring) const override{};
+    void emitIncludes(Util::SourceCodeBuilder* builder) const override;
+    void emitResizeBuffer(Util::SourceCodeBuilder* builder, cstring buffer,
+                          cstring offsetVar) const override;
+    void emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName, cstring key,
+                         cstring value) const override;
+    void emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName, cstring key,
+                         cstring value) const override;
+    void emitGetPacketData(Util::SourceCodeBuilder* builder, cstring ctxVar) const;
+    void emitGetFromStandardMetadata(Util::SourceCodeBuilder* builder, cstring stdMetadataVar,
+                                     cstring metadataField) const;
+    void emitUserTableUpdate(UNUSED Util::SourceCodeBuilder* builder, UNUSED cstring tblName,
+                             UNUSED cstring key, UNUSED cstring value) const override{};
+    void emitTableDecl(Util::SourceCodeBuilder* builder, cstring tblName, EBPF::TableKind tableKind,
                        cstring keyType, cstring valueType, unsigned size) const override;
-    void emitMain(UNUSED Util::SourceCodeBuilder *builder,
-                  UNUSED cstring functionName,
-                  UNUSED cstring argName) const override {};
-    void emitMain(Util::SourceCodeBuilder *builder,
-                  cstring functionName,
-                  cstring argName,
+    void emitMain(UNUSED Util::SourceCodeBuilder* builder, UNUSED cstring functionName,
+                  UNUSED cstring argName) const override{};
+    void emitMain(Util::SourceCodeBuilder* builder, cstring functionName, cstring argName,
                   cstring standardMetadata) const;
-    void emitUbpfHelpers(EBPF::CodeBuilder *builder) const;
-    void emitChecksumHelpers(EBPF::CodeBuilder *builder) const;
+    void emitUbpfHelpers(EBPF::CodeBuilder* builder) const;
+    void emitChecksumHelpers(EBPF::CodeBuilder* builder) const;
 
     cstring dataOffset(UNUSED cstring base) const override { return cstring(""); }
     cstring dataEnd(UNUSED cstring base) const override { return cstring(""); }

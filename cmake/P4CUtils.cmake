@@ -65,6 +65,12 @@ macro(p4c_test_set_name name tag alias)
   set(${name} ${tag}/${alias})
 endmacro(p4c_test_set_name)
 
+function(append value)
+  foreach(variable ${ARGN})
+    set(${variable} "${${variable}} ${value}" PARENT_SCOPE)
+  endforeach(variable)
+endfunction()
+
 # add a single test to the testsuite
 # Arguments:
 #   - tag is a label for the set of test suite where this test belongs

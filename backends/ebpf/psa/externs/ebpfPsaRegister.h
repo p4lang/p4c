@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_EXTERNS_EBPFPSAREGISTER_H_
 #define BACKENDS_EBPF_PSA_EXTERNS_EBPFPSAREGISTER_H_
 
-#include "backends/ebpf/ebpfType.h"
 #include "backends/ebpf/ebpfTable.h"
+#include "backends/ebpf/ebpfType.h"
 
 namespace EBPF {
 
@@ -39,8 +39,7 @@ class EBPFRegisterPSA : public EBPFTableBase {
 
  public:
     EBPFRegisterPSA(const EBPFProgram* program, cstring instanceName,
-                    const IR::Declaration_Instance* di,
-                    CodeGenInspector* codeGen);
+                    const IR::Declaration_Instance* di, CodeGenInspector* codeGen);
 
     void emitTypes(CodeBuilder* builder);
     void emitKeyType(CodeBuilder* builder);

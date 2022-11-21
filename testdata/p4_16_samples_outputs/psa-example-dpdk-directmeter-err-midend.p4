@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <bmv2/psa.p4>
+#include <dpdk/psa.p4>
 
 struct EMPTY {
 }
@@ -34,7 +34,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     }
     @name("MyIC.meter0") DirectMeter(PSA_MeterType_t.BYTES) meter0_0;
     @name("MyIC.execute_meter") action execute_meter() {
-        meter0_0.execute();
+        meter0_0.dpdk_execute(32w0);
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {

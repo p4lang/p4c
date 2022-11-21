@@ -51,12 +51,11 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata_t use
 
 control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     @name("ingress.color_out") PSA_MeterColor_t color_out_0;
-    @name("ingress.color_in") PSA_MeterColor_t color_in_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.BYTES) meter0_0;
     @name("ingress.execute") action execute_1(@name("index") bit<12> index_1) {
-        color_out_0 = meter0_0.execute(index_1, color_in_0, (bit<32>)hdr.ipv4.totalLen);
+        color_out_0 = meter0_0.dpdk_execute(index_1, (bit<32>)hdr.ipv4.totalLen);
         user_meta.port_out = (color_out_0 == PSA_MeterColor_t.GREEN ? 32w1 : 32w0);
     }
     @name("ingress.tbl") table tbl_0 {
@@ -69,17 +68,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
         }
         default_action = NoAction_1();
     }
-    @hidden action psaexampledpdkmeter56() {
-        color_in_0 = PSA_MeterColor_t.RED;
-    }
-    @hidden table tbl_psaexampledpdkmeter56 {
-        actions = {
-            psaexampledpdkmeter56();
-        }
-        const default_action = psaexampledpdkmeter56();
-    }
     apply {
-        tbl_psaexampledpdkmeter56.apply();
         if (user_meta.port_out == 32w1) {
             tbl_0.apply();
         } else {

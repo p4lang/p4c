@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _MIDEND_SINGLEARGUMENTSELECT_H_
 #define _MIDEND_SINGLEARGUMENTSELECT_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -32,9 +32,9 @@ namespace P4 {
 class DoSingleArgumentSelect : public Modifier {
     TypeMap* typeMap;
     const IR::Type* selectListType;
+
  public:
-    explicit DoSingleArgumentSelect(TypeMap* typeMap):
-            typeMap(typeMap), selectListType(nullptr) {
+    explicit DoSingleArgumentSelect(TypeMap* typeMap) : typeMap(typeMap), selectListType(nullptr) {
         setName("DoSingleArgumentSelect");
     }
 
@@ -59,8 +59,7 @@ class SingleArgumentSelect : public PassManager {
  public:
     SingleArgumentSelect(ReferenceMap* refMap, TypeMap* typeMap,
                          TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoSingleArgumentSelect(typeMap));
         setName("SingleArgumentSelect");
