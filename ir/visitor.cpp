@@ -19,7 +19,9 @@ limitations under the License.
 #include <stdlib.h>
 #include <time.h>
 
+#if HAVE_LIBGC
 #include <gc/gc.h>
+#endif
 
 #include "ir/id.h"
 #include "ir/indexed_vector.h"

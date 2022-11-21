@@ -13,6 +13,7 @@
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/timer.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "frontends/p4/optimizeExpressions.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/irutils.h"

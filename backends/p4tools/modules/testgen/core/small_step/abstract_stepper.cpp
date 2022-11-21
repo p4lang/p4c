@@ -13,6 +13,7 @@
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "frontends/p4/optimizeExpressions.h"
 #include "ir/dump.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"

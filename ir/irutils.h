@@ -39,19 +39,6 @@ const Constant* getConstant(const Type* type, big_int v);
 /// @returns a bool literal. The value is cached.
 const BoolLiteral* getBoolLiteral(bool value);
 
-// /// Applies expression optimizations to the input node.
-// /// Currently, performs constant folding and strength reduction.
-// template <class T>
-// const T* optimizeExpression(const T* node) {
-//     auto pass = PassRepeated({
-//         new P4::StrengthReduction(nullptr, nullptr, nullptr),
-//         new P4::ConstantFolding(nullptr, nullptr, false),
-//     });
-//     node = node->apply(pass);
-//     BUG_CHECK(::errorCount() == 0, "Encountered errors while trying to optimize expressions.");
-//     return node;
-// }
-
 /// @returns the "default" value for a given type. The current mapping is
 /// Type_Bits       0
 /// Type_Boolean    false

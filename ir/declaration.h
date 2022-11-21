@@ -22,9 +22,6 @@ limitations under the License.
 
 namespace IR {
 
-// Forward declare ID.
-struct ID;
-
 /// The Declaration interface, representing objects with names.
 class IDeclaration : public virtual INode {
  public:

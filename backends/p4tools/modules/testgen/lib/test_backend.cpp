@@ -17,6 +17,7 @@
 #include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/timer.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "frontends/p4/optimizeExpressions.h"
 #include "ir/irutils.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"

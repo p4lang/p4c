@@ -268,11 +268,10 @@ void IR::ListExpression::dbprint(std::ostream& out) const {
     if (prec == 0) out << ';';
 }
 
-void IR::P4ListExpression::dbprint(std::ostream &out) const {
+void IR::P4ListExpression::dbprint(std::ostream& out) const {
     int prec = getprec(out);
     if (prec > Prec_Postfix) out << '(';
-    out << setprec(Prec_Postfix) << "list<" << elementType <<
-            ">{" << setprec(Prec_Low);
+    out << setprec(Prec_Postfix) << "list<" << elementType << ">{" << setprec(Prec_Low);
     bool first = true;
     for (auto a : components) {
         if (!first) out << ", ";
@@ -284,9 +283,9 @@ void IR::P4ListExpression::dbprint(std::ostream &out) const {
     if (prec == 0) out << ';';
 }
 
-void IR::DefaultExpression::dbprint(std::ostream &out) const { out << "default"; }
+void IR::DefaultExpression::dbprint(std::ostream& out) const { out << "default"; }
 
-void IR::This::dbprint(std::ostream &out) const { out << "this"; }
+void IR::This::dbprint(std::ostream& out) const { out << "this"; }
 
 void IR::StringLiteral::dbprint(std::ostream& out) const { out << '"' << value << '"'; }
 
