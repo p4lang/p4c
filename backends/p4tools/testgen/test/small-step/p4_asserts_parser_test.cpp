@@ -1,30 +1,34 @@
 #include "backends/p4tools/testgen/targets/bmv2/p4_asserts_parser.h"
 
 #include <stdlib.h>
+#include <unistd.h>
 
-#include <fstream>
+#include <ext/alloc_traits.h>
+
 #include <memory>
-#include <utility>
+#include <string>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4test/version.h"
 #include "backends/p4tools/common/compiler/midend.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "frontends/common/options.h"
 #include "frontends/common/parseInput.h"
+#include "frontends/common/parser_options.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/frontend.h"
+#include "frontends/p4/typeMap.h"
 #include "gtest/gtest-message.h"
 #include "gtest/gtest-test-part.h"
 #include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
-#include "ir/node.h"
-#include "lib/log.h"
+#include "lib/compile_context.h"
+#include "lib/null.h"
+#include "p4tools/common/lib/formulae.h"
 
 #include "backends/p4tools/testgen/targets/bmv2/p4_refers_to_parser.h"
 #include "backends/p4tools/testgen/test/gtest_utils.h"
-#include "backends/p4tools/testgen/test/small-step/util.h"
 
 /// Variables are declared in "test/gtest/env.h" which is already included in reachablity.cpp
 extern const char* sourcePath;

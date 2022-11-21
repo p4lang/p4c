@@ -11,7 +11,6 @@
 #include "backends/p4tools/testgen/lib/execution_state.h"
 #include "backends/p4tools/testgen/lib/test_spec.h"
 #include "backends/p4tools/testgen/targets/ebpf/expr_stepper.h"
-#include "backends/p4tools/testgen/targets/ebpf/test_spec.h"
 
 namespace P4Tools {
 

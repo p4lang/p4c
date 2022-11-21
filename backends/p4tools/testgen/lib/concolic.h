@@ -16,6 +16,8 @@
 #include "backends/p4tools/common/lib/model.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
 #include "lib/cstring.h"
 
 #include "backends/p4tools/testgen/lib/execution_state.h"

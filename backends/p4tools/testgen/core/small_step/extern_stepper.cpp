@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <functional>
 #include <ostream>
+#include <string>
 #include <vector>
 
 #include <boost/none.hpp>
@@ -10,8 +11,11 @@
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
+#include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/safe_vector.h"

@@ -1,5 +1,7 @@
+#include <algorithm>
 #include <vector>
 
+#include <boost/core/enable_if.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/detail/et_ops.hpp>
 #include <boost/multiprecision/number.hpp>
@@ -13,6 +15,8 @@
 #include "gtest/gtest-message.h"
 #include "gtest/gtest-test-part.h"
 #include "gtest/gtest.h"
+#include "ir/declaration.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
 #include "lib/enumerator.h"

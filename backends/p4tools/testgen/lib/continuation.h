@@ -15,6 +15,7 @@
 
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "lib/cstring.h"
 
 #include "backends/p4tools/testgen/lib/namespace_context.h"

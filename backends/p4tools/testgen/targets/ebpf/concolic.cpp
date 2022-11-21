@@ -1,25 +1,6 @@
 #include "backends/p4tools/testgen/targets/ebpf/concolic.h"
 
-#include <algorithm>
-#include <iterator>
-#include <map>
-#include <utility>
-#include <vector>
-
-#include <boost/multiprecision/cpp_int.hpp>
-#include <boost/multiprecision/cpp_int/add.hpp>
-#include <boost/multiprecision/cpp_int/import_export.hpp>
-#include <boost/multiprecision/detail/et_ops.hpp>
-#include <boost/multiprecision/number.hpp>
-#include <boost/multiprecision/traits/explicit_conversion.hpp>
-
-#include "backends/p4tools/common/lib/formulae.h"
-#include "ir/irutils.h"
-#include "lib/cstring.h"
-#include "lib/exceptions.h"
-
-#include "backends/p4tools/testgen/lib/exceptions.h"
-#include "backends/p4tools/testgen/lib/execution_state.h"
+#include "p4tools/testgen/lib/concolic.h"
 
 namespace P4Tools {
 

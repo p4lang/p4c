@@ -1,6 +1,5 @@
 #include "backends/p4tools/testgen/targets/bmv2/backend/protobuf/protobuf.h"
 
-#include <algorithm>
 #include <iomanip>
 #include <map>
 #include <stdexcept>
@@ -9,6 +8,7 @@
 #include <vector>
 
 #include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 #include <boost/none.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
@@ -17,9 +17,12 @@
 #include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "control-plane/p4RuntimeArchHandler.h"
 #include "control-plane/p4RuntimeArchStandard.h"
 #include "gsl/gsl-lite.hpp"
+#include "ir/declaration.h"
 #include "ir/ir.h"
+#include "ir/vector.h"
 #include "lib/big_int_util.h"
 #include "lib/error.h"
 #include "lib/error_catalog.h"
@@ -27,6 +30,9 @@
 #include "lib/log.h"
 #include "lib/null.h"
 #include "nlohmann/json.hpp"
+
+#include "p4tools/testgen/lib/tf.h"
+#include "p4tools/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools {
 

@@ -3,15 +3,23 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 
 #include "backends/p4test/version.h"
 #include "backends/p4tools/common/compiler/midend.h"
+#include "frontends/common/options.h"
 #include "frontends/common/parseInput.h"
+#include "frontends/common/parser_options.h"
 #include "frontends/p4/frontend.h"
+#include "gtest/gtest-message.h"
+#include "gtest/gtest-test-part.h"
 #include "gtest/gtest.h"
+#include "ir/declaration.h"
 #include "ir/ir.h"
 #include "ir/node.h"
-#include "lib/log.h"
+#include "lib/compile_context.h"
+#include "lib/enumerator.h"
+#include "lib/exceptions.h"
 #include "test/gtest/env.h"
 
 namespace Test {

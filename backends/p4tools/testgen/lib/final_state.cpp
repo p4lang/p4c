@@ -3,6 +3,11 @@
 #include <vector>
 
 #include "backends/p4tools/common/lib/symbolic_env.h"
+#include "p4tools/common/core/solver.h"
+#include "p4tools/common/lib/model.h"
+#include "p4tools/common/lib/trace_events.h"
+
+#include "p4tools/testgen/lib/execution_state.h"
 
 namespace P4Tools {
 

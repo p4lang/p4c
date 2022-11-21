@@ -16,6 +16,7 @@
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/ir.h"
+#include "ir/json_generator.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
 #include "lib/safe_vector.h"

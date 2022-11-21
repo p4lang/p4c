@@ -17,6 +17,7 @@
 #include "backends/p4tools/testgen/targets/ebpf/expr_stepper.h"
 #include "backends/p4tools/testgen/targets/ebpf/program_info.h"
 #include "backends/p4tools/testgen/targets/ebpf/test_backend.h"
+#include "p4tools/testgen/core/arch_spec.h"
 
 namespace P4Tools {
 

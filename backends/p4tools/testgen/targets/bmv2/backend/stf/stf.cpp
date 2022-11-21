@@ -1,6 +1,5 @@
 #include "backends/p4tools/testgen/targets/bmv2/backend/stf/stf.h"
 
-#include <algorithm>
 #include <iomanip>
 #include <map>
 #include <stdexcept>
@@ -8,7 +7,11 @@
 #include <utility>
 #include <vector>
 
+#include <boost/core/enable_if.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/multiprecision/detail/et_ops.hpp>
+#include <boost/multiprecision/number.hpp>
+#include <boost/multiprecision/traits/explicit_conversion.hpp>
 #include <boost/none.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
@@ -18,13 +21,16 @@
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "gsl/gsl-lite.hpp"
+#include "ir/declaration.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
-#include "lib/big_int_util.h"
+#include "lib/exceptions.h"
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
 
 #include "backends/p4tools/testgen/lib/exceptions.h"
+#include "p4tools/testgen/lib/tf.h"
+#include "p4tools/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools {
 

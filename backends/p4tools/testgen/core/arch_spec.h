@@ -1,6 +1,8 @@
 #ifndef BACKENDS_P4TOOLS_TESTGEN_CORE_ARCH_SPEC_H_
 #define BACKENDS_P4TOOLS_TESTGEN_CORE_ARCH_SPEC_H_
 
+#include <stddef.h>
+
 #include <map>
 #include <vector>
 

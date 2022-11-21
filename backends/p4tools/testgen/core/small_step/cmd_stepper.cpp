@@ -1,11 +1,12 @@
 #include "backends/p4tools/testgen/core/small_step/cmd_stepper.h"
 
-#include <algorithm>
 #include <cstddef>
 #include <map>
 #include <ostream>
+#include <string>
 #include <vector>
 
+#include <boost/format.hpp>
 #include <boost/none.hpp>
 #include <boost/variant/get.hpp>
 #include <boost/variant/variant.hpp>
@@ -14,16 +15,27 @@
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/irutils.h"
+#include "ir/node.h"
+#include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
 #include "lib/safe_vector.h"
+#include "p4tools/common/core/solver.h"
+#include "p4tools/common/lib/formulae.h"
 
 #include "backends/p4tools/testgen//lib/exceptions.h"
 #include "backends/p4tools/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/testgen/options.h"
+#include "p4tools/testgen/core/program_info.h"
+#include "p4tools/testgen/core/small_step/abstract_stepper.h"
+#include "p4tools/testgen/lib/continuation.h"
+#include "p4tools/testgen/lib/execution_state.h"
 
 namespace P4Tools {
 

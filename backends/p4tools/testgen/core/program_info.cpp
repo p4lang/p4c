@@ -1,10 +1,20 @@
 #include "backends/p4tools/testgen/core/program_info.h"
 
+#include <string>
+
 #include "backends/p4tools/common/lib/util.h"
-#include "ir/irutils.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/id.h"
 #include "lib/exceptions.h"
+#include "p4tools/common/compiler/reachability.h"
+#include "p4tools/common/lib/coverage.h"
 
 #include "backends/p4tools/testgen/options.h"
+#include "p4tools/testgen/core/arch_spec.h"
+#include "p4tools/testgen/lib/concolic.h"
+#include "p4tools/testgen/lib/continuation.h"
+#include "p4tools/testgen/lib/namespace_context.h"
 
 namespace P4Tools {
 

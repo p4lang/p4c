@@ -3,7 +3,6 @@
 
 #include <stddef.h>
 
-#include <map>
 #include <vector>
 
 #include "ir/ir.h"

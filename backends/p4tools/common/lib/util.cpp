@@ -2,23 +2,31 @@
 
 #include <cxxabi.h>
 
+#include <bits/types/struct_tm.h>
 #include <lib/null.h>
 
+#include <algorithm>
 #include <chrono>  // NOLINT cpplint throws a warning because Google has a similar library...
 #include <ctime>
 #include <iomanip>
+#include <map>
 #include <sstream>
+#include <tuple>
 
+#include <boost/cstdint.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/cpp_int/add.hpp>
-#include <boost/multiprecision/cpp_int/divide.hpp>
 #include <boost/multiprecision/detail/et_ops.hpp>
 #include <boost/multiprecision/number.hpp>
 #include <boost/none.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
 #include "backends/p4tools/common/lib/zombie.h"
+#include "ir/id.h"
 #include "ir/irutils.h"
+#include "ir/vector.h"
+#include "lib/safe_vector.h"
+#include "p4tools/common/lib/formulae.h"
 
 namespace P4Tools {
 

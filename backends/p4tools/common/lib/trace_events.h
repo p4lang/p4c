@@ -6,6 +6,7 @@
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "ir/ir.h"
+#include "ir/visitor.h"
 #include "lib/cstring.h"
 
 namespace P4Tools {
@@ -22,7 +23,6 @@ class TraceEvent {
     class Emit;
     class Expression;
     class ListExpression;
-
     class Packet;
     class ParserStart;
     class ParserState;

@@ -19,7 +19,9 @@
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "gsl/gsl-lite.hpp"
+#include "ir/declaration.h"
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 

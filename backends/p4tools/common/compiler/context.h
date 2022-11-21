@@ -14,17 +14,17 @@ class CompileContext : public virtual P4CContext {
     /// CompileContext<OptionsType>.
     static CompileContext& get() { return CompileContextStack::top<CompileContext>(); }
 
-    CompileContext() {}
+    CompileContext() = default;
 
     template <typename OptionsDerivedType>
-    CompileContext(CompileContext<OptionsDerivedType>& context)
+    explicit CompileContext(CompileContext<OptionsDerivedType>& context)
         : optionsInstance(context.options()) {}
 
     /// @return the compiler options for this compilation context.
     OptionsType& options() override { return optionsInstance; }
 
  protected:
-    virtual const CompilerConfiguration& getConfigImpl() { return CompilerConfiguration::get(); }
+    const CompilerConfiguration& getConfigImpl() override { return CompilerConfiguration::get(); }
 
  private:
     /// The compiler options for this compilation context.

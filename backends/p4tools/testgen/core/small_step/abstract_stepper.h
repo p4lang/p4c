@@ -9,6 +9,9 @@
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
 
 #include "backends/p4tools/testgen/core/program_info.h"
 #include "backends/p4tools/testgen/core/small_step/small_step.h"

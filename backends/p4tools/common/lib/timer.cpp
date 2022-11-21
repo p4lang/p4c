@@ -2,10 +2,9 @@
 
 #include <algorithm>
 #include <chrono>  // NOLINT linter forbids using chrono, but we don't have alternatives
-#include <cstring>
 #include <memory>
-#include <stack>
 #include <unordered_map>
+#include <utility>
 
 namespace P4Tools {
 

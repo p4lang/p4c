@@ -1,15 +1,24 @@
 #include "backends/p4tools/common/compiler/copy_headers.h"
 
+#include <list>
+#include <string>
 #include <vector>
 
+#include <boost/format.hpp>
 #include <boost/multiprecision/number.hpp>
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/parserControlFlow.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/ir-inline.h"
+#include "ir/vector.h"
 #include "lib/big_int_util.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
+#include "lib/log.h"
 #include "lib/null.h"
 #include "lib/ordered_map.h"
 #include "lib/safe_vector.h"
@@ -17,9 +26,7 @@
 
 namespace P4Tools {
 
-DoCopyHeaders::DoCopyHeaders(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
-    : typeMap(typeMap), refMap(refMap) {
-    CHECK_NULL(refMap);
+DoCopyHeaders::DoCopyHeaders(P4::TypeMap* typeMap) : typeMap(typeMap) {
     CHECK_NULL(typeMap);
     setName("DoCopyHeaders");
 }
@@ -33,7 +40,7 @@ const IR::Node* DoCopyHeaders::postorder(IR::AssignmentStatement* statement) {
 
     const auto& srcInfo = statement->srcInfo;
     const auto* ltype = typeMap->getType(statement->left, false);
-    if (!ltype) {
+    if (ltype == nullptr) {
         return statement;
     }
     // Handle case where we are assigning to a header.
@@ -113,7 +120,7 @@ CopyHeaders::CopyHeaders(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
     // such scenarios.
     passes.emplace_back(new P4::DoCopyStructures(typeMap, /* errorOnMethodCall = */ false));
     passes.emplace_back(typeChecking);
-    passes.emplace_back(new DoCopyHeaders(refMap, typeMap));
+    passes.emplace_back(new DoCopyHeaders(typeMap));
     passes.emplace_back(new P4::RemoveParserControlFlow(refMap, typeMap));
 }
 
