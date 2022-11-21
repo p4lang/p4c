@@ -1301,6 +1301,12 @@ const IR::Node* TypeInference::postorder(IR::Type_Specialized* type) {
             typeError("%1%: contains self '%2%' as type argument", type->baseType, self);
             return type;
         }
+        if (auto tg = argtype->to<IR::IMayBeGenericType>()) {
+            if (tg->getTypeParameters()->size() != 0) {
+                typeError("%1%: generic type needs type arguments", arg);
+                return type;
+            }
+        }
     }
     (void)setTypeType(type);
     return type;
@@ -3604,8 +3610,11 @@ static void convertStructToTuple(const IR::Type_StructLike* structType, IR::Type
             convertStructToTuple(ft, tuple);
         } else if (auto ft = field->type->to<IR::Type_InfInt>()) {
             tuple->components.push_back(ft);
+        } else if (auto ft = field->type->to<IR::Type_Boolean>()) {
+            tuple->components.push_back(ft);
         } else {
-            BUG("Unexpected type %1% for struct field %2%", field->type, field);
+            typeError("Type not supported %1% for struct field %2% in 'select'", field->type,
+                      field);
         }
     }
 }
