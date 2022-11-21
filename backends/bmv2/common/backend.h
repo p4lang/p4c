@@ -140,6 +140,7 @@ class RenameUserMetadata : public Transform {
         : refMap(refMap), userMetaType(userMetaType), namePrefix(namePrefix) {
         setName("RenameUserMetadata");
         CHECK_NULL(refMap);
+        visitDagOnce = false;
     }
 
     const IR::Node* postorder(IR::Type_Struct* type) override {
