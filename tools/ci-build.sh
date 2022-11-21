@@ -45,7 +45,7 @@ export P4C_PIP_PACKAGES="ipaddr \
                           pyroute2 \
                           ply==3.8 \
                           scapy==2.4.5 \
-                          clang-format"
+                          clang-format>=15.0.4"
 
 apt update
 apt install -y --no-install-recommends \
