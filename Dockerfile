@@ -32,6 +32,8 @@ ARG ENABLE_WERROR=ON
 ARG COMPILE_WITH_CLANG=OFF
 # Compile with sanitizers (UBSan, ASan)
 ARG ENABLE_SANITIZERS=OFF
+# Only execute the steps necessary to successfully run CMake.
+ARG CMAKE_ONLY=OFF
 
 # Delegate the build to tools/ci-build.
 COPY . /p4c/

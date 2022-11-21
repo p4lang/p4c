@@ -33,7 +33,8 @@ else
   sm_path="$1"
   sha1="$2"
   tmpfile="$3"
-  echo "Checking submodule ${sm_path} with sha ${sha1}"
+  echo "Checking submodule ${sm_path} with sha ${sha1} in folder ${PWD}."
+  ${skipFetch} || git fetch --quiet origin
   # Figure out what branch we are tracking (e.g., "origin/main") and derive a
   # simple name for that branch (e.g., "main").
   trackingBranch="${branchOverrides["${sm_path}"]}"
@@ -47,7 +48,7 @@ else
   # Check that the top of the branch being tracked is an ancestor of the
   # current refpoint.
   if ! git merge-base --is-ancestor "${sha1}" "${trackingBranch}" ; then
-    echo "Submodule ${sm_path} is not on ${simpleBranchName}"
+    echo "Submodule ${sm_path} is not on ${simpleBranchName} because ${sha1} is not an ancestor of ${trackingBranch}."
 
     # Remove the temporary file to signal an error. We don't use the exit
     # status for this because it would cause `git submodule foreach` to stop

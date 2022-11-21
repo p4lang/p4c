@@ -30,7 +30,7 @@ The code contains seven sample backends:
 * p4c-graphs: can be used to generate visual representations of a P4 program;
   for now it only supports generating graphs of top-level control flows, and
 * p4c-ubpf: can be used to generate eBPF code that runs in user-space.
-* p4tool: a platform for P4 test utilities, including a test-case generator for P4 programs.
+* p4tools: a platform for P4 test utilities, including a test-case generator for P4 programs.
 Sample command lines:
 
 Compile P4_16 or P4_14 source code.  If your program successfully
@@ -264,7 +264,7 @@ libfl-dev libboost-dev libboost-iostreams-dev \
 libboost-graph-dev llvm pkg-config python3 python3-pip \
 tcpdump
 
-pip3 install ipaddr scapy ply
+pip3 install ipaddr scapy ply "clang-format>=15.0.4"
 ```
 
 For documentation building:
@@ -449,14 +449,27 @@ Again, `MY_IR_SRCS` is a list of file names with absolute path.
 
 ### Source files
 
-Sources (.cpp and .h) should be added to the cpplint target using the following rule:
+Sources (.cpp and .h) should be added to the cpplint and clang_format target using the following rule:
 
 ```
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
+add_clang_format_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
 ```
 
 where `mybackend` is the name of the directory you added under extensions.
 The p4c CMakeLists.txt will use that name to figure the full path of the files to lint.
+
+Unlike cpplint, clang-format needs to be installed before the linter can be used. clang-format can be installed with the following command:
+```
+pip3 install --user "clang-format>=15.0.4"
+```
+clang-format can be checked using the `make clang-format` command. Complaints can be fixed by running `make clang-format-fix-errors`.
+
+Both cpplint and clang-format run as checks as port of P4C's continuous integration process. To make sure that these tests pass, we recommend installing the appropriate git hooks. This can be done by running
+```
+./tools/install_git_hooks.sh
+```
+clang-format and cpplint checks will be enforced on every branch commit. In cases where checks are failing but the commit is sound, one can bypass the hook enforcement using `git commit --no-verify`.
 
 ### Target
 
