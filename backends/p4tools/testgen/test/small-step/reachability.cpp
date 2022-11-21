@@ -447,4 +447,11 @@ TEST_F(P4CReachability, testReacabilityEngineNegTable2) {
     ASSERT_TRUE(!checkResultingSTF(ids, "tmp"));
 }
 
+TEST_F(P4CReachability, testReacabilityEngineRestriction) {
+    callTestgen("backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4",
+                "ingress(h.h.isValid() && h.eth_hdr.isValid());egress(ingress.d != h.h.b)", "tmp", 10);
+    std::list<std::list<std::string>> ids = {{"table2"}};
+    ASSERT_TRUE(!checkResultingSTF(ids, "tmp"));
+}
+
 }  // namespace Test

@@ -477,7 +477,9 @@ std::vector<const IR::Expression*> AssertsParser::genIRStructs(
 
     tmp = combineTokensToNames(tmp);
     tmp = combineTokensToNumbers(tmp);
-    tmp = combineTokensToTableKeys(tmp, tableName);
+    if (tableName.size() > 0) {
+        tmp = combineTokensToTableKeys(tmp, tableName);
+    }
     tmp = removeComments(tmp);
     std::vector<Token> tokens;
     for (uint64_t i = 0; i < tmp.size(); i++) {

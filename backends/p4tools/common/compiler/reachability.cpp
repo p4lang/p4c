@@ -3,8 +3,11 @@
 #include <iostream>
 #include <list>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
+
+#include "backends/p4tools/testgen/targets/bmv2/p4_asserts_parser.h"
 
 namespace P4Tools {
 
@@ -557,8 +560,13 @@ const IR::Expression* ReachabilityEngine::getCondition(const DCGVertexType* n) {
     return nullptr;
 }
 
-const IR::Expression* ReachabilityEngine::stringToNode(std::string /*name*/) {
-    P4C_UNIMPLEMENTED("Converting a string into an IR::Expression");
+const IR::Expression* ReachabilityEngine::stringToNode(std::string name) {
+    LOG1("Parse restriction  - " << name);
+    const IR::Vector<IR::KeyElement> keyElements;
+    auto exprsVector = AssertsParser::AssertsParser::genIRStructs("", name, keyElements);
+    BUG_CHECK(exprsVector.size() == 1, "Invalid format of the restriction %1%", name);
+    LOG1("Parsed result  - " << exprsVector[0]);
+    return exprsVector[0];
 }
 
 }  // namespace P4Tools

@@ -35,6 +35,7 @@ control vrfy(inout Headers h, inout Meta meta) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
+    bit<8> d;
 
     action MyAction1() {
         h.h.b = 1;
@@ -108,8 +109,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
         }
         if (h.h.c > 0) {
             table1.apply();
+            d = h.h.b;
         } else {
             table2.apply();
+            d = h.h.b + 1;
         }
     }
 }
