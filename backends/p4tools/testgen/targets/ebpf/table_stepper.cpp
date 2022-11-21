@@ -72,9 +72,7 @@ void EBPFTableStepper::evalTargetTable(
             tableMissCondition = evalTableConstEntries();
             break;
         };
-        default: {
-            evalTableControlEntries(tableActionList);
-        }
+        default: { evalTableControlEntries(tableActionList); }
     }
 
     // Add the default action.

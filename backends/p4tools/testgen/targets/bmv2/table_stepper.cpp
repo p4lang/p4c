@@ -416,9 +416,7 @@ void BMv2_V1ModelTableStepper::evalTargetTable(
             tableMissCondition = evalTableConstEntries();
             break;
         };
-        default: {
-            evalTableControlEntries(tableActionList);
-        }
+        default: { evalTableControlEntries(tableActionList); }
     }
 
     // Add the default action.
