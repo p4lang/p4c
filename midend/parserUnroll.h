@@ -67,8 +67,8 @@ class StackVariableHash {
 };
 
 typedef std::unordered_map<StackVariable, size_t, StackVariableHash> StackVariableMap;
-typedef std::unordered_map<StackVariable, const IR::Expression*,
-                           StackVariableHash> StackVariableIndexMap;
+typedef std::unordered_map<StackVariable, const IR::Expression*, StackVariableHash>
+    StackVariableIndexMap;
 
 /// Information produced for a parser state by the symbolic evaluator
 struct ParserStateInfo {
@@ -83,9 +83,9 @@ struct ParserStateInfo {
     size_t currentIndex;
     StackVariableMap statesIndexes;  // global map in state indexes
     // set of parsers' states names with are in current path.
-    std::unordered_set<cstring>     scenarioStates;
-    std::unordered_set<cstring>     scenarioHS;      // scenario header stack's operations
-    StackVariableIndexMap           substitutedIndexes;  // values of the evaluated indexes
+    std::unordered_set<cstring> scenarioStates;
+    std::unordered_set<cstring> scenarioHS;    // scenario header stack's operations
+    StackVariableIndexMap substitutedIndexes;  // values of the evaluated indexes
     ParserStateInfo(cstring name, const IR::P4Parser* parser, const IR::ParserState* state,
                     const ParserStateInfo* predecessor, ValueMap* before, size_t index)
         : name(name),
