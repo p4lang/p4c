@@ -378,6 +378,11 @@ To enable building code documentation, please run `cmake
 documentation. The HTML output is available in
 `build/doxygen-out/html/index.html`.
 
+## Git setup
+
+Occasionally formatting commits are applied to P4C. These pollute the git history. To ignore these commits in git blame, run this command
+```git config blame.ignoreRevsFile .git-blame-ignore-revs```
+
 # Docker
 
 A Dockerfile is included. You can generate an image which contains a copy of p4c
