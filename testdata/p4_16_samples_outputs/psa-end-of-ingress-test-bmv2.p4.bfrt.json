@@ -2,7 +2,7 @@
   "schema_version" : "1.0.0",
   "tables" : [
     {
-      "name" : "cEgress.egress_pkt_seen",
+      "name" : "ep.cEgress.egress_pkt_seen",
       "id" : 369999048,
       "table_type" : "Register",
       "size" : 256,

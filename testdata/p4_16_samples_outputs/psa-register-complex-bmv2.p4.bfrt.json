@@ -2,7 +2,7 @@
   "schema_version" : "1.0.0",
   "tables" : [
     {
-      "name" : "cIngress.regfile",
+      "name" : "ip.cIngress.regfile",
       "id" : 376043845,
       "table_type" : "Register",
       "size" : 128,

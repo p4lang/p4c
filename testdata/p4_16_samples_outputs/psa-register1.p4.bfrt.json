@@ -57,7 +57,7 @@
       "attributes" : ["EntryScope"]
     },
     {
-      "name" : "MyIC.reg",
+      "name" : "ip.MyIC.reg",
       "id" : 369588800,
       "table_type" : "Register",
       "size" : 1024,

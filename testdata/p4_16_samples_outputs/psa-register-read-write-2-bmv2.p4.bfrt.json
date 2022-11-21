@@ -2,7 +2,7 @@
   "schema_version" : "1.0.0",
   "tables" : [
     {
-      "name" : "MyIC.reg",
+      "name" : "ip.MyIC.reg",
       "id" : 369588800,
       "table_type" : "Register",
       "size" : 6,

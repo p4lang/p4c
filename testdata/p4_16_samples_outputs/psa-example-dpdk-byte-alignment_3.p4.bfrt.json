@@ -297,7 +297,7 @@
       "attributes" : ["MeterByteCountAdjust"]
     },
     {
-      "name" : "ingress.reg",
+      "name" : "ip.ingress.reg",
       "id" : 382856063,
       "table_type" : "Register",
       "size" : 1024,

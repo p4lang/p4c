@@ -2,7 +2,7 @@
   "schema_version" : "1.0.0",
   "tables" : [
     {
-      "name" : "ingress.port_pkt_ip_bytes_in",
+      "name" : "ip.ingress.port_pkt_ip_bytes_in",
       "id" : 383813656,
       "table_type" : "Register",
       "size" : 512,
