@@ -306,8 +306,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Add* e) {
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::AddSat* e) {
-    return binary(
-        e, [](big_int a, big_int b) -> big_int { return a + b; }, true);
+    return binary(e, [](big_int a, big_int b) -> big_int { return a + b; }, true);
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Sub* e) {
@@ -315,8 +314,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Sub* e) {
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::SubSat* e) {
-    return binary(
-        e, [](big_int a, big_int b) -> big_int { return a - b; }, true);
+    return binary(e, [](big_int a, big_int b) -> big_int { return a - b; }, true);
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Mul* e) {
@@ -761,7 +759,7 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
 
     auto tb = left->type->to<IR::Type_Bits>();
     if (tb != nullptr) {
-        if (((unsigned)tb->width_bits() < shift) && warnings)
+        if (((unsigned)tb->width_bits() <= shift) && warnings)
             ::warning(ErrorType::WARN_OVERFLOW, "%1%: Shifting %2%-bit value with %3%", e,
                       tb->width_bits(), shift);
     }
