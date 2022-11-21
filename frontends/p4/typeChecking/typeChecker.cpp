@@ -3613,8 +3613,8 @@ static void convertStructToTuple(const IR::Type_StructLike* structType, IR::Type
         } else if (auto ft = field->type->to<IR::Type_Boolean>()) {
             tuple->components.push_back(ft);
         } else {
-            typeError("Type not supported %1% for struct field %2% in 'select'",
-                      field->type, field);
+            typeError("Type not supported %1% for struct field %2% in 'select'", field->type,
+                      field);
         }
     }
 }
