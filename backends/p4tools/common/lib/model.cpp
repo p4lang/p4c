@@ -8,6 +8,7 @@
 #include <boost/container/vector.hpp>
 #include <boost/format.hpp>
 
+#include "ir/id.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir-inline.h"
 #include "ir/irutils.h"
