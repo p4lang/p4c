@@ -1,4 +1,4 @@
-#include "backends/p4tools/testgen/targets/bmv2/p4_asserts_parser.h"
+#include "backends/p4tools/common/compiler/p4_asserts_parser.h"
 
 #include <stdlib.h>
 #include <unistd.h>

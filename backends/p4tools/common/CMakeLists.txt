@@ -45,6 +45,7 @@ set(
   compiler/copy_headers.cpp
   compiler/hs_index_simplify.cpp
   compiler/midend.cpp
+  compiler/p4_asserts_parser.cpp
   compiler/reachability.cpp
 
   core/target.cpp

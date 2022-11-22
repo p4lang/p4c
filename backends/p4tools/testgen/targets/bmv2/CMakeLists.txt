@@ -20,7 +20,6 @@ set(
   ${CMAKE_CURRENT_SOURCE_DIR}/program_info.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/table_stepper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/target.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/p4_asserts_parser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/p4_refers_to_parser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test_backend.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test_spec.cpp
