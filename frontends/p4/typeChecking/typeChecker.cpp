@@ -2307,28 +2307,33 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
         }
     }
     if ((bl == nullptr && br != nullptr) || castLeft) {
+        // must insert cast on the left
+        auto leftResultType = br;
+        if (castLeft && !br) leftResultType = bl;
         auto e = expression->clone();
-        e->left = new IR::Cast(e->left->srcInfo, br, e->left);
-        setType(e->left, rtype);
+        e->left = new IR::Cast(e->left->srcInfo, leftResultType, e->left);
+        setType(e->left, leftResultType);
         if (isCompileTimeConstant(expression->left)) {
             e->left = constantFold(e->left);
             setCompileTimeConstant(e->left);
-            setType(e->left, rtype);
+            setType(e->left, leftResultType);
         }
         expression = e;
-        resultType = rtype;
+        resultType = leftResultType;
     }
     if ((bl != nullptr && br == nullptr) || castRight) {
         auto e = expression->clone();
-        e->right = new IR::Cast(e->right->srcInfo, bl, e->right);
-        setType(e->right, ltype);
+        auto rightResultType = bl;
+        if (castRight && !bl) rightResultType = br;
+        e->right = new IR::Cast(e->right->srcInfo, rightResultType, e->right);
+        setType(e->right, rightResultType);
         if (isCompileTimeConstant(expression->right)) {
             e->right = constantFold(e->right);
             setCompileTimeConstant(e->right);
-            setType(e->right, ltype);
+            setType(e->right, rightResultType);
         }
         expression = e;
-        resultType = ltype;
+        resultType = rightResultType;
     }
 
     setType(getOriginal(), resultType);
