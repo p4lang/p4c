@@ -359,7 +359,7 @@ class ExecutionState {
 
     /// @returns the maximum length, in bits, of the packet in the current packet buffer. This is
     /// the network's MTU.
-    static int getMaxPacketLength_bits();
+    static int getMaxPacketLength();
 
     /// @returns the current version of the packet that is intended as input.
     const IR::Expression* getInputPacket() const;

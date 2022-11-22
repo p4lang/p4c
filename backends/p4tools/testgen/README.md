@@ -28,8 +28,6 @@ These are the current usage flags:
 ./p4check: Generate packet tests for a P4 program
 --help                     Shows this help message and exits
 --version                  Prints version information and exits
---min-packet-size bytes    Sets the minimum allowed packet size, in bytes. Any packet shorter than this is considered to be invalid, and will be dropped if the program would otherwise send the packet on the network.
---mtu bytes                Sets the network's MTU, in bytes
 --seed seed                Provides a randomization seed
 -I path                    Adds the given path to the preprocessor include path
 -D arg=value               Defines a preprocessor symbol
@@ -46,6 +44,7 @@ These are the current usage flags:
 --dump folder              Folder where P4 programs are dumped.
 -v                         Increase verbosity level (can be repeated)
 --input-packet-only        Only produce the input packet for each test
+-- packet-size-range       Specify the possible range of the input packet size in bits. The format is [min]:[max]. The default values are "0:72000". The maximum is set to jumbo frame size (9000 bytes).
 --max-tests maxTests       Sets the maximum number of tests to be generated
 --out-dir outputDir        Directory for generated tests
 --test-backend             Select a test back end. Available test back ends are defined by the respective target.

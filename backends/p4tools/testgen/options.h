@@ -17,9 +17,6 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// Maximum number of tests to be generated. Defaults to 1.
     int maxTests = 1;
 
-    /// Fixed packet size in bits. Defaults to 0, which implies no sizing.
-    int packetSize = 0;
-
     /// Selects the exploration strategy for test generation
     std::string explorationStrategy;
 

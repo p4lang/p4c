@@ -553,7 +553,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
                  // size.
                  auto* sizeRestriction = new IR::Leq(
                      advanceExpr,
-                     IR::getConstant(advanceExpr->type, ExecutionState::getMaxPacketLength_bits()));
+                     IR::getConstant(advanceExpr->type, ExecutionState::getMaxPacketLength()));
                  // The advance expression should ideally have a size that is a multiple of 8 bits.
                  auto* bytesRestriction =
                      new IR::Equ(new IR::Mod(advanceExpr, IR::getConstant(advanceExpr->type, 8)),
@@ -723,7 +723,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
                  }
                  // The size of the advance expression should be smaller than the maximum packet
                  // size.
-                 auto maxVarbit = std::min(ExecutionState::getMaxPacketLength_bits(), varbit->size);
+                 auto maxVarbit = std::min(ExecutionState::getMaxPacketLength(), varbit->size);
                  auto* sizeRestriction = new IR::Leq(
                      varbitExtractExpr, IR::getConstant(varbitExtractExpr->type, maxVarbit));
                  // The advance expression should ideally fit into a multiple of 8 bits.

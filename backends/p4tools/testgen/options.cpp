@@ -29,6 +29,7 @@ TestgenOptions::TestgenOptions()
             return true;
         },
         "Fail on unimplemented features instead of trying the next branch.");
+
     registerOption(
         "--input-packet-only", nullptr,
         [this](const char*) {
@@ -71,15 +72,6 @@ TestgenOptions::TestgenOptions()
         },
         "Select the test back end. P4Testgen will produce tests that correspond to the input "
         "format of this test back end.");
-
-    registerOption(
-        "--packet-size", "packetSize",
-        [this](const char* arg) {
-            packetSize = std::atoi(arg);
-            return true;
-        },
-        "If enabled, sets all input packets to a fixed size in bits (from 1 to 12000 bits). 0 "
-        "implies no packet sizing.");
 
     registerOption(
         "--input-branches", "selectedBranches",

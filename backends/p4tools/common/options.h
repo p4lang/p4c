@@ -20,11 +20,12 @@ namespace P4Tools {
 /// instance.
 class AbstractP4cToolOptions : protected Util::Options {
  public:
-    /// The network's MTU, in bytes.
-    int networkMtu_bytes = 1500;
+    /// The maximum permitted packet size, in bits.
+    // The default is the jumbo frame packet size, 9000 bytes.
+    int maxPktSize = 72000;
 
-    /// The minimum packet length allowed by the network, in bytes.
-    int minPacketSize_bytes = 64;
+    /// The minimum permitted packet size, in bits.
+    int minPktSize = 0;
 
     /// A seed for the PRNG.
     boost::optional<uint32_t> seed = boost::none;
@@ -48,6 +49,7 @@ class AbstractP4cToolOptions : protected Util::Options {
 
     // No copy constructor and no self-assignments.
     AbstractP4cToolOptions(const AbstractP4cToolOptions&) = delete;
+
     AbstractP4cToolOptions& operator=(const AbstractP4cToolOptions&) = delete;
 };
 

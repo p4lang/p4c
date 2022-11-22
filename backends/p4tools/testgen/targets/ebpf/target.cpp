@@ -60,6 +60,15 @@ const EBPFProgramInfo* EBPFTestgenTarget::initProgram_impl(
         programmableBlocks.emplace(canonicalName, declType);
     }
 
+    // TODO: We bound the max packet size. However, eBPF should be able to support jumbo sized
+    // packets. There might be a bug in the framework
+    auto& testgenOptions = TestgenOptions::get();
+    if (testgenOptions.maxPktSize > 12000) {
+        ::warning("Max packet size %1% larger than 12000 bits. Bounding size to 12000 bits.",
+                  testgenOptions.maxPktSize);
+        testgenOptions.maxPktSize = 12000;
+    }
+
     return new EBPFProgramInfo(program, programmableBlocks);
 }
 
