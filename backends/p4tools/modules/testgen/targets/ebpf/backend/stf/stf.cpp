@@ -29,8 +29,8 @@
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
 
-#include "backends/p4tools/testgen/lib/exceptions.h"
-#include "p4tools/testgen/lib/tf.h"
+#include "backends/p4tools/modules/testgen/lib/exceptions.h"
+#include "backends/p4tools/modules/testgen/lib/tf.h"
 
 namespace P4Tools {
 

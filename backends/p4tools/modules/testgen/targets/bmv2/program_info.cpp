@@ -17,16 +17,16 @@
 #include "lib/null.h"
 #include "p4tools/common/lib/formulae.h"
 
-#include "backends/p4tools/testgen//lib/exceptions.h"
-#include "backends/p4tools/testgen/core/target.h"
-#include "backends/p4tools/testgen/lib/concolic.h"
-#include "backends/p4tools/testgen/targets/bmv2/concolic.h"
-#include "backends/p4tools/testgen/targets/bmv2/p4_asserts_parser.h"
-#include "backends/p4tools/testgen/targets/bmv2/p4_refers_to_parser.h"
-#include "p4tools/testgen/core/arch_spec.h"
-#include "p4tools/testgen/core/program_info.h"
-#include "p4tools/testgen/lib/continuation.h"
-#include "p4tools/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen//lib/exceptions.h"
+#include "backends/p4tools/modules/testgen/core/arch_spec.h"
+#include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/core/target.h"
+#include "backends/p4tools/modules/testgen/lib/concolic.h"
+#include "backends/p4tools/modules/testgen/lib/continuation.h"
+#include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/concolic.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
 
 namespace P4Tools {
 

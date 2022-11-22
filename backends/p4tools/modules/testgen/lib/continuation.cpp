@@ -10,7 +10,7 @@
 #include "lib/exceptions.h"
 #include "p4tools/common/lib/trace_events.h"
 
-#include "p4tools/testgen/lib/namespace_context.h"
+#include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 
 namespace P4Tools {
 

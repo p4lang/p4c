@@ -1,4 +1,4 @@
-#include "backends/p4tools/testgen/targets/bmv2/p4_asserts_parser.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
 
 #include <unistd.h>
 
@@ -25,8 +25,8 @@
 #include "lib/null.h"
 #include "p4tools/common/lib/formulae.h"
 
-#include "backends/p4tools/testgen/targets/bmv2/p4_refers_to_parser.h"
-#include "backends/p4tools/testgen/test/gtest_utils.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
+#include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
 /// Variables are declared in "test/gtest/env.h" which is already included in reachablity.cpp
 extern const char* sourcePath;

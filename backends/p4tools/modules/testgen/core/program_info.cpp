@@ -10,11 +10,11 @@
 #include "p4tools/common/compiler/reachability.h"
 #include "p4tools/common/lib/coverage.h"
 
-#include "backends/p4tools/testgen/options.h"
-#include "p4tools/testgen/core/arch_spec.h"
-#include "p4tools/testgen/lib/concolic.h"
-#include "p4tools/testgen/lib/continuation.h"
-#include "p4tools/testgen/lib/namespace_context.h"
+#include "backends/p4tools/modules/testgen/core/arch_spec.h"
+#include "backends/p4tools/modules/testgen/lib/concolic.h"
+#include "backends/p4tools/modules/testgen/lib/continuation.h"
+#include "backends/p4tools/modules/testgen/lib/namespace_context.h"
+#include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools {
 

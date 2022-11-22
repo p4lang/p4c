@@ -12,9 +12,9 @@
 
 #include "backends/p4tools/common/core/solver.h"
 
-#include "backends/p4tools/testgen/core/exploration_strategy/incremental_max_coverage_stack.h"
-#include "backends/p4tools/testgen/core/program_info.h"
-#include "backends/p4tools/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/core/exploration_strategy/inc_max_coverage_stack.h"
+#include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
 namespace P4Tools {
 

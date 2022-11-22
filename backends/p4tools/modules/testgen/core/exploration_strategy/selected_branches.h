@@ -10,9 +10,9 @@
 
 #include "backends/p4tools/common/core/solver.h"
 
-#include "backends/p4tools/testgen/core/exploration_strategy/exploration_strategy.h"
-#include "backends/p4tools/testgen/core/program_info.h"
-#include "p4tools/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
+#include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
 namespace P4Tools {
 

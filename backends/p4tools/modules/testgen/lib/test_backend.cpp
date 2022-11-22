@@ -26,15 +26,15 @@
 #include "p4tools/common/lib/model.h"
 #include "p4tools/common/lib/trace_events.h"
 
-#include "backends/p4tools/testgen/lib/concolic.h"
-#include "backends/p4tools/testgen/lib/logging.h"
-#include "backends/p4tools/testgen/options.h"
-#include "p4tools/testgen/core/exploration_strategy/exploration_strategy.h"
-#include "p4tools/testgen/core/program_info.h"
-#include "p4tools/testgen/lib/execution_state.h"
-#include "p4tools/testgen/lib/final_state.h"
-#include "p4tools/testgen/lib/test_spec.h"
-#include "p4tools/testgen/lib/tf.h"
+#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
+#include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/lib/concolic.h"
+#include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/final_state.h"
+#include "backends/p4tools/modules/testgen/lib/logging.h"
+#include "backends/p4tools/modules/testgen/lib/test_spec.h"
+#include "backends/p4tools/modules/testgen/lib/tf.h"
+#include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools {
 

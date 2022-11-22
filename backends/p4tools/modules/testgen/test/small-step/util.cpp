@@ -6,7 +6,7 @@
 
 #include "test/gtest/helpers.h"
 
-#include "p4tools/testgen/test/gtest_utils.h"
+#include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
 namespace Test {
 

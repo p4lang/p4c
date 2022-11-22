@@ -26,10 +26,10 @@
 #include "p4tools/common/lib/symbolic_env.h"
 #include "p4tools/common/lib/trace_events.h"
 
-#include "backends/p4tools/testgen/options.h"
-#include "p4tools/testgen/lib/continuation.h"
-#include "p4tools/testgen/lib/namespace_context.h"
-#include "p4tools/testgen/lib/test_spec.h"
+#include "backends/p4tools/modules/testgen/lib/continuation.h"
+#include "backends/p4tools/modules/testgen/lib/namespace_context.h"
+#include "backends/p4tools/modules/testgen/lib/test_spec.h"
+#include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools {
 

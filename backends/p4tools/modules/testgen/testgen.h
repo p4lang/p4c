@@ -4,7 +4,7 @@
 #include "backends/p4tools/common/p4ctool.h"
 #include "ir/ir.h"
 
-#include "backends/p4tools/testgen/options.h"
+#include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools {
 

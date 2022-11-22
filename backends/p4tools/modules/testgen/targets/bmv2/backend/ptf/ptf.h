@@ -15,8 +15,8 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-#include "backends/p4tools/testgen/lib/tf.h"
-#include "p4tools/testgen/lib/test_spec.h"
+#include "backends/p4tools/modules/testgen/lib/test_spec.h"
+#include "backends/p4tools/modules/testgen/lib/tf.h"
 
 namespace P4Tools {
 

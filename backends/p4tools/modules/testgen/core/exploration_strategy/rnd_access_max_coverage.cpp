@@ -15,12 +15,12 @@
 #include "p4tools/common/core/solver.h"
 #include "p4tools/common/lib/formulae.h"
 
-#include "backends/p4tools/testgen/core/small_step/small_step.h"
-#include "backends/p4tools/testgen/lib/exceptions.h"
-#include "backends/p4tools/testgen/options.h"
-#include "p4tools/testgen/core/exploration_strategy/incremental_max_coverage_stack.h"
-#include "p4tools/testgen/core/program_info.h"
-#include "p4tools/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/core/exploration_strategy/inc_max_coverage_stack.h"
+#include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
+#include "backends/p4tools/modules/testgen/lib/exceptions.h"
+#include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools {
 

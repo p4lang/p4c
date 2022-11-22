@@ -3,7 +3,7 @@
 #include "lib/exceptions.h"
 #include "p4tools/common/lib/model.h"
 
-#include "p4tools/testgen/lib/test_spec.h"
+#include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
 namespace P4Tools {
 

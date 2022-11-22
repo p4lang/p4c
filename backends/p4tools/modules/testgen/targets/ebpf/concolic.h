@@ -1,7 +1,7 @@
 #ifndef TESTGEN_TARGETS_EBPF_CONCOLIC_H_
 #define TESTGEN_TARGETS_EBPF_CONCOLIC_H_
 
-#include "backends/p4tools/testgen/lib/concolic.h"
+#include "backends/p4tools/modules/testgen/lib/concolic.h"
 
 namespace P4Tools {
 

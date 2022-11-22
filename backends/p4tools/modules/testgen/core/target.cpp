@@ -10,8 +10,8 @@
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
 
-#include "p4tools/testgen/core/program_info.h"
-#include "p4tools/testgen/lib/namespace_context.h"
+#include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 
 namespace P4Tools {
 

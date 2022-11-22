@@ -21,10 +21,10 @@
 #include "lib/exceptions.h"
 #include "p4tools/common/lib/model.h"
 
-#include "backends/p4tools/testgen/lib/exceptions.h"
-#include "backends/p4tools/testgen/lib/execution_state.h"
-#include "backends/p4tools/testgen/targets/bmv2/contrib/bmv2_hash/calculations.h"
-#include "p4tools/testgen/lib/concolic.h"
+#include "backends/p4tools/modules/testgen/lib/concolic.h"
+#include "backends/p4tools/modules/testgen/lib/exceptions.h"
+#include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/contrib/bmv2_hash/calculations.h"
 
 namespace P4Tools {
 

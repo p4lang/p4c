@@ -7,7 +7,7 @@
 #include "p4tools/common/lib/model.h"
 #include "p4tools/common/lib/trace_events.h"
 
-#include "p4tools/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
 namespace P4Tools {
 

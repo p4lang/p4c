@@ -17,13 +17,13 @@
 #include "lib/safe_vector.h"
 #include "p4tools/common/core/solver.h"
 
-#include "backends/p4tools/testgen/core/small_step/table_stepper.h"
-#include "backends/p4tools/testgen/lib/continuation.h"
-#include "backends/p4tools/testgen/lib/exceptions.h"
-#include "backends/p4tools/testgen/lib/execution_state.h"
-#include "backends/p4tools/testgen/lib/gen_eq.h"
-#include "p4tools/testgen/core/program_info.h"
-#include "p4tools/testgen/core/small_step/abstract_stepper.h"
+#include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
+#include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
+#include "backends/p4tools/modules/testgen/lib/continuation.h"
+#include "backends/p4tools/modules/testgen/lib/exceptions.h"
+#include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/gen_eq.h"
 
 namespace P4Tools {
 

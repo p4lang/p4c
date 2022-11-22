@@ -9,10 +9,10 @@
 
 #include "lib/error.h"
 
-#include "p4tools/testgen/core/small_step/table_stepper.h"
-#include "p4tools/testgen/lib/execution_state.h"
-#include "p4tools/testgen/lib/test_spec.h"
-#include "p4tools/testgen/targets/ebpf/expr_stepper.h"
+#include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
+#include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/test_spec.h"
+#include "backends/p4tools/modules/testgen/targets/ebpf/expr_stepper.h"
 
 namespace P4Tools {
 

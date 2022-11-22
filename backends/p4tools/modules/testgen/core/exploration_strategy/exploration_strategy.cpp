@@ -21,11 +21,11 @@
 #include "p4tools/common/lib/coverage.h"
 #include "p4tools/common/lib/formulae.h"
 
-#include "backends/p4tools/testgen/lib/logging.h"
-#include "p4tools/testgen/core/program_info.h"
-#include "p4tools/testgen/core/small_step/small_step.h"
-#include "p4tools/testgen/lib/execution_state.h"
-#include "p4tools/testgen/lib/final_state.h"
+#include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
+#include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/final_state.h"
+#include "backends/p4tools/modules/testgen/lib/logging.h"
 
 namespace P4Tools {
 
