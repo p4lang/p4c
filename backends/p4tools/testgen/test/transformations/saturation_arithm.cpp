@@ -118,9 +118,6 @@ class SaturationTransform : public Transform {
 
     /// transforms saturation substraction
     const IR::Node* postorder(IR::SubSat* sub) override { return SaturationElim::eliminate(sub); }
-
- private:
-    SaturationElim transform;
 };
 
 void test(const IR::Expression* expression, const IR::AssignmentStatement* variableValue) {

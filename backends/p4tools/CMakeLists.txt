@@ -69,6 +69,10 @@ if(ENABLE_IWYU)
     -Xiwyu
     --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.libc.imp
     -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.symbols.imp
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.stl.headers.imp
+    -Xiwyu
     --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/stl.c.headers.imp
   )
   message("IWYU command: ${iwyu_path}")

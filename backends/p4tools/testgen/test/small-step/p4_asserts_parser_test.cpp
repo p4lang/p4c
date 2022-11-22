@@ -1,10 +1,8 @@
 #include "backends/p4tools/testgen/targets/bmv2/p4_asserts_parser.h"
 
-#include <stdlib.h>
 #include <unistd.h>
 
-#include <ext/alloc_traits.h>
-
+#include <cstdlib>
 #include <memory>
 #include <string>
 #include <vector>

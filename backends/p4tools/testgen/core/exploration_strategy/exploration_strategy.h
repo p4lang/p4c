@@ -31,7 +31,7 @@ class ExplorationStrategy {
 
     ExplorationStrategy(ExplorationStrategy&&) = delete;
 
-    ExplorationStrategy& operator=(const ExplorationStrategy&) = default;
+    ExplorationStrategy& operator=(const ExplorationStrategy&) = delete;
 
     ExplorationStrategy& operator=(ExplorationStrategy&&) = delete;
 
