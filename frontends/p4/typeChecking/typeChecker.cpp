@@ -1871,8 +1871,17 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
                   expression->right);
         return expression;
     }
-    if (auto se = ltype->to<IR::Type_SerEnum>()) ltype = getTypeType(se->type);
-    if (auto se = rtype->to<IR::Type_SerEnum>()) rtype = getTypeType(se->type);
+
+    bool castLeft = false;
+    bool castRight = false;
+    if (auto se = ltype->to<IR::Type_SerEnum>()) {
+        ltype = getTypeType(se->type);
+        castLeft = true;
+    }
+    if (auto se = rtype->to<IR::Type_SerEnum>()) {
+        rtype = getTypeType(se->type);
+        castRight = true;
+    }
     if (ltype == nullptr || rtype == nullptr) {
         // getTypeType should have already taken care of the error message
         return expression;
@@ -1885,6 +1894,22 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
     auto bl = ltype->to<IR::Type_Bits>();
     auto br = rtype->to<IR::Type_Bits>();
     const IR::Type* resultType = IR::Type_Bits::get(bl->size + br->size, bl->isSigned);
+
+    if (castLeft) {
+        auto e = expression->clone();
+        e->left = new IR::Cast(e->left->srcInfo, bl, e->left);
+        if (isCompileTimeConstant(expression->left)) setCompileTimeConstant(e->left);
+        setType(e->left, ltype);
+        expression = e;
+    }
+    if (castRight) {
+        auto e = expression->clone();
+        e->right = new IR::Cast(e->right->srcInfo, br, e->right);
+        if (isCompileTimeConstant(expression->right)) setCompileTimeConstant(e->right);
+        setType(e->right, rtype);
+        expression = e;
+    }
+
     resultType = canonicalize(resultType);
     if (resultType != nullptr) {
         setType(getOriginal(), resultType);
@@ -2236,9 +2261,17 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
     auto ltype = getType(expression->left);
     auto rtype = getType(expression->right);
     if (ltype == nullptr || rtype == nullptr) return expression;
+    bool castLeft = false;
+    bool castRight = false;
 
-    if (auto se = ltype->to<IR::Type_SerEnum>()) ltype = getTypeType(se->type);
-    if (auto se = rtype->to<IR::Type_SerEnum>()) rtype = getTypeType(se->type);
+    if (auto se = ltype->to<IR::Type_SerEnum>()) {
+        ltype = getTypeType(se->type);
+        castLeft = true;
+    }
+    if (auto se = rtype->to<IR::Type_SerEnum>()) {
+        rtype = getTypeType(se->type);
+        castRight = true;
+    }
     BUG_CHECK(ltype && rtype, "Invalid Type_SerEnum/getTypeType");
 
     const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
@@ -2272,23 +2305,32 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
             typeError("%1%: Cannot operate on values with different signs", expression);
             return expression;
         }
-    } else if (bl == nullptr && br != nullptr) {
+    }
+    if ((bl == nullptr && br != nullptr) || castLeft) {
         auto e = expression->clone();
         e->left = new IR::Cast(e->left->srcInfo, br, e->left);
         setType(e->left, rtype);
+        if (isCompileTimeConstant(expression->left)) {
+            e->left = constantFold(e->left);
+            setCompileTimeConstant(e->left);
+            setType(e->left, rtype);
+        }
         expression = e;
         resultType = rtype;
-        setType(expression, resultType);
-    } else if (bl != nullptr && br == nullptr) {
+    }
+    if ((bl != nullptr && br == nullptr) || castRight) {
         auto e = expression->clone();
         e->right = new IR::Cast(e->right->srcInfo, bl, e->right);
         setType(e->right, ltype);
+        if (isCompileTimeConstant(expression->right)) {
+            e->right = constantFold(e->right);
+            setCompileTimeConstant(e->right);
+            setType(e->right, ltype);
+        }
         expression = e;
         resultType = ltype;
-        setType(expression, resultType);
-    } else {
-        setType(expression, resultType);
     }
+
     setType(getOriginal(), resultType);
     setType(expression, resultType);
     if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
@@ -2405,71 +2447,6 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
         setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
         return result;
-    }
-    return expression;
-}
-
-const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
-    if (done()) return expression;
-    auto ltype = getType(expression->left);
-    auto rtype = getType(expression->right);
-    if (ltype == nullptr || rtype == nullptr) return expression;
-
-    if (auto se = ltype->to<IR::Type_SerEnum>()) ltype = getTypeType(se->type);
-    if (auto se = rtype->to<IR::Type_SerEnum>()) rtype = getTypeType(se->type);
-    BUG_CHECK(ltype && rtype, "Invalid Type_SerEnum/getTypeType");
-
-    const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
-    const IR::Type_Bits* br = rtype->to<IR::Type_Bits>();
-    if (bl == nullptr && !ltype->is<IR::Type_InfInt>()) {
-        typeError("%1%: cannot be applied to expression '%2%' with type '%3%'",
-                  expression->getStringOp(), expression->left, ltype->toString());
-        return expression;
-    } else if (br == nullptr && !rtype->is<IR::Type_InfInt>()) {
-        typeError("%1%: cannot be applied to expressio '%2%' with type '%3%'",
-                  expression->getStringOp(), expression->right, rtype->toString());
-        return expression;
-    } else if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_InfInt>()) {
-        auto t = new IR::Type_InfInt();
-        setType(getOriginal(), t);
-        auto result = constantFold(expression);
-        setType(result, t);
-        setCompileTimeConstant(result);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
-        return result;
-    }
-
-    const IR::Type* resultType = ltype;
-    if (bl != nullptr && br != nullptr) {
-        if (!typeMap->equivalent(bl, br)) {
-            typeError("%1%: Cannot operate on values with different types %2% and %3%", expression,
-                      bl->toString(), br->toString());
-            return expression;
-        }
-    } else if (bl == nullptr && br != nullptr) {
-        auto e = expression->clone();
-        auto cst = expression->left->to<IR::Constant>();
-        CHECK_NULL(cst);
-        e->left = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
-        setType(e->left, rtype);
-        setCompileTimeConstant(e->left);
-        expression = e;
-        resultType = rtype;
-    } else if (bl != nullptr && br == nullptr) {
-        auto e = expression->clone();
-        auto cst = expression->right->to<IR::Constant>();
-        CHECK_NULL(cst);
-        e->right = new IR::Constant(cst->srcInfo, ltype, cst->value, cst->base);
-        setType(e->right, ltype);
-        setCompileTimeConstant(e->right);
-        expression = e;
-        resultType = ltype;
-    }
-    setType(expression, resultType);
-    setType(getOriginal(), resultType);
-    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
     }
     return expression;
 }
