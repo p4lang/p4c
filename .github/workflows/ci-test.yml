@@ -143,3 +143,4 @@ jobs:
     - name: Run tests (MacOS)
       run: |
         ctest --output-on-failure -j 2 --schedule-random -LE "bpf$"
+      working-directory: ./build
