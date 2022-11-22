@@ -40,10 +40,6 @@ namespace P4Testgen {
 
 namespace Bmv2 {
 
-using P4::ControlPlaneAPI::p4rt_id_t;
-using P4::ControlPlaneAPI::P4RuntimeSymbolType;
-using P4::ControlPlaneAPI::Standard::SymbolType;
-
 /// Wrapper helper function that automatically inserts separators for hex strings.
 std::string formatHexExprWithSep(const IR::Expression* expr) {
     return insertHexSeparators(formatHexExpr(expr, false, true, false));
@@ -52,22 +48,7 @@ std::string formatHexExprWithSep(const IR::Expression* expr) {
 Protobuf::Protobuf(cstring testName, boost::optional<unsigned int> seed = boost::none)
     : TF(testName, seed) {}
 
-inja::json Protobuf::getTrace(const TestSpec* testSpec) {
-    inja::json traceList = inja::json::array();
-    const auto* traces = testSpec->getTraces();
-    if ((traces != nullptr) && !traces->empty()) {
-        for (const auto& trace : *traces) {
-            std::stringstream ss;
-            ss << *trace;
-            traceList.push_back(ss.str());
-        }
-    }
-    return traceList;
-}
-
-/// @return the id allocated to the object through the @id annotation if any, or
-/// boost::none.
-static boost::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated* node) {
+boost::optional<p4rt_id_t> Protobuf::getIdAnnotation(const IR::IAnnotated* node) {
     const auto* idAnnotation = node->getAnnotation("id");
     if (idAnnotation == nullptr) {
         return boost::none;
@@ -81,11 +62,8 @@ static boost::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated* node) {
     return static_cast<p4rt_id_t>(idConstant->value);
 }
 
-/// @return the value of any P4 '@id' annotation @declaration may have, and
-/// ensure that the value is correct with respect to the P4Runtime
-/// specification. The name 'externalId' is in analogy with externalName().
-static boost::optional<p4rt_id_t> externalId(const P4RuntimeSymbolType& type,
-                                             const IR::IDeclaration* declaration) {
+boost::optional<p4rt_id_t> Protobuf::externalId(const P4RuntimeSymbolType& type,
+                                                const IR::IDeclaration* declaration) {
     CHECK_NULL(declaration);
     if (!declaration->is<IR::IAnnotated>()) {
         return boost::none;  // Assign an id later; see below.
@@ -139,7 +117,7 @@ inja::json Protobuf::getControlPlane(const TestSpec* testSpec) {
     inja::json controlPlaneJson = inja::json::object();
 
     // Map of actionProfiles and actionSelectors for easy reference.
-    std::map<cstring, cstring> apASMap;
+    std::map<cstring, cstring> apAsMap;
 
     auto tables = testSpec->getTestObjectCategory("tables");
     if (!tables.empty()) {
@@ -169,70 +147,25 @@ inja::json Protobuf::getControlPlane(const TestSpec* testSpec) {
                       actionDecl);
             rule["action_id"] = *p4RuntimeId;
             auto j = getControlPlaneForTable(*matches, *actionArgs);
-            rule["priority"] = tblRule.getPriority();
             rule["rules"] = std::move(j);
+            rule["priority"] = tblRule.getPriority();
             tblJson["rules"].push_back(rule);
         }
 
-        // Action Profile
-        const auto* apObject = tblConfig->getProperty("action_profile", false);
-        const Bmv2_V1ModelActionProfile* actionProfile = nullptr;
-        const Bmv2_V1ModelActionSelector* actionSelector = nullptr;
-        if (apObject != nullptr) {
-            actionProfile = apObject->checkedTo<Bmv2_V1ModelActionProfile>();
-            // Check if we have an Action Selector too.
-            // TODO: Change this to check in ActionSelector with table
-            // property "action_selectors".
-            const auto* asObject = tblConfig->getProperty("action_selector", false);
-            if (asObject != nullptr) {
-                actionSelector = asObject->checkedTo<Bmv2_V1ModelActionSelector>();
-                apASMap[actionProfile->getProfileDecl()->controlPlaneName()] =
-                    actionSelector->getSelectorDecl()->controlPlaneName();
-            }
-        }
-        if (actionProfile != nullptr) {
-            tblJson["has_ap"] = true;
-        }
+        // Collect action profiles and selectors associated with the table.
+        checkForTableActionProfile<Bmv2_V1ModelActionProfile, Bmv2_V1ModelActionSelector>(
+            tblJson, apAsMap, tblConfig);
 
-        if (actionSelector != nullptr) {
-            tblJson["has_as"] = true;
-        }
+        // Check whether the default action is overridden for this table.
+        checkForDefaultActionOverride(tblJson, tblConfig);
 
         controlPlaneJson["tables"].push_back(tblJson);
     }
-    auto actionProfiles = testSpec->getTestObjectCategory("action_profiles");
-    if (!actionProfiles.empty()) {
-        controlPlaneJson["action_profiles"] = inja::json::array();
-    }
-    for (auto const& testObject : actionProfiles) {
-        const auto* const actionProfile = testObject.second->checkedTo<Bmv2_V1ModelActionProfile>();
-        const auto* actions = actionProfile->getActions();
-        inja::json j;
-        const auto* profileDecl = actionProfile->getProfileDecl();
-        j["profile"] = profileDecl->controlPlaneName();
-        j["actions"] = inja::json::array();
-        for (size_t idx = 0; idx < actions->size(); ++idx) {
-            const auto& action = actions->at(idx);
-            auto actionName = action.first;
-            auto actionArgs = action.second;
-            inja::json a;
-            a["action_name"] = actionName;
-            a["action_idx"] = std::to_string(idx);
-            inja::json b = inja::json::array();
-            for (const auto& actArg : actionArgs) {
-                inja::json c;
-                c["param"] = actArg.getActionParamName().c_str();
-                c["value"] = formatHexExprWithSep(actArg.getEvaluatedValue()).c_str();
-                b.push_back(c);
-            }
-            a["action_args"] = b;
-            j["actions"].push_back(a);
-        }
-        if (apASMap.find(actionProfile->getProfileDecl()->controlPlaneName()) != apASMap.end()) {
-            j["selector"] = apASMap[actionProfile->getProfileDecl()->controlPlaneName()];
-        }
-        controlPlaneJson["action_profiles"].push_back(j);
-    }
+
+    // Collect declarations of action profiles.
+    collectActionProfileDeclarations<Bmv2_V1ModelActionProfile>(testSpec, controlPlaneJson,
+                                                                apAsMap);
+
     return controlPlaneJson;
 }
 

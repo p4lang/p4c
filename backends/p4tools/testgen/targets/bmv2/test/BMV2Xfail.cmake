@@ -160,7 +160,7 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
-  "Unknown extern method count from type jnf_counter"
+  "Unknown or unimplemented extern method: count"
   # user defined extern
   issue1193-bmv2.p4
 )

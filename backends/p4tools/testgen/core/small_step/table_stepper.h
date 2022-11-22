@@ -62,6 +62,9 @@ class TableStepper {
         /// Whether the table is constant and can not accept control plane entries.
         bool tableIsImmutable = false;
 
+        /// Indicates whether the default action can be overridden.
+        bool defaultIsImmutable = false;
+
         /// Ordered list of key fields with useful properties.
         std::vector<KeyProperties> resolvedKeys;
     } properties;
@@ -112,7 +115,7 @@ class TableStepper {
                                   size_t lpmIndex);
 
     /// @returns whether the table is immutable, meaning control plane entries can not be added.
-    bool checkTableIsImmutable();
+    void checkTableIsImmutable();
 
     /// Add the default action path to the expression stepper. If only hits if @param
     /// tableMissCondition is true.
@@ -143,7 +146,7 @@ class TableStepper {
     /// handle constant entries, it is specialized for control plane entries.
     /// The function also tracks the list of field matches created to achieve a  hit. We later use
     /// this to insert table entries using the STF/PTF framework.
-    const IR::Expression* computeHit(ExecutionState* nextState, const IR::P4Table* table,
+    const IR::Expression* computeHit(ExecutionState* nextState,
                                      std::map<cstring, const FieldMatch>* matches);
 
     /// Collects properties that may be set per table. Target back end may have different semantics
@@ -185,6 +188,8 @@ class TableStepper {
     /// This function allows target back ends to implement their own interpretation of table
     /// execution. How a table is evaluated is target-specific.
     virtual void evalTargetTable(const std::vector<const IR::ActionListElement*>& tableActionList);
+
+    void setTableDefaultEntries(const std::vector<const IR::ActionListElement*>& tableActionList);
 
  public:
     /// Table implementations in P4 are rather flexible. Eval is a delegation function that chooses

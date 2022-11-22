@@ -99,10 +99,7 @@ bool TableStepper::compareLPMEntries(const IR::Entry* leftIn, const IR::Entry* r
         if (const auto* rightMask = right->checkedTo<IR::Mask>()) {
             rightMaskVal = rightMask->right->checkedTo<IR::Constant>();
         }
-        if ((leftMaskVal->value) < (rightMaskVal->value)) {
-            return false;
-        }
-        return true;
+        return (leftMaskVal->value) >= (rightMaskVal->value);
     }
 
     BUG("Unhandled sort elements type: left: %1% - %2% \n right: %3% - %4% ", left,
@@ -167,10 +164,8 @@ const IR::Expression* TableStepper::computeTargetMatchType(
     TESTGEN_UNIMPLEMENTED("Match type %s not implemented for table keys.", keyProperties.matchType);
 }
 
-const IR::Expression* TableStepper::computeHit(ExecutionState* nextState, const IR::P4Table* table,
+const IR::Expression* TableStepper::computeHit(ExecutionState* nextState,
                                                std::map<cstring, const FieldMatch>* matches) {
-    const auto* key = table->getKey();
-    CHECK_NULL(key);
     const IR::Expression* hitCondition = IR::getBoolLiteral(!properties.resolvedKeys.empty());
     for (auto keyProperties : properties.resolvedKeys) {
         hitCondition = computeTargetMatchType(nextState, keyProperties, matches, hitCondition);
@@ -209,10 +204,7 @@ const IR::Expression* TableStepper::evalTableConstEntries() {
     const IR::Expression* tableMissCondition = IR::getBoolLiteral(true);
 
     const auto* keys = table->getKey();
-    if (keys == nullptr) {
-        // No keys to match on. Assume just the default action will be executed.
-        return tableMissCondition;
-    }
+    BUG_CHECK(keys != nullptr, "An empty key list should have been handled earlier.");
 
     const auto* entries = table->getEntries();
     // Sometimes, there are no entries. Just return.
@@ -318,13 +310,75 @@ const IR::Expression* TableStepper::evalTableConstEntries() {
     return tableMissCondition;
 }
 
+void TableStepper::setTableDefaultEntries(
+    const std::vector<const IR::ActionListElement*>& tableActionList) {
+    for (size_t idx = 0; idx < tableActionList.size(); idx++) {
+        const auto* action = tableActionList.at(idx);
+        // Grab the path from the method call.
+        const auto* tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
+        // Try to find the action declaration corresponding to the path reference in the table.
+        const auto* actionType = stepper->state.getActionDecl(tableAction->method);
+        CHECK_NULL(actionType);
+
+        auto* nextState = new ExecutionState(stepper->state);
+
+        // We get the control plane name of the action we are calling.
+        cstring actionName = actionType->controlPlaneName();
+        // Synthesize arguments for the call based on the action parameters.
+        const auto& parameters = actionType->parameters;
+        auto* arguments = new IR::Vector<IR::Argument>();
+        std::vector<ActionArg> ctrlPlaneArgs;
+        for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
+            const auto* parameter = parameters->getParameter(argIdx);
+            // Synthesize a zombie constant here that corresponds to a control plane argument.
+            // We get the unique name of the table coupled with the unique name of the action.
+            // Getting the unique name is needed to avoid generating duplicate arguments.
+            const auto& actionDataVar =
+                Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
+            cstring paramName =
+                properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
+            const auto& actionArg = nextState->createZombieConst(parameter->type, paramName);
+            nextState->set(actionDataVar, actionArg);
+            arguments->push_back(new IR::Argument(actionArg));
+            // We also track the argument we synthesize for the control plane.
+            // Note how we use the control plane name for the parameter here.
+            ctrlPlaneArgs.emplace_back(parameter, actionArg);
+        }
+        const auto* ctrlPlaneActionCall = new ActionCall(actionType, ctrlPlaneArgs);
+
+        // We add the arguments to our action call, effectively creating a const entry call.
+        auto* synthesizedAction = tableAction->clone();
+        synthesizedAction->arguments = arguments;
+
+        // We need to set the table action in the state for eventual switch action_run hits.
+        // We also will need it for control plane table entries.
+        setTableAction(nextState, tableAction);
+
+        // Finally, add all the new rules to the execution stepper->state.
+        auto* tableConfig = new TableConfig(table, {});
+        // Add the action selector to the table. This signifies a slightly different implementation.
+        tableConfig->addTableProperty("overriden_default_action", ctrlPlaneActionCall);
+        nextState->addTestObject("tableconfigs", properties.tableName, tableConfig);
+
+        // Update all the tracking variables for tables.
+        std::vector<Continuation::Command> replacements;
+        replacements.emplace_back(new IR::MethodCallStatement(synthesizedAction));
+
+        nextState->set(getTableHitVar(table), IR::getBoolLiteral(false));
+        nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
+        std::stringstream tableStream;
+        tableStream << "Table Branch: " << properties.tableName;
+        tableStream << "| Overriding default action: " << actionName;
+        nextState->add(new TraceEvent::Generic(tableStream.str()));
+        nextState->replaceTopBody(&replacements);
+        stepper->result->emplace_back(nextState);
+    }
+}
+
 void TableStepper::evalTableControlEntries(
     const std::vector<const IR::ActionListElement*>& tableActionList) {
     const auto* keys = table->getKey();
-    // If we have no keys, there is nothing to match.
-    if (keys == nullptr) {
-        return;
-    }
+    BUG_CHECK(keys != nullptr, "An empty key list should have been handled earlier.");
 
     for (size_t idx = 0; idx < tableActionList.size(); idx++) {
         const auto* action = tableActionList.at(idx);
@@ -338,7 +392,7 @@ void TableStepper::evalTableControlEntries(
 
         // First, we compute the hit condition to trigger this particular action call.
         std::map<cstring, const FieldMatch> matches;
-        const auto* hitCondition = computeHit(nextState, table, &matches);
+        const auto* hitCondition = computeHit(nextState, &matches);
 
         // We get the control plane name of the action we are calling.
         cstring actionName = actionType->controlPlaneName();
@@ -518,14 +572,18 @@ bool TableStepper::resolveTableKeys() {
     return false;
 }
 
-bool TableStepper::checkTableIsImmutable() {
+void TableStepper::checkTableIsImmutable() {
     bool isConstant = false;
-    if (table->properties->getProperty("entries") != nullptr) {
-        isConstant = table->properties->getProperty("entries")->isConstant;
+    const auto* entriesAnnotation = table->properties->getProperty("entries");
+    if (entriesAnnotation != nullptr) {
+        isConstant = entriesAnnotation->isConstant;
     }
     // Also check if the table is invisible to the control plane.
     // This also implies that it cannot be modified.
-    return isConstant || table->getAnnotation("hidden") != nullptr;
+    properties.tableIsImmutable = isConstant || table->getAnnotation("hidden") != nullptr;
+    const auto* defaultAction = table->properties->getProperty("default_action");
+    CHECK_NULL(defaultAction);
+    properties.defaultIsImmutable = defaultAction->isConstant;
 }
 
 std::vector<const IR::ActionListElement*> TableStepper::buildTableActionList() {
@@ -595,8 +653,8 @@ void TableStepper::evalTargetTable(
 }
 
 bool TableStepper::eval() {
-    // Check whether the table is immutable, meaning it has constant entries.
-    properties.tableIsImmutable = checkTableIsImmutable();
+    // Set the appropriate properties when the table is immutable, meaning it has constant entries.
+    checkTableIsImmutable();
     // Resolve any non-symbolic table keys. The function returns true when a key needs replacement.
     if (resolveTableKeys()) {
         return false;
