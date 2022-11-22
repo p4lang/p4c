@@ -106,21 +106,23 @@ struct InheritedCompilerOptionSpec {
 
 AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(message) {
     // Register some common options.
-    registerOption("--help", nullptr,
-                   [this](const char*) {
-                       usage();
-                       exit(0);
-                       return false;
-                   },
-                   "Shows this help message and exits");
+    registerOption(
+        "--help", nullptr,
+        [this](const char*) {
+            usage();
+            exit(0);
+            return false;
+        },
+        "Shows this help message and exits");
 
-    registerOption("--version", nullptr,
-                   [this](const char*) {
-                       printVersion(binaryName);
-                       exit(0);
-                       return false;
-                   },
-                   "Prints version information and exits");
+    registerOption(
+        "--version", nullptr,
+        [this](const char*) {
+            printVersion(binaryName);
+            exit(0);
+            return false;
+        },
+        "Prints version information and exits");
 
     registerOption(
         "--min-packet-size", "bytes",
@@ -137,24 +139,26 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(messag
         "considered to be invalid, and will be dropped if the program would otherwise send the "
         "packet on the network.");
 
-    registerOption("--mtu", "bytes",
-                   [this](const char* arg) {
-                       int maxLen_bytes = std::atoi(arg);
-                       if (maxLen_bytes <= 0) {
-                           ::error("Invalid network MTU: %1%", arg);
-                           return false;
-                       }
-                       networkMtu_bytes = maxLen_bytes;
-                       return true;
-                   },
-                   "Sets the network's MTU, in bytes");
+    registerOption(
+        "--mtu", "bytes",
+        [this](const char* arg) {
+            int maxLen_bytes = std::atoi(arg);
+            if (maxLen_bytes <= 0) {
+                ::error("Invalid network MTU: %1%", arg);
+                return false;
+            }
+            networkMtu_bytes = maxLen_bytes;
+            return true;
+        },
+        "Sets the network's MTU, in bytes");
 
-    registerOption("--seed", "seed",
-                   [this](const char* arg) {
-                       seed = std::stoul(arg);
-                       return true;
-                   },
-                   "Provides a randomization seed");
+    registerOption(
+        "--seed", "seed",
+        [this](const char* arg) {
+            seed = std::stoul(arg);
+            return true;
+        },
+        "Provides a randomization seed");
 
     // Inherit some compiler options, setting them up to be forwarded to the compiler.
     std::vector<InheritedCompilerOptionSpec> inheritedCompilerOptions = {
@@ -200,21 +204,22 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(messag
     };
 
     for (const auto& optionSpec : inheritedCompilerOptions) {
-        registerOption(optionSpec.option, optionSpec.argName,
-                       [this, optionSpec](const char* arg) {
-                           // Add to the list of arguments being forwarded to the compiler.
-                           compilerArgs.push_back(optionSpec.option);
-                           if (optionSpec.argName != nullptr) {
-                               compilerArgs.push_back(arg);
-                           }
+        registerOption(
+            optionSpec.option, optionSpec.argName,
+            [this, optionSpec](const char* arg) {
+                // Add to the list of arguments being forwarded to the compiler.
+                compilerArgs.push_back(optionSpec.option);
+                if (optionSpec.argName != nullptr) {
+                    compilerArgs.push_back(arg);
+                }
 
-                           // Invoke the handler, if provided.
-                           if (optionSpec.handler) {
-                               return (*optionSpec.handler)(arg);
-                           }
-                           return true;
-                       },
-                       optionSpec.description);
+                // Invoke the handler, if provided.
+                if (optionSpec.handler) {
+                    return (*optionSpec.handler)(arg);
+                }
+                return true;
+            },
+            optionSpec.description);
     }
 }
 

@@ -21,25 +21,28 @@ const char* TestgenOptions::getIncludePath() {
 
 TestgenOptions::TestgenOptions()
     : AbstractP4cToolOptions("Generate packet tests for a P4 program") {
-    registerOption("--strict", nullptr,
-                   [this](const char*) {
-                       strict = true;
-                       return true;
-                   },
-                   "Fail on unimplemented features instead of trying the next branch.");
-    registerOption("--input-packet-only", nullptr,
-                   [this](const char*) {
-                       inputPacketOnly = true;
-                       return true;
-                   },
-                   "Only produce the input packet for each test");
+    registerOption(
+        "--strict", nullptr,
+        [this](const char*) {
+            strict = true;
+            return true;
+        },
+        "Fail on unimplemented features instead of trying the next branch.");
+    registerOption(
+        "--input-packet-only", nullptr,
+        [this](const char*) {
+            inputPacketOnly = true;
+            return true;
+        },
+        "Only produce the input packet for each test");
 
-    registerOption("--max-tests", "maxTests",
-                   [this](const char* arg) {
-                       maxTests = std::atoi(arg);
-                       return true;
-                   },
-                   "Sets the maximum number of tests to be generated");
+    registerOption(
+        "--max-tests", "maxTests",
+        [this](const char* arg) {
+            maxTests = std::atoi(arg);
+            return true;
+        },
+        "Sets the maximum number of tests to be generated");
 
     registerOption(
         "--pop-level", "popLevel",
@@ -50,12 +53,13 @@ TestgenOptions::TestgenOptions()
         "Sets the fraction for multiPop exploration; default is 3 when meaningful strategy is "
         "activated.");
 
-    registerOption("--out-dir", "outputDir",
-                   [this](const char* arg) {
-                       outputDir = arg;
-                       return true;
-                   },
-                   "Directory for generated tests\n");
+    registerOption(
+        "--out-dir", "outputDir",
+        [this](const char* arg) {
+            outputDir = arg;
+            return true;
+        },
+        "Directory for generated tests\n");
 
     registerOption(
         "--test-backend", "testBackend",
@@ -116,26 +120,29 @@ TestgenOptions::TestgenOptions()
         "Selects a specific exploration strategy for test generation. Options are: "
         "randomAccessStack, linearEnumeration, maxCoverage. Defaults to incrementalStack.");
 
-    registerOption("--linear-enumeration", "linearEnumeration",
-                   [this](const char* arg) {
-                       linearEnumeration = std::atoi(arg);
-                       return true;
-                   },
-                   "Max bound for vector size in linearEnumeration; defaults to 2.");
+    registerOption(
+        "--linear-enumeration", "linearEnumeration",
+        [this](const char* arg) {
+            linearEnumeration = std::atoi(arg);
+            return true;
+        },
+        "Max bound for vector size in linearEnumeration; defaults to 2.");
 
-    registerOption("--saddle-point", "saddlePoint",
-                   [this](const char* arg) {
-                       saddlePoint = std::atoi(arg);
-                       return true;
-                   },
-                   "Threshold to invoke multiPop on randomAccessMaxCoverage.");
+    registerOption(
+        "--saddle-point", "saddlePoint",
+        [this](const char* arg) {
+            saddlePoint = std::atoi(arg);
+            return true;
+        },
+        "Threshold to invoke multiPop on randomAccessMaxCoverage.");
 
-    registerOption("--print-traces", nullptr,
-                   [](const char*) {
-                       P4Testgen::enableTraceLogging();
-                       return true;
-                   },
-                   "Print the associated traces and test information for each generated test.");
+    registerOption(
+        "--print-traces", nullptr,
+        [](const char*) {
+            P4Testgen::enableTraceLogging();
+            return true;
+        },
+        "Print the associated traces and test information for each generated test.");
 
     registerOption(
         "--print-steps", nullptr,
@@ -155,12 +162,13 @@ TestgenOptions::TestgenOptions()
         "Print detailed statement coverage statistics the interpreter collects while stepping "
         "through the program.");
 
-    registerOption("--print-performance-report", nullptr,
-                   [](const char*) {
-                       P4Testgen::enablePerformanceLogging();
-                       return true;
-                   },
-                   "Print timing report summary at the end of the program.");
+    registerOption(
+        "--print-performance-report", nullptr,
+        [](const char*) {
+            P4Testgen::enablePerformanceLogging();
+            return true;
+        },
+        "Print timing report summary at the end of the program.");
 
     registerOption(
         "--dcg", "DCG",
@@ -171,12 +179,13 @@ TestgenOptions::TestgenOptions()
         R"(Build a DCG for input graph. This control flow graph directed cyclic graph can be used
         for statement reachability analysis.)");
 
-    registerOption("--pattern", "pattern",
-                   [this](const char* arg) {
-                       pattern = arg;
-                       return true;
-                   },
-                   "List of the selected branches which should be chosen for selection.");
+    registerOption(
+        "--pattern", "pattern",
+        [this](const char* arg) {
+            pattern = arg;
+            return true;
+        },
+        "List of the selected branches which should be chosen for selection.");
 }
 
 }  // namespace P4Tools
