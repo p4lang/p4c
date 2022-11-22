@@ -1,10 +1,7 @@
 #ifndef BACKENDS_P4TOOLS_TESTGEN_LIB_TEST_SPEC_H_
 #define BACKENDS_P4TOOLS_TESTGEN_LIB_TEST_SPEC_H_
 
-#include <algorithm>
-#include <cstddef>
 #include <map>
-#include <utility>
 #include <vector>
 
 #include <boost/optional/optional.hpp>
@@ -16,7 +13,6 @@
 #include "ir/ir.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
-#include "lib/exceptions.h"
 
 namespace P4Tools {
 

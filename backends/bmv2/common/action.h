@@ -17,18 +17,16 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_ACTION_H_
 #define BACKENDS_BMV2_COMMON_ACTION_H_
 
-#include "ir/ir.h"
 #include "helpers.h"
+#include "ir/ir.h"
 
 namespace BMV2 {
 
 class ActionConverter : public Inspector {
     ConversionContext* ctxt;
 
-    void convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
-                           Util::JsonArray* result);
-    void convertActionParams(const IR::ParameterList *parameters,
-                             Util::JsonArray* params);
+    void convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);
+    void convertActionParams(const IR::ParameterList* parameters, Util::JsonArray* params);
     cstring jsonAssignment(const IR::Type* type, bool inParser);
     void postorder(const IR::P4Action* action) override;
 
@@ -36,9 +34,10 @@ class ActionConverter : public Inspector {
     const bool emitExterns;
     explicit ActionConverter(ConversionContext* ctxt, const bool& emitExterns_)
         : ctxt(ctxt), emitExterns(emitExterns_) {
-        setName("ConvertActions"); }
+        setName("ConvertActions");
+    }
 };
 
 }  // namespace BMV2
 
-#endif  /* BACKENDS_BMV2_COMMON_ACTION_H_ */
+#endif /* BACKENDS_BMV2_COMMON_ACTION_H_ */

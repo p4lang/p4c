@@ -5,11 +5,17 @@
 #include <utility>
 #include <vector>
 
+#include <boost/optional/optional.hpp>
+
 #include "backends/p4tools/common/lib/util.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
+#include "lib/null.h"
+#include "p4tools/common/lib/formulae.h"
 
 #include "backends/p4tools/testgen//lib/exceptions.h"
 #include "backends/p4tools/testgen/core/target.h"
@@ -17,6 +23,10 @@
 #include "backends/p4tools/testgen/targets/bmv2/concolic.h"
 #include "backends/p4tools/testgen/targets/bmv2/p4_asserts_parser.h"
 #include "backends/p4tools/testgen/targets/bmv2/p4_refers_to_parser.h"
+#include "p4tools/testgen/core/arch_spec.h"
+#include "p4tools/testgen/core/program_info.h"
+#include "p4tools/testgen/lib/continuation.h"
+#include "p4tools/testgen/lib/execution_state.h"
 
 namespace P4Tools {
 

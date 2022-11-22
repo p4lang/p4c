@@ -30,15 +30,11 @@ class EBPFCounterPSA : public EBPFCounterTable {
     bool isDirect;
 
  public:
-    enum CounterType {
-        PACKETS,
-        BYTES,
-        PACKETS_AND_BYTES
-    };
+    enum CounterType { PACKETS, BYTES, PACKETS_AND_BYTES };
     CounterType type;
 
-    EBPFCounterPSA(const EBPFProgram* program, const IR::Declaration_Instance* di,
-                   cstring name, CodeGenInspector* codeGen);
+    EBPFCounterPSA(const EBPFProgram* program, const IR::Declaration_Instance* di, cstring name,
+                   CodeGenInspector* codeGen);
 
     static CounterType toCounterType(int type);
 
@@ -51,7 +47,7 @@ class EBPFCounterPSA : public EBPFCounterTable {
                               CodeGenInspector* codeGen);
     void emitDirectMethodInvocation(CodeBuilder* builder, const P4::ExternMethod* method,
                                     cstring valuePtr);
-    virtual void emitCount(CodeBuilder* builder, const IR::MethodCallExpression *expression,
+    virtual void emitCount(CodeBuilder* builder, const IR::MethodCallExpression* expression,
                            CodeGenInspector* codeGen);
     virtual void emitCounterUpdate(CodeBuilder* builder, cstring target, cstring keyName);
     virtual void emitCounterInitializer(CodeBuilder* builder);

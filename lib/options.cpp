@@ -16,16 +16,14 @@ limitations under the License.
 
 #include "options.h"
 
-void Util::Options::registerOption(
-    const char* option, const char* argName, OptionProcessor processor,
-    const char* description, OptionFlags flags /* = OptionFlags::Default */) {
+void Util::Options::registerOption(const char* option, const char* argName,
+                                   OptionProcessor processor, const char* description,
+                                   OptionFlags flags /* = OptionFlags::Default */) {
     if (option == nullptr || processor == nullptr || description == nullptr)
         throw std::logic_error("Null argument to registerOption");
-    if (strlen(option) <= 1)
-        throw std::logic_error(std::string("Option too short: ") + option);
+    if (strlen(option) <= 1) throw std::logic_error(std::string("Option too short: ") + option);
     if (option[0] != '-')
-        throw std::logic_error(
-            std::string("Expected option to start with -: ") + option);
+        throw std::logic_error(std::string("Expected option to start with -: ") + option);
     auto o = new Option();
     o->option = option;
     o->argName = argName;
@@ -33,19 +31,15 @@ void Util::Options::registerOption(
     o->description = description;
     o->flags = flags;
     auto opt = get(options, option);
-    if (opt != nullptr)
-        throw std::logic_error(std::string("Option already registered: ") +
-                               option);
+    if (opt != nullptr) throw std::logic_error(std::string("Option already registered: ") + option);
     options.emplace(option, o);
     optionOrder.push_back(option);
 }
 
 // Process options; return list of remaining options.
 // Returns 'nullptr' if an error is signalled
-std::vector<const char*>* Util::Options::process(int argc,
-                                                  char* const argv[]) {
-    if (argc == 0 || argv == nullptr)
-        throw std::logic_error("No arguments to process");
+std::vector<const char*>* Util::Options::process(int argc, char* const argv[]) {
+    if (argc == 0 || argv == nullptr) throw std::logic_error("No arguments to process");
     binaryName = argv[0];
     // collect command line args
     if (argc > 1) {
@@ -54,7 +48,7 @@ std::vector<const char*>* Util::Options::process(int argc,
             compileCommand += " ";
         }
         compileCommand = compileCommand.trim();
-     }
+    }
     // collect program compilation date
     const time_t now = time(NULL);
     char build_date[50];
@@ -67,8 +61,7 @@ std::vector<const char*>* Util::Options::process(int argc,
 
         if (opt.startsWith("--")) {
             option = get(options, opt);
-            if (!option && (arg = opt.find('=')))
-                option = get(options, opt.before(arg++));
+            if (!option && (arg = opt.find('='))) option = get(options, opt.before(arg++));
             if (option == nullptr) {
                 ::error(ErrorType::ERR_UNKNOWN, "Unknown option %1%", opt);
                 usage();
@@ -89,8 +82,7 @@ std::vector<const char*>* Util::Options::process(int argc,
                 usage();
                 return nullptr;
             }
-            if ((option->flags & OptionFlags::OptionalArgument) &&
-                (!arg || strlen(arg) == 0))
+            if ((option->flags & OptionFlags::OptionalArgument) && (!arg || strlen(arg) == 0))
                 arg = nullptr;
         }
 
@@ -100,9 +92,8 @@ std::vector<const char*>* Util::Options::process(int argc,
             if (option->argName != nullptr && arg == nullptr &&
                 !(option->flags & OptionFlags::OptionalArgument)) {
                 if (i == argc - 1) {
-                    ::error(ErrorType::ERR_EXPECTED,
-                            "Option %1% is missing required argument %2%", opt,
-                            option->argName);
+                    ::error(ErrorType::ERR_EXPECTED, "Option %1% is missing required argument %2%",
+                            opt, option->argName);
                     usage();
                     return nullptr;
                 }
@@ -116,7 +107,6 @@ std::vector<const char*>* Util::Options::process(int argc,
         }
     }
 
-
     return &remainingOptions;
 }
 
@@ -127,18 +117,15 @@ void Util::Options::usage() {
     for (auto o : optionOrder) {
         size_t len = o.size();
         auto option = get(options, o);
-        if (option->argName != nullptr)
-            len += 1 + strlen(option->argName);
-        if (labelLen < len)
-            labelLen = len;
+        if (option->argName != nullptr) len += 1 + strlen(option->argName);
+        if (labelLen < len) labelLen = len;
     }
 
     labelLen += 3;
     for (auto o : optionOrder) {
         auto option = get(options, o);
         size_t len = strlen(o);
-        if (option->flags & OptionFlags::Hide)
-            continue;
+        if (option->flags & OptionFlags::Hide) continue;
         *outStream << option->option;
         if (option->argName != nullptr) {
             if (option->flags & OptionFlags::OptionalArgument) {
@@ -158,9 +145,8 @@ void Util::Options::usage() {
         }
     }
 
-    if (additionalUsage.size() > 0)  {
+    if (additionalUsage.size() > 0) {
         *outStream << "Additional usage instructions:" << std::endl;
     }
-    for (auto m : additionalUsage)
-        *outStream << m << std::endl;
+    for (auto m : additionalUsage) *outStream << m << std::endl;
 }

@@ -1,15 +1,22 @@
 #include "backends/p4tools/common/lib/taint.h"
 
-#include <algorithm>
-#include <utility>
+#include <stddef.h>
+
 #include <vector>
 
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "ir/indexed_vector.h"
 #include "ir/irutils.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/big_int_util.h"
+#include "lib/bitvec.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
+#include "p4tools/common/lib/model.h"
 
 namespace P4Tools {
 

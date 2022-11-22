@@ -10,6 +10,8 @@
 #include "gtest/gtest-message.h"
 #include "gtest/gtest-test-part.h"
 #include "gtest/gtest.h"
+#include "ir/declaration.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "lib/enumerator.h"
 #include "test/gtest/helpers.h"

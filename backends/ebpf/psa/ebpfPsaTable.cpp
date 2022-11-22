@@ -14,10 +14,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include "ebpfPsaTable.h"
+
 #include <algorithm>
 
 #include "backends/ebpf/ebpfType.h"
-#include "ebpfPsaTable.h"
 #include "ebpfPipeline.h"
 #include "externs/ebpfPsaTableImplementation.h"
 
@@ -33,9 +34,7 @@ class EBPFTablePsaPropertyVisitor : public Inspector {
     // Use these two preorders to print error when property contains something other than name of
     // extern instance. ListExpression is required because without it Expression will take
     // precedence over it and throw error for whole list.
-    bool preorder(const IR::ListExpression*) override {
-        return true;
-    }
+    bool preorder(const IR::ListExpression*) override { return true; }
     bool preorder(const IR::Expression* expr) override {
         ::error(ErrorType::ERR_UNSUPPORTED,
                 "%1%: unsupported expression, expected a named instance", expr);
@@ -44,8 +43,7 @@ class EBPFTablePsaPropertyVisitor : public Inspector {
 
     void visitTableProperty(cstring propertyName) {
         auto property = table->table->container->properties->getProperty(propertyName);
-        if (property != nullptr)
-            property->apply(*this);
+        if (property != nullptr) property->apply(*this);
     }
 };
 
@@ -59,8 +57,8 @@ class EBPFTablePSADirectCounterPropertyVisitor : public EBPFTablePsaPropertyVisi
         auto di = decl->to<IR::Declaration_Instance>();
         CHECK_NULL(di);
         if (EBPFObject::getSpecializedTypeName(di) != "DirectCounter") {
-            ::error(ErrorType::ERR_UNEXPECTED,
-                    "%1%: not a DirectCounter, see declaration of %2%", pe, decl);
+            ::error(ErrorType::ERR_UNEXPECTED, "%1%: not a DirectCounter, see declaration of %2%",
+                    pe, decl);
             return false;
         }
 
@@ -86,8 +84,8 @@ class EBPFTablePSADirectMeterPropertyVisitor : public EBPFTablePsaPropertyVisito
         auto di = decl->to<IR::Declaration_Instance>();
         CHECK_NULL(di);
         if (EBPFObject::getTypeName(di) != "DirectMeter") {
-            ::error(ErrorType::ERR_UNEXPECTED,
-                    "%1%: not a DirectMeter, see declaration of %2%", pe, decl);
+            ::error(ErrorType::ERR_UNEXPECTED, "%1%: not a DirectMeter, see declaration of %2%", pe,
+                    decl);
             return false;
         }
 
@@ -129,8 +127,7 @@ class EBPFTablePSAImplementationPropertyVisitor : public EBPFTablePsaPropertyVis
         if (table->implementation != nullptr)
             table->implementation->registerTable(table);
         else
-            ::error(ErrorType::ERR_UNKNOWN,
-                    "%1%: unknown table implementation %2%", pe, decl);
+            ::error(ErrorType::ERR_UNKNOWN, "%1%: unknown table implementation %2%", pe, decl);
 
         return false;
     }
@@ -143,11 +140,11 @@ class EBPFTablePSAImplementationPropertyVisitor : public EBPFTablePsaPropertyVis
 // =====================ActionTranslationVisitorPSA=============================
 ActionTranslationVisitorPSA::ActionTranslationVisitorPSA(const EBPFProgram* program,
                                                          cstring valueName,
-                                                         const EBPFTablePSA* table) :
-        CodeGenInspector(program->refMap, program->typeMap),
-        ActionTranslationVisitor(valueName, program),
-        ControlBodyTranslatorPSA(program->to<EBPFPipeline>()->control),
-        table(table) {}
+                                                         const EBPFTablePSA* table)
+    : CodeGenInspector(program->refMap, program->typeMap),
+      ActionTranslationVisitor(valueName, program),
+      ControlBodyTranslatorPSA(program->to<EBPFPipeline>()->control),
+      table(table) {}
 
 bool ActionTranslationVisitorPSA::preorder(const IR::PathExpression* pe) {
     if (isActionParameter(pe)) {
@@ -156,7 +153,7 @@ bool ActionTranslationVisitorPSA::preorder(const IR::PathExpression* pe) {
     return ControlBodyTranslator::preorder(pe);
 }
 
-bool ActionTranslationVisitorPSA::isActionParameter(const IR::Expression *expression) const {
+bool ActionTranslationVisitorPSA::isActionParameter(const IR::Expression* expression) const {
     if (auto path = expression->to<IR::PathExpression>())
         return ActionTranslationVisitor::isActionParameter(path);
     else if (auto cast = expression->to<IR::Cast>())
@@ -168,8 +165,7 @@ bool ActionTranslationVisitorPSA::isActionParameter(const IR::Expression *expres
 void ActionTranslationVisitorPSA::processMethod(const P4::ExternMethod* method) {
     auto declType = method->originalExternType;
     auto decl = method->object;
-    BUG_CHECK(decl->is<IR::Declaration_Instance>(),
-              "Extern has not been declared: %1%", decl);
+    BUG_CHECK(decl->is<IR::Declaration_Instance>(), "Extern has not been declared: %1%", decl);
     auto di = decl->to<IR::Declaration_Instance>();
     auto instanceName = EBPFObject::externalName(di);
 
@@ -178,16 +174,14 @@ void ActionTranslationVisitorPSA::processMethod(const P4::ExternMethod* method) 
         if (ctr != nullptr)
             ctr->emitDirectMethodInvocation(builder, method, valueName);
         else
-            ::error(ErrorType::ERR_NOT_FOUND,
-                    "%1%: Table %2% does not own DirectCounter named %3%",
+            ::error(ErrorType::ERR_NOT_FOUND, "%1%: Table %2% does not own DirectCounter named %3%",
                     method->expr, table->table->container, instanceName);
     } else if (declType->name.name == "DirectMeter") {
         auto met = table->getMeter(instanceName);
         if (met != nullptr) {
             met->emitDirectExecute(builder, method, valueName);
         } else {
-            ::error(ErrorType::ERR_NOT_FOUND,
-                    "%1%: Table %2% does not own DirectMeter named %3%",
+            ::error(ErrorType::ERR_NOT_FOUND, "%1%: Table %2% does not own DirectMeter named %3%",
                     method->expr, table->table->container, instanceName);
         }
     } else {
@@ -195,15 +189,13 @@ void ActionTranslationVisitorPSA::processMethod(const P4::ExternMethod* method) 
     }
 }
 
-cstring ActionTranslationVisitorPSA::getParamInstanceName(
-        const IR::Expression *expression) const {
-    if (auto cast = expression->to<IR::Cast>())
-        expression = cast->expr;
+cstring ActionTranslationVisitorPSA::getParamInstanceName(const IR::Expression* expression) const {
+    if (auto cast = expression->to<IR::Cast>()) expression = cast->expr;
 
     return ActionTranslationVisitor::getParamInstanceName(expression);
 }
 
-cstring ActionTranslationVisitorPSA::getParamName(const IR::PathExpression *expr) {
+cstring ActionTranslationVisitorPSA::getParamName(const IR::PathExpression* expr) {
     if (isActionParameter(expr)) {
         return getParamInstanceName(expr);
     }
@@ -213,8 +205,8 @@ cstring ActionTranslationVisitorPSA::getParamName(const IR::PathExpression *expr
 
 // =====================EBPFTablePSA=============================
 EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* table,
-                           CodeGenInspector* codeGen) :
-                           EBPFTable(program, table, codeGen), implementation(nullptr) {
+                           CodeGenInspector* codeGen)
+    : EBPFTable(program, table, codeGen), implementation(nullptr) {
     auto sizeProperty = table->container->properties->getProperty("size");
     if (keyGenerator == nullptr && sizeProperty != nullptr) {
         ::warning(ErrorType::WARN_IGNORE_PROPERTY,
@@ -235,8 +227,8 @@ EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* tab
     initImplementation();
 }
 
-EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name) :
-                           EBPFTable(program, codeGen, name), implementation(nullptr) {}
+EBPFTablePSA::EBPFTablePSA(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name)
+    : EBPFTable(program, codeGen, name), implementation(nullptr) {}
 
 void EBPFTablePSA::initDirectCounters() {
     EBPFTablePSADirectCounterPropertyVisitor visitor(this);
@@ -252,11 +244,11 @@ void EBPFTablePSA::initImplementation() {
     EBPFTablePSAImplementationPropertyVisitor visitor(this);
     visitor.visitTableProperty();
 
-    bool hasActionSelector = (implementation != nullptr &&
-            implementation->is<EBPFActionSelectorPSA>());
+    bool hasActionSelector =
+        (implementation != nullptr && implementation->is<EBPFActionSelectorPSA>());
 
     // check if we have also selector key
-    const IR::KeyElement * selectorKey = nullptr;
+    const IR::KeyElement* selectorKey = nullptr;
     if (keyGenerator != nullptr) {
         for (auto k : keyGenerator->keyElements) {
             auto mkdecl = program->refMap->getDeclaration(k->matchType->path, true);
@@ -270,8 +262,7 @@ void EBPFTablePSA::initImplementation() {
 
     if (hasActionSelector && selectorKey == nullptr) {
         ::error(ErrorType::ERR_NOT_FOUND,
-                "%1%: ActionSelector provided but there is no selector key",
-                table->container);
+                "%1%: ActionSelector provided but there is no selector key", table->container);
     }
     if (!hasActionSelector && selectorKey != nullptr) {
         ::error(ErrorType::ERR_NOT_FOUND,
@@ -280,14 +271,13 @@ void EBPFTablePSA::initImplementation() {
     }
     auto emptyGroupAction = table->container->properties->getProperty("psa_empty_group_action");
     if (!hasActionSelector && emptyGroupAction != nullptr) {
-        ::warning(ErrorType::WARN_UNUSED,
-                  "%1%: unused property (ActionSelector not provided)",
+        ::warning(ErrorType::WARN_UNUSED, "%1%: unused property (ActionSelector not provided)",
                   emptyGroupAction);
     }
 }
 
 ActionTranslationVisitor* EBPFTablePSA::createActionTranslationVisitor(
-        cstring valueName, const EBPFProgram* program) const {
+    cstring valueName, const EBPFProgram* program) const {
     return new ActionTranslationVisitorPSA(program->to<EBPFPipeline>(), valueName, this);
 }
 
@@ -304,7 +294,7 @@ void EBPFTablePSA::emitValueStructStructure(CodeBuilder* builder) {
     }
 }
 
-void EBPFTablePSA::emitInstance(CodeBuilder *builder) {
+void EBPFTablePSA::emitInstance(CodeBuilder* builder) {
     if (isTernaryTable()) {
         emitTernaryInstance(builder);
         if (hasConstEntries()) {
@@ -312,24 +302,23 @@ void EBPFTablePSA::emitInstance(CodeBuilder *builder) {
             // A number of tuples is equal to number of unique prefixes
             int nrOfTuples = entries.size();
             for (int i = 0; i < nrOfTuples; i++) {
-                builder->target->emitTableDecl(builder,
-                                               instanceName + "_tuple_" + std::to_string(i),
-                                               TableHash,"struct " + keyTypeName,
-                                               "struct " + valueTypeName, size);
+                builder->target->emitTableDecl(
+                    builder, instanceName + "_tuple_" + std::to_string(i), TableHash,
+                    "struct " + keyTypeName, "struct " + valueTypeName, size);
             }
         }
     } else {
         TableKind kind = isLPMTable() ? TableLPMTrie : TableHash;
         builder->target->emitTableDecl(builder, instanceName, kind,
-                      cstring("struct ") + keyTypeName,
-                      cstring("struct ") + valueTypeName, size);
+                                       cstring("struct ") + keyTypeName,
+                                       cstring("struct ") + valueTypeName, size);
     }
 
     if (implementation == nullptr) {
         // Default action is up to implementation, define it when no implementation provided
         builder->target->emitTableDecl(builder, defaultActionMapName, TableArray,
-                      program->arrayIndexType,
-                      cstring("struct ") + valueTypeName, 1);
+                                       program->arrayIndexType, cstring("struct ") + valueTypeName,
+                                       1);
     }
 }
 
@@ -361,7 +350,7 @@ void EBPFTablePSA::emitAction(CodeBuilder* builder, cstring valueName, cstring a
         EBPFTable::emitAction(builder, valueName, actionRunVariable);
 }
 
-void EBPFTablePSA::emitInitializer(CodeBuilder *builder) {
+void EBPFTablePSA::emitInitializer(CodeBuilder* builder) {
     // Do not emit initializer when table implementation is provided, because it is not supported.
     // Error for such case is printed when adding implementation to a table.
     if (implementation == nullptr) {
@@ -370,7 +359,7 @@ void EBPFTablePSA::emitInitializer(CodeBuilder *builder) {
     }
 }
 
-void EBPFTablePSA::emitConstEntriesInitializer(CodeBuilder *builder) {
+void EBPFTablePSA::emitConstEntriesInitializer(CodeBuilder* builder) {
     if (isTernaryTable()) {
         emitTernaryConstEntriesInitializer(builder);
         return;
@@ -432,14 +421,14 @@ void EBPFTablePSA::emitConstEntriesInitializer(CodeBuilder *builder) {
                     unsigned prefixLen = 32;
                     if (auto km = expr->to<IR::Mask>()) {
                         auto trailing_zeros = [width](const big_int& n) -> int {
-                            return (n == 0) ? width : boost::multiprecision::lsb(n); };
-                        auto count_ones = [](const big_int& n) -> unsigned {
-                            return bitcount(n); };
+                            return (n == 0) ? width : boost::multiprecision::lsb(n);
+                        };
+                        auto count_ones = [](const big_int& n) -> unsigned { return bitcount(n); };
                         auto mask = km->right->to<IR::Constant>()->value;
                         auto len = trailing_zeros(mask);
                         if (len + count_ones(mask) != width) {  // any remaining 0s in the prefix?
-                            ::error(ErrorType::ERR_INVALID,
-                                    "%1% invalid mask for LPM key", keyElement);
+                            ::error(ErrorType::ERR_INVALID, "%1% invalid mask for LPM key",
+                                    keyElement);
                             return;
                         }
                         prefixLen = width - len;
@@ -454,15 +443,15 @@ void EBPFTablePSA::emitConstEntriesInitializer(CodeBuilder *builder) {
             }
 
             // construct value
-            auto *mce = entry->action->to<IR::MethodCallExpression>();
+            auto* mce = entry->action->to<IR::MethodCallExpression>();
             emitTableValue(builder, mce, valueName.c_str());
 
             // emit update
             auto ret = program->refMap->newName("ret");
             builder->emitIndent();
             builder->appendFormat("int %s = ", ret.c_str());
-            builder->target->emitTableUpdate(builder, instanceName,
-                                             keyName.c_str(), valueName.c_str());
+            builder->target->emitTableUpdate(builder, instanceName, keyName.c_str(),
+                                             valueName.c_str());
             builder->newline();
 
             emitMapUpdateTraceMsg(builder, instanceName, ret);
@@ -470,7 +459,7 @@ void EBPFTablePSA::emitConstEntriesInitializer(CodeBuilder *builder) {
     }
 }
 
-void EBPFTablePSA::emitDefaultActionInitializer(CodeBuilder *builder) {
+void EBPFTablePSA::emitDefaultActionInitializer(CodeBuilder* builder) {
     const IR::P4Table* t = table->container;
     const IR::Expression* defaultAction = t->getDefaultAction();
     auto actionName = getActionNameExpression(defaultAction);
@@ -483,15 +472,15 @@ void EBPFTablePSA::emitDefaultActionInitializer(CodeBuilder *builder) {
         auto ret = program->refMap->newName("ret");
         builder->emitIndent();
         builder->appendFormat("int %s = ", ret.c_str());
-        builder->target->emitTableUpdate(builder, defaultActionMapName,
-                                         program->zeroKey.c_str(), value.c_str());
+        builder->target->emitTableUpdate(builder, defaultActionMapName, program->zeroKey.c_str(),
+                                         value.c_str());
         builder->newline();
 
         emitMapUpdateTraceMsg(builder, defaultActionMapName, ret);
     }
 }
 
-void EBPFTablePSA::emitMapUpdateTraceMsg(CodeBuilder *builder, cstring mapName,
+void EBPFTablePSA::emitMapUpdateTraceMsg(CodeBuilder* builder, cstring mapName,
                                          cstring returnCode) const {
     if (!program->options.emitTraceMessages) {
         return;
@@ -501,26 +490,23 @@ void EBPFTablePSA::emitMapUpdateTraceMsg(CodeBuilder *builder, cstring mapName,
     builder->blockStart();
     cstring msgStr = Util::printf_format("Map initializer: Error while map (%s) update, code: %s",
                                          mapName, "%d");
-    builder->target->emitTraceMessage(builder,
-                                      msgStr, 1, returnCode.c_str());
+    builder->target->emitTraceMessage(builder, msgStr, 1, returnCode.c_str());
 
     builder->blockEnd(false);
     builder->append(" else ");
 
     builder->blockStart();
-    msgStr = Util::printf_format("Map initializer: Map (%s) update succeed",
-                                 mapName, returnCode.c_str());
-    builder->target->emitTraceMessage(builder,
-                                      msgStr);
+    msgStr = Util::printf_format("Map initializer: Map (%s) update succeed", mapName,
+                                 returnCode.c_str());
+    builder->target->emitTraceMessage(builder, msgStr);
     builder->blockEnd(true);
 }
 
 const IR::PathExpression* EBPFTablePSA::getActionNameExpression(const IR::Expression* expr) const {
-    BUG_CHECK(expr->is<IR::MethodCallExpression>(),
-            "%1%: expected an action call", expr);
+    BUG_CHECK(expr->is<IR::MethodCallExpression>(), "%1%: expected an action call", expr);
     auto mce = expr->to<IR::MethodCallExpression>();
-    BUG_CHECK(mce->method->is<IR::PathExpression>(),
-            "%1%: expected IR::PathExpression type", mce->method);
+    BUG_CHECK(mce->method->is<IR::PathExpression>(), "%1%: expected IR::PathExpression type",
+              mce->method);
     return mce->method->to<IR::PathExpression>();
 }
 
@@ -559,8 +545,9 @@ void EBPFTablePSA::emitTableValue(CodeBuilder* builder, const IR::MethodCallExpr
 void EBPFTablePSA::emitLookupDefault(CodeBuilder* builder, cstring key, cstring value,
                                      cstring actionRunVariable) {
     if (implementation != nullptr) {
-        builder->appendLine("/* table with implementation has default action "
-                            "implicitly set to NoAction, so we can skip execution of it */");
+        builder->appendLine(
+            "/* table with implementation has default action "
+            "implicitly set to NoAction, so we can skip execution of it */");
         builder->target->emitTraceMessage(builder,
                                           "Control: skipping default action due to implementation");
 
@@ -575,16 +562,14 @@ void EBPFTablePSA::emitLookupDefault(CodeBuilder* builder, cstring key, cstring 
 }
 
 bool EBPFTablePSA::dropOnNoMatchingEntryFound() const {
-    if (implementation != nullptr)
-        return false;
+    if (implementation != nullptr) return false;
     return EBPFTable::dropOnNoMatchingEntryFound();
 }
 
-void EBPFTablePSA::emitTernaryConstEntriesInitializer(CodeBuilder *builder) {
+void EBPFTablePSA::emitTernaryConstEntriesInitializer(CodeBuilder* builder) {
     std::vector<std::vector<const IR::Entry*>> entriesGroupedByPrefix =
-            getConstEntriesGroupedByPrefix();
-    if (entriesGroupedByPrefix.empty())
-        return;
+        getConstEntriesGroupedByPrefix();
+    if (entriesGroupedByPrefix.empty()) return;
 
     CodeGenInspector cg(program->refMap, program->typeMap);
     cg.setBuilder(builder);
@@ -610,9 +595,8 @@ void EBPFTablePSA::emitTernaryConstEntriesInitializer(CodeBuilder *builder) {
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat("%s(0, 0, &%s, &%s, &%s, &%s, NULL, NULL)",
-                          addPrefixFunctionName, tuplesMapName,
-                          prefixesMapName, headName, valueMask);
+    builder->appendFormat("%s(0, 0, &%s, &%s, &%s, &%s, NULL, NULL)", addPrefixFunctionName,
+                          tuplesMapName, prefixesMapName, headName, valueMask);
     builder->endOfStatement(true);
     builder->newline();
 
@@ -637,41 +621,33 @@ void EBPFTablePSA::emitTernaryConstEntriesInitializer(CodeBuilder *builder) {
         builder->newline();
         builder->emitIndent();
         builder->appendFormat("void *%s[] = {", keysArray);
-        for (auto keyName : keyNames)
-            builder->appendFormat("&%s,", keyName);
+        for (auto keyName : keyNames) builder->appendFormat("&%s,", keyName);
         builder->append("}");
         builder->endOfStatement(true);
 
         // construct values array
         builder->emitIndent();
         builder->appendFormat("void *%s[] = {", valuesArray);
-        for (auto valueName : valueNames)
-            builder->appendFormat("&%s,", valueName);
+        for (auto valueName : valueNames) builder->appendFormat("&%s,", valueName);
         builder->append("}");
         builder->endOfStatement(true);
 
         builder->newline();
         builder->emitIndent();
-        builder->appendFormat("%s(%s, %s, &%s, &%s, &%s, &%s, %s, %s)",
-                              addPrefixFunctionName,
+        builder->appendFormat("%s(%s, %s, &%s, &%s, &%s, &%s, %s, %s)", addPrefixFunctionName,
                               cstring::to_cstring(samePrefixEntries.size()),
-                              cstring::to_cstring(tuple_id),
-                              tuplesMapName,
-                              prefixesMapName,
-                              keyMaskVarName,
-                              valueMask,
-                              keysArray,
-                              valuesArray);
+                              cstring::to_cstring(tuple_id), tuplesMapName, prefixesMapName,
+                              keyMaskVarName, valueMask, keysArray, valuesArray);
         builder->endOfStatement(true);
 
         tuple_id++;
     }
 }
 
-void EBPFTablePSA::emitKeysAndValues(CodeBuilder *builder,
-                                     std::vector<const IR::Entry *> &samePrefixEntries,
-                                     std::vector<cstring> &keyNames,
-                                     std::vector<cstring> &valueNames) {
+void EBPFTablePSA::emitKeysAndValues(CodeBuilder* builder,
+                                     std::vector<const IR::Entry*>& samePrefixEntries,
+                                     std::vector<cstring>& keyNames,
+                                     std::vector<cstring>& valueNames) {
     CodeGenInspector cg(program->refMap, program->typeMap);
     cg.setBuilder(builder);
 
@@ -705,14 +681,14 @@ void EBPFTablePSA::emitKeysAndValues(CodeBuilder *builder,
         }
 
         // construct value
-        auto *mce = entry->action->to<IR::MethodCallExpression>();
+        auto* mce = entry->action->to<IR::MethodCallExpression>();
         emitTableValue(builder, mce, valueName.c_str());
     }
 }
 
-void EBPFTablePSA::emitKeyMasks(CodeBuilder *builder,
-                                std::vector<std::vector<const IR::Entry *>> &entriesGrpedByPrefix,
-                                std::vector<cstring> &keyMasksNames) {
+void EBPFTablePSA::emitKeyMasks(CodeBuilder* builder,
+                                std::vector<std::vector<const IR::Entry*>>& entriesGrpedByPrefix,
+                                std::vector<cstring>& keyMasksNames) {
     CodeGenInspector cg(program->refMap, program->typeMap);
     cg.setBuilder(builder);
 
@@ -748,19 +724,18 @@ void EBPFTablePSA::emitKeyMasks(CodeBuilder *builder,
                 emitMaskForExactMatch(builder, fieldName, ebpfType);
             }
             builder->emitIndent();
-            builder->appendFormat("__builtin_memcpy(%s, &%s, sizeof(%s))",
-                                  keyFieldNamePtr, fieldName, fieldName);
+            builder->appendFormat("__builtin_memcpy(%s, &%s, sizeof(%s))", keyFieldNamePtr,
+                                  fieldName, fieldName);
             builder->endOfStatement(true);
-            builder->appendFormat("%s = %s + sizeof(%s)", keyFieldNamePtr,
-                                  keyFieldNamePtr, fieldName);
+            builder->appendFormat("%s = %s + sizeof(%s)", keyFieldNamePtr, keyFieldNamePtr,
+                                  fieldName);
             builder->endOfStatement(true);
         }
     }
 }
 
-void EBPFTablePSA::emitMaskForExactMatch(CodeBuilder *builder,
-                                         cstring &fieldName,
-                                         EBPFType *ebpfType) const {
+void EBPFTablePSA::emitMaskForExactMatch(CodeBuilder* builder, cstring& fieldName,
+                                         EBPFType* ebpfType) const {
     unsigned width = 0;
     if (auto hasWidth = ebpfType->to<IHasWidth>()) {
         width = hasWidth->widthInBits();
@@ -775,20 +750,18 @@ void EBPFTablePSA::emitMaskForExactMatch(CodeBuilder *builder,
         } else {
             // TODO: handle width > 64 bits
             error(ErrorType::ERR_UNSUPPORTED,
-                    "%1%: fields wider than 64 bits are not supported yet",
-                    fieldName);
+                  "%1%: fields wider than 64 bits are not supported yet", fieldName);
         }
     } else {
         BUG("Cannot assess field bit width");
     }
     builder->append("0x");
-    for (size_t j = 0; j < width / 8; j++)
-        builder->append("ff");
+    for (size_t j = 0; j < width / 8; j++) builder->append("ff");
     builder->endOfStatement(true);
 }
 
-void EBPFTablePSA::emitValueMask(CodeBuilder *builder, const cstring valueMask,
-                                        const cstring nextMask, int tupleId) const {
+void EBPFTablePSA::emitValueMask(CodeBuilder* builder, const cstring valueMask,
+                                 const cstring nextMask, int tupleId) const {
     builder->emitIndent();
     builder->appendFormat("struct %s_mask %s = {0}", valueTypeName, valueMask);
     builder->endOfStatement(true);
@@ -819,8 +792,7 @@ std::vector<std::vector<const IR::Entry*>> EBPFTablePSA::getConstEntriesGroupedB
     std::vector<std::vector<const IR::Entry*>> entriesGroupedByPrefix;
     const IR::EntriesList* entries = table->container->getEntries();
 
-    if (!entries)
-        return entriesGroupedByPrefix;
+    if (!entries) return entriesGroupedByPrefix;
 
     for (int i = 0; i < (int)entries->entries.size(); i++) {
         auto mainEntr = entries->entries[i];
@@ -870,67 +842,58 @@ bool EBPFTablePSA::hasConstEntries() {
 
 cstring EBPFTablePSA::addPrefixFunc(bool trace) {
     cstring addPrefixFunc =
-            "static __always_inline\n"
-            "void add_prefix_and_entries(__u32 nr_entries,\n"
-            "            __u32 tuple_id,\n"
-            "            void *tuples_map,\n"
-            "            void *prefixes_map,\n"
-            "            void *key_mask,\n"
-            "            void *value_mask,\n"
-            "            void *keysPtrs[],\n"
-            "            void *valuesPtrs[]) {\n"
-            "    int ret = bpf_map_update_elem(prefixes_map, key_mask, value_mask, BPF_ANY);\n"
-            "    if (ret) {\n"
-            "%trace_msg_prefix_map_fail%"
-            "        return;\n"
-            "    }\n"
-            "    if (nr_entries == 0) {\n"
-            "        return;\n"
-            "    }\n"
-            "    struct bpf_elf_map *tuple = bpf_map_lookup_elem(tuples_map, &tuple_id);\n"
-            "    if (tuple) {\n"
-            "        for (__u32 i = 0; i < nr_entries; i++) {\n"
-            "            int ret = bpf_map_update_elem(tuple, keysPtrs[i], valuesPtrs[i], "
-            "BPF_ANY);\n"
-            "            if (ret) {\n"
-            "%trace_msg_tuple_update_fail%"
-            "                return;\n"
-            "            } else {\n"
-            "%trace_msg_tuple_update_success%"
-            "            }\n"
-            "        }\n"
-            "    } else {\n"
-            "%trace_msg_tuple_not_found%"
-            "        return;\n"
-            "    }\n"
-            "}";
+        "static __always_inline\n"
+        "void add_prefix_and_entries(__u32 nr_entries,\n"
+        "            __u32 tuple_id,\n"
+        "            void *tuples_map,\n"
+        "            void *prefixes_map,\n"
+        "            void *key_mask,\n"
+        "            void *value_mask,\n"
+        "            void *keysPtrs[],\n"
+        "            void *valuesPtrs[]) {\n"
+        "    int ret = bpf_map_update_elem(prefixes_map, key_mask, value_mask, BPF_ANY);\n"
+        "    if (ret) {\n"
+        "%trace_msg_prefix_map_fail%"
+        "        return;\n"
+        "    }\n"
+        "    if (nr_entries == 0) {\n"
+        "        return;\n"
+        "    }\n"
+        "    struct bpf_elf_map *tuple = bpf_map_lookup_elem(tuples_map, &tuple_id);\n"
+        "    if (tuple) {\n"
+        "        for (__u32 i = 0; i < nr_entries; i++) {\n"
+        "            int ret = bpf_map_update_elem(tuple, keysPtrs[i], valuesPtrs[i], "
+        "BPF_ANY);\n"
+        "            if (ret) {\n"
+        "%trace_msg_tuple_update_fail%"
+        "                return;\n"
+        "            } else {\n"
+        "%trace_msg_tuple_update_success%"
+        "            }\n"
+        "        }\n"
+        "    } else {\n"
+        "%trace_msg_tuple_not_found%"
+        "        return;\n"
+        "    }\n"
+        "}";
 
     if (trace) {
         addPrefixFunc = addPrefixFunc.replace(
-                "%trace_msg_prefix_map_fail%",
-                "        bpf_trace_message(\"Prefixes map update failed\\n\");\n");
+            "%trace_msg_prefix_map_fail%",
+            "        bpf_trace_message(\"Prefixes map update failed\\n\");\n");
         addPrefixFunc = addPrefixFunc.replace(
-                "%trace_msg_tuple_update_fail%",
-                "                bpf_trace_message(\"Tuple map update failed\\n\");\n");
+            "%trace_msg_tuple_update_fail%",
+            "                bpf_trace_message(\"Tuple map update failed\\n\");\n");
         addPrefixFunc = addPrefixFunc.replace(
-                "%trace_msg_tuple_update_success%",
-                "                bpf_trace_message(\"Tuple map update succeed\\n\");\n");
+            "%trace_msg_tuple_update_success%",
+            "                bpf_trace_message(\"Tuple map update succeed\\n\");\n");
         addPrefixFunc = addPrefixFunc.replace(
-                "%trace_msg_tuple_not_found%",
-                "        bpf_trace_message(\"Tuple not found\\n\");\n");
+            "%trace_msg_tuple_not_found%", "        bpf_trace_message(\"Tuple not found\\n\");\n");
     } else {
-        addPrefixFunc = addPrefixFunc.replace(
-                "%trace_msg_prefix_map_fail%",
-                "");
-        addPrefixFunc = addPrefixFunc.replace(
-                "%trace_msg_tuple_update_fail%",
-                "");
-        addPrefixFunc = addPrefixFunc.replace(
-                "%trace_msg_tuple_update_success%",
-                "");
-        addPrefixFunc = addPrefixFunc.replace(
-                "%trace_msg_tuple_not_found%",
-                "");
+        addPrefixFunc = addPrefixFunc.replace("%trace_msg_prefix_map_fail%", "");
+        addPrefixFunc = addPrefixFunc.replace("%trace_msg_tuple_update_fail%", "");
+        addPrefixFunc = addPrefixFunc.replace("%trace_msg_tuple_update_success%", "");
+        addPrefixFunc = addPrefixFunc.replace("%trace_msg_tuple_not_found%", "");
     }
 
     return addPrefixFunc;

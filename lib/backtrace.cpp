@@ -15,25 +15,31 @@ limitations under the License.
 */
 
 #include "backtrace.h"
+
 #include <stdarg.h>
+
 #include <functional>
 #include <regex>
 #include <stdexcept>
 #include <system_error>
 #include <typeinfo>
+
 #include "crash.h"
 
-void backtrace_fill_stacktrace(std::string &msg, void *const*backtrace, int size) {
-  // backtrace_symbols is only available with libexecinfo
+void backtrace_fill_stacktrace(std::string& msg, void* const* backtrace, int size) {
+    // backtrace_symbols is only available with libexecinfo
 #if HAVE_EXECINFO_H
-    char **strings = backtrace_symbols(backtrace, size);
+    char** strings = backtrace_symbols(backtrace, size);
     for (int i = 0; i < size; i++) {
         if (strings) {
             msg += "\n  ";
-            msg += strings[i]; }
-        if (const char *line = addr2line(backtrace[i], strings ? strings[i] : 0)) {
+            msg += strings[i];
+        }
+        if (const char* line = addr2line(backtrace[i], strings ? strings[i] : 0)) {
             msg += "\n    ";
-            msg += line; } }
+            msg += line;
+        }
+    }
     free(strings);
 #else
     // unused
@@ -50,35 +56,21 @@ void backtrace_fill_stacktrace(std::string &msg, void *const*backtrace, int size
 
 namespace std {
 
-void __throw_bad_alloc() {
-    throw backtrace_exception<bad_alloc>();
-}
+void __throw_bad_alloc() { throw backtrace_exception<bad_alloc>(); }
 
-void __throw_bad_cast() {
-    throw backtrace_exception<bad_cast>();
-}
+void __throw_bad_cast() { throw backtrace_exception<bad_cast>(); }
 
-void __throw_bad_function_call() {
-    throw backtrace_exception<bad_function_call>();
-}
+void __throw_bad_function_call() { throw backtrace_exception<bad_function_call>(); }
 
-void __throw_invalid_argument(char const *m) {
-    throw backtrace_exception<invalid_argument>(m);
-}
+void __throw_invalid_argument(char const* m) { throw backtrace_exception<invalid_argument>(m); }
 
-void __throw_length_error(char const *m) {
-    throw backtrace_exception<length_error>(m);
-}
+void __throw_length_error(char const* m) { throw backtrace_exception<length_error>(m); }
 
-void __throw_logic_error(char const *m) {
-    throw backtrace_exception<logic_error>(m);
-}
+void __throw_logic_error(char const* m) { throw backtrace_exception<logic_error>(m); }
 
-void __throw_out_of_range(char const *m) {
-    throw backtrace_exception<out_of_range>(m);
-}
+void __throw_out_of_range(char const* m) { throw backtrace_exception<out_of_range>(m); }
 
-void __throw_out_of_range_fmt(char const *fmt, ...) {
+void __throw_out_of_range_fmt(char const* fmt, ...) {
     char buffer[1024];  // should be large enough for all cases?
     va_list args;
     va_start(args, fmt);

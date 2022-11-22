@@ -18,8 +18,8 @@ limitations under the License.
 
 namespace P4 {
 
-void SwitchAddDefault::postorder(IR::SwitchStatement *sw) {
-    ordered_set<cstring>  case_tags;
+void SwitchAddDefault::postorder(IR::SwitchStatement* sw) {
+    ordered_set<cstring> case_tags;
     for (auto sc : sw->cases) {
         if (sc->label->is<IR::DefaultExpression>()) {
             return;
@@ -45,9 +45,8 @@ void SwitchAddDefault::postorder(IR::SwitchStatement *sw) {
         }
     }
     if (need_default) {
-        sw->cases.push_back(
-            new IR::SwitchCase(new IR::DefaultExpression(IR::Type_Dontcare::get()),
-                               new IR::BlockStatement));
+        sw->cases.push_back(new IR::SwitchCase(new IR::DefaultExpression(IR::Type_Dontcare::get()),
+                                               new IR::BlockStatement));
     }
 }
 

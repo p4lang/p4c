@@ -20,9 +20,13 @@ namespace P4 {
 
 cstring toString(const TernaryBool& c) {
     switch (c) {
-        case TernaryBool::Yes  : return "Yes";
-        case TernaryBool::No   : return "No";;
-        case TernaryBool::Maybe: return "Maybe";
+        case TernaryBool::Yes:
+            return "Yes";
+        case TernaryBool::No:
+            return "No";
+            ;
+        case TernaryBool::Maybe:
+            return "Maybe";
     }
     return "";
 }

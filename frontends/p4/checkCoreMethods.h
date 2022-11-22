@@ -17,23 +17,23 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_CHECKCOREMETHODS_H_
 #define _FRONTENDS_P4_CHECKCOREMETHODS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
 /// Check types for arguments of core.p4 methods
 class DoCheckCoreMethods : public Inspector {
-    ReferenceMap*  refMap;
-    TypeMap*       typeMap;
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
 
     void checkEmitType(const IR::Expression* emit, const IR::Type* type) const;
     void checkCorelibMethods(const ExternMethod* em) const;
 
  public:
-    DoCheckCoreMethods(ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap);
+    DoCheckCoreMethods(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
         setName("DoCheckCoreMethods");
     }
 

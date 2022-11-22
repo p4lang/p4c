@@ -3,9 +3,7 @@
 
 #include "backends/p4tools/common/p4ctool.h"
 #include "ir/ir.h"
-#include "lib/cstring.h"
 
-#include "backends/p4tools/testgen/lib/final_state.h"
 #include "backends/p4tools/testgen/options.h"
 
 namespace P4Tools {

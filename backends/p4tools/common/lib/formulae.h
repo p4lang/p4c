@@ -1,12 +1,11 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_LIB_FORMULAE_H_
 #define BACKENDS_P4TOOLS_COMMON_LIB_FORMULAE_H_
 
-#include <stdint.h>
-
 #include <string>
 
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
 

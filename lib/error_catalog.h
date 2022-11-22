@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <map>
 #include <string>
+
 #include "cstring.h"
 
 /// enumerate supported errors
@@ -30,22 +31,22 @@ class ErrorType {
     // -------- Errors -------------
     // errors as initially defined with a format string
     static const int LEGACY_ERROR;
-    static const int ERR_UNKNOWN;             // unknown construct (in context)
-    static const int ERR_UNSUPPORTED;         // unsupported construct
-    static const int ERR_UNEXPECTED;          // unexpected construct
-    static const int ERR_UNINITIALIZED;       // uninitialized reads/writes
-    static const int ERR_EXPECTED;            // language, compiler expects a different construct
-    static const int ERR_NOT_FOUND;           // A different way to say ERR_EXPECTED
-    static const int ERR_INVALID;             // invalid construct
-    static const int ERR_EXPRESSION;          // expression related errors
-    static const int ERR_OVERLIMIT;           // program node exceeds target limits
-    static const int ERR_INSUFFICIENT;        // program node does not have enough of ...
-    static const int ERR_TYPE_ERROR;          // P4 type checking errors
+    static const int ERR_UNKNOWN;                // unknown construct (in context)
+    static const int ERR_UNSUPPORTED;            // unsupported construct
+    static const int ERR_UNEXPECTED;             // unexpected construct
+    static const int ERR_UNINITIALIZED;          // uninitialized reads/writes
+    static const int ERR_EXPECTED;               // language, compiler expects a different construct
+    static const int ERR_NOT_FOUND;              // A different way to say ERR_EXPECTED
+    static const int ERR_INVALID;                // invalid construct
+    static const int ERR_EXPRESSION;             // expression related errors
+    static const int ERR_OVERLIMIT;              // program node exceeds target limits
+    static const int ERR_INSUFFICIENT;           // program node does not have enough of ...
+    static const int ERR_TYPE_ERROR;             // P4 type checking errors
     static const int ERR_UNSUPPORTED_ON_TARGET;  // target can not handle construct
-    static const int ERR_DUPLICATE;           // duplicate objects
-    static const int ERR_IO;                  // IO error
-    static const int ERR_UNREACHABLE;         // unreachable parser state
-    static const int ERR_MODEL;               // something is wrong with the target model
+    static const int ERR_DUPLICATE;              // duplicate objects
+    static const int ERR_IO;                     // IO error
+    static const int ERR_UNREACHABLE;            // unreachable parser state
+    static const int ERR_MODEL;                  // something is wrong with the target model
 
     // If we specialize for 1000 error types we're good!
     static const int ERR_MAX_ERRORS;
@@ -53,26 +54,26 @@ class ErrorType {
     // -------- Warnings -----------
     // warnings as initially defined with a format string
     static const int LEGACY_WARNING;
-    static const int WARN_FAILED;             // non-fatal failure!
-    static const int WARN_UNKNOWN;            // unknown construct (in context)
-    static const int WARN_INVALID;            // invalid construct
-    static const int WARN_UNSUPPORTED;        // unsupported construct
-    static const int WARN_DEPRECATED;         // deprecated feature
-    static const int WARN_UNINITIALIZED;      // unitialized instance
-    static const int WARN_UNINITIALIZED_USE;  // use of uninitialized value
+    static const int WARN_FAILED;                   // non-fatal failure!
+    static const int WARN_UNKNOWN;                  // unknown construct (in context)
+    static const int WARN_INVALID;                  // invalid construct
+    static const int WARN_UNSUPPORTED;              // unsupported construct
+    static const int WARN_DEPRECATED;               // deprecated feature
+    static const int WARN_UNINITIALIZED;            // unitialized instance
+    static const int WARN_UNINITIALIZED_USE;        // use of uninitialized value
     static const int WARN_UNINITIALIZED_OUT_PARAM;  // output parameter may be uninitialized
-    static const int WARN_UNUSED;             // unused instance
-    static const int WARN_MISSING;            // missing construct
-    static const int WARN_ORDERING;           // inconsistent statement ordering
-    static const int WARN_MISMATCH;           // mismatched constructs
-    static const int WARN_OVERFLOW;           // values do not fit
-    static const int WARN_IGNORE_PROPERTY;    // invalid property for object, ignored
-    static const int WARN_TYPE_INFERENCE;     // type inference can not infer, substitutes
-    static const int WARN_PARSER_TRANSITION;  // parser transition non-fatal issues
-    static const int WARN_UNREACHABLE;        // parser state unreachable
-    static const int WARN_SHADOWING;          // instance shadowing
-    static const int WARN_IGNORE;             // simply ignore
-    static const int WARN_INVALID_HEADER;     // access to fields of an invalid header
+    static const int WARN_UNUSED;                   // unused instance
+    static const int WARN_MISSING;                  // missing construct
+    static const int WARN_ORDERING;                 // inconsistent statement ordering
+    static const int WARN_MISMATCH;                 // mismatched constructs
+    static const int WARN_OVERFLOW;                 // values do not fit
+    static const int WARN_IGNORE_PROPERTY;          // invalid property for object, ignored
+    static const int WARN_TYPE_INFERENCE;           // type inference can not infer, substitutes
+    static const int WARN_PARSER_TRANSITION;        // parser transition non-fatal issues
+    static const int WARN_UNREACHABLE;              // parser state unreachable
+    static const int WARN_SHADOWING;                // instance shadowing
+    static const int WARN_IGNORE;                   // simply ignore
+    static const int WARN_INVALID_HEADER;           // access to fields of an invalid header
 
     static const int WARN_MAX_WARNINGS;
 };
@@ -80,7 +81,7 @@ class ErrorType {
 class ErrorCatalog {
  public:
     /// Return the singleton object
-    static ErrorCatalog &getCatalog() {
+    static ErrorCatalog& getCatalog() {
         static ErrorCatalog instance;
         return instance;
     }
@@ -90,17 +91,15 @@ class ErrorCatalog {
     /// @param errorCode - integer value for the error/warning
     /// @param name      - name for the error. Used to enable/disable all errors of that type
     /// @param forceReplace - override an existing error type in the catalog
-    bool add(int errorCode, const char *name, bool forceReplace = false) {
-        if (forceReplace)
-            errorCatalog.erase(errorCode);
+    bool add(int errorCode, const char* name, bool forceReplace = false) {
+        if (forceReplace) errorCatalog.erase(errorCode);
         auto it = errorCatalog.emplace(errorCode, name);
         return it.second;
     }
 
     /// retrieve the name for errorCode
     const cstring getName(int errorCode) {
-        if (errorCatalog.count(errorCode))
-            return errorCatalog.at(errorCode);
+        if (errorCatalog.count(errorCode)) return errorCatalog.at(errorCode);
         return "--unknown--";
     }
 

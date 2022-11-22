@@ -17,14 +17,14 @@ limitations under the License.
 #ifndef BACKENDS_UBPF_UBPFPROGRAM_H_
 #define BACKENDS_UBPF_UBPFPROGRAM_H_
 
+#include "backends/ebpf/ebpfOptions.h"
+#include "backends/ebpf/ebpfProgram.h"
+#include "codeGen.h"
+#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 #include "target.h"
 #include "ubpfModel.h"
-#include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/p4/evaluator/evaluator.h"
-#include "backends/ebpf/ebpfProgram.h"
-#include "backends/ebpf/ebpfOptions.h"
-#include "codeGen.h"
 
 namespace UBPF {
 
@@ -36,20 +36,20 @@ class UBPFType;
 
 class UBPFProgram : public EBPF::EBPFProgram {
  public:
-    UBPFParser *parser{};
-    UBPFControl *control{};
-    UBPFDeparser *deparser{};
-    UBPFModel &model;
+    UBPFParser* parser{};
+    UBPFControl* control{};
+    UBPFDeparser* deparser{};
+    UBPFModel& model;
 
     cstring contextVar, outerHdrOffsetVar, outerHdrLengthVar;
     cstring stdMetadataVar;
     cstring packetTruncatedSizeVar;
     cstring arrayIndexType = "uint32_t";
 
-    UBPFProgram(const EbpfOptions &options, const IR::P4Program *program,
-                P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const IR::ToplevelBlock *toplevel) :
-            EBPF::EBPFProgram(options, program, refMap, typeMap, toplevel),
-            model(UBPFModel::instance) {
+    UBPFProgram(const EbpfOptions& options, const IR::P4Program* program, P4::ReferenceMap* refMap,
+                P4::TypeMap* typeMap, const IR::ToplevelBlock* toplevel)
+        : EBPF::EBPFProgram(options, program, refMap, typeMap, toplevel),
+          model(UBPFModel::instance) {
         packetStartVar = cstring("pkt");
         offsetVar = cstring("packetOffsetInBits");
         outerHdrOffsetVar = cstring("outHeaderOffset");
@@ -62,19 +62,19 @@ class UBPFProgram : public EBPF::EBPFProgram {
     }
 
     bool build() override;
-    void emitC(UbpfCodeBuilder *builder, cstring headerFile);
-    void emitH(EBPF::CodeBuilder *builder, cstring headerFile) override;
-    void emitPreamble(EBPF::CodeBuilder *builder) override;
-    void emitTypes(EBPF::CodeBuilder *builder) override;
-    void emitTableDefinition(EBPF::CodeBuilder *builder) const;
-    void emitPktVariable(UbpfCodeBuilder *builder) const;
-    void emitPacketLengthVariable(UbpfCodeBuilder *builder) const;
-    void emitHeaderInstances(EBPF::CodeBuilder *builder) override;
-    void emitMetadataInstance(EBPF::CodeBuilder *builder) const;
-    void emitLocalVariables(EBPF::CodeBuilder *builder) override;
-    void emitPipeline(EBPF::CodeBuilder *builder) override;
+    void emitC(UbpfCodeBuilder* builder, cstring headerFile);
+    void emitH(EBPF::CodeBuilder* builder, cstring headerFile) override;
+    void emitPreamble(EBPF::CodeBuilder* builder) override;
+    void emitTypes(EBPF::CodeBuilder* builder) override;
+    void emitTableDefinition(EBPF::CodeBuilder* builder) const;
+    void emitPktVariable(UbpfCodeBuilder* builder) const;
+    void emitPacketLengthVariable(UbpfCodeBuilder* builder) const;
+    void emitHeaderInstances(EBPF::CodeBuilder* builder) override;
+    void emitMetadataInstance(EBPF::CodeBuilder* builder) const;
+    void emitLocalVariables(EBPF::CodeBuilder* builder) override;
+    void emitPipeline(EBPF::CodeBuilder* builder) override;
 };
 
 }  // namespace UBPF
 
-#endif  /* BACKENDS_UBPF_UBPFPROGRAM_H_ */
+#endif /* BACKENDS_UBPF_UBPFPROGRAM_H_ */

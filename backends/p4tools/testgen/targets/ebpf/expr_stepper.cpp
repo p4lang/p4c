@@ -1,24 +1,13 @@
 #include "backends/p4tools/testgen/targets/ebpf/expr_stepper.h"
 
-#include <cstddef>
 #include <functional>
-#include <ostream>
 #include <vector>
 
-#include <boost/multiprecision/number.hpp>
-
-#include "backends/p4tools/common/compiler/hs_index_simplify.h"
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/symbolic_env.h"
-#include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
-#include "lib/exceptions.h"
-#include "lib/ordered_map.h"
-#include "lib/safe_vector.h"
 
 #include "backends/p4tools/testgen/core/externs.h"
 #include "backends/p4tools/testgen/core/small_step/small_step.h"
@@ -26,8 +15,8 @@
 #include "backends/p4tools/testgen/lib/exceptions.h"
 #include "backends/p4tools/testgen/lib/execution_state.h"
 #include "backends/p4tools/testgen/targets/ebpf/table_stepper.h"
-#include "backends/p4tools/testgen/targets/ebpf/target.h"
-#include "backends/p4tools/testgen/targets/ebpf/test_spec.h"
+#include "p4tools/testgen/core/program_info.h"
+#include "p4tools/testgen/core/small_step/expr_stepper.h"
 
 namespace P4Tools {
 

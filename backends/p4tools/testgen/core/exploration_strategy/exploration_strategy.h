@@ -2,22 +2,14 @@
 #define BACKENDS_P4TOOLS_TESTGEN_CORE_EXPLORATION_STRATEGY_EXPLORATION_STRATEGY_H_
 
 #include <cstdint>
-#include <ctime>
 #include <functional>
 #include <iosfwd>
-#include <list>
-#include <map>
-#include <stack>
-#include <string>
-#include <utility>
 #include <vector>
 
 #include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/coverage.h"
-#include "backends/p4tools/common/lib/formulae.h"
-#include "gsl/gsl-lite.hpp"
 
 #include "backends/p4tools/testgen/core/program_info.h"
 #include "backends/p4tools/testgen/core/small_step/small_step.h"

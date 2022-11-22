@@ -15,14 +15,15 @@ limitations under the License.
 */
 
 #include "typeConstraints.h"
+
 #include "typeUnification.h"
 
 namespace P4 {
 
 int TypeConstraint::crtid = 0;
 
-void TypeConstraints::addEqualityConstraint(
-    const IR::Node* source, const IR::Type* left, const IR::Type* right) {
+void TypeConstraints::addEqualityConstraint(const IR::Node* source, const IR::Type* left,
+                                            const IR::Type* right) {
     auto c = new EqualityConstraint(left, right, source);
     add(c);
 }
@@ -34,8 +35,7 @@ TypeVariableSubstitution* TypeConstraints::solve() {
         auto last = constraints.back();
         constraints.pop_back();
         bool success = solve(last->to<P4::BinaryConstraint>());
-        if (!success)
-            return nullptr;
+        if (!success) return nullptr;
     }
     LOG3("Constraint solution:\n" << currentSubstitution);
     return currentSubstitution->trim();
@@ -43,28 +43,24 @@ TypeVariableSubstitution* TypeConstraints::solve() {
 
 bool TypeConstraints::isUnifiableTypeVariable(const IR::Type* type) {
     auto tv = type->to<IR::ITypeVar>();
-    if (tv == nullptr)
-        return false;
-    if (definedVariables->containsKey(tv))
-        return false;
+    if (tv == nullptr) return false;
+    if (definedVariables->containsKey(tv)) return false;
     if (tv->is<IR::Type_InfInt>())
         // These are always unifiable
         return true;
     return unifiableTypeVariables.count(tv) > 0;
 }
 
-bool TypeConstraints::solve(const BinaryConstraint *constraint) {
+bool TypeConstraints::solve(const BinaryConstraint* constraint) {
     if (isUnifiableTypeVariable(constraint->left)) {
         auto leftTv = constraint->left->to<IR::ITypeVar>();
-        if (constraint->left == constraint->right)
-            return true;
+        if (constraint->left == constraint->right) return true;
 
         // check to see whether we already have a substitution for leftTv
         const IR::Type* leftSubst = currentSubstitution->lookup(leftTv);
         if (leftSubst == nullptr) {
             auto right = constraint->right->apply(replaceVariables)->to<IR::Type>();
-            if (leftTv == right->to<IR::ITypeVar>())
-                return true;
+            if (leftTv == right->to<IR::ITypeVar>()) return true;
             LOG3("Binding " << leftTv << " => " << right);
             auto error = currentSubstitution->compose(leftTv, right);
             if (!error.isNullOrEmpty())
@@ -81,8 +77,7 @@ bool TypeConstraints::solve(const BinaryConstraint *constraint) {
         const IR::Type* rightSubst = currentSubstitution->lookup(rightTv);
         if (rightSubst == nullptr) {
             auto left = constraint->left->apply(replaceVariables)->to<IR::Type>();
-            if (left->to<IR::ITypeVar>() == rightTv)
-                return true;
+            if (left->to<IR::ITypeVar>() == rightTv) return true;
             LOG3("Binding " << rightTv << " => " << left);
             auto error = currentSubstitution->compose(rightTv, left);
             if (!error.isNullOrEmpty())
@@ -111,8 +106,7 @@ void TypeConstraints::dbprint(std::ostream& out) const {
     }
     if (constraints.size() != 0) {
         out << "Constraints: ";
-        for (auto c : constraints)
-            out << std::endl << c;
+        for (auto c : constraints) out << std::endl << c;
     }
 }
 

@@ -17,11 +17,11 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_DEFAULTARGUMENTS_H_
 #define _FRONTENDS_P4_DEFAULTARGUMENTS_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -36,11 +36,14 @@ namespace P4 {
  */
 class DoDefaultArguments : public Transform {
     ReferenceMap* refMap;
-    TypeMap*      typeMap;
+    TypeMap* typeMap;
 
  public:
-    DoDefaultArguments(ReferenceMap* refMap, TypeMap* typeMap): refMap(refMap), typeMap(typeMap)
-    { setName("DoDefaultArguments"); CHECK_NULL(refMap); CHECK_NULL(typeMap); }
+    DoDefaultArguments(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
+        setName("DoDefaultArguments");
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+    }
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
     const IR::Node* postorder(IR::Declaration_Instance* inst) override;
     const IR::Node* postorder(IR::ConstructorCallExpression* ccc) override;
@@ -55,7 +58,7 @@ class DefaultArguments : public PassManager {
         passes.push_back(new ClearTypeMap(typeMap));
         // this may insert casts into the new arguments
         passes.push_back(new ResolveReferences(refMap)),
-        passes.push_back(new TypeInference(refMap, typeMap, false));
+            passes.push_back(new TypeInference(refMap, typeMap, false));
     }
 };
 

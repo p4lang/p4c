@@ -3,9 +3,8 @@
 #include <string>
 
 #include "frontends/common/options.h"
-#include "ir/ir.h"
-
-#include "backends/p4tools/testgen/options.h"
+#include "p4tools/common/compiler/compiler_target.h"
+#include "p4tools/common/compiler/midend.h"
 
 namespace P4Tools {
 

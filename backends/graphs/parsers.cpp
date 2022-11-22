@@ -34,8 +34,8 @@ static cstring toString(const IR::Expression* expression) {
 }
 
 // we always have only one subgraph
-Graph *ParserGraphs::CreateSubGraph(Graph &currentSubgraph, const cstring &name ){
-    auto &newSubgraph = currentSubgraph.create_subgraph();
+Graph* ParserGraphs::CreateSubGraph(Graph& currentSubgraph, const cstring& name) {
+    auto& newSubgraph = currentSubgraph.create_subgraph();
     boost::get_property(newSubgraph, boost::graph_name) = "cluster" + name;
     boost::get_property(newSubgraph, boost::graph_graph_attribute)["label"] = name;
     boost::get_property(newSubgraph, boost::graph_graph_attribute)["fontsize"] = "22pt";
@@ -43,13 +43,13 @@ Graph *ParserGraphs::CreateSubGraph(Graph &currentSubgraph, const cstring &name 
     return &newSubgraph;
 }
 
-ParserGraphs::ParserGraphs(P4::ReferenceMap *refMap, const cstring &graphsDir)
+ParserGraphs::ParserGraphs(P4::ReferenceMap* refMap, const cstring& graphsDir)
     : refMap(refMap), graphsDir(graphsDir) {
     visitDagOnce = false;
 }
 
-void ParserGraphs::postorder(const IR::P4Parser *parser) {
-    Graph *g_ = new Graph();
+void ParserGraphs::postorder(const IR::P4Parser* parser) {
+    Graph* g_ = new Graph();
     g = CreateSubGraph(*g_, parser->name);
     boost::get_property(*g_, boost::graph_name) = parser->name;
 
@@ -60,8 +60,7 @@ void ParserGraphs::postorder(const IR::P4Parser *parser) {
         cstring label = state->name;
         if (state->selectExpression != nullptr &&
             state->selectExpression->is<IR::SelectExpression>()) {
-            label += "\n" + toString(
-                state->selectExpression->to<IR::SelectExpression>()->select);
+            label += "\n" + toString(state->selectExpression->to<IR::SelectExpression>()->select);
         }
         add_vertex(label, VertexType::STATE);
         nodes.emplace(std::make_pair(state->name.name.c_str(), iter++));

@@ -2,29 +2,15 @@
 #define BACKENDS_P4TOOLS_TESTGEN_CORE_EXPLORATION_STRATEGY_RANDOM_ACCESS_STACK_H_
 
 #include <cstdint>
-#include <ctime>
-#include <functional>
-#include <iosfwd>
 #include <list>
-#include <map>
-#include <stack>
-#include <string>
-#include <utility>
-#include <vector>
 
-#include <boost/none.hpp>
 #include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
-#include "gsl/gsl-lite.hpp"
-#include "ir/ir.h"
 
 #include "backends/p4tools/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/testgen/core/exploration_strategy/incremental_stack.h"
 #include "backends/p4tools/testgen/core/program_info.h"
-#include "backends/p4tools/testgen/lib/execution_state.h"
-#include "backends/p4tools/testgen/lib/final_state.h"
 
 namespace P4Tools {
 

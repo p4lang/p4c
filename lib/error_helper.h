@@ -17,6 +17,7 @@ limitations under the License.
 #define _LIB_ERROR_HELPER_H_
 
 #include <stdarg.h>
+
 #include <map>
 #include <set>
 #include <type_traits>
@@ -25,9 +26,9 @@ limitations under the License.
 #include <boost/format.hpp>
 
 #include "lib/cstring.h"
+#include "lib/error_message.h"
 #include "lib/source_file.h"
 #include "lib/stringify.h"
-#include "lib/error_message.h"
 
 namespace priv {
 
@@ -38,118 +39,108 @@ static inline ErrorMessage error_helper(boost::format& f, ErrorMessage out) {
     return out;
 }
 
-template<class... Args>
-ErrorMessage error_helper(boost::format& f, ErrorMessage out,
-                         const char* t, Args... args);
+template <class... Args>
+ErrorMessage error_helper(boost::format& f, ErrorMessage out, const char* t, Args... args);
 
-template<class... Args>
-ErrorMessage error_helper(boost::format& f, ErrorMessage out,
-                         const cstring& t, Args... args);
+template <class... Args>
+ErrorMessage error_helper(boost::format& f, ErrorMessage out, const cstring& t, Args... args);
 
 // use: ir/mau.cpp:805
-template<class... Args>
-ErrorMessage error_helper(boost::format& f, ErrorMessage out,
-                         const Util::SourceInfo &info, Args... args);
+template <class... Args>
+ErrorMessage error_helper(boost::format& f, ErrorMessage out, const Util::SourceInfo& info,
+                          Args... args);
 
-template<typename T, class... Args>
-auto error_helper(boost::format& f, ErrorMessage out,
-                  const T &t, Args... args) ->
+template <typename T, class... Args>
+auto error_helper(boost::format& f, ErrorMessage out, const T& t, Args... args) ->
     typename std::enable_if<Util::HasToString<T>::value &&
-                            !std::is_base_of<Util::IHasSourceInfo, T>::value, ErrorMessage>::type;
+                                !std::is_base_of<Util::IHasSourceInfo, T>::value,
+                            ErrorMessage>::type;
 
-template<typename T, class... Args>
-auto error_helper(boost::format& f, ErrorMessage out,
-                  const T *t, Args... args) ->
+template <typename T, class... Args>
+auto error_helper(boost::format& f, ErrorMessage out, const T* t, Args... args) ->
     typename std::enable_if<Util::HasToString<T>::value &&
-                            !std::is_base_of<Util::IHasSourceInfo, T>::value, ErrorMessage>::type;
+                                !std::is_base_of<Util::IHasSourceInfo, T>::value,
+                            ErrorMessage>::type;
 
-template<typename T, class... Args>
-auto error_helper(boost::format& f, ErrorMessage out,
-                  const T &t, Args... args) ->
+template <typename T, class... Args>
+auto error_helper(boost::format& f, ErrorMessage out, const T& t, Args... args) ->
     typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, ErrorMessage>::type;
 
-template<typename T, class... Args>
-auto error_helper(boost::format& f, ErrorMessage out,
-                  const T *t, Args... args) ->
+template <typename T, class... Args>
+auto error_helper(boost::format& f, ErrorMessage out, const T* t, Args... args) ->
     typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, ErrorMessage>::type;
 
-template<class... Args>
-ErrorMessage error_helper(boost::format& f, ErrorMessage out,
-                         const big_int *t, Args... args);
+template <class... Args>
+ErrorMessage error_helper(boost::format& f, ErrorMessage out, const big_int* t, Args... args);
 
-template<class... Args>
-ErrorMessage error_helper(boost::format& f, ErrorMessage out,
-                         const big_int &t, Args... args);
+template <class... Args>
+ErrorMessage error_helper(boost::format& f, ErrorMessage out, const big_int& t, Args... args);
 
-template<typename T, class... Args>
-auto error_helper(boost::format& f, ErrorMessage out,
-             const T& t, Args... args) ->
+template <typename T, class... Args>
+auto error_helper(boost::format& f, ErrorMessage out, const T& t, Args... args) ->
     typename std::enable_if<std::is_arithmetic<T>::value, ErrorMessage>::type;
 
 // actual implementations
 
-template<class... Args>
-ErrorMessage error_helper(boost::format& f, ErrorMessage out,
-                         const char* t, Args... args) {
+template <class... Args>
+ErrorMessage error_helper(boost::format& f, ErrorMessage out, const char* t, Args... args) {
     return error_helper(f % t, out, std::forward<Args>(args)...);
 }
 
-template<class... Args>
-ErrorMessage error_helper(boost::format& f, ErrorMessage out,
-                         const cstring& t, Args... args) {
+template <class... Args>
+ErrorMessage error_helper(boost::format& f, ErrorMessage out, const cstring& t, Args... args) {
     return error_helper(f % t.c_str(), out, std::forward<Args>(args)...);
 }
 
-template<typename T, class... Args>
-auto error_helper(boost::format& f, ErrorMessage out,
-                  const T &t, Args... args) ->
+template <typename T, class... Args>
+auto error_helper(boost::format& f, ErrorMessage out, const T& t, Args... args) ->
     typename std::enable_if<Util::HasToString<T>::value &&
-                            !std::is_base_of<Util::IHasSourceInfo, T>::value, ErrorMessage>::type {
+                                !std::is_base_of<Util::IHasSourceInfo, T>::value,
+                            ErrorMessage>::type {
     return error_helper(f % t.toString(), out, std::forward<Args>(args)...);
 }
 
-template<typename T, class... Args>
-auto error_helper(boost::format& f, ErrorMessage out,
-                  const T *t, Args... args) ->
+template <typename T, class... Args>
+auto error_helper(boost::format& f, ErrorMessage out, const T* t, Args... args) ->
     typename std::enable_if<Util::HasToString<T>::value &&
-                            !std::is_base_of<Util::IHasSourceInfo, T>::value, ErrorMessage>::type {
+                                !std::is_base_of<Util::IHasSourceInfo, T>::value,
+                            ErrorMessage>::type {
     return error_helper(f % t->toString(), out, std::forward<Args>(args)...);
 }
 
-template<class... Args>
-ErrorMessage error_helper(boost::format& f, ErrorMessage out,
-                         const big_int *t, Args... args) {
+template <class... Args>
+ErrorMessage error_helper(boost::format& f, ErrorMessage out, const big_int* t, Args... args) {
     return error_helper(f % t, out, std::forward<Args>(args)...);
 }
 
-template<class... Args>
-ErrorMessage error_helper(boost::format& f, ErrorMessage out, const big_int &t, Args... args) {
+template <class... Args>
+ErrorMessage error_helper(boost::format& f, ErrorMessage out, const big_int& t, Args... args) {
     return error_helper(f % t, out, std::forward<Args>(args)...);
 }
 
-template<typename T, class... Args>
+template <typename T, class... Args>
 auto error_helper(boost::format& f, ErrorMessage out, const T& t, Args... args) ->
     typename std::enable_if<std::is_arithmetic<T>::value, ErrorMessage>::type {
     return error_helper(f % t, out, std::forward<Args>(args)...);
 }
 
-template<class... Args>
-ErrorMessage error_helper(boost::format& f, ErrorMessage out, const Util::SourceInfo &info,
-                         Args... args) {
+template <class... Args>
+ErrorMessage error_helper(boost::format& f, ErrorMessage out, const Util::SourceInfo& info,
+                          Args... args) {
     if (info.isValid()) out.locations.push_back(info);
     return error_helper(f % "", out, std::forward<Args>(args)...);
 }
 
-template<typename T, class... Args>
-auto error_helper(boost::format& f, ErrorMessage out, const T *t, Args... args) ->
+template <typename T, class... Args>
+auto error_helper(boost::format& f, ErrorMessage out, const T* t, Args... args) ->
     typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, ErrorMessage>::type {
     auto info = t->getSourceInfo();
     if (info.isValid()) out.locations.push_back(info);
     return error_helper(f % t->toString(), out, std::forward<Args>(args)...);
 }
 
-template<typename T, class... Args>
-auto error_helper(boost::format& f, ErrorMessage out, const T &t, Args... args) ->
+template <typename T, class... Args>
+auto error_helper(boost::format& f, ErrorMessage out, const T& t, Args... args) ->
     typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, ErrorMessage>::type {
     auto info = t.getSourceInfo();
     if (info.isValid()) out.locations.push_back(info);
@@ -159,129 +150,122 @@ auto error_helper(boost::format& f, ErrorMessage out, const T &t, Args... args) 
 }  // namespace priv
 
 // Most direct invocations of error_helper usually only reduce arguments
-template<class... Args>
+template <class... Args>
 ErrorMessage error_helper(boost::format& f, Args... args) {
     ErrorMessage msg;
     return ::priv::error_helper(f, msg, std::forward<Args>(args)...);
 }
 
 // Invoked from ErrorReporter
-template<class... Args>
-ErrorMessage error_helper(boost::format& f, ErrorMessage &msg, Args... args) {
+template <class... Args>
+ErrorMessage error_helper(boost::format& f, ErrorMessage& msg, Args... args) {
     return ::priv::error_helper(f, msg, std::forward<Args>(args)...);
 }
 
 // This overload exists for backwards compatibility
-template<class... Args>
-ErrorMessage error_helper(boost::format& f, const std::string &prefix,
-                          const Util::SourceInfo &info, const std::string &suffix, Args... args) {
+template <class... Args>
+ErrorMessage error_helper(boost::format& f, const std::string& prefix, const Util::SourceInfo& info,
+                          const std::string& suffix, Args... args) {
     ErrorMessage msg(prefix, info, suffix);
     return ::priv::error_helper(f, msg, std::forward<Args>(args)...);
 }
 
 /***********************************************************************************/
 
-static inline std::string bug_helper(boost::format& f, std::string message,
-                                     std::string position, std::string tail) {
+static inline std::string bug_helper(boost::format& f, std::string message, std::string position,
+                                     std::string tail) {
     std::string text = boost::str(f);
     std::string result = position;
-    if (!position.empty())
-        result += ": ";
+    if (!position.empty()) result += ": ";
     result += message + text + "\n" + tail;
     return result;
 }
 
-template<class... Args>
+template <class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
                        std::string tail, const char* t, Args... args);
 
-template<class... Args>
+template <class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
                        std::string tail, const cstring& t, Args... args);
 
-template<class... Args>
-std::string bug_helper(boost::format& f, std::string message,
-                       std::string position, std::string tail,
-                       const Util::SourceInfo &info, Args... args);
+template <class... Args>
+std::string bug_helper(boost::format& f, std::string message, std::string position,
+                       std::string tail, const Util::SourceInfo& info, Args... args);
 
-template<typename T, class... Args>
-auto bug_helper(boost::format& f, std::string message, std::string position,
-                std::string tail, const T &t, Args... args) ->
+template <typename T, class... Args>
+auto bug_helper(boost::format& f, std::string message, std::string position, std::string tail,
+                const T& t, Args... args) ->
     typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type;
 
-template<typename T, class... Args>
-auto bug_helper(boost::format& f, std::string message, std::string position,
-                std::string tail, const T *t, Args... args) ->
+template <typename T, class... Args>
+auto bug_helper(boost::format& f, std::string message, std::string position, std::string tail,
+                const T* t, Args... args) ->
     typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type;
 
-template<typename T, class... Args>
-auto bug_helper(boost::format& f, std::string message, std::string position,
-                std::string tail, const T *t, Args... args) ->
+template <typename T, class... Args>
+auto bug_helper(boost::format& f, std::string message, std::string position, std::string tail,
+                const T* t, Args... args) ->
     typename std::enable_if<!std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type;
 
-template<class... Args>
+template <class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const big_int *t, Args... args);
+                       std::string tail, const big_int* t, Args... args);
 
-template<class... Args>
+template <class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const big_int &t, Args... args);
+                       std::string tail, const big_int& t, Args... args);
 
-template<typename T, class... Args>
-auto
-bug_helper(boost::format& f, std::string message, std::string position,
-           std::string tail, const T& t, Args... args) ->
-    typename std::enable_if<!std::is_base_of<Util::IHasSourceInfo, T>::value,
-                            std::string>::type;
+template <typename T, class... Args>
+auto bug_helper(boost::format& f, std::string message, std::string position, std::string tail,
+                const T& t, Args... args) ->
+    typename std::enable_if<!std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type;
 
 // actual implementations
 
-template<class... Args>
+template <class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
                        std::string tail, const char* t, Args... args) {
     return bug_helper(f % t, message, position, tail, std::forward<Args>(args)...);
 }
 
-template<class... Args>
+template <class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
                        std::string tail, const cstring& t, Args... args) {
     return bug_helper(f % t.c_str(), message, position, tail, std::forward<Args>(args)...);
 }
 
-template<typename T, class... Args>
-auto bug_helper(boost::format& f, std::string message, std::string position,
-                std::string tail, const T *t, Args... args) ->
-        typename std::enable_if<!std::is_base_of<Util::IHasSourceInfo, T>::value,
-                                std::string>::type {
+template <typename T, class... Args>
+auto bug_helper(boost::format& f, std::string message, std::string position, std::string tail,
+                const T* t, Args... args) ->
+    typename std::enable_if<!std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type {
     std::stringstream str;
     str << t;
     return bug_helper(f % str.str(), message, position, tail, std::forward<Args>(args)...);
 }
 
-template<class... Args>
+template <class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const big_int *t, Args... args) {
+                       std::string tail, const big_int* t, Args... args) {
     return bug_helper(f % t, message, position, tail, std::forward<Args>(args)...);
 }
 
-template<class... Args>
+template <class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const big_int &t, Args... args) {
+                       std::string tail, const big_int& t, Args... args) {
     return bug_helper(f % t, message, position, tail, std::forward<Args>(args)...);
 }
 
-template<typename T, class... Args>
-auto
-bug_helper(boost::format& f, std::string message, std::string position,
-           std::string tail, const T& t, Args... args) ->
-    typename std::enable_if<!std::is_base_of<Util::IHasSourceInfo, T>::value,
-                            std::string>::type {
+template <typename T, class... Args>
+auto bug_helper(boost::format& f, std::string message, std::string position, std::string tail,
+                const T& t, Args... args) ->
+    typename std::enable_if<!std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type {
     return bug_helper(f % t, message, position, tail, std::forward<Args>(args)...);
 }
 
-template<class... Args>
+template <class... Args>
 std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const Util::SourceInfo &info, Args... args) {
+                       std::string tail, const Util::SourceInfo& info, Args... args) {
     cstring posString = info.toPositionString();
     if (position.empty()) {
         position = posString;
@@ -292,16 +276,15 @@ std::string bug_helper(boost::format& f, std::string message, std::string positi
         }
     }
     return bug_helper(f % "", message, position, tail + posString + info.toSourceFragment(),
-                        std::forward<Args>(args)...);
+                      std::forward<Args>(args)...);
 }
 
-template<typename T, class... Args>
-auto bug_helper(boost::format& f, std::string message, std::string position,
-                std::string tail, const T *t, Args... args) ->
+template <typename T, class... Args>
+auto bug_helper(boost::format& f, std::string message, std::string position, std::string tail,
+                const T* t, Args... args) ->
     typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type {
     if (t == nullptr) {
-        return bug_helper(f, message, position,
-                          tail, std::forward<Args>(args)...);
+        return bug_helper(f, message, position, tail, std::forward<Args>(args)...);
     }
 
     cstring posString = t->getSourceInfo().toPositionString();
@@ -320,9 +303,9 @@ auto bug_helper(boost::format& f, std::string message, std::string position,
                       std::forward<Args>(args)...);
 }
 
-template<typename T, class... Args>
-auto bug_helper(boost::format& f, std::string message, std::string position,
-                std::string tail, const T &t, Args... args) ->
+template <typename T, class... Args>
+auto bug_helper(boost::format& f, std::string message, std::string position, std::string tail,
+                const T& t, Args... args) ->
     typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type {
     cstring posString = t.getSourceInfo().toPositionString();
     if (position.empty()) {
@@ -336,8 +319,8 @@ auto bug_helper(boost::format& f, std::string message, std::string position,
     std::stringstream str;
     str << t;
     return bug_helper(f % str.str(), message, position,
-                        tail + posString + t.getSourceInfo().toSourceFragment(),
-                        std::forward<Args>(args)...);
+                      tail + posString + t.getSourceInfo().toSourceFragment(),
+                      std::forward<Args>(args)...);
 }
 
-#endif   // _LIB_ERROR_HELPER_H_
+#endif  // _LIB_ERROR_HELPER_H_

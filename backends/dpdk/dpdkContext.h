@@ -17,11 +17,11 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKCONTEXT_H_
 #define BACKENDS_DPDK_DPDKCONTEXT_H_
 
-#include "dpdkProgramStructure.h"
-#include "options.h"
 #include "constants.h"
-#include "lib/nullstream.h"
+#include "dpdkProgramStructure.h"
 #include "lib/json.h"
+#include "lib/nullstream.h"
+#include "options.h"
 
 /**
 Passes defined in this file are used for generating Context JSON output for DPDK
@@ -63,7 +63,7 @@ struct actionAttributes {
     bool allowed_as_default_action;
     unsigned actionHandle;
     cstring externalName;
-    IR::IndexedVector<IR::Parameter> *params;
+    IR::IndexedVector<IR::Parameter>* params;
 };
 
 struct externAttributes {
@@ -74,20 +74,19 @@ struct externAttributes {
 };
 
 /* Program level information for context json */
-struct TopLevelCtxt{
+struct TopLevelCtxt {
     cstring progName;
     cstring buildDate;
     cstring compileCommand;
     cstring compilerVersion;
-    void initTopLevelCtxt(DpdkOptions &options) {
+    void initTopLevelCtxt(DpdkOptions& options) {
         buildDate = options.getBuildDate();
         compileCommand = options.getCompileCommand();
-        progName =  options.file;
+        progName = options.file;
         auto fileName = progName.findlast('/');
         // Handle the case when input file is in the current working directory.
         // fileName would be null in that case, hence progName should remain unchanged.
-        if (fileName)
-            progName = fileName;
+        if (fileName) progName = fileName;
         auto fileext = progName.find(".");
         progName = progName.replace(fileext, "");
         progName = progName.trim("/\t\n\r");
@@ -100,8 +99,8 @@ struct SelectionTable {
     unsigned max_n_groups;
     unsigned max_n_members_per_group;
     unsigned bound_to_action_data_table_handle;
-    void setAttributes(
-    const IR::P4Table *tbl, const std::map<const cstring, struct TableAttributes> &tableAttrmap) {
+    void setAttributes(const IR::P4Table* tbl,
+                       const std::map<const cstring, struct TableAttributes>& tableAttrmap) {
         max_n_groups = 0;
         max_n_members_per_group = 0;
         auto n_groups = tbl->properties->getProperty("n_groups_max");
@@ -124,26 +123,26 @@ struct SelectionTable {
 
 // This pass generates context JSON into user specified file
 class DpdkContextGenerator : public Inspector {
-    P4::ReferenceMap *refmap;
-    DpdkProgramStructure *structure;
-    DpdkOptions &options;
+    P4::ReferenceMap* refmap;
+    DpdkProgramStructure* structure;
+    DpdkOptions& options;
     // All tables are collected into this vector
     IR::IndexedVector<IR::Declaration> tables;
     std::vector<const IR::Declaration_Instance*> externs;
 
     // Maps holding table, extern and action attributes needed for context JSON
     std::map<const cstring, struct TableAttributes> tableAttrmap;
-    std::map <cstring, struct actionAttributes> actionAttrMap;
-    std::map <cstring, struct externAttributes> externAttrMap;
+    std::map<cstring, struct actionAttributes> actionAttrMap;
+    std::map<cstring, struct externAttributes> externAttrMap;
 
     // Running unique ID for tables and actions
     static unsigned newTableHandle;
     static unsigned newActionHandle;
 
  public:
-    DpdkContextGenerator(P4::ReferenceMap *refmap,
-                         DpdkProgramStructure *structure, DpdkOptions &options) :
-                         refmap(refmap), structure(structure), options(options) {}
+    DpdkContextGenerator(P4::ReferenceMap* refmap, DpdkProgramStructure* structure,
+                         DpdkOptions& options)
+        : refmap(refmap), structure(structure), options(options) {}
 
     unsigned int getNewTableHandle();
     unsigned int getNewActionHandle();
@@ -151,19 +150,19 @@ class DpdkContextGenerator : public Inspector {
     const Util::JsonObject* genContextJsonObject();
     void addMatchTables(Util::JsonArray* tablesJson);
     void addExternInfo(Util::JsonArray* externsJson);
-    Util::JsonObject* initTableCommonJson(const cstring name, const struct TableAttributes & attr);
+    Util::JsonObject* initTableCommonJson(const cstring name, const struct TableAttributes& attr);
     void addKeyField(Util::JsonArray* keyJson, const cstring name, const cstring annon,
-                     const IR::KeyElement *key, int position);
-    Util::JsonArray* addActions(const IR::P4Table * table, const cstring ctrlName, bool isMatch);
-    bool addRefTables(const cstring tbl_name, const IR::P4Table **memberTable,
+                     const IR::KeyElement* key, int position);
+    Util::JsonArray* addActions(const IR::P4Table* table, const cstring ctrlName, bool isMatch);
+    bool addRefTables(const cstring tbl_name, const IR::P4Table** memberTable,
                       Util::JsonObject* tableJson);
     void addImmediateField(Util::JsonArray* paramJson, const cstring name, int dest_start,
-     int dest_Width);
-    void addActionParam(Util::JsonArray* paramJson, const cstring name,
-     int bitWidth, int position, int byte_array_index);
-    Util::JsonObject* addMatchAttributes(const IR::P4Table*table, const cstring ctrlName);
-    void setActionAttributes(const IR::P4Table *table);
-    void setDefaultActionHandle(const IR::P4Table *table);
+                           int dest_Width);
+    void addActionParam(Util::JsonArray* paramJson, const cstring name, int bitWidth, int position,
+                        int byte_array_index);
+    Util::JsonObject* addMatchAttributes(const IR::P4Table* table, const cstring ctrlName);
+    void setActionAttributes(const IR::P4Table* table);
+    void setDefaultActionHandle(const IR::P4Table* table);
     void CollectTablesAndSetAttributes();
 };
 

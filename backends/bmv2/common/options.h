@@ -18,6 +18,7 @@ limitations under the License.
 #define BACKENDS_BMV2_COMMON_OPTIONS_H_
 
 #include <getopt.h>
+
 #include "frontends/common/options.h"
 
 namespace BMV2 {
@@ -32,17 +33,30 @@ class BMV2Options : public CompilerOptions {
     bool loadIRFromJson = false;
 
     BMV2Options() {
-        registerOption("--emit-externs", nullptr,
-                [this](const char*) { emitExterns = true; return true; },
-                "[BMv2 back-end] Force externs be emitted by the backend.\n"
-                "The generated code follows the BMv2 JSON specification.");
-        registerOption("-o", "outfile",
-                [this](const char* arg) { outputFile = arg; return true; },
-                "Write output to outfile");
-        registerOption("--fromJSON", "file",
-                [this](const char* arg) { loadIRFromJson = true; file = arg; return true; },
-                "Use IR representation from JsonFile dumped previously,"\
-                "the compilation starts with reduced midEnd.");
+        registerOption(
+            "--emit-externs", nullptr,
+            [this](const char*) {
+                emitExterns = true;
+                return true;
+            },
+            "[BMv2 back-end] Force externs be emitted by the backend.\n"
+            "The generated code follows the BMv2 JSON specification.");
+        registerOption(
+            "-o", "outfile",
+            [this](const char* arg) {
+                outputFile = arg;
+                return true;
+            },
+            "Write output to outfile");
+        registerOption(
+            "--fromJSON", "file",
+            [this](const char* arg) {
+                loadIRFromJson = true;
+                file = arg;
+                return true;
+            },
+            "Use IR representation from JsonFile dumped previously,"
+            "the compilation starts with reduced midEnd.");
     }
 };
 

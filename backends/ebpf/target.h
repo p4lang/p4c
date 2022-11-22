@@ -19,8 +19,8 @@ limitations under the License.
 
 #include "lib/cstring.h"
 #include "lib/error.h"
-#include "lib/sourceCodeBuilder.h"
 #include "lib/exceptions.h"
+#include "lib/sourceCodeBuilder.h"
 
 // We are prepared to support code generation using multiple styles
 // (e.g., using BCC or using CLANG).
@@ -51,51 +51,48 @@ class Target {
     virtual void emitIncludes(Util::SourceCodeBuilder* builder) const = 0;
     virtual void emitResizeBuffer(Util::SourceCodeBuilder* builder, cstring buffer,
                                   cstring offsetVar) const = 0;
-    virtual void emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
-                                 cstring key, cstring value) const = 0;
-    virtual void emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
-                                 cstring key, cstring value) const = 0;
-    virtual void emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
-                                     cstring key, cstring value) const = 0;
-    virtual void emitTableDecl(Util::SourceCodeBuilder* builder,
-                               cstring tblName, TableKind tableKind,
-                               cstring keyType, cstring valueType, unsigned size) const = 0;
-    virtual void emitTableDeclSpinlock(Util::SourceCodeBuilder* builder,
-                               cstring tblName, TableKind tableKind,
-                               cstring keyType, cstring valueType, unsigned size) const {
-        (void) builder;
-        (void) tblName;
-        (void) tableKind;
-        (void) keyType;
-        (void) valueType;
-        (void) size;
-        ::error(ErrorType::ERR_UNSUPPORTED,
-                "emitTableDeclSpinlock is not supported on %1% target",
+    virtual void emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName, cstring key,
+                                 cstring value) const = 0;
+    virtual void emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName, cstring key,
+                                 cstring value) const = 0;
+    virtual void emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName, cstring key,
+                                     cstring value) const = 0;
+    virtual void emitTableDecl(Util::SourceCodeBuilder* builder, cstring tblName,
+                               TableKind tableKind, cstring keyType, cstring valueType,
+                               unsigned size) const = 0;
+    virtual void emitTableDeclSpinlock(Util::SourceCodeBuilder* builder, cstring tblName,
+                                       TableKind tableKind, cstring keyType, cstring valueType,
+                                       unsigned size) const {
+        (void)builder;
+        (void)tblName;
+        (void)tableKind;
+        (void)keyType;
+        (void)valueType;
+        (void)size;
+        ::error(ErrorType::ERR_UNSUPPORTED, "emitTableDeclSpinlock is not supported on %1% target",
                 name);
     }
     // map-in-map requires declaration of both inner and outer map,
     // thus we define them together in a single method.
-    virtual void emitMapInMapDecl(Util::SourceCodeBuilder* builder,
-                          cstring innerName, TableKind innerTableKind,
-                          cstring innerKeyType, cstring innerValueType, unsigned innerSize,
-                          cstring outerName, TableKind outerTableKind,
-                          cstring outerKeyType, unsigned outerSize) const {
-        (void) builder;
-        (void) innerName;
-        (void) innerTableKind;
-        (void) innerKeyType;
-        (void) innerValueType;
-        (void) innerSize;
-        (void) outerName;
-        (void) outerTableKind;
-        (void) outerKeyType;
-        (void) outerSize;
-        ::error(ErrorType::ERR_UNSUPPORTED,
-                "emitMapInMapDecl is not supported on %1% target",
+    virtual void emitMapInMapDecl(Util::SourceCodeBuilder* builder, cstring innerName,
+                                  TableKind innerTableKind, cstring innerKeyType,
+                                  cstring innerValueType, unsigned innerSize, cstring outerName,
+                                  TableKind outerTableKind, cstring outerKeyType,
+                                  unsigned outerSize) const {
+        (void)builder;
+        (void)innerName;
+        (void)innerTableKind;
+        (void)innerKeyType;
+        (void)innerValueType;
+        (void)innerSize;
+        (void)outerName;
+        (void)outerTableKind;
+        (void)outerKeyType;
+        (void)outerSize;
+        ::error(ErrorType::ERR_UNSUPPORTED, "emitMapInMapDecl is not supported on %1% target",
                 name);
     }
-    virtual void emitMain(Util::SourceCodeBuilder* builder,
-                          cstring functionName,
+    virtual void emitMain(Util::SourceCodeBuilder* builder, cstring functionName,
                           cstring argName) const = 0;
     virtual cstring dataOffset(cstring base) const = 0;
     virtual cstring dataEnd(cstring base) const = 0;
@@ -118,8 +115,8 @@ class Target {
     /// To print variable value: `emitTraceMessage(builder, "var=%u", 1, "var_name")`
     /// To print expression value: `emitTraceMessage(builder, "diff=%d", 1, "var1 - var2")`
     /// To print just message: `emitTraceMessage(builder, "Here")`
-    virtual void emitTraceMessage(Util::SourceCodeBuilder* builder,
-                                  const char* format, int argc, ...) const;
+    virtual void emitTraceMessage(Util::SourceCodeBuilder* builder, const char* format, int argc,
+                                  ...) const;
     virtual void emitTraceMessage(Util::SourceCodeBuilder* builder, const char* format) const;
 };
 
@@ -160,33 +157,32 @@ class KernelSamplesTarget : public Target {
     void emitIncludes(Util::SourceCodeBuilder* builder) const override;
     void emitResizeBuffer(Util::SourceCodeBuilder* builder, cstring buffer,
                           cstring offsetVar) const override;
-    void emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
-                         cstring key, cstring value) const override;
-    void emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
-                         cstring key, cstring value) const override;
-    void emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
-                             cstring key, cstring value) const override;
-    void emitTableDecl(Util::SourceCodeBuilder* builder,
-                       cstring tblName, TableKind tableKind,
+    void emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName, cstring key,
+                         cstring value) const override;
+    void emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName, cstring key,
+                         cstring value) const override;
+    void emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName, cstring key,
+                             cstring value) const override;
+    void emitTableDecl(Util::SourceCodeBuilder* builder, cstring tblName, TableKind tableKind,
                        cstring keyType, cstring valueType, unsigned size) const override;
-    void emitTableDeclSpinlock(Util::SourceCodeBuilder* builder,
-                               cstring tblName, TableKind tableKind,
-                               cstring keyType, cstring valueType, unsigned size) const override;
-    void emitMapInMapDecl(Util::SourceCodeBuilder* builder,
-                          cstring innerName, TableKind innerTableKind,
-                          cstring innerKeyType, cstring innerValueType, unsigned innerSize,
-                          cstring outerName, TableKind outerTableKind,
+    void emitTableDeclSpinlock(Util::SourceCodeBuilder* builder, cstring tblName,
+                               TableKind tableKind, cstring keyType, cstring valueType,
+                               unsigned size) const override;
+    void emitMapInMapDecl(Util::SourceCodeBuilder* builder, cstring innerName,
+                          TableKind innerTableKind, cstring innerKeyType, cstring innerValueType,
+                          unsigned innerSize, cstring outerName, TableKind outerTableKind,
                           cstring outerKeyType, unsigned outerSize) const override;
-    void emitMain(Util::SourceCodeBuilder* builder,
-                  cstring functionName,
+    void emitMain(Util::SourceCodeBuilder* builder, cstring functionName,
                   cstring argName) const override;
     void emitPreamble(Util::SourceCodeBuilder* builder) const override;
-    void emitTraceMessage(Util::SourceCodeBuilder* builder, const char* format,
-                          int argc = 0, ...) const override;
-    cstring dataOffset(cstring base) const override
-    { return cstring("((void*)(long)")+ base + "->data)"; }
-    cstring dataEnd(cstring base) const override
-    { return cstring("((void*)(long)")+ base + "->data_end)"; }
+    void emitTraceMessage(Util::SourceCodeBuilder* builder, const char* format, int argc = 0,
+                          ...) const override;
+    cstring dataOffset(cstring base) const override {
+        return cstring("((void*)(long)") + base + "->data)";
+    }
+    cstring dataEnd(cstring base) const override {
+        return cstring("((void*)(long)") + base + "->data_end)";
+    }
     cstring forwardReturnCode() const override { return "TC_ACT_OK"; }
     cstring dropReturnCode() const override { return "TC_ACT_SHOT"; }
     cstring abortReturnCode() const override { return "TC_ACT_SHOT"; }
@@ -194,33 +190,32 @@ class KernelSamplesTarget : public Target {
 
     cstring packetDescriptorType() const override { return "struct __sk_buff"; }
 
-    void annotateTableWithBTF(Util::SourceCodeBuilder* builder, cstring name,
-                              cstring keyType, cstring valueType) const;
+    void annotateTableWithBTF(Util::SourceCodeBuilder* builder, cstring name, cstring keyType,
+                              cstring valueType) const;
 };
 
 // Represents a target compiled by bcc that uses the TC
 class BccTarget : public Target {
  public:
     BccTarget() : Target("BCC") {}
-    void emitLicense(Util::SourceCodeBuilder*, cstring) const override {};
+    void emitLicense(Util::SourceCodeBuilder*, cstring) const override{};
     void emitCodeSection(Util::SourceCodeBuilder*, cstring) const override {}
     void emitIncludes(Util::SourceCodeBuilder* builder) const override;
-    void emitResizeBuffer(Util::SourceCodeBuilder*, cstring, cstring) const override {};
-    void emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
-                         cstring key, cstring value) const override;
-    void emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
-                         cstring key, cstring value) const override;
-    void emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
-                             cstring key, cstring value) const override;
-    void emitTableDecl(Util::SourceCodeBuilder* builder,
-                       cstring tblName, TableKind tableKind,
+    void emitResizeBuffer(Util::SourceCodeBuilder*, cstring, cstring) const override{};
+    void emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName, cstring key,
+                         cstring value) const override;
+    void emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName, cstring key,
+                         cstring value) const override;
+    void emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName, cstring key,
+                             cstring value) const override;
+    void emitTableDecl(Util::SourceCodeBuilder* builder, cstring tblName, TableKind tableKind,
                        cstring keyType, cstring valueType, unsigned size) const override;
-    void emitMain(Util::SourceCodeBuilder* builder,
-                  cstring functionName,
+    void emitMain(Util::SourceCodeBuilder* builder, cstring functionName,
                   cstring argName) const override;
     cstring dataOffset(cstring base) const override { return base; }
-    cstring dataEnd(cstring base) const override
-    { return cstring("(") + base + " + " + base + "->len)"; }
+    cstring dataEnd(cstring base) const override {
+        return cstring("(") + base + " + " + base + "->len)";
+    }
     cstring forwardReturnCode() const override { return "0"; }
     cstring dropReturnCode() const override { return "1"; }
     cstring abortReturnCode() const override { return "1"; }
@@ -234,15 +229,16 @@ class TestTarget : public EBPF::KernelSamplesTarget {
  public:
     TestTarget() : KernelSamplesTarget(false, "Userspace Test") {}
 
-    void emitResizeBuffer(Util::SourceCodeBuilder*, cstring, cstring) const override {};
+    void emitResizeBuffer(Util::SourceCodeBuilder*, cstring, cstring) const override{};
     void emitIncludes(Util::SourceCodeBuilder* builder) const override;
-    void emitTableDecl(Util::SourceCodeBuilder* builder,
-                       cstring tblName, TableKind tableKind,
+    void emitTableDecl(Util::SourceCodeBuilder* builder, cstring tblName, TableKind tableKind,
                        cstring keyType, cstring valueType, unsigned size) const override;
-    cstring dataOffset(cstring base) const override
-    { return cstring("((void*)(long)")+ base + "->data)"; }
-    cstring dataEnd(cstring base) const override
-    { return cstring("((void*)(long)(")+ base + "->data + "+ base +"->len))"; }
+    cstring dataOffset(cstring base) const override {
+        return cstring("((void*)(long)") + base + "->data)";
+    }
+    cstring dataEnd(cstring base) const override {
+        return cstring("((void*)(long)(") + base + "->data + " + base + "->len))";
+    }
     cstring forwardReturnCode() const override { return "true"; }
     cstring dropReturnCode() const override { return "false"; }
     cstring abortReturnCode() const override { return "false"; }

@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef FRONTENDS_P4_REDUNDANTPARSERS_H_
 #define FRONTENDS_P4_REDUNDANTPARSERS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -26,42 +26,41 @@ namespace P4 {
  *  state, and put them in redundantParsers.
  */
 class FindRedundantParsers : public Inspector {
-    std::set<const IR::P4Parser *> &redundantParsers;
-    bool preorder(const IR::P4Parser *parser) override;
+    std::set<const IR::P4Parser*>& redundantParsers;
+    bool preorder(const IR::P4Parser* parser) override;
+
  public:
-    explicit FindRedundantParsers(std::set<const IR::P4Parser *> &redundantParsers)
-        : redundantParsers(redundantParsers) { }
+    explicit FindRedundantParsers(std::set<const IR::P4Parser*>& redundantParsers)
+        : redundantParsers(redundantParsers) {}
 };
 
 /** Find .apply() calls on parsers that are on redundantParsers, and
  *  eliminate them.
  */
 class EliminateSubparserCalls : public Transform {
-    const std::set<const IR::P4Parser *> &redundantParsers;
-    ReferenceMap *refMap;
-    TypeMap *typeMap;
-    const IR::Node *postorder(IR::MethodCallStatement *methodCallStmt) override;
+    const std::set<const IR::P4Parser*>& redundantParsers;
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
+    const IR::Node* postorder(IR::MethodCallStatement* methodCallStmt) override;
+
  public:
-    EliminateSubparserCalls(const std::set<const IR::P4Parser *> &redundantParsers,
-                            ReferenceMap *refMap,
-                            TypeMap *typeMap)
-        : redundantParsers(redundantParsers), refMap(refMap), typeMap(typeMap)
-    { }
+    EliminateSubparserCalls(const std::set<const IR::P4Parser*>& redundantParsers,
+                            ReferenceMap* refMap, TypeMap* typeMap)
+        : redundantParsers(redundantParsers), refMap(refMap), typeMap(typeMap) {}
 };
 
 class RemoveRedundantParsers : public PassManager {
-    std::set<const IR::P4Parser *> redundantParsers;
+    std::set<const IR::P4Parser*> redundantParsers;
+
  public:
-    RemoveRedundantParsers(ReferenceMap *refMap, TypeMap *typeMap)
-        : PassManager {
-                new TypeChecking(refMap, typeMap, true),
-                new FindRedundantParsers(redundantParsers),
-                new EliminateSubparserCalls(redundantParsers, refMap, typeMap)
-        } {
+    RemoveRedundantParsers(ReferenceMap* refMap, TypeMap* typeMap)
+        : PassManager{new TypeChecking(refMap, typeMap, true),
+                      new FindRedundantParsers(redundantParsers),
+                      new EliminateSubparserCalls(redundantParsers, refMap, typeMap)} {
         setName("RemoveRedundantParsers");
     }
 };
 
-}
+}  // namespace P4
 
-#endif  /* FRONTENDS_P4_REDUNDANTPARSERS_H_ */
+#endif /* FRONTENDS_P4_REDUNDANTPARSERS_H_ */

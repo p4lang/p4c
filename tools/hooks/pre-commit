@@ -81,9 +81,12 @@ class Linter:
         if self._verbose:
             print(args)
         (rc, out) = self.runCmd(args, self._basedir)
-        if out not in ['no modified files to format\n', 'clang-format did not modify any files\n']:
+        # git-clang-format only returns an exit code in later version.
+        # We need to check for diff patterns.
+        if rc != 0 and ("+++" in out or "---" in out):
             print(out)
-            print("Found formatting issues. Run git clang-format, then commit.")
+            print(
+                f"Return code {rc}. Found formatting issues. Run make clang-format-fix-errors, then commit.")
             return 1
         else:
             return 0

@@ -1,4 +1,5 @@
 #include "hash.h"
+
 #include <cstdint>
 #include <cstring>
 
@@ -7,16 +8,16 @@ namespace Hash {
 
 namespace Detail {
 
-template<std::size_t Size = sizeof(std::size_t)>
+template <std::size_t Size = sizeof(std::size_t)>
 struct fnv1a_traits;
 
-template<>
+template <>
 struct fnv1a_traits<sizeof(std::uint32_t)> {
     static const std::size_t offset_basis = static_cast<std::size_t>(2166136261);
     static const std::size_t prime = static_cast<std::size_t>(16777619);
 };
 
-template<>
+template <>
 struct fnv1a_traits<sizeof(std::uint64_t)> {
     static const std::size_t offset_basis = static_cast<std::size_t>(14695981039346656037ULL);
     static const std::size_t prime = static_cast<std::size_t>(1099511628211ULL);
@@ -24,8 +25,8 @@ struct fnv1a_traits<sizeof(std::uint64_t)> {
 
 }  // namespace Detail
 
-std::size_t fnv1a(const void *data, std::size_t size) {
-    auto raw = reinterpret_cast<const unsigned char *>(data);
+std::size_t fnv1a(const void* data, std::size_t size) {
+    auto raw = reinterpret_cast<const unsigned char*>(data);
     std::size_t result = Detail::fnv1a_traits<>::offset_basis;
 
     for (std::size_t byte = 0; byte < size; ++byte) {
@@ -35,7 +36,6 @@ std::size_t fnv1a(const void *data, std::size_t size) {
 
     return result;
 }
-
 
 namespace Detail {
 std::uint32_t murmur32(const void* data, std::uint32_t size) {
@@ -57,16 +57,16 @@ std::uint32_t murmur32(const void* data, std::uint32_t size) {
     }
 
     switch (size) {
-    case 3:
-        result ^= static_cast<unsigned char>(raw[2]) << 16;
-        [[fallthrough]];
-    case 2:
-        result ^= static_cast<unsigned char>(raw[1]) << 8;
-        [[fallthrough]];
-    case 1:
-        result ^= static_cast<unsigned char>(raw[0]);
-        result *= m;
-        break;
+        case 3:
+            result ^= static_cast<unsigned char>(raw[2]) << 16;
+            [[fallthrough]];
+        case 2:
+            result ^= static_cast<unsigned char>(raw[1]) << 8;
+            [[fallthrough]];
+        case 1:
+            result ^= static_cast<unsigned char>(raw[0]);
+            result *= m;
+            break;
     }
 
     result ^= result >> 13;
@@ -75,7 +75,7 @@ std::uint32_t murmur32(const void* data, std::uint32_t size) {
     return result;
 }
 
-std::uint64_t murmur64(const void *data, std::uint64_t size) {
+std::uint64_t murmur64(const void* data, std::uint64_t size) {
     const std::uint64_t mul = (UINT64_C(0xc6a4a793) << 32) + UINT64_C(0x5bd1e995);
 
     const std::uint64_t seed = UINT64_C(0xc70f6907);
@@ -92,7 +92,7 @@ std::uint64_t murmur64(const void *data, std::uint64_t size) {
         std::memcpy(&k, p, sizeof(k));
         k *= mul;
         k ^= k >> 47;
-        const uint64_t data = (k) * mul;
+        const uint64_t data = (k)*mul;
         hash ^= data;
         hash *= mul;
     }
@@ -118,25 +118,21 @@ std::uint64_t murmur64(const void *data, std::uint64_t size) {
     return hash;
 }
 
-template<std::size_t Size = sizeof(std::size_t)>
+template <std::size_t Size = sizeof(std::size_t)>
 struct murmur;
 
-template<>
+template <>
 struct murmur<sizeof(std::uint32_t)> {
-    static std::size_t hash(const void *data, std::size_t size) {
-        return murmur32(data, size);
-    }
+    static std::size_t hash(const void* data, std::size_t size) { return murmur32(data, size); }
 };
 
-template<>
+template <>
 struct murmur<sizeof(std::uint64_t)> {
-    static std::size_t hash(const void *data, std::size_t size) {
-        return murmur64(data, size);
-    }
+    static std::size_t hash(const void* data, std::size_t size) { return murmur64(data, size); }
 };
 }  // namespace Detail
 
-std::size_t murmur(const void *data, std::size_t size) {
+std::size_t murmur(const void* data, std::size_t size) {
     return Detail::murmur<>::hash(data, size);
 }
 }  // namespace Hash

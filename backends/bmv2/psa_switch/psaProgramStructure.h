@@ -18,26 +18,26 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_PSA_SWITCH_PSAPROGRAMSTRUCTURE_H_
 #define BACKENDS_BMV2_PSA_SWITCH_PSAPROGRAMSTRUCTURE_H_
 
+#include "backends/bmv2/common/backend.h"
+#include "backends/bmv2/common/programStructure.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
-#include "backends/bmv2/common/programStructure.h"
-#include "backends/bmv2/common/backend.h"
 
 // TODO: this is not really specific to BMV2, it should reside somewhere else
 namespace BMV2 {
 
 class PsaProgramStructure : public ProgramStructure {
  protected:
-    P4::ReferenceMap*    refMap;
-    P4::TypeMap*         typeMap;
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
 
  public:
     // We place scalar user metadata fields (i.e., bit<>, bool)
     // in the scalars map.
     ordered_map<cstring, const IR::Declaration_Variable*> scalars;
-    unsigned                            scalars_width = 0;
-    unsigned                            error_width = 32;
-    unsigned                            bool_width = 1;
+    unsigned scalars_width = 0;
+    unsigned error_width = 32;
+    unsigned bool_width = 1;
 
     // architecture related information
     ordered_map<const IR::Node*, std::pair<gress_t, block_t>> block_type;
@@ -84,9 +84,7 @@ class PsaProgramStructure : public ProgramStructure {
      * Checks if a string is of type PSA_CounterType_t returns true
      * if it is, false otherwise.
      */
-    static bool isCounterMetadata(cstring ptName) {
-        return !strcmp(ptName, "PSA_CounterType_t");
-    }
+    static bool isCounterMetadata(cstring ptName) { return !strcmp(ptName, "PSA_CounterType_t"); }
 
     /**
      * Checks if a string is a psa metadata returns true
@@ -94,20 +92,22 @@ class PsaProgramStructure : public ProgramStructure {
      */
     static bool isStandardMetadata(cstring ptName) {
         return (!strcmp(ptName, "psa_ingress_parser_input_metadata_t") ||
-        !strcmp(ptName, "psa_egress_parser_input_metadata_t") ||
-        !strcmp(ptName, "psa_ingress_input_metadata_t") ||
-        !strcmp(ptName, "psa_ingress_output_metadata_t") ||
-        !strcmp(ptName, "psa_egress_input_metadata_t") ||
-        !strcmp(ptName, "psa_egress_deparser_input_metadata_t") ||
-        !strcmp(ptName, "psa_egress_output_metadata_t"));
+                !strcmp(ptName, "psa_egress_parser_input_metadata_t") ||
+                !strcmp(ptName, "psa_ingress_input_metadata_t") ||
+                !strcmp(ptName, "psa_ingress_output_metadata_t") ||
+                !strcmp(ptName, "psa_egress_input_metadata_t") ||
+                !strcmp(ptName, "psa_egress_deparser_input_metadata_t") ||
+                !strcmp(ptName, "psa_egress_output_metadata_t"));
     }
 };
 
 class ParsePsaArchitecture : public Inspector {
     PsaProgramStructure* structure;
+
  public:
-    explicit ParsePsaArchitecture(PsaProgramStructure* structure) :
-        structure(structure) { CHECK_NULL(structure); }
+    explicit ParsePsaArchitecture(PsaProgramStructure* structure) : structure(structure) {
+        CHECK_NULL(structure);
+    }
 
     void modelError(const char* format, const IR::INode* node) {
         ::error(ErrorType::ERR_MODEL,
@@ -119,7 +119,7 @@ class ParsePsaArchitecture : public Inspector {
     bool preorder(const IR::PackageBlock* block) override;
     bool preorder(const IR::ExternBlock* block) override;
 
-    profile_t init_apply(const IR::Node *root) override {
+    profile_t init_apply(const IR::Node* root) override {
         structure->block_type.clear();
         structure->globals.clear();
         return Inspector::init_apply(root);
@@ -129,10 +129,10 @@ class ParsePsaArchitecture : public Inspector {
 class InspectPsaProgram : public Inspector {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
-    PsaProgramStructure *pinfo;
+    PsaProgramStructure* pinfo;
 
  public:
-    InspectPsaProgram(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, PsaProgramStructure *pinfo)
+    InspectPsaProgram(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, PsaProgramStructure* pinfo)
         : refMap(refMap), typeMap(typeMap), pinfo(pinfo) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
@@ -140,18 +140,18 @@ class InspectPsaProgram : public Inspector {
         setName("InspectPsaProgram");
     }
 
-    void postorder(const IR::P4Parser *p) override;
+    void postorder(const IR::P4Parser* p) override;
     void postorder(const IR::P4Control* c) override;
     void postorder(const IR::Declaration_Instance* di) override;
 
     bool isHeaders(const IR::Type_StructLike* st);
     void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
-    void addHeaderType(const IR::Type_StructLike *st);
-    void addHeaderInstance(const IR::Type_StructLike *st, cstring name);
+    void addHeaderType(const IR::Type_StructLike* st);
+    void addHeaderInstance(const IR::Type_StructLike* st, cstring name);
     bool preorder(const IR::Declaration_Variable* dv) override;
     bool preorder(const IR::Parameter* parameter) override;
 };
 
 }  // namespace BMV2
 
-#endif  /* BACKENDS_BMV2_PSA_SWITCH_PSAPROGRAMSTRUCTURE_H_ */
+#endif /* BACKENDS_BMV2_PSA_SWITCH_PSAPROGRAMSTRUCTURE_H_ */

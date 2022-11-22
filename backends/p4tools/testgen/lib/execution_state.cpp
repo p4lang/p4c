@@ -5,19 +5,31 @@
 #include <initializer_list>
 #include <map>
 #include <stack>
+#include <string>
 #include <utility>
 #include <vector>
 
+#include <boost/container/vector.hpp>
 #include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/compiler/hs_index_simplify.h"
 #include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/irutils.h"
 #include "lib/log.h"
 #include "lib/null.h"
+#include "p4tools/common/compiler/reachability.h"
+#include "p4tools/common/lib/formulae.h"
+#include "p4tools/common/lib/model.h"
+#include "p4tools/common/lib/symbolic_env.h"
+#include "p4tools/common/lib/trace_events.h"
 
 #include "backends/p4tools/testgen/options.h"
+#include "p4tools/testgen/lib/continuation.h"
+#include "p4tools/testgen/lib/namespace_context.h"
+#include "p4tools/testgen/lib/test_spec.h"
 
 namespace P4Tools {
 

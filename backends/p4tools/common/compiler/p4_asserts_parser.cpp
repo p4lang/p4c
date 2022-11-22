@@ -1,13 +1,30 @@
 #include "backends/p4tools/testgen/targets/bmv2/p4_asserts_parser.h"
 
-#include <boost/multiprecision/cpp_int.hpp>
-#include <boost/optional/optional_io.hpp>
+#include <stdint.h>
+
+#include <iostream>
+#include <list>
+#include <memory>
+#include <string>
+#include <utility>
+
+#include <boost/format.hpp>
+#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/ir-inline.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
+#include "lib/big_int_util.h"
 #include "lib/error.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/ordered_map.h"
+#include "lib/safe_vector.h"
+#include "p4tools/common/lib/formulae.h"
 
 namespace P4Tools {
 

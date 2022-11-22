@@ -36,14 +36,14 @@ class ControlBodyTranslator : public virtual CodeGenInspector {
     explicit ControlBodyTranslator(const EBPFControl* control);
 
     // handle the packet_out.emit method
-    virtual void compileEmitField(const IR::Expression* expr, cstring field,
-                                  unsigned alignment, EBPFType* type);
+    virtual void compileEmitField(const IR::Expression* expr, cstring field, unsigned alignment,
+                                  EBPFType* type);
     virtual void compileEmit(const IR::Vector<IR::Argument>* args);
     virtual void processMethod(const P4::ExternMethod* method);
     virtual void processApply(const P4::ApplyMethod* method);
     virtual void processFunction(const P4::ExternFunction* function);
     void processCustomExternFunction(const P4::ExternFunction* function,
-                                     EBPFTypeFactory *typeFactory);
+                                     EBPFTypeFactory* typeFactory);
 
     bool preorder(const IR::PathExpression* expression) override;
     bool preorder(const IR::MethodCallExpression* expression) override;
@@ -51,24 +51,24 @@ class ControlBodyTranslator : public virtual CodeGenInspector {
     bool preorder(const IR::ReturnStatement*) override;
     bool preorder(const IR::IfStatement* statement) override;
     bool preorder(const IR::SwitchStatement* statement) override;
-    bool preorder(const IR::StructExpression *expr) override;
+    bool preorder(const IR::StructExpression* expr) override;
 };
 
 class EBPFControl : public EBPFObject {
  public:
-    const EBPFProgram*      program;
+    const EBPFProgram* program;
     const IR::ControlBlock* controlBlock;
-    const IR::Parameter*    headers;
-    const IR::Parameter*    accept;
-    const IR::Parameter*    parserHeaders;
+    const IR::Parameter* headers;
+    const IR::Parameter* accept;
+    const IR::Parameter* parserHeaders;
     // replace references to headers with references to parserHeaders
-    cstring                 hitVariable;
-    ControlBodyTranslator*  codeGen;
-    const bool              emitExterns;
+    cstring hitVariable;
+    ControlBodyTranslator* codeGen;
+    const bool emitExterns;
 
     std::set<const IR::Parameter*> toDereference;
-    std::map<cstring, EBPFTable*>  tables;
-    std::map<cstring, EBPFCounterTable*>  counters;
+    std::map<cstring, EBPFTable*> tables;
+    std::map<cstring, EBPFCounterTable*> counters;
 
     EBPFControl(const EBPFProgram* program, const IR::ControlBlock* block,
                 const IR::Parameter* parserHeaders);
@@ -81,11 +81,13 @@ class EBPFControl : public EBPFObject {
     EBPFTable* getTable(cstring name) const {
         auto result = ::get(tables, name);
         BUG_CHECK(result != nullptr, "No table named %1%", name);
-        return result; }
+        return result;
+    }
     EBPFCounterTable* getCounter(cstring name) const {
         auto result = ::get(counters, name);
         BUG_CHECK(result != nullptr, "No counter named %1%", name);
-        return result; }
+        return result;
+    }
 
  protected:
     void scanConstants();

@@ -33,20 +33,23 @@ clang-format checks whether the C/C++ code in this repository is formatted corre
 
 To check whether the code confirms to the correct formatting standard you can run
 ```
-./run-clang-format.sh
+make clang-format
 ```
+in the build directory.
 To automatically apply formatting to the entire configured code base run
 ```
-./run-clang-format.sh -w
+make clang-format-fix-errors
 ```
+in the build directory.
 
 ## cpplint
 cpplint contains additional semantic checks that are enforced. These are configured in `CPPLINT.cfg`
 
 To check whether the code confirms to the correct cpplint standard you can run
 ```
-./run-cpplint.sh
+make cpplint
 ```
+in the build directory.
 
 ## clang-tidy
 This repository also contains configurations for clang-tidy, which are listed in `.clang-tidy` file. These recommendations are not enforced yet.

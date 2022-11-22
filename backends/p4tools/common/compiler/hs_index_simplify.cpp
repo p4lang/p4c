@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "ir/id.h"
 #include "lib/cstring.h"
 
 namespace P4Tools {

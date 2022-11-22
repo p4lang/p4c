@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <list>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -9,17 +10,20 @@
 #include "backends/p4tools/common/lib/saturation_elim.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/util.h"
-#include "ir/irutils.h"
-#include "lib/error.h"
+#include "ir/declaration.h"
+#include "ir/node.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
 #include "lib/safe_vector.h"
+#include "p4tools/common/core/solver.h"
 
 #include "backends/p4tools/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/testgen/lib/continuation.h"
 #include "backends/p4tools/testgen/lib/exceptions.h"
 #include "backends/p4tools/testgen/lib/execution_state.h"
 #include "backends/p4tools/testgen/lib/gen_eq.h"
+#include "p4tools/testgen/core/program_info.h"
+#include "p4tools/testgen/core/small_step/abstract_stepper.h"
 
 namespace P4Tools {
 

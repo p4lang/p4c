@@ -45,15 +45,13 @@ class ProgramMap : public IHasDbPrint {
         return false;
     }
     void validateMap(const IR::Node* node) const {
-        if (node == nullptr || !node->is<IR::P4Program>() || program == nullptr)
-            return;
+        if (node == nullptr || !node->is<IR::P4Program>() || program == nullptr) return;
         if (program != node)
-            BUG("Invalid map %1%: computed for %2%, used for %3%",
-                mapKind, dbp(program), dbp(node));
+            BUG("Invalid map %1%: computed for %2%, used for %3%", mapKind, dbp(program),
+                dbp(node));
     }
     void updateMap(const IR::Node* node) {
-        if (node == nullptr || !node->is<IR::P4Program>())
-            return;
+        if (node == nullptr || !node->is<IR::P4Program>()) return;
         program = node->to<IR::P4Program>();
         LOG2(mapKind << " updated to " << dbp(node));
     }

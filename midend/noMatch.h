@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _MIDEND_NOMATCH_H_
 #define _MIDEND_NOMATCH_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -29,10 +29,13 @@ namespace P4 {
 /// state noMatch { verify(false, error.NoMatch); transition reject; }
 class DoHandleNoMatch : public Transform {
     NameGenerator* nameGen;
+
  public:
     const IR::ParserState* noMatch = nullptr;
-    explicit DoHandleNoMatch(NameGenerator* ng): nameGen(ng)
-    { CHECK_NULL(ng); setName("DoHandleNoMatch"); }
+    explicit DoHandleNoMatch(NameGenerator* ng) : nameGen(ng) {
+        CHECK_NULL(ng);
+        setName("DoHandleNoMatch");
+    }
     const IR::Node* postorder(IR::SelectExpression* expression) override;
     const IR::Node* postorder(IR::P4Parser* parser) override;
     const IR::Node* postorder(IR::P4Program* program) override;

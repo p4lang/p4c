@@ -1,13 +1,24 @@
 #include "backends/p4tools/common/lib/model.h"
 
+#include <list>
 #include <ostream>
+#include <string>
 #include <utility>
 
+#include <boost/container/vector.hpp>
+#include <boost/format.hpp>
+
+#include "ir/indexed_vector.h"
+#include "ir/ir-inline.h"
 #include "ir/irutils.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/ordered_map.h"
 #include "lib/safe_vector.h"
+#include "p4tools/common/lib/formulae.h"
 
 namespace P4Tools {
 

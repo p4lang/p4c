@@ -1,13 +1,18 @@
 #include "backends/p4tools/common/lib/format_int.h"
 
-#include <cstddef>
+#include <algorithm>
+#include <iomanip>
 #include <ostream>
 #include <string>
 
 #include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/cpp_int/bitwise.hpp>
 #include <boost/multiprecision/detail/et_ops.hpp>
+#include <boost/multiprecision/number.hpp>
 #include <boost/multiprecision/traits/explicit_conversion.hpp>
 
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
 #include "lib/log.h"
 
 namespace P4Tools {

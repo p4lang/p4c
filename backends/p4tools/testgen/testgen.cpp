@@ -4,17 +4,18 @@
 #include <cstdlib>
 #include <functional>
 #include <iostream>
-#include <memory>
 #include <string>
 
+#include <boost/cstdint.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 #include <boost/none.hpp>
 #include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
-#include "backends/p4tools/common/lib/timer.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "frontends/common/parser_options.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
 
 #include "backends/p4tools/testgen/core/exploration_strategy/exploration_strategy.h"
@@ -28,6 +29,8 @@
 #include "backends/p4tools/testgen/lib/logging.h"
 #include "backends/p4tools/testgen/lib/test_backend.h"
 #include "backends/p4tools/testgen/register.h"
+#include "p4tools/testgen/core/program_info.h"
+#include "p4tools/testgen/options.h"
 
 namespace fs = boost::filesystem;
 

@@ -6,6 +6,8 @@
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
 #include "midend/convertEnums.h"
 
 namespace P4Tools {

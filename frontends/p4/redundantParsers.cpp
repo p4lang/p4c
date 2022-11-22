@@ -20,14 +20,13 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 
 namespace P4 {
-bool FindRedundantParsers::preorder(const IR::P4Parser *parser) {
-    for (const IR::ParserState *state : parser->states) {
+bool FindRedundantParsers::preorder(const IR::P4Parser* parser) {
+    for (const IR::ParserState* state : parser->states) {
         if (state->name != IR::ParserState::start) {
             continue;
         }
-        const auto *pathExpr = state->selectExpression->to<IR::PathExpression>();
-        if (!pathExpr ||
-            pathExpr->path->name != IR::ParserState::accept ||
+        const auto* pathExpr = state->selectExpression->to<IR::PathExpression>();
+        if (!pathExpr || pathExpr->path->name != IR::ParserState::accept ||
             !state->components.empty()) {
             continue;
         }
@@ -37,7 +36,7 @@ bool FindRedundantParsers::preorder(const IR::P4Parser *parser) {
     return false;
 }
 
-const IR::Node *EliminateSubparserCalls::postorder(IR::MethodCallStatement *mcs) {
+const IR::Node* EliminateSubparserCalls::postorder(IR::MethodCallStatement* mcs) {
     auto mi = MethodInstance::resolve(mcs->methodCall, refMap, typeMap, true);
     if (!mi->isApply()) return mcs;
 
@@ -52,8 +51,7 @@ const IR::Node *EliminateSubparserCalls::postorder(IR::MethodCallStatement *mcs)
     auto p4parser = decl->to<IR::P4Parser>();
     if (!p4parser || !redundantParsers.count(p4parser)) return mcs;
 
-    LOG4("Removing apply call to redundant parser " << parser->getName()
-         << ": " << *mcs);
+    LOG4("Removing apply call to redundant parser " << parser->getName() << ": " << *mcs);
     return nullptr;
 }
-}
+}  // namespace P4

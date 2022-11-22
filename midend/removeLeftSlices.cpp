@@ -19,8 +19,7 @@ limitations under the License.
 namespace P4 {
 
 const IR::Node* DoRemoveLeftSlices::postorder(IR::AssignmentStatement* stat) {
-    if (!stat->left->is<IR::Slice>())
-        return stat;
+    if (!stat->left->is<IR::Slice>()) return stat;
     auto ls = stat->left->to<IR::Slice>();
     int h = ls->getH();
     int l = ls->getL();

@@ -5,11 +5,10 @@
 #include <utility>
 #include <vector>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
+#include "ir/declaration.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
-#include "lib/exceptions.h"
 
 #include "backends/p4tools/testgen/lib/test_spec.h"
 

@@ -33,8 +33,8 @@ boost::optional<std::string> stringReprConstant(big_int value, int width) {
     }
     BUG_CHECK(width > 0, "Unexpected width 0");
     size_t bitsRequired = floor_log2(value) + 1;
-    BUG_CHECK(static_cast<size_t>(width) >= bitsRequired,
-              "Cannot represent %1% on %2% bits", value, width);
+    BUG_CHECK(static_cast<size_t>(width) >= bitsRequired, "Cannot represent %1% on %2% bits", value,
+              width);
     // TODO(antonin): P4Runtime defines the canonical representation for bit<W>
     // value as the smallest binary string required to represent the value (no 0
     // padding). Unfortunately the reference P4Runtime implementation
@@ -45,9 +45,10 @@ boost::optional<std::string> stringReprConstant(big_int value, int width) {
     // auto bytes = ROUNDUP(mpz_sizeinbase(value.get_mpz_t(), 2), 8);
     auto bytes = ROUNDUP(width, 8);
     std::vector<char> data(bytes);
-    for (auto &d : data) {
+    for (auto& d : data) {
         big_int v = (value >> (--bytes * 8)) & 0xff;
-        d = static_cast<uint8_t>(v); }
+        d = static_cast<uint8_t>(v);
+    }
     return std::string(data.begin(), data.end());
 }
 

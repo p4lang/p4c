@@ -1,10 +1,8 @@
 #ifndef BACKENDS_P4TOOLS_TESTGEN_CORE_TARGET_H_
 #define BACKENDS_P4TOOLS_TESTGEN_CORE_TARGET_H_
 
-#include <stddef.h>
 #include <stdint.h>
 
-#include <map>
 #include <string>
 #include <vector>
 
@@ -14,7 +12,7 @@
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/core/target.h"
 #include "ir/ir.h"
-#include "lib/cstring.h"
+#include "ir/vector.h"
 
 #include "backends/p4tools/testgen/core/arch_spec.h"
 #include "backends/p4tools/testgen/core/exploration_strategy/exploration_strategy.h"

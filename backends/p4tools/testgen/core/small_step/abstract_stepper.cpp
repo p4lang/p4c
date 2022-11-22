@@ -13,10 +13,19 @@
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "ir/dump.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
+#include "p4tools/common/core/solver.h"
+
+#include "p4tools/testgen/core/program_info.h"
+#include "p4tools/testgen/core/small_step/small_step.h"
+#include "p4tools/testgen/lib/continuation.h"
+#include "p4tools/testgen/lib/execution_state.h"
 
 namespace P4Tools {
 

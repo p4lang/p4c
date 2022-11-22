@@ -19,16 +19,16 @@ limitations under the License.
 
 #include <sstream>
 
-#include <boost/optional.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/optional.hpp>
 
 #include "ir/ir.h"
-#include "typeUnification.h"
+#include "lib/castable.h"
+#include "lib/error_helper.h"
 #include "typeConstraints.h"
 #include "typeSubstitution.h"
 #include "typeSubstitutionVisitor.h"
-#include "lib/error_helper.h"
-#include "lib/castable.h"
+#include "typeUnification.h"
 
 namespace P4 {
 
@@ -39,17 +39,18 @@ class Explain : public Inspector {
 
  public:
     std::string explanation;
-    explicit Explain(const TypeVariableSubstitution* subst): subst(subst) { CHECK_NULL(subst); }
-    profile_t init_apply(const IR::Node* node) override
-    { explanation = ""; return Inspector::init_apply(node); }
+    explicit Explain(const TypeVariableSubstitution* subst) : subst(subst) { CHECK_NULL(subst); }
+    profile_t init_apply(const IR::Node* node) override {
+        explanation = "";
+        return Inspector::init_apply(node);
+    }
     void postorder(const IR::Type_Var* tv) override {
         if (explained.find(tv) != explained.end())
             // Do not repeat explanations.
             return;
         explained.emplace(tv);
         auto val = subst->lookup(tv);
-        if (!val)
-            return;
+        if (!val) return;
         explanation += "Where '" + tv->toString() + "' is bound to '" + val->toString() + "'\n";
         Explain erec(subst);  // recursive explain variables in this substitution
         erec.setCalledBy(this);
@@ -71,10 +72,9 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
     /// Place in source code which originated the contraint.  May be nullptr.
     const IR::Node* origin = nullptr;
 
-    explicit TypeConstraint(const TypeConstraint* derivedFrom):
-            id(crtid++), derivedFrom(derivedFrom) {}
-    explicit TypeConstraint(const IR::Node* origin):
-            id(crtid++), origin(origin) {}
+    explicit TypeConstraint(const TypeConstraint* derivedFrom)
+        : id(crtid++), derivedFrom(derivedFrom) {}
+    explicit TypeConstraint(const IR::Node* origin) : id(crtid++), origin(origin) {}
     std::string explain(size_t index, Explain* explainer) const {
         auto node = errArguments.at(index);
         node->apply(*explainer);
@@ -86,7 +86,7 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
         boost::format fmt = boost::format(errFormat);
         switch (errArguments.size()) {
             case 0:
-               message = boost::str(fmt);
+                message = boost::str(fmt);
                 break;
             case 1:
                 explanation += explain(0, explainer);
@@ -95,25 +95,24 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
             case 2:
                 explanation += explain(0, explainer);
                 explanation += explain(1, explainer);
-                message = ::error_helper(
-                    fmt, errArguments.at(0), errArguments.at(1)).toString();
+                message = ::error_helper(fmt, errArguments.at(0), errArguments.at(1)).toString();
                 break;
             case 3:
                 explanation += explain(0, explainer);
                 explanation += explain(1, explainer);
                 explanation += explain(2, explainer);
-                message = ::error_helper(
-                    fmt, errArguments.at(0), errArguments.at(1),
-                    errArguments.at(2)).toString();
+                message =
+                    ::error_helper(fmt, errArguments.at(0), errArguments.at(1), errArguments.at(2))
+                        .toString();
                 break;
             case 4:
                 explanation += explain(0, explainer);
                 explanation += explain(1, explainer);
                 explanation += explain(2, explainer);
                 explanation += explain(3, explainer);
-                message = ::error_helper(
-                    fmt, errArguments.at(0), errArguments.at(1),
-                    errArguments.at(2), errArguments.at(3)).toString();
+                message = ::error_helper(fmt, errArguments.at(0), errArguments.at(1),
+                                         errArguments.at(2), errArguments.at(3))
+                              .toString();
                 break;
             default:
                 BUG("Unexpected argument count for error message");
@@ -135,8 +134,8 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
         /// and it contains the actual source position where
         /// the analysis started.
         boost::format fmt(format);
-        cstring message = cstring("  ---- Actual error:\n") +
-                ::error_helper(fmt, args...).toString();
+        cstring message =
+            cstring("  ---- Actual error:\n") + ::error_helper(fmt, args...).toString();
         auto o = origin;
         auto constraint = this;
         Explain explainer(subst);
@@ -152,14 +151,13 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
         // Indent each string in the message
         std::string s = message.c_str();
         std::vector<std::string> lines;
-        boost::split(lines, s, [](char c){ return c == '\n'; });
+        boost::split(lines, s, [](char c) { return c == '\n'; });
         bool lastIsEmpty = lines.at(lines.size() - 1) == "";
         if (lastIsEmpty)
             // We don't want to indent an empty line.
             lines.pop_back();
         message = cstring::join(lines.begin(), lines.end(), "\n  ");
-        if (lastIsEmpty)
-            message += "\n";
+        if (lastIsEmpty) message += "\n";
 
         CHECK_NULL(o);
         ::errorWithSuffix(ErrorType::ERR_TYPE_ERROR, "%1%", message.c_str(), o);
@@ -176,16 +174,17 @@ class BinaryConstraint : public TypeConstraint {
     const IR::Type* right;
 
  protected:
-    BinaryConstraint(const IR::Type* left, const IR::Type* right,
-                     const TypeConstraint* derivedFrom)
-            : TypeConstraint(derivedFrom), left(left), right(right)
-    { validate(); }
-    BinaryConstraint(const IR::Type* left, const IR::Type* right,
-                     const IR::Node* origin)
-            : TypeConstraint(origin), left(left), right(right)
-    { validate(); }
+    BinaryConstraint(const IR::Type* left, const IR::Type* right, const TypeConstraint* derivedFrom)
+        : TypeConstraint(derivedFrom), left(left), right(right) {
+        validate();
+    }
+    BinaryConstraint(const IR::Type* left, const IR::Type* right, const IR::Node* origin)
+        : TypeConstraint(origin), left(left), right(right) {
+        validate();
+    }
     void validate() const {
-        CHECK_NULL(left); CHECK_NULL(right);
+        CHECK_NULL(left);
+        CHECK_NULL(right);
         if (left->is<IR::Type_Name>() || right->is<IR::Type_Name>())
             BUG("type names should not appear in unification: %1% and %2%", left, right);
     }
@@ -200,12 +199,12 @@ class EqualityConstraint : public BinaryConstraint {
  public:
     EqualityConstraint(const IR::Type* left, const IR::Type* right,
                        const TypeConstraint* derivedFrom)
-            : BinaryConstraint(left, right, derivedFrom) {}
-    EqualityConstraint(const IR::Type* left, const IR::Type* right,
-                       const IR::Node* origin)
-            : BinaryConstraint(left, right, origin) {}
-    void dbprint(std::ostream& out) const override
-    { out << "Constraint:" << dbp(left) << " = " << dbp(right); }
+        : BinaryConstraint(left, right, derivedFrom) {}
+    EqualityConstraint(const IR::Type* left, const IR::Type* right, const IR::Node* origin)
+        : BinaryConstraint(left, right, origin) {}
+    void dbprint(std::ostream& out) const override {
+        out << "Constraint:" << dbp(left) << " = " << dbp(right);
+    }
     using TypeConstraint::reportError;
     bool reportError(const TypeVariableSubstitution* subst) const override {
         return reportError(subst, "Cannot unify type '%1%' with type '%2%'", right, left);
@@ -220,12 +219,13 @@ class CanBeImplicitlyCastConstraint : public BinaryConstraint {
  public:
     CanBeImplicitlyCastConstraint(const IR::Type* left, const IR::Type* right,
                                   const TypeConstraint* derivedFrom)
-            : BinaryConstraint(left, right, derivedFrom) {}
+        : BinaryConstraint(left, right, derivedFrom) {}
     CanBeImplicitlyCastConstraint(const IR::Type* left, const IR::Type* right,
                                   const IR::Node* origin)
-            : BinaryConstraint(left, right, origin) {}
-    void dbprint(std::ostream& out) const override
-    { out << "Constraint:" << dbp(left) << " := " << dbp(right); }
+        : BinaryConstraint(left, right, origin) {}
+    void dbprint(std::ostream& out) const override {
+        out << "Constraint:" << dbp(left) << " := " << dbp(right);
+    }
     using TypeConstraint::reportError;
     bool reportError(const TypeVariableSubstitution* subst) const override {
         return reportError(subst, "Cannot cast implicitly type '%1%' to type '%2%'", right, left);
@@ -252,7 +252,7 @@ class TypeConstraints final : public IHasDbPrint {
      */
     std::set<const IR::ITypeVar*> unifiableTypeVariables;
     std::vector<const TypeConstraint*> constraints;
-    TypeUnification *unification;
+    TypeUnification* unification;
     const TypeVariableSubstitution* definedVariables;
     /// Keeps track of the values of all variables.
     TypeVariableSubstitution* currentSubstitution;
@@ -260,29 +260,29 @@ class TypeConstraints final : public IHasDbPrint {
  public:
     TypeVariableSubstitutionVisitor replaceVariables;
 
-    TypeConstraints(const TypeVariableSubstitution* definedVariables, const P4::TypeMap* typeMap):
-            unification(new TypeUnification(this, typeMap)),
-            definedVariables(definedVariables),
-            currentSubstitution(new TypeVariableSubstitution()),
-            replaceVariables(definedVariables) {}
+    TypeConstraints(const TypeVariableSubstitution* definedVariables, const P4::TypeMap* typeMap)
+        : unification(new TypeUnification(this, typeMap)),
+          definedVariables(definedVariables),
+          currentSubstitution(new TypeVariableSubstitution()),
+          replaceVariables(definedVariables) {}
     // Mark this variable as being free.
-    void addUnifiableTypeVariable(const IR::ITypeVar* typeVariable)
-    { unifiableTypeVariables.insert(typeVariable); }
+    void addUnifiableTypeVariable(const IR::ITypeVar* typeVariable) {
+        unifiableTypeVariables.insert(typeVariable);
+    }
 
     /// True if type is a type variable that can be unified.
     /// A variable is unifiable if it is marked so and it not already
     /// part of definedVariables.
     bool isUnifiableTypeVariable(const IR::Type* type);
     void add(const TypeConstraint* constraint) { constraints.push_back(constraint); }
-    void addEqualityConstraint(
-        const IR::Node* source, const IR::Type* left, const IR::Type* right);
+    void addEqualityConstraint(const IR::Node* source, const IR::Type* left, const IR::Type* right);
     /*
      * Solve the specified constraint.
      * @param subst      Variable substitution which is updated with new constraints.
      * @param constraint Constraint to solve.
      * @return           True on success.  Does not report error on failure.
      */
-    bool solve(const BinaryConstraint *constraint);
+    bool solve(const BinaryConstraint* constraint);
     TypeVariableSubstitution* solve();
     void dbprint(std::ostream& out) const;
     const TypeVariableSubstitution* getCurrentSubstitution() const { return currentSubstitution; }

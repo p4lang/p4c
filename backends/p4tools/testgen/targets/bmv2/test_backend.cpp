@@ -12,11 +12,18 @@
 #include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
+#include "p4tools/common/lib/model.h"
+#include "p4tools/common/lib/trace_events.h"
 
 #include "backends/p4tools/testgen/options.h"
 #include "backends/p4tools/testgen/targets/bmv2/backend/protobuf/protobuf.h"
 #include "backends/p4tools/testgen/targets/bmv2/backend/ptf/ptf.h"
 #include "backends/p4tools/testgen/targets/bmv2/backend/stf/stf.h"
+#include "p4tools/testgen/core/exploration_strategy/exploration_strategy.h"
+#include "p4tools/testgen/core/program_info.h"
+#include "p4tools/testgen/lib/execution_state.h"
+#include "p4tools/testgen/lib/test_backend.h"
+#include "p4tools/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools {
 

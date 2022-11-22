@@ -35,7 +35,10 @@ class CreateBuiltins final : public Transform {
     void checkGlobalAction();
 
  public:
-    CreateBuiltins() { setName("CreateBuiltins"); globalNoAction = nullptr; }
+    CreateBuiltins() {
+        setName("CreateBuiltins");
+        globalNoAction = nullptr;
+    }
     const IR::Node* postorder(IR::ParserState* state) override;
     const IR::Node* postorder(IR::P4Parser* parser) override;
     const IR::Node* postorder(IR::ActionListElement* element) override;

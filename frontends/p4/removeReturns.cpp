@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "removeReturns.h"
+
 #include "frontends/p4/methodInstance.h"
 
 namespace P4 {
@@ -63,8 +64,8 @@ const IR::Node* DoRemoveReturns::preorder(IR::Function* function) {
         return function;
     }
 
-    bool returnsVal = function->type->returnType != nullptr &&
-                      !function->type->returnType->is<IR::Type_Void>();
+    bool returnsVal =
+        function->type->returnType != nullptr && !function->type->returnType->is<IR::Type_Void>();
 
     cstring var = refMap->newName(variableName);
     returnVar = IR::ID(var, nullptr);
@@ -81,11 +82,9 @@ const IR::Node* DoRemoveReturns::preorder(IR::Function* function) {
     visit(function->body);
     auto body = new IR::BlockStatement(function->body->srcInfo, function->body->annotations);
     body->push_back(decl);
-    if (retvalDecl != nullptr)
-        body->push_back(retvalDecl);
+    if (retvalDecl != nullptr) body->push_back(retvalDecl);
     body->components.append(function->body->components);
-    if (returnsVal)
-        body->push_back(new IR::ReturnStatement(new IR::PathExpression(returnedValue)));
+    if (returnsVal) body->push_back(new IR::ReturnStatement(new IR::PathExpression(returnedValue)));
     auto result = new IR::Function(function->srcInfo, function->name, function->type, body);
     pop();
     BUG_CHECK(stack.empty(), "Non-empty stack");
@@ -128,12 +127,12 @@ const IR::Node* DoRemoveReturns::preorder(IR::ReturnStatement* statement) {
     auto vec = new IR::IndexedVector<IR::StatOrDecl>();
 
     auto left = new IR::PathExpression(returnVar);
-    vec->push_back(new IR::AssignmentStatement(statement->srcInfo, left,
-                                               new IR::BoolLiteral(true)));
+    vec->push_back(
+        new IR::AssignmentStatement(statement->srcInfo, left, new IR::BoolLiteral(true)));
     if (statement->expression != nullptr) {
         left = new IR::PathExpression(returnedValue);
-        vec->push_back(new IR::AssignmentStatement(statement->srcInfo, left,
-                                                   statement->expression));
+        vec->push_back(
+            new IR::AssignmentStatement(statement->srcInfo, left, statement->expression));
     }
     return new IR::BlockStatement(*vec);
 }
@@ -166,8 +165,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::BlockStatement* statement) {
             ret = r;
         }
     }
-    if (!stack.empty())
-        set(ret);
+    if (!stack.empty()) set(ret);
     prune();
     return block;
 }
@@ -175,8 +173,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::BlockStatement* statement) {
 const IR::Node* DoRemoveReturns::preorder(IR::IfStatement* statement) {
     push();
     visit(statement->ifTrue);
-    if (statement->ifTrue == nullptr)
-        statement->ifTrue = new IR::EmptyStatement();
+    if (statement->ifTrue == nullptr) statement->ifTrue = new IR::EmptyStatement();
     auto rt = hasReturned();
     auto rf = TernaryBool::No;
     pop();
@@ -199,7 +196,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::IfStatement* statement) {
 const IR::Node* DoRemoveReturns::preorder(IR::SwitchStatement* statement) {
     auto r = TernaryBool::No;
     push();
-    for (auto &swCase : statement->cases) {
+    for (auto& swCase : statement->cases) {
         push();
         visit(swCase);
         if (hasReturned() != TernaryBool::No)

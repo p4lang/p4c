@@ -16,6 +16,7 @@
 #include "frontends/p4/frontend.h"
 #include "lib/compile_context.h"
 #include "lib/error.h"
+#include "p4tools/common/core/target.h"
 
 namespace P4Tools {
 

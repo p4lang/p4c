@@ -45,8 +45,7 @@ class ParserOptions : public Util::Options {
 
  protected:
     // Function that is returned by getDebugHook.
-    void dumpPass(const char* manager, unsigned seq, const char* pass,
-                  const IR::Node* node) const;
+    void dumpPass(const char* manager, unsigned seq, const char* pass, const IR::Node* node) const;
     // Checks if parsed options make sense with respect to each-other.
     virtual void validateOptions() const;
 
@@ -77,7 +76,7 @@ class ParserOptions : public Util::Options {
     // Expect that the only remaining argument is the input file.
     void setInputFile();
     // Return target specific include path.
-    const char *getIncludePath() override;
+    const char* getIncludePath() override;
     // Returns the output of the preprocessor.
     FILE* preprocess();
     // Closes the input stream returned by preprocess.
@@ -88,11 +87,11 @@ class ParserOptions : public Util::Options {
     // in the pass managers that are executed.
     DebugHook getDebugHook() const;
     // Check whether this particular annotation was disabled
-    bool isAnnotationDisabled(const IR::Annotation *a) const;
+    bool isAnnotationDisabled(const IR::Annotation* a) const;
     // Search and set 'includePathOut' to be the first valid path from the
     // list of possible relative paths.
-    bool searchForIncludePath(const char*& includePathOut,
-        std::vector<cstring> relativePaths, const char*);
+    bool searchForIncludePath(const char*& includePathOut, std::vector<cstring> relativePaths,
+                              const char*);
     /// If true do not generate #include statements.
     /// Used for debugging.
     bool noIncludes = false;
@@ -128,8 +127,7 @@ class P4CContext : public BaseCompileContext {
 
     /// @return the action to take for the given diagnostic, falling back to the
     /// default action if it wasn't overridden via the command line or a pragma.
-    DiagnosticAction getDiagnosticAction(cstring diagnostic,
-                                         DiagnosticAction defaultAction) final {
+    DiagnosticAction getDiagnosticAction(cstring diagnostic, DiagnosticAction defaultAction) final {
         return errorReporter().getDiagnosticAction(diagnostic, defaultAction);
     }
 
@@ -176,4 +174,4 @@ class P4CContextWithOptions final : public P4CContext {
     OptionsType optionsInstance;
 };
 
-#endif  /* FRONTENDS_COMMON_PARSER_OPTIONS_H_*/
+#endif /* FRONTENDS_COMMON_PARSER_OPTIONS_H_*/

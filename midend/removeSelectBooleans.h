@@ -35,8 +35,9 @@ class DoRemoveSelectBooleans : public Transform {
     const P4::TypeMap* typeMap;
 
     const IR::Expression* addToplevelCasts(const IR::Expression* expression);
+
  public:
-    explicit DoRemoveSelectBooleans(const P4::TypeMap* typeMap): typeMap(typeMap) {
+    explicit DoRemoveSelectBooleans(const P4::TypeMap* typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("DoRemoveSelectBooleans");
     }
@@ -49,8 +50,7 @@ class RemoveSelectBooleans : public PassManager {
  public:
     RemoveSelectBooleans(ReferenceMap* refMap, TypeMap* typeMap,
                          TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoRemoveSelectBooleans(typeMap));
         passes.push_back(new ClearTypeMap(typeMap));  // some types have changed

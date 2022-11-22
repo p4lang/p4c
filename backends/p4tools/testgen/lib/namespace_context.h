@@ -5,6 +5,7 @@
 
 #include <boost/optional/optional.hpp>
 
+#include "ir/declaration.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 

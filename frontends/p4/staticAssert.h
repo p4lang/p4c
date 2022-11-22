@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_STATICASSERT_H_
 #define _FRONTENDS_P4_STATICASSERT_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -33,9 +33,12 @@ class DoStaticAssert : public Transform {
     bool removeStatement;
 
  public:
-    DoStaticAssert(ReferenceMap* refMap, TypeMap* typeMap):
-            refMap(refMap), typeMap(typeMap), removeStatement(false)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoStaticAssert"); }
+    DoStaticAssert(ReferenceMap* refMap, TypeMap* typeMap)
+        : refMap(refMap), typeMap(typeMap), removeStatement(false) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        setName("DoStaticAssert");
+    }
     const IR::Node* postorder(IR::MethodCallExpression* method) override {
         MethodInstance* mi = MethodInstance::resolve(method, refMap, typeMap);
         if (auto ef = mi->to<ExternFunction>()) {
@@ -43,8 +46,8 @@ class DoStaticAssert : public Transform {
                 auto subst = ef->substitution;
                 auto params = subst.getParametersInOrder();
                 if (!params->moveNext()) {
-                    ::warning(ErrorType::WARN_INVALID,
-                              "static_assert with no arguments: %1%", method);
+                    ::warning(ErrorType::WARN_INVALID, "static_assert with no arguments: %1%",
+                              method);
                     return method;
                 }
                 auto param = params->getCurrent();
@@ -63,8 +66,7 @@ class DoStaticAssert : public Transform {
                                 message = sl->value;
                             }
                         }
-                        ::error(ErrorType::ERR_EXPECTED, "%1%: %2%",
-                                method, message);
+                        ::error(ErrorType::ERR_EXPECTED, "%1%: %2%", method, message);
                         return method;
                     }
                     if (getContext()->node->is<IR::MethodCallStatement>()) {

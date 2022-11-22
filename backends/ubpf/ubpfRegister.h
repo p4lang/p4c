@@ -24,22 +24,17 @@ namespace UBPF {
 
 class UBPFRegister final : public UBPFTableBase {
  public:
-    UBPFRegister(const UBPFProgram *program, const IR::ExternBlock *block,
-                 cstring name, EBPF::CodeGenInspector *codeGen);
+    UBPFRegister(const UBPFProgram* program, const IR::ExternBlock* block, cstring name,
+                 EBPF::CodeGenInspector* codeGen);
 
-    void emitInstance(EBPF::CodeBuilder *builder);
-    void emitRegisterRead(EBPF::CodeBuilder *builder,
-                          const IR::MethodCallExpression *expression);
-    void emitRegisterWrite(EBPF::CodeBuilder *builder,
-                           const IR::MethodCallExpression *expression);
-    void emitMethodInvocation(EBPF::CodeBuilder *builder,
-                              const P4::ExternMethod *method);
-    void emitKeyInstance(EBPF::CodeBuilder *builder,
-                         const IR::MethodCallExpression *expression);
-    cstring emitValueInstanceIfNeeded(EBPF::CodeBuilder *builder,
-                                      const IR::Argument *arg_value);
+    void emitInstance(EBPF::CodeBuilder* builder);
+    void emitRegisterRead(EBPF::CodeBuilder* builder, const IR::MethodCallExpression* expression);
+    void emitRegisterWrite(EBPF::CodeBuilder* builder, const IR::MethodCallExpression* expression);
+    void emitMethodInvocation(EBPF::CodeBuilder* builder, const P4::ExternMethod* method);
+    void emitKeyInstance(EBPF::CodeBuilder* builder, const IR::MethodCallExpression* expression);
+    cstring emitValueInstanceIfNeeded(EBPF::CodeBuilder* builder, const IR::Argument* arg_value);
 };
 
 }  // namespace UBPF
 
-#endif  /* BACKENDS_UBPF_UBPFREGISTER_H_ */
+#endif /* BACKENDS_UBPF_UBPFREGISTER_H_ */

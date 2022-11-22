@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "frontends/common/applyOptionsPragmas.h"
+
 #include "frontends/common/options.h"
 #include "frontends/parsers/parserDriver.h"
 #include "lib/error.h"
@@ -22,8 +23,7 @@ limitations under the License.
 
 namespace P4 {
 
-ApplyOptionsPragmas::ApplyOptionsPragmas(IOptionPragmaParser& parser)
-        : parser(parser) {
+ApplyOptionsPragmas::ApplyOptionsPragmas(IOptionPragmaParser& parser) : parser(parser) {
     // Add an initial "option" which will ultimately be ignored.
     // Util::Options::process() expects its arguments to be `argc` and `argv`,
     // so it skips over `argv[0]`, which would ordinarily be the program name.
@@ -44,20 +44,18 @@ void ApplyOptionsPragmas::end_apply() {
     // XXX(seth): It'd be nice if the user's command line options took
     // precedence; currently, pragmas override the command line.
     auto& compilerOptionsInstance = P4CContext::get().options();
-    compilerOptionsInstance.process(options.size(),
-                                    const_cast<char* const*>(options.data()));
+    compilerOptionsInstance.process(options.size(), const_cast<char* const*>(options.data()));
 }
 
-boost::optional<IOptionPragmaParser::CommandLineOptions>
-P4COptionPragmaParser::tryToParse(const IR::Annotation* annotation) {
+boost::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::tryToParse(
+    const IR::Annotation* annotation) {
     auto pragmaName = annotation->name.name;
-    if (pragmaName == "diagnostic")
-        return parseDiagnostic(annotation);
+    if (pragmaName == "diagnostic") return parseDiagnostic(annotation);
     return boost::none;
 }
 
-boost::optional<IOptionPragmaParser::CommandLineOptions>
-P4COptionPragmaParser::parseDiagnostic(const IR::Annotation* annotation) {
+boost::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::parseDiagnostic(
+    const IR::Annotation* annotation) {
     CommandLineOptions newOptions;
 
     auto pragmaArgs = &annotation->expr;
@@ -67,8 +65,7 @@ P4COptionPragmaParser::parseDiagnostic(const IR::Annotation* annotation) {
     // here.
     if (pragmaArgs->empty()) {
         auto parseResult =
-            P4ParserDriver::parseExpressionList(annotation->srcInfo,
-                                                annotation->body);
+            P4ParserDriver::parseExpressionList(annotation->srcInfo, annotation->body);
         if (parseResult != nullptr) {
             pragmaArgs = parseResult;
         }
@@ -95,8 +92,10 @@ P4COptionPragmaParser::parseDiagnostic(const IR::Annotation* annotation) {
     } else if (diagnosticAction->value == "error") {
         diagnosticOption = "--Werror=";
     } else {
-        ::warning(ErrorType::WARN_MISMATCH, "@diagnostic's second argument must be 'disable', "
-                  "'warn', or 'error': %1%", annotation);
+        ::warning(ErrorType::WARN_MISMATCH,
+                  "@diagnostic's second argument must be 'disable', "
+                  "'warn', or 'error': %1%",
+                  annotation);
         return boost::none;
     }
 

@@ -2,7 +2,6 @@
 #define BACKENDS_P4TOOLS_TESTGEN_TEST_SMALL_STEP_UTIL_H_
 
 #include <functional>
-#include <map>
 #include <stack>
 #include <string>
 #include <vector>
@@ -17,8 +16,12 @@
 #include "gtest/gtest-message.h"
 #include "gtest/gtest-test-part.h"
 #include "gtest/gtest.h"
+#include "ir/declaration.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/vector.h"
 #include "lib/enumerator.h"
+#include "p4tools/common/lib/model.h"
 
 #include "backends/p4tools/testgen/core/small_step/small_step.h"
 #include "backends/p4tools/testgen/core/target.h"

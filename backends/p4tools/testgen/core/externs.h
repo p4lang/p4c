@@ -10,7 +10,9 @@
 #include <utility>
 #include <vector>
 
+#include "ir/id.h"
 #include "ir/ir.h"
+#include "ir/vector.h"
 #include "lib/cstring.h"
 
 #include "backends/p4tools/testgen/core/small_step/small_step.h"

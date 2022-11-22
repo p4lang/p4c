@@ -4,12 +4,16 @@
 #include <cstddef>
 #include <vector>
 
+#include <boost/none.hpp>
+#include <boost/optional/optional.hpp>
+
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/coverage.h"
+#include "ir/declaration.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
-#include "lib/null.h"
+#include "p4tools/common/lib/formulae.h"
 
 #include "backends/p4tools/testgen/core/arch_spec.h"
 #include "backends/p4tools/testgen/lib/concolic.h"

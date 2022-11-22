@@ -80,4 +80,4 @@ class CompilerOptions : public ParserOptions {
 
     virtual bool enable_intrinsic_metadata_fix();
 };
-#endif  /* FRONTENDS_COMMON_OPTIONS_H_ */
+#endif /* FRONTENDS_COMMON_OPTIONS_H_ */

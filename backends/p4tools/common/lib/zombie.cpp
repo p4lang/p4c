@@ -4,6 +4,9 @@
 #include <string>
 #include <utility>
 
+#include "ir/id.h"
+#include "p4tools/common/lib/formulae.h"
+
 namespace P4Tools {
 
 const cstring Zombie::P4tZombie = "p4t*zombie";

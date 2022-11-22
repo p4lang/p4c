@@ -1,30 +1,31 @@
 #include "backends/p4tools/testgen/core/exploration_strategy/exploration_strategy.h"
 
 #include <algorithm>
-#include <cstdlib>
 #include <fstream>
 #include <iterator>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include <boost/format.hpp>
 #include <boost/none.hpp>
-#include <boost/variant/get.hpp>
 
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/timer.h"
-#include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/irutils.h"
-#include "lib/cstring.h"
 #include "lib/error.h"
-#include "lib/exceptions.h"
-#include "lib/log.h"
+#include "p4tools/common/core/solver.h"
+#include "p4tools/common/lib/coverage.h"
+#include "p4tools/common/lib/formulae.h"
 
-#include "backends/p4tools/testgen/lib/continuation.h"
-#include "backends/p4tools/testgen/lib/exceptions.h"
 #include "backends/p4tools/testgen/lib/logging.h"
-#include "backends/p4tools/testgen/options.h"
+#include "p4tools/testgen/core/program_info.h"
+#include "p4tools/testgen/core/small_step/small_step.h"
+#include "p4tools/testgen/lib/execution_state.h"
+#include "p4tools/testgen/lib/final_state.h"
 
 namespace P4Tools {
 

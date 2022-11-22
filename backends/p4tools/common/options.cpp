@@ -2,7 +2,6 @@
 
 #include <string.h>
 
-#include <algorithm>
 #include <cstdlib>
 #include <functional>
 #include <string>

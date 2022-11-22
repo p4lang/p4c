@@ -20,14 +20,10 @@ limitations under the License.
 #include "lib/cstring.h"
 
 namespace P4 {
-enum class TernaryBool {
-    Yes,
-    No,
-    Maybe
-};
+enum class TernaryBool { Yes, No, Maybe };
 
 cstring toString(const TernaryBool& c);
 
 }  // namespace P4
 
-#endif  /* _FRONTENDS_P4_TERNARYBOOL_H_ */
+#endif /* _FRONTENDS_P4_TERNARYBOOL_H_ */

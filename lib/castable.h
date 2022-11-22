@@ -32,26 +32,26 @@ class ICastable {
 
     /// Tries to convert the class to type T. Returns a nullptr if the cast fails.
     template <typename T>
-    const T &as() const {
-        return dynamic_cast<const T &>(*this);
+    const T& as() const {
+        return dynamic_cast<const T&>(*this);
     }
 
     /// Tries to convert the class to type T. Returns a nullptr if the cast fails.
     template <typename T>
-    T *to() {
-        return dynamic_cast<T *>(this);
+    T* to() {
+        return dynamic_cast<T*>(this);
     }
 
     /// Tries to convert the class to type T. Returns a nullptr if the cast fails.
     template <typename T>
-    const T *to() const {
-        return dynamic_cast<const T *>(this);
+    const T* to() const {
+        return dynamic_cast<const T*>(this);
     }
 
     /// Performs a checked cast. A BUG occurs if the cast fails.
     template <typename T>
-    const T *checkedTo() const {
-        auto *result = to<T>();
+    const T* checkedTo() const {
+        auto* result = to<T>();
         BUG_CHECK(result, "Cast failed: %1% is not a %2%", this, typeid(T).name());
         return result;
     }

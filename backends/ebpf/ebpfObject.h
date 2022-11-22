@@ -17,13 +17,13 @@ limitations under the License.
 #ifndef _BACKENDS_EBPF_EBPFOBJECT_H_
 #define _BACKENDS_EBPF_EBPFOBJECT_H_
 
-#include "target.h"
-#include "ebpfModel.h"
-#include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/p4/evaluator/evaluator.h"
 #include "codeGen.h"
+#include "ebpfModel.h"
+#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 #include "lib/castable.h"
+#include "target.h"
 
 namespace EBPF {
 
