@@ -17,11 +17,11 @@
 #include "lib/null.h"
 #include "p4tools/common/lib/formulae.h"
 
+#include "backends/p4tools/common/compiler/p4_asserts_parser.h"
 #include "backends/p4tools/testgen//lib/exceptions.h"
 #include "backends/p4tools/testgen/core/target.h"
 #include "backends/p4tools/testgen/lib/concolic.h"
 #include "backends/p4tools/testgen/targets/bmv2/concolic.h"
-#include "backends/p4tools/testgen/targets/bmv2/p4_asserts_parser.h"
 #include "backends/p4tools/testgen/targets/bmv2/p4_refers_to_parser.h"
 #include "p4tools/testgen/core/arch_spec.h"
 #include "p4tools/testgen/core/program_info.h"
