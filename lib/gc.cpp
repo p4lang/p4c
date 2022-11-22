@@ -37,6 +37,7 @@ limitations under the License.
 #define _GLIBCXX_USE_NOEXCEPT _NOEXCEPT
 #endif
 
+#if HAVE_LIBGC
 static bool done_init, started_init;
 // emergency pool to allow a few extra allocations after a bad_alloc is thrown so we
 // can generate reasonable errors, a stack trace, etc
@@ -44,7 +45,6 @@ static char emergency_pool[16 * 1024];
 static char* emergency_ptr;
 
 // One can disable the GC, e.g., to run under Valgrind, by editing config.h
-#if HAVE_LIBGC
 void* operator new(std::size_t size) {
     /* DANGER -- on OSX, can't safely call the garbage collector allocation
      * routines from a static global constructor without manually initializing
