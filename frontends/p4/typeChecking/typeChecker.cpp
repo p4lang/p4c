@@ -3400,6 +3400,11 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             }
         }
 
+        if (getContext()->node->is<IR::ActionListElement>()) {
+            typeError("%1% is not invoking an action", expression);
+            return expression;
+        }
+
         // We build a type for the callExpression and unify it with the method expression
         // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
         auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), "<returned type>"));
