@@ -944,6 +944,8 @@ std::pair<const IR::Type*, const IR::Vector<IR::Argument>*> TypeInference::check
         if (named) {
             param = functionType->parameters->getParameter(argName);
         } else {
+            BUG_CHECK(paramIt != functionType->parameters->end(), "Not enough parameters %1%",
+                      errorPosition);
             param = *paramIt;
         }
 
