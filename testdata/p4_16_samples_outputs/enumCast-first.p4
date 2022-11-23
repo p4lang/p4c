@@ -42,8 +42,8 @@ parser p(packet_in packet, out O o) {
         bb = bb && a == 8w0;
         bb = bb && b == 8w0;
         a = (E1)b;
-        a = (E1)(E1.e1 + 8w1);
-        a = (E1)(E2.e1 + E2.e2);
+        a = (E1)8w1;
+        a = (E1)8w21;
         packet.extract<B>(o.b);
         transition select(o.b.x) {
             X.Zero &&& 32w0x1: accept;
