@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _MIDEND_VALIDATEPROPERTIES_H_
 #define _MIDEND_VALIDATEPROPERTIES_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -30,6 +30,7 @@ namespace P4 {
  */
 class ValidateTableProperties : public Inspector {
     std::set<cstring> legalProperties;
+
  public:
     ValidateTableProperties(const std::initializer_list<cstring> legal) {
         setName("ValidateTableProperties");
@@ -37,12 +38,11 @@ class ValidateTableProperties : public Inspector {
         legalProperties.emplace("default_action");
         legalProperties.emplace("key");
         legalProperties.emplace("entries");
-        for (auto l : legal)
-            legalProperties.emplace(l);
+        for (auto l : legal) legalProperties.emplace(l);
     }
     void postorder(const IR::Property* property) override;
     // don't check properties in externs (Declaration_Instances)
-    bool preorder(const IR::Declaration_Instance *) override { return false; }
+    bool preorder(const IR::Declaration_Instance*) override { return false; }
 };
 
 }  // namespace P4

@@ -17,15 +17,15 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKCHECKEXTERNINVOCATION_H_
 #define BACKENDS_DPDK_DPDKCHECKEXTERNINVOCATION_H_
 
+#include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
-#include "frontends/p4/methodInstance.h"
 #include "midend/checkExternInvocationCommon.h"
 
 namespace P4 {
 class ReferenceMap;
 class TypeMap;
-}
+}  // namespace P4
 
 namespace DPDK {
 
@@ -34,7 +34,7 @@ namespace DPDK {
  *        methods and functions.
  */
 class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
-    DpdkProgramStructure *structure;
+    DpdkProgramStructure* structure;
 
     enum block_t {
         MAIN_PARSER = 0,
@@ -53,44 +53,44 @@ class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
     }
 
     cstring getBlockName(int bit) override {
-        static const char* lookup[] = {"main parser", "pre control",
-            "main control", "main deparser"};
-        BUG_CHECK(sizeof(lookup)/sizeof(lookup[0]) == BLOCK_COUNT, "Bad lookup table");
+        static const char* lookup[] = {"main parser", "pre control", "main control",
+                                       "main deparser"};
+        BUG_CHECK(sizeof(lookup) / sizeof(lookup[0]) == BLOCK_COUNT, "Bad lookup table");
         return lookup[bit % BLOCK_COUNT];
     }
 
-    const IR::P4Parser *getParser(const cstring parserName) {
+    const IR::P4Parser* getParser(const cstring parserName) {
         if (auto p = findContext<IR::P4Parser>()) {
             if (structure->parsers.count(parserName) != 0 &&
-                    structure->parsers.at(parserName)->name == p->name) {
+                structure->parsers.at(parserName)->name == p->name) {
                 return p;
             }
         }
         return nullptr;
     }
 
-    const IR::P4Control *getControl(const cstring controlName) {
+    const IR::P4Control* getControl(const cstring controlName) {
         if (auto c = findContext<IR::P4Control>()) {
             if (structure->pipelines.count(controlName) != 0 &&
-                    structure->pipelines.at(controlName)->name == c->name) {
+                structure->pipelines.at(controlName)->name == c->name) {
                 return c;
             }
         }
         return nullptr;
     }
 
-    const IR::P4Control *getDeparser(const cstring deparserName) {
+    const IR::P4Control* getDeparser(const cstring deparserName) {
         if (auto d = findContext<IR::P4Control>()) {
             if (structure->deparsers.count(deparserName) != 0 &&
-                    structure->deparsers.at(deparserName)->name == d->name) {
+                structure->deparsers.at(deparserName)->name == d->name) {
                 return d;
             }
         }
         return nullptr;
     }
 
-    void checkBlock(const IR::MethodCallExpression *expr,
-            const cstring externType, const cstring externName) {
+    void checkBlock(const IR::MethodCallExpression* expr, const cstring externType,
+                    const cstring externName) {
         bitvec pos;
 
         LOG4("externType: " << externType << ", externName: " << externName);
@@ -120,22 +120,22 @@ class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
         }
     }
 
-    void checkExtern(const P4::ExternMethod *extMethod,
-            const IR::MethodCallExpression *expr) override {
+    void checkExtern(const P4::ExternMethod* extMethod,
+                     const IR::MethodCallExpression* expr) override {
         LOG3("ExternMethod: " << extMethod << ", MethodCallExpression: " << expr);
         checkBlock(expr, extMethod->originalExternType->name, extMethod->object->getName().name);
     }
 
-    void checkExtern(const P4::ExternFunction *extFunction,
-            const IR::MethodCallExpression *expr) override {
+    void checkExtern(const P4::ExternFunction* extFunction,
+                     const IR::MethodCallExpression* expr) override {
         LOG3("ExternFunction: " << extFunction << ", MethodCallExpression: " << expr);
         checkBlock(expr, expr->method->toString(), "");
     }
 
  public:
-    CheckPNAExternInvocation(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-            DpdkProgramStructure *structure) :
-            P4::CheckExternInvocationCommon(refMap, typeMap), structure(structure) {
+    CheckPNAExternInvocation(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                             DpdkProgramStructure* structure)
+        : P4::CheckExternInvocationCommon(refMap, typeMap), structure(structure) {
         initPipeConstraints();
     }
 };
@@ -145,15 +145,16 @@ class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
  *        of extern methods and functions depending on the architecture.
  */
 class CheckExternInvocation : public Inspector {
-    P4::ReferenceMap     *refMap;
-    P4::TypeMap          *typeMap;
-    DpdkProgramStructure *structure;
- public:
-    CheckExternInvocation(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-            DpdkProgramStructure *structure) :
-            refMap(refMap), typeMap(typeMap), structure(structure) {}
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    DpdkProgramStructure* structure;
 
-    bool preorder(const IR::P4Program *program) {
+ public:
+    CheckExternInvocation(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                          DpdkProgramStructure* structure)
+        : refMap(refMap), typeMap(typeMap), structure(structure) {}
+
+    bool preorder(const IR::P4Program* program) {
         if (structure->isPNA()) {
             LOG1("Checking extern invocations for PNA architecture.");
             auto checker = new CheckPNAExternInvocation(refMap, typeMap, structure);
@@ -171,4 +172,3 @@ class CheckExternInvocation : public Inspector {
 }  // namespace DPDK
 
 #endif /* BACKENDS_DPDK_DPDKCHECKEXTERNINVOCATION_H_ */
-

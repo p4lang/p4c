@@ -24,13 +24,14 @@ limitations under the License.
  */
 
 #include "dpdkArch.h"
+
 #include "dpdkHelpers.h"
 #include "dpdkUtils.h"
-#include "frontends/p4/coreLibrary.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/externInstance.h"
-#include "frontends/p4/typeMap.h"
 #include "frontends/p4/tableApply.h"
+#include "frontends/p4/typeMap.h"
 
 namespace DPDK {
 
@@ -45,18 +46,17 @@ cstring TypeStruct2Name(const cstring s) {
 // This function is a sanity to check whether the component of a Expression
 // falls into following classes, if not, it means we haven't implemented a
 // handle for that class.
-void expressionUnrollSanityCheck(const IR::Expression *e) {
-    if (!e->is<IR::Operation_Unary>() &&
-            !e->is<IR::MethodCallExpression>() && !e->is<IR::Member>() &&
-            !e->is<IR::PathExpression>() && !e->is<IR::Operation_Binary>() &&
-            !e->is<IR::Constant>() && !e->is<IR::BoolLiteral>()) {
+void expressionUnrollSanityCheck(const IR::Expression* e) {
+    if (!e->is<IR::Operation_Unary>() && !e->is<IR::MethodCallExpression>() &&
+        !e->is<IR::Member>() && !e->is<IR::PathExpression>() && !e->is<IR::Operation_Binary>() &&
+        !e->is<IR::Constant>() && !e->is<IR::BoolLiteral>()) {
         std::cerr << e->node_type_name() << std::endl;
         BUG("Untraversed node");
     }
 }
 
-const IR::Type_Control *
-ConvertToDpdkArch::rewriteControlType(const IR::Type_Control *c, cstring name) {
+const IR::Type_Control* ConvertToDpdkArch::rewriteControlType(const IR::Type_Control* c,
+                                                              cstring name) {
     auto applyParams = new IR::ParameterList();
     if (name == "Ingress" || name == "Egress") {
         auto header = c->applyParams->parameters.at(0);
@@ -74,13 +74,12 @@ ConvertToDpdkArch::rewriteControlType(const IR::Type_Control *c, cstring name) {
         auto meta = c->applyParams->parameters.at(1);
         applyParams->push_back(new IR::Parameter(IR::ID("m"), meta->direction, meta->type));
     }
-    auto tc = new IR::Type_Control(c->name, c->annotations, c->typeParameters,
-                                   applyParams);
+    auto tc = new IR::Type_Control(c->name, c->annotations, c->typeParameters, applyParams);
     return tc;
 }
 
-const IR::Type_Control *
-ConvertToDpdkArch::rewriteDeparserType(const IR::Type_Control *c, cstring name) {
+const IR::Type_Control* ConvertToDpdkArch::rewriteDeparserType(const IR::Type_Control* c,
+                                                               cstring name) {
     auto applyParams = new IR::ParameterList();
     if (name == "IngressDeparser") {
         applyParams->push_back(c->applyParams->parameters.at(0));
@@ -106,16 +105,14 @@ ConvertToDpdkArch::rewriteDeparserType(const IR::Type_Control *c, cstring name) 
 }
 
 // translate control block signature in arch.p4
-const IR::Node *ConvertToDpdkArch::postorder(IR::Type_Control *c) {
+const IR::Node* ConvertToDpdkArch::postorder(IR::Type_Control* c) {
     const IR::Type_Control* t = nullptr;
     for (auto kv : structure->pipelines) {
-        if (kv.second->type->name != c->name)
-            continue;
+        if (kv.second->type->name != c->name) continue;
         t = rewriteControlType(c, kv.first);
     }
     for (auto kv : structure->deparsers) {
-        if (kv.second->type->name != c->name)
-            continue;
+        if (kv.second->type->name != c->name) continue;
         t = rewriteDeparserType(c, kv.first);
     }
     // Ingress, Egress, IngressDeparser, EgressDeparser are reserved name in psa.p4
@@ -133,27 +130,24 @@ const IR::Node *ConvertToDpdkArch::postorder(IR::Type_Control *c) {
     return t;
 }
 
-const IR::Type_Parser *
-ConvertToDpdkArch::rewriteParserType(const IR::Type_Parser *p, cstring name) {
+const IR::Type_Parser* ConvertToDpdkArch::rewriteParserType(const IR::Type_Parser* p,
+                                                            cstring name) {
     auto applyParams = new IR::ParameterList();
-    if (name == "IngressParser" || name == "EgressParser" ||
-        name == "MainParserT") {
+    if (name == "IngressParser" || name == "EgressParser" || name == "MainParserT") {
         applyParams->push_back(p->applyParams->parameters.at(0));
         auto header = p->applyParams->parameters.at(1);
         applyParams->push_back(new IR::Parameter(IR::ID("h"), header->direction, header->type));
         auto meta = p->applyParams->parameters.at(2);
         applyParams->push_back(new IR::Parameter(IR::ID("m"), meta->direction, meta->type));
     }
-    auto tp = new IR::Type_Parser(p->name, p->annotations, p->typeParameters,
-                                  applyParams);
+    auto tp = new IR::Type_Parser(p->name, p->annotations, p->typeParameters, applyParams);
     return tp;
 }
 
-const IR::Node *ConvertToDpdkArch::postorder(IR::Type_Parser *p) {
+const IR::Node* ConvertToDpdkArch::postorder(IR::Type_Parser* p) {
     const IR::Type_Parser* t = nullptr;
     for (auto kv : structure->parsers) {
-        if (kv.second->type->name != p->name)
-            continue;
+        if (kv.second->type->name != p->name) continue;
         t = rewriteParserType(p, kv.first);
     }
     if (p->name == "IngressParser" || p->name == "EgressParser") {
@@ -164,12 +158,11 @@ const IR::Node *ConvertToDpdkArch::postorder(IR::Type_Parser *p) {
     return t;
 }
 
-const IR::Node *ConvertToDpdkArch::preorder(IR::PathExpression *pe) {
+const IR::Node* ConvertToDpdkArch::preorder(IR::PathExpression* pe) {
     auto declaration = refMap->getDeclaration(pe->path);
     if (auto decl = declaration->to<IR::Parameter>()) {
         if (auto type = decl->type->to<IR::Type_Name>()) {
-            LOG3("Expression: " << pe << std::endl <<
-                 "  declaration: " << declaration);
+            LOG3("Expression: " << pe << std::endl << "  declaration: " << declaration);
             if (type->path->name == structure->header_type) {
                 auto expr = new IR::PathExpression(IR::ID("h"));
                 LOG3("  replaced by: " << expr);
@@ -184,35 +177,30 @@ const IR::Node *ConvertToDpdkArch::preorder(IR::PathExpression *pe) {
     return pe;
 }
 
-const IR::Node *ConvertToDpdkArch::preorder(IR::Member *m) {
+const IR::Node* ConvertToDpdkArch::preorder(IR::Member* m) {
     /* PathExpressions are handled in a separate preorder function
        Hence do not process them here */
-    if (!m->expr->is<IR::Member>() &&
-        !m->expr->is<IR::ArrayIndex>())
-        prune();
+    if (!m->expr->is<IR::Member>() && !m->expr->is<IR::ArrayIndex>()) prune();
 
     if (auto p = m->expr->to<IR::PathExpression>()) {
         auto declaration = refMap->getDeclaration(p->path);
         if (auto decl = declaration->to<IR::Parameter>()) {
             if (auto type = decl->type->to<IR::Type_Name>()) {
-                LOG3("Member: " << m << std::endl <<
-                      "  declaration: " << declaration);
+                LOG3("Member: " << m << std::endl << "  declaration: " << declaration);
                 if (isStandardMetadata(type->path->name)) {
                     auto nm = new IR::Member(
                         new IR::PathExpression(IR::ID("m")),
-                        IR::ID(TypeStruct2Name(type->path->name.name) + "_" +
-                               m->member.name));
+                        IR::ID(TypeStruct2Name(type->path->name.name) + "_" + m->member.name));
                     LOG3("  replaced by new member: " << nm);
                     return nm;
                 } else if (type->path->name == structure->header_type) {
-                    auto nm = new IR::Member(new IR::PathExpression(IR::ID("h")),
-                                          IR::ID(m->member.name));
+                    auto nm =
+                        new IR::Member(new IR::PathExpression(IR::ID("h")), IR::ID(m->member.name));
                     LOG3("  replaced by new member: " << nm);
                     return nm;
                 } else if (type->path->name == structure->local_metadata_type) {
-                    auto nm = new IR::Member(
-                        new IR::PathExpression(IR::ID("m")),
-                        IR::ID("local_metadata_" + m->member.name));
+                    auto nm = new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                             IR::ID("local_metadata_" + m->member.name));
                     LOG3("  replaced by new member: " << nm);
                     return nm;
                 }
@@ -222,22 +210,17 @@ const IR::Node *ConvertToDpdkArch::preorder(IR::Member *m) {
     return m;
 }
 
-
-
-void ConvertLookahead::Collect::postorder(const IR::AssignmentStatement *statement) {
-    if (!statement->right->is<IR::MethodCallExpression>())
-        return;
+void ConvertLookahead::Collect::postorder(const IR::AssignmentStatement* statement) {
+    if (!statement->right->is<IR::MethodCallExpression>()) return;
     auto mce = statement->right->to<IR::MethodCallExpression>();
 
-    if (mce->type->is<IR::Type_Header>())
-        return;
+    if (mce->type->is<IR::Type_Header>()) return;
 
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
-    if (!mi->is<P4::ExternMethod>())
-        return;
+    if (!mi->is<P4::ExternMethod>()) return;
     auto em = mi->to<P4::ExternMethod>();
     if (em->originalExternType->name != P4::P4CoreLibrary::instance.packetIn.name ||
-            em->method->name != P4::P4CoreLibrary::instance.packetIn.lookahead.name)
+        em->method->name != P4::P4CoreLibrary::instance.packetIn.lookahead.name)
         return;
 
     LOG2("Collecting lookahead in statement:" << std::endl << " " << statement);
@@ -282,13 +265,13 @@ void ConvertLookahead::Collect::postorder(const IR::AssignmentStatement *stateme
      * var_name = lookahead_tmp.f;
      */
     auto newStatements = new IR::IndexedVector<IR::StatOrDecl>;
-    const IR::Expression *newLeft;
-    const IR::Expression *newRight;
-    const IR::AssignmentStatement *newStat;
+    const IR::Expression* newLeft;
+    const IR::Expression* newRight;
+    const IR::AssignmentStatement* newStat;
 
     newLeft = new IR::PathExpression(newHeader, new IR::Path(newLocalVarName));
     newRight = new IR::MethodCallExpression(newHeader, mce->method,
-            new IR::Vector<IR::Type>(newLocalVarType));
+                                            new IR::Vector<IR::Type>(newLocalVarType));
     newStat = new IR::AssignmentStatement(newLeft, newRight);
     newStatements->push_back(newStat);
 
@@ -300,10 +283,9 @@ void ConvertLookahead::Collect::postorder(const IR::AssignmentStatement *stateme
     repl->insertStatements(statement, newStatements);
 }
 
-const IR::Node *ConvertLookahead::Replace::postorder(IR::AssignmentStatement *as) {
+const IR::Node* ConvertLookahead::Replace::postorder(IR::AssignmentStatement* as) {
     auto result = repl->getStatements(getOriginal()->to<IR::AssignmentStatement>());
-    if (result == nullptr)
-        return as;
+    if (result == nullptr) return as;
 
     LOG2("Statement:" << std::endl << " " << as);
     LOG2("replaced by statements:");
@@ -314,15 +296,13 @@ const IR::Node *ConvertLookahead::Replace::postorder(IR::AssignmentStatement *as
     return result;
 }
 
-const IR::Node *ConvertLookahead::Replace::postorder(IR::Type_Struct *s) {
+const IR::Node* ConvertLookahead::Replace::postorder(IR::Type_Struct* s) {
     auto program = findOrigCtxt<IR::P4Program>();
 
-    if (s->name != structure->header_type || program == nullptr)
-        return s;
+    if (s->name != structure->header_type || program == nullptr) return s;
 
     auto result = repl->getHeaders(program);
-    if (result == nullptr)
-        return s;
+    if (result == nullptr) return s;
 
     LOG2("Following new headers inserted into program " << dbp(program) << ":");
     for (auto h : *result) {
@@ -333,7 +313,7 @@ const IR::Node *ConvertLookahead::Replace::postorder(IR::Type_Struct *s) {
     return result;
 }
 
-const IR::Node *ConvertLookahead::Replace::postorder(IR::P4Parser *parser) {
+const IR::Node* ConvertLookahead::Replace::postorder(IR::P4Parser* parser) {
     auto result = repl->getVars(getOriginal()->to<IR::P4Parser>());
     if (result != nullptr) {
         parser->parserLocals.append(*result);
@@ -345,16 +325,14 @@ const IR::Node *ConvertLookahead::Replace::postorder(IR::P4Parser *parser) {
     return parser;
 }
 
-
-
 void CollectMetadataHeaderInfo::pushMetadata(const IR::ParameterList* params,
-        std::list<int> indices) {
+                                             std::list<int> indices) {
     for (auto idx : indices) {
         pushMetadata(params->getParameter(idx));
     }
 }
 
-void CollectMetadataHeaderInfo::pushMetadata(const IR::Parameter *p) {
+void CollectMetadataHeaderInfo::pushMetadata(const IR::Parameter* p) {
     for (auto m : structure->used_metadata) {
         if (m->to<IR::Type_Name>()->path->name.name ==
             p->type->to<IR::Type_Name>()->path->name.name) {
@@ -364,7 +342,7 @@ void CollectMetadataHeaderInfo::pushMetadata(const IR::Parameter *p) {
     structure->used_metadata.push_back(p->type);
 }
 
-bool CollectMetadataHeaderInfo::preorder(const IR::P4Program *) {
+bool CollectMetadataHeaderInfo::preorder(const IR::P4Program*) {
     for (auto kv : structure->parsers) {
         if (kv.first == "IngressParser") {
             auto local_metadata = kv.second->getApplyParameters()->getParameter(2);
@@ -372,17 +350,17 @@ bool CollectMetadataHeaderInfo::preorder(const IR::P4Program *) {
             auto header = kv.second->getApplyParameters()->getParameter(1);
             structure->header_type = header->type->to<IR::Type_Name>()->path->name;
             auto params = kv.second->getApplyParameters();
-            pushMetadata(params, { 2, 3, 4, 5 });
+            pushMetadata(params, {2, 3, 4, 5});
         } else if (kv.first == "EgressParser") {
             auto params = kv.second->getApplyParameters();
-            pushMetadata(params, { 2, 3, 4, 5, 6 });
+            pushMetadata(params, {2, 3, 4, 5, 6});
         } else if (kv.first == "MainParserT") {
             auto local_metadata = kv.second->getApplyParameters()->getParameter(2);
             structure->local_metadata_type = local_metadata->type->to<IR::Type_Name>()->path->name;
             auto header = kv.second->getApplyParameters()->getParameter(1);
             structure->header_type = header->type->to<IR::Type_Name>()->path->name;
             auto params = kv.second->getApplyParameters();
-            pushMetadata(params, { 2, 3 });
+            pushMetadata(params, {2, 3});
         }
     }
 
@@ -390,19 +368,19 @@ bool CollectMetadataHeaderInfo::preorder(const IR::P4Program *) {
         if (kv.first == "Ingress") {
             auto control = kv.second->to<IR::P4Control>();
             auto params = control->getApplyParameters();
-            pushMetadata(params, { 1, 2, 3 });
+            pushMetadata(params, {1, 2, 3});
         } else if (kv.first == "Egress") {
             auto control = kv.second->to<IR::P4Control>();
             auto params = control->getApplyParameters();
-            pushMetadata(params, { 1, 2, 3 });
+            pushMetadata(params, {1, 2, 3});
         } else if (kv.first == "MainControlT") {
             auto control = kv.second->to<IR::P4Control>();
             auto params = control->getApplyParameters();
-            pushMetadata(params, { 1, 2, 3 });
+            pushMetadata(params, {1, 2, 3});
         } else if (kv.first == "PreControlT") {
             auto control = kv.second->to<IR::P4Control>();
             auto params = control->getApplyParameters();
-            pushMetadata(params, { 1, 2, 3 });
+            pushMetadata(params, {1, 2, 3});
         }
     }
 
@@ -410,27 +388,26 @@ bool CollectMetadataHeaderInfo::preorder(const IR::P4Program *) {
         if (kv.first == "IngressDeparser") {
             auto deparser = kv.second->to<IR::P4Control>();
             auto params = deparser->getApplyParameters();
-            pushMetadata(params, { 1, 2, 3, 5, 6 });
+            pushMetadata(params, {1, 2, 3, 5, 6});
         } else if (kv.first == "EgressDeparser") {
             auto deparser = kv.second->to<IR::P4Control>();
             auto params = deparser->getApplyParameters();
-            pushMetadata(params, { 1, 2, 4, 5, 6 });
+            pushMetadata(params, {1, 2, 4, 5, 6});
         } else if (kv.first == "MainDeparser") {
             auto deparser = kv.second->to<IR::P4Control>();
             auto params = deparser->getApplyParameters();
-            pushMetadata(params, { 1, 2, 3 });
+            pushMetadata(params, {1, 2, 3});
         }
     }
     return true;
 }
 
-bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s) {
+bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct* s) {
     for (auto m : structure->used_metadata) {
         if (m->to<IR::Type_Name>()->path->name.name == s->name.name) {
             for (auto field : s->fields) {
                 auto sf = new IR::StructField(
-                    IR::ID(TypeStruct2Name(s->name.name) + "_" + field->name),
-                    field->type);
+                    IR::ID(TypeStruct2Name(s->name.name) + "_" + field->name), field->type);
                 LOG4("Adding metadata field: " << sf);
                 structure->compiler_added_fields.push_back(sf);
             }
@@ -473,7 +450,7 @@ bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s) {
             bit<32> dstAddr;
        }
 */
-const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
+const IR::Node* AlignHdrMetaField::preorder(IR::Type_StructLike* st) {
     if (st->is<IR::Type_Header>()) {
         unsigned size_sum_so_far = 0;
         bool all_hdr_field_aligned = true;
@@ -485,7 +462,8 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
                 width = type->width_bits();
             } else {
                 BUG("header fields should be of type bit<> or varbit<>"
-                    "found this %1%", field->toString());
+                    "found this %1%",
+                    field->toString());
             }
             size_sum_so_far += width;
             if ((width & 0x7) != 0) {
@@ -493,8 +471,8 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
             }
         }
         if ((size_sum_so_far & 0x7) != 0) {
-            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "'%1%' is not 8-bit aligned", st->name.name);
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "'%1%' is not 8-bit aligned",
+                    st->name.name);
             return st;
         }
         if (all_hdr_field_aligned) {
@@ -516,8 +494,8 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
             width = type0->width_bits();
         }
         if ((width & 0x7) == 0 && size_sum_so_far == 0) {
-                fields->push_back(field);
-                continue;
+            fields->push_back(field);
+            continue;
         } else {
             if (size_sum_so_far == 0 || (size_sum_so_far & 0x7) != 0) {
                 size_sum_so_far += width;
@@ -533,8 +511,7 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
         // Check if the sum of width of non-aligned field is divisble by 8.
         if (size_sum_so_far && (size_sum_so_far % 8 == 0)) {
             // Form the field with all non-aligned field stored in "field_name_list"
-            for (auto s = field_name_list.begin(); s != field_name_list.end();
-                    s++, i++) {
+            for (auto s = field_name_list.begin(); s != field_name_list.end(); s++, i++) {
                 if ((i + 1) < size)
                     modifiedName += s->first + "_";
                 else
@@ -579,8 +556,8 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
                 structure->hdrFieldInfoList[s->first].push_back(fieldObj);
                 offset += s->second.fieldWidth;
             }
-            fields->push_back(new IR::StructField(IR::ID(modifiedName),
-                                IR::Type_Bits::get(size_sum_so_far)));
+            fields->push_back(
+                new IR::StructField(IR::ID(modifiedName), IR::Type_Bits::get(size_sum_so_far)));
             size_sum_so_far = 0;
             modifiedName = "";
             field_name_list.clear();
@@ -591,7 +568,8 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "8-bit Alignment for Header Structure '%1%' is not possible as no more header"
                 " fields available in header to combine. DPDK does not support non-aligned"
-                " header fields.", st->name.name);
+                " header fields.",
+                st->name.name);
         return st;
     }
     return new IR::Type_Header(IR::ID(st->name), st->annotations, *fields);
@@ -620,11 +598,10 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
        Then, the above condition is converted into
            if (hdrs.ipv4.flags_fragOffset[15:3] == 4) ....
 */
-const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
+const IR::Node* AlignHdrMetaField::preorder(IR::Member* m) {
     cstring hdrStrName = "";
     /* Get the member's header structure name */
-    if ((m != nullptr) && (m->expr != nullptr) &&
-        (m->expr->type != nullptr) &&
+    if ((m != nullptr) && (m->expr != nullptr) && (m->expr->type != nullptr) &&
         (m->expr->type->is<IR::Type_Header>())) {
         auto str_type = m->expr->type->to<IR::Type_Header>();
         hdrStrName = str_type->name.name;
@@ -638,11 +615,10 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
         for (auto memVec : structure->hdrFieldInfoList[m->member.name]) {
             /* header structure name is matched to handle the scenario where
                two different headers have field with same name */
-            if (memVec.headerStr != hdrStrName)
-                continue;
+            if (memVec.headerStr != hdrStrName) continue;
             auto mem = new IR::Member(m->expr, IR::ID(memVec.modifiedName));
-            auto sliceMem = new IR::Slice(mem->clone(), (memVec.offset + memVec.fieldWidth - 1),
-                                          memVec.offset);
+            auto sliceMem =
+                new IR::Slice(mem->clone(), (memVec.offset + memVec.fieldWidth - 1), memVec.offset);
             return sliceMem;
         }
     }
@@ -651,7 +627,7 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Member *m) {
 
 /* This function processes the metadata structure and modify the metadata field width
    to 32/64 bits if it is not 8-bit aligned */
-const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
+const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct* st) {
     auto fields = new IR::IndexedVector<IR::StructField>;
     if (st->is<IR::Type_Struct>()) {
         for (auto field : st->fields) {
@@ -662,8 +638,8 @@ const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
                         width = 32;
                     else
                         width = 64;
-                    fields->push_back(new IR::StructField(IR::ID(field->name),
-                                      IR::Type_Bits::get(width)));
+                    fields->push_back(
+                        new IR::StructField(IR::ID(field->name), IR::Type_Bits::get(width)));
                 } else {
                     fields->push_back(field);
                 }
@@ -678,7 +654,7 @@ const IR::Node* ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
 
 // This function collects the match key information of a table. This is later used for
 // generating context JSON.
-bool CollectTableInfo::preorder(const IR::Key *keys) {
+bool CollectTableInfo::preorder(const IR::Key* keys) {
     std::vector<std::pair<cstring, cstring>> tableKeys;
     if (!keys || keys->keyElements.size() == 0) {
         return false;
@@ -687,11 +663,11 @@ bool CollectTableInfo::preorder(const IR::Key *keys) {
        Selector keys become part of the selector table */
     for (auto key : keys->keyElements) {
         cstring keyName = key->expression->toString();
-        cstring keyNameAnnon = key->expression->toString();;
+        cstring keyNameAnnon = key->expression->toString();
+        ;
         auto annon = key->getAnnotation(IR::Annotation::nameAnnotation);
         if (key->matchType->toString() != "selector") {
-            if (annon !=  nullptr)
-                keyNameAnnon = annon->getSingleString();
+            if (annon != nullptr) keyNameAnnon = annon->getSingleString();
             tableKeys.push_back(std::make_pair(keyName, keyNameAnnon));
         }
     }
@@ -700,38 +676,37 @@ bool CollectTableInfo::preorder(const IR::Key *keys) {
     auto table = findOrigCtxt<IR::P4Table>();
     CHECK_NULL(control);
     CHECK_NULL(table);
-    structure->key_map.emplace(
-               control->name.originalName + "_" + table->name.originalName, tableKeys);
+    structure->key_map.emplace(control->name.originalName + "_" + table->name.originalName,
+                               tableKeys);
     return false;
 }
 
-const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct *s) {
+const IR::Node* InjectJumboStruct::preorder(IR::Type_Struct* s) {
     if (s->name == structure->local_metadata_type) {
-        auto *annotations = new IR::Annotations(
-            {new IR::Annotation(IR::ID("__metadata__"), {})});
+        auto* annotations = new IR::Annotations({new IR::Annotation(IR::ID("__metadata__"), {})});
         return new IR::Type_Struct(s->name, annotations, structure->compiler_added_fields);
     } else if (s->name == structure->header_type) {
-        auto *annotations = new IR::Annotations(
-            {new IR::Annotation(IR::ID("__packet_data__"), {})});
+        auto* annotations =
+            new IR::Annotations({new IR::Annotation(IR::ID("__packet_data__"), {})});
         return new IR::Type_Struct(s->name, annotations, s->fields);
     }
     return s;
 }
 
-const IR::Node *InjectFixedMetadataField::preorder(IR::Type_Struct *s) {
-    if  (s->name.name == structure->local_metadata_type) {
-         if (structure->isPNA()) {
-             s->fields.push_back(new IR::StructField(
-                  IR::ID(PnaMainOutputMetadataOutputPortName), IR::Type_Bits::get(32)));
-          }
-          s->fields.push_back(new IR::StructField(
-               IR::ID(DirectResourceTableEntryIndex), IR::Type_Bits::get(32)));
+const IR::Node* InjectFixedMetadataField::preorder(IR::Type_Struct* s) {
+    if (s->name.name == structure->local_metadata_type) {
+        if (structure->isPNA()) {
+            s->fields.push_back(new IR::StructField(IR::ID(PnaMainOutputMetadataOutputPortName),
+                                                    IR::Type_Bits::get(32)));
+        }
+        s->fields.push_back(
+            new IR::StructField(IR::ID(DirectResourceTableEntryIndex), IR::Type_Bits::get(32)));
         LOG3("Metadata structure after injecting Fixed metadata fields:" << std::endl << s);
     }
     return s;
 }
 
-const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
+const IR::Node* StatementUnroll::preorder(IR::AssignmentStatement* a) {
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
     auto right = a->right;
     auto control = findOrigCtxt<IR::P4Control>();
@@ -748,23 +723,17 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
         auto right_unroller = new ExpressionUnroll(refMap, structure);
         right_unroller->setCalledBy(this);
         bin->left->apply(*left_unroller);
-        const IR::Expression *left_tmp = left_unroller->root;
+        const IR::Expression* left_tmp = left_unroller->root;
         bin->right->apply(*right_unroller);
-        const IR::Expression *right_tmp = right_unroller->root;
-        if (!left_tmp)
-            left_tmp = bin->left;
-        if (!right_tmp)
-            right_tmp = bin->right;
-        for (auto s : left_unroller->stmt)
-            code_block->push_back(s);
-        for (auto d : left_unroller->decl)
-            injector.collect(control, parser, d);
-        for (auto s : right_unroller->stmt)
-            code_block->push_back(s);
-        for (auto d : right_unroller->decl)
-            injector.collect(control, parser, d);
+        const IR::Expression* right_tmp = right_unroller->root;
+        if (!left_tmp) left_tmp = bin->left;
+        if (!right_tmp) right_tmp = bin->right;
+        for (auto s : left_unroller->stmt) code_block->push_back(s);
+        for (auto d : left_unroller->decl) injector.collect(control, parser, d);
+        for (auto s : right_unroller->stmt) code_block->push_back(s);
+        for (auto d : right_unroller->decl) injector.collect(control, parser, d);
         prune();
-        IR::Operation_Binary *bin_expr;
+        IR::Operation_Binary* bin_expr;
         bin_expr = bin->clone();
         bin_expr->left = left_tmp;
         bin_expr->right = right_tmp;
@@ -780,13 +749,10 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
         unroller->setCalledBy(this);
         un->expr->apply(*unroller);
         prune();
-        const IR::Expression *un_tmp = unroller->root;
-        for (auto s : unroller->stmt)
-            code_block->push_back(s);
-        for (auto d : unroller->decl)
-            injector.collect(control, parser, d);
-        if (!un_tmp)
-            un_tmp = un->expr;
+        const IR::Expression* un_tmp = unroller->root;
+        for (auto s : unroller->stmt) code_block->push_back(s);
+        for (auto d : unroller->decl) injector.collect(control, parser, d);
+        if (!un_tmp) un_tmp = un->expr;
         if (right->to<IR::Neg>()) {
             a->right = new IR::Neg(un_tmp);
         } else if (right->to<IR::Cmpl>()) {
@@ -807,19 +773,19 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
     return a;
 }
 
-const IR::Node *StatementUnroll::postorder(IR::P4Control *a) {
+const IR::Node* StatementUnroll::postorder(IR::P4Control* a) {
     auto control = getOriginal();
     return injector.inject_control(control, a);
 }
-const IR::Node *StatementUnroll::postorder(IR::P4Parser *a) {
+const IR::Node* StatementUnroll::postorder(IR::P4Parser* a) {
     auto parser = getOriginal();
     return injector.inject_parser(parser, a);
 }
 
-bool ExpressionUnroll::preorder(const IR::Operation_Unary *u) {
+bool ExpressionUnroll::preorder(const IR::Operation_Unary* u) {
     expressionUnrollSanityCheck(u->expr);
     visit(u->expr);
-    const IR::Expression *un_expr;
+    const IR::Expression* un_expr;
     if (root) {
         if (u->to<IR::Neg>()) {
             un_expr = new IR::Neg(root);
@@ -842,23 +808,21 @@ bool ExpressionUnroll::preorder(const IR::Operation_Unary *u) {
     return false;
 }
 
-bool ExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
+bool ExpressionUnroll::preorder(const IR::Operation_Binary* bin) {
     expressionUnrollSanityCheck(bin->left);
     expressionUnrollSanityCheck(bin->right);
     visit(bin->left);
-    const IR::Expression *left_root = root;
+    const IR::Expression* left_root = root;
     visit(bin->right);
-    const IR::Expression *right_root = root;
-    if (!left_root)
-        left_root = bin->left;
-    if (!right_root)
-        right_root = bin->right;
+    const IR::Expression* right_root = root;
+    if (!left_root) left_root = bin->left;
+    if (!right_root) right_root = bin->right;
 
     root = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
 
     decl.push_back(new IR::Declaration_Variable(root->path->name, bin->type));
 
-    IR::Operation_Binary *bin_expr;
+    IR::Operation_Binary* bin_expr;
     bin_expr = bin->clone();
     bin_expr->left = left_root;
     bin_expr->right = right_root;
@@ -867,7 +831,7 @@ bool ExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
     return false;
 }
 
-bool ExpressionUnroll::preorder(const IR::MethodCallExpression *m) {
+bool ExpressionUnroll::preorder(const IR::MethodCallExpression* m) {
     auto args = new IR::Vector<IR::Argument>;
     for (auto arg : *m->arguments) {
         expressionUnrollSanityCheck(arg->expression);
@@ -884,39 +848,37 @@ bool ExpressionUnroll::preorder(const IR::MethodCallExpression *m) {
     return false;
 }
 
-bool ExpressionUnroll::preorder(const IR::Member *) {
+bool ExpressionUnroll::preorder(const IR::Member*) {
     root = nullptr;
     return false;
 }
 
-bool ExpressionUnroll::preorder(const IR::PathExpression *) {
+bool ExpressionUnroll::preorder(const IR::PathExpression*) {
     root = nullptr;
     return false;
 }
 
-bool ExpressionUnroll::preorder(const IR::Constant *) {
+bool ExpressionUnroll::preorder(const IR::Constant*) {
     root = nullptr;
     return false;
 }
-bool ExpressionUnroll::preorder(const IR::BoolLiteral *) {
+bool ExpressionUnroll::preorder(const IR::BoolLiteral*) {
     root = nullptr;
     return false;
 }
 
-const IR::Node *IfStatementUnroll::postorder(IR::SwitchStatement *sw) {
+const IR::Node* IfStatementUnroll::postorder(IR::SwitchStatement* sw) {
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
     expressionUnrollSanityCheck(sw->expression);
-    auto unroller = new LogicalExpressionUnroll(refMap, structure);
+    auto unroller = new LogicalExpressionUnroll(refMap);
     unroller->setCalledBy(this);
     sw->expression->apply(*unroller);
-    for (auto i : unroller->stmt)
-        code_block->push_back(i);
+    for (auto i : unroller->stmt) code_block->push_back(i);
 
     auto control = findOrigCtxt<IR::P4Control>();
     auto parser = findOrigCtxt<IR::P4Parser>();
 
-    for (auto d : unroller->decl)
-        injector.collect(control, parser, d);
+    for (auto d : unroller->decl) injector.collect(control, parser, d);
     if (unroller->root) {
         sw->expression = unroller->root;
     }
@@ -924,19 +886,17 @@ const IR::Node *IfStatementUnroll::postorder(IR::SwitchStatement *sw) {
     return new IR::BlockStatement(*code_block);
 }
 
-const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
+const IR::Node* IfStatementUnroll::postorder(IR::IfStatement* i) {
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
     expressionUnrollSanityCheck(i->condition);
-    auto unroller = new LogicalExpressionUnroll(refMap, structure);
+    auto unroller = new LogicalExpressionUnroll(refMap);
     unroller->setCalledBy(this);
     i->condition->apply(*unroller);
-    for (auto i : unroller->stmt)
-        code_block->push_back(i);
+    for (auto i : unroller->stmt) code_block->push_back(i);
 
     auto control = findOrigCtxt<IR::P4Control>();
     auto parser = findOrigCtxt<IR::P4Parser>();
-    for (auto d : unroller->decl)
-        injector.collect(control, parser, d);
+    for (auto d : unroller->decl) injector.collect(control, parser, d);
     if (unroller->root) {
         i->condition = unroller->root;
     }
@@ -944,12 +904,12 @@ const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
     return new IR::BlockStatement(*code_block);
 }
 
-const IR::Node *IfStatementUnroll::postorder(IR::P4Control *a) {
+const IR::Node* IfStatementUnroll::postorder(IR::P4Control* a) {
     auto control = getOriginal();
     return injector.inject_control(control, a);
 }
 
-const IR::Node *IfStatementUnroll::postorder(IR::P4Parser *a) {
+const IR::Node* IfStatementUnroll::postorder(IR::P4Parser* a) {
     auto parser = getOriginal();
     return injector.inject_parser(parser, a);
 }
@@ -957,28 +917,26 @@ const IR::Node *IfStatementUnroll::postorder(IR::P4Parser *a) {
 // TODO(GordonWuCn): simplify with a postorder visitor if it is a statement,
 // return the expression, else introduce a temporary for the current expression
 // and return the temporary in a pathexpression.
-bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary *u) {
+bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary* u) {
     expressionUnrollSanityCheck(u->expr);
 
     // If the expression is a methodcall expression, do not insert a temporary
     // variable to represent the value of the methodcall. Instead the
     // methodcall is converted to a dpdk branch instruction in a later pass.
-    if (u->expr->is<IR::MethodCallExpression>())
-        return false;
+    if (u->expr->is<IR::MethodCallExpression>()) return false;
 
     // if the expression is apply().hit or apply().miss, do not insert a temporary
     // variable.
     if (auto member = u->expr->to<IR::Member>()) {
         if (member->expr->is<IR::MethodCallExpression>() &&
-            (member->member == IR::Type_Table::hit ||
-             member->member == IR::Type_Table::miss)) {
+            (member->member == IR::Type_Table::hit || member->member == IR::Type_Table::miss)) {
             return false;
         }
     }
 
     root = u->clone();
     visit(u->expr);
-    const IR::Expression *un_expr;
+    const IR::Expression* un_expr;
     if (root) {
         if (u->to<IR::Neg>()) {
             un_expr = new IR::Neg(root);
@@ -1002,20 +960,18 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary *u) {
     return false;
 }
 
-bool LogicalExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
+bool LogicalExpressionUnroll::preorder(const IR::Operation_Binary* bin) {
     expressionUnrollSanityCheck(bin->left);
     expressionUnrollSanityCheck(bin->right);
     visit(bin->left);
-    const IR::Expression *left_root = root;
+    const IR::Expression* left_root = root;
     visit(bin->right);
-    const IR::Expression *right_root = root;
-    if (!left_root)
-        left_root = bin->left;
-    if (!right_root)
-        right_root = bin->right;
+    const IR::Expression* right_root = root;
+    if (!left_root) left_root = bin->left;
+    if (!right_root) right_root = bin->right;
 
     if (is_logical(bin)) {
-        IR::Operation_Binary *bin_expr;
+        IR::Operation_Binary* bin_expr;
         bin_expr = bin->clone();
         bin_expr->left = left_root;
         bin_expr->right = right_root;
@@ -1023,9 +979,8 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
     } else {
         auto tmp = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
         root = tmp;
-        decl.push_back(
-            new IR::Declaration_Variable(tmp->path->name, bin->type));
-        IR::Operation_Binary *bin_expr;
+        decl.push_back(new IR::Declaration_Variable(tmp->path->name, bin->type));
+        IR::Operation_Binary* bin_expr;
         bin_expr = bin->clone();
         bin_expr->left = left_root;
         bin_expr->right = right_root;
@@ -1034,7 +989,7 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
     return false;
 }
 
-bool LogicalExpressionUnroll::preorder(const IR::MethodCallExpression *m) {
+bool LogicalExpressionUnroll::preorder(const IR::MethodCallExpression* m) {
     auto args = new IR::Vector<IR::Argument>;
     for (auto arg : *m->arguments) {
         expressionUnrollSanityCheck(arg->expression);
@@ -1056,39 +1011,37 @@ bool LogicalExpressionUnroll::preorder(const IR::MethodCallExpression *m) {
     return false;
 }
 
-bool LogicalExpressionUnroll::preorder(const IR::Member *) {
+bool LogicalExpressionUnroll::preorder(const IR::Member*) {
     root = nullptr;
     return false;
 }
 
-bool LogicalExpressionUnroll::preorder(const IR::PathExpression *) {
+bool LogicalExpressionUnroll::preorder(const IR::PathExpression*) {
     root = nullptr;
     return false;
 }
 
-bool LogicalExpressionUnroll::preorder(const IR::Constant *) {
+bool LogicalExpressionUnroll::preorder(const IR::Constant*) {
     root = nullptr;
     return false;
 }
-bool LogicalExpressionUnroll::preorder(const IR::BoolLiteral *) {
+bool LogicalExpressionUnroll::preorder(const IR::BoolLiteral*) {
     root = nullptr;
     return false;
 }
 
-const IR::Node *
-ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
+const IR::Node* ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement* a) {
     auto right = a->right;
     auto left = a->left;
     // This pass does not apply to 'bool foo = (a == b)' or 'bool foo = (a > b)' etc.
-    if (right->to<IR::Operation_Relation>())
-        return a;
+    if (right->to<IR::Operation_Relation>()) return a;
     if (auto r = right->to<IR::Operation_Binary>()) {
         if (!isSimpleExpression(r->right) || !isSimpleExpression(r->left))
             BUG("%1%: Statement Unroll pass failed", a);
         if (left->equiv(*r->left)) {
             return a;
         } else if (left->equiv(*r->right)) {
-            IR::Operation_Binary *bin_expr;
+            IR::Operation_Binary* bin_expr;
             bin_expr = r->clone();
             if (isCommutativeBinaryOperation(r)) {
                 bin_expr->left = r->right;
@@ -1115,8 +1068,8 @@ ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
             }
         } else {
             IR::IndexedVector<IR::StatOrDecl> code_block;
-            const IR::Expression *src1;
-            const IR::Expression *src2;
+            const IR::Expression* src1;
+            const IR::Expression* src2;
             if (isNonConstantSimpleExpression(r->left)) {
                 src1 = r->left;
                 src2 = r->right;
@@ -1135,7 +1088,7 @@ ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
                     "a constant.");
             }
             code_block.push_back(new IR::AssignmentStatement(left, src1));
-            IR::Operation_Binary *expr;
+            IR::Operation_Binary* expr;
             expr = r->clone();
             expr->left = left;
             expr->right = src2;
@@ -1146,17 +1099,17 @@ ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
     return a;
 }
 
-const IR::Node *ConvertBinaryOperationTo2Params::postorder(IR::P4Control *a) {
+const IR::Node* ConvertBinaryOperationTo2Params::postorder(IR::P4Control* a) {
     auto control = getOriginal();
     return injector.inject_control(control, a);
 }
 
-const IR::Node *ConvertBinaryOperationTo2Params::postorder(IR::P4Parser *a) {
+const IR::Node* ConvertBinaryOperationTo2Params::postorder(IR::P4Parser* a) {
     auto parser = getOriginal();
     return injector.inject_parser(parser, a);
 }
 
-const IR::Node *CollectLocalVariables::preorder(IR::P4Program *p) {
+const IR::Node* CollectLocalVariables::preorder(IR::P4Program* p) {
     for (auto kv : structure->parsers) {
         insert(kv.first + "_parser", &kv.second->parserLocals);
     }
@@ -1174,32 +1127,32 @@ const IR::Node *CollectLocalVariables::preorder(IR::P4Program *p) {
     return p;
 }
 
-const IR::Node *CollectLocalVariables::postorder(IR::Type_Struct *s) {
+const IR::Node* CollectLocalVariables::postorder(IR::Type_Struct* s) {
     if (s->name.name == structure->local_metadata_type) {
         for (auto sf : structure->key_fields) {
-             s->fields.push_back(sf);
+            s->fields.push_back(sf);
         }
         for (auto kv : localsMap) {
             auto dv = kv.first;
             auto type = typeMap->getType(dv, true);
             if (type->is<IR::Type_Header>()) {
-                LOG3("Variable: " << dv << std::endl <<
-                     " type: " << type << std::endl <<
-                     " already added to: " << structure->header_type);
+                LOG3("Variable: " << dv << std::endl
+                                  << " type: " << type << std::endl
+                                  << " already added to: " << structure->header_type);
             } else if (auto strct = type->to<IR::Type_Struct>()) {
                 for (auto field : strct->fields) {
-                    auto sf = new IR::StructField(IR::ID(kv.second + "_" + field->name),
-                                  field->type);
-                    LOG2("New field: " << sf << std::endl <<
-                         " type: " << field->type << std::endl <<
-                         " added to: " << s->name.name);
+                    auto sf =
+                        new IR::StructField(IR::ID(kv.second + "_" + field->name), field->type);
+                    LOG2("New field: " << sf << std::endl
+                                       << " type: " << field->type << std::endl
+                                       << " added to: " << s->name.name);
                     s->fields.push_back(sf);
                 }
             } else {
                 auto sf = new IR::StructField(IR::ID(kv.second), dv->type);
-                LOG2("New field: " << sf << std::endl <<
-                     " type: " << type << std::endl <<
-                     " added to: " << s->name.name);
+                LOG2("New field: " << sf << std::endl
+                                   << " type: " << type << std::endl
+                                   << " added to: " << s->name.name);
                 s->fields.push_back(sf);
             }
         }
@@ -1209,26 +1162,25 @@ const IR::Node *CollectLocalVariables::postorder(IR::Type_Struct *s) {
             auto type = typeMap->getType(dv, true);
             if (type->is<IR::Type_Header>()) {
                 auto sf = new IR::StructField(IR::ID(kv.second), dv->type);
-                LOG2("New field: " << sf << std::endl <<
-                     " type: " << type << std::endl <<
-                     " added to: " << s->name.name);
+                LOG2("New field: " << sf << std::endl
+                                   << " type: " << type << std::endl
+                                   << " added to: " << s->name.name);
                 s->fields.push_back(sf);
             } else {
-                LOG3("Variable: " << dv << std::endl <<
-                     " type: " << type << std::endl <<
-                     " already added to: " << structure->local_metadata_type);
+                LOG3("Variable: " << dv << std::endl
+                                  << " type: " << type << std::endl
+                                  << " already added to: " << structure->local_metadata_type);
             }
         }
     }
     return s;
 }
 
-const IR::Node *
-CollectLocalVariables::postorder(IR::PathExpression *p) {
+const IR::Node* CollectLocalVariables::postorder(IR::PathExpression* p) {
     if (auto decl = refMap->getDeclaration(p->path)->to<IR::Declaration_Variable>()) {
         if (localsMap.count(decl)) {
             IR::ID name(localsMap.at(decl));
-            IR::Member *member;
+            IR::Member* member;
             if (typeMap->getType(decl, true)->is<IR::Type_Header>()) {
                 member = new IR::Member(new IR::PathExpression(IR::ID("h")), name);
             } else {
@@ -1243,23 +1195,21 @@ CollectLocalVariables::postorder(IR::PathExpression *p) {
     return p;
 }
 
-const IR::Node *
-CollectLocalVariables::postorder(IR::Member *mem) {
+const IR::Node* CollectLocalVariables::postorder(IR::Member* mem) {
     // Ensure that member's expression is a member expression
     // then convert like (m.field.field_0 to m.field_field_0)
     auto expr = mem->expr->to<IR::Member>();
     if (expr && expr->expr->toString() == "m")
         return new IR::Member(new IR::PathExpression(IR::ID("m")),
-            IR::ID(expr->member.toString() + "_" + mem->member.toString()));
+                              IR::ID(expr->member.toString() + "_" + mem->member.toString()));
     else
         return mem;
 }
 
-const IR::Node *CollectLocalVariables::postorder(IR::P4Control *c) {
+const IR::Node* CollectLocalVariables::postorder(IR::P4Control* c) {
     IR::IndexedVector<IR::Declaration> decls;
     for (auto d : c->controlLocals) {
-        if (d->is<IR::Declaration_Instance>() || d->is<IR::P4Action>() ||
-            d->is<IR::P4Table>()) {
+        if (d->is<IR::Declaration_Instance>() || d->is<IR::P4Action>() || d->is<IR::P4Table>()) {
             decls.push_back(d);
         } else if (!d->is<IR::Declaration_Variable>()) {
             BUG("%1%: Unhandled declaration type in control", d);
@@ -1269,7 +1219,7 @@ const IR::Node *CollectLocalVariables::postorder(IR::P4Control *c) {
     return c;
 }
 
-const IR::Node *CollectLocalVariables::postorder(IR::P4Parser *p) {
+const IR::Node* CollectLocalVariables::postorder(IR::P4Parser* p) {
     IR::IndexedVector<IR::Declaration> decls;
     for (auto d : p->parserLocals) {
         if (d->is<IR::Declaration_Instance>()) {
@@ -1284,20 +1234,20 @@ const IR::Node *CollectLocalVariables::postorder(IR::P4Parser *p) {
 
 /* This function stores the information about parameters of default action
    for each table */
-void DefActionValue::postorder(const IR::P4Table *t) {
+void DefActionValue::postorder(const IR::P4Table* t) {
     auto default_action = t->properties->getProperty("default_action");
     if (default_action != nullptr && default_action->value->is<IR::ExpressionValue>()) {
         auto expr = default_action->value->to<IR::ExpressionValue>()->expression;
-        auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
-                refMap, typeMap);
-        BUG_CHECK(mi->is<P4::ActionCall>(),
-            "%1%: expected action in default_action", default_action);
+        auto mi =
+            P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(), refMap, typeMap);
+        BUG_CHECK(mi->is<P4::ActionCall>(), "%1%: expected action in default_action",
+                  default_action);
         structure->defActionParamList[t->toString()] =
-                   new IR::ParameterList(mi->to<P4::ActionCall>()->action->parameters->parameters);
+            new IR::ParameterList(mi->to<P4::ActionCall>()->action->parameters->parameters);
     }
 }
 
-const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Action *a) {
+const IR::Node* PrependPDotToActionArgs::postorder(IR::P4Action* a) {
     if (a->parameters->size() > 0) {
         auto l = new IR::IndexedVector<IR::Parameter>;
         for (auto p : a->parameters->parameters) {
@@ -1305,28 +1255,23 @@ const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Action *a) {
         }
         structure->args_struct_map.emplace(a->name.name + "_arg_t", l);
         auto new_l = new IR::IndexedVector<IR::Parameter>;
-        new_l->push_back(new IR::Parameter(
-            IR::ID("t"), IR::Direction::None,
-            new IR::Type_Name(IR::ID(a->name.name + "_arg_t"))));
+        new_l->push_back(new IR::Parameter(IR::ID("t"), IR::Direction::None,
+                                           new IR::Type_Name(IR::ID(a->name.name + "_arg_t"))));
         a->parameters = new IR::ParameterList(*new_l);
     }
     return a;
 }
 
-const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Program *program) {
+const IR::Node* PrependPDotToActionArgs::postorder(IR::P4Program* program) {
     auto new_objs = new IR::Vector<IR::Node>;
     for (auto kv : structure->pipelines) {
-        if (kv.first == "Ingress" ||
-            kv.first == "MainControlT") {
+        if (kv.first == "Ingress" || kv.first == "MainControlT") {
             for (auto kv : structure->args_struct_map) {
-                auto fields =
-                    new IR::IndexedVector<IR::StructField>;
+                auto fields = new IR::IndexedVector<IR::StructField>;
                 for (auto field : *kv.second) {
-                    fields->push_back(new IR::StructField(
-                                field->name.toString(), field->type));
+                    fields->push_back(new IR::StructField(field->name.toString(), field->type));
                 }
-                new_objs->push_back(
-                        new IR::Type_Struct(IR::ID(kv.first), *fields));
+                new_objs->push_back(new IR::Type_Struct(IR::ID(kv.first), *fields));
             }
         }
     }
@@ -1337,7 +1282,7 @@ const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Program *program) {
     return program;
 }
 
-const IR::Node *PrependPDotToActionArgs::preorder(IR::PathExpression *path) {
+const IR::Node* PrependPDotToActionArgs::preorder(IR::PathExpression* path) {
     auto declaration = refMap->getDeclaration(path->path);
     if (auto action = findContext<IR::P4Action>()) {
         if (!declaration) {
@@ -1358,27 +1303,20 @@ const IR::Node *PrependPDotToActionArgs::preorder(IR::PathExpression *path) {
 
 const IR::Node* PrependPDotToActionArgs::preorder(IR::MethodCallExpression* mce) {
     auto property = findContext<IR::Property>();
-    if (!property)
-        return mce;
-    if (property->name != "default_action" &&
-        property->name != "entries")
-        return mce;
+    if (!property) return mce;
+    if (property->name != "default_action" && property->name != "entries") return mce;
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
-    if (!mi->is<P4::ActionCall>())
-        return mce;
+    if (!mi->is<P4::ActionCall>()) return mce;
     // We assume all action call has been converted to take struct as input,
     // therefore, the arguments must be passed in as a list expression
-    if (mce->arguments->size() == 0)
-        return mce;
+    if (mce->arguments->size() == 0) return mce;
     IR::Vector<IR::Expression> components;
     for (auto arg : *mce->arguments) {
         components.push_back(arg->expression);
     }
     auto arguments = new IR::Vector<IR::Argument>;
     arguments->push_back(new IR::Argument(new IR::ListExpression(components)));
-    return new IR::MethodCallExpression(
-            mce->method,
-            arguments);
+    return new IR::MethodCallExpression(mce->method, arguments);
 }
 
 const IR::Node* DismantleMuxExpressions::preorder(IR::Mux* expression) {
@@ -1399,8 +1337,8 @@ const IR::Node* DismantleMuxExpressions::preorder(IR::Mux* expression) {
     auto ifFalse = statements;
     statements = save;
 
-    auto ifStatement = new IR::IfStatement(
-        expression->e0, new IR::BlockStatement(ifTrue), new IR::BlockStatement(ifFalse));
+    auto ifStatement = new IR::IfStatement(expression->e0, new IR::BlockStatement(ifTrue),
+                                           new IR::BlockStatement(ifFalse));
     statements.push_back(ifStatement);
     typeMap->setType(path2, type);
     prune();
@@ -1415,10 +1353,9 @@ cstring DismantleMuxExpressions::createTemporary(const IR::Type* type) {
     return tmp;
 }
 
-const IR::Expression* DismantleMuxExpressions::addAssignment(
-    Util::SourceInfo srcInfo,
-    cstring varName,
-    const IR::Expression* expression) {
+const IR::Expression* DismantleMuxExpressions::addAssignment(Util::SourceInfo srcInfo,
+                                                             cstring varName,
+                                                             const IR::Expression* expression) {
     const IR::PathExpression* left;
     if (auto pe = expression->to<IR::PathExpression>())
         left = new IR::PathExpression(IR::ID(pe->srcInfo, varName, pe->path->name.originalName));
@@ -1431,51 +1368,41 @@ const IR::Expression* DismantleMuxExpressions::addAssignment(
 }
 
 const IR::Node* DismantleMuxExpressions::postorder(IR::P4Action* action) {
-    if (toInsert.empty())
-        return action;
+    if (toInsert.empty()) return action;
     auto body = new IR::BlockStatement(action->body->srcInfo);
-    for (auto a : toInsert)
-        body->push_back(a);
-    for (auto s : action->body->components)
-        body->push_back(s);
+    for (auto a : toInsert) body->push_back(a);
+    for (auto s : action->body->components) body->push_back(s);
     action->body = body;
     toInsert.clear();
     return action;
 }
 
-
 const IR::Node* DismantleMuxExpressions::postorder(IR::Function* function) {
-    if (toInsert.empty())
-        return function;
+    if (toInsert.empty()) return function;
     auto body = new IR::BlockStatement(function->body->srcInfo);
-    for (auto a : toInsert)
-        body->push_back(a);
-    for (auto s : function->body->components)
-        body->push_back(s);
+    for (auto a : toInsert) body->push_back(a);
+    for (auto s : function->body->components) body->push_back(s);
     function->body = body;
     toInsert.clear();
     return function;
 }
 
 const IR::Node* DismantleMuxExpressions::postorder(IR::P4Parser* parser) {
-    if (toInsert.empty())
-        return parser;
+    if (toInsert.empty()) return parser;
     parser->parserLocals.append(toInsert);
     toInsert.clear();
     return parser;
 }
 
 const IR::Node* DismantleMuxExpressions::postorder(IR::P4Control* control) {
-    if (toInsert.empty())
-        return control;
+    if (toInsert.empty()) return control;
     control->controlLocals.append(toInsert);
     toInsert.clear();
     return control;
 }
 
 const IR::Node* DismantleMuxExpressions::postorder(IR::AssignmentStatement* statement) {
-    if (statements.empty())
-        return statement;
+    if (statements.empty()) return statement;
     statements.push_back(statement);
     auto block = new IR::BlockStatement(statements);
     statements.clear();
@@ -1544,8 +1471,8 @@ bool CopyMatchKeysToSingleStruct::isLearnerTable(const IR::P4Table* t) {
     if (add_on_miss->value->is<IR::ExpressionValue>()) {
         auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
         if (!expr->is<IR::BoolLiteral>()) {
-            ::error(ErrorType::ERR_UNEXPECTED,
-                    "%1%: expected boolean for 'add_on_miss' property", add_on_miss);
+            ::error(ErrorType::ERR_UNEXPECTED, "%1%: expected boolean for 'add_on_miss' property",
+                    add_on_miss);
             return false;
         } else {
             use_add_on_miss = expr->to<IR::BoolLiteral>()->value;
@@ -1554,7 +1481,7 @@ bool CopyMatchKeysToSingleStruct::isLearnerTable(const IR::P4Table* t) {
     return use_add_on_miss;
 }
 
-int CopyMatchKeysToSingleStruct::getFieldSizeBits(const IR::Type *field_type) {
+int CopyMatchKeysToSingleStruct::getFieldSizeBits(const IR::Type* field_type) {
     if (auto t = field_type->to<IR::Type_Bits>()) {
         return t->width_bits();
     } else if (field_type->is<IR::Type_Boolean>() || field_type->is<IR::Type_Error>()) {
@@ -1569,7 +1496,7 @@ int CopyMatchKeysToSingleStruct::getFieldSizeBits(const IR::Type *field_type) {
     return -1;
 }
 
-struct keyInfo *CopyMatchKeysToSingleStruct::getKeyInfo(IR::Key* keys) {
+struct keyInfo* CopyMatchKeysToSingleStruct::getKeyInfo(IR::Key* keys) {
     auto oneKey = new struct keyInfo();
     oneKey->numElements = keys->keyElements.size();
     int size = 0;
@@ -1581,9 +1508,8 @@ struct keyInfo *CopyMatchKeysToSingleStruct::getKeyInfo(IR::Key* keys) {
             nonExact++;
         }
 
-        auto keyName =  key->expression->toString();
-        if (keyName.startsWith("m."))
-            numExistingMetaFields++;
+        auto keyName = key->expression->toString();
+        if (keyName.startsWith("m.")) numExistingMetaFields++;
 
         auto elem = new struct keyElementInfo();
         elem->offsetInMetadata = -1;
@@ -1602,8 +1528,7 @@ struct keyInfo *CopyMatchKeysToSingleStruct::getKeyInfo(IR::Key* keys) {
             return nullptr;
         }
         // These are complex expressions
-        if (elem->offsetInMetadata == -1)
-            numExistingMetaFields++;
+        if (elem->offsetInMetadata == -1) numExistingMetaFields++;
         size += elem->size;
         oneKey->elements.push_back(elem);
     }
@@ -1611,7 +1536,7 @@ struct keyInfo *CopyMatchKeysToSingleStruct::getKeyInfo(IR::Key* keys) {
     auto table = findOrigCtxt<IR::P4Table>();
     CHECK_NULL(table);
     oneKey->isLearner = isLearnerTable(table);
-    oneKey->size  = size;
+    oneKey->size = size;
     oneKey->numExistingMetaFields = numExistingMetaFields;
     oneKey->isExact = nonExact ? false : true;
     return oneKey;
@@ -1635,15 +1560,14 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
         /* ReplaceMetadataHeaderName pass converts all header fields to the form
            "h.<header_name>.<field_name> and similarly metadata fields are prefixed with "m.".
            Check if the match key is part of a header by checking the "h" prefix. */
-        if (firstKeyStr.startsWith("h"))
-            firstKeyHdr = true;
+        if (firstKeyStr.startsWith("h")) firstKeyHdr = true;
     }
 
     /* Key fields should be part of same header/metadata struct */
     for (auto key : keys->keyElements) {
         cstring keyTypeStr = "";
         if (auto keyField = key->expression->to<IR::Member>()) {
-            keyTypeStr =keyField->expr->toString();
+            keyTypeStr = keyField->expr->toString();
         } else if (auto m = key->expression->to<IR::MethodCallExpression>()) {
             /* When isValid is present as table key, it should be moved to metadata */
             auto mi = P4::MethodInstance::resolve(m, refMap, typeMap);
@@ -1666,7 +1590,7 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
     BUG_CHECK(keyInfoInstance, "Failed to collect key information");
     bool contiguous = true;
 
-    for (int i = 0; i < keyInfoInstance->numElements ; i++) {
+    for (int i = 0; i < keyInfoInstance->numElements; i++) {
         for (int j = 0; j < keyInfoInstance->numElements; j++) {
             auto keyI = keyInfoInstance->elements.at(i);
             auto keyJ = keyInfoInstance->elements.at(j);
@@ -1690,12 +1614,12 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
 
     if (keyInfoInstance->isLearner) {
         if (!keyInfoInstance->isExact) {
-            ::error(ErrorType::ERR_EXPECTED,"Learner table %1% must have all exact match keys",
+            ::error(ErrorType::ERR_EXPECTED, "Learner table %1% must have all exact match keys",
                     table->name);
             return keys;
         }
         structure->table_type_map.emplace(table->name.name, InternalTableType::LEARNER);
-    } else if (contiguous && keyInfoInstance->isExact){
+    } else if (contiguous && keyInfoInstance->isExact) {
         structure->table_type_map.emplace(table->name.name, InternalTableType::REGULAR_EXACT);
     } else {
         structure->table_type_map.emplace(table->name.name, InternalTableType::WILDCARD);
@@ -1704,8 +1628,9 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
      * Check remaining conditions to see if the copy is needed or not */
     metaCopyNeeded = false;
     if (!copyNeeded) {
-        if (!contiguous && ((keyInfoInstance->isLearner) || (keyInfoInstance->isExact
-                        && keyInfoInstance->numExistingMetaFields <= 5))) {
+        if (!contiguous &&
+            ((keyInfoInstance->isLearner) ||
+             (keyInfoInstance->isExact && keyInfoInstance->numExistingMetaFields <= 5))) {
             metaCopyNeeded = true;
             copyNeeded = true;
         }
@@ -1715,7 +1640,8 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
         // This prune will prevent the postorder(IR::KeyElement*) below from executing
         prune();
     } else {
-        ::warning(ErrorType::WARN_MISMATCH, "Mismatched header/metadata struct for key "
+        ::warning(ErrorType::WARN_MISMATCH,
+                  "Mismatched header/metadata struct for key "
                   "elements in table %1%. Copying all match fields to metadata",
                   findOrigCtxt<IR::P4Table>()->name.toString());
         LOG3("Will pull out " << keys);
@@ -1738,23 +1664,24 @@ const IR::Node* CopyMatchKeysToSingleStruct::postorder(IR::KeyElement* element) 
         insertions = it->second;
     }
 
-    auto keyName =  element->expression->toString();
+    auto keyName = element->expression->toString();
     bool isHeader = false;
     /* All header fields are prefixed with "h." and metadata fields are prefixed with "m."
      * Prefix the match field with control and table name */
     if (keyName.startsWith("h.")) {
         isHeader = true;
-        keyName = keyName.replace('.','_');
-        keyName = keyName.replace("h_",control->name.toString() + "_" + table->name.toString()+"_");
+        keyName = keyName.replace('.', '_');
+        keyName =
+            keyName.replace("h_", control->name.toString() + "_" + table->name.toString() + "_");
     } else if (keyName.startsWith("m.") && metaCopyNeeded) {
-        keyName = keyName.replace('.','_');
-        keyName = keyName.replace("m_",control->name.toString() + "_" + table->name.toString()+"_");
+        keyName = keyName.replace('.', '_');
+        keyName =
+            keyName.replace("m_", control->name.toString() + "_" + table->name.toString() + "_");
     }
 
     if (isHeader || metaCopyNeeded) {
         IR::ID keyNameId(refMap->newName(keyName));
-        auto decl = new IR::Declaration_Variable(keyNameId,
-                                                 element->expression->type, nullptr);
+        auto decl = new IR::Declaration_Variable(keyNameId, element->expression->type, nullptr);
         // Store the compiler generated table keys in Program structure. These will be
         // inserted to Metadata by CollectLocalVariables pass.
         structure->key_fields.push_back(new IR::StructField(decl->name.name, decl->type));
@@ -1768,19 +1695,16 @@ const IR::Node* CopyMatchKeysToSingleStruct::postorder(IR::KeyElement* element) 
 }
 
 const IR::Node* CopyMatchKeysToSingleStruct::doStatement(const IR::Statement* statement,
-                                           const IR::Expression *expression) {
+                                                         const IR::Expression* expression) {
     LOG3("Visiting " << getOriginal());
     P4::HasTableApply hta(refMap, typeMap);
     hta.setCalledBy(this);
     (void)expression->apply(hta);
-    if (hta.table == nullptr)
-        return statement;
+    if (hta.table == nullptr) return statement;
     auto insertions = get(toInsert, hta.table);
-    if (insertions == nullptr)
-        return statement;
+    if (insertions == nullptr) return statement;
     auto result = new IR::IndexedVector<IR::StatOrDecl>();
-    for (auto assign : insertions->statements)
-        result->push_back(assign);
+    for (auto assign : insertions->statements) result->push_back(assign);
     result->push_back(statement);
     auto block = new IR::BlockStatement(*result);
     return block;
@@ -1788,29 +1712,27 @@ const IR::Node* CopyMatchKeysToSingleStruct::doStatement(const IR::Statement* st
 
 namespace Helpers {
 
-boost::optional<P4::ExternInstance>
-getExternInstanceFromProperty(const IR::P4Table* table,
-                              const cstring& propertyName,
-                              P4::ReferenceMap* refMap,
-                              P4::TypeMap* typeMap,
-                              bool *isConstructedInPlace, cstring &externName) {
+boost::optional<P4::ExternInstance> getExternInstanceFromProperty(
+    const IR::P4Table* table, const cstring& propertyName, P4::ReferenceMap* refMap,
+    P4::TypeMap* typeMap, bool* isConstructedInPlace, cstring& externName) {
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return boost::none;
     if (!property->value->is<IR::ExpressionValue>()) {
         ::error(ErrorType::ERR_EXPECTED,
-                "Expected %1% property value for table %2% to be an expression: %3%",
-                propertyName, table->controlPlaneName(), property);
+                "Expected %1% property value for table %2% to be an expression: %3%", propertyName,
+                table->controlPlaneName(), property);
         return boost::none;
     }
 
     auto expr = property->value->to<IR::ExpressionValue>()->expression;
     externName = expr->to<IR::PathExpression>()->path->name.name;
     if (isConstructedInPlace) *isConstructedInPlace = expr->is<IR::ConstructorCallExpression>();
-    if (expr->is<IR::ConstructorCallExpression>()
-        && property->getAnnotation(IR::Annotation::nameAnnotation) == nullptr) {
+    if (expr->is<IR::ConstructorCallExpression>() &&
+        property->getAnnotation(IR::Annotation::nameAnnotation) == nullptr) {
         ::error(ErrorType::ERR_UNSUPPORTED,
                 "Table '%1%' has an anonymous table property '%2%' with no name annotation, "
-                "which is not supported by P4Runtime", table->controlPlaneName(), propertyName);
+                "which is not supported by P4Runtime",
+                table->controlPlaneName(), propertyName);
         return boost::none;
     }
     auto name = property->controlPlaneName();
@@ -1818,20 +1740,20 @@ getExternInstanceFromProperty(const IR::P4Table* table,
     if (!externInstance) {
         ::error(ErrorType::ERR_INVALID,
                 "Expected %1% property value for table %2% to resolve to an "
-                "extern instance: %3%", propertyName, table->controlPlaneName(),
-                property);
+                "extern instance: %3%",
+                propertyName, table->controlPlaneName(), property);
         return boost::none;
     }
     return externInstance;
 }
 
-}
+}  // namespace Helpers
 
 // create P4Table object that represents the matching part of the original P4
 // table. This table sets the internal group_id or member_id which are used
 // for subsequent table lookup.
-std::tuple<const IR::P4Table*, cstring, cstring>
-SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
+std::tuple<const IR::P4Table*, cstring, cstring> SplitP4TableCommon::create_match_table(
+    const IR::P4Table* tbl) {
     cstring grpActionName = "", memActionName;
     if (implementation == TableImplementation::ACTION_SELECTOR) {
         grpActionName = refMap->newName(tbl->name.originalName + "_set_group_id");
@@ -1870,34 +1792,36 @@ SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
     IR::IndexedVector<IR::Property> properties;
     properties.push_back(new IR::Property("actions", new IR::ActionList(actionsList), false));
     properties.push_back(new IR::Property("key", new IR::Key(match_keys), false));
-    properties.push_back(new IR::Property("default_action",
-                         new IR::ExpressionValue(tbl->getDefaultAction()), isConstDefAction));
+    properties.push_back(new IR::Property(
+        "default_action", new IR::ExpressionValue(tbl->getDefaultAction()), isConstDefAction));
     if (tbl->getSizeProperty()) {
-        properties.push_back(new IR::Property("size",
-                             new IR::ExpressionValue(tbl->getSizeProperty()), false)); }
-    auto match_table = new IR::P4Table(tbl->name, tbl->annotations,
-                                       new IR::TableProperties(properties));
+        properties.push_back(
+            new IR::Property("size", new IR::ExpressionValue(tbl->getSizeProperty()), false));
+    }
+    auto match_table =
+        new IR::P4Table(tbl->name, tbl->annotations, new IR::TableProperties(properties));
     return std::make_tuple(match_table, grpActionName, memActionName);
 }
 
-const IR::P4Action*
-SplitP4TableCommon::create_action(cstring actionName, cstring group_id, cstring param) {
+const IR::P4Action* SplitP4TableCommon::create_action(cstring actionName, cstring group_id,
+                                                      cstring param) {
     auto hidden = new IR::Annotations();
     hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
-    auto set_id = new IR::AssignmentStatement(
-            new IR::PathExpression(group_id), new IR::PathExpression(param));
+    auto set_id = new IR::AssignmentStatement(new IR::PathExpression(group_id),
+                                              new IR::PathExpression(param));
     auto parameter = new IR::Parameter(param, IR::Direction::None, IR::Type_Bits::get(32));
-    auto action = new IR::P4Action(
-            actionName, hidden, new IR::ParameterList({ parameter }),
-            new IR::BlockStatement({ set_id }));
+    auto action = new IR::P4Action(actionName, hidden, new IR::ParameterList({parameter}),
+                                   new IR::BlockStatement({set_id}));
     return action;
 }
 
 const IR::P4Table* SplitP4TableCommon::create_member_table(const IR::P4Table* tbl,
-                                       cstring memberTableName, cstring member_id) {
+                                                           cstring memberTableName,
+                                                           cstring member_id) {
     IR::Vector<IR::KeyElement> member_keys;
-    auto tableKeyEl = new IR::KeyElement(new IR::PathExpression(member_id),
-            new IR::PathExpression(P4::P4CoreLibrary::instance.exactMatch.Id()));
+    auto tableKeyEl =
+        new IR::KeyElement(new IR::PathExpression(member_id),
+                           new IR::PathExpression(P4::P4CoreLibrary::instance.exactMatch.Id()));
     member_keys.push_back(tableKeyEl);
     IR::IndexedVector<IR::Property> member_properties;
     member_properties.push_back(new IR::Property("key", new IR::Key(member_keys), false));
@@ -1910,26 +1834,27 @@ const IR::P4Table* SplitP4TableCommon::create_member_table(const IR::P4Table* tb
     hidden->addAnnotation(IR::Annotation::nameAnnotation, new IR::StringLiteral(memName), false);
 
     IR::IndexedVector<IR::ActionListElement> memberActionList;
-    for (auto action : tbl->getActionList()->actionList)
-        memberActionList.push_back(action);
-    member_properties.push_back(new IR::Property("actions",
-                                                 new IR::ActionList(memberActionList), false));
+    for (auto action : tbl->getActionList()->actionList) memberActionList.push_back(action);
+    member_properties.push_back(
+        new IR::Property("actions", new IR::ActionList(memberActionList), false));
     if (tbl->getSizeProperty()) {
-        member_properties.push_back(new IR::Property("size",
-                                    new IR::ExpressionValue(tbl->getSizeProperty()), false)); }
-    member_properties.push_back(new IR::Property("default_action",
-                                new IR::ExpressionValue(tbl->getDefaultAction()), false));
+        member_properties.push_back(
+            new IR::Property("size", new IR::ExpressionValue(tbl->getSizeProperty()), false));
+    }
+    member_properties.push_back(new IR::Property(
+        "default_action", new IR::ExpressionValue(tbl->getDefaultAction()), false));
 
-    auto member_table = new IR::P4Table(memberTableName, hidden,
-                                        new IR::TableProperties(member_properties));
+    auto member_table =
+        new IR::P4Table(memberTableName, hidden, new IR::TableProperties(member_properties));
 
     return member_table;
 }
 
 const IR::P4Table* SplitP4TableCommon::create_group_table(const IR::P4Table* tbl,
-                                       cstring selectorTableName, cstring group_id,
-                                       cstring member_id, int n_groups_max,
-                                       int n_members_per_group_max) {
+                                                          cstring selectorTableName,
+                                                          cstring group_id, cstring member_id,
+                                                          int n_groups_max,
+                                                          int n_members_per_group_max) {
     IR::Vector<IR::KeyElement> selector_keys;
     for (auto key : tbl->getKey()->keyElements) {
         if (key->matchType->toString() == "selector") {
@@ -1944,18 +1869,19 @@ const IR::P4Table* SplitP4TableCommon::create_group_table(const IR::P4Table* tbl
     hidden->addAnnotation(IR::Annotation::nameAnnotation, new IR::StringLiteral(selName), false);
     IR::IndexedVector<IR::Property> selector_properties;
     selector_properties.push_back(new IR::Property("selector", new IR::Key(selector_keys), false));
-    selector_properties.push_back(new IR::Property("group_id",
-        new IR::ExpressionValue(new IR::PathExpression(group_id)), false));
-    selector_properties.push_back(new IR::Property("member_id",
-        new IR::ExpressionValue(new IR::PathExpression(member_id)), false));
+    selector_properties.push_back(new IR::Property(
+        "group_id", new IR::ExpressionValue(new IR::PathExpression(group_id)), false));
+    selector_properties.push_back(new IR::Property(
+        "member_id", new IR::ExpressionValue(new IR::PathExpression(member_id)), false));
 
-    selector_properties.push_back(new IR::Property("n_groups_max",
-        new IR::ExpressionValue(new IR::Constant(n_groups_max)), false));
-    selector_properties.push_back(new IR::Property("n_members_per_group_max",
+    selector_properties.push_back(new IR::Property(
+        "n_groups_max", new IR::ExpressionValue(new IR::Constant(n_groups_max)), false));
+    selector_properties.push_back(new IR::Property(
+        "n_members_per_group_max",
         new IR::ExpressionValue(new IR::Constant(n_members_per_group_max)), false));
     selector_properties.push_back(new IR::Property("actions", new IR::ActionList({}), false));
-    auto group_table = new IR::P4Table(selectorTableName, hidden,
-                                       new IR::TableProperties(selector_properties));
+    auto group_table =
+        new IR::P4Table(selectorTableName, hidden, new IR::TableProperties(selector_properties));
     return group_table;
 }
 
@@ -1966,7 +1892,7 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     cstring prefix = "psa_";
 
     if (structure->isPNA()) {
-       prefix = "pna_";
+        prefix = "pna_";
     }
 
     auto property = tbl->properties->getProperty(prefix + "implementation");
@@ -1976,21 +1902,19 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     if (property != nullptr && (counterProperty != nullptr || meterProperty != nullptr)) {
         ::error(ErrorType::ERR_UNEXPECTED,
                 "implementation property cannot co-exist with direct counter and direct meter "
-                "property for table %1%", tbl->name);
+                "property for table %1%",
+                tbl->name);
         return tbl;
     }
 
-    auto instance = Helpers::getExternInstanceFromProperty(tbl, prefix + "implementation",
-                                                           refMap, typeMap, &isConstructedInPlace,
-                                                           externName);
-    if (!instance)
-        return tbl;
-    if (instance->type->name != "ActionSelector")
-        return tbl;
+    auto instance = Helpers::getExternInstanceFromProperty(
+        tbl, prefix + "implementation", refMap, typeMap, &isConstructedInPlace, externName);
+    if (!instance) return tbl;
+    if (instance->type->name != "ActionSelector") return tbl;
 
     if (instance->arguments->size() != 3) {
-        ::error(ErrorType::ERR_UNEXPECTED,
-                "Incorrect number of argument on action selector %1%", *instance->name);
+        ::error(ErrorType::ERR_UNEXPECTED, "Incorrect number of argument on action selector %1%",
+                *instance->name);
         return tbl;
     }
 
@@ -2029,8 +1953,7 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     // When multiple tables share an action selector instance, they share the metadata
     // field for member id and group id.
     for (auto mid : member_ids) {
-        if (mid.second == member_id)
-            isAsInstanceShared = true;
+        if (mid.second == member_id) isAsInstanceShared = true;
     }
 
     member_ids.emplace(tbl->name, member_id);
@@ -2071,18 +1994,18 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     } else {
         // Use existing member table and group table created for this action selector instance
         for (auto mt : structure->member_tables) {
-             if (mt.second->name == member_table_name) {
-                 auto memTable = mt.second;
-                 structure->member_tables.emplace(tbl->name, memTable);
-                 break;
-             }
+            if (mt.second->name == member_table_name) {
+                auto memTable = mt.second;
+                structure->member_tables.emplace(tbl->name, memTable);
+                break;
+            }
         }
         for (auto mt : structure->group_tables) {
-             if (mt.second->name == group_table_name) {
-                 auto groupTable = mt.second;
-                 structure->group_tables.emplace(tbl->name, groupTable);
-                 break;
-             }
+            if (mt.second->name == group_table_name) {
+                auto groupTable = mt.second;
+                structure->group_tables.emplace(tbl->name, groupTable);
+                break;
+            }
         }
     }
 
@@ -2099,18 +2022,16 @@ const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
     cstring externName = "";
     cstring implementation = "psa_implementation";
 
-    if (structure->isPNA())
-        implementation = "pna_implementation";
+    if (structure->isPNA()) implementation = "pna_implementation";
 
-    auto instance = Helpers::getExternInstanceFromProperty(tbl, implementation,
-                            refMap, typeMap, &isConstructedInPlace, externName);
+    auto instance = Helpers::getExternInstanceFromProperty(tbl, implementation, refMap, typeMap,
+                                                           &isConstructedInPlace, externName);
 
-    if (!instance || instance->type->name != "ActionProfile")
-        return tbl;
+    if (!instance || instance->type->name != "ActionProfile") return tbl;
 
     if (instance->arguments->size() != 1) {
-        ::error(ErrorType::ERR_MODEL,
-                "Incorrect number of argument on action profile %1%", *instance->name);
+        ::error(ErrorType::ERR_MODEL, "Incorrect number of argument on action profile %1%",
+                *instance->name);
         return tbl;
     }
 
@@ -2131,8 +2052,7 @@ const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
     // When multiple tables share an action profile instance, they share the metadata
     // field for member id.
     for (auto mid : member_ids) {
-        if (mid.second == member_id)
-            isApInstanceShared = true;
+        if (mid.second == member_id) isApInstanceShared = true;
     }
 
     member_ids.emplace(tbl->name, member_id);
@@ -2159,11 +2079,11 @@ const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
     } else {
         // Use existing member table created for this action profile instance
         for (auto mt : structure->member_tables) {
-             if (mt.second->name == member_table_name) {
-                 auto memTable = mt.second;
-                 structure->member_tables.emplace(tbl->name, memTable);
-                 break;
-             }
+            if (mt.second->name == member_table_name) {
+                auto memTable = mt.second;
+                structure->member_tables.emplace(tbl->name, memTable);
+                break;
+            }
         }
     }
 
@@ -2172,22 +2092,18 @@ const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
     return decls;
 }
 
-const IR::Node* SplitP4TableCommon::postorder(IR::MethodCallStatement *statement) {
+const IR::Node* SplitP4TableCommon::postorder(IR::MethodCallStatement* statement) {
     auto methodCall = statement->methodCall;
     auto mi = P4::MethodInstance::resolve(methodCall, refMap, typeMap);
     auto gen_apply = [](cstring table) {
-        IR::Statement *expr = new IR::MethodCallStatement(
-                new IR::MethodCallExpression(
-                new IR::Member(new IR::PathExpression(table),
-                IR::ID(IR::IApply::applyMethodName))));
+        IR::Statement* expr = new IR::MethodCallStatement(new IR::MethodCallExpression(
+            new IR::Member(new IR::PathExpression(table), IR::ID(IR::IApply::applyMethodName))));
         return expr;
     };
     if (auto apply = mi->to<P4::ApplyMethod>()) {
-        if (!apply->isTableApply())
-            return statement;
+        if (!apply->isTableApply()) return statement;
         auto table = apply->object->to<IR::P4Table>();
-        if (match_tables.count(table->name) == 0)
-            return statement;
+        if (match_tables.count(table->name) == 0) return statement;
         auto decls = new IR::IndexedVector<IR::StatOrDecl>();
         auto tableName = apply->object->getName().name;
 
@@ -2195,29 +2111,27 @@ const IR::Node* SplitP4TableCommon::postorder(IR::MethodCallStatement *statement
         if (member_ids.count(tableName) != 0) {
             auto member_id = member_ids.at(tableName);
             decls->push_back(new IR::AssignmentStatement(
-                        new IR::PathExpression(member_id),
-                        new IR::Constant(IR::Type_Bits::get(32), 0))); }
+                new IR::PathExpression(member_id), new IR::Constant(IR::Type_Bits::get(32), 0)));
+        }
 
         if (group_ids.count(tableName) != 0) {
             auto group_id = group_ids.at(tableName);
             decls->push_back(new IR::AssignmentStatement(
-                        new IR::PathExpression(group_id),
-                        new IR::Constant(IR::Type_Bits::get(32), 0))); }
+                new IR::PathExpression(group_id), new IR::Constant(IR::Type_Bits::get(32), 0)));
+        }
 
         decls->push_back(statement);
 
         if (implementation == TableImplementation::ACTION_SELECTOR) {
             if (group_tables.count(tableName) == 0) {
-                ::error(ErrorType::ERR_NOT_FOUND,
-                        "Unable to find group table %1%", tableName);
+                ::error(ErrorType::ERR_NOT_FOUND, "Unable to find group table %1%", tableName);
                 return statement;
             }
             auto selectorTable = group_tables.at(tableName);
             decls->push_back(gen_apply(selectorTable));
         }
         if (member_tables.count(tableName) == 0) {
-            ::error(ErrorType::ERR_NOT_FOUND,
-                    "Unable to find member table %1%", tableName);
+            ::error(ErrorType::ERR_NOT_FOUND, "Unable to find member table %1%", tableName);
             return statement;
         }
 
@@ -2236,34 +2150,30 @@ const IR::Node* SplitP4TableCommon::postorder(IR::IfStatement* statement) {
         // We handle !hit, which may have been created by the
         // removal of miss
         negated = true;
-        cond = neg->expr; }
+        cond = neg->expr;
+    }
 
-    if (!P4::TableApplySolver::isHit(cond, refMap, typeMap))
-        return statement;
-    if (!cond->is<IR::Member>())
-        return statement;
+    if (!P4::TableApplySolver::isHit(cond, refMap, typeMap)) return statement;
+    if (!cond->is<IR::Member>()) return statement;
 
     auto member = cond->to<IR::Member>();
-    if (!member->expr->is<IR::MethodCallExpression>())
-        return statement;
+    if (!member->expr->is<IR::MethodCallExpression>()) return statement;
     auto mce = member->expr->to<IR::MethodCallExpression>();
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
 
-    auto apply_hit = [](cstring table, bool negated){
-        IR::Expression *expr = new IR::Member(new IR::MethodCallExpression(
-                new IR::Member(new IR::PathExpression(table),
-                IR::ID(IR::IApply::applyMethodName))), "hit");
-        if (negated)
-            expr = new IR::LNot(expr);
+    auto apply_hit = [](cstring table, bool negated) {
+        IR::Expression* expr =
+            new IR::Member(new IR::MethodCallExpression(new IR::Member(
+                               new IR::PathExpression(table), IR::ID(IR::IApply::applyMethodName))),
+                           "hit");
+        if (negated) expr = new IR::LNot(expr);
         return expr;
     };
 
     if (auto apply = mi->to<P4::ApplyMethod>()) {
-        if (!apply->isTableApply())
-            return statement;
+        if (!apply->isTableApply()) return statement;
         auto table = apply->object->to<IR::P4Table>();
-        if (match_tables.count(table->name) == 0)
-            return statement;
+        if (match_tables.count(table->name) == 0) return statement;
         // an action selector t.apply() is converted to
         // t0.apply();  // base table
         // t1.apply();  // group table
@@ -2296,8 +2206,7 @@ const IR::Node* SplitP4TableCommon::postorder(IR::IfStatement* statement) {
         //   }
         // }
         auto tableName = apply->object->getName().name;
-        if (member_tables.count(tableName) == 0)
-            return statement;
+        if (member_tables.count(tableName) == 0) return statement;
         auto memberTable = member_tables.at(tableName);
         auto t2stat = apply_hit(memberTable, negated);
         IR::Expression* t1stat = nullptr;
@@ -2309,28 +2218,28 @@ const IR::Node* SplitP4TableCommon::postorder(IR::IfStatement* statement) {
         IR::IfStatement* ret = nullptr;
         if (negated) {
             if (implementation == TableImplementation::ACTION_SELECTOR) {
-                ret = new IR::IfStatement(cond, statement->ifTrue,
-                        new IR::IfStatement(t1stat, statement->ifTrue,
-                            new IR::IfStatement(t2stat, statement->ifTrue,
-                                statement->ifFalse)));
+                ret = new IR::IfStatement(
+                    cond, statement->ifTrue,
+                    new IR::IfStatement(
+                        t1stat, statement->ifTrue,
+                        new IR::IfStatement(t2stat, statement->ifTrue, statement->ifFalse)));
             } else if (implementation == TableImplementation::ACTION_PROFILE) {
-                ret = new IR::IfStatement(cond, statement->ifTrue,
-                        new IR::IfStatement(t2stat, statement->ifTrue,
-                            statement->ifFalse));
+                ret = new IR::IfStatement(
+                    cond, statement->ifTrue,
+                    new IR::IfStatement(t2stat, statement->ifTrue, statement->ifFalse));
             }
         } else {
             if (implementation == TableImplementation::ACTION_SELECTOR) {
-                ret = new IR::IfStatement(cond,
-                        new IR::IfStatement(t1stat,
-                            new IR::IfStatement(t2stat, statement->ifTrue,
-                                statement->ifFalse),
-                            statement->ifFalse),
-                        statement->ifFalse);
+                ret = new IR::IfStatement(
+                    cond,
+                    new IR::IfStatement(
+                        t1stat, new IR::IfStatement(t2stat, statement->ifTrue, statement->ifFalse),
+                        statement->ifFalse),
+                    statement->ifFalse);
             } else if (implementation == TableImplementation::ACTION_PROFILE) {
-                ret = new IR::IfStatement(cond,
-                        new IR::IfStatement(t2stat, statement->ifTrue,
-                            statement->ifFalse),
-                        statement->ifFalse);
+                ret = new IR::IfStatement(
+                    cond, new IR::IfStatement(t2stat, statement->ifTrue, statement->ifFalse),
+                    statement->ifFalse);
             }
         }
         return ret;
@@ -2341,32 +2250,27 @@ const IR::Node* SplitP4TableCommon::postorder(IR::IfStatement* statement) {
 const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
     auto expr = statement->expression;
     auto member = expr->to<IR::Member>();
-    if (!member || member->member != "action_run")
-        return statement;
-    if (!member->expr->is<IR::MethodCallExpression>())
-        return statement;
+    if (!member || member->member != "action_run") return statement;
+    if (!member->expr->is<IR::MethodCallExpression>()) return statement;
     auto mce = member->expr->to<IR::MethodCallExpression>();
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
     auto gen_apply = [](cstring table) {
-        IR::Statement *expr = new IR::MethodCallStatement(
-                new IR::MethodCallExpression(
-                new IR::Member(new IR::PathExpression(table),
-                IR::ID(IR::IApply::applyMethodName))));
+        IR::Statement* expr = new IR::MethodCallStatement(new IR::MethodCallExpression(
+            new IR::Member(new IR::PathExpression(table), IR::ID(IR::IApply::applyMethodName))));
         return expr;
     };
     auto gen_action_run = [](cstring table) {
-        IR::Expression *expr = new IR::Member(new IR::MethodCallExpression(
-                new IR::Member(new IR::PathExpression(table),
-                IR::ID(IR::IApply::applyMethodName))), "action_run");
+        IR::Expression* expr =
+            new IR::Member(new IR::MethodCallExpression(new IR::Member(
+                               new IR::PathExpression(table), IR::ID(IR::IApply::applyMethodName))),
+                           "action_run");
         return expr;
     };
 
     if (auto apply = mi->to<P4::ApplyMethod>()) {
-        if (!apply->isTableApply())
-            return statement;
+        if (!apply->isTableApply()) return statement;
         auto table = apply->object->to<IR::P4Table>();
-        if (match_tables.count(table->name) == 0)
-            return statement;
+        if (match_tables.count(table->name) == 0) return statement;
 
         // switch(t0.apply()) {} is converted to
         //
@@ -2381,22 +2285,21 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
 
         if (implementation == TableImplementation::ACTION_SELECTOR) {
             if (group_tables.count(tableName) == 0) {
-                ::error(ErrorType::ERR_NOT_FOUND,
-                        "Unable to find group table %1%", tableName);
-                return statement; }
+                ::error(ErrorType::ERR_NOT_FOUND, "Unable to find group table %1%", tableName);
+                return statement;
+            }
             auto selectorTable = group_tables.at(tableName);
             auto t1stat = gen_apply(selectorTable);
             decls->push_back(t1stat);
         }
 
         if (member_tables.count(tableName) == 0) {
-            ::error(ErrorType::ERR_NOT_FOUND,
-                    "Unable to find member table %1%", tableName);
-            return statement; }
+            ::error(ErrorType::ERR_NOT_FOUND, "Unable to find member table %1%", tableName);
+            return statement;
+        }
         auto memberTable = member_tables.at(tableName);
         auto t2stat = gen_action_run(memberTable);
-        decls->push_back(new IR::SwitchStatement(statement->srcInfo,
-                    t2stat, statement->cases));
+        decls->push_back(new IR::SwitchStatement(statement->srcInfo, t2stat, statement->cases));
 
         return new IR::BlockStatement(*decls);
     }
@@ -2405,15 +2308,14 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
 
 /* For regular tables, the direct counter array size is same as table size
  * For learner tables, the direct counter/meter array size is 4 times the table size */
-int CollectDirectCounterMeter::getTableSize(const IR::P4Table * tbl) {
+int CollectDirectCounterMeter::getTableSize(const IR::P4Table* tbl) {
     int tableSize = dpdk_default_table_size;
     auto size = tbl->getSizeProperty();
-    if (size)
-        tableSize = size->asUnsigned();
+    if (size) tableSize = size->asUnsigned();
     return tableSize;
 }
 
-void CollectDirectCounterMeter::checkMethodCallInAction(const P4::ExternMethod *a) {
+void CollectDirectCounterMeter::checkMethodCallInAction(const P4::ExternMethod* a) {
     cstring externName = a->originalExternType->getName().name;
     if (externName == "DirectMeter" || externName == "DirectCounter") {
         auto di = a->object->to<IR::Declaration_Instance>();
@@ -2423,14 +2325,14 @@ void CollectDirectCounterMeter::checkMethodCallInAction(const P4::ExternMethod *
                 methodCallFound = true;
             }
 
-            if (oneInstance == "")
-                oneInstance = instanceName;
+            if (oneInstance == "") oneInstance = instanceName;
 
             // error if more than one count method found with different instance name
             if (oneInstance != instanceName) {
-                ::error(ErrorType::ERR_UNEXPECTED, "%1% method for different %2% "
-                         "instances (%3% and %4%) called within same action",
-                         method, externName, oneInstance, instanceName);
+                ::error(ErrorType::ERR_UNEXPECTED,
+                        "%1% method for different %2% "
+                        "instances (%3% and %4%) called within same action",
+                        method, externName, oneInstance, instanceName);
                 return;
             }
         }
@@ -2455,8 +2357,8 @@ bool CollectDirectCounterMeter::preorder(const IR::AssignmentStatement* assn) {
     return false;
 }
 
-bool CollectDirectCounterMeter::ifMethodFound(const IR::P4Action *a,
-                             cstring methodName, cstring instance) {
+bool CollectDirectCounterMeter::ifMethodFound(const IR::P4Action* a, cstring methodName,
+                                              cstring instance) {
     oneInstance = "";
     instancename = instance;
     method = methodName;
@@ -2489,24 +2391,23 @@ bool CollectDirectCounterMeter::preorder(const IR::P4Table* tbl) {
         direct_meter = "pna_direct_meter";
     }
 
-    auto counterInstance = Helpers::getExternInstanceFromProperty(tbl, direct_counter,
-                                                           refMap, typeMap, &isConstructedInPlace,
-                                                           counterExternName);
-    auto meterInstance = Helpers::getExternInstanceFromProperty(tbl, direct_meter,
-                                                           refMap, typeMap, &isConstructedInPlace,
-                                                           meterExternName);
+    auto counterInstance = Helpers::getExternInstanceFromProperty(
+        tbl, direct_counter, refMap, typeMap, &isConstructedInPlace, counterExternName);
+    auto meterInstance = Helpers::getExternInstanceFromProperty(
+        tbl, direct_meter, refMap, typeMap, &isConstructedInPlace, meterExternName);
     int table_size = getTableSize(tbl);
     auto table_type = ::get(structure->table_type_map, tbl->name.name);
 
     // Direct Counter and Meter are not supported with Wildcard match tables
     if (table_type == InternalTableType::WILDCARD && (counterInstance || meterInstance)) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Direct counters and direct meters are"
-                " unsupported for wildcard match table %1%", tbl->name);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "Direct counters and direct meters are"
+                " unsupported for wildcard match table %1%",
+                tbl->name);
         return false;
     }
 
-    if (table_type == InternalTableType::LEARNER)
-        table_size *= 4;
+    if (table_type == InternalTableType::LEARNER) table_size *= 4;
 
     auto default_action = tbl->getDefaultAction();
     if (default_action) {
@@ -2520,7 +2421,8 @@ bool CollectDirectCounterMeter::preorder(const IR::P4Table* tbl) {
             if (defaultActionDecl->name.originalName != "NoAction") {
                 if (!ifMethodFound(defaultActionDecl, "count", counterExternName)) {
                     if (counterInstance) {
-                        ::error(ErrorType::ERR_EXPECTED, "Expected default action %1% to have "
+                        ::error(ErrorType::ERR_EXPECTED,
+                                "Expected default action %1% to have "
                                 "'count' method call for DirectCounter extern instance %2%",
                                 defaultActionDecl->name, *counterInstance->name);
                         return false;
@@ -2528,9 +2430,10 @@ bool CollectDirectCounterMeter::preorder(const IR::P4Table* tbl) {
                 }
                 if (!ifMethodFound(defaultActionDecl, "dpdk_execute", meterExternName)) {
                     if (meterInstance) {
-                        ::error(ErrorType::ERR_EXPECTED, "Expected default action %1% to have "
+                        ::error(ErrorType::ERR_EXPECTED,
+                                "Expected default action %1% to have "
                                 "'dpdk_execute' method call for DirectMeter extern instance %2%",
-                                 defaultActionDecl->name, *meterInstance->name);
+                                defaultActionDecl->name, *meterInstance->name);
                         return false;
                     }
                 }
@@ -2549,7 +2452,7 @@ bool CollectDirectCounterMeter::preorder(const IR::P4Table* tbl) {
     return false;
 }
 
-void ValidateDirectCounterMeter::validateMethodInvocation(P4::ExternMethod *a) {
+void ValidateDirectCounterMeter::validateMethodInvocation(P4::ExternMethod* a) {
     cstring externName = a->originalExternType->getName().name;
     cstring methodName = a->method->getName().name;
     if (externName != "DirectCounter" && externName != "DirectMeter") {
@@ -2558,8 +2461,8 @@ void ValidateDirectCounterMeter::validateMethodInvocation(P4::ExternMethod *a) {
 
     if ((externName == "DirectCounter" && methodName != "count") ||
         (externName == "DirectMeter" && methodName != "dpdk_execute")) {
-        ::error(ErrorType::ERR_UNEXPECTED, "%1% method not supported for %2% extern",
-                                           methodName, externName);
+        ::error(ErrorType::ERR_UNEXPECTED, "%1% method not supported for %2% extern", methodName,
+                externName);
         return;
     }
 
@@ -2568,9 +2471,10 @@ void ValidateDirectCounterMeter::validateMethodInvocation(P4::ExternMethod *a) {
         bool invokedFromOwnerTable = false;
         auto act = findOrigCtxt<IR::P4Action>();
         if (!act) {
-            ::error(ErrorType::ERR_UNEXPECTED,"%1% method of %2% extern "
-            "must only be called from within an action", a->method->getName().name,
-            di->name.originalName);
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "%1% method of %2% extern "
+                    "must only be called from within an action",
+                    a->method->getName().name, di->name.originalName);
             return;
         }
 
@@ -2583,16 +2487,16 @@ void ValidateDirectCounterMeter::validateMethodInvocation(P4::ExternMethod *a) {
         }
 
         if (!invokedFromOwnerTable) {
-            ::error(ErrorType::ERR_UNEXPECTED,"%1% method of %2% extern "
-             "can only be invoked from within action of ownertable", a->method->getName(),
-              di->name.originalName);
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "%1% method of %2% extern "
+                    "can only be invoked from within action of ownertable",
+                    a->method->getName(), di->name.originalName);
             return;
         }
     }
 }
 
-
-void ValidateDirectCounterMeter::postorder(const IR::AssignmentStatement *assn) {
+void ValidateDirectCounterMeter::postorder(const IR::AssignmentStatement* assn) {
     if (auto m = assn->right->to<IR::MethodCallExpression>()) {
         auto mi = P4::MethodInstance::resolve(m, refMap, typeMap);
         if (auto a = mi->to<P4::ExternMethod>()) {
@@ -2601,7 +2505,7 @@ void ValidateDirectCounterMeter::postorder(const IR::AssignmentStatement *assn) 
     }
 }
 
-void ValidateDirectCounterMeter::postorder(const IR::MethodCallStatement *mcs) {
+void ValidateDirectCounterMeter::postorder(const IR::MethodCallStatement* mcs) {
     auto mi = P4::MethodInstance::resolve(mcs->methodCall, refMap, typeMap);
     if (auto a = mi->to<P4::ExternMethod>()) {
         return validateMethodInvocation(a);
@@ -2615,13 +2519,12 @@ void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
     if (add_on_miss->value->is<IR::ExpressionValue>()) {
         auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
         if (!expr->is<IR::BoolLiteral>()) {
-            ::error(ErrorType::ERR_UNEXPECTED,
-                    "%1%: expected boolean for 'add_on_miss' property", add_on_miss);
+            ::error(ErrorType::ERR_UNEXPECTED, "%1%: expected boolean for 'add_on_miss' property",
+                    add_on_miss);
             return;
         } else {
             use_add_on_miss = expr->to<IR::BoolLiteral>()->value;
-            if (use_add_on_miss)
-                structure->learner_tables.insert(t->name.name);
+            if (use_add_on_miss) structure->learner_tables.insert(t->name.name);
         }
     }
 
@@ -2630,17 +2533,18 @@ void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
     if (use_add_on_miss && default_action == nullptr) {
         ::error(ErrorType::ERR_UNEXPECTED,
                 "%1%: add_on_miss property is defined, "
-                "but default_action not specificed for table %2%", default_action, t->name);
+                "but default_action not specificed for table %2%",
+                default_action, t->name);
         return;
     }
     if (default_action->value->is<IR::ExpressionValue>()) {
         auto expr = default_action->value->to<IR::ExpressionValue>()->expression;
-        BUG_CHECK(expr->is<IR::MethodCallExpression>(),
-            "%1%: expected expression to an action", default_action);
-        auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
-                refMap, typeMap);
-        BUG_CHECK(mi->is<P4::ActionCall>(),
-            "%1%: expected action in default_action", default_action);
+        BUG_CHECK(expr->is<IR::MethodCallExpression>(), "%1%: expected expression to an action",
+                  default_action);
+        auto mi =
+            P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(), refMap, typeMap);
+        BUG_CHECK(mi->is<P4::ActionCall>(), "%1%: expected action in default_action",
+                  default_action);
         if (mi->to<P4::ActionCall>()->action->parameters->parameters.size() != 0) {
             ::error(ErrorType::ERR_UNEXPECTED,
                     "%1%: action cannot have action argument when used with add_on_miss",
@@ -2662,7 +2566,7 @@ void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
     }
 }
 
-void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
+void CollectAddOnMissTable::postorder(const IR::MethodCallStatement* mcs) {
     auto mce = mcs->methodCall;
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
     if (!mi->is<P4::ExternFunction>()) {
@@ -2675,8 +2579,7 @@ void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
     auto ctxt = findContext<IR::P4Action>();
     BUG_CHECK(ctxt != nullptr, "%1% add_entry extern can only be used in an action", mcs);
     // In p4c, by design, only  backend checks args of an extern.
-    BUG_CHECK(mce->arguments->size() == 3,
-              "%1%: expected 3 arguments in add_entry extern", mcs);
+    BUG_CHECK(mce->arguments->size() == 3, "%1%: expected 3 arguments in add_entry extern", mcs);
     auto action = mce->arguments->at(0);
     // assuming syntax check is already performed earlier
     auto action_name = action->expression->to<IR::StringLiteral>()->value;
@@ -2684,7 +2587,7 @@ void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
     return;
 }
 
-void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
+void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement* mcs) {
     bool isValidExternCall = false;
     cstring propName = "";
     auto mce = mcs->methodCall;
@@ -2704,22 +2607,22 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
         bool use_idle_timeout_with_auto_delete = false;
         if (tbl) {
             auto idle_timeout_with_auto_delete =
-                 tbl->properties->getProperty("idle_timeout_with_auto_delete");
+                tbl->properties->getProperty("idle_timeout_with_auto_delete");
             if (idle_timeout_with_auto_delete != nullptr) {
                 propName = "idle_timeout_with_auto_delete";
                 if (idle_timeout_with_auto_delete->value->is<IR::ExpressionValue>()) {
                     auto expr =
-                    idle_timeout_with_auto_delete->value->to<IR::ExpressionValue>()->expression;
+                        idle_timeout_with_auto_delete->value->to<IR::ExpressionValue>()->expression;
                     if (!expr->is<IR::BoolLiteral>()) {
-                        ::error(ErrorType::ERR_UNEXPECTED,
-                               "%1%: expected boolean for 'idle_timeout_with_auto_delete' property",
-                               idle_timeout_with_auto_delete);
+                        ::error(
+                            ErrorType::ERR_UNEXPECTED,
+                            "%1%: expected boolean for 'idle_timeout_with_auto_delete' property",
+                            idle_timeout_with_auto_delete);
                         return;
-                     } else {
-                         use_idle_timeout_with_auto_delete = expr->to<IR::BoolLiteral>()->value;
-                         if (use_idle_timeout_with_auto_delete)
-                             isValidExternCall = true;
-                     }
+                    } else {
+                        use_idle_timeout_with_auto_delete = expr->to<IR::BoolLiteral>()->value;
+                        if (use_idle_timeout_with_auto_delete) isValidExternCall = true;
+                    }
                 }
             }
         }
@@ -2746,23 +2649,22 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
                             cstring st = getDefActionName(tbl);
                             if (st != act->name.name) {  // checks caller
                                 ::error(ErrorType::ERR_UNEXPECTED,
-                                "%1% is not called from a default action: %2% ",
-                                mcs, act->name.name);
+                                        "%1% is not called from a default action: %2% ", mcs,
+                                        act->name.name);
                                 return;
                             } else if (st == an) {  // checks arg0
                                 ::error(ErrorType::ERR_UNEXPECTED,
-                                "%1% action cannot be default action: %2%:",
-                                mcs, an);
+                                        "%1% action cannot be default action: %2%:", mcs, an);
                                 return;
                             }
                             for (auto action : tbl->getActionList()->actionList) {
-                                if (action->getName().originalName == an)
-                                    found = true;
+                                if (action->getName().originalName == an) found = true;
                             }
                             if (!found) {
-                                ::error(ErrorType::ERR_UNEXPECTED,
-                                "%1% first arg action name %2% is not any action in table %3%",
-                                mcs, an, tbl->name.name);
+                                ::error(
+                                    ErrorType::ERR_UNEXPECTED,
+                                    "%1% first arg action name %2% is not any action in table %3%",
+                                    mcs, an, tbl->name.name);
                                 return;
                             }
                         }
@@ -2772,66 +2674,69 @@ void ValidateAddOnMissExterns::postorder(const IR::MethodCallStatement *mcs) {
         }
     }
     if (!isValidExternCall) {
-         ::error(ErrorType::ERR_UNEXPECTED,
-                 "%1% must only be called from within an action with '%2% %3%'"
-                 " property equal to true", mcs, propName, act->name.name);
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "%1% must only be called from within an action with '%2% %3%'"
+                " property equal to true",
+                mcs, propName, act->name.name);
     }
     return;
 }
 
 bool ElimHeaderCopy::isHeader(const IR::Expression* e) {
     auto type = typeMap->getType(e);
-    if (type)
-        return type->is<IR::Type_Header>() && !e->is<IR::MethodCallExpression>();
+    if (type) return type->is<IR::Type_Header>() && !e->is<IR::MethodCallExpression>();
     return false;
 }
 
 const IR::Node* ElimHeaderCopy::preorder(IR::AssignmentStatement* as) {
     if (isHeader(as->left) && isHeader(as->right)) {
         if (auto path = as->left->to<IR::PathExpression>()) {
-            replacementMap.insert(std::make_pair(path->path->name.name,
-                                   as->right->to<IR::Member>()));
+            replacementMap.insert(
+                std::make_pair(path->path->name.name, as->right->to<IR::Member>()));
             return new IR::EmptyStatement();
         } else if (auto path = as->right->to<IR::PathExpression>()) {
-            replacementMap.insert(std::make_pair(path->path->name.name,
-                                  as->left->to<IR::Member>()));
-            return  new IR::EmptyStatement();
+            replacementMap.insert(
+                std::make_pair(path->path->name.name, as->left->to<IR::Member>()));
+            return new IR::EmptyStatement();
         } else {
             IR::ID methodName;
             IR::IndexedVector<IR::StatOrDecl> components;
             // copy validity flag
-            auto isValid = new IR::Member(as->right->srcInfo, as->right,
-                              IR::ID(IR::Type_Header::isValid));
-            auto result = new IR::MethodCallExpression(as->right->srcInfo, IR::Type::Boolean::get(),
-                                                   isValid);
-            typeMap->setType(isValid, new IR::Type_Method(IR::Type::Boolean::get(),
-                                          new IR::ParameterList(), IR::Type_Header::isValid));
-            auto method = new IR::Member(as->left->srcInfo, as->left,
-                                         IR::ID(IR::Type_Header::setValid));
+            auto isValid =
+                new IR::Member(as->right->srcInfo, as->right, IR::ID(IR::Type_Header::isValid));
+            auto result =
+                new IR::MethodCallExpression(as->right->srcInfo, IR::Type::Boolean::get(), isValid);
+            typeMap->setType(isValid,
+                             new IR::Type_Method(IR::Type::Boolean::get(), new IR::ParameterList(),
+                                                 IR::Type_Header::isValid));
+            auto method =
+                new IR::Member(as->left->srcInfo, as->left, IR::ID(IR::Type_Header::setValid));
             auto mc = new IR::MethodCallExpression(as->left->srcInfo, method,
-                          new IR::Vector<IR::Argument>());
-            typeMap->setType(method, new IR::Type_Method(IR::Type_Void::get(),
-                                new IR::ParameterList(), IR::Type_Header::setValid));
+                                                   new IR::Vector<IR::Argument>());
+            typeMap->setType(method,
+                             new IR::Type_Method(IR::Type_Void::get(), new IR::ParameterList(),
+                                                 IR::Type_Header::setValid));
             components.push_back(new IR::MethodCallStatement(mc->srcInfo, mc));
             auto ifTrue = components;
             components.clear();
-            auto method1 = new IR::Member(as->left->srcInfo, as->left,
-                                              IR::ID(IR::Type_Header::setInvalid));
+            auto method1 =
+                new IR::Member(as->left->srcInfo, as->left, IR::ID(IR::Type_Header::setInvalid));
             auto mc1 = new IR::MethodCallExpression(as->left->srcInfo, method1,
-                          new IR::Vector<IR::Argument>());
-            typeMap->setType(method1, new IR::Type_Method(IR::Type_Void::get(),
-                                new IR::ParameterList(), IR::Type_Header::setInvalid));
+                                                    new IR::Vector<IR::Argument>());
+            typeMap->setType(method1,
+                             new IR::Type_Method(IR::Type_Void::get(), new IR::ParameterList(),
+                                                 IR::Type_Header::setInvalid));
             components.push_back(new IR::MethodCallStatement(mc1->srcInfo, mc1));
             auto ifFalse = components;
             components.clear();
-            auto ifStatement = new IR::IfStatement(
-              result, new IR::BlockStatement(ifTrue), new IR::BlockStatement(ifFalse));
+            auto ifStatement = new IR::IfStatement(result, new IR::BlockStatement(ifTrue),
+                                                   new IR::BlockStatement(ifFalse));
             components.push_back(ifStatement);
             // both are non temporary header instance do element wise copy
             for (auto field : typeMap->getType(as->left)->to<IR::Type_Header>()->fields) {
-                components.push_back(new IR::AssignmentStatement(as->srcInfo,
-                                     new IR::Member(as->left, field->name),
-                                     new IR::Member(as->right, field->name)));
+                components.push_back(
+                    new IR::AssignmentStatement(as->srcInfo, new IR::Member(as->left, field->name),
+                                                new IR::Member(as->right, field->name)));
             }
             return new IR::BlockStatement(as->srcInfo, components);
         }
@@ -2845,13 +2750,11 @@ const IR::Node* ElimHeaderCopy::preorder(IR::AssignmentStatement* as) {
  * with empty statement as all uses of eth_0 already replaced
  *
  */
-const IR::Node* ElimHeaderCopy::preorder(IR::MethodCallStatement *mcs) {
+const IR::Node* ElimHeaderCopy::preorder(IR::MethodCallStatement* mcs) {
     auto me = mcs->methodCall;
     auto m = me->method->to<IR::Member>();
-    if (!m)
-        return mcs;
-    if (!isHeader(m->expr))
-        return mcs;
+    if (!m) return mcs;
+    if (!isHeader(m->expr)) return mcs;
     auto expr = m->expr->to<IR::PathExpression>();
     if (expr && replacementMap.count(expr->path->name.name)) {
         return new IR::EmptyStatement();

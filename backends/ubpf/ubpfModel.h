@@ -25,8 +25,7 @@ limitations under the License.
 namespace UBPF {
 
 struct Pipeline_Model : public ::Model::Elem {
-    Pipeline_Model() : Elem("Pipeline"),
-                       parser("prs"), control("p"), deparser("dprs") {}
+    Pipeline_Model() : Elem("Pipeline"), parser("prs"), control("p"), deparser("dprs") {}
 
     ::Model::Elem parser;
     ::Model::Elem control;
@@ -34,11 +33,14 @@ struct Pipeline_Model : public ::Model::Elem {
 };
 
 struct Register_Model : public ::Model::Extern_Model {
-    Register_Model() : Extern_Model("Register"),
-                       sizeParam("size"), read("read"), write("write"),
-                       initial_value("initial_value"),
-                       index("index"),
-                       value("value") {}
+    Register_Model()
+        : Extern_Model("Register"),
+          sizeParam("size"),
+          read("read"),
+          write("write"),
+          initial_value("initial_value"),
+          index("index"),
+          value("value") {}
 
     ::Model::Elem sizeParam;
     ::Model::Elem read;
@@ -49,8 +51,7 @@ struct Register_Model : public ::Model::Extern_Model {
 };
 
 struct Algorithm_Model : public ::Model::Enum_Model {
-    Algorithm_Model() : ::Model::Enum_Model("HashAlgorithm"),
-            lookup3("lookup3") {}
+    Algorithm_Model() : ::Model::Enum_Model("HashAlgorithm"), lookup3("lookup3") {}
 
     ::Model::Elem lookup3;
 };
@@ -61,18 +62,19 @@ struct Hash_Model : public ::Model::Elem {
 
 class UBPFModel : public ::Model::Model {
  protected:
-    UBPFModel() : CPacketName("pkt"),
-                  packet("packet", P4::P4CoreLibrary::instance.packetIn, 0),
-                  pipeline(),
-                  registerModel(),
-                  drop("mark_to_drop"),
-                  pass("mark_to_pass"),
-                  ubpf_time_get_ns("ubpf_time_get_ns"),
-                  truncate("truncate"),
-                  csum_replace2("csum_replace2"),
-                  csum_replace4("csum_replace4"),
-                  hashAlgorithm(),
-                  hash() {}
+    UBPFModel()
+        : CPacketName("pkt"),
+          packet("packet", P4::P4CoreLibrary::instance.packetIn, 0),
+          pipeline(),
+          registerModel(),
+          drop("mark_to_drop"),
+          pass("mark_to_pass"),
+          ubpf_time_get_ns("ubpf_time_get_ns"),
+          truncate("truncate"),
+          csum_replace2("csum_replace2"),
+          csum_replace4("csum_replace4"),
+          hashAlgorithm(),
+          hash() {}
 
  public:
     static UBPFModel instance;
@@ -98,29 +100,30 @@ class UBPFModel : public ::Model::Model {
     int numberOfControlBlockArguments() const { return version >= 20200515 ? 3 : 2; }
 
     class getUBPFModelVersion : public Inspector {
-        bool preorder(const IR::Declaration_Constant *dc) override {
+        bool preorder(const IR::Declaration_Constant* dc) override {
             if (dc->name == "__ubpf_model_version") {
                 auto val = dc->initializer->to<IR::Constant>();
-                UBPFModel::instance.version = static_cast<unsigned>(val->value); }
-            return false; }
-        bool preorder(const IR::Declaration *) override { return false; }
+                UBPFModel::instance.version = static_cast<unsigned>(val->value);
+            }
+            return false;
+        }
+        bool preorder(const IR::Declaration*) override { return false; }
     };
 
-    const IR::P4Program *run(const IR::P4Program *program) {
-        if (program == nullptr)
-            return nullptr;
+    const IR::P4Program* run(const IR::P4Program* program) {
+        if (program == nullptr) return nullptr;
 
         PassManager passes({
-                new getUBPFModelVersion,
-            });
+            new getUBPFModelVersion,
+        });
 
         passes.setName("UBPFFrontEnd");
         passes.setStopOnError(true);
-        const IR::P4Program *result = program->apply(passes);
+        const IR::P4Program* result = program->apply(passes);
         return result;
     }
 };
 
 }  // namespace UBPF
 
-#endif  /* BACKENDS_UBPF_UBPFMODEL_H_ */
+#endif /* BACKENDS_UBPF_UBPFMODEL_H_ */

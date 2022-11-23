@@ -13,11 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include <iostream>
 #include "dpdkHelpers.h"
+
+#include <iostream>
+
 #include "dpdkUtils.h"
-#include "ir/ir.h"
 #include "frontends/p4/tableApply.h"
+#include "ir/ir.h"
 
 namespace DPDK {
 
@@ -82,9 +84,8 @@ void ConvertStatementToDpdk::process_relation_operation(const IR::Expression* ds
    ConvertLogicalExpression pass.
 */
 void ConvertStatementToDpdk::process_logical_operation(const IR::Expression* dst,
-                                                        const IR::Operation_Binary* op) {
-    if (!op->is<IR::LOr>() && !op->is<IR::LAnd>())
-        return;
+                                                       const IR::Operation_Binary* op) {
+    if (!op->is<IR::LOr>() && !op->is<IR::LAnd>()) return;
     auto true_label = refmap->newName("label_true");
     auto false_label = refmap->newName("label_false");
     auto end_label = refmap->newName("label_end");
@@ -109,10 +110,10 @@ void ConvertStatementToDpdk::process_logical_operation(const IR::Expression* dst
     }
 }
 
-bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
+bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement* a) {
     auto left = a->left;
     auto right = a->right;
-    IR::DpdkAsmStatement *i = nullptr;
+    IR::DpdkAsmStatement* i = nullptr;
 
     if (auto r = right->to<IR::Operation_Relation>()) {
         process_relation_operation(left, r);
@@ -184,8 +185,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                         IR::ID src1(refmap->newName("tmp"));
                         metadataStruct->fields.push_back(new IR::StructField(src1, src2Op->type));
                         auto src1Member = new IR::Member(new IR::PathExpression("m"), src1);
-                        add_instr(new IR::DpdkAndStatement(src2Op, src2Op,
-                                                           new IR::Constant(maskMsb)));
+                        add_instr(
+                            new IR::DpdkAndStatement(src2Op, src2Op, new IR::Constant(maskMsb)));
                         add_instr(new IR::DpdkShrStatement(src2Op, src2Op,
                                                            new IR::Constant(consOrgBitwidth - 1)));
                         add_instr(new IR::DpdkMovStatement(src1Member, src2Op));
@@ -223,8 +224,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
            fields , add BAnd operation with mask value of original bit-width to
            avoid any result overflow */
         if (!isEightBitAligned(left) && !isSignExtended) {
-            if (right->is<IR::Add>() || right->is<IR::Sub>() ||
-                right->is<IR::Shl>() || right->is<IR::Shr>()) {
+            if (right->is<IR::Add>() || right->is<IR::Sub>() || right->is<IR::Shl>() ||
+                right->is<IR::Shr>()) {
                 auto width = left->type->width_bits();
                 auto tmp = new IR::Constant(1);
                 auto mask = (tmp->value << width) - 1;
@@ -239,8 +240,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 auto declArgs = di->arguments;
                 if (declArgs->size() == 0) {
                     ::error(ErrorType::ERR_UNEXPECTED, "Expected atleast 1 argument for %1%",
-                                e->object->getName());
-                        return false;
+                            e->object->getName());
+                    return false;
                 }
                 auto hash_alg = declArgs->at(0)->expression;
                 unsigned hashAlgValue = 0;
@@ -253,7 +254,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     hashAlgName = "crc32";
 
                 IR::Vector<IR::Expression> components;
-                IR::ListExpression *listExp = nullptr;
+                IR::ListExpression* listExp = nullptr;
 
                 /* This processes two prototypes of get_hash method of Hash extern
                     /// Constructor
@@ -289,8 +290,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     i = new IR::DpdkGetHashStatement(hashAlgName, listExp, left);
                 } else if (e->expr->arguments->size() == 3) {
                     auto maxValue = 0;
-                    auto base    = (*e->expr->arguments)[0];
-                    auto field   = (*e->expr->arguments)[1];
+                    auto base = (*e->expr->arguments)[0];
+                    auto field = (*e->expr->arguments)[1];
                     auto max_val = (*e->expr->arguments)[2];
 
                     /* Checks whether 'base' and 'max' param values are const values or not.
@@ -298,9 +299,11 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     */
                     if (auto b = base->expression->to<IR::Expression>()) {
                         if (!b->is<IR::Constant>())
-                            ::error(ErrorType::ERR_UNEXPECTED, "Expecting const expression '%1%'"
-                            " for 'base' value in get_hash method of Hash extern in DPDK Target",
-                            base);
+                            ::error(ErrorType::ERR_UNEXPECTED,
+                                    "Expecting const expression '%1%'"
+                                    " for 'base' value in get_hash method of Hash extern in DPDK "
+                                    "Target",
+                                    base);
                     }
 
                     if (auto b = max_val->expression->to<IR::Expression>()) {
@@ -308,14 +311,18 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                             maxValue = b->to<IR::Constant>()->asUnsigned();
                             // Check whether max value is power of 2 or not
                             if (maxValue == 0 || ((maxValue & (maxValue - 1)) != 0)) {
-                                ::error(ErrorType::ERR_UNEXPECTED, "Invalid Max value '%1%'. DPDK"
-                                " Target expect 'Max' value to be power of 2", maxValue);
+                                ::error(ErrorType::ERR_UNEXPECTED,
+                                        "Invalid Max value '%1%'. DPDK"
+                                        " Target expect 'Max' value to be power of 2",
+                                        maxValue);
                                 return false;
                             }
                         } else {
-                            ::error(ErrorType::ERR_UNEXPECTED, "Expecting const expression '%1%'"
-                            " for 'Max' value in get_hash method of Hash extern in DPDK Target",
-                            max_val);
+                            ::error(
+                                ErrorType::ERR_UNEXPECTED,
+                                "Expecting const expression '%1%'"
+                                " for 'Max' value in get_hash method of Hash extern in DPDK Target",
+                                max_val);
                             return false;
                         }
                     }
@@ -329,23 +336,19 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     listExp = new IR::ListExpression(components);
                     auto bs = base->expression->to<IR::Expression>();
                     add_instr(new IR::DpdkGetHashStatement(hashAlgName, listExp, left));
-                    add_instr(new IR::DpdkAndStatement(left, left,
-                                                       new IR::Constant(maxValue - 1)));
+                    add_instr(new IR::DpdkAndStatement(left, left, new IR::Constant(maxValue - 1)));
                     i = new IR::DpdkAddStatement(left, left, bs);
                 }
-            } else if (e->originalExternType->getName().name ==
-                       "InternetChecksum") {
+            } else if (e->originalExternType->getName().name == "InternetChecksum") {
                 if (e->method->getName().name == "get") {
-                    auto res = structure->csum_map.find(
-                        e->object->to<IR::Declaration_Instance>());
+                    auto res = structure->csum_map.find(e->object->to<IR::Declaration_Instance>());
                     cstring intermediate = "";
                     if (res != structure->csum_map.end()) {
                         intermediate = res->second;
                     } else {
                         BUG("checksum map does not collect all checksum def.");
                     }
-                    i = new IR::DpdkGetChecksumStatement(
-                        left, e->object->getName(), intermediate);
+                    i = new IR::DpdkGetChecksumStatement(left, e->object->getName(), intermediate);
                 }
             } else if (e->originalExternType->getName().name == "Meter") {
                 if (e->method->getName().name == "execute") {
@@ -364,8 +367,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                                 e->object->getName());
                         return false;
                     }
-                    const IR::Expression *color_in = nullptr;
-                    const IR::Expression *length = nullptr;
+                    const IR::Expression* color_in = nullptr;
+                    const IR::Expression* length = nullptr;
                     auto index = e->expr->arguments->at(0)->expression;
                     if (argSize == 2) {
                         length = e->expr->arguments->at(1)->expression;
@@ -374,8 +377,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                         length = e->expr->arguments->at(2)->expression;
                         color_in = e->expr->arguments->at(1)->expression;
                     }
-                    i = new IR::DpdkMeterExecuteStatement(
-                         e->object->getName(), index, length, color_in, left);
+                    i = new IR::DpdkMeterExecuteStatement(e->object->getName(), index, length,
+                                                          color_in, left);
                 }
             } else if (e->originalExternType->getName().name == "DirectMeter") {
                 if (e->method->getName().name == "dpdk_execute") {
@@ -383,12 +386,14 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
 
                     // DPDK target needs packet length as mandatory parameters
                     if (argSize < 1) {
-                        ::error(ErrorType::ERR_UNEXPECTED, "Expected atleast 1 argument "
-                                "(packet length) for %1%", e->object->getName());
+                        ::error(ErrorType::ERR_UNEXPECTED,
+                                "Expected atleast 1 argument "
+                                "(packet length) for %1%",
+                                e->object->getName());
                         return false;
                     }
-                    const IR::Expression *color_in = nullptr;
-                    const IR::Expression *length = nullptr;
+                    const IR::Expression* color_in = nullptr;
+                    const IR::Expression* length = nullptr;
                     if (argSize == 1) {
                         length = e->expr->arguments->at(0)->expression;
                         color_in = new IR::Constant(1);
@@ -399,14 +404,13 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     auto metaIndex = new IR::Member(new IR::PathExpression(IR::ID("m")),
                                                     DirectResourceTableEntryIndex);
                     add_instr(new IR::DpdkGetTableEntryIndex(metaIndex));
-                    i = new IR::DpdkMeterExecuteStatement(
-                         e->object->getName(), metaIndex, length, color_in, left);
+                    i = new IR::DpdkMeterExecuteStatement(e->object->getName(), metaIndex, length,
+                                                          color_in, left);
                 }
             } else if (e->originalExternType->getName().name == "Register") {
                 if (e->method->getName().name == "read") {
                     auto index = (*e->expr->arguments)[0]->expression;
-                    i = new IR::DpdkRegisterReadStatement(
-                        left, e->object->getName(), index);
+                    i = new IR::DpdkRegisterReadStatement(left, e->object->getName(), index);
                 }
             } else if (e->originalExternType->getName().name == "packet_in") {
                 if (e->method->getName().name == "lookahead") {
@@ -435,10 +439,10 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
 
                 In this example, KeySideEffect pass inserts a temporary for holding the result of
                 complex key expression and replaces the key expression with the temporary. An
-                assignment is inserted in the apply block before the table apply to assign the complex
-                expression into this temporary variable. After KeySideEffect pass, SelectByDirection
-                extern invocation is present as RHS of assignment and hence is evaluated here in this
-                visitor.
+                assignment is inserted in the apply block before the table apply to assign the
+               complex expression into this temporary variable. After KeySideEffect pass,
+               SelectByDirection extern invocation is present as RHS of assignment and hence is
+               evaluated here in this visitor.
 
                 After keySideEffect pass:
                 bit <> key_0;
@@ -544,8 +548,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
         std::cerr << right->node_type_name() << std::endl;
         BUG("Not implemented.");
     }
-    if (i)
-        add_instr(i);
+    if (i) add_instr(i);
     return false;
 }
 
@@ -588,7 +591,7 @@ void ConvertStatementToDpdk::processHashParams(const IR::Argument* field,
    the structure they are coming from
 */
 void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument* field,
-                                               IR::Vector<IR::Expression>& components) {
+                                                    IR::Vector<IR::Expression>& components) {
     if (auto s = field->expression->to<IR::StructExpression>()) {
         for (auto field1 : s->components) {
             if (auto exp = field1->expression->to<IR::Member>()) {
@@ -597,8 +600,8 @@ void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument* field,
                     auto typeheader = typeInfo->to<IR::Type_Header>();
                     for (auto it : typeheader->fields) {
                         IR::ID name(refmap->newName(exp->member.name + "." + it->name));
-                        IR::ID fldName(refmap->newName(typeheader->name.toString() + "_" +
-                                                       it->name));
+                        IR::ID fldName(
+                            refmap->newName(typeheader->name.toString() + "_" + it->name));
                         auto rt = new IR::Member(new IR::PathExpression(IR::ID("h")), name);
                         auto lt = new IR::Member(new IR::PathExpression(IR::ID("m")), fldName);
                         BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
@@ -607,8 +610,7 @@ void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument* field,
                         components.push_back(lt);
                     }
                 } else {
-                    IR::ID name(refmap->newName(getHdrMdStrName(exp) + "_" +
-                                                exp->member.name));
+                    IR::ID name(refmap->newName(getHdrMdStrName(exp) + "_" + exp->member.name));
                     BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
                     metadataStruct->fields.push_back(new IR::StructField(name, exp->type));
                     auto lt = new IR::Member(new IR::PathExpression(IR::ID("m")), name);
@@ -623,12 +625,11 @@ void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument* field,
 /* This function returns the header/metadata structure name */
 cstring ConvertStatementToDpdk::getHdrMdStrName(const IR::Member* mem) {
     cstring sName = "";
-    if ((mem != nullptr) && (mem->expr != nullptr) &&
-       (mem->expr->type != nullptr)) {
+    if ((mem != nullptr) && (mem->expr != nullptr) && (mem->expr->type != nullptr)) {
         if (auto st = mem->expr->type->to<IR::Type_Header>()) {
             sName = st->name.name;
         } else if (auto st = mem->expr->type->to<IR::Type_Struct>()) {
-             sName = st->name.name;
+            sName = st->name.name;
         }
     }
     return sName;
@@ -639,8 +640,7 @@ cstring ConvertStatementToDpdk::getHdrMdStrName(const IR::Member* mem) {
 */
 bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argument* field) {
     if (auto s = field->expression->to<IR::StructExpression>()) {
-        if (s->components.size() == 1)
-            return true;
+        if (s->components.size() == 1) return true;
 
         cstring hdrStrName = "";
         for (auto field1 : s->components) {
@@ -682,15 +682,13 @@ bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argumen
 */
 bool ConvertStatementToDpdk::checkIfConsecutiveHdrMdfields(const IR::Argument* field) {
     if (auto s = field->expression->to<IR::StructExpression>()) {
-        if (s->components.size() == 1)
-            return true;
+        if (s->components.size() == 1) return true;
         cstring stName = "";
         const IR::Type* hdrMdType = nullptr;
         std::vector<cstring> fldList;
         for (auto field1 : s->components) {
             if (auto exp = field1->expression->to<IR::Member>()) {
-                if (stName == "")
-                    stName = getHdrMdStrName(exp);
+                if (stName == "") stName = getHdrMdStrName(exp);
 
                 auto type = typemap->getType(exp, true);
                 if (type->is<IR::Type_Header>()) {
@@ -711,8 +709,7 @@ bool ConvertStatementToDpdk::checkIfConsecutiveHdrMdfields(const IR::Argument* f
             for (unsigned idx = 0; idx != typeheader->fields.size(); idx++) {
                 if (typeheader->fields[idx]->name == fldList[0]) {
                     for (unsigned j = 1; j != fldList.size(); j++) {
-                        if (fldList[j] != typeheader->fields[++idx]->name)
-                            return false;
+                        if (fldList[j] != typeheader->fields[++idx]->name) return false;
                     }
                     break;
                 }
@@ -729,10 +726,8 @@ bool ConvertStatementToDpdk::checkIfConsecutiveHdrMdfields(const IR::Argument* f
  *  LAnd or LOr) or a nested expression(LAnd or LOr). The right side can be a
  * nested expression or {simple one if left side is simple as well}.
  */
-bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
-        cstring true_label,
-        cstring false_label,
-        bool is_and) {
+bool BranchingInstructionGeneration::generate(const IR::Expression* expr, cstring true_label,
+                                              cstring false_label, bool is_and) {
     if (auto land = expr->to<IR::LAnd>()) {
         /* First, the left side and right side are both nested expressions. In
          * this case, we need to introduce another label that represent the half
@@ -741,31 +736,30 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
          */
         if (nested(land->left) && nested(land->right)) {
             generate(land->left, true_label + "half", false_label, true);
-            instructions.push_back(
-                    new IR::DpdkLabelStatement(true_label + "half"));
+            instructions.push_back(new IR::DpdkLabelStatement(true_label + "half"));
             return generate(land->right, true_label, false_label, true);
         } else if (!nested(land->left) && nested(land->right)) {
-        /* Second, left is simple and right is nested. Call recursion for the
-         * left part, true fall through. Note that right now, the truthfulness
-         * of right represents the truthfulness of the whole, because if the
-         * left part is false, it will not ranch to the right part due to
-         * principle of short-circuit. For right side, recursion is called and
-         * what will fall through depends on the return value of this recursion
-         * function. Since the basic case and `left simple right simple` case
-         * have already properly jmp to correct label, there is no need to jmp
-         * to any label.
-         */
+            /* Second, left is simple and right is nested. Call recursion for the
+             * left part, true fall through. Note that right now, the truthfulness
+             * of right represents the truthfulness of the whole, because if the
+             * left part is false, it will not ranch to the right part due to
+             * principle of short-circuit. For right side, recursion is called and
+             * what will fall through depends on the return value of this recursion
+             * function. Since the basic case and `left simple right simple` case
+             * have already properly jmp to correct label, there is no need to jmp
+             * to any label.
+             */
             generate(land->left, true_label, false_label, true);
             return generate(land->right, true_label, false_label, true);
         } else if (!nested(land->left) && !nested(land->right)) {
-        /* Third, left is simple and right is simple. In this case, call the
-         * recursion and indicating  that this call is from LAnd, the
-         * subfunction will let true fall  through. Therefore, after two
-         * function calls, the control flow  should jump to true label. In
-         * addition, indicate that true condition  fallen through. The reason
-         * why I still need to indicate true fallen  through is because there
-         * is chance to eliminate the jmp instruction  I just added.
-         */
+            /* Third, left is simple and right is simple. In this case, call the
+             * recursion and indicating  that this call is from LAnd, the
+             * subfunction will let true fall  through. Therefore, after two
+             * function calls, the control flow  should jump to true label. In
+             * addition, indicate that true condition  fallen through. The reason
+             * why I still need to indicate true fallen  through is because there
+             * is chance to eliminate the jmp instruction  I just added.
+             */
             generate(land->left, true_label, false_label, true);
             generate(land->right, true_label, false_label, true);
             instructions.push_back(new IR::DpdkJmpLabelStatement(true_label));
@@ -776,8 +770,7 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
     } else if (auto lor = expr->to<IR::LOr>()) {
         if (nested(lor->left) && nested(lor->right)) {
             generate(lor->left, true_label, false_label + "half", false);
-            instructions.push_back(
-                    new IR::DpdkLabelStatement(false_label + "half"));
+            instructions.push_back(new IR::DpdkLabelStatement(false_label + "half"));
             return generate(lor->right, true_label, false_label, false);
         } else if (!nested(lor->left) && nested(lor->right)) {
             generate(lor->left, true_label, false_label, false);
@@ -791,68 +784,65 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
             BUG("Previous simple expression lifting pass failed");
         }
     } else if (auto equ = expr->to<IR::Equ>()) {
-    /* First, I will describe the base case. The base case is handling logical
-     * expression that is not LAnd and LOr. It will conside whether the simple
-     * expression itself is the left or right of a LAnd or a LOr(The
-     * information is provided by is_and). If it is from LAnd, it will use the
-     * opposite branching statement and let true fall through. For example, a
-     * == b becomes jneq a b false. This is because for a LAnd if one of its
-     * statement is true it is not necessary to be true, but if one is false,
-     * it is definitely false. If it is from a LOr, it will let false fall
-     * through. And finally for a base case, it returns what condition it fall
-     * through.
-     */
+        /* First, I will describe the base case. The base case is handling logical
+         * expression that is not LAnd and LOr. It will conside whether the simple
+         * expression itself is the left or right of a LAnd or a LOr(The
+         * information is provided by is_and). If it is from LAnd, it will use the
+         * opposite branching statement and let true fall through. For example, a
+         * == b becomes jneq a b false. This is because for a LAnd if one of its
+         * statement is true it is not necessary to be true, but if one is false,
+         * it is definitely false. If it is from a LOr, it will let false fall
+         * through. And finally for a base case, it returns what condition it fall
+         * through.
+         */
         if (is_and) {
-            instructions.push_back(new IR::DpdkJmpNotEqualStatement(
-                        false_label, equ->left, equ->right));
+            instructions.push_back(
+                new IR::DpdkJmpNotEqualStatement(false_label, equ->left, equ->right));
         } else {
-            instructions.push_back(new IR::DpdkJmpEqualStatement(
-                        true_label, equ->left, equ->right));
+            instructions.push_back(
+                new IR::DpdkJmpEqualStatement(true_label, equ->left, equ->right));
         }
         return is_and;
     } else if (auto neq = expr->to<IR::Neq>()) {
         if (is_and) {
-            instructions.push_back(new IR::DpdkJmpEqualStatement(
-                        false_label, neq->left, neq->right));
+            instructions.push_back(
+                new IR::DpdkJmpEqualStatement(false_label, neq->left, neq->right));
         } else {
-            instructions.push_back(new IR::DpdkJmpNotEqualStatement(
-                        true_label, neq->left, neq->right));
+            instructions.push_back(
+                new IR::DpdkJmpNotEqualStatement(true_label, neq->left, neq->right));
         }
         return is_and;
     } else if (auto lss = expr->to<IR::Lss>()) {
         /* Dpdk target does not support the negated condition Geq,
            so always jump on true label*/
-        instructions.push_back(new IR::DpdkJmpLessStatement(
-                     true_label, lss->left, lss->right));
+        instructions.push_back(new IR::DpdkJmpLessStatement(true_label, lss->left, lss->right));
         return false;
     } else if (auto grt = expr->to<IR::Grt>()) {
         /* Dpdk target does not support the negated condition Leq,
            so always jump on true label*/
-        instructions.push_back(new IR::DpdkJmpGreaterStatement(
-                     true_label, grt->left, grt->right));
+        instructions.push_back(new IR::DpdkJmpGreaterStatement(true_label, grt->left, grt->right));
         return false;
     } else if (auto geq = expr->to<IR::Geq>()) {
         /* Dpdk target does not support the condition Geq,
            so always negate the condition and jump on false label*/
-        instructions.push_back(new IR::DpdkJmpLessStatement(
-                     false_label, geq->left, geq->right));
+        instructions.push_back(new IR::DpdkJmpLessStatement(false_label, geq->left, geq->right));
         return true;
     } else if (auto leq = expr->to<IR::Leq>()) {
         /* Dpdk target does not support the condition Leq,
            so always negate the condition and jump on false label*/
-        instructions.push_back(new IR::DpdkJmpGreaterStatement(
-                     false_label, leq->left, leq->right));
+        instructions.push_back(new IR::DpdkJmpGreaterStatement(false_label, leq->left, leq->right));
         return true;
     } else if (auto mce = expr->to<IR::MethodCallExpression>()) {
         auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
         if (auto a = mi->to<P4::BuiltInMethod>()) {
             if (a->name == "isValid") {
                 if (is_and) {
-                    instructions.push_back(new IR::DpdkJmpIfInvalidStatement(
-                                false_label, a->appliedTo));
+                    instructions.push_back(
+                        new IR::DpdkJmpIfInvalidStatement(false_label, a->appliedTo));
                 } else {
-                    instructions.push_back(new IR::DpdkJmpIfValidStatement(
-                                true_label, a->appliedTo)); }
+                    instructions.push_back(
+                        new IR::DpdkJmpIfValidStatement(true_label, a->appliedTo));
+                }
                 return is_and;
             } else {
                 BUG("%1%: Not implemented", expr);
@@ -862,11 +852,12 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
         }
     } else if (expr->is<IR::PathExpression>()) {
         if (is_and) {
-            instructions.push_back(new IR::DpdkJmpNotEqualStatement(
-                        false_label, expr, new IR::Constant(1)));
+            instructions.push_back(
+                new IR::DpdkJmpNotEqualStatement(false_label, expr, new IR::Constant(1)));
         } else {
-            instructions.push_back(new IR::DpdkJmpEqualStatement(
-                        true_label, expr, new IR::Constant(1))); }
+            instructions.push_back(
+                new IR::DpdkJmpEqualStatement(true_label, expr, new IR::Constant(1)));
+        }
     } else if (auto mem = expr->to<IR::Member>()) {
         if (auto mce = mem->expr->to<IR::MethodCallExpression>()) {
             auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
@@ -874,14 +865,11 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
                 if (a->isTableApply()) {
                     if (mem->member == IR::Type_Table::hit) {
                         auto tbl = a->object->to<IR::P4Table>();
-                        instructions.push_back(
-                                new IR::DpdkApplyStatement(tbl->name.toString()));
+                        instructions.push_back(new IR::DpdkApplyStatement(tbl->name.toString()));
                         if (is_and) {
-                            instructions.push_back(
-                                    new IR::DpdkJmpMissStatement(false_label));
+                            instructions.push_back(new IR::DpdkJmpMissStatement(false_label));
                         } else {
-                            instructions.push_back(
-                                    new IR::DpdkJmpHitStatement(true_label));
+                            instructions.push_back(new IR::DpdkJmpHitStatement(true_label));
                         }
                     }
                 } else {
@@ -892,11 +880,12 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
             }
         } else {
             if (is_and) {
-                instructions.push_back(new IR::DpdkJmpNotEqualStatement(
-                            false_label, expr, new IR::Constant(1)));
+                instructions.push_back(
+                    new IR::DpdkJmpNotEqualStatement(false_label, expr, new IR::Constant(1)));
             } else {
-                instructions.push_back(new IR::DpdkJmpEqualStatement(
-                            true_label, expr, new IR::Constant(1))); }
+                instructions.push_back(
+                    new IR::DpdkJmpEqualStatement(true_label, expr, new IR::Constant(1)));
+            }
         }
         return is_and;
     } else if (auto lnot = expr->to<IR::LNot>()) {
@@ -912,7 +901,7 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
 // BranchingInstructionGeneration's recursion function, this function decides
 // whether the true or false code block will go first. This is important because
 // following optimization pass might eliminate some redundant jmps and labels.
-bool ConvertStatementToDpdk::preorder(const IR::IfStatement *s) {
+bool ConvertStatementToDpdk::preorder(const IR::IfStatement* s) {
     auto true_label = refmap->newName("label_true");
     auto false_label = refmap->newName("label_false");
     auto end_label = refmap->newName("label_end");
@@ -942,7 +931,7 @@ cstring ConvertStatementToDpdk::append_parser_name(const IR::P4Parser* p, cstrin
     return p->name + "_" + label;
 }
 
-bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
+bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement* s) {
     auto mi = P4::MethodInstance::resolve(s->methodCall, refmap, typemap);
     if (auto a = mi->to<P4::ApplyMethod>()) {
         LOG3("apply method: " << dbp(s) << std::endl << s);
@@ -956,8 +945,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         LOG3("extern method: " << dbp(s) << std::endl << s);
         // Checksum function call
         if (a->originalExternType->getName().name == "InternetChecksum") {
-            auto res =
-                structure->csum_map.find(a->object->to<IR::Declaration_Instance>());
+            auto res = structure->csum_map.find(a->object->to<IR::Declaration_Instance>());
             cstring intermediate = "";
             if (res != structure->csum_map.end()) {
                 intermediate = res->second;
@@ -967,11 +955,11 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
 
             if (a->method->getName().name == "add") {
                 auto args = a->expr->arguments;
-                const IR::Argument *arg = args->at(0);
+                const IR::Argument* arg = args->at(0);
                 if (auto l = arg->expression->to<IR::ListExpression>()) {
                     for (auto field : l->components) {
-                        add_instr(new IR::DpdkChecksumAddStatement(
-                            a->object->getName(), intermediate, field));
+                        add_instr(new IR::DpdkChecksumAddStatement(a->object->getName(),
+                                                                   intermediate, field));
                     }
                 } else if (auto s = arg->expression->to<IR::StructExpression>()) {
                     for (auto field : s->components) {
@@ -979,16 +967,16 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                             a->object->getName(), intermediate, field->expression));
                     }
                 } else {
-                    add_instr(new IR::DpdkChecksumAddStatement(
-                                a->object->getName(), intermediate, arg->expression));
+                    add_instr(new IR::DpdkChecksumAddStatement(a->object->getName(), intermediate,
+                                                               arg->expression));
                 }
             } else if (a->method->getName().name == "subtract") {
                 auto args = a->expr->arguments;
-                const IR::Argument *arg = args->at(0);
+                const IR::Argument* arg = args->at(0);
                 if (auto l = arg->expression->to<IR::ListExpression>()) {
                     for (auto field : l->components) {
-                        add_instr(new IR::DpdkChecksumSubStatement(
-                            a->object->getName(), intermediate, field));
+                        add_instr(new IR::DpdkChecksumSubStatement(a->object->getName(),
+                                                                   intermediate, field));
                     }
                 } else if (auto s = arg->expression->to<IR::StructExpression>()) {
                     for (auto field : s->components) {
@@ -996,12 +984,11 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                             a->object->getName(), intermediate, field->expression));
                     }
                 } else {
-                    add_instr(new IR::DpdkChecksumSubStatement(
-                                a->object->getName(), intermediate, arg->expression));
+                    add_instr(new IR::DpdkChecksumSubStatement(a->object->getName(), intermediate,
+                                                               arg->expression));
                 }
             } else if (a->method->getName().name == "clear") {
-                add_instr(new IR::DpdkChecksumClearStatement(
-                            a->object->getName(), intermediate));
+                add_instr(new IR::DpdkChecksumClearStatement(a->object->getName(), intermediate));
             }
         } else if (a->originalExternType->getName().name == "packet_out") {
             if (a->method->getName().name == "emit") {
@@ -1021,8 +1008,8 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 if (args->size() == 1 || args->size() == 2) {
                     auto header = args->at(0);
                     if (!(header->expression->is<IR::Member>() ||
-                        header->expression->is<IR::PathExpression>() ||
-                        header->expression->is<IR::ArrayIndex>())) {
+                          header->expression->is<IR::PathExpression>() ||
+                          header->expression->is<IR::ArrayIndex>())) {
                         ::error(ErrorType::ERR_UNSUPPORTED, "%1% is not supported", s);
                     }
                     if (args->size() == 1) {
@@ -1042,28 +1029,27 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                         cstring baseName = "";
                         if (length->expression->is<IR::Constant>()) {
                             baseName = "varbit";
-                         } else if (length->expression->is<IR::Member>()) {
+                        } else if (length->expression->is<IR::Member>()) {
                             baseName = length->expression->to<IR::Member>()->member.name;
-                         } else {
+                        } else {
                             ::error(ErrorType::ERR_UNSUPPORTED, "%1% is not supported", s);
-                         }
+                        }
 
                         IR::ID tmpName(refmap->newName(baseName + "_extract_tmp"));
                         BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
                         metadataStruct->fields.push_back(
-                                     new IR::StructField(tmpName, length->expression->type));
+                            new IR::StructField(tmpName, length->expression->type));
                         auto tmpMember = new IR::Member(new IR::PathExpression("m"), tmpName);
                         add_instr(new IR::DpdkMovStatement(tmpMember, length->expression));
-                        add_instr(new IR::DpdkShrStatement(tmpMember, tmpMember,
-                                new IR::Constant(0x3)));
+                        add_instr(
+                            new IR::DpdkShrStatement(tmpMember, tmpMember, new IR::Constant(0x3)));
                         add_instr(new IR::DpdkExtractStatement(header->expression, tmpMember));
                     }
                 }
             }
         } else if (a->originalExternType->getName().name == "Meter") {
             if (a->method->getName().name != "dpdk_execute") {
-                BUG("Meter function %1% not implemented, use dpdk_execute",
-                    a->method->getName());
+                BUG("Meter function %1% not implemented, use dpdk_execute", a->method->getName());
             }
         } else if (a->originalExternType->getName().name == "DirectMeter") {
             if (a->method->getName().name != "dpdk_execute") {
@@ -1078,33 +1064,34 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             if (a->method->getName().name == "count") {
                 auto args = a->expr->arguments;
                 if (args->size() > 1) {
-                    ::error(ErrorType::ERR_UNEXPECTED, "Expected at most 1 argument for %1%," \
-                            "provided %2%", a->method->getName(), args->size());
+                    ::error(ErrorType::ERR_UNEXPECTED,
+                            "Expected at most 1 argument for %1%,"
+                            "provided %2%",
+                            a->method->getName(), args->size());
                 } else {
-                    const IR::Expression *incr = nullptr;
+                    const IR::Expression* incr = nullptr;
                     auto counter = a->object->getName();
-                    if (args->size() == 1)
-                        incr = args->at(0)->expression;
+                    if (args->size() == 1) incr = args->at(0)->expression;
                     if (!incr && value > 0) {
                         ::error(ErrorType::ERR_UNEXPECTED,
-                                "Expected packet length argument for %1% " \
+                                "Expected packet length argument for %1% "
                                 "method of direct counter",
                                 a->method->getName());
                         return false;
                     }
-                    auto metaIndex = new IR::Member(new IR::PathExpression(
-                                                    IR::ID("m")), DirectResourceTableEntryIndex);
+                    auto metaIndex = new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                                    DirectResourceTableEntryIndex);
                     add_instr(new IR::DpdkGetTableEntryIndex(metaIndex));
                     if (value == 2) {
-                        add_instr(new IR::DpdkCounterCountStatement(counter+"_packets", metaIndex));
-                        add_instr(new IR::DpdkCounterCountStatement(counter+"_bytes", metaIndex,
-                                                                    incr));
+                        add_instr(
+                            new IR::DpdkCounterCountStatement(counter + "_packets", metaIndex));
+                        add_instr(
+                            new IR::DpdkCounterCountStatement(counter + "_bytes", metaIndex, incr));
                     } else {
-                         if (value == 1)
-                             add_instr(new IR::DpdkCounterCountStatement(counter, metaIndex,
-                                                                               incr));
-                         else
-                             add_instr(new IR::DpdkCounterCountStatement(counter, metaIndex));
+                        if (value == 1)
+                            add_instr(new IR::DpdkCounterCountStatement(counter, metaIndex, incr));
+                        else
+                            add_instr(new IR::DpdkCounterCountStatement(counter, metaIndex));
                     }
                 }
             } else {
@@ -1119,33 +1106,31 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 value = counter_type->to<IR::Constant>()->asUnsigned();
             if (a->method->getName().name == "count") {
                 auto args = a->expr->arguments;
-                if (args->size() < 1){
+                if (args->size() < 1) {
                     ::error(ErrorType::ERR_UNEXPECTED, "Expected atleast 1 arguments for %1%",
                             a->method->getName());
                 } else {
-                    const IR::Expression *incr = nullptr;
+                    const IR::Expression* incr = nullptr;
                     auto index = args->at(0)->expression;
                     auto counter = a->object->getName();
-                    if (args->size() == 2)
-                        incr = args->at(1)->expression;
+                    if (args->size() == 2) incr = args->at(1)->expression;
                     if (!incr && value > 0) {
                         ::error(ErrorType::ERR_UNEXPECTED,
-                                "Expected packet length argument for %1% " \
+                                "Expected packet length argument for %1% "
                                 "method of indirect counter",
                                 a->method->getName());
                         return false;
                     }
                     if (value == 2) {
-                        add_instr(new IR::DpdkCounterCountStatement(counter+"_packets",
-                                                                        index));
-                        add_instr(new IR::DpdkCounterCountStatement(counter+"_bytes",
-                                                                        index, incr));
+                        add_instr(new IR::DpdkCounterCountStatement(counter + "_packets", index));
+                        add_instr(
+                            new IR::DpdkCounterCountStatement(counter + "_bytes", index, incr));
                     } else {
-                         if (value == 1)
-                             add_instr(new IR::DpdkCounterCountStatement(counter, index, incr));
-                         else
-                             add_instr(new IR::DpdkCounterCountStatement(counter, index));
-                     }
+                        if (value == 1)
+                            add_instr(new IR::DpdkCounterCountStatement(counter, index, incr));
+                        else
+                            add_instr(new IR::DpdkCounterCountStatement(counter, index));
+                    }
                 }
             } else {
                 BUG("Counter function not implemented");
@@ -1170,35 +1155,34 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             auto condition = args->at(0);
             auto error_id = args->at(1);
             auto end_label = refmap->newName("label_end");
-            const IR::BoolLiteral *boolLiteral = condition->expression->to<IR::BoolLiteral>();
+            const IR::BoolLiteral* boolLiteral = condition->expression->to<IR::BoolLiteral>();
             if (!boolLiteral) {
-                add_instr(new IR::DpdkJmpNotEqualStatement(
-                            end_label,
-                            condition->expression, new IR::BoolLiteral(false)));
+                add_instr(new IR::DpdkJmpNotEqualStatement(end_label, condition->expression,
+                                                           new IR::BoolLiteral(false)));
             } else if (boolLiteral->value == true) {
                 return false;
             }
-            IR::Member *error_meta_path;
+            IR::Member* error_meta_path;
             if (structure->isPSA()) {
-                error_meta_path = new IR::Member(new IR::PathExpression(
-                    IR::ID("m")), IR::ID("psa_ingress_input_metadata_parser_error"));
+                error_meta_path = new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                                 IR::ID("psa_ingress_input_metadata_parser_error"));
             } else if (structure->isPNA()) {
-                error_meta_path = new IR::Member( new IR::PathExpression(IR::ID("m")),
-                    IR::ID("pna_pre_input_metadata_parser_error"));
+                error_meta_path = new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                                 IR::ID("pna_pre_input_metadata_parser_error"));
             } else {
                 BUG("Unknown architecture unexpectedly!");
             }
 
             add_instr(new IR::DpdkMovStatement(error_meta_path, error_id->expression));
-            add_instr(new IR::DpdkJmpLabelStatement(
-                        append_parser_name(parser, IR::ParserState::reject)));
+            add_instr(
+                new IR::DpdkJmpLabelStatement(append_parser_name(parser, IR::ParserState::reject)));
             add_instr(new IR::DpdkLabelStatement(end_label));
         } else if (a->method->name == "add_entry") {
             auto args = a->expr->arguments;
             auto argSize = args->size();
             if (argSize != 3) {
                 ::error(ErrorType::ERR_UNEXPECTED, "Unexpected number of arguments for %1%",
-                            a->method->name);
+                        a->method->name);
                 return false;
             }
             auto action = a->expr->arguments->at(0)->expression;
@@ -1240,8 +1224,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         } else if (a->method->name == "set_entry_expire_time") {
             auto args = a->expr->arguments;
             if (args->size() != 1) {
-                ::error(ErrorType::ERR_UNEXPECTED, "Expected 1 argument for %1%",
-                            a->method->name);
+                ::error(ErrorType::ERR_UNEXPECTED, "Expected 1 argument for %1%", a->method->name);
                 return false;
             }
             auto timeout = a->expr->arguments->at(0)->expression;
@@ -1259,8 +1242,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         } else if (a->method->name == "mirror_packet") {
             auto args = a->expr->arguments;
             if (args->size() != 2) {
-                ::error(ErrorType::ERR_UNEXPECTED, "Expected 2 arguments for %1%",
-                            a->method->name);
+                ::error(ErrorType::ERR_UNEXPECTED, "Expected 2 arguments for %1%", a->method->name);
                 return false;
             }
             auto slotId = a->expr->arguments->at(0)->expression;
@@ -1277,7 +1259,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             }
             if (!isMetadataField(sessionId)) {
                 if (sessionId->is<IR::Constant>()) {
-                    unsigned value =  sessionId->to<IR::Constant>()->asUnsigned();
+                    unsigned value = sessionId->to<IR::Constant>()->asUnsigned();
                     if (value == 0) {
                         ::error(ErrorType::ERR_INVALID,
                                 "Mirror session ID 0 is reserved for use by Architecture");
@@ -1296,7 +1278,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             add_instr(new IR::DpdkRecirculateStatement());
         } else if (a->method->name == "send_to_port") {
             BUG_CHECK(a->expr->arguments->size() == 1,
-                "%1%: expected one argument for send_to_port extern", a);
+                      "%1%: expected one argument for send_to_port extern", a);
             add_instr(new IR::DpdkMovStatement(
                 new IR::Member(new IR::PathExpression("m"), PnaMainOutputMetadataOutputPortName),
                 a->expr->arguments->at(0)->expression));
@@ -1328,7 +1310,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
     return false;
 }
 
-bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
+bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement* s) {
     // Check if switch expression is action_run expression. DPDK has special jump instructions
     // for jumping on action run event.
     auto tc = P4::TableApplySolver::isActionRun(s->expression, refmap, typemap);
@@ -1341,7 +1323,7 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
     }
 
     auto size = s->cases.size();
-    std::vector <cstring> labels;
+    std::vector<cstring> labels;
     cstring label;
     cstring default_label = "";
     auto end_label = refmap->newName("label_endswitch");
@@ -1355,25 +1337,25 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
         label = refmap->newName("label_switch");
         if (tc != nullptr) {
             auto pe = caseLabel->label->checkedTo<IR::PathExpression>();
-            add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
+            add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name));
         } else {
             add_instr(new IR::DpdkJmpEqualStatement(label, s->expression, caseLabel->label));
         }
         labels.push_back(label);
     }
 
-    if (s->cases.at(size-1)->label->is<IR::DefaultExpression>()) {
+    if (s->cases.at(size - 1)->label->is<IR::DefaultExpression>()) {
         label = refmap->newName("label_default");
         add_instr(new IR::DpdkJmpLabelStatement(label));
         default_label = label;
     } else {
         label = refmap->newName("label_switch");
         if (tc != nullptr) {
-            auto pe = s->cases.at(size-1)->label->checkedTo<IR::PathExpression>();
-            add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name.name));
+            auto pe = s->cases.at(size - 1)->label->checkedTo<IR::PathExpression>();
+            add_instr(new IR::DpdkJmpIfActionRunStatement(label, pe->path->name));
         } else {
-            add_instr(new IR::DpdkJmpEqualStatement(label, s->expression,
-                                                    s->cases.at(size-1)->label));
+            add_instr(
+                new IR::DpdkJmpEqualStatement(label, s->expression, s->cases.at(size - 1)->label));
         }
         add_instr(new IR::DpdkJmpLabelStatement(end_label));
     }
@@ -1389,13 +1371,11 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
         add_instr(new IR::DpdkLabelStatement(label));
         if (caseLabel->statement != nullptr) {
             visit(caseLabel->statement);
-            if (label != default_label)
-                add_instr(new IR::DpdkJmpLabelStatement(end_label));
+            if (label != default_label) add_instr(new IR::DpdkJmpLabelStatement(end_label));
         }
     }
     add_instr(new IR::DpdkLabelStatement(end_label));
     return false;
 }
-
 
 }  // namespace DPDK

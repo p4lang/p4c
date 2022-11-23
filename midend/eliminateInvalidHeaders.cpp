@@ -24,8 +24,8 @@ const IR::Node* DoEliminateInvalidHeaders::postorder(IR::P4Control* control) {
     vec->srcInfo = control->body->srcInfo;
     vec->append(statements);
     vec->append(control->body->components);
-    control->body = new IR::BlockStatement(
-        control->body->srcInfo, control->body->annotations, *vec);
+    control->body =
+        new IR::BlockStatement(control->body->srcInfo, control->body->annotations, *vec);
     statements.clear();
     variables.clear();
     return control;
@@ -44,16 +44,14 @@ const IR::Node* DoEliminateInvalidHeaders::postorder(IR::P4Action* action) {
     vec->append(variables);
     vec->append(statements);
     vec->append(action->body->components);
-    action->body = new IR::BlockStatement(
-        action->body->srcInfo, action->body->annotations, *vec);
+    action->body = new IR::BlockStatement(action->body->srcInfo, action->body->annotations, *vec);
     variables.clear();
     statements.clear();
     return action;
 }
 
 const IR::Node* DoEliminateInvalidHeaders::postorder(IR::InvalidHeader* expression) {
-    if (!findContext<IR::BlockStatement>() &&
-        !findContext<IR::P4Action>() &&
+    if (!findContext<IR::BlockStatement>() && !findContext<IR::P4Action>() &&
         !findContext<IR::ParserState>()) {
         // We need some place to insert the setInvalid call.
         ::error("%1%: Cannot eliminate invalid header", expression);
@@ -64,9 +62,9 @@ const IR::Node* DoEliminateInvalidHeaders::postorder(IR::InvalidHeader* expressi
     auto decl = new IR::Declaration_Variable(name, expression->headerType->getP4Type());
     variables.push_back(decl);
     auto setInv = new IR::MethodCallStatement(
-        src, new IR::MethodCallExpression(
-            new IR::Member(src, new IR::PathExpression(src, new IR::Path(name)),
-                           IR::Type_Header::setInvalid)));
+        src,
+        new IR::MethodCallExpression(new IR::Member(
+            src, new IR::PathExpression(src, new IR::Path(name)), IR::Type_Header::setInvalid)));
     statements.push_back(setInv);
     LOG2("Replacing " << expression << " with " << decl << " and " << setInv);
     return new IR::PathExpression(src, new IR::Path(name));

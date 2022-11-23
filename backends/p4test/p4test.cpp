@@ -19,19 +19,19 @@ limitations under the License.
 
 #include "backends/p4test/version.h"
 #include "control-plane/p4RuntimeSerializer.h"
-#include "ir/ir.h"
-#include "ir/json_loader.h"
-#include "lib/log.h"
-#include "lib/error.h"
-#include "lib/exceptions.h"
-#include "lib/gc.h"
-#include "lib/crash.h"
-#include "lib/nullstream.h"
 #include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/frontend.h"
 #include "frontends/p4/toP4/toP4.h"
+#include "ir/ir.h"
+#include "ir/json_loader.h"
+#include "lib/crash.h"
+#include "lib/error.h"
+#include "lib/exceptions.h"
+#include "lib/gc.h"
+#include "lib/log.h"
+#include "lib/nullstream.h"
 #include "midend.h"
 
 class P4TestOptions : public CompilerOptions {
@@ -40,50 +40,58 @@ class P4TestOptions : public CompilerOptions {
     bool validateOnly = false;
     bool loadIRFromJson = false;
     P4TestOptions() {
-        registerOption("--listMidendPasses", nullptr,
-                [this](const char*) {
-                    listMidendPasses = true;
-                    loadIRFromJson = false;
-                    P4Test::MidEnd MidEnd(*this, outStream);
-                    exit(0);
-                    return false; },
-                "[p4test] Lists exact name of all midend passes.\n");
-        registerOption("--parse-only", nullptr,
-                       [this](const char*) {
-                           parseOnly = true;
-                           return true; },
-                       "only parse the P4 input, without any further processing");
-        registerOption("--validate", nullptr,
-                       [this](const char*) {
-                           validateOnly = true;
-                           return true;
-                       },
-                       "Validate the P4 input, running just the front-end");
-        registerOption("--fromJSON", "file",
-                       [this](const char* arg) {
-                           loadIRFromJson = true;
-                           file = arg;
-                           return true;
-                       },
-                       "read previously dumped json instead of P4 source code");
-     }
+        registerOption(
+            "--listMidendPasses", nullptr,
+            [this](const char*) {
+                listMidendPasses = true;
+                loadIRFromJson = false;
+                P4Test::MidEnd MidEnd(*this, outStream);
+                exit(0);
+                return false;
+            },
+            "[p4test] Lists exact name of all midend passes.\n");
+        registerOption(
+            "--parse-only", nullptr,
+            [this](const char*) {
+                parseOnly = true;
+                return true;
+            },
+            "only parse the P4 input, without any further processing");
+        registerOption(
+            "--validate", nullptr,
+            [this](const char*) {
+                validateOnly = true;
+                return true;
+            },
+            "Validate the P4 input, running just the front-end");
+        registerOption(
+            "--fromJSON", "file",
+            [this](const char* arg) {
+                loadIRFromJson = true;
+                file = arg;
+                return true;
+            },
+            "read previously dumped json instead of P4 source code");
+    }
 };
 
 using P4TestContext = P4CContextWithOptions<P4TestOptions>;
 
-static void log_dump(const IR::Node *node, const char *head) {
+static void log_dump(const IR::Node* node, const char* head) {
     if (node && LOGGING(1)) {
         if (head)
-            std::cout << '+' << std::setw(strlen(head)+6) << std::setfill('-') << "+\n| "
-                      << head << " |\n" << '+' << std::setw(strlen(head)+3) << "+" <<
-                      std::endl << std::setfill(' ');
+            std::cout << '+' << std::setw(strlen(head) + 6) << std::setfill('-') << "+\n| " << head
+                      << " |\n"
+                      << '+' << std::setw(strlen(head) + 3) << "+" << std::endl
+                      << std::setfill(' ');
         if (LOGGING(2))
             dump(node);
         else
-            std::cout << *node << std::endl; }
+            std::cout << *node << std::endl;
+    }
 }
 
-int main(int argc, char *const argv[]) {
+int main(int argc, char* const argv[]) {
     setup_gc_logging();
     setup_signals();
 
@@ -93,12 +101,10 @@ int main(int argc, char *const argv[]) {
     options.compilerVersion = P4TEST_VERSION_STRING;
 
     if (options.process(argc, argv) != nullptr) {
-            if (options.loadIRFromJson == false)
-                    options.setInputFile();
+        if (options.loadIRFromJson == false) options.setInputFile();
     }
-    if (::errorCount() > 0)
-        return 1;
-    const IR::P4Program *program = nullptr;
+    if (::errorCount() > 0) return 1;
+    const IR::P4Program* program = nullptr;
     auto hook = options.getDebugHook();
     if (options.loadIRFromJson) {
         std::ifstream json(options.file);
@@ -109,7 +115,8 @@ int main(int argc, char *const argv[]) {
             if (!(program = node->to<IR::P4Program>()))
                 error(ErrorType::ERR_INVALID, "%s is not a P4Program in json format", options.file);
         } else {
-            error(ErrorType::ERR_IO, "Can't open %s", options.file); }
+            error(ErrorType::ERR_IO, "Can't open %s", options.file);
+        }
     } else {
         program = P4::parseP4File(options);
 
@@ -122,7 +129,7 @@ int main(int argc, char *const argv[]) {
                     P4::FrontEnd fe;
                     fe.addDebugHook(hook);
                     program = fe.run(options, program);
-                } catch (const std::exception &bug) {
+                } catch (const std::exception& bug) {
                     std::cerr << bug.what() << std::endl;
                     return 1;
                 }
@@ -147,13 +154,13 @@ int main(int argc, char *const argv[]) {
                 loader >> program;
             }
 #endif
-            const IR::ToplevelBlock *top = nullptr;
+            const IR::ToplevelBlock* top = nullptr;
             try {
                 top = midEnd.process(program);
                 // This can modify program!
                 log_dump(program, "After midend");
                 log_dump(top, "Top level block");
-            } catch (const std::exception &bug) {
+            } catch (const std::exception& bug) {
                 std::cerr << bug.what() << std::endl;
                 return 1;
             }
@@ -177,14 +184,13 @@ int main(int argc, char *const argv[]) {
                     t1 << ss1.str() << std::flush;
                     t2 << ss2.str() << std::flush;
                     auto rv = system("json_diff t1.json t2.json");
-                    if (rv != 0) ::warning(ErrorType::WARN_FAILED,
-                                           "json_diff failed with code %1%", rv);
+                    if (rv != 0)
+                        ::warning(ErrorType::WARN_FAILED, "json_diff failed with code %1%", rv);
                 }
             }
         }
     }
 
-    if (Log::verbose())
-        std::cerr << "Done." << std::endl;
+    if (Log::verbose()) std::cerr << "Done." << std::endl;
     return ::errorCount() > 0;
 }

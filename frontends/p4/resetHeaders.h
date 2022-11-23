@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_RESETHEADERS_H_
 #define _FRONTENDS_P4_RESETHEADERS_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -58,11 +58,12 @@ class DoResetHeaders : public Transform {
     IR::IndexedVector<IR::StatOrDecl> insert;
 
  public:
-    static void generateResets(
-        const TypeMap* typeMap, const IR::Type* type,
-        const IR::Expression* expr, IR::Vector<IR::StatOrDecl>* resets);
+    static void generateResets(const TypeMap* typeMap, const IR::Type* type,
+                               const IR::Expression* expr, IR::Vector<IR::StatOrDecl>* resets);
     explicit DoResetHeaders(const TypeMap* typeMap) : typeMap(typeMap) {
-        CHECK_NULL(typeMap); setName("DoResetHeaders"); }
+        CHECK_NULL(typeMap);
+        setName("DoResetHeaders");
+    }
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
     const IR::Node* postorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::ParserState* state) override;

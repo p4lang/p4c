@@ -15,12 +15,15 @@ limitations under the License.
 */
 
 #include "exename.h"
+
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
+
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include "exceptions.h"
 
 template <size_t N>
@@ -39,7 +42,7 @@ static void convertToAbsPath(const char* const relPath, char (&output)[N]) {
     BUG_CHECK(n >= 0, "Pathname too long");
 }
 
-const char *exename(const char *argv0) {
+const char* exename(const char* argv0) {
     static char buffer[PATH_MAX];
     if (buffer[0]) return buffer;  // done already
     int len;
@@ -59,6 +62,7 @@ const char *exename(const char *argv0) {
         strncpy(buffer, getenv("_"), sizeof(buffer));
         buffer[sizeof(buffer) - 1] = 0;
     } else {
-        buffer[0] = 0; }
+        buffer[0] = 0;
+    }
     return buffer;
 }

@@ -3,12 +3,10 @@
 #include <z3_api.h>
 
 #include <cstdint>
-#include <cstdio>
 #include <exception>
 #include <iterator>
 #include <list>
 #include <map>
-#include <memory>
 #include <ostream>
 #include <string>
 #include <utility>
@@ -19,10 +17,14 @@
 #include "ir/irutils.h"
 #include "ir/json_loader.h"  // IWYU pragma: keep
 #include "ir/json_parser.h"  // IWYU pragma: keep
+#include "ir/node.h"
+#include "ir/visitor.h"
 #include "lib/big_int_util.h"
 #include "lib/exceptions.h"
 #include "lib/indent.h"
 #include "lib/log.h"
+#include "p4tools/common/lib/formulae.h"
+#include "p4tools/common/lib/model.h"
 
 namespace P4Tools {
 

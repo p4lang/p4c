@@ -1,13 +1,20 @@
 #include "backends/p4tools/common/lib/symbolic_env.h"
 
 #include <algorithm>
-#include <map>
 #include <utility>
 #include <vector>
 
+#include <boost/container/flat_map.hpp>
+#include <boost/container/vector.hpp>
+
 #include "backends/p4tools/common/lib/zombie.h"
+#include "ir/indexed_vector.h"
 #include "ir/irutils.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
 #include "lib/exceptions.h"
+#include "p4tools/common/lib/formulae.h"
+#include "p4tools/common/lib/model.h"
 
 namespace P4Tools {
 

@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "tableHit.h"
+
 #include "frontends/p4/tableApply.h"
 
 namespace P4 {
@@ -29,13 +30,10 @@ const IR::Node* DoTableHit::postorder(IR::AssignmentStatement* statement) {
         right = neg->expr;
     }
 
-    if (!TableApplySolver::isHit(right, refMap, typeMap))
-        return statement;
+    if (!TableApplySolver::isHit(right, refMap, typeMap)) return statement;
 
-    auto tstat = new IR::AssignmentStatement(
-        statement->left->clone(), new IR::BoolLiteral(true));
-    auto fstat = new IR::AssignmentStatement(
-        statement->left->clone(), new IR::BoolLiteral(false));
+    auto tstat = new IR::AssignmentStatement(statement->left->clone(), new IR::BoolLiteral(true));
+    auto fstat = new IR::AssignmentStatement(statement->left->clone(), new IR::BoolLiteral(false));
     if (negated)
         return new IR::IfStatement(right, fstat, tstat);
     else

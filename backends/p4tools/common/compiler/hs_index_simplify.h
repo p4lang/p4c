@@ -1,7 +1,11 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_COMPILER_HS_INDEX_SIMPLIFY_H_
 #define BACKENDS_P4TOOLS_COMMON_COMPILER_HS_INDEX_SIMPLIFY_H_
 
+#include <stddef.h>
+
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
 
 namespace P4Tools {
 

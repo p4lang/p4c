@@ -1,11 +1,10 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_LIB_SYMBOLIC_ENV_H_
 #define BACKENDS_P4TOOLS_COMMON_LIB_SYMBOLIC_ENV_H_
 
-#include <map>
-
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/ir.h"
+#include "ir/node.h"
 
 namespace P4Tools {
 

@@ -15,11 +15,12 @@ limitations under the License.
 */
 
 #include "removeParameters.h"
+
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
-#include "frontends/p4/moveDeclarations.h"
-#include "frontends/common/resolveReferences/resolveReferences.h"
 
 namespace P4 {
 
@@ -28,16 +29,16 @@ namespace {
 class RemoveMethodCallArguments : public Transform {
     int argumentsToRemove;  // -1 => all
  public:
-    explicit RemoveMethodCallArguments(int toRemove = -1) : argumentsToRemove(toRemove)
-    { setName("RemoveMethodCallArguments"); }
+    explicit RemoveMethodCallArguments(int toRemove = -1) : argumentsToRemove(toRemove) {
+        setName("RemoveMethodCallArguments");
+    }
     const IR::Node* postorder(IR::MethodCallExpression* expression) override {
         if (argumentsToRemove == -1) {
             expression->arguments = new IR::Vector<IR::Argument>();
         } else {
             auto args = new IR::Vector<IR::Argument>();
             for (int i = 0; i < static_cast<int>(expression->arguments->size()); i++) {
-                if (i < argumentsToRemove)
-                    continue;
+                if (i < argumentsToRemove) continue;
                 args->push_back(expression->arguments->at(i));
             }
             expression->arguments = args;
@@ -51,16 +52,15 @@ void FindActionParameters::postorder(const IR::ActionListElement* element) {
     auto path = element->getPath();
     auto decl = refMap->getDeclaration(path, true);
     BUG_CHECK(decl->is<IR::P4Action>(), "%1%: not an action", element);
-    BUG_CHECK(element->expression->is<IR::MethodCallExpression>(),
-              "%1%: expected a method call", element->expression);
-    invocations->bind(decl->to<IR::P4Action>(),
-                      element->expression->to<IR::MethodCallExpression>(), false);
+    BUG_CHECK(element->expression->is<IR::MethodCallExpression>(), "%1%: expected a method call",
+              element->expression);
+    invocations->bind(decl->to<IR::P4Action>(), element->expression->to<IR::MethodCallExpression>(),
+                      false);
 }
 
 void FindActionParameters::postorder(const IR::MethodCallExpression* expression) {
     auto mi = MethodInstance::resolve(expression, refMap, typeMap);
-    if (!mi->is<P4::ActionCall>())
-        return;
+    if (!mi->is<P4::ActionCall>()) return;
     auto ac = mi->to<P4::ActionCall>();
 
     auto table = findContext<IR::P4Table>();
@@ -81,20 +81,24 @@ namespace {
 // Inserts a vector of operations before a return or exit
 // statement.
 class InsertBeforeExits : public Transform {
-    const IR::IndexedVector<IR::StatOrDecl> *toInsert;
+    const IR::IndexedVector<IR::StatOrDecl>* toInsert;
 
  public:
-    explicit InsertBeforeExits(const IR::IndexedVector<IR::StatOrDecl> *toInsert):
-            toInsert(toInsert) { setName("InsertBeforeExits"); }
+    explicit InsertBeforeExits(const IR::IndexedVector<IR::StatOrDecl>* toInsert)
+        : toInsert(toInsert) {
+        setName("InsertBeforeExits");
+    }
     const IR::Node* postorder(IR::ReturnStatement* statement) override {
         auto vec = new IR::IndexedVector<IR::StatOrDecl>(*toInsert);
         vec->push_back(statement);
-        return new IR::BlockStatement(statement->srcInfo, *vec); }
+        return new IR::BlockStatement(statement->srcInfo, *vec);
+    }
 
     const IR::Node* postorder(IR::ExitStatement* statement) override {
         auto vec = new IR::IndexedVector<IR::StatOrDecl>(*toInsert);
         vec->push_back(statement);
-        return new IR::BlockStatement(statement->srcInfo, *vec); }
+        return new IR::BlockStatement(statement->srcInfo, *vec);
+    }
 };
 
 }  // namespace
@@ -108,8 +112,7 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
     auto body = new IR::IndexedVector<IR::StatOrDecl>();
     auto postamble = new IR::IndexedVector<IR::StatOrDecl>();
     auto invocation = invocations->get(getOriginal<IR::P4Action>());
-    if (invocation == nullptr)
-        return action;
+    if (invocation == nullptr) return action;
     auto args = invocation->arguments;
 
     ParameterSubstitution substitution;
@@ -120,34 +123,31 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
         if (p->direction == IR::Direction::None && !removeAll) {
             leftParams->push_back(p);
         } else {
-            auto decl = new IR::Declaration_Variable(p->srcInfo, p->name,
-                                                     p->annotations, p->type, nullptr);
+            auto decl =
+                new IR::Declaration_Variable(p->srcInfo, p->name, p->annotations, p->type, nullptr);
             LOG3("Added declaration " << decl << " annotations " << p->annotations);
             result->push_back(decl);
             auto arg = substitution.lookup(p);
             if (arg == nullptr) {
-                ::error(ErrorType::ERR_UNINITIALIZED,
-                        "action %1%: parameter %2% must be bound", invocation, p);
+                ::error(ErrorType::ERR_UNINITIALIZED, "action %1%: parameter %2% must be bound",
+                        invocation, p);
                 continue;
             }
 
-            if (p->direction == IR::Direction::In ||
-                p->direction == IR::Direction::InOut ||
+            if (p->direction == IR::Direction::In || p->direction == IR::Direction::InOut ||
                 p->direction == IR::Direction::None) {
                 auto left = new IR::PathExpression(p->name);
                 auto assign = new IR::AssignmentStatement(arg->srcInfo, left, arg->expression);
                 body->push_back(assign);
             }
-            if (p->direction == IR::Direction::Out ||
-                p->direction == IR::Direction::InOut) {
+            if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
                 auto right = new IR::PathExpression(p->name);
                 auto assign = new IR::AssignmentStatement(arg->srcInfo, arg->expression, right);
                 postamble->push_back(assign);
             }
         }
     }
-    if (result->empty())
-        return action;
+    if (result->empty()) return action;
 
     InsertBeforeExits ibf(postamble);
     ibf.setCalledBy(this);
@@ -196,8 +196,7 @@ RemoveActionParameters::RemoveActionParameters(ReferenceMap* refMap, TypeMap* ty
     // bit<32> w;
     // table t() { actions = a(); ... }
     passes.emplace_back(new MoveDeclarations());
-    if (!typeChecking)
-        typeChecking = new TypeChecking(refMap, typeMap);
+    if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
     passes.emplace_back(typeChecking);
     passes.emplace_back(new FindActionParameters(refMap, typeMap, ai));
     passes.emplace_back(new DoRemoveActionParameters(ai));

@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "midend.h"
+
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -26,10 +27,11 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/unusedDeclarations.h"
+#include "lower.h"
 #include "midend/actionSynthesis.h"
 #include "midend/complexComparison.h"
-#include "midend/copyStructures.h"
 #include "midend/convertEnums.h"
+#include "midend/copyStructures.h"
 #include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateTuples.h"
@@ -48,7 +50,6 @@ limitations under the License.
 #include "midend/singleArgumentSelect.h"
 #include "midend/tableHit.h"
 #include "midend/validateProperties.h"
-#include "lower.h"
 
 namespace EBPF {
 
@@ -62,14 +63,12 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
         }
         return true;
     }
-    unsigned enumSize(unsigned) const override
-    { return 32; }
+    unsigned enumSize(unsigned) const override { return 32; }
 };
 
-const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
-    const IR::P4Program* program, std::ostream* outStream) {
-    if (program == nullptr && options.listMidendPasses == 0)
-        return nullptr;
+const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* program,
+                                     std::ostream* outStream) {
+    if (program == nullptr && options.listMidendPasses == 0) return nullptr;
 
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     refMap.setIsV1(isv1);
@@ -77,53 +76,45 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
 
     PassManager midEnd = {};
     if (options.loadIRFromJson == false) {
-        midEnd.addPasses({
-            new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
-            new P4::ClearTypeMap(&typeMap),
-            new P4::RemoveMiss(&refMap, &typeMap),
-            new P4::EliminateInvalidHeaders(&refMap, &typeMap),
-            new P4::EliminateNewtype(&refMap, &typeMap),
-            new P4::SimplifyControlFlow(&refMap, &typeMap),
-            new P4::SimplifyKey(&refMap, &typeMap,
-                                new P4::OrPolicy(
-                                    new P4::IsValid(&refMap, &typeMap),
-                                    new P4::IsLikeLeftValue())),
-            new P4::RemoveExits(&refMap, &typeMap),
-            new P4::ConstantFolding(&refMap, &typeMap),
-            new P4::SimplifySelectCases(&refMap, &typeMap, false),  // accept non-constant keysets
-            new P4::ExpandEmit(&refMap, &typeMap),
-            new P4::HandleNoMatch(&refMap),
-            new P4::SimplifyParsers(&refMap),
-            new P4::StrengthReduction(&refMap, &typeMap),
-            new P4::SimplifyComparisons(&refMap, &typeMap),
-            new P4::EliminateTuples(&refMap, &typeMap),
-            new P4::SimplifySelectList(&refMap, &typeMap),
-            new P4::MoveDeclarations(),  // more may have been introduced
-            new P4::RemoveSelectBooleans(&refMap, &typeMap),
-            new P4::SingleArgumentSelect(&refMap, &typeMap),
-            new P4::ConstantFolding(&refMap, &typeMap),
-            new P4::SimplifyControlFlow(&refMap, &typeMap),
-            new P4::TableHit(&refMap, &typeMap),
-            new P4::RemoveLeftSlices(&refMap, &typeMap),
-            new EBPF::Lower(&refMap, &typeMap),
-            new P4::ParsersUnroll(true, &refMap, &typeMap),
-            evaluator,
-            new P4::MidEndLast()
-        });
+        midEnd.addPasses(
+            {new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
+             new P4::ClearTypeMap(&typeMap),
+             new P4::RemoveMiss(&refMap, &typeMap),
+             new P4::EliminateInvalidHeaders(&refMap, &typeMap),
+             new P4::EliminateNewtype(&refMap, &typeMap),
+             new P4::SimplifyControlFlow(&refMap, &typeMap),
+             new P4::SimplifyKey(
+                 &refMap, &typeMap,
+                 new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsLikeLeftValue())),
+             new P4::RemoveExits(&refMap, &typeMap),
+             new P4::ConstantFolding(&refMap, &typeMap),
+             new P4::SimplifySelectCases(&refMap, &typeMap, false),  // accept non-constant keysets
+             new P4::ExpandEmit(&refMap, &typeMap),
+             new P4::HandleNoMatch(&refMap),
+             new P4::SimplifyParsers(&refMap),
+             new PassRepeated({new P4::ConstantFolding(&refMap, &typeMap),
+                               new P4::StrengthReduction(&refMap, &typeMap)}),
+             new P4::SimplifyComparisons(&refMap, &typeMap),
+             new P4::EliminateTuples(&refMap, &typeMap),
+             new P4::SimplifySelectList(&refMap, &typeMap),
+             new P4::MoveDeclarations(),  // more may have been introduced
+             new P4::RemoveSelectBooleans(&refMap, &typeMap),
+             new P4::SingleArgumentSelect(&refMap, &typeMap),
+             new P4::ConstantFolding(&refMap, &typeMap),
+             new P4::SimplifyControlFlow(&refMap, &typeMap),
+             new P4::TableHit(&refMap, &typeMap),
+             new P4::RemoveLeftSlices(&refMap, &typeMap),
+             new EBPF::Lower(&refMap, &typeMap),
+             new P4::ParsersUnroll(true, &refMap, &typeMap),
+             evaluator,
+             new P4::MidEndLast()});
 
         if (options.arch == "psa") {
-            midEnd.addPasses({
-                new P4::ValidateTableProperties({ "size",
-                                                  "psa_direct_counter",
-                                                  "psa_direct_meter",
-                                                  "psa_empty_group_action",
-                                                  "psa_implementation" })
-            });
+            midEnd.addPasses({new P4::ValidateTableProperties(
+                {"size", "psa_direct_counter", "psa_direct_meter", "psa_empty_group_action",
+                 "psa_implementation"})});
         } else {
-            midEnd.addPasses({
-                new P4::ValidateTableProperties({ "size",
-                                                  "implementation" })
-            });
+            midEnd.addPasses({new P4::ValidateTableProperties({"size", "implementation"})});
         }
 
         if (options.listMidendPasses) {
@@ -134,17 +125,13 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
             midEnd.removePasses(options.passesToExcludeMidend);
         }
     } else {
-        midEnd.addPasses({
-            new P4::ResolveReferences(&refMap),
-            new P4::TypeChecking(&refMap, &typeMap),
-            evaluator
-        });
+        midEnd.addPasses({new P4::ResolveReferences(&refMap),
+                          new P4::TypeChecking(&refMap, &typeMap), evaluator});
     }
     midEnd.setName("MidEnd");
     midEnd.addDebugHooks(hooks);
     program = program->apply(midEnd);
-    if (::errorCount() > 0)
-        return nullptr;
+    if (::errorCount() > 0) return nullptr;
 
     return evaluator->getToplevelBlock();
 }

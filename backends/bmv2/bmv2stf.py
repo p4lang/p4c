@@ -481,7 +481,7 @@ class RunBMV2(object):
             actionArgs.set(k, v)
         command = "table_set_default " + tableName + " " + actionName
         if actionArgs.size():
-            command += " => " + str(actionArgs)
+            command += " " + str(actionArgs)
         return command
     def parse_table_add(self, cmd):
         tableName, cmd = nextWord(cmd)

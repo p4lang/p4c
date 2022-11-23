@@ -17,10 +17,10 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_EBPFPIPELINE_H_
 #define BACKENDS_EBPF_PSA_EBPFPIPELINE_H_
 
-#include "ebpfPsaControl.h"
 #include "backends/ebpf/ebpfProgram.h"
-#include "ebpfPsaDeparser.h"
 #include "backends/ebpf/target.h"
+#include "ebpfPsaControl.h"
+#include "ebpfPsaDeparser.h"
 
 namespace EBPF {
 
@@ -53,8 +53,10 @@ class EBPFPipeline : public EBPFProgram {
 
     EBPFPipeline(cstring name, const EbpfOptions& options, P4::ReferenceMap* refMap,
                  P4::TypeMap* typeMap)
-                 : EBPFProgram(options, nullptr, refMap, typeMap, nullptr),
-                 name(name), control(nullptr), deparser(nullptr) {
+        : EBPFProgram(options, nullptr, refMap, typeMap, nullptr),
+          name(name),
+          control(nullptr),
+          deparser(nullptr) {
         sectionName = "classifier/" + name;
         functionName = name.replace("-", "_") + "_func";
         errorEnum = "ParserError_t";
@@ -93,38 +95,37 @@ class EBPFPipeline : public EBPFProgram {
     }
 
     virtual void emit(CodeBuilder* builder) = 0;
-    virtual void emitTrafficManager(CodeBuilder *builder) = 0;
+    virtual void emitTrafficManager(CodeBuilder* builder) = 0;
     virtual void emitPSAControlInputMetadata(CodeBuilder* builder) = 0;
     virtual void emitPSAControlOutputMetadata(CodeBuilder* builder) = 0;
 
     /* Generates a pointer to struct Headers_t and puts it on the BPF program's stack. */
-    void emitLocalHeaderInstancesAsPointers(CodeBuilder *builder);
+    void emitLocalHeaderInstancesAsPointers(CodeBuilder* builder);
     /* Generates a pointer to struct hdr_md. The pointer is used to access data from per-CPU map. */
-    void emitCPUMAPHeadersInitializers(CodeBuilder *builder);
+    void emitCPUMAPHeadersInitializers(CodeBuilder* builder);
     /* Generates an instance of struct Headers_t,
      * allocated in the per-CPU map. */
-    void emitHeaderInstances(CodeBuilder *builder) override;
+    void emitHeaderInstances(CodeBuilder* builder) override;
     /* Generates a set of helper variables that are used during packet processing. */
     void emitLocalVariables(CodeBuilder* builder) override;
 
     /* Generates and instance of user metadata for a pipeline,
      * allocated in the per-CPU map. */
-    void emitUserMetadataInstance(CodeBuilder *builder);
+    void emitUserMetadataInstance(CodeBuilder* builder);
 
-    virtual void emitCPUMAPInitializers(CodeBuilder *builder);
-    virtual void emitCPUMAPLookup(CodeBuilder *builder);
+    virtual void emitCPUMAPInitializers(CodeBuilder* builder);
+    virtual void emitCPUMAPLookup(CodeBuilder* builder);
     /* Generates a pointer to skb->cb and maps it to
      * psa_global_metadata to access global metadata shared between pipelines. */
-    virtual void emitGlobalMetadataInitializer(CodeBuilder *builder);
-    virtual void emitPacketLength(CodeBuilder *builder);
-    virtual void emitTimestamp(CodeBuilder *builder);
+    virtual void emitGlobalMetadataInitializer(CodeBuilder* builder);
+    virtual void emitPacketLength(CodeBuilder* builder);
+    virtual void emitTimestamp(CodeBuilder* builder);
 
     void emitHeadersFromCPUMAP(CodeBuilder* builder);
-    void emitMetadataFromCPUMAP(CodeBuilder *builder);
+    void emitMetadataFromCPUMAP(CodeBuilder* builder);
 
     bool hasAnyMeter() const {
-        auto directMeter = std::find_if(control->tables.begin(),
-                                        control->tables.end(),
+        auto directMeter = std::find_if(control->tables.begin(), control->tables.end(),
                                         [](std::pair<const cstring, EBPFTable*> elem) {
                                             return !elem.second->to<EBPFTablePSA>()->meters.empty();
                                         });
@@ -138,9 +139,7 @@ class EBPFPipeline : public EBPFProgram {
      * This allows to avoid overhead introduced by bpf_ktime_get_ns(),
      * if the timestamp field is not used within a pipeline.
      */
-    bool shouldEmitTimestamp() const {
-        return hasAnyMeter() || control->timestampIsUsed;
-    }
+    bool shouldEmitTimestamp() const { return hasAnyMeter() || control->timestampIsUsed; }
 };
 
 /*
@@ -155,7 +154,8 @@ class EBPFIngressPipeline : public EBPFPipeline {
     int actUnspecCode;
 
     EBPFIngressPipeline(cstring name, const EbpfOptions& options, P4::ReferenceMap* refMap,
-                        P4::TypeMap* typeMap) : EBPFPipeline(name, options, refMap, typeMap) {
+                        P4::TypeMap* typeMap)
+        : EBPFPipeline(name, options, refMap, typeMap) {
         // FIXME: hardcoded
         maxResubmitDepth = 4;
         // actUnspecCode should not collide with TC/XDP return codes,
@@ -165,7 +165,7 @@ class EBPFIngressPipeline : public EBPFPipeline {
 
     void emitSharedMetadataInitializer(CodeBuilder* builder);
 
-    void emit(CodeBuilder *builder) override;
+    void emit(CodeBuilder* builder) override;
     void emitPSAControlInputMetadata(CodeBuilder* builder) override;
     void emitPSAControlOutputMetadata(CodeBuilder* builder) override;
 };
@@ -177,35 +177,37 @@ class EBPFIngressPipeline : public EBPFPipeline {
 class EBPFEgressPipeline : public EBPFPipeline {
  public:
     EBPFEgressPipeline(cstring name, const EbpfOptions& options, P4::ReferenceMap* refMap,
-                       P4::TypeMap* typeMap) : EBPFPipeline(name, options, refMap, typeMap) { }
+                       P4::TypeMap* typeMap)
+        : EBPFPipeline(name, options, refMap, typeMap) {}
 
     void emit(CodeBuilder* builder) override;
     void emitPSAControlInputMetadata(CodeBuilder* builder) override;
     void emitPSAControlOutputMetadata(CodeBuilder* builder) override;
-    void emitCPUMAPLookup(CodeBuilder *builder) override;
+    void emitCPUMAPLookup(CodeBuilder* builder) override;
 };
 
 class TCIngressPipeline : public EBPFIngressPipeline {
  public:
     TCIngressPipeline(cstring name, const EbpfOptions& options, P4::ReferenceMap* refMap,
-                        P4::TypeMap* typeMap) :
-            EBPFIngressPipeline(name, options, refMap, typeMap) {}
+                      P4::TypeMap* typeMap)
+        : EBPFIngressPipeline(name, options, refMap, typeMap) {}
 
-    void emitGlobalMetadataInitializer(CodeBuilder *builder) override;
-    void emitTrafficManager(CodeBuilder *builder) override;
+    void emitGlobalMetadataInitializer(CodeBuilder* builder) override;
+    void emitTrafficManager(CodeBuilder* builder) override;
+
  private:
-    void emitTCWorkaroundUsingMeta(CodeBuilder *builder);
-    void emitTCWorkaroundUsingHead(CodeBuilder *builder);
-    void emitTCWorkaroundUsingCPUMAP(CodeBuilder *builder);
+    void emitTCWorkaroundUsingMeta(CodeBuilder* builder);
+    void emitTCWorkaroundUsingHead(CodeBuilder* builder);
+    void emitTCWorkaroundUsingCPUMAP(CodeBuilder* builder);
 };
 
 class TCEgressPipeline : public EBPFEgressPipeline {
  public:
     TCEgressPipeline(cstring name, const EbpfOptions& options, P4::ReferenceMap* refMap,
-                       P4::TypeMap* typeMap) :
-            EBPFEgressPipeline(name, options, refMap, typeMap) { }
+                     P4::TypeMap* typeMap)
+        : EBPFEgressPipeline(name, options, refMap, typeMap) {}
 
-    void emitTrafficManager(CodeBuilder *builder) override;
+    void emitTrafficManager(CodeBuilder* builder) override;
 };
 }  // namespace EBPF
 

@@ -20,27 +20,23 @@ namespace P4 {
 
 bool DoSimplifySwitch::matches(const IR::Expression* left, const IR::Expression* right) const {
     // We know that left and right have matching types
-    if (left->is<IR::DefaultExpression>())
-        return true;
+    if (left->is<IR::DefaultExpression>()) return true;
     auto type = typeMap->getType(right);
     if (auto cr = right->to<IR::Constant>()) {
-        if (auto cl = left->to<IR::Constant>())
-            return cr->value == cl->value;
+        if (auto cl = left->to<IR::Constant>()) return cr->value == cl->value;
         BUG("Unexpected comparison %1% with %2%", left, right);
     } else if (type->is<IR::Type_Enum>() || type->is<IR::Type_SerEnum>()) {
         // We expect both left and right to be Member expressions.
         return left->equiv(*right);
     } else if (auto br = right->to<IR::BoolLiteral>()) {
-        if (auto bl = left->to<IR::BoolLiteral>())
-            return bl->value == br->value;
+        if (auto bl = left->to<IR::BoolLiteral>()) return bl->value == br->value;
     }
     BUG("Unexpected expression %1%", right);
     return false;
 }
 
 const IR::Node* DoSimplifySwitch::postorder(IR::SwitchStatement* stat) {
-    if (!typeMap->isCompileTimeConstant(stat->expression))
-        return stat;
+    if (!typeMap->isCompileTimeConstant(stat->expression)) return stat;
     bool foundMatch = false;
     for (auto ss : stat->cases) {
         if (matches(ss->label, stat->expression)) {

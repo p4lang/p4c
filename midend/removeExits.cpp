@@ -15,33 +15,31 @@ limitations under the License.
 */
 
 #include "removeExits.h"
+
 #include "frontends/p4/methodInstance.h"
 
 namespace P4 {
 
 namespace {
 class CallsExit : public Inspector {
-    ReferenceMap*        refMap;
-    TypeMap*             typeMap;
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
     std::set<const IR::Node*>* callers;
 
  public:
     bool callsExit = false;
-    CallsExit(ReferenceMap* refMap, TypeMap* typeMap,
-              std::set<const IR::Node*>* callers) :
-            refMap(refMap), typeMap(typeMap), callers(callers) {}
+    CallsExit(ReferenceMap* refMap, TypeMap* typeMap, std::set<const IR::Node*>* callers)
+        : refMap(refMap), typeMap(typeMap), callers(callers) {}
     void postorder(const IR::MethodCallExpression* expression) override {
         auto mi = MethodInstance::resolve(expression, refMap, typeMap);
         if (mi->isApply()) {
             auto am = mi->to<ApplyMethod>();
             CHECK_NULL(am->object);
             auto obj = am->object->getNode();
-            if (callers->find(obj) != callers->end())
-                callsExit = true;
+            if (callers->find(obj) != callers->end()) callsExit = true;
         } else if (mi->is<ActionCall>()) {
             auto ac = mi->to<ActionCall>();
-            if (callers->find(ac->action) != callers->end())
-                callsExit = true;
+            if (callers->find(ac->action) != callers->end()) callsExit = true;
         }
     }
     void end_apply(const IR::Node* node) override {
@@ -58,8 +56,7 @@ void DoRemoveExits::callExit(const IR::Node* node) {
 const IR::Node* DoRemoveExits::preorder(IR::ExitStatement* statement) {
     set(TernaryBool::Yes);
     auto left = new IR::PathExpression(returnVar);
-    return new IR::AssignmentStatement(statement->srcInfo, left,
-                                       new IR::BoolLiteral(true));
+    return new IR::AssignmentStatement(statement->srcInfo, left, new IR::BoolLiteral(true));
 }
 
 const IR::Node* DoRemoveExits::preorder(IR::P4Table* table) {
@@ -118,8 +115,8 @@ const IR::Node* DoRemoveExits::preorder(IR::P4Control* control) {
     auto init = new IR::AssignmentStatement(left, new IR::BoolLiteral(false));
     newbody.push_back(init);
     newbody.append(control->body->components);
-    control->body = new IR::BlockStatement(
-        control->body->srcInfo, control->body->annotations, newbody);
+    control->body =
+        new IR::BlockStatement(control->body->srcInfo, control->body->annotations, newbody);
 
     pop();
     BUG_CHECK(stack.empty(), "Non-empty stack");
@@ -150,8 +147,7 @@ const IR::Node* DoRemoveExits::preorder(IR::BlockStatement* statement) {
             ret = r;
         }
     }
-    if (!stack.empty())
-        set(ret);
+    if (!stack.empty()) set(ret);
     prune();
     return block;
 }
@@ -168,8 +164,7 @@ const IR::Node* DoRemoveExits::preorder(IR::IfStatement* statement) {
     auto rcond = ce.callsExit ? TernaryBool::Maybe : TernaryBool::No;
 
     visit(statement->ifTrue);
-    if (statement->ifTrue == nullptr)
-        statement->ifTrue = new IR::EmptyStatement();
+    if (statement->ifTrue == nullptr) statement->ifTrue = new IR::EmptyStatement();
     if (ce.callsExit) {
         auto path = new IR::PathExpression(returnVar);
         auto condition = new IR::LNot(path);
@@ -208,12 +203,12 @@ const IR::Node* DoRemoveExits::preorder(IR::SwitchStatement* statement) {
     (void)statement->expression->apply(ce);
 
     /* FIXME -- alter cases in place rather than allocating a new Vector */
-    IR::Vector<IR::SwitchCase> *cases = nullptr;
+    IR::Vector<IR::SwitchCase>* cases = nullptr;
     if (ce.callsExit) {
         r = TernaryBool::Maybe;
         cases = new IR::Vector<IR::SwitchCase>();
     }
-    for (auto &c : statement->cases) {
+    for (auto& c : statement->cases) {
         push();
         visit(c);
         if (hasReturned() != TernaryBool::No)
@@ -234,8 +229,7 @@ const IR::Node* DoRemoveExits::preorder(IR::SwitchStatement* statement) {
     }
     set(r);
     prune();
-    if (cases != nullptr)
-        statement->cases = std::move(*cases);
+    if (cases != nullptr) statement->cases = std::move(*cases);
     return statement;
 }
 
@@ -243,8 +237,7 @@ const IR::Node* DoRemoveExits::preorder(IR::AssignmentStatement* statement) {
     CallsExit ce(refMap, typeMap, &callsExit);
     ce.setCalledBy(this);
     (void)statement->apply(ce);
-    if (ce.callsExit)
-        set(TernaryBool::Maybe);
+    if (ce.callsExit) set(TernaryBool::Maybe);
     return statement;
 }
 
@@ -252,8 +245,7 @@ const IR::Node* DoRemoveExits::preorder(IR::MethodCallStatement* statement) {
     CallsExit ce(refMap, typeMap, &callsExit);
     ce.setCalledBy(this);
     (void)statement->apply(ce);
-    if (ce.callsExit)
-        set(TernaryBool::Maybe);
+    if (ce.callsExit) set(TernaryBool::Maybe);
     return statement;
 }
 

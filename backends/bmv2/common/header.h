@@ -18,28 +18,29 @@ limitations under the License.
 #define BACKENDS_BMV2_COMMON_HEADER_H_
 
 #include <list>
+
+#include "JsonObjects.h"
+#include "backends/bmv2/common/options.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
+#include "helpers.h"
 #include "ir/ir.h"
 #include "lib/json.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
-#include "helpers.h"
-#include "JsonObjects.h"
 #include "programStructure.h"
-#include "backends/bmv2/common/options.h"
 
 namespace BMV2 {
 
 class Backend;
 
 class HeaderConverter : public Inspector {
-    ConversionContext*   ctxt;
-    cstring              scalarsName;
-    cstring              scalarsTypeName;
-    std::set<cstring>    visitedHeaders;
+    ConversionContext* ctxt;
+    cstring scalarsName;
+    cstring scalarsTypeName;
+    std::set<cstring> visitedHeaders;
 
-    const unsigned       boolWidth = 1;    // convert booleans to 1-bit integers
-    const unsigned       errorWidth = 32;  // convert errors to 32-bit integers
-    unsigned             scalars_width = 0;
+    const unsigned boolWidth = 1;    // convert booleans to 1-bit integers
+    const unsigned errorWidth = 32;  // convert errors to 32-bit integers
+    unsigned scalars_width = 0;
 
  protected:
     Util::JsonArray* pushNewArray(Util::JsonArray* parent);

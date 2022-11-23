@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _MIDEND_ELIMINATEINVALIDHEADERS_H_
 #define _MIDEND_ELIMINATEINVALIDHEADERS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -29,13 +29,14 @@ namespace P4 {
  */
 class DoEliminateInvalidHeaders final : public Transform {
     ReferenceMap* refMap;
-    const TypeMap* typeMap;
     IR::IndexedVector<IR::StatOrDecl> statements;
     std::vector<const IR::Declaration_Variable*> variables;
+
  public:
-    DoEliminateInvalidHeaders(ReferenceMap* refMap, const TypeMap* typeMap):
-            refMap(refMap), typeMap(typeMap)
-    { setName("DoEliminateInvalidHeaders"); CHECK_NULL(refMap); CHECK_NULL(typeMap); }
+    DoEliminateInvalidHeaders(ReferenceMap* refMap) : refMap(refMap) {
+        setName("DoEliminateInvalidHeaders");
+        CHECK_NULL(refMap);
+    }
     const IR::Node* postorder(IR::InvalidHeader* expression) override;
     const IR::Node* postorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::ParserState* parser) override;
@@ -46,10 +47,9 @@ class EliminateInvalidHeaders final : public PassManager {
  public:
     EliminateInvalidHeaders(ReferenceMap* refMap, TypeMap* typeMap,
                             TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new DoEliminateInvalidHeaders(refMap, typeMap));
+        passes.push_back(new DoEliminateInvalidHeaders(refMap));
         setName("EliminateInvalidHeaders");
     }
 };

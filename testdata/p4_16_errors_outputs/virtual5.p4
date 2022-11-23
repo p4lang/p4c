@@ -1,4 +1,5 @@
 extern Virtual {
+    Virtual();
     abstract bit<16> f(in bit<16> ix);
 }
 

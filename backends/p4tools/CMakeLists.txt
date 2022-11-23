@@ -69,6 +69,10 @@ if(ENABLE_IWYU)
     -Xiwyu
     --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.libc.imp
     -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.symbols.imp
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.stl.headers.imp
+    -Xiwyu
     --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/stl.c.headers.imp
   )
   message("IWYU command: ${iwyu_path}")
@@ -80,8 +84,23 @@ set(ENABLE_TESTING ON)
 
 # Include sub projects.
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/testgen)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/p4check)
+
+file(GLOB tools_modules RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/modules ${CMAKE_CURRENT_SOURCE_DIR}/modules/*)
+foreach(ext ${tools_modules})
+  set (tools_dir  ${CMAKE_CURRENT_SOURCE_DIR}/modules/${ext})
+  if(EXISTS ${tools_dir}/CMakeLists.txt AND IS_DIRECTORY ${tools_dir})
+    # Generate an option that makes it possible to disable this extension.
+    string(MAKE_C_IDENTIFIER ${ext} EXT_AS_IDENTIFIER)
+    string(TOUPPER ${EXT_AS_IDENTIFIER} EXT_AS_OPTION_NAME)
+    string(CONCAT ENABLE_EXT_OPTION "ENABLE_TOOLS_MODULE_" ${EXT_AS_OPTION_NAME})
+    string(CONCAT EXT_HELP_TEXT "Build the " ${ext} " module")
+    option(${ENABLE_EXT_OPTION} ${EXT_HELP_TEXT} ON)
+    if(${ENABLE_EXT_OPTION})
+      message("-- Enabling P4Tools module ${ext}")
+      add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/modules/${ext})
+    endif()
+  endif()
+endforeach(ext)
 
 # Custom IR constructs for P4Tools.
 set(IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/common/testgen.def PARENT_SCOPE)

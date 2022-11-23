@@ -16,8 +16,8 @@ limitations under the License.
 #ifndef _MIDEND_CONVERTERRORS_H_
 #define _MIDEND_CONVERTERRORS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -30,21 +30,21 @@ class ChooseErrorRepresentation {
  public:
     virtual ~ChooseErrorRepresentation() {}
     // If true this type has to be converted.
-    virtual bool convert(const IR::Type_Error* /* type */) const { return false;};
+    virtual bool convert(const IR::Type_Error* /* type */) const { return false; };
     // errorCount is the number of different error values.
     // The returned value is the width of Type_Bits used
     // to represent the errors.  Obviously, we must have
     // 2^(return) >= errorCount.
-    virtual unsigned errorSize(unsigned /* errorCount */) const{ return 0;};
+    virtual unsigned errorSize(unsigned /* errorCount */) const { return 0; };
     // This function allows backends to override the values for the error constants.
     // Default values for error constants is a sequence of numbers starting with 0.
-    virtual IR::IndexedVector<IR::SerEnumMember> *assignValues(
-                  IR::Type_Error* type, unsigned width) const {
+    virtual IR::IndexedVector<IR::SerEnumMember>* assignValues(IR::Type_Error* type,
+                                                               unsigned width) const {
         auto members = new IR::IndexedVector<IR::SerEnumMember>;
         unsigned idx = 0;
         for (auto d : type->members) {
-            members->push_back(new IR::SerEnumMember(d->name.name,
-                               new IR::Constant(IR::Type_Bits::get(width),idx++)));
+            members->push_back(new IR::SerEnumMember(
+                d->name.name, new IR::Constant(IR::Type_Bits::get(width), idx++)));
         }
         return members;
     }
@@ -75,33 +75,32 @@ class DoConvertErrors : public Transform {
     friend class ConvertErrors;
 
     ChooseErrorRepresentation* policy;
-    TypeMap* typeMap;
+
  public:
-    DoConvertErrors(ChooseErrorRepresentation* policy, TypeMap* typeMap)
-            : policy(policy), typeMap(typeMap)
-    { CHECK_NULL(policy); CHECK_NULL(typeMap); setName("DoConvertErrors"); }
+    explicit DoConvertErrors(ChooseErrorRepresentation* policy) : policy(policy) {
+        CHECK_NULL(policy);
+        setName("DoConvertErrors");
+    }
 
     const IR::Node* preorder(IR::Type_Error* type) {
         bool convert = policy->convert(type);
-        if (!convert)
-            return type;
+        if (!convert) return type;
         IR::IndexedVector<IR::SerEnumMember> members;
         unsigned count = type->members.size();
         unsigned width = policy->errorSize(count);
         return new IR::Type_SerEnum("error", IR::Type_Bits::get(width),
-                                     *policy->assignValues(type, width));
+                                    *policy->assignValues(type, width));
     }
 };
 
 class ConvertErrors : public PassManager {
-  DoConvertErrors *convertErrors{nullptr};
+    DoConvertErrors* convertErrors{nullptr};
+
  public:
-    ConvertErrors(ReferenceMap* refMap, TypeMap* typeMap,
-                 ChooseErrorRepresentation* policy,
-                 TypeChecking* typeChecking = nullptr)
-        : convertErrors(new DoConvertErrors(policy, typeMap)) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+    ConvertErrors(ReferenceMap* refMap, TypeMap* typeMap, ChooseErrorRepresentation* policy,
+                  TypeChecking* typeChecking = nullptr)
+        : convertErrors(new DoConvertErrors(policy)) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(convertErrors);
         passes.push_back(new ClearTypeMap(typeMap));

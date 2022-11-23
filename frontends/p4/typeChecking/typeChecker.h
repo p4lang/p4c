@@ -17,15 +17,15 @@ limitations under the License.
 #ifndef _TYPECHECKING_TYPECHECKER_H_
 #define _TYPECHECKING_TYPECHECKER_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "lib/exceptions.h"
-#include "lib/cstring.h"
+#include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeSubstitution.h"
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
 #include "typeUnification.h"
-#include "frontends/p4/methodInstance.h"
 
 namespace P4 {
 
@@ -34,18 +34,19 @@ namespace P4 {
 // This is needed if the types of some objects in the program change.
 class ClearTypeMap : public Inspector {
     TypeMap* typeMap;
-    bool     force;
+    bool force;
+
  public:
-    explicit ClearTypeMap(TypeMap* typeMap, bool force = false) :
-            typeMap(typeMap), force(force) { CHECK_NULL(typeMap); }
+    explicit ClearTypeMap(TypeMap* typeMap, bool force = false) : typeMap(typeMap), force(force) {
+        CHECK_NULL(typeMap);
+    }
     bool preorder(const IR::P4Program* program) override {
         // Clear map only if program has not changed from last time
         // otherwise we can reuse it.  The 'force' flag is needed
         // because the program is saved only *after* typechecking,
         // so if the program changes during type-checking, the
         // typeMap may not be complete.
-        if (force || !typeMap->checkMap(program))
-            typeMap->clear();
+        if (force || !typeMap->checkMap(program)) typeMap->clear();
         return false;  // prune()
     }
 };
@@ -56,11 +57,11 @@ class ClearTypeMap : public Inspector {
 /// the Expression::type field.
 class TypeChecking : public PassManager {
  public:
-    TypeChecking(/* out */ReferenceMap* refMap, /* out */TypeMap* typeMap,
+    TypeChecking(/* out */ ReferenceMap* refMap, /* out */ TypeMap* typeMap,
                  bool updateExpressions = false);
 };
 
-template<typename... T>
+template <typename... T>
 void typeError(const char* format, T... args) {
     ::error(ErrorType::ERR_TYPE_ERROR, format, args...);
 }
@@ -87,8 +88,8 @@ class TypeInference : public Transform {
  public:
     // @param readOnly If true it will assert that it behaves like
     //        an Inspector.
-    TypeInference(ReferenceMap* refMap, TypeMap* typeMap,
-                  bool readOnly = false, bool checkArrays = true);
+    TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool readOnly = false,
+                  bool checkArrays = true);
 
  protected:
     // If true we expect to leave the program unchanged
@@ -97,38 +98,40 @@ class TypeInference : public Transform {
     const IR::Type* getType(const IR::Node* element) const;
     const IR::Type* getTypeType(const IR::Node* element) const;
     void setType(const IR::Node* element, const IR::Type* type);
-    void setLeftValue(const IR::Expression* expression)
-    { typeMap->setLeftValue(expression); }
-    bool isLeftValue(const IR::Expression* expression) const
-    { return typeMap->isLeftValue(expression) || expression->is<IR::DefaultExpression>(); }
-    void setCompileTimeConstant(const IR::Expression* expression)
-    { typeMap->setCompileTimeConstant(expression); }
-    bool isCompileTimeConstant(const IR::Expression* expression) const
-    { return typeMap->isCompileTimeConstant(expression); }
+    void setLeftValue(const IR::Expression* expression) { typeMap->setLeftValue(expression); }
+    bool isLeftValue(const IR::Expression* expression) const {
+        return typeMap->isLeftValue(expression) || expression->is<IR::DefaultExpression>();
+    }
+    void setCompileTimeConstant(const IR::Expression* expression) {
+        typeMap->setCompileTimeConstant(expression);
+    }
+    bool isCompileTimeConstant(const IR::Expression* expression) const {
+        return typeMap->isCompileTimeConstant(expression);
+    }
 
     // This is needed because sometimes we invoke visitors recursively on subtrees explicitly.
     // (visitDagOnce cannot take care of this).
     bool done() const;
 
-    TypeVariableSubstitution* unifyBase(
-        bool allowCasts, const IR::Node* errorPosition, const IR::Type* destType,
-        const IR::Type* srcType,
-        cstring errorFormat, std::initializer_list<const IR::Node*> errorArgs);
+    TypeVariableSubstitution* unifyBase(bool allowCasts, const IR::Node* errorPosition,
+                                        const IR::Type* destType, const IR::Type* srcType,
+                                        cstring errorFormat,
+                                        std::initializer_list<const IR::Node*> errorArgs);
 
     /// Unifies two types.  Returns nullptr if unification fails.
     /// Populates the typeMap with values for the type variables.
     /// This allows an implicit cast from the right type to the left type.
-    TypeVariableSubstitution* unifyCast(
-        const IR::Node* errorPosition, const IR::Type* destType,
-        const IR::Type* srcType,
-        cstring errorFormat = nullptr, std::initializer_list<const IR::Node*> errorArgs = {})
-    { return unifyBase(true, errorPosition, destType, srcType, errorFormat, errorArgs); }
+    TypeVariableSubstitution* unifyCast(const IR::Node* errorPosition, const IR::Type* destType,
+                                        const IR::Type* srcType, cstring errorFormat = nullptr,
+                                        std::initializer_list<const IR::Node*> errorArgs = {}) {
+        return unifyBase(true, errorPosition, destType, srcType, errorFormat, errorArgs);
+    }
     /// Same as above, not allowing casts
-    TypeVariableSubstitution* unify(
-        const IR::Node* errorPosition, const IR::Type* destType,
-        const IR::Type* srcType,
-        cstring errorFormat = nullptr, std::initializer_list<const IR::Node*> errorArgs = {})
-    { return unifyBase(false, errorPosition, destType, srcType, errorFormat, errorArgs); }
+    TypeVariableSubstitution* unify(const IR::Node* errorPosition, const IR::Type* destType,
+                                    const IR::Type* srcType, cstring errorFormat = nullptr,
+                                    std::initializer_list<const IR::Node*> errorArgs = {}) {
+        return unifyBase(false, errorPosition, destType, srcType, errorFormat, errorArgs);
+    }
 
     /** Tries to assign sourceExpression to a destination with type destType.
         This may rewrite the sourceExpression, in particular converting InfInt values
@@ -136,9 +139,9 @@ class TypeInference : public Transform {
         @returns new sourceExpression. */
     const IR::Expression* assignment(const IR::Node* errorPosition, const IR::Type* destType,
                                      const IR::Expression* sourceExpression);
-    const IR::SelectCase* matchCase(
-        const IR::SelectExpression* select, const IR::Type_BaseList* selectType,
-        const IR::SelectCase* selectCase, const IR::Type* caseType);
+    const IR::SelectCase* matchCase(const IR::SelectExpression* select,
+                                    const IR::Type_BaseList* selectType,
+                                    const IR::SelectCase* selectCase, const IR::Type* caseType);
     bool canCastBetween(const IR::Type* dest, const IR::Type* src) const;
     bool checkAbstractMethods(const IR::Declaration_Instance* inst, const IR::Type_Extern* type);
     void addSubstitutions(const TypeVariableSubstitution* tvs);
@@ -157,8 +160,7 @@ class TypeInference : public Transform {
     // various helpers
     bool onlyBitsOrBitStructs(const IR::Type* type) const;
     bool containsHeader(const IR::Type* canonType);
-    bool validateFields(const IR::Type* type,
-                        std::function<bool(const IR::Type*)> checker) const;
+    bool validateFields(const IR::Type* type, std::function<bool(const IR::Type*)> checker) const;
     const IR::Node* binaryBool(const IR::Operation_Binary* op);
     const IR::Node* binaryArith(const IR::Operation_Binary* op);
     const IR::Node* unsBinaryArith(const IR::Operation_Binary* op);
@@ -167,22 +169,20 @@ class TypeInference : public Transform {
     const IR::Node* typeSet(const IR::Operation_Binary* op);
 
     const IR::Type* cloneWithFreshTypeVariables(const IR::IMayBeGenericType* type);
-    std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>
-    containerInstantiation(const IR::Node* node,
-                           const IR::Vector<IR::Argument>* args,
-                           const IR::IContainer* container);
+    std::pair<const IR::Type*, const IR::Vector<IR::Argument>*> containerInstantiation(
+        const IR::Node* node, const IR::Vector<IR::Argument>* args,
+        const IR::IContainer* container);
     const IR::Expression* actionCall(
-        bool inActionList,   // if true this "call" is in the action list of a table
+        bool inActionList,  // if true this "call" is in the action list of a table
         const IR::MethodCallExpression* actionCall);
-    const IR::Vector<IR::Argument>*
-            checkExternConstructor(const IR::Node* errorPosition,
-                                   const IR::Type_Extern* ext,
-                                   const IR::Vector<IR::Argument> *arguments);
+    std::pair<const IR::Type*, const IR::Vector<IR::Argument>*> checkExternConstructor(
+        const IR::Node* errorPosition, const IR::Type_Extern* ext,
+        const IR::Vector<IR::Argument>* arguments);
 
     static constexpr bool forbidModules = true;
     static constexpr bool forbidPackages = true;
-    bool checkParameters(const IR::ParameterList* paramList,
-                         bool forbidModules = false, bool forbidPackage = false) const;
+    bool checkParameters(const IR::ParameterList* paramList, bool forbidModules = false,
+                         bool forbidPackage = false) const;
     virtual const IR::Type* setTypeType(const IR::Type* type, bool learn = true);
 
     /// Action list of the current table.
@@ -200,12 +200,16 @@ class TypeInference : public Transform {
 
     static const IR::Type* specialize(const IR::IMayBeGenericType* type,
                                       const IR::Vector<IR::Type>* arguments);
-    const IR::Node* pruneIfDone(const IR::Node* node)
-    { if (done()) { prune(); } return node; }
-    const IR::Node* preorder(IR::Expression* expression) override
-    { return pruneIfDone(expression); }
-    const IR::Node* preorder(IR::Type* type) override
-    { return pruneIfDone(type); }
+    const IR::Node* pruneIfDone(const IR::Node* node) {
+        if (done()) {
+            prune();
+        }
+        return node;
+    }
+    const IR::Node* preorder(IR::Expression* expression) override {
+        return pruneIfDone(expression);
+    }
+    const IR::Node* preorder(IR::Type* type) override { return pruneIfDone(type); }
 
     struct Comparison {
         const IR::Expression* left;
@@ -213,8 +217,8 @@ class TypeInference : public Transform {
     };
 
     // Helper function to handle comparisons
-    bool compare(const IR::Node* errorPosition, const IR::Type* ltype,
-                 const IR::Type* rtype, Comparison* compare);
+    bool compare(const IR::Node* errorPosition, const IR::Type* ltype, const IR::Type* rtype,
+                 Comparison* compare);
 
     // do functions pre-order so we can check the prototype
     // before the returns
@@ -251,6 +255,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Type_Specialized* type) override;
     const IR::Node* postorder(IR::Type_SpecializedCanonical* type) override;
     const IR::Node* postorder(IR::Type_Tuple* type) override;
+    const IR::Node* postorder(IR::Type_P4List* type) override;
     const IR::Node* postorder(IR::Type_List* type) override;
     const IR::Node* postorder(IR::Type_Set* type) override;
     const IR::Node* postorder(IR::Type_ArchBlock* type) override;
@@ -300,6 +305,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::TypeNameExpression* expression) override;
     const IR::Node* postorder(IR::ListExpression* expression) override;
     const IR::Node* postorder(IR::InvalidHeader* expression) override;
+    const IR::Node* postorder(IR::P4ListExpression* expression) override;
     const IR::Node* postorder(IR::StructExpression* expression) override;
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
     const IR::Node* postorder(IR::ConstructorCallExpression* expression) override;
@@ -331,29 +337,29 @@ class TypeInference : public Transform {
 
 // Copy types from the typeMap to expressions.  Updates the typeMap with newly created nodes
 class ApplyTypesToExpressions : public Transform {
-    TypeMap *typeMap;
-    IR::Node *postorder(IR::Node *n) override {
-        const IR::Node *orig = getOriginal();
+    TypeMap* typeMap;
+    IR::Node* postorder(IR::Node* n) override {
+        const IR::Node* orig = getOriginal();
         if (auto type = typeMap->getType(orig)) {
-            if (*orig != *n)
-                typeMap->setType(n, type); }
-        return n; }
-    IR::Expression *postorder(IR::Expression *e) override {
+            if (*orig != *n) typeMap->setType(n, type);
+        }
+        return n;
+    }
+    IR::Expression* postorder(IR::Expression* e) override {
         auto orig = getOriginal<IR::Expression>();
         if (auto type = typeMap->getType(orig)) {
             e->type = type;
             if (*orig != *e) {
                 typeMap->setType(e, type);
-                if (typeMap->isLeftValue(orig))
-                    typeMap->setLeftValue(e);
-                if (typeMap->isCompileTimeConstant(orig))
-                    typeMap->setCompileTimeConstant(e);
+                if (typeMap->isLeftValue(orig)) typeMap->setLeftValue(e);
+                if (typeMap->isCompileTimeConstant(orig)) typeMap->setCompileTimeConstant(e);
             }
         }
-        return e; }
+        return e;
+    }
 
  public:
-    explicit ApplyTypesToExpressions(TypeMap *typeMap) : typeMap(typeMap) { }
+    explicit ApplyTypesToExpressions(TypeMap* typeMap) : typeMap(typeMap) {}
 };
 
 }  // namespace P4

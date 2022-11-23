@@ -18,14 +18,14 @@ limitations under the License.
 #define _LIB_OPTIONS_H_
 
 #include <functional>
+#include <ostream>
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <ostream>
 
 #include "cstring.h"
-#include "map.h"
 #include "error.h"
+#include "map.h"
 
 namespace Util {
 
@@ -74,15 +74,14 @@ class Options {
 
     void setOutStream(std::ostream* out) { outStream = out; }
     void registerUsage(const char* msg) { additionalUsage.push_back(msg); }
-    void registerOption(const char* option,   // option to register, e.g., -c or --version
-                        const char* argName,  // name of option argument;
-                                              // nullptr if no argument expected
+    void registerOption(const char* option,         // option to register, e.g., -c or --version
+                        const char* argName,        // name of option argument;
+                                                    // nullptr if no argument expected
                         OptionProcessor processor,  // function to execute when option matches
-                        const char* description,  // option help message
+                        const char* description,    // option help message
                         OptionFlags flags = OptionFlags::Default);  // additional flags
 
-    explicit Options(cstring message) : binaryName(nullptr), message(message),
-                compileCommand("") {}
+    explicit Options(cstring message) : binaryName(nullptr), message(message), compileCommand("") {}
 
  public:
     /**

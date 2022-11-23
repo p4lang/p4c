@@ -25,15 +25,15 @@ const IR::Expression* LowerExpressions::shift(const IR::Operation_Binary* expres
         auto cst = rhs->to<IR::Constant>();
         big_int maxShift = Util::shift_left(1, LowerExpressions::maxShiftWidth);
         if (cst->value > maxShift)
-            ::error(ErrorType::ERR_OVERLIMIT,
-                    "%1%: shift amount limited to %2% on this target", expression, maxShift);
+            ::error(ErrorType::ERR_OVERLIMIT, "%1%: shift amount limited to %2% on this target",
+                    expression, maxShift);
     } else {
         BUG_CHECK(rhstype->is<IR::Type_Bits>(), "%1%: expected a bit<> type", rhstype);
         auto bs = rhstype->to<IR::Type_Bits>();
         if (bs->size > LowerExpressions::maxShiftWidth)
             ::error(ErrorType::ERR_OVERLIMIT,
-                    "%1%: shift amount limited to %2% bits on this target",
-                    expression, LowerExpressions::maxShiftWidth);
+                    "%1%: shift amount limited to %2% bits on this target", expression,
+                    LowerExpressions::maxShiftWidth);
     }
     auto ltype = typeMap->getType(getOriginal(), true);
     typeMap->setType(expression, ltype);
@@ -70,8 +70,8 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
     // a ++ b  -> ((cast)a << sizeof(b)) | ((cast)b & mask)
     auto type = typeMap->getType(expression->right, true);
     auto resulttype = typeMap->getType(getOriginal(), true);
-    BUG_CHECK(type->is<IR::Type_Bits>(), "%1%: expected a bitstring got a %2%",
-              expression->right, type);
+    BUG_CHECK(type->is<IR::Type_Bits>(), "%1%: expected a bitstring got a %2%", expression->right,
+              type);
     BUG_CHECK(resulttype->is<IR::Type_Bits>(), "%1%: expected a bitstring got a %2%",
               expression->right, type);
     unsigned sizeofb = type->to<IR::Type_Bits>()->size;
@@ -80,9 +80,9 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
     auto cast1 = new IR::Cast(expression->right->srcInfo, resulttype, expression->right);
 
     auto sh = new IR::Shl(cast0->srcInfo, cast0, new IR::Constant(sizeofb));
-    big_int m = Util::maskFromSlice(sizeofb-1, 0);
-    auto mask = new IR::Constant(expression->right->srcInfo,
-                                 IR::Type_Bits::get(sizeofresult), m, 16);
+    big_int m = Util::maskFromSlice(sizeofb - 1, 0);
+    auto mask =
+        new IR::Constant(expression->right->srcInfo, IR::Type_Bits::get(sizeofresult), m, 16);
     auto and0 = new IR::BAnd(expression->right->srcInfo, cast1, mask);
     auto result = new IR::BOr(expression->srcInfo, sh, and0);
     typeMap->setType(cast0, resulttype);
@@ -104,8 +104,7 @@ const IR::Node* LowerExpressions::postorder(IR::Cast* expression) {
         LOG3("Replaced " << expression << " with " << cmp);
         return cmp;
     } else if (destType->is<IR::Type_Bits>() && srcType->is<IR::Type_Boolean>()) {
-        auto mux = new IR::Mux(expression->srcInfo, expression->expr,
-                               new IR::Constant(destType, 1),
+        auto mux = new IR::Mux(expression->srcInfo, expression->expr, new IR::Constant(destType, 1),
                                new IR::Constant(destType, 0));
         typeMap->setType(mux, destType);
         LOG3("Replaced " << expression << " with " << mux);

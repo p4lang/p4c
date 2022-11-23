@@ -103,7 +103,7 @@ class DpdkApplyStatement : DpdkAsmStatement, IDPDKNode {
 }
 
 class DpdkLearnStatement : DpdkAsmStatement, IDPDKNode {
-    cstring action;
+    ID action;
     Expression timeout;
     NullOK optional Expression argument;
     std::ostream& toSpec(std::ostream& out) const override;
@@ -161,11 +161,11 @@ class DpdkJmpMissStatement : DpdkJmpStatement {
 }
 
 abstract DpdkJmpActionStatement : DpdkJmpStatement {
-    cstring action;
+    ID action;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 #noconstructor
-    DpdkJmpActionStatement(cstring instruction, cstring label, cstring action) :
+    DpdkJmpActionStatement(cstring instruction, cstring label, ID action) :
         DpdkJmpStatement(instruction, label), action(action) { }
 }
 

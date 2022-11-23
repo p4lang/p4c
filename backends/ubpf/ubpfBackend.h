@@ -18,14 +18,14 @@ limitations under the License.
 #define BACKENDS_UBPF_UBPFBACKEND_H_
 
 #include "backends/ebpf/ebpfOptions.h"
-#include "ir/ir.h"
 #include "frontends/p4/evaluator/evaluator.h"
+#include "ir/ir.h"
 
 namespace UBPF {
 
-void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *toplevel,
-                      P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
-std::string extract_file_name(const std::string &fullPath);
+void run_ubpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* toplevel,
+                      P4::ReferenceMap* refMap, P4::TypeMap* typeMap);
+std::string extract_file_name(const std::string& fullPath);
 
 }  // namespace UBPF
 

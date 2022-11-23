@@ -1,6 +1,8 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_LIB_TIMER_H_
 #define BACKENDS_P4TOOLS_COMMON_LIB_TIMER_H_
 
+#include <stddef.h>
+
 #include <functional>
 #include <memory>
 #include <string>
@@ -46,6 +48,7 @@ class ScopedTimer {
  private:
     // Internal implementation.
     struct Ctx;
+
     std::unique_ptr<Ctx> ctx;
 };
 

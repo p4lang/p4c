@@ -49,7 +49,7 @@ macro (p4c_add_library name symbol var)
 endmacro(p4c_add_library)
 
 # Add files with the appropriate path to the list of linted files
-macro(add_cpplint_files dir filelist)
+function(add_cpplint_files dir filelist)
   foreach(__f ${filelist})
     string(REGEX MATCH "^/.*" abs_path "${__f}")
     if (NOT ${abs_path} EQUAL "")
@@ -59,11 +59,30 @@ macro(add_cpplint_files dir filelist)
     endif()
   endforeach(__f)
   set (CPPLINT_FILES ${CPPLINT_FILES} ${__cpplintFileList} PARENT_SCOPE)
-endmacro(add_cpplint_files)
+endfunction(add_cpplint_files)
+
+function(add_clang_format_files dir filelist)
+  foreach(__f ${filelist})
+    string(REGEX MATCH "^/.*" abs_path "${__f}")
+    if (NOT ${abs_path} EQUAL "")
+      list (APPEND __cpplintFileList "${__f}")
+    else()
+      list (APPEND __cpplintFileList "${dir}/${__f}")
+    endif()
+  endforeach(__f)
+  set (CLANG_FORMAT_FILES ${CLANG_FORMAT_FILES} ${__cpplintFileList} PARENT_SCOPE)
+endfunction(add_clang_format_files)
+
 
 macro(p4c_test_set_name name tag alias)
   set(${name} ${tag}/${alias})
 endmacro(p4c_test_set_name)
+
+function(append value)
+  foreach(variable ${ARGN})
+    set(${variable} "${${variable}} ${value}" PARENT_SCOPE)
+  endforeach(variable)
+endfunction()
 
 # add a single test to the testsuite
 # Arguments:

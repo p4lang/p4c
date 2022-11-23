@@ -47,8 +47,7 @@ class FlattenHeader {
     /// If the @headerType needs flattening, creates a clone of the IR node with
     /// a new flattened field list. Otherwise returns @headerType. This does not
     /// modify the IR.
-    static const IR::Type_Header* flatten(
-        P4::TypeMap* typeMap, const IR::Type_Header* headerType);
+    static const IR::Type_Header* flatten(P4::TypeMap* typeMap, const IR::Type_Header* headerType);
 };
 
 }  // namespace ControlPlaneAPI

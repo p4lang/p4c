@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_DONTCAREARGS_H_
 #define _FRONTENDS_P4_DONTCAREARGS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -30,13 +30,15 @@ class DontcareArgs : public Transform {
     IR::IndexedVector<IR::Declaration> toAdd;
 
  public:
-    DontcareArgs(ReferenceMap* refMap, TypeMap* typeMap): refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DontcareArgs"); }
+    DontcareArgs(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        setName("DontcareArgs");
+    }
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
     const IR::Node* postorder(IR::Function* function) override {
         IR::IndexedVector<IR::StatOrDecl> body;
-        for (auto d : toAdd)
-            body.push_back(d);
+        for (auto d : toAdd) body.push_back(d);
         body.append(function->body->components);
         function->body = new IR::BlockStatement(function->body->srcInfo, body);
         toAdd.clear();
@@ -45,11 +47,15 @@ class DontcareArgs : public Transform {
     const IR::Node* postorder(IR::P4Parser* parser) override {
         toAdd.append(parser->parserLocals);
         parser->parserLocals = toAdd;
-        toAdd.clear(); return parser; }
+        toAdd.clear();
+        return parser;
+    }
     const IR::Node* postorder(IR::P4Control* control) override {
         toAdd.append(control->controlLocals);
         control->controlLocals = toAdd;
-        toAdd.clear(); return control; }
+        toAdd.clear();
+        return control;
+    }
 };
 
 class RemoveDontcareArgs : public PassManager {
@@ -64,4 +70,4 @@ class RemoveDontcareArgs : public PassManager {
 
 }  // namespace P4
 
-#endif  /* _FRONTENDS_P4_DONTCAREARGS_H_ */
+#endif /* _FRONTENDS_P4_DONTCAREARGS_H_ */

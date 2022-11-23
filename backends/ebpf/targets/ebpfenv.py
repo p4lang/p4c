@@ -101,6 +101,7 @@ class Bridge(object):
             avoid ICMPv6 spam. """
         # We do not care about failures here
         self.ns_exec("ip link set dev %s up" % br_name)
+        self.ns_exec("ip link set dev %s mtu 9000" % br_name)
         # Prevent the broadcasting of ipv6 link discovery messages
         self.ns_exec("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
         self.ns_exec("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
@@ -118,6 +119,7 @@ class Bridge(object):
     def _configure_bridge_port(self, port_name):
         """ Set a bridge port active. """
         cmd = "ip link set dev %s up" % port_name
+        cmd += " && ip link set dev %s mtu 9000" % port_name
         return self.ns_exec(cmd)
 
     def attach_interfaces(self, num_ifaces):

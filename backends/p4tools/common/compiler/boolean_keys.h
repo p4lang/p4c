@@ -2,6 +2,8 @@
 #define BACKENDS_P4TOOLS_COMMON_COMPILER_BOOLEAN_KEYS_H_
 
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
 
 namespace P4Tools {
 

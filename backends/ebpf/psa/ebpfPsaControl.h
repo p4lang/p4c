@@ -17,11 +17,11 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_EBPFPSACONTROL_H_
 #define BACKENDS_EBPF_PSA_EBPFPSACONTROL_H_
 
-#include "ebpfPsaTable.h"
 #include "backends/ebpf/ebpfControl.h"
 #include "backends/ebpf/psa/externs/ebpfPsaChecksum.h"
 #include "backends/ebpf/psa/externs/ebpfPsaRandom.h"
 #include "backends/ebpf/psa/externs/ebpfPsaRegister.h"
+#include "ebpfPsaTable.h"
 
 namespace EBPF {
 
@@ -35,7 +35,7 @@ class ControlBodyTranslatorPSA : public ControlBodyTranslator {
 
     void processMethod(const P4::ExternMethod* method) override;
 
-    virtual cstring getParamName(const IR::PathExpression *);
+    virtual cstring getParamName(const IR::PathExpression*);
 };
 
 class ActionTranslationVisitorPSA : public ActionTranslationVisitor,
@@ -48,11 +48,11 @@ class ActionTranslationVisitorPSA : public ActionTranslationVisitor,
                                 const EBPFTablePSA* table);
 
     bool preorder(const IR::PathExpression* pe) override;
-    bool isActionParameter(const IR::Expression *expression) const;
+    bool isActionParameter(const IR::Expression* expression) const;
 
     void processMethod(const P4::ExternMethod* method) override;
-    cstring getParamInstanceName(const IR::Expression *expression) const override;
-    cstring getParamName(const IR::PathExpression *) override;
+    cstring getParamInstanceName(const IR::Expression* expression) const override;
+    cstring getParamName(const IR::PathExpression*) override;
 };
 
 class EBPFControlPSA : public EBPFControl {
@@ -66,12 +66,12 @@ class EBPFControlPSA : public EBPFControl {
 
     std::map<cstring, EBPFHashPSA*> hashes;
     std::map<cstring, EBPFRandomPSA*> randoms;
-    std::map<cstring, EBPFRegisterPSA*>  registers;
-    std::map<cstring, EBPFMeterPSA*>  meters;
+    std::map<cstring, EBPFRegisterPSA*> registers;
+    std::map<cstring, EBPFMeterPSA*> meters;
 
     EBPFControlPSA(const EBPFProgram* program, const IR::ControlBlock* control,
-                   const IR::Parameter* parserHeaders) :
-        EBPFControl(program, control, parserHeaders) {}
+                   const IR::Parameter* parserHeaders)
+        : EBPFControl(program, control, parserHeaders) {}
 
     void emit(CodeBuilder* builder) override;
     void emitTableTypes(CodeBuilder* builder) override;
@@ -105,4 +105,4 @@ class EBPFControlPSA : public EBPFControl {
 
 }  // namespace EBPF
 
-#endif  /* BACKENDS_EBPF_PSA_EBPFPSACONTROL_H_ */
+#endif /* BACKENDS_EBPF_PSA_EBPFPSACONTROL_H_ */

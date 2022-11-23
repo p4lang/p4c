@@ -1,6 +1,9 @@
 #include "backends/p4tools/common/compiler/boolean_keys.h"
 
+#include <stddef.h>
+
 #include "ir/irutils.h"
+#include "ir/vector.h"
 
 namespace P4Tools {
 

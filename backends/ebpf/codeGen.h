@@ -17,10 +17,10 @@ limitations under the License.
 #ifndef _BACKENDS_EBPF_CODEGEN_H_
 #define _BACKENDS_EBPF_CODEGEN_H_
 
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "lib/sourceCodeBuilder.h"
 #include "target.h"
-#include "frontends/p4/typeMap.h"
 
 namespace P4 {
 
@@ -40,7 +40,7 @@ class CodeBuilder : public Util::SourceCodeBuilder {
 // This visitor is invoked on various subtrees
 class CodeGenInspector : public Inspector {
  protected:
-    CodeBuilder*       builder;
+    CodeBuilder* builder;
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
     std::map<const IR::Parameter*, const IR::Parameter*> substitution;
@@ -54,10 +54,13 @@ class CodeGenInspector : public Inspector {
 
  public:
     int expressionPrecedence;  /// precedence of current IR::Operation
-    CodeGenInspector(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
-        builder(nullptr), refMap(refMap), typeMap(typeMap),
-        expressionPrecedence(DBPrint::Prec_Low) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap);
+    CodeGenInspector(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
+        : builder(nullptr),
+          refMap(refMap),
+          typeMap(typeMap),
+          expressionPrecedence(DBPrint::Prec_Low) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
         visitDagOnce = false;
     }
 
@@ -68,34 +71,29 @@ class CodeGenInspector : public Inspector {
 
     void substitute(const IR::Parameter* p, const IR::Parameter* with);
     void copySubstitutions(CodeGenInspector* other) {
-        for (auto s : other->substitution)
-            substitute(s.first, s.second);
+        for (auto s : other->substitution) substitute(s.first, s.second);
     }
 
-    void useAsPointerVariable(cstring name) {
-        this->asPointerVariables.insert(name);
-    }
-    void copyPointerVariables(CodeGenInspector *other) {
+    void useAsPointerVariable(cstring name) { this->asPointerVariables.insert(name); }
+    void copyPointerVariables(CodeGenInspector* other) {
         for (auto s : other->asPointerVariables) {
             this->asPointerVariables.insert(s);
         }
     }
-    bool isPointerVariable(cstring name) {
-        return asPointerVariables.count(name) > 0;
+    bool isPointerVariable(cstring name) { return asPointerVariables.count(name) > 0; }
+
+    bool notSupported(const IR::Expression* expression) {
+        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: not yet implemented", expression);
+        return false;
     }
 
-    bool notSupported(const IR::Expression* expression)
-    { ::error(ErrorType::ERR_UNSUPPORTED,
-              "%1%: not yet implemented", expression); return false; }
-
-    bool preorder(const IR::Expression* expression) override
-    { return notSupported(expression); }
-    bool preorder(const IR::Range* expression) override
-    { return notSupported(expression); }
-    bool preorder(const IR::Mask* expression) override
-    { return notSupported(expression); }
+    bool preorder(const IR::Expression* expression) override { return notSupported(expression); }
+    bool preorder(const IR::Range* expression) override { return notSupported(expression); }
+    bool preorder(const IR::Mask* expression) override { return notSupported(expression); }
     bool preorder(const IR::Slice* expression) override  // should not happen
-    { return notSupported(expression); }
+    {
+        return notSupported(expression);
+    }
     bool preorder(const IR::StringLiteral* expression) override;
     bool preorder(const IR::ListExpression* expression) override;
     bool preorder(const IR::PathExpression* expression) override;
@@ -113,7 +111,7 @@ class CodeGenInspector : public Inspector {
     bool preorder(const IR::Equ* e) override { return comparison(e); }
     bool preorder(const IR::Neq* e) override { return comparison(e); }
     bool preorder(const IR::Path* path) override;
-    bool preorder(const IR::StructExpression *expr) override;
+    bool preorder(const IR::StructExpression* expr) override;
 
     bool preorder(const IR::Type_Typedef* type) override;
     bool preorder(const IR::Type_Enum* type) override;
@@ -129,6 +127,5 @@ class CodeGenInspector : public Inspector {
 };
 
 }  // namespace EBPF
-
 
 #endif /* _BACKENDS_EBPF_CODEGEN_H_ */

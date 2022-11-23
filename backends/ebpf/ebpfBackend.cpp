@@ -14,18 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "ebpfBackend.h"
+
 #include "backends/bmv2/psa_switch/psaSwitch.h"
+#include "ebpfProgram.h"
+#include "ebpfType.h"
+#include "frontends/p4/evaluator/evaluator.h"
 #include "lib/error.h"
 #include "lib/nullstream.h"
-#include "frontends/p4/evaluator/evaluator.h"
-
-#include "ebpfBackend.h"
-#include "target.h"
-#include "ebpfType.h"
-#include "ebpfProgram.h"
-
 #include "psa/backend.h"
 #include "psa/ebpfPsaGen.h"
+#include "target.h"
 
 namespace EBPF {
 
@@ -36,16 +35,13 @@ void emitFilterModel(const EbpfOptions& options, Target* target, const IR::Tople
 
     EBPFTypeFactory::createFactory(typeMap);
     auto ebpfprog = new EBPFProgram(options, toplevel->getProgram(), refMap, typeMap, toplevel);
-    if (!ebpfprog->build())
-        return;
+    if (!ebpfprog->build()) return;
 
-    if (options.outputFile.isNullOrEmpty())
-        return;
+    if (options.outputFile.isNullOrEmpty()) return;
 
     cstring cfile = options.outputFile;
     auto cstream = openFile(cfile, false);
-    if (cstream == nullptr)
-        return;
+    if (cstream == nullptr) return;
 
     cstring hfile;
     const char* dot = cfile.findlast('.');
@@ -54,8 +50,7 @@ void emitFilterModel(const EbpfOptions& options, Target* target, const IR::Tople
     else
         hfile = cfile.before(dot) + ".h";
     auto hstream = openFile(hfile, false);
-    if (hstream == nullptr)
-        return;
+    if (hstream == nullptr) return;
 
     ebpfprog->emitH(&h, hfile);
     ebpfprog->emitC(&c, hfile);
@@ -67,14 +62,12 @@ void emitFilterModel(const EbpfOptions& options, Target* target, const IR::Tople
 
 void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* toplevel,
                       P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
-    if (toplevel == nullptr)
-        return;
+    if (toplevel == nullptr) return;
 
     auto main = toplevel->getMain();
     if (main == nullptr) {
         ::warning(ErrorType::WARN_MISSING,
-                  "Could not locate top-level block; is there a %1% module?",
-                  IR::P4Program::main);
+                  "Could not locate top-level block; is there a %1% module?", IR::P4Program::main);
         return;
     }
 
@@ -97,13 +90,11 @@ void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* tople
         auto backend = new EBPF::PSASwitchBackend(options, target, refMap, typeMap);
         backend->convert(toplevel);
 
-        if (options.outputFile.isNullOrEmpty())
-            return;
+        if (options.outputFile.isNullOrEmpty()) return;
 
         cstring cfile = options.outputFile;
         auto cstream = openFile(cfile, false);
-        if (cstream == nullptr)
-            return;
+        if (cstream == nullptr) return;
 
         backend->codegen(*cstream);
         cstream->flush();

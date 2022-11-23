@@ -17,10 +17,10 @@ limitations under the License.
 #ifndef _MIDEND_EXPANDLOOKAHEAD_H_
 #define _MIDEND_EXPANDLOOKAHEAD_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -55,25 +55,29 @@ class DoExpandLookahead : public Transform {
         const IR::PathExpression* tmp;  // temporary used for result
     };
 
-    void expand(
-        const IR::PathExpression* bitvector, const IR::Type* type, unsigned* offset,
-        const IR::Expression* destination,
-        IR::IndexedVector<IR::StatOrDecl>* output);
+    void expand(const IR::PathExpression* bitvector, const IR::Type* type, unsigned* offset,
+                const IR::Expression* destination, IR::IndexedVector<IR::StatOrDecl>* output);
     ExpansionInfo* convertLookahead(const IR::MethodCallExpression* expression);
 
  public:
-    DoExpandLookahead(ReferenceMap* refMap, TypeMap* typeMap, bool expandHeader = true) :
-            refMap(refMap), typeMap(typeMap), expandHeader(expandHeader) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoExpandLookahead"); }
+    DoExpandLookahead(ReferenceMap* refMap, TypeMap* typeMap, bool expandHeader = true)
+        : refMap(refMap), typeMap(typeMap), expandHeader(expandHeader) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        setName("DoExpandLookahead");
+    }
     const IR::Node* postorder(IR::AssignmentStatement* statement) override;
     const IR::Node* postorder(IR::MethodCallStatement* statement) override;
-    const IR::Node* preorder(IR::P4Control* control) override
-    { prune(); return control; }
-    const IR::Node* preorder(IR::P4Parser* parser) override
-    { newDecls.clear(); return parser; }
+    const IR::Node* preorder(IR::P4Control* control) override {
+        prune();
+        return control;
+    }
+    const IR::Node* preorder(IR::P4Parser* parser) override {
+        newDecls.clear();
+        return parser;
+    }
     const IR::Node* postorder(IR::P4Parser* parser) override {
-        if (!newDecls.empty())
-            parser->parserLocals.append(newDecls);
+        if (!newDecls.empty()) parser->parserLocals.append(newDecls);
         return parser;
     }
 };
@@ -83,10 +87,9 @@ class DoExpandLookahead : public Transform {
 /// See also description in class DoExpandLookahead.
 class ExpandLookahead : public PassManager {
  public:
-    ExpandLookahead(ReferenceMap* refMap, TypeMap* typeMap,
-            TypeChecking* typeChecking = nullptr, bool expandHeader = true) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+    ExpandLookahead(ReferenceMap* refMap, TypeMap* typeMap, TypeChecking* typeChecking = nullptr,
+                    bool expandHeader = true) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoExpandLookahead(refMap, typeMap, expandHeader));
         setName("ExpandLookahead");

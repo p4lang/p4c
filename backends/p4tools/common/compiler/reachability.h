@@ -7,14 +7,18 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
-#include <variant>
+#include <vector>
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/callGraph.h"
 #include "frontends/p4/typeMap.h"
 #include "gsl/gsl-lite.hpp"
+#include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/node.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/null.h"
 
 namespace P4Tools {
 

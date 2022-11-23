@@ -15,11 +15,12 @@ limitations under the License.
 */
 
 #include "orderArguments.h"
+
 #include "frontends/p4/methodInstance.h"
 
 namespace P4 {
 
-static IR::Vector<IR::Argument>* reorder(const ParameterSubstitution &substitution) {
+static IR::Vector<IR::Argument>* reorder(const ParameterSubstitution& substitution) {
     auto reordered = new IR::Vector<IR::Argument>();
 
     bool foundOptional = false;
@@ -55,6 +56,5 @@ const IR::Node* DoOrderArguments::postorder(IR::Declaration_Instance* instance) 
     instance->arguments = reorder(inst->substitution);
     return instance;
 }
-
 
 }  // namespace P4

@@ -38,28 +38,28 @@ enum class BlockConverted {
 class ProgramStructure {
  public:
     /// Map action to parent control.
-    ordered_map<const IR::P4Action *, const IR::P4Control *> actions;
+    ordered_map<const IR::P4Action*, const IR::P4Control*> actions;
     /// Maps each Parameter of an action to its positional index.
     /// Needed to generate code for actions.
-    ordered_map<const IR::Parameter *, unsigned> index;
+    ordered_map<const IR::Parameter*, unsigned> index;
     /// Parameters of controls/parsers
-    ordered_set<const IR::Parameter *> nonActionParameters;
+    ordered_set<const IR::Parameter*> nonActionParameters;
     /// For each action its json id.
-    ordered_map<const IR::P4Action *, unsigned> ids;
+    ordered_map<const IR::P4Action*, unsigned> ids;
     /// All local variables.
-    std::vector<const IR::Declaration_Variable *> variables;
+    std::vector<const IR::Declaration_Variable*> variables;
     /// All error codes.
-    ordered_map<const IR::IDeclaration *, unsigned int> errorCodesMap;
+    ordered_map<const IR::IDeclaration*, unsigned int> errorCodesMap;
     // We place scalar user metadata fields (i.e., bit<>, bool)
     // in the scalarsName metadata object, so we may need to rename
     // these fields.  This map holds the new names.
-    std::map<const IR::StructField *, cstring> scalarMetadataFields;
+    std::map<const IR::StructField*, cstring> scalarMetadataFields;
     /// All the direct meters.
     DirectMeterMap directMeterMap;
     /// All the direct counters.
-    ordered_map<cstring, const IR::P4Table *> directCounterMap;
+    ordered_map<cstring, const IR::P4Table*> directCounterMap;
     /// All match kinds
-    std::set<cstring>  match_kinds;
+    std::set<cstring> match_kinds;
     /// map IR node to compile-time allocated resource blocks.
     ResourceMap resourceMap;
 
@@ -68,14 +68,15 @@ class ProgramStructure {
 
 class DiscoverStructure : public Inspector {
  public:
-    ProgramStructure *structure;
+    ProgramStructure* structure;
 
-    explicit DiscoverStructure(ProgramStructure *structure) :
-        structure(structure) { setName("DiscoverStructure"); }
-    void postorder(const IR::ParameterList *paramList) override;
-    void postorder(const IR::P4Action *action) override;
-    void postorder(const IR::Declaration_Variable *decl) override;
-    void postorder(const IR::Type_Error *errors) override;
+    explicit DiscoverStructure(ProgramStructure* structure) : structure(structure) {
+        setName("DiscoverStructure");
+    }
+    void postorder(const IR::ParameterList* paramList) override;
+    void postorder(const IR::P4Action* action) override;
+    void postorder(const IR::Declaration_Variable* decl) override;
+    void postorder(const IR::Type_Error* errors) override;
     void postorder(const IR::Declaration_MatchKind* kind) override;
 };
 
@@ -84,11 +85,12 @@ class DiscoverStructure : public Inspector {
 // The Evaluator pass generates a mapping from IR::Block to IR::Node. This pass
 // provides a reversed map.
 class BuildResourceMap : public Inspector {
-    ResourceMap *resourceMap;
+    ResourceMap* resourceMap;
 
  public:
-    explicit BuildResourceMap(ResourceMap *resourceMap) : resourceMap(resourceMap) {
-        CHECK_NULL(resourceMap); }
+    explicit BuildResourceMap(ResourceMap* resourceMap) : resourceMap(resourceMap) {
+        CHECK_NULL(resourceMap);
+    }
 
     bool preorder(const IR::ControlBlock* control) override {
         resourceMap->emplace(control->container, control);
@@ -99,7 +101,8 @@ class BuildResourceMap : public Inspector {
         for (auto c : control->container->controlLocals) {
             if (c->is<IR::InstantiatedBlock>()) {
                 resourceMap->emplace(c, control->getValue(c));
-            } }
+            }
+        }
         return false;
     }
 
@@ -109,12 +112,14 @@ class BuildResourceMap : public Inspector {
             resourceMap->emplace(cv.first, cv.second);
             if (cv.second->is<IR::Block>()) {
                 visit(cv.second->getNode());
-            } }
+            }
+        }
 
         for (auto c : parser->container->parserLocals) {
             if (c->is<IR::InstantiatedBlock>()) {
                 resourceMap->emplace(c, parser->getValue(c));
-            } }
+            }
+        }
         return false;
     }
 
@@ -123,14 +128,18 @@ class BuildResourceMap : public Inspector {
         for (auto cv : table->constantValue) {
             resourceMap->emplace(cv.first, cv.second);
             if (cv.second->is<IR::Block>()) {
-                visit(cv.second->getNode()); } }
+                visit(cv.second->getNode());
+            }
+        }
         return false;
     }
 
     bool preorder(const IR::PackageBlock* package) override {
         for (auto cv : package->constantValue) {
             if (cv.second->is<IR::Block>()) {
-                visit(cv.second->getNode()); } }
+                visit(cv.second->getNode());
+            }
+        }
         return false;
     }
 
@@ -143,4 +152,4 @@ class BuildResourceMap : public Inspector {
 
 }  // namespace BMV2
 
-#endif  /* BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_ */
+#endif /* BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_ */
