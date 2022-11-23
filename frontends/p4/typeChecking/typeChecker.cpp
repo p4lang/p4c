@@ -134,7 +134,8 @@ TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool readOn
       typeMap(typeMap),
       initialNode(nullptr),
       readOnly(readOnly),
-      checkArrays(checkArrays) {
+      checkArrays(checkArrays),
+      currentActionList(nullptr) {
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
     visitDagOnce = false;  // the done() method will take care of this
