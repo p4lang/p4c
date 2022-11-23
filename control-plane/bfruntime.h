@@ -262,6 +262,7 @@ class TypeSpecParser {
     const_iterator cbegin() { return fields.cbegin(); }
     iterator end() { return fields.end(); }
     const_iterator cend() { return fields.cend(); }
+    size_t size() { return fields.size(); }
 
  private:
     explicit TypeSpecParser(Fields&& fields) : fields(std::move(fields)) {}
@@ -380,8 +381,7 @@ class BFRuntimeGenerator {
         p4configv1::P4DataTypeSpec typeSpec;
         Util::JsonArray* annotations;
 
-        // static boost::optional<Register>
-        // from(const p4configv1::ExternInstance& externInstance);
+        static boost::optional<Register> from(const p4configv1::Register& regInstance);
     };
 
     void addMatchTables(Util::JsonArray* tablesJson) const;
@@ -390,10 +390,11 @@ class BFRuntimeGenerator {
                                   Util::JsonObject* tableJson) const;
     void addCounters(Util::JsonArray* tablesJson) const;
     void addMeters(Util::JsonArray* tablesJson) const;
+    void addRegisters(Util::JsonArray* tablesJson) const;
 
     void addCounterCommon(Util::JsonArray* tablesJson, const Counter& counter) const;
     void addMeterCommon(Util::JsonArray* tablesJson, const Meter& meter) const;
-    void addRegisterCommon(Util::JsonArray* tablesJson, const Register& meter) const;
+    void addRegisterCommon(Util::JsonArray* tablesJson, const Register& reg) const;
     void addActionProfCommon(Util::JsonArray* tablesJson, const ActionProf& actionProf) const;
     void addLearnFilters(Util::JsonArray* learnFiltersJson) const;
     void addLearnFilterCommon(Util::JsonArray* learnFiltersJson, const Digest& digest) const;
