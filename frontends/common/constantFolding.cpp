@@ -761,7 +761,7 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
 
     auto tb = left->type->to<IR::Type_Bits>();
     if (tb != nullptr) {
-        if (((unsigned)tb->width_bits() < shift) && warnings)
+        if (((unsigned)tb->width_bits() <= shift) && warnings)
             ::warning(ErrorType::WARN_OVERFLOW, "%1%: Shifting %2%-bit value with %3%", e,
                       tb->width_bits(), shift);
     }
