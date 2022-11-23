@@ -237,10 +237,13 @@ void EBPFIngressPipeline::emit(CodeBuilder* builder) {
     emitMetadataFromCPUMAP(builder);
     builder->newline();
 
-    msgStr =
-        Util::printf_format("%s parser: parsing new packet, path=%%d, pkt_len=%%d", sectionName);
+    msgStr = Util::printf_format(
+        "%s parser: parsing new packet, input_port=%%d, path=%%d, "
+        "pkt_len=%%d",
+        sectionName);
     varStr = Util::printf_format("%s->packet_path", compilerGlobalMetadata);
-    builder->target->emitTraceMessage(builder, msgStr.c_str(), 2, varStr, lengthVar.c_str());
+    builder->target->emitTraceMessage(builder, msgStr.c_str(), 3, ifindexVar.c_str(), varStr,
+                                      lengthVar.c_str());
 
     // PARSER
     parser->emit(builder);
@@ -395,6 +398,13 @@ void EBPFEgressPipeline::emit(CodeBuilder* builder) {
     builder->blockStart();
 
     emitGlobalMetadataInitializer(builder);
+    builder->appendFormat("if (compiler_meta__->mark != %u) ", packetMark);
+    builder->blockStart();
+    builder->emitIndent();
+    builder->append("return TC_ACT_OK");
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+
     emitLocalVariables(builder);
     emitUserMetadataInstance(builder);
     builder->newline();
@@ -412,10 +422,13 @@ void EBPFEgressPipeline::emit(CodeBuilder* builder) {
     emitPSAControlOutputMetadata(builder);
     emitPSAControlInputMetadata(builder);
 
-    msgStr =
-        Util::printf_format("%s parser: parsing new packet, path=%%d, pkt_len=%%d", sectionName);
+    msgStr = Util::printf_format(
+        "%s parser: parsing new packet, input_port=%%d, path=%%d, "
+        "pkt_len=%%d",
+        sectionName);
     varStr = Util::printf_format("%s->packet_path", compilerGlobalMetadata);
-    builder->target->emitTraceMessage(builder, msgStr.c_str(), 2, varStr, lengthVar.c_str());
+    builder->target->emitTraceMessage(builder, msgStr.c_str(), 3, ifindexVar.c_str(), varStr,
+                                      lengthVar.c_str());
 
     // PARSER
     parser->emit(builder);
@@ -458,11 +471,19 @@ void EBPFEgressPipeline::emit(CodeBuilder* builder) {
 void TCIngressPipeline::emitGlobalMetadataInitializer(CodeBuilder* builder) {
     EBPFPipeline::emitGlobalMetadataInitializer(builder);
 
+    // if Traffic Manager decided to pass packet to the kernel stack earlier, send it up immediately
+    builder->emitIndent();
+    builder->append("if (compiler_meta__->pass_to_kernel == true) return TC_ACT_OK;");
+    builder->newline();
+
     // workaround to make TC protocol-independent, DO NOT REMOVE
     builder->emitIndent();
     // replace ether_type only if a packet comes from XDP
     builder->appendFormat("if (%s->packet_path == NORMAL) ", compilerGlobalMetadata);
     builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("compiler_meta__->mark = %u", packetMark);
+    builder->endOfStatement(true);
     builder->emitIndent();
     if (options.xdp2tcMode == XDP2TC_META) {
         emitTCWorkaroundUsingMeta(builder);
@@ -556,6 +577,27 @@ void TCIngressPipeline::emitTrafficManager(CodeBuilder* builder) {
     builder->appendFormat("skb->priority = %s.class_of_service;",
                           control->outputStandardMetadata->name.name);
     builder->newline();
+
+    builder->appendFormat("if (!%s.drop && %s.egress_port == 0) ",
+                          control->outputStandardMetadata->name.name,
+                          control->outputStandardMetadata->name.name);
+    builder->blockStart();
+    builder->target->emitTraceMessage(builder, "IngressTM: Sending packet up to the kernel stack");
+    builder->emitIndent();
+
+    // Since XDP helper re-writes EtherType for packets other than IPv4 (e.g., ARP)
+    // we cannot simply return TC_ACT_OK to pass the packet up to the kernel stack,
+    // because the kernel stack would receive a malformed packet (with invalid skb->protocol).
+    // The workaround is to send the packet back to the same interface. If we redirect,
+    // the packet will be re-written back to the original format.
+    // At the beginning of the pipeline we check if pass_to_kernel is true and,
+    // if so, the program returns TC_ACT_OK.
+    builder->newline();
+    builder->append("compiler_meta__->pass_to_kernel = true;");
+    builder->newline();
+    builder->append("return bpf_redirect(skb->ifindex, BPF_F_INGRESS)");
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
 
     cstring eg_port =
         Util::printf_format("%s.egress_port", control->outputStandardMetadata->name.name);
