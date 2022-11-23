@@ -8,7 +8,7 @@ fi
 
 $BREW update
 $BREW install autoconf automake bdw-gc bison boost ccache cmake \
-      libtool openssl pkg-config python coreutils
+      libtool openssl pkg-config python coreutils grep
 $BREW install protobuf
 
 # Prefer Homebrew's bison over the macOS-provided version
