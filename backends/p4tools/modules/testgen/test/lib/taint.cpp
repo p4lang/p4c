@@ -287,6 +287,9 @@ TEST_F(TaintTest, Taint09) {
     const auto* taint64b = Utils::getTaintExpression(IR::getBitType(64));
     ASSERT_TRUE(Taint::hasTaint({}, taint64b));
 
+    ASSERT_TRUE(Taint::hasTaint({}, new IR::Slice(taint64b, 0, 0)));
+    ASSERT_TRUE(Taint::hasTaint({}, new IR::Slice(new IR::Slice(taint64b, 0, 0), 0, 0)));
+
     // 64w0 ++ taint<64>
     const auto* taint128bLowerQ = new IR::Cast(IR::getBitType(128), taint64b);
     ASSERT_TRUE(Taint::hasTaint({}, taint128bLowerQ));
