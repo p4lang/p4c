@@ -439,32 +439,10 @@ big_int EmitDpdkTableConfig::convertSimpleKeyExpressionToBigInt(const IR::Expres
         }
         ::error(ErrorType::ERR_INVALID, "%1% invalid Member key expression", k);
         return -1;
-    } else if (k->is<IR::Cast>()) {
-        return convertSimpleKeyExpressionToBigInt(k->to<IR::Cast>()->expr, keyWidth, typeMap);
     } else {
         ::error(ErrorType::ERR_INVALID, "%1% invalid key expression", k);
         return -1;
     }
-}
-
-const IR::Key* EmitDpdkTableConfig::getKey(const IR::DpdkTable* dt) {
-    auto kp = dt->properties->getProperty(IR::TableProperties::keyPropertyName);
-    if (kp == nullptr) return nullptr;
-    if (!kp->value->is<IR::Key>()) {
-        ::error(ErrorType::ERR_INVALID, "%1%: must be a key", kp);
-        return nullptr;
-    }
-    return kp->value->to<IR::Key>();
-}
-
-const IR::EntriesList* EmitDpdkTableConfig::getEntries(const IR::DpdkTable* dt) {
-    auto ep = dt->properties->getProperty(IR::TableProperties::entriesPropertyName);
-    if (ep == nullptr) return nullptr;
-    if (!ep->value->is<IR::EntriesList>()) {
-        ::error(ErrorType::ERR_INVALID, "%1%: must be a list of entries", ep);
-        return nullptr;
-    }
-    return ep->value->to<IR::EntriesList>();
 }
 
 void EmitDpdkTableConfig::addAction(const IR::Expression* actionRef, P4::ReferenceMap* refMap,
@@ -634,7 +612,7 @@ void EmitDpdkTableConfig::addMatchKey(const IR::DpdkTable* table, const IR::List
                                       P4::TypeMap* typeMap) {
     int keyIndex = 0;
     for (auto k : keyset->components) {
-        auto tableKey = getKey(table)->keyElements.at(keyIndex++);
+        auto tableKey = table->getKey()->keyElements.at(keyIndex++);
         auto keyWidth = getTypeWidth(tableKey->expression->type, typeMap);
         auto matchType = getKeyMatchType(tableKey, refMap);
         if (matchType == P4::P4CoreLibrary::instance.exactMatch.name) {
@@ -659,7 +637,7 @@ void EmitDpdkTableConfig::addMatchKey(const IR::DpdkTable* table, const IR::List
 /// Checks if the @table entries need to be assigned a priority, i.e. does
 /// the match key for the table includes a ternary, range, or optional match?
 bool EmitDpdkTableConfig::tableNeedsPriority(const IR::DpdkTable* table, P4::ReferenceMap* refMap) {
-    for (auto e : getKey(table)->keyElements) {
+    for (auto e : table->getKey()->keyElements) {
         auto matchType = getKeyMatchType(e, refMap);
         // TODO(antonin): remove dependency on v1model.
         if (matchType == "ternary" || matchType == "range" || matchType == "optional") {
@@ -678,7 +656,7 @@ bool EmitDpdkTableConfig::isAllKeysDefaultExpression(const IR::ListExpression* k
 }
 
 void EmitDpdkTableConfig::postorder(const IR::DpdkTable* table) {
-    auto entriesList = getEntries(table);
+    auto entriesList = table->getEntries();
     if (entriesList == nullptr) return;
     dpdkTableConfigFile.open(table->name + ".txt");
     auto needsPriority = tableNeedsPriority(table, refMap);

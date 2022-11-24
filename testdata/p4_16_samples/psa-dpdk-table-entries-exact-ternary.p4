@@ -76,7 +76,7 @@ control ingress(inout Header_t h, inout Meta_t m, in psa_ingress_input_metadata_
 	default_action = a;
 
         const entries = {
-            (0x01, 0x1111 &&& 0xF   ) : a_with_control_params(1);
+            ((bit<8>)32w0x01, 0x1111 &&& 0xF   ) : a_with_control_params(1);
             (0x02, 0x1181           ) : a_with_control_params(2);
             (0x03, 0x1111 &&& 0xF000) : a_with_control_params(3);
             // test default entries
