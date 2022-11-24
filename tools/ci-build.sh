@@ -174,6 +174,8 @@ CMAKE_FLAGS+="-DCMAKE_BUILD_TYPE=RELEASE "
 CMAKE_FLAGS+="-DENABLE_WERROR=${ENABLE_WERROR} "
 # Enable sanitizers.
 CMAKE_FLAGS+="-DENABLE_SANITIZERS=${ENABLE_SANITIZERS} "
+# Enable auto var initialization with pattern.
+CMAKE_FLAGS+="-DBUILD_AUTO_VAR_INIT_PATTERN=${BUILD_AUTO_VAR_INIT_PATTERN} "
 
 # Run CMake in the build folder.
 if [ -e build ]; then /bin/rm -rf build; fi
