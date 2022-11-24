@@ -44,6 +44,7 @@ OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" OFF)
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
 OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
 OPTION (BUILD_STATIC_RELEASE "Build a statically linked release binary" OFF)
+OPTION (BUILD_AUTO_VAR_INIT_PATTERN "Initialize variables with pattern during build" OFF)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
 
@@ -217,6 +218,10 @@ add_cxx_compiler_option ("-Wno-deprecated-declarations")
 
 if (ENABLE_SANITIZERS)
   add_cxx_compiler_option  ("-fsanitize=undefined,address")
+endif ()
+
+if (BUILD_AUTO_VAR_INIT_PATTERN)
+  add_cxx_compiler_option  ("-ftrivial-auto-var-init=pattern")
 endif ()
 
 if (ENABLE_WERROR)

@@ -34,6 +34,9 @@ ARG COMPILE_WITH_CLANG=OFF
 ARG ENABLE_SANITIZERS=OFF
 # Only execute the steps necessary to successfully run CMake.
 ARG CMAKE_ONLY=OFF
+# Build with -ftrivial-auto-var-init=pattern to catch more bugs caused by
+# uninitialized variables.
+ARG BUILD_AUTO_VAR_INIT_PATTERN=OFF
 
 # Delegate the build to tools/ci-build.
 COPY . /p4c/

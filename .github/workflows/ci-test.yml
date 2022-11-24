@@ -65,7 +65,7 @@ jobs:
 
     - name: Build (Ubuntu Linux, Clang)
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg COMPILE_WITH_CLANG=ON .
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg COMPILE_WITH_CLANG=ON --build-arg BUILD_AUTO_VAR_INIT_PATTERN=ON .
         ./tools/export_ccache.sh
 
       # run with sudo (...) --privileged
