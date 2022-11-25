@@ -1,5 +1,5 @@
-#ifndef BACKENDS_P4TOOLS_COMMON_COMPILER_COPY_HEADERS_H_
-#define BACKENDS_P4TOOLS_COMMON_COMPILER_COPY_HEADERS_H_
+#ifndef MIDEND_COPYHEADERS_H_
+#define MIDEND_COPYHEADERS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -9,7 +9,7 @@
 #include "ir/pass_manager.h"
 #include "ir/visitor.h"
 
-namespace P4Tools {
+namespace P4 {
 
 /// Converts assignments of headers, header stacks, and structs into assignments of their
 /// individual fields.
@@ -32,6 +32,6 @@ class CopyHeaders : public PassRepeated {
                 P4::TypeChecking* typeChecking = nullptr);
 };
 
-}  // namespace P4Tools
+}  // namespace P4
 
-#endif /* BACKENDS_P4TOOLS_COMMON_COMPILER_COPY_HEADERS_H_ */
+#endif /* MIDEND_COPYHEADERS_H_ */

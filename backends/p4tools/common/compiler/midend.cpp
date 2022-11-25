@@ -1,7 +1,6 @@
 #include "backends/p4tools/common/compiler/midend.h"
 
 #include "backends/p4tools/common/compiler/convert_varbits.h"
-#include "backends/p4tools/common/compiler/copy_headers.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
 #include "frontends/common/parser_options.h"
@@ -15,6 +14,7 @@
 #include "midend/complexComparison.h"
 #include "midend/convertEnums.h"
 #include "midend/convertErrors.h"
+#include "midend/copyHeaders.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
 #include "midend/eliminateSwitch.h"
@@ -120,7 +120,7 @@ void MidEnd::addDefaultPasses() {
         // Expand comparisons on structs and headers into comparisons on fields.
         new P4::SimplifyComparisons(&refMap, &typeMap),
         // Expand header and struct assignments into sequences of field assignments.
-        new CopyHeaders(&refMap, &typeMap),
+        new P4::CopyHeaders(&refMap, &typeMap),
         // Flatten nested list expressions.
         new P4::SimplifySelectList(&refMap, &typeMap),
         // Convert booleans in selects into bit<1>.
