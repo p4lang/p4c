@@ -319,8 +319,8 @@ class Instantiation : public InstanceBase {
     const IR::Declaration_Instance* instance;
     const IR::Vector<IR::Type>* typeArguments;
     const IR::Vector<IR::Argument>* constructorArguments;
-    const IR::ParameterList* constructorParameters;
-    const IR::TypeParameters* typeParameters;
+    const IR::ParameterList* constructorParameters = nullptr;
+    const IR::TypeParameters* typeParameters = nullptr;
 
     static Instantiation* resolve(const IR::Declaration_Instance* instance,
                                   DeclarationLookup* refMap, TypeMap* typeMap);
