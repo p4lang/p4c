@@ -146,7 +146,10 @@ static bool writeTextTo(const Message& message, std::ostream* destination) {
     // with a FileOutputStream object for performance reasons. However all we
     // have here is a std::ostream and performance is not a concern.
     std::string output;
-    if (!google::protobuf::TextFormat::PrintToString(message, &output)) {
+    google::protobuf::TextFormat::Printer textPrinter;
+    // set to expand google.protobuf.Any payloads
+    textPrinter.SetExpandAny(true);
+    if (textPrinter.PrintToString(message, &output) == false) {
         ::error(ErrorType::ERR_IO, "Failed to serialize protobuf message to text");
         return false;
     }
