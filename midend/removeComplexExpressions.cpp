@@ -59,7 +59,7 @@ const IR::PathExpression* RemoveComplexExpressions::createTemporary(
 
 const IR::Vector<IR::Argument>* RemoveComplexExpressions::simplifyExpressions(
     const IR::Vector<IR::Argument>* args) {
-    bool changes = true;
+    bool changes = false;
     auto result = new IR::Vector<IR::Argument>();
     for (auto arg : *args) {
         auto r = simplifyExpression(arg->expression, false);

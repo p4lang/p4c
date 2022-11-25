@@ -141,7 +141,7 @@ const IR::Node* CreateBuiltins::postorder(IR::Property* property) {
     if (auto key = property->value->to<IR::Key>()) {
         if (key->keyElements.size() == 0) return nullptr;
     } else {
-        ::error(ErrorType::ERR_INVALID, "%1%: must be a key", key);
+        ::error(ErrorType::ERR_INVALID, "%1%: must be a key", property->value);
         return nullptr;
     }
     return property;

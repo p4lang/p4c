@@ -23,7 +23,7 @@ typedef std::function<void(const char* manager, unsigned seqNo,
                            const char* pass, const IR::Node* node)> DebugHook;
 
 class PassManager : virtual public Visitor, virtual public Backtrack {
-    bool early_exit_flag;
+    bool early_exit_flag = false;
     mutable int never_backtracks_cache = -1;
 
  protected:

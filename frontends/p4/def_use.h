@@ -353,7 +353,7 @@ class Definitions : public IHasDbPrint {
     /// (conservative approximation).
     ordered_map<const BaseLocation*, const ProgramPoints*> definitions;
     /// If true the current program point is actually unreachable.
-    bool unreachable;
+    bool unreachable = false;
 
  public:
     Definitions() = default;

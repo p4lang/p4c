@@ -123,8 +123,8 @@ class Graph_visitor : public Graphs {
     void forLoopFullGraph(std::vector<Graph*>& graphsArray, fullGraphOpts* opts,
                           PrevType prev_type);
 
-    Util::JsonObject* json;          // stores json that will be outputted
-    Util::JsonArray* programBlocks;  // stores objects in top level array "nodes"
+    Util::JsonObject* json;                    // stores json that will be outputted
+    Util::JsonArray* programBlocks = nullptr;  // stores objects in top level array "nodes"
     const cstring graphsDir;
     // options
     const bool graphs;     // output boost graphs to files

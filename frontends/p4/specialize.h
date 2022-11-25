@@ -64,8 +64,8 @@ class SpecializationMap {
                                         const IR::Parameter* param);
 
  public:
-    TypeMap* typeMap;
-    ReferenceMap* refMap;
+    TypeMap* typeMap = nullptr;
+    ReferenceMap* refMap = nullptr;
     /** Add a specialization instance.
      *
      * @param invocation The constructor invocation.
