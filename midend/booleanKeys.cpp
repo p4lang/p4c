@@ -1,11 +1,11 @@
-#include "backends/p4tools/common/compiler/boolean_keys.h"
+#include "midend/booleanKeys.h"
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "ir/irutils.h"
 #include "ir/vector.h"
 
-namespace P4Tools {
+namespace P4 {
 
 const IR::Node* CastBooleanTableKeys::postorder(IR::KeyElement* key) {
     if (key->expression->type->is<IR::Type_Boolean>()) {
@@ -28,4 +28,4 @@ const IR::Node* CastBooleanTableKeys::postorder(IR::Entry* entry) {
     return entry;
 }
 
-}  // namespace P4Tools
+}  // namespace P4

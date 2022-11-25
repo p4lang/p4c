@@ -14,6 +14,7 @@
 
 set (MIDEND_SRCS
   actionSynthesis.cpp
+  booleanKeys.cpp
   complexComparison.cpp
   convertEnums.cpp
   copyStructures.cpp
@@ -58,6 +59,7 @@ set (MIDEND_SRCS
 
 set (MIDEND_HDRS
   actionSynthesis.h
+  booleanKeys.h
   checkSize.h
   checkExternInvocationCommon.h
   compileTimeOps.h
