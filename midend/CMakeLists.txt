@@ -49,6 +49,7 @@ set (MIDEND_SRCS
   removeSelectBooleans.cpp
   replaceSelectRange.cpp
   removeUnusedParameters.cpp
+  saturationElim.cpp
   simplifyBitwise.cpp
   simplifyKey.cpp
   simplifySelectCases.cpp
@@ -99,6 +100,7 @@ set (MIDEND_HDRS
   removeSelectBooleans.h
   removeUnusedParameters.h
   replaceSelectRange.h
+  saturationElim.h
   simplifyBitwise.h
   simplifyKey.h
   simplifySelectCases.h

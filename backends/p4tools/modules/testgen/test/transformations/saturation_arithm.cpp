@@ -7,7 +7,6 @@
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
-#include "backends/p4tools/common/lib/saturation_elim.h"
 #include "gtest/gtest-message.h"
 #include "gtest/gtest-test-part.h"
 #include "gtest/gtest.h"
@@ -17,6 +16,7 @@
 #include "ir/node.h"
 #include "ir/visitor.h"
 #include "lib/enumerator.h"
+#include "midend/saturationElim.h"
 #include "test/gtest/helpers.h"
 
 #include "backends/p4tools/modules/testgen/core/target.h"
@@ -24,8 +24,8 @@
 
 namespace Test {
 
+using P4::SaturationElim;
 using P4Tools::Model;
-using P4Tools::SaturationElim;
 using P4Tools::Z3Solver;
 using P4Tools::P4Testgen::TestgenTarget;
 

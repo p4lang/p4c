@@ -1,10 +1,10 @@
-#include "backends/p4tools/common/lib/saturation_elim.h"
+#include "midend/saturationElim.h"
 
 #include "ir/irutils.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
 
-namespace P4Tools {
+namespace P4 {
 
 bool SaturationElim::isSaturationOperation(const IR::Expression* expr) {
     CHECK_NULL(expr);
@@ -116,4 +116,4 @@ const IR::Mux* SaturationElim::eliminate(const IR::Operation_Binary* binary) {
                        new IR::Mux(binary->type, underflowCondition, underflowNumber, expr));
 }
 
-}  // namespace P4Tools
+}  // namespace P4
