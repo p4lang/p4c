@@ -1,7 +1,6 @@
-#include "backends/p4tools/common/compiler/convert_errors.h"
+#include "midend/convertErrors.h"
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <vector>
 
 #include "frontends/p4/typeMap.h"
@@ -11,7 +10,7 @@
 #include "lib/exceptions.h"
 #include "lib/map.h"
 
-namespace P4Tools {
+namespace P4 {
 
 const IR::Node* DoConvertErrors::preorder(IR::Type_Error* type) {
     bool convert = policy->convert(type);
@@ -69,4 +68,4 @@ const IR::Node* DoConvertErrors::postorder(IR::Member* member) {
     return cst;
 }
 
-}  // namespace P4Tools
+}  // namespace P4

@@ -39,7 +39,6 @@ set(
   version.cpp
 
   compiler/compiler_target.cpp
-  compiler/convert_errors.cpp
   compiler/convert_varbits.cpp
   compiler/copy_headers.cpp
   compiler/hs_index_simplify.cpp

@@ -17,6 +17,7 @@ set (MIDEND_SRCS
   booleanKeys.cpp
   complexComparison.cpp
   convertEnums.cpp
+  convertErrors.cpp
   copyStructures.cpp
   eliminateInvalidHeaders.cpp
   eliminateNewtype.cpp

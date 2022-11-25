@@ -1,6 +1,5 @@
 #include "backends/p4tools/common/compiler/midend.h"
 
-#include "backends/p4tools/common/compiler/convert_errors.h"
 #include "backends/p4tools/common/compiler/convert_varbits.h"
 #include "backends/p4tools/common/compiler/copy_headers.h"
 #include "frontends/common/constantFolding.h"
@@ -15,6 +14,7 @@
 #include "midend/booleanKeys.h"
 #include "midend/complexComparison.h"
 #include "midend/convertEnums.h"
+#include "midend/convertErrors.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
 #include "midend/eliminateSwitch.h"
@@ -49,7 +49,7 @@ Visitor* MidEnd::mkConvertEnums() {
 }
 
 Visitor* MidEnd::mkConvertErrors() {
-    return new ConvertErrors(&refMap, &typeMap, mkConvertErrorPolicy());
+    return new P4::ConvertErrors(&refMap, &typeMap, mkConvertErrorPolicy());
 }
 
 Visitor* MidEnd::mkConvertKeys() {
@@ -67,9 +67,9 @@ P4::ChooseEnumRepresentation* MidEnd::mkConvertEnumsPolicy() {
     return new EnumOn32Bits();
 }
 
-ChooseErrorRepresentation* MidEnd::mkConvertErrorPolicy() {
+P4::ChooseErrorRepresentation* MidEnd::mkConvertErrorPolicy() {
     /// Implements the default enum-conversion policy, which converts all enums to bit<32>.
-    class ErrorOn32Bits : public ChooseErrorRepresentation {
+    class ErrorOn32Bits : public P4::ChooseErrorRepresentation {
         bool convert(const IR::Type_Error* /*type*/) const override { return true; }
 
         unsigned errorSize(unsigned) const override { return 32; }
