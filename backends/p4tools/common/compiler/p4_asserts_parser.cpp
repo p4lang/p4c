@@ -325,9 +325,15 @@ std::vector<Token> combineTokensToNames(const std::vector<Token>& inputVector) {
     std::vector<Token> result;
     Token prevToken = Token(Token::Kind::Unknown, " ", 1);
     cstring txt = "";
-    for (const auto& input : inputVector) {
-        if (prevToken.is(Token::Kind::Text) && input.is(Token::Kind::Number)) {
+    for (size_t i = 0; i < inputVector.size(); i++) {
+        const auto& input = inputVector[i];
+        if (prevToken.is(Token::Kind::Text) &&
+                (input.is(Token::Kind::Number) || input.is(Token::Kind::LeftParen) ||
+                 input.is(Token::Kind::RightParen))) {
             txt += std::string(input.lexeme());
+            if (i == inputVector.size() - 1) {
+                result.emplace_back(Token::Kind::Text, txt, txt.size());
+            }
             continue;
         }
         if (input.is(Token::Kind::Text)) {
@@ -493,8 +499,17 @@ std::vector<const IR::Expression*> AssertsParser::genIRStructs(
     std::vector<const IR::Expression*> result;
 
     tmp = combineTokensToNames(tmp);
+    
     tmp = combineTokensToNumbers(tmp);
-    if (tableName.size() > 0) {
+    if (tableName.size() == 0) {
+        for (uint64_t i = 0; i < tmp.size(); i++) {
+            std::cout << tmp[i].lexeme() << std::endl;
+        }
+        const auto* expr = getIR(tmp, keyElements);
+        std::cout << expr << std::endl;
+        result.push_back(expr);
+        return result;
+    } else {
         tmp = combineTokensToTableKeys(tmp, tableName);
     }
     tmp = removeComments(tmp);

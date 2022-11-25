@@ -18,7 +18,7 @@
 #include "p4tools/common/lib/formulae.h"
 
 #include "backends/p4tools/common/compiler/p4_asserts_parser.h"
-#include "backends/p4tools/testgen//lib/exceptions.h"
+#include "backends/p4tools/testgen/lib/exceptions.h"
 #include "backends/p4tools/testgen/core/target.h"
 #include "backends/p4tools/testgen/lib/concolic.h"
 #include "backends/p4tools/testgen/targets/bmv2/concolic.h"
