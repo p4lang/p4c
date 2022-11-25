@@ -46,7 +46,6 @@ set(
   core/target.cpp
   core/z3_solver.cpp
 
-  lib/coverage.cpp
   lib/format_int.cpp
   lib/formulae.cpp
   lib/model.cpp

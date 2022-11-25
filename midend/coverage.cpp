@@ -1,10 +1,10 @@
-#include "backends/p4tools/common/lib/coverage.h"
+#include "midend/coverage.h"
 
 #include <ostream>
 
 #include "lib/log.h"
 
-namespace P4Tools {
+namespace P4 {
 
 namespace Coverage {
 
@@ -56,4 +56,4 @@ void logCoverage(const CoverageSet& all, const CoverageSet& visited,
 
 }  // namespace Coverage
 
-}  // namespace P4Tools
+}  // namespace P4

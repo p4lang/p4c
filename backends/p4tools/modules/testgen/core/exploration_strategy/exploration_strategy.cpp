@@ -17,8 +17,8 @@
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/error.h"
+#include "midend/coverage.h"
 #include "p4tools/common/core/solver.h"
-#include "p4tools/common/lib/coverage.h"
 #include "p4tools/common/lib/formulae.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
@@ -109,7 +109,7 @@ ExplorationStrategy::ExplorationStrategy(AbstractSolver& solver, const ProgramIn
     executionState = new ExecutionState(programInfo.program);
 }
 
-const Coverage::CoverageSet& ExplorationStrategy::getVisitedStatements() {
+const P4::Coverage::CoverageSet& ExplorationStrategy::getVisitedStatements() {
     return visitedStatements;
 }
 

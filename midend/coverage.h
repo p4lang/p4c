@@ -1,5 +1,5 @@
-#ifndef BACKENDS_P4TOOLS_COMMON_LIB_COVERAGE_H_
-#define BACKENDS_P4TOOLS_COMMON_LIB_COVERAGE_H_
+#ifndef MIDEND_COVERAGE_H_
+#define MIDEND_COVERAGE_H_
 
 #include <set>
 #include <vector>
@@ -8,7 +8,12 @@
 #include "ir/visitor.h"
 #include "lib/source_file.h"
 
-namespace P4Tools {
+/// This file is a collection of utilities for coverage tracking in P4 programs. Currently, this
+/// class merely tracks statement coverage. The utilities here can be used by interpreters that need
+/// to walk the IR of the P4 program and track which percentage of statement they have visited. The
+/// p4tools (backends/p4tools) framework uses this coverage visitor.
+
+namespace P4 {
 
 namespace Coverage {
 
@@ -18,10 +23,12 @@ struct SourceIdCmp {
     }
 };
 
-// Set of statements used for coverage purposes. Compares statements based on their
-// clone_id to take statement modifications into account.
+/// Set of statements used for coverage purposes. Compares statements based on their
+/// clone_id to take statement modifications into account.
 using CoverageSet = std::set<const IR::Statement*, SourceIdCmp>;
 
+/// CollectStatements iterates across all assignment, method call, and exit statements in the P4
+/// program and collects them in a "CoverageSet".
 class CollectStatements : public Inspector {
     CoverageSet& statements;
 
@@ -41,6 +48,6 @@ void logCoverage(const CoverageSet& all, const CoverageSet& visited,
 
 }  // namespace Coverage
 
-}  // namespace P4Tools
+}  // namespace P4
 
-#endif /* BACKENDS_P4TOOLS_COMMON_LIB_COVERAGE_H_ */
+#endif /* MIDEND_COVERAGE_H_ */

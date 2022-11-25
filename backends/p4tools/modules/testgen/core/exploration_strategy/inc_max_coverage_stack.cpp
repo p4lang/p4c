@@ -7,10 +7,10 @@
 
 #include <boost/none.hpp>
 
-#include "backends/p4tools/common/lib/coverage.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "lib/error.h"
+#include "midend/coverage.h"
 #include "p4tools/common/core/solver.h"
 #include "p4tools/common/lib/formulae.h"
 

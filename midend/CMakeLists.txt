@@ -72,6 +72,7 @@ set (MIDEND_HDRS
   convertErrors.h
   copyHeaders.h
   copyStructures.h
+  coverage.h
   eliminateInvalidHeaders.h
   eliminateNewtype.h
   eliminateSerEnums.h
