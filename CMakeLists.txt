@@ -459,15 +459,13 @@ install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
 ################################ Linters Begin ################################
 
 file(
-  GLOB_RECURSE P4C_LINT_LIST
+  GLOB_RECURSE P4C_LINT_LIST  FOLLOW_SYMLINKS
   backends/*.cpp
   backends/*.h
   control-plane/*.cpp
   control-plane/*.h
   frontends/*.cpp
   frontends/*.h
-  extensions/*.cpp
-  extensions/*.h
   ir/*.cpp
   ir/*.h
   tools/*.cpp
@@ -510,13 +508,13 @@ if(NOT ${CLANG_FORMAT_CMD})
     set(CLANG_FORMAT_CMD clang-format)
     add_custom_target(
       clang-format
-      COMMAND ${CLANG_FORMAT_CMD} --Werror --dry-run -i ${CLANG_FORMAT_FILES}
+      COMMAND ${CLANG_FORMAT_CMD} --verbose --Werror --dry-run -i ${CLANG_FORMAT_FILES}
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Checking files for correct clang-format formatting."
     )
     add_custom_target(
       clang-format-fix-errors
-      COMMAND ${CLANG_FORMAT_CMD} -i ${CLANG_FORMAT_FILES}
+      COMMAND ${CLANG_FORMAT_CMD} --verbose -i ${CLANG_FORMAT_FILES}
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Formatting files using clang-format."
     )
