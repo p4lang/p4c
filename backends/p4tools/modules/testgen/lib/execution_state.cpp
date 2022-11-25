@@ -12,7 +12,6 @@
 #include <boost/container/vector.hpp>
 #include <boost/variant/variant.hpp>
 
-#include "backends/p4tools/common/compiler/hs_index_simplify.h"
 #include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"
@@ -20,6 +19,7 @@
 #include "ir/irutils.h"
 #include "lib/log.h"
 #include "lib/null.h"
+#include "midend/hsIndexSimplify.h"
 #include "p4tools/common/compiler/reachability.h"
 #include "p4tools/common/lib/formulae.h"
 #include "p4tools/common/lib/model.h"
@@ -539,7 +539,7 @@ std::vector<const IR::Member*> ExecutionState::getFlatFields(
         } else if (const auto* typeStack = fieldType->to<IR::Type_Stack>()) {
             const auto* stackElementsType = resolveType(typeStack->elementType);
             for (size_t arrayIndex = 0; arrayIndex < typeStack->getSize(); arrayIndex++) {
-                const auto* newMember = HSIndexToMember::produceStackIndex(
+                const auto* newMember = P4::HSIndexToMember::produceStackIndex(
                     stackElementsType, new IR::Member(typeStack, parent, field->name), arrayIndex);
                 BUG_CHECK(stackElementsType->is<IR::Type_StructLike>(),
                           "Try to make the flat fields for non Type_StructLike element : %1%",

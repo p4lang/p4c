@@ -8,7 +8,7 @@
 
 namespace P4 {
 
-typedef std::map<cstring, const IR::PathExpression*> GeneratedVariablesMap;
+using GeneratedVariablesMap = std::map<cstring, const IR::PathExpression*>;
 
 /// This class finds innermost header stack with non-concrete index.
 /// For each found innermost header stack it generates new local variable and
@@ -19,8 +19,8 @@ class HSIndexFinder : public Inspector {
     IR::IndexedVector<IR::Declaration>* locals;
     ReferenceMap* refMap;
     TypeMap* typeMap;
-    const IR::ArrayIndex* arrayIndex;
-    const IR::PathExpression* newVariable;
+    const IR::ArrayIndex* arrayIndex = nullptr;
+    const IR::PathExpression* newVariable = nullptr;
     GeneratedVariablesMap* generatedVariables;
     std::set<cstring> storedMember;
     std::list<IR::Member*> dependedMembers;
@@ -31,8 +31,6 @@ class HSIndexFinder : public Inspector {
         : locals(locals),
           refMap(refMap),
           typeMap(typeMap),
-          arrayIndex(nullptr),
-          newVariable(nullptr),
           generatedVariables(generatedVariables) {}
     void postorder(const IR::ArrayIndex* curArrayIndex) override;
 
@@ -43,11 +41,11 @@ class HSIndexFinder : public Inspector {
 /// This class substitutes index of a header stack in all occurence of found header stack.
 class HSIndexTransform : public Transform {
     friend class HSIndexContretizer;
-    int index;
+    size_t index;
     HSIndexFinder& hsIndexFinder;
 
  public:
-    HSIndexTransform(HSIndexFinder& finder, int index) : index(index), hsIndexFinder(finder) {}
+    HSIndexTransform(HSIndexFinder& finder, size_t index) : index(index), hsIndexFinder(finder) {}
     const IR::Node* postorder(IR::ArrayIndex* curArrayIndex) override;
 };
 
@@ -77,11 +75,13 @@ class HSIndexContretizer : public Transform {
                        IR::IndexedVector<IR::Declaration>* locals = nullptr,
                        GeneratedVariablesMap* generatedVariables = nullptr)
         : refMap(refMap), typeMap(typeMap), locals(locals), generatedVariables(generatedVariables) {
-        if (generatedVariables == nullptr) generatedVariables = new GeneratedVariablesMap();
+        if (generatedVariables == nullptr) {
+            generatedVariables = new GeneratedVariablesMap();
+        }
     }
     IR::Node* preorder(IR::IfStatement* ifStatement) override;
     IR::Node* preorder(IR::AssignmentStatement* assignmentStatement) override;
-    IR::Node* preorder(IR::BlockStatement* assignmentStatement) override;
+    IR::Node* preorder(IR::BlockStatement* blockStatement) override;
     IR::Node* preorder(IR::MethodCallStatement* methodCallStatement) override;
     IR::Node* preorder(IR::P4Control* control) override;
     IR::Node* preorder(IR::P4Parser* parser) override;
@@ -100,6 +100,19 @@ class HSIndexSimplifier : public PassManager {
         passes.push_back(new HSIndexContretizer(refMap, typeMap));
         setName("HSIndexSimplifier");
     }
+};
+
+/// Replaces all ArrayIndex classes with a member classes that have the integer index as string
+/// member.
+/// WARNING: After applying this pass, the IR will not type check any longer.
+class HSIndexToMember : public Transform {
+ public:
+    const IR::Node* postorder(IR::ArrayIndex* curArrayIndex) override;
+
+    /// Convert a parent expression and an index into a member expression with that
+    /// particular index as string member. The type is used to specify the member type.
+    static const IR::Member* produceStackIndex(const IR::Type* type,
+                                               const IR::Expression* expression, size_t arrayIndex);
 };
 
 }  // namespace P4

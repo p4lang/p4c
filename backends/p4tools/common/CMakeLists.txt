@@ -41,7 +41,6 @@ set(
   compiler/compiler_target.cpp
   compiler/convert_varbits.cpp
   compiler/copy_headers.cpp
-  compiler/hs_index_simplify.cpp
   compiler/midend.cpp
   compiler/reachability.cpp
 
