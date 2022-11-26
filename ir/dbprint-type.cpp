@@ -30,23 +30,24 @@ limitations under the License.
 using namespace DBPrint;
 using namespace IndentCtl;
 
-void IR::ParameterList::dbprint(std::ostream& out) const {
+void IR::ParameterList::dbprint(std::ostream &out) const {
     int flags = dbgetflags(out);
-    const char* sep = "";
+    const char *sep = "";
     out << Brief;
     for (auto param : parameters) {
         out << sep << param;
-        sep = ", ";
-    }
+        sep = ", "; }
     dbsetflags(out, flags);
 }
 
 void IR::Type_MethodBase::dbprint(std::ostream& out) const {
     int flags = dbgetflags(out);
     out << Brief;
-    if (returnType != nullptr) out << returnType << " ";
+    if (returnType != nullptr)
+        out << returnType << " ";
     out << "_";
-    if (typeParameters != nullptr) out << typeParameters;
+    if (typeParameters != nullptr)
+        out << typeParameters;
     out << "(" << parameters << ")";
     dbsetflags(out, flags);
 }
@@ -56,7 +57,8 @@ void IR::Method::dbprint(std::ostream& out) const {
     out << annotations;
     if (isAbstract) out << "abstract ";
     out << Brief << type->returnType << " " << name;
-    if (type->typeParameters != nullptr) out << type->typeParameters;
+    if (type->typeParameters != nullptr)
+        out << type->typeParameters;
     out << "(" << type->parameters << ")";
     dbsetflags(out, flags);
 }
@@ -64,31 +66,30 @@ void IR::Method::dbprint(std::ostream& out) const {
 void IR::Type_Parser::dbprint(std::ostream& out) const {
     if (dbgetflags(out) & Brief) {
         out << name;
-        return;
-    }
+        return; }
     out << Brief << "parser " << name;
-    if (typeParameters != nullptr) out << typeParameters;
+    if (typeParameters != nullptr)
+        out << typeParameters;
     out << "(" << applyParams << ")" << annotations << ';' << clrflag(Brief);
 }
 
 void IR::Type_Control::dbprint(std::ostream& out) const {
     if (dbgetflags(out) & Brief) {
         out << name;
-        return;
-    }
+        return; }
     out << Brief << "control " << name;
-    if (typeParameters != nullptr) out << typeParameters;
+    if (typeParameters != nullptr)
+        out << typeParameters;
     out << "(" << applyParams << ")" << annotations << ';' << clrflag(Brief);
 }
 
 void IR::Type_Specialized::dbprint(std::ostream& out) const {
     int flags = dbgetflags(out);
     out << Brief << baseType << "<";
-    const char* sep = "";
-    for (auto* arg : *arguments) {
+    const char *sep = "";
+    for (auto *arg : *arguments) {
         out << sep << arg;
-        sep = ", ";
-    }
+        sep = ", "; }
     out << ">";
     dbsetflags(out, flags);
 }
@@ -96,21 +97,20 @@ void IR::Type_Specialized::dbprint(std::ostream& out) const {
 void IR::Type_Package::dbprint(std::ostream& out) const {
     if (dbgetflags(out) & Brief) {
         out << name;
-        return;
-    }
+        return; }
     out << Brief << "package " << name;
-    if (typeParameters != nullptr) out << typeParameters;
+    if (typeParameters != nullptr)
+        out << typeParameters;
     out << "(" << constructorParams << ")" << annotations << ';' << clrflag(Brief);
 }
 
 void IR::Type_Tuple::dbprint(std::ostream& out) const {
     int flags = dbgetflags(out);
     out << Brief << "tuple<";
-    const char* sep = "";
+    const char *sep = "";
     for (auto t : components) {
         out << sep << t;
-        sep = ", ";
-    }
+        sep = ", "; }
     out << ">";
     dbsetflags(out, flags);
 }
@@ -124,11 +124,10 @@ void IR::Type_P4List::dbprint(std::ostream& out) const {
 void IR::Type_List::dbprint(std::ostream& out) const {
     int flags = dbgetflags(out);
     out << Brief << "list<";
-    const char* sep = "";
+    const char *sep = "";
     for (auto t : components) {
         out << sep << t;
-        sep = ", ";
-    }
+        sep = ", "; }
     out << ">";
     dbsetflags(out, flags);
 }
@@ -136,40 +135,40 @@ void IR::Type_List::dbprint(std::ostream& out) const {
 void IR::Type_Extern::dbprint(std::ostream& out) const {
     if (dbgetflags(out) & Brief) {
         out << name;
-        return;
-    }
+        return; }
     out << Brief << "extern " << name;
-    if (typeParameters != nullptr) out << typeParameters;
+    if (typeParameters != nullptr)
+        out << typeParameters;
     out << " {" << indent << clrflag(Brief);
-    for (auto& method : methods) out << Log::endl << method << ';';
+    for (auto &method : methods)
+        out << Log::endl << method << ';';
     out << " }" << unindent;
 }
 
 void IR::TypeParameters::dbprint(std::ostream& out) const {
     int flags = dbgetflags(out);
     out << Brief << "<";
-    const char* sep = "";
+    const char *sep = "";
     for (auto p : parameters) {
         out << sep << p;
-        sep = ", ";
-    }
+        sep = ", "; }
     out << ">";
     dbsetflags(out, flags);
 }
 
-void IR::StructField::dbprint(std::ostream& out) const {
+void IR::StructField::dbprint(std::ostream &out) const {
     int flags = dbgetflags(out);
     out << Brief << annotations << type << ' ' << name;
     dbsetflags(out, flags);
 }
 
-void IR::Type_StructLike::dbprint(std::ostream& out) const {
+void IR::Type_StructLike::dbprint(std::ostream &out) const {
     if (dbgetflags(out) & Brief) {
         out << name;
-        return;
-    }
+        return; }
     out << toString() << " " << annotations << "{" << indent;
-    for (auto& field : fields) out << Log::endl << field << ';';
+    for (auto &field : fields)
+        out << Log::endl << field << ';';
     out << " }" << unindent;
 }
 
@@ -179,4 +178,6 @@ void IR::Type_MethodCall::dbprint(std::ostream& out) const {
     dbsetflags(out, flags);
 }
 
-void IR::Type_ActionEnum::dbprint(std::ostream& out) const { Node::dbprint(out); }
+void IR::Type_ActionEnum::dbprint(std::ostream& out) const {
+    Node::dbprint(out);
+}

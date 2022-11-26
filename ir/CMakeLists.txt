@@ -66,7 +66,3 @@ set (IR_DEF_FILES ${IR_DEF_FILES} ${BASE_IR_DEF_FILES} PARENT_SCOPE)
 build_unified(IR_SRCS)
 add_library (ir STATIC ${IR_SRCS})
 add_dependencies(ir genIR)
-
-if(ENABLE_IWYU)
-  set_property(TARGET ir PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
-endif()

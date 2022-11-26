@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2013-present Barefoot Networks, Inc. 
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,44 +27,47 @@ limitations under the License.
 using namespace DBPrint;
 using namespace IndentCtl;
 
-void IR::ReturnStatement::dbprint(std::ostream& out) const {
+void IR::ReturnStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << "return";
     if (expression) {
-        out << " " << Prec_Low << expression << setprec(prec);
-    }
+        out << " " << Prec_Low << expression << setprec(prec); }
     if (!prec) out << ';';
 }
 
-void IR::AssignmentStatement::dbprint(std::ostream& out) const {
+
+void IR::AssignmentStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << Prec_Low << left << " = " << right << setprec(prec);
     if (!prec) out << ';';
 }
 
-void IR::IfStatement::dbprint(std::ostream& out) const {
+void IR::IfStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << Prec_Low << "if (" << condition << ") {" << indent << setprec(0) << Log::endl << ifTrue;
-    if (ifFalse) out << unindent << Log::endl << "} else {" << indent << Log::endl << ifFalse;
+    if (ifFalse)
+        out << unindent << Log::endl << "} else {" << indent << Log::endl << ifFalse;
     out << " }" << unindent << setprec(prec);
 }
 
-void IR::MethodCallStatement::dbprint(std::ostream& out) const {
+void IR::MethodCallStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << Prec_Low << methodCall << setprec(prec);
     if (!prec) out << ';';
 }
 
-void IR::Function::dbprint(std::ostream& out) const {
+void IR::Function::dbprint(std::ostream &out) const {
     if (type->returnType) out << type->returnType << ' ';
     out << name;
-    if (type->typeParameters && !type->typeParameters->empty()) out << type->typeParameters;
+    if (type->typeParameters && !type->typeParameters->empty())
+        out << type->typeParameters;
     out << "(" << type->parameters << ") {" << indent;
-    for (auto s : body->components) out << Log::endl << s;
+    for (auto s : body->components)
+        out << Log::endl << s;
     out << unindent << " }";
 }
 
-void IR::SwitchStatement::dbprint(std::ostream& out) const {
+void IR::SwitchStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << Prec_Low << "switch (" << expression << ") {" << indent;
     bool fallthrough = false;

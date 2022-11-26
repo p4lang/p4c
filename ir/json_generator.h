@@ -33,23 +33,19 @@ limitations under the License.
 #include "lib/ordered_set.h"
 #include "lib/safe_vector.h"
 
+
 class JSONGenerator {
     std::unordered_set<int> node_refs;
-    std::ostream& out;
+    std::ostream &out;
     bool dumpSourceInfo;
 
-    template <typename T>
+    template<typename T>
     class has_toJSON {
         typedef char small;
-        typedef struct {
-            char c[2];
-        } big;
+        typedef struct { char c[2]; } big;
 
-        template <typename C>
-        static small test(decltype(&C::toJSON));
-        template <typename C>
-        static big test(...);
-
+        template<typename C> static small test(decltype(&C::toJSON));
+        template<typename C> static big test(...);
      public:
         static const bool value = sizeof(test<T>(0)) == sizeof(char);
     };
@@ -57,57 +53,53 @@ class JSONGenerator {
  public:
     indent_t indent;
 
-    explicit JSONGenerator(std::ostream& out, bool dumpSourceInfo = false)
-        : out(out), dumpSourceInfo(dumpSourceInfo) {}
+    explicit JSONGenerator(std::ostream &out, bool dumpSourceInfo = false) :
+        out(out), dumpSourceInfo(dumpSourceInfo) {}
 
-    template <typename T>
-    void generate(const safe_vector<T>& v) {
+    template<typename T>
+    void generate(const safe_vector<T> &v) {
         out << "[";
         if (v.size() > 0) {
             out << std::endl << ++indent;
             generate(v[0]);
             for (size_t i = 1; i < v.size(); i++) {
                 out << "," << std::endl << indent;
-                generate(v[i]);
-            }
-            out << std::endl << --indent;
-        }
+                generate(v[i]); }
+            out << std::endl << --indent; }
         out << "]";
     }
 
-    template <typename T>
-    void generate(const std::vector<T>& v) {
+    template<typename T>
+    void generate(const std::vector<T> &v) {
         out << "[";
         if (v.size() > 0) {
             out << std::endl << ++indent;
             generate(v[0]);
             for (size_t i = 1; i < v.size(); i++) {
                 out << "," << std::endl << indent;
-                generate(v[i]);
-            }
-            out << std::endl << --indent;
-        }
+                generate(v[i]); }
+            out << std::endl << --indent; }
         out << "]";
     }
 
-    template <typename T, typename U>
-    void generate(const std::pair<T, U>& v) {
+    template<typename T, typename U>
+    void generate(const std::pair<T, U> &v) {
         ++indent;
         out << "{" << std::endl;
         toJSON(v);
         out << std::endl << --indent << "}";
     }
 
-    template <typename T, typename U>
-    void toJSON(const std::pair<T, U>& v) {
+    template<typename T, typename U>
+    void toJSON(const std::pair<T, U> &v) {
         out << indent << "\"first\" : ";
         generate(v.first);
         out << "," << std::endl << indent << "\"second\" : ";
         generate(v.second);
     }
 
-    template <typename T>
-    void generate(const boost::optional<T>& v) {
+    template<typename T>
+    void generate(const boost::optional<T> &v) {
         if (!v) {
             out << "{ \"valid\" : false }";
             return;
@@ -119,8 +111,8 @@ class JSONGenerator {
         out << std::endl << --indent << "}";
     }
 
-    template <typename T>
-    void generate(const std::set<T>& v) {
+    template<typename T>
+    void generate(const std::set<T> &v) {
         out << "[" << std::endl;
         if (v.size() > 0) {
             auto it = v.begin();
@@ -135,8 +127,8 @@ class JSONGenerator {
         out << "]";
     }
 
-    template <typename T>
-    void generate(const ordered_set<T>& v) {
+    template<typename T>
+    void generate(const ordered_set<T> &v) {
         out << "[" << std::endl;
         if (v.size() > 0) {
             auto it = v.begin();
@@ -151,8 +143,8 @@ class JSONGenerator {
         out << "]";
     }
 
-    template <typename K, typename V>
-    void generate(const std::map<K, V>& v) {
+    template<typename K, typename V>
+    void generate(const std::map<K, V> &v) {
         out << "[" << std::endl;
         if (v.size() > 0) {
             auto it = v.begin();
@@ -160,15 +152,13 @@ class JSONGenerator {
             generate(*it);
             for (it++; it != v.end(); ++it) {
                 out << "," << std::endl << indent;
-                generate(*it);
-            }
-            out << std::endl << --indent;
-        }
+                generate(*it); }
+            out << std::endl << --indent; }
         out << "]";
     }
 
-    template <typename K, typename V>
-    void generate(const ordered_map<K, V>& v) {
+    template<typename K, typename V>
+    void generate(const ordered_map<K, V> &v) {
         out << "[" << std::endl;
         if (v.size() > 0) {
             auto it = v.begin();
@@ -176,23 +166,19 @@ class JSONGenerator {
             generate(*it);
             for (it++; it != v.end(); ++it) {
                 out << "," << std::endl << indent;
-                generate(*it);
-            }
-            out << std::endl << --indent;
-        }
+                generate(*it); }
+            out << std::endl << --indent; }
         out << "]";
     }
 
     void generate(bool v) { out << (v ? "true" : "false"); }
-    template <typename T>
-    typename std::enable_if<std::is_integral<T>::value>::type generate(T v) {
-        out << std::to_string(v);
-    }
+    template<typename T>
+    typename std::enable_if<std::is_integral<T>::value>::type
+    generate(T v) { out << std::to_string(v); }
     void generate(double v) { out << std::to_string(v); }
-    template <typename T>
-    typename std::enable_if<std::is_same<T, big_int>::value>::type generate(const T& v) {
-        out << v;
-    }
+    template<typename T>
+    typename std::enable_if<std::is_same<T, big_int>::value>::type
+    generate(const T &v) { out << v; }
 
     void generate(cstring v) {
         if (v)
@@ -200,31 +186,37 @@ class JSONGenerator {
         else
             out << "null";
     }
-    template <typename T>
-    typename std::enable_if<std::is_same<T, LTBitMatrix>::value || std::is_enum<T>::value>::type
+    template<typename T>
+    typename std::enable_if<
+                std::is_same<T, LTBitMatrix>::value ||
+                std::is_enum<T>::value>::type
     generate(T v) {
         out << "\"" << v << "\"";
     }
 
-    void generate(const bitvec& v) { out << "\"" << v << "\""; }
+    void generate(const bitvec &v) {
+        out << "\"" << v << "\"";
+    }
 
-    void generate(const match_t& v) {
+    void generate(const match_t &v) {
         out << "{" << std::endl
             << (indent + 1) << "\"word0\" : " << v.word0 << "," << std::endl
             << (indent + 1) << "\"word1\" : " << v.word1 << std::endl
             << indent << "}";
     }
 
-    template <typename T>
-    typename std::enable_if<has_toJSON<T>::value && !std::is_base_of<IR::Node, T>::value>::type
-    generate(const T& v) {
+    template<typename T>
+    typename std::enable_if<
+                    has_toJSON<T>::value &&
+                    !std::is_base_of<IR::Node, T>::value>::type
+    generate(const T &v) {
         ++indent;
         out << "{" << std::endl;
         v.toJSON(*this);
         out << std::endl << --indent << "}";
     }
 
-    void generate(const IR::Node& v) {
+    void generate(const IR::Node &v) {
         out << "{" << std::endl;
         ++indent;
         if (node_refs.find(v.id) != node_refs.end()) {
@@ -239,9 +231,10 @@ class JSONGenerator {
         out << std::endl << --indent << "}";
     }
 
-    template <typename T>
-    typename std::enable_if<std::is_pointer<T>::value &&
-                            has_toJSON<typename std::remove_pointer<T>::type>::value>::type
+    template<typename T>
+    typename std::enable_if<
+                    std::is_pointer<T>::value &&
+                    has_toJSON<typename std::remove_pointer<T>::type>::value>::type
     generate(T v) {
         if (v)
             generate(*v);
@@ -249,7 +242,7 @@ class JSONGenerator {
             out << "null";
     }
 
-    template <typename T, size_t N>
+    template<typename T, size_t N>
     void generate(const T (&v)[N]) {
         out << "[";
         if (N > 0) {
@@ -257,34 +250,17 @@ class JSONGenerator {
             generate(v[0]);
             for (size_t i = 1; i < N; i++) {
                 out << "," << std::endl << indent;
-                generate(v[i]);
-            }
-            out << std::endl << --indent;
-        }
+                generate(v[i]); }
+            out << std::endl << --indent; }
         out << "]";
     }
 
-    JSONGenerator& operator<<(char ch) {
-        out << ch;
-        return *this;
-    }
-    JSONGenerator& operator<<(const char* s) {
-        out << s;
-        return *this;
-    }
-    JSONGenerator& operator<<(indent_t i) {
-        out << i;
-        return *this;
-    }
-    JSONGenerator& operator<<(std::ostream& (*fn)(std::ostream&)) {
-        out << fn;
-        return *this;
-    }
-    template <typename T>
-    JSONGenerator& operator<<(const T& v) {
-        generate(v);
-        return *this;
-    }
+    JSONGenerator &operator<<(char ch) { out << ch; return *this; }
+    JSONGenerator &operator<<(const char *s) { out << s; return *this; }
+    JSONGenerator &operator<<(indent_t i) { out << i; return *this; }
+    JSONGenerator &operator<<(std::ostream &(*fn)(std::ostream &)) { out << fn; return *this; }
+    template<typename T> JSONGenerator &operator<<(const T &v) { generate(v); return *this; }
 };
+
 
 #endif /* _IR_JSON_GENERATOR_H_ */
