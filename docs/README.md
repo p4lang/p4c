@@ -71,6 +71,7 @@ p4c
   `extensions` sub-folders, and also the following supplied back-ends:
   * [BMv2](../backends/bmv2/README.md)
   * [eBPF](../backends/ebpf/README.md)
+  * [P4Tools](../backends/p4tools/README.md)
 
 * Check out the [IntelliJ P4 plugin](https://github.com/TakeshiTseng/IntelliJ-P4-Plugin)
 
@@ -219,41 +220,41 @@ tests are using at the link below:
 
 ## Coding conventions
 
-* Coding style is guided by the [following
-  rules](CodingStandardPhilosophy.md)
+* Coding style is guided by the [following rules](CodingStandardPhilosophy.md).
 
-* We use several (but not all) of the [Google C++ coding style
-  guidelines](https://google.github.io/styleguide/cppguide.html).
-  We have customized Google's `cpplint.py` tool for our
-  purposes.  The tool can be invoked with `make cpplint`.
+* We generally follow the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html). This is partially enforced by `cpplint` and `clang-format` and their respective configuration files. We have customized Google's `cpplint.py` tool for our purposes.  The tool can be invoked with `make cpplint`. To be able to run `clang-format` on Ubuntu 20.04, install it with `pip3 install --user clang-format`. Do not use the Debian package. Both tools run in a git hook and as part of CI.
 
-* watch out for `const`; it is very important.
+* Watch out for `const`; it is very important.
 
-* use `override` whenever possible (new gcc versions enforce this)
+* Use `override` whenever possible (new gcc versions enforce this).
 
-* never use `const_cast` and `reinterpret_cast`.
+* Never use `const_cast` and `reinterpret_cast`.
+
+* Lines are wrapped at 100 characters.
+
+* Indents are four spaces. Tab characters should not be used for indenting.
 
 * The C++ code is written to use a garbage-collector
   * do not use any smart pointers, just raw pointers
 * Use our implementations and wrappers instead of standard classes:
 
-  * use `cstring` for constant strings.  For java programmers, `cstring`
+  * Use `cstring` for constant strings.  For java programmers, `cstring`
     should be used where you would use java.lang.String, and `std::string`
     should be used where you would use StringBuilder or StringBuffer.
 
-  * use the `BUG()` macro to signal an exception.  This macro is
+  * Use the `BUG()` macro to signal an exception.  This macro is
     guaranteed to throw an exception.
 
-  * use `CHECK_NULL()` to validate that pointers are not nullptr
+  * Use `CHECK_NULL()` to validate that pointers are not nullptr.
 
-  * use `BUG_CHECK()` instead of `assert`, and always supply an
-    informative error message
+  * Use `BUG_CHECK()` instead of `assert`, and always supply an
+    informative error message.
 
-  * use `::error()` and `::warning()` for error reporting. See the
+  * Use `::error()` and `::warning()` for error reporting. See the
     [guidelines](CodingStandardPhilosophy.md#Handling-errors) for more
     details.
 
-  * use `LOGn()` for log messages -- the `n` is an integer constant for
+  * Use `LOGn()` for log messages -- the `n` is an integer constant for
     verbosity level.  These can be controlled on a per-source-file basis
     with the -T option.  LOG1 should be used for general messages, so that
     running with -T*:1 (turning on all LOG1 messages) is not too overwhelming.
@@ -262,11 +263,11 @@ tests are using at the link below:
     or pass is doing and looking at (only of interest when debugging that
     code) should be at LOG4 or higher.
 
-  * use the `vector` and `array` wrappers for `std::vector` and `std::array`
+  * Use the `vector` and `array` wrappers for `std::vector` and `std::array`
     (these do bounds checking on all accesses).
 
-  * use `ordered_map` and `ordered_set` when you need to iterate;
-    they provide deterministic iterators
+  * Use `ordered_map` and `ordered_set` when you need to iterate;
+    they provide deterministic iterators.
 
 ## Compiler Driver
 

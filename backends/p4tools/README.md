@@ -45,14 +45,10 @@ for where to find/put what:
 * If it's something that resembles a general-purpose data structure (e.g., an
   environment or a symbol table), it's probably in `lib`.
 
+
 ### C++ Coding style
 
-We generally follow the [Google C++ Style
-Guide](https://google.github.io/styleguide/cppguide.html). This is partially
-enforced by `cpplint` and `clang-format` and their respective configuration files. Both tools run in a git hook and as part of CI. To run `clang-format` on Ubuntu 20.04, install it with `pip3 install --user clang-format`.
-
-Some deviations from the Style Guide are highlighted below. While this
-repository depends heavily on the main P4 compiler ([P4C](https://github.com/p4lang/p4c/)), the code there doesn't always follow our style; don't follow its precedent!
+P4Tools in general follows the [P4C coding style](https://github.com/p4lang/p4c/blob/main/docs/README.md#coding-conventions). Some deviations from the Style Guide are highlighted below.
 
 * Comments are important. The Style Guide's [section on
   comments](https://google.github.io/styleguide/cppguide.html#Comments) is
@@ -66,42 +62,7 @@ repository depends heavily on the main P4 compiler ([P4C](https://github.com/p4l
     * We do not use copyright headers or license boilerplate in our source
       files. Where needed, these will be auto-generated during release
       packaging.
-* Lines are wrapped at 100 characters.
-* Indents are four spaces. Tab characters should not be used for indenting.
 * Generally prefer a single class declaration per `.h` file, unless providing a
   library of related classes. Multiple classes may be declared in a `.cpp`
   file.
-* Include headers in the following order: related header, C system headers, C++
-  system headers, other library headers, `P4Tools` headers. Each class of
-  headers should be sorted alphabetically and separated by a blank line. Files
-  from `P4Tools` should be listed relative to the project root. Files from
-  `p4c` should be listed relative to the submodule's root.
-
-  For example, in `testgen/lib/foo.cpp`, format your includes as follows.
-  (Note: the comments below are for explanatory purposes, and should be elided
-  in the actual file.)
-  ```
-  // Related header
-  #include "backends/p4tools/lib/foo.h"
-
-  // C system headers
-  #include <stdlib.h>
-  #include <time.h>
-
-  // C++ system headers
-  #include <boost/optional.hpp>
-  #include <set>
-  #include <vector>
-
-  // Other library headers
-  #include "lib/error_type.h"
-  #include "gsl/gsl-lite.hpp"
-  #include "ir.h"
-
-  // Headers from P4Tools folders
-  #include "backends/p4tools/testgen/common/lib/model.h"
-  #include "backends/p4tools/testgen/lib/symbolic_env.h"
-  ```
-
-
 
