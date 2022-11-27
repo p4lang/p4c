@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   # Build with gcc and test p4c on Ubuntu 20.04.
-  test-linux-sanitizers:
+  test-linux:
     strategy:
       fail-fast: false
       matrix:
@@ -33,9 +33,9 @@ jobs:
         key: test-${{ matrix.unified }}-${{ runner.os }}-gcc
         max-size: 1000M
 
-    - name: Build (Ubuntu Linux, GCC, Sanitizers)
+    - name: Build (Ubuntu Linux, GCC)
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} --build-arg ENABLE_SANITIZERS=ON .
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} .
         ./tools/export_ccache.sh
 
       # run with sudo (...) --privileged
@@ -46,7 +46,7 @@ jobs:
       if: matrix.unified == 'ON'
 
   # Build with clang and test p4c on Ubuntu 20.04.
-  test-linux-clang:
+  test-linux-clang-sanitizers:
     strategy:
       fail-fast: false
     runs-on: ubuntu-latest
@@ -63,9 +63,10 @@ jobs:
         key: test-${{ runner.os }}-clang
         max-size: 1000M
 
-    - name: Build (Ubuntu Linux, Clang)
+    - name: Build (Ubuntu Linux, Clang, Sanitizers)
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg COMPILE_WITH_CLANG=ON --build-arg BUILD_AUTO_VAR_INIT_PATTERN=ON .
+        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg COMPILE_WITH_CLANG=ON \
+        --build-arg BUILD_AUTO_VAR_INIT_PATTERN=ON --build-arg ENABLE_SANITIZERS=ON .
         ./tools/export_ccache.sh
 
       # run with sudo (...) --privileged
