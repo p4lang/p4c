@@ -4,20 +4,19 @@
 
 ```
 p4tools
- ├─ cmake       ── common CMake modules
+ ├─ cmake       ── Common CMake modules
  ├─ common      ── C++ source: common code for the various components of p4check
- ├─ p4check     ── C++ source: the main entry point for p4check
- ├─ scripts
- │   ├─ hooks   ── git hooks
- │   └─ tools   ── development-support scripts (e.g., cpplint)
- ├─ submodules  ── external dependencies
- └─ testgen     ── C++ source: p4testgen
+ ├─ modules     ── P4Tools extensions.
+ │  └─ testgen  ── C++ source: P4Testgen.
+ └─ submodules  ── External dependencies.
+    ├─ gsl-lite ── C++ Core Guidelines Support Library.
+    └─ inja     ── C++ template engine used for test generation.
 ```
 
 ## P4Tools
 P4Tools is a collection of tools that make testing P4 targets and programs a little easier. So far the platform supports the following tools and projects:
 
-- [P4Testgen](https://github.com/p4lang/p4c/tree/main/backends/p4tools/testgen): An input-output test case generator for P4.
+- [P4Testgen](https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/testgen): An input-output test case generator for P4.
 
 ## Building
 
