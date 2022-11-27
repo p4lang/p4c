@@ -11,10 +11,12 @@ $BREW install autoconf automake bdw-gc bison boost ccache cmake \
       libtool openssl pkg-config python coreutils grep
 $BREW install protobuf
 
-# Prefer Homebrew's bison over the macOS-provided version
-$BREW link --force bison
+# Prefer Homebrew's bison and grep over the macOS-provided version
+$BREW link --force bison grep
 echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.bash_profile
+echo 'export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"' >> ~/.bash_profile
 export PATH="/usr/local/opt/bison/bin:$PATH"
+export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
 
 # install pip and required pip packages
 # curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
