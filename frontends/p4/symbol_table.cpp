@@ -176,7 +176,7 @@ void ProgramStructure::pop() {
 void ProgramStructure::declareType(IR::ID id) {
     if (debug) fprintf(debugStream, "ProgramStructure: adding type %s\n", id.name.c_str());
 
-    LOG3("ProgramStructure: adding type " << id.name.c_str());
+    LOG3("ProgramStructure: adding type " << id);
     auto st = new SimpleType(id.name, id.srcInfo);
     currentNamespace->declare(st);
 }
@@ -184,7 +184,7 @@ void ProgramStructure::declareType(IR::ID id) {
 void ProgramStructure::declareObject(IR::ID id, cstring type) {
     if (debug) fprintf(debugStream, "ProgramStructure: adding object %s\n", id.name.c_str());
 
-    LOG3("ProgramStructure: adding object " << id.name.c_str() << " with type " << type);
+    LOG3("ProgramStructure: adding object " << id << " with type " << type);
     auto type_sym = lookup(type);
     auto o = new Object(id.name, id.srcInfo);
     if (auto tns = dynamic_cast<const Namespace*>(type_sym)) o->setNamespace(tns);
@@ -192,7 +192,7 @@ void ProgramStructure::declareObject(IR::ID id, cstring type) {
 }
 
 void ProgramStructure::markAsTemplate(IR::ID id) {
-    LOG3("ProgramStructure: " << id.name.c_str() << " has template args");
+    LOG3("ProgramStructure: " << id << " has template args");
     lookup(id)->template_args = true;
 }
 

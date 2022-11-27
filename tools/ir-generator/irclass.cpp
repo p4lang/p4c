@@ -109,12 +109,13 @@ void IrDefinitions::generate(std::ostream& t, std::ostream& out, std::ostream& i
         << "#define " << macroname << "\n"
         << std::endl;
 
-    impl << "#include \"ir/ir-generated.h\"\n\n"
-         << "#include \"ir/ir-inline.h\"\n"
-         << "#include \"ir/json_generator.h\"\n"
-         << "#include \"ir/json_loader.h\"\n"
-         << "#include \"ir/visitor.h\"\n"
-         << "#include \"lib/algorithm.h\"\n"
+    impl << "#include \"ir/ir-generated.h\"    // IWYU pragma: keep\n\n"
+         << "#include \"ir/ir-inline.h\"       // IWYU pragma: keep\n"
+         << "#include \"ir/json_generator.h\"  // IWYU pragma: keep\n"
+         << "#include \"ir/json_loader.h\"     // IWYU pragma: keep\n"
+         << "#include \"ir/visitor.h\"         // IWYU pragma: keep\n"
+         << "#include \"lib/algorithm.h\"      // IWYU pragma: keep\n"
+         << "#include \"lib/log.h\"            // IWYU pragma: keep\n"
          << std::endl;
 
     out << "#include <functional>\n"

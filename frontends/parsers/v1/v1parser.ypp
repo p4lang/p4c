@@ -75,19 +75,8 @@ inline std::ostream& operator<<(std::ostream& out, const V1::HeaderType& headerT
 }
 
 inline std::ostream& operator<<(std::ostream& out, const V1::Attributes& a) {
-    out << "Attributes(" << (a.signed_ ? "signed," : "") << (a.saturating ? "saturating," : "");
-    bool isFirst = true;
-    for (const auto& a : a.annotations) {
-        if (isFirst) {
-            isFirst = false;
-        } else {
-            out << ", ";
-        }
-        out << a;
-    }
-    out << ')';
-    return out;
-}
+    return out << "Attributes(" << (a.signed_ ? "signed," : "") <<
+                  (a.saturating ? "saturating," : "") << a.annotations << ')'; }
 
 typedef std::pair<const IR::Expression*, const IR::Constant*> CaseValue;
 

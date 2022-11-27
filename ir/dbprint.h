@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <cassert>
 #include <iosfwd>
+#include "lib/log.h"
 
 namespace DBPrint {
 
