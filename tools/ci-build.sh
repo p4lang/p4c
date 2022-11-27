@@ -177,6 +177,12 @@ CMAKE_FLAGS+="-DENABLE_SANITIZERS=${ENABLE_SANITIZERS} "
 # Enable auto var initialization with pattern.
 CMAKE_FLAGS+="-DBUILD_AUTO_VAR_INIT_PATTERN=${BUILD_AUTO_VAR_INIT_PATTERN} "
 
+if [ "$ENABLE_SANITIZERS" == "ON" ]; then
+  export UBSAN_OPTIONS=print_stacktrace=1
+  export ASAN_OPTIONS=print_stacktrace=1:detect_leaks=0
+  CMAKE_FLAGS+="-DENABLE_GC=OFF"
+fi
+
 # Run CMake in the build folder.
 if [ -e build ]; then /bin/rm -rf build; fi
 mkdir -p build

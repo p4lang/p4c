@@ -214,7 +214,7 @@ add_cxx_compiler_option ("-Wno-deprecated")
 add_cxx_compiler_option ("-Wno-deprecated-declarations")
 
 if (ENABLE_SANITIZERS)
-  add_cxx_compiler_option  ("-fsanitize=undefined,address")
+  append("-fsanitize=undefined,address" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
 endif ()
 
 if (BUILD_AUTO_VAR_INIT_PATTERN)
