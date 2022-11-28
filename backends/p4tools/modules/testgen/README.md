@@ -12,20 +12,20 @@ testgen
  │   └─ small_step             ── code for the testgen symbolic generator and test case generation
  ├─ lib                        ── C++ source: testgen library files
  ├─ targets
- │   └─ bmv2                   ── the extension for the behavioral model [simple switch](https://github.com/p4lang/behavioral-model/blob/main/targets/README.md#simple_switch)
+ │   ├─ bmv2                   ── the extension for the behavioral model [simple switch](https://github.com/p4lang/behavioral-model/blob/main/targets/README.md#simple_switch)
+ │   └─ ebpf                   ── the extension for the [P4-to-eBPF kernel target](https://github.com/p4lang/p4c/tree/main/backends/ebpf).
  └─ test                       ── Unit tests
 ```
 
 ## Usage
-The main binary can be found in `build/p4check`.
+The main binary can be found in `build/p4testgen`.
 
-To generate tests for a particular target and P4 architecture, run `p4check testgen –target [TARGET] –arch [ARCH] –max-tests 10 –out-dir [OUT] prog.p4`
-`p4check` is an umbrella binary which delegates execution to all tools of the p4-tools repository.
-`testgen` specifies that the p4testgen tool should be used. In the future, other tools may be supported, for example random program generation or translation validators.
+To generate tests for a particular target and P4 architecture, run `p4testgen –target [TARGET] –arch [ARCH] –max-tests 10 –out-dir [OUT] prog.p4`
+`p4testgen` specifies that the p4testgen tool should be used. In the future, other tools may be supported, for example random program generation or translation validators.
 These are the current usage flags:
 
 ```
-./p4check: Generate packet tests for a P4 program
+./p4testgen: Generate packet tests for a P4 program
 --help                     Shows this help message and exits
 --version                  Prints version information and exits
 --seed seed                Provides a randomization seed
