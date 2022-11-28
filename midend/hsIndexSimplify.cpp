@@ -224,17 +224,4 @@ IR::Node* HSIndexContretizer::preorder(IR::SwitchStatement* switchStatement) {
     return eliminateArrayIndexes(aiFinder, switchStatement, nullptr);
 }
 
-const IR::Node* HSIndexToMember::postorder(IR::ArrayIndex* curArrayIndex) {
-    if (const auto* arrayConst = curArrayIndex->right->to<IR::Constant>()) {
-        return produceStackIndex(curArrayIndex->type, curArrayIndex->left, arrayConst->asInt());
-    }
-    return curArrayIndex;
-}
-
-const IR::Member* HSIndexToMember::produceStackIndex(const IR::Type* type,
-                                                     const IR::Expression* expression,
-                                                     size_t arrayIndex) {
-    return new IR::Member(type, expression, IR::ID(std::to_string(arrayIndex)));
-}
-
 }  // namespace P4

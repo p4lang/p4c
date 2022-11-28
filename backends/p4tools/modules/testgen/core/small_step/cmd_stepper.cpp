@@ -11,6 +11,7 @@
 #include <boost/variant/get.hpp>
 #include <boost/variant/variant.hpp>
 
+#include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
@@ -25,7 +26,6 @@
 #include "lib/exceptions.h"
 #include "lib/null.h"
 #include "lib/safe_vector.h"
-#include "midend/hsIndexSimplify.h"
 #include "p4tools/common/core/solver.h"
 #include "p4tools/common/lib/formulae.h"
 
@@ -64,7 +64,7 @@ void CmdStepper::declareVariable(ExecutionState* nextState, const IR::Declaratio
         }
         const auto* structType = stackElemType->checkedTo<IR::Type_StructLike>();
         for (auto idx = 0; idx < stackSize; idx++) {
-            const auto* parentExpr = P4::HSIndexToMember::produceStackIndex(
+            const auto* parentExpr = HSIndexToMember::produceStackIndex(
                 structType, new IR::PathExpression(stackType, new IR::Path(decl->name.name)), idx);
             declareStructLike(&state, parentExpr, structType);
         }

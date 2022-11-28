@@ -8,6 +8,7 @@
 #include <boost/optional/optional.hpp>
 #include <boost/variant/variant.hpp>
 
+#include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
@@ -19,7 +20,6 @@
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
-#include "midend/hsIndexSimplify.h"
 #include "p4tools/common/core/solver.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
@@ -264,7 +264,7 @@ bool AbstractStepper::stepSetHeaderValidity(const IR::Expression* headerRef, boo
 
 const IR::MethodCallStatement* generateStacksetValid(const IR::Expression* stackRef, int index,
                                                      bool isValid) {
-    const auto* arrayIndex = P4::HSIndexToMember::produceStackIndex(
+    const auto* arrayIndex = HSIndexToMember::produceStackIndex(
         stackRef->type->checkedTo<IR::Type_Stack>()->elementType, stackRef, index);
     auto name = (isValid) ? IR::Type_Header::setValid : IR::Type_Header::setInvalid;
     return new IR::MethodCallStatement(new IR::MethodCallExpression(
@@ -278,9 +278,8 @@ void generateStackAssigmentStatement(ExecutionState* state,
                                      const IR::Expression* stackRef, int leftIndex,
                                      int rightIndex) {
     const auto* elemType = stackRef->type->checkedTo<IR::Type_Stack>()->elementType;
-    const auto* leftArIndex = P4::HSIndexToMember::produceStackIndex(elemType, stackRef, leftIndex);
-    const auto* rightArrIndex =
-        P4::HSIndexToMember::produceStackIndex(elemType, stackRef, rightIndex);
+    const auto* leftArIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, leftIndex);
+    const auto* rightArrIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, rightIndex);
 
     // Check right header validity.
     const auto* value = state->getSymbolicEnv().get(Utils::getHeaderValidity(rightArrIndex));

@@ -29,7 +29,7 @@ namespace P4 {
  *
  * \code{.cpp}
  *  table t {
- *    key = { (bit<1<) h.a  : exact; }
+ *    key = { (bit<1>) h.a  : exact; }
  *    const entries = {
  *           1w1 : action();
  +        }

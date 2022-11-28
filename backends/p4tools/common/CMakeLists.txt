@@ -39,6 +39,7 @@ set(
   version.cpp
 
   compiler/compiler_target.cpp
+  compiler/convert_hs_index.cpp
   compiler/convert_varbits.cpp
   compiler/midend.cpp
   compiler/reachability.cpp

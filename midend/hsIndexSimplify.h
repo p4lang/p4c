@@ -102,19 +102,6 @@ class HSIndexSimplifier : public PassManager {
     }
 };
 
-/// Replaces all ArrayIndex classes with a member classes that have the integer index as string
-/// member.
-/// WARNING: After applying this pass, the IR will not type check any longer.
-class HSIndexToMember : public Transform {
- public:
-    const IR::Node* postorder(IR::ArrayIndex* curArrayIndex) override;
-
-    /// Convert a parent expression and an index into a member expression with that
-    /// particular index as string member. The type is used to specify the member type.
-    static const IR::Member* produceStackIndex(const IR::Type* type,
-                                               const IR::Expression* expression, size_t arrayIndex);
-};
-
 }  // namespace P4
 
 #endif /*  _MIDEND_HSINDEXSIMPLIFY_H_ */

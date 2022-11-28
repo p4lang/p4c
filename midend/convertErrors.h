@@ -40,13 +40,20 @@ namespace P4 {
 class ChooseErrorRepresentation {
  public:
     virtual ~ChooseErrorRepresentation() = default;
-    // If true this type has to be converted.
+
+    /// If true this type has to be converted.
     virtual bool convert(const IR::Type_Error* type) const = 0;
-    // errorCount is the number of different error values.
-    // The returned value is the width of Type_Bits used
-    // to represent the error.  Obviously, we must have
-    // 2^(return) >= errorCount.
+
+    /// errorCount is the number of different error values.
+    /// The returned value is the width of Type_Bits used
+    /// to represent the error.  Obviously, we must have
+    /// 2^(return) >= errorCount.
     virtual unsigned errorSize(unsigned errorCount) const = 0;
+
+    /// This function allows backends to override the values for the error constants.
+    /// Default values for error constants is a sequence of numbers starting with 0.
+    virtual IR::IndexedVector<IR::SerEnumMember>* assignValues(IR::Type_Error* type,
+                                                               unsigned width) const;
 };
 
 class DoConvertErrors : public Transform {

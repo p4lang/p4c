@@ -7,6 +7,7 @@
 
 #include "backends/p4tools/common/compiler/configuration.h"
 #include "backends/p4tools/common/compiler/context.h"
+#include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/compiler/midend.h"
 #include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/options.h"
@@ -15,7 +16,6 @@
 #include "frontends/p4/frontend.h"
 #include "lib/compile_context.h"
 #include "lib/error.h"
-#include "midend/hsIndexSimplify.h"
 #include "p4tools/common/core/target.h"
 
 namespace P4Tools {
@@ -60,7 +60,7 @@ boost::optional<const IR::P4Program*> CompilerTarget::runCompiler(const IR::P4Pr
     // Rewrite all occurrences of ArrayIndex to be members instead.
     // IMPORTANT: After this change, the program will no longer type-check.
     // This is why perform this rewrite after all front and mid end passes have been applied.
-    program = program->apply(P4::HSIndexToMember());
+    program = program->apply(HSIndexToMember());
 
     return program;
 }

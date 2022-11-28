@@ -68,4 +68,15 @@ const IR::Node* DoConvertErrors::postorder(IR::Member* member) {
     return cst;
 }
 
+IR::IndexedVector<IR::SerEnumMember>* ChooseErrorRepresentation::assignValues(
+    IR::Type_Error* type, unsigned width) const {
+    auto* members = new IR::IndexedVector<IR::SerEnumMember>;
+    unsigned idx = 0;
+    for (const auto* d : type->members) {
+        members->push_back(new IR::SerEnumMember(
+            d->name.name, new IR::Constant(IR::Type_Bits::get(width), idx++)));
+    }
+    return members;
+}
+
 }  // namespace P4
