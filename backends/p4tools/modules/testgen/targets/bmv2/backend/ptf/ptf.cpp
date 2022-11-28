@@ -204,28 +204,38 @@ static std::string getPreamble() {
 # p4testgen seed: {{ default(seed, "none") }}
 
 import logging
-import itertools
+import sys
+import os
 
+from functools import wraps
 from ptf import config
 from ptf.thriftutils import *
 from ptf.mask import Mask
 from ptf.testutils import send_packet
 from ptf.testutils import verify_packet
+
 from ptf.testutils import verify_no_other_packets
 from ptf.packet import *
+from ptf import testutils as testutils
 
-from p4.v1 import p4runtime_pb2
-from p4runtime_base_tests import P4RuntimeTest, autocleanup, stringify, ipv4_to_binary, mac_to_binary
+
+directory = os.getcwd()
+directory = directory.split("/")
+workspaceFolder = ""
+for i in range(len(directory)-1):
+    workspaceFolder += directory[i] +"/"
+sys.path.insert(1,workspaceFolder+'backends/p4tools/modules/testgen/targets/bmv2/backend/ptf')
+import base_test as bt
 
 logger = logging.getLogger('{{test_name}}')
 logger.addHandler(logging.StreamHandler())
 
-class AbstractTest(P4RuntimeTest):
-    @autocleanup
+class AbstractTest(bt.P4RuntimeTest):
+    @bt.autocleanup
     def setUp(self):
-        super(AbstractTest, self).setUp()
-        self.req = p4runtime_pb2.WriteRequest()
-        self.req.device_id = self.device_id
+        bt.P4RuntimeTest.setUp(self)
+        success = bt.P4RuntimeTest.updateConfig(self)
+        assert success
 
     def tearDown(self):
         # TODO: Figure this out
@@ -253,7 +263,7 @@ class AbstractTest(P4RuntimeTest):
         logger.info("Verifying Packet ...")
         self.verifyPackets()
         logger.info("Verifying no other packets ...")
-        verify_no_other_packets(self, self.dev_id, timeout=2)
+        verify_no_other_packets(self, self.device_id, timeout=2)
 )""");
     return PREAMBLE;
 }

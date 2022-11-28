@@ -119,6 +119,8 @@ ccache --set-config max_size=1G
 sudo pip3 install --upgrade pip
 sudo pip3 install -r ${P4C_DIR}/requirements.txt
 
+pip3 show protobuf
+
 # Build libbpf for eBPF tests.
 pushd ${P4C_DIR}
 backends/ebpf/build_libbpf

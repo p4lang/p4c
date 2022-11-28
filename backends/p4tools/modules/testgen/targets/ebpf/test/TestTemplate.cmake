@@ -70,9 +70,9 @@ macro(p4tools_add_test_with_args)
     "--std p4-16 ${test_args} --out-dir ${__testfolder} \"$@\" ${P4C_SOURCE_DIR}/${p4test}\n"
   )
   # If ENABLE_RUNNER is active, run the generated tests on the eBPF kernek.
-  if(${TOOLS_EBPF_TESTS_ENABLE_RUNNER})
-    check_with_kernel(${__testfile} ${__testfolder} ${p4test} "${runner_args}")
-  endif()
+  #if(${TOOLS_EBPF_TESTS_ENABLE_RUNNER})
+  #  check_with_kernel(${__testfile} ${__testfolder} ${p4test} "${runner_args}")
+  #endif()
 
   execute_process(COMMAND chmod +x ${__testfile})
   separate_arguments(__args UNIX_COMMAND ${cmake_args})
