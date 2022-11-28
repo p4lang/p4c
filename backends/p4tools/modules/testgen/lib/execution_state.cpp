@@ -12,7 +12,7 @@
 #include <boost/container/vector.hpp>
 #include <boost/variant/variant.hpp>
 
-#include "backends/p4tools/common/compiler/hs_index_simplify.h"
+#include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"

@@ -1,9 +1,6 @@
 #include "backends/p4tools/common/compiler/midend.h"
 
-#include "backends/p4tools/common/compiler/boolean_keys.h"
-#include "backends/p4tools/common/compiler/convert_errors.h"
 #include "backends/p4tools/common/compiler/convert_varbits.h"
-#include "backends/p4tools/common/compiler/copy_headers.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
 #include "frontends/common/parser_options.h"
@@ -13,8 +10,11 @@
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "midend/booleanKeys.h"
 #include "midend/complexComparison.h"
 #include "midend/convertEnums.h"
+#include "midend/convertErrors.h"
+#include "midend/copyHeaders.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
 #include "midend/eliminateSwitch.h"
@@ -49,7 +49,7 @@ Visitor* MidEnd::mkConvertEnums() {
 }
 
 Visitor* MidEnd::mkConvertErrors() {
-    return new ConvertErrors(&refMap, &typeMap, mkConvertErrorPolicy());
+    return new P4::ConvertErrors(&refMap, &typeMap, mkConvertErrorPolicy());
 }
 
 Visitor* MidEnd::mkConvertKeys() {
@@ -67,9 +67,9 @@ P4::ChooseEnumRepresentation* MidEnd::mkConvertEnumsPolicy() {
     return new EnumOn32Bits();
 }
 
-ChooseErrorRepresentation* MidEnd::mkConvertErrorPolicy() {
+P4::ChooseErrorRepresentation* MidEnd::mkConvertErrorPolicy() {
     /// Implements the default enum-conversion policy, which converts all enums to bit<32>.
-    class ErrorOn32Bits : public ChooseErrorRepresentation {
+    class ErrorOn32Bits : public P4::ChooseErrorRepresentation {
         bool convert(const IR::Type_Error* /*type*/) const override { return true; }
 
         unsigned errorSize(unsigned) const override { return 32; }
@@ -120,7 +120,7 @@ void MidEnd::addDefaultPasses() {
         // Expand comparisons on structs and headers into comparisons on fields.
         new P4::SimplifyComparisons(&refMap, &typeMap),
         // Expand header and struct assignments into sequences of field assignments.
-        new CopyHeaders(&refMap, &typeMap),
+        new P4::CopyHeaders(&refMap, &typeMap),
         // Flatten nested list expressions.
         new P4::SimplifySelectList(&refMap, &typeMap),
         // Convert booleans in selects into bit<1>.
@@ -158,7 +158,7 @@ void MidEnd::addDefaultPasses() {
         // Convert Type_Varbits into a type that contains information about the assigned width.
         new ConvertVarbits(&refMap, &typeMap),
         // Cast all boolean table keys with a bit<1>.
-        new CastBooleanTableKeys(),
+        new P4::CastBooleanTableKeys(),
     });
 }
 

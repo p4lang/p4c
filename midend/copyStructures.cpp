@@ -21,15 +21,19 @@ limitations under the License.
 namespace P4 {
 
 const IR::Node* RemoveAliases::postorder(IR::AssignmentStatement* statement) {
-    auto type = typeMap->getType(statement->left);
-    if (!type->is<IR::Type_StructLike>()) return statement;
+    const auto* type = typeMap->getType(statement->left);
+    if (!type->is<IR::Type_StructLike>()) {
+        return statement;
+    }
 
     ReadsWrites rw(refMap);
-    if (!rw.mayAlias(statement->left, statement->right)) return statement;
+    if (!rw.mayAlias(statement->left, statement->right)) {
+        return statement;
+    }
     auto tmp = refMap->newName("tmp");
-    auto decl = new IR::Declaration_Variable(IR::ID(tmp), type->getP4Type(), nullptr);
+    auto* decl = new IR::Declaration_Variable(IR::ID(tmp), type->getP4Type(), nullptr);
     declarations.push_back(decl);
-    auto result = new IR::IndexedVector<IR::StatOrDecl>();
+    auto* result = new IR::IndexedVector<IR::StatOrDecl>();
     result->push_back(new IR::AssignmentStatement(statement->srcInfo, new IR::PathExpression(tmp),
                                                   statement->right));
     result->push_back(new IR::AssignmentStatement(statement->srcInfo, statement->left,
@@ -57,46 +61,48 @@ const IR::Node* RemoveAliases::postorder(IR::P4Control* control) {
 }
 
 const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) {
-    auto ltype = typeMap->getType(statement->left, true);
+    const auto* ltype = typeMap->getType(statement->left, true);
     if (ltype->is<IR::Type_StructLike>()) {
         if (statement->right->is<IR::MethodCallExpression>()) {
-            if (errorOnMethodCall)
+            if (errorOnMethodCall) {
                 ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                         "%1%: functions or methods returning structures "
                         "are not supported on this target",
                         statement->right);
+            }
             return statement;
         }
 
-        auto retval = new IR::IndexedVector<IR::StatOrDecl>();
-        auto strct = ltype->to<IR::Type_StructLike>();
-        if (auto list = statement->right->to<IR::ListExpression>()) {
+        auto* retval = new IR::IndexedVector<IR::StatOrDecl>();
+        const auto* strct = ltype->to<IR::Type_StructLike>();
+        if (const auto* list = statement->right->to<IR::ListExpression>()) {
             unsigned index = 0;
-            for (auto f : strct->fields) {
-                auto right = list->components.at(index);
-                auto left = new IR::Member(statement->left, f->name);
+            for (const auto* f : strct->fields) {
+                const auto* right = list->components.at(index);
+                const auto* left = new IR::Member(statement->left, f->name);
                 retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
                 index++;
             }
-        } else if (auto si = statement->right->to<IR::StructExpression>()) {
-            for (auto f : strct->fields) {
-                auto right = si->components.getDeclaration<IR::NamedExpression>(f->name);
-                auto left = new IR::Member(statement->left, f->name);
+        } else if (const auto* si = statement->right->to<IR::StructExpression>()) {
+            for (const auto* f : strct->fields) {
+                const auto* right = si->components.getDeclaration<IR::NamedExpression>(f->name);
+                const auto* left = new IR::Member(statement->left, f->name);
                 retval->push_back(
                     new IR::AssignmentStatement(statement->srcInfo, left, right->expression));
             }
         } else {
-            if (ltype->is<IR::Type_Header>())
+            if (ltype->is<IR::Type_Header>()) {
                 // Leave headers as they are -- copy_header will also copy the valid bit
                 return statement;
+            }
 
             BUG_CHECK(
                 statement->right->is<IR::PathExpression>() || statement->right->is<IR::Member>() ||
                     statement->right->is<IR::ArrayIndex>(),
                 "%1%: Unexpected operation when eliminating struct copying", statement->right);
-            for (auto f : strct->fields) {
-                auto right = new IR::Member(statement->right, f->name);
-                auto left = new IR::Member(statement->left, f->name);
+            for (const auto* f : strct->fields) {
+                const auto* right = new IR::Member(statement->right, f->name);
+                const auto* left = new IR::Member(statement->left, f->name);
                 retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
             }
         }

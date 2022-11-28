@@ -1,7 +1,6 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_COMPILER_MIDEND_H_
 #define BACKENDS_P4TOOLS_COMMON_COMPILER_MIDEND_H_
 
-#include "backends/p4tools/common/compiler/convert_errors.h"
 #include "frontends/common/options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
@@ -9,6 +8,7 @@
 #include "ir/pass_manager.h"
 #include "ir/visitor.h"
 #include "midend/convertEnums.h"
+#include "midend/convertErrors.h"
 
 namespace P4Tools {
 
@@ -45,7 +45,7 @@ class MidEnd : public PassManager {
 
     /// Provides a target-specific policy for converting P4 error to bit<n>. The default
     /// implementation converts all errors to bit<32>.
-    virtual ChooseErrorRepresentation* mkConvertErrorPolicy();
+    virtual P4::ChooseErrorRepresentation* mkConvertErrorPolicy();
 
     /// Provides a target-specific policy for determining when to do local copy propagation.
     /// Implementations should return @false if local copy propagation should not be performed on

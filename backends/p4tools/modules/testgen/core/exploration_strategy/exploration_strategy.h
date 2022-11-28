@@ -9,7 +9,7 @@
 #include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/coverage.h"
+#include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
@@ -56,7 +56,7 @@ class ExplorationStrategy {
     void printCurrentTraceAndBranches(std::ostream& out);
 
     /// Getter to access visitedStatements
-    const Coverage::CoverageSet& getVisitedStatements();
+    const P4::Coverage::CoverageSet& getVisitedStatements();
 
  protected:
     /// Target-specific information about the P4 program.
@@ -81,10 +81,10 @@ class ExplorationStrategy {
     ExecutionState* executionState = nullptr;
 
     /// Set of all stetements, to be retrieved from programInfo.
-    const Coverage::CoverageSet& allStatements;
+    const P4::Coverage::CoverageSet& allStatements;
 
     /// Set of all statements executed in any testcase that has been outputted.
-    Coverage::CoverageSet visitedStatements;
+    P4::Coverage::CoverageSet visitedStatements;
 
  private:
     SmallStepEvaluator evaluator;

@@ -21,8 +21,8 @@
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
+#include "midend/coverage.h"
 #include "p4tools/common/core/z3_solver.h"
-#include "p4tools/common/lib/coverage.h"
 #include "p4tools/common/lib/model.h"
 #include "p4tools/common/lib/trace_events.h"
 
@@ -104,7 +104,7 @@ bool TestBackEnd::run(const FinalState& state) {
         const auto* completedModel = state.getCompletedModel();
         const auto* outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
         const auto& allStatements = programInfo.getAllStatements();
-        const Coverage::CoverageSet& visitedStatements = symbex.getVisitedStatements();
+        const P4::Coverage::CoverageSet& visitedStatements = symbex.getVisitedStatements();
 
         auto* solver = state.getSolver()->to<Z3Solver>();
         CHECK_NULL(solver);
@@ -114,7 +114,7 @@ bool TestBackEnd::run(const FinalState& state) {
                                                              outputPacketExpr, outputPortExpr);
         if (concolicModel == nullptr) {
             testCount++;
-            Coverage::coverageReportFinal(allStatements, visitedStatements);
+            P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
             printPerformanceReport();
             return testCount > maxTests - 1;
         }
@@ -133,7 +133,7 @@ bool TestBackEnd::run(const FinalState& state) {
         abort = printTestInfo(executionState, testInfo, testCount, outputPortExpr);
         if (abort) {
             testCount++;
-            Coverage::coverageReportFinal(allStatements, visitedStatements);
+            P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
             printPerformanceReport();
             return testCount > maxTests - 1;
         }
@@ -144,7 +144,7 @@ bool TestBackEnd::run(const FinalState& state) {
         printFeature("test_info", 4,
                      "============ Test %1%: Statements covered: %2% (%3%/%4%) ============",
                      testCount, coverage, visitedStatements.size(), allStatements.size());
-        Coverage::logCoverage(allStatements, visitedStatements, executionState->getVisited());
+        P4::Coverage::logCoverage(allStatements, visitedStatements, executionState->getVisited());
 
         // Output the test.
         withTimer("backend",
@@ -152,7 +152,7 @@ bool TestBackEnd::run(const FinalState& state) {
 
         printTraces("============ End Test %1% ============\n", testCount);
         testCount++;
-        Coverage::coverageReportFinal(allStatements, visitedStatements);
+        P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
         printPerformanceReport();
         return testCount > maxTests - 1;
     }

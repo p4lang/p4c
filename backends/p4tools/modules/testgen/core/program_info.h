@@ -8,11 +8,11 @@
 #include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/compiler/reachability.h"
-#include "backends/p4tools/common/lib/coverage.h"
 #include "ir/declaration.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
+#include "midend/coverage.h"
 #include "p4tools/common/lib/formulae.h"
 
 #include "backends/p4tools/modules/testgen/core/arch_spec.h"
@@ -37,7 +37,7 @@ class ProgramInfo : public ICastable {
     ConcolicMethodImpls concolicMethodImpls;
 
     /// Set of all statements in the input P4 program.
-    Coverage::CoverageSet allStatements;
+    P4::Coverage::CoverageSet allStatements;
 
     std::vector<Continuation::Command> pipelineSequence;
 
@@ -84,7 +84,7 @@ class ProgramInfo : public ICastable {
                                                             bool forceTaint) const = 0;
 
     /// Getter to access allStatements.
-    const Coverage::CoverageSet& getAllStatements() const;
+    const P4::Coverage::CoverageSet& getAllStatements() const;
 
     /// @returns the list of implemented concolic methods for this particular program.
     const ConcolicMethodImpls* getConcolicMethodImpls() const;

@@ -1,7 +1,6 @@
-#include "backends/p4tools/common/compiler/convert_errors.h"
+#include "midend/convertErrors.h"
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <vector>
 
 #include "frontends/p4/typeMap.h"
@@ -11,7 +10,7 @@
 #include "lib/exceptions.h"
 #include "lib/map.h"
 
-namespace P4Tools {
+namespace P4 {
 
 const IR::Node* DoConvertErrors::preorder(IR::Type_Error* type) {
     bool convert = policy->convert(type);
@@ -69,4 +68,15 @@ const IR::Node* DoConvertErrors::postorder(IR::Member* member) {
     return cst;
 }
 
-}  // namespace P4Tools
+IR::IndexedVector<IR::SerEnumMember>* ChooseErrorRepresentation::assignValues(
+    IR::Type_Error* type, unsigned width) const {
+    auto* members = new IR::IndexedVector<IR::SerEnumMember>;
+    unsigned idx = 0;
+    for (const auto* d : type->members) {
+        members->push_back(new IR::SerEnumMember(
+            d->name.name, new IR::Constant(IR::Type_Bits::get(width), idx++)));
+    }
+    return members;
+}
+
+}  // namespace P4

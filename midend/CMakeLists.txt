@@ -14,9 +14,13 @@
 
 set (MIDEND_SRCS
   actionSynthesis.cpp
+  booleanKeys.cpp
   complexComparison.cpp
   convertEnums.cpp
+  convertErrors.cpp
+  copyHeaders.cpp
   copyStructures.cpp
+  coverage.cpp
   eliminateInvalidHeaders.cpp
   eliminateNewtype.cpp
   eliminateSerEnums.cpp
@@ -47,6 +51,7 @@ set (MIDEND_SRCS
   removeSelectBooleans.cpp
   replaceSelectRange.cpp
   removeUnusedParameters.cpp
+  saturationElim.cpp
   simplifyBitwise.cpp
   simplifyKey.cpp
   simplifySelectCases.cpp
@@ -58,13 +63,16 @@ set (MIDEND_SRCS
 
 set (MIDEND_HDRS
   actionSynthesis.h
+  booleanKeys.h
   checkSize.h
   checkExternInvocationCommon.h
   compileTimeOps.h
   complexComparison.h
   convertEnums.h
   convertErrors.h
+  copyHeaders.h
   copyStructures.h
+  coverage.h
   eliminateInvalidHeaders.h
   eliminateNewtype.h
   eliminateSerEnums.h
@@ -96,6 +104,7 @@ set (MIDEND_HDRS
   removeSelectBooleans.h
   removeUnusedParameters.h
   replaceSelectRange.h
+  saturationElim.h
   simplifyBitwise.h
   simplifyKey.h
   simplifySelectCases.h

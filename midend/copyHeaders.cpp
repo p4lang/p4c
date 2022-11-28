@@ -1,4 +1,4 @@
-#include "backends/p4tools/common/compiler/copy_headers.h"
+#include "midend/copyHeaders.h"
 
 #include <list>
 #include <string>
@@ -24,7 +24,7 @@
 #include "lib/safe_vector.h"
 #include "midend/copyStructures.h"
 
-namespace P4Tools {
+namespace P4 {
 
 DoCopyHeaders::DoCopyHeaders(P4::TypeMap* typeMap) : typeMap(typeMap) {
     CHECK_NULL(typeMap);
@@ -124,4 +124,4 @@ CopyHeaders::CopyHeaders(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
     passes.emplace_back(new P4::RemoveParserControlFlow(refMap, typeMap));
 }
 
-}  // namespace P4Tools
+}  // namespace P4

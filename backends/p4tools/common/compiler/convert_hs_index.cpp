@@ -1,4 +1,4 @@
-#include "backends/p4tools/common/compiler/hs_index_simplify.h"
+#include "backends/p4tools/common/compiler/convert_hs_index.h"
 
 #include <string>
 

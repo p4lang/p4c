@@ -11,7 +11,7 @@
 #include <boost/variant/get.hpp>
 #include <boost/variant/variant.hpp>
 
-#include "backends/p4tools/common/compiler/hs_index_simplify.h"
+#include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"

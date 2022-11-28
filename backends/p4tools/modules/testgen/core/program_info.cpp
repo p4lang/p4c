@@ -7,8 +7,8 @@
 #include "frontends/p4/typeMap.h"
 #include "ir/id.h"
 #include "lib/exceptions.h"
+#include "midend/coverage.h"
 #include "p4tools/common/compiler/reachability.h"
-#include "p4tools/common/lib/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
@@ -34,7 +34,7 @@ ProgramInfo::ProgramInfo(const IR::P4Program* program)
         program->apply(dcgCreator);
         dcg = currentDCG;
     }
-    program->apply(Coverage::CollectStatements(allStatements));
+    program->apply(P4::Coverage::CollectStatements(allStatements));
 }
 
 /* =============================================================================================
@@ -60,7 +60,7 @@ const IR::Type_Declaration* ProgramInfo::resolveProgramType(const IR::Type_Name*
  *  Getters
  * ============================================================================================= */
 
-const Coverage::CoverageSet& ProgramInfo::getAllStatements() const { return allStatements; }
+const P4::Coverage::CoverageSet& ProgramInfo::getAllStatements() const { return allStatements; }
 
 const ConcolicMethodImpls* ProgramInfo::getConcolicMethodImpls() const {
     return &concolicMethodImpls;

@@ -7,7 +7,7 @@
 
 #include "backends/p4tools/common/compiler/configuration.h"
 #include "backends/p4tools/common/compiler/context.h"
-#include "backends/p4tools/common/compiler/hs_index_simplify.h"
+#include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/compiler/midend.h"
 #include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/options.h"

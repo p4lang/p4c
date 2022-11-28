@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/saturation_elim.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/declaration.h"
@@ -15,6 +14,7 @@
 #include "lib/exceptions.h"
 #include "lib/null.h"
 #include "lib/safe_vector.h"
+#include "midend/saturationElim.h"
 #include "p4tools/common/core/solver.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
@@ -305,9 +305,9 @@ bool ExprStepper::preorder(const IR::Operation_Binary* binary) {
     }
 
     // Handle saturating arithmetic expressions by translating them into Mux expressions.
-    if (SaturationElim::isSaturationOperation(binary)) {
+    if (P4::SaturationElim::isSaturationOperation(binary)) {
         auto* nextState = new ExecutionState(state);
-        nextState->replaceTopBody(Continuation::Return(SaturationElim::eliminate(binary)));
+        nextState->replaceTopBody(Continuation::Return(P4::SaturationElim::eliminate(binary)));
         result->emplace_back(nextState);
         return false;
     }

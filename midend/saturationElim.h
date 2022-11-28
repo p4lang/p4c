@@ -1,9 +1,9 @@
-#ifndef BACKENDS_P4TOOLS_COMMON_LIB_SATURATION_ELIM_H_
-#define BACKENDS_P4TOOLS_COMMON_LIB_SATURATION_ELIM_H_
+#ifndef MIDEND_SATURATIONELIM_H_
+#define MIDEND_SATURATIONELIM_H_
 
 #include "ir/ir.h"
 
-namespace P4Tools {
+namespace P4 {
 
 /// Contains utility functions for eliminating saturating arithmetic.
 class SaturationElim {
@@ -19,6 +19,6 @@ class SaturationElim {
     static const IR::Mux* eliminate(const IR::Operation_Binary* binary);
 };
 
-}  // namespace P4Tools
+}  // namespace P4
 
-#endif /* BACKENDS_P4TOOLS_COMMON_LIB_SATURATION_ELIM_H_ */
+#endif /* MIDEND_SATURATIONELIM_H_ */
