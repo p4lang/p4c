@@ -6,6 +6,8 @@
 #include "lib/big_int_util.h"
 
 namespace IR {
+
+// Forward-declare some IR classes that are used in function declarations.
 class BoolLiteral;
 class Constant;
 class Expression;
