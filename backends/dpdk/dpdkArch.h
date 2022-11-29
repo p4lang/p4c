@@ -940,7 +940,6 @@ class UpdateActionForSwitch : public Transform {
 /**
  * Handle ActionSelector and ActionProfile extern */
 class ConvertActionSelectorAndProfile : public PassManager {
-    DpdkProgramStructure* structure;
     // Map which holds the switch expression variable and constant tuple per switch statement for
     // each action action_name: {<switch_var, constant_value>, <switch_var1, constant_value1>, ...}
     std::map<cstring, std::vector<std::tuple<cstring, IR::Constant*>>> actionCaseMap;

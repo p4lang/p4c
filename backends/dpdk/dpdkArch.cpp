@@ -2208,7 +2208,7 @@ const IR::Node* SplitP4TableCommon::postorder(IR::IfStatement* statement) {
         //           }
         //       }
         //    } else if (as.apply().hit) {
-        //        foo_0.apply();
+        //        foo();
         //    }
         // }
         IR::Expression* group_id_expr = nullptr;
