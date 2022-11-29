@@ -100,8 +100,9 @@ apply {
 	extract h.ethernet
 	mov m.Ingress_ap_member_id 0x0
 	table tbl
+	jmpnh LABEL_END
 	table ap
-	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop

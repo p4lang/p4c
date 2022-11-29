@@ -177,11 +177,13 @@ apply {
 	mov m.psa_ingress_output_metadata_egress_port 0x0
 	mov m.Ingress_ap_member_id 0x0
 	table tbl
+	jmpnh LABEL_END
 	table ap
-	mov m.Ingress_ap_member_id 0x0
+	LABEL_END :	mov m.Ingress_ap_member_id 0x0
 	table tbl2
+	jmpnh LABEL_END_0
 	table ap
-	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	LABEL_END_0 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ipv4_base
 	tx m.psa_ingress_output_metadata_egress_port

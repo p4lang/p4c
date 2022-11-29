@@ -1853,8 +1853,8 @@ const IR::P4Table* SplitP4TableCommon::create_member_table(const IR::P4Table* tb
 const IR::P4Table* SplitP4TableCommon::create_group_table(const IR::P4Table* tbl,
                                                           cstring selectorTableName,
                                                           cstring group_id, cstring member_id,
-                                                          int n_groups_max,
-                                                          int n_members_per_group_max) {
+                                                          unsigned n_groups_max,
+                                                          unsigned n_members_per_group_max) {
     IR::Vector<IR::KeyElement> selector_keys;
     for (auto key : tbl->getKey()->keyElements) {
         if (key->matchType->toString() == "selector") {
@@ -1873,12 +1873,13 @@ const IR::P4Table* SplitP4TableCommon::create_group_table(const IR::P4Table* tbl
         "group_id", new IR::ExpressionValue(new IR::PathExpression(group_id)), false));
     selector_properties.push_back(new IR::Property(
         "member_id", new IR::ExpressionValue(new IR::PathExpression(member_id)), false));
-
     selector_properties.push_back(new IR::Property(
-        "n_groups_max", new IR::ExpressionValue(new IR::Constant(n_groups_max)), false));
+        "n_groups_max",
+        new IR::ExpressionValue(new IR::Constant(IR::Type_Bits::get(32), n_groups_max)), false));
     selector_properties.push_back(new IR::Property(
         "n_members_per_group_max",
-        new IR::ExpressionValue(new IR::Constant(n_members_per_group_max)), false));
+        new IR::ExpressionValue(new IR::Constant(IR::Type_Bits::get(32), n_members_per_group_max)),
+        false));
     selector_properties.push_back(new IR::Property("actions", new IR::ActionList({}), false));
     auto group_table =
         new IR::P4Table(selectorTableName, hidden, new IR::TableProperties(selector_properties));
@@ -1924,14 +1925,14 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
         return tbl;
     }
 
-    int n_groups_max = instance->arguments->at(1)->expression->to<IR::Constant>()->asInt();
+    int n_groups_max = instance->arguments->at(1)->expression->to<IR::Constant>()->asUnsigned();
     if (!instance->arguments->at(2)->expression->is<IR::Constant>()) {
         ::error(ErrorType::ERR_UNEXPECTED,
                 "The 'outputWidth' argument of ActionSelector %1% must be a constant",
                 *instance->name);
         return tbl;
     }
-    auto outputWidth = instance->arguments->at(2)->expression->to<IR::Constant>()->asInt();
+    auto outputWidth = instance->arguments->at(2)->expression->to<IR::Constant>()->asUnsigned();
     if (outputWidth >= 32) {
         ::error(ErrorType::ERR_UNEXPECTED,
                 "The 'outputWidth' argument of ActionSelector %1% must be smaller than 32",
@@ -2100,10 +2101,20 @@ const IR::Node* SplitP4TableCommon::postorder(IR::MethodCallStatement* statement
             new IR::Member(new IR::PathExpression(table), IR::ID(IR::IApply::applyMethodName))));
         return expr;
     };
+
+    auto apply_hit = [](cstring table) {
+        IR::Expression* expr =
+            new IR::Member(new IR::MethodCallExpression(new IR::Member(
+                               new IR::PathExpression(table), IR::ID(IR::IApply::applyMethodName))),
+                           "hit");
+        return expr;
+    };
+
     if (auto apply = mi->to<P4::ApplyMethod>()) {
         if (!apply->isTableApply()) return statement;
         auto table = apply->object->to<IR::P4Table>();
         if (match_tables.count(table->name) == 0) return statement;
+        IR::Expression* group_id_expr = nullptr;
         auto decls = new IR::IndexedVector<IR::StatOrDecl>();
         auto tableName = apply->object->getName().name;
 
@@ -2116,57 +2127,67 @@ const IR::Node* SplitP4TableCommon::postorder(IR::MethodCallStatement* statement
 
         if (group_ids.count(tableName) != 0) {
             auto group_id = group_ids.at(tableName);
+            group_id_expr = new IR::PathExpression(group_id);
             decls->push_back(new IR::AssignmentStatement(
-                new IR::PathExpression(group_id), new IR::Constant(IR::Type_Bits::get(32), 0)));
+                group_id_expr, new IR::Constant(IR::Type_Bits::get(32), 0xFFFFFFFF)));
         }
 
-        decls->push_back(statement);
-
+        if (member_tables.count(tableName) == 0) {
+            ::error(ErrorType::ERR_NOT_FOUND, "Unable to find member table %1%", tableName);
+            return statement;
+        }
+        // an action selector t.apply() is converted to
+        // if (t0.apply().hit) {  // base table
+        //      if (group_id != initial_groupid)
+        //          t1.apply();  // group table
+        //      t2.apply();  // member table
+        // }
+        auto ifBaseTableHit = new IR::IndexedVector<IR::StatOrDecl>();
+        auto memberTable = member_tables.at(tableName);
+        auto t2stat = gen_apply(memberTable);
+        auto cond = apply_hit(tableName);
+        IR::Statement* t1stat = nullptr;
+        IR::Expression* t0stat = nullptr;
         if (implementation == TableImplementation::ACTION_SELECTOR) {
             if (group_tables.count(tableName) == 0) {
                 ::error(ErrorType::ERR_NOT_FOUND, "Unable to find group table %1%", tableName);
                 return statement;
             }
             auto selectorTable = group_tables.at(tableName);
-            decls->push_back(gen_apply(selectorTable));
-        }
-        if (member_tables.count(tableName) == 0) {
-            ::error(ErrorType::ERR_NOT_FOUND, "Unable to find member table %1%", tableName);
-            return statement;
+            auto max_group_cst = new IR::Constant(IR::Type_Bits::get(32), 0xFFFFFFFF);
+            t0stat = new IR::Neq(statement->srcInfo, group_id_expr, max_group_cst);
+            t1stat = gen_apply(selectorTable);
         }
 
-        auto memberTable = member_tables.at(tableName);
-        decls->push_back(gen_apply(memberTable));
+        IR::IfStatement* ret = nullptr;
+        if (implementation == TableImplementation::ACTION_SELECTOR) {
+            ifBaseTableHit->push_back(new IR::IfStatement(t0stat, t1stat, nullptr));
+            ifBaseTableHit->push_back(t2stat);
+            ret = new IR::IfStatement(cond, new IR::BlockStatement(*ifBaseTableHit), nullptr);
+        } else if (implementation == TableImplementation::ACTION_PROFILE) {
+            ret = new IR::IfStatement(cond, t2stat, nullptr);
+        }
+        decls->push_back(ret);
         return new IR::BlockStatement(*decls);
     }
     return statement;
 }
 
-// assume the RemoveMiss pass is applied
+// assume the RemoveMiss and SimplifyControlFlow pass is applied
 const IR::Node* SplitP4TableCommon::postorder(IR::IfStatement* statement) {
     auto cond = statement->condition;
-    bool negated = false;
-    if (auto neg = cond->to<IR::LNot>()) {
-        // We handle !hit, which may have been created by the
-        // removal of miss
-        negated = true;
-        cond = neg->expr;
-    }
-
     if (!P4::TableApplySolver::isHit(cond, refMap, typeMap)) return statement;
     if (!cond->is<IR::Member>()) return statement;
-
     auto member = cond->to<IR::Member>();
     if (!member->expr->is<IR::MethodCallExpression>()) return statement;
     auto mce = member->expr->to<IR::MethodCallExpression>();
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
 
-    auto apply_hit = [](cstring table, bool negated) {
+    auto apply_hit = [](cstring table) {
         IR::Expression* expr =
             new IR::Member(new IR::MethodCallExpression(new IR::Member(
                                new IR::PathExpression(table), IR::ID(IR::IApply::applyMethodName))),
                            "hit");
-        if (negated) expr = new IR::LNot(expr);
         return expr;
     };
 
@@ -2174,78 +2195,113 @@ const IR::Node* SplitP4TableCommon::postorder(IR::IfStatement* statement) {
         if (!apply->isTableApply()) return statement;
         auto table = apply->object->to<IR::P4Table>();
         if (match_tables.count(table->name) == 0) return statement;
-        // an action selector t.apply() is converted to
-        // t0.apply();  // base table
-        // t1.apply();  // group table
-        // t2.apply();  // member table
-        //
-        // if (!t.apply().hit) {
-        //   foo();
-        // }
-        // is equivalent to
-        // if (t0.apply().hit) {
-        //   if (t1.apply().hit) {
-        //      if (t2.apply().hit) {
-        //        ; }
-        //      else {
-        //        foo(); }
-        //   else {
-        //      foo(); }
-        // else {
-        //   foo(); } } }
         //
         // if (t.apply().hit) {
         //   foo();
         // }
         // is equivalent to
         // if (t0.apply().hit) {
-        //   if (t1.apply().hit) {
-        //      if (t2.apply().hit) {
-        //        foo();
-        //      }
-        //   }
+        //    if (group_id != initial_groupid) {
+        //       if (t1.apply().hit) {
+        //           if (t2.apply().hit) {
+        //              foo();
+        //           }
+        //       }
+        //    } else if (as.apply().hit) {
+        //        foo_0.apply();
+        //    }
         // }
+        IR::Expression* group_id_expr = nullptr;
+        auto decls = new IR::IndexedVector<IR::StatOrDecl>();
         auto tableName = apply->object->getName().name;
+        // member_id and/or group_id must be initialized prior to member table apply.
+        if (member_ids.count(tableName) != 0) {
+            auto member_id = member_ids.at(tableName);
+            decls->push_back(new IR::AssignmentStatement(
+                new IR::PathExpression(member_id), new IR::Constant(IR::Type_Bits::get(32), 0)));
+        }
+
+        if (group_ids.count(tableName) != 0) {
+            auto group_id = group_ids.at(tableName);
+            group_id_expr = new IR::PathExpression(group_id);
+            decls->push_back(new IR::AssignmentStatement(
+                group_id_expr, new IR::Constant(IR::Type_Bits::get(32), 0xFFFFFFFF)));
+        }
+
+        if (member_tables.count(tableName) == 0) {
+            ::error(ErrorType::ERR_NOT_FOUND, "Unable to find member table %1%", tableName);
+            return statement;
+        }
         if (member_tables.count(tableName) == 0) return statement;
         auto memberTable = member_tables.at(tableName);
-        auto t2stat = apply_hit(memberTable, negated);
+        IR::Expression* t0stat = nullptr;
         IR::Expression* t1stat = nullptr;
         if (implementation == TableImplementation::ACTION_SELECTOR) {
             auto selectorTable = group_tables.at(tableName);
-            t1stat = apply_hit(selectorTable, negated);
+            auto max_group_cst = new IR::Constant(IR::Type_Bits::get(32), 0xFFFFFFFF);
+            t0stat = new IR::Neq(statement->srcInfo, group_id_expr, max_group_cst);
+            t1stat = apply_hit(selectorTable);
         }
 
         IR::IfStatement* ret = nullptr;
-        if (negated) {
-            if (implementation == TableImplementation::ACTION_SELECTOR) {
-                ret = new IR::IfStatement(
-                    cond, statement->ifTrue,
-                    new IR::IfStatement(
-                        t1stat, statement->ifTrue,
-                        new IR::IfStatement(t2stat, statement->ifTrue, statement->ifFalse)));
-            } else if (implementation == TableImplementation::ACTION_PROFILE) {
-                ret = new IR::IfStatement(
-                    cond, statement->ifTrue,
-                    new IR::IfStatement(t2stat, statement->ifTrue, statement->ifFalse));
-            }
-        } else {
-            if (implementation == TableImplementation::ACTION_SELECTOR) {
-                ret = new IR::IfStatement(
-                    cond,
-                    new IR::IfStatement(
-                        t1stat, new IR::IfStatement(t2stat, statement->ifTrue, statement->ifFalse),
-                        statement->ifFalse),
-                    statement->ifFalse);
-            } else if (implementation == TableImplementation::ACTION_PROFILE) {
-                ret = new IR::IfStatement(
-                    cond, new IR::IfStatement(t2stat, statement->ifTrue, statement->ifFalse),
-                    statement->ifFalse);
-            }
+        auto t2stat =
+            new IR::IfStatement(apply_hit(memberTable), statement->ifTrue, statement->ifFalse);
+
+        if (implementation == TableImplementation::ACTION_SELECTOR) {
+            ret = new IR::IfStatement(
+                cond,
+                new IR::IfStatement(t0stat, new IR::IfStatement(t1stat, t2stat, statement->ifFalse),
+                                    t2stat),
+                statement->ifFalse);
+        } else if (implementation == TableImplementation::ACTION_PROFILE) {
+            ret = new IR::IfStatement(cond, t2stat, statement->ifFalse);
         }
-        return ret;
+        decls->push_back(ret);
+        return new IR::BlockStatement(*decls);
     }
     return statement;
 }
+
+/* For tables using action selector/profile property, the group table and member table should
+ * only be applied if the base table is a hit. Hence, we split the switch(tbl.apply().action_run)
+ * into an if statement to see if all three tables should be applied or not  and a switch statement
+ * which handles the side effect of table.apply(). We assign a number to each action the table can
+ * invoke. Each action which can be invoked from the base table updates a common variable with its
+ * action number. This common variable is used as switch expression.
+ *
+ * action a0{...}
+ * action a1{...}
+ *
+ * switch(t.apply().action_run) {
+ *    a0: { bar_0.apply();}
+ *    a1: { foo_0.apply();}
+ * }
+ *
+ * is converted to
+ * action a0{
+ *     switchExprTmp = 0;
+ *     ...
+ * }
+ * action a1{
+ *     switchExprTmp = 1;
+ *     ...
+ * }
+ *
+ * switchExprTmp = 0xFFFFFFFF;
+ * if (t0.apply().hit) {
+ *    if (group_id != initial_group_id) {
+ *        t1.apply();
+ *    }
+ *    t2.apply();
+ * }
+ *
+ * Action invoked on above table apply will set the switch expression variable
+ * switch (switchExprTmp) {
+ *    0: { bar_0.apply();}
+ *    1: { foo_0.apply();}
+ * }
+ *
+ */
 
 const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
     auto expr = statement->expression;
@@ -2259,11 +2315,11 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
             new IR::Member(new IR::PathExpression(table), IR::ID(IR::IApply::applyMethodName))));
         return expr;
     };
-    auto gen_action_run = [](cstring table) {
+    auto apply_hit = [](cstring table) {
         IR::Expression* expr =
             new IR::Member(new IR::MethodCallExpression(new IR::Member(
                                new IR::PathExpression(table), IR::ID(IR::IApply::applyMethodName))),
-                           "action_run");
+                           "hit");
         return expr;
     };
 
@@ -2271,17 +2327,35 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
         if (!apply->isTableApply()) return statement;
         auto table = apply->object->to<IR::P4Table>();
         if (match_tables.count(table->name) == 0) return statement;
-
-        // switch(t0.apply()) {} is converted to
-        //
-        // t0.apply();
-        // t1.apply();
-        // switch(t2.apply()) {}
-        //
+        IR::Expression* group_id_expr = nullptr;
         auto decls = new IR::IndexedVector<IR::StatOrDecl>();
-        auto t0stat = gen_apply(table->name);
         auto tableName = apply->object->getName().name;
-        decls->push_back(t0stat);
+
+        // member_id and/or group_id must be initialized prior to member table apply.
+        if (member_ids.count(tableName) != 0) {
+            auto member_id = member_ids.at(tableName);
+            decls->push_back(new IR::AssignmentStatement(
+                new IR::PathExpression(member_id), new IR::Constant(IR::Type_Bits::get(32), 0)));
+        }
+
+        // Initialize group_id with max possible value
+        if (group_ids.count(tableName) != 0) {
+            auto group_id = group_ids.at(tableName);
+            group_id_expr = new IR::PathExpression(group_id);
+            decls->push_back(new IR::AssignmentStatement(
+                group_id_expr, new IR::Constant(IR::Type_Bits::get(32), 0xFFFFFFFF)));
+        }
+
+        if (member_tables.count(tableName) == 0) {
+            ::error(ErrorType::ERR_NOT_FOUND, "Unable to find member table %1%", tableName);
+            return statement;
+        }
+        auto ifBaseTableHit = new IR::IndexedVector<IR::StatOrDecl>();
+        auto memberTable = member_tables.at(tableName);
+        auto t2stat = gen_apply(memberTable);
+        auto cond = apply_hit(tableName);
+        IR::Statement* t1stat = nullptr;
+        IR::Expression* t0stat = nullptr;
 
         if (implementation == TableImplementation::ACTION_SELECTOR) {
             if (group_tables.count(tableName) == 0) {
@@ -2289,21 +2363,58 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
                 return statement;
             }
             auto selectorTable = group_tables.at(tableName);
-            auto t1stat = gen_apply(selectorTable);
-            decls->push_back(t1stat);
+            auto max_group_cst = new IR::Constant(IR::Type_Bits::get(32), 0xFFFFFFFF);
+            t0stat = new IR::Neq(statement->srcInfo, group_id_expr, max_group_cst);
+            t1stat = gen_apply(selectorTable);
         }
 
-        if (member_tables.count(tableName) == 0) {
-            ::error(ErrorType::ERR_NOT_FOUND, "Unable to find member table %1%", tableName);
-            return statement;
+        IR::IfStatement* ret = nullptr;
+        if (implementation == TableImplementation::ACTION_SELECTOR) {
+            ifBaseTableHit->push_back(new IR::IfStatement(t0stat, t1stat, nullptr));
+            ifBaseTableHit->push_back(t2stat);
+            ret = new IR::IfStatement(cond, new IR::BlockStatement(*ifBaseTableHit), nullptr);
+        } else if (implementation == TableImplementation::ACTION_PROFILE) {
+            ret = new IR::IfStatement(cond, t2stat, nullptr);
         }
-        auto memberTable = member_tables.at(tableName);
-        auto t2stat = gen_action_run(memberTable);
-        decls->push_back(new IR::SwitchStatement(statement->srcInfo, t2stat, statement->cases));
+
+        // Generate new switch statement with a temporary variable as switch expression
+        // and insert this temporary variable declaration into the enclosing control block
+        auto control = findOrigCtxt<IR::P4Control>();
+        switchExprTmp = refMap->newName("switchExprTmp");
+        auto decl = new IR::Declaration_Variable(IR::ID(switchExprTmp), IR::Type_Bits::get(32));
+        injector.collect(control, nullptr, decl);
+        decls->push_back(new IR::AssignmentStatement(
+            statement->srcInfo, new IR::PathExpression(IR::ID(switchExprTmp)),
+            new IR::Constant(IR::Type_Bits::get(32), 0xFFFFFFFF)));
+        decls->push_back(ret);
+
+        unsigned label_value = 0;
+        IR::Vector<IR::SwitchCase> cases;
+        for (auto c : statement->cases) {
+            if (c->label->is<IR::DefaultExpression>()) {
+                cases.push_back(c);
+            } else if (auto pe = c->label->to<IR::PathExpression>()) {
+                auto caseLabelValue = new IR::Constant(IR::Type_Bits::get(32), label_value);
+                auto currCase = new IR::SwitchCase(caseLabelValue, c->statement);
+                cases.push_back(currCase);
+                cstring label = pe->path->name.name;
+                actionCaseMap[label].push_back(std::make_tuple(switchExprTmp, caseLabelValue));
+                label_value++;
+            } else {
+                BUG("Unexpected case label %1%, expected action name or default", c->label);
+            }
+        }
+        decls->push_back(new IR::SwitchStatement(
+            statement->srcInfo, new IR::PathExpression(IR::ID(switchExprTmp)), cases));
 
         return new IR::BlockStatement(*decls);
     }
     return statement;
+}
+
+const IR::Node* SplitP4TableCommon::postorder(IR::P4Control* a) {
+    auto control = getOriginal();
+    return injector.inject_control(control, a);
 }
 
 /* For regular tables, the direct counter array size is same as table size
