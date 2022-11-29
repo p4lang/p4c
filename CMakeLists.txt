@@ -459,7 +459,7 @@ install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
 ################################ Linters Begin ################################
 
 file(
-  GLOB_RECURSE P4C_LINT_LIST  FOLLOW_SYMLINKS
+  GLOB_RECURSE P4C_LINT_LIST FOLLOW_SYMLINKS
   backends/*.cpp
   backends/*.h
   control-plane/*.cpp
@@ -471,11 +471,29 @@ file(
   tools/*.cpp
   tools/*.h
 )
+
 # Filter some folders from the CI checks.
-list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/p4tools/submodules")
-list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ebpf/runtime")
-list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ubpf/runtime")
-list(FILTER P4C_LINT_LIST EXCLUDE REGEX "control-plane/p4runtime")
+if (CMAKE_VERSION VERSION_LESS "3.6")
+  file(
+    GLOB_RECURSE P4C_LINT_EXCLUDE_LIST FOLLOW_SYMLINKS
+    backends/p4tools/submodules/*.cpp
+    backends/p4tools/submodules/*.h
+    backends/ebpf/runtime/*.cpp
+    backends/ebpf/runtime/*.h
+    backends/ubpf/runtime/*.cpp
+    backends/ubpf/runtime/*.h
+    control-plane/p4runtime/*.cpp
+    control-plane/p4runtime/*.h
+  )
+  foreach(f IN ITEMS ${P4C_LINT_EXCLUDE_LIST})
+       list(REMOVE_ITEM P4C_LINT_LIST ${f})
+  endforeach()
+else()
+  list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/p4tools/submodules")
+  list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ebpf/runtime")
+  list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ubpf/runtime")
+  list(FILTER P4C_LINT_LIST EXCLUDE REGEX "control-plane/p4runtime")
+endif()
 
 # cpplint
 add_cpplint_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
@@ -497,7 +515,18 @@ endif()
 # clang-format
 # Temporarily disable clang-format linting for the ir folder.
 #TODO: Fix up the IR include system.
-list(FILTER P4C_LINT_LIST EXCLUDE REGEX "${P4C_SOURCE_DIR}/ir/")
+if (CMAKE_VERSION VERSION_LESS "3.6")
+  file(
+    GLOB_RECURSE P4C_LINT_EXCLUDE_LIST FOLLOW_SYMLINKS
+    ir/*.cpp
+    ir/*.h
+  )
+  foreach(f IN ITEMS ${P4C_LINT_EXCLUDE_LIST})
+       list(REMOVE_ITEM P4C_LINT_LIST ${f})
+  endforeach()
+else()
+  list(FILTER P4C_LINT_LIST EXCLUDE REGEX "${P4C_SOURCE_DIR}/ir/")
+endif()
 add_clang_format_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
 
 find_program(CLANG_FORMAT_CMD clang-format)
