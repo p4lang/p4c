@@ -81,16 +81,7 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
 
     const auto& srcInfo = statement->srcInfo;
     auto* retval = new IR::IndexedVector<IR::StatOrDecl>();
-    if (const auto* list = statement->right->to<IR::ListExpression>()) {
-        const auto* strct = ltype->checkedTo<IR::Type_StructLike>();
-        unsigned index = 0;
-        for (const auto* f : strct->fields) {
-            const auto* right = list->components.at(index);
-            const auto* left = new IR::Member(statement->left, f->name);
-            retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
-            index++;
-        }
-    } else if (const auto* si = statement->right->to<IR::StructExpression>()) {
+    if (const auto* si = statement->right->to<IR::StructExpression>()) {
         const auto* strct = ltype->checkedTo<IR::Type_StructLike>();
         for (const auto* f : strct->fields) {
             const auto* right = si->components.getDeclaration<IR::NamedExpression>(f->name);
