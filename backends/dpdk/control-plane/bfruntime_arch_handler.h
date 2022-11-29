@@ -282,6 +282,14 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
                     break;
                 }
             }
+        } else if (externBlock->type->name == "Register") {
+            for (auto& extType : *p4info->mutable_registers()) {
+                auto* pre = extType.mutable_preamble();
+                if (pre->name() == decl->controlPlaneName()) {
+                    pre->set_name(prefix(pipeName, pre->name()));
+                    break;
+                }
+            }
         }
     }
 
