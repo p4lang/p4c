@@ -48,11 +48,11 @@ std::vector<char> Bmv2Concolic::convertBigIntToBytes(big_int &dataInt, int targe
     return bytes;
 }
 
-const IR::Expression *Bmv2Concolic::setAndComputePayload(
-    const Model &completedModel, ConcolicVariableMap *resolvedConcolicVariables, int payloadSize) {
-    const auto *payloadType = IR::getBitType(payloadSize);
-    const auto &payLoadVar = StateVariable(ExecutionState::getPayloadLabel(payloadType));
-    const auto *payloadExpr = completedModel.get(payLoadVar, false);
+const IR::Expression* Bmv2Concolic::setAndComputePayload(
+    const Model& completedModel, ConcolicVariableMap* resolvedConcolicVariables, int payloadSize) {
+    const auto* payloadType = IR::getBitType(payloadSize);
+    const auto& payLoadVar = IR::StateVariable(ExecutionState::getPayloadLabel(payloadType));
+    const auto* payloadExpr = completedModel.get(payLoadVar, false);
     // If the variable already has been fixed, return it
     auto it = resolvedConcolicVariables->find(payLoadVar);
     if (it != resolvedConcolicVariables->end()) {

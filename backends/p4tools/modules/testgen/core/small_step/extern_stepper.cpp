@@ -137,8 +137,9 @@ ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateAdvanceExpression(
     return {advanceVal, advanceCond, notAdvanceVal, notAdvanceCond};
 }
 
-void ExprStepper::generateCopyIn(ExecutionState& nextState, const StateVariable& targetPath,
-                                 const StateVariable& srcPath, cstring dir, bool forceTaint) const {
+void ExprStepper::generateCopyIn(ExecutionState& nextState, const IR::StateVariable& targetPath,
+                                 const IR::StateVariable& srcPath, cstring dir,
+                                 bool forceTaint) const {
     // If the direction is out, we do not copy in external values.
     // We set the parameter to uninitialized.
     if (dir == "out") {

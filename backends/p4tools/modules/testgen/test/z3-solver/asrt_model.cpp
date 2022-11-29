@@ -30,7 +30,6 @@
 namespace Test {
 
 using P4Tools::Model;
-using P4Tools::StateVariable;
 using P4Tools::Z3Solver;
 using P4Tools::Z3SolverAccessor;
 using P4Tools::P4Testgen::TestgenTarget;
@@ -138,13 +137,13 @@ TEST_F(Z3SolverTest, Assertion2Model) {
 
     // getting right variable
     ASSERT_TRUE(opLss->right->is<IR::Member>());
-    const StateVariable varB = opLss->right->to<IR::Member>();
+    const IR::StateVariable varB = opLss->right->to<IR::Member>();
 
     // getting numeric and left variable
     ASSERT_TRUE(opLss->left->is<IR::Add>());
     const auto *opAdd = opLss->left->to<IR::Add>();
     ASSERT_TRUE(opAdd->left->is<IR::Member>());
-    const StateVariable varA = opAdd->left->to<IR::Member>();
+    const IR::StateVariable varA = opAdd->left->to<IR::Member>();
     ASSERT_TRUE(opAdd->right->is<IR::Constant>());
     const auto *addToA = opAdd->right->to<IR::Constant>();
 

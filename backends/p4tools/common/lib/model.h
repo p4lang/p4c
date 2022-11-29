@@ -13,7 +13,7 @@
 namespace P4Tools {
 
 /// Symbolic maps map a state variable to a IR::Expression.
-using SymbolicMapType = boost::container::flat_map<StateVariable, const IR::Expression *>;
+using SymbolicMapType = boost::container::flat_map<IR::StateVariable, const IR::Expression*>;
 
 /// Represents a solution found by the solver. A model is a concretized form of a symbolic
 /// environment. All the expressions in a Model must be of type IR::Literal.
@@ -34,7 +34,7 @@ class Model : public SymbolicMapType {
 
     /// Adds the given set of variables to the model (if they do not exist already).
     /// If the variable does not exist, it is initialized to a default value.
-    void complete(const std::set<StateVariable> &inputSet);
+    void complete(const std::set<IR::StateVariable>& inputSet);
 
     /// Evaluates a P4 expression in the context of this model.
     ///
@@ -83,7 +83,7 @@ class Model : public SymbolicMapType {
     /// Tries to retrieve @param var from the model.
     /// If @param checked is true, this function throws a BUG if the variable can not be found.
     /// Otherwise, it returns a nullptr.
-    const IR::Expression *get(const StateVariable &var, bool checked) const;
+    const IR::Expression* get(const IR::StateVariable& var, bool checked) const;
 };
 
 }  // namespace P4Tools

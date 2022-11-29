@@ -39,8 +39,8 @@ class CompleteVisitor : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::ConcolicVariable *var) override {
-        auto stateVar = StateVariable(var->concolicMember);
+    bool preorder(const IR::ConcolicVariable* var) override {
+        auto stateVar = IR::StateVariable(var->concolicMember);
         model->emplace(stateVar, IR::getDefaultValue(var->type));
         return false;
     }
@@ -50,7 +50,7 @@ class CompleteVisitor : public Inspector {
 
 void Model::complete(const IR::Expression *expr) { expr->apply(CompleteVisitor(this)); }
 
-void Model::complete(const std::set<StateVariable> &inputSet) {
+void Model::complete(const std::set<IR::StateVariable>& inputSet) {
     auto completionVisitor = CompleteVisitor(this);
     for (const auto &var : inputSet) {
         var->apply(completionVisitor);
@@ -104,15 +104,15 @@ const Value *Model::evaluate(const IR::Expression *expr, ExpressionMap *resolved
         const IR::Literal *preorder(IR::Member *member) override {
             BUG_CHECK(self.count(member), "Variable not bound in model: %1%", member);
             prune();
-            return self.at(StateVariable(member))->checkedTo<IR::Literal>();
+            return self.at(IR::StateVariable(member))->checkedTo<IR::Literal>();
         }
 
         const IR::Literal *preorder(IR::TaintExpression *var) override {
             return IR::getDefaultValue(var->type);
         }
 
-        const IR::Literal *preorder(IR::ConcolicVariable *var) override {
-            auto stateVar = StateVariable(var->concolicMember);
+        const IR::Literal* preorder(IR::ConcolicVariable* var) override {
+            auto stateVar = IR::StateVariable(var->concolicMember);
             BUG_CHECK(self.count(stateVar), "Variable not bound in model: %1%",
                       stateVar->toString());
             return self.at(stateVar)->checkedTo<IR::Literal>();
@@ -140,7 +140,7 @@ Model *Model::evaluate(const SymbolicMapType &inputMap, ExpressionMap *resolvedE
     return result;
 }
 
-const IR::Expression *Model::get(const StateVariable &var, bool checked) const {
+const IR::Expression* Model::get(const IR::StateVariable& var, bool checked) const {
     auto it = find(var);
     if (it != end()) {
         return it->second;

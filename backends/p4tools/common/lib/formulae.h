@@ -30,44 +30,6 @@ class AbstractRepCheckedNode : public ICastable {
     }
 };
 
-/// Represents a reference to an object in a P4 program.
-///
-/// This is a thin wrapper around a 'const IR::Member*' to (1) enforce invariants on which forms of
-/// Members can represent state variables and (2) enable the use of StateVariables as map keys.
-///
-/// A Member can represent a StateVariable exactly when its qualifying expression
-/// (IR::Member::expr) either is a PathExpression or can represent a StateVariable.
-class StateVariable : private AbstractRepCheckedNode<StateVariable, IR::Member> {
- public:
-    /// Determines whether @expr can represent a StateVariable.
-    static bool repOk(const IR::Expression *expr);
-
-    // Implicit conversions.
-    using AbstractRepCheckedNode::operator const IR::Member *;
-    using AbstractRepCheckedNode::operator*;
-    using AbstractRepCheckedNode::operator->;
-
-    // Implements comparisons so that StateVariables can be used as map keys.
-    bool operator<(const StateVariable &other) const;
-    bool operator==(const StateVariable &other) const;
-
- private:
-    // Returns a negative value if e1 < e2, zero if e1 == e2, and a positive value otherwise.
-    // In these comparisons,
-    //   * PathExpressions < Members.
-    //   * PathExpressions are ordered on the name contained in their Paths.
-    //   * Members are ordered first by their expressions, then by their member.
-    static int compare(const IR::Expression *e1, const IR::Expression *e2);
-    static int compare(const IR::Member *m1, const IR::Expression *e2);
-    static int compare(const IR::Member *m1, const IR::Member *m2);
-    static int compare(const IR::PathExpression *p1, const IR::Expression *e2);
-    static int compare(const IR::PathExpression *p1, const IR::PathExpression *p2);
-
- public:
-    /// Implicitly converts IR::Expression* to a StateVariable.
-    StateVariable(const IR::Member* member);  // NOLINT(runtime/explicit)
-};
-
 /// Represents a constraint that can be shipped to and asserted within a solver.
 // TODO: This should implement AbstractRepCheckedNode<Constraint>.
 using Constraint = IR::Expression;

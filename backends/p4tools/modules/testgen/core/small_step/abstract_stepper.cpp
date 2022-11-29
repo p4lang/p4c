@@ -184,10 +184,10 @@ bool AbstractStepper::stepToStructSubexpr(
 bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
     // The top of the body should be a Return command containing a call to getValid on the given
     // header ref. Replace this with the variable representing the header ref's validity.
-    if (const auto *headerUnion = headerRef->type->to<IR::Type_HeaderUnion>()) {
-        for (const auto *field : headerUnion->fields) {
-            auto *fieldRef = new IR::Member(field->type, headerRef, field->name);
-            auto variable = Utils::getHeaderValidity(fieldRef);
+    if (const auto* headerUnion = headerRef->type->to<IR::Type_HeaderUnion>()) {
+        for (const auto* field : headerUnion->fields) {
+            auto* fieldRef = new IR::Member(field->type, headerRef, field->name);
+            const auto& variable = Utils::getHeaderValidity(fieldRef);
             BUG_CHECK(state.exists(variable),
                       "At this point, the header validity bit should be initialized.");
             const auto *value = state.getSymbolicEnv().get(variable);
@@ -205,18 +205,18 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
         result->emplace_back(state);
         return false;
     }
-    auto variable = Utils::getHeaderValidity(headerRef);
+    const auto& variable = Utils::getHeaderValidity(headerRef);
     BUG_CHECK(state.exists(variable),
-              "At this point, the header validity bit should be initialized.");
+              "At this point, the header validity bit %1% should be initialized.", variable);
     state.replaceTopBody(Continuation::Return(variable));
     result->emplace_back(state);
     return false;
 }
 
-void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validity,
-                                        ExecutionState &nextState) {
-    auto headerRefValidity = Utils::getHeaderValidity(expr);
-    nextState.set(headerRefValidity, IR::getBoolLiteral(validity));
+void AbstractStepper::setHeaderValidity(const IR::Expression* expr, bool validity,
+                                        ExecutionState* nextState) {
+    const auto& headerRefValidity = Utils::getHeaderValidity(expr);
+    nextState->set(headerRefValidity, IR::getBoolLiteral(validity));
 
     // In some cases, the header may be part of a union.
     if (validity) {
@@ -389,7 +389,7 @@ void AbstractStepper::declareStructLike(ExecutionState &nextState, const IR::Exp
     }
 }
 
-void AbstractStepper::declareBaseType(ExecutionState* nextState, const StateVariable& paramPath,
+void AbstractStepper::declareBaseType(ExecutionState* nextState, const IR::StateVariable& paramPath,
                                       const IR::Type_Base* baseType) const {
     nextState->set(paramPath, programInfo.createTargetUninitialized(baseType, false));
 }
