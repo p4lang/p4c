@@ -11,7 +11,7 @@
 namespace P4Tools {
 
 /// Provides a higher-level interface for an SMT solver.
-class AbstractSolver {
+class AbstractSolver : public ICastable {
  public:
     /// Adds a comment to any log file that might be produced. Useful for understanding the
     /// sequence of calls made to the solver when debugging.

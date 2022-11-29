@@ -389,9 +389,9 @@ void AbstractStepper::declareStructLike(ExecutionState &nextState, const IR::Exp
     }
 }
 
-void AbstractStepper::declareBaseType(ExecutionState &nextState, const IR::Expression *paramPath,
-                                      const IR::Type_Base *baseType) const {
-    nextState.set(paramPath, programInfo.createTargetUninitialized(baseType, false));
+void AbstractStepper::declareBaseType(ExecutionState* nextState, const StateVariable& paramPath,
+                                      const IR::Type_Base* baseType) const {
+    nextState->set(paramPath, programInfo.createTargetUninitialized(baseType, false));
 }
 
 }  // namespace P4Tools::P4Testgen

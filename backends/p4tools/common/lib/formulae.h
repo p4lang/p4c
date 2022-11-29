@@ -14,7 +14,7 @@ namespace P4Tools {
 /// invariants on which forms of IR nodes can inhabit implementations of this type. Implementations
 /// must provide a static repOk(const Node*) function.
 template <class Self, class Node = IR::Expression>
-class AbstractRepCheckedNode {
+class AbstractRepCheckedNode : public ICastable {
  protected:
     std::reference_wrapper<const Node> node;
 
@@ -22,15 +22,6 @@ class AbstractRepCheckedNode {
     operator const Node *() const { return &node.get(); }
     const Node &operator*() const { return node.get(); }
     const Node *operator->() const { return &node.get(); }
-
-    /// Performs a checked cast. A BUG occurs if the cast fails.
-    template <class T>
-    static const T *checkedTo(const IR::Node *n) {
-        const T *result = n->to<T>();
-        BUG_CHECK(result, "Cast failed: %1% is not a %2%. It is a %3% instead.", n,
-                  T::static_type_name(), n->node_type_name());
-        return result;
-    }
 
     /// @param classDesc a user-friendly description of the class, for reporting errors to the
     ///     user.
@@ -74,7 +65,7 @@ class StateVariable : private AbstractRepCheckedNode<StateVariable, IR::Member> 
 
  public:
     /// Implicitly converts IR::Expression* to a StateVariable.
-    StateVariable(const IR::Expression *expr);  // NOLINT(runtime/explicit)
+    StateVariable(const IR::Member* member);  // NOLINT(runtime/explicit)
 };
 
 /// Represents a constraint that can be shipped to and asserted within a solver.

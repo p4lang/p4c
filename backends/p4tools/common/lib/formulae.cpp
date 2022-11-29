@@ -9,8 +9,8 @@ namespace P4Tools {
  *  StateVariable
  * ============================================================================================= */
 
-StateVariable::StateVariable(const IR::Expression *expr)
-    : AbstractRepCheckedNode(checkedTo<IR::Member>(expr), "state variable") {}
+StateVariable::StateVariable(const IR::Member* member)
+    : AbstractRepCheckedNode(member, "state variable") {}
 
 bool StateVariable::repOk(const IR::Expression *expr) {
     // Only members can be state variables.

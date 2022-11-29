@@ -1511,15 +1511,16 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
 
-             const auto *checksumVar = args->at(2)->expression;
-             if (!(checksumVar->is<IR::Member>() || checksumVar->is<IR::PathExpression>())) {
-                 TESTGEN_UNIMPLEMENTED("Checksum input %1% of type %2% not supported", checksumVar,
-                                       checksumVar->node_type_name());
+             const auto* checksumVarRef = args->at(2)->expression;
+             if (const auto* argPath = checksumVarRef->to<IR::PathExpression>()) {
+                 checksumVarRef = state.convertPathExpr(argPath);
              }
-             const auto *updateCond = args->at(0)->expression;
-             const auto *checksumVarType = checksumVar->type;
-             const auto *data = args->at(1)->expression;
-             const auto *algo = args->at(3)->expression;
+             const auto* checksumVar = checksumVarRef->checkedTo<IR::Member>();
+
+             const auto* updateCond = args->at(0)->expression;
+             const auto* checksumVarType = checksumVar->type;
+             const auto* data = args->at(1)->expression;
+             const auto* algo = args->at(3)->expression;
              // If the condition is tainted or the input data is tainted.
              // The checksum will also be tainted.
              if (argsAreTainted) {
@@ -1593,15 +1594,16 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
 
-             const auto *checksumVar = args->at(2)->expression;
-             if (!(checksumVar->is<IR::Member>() || checksumVar->is<IR::PathExpression>())) {
-                 TESTGEN_UNIMPLEMENTED("Checksum input %1% of type %2% not supported", checksumVar,
-                                       checksumVar->node_type_name());
+             const auto* checksumVarRef = args->at(2)->expression;
+             if (const auto* argPath = checksumVarRef->to<IR::PathExpression>()) {
+                 checksumVarRef = state.convertPathExpr(argPath);
              }
-             const auto *updateCond = args->at(0)->expression;
-             const auto *checksumVarType = checksumVar->type;
-             const auto *data = args->at(1)->expression;
-             const auto *algo = args->at(3)->expression;
+             const auto* checksumVar = checksumVarRef->checkedTo<IR::Member>();
+
+             const auto* updateCond = args->at(0)->expression;
+             const auto* checksumVarType = checksumVar->type;
+             const auto* data = args->at(1)->expression;
+             const auto* algo = args->at(3)->expression;
              // If the condition is tainted or the input data is tainted.
              // The checksum will also be tainted.
              if (argsAreTainted) {

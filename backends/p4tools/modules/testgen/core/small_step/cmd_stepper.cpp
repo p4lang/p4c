@@ -154,9 +154,7 @@ bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
         if (const auto *path = assign->left->to<IR::PathExpression>()) {
             left = state.convertPathExpr(path);
         }
-        // Check that all members have the correct format. All members end with a pathExpression.
-        checkMemberInvariant(left);
-        state.set(left, assign->right);
+        state.set(left->checkedTo<IR::Member>(), assign->right);
     } else {
         TESTGEN_UNIMPLEMENTED("Unsupported assign type %1% node: %2%", leftType,
                               leftType->node_type_name());

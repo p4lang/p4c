@@ -173,8 +173,8 @@ class AbstractStepper : public Inspector {
 
     /// This is a helper function to declare base type variables. Because all variables need to be a
     /// member in the execution state environment, this helper function suffixes a "*".
-    void declareBaseType(ExecutionState &nextState, const IR::Expression *paramPath,
-                         const IR::Type_Base *baseType) const;
+    void declareBaseType(ExecutionState& nextState, const StateVariable& paramPath,
+                         const IR::Type_Base* baseType) const;
 };
 
 }  // namespace P4Tools::P4Testgen
