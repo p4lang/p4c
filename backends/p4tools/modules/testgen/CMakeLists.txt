@@ -89,6 +89,9 @@ foreach(ext ${testgen_targets})
   endif()
 endforeach(ext)
 
+# Propagate def files set by target extensions upwards.
+set(IR_DEF_FILES ${IR_DEF_FILES} PARENT_SCOPE)
+
 # Convert the list of files into #includes
 foreach(include_file ${include_files})
 endforeach()
