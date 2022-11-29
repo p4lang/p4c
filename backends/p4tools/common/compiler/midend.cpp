@@ -6,6 +6,7 @@
 #include "frontends/common/parser_options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/moveDeclarations.h"
+#include "frontends/p4/parserControlFlow.h"
 #include "frontends/p4/removeParameters.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -14,7 +15,7 @@
 #include "midend/complexComparison.h"
 #include "midend/convertEnums.h"
 #include "midend/convertErrors.h"
-#include "midend/copyHeaders.h"
+#include "midend/copyStructures.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
 #include "midend/eliminateSwitch.h"
@@ -120,7 +121,10 @@ void MidEnd::addDefaultPasses() {
         // Expand comparisons on structs and headers into comparisons on fields.
         new P4::SimplifyComparisons(&refMap, &typeMap),
         // Expand header and struct assignments into sequences of field assignments.
-        new P4::CopyHeaders(&refMap, &typeMap),
+        new PassRepeated({
+            new P4::CopyStructures(&refMap, &typeMap, false, true, nullptr),
+        }),
+        new P4::RemoveParserControlFlow(&refMap, &typeMap),
         // Flatten nested list expressions.
         new P4::SimplifySelectList(&refMap, &typeMap),
         // Convert booleans in selects into bit<1>.
