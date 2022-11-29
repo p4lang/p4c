@@ -30,6 +30,8 @@ class AssertsParser : public Transform {
     const IR::Node* postorder(IR::P4Table* node) override;
 };
 
+const IR::Expression* getIR(const std::vector<Token>& tokens, size_t index = 0);
+
 class Token {
  public:
     enum class Kind {

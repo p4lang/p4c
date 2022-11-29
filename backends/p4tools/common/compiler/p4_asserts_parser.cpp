@@ -325,17 +325,11 @@ std::vector<Token> combineTokensToNames(const std::vector<Token>& inputVector) {
     std::vector<Token> result;
     Token prevToken = Token(Token::Kind::Unknown, " ", 1);
     cstring txt = "";
-    for (size_t i = 0; i < inputVector.size(); i++) {
-        const auto& input = inputVector[i];
-        if (prevToken.is(Token::Kind::Text) &&
-                (input.is(Token::Kind::Number) || input.is(Token::Kind::LeftParen) ||
-                 input.is(Token::Kind::RightParen))) {
+    for (const auto& input : inputVector) {
+        if (prevToken.is(Token::Kind::Text) && input.is(Token::Kind::Number)) {
             txt += std::string(input.lexeme());
-            if (i == inputVector.size() - 1) {
-                result.emplace_back(Token::Kind::Text, txt, txt.size());
-            }
             continue;
-        }
+        } 
         if (input.is(Token::Kind::Text)) {
             auto strtmp = std::string(input.lexeme());
             if (strtmp == "." && prevToken.is(Token::Kind::Number)) {
@@ -530,6 +524,99 @@ std::vector<const IR::Expression*> AssertsParser::genIRStructs(
     }
 
     return result;
+}
+
+using IRResult = std::pair<const IR::Expression*, size_t>;
+using IRParamsResult = std::pair<std::vector<const IR::Expression*>, size_t>;
+IRParamsResult createParamsIR(const std::vector<Token>& tokens, size_t index) {
+    BUG_CHECK(tokens[index].is(Token::Kind::LeftParen), "Invalid token in createParamsIR");
+    IRResult createArithmeticIR(const std::vector<Token>& tokens, size_t index);
+    auto result = createArithmeticIR(tokens, index);
+    BUG_CHECK(tokens[result.second].is(Token::Kind::RightParen), "Invalid token in createParamsIR");
+    result.second++;
+    return result;
+}
+
+IRResult createArithmeticHighIR(const std::vector<Token>& tokens, size_t index) {
+    auto mainArgument = createFunctionCallIR(tokens, index);
+    if (mainArgument.second >= tokens.size()) {
+        return mainArgument;
+    }
+    if (tokens[mainArgument.second].is_one_of(Token::Kind::Slash, Token::Kind::Percent,
+        Token::Kind::Shr, Token::Kind::Shl, Token::Kind::Mul)) {
+        IRResult right = createArithmeticHighIR(tokens, mainArgument.second + 1);
+        right.first = pickBinaryExpr(tokens[mainArgument.second], mainArgument.first, right.first);
+        return right;
+    }
+    return mainArgument;
+}
+
+IRResult createArithmeticIR(const std::vector<Token>& tokens, size_t index) {
+    if (tokens[index].is(Token::Kind::LeftParen)) {
+        auto params = createParamsIR(tokens, index);
+        BUG_CHECK(params.first.size() == 1, "Invalid format for expression");
+        auto result = IRResult(params.first[0], params.second);
+        return result;
+    }
+    auto mainArgument = createArithmeticIR(tokens, index);
+    if (mainArgument.second >= tokens.size()) {
+        return mainArgument;
+    }
+    if (tokens[mainArgument.second].is_one_of(Token::Kind::Minus, Token::Kind::Plus)) {
+        IRResult right = createArithmeticHighIR(tokens, mainArgument.second + 1);
+        right.first = pickBinaryExpr(tokens[mainArgument.second], mainArgument.first, right.first);
+        return right;
+    }
+    return mainArgument;
+}
+
+IRResult createLogicalHighIR(const std::vector<Token>& tokens, size_t index) { 
+    auto mainArgument = createArithmeticIR(tokens, index);
+    if (mainArgument.second >= tokens.size()) {
+        return mainArgument;
+    }
+    if (tokens[mainArgument.second].is_one_of(Token::Kind::Equal, Token::Kind::NotEqual,
+        Token::Kind::GreaterThan, Token::Kind::GreaterEqual, Token::Kind::LessThan,
+        Token::Kind::LessEqual, Token::Kind::NotEqual)) {
+        IRResult right = createArithmeticIR(tokens, mainArgument.second + 1);
+        right.first = pickBinaryExpr(tokens[mainArgument.second], mainArgument.first, right.first);\
+        return right;
+    }
+    return mainArgument;
+}
+
+IRResult createLogicalIR(const std::vector<Token>& tokens, size_t index) {
+    BUG_CHECK(index < tokens.size(), "Invalid index of a token in createLogicalIR");
+    if (tokens[index].is(Token::Kind::LNot)) {
+        auto result = createLogicalIR(tokes, index + 1);
+        result.first = new IR::LNot(IR::Type_Bool::get(), result.first);
+        return result;
+    }
+    auto mainArgument = createLogicalHighIR(tokes, index);
+    if (mainArgument.secon >= tokens.size()) {
+        return mainArgument;
+    }
+    if (tokens[mainArgument.second].is_one_of(Token::Kind::Disjunction, Token::Kind::Implication)) {
+        if (token.is(Token::Kind::Implication)) {
+            mainArgument.first = new IR::LNot(IR::Type_Bool::get(), mainArgument.first);
+        }
+        auto result = createLogicalIR(tokes, mainArgument.second + 1);
+        result.first = new IR::LOr(IR::Type_Bool::get(), mainArgument, result.first);
+        return result;
+    } else if (tokens[index].is(Token::Kind::Conjunction)) {
+        auto result = createLogicalIR(tokes, mainArgument.second + 1);
+        result.first = new IR::LAnd(IR::Type_Bool::get(), mainArgument, result.first);
+        return result;
+    }
+    BUG_CHECK(mainArgument.second < tokens.size(), "Error in translation of the expression");
+    return mainArgument;
+}
+
+const IR::Expression* getIR(const std::vector<Token>& tokens, size_t index) {
+    BUG_CHECK(index < tokens.size(), "Invalid size of the tokens vector");
+    auto result = createLogicalIR(tokens, index);
+    BUG_CHECK(result.second < tokes.size(), "Can't translate string into IR");
+    return result.first;
 }
 
 const IR::Node* AssertsParser::postorder(IR::P4Table* node) {
