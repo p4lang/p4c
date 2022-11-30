@@ -37,6 +37,8 @@ class EbpfOptions : public CompilerOptions {
     enum XDP2TC xdp2tcMode = XDP2TC_NONE;
     // maximum number of unique ternary masks
     unsigned int maxTernaryMasks = 128;
+    // Enable table cache for LPM and ternary tables
+    bool enableTableCache = false;
 
     EbpfOptions();
 

@@ -201,7 +201,16 @@ class SimpleActionSelectorPSATest(ActionSelectorTest):
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet_any_port(self, pkt, output_ports)
 
-        # TODO: test cache
+        if "--table-caching" in self.p4c_additional_args:
+            # modify cache directly and verify its usage
+            self.table_update(table="MyIC_as_cache", key=[1, "22:33:44:55:66:78"], action=1, data=[DP_PORTS[1]])
+            testutils.send_packet(self, PORT0, pkt)
+            testutils.verify_packet(self, pkt, PORT1)
+
+
+class CacheActionSelectorPSATest(SimpleActionSelectorPSATest):
+    """Test ActionSelector in the same way as in the base class but also test cache after it"""
+    p4c_additional_args = "--table-caching"
 
 
 class ActionSelectorTwoTablesSameInstancePSATest(ActionSelectorTest):

@@ -68,6 +68,7 @@ line_id = 99
 pppoe_session_id = 0xbeac
 core_router_mac = HOST1_MAC
 
+
 def pkt_route(pkt, mac_dst):
     new_pkt = pkt.copy()
     new_pkt[Ether].src = pkt[Ether].dst

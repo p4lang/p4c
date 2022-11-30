@@ -535,6 +535,23 @@ $ bpftool help
 
 Refer to [the bpftool guide](https://manpages.ubuntu.com/manpages/focal/man8/bpftool-prog.8.html) for more examples how to use it.
 
+# Performance optimizations
+
+## Table caching
+
+Table caching optimizes P4 table lookups by adding a cache with all `exact` matches for time-consuming lookups including:
+- table with `ternary` (and/or lpm, exact) key - skip slow TSS algorithm if the key was matched earlier.
+- table with `lpm` (and/or exact) key - skip slow `LPM_TRIE` map (especially when there is many entries) if the key was matched earlier.
+- `ActionSelector` member selection from group - skip slow checksum calculation for `selector` key if it was calculated earlier.
+
+The fast exact-match map is added in front of each instance of a table that contains a `lpm`, `ternary` or `selector` match
+key. The table cache is implemented with `BPF_MAP_TYPE_LRU_HASH`, which shares its implementation with the BPF hash map.
+The LRU map provides a good lookup performance, but lower performance on map updates due to a maintenance process. Thus,
+this optimization fits into use cases, where a value of table key changes infrequently between packets.
+
+This optimization may not improve performance in every case, so it must be explicitly enabled by compiler option. To enable
+table caching pass `--table-caching` to the compiler.
+
 # TODO / Limitations
 
 We list the known bugs/limitations below. Refer to the Roadmap section for features planned in the near future.
@@ -545,7 +562,7 @@ with some NICs. So far, we have verified the correct behavior with Intel 82599ES
 - `lookahead()` with bit fields (e.g., `bit<16>`) doesn't work.
 - `@atomic` operation is not supported yet.
 - `psa_idle_timeout` is not supported yet.
-- DirectCounter and DirectMeter externs are not supported for P4 tables with implementation (ActionProfile).
+- DirectCounter and DirectMeter externs are not supported for P4 tables with implementation (ActionProfile or ActionSelector).
 - The `xdp2tc=head` mode works only for packets larger than 34 bytes (the size of Ethernet and IPv4 header).
 - `value_set` only supports the exact match type and can only match on a single field in the `select()` expression.
 - The number of entries in ternary tables are limited by the number of unique ternary masks. If a P4 program uses many ternary tables and the `--max-ternary-masks` (default: 128) is set 
@@ -553,6 +570,12 @@ with some NICs. So far, we have verified the correct behavior with Intel 82599ES
   requires iteration over BPF maps. Note that the recent kernel introduced the [bpf_for_each_map_elem()](https://lwn.net/Articles/846504/) helper that should simplify the iteration process and help to overcome the current limitation.
 - Setting a size of ternary tables does not currently work. 
 - DirectMeter cannot be used if a table defines `ternary` match fields, as [BPF spinlocks are not allowed in inner maps of map-in-map](https://patchwork.ozlabs.org/project/netdev/patch/20190124041403.2100609-2-ast@kernel.org/).
+- Table cache optimization can't be enabled on tables with DirectCounter or DirectMeter due to two different states of a
+  table entry. Tables with these externs will not have enabled cache optimization even when enabled by compiler option.
+- When table cache optimization is enabled for a table, the number of cached entries is determined as a half of table size.
+  This would be more configurable or smart during compilation.
+- Updates to tables or ActionSelector with enabled table cache optimization require cache invalidation. `nikss` library
+  will remove all cached entries if it detects cache.
 
 # Roadmap
 

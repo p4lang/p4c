@@ -129,6 +129,18 @@ class EBPFTable : public EBPFTableBase {
     // Whether to drop packet if no match entry found.
     // Some table implementations may want to continue processing.
     virtual bool dropOnNoMatchingEntryFound() const { return true; }
+
+    virtual bool cacheEnabled() { return false; }
+    virtual void emitCacheLookup(CodeBuilder* builder, cstring key, cstring value) {
+        (void)builder;
+        (void)key;
+        (void)value;
+    }
+    virtual void emitCacheUpdate(CodeBuilder* builder, cstring key, cstring value) {
+        (void)builder;
+        (void)key;
+        (void)value;
+    }
 };
 
 class EBPFCounterTable : public EBPFTableBase {

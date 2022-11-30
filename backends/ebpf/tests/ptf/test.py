@@ -610,7 +610,6 @@ class PassToKernelStackTest(P4EbpfTest):
 
         super(PassToKernelStackTest, self).tearDown()
 
-
     def runTest(self):
         # simple forward by Linux routing
         pkt = testutils.simple_tcp_packet(eth_dst="00:00:00:00:00:01", ip_src="10.0.0.2", ip_dst="20.0.0.15")
@@ -650,3 +649,61 @@ class PassToKernelStackTest(P4EbpfTest):
         mask.set_do_not_care_scapy(IP, "chksum")
         testutils.verify_packet(self, mask, PORT0)
         self.counter_verify(name="egress_eg_packets", key=[0], packets=0)
+
+
+class LPMTableCachePSATest(P4EbpfTest):
+    p4_file_path = "p4testdata/table-cache-lpm.p4"
+    p4c_additional_args = "--table-caching"
+
+    def runTest(self):
+        # TODO: make this additional entry working
+        # self.table_add(table="ingress_tbl_lpm", key=["00:11:22:33:44:50/44"], action=1, data=["11:22:33:44:55:67"])
+        self.table_add(table="ingress_tbl_lpm", key=["00:11:22:33:44:55/48"], action=1, data=["11:22:33:44:55:66"])
+        pkt = testutils.simple_ip_packet(eth_dst="00:11:22:33:44:50")
+        exp_pkt = testutils.simple_ip_packet(eth_dst="11:22:33:44:55:66")
+        exp_pkt[Ether].type = 0x8601
+
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, exp_pkt, PORT1)
+
+        # Validate that cache entry is used during packet processing. By altering cache we get two different states
+        # of a table entry with different executed actions. Based on this it is possible to detect which entry is in
+        # use, table entry or cached entry. If we only read cache here then we couldn't test that it is used correctly.
+        self.table_update(table="ingress_tbl_lpm_cache",
+                          key=["32w0x60", "32w0", "64w0x5044332211000000"], action=0, data=["160w0"])
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, pkt, PORT1)
+
+        # Update table entry to test if NIKSS library invalidates cache
+        self.table_update(table="ingress_tbl_lpm", key=["00:11:22:33:44:55"], action=1, data=["11:22:33:44:55:66"])
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, exp_pkt, PORT1)
+
+
+class TernaryTableCachePSATest(P4EbpfTest):
+    p4_file_path = "p4testdata/table-cache-ternary.p4"
+    p4c_additional_args = "--table-caching"
+
+    def runTest(self):
+        self.table_add(table="ingress_tbl_ternary", key=["00:11:22:33:44:55"], action=1, data=["11:22:33:44:55:66"])
+        pkt = testutils.simple_ip_packet(eth_dst="00:11:22:33:44:55")
+        exp_pkt = testutils.simple_ip_packet(eth_dst="11:22:33:44:55:66")
+        exp_pkt[Ether].type = 0x8601
+
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, exp_pkt, PORT1)
+
+        # Validate that cache entry is used during packet processing. By altering cache we get two different states
+        # of a table entry with different executed actions. Based on this it is possible to detect which entry is in
+        # use, table entry or cached entry. If we only read cache here then we couldn't test that it is used correctly.
+        self.table_update(table="ingress_tbl_ternary_cache",
+                          key=["00:11:22:33:44:55"],
+                          action=1, data=["32w0", "11:22:33:44:55:66", "16w0", "64w0"])
+        testutils.send_packet(self, PORT0, pkt)
+        exp_pkt[Ether].type = 0x0800
+        testutils.verify_packet(self, exp_pkt, PORT1)
+
+        # Delete table entry to test if NIKSS library invalidates cache
+        self.table_delete(table="ingress_tbl_ternary", key=["00:11:22:33:44:55"])
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, pkt, PORT1)
