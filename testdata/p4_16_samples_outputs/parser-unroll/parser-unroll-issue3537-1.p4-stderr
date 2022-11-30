@@ -1,2 +1,6 @@
 [--Wwarn=invalid] warning: Parser cycle can't be unrolled, because ParserUnroll can't detect the number of loop iterations:
 Parser ParserI state chain: start, s1, s2, s2
+[--Wwarn=invalid] warning: Parser cycle can't be unrolled, because ParserUnroll can't detect the number of loop iterations:
+Parser ParserI state chain: start, s1, s2, s1
+[--Wwarn=invalid] warning: Parser cycle can't be unrolled, because ParserUnroll can't detect the number of loop iterations:
+Parser ParserI state chain: start, s1, s1

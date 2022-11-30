@@ -39,15 +39,6 @@ struct M {
 }
 
 parser ParserI(packet_in packet, out H hdr, inout M meta, inout standard_metadata_t smeta) {
-    state start {
-        packet.extract<h1_t>(hdr.h1);
-        packet.extract<h2_t>(hdr.h2);
-        transition select(hdr.h2.f1) {
-            16w0x800: parse_ipv4;
-            16w0x86dd: parse_ipv6;
-            default: accept;
-        }
-    }
     state parse_ipv4 {
         packet.extract<h3_t>(hdr.h3);
         transition select(hdr.h3.f2, hdr.h3.f3) {
@@ -73,6 +64,15 @@ parser ParserI(packet_in packet, out H hdr, inout M meta, inout standard_metadat
         transition select(hdr.h6.f5) {
             16w0xcafe: parse_ipv4;
             16w0xffff: reject;
+            default: accept;
+        }
+    }
+    state start {
+        packet.extract<h1_t>(hdr.h1);
+        packet.extract<h2_t>(hdr.h2);
+        transition select(hdr.h2.f1) {
+            16w0x800: parse_ipv4;
+            16w0x86dd: parse_ipv6;
             default: accept;
         }
     }
