@@ -730,7 +730,8 @@ void EBPFActionSelectorPSA::emitCacheLookup(CodeBuilder* builder, cstring key, c
 
         builder->emitIndent();
         if (memcpy) {
-            builder->appendFormat("memcpy(&%s.%s, &", cacheKeyVar.c_str(), fieldName.c_str());
+            builder->appendFormat("__builtin_memcpy(&%s.%s, &", cacheKeyVar.c_str(),
+                                  fieldName.c_str());
             codeGen->visit(s->expression);
             builder->appendFormat(", %d)", scalar->bytesRequired());
         } else {
