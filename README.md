@@ -232,7 +232,7 @@ use them, but YMMV.
 
 - GNU autotools for the build process
 
-- CMake 3.0.2 or higher
+- CMake 3.16.3 or higher
 
 - Boehm-Weiser garbage-collector C++ library
 
