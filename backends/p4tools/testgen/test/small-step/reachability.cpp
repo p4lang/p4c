@@ -327,7 +327,7 @@ TEST_F(P4CReachability, testReacabilityEngine) {
     const auto hash = std::get<2>(result);
     std::string strBehavior = "ingress.MyAction1 + ingress.MyAction2;";
     strBehavior += "ingress.table2";
-    P4Tools::ReachabilityEngine engine(dcg, strBehavior);
+    P4Tools::ReachabilityEngine engine(dcg, strBehavior, program);
     auto* engineState = P4Tools::ReachabilityEngineState::getInitial();
     // Initialize engine.
     const auto* ingress = getFromHash(hash, "ingress");

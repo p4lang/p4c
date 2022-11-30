@@ -30,8 +30,6 @@ class AssertsParser : public Transform {
     const IR::Node* postorder(IR::P4Table* node) override;
 };
 
-const IR::Expression* getIR(const std::vector<Token>& tokens, size_t index = 0);
-
 class Token {
  public:
     enum class Kind {
@@ -66,6 +64,7 @@ class Token {
         Shr,                 // >>
         Shl,                 // <<
         Mul,                 // *
+        Comma,               // ,
         Comment,             // //
         Unknown,
         EndString,
@@ -114,6 +113,27 @@ class Lexer {
     char prev() noexcept;
     char get() noexcept;
 };
+
+class Parser {
+ private:
+    const IR::P4Program* program;
+    const std::vector<Token> tokens;
+    size_t index;
+
+ public:
+    Parser(const IR::P4Program* program);
+    static const IR::Expression* getIR(const char* str, const IR::P4Program* program);
+
+ protected:
+    const IR::Expression* getIR();
+    const IR::Expression* createLogicalIR();
+    const IR::Expression* createArithmeticIR();
+    const IR::Expression* createFunctionCallOrConstantIR();
+    const IR::Expression* createConstantIR();
+    std::vector<const IR::Expression*> createParamsIR();
+    const IR::Type* getDefinedType(cstring& txt);
+};
+
 }  // namespace AssertsParser
 }  // namespace P4Tools
 

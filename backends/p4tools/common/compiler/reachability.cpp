@@ -366,8 +366,9 @@ void ReachabilityEngineState::clear() { state.clear(); }
 
 ReachabilityEngine::ReachabilityEngine(gsl::not_null<const NodesCallGraph*> dcg,
                                        std::string reachabilityExpression,
+                                       const IR::P4Program* program,
                                        bool eliminateAnnotations)
-    : dcg(dcg), hash(dcg->getHash()) {
+    : dcg(dcg), hash(dcg->getHash()), program(program) {
     std::list<const DCGVertexType*> start;
     start.push_back(nullptr);
     size_t i = 0;
@@ -573,11 +574,7 @@ const IR::Expression* ReachabilityEngine::getCondition(const DCGVertexType* n) {
 
 const IR::Expression* ReachabilityEngine::stringToNode(std::string name) {
     LOG1("Parse restriction  - " << name);
-    const IR::Vector<IR::KeyElement> keyElements;
-    auto exprsVector = AssertsParser::AssertsParser::genIRStructs("", name, keyElements);
-    BUG_CHECK(exprsVector.size() == 1, "Invalid format of the restriction %1%", name);
-    LOG1("Parsed result  - " << exprsVector[0]);
-    return exprsVector[0];
+    return AssertsParser::Parser::getIR(name.c_str(), program);
 }
 
 }  // namespace P4Tools
