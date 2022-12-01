@@ -187,10 +187,6 @@ void ValidateParsedProgram::postorder(const IR::EntriesList *l) {
                 "%1%: invalid initializer. Table initializers must belong to a table.", l);
         return;
     }
-    auto ep = table->properties->getProperty(IR::TableProperties::entriesPropertyName);
-    if (!ep->isConstant)
-        ::error(ErrorType::ERR_INVALID,
-                "%1%: invalid initializer. Table initializers must be constant.", l);
 }
 
 /// Default label in switch statement is always the last one.

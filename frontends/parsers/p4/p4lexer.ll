@@ -159,6 +159,8 @@ using Parser = P4::P4Parser;
                   return makeToken(PARSER); }
 "package"       { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(PACKAGE); }
+"priority"      { BEGIN(driver.saveState); driver.template_args = false;
+                  return makeToken(PRIORITY); }
 "return"        { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(RETURN); }
 "select"        { BEGIN(driver.saveState); driver.template_args = false;

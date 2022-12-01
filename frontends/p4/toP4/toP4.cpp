@@ -1512,6 +1512,12 @@ bool ToP4::preorder(const IR::EntriesList *l) {
 bool ToP4::preorder(const IR::Entry *e) {
     dump(2);
     builder.emitIndent();
+    if (e->isConst) builder.append("const ");
+    if (e->priority) {
+        builder.append("priority=");
+        visit(e->priority);
+        builder.append(" ");
+    }
     if (e->keys->components.size() == 1)
         setListTerm("", "");
     else

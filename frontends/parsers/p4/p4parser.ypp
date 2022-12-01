@@ -229,8 +229,8 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token<Token>      TRUE FALSE THIS
 %token<Token>      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT
                    ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
-                   INT KEY  LIST SELECT MATCH_KIND TYPE OUT PACKAGE PARSER PRAGMA RETURN STATE
-                   STRING STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
+                   INT KEY  LIST SELECT MATCH_KIND TYPE OUT PACKAGE PARSER PRAGMA PRIORITY RETURN
+                   STATE STRING STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
 
 %token<cstring> IDENTIFIER TYPE_IDENTIFIER STRING_LITERAL
 %token<UnparsedConstant>  INTEGER
@@ -246,7 +246,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %type<IR::Expression*>      expression lvalue keysetExpression selectExpression
                             stateExpression optInitializer initializer
                             simpleKeysetExpression transitionStatement switchLabel
-                            p4rtControllerType reducedSimpleKeysetExpression
+                            p4rtControllerType reducedSimpleKeysetExpression optEntryPriority
                             nonBraceExpression
 %type<ConstType*>           baseType typeOrVoid specializedType headerStackType
                             typeRef tupleType typeArg realTypeArg namedType p4listType
@@ -478,6 +478,7 @@ nonTypeName
 name
     : nonTypeName { $$ = $1; }
     | LIST { $$ = new IR::ID(@1, "list"); }
+    | PRIORITY { $$ = new IR::ID(@1, "priority"); }
     | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
     ;
 
@@ -487,6 +488,7 @@ nonTableKwName
     | APPLY            { $$ = new IR::ID(@1, "apply"); }
     | STATE            { $$ = new IR::ID(@1, "state"); }
     | TYPE             { $$ = new IR::ID(@1, "type"); }
+    | PRIORITY         { $$ = new IR::ID(@1, "priority"); }
     ;
 
 optCONST
@@ -1335,16 +1337,21 @@ actionRef
     ;
 
 entry
-    : keysetExpression ":" actionRef optAnnotations ";"
-        { if (auto l = $1->to<IR::ListExpression>())
-            $$ = new IR::Entry(@1+@4, $4, l, $3, false);
+    : optCONST optEntryPriority keysetExpression ":" actionRef optAnnotations ";"
+        { if (auto l = $3->to<IR::ListExpression>())
+            $$ = new IR::Entry(@1+@6, $6, $1.isConst, $2, l, $5, false);
           else {  // if not a tuple, make it a list of 1
-            IR::Vector<IR::Expression> le($1);
-            $$ = new IR::Entry(@1+@4, $4,
-                   new IR::ListExpression(@1, le),
-                   $3, true);
+            IR::Vector<IR::Expression> le($3);
+            $$ = new IR::Entry(@1+@6, $6, $1.isConst, $2,
+                   new IR::ListExpression(@1, le), $5, true);
           }
         }
+    ;
+
+optEntryPriority
+    : %empty                         { $$ = nullptr; }
+    | PRIORITY "=" INTEGER           { $$ = new IR::Constant(parseConstantChecked(@3, $3)); }
+    | PRIORITY "=" "(" expression ")" { $$ = $4; }
     ;
 
 entriesList
