@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required (VERSION 3.16.3 FATAL_ERROR)
+# This is the CMake version supplied by Ubuntu 18.04.
+cmake_minimum_required (VERSION 3.10.2 FATAL_ERROR)
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
