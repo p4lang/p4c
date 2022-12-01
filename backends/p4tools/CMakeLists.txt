@@ -85,9 +85,13 @@ set(ENABLE_TESTING ON)
 # Include sub projects.
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common)
 
+
+# Custom IR constructs for P4Tools.
+set(IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/common/testgen.def)
+
 file(GLOB tools_modules RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/modules ${CMAKE_CURRENT_SOURCE_DIR}/modules/*)
 foreach(ext ${tools_modules})
-  set (tools_dir  ${CMAKE_CURRENT_SOURCE_DIR}/modules/${ext})
+  set(tools_dir ${CMAKE_CURRENT_SOURCE_DIR}/modules/${ext})
   if(EXISTS ${tools_dir}/CMakeLists.txt AND IS_DIRECTORY ${tools_dir})
     # Generate an option that makes it possible to disable this extension.
     string(MAKE_C_IDENTIFIER ${ext} EXT_AS_IDENTIFIER)
@@ -102,5 +106,5 @@ foreach(ext ${tools_modules})
   endif()
 endforeach(ext)
 
-# Custom IR constructs for P4Tools.
-set(IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/common/testgen.def PARENT_SCOPE)
+# Propagate new def files upwards after all modules have been included.
+set(IR_DEF_FILES ${IR_DEF_FILES} PARENT_SCOPE)
