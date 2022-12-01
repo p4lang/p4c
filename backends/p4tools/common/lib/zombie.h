@@ -1,7 +1,6 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_LIB_ZOMBIE_H_
 #define BACKENDS_P4TOOLS_COMMON_LIB_ZOMBIE_H_
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 

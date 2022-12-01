@@ -7,8 +7,6 @@
 #include <vector>
 
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
-#include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/util.h"
@@ -325,8 +323,8 @@ bool AbstractStepper::stepStackPushPopFront(const IR::Expression *stackRef,
     return false;
 }
 
-const Value *AbstractStepper::evaluateExpression(const IR::Expression *expr,
-                                                 std::optional<const IR::Expression *> cond) const {
+const IR::Literal* AbstractStepper::evaluateExpression(
+    const IR::Expression* expr, std::optional<const IR::Expression*> cond) const {
     BUG_CHECK(solver.isInIncrementalMode(),
               "Currently, expression valuation only supports an incremental solver.");
     auto constraints = state.getPathConstraint();
@@ -339,7 +337,7 @@ const Value *AbstractStepper::evaluateExpression(const IR::Expression *expr,
     auto solverResult = solver.checkSat(constraints);
     // If the solver can find a solution under the given condition, get the model and return the
     // value.
-    const Value *result = nullptr;
+    const IR::Literal* result = nullptr;
     if (solverResult != std::nullopt && *solverResult) {
         auto model = *solver.getModel();
         model.complete(expr);

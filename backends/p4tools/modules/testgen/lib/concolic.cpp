@@ -4,7 +4,6 @@
 #include <utility>
 #include <vector>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/id.h"
 #include "lib/exceptions.h"

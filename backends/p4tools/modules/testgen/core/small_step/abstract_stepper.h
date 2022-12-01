@@ -6,7 +6,6 @@
 #include <string>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
 #include "ir/node.h"
 #include "ir/vector.h"
@@ -155,8 +154,8 @@ class AbstractStepper : public Inspector {
     /// Optionally, a condition can be provided that is temporarily added to the list of assertions.
     /// If the solver can find a solution, it @returns the assigned value to the expression.
     /// If not, this function @returns nullptr.
-    const Value *evaluateExpression(const IR::Expression *expr,
-                                    std::optional<const IR::Expression *> cond) const;
+    const IR::Literal* evaluateExpression(const IR::Expression* expr,
+                                          boost::optional<const IR::Expression*> cond) const;
 
     /// Reset the given reference to an  uninitialized value. If the reference has a
     /// Type_StructLike, unroll the reference and reset each member.

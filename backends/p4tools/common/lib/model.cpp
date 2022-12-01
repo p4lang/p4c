@@ -96,7 +96,8 @@ const IR::ListExpression *Model::evaluateListExpr(const IR::ListExpression *list
     return resolvedListExpr;
 }
 
-const Value *Model::evaluate(const IR::Expression *expr, ExpressionMap *resolvedExpressions) const {
+const IR::Literal* Model::evaluate(const IR::Expression* expr,
+                                   ExpressionMap* resolvedExpressions) const {
     class SubstVisitor : public Transform {
         const Model &self;
 

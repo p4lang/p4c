@@ -7,7 +7,6 @@
 
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/arch_spec.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/namespace_context.h"
 #include "ir/declaration.h"
 #include "ir/ir.h"

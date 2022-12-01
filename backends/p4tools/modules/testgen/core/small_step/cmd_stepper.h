@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 

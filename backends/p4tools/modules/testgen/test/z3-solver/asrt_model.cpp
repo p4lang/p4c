@@ -11,7 +11,6 @@
 #include <boost/multiprecision/traits/explicit_conversion.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"

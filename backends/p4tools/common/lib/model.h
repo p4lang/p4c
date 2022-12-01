@@ -7,7 +7,6 @@
 
 #include <boost/container/flat_map.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
 
 namespace P4Tools {
@@ -41,8 +40,8 @@ class Model : public SymbolicMapType {
     /// A BUG occurs if the given expression refers to a variable that is not bound by this model.
     /// If the input list @param resolvedExpressions is not null, we also collect the resolved value
     /// of this expression.
-    const Value *evaluate(const IR::Expression *expr,
-                          ExpressionMap *resolvedExpressions = nullptr) const;
+    const IR::Literal* evaluate(const IR::Expression* expr,
+                                ExpressionMap* resolvedExpressions = nullptr) const;
 
     // Evaluates a P4 StructExpression in the context of this model. Recursively calls into
     // @evaluate and substitutes all members of this list with a Value type.
@@ -62,10 +61,11 @@ class Model : public SymbolicMapType {
     /// If the input list @param resolvedExpressions is not null, we also collect the bound values
     /// of all the variables we have resolved within this expression.
     template <template <class...> class Collection>
-    std::vector<const Value *> evaluateAll(const Collection<const IR::Expression *> *exprs,
-                                           ExpressionMap *resolvedExpressions = nullptr) const {
-        std::vector<const Value *> result(exprs->size());
-        for (const auto *expr : *exprs) {
+    std::vector<const IR::Literal*> evaluateAll(
+        const Collection<const IR::Expression*>* exprs,
+        ExpressionMap* resolvedExpressions = nullptr) const {
+        std::vector<const IR::Literal*> result(exprs->size());
+        for (const auto* expr : *exprs) {
             result.push_back(evaluate(expr, resolvedExpressions));
         }
         return result;

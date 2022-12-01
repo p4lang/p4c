@@ -30,18 +30,6 @@ class AbstractRepCheckedNode : public ICastable {
     }
 };
 
-/// Represents a constraint that can be shipped to and asserted within a solver.
-// TODO: This should implement AbstractRepCheckedNode<Constraint>.
-using Constraint = IR::Expression;
-
-/// Represents a P4 constant value.
-//
-// Representations of values include the following:
-//   - IR::Constant for int-like values
-//   - IR::BoolLiteral
-// The lowest common ancestor of these two is an IR::Literal.
-using Value = IR::Literal;
-
 }  // namespace P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_FORMULAE_H_ */

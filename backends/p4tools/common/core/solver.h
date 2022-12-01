@@ -4,11 +4,14 @@
 #include <optional>
 #include <vector>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "lib/cstring.h"
 
 namespace P4Tools {
+
+/// Represents a constraint that can be shipped to and asserted within a solver.
+// TODO: This should implement AbstractRepCheckedNode<Constraint>.
+using Constraint = IR::Expression;
 
 /// Provides a higher-level interface for an SMT solver.
 class AbstractSolver : public ICastable {
