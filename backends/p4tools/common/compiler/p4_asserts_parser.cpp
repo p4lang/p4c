@@ -540,10 +540,6 @@ std::vector<const IR::Expression*> Parser::createParamsIR() {
     return result;
 }
 
-const IR::Type* Parser::getDefinedType(cstring& txt) {
-    return nullptr;
-}
-
 const IR::Expression* Parser::createConstantIR() {
     if (tokens[index].is(Token::Kind::Text)) {
         cstring txt;
@@ -556,8 +552,6 @@ const IR::Expression* Parser::createConstantIR() {
             expression = new IR::BoolLiteral(true);
         } else if (txt == "false") {
             expression = new IR::BoolLiteral(false);
-        } else if (const auto* type = getDefinedType(txt)) {
-            expression = new IR::PathExpression(type, new IR::Path(txt));
         } else {
             // Used for representation of a member part.
             expression = new IR::StringLiteral(txt);
@@ -595,7 +589,22 @@ const IR::Expression* Parser::createConstantIR() {
     BUG("Unimplemented token %1%", tokens[index].lexeme());
 }
 
+const IR::Type* Parser::getDefinedType(cstring txt, const IR::Type* prevType) {
+    if (prevType == nullptr) {
+        // Find struct inside a program.
+        auto* decl = program->getDeclsByName(txt)->single();
+        return decl->to<IR::Type>();
+    } else if (const auto* structType = prevType->to<IR::Type_StructLike>()) {
+        // Find field in a struct.
+        const auto* field = structType->getField(txt);
+        BUG_CHECK(field != nullptr, "Can't find field %1% in struct %2%", txt, prevType);
+        return field->type;
+    }
+    BUG("Can't find't type %1%", prevType);
+}
+
 const IR::Expression* Parser::createFunctionCallOrConstantIR() {
+    LOG1("createFunctionCallOrConstantIR : " << tokens[index].lexeme());
     if (tokens[index].is_one_of(Token::Kind::Minus, Token::Kind::Plus)) {
         // Unary operations
         index++;
@@ -615,17 +624,24 @@ const IR::Expression* Parser::createFunctionCallOrConstantIR() {
         methodCall->arguments = v;
         mainArgument = methodCall;
     } else if (tokens[index].is(Token::Kind::Dot)) {
+        const IR::Type* prevType = nullptr;
+        if (const auto* str = mainArgument->to<IR::StringLiteral>()) {
+            prevType = getDefinedType(str->value, nullptr);
+            mainArgument = new IR::PathExpression(prevType, new IR::Path(str->value));
+        }
         do {
             index++;
             auto result = createConstantIR();
+            prevType = getDefinedType(result->to<IR::StringLiteral>()->value, prevType);
             mainArgument =
-                new IR::Member(mainArgument, result->to<IR::StringLiteral>()->value);
+                new IR::Member(prevType, mainArgument, result->to<IR::StringLiteral>()->value);
         } while (tokens[index].is(Token::Kind::Dot));
     }
     return mainArgument;
 }
 
 const IR::Expression* Parser::createArithmeticIR() {
+    LOG1("createArithmeticIR : " << tokens[index].lexeme());
     if (tokens[index].is(Token::Kind::LeftParen)) {
         auto params = createParamsIR();
         BUG_CHECK(params.size() == 1, "Invalid format for expression");
@@ -664,6 +680,7 @@ const IR::Expression* Parser::createArithmeticIR() {
 }
 
 const IR::Expression* Parser::createLogicalIR() {
+    LOG1("createLogicalIR : " << tokens[index].lexeme());
     BUG_CHECK(index < tokens.size(), "Invalid index of a token in createLogicalIR");
     if (tokens[index].is(Token::Kind::LNot)) {
         index++;
@@ -697,6 +714,8 @@ const IR::Expression* Parser::createLogicalIR() {
 }
 
 const IR::Expression* Parser::getIR() {
+    index = 0;
+    LOG1("getIR : " << tokens[index].lexeme());
     BUG_CHECK(index < tokens.size(), "Invalid size of the tokens vector");
     const auto* result = createLogicalIR();
     BUG_CHECK(index < tokens.size(), "Can't translate string into IR");
@@ -710,11 +729,12 @@ const IR::Expression* Parser::getIR(const char* str, const IR::P4Program* progra
          token = lex.next()) {
         tmp.push_back(token);
     }
-    Parser parser(program);
+    Parser parser(program, tmp);
     return parser.getIR();
 }
 
-Parser::Parser(const IR::P4Program* program) : program(program) {}
+Parser::Parser(const IR::P4Program* program, std::vector<Token> &tokens)
+    : program(program), tokens(tokens) {}
 
 const IR::Node* AssertsParser::postorder(IR::P4Table* node) {
     const auto* annotation = node->getAnnotation("entry_restriction");

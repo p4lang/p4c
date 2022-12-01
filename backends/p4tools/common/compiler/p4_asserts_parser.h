@@ -121,7 +121,7 @@ class Parser {
     size_t index;
 
  public:
-    Parser(const IR::P4Program* program);
+    Parser(const IR::P4Program* program, std::vector<Token> &tokens);
     static const IR::Expression* getIR(const char* str, const IR::P4Program* program);
 
  protected:
@@ -131,7 +131,7 @@ class Parser {
     const IR::Expression* createFunctionCallOrConstantIR();
     const IR::Expression* createConstantIR();
     std::vector<const IR::Expression*> createParamsIR();
-    const IR::Type* getDefinedType(cstring& txt);
+    const IR::Type* getDefinedType(cstring txt, const IR::Type* prevType);
 };
 
 }  // namespace AssertsParser
