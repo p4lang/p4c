@@ -32,14 +32,16 @@ namespace P4Tools {
 
 namespace AssertsParser {
 
-static std::vector<std::string> NAMES{
-    "Priority",    "Text",           "True",         "False",       "LineStatementClose",
-    "Id",          "Number",         "Minus",        "Plus",        "Dot",
-    "FieldAcces",  "MetadataAccess", "LeftParen",    "RightParen",  "Equal",
-    "NotEqual",    "GreaterThan",    "GreaterEqual", "LessThan",    "LessEqual",
-    "LNot",        "Colon",          "Semicolon",    "Conjunction", "Disjunction",
-    "Implication", "Slash",          "Percent",      "Shr",         "Shl",
-    "Mul",         "Comment",        "Unknown",      "EndString",   "End",
+static std::vector<std::string> NAMES {
+    "Priority",      "Text",        "LineStatementClose", "Number",        "Comment", 
+    "StringLiteral", "LeftParen",   "RightParen",         "LeftSParent",   "RightSParent",
+    "Dot",           "FieldAccess", "LNot",               "Complement",    "Mul",
+    "Percent",       "Slash",       "Minus",              "SaturationSub", "Plus",
+    "SaturationAdd", "LessEqual",   "Shl",                "LessThan",      "GreaterEqual",
+    "Shr",           "GreaterThan", "NotEqual",           "Equal",         "BAnd",
+    "Xor",           "BOr",         "Conjunction",        "Disjunction",   "Implication",
+    "Colon",         "Question",    "Semicolon",          "Comma",         "Unknown",
+    "EndString",     "End"
 };
 
 AssertsParser::AssertsParser(std::vector<std::vector<const IR::Expression*>>& output)
@@ -544,7 +546,7 @@ const IR::Expression* Parser::createConstantIR() {
     if (tokens[index].is(Token::Kind::Text)) {
         cstring txt;
         do {
-            txt += std::data(tokens[index].lexeme());
+            txt += tokens[index].lexeme().data();
             index++;
         } while (tokens[index].is(Token::Kind::Text));
         const IR::Expression* expression = nullptr;
@@ -708,7 +710,7 @@ const IR::Expression* Parser::createLogicalIR() {
         Token::Kind::LessEqual, Token::Kind::NotEqual)) {
         size_t oldIndex = index;
         index++;
-        return pickBinaryExpr(tokens[oldIndex], mainArgument, createArithmeticIR());
+        return pickBinaryExpr(tokens[oldIndex], mainArgument, createLogicalIR());
     }
     return mainArgument;
 }
@@ -722,12 +724,15 @@ const IR::Expression* Parser::getIR() {
     return result;
 }
 
-const IR::Expression* Parser::getIR(const char* str, const IR::P4Program* program) {
+const IR::Expression* Parser::getIR(const char* str, const IR::P4Program* program,
+                                    TokensSet skippedTokens) {
     Lexer lex(str);
     std::vector<Token> tmp;
     for (auto token = lex.next(); !token.is_one_of(Token::Kind::End, Token::Kind::Unknown);
          token = lex.next()) {
-        tmp.push_back(token);
+        if (skippedTokens.count(token.kind()) == 0) {
+            tmp.push_back(token);
+        }
     }
     Parser parser(program, tmp);
     return parser.getIR();
@@ -852,6 +857,15 @@ Token Lexer::next() noexcept {
             return atom(Token::Kind::Semicolon);
         case ',':
             return atom(Token::Kind::Comma);
+        case '.':
+            return atom(Token::Kind::Dot);
+        case ':':
+            get();
+            if (get() == ':') {
+                get();
+                return atom(Token::Kind::FieldAccess);
+            }
+            return atom(Token::Kind::Colon);
         case '&':
             get();
             if (get() == '&') {

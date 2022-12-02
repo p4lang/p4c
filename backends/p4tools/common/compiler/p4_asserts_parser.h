@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <iterator>
+#include <set>
 #include <string_view>
 #include <vector>
 
@@ -35,37 +36,43 @@ class Token {
     enum class Kind {
         Priority,
         Text,
-        True,
-        False,
         LineStatementClose,  // \n
-        Id,                  // this, this.foo
         Number,              // 1, 2, -1, 5.2, -5.3
-        Minus,               // -
-        Plus,                // +
-        Dot,                 // .
-        FieldAcces,          // :: (after key)
-        MetadataAccess,      // :: (otherwise)
+        Comment,             // //String
+        StringLiteral,       // "String"
         LeftParen,           // (
         RightParen,          // )
-        Equal,               // ==
-        NotEqual,            // !=
-        GreaterThan,         // >
-        GreaterEqual,        // >=
-        LessThan,            // <
-        LessEqual,           // <=
+        LeftSParent,         // [
+        RightSParent,        // ]
+        Dot,                 // .
+        FieldAccess,         // ::
         LNot,                // !
-        Colon,               // :
-        Semicolon,           // ;
+        Complement,          // ~
+        Mul,                 // *
+        Percent,             // %
+        Slash,               // /
+        Minus,               // -
+        SaturationSub,       // |-|
+        Plus,                // +
+        SaturationAdd,       // |+|
+        LessEqual,           // <=
+        Shl,                 // <<
+        LessThan,            // <
+        GreaterEqual,        // >=
+        Shr,                 // >>
+        GreaterThan,         // >
+        NotEqual,            // !=
+        Equal,               // ==
+        BAnd,                // &
+        Xor,                 // ^
+        BOr,                 // |
         Conjunction,         // &&
         Disjunction,         // ||
         Implication,         // ->
-        Slash,               // /
-        Percent,             // %
-        Shr,                 // >>
-        Shl,                 // <<
-        Mul,                 // *
+        Colon,               // :
+        Question,            // ?
+        Semicolon,           // ;
         Comma,               // ,
-        Comment,             // //
         Unknown,
         EndString,
         End,
@@ -114,6 +121,8 @@ class Lexer {
     char get() noexcept;
 };
 
+using TokensSet = std::set<Token::Kind>;
+
 class Parser {
  private:
     const IR::P4Program* program;
@@ -122,8 +131,10 @@ class Parser {
 
  public:
     Parser(const IR::P4Program* program, std::vector<Token> &tokens);
-    static const IR::Expression* getIR(const char* str, const IR::P4Program* program);
-
+    static const IR::Expression* getIR(const char* str, const IR::P4Program* program,
+                                       TokensSet skippedTokens = {Token::Kind::Comment});
+    char prev() noexcept;
+    
  protected:
     const IR::Expression* getIR();
     const IR::Expression* createLogicalIR();
