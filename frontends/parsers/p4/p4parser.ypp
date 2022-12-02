@@ -1338,12 +1338,14 @@ actionRef
 
 entry
     : optCONST optEntryPriority keysetExpression ":" actionRef optAnnotations ";"
+        // below we set the position starting at @3 because optional
+        // fields generate weird position information.
         { if (auto l = $3->to<IR::ListExpression>())
-            $$ = new IR::Entry(@1+@6, $6, $1.isConst, $2, l, $5, false);
+            $$ = new IR::Entry(@3+@6, $6, $1.isConst, $2, l, $5, false);
           else {  // if not a tuple, make it a list of 1
             IR::Vector<IR::Expression> le($3);
-            $$ = new IR::Entry(@1+@6, $6, $1.isConst, $2,
-                   new IR::ListExpression(@1, le), $5, true);
+            $$ = new IR::Entry(@3+@6, $6, $1.isConst, $2,
+                   new IR::ListExpression(@3, le), $5, true);
           }
         }
     ;
