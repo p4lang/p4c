@@ -1388,7 +1388,8 @@ const IR::Node* TypeInference::postorder(IR::Type_List* type) {
 
 const IR::Node* TypeInference::postorder(IR::Type_Tuple* type) {
     for (auto field : type->components) {
-        if (field->is<IR::IContainer>()) {
+        auto fieldType = getTypeType(field);
+        if (fieldType->is<IR::IContainer>() || fieldType->is<IR::Type_ArchBlock>()) {
             typeError("%1%: not supported as a tuple field", field);
             return type;
         }
