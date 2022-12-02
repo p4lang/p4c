@@ -27,7 +27,6 @@ namespace P4 {
  * Checks that match annotations only have 1 argument which is of type match_kind.
  */
 class ValidateValueSets final : public Inspector {
-
  public:
     ValidateValueSets() {
         setName("ValidateValueSets");
