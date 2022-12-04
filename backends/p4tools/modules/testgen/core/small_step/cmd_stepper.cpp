@@ -596,19 +596,24 @@ bool CmdStepper::preorder(const IR::SwitchStatement* switchStatement) {
         cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState", currentTaint));
     } else {
         // Otherwise, we pick the switch statement case in a normal fashion.
+
+        bool hasMatched = false;
         for (const auto* switchCase : switchStatement->cases) {
-            // Nothing to do with this statement, fall through to the next case.
+            // We have either matched already, or still need to match.
+            hasMatched = hasMatched || switchStatement->expression->equiv(*switchCase->label);
+            // Nothing to do with this statement. Fall through to the next case.
             if (switchCase->statement == nullptr) {
                 continue;
             }
-            if (switchStatement->expression->equiv(*switchCase->label)) {
+            // If any of the values in the match list hits, execute the switch case block.
+            if (hasMatched) {
                 cmds.emplace_back(switchCase->statement);
-                // If the statement is a block, we do not fall through
+                // If the statement is a block, we do not fall through and terminate execution.
                 if (switchCase->statement->is<IR::BlockStatement>()) {
                     break;
                 }
             }
-            // The default label should be last, so break here.
+            // The default label must be last. Always break here.
             if (switchCase->label->is<IR::DefaultExpression>()) {
                 cmds.emplace_back(switchCase->statement);
                 break;
