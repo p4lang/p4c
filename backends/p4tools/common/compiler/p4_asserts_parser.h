@@ -137,11 +137,16 @@ class Parser {
     
  protected:
     const IR::Expression* getIR();
-    const IR::Expression* createLogicalIR();
-    const IR::Expression* createArithmeticIR();
-    const IR::Expression* createFunctionCallOrConstantIR();
-    const IR::Expression* createConstantIR();
-    std::vector<const IR::Expression*> createParamsIR();
+    const IR::Expression* createPunctuationMarks();
+    const IR::Expression* createListExpressions(const IR::Expression*, const char*, Token::Kind);
+    const IR::Expression* createLogicalOp();
+    const IR::Expression* createIR(Token::Kind, const IR::Expression*, const IR::Expression*);
+    const IR::Expression* createBinaryOp();
+    const IR::Expression* createEqCompareAndShiftOp();
+    const IR::Expression* createArithmeticOp();
+    const IR::Expression* createFunctionCallOrConstantOp();
+    const IR::Expression* createConstantOp();
+    const IR::Expression* createSliceOrArrayOp(const IR::Expression*);
     const IR::Type* getDefinedType(cstring txt, const IR::Type* prevType);
 };
 
