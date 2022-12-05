@@ -73,6 +73,7 @@ limitations under the License.
 #include "uselessCasts.h"
 #include "validateMatchAnnotations.h"
 #include "validateParsedProgram.h"
+#include "validateValueSets.h"
 
 namespace P4 {
 
@@ -180,6 +181,7 @@ const IR::P4Program* FrontEnd::run(const CompilerOptions& options, const IR::P4P
         new TypeInference(&refMap, &typeMap, false, false),  // insert casts, dont' check arrays
         new SetStrictStruct(&typeMap, false),
         new ValidateMatchAnnotations(&typeMap),
+        new ValidateValueSets(),
         new BindTypeVariables(&refMap, &typeMap),
         new PassRepeated(
             {new SpecializeGenericTypes(&refMap, &typeMap),
