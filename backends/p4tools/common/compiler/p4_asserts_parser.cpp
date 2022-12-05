@@ -714,7 +714,7 @@ const IR::Expression* Parser::createFunctionCallOrConstantOp() {
         return res;
     }
     const auto* mainArgument = createConstantOp();
-    if (tokens[index].is(Token::Kind::Dot)) {
+    if (tokens[index].is(Token::Kind::Dot) || tokens[index].is(Token::Kind::FieldAccess)) {
         const IR::Type* prevType = nullptr;
         do {
             index++;
@@ -722,7 +722,7 @@ const IR::Expression* Parser::createFunctionCallOrConstantOp() {
             prevType = getDefinedType(result->to<IR::StringLiteral>()->value, mainArgument->type);
             mainArgument =
                 new IR::Member(prevType, mainArgument, result->to<IR::NamedExpression>()->expression->to<IR::StringLiteral>()->value);
-        } while (tokens[index].is(Token::Kind::Dot));
+        } while (tokens[index].is(Token::Kind::Dot) || tokens[index].is(Token::Kind::FieldAccess));
         if (index >= tokens.size()) {
             return mainArgument;
         }
@@ -733,15 +733,6 @@ const IR::Expression* Parser::createFunctionCallOrConstantOp() {
     }
     if (tokens[index].is(Token::Kind::LeftSParent) && mainArgument->is<IR::PathExpression>()) {
         return createSliceOrArrayOp(mainArgument);
-    }
-    if (tokens[index].is(Token::Kind::FieldAccess)) {
-        do {
-            index++;
-            auto result = createConstantOp();
-            prevType = getDefinedType(result->to<IR::StringLiteral>()->value, mainArgument->type);
-            mainArgument =
-                new IR::Member(prevType, mainArgument, result->to<IR::NamedExpression>()->expression->to<IR::StringLiteral>()->value);
-        } while (tokens[index].is(Token::Kind::FieldAccess));
     }
     return mainArgument;
 }
