@@ -18,7 +18,7 @@ limitations under the License.
 #define IR_IR_TREE_MACROS_H_
 
 /* macro table listing ALL IR subclasses of Node and all their direct and indirect bases
- * whenever a new IR Node subclass is addeded, it MUST be added to this table.  Target
+ * whenever a new IR Node subclass is added, it MUST be added to this table.  Target
  * specific subclasses might be broken out into a separate table and included here
  * Because we want to be able to forward-declare all these types, the class type MUST
  * be a simple identifier that will be declared in namespace IR.  Aliases can be defined

@@ -17,10 +17,10 @@ limitations under the License.
 #ifndef _IR_ID_H_
 #define _IR_ID_H_
 
-#include "lib/source_file.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
-#include "lib/cstring.h"
+#include "lib/source_file.h"
 
 namespace IR {
 

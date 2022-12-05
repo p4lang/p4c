@@ -14,9 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ir.h"
 #include "dbprint.h"
-#include "lib/hex.h"
+
+#include <iostream>
+#include <list>
+#include <set>
+#include <utility>
+#include <vector>
+
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/indent.h"
+#include "lib/log.h"
+#include "lib/ordered_map.h"
 
 using namespace DBPrint;
 using namespace IndentCtl;

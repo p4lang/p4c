@@ -18,6 +18,7 @@
 #include <boost/graph/copy.hpp>
 
 #include "graphs.h"
+#include "lib/json.h"
 
 #ifndef _BACKENDS_GRAPHS_GRAPH_VISITOR_H_
 #define _BACKENDS_GRAPHS_GRAPH_VISITOR_H_

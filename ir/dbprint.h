@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _IR_DBPRINT_H_
 #define _IR_DBPRINT_H_
 
-#include <assert.h>
-#include "lib/log.h"  // to get operator<< templates that call dbprint methods
-#include "lib/indent.h"
+#include <cassert>
+#include <iosfwd>
+#include "lib/log.h"
 
 namespace DBPrint {
 

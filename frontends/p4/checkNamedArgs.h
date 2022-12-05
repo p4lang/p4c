@@ -18,6 +18,7 @@ limitations under the License.
 #define _FRONTENDS_P4_CHECKNAMEDARGS_H_
 
 #include "ir/ir.h"
+#include "ir/visitor.h"
 
 namespace P4 {
 

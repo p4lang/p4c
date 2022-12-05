@@ -35,6 +35,8 @@ limitations under the License.
 
 // Declare dependencies.
 %code requires {
+#include "ir/ir.h"
+
 namespace V1 {
 class V1Lexer;
 class V1ParserDriver;

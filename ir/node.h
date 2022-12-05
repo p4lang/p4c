@@ -17,15 +17,15 @@ limitations under the License.
 #ifndef _IR_NODE_H_
 #define _IR_NODE_H_
 
-#include <memory>
-#include "lib/cstring.h"
-#include "lib/stringify.h"
-#include "lib/indent.h"
-#include "lib/source_file.h"
+#include <iosfwd>
+#include <typeinfo>
+
 #include "ir-tree-macros.h"
-#include "lib/log.h"
-#include "lib/json.h"
+#include "ir/gen-tree-macro.h"
 #include "lib/castable.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/source_file.h"
 
 class Visitor;
 struct Visitor_Context;
@@ -35,13 +35,19 @@ class Transform;
 class JSONGenerator;
 class JSONLoader;
 
+namespace Util {
+class JsonObject;
+}  // namespace Util
+
 namespace IR {
 
 class Node;
-class Annotation;
+class Annotation;  // IWYU pragma: keep
+template <class T>
+class Vector;  // IWYU pragma: keep
+template <class T>
+class IndexedVector;  // IWYU pragma: keep
 
-template<class T> class Vector;
-template<class T> class IndexedVector;
 // node interface
 class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable {
  public:

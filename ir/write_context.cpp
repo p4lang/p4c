@@ -14,9 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ir.h"
-#include "lib/log.h"
-#include "frontends/p4/typeMap.h"
+#include <string>
+#include <vector>
+
+#include <boost/format.hpp>
+
+#include "ir/indexed_vector.h"
+#include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/ordered_map.h"
+#include "lib/safe_vector.h"
 
 /* Determine from the Visitor context whether the currently being visited IR node
  * denotes something that might be written to by the code.  This is always conservative

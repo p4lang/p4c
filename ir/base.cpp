@@ -14,7 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ir.h"
+#include <boost/format.hpp>
+
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/ir.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
 
 namespace IR {
 

@@ -16,6 +16,35 @@ limitations under the License.
 
 #include "ir/ir.h"
 
+#include <strings.h>
+
+#include <functional>
+#include <iterator>
+#include <list>
+#include <map>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+#include <boost/format.hpp>
+
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/enumerator.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/null.h"
+#include "lib/ordered_map.h"
+#include "lib/safe_vector.h"
+
 namespace IR {
 
 const cstring ParserState::accept = "accept";

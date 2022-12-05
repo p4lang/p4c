@@ -17,6 +17,14 @@ limitations under the License.
 #ifndef _IR_NAMEMAP_H_
 #define _IR_NAMEMAP_H_
 
+#include <map>
+
+#include "ir/node.h"
+#include "lib/cstring.h"
+#include "lib/enumerator.h"
+#include "lib/error.h"
+#include "lib/exceptions.h"
+
 class JSONLoader;
 
 namespace IR {

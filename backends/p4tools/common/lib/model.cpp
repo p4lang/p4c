@@ -8,6 +8,7 @@
 #include <boost/container/vector.hpp>
 #include <boost/format.hpp>
 
+#include "frontends/p4/optimizeExpressions.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir-inline.h"
@@ -126,7 +127,7 @@ const Value* Model::evaluate(const IR::Expression* expr, ExpressionMap* resolved
         explicit SubstVisitor(const Model& model) : self(model) {}
     };
     const auto* substituted = expr->apply(SubstVisitor(*this));
-    const auto* evaluated = IR::optimizeExpression(substituted);
+    const auto* evaluated = P4::optimizeExpression(substituted);
     const auto* literal = evaluated->checkedTo<IR::Literal>();
     // Add the variable to the resolvedExpressions list, if the list is not null.
     if (resolvedExpressions != nullptr) {

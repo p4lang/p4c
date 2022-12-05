@@ -17,22 +17,22 @@ limitations under the License.
 #ifndef _IR_JSON_GENERATOR_H_
 #define _IR_JSON_GENERATOR_H_
 
-#include <assert.h>
-
+#include <cassert>
 #include <string>
 #include <unordered_set>
 
 #include <boost/optional.hpp>
 
+#include "ir/node.h"
 #include "lib/bitvec.h"
 #include "lib/cstring.h"
 #include "lib/indent.h"
+#include "lib/ltbitmatrix.h"
 #include "lib/match.h"
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 #include "lib/safe_vector.h"
 
-#include "ir.h"
 
 class JSONGenerator {
     std::unordered_set<int> node_refs;

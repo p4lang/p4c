@@ -17,7 +17,8 @@ limitations under the License.
 #ifndef _IR_VECTOR_H_
 #define _IR_VECTOR_H_
 
-#include "dbprint.h"
+#include "ir/dbprint.h"
+#include "ir/node.h"
 #include "lib/enumerator.h"
 #include "lib/null.h"
 #include "lib/safe_vector.h"

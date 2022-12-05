@@ -1,14 +1,15 @@
 #ifndef IR_JSON_PARSER_H_
 #define IR_JSON_PARSER_H_
 
+#include <algorithm>
 #include <iosfwd>
+#include <string>
 #include <vector>
 
-#include "lib/cstring.h"
 #include "lib/big_int_util.h"
-#include "lib/ordered_map.h"
-#include "lib/source_file.h"
 #include "lib/castable.h"
+#include "lib/cstring.h"
+#include "lib/ordered_map.h"
 
 class JsonData : public ICastable {
  public:

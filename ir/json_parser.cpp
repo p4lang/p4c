@@ -16,7 +16,13 @@ limitations under the License.
 
 #include "ir/json_parser.h"
 
+#include <ctype.h>
+
 #include <iostream>
+#include <list>
+#include <utility>
+
+#include <boost/multiprecision/number.hpp>
 
 int JsonObject::get_id() const {
     if (find("Node_ID") == end())

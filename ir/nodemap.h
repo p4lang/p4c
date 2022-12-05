@@ -17,6 +17,9 @@ limitations under the License.
 #ifndef _IR_NODEMAP_H_
 #define _IR_NODEMAP_H_
 
+#include "ir/node.h"
+#include "lib/cstring.h"
+
 namespace IR {
 
 template<class KEY, class VALUE,

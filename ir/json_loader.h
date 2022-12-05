@@ -19,21 +19,23 @@ limitations under the License.
 
 #include <assert.h>
 
-#include <string>
 #include <map>
+#include <string>
 #include <unordered_map>
 #include <utility>
 
 #include <boost/optional.hpp>
 
+#include "ir.h"
+#include "json_parser.h"
+#include "lib/bitvec.h"
 #include "lib/cstring.h"
 #include "lib/indent.h"
+#include "lib/ltbitmatrix.h"
 #include "lib/match.h"
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 #include "lib/safe_vector.h"
-#include "ir.h"
-#include "json_parser.h"
 
 class JSONLoader {
     template<typename T> class has_fromJSON {

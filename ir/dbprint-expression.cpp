@@ -14,8 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ir.h"
+#include <list>
+#include <ostream>
+#include <utility>
+#include <vector>
+
+#include <boost/multiprecision/number.hpp>
+
 #include "dbprint.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/ir.h"
+#include "ir/namemap.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/indent.h"
+#include "lib/log.h"
+#include "lib/safe_vector.h"
 #include "lib/hex.h"
 
 #define ALL_UNARY_OPS(M, ...)           \

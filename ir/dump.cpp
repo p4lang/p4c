@@ -14,9 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ir.h"
-
 #include "dump.h"
+
+#include <set>
+
+#include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/indent.h"
+#include "lib/source_file.h"
 
 namespace {
 class IRDumper : public Inspector {

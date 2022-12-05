@@ -14,11 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ir.h"
-#include "lib/gc.h"
-#include "lib/n4.h"
-
 #include "pass_manager.h"
+
+#include <cstddef>
+
+#include <memory>
+#include <ostream>
+#include <stdexcept>
+#include <string>
+#include <utility>
+
+#include "ir/dump.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
+#include "lib/error.h"
+#include "lib/gc.h"
+#include "lib/indent.h"
+#include "lib/log.h"
+#include "lib/n4.h"
 
 void PassManager::removePasses(const std::vector<cstring> &exclude) {
     for (auto it : exclude) {

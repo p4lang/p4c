@@ -14,9 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ir.h"
-#include "dbprint.h"
+#include <ostream>
+#include <vector>
+
+#include <boost/core/enable_if.hpp>
+#include <boost/format.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/detail/et_ops.hpp>
+#include <boost/multiprecision/number.hpp>
+#include <boost/multiprecision/traits/explicit_conversion.hpp>
+
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/ir.h"
 #include "lib/big_int_util.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
 
 const IR::Expression *IR::Slice::make(const IR::Expression *e, unsigned lo, unsigned hi) {
     if (auto k = e->to<IR::Constant>()) {

@@ -17,15 +17,15 @@ limitations under the License.
 #ifndef IR_INDEXED_VECTOR_H_
 #define IR_INDEXED_VECTOR_H_
 
-
-#include "dbprint.h"
+#include "ir/dbprint.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/vector.h"
 #include "lib/enumerator.h"
 #include "lib/error.h"
 #include "lib/null.h"
+#include "lib/ordered_map.h"
 #include "lib/safe_vector.h"
-#include "vector.h"
-#include "id.h"
-#include "declaration.h"
 
 class JSONLoader;
 

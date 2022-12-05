@@ -17,6 +17,12 @@ limitations under the License.
 #ifndef _IR_IR_INLINE_H_
 #define _IR_IR_INLINE_H_
 
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/json_generator.h"
+#include "ir/namemap.h"
+#include "ir/nodemap.h"
+#include "ir/visitor.h"
 #define DEFINE_APPLY_FUNCTIONS(CLASS, TEMPLATE, TT, INLINE)                                     \
     TEMPLATE INLINE bool IR::CLASS TT::apply_visitor_preorder(Modifier &v)                      \
     { Node::traceVisit("Mod pre"); return v.preorder(this); }                                   \

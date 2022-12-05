@@ -17,12 +17,28 @@ limitations under the License.
 #ifndef _IR_VISITOR_H_
 #define _IR_VISITOR_H_
 
-#include <stdexcept>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <iosfwd>
+#include <map>
+#include <memory>
+#include <type_traits>
+#include <typeinfo>
 #include <unordered_map>
-#include "lib/cstring.h"
-#include "ir/ir.h"
-#include "lib/exceptions.h"
+#include <utility>
+
+#include "ir/gen-tree-macro.h"
+#include "ir/ir-tree-macros.h"
+#include "ir/node.h"
+#include "ir/vector.h"
 #include "lib/castable.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
+#include "lib/source_file.h"
 
 // declare this outside of Visitor so it can be forward declared in node.h
 struct Visitor_Context {

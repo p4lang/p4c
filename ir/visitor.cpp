@@ -14,12 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-
-#include <time.h>
-#include "ir.h"
-#include "lib/log.h"
-
 #include "visitor.h"
+
+#include <stdlib.h>
+#include <time.h>
+
+#if HAVE_LIBGC
+#include <gc/gc.h>
+#endif
+
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/ir.h"
+#include "ir/vector.h"
+#include "lib/algorithm.h"
+#include "lib/error_catalog.h"
+#include "lib/indent.h"
+#include "lib/log.h"
+#include "lib/map.h"
 
 /** @class Visitor::ChangeTracker
  *  @brief Assists visitors in traversing the IR.

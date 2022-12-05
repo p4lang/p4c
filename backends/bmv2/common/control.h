@@ -26,6 +26,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "helpers.h"
 #include "ir/ir.h"
+#include "lib/algorithm.h"
 #include "lib/json.h"
 #include "midend/convertEnums.h"
 #include "sharedActionSelectorCheck.h"

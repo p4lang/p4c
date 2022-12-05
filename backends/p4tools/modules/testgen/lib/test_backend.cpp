@@ -17,6 +17,7 @@
 #include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/timer.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "frontends/p4/optimizeExpressions.h"
 #include "ir/irutils.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
@@ -77,7 +78,7 @@ const Model* TestBackEnd::computeConcolicVariables(const ExecutionState* executi
             }
             CHECK_NULL(pathConstraint);
             pathConstraint = executionState->getSymbolicEnv().subst(pathConstraint);
-            pathConstraint = IR::optimizeExpression(pathConstraint);
+            pathConstraint = P4::optimizeExpression(pathConstraint);
             asserts.push_back(pathConstraint);
         }
         auto solverResult = solver->checkSat(asserts);

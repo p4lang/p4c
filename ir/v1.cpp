@@ -14,12 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <algorithm>
+#include <cstdio>
+#include <functional>
+#include <list>
+#include <map>
+#include <string>
+#include <vector>
 
-#include "ir.h"
-#include "dbprint.h"
-#include "lib/big_int_util.h"
+#include <boost/format.hpp>
+
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/ir.h"
+#include "ir/namemap.h"
+#include "ir/node.h"
+#include "ir/vector.h"
 #include "lib/bitops.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/ordered_map.h"
+#include "lib/safe_vector.h"
+#include "lib/source_file.h"
 
 #define SINGLETON_TYPE(NAME)                                    \
 const IR::Type_##NAME *IR::Type_##NAME::get() {                 \

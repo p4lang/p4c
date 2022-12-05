@@ -17,10 +17,21 @@ limitations under the License.
 #ifndef _IR_PASS_MANAGER_H_
 #define _IR_PASS_MANAGER_H_
 
-#include "visitor.h"
+#include <functional>
+#include <initializer_list>
+#include <iosfwd>
+#include <type_traits>
+#include <vector>
 
-typedef std::function<void(const char* manager, unsigned seqNo,
-                           const char* pass, const IR::Node* node)> DebugHook;
+#include "ir/node.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/safe_vector.h"
+
+typedef std::function<void(const char* manager, unsigned seqNo, const char* pass,
+                           const IR::Node* node)>
+    DebugHook;
 
 class PassManager : virtual public Visitor, virtual public Backtrack {
     bool early_exit_flag = false;

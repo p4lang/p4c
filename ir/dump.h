@@ -17,8 +17,12 @@ limitations under the License.
 #ifndef _IR_DUMP_H_
 #define _IR_DUMP_H_
 
-#include <string>
+#include <cstdint>
 #include <iostream>
+#include <string>
+
+#include "ir/node.h"
+#include "ir/visitor.h"
 
 /* overloads rather than optional arguments to make it easier to call from the debugger */
 void dump(std::ostream &out, const IR::Node *n);

@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "local_copyprop.h"
 
+#include <unordered_set>
+
 #include "expr_uses.h"
 #include "frontends/common/copySrcInfo.h"
 #include "has_side_effects.h"

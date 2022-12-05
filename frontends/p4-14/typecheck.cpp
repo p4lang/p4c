@@ -16,6 +16,9 @@ limitations under the License.
 
 #include "typecheck.h"
 
+#include "ir/dump.h"
+#include "lib/log.h"
+
 /// P4-14 (v1.0 and v1.1) type checking algorithm
 /// Initial type setting based on immediate context:
 /// - replace named reference to ActionParams in the bodies of ActionFunctions with the

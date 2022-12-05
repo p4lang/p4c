@@ -13,6 +13,7 @@
 
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
+#include "frontends/p4/optimizeExpressions.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/irutils.h"
@@ -174,7 +175,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                 // If the guard condition is tainted, treat it equivalent to an invalid state.
                 if (!state.hasTaint(cond)) {
                     cond = state.getSymbolicEnv().subst(cond);
-                    cond = IR::optimizeExpression(cond);
+                    cond = P4::optimizeExpression(cond);
                     // Check whether the condition is satisfiable in the current execution state.
                     auto pathConstraints = state.getPathConstraint();
                     pathConstraints.push_back(cond);
