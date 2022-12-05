@@ -11,9 +11,16 @@ This directory implements PSA (Portable Switch Architecture) for the eBPF backen
 
 # Design
 
+The PSA to eBPF compiler provides two flavors of generated eBPF code: TC-based design and XDP-based design.
+The TC-based design leverages eBPF TC (Traffic Control) hook and is able to implement any PSA program. 
+The XDP-based design offloads packet processing to eBPF XDP (eXpress Data Path) hook and provides better performance than the TC-based flavor.
+However, the XDP-based design lacks support for packet recirculation, QoS (no integration with TC qdisc) and CLONE_E2E packet path.
+
+## TC-based design (default)
+
 P4 packet processing is translated into a set of eBPF programs attached to the TC hook. The eBPF programs implement packet processing defined
 in a P4 program written according to the PSA model. The TC hook is used as a main engine, because it enables a full implementation of the PSA specification.
-We also plan to contribute the XDP-based version of the PSA implementation that does not implement the full specification, but provides better performance.
+The XDP-based version of the PSA implementation does not implement the full specification, but provides better performance.
 
 The TC-based design of PSA for eBPF is depicted in Figure below.
 
@@ -33,8 +40,27 @@ The TC-based design of PSA for eBPF is depicted in Figure below.
   It is also responsible for packet replication via clone sessions or multicast groups and sending packet to CPU.
 - `tc-egress` - The PSA Egress pipeline (composed of Parser, Control block and Deparser) is attached to the TC Egress hook. As there is no
   XDP hook in the Egress path, the use of TC is mandatory for the egress processing. **Note!** If the PSA Egress pipeline is not used (i.e. it is left empty by a developer),
-  the PSA-eBPF compiler will not generate the TC Egress program. This brings a noticeable performance gain, if the egress pipeline is not used. 
-  
+  the PSA-eBPF compiler will not generate the TC Egress program. This brings a noticeable performance gain, if the egress pipeline is not used.
+
+## XDP-based design
+
+The XDP-based design of PSA for eBPF is depicted in Figure below.
+
+![XDP-based PSA-eBPF design](psa-ebpf-xdp-design.png)
+
+`xdp-helper` does not exist in this design, instead the PSA Ingress pipeline is attached to XDP hook.
+Since XDP does not provide a hook on the egress path, we mimic the PSA Egress pipeline by using eBPF program
+attached to `BPF_MAP_TYPE_DEVMAP`, a special type of BPF map used to perform packet redirection with `bpf_redirect_map()` helper.
+Also, XDP hook in the currently supported kernel version (up to 5.13) does not support packet cloning. Therefore, packets to be cloned
+are passed up to the TC hook, where the Packet Replication Engine is implemented. Once a packet reaches the TC hook,
+it is further processed by TC exclusively. Thus, the PSA-eBPF compiler generates a TC Egress program, which is a mirror reflection of the 
+PSA Egress pipeline attached to the XDP DEVMAP. The packets to be cloned are passed up to TC with additional metadata. The mechanism used to 
+transfer the metadata depends on the XDP2TC mode, we support `cpumap` and `head` modes for XDP-based design (`meta` mode is not supported).
+
+There is no difference (comparing to TC-based design) in how PSA externs, P4 match kinds and parser primitives are implemented for XDP-based design.
+
+To compile P4 programs for XDP, use `--xdp` compiler option.
+
 ## Packet paths
 
 ### NTK (Normal Packet To Kernel) 
@@ -53,10 +79,16 @@ As a consequence, all packets that have not been processed by the PSA Ingress pi
 
 ### NFP (Normal Packet From Port)
 
+**TC-based design**
+
 Packet arriving on an interface is intercepted in the XDP hook by the `xdp-helper` program. It performs pre-processing and
 packet is passed for further processing to the TC ingress. Note that there is no P4-related processing done in the `xdp-helper` program.
 
 By default, a packet is further passed to the TC subsystem. It is done by `XDP_PASS` action and packet is further handled by `tc-ingress` program.
+
+**XDP-based design** 
+
+No specific processing is done. Packets are just received by the eBPF programm attached to XDP.
 
 ### RESUBMIT
 
@@ -79,7 +111,11 @@ for (i = 0; i < MAX_RESUBMIT_DEPTH; i++) {
 }
 ```
 
+The same mechanism for RESUBMIT is used in the TC-based and XDP-based design.
+
 ### NU (Normal Unicast), NM (Normal Multicast), CI2E (Clone Ingress to Egress)
+
+**TC-based design**
 
 NU, NM and CI2E refer to process of sending packet from the PSA Ingress Pipeline (more specifically from the Traffic Manager)
 to the PSA Egress pipeline. The NU path is implemented in the eBPF subsystem by invoking the `bpf_redirect()` helper from
@@ -97,12 +133,25 @@ are stored in the inner hash map.
 While performing the packet replication, the eBPF program does a lookup to the outer map based on the clone session/multicast group identifier and, then,
 does another lookup to the inner map to find all members.
 
+**XDP-based design**
+
+The NU path is implemented by calling `bpf_redirect_map()` after the ingress processing is completed.
+The NM and CI2E paths are not possible in the XDP layer. Packets marked to be cloned are sent up to the TC hook
+with additional metadata (e.g., parsed headers) and they are cloned by the eBPF program attached to the TC Ingress by using `bpf_clone_redirect()`.
+The clone sessions and multicast groups are implemented exactly like for the TC-based design.
+
 ### CE2E (Clone Egress to Egress)
+
+**TC-based design**
 
 CE2E refers to process of copying a packet that was handled by the Egress pipeline and resubmitting the cloned packet to the Egress Parser.
 
 CE2E is implemented by invoking `bpf_clone_redirect()` helper in the Egress path. Output ports are determined based on the
 `clone_session_id` and lookup to "clone_session" BPF map, which is shared among TC ingress and egress (eBPF subsystem allows for map sharing between programs).
+
+**XDP-based design**
+
+CE2E is not supported by the XDP-based design.
 
 ### Sending packet to CPU
 
@@ -111,7 +160,11 @@ a control plane application and data plane. Sending packet to CPU does not diffe
 A control plane application should listen for new packets on the interface identified by `PSA_PORT_CPU` in a P4 program. 
 By redirecting a packet to `PSA_PORT_CPU` in the Ingress pipeline the packet is forwarded via Traffic Manager to the Egress pipeline and then, sent to the "CPU" interface.
 
+The mechanism is common for both design options (TC/XDP).
+
 ### NTP (Normal packet to port)
+
+**TC-based design**
 
 Packets from `tc-egress` are sent out to the egress port. The egress port is determined in the Ingress pipeline and is not changed in the Egress pipeline.
 
@@ -120,12 +173,22 @@ The eBPF programs generated by P4-eBPF compiler sets `skb->priority` value based
 The `skb->priority` is used to interact between eBPF programs and `TC qdisc`. A user can configure different QoS behaviors via TC CLI and 
 send a packet from PSA pipeline to a specific QoS class identified by `skb->priority`. 
 
+**XDP-based design**
+
+Packets from the XDP egress program attached to BPF_DEVMAP are directly sent out to the egress port. There is no equivalent of Buffering & Queueing Engine in the XDP-based design.
+
 ### RECIRCULATE
+
+**TC-based design**
 
 The purpose of `RECIRCULATE` is to transfer packet processing back from the Egress Deparser to the Ingress Parser.
 
 In order to implement `RECIRCULATE` we assume the existence of `PSA_PORT_RECIRCULATE` ports. Therefore, packet recirculation is simply performed by
 invoking `bpf_redirect()` to the `PSA_PORT_RECIRCULATE` port with `BPF_F_INGRESS` flag to enforce processing a packet by the Ingress pipeline.
+
+**XDP-based design**
+
+The RECIRCULATE path is not supported by the XDP-based design.
 
 ## Metadata
 
@@ -583,9 +646,6 @@ with some NICs. So far, we have verified the correct behavior with Intel 82599ES
 
 All the below features are already implemented and will be contributed to the P4 compiler in subsequent pull requests.
 
-- **XDP support.** The current version of P4-eBPF compiler leverages the BPF TC hook for P4-programmable packet processing. 
-The TC subsystem enables implementation of the full PSA specification, contrary to XDP, but offers lower throughput. We're going to 
-contribute the XDP-based version of P4-eBPF that is not fully spec-compliant, but provides higher throughput.
 - **Extended ValueSet support.** We plan to extend implementation to support other match kinds and multiple fields in the `select()` expression.
 
 ## Long-term goals
