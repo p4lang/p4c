@@ -78,7 +78,7 @@ const Model* TestBackEnd::computeConcolicVariables(const ExecutionState* executi
             }
             CHECK_NULL(pathConstraint);
             pathConstraint = executionState->getSymbolicEnv().subst(pathConstraint);
-            pathConstraint = IR::optimizeExpression(pathConstraint);
+            pathConstraint = P4::optimizeExpression(pathConstraint);
             asserts.push_back(pathConstraint);
         }
         auto solverResult = solver->checkSat(asserts);

@@ -4,7 +4,7 @@
 #include "frontends/common/constantFolding.h"
 #include "frontends/p4/strengthReduction.h"
 
-namespace IR {
+namespace P4 {
 
 /// Applies expression optimizations to the input node.
 /// Currently, performs constant folding and strength reduction.
@@ -19,6 +19,6 @@ const T* optimizeExpression(const T* node) {
     return node;
 }
 
-}  // namespace IR
+}  // namespace P4
 
 #endif /* FRONTENDS_P4_OPTIMIZEEXPRESSIONS_H_ */

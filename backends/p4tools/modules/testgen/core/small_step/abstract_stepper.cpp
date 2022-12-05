@@ -335,7 +335,7 @@ const Value* AbstractStepper::evaluateExpression(
               "Currently, expression valuation only supports an incremental solver.");
     auto constraints = state.getPathConstraint();
     expr = state.getSymbolicEnv().subst(expr);
-    expr = IR::optimizeExpression(expr);
+    expr = P4::optimizeExpression(expr);
     // Assert the path constraint to the solver and check whether it is satisfiable.
     if (cond) {
         constraints.push_back(*cond);

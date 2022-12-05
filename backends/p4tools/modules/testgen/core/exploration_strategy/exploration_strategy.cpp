@@ -44,7 +44,7 @@ ExplorationStrategy::Branch::Branch(boost::optional<const Constraint*> c,
         // Substitutes all variables to their symbolic value (expression on the program's initial
         // state).
         constraint = prevState.getSymbolicEnv().subst(*c);
-        constraint = IR::optimizeExpression(constraint);
+        constraint = P4::optimizeExpression(constraint);
         // Append the evaluated and optimized constraint to the next execution state's list of
         // path constraints.
         nextState->pushPathConstraint(constraint);
