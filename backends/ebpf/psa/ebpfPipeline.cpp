@@ -758,7 +758,7 @@ void TCTrafficManagerForXDP::emitGlobalMetadataInitializer(CodeBuilder* builder)
 
     // if Traffic Manager decided to pass packet to the kernel stack earlier, send it up immediately
     builder->emitIndent();
-    builder->appendFormat("if (%s->pass_to_kernel == true) return %s;", compilerGlobalMetadata,
+    builder->appendFormat("if (%s->pass_to_kernel) return %s;", compilerGlobalMetadata,
                           progTarget->forwardReturnCode());
     builder->newline();
 
