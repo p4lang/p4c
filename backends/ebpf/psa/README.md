@@ -12,7 +12,7 @@ This directory implements PSA (Portable Switch Architecture) for the eBPF backen
 # Design
 
 The PSA to eBPF compiler provides two flavors of generated eBPF code: TC-based design and XDP-based design.
-The TC-based design leverages eBPF TC (Traffic Control) hook and is able to implement any PSA program at the cost of performance. 
+The TC-based design leverages eBPF TC (Traffic Control) hook and is able to implement any PSA program. 
 The XDP-based design offloads packet processing to eBPF XDP (eXpress Data Path) hook and provides better performance than the TC-based flavor.
 However, the XDP-based design lacks support for packet recirculation, QoS (no integration with TC qdisc) and CLONE_E2E packet path.
 
