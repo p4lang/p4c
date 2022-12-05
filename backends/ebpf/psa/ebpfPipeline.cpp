@@ -800,14 +800,15 @@ void TCTrafficManagerForXDP::emitReadXDP2TCMetadataFromHead(CodeBuilder* builder
     builder->append(
         "    void *data = (void *)(long)skb->data;\n"
         "    void *data_end = (void *)(long)skb->data_end;\n"
-        "    if (((char *) data + 14 + sizeof(struct xdp2tc_metadata)) > (char *) data_end) {\n"
+        "    if (((char *) data + sizeof(struct ethhdr) + sizeof(struct xdp2tc_metadata)) > "
+        "(char *) data_end) {\n"
         "        return TC_ACT_SHOT;\n"
         "    }\n");
     builder->emitIndent();
     builder->appendLine("struct xdp2tc_metadata xdp2tc_md = {};");
     builder->emitIndent();
     builder->appendFormat(
-        "bpf_skb_load_bytes(%s, 14, &xdp2tc_md, "
+        "bpf_skb_load_bytes(%s, sizeof(struct ethhdr), &xdp2tc_md, "
         "sizeof(struct xdp2tc_metadata))",
         model.CPacketName.str());
     builder->endOfStatement(true);
