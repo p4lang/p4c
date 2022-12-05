@@ -602,7 +602,9 @@ void PSAArchXDP::emitXDP2TCInternalStructures(CodeBuilder* builder) const {
 }
 
 void PSAArchXDP::emitDummyProgram(CodeBuilder* builder) const {
-    // this is static program, so we can just paste a piece of code.
+    // In some cases (like veth pair on some kernels) XDP program must be present on the both ends
+    // of the pair. This program, which passes all the packets to TC layer, can be used in such case
+    // on the second end.
     builder->appendLine("SEC(\"xdp_redirect_dummy_sec\")");
     builder->append("int xdp_redirect_dummy(struct xdp_md *skb)");
     builder->spc();
