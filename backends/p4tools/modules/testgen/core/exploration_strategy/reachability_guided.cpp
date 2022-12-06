@@ -1,16 +1,20 @@
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/incremental_stack.h"
+#include "backends/p4tools/modules/testgen/core/exploration_strategy/reachability_guided.h"
 
+#include <ctime>
+#include <iterator>
+#include <type_traits>
 #include <vector>
 
 #include <boost/none.hpp>
 
+#include "backends/p4tools/common/lib/util.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "lib/error.h"
+#include "midend/coverage.h"
 #include "p4tools/common/core/solver.h"
 #include "p4tools/common/lib/formulae.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
@@ -21,8 +25,7 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-void IncrementalStack::run(const Callback& callback) {
-    std::cout << "AAAAAAAAAA" << std::endl;
+void ReachabilityGuided::run(const Callback& callback) {
     while (true) {
         try {
             if (executionState->isTerminal()) {
@@ -73,11 +76,8 @@ void IncrementalStack::run(const Callback& callback) {
     }
 }
 
-IncrementalStack::IncrementalStack(AbstractSolver& solver, const ProgramInfo& programInfo,
-                                   boost::optional<uint32_t> seed)
-    : ExplorationStrategy(solver, programInfo, seed) {}
 
-ExecutionState* IncrementalStack::chooseBranch(std::vector<Branch>& branches,
+ExecutionState* ReachabilityGuided::chooseBranch(std::vector<Branch>& branches,
                                                bool guaranteeViability) {
     while (true) {
         // Fail if we've run out of branches.
@@ -124,21 +124,10 @@ ExecutionState* IncrementalStack::chooseBranch(std::vector<Branch>& branches,
     }
 }
 
-bool IncrementalStack::UnexploredBranches::empty() const { return unexploredBranches.empty(); }
-
-void IncrementalStack::UnexploredBranches::push(IncrementalStack::StepResult branches) {
-    unexploredBranches.push(branches);
-}
-
-IncrementalStack::StepResult IncrementalStack::UnexploredBranches::pop() {
-    auto* result = unexploredBranches.top();
-    unexploredBranches.pop();
-    return result;
-}
-
-size_t IncrementalStack::UnexploredBranches::size() { return unexploredBranches.size(); }
-
-IncrementalStack::UnexploredBranches::UnexploredBranches() = default;
+ReachabilityGuided::ReachabilityGuided(AbstractSolver& solver,
+                                                 const ProgramInfo& programInfo,
+                                                 boost::optional<uint32_t> seed)
+    : IncrementalStack(solver, programInfo, seed) {}
 
 }  // namespace P4Testgen
 
