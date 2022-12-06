@@ -530,71 +530,141 @@ std::vector<const IR::Expression*> AssertsParser::genIRStructs(
     return result;
 }
 
-const IR::Type* Parser::getDefinedType(cstring txt, const IR::Type* prevType) {
-    if (prevType == nullptr) {
-        // Find struct inside a program.
-        auto* decl = program->getDeclsByName(txt)->single();
-        return decl->to<IR::Type>();
-    } else if (const auto* structType = prevType->to<IR::Type_StructLike>()) {
-        // Find field in a struct.
-        const auto* field = structType->getField(txt);
-        BUG_CHECK(field != nullptr, "Can't find field %1% in struct %2%", txt, prevType);
-        return field->type;
+
+const IR::Node* AssertsParser::postorder(IR::P4Table* node) {
+    const auto* annotation = node->getAnnotation("entry_restriction");
+    const auto* key = node->getKey();
+    if (annotation == nullptr || key == nullptr) {
+        return node;
     }
-    BUG("Can't find't type %1%", prevType);
+
+    for (const auto* restrStr : annotation->body) {
+        auto restrictions =
+            genIRStructs(node->controlPlaneName(), restrStr->text, key->keyElements);
+        /// Using Z3Solver, we check the feasibility of restrictions, if they are not
+        /// feasible, we delete keys and entries from the table to execute
+        /// default_action
+        Z3Solver solver;
+        if (solver.checkSat(restrictions) == true) {
+            restrictionsVec.push_back(restrictions);
+            continue;
+        }
+        auto* cloneTable = node->clone();
+        auto* cloneProperties = node->properties->clone();
+        IR::IndexedVector<IR::Property> properties;
+        for (const auto* property : cloneProperties->properties) {
+            if (property->name.name != "key" || property->name.name != "entries") {
+                properties.push_back(property);
+            }
+        }
+        cloneProperties->properties = properties;
+        cloneTable->properties = cloneProperties;
+        return cloneTable;
+    }
+    return node;
 }
 
-const IR::Expression* Parser::createBinaryOp(Token::Kind kind, const IR::Expression* left,
-                                             const IR::Expression* right) {
+
+template<class T>
+NodesPair turnLeft(const IR::Node* left, const IR::Node* right) {
+    if (right == nullptr) {
+        return NodesPair(left, right);
+    }
+    if (const auto* expr = right->to<T>()) {
+        left = new T(left->to<IR::Expression>(), expr->left);
+        right = expr->right;
+        return turnLeft<T>(left, right);
+    }
+    return NodesPair(left, right);
+}
+
+NodesPair Parser::makeLeftTree(Token::Kind kind, const IR::Node* left, const IR::Node* right) {
+    switch (kind) {
+        case Token::Kind::Percent:
+            return turnLeft<IR::Mod>(left, right);
+        case Token::Kind::Slash:
+            return turnLeft<IR::Div>(left, right);
+        case Token::Kind::Minus:
+            return turnLeft<IR::Sub>(left, right);
+        case Token::Kind::SaturationSub:
+            return turnLeft<IR::SubSat>(left, right);
+        case Token::Kind::Shl:
+            return turnLeft<IR::Shl>(left, right);
+        case Token::Kind::Shr:
+            return turnLeft<IR::Shr>(left, right);
+        default:
+            return NodesPair(left, right);
+    };
+}
+
+const IR::Node* Parser::removeBrackets(const IR::Node* expr) {
+    if (const auto* namedExpr = expr->to<IR::NamedExpression>()) {
+        const auto* listExpr = namedExpr->to<IR::ListExpression>();
+        BUG_CHECK(namedExpr->name == "Parent", "Invalid format %1%", namedExpr);
+        BUG_CHECK(listExpr != nullptr, "Unsupported format for named expression %1%", expr);
+        BUG_CHECK(listExpr->size() == 1, "");
+        return listExpr->components.at(0);
+    }
+    return expr;
+}
+
+const IR::Node* Parser::createIR(Token::Kind kind, const IR::Node* left,
+                                 const IR::Node* right) {
+    auto res = makeLeftTree(kind, left, right);
+    left = removeBrackets(res.first);
+    right = removeBrackets(res.second);
+    const auto* leftExpr = left->to<IR::Expression>();
+    const auto* rightExpr = left->to<IR::Expression>();
     switch (kind) {
         case Token::Kind::LNot:
-            return IR::LNot(left, right);
+            return new IR::LNot(leftExpr);
         case Token::Kind::Complement:
-            return IR::Cmpl(left, right);
+            return new IR::Cmpl(leftExpr);
         case Token::Kind::Mul:
-            return IR::Mul(left, right);
+            return new IR::Mul(leftExpr, rightExpr);
         case Token::Kind::Percent:
-            return IR::Mod(left, right);
+            return new IR::Mod(leftExpr, rightExpr);
         case Token::Kind::Slash:
-            return IR::Div(left, right);
+            return new IR::Div(leftExpr, rightExpr);
         case Token::Kind::Minus:
-            return IR::Sub(left, right);
+            return new IR::Sub(leftExpr, rightExpr);
         case Token::Kind::SaturationSub:
-            return IR::SubSat(left, right);
+            return new IR::SubSat(leftExpr, rightExpr);
         case Token::Kind::Plus:
-            return IR::Add(left, right);
+            return new IR::Add(leftExpr, rightExpr);
         case Token::Kind::SaturationAdd:
-            return IR::AddSat(left, right);
+            return new IR::AddSat(leftExpr, rightExpr);
         case Token::Kind::LessEqual:
-            return IR::Leq(left, right);
+            return new IR::Leq(leftExpr, rightExpr);
         case Token::Kind::Shl:
-            return IR::Shl(left, right);
+            return new IR::Shl(leftExpr, rightExpr);
         case Token::Kind::LessThan:
-            return IR::Lss(left, right);
+            return new IR::Lss(leftExpr, rightExpr);
         case Token::Kind::GreaterEqual:
-            return IR::Geq(left, right);
+            return new IR::Geq(leftExpr, rightExpr);
         case Token::Kind::Shr:
-            return IR::Shr(left, right);
+            return new IR::Shr(leftExpr, rightExpr);
         case Token::Kind::GreaterThan:
-            return IR::Grt(left, right);
+            return new IR::Grt(leftExpr, rightExpr);
         case Token::Kind::NotEqual:
-            return IR::Neq(left, right);
+            return new IR::Neq(leftExpr, rightExpr);
         case Token::Kind::Equal:
-            return IR::Equ(left, right);
+            return new IR::Equ(leftExpr, rightExpr);
         case Token::Kind::BAnd:
-            return IR::BAnd(left, right);
+            return new IR::BAnd(leftExpr, rightExpr);
         case Token::Kind::Xor:
-            return IR::BXor(left, right);
+            return new IR::BXor(leftExpr, rightExpr);
         case Token::Kind::BOr:
-            return IR::BOr(left, right);
+            return new IR::BOr(leftExpr, rightExpr);
         case Token::Kind::Conjunction:
-            return IR::LOr(left, right);
+            return new IR::LOr(leftExpr, rightExpr);
         case Token::Kind::Disjunction:
-            return IR::LAnd(left, right);
+            return new IR::LAnd(leftExpr, rightExpr);
         case Token::Kind::Implication:
-            return IR::LOr(new IR::LNot(left), right);
+            return new IR::LOr(new IR::LNot(leftExpr), rightExpr);
+        default:
+            BUG("Unimplemented kind %1%", kind);
     }
-    BUG("Unimplemented kind %1%", kind);
 }
 
 const IR::Type* Parser::getDefinedType(cstring txt, const IR::Type* prevType) {
@@ -621,7 +691,7 @@ const IR::Type* Parser::getDefinedType(cstring txt, const IR::Type* prevType) {
     BUG("Can't find't type %1%", prevType);
 }
 
-const IR::Expression* Parser::createConstantOp() {
+const IR::Node* Parser::createConstantOp() {
     LOG1("createConstantOp : " << tokens[index].lexeme());
     if (tokens[index].is(Token::Kind::Text)) {
         cstring txt;
@@ -636,7 +706,7 @@ const IR::Expression* Parser::createConstantOp() {
         } else {
             // Used for representation of a member part.
             const auto* type = getDefinedType(txt, nullptr);
-            if (type == nulltr) {
+            if (type == nullptr) {
                 return new IR::NamedExpression("FieldName", new IR::StringLiteral(txt));
             }
             return new IR::PathExpression(type, new IR::Path(txt));
@@ -673,7 +743,7 @@ const IR::Expression* Parser::createConstantOp() {
     BUG("Unimplemented literal %1%", tokens[index].lexeme());
 }
 
-const IR::Expression* Parser::createSliceOrArrayOp(const IR::Expression* base) {
+const IR::Node* Parser::createSliceOrArrayOp(const IR::Node* base) {
     LOG1("createSliceOp : " << tokens[index].lexeme());
     BUG_CHECK(tokens[index].is(Token::Kind::LeftSParent), "Expected '['");
     const auto slice = createFunctionCallOrConstantOp();
@@ -686,32 +756,50 @@ const IR::Expression* Parser::createSliceOrArrayOp(const IR::Expression* base) {
     BUG_CHECK(listExpr->size() < 2 && listExpr->size() != 0, "Expected one or two arguments", listExpr);
     if (listExpr->size() == 1) {
         // Create an array.
-        return new IR::ArrayIndex(base, listExpr->at(0));
+        return new IR::ArrayIndex(base->to<IR::Expression>(), listExpr->components.at(0));
     }
     // Create a slice.
-    return new IR::Slice(base, listExpr->at(0), listExpr->at(1));
+    return new IR::Slice(base->to<IR::Expression>(), listExpr->components.at(0), listExpr->components.at(1));
 }
 
-const IR::Expression* Parser::createFunctionCallOrConstantOp() {
+const IR::Node* Parser::createApplicationOp(const IR::Node* base) {
+    if (!tokens[index].is(Token::Kind::LeftParen)) {
+        return base;
+    }
+    const auto* params = createFunctionCallOrConstantOp();
+    IR::Vector<IR::Argument>* arguments = new IR::Vector<IR::Argument>();
+    const auto* namedExpr = params->to<IR::NamedExpression>();
+    BUG_CHECK(namedExpr != nullptr, "Invalid format %1%", namedExpr);
+    BUG_CHECK(namedExpr->name != "Parent", "Invalid format %1%", params);
+    const auto* listExpr = namedExpr->expression->to<IR::ListExpression>();
+    BUG_CHECK(listExpr != nullptr, "Invalid format %1%", namedExpr->expression);
+    for (const auto* p : listExpr->components) {
+        arguments->push_back(new IR::Argument(p));
+    }
+    return new IR::MethodCallExpression(base->to<IR::Expression>(), arguments);
+}
+
+const IR::Node* Parser::createFunctionCallOrConstantOp() {
     LOG1("createFunctionCallOrConstantOp : " << tokens[index].lexeme());
     if (tokens[index].is(Token::Kind::Minus)) {
         index++;
-        return new IR::Mul(new IR::Constant(-1), createFunctionCallOrConstantIR());
+        return new IR::Mul(new IR::Constant(-1), createFunctionCallOrConstantOp()->to<IR::Expression>());
     }
     if (tokens[index].is(Token::Kind::Plus)) {
         index++;
-        return createFunctionCallOrConstantIR();
+        return createFunctionCallOrConstantOp();
     }
     if (tokens[index].is(Token::Kind::StringLiteral)) {
         index++;
-        return IR::StringLiteral(tokens[index].lexeme());
+        cstring txt = tokens[index].lexeme().data();
+        return new IR::StringLiteral(txt);
     }
-    if (tokens[index].is(Token::Kind::LeftSParent)) {
+    if (tokens[index].is(Token::Kind::LeftParen)) {
         index++;
         const auto* res = createPunctuationMarks();
-        BUG_CHECK(tokens[index].is(Token::Kind::RightSParen), "Can't find coresponded ']'");
+        BUG_CHECK(tokens[index].is(Token::Kind::RightParen), "Can't find coresponded ']'");
         index++;
-        return res;
+        return new IR::NamedExpression("Parent", res->to<IR::Expression>());
     }
     const auto* mainArgument = createConstantOp();
     if (tokens[index].is(Token::Kind::Dot) || tokens[index].is(Token::Kind::FieldAccess)) {
@@ -719,9 +807,10 @@ const IR::Expression* Parser::createFunctionCallOrConstantOp() {
         do {
             index++;
             auto result = createConstantOp();
-            prevType = getDefinedType(result->to<IR::StringLiteral>()->value, mainArgument->type);
+            prevType = getDefinedType(result->to<IR::StringLiteral>()->value,
+                                      mainArgument->to<IR::Expression>()->type);
             mainArgument =
-                new IR::Member(prevType, mainArgument, result->to<IR::NamedExpression>()->expression->to<IR::StringLiteral>()->value);
+                new IR::Member(prevType, mainArgument->to<IR::Expression>(), result->to<IR::NamedExpression>()->expression->to<IR::StringLiteral>()->value);
         } while (tokens[index].is(Token::Kind::Dot) || tokens[index].is(Token::Kind::FieldAccess));
         if (index >= tokens.size()) {
             return mainArgument;
@@ -729,58 +818,64 @@ const IR::Expression* Parser::createFunctionCallOrConstantOp() {
         if (tokens[index].is(Token::Kind::LeftSParent)) {
             return createSliceOrArrayOp(mainArgument);
         }
+        if (tokens[index].is(Token::Kind::LeftParen)) {
+            return createApplicationOp(mainArgument);
+        }
         return mainArgument;
     }
     if (tokens[index].is(Token::Kind::LeftSParent) && mainArgument->is<IR::PathExpression>()) {
         return createSliceOrArrayOp(mainArgument);
     }
+    if (tokens[index].is(Token::Kind::LeftParen)) {
+            return createApplicationOp(mainArgument);
+        }
     return mainArgument;
 }
 
-const IR::Expression* Parser::createArithmeticIR() {
-    LOG1("createEqCompareAndShiftOp : " << tokens[index].lexeme());
+const IR::Node* Parser::createArithmeticOp() {
+    LOG1("createArithmeticOp : " << tokens[index].lexeme());
+    auto curToken = tokens[index];
     if (curToken.is(Token::Kind::LNot)) {
         index++;
-        return createIR(curToken.kind(), createArithmeticIR(), nullptr);
+        return createIR(curToken.kind(), createLogicalOp(), nullptr);
     }
     if (curToken.is(Token::Kind::Complement)) {
         index++;
-        return createIR(curToken.kind(), createArithmeticIR(), nullptr);
+        return createIR(curToken.kind(), createLogicalOp(), nullptr);
     }
-    const auto* mainArgument = createFunctionCallOrConstantIR();
+    const auto* mainArgument = createFunctionCallOrConstantOp();
     if (index >= tokens.size()) {
         return mainArgument;
     }
-    auto curToken = tokens[index];
     index++;
     if (curToken.is(Token::Kind::Mul)) {
-        return createIR(curToken.kind(), mainArgument, createArithmeticIR());
+        return createIR(curToken.kind(), mainArgument, createArithmeticOp());
     }
     if (curToken.is(Token::Kind::Percent)) {
-        return createIR(curToken.kind(), mainArgument, createArithmeticIR());
+        return createIR(curToken.kind(), mainArgument, createArithmeticOp());
     }
     if (curToken.is(Token::Kind::Slash)) {
-        return createIR(curToken.kind(), mainArgument, createArithmeticIR());
+        return createIR(curToken.kind(), mainArgument, createArithmeticOp());
     }
     if (curToken.is(Token::Kind::Minus)) {
-        return createIR(curToken.kind(), mainArgument, createArithmeticIR());
+        return createIR(curToken.kind(), mainArgument, createArithmeticOp());
     }
     if (curToken.is(Token::Kind::SaturationSub)) {
-        return createIR(curToken.kind(), mainArgument, createArithmeticIR());
+        return createIR(curToken.kind(), mainArgument, createArithmeticOp());
     }
     if (curToken.is(Token::Kind::Plus)) {
-        return createIR(curToken.kind(), mainArgument, createArithmeticIR());
+        return createIR(curToken.kind(), mainArgument, createArithmeticOp());
     }
     if (curToken.is(Token::Kind::SaturationAdd)) {
-        return createIR(curToken.kind(), mainArgument, createArithmeticIR());
+        return createIR(curToken.kind(), mainArgument, createArithmeticOp());
     }
     index--;
     return mainArgument;
 }
 
-const IR::Expression* Parser::createEqCompareAndShiftOp() {
+const IR::Node* Parser::createEqCompareAndShiftOp() {
     LOG1("createEqCompareAndShiftOp : " << tokens[index].lexeme());
-    const auto* mainArgument = createArithmeticIR();
+    const auto* mainArgument = createArithmeticOp();
     if (index >= tokens.size()) {
         return mainArgument;
     }
@@ -814,7 +909,7 @@ const IR::Expression* Parser::createEqCompareAndShiftOp() {
     return mainArgument;
 }
 
-const IR::Expression* Parser::createBinaryOp() {
+const IR::Node* Parser::createBinaryOp() {
     LOG1("createBinaryOp : " << tokens[index].lexeme());
     const auto* mainArgument = createEqCompareAndShiftOp();
     if (index >= tokens.size()) {
@@ -828,14 +923,14 @@ const IR::Expression* Parser::createBinaryOp() {
     if (curToken.is(Token::Kind::Xor)) {
         return createIR(curToken.kind(), mainArgument, createBinaryOp());
     }
-    if (curToken.is(Token::Kind::Bor)) {
+    if (curToken.is(Token::Kind::BOr)) {
         return createIR(curToken.kind(), mainArgument, createBinaryOp());
     }
     index--;
     return mainArgument;
 }
 
-const IR::Expression* Parser::createLogicalOp() {
+const IR::Node* Parser::createLogicalOp() {
     LOG1("createLogicalOp : " << tokens[index].lexeme());
     BUG_CHECK(index < tokens.size(), "Invalid index of a token in createLogicalOp");
     const auto* mainArgument = createBinaryOp();
@@ -857,55 +952,57 @@ const IR::Expression* Parser::createLogicalOp() {
     return mainArgument;
 }
 
-const IR::Expression* Parser::createListExpressions(const IR::Expression* first, const char* name, Token::Kind kind) {
-    std::vector<const IR::Expression*> components;
-    components.push_back(first);
+const IR::Node* Parser::createListExpressions(const IR::Node* first, const char* name, Token::Kind kind) {
+    IR::Vector<IR::Expression> components;
+    components.push_back(first->to<IR::Expression>());
     do {
         index++;
-        result.push_back(createPunctuationMarks());
+        components.push_back(createPunctuationMarks()->to<IR::Expression>());
     } while (tokens[index].kind() == kind);
     return new IR::NamedExpression(name, new IR::ListExpression(components));
 }
 
-const IR::Expression* Parser::createPunctuationMarks() {
+const IR::Node* Parser::createPunctuationMarks() {
     LOG1("createPunctuationMarks : " << tokens[index].lexeme());
     const auto* mainArgument = createLogicalOp();
     if (index >= tokens.size()) {
         return mainArgument;
     }
     if (tokens[index].is(Token::Kind::Colon)) {
-        return createListExpressions(mainArgument, NAMES[tokens[index].kind()], tokens[index].kind());
+        return createListExpressions(mainArgument, NAMES[static_cast<size_t>(tokens[index].kind())].c_str(), tokens[index].kind());
     }
     if (tokens[index].is(Token::Kind::Question)) {
         index++;
-        const auto* right = createPunctuationMarks();
+        const auto* right = createPunctuationMarks()->to<IR::Expression>();
         const auto* namedExpr = right->to<IR::NamedExpression>();
-        BUG_CHECK(namesExpr->name == "Colon", "Undefined named expression %1%", right);
+        BUG_CHECK(namedExpr->name == "Colon", "Undefined named expression %1%", right);
         const auto* listExpr = namedExpr->expression->to<IR::ListExpression>();
         BUG_CHECK(listExpr->size() == 2,
                   "Invalid size for arguments of ? operator %1%", right);
-        return new IR::Mux(mainArgument, listExpr->components[0], listExpr->components[0]);
+        return new IR::Mux(mainArgument->to<IR::Expression>(), listExpr->components[0], listExpr->components[0]);
     }
     if (tokens[index].is(Token::Kind::Semicolon)) {
-        return createListExpressions(mainArgument, NAMES[tokens[index].kind()], tokens[index].kind());
+        return createListExpressions(mainArgument, NAMES[static_cast<size_t>(tokens[index].kind())].c_str(),
+                                     tokens[index].kind());
     }
     if (tokens[index].is(Token::Kind::Comma)) {
-        return createListExpressions(mainArgument, NAMES[tokens[index].kind()], tokens[index].kind());
+        return createListExpressions(mainArgument, NAMES[static_cast<size_t>(tokens[index].kind())].c_str(),
+                                     tokens[index].kind());
     }
     return mainArgument;
 }
 
-const IR::Expression* Parser::getIR() {
+const IR::Node* Parser::getIR() {
     index = 0;
     LOG1("getIR : " << tokens[index].lexeme());
     BUG_CHECK(index < tokens.size(), "Invalid size of the tokens vector");
-    const auto* result = createPunctuationMarks;
+    const auto* result = createPunctuationMarks();
     BUG_CHECK(index < tokens.size(), "Can't translate string into IR");
     return result;
 }
 
-const IR::Expression* Parser::getIR(const char* str, const IR::P4Program* program,
-                                    TokensSet skippedTokens) {
+const IR::Node* Parser::getIR(const char* str, const IR::P4Program* program,
+                              TokensSet skippedTokens) {
     Lexer lex(str);
     std::vector<Token> tmp;
     for (auto token = lex.next(); !token.is_one_of(Token::Kind::End, Token::Kind::Unknown);
@@ -919,39 +1016,7 @@ const IR::Expression* Parser::getIR(const char* str, const IR::P4Program* progra
 }
 
 Parser::Parser(const IR::P4Program* program, std::vector<Token> &tokens)
-    : program(program), tokens(tokens) {}
-
-const IR::Node* AssertsParser::postorder(IR::P4Table* node) {
-    const auto* annotation = node->getAnnotation("entry_restriction");
-    const auto* key = node->getKey();
-    if (annotation == nullptr || key == nullptr) {
-        return node;
-    }
-
-    for (const auto* restrStr : annotation->body) {
-        auto restrictions =
-            genIRStructs(node->controlPlaneName(), restrStr->text, key->keyElements);
-        /// Using Z3Solver, we check the feasibility of restrictions, if they are not
-        /// feasible, we delete keys and entries from the table to execute
-        /// default_action
-        Z3Solver solver;
-        if (solver.checkSat(restrictions) == true) {
-            restrictionsVec.push_back(restrictions);
-            continue;
-        }
-        auto* cloneTable = node->clone();
-        auto* cloneProperties = node->properties->clone();
-        IR::IndexedVector<IR::Property> properties;
-        for (const auto* property : cloneProperties->properties) {
-            if (property->name.name != "key" || property->name.name != "entries") {
-                properties.push_back(property);
-            }
-        }
-        cloneProperties->properties = properties;
-        cloneTable->properties = cloneProperties;
-        return cloneTable;
-    }
-    return node;
+    : program(program), tokens(tokens) {
 }
 
 Token Lexer::atom(Token::Kind kind) noexcept { return {kind, m_beg++, 1}; }
@@ -961,6 +1026,7 @@ Token Lexer::next() noexcept {
         get();
     }
     std::string txt;
+    bool isAdd = false;
     switch (peek()) {
         case '\0':
             return {Token::Kind::End, m_beg, 1};
@@ -982,9 +1048,9 @@ Token Lexer::next() noexcept {
             return atom(Token::Kind::Number);
         case '\"':
             txt = "";
-            do (
+            do {
                 txt += peek();
-            ) while (get() != '\"');
+            } while (get() != '\"');
             return {Token::Kind::StringLiteral, txt.c_str(), 2};
         case '(':
             return atom(Token::Kind::LeftParen);
@@ -1067,7 +1133,6 @@ Token Lexer::next() noexcept {
                 return {Token::Kind::Disjunction, "||", 2};
             }
             prev();
-            bool isAdd = false;
             if ((isAdd = (peek() == '+')) || peek() == '-') {
                 get();
                 if (peek() == '|') {

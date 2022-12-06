@@ -574,7 +574,7 @@ const IR::Expression* ReachabilityEngine::getCondition(const DCGVertexType* n) {
 
 const IR::Expression* ReachabilityEngine::stringToNode(std::string name) {
     LOG1("Parse restriction  - " << name);
-    return AssertsParser::Parser::getIR(name.c_str(), program);
+    return AssertsParser::Parser::getIR(name.c_str(), program)->to<IR::Expression>();
 }
 
 }  // namespace P4Tools

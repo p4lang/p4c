@@ -122,6 +122,7 @@ class Lexer {
 };
 
 using TokensSet = std::set<Token::Kind>;
+using NodesPair = std::pair<const IR::Node*, const IR::Node*>;
 
 class Parser {
  private:
@@ -131,22 +132,27 @@ class Parser {
 
  public:
     Parser(const IR::P4Program* program, std::vector<Token> &tokens);
-    static const IR::Expression* getIR(const char* str, const IR::P4Program* program,
+    static const IR::Node* getIR(const char* str, const IR::P4Program* program,
                                        TokensSet skippedTokens = {Token::Kind::Comment});
     char prev() noexcept;
     
  protected:
-    const IR::Expression* getIR();
-    const IR::Expression* createPunctuationMarks();
-    const IR::Expression* createListExpressions(const IR::Expression*, const char*, Token::Kind);
-    const IR::Expression* createLogicalOp();
-    const IR::Expression* createIR(Token::Kind, const IR::Expression*, const IR::Expression*);
-    const IR::Expression* createBinaryOp();
-    const IR::Expression* createEqCompareAndShiftOp();
-    const IR::Expression* createArithmeticOp();
-    const IR::Expression* createFunctionCallOrConstantOp();
-    const IR::Expression* createConstantOp();
-    const IR::Expression* createSliceOrArrayOp(const IR::Expression*);
+    const IR::Node* getIR();
+    const IR::Node* createPunctuationMarks();
+    const IR::Node* createListExpressions(const IR::Node*, const char*, Token::Kind);
+    const IR::Node* createLogicalOp();
+    const IR::Node* createIR(Token::Kind, const IR::Node*, const IR::Node*);
+    NodesPair makeLeftTree(Token::Kind, const IR::Node*, const IR::Node*);
+    const IR::Node* removeBrackets(const IR::Node*);
+    const IR::Node* createBinaryOp(Token::Kind kind, const IR::Node* left,
+                                         const IR::Node* right);
+    const IR::Node* createBinaryOp();
+    const IR::Node* createEqCompareAndShiftOp();
+    const IR::Node* createArithmeticOp();
+    const IR::Node* createFunctionCallOrConstantOp();
+    const IR::Node* createApplicationOp(const IR::Node*);
+    const IR::Node* createConstantOp();
+    const IR::Node* createSliceOrArrayOp(const IR::Node*);
     const IR::Type* getDefinedType(cstring txt, const IR::Type* prevType);
 };
 
