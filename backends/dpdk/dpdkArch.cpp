@@ -1624,16 +1624,16 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
     } else {
         structure->table_type_map.emplace(table->name.name, InternalTableType::WILDCARD);
     }
+
     /* If copyNeeded is false at this point, it means the keys are from same struct.
      * Check remaining conditions to see if the copy is needed or not */
     metaCopyNeeded = false;
-    if (!copyNeeded) {
-        if (!contiguous &&
-            ((keyInfoInstance->isLearner) ||
-             (keyInfoInstance->isExact && keyInfoInstance->numExistingMetaFields <= 5))) {
-            metaCopyNeeded = true;
-            copyNeeded = true;
-        }
+
+    if (!contiguous &&
+        ((keyInfoInstance->isLearner) ||
+         (keyInfoInstance->isExact && keyInfoInstance->numExistingMetaFields <= 5))) {
+        metaCopyNeeded = true;
+        copyNeeded = true;
     }
 
     if (!copyNeeded) {
