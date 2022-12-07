@@ -50,6 +50,7 @@ endmacro(p4c_add_library)
 
 # Add files with the appropriate path to the list of linted files
 macro(add_cpplint_files dir filelist)
+  unset (__cpplintFileList)
   foreach(__f ${filelist})
     string(REGEX MATCH "^/.*" abs_path "${__f}")
     if (NOT ${abs_path} EQUAL "")
@@ -62,10 +63,12 @@ macro(add_cpplint_files dir filelist)
   # Get the global cpplint property and append to it.
   get_property(CPPLINT_FILES GLOBAL PROPERTY cpplint-files)
   list (APPEND CPPLINT_FILES "${__cpplintFileList}")
+  list(REMOVE_DUPLICATES CPPLINT_FILES)
   set_property(GLOBAL PROPERTY cpplint-files "${CPPLINT_FILES}")
 endmacro(add_cpplint_files)
 
 macro(add_clang_format_files dir filelist)
+  unset (__clangFormatFileList)
   foreach(__f ${filelist})
     string(REGEX MATCH "^/.*" abs_path "${__f}")
     if (NOT ${abs_path} EQUAL "")
@@ -78,6 +81,7 @@ macro(add_clang_format_files dir filelist)
   # Get the global clang-format property and append to it.
   get_property(CLANG_FORMAT_FILES GLOBAL PROPERTY clang-format-files)
   list (APPEND CLANG_FORMAT_FILES "${__clangFormatFileList}")
+  list(REMOVE_DUPLICATES CLANG_FORMAT_FILES)
   set_property(GLOBAL PROPERTY clang-format-files "${CLANG_FORMAT_FILES}")
 endmacro(add_clang_format_files)
 
