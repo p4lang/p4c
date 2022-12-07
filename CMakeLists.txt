@@ -515,21 +515,21 @@ get_property(CPPLINT_FILES GLOBAL PROPERTY cpplint-files)
 if(DEFINED CPPLINT_FILES)
   # Write the list to a file. We need to do this as too many files will reach
   # the shell argument limit.
-  set(CPPLINT_FILE ${P4C_BINARY_DIR}/cpplint_files.txt)
-  file(WRITE ${CPPLINT_FILE} "${CPPLINT_FILES}")
+  set(CPPLINT_TXT_FILE ${P4C_BINARY_DIR}/cpplint_files.txt)
+  file(WRITE ${CPPLINT_TXT_FILE} "${CPPLINT_FILES}")
   list(SORT CPPLINT_FILES)
   set(CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
   set(CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
   # Pipe the file into cpplint.
   add_custom_target(
     cpplint
-    COMMAND cat ${CPPLINT_FILE} | xargs -d '\;' ${CPPLINT_CMD} ${CPPLINT_ARGS}
+    COMMAND xargs -a ${CPPLINT_TXT_FILE} -r -d '\;' ${CPPLINT_CMD} ${CPPLINT_ARGS}
     WORKING_DIRECTORY ${P4C_SOURCE_DIR}
     COMMENT "cpplint"
   )
   add_custom_target(
     cpplint-quiet
-    COMMAND cat ${CPPLINT_FILE} | xargs -d '\;' ${CPPLINT_CMD} ${CPPLINT_ARGS} --quiet
+    COMMAND xargs -a ${CPPLINT_TXT_FILE} -r -d '\;' ${CPPLINT_CMD} ${CPPLINT_ARGS} --quiet
     WORKING_DIRECTORY ${P4C_SOURCE_DIR}
     COMMENT "cpplint quietly"
   )
@@ -549,19 +549,19 @@ if(NOT ${CLANG_FORMAT_CMD})
   if(DEFINED CLANG_FORMAT_FILES)
     # Write the list to a file. We need to do this as too many files will reach
     # the shell argument limit.
-    set(CLANG_FORMAT_FILE ${P4C_BINARY_DIR}/clang_format_files.txt)
-    file(WRITE ${CLANG_FORMAT_FILE} "${CLANG_FORMAT_FILES}")
+    set(CLANG_FORMAT_TXT_FILE ${P4C_BINARY_DIR}/clang_format_files.txt)
     list(SORT CLANG_FORMAT_FILES)
+    file(WRITE ${CLANG_FORMAT_TXT_FILE} "${CLANG_FORMAT_FILES}")
     set(CLANG_FORMAT_CMD clang-format)
     add_custom_target(
       clang-format
-      COMMAND cat ${CLANG_FORMAT_FILE} | xargs -d '\;' ${CLANG_FORMAT_CMD} --verbose --Werror --dry-run -i --
+      COMMAND xargs -a ${CLANG_FORMAT_TXT_FILE} -r -d '\;' ${CLANG_FORMAT_CMD} --verbose --Werror --dry-run -i --
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Checking files for correct clang-format formatting."
     )
     add_custom_target(
       clang-format-fix-errors
-      COMMAND cat ${CLANG_FORMAT_FILE} | xargs -d '\;' ${CLANG_FORMAT_CMD} --verbose -i --
+      COMMAND xargs -a ${CLANG_FORMAT_TXT_FILE} -r -d '\;' ${CLANG_FORMAT_CMD} --verbose -i --
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Formatting files using clang-format."
     )

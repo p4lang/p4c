@@ -50,6 +50,10 @@ endmacro(p4c_add_library)
 
 # Add files with the appropriate path to the list of cpplint-linted files.
 function(add_cpplint_files dir filelist)
+  if (NOT filelist)
+    message(WARNING "Input file list is empty. Returning.")
+    return()
+  endif()
   foreach(__f ${filelist})
     string(REGEX MATCH "^/.*" abs_path "${__f}")
     if (NOT ${abs_path} EQUAL "")
@@ -68,6 +72,10 @@ endfunction(add_cpplint_files)
 
 # Add files with the appropriate path to the list of clang-format-linted files.
 function(add_clang_format_files dir filelist)
+  if (NOT filelist)
+    message(WARNING "Input file list is empty. Returning.")
+    return()
+  endif()
   foreach(__f ${filelist})
     string(REGEX MATCH "^/.*" abs_path "${__f}")
     if (NOT ${abs_path} EQUAL "")
