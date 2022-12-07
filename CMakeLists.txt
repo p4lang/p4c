@@ -509,8 +509,8 @@ list(FILTER P4C_LINT_LIST EXCLUDE REGEX "control-plane/p4runtime")
 # cpplint
 add_cpplint_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
 
-if(DEFINED CPPLINT_FILES)
-  get_property(TARGET cpplint CPPLINT_FILES PROPERTY cpplint-files)
+get_property(CPPLINT_FILES GLOBAL PROPERTY cpplint-files)
+if(CPPLINT_FILES)
   list ( SORT CPPLINT_FILES )
   set (CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
   set (CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
@@ -533,6 +533,7 @@ add_clang_format_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
 find_program(CLANG_FORMAT_CMD clang-format)
 
 if(NOT ${CLANG_FORMAT_CMD})
+  get_property(CLANG_FORMAT_FILES GLOBAL PROPERTY clang-format-files)
   if(DEFINED CLANG_FORMAT_FILES)
     list(SORT CLANG_FORMAT_FILES)
     set(CLANG_FORMAT_CMD clang-format)

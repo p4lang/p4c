@@ -59,34 +59,26 @@ macro(add_cpplint_files dir filelist)
     endif()
   endforeach(__f)
 
-  # Since add_cpplint_files is a macro, we need to check whether the
-  # calling context has a parent. If not, add to the variable directly.
-  get_directory_property(hasParent PARENT_DIRECTORY)
-  if(hasParent)
-    set (CPPLINT_FILES ${CPPLINT_FILES} ${__cpplintFileList} PARENT_SCOPE)
-  else()
-    set (CPPLINT_FILES ${CPPLINT_FILES} ${__cpplintFileList})
-  endif()
+  # Get the global cpplint property and append to it.
+  get_property(CPPLINT_FILES GLOBAL PROPERTY cpplint-files)
+  list (APPEND CPPLINT_FILES "${__cpplintFileList}")
+  set_property(GLOBAL PROPERTY cpplint-files "${CPPLINT_FILES}")
 endmacro(add_cpplint_files)
 
 macro(add_clang_format_files dir filelist)
   foreach(__f ${filelist})
     string(REGEX MATCH "^/.*" abs_path "${__f}")
     if (NOT ${abs_path} EQUAL "")
-      list (APPEND __cpplintFileList "${__f}")
+      list (APPEND __clangFormatFileList "${__f}")
     else()
-      list (APPEND __cpplintFileList "${dir}/${__f}")
+      list (APPEND __clangFormatFileList "${dir}/${__f}")
     endif()
   endforeach(__f)
 
-  # Since add_cpplint_files is a macro, we need to check whether the
-  # calling context has a parent. If not, add to the variable directly.
-  get_directory_property(hasParent PARENT_DIRECTORY)
-  if(hasParent)
-    set (CLANG_FORMAT_FILES ${CLANG_FORMAT_FILES} ${__cpplintFileList} PARENT_SCOPE)
-  else()
-    set (CLANG_FORMAT_FILES ${CLANG_FORMAT_FILES} ${__cpplintFileList})
-  endif()
+  # Get the global clang-format property and append to it.
+  get_property(CLANG_FORMAT_FILES GLOBAL PROPERTY clang-format-files)
+  list (APPEND CLANG_FORMAT_FILES "${__clangFormatFileList}")
+  set_property(GLOBAL PROPERTY clang-format-files "${CLANG_FORMAT_FILES}")
 endmacro(add_clang_format_files)
 
 
