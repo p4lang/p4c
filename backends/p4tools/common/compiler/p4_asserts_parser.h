@@ -42,8 +42,8 @@ class Token {
         StringLiteral,       // "String"
         LeftParen,           // (
         RightParen,          // )
-        LeftSParent,         // [
-        RightSParent,        // ]
+        LeftSParen,         // [
+        RightSParen,        // ]
         Dot,                 // .
         FieldAccess,         // ::
         LNot,                // !
@@ -104,6 +104,8 @@ class Token {
     std::string_view lexeme() const noexcept;
 
     void lexeme(std::string_view lexeme) noexcept;
+
+    std::string strLexeme() const noexcept;
 };
 
 class Lexer {
@@ -144,8 +146,6 @@ class Parser {
     const IR::Node* createIR(Token::Kind, const IR::Node*, const IR::Node*);
     NodesPair makeLeftTree(Token::Kind, const IR::Node*, const IR::Node*);
     const IR::Node* removeBrackets(const IR::Node*);
-    const IR::Node* createBinaryOp(Token::Kind kind, const IR::Node* left,
-                                         const IR::Node* right);
     const IR::Node* createBinaryOp();
     const IR::Node* createEqCompareAndShiftOp();
     const IR::Node* createArithmeticOp();
@@ -153,7 +153,8 @@ class Parser {
     const IR::Node* createApplicationOp(const IR::Node*);
     const IR::Node* createConstantOp();
     const IR::Node* createSliceOrArrayOp(const IR::Node*);
-    const IR::Type* getDefinedType(cstring txt, const IR::Type* prevType);
+    const IR::Node* getDefinedType(cstring txt, const IR::Node* nd);
+    const IR::Type* ndToType(const IR::Node* nd);
 };
 
 }  // namespace AssertsParser

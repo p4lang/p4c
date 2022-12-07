@@ -34,7 +34,7 @@ namespace AssertsParser {
 
 static std::vector<std::string> NAMES {
     "Priority",      "Text",        "LineStatementClose", "Number",        "Comment", 
-    "StringLiteral", "LeftParen",   "RightParen",         "LeftSParent",   "RightSParent",
+    "StringLiteral", "LeftParen",   "RightParen",         "LeftSParen",   "RightSParen",
     "Dot",           "FieldAccess", "LNot",               "Complement",    "Mul",
     "Percent",       "Slash",       "Minus",              "SaturationSub", "Plus",
     "SaturationAdd", "LessEqual",   "Shl",                "LessThan",      "GreaterEqual",
@@ -73,6 +73,11 @@ bool Token::is_one_of(Token::Kind k1, Token::Kind k2, Ts... ks) const noexcept {
 
 /// The function to get lexeme from token
 std::string_view Token::lexeme() const noexcept { return m_lexeme; }
+
+/// Get string for lexeme
+std::string Token::strLexeme() const noexcept {
+    return {m_lexeme.data(), m_lexeme.size()};
+}
 
 /// The function to replace the token lexeme with another lexeme
 void Token::lexeme(std::string_view lexeme) noexcept { m_lexeme = lexeme; }
@@ -600,7 +605,7 @@ NodesPair Parser::makeLeftTree(Token::Kind kind, const IR::Node* left, const IR:
 const IR::Node* Parser::removeBrackets(const IR::Node* expr) {
     if (const auto* namedExpr = expr->to<IR::NamedExpression>()) {
         const auto* listExpr = namedExpr->to<IR::ListExpression>();
-        BUG_CHECK(namedExpr->name == "Parent", "Invalid format %1%", namedExpr);
+        BUG_CHECK(namedExpr->name == "Paren", "Invalid format %1%", namedExpr);
         BUG_CHECK(listExpr != nullptr, "Unsupported format for named expression %1%", expr);
         BUG_CHECK(listExpr->size() == 1, "");
         return listExpr->components.at(0);
@@ -667,36 +672,45 @@ const IR::Node* Parser::createIR(Token::Kind kind, const IR::Node* left,
     }
 }
 
-const IR::Type* Parser::getDefinedType(cstring txt, const IR::Type* prevType) {
-    if (prevType == nullptr) {
-        // Find struct inside a program.
-        const auto* decl = program->getDeclsByName(txt)->single();
-        BUG_CHECK(decl != nullptr, "Can't find type for %1%", txt);
-        if (const auto* declVar = decl->to<IR::Declaration_Variable>()) {
-            return declVar->type;
+const IR::Node* Parser::getDefinedType(cstring txt, const IR::Node* nd) {
+    if (nd == nullptr) {
+        return getDefinedType(txt, program);
+    } else {
+        const IR::IDeclaration *decl = nullptr;
+        if (nd->is<IR::P4Program>()) {
+            auto* decls = program->getDeclsByName(txt);
+            BUG_CHECK(decls != nullptr, "Can't find type for %1%", txt);
+            decl = decls->single();
+        } else if (const auto* ns = nd->to<IR::ISimpleNamespace>()) {
+            decl = ns->getDeclByName(txt);
+            if (decl == nullptr) {
+                if (const auto* strct = nd->to<IR::Type_StructLike>()) {
+                    return strct->getField(txt)->type;
+                }
+                // Find in parameters
+                if (const auto iapply = nd->to<IR::IApply>()) {
+                    const auto paramList = iapply->getApplyParameters();
+                    decl = paramList->getDeclByName(txt);
+                    if (const auto* parameter = decl->to<IR::Parameter>()) {
+                        return parameter->type;
+                    }
+                }
+            }
         }
-        if (const auto* declConst = decl->to<IR::Declaration_Constant>()) {
-            return declConst->type;
+        if (decl == nullptr) {
+            // Retrun Boolean type by default.
+            return IR::Type_Boolean::get();
         }
-        if (const auto* declInst = decl->to<IR::Declaration_Instance>()) {
-            return declInst->type;
-        }
-        BUG("Can't find declaration for %1%", txt);
-    } else if (const auto* structType = prevType->to<IR::Type_StructLike>()) {
-        // Find field in a struct.
-        const auto* field = structType->getField(txt);
-        BUG_CHECK(field != nullptr, "Can't find field %1% in struct %2%", txt, prevType);
-        return field->type;
+        return decl->to<IR::Node>();
     }
-    BUG("Can't find't type %1%", prevType);
 }
 
 const IR::Node* Parser::createConstantOp() {
     LOG1("createConstantOp : " << tokens[index].lexeme());
     if (tokens[index].is(Token::Kind::Text)) {
-        cstring txt;
+        cstring txt = "";
         do {
-            txt += tokens[index].lexeme().data();
+            txt += tokens[index].strLexeme();
             index++;
         } while (tokens[index].is(Token::Kind::Text));
         if (txt == "true") {
@@ -704,12 +718,7 @@ const IR::Node* Parser::createConstantOp() {
         } else if (txt == "false") {
             return new IR::BoolLiteral(false);
         } else {
-            // Used for representation of a member part.
-            const auto* type = getDefinedType(txt, nullptr);
-            if (type == nullptr) {
-                return new IR::NamedExpression("FieldName", new IR::StringLiteral(txt));
-            }
-            return new IR::PathExpression(type, new IR::Path(txt));
+            return new IR::NamedExpression("FieldName", new IR::StringLiteral(txt));
         }
     }
     if (tokens[index].is(Token::Kind::Number)) {
@@ -745,9 +754,9 @@ const IR::Node* Parser::createConstantOp() {
 
 const IR::Node* Parser::createSliceOrArrayOp(const IR::Node* base) {
     LOG1("createSliceOp : " << tokens[index].lexeme());
-    BUG_CHECK(tokens[index].is(Token::Kind::LeftSParent), "Expected '['");
+    BUG_CHECK(tokens[index].is(Token::Kind::LeftSParen), "Expected '['");
     const auto slice = createFunctionCallOrConstantOp();
-    BUG_CHECK(tokens[index].is(Token::Kind::RightSParent), "Expected ']'");
+    BUG_CHECK(tokens[index].is(Token::Kind::RightSParen), "Expected ']'");
     index++;
     const auto* namedExpr = slice->to<IR::NamedExpression>();
     BUG_CHECK(namedExpr != nullptr, "Unexpected expression %1%", namedExpr);
@@ -770,13 +779,31 @@ const IR::Node* Parser::createApplicationOp(const IR::Node* base) {
     IR::Vector<IR::Argument>* arguments = new IR::Vector<IR::Argument>();
     const auto* namedExpr = params->to<IR::NamedExpression>();
     BUG_CHECK(namedExpr != nullptr, "Invalid format %1%", namedExpr);
-    BUG_CHECK(namedExpr->name != "Parent", "Invalid format %1%", params);
+    BUG_CHECK(namedExpr->name == "Paren", "Invalid format %1%", params);
     const auto* listExpr = namedExpr->expression->to<IR::ListExpression>();
     BUG_CHECK(listExpr != nullptr, "Invalid format %1%", namedExpr->expression);
     for (const auto* p : listExpr->components) {
         arguments->push_back(new IR::Argument(p));
     }
     return new IR::MethodCallExpression(base->to<IR::Expression>(), arguments);
+}
+
+const IR::Type* Parser::ndToType(const IR::Node* nd) {
+    if (nd->is<IR::ISimpleNamespace>()) {
+        if (const auto* control = nd->to<IR::P4Control>()) {
+            return control->type;
+        }
+        if (const auto* action = nd->to<IR::P4Action>()) {
+            return new IR::Type_Action(action->srcInfo, action->parameters);
+        }
+        if (const auto* table = nd->to<IR::P4Table>()) {
+            return new IR::Type_Table(table);
+        }
+    }
+    if (const auto* typeName = nd->to<IR::Type_Name>()) {
+        return ndToType(getDefinedType(typeName->path->name, nullptr));
+    }
+    return nd->to<IR::Type>();
 }
 
 const IR::Node* Parser::createFunctionCallOrConstantOp() {
@@ -791,31 +818,52 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
     }
     if (tokens[index].is(Token::Kind::StringLiteral)) {
         index++;
-        cstring txt = tokens[index].lexeme().data();
+        std::string txt = tokens[index].strLexeme();
         return new IR::StringLiteral(txt);
     }
     if (tokens[index].is(Token::Kind::LeftParen)) {
         index++;
+        if (tokens[index].is(Token::Kind::RightParen)) {
+            index++;
+            IR::Vector<IR::Expression> components;
+            return new IR::NamedExpression("Paren", new IR::ListExpression(components));
+        }
         const auto* res = createPunctuationMarks();
         BUG_CHECK(tokens[index].is(Token::Kind::RightParen), "Can't find coresponded ']'");
         index++;
-        return new IR::NamedExpression("Parent", res->to<IR::Expression>());
+        return new IR::NamedExpression("Paren", res->to<IR::Expression>());
     }
     const auto* mainArgument = createConstantOp();
+    if (index >= tokens.size()) {
+        return mainArgument;
+    }
+    const IR::Node* nd = nullptr;
+    if (const auto* namedExpr = mainArgument->to<IR::NamedExpression>()) {
+        if (namedExpr->name == "FieldName") {
+            const auto name = namedExpr->expression->to<IR::StringLiteral>()->value;
+            nd = getDefinedType(name, nullptr);
+            const auto* ns = getDefinedType(name, nullptr);
+            mainArgument = new IR::PathExpression(ndToType(ns), new IR::Path(name));
+        }
+    }
+    LOG1("createFunctionCallOrConstantOp next : " << tokens[index-1].lexeme());
+    LOG1("createFunctionCallOrConstantOp next : " << tokens[index].lexeme());
+    LOG1("createFunctionCallOrConstantOp next : " << tokens[index+1].lexeme());
     if (tokens[index].is(Token::Kind::Dot) || tokens[index].is(Token::Kind::FieldAccess)) {
-        const IR::Type* prevType = nullptr;
+        if (nd == nullptr) {
+            nd = getDefinedType(mainArgument->to<IR::NamedExpression>()->expression->to<IR::StringLiteral>()->value, nullptr);
+        }
         do {
             index++;
             auto result = createConstantOp();
-            prevType = getDefinedType(result->to<IR::StringLiteral>()->value,
-                                      mainArgument->to<IR::Expression>()->type);
-            mainArgument =
-                new IR::Member(prevType, mainArgument->to<IR::Expression>(), result->to<IR::NamedExpression>()->expression->to<IR::StringLiteral>()->value);
+            cstring name = result->to<IR::NamedExpression>()->expression->to<IR::StringLiteral>()->value;
+            nd = getDefinedType(name, nd);
+            mainArgument =  new IR::Member(ndToType(nd), mainArgument->to<IR::Expression>(), name);
         } while (tokens[index].is(Token::Kind::Dot) || tokens[index].is(Token::Kind::FieldAccess));
         if (index >= tokens.size()) {
             return mainArgument;
         }
-        if (tokens[index].is(Token::Kind::LeftSParent)) {
+        if (tokens[index].is(Token::Kind::LeftSParen)) {
             return createSliceOrArrayOp(mainArgument);
         }
         if (tokens[index].is(Token::Kind::LeftParen)) {
@@ -823,7 +871,7 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
         }
         return mainArgument;
     }
-    if (tokens[index].is(Token::Kind::LeftSParent) && mainArgument->is<IR::PathExpression>()) {
+    if (tokens[index].is(Token::Kind::LeftSParen) && mainArgument->is<IR::PathExpression>()) {
         return createSliceOrArrayOp(mainArgument);
     }
     if (tokens[index].is(Token::Kind::LeftParen)) {
@@ -847,6 +895,7 @@ const IR::Node* Parser::createArithmeticOp() {
     if (index >= tokens.size()) {
         return mainArgument;
     }
+    LOG1("createArithmeticOp next : " << tokens[index].lexeme());
     index++;
     if (curToken.is(Token::Kind::Mul)) {
         return createIR(curToken.kind(), mainArgument, createArithmeticOp());
@@ -879,6 +928,7 @@ const IR::Node* Parser::createEqCompareAndShiftOp() {
     if (index >= tokens.size()) {
         return mainArgument;
     }
+    LOG1("createEqCompareAndShiftOp : " << tokens[index].lexeme());
     auto curToken = tokens[index];
     index++;
     if (curToken.is(Token::Kind::LessEqual)) {
@@ -915,6 +965,7 @@ const IR::Node* Parser::createBinaryOp() {
     if (index >= tokens.size()) {
         return mainArgument;
     }
+    LOG1("createBinaryOp next : " << tokens[index].lexeme());
     auto curToken = tokens[index];
     index++;
     if (curToken.is(Token::Kind::BAnd)) {
@@ -937,6 +988,7 @@ const IR::Node* Parser::createLogicalOp() {
     if (index >= tokens.size()) {
         return mainArgument;
     }
+    LOG1("createLogicalOp next : " << tokens[index].lexeme());
     auto curToken = tokens[index];
     index++;
     if (curToken.is(Token::Kind::Conjunction)) {
@@ -968,6 +1020,7 @@ const IR::Node* Parser::createPunctuationMarks() {
     if (index >= tokens.size()) {
         return mainArgument;
     }
+    LOG1("createPunctuationMarks next : " << tokens[index].lexeme());
     if (tokens[index].is(Token::Kind::Colon)) {
         return createListExpressions(mainArgument, NAMES[static_cast<size_t>(tokens[index].kind())].c_str(), tokens[index].kind());
     }
@@ -1051,7 +1104,7 @@ Token Lexer::next() noexcept {
             do {
                 txt += peek();
             } while (get() != '\"');
-            return {Token::Kind::StringLiteral, txt.c_str(), 2};
+            return {Token::Kind::StringLiteral, txt.c_str(), txt.length()};
         case '(':
             return atom(Token::Kind::LeftParen);
         case ')':
@@ -1059,24 +1112,21 @@ Token Lexer::next() noexcept {
         case '=':
             get();
             if (get() == '=') {
-                get();
                 return {Token::Kind::Equal, "==", 2};
             }
             prev();
-            return atom(Token::Kind::Unknown);
+            prev();
+            return atom(Token::Kind::Text);
         case '!':
             get();
             if (get() == '=') {
-                get();
                 return {Token::Kind::NotEqual, "!=", 2};
             }
-            prev();
             prev();
             return atom(Token::Kind::LNot);
         case '-':
             get();
             if (get() == '>') {
-                get();
                 return {Token::Kind::Implication, "->", 2};
             }
             prev();
@@ -1084,7 +1134,6 @@ Token Lexer::next() noexcept {
         case '<':
             get();
             if (get() == '=') {
-                get();
                 return {Token::Kind::LessEqual, "<=", 2};
             }
             prev();
@@ -1096,7 +1145,6 @@ Token Lexer::next() noexcept {
         case '>':
             get();
             if (get() == '=') {
-                get();
                 return {Token::Kind::GreaterEqual, ">=", 2};
             }
             prev();
@@ -1114,22 +1162,21 @@ Token Lexer::next() noexcept {
         case ':':
             get();
             if (get() == ':') {
-                get();
-                return atom(Token::Kind::FieldAccess);
+                return {Token::Kind::FieldAccess, "::", 2};
             }
-            return atom(Token::Kind::Colon);
+            prev();
+            return {Token::Kind::FieldAccess, ":", 1};
         case '&':
             get();
             if (get() == '&') {
-                get();
                 return {Token::Kind::Conjunction, "&&", 2};
             }
+            prev();
             prev();
             return atom(Token::Kind::Text);
         case '|':
             get();
             if (get() == '|') {
-                get();
                 return {Token::Kind::Disjunction, "||", 2};
             }
             prev();
@@ -1145,15 +1192,20 @@ Token Lexer::next() noexcept {
                 }
                 prev();
             }
+            prev();
             return atom(Token::Kind::Text);
         case '+':
             return atom(Token::Kind::Plus);
         case '/':
             get();
             if (get() == '/') {
-                get();
-                return {Token::Kind::Comment, "//", 2};
+                txt = "";
+                while (peek() != '\n') {
+                    txt += get();
+                }
+                return {Token::Kind::Comment, txt.c_str(), txt.length()};
             }
+            prev();
             prev();
             return atom(Token::Kind::Slash);
         case '%':
