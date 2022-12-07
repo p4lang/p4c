@@ -513,7 +513,7 @@ add_cpplint_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
 get_property(CPPLINT_FILES GLOBAL PROPERTY cpplint-files)
 
 if(DEFINED CPPLINT_FILES)
-  # Write the list to a file. We need to do this too many files will reach
+  # Write the list to a file. We need to do this as too many files will reach
   # the shell argument limit.
   set(CPPLINT_FILE ${P4C_BINARY_DIR}/cpplint_files.txt)
   file(WRITE ${CPPLINT_FILE} "${CPPLINT_FILES}")
@@ -547,7 +547,7 @@ if(NOT ${CLANG_FORMAT_CMD})
   # Retrieve the global clang-format property.
   get_property(CLANG_FORMAT_FILES GLOBAL PROPERTY clang-format-files)
   if(DEFINED CLANG_FORMAT_FILES)
-    # Write the list to a file. We need to do this too many files will reach
+    # Write the list to a file. We need to do this as too many files will reach
     # the shell argument limit.
     set(CLANG_FORMAT_FILE ${P4C_BINARY_DIR}/clang_format_files.txt)
     file(WRITE ${CLANG_FORMAT_FILE} "${CLANG_FORMAT_FILES}")
