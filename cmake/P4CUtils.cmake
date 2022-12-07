@@ -49,7 +49,7 @@ macro (p4c_add_library name symbol var)
 endmacro(p4c_add_library)
 
 # Add files with the appropriate path to the list of linted files
-function(add_cpplint_files dir filelist)
+macro(add_cpplint_files dir filelist)
   foreach(__f ${filelist})
     string(REGEX MATCH "^/.*" abs_path "${__f}")
     if (NOT ${abs_path} EQUAL "")
@@ -58,10 +58,18 @@ function(add_cpplint_files dir filelist)
       list (APPEND __cpplintFileList "${dir}/${__f}")
     endif()
   endforeach(__f)
-  set (CPPLINT_FILES ${CPPLINT_FILES} ${__cpplintFileList} PARENT_SCOPE)
-endfunction(add_cpplint_files)
 
-function(add_clang_format_files dir filelist)
+  # Since add_cpplint_files is a macro, we need to check whether the
+  # calling context has a parent. If not, add to the variable directly.
+  get_directory_property(hasParent PARENT_DIRECTORY)
+  if(hasParent)
+    set (CPPLINT_FILES ${CPPLINT_FILES} ${__cpplintFileList} PARENT_SCOPE)
+  else()
+    set (CPPLINT_FILES ${CPPLINT_FILES} ${__cpplintFileList})
+  endif()
+endmacro(add_cpplint_files)
+
+macro(add_clang_format_files dir filelist)
   foreach(__f ${filelist})
     string(REGEX MATCH "^/.*" abs_path "${__f}")
     if (NOT ${abs_path} EQUAL "")
@@ -70,8 +78,16 @@ function(add_clang_format_files dir filelist)
       list (APPEND __cpplintFileList "${dir}/${__f}")
     endif()
   endforeach(__f)
-  set (CLANG_FORMAT_FILES ${CLANG_FORMAT_FILES} ${__cpplintFileList} PARENT_SCOPE)
-endfunction(add_clang_format_files)
+
+  # Since add_cpplint_files is a macro, we need to check whether the
+  # calling context has a parent. If not, add to the variable directly.
+  get_directory_property(hasParent PARENT_DIRECTORY)
+  if(hasParent)
+    set (CLANG_FORMAT_FILES ${CLANG_FORMAT_FILES} ${__cpplintFileList} PARENT_SCOPE)
+  else()
+    set (CLANG_FORMAT_FILES ${CLANG_FORMAT_FILES} ${__cpplintFileList})
+  endif()
+endmacro(add_clang_format_files)
 
 
 macro(p4c_test_set_name name tag alias)

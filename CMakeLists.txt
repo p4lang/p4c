@@ -495,6 +495,8 @@ file(
   frontends/*.h
   ir/*.cpp
   ir/*.h
+  midend/*.cpp
+  midend/*.h
   tools/*.cpp
   tools/*.h
 )
@@ -508,6 +510,7 @@ list(FILTER P4C_LINT_LIST EXCLUDE REGEX "control-plane/p4runtime")
 add_cpplint_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
 
 if(DEFINED CPPLINT_FILES)
+  get_property(TARGET cpplint CPPLINT_FILES PROPERTY cpplint-files)
   list ( SORT CPPLINT_FILES )
   set (CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
   set (CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
