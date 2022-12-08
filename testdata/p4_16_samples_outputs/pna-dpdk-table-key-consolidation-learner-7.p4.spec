@@ -34,6 +34,7 @@ struct main_metadata_t {
 	bit<32> pna_main_output_metadata_output_port
 	bit<32> MainControlImpl_ipv4_da_ipv4_srcAddr
 	bit<32> MainControlImpl_ipv4_da_ipv4_dstAddr
+	bit<32> MainControlImpl_ipv4_da_local_metadata_meta
 	bit<8> MainControlImpl_ipv4_da_ethernet_isValid
 	bit<32> MainControlT_tmp
 	bit<32> MainControlT_tmp_0
@@ -74,7 +75,7 @@ learner ipv4_da {
 	key {
 		m.MainControlImpl_ipv4_da_ipv4_srcAddr
 		m.MainControlImpl_ipv4_da_ipv4_dstAddr
-		m.local_metadata_meta
+		m.MainControlImpl_ipv4_da_local_metadata_meta
 		m.MainControlImpl_ipv4_da_ethernet_isValid
 	}
 	actions {
@@ -128,6 +129,7 @@ apply {
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
 	mov m.MainControlImpl_ipv4_da_ipv4_srcAddr h.ipv4.srcAddr
 	mov m.MainControlImpl_ipv4_da_ipv4_dstAddr h.ipv4.dstAddr
+	mov m.MainControlImpl_ipv4_da_local_metadata_meta m.local_metadata_meta
 	mov m.MainControlImpl_ipv4_da_ethernet_isValid 1
 	jmpv LABEL_END_0 h.ethernet
 	mov m.MainControlImpl_ipv4_da_ethernet_isValid 0

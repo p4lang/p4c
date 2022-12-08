@@ -71,6 +71,7 @@ struct metadata {
 	bit<48> local_metadata_data13
 	bit<48> local_metadata_data14
 	bit<48> local_metadata_data15
+	bit<48> ingress_tbl_local_metadata_data1
 	bit<8> ingress_tbl_ethernet_isValid
 	bit<8> ingress_tbl_tcp_isValid
 	bit<8> ingress_tbl_ipv4_isValid
@@ -108,7 +109,7 @@ action execute_1 args none {
 
 table tbl {
 	key {
-		m.local_metadata_data1 exact
+		m.ingress_tbl_local_metadata_data1 exact
 		m.ingress_tbl_ethernet_isValid exact
 		m.ingress_tbl_tcp_isValid exact
 		m.ingress_tbl_ipv4_isValid exact
@@ -137,7 +138,8 @@ apply {
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
-	INGRESSPARSERIMPL_ACCEPT :	mov m.ingress_tbl_ethernet_isValid 1
+	INGRESSPARSERIMPL_ACCEPT :	mov m.ingress_tbl_local_metadata_data1 m.local_metadata_data1
+	mov m.ingress_tbl_ethernet_isValid 1
 	jmpv LABEL_END h.ethernet
 	mov m.ingress_tbl_ethernet_isValid 0
 	LABEL_END :	mov m.ingress_tbl_tcp_isValid 1
