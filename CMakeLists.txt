@@ -495,6 +495,8 @@ file(
   frontends/*.h
   ir/*.cpp
   ir/*.h
+  lib/*.cpp
+  lib/*.h
   midend/*.cpp
   midend/*.h
   tools/*.cpp
@@ -536,9 +538,6 @@ if(DEFINED CPPLINT_FILES)
 endif()
 
 # clang-format
-# Temporarily disable clang-format linting for the ir folder.
-#TODO: Fix up the IR include system.
-list(FILTER P4C_LINT_LIST EXCLUDE REGEX "${P4C_SOURCE_DIR}/ir/")
 add_clang_format_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
 
 find_program(CLANG_FORMAT_CMD clang-format)

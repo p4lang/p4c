@@ -37,20 +37,20 @@ using namespace IndentCtl;
 
 static int dbprint_index = -1;
 
-int DBPrint::dbgetflags(std::ostream &out) {
+int DBPrint::dbgetflags(std::ostream& out) {
     if (dbprint_index < 0) dbprint_index = out.xalloc();
     return out.iword(dbprint_index);
 }
 
-int DBPrint::dbsetflags(std::ostream &out, int val, int mask) {
+int DBPrint::dbsetflags(std::ostream& out, int val, int mask) {
     if (dbprint_index < 0) dbprint_index = out.xalloc();
-    auto &flags = out.iword(dbprint_index);
+    auto& flags = out.iword(dbprint_index);
     int rv = flags;
     flags = (flags & ~mask) | val;
     return rv;
 }
 
-void IR::Node::dbprint(std::ostream &out) const {
+void IR::Node::dbprint(std::ostream& out) const {
     out << "<" << node_type_name() << ">(" << id << ")";
 }
 
@@ -66,10 +66,11 @@ void IR::InstantiatedBlock::dbprint(std::ostream& out) const {
 
 void IR::Annotation::dbprint(std::ostream& out) const {
     out << '@' << name;
-    const char *sep = "(";
+    const char* sep = "(";
     for (auto e : expr) {
         out << sep << e;
-        sep = ", "; }
+        sep = ", ";
+    }
     if (*sep != '(') out << ')';
 }
 
@@ -90,27 +91,23 @@ void IR::Block::dbprint_recursive(std::ostream& out) const {
     out << unindent;
 }
 
-std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v) {
+std::ostream& operator<<(std::ostream& out, const IR::Vector<IR::Expression>& v) {
     int prec = getprec(out);
     if (prec) {
         if (v.size() == 1) {
             out << v[0];
-            return out; }
-        out << "{"; }
-    for (auto e : v)
-        out << Log::endl << setprec(0) << e << setprec(prec);
-    if (prec)
-        out << " }";
+            return out;
+        }
+        out << "{";
+    }
+    for (auto e : v) out << Log::endl << setprec(0) << e << setprec(prec);
+    if (prec) out << " }";
     return out;
 }
 
-void dbprint(const IR::Node *n) {
-  std::cout << n << std::endl;
-}
-void dbprint(const IR::Node &n) {
-  std::cout << n << std::endl;
-}
-void dbprint(const std::set<const IR::Expression *> s) {
+void dbprint(const IR::Node* n) { std::cout << n << std::endl; }
+void dbprint(const IR::Node& n) { std::cout << n << std::endl; }
+void dbprint(const std::set<const IR::Expression*> s) {
     std::cout << indent << " {";
     int i = 0;
     for (auto el : s) std::cout << Log::endl << '[' << i++ << "] " << el;
