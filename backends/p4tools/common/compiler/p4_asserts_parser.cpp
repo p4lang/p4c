@@ -619,7 +619,7 @@ const IR::Node* Parser::createIR(Token::Kind kind, const IR::Node* left,
     left = removeBrackets(res.first);
     right = removeBrackets(res.second);
     const auto* leftExpr = left->to<IR::Expression>();
-    const auto* rightExpr = left->to<IR::Expression>();
+    const auto* rightExpr = right->to<IR::Expression>();
     switch (kind) {
         case Token::Kind::LNot:
             return new IR::LNot(leftExpr);
@@ -662,9 +662,9 @@ const IR::Node* Parser::createIR(Token::Kind kind, const IR::Node* left,
         case Token::Kind::BOr:
             return new IR::BOr(leftExpr, rightExpr);
         case Token::Kind::Conjunction:
-            return new IR::LOr(leftExpr, rightExpr);
-        case Token::Kind::Disjunction:
             return new IR::LAnd(leftExpr, rightExpr);
+        case Token::Kind::Disjunction:
+            return new IR::LOr(leftExpr, rightExpr);
         case Token::Kind::Implication:
             return new IR::LOr(new IR::LNot(leftExpr), rightExpr);
         default:
@@ -672,9 +672,11 @@ const IR::Node* Parser::createIR(Token::Kind kind, const IR::Node* left,
     }
 }
 
-const IR::Node* Parser::getDefinedType(cstring txt, const IR::Node* nd) {
+std::pair<const IR::Node*, cstring> Parser::getDefinedType(cstring txt, const IR::Node* nd) {
     if (nd == nullptr) {
         return getDefinedType(txt, program);
+    } else if (const auto* typeName = nd->to<IR::Type_Name>()) {
+        return getDefinedType(txt, getDefinedType(typeName->path->name, nullptr).first);
     } else {
         const IR::IDeclaration *decl = nullptr;
         if (nd->is<IR::P4Program>()) {
@@ -684,24 +686,53 @@ const IR::Node* Parser::getDefinedType(cstring txt, const IR::Node* nd) {
         } else if (const auto* ns = nd->to<IR::ISimpleNamespace>()) {
             decl = ns->getDeclByName(txt);
             if (decl == nullptr) {
-                if (const auto* strct = nd->to<IR::Type_StructLike>()) {
-                    return strct->getField(txt)->type;
+                if (const auto* control = nd->to<IR::P4Control>()) {
+                    for (const auto* d : control->controlLocals) {
+                        if (d->name.originalName == txt) {
+                            if (const auto* var = d->to<IR::Declaration_Variable>()){
+                                return std::make_pair(var->type, d->name.name);
+                            }
+                            if (const auto* c = d->to<IR::Declaration_Constant>()) {
+                                return std::make_pair(c->type, d->name.name);
+                            }
+                            if (const auto* i = d->to<IR::Declaration_Instance>()) {
+                                return std::make_pair(i->type, d->name.name);
+                            }
+                        }
+                    }
                 }
+            } else if (const auto* field = decl->to<IR::StructField>()) {
+                return std::make_pair(field->type, txt);
+            }
+            if (decl == nullptr) {
                 // Find in parameters
                 if (const auto iapply = nd->to<IR::IApply>()) {
                     const auto paramList = iapply->getApplyParameters();
                     decl = paramList->getDeclByName(txt);
-                    if (const auto* parameter = decl->to<IR::Parameter>()) {
-                        return parameter->type;
+                    if (decl != nullptr && decl->is<IR::Parameter>()) {
+                        return std::make_pair(decl->to<IR::Parameter>()->type, txt);
                     }
                 }
             }
         }
         if (decl == nullptr) {
+            if (const auto* strct = nd->to<IR::Type_StructLike>()) {
+                const auto *field = strct->getField(txt);
+                if (field == nullptr) {
+                    for (auto i : strct->fields) {
+                        if (i->name.originalName == txt) {
+                            return std::make_pair(i->type, i->name.name);
+                        }
+                    }
+                } else {
+                    return std::make_pair(field->type, txt);
+                }
+            }
+            BUG_CHECK(!nd->is<IR::P4Control>() && !nd->is<IR::P4Action>() && !nd->is<IR::P4Table>(), "Can't find %1% in %2%", txt, nd);
             // Retrun Boolean type by default.
-            return IR::Type_Boolean::get();
+            return std::make_pair(IR::Type_Boolean::get(), txt);
         }
-        return decl->to<IR::Node>();
+        return std::make_pair(decl->to<IR::Node>(), txt);
     }
 }
 
@@ -712,7 +743,7 @@ const IR::Node* Parser::createConstantOp() {
         do {
             txt += tokens[index].strLexeme();
             index++;
-        } while (tokens[index].is(Token::Kind::Text));
+        } while (tokens[index].is(Token::Kind::Text) || tokens[index].is(Token::Kind::Number));
         if (txt == "true") {
             return new IR::BoolLiteral(true);
         } else if (txt == "false") {
@@ -801,7 +832,7 @@ const IR::Type* Parser::ndToType(const IR::Node* nd) {
         }
     }
     if (const auto* typeName = nd->to<IR::Type_Name>()) {
-        return ndToType(getDefinedType(typeName->path->name, nullptr));
+        return ndToType(getDefinedType(typeName->path->name, nullptr).first);
     }
     return nd->to<IR::Type>();
 }
@@ -841,9 +872,9 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
     if (const auto* namedExpr = mainArgument->to<IR::NamedExpression>()) {
         if (namedExpr->name == "FieldName") {
             const auto name = namedExpr->expression->to<IR::StringLiteral>()->value;
-            nd = getDefinedType(name, nullptr);
-            const auto* ns = getDefinedType(name, nullptr);
-            mainArgument = new IR::PathExpression(ndToType(ns), new IR::Path(name));
+            auto res = getDefinedType(name, nullptr);
+            nd = res.first;
+            mainArgument = new IR::PathExpression(ndToType(res.first), new IR::Path(res.second));
         }
     }
     LOG1("createFunctionCallOrConstantOp next : " << tokens[index-1].lexeme());
@@ -851,14 +882,15 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
     LOG1("createFunctionCallOrConstantOp next : " << tokens[index+1].lexeme());
     if (tokens[index].is(Token::Kind::Dot) || tokens[index].is(Token::Kind::FieldAccess)) {
         if (nd == nullptr) {
-            nd = getDefinedType(mainArgument->to<IR::NamedExpression>()->expression->to<IR::StringLiteral>()->value, nullptr);
+            nd = getDefinedType(mainArgument->to<IR::NamedExpression>()->expression->to<IR::StringLiteral>()->value, nullptr).first;
         }
         do {
             index++;
             auto result = createConstantOp();
             cstring name = result->to<IR::NamedExpression>()->expression->to<IR::StringLiteral>()->value;
-            nd = getDefinedType(name, nd);
-            mainArgument =  new IR::Member(ndToType(nd), mainArgument->to<IR::Expression>(), name);
+            auto res = getDefinedType(name, nd);
+            nd = res.first;
+            mainArgument =  new IR::Member(ndToType(res.first), mainArgument->to<IR::Expression>(), res.second);
         } while (tokens[index].is(Token::Kind::Dot) || tokens[index].is(Token::Kind::FieldAccess));
         if (index >= tokens.size()) {
             return mainArgument;
@@ -1050,7 +1082,8 @@ const IR::Node* Parser::getIR() {
     LOG1("getIR : " << tokens[index].lexeme());
     BUG_CHECK(index < tokens.size(), "Invalid size of the tokens vector");
     const auto* result = createPunctuationMarks();
-    BUG_CHECK(index < tokens.size(), "Can't translate string into IR");
+    BUG_CHECK(index >= tokens.size(), "Can't translate string into IR");
+    std::cout << result << std::endl;
     return result;
 }
 

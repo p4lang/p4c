@@ -153,7 +153,7 @@ class Parser {
     const IR::Node* createApplicationOp(const IR::Node*);
     const IR::Node* createConstantOp();
     const IR::Node* createSliceOrArrayOp(const IR::Node*);
-    const IR::Node* getDefinedType(cstring txt, const IR::Node* nd);
+    std::pair<const IR::Node*, cstring> getDefinedType(cstring txt, const IR::Node* nd);
     const IR::Type* ndToType(const IR::Node* nd);
 };
 

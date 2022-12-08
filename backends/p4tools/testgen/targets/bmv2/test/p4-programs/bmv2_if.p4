@@ -114,6 +114,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
             table2.apply();
             d = h.h.b + 1;
         }
+        h.h.c = d;
     }
 }
 
