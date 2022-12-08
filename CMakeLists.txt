@@ -495,6 +495,8 @@ file(
   frontends/*.h
   ir/*.cpp
   ir/*.h
+  midend/*.cpp
+  midend/*.h
   tools/*.cpp
   tools/*.h
 )
@@ -507,18 +509,30 @@ list(FILTER P4C_LINT_LIST EXCLUDE REGEX "control-plane/p4runtime")
 # cpplint
 add_cpplint_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
 
+# Retrieve the global cpplint property.
+get_property(CPPLINT_FILES GLOBAL PROPERTY cpplint-files)
+
 if(DEFINED CPPLINT_FILES)
-  list ( SORT CPPLINT_FILES )
-  set (CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
-  set (CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
-  add_custom_target(cpplint
-    COMMAND ${CPPLINT_CMD} ${CPPLINT_ARGS} ${CPPLINT_FILES}
+  # Write the list to a file. We need to do this as too many files will reach
+  # the shell argument limit.
+  set(CPPLINT_TXT_FILE ${P4C_BINARY_DIR}/cpplint_files.txt)
+  file(WRITE ${CPPLINT_TXT_FILE} "${CPPLINT_FILES}")
+  list(SORT CPPLINT_FILES)
+  set(CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
+  set(CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
+  # Pipe the file into cpplint.
+  add_custom_target(
+    cpplint
+    COMMAND xargs -a ${CPPLINT_TXT_FILE} -r -d '\;' ${CPPLINT_CMD} ${CPPLINT_ARGS}
     WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-    COMMENT "cpplint")
-  add_custom_target(cpplint-quiet
-    COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
+    COMMENT "cpplint"
+  )
+  add_custom_target(
+    cpplint-quiet
+    COMMAND xargs -a ${CPPLINT_TXT_FILE} -r -d '\;' ${CPPLINT_CMD} ${CPPLINT_ARGS} --quiet
     WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-    COMMENT "cpplint quietly")
+    COMMENT "cpplint quietly"
+  )
 endif()
 
 # clang-format
@@ -530,18 +544,24 @@ add_clang_format_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
 find_program(CLANG_FORMAT_CMD clang-format)
 
 if(NOT ${CLANG_FORMAT_CMD})
+  # Retrieve the global clang-format property.
+  get_property(CLANG_FORMAT_FILES GLOBAL PROPERTY clang-format-files)
   if(DEFINED CLANG_FORMAT_FILES)
+    # Write the list to a file. We need to do this as too many files will reach
+    # the shell argument limit.
+    set(CLANG_FORMAT_TXT_FILE ${P4C_BINARY_DIR}/clang_format_files.txt)
     list(SORT CLANG_FORMAT_FILES)
+    file(WRITE ${CLANG_FORMAT_TXT_FILE} "${CLANG_FORMAT_FILES}")
     set(CLANG_FORMAT_CMD clang-format)
     add_custom_target(
       clang-format
-      COMMAND ${CLANG_FORMAT_CMD} --verbose --Werror --dry-run -i ${CLANG_FORMAT_FILES}
+      COMMAND xargs -a ${CLANG_FORMAT_TXT_FILE} -r -d '\;' ${CLANG_FORMAT_CMD} --verbose --Werror --dry-run -i --
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Checking files for correct clang-format formatting."
     )
     add_custom_target(
       clang-format-fix-errors
-      COMMAND ${CLANG_FORMAT_CMD} --verbose -i ${CLANG_FORMAT_FILES}
+      COMMAND xargs -a ${CLANG_FORMAT_TXT_FILE} -r -d '\;' ${CLANG_FORMAT_CMD} --verbose -i --
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Formatting files using clang-format."
     )
