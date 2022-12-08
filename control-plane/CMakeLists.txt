@@ -81,10 +81,6 @@ set (CONTROLPLANE_SRCS
   typeSpecConverter.cpp
   bfruntime.cpp
   )
-set (CONTROLPLANE_SOURCES
-  ${P4RUNTIME_GEN_SRCS}
-  ${CONTROLPLANE_SRCS}
-  )
 
 set (CONTROLPLANE_HDRS
   addMissingIds.h
@@ -98,10 +94,12 @@ set (CONTROLPLANE_HDRS
   bfruntime.h
   )
 
+add_library(controlplane-gen OBJECT ${P4RUNTIME_GEN_SRCS})
+
 include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 # Silence -Warray-bounds as the root issue is out of our control: https://github.com/protocolbuffers/protobuf/issues/7140
 set_source_files_properties (${P4RUNTIME_GEN_SRCS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds")
 
-add_library (controlplane STATIC ${CONTROLPLANE_SOURCES} )
-target_link_libraries (controlplane ${PROTOBUF_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
+add_library (controlplane STATIC ${CONTROLPLANE_SRCS} )
+target_link_libraries (controlplane ${PROTOBUF_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} controlplane-gen)
 add_dependencies (controlplane mkP4configdir genIR frontend)

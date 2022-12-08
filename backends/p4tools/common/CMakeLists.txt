@@ -63,6 +63,3 @@ target_include_directories(
 )
 
 add_dependencies(p4tools-common genIR frontend)
-if(ENABLE_IWYU)
-  set_property(TARGET p4tools-common PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
-endif()

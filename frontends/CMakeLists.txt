@@ -236,17 +236,15 @@ endmacro(add_parser)
 add_parser(v1)
 add_parser(p4)
 
+add_library (parser-gen OBJECT ${p4PARSER_GEN_SRCS} ${v1PARSER_GEN_SRCS})
+add_dependencies (parser-gen mkp4dirs mkv1dirs ir-generated)
+
 set (FRONTEND_SOURCES
-  ${IR_GENERATED_SRCS}
   ${COMMON_FRONTEND_SRCS}
   ${PARSERS_SRCS}
   ${P4_FRONTEND_SRCS}
   ${V1_FRONTEND_SRCS}
-  ${p4PARSER_GEN_SRCS}
-  ${v1PARSER_GEN_SRCS}
   )
-
-set_source_files_properties(${IR_GENERATED_SRCS} PROPERTIES GENERATED TRUE)
 
 set (FRONTEND_CPPLINT_FILES
   ${P4_FRONTEND_SRCS} ${P4_FRONTEND_HDRS}
@@ -255,8 +253,8 @@ set (FRONTEND_CPPLINT_FILES
   ${PARSERS_SRCS} ${PARSERS_HDRS})
 
 if (FLEX_INCLUDE_DIRS)
-  include_directories(${FLEX_INCLUDE_DIRS})
+  include_directories (${FLEX_INCLUDE_DIRS})
 endif ()
 add_library (frontend STATIC ${FRONTEND_SOURCES} ${EXTENSION_FRONTEND_SOURCES})
-add_dependencies (frontend genIR)
-add_dependencies (frontend mkp4dirs mkv1dirs)
+add_dependencies (frontend genIR parser-gen)
+target_link_libraries (frontend parser-gen)

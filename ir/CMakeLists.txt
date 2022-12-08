@@ -64,4 +64,7 @@ set (BASE_IR_DEF_FILES
 set (IR_DEF_FILES ${IR_DEF_FILES} ${BASE_IR_DEF_FILES} PARENT_SCOPE)
 
 add_library (ir STATIC ${IR_SRCS})
-add_dependencies(ir genIR)
+add_dependencies(ir genIR ir-generated)
+target_link_libraries (ir ir-generated)
+
+
