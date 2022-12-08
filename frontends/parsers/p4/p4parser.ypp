@@ -1409,6 +1409,7 @@ prefixedNonTypeName
 dot_name:
     "." { driver.structure->relativePathFromLastSymbol(); } name {
           driver.structure->clearPath(); $$ = $3; }
+    ;
 
 lvalue
     : prefixedNonTypeName                { $$ = new IR::PathExpression($1); }
