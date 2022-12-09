@@ -3,3 +3,5 @@
 # Source: https://www.stefanjudis.com/today-i-learned/how-to-exclude-commits-from-git-blame/
 # clang-format first PR.
 e26a49dbf5749ee92585cec9e95ca781d377ebfd
+# clang-format ir and lib folder.
+7a722a3fb8205c57d7e9554fc7c62c2629720d5a
