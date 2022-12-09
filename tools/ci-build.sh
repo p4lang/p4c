@@ -94,7 +94,6 @@ P4C_RUNTIME_DEPS="cpp \
                   libgmp-dev \
                   python3"
 
-
 # TODO: Remove this check once 18.04 is deprecated.
 if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/null)" != "" ]] ; then
   P4C_DEPS+=" libprotobuf-dev protobuf-compiler"
@@ -119,7 +118,8 @@ ccache --set-config max_size=1G
 sudo pip3 install --upgrade pip
 sudo pip3 install -r ${P4C_DIR}/requirements.txt
 
-pip3 show protobuf
+# All imports should work now.
+printf "import google.rpc\nimport google.protobuf" | python3
 
 # Build libbpf for eBPF tests.
 pushd ${P4C_DIR}

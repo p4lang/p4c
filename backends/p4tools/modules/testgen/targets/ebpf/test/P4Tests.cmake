@@ -48,15 +48,15 @@ p4tools_add_tests(
   TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend STF ${EXTRA_OPTS} "
 )
 
-p4tools_add_tests(
-  TESTSUITES "${P4TESTDATA}/p4_16_samples/ebpf_conntrack_extern.p4;"
-  TAG "testgen-p4c-ebpf" DRIVER ${P4TESTGEN_DRIVER} TEMPLATE_FILE ${TEMPLATE_FILE}
-  TARGET "ebpf" ARCH "ebpf" ENABLE_RUNNER RUNNER_ARGS "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-conntrack-ebpf.c"
-  TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend STF ${EXTRA_OPTS} "
-)
+# p4tools_add_tests(
+#   TESTSUITES "${P4TESTDATA}/p4_16_samples/ebpf_conntrack_extern.p4;"
+#   TAG "testgen-p4c-ebpf" DRIVER ${P4TESTGEN_DRIVER} TEMPLATE_FILE ${TEMPLATE_FILE}
+#   TARGET "ebpf" ARCH "ebpf" ENABLE_RUNNER RUNNER_ARGS "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-conntrack-ebpf.c"
+#   TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend STF ${EXTRA_OPTS} "
+# )
 
 #############################################################################
 # TEST PROPERTIES
 #############################################################################
 
-include(${CMAKE_CURRENT_LIST_DIR}/EBPFXfail.cmake)
+# include(${CMAKE_CURRENT_LIST_DIR}/EBPFXfail.cmake)

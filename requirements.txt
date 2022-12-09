@@ -6,3 +6,5 @@ ply==3.11
 ptf==0.9.3
 scapy==2.4.5
 clang-format==15.0.6
+protobuf==3.18.1
+google-api-python-client
