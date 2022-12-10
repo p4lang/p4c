@@ -8,6 +8,7 @@
 #include <boost/container/vector.hpp>
 #include <boost/format.hpp>
 
+#include "backends/p4tools/common/lib/formulae.h"
 #include "frontends/p4/optimizeExpressions.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
@@ -20,7 +21,6 @@
 #include "lib/log.h"
 #include "lib/ordered_map.h"
 #include "lib/safe_vector.h"
-#include "p4tools/common/lib/formulae.h"
 
 namespace P4Tools {
 

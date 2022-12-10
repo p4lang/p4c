@@ -2,13 +2,13 @@
 
 #include <string>
 
+#include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/id.h"
 #include "lib/exceptions.h"
 #include "midend/coverage.h"
-#include "p4tools/common/compiler/reachability.h"
 
 #include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"

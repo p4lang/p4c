@@ -1,7 +1,7 @@
 #ifndef BACKENDS_UBPF_CODEGEN_H_
 #define BACKENDS_UBPF_CODEGEN_H_
 
-#include "ebpf/codeGen.h"
+#include "backends/ebpf/codeGen.h"
 #include "lib/sourceCodeBuilder.h"
 #include "target.h"
 

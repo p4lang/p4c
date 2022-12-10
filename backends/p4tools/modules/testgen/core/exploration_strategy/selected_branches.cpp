@@ -6,10 +6,10 @@
 #include <utility>
 #include <vector>
 
+#include "backends/p4tools/common/core/solver.h"
 #include "gsl/gsl-lite.hpp"
 #include "lib/error.h"
 #include "lib/exceptions.h"
-#include "p4tools/common/core/solver.h"
 
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"

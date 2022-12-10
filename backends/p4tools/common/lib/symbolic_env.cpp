@@ -7,6 +7,8 @@
 #include <boost/container/flat_map.hpp>
 #include <boost/container/vector.hpp>
 
+#include "backends/p4tools/common/lib/formulae.h"
+#include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/zombie.h"
 #include "frontends/p4/optimizeExpressions.h"
 #include "ir/indexed_vector.h"
@@ -14,8 +16,6 @@
 #include "ir/vector.h"
 #include "ir/visitor.h"
 #include "lib/exceptions.h"
-#include "p4tools/common/lib/formulae.h"
-#include "p4tools/common/lib/model.h"
 
 namespace P4Tools {
 

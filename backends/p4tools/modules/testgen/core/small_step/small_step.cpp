@@ -11,6 +11,8 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 
+#include "backends/p4tools/common/compiler/reachability.h"
+#include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "frontends/p4/optimizeExpressions.h"
@@ -21,8 +23,6 @@
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
-#include "p4tools/common/compiler/reachability.h"
-#include "p4tools/common/core/solver.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/cmd_stepper.h"

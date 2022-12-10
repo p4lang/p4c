@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 
+#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
@@ -13,7 +14,6 @@
 #include "lib/exceptions.h"
 #include "lib/null.h"
 #include "lib/safe_vector.h"
-#include "p4tools/common/lib/formulae.h"
 
 namespace P4Tools {
 

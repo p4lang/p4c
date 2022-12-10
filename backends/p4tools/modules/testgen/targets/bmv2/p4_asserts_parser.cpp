@@ -12,6 +12,7 @@
 #include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
+#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
@@ -24,7 +25,6 @@
 #include "lib/log.h"
 #include "lib/ordered_map.h"
 #include "lib/safe_vector.h"
-#include "p4tools/common/lib/formulae.h"
 
 namespace P4Tools {
 

@@ -9,6 +9,7 @@
 
 #include "backends/p4test/version.h"
 #include "backends/p4tools/common/compiler/midend.h"
+#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "frontends/common/options.h"
 #include "frontends/common/parseInput.h"
@@ -23,7 +24,6 @@
 #include "ir/irutils.h"
 #include "lib/compile_context.h"
 #include "lib/null.h"
-#include "p4tools/common/lib/formulae.h"
 
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"

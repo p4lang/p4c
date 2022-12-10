@@ -6,6 +6,7 @@
 #include <utility>
 #include <vector>
 
+#include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/util.h"
@@ -15,7 +16,6 @@
 #include "lib/null.h"
 #include "lib/safe_vector.h"
 #include "midend/saturationElim.h"
-#include "p4tools/common/core/solver.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"

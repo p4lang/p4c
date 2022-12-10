@@ -2,13 +2,13 @@
 
 #include <string>
 
-#include "bmv2/common/annotations.h"
+#include "backends/bmv2/common/annotations.h"
+#include "backends/p4tools/common/compiler/compiler_target.h"
+#include "backends/p4tools/common/compiler/midend.h"
 #include "control-plane/addMissingIds.h"
 #include "control-plane/p4RuntimeArchStandard.h"
 #include "frontends/common/options.h"
 #include "lib/cstring.h"
-#include "p4tools/common/compiler/compiler_target.h"
-#include "p4tools/common/compiler/midend.h"
 
 #include "backends/p4tools/modules/testgen/options.h"
 

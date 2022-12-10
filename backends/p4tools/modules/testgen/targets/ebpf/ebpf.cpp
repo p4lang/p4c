@@ -2,9 +2,9 @@
 
 #include <string>
 
+#include "backends/p4tools/common/compiler/compiler_target.h"
+#include "backends/p4tools/common/compiler/midend.h"
 #include "frontends/common/options.h"
-#include "p4tools/common/compiler/compiler_target.h"
-#include "p4tools/common/compiler/midend.h"
 
 namespace P4Tools {
 
