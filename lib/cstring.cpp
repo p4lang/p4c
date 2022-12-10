@@ -187,10 +187,12 @@ cstring cstring::newline = cstring("\n");
 cstring cstring::empty = cstring("");
 
 bool cstring::startsWith(const cstring& prefix) const {
+    if (prefix.isNullOrEmpty()) return true;
     return size() >= prefix.size() && memcmp(str, prefix.str, prefix.size()) == 0;
 }
 
 bool cstring::endsWith(const cstring& suffix) const {
+    if (suffix.isNullOrEmpty()) return true;
     return size() >= suffix.size() &&
            memcmp(str + size() - suffix.size(), suffix.str, suffix.size()) == 0;
 }

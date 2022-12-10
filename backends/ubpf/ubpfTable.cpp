@@ -191,12 +191,13 @@ void UBPFTable::emitInstance(EBPF::CodeBuilder* builder) {
 }
 
 void UBPFTable::setTableKind() {
+    // set table kind to HASH by default
+    this->tableKind = EBPF::TableHash;
     if (keyGenerator == nullptr) {
         return;
     }
-    // set table kind to HASH by default
-    EBPF::TableKind tableKind = EBPF::TableHash;
 
+    EBPF::TableKind tableKind = EBPF::TableHash;
     // If any key field is LPM we will generate an LPM table
     for (auto it : keyGenerator->keyElements) {
         auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);

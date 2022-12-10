@@ -38,6 +38,12 @@ ARG CMAKE_ONLY=OFF
 # uninitialized variables.
 ARG BUILD_AUTO_VAR_INIT_PATTERN=OFF
 
+# Configuration of ASAN and UBSAN sanitizers:
+# - Print symbolized stack trace for each error report.
+# - Disable leaks detector as p4c uses GC.
+ENV UBSAN_OPTIONS=print_stacktrace=1
+ENV ASAN_OPTIONS=print_stacktrace=1:detect_leaks=0
+
 # Delegate the build to tools/ci-build.
 COPY . /p4c/
 RUN chmod u+x /p4c/tools/ci-build.sh && /p4c/tools/ci-build.sh
