@@ -5,17 +5,21 @@
 set -e  # Exit on error.
 set -x  # Make command execution verbose
 
+. /etc/lsb-release
+
 export P4C_DEPS="bison \
              build-essential \
+             ccache \
              cmake \
              curl \
              flex \
              g++ \
              git \
+             gnupg \
              lld \
              libboost-dev \
              libboost-graph-dev \
-             libboost-iostreams1.71-dev \
+             libboost-iostreams-dev \
              libfl-dev \
              libgc-dev \
              pkg-config \
@@ -33,10 +37,15 @@ export P4C_EBPF_DEPS="libpcap-dev \
              iptables \
              net-tools"
 
+if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
+  P4C_RUNTIME_DEPS_BOOST="libboost-graph1.65.1 libboost-iostreams1.65.1"
+else
+  P4C_RUNTIME_DEPS_BOOST="libboost-graph1.7* libboost-iostreams1.7*"
+fi
+
 export P4C_RUNTIME_DEPS="cpp \
-                     libboost-graph1.71.0 \
-                     libboost-iostreams1.71.0 \
-                     libgc1c2 \
+                     ${P4C_RUNTIME_DEPS_BOOST} \
+                     libgc1* \
                      libgmp-dev \
                      python3"
 
@@ -44,6 +53,7 @@ export P4C_RUNTIME_DEPS="cpp \
 export P4C_PIP_PACKAGES="ipaddr \
                           pyroute2 \
                           ply==3.8 \
+                          ptf \
                           scapy==2.4.5 \
                           clang-format>=15.0.4"
 
@@ -53,15 +63,24 @@ apt install -y --no-install-recommends \
   ${P4C_EBPF_DEPS} \
   ${P4C_RUNTIME_DEPS}
 
-# TODO: Remove this rm -rf line once the ccache memcache config (https://github.com/p4lang/third-party/blob/main/Dockerfile#L72) is removed.
-rm -rf /usr/local/etc/ccache.conf
-/usr/local/bin/ccache --set-config cache_dir=/p4c/.ccache
-/usr/local/bin/ccache --set-config max_size=1G
+if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
+  apt-get install -y libprotobuf-dev protobuf-compiler
+else
+  echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | tee /etc/apt/sources.list.d/home:p4lang.list
+  curl -L "http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key" | apt-key add -
+  apt update
+  apt install -y p4lang-bmv2
+fi
+
+
+ccache --set-config cache_dir=/p4c/.ccache
+ccache --set-config max_size=1G
 
 # we want to use Python as the default so change the symlinks
 ln -sf /usr/bin/python3 /usr/bin/python
 ln -sf /usr/bin/pip3 /usr/bin/pip
 
+pip3 install --upgrade pip
 pip3 install wheel
 pip3 install $P4C_PIP_PACKAGES
 
@@ -193,7 +212,7 @@ if [ "$CMAKE_ONLY" == "OFF" ]; then
   make
   make install
   # Print ccache statistics after building
-  /usr/local/bin/ccache -p -s
+  ccache -p -s
 fi
 
 

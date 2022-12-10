@@ -1,4 +1,6 @@
-FROM p4lang/behavioral-model:latest
+ARG UBUNTU_VERSION=20.04
+ARG BASE_IMAGE=ubuntu:${UBUNTU_VERSION}
+FROM ${BASE_IMAGE}
 LABEL maintainer="P4 Developers <p4-dev@lists.p4.org>"
 
 # Default to using 2 make jobs, which is a good default for CI. If you're
