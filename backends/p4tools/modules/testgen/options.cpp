@@ -306,6 +306,23 @@ TestgenOptions::TestgenOptions()
             return true;
         },
         "List of the selected branches which should be chosen for selection.");
+
+    registerOption(
+        "--assumption-mode", nullptr,
+        [this](const char * /*arg*/) {
+            enforceAssumptions = true;
+            return true;
+        },
+        "Add conditions defined in assert/assume to the path conditions. Only tests which satisfy "
+        "these conditions can be generated.");
+    registerOption(
+        "--assertion-mode", nullptr,
+        [this](const char * /*arg*/) {
+            assertionModeEnabled = true;
+            return true;
+        },
+        "Produce only tests that violate the condition defined in assert calls. This will either "
+        "produce no tests or only tests that contain counter examples.");
 }
 
 }  // namespace P4Tools
