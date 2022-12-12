@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-#include "backends/p4tools/common/compiler/p4_asserts_parser.h"
+#include "backends/p4tools/common/compiler/p4_expr_parser.h"
 
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
@@ -574,7 +574,7 @@ const IR::Expression* ReachabilityEngine::getCondition(const DCGVertexType* n) {
 
 const IR::Expression* ReachabilityEngine::stringToNode(std::string name) {
     LOG1("Parse restriction  - " << name);
-    return AssertsParser::Parser::getIR(name.c_str(), program)->to<IR::Expression>();
+    return ExpressionParser::Parser::getIR(name.c_str(), program)->to<IR::Expression>();
 }
 
 }  // namespace P4Tools

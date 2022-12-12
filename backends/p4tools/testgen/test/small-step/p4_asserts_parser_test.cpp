@@ -82,7 +82,7 @@ Restrictions loadExample(const char* curFile, bool flag) {
     program = program->apply(midEnd);
     Restrictions result;
     if (flag) {
-        program->apply(P4Tools::AssertsParser::AssertsParser(result));
+        program->apply(P4Tools::ExpressionParser::AssertsParser(result));
     } else {
         program->apply(P4Tools::RefersToParser::RefersToParser(result));
     }

@@ -72,7 +72,7 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     std::vector<std::vector<const IR::Expression*>> restrictionsVec;
     /// Defines all "entry_restriction" and then converts restrictions from string to IR
     /// expressions, and stores them in restrictionsVec to move targetConstraints further.
-    program->apply(AssertsParser::AssertsParser(restrictionsVec));
+    program->apply(ExpressionParser::AssertsParser(restrictionsVec));
     /// Defines all "refers_to" and then converts restrictions from string to IR expressions,
     /// and stores them in restrictionsVec to move targetConstraints further.
     program->apply(RefersToParser::RefersToParser(restrictionsVec));

@@ -6,7 +6,7 @@ include(common)
 project(p4tools-common)
 
 # We need a fairly recent version of Z3.
-set(Z3_MIN_VERSION "4.8.14")
+set(Z3_MIN_VERSION "4.8.12")
 find_package(Z3 ${Z3_MIN_VERSION} REQUIRED)
 
 if(NOT DEFINED Z3_VERSION_STRING OR ${Z3_VERSION_STRING} VERSION_LESS ${Z3_MIN_VERSION})
@@ -46,6 +46,7 @@ set(
   compiler/hs_index_simplify.cpp
   compiler/midend.cpp
   compiler/p4_asserts_parser.cpp
+  compiler/p4_expr_parser.cpp
   compiler/reachability.cpp
 
   core/target.cpp
