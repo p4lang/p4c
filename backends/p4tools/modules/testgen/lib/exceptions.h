@@ -29,10 +29,10 @@ class TestgenUnimplemented final : public Util::P4CExceptionBase {
     }
 };
 
-#define TESTGEN_UNIMPLEMENTED(...)                                   \
-    do {                                                             \
-        throw TestgenUnimplemented(__LINE__, __FILE__, __VA_ARGS__); \
-    } while (0)
+template <class... Args>
+[[noreturn]] inline auto TESTGEN_UNIMPLEMENTED(Args&&... args) {
+    throw TestgenUnimplemented(__LINE__, __FILE__, std::forward<Args>(args)...);
+}
 
 }  // namespace P4Testgen
 

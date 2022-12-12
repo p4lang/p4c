@@ -126,25 +126,29 @@ class CompilationError : public P4CExceptionBase {
     CompilationError(const char *format, T... args) : P4CExceptionBase(format, args...) {}
 };
 
-#define BUG(...)                                                  \
-    do {                                                          \
-        throw Util::CompilerBug(__LINE__, __FILE__, __VA_ARGS__); \
-    } while (0)
-#define BUG_CHECK(e, ...)           \
-    do {                            \
-        if (!(e)) BUG(__VA_ARGS__); \
-    } while (0)
-#define P4C_UNIMPLEMENTED(...)                                              \
-    do {                                                                    \
-        throw Util::CompilerUnimplemented(__LINE__, __FILE__, __VA_ARGS__); \
-    } while (0)
-
 }  // namespace Util
 
+template <class... Args>
+[[noreturn]] inline auto BUG(Args&&... args) {
+    throw Util::CompilerBug(__LINE__, __FILE__, std::forward<Args>(args)...);
+}
+
+template <class... Args>
+inline auto BUG_CHECK(bool e, Args&&... args) {
+    if (!e) {
+        BUG(std::forward<Args>(args)...);
+    }
+}
+
+template <class... Args>
+[[noreturn]] inline auto P4C_UNIMPLEMENTED(Args&&... args) {
+    throw Util::CompilerUnimplemented(__LINE__, __FILE__, std::forward<Args>(args)...);
+}
+
 /// Report an error and exit
-#define FATAL_ERROR(...)                           \
-    do {                                           \
-        throw Util::CompilationError(__VA_ARGS__); \
-    } while (0)
+template <class... Args>
+[[noreturn]] inline auto FATAL_ERROR(Args&&... args) {
+    throw Util::CompilationError(std::forward<Args>(args)...);
+}
 
 #endif /* _LIB_EXCEPTIONS_H_ */
