@@ -18,9 +18,10 @@ limitations under the License.
 
 #ifndef _LIB_EXCEPTIONS_H_
 #define _LIB_EXCEPTIONS_H_
-
 #include <unistd.h>
 
+#include <experimental/source_location>
+// Exception is after experimental.
 #include <exception>
 
 #include "lib/error_helper.h"
@@ -129,25 +130,45 @@ class CompilationError : public P4CExceptionBase {
 }  // namespace Util
 
 template <class... Args>
-[[noreturn]] inline auto BUG(Args&&... args) {
-    throw Util::CompilerBug(__LINE__, __FILE__, std::forward<Args>(args)...);
-}
-
-template <class... Args>
-inline auto BUG_CHECK(bool e, Args&&... args) {
-    if (!e) {
-        BUG(std::forward<Args>(args)...);
+struct BUG {
+    [[noreturn]] explicit BUG(Args &&...args, const std::experimental::source_location &loc =
+                                                  std::experimental::source_location::current()) {
+        throw Util::CompilerBug(loc.line(), loc.file_name(), std::forward<Args>(args)...);
     }
-}
+};
+
+template <typename... Args>
+BUG(Args &&...) -> BUG<Args...>;
 
 template <class... Args>
-[[noreturn]] inline auto P4C_UNIMPLEMENTED(Args&&... args) {
-    throw Util::CompilerUnimplemented(__LINE__, __FILE__, std::forward<Args>(args)...);
-}
+struct BUG_CHECK {
+    explicit BUG_CHECK(bool e, Args &&...args,
+                       const std::experimental::source_location &loc =
+                           std::experimental::source_location::current()) {
+        if (!e) {
+            throw Util::CompilerBug(loc.line(), loc.file_name(), std::forward<Args>(args)...);
+        }
+    }
+};
+
+template <typename... Args>
+BUG_CHECK(bool e, Args &&...) -> BUG_CHECK<Args...>;
+
+template <class... Args>
+struct P4C_UNIMPLEMENTED {
+    [[noreturn]] explicit P4C_UNIMPLEMENTED(Args &&...args,
+                                            const std::experimental::source_location &loc =
+                                                std::experimental::source_location::current()) {
+        throw Util::CompilerUnimplemented(loc.line(), loc.file_name(), std::forward<Args>(args)...);
+    }
+};
+
+template <typename... Args>
+P4C_UNIMPLEMENTED(Args &&...) -> P4C_UNIMPLEMENTED<Args...>;
 
 /// Report an error and exit
 template <class... Args>
-[[noreturn]] inline auto FATAL_ERROR(Args&&... args) {
+[[noreturn]] inline auto FATAL_ERROR(Args &&...args) {
     throw Util::CompilationError(std::forward<Args>(args)...);
 }
 
