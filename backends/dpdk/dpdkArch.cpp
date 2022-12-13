@@ -2093,6 +2093,32 @@ const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
     return decls;
 }
 
+// Member_id and/or group_id must be initialized prior to member table apply.
+// An action selector table can either set a group_id which in turns set the member_id or it
+// can directly set a member_id. Member table is always applied in either case.
+// Hence, we initialize member_id with 0 as it will always have a valid value based on the base
+// table match Since the values of member_id and group_id are set during run-time, to make a
+// decision whether to apply the group table or not, we initialize group_id with the maximum
+// possible value (this is 32-bit as per PSA specification) and compare this initial value with the
+// group_id at run-time.
+IR::Expression* SplitP4TableCommon::initializeMemberAndGroupId(
+    cstring tableName, IR::IndexedVector<IR::StatOrDecl>* decls) {
+    IR::Expression* group_id_expr = nullptr;
+    if (member_ids.count(tableName) != 0) {
+        auto member_id = member_ids.at(tableName);
+        decls->push_back(new IR::AssignmentStatement(
+            new IR::PathExpression(member_id),
+            new IR::Constant(IR::Type_Bits::get(32), initial_member_id)));
+    }
+    if (group_ids.count(tableName) != 0) {
+        auto group_id = group_ids.at(tableName);
+        group_id_expr = new IR::PathExpression(group_id);
+        decls->push_back(new IR::AssignmentStatement(
+            group_id_expr, new IR::Constant(IR::Type_Bits::get(32), initial_group_id)));
+    }
+    return group_id_expr;
+}
+
 const IR::Node* SplitP4TableCommon::postorder(IR::MethodCallStatement* statement) {
     auto methodCall = statement->methodCall;
     auto mi = P4::MethodInstance::resolve(methodCall, refMap, typeMap);
@@ -2117,21 +2143,7 @@ const IR::Node* SplitP4TableCommon::postorder(IR::MethodCallStatement* statement
         IR::Expression* group_id_expr = nullptr;
         auto decls = new IR::IndexedVector<IR::StatOrDecl>();
         auto tableName = apply->object->getName().name;
-
-        // member_id and/or group_id must be initialized prior to member table apply.
-        if (member_ids.count(tableName) != 0) {
-            auto member_id = member_ids.at(tableName);
-            decls->push_back(new IR::AssignmentStatement(
-                new IR::PathExpression(member_id), new IR::Constant(IR::Type_Bits::get(32), 0)));
-        }
-
-        if (group_ids.count(tableName) != 0) {
-            auto group_id = group_ids.at(tableName);
-            group_id_expr = new IR::PathExpression(group_id);
-            decls->push_back(new IR::AssignmentStatement(
-                group_id_expr, new IR::Constant(IR::Type_Bits::get(32), 0xFFFFFFFF)));
-        }
-
+        group_id_expr = initializeMemberAndGroupId(tableName, decls);
         if (member_tables.count(tableName) == 0) {
             ::error(ErrorType::ERR_NOT_FOUND, "Unable to find member table %1%", tableName);
             return statement;
@@ -2154,7 +2166,8 @@ const IR::Node* SplitP4TableCommon::postorder(IR::MethodCallStatement* statement
                 return statement;
             }
             auto selectorTable = group_tables.at(tableName);
-            auto max_group_cst = new IR::Constant(IR::Type_Bits::get(32), 0xFFFFFFFF);
+            BUG_CHECK(group_id_expr, "initial group id is not set");
+            auto max_group_cst = new IR::Constant(IR::Type_Bits::get(32), initial_group_id);
             t0stat = new IR::Neq(statement->srcInfo, group_id_expr, max_group_cst);
             t1stat = gen_apply(selectorTable);
         }
@@ -2214,20 +2227,7 @@ const IR::Node* SplitP4TableCommon::postorder(IR::IfStatement* statement) {
         IR::Expression* group_id_expr = nullptr;
         auto decls = new IR::IndexedVector<IR::StatOrDecl>();
         auto tableName = apply->object->getName().name;
-        // member_id and/or group_id must be initialized prior to member table apply.
-        if (member_ids.count(tableName) != 0) {
-            auto member_id = member_ids.at(tableName);
-            decls->push_back(new IR::AssignmentStatement(
-                new IR::PathExpression(member_id), new IR::Constant(IR::Type_Bits::get(32), 0)));
-        }
-
-        if (group_ids.count(tableName) != 0) {
-            auto group_id = group_ids.at(tableName);
-            group_id_expr = new IR::PathExpression(group_id);
-            decls->push_back(new IR::AssignmentStatement(
-                group_id_expr, new IR::Constant(IR::Type_Bits::get(32), 0xFFFFFFFF)));
-        }
-
+        group_id_expr = initializeMemberAndGroupId(tableName, decls);
         if (member_tables.count(tableName) == 0) {
             ::error(ErrorType::ERR_NOT_FOUND, "Unable to find member table %1%", tableName);
             return statement;
@@ -2238,7 +2238,8 @@ const IR::Node* SplitP4TableCommon::postorder(IR::IfStatement* statement) {
         IR::Expression* t1stat = nullptr;
         if (implementation == TableImplementation::ACTION_SELECTOR) {
             auto selectorTable = group_tables.at(tableName);
-            auto max_group_cst = new IR::Constant(IR::Type_Bits::get(32), 0xFFFFFFFF);
+            BUG_CHECK(group_id_expr, "initial group id is not set");
+            auto max_group_cst = new IR::Constant(IR::Type_Bits::get(32), initial_group_id);
             t0stat = new IR::Neq(statement->srcInfo, group_id_expr, max_group_cst);
             t1stat = apply_hit(selectorTable);
         }
@@ -2331,21 +2332,7 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
         auto decls = new IR::IndexedVector<IR::StatOrDecl>();
         auto tableName = apply->object->getName().name;
 
-        // member_id and/or group_id must be initialized prior to member table apply.
-        if (member_ids.count(tableName) != 0) {
-            auto member_id = member_ids.at(tableName);
-            decls->push_back(new IR::AssignmentStatement(
-                new IR::PathExpression(member_id), new IR::Constant(IR::Type_Bits::get(32), 0)));
-        }
-
-        // Initialize group_id with max possible value
-        if (group_ids.count(tableName) != 0) {
-            auto group_id = group_ids.at(tableName);
-            group_id_expr = new IR::PathExpression(group_id);
-            decls->push_back(new IR::AssignmentStatement(
-                group_id_expr, new IR::Constant(IR::Type_Bits::get(32), 0xFFFFFFFF)));
-        }
-
+        group_id_expr = initializeMemberAndGroupId(tableName, decls);
         if (member_tables.count(tableName) == 0) {
             ::error(ErrorType::ERR_NOT_FOUND, "Unable to find member table %1%", tableName);
             return statement;
@@ -2363,7 +2350,8 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
                 return statement;
             }
             auto selectorTable = group_tables.at(tableName);
-            auto max_group_cst = new IR::Constant(IR::Type_Bits::get(32), 0xFFFFFFFF);
+            BUG_CHECK(group_id_expr, "initial group id is not set");
+            auto max_group_cst = new IR::Constant(IR::Type_Bits::get(32), initial_group_id);
             t0stat = new IR::Neq(statement->srcInfo, group_id_expr, max_group_cst);
             t1stat = gen_apply(selectorTable);
         }
@@ -2398,7 +2386,7 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
                 auto currCase = new IR::SwitchCase(caseLabelValue, c->statement);
                 cases.push_back(currCase);
                 cstring label = pe->path->name.name;
-                actionCaseMap[label].push_back(std::make_tuple(switchExprTmp, caseLabelValue));
+                sw.addToSwitchMap(label, switchExprTmp, caseLabelValue);
                 label_value++;
             } else {
                 BUG("Unexpected case label %1%, expected action name or default", c->label);
