@@ -112,7 +112,7 @@ int Testgen::mainImpl(const IR::P4Program* program) {
             return new IncrementalMaxCoverageStack(solver, *programInfo, seed);
         }
         if (explorationStrategy.compare("reachabilityGuided") == 0) {
-            if (TestgenOptions::get().dcg) {
+            if (TestgenOptions::get().dcg || !TestgenOptions::get().pattern.empty()) {
                 return new ReachabilityGuided(solver, *programInfo, seed);
             } else {
                 ::warning("This strategy requires the --dcg flag. Please re-run the tool with --dcg. Defaulting to the default exploration strategy.\n");

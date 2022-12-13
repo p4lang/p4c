@@ -27,6 +27,7 @@ namespace P4Testgen {
 
 void ReachabilityGuided::run(const Callback& callback) {
     while (true) {
+        std::cout << "Rechability strategy" << std::endl;
         try {
             if (executionState->isTerminal()) {
                 // We've reached the end of the program. Call back and (if desired) end execution.

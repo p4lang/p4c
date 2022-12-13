@@ -22,7 +22,6 @@ namespace P4Tools {
 namespace P4Testgen {
 
 void IncrementalStack::run(const Callback& callback) {
-    std::cout << "AAAAAAAAAA" << std::endl;
     while (true) {
         try {
             if (executionState->isTerminal()) {
