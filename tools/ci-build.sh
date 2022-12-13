@@ -5,6 +5,49 @@
 set -e  # Exit on error.
 set -x  # Make command execution verbose
 
+# Default to using 2 make jobs, which is a good default for CI. If you're
+# building locally or you know there are more cores available, you may want to
+# override this.
+: "${MAKEFLAGS:=-j2}"
+# Select the type of image we're building. Use `build` for a normal build, which
+# is optimized for image size. Use `test` if this image will be used for
+# testing; in this case, the source code and build-only dependencies will not be
+# removed from the image.
+: "${IMAGE_TYPE:=build}"
+# Whether to do a unified build.
+: "${ENABLE_UNIFIED_COMPILATION:=ON}"
+# Whether to enable translation validation
+: "${VALIDATION:=OFF}"
+# This creates a release build that includes link time optimization and links
+# all libraries statically.
+: "${BUILD_STATIC_RELEASE:=OFF}"
+# No questions asked during package installation.
+: "${DEBIAN_FRONTEND:=noninteractive}"
+# Whether to install dependencies required to run PTF-ebpf tests
+: "${INSTALL_PTF_EBPF_DEPENDENCIES:=OFF}"
+# List of kernel versions to install supporting packages for PTF-ebpf tests
+: "${INSTALL_PTF_EBPF_DEPENDENCIES:=}"
+# Whether to build the P4Tools back end and platform.
+: "${ENABLE_TEST_TOOLS:=OFF}"
+# Whether to treat warnings as errors.
+: "${ENABLE_WERROR:=ON}"
+# Compile with Clang compiler
+: "${COMPILE_WITH_CLANG:=OFF}"
+# Compile with sanitizers (UBSan, ASan)
+: "${ENABLE_SANITIZERS:=OFF}"
+# Only execute the steps necessary to successfully run CMake.
+: "${CMAKE_ONLY:=OFF}"
+# Build with -ftrivial-auto-var-init=pattern to catch more bugs caused by
+# uninitialized variables.
+: "${BUILD_AUTO_VAR_INIT_PATTERN:=OFF}"
+
+# Configuration of ASAN and UBSAN sanitizers:
+# - Print symbolized stack trace for each error report.
+# - Disable leaks detector as p4c uses GC.
+
+: "${UBSAN_OPTIONS:=print_stacktrace=1}"
+: "${ASAN_OPTIONS:=print_stacktrace=1:detect_leaks=0}"
+
 . /etc/lsb-release
 
 export P4C_DEPS="bison \
