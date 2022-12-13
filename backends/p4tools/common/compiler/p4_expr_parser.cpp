@@ -242,13 +242,13 @@ std::pair<const IR::Node*, IR::ID> Parser::getDefinedType(cstring txt, const IR:
 }
 
 bool isValidNumber(Token t, bool isHex) {
-    if (tokens[index].is(Token::Kind::Number)) {
+    if (t.is(Token::Kind::Number)) {
         return true;
     }
     if (!isHex) {
         return false;
     }
-    cstring s = t.strLexeme)();
+    char s = t.strLexeme()[0];
     return (s == 'a' || s == 'A' || s == 'b' || s == 'B' || s == 'c' || s == 'C' ||
             s == 'd' || s == 'D' || s == 'e' || s == 'E' || s == 'f' || s == 'F');
 }
@@ -272,7 +272,6 @@ const IR::Node* Parser::createConstantOp() {
     if (tokens[index].is(Token::Kind::Number)) {
         std::string txt;
         bool isHex = false;
-        bool wasX = fasle;
         do {
             txt += std::data(tokens[index].lexeme());
             index++;
@@ -314,7 +313,8 @@ const IR::Node* Parser::createSliceOrArrayOp(const IR::Node* base) {
     BUG_CHECK(listExpr->size() < 2 && listExpr->size() != 0, "Expected one or two arguments", listExpr);
     if (listExpr->size() == 1) {
         // Create an array.
-        return new IR::ArrayIndex(base->to<IR::Expression>(), listExpr->components.at(0));
+        const auto* expr = base->to<IR::Expression>();
+        return new IR::ArrayIndex(expr->type->to<IR::HeaderStack>()->type, expr, listExpr->components.at(0));
     }
     // Create a slice.
     return new IR::Slice(base->to<IR::Expression>(), listExpr->components.at(0), listExpr->components.at(1));
@@ -408,7 +408,11 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
             cstring name = result->to<IR::NamedExpression>()->expression->to<IR::StringLiteral>()->value;
             auto res = getDefinedType(name, nd);
             nd = res.first;
-            mainArgument =  new IR::Member(ndToType(res.first), mainArgument->to<IR::Expression>(), res.second);
+            const IR::Type* type = ndToType(res.first);
+            if (res.second.originalName == "isValid") {
+                type = mainArgument->to<IR::Expression>()->type;
+            }
+            mainArgument =  new IR::Member(type, mainArgument->to<IR::Expression>(), res.second);
         } while (tokens[index].is(Token::Kind::Dot) || tokens[index].is(Token::Kind::FieldAccess));
         if (index >= tokens.size()) {
             return mainArgument;
@@ -675,6 +679,8 @@ Token Lexer::next() noexcept {
             }
             prev();
             return atom(Token::Kind::LNot);
+        case '~':
+            return atom(Token::Kind::Complement);
         case '-':
             get();
             if (get() == '>') {

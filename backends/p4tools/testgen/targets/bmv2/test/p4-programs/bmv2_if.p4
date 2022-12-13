@@ -10,11 +10,14 @@ header H {
     bit<8> a;
     bit<8> b;
     bit<8> c;
+    bool b1;
+    bool b2;
 }
 
 struct Headers {
     ethernet_t eth_hdr;
     H          h;
+    H[2]       harray;
 }
 
 struct Meta {}
