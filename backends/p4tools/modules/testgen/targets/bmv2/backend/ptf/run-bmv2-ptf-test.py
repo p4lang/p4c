@@ -74,11 +74,16 @@ def run_test(options):
         print("---------------------- End simple_switch_grpc with errors ----------------------")
         raise SystemExit('simple_switch_grpc ended with errors')
     print("---------------------- Start ptf ----------------------")
-    ptf = 'ptf  "$P" -i 0@veth1 -i 1@veth3 -i 2@veth5 -i 3@veth7 -i 4@veth9 -i 5@veth11 -i 6@veth13 -i 7@veth15 --test-params="grpcaddr=\'localhost:9559\';p4info=\'' + \
+    pypath = 'T="`realpath ../../testlib`"; if x"${PYTHONPATH}" == "x" ]; then P="${T}"; else P="${T}:${PYTHONPATH}"; fi;'
+    # Show list of the tests
+    ptfTestList = subprocess.Popen(pypath +' ptf --pypath "$P" --test-dir '+options.testdir+' --list', shell=True,
+                            stdin=subprocess.PIPE, universal_newlines=True)
+    ptfTestList.communicate()                   
+    ptf = 'ptf --pypath "$P" -i 0@veth1 -i 1@veth3 -i 2@veth5 -i 3@veth7 -i 4@veth9 -i 5@veth11 -i 6@veth13 -i 7@veth15 --test-params="grpcaddr=\'localhost:9559\';p4info=\'' + \
         options.infoName+'\';config=\''+options.jsonName + \
         '\';" --test-dir ' + options.testdir
     print(f"RUNNING {ptf}")
-    ptfP = subprocess.Popen(ptf, shell=True,
+    ptfP = subprocess.Popen(pypath + ptf, shell=True,
                             stdin=subprocess.PIPE, universal_newlines=True)
     timeout = 3
     ptfP.communicate()
