@@ -1,5 +1,5 @@
 #include <core.p4>
-#include "pna.p4"
+#include <dpdk/pna.p4>
 
 
 typedef bit<48>  EthernetAddress;
@@ -89,15 +89,15 @@ control MainControlImpl(
     DirectMeter(PNA_MeterType_t.BYTES) meter1;
 
     action next_hop(PortId_t oport) {
-        out1 = meter0.execute(color_in, 32w1024);
+        out1 = meter0.dpdk_execute(color_in, 32w1024);
         user_meta.port_out = (out1 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
-        color_out = meter1.execute(color_in, 32w1024);
+        color_out = meter1.dpdk_execute(color_in, 32w1024);
         user_meta.port_out1 = (color_out == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);        
         send_to_port(oport);
     }
 
     action default_route_drop() {
-        out1 = meter0.execute(color_in, 32w1024);
+        out1 = meter0.dpdk_execute(color_in, 32w1024);
         user_meta.port_out = (out1 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
         drop_packet();
     }
@@ -125,7 +125,7 @@ control MainControlImpl(
     }
     apply {
         if (hdr.ipv4.isValid()) {
-            color_out = meter1.execute(color_in, 32w1024);
+            color_out = meter1.dpdk_execute(color_in, 32w1024);
             user_meta.port_out1 = (color_out == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);        
             ipv4_da_lpm.apply();
             ipv4_da.apply();

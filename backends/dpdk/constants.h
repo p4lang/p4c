@@ -46,4 +46,8 @@ const cstring tdiSchemaVersion = "0.1";
 #define CRC4 4
 #define JHASH5 5
 
+// Initial values for group_id and member_id for action selector and action profile tables
+const unsigned initial_member_id = 0;
+const unsigned initial_group_id = 0xFFFFFFFF;
+
 #endif /* BACKENDS_DPDK_CONSTANTS_H_ */
