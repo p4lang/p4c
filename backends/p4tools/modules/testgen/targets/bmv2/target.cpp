@@ -6,11 +6,11 @@
 #include <string>
 #include <vector>
 
+#include "backends/p4tools/common/core/solver.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
-#include "p4tools/common/core/solver.h"
 
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"

@@ -10,6 +10,7 @@
 #include <boost/multiprecision/number.hpp>
 #include <boost/none.hpp>
 
+#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
@@ -22,7 +23,6 @@
 #include "lib/log.h"
 #include "lib/null.h"
 #include "lib/safe_vector.h"
-#include "p4tools/common/lib/formulae.h"
 
 #include "backends/p4tools/modules/testgen/core/constants.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"

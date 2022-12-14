@@ -7,13 +7,13 @@
 
 #include <boost/none.hpp>
 
+#include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "lib/error.h"
 #include "midend/coverage.h"
-#include "p4tools/common/core/solver.h"
-#include "p4tools/common/lib/formulae.h"
 
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/inc_max_coverage_stack.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"

@@ -293,7 +293,6 @@ else()
 endif()
 
 include_directories (
-  ${P4C_SOURCE_DIR}/backends
   ${P4C_SOURCE_DIR}/extensions
   ${P4C_SOURCE_DIR}
   ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include

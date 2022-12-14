@@ -11,11 +11,14 @@
 #include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/formulae.h"
+#include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/timer.h"
+#include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "frontends/p4/optimizeExpressions.h"
 #include "ir/irutils.h"
@@ -23,9 +26,6 @@
 #include "lib/exceptions.h"
 #include "lib/null.h"
 #include "midend/coverage.h"
-#include "p4tools/common/core/z3_solver.h"
-#include "p4tools/common/lib/model.h"
-#include "p4tools/common/lib/trace_events.h"
 
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"

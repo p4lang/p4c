@@ -2,10 +2,10 @@
 
 #include <vector>
 
+#include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
-#include "p4tools/common/core/solver.h"
-#include "p4tools/common/lib/model.h"
-#include "p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/trace_events.h"
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 

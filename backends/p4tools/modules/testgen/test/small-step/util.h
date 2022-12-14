@@ -11,6 +11,7 @@
 
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
+#include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "gsl/gsl-lite.hpp"
 #include "gtest/gtest-message.h"
@@ -21,7 +22,6 @@
 #include "ir/ir.h"
 #include "ir/vector.h"
 #include "lib/enumerator.h"
-#include "p4tools/common/lib/model.h"
 
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
 #include "backends/p4tools/modules/testgen/core/target.h"

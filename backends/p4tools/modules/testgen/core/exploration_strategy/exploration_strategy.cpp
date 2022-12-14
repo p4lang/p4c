@@ -10,6 +10,8 @@
 #include <boost/format.hpp>
 #include <boost/none.hpp>
 
+#include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/timer.h"
 #include "backends/p4tools/common/lib/util.h"
@@ -19,8 +21,6 @@
 #include "ir/irutils.h"
 #include "lib/error.h"
 #include "midend/coverage.h"
-#include "p4tools/common/core/solver.h"
-#include "p4tools/common/lib/formulae.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"

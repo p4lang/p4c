@@ -8,12 +8,12 @@
 #include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/compiler/reachability.h"
+#include "backends/p4tools/common/lib/formulae.h"
 #include "ir/declaration.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
 #include "midend/coverage.h"
-#include "p4tools/common/lib/formulae.h"
 
 #include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"

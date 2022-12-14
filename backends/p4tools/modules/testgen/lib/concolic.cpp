@@ -6,10 +6,10 @@
 #include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
+#include "backends/p4tools/common/lib/model.h"
 #include "ir/id.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
-#include "p4tools/common/lib/model.h"
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
