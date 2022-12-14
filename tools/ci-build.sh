@@ -26,9 +26,10 @@ set -x  # Make command execution verbose
 # Whether to install dependencies required to run PTF-ebpf tests
 : "${INSTALL_PTF_EBPF_DEPENDENCIES:=OFF}"
 # List of kernel versions to install supporting packages for PTF-ebpf tests
-: "${INSTALL_PTF_EBPF_DEPENDENCIES:=}"
+: "${KERNEL_VERSIONS:=}"
 # Whether to build the P4Tools back end and platform.
 : "${ENABLE_TEST_TOOLS:=OFF}"
+
 # Whether to treat warnings as errors.
 : "${ENABLE_WERROR:=ON}"
 # Compile with Clang compiler
@@ -40,13 +41,6 @@ set -x  # Make command execution verbose
 # Build with -ftrivial-auto-var-init=pattern to catch more bugs caused by
 # uninitialized variables.
 : "${BUILD_AUTO_VAR_INIT_PATTERN:=OFF}"
-
-# Configuration of ASAN and UBSAN sanitizers:
-# - Print symbolized stack trace for each error report.
-# - Disable leaks detector as p4c uses GC.
-
-: "${UBSAN_OPTIONS:=print_stacktrace=1}"
-: "${ASAN_OPTIONS:=print_stacktrace=1:detect_leaks=0}"
 
 . /etc/lsb-release
 
