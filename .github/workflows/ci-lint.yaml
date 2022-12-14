@@ -8,7 +8,10 @@ on:
 
 jobs:
   p4c-lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
+    env:
+      IMAGE_TYPE: test
+      CMAKE_ONLY: ON
     steps:
     - uses: actions/checkout@v3
       with:
@@ -26,14 +29,16 @@ jobs:
     #   run: |
     #     ./tools/check-git-submodules.sh
 
-    - name: Build
-      run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg CMAKE_ONLY=ON .
+      - name: Build (Ubuntu 20.04)
+        run: |
+          sudo cp -rf . /p4c/
+          (cd /p4c/ && sudo -E tools/ci-build.sh)
+          sudo cp -rf /p4c/.ccache .
 
     - name: Run cpplint.
-      run: |
-        docker run p4c make cpplint -C build
+      run: make cpplint -C build
+      working-directory: /p4c
 
     - name: Run clang-format.
-      run: |
-        docker run p4c make clang-format -C build
+      run: make clang-format -C build
+      working-directory: /p4c
