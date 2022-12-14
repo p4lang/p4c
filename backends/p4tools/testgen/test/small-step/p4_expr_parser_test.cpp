@@ -171,14 +171,14 @@ TEST_F(P4ExpressionParserTest, SimpleExpressions) {
     ASSERT_TRUE(strct->name.originalName == "Headers");
 
     // check slice
-    expr = parseExpression("ingress::h.h.a[1:2]", program);
+    expr = parseExpression("ingress::h.h.a[3:2]", program);
     ASSERT_TRUE(expr->type->is<IR::Type_Bits>());
-    type = member->type->to<IR::Type_Bits>();
+    type = expr->type->to<IR::Type_Bits>();
     ASSERT_TRUE(type->size == 2);
     ASSERT_TRUE(expr->is<IR::Slice>());
     const auto* slice = expr->to<IR::Slice>();
-    ASSERT_TRUE(slice->getL() == 1);
-    ASSERT_TRUE(slice->getH() == 2);
+    ASSERT_TRUE(slice->getL() == 2);
+    ASSERT_TRUE(slice->getH() == 3);
     ASSERT_TRUE(checkMember(slice->e0, "a"));
     member = slice->e0->to<IR::Member>();
     ASSERT_TRUE(member->type->is<IR::Type_Bits>());
@@ -190,8 +190,8 @@ TEST_F(P4ExpressionParserTest, SimpleExpressions) {
     ASSERT_TRUE(expr->is<IR::ArrayIndex>());
     const auto* array = expr->to<IR::ArrayIndex>();
     ASSERT_TRUE(array->left->is<IR::Member>());
-    ASSERT_TRUE(array->left->type->is<IR::HeaderStack>());
-    ASSERT_TRUE(array->left->type->to<IR::HeaderStack>()->size == 2);
+    ASSERT_TRUE(array->left->type->is<IR::Type_Stack>());
+    ASSERT_TRUE(array->left->type->to<IR::Type_Stack>()->getSize() == 2);
     ASSERT_TRUE(array->right->is<IR::Constant>());
     ASSERT_TRUE(array->right->to<IR::Constant>()->value == 0);
 

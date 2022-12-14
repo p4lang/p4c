@@ -124,15 +124,30 @@ class Parser {
     char prev() noexcept;
     
  protected:
+    typedef  const IR::Node* (Parser::*createFuncType)();
     const IR::Node* getIR();
     const IR::Node* createPunctuationMarks();
-    const IR::Node* createListExpressions(const IR::Node*, const char*, Token::Kind);
+    const IR::Node* createSemi();
+    const IR::Node* createQuestion();
+    const IR::Node* createColon();
+    const IR::Node* createListExpressions(const IR::Node*, const char*, Token::Kind,
+                                          createFuncType func);
     const IR::Node* createLogicalOp();
+    const IR::Node* createDisjunction();
+    const IR::Node* createConjunction();
     const IR::Node* createIR(Token::Kind, const IR::Node*, const IR::Node*);
     NodesPair makeLeftTree(Token::Kind, const IR::Node*, const IR::Node*);
     const IR::Node* removeBrackets(const IR::Node*);
     const IR::Node* createBinaryOp();
+    const IR::Node* createXor();
+    const IR::Node* createBAnd();
     const IR::Node* createEqCompareAndShiftOp();
+    const IR::Node* createNotEqual();
+    const IR::Node* createGreaterThan();
+    const IR::Node* createShr();
+    const IR::Node* createGreaterEqual();
+    const IR::Node* createShl();
+    const IR::Node* createLessEqual();
     const IR::Node* createArithmeticOp();
     const IR::Node* createFunctionCallOrConstantOp();
     const IR::Node* createApplicationOp(const IR::Node*);
