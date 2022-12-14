@@ -20,7 +20,8 @@ jobs:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
       ENABLE_UNIFIED_COMPILATION: ON
-    runs-on: ubuntu-latest
+      VALIDATION: ON
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
       with:
@@ -41,4 +42,3 @@ jobs:
     - name: Validate
       run: sudo -E ctest  -R toz3-validate-p4c --output-on-failure --schedule-random
       working-directory: /p4c/build
-
