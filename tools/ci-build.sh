@@ -44,35 +44,35 @@ set -x  # Make command execution verbose
 
 . /etc/lsb-release
 
-export P4C_DEPS="bison \
-             build-essential \
-             ccache \
-             cmake \
-             curl \
-             flex \
-             g++ \
-             git \
-             gnupg \
-             lld \
-             libboost-dev \
-             libboost-graph-dev \
-             libboost-iostreams-dev \
-             libfl-dev \
-             libgc-dev \
-             pkg-config \
-             python3 \
-             python3-pip \
-             python3-setuptools \
-             tcpdump"
+P4C_DEPS="bison \
+          build-essential \
+          ccache \
+          cmake \
+          curl \
+          flex \
+          g++ \
+          git \
+          gnupg \
+          lld \
+          libboost-dev \
+          libboost-graph-dev \
+          libboost-iostreams-dev \
+          libfl-dev \
+          libgc-dev \
+          pkg-config \
+          python3 \
+          python3-pip \
+          python3-setuptools \
+          tcpdump"
 
-export P4C_EBPF_DEPS="libpcap-dev \
-             libelf-dev \
-             zlib1g-dev \
-             llvm \
-             clang \
-             iproute2 \
-             iptables \
-             net-tools"
+P4C_EBPF_DEPS="libpcap-dev \
+               libelf-dev \
+               zlib1g-dev \
+               llvm \
+               clang \
+               iproute2 \
+               iptables \
+               net-tools"
 
 if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
   P4C_RUNTIME_DEPS_BOOST="libboost-graph1.65.1 libboost-iostreams1.65.1"
@@ -80,35 +80,34 @@ else
   P4C_RUNTIME_DEPS_BOOST="libboost-graph1.7* libboost-iostreams1.7*"
 fi
 
-export P4C_RUNTIME_DEPS="cpp \
-                     ${P4C_RUNTIME_DEPS_BOOST} \
-                     libgc1* \
-                     libgmp-dev \
-                     python3"
+P4C_RUNTIME_DEPS="cpp \
+                  ${P4C_RUNTIME_DEPS_BOOST} \
+                  libgc1* \
+                  libgmp-dev \
+                  python3"
 
 # use scapy 2.4.5, which is the version on which ptf depends
-export P4C_PIP_PACKAGES="ipaddr \
-                          pyroute2 \
-                          ply==3.8 \
-                          ptf \
-                          scapy==2.4.5 \
-                          clang-format>=15.0.4"
+P4C_PIP_PACKAGES="ipaddr \
+                  pyroute2 \
+                  ply==3.8 \
+                  ptf \
+                  scapy==2.4.5 \
+                  clang-format>=15.0.4"
+
+
+if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
+  P4C_DEPS+=" libprotobuf-dev protobuf-compiler"
+else
+  echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | tee /etc/apt/sources.list.d/home:p4lang.list
+  curl -L "http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key" | apt-key add -
+  P4C_DEPS+=" p4lang-bmv2"
+fi
 
 apt update
 apt install -y --no-install-recommends \
   ${P4C_DEPS} \
   ${P4C_EBPF_DEPS} \
   ${P4C_RUNTIME_DEPS}
-
-if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
-  apt-get install -y libprotobuf-dev protobuf-compiler
-else
-  echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | tee /etc/apt/sources.list.d/home:p4lang.list
-  curl -L "http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key" | apt-key add -
-  apt update
-  apt install -y p4lang-bmv2
-fi
-
 
 ccache --set-config cache_dir=/p4c/.ccache
 ccache --set-config max_size=1G
@@ -133,7 +132,7 @@ function install_ptf_ebpf_test_deps() (
   for version in $KERNEL_VERSIONS; do
     LINUX_TOOLS+=" linux-tools-$version-generic"
   done
-  export P4C_PTF_PACKAGES="gcc-multilib \
+  P4C_PTF_PACKAGES="gcc-multilib \
                            python3-six \
                            libgmp-dev \
                            libjansson-dev"
