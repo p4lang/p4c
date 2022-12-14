@@ -238,8 +238,7 @@ class AbstractTest(bt.P4RuntimeTest):
         assert success
 
     def tearDown(self):
-        # TODO: Figure this out
-        pass
+        bt.P4RuntimeTest.tearDown(self)
 
     def insertTableEntry(self, table_name, key_fields = None,
             action_name = None, data_fields = []):
