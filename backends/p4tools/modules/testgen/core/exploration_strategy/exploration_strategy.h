@@ -58,7 +58,7 @@ class ExplorationStrategy {
     /// Getter to access visitedStatements
     const P4::Coverage::CoverageSet& getVisitedStatements();
 
-    /// Prints relevant information about test generation, including when no tests can 
+    /// Prints relevant information about test generation, including when no tests can
     /// be produced.
     void printTestGenerationStatus(bool initialTest);
 
@@ -69,6 +69,7 @@ class ExplorationStrategy {
     /// The SMT solver backing this executor.
     AbstractSolver& solver;
 
+    /// A control flag that changes to true if handleTerminalState is invoked at lest once.
     bool producedInitialTest = false;
 
     /// @returns a pseudorandom integer in the range of [0, branches.size() - 1]
