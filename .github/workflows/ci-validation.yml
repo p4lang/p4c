@@ -17,7 +17,6 @@ jobs:
   # We only test the front end and some mid end passes for now.
   validate:
     env:
-      BUILD_SUCCESS: true
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
       ENABLE_UNIFIED_COMPILATION: ON
@@ -36,16 +35,10 @@ jobs:
     - name: Build (Ubuntu 20.04)
       run: |
         sudo cp -rf . /p4c/
-        (cd /p4c/ && sudo -E tools/ci-build.sh || echo "BUILD_SUCCESS=false" >> $GITHUB_ENV)
-        sudo cp -rf /p4c/.ccache . || echo "BUILD_SUCCESS=false" >> $GITHUB_ENV
+        (cd /p4c/ && sudo -E tools/ci-build.sh)
+        sudo cp -rf /p4c/.ccache .
 
     - name: Validate
-      if: env.BUILD_SUCCESS == 'true'
       run: sudo -E ctest  -R toz3-validate-p4c --output-on-failure --schedule-random
       working-directory: /p4c/build
-
-    - name: Build Failed
-      if: env.BUILD_SUCCESS == 'false'
-      run: |
-          echo "Building Gauntlet failed."
 
