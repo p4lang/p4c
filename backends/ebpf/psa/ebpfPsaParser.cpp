@@ -17,6 +17,7 @@ limitations under the License.
 #include "ebpfPsaParser.h"
 
 #include "backends/ebpf/ebpfType.h"
+#include "backends/ebpf/psa/ebpfPipeline.h"
 #include "frontends/p4/enumInstance.h"
 
 namespace EBPF {
