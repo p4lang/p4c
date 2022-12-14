@@ -70,8 +70,15 @@ uint64_t ExplorationStrategy::selectBranch(const std::vector<Branch>& branches) 
     return Utils::getRandInt(branches.size() - 1);
 }
 
+void ExplorationStrategy::printTestGenerationStatus(bool initialTest) {
+    if (!initialTest && programInfo.dcg) {
+        printTraces("========== No tests were produced with the given pattern or graph. ==========");
+    }
+}
+
 bool ExplorationStrategy::handleTerminalState(const Callback& callback,
                                               const ExecutionState& terminalState) {
+    producedInitialTest = true;
     // We update the set of visitedStatements in every terminal state.
     for (const auto& stmt : terminalState.getVisited()) {
         if (allStatements.count(stmt) != 0U) {

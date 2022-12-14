@@ -27,6 +27,7 @@ void LinearEnumeration::run(const Callback& callback) {
     while (true) {
         try {
             if (exploredBranches.empty()) {
+                printTestGenerationStatus(producedInitialTest);
                 return;
             }
             // Select the branch in the vector to produce a test.

@@ -65,6 +65,7 @@ void IncrementalMaxCoverageStack::run(const Callback& callback) {
         // until either we run out of unexplored branches or we find a viable branch.
         while (true) {
             if (unexploredBranches.empty()) {
+                printTestGenerationStatus(producedInitialTest);
                 return;
             }
             bool guaranteeViability = true;

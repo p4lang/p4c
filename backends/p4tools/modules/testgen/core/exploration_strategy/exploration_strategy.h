@@ -58,12 +58,16 @@ class ExplorationStrategy {
     /// Getter to access visitedStatements
     const P4::Coverage::CoverageSet& getVisitedStatements();
 
+    void printTestGenerationStatus(bool initialTest);
+
  protected:
     /// Target-specific information about the P4 program.
     const ProgramInfo& programInfo;
 
     /// The SMT solver backing this executor.
     AbstractSolver& solver;
+
+    bool producedInitialTest = false;
 
     /// @returns a pseudorandom integer in the range of [0, branches.size() - 1]
     uint64_t selectBranch(const std::vector<Branch>& branches);

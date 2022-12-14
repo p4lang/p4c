@@ -23,7 +23,6 @@
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/incremental_stack.h"
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/linear_enumeration.h"
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/random_access_stack.h"
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/reachability_guided.h"
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/rnd_access_max_coverage.h"
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/selected_branches.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
@@ -110,13 +109,6 @@ int Testgen::mainImpl(const IR::P4Program* program) {
         }
         if (explorationStrategy.compare("maxCoverage") == 0) {
             return new IncrementalMaxCoverageStack(solver, *programInfo, seed);
-        }
-        if (explorationStrategy.compare("reachabilityGuided") == 0) {
-            if (TestgenOptions::get().dcg || !TestgenOptions::get().pattern.empty()) {
-                return new ReachabilityGuided(solver, *programInfo, seed);
-            } else {
-                ::warning("This strategy requires the --dcg flag. Please re-run the tool with --dcg. Defaulting to the default exploration strategy.\n");
-            }
         }
         if (explorationStrategy.compare("randomAccessMaxCoverage") == 0) {
             // If the user mistakenly sets an invalid saddlePoint, we set it to 5.

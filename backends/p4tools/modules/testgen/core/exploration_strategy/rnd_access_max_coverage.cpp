@@ -75,6 +75,7 @@ void RandomAccessMaxCoverage::run(const Callback& callback) {
             // If the buffer and unexploredBranches itself are empty, there's nothing left to
             // explore.
             if (unexploredBranches.empty() && bufferUnexploredBranches.empty()) {
+                printTestGenerationStatus(producedInitialTest);
                 return;
             }
 
