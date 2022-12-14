@@ -58,6 +58,8 @@ class ExplorationStrategy {
     /// Getter to access visitedStatements
     const P4::Coverage::CoverageSet& getVisitedStatements();
 
+    /// Prints relevant information about test generation, including when no tests can 
+    /// be produced.
     void printTestGenerationStatus(bool initialTest);
 
  protected:

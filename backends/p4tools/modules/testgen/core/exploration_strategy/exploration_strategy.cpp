@@ -72,7 +72,8 @@ uint64_t ExplorationStrategy::selectBranch(const std::vector<Branch>& branches) 
 
 void ExplorationStrategy::printTestGenerationStatus(bool initialTest) {
     if (!initialTest && programInfo.dcg) {
-        printTraces("========== No tests were produced with the given pattern or graph. ==========");
+        printTraces(
+            "========== No tests were produced with the given pattern or graph. ==========");
     }
 }
 
