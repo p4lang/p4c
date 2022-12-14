@@ -40,6 +40,13 @@ Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo& programInfo, ExplorationStra
                                  boost::optional<uint32_t> seed)
     : TestBackEnd(programInfo, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
+    if (testBackendString.isNullOrEmpty()) {
+        ::error(
+            "No test back end provided. Please provide a test back end using the --test-backend "
+            "parameter.");
+        exit(EXIT_FAILURE);
+    }
+
     if (testBackendString == "PTF-P4") {
         testWriter = new PTF(testPath.c_str(), seed);
     } else if (testBackendString == "STF") {
