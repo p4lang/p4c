@@ -139,6 +139,9 @@ bool TestBackEnd::run(const FinalState& state) {
             return testCount > maxTests - 1;
         }
 
+        // Don't increase the test count if --with-output-packet is enabled and we don't
+        // produce a test with an output packet. Excludes the first test, so
+        // selectBranches, trackBranches and others continue to work.
         if (TestgenOptions::get().withOutputPacket && testCount > 0) {
             auto outputPacketSize = testInfo.outputPacket->type->width_bits();
             if (outputPacketSize <= 0) {
