@@ -93,16 +93,19 @@ void IR::Vector<T>::visit_children(Visitor& v) {
             } else {
                 i = insert(i, v->size() - 1, nullptr);
                 for (auto el : *v) {
-                    if (auto e = dynamic_cast<const T*>(el))
+                    if (auto e = dynamic_cast<const T*>(el)) {
                         *i++ = e;
-                    else if (el)
+                    } else {
+                        CHECK_NULL(n);
                         BUG("visitor returned invalid type %s for Vector<%s>", el->node_type_name(),
                             T::static_type_name());
+                    }
                 }
             }
         } else if (auto e = dynamic_cast<const T*>(n)) {
             *i++ = e;
-        } else if (n) {
+        } else {
+            CHECK_NULL(n);
             BUG("visitor returned invalid type %s for Vector<%s>", n->node_type_name(),
                 T::static_type_name());
         }
@@ -134,16 +137,19 @@ void IR::Vector<T>::parallel_visit_children(Visitor& v) {
             } else {
                 i = insert(i, v->size() - 1, nullptr);
                 for (auto el : *v) {
-                    if (auto e = dynamic_cast<const T*>(el))
+                    if (auto e = dynamic_cast<const T*>(el)) {
                         *i++ = e;
-                    else if (el)
+                    } else {
+                        CHECK_NULL(n);
                         BUG("visitor returned invalid type %s for Vector<%s>", el->node_type_name(),
                             T::static_type_name());
+                    }
                 }
             }
         } else if (auto e = dynamic_cast<const T*>(n)) {
             *i++ = e;
-        } else if (n) {
+        } else {
+            CHECK_NULL(n);
             BUG("visitor returned invalid type %s for Vector<%s>", n->node_type_name(),
                 T::static_type_name());
         }
@@ -194,7 +200,8 @@ void IR::IndexedVector<T>::visit_children(Visitor& v) {
             i += l->Vector<T>::size();
         } else if (auto e = dynamic_cast<const T*>(n)) {
             i = replace(i, e);
-        } else if (n) {
+        } else {
+            CHECK_NULL(n);
             BUG("visitor returned invalid type %s for IndexedVector<%s>", n->node_type_name(),
                 T::static_type_name());
         }
@@ -269,7 +276,8 @@ void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor& v) {
                 namemap_insert_helper(i, cstring(obj_name(s)), std::move(s), symbols, new_symbols);
                 i = symbols.erase(i);
             }
-        } else if (n) {
+        } else if {
+            CHECK_NULL(n);
             BUG("visitor returned invalid type %s for NameMap<%s>", n->node_type_name(),
                 T::static_type_name());
         }
