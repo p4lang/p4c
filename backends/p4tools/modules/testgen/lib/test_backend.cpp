@@ -117,6 +117,13 @@ bool TestBackEnd::run(const FinalState& state) {
             testCount++;
             P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
             printPerformanceReport();
+            if (TestgenOptions::get().withOutputPacket && testCount > 0) {
+                auto outputPacketSize = executionState->getPacketBufferSize();
+                bool packetIsDropped = executionState->getProperty<bool>("drop");
+                if (outputPacketSize <= 0 || packetIsDropped) {
+                    return testCount > maxTests - 1;
+                }
+            }
             return testCount > maxTests - 1;
         }
         completedModel = concolicModel;
