@@ -144,7 +144,7 @@ bool TestBackEnd::run(const FinalState& state) {
         // selectBranches, trackBranches and others continue to work.
         if (TestgenOptions::get().withOutputPacket && testCount > 0) {
             auto outputPacketSize = testInfo.outputPacket->type->width_bits();
-            if (outputPacketSize <= 0) {
+            if (outputPacketSize <= 0 || testInfo.packetIsDropped) {
                 return testCount > maxTests - 1;
             }
         }
