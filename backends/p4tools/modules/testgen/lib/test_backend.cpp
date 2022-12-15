@@ -109,6 +109,17 @@ bool TestBackEnd::run(const FinalState& state) {
 
         auto* solver = state.getSolver()->to<Z3Solver>();
         CHECK_NULL(solver);
+        
+        // Don't increase the test count if --with-output-packet is enabled and we don't
+        // produce a test with an output packet. Excludes the first test, so
+        // selectBranches, trackBranches and others continue to work.
+        if (TestgenOptions::get().withOutputPacket && testCount > 0) {
+            auto outputPacketSize = executionState->getPacketBufferSize();
+            bool packetIsDropped = executionState->getProperty<bool>("drop");
+            if (outputPacketSize <= 0 || packetIsDropped) {
+                return testCount > maxTests - 1;
+            }
+        }
 
         bool abort = false;
         const auto* concolicModel = computeConcolicVariables(executionState, completedModel, solver,
@@ -117,13 +128,6 @@ bool TestBackEnd::run(const FinalState& state) {
             testCount++;
             P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
             printPerformanceReport();
-            if (TestgenOptions::get().withOutputPacket && testCount > 0) {
-                auto outputPacketSize = executionState->getPacketBufferSize();
-                bool packetIsDropped = executionState->getProperty<bool>("drop");
-                if (outputPacketSize <= 0 || packetIsDropped) {
-                    return testCount > maxTests - 1;
-                }
-            }
             return testCount > maxTests - 1;
         }
         completedModel = concolicModel;
@@ -144,16 +148,6 @@ bool TestBackEnd::run(const FinalState& state) {
             P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
             printPerformanceReport();
             return testCount > maxTests - 1;
-        }
-
-        // Don't increase the test count if --with-output-packet is enabled and we don't
-        // produce a test with an output packet. Excludes the first test, so
-        // selectBranches, trackBranches and others continue to work.
-        if (TestgenOptions::get().withOutputPacket && testCount > 0) {
-            auto outputPacketSize = testInfo.outputPacket->type->width_bits();
-            if (outputPacketSize <= 0 || testInfo.packetIsDropped) {
-                return testCount > maxTests - 1;
-            }
         }
 
         const auto* testSpec = createTestSpec(executionState, completedModel, testInfo);
