@@ -139,6 +139,13 @@ bool TestBackEnd::run(const FinalState& state) {
             return testCount > maxTests - 1;
         }
 
+        if (TestgenOptions::get().withOutputPacket && testCount > 0) {
+            auto outputPacketSize = testInfo.outputPacket->type->width_bits();
+            if (outputPacketSize <= 0) {
+                return testCount > maxTests - 1;
+            }
+        }
+
         const auto* testSpec = createTestSpec(executionState, completedModel, testInfo);
 
         float coverage = static_cast<float>(visitedStatements.size()) / allStatements.size();
