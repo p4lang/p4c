@@ -90,7 +90,7 @@ bool checkMember(const IR::Expression* expr, const char* name) {
 }
 
 bool checkMembers(const IR::Operation_Binary* binOp, const char* lName, const char* rName) {
-    return checkMember(binOp, lName) && checkMember(binOp->right, rName);
+    return checkMember(binOp->left, lName) && checkMember(binOp->right, rName);
 }
 
 const IR::Expression* parseExpression(const char* str, const IR::P4Program* p) {
@@ -205,7 +205,7 @@ TEST_F(P4ExpressionParserTest, SimpleExpressions) {
     expr = orExpr->left->to<IR::LNot>()->expr;
     ASSERT_TRUE(expr->is<IR::LOr>());
     orExpr = expr->to<IR::LOr>();
-    ASSERT_TRUE(checkMember(orExpr->right, "b2"));
+    ASSERT_TRUE(checkMember(orExpr->right, "b1"));
     ASSERT_TRUE(orExpr->left->is<IR::LAnd>());
     const auto* andExpr = orExpr->left->to<IR::LAnd>();
     ASSERT_TRUE(checkMember(andExpr->right, "b2"));
@@ -228,7 +228,7 @@ TEST_F(P4ExpressionParserTest, SimpleExpressions) {
     ASSERT_TRUE(checkMember(mltExpr->left, "a"));
     ASSERT_TRUE(checkMember(mltExpr->right, "b"));
     ASSERT_TRUE(divExpr->right->is<IR::Mod>());
-    const auto* modExpr = divExpr->left->to<IR::Mod>();
+    const auto* modExpr = divExpr->right->to<IR::Mod>();
     ASSERT_TRUE(checkMember(modExpr->left, "c"));
     ASSERT_TRUE(checkMember(modExpr->right, "a"));
 
@@ -286,7 +286,7 @@ TEST_F(P4ExpressionParserTest, SimpleExpressions) {
     ASSERT_TRUE(checkMember(mltExpr->right, "c"));
     ASSERT_TRUE(mltExpr->left->is<IR::Add>());
     ASSERT_TRUE(checkMembers(mltExpr->left->to<IR::Add>(), "a", "b"));
-
+ 
     // a + b * c
     expr = parseExpression("ingress::h.h.a + ingress::h.h.b * ingress::h.h.c", program);
     ASSERT_TRUE(expr->is<IR::Add>());
@@ -318,6 +318,39 @@ TEST_F(P4ExpressionParserTest, SimpleExpressions) {
     ASSERT_TRUE(checkMember(subExpr->left, "a"));
     ASSERT_TRUE(subExpr->right->is<IR::Sub>());
     ASSERT_TRUE(checkMembers(subExpr->right->to<IR::Sub>(), "b", "c"));
+
+    // -a
+    expr = parseExpression("-ingress::h.h.a", program);
+    ASSERT_TRUE(expr->is<IR::Mul>());
+    mltExpr = expr->to<IR::Mul>();
+    ASSERT_TRUE(mltExpr->left->is<IR::Constant>());
+    ASSERT_TRUE(mltExpr->left->to<IR::Constant>()->value == -1);
+    ASSERT_TRUE(checkMember(mltExpr->right, "a"));
+
+    // +a
+    expr = parseExpression("+ingress::h.h.a", program);
+    ASSERT_TRUE(checkMember(expr, "a"));
+
+    // -(a + b)
+    expr = parseExpression("-(ingress::h.h.a + ingress::h.h.b)", program);
+    ASSERT_TRUE(expr->is<IR::Mul>());
+    mltExpr = expr->to<IR::Mul>();
+    ASSERT_TRUE(mltExpr->left->is<IR::Constant>());
+    ASSERT_TRUE(mltExpr->left->to<IR::Constant>()->value == -1);
+    ASSERT_TRUE(mltExpr->right->is<IR::Add>());
+    ASSERT_TRUE(checkMembers(mltExpr->right->to<IR::Add>(), "a", "b"));
+
+    // +(a + b)
+    expr = parseExpression("+(ingress::h.h.a + ingress::h.h.b)", program);
+    ASSERT_TRUE(expr->is<IR::Add>());
+    ASSERT_TRUE(checkMembers(expr->to<IR::Add>(), "a", "b"));
+    
+    // !(b1||b2)
+    expr = parseExpression("!(ingress::h.h.b1 || ingress::h.h.b2)", program);
+    ASSERT_TRUE(expr->is<IR::LNot>());
+    const auto* lNot = expr->to<IR::LNot>();
+    ASSERT_TRUE(lNot->expr->is<IR::LOr>());
+    ASSERT_TRUE(checkMembers(lNot->expr->to<IR::LOr>(), "b1", "b2"));
 }
 
 }  // Test

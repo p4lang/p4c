@@ -124,7 +124,8 @@ class Parser {
     char prev() noexcept;
     
  protected:
-    typedef  const IR::Node* (Parser::*createFuncType)();
+    typedef const IR::Node* (Parser::*createFuncType)();
+    //typedef std::function<const IR::Node*()> createFuncType;
     const IR::Node* getIR();
     const IR::Node* createPunctuationMarks();
     const IR::Node* createSemi();
@@ -132,27 +133,41 @@ class Parser {
     const IR::Node* createColon();
     const IR::Node* createListExpressions(const IR::Node*, const char*, Token::Kind,
                                           createFuncType func);
-    const IR::Node* createLogicalOp();
+    const IR::Node* createImplication();
     const IR::Node* createDisjunction();
     const IR::Node* createConjunction();
     const IR::Node* createIR(Token::Kind, const IR::Node*, const IR::Node*);
     NodesPair makeLeftTree(Token::Kind, const IR::Node*, const IR::Node*);
     const IR::Node* removeBrackets(const IR::Node*);
-    const IR::Node* createBinaryOp();
+    const IR::Node* createBor();
     const IR::Node* createXor();
     const IR::Node* createBAnd();
-    const IR::Node* createEqCompareAndShiftOp();
+    const IR::Node* createEqual();
     const IR::Node* createNotEqual();
     const IR::Node* createGreaterThan();
     const IR::Node* createShr();
     const IR::Node* createGreaterEqual();
     const IR::Node* createShl();
     const IR::Node* createLessEqual();
-    const IR::Node* createArithmeticOp();
+    const IR::Node* createLessThan();
+    const IR::Node* createSaturationAdd();
+    const IR::Node* createPlus();
+    const IR::Node* createSaturationSub();
+    const IR::Node* createMinus();
+    const IR::Node* createSlash();
+    const IR::Node* createPercent();
+    const IR::Node* createMul();
+    const IR::Node* createUnaryOp();
     const IR::Node* createFunctionCallOrConstantOp();
     const IR::Node* createApplicationOp(const IR::Node*);
     const IR::Node* createConstantOp();
     const IR::Node* createSliceOrArrayOp(const IR::Node*);
+    const IR::Node* createBinaryExpression(const char* msg, Token::Kind kind,
+                                           createFuncType funcLeft,
+                                           createFuncType funcRight);
+    const IR::Node* createListExpression(const char* msg, Token::Kind kind,
+                                         createFuncType funcLeft,
+                                         createFuncType funcRight);
     std::pair<const IR::Node*, IR::ID> getDefinedType(cstring txt, const IR::Node* nd);
     const IR::Type* ndToType(const IR::Node* nd);
 };
