@@ -65,6 +65,9 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// for statement reachability analysis.
     bool dcg = false;
 
+    /// Enforces the test generation of tests with mandatory output packet.
+    bool withOutputPacket = false;
+
     const char* getIncludePath() override;
 
  private:

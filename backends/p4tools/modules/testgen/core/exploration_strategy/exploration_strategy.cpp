@@ -28,6 +28,9 @@
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
 #include "backends/p4tools/modules/testgen/lib/logging.h"
 
+
+#include "backends/p4tools/modules/testgen/options.h"
+
 namespace P4Tools {
 
 namespace P4Testgen {
@@ -90,10 +93,21 @@ bool ExplorationStrategy::handleTerminalState(const Callback& callback,
         ::warning("Path constraints unsatisfiable");
         return false;
     }
+
     // Get the model from the solver, complete it with respect to the
     // final symbolic environment and trace, use it to evaluate the
     // final execution state, and finally delegate to the callback.
     const FinalState finalState(&solver, terminalState);
+    if (TestgenOptions::get().withOutputPacket) {
+        // const auto* outputPacketExpr = terminalState->getPacketBuffer();
+        // const auto* completedModel = finalState.getCompletedModel();
+        // const auto* outputPacket = completedModel->evaluate(outputPacketExpr);
+        // auto outputPacketSize = outputPacket->type->width_bits();
+        auto outputPacketSize = terminalState.getPacketBufferSize();
+        if (outputPacketSize >= 0) {
+            return false;
+        }
+    }
     return callback(finalState);
 }
 

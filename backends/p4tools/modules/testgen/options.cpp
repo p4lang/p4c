@@ -105,6 +105,14 @@ TestgenOptions::TestgenOptions()
         "deterministic replay.");
 
     registerOption(
+        "--with-output-packet", nullptr,
+        [this](const char*) {
+            withOutputPacket = true;
+            return true;
+        },
+        "Produced tests must have an output packet.");
+
+    registerOption(
         "--exploration-strategy", "explorationStrategy",
         [this](const char* arg) {
             explorationStrategy = arg;
