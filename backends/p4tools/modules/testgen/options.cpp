@@ -108,8 +108,8 @@ TestgenOptions::TestgenOptions()
         "--with-output-packet", nullptr,
         [this](const char*) {
             withOutputPacket = true;
-            if (trackBranches) {
-                std::cerr << "--track-branches cannot guarantee --with-output-packet."
+            if (!selectedBranches.empty()) {
+                std::cerr << "--input-branches cannot guarantee --with-output-packet."
                              " Aborting."
                           << std::endl;
                 exit(1);
