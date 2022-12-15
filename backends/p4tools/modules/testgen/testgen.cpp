@@ -146,7 +146,9 @@ int Testgen::mainImpl(const IR::P4Program* program) {
     }
 
     if (testBackend->getTestCount() == 0) {
-        ::warning("Unable to generate tests with give inputs. Double-check provided options and parameters.\n");
+        ::warning(
+            "Unable to generate tests with give inputs. Double-check provided options and "
+            "parameters.\n");
     }
 
     return ::errorCount() == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
