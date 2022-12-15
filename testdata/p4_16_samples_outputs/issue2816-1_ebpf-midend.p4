@@ -28,13 +28,6 @@ struct Headers_t {
 }
 
 parser prs(packet_in p, out Headers_t headers) {
-    state start {
-        p.extract<Ethernet_h>(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
-            16w0x800: ip;
-            default: reject;
-        }
-    }
     state ip {
         p.extract<IPv4_h>(headers.ipv4);
         transition select(headers.ipv4.ihl, headers.ipv4.protocol, headers.ipv4.diffserv) {
@@ -46,6 +39,13 @@ parser prs(packet_in p, out Headers_t headers) {
     }
     state parse_l4 {
         transition accept;
+    }
+    state start {
+        p.extract<Ethernet_h>(headers.ethernet);
+        transition select(headers.ethernet.etherType) {
+            16w0x800: ip;
+            default: reject;
+        }
     }
 }
 

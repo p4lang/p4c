@@ -24,15 +24,22 @@ control VerifyChecksumI(inout H hdr, inout M meta) {
 }
 
 parser ParserI(packet_in b, out H parsedHdr, inout M meta, inout standard_metadata_t std_meta) {
-    state start {
-        transition p0;
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
     }
     state p0 {
-        b.extract<T>(parsedHdr.hstack.next);
-        transition select(parsedHdr.hstack.next.y) {
-            32w0: p0;
+        b.extract<T>(parsedHdr.hstack[32w0]);
+        transition select(parsedHdr.hstack[32w1].y) {
+            32w0: p01;
             default: accept;
         }
+    }
+    state p01 {
+        transition stateOutOfBound;
+    }
+    state start {
+        transition p0;
     }
 }
 

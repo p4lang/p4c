@@ -37,16 +37,16 @@ struct metadata_t {
 }
 
 parser test_parser(packet_in packet, out headers_t hd, inout metadata_t meta, inout standard_metadata_t standard_meta) {
+    state parse_ipv4 {
+        packet.extract<ipv4_t>(hd.ipv4);
+        transition accept;
+    }
     state start {
         packet.extract<ethernet_t>(hd.ethernet);
         transition select(hd.ethernet.ether_type) {
             16w0x800: parse_ipv4;
             default: accept;
         }
-    }
-    state parse_ipv4 {
-        packet.extract<ipv4_t>(hd.ipv4);
-        transition accept;
     }
 }
 

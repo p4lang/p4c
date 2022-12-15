@@ -14,11 +14,9 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".start") state start_0 {
-        transition accept;
-    }
-    @packet_entry @name(".start_i2e_mirrored") state start_i2e_mirrored {
-        transition start_0;
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
     }
     @name(".$start") state start {
         transition select((bit<32>)standard_metadata.instance_type) {
@@ -27,9 +25,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: noMatch;
         }
     }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
+    @name(".start") state start_0 {
+        transition accept;
+    }
+    @packet_entry @name(".start_i2e_mirrored") state start_i2e_mirrored {
+        transition start_0;
     }
 }
 

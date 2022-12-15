@@ -16,16 +16,16 @@ struct Headers_t {
 
 parser prs(packet_in p, out Headers_t headers) {
     @name("prs.pvs") value_set<bit<8>>(4) pvs_0;
+    state parse_next {
+        p.extract<next_header>(headers.next);
+        transition accept;
+    }
     state start {
         p.extract<test_header>(headers.first);
         transition select(headers.first.value) {
             pvs_0: parse_next;
             default: accept;
         }
-    }
-    state parse_next {
-        p.extract<next_header>(headers.next);
-        transition accept;
     }
 }
 

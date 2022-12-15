@@ -22,16 +22,16 @@ struct Headers_t {
 }
 
 parser prs(packet_in p, out Headers_t headers) {
+    state ipv6 {
+        p.extract<IPv6_h>(headers.ipv6);
+        transition accept;
+    }
     state start {
         p.extract<Ethernet_h>(headers.ethernet);
         transition select(headers.ethernet.etherType) {
             16w0x86dd: ipv6;
             default: reject;
         }
-    }
-    state ipv6 {
-        p.extract<IPv6_h>(headers.ipv6);
-        transition accept;
     }
 }
 

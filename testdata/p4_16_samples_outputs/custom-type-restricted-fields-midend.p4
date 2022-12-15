@@ -53,10 +53,11 @@ struct metadata_t {
 }
 
 parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    state start {
-        transition select(stdmeta.ingress_port) {
-            9w111: parse_cpu_hdr;
-            default: parse_ethernet;
+    state parse_andycustom {
+        packet.extract<andycustom_t>(hdr.andycustom);
+        transition select(hdr.andycustom.protocol) {
+            8w4: parse_ipv4;
+            default: accept;
         }
     }
     state parse_cpu_hdr {
@@ -71,16 +72,15 @@ parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, in
             default: accept;
         }
     }
-    state parse_andycustom {
-        packet.extract<andycustom_t>(hdr.andycustom);
-        transition select(hdr.andycustom.protocol) {
-            8w4: parse_ipv4;
-            default: accept;
-        }
-    }
     state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
         transition accept;
+    }
+    state start {
+        transition select(stdmeta.ingress_port) {
+            9w111: parse_cpu_hdr;
+            default: parse_ethernet;
+        }
     }
 }
 

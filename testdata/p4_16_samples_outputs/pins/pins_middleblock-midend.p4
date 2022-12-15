@@ -156,25 +156,13 @@ struct local_metadata_t {
 }
 
 parser packet_parser(packet_in packet, out headers_t headers, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    state start {
-        local_metadata._admit_to_l30 = false;
-        local_metadata._vrf_id1 = 10w0;
-        local_metadata._packet_rewrites_src_mac2 = 48w0;
-        local_metadata._packet_rewrites_dst_mac3 = 48w0;
-        local_metadata._l4_src_port4 = 16w0;
-        local_metadata._l4_dst_port5 = 16w0;
-        local_metadata._wcmp_selector_input6 = 16w0;
-        local_metadata._mirror_session_id_valid10 = false;
-        local_metadata._color18 = 2w0;
-        local_metadata._ingress_port19 = standard_metadata.ingress_port;
-        local_metadata._route_metadata20 = 6w0;
-        packet.extract<ethernet_t>(headers.ethernet);
-        transition select(headers.ethernet.ether_type) {
-            16w0x800: parse_ipv4;
-            16w0x86dd: parse_ipv6;
-            16w0x806: parse_arp;
-            default: accept;
-        }
+    state parse_arp {
+        packet.extract<arp_t>(headers.arp);
+        transition accept;
+    }
+    state parse_icmp {
+        packet.extract<icmp_t>(headers.icmp);
+        transition accept;
     }
     state parse_ipv4 {
         packet.extract<ipv4_t>(headers.ipv4);
@@ -206,13 +194,25 @@ parser packet_parser(packet_in packet, out headers_t headers, inout local_metada
         local_metadata._l4_dst_port5 = headers.udp.dst_port;
         transition accept;
     }
-    state parse_icmp {
-        packet.extract<icmp_t>(headers.icmp);
-        transition accept;
-    }
-    state parse_arp {
-        packet.extract<arp_t>(headers.arp);
-        transition accept;
+    state start {
+        local_metadata._admit_to_l30 = false;
+        local_metadata._vrf_id1 = 10w0;
+        local_metadata._packet_rewrites_src_mac2 = 48w0;
+        local_metadata._packet_rewrites_dst_mac3 = 48w0;
+        local_metadata._l4_src_port4 = 16w0;
+        local_metadata._l4_dst_port5 = 16w0;
+        local_metadata._wcmp_selector_input6 = 16w0;
+        local_metadata._mirror_session_id_valid10 = false;
+        local_metadata._color18 = 2w0;
+        local_metadata._ingress_port19 = standard_metadata.ingress_port;
+        local_metadata._route_metadata20 = 6w0;
+        packet.extract<ethernet_t>(headers.ethernet);
+        transition select(headers.ethernet.ether_type) {
+            16w0x800: parse_ipv4;
+            16w0x86dd: parse_ipv6;
+            16w0x806: parse_arp;
+            default: accept;
+        }
     }
 }
 

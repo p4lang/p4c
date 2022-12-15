@@ -43,6 +43,10 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.ethertype) {
@@ -56,12 +60,23 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition accept;
     }
     @name(".parse_vlan_tag") state parse_vlan_tag {
-        packet.extract<vlan_tag_t>(hdr.vlan_tag.next);
-        transition select(hdr.vlan_tag.last.ethertype) {
-            16w0x8100 &&& 16w0xefff: parse_vlan_tag;
+        packet.extract<vlan_tag_t>(hdr.vlan_tag[32w0]);
+        transition select(hdr.vlan_tag[32w0].ethertype) {
+            16w0x8100 &&& 16w0xefff: parse_vlan_tag1;
             16w0x800: parse_ipv4;
             default: accept;
         }
+    }
+    state parse_vlan_tag1 {
+        packet.extract<vlan_tag_t>(hdr.vlan_tag[32w1]);
+        transition select(hdr.vlan_tag[32w1].ethertype) {
+            16w0x8100 &&& 16w0xefff: parse_vlan_tag2;
+            16w0x800: parse_ipv4;
+            default: accept;
+        }
+    }
+    state parse_vlan_tag2 {
+        transition stateOutOfBound;
     }
     @name(".start") state start {
         transition parse_ethernet;

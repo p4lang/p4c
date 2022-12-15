@@ -23,6 +23,12 @@ parser p(packet_in packet, out headers hdr) {
         tmp_0.setInvalid();
         transition sub_parser_next;
     }
+    state start_0 {
+        hdr.nop = tmp_nop;
+        hdr.p = tmp_p;
+        hdr.p = tmp_0;
+        transition accept;
+    }
     state sub_parser_next {
         transition select(tmp_0.p) {
             8w0: sub_parser_parse_hdr;
@@ -32,12 +38,6 @@ parser p(packet_in packet, out headers hdr) {
     state sub_parser_parse_hdr {
         packet.extract<H>(tmp_nop);
         transition sub_parser_next;
-    }
-    state start_0 {
-        hdr.nop = tmp_nop;
-        hdr.p = tmp_p;
-        hdr.p = tmp_0;
-        transition accept;
     }
 }
 

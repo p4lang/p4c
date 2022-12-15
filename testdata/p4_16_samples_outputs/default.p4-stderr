@@ -1,0 +1,7 @@
+default.p4(33): [--Wwarn=expr] warning: p.extract: error OverwritingHeader will be triggered
+Parser p0 state chain: start, next
+        p.extract(h);
+        ^^^^^^^^^^^^
+default.p4(33): [--Wwarn=ignore-prop] warning: Result of p.extract is not defined: Exception: OverwritingHeader
+        p.extract(h);
+        ^^^^^^^^^^^^

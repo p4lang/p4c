@@ -10,3 +10,6 @@ issue1937-2-bmv2.p4(33): [--Wwarn=invalid_header] warning: accessing a field of 
 issue1937-2-bmv2.p4(34): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.h1
         foo.apply(hdr.h1.f2);
                   ^^^^^^
+issue1937-2-bmv2.p4(26): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+        x = (y >> 2);
+          ^

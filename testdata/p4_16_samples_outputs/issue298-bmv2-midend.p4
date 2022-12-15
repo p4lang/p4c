@@ -58,12 +58,9 @@ struct metadata {
 }
 
 parser TopParser(packet_in b, out headers p, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    state start {
-        b.extract<ethernet_t>(p.ethernet);
-        transition select(p.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: noMatch;
-        }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
     }
     state parse_ipv4 {
         b.extract<ipv4_t>(p.ipv4);
@@ -72,6 +69,10 @@ parser TopParser(packet_in b, out headers p, inout metadata meta, inout standard
             default: accept;
         }
     }
+    state parse_myhdr {
+        b.extract<myhdr_t>(p.myhdr);
+        transition accept;
+    }
     state parse_udp {
         b.extract<udp_t>(p.udp);
         transition select(p.udp.dstPort) {
@@ -79,13 +80,12 @@ parser TopParser(packet_in b, out headers p, inout metadata meta, inout standard
             default: accept;
         }
     }
-    state parse_myhdr {
-        b.extract<myhdr_t>(p.myhdr);
-        transition accept;
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
+    state start {
+        b.extract<ethernet_t>(p.ethernet);
+        transition select(p.ethernet.etherType) {
+            16w0x800: parse_ipv4;
+            default: noMatch;
+        }
     }
 }
 

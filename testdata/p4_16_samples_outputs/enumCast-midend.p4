@@ -14,16 +14,16 @@ struct O {
 }
 
 parser p(packet_in packet, out O o) {
+    state getopt {
+        packet.extract<Opt>(o.opt);
+        transition accept;
+    }
     state start {
         packet.extract<B>(o.b);
         transition select(o.b.x) {
             32w0 &&& 32w0x1: accept;
             default: getopt;
         }
-    }
-    state getopt {
-        packet.extract<Opt>(o.opt);
-        transition accept;
     }
 }
 

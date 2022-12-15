@@ -16,4 +16,3 @@ control c() {
 control C();
 package top(C _c);
 top(c()) main;
-

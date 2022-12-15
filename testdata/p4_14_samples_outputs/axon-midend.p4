@@ -37,10 +37,332 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("ParserImpl.tmp_0") bit<64> tmp_0;
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
     @name(".parse_fwdHop") state parse_fwdHop {
-        packet.extract<axon_hop_t>(hdr.axon_fwdHop.next);
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w0]);
         meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
-        transition parse_next_fwdHop;
+        transition parse_next_fwdHop1;
+    }
+    state parse_fwdHop1 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w1]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop2;
+    }
+    state parse_fwdHop2 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w2]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop3;
+    }
+    state parse_fwdHop3 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w3]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop4;
+    }
+    state parse_fwdHop4 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w4]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop5;
+    }
+    state parse_fwdHop5 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w5]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop6;
+    }
+    state parse_fwdHop6 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w6]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop7;
+    }
+    state parse_fwdHop7 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w7]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop8;
+    }
+    state parse_fwdHop8 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w8]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop9;
+    }
+    state parse_fwdHop9 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w9]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop10;
+    }
+    state parse_fwdHop10 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w10]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop11;
+    }
+    state parse_fwdHop11 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w11]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop12;
+    }
+    state parse_fwdHop12 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w12]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop13;
+    }
+    state parse_fwdHop13 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w13]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop14;
+    }
+    state parse_fwdHop14 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w14]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop15;
+    }
+    state parse_fwdHop15 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w15]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop16;
+    }
+    state parse_fwdHop16 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w16]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop17;
+    }
+    state parse_fwdHop17 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w17]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop18;
+    }
+    state parse_fwdHop18 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w18]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop19;
+    }
+    state parse_fwdHop19 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w19]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop20;
+    }
+    state parse_fwdHop20 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w20]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop21;
+    }
+    state parse_fwdHop21 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w21]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop22;
+    }
+    state parse_fwdHop22 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w22]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop23;
+    }
+    state parse_fwdHop23 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w23]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop24;
+    }
+    state parse_fwdHop24 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w24]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop25;
+    }
+    state parse_fwdHop25 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w25]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop26;
+    }
+    state parse_fwdHop26 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w26]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop27;
+    }
+    state parse_fwdHop27 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w27]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop28;
+    }
+    state parse_fwdHop28 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w28]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop29;
+    }
+    state parse_fwdHop29 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w29]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop30;
+    }
+    state parse_fwdHop30 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w30]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop31;
+    }
+    state parse_fwdHop31 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w31]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop32;
+    }
+    state parse_fwdHop32 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w32]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop33;
+    }
+    state parse_fwdHop33 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w33]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop34;
+    }
+    state parse_fwdHop34 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w34]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop35;
+    }
+    state parse_fwdHop35 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w35]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop36;
+    }
+    state parse_fwdHop36 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w36]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop37;
+    }
+    state parse_fwdHop37 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w37]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop38;
+    }
+    state parse_fwdHop38 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w38]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop39;
+    }
+    state parse_fwdHop39 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w39]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop40;
+    }
+    state parse_fwdHop40 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w40]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop41;
+    }
+    state parse_fwdHop41 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w41]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop42;
+    }
+    state parse_fwdHop42 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w42]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop43;
+    }
+    state parse_fwdHop43 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w43]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop44;
+    }
+    state parse_fwdHop44 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w44]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop45;
+    }
+    state parse_fwdHop45 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w45]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop46;
+    }
+    state parse_fwdHop46 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w46]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop47;
+    }
+    state parse_fwdHop47 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w47]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop48;
+    }
+    state parse_fwdHop48 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w48]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop49;
+    }
+    state parse_fwdHop49 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w49]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop50;
+    }
+    state parse_fwdHop50 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w50]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop51;
+    }
+    state parse_fwdHop51 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w51]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop52;
+    }
+    state parse_fwdHop52 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w52]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop53;
+    }
+    state parse_fwdHop53 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w53]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop54;
+    }
+    state parse_fwdHop54 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w54]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop55;
+    }
+    state parse_fwdHop55 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w55]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop56;
+    }
+    state parse_fwdHop56 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w56]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop57;
+    }
+    state parse_fwdHop57 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w57]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop58;
+    }
+    state parse_fwdHop58 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w58]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop59;
+    }
+    state parse_fwdHop59 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w59]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop60;
+    }
+    state parse_fwdHop60 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w60]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop61;
+    }
+    state parse_fwdHop61 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w61]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop62;
+    }
+    state parse_fwdHop62 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w62]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop63;
+    }
+    state parse_fwdHop63 {
+        packet.extract<axon_hop_t>(hdr.axon_fwdHop[32w63]);
+        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        transition parse_next_fwdHop64;
+    }
+    state parse_fwdHop64 {
+        transition stateOutOfBound;
     }
     @name(".parse_head") state parse_head {
         packet.extract<axon_head_t>(hdr.axon_head);
@@ -58,6 +380,390 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_fwdHop;
         }
     }
+    state parse_next_fwdHop1 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop1;
+        }
+    }
+    state parse_next_fwdHop2 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop2;
+        }
+    }
+    state parse_next_fwdHop3 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop3;
+        }
+    }
+    state parse_next_fwdHop4 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop4;
+        }
+    }
+    state parse_next_fwdHop5 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop5;
+        }
+    }
+    state parse_next_fwdHop6 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop6;
+        }
+    }
+    state parse_next_fwdHop7 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop7;
+        }
+    }
+    state parse_next_fwdHop8 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop8;
+        }
+    }
+    state parse_next_fwdHop9 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop9;
+        }
+    }
+    state parse_next_fwdHop10 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop10;
+        }
+    }
+    state parse_next_fwdHop11 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop11;
+        }
+    }
+    state parse_next_fwdHop12 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop12;
+        }
+    }
+    state parse_next_fwdHop13 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop13;
+        }
+    }
+    state parse_next_fwdHop14 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop14;
+        }
+    }
+    state parse_next_fwdHop15 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop15;
+        }
+    }
+    state parse_next_fwdHop16 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop16;
+        }
+    }
+    state parse_next_fwdHop17 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop17;
+        }
+    }
+    state parse_next_fwdHop18 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop18;
+        }
+    }
+    state parse_next_fwdHop19 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop19;
+        }
+    }
+    state parse_next_fwdHop20 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop20;
+        }
+    }
+    state parse_next_fwdHop21 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop21;
+        }
+    }
+    state parse_next_fwdHop22 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop22;
+        }
+    }
+    state parse_next_fwdHop23 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop23;
+        }
+    }
+    state parse_next_fwdHop24 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop24;
+        }
+    }
+    state parse_next_fwdHop25 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop25;
+        }
+    }
+    state parse_next_fwdHop26 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop26;
+        }
+    }
+    state parse_next_fwdHop27 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop27;
+        }
+    }
+    state parse_next_fwdHop28 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop28;
+        }
+    }
+    state parse_next_fwdHop29 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop29;
+        }
+    }
+    state parse_next_fwdHop30 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop30;
+        }
+    }
+    state parse_next_fwdHop31 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop31;
+        }
+    }
+    state parse_next_fwdHop32 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop32;
+        }
+    }
+    state parse_next_fwdHop33 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop33;
+        }
+    }
+    state parse_next_fwdHop34 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop34;
+        }
+    }
+    state parse_next_fwdHop35 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop35;
+        }
+    }
+    state parse_next_fwdHop36 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop36;
+        }
+    }
+    state parse_next_fwdHop37 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop37;
+        }
+    }
+    state parse_next_fwdHop38 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop38;
+        }
+    }
+    state parse_next_fwdHop39 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop39;
+        }
+    }
+    state parse_next_fwdHop40 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop40;
+        }
+    }
+    state parse_next_fwdHop41 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop41;
+        }
+    }
+    state parse_next_fwdHop42 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop42;
+        }
+    }
+    state parse_next_fwdHop43 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop43;
+        }
+    }
+    state parse_next_fwdHop44 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop44;
+        }
+    }
+    state parse_next_fwdHop45 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop45;
+        }
+    }
+    state parse_next_fwdHop46 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop46;
+        }
+    }
+    state parse_next_fwdHop47 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop47;
+        }
+    }
+    state parse_next_fwdHop48 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop48;
+        }
+    }
+    state parse_next_fwdHop49 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop49;
+        }
+    }
+    state parse_next_fwdHop50 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop50;
+        }
+    }
+    state parse_next_fwdHop51 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop51;
+        }
+    }
+    state parse_next_fwdHop52 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop52;
+        }
+    }
+    state parse_next_fwdHop53 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop53;
+        }
+    }
+    state parse_next_fwdHop54 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop54;
+        }
+    }
+    state parse_next_fwdHop55 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop55;
+        }
+    }
+    state parse_next_fwdHop56 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop56;
+        }
+    }
+    state parse_next_fwdHop57 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop57;
+        }
+    }
+    state parse_next_fwdHop58 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop58;
+        }
+    }
+    state parse_next_fwdHop59 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop59;
+        }
+    }
+    state parse_next_fwdHop60 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop60;
+        }
+    }
+    state parse_next_fwdHop61 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop61;
+        }
+    }
+    state parse_next_fwdHop62 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop62;
+        }
+    }
+    state parse_next_fwdHop63 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop63;
+        }
+    }
+    state parse_next_fwdHop64 {
+        transition select(meta._my_metadata_fwdHopCount0) {
+            8w0x0: parse_next_revHop;
+            default: parse_fwdHop64;
+        }
+    }
     @name(".parse_next_revHop") state parse_next_revHop {
         transition select(meta._my_metadata_revHopCount1) {
             8w0x0: accept;
@@ -65,7 +771,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name(".parse_revHop") state parse_revHop {
-        packet.extract<axon_hop_t>(hdr.axon_revHop.next);
+        packet.extract<axon_hop_t>(hdr.axon_revHop[32w0]);
         meta._my_metadata_revHopCount1 = meta._my_metadata_revHopCount1 + 8w255;
         transition parse_next_revHop;
     }

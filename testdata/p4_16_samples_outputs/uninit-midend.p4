@@ -13,6 +13,19 @@ parser p1(packet_in p, out Header h) {
     @name("p1.tmp") bit<32> tmp;
     @name("p1.tmp_0") bit<32> tmp_0;
     @name("p1.tmp_1") bit<32> tmp_1;
+    state next1 {
+        transition next3;
+    }
+    state next2 {
+        transition next3;
+    }
+    state next3 {
+        transition accept;
+    }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
     state start {
         stack_0[0].setInvalid();
         stack_0[1].setInvalid();
@@ -28,19 +41,6 @@ parser p1(packet_in p, out Header h) {
             1w0: next2;
             default: noMatch;
         }
-    }
-    state next1 {
-        transition next3;
-    }
-    state next2 {
-        transition next3;
-    }
-    state next3 {
-        transition accept;
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
     }
 }
 

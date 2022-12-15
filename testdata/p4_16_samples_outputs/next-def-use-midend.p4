@@ -16,8 +16,8 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
         packet.extract<data_t>(hdr.hs[0]);
-        hdr.hs.next.setValid();
-        hdr.hs.next.f = 8w0;
+        hdr.hs[32w0].setValid();
+        hdr.hs[32w1].f = 8w0;
         transition accept;
     }
 }

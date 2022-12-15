@@ -27,6 +27,10 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
     @name(".parse_1bytes") state parse_1bytes {
         packet.extract<byte_hdr_t>(hdr.byte_hdr[0]);
         transition accept;
@@ -49,10 +53,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             16w6: parse_3bytes;
             default: noMatch;
         }
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
     }
 }
 

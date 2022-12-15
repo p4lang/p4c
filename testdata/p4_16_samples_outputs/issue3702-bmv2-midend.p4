@@ -41,13 +41,6 @@ struct local_metadata_t {
 parser v1model_parser(packet_in pkt, out headers_t hdrs, inout local_metadata_t local_meta, inout standard_metadata_t standard_meta) {
     @name("v1model_parser.ipv4") ipv4_t ipv4_0;
     bit<160> tmp;
-    state start {
-        pkt.extract<ethernet_t>(hdrs.mac);
-        transition select(hdrs.mac.type) {
-            16w0x800: parse_ipv4;
-            default: accept;
-        }
-    }
     state parse_ipv4 {
         tmp = pkt.lookahead<bit<160>>();
         ipv4_0.setValid();
@@ -68,6 +61,13 @@ parser v1model_parser(packet_in pkt, out headers_t hdrs, inout local_metadata_t 
         ipv4_0.dst_addr = tmp[31:0];
         pkt.extract<ipv4_options_t>(hdrs.ip, (bit<32>)tmp[155:152] << 2 + 3);
         transition accept;
+    }
+    state start {
+        pkt.extract<ethernet_t>(hdrs.mac);
+        transition select(hdrs.mac.type) {
+            16w0x800: parse_ipv4;
+            default: accept;
+        }
     }
 }
 

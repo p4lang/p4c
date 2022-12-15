@@ -1,0 +1,14 @@
+issue561-6-bmv2.p4(59): [--Wwarn=expr] warning: packet.extract: error OverwritingHeader will be triggered
+Parser ParserImpl state chain: start, parseO2O2
+        packet.extract(hdr.u.next.short);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue561-6-bmv2.p4(59): [--Wwarn=ignore-prop] warning: Result of packet.extract is not defined: Exception: OverwritingHeader
+        packet.extract(hdr.u.next.short);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue561-6-bmv2.p4(44): [--Wwarn=expr] warning: packet.extract: error OverwritingHeader will be triggered
+Parser ParserImpl state chain: start, parseO1O1
+        packet.extract(hdr.u.next.byte);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue561-6-bmv2.p4(44): [--Wwarn=ignore-prop] warning: Result of packet.extract is not defined: Exception: OverwritingHeader
+        packet.extract(hdr.u.next.byte);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

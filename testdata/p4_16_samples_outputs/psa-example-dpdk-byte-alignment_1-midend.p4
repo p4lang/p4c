@@ -40,17 +40,17 @@ struct headers {
 }
 
 parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata_t user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
-    state start {
-        buffer.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
-        }
-    }
     state parse_ipv4 {
         buffer.extract<ipv4_t>(hdr.ipv4);
         verify(hdr.ipv4.ihl == 4w5, error.UnhandledIPv4Options);
         transition select(hdr.ipv4.version) {
+            default: accept;
+        }
+    }
+    state start {
+        buffer.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0x800: parse_ipv4;
             default: accept;
         }
     }

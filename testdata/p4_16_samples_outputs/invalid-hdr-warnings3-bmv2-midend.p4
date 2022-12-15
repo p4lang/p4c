@@ -151,27 +151,23 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     apply {
         tbl_invalidhdrwarnings3bmv2l24.apply();
-        {
-            tbl_invalidhdrwarnings3bmv2l33.apply();
-            switch (switch_0_table.apply().action_run) {
-                switch_0_case: {
-                    tbl_invalidhdrwarnings3bmv2l35.apply();
-                }
-                switch_0_case_0: {
-                    tbl_invalidhdrwarnings3bmv2l36.apply();
-                }
+        tbl_invalidhdrwarnings3bmv2l33.apply();
+        switch (switch_0_table.apply().action_run) {
+            switch_0_case: {
+                tbl_invalidhdrwarnings3bmv2l35.apply();
+            }
+            switch_0_case_0: {
+                tbl_invalidhdrwarnings3bmv2l36.apply();
             }
         }
         tbl_invalidhdrwarnings3bmv2l40.apply();
-        {
-            tbl_invalidhdrwarnings3bmv2l42.apply();
-            switch (switch_1_table.apply().action_run) {
-                switch_1_case: {
-                    tbl_invalidhdrwarnings3bmv2l44.apply();
-                }
-                switch_1_case_0: {
-                    tbl_invalidhdrwarnings3bmv2l45.apply();
-                }
+        tbl_invalidhdrwarnings3bmv2l42.apply();
+        switch (switch_1_table.apply().action_run) {
+            switch_1_case: {
+                tbl_invalidhdrwarnings3bmv2l44.apply();
+            }
+            switch_1_case_0: {
+                tbl_invalidhdrwarnings3bmv2l45.apply();
             }
         }
         tbl_invalidhdrwarnings3bmv2l49.apply();

@@ -40,20 +40,20 @@ struct headers {
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
+    state parse_ipv4 {
+        packet.extract<ipv4_t>(hdr.ipv4);
+        transition accept;
+    }
     state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x800: parse_ipv4;
             default: noMatch;
         }
-    }
-    state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4);
-        transition accept;
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
     }
 }
 

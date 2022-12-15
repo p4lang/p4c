@@ -365,6 +365,10 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("ParserImpl.tmp_0") bit<24> tmp_0;
     @name("ParserImpl.tmp_2") bit<4> tmp_2;
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
     @name(".parse_arp_rarp") state parse_arp_rarp {
         packet.extract<arp_rarp_t>(hdr.arp_rarp);
         transition select(hdr.arp_rarp.protoType) {
@@ -537,6 +541,30 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: parse_payload;
         }
     }
+    state parse_mpls1 {
+        tmp_0 = packet.lookahead<bit<24>>();
+        transition select(tmp_0[0:0]) {
+            1w0: parse_mpls_not_bos1;
+            1w1: parse_mpls_bos;
+            default: parse_payload;
+        }
+    }
+    state parse_mpls2 {
+        tmp_0 = packet.lookahead<bit<24>>();
+        transition select(tmp_0[0:0]) {
+            1w0: parse_mpls_not_bos2;
+            1w1: parse_mpls_bos;
+            default: parse_payload;
+        }
+    }
+    state parse_mpls3 {
+        tmp_0 = packet.lookahead<bit<24>>();
+        transition select(tmp_0[0:0]) {
+            1w0: parse_mpls_not_bos3;
+            1w1: parse_mpls_bos;
+            default: parse_payload;
+        }
+    }
     @name(".parse_mpls_bos") state parse_mpls_bos {
         packet.extract<mpls_t>(hdr.mpls_bos);
         tmp_2 = packet.lookahead<bit<4>>();
@@ -547,8 +575,19 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name(".parse_mpls_not_bos") state parse_mpls_not_bos {
-        packet.extract<mpls_t>(hdr.mpls.next);
-        transition parse_mpls;
+        packet.extract<mpls_t>(hdr.mpls[32w0]);
+        transition parse_mpls1;
+    }
+    state parse_mpls_not_bos1 {
+        packet.extract<mpls_t>(hdr.mpls[32w1]);
+        transition parse_mpls2;
+    }
+    state parse_mpls_not_bos2 {
+        packet.extract<mpls_t>(hdr.mpls[32w2]);
+        transition parse_mpls3;
+    }
+    state parse_mpls_not_bos3 {
+        transition stateOutOfBound;
     }
     @name(".parse_nsh") state parse_nsh {
         packet.extract<nsh_t>(hdr.nsh);
@@ -594,12 +633,12 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name(".parse_vlan") state parse_vlan {
-        packet.extract<vlan_tag_t>(hdr.vlan_tag_.next);
-        transition select(hdr.vlan_tag_.last.etherType) {
-            16w0x8100: parse_vlan;
-            16w0x9100: parse_vlan;
-            16w0x9200: parse_vlan;
-            16w0x9300: parse_vlan;
+        packet.extract<vlan_tag_t>(hdr.vlan_tag_[32w0]);
+        transition select(hdr.vlan_tag_[32w0].etherType) {
+            16w0x8100: parse_vlan1;
+            16w0x9100: parse_vlan1;
+            16w0x9200: parse_vlan1;
+            16w0x9300: parse_vlan1;
             16w0x8847: parse_mpls;
             16w0x800: parse_ipv4;
             16w0x86dd: parse_ipv6;
@@ -607,6 +646,24 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             16w0x8035: parse_arp_rarp;
             default: parse_payload;
         }
+    }
+    state parse_vlan1 {
+        packet.extract<vlan_tag_t>(hdr.vlan_tag_[32w1]);
+        transition select(hdr.vlan_tag_[32w1].etherType) {
+            16w0x8100: parse_vlan2;
+            16w0x9100: parse_vlan2;
+            16w0x9200: parse_vlan2;
+            16w0x9300: parse_vlan2;
+            16w0x8847: parse_mpls;
+            16w0x800: parse_ipv4;
+            16w0x86dd: parse_ipv6;
+            16w0x806: parse_arp_rarp;
+            16w0x8035: parse_arp_rarp;
+            default: parse_payload;
+        }
+    }
+    state parse_vlan2 {
+        transition stateOutOfBound;
     }
     @name(".parse_vxlan") state parse_vxlan {
         packet.extract<vxlan_t>(hdr.vxlan);

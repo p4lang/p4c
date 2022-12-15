@@ -7,14 +7,6 @@ header H {
 parser P(packet_in p, out H[2] h) {
     @name("P.x") bit<32> x_0;
     @name("P.tmp") H tmp;
-    state start {
-        tmp.setInvalid();
-        p.extract<H>(tmp);
-        transition select(tmp.field) {
-            32w0: n1;
-            default: n2;
-        }
-    }
     state n1 {
         x_0 = 32w1;
         transition n3;
@@ -25,8 +17,16 @@ parser P(packet_in p, out H[2] h) {
     }
     state n3 {
         x_0 = x_0 + 32w4294967295;
-        p.extract<H>(h[x_0]);
+        p.extract<H>(h[32w1]);
         transition accept;
+    }
+    state start {
+        tmp.setInvalid();
+        p.extract<H>(tmp);
+        transition select(tmp.field) {
+            32w0: n1;
+            default: n2;
+        }
     }
 }
 

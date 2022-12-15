@@ -36,20 +36,20 @@ struct Metadata {
 }
 
 parser P(packet_in b, out Headers p, inout Metadata meta, inout standard_metadata_t standard_meta) {
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
+    state parse_ipv4 {
+        b.extract<ipv4_t>(p.ip);
+        transition accept;
+    }
     state start {
         b.extract<ethernet_t>(p.ethernet);
         transition select(p.ethernet.etherType) {
             16w0x800: parse_ipv4;
             default: noMatch;
         }
-    }
-    state parse_ipv4 {
-        b.extract<ipv4_t>(p.ip);
-        transition accept;
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
     }
 }
 

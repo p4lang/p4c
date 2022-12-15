@@ -43,18 +43,18 @@ control DeparserI(packet_out packet, in Parsed_packet hdr) {
 }
 
 parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
-    state start {
-        pkt.extract<Ethernet_h>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
-        }
-    }
     state parse_ipv4 {
         pkt.extract<ipv4_t>(hdr.ipv4);
         transition select(hdr.ipv4.version, hdr.ipv4.protocol) {
             (4w0x4, 8w0x6): accept;
             (4w0x4, 8w0x17): accept;
+            default: accept;
+        }
+    }
+    state start {
+        pkt.extract<Ethernet_h>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0x800: parse_ipv4;
             default: accept;
         }
     }

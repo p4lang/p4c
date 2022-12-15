@@ -16,3 +16,13 @@ invalid-hdr-warnings1.p4(44): [--Wwarn=invalid_header] warning: accessing a fiel
 invalid-hdr-warnings1.p4(44): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.h2
         hdr.h2.data = hdr.h2.data + 1; // from next: invalid, from state0: may be invalid, from state1: valid
                       ^^^^^^
+invalid-hdr-warnings1.p4(18): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+        hdr.h2.data = 1; // always invalid
+                    ^
+invalid-hdr-warnings1.p4(44): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+        hdr.h2.data = hdr.h2.data + 1; // from next: invalid, from state0: may be invalid, from state1: valid
+                    ^
+[--Wwarn=invalid] warning: Parser cycle can't be unrolled, because ParserUnroll can't detect the number of loop iterations:
+Parser ParserI state chain: start, next, next_join, state1, state0, state1
+[--Wwarn=invalid] warning: Parser cycle can't be unrolled, because ParserUnroll can't detect the number of loop iterations:
+Parser ParserI state chain: start, next, next_join, state1, state1

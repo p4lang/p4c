@@ -29,8 +29,8 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
     state start {
         pkt.extract<ethernet_t>(hdr.eth_hdr);
         pkt.extract<IDX>(hdr.idx);
-        pkt.extract<H>(hdr.h.next);
-        pkt.extract<H>(hdr.h.next);
+        pkt.extract<H>(hdr.h[32w0]);
+        pkt.extract<H>(hdr.h[32w1]);
         transition accept;
     }
 }

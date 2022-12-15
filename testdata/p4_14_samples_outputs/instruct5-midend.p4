@@ -27,12 +27,40 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
     @name(".parse_extra") state parse_extra {
-        packet.extract<data2_t_0>(hdr.extra.next);
-        transition select(hdr.extra.last.more) {
+        packet.extract<data2_t_0>(hdr.extra[32w0]);
+        transition select(hdr.extra[32w0].more) {
             8w0: accept;
-            default: parse_extra;
+            default: parse_extra1;
         }
+    }
+    state parse_extra1 {
+        packet.extract<data2_t_0>(hdr.extra[32w1]);
+        transition select(hdr.extra[32w1].more) {
+            8w0: accept;
+            default: parse_extra2;
+        }
+    }
+    state parse_extra2 {
+        packet.extract<data2_t_0>(hdr.extra[32w2]);
+        transition select(hdr.extra[32w2].more) {
+            8w0: accept;
+            default: parse_extra3;
+        }
+    }
+    state parse_extra3 {
+        packet.extract<data2_t_0>(hdr.extra[32w3]);
+        transition select(hdr.extra[32w3].more) {
+            8w0: accept;
+            default: parse_extra4;
+        }
+    }
+    state parse_extra4 {
+        transition stateOutOfBound;
     }
     @name(".start") state start {
         packet.extract<data_t>(hdr.data);

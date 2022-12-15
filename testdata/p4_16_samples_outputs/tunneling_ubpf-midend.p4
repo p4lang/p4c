@@ -39,6 +39,14 @@ struct metadata {
 }
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
+    state ipv4 {
+        p.extract<IPv4_h>(headers.ipv4);
+        transition accept;
+    }
+    state mpls {
+        p.extract<mpls_h>(headers.mpls);
+        transition ipv4;
+    }
     state start {
         p.extract<Ethernet_h>(headers.ethernet);
         transition select(headers.ethernet.etherType) {
@@ -46,14 +54,6 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
             16w0x8847: mpls;
             default: reject;
         }
-    }
-    state mpls {
-        p.extract<mpls_h>(headers.mpls);
-        transition ipv4;
-    }
-    state ipv4 {
-        p.extract<IPv4_h>(headers.ipv4);
-        transition accept;
     }
 }
 

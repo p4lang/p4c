@@ -39,6 +39,40 @@ struct headers {
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    state access1 {
+        hdr.index = hdr.index + 32w1;
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32w0]);
+        transition last;
+    }
+    state access11 {
+        hdr.index = hdr.index + 32w1;
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32w2]);
+        transition last;
+    }
+    state access12 {
+        hdr.index = hdr.index + 32w1;
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32w1]);
+        transition last;
+    }
+    state access2 {
+        hdr.index = hdr.index + 32w1;
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32w0]);
+        transition access12;
+    }
+    state access21 {
+        hdr.index = hdr.index + 32w1;
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32w1]);
+        transition access11;
+    }
+    state access3 {
+        hdr.index = hdr.index + 32w1;
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32w0]);
+        transition access21;
+    }
+    state last {
+        hdr.index = hdr.index + 32w1;
+        transition accept;
+    }
     state start {
         hdr.index = 32w0;
         packet.extract<ethernet_t>(hdr.ethernet);
@@ -49,25 +83,6 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
             16w3: access3;
             default: accept;
         }
-    }
-    state last {
-        hdr.index = hdr.index + 32w1;
-        transition accept;
-    }
-    state access1 {
-        hdr.index = hdr.index + 32w1;
-        packet.extract<srcRoute_t>(hdr.srcRoutes.next);
-        transition last;
-    }
-    state access2 {
-        hdr.index = hdr.index + 32w1;
-        packet.extract<srcRoute_t>(hdr.srcRoutes.next);
-        transition access1;
-    }
-    state access3 {
-        hdr.index = hdr.index + 32w1;
-        packet.extract<srcRoute_t>(hdr.srcRoutes.next);
-        transition access2;
     }
 }
 

@@ -13,17 +13,6 @@ extern bit<32> g(inout bit<32> v, in bit<32> w);
     @name("p1.tmp") bit<32> tmp;
     @name("p1.tmp_0") bit<32> tmp_0;
     @name("p1.tmp_1") bit<32> tmp_1;
-    @noWarn("invalid_header") @noWarn("ordering") state start {
-        stack_0[0].setInvalid();
-        stack_0[1].setInvalid();
-        h.data1 = 32w0;
-        func(h);
-        tmp = h.data2;
-        tmp_0 = h.data2;
-        tmp_1 = g(h.data2, tmp_0);
-        g(tmp, tmp_1);
-        transition next;
-    }
     @noWarn("invalid_header") state next {
         h.data2 = h.data3 + 32w1;
         transition select((bit<1>)h.isValid()) {
@@ -44,6 +33,17 @@ extern bit<32> g(inout bit<32> v, in bit<32> w);
     state noMatch {
         verify(false, error.NoMatch);
         transition reject;
+    }
+    @noWarn("invalid_header") @noWarn("ordering") state start {
+        stack_0[0].setInvalid();
+        stack_0[1].setInvalid();
+        h.data1 = 32w0;
+        func(h);
+        tmp = h.data2;
+        tmp_0 = h.data2;
+        tmp_1 = g(h.data2, tmp_0);
+        g(tmp, tmp_1);
+        transition next;
     }
 }
 

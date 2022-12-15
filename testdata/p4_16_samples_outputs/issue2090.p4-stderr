@@ -1,0 +1,3 @@
+issue2090.p4(57): [--Wwarn=ignore-prop] warning: Result of b.extract is not defined: Exception: OverwritingHeader
+         b.extract(vec.next.sack,
+         ^

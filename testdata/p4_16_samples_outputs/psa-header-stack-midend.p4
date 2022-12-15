@@ -38,16 +38,30 @@ struct header_t {
 }
 
 parser MyIP(packet_in buffer, out header_t h, inout EMPTY_M b, in psa_ingress_parser_input_metadata_t c, in EMPTY_RESUB d, in EMPTY_RECIRC e) {
-    state start {
-        buffer.extract<ethernet_t>(h.ethernet);
-        transition select(h.ethernet.etherType) {
-            16w0x8100: parse_vlan_tag;
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
+    state parse_vlan_tag {
+        buffer.extract<vlan_tag_h>(h.vlan_tag[32w0]);
+        transition select(h.vlan_tag[32w0].ether_type) {
+            16w0x8100: parse_vlan_tag1;
             default: accept;
         }
     }
-    state parse_vlan_tag {
-        buffer.extract<vlan_tag_h>(h.vlan_tag.next);
-        transition select(h.vlan_tag.last.ether_type) {
+    state parse_vlan_tag1 {
+        buffer.extract<vlan_tag_h>(h.vlan_tag[32w1]);
+        transition select(h.vlan_tag[32w1].ether_type) {
+            16w0x8100: parse_vlan_tag2;
+            default: accept;
+        }
+    }
+    state parse_vlan_tag2 {
+        transition stateOutOfBound;
+    }
+    state start {
+        buffer.extract<ethernet_t>(h.ethernet);
+        transition select(h.ethernet.etherType) {
             16w0x8100: parse_vlan_tag;
             default: accept;
         }

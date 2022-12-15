@@ -58,13 +58,6 @@ struct metadata {
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
-        }
-    }
     state parse_ipv4 {
         pkt.extract<ipv4_t>(hdr.ipv4);
         verify(hdr.ipv4.version == 4w4, error.IPv4IncorrectVersion);
@@ -77,6 +70,13 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
     state parse_tcp {
         pkt.extract<tcp_t>(hdr.tcp);
         transition accept;
+    }
+    state start {
+        pkt.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0x800: parse_ipv4;
+            default: accept;
+        }
     }
 }
 

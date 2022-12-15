@@ -28,16 +28,16 @@ struct Headers_t {
 }
 
 parser prs(packet_in p, out Headers_t headers) {
+    state ip {
+        p.extract<IPv4_h>(headers.ipv4);
+        transition accept;
+    }
     state start {
         p.extract<Ethernet_h>(headers.ethernet);
         transition select(headers.ethernet.etherType, 16w1) {
             (default, 16w1): ip;
             default: reject;
         }
-    }
-    state ip {
-        p.extract<IPv4_h>(headers.ipv4);
-        transition accept;
     }
 }
 

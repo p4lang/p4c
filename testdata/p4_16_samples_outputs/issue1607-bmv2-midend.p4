@@ -17,8 +17,8 @@ struct headers {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<elem>(hdr.stack.next);
-        meta.temp = hdr.stack.last;
+        packet.extract<elem>(hdr.stack[32w0]);
+        meta.temp = hdr.stack[32w0];
         transition accept;
     }
 }

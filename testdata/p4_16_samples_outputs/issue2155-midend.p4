@@ -14,6 +14,10 @@ struct metadata {
 }
 
 parser ParserImpl(packet_in b, out headers p, inout metadata m) {
+    state parse_b {
+        m.foo = 32w2;
+        transition accept;
+    }
     state start {
         b.extract<data>(p.hdr);
         m.foo = 32w1;
@@ -21,10 +25,6 @@ parser ParserImpl(packet_in b, out headers p, inout metadata m) {
             8w0xaa: parse_b;
             default: reject;
         }
-    }
-    state parse_b {
-        m.foo = 32w2;
-        transition accept;
     }
 }
 

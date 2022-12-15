@@ -1,0 +1,4 @@
+gauntlet_parser_test_1.p4(18): [--Wwarn=expr] warning: h.h1.next: error StackOutOfBounds will be triggered
+Parser P state chain: start, start_true
+            p.extract(h.h1.next);
+                      ^^^^^^^^^

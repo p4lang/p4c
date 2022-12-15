@@ -45,12 +45,12 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         packet.extract<ipv4_t>(hdr.ipv4);
         transition accept;
     }
-    @name(".start") state start {
-        transition ethernet;
-    }
     state noMatch {
         verify(false, error.NoMatch);
         transition reject;
+    }
+    @name(".start") state start {
+        transition ethernet;
     }
 }
 
