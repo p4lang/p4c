@@ -267,6 +267,10 @@ void TestBackEnd::printPerformanceReport() {
     }
 }
 
+int TestBackEnd::getTestCount() {
+    return testCount;
+}
+
 }  // namespace P4Testgen
 
 }  // namespace P4Tools

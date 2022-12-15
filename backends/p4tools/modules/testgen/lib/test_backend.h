@@ -112,6 +112,9 @@ class TestBackEnd {
 
     /// Print out some performance numbers if logging feature "performance" is enabled.
     static void printPerformanceReport();
+
+    /// Accessors
+    int getTestCount();
 };
 
 }  // namespace P4Testgen
