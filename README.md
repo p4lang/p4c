@@ -230,7 +230,7 @@ use them, but YMMV.
 
 - `git` for version control
 
-- CMake 3.10.2 or higher
+- CMake 3.16.3 or higher
 
 - Boehm-Weiser garbage-collector C++ library
 
@@ -282,6 +282,9 @@ After cloning Protobuf and before you build, check-out version 3.18.1:
 Please note that while all Protobuf versions newer than 3.0 should work for
 `p4c` itself, you may run into trouble with some extensions and other p4lang
 projects unless you install version 3.18.1.
+
+### CMake
+p4c requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using `pip3 install --user cmake==3.16.3`. We have a CI test on Ubuntu 18.04 that uses this option, but there is no guarantee that this will lead to a successful build.
 
 ## Fedora dependencies
 
