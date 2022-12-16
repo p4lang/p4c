@@ -11,11 +11,6 @@
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "simple_switch died with return code -6"
-  # Assertion 'Default switch case should not be reachable' failed,
-  # file '../../include/bm/bm_sim/actions.h' line '369'.
-  issue1607-bmv2.p4
-  bmv2_copy_headers.p4
-
   # terminate called after throwing an instance of 'std::out_of_range'
   # h.array[h.h.a].index
   # It turns out that h.h.a matters more than the size of the array
@@ -40,7 +35,6 @@ p4tools_add_xfail_reason(
   # terminate called after throwing an instance of 'std::runtime_error'
   # Type is not convertible to string
   control-hs-index-test3.p4
-  parser-unroll-test1.p4
 )
 
 p4tools_add_xfail_reason(
@@ -230,14 +224,6 @@ p4tools_add_xfail_reason(
 # 4. PARAMETERS NEEDED
 ####################################################################################################
 # These tests require additional input parameters to compile properly.
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
-  "uninitialized: next field read"
-  # error: parsedHdr.hstack.next uninitialized: next field read
-  # next not implemented in p4c/backends/bmv2/common/expression.cpp line 367
-  next-def-use.p4
-)
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
