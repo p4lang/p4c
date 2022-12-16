@@ -92,8 +92,12 @@ set (P4C_CXX_FLAGS "")
 set (P4C_LIB_DEPS)
 
 
-# Support a legacy option.
-if (ENABLE_UNIFIED_COMPILATION)
+# Support the legacy unified build option.
+if(ENABLE_UNIFIED_COMPILATION)
+  message(
+    WARNING
+      "Using deprecated option \"ENABLE_UNIFIED_COMPILATION\". Please use \"CMAKE_UNITY_BUILD\" instead."
+  )
   set(CMAKE_UNITY_BUILD ON)
 endif()
 
