@@ -47,6 +47,8 @@ OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
 OPTION (BUILD_STATIC_RELEASE "Build a statically linked release binary" OFF)
 OPTION (BUILD_AUTO_VAR_INIT_PATTERN "Initialize variables with pattern during build" OFF)
 OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
+# Support a legacy option. TODO: Remove?
+OPTION (ENABLE_UNIFIED_COMPILATION "Enable CMAKE_UNITY_BUILD" OFF)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
 
@@ -89,6 +91,11 @@ include(P4CUtils)
 set (P4C_CXX_FLAGS "")
 set (P4C_LIB_DEPS)
 
+
+# Support a legacy option.
+if (ENABLE_UNIFIED_COMPILATION)
+  set(CMAKE_UNITY_BUILD ON)
+endif()
 
 # If unity builds are enable, choose an aggressive batch size.
 if (CMAKE_UNITY_BUILD)
