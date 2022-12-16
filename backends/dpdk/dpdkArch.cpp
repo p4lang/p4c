@@ -1628,6 +1628,7 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
     /* If copyNeeded is false at this point, it means the keys are from same struct.
      * Check remaining conditions to see if the copy is needed or not */
     metaCopyNeeded = false;
+    if (copyNeeded) contiguous = false;
 
     if (!contiguous &&
         ((keyInfoInstance->isLearner) ||
@@ -1673,10 +1674,14 @@ const IR::Node* CopyMatchKeysToSingleStruct::postorder(IR::KeyElement* element) 
         keyName = keyName.replace('.', '_');
         keyName =
             keyName.replace("h_", control->name.toString() + "_" + table->name.toString() + "_");
-    } else if (keyName.startsWith("m.") && metaCopyNeeded) {
-        keyName = keyName.replace('.', '_');
-        keyName =
-            keyName.replace("m_", control->name.toString() + "_" + table->name.toString() + "_");
+    } else if (metaCopyNeeded) {
+        if (keyName.startsWith("m.")) {
+            keyName = keyName.replace('.', '_');
+            keyName = keyName.replace(
+                "m_", control->name.toString() + "_" + table->name.toString() + "_");
+        } else {
+            keyName = control->name.toString() + "_" + table->name.toString() + "_" + keyName;
+        }
     }
 
     if (isHeader || metaCopyNeeded) {
