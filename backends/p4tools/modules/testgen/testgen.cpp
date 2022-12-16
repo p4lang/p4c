@@ -147,7 +147,7 @@ int Testgen::mainImpl(const IR::P4Program* program) {
 
     if (testBackend->getTestCount() == 0) {
         ::warning(
-            "Unable to generate tests with give inputs. Double-check provided options and "
+            "Unable to generate tests with given inputs. Double-check provided options and "
             "parameters.\n");
     }
 
