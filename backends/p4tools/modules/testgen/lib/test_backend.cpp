@@ -110,6 +110,16 @@ bool TestBackEnd::run(const FinalState& state) {
         auto* solver = state.getSolver()->to<Z3Solver>();
         CHECK_NULL(solver);
 
+        // Don't increase the test count if --with-output-packet is enabled and we don't
+        // produce a test with an output packet.
+        if (TestgenOptions::get().withOutputPacket) {
+            auto outputPacketSize = executionState->getPacketBufferSize();
+            bool packetIsDropped = executionState->getProperty<bool>("drop");
+            if (outputPacketSize <= 0 || packetIsDropped) {
+                return testCount > maxTests - 1;
+            }
+        }
+
         bool abort = false;
         const auto* concolicModel = computeConcolicVariables(executionState, completedModel, solver,
                                                              outputPacketExpr, outputPortExpr);

@@ -53,6 +53,7 @@ These are the current usage flags:
 --pop-level                This is the fraction of unexploredBranches we select on randomAccessStack. Defaults to 3.
 --linear-enumeration       Max bound for LinearEnumeration strategy. Defaults to 2. **Experimental feature**.
 --saddle-point             To be used with randomAccessMaxCoverage. Specifies when to randomly explore the map after a saddle point in the coverage of the test generation.
+--with-output-packet       Produced tests must have an output packet.
 ```
 
 Once P4Testgen has generated tests, the tests can be executed by either the P4Runtime or STF test back ends.

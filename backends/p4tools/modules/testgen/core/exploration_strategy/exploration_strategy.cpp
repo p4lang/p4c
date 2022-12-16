@@ -90,6 +90,7 @@ bool ExplorationStrategy::handleTerminalState(const Callback& callback,
         ::warning("Path constraints unsatisfiable");
         return false;
     }
+
     // Get the model from the solver, complete it with respect to the
     // final symbolic environment and trace, use it to evaluate the
     // final execution state, and finally delegate to the callback.
