@@ -33,10 +33,6 @@ namespace P4Tools {
 
 namespace ExpressionParser {
 
-AssertsParser::AssertsParser(std::vector<std::vector<const IR::Expression*>>& output)
-    : restrictionsVec(output) {
-    setName("Restrictions");
-}
 /// Convert access tokens or keys into table keys. For converting access tokens or keys to
 /// table keys we must first use combineTokensToNames. Returns a vector with tokens converted into
 /// table keys.
@@ -46,68 +42,136 @@ AssertsParser::AssertsParser(std::vector<std::vector<const IR::Expression*>>& ou
 /// [tableName_lpm_prefix_key(Text), ==(Equal) , 0(Number)] [key::priority(Text), ==(Equal) ,
 /// 0(Number)] -> [tableName_priority_key(Text), ==(Equal) , 0(Number)] [Name01(Text), ==(Equal) ,
 /// 0(Number)] -> [tableName_key_Name01(Text), ==(Equal) , 0(Number)]
-std::vector<Token> combineTokensToTableKeys(std::vector<Token> input, cstring tableName) {
-    std::vector<Token> result;
-    for (uint64_t idx = 0; idx < input.size(); idx++) {
-        if (!input[idx].is(Token::Kind::Text)) {
-            result.push_back(input[idx]);
-            continue;
-        }
-        auto str = std::string(input[idx].lexeme());
+class MemberToVariable : public Transform {
+    cstring tableName;
+    const std::map<cstring, const IR::Type*>& types;
 
-        auto substr = str.substr(0, str.find("::mask"));
-        if (substr != str) {
-            cstring cstr = tableName + "_mask_" + substr;
-            result.emplace_back(Token::Kind::Text, cstr, cstr.size());
-            continue;
-        }
-        substr = str.substr(0, str.find("::prefix_length"));
-        if (substr != str) {
-            cstring cstr = tableName + "_lpm_prefix_" + substr;
-            result.emplace_back(Token::Kind::Text, cstr, cstr.size());
-            continue;
-        }
+ public:
+    explicit MemberToVariable(cstring tableName, const std::map<cstring, const IR::Type*> types)
+        : tableName(tableName), types(types) {};
 
-        substr = str.substr(0, str.find("::priority"));
-        if (substr != str) {
-            cstring cstr = tableName + "_priority";
-            result.emplace_back(Token::Kind::Priority, cstr, cstr.size());
-            continue;
+    const IR::Node* preorder(IR::MethodCallExpression* methodCall) override {
+        if (const auto* member = methodCall->method->to<IR::Member>()) {
+            if (member->member.name == "isValid") {
+                return Utils::getZombieConst(getType(member), 0,
+                                             std::string(memberToString(member)));
+            }
         }
+        return methodCall;
+    };
 
-        if (str.find("isValid") != std::string::npos) {
-            cstring cstr = tableName + "_key_" + str;
-            result.emplace_back(Token::Kind::Text, cstr, cstr.size());
-            idx += 2;
-            continue;
-        }
-
-        cstring cstr = tableName + "_key_" + str;
-        result.emplace_back(Token::Kind::Text, cstr, cstr.size());
+    const IR::Node* preorder(IR::Member* member) override {
+        return Utils::getZombieConst(getType(member), 0,
+                                     std::string(memberToString(member->expr)));
     }
-    return result;
+
+ protected:
+    cstring memberToString(const IR::Expression* expr) {
+        cstring name;
+        if (const auto* member = expr->to<IR::Member>()) {
+            name = member->member.name;
+            if (name == "mask" && member->type == nullptr) {
+                name = toString(member->expr);
+                return tableName + "_mask_" + name;
+            }
+            if (name == "prefix_length" && member->type == nullptr) {
+                name = toString(member->expr);
+                return tableName + "_lpm_prefix_" + name;
+            }
+            if (name == "priority" && member->type == nullptr) {
+                name = toString(member->expr);
+                return tableName + "_priority" + name;
+            }
+            if (name == "isValid") {
+                name = toString(member->expr);
+                return tableName + "_key_" + name;
+            }
+        }
+        return tableName + "_key_" + toString(expr);
+    }
+
+    cstring toString(const IR::Expression* expr) {
+        if (const auto* member = expr->to<IR::Member>()) {
+            return toString(member->expr) + member->member.name;
+        }
+        if (const auto* pathExpression = expr->to<IR::PathExpression>()) {
+            return pathExpression->path->name.name;
+        }
+        BUG("Unimplemented format of the name %1%", expr);
+    }
+
+    const IR::Type* getType(const IR::Member* member) {
+        CHECK_NULL(member);
+        auto name = member->member.name;
+        auto typeName = types.find(name);
+        if (typeName != types.end()) {
+            return typeName->second;
+        }
+        if (name == "isValid") {
+            return IR::Type_Bits::get(1);
+        }
+        if (name == "mask" || name == "prefix_length" || name == "priority") {
+            return member->expr->type;
+        }
+        return member->type;
+    }
+};
+
+AssertsParser::AssertsParser(std::vector<std::vector<const IR::Expression*>>& output)
+    : restrictionsVec(output) {
+    setName("Restrictions");
 }
 
-/// A function that calls the beginning of the transformation of restrictions from a string into an
-/// IR::Expression. Internally calls all other necessary functions, for example combineTokensToNames
-/// and the like, to eventually get an IR expression that meets the string constraint
 std::vector<const IR::Expression*> AssertsParser::genIRStructs(
     cstring tableName, cstring restrictionString, const IR::Vector<IR::KeyElement>& keyElements) {
+    const auto* restr = ExpressionParser::Parser::getIR(restrictionString, p4Program, true);        
     std::vector<const IR::Expression*> result;
+    std::map<cstring, const IR::Type*> types;
+    for (const auto* key : keyElements) {
+        cstring keyName;
+        if (const auto* annotation = key->getAnnotation(IR::Annotation::nameAnnotation)) {
+            keyName = annotation->getName();
+        }
+        BUG_CHECK(keyName.size() > 0, "Key does not have a name annotation.");
+        const auto* keyType = key->expression->type;
+        const IR::Type* type = nullptr;
+        if (const auto* bit = keyType->to<IR::Type_Bits>()) {
+            type = bit;
+        } else if (const auto* varbit = keyType->to<IR::Extracted_Varbits>()) {
+            type = varbit;
+        } else if (keyType->is<IR::Type_Boolean>()) {
+            type = IR::Type_Bits::get(1);
+        } else {
+            BUG("Unexpected key type %s.", keyType->node_type_name());
+        }
+        types.emplace(keyName, type);
+    }
+
+    MemberToVariable memberToVariable(tableName, types);
+    if (const auto* listExpression = restr->to<IR::ListExpression>()) {
+        for (const auto* component : listExpression->components) {
+            result.push_back(component->apply(memberToVariable)->to<IR::Expression>());
+        }
+    } else {
+        result.push_back(restr->apply(memberToVariable)->to<IR::Expression>());
+    }
     return result;
 }
 
+const IR::Node* AssertsParser::preorder(IR::P4Program* program) {
+    p4Program = program;
+    return program;
+}
 
-const IR::Node* AssertsParser::postorder(IR::P4Table* node) {
-    const auto* annotation = node->getAnnotation("entry_restriction");
-    const auto* key = node->getKey();
+const IR::Node* AssertsParser::postorder(IR::P4Table* table) {
+    const auto* annotation = table->getAnnotation("entry_restriction");
+    const auto* key = table->getKey();
     if (annotation == nullptr || key == nullptr) {
-        return node;
+        return table;
     }
-
     for (const auto* restrStr : annotation->body) {
         auto restrictions =
-            genIRStructs(node->controlPlaneName(), restrStr->text, key->keyElements);
+            genIRStructs(table->controlPlaneName(), restrStr->text, key->keyElements);
         /// Using Z3Solver, we check the feasibility of restrictions, if they are not
         /// feasible, we delete keys and entries from the table to execute
         /// default_action
@@ -116,8 +180,8 @@ const IR::Node* AssertsParser::postorder(IR::P4Table* node) {
             restrictionsVec.push_back(restrictions);
             continue;
         }
-        auto* cloneTable = node->clone();
-        auto* cloneProperties = node->properties->clone();
+        auto* cloneTable = table->clone();
+        auto* cloneProperties = table->properties->clone();
         IR::IndexedVector<IR::Property> properties;
         for (const auto* property : cloneProperties->properties) {
             if (property->name.name != "key" || property->name.name != "entries") {
@@ -128,7 +192,7 @@ const IR::Node* AssertsParser::postorder(IR::P4Table* node) {
         cloneTable->properties = cloneProperties;
         return cloneTable;
     }
-    return node;
+    return table;
 }
 
 

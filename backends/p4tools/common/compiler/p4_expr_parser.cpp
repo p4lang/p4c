@@ -425,7 +425,7 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
             if (res.second.originalName == "isValid") {
                 type = mainArgument->to<IR::Expression>()->type;
             }
-            if (isFieldAccess) {
+            if (!addFA && isFieldAccess) {
                 mainArgument = new IR::PathExpression(type, new IR::Path(res.second));
             } else {
                 mainArgument =  new IR::Member(type, mainArgument->to<IR::Expression>(), res.second);
@@ -651,7 +651,7 @@ const IR::Node* Parser::getIR() {
     return result;
 }
 
-const IR::Node* Parser::getIR(const char* str, const IR::P4Program* program,
+const IR::Node* Parser::getIR(const char* str, const IR::P4Program* program, bool addFA,
                               TokensSet skippedTokens) {
     Lexer lex(str);
     std::vector<Token> tmp;
@@ -661,12 +661,12 @@ const IR::Node* Parser::getIR(const char* str, const IR::P4Program* program,
             tmp.push_back(token);
         }
     }
-    Parser parser(program, tmp);
+    Parser parser(program, tmp, addFA);
     return parser.getIR();
 }
 
-Parser::Parser(const IR::P4Program* program, std::vector<Token> &tokens)
-    : program(program), tokens(tokens) {
+Parser::Parser(const IR::P4Program* program, std::vector<Token> &tokens, bool addFA)
+    : program(program), tokens(tokens), addFA(addFA) {
 }
 
 Token Lexer::atom(Token::Kind kind) noexcept { return {kind, m_beg++, 1}; }

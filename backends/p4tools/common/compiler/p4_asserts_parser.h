@@ -18,17 +18,17 @@ namespace ExpressionParser {
 
 class AssertsParser : public Transform {
     std::vector<std::vector<const IR::Expression*>>& restrictionsVec;
-
+    const IR::P4Program* p4Program;
  public:
     explicit AssertsParser(std::vector<std::vector<const IR::Expression*>>& output);
-    /// A function that calls the beginning of the transformation of restrictions from a string into
-    /// an IR::Expression. Internally calls all other necessary functions, for example
-    /// combineTokensToNames and the like, to eventually get an IR expression that meets the string
-    /// constraint
-    static std::vector<const IR::Expression*> genIRStructs(
-        cstring tableName, cstring restrictionString,
-        const IR::Vector<IR::KeyElement>& keyElements);
-    const IR::Node* postorder(IR::P4Table* node) override;
+    const IR::Node* preorder(IR::P4Program* program) override;
+    const IR::Node* postorder(IR::P4Table* table) override;
+ protected:
+    /// A function that calls the beginning of the transformation of restrictions from  string into an
+    /// IR::Expression. Internally calls all other necessary functions, for example combineTokensToNames
+    /// and the like, to eventually get an IR expression that meets the string constraint
+    std::vector<const IR::Expression*> genIRStructs(
+    cstring tableName, cstring restrictionString, const IR::Vector<IR::KeyElement>& keyElements);
 };
 
 }  // namespace ExpressionParser
