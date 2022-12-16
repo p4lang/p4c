@@ -1,4 +1,4 @@
-#include "backends/p4tools/common/lib/timer.h"
+#include "lib/timer.h"
 
 #include <algorithm>
 #include <chrono>  // NOLINT linter forbids using chrono, but we don't have alternatives
@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <utility>
 
-namespace P4Tools {
+namespace Util {
 
 namespace {
 
@@ -19,10 +19,10 @@ using Clock = std::chrono::high_resolution_clock;
 struct CounterEntry {
     const char* name;
     std::unordered_map<std::string, std::unique_ptr<CounterEntry>> counters;
-    Clock::duration duration;
+    Clock::duration duration{};
 
     /// Lookup existing or create new child counter.
-    CounterEntry* open_subcounter(const char* name) {
+    CounterEntry* openSubcounter(const char* name) {
         auto it = counters.find(name);
         if (it == counters.end()) {
             it = counters.emplace(name, new CounterEntry(name)).first;
@@ -50,9 +50,9 @@ struct RootCounter {
         //
         // however libgc cannot scan thread local data, which can lead to premature object
         // garbage collection.
-        static RootCounter root;
-        root.counter.duration = Clock::now() - root.start;
-        return root;
+        static RootCounter ROOT;
+        ROOT.counter.duration = Clock::now() - ROOT.start;
+        return ROOT;
     }
 
     CounterEntry* getCurrent() const { return current; }
@@ -60,42 +60,48 @@ struct RootCounter {
     void setCurrent(CounterEntry* c) { current = c; }
 
  private:
-    RootCounter() : counter("") {
-        current = &counter;
-        start = Clock::now();
-    }
+    RootCounter() : counter(""), current(&counter) { start = Clock::now(); }
 };
 
 }  // namespace
 
+#pragma GCC diagnostic push
+#if defined(__has_warning)
+#if __has_warning("-Wsubobject-linkage")
+#pragma GCC diagnostic ignored "-Wsubobject-linkage"
+#endif
+#else
+#pragma GCC diagnostic ignored "-Wsubobject-linkage"
+#endif
 // RAII helper which manages lifetime of one timer invocation.
-struct ScopedTimer::Ctx {
+struct ScopedTimerCtx {
     CounterEntry* parent = nullptr;
     CounterEntry* self = nullptr;
-    Clock::time_point start_time;
+    Clock::time_point startTime;
 
-    explicit Ctx(const char* counter_name) {
-        start_time = Clock::now();
+    explicit ScopedTimerCtx(const char* timerName)
+        : parent(RootCounter::get().getCurrent()), self(parent->openSubcounter(timerName)) {
+        startTime = Clock::now();
         // Push new active counter - the current active counter becomes the parent of this
         // counter, and this counter becomes the current active counter.
-        parent = RootCounter::get().getCurrent();
-        self = parent->open_subcounter(counter_name);
         RootCounter::get().setCurrent(self);
     }
-    ~Ctx() {
+    ~ScopedTimerCtx() {
         // Close the current timer invocation, measure time and add it to the counter.
-        auto duration = Clock::now() - start_time;
+        auto duration = Clock::now() - startTime;
         self->add(duration);
         // Restore previous counter as current.
         RootCounter::get().setCurrent(parent);
     }
 };
+#pragma GCC diagnostic pop
 
-ScopedTimer::ScopedTimer(const char* name) : ctx(new ScopedTimer::Ctx(name)) {}
+ScopedTimer::ScopedTimer(const char* name) : ctx(new ScopedTimerCtx(name)) {}
+
 ScopedTimer::~ScopedTimer() = default;
 
-void withTimer(const char* counter_name, std::function<void()> fn) {
-    ScopedTimer timer(counter_name);
+void withTimer(const char* timerName, const std::function<void()>& fn) {
+    ScopedTimer timer(timerName);
     fn();
 }
 
@@ -127,9 +133,9 @@ static void formatCounters(std::vector<TimerEntry>& out, CounterEntry& current,
 
 std::vector<TimerEntry> getTimers() {
     std::vector<TimerEntry> ret;
-    std::string namePrefix = "";
+    std::string namePrefix;
     formatCounters(ret, RootCounter::get().counter, namePrefix, 0);
     return ret;
 }
 
-}  // namespace P4Tools
+}  // namespace Util

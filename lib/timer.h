@@ -1,14 +1,13 @@
-#ifndef BACKENDS_P4TOOLS_COMMON_LIB_TIMER_H_
-#define BACKENDS_P4TOOLS_COMMON_LIB_TIMER_H_
+#ifndef _LIB_TIMER_H_
+#define _LIB_TIMER_H_
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace P4Tools {
+namespace Util {
 
 /// Runs specified function and measures it's execution duration under specified timer name.
 /// Timers can be nested. Measured durations are added under given timer name. In case of nested
@@ -23,7 +22,7 @@ namespace P4Tools {
 /// });
 ///
 /// uses two separate counters denoted as "A.C" and "B.C".
-void withTimer(const char* timer_name, std::function<void()> fn);
+void withTimer(const char* timerName, const std::function<void()>& fn);
 
 struct TimerEntry {
     /// Counter name. If a timer "Y" was invoked inside timer "X", its timer name is "X.Y".
@@ -37,6 +36,9 @@ struct TimerEntry {
 /// Returns list of all timers for and their current values.
 std::vector<TimerEntry> getTimers();
 
+// Internal implementation.
+struct ScopedTimerCtx;
+
 /// Similar to withTimer function, measures execution time elapsed from instance creation to
 /// destruction.
 class ScopedTimer {
@@ -46,12 +48,9 @@ class ScopedTimer {
     ~ScopedTimer();
 
  private:
-    // Internal implementation.
-    struct Ctx;
-
-    std::unique_ptr<Ctx> ctx;
+    std::unique_ptr<ScopedTimerCtx> ctx;
 };
 
-}  // namespace P4Tools
+}  // namespace Util
 
-#endif /* BACKENDS_P4TOOLS_COMMON_LIB_TIMER_H_ */
+#endif /* _LIB_TIMER_H_ */
