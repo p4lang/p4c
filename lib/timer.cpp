@@ -66,6 +66,8 @@ struct RootCounter {
 }  // namespace
 
 #pragma GCC diagnostic push
+// Ignore a bogus subobject-linkage warning, which can occur in unity builds.
+// the #if pragma is a little awkward because some preprocessors do not like ||
 #if defined(__has_warning)
 #if __has_warning("-Wsubobject-linkage")
 #pragma GCC diagnostic ignored "-Wsubobject-linkage"
