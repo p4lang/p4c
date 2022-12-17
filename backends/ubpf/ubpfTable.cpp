@@ -191,7 +191,7 @@ void UBPFTable::emitInstance(EBPF::CodeBuilder* builder) {
 }
 
 void UBPFTable::setTableKind() {
-    // set table kind to HASH by default
+    // Set table kind to HASH by default
     this->tableKind = EBPF::TableHash;
     if (keyGenerator == nullptr) {
         return;

@@ -1,4 +1,5 @@
-FROM p4lang/behavioral-model:latest
+ARG BASE_IMAGE=p4lang/behavioral-model:latest
+FROM ${BASE_IMAGE}
 LABEL maintainer="P4 Developers <p4-dev@lists.p4.org>"
 
 # Default to using 2 make jobs, which is a good default for CI. If you're
@@ -46,6 +47,6 @@ ENV ASAN_OPTIONS=print_stacktrace=1:detect_leaks=0
 
 # Delegate the build to tools/ci-build.
 COPY . /p4c/
-RUN chmod u+x /p4c/tools/ci-build.sh && /p4c/tools/ci-build.sh
+RUN /p4c/tools/ci-build.sh
 # Set the workdir after building p4c.
 WORKDIR /p4c/

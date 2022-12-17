@@ -81,44 +81,62 @@ void IR::Vector<T>::visit_children(Visitor& v) {
         auto n = v.apply_visitor(*i);
         if (!n && *i) {
             i = erase(i);
-        } else if (n == *i) {
+            continue;
+        }
+        CHECK_NULL(n);
+        if (n == *i) {
             i++;
-        } else if (auto l = dynamic_cast<const Vector*>(n)) {
+            continue;
+        }
+        if (auto l = dynamic_cast<const Vector*>(n)) {
             i = erase(i);
             i = insert(i, l->vec.begin(), l->vec.end());
             i += l->vec.size();
-        } else if (auto v = dynamic_cast<const VectorBase*>(n)) {
+            continue;
+        }
+        if (const auto* v = dynamic_cast<const VectorBase*>(n)) {
             if (v->empty()) {
                 i = erase(i);
             } else {
                 i = insert(i, v->size() - 1, nullptr);
-                for (auto el : *v) {
-                    if (auto e = dynamic_cast<const T*>(el))
+                for (const auto* el : *v) {
+                    CHECK_NULL(el);
+                    if (auto e = dynamic_cast<const T*>(el)) {
                         *i++ = e;
-                    else
+                    } else {
                         BUG("visitor returned invalid type %s for Vector<%s>", el->node_type_name(),
                             T::static_type_name());
+                    }
                 }
             }
-        } else if (auto e = dynamic_cast<const T*>(n)) {
-            *i++ = e;
-        } else {
-            BUG("visitor returned invalid type %s for Vector<%s>", n->node_type_name(),
-                T::static_type_name());
+            continue;
         }
+        if (auto e = dynamic_cast<const T*>(n)) {
+            *i++ = e;
+            continue;
+        }
+        BUG("visitor returned invalid type %s for Vector<%s>", n->node_type_name(),
+            T::static_type_name());
     }
 }
 template <class T>
 void IR::Vector<T>::visit_children(Visitor& v) const {
-    for (auto& a : vec) v.visit(a);
+    for (auto& a : vec) {
+        v.visit(a);
+    }
 }
 template <class T>
 void IR::Vector<T>::parallel_visit_children(Visitor& v) {
-    Visitor *start = nullptr, *tmp = &v;
+    Visitor* start = nullptr;
+    Visitor* tmp = &v;
     size_t todo = vec.size();
-    if (todo > 1) start = &v.flow_clone();
+    if (todo > 1) {
+        start = &v.flow_clone();
+    }
     for (auto i = vec.begin(); i != vec.end(); --todo, tmp = nullptr) {
-        if (!tmp) tmp = todo > 1 ? &start->flow_clone() : start;
+        if (tmp == nullptr) {
+            tmp = todo > 1 ? &start->flow_clone() : start;
+        }
         auto n = tmp->apply_visitor(*i);
         if (!n && *i) {
             i = erase(i);
@@ -128,37 +146,50 @@ void IR::Vector<T>::parallel_visit_children(Visitor& v) {
             i = erase(i);
             i = insert(i, l->vec.begin(), l->vec.end());
             i += l->vec.size();
-        } else if (auto v = dynamic_cast<const VectorBase*>(n)) {
+        } else if (const auto* v = dynamic_cast<const VectorBase*>(n)) {
             if (v->empty()) {
                 i = erase(i);
             } else {
                 i = insert(i, v->size() - 1, nullptr);
-                for (auto el : *v) {
-                    if (auto e = dynamic_cast<const T*>(el))
+                for (const auto* el : *v) {
+                    CHECK_NULL(el);
+                    if (auto e = dynamic_cast<const T*>(el)) {
                         *i++ = e;
-                    else
+                    } else {
                         BUG("visitor returned invalid type %s for Vector<%s>", el->node_type_name(),
                             T::static_type_name());
+                    }
                 }
             }
         } else if (auto e = dynamic_cast<const T*>(n)) {
             *i++ = e;
         } else {
+            CHECK_NULL(n);
             BUG("visitor returned invalid type %s for Vector<%s>", n->node_type_name(),
                 T::static_type_name());
         }
-        if (tmp != &v) v.flow_merge(*tmp);
+
+        if (tmp != &v) {
+            v.flow_merge(*tmp);
+        }
     }
 }
 template <class T>
 void IR::Vector<T>::parallel_visit_children(Visitor& v) const {
-    Visitor *start = nullptr, *tmp = &v;
+    Visitor* start = nullptr;
+    Visitor* tmp = &v;
     size_t todo = vec.size();
-    if (todo > 1) start = &v.flow_clone();
+    if (todo > 1) {
+        start = &v.flow_clone();
+    }
     for (auto& a : vec) {
-        if (!tmp) tmp = todo > 1 ? &start->flow_clone() : start;
+        if (tmp == nullptr) {
+            tmp = todo > 1 ? &start->flow_clone() : start;
+        }
         tmp->visit(a);
-        if (tmp != &v) v.flow_merge(*tmp);
+        if (tmp != &v) {
+            v.flow_merge(*tmp);
+        }
         --todo;
         tmp = nullptr;
     }
@@ -174,7 +205,9 @@ void IR::Vector<T>::toJSON(JSONGenerator& json) const {
         sep = ",";
     }
     --json.indent;
-    if (*sep) json << std::endl << json.indent;
+    if (*sep) {
+        json << std::endl << json.indent;
+    }
     json << "]";
 }
 
@@ -186,18 +219,25 @@ void IR::IndexedVector<T>::visit_children(Visitor& v) {
         auto n = v.apply_visitor(*i);
         if (!n && *i) {
             i = erase(i);
-        } else if (n == *i) {
+            continue;
+        }
+        CHECK_NULL(n);
+        if (n == *i) {
             i++;
-        } else if (auto l = dynamic_cast<const Vector<T>*>(n)) {
+            continue;
+        }
+        if (auto l = dynamic_cast<const Vector<T>*>(n)) {
             i = erase(i);
             i = insert(i, l->begin(), l->end());
             i += l->Vector<T>::size();
-        } else if (auto e = dynamic_cast<const T*>(n)) {
-            i = replace(i, e);
-        } else {
-            BUG("visitor returned invalid type %s for IndexedVector<%s>", n->node_type_name(),
-                T::static_type_name());
+            continue;
         }
+        if (auto e = dynamic_cast<const T*>(n)) {
+            i = replace(i, e);
+            continue;
+        }
+        BUG("visitor returned invalid type %s for IndexedVector<%s>", n->node_type_name(),
+            T::static_type_name());
     }
 }
 template <class T>
@@ -209,12 +249,14 @@ void IR::IndexedVector<T>::toJSON(JSONGenerator& json) const {
     const char* sep = "";
     Vector<T>::toJSON(json);
     json << "," << std::endl << json.indent++ << "\"declarations\" : {";
-    for (auto& k : declarations) {
+    for (const auto& k : declarations) {
         json << sep << std::endl << json.indent << k.first << " : " << k.second;
         sep = ",";
     }
     --json.indent;
-    if (*sep) json << std::endl << json.indent;
+    if (*sep != 0) {
+        json << std::endl << json.indent;
+    }
     json << "}";
 }
 IRNODE_DEFINE_APPLY_OVERLOAD(IndexedVector, template <class T>, <T>)
@@ -256,12 +298,19 @@ void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor& v) {
         auto n = v.apply_visitor(i->second, i->first);
         if (!n && i->second) {
             i = symbols.erase(i);
-        } else if (n == i->second) {
+            continue;
+        }
+        CHECK_NULL(n);
+        if (n == i->second) {
             i++;
-        } else if (auto m = dynamic_cast<const NameMap*>(n)) {
+            continue;
+        }
+        if (auto m = dynamic_cast<const NameMap*>(n)) {
             namemap_insert_helper(i, m->symbols.begin(), m->symbols.end(), symbols, new_symbols);
             i = symbols.erase(i);
-        } else if (auto s = dynamic_cast<const T*>(n)) {
+            continue;
+        }
+        if (auto s = dynamic_cast<const T*>(n)) {
             if (match_name(i->first, s)) {
                 i->second = s;
                 i++;
@@ -269,10 +318,10 @@ void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor& v) {
                 namemap_insert_helper(i, cstring(obj_name(s)), std::move(s), symbols, new_symbols);
                 i = symbols.erase(i);
             }
-        } else {
-            BUG("visitor returned invalid type %s for NameMap<%s>", n->node_type_name(),
-                T::static_type_name());
+            continue;
         }
+        BUG("visitor returned invalid type %s for NameMap<%s>", n->node_type_name(),
+            T::static_type_name());
     }
     symbols.insert(new_symbols.begin(), new_symbols.end());
 }
@@ -280,7 +329,9 @@ template <class T, template <class K, class V, class COMP, class ALLOC> class MA
           class COMP /*= std::less<cstring>*/,
           class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
 void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor& v) const {
-    for (auto& k : symbols) v.visit(k.second, k.first);
+    for (auto& k : symbols) {
+        v.visit(k.second, k.first);
+    }
 }
 template <class T, template <class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
           class COMP /*= std::less<cstring>*/,
@@ -294,7 +345,9 @@ void IR::NameMap<T, MAP, COMP, ALLOC>::toJSON(JSONGenerator& json) const {
         sep = ",";
     }
     --json.indent;
-    if (*sep) json << std::endl << json.indent;
+    if (*sep) {
+        json << std::endl << json.indent;
+    }
     json << "}";
 }
 

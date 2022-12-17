@@ -17,9 +17,11 @@ jobs:
   build-linux:
     strategy:
       fail-fast: false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
-      CTEST_PARALLEL_LEVEL: 4
+      IMAGE_TYPE: test
+      ENABLE_UNIFIED_COMPILATION: ON
+      BUILD_STATIC_RELEASE: ON
     steps:
     - uses: actions/checkout@v2
       with:
@@ -28,10 +30,11 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1
       with:
-        key: static-${{ runner.os }}
+        key: test-static-${{ runner.os }}
         max-size: 1000M
 
-    - name: Build (Linux)
+    - name: Build (Ubuntu 20.04)
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg BUILD_STATIC_RELEASE=ON  .
-        ./tools/export_ccache.sh
+        sudo cp -rf . /p4c/
+        (cd /p4c/ && sudo -E tools/ci-build.sh)
+        sudo cp -rf /p4c/.ccache .

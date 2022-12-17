@@ -12,15 +12,48 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
+  # Build with gcc and test p4c on Ubuntu 22.04.
+  test-ubuntu22:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-22.04
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+      IMAGE_TYPE: test
+      ENABLE_UNIFIED_COMPILATION: ON
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: test-${{ runner.os }}-gcc
+        max-size: 1000M
+
+    - name: Build (Ubuntu 22.04, GCC)
+      run: |
+        sudo cp -rf . /p4c/
+        (cd /p4c/ && sudo -E tools/ci-build.sh)
+        sudo cp -rf /p4c/.ccache .
+
+    - name: Run tests (Ubuntu 22.04)
+      run: sudo -E ctest --output-on-failure --schedule-random
+      working-directory: /p4c/build
+
   # Build with gcc and test p4c on Ubuntu 20.04.
-  test-linux:
+  test-ubuntu20:
     strategy:
       fail-fast: false
       matrix:
         unified: [ON, OFF]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       CTEST_PARALLEL_LEVEL: 4
+      IMAGE_TYPE: test
+      ENABLE_UNIFIED_COMPILATION: ${{ matrix.unified }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -33,25 +66,31 @@ jobs:
         key: test-${{ matrix.unified }}-${{ runner.os }}-gcc
         max-size: 1000M
 
-    - name: Build (Ubuntu Linux, GCC)
+    - name: Build (Ubuntu 20.04, GCC)
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=${{ matrix.unified }} .
-        ./tools/export_ccache.sh
+        sudo cp -rf . /p4c/
+        (cd /p4c/ && sudo -E tools/ci-build.sh)
+        sudo cp -rf /p4c/.ccache .
 
-      # run with sudo (...) --privileged
-      # this is needed to create network namespaces for the ebpf tests.
-    - name: Run tests (Ubuntu Linux)
-      run: |
-        sudo docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
+    - name: Run tests (Ubuntu 20.04)
+      run: sudo -E ctest --output-on-failure --schedule-random
+      working-directory: /p4c/build
       if: matrix.unified == 'ON'
 
   # Build with clang and test p4c on Ubuntu 20.04.
-  test-linux-clang-sanitizers:
+  test-ubuntu20-clang-sanitizers:
     strategy:
       fail-fast: false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
-      CTEST_PARALLEL_LEVEL: 4
+      CTEST_PARALLEL_LEVEL: 2
+      IMAGE_TYPE: test
+      ENABLE_UNIFIED_COMPILATION: ON
+      COMPILE_WITH_CLANG: ON
+      BUILD_AUTO_VAR_INIT_PATTERN: ON
+      ENABLE_SANITIZERS: ON
+      UBSAN_OPTIONS: print_stacktrace=1
+      ASAN_OPTIONS: print_stacktrace=1:detect_leaks=0
     steps:
     - uses: actions/checkout@v2
       with:
@@ -63,17 +102,46 @@ jobs:
         key: test-${{ runner.os }}-clang
         max-size: 1000M
 
-    - name: Build (Ubuntu Linux, Clang, Sanitizers)
+    - name: Build (Ubuntu 20.04, Clang, Sanitizers)
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg COMPILE_WITH_CLANG=ON \
-        --build-arg BUILD_AUTO_VAR_INIT_PATTERN=ON --build-arg ENABLE_SANITIZERS=ON .
+        sudo cp -rf . /p4c/
+        (cd /p4c/ && sudo -E tools/ci-build.sh)
+        sudo cp -rf /p4c/.ccache .
+
+    - name: Run tests (Ubuntu 20.04)
+      run: sudo -E ctest --output-on-failure --schedule-random
+      working-directory: /p4c/build
+
+  # Build with gcc and test p4c on Ubuntu 18.04.
+  test-ubuntu18:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+      ENABLE_UNIFIED_COMPILATION: ON
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: test-ubuntu-18.04-gcc
+        max-size: 1000M
+
+    - name: Build (Ubuntu 18.04, GCC)
+      run: |
+        docker build -t p4c --build-arg BASE_IMAGE=ubuntu:18.04 --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON .
         ./tools/export_ccache.sh
 
       # run with sudo (...) --privileged
       # this is needed to create network namespaces for the ebpf tests.
-    - name: Run tests (Ubuntu Linux)
+    - name: Run tests (Ubuntu 18.04)
       run: |
-        sudo docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
+        sudo -E docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
   
   # Build and test p4c on Fedora.
   test-fedora-linux:
