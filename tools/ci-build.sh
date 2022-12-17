@@ -48,11 +48,9 @@ P4C_DEPS="bison \
           build-essential \
           ccache \
           cmake \
-          curl \
           flex \
           g++ \
           git \
-          gnupg \
           lld \
           libboost-dev \
           libboost-graph-dev \
@@ -94,17 +92,17 @@ P4C_PIP_PACKAGES="ipaddr \
                   scapy==2.4.5 \
                   clang-format>=15.0.4"
 
-
-if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
+if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/null)" != "" ]] ; then
   P4C_DEPS+=" libprotobuf-dev protobuf-compiler"
 else
+  apt-get update && apt-get install -y curl gnupg
   echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | tee /etc/apt/sources.list.d/home:p4lang.list
   curl -L "http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key" | apt-key add -
   P4C_DEPS+=" p4lang-bmv2"
 fi
 
-apt update
-apt install -y --no-install-recommends \
+apt-get update
+apt-get install -y --no-install-recommends \
   ${P4C_DEPS} \
   ${P4C_EBPF_DEPS} \
   ${P4C_RUNTIME_DEPS}
@@ -136,10 +134,10 @@ function install_ptf_ebpf_test_deps() (
                            python3-six \
                            libgmp-dev \
                            libjansson-dev"
-  apt install -y --no-install-recommends ${P4C_PTF_PACKAGES}
+  apt-get install -y --no-install-recommends ${P4C_PTF_PACKAGES}
 
   if apt-cache show ${LINUX_TOOLS}; then
-    apt install -y --no-install-recommends ${LINUX_TOOLS}
+    apt-get install -y --no-install-recommends ${LINUX_TOOLS}
   fi
 
   git clone --depth 1 --recursive --branch v0.2.0 https://github.com/NIKSS-vSwitch/nikss /tmp/nikss
@@ -166,12 +164,12 @@ fi
 # ! ------  BEGIN VALIDATION -----------------------------------------------
 function build_gauntlet() {
   # For add-apt-repository.
-  apt install -y software-properties-common
+  apt-get install -y software-properties-common
   # Symlink the toz3 extension for the p4 compiler.
   mkdir -p /p4c/extensions
   git clone -b stable https://github.com/p4gauntlet/toz3 /p4c/extensions/toz3
   # The interpreter requires boost filesystem for file management.
-  apt install -y libboost-filesystem-dev
+  apt-get install -y libboost-filesystem-dev
   # Disable failures on crashes
   CMAKE_FLAGS+="-DVALIDATION_IGNORE_CRASHES=ON "
 }
@@ -186,7 +184,7 @@ fi
 # ! ------  BEGIN P4TESTGEN -----------------------------------------------
 function build_tools_deps() {
   # This is needed for P4Testgen.
-  apt install -y libboost-filesystem-dev libboost-system-dev wget zip
+  apt-get install -y libboost-filesystem-dev libboost-system-dev wget zip
 
   # Install a recent version of Z3
   Z3_VERSION="z3-4.8.14"
@@ -253,8 +251,8 @@ fi
 
 
 if [[ "${IMAGE_TYPE}" == "build" ]] ; then
-  apt purge -y ${P4C_DEPS} git
-  apt autoremove --purge -y
+  apt-get purge -y ${P4C_DEPS} git
+  apt-get autoremove --purge -y
   rm -rf /p4c /var/cache/apt/* /var/lib/apt/lists/*
   echo 'Build image ready'
 
