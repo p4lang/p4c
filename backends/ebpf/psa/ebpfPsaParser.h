@@ -40,10 +40,13 @@ class PsaStateTranslationVisitor : public StateTranslationVisitor {
 class EBPFPsaParser : public EBPFParser {
  public:
     std::map<cstring, EBPFChecksumPSA*> checksums;
+    const IR::Parameter* inputMetadata;
 
     EBPFPsaParser(const EBPFProgram* program, const IR::ParserBlock* block,
                   const P4::TypeMap* typeMap);
 
+    void emit(CodeBuilder* builder) override;
+    void emitParserInputMetadata(CodeBuilder* builder);
     void emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) override;
     void emitRejectState(CodeBuilder* builder) override;
 

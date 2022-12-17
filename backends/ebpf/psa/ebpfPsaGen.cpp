@@ -794,7 +794,10 @@ bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock* prsr) {
     parser->headers = *it;
     ++it;
     parser->user_metadata = *it;
-    auto resubmit_meta = *(it + 2);
+    ++it;
+    parser->inputMetadata = *it;
+    ++it;
+    auto resubmit_meta = *it;
 
     for (auto state : prsr->container->states) {
         auto ps = new EBPFParserState(state, parser);

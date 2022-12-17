@@ -49,6 +49,8 @@ class EBPFPipeline : public EBPFProgram {
     cstring oneKey;
     // A unique mark used to differentiate packets processed by P4/eBPF from others.
     unsigned packetMark;
+    // A variable to store ifindex after mapping (e.g. due to recirculation)
+    cstring inputPortVar;
 
     EBPFControlPSA* control;
     EBPFDeparserPSA* deparser;
@@ -57,6 +59,7 @@ class EBPFPipeline : public EBPFProgram {
                  P4::TypeMap* typeMap)
         : EBPFProgram(options, nullptr, refMap, typeMap, nullptr),
           name(name),
+          packetMark(0x99),
           control(nullptr),
           deparser(nullptr) {
         sectionName = "classifier/" + name;
@@ -73,7 +76,7 @@ class EBPFPipeline : public EBPFProgram {
         pktInstanceVar = compilerGlobalMetadata + cstring("->instance");
         priorityVar = cstring("skb->priority");
         oneKey = EBPFModel::reserved("one");
-        packetMark = 0x99;
+        inputPortVar = cstring("ebpf_input_port");
         progTarget = new KernelSamplesTarget(options.emitTraceMessages);
     }
 
@@ -124,6 +127,7 @@ class EBPFPipeline : public EBPFProgram {
     virtual void emitGlobalMetadataInitializer(CodeBuilder* builder);
     virtual void emitPacketLength(CodeBuilder* builder);
     virtual void emitTimestamp(CodeBuilder* builder);
+    void emitInputPortMapping(CodeBuilder* builder);
 
     void emitHeadersFromCPUMAP(CodeBuilder* builder);
     void emitMetadataFromCPUMAP(CodeBuilder* builder);

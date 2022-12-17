@@ -87,6 +87,11 @@ void EBPFPipeline::emitLocalVariables(CodeBuilder* builder) {
         emitTimestamp(builder);
         builder->endOfStatement(true);
     }
+
+    builder->emitIndent();
+    builder->appendFormat("u32 %s = %s;", inputPortVar.c_str(), ifindexVar.c_str());
+    builder->newline();
+    emitInputPortMapping(builder);
 }
 
 void EBPFPipeline::emitUserMetadataInstance(CodeBuilder* builder) {
@@ -169,6 +174,17 @@ void EBPFPipeline::emitTimestamp(CodeBuilder* builder) {
     builder->appendFormat("bpf_ktime_get_ns()");
 }
 
+void EBPFPipeline::emitInputPortMapping(CodeBuilder* builder) {
+    builder->emitIndent();
+    builder->appendFormat("if (%s == PSA_PORT_RECIRCULATE) ", inputPortVar.c_str());
+    builder->blockStart();
+    builder->emitIndent();
+    // To be conformant with psa.p4, where PSA_PORT_RECIRCULATE is constant
+    builder->appendFormat("%s = P4C_PSA_PORT_RECIRCULATE", inputPortVar.c_str());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+}
+
 // =====================EBPFIngressPipeline===========================
 void EBPFIngressPipeline::emitSharedMetadataInitializer(CodeBuilder* builder) {
     auto type = EBPFTypeFactory::instance->create(this->deparser->resubmit_meta->type);
@@ -184,7 +200,7 @@ void EBPFIngressPipeline::emitPSAControlInputMetadata(CodeBuilder* builder) {
         "            .packet_path = %s,\n"
         "            .parser_error = %s,\n"
         "    };",
-        control->inputStandardMetadata->name.name, ifindexVar.c_str(), packetPathVar.c_str(),
+        control->inputStandardMetadata->name.name, inputPortVar.c_str(), packetPathVar.c_str(),
         errorVar.c_str());
     builder->newline();
     if (shouldEmitTimestamp()) {
@@ -247,7 +263,7 @@ void EBPFIngressPipeline::emit(CodeBuilder* builder) {
         "pkt_len=%%d",
         sectionName);
     varStr = Util::printf_format("%s->packet_path", compilerGlobalMetadata);
-    builder->target->emitTraceMessage(builder, msgStr.c_str(), 3, ifindexVar.c_str(), varStr,
+    builder->target->emitTraceMessage(builder, msgStr.c_str(), 3, inputPortVar.c_str(), varStr,
                                       lengthVar.c_str());
 
     // PARSER
@@ -353,7 +369,7 @@ void EBPFEgressPipeline::emitPSAControlInputMetadata(CodeBuilder* builder) {
         "            .instance = %s,\n"
         "            .parser_error = %s,\n"
         "        };",
-        control->inputStandardMetadata->name.name, priorityVar.c_str(), ifindexVar.c_str(),
+        control->inputStandardMetadata->name.name, priorityVar.c_str(), inputPortVar.c_str(),
         packetPathVar.c_str(), pktInstanceVar.c_str(), errorVar.c_str());
     builder->newline();
     if (shouldEmitTimestamp()) {
@@ -362,16 +378,6 @@ void EBPFEgressPipeline::emitPSAControlInputMetadata(CodeBuilder* builder) {
                               timestampVar.c_str());
         builder->endOfStatement(true);
     }
-    builder->emitIndent();
-    builder->appendFormat("if (%s.egress_port == PSA_PORT_RECIRCULATE) ",
-                          control->inputStandardMetadata->name.name);
-    builder->blockStart();
-    builder->emitIndent();
-    // To be conformant with psa.p4, where PSA_PORT_RECIRCULATE is constant
-    builder->appendFormat("%s.egress_port = P4C_PSA_PORT_RECIRCULATE",
-                          control->inputStandardMetadata->name.name);
-    builder->endOfStatement(true);
-    builder->blockEnd(true);
 }
 
 void EBPFEgressPipeline::emitPSAControlOutputMetadata(CodeBuilder* builder) {
@@ -427,7 +433,7 @@ void EBPFEgressPipeline::emit(CodeBuilder* builder) {
         "pkt_len=%%d",
         sectionName);
     varStr = Util::printf_format("%s->packet_path", compilerGlobalMetadata);
-    builder->target->emitTraceMessage(builder, msgStr.c_str(), 3, ifindexVar.c_str(), varStr,
+    builder->target->emitTraceMessage(builder, msgStr.c_str(), 3, inputPortVar.c_str(), varStr,
                                       lengthVar.c_str());
 
     // PARSER

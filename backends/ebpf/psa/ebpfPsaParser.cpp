@@ -17,6 +17,7 @@ limitations under the License.
 #include "ebpfPsaParser.h"
 
 #include "backends/ebpf/ebpfType.h"
+#include "backends/ebpf/psa/ebpfPipeline.h"
 #include "frontends/p4/enumInstance.h"
 
 namespace EBPF {
@@ -37,8 +38,45 @@ void PsaStateTranslationVisitor::processMethod(const P4::ExternMethod* ext) {
 // =====================EBPFPsaParser=============================
 EBPFPsaParser::EBPFPsaParser(const EBPFProgram* program, const IR::ParserBlock* block,
                              const P4::TypeMap* typeMap)
-    : EBPFParser(program, block, typeMap) {
+    : EBPFParser(program, block, typeMap), inputMetadata(nullptr) {
     visitor = new PsaStateTranslationVisitor(program->refMap, program->typeMap, this);
+}
+
+void EBPFPsaParser::emit(CodeBuilder* builder) {
+    builder->emitIndent();
+    builder->blockStart();
+    emitParserInputMetadata(builder);
+    EBPFParser::emit(builder);
+    builder->blockEnd(true);
+}
+
+void EBPFPsaParser::emitParserInputMetadata(CodeBuilder* builder) {
+    bool isIngress = program->is<EBPFIngressPipeline>();
+
+    builder->emitIndent();
+    if (isIngress) {
+        builder->append("struct psa_ingress_parser_input_metadata_t ");
+    } else {
+        builder->append("struct psa_egress_parser_input_metadata_t ");
+    }
+    builder->append(inputMetadata->name.name);
+    builder->append(" = ");
+    builder->blockStart();
+
+    builder->emitIndent();
+    if (isIngress) {
+        builder->append(".ingress_port = ");
+    } else {
+        builder->append(".egress_port = ");
+    }
+    builder->append(program->to<EBPFPipeline>()->inputPortVar);
+    builder->appendLine(",");
+
+    builder->emitIndent();
+    builder->appendLine(".packet_path = compiler_meta__->packet_path,");
+
+    builder->blockEnd(false);
+    builder->endOfStatement(true);
 }
 
 void EBPFPsaParser::emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) {
