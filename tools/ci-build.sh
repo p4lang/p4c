@@ -50,7 +50,6 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 P4C_DEPS="bison \
           build-essential \
           ccache \
-          cmake \
           flex \
           g++ \
           git \
@@ -109,20 +108,28 @@ else
   P4C_DEPS+=" p4lang-bmv2"
 fi
 
+# TODO: Remove this check once 18.04 is deprecated.
+if [[ "${DISTRIB_RELEASE}" != "18.04" ]] ; then
+  P4C_DEPS+=" cmake"
+fi
+
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends \
   ${P4C_DEPS} \
   ${P4C_EBPF_DEPS} \
   ${P4C_RUNTIME_DEPS}
 
+sudo pip3 install --upgrade pip
+sudo pip3 install -r ${P4C_DIR}/requirements.txt
+
 # TODO: Remove this check once 18.04 is deprecated.
 if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
   ccache --set-config cache_dir=.ccache
+  # For Ubuntu 18.04 install the pypi-supplied version of cmake instead.
+  sudo pip3 install cmake==3.16.3
 fi
 ccache --set-config max_size=1G
 
-sudo pip3 install --upgrade pip
-sudo pip3 install -r ${P4C_DIR}/requirements.txt
 
 # Install add-ons to communicate with simple_switch_grpc via P4Runtime.
 # These packages are necessary because of a protobuf version mismatch in more recent Ubuntu distributions.
