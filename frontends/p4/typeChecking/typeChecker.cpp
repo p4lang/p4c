@@ -3782,9 +3782,17 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
         if (isCompileTimeConstant(stat->expression))
             warn(ErrorType::WARN_MISMATCH, "%1%: constant expression in switch", stat->expression);
 
+        std::map<big_int, const IR::Node*> caselabels;
         for (auto& c : stat->cases) {
             if (!isCompileTimeConstant(c->label))
                 typeError("%1%: must be a compile-time constant", c->label);
+            if (auto cst = c->label->to<IR::Constant>()) {
+                auto it = caselabels.find(cst->value);
+                if (it != caselabels.end()) {
+                    typeError("%1%: 'switch' label duplicates %2%", c->label, it->second);
+                }
+                caselabels.emplace(cst->value, c->label);
+            }
             auto lt = getType(c->label);
             if (lt == nullptr) continue;
             if (lt->is<IR::Type_InfInt>() && type->is<IR::Type_Bits>()) {
