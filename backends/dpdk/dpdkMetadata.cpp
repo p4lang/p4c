@@ -83,7 +83,7 @@ const IR::Node* DirectionToRegRead::postorder(IR::DpdkAction* a) {
 // replace direction field uses with register read i.e.
 // istd.direction = direction.read(istd.input_port)
 void DirectionToRegRead::replaceDirection(const IR::Member* m) {
-    if (isInitialized[m->member.name]) return;
+    // if (isInitialized[m->member.name]) return;
     auto inputPort =
         new IR::Member(new IR::PathExpression(IR::ID("m")), IR::ID(dirToInput[m->member.name]));
 

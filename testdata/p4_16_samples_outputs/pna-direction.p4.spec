@@ -73,7 +73,8 @@ apply {
 	mov m.local_metadata_b 0x0
 	jmp LABEL_END
 	LABEL_TRUE :	mov m.local_metadata_b 0x1
-	LABEL_END :	jmpneq LABEL_FALSE_0 0x0 m.pna_pre_input_metadata_direction
+	LABEL_END :	regrd m.pna_pre_input_metadata_direction direction m.pna_pre_input_metadata_input_port
+	jmpneq LABEL_FALSE_0 0x0 m.pna_pre_input_metadata_direction
 	mov m.local_metadata_tmpDir h.ipv4.srcAddr
 	jmp LABEL_END_0
 	LABEL_FALSE_0 :	mov m.local_metadata_tmpDir h.ipv4.dstAddr
