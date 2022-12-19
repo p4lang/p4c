@@ -648,11 +648,12 @@ const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
             if (!found) BUG("Could not find field %1% in type %2%", e->member, type);
             result = CloneConstants::clone(list->components.at(index), this);
         } else if (auto si = expr->to<IR::StructExpression>()) {
-            if (origtype->is<IR::Type_Header>() && e->member.name == IR::Type_Header::isValid)
-                return e;
+            if (type->is<IR::Type_Header>() && e->member.name == IR::Type_Header::isValid) return e;
             auto ne = si->components.getDeclaration<IR::NamedExpression>(e->member.name);
             BUG_CHECK(ne != nullptr, "Could not find field %1% in initializer %2%", e->member, si);
             return CloneConstants::clone(ne->expression, this);
+        } else if (expr->is<IR::InvalidHeader>() && e->member.name == IR::Type_Header::isValid) {
+            return e;
         } else {
             BUG("Unexpected initializer: %1%", expr);
         }

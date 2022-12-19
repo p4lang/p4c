@@ -3397,12 +3397,25 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
                 LOG3("Folding " << mem << " to " << w);
                 if (w < 0) return expression;
                 if (mem->member.name.endsWith("Bytes")) w = ROUNDUP(w, 8);
-                auto result = new IR::Constant(w);
+                auto result = new IR::Constant(expression->srcInfo, w);
                 auto tt = new IR::Type_Type(result->type);
                 setType(result->type, tt);
                 setType(result, result->type);
                 setCompileTimeConstant(result);
                 return result;
+            }
+            if (mem->member == IR::Type_Header::isValid && type->is<IR::Type_Header>()) {
+                const IR::BoolLiteral* lit = nullptr;
+                if (mem->expr->is<IR::InvalidHeader>())
+                    lit = new IR::BoolLiteral(expression->srcInfo, false);
+                if (mem->expr->is<IR::StructExpression>())
+                    lit = new IR::BoolLiteral(expression->srcInfo, true);
+                if (lit) {
+                    LOG3("Folding " << mem << " to " << lit);
+                    setType(lit, IR::Type_Boolean::get());
+                    setCompileTimeConstant(lit);
+                    return lit;
+                }
             }
         }
 
