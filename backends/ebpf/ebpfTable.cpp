@@ -478,8 +478,8 @@ void EBPFTable::emitKey(CodeBuilder* builder, cstring keyName) {
             } else if (width <= 64) {
                 swap = "bpf_htonll";
             } else {
-                // The code works with fields wider than 64 bits for PSA architecture. It is shred
-                // with filter model, so should works but has not been tested. Error message is
+                // The code works with fields wider than 64 bits for PSA architecture. It is shared
+                // with filter model, so should work but has not been tested. Error message is
                 // preserved for filter model because existing tests expect it.
                 // TODO: handle width > 64 bits for filter model
                 if (program->options.arch.isNullOrEmpty() || program->options.arch == "filter") {
