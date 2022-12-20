@@ -23,8 +23,6 @@ struct next_hop_arg_t {
 }
 
 struct main_metadata_t {
-	bit<32> pna_pre_input_metadata_input_port
-	bit<32> pna_pre_input_metadata_direction
 	bit<32> pna_main_input_metadata_direction
 	bit<32> pna_main_input_metadata_input_port
 	bit<32> local_metadata_tmpDir
@@ -64,22 +62,20 @@ table ipv4_da_lpm {
 
 apply {
 	rx m.pna_main_input_metadata_input_port
+	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
 	extract h.ethernet
 	jmpeq MAINPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
-	MAINPARSERIMPL_ACCEPT :	regrd m.pna_pre_input_metadata_direction direction m.pna_pre_input_metadata_input_port
-	jmpneq LABEL_TRUE m.pna_pre_input_metadata_direction 0x0
+	MAINPARSERIMPL_ACCEPT :	jmpneq LABEL_TRUE m.pna_main_input_metadata_direction 0x0
 	mov m.local_metadata_b 0x0
 	jmp LABEL_END
 	LABEL_TRUE :	mov m.local_metadata_b 0x1
-	LABEL_END :	regrd m.pna_pre_input_metadata_direction direction m.pna_pre_input_metadata_input_port
-	jmpneq LABEL_FALSE_0 0x0 m.pna_pre_input_metadata_direction
+	LABEL_END :	jmpneq LABEL_FALSE_0 0x0 m.pna_main_input_metadata_direction
 	mov m.local_metadata_tmpDir h.ipv4.srcAddr
 	jmp LABEL_END_0
 	LABEL_FALSE_0 :	mov m.local_metadata_tmpDir h.ipv4.dstAddr
-	LABEL_END_0 :	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
-	jmpneq LABEL_FALSE_1 0x0 m.pna_main_input_metadata_direction
+	LABEL_END_0 :	jmpneq LABEL_FALSE_1 0x0 m.pna_main_input_metadata_direction
 	mov m.MainControlT_tmpDir h.ipv4.srcAddr
 	jmp LABEL_END_1
 	LABEL_FALSE_1 :	mov m.MainControlT_tmpDir h.ipv4.dstAddr

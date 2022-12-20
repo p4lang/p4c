@@ -138,6 +138,7 @@ learner ct_tcp_table {
 
 apply {
 	rx m.pna_main_input_metadata_input_port
+	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
 	extract h.eth
 	jmpeq MAINPARSERIMPL_PARSE_IPV4 h.eth.etherType 0x800
 	jmp MAINPARSERIMPL_ACCEPT
@@ -147,30 +148,25 @@ apply {
 	MAINPARSERIMPL_PARSE_TCP :	extract h.tcp
 	MAINPARSERIMPL_ACCEPT :	mov m.MainControlT_do_add_on_miss 0
 	mov m.MainControlT_update_expire_time 0
-	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
 	jmpneq LABEL_END m.pna_main_input_metadata_direction 0x1
 	jmpnv LABEL_END h.ipv4
 	jmpnv LABEL_END h.tcp
 	table set_ct_options
 	LABEL_END :	jmpnv LABEL_END_0 h.ipv4
 	jmpnv LABEL_END_0 h.tcp
-	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
 	jmpeq LABEL_TRUE_1 m.pna_main_input_metadata_direction 0x0
 	mov m.MainControlT_key h.ipv4.dstAddr
 	jmp LABEL_END_1
 	LABEL_TRUE_1 :	mov m.MainControlT_key h.ipv4.srcAddr
-	LABEL_END_1 :	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
-	jmpeq LABEL_TRUE_2 m.pna_main_input_metadata_direction 0x0
+	LABEL_END_1 :	jmpeq LABEL_TRUE_2 m.pna_main_input_metadata_direction 0x0
 	mov m.MainControlT_key_0 h.ipv4.srcAddr
 	jmp LABEL_END_2
 	LABEL_TRUE_2 :	mov m.MainControlT_key_0 h.ipv4.dstAddr
-	LABEL_END_2 :	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
-	jmpeq LABEL_TRUE_3 m.pna_main_input_metadata_direction 0x0
+	LABEL_END_2 :	jmpeq LABEL_TRUE_3 m.pna_main_input_metadata_direction 0x0
 	mov m.MainControlT_key_1 h.tcp.dstPort
 	jmp LABEL_END_3
 	LABEL_TRUE_3 :	mov m.MainControlT_key_1 h.tcp.srcPort
-	LABEL_END_3 :	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
-	jmpeq LABEL_TRUE_4 m.pna_main_input_metadata_direction 0x0
+	LABEL_END_3 :	jmpeq LABEL_TRUE_4 m.pna_main_input_metadata_direction 0x0
 	mov m.MainControlT_key_2 h.tcp.srcPort
 	jmp LABEL_END_4
 	LABEL_TRUE_4 :	mov m.MainControlT_key_2 h.tcp.dstPort

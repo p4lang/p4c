@@ -69,4 +69,10 @@ bool isEightBitAligned(const IR::Expression* e) {
     return true;
 }
 
+bool isDirection(const IR::Member* m) {
+    if (m == nullptr) return false;
+    return m->member.name == "pna_main_input_metadata_direction" ||
+           m->member.name == "pna_pre_input_metadata_direction" ||
+           m->member.name == "pna_main_parser_input_metadata_direction";
+}
 }  // namespace DPDK

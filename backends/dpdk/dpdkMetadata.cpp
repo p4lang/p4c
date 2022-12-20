@@ -35,14 +35,18 @@ void DirectionToRegRead::uniqueNames(IR::DpdkAsmProgram* p) {
 }
 
 const IR::Node* DirectionToRegRead::preorder(IR::DpdkAsmProgram* p) {
+    bool is_direction_used = false;
+    auto IsDirUsed = new IsDirectionMetadataUsed(is_direction_used);
+    IsDirUsed->setCalledBy(this);
+    p->apply(*IsDirUsed);
     uniqueNames(p);
     p->externDeclarations.push_back(addRegDeclInstance(registerInstanceName));
-    IR::IndexedVector<IR::DpdkAsmStatement> stmts;
-    for (auto stmt : p->statements) {
-        auto stmtList = stmt->to<IR::DpdkListStatement>()->clone();
-        stmts.push_back(replaceDirection(stmtList));
+    if (is_direction_used) {
+        IR::IndexedVector<IR::DpdkAsmStatement> stmts;
+        stmts.push_back(new IR::DpdkListStatement(replaceDirectionWithRegRead(
+            p->statements[0]->to<IR::DpdkListStatement>()->statements)));
+        p->statements = stmts;
     }
-    p->statements = stmts;
     return p;
 }
 
@@ -60,51 +64,29 @@ IR::DpdkExternDeclaration* DirectionToRegRead::addRegDeclInstance(cstring instan
     return decl;
 }
 
-// check member expression using metadata direction field
-bool DirectionToRegRead::isDirection(const IR::Member* m) {
-    if (m == nullptr) return false;
-    return m->member.name == "pna_main_input_metadata_direction" ||
-           m->member.name == "pna_pre_input_metadata_direction" ||
-           m->member.name == "pna_main_parser_input_metadata_direction";
-}
-
-IR::DpdkListStatement* DirectionToRegRead::replaceDirection(IR::DpdkListStatement* l) {
-    l->statements = replaceDirectionWithRegRead(l->statements);
-    newStmts.clear();
-    return l;
-}
-
-const IR::Node* DirectionToRegRead::postorder(IR::DpdkAction* a) {
-    a->statements = replaceDirectionWithRegRead(a->statements);
-    newStmts.clear();
-    return a;
-}
-
-// replace direction field uses with register read i.e.
-// istd.direction = direction.read(istd.input_port)
-void DirectionToRegRead::replaceDirection(const IR::Member* m) {
-    // if (isInitialized[m->member.name]) return;
-    auto inputPort =
-        new IR::Member(new IR::PathExpression(IR::ID("m")), IR::ID(dirToInput[m->member.name]));
-
-    auto reads = new IR::DpdkRegisterReadStatement(m, registerInstanceName, inputPort);
-    newStmts.push_back(reads);
-    isInitialized[m->member.name] = true;
+// replace all direction uses with m.pna_main_input_metadata_direction
+// it's initilization will be done like istd.direction = direction.read(istd.input_port)
+// at start of the pipeline
+const IR::Node* DirectionToRegRead::preorder(IR::Member* m) {
+    if (isDirection(m))
+        return new IR::Member(new IR::PathExpression(IR::ID("m")),
+                              IR::ID(dirToDirMapping[m->member.name]));
+    else
+        return m;
 }
 
 IR::IndexedVector<IR::DpdkAsmStatement> DirectionToRegRead::replaceDirectionWithRegRead(
     IR::IndexedVector<IR::DpdkAsmStatement> stmts) {
-    for (auto s : stmts) {
-        if (auto jc = s->to<IR::DpdkJmpCondStatement>()) {
-            if (isDirection(jc->src1->to<IR::Member>()))
-                replaceDirection(jc->src1->to<IR::Member>());
-            else if (isDirection(jc->src2->to<IR::Member>()))
-                replaceDirection(jc->src2->to<IR::Member>());
-        } else if (auto u = s->to<IR::DpdkUnaryStatement>()) {
-            if (isDirection(u->src->to<IR::Member>())) replaceDirection(u->src->to<IR::Member>());
-        }
-        newStmts.push_back(s);
-    }
+    IR::IndexedVector<IR::DpdkAsmStatement> newStmts;
+    newStmts.insert(newStmts.begin(), *stmts.begin());
+    // insert direction read after rx statement
+    auto dirMeta = new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                  IR::ID("pna_main_input_metadata_direction"));
+    auto inputPort = new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                    IR::ID("pna_main_input_metadata_input_port"));
+    auto reads = new IR::DpdkRegisterReadStatement(dirMeta, registerInstanceName, inputPort);
+    newStmts.insert(newStmts.begin() + 1, reads);
+    newStmts.insert(newStmts.begin() + 2, stmts.begin() + 1, stmts.end());
     return newStmts;
 }
 
