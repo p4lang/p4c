@@ -43,8 +43,8 @@ const IR::Node* DirectionToRegRead::preorder(IR::DpdkAsmProgram* p) {
     p->externDeclarations.push_back(addRegDeclInstance(registerInstanceName));
     if (is_direction_used) {
         IR::IndexedVector<IR::DpdkAsmStatement> stmts;
-        stmts.push_back(new IR::DpdkListStatement(replaceDirectionWithRegRead(
-            p->statements[0]->to<IR::DpdkListStatement>()->statements)));
+        stmts.push_back(new IR::DpdkListStatement(
+            addRegReadStmtForDirection(p->statements[0]->to<IR::DpdkListStatement>()->statements)));
         p->statements = stmts;
     }
     return p;
@@ -75,11 +75,13 @@ const IR::Node* DirectionToRegRead::preorder(IR::Member* m) {
         return m;
 }
 
-IR::IndexedVector<IR::DpdkAsmStatement> DirectionToRegRead::replaceDirectionWithRegRead(
+IR::IndexedVector<IR::DpdkAsmStatement> DirectionToRegRead::addRegReadStmtForDirection(
     IR::IndexedVector<IR::DpdkAsmStatement> stmts) {
     IR::IndexedVector<IR::DpdkAsmStatement> newStmts;
     newStmts.insert(newStmts.begin(), *stmts.begin());
-    // insert direction read after rx statement
+    // insert direction read after rx statement, we initialize direction so early in
+    // pipeline because we sure that it's not going to change after this and this direction
+    // is available to all the blocks.
     auto dirMeta = new IR::Member(new IR::PathExpression(IR::ID("m")),
                                   IR::ID("pna_main_input_metadata_direction"));
     auto inputPort = new IR::Member(new IR::PathExpression(IR::ID("m")),

@@ -74,7 +74,7 @@ class DirectionToRegRead : public Transform {
     void uniqueNames(IR::DpdkAsmProgram* p);
     IR::DpdkExternDeclaration* addRegDeclInstance(cstring instanceName);
     IR::DpdkListStatement* replaceDirection(IR::DpdkListStatement* l);
-    IR::IndexedVector<IR::DpdkAsmStatement> replaceDirectionWithRegRead(
+    IR::IndexedVector<IR::DpdkAsmStatement> addRegReadStmtForDirection(
         IR::IndexedVector<IR::DpdkAsmStatement> stmts);
 };
 
