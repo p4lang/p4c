@@ -366,6 +366,35 @@ const IR::Type* Parser::ndToType(const IR::Node* nd) {
     return nd->to<IR::Type>();
 }
 
+const IR::Type* Parser::getCastType() {
+    size_t oldIndex = index;
+    if (!tokens[index].is(Token::Kind::Text)) {
+        return nullptr;
+    }
+    const auto* name = createConstantOp();
+    if (const auto* path = name->to<IR::PathExpression>()) {
+        if (path->path->name.name == "bool") {
+            BUG_CHECK(tokens[index].is(Token::Kind::RightParen), "Can't find coresponded ']'");
+            index++;
+            return IR::Type_Boolean::get();
+        }
+        if (path->path->name.name == "int" || path->path->name.name == "bit") {
+            if (tokens[index].is(Token::Kind::LessThan)) {
+                index++;
+                const auto* res = createConstantOp();
+                BUG_CHECK(res->is<IR::Constant>(), "Invalid format of type cast");
+                const auto* num = res->to<IR::Constant>();
+                BUG_CHECK(tokens[index].is(Token::Kind::GreaterThan),
+                          "Can't find coresponded '>' for type cast");
+                index++;
+                return new IR::Type_Bits(num->asInt(), path->path->name.name == "int");
+        }
+        return getDefinedType(path->path->name.name).first;
+    }
+    index = oldIndex;
+    return nullptr;
+}
+
 const IR::Node* Parser::createFunctionCallOrConstantOp() {
     LOG1("createFunctionCallOrConstantOp : " << tokens[index].lexeme());
     if (tokens[index].is(Token::Kind::Minus)) {
@@ -389,9 +418,16 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
             IR::Vector<IR::Expression> components;
             return new IR::NamedExpression("Paren", new IR::ListExpression(components));
         }
+        const auto* castType = getCastType();
         const auto* res = createPunctuationMarks();
-        BUG_CHECK(tokens[index].is(Token::Kind::RightParen), "Can't find coresponded ']'");
-        index++;
+        if (castType == nullptr) {
+            BUG_CHECK(tokens[index].is(Token::Kind::RightParen), "Can't find coresponded ']'");
+            index++;
+        } else {
+            auto* castRes = res->clone();
+            castRes->type = castType;
+            return castRes; 
+        }
         return new IR::NamedExpression("Paren", res->to<IR::Expression>());
     }
     const auto* mainArgument = createConstantOp();

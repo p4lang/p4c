@@ -126,7 +126,6 @@ class Parser {
     
  protected:
     typedef const IR::Node* (Parser::*createFuncType)();
-    //typedef std::function<const IR::Node*()> createFuncType;
     const IR::Node* getIR();
     const IR::Node* createPunctuationMarks();
     const IR::Node* createSemi();
@@ -159,6 +158,7 @@ class Parser {
     const IR::Node* createPercent();
     const IR::Node* createMul();
     const IR::Node* createUnaryOp();
+    const IR::Type* getCastType();
     const IR::Node* createFunctionCallOrConstantOp();
     const IR::Node* createApplicationOp(const IR::Node*);
     const IR::Node* createConstantOp();
