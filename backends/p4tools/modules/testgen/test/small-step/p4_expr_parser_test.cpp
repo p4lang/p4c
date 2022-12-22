@@ -122,13 +122,13 @@ TEST_F(P4ExpressionParserTest, SimpleExpressions) {
     member = member->expr->to<IR::Member>();
     ASSERT_TRUE(member->type->is<IR::Type_StructLike>());
     const auto* strct = member->type->to<IR::Type_StructLike>();
-    ASSERT_TRUE(strct->name.originalName == "H");
+    ASSERT_EQ(strct->name.originalName, "H");
     ASSERT_TRUE(member->expr->is<IR::PathExpression>());
     const auto* pathExpression = member->expr->to<IR::PathExpression>();
-    ASSERT_TRUE(pathExpression->path->name.originalName == "h");
+    ASSERT_EQ(pathExpression->path->name.originalName, "h");
     ASSERT_TRUE(pathExpression->type->is<IR::Type_StructLike>());
     strct = pathExpression->type->to<IR::Type_StructLike>();
-    ASSERT_TRUE(strct->name.originalName == "Headers");
+    ASSERT_EQ(strct->name.originalName, "Headers");
 
     // Check true/false.
     expr = parseExpression("true", program);
@@ -144,13 +144,13 @@ TEST_F(P4ExpressionParserTest, SimpleExpressions) {
     expr = parseExpression("10", program);
     ASSERT_TRUE(expr->is<IR::Constant>());
     const auto* cnsnt = expr->to<IR::Constant>();
-    ASSERT_TRUE(cnsnt->value == 10);
+    ASSERT_EQ(cnsnt->value, 10);
 
     // Check hex constant.
     expr = parseExpression("0xaB", program);
     ASSERT_TRUE(expr->is<IR::Constant>());
     cnsnt = expr->to<IR::Constant>();
-    ASSERT_TRUE(cnsnt->value == 171);
+    ASSERT_E(cnsnt->value, 171);
 
     // check method call
     expr = parseExpression("ingress::h.h.isValid()", program);
@@ -162,28 +162,28 @@ TEST_F(P4ExpressionParserTest, SimpleExpressions) {
     member = member->expr->to<IR::Member>();
     ASSERT_TRUE(member->type->is<IR::Type_StructLike>());
     strct = member->type->to<IR::Type_StructLike>();
-    ASSERT_TRUE(strct->name.originalName == "H");
+    ASSERT_EQ(strct->name.originalName, "H");
     ASSERT_TRUE(member->expr->is<IR::PathExpression>());
     pathExpression = member->expr->to<IR::PathExpression>();
-    ASSERT_TRUE(pathExpression->path->name.originalName == "h");
+    ASSERT_EQ(pathExpression->path->name.originalName, "h");
     ASSERT_TRUE(pathExpression->type->is<IR::Type_StructLike>());
     strct = pathExpression->type->to<IR::Type_StructLike>();
-    ASSERT_TRUE(strct->name.originalName == "Headers");
+    ASSERT_EQ(strct->name.originalName, "Headers");
 
     // check slice
     expr = parseExpression("ingress::h.h.a[3:2]", program);
     ASSERT_TRUE(expr->type->is<IR::Type_Bits>());
     type = expr->type->to<IR::Type_Bits>();
-    ASSERT_TRUE(type->size == 2);
+    ASSERT_EQ(type->size, 2);
     ASSERT_TRUE(expr->is<IR::Slice>());
     const auto* slice = expr->to<IR::Slice>();
-    ASSERT_TRUE(slice->getL() == 2);
-    ASSERT_TRUE(slice->getH() == 3);
+    ASSERT_EQ(slice->getL(), 2);
+    ASSERT_EQ(slice->getH(), 3);
     ASSERT_TRUE(checkMember(slice->e0, "a"));
     member = slice->e0->to<IR::Member>();
     ASSERT_TRUE(member->type->is<IR::Type_Bits>());
     type = member->type->to<IR::Type_Bits>();
-    ASSERT_TRUE(type->size == 8);
+    ASSERT_EQ(type->size, 8);
 
     // check array
     expr = parseExpression("ingress::h.harray[0]", program);
@@ -286,7 +286,7 @@ TEST_F(P4ExpressionParserTest, SimpleExpressions) {
     ASSERT_TRUE(checkMember(mltExpr->right, "c"));
     ASSERT_TRUE(mltExpr->left->is<IR::Add>());
     ASSERT_TRUE(checkMembers(mltExpr->left->to<IR::Add>(), "a", "b"));
- 
+
     // a + b * c
     expr = parseExpression("ingress::h.h.a + ingress::h.h.b * ingress::h.h.c", program);
     ASSERT_TRUE(expr->is<IR::Add>());
@@ -344,7 +344,7 @@ TEST_F(P4ExpressionParserTest, SimpleExpressions) {
     expr = parseExpression("+(ingress::h.h.a + ingress::h.h.b)", program);
     ASSERT_TRUE(expr->is<IR::Add>());
     ASSERT_TRUE(checkMembers(expr->to<IR::Add>(), "a", "b"));
-    
+
     // !(b1||b2)
     expr = parseExpression("!(ingress::h.h.b1 || ingress::h.h.b2)", program);
     ASSERT_TRUE(expr->is<IR::LNot>());
@@ -361,7 +361,7 @@ TEST_F(P4ExpressionParserTest, SimpleExpressions) {
     const auto* cast = equ->right->to<IR::Cast>();
     ASSERT_TRUE(cast->destType->is<IR::Type_Bits>());
     type = equ->right->type->to<IR::Type_Bits>();
-    ASSERT_TRUE(type->width_bits() == 4);
+    ASSERT_EQ(type->width_bits(), 4);
     ASSERT_TRUE(checkMember(cast->expr, "a"));
 }
 

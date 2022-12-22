@@ -1,4 +1,4 @@
-#include "backends/p4tools/common/compiler/p4_asserts_parser.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
 
 #include <stdint.h>
 
@@ -124,7 +124,7 @@ AssertsParser::AssertsParser(std::vector<std::vector<const IR::Expression*>>& ou
 
 std::vector<const IR::Expression*> AssertsParser::genIRStructs(
     cstring tableName, cstring restrictionString, const IR::Vector<IR::KeyElement>& keyElements) {
-    const auto* restr = ExpressionParser::Parser::getIR(restrictionString, p4Program, true);        
+    const auto* restr = ExpressionParser::Parser::getIR(restrictionString, p4Program, true);
     std::vector<const IR::Expression*> result;
     std::map<cstring, const IR::Type*> types;
     for (const auto* key : keyElements) {

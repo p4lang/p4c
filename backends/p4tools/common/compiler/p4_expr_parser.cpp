@@ -5,7 +5,7 @@ namespace P4Tools {
 namespace ExpressionParser {
 
 static std::vector<std::string> NAMES {
-    "Priority",      "Text",        "LineStatementClose", "Number",        "Comment", 
+    "Priority",      "Text",        "LineStatementClose", "Number",        "Comment",
     "StringLiteral", "LeftParen",   "RightParen",         "LeftSParen",   "RightSParen",
     "Dot",           "FieldAccess", "LNot",               "Complement",    "Mul",
     "Percent",       "Slash",       "Minus",              "SaturationSub", "Plus",
@@ -241,7 +241,8 @@ std::pair<const IR::Node*, IR::ID> Parser::getDefinedType(cstring txt, const IR:
                     return std::make_pair(field->type, IR::ID(txt));
                 }
             }
-            BUG_CHECK(!nd->is<IR::P4Control>() && !nd->is<IR::P4Action>() && !nd->is<IR::P4Table>(), "Can't find %1% in %2%", txt, nd);
+            BUG_CHECK(!nd->is<IR::P4Control>() && !nd->is<IR::P4Action>() && !nd->is<IR::P4Table>(),
+                      "Can't find %1% in %2%", txt, nd);
             // Retrun Boolean type by default.
             return std::make_pair(IR::Type_Boolean::get(), IR::ID(txt));
         }
@@ -322,9 +323,11 @@ const IR::Node* Parser::createSliceOrArrayOp(const IR::Node* base) {
         BUG_CHECK(namedExpr != nullptr, "Unexpected expression %1%", namedExpr);
         BUG_CHECK(namedExpr->name == "Colon", "Expected colon expression %1%", namedExpr);
         const auto* listExpr = namedExpr->expression->to<IR::ListExpression>();
-        BUG_CHECK(listExpr->size() < 3 && listExpr->size() != 0, "Expected one or two arguments", listExpr);
+        BUG_CHECK(listExpr->size() < 3 && listExpr->size() != 0, "Expected one or two arguments",
+                  listExpr);
         // Create a slice.
-        return new IR::Slice(base->to<IR::Expression>(), listExpr->components.at(0), listExpr->components.at(1));
+        return new IR::Slice(base->to<IR::Expression>(), listExpr->components.at(0),
+                             listExpr->components.at(1));
     }
     // Create an array.
     const auto* expr = base->to<IR::Expression>();
@@ -445,7 +448,7 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
             index++;
         } else {
             res = (this->*prevFunc)();
-            return new IR::Cast(castType, res->to<IR::Expression>()); 
+            return new IR::Cast(castType, res->to<IR::Expression>());
         }
         return new IR::NamedExpression("Paren", res->to<IR::Expression>());
     }
@@ -467,13 +470,15 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
     LOG1("createFunctionCallOrConstantOp next : " << tokens[index+1].lexeme());
     if (tokens[index].is(Token::Kind::Dot) || tokens[index].is(Token::Kind::FieldAccess)) {
         if (nd == nullptr) {
-            nd = getDefinedType(mainArgument->to<IR::NamedExpression>()->expression->to<IR::StringLiteral>()->value, nullptr).first;
+            nd = getDefinedType(mainArgument->to<IR::NamedExpression>()->expression->
+                                to<IR::StringLiteral>()->value, nullptr).first;
         }
         do {
             bool isFieldAccess = tokens[index].is(Token::Kind::FieldAccess);
             index++;
             auto result = createConstantOp();
-            cstring name = result->to<IR::NamedExpression>()->expression->to<IR::StringLiteral>()->value;
+            cstring name =
+                result->to<IR::NamedExpression>()->expression->to<IR::StringLiteral>()->value;
             auto res = getDefinedType(name, nd);
             nd = res.first;
             const IR::Type* type = ndToType(res.first);
@@ -483,7 +488,7 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
             if (!addFA && isFieldAccess) {
                 mainArgument = new IR::PathExpression(type, new IR::Path(res.second));
             } else {
-                mainArgument =  new IR::Member(type, mainArgument->to<IR::Expression>(), res.second);
+                mainArgument = new IR::Member(type, mainArgument->to<IR::Expression>(), res.second);
             }
         } while (tokens[index].is(Token::Kind::Dot) || tokens[index].is(Token::Kind::FieldAccess));
         if (index >= tokens.size()) {
@@ -688,7 +693,7 @@ const IR::Node* Parser::createListExpressions(const IR::Node* first, const char*
     return new IR::NamedExpression(name, new IR::ListExpression(components));
 }
 
-const IR::Node* Parser::createListExpression(const char* msg, Token::Kind kind, 
+const IR::Node* Parser::createListExpression(const char* msg, Token::Kind kind,
                                              createFuncType funcLeft, createFuncType funcRight) {
     LOG1(msg << " : " << tokens[index].lexeme());
     const auto* mainArgument = (this->*funcLeft)();
@@ -696,7 +701,8 @@ const IR::Node* Parser::createListExpression(const char* msg, Token::Kind kind,
         return mainArgument;
     }
     if (tokens[index].is(kind)) {
-        return createListExpressions(mainArgument, NAMES[static_cast<size_t>(tokens[index].kind())].c_str(),
+        return createListExpressions(mainArgument,
+                                     NAMES[static_cast<size_t>(tokens[index].kind())].c_str(),
                                      tokens[index].kind(), funcRight);
     }
     return mainArgument;

@@ -1,5 +1,5 @@
-#ifndef TESTGEN_COMMON_COMPILER_P4_ASSERTS_PARSER_H_
-#define TESTGEN_COMMON_COMPILER_P4_ASSERTS_PARSER_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_P4_ASSERTS_PARSER_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_P4_ASSERTS_PARSER_H_
 
 #include <cstddef>
 #include <iterator>
@@ -24,9 +24,10 @@ class AssertsParser : public Transform {
     const IR::Node* preorder(IR::P4Program* program) override;
     const IR::Node* postorder(IR::P4Table* table) override;
  protected:
-    /// A function that calls the beginning of the transformation of restrictions from  string into an
-    /// IR::Expression. Internally calls all other necessary functions, for example combineTokensToNames
-    /// and the like, to eventually get an IR expression that meets the string constraint
+    /// A function that calls the beginning of the transformation of restrictions from string into
+    /// an IR::Expression. Internally calls all other necessary functions, for example
+    /// combineTokensToNames and the like, to eventually get an IR expression that meets
+    /// the string constraint
     std::vector<const IR::Expression*> genIRStructs(
     cstring tableName, cstring restrictionString, const IR::Vector<IR::KeyElement>& keyElements);
 };
@@ -34,4 +35,4 @@ class AssertsParser : public Transform {
 }  // namespace ExpressionParser
 }  // namespace P4Tools
 
-#endif /* TESTGEN_COMMON_COMPILER_P4_ASSERTS_PARSER_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_P4_ASSERTS_PARSER_H_ */
