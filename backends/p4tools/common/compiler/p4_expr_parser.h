@@ -117,6 +117,8 @@ class Parser {
     const std::vector<Token> tokens;
     size_t index;
     bool addFA;
+    typedef const IR::Node* (Parser::*createFuncType)();
+    createFuncType prevFunc;
 
  public:
     Parser(const IR::P4Program* program, std::vector<Token> &tokens, bool addFA);
@@ -125,7 +127,6 @@ class Parser {
     char prev() noexcept;
     
  protected:
-    typedef const IR::Node* (Parser::*createFuncType)();
     const IR::Node* getIR();
     const IR::Node* createPunctuationMarks();
     const IR::Node* createSemi();

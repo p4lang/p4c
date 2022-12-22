@@ -372,13 +372,18 @@ const IR::Type* Parser::getCastType() {
         return nullptr;
     }
     const auto* name = createConstantOp();
-    if (const auto* path = name->to<IR::PathExpression>()) {
-        if (path->path->name.name == "bool") {
-            BUG_CHECK(tokens[index].is(Token::Kind::RightParen), "Can't find coresponded ']'");
+    const auto* namedExpr = name->to<IR::NamedExpression>();
+    if (namedExpr == nullptr) {
+        index = oldIndex;
+        return nullptr;
+    }
+    if (const auto* strLiteral = namedExpr->expression->to<IR::StringLiteral>()) {
+        if (strLiteral->value == "bool") {
+            BUG_CHECK(tokens[index].is(Token::Kind::RightParen), "Can't find coresponded ')'");
             index++;
             return IR::Type_Boolean::get();
         }
-        if (path->path->name.name == "int" || path->path->name.name == "bit") {
+        if (strLiteral->value == "int" || strLiteral->value == "bit") {
             if (tokens[index].is(Token::Kind::LessThan)) {
                 index++;
                 const auto* res = createConstantOp();
@@ -387,9 +392,21 @@ const IR::Type* Parser::getCastType() {
                 BUG_CHECK(tokens[index].is(Token::Kind::GreaterThan),
                           "Can't find coresponded '>' for type cast");
                 index++;
-                return new IR::Type_Bits(num->asInt(), path->path->name.name == "int");
+                BUG_CHECK(tokens[index].is(Token::Kind::RightParen), "Can't find coresponded ')'");
+                index++;
+                return new IR::Type_Bits(num->asInt(), strLiteral->value == "int");
+            } else {
+                BUG_CHECK(tokens[index].is(Token::Kind::RightParen), "Can't find coresponded ')'");
+                index++;
+                return new IR::Type_Bits(strLiteral->value == "int");
+            }
         }
-        return getDefinedType(path->path->name.name).first;
+        const auto* result = getDefinedType(strLiteral->value, nullptr).first;
+        if (result == nullptr || !result->is<IR::Type_StructLike>()) {
+            index = oldIndex;
+            return nullptr;
+        }
+        return result->to<IR::Type>();
     }
     index = oldIndex;
     return nullptr;
@@ -399,11 +416,13 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
     LOG1("createFunctionCallOrConstantOp : " << tokens[index].lexeme());
     if (tokens[index].is(Token::Kind::Minus)) {
         index++;
+        prevFunc = &Parser::createFunctionCallOrConstantOp;
         const auto* res = removeBrackets(createFunctionCallOrConstantOp());
         return new IR::Mul(new IR::Constant(-1), res->to<IR::Expression>());
     }
     if (tokens[index].is(Token::Kind::Plus)) {
         index++;
+        prevFunc = &Parser::createFunctionCallOrConstantOp;
         return removeBrackets(createFunctionCallOrConstantOp());
     }
     if (tokens[index].is(Token::Kind::StringLiteral)) {
@@ -418,15 +437,15 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
             IR::Vector<IR::Expression> components;
             return new IR::NamedExpression("Paren", new IR::ListExpression(components));
         }
+        const IR::Node* res = nullptr;
         const auto* castType = getCastType();
-        const auto* res = createPunctuationMarks();
         if (castType == nullptr) {
+            res = createPunctuationMarks();
             BUG_CHECK(tokens[index].is(Token::Kind::RightParen), "Can't find coresponded ']'");
             index++;
         } else {
-            auto* castRes = res->clone();
-            castRes->type = castType;
-            return castRes; 
+            res = (this->*prevFunc)();
+            return new IR::Cast(castType, res->to<IR::Expression>()); 
         }
         return new IR::NamedExpression("Paren", res->to<IR::Expression>());
     }
@@ -483,7 +502,7 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
     }
     if (tokens[index].is(Token::Kind::LeftParen)) {
             return createApplicationOp(mainArgument);
-        }
+    }
     return mainArgument;
 }
 
@@ -492,6 +511,7 @@ const IR::Node* Parser::createUnaryOp() {
     auto curToken = tokens[index];
     if (curToken.is(Token::Kind::LNot)) {
         index++;
+        prevFunc = &Parser::createPunctuationMarks;
         const IR::Node* nd = nullptr;
         if (tokens[index].is(Token::Kind::LeftParen)) {
             index++;
@@ -504,9 +524,11 @@ const IR::Node* Parser::createUnaryOp() {
         return createIR(curToken.kind(), nd, nullptr);
     }
     if (curToken.is(Token::Kind::Complement)) {
+        prevFunc = &Parser::createBor;
         index++;
         return createIR(curToken.kind(), createBor(), nullptr);
     }
+    prevFunc = &Parser::createFunctionCallOrConstantOp;
     return createFunctionCallOrConstantOp();
 }
 
@@ -621,12 +643,14 @@ const IR::Node* Parser::createBinaryExpression(const char* msg, Token::Kind kind
                                                createFuncType funcRight) {
     LOG1(msg << " : " << tokens[index].lexeme());
     BUG_CHECK(index < tokens.size(), "Invalid index of a token in %1%", msg);
+    prevFunc = funcLeft;
     const auto* mainArgument = (this->*funcLeft)();
     if (index >= tokens.size()) {
         return mainArgument;
     }
     if (tokens[index].is(kind)) {
         index++;
+        prevFunc = funcRight;
         return createIR(kind, mainArgument, (this->*funcRight)());
     }
     return mainArgument;
@@ -656,6 +680,7 @@ const IR::Node* Parser::createListExpressions(const IR::Node* first, const char*
                                               Token::Kind kind, createFuncType func) {
     IR::Vector<IR::Expression> components;
     components.push_back(first->to<IR::Expression>());
+    prevFunc = func;
     do {
         index++;
         components.push_back((this->*func)()->to<IR::Expression>());
@@ -682,7 +707,6 @@ const IR::Node* Parser::getIR() {
     LOG1("getIR : " << tokens[index].lexeme());
     BUG_CHECK(index < tokens.size(), "Invalid size of the tokens vector");
     const auto* result = removeBrackets(createPunctuationMarks());
-    std::cout << "Result : " << result << std::endl;
     BUG_CHECK(index >= tokens.size(), "Can't translate string into IR");
     return result;
 }

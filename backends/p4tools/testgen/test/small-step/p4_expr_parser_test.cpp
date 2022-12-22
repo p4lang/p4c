@@ -351,6 +351,18 @@ TEST_F(P4ExpressionParserTest, SimpleExpressions) {
     const auto* lNot = expr->to<IR::LNot>();
     ASSERT_TRUE(lNot->expr->is<IR::LOr>());
     ASSERT_TRUE(checkMembers(lNot->expr->to<IR::LOr>(), "b1", "b2"));
+
+    // d == (bit<4>)a
+    expr = parseExpression("ingress::h.h.d == (bit<4>)ingress::h.h.a", program);
+    ASSERT_TRUE(expr->is<IR::Equ>());
+    const auto* equ = expr->to<IR::Equ>();
+    ASSERT_TRUE(checkMember(equ->left, "d"));
+    ASSERT_TRUE(equ->right->is<IR::Cast>());
+    const auto* cast = equ->right->to<IR::Cast>();
+    ASSERT_TRUE(cast->destType->is<IR::Type_Bits>());
+    type = equ->right->type->to<IR::Type_Bits>();
+    ASSERT_TRUE(type->width_bits() == 4);
+    ASSERT_TRUE(checkMember(cast->expr, "a"));
 }
 
 }  // Test
