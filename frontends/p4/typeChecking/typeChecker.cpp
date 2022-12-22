@@ -269,6 +269,7 @@ bool TypeInference::checkParameters(const IR::ParameterList* paramList, bool for
     for (auto p : paramList->parameters) {
         auto type = getType(p);
         if (type == nullptr) return false;
+        if (auto ts = type->to<IR::Type_SpecializedCanonical>()) type = ts->baseType;
         if (forbidPackage && type->is<IR::Type_Package>()) {
             typeError("%1%: parameter cannot be a package", p);
             return false;
