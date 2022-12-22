@@ -75,6 +75,11 @@ class EBPFActionSelectorPSA : public EBPFTableImplementationPSA {
 
     void registerTable(const EBPFTablePSA* instance) override;
 
+    void emitCacheTypes(CodeBuilder* builder) override;
+    void emitCacheVariables(CodeBuilder* builder);
+    void emitCacheLookup(CodeBuilder* builder, cstring key, cstring value) override;
+    void emitCacheUpdate(CodeBuilder* builder, cstring key, cstring value) override;
+
  protected:
     typedef std::vector<const IR::KeyElement*> SelectorsListType;
 
@@ -88,6 +93,8 @@ class EBPFActionSelectorPSA : public EBPFTableImplementationPSA {
     cstring outputHashMask;
     cstring isGroupEntryName;
     cstring groupStateVarName;
+    cstring cacheKeyVar;
+    cstring cacheDoUpdateVar;
 
     EBPFHashAlgorithmPSA::ArgumentsList unpackSelectors();
     SelectorsListType getSelectorsFromTable(const EBPFTablePSA* instance);

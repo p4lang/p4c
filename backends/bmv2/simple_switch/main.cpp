@@ -14,8 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <stdio.h>
-
+#include <cstdio>
 #include <iostream>
 #include <string>
 
@@ -30,7 +29,9 @@ limitations under the License.
 #include "frontends/p4/frontend.h"
 #include "fstream"
 #include "ir/ir.h"
+#include "ir/json_generator.h"
 #include "ir/json_loader.h"
+#include "lib/algorithm.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/gc.h"

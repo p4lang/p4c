@@ -17,13 +17,23 @@ limitations under the License.
 // If you want to use 'raise' below to trace a node creation uncomment the next line
 // #include <signal.h>
 
-#include "ir.h"
-#include "ir/json_loader.h"
-
 #include "node.h"
 
-void IR::Node::traceVisit(const char* visitor) const
-{ LOG3("Visiting " << visitor << " " << id << ":" << node_type_name()); }
+#include <memory>
+#include <ostream>
+
+#include "ir/declaration.h"
+#include "ir/ir.h"
+#include "ir/json_generator.h"
+#include "ir/json_loader.h"
+#include "ir/visitor.h"
+#include "lib/indent.h"
+#include "lib/json.h"
+#include "lib/log.h"
+
+void IR::Node::traceVisit(const char* visitor) const {
+    LOG3("Visiting " << visitor << " " << id << ":" << node_type_name());
+}
 
 void IR::Node::traceCreation() const {
     /*
@@ -37,17 +47,17 @@ void IR::Node::traceCreation() const {
 
 int IR::Node::currentId = 0;
 
-void IR::Node::toJSON(JSONGenerator &json) const {
+void IR::Node::toJSON(JSONGenerator& json) const {
     json << json.indent << "\"Node_ID\" : " << id << "," << std::endl
          << json.indent << "\"Node_Type\" : " << node_type_name();
 }
 
-IR::Node::Node(JSONLoader &json) : id(-1) {
+IR::Node::Node(JSONLoader& json) : id(-1) {
     json.load("Node_ID", id);
     if (id < 0)
         id = currentId++;
     else if (id >= currentId)
-        currentId = id+1;
+        currentId = id + 1;
     clone_id = id;
 }
 
@@ -70,12 +80,9 @@ cstring IR::dbp(const IR::INode* node) {
         } else if (node->is<IR::Type_Type>()) {
             node->getNode()->Node::dbprint(str);
             str << "(" << dbp(node->to<IR::Type_Type>()->type) << ")";
-        } else if (node->is<IR::PathExpression>() ||
-                   node->is<IR::Path>() ||
-                   node->is<IR::TypeNameExpression>() ||
-                   node->is<IR::Constant>() ||
-                   node->is<IR::Type_Name>() ||
-                   node->is<IR::Type_Base>() ||
+        } else if (node->is<IR::PathExpression>() || node->is<IR::Path>() ||
+                   node->is<IR::TypeNameExpression>() || node->is<IR::Constant>() ||
+                   node->is<IR::Type_Name>() || node->is<IR::Type_Base>() ||
                    node->is<IR::Type_Specialized>()) {
             node->getNode()->Node::dbprint(str);
             str << " " << node->toString();
@@ -86,9 +93,8 @@ cstring IR::dbp(const IR::INode* node) {
     return str.str();
 }
 
-cstring IR::Node::prepareSourceInfoForJSON(Util::SourceInfo& si,
-                                           unsigned *lineNumber,
-                                           unsigned *columnNumber) const {
+cstring IR::Node::prepareSourceInfoForJSON(Util::SourceInfo& si, unsigned* lineNumber,
+                                           unsigned* columnNumber) const {
     if (!si.isValid()) {
         return nullptr;
     }
@@ -125,13 +131,12 @@ Util::JsonObject* IR::Node::sourceInfoJsonObj() const {
         json->emplace("filename", fName);
         json->emplace("line", lineNumber);
         json->emplace("column", columnNumber);
-        json->emplace("source_fragment",
-                      si.toBriefSourceFragment().escapeJson());
+        json->emplace("source_fragment", si.toBriefSourceFragment().escapeJson());
         return json;
     }
 }
 
-void IR::Node::sourceInfoToJSON(JSONGenerator &json) const {
+void IR::Node::sourceInfoToJSON(JSONGenerator& json) const {
     Util::SourceInfo si = srcInfo;
     unsigned lineNumber, columnNumber;
     cstring fName = prepareSourceInfoForJSON(si, &lineNumber, &columnNumber);
@@ -140,14 +145,13 @@ void IR::Node::sourceInfoToJSON(JSONGenerator &json) const {
         return;
     }
 
-    json << "," << std::endl
-         << json.indent++ << "\"Source_Info\" : {" << std::endl;
+    json << "," << std::endl << json.indent++ << "\"Source_Info\" : {" << std::endl;
 
     json << json.indent << "\"filename\" : " << fName << "," << std::endl;
     json << json.indent << "\"line\" : " << lineNumber << "," << std::endl;
     json << json.indent << "\"column\" : " << columnNumber << "," << std::endl;
-    json << json.indent << "\"source_fragment\" : " <<
-            si.toBriefSourceFragment().escapeJson() << std::endl;
+    json << json.indent << "\"source_fragment\" : " << si.toBriefSourceFragment().escapeJson()
+         << std::endl;
 
     json << --json.indent << "}";
 }

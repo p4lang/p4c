@@ -99,6 +99,9 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
 %nonassoc ABSTRACT CLASS INTERFACE
 
 %{
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-function"
 static void
 symbol_print(FILE* file, int type, YYSTYPE value)
 {
@@ -123,9 +126,6 @@ symbol_print(FILE* file, int type, YYSTYPE value)
 
 #define YYPRINT(file, type, value)   symbol_print(file, type, value)
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-function"
 #include "ir-generator-lex.c"
 #pragma GCC diagnostic pop
 

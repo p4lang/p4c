@@ -2,7 +2,6 @@
 
 #include <cxxabi.h>
 
-#include <bits/types/struct_tm.h>
 #include <lib/null.h>
 
 #include <algorithm>
@@ -21,12 +20,12 @@
 #include <boost/none.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
+#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/zombie.h"
 #include "ir/id.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
 #include "lib/safe_vector.h"
-#include "p4tools/common/lib/formulae.h"
 
 namespace P4Tools {
 

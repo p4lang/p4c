@@ -18,6 +18,7 @@ limitations under the License.
 #define _P4_CREATEBUILTINS_H_
 
 #include "ir/ir.h"
+#include "ir/visitor.h"
 
 /*
  * Creates accept and reject states.

@@ -181,6 +181,7 @@ class ParserStateRewriter : public Transform {
             wasOutOfBound = true;
             return expression;
         }
+        state->substitutedIndexes[newExpression->left] = res;
         return newExpression;
     }
 
@@ -248,6 +249,44 @@ class ParserStateRewriter : public Transform {
         return true;
     }
 
+    /// Checks values of the headers stacks which were evaluated.
+    bool checkIndexes(const StackVariableIndexMap& prev, const StackVariableIndexMap& cur) {
+        if (prev.size() != cur.size()) {
+            return false;
+        }
+        for (auto& i : prev) {
+            auto j = cur.find(i.first);
+            if (j == cur.end()) {
+                return false;
+            }
+            if (!i.second->equiv(*j->second)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /// Returns true for current id if indexes of the headers stack
+    /// are the same before previous call of the same parser state.
+    bool calledWithNoChanges(IR::ID id, const ParserStateInfo* state) {
+        CHECK_NULL(state);
+        const auto* prevState = state;
+        while (prevState->state->name.name != id.name) {
+            prevState = prevState->predecessor;
+            if (prevState == nullptr) {
+                return false;
+            }
+        }
+        if (prevState->predecessor != nullptr) {
+            prevState = prevState->predecessor;
+        } else if (prevState == state && state->predecessor == nullptr) {
+            // The map should be empty if no next operators in a start.
+            return state->statesIndexes.empty();
+        }
+        return prevState->statesIndexes == state->statesIndexes &&
+               checkIndexes(prevState->substitutedIndexes, state->substitutedIndexes);
+    }
+
     /// Generated new state name
     IR::ID genNewName(IR::ID id) {
         if (isTerminalState(id)) return id;
@@ -256,12 +295,26 @@ class ParserStateRewriter : public Transform {
         if (parserStructure->callsIndexes.count(id.name) &&
             (state->scenarioStates.count(id.name) ||
              parserStructure->reachableHSUsage(id, state))) {
-            if (was_called(name, id)) return id;
-            index = parserStructure->callsIndexes[id.name];
-            parserStructure->callsIndexes[id.name] = index + 1;
-            if (index + 1 > 0) {
-                index++;
-                id = IR::ID(id.name + std::to_string(index));
+            // or self called with no extraction...
+            // in this case we need to use the same name as it was in previous call
+            if (was_called(name, id)) {
+                return id;
+            }
+            if (calledWithNoChanges(id, state)) {
+                index = 0;
+                if (parserStructure->callsIndexes.count(id.name)) {
+                    index = parserStructure->callsIndexes[id.name];
+                }
+                if (index > 0) {
+                    id = IR::ID(id.name + std::to_string(index));
+                }
+            } else {
+                index = parserStructure->callsIndexes[id.name];
+                parserStructure->callsIndexes[id.name] = index + 1;
+                if (index + 1 > 0) {
+                    index++;
+                    id = IR::ID(id.name + std::to_string(index));
+                }
             }
         } else if (!parserStructure->callsIndexes.count(id.name)) {
             index = 0;
@@ -645,7 +698,8 @@ class ParserSymbolicInterpreter {
         return IR::ID(state->state->name + std::to_string(state->currentIndex));
     }
 
-    using EvaluationStateResult = std::pair<std::vector<ParserStateInfo*>*, bool>;
+    using EvaluationStateResult =
+        std::tuple<std::vector<ParserStateInfo*>*, bool, IR::IndexedVector<IR::StatOrDecl>>;
 
     /// Generates new state with the help of symbolic execution.
     /// If corresponded state was generated previously then it returns @a nullptr and false.
@@ -658,19 +712,25 @@ class ParserSymbolicInterpreter {
         IR::ID newName;
         if (unroll) {
             newName = getNewName(state);
-            if (newStates.count(newName)) return EvaluationStateResult(nullptr, false);
+            if (newStates.count(newName)) {
+                return EvaluationStateResult(nullptr, false, components);
+            }
             newStates.insert(newName);
         }
         for (auto s : state->state->components) {
             auto* newComponent = executeStatement(state, s, valueMap);
-            if (!newComponent) return EvaluationStateResult(nullptr, true);
-            if (unroll) components.push_back(newComponent);
+            if (!newComponent) {
+                return EvaluationStateResult(nullptr, true, components);
+            }
+            if (unroll) {
+                components.push_back(newComponent);
+            }
         }
         state->after = valueMap;
         auto result = evaluateSelect(state, valueMap);
         if (unroll) {
             if (result.second == nullptr) {
-                return EvaluationStateResult(nullptr, true);
+                return EvaluationStateResult(nullptr, true, components);
             }
             if (state->name == newName) {
                 state->newState =
@@ -681,7 +741,7 @@ class ParserSymbolicInterpreter {
                     new IR::ParserState(state->state->srcInfo, newName, components, result.second);
             }
         }
-        return EvaluationStateResult(result.first, true);
+        return EvaluationStateResult(result.first, true, components);
     }
 
  public:
@@ -703,19 +763,20 @@ class ParserSymbolicInterpreter {
         hasOutOfboundState = false;
     }
 
+    using StatOrDeclVector = IR::IndexedVector<IR::StatOrDecl>;
+
     /// generate call OutOfBound
-    void addOutFoBound(ParserStateInfo* stateInfo, std::unordered_set<cstring>& newStates,
-                       bool checkBefore = true) {
+    void addOutOfBound(ParserStateInfo* stateInfo, std::unordered_set<cstring>& newStates,
+                       bool checkBefore = true, StatOrDeclVector components = StatOrDeclVector()) {
         IR::ID newName = getNewName(stateInfo);
         if (checkBefore && newStates.count(newName)) {
             return;
         }
         hasOutOfboundState = true;
         newStates.insert(newName);
-        stateInfo->newState =
-            new IR::ParserState(newName, IR::IndexedVector<IR::StatOrDecl>(),
-                                new IR::PathExpression(new IR::Type_State(),
-                                                       new IR::Path(outOfBoundsStateName, false)));
+        auto* pathExpr =
+            new IR::PathExpression(new IR::Type_State(), new IR::Path(outOfBoundsStateName, false));
+        stateInfo->newState = new IR::ParserState(newName, components, pathExpr);
     }
 
     /// running symbolic execution
@@ -751,21 +812,26 @@ class ParserSymbolicInterpreter {
             if (infLoop) {
                 // Stop unrolling if it was an error.
                 if (wasError) {
-                    break;
+                    IR::ID newName = getNewName(stateInfo);
+                    if (newStates.count(newName) != 0) {
+                        evaluateState(stateInfo, newStates);
+                    }
+                    wasError = false;
+                    continue;
                 }
                 // don't evaluate successors anymore
                 // generate call OutOfBound
-                addOutFoBound(stateInfo, newStates);
+                addOutOfBound(stateInfo, newStates);
                 continue;
             }
             IR::ID newName = getNewName(stateInfo);
             bool notAdded = newStates.count(newName) == 0;
             auto nextStates = evaluateState(stateInfo, newStates);
-            if (nextStates.first == nullptr) {
-                if (nextStates.second && stateInfo->predecessor &&
+            if (get<0>(nextStates) == nullptr) {
+                if (get<1>(nextStates) && stateInfo->predecessor &&
                     newName.name != stateInfo->predecessor->newState->name) {
                     // generate call OutOfBound
-                    addOutFoBound(stateInfo, newStates, false);
+                    addOutOfBound(stateInfo, newStates, false, get<2>(nextStates));
                 } else {
                     // save current state
                     if (notAdded) {
@@ -775,7 +841,7 @@ class ParserSymbolicInterpreter {
                 LOG1("No next states");
                 continue;
             }
-            toRun.insert(toRun.end(), nextStates.first->begin(), nextStates.first->end());
+            toRun.insert(toRun.end(), get<0>(nextStates)->begin(), get<0>(nextStates)->end());
         }
 
         return synthesizedParser;

@@ -18,6 +18,7 @@ limitations under the License.
 #define FRONTENDS_P4_SWITCHADDDEFAULT_H_
 
 #include "ir/ir.h"
+#include "ir/visitor.h"
 
 namespace P4 {
 

@@ -28,9 +28,14 @@ class EBPFTableImplementationPSA;
 
 class EBPFTablePSA : public EBPFTable {
  private:
-    std::vector<std::vector<const IR::Entry*>> getConstEntriesGroupedByPrefix();
+    struct ConstTernaryEntryDesc {
+        const IR::Entry* entry;
+        unsigned priority;
+    };
+    typedef std::vector<ConstTernaryEntryDesc> EntriesGroup_t;
+    typedef std::vector<EntriesGroup_t> EntriesGroupedByMask_t;
+    EntriesGroupedByMask_t getConstEntriesGroupedByMask();
     bool hasConstEntries();
-    void emitMaskForExactMatch(CodeBuilder* builder, cstring& fieldName, EBPFType* ebpfType) const;
     const cstring addPrefixFunctionName = "add_prefix_and_entries";
     const cstring tuplesMapName = instanceName + "_tuples_map";
     const cstring prefixesMapName = instanceName + "_prefixes";
@@ -43,18 +48,23 @@ class EBPFTablePSA : public EBPFTable {
     void initDirectMeters();
     void initImplementation();
 
-    void emitTableValue(CodeBuilder* builder, const IR::MethodCallExpression* actionMce,
-                        cstring valueName);
+    bool tableCacheEnabled = false;
+    cstring cacheValueTypeName;
+    cstring cacheTableName;
+    cstring cacheKeyTypeName;
+    void tryEnableTableCache();
+    void createCacheTypeNames(bool isCacheKeyType, bool isCacheValueType);
+
+    void emitTableValue(CodeBuilder* builder, const IR::Expression* expr, cstring valueName);
     void emitDefaultActionInitializer(CodeBuilder* builder);
     void emitConstEntriesInitializer(CodeBuilder* builder);
     void emitTernaryConstEntriesInitializer(CodeBuilder* builder);
     void emitMapUpdateTraceMsg(CodeBuilder* builder, cstring mapName, cstring returnCode) const;
     void emitValueMask(CodeBuilder* builder, cstring valueMask, cstring nextMask,
                        int tupleId) const;
-    void emitKeyMasks(CodeBuilder* builder,
-                      std::vector<std::vector<const IR::Entry*>>& entriesGrpedByPrefix,
+    void emitKeyMasks(CodeBuilder* builder, EntriesGroupedByMask_t& entriesGroupedByMask,
                       std::vector<cstring>& keyMasksNames);
-    void emitKeysAndValues(CodeBuilder* builder, std::vector<const IR::Entry*>& samePrefixEntries,
+    void emitKeysAndValues(CodeBuilder* builder, EntriesGroup_t& sameMaskEntries,
                            std::vector<cstring>& keyNames, std::vector<cstring>& valueNames);
 
     const IR::PathExpression* getActionNameExpression(const IR::Expression* expr) const;
@@ -80,6 +90,12 @@ class EBPFTablePSA : public EBPFTable {
                            cstring actionRunVariable) override;
     bool dropOnNoMatchingEntryFound() const override;
     static cstring addPrefixFunc(bool trace);
+
+    virtual void emitCacheTypes(CodeBuilder* builder);
+    void emitCacheInstance(CodeBuilder* builder);
+    void emitCacheLookup(CodeBuilder* builder, cstring key, cstring value) override;
+    void emitCacheUpdate(CodeBuilder* builder, cstring key, cstring value) override;
+    bool cacheEnabled() override { return tableCacheEnabled; }
 
     EBPFCounterPSA* getDirectCounter(cstring name) const {
         auto result = std::find_if(counters.begin(), counters.end(),

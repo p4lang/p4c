@@ -152,6 +152,7 @@ set (P4_FRONTEND_HDRS
   p4/uselessCasts.h
   p4/validateMatchAnnotations.h
   p4/validateParsedProgram.h
+  p4/validateValueSets.h
   )
 
 
@@ -209,16 +210,9 @@ macro(add_parser pname)
   add_custom_target (mk${pname}dirs
     ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname})
 
-  # Versions of CMake before 3.7.2 require a filename argument to BISON_TARGET's
-  # VERBOSE option. Later versions "support" it, but they generate a file with
-  # the same name automatically anyway, and then issue a warning because the
-  # file gets overwritten, so we need this code to avoid warning spew during
-  # compilation.
-  if (CMAKE_VERSION VERSION_LESS "3.7.2")
-      BISON_TARGET (${pname}Parser parsers/${pname}/${pname}parser.ypp ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}parser.cpp VERBOSE ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}parser.output)
-  else ()
-      BISON_TARGET (${pname}Parser parsers/${pname}/${pname}parser.ypp ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}parser.cpp VERBOSE COMPILE_FLAGS "-Werror=conflicts-sr -Werror=conflicts-rr")
-  endif ()
+  # CMake generates a file with the same name automatically and then issues a warning because the
+  # file gets overwritten, so we need this code to avoid warning spew during compilation.
+  BISON_TARGET (${pname}Parser parsers/${pname}/${pname}parser.ypp ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}parser.cpp VERBOSE COMPILE_FLAGS "-Werror=conflicts-sr -Werror=conflicts-rr")
 
   # regardless of the output name, flex puts out yy.lex.c, so we use a custom command to generate
   # the file to stdout and redirect to the desired name
@@ -249,13 +243,13 @@ add_parser(p4)
 # 	parsers/v1/v1lexer.hpp
 
 set (FRONTEND_SOURCES
+  ${IR_GENERATED_SRCS}
   ${COMMON_FRONTEND_SRCS}
   ${PARSERS_SRCS}
   ${P4_FRONTEND_SRCS}
   ${V1_FRONTEND_SRCS}
   ${p4PARSER_GEN_SRCS}
   ${v1PARSER_GEN_SRCS}
-  ${IR_GENERATED_SRCS}
   )
 
 set_source_files_properties(${IR_GENERATED_SRCS} PROPERTIES GENERATED TRUE)

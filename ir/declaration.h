@@ -17,12 +17,10 @@ limitations under the License.
 #ifndef _IR_DECLARATION_H_
 #define _IR_DECLARATION_H_
 
-#include "node.h"
+#include "ir/id.h"
+#include "ir/node.h"
 
 namespace IR {
-
-// Forward declare ID.
-struct ID;
 
 /// The Declaration interface, representing objects with names.
 class IDeclaration : public virtual INode {

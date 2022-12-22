@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "ir/visitor.h"
 
 namespace P4 {
 
@@ -38,11 +39,13 @@ class ValidateTableProperties : public Inspector {
         legalProperties.emplace("default_action");
         legalProperties.emplace("key");
         legalProperties.emplace("entries");
-        for (auto l : legal) legalProperties.emplace(l);
+        for (auto l : legal) {
+            legalProperties.emplace(l);
+        }
     }
     void postorder(const IR::Property* property) override;
     // don't check properties in externs (Declaration_Instances)
-    bool preorder(const IR::Declaration_Instance*) override { return false; }
+    bool preorder(const IR::Declaration_Instance* /*instance*/) override { return false; }
 };
 
 }  // namespace P4

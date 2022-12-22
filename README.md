@@ -111,8 +111,8 @@ A p4c package is available in the following repositories for Ubuntu 20.04 and ne
 
 ```bash
 . /etc/os-release
-echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${VERSION_ID}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
-curl -L "http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${VERSION_ID}/Release.key" | sudo apt-key add -
+echo "deb https://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${VERSION_ID}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
+curl -L "https://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${VERSION_ID}/Release.key" | sudo apt-key add -
 sudo apt-get update
 sudo apt install p4lang-p4c
 ```
@@ -122,7 +122,7 @@ sudo apt install p4lang-p4c
 For Debian 11 (Bullseye) it can be installed as follows:
 
 ```bash
-echo 'deb http://download.opensuse.org/repositories/home:/p4lang/Debian_11/ /' | sudo tee /etc/apt/sources.list.d/home:p4lang.list
+echo 'deb https://download.opensuse.org/repositories/home:/p4lang/Debian_11/ /' | sudo tee /etc/apt/sources.list.d/home:p4lang.list
 curl -fsSL https://download.opensuse.org/repositories/home:p4lang/Debian_11/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_p4lang.gpg > /dev/null
 sudo apt update
 sudo apt install p4lang-p4c
@@ -232,7 +232,7 @@ use them, but YMMV.
 
 - GNU autotools for the build process
 
-- CMake 3.0.2 or higher
+- CMake 3.10.2 or higher
 
 - Boehm-Weiser garbage-collector C++ library
 

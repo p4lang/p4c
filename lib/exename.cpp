@@ -43,16 +43,17 @@ static void convertToAbsPath(const char* const relPath, char (&output)[N]) {
 }
 
 const char* exename(const char* argv0) {
-    static char buffer[PATH_MAX];
+    // Leave 1 extra char for the \0
+    static char buffer[PATH_MAX + 1];
     if (buffer[0]) return buffer;  // done already
     int len;
     /* find the path of the executable.  We use a number of techniques that may fail
      * or work on different systems, and take the first working one we find.  Fall
      * back to not overriding the compiled-in installation path */
-    if ((len = readlink("/proc/self/exe", buffer, sizeof(buffer))) > 0 ||
-        (len = readlink("/proc/curproc/exe", buffer, sizeof(buffer))) > 0 ||
-        (len = readlink("/proc/curproc/file", buffer, sizeof(buffer))) > 0 ||
-        (len = readlink("/proc/self/path/a.out", buffer, sizeof(buffer))) > 0) {
+    if ((len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1)) > 0 ||
+        (len = readlink("/proc/curproc/exe", buffer, sizeof(buffer) - 1)) > 0 ||
+        (len = readlink("/proc/curproc/file", buffer, sizeof(buffer) - 1)) > 0 ||
+        (len = readlink("/proc/self/path/a.out", buffer, sizeof(buffer) - 1)) > 0) {
         buffer[len] = 0;
     } else if (argv0 && argv0[0] == '/') {
         snprintf(buffer, sizeof(buffer), "%s", argv0);

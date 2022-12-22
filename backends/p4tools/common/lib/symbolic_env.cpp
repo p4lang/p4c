@@ -7,14 +7,15 @@
 #include <boost/container/flat_map.hpp>
 #include <boost/container/vector.hpp>
 
+#include "backends/p4tools/common/lib/formulae.h"
+#include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/zombie.h"
+#include "frontends/p4/optimizeExpressions.h"
 #include "ir/indexed_vector.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
 #include "ir/visitor.h"
 #include "lib/exceptions.h"
-#include "p4tools/common/lib/formulae.h"
-#include "p4tools/common/lib/model.h"
 
 namespace P4Tools {
 
@@ -29,7 +30,7 @@ const IR::Expression* SymbolicEnv::get(const StateVariable& var) const {
 bool SymbolicEnv::exists(const StateVariable& var) const { return map.find(var) != map.end(); }
 
 void SymbolicEnv::set(const StateVariable& var, const IR::Expression* value) {
-    map[var] = IR::optimizeExpression(value);
+    map[var] = P4::optimizeExpression(value);
 }
 
 Model* SymbolicEnv::complete(const Model& model) const {

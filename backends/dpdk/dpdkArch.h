@@ -838,15 +838,50 @@ class CopyMatchKeysToSingleStruct : public P4::KeySideEffect {
     bool isLearnerTable(const IR::P4Table* t);
 };
 
+class SwitchHandler {
+    // Map which holds the switch expression variable and constant tuple per switch statement for
+    // each action.
+    // action_name: {<switch_var, constant_value>, <switch_var1, constant_value1>, ...}
+    std::map<cstring, std::vector<std::tuple<cstring, IR::Constant*>>> actionCaseMap;
+
+ public:
+    // Fill Switch Action Map
+    void addToSwitchMap(cstring actionName, cstring switchExprTmp, IR::Constant* caseLabelValue) {
+        actionCaseMap[actionName].push_back(std::make_tuple(switchExprTmp, caseLabelValue));
+    }
+
+    const IR::Node* setSwitchVarInAction(IR::P4Action* action) {
+        if (actionCaseMap.count(action->name.name)) {
+            // Insert assignment statements for each switch statement which uses this action name as
+            // switch case.
+            auto acm = actionCaseMap[action->name.name];
+            auto body = new IR::BlockStatement(action->body->srcInfo);
+            for (auto pair : acm) {
+                auto assn = new IR::AssignmentStatement(
+                    new IR::PathExpression(IR::ID(get<0>(pair))), get<1>(pair));
+                body->push_back(assn);
+            }
+            for (auto s : action->body->components) body->push_back(s);
+            action->body = body;
+            actionCaseMap.erase(action->name.name);
+        }
+        return action;
+    }
+};
+
 /**
  * Common code between SplitActionSelectorTable and SplitActionProfileTable
  */
 class SplitP4TableCommon : public Transform {
+    cstring switchExprTmp;
+    DeclarationInjector injector;
+
  public:
     enum class TableImplementation { DEFAULT, ACTION_PROFILE, ACTION_SELECTOR };
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
     DpdkProgramStructure* structure;
+    SwitchHandler& sw;
     TableImplementation implementation;
     std::set<cstring> match_tables;
     std::map<cstring, cstring> group_tables;
@@ -855,20 +890,23 @@ class SplitP4TableCommon : public Transform {
     std::map<cstring, cstring> group_ids;
 
     SplitP4TableCommon(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                       DpdkProgramStructure* structure)
-        : refMap(refMap), typeMap(typeMap), structure(structure) {
+                       DpdkProgramStructure* structure, SwitchHandler& sw)
+        : refMap(refMap), typeMap(typeMap), structure(structure), sw(sw) {
         implementation = TableImplementation::DEFAULT;
     }
 
     const IR::Node* postorder(IR::MethodCallStatement*) override;
     const IR::Node* postorder(IR::IfStatement*) override;
     const IR::Node* postorder(IR::SwitchStatement*) override;
-
+    const IR::Node* postorder(IR::P4Control*) override;
     std::tuple<const IR::P4Table*, cstring, cstring> create_match_table(
         const IR::P4Table* /* tbl */);
     const IR::P4Action* create_action(cstring /* actionName */, cstring /* id */, cstring);
     const IR::P4Table* create_member_table(const IR::P4Table*, cstring, cstring);
-    const IR::P4Table* create_group_table(const IR::P4Table*, cstring, cstring, cstring, int, int);
+    const IR::P4Table* create_group_table(const IR::P4Table*, cstring, cstring, cstring, unsigned,
+                                          unsigned);
+    IR::Expression* initializeMemberAndGroupId(cstring tableName,
+                                               IR::IndexedVector<IR::StatOrDecl>* decls);
 };
 
 /**
@@ -880,8 +918,8 @@ class SplitP4TableCommon : public Transform {
 class SplitActionSelectorTable : public SplitP4TableCommon {
  public:
     SplitActionSelectorTable(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                             DpdkProgramStructure* structure)
-        : SplitP4TableCommon(refMap, typeMap, structure) {
+                             DpdkProgramStructure* structure, SwitchHandler& sw)
+        : SplitP4TableCommon(refMap, typeMap, structure, sw) {
         implementation = TableImplementation::ACTION_SELECTOR;
     }
     const IR::Node* postorder(IR::P4Table* tbl) override;
@@ -895,25 +933,54 @@ class SplitActionSelectorTable : public SplitP4TableCommon {
 class SplitActionProfileTable : public SplitP4TableCommon {
  public:
     SplitActionProfileTable(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                            DpdkProgramStructure* structure)
-        : SplitP4TableCommon(refMap, typeMap, structure) {
+                            DpdkProgramStructure* structure, SwitchHandler& sw)
+        : SplitP4TableCommon(refMap, typeMap, structure, sw) {
         implementation = TableImplementation::ACTION_PROFILE;
     }
     const IR::Node* postorder(IR::P4Table* tbl) override;
 };
 
 /**
- * Handle ActionSelector and ActionProfile extern in PSA
+ * For tables implementing action selector/profile, switch expressions using the
+ * table.apply().action_run needs to be split into two parts, one to enable conditional
+ * apply of group/member tables on base table hit and second to execute the statements within
+ * switch cases based on the action which is run. To enable this, we create a temporary
+ * switch expression which holds a number corresponding to each action which can be invoked by the
+ * table.
+ *
+ * We use a map which holds the tuple for switch expression variable and constant for each action
+ * {<switch_var, constant_value>, <switch_var1, constant_value1>, ...}
+ *
+ * There can be multiple switch statements using the same table apply expression but performing
+ * different functionality when the action is run, hence we use a vector of tuples having switch
+ * expression variable and the constant value to be assigned to it for a particular action.
+ *
+ * This pass inserts the assignment statements for these switch expressions with the corresponding
+ * constant values for each action.
+ *
  */
+class UpdateActionForSwitch : public Transform {
+    SwitchHandler& sw;
+
+ public:
+    explicit UpdateActionForSwitch(SwitchHandler& sw) : sw(sw) { setName("UpdateActionForSwitch"); }
+    const IR::Node* postorder(IR::P4Action* action) { return sw.setSwitchVarInAction(action); }
+};
+/**
+ * Handle ActionSelector and ActionProfile extern */
 class ConvertActionSelectorAndProfile : public PassManager {
+    SwitchHandler sw;
+
  public:
     ConvertActionSelectorAndProfile(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                                     DpdkProgramStructure* structure) {
         passes.emplace_back(new P4::TypeChecking(refMap, typeMap));
-        passes.emplace_back(new SplitActionSelectorTable(refMap, typeMap, structure));
+        passes.emplace_back(new SplitActionSelectorTable(refMap, typeMap, structure, sw));
+        passes.emplace_back(new UpdateActionForSwitch(sw));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.emplace_back(new P4::TypeChecking(refMap, typeMap, true));
-        passes.emplace_back(new SplitActionProfileTable(refMap, typeMap, structure));
+        passes.emplace_back(new SplitActionProfileTable(refMap, typeMap, structure, sw));
+        passes.emplace_back(new UpdateActionForSwitch(sw));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.emplace_back(new P4::TypeChecking(refMap, typeMap, true));
     }

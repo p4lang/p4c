@@ -15,13 +15,13 @@ limitations under the License.
 */
 #include "ubpfControl.h"
 
+#include "backends/ubpf/ubpfType.h"
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/typeMap.h"
 #include "lib/error.h"
-#include "ubpf/ubpfType.h"
 
 namespace UBPF {
 

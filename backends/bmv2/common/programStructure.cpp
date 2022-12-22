@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "programStructure.h"
 
+#include "lib/log.h"
+
 namespace BMV2 {
 
 void DiscoverStructure::postorder(const IR::ParameterList* paramList) {

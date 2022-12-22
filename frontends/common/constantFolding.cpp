@@ -19,6 +19,7 @@ limitations under the License.
 #include "frontends/common/options.h"
 #include "frontends/p4/enumInstance.h"
 #include "lib/big_int_util.h"
+#include "lib/log.h"
 
 namespace P4 {
 
@@ -761,7 +762,7 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
 
     auto tb = left->type->to<IR::Type_Bits>();
     if (tb != nullptr) {
-        if (((unsigned)tb->width_bits() < shift) && warnings)
+        if (((unsigned)tb->width_bits() <= shift) && warnings)
             ::warning(ErrorType::WARN_OVERFLOW, "%1%: Shifting %2%-bit value with %3%", e,
                       tb->width_bits(), shift);
     }
@@ -854,7 +855,8 @@ DoConstantFolding::Result DoConstantFolding::setContains(const IR::Expression* k
     if (select->is<IR::BoolLiteral>()) {
         auto key = getConstant(keySet);
         if (key == nullptr) {
-            ::error(ErrorType::ERR_TYPE_ERROR, "%1%: expression must evaluate to a constant", key);
+            ::error(ErrorType::ERR_TYPE_ERROR, "%1%: expression must evaluate to a constant",
+                    keySet);
             return Result::No;
         }
         BUG_CHECK(key->is<IR::BoolLiteral>(), "%1%: expected a boolean", key);
@@ -867,7 +869,8 @@ DoConstantFolding::Result DoConstantFolding::setContains(const IR::Expression* k
         // This must be an enum value
         auto key = getConstant(keySet);
         if (key == nullptr) {
-            ::error(ErrorType::ERR_TYPE_ERROR, "%1%: expression must evaluate to a constant", key);
+            ::error(ErrorType::ERR_TYPE_ERROR, "%1%: expression must evaluate to a constant",
+                    keySet);
             return Result::No;
         }
         auto sel = getConstant(select);
@@ -885,12 +888,14 @@ DoConstantFolding::Result DoConstantFolding::setContains(const IR::Expression* k
     } else if (auto range = keySet->to<IR::Range>()) {
         auto left = getConstant(range->left);
         if (left == nullptr) {
-            ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant", left);
+            ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant",
+                    range->left);
             return Result::DontKnow;
         }
         auto right = getConstant(range->right);
         if (right == nullptr) {
-            ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant", right);
+            ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant",
+                    range->right);
             return Result::DontKnow;
         }
         if (left->to<IR::Constant>()->value <= cst->value &&

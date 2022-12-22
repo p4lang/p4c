@@ -194,6 +194,27 @@ class KernelSamplesTarget : public Target {
                               cstring valueType) const;
 };
 
+// Target XDP
+class XdpTarget : public KernelSamplesTarget {
+ public:
+    explicit XdpTarget(bool emitTrace) : KernelSamplesTarget(emitTrace, "XDP") {}
+
+    cstring forwardReturnCode() const override { return "XDP_PASS"; }
+    cstring dropReturnCode() const override { return "XDP_DROP"; }
+    cstring abortReturnCode() const override { return "XDP_ABORTED"; }
+    cstring redirectReturnCode() const { return "XDP_REDIRECT"; }
+    cstring sysMapPath() const override { return "/sys/fs/bpf/xdp/globals"; }
+    cstring packetDescriptorType() const override { return "struct xdp_md"; }
+
+    void emitResizeBuffer(Util::SourceCodeBuilder* builder, cstring buffer,
+                          cstring offsetVar) const override;
+    void emitMain(Util::SourceCodeBuilder* builder, cstring functionName,
+                  cstring argName) const override {
+        builder->appendFormat("int %s(%s *%s)", functionName.c_str(), packetDescriptorType(),
+                              argName.c_str());
+    }
+};
+
 // Represents a target compiled by bcc that uses the TC
 class BccTarget : public Target {
  public:

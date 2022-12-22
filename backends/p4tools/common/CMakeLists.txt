@@ -38,12 +38,9 @@ set(
   options.cpp
   version.cpp
 
-  compiler/boolean_keys.cpp
   compiler/compiler_target.cpp
-  compiler/convert_errors.cpp
+  compiler/convert_hs_index.cpp
   compiler/convert_varbits.cpp
-  compiler/copy_headers.cpp
-  compiler/hs_index_simplify.cpp
   compiler/midend.cpp
   compiler/p4_asserts_parser.cpp
   compiler/p4_expr_parser.cpp
@@ -52,11 +49,9 @@ set(
   core/target.cpp
   core/z3_solver.cpp
 
-  lib/coverage.cpp
   lib/format_int.cpp
   lib/formulae.cpp
   lib/model.cpp
-  lib/saturation_elim.cpp
   lib/symbolic_env.cpp
   lib/taint.cpp
   lib/timer.cpp

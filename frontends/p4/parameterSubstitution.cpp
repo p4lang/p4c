@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "parameterSubstitution.h"
 
+#include "lib/log.h"
+
 namespace P4 {
 
 void ParameterSubstitution::add(const IR::Parameter* parameter, const IR::Argument* value) {

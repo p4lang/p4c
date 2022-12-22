@@ -17,12 +17,13 @@ jobs:
   # We only test the front end and some mid end passes for now.
   validate:
     env:
-      UNIFIED: ON
-      BUILD_SUCCESS: true
       CTEST_PARALLEL_LEVEL: 4
-    runs-on: ubuntu-latest
+      IMAGE_TYPE: test
+      ENABLE_UNIFIED_COMPILATION: ON
+      VALIDATION: ON
+    runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
 
@@ -32,18 +33,12 @@ jobs:
         key: validation-${{ runner.os }}
         max-size: 1000M
 
-    - name: Build (Linux)
+    - name: Build (Ubuntu 20.04)
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg VALIDATION=ON . || echo "BUILD_SUCCESS=false" >> $GITHUB_ENV
-        ./tools/export_ccache.sh || echo "BUILD_SUCCESS=false" >> $GITHUB_ENV
+        sudo cp -rf . /p4c/
+        (cd /p4c/ && sudo -E tools/ci-build.sh)
+        sudo cp -rf /p4c/.ccache .
 
     - name: Validate
-      if: env.BUILD_SUCCESS == 'true'
-      run: |
-          docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest  -R toz3-validate-p4c --output-on-failure --schedule-random
-
-    - name: Build Failed
-      if: env.BUILD_SUCCESS == 'false'
-      run: |
-          echo "Building Gauntlet failed."
-
+      run: sudo -E ctest  -R toz3-validate-p4c --output-on-failure --schedule-random
+      working-directory: /p4c/build

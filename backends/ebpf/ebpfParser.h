@@ -92,7 +92,7 @@ class EBPFParser : public EBPFObject {
     explicit EBPFParser(const EBPFProgram* program, const IR::ParserBlock* block,
                         const P4::TypeMap* typeMap);
     virtual void emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl);
-    void emit(CodeBuilder* builder);
+    virtual void emit(CodeBuilder* builder);
     virtual bool build();
 
     virtual void emitTypes(CodeBuilder* builder);

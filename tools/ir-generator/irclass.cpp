@@ -109,13 +109,25 @@ void IrDefinitions::generate(std::ostream& t, std::ostream& out, std::ostream& i
         << "#define " << macroname << "\n"
         << std::endl;
 
-    impl << "#include \"ir/ir.h\"\n"
-         << "#include \"ir/visitor.h\"\n"
-         << "#include \"ir/json_loader.h\"\n"
+    impl << "#include \"ir/ir-generated.h\"    // IWYU pragma: keep\n\n"
+         << "#include \"ir/ir-inline.h\"       // IWYU pragma: keep\n"
+         << "#include \"ir/json_generator.h\"  // IWYU pragma: keep\n"
+         << "#include \"ir/json_loader.h\"     // IWYU pragma: keep\n"
+         << "#include \"ir/visitor.h\"         // IWYU pragma: keep\n"
+         << "#include \"lib/algorithm.h\"      // IWYU pragma: keep\n"
+         << "#include \"lib/log.h\"            // IWYU pragma: keep\n"
          << std::endl;
 
-    out << "#include <map>\n"
-        << "#include <functional>\n"
+    out << "#include <functional>\n"
+        << "#include <map>\n\n"
+        << "// Special IR classes and types\n"
+        << "#include \"ir/dbprint.h\"         // IWYU pragma: keep\n"
+        << "#include \"ir/id.h\"              // IWYU pragma: keep\n"
+        << "#include \"ir/indexed_vector.h\"  // IWYU pragma: keep\n"
+        << "#include \"ir/namemap.h\"         // IWYU pragma: keep\n"
+        << "#include \"ir/node.h\"            // IWYU pragma: keep\n"
+        << "#include \"ir/nodemap.h\"         // IWYU pragma: keep\n"
+        << "#include \"ir/vector.h\"          // IWYU pragma: keep\n"
         << std::endl
         << "class JSONLoader;\n"
         << "using NodeFactoryFn = IR::Node*(*)(JSONLoader&);\n"

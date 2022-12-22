@@ -232,7 +232,7 @@ const Util::JsonObject* BFRuntimeSchemaGenerator::genSchema() const {
     addActionProfs(tablesJson);
     addCounters(tablesJson);
     addMeters(tablesJson);
-    // TODO(antonin): handle "standard" (v1model / PSA) registers
+    addRegisters(tablesJson);
 
     auto* learnFiltersJson = new Util::JsonArray();
     json->emplace("learn_filters", learnFiltersJson);

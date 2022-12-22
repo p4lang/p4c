@@ -18,6 +18,7 @@
 #include <boost/graph/copy.hpp>
 
 #include "graphs.h"
+#include "lib/json.h"
 
 #ifndef _BACKENDS_GRAPHS_GRAPH_VISITOR_H_
 #define _BACKENDS_GRAPHS_GRAPH_VISITOR_H_
@@ -123,8 +124,8 @@ class Graph_visitor : public Graphs {
     void forLoopFullGraph(std::vector<Graph*>& graphsArray, fullGraphOpts* opts,
                           PrevType prev_type);
 
-    Util::JsonObject* json;          // stores json that will be outputted
-    Util::JsonArray* programBlocks;  // stores objects in top level array "nodes"
+    Util::JsonObject* json;                    // stores json that will be outputted
+    Util::JsonArray* programBlocks = nullptr;  // stores objects in top level array "nodes"
     const cstring graphsDir;
     // options
     const bool graphs;     // output boost graphs to files

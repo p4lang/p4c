@@ -3,14 +3,21 @@
 #include <algorithm>
 #include <cmath>
 #include <map>
-#include <ostream>
-#include <string>
 #include <tuple>
 #include <typeindex>
-#include <typeinfo>
 #include <vector>
 
-#include "lib/safe_vector.h"
+#include <boost/core/enable_if.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/detail/default_ops.hpp>
+#include <boost/multiprecision/detail/et_ops.hpp>
+#include <boost/multiprecision/number.hpp>
+#include <boost/multiprecision/traits/explicit_conversion.hpp>
+
+#include "ir/indexed_vector.h"
+#include "ir/ir.h"
+#include "ir/vector.h"
+#include "lib/exceptions.h"
 
 namespace IR {
 

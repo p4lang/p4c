@@ -11,6 +11,8 @@
 #include <string>
 #include <utility>
 
+#include "backends/p4tools/common/lib/formulae.h"
+#include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/timer.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
@@ -23,8 +25,6 @@
 #include "lib/exceptions.h"
 #include "lib/indent.h"
 #include "lib/log.h"
-#include "p4tools/common/lib/formulae.h"
-#include "p4tools/common/lib/model.h"
 
 namespace P4Tools {
 

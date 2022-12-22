@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required (VERSION 3.0.2 FATAL_ERROR)
+# This is the CMake version supplied by Ubuntu 18.04.
+cmake_minimum_required (VERSION 3.10.2 FATAL_ERROR)
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
@@ -44,6 +45,8 @@ OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" OFF)
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
 OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
 OPTION (BUILD_STATIC_RELEASE "Build a statically linked release binary" OFF)
+OPTION (BUILD_AUTO_VAR_INIT_PATTERN "Initialize variables with pattern during build" OFF)
+OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
 
@@ -201,12 +204,7 @@ enable_testing ()
 # endif ()
 
 # set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++17 rather than -std=gnu++17
-# CMAKE_CXX_STANDARD was introduced in CMake 3.1, so for older versions of CMake, we use -std=gnu++17
-if (CMAKE_VERSION VERSION_LESS "3.1")
-    set (CMAKE_CXX_FLAGS "-std=gnu++17 ${CMAKE_CXX_FLAGS}")
-elseif(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 17)
-    set (CMAKE_CXX_STANDARD 17)
-endif ()
+set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_cxx_compiler_option ("-Wall")
@@ -216,7 +214,11 @@ add_cxx_compiler_option ("-Wno-deprecated")
 add_cxx_compiler_option ("-Wno-deprecated-declarations")
 
 if (ENABLE_SANITIZERS)
-  add_cxx_compiler_option  ("-fsanitize=undefined,address")
+  append("-fsanitize=undefined,address" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
+endif ()
+
+if (BUILD_AUTO_VAR_INIT_PATTERN)
+  add_cxx_compiler_option  ("-ftrivial-auto-var-init=pattern")
 endif ()
 
 if (ENABLE_WERROR)
@@ -291,7 +293,6 @@ else()
 endif()
 
 include_directories (
-  ${P4C_SOURCE_DIR}/backends
   ${P4C_SOURCE_DIR}/extensions
   ${P4C_SOURCE_DIR}
   ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include
@@ -318,6 +319,36 @@ set (IR_GENERATED_SRCS
 # of the irgenerator target to the matching path
 set (IR_GENERATOR_DIRECTORY ${P4C_BINARY_DIR}/tools/ir-generator)
 set (IR_GENERATOR ${IR_GENERATOR_DIRECTORY}/irgenerator)
+
+# Set up IWYU for P4C. Each CMake target needs to manually add IWYU to its checks.
+if(ENABLE_IWYU)
+  message("Enabling IWYU checks.")
+  find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
+  set(
+    iwyu_path
+    ${iwyu_path}
+    -Xiwyu
+    --max_line_length=100
+    -Xiwyu
+    --no_fwd_decls
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/p4c.imp
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/boost-1.75-all.imp
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/libcxx.imp
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.libc.imp
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.symbols.imp
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.stl.headers.imp
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/stl.c.headers.imp
+  )
+  message("IWYU command: ${iwyu_path}")
+endif()
+
 
 # the order of adding subdirectories matters because of target dependencies
 add_subdirectory (tools/driver)
@@ -454,17 +485,19 @@ install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
 ################################ Linters Begin ################################
 
 file(
-  GLOB_RECURSE P4C_LINT_LIST
+  GLOB_RECURSE P4C_LINT_LIST  FOLLOW_SYMLINKS
   backends/*.cpp
   backends/*.h
   control-plane/*.cpp
   control-plane/*.h
   frontends/*.cpp
   frontends/*.h
-  extensions/*.cpp
-  extensions/*.h
   ir/*.cpp
   ir/*.h
+  lib/*.cpp
+  lib/*.h
+  midend/*.cpp
+  midend/*.h
   tools/*.cpp
   tools/*.h
 )
@@ -477,41 +510,56 @@ list(FILTER P4C_LINT_LIST EXCLUDE REGEX "control-plane/p4runtime")
 # cpplint
 add_cpplint_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
 
+# Retrieve the global cpplint property.
+get_property(CPPLINT_FILES GLOBAL PROPERTY cpplint-files)
+
 if(DEFINED CPPLINT_FILES)
-  list ( SORT CPPLINT_FILES )
-  set (CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
-  set (CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
-  add_custom_target(cpplint
-    COMMAND ${CPPLINT_CMD} ${CPPLINT_ARGS} ${CPPLINT_FILES}
+  # Write the list to a file. We need to do this as too many files will reach
+  # the shell argument limit.
+  set(CPPLINT_TXT_FILE ${P4C_BINARY_DIR}/cpplint_files.txt)
+  file(WRITE ${CPPLINT_TXT_FILE} "${CPPLINT_FILES}")
+  list(SORT CPPLINT_FILES)
+  set(CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
+  set(CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
+  # Pipe the file into cpplint.
+  add_custom_target(
+    cpplint
+    COMMAND xargs -a ${CPPLINT_TXT_FILE} -r -d '\;' ${CPPLINT_CMD} ${CPPLINT_ARGS}
     WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-    COMMENT "cpplint")
-  add_custom_target(cpplint-quiet
-    COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
+    COMMENT "cpplint"
+  )
+  add_custom_target(
+    cpplint-quiet
+    COMMAND xargs -a ${CPPLINT_TXT_FILE} -r -d '\;' ${CPPLINT_CMD} ${CPPLINT_ARGS} --quiet
     WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-    COMMENT "cpplint quietly")
+    COMMENT "cpplint quietly"
+  )
 endif()
 
 # clang-format
-# Temporarily disable clang-format linting for the ir folder.
-#TODO: Fix up the IR include system.
-list(FILTER P4C_LINT_LIST EXCLUDE REGEX "${P4C_SOURCE_DIR}/ir/")
 add_clang_format_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
 
 find_program(CLANG_FORMAT_CMD clang-format)
 
 if(NOT ${CLANG_FORMAT_CMD})
+  # Retrieve the global clang-format property.
+  get_property(CLANG_FORMAT_FILES GLOBAL PROPERTY clang-format-files)
   if(DEFINED CLANG_FORMAT_FILES)
+    # Write the list to a file. We need to do this as too many files will reach
+    # the shell argument limit.
+    set(CLANG_FORMAT_TXT_FILE ${P4C_BINARY_DIR}/clang_format_files.txt)
     list(SORT CLANG_FORMAT_FILES)
+    file(WRITE ${CLANG_FORMAT_TXT_FILE} "${CLANG_FORMAT_FILES}")
     set(CLANG_FORMAT_CMD clang-format)
     add_custom_target(
       clang-format
-      COMMAND ${CLANG_FORMAT_CMD} --Werror --dry-run -i ${CLANG_FORMAT_FILES}
+      COMMAND xargs -a ${CLANG_FORMAT_TXT_FILE} -r -d '\;' ${CLANG_FORMAT_CMD} --verbose --Werror --dry-run -i --
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Checking files for correct clang-format formatting."
     )
     add_custom_target(
       clang-format-fix-errors
-      COMMAND ${CLANG_FORMAT_CMD} -i ${CLANG_FORMAT_FILES}
+      COMMAND xargs -a ${CLANG_FORMAT_TXT_FILE} -r -d '\;' ${CLANG_FORMAT_CMD} --verbose -i --
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Formatting files using clang-format."
     )

@@ -17,41 +17,8 @@ limitations under the License.
 #ifndef _IR_IR_H_
 #define _IR_IR_H_
 
-#include <strings.h>
-#include <cassert>
-#include <sstream>
-
-#include "lib/log.h"
-#include "lib/null.h"
-#include "lib/error.h"
-#include "lib/algorithm.h"
-#include "lib/cstring.h"
-#include "lib/map.h"
-#include "lib/ordered_map.h"
-#include "lib/exceptions.h"
-#include "lib/source_file.h"
-#include "lib/ltbitmatrix.h"
-#include "lib/match.h"
-#include "lib/big_int_util.h"
-
-// Special IR classes and types
-#include "node.h"
-#include "vector.h"
-#include "indexed_vector.h"
-#include "dbprint.h"
-#include "namemap.h"
-#include "nodemap.h"
-#include "id.h"
-
-
 // generated ir file
-#include "ir/ir-generated.h"
-
-class JSONLoader;
-#include "json_generator.h"
-
-#include "pass_manager.h"
-#include "ir-inline.h"
-#include "dump.h"
+#include "ir/ir-generated.h"  // IWYU pragma: keep
+#include "ir/ir-inline.h"     // IWYU pragma: keep
 
 #endif /* _IR_IR_H_*/

@@ -24,9 +24,11 @@ limitations under the License.
 #include <vector>
 
 #include "cstring.h"
-#include "gtest/gtest_prod.h"
 #include "map.h"
 #include "stringref.h"
+
+// GTest
+#include "gtest/gtest_prod.h"
 
 namespace Test {
 class UtilSourceFile;

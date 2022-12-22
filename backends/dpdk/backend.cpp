@@ -133,14 +133,15 @@ void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
         };
         dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
     }
-
+    ordered_map<cstring, cstring> newNameMap;
     PassManager post_code_gen = {
         new EliminateUnusedAction(),
         new DpdkAsmOptimization,
         new CopyPropagationAndElimination(typeMap),
         new CollectUsedMetadataField(used_fields),
         new RemoveUnusedMetadataFields(used_fields),
-        new ShortenTokenLength(),
+        new ShortenTokenLength(newNameMap),
+        new EmitDpdkTableConfig(refMap, typeMap, newNameMap),
     };
 
     dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();

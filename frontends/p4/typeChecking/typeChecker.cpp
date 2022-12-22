@@ -22,6 +22,7 @@ limitations under the License.
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/toP4/toP4.h"
+#include "lib/algorithm.h"
 #include "lib/log.h"
 #include "syntacticEquivalence.h"
 #include "typeConstraints.h"
@@ -134,7 +135,8 @@ TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool readOn
       typeMap(typeMap),
       initialNode(nullptr),
       readOnly(readOnly),
-      checkArrays(checkArrays) {
+      checkArrays(checkArrays),
+      currentActionList(nullptr) {
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
     visitDagOnce = false;  // the done() method will take care of this
@@ -267,6 +269,7 @@ bool TypeInference::checkParameters(const IR::ParameterList* paramList, bool for
     for (auto p : paramList->parameters) {
         auto type = getType(p);
         if (type == nullptr) return false;
+        if (auto ts = type->to<IR::Type_SpecializedCanonical>()) type = ts->baseType;
         if (forbidPackage && type->is<IR::Type_Package>()) {
             typeError("%1%: parameter cannot be a package", p);
             return false;
@@ -943,6 +946,8 @@ std::pair<const IR::Type*, const IR::Vector<IR::Argument>*> TypeInference::check
         if (named) {
             param = functionType->parameters->getParameter(argName);
         } else {
+            BUG_CHECK(paramIt != functionType->parameters->end(), "Not enough parameters %1%",
+                      errorPosition);
             param = *paramIt;
         }
 
@@ -1385,7 +1390,10 @@ const IR::Node* TypeInference::postorder(IR::Type_List* type) {
 
 const IR::Node* TypeInference::postorder(IR::Type_Tuple* type) {
     for (auto field : type->components) {
-        if (field->is<IR::IContainer>()) {
+        auto fieldType = getTypeType(field);
+        if (auto spec = fieldType->to<IR::Type_SpecializedCanonical>()) fieldType = spec->baseType;
+        if (fieldType->is<IR::IContainer>() || fieldType->is<IR::Type_ArchBlock>() ||
+            fieldType->is<IR::Type_Extern>()) {
             typeError("%1%: not supported as a tuple field", field);
             return type;
         }
@@ -1871,8 +1879,17 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
                   expression->right);
         return expression;
     }
-    if (auto se = ltype->to<IR::Type_SerEnum>()) ltype = getTypeType(se->type);
-    if (auto se = rtype->to<IR::Type_SerEnum>()) rtype = getTypeType(se->type);
+
+    bool castLeft = false;
+    bool castRight = false;
+    if (auto se = ltype->to<IR::Type_SerEnum>()) {
+        ltype = getTypeType(se->type);
+        castLeft = true;
+    }
+    if (auto se = rtype->to<IR::Type_SerEnum>()) {
+        rtype = getTypeType(se->type);
+        castRight = true;
+    }
     if (ltype == nullptr || rtype == nullptr) {
         // getTypeType should have already taken care of the error message
         return expression;
@@ -1885,6 +1902,22 @@ const IR::Node* TypeInference::postorder(IR::Concat* expression) {
     auto bl = ltype->to<IR::Type_Bits>();
     auto br = rtype->to<IR::Type_Bits>();
     const IR::Type* resultType = IR::Type_Bits::get(bl->size + br->size, bl->isSigned);
+
+    if (castLeft) {
+        auto e = expression->clone();
+        e->left = new IR::Cast(e->left->srcInfo, bl, e->left);
+        if (isCompileTimeConstant(expression->left)) setCompileTimeConstant(e->left);
+        setType(e->left, ltype);
+        expression = e;
+    }
+    if (castRight) {
+        auto e = expression->clone();
+        e->right = new IR::Cast(e->right->srcInfo, br, e->right);
+        if (isCompileTimeConstant(expression->right)) setCompileTimeConstant(e->right);
+        setType(e->right, rtype);
+        expression = e;
+    }
+
     resultType = canonicalize(resultType);
     if (resultType != nullptr) {
         setType(getOriginal(), resultType);
@@ -2236,9 +2269,17 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
     auto ltype = getType(expression->left);
     auto rtype = getType(expression->right);
     if (ltype == nullptr || rtype == nullptr) return expression;
+    bool castLeft = false;
+    bool castRight = false;
 
-    if (auto se = ltype->to<IR::Type_SerEnum>()) ltype = getTypeType(se->type);
-    if (auto se = rtype->to<IR::Type_SerEnum>()) rtype = getTypeType(se->type);
+    if (auto se = ltype->to<IR::Type_SerEnum>()) {
+        ltype = getTypeType(se->type);
+        castLeft = true;
+    }
+    if (auto se = rtype->to<IR::Type_SerEnum>()) {
+        rtype = getTypeType(se->type);
+        castRight = true;
+    }
     BUG_CHECK(ltype && rtype, "Invalid Type_SerEnum/getTypeType");
 
     const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
@@ -2272,23 +2313,37 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
             typeError("%1%: Cannot operate on values with different signs", expression);
             return expression;
         }
-    } else if (bl == nullptr && br != nullptr) {
-        auto e = expression->clone();
-        e->left = new IR::Cast(e->left->srcInfo, br, e->left);
-        setType(e->left, rtype);
-        expression = e;
-        resultType = rtype;
-        setType(expression, resultType);
-    } else if (bl != nullptr && br == nullptr) {
-        auto e = expression->clone();
-        e->right = new IR::Cast(e->right->srcInfo, bl, e->right);
-        setType(e->right, ltype);
-        expression = e;
-        resultType = ltype;
-        setType(expression, resultType);
-    } else {
-        setType(expression, resultType);
     }
+    if ((bl == nullptr && br != nullptr) || castLeft) {
+        // must insert cast on the left
+        auto leftResultType = br;
+        if (castLeft && !br) leftResultType = bl;
+        auto e = expression->clone();
+        e->left = new IR::Cast(e->left->srcInfo, leftResultType, e->left);
+        setType(e->left, leftResultType);
+        if (isCompileTimeConstant(expression->left)) {
+            e->left = constantFold(e->left);
+            setCompileTimeConstant(e->left);
+            setType(e->left, leftResultType);
+        }
+        expression = e;
+        resultType = leftResultType;
+    }
+    if ((bl != nullptr && br == nullptr) || castRight) {
+        auto e = expression->clone();
+        auto rightResultType = bl;
+        if (castRight && !bl) rightResultType = br;
+        e->right = new IR::Cast(e->right->srcInfo, rightResultType, e->right);
+        setType(e->right, rightResultType);
+        if (isCompileTimeConstant(expression->right)) {
+            e->right = constantFold(e->right);
+            setCompileTimeConstant(e->right);
+            setType(e->right, rightResultType);
+        }
+        expression = e;
+        resultType = rightResultType;
+    }
+
     setType(getOriginal(), resultType);
     setType(expression, resultType);
     if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
@@ -2405,71 +2460,6 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
         setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
         return result;
-    }
-    return expression;
-}
-
-const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
-    if (done()) return expression;
-    auto ltype = getType(expression->left);
-    auto rtype = getType(expression->right);
-    if (ltype == nullptr || rtype == nullptr) return expression;
-
-    if (auto se = ltype->to<IR::Type_SerEnum>()) ltype = getTypeType(se->type);
-    if (auto se = rtype->to<IR::Type_SerEnum>()) rtype = getTypeType(se->type);
-    BUG_CHECK(ltype && rtype, "Invalid Type_SerEnum/getTypeType");
-
-    const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
-    const IR::Type_Bits* br = rtype->to<IR::Type_Bits>();
-    if (bl == nullptr && !ltype->is<IR::Type_InfInt>()) {
-        typeError("%1%: cannot be applied to expression '%2%' with type '%3%'",
-                  expression->getStringOp(), expression->left, ltype->toString());
-        return expression;
-    } else if (br == nullptr && !rtype->is<IR::Type_InfInt>()) {
-        typeError("%1%: cannot be applied to expressio '%2%' with type '%3%'",
-                  expression->getStringOp(), expression->right, rtype->toString());
-        return expression;
-    } else if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_InfInt>()) {
-        auto t = new IR::Type_InfInt();
-        setType(getOriginal(), t);
-        auto result = constantFold(expression);
-        setType(result, t);
-        setCompileTimeConstant(result);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
-        return result;
-    }
-
-    const IR::Type* resultType = ltype;
-    if (bl != nullptr && br != nullptr) {
-        if (!typeMap->equivalent(bl, br)) {
-            typeError("%1%: Cannot operate on values with different types %2% and %3%", expression,
-                      bl->toString(), br->toString());
-            return expression;
-        }
-    } else if (bl == nullptr && br != nullptr) {
-        auto e = expression->clone();
-        auto cst = expression->left->to<IR::Constant>();
-        CHECK_NULL(cst);
-        e->left = new IR::Constant(cst->srcInfo, rtype, cst->value, cst->base);
-        setType(e->left, rtype);
-        setCompileTimeConstant(e->left);
-        expression = e;
-        resultType = rtype;
-    } else if (bl != nullptr && br == nullptr) {
-        auto e = expression->clone();
-        auto cst = expression->right->to<IR::Constant>();
-        CHECK_NULL(cst);
-        e->right = new IR::Constant(cst->srcInfo, ltype, cst->value, cst->base);
-        setType(e->right, ltype);
-        setCompileTimeConstant(e->right);
-        expression = e;
-        resultType = ltype;
-    }
-    setType(expression, resultType);
-    setType(getOriginal(), resultType);
-    if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
     }
     return expression;
 }
@@ -3415,6 +3405,11 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
                 setCompileTimeConstant(result);
                 return result;
             }
+        }
+
+        if (getContext()->node->is<IR::ActionListElement>()) {
+            typeError("%1% is not invoking an action", expression);
+            return expression;
         }
 
         // We build a type for the callExpression and unify it with the method expression

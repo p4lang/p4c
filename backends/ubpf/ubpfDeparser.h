@@ -17,7 +17,7 @@ limitations under the License.
 #ifndef BACKENDS_UBPF_UBPFDEPARSER_H_
 #define BACKENDS_UBPF_UBPFDEPARSER_H_
 
-#include "ebpf/ebpfObject.h"
+#include "backends/ebpf/ebpfObject.h"
 #include "ir/ir.h"
 #include "ubpfHelpers.h"
 #include "ubpfProgram.h"

@@ -1,4 +1,5 @@
-FROM p4lang/behavioral-model:latest
+ARG BASE_IMAGE=p4lang/behavioral-model:latest
+FROM ${BASE_IMAGE}
 LABEL maintainer="P4 Developers <p4-dev@lists.p4.org>"
 
 # Default to using 2 make jobs, which is a good default for CI. If you're
@@ -34,9 +35,18 @@ ARG COMPILE_WITH_CLANG=OFF
 ARG ENABLE_SANITIZERS=OFF
 # Only execute the steps necessary to successfully run CMake.
 ARG CMAKE_ONLY=OFF
+# Build with -ftrivial-auto-var-init=pattern to catch more bugs caused by
+# uninitialized variables.
+ARG BUILD_AUTO_VAR_INIT_PATTERN=OFF
+
+# Configuration of ASAN and UBSAN sanitizers:
+# - Print symbolized stack trace for each error report.
+# - Disable leaks detector as p4c uses GC.
+ENV UBSAN_OPTIONS=print_stacktrace=1
+ENV ASAN_OPTIONS=print_stacktrace=1:detect_leaks=0
 
 # Delegate the build to tools/ci-build.
 COPY . /p4c/
-RUN chmod u+x /p4c/tools/ci-build.sh && /p4c/tools/ci-build.sh
+RUN /p4c/tools/ci-build.sh
 # Set the workdir after building p4c.
 WORKDIR /p4c/

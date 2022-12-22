@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-extern Crc16<T> 
+extern Crc16<T>
 {}
 
-extern Checksum16 
+extern Checksum16
 {
     void initialize<T>();
 }
@@ -38,7 +38,7 @@ extern X<D>
    T f<T>(in D d, in T t);
 }
 
-control z<D1, T1>(in X<D1> x, in D1 v, in T1 t)
+control z<D1, T1>(X<D1> x, in D1 v, in T1 t)
 {
    // x's type is X<D1>
    // x.f's type is T f<T>(D1 d, T t);

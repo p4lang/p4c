@@ -54,6 +54,7 @@ struct metadata_t {
 	bit<32> local_metadata_port_out
 	bit<48> ingress_tbl_ethernet_srcAddr
 	bit<16> ingress_tbl_ipv4_hdrChecksum
+	bit<32> ingress_tbl_key
 	bit<8> IngressParser_parser_tmp
 	bit<8> IngressParser_parser_tmp_0
 	bit<32> IngressParser_parser_tmp_1
@@ -76,7 +77,6 @@ struct metadata_t {
 	bit<32> Ingress_color_out
 	bit<32> Ingress_color_in
 	bit<32> Ingress_tmp_21
-	bit<32> Ingress_key
 }
 metadata instanceof metadata_t
 
@@ -136,7 +136,7 @@ table tbl {
 	key {
 		m.ingress_tbl_ethernet_srcAddr exact
 		m.ingress_tbl_ipv4_hdrChecksum exact
-		m.Ingress_key exact
+		m.ingress_tbl_key exact
 	}
 	actions {
 		NoAction
@@ -165,9 +165,9 @@ apply {
 	and m.Ingress_tmp_18 0xF
 	mov m.Ingress_tmp_19 m.Ingress_tmp_18
 	and m.Ingress_tmp_19 0xF
-	mov m.Ingress_key m.Ingress_tmp_19
 	mov m.ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	mov m.ingress_tbl_ipv4_hdrChecksum h.ipv4.hdrChecksum
+	mov m.ingress_tbl_key m.Ingress_tmp_19
 	table tbl
 	regadd counter0_0_packets 0x3FF 1
 	regadd counter0_0_bytes 0x3FF 0x14

@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_DEF_USE_H_
 #define _FRONTENDS_P4_DEF_USE_H_
 
+#include <unordered_set>
+
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 #include "lib/ordered_map.h"
@@ -353,7 +355,7 @@ class Definitions : public IHasDbPrint {
     /// (conservative approximation).
     ordered_map<const BaseLocation*, const ProgramPoints*> definitions;
     /// If true the current program point is actually unreachable.
-    bool unreachable;
+    bool unreachable = false;
 
  public:
     Definitions() = default;

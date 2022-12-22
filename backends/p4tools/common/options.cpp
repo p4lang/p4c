@@ -1,8 +1,8 @@
 #include "backends/p4tools/common/options.h"
 
-#include <string.h>
-
+#include <algorithm>
 #include <cstdlib>
+#include <cstring>
 #include <functional>
 #include <string>
 #include <tuple>
@@ -124,32 +124,37 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(messag
         "Prints version information and exits");
 
     registerOption(
-        "--min-packet-size", "bytes",
+        "--packet-size-range", "packetSizeRange",
         [this](const char* arg) {
-            int minLen_bytes = std::atoi(arg);
-            if (minLen_bytes <= 0) {
-                ::error("Invalid minimum packet length: %1%", arg);
+            auto rangeStr = std::string(arg);
+            size_t packetLenStr = rangeStr.find_first_of(':');
+            try {
+                auto minPacketLenStr = rangeStr.substr(0, packetLenStr);
+                minPktSize = std::stoi(minPacketLenStr);
+                if (minPktSize < 0) {
+                    ::error(
+                        "Invalid minimum packet size %1%. Minimum packet size must be at least 0.",
+                        minPktSize);
+                }
+                auto maxPacketLenStr = rangeStr.substr(packetLenStr + 1);
+                maxPktSize = std::stoi(maxPacketLenStr);
+                if (maxPktSize < minPktSize) {
+                    ::error(
+                        "Invalid packet size range %1%:%2%.  The maximum packet size must be at "
+                        "least the size of the minimum packet size.",
+                        minPktSize, maxPktSize);
+                }
+            } catch (std::invalid_argument&) {
+                ::error(
+                    "Invalid packet size range %1%. Expected format is [min]:[max], where [min] "
+                    "and [max] are integers.",
+                    arg);
                 return false;
             }
-            minPacketSize_bytes = minLen_bytes;
             return true;
         },
-        "Sets the minimum allowed packet size, in bytes. Any packet shorter than this is "
-        "considered to be invalid, and will be dropped if the program would otherwise send the "
-        "packet on the network.");
-
-    registerOption(
-        "--mtu", "bytes",
-        [this](const char* arg) {
-            int maxLen_bytes = std::atoi(arg);
-            if (maxLen_bytes <= 0) {
-                ::error("Invalid network MTU: %1%", arg);
-                return false;
-            }
-            networkMtu_bytes = maxLen_bytes;
-            return true;
-        },
-        "Sets the network's MTU, in bytes");
+        "Specify the possible range of the input packet size in bits. The format is [min]:[max]. "
+        "The default values are \"0:72000\". The maximum is set to jumbo frame size (9000 bytes).");
 
     registerOption(
         "--seed", "seed",

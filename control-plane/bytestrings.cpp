@@ -17,6 +17,7 @@ limitations under the License.
 #include "bytestrings.h"
 
 #include "ir/ir.h"
+#include "lib/algorithm.h"
 
 namespace P4 {
 

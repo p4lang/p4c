@@ -72,12 +72,11 @@ class EBPFTable : public EBPFTableBase {
 
     void initKey();
 
- protected:
-    const cstring prefixFieldName = "prefixlen";
-
+ public:
     bool isLPMTable() const;
     bool isTernaryTable() const;
 
+ protected:
     void emitTernaryInstance(CodeBuilder* builder);
 
     virtual void validateKeys() const;
@@ -96,6 +95,7 @@ class EBPFTable : public EBPFTableBase {
     // Use 1024 by default.
     // TODO: make it configurable using compiler options.
     size_t size = 1024;
+    const cstring prefixFieldName = "prefixlen";
 
     EBPFTable(const EBPFProgram* program, const IR::TableBlock* table, CodeGenInspector* codeGen);
     EBPFTable(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name);
@@ -129,6 +129,18 @@ class EBPFTable : public EBPFTableBase {
     // Whether to drop packet if no match entry found.
     // Some table implementations may want to continue processing.
     virtual bool dropOnNoMatchingEntryFound() const { return true; }
+
+    virtual bool cacheEnabled() { return false; }
+    virtual void emitCacheLookup(CodeBuilder* builder, cstring key, cstring value) {
+        (void)builder;
+        (void)key;
+        (void)value;
+    }
+    virtual void emitCacheUpdate(CodeBuilder* builder, cstring key, cstring value) {
+        (void)builder;
+        (void)key;
+        (void)value;
+    }
 };
 
 class EBPFCounterTable : public EBPFTableBase {

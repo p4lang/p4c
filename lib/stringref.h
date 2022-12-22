@@ -17,9 +17,8 @@ limitations under the License.
 #ifndef _LIB_STRINGREF_H_
 #define _LIB_STRINGREF_H_
 
-#include <stdlib.h>
-#include <string.h>
-
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <string>
 

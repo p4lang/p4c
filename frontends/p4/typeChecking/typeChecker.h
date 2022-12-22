@@ -23,6 +23,8 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "typeUnification.h"
@@ -165,7 +167,6 @@ class TypeInference : public Transform {
     const IR::Node* binaryArith(const IR::Operation_Binary* op);
     const IR::Node* unsBinaryArith(const IR::Operation_Binary* op);
     const IR::Node* shift(const IR::Operation_Binary* op);
-    const IR::Node* bitwise(const IR::Operation_Binary* op);
     const IR::Node* typeSet(const IR::Operation_Binary* op);
 
     const IR::Type* cloneWithFreshTypeVariables(const IR::IMayBeGenericType* type);
@@ -288,9 +289,9 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Mod* expression) override { return unsBinaryArith(expression); }
     const IR::Node* postorder(IR::Shl* expression) override { return shift(expression); }
     const IR::Node* postorder(IR::Shr* expression) override { return shift(expression); }
-    const IR::Node* postorder(IR::BXor* expression) override { return bitwise(expression); }
-    const IR::Node* postorder(IR::BAnd* expression) override { return bitwise(expression); }
-    const IR::Node* postorder(IR::BOr* expression) override { return bitwise(expression); }
+    const IR::Node* postorder(IR::BXor* expression) override { return binaryArith(expression); }
+    const IR::Node* postorder(IR::BAnd* expression) override { return binaryArith(expression); }
+    const IR::Node* postorder(IR::BOr* expression) override { return binaryArith(expression); }
     const IR::Node* postorder(IR::Mask* expression) override { return typeSet(expression); }
     const IR::Node* postorder(IR::Range* expression) override { return typeSet(expression); }
     const IR::Node* postorder(IR::LNot* expression) override;

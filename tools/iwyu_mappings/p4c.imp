@@ -1,3 +1,5 @@
 [
     { include: ["@\"ir/ir-generated.h\"", "private", "\"ir/ir.h\"", "public"] },
+    { include: ["\"ir/ir-inline.h\"", "private", "\"ir/ir.h\"", "public"] },
+    { include: ["<ext/alloc_traits.h>", private, "<memory>", public ] },
 ]
