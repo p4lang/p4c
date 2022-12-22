@@ -27,7 +27,7 @@
 #include "lib/log.h"
 #include "lib/ordered_map.h"
 #include "lib/safe_vector.h"
-#include "p4tools/common/lib/formulae.h"
+#include "backends/p4tools/common/lib/formulae.h"
 
 namespace P4Tools {
 

@@ -1,8 +1,4 @@
-<<<<<<< HEAD:backends/p4tools/testgen/test/small-step/p4_asserts_parser_test.cpp
-#include "backends/p4tools/common/compiler/p4_asserts_parser.h"
-=======
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
->>>>>>> main:backends/p4tools/modules/testgen/test/small-step/p4_asserts_parser_test.cpp
 
 #include <unistd.h>
 
