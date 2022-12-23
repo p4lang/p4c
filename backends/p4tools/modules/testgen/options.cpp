@@ -315,6 +315,7 @@ TestgenOptions::TestgenOptions()
         },
         "Add conditions defined in assert/assume to the path conditions. Only tests which satisfy "
         "these conditions can be generated.");
+
     registerOption(
         "--assertion-mode", nullptr,
         [this](const char * /*arg*/) {

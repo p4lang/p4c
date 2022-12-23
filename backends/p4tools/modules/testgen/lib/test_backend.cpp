@@ -111,11 +111,13 @@ bool TestBackEnd::run(const FinalState &state) {
         CHECK_NULL(solver);
 
         // If assertion mode is active, ignore any test that does not trigger an assertion.
-        if (TestgenOptions::get().assertionModeEnabled &&
-            !executionState->getProperty<bool>("assertionTriggered")) {
-            return testCount > maxTests - 1;
+        if (TestgenOptions::get().assertionModeEnabled) {
+            if (!executionState->getProperty<bool>("assertionTriggered")) {
+                return testCount > maxTests - 1;
+            }
+            printFeature("test_info", 4,
+                         "AssertionMode: Found an input that triggers an assertion.");
         }
-        
         // Don't increase the test count if --with-output-packet is enabled and we don't
         // produce a test with an output packet.
         if (TestgenOptions::get().withOutputPacket) {

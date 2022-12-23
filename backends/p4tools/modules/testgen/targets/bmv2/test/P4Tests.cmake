@@ -36,6 +36,7 @@ set(
 p4c_find_tests("${TESTGEN_BMV2_P416_TESTS}" BMV2_P4_16_V1_TESTS INCLUDE "${V1_SEARCH_PATTERNS}" EXCLUDE "")
 p4tools_find_tests("${BMV2_P4_16_V1_TESTS}" bmv2v1tests EXCLUDE "")
 
+
 # Add bmv2 tests from p4c and from testgen/test/p4-programs/bmv2
 set(P4C_V1_TEST_SUITES_P416 ${v1tests} ${bmv2v1tests})
 
@@ -44,6 +45,11 @@ p4tools_add_tests(
   TAG "testgen-p4c-bmv2" DRIVER ${P4TESTGEN_DRIVER} TEMPLATE_FILE ${TEMPLATE_FILE}
   TARGET "bmv2" ARCH "v1model" ENABLE_RUNNER TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend STF ${EXTRA_OPTS} "
 )
+
+#############################################################################
+# ASSERT_ASSUME TESTS
+#############################################################################
+include(${CMAKE_CURRENT_LIST_DIR}/AssumeAssertTests.cmake)
 
 #############################################################################
 # TEST PROPERTIES
