@@ -54,6 +54,11 @@ void CRCChecksumAlgorithm::emitUpdateMethod(CodeBuilder* builder, int crcWidth) 
     // version may require other method of update. When data_size <= 64 bits,
     // applies host byte order for input data, otherwise network byte order is expected.
     if (crcWidth == 16) {
+        // This function calculates CRC16 by definition, it is bit by bit. If input data has more
+        // than 64 bit, the outer loop process bytes in network byte order - data pointer is
+        // incremented. For data shorter than or equal 64 bits, bytes are processed in little endian
+        // byte order - data pointer is decremented by outer loop in this case.
+        // There is no need for lookup table.
         cstring code =
             "static __always_inline\n"
             "void crc16_update(u16 * reg, const u8 * data, "
@@ -75,6 +80,17 @@ void CRCChecksumAlgorithm::emitUpdateMethod(CodeBuilder* builder, int crcWidth) 
             "}";
         builder->appendLine(code);
     } else if (crcWidth == 32) {
+        // This function calculates CRC32 using two optimisations: slice-by-8 and Standard
+        // Implementation. Both algorithms have to properly handle byte order depending on data
+        // length. There are four cases which must be handled:
+        // 1. Data size below 8 bytes - calculated using Standard Implementation in little endian
+        //    byte order.
+        // 2. Data size equal to 8 bytes - calculated using slice-by-8 in little endian byte order.
+        // 3. Data size more than 8 bytes and multiply of 8 bytes - calculated using slice-by-8 in
+        //    big endian byte order.
+        // 4. Data size more than 8 bytes and not multiply of 8 bytes - calculated using slice-by-8
+        //    and Standard Implementation both in big endian byte order.
+        // Lookup table is necessary for both algorithms.
         cstring code =
             "static __always_inline\n"
             "void crc32_update(u32 * reg, const u8 * data, u16 data_size, const u32 poly) {\n"
@@ -95,6 +111,7 @@ void CRCChecksumAlgorithm::emitUpdateMethod(CodeBuilder* builder, int crcWidth) 
             "    u16 tmp = 0;\n"
             "    if (lookup_table != NULL) {\n"
             "        for (u16 i = data_size; i >= 8; i -= 8) {\n"
+            "            /* Vars one and two will have swapped byte order if data_size == 8 */\n"
             "            if (data_size == 8) current = data + 4;\n"
             "            bpf_trace_message(\"CRC32: data dword: %x\\n\", *current);\n"
             "            u32 one = (data_size == 8 ? __builtin_bswap32(*current--) : *current++) ^ "
@@ -123,6 +140,7 @@ void CRCChecksumAlgorithm::emitUpdateMethod(CodeBuilder* builder, int crcWidth) 
             "        }\n"
             "        volatile int std_algo_lookup_key = 0;\n"
             "        if (data_size < 8) {\n"
+            // Standard Implementation for little endian byte order
             "            unsigned char *currentChar = (unsigned char *) current;\n"
             "            currentChar += data_size - 1;\n"
             "            for (u16 i = tmp; i < data_size; i++) {\n"
@@ -135,6 +153,7 @@ void CRCChecksumAlgorithm::emitUpdateMethod(CodeBuilder* builder, int crcWidth) 
             "                *reg = ((*reg) >> 8) ^ lookup_value;\n"
             "            }\n"
             "        } else {\n"
+            // Standard Implementation for big endian byte order
             "            /* Consume data not processed by slice-by-8 algorithm above, "
             "these data are in network byte order */\n"
             "            unsigned char *currentChar = (unsigned char *) current;\n"
