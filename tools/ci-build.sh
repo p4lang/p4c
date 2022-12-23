@@ -5,7 +5,7 @@
 set -e  # Exit on error.
 set -x  # Make command execution verbose
 
-THIS_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+THIS_DIR=$( cd -- "$( dirname -- "${0}" )" &> /dev/null && pwd )
 P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 
 # Default to using 2 make jobs, which is a good default for CI. If you're
