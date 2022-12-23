@@ -458,7 +458,10 @@ const IR::Expression* ReachabilityEngine::addCondition(const IR::Expression* pre
     if (newCond == nullptr) {
         return prev;
     }
-    return new IR::BOr(IR::Type_Boolean::get(), newCond, prev);
+    if (prev == nullptr) {
+        return newCond;
+    }
+    return new IR::BAnd(IR::Type_Boolean::get(), newCond, prev);
 }
 
 std::unordered_set<const DCGVertexType*> ReachabilityEngine::getName(std::string name) {

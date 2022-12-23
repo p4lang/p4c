@@ -375,7 +375,7 @@ void callTestgen(const char* inputFile, const char* behavior, const char* path, 
         BUG("Can't create folder - %1%", mkDir.str());
     }
     std::ostringstream cmdTestgen;
-    cmdTestgen << buildPath << "p4testgen ";
+    std::cout << "Cmd:" << cmdTestgen.str() << std::endl;
     cmdTestgen << "-I \"" << buildPath << "p4include\" --target bmv2  --std p4-16 ";
     cmdTestgen << "--test-backend STF --arch v1model --seed 1000 --max-tests " << maxTests << "  ";
     cmdTestgen << "--pattern \"" << behavior << "\" ";
@@ -456,8 +456,8 @@ TEST_F(P4CReachability, testReacabilityEngineNegTable2) {
 }
 
 TEST_F(P4CReachability, testReacabilityEngineRestriction) {
-    callTestgen("backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4",
-                "ingress(h.h.isValid() && h.eth_hdr.isValid());egress(ingress.d != h.h.b)", "tmp",
+    callTestgen("backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4",
+                "ingress(ingress::h.h.isValid() && ingress::h.eth_hdr.isValid());egress(ingress::d != egress::h.h.b)", "tmp",
                 10);
     std::list<std::list<std::string>> ids = {{"table2"}};
     ASSERT_TRUE(!checkResultingSTF(ids, "tmp"));

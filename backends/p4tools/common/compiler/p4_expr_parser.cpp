@@ -112,6 +112,7 @@ const IR::Node* Parser::removeBrackets(const IR::Node* expr) {
         return nullptr;
     }
     if (const auto* namedExpr = expr->to<IR::NamedExpression>()) {
+        std::cout << namedExpr << std::endl;
         BUG_CHECK(namedExpr->name == "Paren", "Invalid format %1%", namedExpr);
         if (const auto* listExpr = namedExpr->expression->to<IR::ListExpression>()) {
             BUG_CHECK(listExpr->size() == 1, "");
@@ -338,15 +339,23 @@ const IR::Node* Parser::createApplicationOp(const IR::Node* base) {
     if (!tokens[index].is(Token::Kind::LeftParen)) {
         return base;
     }
-    const auto* params = createPunctuationMarks();
+    index++;
+    const IR::Node* params = nullptr;
+    if (!tokens[index].is(Token::Kind::RightParen)) {
+        params = createPunctuationMarks();
+    }
+    BUG_CHECK(tokens[index].is(Token::Kind::RightParen), "Expected ')'");
+    index++;
     IR::Vector<IR::Argument>* arguments = new IR::Vector<IR::Argument>();
-    const auto* namedExpr = params->to<IR::NamedExpression>();
-    BUG_CHECK(namedExpr != nullptr, "Invalid format %1%", namedExpr);
-    BUG_CHECK(namedExpr->name == "Paren", "Invalid format %1%", params);
-    const auto* listExpr = namedExpr->expression->to<IR::ListExpression>();
-    BUG_CHECK(listExpr != nullptr, "Invalid format %1%", namedExpr->expression);
-    for (const auto* p : listExpr->components) {
-        arguments->push_back(new IR::Argument(p));
+    if (params != nullptr) {
+        const auto* namedExpr = params->to<IR::NamedExpression>();
+        BUG_CHECK(namedExpr != nullptr, "Invalid format %1%", namedExpr);
+        BUG_CHECK(namedExpr->name == "Paren", "Invalid format %1%", params);
+        const auto* listExpr = namedExpr->expression->to<IR::ListExpression>();
+        BUG_CHECK(listExpr != nullptr, "Invalid format %1%", namedExpr->expression);
+        for (const auto* p : listExpr->components) {
+            arguments->push_back(new IR::Argument(p));
+        }
     }
     return new IR::MethodCallExpression(base->to<IR::Expression>(), arguments);
 }

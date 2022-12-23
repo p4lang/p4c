@@ -25,10 +25,10 @@
 #include "ir/irutils.h"
 #include "lib/compile_context.h"
 #include "lib/null.h"
-#include "p4tools/common/lib/formulae.h"
+#include "backends/p4tools/common/lib/formulae.h"
 
-#include "backends/p4tools/testgen/targets/bmv2/p4_refers_to_parser.h"
-#include "backends/p4tools/testgen/test/gtest_utils.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
+#include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
 /// Variables are declared in "test/gtest/env.h" which is already included in reachablity.cpp
 extern const char* sourcePath;
@@ -150,7 +150,7 @@ TEST_F(P4ExpressionParserTest, SimpleExpressions) {
     expr = parseExpression("0xaB", program);
     ASSERT_TRUE(expr->is<IR::Constant>());
     cnsnt = expr->to<IR::Constant>();
-    ASSERT_E(cnsnt->value, 171);
+    ASSERT_EQ(cnsnt->value, 171);
 
     // check method call
     expr = parseExpression("ingress::h.h.isValid()", program);
