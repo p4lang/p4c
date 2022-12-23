@@ -509,9 +509,9 @@ annotation
           $$ = new IR::Annotation(@1, *$2, body); }
     | "@" name "(" annotationBody ")"
         { $$ = new IR::Annotation(@1, *$2, *$4); }
-    | "@" name "[" expressionList "]"
+    | "@" name "[" expressionList optTrailingComma "]"
         { $$ = new IR::Annotation(@1, *$2, *$4, true); }
-    | "@" name "[" kvList "]"
+    | "@" name "[" kvList optTrailingComma "]"
         { $$ = new IR::Annotation(@1, *$2, *$4, true); }
     // Experimental: backwards compatibility with P4-14 pragmas (which
     // themselves are experimental!)
@@ -638,8 +638,8 @@ annotationToken
     ;
 
 kvList
-    : kvPair                          { $$ = new IR::IndexedVector<IR::NamedExpression>; $$->push_back($1); $$->srcInfo = @1; }
-    | kvList "," kvPair               { $$ = $1; $$->push_back($3); $$->srcInfo = @1 + @3;}
+    : kvPair            { $$ = new IR::IndexedVector<IR::NamedExpression>; $$->push_back($1); $$->srcInfo = @1; }
+    | kvList "," kvPair { $$ = $1; $$->push_back($3); $$->srcInfo = @1 + @3;}
     ;
 
 kvPair
@@ -824,6 +824,11 @@ tupleKeysetExpression
     : "(" simpleKeysetExpression "," simpleExpressionList ")"
                                             { $$ = $4; $4->insert($4->begin(), $2); $$->srcInfo = @2 + @4; }
     | "(" reducedSimpleKeysetExpression ")" { $$ = new IR::Vector<IR::Expression>(); $$->push_back($2); $$->srcInfo = @2; }
+    ;
+
+optTrailingComma
+    : %empty
+    | ","
     ;
 
 simpleExpressionList
@@ -1113,16 +1118,17 @@ structField
 enumDeclaration
     : optAnnotations
         ENUM name { driver.structure->declareType(*$3); }
-        "{" identifierList "}" { $$ = new IR::Type_Enum(@3, *$3, *$6); }
+        "{" identifierList optTrailingComma "}" { $$ = new IR::Type_Enum(@3, *$3, *$6); }
     | optAnnotations ENUM typeRef name { driver.structure->declareType(*$4); }
-	 "{" specifiedIdentifierList "}" {
+	 "{" specifiedIdentifierList optTrailingComma "}" {
               auto type = $typeRef;
               $$ = new IR::Type_SerEnum(@4, *$4, type, *$7);
 	  }
     ;
 
 specifiedIdentifierList
-    : specifiedIdentifier     { $$ = new IR::IndexedVector<IR::SerEnumMember>(); $$->push_back($1); $$->srcInfo = @1; }
+    : specifiedIdentifier                  { $$ = new IR::IndexedVector<IR::SerEnumMember>();
+                                             $$->push_back($1); $$->srcInfo = @1; }
     | specifiedIdentifierList "," specifiedIdentifier { $$ = $1; $1->push_back($3); $$->srcInfo = @1 + @3; }
     ;
 
@@ -1136,14 +1142,15 @@ errorDeclaration
     ;
 
 matchKindDeclaration
-    : MATCH_KIND "{" identifierList "}"
+    : MATCH_KIND "{" identifierList optTrailingComma "}"
         { $$ = new IR::Declaration_MatchKind(@1 + @4, *$3); }
     ;
 
 identifierList
     : name                    { $$ = new IR::IndexedVector<IR::Declaration_ID>();
                                 $$->push_back(new IR::Declaration_ID(@1, *$1)); $$->srcInfo = @1; }
-    | identifierList "," name { $$ = $1; $$->push_back(new IR::Declaration_ID(@3, *$3)); $$->srcInfo = @1 + @3; }
+    | identifierList "," name { $$ = $1; $$->push_back(new IR::Declaration_ID(@3, *$3));
+                                $$->srcInfo = @1 + @3; }
     ;
 
 typedefDeclaration
@@ -1428,11 +1435,11 @@ expression
     | prefixedNonTypeName                { $$ = new IR::PathExpression($1); }
     | expression "[" expression "]"      { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
     | expression "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
-    | "{" expressionList "}"             { $$ = new IR::ListExpression(@1 + @3, *$2); }
+    | "{" expressionList optTrailingComma "}" { $$ = new IR::ListExpression(@1 + @4, *$2); }
     | "{" SHARP "}"                      { $$ = new IR::InvalidHeader(
                                                   @1 + @3, IR::Type::Unknown::get(), nullptr); }
-    | "{" kvList "}"                     { $$ = new IR::StructExpression(
-                                                  @1 + @3, IR::Type::Unknown::get(), (IR::Type_Name*)nullptr, *$2); }
+    | "{" kvList optTrailingComma "}"    { $$ = new IR::StructExpression(
+                                                  @1 + @4, IR::Type::Unknown::get(), (IR::Type_Name*)nullptr, *$2); }
     | "(" expression ")"                 { $$ = $2; }
     | "!" expression %prec PREFIX        { $$ = new IR::LNot(@1 + @2, $2); }
     | "~" expression %prec PREFIX        { $$ = new IR::Cmpl(@1 + @2, $2); }
@@ -1545,10 +1552,10 @@ intList
     ;
 
 intOrStrList
-    : intOrStr                   { $$ = new IR::Vector<IR::Expression>();
+    : intOrStr                  { $$ = new IR::Vector<IR::Expression>();
                                    $$->push_back($1);
                                    $$->srcInfo = @1; }
-    | intOrStrList "," intOrStr  { $$ = $1;
+    | intOrStrList "," intOrStr { $$ = $1;
                                    $$->push_back($3);
                                    $$->srcInfo = @1 + @3; }
     ;
