@@ -375,7 +375,7 @@ void InternetChecksumAlgorithm::updateChecksum(CodeBuilder* builder, const Argum
             }
 
             // Let's convert internal array into an array of u16 and calc csum for such entries.
-            // Byte order conversion is required, because scum is calculated in host byte order
+            // Byte order conversion is required, because csum is calculated in host byte order
             // but data is preserved in network byte order
             const unsigned arrayEntries = width / 16;
             for (unsigned i = 0; i < arrayEntries; ++i) {
@@ -389,11 +389,12 @@ void InternetChecksumAlgorithm::updateChecksum(CodeBuilder* builder, const Argum
                 builder->target->emitTraceMessage(builder, "InternetChecksum: word=0x%llx", 1,
                                                   tmpVar.c_str());
                 builder->emitIndent();
-                builder->appendFormat("%s = ", stateVar.c_str());
                 if (addData) {
-                    builder->appendFormat("csum16_add(%s, %s)", stateVar.c_str(), tmpVar.c_str());
+                    builder->appendFormat("%s = csum16_add(%s, %s)", stateVar.c_str(),
+                                          stateVar.c_str(), tmpVar.c_str());
                 } else {
-                    builder->appendFormat("csum16_sub(%s, %s)", stateVar.c_str(), tmpVar.c_str());
+                    builder->appendFormat("%s = csum16_sub(%s, %s)", stateVar.c_str(),
+                                          stateVar.c_str(), tmpVar.c_str());
                 }
                 builder->endOfStatement(true);
             }
