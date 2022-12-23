@@ -483,6 +483,21 @@ bool ComputeWriteSet::preorder(const IR::InvalidHeaderUnion *expression) {
     return false;
 }
 
+bool ComputeWriteSet::preorder(const IR::StructExpression *expression) {
+    expressionWrites(expression, LocationSet::empty);
+    return false;
+}
+
+bool ComputeWriteSet::preorder(const IR::HeaderStackExpression *expression) {
+    expressionWrites(expression, LocationSet::empty);
+    return false;
+}
+
+bool ComputeWriteSet::preorder(const IR::P4ListExpression *expression) {
+    expressionWrites(expression, LocationSet::empty);
+    return false;
+}
+
 bool ComputeWriteSet::preorder(const IR::Literal *expression) {
     expressionWrites(expression, LocationSet::empty);
     return false;

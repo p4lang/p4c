@@ -146,6 +146,7 @@ class ReadsWrites : public Inspector {
 
     void postorder(const IR::ArrayIndex *expression) override {
         auto e = ::get(rw, expression->left);
+        CHECK_NULL(e);
         const SetOfLocations *result;
         if (expression->right->is<IR::Constant>()) {
             int index = expression->right->to<IR::Constant>()->asInt();
@@ -166,6 +167,10 @@ class ReadsWrites : public Inspector {
     }
 
     void postorder(const IR::InvalidHeaderUnion *expression) override {
+        rw.emplace(expression, new SetOfLocations());
+    }
+
+    void postorder(const IR::HeaderStackExpression *expression) override {
         rw.emplace(expression, new SetOfLocations());
     }
 

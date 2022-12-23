@@ -135,6 +135,7 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
         BUG_CHECK(stackSize && stackSize->value > 0, "Size of stack %s is not a positive constant",
                   ltype);
         BUG_CHECK(statement->right->is<IR::PathExpression>() ||
+                      statement->right->is<IR::HeaderStackExpression>() ||
                       statement->right->is<IR::Member>() || statement->right->is<IR::ArrayIndex>(),
                   "%1%: Unexpected operation encountered while eliminating stack copying",
                   statement->right);

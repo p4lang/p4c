@@ -314,6 +314,20 @@ const IR::Node *DoStrengthReduction::postorder(IR::Concat *expr) {
     return expr;
 }
 
+const IR::Node *DoStrengthReduction::postorder(IR::ArrayIndex *expr) {
+    if (auto hse = expr->left->to<IR::HeaderStackExpression>()) {
+        if (auto cst = expr->right->to<IR::Constant>()) {
+            auto index = cst->asInt();
+            if (index < 0 || (size_t)index >= hse->components.size()) {
+                ::error(ErrorType::ERR_EXPRESSION, "%1%: Index %2% out of bounds", index, expr);
+                return expr;
+            }
+            return hse->components.at(index);
+        }
+    }
+    return expr;
+}
+
 const IR::Node *DoStrengthReduction::postorder(IR::Slice *expr) {
     int shift_amt = 0;
     const IR::Expression *shift_of = nullptr;

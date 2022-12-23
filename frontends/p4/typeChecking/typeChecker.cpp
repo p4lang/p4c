@@ -2162,8 +2162,13 @@ const IR::Node *TypeInference::postorder(IR::Invalid *expression) {
 const IR::Node *TypeInference::postorder(IR::InvalidHeader *expression) {
     if (done()) return expression;
     auto type = getTypeType(expression->headerType);
-    BUG_CHECK(type->is<IR::Type_Header>(), "%1%: does not have a header type `%2%`", expression,
-              type);
+    auto concreteType = type;
+    if (auto ts = concreteType->to<IR::Type_SpecializedCanonical>()) concreteType = ts->substituted;
+    if (!concreteType->is<IR::Type_Header>()) {
+        typeError("%1%: invalid header expression has a non-header type `%2%`", expression, type);
+        return expression;
+    }
+    setType(getOriginal(), type);
     setType(expression, type);
     setType(getOriginal(), type);
     setCompileTimeConstant(expression);
@@ -2174,8 +2179,11 @@ const IR::Node *TypeInference::postorder(IR::InvalidHeader *expression) {
 const IR::Node *TypeInference::postorder(IR::InvalidHeaderUnion *expression) {
     if (done()) return expression;
     auto type = getTypeType(expression->headerUnionType);
-    BUG_CHECK(type->is<IR::Type_HeaderUnion>(), "%1%: does not have a header_union type `%2%`",
-              expression, type);
+    if (auto ts = concreteType->to<IR::Type_SpecializedCanonical>()) concreteType = ts->substituted;
+    if (!concreteType->is<IR::Type_HeaderUnion>()) {
+	typeError("%1%: does not have a header_union type `%2%`", expression, type);
+	return expression;
+    }
     setType(expression, type);
     setType(getOriginal(), type);
     setCompileTimeConstant(expression);
@@ -2212,6 +2220,53 @@ const IR::Node *TypeInference::postorder(IR::P4ListExpression *expression) {
     auto type = new IR::Type_P4List(expression->srcInfo, elementType);
     setType(getOriginal(), type);
     setType(expression, type);
+    if (constant) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+    }
+    return expression;
+}
+
+const IR::Node *TypeInference::postorder(IR::HeaderStackExpression *expression) {
+    if (done()) return expression;
+    bool constant = true;
+    auto stackType = getTypeType(expression->headerStackType);
+    if (auto st = stackType->to<IR::Type_Stack>()) {
+        auto elementType = st->elementType;
+        auto vec = new IR::Vector<IR::Expression>();
+        bool changed = false;
+        if (expression->size() != st->getSize()) {
+            typeError("%1%: number of initializers %2% has to match stack size %3%", expression,
+                      expression->size(), st->getSize());
+            return expression;
+        }
+        for (auto c : expression->components) {
+            if (!isCompileTimeConstant(c)) constant = false;
+            auto type = getType(c);
+            if (type == nullptr) return expression;
+            auto tvs = unify(expression, elementType, type,
+                             "Stack element type '%1%' does not match expected type '%2%'",
+                             {type, elementType});
+            if (tvs == nullptr) return expression;
+            if (!tvs->isIdentity()) {
+                ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+                auto converted = cts.convert(c);
+                vec->push_back(converted);
+                changed = true;
+            } else {
+                vec->push_back(c);
+            }
+            if (changed)
+                expression = new IR::HeaderStackExpression(expression->srcInfo, *vec, stackType);
+        }
+    } else {
+        typeError("%1%: header stack expression has an incorrect type `%2%`", expression,
+                  stackType);
+        return expression;
+    }
+
+    setType(getOriginal(), stackType);
+    setType(expression, stackType);
     if (constant) {
         setCompileTimeConstant(expression);
         setCompileTimeConstant(getOriginal<IR::Expression>());
@@ -2813,7 +2868,32 @@ const IR::Node *TypeInference::postorder(IR::Cast *expression) {
             }
             return result;
         } else {
-            typeError("%1%: casts to vector not supported", expression);
+            typeError("%1%: casts to list not supported", expression);
+            return expression;
+        }
+    }
+    if (auto lt = concreteType->to<IR::Type_Stack>()) {
+        auto stackElementType = lt->elementType;
+        if (auto le = expression->expr->to<IR::ListExpression>()) {
+            IR::Vector<IR::Expression> vec;
+            bool isConstant = true;
+            for (size_t i = 0; i < le->size(); i++) {
+                auto compI = le->components.at(i);
+                auto src = assignment(expression, stackElementType, compI);
+                if (!isCompileTimeConstant(src)) isConstant = false;
+                vec.push_back(src);
+            }
+            auto vecType = castType->getP4Type();
+            setType(vecType, new IR::Type_Type(lt));
+            auto result = new IR::HeaderStackExpression(le->srcInfo, vec, lt->getP4Type());
+            setType(result, lt);
+            if (isConstant) {
+                setCompileTimeConstant(result);
+                setCompileTimeConstant(getOriginal<IR::Expression>());
+            }
+            return result;
+        } else {
+            typeError("%1%: casts to header stack not supported", expression);
             return expression;
         }
     }
@@ -2836,7 +2916,7 @@ const IR::Node *TypeInference::postorder(IR::Cast *expression) {
         auto tvs = unify(expression, destType, sourceType, "Cannot cast from '%1%' to '%2%'",
                          {sourceType, castType});
         if (tvs == nullptr) return expression;
-        const IR::Expression *rhs = expression;
+        const IR::Expression *rhs = expression->expr;
         if (!tvs->isIdentity()) {
             ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
             rhs = cts.convert(expression->expr);  // sets type
@@ -3074,8 +3154,7 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
     if (type == nullptr) return expression;
 
     cstring member = expression->member.name;
-    if (type->is<IR::Type_SpecializedCanonical>())
-        type = type->to<IR::Type_SpecializedCanonical>()->substituted;
+    if (auto ts = type->to<IR::Type_SpecializedCanonical>()) type = ts->substituted;
 
     if (type->is<IR::Type_Extern>()) {
         auto ext = type->to<IR::Type_Extern>();
