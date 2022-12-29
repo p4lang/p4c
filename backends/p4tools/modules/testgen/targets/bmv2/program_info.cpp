@@ -67,7 +67,7 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     /// larger than 32 bits
     const IR::Operation_Binary *constraint =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                    IR::getConstant(ExecutionState::getPacketSizeVarType(), 32));
+                    IR::getConstant(ExecutionState::getPacketSizeVarType(), 122));
     /// Vector containing pairs of restrictions and nodes to which these restrictions apply.
     std::vector<std::vector<const IR::Expression *>> restrictionsVec;
     /// Defines all "entry_restriction" and then converts restrictions from string to IR
