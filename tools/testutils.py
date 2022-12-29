@@ -147,6 +147,7 @@ def check_root():
 class PathError(RuntimeError):
     pass
 
+
 def check_if_file(input_path):
     """Checks if a path is a file and converts the input
         to an absolute path"""
@@ -160,6 +161,7 @@ def check_if_file(input_path):
         report_err(sys.stderr, msg)
         sys.exit(1)
     return str(input_path.absolute())
+
 
 def check_if_dir(input_path):
     """Checks if a path is an actual directory and converts the input
