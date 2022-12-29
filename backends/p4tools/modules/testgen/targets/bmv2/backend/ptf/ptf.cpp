@@ -211,12 +211,10 @@ from functools import wraps
 from ptf import config
 from ptf.thriftutils import *
 from ptf.mask import Mask
-from ptf.testutils import send_packet
-from ptf.testutils import verify_packet
+from p4.v1 import p4runtime_pb2_grpc
 
-from ptf.testutils import verify_no_other_packets
 from ptf.packet import *
-from ptf import testutils as testutils
+from ptf import testutils as ptfutils
 
 
 directory = os.getcwd()
@@ -242,9 +240,10 @@ class AbstractTest(bt.P4RuntimeTest):
 
     def insertTableEntry(self, table_name, key_fields = None,
             action_name = None, data_fields = []):
-        self.push_update_add_entry_to_action(
-            self.req, table_name, key_fields, action_name, data_fields)
-        self.write_request(req)
+        req = p4runtime_pb2_grpc.WriteRequest()
+        req.device_id = 1
+        self.push_update_add_entry_to_action(req, table_name, key_fields,
+                                             action_name, data_fields)
 
     def setupCtrlPlane(self):
         pass
@@ -262,7 +261,7 @@ class AbstractTest(bt.P4RuntimeTest):
         logger.info("Verifying Packet ...")
         self.verifyPackets()
         logger.info("Verifying no other packets ...")
-        verify_no_other_packets(self, self.device_id, timeout=2)
+        ptfutils.verify_no_other_packets(self, self.device_id, timeout=2)
 )""");
     return PREAMBLE;
 }
@@ -360,7 +359,7 @@ class Test{{test_id}}(AbstractTest):
 ## if send
         ig_port = {{send.ig_port}}
         pkt = b'{{send.pkt}}'
-        send_packet(self, ig_port, pkt)
+        ptfutils.send_packet(self, ig_port, pkt)
 ## else
         pass
 ## endif
@@ -368,12 +367,11 @@ class Test{{test_id}}(AbstractTest):
     def verifyPackets(self):
 ## if verify
         eg_port = {{verify.eg_port}}
-        exp_pkt = b'{{verify.exp_pkt}}'
-        exp_pkt = Mask(exp_pkt)
+        exp_pkt = Mask(b'{{verify.exp_pkt}}')
 ## for ignore_mask in verify.ignore_masks
         exp_pkt.set_do_not_care({{ignore_mask.0}}, {{ignore_mask.1}})
 ## endfor
-        verify_packet(self, exp_pkt, eg_port)
+        ptfutils.verify_packet(self, exp_pkt, eg_port)
 ## else
         pass
 ## endif

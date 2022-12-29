@@ -25,14 +25,17 @@ from p4.v1 import p4runtime_pb2_grpc
 from p4.config.v1 import p4info_pb2
 import google.protobuf.text_format
 
+
 # See https://gist.github.com/carymrobbins/8940382
 # functools.partialmethod is introduced in Python 3.4
 class partialmethod(partial):
+
     def __get__(self, instance, owner):
         if instance is None:
             return self
-        return partial(self.func, instance,
-                       *(self.args or ()), **(self.keywords or {}))
+        return partial(self.func, instance, *(self.args or ()),
+                       **(self.keywords or {}))
+
 
 def stringify(n, length=0):
     """Take a non-negative integer 'n' as the first parameter, and a
@@ -57,6 +60,7 @@ def stringify(n, length=0):
     s = n.to_bytes(length, byteorder='big')
     return s
 
+
 def ipv4_to_binary(addr):
     """Take an argument 'addr' containing an IPv4 address written as a
     string in dotted decimal notation, e.g. '10.1.2.3', and convert it
@@ -69,6 +73,7 @@ def ipv4_to_binary(addr):
     # to add a separate check for that here.
     return bytes(bytes_)
 
+
 def ipv4_to_int(addr):
     """Take an argument 'addr' containing an IPv4 address written as a
     string in dotted decimal notation, e.g. '10.1.2.3', and convert it
@@ -80,12 +85,14 @@ def ipv4_to_int(addr):
     # to add a separate check for that here.
     return int.from_bytes(bytes(bytes_), byteorder='big')
 
+
 def ipv6_to_binary(addr):
     """Take an argument 'addr' containing an IPv6 address written in
     standard syntax, e.g. '2001:0db8::3210', and convert it to a
     string with binary contents expected by the Python P4Runtime
     client operations."""
     return socket.inet_pton(socket.AF_INET6, addr)
+
 
 def ipv6_to_int(addr):
     """Take an argument 'addr' containing an IPv6 address written in
@@ -96,6 +103,7 @@ def ipv6_to_int(addr):
     # elements of bytes_ is outside of the range [0, 255]], so no need
     # to add a separate check for that here.
     return int.from_bytes(bytes_, byteorder='big')
+
 
 def mac_to_binary(addr):
     """Take an argument 'addr' containing an Ethernet MAC address written
@@ -110,6 +118,7 @@ def mac_to_binary(addr):
     # to add a separate check for that here.
     return bytes(bytes_)
 
+
 def mac_to_int(addr):
     """Take an argument 'addr' containing an Ethernet MAC address written
     as a string in hexadecimal notation, with each byte separated by a
@@ -121,16 +130,20 @@ def mac_to_int(addr):
     # to add a separate check for that here.
     return int.from_bytes(bytes(bytes_), byteorder='big')
 
+
 # Used to indicate that the gRPC error Status object returned by the server has
 # an incorrect format.
 class P4RuntimeErrorFormatException(Exception):
+
     def __init__(self, message):
         super(P4RuntimeErrorFormatException, self).__init__(message)
 
+
 # Used to iterate over the p4.Error messages in a gRPC error Status object
 class P4RuntimeErrorIterator:
+
     def __init__(self, grpc_error):
-        assert(grpc_error.code() == grpc.StatusCode.UNKNOWN)
+        assert (grpc_error.code() == grpc.StatusCode.UNKNOWN)
         self.grpc_error = grpc_error
 
         error = None
@@ -167,6 +180,7 @@ class P4RuntimeErrorIterator:
             return v
         raise StopIteration
 
+
 # P4Runtime uses a 3-level message in case of an error during the processing of
 # a write batch. This means that if we do not wrap the grpc.RpcError inside a
 # custom exception, we can end-up with a non-helpful exception message in case
@@ -175,8 +189,9 @@ class P4RuntimeErrorIterator:
 # the batch) in order to print error code + user-facing message.  See P4 Runtime
 # documentation for more details on error-reporting.
 class P4RuntimeWriteException(Exception):
+
     def __init__(self, grpc_error):
-        assert(grpc_error.code() == grpc.StatusCode.UNKNOWN)
+        assert (grpc_error.code() == grpc.StatusCode.UNKNOWN)
         super(P4RuntimeWriteException, self).__init__()
         self.errors = []
         try:
@@ -200,14 +215,17 @@ class P4RuntimeWriteException(Exception):
         for idx, p4_error in self.errors:
             code_name = code_pb2._CODE.values_by_number[
                 p4_error.canonical_code].name
-            lst.append({'index': idx,
-                        'code': p4_error.code,
-                        'canonical_code': p4_error.canonical_code,
-                        'code_name': code_name,
-                        'details': p4_error.details,
-                        'message': p4_error.message,
-                        'space': p4_error.space})
+            lst.append({
+                'index': idx,
+                'code': p4_error.code,
+                'canonical_code': p4_error.canonical_code,
+                'code_name': code_name,
+                'details': p4_error.details,
+                'message': p4_error.message,
+                'space': p4_error.space
+            })
         return lst
+
 
 # Strongly inspired from _AssertRaisesContext in Python's unittest module
 class _AssertP4RuntimeErrorContext(object):
@@ -227,8 +245,7 @@ class _AssertP4RuntimeErrorContext(object):
                 exc_name = self.expected.__name__
             except AttributeError:
                 exc_name = str(self.expected)
-            raise self.failureException(
-                "{} not raised".format(exc_name))
+            raise self.failureException("{} not raised".format(exc_name))
         if not issubclass(exc_type, P4RuntimeWriteException):
             # let unexpected exceptions pass through
             return False
@@ -255,13 +272,15 @@ class _AssertP4RuntimeErrorContext(object):
         if not self.msg_regexp.search(p4_error.message):
             raise self.failureException(
                 "Invalid P4Runtime error msg: '{}' does not match '{}'".format(
-                self.msg_regexp.pattern, p4_error.message))
+                    self.msg_regexp.pattern, p4_error.message))
         return True
+
 
 # This code is common to all tests. setUp() is invoked at the beginning of the
 # test and tearDown is called at the end, no matter whether the test passed /
 # failed / errored.
 class P4RuntimeTest(BaseTest):
+
     def setUp(self):
         BaseTest.setUp(self)
         self.device_id = 0
@@ -276,7 +295,7 @@ class P4RuntimeTest(BaseTest):
 
         grpc_addr = testutils.test_param_get("grpcaddr")
         if grpc_addr is None:
-            grpc_addr = 'localhost:9559'
+            grpc_addr = 'localhost:28000'
 
         self.channel = grpc.insecure_channel(grpc_addr)
         self.stub = p4runtime_pb2_grpc.P4RuntimeStub(self.channel)
@@ -315,14 +334,16 @@ class P4RuntimeTest(BaseTest):
         with open(proto_txt_path, 'r') as fin:
             google.protobuf.text_format.Merge(fin.read(), config.p4info)
         config_path = testutils.test_param_get("config")
-        logging.info("Reading config (compiled P4 program) from {}".format(config_path))
+        logging.info(
+            "Reading config (compiled P4 program) from {}".format(config_path))
         with open(config_path, 'rb') as config_f:
             config.p4_device_config = config_f.read()
         request.action = p4runtime_pb2.SetForwardingPipelineConfigRequest.VERIFY_AND_COMMIT
         try:
             response = self.stub.SetForwardingPipelineConfig(request)
         except Exception as e:
-            logging.error("Error during SetForwardingPipelineConfig", file=sys.stderr)
+            logging.error("Error during SetForwardingPipelineConfig",
+                          file=sys.stderr)
             logging.error(str(e), file=sys.stderr)
             return False
         return True
@@ -332,8 +353,10 @@ class P4RuntimeTest(BaseTest):
     def import_p4info_names(self):
         self.p4info_obj_map = {}
         suffix_count = Counter()
-        for obj_type in ["tables", "action_profiles", "actions", "counters",
-                         "direct_counters", "controller_packet_metadata"]:
+        for obj_type in [
+                "tables", "action_profiles", "actions", "counters",
+                "direct_counters", "controller_packet_metadata"
+        ]:
             for obj in getattr(self.p4info, obj_type):
                 pre = obj.preamble
                 suffix = None
@@ -349,6 +372,7 @@ class P4RuntimeTest(BaseTest):
     def set_up_stream(self):
         self.stream_out_q = queue.Queue()
         self.stream_in_q = queue.Queue()
+
         def stream_req_iterator():
             while True:
                 p = self.stream_out_q.get()
@@ -359,13 +383,14 @@ class P4RuntimeTest(BaseTest):
         def stream_recv(stream):
             for p in stream:
                 now = time.time()
-                logging.debug("stream_recv received at time %s and stored stream msg in stream_in_q: %s"
-                              "" % (now, p))
+                logging.debug(
+                    "stream_recv received at time %s and stored stream msg in stream_in_q: %s"
+                    "" % (now, p))
                 self.stream_in_q.put({'time': now, 'message': p})
 
         self.stream = self.stub.StreamChannel(stream_req_iterator())
-        self.stream_recv_thread = threading.Thread(
-            target=stream_recv, args=(self.stream,))
+        self.stream_recv_thread = threading.Thread(target=stream_recv,
+                                                   args=(self.stream, ))
         self.stream_recv_thread.start()
 
         self.handshake()
@@ -382,7 +407,9 @@ class P4RuntimeTest(BaseTest):
         # election_id.low = 1
         self.stream_out_q.put(req)
 
-        logging.debug("handshake() checking whether arbitration msg received from server")
+        logging.debug(
+            "handshake() checking whether arbitration msg received from server"
+        )
         rep = self.get_stream_packet("arbitration", timeout=2)
         if rep is None:
             self.fail("Failed to establish handshake")
@@ -415,8 +442,9 @@ class P4RuntimeTest(BaseTest):
             int_val = int.from_bytes(member.value, byteorder='big')
             name_to_int[name] = int_val
             int_to_name[int_val] = name
-        logging.debug("serializable_enum_dict: name='%s' name_to_int=%s int_to_name=%s"
-                      "" % (name, name_to_int, int_to_name))
+        logging.debug(
+            "serializable_enum_dict: name='%s' name_to_int=%s int_to_name=%s"
+            "" % (name, name_to_int, int_to_name))
         return name_to_int, int_to_name
 
     def controller_packet_metadata_dict_key_id(self, name):
@@ -425,7 +453,11 @@ class P4RuntimeTest(BaseTest):
         ret = {}
         for md in cpm_info.metadata:
             id = md.id
-            ret[md.id] = {'id': md.id, 'name': md.name, 'bitwidth': md.bitwidth}
+            ret[md.id] = {
+                'id': md.id,
+                'name': md.name,
+                'bitwidth': md.bitwidth
+            }
         return ret
 
     def controller_packet_metadata_dict_key_name(self, name):
@@ -434,7 +466,11 @@ class P4RuntimeTest(BaseTest):
         ret = {}
         for md in cpm_info.metadata:
             id = md.id
-            ret[md.name] = {'id': md.id, 'name': md.name, 'bitwidth': md.bitwidth}
+            ret[md.name] = {
+                'id': md.id,
+                'name': md.name,
+                'bitwidth': md.bitwidth
+            }
         return ret
 
     def decode_packet_in_metadata(self, packet):
@@ -446,8 +482,7 @@ class P4RuntimeTest(BaseTest):
             assert md_id_int in pktin_info
             md_field_info = pktin_info[md_id_int]
             pktin_field_to_val[md_field_info['name']] = md_val_int
-        ret = {'metadata': pktin_field_to_val,
-               'payload': packet.payload}
+        ret = {'metadata': pktin_field_to_val, 'payload': packet.payload}
         logging.debug("decode_packet_in_metadata: ret=%s" % (ret))
         return ret
 
@@ -473,12 +508,14 @@ class P4RuntimeTest(BaseTest):
                 if remaining < 0:
                     break
                 msg = self.stream_in_q.get(timeout=remaining)
-                logging.debug("get_stream_packet dequeuing msg from stream_in_q: %s"
-                              "" % (msg))
+                logging.debug(
+                    "get_stream_packet dequeuing msg from stream_in_q: %s"
+                    "" % (msg))
                 if type_ is None or msg['message'].HasField(type_):
                     return msg['message']
-                logging.debug("get_stream_packet msg=%s has no field type_=%s so discarding"
-                              "" % (msg, type_))
+                logging.debug(
+                    "get_stream_packet msg=%s has no field type_=%s so discarding"
+                    "" % (msg, type_))
         except:  # timeout expired
             pass
         return None
@@ -504,12 +541,14 @@ class P4RuntimeTest(BaseTest):
                     return None, skipped_msginfos
                     break
                 msginfo = self.stream_in_q.get(timeout=remaining)
-                logging.debug("get_stream_packet dequeuing msginfo from stream_in_q: %s"
-                              "" % (msginfo))
+                logging.debug(
+                    "get_stream_packet dequeuing msginfo from stream_in_q: %s"
+                    "" % (msginfo))
                 if type_ is None or msg['message'].HasField(type_):
                     return msginfo, skipped_msginfos
-                logging.debug("get_stream_packet msginfo['message'] has no field type_=%s so discarding"
-                              "" % (type_))
+                logging.debug(
+                    "get_stream_packet msginfo['message'] has no field type_=%s so discarding"
+                    "" % (type_))
                 skipped_msginfos.append(msginfo)
         except:  # timeout expired
             pass
@@ -518,7 +557,8 @@ class P4RuntimeTest(BaseTest):
     def encode_packet_out_metadata(self, pktout_dict):
         ret = p4runtime_pb2.PacketOut()
         ret.payload = pktout_dict['payload']
-        pktout_info = self.controller_packet_metadata_dict_key_name("packet_out")
+        pktout_info = self.controller_packet_metadata_dict_key_name(
+            "packet_out")
         for k, v in pktout_dict['metadata'].items():
             md = ret.metadata.add()
             md.metadata_id = pktout_info[k]['id']
@@ -575,10 +615,12 @@ class P4RuntimeTest(BaseTest):
     # P4Runtime PTF tests easier.
 
     class MF(object):
+
         def __init__(self, name):
             self.name = name
 
     class Exact(MF):
+
         def __init__(self, name, v):
             super(P4RuntimeTest.Exact, self).__init__(name)
             assert isinstance(v, int)
@@ -590,6 +632,7 @@ class P4RuntimeTest(BaseTest):
             mf.exact.value = stringify(self.v)
 
     class Lpm(MF):
+
         def __init__(self, name, v, pLen):
             super(P4RuntimeTest.Lpm, self).__init__(name)
             assert isinstance(v, int)
@@ -613,6 +656,7 @@ class P4RuntimeTest(BaseTest):
             mf.lpm.value = stringify(self.v & prefix_mask)
 
     class Ternary(MF):
+
         def __init__(self, name, v, mask):
             super(P4RuntimeTest.Ternary, self).__init__(name)
             assert isinstance(v, int)
@@ -634,6 +678,7 @@ class P4RuntimeTest(BaseTest):
             mf.ternary.mask = stringify(self.mask)
 
     class Range(MF):
+
         def __init__(self, name, min_val, max_val):
             super(P4RuntimeTest.Range, self).__init__(name)
             assert isinstance(min_val, int)
@@ -654,6 +699,7 @@ class P4RuntimeTest(BaseTest):
             mf.range.high = stringify(self.max_val)
 
     class Optional(MF):
+
         def __init__(self, name, val, exact_match):
             super(P4RuntimeTest.Optional, self).__init__(name)
             assert isinstance(val, int)
@@ -679,7 +725,9 @@ class P4RuntimeTest(BaseTest):
     def set_action(self, action, a_name, params):
         action_id = self.get_action_id(a_name)
         if action_id is None:
-            self.fail("Failed to get id of action '{}' - perhaps the action name is misspelled?").format(a_name)
+            self.fail(
+                "Failed to get id of action '{}' - perhaps the action name is misspelled?"
+            ).format(a_name)
         action.action_id = action_id
         for p_name, v in params:
             param = action.params.add()
@@ -738,7 +786,11 @@ class P4RuntimeTest(BaseTest):
         self.push_update_modify_member(req, ap_name, mbr_id, a_name, params)
         return req, self.write_request(req, store=False)
 
-    def push_update_add_group(self, req, ap_name, grp_id, grp_size=32,
+    def push_update_add_group(self,
+                              req,
+                              ap_name,
+                              grp_id,
+                              grp_size=32,
                               mbr_ids=[]):
         update = req.updates.add()
         update.type = p4runtime_pb2.Update.INSERT
@@ -756,7 +808,10 @@ class P4RuntimeTest(BaseTest):
         self.push_update_add_group(req, ap_name, grp_id, grp_size, mbr_ids)
         return req, self.write_request(req)
 
-    def push_update_set_group_membership(self, req, ap_name, grp_id,
+    def push_update_set_group_membership(self,
+                                         req,
+                                         ap_name,
+                                         grp_id,
                                          mbr_ids=[]):
         update = req.updates.add()
         update.type = p4runtime_pb2.Update.MODIFY
@@ -782,7 +837,12 @@ class P4RuntimeTest(BaseTest):
     # list used for autocleanup, by passing store=False to write_request calls.
     #
 
-    def push_update_add_entry_to_action(self, req, t_name, mk, a_name, params,
+    def push_update_add_entry_to_action(self,
+                                        req,
+                                        t_name,
+                                        mk,
+                                        a_name,
+                                        params,
                                         priority=None):
         update = req.updates.add()
         update.type = p4runtime_pb2.Update.INSERT
@@ -797,7 +857,11 @@ class P4RuntimeTest(BaseTest):
             table_entry.priority = priority
         self.set_action_entry(table_entry, a_name, params)
 
-    def send_request_add_entry_to_action(self, t_name, mk, a_name, params,
+    def send_request_add_entry_to_action(self,
+                                         t_name,
+                                         mk,
+                                         a_name,
+                                         params,
                                          priority=None):
         req = p4runtime_pb2.WriteRequest()
         req.device_id = self.device_id
@@ -813,8 +877,11 @@ class P4RuntimeTest(BaseTest):
         assert isinstance(action_name_and_params, tuple)
         assert len(action_name_and_params) == 2
 
-    def make_table_entry(self, table_name_and_key, action_name_and_params,
-                         priority=None, options=None):
+    def make_table_entry(self,
+                         table_name_and_key,
+                         action_name_and_params,
+                         priority=None,
+                         options=None):
         self.check_table_name_and_key(table_name_and_key)
         table_name = table_name_and_key[0]
         key = table_name_and_key[1]
@@ -834,7 +901,8 @@ class P4RuntimeTest(BaseTest):
             if 'idle_timeout_ns' in options:
                 table_entry.idle_timeout_ns = options['idle_timeout_ns']
             if 'elapsed_ns' in options:
-                table_entry.time_since_last_hit.elapsed_ns = options['elapsed_ns']
+                table_entry.time_since_last_hit.elapsed_ns = options[
+                    'elapsed_ns']
             if 'metadata' in options:
                 table_entry.metadata = options['metadata']
         self.set_action_entry(table_entry, action_name, action_params)
@@ -844,8 +912,11 @@ class P4RuntimeTest(BaseTest):
     # bundles up table name and key into one tuple, and action name
     # and params into another tuple, for the convenience of the caller
     # using some helper functions that create these tuples.
-    def table_add(self, table_name_and_key, action_name_and_params,
-                  priority=None, options=None):
+    def table_add(self,
+                  table_name_and_key,
+                  action_name_and_params,
+                  priority=None,
+                  options=None):
         table_entry = self.make_table_entry(table_name_and_key,
                                             action_name_and_params, priority,
                                             options)
@@ -1037,22 +1108,23 @@ class P4RuntimeTest(BaseTest):
         context = _AssertP4RuntimeErrorContext(self, code, msg_regexp)
         return context
 
+
 # Add p4info object and object id "getters" for each object type; these are just
 # wrappers around P4RuntimeTest.get_obj and P4RuntimeTest.get_obj_id.
 # For example: get_table(x) and get_table_id(x) respectively call
 # get_obj("tables", x) and get_obj_id("tables", x)
-for obj_type, nickname in [("tables", "table"),
-                           ("action_profiles", "ap"),
-                           ("actions", "action"),
-                           ("counters", "counter"),
+for obj_type, nickname in [("tables", "table"), ("action_profiles", "ap"),
+                           ("actions", "action"), ("counters", "counter"),
                            ("direct_counters", "direct_counter"),
-                           ("controller_packet_metadata", "controller_packet_metadata")]:
+                           ("controller_packet_metadata",
+                            "controller_packet_metadata")]:
     name = "_".join(["get", nickname])
-    setattr(P4RuntimeTest, name, partialmethod(
-        P4RuntimeTest.get_obj, obj_type))
+    setattr(P4RuntimeTest, name, partialmethod(P4RuntimeTest.get_obj,
+                                               obj_type))
     name = "_".join(["get", nickname, "id"])
-    setattr(P4RuntimeTest, name, partialmethod(
-        P4RuntimeTest.get_obj_id, obj_type))
+    setattr(P4RuntimeTest, name,
+            partialmethod(P4RuntimeTest.get_obj_id, obj_type))
+
 
 # this decorator can be used on the runTest method of P4Runtime PTF tests
 # when it is used, the undo_write_requests will be called at the end of the test
@@ -1070,19 +1142,23 @@ for obj_type, nickname in [("tables", "table"),
 # it seems more appropriate to define a decorator for this rather than do it
 # unconditionally in the P4RuntimeTest tearDown method.
 def autocleanup(f):
+
     @wraps(f)
     def handle(*args, **kwargs):
         test = args[0]
-        assert(isinstance(test, P4RuntimeTest))
+        assert (isinstance(test, P4RuntimeTest))
         try:
             return f(*args, **kwargs)
         finally:
             test.undo_write_requests(test._reqs)
+
     return handle
+
 
 # Copied update_config from the https://github.com/p4lang/PI
 # repository in file proto/ptf/ptf_runner.py, then modified it
 # slightly:
+
 
 def update_config(config_path, p4info_path, grpc_addr, device_id):
     '''

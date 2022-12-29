@@ -68,9 +68,9 @@ def run_test(options):
     assert isinstance(options, Options)
     print("---------------------- Start p4c-bm2-ss ----------------------")
     p4c_bm2_ss = (
-        options.rootDir +
-        "/build/p4c-bm2-ss --target bmv2 --arch v1model --p4runtime-files " +
-        options.jsonName + "," + options.infoName + " " + options.p4Filename)
+        f"{options.rootDir}/build/p4c-bm2-ss --target bmv2 --arch v1model --p4runtime-files {options.infoName} {options.p4Filename} -o {options.jsonName}"
+    )
+    print('RUNNING', p4c_bm2_ss)
     p = subprocess.Popen(p4c_bm2_ss,
                          shell=True,
                          stdin=subprocess.PIPE,
@@ -94,7 +94,7 @@ def run_test(options):
     print(
         "---------------------- Start simple_switch_grpc ----------------------"
     )
-    simple_switch_grpc = "simple_switch_grpc --log-file ss-log --log-flush --dump-packet-data 10000 -i 0@veth0 -i 1@veth2 -i 2@veth4 -i 3@veth6 -i 4@veth8 -i 5@veth10 -i 6@veth12 -i 7@veth14 --no-p4"
+    simple_switch_grpc = "simple_switch_grpc --log-console -i 0@veth0 -i 1@veth2 -i 2@veth4 -i 3@veth6 -i 4@veth8 -i 5@veth10 -i 6@veth12 -i 7@veth14 --no-p4 -- --grpc-server-addr localhost:28000"
     simple_switch_grpcP = subprocess.Popen(simple_switch_grpc,
                                            shell=True,
                                            stdin=subprocess.PIPE,
@@ -119,9 +119,9 @@ def run_test(options):
             universal_newlines=True,
     ) as ptfTestList:
         ptfTestList.communicate()
-    ifaces = "0@veth1 -i 1@veth3 -i 2@veth5 -i 3@veth7 -i 4@veth9 -i 5@veth11 -i 6@veth13 -i 7@veth15"
-    test_params = f"grpcaddr='localhost:9559';p4info='{options.infoName}';config='{options.jsonName}'"
-    ptf = f'ptf --verbose --pypath {pypath} -i {ifaces} --test-params="{test_params}" --test-dir {options.testdir}'
+    ifaces = "-i 0@veth1 -i 0@veth0 -i 1@veth2 -i 2@veth4 -i 3@veth6 -i 4@veth8 -i 5@veth10 -i 6@veth12 -i 7@veth14"
+    test_params = f"grpcaddr='localhost:28000';p4info='{options.infoName}';config='{options.jsonName}';"
+    ptf = f'ptf --verbose --pypath {pypath} {ifaces} --test-params="{test_params}" --test-dir {options.testdir}'
     print('RUNNING ', ptf)
     ptfP = subprocess.Popen(ptf,
                             shell=True,
