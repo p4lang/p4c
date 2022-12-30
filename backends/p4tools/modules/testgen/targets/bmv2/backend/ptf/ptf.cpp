@@ -117,6 +117,7 @@ inja::json PTF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
     rulesJson["lpm_matches"] = inja::json::array();
 
     rulesJson["act_args"] = inja::json::array();
+    rulesJson["needs_priority"] = false;
 
     for (const auto &match : matches) {
         const auto fieldName = match.first;
@@ -149,6 +150,8 @@ inja::json PTF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
                 j["value"] = formatHexExpr(elem.getEvaluatedValue()).c_str();
                 j["mask"] = formatHexExpr(elem.getEvaluatedMask()).c_str();
                 rulesJson["ternary_matches"].push_back(j);
+                // If the rule has a ternary match we need to add the priority.
+                rulesJson["needs_priority"] = true;
             }
             void operator()(const LPM &elem) const {
                 inja::json j;
@@ -238,13 +241,6 @@ class AbstractTest(bt.P4RuntimeTest):
     def tearDown(self):
         bt.P4RuntimeTest.tearDown(self)
 
-    def insertTableEntry(self, table_name, key_fields = None,
-            action_name = None, data_fields = []):
-        req = p4runtime_pb2_grpc.WriteRequest()
-        req.device_id = 1
-        self.push_update_add_entry_to_action(req, table_name, key_fields,
-                                             action_name, data_fields)
-
     def setupCtrlPlane(self):
         pass
 
@@ -316,8 +312,8 @@ class Test{{test_id}}(AbstractTest):
 ## endif
 ## for table in control_plane.tables
 ## for rule in table.rules
-        self.insertTableEntry(
-            '{{table.table_name}}',
+        self.table_add(
+            ('{{table.table_name}}',
             [
 ## for r in rule.rules.single_exact_matches
                 self.Exact('{{r.field_name}}', {{r.value}}),
@@ -337,16 +333,16 @@ class Test{{test_id}}(AbstractTest):
             None,
             [
                 ('$ACTION_MEMBER_ID', {{rule.action_name}}),
-            ]
+            ], {% if rule.rules.needs_priority %}{{rule.priority}}{% endif %}
         )
 ## else
-            ],
-            '{{rule.action_name}}',
+            ]),
+            ('{{rule.action_name}}',
             [
 ## for act_param in rule.rules.act_args
                 ('{{act_param.param}}', {{act_param.value}}),
 ## endfor
-            ]
+            ]), {% if rule.rules.needs_priority %}{{rule.priority}}{% endif %}
         )
 ## endfor
 ## endif

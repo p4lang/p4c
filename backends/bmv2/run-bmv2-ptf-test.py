@@ -42,7 +42,7 @@ def processKill():
                           shell=True,
                           stdin=subprocess.PIPE,
                           universal_newlines=True) as _:
-        time.sleep(2)
+        pass
 
     print("Waiting 2 seconds before killing simple_switch_grpc ...")
     kill = "pkill --signal 9 --list-name simple_switch"
@@ -50,9 +50,9 @@ def processKill():
                           shell=True,
                           stdin=subprocess.PIPE,
                           universal_newlines=True) as _:
-        time.sleep(4)
+        pass
     print(
-        "Verifying that there are no simple_switch_grpc processes running any longer in 4 seconds ..."
+        "Verifying that there are no simple_switch_grpc processes running any longer..."
     )
     ps = "ps axguwww | grep simple_switch"
     with subprocess.Popen(ps,
@@ -70,7 +70,6 @@ def run_test(options):
     p4c_bm2_ss = (
         f"{options.rootDir}/build/p4c-bm2-ss --target bmv2 --arch v1model --p4runtime-files {options.infoName} {options.p4Filename} -o {options.jsonName}"
     )
-    print('RUNNING', p4c_bm2_ss)
     p = subprocess.Popen(p4c_bm2_ss,
                          shell=True,
                          stdin=subprocess.PIPE,
@@ -99,10 +98,8 @@ def run_test(options):
                                            shell=True,
                                            stdin=subprocess.PIPE,
                                            universal_newlines=True)
-    time.sleep(2)
     if simple_switch_grpcP.poll() is not None:
         processKill()
-        time.sleep(2)
         print(
             "---------------------- End simple_switch_grpc with errors ----------------------"
         )
@@ -122,7 +119,6 @@ def run_test(options):
     ifaces = "-i 0@veth1 -i 0@veth0 -i 1@veth2 -i 2@veth4 -i 3@veth6 -i 4@veth8 -i 5@veth10 -i 6@veth12 -i 7@veth14"
     test_params = f"grpcaddr='localhost:28000';p4info='{options.infoName}';config='{options.jsonName}';"
     ptf = f'ptf --verbose --pypath {pypath} {ifaces} --test-params="{test_params}" --test-dir {options.testdir}'
-    print('RUNNING ', ptf)
     ptfP = subprocess.Popen(ptf,
                             shell=True,
                             stdin=subprocess.PIPE,
@@ -133,7 +129,6 @@ def run_test(options):
         poll = (
             ptfP.poll()
         )  # returns the exit code or None if the process is still running
-        time.sleep(6)  # here we could actually do something useful
         timeout -= 0.5
         if timeout <= 0:
             break
@@ -144,7 +139,6 @@ def run_test(options):
             "---------------------- End ptf with errors ----------------------"
         )
         processKill()
-        time.sleep(2)
         raise SystemExit("PTF ended with errors")
 
     print("---------------------- End ptf ----------------------")

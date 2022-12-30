@@ -24,6 +24,7 @@ from p4.v1 import p4runtime_pb2
 from p4.v1 import p4runtime_pb2_grpc
 from p4.config.v1 import p4info_pb2
 import google.protobuf.text_format
+from p4.v1 import p4runtime_pb2, p4runtime_pb2_grpc
 
 
 # See https://gist.github.com/carymrobbins/8940382
@@ -1108,6 +1109,13 @@ class P4RuntimeTest(BaseTest):
         context = _AssertP4RuntimeErrorContext(self, code, msg_regexp)
         return context
 
+    def get_new_write_request(self):
+        req = p4runtime_pb2.WriteRequest()
+        req.device_id = self.device_id
+        election_id = req.election_id
+        election_id.high = 0
+        election_id.low = 0
+        return req
 
 # Add p4info object and object id "getters" for each object type; these are just
 # wrappers around P4RuntimeTest.get_obj and P4RuntimeTest.get_obj_id.
