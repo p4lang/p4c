@@ -2,9 +2,9 @@ import argparse
 import subprocess
 import os
 import sys
-import time
+import socket
+import random
 from pathlib import Path
-import ptf.testutils as tu
 
 FILE_DIR = Path(__file__).parent.resolve()
 TOOLS_PATH = FILE_DIR.joinpath("../../tools")
@@ -22,6 +22,11 @@ PARSER.add_argument(
     dest="testfile",
     help="Provide the path for the ptf py file for this test. ",
 )
+
+
+def is_port_in_use(port: int) -> bool:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(('localhost', port)) == 0
 
 
 class Options:
@@ -90,10 +95,21 @@ def run_test(options):
                           universal_newlines=True) as _:
         pass
 
+    # Pick an available port.
+    grpc_port_used = True
+    grpc_port = 28000
+    while grpc_port_used:
+        grpc_port = random.randrange(1024, 65535)
+        grpc_port_used = is_port_in_use(grpc_port)
+    thrift_port_used = True
+    thrift_port = 28000
+    while thrift_port_used or thrift_port == grpc_port:
+        thrift_port = random.randrange(1024, 65535)
+        thrift_port_used = is_port_in_use(thrift_port)
     print(
         "---------------------- Start simple_switch_grpc ----------------------"
     )
-    simple_switch_grpc = "simple_switch_grpc --log-console -i 0@veth0 -i 1@veth2 -i 2@veth4 -i 3@veth6 -i 4@veth8 -i 5@veth10 -i 6@veth12 -i 7@veth14 --no-p4 -- --grpc-server-addr localhost:28000"
+    simple_switch_grpc = f"simple_switch_grpc --thrift-port {thrift_port} --log-console -i 0@veth0 -i 1@veth2 -i 2@veth4 -i 3@veth6 -i 4@veth8 -i 5@veth10 -i 6@veth12 -i 7@veth14 --no-p4 -- --grpc-server-addr localhost:{grpc_port}  "
     simple_switch_grpcP = subprocess.Popen(simple_switch_grpc,
                                            shell=True,
                                            stdin=subprocess.PIPE,
@@ -116,8 +132,8 @@ def run_test(options):
             universal_newlines=True,
     ) as ptfTestList:
         ptfTestList.communicate()
-    ifaces = "-i 0@veth1 -i 0@veth0 -i 1@veth2 -i 2@veth4 -i 3@veth6 -i 4@veth8 -i 5@veth10 -i 6@veth12 -i 7@veth14"
-    test_params = f"grpcaddr='localhost:28000';p4info='{options.infoName}';config='{options.jsonName}';"
+    ifaces = "-i 0@veth0 -i 1@veth2 -i 2@veth4 -i 3@veth6 -i 4@veth8 -i 5@veth10 -i 6@veth12 -i 7@veth14"
+    test_params = f"grpcaddr='localhost:{grpc_port}';p4info='{options.infoName}';config='{options.jsonName}';"
     ptf = f'ptf --verbose --pypath {pypath} {ifaces} --test-params="{test_params}" --test-dir {options.testdir}'
     ptfP = subprocess.Popen(ptf,
                             shell=True,
