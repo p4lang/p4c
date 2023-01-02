@@ -1135,6 +1135,153 @@ class ElimHeaderCopy : public Transform {
     const IR::Node* postorder(IR::Member* m) override;
 };
 
+/// This pass check wether program uses InternetChecksum and
+/// all argument to the method add or sub have non header fields expression
+class HaveNonHeaderChecksumArgs : public Inspector {
+    P4::TypeMap* typeMap;
+    bool& is_all_arg_header_fields;
+
+ public:
+    HaveNonHeaderChecksumArgs(P4::TypeMap* typeMap, bool& is_all_arg_header_fields)
+        : typeMap(typeMap), is_all_arg_header_fields(is_all_arg_header_fields) {}
+    bool preorder(const IR::MethodCallExpression* mce) override {
+        if (!is_all_arg_header_fields) return false;
+        if (auto* m = mce->method->to<IR::Member>()) {
+            if (auto* type = typeMap->getType(m->expr)->to<IR::Type_Extern>()) {
+                if (type->name == "InternetChecksum") {
+                    if (m->member == "add" || m->member == "subtract") {
+                        for (auto arg : *mce->arguments) {
+                            BUG_CHECK(arg->expression->is<IR::StructExpression>(),
+                                      "Expected a StructExpression");
+                            for (auto c : arg->expression->to<IR::StructExpression>()->components) {
+                                if (auto m0 = c->expression->to<IR::Member>()) {
+                                    if (!typeMap->getType(m0->expr, true)->is<IR::Type_Header>()) {
+                                        is_all_arg_header_fields = false;
+                                        return false;
+                                    }
+                                } else {
+                                    is_all_arg_header_fields = false;
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+};
+
+/// @brief This pass add a pseudo header declaration, it will be used as
+/// container of operands where dpdk instructions require it's operand to be in
+/// a header.
+class DpdkAddPseudoHeaderDecl : public Transform {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    DpdkProgramStructure* structure;
+
+    bool& is_all_args_header;
+    IR::Vector<IR::Node> allTypeDecls;
+
+ public:
+    static cstring headerInstanceName;
+    static cstring headerTypeName;
+    static cstring headersDeclName;
+    DpdkAddPseudoHeaderDecl(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                            DpdkProgramStructure* structure, bool& is_all_args_header)
+        : refMap(refMap),
+          typeMap(typeMap),
+          structure(structure),
+          is_all_args_header(is_all_args_header) {
+        headerInstanceName = refMap->newName("dpdk_pseudo_header");
+        headerTypeName = refMap->newName("dpdk_pseudo_header_t");
+        headersDeclName = "";
+    }
+
+    const IR::Node* preorder(IR::P4Program* program) override;
+    const IR::Node* preorder(IR::Type_Struct* st) override;
+    bool isHeadersStruct(const IR::Type_Struct* st);
+    const IR::Node* preorder(IR::P4Control* c) override;
+};
+
+/// @brief This pass identify and collect statements which requires it's operand to be
+/// in a header and also initialize added header fields with original operand.
+class MoveNonHeaderFieldsToPseudoHeader : public Transform {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    bool& is_all_args_header;
+    IR::Vector<IR::Node> newStructTypes;
+    cstring headerTypeName;
+    cstring headerInstanceName;
+
+ public:
+    static std::vector<std::pair<cstring, const IR::Type*>> pseudoFieldNameType;
+    MoveNonHeaderFieldsToPseudoHeader(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                                      bool& is_all_args_header)
+        : refMap(refMap), typeMap(typeMap), is_all_args_header(is_all_args_header) {
+        headerInstanceName = DpdkAddPseudoHeaderDecl::headerInstanceName;
+        headerTypeName = DpdkAddPseudoHeaderDecl::headerTypeName;
+    }
+    std::pair<IR::AssignmentStatement*, IR::Member*> addAssignmentStmt(
+        const IR::NamedExpression* ne);
+
+    const IR::Node* postorder(IR::P4Program* p) {
+        if (newStructTypes.size() > 0) {
+            IR::Vector<IR::Node> allTypeDecls;
+            allTypeDecls.append(newStructTypes);
+            allTypeDecls.append(p->objects);
+            p->objects = allTypeDecls;
+        }
+        return p;
+    }
+    const IR::Node* postorder(IR::MethodCallStatement* statement) override;
+};
+
+/// @brief This pass finally adds all the collected fields to pseudo header
+class AddFieldsToPseudoHeader : public Transform {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    DpdkProgramStructure* structure;
+    bool& is_all_args_header;
+
+ public:
+    AddFieldsToPseudoHeader(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                            DpdkProgramStructure* structure, bool& is_all_args_header)
+        : refMap(refMap),
+          typeMap(typeMap),
+          structure(structure),
+          is_all_args_header(is_all_args_header) {}
+    const IR::Node* preorder(IR::Type_Header* h) override;
+};
+
+struct DpdkAddPseudoHeader : public PassManager {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    DpdkProgramStructure* structure;
+    bool& is_all_args_header;
+
+ public:
+    DpdkAddPseudoHeader(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                        DpdkProgramStructure* structure, bool& is_all_args_header_fields)
+        : refMap(refMap),
+          typeMap(typeMap),
+          structure(structure),
+          is_all_args_header(is_all_args_header_fields) {
+        passes.push_back(new HaveNonHeaderChecksumArgs(typeMap, is_all_args_header));
+        passes.push_back(
+            new DpdkAddPseudoHeaderDecl(refMap, typeMap, structure, is_all_args_header));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap));
+        passes.push_back(
+            new MoveNonHeaderFieldsToPseudoHeader(refMap, typeMap, is_all_args_header));
+        passes.push_back(
+            new AddFieldsToPseudoHeader(refMap, typeMap, structure, is_all_args_header));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap));
+    }
+};
+
 class DpdkArchFirst : public PassManager {
  public:
     DpdkArchFirst() { setName("DpdkArchFirst"); }
@@ -1165,6 +1312,5 @@ class CollectProgramStructure : public PassManager {
         }));
     }
 };
-
 };     // namespace DPDK
 #endif /* BACKENDS_DPDK_DPDKARCH_H_ */

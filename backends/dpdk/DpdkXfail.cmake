@@ -11,18 +11,13 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "not implemented"
-  testdata/p4_16_samples/psa-example-dpdk-byte-alignment_4.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
-  "cannot be the target of an assignment"
-  testdata/p4_16_samples/psa-example-dpdk-byte-alignment_2.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
   "Not implemented"
   testdata/p4_16_samples/psa-random.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+"not implemented"
+testdata/p4_16_samples/psa-example-dpdk-byte-alignment_4.p4
   )
 
 p4c_add_xfail_reason("dpdk"
