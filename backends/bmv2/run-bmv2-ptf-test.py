@@ -141,23 +141,16 @@ def _run_ptf(bridge, grpc_port):
     ptfProc  = _run_proc_in_backgraund(bridge, ptf)
     timeout = 3
     ptfProc.communicate()
-    while True:
-        poll = (
+    poll = (
             ptfProc.poll()
         )  # returns the exit code or None if the process is still running
-        timeout -= 0.5
-        if timeout <= 0:
-            break
-        if poll is not None:
-            break
     if poll is not None and poll != p4c_utils.SUCCESS:
         print(
             "---------------------- End ptf with errors ----------------------"
         )
         raise SystemExit("PTF ended with errors")
-
-    print("---------------------- End ptf ----------------------")
-
+    elif poll == p4c_utils.SUCCESS:
+        print("---------------------- End ptf ----------------------")
     return bridge
 
 def _pick_port():
