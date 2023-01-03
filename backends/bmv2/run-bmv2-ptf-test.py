@@ -97,7 +97,7 @@ def _create_runtime():
 def _run_proc_in_backgraund(bridge, cmd):
     namedCmd = bridge.get_ns_prefix() + " " + cmd
     return subprocess.Popen(namedCmd, shell=True,
-                          stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                          stdin=subprocess.PIPE,
                           universal_newlines=True)
 
 def _run_simple_switch_grpc(bridge, thrift_port, grpc_port):
