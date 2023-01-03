@@ -77,25 +77,28 @@ def _kill_process(proc):
     os.kill(proc.pid, 15)
 
 
-def _create_runtime(bridge):
+def _create_runtime():
     print("---------------------- Start p4c-bm2-ss ----------------------")
-    proc = _open_proc(bridge)
     p4c_bm2_ss = (
         f"{options.rootDir}/build/p4c-bm2-ss --target bmv2 --arch v1model --p4runtime-files {options.infoName} {options.p4Filename} -o {options.jsonName}"
     )
-    result = bridge.ns_proc_write(proc, p4c_bm2_ss)
-    if result != p4c_utils.SUCCESS:
-        _kill_process(proc)
+    p = subprocess.Popen(p4c_bm2_ss,
+                         shell=True,
+                         stdin=subprocess.PIPE,
+                         universal_newlines=True)
+
+    p.communicate()
+    if p.returncode != 0:
         print(
             "---------------------- End p4c-bm2-ss with errors ----------------------"
         )
         raise SystemExit("p4c-bm2-ss ended with errors")
-    bridge.ns_proc_close(proc)
-    return bridge
 
 def _run_proc_in_backgraund(bridge, cmd):
     namedCmd = bridge.get_ns_prefix() + " " + cmd
-    return subprocess.Popen(namedCmd.split())
+    return subprocess.Popen(namedCmd, shell=True,
+                          stdin=subprocess.PIPE,
+                          universal_newlines=True)
 
 def _run_simple_switch_grpc(bridge, thrift_port, grpc_port):
     proc = _open_proc(bridge)
@@ -151,11 +154,8 @@ def _run_ptf(bridge, grpc_port):
         print(
             "---------------------- End ptf with errors ----------------------"
         )
-        _kill_process(ptfProc)
         raise SystemExit("PTF ended with errors")
 
-
-    _kill_process(ptfProc)
     print("---------------------- End ptf ----------------------")
 
     return bridge
@@ -180,7 +180,7 @@ def run_test(options):
     Optional: Run the generated model"""
     assert isinstance(options, Options)
     bridge = _create_bridge()
-    bridge = _create_runtime(bridge)
+    _create_runtime()
     thrift_port, grpc_port = _pick_port()
     
     bridge, switchProc = _run_simple_switch_grpc(bridge, thrift_port, grpc_port)
