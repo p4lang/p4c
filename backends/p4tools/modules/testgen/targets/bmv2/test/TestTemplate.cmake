@@ -28,14 +28,12 @@ macro(check_bmv2_with_ptf testfile testfolder p4test)
   set(__p4cbmv2path "${P4C_BINARY_DIR}")
   set(__bmv2runner " ${P4C_SOURCE_DIR}/backends/bmv2/run-bmv2-ptf-test.py")
   # Find all the stf tests generated for this P4 file and test them with bmv2 model
-  file(APPEND ${testfile} "${P4C_SOURCE_DIR}/tools/veth_setup.sh\n")
   file(APPEND ${testfile} "ptffiles=($(find ${testfolder} -name \"*.py\"  | sort -n ))\n")
   file(APPEND ${testfile} "for item in \${ptffiles[@]}\n")
   file(APPEND ${testfile} "do\n")
   file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
   file(APPEND ${testfile} "\t python3 ${__bmv2runner} -tf \${item} ${P4C_SOURCE_DIR} -pfn ${P4C_SOURCE_DIR}/${p4test} \n")
   file(APPEND ${testfile} "done\n")
-  file(APPEND ${testfile} " ${P4C_SOURCE_DIR}/tools/veth_teardown.sh\n")
 endmacro(check_bmv2_with_ptf)
 
 # Write the script to validate whether a given protobuf file has a valid format.

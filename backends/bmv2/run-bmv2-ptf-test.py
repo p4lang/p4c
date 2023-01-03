@@ -189,6 +189,7 @@ def run_test(options):
 
     _kill_process(switchProc)
     print("---------------------- End simple_switch_grpc ----------------------")
+    bridge.ns_del()
 
 
 if __name__ == "__main__":
