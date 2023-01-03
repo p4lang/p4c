@@ -97,7 +97,7 @@ def _create_runtime():
 def _run_proc_in_backgraund(bridge, cmd):
     namedCmd = bridge.get_ns_prefix() + " " + cmd
     return subprocess.Popen(namedCmd, shell=True,
-                          stdin=subprocess.PIPE,
+                          stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                           universal_newlines=True)
 
 def _run_simple_switch_grpc(bridge, thrift_port, grpc_port):
@@ -139,11 +139,9 @@ def _run_ptf(bridge, grpc_port):
     test_params = f"grpcaddr='localhost:{grpc_port}';p4info='{options.infoName}';config='{options.jsonName}';"
     ptf = f'ptf --verbose --pypath {pypath} {ifaces} --test-params="{test_params}" --test-dir {options.testdir}'
     ptfProc  = _run_proc_in_backgraund(bridge, ptf)
-    timeout = 3
     ptfProc.communicate()
-    poll = (
-            ptfProc.poll()
-        )  # returns the exit code or None if the process is still running
+    # returns the exit code or None if the process is still running
+    poll = ptfProc.poll() 
     if poll is not None and poll != p4c_utils.SUCCESS:
         print(
             "---------------------- End ptf with errors ----------------------"
