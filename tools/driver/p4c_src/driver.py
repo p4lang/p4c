@@ -117,8 +117,8 @@ class BackendDriver:
 
         # append to the list of defines
         for d in opts.preprocessor_defines:
-            self.add_command_option('preprocessor', "-D"+d)
-            self.add_command_option('compiler', "-D"+d)
+            self.add_command_option('preprocessor', "-D'{}'".format(d))
+            self.add_command_option('compiler', "-D'{}'".format(d))
 
         # Preserve comments: -C
         # Unix and std C keywords should be allowed in P4 (-undef and -nostdinc)
