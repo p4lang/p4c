@@ -464,8 +464,9 @@ std::ostream& IR::DpdkSelector::toSpec(std::ostream& out) const {
         out << "\t}" << std::endl;
     }
     out << "\tmember_id " << DPDK::toStr(member_id) << std::endl;
-    out << "\tn_groups_max " << n_groups_max << std::endl;
-    out << "\tn_members_per_group_max " << n_members_per_group_max << std::endl;
+    out << "\tn_groups_max 0x" << std::hex << std::uppercase << n_groups_max << std::endl;
+    out << "\tn_members_per_group_max 0x" << std::hex << std::uppercase << n_members_per_group_max
+        << std::endl;
     out << "}" << std::endl;
     return out;
 }

@@ -26,5 +26,6 @@ bool isStandardMetadata(cstring name);
 bool isMetadataStruct(const IR::Type_Struct* st);
 bool isMetadataField(const IR::Expression* e);
 bool isEightBitAligned(const IR::Expression* e);
+bool isDirection(const IR::Member* m);
 }  // namespace DPDK
 #endif /* BACKENDS_DPDK_DPDKUTILS_H_ */

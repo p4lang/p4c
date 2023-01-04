@@ -138,6 +138,7 @@ learner ct_tcp_table {
 
 apply {
 	rx m.pna_main_input_metadata_input_port
+	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
 	extract h.eth
 	jmpeq MAINPARSERIMPL_PARSE_IPV4 h.eth.etherType 0x800
 	jmp MAINPARSERIMPL_ACCEPT
@@ -147,7 +148,6 @@ apply {
 	MAINPARSERIMPL_PARSE_TCP :	extract h.tcp
 	MAINPARSERIMPL_ACCEPT :	mov m.MainControlT_do_add_on_miss 0
 	mov m.MainControlT_update_expire_time 0
-	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
 	jmpneq LABEL_END m.pna_main_input_metadata_direction 0x1
 	jmpnv LABEL_END h.ipv4
 	jmpnv LABEL_END h.tcp
