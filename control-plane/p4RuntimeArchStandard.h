@@ -71,7 +71,7 @@ namespace Helpers {
 
 /// @ref CounterlikeTraits<> specialization for @ref CounterExtern for v1model
 template <>
-struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL> > {
+struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL>> {
     static const cstring name() { return "counter"; }
     static const cstring directPropertyName() {
         return P4V1::V1Model::instance.tableAttributes.counters.name;
@@ -93,7 +93,7 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL> > {
 };
 
 template <>
-struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL2020> > {
+struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL2020>> {
     static const cstring name() { return "counter"; }
     static const cstring directPropertyName() {
         return P4V1::V1Model::instance.tableAttributes.counters.name;
@@ -116,7 +116,7 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL2020> > 
 
 /// @ref CounterlikeTraits<> specialization for @ref CounterExtern for PSA
 template <>
-struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PSA> > {
+struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PSA>> {
     static const cstring name() { return "counter"; }
     static const cstring directPropertyName() { return "psa_direct_counter"; }
     static const cstring typeName() { return "Counter"; }
@@ -139,7 +139,7 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PSA> > {
 
 /// @ref CounterlikeTraits<> specialization for @ref CounterExtern for PNA
 template <>
-struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PNA> > {
+struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PNA>> {
     static const cstring name() { return "counter"; }
     static const cstring directPropertyName() { return "pna_direct_counter"; }
     static const cstring typeName() { return "Counter"; }
@@ -162,7 +162,7 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PNA> > {
 
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for v1model
 template <>
-struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL> > {
+struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL>> {
     static const cstring name() { return "meter"; }
     static const cstring directPropertyName() {
         return P4V1::V1Model::instance.tableAttributes.meters.name;
@@ -182,7 +182,7 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL> > {
 };
 
 template <>
-struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL2020> > {
+struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL2020>> {
     static const cstring name() { return "meter"; }
     static const cstring directPropertyName() {
         return P4V1::V1Model::instance.tableAttributes.meters.name;
@@ -203,7 +203,7 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL2020> > {
 
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for PSA
 template <>
-struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA> > {
+struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA>> {
     static const cstring name() { return "meter"; }
     static const cstring directPropertyName() { return "psa_direct_meter"; }
     static const cstring typeName() { return "Meter"; }
@@ -224,7 +224,7 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA> > {
 
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for PNA
 template <>
-struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PNA> > {
+struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PNA>> {
     static const cstring name() { return "meter"; }
     static const cstring directPropertyName() { return "pna_direct_meter"; }
     static const cstring typeName() { return "Meter"; }
@@ -922,7 +922,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
     TypeMap* typeMap;
     const IR::ToplevelBlock* evaluatedProgram;
 
-    std::unordered_map<cstring, std::set<cstring> > actionProfilesRefs;
+    std::unordered_map<cstring, std::set<cstring>> actionProfilesRefs;
 
     /// The extern instances we've serialized so far. Used for deduplication.
     std::set<p4rt_id_t> serializedInstances;
