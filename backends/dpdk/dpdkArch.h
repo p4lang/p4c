@@ -1226,7 +1226,7 @@ class MoveNonHeaderFieldsToPseudoHeader : public Transform {
     std::pair<IR::AssignmentStatement*, IR::Member*> addAssignmentStmt(
         const IR::NamedExpression* ne);
 
-    const IR::Node* postorder(IR::P4Program* p) {
+    const IR::Node* postorder(IR::P4Program* p) override {
         if (newStructTypes.size() > 0) {
             IR::Vector<IR::Node> allTypeDecls;
             allTypeDecls.append(newStructTypes);

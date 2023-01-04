@@ -2954,7 +2954,7 @@ MoveNonHeaderFieldsToPseudoHeader::addAssignmentStmt(const IR::NamedExpression* 
     BUG_CHECK(typeMap->getType(ne->expression, true)->is<IR::Type_Bits>(), "Unexpected type");
     auto type = typeMap->getType(ne->expression, true)->to<IR::Type_Bits>();
     auto width = (type->width_bits() + 7) & (~7);
-    pseudoFieldNameType.push_back(std::pair(name, IR::Type_Bits::get(width)));
+    pseudoFieldNameType.push_back(std::pair<cstring, const IR::Type*>(name, IR::Type_Bits::get(width)));
     auto mem0 =
         new IR::Member(new IR::PathExpression(IR::ID(DpdkAddPseudoHeaderDecl::headersDeclName)),
                        IR::ID(headerInstanceName));
