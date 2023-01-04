@@ -78,10 +78,10 @@ class IndexedVector : public Vector<T> {
     IndexedVector& operator=(IndexedVector&&) = default;
     explicit IndexedVector(const T* a) { push_back(std::move(a)); }
     explicit IndexedVector(const safe_vector<const T*>& a) {
-        insert(typename Vector<T>::end(), a.begin(), a.end());
+        insert(Vector<T>::end(), a.begin(), a.end());
     }
     explicit IndexedVector(const Vector<T>& a) {
-        insert(typename Vector<T>::end(), a.begin(), a.end());
+        insert(Vector<T>::end(), a.begin(), a.end());
     }
     explicit IndexedVector(JSONLoader& json);
 
@@ -162,10 +162,10 @@ class IndexedVector : public Vector<T> {
         insertInMap(a);
     }
     void pop_back() {
-        if (typename Vector<T>::empty()) BUG("pop_back from empty IndexedVector");
-        auto last = typename Vector<T>::back();
+        if (Vector<T>::empty()) BUG("pop_back from empty IndexedVector");
+        auto last = Vector<T>::back();
         removeFromMap(last);
-        typename Vector<T>::pop_back();
+        Vector<T>::pop_back();
     }
     template <class U>
     void push_back(U& a) {
