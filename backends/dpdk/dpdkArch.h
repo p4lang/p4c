@@ -1197,6 +1197,8 @@ class DpdkAddPseudoHeaderDecl : public Transform {
         headerInstanceName = refMap->newName("dpdk_pseudo_header");
         headerTypeName = refMap->newName("dpdk_pseudo_header_t");
         headersDeclName = "";
+        (void)this->typeMap;
+        (void)this->refMap;
     }
 
     const IR::Node* preorder(IR::P4Program* program) override;
@@ -1251,7 +1253,11 @@ class AddFieldsToPseudoHeader : public Transform {
         : refMap(refMap),
           typeMap(typeMap),
           structure(structure),
-          is_all_args_header(is_all_args_header) {}
+          is_all_args_header(is_all_args_header) {
+        (void)this->typeMap;
+        (void)this->refMap;
+        (void)this->structure;
+    }
     const IR::Node* preorder(IR::Type_Header* h) override;
 };
 
