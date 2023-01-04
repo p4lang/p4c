@@ -80,9 +80,7 @@ class IndexedVector : public Vector<T> {
     explicit IndexedVector(const safe_vector<const T*>& a) {
         insert(Vector<T>::end(), a.begin(), a.end());
     }
-    explicit IndexedVector(const Vector<T>& a) {
-        insert(Vector<T>::end(), a.begin(), a.end());
-    }
+    explicit IndexedVector(const Vector<T>& a) { insert(Vector<T>::end(), a.begin(), a.end()); }
     explicit IndexedVector(JSONLoader& json);
 
     void clear() {
