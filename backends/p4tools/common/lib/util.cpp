@@ -78,8 +78,6 @@ big_int Utils::getRandBigInt(big_int max) {
     return dist(rng);
 }
 
-uint64_t TestgenUtils::getRandPct() { return getRandInt(100); }
-
 const IR::Constant* Utils::getRandConstantForWidth(int bitWidth) {
     auto maxVal = IR::getMaxBvVal(bitWidth);
     auto randInt = Utils::getRandBigInt(maxVal);
