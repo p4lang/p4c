@@ -57,7 +57,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "no port"
-  issue2726-bmv2
+  issue2726-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
