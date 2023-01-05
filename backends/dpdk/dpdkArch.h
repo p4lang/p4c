@@ -1176,6 +1176,9 @@ class HaveNonHeaderChecksumArgs : public Inspector {
 /// @brief This pass add a pseudo header declaration, it will be used as
 /// container of operands where dpdk instructions require it's operand to be in
 /// a header.
+/// It adds a type decl like below
+/// @__pseudo_header__ header dpdk_pseudo_header_t {
+/// }
 class DpdkAddPseudoHeaderDecl : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
@@ -1209,6 +1212,19 @@ class DpdkAddPseudoHeaderDecl : public Transform {
 
 /// @brief This pass identify and collect statements which requires it's operand to be
 /// in a header and also initialize added header fields with original operand.
+/// i.e.
+/// csum_0.add<tuple_0>((tuple_0){f0 = m.Ingress_tmp_1,f1 = m.Ingress_tmp_2,
+///    f2 = m.Ingress_tmp_3,f3 = m.Ingress_tmp_4,f4 = m.Ingress_tmp_5});
+/// transformed into
+/// h.dpdk_pseudo_header.pseudo = (bit<16>)m.Ingress_tmp_1;
+/// h.dpdk_pseudo_header.pseudo_0 = (bit<16>)m.Ingress_tmp_2;
+/// h.dpdk_pseudo_header.pseudo_1 = (bit<8>)m.Ingress_tmp_3;
+/// h.dpdk_pseudo_header.pseudo_2 = (bit<32>)m.Ingress_tmp_4;
+/// h.dpdk_pseudo_header.pseudo_3 = (bit<32>)m.Ingress_tmp_5;
+/// csum_0.add<tuple_1>((tuple_1){f0 = h.dpdk_pseudo_header.pseudo,
+///    f1 = h.dpdk_pseudo_header.pseudo_0,f2 = h.dpdk_pseudo_header.pseudo_1,
+///    f3 = h.dpdk_pseudo_header.pseudo_2,f4 = h.dpdk_pseudo_header.pseudo_3});
+
 class MoveNonHeaderFieldsToPseudoHeader : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
@@ -1241,6 +1257,7 @@ class MoveNonHeaderFieldsToPseudoHeader : public Transform {
 };
 
 /// @brief This pass finally adds all the collected fields to pseudo header
+/// add collected pseudo header fields into dpdk_pseudo_header_t
 class AddFieldsToPseudoHeader : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
