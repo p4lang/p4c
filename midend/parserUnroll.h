@@ -147,7 +147,7 @@ class ParserStructure {
     const IR::ParserState* start;
     const ParserInfo* result;
     StateCallGraph* callGraph;
-    std::map<cstring, std::set<cstring> > statesWithHeaderStacks;
+    std::map<cstring, std::set<cstring>> statesWithHeaderStacks;
     std::map<cstring, size_t> callsIndexes;  // map for curent calls of state insite current one
     void setParser(const IR::P4Parser* parser) {
         CHECK_NULL(parser);

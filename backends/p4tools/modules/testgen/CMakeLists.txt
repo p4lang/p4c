@@ -76,7 +76,7 @@ foreach(ext ${testgen_targets})
     # Generate an option that makes it possible to disable this extension.
     string(MAKE_C_IDENTIFIER ${ext} EXT_AS_IDENTIFIER)
     string(TOUPPER ${EXT_AS_IDENTIFIER} EXT_AS_OPTION_NAME)
-    string(CONCAT ENABLE_EXT_OPTION "ENABLE_TESTGEN_TARGET_" ${EXT_AS_OPTION_NAME})
+    string(CONCAT ENABLE_EXT_OPTION "ENABLE_TOOLS_TARGET_" ${EXT_AS_OPTION_NAME})
     string(CONCAT EXT_HELP_TEXT "Build the " ${ext} " target")
     option(${ENABLE_EXT_OPTION} ${EXT_HELP_TEXT} ON)
     if(${ENABLE_EXT_OPTION})

@@ -119,19 +119,19 @@ class Graphs : public Inspector {
     using vertexProperties = boost::property<boost::vertex_attribute_t, GraphvizAttributes, Vertex>;
     using edgeProperties = boost::property<
         boost::edge_attribute_t, GraphvizAttributes,
-        boost::property<boost::edge_name_t, cstring, boost::property<boost::edge_index_t, int> > >;
+        boost::property<boost::edge_name_t, cstring, boost::property<boost::edge_index_t, int>>>;
     using graphProperties = boost::property<
         boost::graph_name_t, cstring,
-        boost::property<boost::graph_graph_attribute_t, GraphvizAttributes,
-                        boost::property<boost::graph_vertex_attribute_t, GraphvizAttributes,
-                                        boost::property<boost::graph_edge_attribute_t,
-                                                        GraphvizAttributes> > > >;
+        boost::property<
+            boost::graph_graph_attribute_t, GraphvizAttributes,
+            boost::property<boost::graph_vertex_attribute_t, GraphvizAttributes,
+                            boost::property<boost::graph_edge_attribute_t, GraphvizAttributes>>>>;
     using Graph_ = boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
                                          vertexProperties, edgeProperties, graphProperties>;
     using Graph = boost::subgraph<Graph_>;
     using vertex_t = boost::graph_traits<Graph>::vertex_descriptor;
 
-    using Parents = std::vector<std::pair<vertex_t, EdgeTypeIface*> >;
+    using Parents = std::vector<std::pair<vertex_t, EdgeTypeIface*>>;
 
     // merge misc control statements (action calls, extern method calls,
     // assignments) into a single vertex to reduce graph complexity
