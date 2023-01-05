@@ -1,39 +1,216 @@
-# XFAILS: tests that *temporarily* fail
-# =====================================
-# Xfails are _temporary_ failures: the tests should work but we haven't fixed p4testgen yet.
+# XFAILS: tests that currently fail. Most of these are temporary.
+# ================================================
 
-# TODO: For these test we should add the --permissive flag.
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "The validity bit of .* is tainted"
-    up4.p4
-)
 
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "Internal error"
-  #variable 'action.action_args' not found
-  issue297-bmv2.p4
-)
+####################################################################################################
+# 1. P4C Toolchain Issues
+# These are issues either with the P4 compiler or the behavioral model executing the code.
+# These issues needed to be tracked and fixed in P4C.
+####################################################################################################
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  ""
+  "simple_switch died with return code -6"
   # Assertion 'Default switch case should not be reachable' failed,
   # file '../../include/bm/bm_sim/actions.h' line '369'.
   issue1607-bmv2.p4
+  bmv2_copy_headers.p4
 
+  # terminate called after throwing an instance of 'std::out_of_range'
+  # h.array[h.h.a].index
+  # It turns out that h.h.a matters more than the size of the array
+  bmv2_hs1.p4
+  control-hs-index-test1.p4
+  control-hs-index-test2.p4
+
+  # terminate called after throwing an instance of 'boost::wrapexcept<std::range_error>'
+  # Conversion from negative integer to an unsigned type results in undefined behaviour
+  issue2726-bmv2.p4
+  runtime-index-bmv2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "terminate called after throwing an instance of"
   # terminate called after throwing an instance of 'std::runtime_error'
   # in Json::Value::operator[](ArrayIndex)const: requires arrayValue
+  control-hs-index-test6.p4
   issue3374.p4
 
   # terminate called after throwing an instance of 'std::runtime_error'
   # Type is not convertible to string
   control-hs-index-test3.p4
   parser-unroll-test1.p4
+)
 
-  # Address family not supported by protocol
-  bmv2_read_write.p4
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "bad json"
+  control-hs-index-test5.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Exception"
+  #  Running simple_switch_CLI: Exception  Unexpected key field &
+  match-on-exprs2-bmv2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Invalid reference to object of type"
+  extract_for_header_union.p4
+)
+
+####################################################################################################
+# 2. P4Testgen Issues
+# These are failures in P4Testgen that need to be fixed.
+####################################################################################################
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Computations are not supported in update_checksum"
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Cast failed"
+  # push front can not handled tainted header validity.
+  header-stack-ops-bmv2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "is trying to match on a tainted key set"
+  # unimlemented feature (for select statement)
+  invalid-hdr-warnings1.p4
+  issue692-bmv2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "differs|Expected ([0-9]+) packets on port ([0-9]+) got ([0-9]+)"
+  # Difficult to reproduce bug in the checksum calculation.
+  checksum-l4-bmv2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Only registers with bit or int types are currently supported"
+  issue907-bmv2.p4
+)
+
+####################################################################################################
+# 3. WONTFIX
+# These are failures that can not be solved by changing P4Testgen
+####################################################################################################
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Assert/assume can not be executed under a tainted condition"
+  # Assert/Assume error: assert/assume(false).
+  bmv2_assert.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "simple_switch died with return code -6"
+  # Assert/Assume error: assert/assume(false).
+  bmv2_assume.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Computations are not supported in update_checksum"
+  issue1765-bmv2.p4
+  issue1765-1-bmv2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "error: exit"
+  # exit: Conditional execution in actions unsupported on this target.
+  issue2359.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Error compiling"
+  # IfStatement: not supported within a deparser on this target.
+  issue887.p4
+)
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Checksum16.get is deprecated and not supported."
+  # Not supported
+  issue841.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Unknown or unimplemented extern method: increment"
+  # user defined externs
+  issue1882-1-bmv2.p4
+  issue1882-bmv2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Unknown or unimplemented extern method: update"
+  issue2664-bmv2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Unknown or unimplemented extern method: count"
+  # user defined extern
+  issue1193-bmv2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Unknown or unimplemented extern method: fn_foo"
+  # user defined extern
+  issue3091.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "BMv2 target only supports headers with fields totaling a multiple of 8 bits"
+  custom-type-restricted-fields.p4
+  issue3225.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "with type Type_Specialized is not a Type_Declaration"
+  # Pipeline as a parameter of a switch, not a valid v1model program
+  issue1304.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Program is not supported by this target"
+  issue986-bmv2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Program can not be implemented on this target"
+  # The error appears because the table calls itself:
+  # apply {
+  #  simple_table.apply();
+  #  simple_table.apply();
+  # }
+  # if you remove one of the calls, then the test will pass, but at the end there will be an error:
+  # Transmitting packet of size 1333 out of port 0
+  issue2344.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "error.NoError: unsupported exact key expression"
+  issue1062-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -46,66 +223,20 @@ p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "expected a struct"
   hashing-non-tuple-bmv2.p4
+  issue584-1-bmv2.p4
 )
+
+####################################################################################################
+# 4. PARAMETERS NEEDED
+####################################################################################################
+# These tests require additional input parameters to compile properly.
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "Expected packet"
-  bmv2_lookahead_2.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "no port"
-  issue2726-bmv2.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "Checksum16.get is deprecated and not supported."
-  # Not supported
-  issue841.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "BMv2 target only supports headers with fields totaling a multiple of 8 bits"
-  custom-type-restricted-fields.p4
-  issue3225.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "out of port"
-  issue461-bmv2.p4
-  issue774-4-bmv2.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "expected no packets"
-  issue1897-bmv2.p4
-  issue949.p4
-  table-entries-ser-enum-bmv2.p4
-  union-valid-bmv2.p4
-  issue-2123.p4
-  table-entries-valid-bmv2.p4
-  gauntlet_side_effects_in_mux-bmv2.p4
-  gauntlet_mux_typecasting-bmv2.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "is trying to match on a tainted key set"
-  # unimlemented feature (for select statement)
-  invalid-hdr-warnings1.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "Assert/assume can not be executed under a tainted condition"
-  # Assert/Assume error: assert/assume(false).
-  bmv2_assert.p4
+  "uninitialized: next field read"
+  # error: parsedHdr.hstack.next uninitialized: next field read
+  # next not implemented in p4c/backends/bmv2/common/expression.cpp line 367
+  next-def-use.p4
 )
 
 p4tools_add_xfail_reason(
@@ -114,4 +245,19 @@ p4tools_add_xfail_reason(
   parser-unroll-test3.p4
   parser-unroll-test5.p4
   parser-unroll-test4.p4
+)
+
+# TODO: For these test we should add the --permissive flag.
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "The validity bit of .* is tainted"
+  control-hs-index-test3.p4
+  control-hs-index-test5.p4
+  gauntlet_hdr_function_cast-bmv2.p4
+  issue2345-1.p4
+  issue2345-2.p4
+  issue2345-multiple_dependencies.p4
+  issue2345-with_nested_if.p4
+  issue2345.p4
+  up4.p4
 )
