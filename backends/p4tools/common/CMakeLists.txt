@@ -52,7 +52,6 @@ set(
   lib/model.cpp
   lib/symbolic_env.cpp
   lib/taint.cpp
-  lib/timer.cpp
   lib/trace_events.cpp
   lib/util.cpp
   lib/zombie.cpp
