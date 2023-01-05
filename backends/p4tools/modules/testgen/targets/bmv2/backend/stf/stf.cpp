@@ -237,7 +237,7 @@ inja::json::array_t STF::getClone(const std::map<cstring, const TestObject*>& cl
 
 static std::string getTestCase() {
     static std::string TEST_CASE(
-        R"""(# p4testgen seed: '{{ default(seed, '"none"') }}'
+        R"""(# p4testgen seed: {{ default(seed, "none") }}
 # Date generated: {{timestamp}}
 ## if length(selected_branches) > 0
     # {{selected_branches}}
