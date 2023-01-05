@@ -48,7 +48,9 @@ class Options:
 
 
 def _create_bridge():
-    print("---------------------- Start creating of bridge ----------------------")
+    print(
+        "---------------------- Start creating of bridge ----------------------"
+    )
     random.seed(datetime.now().timestamp())
     outputs = {}
     outputs["stdout"] = sys.stdout
@@ -57,7 +59,9 @@ def _create_bridge():
     result = bridge.create_virtual_env(8)
     if result != p4c_utils.SUCCESS:
         bridge.ns_del()
-        print("---------------------- End creating of bridge with errors ----------------------")
+        print(
+            "---------------------- End creating of bridge with errors ----------------------"
+        )
         exit()
     print("---------------------- Bridge created ----------------------")
     return bridge
@@ -67,7 +71,9 @@ def _open_proc(bridge):
     proc = bridge.ns_proc_open()
     if not proc:
         bridge.ns_del()
-        print("---------------------- Unable to open bash process in the namespace ----------------------")
+        print(
+            "---------------------- Unable to open bash process in the namespace ----------------------"
+        )
         exit()
     return proc
 
@@ -75,6 +81,7 @@ def _open_proc(bridge):
 def _kill_process(proc):
     # kill process
     os.kill(proc.pid, 15)
+    os.kill(proc.pid, 9)
 
 
 def _create_runtime():
@@ -94,62 +101,49 @@ def _create_runtime():
         )
         raise SystemExit("p4c-bm2-ss ended with errors")
 
-def _run_proc_in_backgraund(bridge, cmd):
+
+def _run_proc_in_background(bridge, cmd):
     namedCmd = bridge.get_ns_prefix() + " " + cmd
     return subprocess.Popen(namedCmd, shell=True,
                           stdin=subprocess.PIPE,
                           universal_newlines=True)
 
+
 def _run_simple_switch_grpc(bridge, thrift_port, grpc_port):
     proc = _open_proc(bridge)
     # Remove the log file.
     removeLogFileCmd = "/bin/rm -f ss-log.txt"
-    bridge.ns_proc_write(proc, removeLogFileCmd)
+    bridge.ns_exec(removeLogFileCmd)
 
     print(
         "---------------------- Start simple_switch_grpc ----------------------"
     )
 
-    bridge.ns_proc_close(proc)
     simple_switch_grpc = f"simple_switch_grpc --thrift-port {thrift_port} --log-console -i 0@0 -i 1@1 -i 2@2 -i 3@3 -i 4@4 -i 5@5 -i 6@6 -i 7@7 --no-p4 -- --grpc-server-addr localhost:{grpc_port}"
-    
-    switchProc = _run_proc_in_backgraund(bridge, simple_switch_grpc)
-    # Wait for simple_switch_grpc to initialise
-    time.sleep(2)
+
+    switchProc = _run_proc_in_background(bridge, simple_switch_grpc)
     if switchProc.poll() is not None:
         _kill_process(switchProc)
         print(
             "---------------------- End simple_switch_grpc with errors ----------------------"
         )
         raise SystemExit("simple_switch_grpc ended with errors")
-    
-    return [bridge, switchProc]
+
+    return switchProc
 
 
 def _run_ptf(bridge, grpc_port):
-    proc = _open_proc(bridge)
     print("---------------------- Start ptf ----------------------")
     # Add the file location to the python path.
     pypath = FILE_DIR
     # Show list of the tests
     testLostCmd = f"ptf --pypath {pypath} --test-dir {options.testdir} --list"
-    bridge.ns_proc_write(proc,testLostCmd)
-    bridge.ns_proc_close(proc)
+    bridge.ns_exec(testLostCmd)
     ifaces = "-i 0@br_0 -i 1@br_1 -i 2@br_2 -i 3@br_3 -i 4@br_4 -i 5@br_5 -i 6@br_6 -i 7@br_7"
     test_params = f"grpcaddr='localhost:{grpc_port}';p4info='{options.infoName}';config='{options.jsonName}';"
-    ptf = f'ptf --verbose --pypath {pypath} {ifaces} --test-params="{test_params}" --test-dir {options.testdir}'
-    ptfProc  = _run_proc_in_backgraund(bridge, ptf)
-    ptfProc.communicate()
-    # returns the exit code or None if the process is still running
-    poll = ptfProc.poll() 
-    if poll is not None and poll != p4c_utils.SUCCESS:
-        print(
-            "---------------------- End ptf with errors ----------------------"
-        )
-        raise SystemExit("PTF ended with errors")
-    elif poll == p4c_utils.SUCCESS:
-        print("---------------------- End ptf ----------------------")
-    return bridge
+    ptf = f'ptf --verbose --pypath {pypath} {ifaces} --test-params=\\"{test_params}\\\" --test-dir {options.testdir}'
+    return bridge.ns_exec(ptf)
+
 
 def _pick_port():
     # Pick an available port.
@@ -166,6 +160,7 @@ def _pick_port():
 
     return [thrift_port, grpc_port]
 
+
 def run_test(options):
     """Define the test environment and compile the p4 target
     Optional: Run the generated model"""
@@ -173,14 +168,11 @@ def run_test(options):
     bridge = _create_bridge()
     _create_runtime()
     thrift_port, grpc_port = _pick_port()
-    
-    bridge, switchProc = _run_simple_switch_grpc(bridge, thrift_port, grpc_port)
-    bridge = _run_ptf(bridge, grpc_port)
 
-
-    _kill_process(switchProc)
-    print("---------------------- End simple_switch_grpc ----------------------")
+    switch_proc = _run_simple_switch_grpc(bridge, thrift_port, grpc_port)
+    result = _run_ptf(bridge, grpc_port)
     bridge.ns_del()
+    return result
 
 
 if __name__ == "__main__":
