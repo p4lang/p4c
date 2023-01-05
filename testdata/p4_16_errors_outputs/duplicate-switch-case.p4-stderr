@@ -1,0 +1,6 @@
+duplicate-switch-case.p4(10): [--Werror=type-error] error: 4w1: 'switch' label duplicates 4w1
+      4w1: {} // { dg-error "" }
+      ^^^
+duplicate-switch-case.p4(9)
+      4w1: {} // { dg-note "" }
+      ^^^
