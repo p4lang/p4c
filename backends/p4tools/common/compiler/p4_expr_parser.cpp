@@ -347,6 +347,7 @@ const IR::Node* Parser::createApplicationOp(const IR::Node* base) {
     BUG_CHECK(tokens[index].is(Token::Kind::RightParen), "Expected ')'");
     index++;
     IR::Vector<IR::Argument>* arguments = new IR::Vector<IR::Argument>();
+    IR::ParameterList *paramList = new IR::ParameterList();
     if (params != nullptr) {
         const auto* namedExpr = params->to<IR::NamedExpression>();
         BUG_CHECK(namedExpr != nullptr, "Invalid format %1%", namedExpr);
@@ -356,8 +357,12 @@ const IR::Node* Parser::createApplicationOp(const IR::Node* base) {
         for (const auto* p : listExpr->components) {
             arguments->push_back(new IR::Argument(p));
         }
+        // find Parameters.
+        BUG("Inimplemented parameters");
     }
-    return new IR::MethodCallExpression(base->to<IR::Expression>(), arguments);
+    auto* expr = base->to<IR::Expression>()->clone();
+    expr->type = new IR::Type_Method(paramList, expr->to<IR::Member>()->member.name);
+    return new IR::MethodCallExpression(expr, arguments);
 }
 
 const IR::Type* Parser::ndToType(const IR::Node* nd) {

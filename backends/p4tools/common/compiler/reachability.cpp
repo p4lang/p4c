@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 
+#include "backends/p4tools/common/compiler/p4_asserts_parser.h"
 #include "backends/p4tools/common/compiler/p4_expr_parser.h"
 
 #include "ir/declaration.h"
@@ -529,35 +530,42 @@ ReachabilityResult ReachabilityEngine::next(ReachabilityEngineState* state,
             }
             for (const auto* k : j->second) {
                 if (next == k) {
+                    if (expr == nullptr) {
+                        expr = getCondition(k);
+                    } else {
+                        expr = new IR::LOr(getCondition(k), expr);
+                    }
                     // Checking next states.
                     auto m = userTransitions.find(k);
                     if (m == userTransitions.end()) {
                         // No next state found.
                         state->clear();
-                        return std::make_pair(true, getCondition(k));
+                        return std::make_pair(true, expr);
                     }
                     for (const auto* n : m->second) {
-                        expr = addCondition(expr, n);
                         newState.push_back(n);
                     }
                 } else if (dcg->isReachable(next, k)) {
-                    expr = addCondition(expr, k);
                     newState.push_back(k);
                 }
             }
         } else if (i == next) {
+            if (expr == nullptr) {
+                expr = getCondition(i);
+            } else {
+                expr = new IR::LOr(getCondition(i), expr);
+            }
             auto m = userTransitions.find(i);
             if (m == userTransitions.end()) {
                 // No next state found.
                 state->clear();
-                return std::make_pair(true, getCondition(i));
+                return std::make_pair(true, expr);
             }
             for (const auto* n : m->second) {
-                expr = addCondition(expr, n);
                 newState.push_back(n);
             }
         } else if (dcg->isReachable(next, i)) {
-            expr = addCondition(expr, i);
+            //expr = addCondition(expr, i);
             newState.push_back(i);
         }
     }
@@ -577,7 +585,9 @@ const IR::Expression* ReachabilityEngine::getCondition(const DCGVertexType* n) {
 
 const IR::Expression* ReachabilityEngine::stringToNode(std::string name) {
     LOG1("Parse restriction  - " << name);
-    return ExpressionParser::Parser::getIR(name.c_str(), program)->to<IR::Expression>();
+    const auto* result = ExpressionParser::Parser::getIR(name.c_str(), program)->to<IR::Expression>();
+    const std::map<cstring, const IR::Type*> types;
+    return result;
 }
 
 }  // namespace P4Tools

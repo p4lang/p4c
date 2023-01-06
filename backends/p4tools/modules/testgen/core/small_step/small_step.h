@@ -60,6 +60,8 @@ class SmallStepEvaluator {
  public:
     Result step(ExecutionState& state);
 
+   const IR::Expression* stepAndReturnValue(const IR::Expression* expr);
+
     SmallStepEvaluator(AbstractSolver& solver, const ProgramInfo& programInfo);
 };
 
