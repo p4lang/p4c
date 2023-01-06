@@ -17,7 +17,7 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 # testing; in this case, the source code and build-only dependencies will not be
 # removed from the image.
 : "${IMAGE_TYPE:=build}"
-# Whether to do a unified build.
+# Whether to do a unity build.
 : "${CMAKE_UNITY_BUILD:=ON}"
 # Whether to enable translation validation
 : "${VALIDATION:=OFF}"
@@ -237,7 +237,7 @@ fi
 
 # Strong optimization.
 export CXXFLAGS="${CXXFLAGS} -O3"
-# Toggle unified compilation.
+# Toggle unity compilation.
 CMAKE_FLAGS+="-DCMAKE_UNITY_BUILD=${CMAKE_UNITY_BUILD} "
 # Toggle static builds.
 CMAKE_FLAGS+="-DBUILD_STATIC_RELEASE=${BUILD_STATIC_RELEASE} "

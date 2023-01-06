@@ -13,7 +13,7 @@ ARG IN_DOCKER=TRUE
 # testing; in this case, the source code and build-only dependencies will not be
 # removed from the image.
 ARG IMAGE_TYPE=build
-# Whether to do a unified build.
+# Whether to do a unity build.
 ARG CMAKE_UNITY_BUILD=ON
 # Whether to enable translation validation
 ARG VALIDATION=OFF

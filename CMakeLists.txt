@@ -101,7 +101,7 @@ if(ENABLE_UNIFIED_COMPILATION)
   set(CMAKE_UNITY_BUILD ON)
 endif()
 
-# If unity builds are enable, choose an aggressive batch size.
+# If unity builds are enabled, choose an aggressive batch size.
 if (CMAKE_UNITY_BUILD)
   set(CMAKE_UNITY_BUILD_BATCH_SIZE 16 CACHE UNINITIALIZED "Set the unity build batch size.")
 endif ()
