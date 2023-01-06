@@ -293,13 +293,13 @@ traces: "{{trace_item}}"
 
 input_packet {
   packet: "{{send.pkt}}"
-  port: "{{send.ig_port}}"
+  port: {{send.ig_port}}
 }
 
 ## if verify
 expected_output_packet {
   packet: "{{verify.exp_pkt}}"
-  port: "{{verify.eg_port}}"
+  port: {{verify.eg_port}}
   packet_mask: "{{verify.ignore_mask}}"
 }
 ## endif
