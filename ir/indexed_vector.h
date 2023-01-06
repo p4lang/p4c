@@ -137,7 +137,7 @@ class IndexedVector : public Vector<T> {
     template <class... Args>
     void emplace_back(Args&&... args) {
         auto el = new T(std::forward<Args>(args)...);
-        insert(el);
+        push_back(el);
     }
     bool removeByName(cstring name) {
         for (auto it = begin(); it != end(); ++it) {
