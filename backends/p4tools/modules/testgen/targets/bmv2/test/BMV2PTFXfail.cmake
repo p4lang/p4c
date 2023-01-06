@@ -7,10 +7,10 @@
 # These are issues either with the P4 compiler or the behavioral model executing the code.
 # These issues needed to be tracked and fixed in P4C.
 ####################################################################################################
-
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "simple_switch died with return code -6"
+  ""
+
   # Assertion 'Default switch case should not be reachable' failed,
   # file '../../include/bm/bm_sim/actions.h' line '369'.
   issue1607-bmv2.p4
@@ -27,11 +27,7 @@ p4tools_add_xfail_reason(
   # Conversion from negative integer to an unsigned type results in undefined behaviour
   issue2726-bmv2.p4
   runtime-index-bmv2.p4
-)
 
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "terminate called after throwing an instance of"
   # terminate called after throwing an instance of 'std::runtime_error'
   # in Json::Value::operator[](ArrayIndex)const: requires arrayValue
   control-hs-index-test6.p4
@@ -51,9 +47,8 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "Exception"
-  #  Running simple_switch_CLI: Exception  Unexpected key field &
-  match-on-exprs2-bmv2.p4
+  "Unsupported type argument for Value Set"
+  pvs-nested-struct.p4
 )
 
 p4tools_add_xfail_reason(
@@ -74,24 +69,10 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "Cast failed"
-  # push front can not handled tainted header validity.
-  header-stack-ops-bmv2.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
   "is trying to match on a tainted key set"
   # unimlemented feature (for select statement)
   invalid-hdr-warnings1.p4
   issue692-bmv2.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "differs|Expected ([0-9]+) packets on port ([0-9]+) got ([0-9]+)"
-  # Difficult to reproduce bug in the checksum calculation.
-  checksum-l4-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -107,14 +88,14 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "Assert/assume can not be executed under a tainted condition"
+  "Assert error"
   # Assert/Assume error: assert/assume(false).
   bmv2_assert.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "simple_switch died with return code -6"
+  "Assume error"
   # Assert/Assume error: assert/assume(false).
   bmv2_assume.p4
 )
@@ -135,7 +116,7 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "Error compiling"
+  "IfStatement"
   # IfStatement: not supported within a deparser on this target.
   issue887.p4
 )
@@ -162,7 +143,7 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "Unknown or unimplemented extern method: count"
+  "Unknown extern method count from type jnf_counter"
   # user defined extern
   issue1193-bmv2.p4
 )
@@ -247,17 +228,15 @@ p4tools_add_xfail_reason(
   parser-unroll-test4.p4
 )
 
-# TODO: For these test we should add the --permissive flag.
+####################################################################################################
+# 5. Inja formatting error
+####################################################################################################
+
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "The validity bit of .* is tainted"
-  control-hs-index-test3.p4
-  control-hs-index-test5.p4
-  gauntlet_hdr_function_cast-bmv2.p4
-  issue2345-1.p4
-  issue2345-2.p4
-  issue2345-multiple_dependencies.p4
-  issue2345-with_nested_if.p4
-  issue2345.p4
-  up4.p4
+  "variable 'action.action_args' not found"
+  issue297-bmv2.p4
+  action_profile_max_group_size_annotation.p4
+  action_selector_shared-bmv2.p4
+  action_profile-bmv2.p4
 )
