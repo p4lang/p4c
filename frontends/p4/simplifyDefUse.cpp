@@ -781,7 +781,7 @@ class FindUninitialized : public Inspector {
                 }
             } else if (auto stack_exp = src->to<IR::HeaderStackExpression>()) {
                 for (size_t index = 0; index < st->getSize(); index++) {
-                    auto dst_elem = new IR::ArrayIndex(dst, new IR::Constant(index));
+                    auto dst_elem = new IR::ArrayIndex(dst, new IR::Constant((uint64_t)index));
                     auto source = stack_exp->components.at(index);
                     auto src_type = typeMap->getType(source, true);
                     typeMap->setType(dst_elem, st->elementType);
