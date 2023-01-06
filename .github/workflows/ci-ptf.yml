@@ -50,10 +50,8 @@ jobs:
 
       - name: Build (Ubuntu 20.04)
         run: |
-          sudo cp -rf . /p4c/
-          (cd /p4c/ && sudo -E tools/ci-build.sh)
-          sudo cp -rf /p4c/.ccache .
+          tools/ci-build.sh
 
       - name: Run PTF tests for eBPF backend (Ubuntu 20.04)
         run: sudo -E ./test.sh
-        working-directory: /p4c/backends/ebpf/tests
+        working-directory: ./backends/ebpf/tests

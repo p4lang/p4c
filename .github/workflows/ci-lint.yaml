@@ -33,13 +33,10 @@ jobs:
 
     - name: Build (Ubuntu 20.04)
       run: |
-        sudo cp -rf . /p4c/
-        (cd /p4c/ && sudo -E tools/ci-build.sh)
+       tools/ci-build.sh
 
     - name: Run cpplint.
       run: make cpplint -C build
-      working-directory: /p4c
 
     - name: Run clang-format.
       run: make clang-format -C build
-      working-directory: /p4c
