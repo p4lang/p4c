@@ -142,6 +142,7 @@ void TypeMap::addSubstitutions(const TypeVariableSubstitution* tvs) {
 bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool strict) const {
     if (!strict) strict = strictStruct;
     LOG3("Checking equivalence of " << left << " and " << right);
+    if (left == right) return true;
     if (left == nullptr) return right == nullptr;
     if (right == nullptr) return false;
     if (left->node_type_name() != right->node_type_name()) return false;
