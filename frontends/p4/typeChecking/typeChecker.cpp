@@ -51,10 +51,13 @@ class ConstantTypeSubstitution : public Transform {
         auto cstType = typeMap->getType(getOriginal(), true);
         if (!cstType->is<IR::ITypeVar>()) return cst;
         auto repl = cstType;
-        while (repl != nullptr && repl->is<IR::ITypeVar>())
-            repl = subst->get(repl->to<IR::ITypeVar>());
-        if (repl != nullptr && !repl->is<IR::ITypeVar>()) {
-            // maybe the substitution could not infer a width...
+        while (repl->is<IR::ITypeVar>()) {
+            auto next = subst->get(repl->to<IR::ITypeVar>());
+            if (!next) break;
+            repl = next;
+        }
+        if (repl != cstType) {
+            // We may replace a type variable with another one
             LOG2("Inferred type " << repl << " for " << cst);
             cst = new IR::Constant(cst->srcInfo, repl, cst->value, cst->base);
         } else {
@@ -2118,7 +2121,7 @@ const IR::Node* TypeInference::postorder(IR::P4ListExpression* expression) {
             ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
             auto converted = cts.convert(c);
             vec->push_back(converted);
-            changed = true;
+            changed = changed || converted != c;
         } else {
             vec->push_back(c);
         }
