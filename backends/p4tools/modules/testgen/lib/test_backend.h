@@ -23,6 +23,10 @@ namespace P4Tools {
 namespace P4Testgen {
 
 class TestBackEnd {
+ private:
+    /// The current test count. If it exceeds @var maxTests, the symbolic executor will stop.
+    uint64_t testCount = 0;
+
  protected:
     /// ProgramInfo is used to access some target specific information for test generation.
     const ProgramInfo& programInfo;
@@ -35,10 +39,7 @@ class TestBackEnd {
     ExplorationStrategy& symbex;
 
     /// Test maximum number of tests that are to be produced.
-    int maxTests;
-
-    /// The current test count. If it exceeds @var maxTests, the symbolic executor will stop.
-    int testCount = 0;
+    uint64_t maxTests;
 
     explicit TestBackEnd(const ProgramInfo& programInfo, ExplorationStrategy& symbex)
         : programInfo(programInfo), symbex(symbex), maxTests(TestgenOptions::get().maxTests) {
@@ -47,6 +48,8 @@ class TestBackEnd {
             maxTests = 1;
         }
     }
+
+    [[nodiscard]] bool needsToTerminate(uint64_t testCount) const { return testCount == maxTests; }
 
  public:
     TestBackEnd(const TestBackEnd&) = default;
@@ -92,7 +95,7 @@ class TestBackEnd {
     /// @returns false if the test generation is to be aborted (for example when the port is
     /// tainted.)
     virtual bool printTestInfo(const ExecutionState* executionState, const TestInfo& testInfo,
-                               int testCount, const IR::Expression* outputPortExpr);
+                               const IR::Expression* outputPortExpr);
 
     /// @returns a new modules with all concolic variables in the program resolved.
     const Model* computeConcolicVariables(const ExecutionState* executionState,
@@ -114,7 +117,7 @@ class TestBackEnd {
     static void printPerformanceReport();
 
     /// Accessors.
-    int getTestCount();
+    [[nodiscard]] uint64_t getTestCount() const;
 };
 
 }  // namespace P4Testgen

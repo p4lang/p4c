@@ -20,8 +20,13 @@ const char* TestgenOptions::getIncludePath() {
     P4C_UNIMPLEMENTED("getIncludePath not implemented for P4Testgen.");
 }
 
+const std::set<cstring> TestgenOptions::SUPPORTED_STOP_METRICS = {"MAX_STATEMENT_COVERAGE"};
+const std::set<cstring> TestgenOptions::SUPPORTED_EXPLORATION_STRATEGIES = {
+    "INCREMENTAL_STACK", "RANDOM_ACCESS_STACK", "LINEAR_ENUMERATION", "MAX_COVERAGE",
+    "RANDOM_ACCESS_MAX_COVERAGE"};
+
 TestgenOptions::TestgenOptions()
-    : AbstractP4cToolOptions("Generate packet tests for a P4 program") {
+    : AbstractP4cToolOptions("Generate packet tests for a P4 program.") {
     registerOption(
         "--strict", nullptr,
         [this](const char*) {
@@ -33,19 +38,65 @@ TestgenOptions::TestgenOptions()
     registerOption(
         "--max-tests", "maxTests",
         [this](const char* arg) {
-            maxTests = std::atoi(arg);
+            try {
+                maxTests = std::stoull(arg);
+            } catch (std::invalid_argument&) {
+                ::error("Invalid input value %1% for --max-tests. Expected integer.", arg);
+                return false;
+            }
             return true;
         },
-        "Sets the maximum number of tests to be generated");
+        "Sets the maximum number of tests to be generated [default: 1]. Setting the value to <=0 "
+        "will generate tests until no more paths can be found.");
 
     registerOption(
-        "--pop-level", "popLevel",
+        "--stop-metric", "stopMetric",
         [this](const char* arg) {
-            popLevel = std::atoi(arg);
+            stopMetric = cstring(arg).toUpper();
+            if (SUPPORTED_STOP_METRICS.count(stopMetric) == 0) {
+                ::error(
+                    "Stop metric %1% not supported. Supported stop metrics are "
+                    "%2%.",
+                    stopMetric, Utils::containerToString(SUPPORTED_STOP_METRICS));
+                return false;
+            }
             return true;
         },
-        "Sets the fraction for multiPop exploration; default is 3 when meaningful strategy is "
-        "activated.");
+        "Stops generating tests when a particular metric is satisifed. Currently supported options "
+        "are:\n\"MAX_STATEMENT_COVERAGE\".");
+
+    registerOption(
+        "--packet-size-range", "packetSizeRange",
+        [this](const char* arg) {
+            auto rangeStr = std::string(arg);
+            size_t packetLenStr = rangeStr.find_first_of(':');
+            try {
+                auto minPacketLenStr = rangeStr.substr(0, packetLenStr);
+                minPktSize = std::stoi(minPacketLenStr);
+                if (minPktSize < 0) {
+                    ::error(
+                        "Invalid minimum packet size %1%. Minimum packet size must be at least 0.",
+                        minPktSize);
+                }
+                auto maxPacketLenStr = rangeStr.substr(packetLenStr + 1);
+                maxPktSize = std::stoi(maxPacketLenStr);
+                if (maxPktSize < minPktSize) {
+                    ::error(
+                        "Invalid packet size range %1%:%2%.  The maximum packet size must be at "
+                        "least the size of the minimum packet size.",
+                        minPktSize, maxPktSize);
+                }
+            } catch (std::invalid_argument&) {
+                ::error(
+                    "Invalid packet size range %1%. Expected format is [min]:[max], where [min] "
+                    "and [max] are integers.",
+                    arg);
+                return false;
+            }
+            return true;
+        },
+        "Specify the possible range of the input packet size in bits. The format is [min]:[max]. "
+        "The default values are \"0:72000\". The maximum is set to jumbo frame size (9000 bytes).");
 
     registerOption(
         "--out-dir", "outputDir",
@@ -53,7 +104,8 @@ TestgenOptions::TestgenOptions()
             outputDir = arg;
             return true;
         },
-        "Directory for generated tests\n");
+        "The output directory for the generated tests. The directory will be created, if it does "
+        "not exist.");
 
     registerOption(
         "--test-backend", "testBackend",
@@ -113,27 +165,88 @@ TestgenOptions::TestgenOptions()
     registerOption(
         "--exploration-strategy", "explorationStrategy",
         [this](const char* arg) {
-            explorationStrategy = arg;
+            explorationStrategy = cstring(arg).toUpper();
+            if (SUPPORTED_EXPLORATION_STRATEGIES.count(explorationStrategy) == 0) {
+                ::error(
+                    "Exploration strategy %1% not supported. Supported exploration strategies are "
+                    "%2%.",
+                    explorationStrategy,
+                    Utils::containerToString(SUPPORTED_EXPLORATION_STRATEGIES));
+                return false;
+            }
             return true;
         },
         "Selects a specific exploration strategy for test generation. Options are: "
-        "randomAccessStack, linearEnumeration, maxCoverage. Defaults to incrementalStack.");
+        "INCREMENTAL_STACK, RANDOM_ACCESS_STACK, LINEAR_ENUMERATION, MAX_COVERAGE, and "
+        "RANDOM_ACCESS_MAX_COVERAGE. Defaults to "
+        "INCREMENTAL_STACK.");
+
+    registerOption(
+        "--pop-level", "popLevel",
+        [this](const char* arg) {
+            int64_t popLevelTmp = 0;
+            try {
+                // Unfortunately, we can not use std::stoul because negative inputs are okay
+                // according to the C++ standard.
+                popLevelTmp = std::stoll(arg);
+                if (popLevelTmp < 0) {
+                    throw std::invalid_argument("Negative input.");
+                }
+            } catch (std::invalid_argument&) {
+                ::error("Invalid input value %1% for --pop-level. Expected non-negative integer.",
+                        arg);
+                return false;
+            }
+            popLevel = popLevelTmp;
+            return true;
+        },
+        "Sets the fraction for multiPop exploration; default is 3 when meaningful strategy is "
+        "activated.");
 
     registerOption(
         "--linear-enumeration", "linearEnumeration",
         [this](const char* arg) {
-            linearEnumeration = std::atoi(arg);
+            int64_t linearEnumerationTmp = 0;
+            try {
+                // Unfortunately, we can not use std::stoul because negative inputs are okay
+                // according to the C++ standard.
+                linearEnumerationTmp = std::stoll(arg);
+                if (linearEnumerationTmp < 0) {
+                    throw std::invalid_argument("Negative input.");
+                }
+            } catch (std::invalid_argument&) {
+                ::error(
+                    "Invalid input value %1% for --linear-enumeration. Expected non-negative "
+                    "integer.",
+                    arg);
+                return false;
+            }
+            linearEnumeration = linearEnumerationTmp;
             return true;
         },
-        "Max bound for vector size in linearEnumeration; defaults to 2.");
+        "Max bound for vector size in LINEAR_ENUMERATION; defaults to 2.");
 
     registerOption(
         "--saddle-point", "saddlePoint",
         [this](const char* arg) {
-            saddlePoint = std::atoi(arg);
+            int64_t saddlePointTmp = 0;
+            try {
+                // Unfortunately, we can not use std::stoul because negative inputs are okay
+                // according to the C++ standard.
+                saddlePointTmp = std::stoll(arg);
+                if (saddlePointTmp < 0) {
+                    throw std::invalid_argument("Negative input.");
+                }
+            } catch (std::invalid_argument&) {
+                ::error(
+                    "Invalid input value %1% for --saddle-point. Expected non-negative integer.",
+                    arg);
+                return false;
+            }
+            saddlePoint = saddlePointTmp;
             return true;
         },
-        "Threshold to invoke multiPop on randomAccessMaxCoverage.");
+        "Threshold to invoke multiPop on RANDOM_ACCESS_MAX_COVERAGE.");
 
     registerOption(
         "--print-traces", nullptr,

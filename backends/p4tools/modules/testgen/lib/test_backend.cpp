@@ -116,7 +116,7 @@ bool TestBackEnd::run(const FinalState& state) {
             auto outputPacketSize = executionState->getPacketBufferSize();
             bool packetIsDropped = executionState->getProperty<bool>("drop");
             if (outputPacketSize <= 0 || packetIsDropped) {
-                return testCount > maxTests - 1;
+                return needsToTerminate(testCount);
             }
         }
 
@@ -127,7 +127,7 @@ bool TestBackEnd::run(const FinalState& state) {
             testCount++;
             P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
             printPerformanceReport();
-            return testCount > maxTests - 1;
+            return needsToTerminate(testCount);
         }
         completedModel = concolicModel;
 
@@ -141,17 +141,16 @@ bool TestBackEnd::run(const FinalState& state) {
             symbex.printCurrentTraceAndBranches(selectedBranches);
         }
 
-        abort = printTestInfo(executionState, testInfo, testCount, outputPortExpr);
+        abort = printTestInfo(executionState, testInfo, outputPortExpr);
         if (abort) {
             testCount++;
             P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
             printPerformanceReport();
-            return testCount > maxTests - 1;
+            return needsToTerminate(testCount);
         }
-
         const auto* testSpec = createTestSpec(executionState, completedModel, testInfo);
-
         float coverage = static_cast<float>(visitedStatements.size()) / allStatements.size();
+
         printFeature("test_info", 4,
                      "============ Test %1%: Statements covered: %2% (%3%/%4%) ============",
                      testCount, coverage, visitedStatements.size(), allStatements.size());
@@ -166,7 +165,12 @@ bool TestBackEnd::run(const FinalState& state) {
         testCount++;
         P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
         printPerformanceReport();
-        return testCount > maxTests - 1;
+
+        // If MAX_STATEMENT_COVERAGE is enabled, terminate early if we hit max coverage already.
+        if (TestgenOptions::get().stopMetric == "MAX_STATEMENT_COVERAGE" && coverage == 1.0) {
+            return true;
+        }
+        return needsToTerminate(testCount);
     }
 }
 
@@ -219,7 +223,7 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
 }
 
 bool TestBackEnd::printTestInfo(const ExecutionState* executionState, const TestInfo& testInfo,
-                                int testCount, const IR::Expression* outputPortExpr) {
+                                const IR::Expression* outputPortExpr) {
     // Print all the important variables and properties of this test.
     printTraces("============ Program trace for Test %1% ============\n", testCount);
     for (const auto& event : testInfo.programTraces) {
@@ -278,7 +282,7 @@ void TestBackEnd::printPerformanceReport() {
     }
 }
 
-int TestBackEnd::getTestCount() { return testCount; }
+uint64_t TestBackEnd::getTestCount() const { return testCount; }
 
 }  // namespace P4Testgen
 
