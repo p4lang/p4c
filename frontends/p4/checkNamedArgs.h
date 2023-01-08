@@ -25,7 +25,10 @@ namespace P4 {
 /// A method call must have either all or none of the arguments named.
 /// We also check that no argument appears twice.
 /// We also check that no optional parameter has a default value.
+/// We also check that controls, parsers, and functions cannot have optional parameters
 class CheckNamedArgs : public Inspector {
+    bool checkOptionalParameters(const IR::ParameterList* params);
+
  public:
     CheckNamedArgs() { setName("CheckNamedArgs"); }
 
@@ -37,6 +40,15 @@ class CheckNamedArgs : public Inspector {
         return checkArguments(call->arguments);
     }
     bool preorder(const IR::Parameter* parameter) override;
+    bool preorder(const IR::P4Control* control) override {
+        return checkOptionalParameters(control->getConstructorParameters());
+    }
+    bool preorder(const IR::P4Parser* parser) override {
+        return checkOptionalParameters(parser->getConstructorParameters());
+    }
+    bool preorder(const IR::Function* function) override {
+        return checkOptionalParameters(function->getParameters());
+    }
 };
 
 }  // namespace P4

@@ -45,6 +45,14 @@ bool CheckNamedArgs::checkArguments(const IR::Vector<IR::Argument>* arguments) {
     return true;
 }
 
+bool CheckNamedArgs::checkOptionalParameters(const IR::ParameterList* parameters) {
+    for (auto parameter : parameters->parameters) {
+        if (parameter->isOptional())
+            ::error(ErrorType::ERR_INVALID, "%1%: optional parameter not allowed here", parameter);
+    }
+    return true;
+}
+
 bool CheckNamedArgs::preorder(const IR::Parameter* parameter) {
     if (parameter->defaultValue != nullptr) {
         if (parameter->isOptional())
