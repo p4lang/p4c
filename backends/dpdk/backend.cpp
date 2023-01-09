@@ -34,7 +34,7 @@ limitations under the License.
 #include "midend/simplifyKey.h"
 namespace DPDK {
 
-void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
+void DpdkBackend::convert(const IR::ToplevelBlock* tlb, const p4configv1::P4Info& p4info) {
     CHECK_NULL(tlb);
     DpdkProgramStructure structure;
     auto parseDpdkArch = new ParseDpdkArchitecture(&structure);
@@ -47,7 +47,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
 
     std::set<const IR::P4Table*> invokedInKey;
     auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure, options);
-    auto genContextJson = new DpdkContextGenerator(refMap, &structure, options);
+    auto genContextJson = new DpdkContextGenerator(refMap, &structure, p4info, options);
     bool is_all_args_header_fields = true;
     PassManager simplify = {
         new DpdkArchFirst(),

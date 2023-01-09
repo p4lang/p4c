@@ -136,7 +136,7 @@ int main(int argc, char* const argv[]) {
 
     auto backend = new DPDK::DpdkBackend(options, &midEnd.refMap, &midEnd.typeMap);
 
-    backend->convert(toplevel);
+    backend->convert(toplevel, *P4::generateP4Runtime(program, options.arch).p4Info);
     if (::errorCount() > 0) return 1;
 
     if (!options.outputFile.isNullOrEmpty()) {

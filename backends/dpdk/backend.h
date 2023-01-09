@@ -16,6 +16,10 @@ limitations under the License.
 
 #ifndef BACKENDS_DPDK_BACKEND_H_
 #define BACKENDS_DPDK_BACKEND_H_
+#include "p4/config/v1/p4info.pb.h"
+
+namespace p4configv1 = ::p4::config::v1;
+#undef setbit
 
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
@@ -40,7 +44,7 @@ class DpdkBackend {
     const IR::DpdkAsmProgram* dpdk_program = nullptr;
 
  public:
-    void convert(const IR::ToplevelBlock* tlb);
+    void convert(const IR::ToplevelBlock* tlb, const p4configv1::P4Info& p4info);
     DpdkBackend(DpdkOptions& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
         : options(options), refMap(refMap), typeMap(typeMap) {}
     void codegen(std::ostream&) const;

@@ -22,7 +22,10 @@ limitations under the License.
 #include "lib/json.h"
 #include "lib/nullstream.h"
 #include "options.h"
+#include "p4/config/v1/p4info.pb.h"
+#include "control-plane/bfruntime.h"
 
+namespace p4configv1 = ::p4::config::v1;
 /**
 Passes defined in this file are used for generating Context JSON output for DPDK
 Context JSON is a JSON file used by the control plane software for manipulating tables and
@@ -125,6 +128,7 @@ struct SelectionTable {
 class DpdkContextGenerator : public Inspector {
     P4::ReferenceMap* refmap;
     DpdkProgramStructure* structure;
+    const p4configv1::P4Info& p4info;
     DpdkOptions& options;
     // All tables are collected into this vector
     IR::IndexedVector<IR::Declaration> tables;
@@ -136,19 +140,19 @@ class DpdkContextGenerator : public Inspector {
     std::map<cstring, struct externAttributes> externAttrMap;
 
     // Running unique ID for tables and actions
-    static unsigned newTableHandle;
-    static unsigned newActionHandle;
+    std::map<cstring,size_t> context_handle_map;
 
  public:
     DpdkContextGenerator(P4::ReferenceMap* refmap, DpdkProgramStructure* structure,
+    const p4configv1::P4Info& p4info,
                          DpdkOptions& options)
-        : refmap(refmap), structure(structure), options(options) {}
+        : refmap(refmap), structure(structure), p4info(p4info), options(options) {}
 
-    unsigned int getNewTableHandle();
-    unsigned int getNewActionHandle();
     void serializeContextJson(std::ostream* destination);
     const Util::JsonObject* genContextJsonObject();
     void addMatchTables(Util::JsonArray* tablesJson);
+    size_t getHandleId(cstring name);
+    void collectHandleId();
     void addExternInfo(Util::JsonArray* externsJson);
     Util::JsonObject* initTableCommonJson(const cstring name, const struct TableAttributes& attr);
     void addKeyField(Util::JsonArray* keyJson, const cstring name, const cstring annon,

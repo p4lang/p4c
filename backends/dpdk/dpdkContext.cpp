@@ -20,19 +20,6 @@ limitations under the License.
 #include "printUtils.h"
 namespace DPDK {
 
-unsigned DpdkContextGenerator::newTableHandle = 0;
-unsigned DpdkContextGenerator::newActionHandle = 0;
-
-// Returns a unique ID for table
-unsigned int DpdkContextGenerator::getNewTableHandle() {
-    return table_handle_prefix | newTableHandle++;
-}
-
-// Returns a unique ID for action
-unsigned int DpdkContextGenerator::getNewActionHandle() {
-    return action_handle_prefix | newActionHandle++;
-}
-
 // This function collects all tables in a vector and sets the table attributes required
 // by context json into a map.
 void DpdkContextGenerator::CollectTablesAndSetAttributes() {
@@ -51,7 +38,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 tblAttr.direction = direction;
                 tblAttr.controlName = control->name.originalName;
                 tblAttr.externalName = tbl->controlPlaneName();
-                tblAttr.tableHandle = getNewTableHandle();
+                tblAttr.tableHandle = getHandleId(tblAttr.controlName+"."+tbl->name.originalName);
                 auto size = tbl->getSizeProperty();
                 tblAttr.size = dpdk_default_table_size;
                 if (size) tblAttr.size = size->asUnsigned();
@@ -200,6 +187,33 @@ Util::JsonObject* DpdkContextGenerator::initTableCommonJson(const cstring name,
     return tableJson;
 }
 
+void DpdkContextGenerator::collectHandleId(){
+    for (auto table : p4info.tables()){
+        const auto& pre_t = table.preamble();
+        context_handle_map[pre_t.name().c_str()] = pre_t.id();
+        for (auto& action_ref : table.action_refs()){
+            auto* action = P4::BFRT::Standard::findAction(p4info, action_ref.id());
+            if (action == nullptr) {
+                ::error(ErrorType::ERR_INVALID, "Invalid action id '%1%'", action_ref.id());
+            continue;
+            }
+            const auto& pre_a = action->preamble();
+            context_handle_map[pre_a.name()] = pre_a.id();
+        }
+    }
+}
+
+size_t DpdkContextGenerator::getHandleId(cstring name ){
+    size_t id = 0;
+    for (auto x : context_handle_map){
+        if (x.first.find(name.c_str())){
+            id = context_handle_map[x.first];
+            break;
+        }
+    }
+    return id;
+}
+
 // This function sets action attributes for actions in a table.
 void DpdkContextGenerator::setActionAttributes(const IR::P4Table* tbl) {
     for (auto act : tbl->getActionList()->actionList) {
@@ -260,7 +274,7 @@ void DpdkContextGenerator::setActionAttributes(const IR::P4Table* tbl) {
         attr.is_compiler_added_action = is_compiler_added_action;
         attr.allowed_as_hit_action = can_be_hit_action;
         attr.allowed_as_default_action = can_be_default_action;
-        attr.actionHandle = getNewActionHandle();
+        attr.actionHandle = getHandleId(action_decl->controlPlaneName());
         attr.externalName = action_decl->controlPlaneName();
         actionAttrMap.emplace(act->getName(), attr);
     }
@@ -538,6 +552,7 @@ const Util::JsonObject* DpdkContextGenerator::genContextJsonObject() {
 }
 
 void DpdkContextGenerator::serializeContextJson(std::ostream* destination) {
+    collectHandleId();
     CollectTablesAndSetAttributes();
     auto* json = genContextJsonObject();
     json->serialize(*destination);
