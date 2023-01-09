@@ -9,13 +9,16 @@
 ####################################################################################################
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  ""
-
+  "Assertion"
   # Assertion 'Default switch case should not be reachable' failed,
   # file '../../include/bm/bm_sim/actions.h' line '369'.
   issue1607-bmv2.p4
   bmv2_copy_headers.p4
-
+)
+ 
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "terminate called after throwing an instance"
   # terminate called after throwing an instance of 'std::out_of_range'
   # h.array[h.h.a].index
   # It turns out that h.h.a matters more than the size of the array
@@ -41,12 +44,6 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "bad json"
-  control-hs-index-test5.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
   "Unsupported type argument for Value Set"
   pvs-nested-struct.p4
 )
@@ -61,6 +58,16 @@ p4tools_add_xfail_reason(
 # 2. P4Testgen Issues
 # These are failures in P4Testgen that need to be fixed.
 ####################################################################################################
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "invalid syntax"
+  # Deprecated implementation for action profiles in ptf tests
+  issue297-bmv2.p4
+  action_profile_max_group_size_annotation.p4
+  action_selector_shared-bmv2.p4
+  action_profile-bmv2.p4
+)
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
@@ -228,15 +235,9 @@ p4tools_add_xfail_reason(
   parser-unroll-test4.p4
 )
 
-####################################################################################################
-# 5. Inja formatting error
-####################################################################################################
-
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "variable 'action.action_args' not found"
-  issue297-bmv2.p4
-  action_profile_max_group_size_annotation.p4
-  action_selector_shared-bmv2.p4
-  action_profile-bmv2.p4
+  "testgen-p4c-bmv2"
+  "The validity bit of .* is tainted"
+  up4.p4
+  control-hs-index-test5.p4
 )
