@@ -48,6 +48,12 @@ bool isStandardMetadata(cstring name) {
     return isStdMeta;
 }
 
+bool isHeadersStruct(const IR::Type_Struct* st) {
+    if (!st) return false;
+    auto annon = st->getAnnotation("__packet_data__");
+    if (annon) return true;
+    return false;
+}
 bool isMetadataStruct(const IR::Type_Struct* st) {
     for (auto anno : st->annotations->annotations) {
         if (anno->name == "__metadata__") {
@@ -67,6 +73,11 @@ bool isMetadataField(const IR::Expression* e) {
 bool isEightBitAligned(const IR::Expression* e) {
     if (e->type->width_bits() % 8 != 0) return false;
     return true;
+}
+
+const IR::Type_Bits* getEightBitAlignedType(const IR::Type_Bits* tb) {
+    auto width = (tb->width_bits() + 7) & (~7);
+    return IR::Type_Bits::get(width);
 }
 
 bool isDirection(const IR::Member* m) {

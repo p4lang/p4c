@@ -104,7 +104,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
         new P4::TypeChecking(refMap, typeMap, true),
         new CollectDirectCounterMeter(refMap, typeMap, &structure),
         new ValidateDirectCounterMeter(refMap, typeMap, &structure),
-        new DpdkAddPseudoHeader(refMap, typeMap, &structure, is_all_args_header_fields),
+        new DpdkAddPseudoHeader(refMap, typeMap, is_all_args_header_fields),
         new CollectProgramStructure(refMap, typeMap, &structure),
         new InspectDpdkProgram(refMap, typeMap, &structure),
         new CheckExternInvocation(refMap, typeMap, &structure),

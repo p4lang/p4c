@@ -56,7 +56,9 @@ struct local_metadata_t {
 }
 
 parser packet_parser(packet_in packet, out headers_t headers, inout local_metadata_t local_metadata, in psa_ingress_parser_input_metadata_t standard_metadata, in empty_metadata_t resub_meta, in empty_metadata_t recirc_meta) {
+    InternetChecksum() csum;
     state start {
+        csum.add(31w0x7);
         transition parse_ethernet;
     }
     state parse_ethernet {
@@ -81,7 +83,6 @@ control packet_deparser(packet_out packet, out empty_metadata_t clone_i2e_meta, 
 }
 
 control ingress(inout headers_t headers, inout local_metadata_t local_metadata1, in psa_ingress_input_metadata_t standard_metadata, inout psa_ingress_output_metadata_t ostd) {
-    InternetChecksum() csum;
     action vxlan_encap(bit<48> ethernet_dst_addr, bit<48> ethernet_src_addr, bit<16> ethernet_ether_type, bit<8> ipv4_diffserv, bit<16> ipv4_total_len, bit<16> ipv4_identification, bit<16> ipv4_flags_offset, bit<8> ipv4_ttl, bit<8> ipv4_protocol, bit<16> ipv4_hdr_checksum, bit<32> ipv4_src_addr, bit<32> ipv4_dst_addr, bit<16> udp_src_port, bit<16> udp_dst_port, bit<16> udp_length, bit<16> udp_checksum, bit<8> vxlan_flags, bit<24> vxlan_reserved, bit<24> vxlan_vni, bit<8> vxlan_reserved2, bit<32> port_out) {
         headers.outer_ethernet.src_addr = ethernet_src_addr;
         headers.outer_ethernet.dst_addr = ethernet_dst_addr;
@@ -104,8 +105,6 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata1,
         headers.vxlan.vni = vxlan_vni;
         headers.vxlan.reserved2 = vxlan_reserved2;
         ostd.egress_port = (PortId_t)port_out;
-        csum.add({ headers.outer_ipv4.hdr_checksum, headers.ipv4.total_len, headers.ipv4.ver, 32w0x6, local_metadata1.mem1 });
-        headers.outer_ipv4.hdr_checksum = csum.get();
         headers.outer_ipv4.total_len = headers.outer_ipv4.total_len + headers.ipv4.total_len;
         headers.outer_udp.length = headers.outer_udp.length + headers.ipv4.total_len;
     }

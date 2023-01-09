@@ -38,11 +38,7 @@ struct cksum_state_t {
 }
 
 struct dpdk_pseudo_header_t {
-	bit<16> pseudo
-	bit<16> pseudo_0
-	bit<8> pseudo_1
-	bit<32> pseudo_2
-	bit<32> pseudo_3
+	bit<32> pseudo
 }
 
 struct psa_ingress_output_metadata_t {
@@ -103,14 +99,6 @@ struct local_metadata_t {
 	bit<32> psa_ingress_input_metadata_ingress_port
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
-	bit<32> local_metadata_mem1
-	bit<8> Ingress_tmp
-	bit<8> Ingress_tmp_0
-	bit<16> Ingress_tmp_1
-	bit<16> Ingress_tmp_2
-	bit<32> Ingress_tmp_3
-	bit<32> Ingress_tmp_4
-	bit<32> Ingress_tmp_5
 }
 metadata instanceof local_metadata_t
 
@@ -136,26 +124,6 @@ action vxlan_encap args instanceof vxlan_encap_arg_t {
 	mov h.vxlan.vni t.vxlan_vni
 	mov h.vxlan.reserved2 t.vxlan_reserved2
 	mov m.psa_ingress_output_metadata_egress_port t.port_out
-	mov m.Ingress_tmp_1 h.outer_ipv4.hdr_checksum
-	mov m.Ingress_tmp_2 h.ipv4.total_len
-	mov m.Ingress_tmp h.ipv4.ver_ihl
-	and m.Ingress_tmp 0xF
-	mov m.Ingress_tmp_0 m.Ingress_tmp
-	and m.Ingress_tmp_0 0xF
-	mov m.Ingress_tmp_3 m.Ingress_tmp_0
-	mov m.Ingress_tmp_4 0x6
-	mov m.Ingress_tmp_5 m.local_metadata_mem1
-	mov h.dpdk_pseudo_header.pseudo m.Ingress_tmp_1
-	mov h.dpdk_pseudo_header.pseudo_0 m.Ingress_tmp_2
-	mov h.dpdk_pseudo_header.pseudo_1 m.Ingress_tmp_3
-	mov h.dpdk_pseudo_header.pseudo_2 m.Ingress_tmp_4
-	mov h.dpdk_pseudo_header.pseudo_3 m.Ingress_tmp_5
-	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo
-	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_0
-	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_1
-	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_2
-	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_3
-	mov h.outer_ipv4.hdr_checksum h.cksum_state.state_0
 	mov h.outer_ipv4.total_len t.ipv4_total_len
 	add h.outer_ipv4.total_len h.ipv4.total_len
 	mov h.outer_udp.length t.udp_length
@@ -184,6 +152,8 @@ table vxlan {
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x1
+	mov h.dpdk_pseudo_header.pseudo 0x7
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo
 	extract h.ethernet
 	extract h.ipv4
 	table vxlan

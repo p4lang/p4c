@@ -55,7 +55,9 @@ struct local_metadata_t {
 }
 
 parser packet_parser(packet_in packet, out headers_t headers, inout local_metadata_t local_metadata, in psa_ingress_parser_input_metadata_t standard_metadata, in empty_metadata_t resub_meta, in empty_metadata_t recirc_meta) {
+    @name("packet_parser.csum") InternetChecksum() csum_0;
     state start {
+        csum_0.add<bit<31>>(31w0x7);
         packet.extract<ethernet_t>(headers.ethernet);
         packet.extract<ipv4_t>(headers.ipv4);
         transition accept;
@@ -63,7 +65,7 @@ parser packet_parser(packet_in packet, out headers_t headers, inout local_metada
 }
 
 control packet_deparser(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t headers, in local_metadata_t local_metadata, in psa_ingress_output_metadata_t istd) {
-    @hidden action psadpdkchecksumargheader75() {
+    @hidden action psadpdkchecksumargheader77() {
         packet.emit<ethernet_t>(headers.outer_ethernet);
         packet.emit<ipv4_t>(headers.outer_ipv4);
         packet.emit<udp_t>(headers.outer_udp);
@@ -71,27 +73,18 @@ control packet_deparser(packet_out packet, out empty_metadata_t clone_i2e_meta, 
         packet.emit<ethernet_t>(headers.ethernet);
         packet.emit<ipv4_t>(headers.ipv4);
     }
-    @hidden table tbl_psadpdkchecksumargheader75 {
+    @hidden table tbl_psadpdkchecksumargheader77 {
         actions = {
-            psadpdkchecksumargheader75();
+            psadpdkchecksumargheader77();
         }
-        const default_action = psadpdkchecksumargheader75();
+        const default_action = psadpdkchecksumargheader77();
     }
     apply {
-        tbl_psadpdkchecksumargheader75.apply();
+        tbl_psadpdkchecksumargheader77.apply();
     }
-}
-
-struct tuple_0 {
-    bit<16> f0;
-    bit<16> f1;
-    bit<4>  f2;
-    bit<32> f3;
-    bit<32> f4;
 }
 
 control ingress(inout headers_t headers, inout local_metadata_t local_metadata1, in psa_ingress_input_metadata_t standard_metadata, inout psa_ingress_output_metadata_t ostd) {
-    @name("ingress.csum") InternetChecksum() csum_0;
     @name("ingress.vxlan_encap") action vxlan_encap(@name("ethernet_dst_addr") bit<48> ethernet_dst_addr, @name("ethernet_src_addr") bit<48> ethernet_src_addr, @name("ethernet_ether_type") bit<16> ethernet_ether_type, @name("ipv4_diffserv") bit<8> ipv4_diffserv, @name("ipv4_total_len") bit<16> ipv4_total_len, @name("ipv4_identification") bit<16> ipv4_identification, @name("ipv4_flags_offset") bit<16> ipv4_flags_offset, @name("ipv4_ttl") bit<8> ipv4_ttl, @name("ipv4_protocol") bit<8> ipv4_protocol, @name("ipv4_hdr_checksum") bit<16> ipv4_hdr_checksum, @name("ipv4_src_addr") bit<32> ipv4_src_addr, @name("ipv4_dst_addr") bit<32> ipv4_dst_addr, @name("udp_src_port") bit<16> udp_src_port, @name("udp_dst_port") bit<16> udp_dst_port, @name("udp_length") bit<16> udp_length, @name("udp_checksum") bit<16> udp_checksum, @name("vxlan_flags") bit<8> vxlan_flags, @name("vxlan_reserved") bit<24> vxlan_reserved, @name("vxlan_vni") bit<24> vxlan_vni, @name("vxlan_reserved2") bit<8> vxlan_reserved2, @name("port_out") bit<32> port_out) {
         headers.outer_ethernet.src_addr = ethernet_src_addr;
         headers.outer_ethernet.dst_addr = ethernet_dst_addr;
@@ -114,8 +107,6 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata1,
         headers.vxlan.vni = vxlan_vni;
         headers.vxlan.reserved2 = vxlan_reserved2;
         ostd.egress_port = port_out;
-        csum_0.add<tuple_0>((tuple_0){f0 = ipv4_hdr_checksum,f1 = headers.ipv4.total_len,f2 = headers.ipv4.ver,f3 = 32w0x6,f4 = local_metadata1.mem1});
-        headers.outer_ipv4.hdr_checksum = csum_0.get();
         headers.outer_ipv4.total_len = ipv4_total_len + headers.ipv4.total_len;
         headers.outer_udp.length = udp_length + headers.ipv4.total_len;
     }

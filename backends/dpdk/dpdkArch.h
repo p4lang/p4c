@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "constants.h"
 #include "dpdkProgramStructure.h"
+#include "dpdkUtils.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/sideEffects.h"
@@ -1151,15 +1152,24 @@ class HaveNonHeaderChecksumArgs : public Inspector {
                 if (type->name == "InternetChecksum") {
                     if (m->member == "add" || m->member == "subtract") {
                         for (auto arg : *mce->arguments) {
-                            BUG_CHECK(arg->expression->is<IR::StructExpression>(),
-                                      "Expected a StructExpression");
-                            for (auto c : arg->expression->to<IR::StructExpression>()->components) {
-                                if (auto m0 = c->expression->to<IR::Member>()) {
-                                    if (!typeMap->getType(m0->expr, true)->is<IR::Type_Header>()) {
+                            if (auto se = arg->expression->to<IR::StructExpression>()) {
+                                for (auto c : se->components) {
+                                    if (auto m0 = c->expression->to<IR::Member>()) {
+                                        if (!typeMap->getType(m0->expr, true)
+                                                 ->is<IR::Type_Header>()) {
+                                            is_all_arg_header_fields = false;
+                                            return false;
+                                        }
+                                    } else {
                                         is_all_arg_header_fields = false;
                                         return false;
                                     }
-                                } else {
+                                }
+                            } else if (arg->expression->to<IR::Constant>()) {
+                                is_all_arg_header_fields = false;
+                                return false;
+                            } else if (auto m = arg->expression->to<IR::Member>()) {
+                                if (!typeMap->getType(m->expr, true)->is<IR::Type_Header>()) {
                                     is_all_arg_header_fields = false;
                                     return false;
                                 }
@@ -1173,7 +1183,7 @@ class HaveNonHeaderChecksumArgs : public Inspector {
     }
 };
 
-/// @brief This pass add a pseudo header declaration, it will be used as
+/// @brief This pass adds a pseudo header declaration, it will be used as
 /// container of operands where dpdk instructions require it's operand to be in
 /// a header.
 /// It adds a type decl like below
@@ -1182,32 +1192,23 @@ class HaveNonHeaderChecksumArgs : public Inspector {
 class DpdkAddPseudoHeaderDecl : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
-    DpdkProgramStructure* structure;
-
     bool& is_all_args_header;
     IR::Vector<IR::Node> allTypeDecls;
 
  public:
-    static cstring headerInstanceName;
-    static cstring headerTypeName;
-    static cstring headersDeclName;
+    static cstring pseudoHeaderInstanceName;
+    static cstring pseudoHeaderTypeName;
     DpdkAddPseudoHeaderDecl(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                            DpdkProgramStructure* structure, bool& is_all_args_header)
-        : refMap(refMap),
-          typeMap(typeMap),
-          structure(structure),
-          is_all_args_header(is_all_args_header) {
-        headerInstanceName = refMap->newName("dpdk_pseudo_header");
-        headerTypeName = refMap->newName("dpdk_pseudo_header_t");
-        headersDeclName = "";
+                            bool& is_all_args_header)
+        : refMap(refMap), typeMap(typeMap), is_all_args_header(is_all_args_header) {
+        pseudoHeaderInstanceName = refMap->newName("dpdk_pseudo_header");
+        pseudoHeaderTypeName = refMap->newName("dpdk_pseudo_header_t");
         (void)this->typeMap;
         (void)this->refMap;
     }
 
     const IR::Node* preorder(IR::P4Program* program) override;
     const IR::Node* preorder(IR::Type_Struct* st) override;
-    bool isHeadersStruct(const IR::Type_Struct* st);
-    const IR::Node* preorder(IR::P4Control* c) override;
 };
 
 /// @brief This pass identify and collect statements which requires it's operand to be
@@ -1230,19 +1231,13 @@ class MoveNonHeaderFieldsToPseudoHeader : public Transform {
     P4::TypeMap* typeMap;
     bool& is_all_args_header;
     IR::Vector<IR::Node> newStructTypes;
-    cstring headerTypeName;
-    cstring headerInstanceName;
 
  public:
     static std::vector<std::pair<cstring, const IR::Type*>> pseudoFieldNameType;
     MoveNonHeaderFieldsToPseudoHeader(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                                       bool& is_all_args_header)
-        : refMap(refMap), typeMap(typeMap), is_all_args_header(is_all_args_header) {
-        headerInstanceName = DpdkAddPseudoHeaderDecl::headerInstanceName;
-        headerTypeName = DpdkAddPseudoHeaderDecl::headerTypeName;
-    }
-    std::pair<IR::AssignmentStatement*, IR::Member*> addAssignmentStmt(
-        const IR::NamedExpression* ne);
+        : refMap(refMap), typeMap(typeMap), is_all_args_header(is_all_args_header) {}
+    std::pair<IR::AssignmentStatement*, IR::Member*> addAssignmentStmt(const IR::Expression* ne);
 
     const IR::Node* postorder(IR::P4Program* p) override {
         if (newStructTypes.size() > 0) {
@@ -1261,19 +1256,14 @@ class MoveNonHeaderFieldsToPseudoHeader : public Transform {
 class AddFieldsToPseudoHeader : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
-    DpdkProgramStructure* structure;
     bool& is_all_args_header;
 
  public:
     AddFieldsToPseudoHeader(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                            DpdkProgramStructure* structure, bool& is_all_args_header)
-        : refMap(refMap),
-          typeMap(typeMap),
-          structure(structure),
-          is_all_args_header(is_all_args_header) {
+                            bool& is_all_args_header)
+        : refMap(refMap), typeMap(typeMap), is_all_args_header(is_all_args_header) {
         (void)this->typeMap;
         (void)this->refMap;
-        (void)this->structure;
     }
     const IR::Node* preorder(IR::Type_Header* h) override;
 };
@@ -1281,25 +1271,19 @@ class AddFieldsToPseudoHeader : public Transform {
 struct DpdkAddPseudoHeader : public PassManager {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
-    DpdkProgramStructure* structure;
     bool& is_all_args_header;
 
  public:
     DpdkAddPseudoHeader(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                        DpdkProgramStructure* structure, bool& is_all_args_header_fields)
-        : refMap(refMap),
-          typeMap(typeMap),
-          structure(structure),
-          is_all_args_header(is_all_args_header_fields) {
+                        bool& is_all_args_header_fields)
+        : refMap(refMap), typeMap(typeMap), is_all_args_header(is_all_args_header_fields) {
         passes.push_back(new HaveNonHeaderChecksumArgs(typeMap, is_all_args_header));
-        passes.push_back(
-            new DpdkAddPseudoHeaderDecl(refMap, typeMap, structure, is_all_args_header));
+        passes.push_back(new DpdkAddPseudoHeaderDecl(refMap, typeMap, is_all_args_header));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
         passes.push_back(
             new MoveNonHeaderFieldsToPseudoHeader(refMap, typeMap, is_all_args_header));
-        passes.push_back(
-            new AddFieldsToPseudoHeader(refMap, typeMap, structure, is_all_args_header));
+        passes.push_back(new AddFieldsToPseudoHeader(refMap, typeMap, is_all_args_header));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
     }
