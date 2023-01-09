@@ -25,7 +25,7 @@ namespace P4Testgen {
 class TestBackEnd {
  private:
     /// The current test count. If it exceeds @var maxTests, the symbolic executor will stop.
-    uint64_t testCount = 0;
+    int64_t testCount = 0;
 
  protected:
     /// ProgramInfo is used to access some target specific information for test generation.
@@ -39,7 +39,7 @@ class TestBackEnd {
     ExplorationStrategy& symbex;
 
     /// Test maximum number of tests that are to be produced.
-    uint64_t maxTests;
+    int64_t maxTests;
 
     explicit TestBackEnd(const ProgramInfo& programInfo, ExplorationStrategy& symbex)
         : programInfo(programInfo), symbex(symbex), maxTests(TestgenOptions::get().maxTests) {
@@ -49,7 +49,7 @@ class TestBackEnd {
         }
     }
 
-    [[nodiscard]] bool needsToTerminate(uint64_t testCount) const { return testCount == maxTests; }
+    [[nodiscard]] bool needsToTerminate(int64_t testCount) const { return testCount == maxTests; }
 
  public:
     TestBackEnd(const TestBackEnd&) = default;
@@ -117,7 +117,7 @@ class TestBackEnd {
     static void printPerformanceReport();
 
     /// Accessors.
-    [[nodiscard]] uint64_t getTestCount() const;
+    [[nodiscard]] int64_t getTestCount() const;
 };
 
 }  // namespace P4Testgen

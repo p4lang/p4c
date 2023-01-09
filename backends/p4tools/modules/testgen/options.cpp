@@ -39,14 +39,19 @@ TestgenOptions::TestgenOptions()
         "--max-tests", "maxTests",
         [this](const char* arg) {
             try {
-                maxTests = std::stoull(arg);
+                // Unfortunately, we can not use std::stoul because negative inputs are okay
+                // according to the C++ standard.
+                maxTests = std::stoll(arg);
+                if (maxTests < 0) {
+                    throw std::invalid_argument("Invalid input.");
+                }
             } catch (std::invalid_argument&) {
-                ::error("Invalid input value %1% for --max-tests. Expected integer.", arg);
+                ::error("Invalid input value %1% for --max-tests. Expected positive integer.", arg);
                 return false;
             }
             return true;
         },
-        "Sets the maximum number of tests to be generated [default: 1]. Setting the value to <=0 "
+        "Sets the maximum number of tests to be generated [default: 1]. Setting the value to 0 "
         "will generate tests until no more paths can be found.");
 
     registerOption(
@@ -189,12 +194,14 @@ TestgenOptions::TestgenOptions()
                 // Unfortunately, we can not use std::stoul because negative inputs are okay
                 // according to the C++ standard.
                 popLevelTmp = std::stoll(arg);
-                if (popLevelTmp < 0) {
-                    throw std::invalid_argument("Negative input.");
+                if (popLevelTmp <= 0) {
+                    throw std::invalid_argument("Invalid input.");
                 }
             } catch (std::invalid_argument&) {
-                ::error("Invalid input value %1% for --pop-level. Expected non-negative integer.",
-                        arg);
+                ::error(
+                    "Invalid input value %1% for --pop-level. Expected positive, non-zero "
+                    "integer.",
+                    arg);
                 return false;
             }
             popLevel = popLevelTmp;
@@ -216,7 +223,7 @@ TestgenOptions::TestgenOptions()
                 }
             } catch (std::invalid_argument&) {
                 ::error(
-                    "Invalid input value %1% for --linear-enumeration. Expected non-negative "
+                    "Invalid input value %1% for --linear-enumeration. Expected positive "
                     "integer.",
                     arg);
                 return false;
@@ -238,9 +245,8 @@ TestgenOptions::TestgenOptions()
                     throw std::invalid_argument("Negative input.");
                 }
             } catch (std::invalid_argument&) {
-                ::error(
-                    "Invalid input value %1% for --saddle-point. Expected non-negative integer.",
-                    arg);
+                ::error("Invalid input value %1% for --saddle-point. Expected positive integer.",
+                        arg);
                 return false;
             }
             saddlePoint = saddlePointTmp;

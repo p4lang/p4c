@@ -12,7 +12,7 @@ namespace P4Tools {
 class TestgenOptions : public AbstractP4cToolOptions {
  public:
     /// Maximum number of tests to be generated. Defaults to 1.
-    uint64_t maxTests = 1;
+    int64_t maxTests = 1;
 
     /// List of the supported exploration strategies.
     static const std::set<cstring> SUPPORTED_EXPLORATION_STRATEGIES;
