@@ -94,14 +94,6 @@ P4C_RUNTIME_DEPS="cpp \
                   libgmp-dev \
                   python3"
 
-# use scapy 2.4.5, which is the version on which ptf depends
-P4C_PIP_PACKAGES="ipaddr \
-                  pyroute2 \
-                  ply==3.8 \
-                  ptf \
-                  scapy==2.4.5 \
-                  clang-format>=15.0.4"
-
 
 # TODO: Remove this check once 18.04 is deprecated.
 if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/null)" != "" ]] ; then
@@ -125,8 +117,7 @@ fi
 ccache --set-config max_size=1G
 
 sudo pip3 install --upgrade pip
-sudo pip3 install wheel
-sudo pip3 install $P4C_PIP_PACKAGES
+sudo pip3 install -r ${P4C_DIR}/requirements.txt
 
 # Build libbpf for eBPF tests.
 pushd ${P4C_DIR}
