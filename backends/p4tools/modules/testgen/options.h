@@ -11,9 +11,6 @@ namespace P4Tools {
 /// Encapsulates and processes command-line options for p4testgen.
 class TestgenOptions : public AbstractP4cToolOptions {
  public:
-    /// Whether to produce just the input packet for each test.
-    bool inputPacketOnly = false;
-
     /// Maximum number of tests to be generated. Defaults to 1.
     int maxTests = 1;
 

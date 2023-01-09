@@ -369,24 +369,6 @@ bool CmdStepper::preorder(const IR::P4Program* /*program*/) {
     }
 
     const auto* topLevelBlocks = programInfo.getPipelineSequence();
-    // If we are just producing input packets, remove anything appearing after the first parser.
-    // TODO: Move this into getPipelineSequence? Also, clean up.
-    if (TestgenOptions::get().inputPacketOnly) {
-        auto* blocks = new std::vector<Continuation::Command>();
-        for (const auto& block : *topLevelBlocks) {
-            blocks->push_back(block);
-            const auto* p4Node = boost::get<const IR::Node*>(&block);
-            if (p4Node == nullptr) {
-                continue;
-            }
-            if (const auto* cce = (*p4Node)->to<IR::ConstructorCallExpression>()) {
-                if (cce->type->is<IR::Type_Parser>()) {
-                    break;
-                }
-            }
-        }
-        topLevelBlocks = blocks;
-    }
 
     // In between pipe lines we may drop packets or exit.
     // This segment inserts a special exception to deal with this case.

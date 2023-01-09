@@ -31,14 +31,6 @@ TestgenOptions::TestgenOptions()
         "Fail on unimplemented features instead of trying the next branch.");
 
     registerOption(
-        "--input-packet-only", nullptr,
-        [this](const char*) {
-            inputPacketOnly = true;
-            return true;
-        },
-        "Only produce the input packet for each test");
-
-    registerOption(
         "--max-tests", "maxTests",
         [this](const char* arg) {
             maxTests = std::atoi(arg);
