@@ -236,7 +236,7 @@ p4tools_add_xfail_reason(
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-ptf"
   "The validity bit of .* is tainted"
   up4.p4
   control-hs-index-test5.p4
