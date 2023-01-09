@@ -38,7 +38,8 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 tblAttr.direction = direction;
                 tblAttr.controlName = control->name.originalName;
                 tblAttr.externalName = tbl->controlPlaneName();
-                tblAttr.tableHandle = getHandleId(tblAttr.controlName+"."+tbl->name.originalName);
+                tblAttr.tableHandle =
+                    getHandleId(tblAttr.controlName + "." + tbl->name.originalName);
                 auto size = tbl->getSizeProperty();
                 tblAttr.size = dpdk_default_table_size;
                 if (size) tblAttr.size = size->asUnsigned();
@@ -187,15 +188,15 @@ Util::JsonObject* DpdkContextGenerator::initTableCommonJson(const cstring name,
     return tableJson;
 }
 
-void DpdkContextGenerator::collectHandleId(){
-    for (auto table : p4info.tables()){
+void DpdkContextGenerator::collectHandleId() {
+    for (auto table : p4info.tables()) {
         const auto& pre_t = table.preamble();
         context_handle_map[pre_t.name().c_str()] = pre_t.id();
-        for (auto& action_ref : table.action_refs()){
+        for (auto& action_ref : table.action_refs()) {
             auto* action = P4::BFRT::Standard::findAction(p4info, action_ref.id());
             if (action == nullptr) {
                 ::error(ErrorType::ERR_INVALID, "Invalid action id '%1%'", action_ref.id());
-            continue;
+                continue;
             }
             const auto& pre_a = action->preamble();
             context_handle_map[pre_a.name()] = pre_a.id();
@@ -203,10 +204,10 @@ void DpdkContextGenerator::collectHandleId(){
     }
 }
 
-size_t DpdkContextGenerator::getHandleId(cstring name ){
+size_t DpdkContextGenerator::getHandleId(cstring name) {
     size_t id = 0;
-    for (auto x : context_handle_map){
-        if (x.first.find(name.c_str())){
+    for (auto x : context_handle_map) {
+        if (x.first.find(name.c_str())) {
             id = context_handle_map[x.first];
             break;
         }

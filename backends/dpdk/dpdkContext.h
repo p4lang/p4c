@@ -18,12 +18,12 @@ limitations under the License.
 #define BACKENDS_DPDK_DPDKCONTEXT_H_
 
 #include "constants.h"
+#include "control-plane/bfruntime.h"
 #include "dpdkProgramStructure.h"
 #include "lib/json.h"
 #include "lib/nullstream.h"
 #include "options.h"
 #include "p4/config/v1/p4info.pb.h"
-#include "control-plane/bfruntime.h"
 
 namespace p4configv1 = ::p4::config::v1;
 /**
@@ -140,12 +140,11 @@ class DpdkContextGenerator : public Inspector {
     std::map<cstring, struct externAttributes> externAttrMap;
 
     // Running unique ID for tables and actions
-    std::map<cstring,size_t> context_handle_map;
+    std::map<cstring, size_t> context_handle_map;
 
  public:
     DpdkContextGenerator(P4::ReferenceMap* refmap, DpdkProgramStructure* structure,
-    const p4configv1::P4Info& p4info,
-                         DpdkOptions& options)
+                         const p4configv1::P4Info& p4info, DpdkOptions& options)
         : refmap(refmap), structure(structure), p4info(p4info), options(options) {}
 
     void serializeContextJson(std::ostream* destination);
