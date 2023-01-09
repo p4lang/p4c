@@ -1136,8 +1136,8 @@ class ElimHeaderCopy : public Transform {
     const IR::Node* postorder(IR::Member* m) override;
 };
 
-/// This pass check wether program uses InternetChecksum and
-/// all argument to the method add or sub have non header fields expression
+/// This pass checks whether program uses InternetChecksum and
+/// all arguments to the method add or sub have non header fields expression
 class HaveNonHeaderChecksumArgs : public Inspector {
     P4::TypeMap* typeMap;
     bool& is_all_arg_header_fields;
@@ -1211,7 +1211,7 @@ class DpdkAddPseudoHeaderDecl : public Transform {
     const IR::Node* preorder(IR::Type_Struct* st) override;
 };
 
-/// @brief This pass identify and collect statements which requires it's operand to be
+/// @brief This pass identifies and collects statement which requires it's operand to be
 /// in a header and also initialize added header fields with original operand.
 /// i.e.
 /// csum_0.add<tuple_0>((tuple_0){f0 = m.Ingress_tmp_1,f1 = m.Ingress_tmp_2,

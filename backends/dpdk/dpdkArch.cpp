@@ -2918,13 +2918,12 @@ MoveNonHeaderFieldsToPseudoHeader::addAssignmentStmt(const IR::Expression* e) {
         type = typeMap->getType(e, true)->to<IR::Type_Bits>();
     }
     auto name = refMap->newName("pseudo");
-    auto width = (type->width_bits() + 7) & (~7);
-    pseudoFieldNameType.push_back(
-        std::pair<cstring, const IR::Type*>(name, IR::Type_Bits::get(width)));
+    auto aligned_type = getEightBitAlignedType(type);
+    pseudoFieldNameType.push_back(std::pair<cstring, const IR::Type*>(name, aligned_type));
     auto mem0 = new IR::Member(new IR::PathExpression(IR::ID("h")),
                                IR::ID(DpdkAddPseudoHeaderDecl::pseudoHeaderInstanceName));
     auto mem1 = new IR::Member(mem0, IR::ID(name));
-    auto cast1 = new IR::Cast(IR::Type_Bits::get(width), e);
+    auto cast1 = new IR::Cast(aligned_type, e);
     return {new IR::AssignmentStatement(mem1, cast1), mem1};
 }
 
@@ -2990,7 +2989,6 @@ const IR::Node* MoveNonHeaderFieldsToPseudoHeader::postorder(IR::MethodCallState
                                 typeMap->getType(arg->expression, true)->to<IR::Type_Bits>();
                             newTname0 = getEightBitAlignedType(type);
                             newarg = stm.second;
-                            ;
                             result->push_back(stm.first);
                         } else {
                             BUG("unexpected expression");
