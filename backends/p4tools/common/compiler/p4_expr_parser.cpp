@@ -153,21 +153,21 @@ const IR::Node* Parser::createIR(Token::Kind kind, const IR::Node* left,
         case Token::Kind::SaturationAdd:
             return new IR::AddSat(leftExpr, rightExpr);
         case Token::Kind::LessEqual:
-            return new IR::Leq(leftExpr, rightExpr);
+            return new IR::Leq(IR::Type_Boolean::get(), leftExpr, rightExpr);
         case Token::Kind::Shl:
             return new IR::Shl(leftExpr, rightExpr);
         case Token::Kind::LessThan:
-            return new IR::Lss(leftExpr, rightExpr);
+            return new IR::Lss(IR::Type_Boolean::get(), leftExpr, rightExpr);
         case Token::Kind::GreaterEqual:
-            return new IR::Geq(leftExpr, rightExpr);
+            return new IR::Geq(IR::Type_Boolean::get(), leftExpr, rightExpr);
         case Token::Kind::Shr:
             return new IR::Shr(leftExpr, rightExpr);
         case Token::Kind::GreaterThan:
-            return new IR::Grt(leftExpr, rightExpr);
+            return new IR::Grt(IR::Type_Boolean::get(), leftExpr, rightExpr);
         case Token::Kind::NotEqual:
-            return new IR::Neq(leftExpr, rightExpr);
+            return new IR::Neq(IR::Type_Boolean::get(), leftExpr, rightExpr);
         case Token::Kind::Equal:
-            return new IR::Equ(leftExpr, rightExpr);
+            return new IR::Equ(IR::Type_Boolean::get(), leftExpr, rightExpr);
         case Token::Kind::BAnd:
             return new IR::BAnd(leftExpr, rightExpr);
         case Token::Kind::Xor:
@@ -175,11 +175,12 @@ const IR::Node* Parser::createIR(Token::Kind kind, const IR::Node* left,
         case Token::Kind::BOr:
             return new IR::BOr(leftExpr, rightExpr);
         case Token::Kind::Conjunction:
-            return new IR::LAnd(leftExpr, rightExpr);
+            return new IR::LAnd(IR::Type_Boolean::get(), leftExpr, rightExpr);
         case Token::Kind::Disjunction:
-            return new IR::LOr(leftExpr, rightExpr);
+            return new IR::LOr(IR::Type_Boolean::get(), leftExpr, rightExpr);
         case Token::Kind::Implication:
-            return new IR::LOr(new IR::LNot(leftExpr), rightExpr);
+            return new IR::LOr(IR::Type_Boolean::get(),
+                               new IR::LNot(IR::Type_Boolean::get(), leftExpr), rightExpr);
         default:
             BUG("Unimplemented kind %1%", kind);
     }
@@ -361,7 +362,12 @@ const IR::Node* Parser::createApplicationOp(const IR::Node* base) {
         BUG("Inimplemented parameters");
     }
     auto* expr = base->to<IR::Expression>()->clone();
-    expr->type = new IR::Type_Method(paramList, expr->to<IR::Member>()->member.name);
+    const auto* member = expr->to<IR::Member>();
+    if (member->member.name == "isValid") {
+        expr->type = new IR::Type_Method(IR::Type_Boolean::get(), paramList, member->member.name);
+    } else {
+        expr->type = new IR::Type_Method(paramList, member->member.name);
+    }
     return new IR::MethodCallExpression(expr, arguments);
 }
 

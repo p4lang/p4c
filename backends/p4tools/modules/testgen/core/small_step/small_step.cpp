@@ -47,6 +47,9 @@ SmallStepEvaluator::SmallStepEvaluator(AbstractSolver& solver, const ProgramInfo
 
 const IR::Expression* SmallStepEvaluator::stepAndReturnValue(const IR::Expression* expr) {
     // Create a base state with a parameter continuation to apply the value on.
+    std::cout << expr->type << std::endl;
+    std::cout << expr->to<IR::Operation_Binary>()->left << std::endl;
+    std::cout << expr->to<IR::Operation_Binary>()->left->type << std::endl;
     const auto* v = Continuation::genParameter(expr->type, "v", NamespaceContext::Empty);
     Continuation::Body bodyBase({Continuation::Return(v->param)});
     Continuation continuationBase(v, bodyBase);
@@ -67,7 +70,14 @@ const IR::Expression* SmallStepEvaluator::stepAndReturnValue(const IR::Expressio
         BUG_CHECK(ret && ret->expr, "Invalid format for the return result");
         expr = ret->expr.get()->to<IR::Expression>();
         std::cout << expr << std::endl;
+        std::cout << expr->type << std::endl;
     }
+    exprState->popContinuation(expr);
+    auto cmd1 = exprState->getBody().next();
+    auto* ret1 = boost::get<Continuation::Return>(&cmd1);
+    BUG_CHECK(ret1 && ret1->expr, "Invalid format for the return result");
+    expr = ret1->expr.get()->to<IR::Expression>();
+    std::cout << expr << std::endl;
     // Examine the resulting execution state.
     // Examine the resulting body.
     auto cmd = exprState->getBody().next();

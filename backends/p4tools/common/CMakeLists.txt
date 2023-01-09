@@ -42,6 +42,7 @@ set(
   compiler/convert_hs_index.cpp
   compiler/convert_varbits.cpp
   compiler/midend.cpp
+  compiler/p4_asserts_parser.cpp
   compiler/p4_expr_parser.cpp
   compiler/reachability.cpp
 
