@@ -40,13 +40,14 @@ class DpdkBackend {
     DpdkOptions& options;
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
-
+    const p4configv1::P4Info& p4info;
     const IR::DpdkAsmProgram* dpdk_program = nullptr;
 
  public:
-    void convert(const IR::ToplevelBlock* tlb, const p4configv1::P4Info& p4info);
-    DpdkBackend(DpdkOptions& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
-        : options(options), refMap(refMap), typeMap(typeMap) {}
+    void convert(const IR::ToplevelBlock* tlb);
+    DpdkBackend(DpdkOptions& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                const p4configv1::P4Info& p4info)
+        : options(options), refMap(refMap), typeMap(typeMap), p4info(p4info) {}
     void codegen(std::ostream&) const;
 };
 

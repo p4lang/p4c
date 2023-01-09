@@ -110,6 +110,7 @@ int main(int argc, char* const argv[]) {
     }
 
     P4::serializeP4RuntimeIfRequired(program, options);
+    auto p4info = *P4::generateP4Runtime(program, options.arch).p4Info;
     if (::errorCount() > 0) return 1;
 
     if (!options.bfRtSchema.isNullOrEmpty()) {
@@ -134,9 +135,9 @@ int main(int argc, char* const argv[]) {
     }
     if (::errorCount() > 0) return 1;
 
-    auto backend = new DPDK::DpdkBackend(options, &midEnd.refMap, &midEnd.typeMap);
+    auto backend = new DPDK::DpdkBackend(options, &midEnd.refMap, &midEnd.typeMap, p4info);
 
-    backend->convert(toplevel, *P4::generateP4Runtime(program, options.arch).p4Info);
+    backend->convert(toplevel);
     if (::errorCount() > 0) return 1;
 
     if (!options.outputFile.isNullOrEmpty()) {

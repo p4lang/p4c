@@ -34,7 +34,7 @@ limitations under the License.
 #include "midend/simplifyKey.h"
 namespace DPDK {
 
-void DpdkBackend::convert(const IR::ToplevelBlock* tlb, const p4configv1::P4Info& p4info) {
+void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
     CHECK_NULL(tlb);
     DpdkProgramStructure structure;
     auto parseDpdkArch = new ParseDpdkArchitecture(&structure);
