@@ -27,5 +27,7 @@ bool isMetadataStruct(const IR::Type_Struct* st);
 bool isMetadataField(const IR::Expression* e);
 bool isEightBitAligned(const IR::Expression* e);
 bool isDirection(const IR::Member* m);
+bool isHeadersStruct(const IR::Type_Struct* st);
+const IR::Type_Bits* getEightBitAlignedType(const IR::Type_Bits* tb);
 }  // namespace DPDK
 #endif /* BACKENDS_DPDK_DPDKUTILS_H_ */
