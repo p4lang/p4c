@@ -25,21 +25,6 @@ p4tools_add_xfail_reason(
   bmv2_hs1.p4
   control-hs-index-test1.p4
   control-hs-index-test2.p4
-
-  # terminate called after throwing an instance of 'boost::wrapexcept<std::range_error>'
-  # Conversion from negative integer to an unsigned type results in undefined behaviour
-  issue2726-bmv2.p4
-  runtime-index-bmv2.p4
-
-  # terminate called after throwing an instance of 'std::runtime_error'
-  # in Json::Value::operator[](ArrayIndex)const: requires arrayValue
-  control-hs-index-test6.p4
-  issue3374.p4
-
-  # terminate called after throwing an instance of 'std::runtime_error'
-  # Type is not convertible to string
-  control-hs-index-test3.p4
-  parser-unroll-test1.p4
 )
 
 p4tools_add_xfail_reason(
@@ -240,4 +225,26 @@ p4tools_add_xfail_reason(
   "The validity bit of .* is tainted"
   up4.p4
   control-hs-index-test5.p4
+)
+
+####################################################################################################
+# 5. PTF tests
+# These are failures in PTF test that need to be fixed.
+####################################################################################################
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "no port"
+  issue2726-bmv2.p4
+  runtime-index-bmv2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "TypeError: _log()"
+  # TypeError: _log() got an unexpected keyword argument 'file'
+  issue3374.p4
+  control-hs-index-test6.p4
+  parser-unroll-test1.p4
+  control-hs-index-test3.p4
 )
