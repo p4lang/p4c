@@ -212,6 +212,7 @@ size_t DpdkContextGenerator::getHandleId(cstring name) {
             break;
         }
     }
+    BUG_CHECK(id != 0, "unable to find id for %1%", name);
     return id;
 }
 
