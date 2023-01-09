@@ -740,6 +740,21 @@ class P4RuntimeTest(BaseTest):
     def set_action_entry(self, table_entry, a_name, params):
         self.set_action(table_entry.action.action, a_name, params)
 
+    def set_one_shot_profile(self, table_entry, a_name, params):
+        action_profile_action = table_entry.action.action_profile_action_set.action_profile_actions.add(
+        )
+        action_id = self.get_action_id(a_name)
+        if action_id is None:
+            self.fail(
+                "Failed to get id of action '{}' - perhaps the action name is misspelled?"
+            ).format(a_name)
+        action_profile_action.action.action_id = action_id
+        for p_name, v in params:
+            param = action_profile_action.action.params.add()
+            param.param_id = self.get_param_id(a_name, p_name)
+            param.value = stringify(v)
+        action_profile_action.weight = 1
+
     def _write(self, req):
         try:
             return self.stub.Write(req)
@@ -906,6 +921,9 @@ class P4RuntimeTest(BaseTest):
                     'elapsed_ns']
             if 'metadata' in options:
                 table_entry.metadata = options['metadata']
+            if 'oneshot' in options and options['oneshot']:
+                self.set_one_shot_profile(table_entry, action_name, action_params)
+                return table_entry
         self.set_action_entry(table_entry, action_name, action_params)
         return table_entry
 
@@ -1116,6 +1134,7 @@ class P4RuntimeTest(BaseTest):
         election_id.high = 0
         election_id.low = 0
         return req
+
 
 # Add p4info object and object id "getters" for each object type; these are just
 # wrappers around P4RuntimeTest.get_obj and P4RuntimeTest.get_obj_id.

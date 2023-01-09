@@ -292,24 +292,6 @@ class Test{{test_id}}(AbstractTest):
 
     def setupCtrlPlane(self):
 ## if control_plane
-## if existsIn(control_plane, "action_profiles")
-## for ap in control_plane.action_profiles
-## for action in ap.actions
-        self.insertTableEntry(
-            '{{ap.profile}}',
-            [
-                gc.KeyTuple('$ACTION_MEMBER_ID', {{action.action_idx}}),
-            ],
-            '{{action.action_name}}',
-            [
-## for act_param in action.act_args
-                gc.DataTuple('{{act_param.param}}', {{act_param.value}}),
-## endfor
-            ]
-        )
-## endfor
-## endfor
-## endif
 ## for table in control_plane.tables
 ## for rule in table.rules
         self.table_add(
@@ -328,24 +310,17 @@ class Test{{test_id}}(AbstractTest):
 ## for r in rule.rules.lpm_matches
                 self.Lpm('{{r.field_name}}', {{r.value}}, {{r.prefix_len}}),
 ## endfor
-## if existsIn(table, "has_ap")
-            ],
-            None,
-            [
-                ('$ACTION_MEMBER_ID', {{rule.action_name}}),
-            ], {% if rule.rules.needs_priority %}{{rule.priority}}{% endif %}
-        )
-## else
             ]),
             ('{{rule.action_name}}',
             [
 ## for act_param in rule.rules.act_args
                 ('{{act_param.param}}', {{act_param.value}}),
 ## endfor
-            ]), {% if rule.rules.needs_priority %}{{rule.priority}}{% endif %}
+            ])
+            , {% if rule.rules.needs_priority %}{{rule.priority}}{% else %}None{% endif %}
+            {% if existsIn(table, "has_ap") %}, {"oneshot": True}{% endif %}
         )
 ## endfor
-## endif
 ## endfor
 ## else
         pass

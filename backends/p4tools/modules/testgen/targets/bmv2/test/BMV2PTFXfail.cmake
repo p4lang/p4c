@@ -46,16 +46,6 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "invalid syntax"
-  # Deprecated implementation for action profiles in ptf tests
-  issue297-bmv2.p4
-  action_profile_max_group_size_annotation.p4
-  action_selector_shared-bmv2.p4
-  action_profile-bmv2.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
   "Computations are not supported in update_checksum"
 )
 
@@ -224,6 +214,7 @@ p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "The validity bit of .* is tainted"
   up4.p4
+  control-hs-index-test3.p4
   control-hs-index-test5.p4
 )
 
@@ -246,5 +237,4 @@ p4tools_add_xfail_reason(
   issue3374.p4
   control-hs-index-test6.p4
   parser-unroll-test1.p4
-  control-hs-index-test3.p4
 )
