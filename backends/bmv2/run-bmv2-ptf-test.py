@@ -190,4 +190,4 @@ if __name__ == "__main__":
     options.infoName = testdir + "/" + partOfTestName + ".p4info.txt"
     options.rootDir = args.rootdir
     # Run the test with the extracted options
-    run_test(options)
+    sys.exit(run_test(options))
