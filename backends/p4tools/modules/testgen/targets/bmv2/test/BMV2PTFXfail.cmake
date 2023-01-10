@@ -226,46 +226,9 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "no port"
-  issue2726-bmv2.p4
-  runtime-index-bmv2.p4
-  basic_routing-bmv2.p4
-  issue1478-bmv2.p4
-  same_name_for_table_and_action.p4
-  std_meta_inlining.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
   "Address family not supported by protocol"
   pvs-struct-2-bmv2.p4
   table-entries-lpm-bmv2.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "KeyError"
-  crc32-bmv2.p4
-  issue-2123.p4
-  issue1538.p4
-  issue1544-1-bmv2.p4
-  issue1544-2-bmv2.p4
-  issue1544-bmv2.p4
-  issue1630-bmv2.p4
-  issue1739-bmv2.p4
-  issue3488-1-bmv2.p4
-  issue3488-bmv2.p4
-  issue461-bmv2.p4
-  issue561-bmv2.p4 
-  match-on-exprs-bmv2.p4
-  match-on-exprs2-bmv2.p4
-  named_meter_1-bmv2.p4
-  p416-type-use3.p4
-  stack_complex-bmv2.p4
-  table-entries-range-bmv2.p4
-  v1model-special-ops-bmv2.p4
-  bmv2_table_lpm_2.p4
-  bmv2_tainted_table_key.p4
 )
 
 p4tools_add_xfail_reason(

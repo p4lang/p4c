@@ -57,7 +57,8 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     /// the deparser. This sequence also includes nodes that handle transitions between the
     /// individual component instantiations.
     int pipeIdx = 0;
-    for (const auto &declTuple : programmableBlocks) {
+    pipelineSequence.emplace_back(Continuation::Guard(getPortConstraint(getTargetInputPortVar())));
+    for (const auto& declTuple : programmableBlocks) {
         // Iterate through the (ordered) pipes of the target architecture.
         auto subResult = processDeclaration(declTuple.second, pipeIdx);
         pipelineSequence.insert(pipelineSequence.end(), subResult.begin(), subResult.end());
@@ -81,6 +82,7 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
             constraint = new IR::LAnd(constraint, restriction);
         }
     }
+
     targetConstraints = constraint;
 }
 
@@ -129,7 +131,8 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
         auto *egressPortVar =
             new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                            new IR::PathExpression("*standard_metadata"), "egress_port");
-        auto *portStmt = new IR::AssignmentStatement(egressPortVar, getTargetOutputPortVar());
+        cmds.emplace_back(Continuation::Guard(getPortConstraint(getTargetOutputPortVar())));
+        auto* portStmt = new IR::AssignmentStatement(egressPortVar, getTargetOutputPortVar());
         cmds.emplace_back(portStmt);
         // TODO: We have not implemented multi cast yet.
         // Drop the packet if the multicast group is set.
@@ -158,6 +161,12 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
 const IR::Member *BMv2_V1ModelProgramInfo::getTargetInputPortVar() const {
     return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                           new IR::PathExpression("*standard_metadata"), "ingress_port");
+}
+const IR::Expression* BMv2_V1ModelProgramInfo::getPortConstraint(const IR::Member* portVar) const {
+    const IR::Operation_Binary* portConstraint =
+        new IR::LAnd(new IR::Geq(portVar, new IR::Constant(portVar->type, 0)),
+                     new IR::Leq(portVar, new IR::Constant(portVar->type, 7)));
+    return portConstraint;
 }
 
 const IR::Member *BMv2_V1ModelProgramInfo::getTargetOutputPortVar() const {
