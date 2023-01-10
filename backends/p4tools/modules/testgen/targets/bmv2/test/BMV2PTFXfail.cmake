@@ -25,6 +25,11 @@ p4tools_add_xfail_reason(
   bmv2_hs1.p4
   control-hs-index-test1.p4
   control-hs-index-test2.p4
+  action_selector_shared-bmv2.p4
+
+  # terminate called after throwing an instance of 'std::length_error'
+  # what():  cannot create std::vector larger than max_size()
+  header-stack-ops-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -228,6 +233,72 @@ p4tools_add_xfail_reason(
   "no port"
   issue2726-bmv2.p4
   runtime-index-bmv2.p4
+  basic_routing-bmv2.p4
+  issue1478-bmv2.p4
+  same_name_for_table_and_action.p4
+  pvs-struct-2-bmv2.p4
+  std_meta_inlining.p4
+  table-entries-lpm-bmv2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "KeyError"
+  crc32-bmv2.p4
+  issue-2123.p4
+  issue1538.p4
+  issue1544-1-bmv2.p4
+  issue1544-2-bmv2.p4
+  issue1544-bmv2.p4
+  issue1630-bmv2.p4
+  issue1739-bmv2.p4
+  issue3488-1-bmv2.p4
+  issue3488-bmv2.p4
+  issue461-bmv2.p4
+  issue561-bmv2.p4 
+  match-on-exprs-bmv2.p4
+  match-on-exprs2-bmv2.p4
+  named_meter_1-bmv2.p4
+  p416-type-use3.p4
+  stack_complex-bmv2.p4
+  table-entries-range-bmv2.p4
+  v1model-special-ops-bmv2.p4
+  bmv2_table_lpm_2.p4
+  bmv2_tainted_table_key.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Expected packet was not received on device"
+  issue1653-complex-bmv2.p4
+  issue2314.p4
+  issue281.p4
+  issue3702-bmv2.p4
+  issue383-bmv2.p4
+  parser-if.p4
+  parser-unroll-issue3537-1.p4
+  parser-unroll-issue3537.p4
+  parser-unroll-t1-cond.p4
+  parser-unroll-test2.p4
+  v1model-p4runtime-enumint-types1.p4
+  xor_test.p4
+  bmv2_clone_preserving_field_list_eg.p4
+  bmv2_clone_preserving_field_list_ig.p4
+  bmv2_lookahead_2.p4
+  bmv2_parse_1.p4
+  fabric.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Error when adding match entry to target"
+  # At index 0: UNKNOWN, 'Error when adding match entry to target'
+  issue1062-1-bmv2.p4
+  issue2283_1-bmv2.p4
+  v1model-p4runtime-most-types1.p4
+  pins_fabric.p4
+  pins_middleblock.p4
+  pins_wbb.p4
 )
 
 p4tools_add_xfail_reason(
@@ -237,4 +308,12 @@ p4tools_add_xfail_reason(
   issue3374.p4
   control-hs-index-test6.p4
   parser-unroll-test1.p4
+)
+
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Error when importing p4info"
+  v1model-digest-containing-ser-enum.p4
+  v1model-digest-custom-type.p4
 )
