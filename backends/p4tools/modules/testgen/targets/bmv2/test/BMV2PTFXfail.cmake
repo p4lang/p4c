@@ -26,10 +26,6 @@ p4tools_add_xfail_reason(
   control-hs-index-test1.p4
   control-hs-index-test2.p4
   action_selector_shared-bmv2.p4
-
-  # terminate called after throwing an instance of 'std::length_error'
-  # what():  cannot create std::vector larger than max_size()
-  header-stack-ops-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -236,8 +232,13 @@ p4tools_add_xfail_reason(
   basic_routing-bmv2.p4
   issue1478-bmv2.p4
   same_name_for_table_and_action.p4
-  pvs-struct-2-bmv2.p4
   std_meta_inlining.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Address family not supported by protocol"
+  pvs-struct-2-bmv2.p4
   table-entries-lpm-bmv2.p4
 )
 
@@ -287,18 +288,21 @@ p4tools_add_xfail_reason(
   bmv2_lookahead_2.p4
   bmv2_parse_1.p4
   fabric.p4
+  header-stack-ops-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "Error when adding match entry to target"
+  "At index"
   # At index 0: UNKNOWN, 'Error when adding match entry to target'
   issue1062-1-bmv2.p4
-  issue2283_1-bmv2.p4
   v1model-p4runtime-most-types1.p4
   pins_fabric.p4
   pins_middleblock.p4
   pins_wbb.p4
+
+  # At index 0: INVALID_ARGUMENT, 'Bytestring provided does not fit within 0 bits'
+  issue2283_1-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
