@@ -129,10 +129,10 @@ class Bridge(object):
                                   "peer name %s" % (edge_veth, bridge_veth))
             if result != SUCCESS:
                 return result
-            result = self.ns_exec("ip link set %s master %s" %
-                                  (edge_veth, self.br_name))
-            if result != SUCCESS:
-                return result
+            # result = self.ns_exec("ip link set %s master %s" %
+            #                       (edge_veth, self.br_name))
+            # if result != SUCCESS:
+            #     return result
             result = self._configure_bridge_port(edge_veth)
             if result != SUCCESS:
                 return result
