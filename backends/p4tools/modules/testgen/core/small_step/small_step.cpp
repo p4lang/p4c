@@ -45,7 +45,7 @@ SmallStepEvaluator::SmallStepEvaluator(AbstractSolver& solver, const ProgramInfo
     }
 }
 
-const IR::Expression* SmallStepEvaluator::stepAndReturnValue(const IR::Expression* expr) {
+const IR::Expression* SmallStepEvaluator::stepAndReturnValue(const IR::Expression* expr, ExecutionState& state) {
     // Create a base state with a parameter continuation to apply the value on.
     std::cout << expr->type << std::endl;
     std::cout << expr->to<IR::Operation_Binary>()->left << std::endl;
@@ -53,13 +53,13 @@ const IR::Expression* SmallStepEvaluator::stepAndReturnValue(const IR::Expressio
     const auto* v = Continuation::genParameter(expr->type, "v", NamespaceContext::Empty);
     Continuation::Body bodyBase({Continuation::Return(v->param)});
     Continuation continuationBase(v, bodyBase);
-    ExecutionState esBase(bodyBase);
+    //ExecutionState esBase(bodyBase);
 
-    auto* exprState = new ExecutionState(esBase);
+    auto* exprState = new ExecutionState(state);
     Continuation::Body body({Continuation::Return(expr)});
     exprState->replaceBody(body);
     exprState->pushContinuation(
-        new ExecutionState::StackFrame(continuationBase, esBase.getNamespaceContext()));
+        new ExecutionState::StackFrame(continuationBase, state.getNamespaceContext()));
     while(!SymbolicEnv::isSymbolicValue(expr)) {
         auto successors = step(*exprState);
         BUG_CHECK(successors->size() == 1u, "Invalid size of a result of the expression evaluation");
@@ -71,22 +71,22 @@ const IR::Expression* SmallStepEvaluator::stepAndReturnValue(const IR::Expressio
         expr = ret->expr.get()->to<IR::Expression>();
         std::cout << expr << std::endl;
         std::cout << expr->type << std::endl;
+        if (SymbolicEnv::isSymbolicValue(expr)) {
+            exprState->popContinuation(expr);
+            cmd = exprState->getBody().next();
+            ret = boost::get<Continuation::Return>(&cmd);
+            BUG_CHECK(ret && ret->expr, "Invalid format for the return result");
+            expr = ret->expr.get()->to<IR::Expression>();
+            std::cout << expr << std::endl;
+            if (!SymbolicEnv::isSymbolicValue(expr)) {
+                Continuation::Body body({Continuation::Return(expr)});
+                exprState->replaceBody(body);
+                exprState->pushContinuation(
+                new ExecutionState::StackFrame(continuationBase, state.getNamespaceContext()));
+            }
+        }
     }
-    exprState->popContinuation(expr);
-    auto cmd1 = exprState->getBody().next();
-    auto* ret1 = boost::get<Continuation::Return>(&cmd1);
-    BUG_CHECK(ret1 && ret1->expr, "Invalid format for the return result");
-    expr = ret1->expr.get()->to<IR::Expression>();
-    std::cout << expr << std::endl;
-    // Examine the resulting execution state.
-    // Examine the resulting body.
-    auto cmd = exprState->getBody().next();
-    auto* ret = boost::get<Continuation::Return>(&cmd);
-    if (ret && ret->expr) {
-        std::cout << ret->expr.get() << std::endl;
-        return ret->expr.get()->to<IR::Expression>();
-    }
-    BUG("Invalid evaluation of the expression %1%", expr);
+    return expr;
 }
 
 SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
@@ -175,7 +175,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                         //std::cout << cmd << std::endl;
                         //ExprStepper stepper(state, self.solver, self.programInfo);
                         //r.first.second = r.first.second->apply(*exprStepper);
-                        r.first.second = self.stepAndReturnValue(r.first.second);
+                        r.first.second = self.stepAndReturnValue(r.first.second, state);
                         std::cout << r.first.second << std::endl;
                     }
                     renginePostprocessing(r.first, result, self.solver);

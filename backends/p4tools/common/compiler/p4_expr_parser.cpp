@@ -363,12 +363,16 @@ const IR::Node* Parser::createApplicationOp(const IR::Node* base) {
     }
     auto* expr = base->to<IR::Expression>()->clone();
     const auto* member = expr->to<IR::Member>();
+    const IR::Type* type = nullptr;
     if (member->member.name == "isValid") {
+        type = IR::Type_Boolean::get();
         expr->type = new IR::Type_Method(IR::Type_Boolean::get(), paramList, member->member.name);
     } else {
-        expr->type = new IR::Type_Method(paramList, member->member.name);
+        type = new IR::Type_Method(paramList, member->member.name);
+        expr->type = type;
     }
-    return new IR::MethodCallExpression(expr, arguments);
+    
+    return new IR::MethodCallExpression(type, expr, arguments);
 }
 
 const IR::Type* Parser::ndToType(const IR::Node* nd) {
