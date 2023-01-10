@@ -47,7 +47,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
 
     std::set<const IR::P4Table*> invokedInKey;
     auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure, options);
-    auto genContextJson = new DpdkContextGenerator(refMap, &structure, options);
+    auto genContextJson = new DpdkContextGenerator(refMap, &structure, p4info, options);
     bool is_all_args_header_fields = true;
     PassManager simplify = {
         new DpdkArchFirst(),
