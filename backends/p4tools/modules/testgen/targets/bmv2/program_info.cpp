@@ -57,7 +57,7 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     /// the deparser. This sequence also includes nodes that handle transitions between the
     /// individual component instantiations.
     int pipeIdx = 0;
-    pipelineSequence.emplace_back(Continuation::Guard(getPortConstraint(getTargetInputPortVar())));
+
     for (const auto& declTuple : programmableBlocks) {
         // Iterate through the (ordered) pipes of the target architecture.
         auto subResult = processDeclaration(declTuple.second, pipeIdx);
@@ -82,6 +82,8 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
             constraint = new IR::LAnd(constraint, restriction);
         }
     }
+
+    constraint = new IR::LAnd(constraint, getPortConstraint(getTargetInputPortVar()));
 
     targetConstraints = constraint;
 }
@@ -164,8 +166,7 @@ const IR::Member *BMv2_V1ModelProgramInfo::getTargetInputPortVar() const {
 }
 const IR::Expression* BMv2_V1ModelProgramInfo::getPortConstraint(const IR::Member* portVar) const {
     const IR::Operation_Binary* portConstraint =
-        new IR::LAnd(new IR::Geq(portVar, new IR::Constant(portVar->type, 0)),
-                     new IR::Leq(portVar, new IR::Constant(portVar->type, 7)));
+        new IR::Leq(portVar, new IR::Constant(portVar->type, 7));
     return portConstraint;
 }
 
