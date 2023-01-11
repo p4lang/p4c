@@ -365,6 +365,32 @@ bool ReachabilityEngineState::isEmpty() { return state.empty(); }
 
 void ReachabilityEngineState::clear() { state.clear(); }
 
+bool skipExpr(std::string s) {
+    int index = 0;
+    for (size_t i = 0; i < s.length(); i++) {
+        if (s[i] == '(') {
+            index++;
+        } else if (s[i] == ')') {
+            index--;
+        }
+    }
+    return index != 0;
+}
+
+size_t getCorrectAddIndex(std::string s, size_t prefix = 0) {
+    size_t i = s.find("+");
+    if (i == std::string::npos) {
+        return i;
+    }
+    std::string str = s.substr(0, i);
+    if (skipExpr(str)) {
+        if (prefix + i + 1 < s.length()) {
+            return getCorrectAddIndex(s.substr(i + 1), prefix + i + 1);
+        }
+    }
+    return prefix + i;
+}
+
 ReachabilityEngine::ReachabilityEngine(gsl::not_null<const NodesCallGraph*> dcg,
                                        std::string reachabilityExpression,
                                        const IR::P4Program* program,
@@ -379,7 +405,7 @@ ReachabilityEngine::ReachabilityEngine(gsl::not_null<const NodesCallGraph*> dcg,
         auto addSubExpr = reachabilityExpression.substr(0, i);
         addSubExpr += "+";
         std::list<const DCGVertexType*> newStart;
-        while ((j = addSubExpr.find('+')) != std::string::npos) {
+        while ((j = getCorrectAddIndex(addSubExpr)) != std::string::npos) {
             auto dotSubExpr = addSubExpr.substr(0, j);
             while (dotSubExpr[0] == ' ') {
                 dotSubExpr.erase(0, 1);

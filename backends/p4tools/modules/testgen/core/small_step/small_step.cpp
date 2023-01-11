@@ -120,7 +120,8 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
 
             static void renginePostprocessing(ReachabilityResult& result,
                                               std::vector<Branch>* branches,
-                                              AbstractSolver& solver) {
+                                              AbstractSolver& solver,
+                                              ExecutionState& state) {
                 // All Reachability engine state for branch should be copied.
                 if (branches->size() > 1 || result.second != nullptr) {
                     for (auto& n : *branches) {
@@ -136,6 +137,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                             if (solverResult == boost::none || !solverResult.get()) {
                                 n.constraint = IR::getBoolLiteral(false);
                             }
+                            state.pushPathConstraint(cond);
                         }
                         if (branches->size() > 1) {
                             // Copy reachability engine state
@@ -178,7 +180,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                         r.first.second = self.stepAndReturnValue(r.first.second, state);
                         std::cout << r.first.second << std::endl;
                     }
-                    renginePostprocessing(r.first, result, self.solver);
+                    renginePostprocessing(r.first, result, self.solver, state);
                 }
                 return result;
             }
@@ -207,7 +209,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                     auto* result = stepper->step(expr);
                     if (self.reachabilityEngine != nullptr) {
                         ReachabilityResult rresult = std::make_pair(true, nullptr);
-                        renginePostprocessing(rresult, result, self.solver);
+                        renginePostprocessing(rresult, result, self.solver, state);
                     }
                     return result;
                 }
