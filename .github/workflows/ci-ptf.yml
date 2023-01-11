@@ -1,0 +1,57 @@
+# Copyright 2022-present Orange
+# Copyright 2022-present Open Networking Foundation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: "ptf-ebpf"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: ptf-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  ptf-linux:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-20.04
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+      IMAGE_TYPE: test
+      ENABLE_UNIFIED_COMPILATION: ON
+      MAKEFLAGS: -j8
+      INSTALL_PTF_EBPF_DEPENDENCIES: ON
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: test-ptf-${{ runner.os }}
+          max-size: 1000M
+
+      - name: Build (Ubuntu 20.04)
+        run: |
+          tools/ci-build.sh
+
+      - name: Run PTF tests for eBPF backend (Ubuntu 20.04)
+        run: sudo -E ./test.sh
+        working-directory: ./backends/ebpf/tests

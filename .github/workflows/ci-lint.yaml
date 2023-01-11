@@ -1,0 +1,42 @@
+name: "p4c-lint"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  p4c-lint:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-20.04
+    env:
+      IMAGE_TYPE: test
+      CMAKE_ONLY: ON
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - uses: actions/setup-python@v4
+
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: apply-linters-${{ runner.os }}
+        max-size: 1000M
+
+    # TODO: This check is disabled because git on the Github serves behaves differently. Unclear why.
+    # - name: Check submodule ref points.
+    #   run: |
+    #     ./tools/check-git-submodules.sh
+
+    - name: Build (Ubuntu 20.04)
+      run: |
+       tools/ci-build.sh
+
+    - name: Run cpplint.
+      run: make cpplint -C build
+
+    - name: Run clang-format.
+      run: make clang-format -C build
