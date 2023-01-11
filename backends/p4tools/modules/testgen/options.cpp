@@ -218,13 +218,13 @@ TestgenOptions::TestgenOptions()
                 // Unfortunately, we can not use std::stoul because negative inputs are okay
                 // according to the C++ standard.
                 linearEnumerationTmp = std::stoll(arg);
-                if (linearEnumerationTmp < 0) {
-                    throw std::invalid_argument("Negative input.");
+                if (linearEnumerationTmp <= 1) {
+                    throw std::invalid_argument("Invalid input.");
                 }
             } catch (std::invalid_argument&) {
                 ::error(
-                    "Invalid input value %1% for --linear-enumeration. Expected positive "
-                    "integer.",
+                    "Invalid input value %1% for --linear-enumeration. Expected an integer greater "
+                    "than 1.",
                     arg);
                 return false;
             }
@@ -241,12 +241,14 @@ TestgenOptions::TestgenOptions()
                 // Unfortunately, we can not use std::stoul because negative inputs are okay
                 // according to the C++ standard.
                 saddlePointTmp = std::stoll(arg);
-                if (saddlePointTmp < 0) {
-                    throw std::invalid_argument("Negative input.");
+                if (saddlePointTmp <= 1) {
+                    throw std::invalid_argument("Invalid input.");
                 }
             } catch (std::invalid_argument&) {
-                ::error("Invalid input value %1% for --saddle-point. Expected positive integer.",
-                        arg);
+                ::error(
+                    "Invalid input value %1% for --saddle-point. Expected an integer greater than "
+                    "1.",
+                    arg);
                 return false;
             }
             saddlePoint = saddlePointTmp;

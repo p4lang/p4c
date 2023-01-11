@@ -90,7 +90,7 @@ int Testgen::mainImpl(const IR::P4Program* program) {
         auto explorationStrategy = testgenOptions.explorationStrategy;
         if (explorationStrategy == "RANDOM_ACCESS_STACK") {
             // If the user mistakenly specifies an invalid popLevel, we set it to 3.
-            int popLevel = testgenOptions.popLevel;
+            auto popLevel = testgenOptions.popLevel;
             if (popLevel <= 1) {
                 ::warning("--pop-level must be greater than 1; using default value of 3.\n");
                 popLevel = 3;
@@ -98,27 +98,15 @@ int Testgen::mainImpl(const IR::P4Program* program) {
             return new RandomAccessStack(solver, *programInfo, seed, popLevel);
         }
         if (explorationStrategy == "LINEAR_ENUMERATION") {
-            // If the user mistakenly specifies an invalid bound, we set it to 2
-            // to generate at least 2 tests.
-            int linearBound = testgenOptions.linearEnumeration;
-            if (linearBound <= 1) {
-                ::warning(
-                    "--linear-enumeration must be greater than 1; using default value of 2.\n");
-                linearBound = 2;
-            }
-            return new LinearEnumeration(solver, *programInfo, seed, linearBound);
+            return new LinearEnumeration(solver, *programInfo, seed,
+                                         testgenOptions.linearEnumeration);
         }
         if (explorationStrategy == "MAX_COVERAGE") {
             return new IncrementalMaxCoverageStack(solver, *programInfo, seed);
         }
         if (explorationStrategy == "RANDOM_ACCESS_MAX_COVERAGE") {
-            // If the user mistakenly sets an invalid saddlePoint, we set it to 5.
-            auto saddlePoint = testgenOptions.saddlePoint;
-            if (saddlePoint <= 1) {
-                ::warning("--saddle-point must be greater than 1; using default value of 5.\n");
-                saddlePoint = 5;
-            }
-            return new RandomAccessMaxCoverage(solver, *programInfo, seed, saddlePoint);
+            return new RandomAccessMaxCoverage(solver, *programInfo, seed,
+                                               testgenOptions.saddlePoint);
         }
         if (!testgenOptions.selectedBranches.empty()) {
             std::string selectedBranchesStr = testgenOptions.selectedBranches;
