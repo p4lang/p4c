@@ -248,7 +248,6 @@ void Z3Solver::seed(unsigned seed) {
     z3::params param(z3context);
     param.set("phase_selection", 5U);
     param.set("random_seed", seed);
-    param.set("arith.random_initial_value", true);
     z3solver.set(param);
     seed_ = seed;
 }

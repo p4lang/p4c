@@ -82,14 +82,14 @@ void RandomAccessStack::run(const Callback& callback) {
 }
 
 RandomAccessStack::RandomAccessStack(AbstractSolver& solver, const ProgramInfo& programInfo,
-                                     boost::optional<uint32_t> seed, int popLevel)
-    : IncrementalStack(solver, programInfo, seed), popLevel(popLevel) {}
+                                     uint64_t popLevel)
+    : IncrementalStack(solver, programInfo), popLevel(popLevel) {}
 
 RandomAccessStack::StepResult RandomAccessStack::multiPop(
     IncrementalStack::UnexploredBranches& unexploredBranches) {
     // A good spot seems to be 10 per cent of the paths. Needs better stats.
-    size_t unexploredRange = unexploredBranches.size() / popLevel;
-    uint64_t popLevels = Utils::getRandInt(unexploredRange) + 1;
+    auto unexploredRange = unexploredBranches.size() / popLevel;
+    auto popLevels = Utils::getRandInt(unexploredRange) + 1;
     // Saves unexploredBranches in the buffer if we are popping more
     // than one level to revist them later.
     if (popLevels == 1) {

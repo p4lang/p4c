@@ -65,7 +65,10 @@ int Testgen::mainImpl(const IR::P4Program* program) {
     auto const inputFile = P4CContext::get().options().file;
     const auto& testgenOptions = TestgenOptions::get();
     cstring testDirStr = testgenOptions.outputDir;
-    auto seed = testgenOptions.seed;
+    auto seed = Utils::getCurrentSeed();
+    if (seed) {
+        printFeature("test_info", 4, "============ Program seed %1% =============\n", *seed);
+    }
 
     // Get the basename of the input file and remove the extension
     // This assumes that inputFile is not null.
@@ -78,15 +81,9 @@ int Testgen::mainImpl(const IR::P4Program* program) {
         testPath = fs::path(testDir) / testPath;
     }
 
-    if (seed != boost::none) {
-        // Initialize the global seed for randomness.
-        Utils::setRandomSeed(*seed);
-        printFeature("test_info", 4, "============ Program seed %1% =============\n", *seed);
-    }
-
     Z3Solver solver;
 
-    auto* symExec = [&solver, &programInfo, seed, &testgenOptions]() -> ExplorationStrategy* {
+    auto* symExec = [&solver, &programInfo, &testgenOptions]() -> ExplorationStrategy* {
         auto explorationStrategy = testgenOptions.explorationStrategy;
         if (explorationStrategy == "RANDOM_ACCESS_STACK") {
             // If the user mistakenly specifies an invalid popLevel, we set it to 3.
@@ -95,24 +92,22 @@ int Testgen::mainImpl(const IR::P4Program* program) {
                 ::warning("--pop-level must be greater than 1; using default value of 3.\n");
                 popLevel = 3;
             }
-            return new RandomAccessStack(solver, *programInfo, seed, popLevel);
+            return new RandomAccessStack(solver, *programInfo, popLevel);
         }
         if (explorationStrategy == "LINEAR_ENUMERATION") {
-            return new LinearEnumeration(solver, *programInfo, seed,
-                                         testgenOptions.linearEnumeration);
+            return new LinearEnumeration(solver, *programInfo, testgenOptions.linearEnumeration);
         }
         if (explorationStrategy == "MAX_COVERAGE") {
-            return new IncrementalMaxCoverageStack(solver, *programInfo, seed);
+            return new IncrementalMaxCoverageStack(solver, *programInfo);
         }
         if (explorationStrategy == "RANDOM_ACCESS_MAX_COVERAGE") {
-            return new RandomAccessMaxCoverage(solver, *programInfo, seed,
-                                               testgenOptions.saddlePoint);
+            return new RandomAccessMaxCoverage(solver, *programInfo, testgenOptions.saddlePoint);
         }
         if (!testgenOptions.selectedBranches.empty()) {
             std::string selectedBranchesStr = testgenOptions.selectedBranches;
-            return new SelectedBranches(solver, *programInfo, seed, selectedBranchesStr);
+            return new SelectedBranches(solver, *programInfo, selectedBranchesStr);
         }
-        return new IncrementalStack(solver, *programInfo, seed);
+        return new IncrementalStack(solver, *programInfo);
     }();
 
     // Define how to handle the final state for each test. This is target defined.

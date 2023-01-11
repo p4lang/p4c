@@ -62,8 +62,8 @@ uint64_t getNumeric(const std::string& str) {
 }
 
 SelectedBranches::SelectedBranches(AbstractSolver& solver, const ProgramInfo& programInfo,
-                                   boost::optional<uint32_t> seed, std::string selectedBranchesStr)
-    : ExplorationStrategy(solver, programInfo, seed) {
+                                   std::string selectedBranchesStr)
+    : ExplorationStrategy(solver, programInfo) {
     size_t n = 0;
     auto str = std::move(selectedBranchesStr);
     while ((n = str.find(',')) != std::string::npos) {

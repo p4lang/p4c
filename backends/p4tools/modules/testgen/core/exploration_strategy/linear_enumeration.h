@@ -27,8 +27,7 @@ class LinearEnumeration : public ExplorationStrategy {
     void run(const Callback& callBack) override;
 
     /// Constructor for this strategy, considering inheritance.
-    LinearEnumeration(AbstractSolver& solver, const ProgramInfo& programInfo,
-                      boost::optional<uint32_t> seed, uint64_t maxBound);
+    LinearEnumeration(AbstractSolver& solver, const ProgramInfo& programInfo, uint64_t maxBound);
 
  protected:
     /// The max size for the exploredBranches vector.

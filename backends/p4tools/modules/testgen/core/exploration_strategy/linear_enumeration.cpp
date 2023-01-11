@@ -55,8 +55,8 @@ void LinearEnumeration::run(const Callback& callback) {
 }
 
 LinearEnumeration::LinearEnumeration(AbstractSolver& solver, const ProgramInfo& programInfo,
-                                     boost::optional<uint32_t> seed, uint64_t maxBound)
-    : ExplorationStrategy(solver, programInfo, seed), maxBound(maxBound) {
+                                     uint64_t maxBound)
+    : ExplorationStrategy(solver, programInfo), maxBound(maxBound) {
     // The constructor populates the initial vector of branches holding a terminal state.
     // It fill the vector with a recursive call to mapBranch and stops at maxBound.
     StepResult initialSuccessors = step(*executionState);

@@ -49,8 +49,7 @@ class ExplorationStrategy {
     /// TODO there is a lot of code repetition in subclasses. Refactor and extract duplicates.
     virtual void run(const Callback& callBack) = 0;
 
-    explicit ExplorationStrategy(AbstractSolver& solver, const ProgramInfo& programInfo,
-                                 boost::optional<uint32_t> seed);
+    explicit ExplorationStrategy(AbstractSolver& solver, const ProgramInfo& programInfo);
 
     /// Writes a list of the selected branches into @param out.
     void printCurrentTraceAndBranches(std::ostream& out);

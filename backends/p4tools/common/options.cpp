@@ -10,6 +10,7 @@
 
 #include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/core/target.h"
+#include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/common/version.h"
 #include "frontends/common/parser_options.h"
 #include "lib/error.h"
@@ -170,6 +171,8 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(messag
         "--seed", "seed",
         [this](const char* arg) {
             seed = std::stoul(arg);
+            // Initialize the global seed for randomness.
+            Utils::setRandomSeed(*seed);
             return true;
         },
         "Provides a randomization seed");

@@ -30,8 +30,7 @@ class IncrementalStack : public ExplorationStrategy {
     void run(const Callback& callBack) override;
 
     /// Constructor for this strategy, considering inheritance
-    IncrementalStack(AbstractSolver& solver, const ProgramInfo& programInfo,
-                     boost::optional<uint32_t> seed);
+    IncrementalStack(AbstractSolver& solver, const ProgramInfo& programInfo);
 
  protected:
     /// Encapsulates a stack of unexplored branches. This exists to help enforce the invariant that
@@ -39,7 +38,7 @@ class IncrementalStack : public ExplorationStrategy {
     /// operation on the solver.
     class UnexploredBranches {
      public:
-        bool empty() const;
+        [[nodiscard]] bool empty() const;
         void push(StepResult branches);
         StepResult pop();
         size_t size();

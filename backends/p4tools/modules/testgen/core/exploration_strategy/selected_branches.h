@@ -28,7 +28,7 @@ class SelectedBranches : public ExplorationStrategy {
 
     /// Constructor for this strategy, considering inheritance
     SelectedBranches(AbstractSolver& solver, const ProgramInfo& programInfo,
-                     boost::optional<uint32_t> seed, std::string selectedBranchesStr);
+                     std::string selectedBranchesStr);
 
  private:
     /// Chooses a branch corresponding to a given branch identifier.
