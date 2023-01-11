@@ -83,6 +83,8 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
         }
     }
 
+    /// Set the restriction on the input port,
+    /// this is necessary since ptf tests use ports from 0 to 7
     constraint = new IR::LAnd(constraint, getPortConstraint(getTargetInputPortVar()));
 
     targetConstraints = constraint;
@@ -133,6 +135,8 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
         auto *egressPortVar =
             new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                            new IR::PathExpression("*standard_metadata"), "egress_port");
+        /// Set the restriction on the output port,
+        /// this is necessary since ptf tests use ports from 0 to 7
         cmds.emplace_back(Continuation::Guard(getPortConstraint(getTargetOutputPortVar())));
         auto* portStmt = new IR::AssignmentStatement(egressPortVar, getTargetOutputPortVar());
         cmds.emplace_back(portStmt);
@@ -164,6 +168,7 @@ const IR::Member *BMv2_V1ModelProgramInfo::getTargetInputPortVar() const {
     return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                           new IR::PathExpression("*standard_metadata"), "ingress_port");
 }
+
 const IR::Expression* BMv2_V1ModelProgramInfo::getPortConstraint(const IR::Member* portVar) const {
     const IR::Operation_Binary* portConstraint =
         new IR::Leq(portVar, new IR::Constant(portVar->type, 7));

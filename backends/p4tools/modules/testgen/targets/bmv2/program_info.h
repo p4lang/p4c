@@ -53,6 +53,7 @@ class BMv2_V1ModelProgramInfo : public ProgramInfo {
 
     const IR::Member *getTargetInputPortVar() const override;
 
+    /// @returns the constraint expression for a given port variable
     const IR::Expression* getPortConstraint(const IR::Member* portVar) const;
 
     const IR::Member* getTargetOutputPortVar() const override;

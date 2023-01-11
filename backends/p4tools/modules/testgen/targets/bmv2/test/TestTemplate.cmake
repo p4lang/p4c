@@ -105,16 +105,17 @@ macro(p4tools_add_test_with_args)
   )
 
   # If ENABLE_RUNNER is active, run the BMv2 runner.
-  #if(${TOOLS_BMV2_TESTS_ENABLE_RUNNER})
-   # check_with_bmv2(${__testfile} ${__testfolder} ${p4test})
-  #endif()
+  if(${TOOLS_BMV2_TESTS_ENABLE_RUNNER})
+    check_with_bmv2(${__testfile} ${__testfolder} ${p4test})
+  endif()
+  # If P416_PTF is active, run the PTF BMv2 runner.
   if(${TOOLS_BMV2_TESTS_P416_PTF})
     check_bmv2_with_ptf(${__testfile} ${__testfolder} ${p4test} ${__ptfRunerFolder})
   endif()
   # If VALIDATE_PROTOBUF is active, check whether the format of the generated tests is valid.
-  #if(${TOOLS_BMV2_TESTS_VALIDATE_PROTOBUF})
-    #validate_protobuf(${__testfile} ${__testfolder})
-  #endif()
+  if(${TOOLS_BMV2_TESTS_VALIDATE_PROTOBUF})
+    validate_protobuf(${__testfile} ${__testfolder})
+  endif()
 
   execute_process(COMMAND chmod +x ${__testfile})
   separate_arguments(__args UNIX_COMMAND ${cmake_args})
