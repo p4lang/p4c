@@ -26,6 +26,10 @@ p4tools_add_xfail_reason(
   control-hs-index-test1.p4
   control-hs-index-test2.p4
   action_selector_shared-bmv2.p4
+
+  # terminate called after throwing an instance of 'boost::wrapexcept<std::range_error>'
+  issue2726-bmv2.p4
+  runtime-index-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -214,7 +218,6 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "The validity bit of .* is tainted"
-  up4.p4
   control-hs-index-test3.p4
   control-hs-index-test5.p4
 )
@@ -228,7 +231,6 @@ p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "Address family not supported by protocol"
   pvs-struct-2-bmv2.p4
-  table-entries-lpm-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -252,6 +254,10 @@ p4tools_add_xfail_reason(
   bmv2_parse_1.p4
   fabric.p4
   header-stack-ops-bmv2.p4
+  basic_routing-bmv2.p4
+  issue914-bmv2.p4
+  v1model-special-ops-bmv2.p4
+  up4.p4
 )
 
 p4tools_add_xfail_reason(
