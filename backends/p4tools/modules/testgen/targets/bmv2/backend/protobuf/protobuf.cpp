@@ -280,7 +280,7 @@ inja::json Protobuf::getVerify(const TestSpec* testSpec) {
 static std::string getTestCase() {
     static std::string TEST_CASE(
         R"""(# A P4TestGen-generated test case for {{test_name}}.p4
-metadata: "p4testgen seed: '{{ default(seed, '"none"') }}'"
+metadata: "p4testgen seed: {{ default(seed, "none") }}"
 metadata: "Date generated: {{timestamp}}"
 ## if length(selected_branches) > 0
 metadata: "{{selected_branches}}"
@@ -293,13 +293,13 @@ traces: "{{trace_item}}"
 
 input_packet {
   packet: "{{send.pkt}}"
-  port: "{{send.ig_port}}"
+  port: {{send.ig_port}}
 }
 
 ## if verify
 expected_output_packet {
   packet: "{{verify.exp_pkt}}"
-  port: "{{verify.eg_port}}"
+  port: {{verify.eg_port}}
   packet_mask: "{{verify.ignore_mask}}"
 }
 ## endif
@@ -356,7 +356,7 @@ entities : [
 ## endfor
       # Action {{rule.action_name}}
       action {
-## if existsIn(table, '"has_ap"')
+## if existsIn(table, "has_ap")
         action_profile_action_set {
           action_profile_actions {
             action {

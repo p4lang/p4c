@@ -35,10 +35,8 @@ jobs:
 
     - name: Build (Ubuntu 20.04)
       run: |
-        sudo cp -rf . /p4c/
-        (cd /p4c/ && sudo -E tools/ci-build.sh)
-        sudo cp -rf /p4c/.ccache .
+        tools/ci-build.sh
 
     - name: Validate
-      run: sudo -E ctest  -R toz3-validate-p4c --output-on-failure --schedule-random
-      working-directory: /p4c/build
+      run: ctest -R toz3-validate-p4c --output-on-failure --schedule-random
+      working-directory: ./build

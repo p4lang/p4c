@@ -237,14 +237,14 @@ const IR::Expression* CopyPropagationAndElimination::replaceIfCopy(const IR::Exp
 const IR::DpdkAsmStatement* CopyPropagationAndElimination::elimCastOrMov(
     const IR::DpdkAsmStatement* stmt) {
     const IR::Expression *srcExpr = nullptr, *dstExpr = nullptr;
-    if (stmt->is<IR::DpdkMovStatement>()) {
-        auto mv = stmt->to<IR::DpdkMovStatement>();
+    if (auto mv = stmt->to<IR::DpdkMovStatement>()) {
+        srcExpr = mv->src;
+        dstExpr = mv->dst;
+    } else if (auto mv = stmt->to<IR::DpdkCastStatement>()) {
         srcExpr = mv->src;
         dstExpr = mv->dst;
     } else {
-        auto mv = stmt->to<IR::DpdkCastStatement>();
-        srcExpr = mv->src;
-        dstExpr = mv->dst;
+        return stmt;
     }
     auto src = srcExpr->toString();
     auto dst = dstExpr->toString();
@@ -386,6 +386,12 @@ IR::IndexedVector<IR::DpdkAsmStatement> CopyPropagationAndElimination::copyPropA
         } else if (auto rrw = stmt->to<IR::DpdkRegisterWriteStatement>()) {
             instr.push_back(new IR::DpdkRegisterWriteStatement(rrw->reg, replaceIfCopy(rrw->index),
                                                                replaceIfCopy(rrw->src)));
+        } else if (auto ca = stmt->to<IR::DpdkChecksumAddStatement>()) {
+            instr.push_back(new IR::DpdkChecksumAddStatement(ca->csum, ca->intermediate_value,
+                                                             replaceIfCopy(ca->field, false)));
+        } else if (auto ca = stmt->to<IR::DpdkChecksumSubStatement>()) {
+            instr.push_back(new IR::DpdkChecksumSubStatement(ca->csum, ca->intermediate_value,
+                                                             replaceIfCopy(ca->field, false)));
         } else {
             instr.push_back(stmt);
         }

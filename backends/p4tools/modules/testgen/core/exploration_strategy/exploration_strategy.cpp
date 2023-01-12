@@ -13,13 +13,13 @@
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
-#include "backends/p4tools/common/lib/timer.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "frontends/p4/optimizeExpressions.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/error.h"
+#include "lib/timer.h"
 #include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
@@ -52,7 +52,7 @@ ExplorationStrategy::Branch::Branch(boost::optional<const Constraint*> c,
 }
 
 ExplorationStrategy::StepResult ExplorationStrategy::step(ExecutionState& state) {
-    ScopedTimer st("step");
+    Util::ScopedTimer st("step");
     StepResult successors = evaluator.step(state);
     // Assign branch ids to the branches. These integer branch ids are used by track-branches
     // and selected (input) branches features.

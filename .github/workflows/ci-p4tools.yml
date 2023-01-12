@@ -35,10 +35,9 @@ jobs:
 
     - name: Build (Ubuntu 20.04)
       run: |
-        sudo cp -rf . /p4c/
-        (cd /p4c/ && sudo -E tools/ci-build.sh)
-        sudo cp -rf /p4c/.ccache .
+        tools/ci-build.sh
 
     - name: Run tests (Ubuntu 20.04)
+      # Need to use sudo for the eBPF kernel tests.
       run: sudo -E ctest -R testgen- --output-on-failure --schedule-random
-      working-directory: /p4c/build
+      working-directory: ./build

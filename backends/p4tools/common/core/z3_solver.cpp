@@ -13,7 +13,6 @@
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
-#include "backends/p4tools/common/lib/timer.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/irutils.h"
@@ -25,6 +24,7 @@
 #include "lib/exceptions.h"
 #include "lib/indent.h"
 #include "lib/log.h"
+#include "lib/timer.h"
 
 namespace P4Tools {
 
@@ -283,8 +283,8 @@ boost::optional<bool> Z3Solver::checkSat(const std::vector<const Constraint*>& a
     }
     Z3_LOG("checking satisfiability for %d assertions",
            isIncremental ? z3solver.assertions().size() : z3Assertions.size());
-    ScopedTimer ctZ3("z3");
-    ScopedTimer ctCheckSat("checkSat");
+    Util::ScopedTimer ctZ3("z3");
+    Util::ScopedTimer ctCheckSat("checkSat");
     z3::check_result result = isIncremental ? z3solver.check() : z3solver.check(z3Assertions);
     switch (result) {
         case z3::sat:
@@ -332,8 +332,8 @@ const Model* Z3Solver::getModel() const {
     }
     // Then, get the model and match each declaration in the model to its StateVariable.
     try {
-        ScopedTimer ctZ3("z3");
-        ScopedTimer ctCheckSat("getModel");
+        Util::ScopedTimer ctZ3("z3");
+        Util::ScopedTimer ctCheckSat("getModel");
         auto z3Model = z3solver.get_model();
         Z3_LOG("z3 model:%s", toString(z3Model));
 

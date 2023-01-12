@@ -51,10 +51,13 @@ class ConstantTypeSubstitution : public Transform {
         auto cstType = typeMap->getType(getOriginal(), true);
         if (!cstType->is<IR::ITypeVar>()) return cst;
         auto repl = cstType;
-        while (repl != nullptr && repl->is<IR::ITypeVar>())
-            repl = subst->get(repl->to<IR::ITypeVar>());
-        if (repl != nullptr && !repl->is<IR::ITypeVar>()) {
-            // maybe the substitution could not infer a width...
+        while (repl->is<IR::ITypeVar>()) {
+            auto next = subst->get(repl->to<IR::ITypeVar>());
+            if (!next) break;
+            repl = next;
+        }
+        if (repl != cstType) {
+            // We may replace a type variable with another one
             LOG2("Inferred type " << repl << " for " << cst);
             cst = new IR::Constant(cst->srcInfo, repl, cst->value, cst->base);
         } else {
@@ -818,6 +821,9 @@ const IR::Node* TypeInference::postorder(IR::Annotation* annotation) {
         if (!isCompileTimeConstant(e))
             typeError("%1%: structured annotation must be compile-time constant values", e);
         auto t = getType(e);
+        if (!t)
+            // type error during typechecking
+            return;
         if (!t->is<IR::Type_InfInt>() && !t->is<IR::Type_String>() && !t->is<IR::Type_Boolean>())
             typeError("%1%: illegal type for structured annotation; must be int, string or bool",
                       e);
@@ -1705,6 +1711,10 @@ bool TypeInference::compare(const IR::Node* errorPosition, const IR::Type* ltype
         typeError("%1% and %2%: tables cannot be compared", compare->left, compare->right);
         return false;
     }
+    if (ltype->is<IR::Type_Extern>() || rtype->is<IR::Type_Extern>()) {
+        typeError("%1% and %2%: externs cannot be compared", compare->left, compare->right);
+        return false;
+    }
 
     bool defined = false;
     if (typeMap->equivalent(ltype, rtype) &&
@@ -2078,23 +2088,23 @@ const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
     return expression;
 }
 
+const IR::Node* TypeInference::postorder(IR::Invalid* expression) {
+    if (done()) return expression;
+    auto unk = IR::Type_Unknown::get();
+    setType(expression, unk);
+    setType(getOriginal(), unk);
+    setCompileTimeConstant(expression);
+    setCompileTimeConstant(getOriginal<IR::Expression>());
+    return expression;
+}
+
 const IR::Node* TypeInference::postorder(IR::InvalidHeader* expression) {
     if (done()) return expression;
-    if (!expression->headerType) {
-        // This expression should be enclosed within a cast.
-        // Processing the cast will replace this expression with an
-        // InvalidHeader expression with a known type.
-        setType(expression, IR::Type_Unknown::get());
-        setType(getOriginal(), IR::Type_Unknown::get());
-        return expression;
-    }
     auto type = getTypeType(expression->headerType);
-    if (!type->is<IR::Type_Header>()) {
-        typeError("%1%: invalid header expression has a non-header type `%2%`", expression, type);
-        return expression;
-    }
-    setType(getOriginal(), type);
+    BUG_CHECK(type->is<IR::Type_Header>(), "%1%: does not have a header type %2%", expression,
+              type);
     setType(expression, type);
+    setType(getOriginal(), type);
     setCompileTimeConstant(expression);
     setCompileTimeConstant(getOriginal<IR::Expression>());
     return expression;
@@ -2118,7 +2128,7 @@ const IR::Node* TypeInference::postorder(IR::P4ListExpression* expression) {
             ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
             auto converted = cts.convert(c);
             vec->push_back(converted);
-            changed = true;
+            changed = changed || converted != c;
         } else {
             vec->push_back(c);
         }
@@ -2690,19 +2700,17 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
                           expression, st->fields.size(), le->components.size());
                 return expression;
             }
-        } else if (auto ih = expression->expr->to<IR::InvalidHeader>()) {
-            if (!ih->headerType) {
-                auto type = castType->getP4Type();
-                if (!castType->is<IR::Type_Header>()) {
-                    typeError("%1%: invalid header expression has a non-header type `%2%`",
-                              expression, castType);
-                    return expression;
-                }
-                setType(type, new IR::Type_Type(castType));
-                auto result = new IR::InvalidHeader(ih->srcInfo, type, type);
-                setType(result, castType);
-                return result;
+        } else if (auto ih = expression->expr->to<IR::Invalid>()) {
+            auto type = castType->getP4Type();
+            if (!castType->is<IR::Type_Header>()) {
+                typeError("%1%: invalid header expression has a non-header type `%2%`", expression,
+                          castType);
+                return expression;
             }
+            setType(type, new IR::Type_Type(castType));
+            auto result = new IR::InvalidHeader(ih->srcInfo, type, type);
+            setType(result, castType);
+            return result;
         }
     }
     if (auto lt = concreteType->to<IR::Type_P4List>()) {

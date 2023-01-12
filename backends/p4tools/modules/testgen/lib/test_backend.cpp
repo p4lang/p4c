@@ -17,7 +17,6 @@
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/taint.h"
-#include "backends/p4tools/common/lib/timer.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "frontends/p4/optimizeExpressions.h"
@@ -25,6 +24,7 @@
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
+#include "lib/timer.h"
 #include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
@@ -158,8 +158,9 @@ bool TestBackEnd::run(const FinalState& state) {
         P4::Coverage::logCoverage(allStatements, visitedStatements, executionState->getVisited());
 
         // Output the test.
-        withTimer("backend",
-                  [&] { testWriter->outputTest(testSpec, selectedBranches, testCount, coverage); });
+        Util::withTimer("backend", [&] {
+            testWriter->outputTest(testSpec, selectedBranches, testCount, coverage);
+        });
 
         printTraces("============ End Test %1% ============\n", testCount);
         testCount++;
@@ -267,7 +268,7 @@ bool TestBackEnd::printTestInfo(const ExecutionState* executionState, const Test
 
 void TestBackEnd::printPerformanceReport() {
     printFeature("performance", 4, "============ Timers ============");
-    for (const auto& c : getTimers()) {
+    for (const auto& c : Util::getTimers()) {
         if (c.timerName.empty()) {
             printFeature("performance", 4, "Total: %i ms", c.milliseconds);
         } else {

@@ -35,16 +35,16 @@ jobs:
 
     - name: Build (Ubuntu 22.04, GCC)
       run: |
-        sudo cp -rf . /p4c/
-        (cd /p4c/ && sudo -E tools/ci-build.sh)
-        sudo cp -rf /p4c/.ccache .
+        tools/ci-build.sh
 
     - name: Run tests (Ubuntu 22.04)
+      # Need to use sudo for the eBPF kernel tests.
       run: sudo -E ctest --output-on-failure --schedule-random
-      working-directory: /p4c/build
+      working-directory: ./build
 
   # Build with gcc and test p4c on Ubuntu 20.04.
   test-ubuntu20:
+    name: test-ubuntu20 (Unified ${{ matrix.unified }})
     strategy:
       fail-fast: false
       matrix:
@@ -68,13 +68,12 @@ jobs:
 
     - name: Build (Ubuntu 20.04, GCC)
       run: |
-        sudo cp -rf . /p4c/
-        (cd /p4c/ && sudo -E tools/ci-build.sh)
-        sudo cp -rf /p4c/.ccache .
+        tools/ci-build.sh
 
     - name: Run tests (Ubuntu 20.04)
+      # Need to use sudo for the eBPF kernel tests.
       run: sudo -E ctest --output-on-failure --schedule-random
-      working-directory: /p4c/build
+      working-directory: ./build
       if: matrix.unified == 'ON'
 
   # Build with clang and test p4c on Ubuntu 20.04.
@@ -104,13 +103,12 @@ jobs:
 
     - name: Build (Ubuntu 20.04, Clang, Sanitizers)
       run: |
-        sudo cp -rf . /p4c/
-        (cd /p4c/ && sudo -E tools/ci-build.sh)
-        sudo cp -rf /p4c/.ccache .
+        tools/ci-build.sh
 
     - name: Run tests (Ubuntu 20.04)
+      # Need to use sudo for the eBPF kernel tests.
       run: sudo -E ctest --output-on-failure --schedule-random
-      working-directory: /p4c/build
+      working-directory: ./build
 
   # Build with gcc and test p4c on Ubuntu 18.04.
   test-ubuntu18:
@@ -178,7 +176,8 @@ jobs:
 
 
     - name: Run p4c tests (Fedora Linux)
-      run: ctest --output-on-failure --schedule-random
+      # Need to use sudo for the eBPF kernel tests.
+      run: sudo -E ctest --output-on-failure --schedule-random
       working-directory: ./build
 
   # Build and test p4c on MacOS 11

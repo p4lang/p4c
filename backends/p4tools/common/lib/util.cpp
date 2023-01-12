@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <chrono>  // NOLINT cpplint throws a warning because Google has a similar library...
+#include <cstdint>
 #include <ctime>
 #include <iomanip>
 #include <map>

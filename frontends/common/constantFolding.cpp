@@ -623,42 +623,45 @@ const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
     auto type = typeMap->getType(orig->expr, true);
     auto origtype = typeMap->getType(orig);
 
-    const IR::Expression* result = e;
     if (type->is<IR::Type_Stack>() && e->member == IR::Type_Stack::arraySize) {
         auto st = type->to<IR::Type_Stack>();
         auto size = st->getSize();
-        result = new IR::Constant(st->size->srcInfo, origtype, size);
-    } else {
-        auto expr = getConstant(e->expr);
-        if (expr == nullptr) return e;
-
-        auto structType = type->to<IR::Type_StructLike>();
-        if (structType == nullptr) BUG("Expected a struct type, got %1%", type);
-        if (auto list = expr->to<IR::ListExpression>()) {
-            bool found = false;
-            int index = 0;
-            for (auto f : structType->fields) {
-                if (f->name.name == e->member.name) {
-                    found = true;
-                    break;
-                }
-                index++;
-            }
-
-            if (!found) BUG("Could not find field %1% in type %2%", e->member, type);
-            result = CloneConstants::clone(list->components.at(index), this);
-        } else if (auto si = expr->to<IR::StructExpression>()) {
-            if (type->is<IR::Type_Header>() && e->member.name == IR::Type_Header::isValid) return e;
-            auto ne = si->components.getDeclaration<IR::NamedExpression>(e->member.name);
-            BUG_CHECK(ne != nullptr, "Could not find field %1% in initializer %2%", e->member, si);
-            return CloneConstants::clone(ne->expression, this);
-        } else if (expr->is<IR::InvalidHeader>() && e->member.name == IR::Type_Header::isValid) {
-            return e;
-        } else {
-            BUG("Unexpected initializer: %1%", expr);
-        }
+        return new IR::Constant(st->size->srcInfo, origtype, size);
     }
-    return result;
+
+    auto expr = getConstant(e->expr);
+    if (expr == nullptr) return e;
+
+    auto structType = type->to<IR::Type_StructLike>();
+    if (structType == nullptr) BUG("Expected a struct type, got %1%", type);
+
+    if (auto list = expr->to<IR::ListExpression>()) {
+        bool found = false;
+        int index = 0;
+        for (auto f : structType->fields) {
+            if (f->name.name == e->member.name) {
+                found = true;
+                break;
+            }
+            index++;
+        }
+
+        if (!found) BUG("Could not find field %1% in type %2%", e->member, type);
+        return CloneConstants::clone(list->components.at(index), this);
+    }
+
+    if (auto si = expr->to<IR::StructExpression>()) {
+        if (type->is<IR::Type_Header>() && e->member.name == IR::Type_Header::isValid) return e;
+        auto ne = si->components.getDeclaration<IR::NamedExpression>(e->member.name);
+        BUG_CHECK(ne != nullptr, "Could not find field %1% in initializer %2%", e->member, si);
+        return CloneConstants::clone(ne->expression, this);
+    }
+
+    if (expr->is<IR::InvalidHeader>() && e->member.name == IR::Type_Header::isValid) {
+        return e;
+    }
+
+    BUG("Unexpected initializer: %1%", expr);
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Concat* e) {

@@ -10,7 +10,7 @@ structure-valued-expr-errs-2.p4(100): [--Werror=duplicate] error: f2: Duplicates
 structure-valued-expr-errs-2.p4(100)
             hdr.hstructs.s2 = {f2=5, f1=2, f2=5}
                                ^^
-structure-valued-expr-errs-2.p4(106):syntax error, unexpected =, expecting } or ","
+structure-valued-expr-errs-2.p4(106):syntax error, unexpected =, expecting }
             hdr.h2 = {2, f2=
                            ^
 [--Werror=overlimit] error: 3 errors encountered, aborting compilation

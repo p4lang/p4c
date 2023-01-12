@@ -482,15 +482,17 @@ class CollectUseDefInfo : public Inspector {
 
     bool preorder(const IR::DpdkChecksumAddStatement* c) override {
         usesInfo[c->field->toString()]++;
-        // dpdk requires it in metadata struct
-        dontEliminate[c->field->toString()] = true;
+        // dpdk requires it in header
+        if (auto m = c->field->to<IR::Member>())
+            if (m->expr->is<IR::Type_Header>()) dontEliminate[c->field->toString()] = true;
         return false;
     }
 
     bool preorder(const IR::DpdkChecksumSubStatement* c) override {
         usesInfo[c->field->toString()]++;
-        // dpdk requires it in metadata struct
-        dontEliminate[c->field->toString()] = true;
+        // dpdk requires it in header
+        if (auto m = c->field->to<IR::Member>())
+            if (m->expr->is<IR::Type_Header>()) dontEliminate[c->field->toString()] = true;
         return false;
     }
 
@@ -572,17 +574,18 @@ class CopyPropagationAndElimination : public Transform {
     IR::IndexedVector<IR::DpdkAsmStatement> copyPropAndDeadCodeElim(
         IR::IndexedVector<IR::DpdkAsmStatement> stmts);
 
-    const IR::Node* preorder(IR::DpdkAction* a) override {
+    CollectUseDefInfo* calculateUseDef() {
         collectUseDef = new CollectUseDefInfo(typeMap);
         collectUseDef->setCalledBy(this);
-        a->apply(*collectUseDef);
+        return collectUseDef;
+    }
+    const IR::Node* preorder(IR::DpdkAction* a) override {
+        a->apply(*calculateUseDef());
         return a;
     }
 
     const IR::Node* preorder(IR::DpdkListStatement* l) override {
-        collectUseDef = new CollectUseDefInfo(typeMap);
-        collectUseDef->setCalledBy(this);
-        l->apply(*collectUseDef);
+        l->apply(*calculateUseDef());
         return l;
     }
 

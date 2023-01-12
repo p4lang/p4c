@@ -201,7 +201,7 @@ inja::json PTF::getVerify(const TestSpec* testSpec) {
 static std::string getPreamble() {
     static const std::string PREAMBLE(
         R"""(# P4Runtime PTF test for {{test_name}}
-# p4testgen seed: '{{ default(seed, '"none"') }}'
+# p4testgen seed: {{ default(seed, "none") }}
 
 import logging
 import itertools
@@ -288,7 +288,7 @@ class Test{{test_id}}(AbstractTest):
 
     def setupCtrlPlane(self):
 ## if control_plane
-## if existsIn(control_plane, '"action_profiles"')
+## if existsIn(control_plane, "action_profiles")
 ## for ap in control_plane.action_profiles
 ## for action in ap.actions
         self.insertTableEntry(
@@ -298,7 +298,7 @@ class Test{{test_id}}(AbstractTest):
             ],
             '{{action.action_name}}',
             [
-## for act_param in action.action_args
+## for act_param in action.act_args
                 gc.DataTuple('{{act_param.param}}', {{act_param.value}}),
 ## endfor
             ]
@@ -324,7 +324,7 @@ class Test{{test_id}}(AbstractTest):
 ## for r in rule.rules.lpm_matches
                 self.Lpm('{{r.field_name}}', {{r.value}}, {{r.prefix_len}}),
 ## endfor
-## if existsIn(table, '"has_ap"')
+## if existsIn(table, "has_ap")
             ],
             None,
             [
