@@ -68,8 +68,8 @@ class CmdStepper : public AbstractStepper {
     /// cstring list as prefixes.All the members of the Type_Declaration are initialized using the
     /// createTargetUninitialized of the respective target.
     void initializeBlockParams(const IR::Type_Declaration* typeDecl,
-                               const std::vector<cstring>* blockParams,
-                               ExecutionState* nextState) const;
+                               const std::vector<cstring>* blockParams, ExecutionState* nextState,
+                               bool forceTaint = false) const;
 
     /// Add a variable to the symbolic interpreter. This looks up the full control-plane name of a
     /// variable defined in @param decl and declares in the symbolic environment of @param
