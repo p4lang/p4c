@@ -2081,23 +2081,23 @@ const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
     return expression;
 }
 
+const IR::Node* TypeInference::postorder(IR::Invalid* expression) {
+    if (done()) return expression;
+    auto unk = IR::Type_Unknown::get();
+    setType(expression, unk);
+    setType(getOriginal(), unk);
+    setCompileTimeConstant(expression);
+    setCompileTimeConstant(getOriginal<IR::Expression>());
+    return expression;
+}
+
 const IR::Node* TypeInference::postorder(IR::InvalidHeader* expression) {
     if (done()) return expression;
-    if (!expression->headerType) {
-        // This expression should be enclosed within a cast.
-        // Processing the cast will replace this expression with an
-        // InvalidHeader expression with a known type.
-        setType(expression, IR::Type_Unknown::get());
-        setType(getOriginal(), IR::Type_Unknown::get());
-        return expression;
-    }
     auto type = getTypeType(expression->headerType);
-    if (!type->is<IR::Type_Header>()) {
-        typeError("%1%: invalid header expression has a non-header type `%2%`", expression, type);
-        return expression;
-    }
-    setType(getOriginal(), type);
+    BUG_CHECK(type->is<IR::Type_Header>(), "%1%: does not have a header type %2%", expression,
+              type);
     setType(expression, type);
+    setType(getOriginal(), type);
     setCompileTimeConstant(expression);
     setCompileTimeConstant(getOriginal<IR::Expression>());
     return expression;
@@ -2693,19 +2693,17 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
                           expression, st->fields.size(), le->components.size());
                 return expression;
             }
-        } else if (auto ih = expression->expr->to<IR::InvalidHeader>()) {
-            if (!ih->headerType) {
-                auto type = castType->getP4Type();
-                if (!castType->is<IR::Type_Header>()) {
-                    typeError("%1%: invalid header expression has a non-header type `%2%`",
-                              expression, castType);
-                    return expression;
-                }
-                setType(type, new IR::Type_Type(castType));
-                auto result = new IR::InvalidHeader(ih->srcInfo, type, type);
-                setType(result, castType);
-                return result;
+        } else if (auto ih = expression->expr->to<IR::Invalid>()) {
+            auto type = castType->getP4Type();
+            if (!castType->is<IR::Type_Header>()) {
+                typeError("%1%: invalid header expression has a non-header type `%2%`", expression,
+                          castType);
+                return expression;
             }
+            setType(type, new IR::Type_Type(castType));
+            auto result = new IR::InvalidHeader(ih->srcInfo, type, type);
+            setType(result, castType);
+            return result;
         }
     }
     if (auto lt = concreteType->to<IR::Type_P4List>()) {
