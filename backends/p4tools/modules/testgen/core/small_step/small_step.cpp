@@ -45,39 +45,34 @@ SmallStepEvaluator::SmallStepEvaluator(AbstractSolver& solver, const ProgramInfo
     }
 }
 
-const IR::Expression* SmallStepEvaluator::stepAndReturnValue(const IR::Expression* expr, ExecutionState& state) {
+const IR::Expression* SmallStepEvaluator::stepAndReturnValue(const IR::Expression* expr,
+                                                             ExecutionState& state) {
     // Create a base state with a parameter continuation to apply the value on.
-    std::cout << expr->type << std::endl;
-    std::cout << expr->to<IR::Operation_Binary>()->left << std::endl;
-    std::cout << expr->to<IR::Operation_Binary>()->left->type << std::endl;
     const auto* v = Continuation::genParameter(expr->type, "v", NamespaceContext::Empty);
     Continuation::Body bodyBase({Continuation::Return(v->param)});
     Continuation continuationBase(v, bodyBase);
-    //ExecutionState esBase(bodyBase);
 
     auto* exprState = new ExecutionState(state);
     Continuation::Body body({Continuation::Return(expr)});
     exprState->replaceBody(body);
     exprState->pushContinuation(
         new ExecutionState::StackFrame(continuationBase, state.getNamespaceContext()));
-    while(!SymbolicEnv::isSymbolicValue(expr)) {
+    while (!SymbolicEnv::isSymbolicValue(expr)) {
         auto successors = step(*exprState);
-        BUG_CHECK(successors->size() == 1u, "Invalid size of a result of the expression evaluation");
+        BUG_CHECK(successors->size() == 1u,
+                  "Invalid size of a result of the expression evaluation");
         const auto branch = (*successors)[0];
         exprState = branch.nextState;
         auto cmd = exprState->getBody().next();
         auto* ret = boost::get<Continuation::Return>(&cmd);
         BUG_CHECK(ret && ret->expr, "Invalid format for the return result");
         expr = ret->expr.get()->to<IR::Expression>();
-        std::cout << expr << std::endl;
-        std::cout << expr->type << std::endl;
         if (SymbolicEnv::isSymbolicValue(expr)) {
             exprState->popContinuation(expr);
             cmd = exprState->getBody().next();
             ret = boost::get<Continuation::Return>(&cmd);
             BUG_CHECK(ret && ret->expr, "Invalid format for the return result");
             expr = ret->expr.get()->to<IR::Expression>();
-            std::cout << expr << std::endl;
             if (!SymbolicEnv::isSymbolicValue(expr)) {
                 Continuation::Body body({Continuation::Return(expr)});
                 exprState->replaceBody(body);
@@ -130,7 +125,8 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                                 new IR::BAnd(IR::Type_Boolean::get(), n.constraint, result.second);
                             const auto* cond = n.nextState->getSymbolicEnv().subst(n.constraint);
                             cond = P4::optimizeExpression(cond);
-                            // Check whether the condition is satisfiable in the current execution state.
+                            // Check whether the condition is satisfiable in
+                            // the current execution state.
                             auto pathConstraints = n.nextState->getPathConstraint();
                             pathConstraints.push_back(cond);
                             auto solverResult = solver.checkSat(pathConstraints);
@@ -162,23 +158,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState& state) {
                 auto* result = stepper->step(node);
                 if (self.reachabilityEngine != nullptr) {
                     if (r.first.second != nullptr) {
-                        std::cout << r.first.second << std::endl;
-                        /*if (!SymbolicEnv::isSymbolicValue(r.first.second)) {
-                            stepper->stepToSubexpr(r.first.second, result, state,
-                                [](const Continuation::Parameter* v) {
-                                    std::cout << v->param << std::endl;
-                                    return v->param;
-                                });
-                        }*/
-                        //auto* exprStepper = TestgenTarget::getExprStepper(state, self.solver, self.programInfo);
-                        //auto* result1 = r.first.second->apply(*exprStepper);
-                        //auto* result1 = exprStepper->step(r.first.second);
-                        //auto cmd = result1->at(0).nextState->getNextCmd();
-                        //std::cout << cmd << std::endl;
-                        //ExprStepper stepper(state, self.solver, self.programInfo);
-                        //r.first.second = r.first.second->apply(*exprStepper);
                         r.first.second = self.stepAndReturnValue(r.first.second, state);
-                        std::cout << r.first.second << std::endl;
                     }
                     renginePostprocessing(r.first, result, self.solver, state);
                 }

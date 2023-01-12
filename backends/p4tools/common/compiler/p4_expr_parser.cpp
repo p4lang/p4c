@@ -112,7 +112,6 @@ const IR::Node* Parser::removeBrackets(const IR::Node* expr) {
         return nullptr;
     }
     if (const auto* namedExpr = expr->to<IR::NamedExpression>()) {
-        std::cout << namedExpr << std::endl;
         BUG_CHECK(namedExpr->name == "Paren", "Invalid format %1%", namedExpr);
         if (const auto* listExpr = namedExpr->expression->to<IR::ListExpression>()) {
             BUG_CHECK(listExpr->size() == 1, "");
@@ -371,7 +370,6 @@ const IR::Node* Parser::createApplicationOp(const IR::Node* base) {
         type = new IR::Type_Method(paramList, member->member.name);
         expr->type = type;
     }
-    
     return new IR::MethodCallExpression(type, expr, arguments);
 }
 

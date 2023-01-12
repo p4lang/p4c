@@ -123,7 +123,6 @@ void stepAndExamineValue(const T* value, const IR::P4Program* program) {
 template <class T>
 void stepAndExamineOp(const T* op, const IR::Expression* subexpr, const IR::P4Program* program,
                       std::function<const IR::Expression*(const IR::PathExpression*)> rebuildNode) {
-    std::cout << op << " : " << subexpr << std::endl; 
     // Produce a ProgramInfo, which is needed to create a SmallStepEvaluator.
     const auto* progInfo = TestgenTarget::initProgram(program);
     ASSERT_TRUE(progInfo);

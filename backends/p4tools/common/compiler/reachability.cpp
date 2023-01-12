@@ -591,7 +591,6 @@ ReachabilityResult ReachabilityEngine::next(ReachabilityEngineState* state,
                 newState.push_back(n);
             }
         } else if (dcg->isReachable(next, i)) {
-            //expr = addCondition(expr, i);
             newState.push_back(i);
         }
     }
