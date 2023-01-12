@@ -821,6 +821,9 @@ const IR::Node* TypeInference::postorder(IR::Annotation* annotation) {
         if (!isCompileTimeConstant(e))
             typeError("%1%: structured annotation must be compile-time constant values", e);
         auto t = getType(e);
+        if (!t)
+            // type error during typechecking
+            return;
         if (!t->is<IR::Type_InfInt>() && !t->is<IR::Type_String>() && !t->is<IR::Type_Boolean>())
             typeError("%1%: illegal type for structured annotation; must be int, string or bool",
                       e);
@@ -1706,6 +1709,10 @@ bool TypeInference::compare(const IR::Node* errorPosition, const IR::Type* ltype
     }
     if (ltype->is<IR::Type_Table>() || rtype->is<IR::Type_Table>()) {
         typeError("%1% and %2%: tables cannot be compared", compare->left, compare->right);
+        return false;
+    }
+    if (ltype->is<IR::Type_Extern>() || rtype->is<IR::Type_Extern>()) {
+        typeError("%1% and %2%: externs cannot be compared", compare->left, compare->right);
         return false;
     }
 
