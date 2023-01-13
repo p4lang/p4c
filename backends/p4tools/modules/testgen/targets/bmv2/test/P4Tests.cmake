@@ -51,6 +51,17 @@ set(P4C_V1_TEST_SUITES_P416 ${v1tests} ${bmv2v1tests})
 # Add bmv2 PTF tests from p4c and from testgen/test/p4-programs/bmv2
 set(P4C_V1_TEST_SUITES_P416_PTF ${bmv2v1tests})
 
+execute_process(
+  COMMAND bash -c "printf \"import google.rpc\nimport google.protobuf\" | python3" RESULT_VARIABLE result
+)
+if(result AND NOT result EQUAL 0)
+  message(
+    WARNING
+      "BMv2 PTF tests are enabled, but the Python3 module 'google.rpc' can not be found. BMv2 PTF tests will fail."
+  )
+endif()
+
+
 p4tools_add_tests(
   TESTSUITES "${P4C_V1_TEST_SUITES_P416}"
   TAG "testgen-p4c-bmv2-ptf" DRIVER ${P4TESTGEN_DRIVER} TEMPLATE_FILE ${TEMPLATE_FILE}

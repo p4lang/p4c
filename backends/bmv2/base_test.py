@@ -1,6 +1,7 @@
 # This file was copied and then modified from the file
 # testlib/base_test.py in the https://github.com/jafingerhut/p4-guide/
-# repository.
+# repository. This file in turn was a modified version of
+# https://github.com/p4lang/PI/blob/ec6865edc770b42f22fea15e6da17ca58a83d3a6/proto/ptf/base_test.py.
 
 from collections import Counter
 from functools import wraps, partial
@@ -15,16 +16,14 @@ import queue
 import ptf
 from ptf.base_tests import BaseTest
 from ptf import config
-import ptf.testutils as testutils
+from ptf import testutils
 
 import grpc
 
 from google.rpc import status_pb2, code_pb2
-from p4.v1 import p4runtime_pb2
-from p4.v1 import p4runtime_pb2_grpc
+from p4.v1 import p4runtime_pb2, p4runtime_pb2_grpc
 from p4.config.v1 import p4info_pb2
 import google.protobuf.text_format
-from p4.v1 import p4runtime_pb2, p4runtime_pb2_grpc
 
 
 # See https://gist.github.com/carymrobbins/8940382
@@ -99,7 +98,7 @@ def ipv6_to_int(addr):
     """Take an argument 'addr' containing an IPv6 address written in
     standard syntax, e.g. '2001:0db8::3210', and convert it to an
     integer."""
-    bytes_ = socket.inet_pton(socket.AF_INET6, '2001:0db8::3210')
+    bytes_ = socket.inet_pton(socket.AF_INET6, addr)
     # Note: The bytes() call below will throw exception if any
     # elements of bytes_ is outside of the range [0, 255]], so no need
     # to add a separate check for that here.
@@ -137,14 +136,14 @@ def mac_to_int(addr):
 class P4RuntimeErrorFormatException(Exception):
 
     def __init__(self, message):
-        super(P4RuntimeErrorFormatException, self).__init__(message)
+        super().__init__(message)
 
 
 # Used to iterate over the p4.Error messages in a gRPC error Status object
 class P4RuntimeErrorIterator:
 
     def __init__(self, grpc_error):
-        assert (grpc_error.code() == grpc.StatusCode.UNKNOWN)
+        assert grpc_error.code() == grpc.StatusCode.UNKNOWN
         self.grpc_error = grpc_error
 
         error = None
@@ -192,23 +191,19 @@ class P4RuntimeErrorIterator:
 class P4RuntimeWriteException(Exception):
 
     def __init__(self, grpc_error):
-        assert (grpc_error.code() == grpc.StatusCode.UNKNOWN)
-        super(P4RuntimeWriteException, self).__init__()
+        assert grpc_error.code() == grpc.StatusCode.UNKNOWN
+        super().__init__()
         self.errors = []
-        try:
-            error_iterator = P4RuntimeErrorIterator(grpc_error)
-            for error_tuple in error_iterator:
-                self.errors.append(error_tuple)
-        except P4RuntimeErrorFormatException:
-            raise  # just propagate exception for now
+        error_iterator = P4RuntimeErrorIterator(grpc_error)
+        for error_tuple in error_iterator:
+            self.errors.append(error_tuple)
 
     def __str__(self):
         message = "Error(s) during Write:\n"
         for idx, p4_error in self.errors:
             code_name = code_pb2._CODE.values_by_number[
                 p4_error.canonical_code].name
-            message += "\t* At index {}: {}, '{}'\n".format(
-                idx, code_name, p4_error.message)
+            message += f"\t* At index {idx}: {code_name}, '{p4_error.message}'\n"
         return message
 
     def as_list_of_dicts(self):
@@ -229,13 +224,14 @@ class P4RuntimeWriteException(Exception):
 
 
 # Strongly inspired from _AssertRaisesContext in Python's unittest module
-class _AssertP4RuntimeErrorContext(object):
+class _AssertP4RuntimeErrorContext():
     """A context manager used to implement the assertP4RuntimeError method."""
 
     def __init__(self, test_case, error_code=None, msg_regexp=None):
         self.failureException = test_case.failureException
         self.error_code = error_code
         self.msg_regexp = msg_regexp
+        self.exception = None
 
     def __enter__(self):
         return self
@@ -245,8 +241,8 @@ class _AssertP4RuntimeErrorContext(object):
             try:
                 exc_name = self.expected.__name__
             except AttributeError:
-                exc_name = str(self.expected)
-            raise self.failureException("{} not raised".format(exc_name))
+                exc_name = str(self.msg_regexp)
+            raise self.failureException(f"{exc_name} not raised")
         if not issubclass(exc_type, P4RuntimeWriteException):
             # let unexpected exceptions pass through
             return False
@@ -264,16 +260,16 @@ class _AssertP4RuntimeErrorContext(object):
         if p4_error.canonical_code != self.error_code:
             # not the expected error code
             raise self.failureException(
-                "Invalid P4Runtime error code: expected {} but got {}".format(
-                    expected_code_name, code_name))
+                f"Invalid P4Runtime error code: expected {expected_code_name} but got {code_name}"
+            )
 
         if self.msg_regexp is None:
             return True
 
         if not self.msg_regexp.search(p4_error.message):
             raise self.failureException(
-                "Invalid P4Runtime error msg: '{}' does not match '{}'".format(
-                    self.msg_regexp.pattern, p4_error.message))
+                f"Invalid P4Runtime error msg: '{self.msg_regexp.pattern}' does not match '{p4_error.message}'"
+            )
         return True
 
 
@@ -291,7 +287,7 @@ class P4RuntimeTest(BaseTest):
         self.dataplane.flush()
 
         self._swports = []
-        for device, port, ifname in config["interfaces"]:
+        for _, port, _ in config["interfaces"]:
             self._swports.append(port)
 
         grpc_addr = testutils.test_param_get("grpcaddr")
@@ -302,7 +298,7 @@ class P4RuntimeTest(BaseTest):
         self.stub = p4runtime_pb2_grpc.P4RuntimeStub(self.channel)
 
         proto_txt_path = testutils.test_param_get("p4info")
-        logging.info("Reading p4info from {}".format(proto_txt_path))
+        logging.info(f"Reading p4info from {proto_txt_path}")
         self.p4info = p4info_pb2.P4Info()
         with open(proto_txt_path, "rb") as fin:
             google.protobuf.text_format.Merge(fin.read(), self.p4info)
@@ -330,18 +326,19 @@ class P4RuntimeTest(BaseTest):
         # reading the P4info file again, instead getting the data from
         # self.p4info as saved when executing the setUp() method
         # above.  The following commented-out assignment does not work.
-        #config.p4info = self.p4info
+        # config.p4info = self.p4info
         proto_txt_path = testutils.test_param_get("p4info")
-        with open(proto_txt_path, 'r') as fin:
+        with open(proto_txt_path, 'r', encoding="utf-8") as fin:
             google.protobuf.text_format.Merge(fin.read(), config.p4info)
         config_path = testutils.test_param_get("config")
         logging.info(
-            "Reading config (compiled P4 program) from {}".format(config_path))
+            f"Reading config (compiled P4 program) from {config_path}")
         with open(config_path, 'rb') as config_f:
             config.p4_device_config = config_f.read()
         request.action = p4runtime_pb2.SetForwardingPipelineConfigRequest.VERIFY_AND_COMMIT
         try:
             response = self.stub.SetForwardingPipelineConfig(request)
+            logging.debug(f"Response {response}")
         except Exception as e:
             logging.error("Error during SetForwardingPipelineConfig",
                           file=sys.stderr)
@@ -385,8 +382,8 @@ class P4RuntimeTest(BaseTest):
             for p in stream:
                 now = time.time()
                 logging.debug(
-                    "stream_recv received at time %s and stored stream msg in stream_in_q: %s"
-                    "" % (now, p))
+                    f"stream_recv received at time {now} and stored stream msg in stream_in_q: {p}"
+                )
                 self.stream_in_q.put({'time': now, 'message': p})
 
         self.stream = self.stub.StreamChannel(stream_req_iterator())
@@ -426,7 +423,7 @@ class P4RuntimeTest(BaseTest):
     def get_packet_in(self, timeout=1):
         msg = self.get_stream_packet("packet", timeout)
         if msg is None:
-            #self.fail("Packet in not received")
+            self.fail("Packet in not received")
             return None
         else:
             return msg.packet
@@ -434,8 +431,9 @@ class P4RuntimeTest(BaseTest):
     def serializable_enum_dict(self, name):
         p4info = self.p4info
         type_info = p4info.type_info
-        #logging.debug("serializable_enum_dict: data=%s"
-        #              "" % (type_info.serializable_enums[name]))
+        logging.debug(
+            f"serializable_enum_dict: data{type_info.serializable_enums[name]}"
+        )
         name_to_int = {}
         int_to_name = {}
         for member in type_info.serializable_enums[name].members:
@@ -444,16 +442,15 @@ class P4RuntimeTest(BaseTest):
             name_to_int[name] = int_val
             int_to_name[int_val] = name
         logging.debug(
-            "serializable_enum_dict: name='%s' name_to_int=%s int_to_name=%s"
-            "" % (name, name_to_int, int_to_name))
+            f"serializable_enum_dict: name='{name}' name_to_int={name_to_int} int_to_name={int_to_name}"
+        )
         return name_to_int, int_to_name
 
     def controller_packet_metadata_dict_key_id(self, name):
         cpm_info = self.get_controller_packet_metadata(name)
-        assert cpm_info != None
+        assert cpm_info is not None
         ret = {}
         for md in cpm_info.metadata:
-            id = md.id
             ret[md.id] = {
                 'id': md.id,
                 'name': md.name,
@@ -463,10 +460,9 @@ class P4RuntimeTest(BaseTest):
 
     def controller_packet_metadata_dict_key_name(self, name):
         cpm_info = self.get_controller_packet_metadata(name)
-        assert cpm_info != None
+        assert cpm_info is not None
         ret = {}
         for md in cpm_info.metadata:
-            id = md.id
             ret[md.name] = {
                 'id': md.id,
                 'name': md.name,
@@ -484,15 +480,15 @@ class P4RuntimeTest(BaseTest):
             md_field_info = pktin_info[md_id_int]
             pktin_field_to_val[md_field_info['name']] = md_val_int
         ret = {'metadata': pktin_field_to_val, 'payload': packet.payload}
-        logging.debug("decode_packet_in_metadata: ret=%s" % (ret))
+        logging.debug(f"decode_packet_in_metadata: ret={ret}")
         return ret
 
     def verify_packet_in(self, exp_pktinfo, received_pktinfo):
         if received_pktinfo != exp_pktinfo:
             logging.error("PacketIn packet received:")
-            logging.error("%s" % (received_pktinfo))
+            logging.error(received_pktinfo)
             logging.error("PacketIn packet expected:")
-            logging.error("%s" % (exp_pktinfo))
+            logging.error(exp_pktinfo)
             assert received_pktinfo == exp_pktinfo
 
     def get_stream_packet(self, type_, timeout=1):
@@ -508,15 +504,15 @@ class P4RuntimeTest(BaseTest):
                 remaining = timeout - (time.time() - start)
                 if remaining < 0:
                     break
-                msg = self.stream_in_q.get(timeout=remaining)
+                msginfo = self.stream_in_q.get(timeout=remaining)
                 logging.debug(
-                    "get_stream_packet dequeuing msg from stream_in_q: %s"
-                    "" % (msg))
-                if type_ is None or msg['message'].HasField(type_):
-                    return msg['message']
+                    f"get_stream_packet dequeuing msg from stream_in_q:{msginfo}"
+                )
+                if type_ is None or msginfo['message'].HasField(type_):
+                    return msginfo['message']
                 logging.debug(
-                    "get_stream_packet msg=%s has no field type_=%s so discarding"
-                    "" % (msg, type_))
+                    "get_stream_packet msg={msginfo} has no field type_={type_} so discarding"
+                )
         except:  # timeout expired
             pass
         return None
@@ -540,16 +536,15 @@ class P4RuntimeTest(BaseTest):
                 remaining = timeout - (time.time() - start)
                 if remaining < 0:
                     return None, skipped_msginfos
-                    break
                 msginfo = self.stream_in_q.get(timeout=remaining)
                 logging.debug(
-                    "get_stream_packet dequeuing msginfo from stream_in_q: %s"
-                    "" % (msginfo))
-                if type_ is None or msg['message'].HasField(type_):
+                    f"get_stream_packet dequeuing msginfo from stream_in_q:{msginfo}"
+                )
+                if type_ is None or msginfo['message'].HasField(type_):
                     return msginfo, skipped_msginfos
                 logging.debug(
-                    "get_stream_packet msginfo['message'] has no field type_=%s so discarding"
-                    "" % (type_))
+                    f"get_stream_packet msginfo['message'] has no field type_={type_} so discarding"
+                )
                 skipped_msginfos.append(msginfo)
         except:  # timeout expired
             pass
@@ -570,7 +565,7 @@ class P4RuntimeTest(BaseTest):
             # bytes that most P4Runtime API messages expect.
             bitwidth = pktout_info[k]['bitwidth']
             bytewidth = (bitwidth + 7) // 8
-            #logging.debug("dbg encode k=%s v=%s bitwidth=%s bytewidth=%s"
+            # logging.debug("dbg encode k=%s v=%s bitwidth=%s bytewidth=%s"
             #              "" % (k, v, bitwidth, bytewidth))
             md.value = stringify(v, bytewidth)
         return ret
@@ -582,7 +577,7 @@ class P4RuntimeTest(BaseTest):
 
     def swports(self, idx):
         if idx >= len(self._swports):
-            self.fail("Index {} is out-of-bound of port map".format(idx))
+            self.fail(f"Index {idx} is out-of-bound of port map")
             return None
         return self._swports[idx]
 
@@ -603,6 +598,7 @@ class P4RuntimeTest(BaseTest):
         for p in a.params:
             if p.name == name:
                 return p.id
+        return None
 
     def get_mf_by_name(self, table_name, field_name):
         t = self.get_obj("tables", table_name)
@@ -611,11 +607,12 @@ class P4RuntimeTest(BaseTest):
         for mf in t.match_fields:
             if mf.name == field_name:
                 return mf
+        return None
 
     # These are attempts at convenience functions aimed at making writing
     # P4Runtime PTF tests easier.
 
-    class MF(object):
+    class MF():
 
         def __init__(self, name):
             self.name = name
@@ -709,7 +706,7 @@ class P4RuntimeTest(BaseTest):
             self.exact_match = exact_match
 
         def add_to(self, mf_id, mf_bitwidth, mk):
-            if self.exact_match == False:
+            if not self.exact_match:
                 return
             mf = mk.add()
             mf.field_id = mf_id
@@ -718,7 +715,6 @@ class P4RuntimeTest(BaseTest):
     # Sets the match key for a p4::TableEntry object. mk needs to be an iterable
     # object of MF instances
     def set_match_key(self, table_entry, t_name, mk):
-        table_obj = self.get_obj("tables", t_name)
         for mf in mk:
             mf_obj = self.get_mf_by_name(t_name, mf.name)
             mf.add_to(mf_obj.id, mf_obj.bitwidth, table_entry.match)
@@ -761,7 +757,7 @@ class P4RuntimeTest(BaseTest):
         except grpc.RpcError as e:
             if e.code() != grpc.StatusCode.UNKNOWN:
                 raise e
-            raise P4RuntimeWriteException(e)
+            raise P4RuntimeWriteException(e) from e
 
     def write_request(self, req, store=True):
         rep = self._write(req)
@@ -922,7 +918,8 @@ class P4RuntimeTest(BaseTest):
             if 'metadata' in options:
                 table_entry.metadata = options['metadata']
             if 'oneshot' in options and options['oneshot']:
-                self.set_one_shot_profile(table_entry, action_name, action_params)
+                self.set_one_shot_profile(table_entry, action_name,
+                                          action_params)
                 return table_entry
         self.set_action_entry(table_entry, action_name, action_params)
         return table_entry
@@ -939,18 +936,16 @@ class P4RuntimeTest(BaseTest):
         table_entry = self.make_table_entry(table_name_and_key,
                                             action_name_and_params, priority,
                                             options)
-        logging.info("table_add: table_entry={}".format(table_entry))
+        logging.info(f"table_add: table_entry={table_entry}")
         req = p4runtime_pb2.WriteRequest()
         req.device_id = self.device_id
         update = req.updates.add()
         update.type = p4runtime_pb2.Update.INSERT
-        #te = update.entity.table_entry
-        #te = table_entry
         update.entity.table_entry.CopyFrom(table_entry)
         key = table_name_and_key[1]
         if key is None:
             update.type = p4runtime_pb2.Update.MODIFY
-        logging.info("table_add: req={}".format(req))
+        logging.info(f"table_add: req={req}")
         return req, self.write_request(req, store=(key is not None))
 
     def pre_add_mcast_group(self, mcast_grp_id, port_instance_pair_list):
@@ -1012,7 +1007,7 @@ class P4RuntimeTest(BaseTest):
         return req, counter
 
     def counter_dump_data(self, counter_name, direct=False):
-        req, counter = self.make_counter_read_request(counter_name, direct)
+        req, _ = self.make_counter_read_request(counter_name, direct)
         if direct:
             exp_one_of = 'direct_counter_entry'
         else:
@@ -1041,13 +1036,13 @@ class P4RuntimeTest(BaseTest):
         table_entries = []
         for response in self.response_dump_helper(req):
             for entity in response.entities:
-                #print('entity.WhichOneof("entity")="%s"'
+                #logging.info('entity.WhichOneof("entity")="%s"'
                 #      '' % (entity.WhichOneof('entity')))
                 assert entity.WhichOneof('entity') == 'table_entry'
                 entry = entity.table_entry
                 table_entries.append(entry)
-                #print(entry)
-                #print('----')
+                #logging.info(entry)
+                #logging.info('----')
 
         # Now try to get the default action.  I say 'try' because as
         # of 2019-Mar-21, this is not yet implemented in the open
@@ -1060,14 +1055,14 @@ class P4RuntimeTest(BaseTest):
         try:
             for response in self.response_dump_helper(req):
                 for entity in response.entities:
-                    #print('entity.WhichOneof("entity")="%s"'
+                    #logging.info('entity.WhichOneof("entity")="%s"'
                     #      '' % (entity.WhichOneof('entity')))
                     assert entity.WhichOneof('entity') == 'table_entry'
                     entry = entity.table_entry
                     table_default_entry = entity
         except grpc._channel._Rendezvous as e:
-            print("Caught exception:")
-            print(e)
+            logging.info("Caught exception:")
+            logging.info(e)
 
         return table_entries, table_default_entry
 
@@ -1119,7 +1114,7 @@ class P4RuntimeTest(BaseTest):
         for update in updates:
             update.type = p4runtime_pb2.Update.DELETE
             new_req.updates.add().CopyFrom(update)
-        rep = self._write(new_req)
+        return self._write(new_req)
 
     def assertP4RuntimeError(self, code=None, msg_regexp=None):
         if msg_regexp is not None:
@@ -1173,7 +1168,7 @@ def autocleanup(f):
     @wraps(f)
     def handle(*args, **kwargs):
         test = args[0]
-        assert (isinstance(test, P4RuntimeTest))
+        assert isinstance(test, P4RuntimeTest)
         try:
             return f(*args, **kwargs)
         finally:
@@ -1194,20 +1189,21 @@ def update_config(config_path, p4info_path, grpc_addr, device_id):
     '''
     channel = grpc.insecure_channel(grpc_addr)
     stub = p4runtime_pb2_grpc.P4RuntimeStub(channel)
-    print("Sending P4 config from file {} with P4info {}".format(
-        config_path, p4info_path))
+    logging.info(
+        f"Sending P4 config from file {config_path} with P4info {p4info_path}")
     request = p4runtime_pb2.SetForwardingPipelineConfigRequest()
     request.device_id = device_id
     config = request.config
-    with open(p4info_path, 'r') as p4info_f:
+    with open(p4info_path, 'r', encoding="utf-8") as p4info_f:
         google.protobuf.text_format.Merge(p4info_f.read(), config.p4info)
     with open(config_path, 'rb') as config_f:
         config.p4_device_config = config_f.read()
     request.action = p4runtime_pb2.SetForwardingPipelineConfigRequest.VERIFY_AND_COMMIT
     try:
         response = stub.SetForwardingPipelineConfig(request)
+        logging.debug(f"Response {response}")
     except Exception as e:
-        print("Error during SetForwardingPipelineConfig", file=sys.stderr)
-        print(str(e), file=sys.stderr)
+        logging.error("Error during SetForwardingPipelineConfig")
+        logging.error(e)
         return False
     return True
