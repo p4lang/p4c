@@ -177,8 +177,8 @@ TEST_F(P4ExpressionParserTest, SimpleExpressions) {
     ASSERT_EQ(type->size, 2);
     ASSERT_TRUE(expr->is<IR::Slice>());
     const auto* slice = expr->to<IR::Slice>();
-    ASSERT_EQ(slice->getL(), 2);
-    ASSERT_EQ(slice->getH(), 3);
+    ASSERT_EQ(slice->getL(), 2U);
+    ASSERT_EQ(slice->getH(), 3U);
     ASSERT_TRUE(checkMember(slice->e0, "a"));
     member = slice->e0->to<IR::Member>();
     ASSERT_TRUE(member->type->is<IR::Type_Bits>());
