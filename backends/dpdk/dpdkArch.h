@@ -1169,7 +1169,8 @@ class HaveNonHeaderChecksumArgs : public Inspector {
                                 is_all_arg_header_fields = false;
                                 return false;
                             } else if (auto m = arg->expression->to<IR::Member>()) {
-                                if (!typeMap->getType(m->expr, true)->is<IR::Type_Header>()) {
+                                if (!(typeMap->getType(m->expr, true)->is<IR::Type_Header>() ||
+                                      typeMap->getType(m, true)->is<IR::Type_Header>())) {
                                     is_all_arg_header_fields = false;
                                     return false;
                                 }
