@@ -25,6 +25,7 @@ namespace P4 {
 /**
  * Replaces invalid header expressions by variables
  * which are explicitly initialized to be invalid.
+ * A similar operation is performed for invalid header unions.
  * This cannot be done for constant declarations, though.
  */
 class DoEliminateInvalidHeaders final : public Transform {
@@ -37,10 +38,11 @@ class DoEliminateInvalidHeaders final : public Transform {
         setName("DoEliminateInvalidHeaders");
         CHECK_NULL(refMap);
     }
-    const IR::Node *postorder(IR::InvalidHeader *expression) override;
-    const IR::Node *postorder(IR::P4Control *control) override;
-    const IR::Node *postorder(IR::ParserState *parser) override;
-    const IR::Node *postorder(IR::P4Action *action) override;
+    const IR::Node* postorder(IR::InvalidHeader* expression) override;
+    const IR::Node* postorder(IR::InvalidHeaderUnion* expression) override;
+    const IR::Node* postorder(IR::P4Control* control) override;
+    const IR::Node* postorder(IR::ParserState* parser) override;
+    const IR::Node* postorder(IR::P4Action* action) override;
 };
 
 class EliminateInvalidHeaders final : public PassManager {

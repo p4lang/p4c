@@ -104,6 +104,9 @@ set (P4_XFAIL_TESTS
   # arguments and with incorrect number of arguments
   testdata/p4_16_samples/pna-example-mirror-packet-error2.p4
   testdata/p4_16_samples/pna-example-mirror-packet-error3.p4
+  # This test fails only when recompiling the produced output, because
+  # of the predication pass
+  testdata/p4_16_samples/invalid-union.p4
   )
 # we invoke p4c with --p4runtime-files even for programs in p4_16_errors. This
 # enables us to use p4_16_errors even for programs which pass compilation but

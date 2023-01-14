@@ -10,6 +10,12 @@ header Header2 {
     bit<16> data;
 }
 
+header_union Union {
+    Header1 h1;
+    Header2 h2;
+    Header1 h3;
+}
+
 struct H {
     Header1 h1;
     Header1 u1_h1;

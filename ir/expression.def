@@ -459,6 +459,11 @@ class InvalidHeader : Expression {
     Type headerType;
 }
 
+/// An expression that evaluates to an invalid header union with the specified type.
+class InvalidHeaderUnion : Expression {
+    Type headerUnionType;
+}
+
 /// A ListExpression where all the components are compile-time values.
 /// This is used by the evaluator pass.
 class ListCompileTimeValue : CompileTimeValue {

@@ -657,9 +657,9 @@ const IR::Node *DoConstantFolding::postorder(IR::Member *e) {
         return CloneConstants::clone(ne->expression, this);
     }
 
-    if (expr->is<IR::InvalidHeader>() && e->member.name == IR::Type_Header::isValid) {
-        return e;
-    }
+    if (expr->is<IR::InvalidHeader>() && e->member.name == IR::Type_Header::isValid) return e;
+    if (expr->is<IR::InvalidHeaderUnion>() && e->member.name == IR::Type_Header::isValid) return e;
+    if (expr->is<IR::Invalid>() && e->member.name == IR::Type_Header::isValid) return e;
 
     BUG("Unexpected initializer: %1%", expr);
 }

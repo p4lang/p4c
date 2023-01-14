@@ -70,4 +70,19 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeader *expressi
     return new IR::PathExpression(src, new IR::Path(name));
 }
 
+const IR::Node* DoEliminateInvalidHeaders::postorder(IR::InvalidHeaderUnion* expression) {
+    if (!findContext<IR::BlockStatement>() && !findContext<IR::P4Action>() &&
+        !findContext<IR::ParserState>()) {
+        // We need some place to insert the setInvalid call.
+        ::error("%1%: Cannot eliminate invalid header union", expression);
+        return expression;
+    }
+    cstring name = refMap->newName("ih");
+    auto src = expression->srcInfo;
+    auto decl = new IR::Declaration_Variable(name, expression->headerUnionType->getP4Type());
+    variables.push_back(decl);  // Uninitialized header unions are invalid
+    LOG2("Replacing " << expression << " with " << decl);
+    return new IR::PathExpression(src, new IR::Path(name));
+}
+
 }  // namespace P4
