@@ -172,7 +172,7 @@ class AbstractStepper : public Inspector {
     /// This also is used to declare the members of a stack. This function is primarily used by the
     /// Declaration_Variable preorder function.
     void declareStructLike(ExecutionState* nextState, const IR::Expression* parentExpr,
-                           const IR::Type_StructLike* structType) const;
+                           const IR::Type_StructLike* structType, bool forceTaint = false) const;
 
     /// This is a helper function to declare base type variables. Because all variables need to be a
     /// member in the execution state environment, this helper function suffixes a "*".

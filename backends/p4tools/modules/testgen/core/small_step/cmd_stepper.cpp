@@ -103,7 +103,7 @@ void CmdStepper::initializeBlockParams(const IR::Type_Declaration* typeDecl,
         paramType = nextState->resolveType(paramType);
         const auto* paramPath = new IR::PathExpression(paramType, new IR::Path(archRef));
         if (const auto* ts = paramType->to<IR::Type_StructLike>()) {
-            declareStructLike(nextState, paramPath, ts);
+            declareStructLike(nextState, paramPath, ts, forceTaint);
         } else if (const auto* tb = paramType->to<IR::Type_Base>()) {
             // If the type is a flat Type_Base, postfix it with a "*".
             const auto& paramRef = Utils::addZombiePostfix(paramPath, tb);
