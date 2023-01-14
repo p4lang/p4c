@@ -81,7 +81,7 @@ void CmdStepper::declareVariable(ExecutionState* nextState, const IR::Declaratio
 
 void CmdStepper::initializeBlockParams(const IR::Type_Declaration* typeDecl,
                                        const std::vector<cstring>* blockParams,
-                                       ExecutionState* nextState) const {
+                                       ExecutionState* nextState, bool forceTaint) const {
     // Collect parameters.
     const auto* iApply = typeDecl->to<IR::IApply>();
     BUG_CHECK(iApply != nullptr, "Constructed type %s of type %s not supported.", typeDecl,
@@ -103,11 +103,11 @@ void CmdStepper::initializeBlockParams(const IR::Type_Declaration* typeDecl,
         paramType = nextState->resolveType(paramType);
         const auto* paramPath = new IR::PathExpression(paramType, new IR::Path(archRef));
         if (const auto* ts = paramType->to<IR::Type_StructLike>()) {
-            declareStructLike(nextState, paramPath, ts);
+            declareStructLike(nextState, paramPath, ts, forceTaint);
         } else if (const auto* tb = paramType->to<IR::Type_Base>()) {
             // If the type is a flat Type_Base, postfix it with a "*".
             const auto& paramRef = Utils::addZombiePostfix(paramPath, tb);
-            nextState->set(paramRef, programInfo.createTargetUninitialized(paramType, false));
+            nextState->set(paramRef, programInfo.createTargetUninitialized(paramType, forceTaint));
         } else {
             P4C_UNIMPLEMENTED("Unsupported initialization type %1%", paramType->node_type_name());
         }
