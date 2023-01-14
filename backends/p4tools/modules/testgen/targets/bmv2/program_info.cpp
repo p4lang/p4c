@@ -25,6 +25,7 @@
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/concolic.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
 
@@ -42,6 +43,7 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     : ProgramInfo(program),
       programmableBlocks(std::move(inputBlocks)),
       declIdToGress(declIdToGress) {
+    const auto& options = TestgenOptions::get();
     concolicMethodImpls.add(*Bmv2Concolic::getBmv2ConcolicMethodImpls());
 
     // Just concatenate everything together.
@@ -65,10 +67,15 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
         ++pipeIdx;
     }
     /// Sending a too short packet in BMV2 produces nonsense, so we require the packet size to be
-    /// larger than 32 bits
-    const IR::Operation_Binary *constraint =
+    /// larger than 32 bits.This number needs to be raised to the size of the ethernet header for
+    /// the PTF and PROTOBUF back ends.
+    auto minPktSize = BMv2Constants::STF_MIN_PKT_SIZE;
+    if (options.testBackend == "PTF") {
+        minPktSize = BMv2Constants::ETH_HDR_SIZE;
+    }
+    const IR::Operation_Binary* constraint =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                    IR::getConstant(ExecutionState::getPacketSizeVarType(), 122));
+                    IR::getConstant(ExecutionState::getPacketSizeVarType(), minPktSize));
     /// Vector containing pairs of restrictions and nodes to which these restrictions apply.
     std::vector<std::vector<const IR::Expression *>> restrictionsVec;
     /// Defines all "entry_restriction" and then converts restrictions from string to IR

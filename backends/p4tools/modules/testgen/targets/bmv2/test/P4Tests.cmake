@@ -61,11 +61,12 @@ if(result AND NOT result EQUAL 0)
   )
 endif()
 
-
+# TODO: The PTF test back end currently does not support packet sizes over 12000 bits, so we limit
+# the range.
 p4tools_add_tests(
   TESTSUITES "${P4C_V1_TEST_SUITES_P416}"
   TAG "testgen-p4c-bmv2-ptf" DRIVER ${P4TESTGEN_DRIVER} TEMPLATE_FILE ${TEMPLATE_FILE}
-  TARGET "bmv2" ARCH "v1model" P416_PTF TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend PTF ${EXTRA_OPTS} "
+  TARGET "bmv2" ARCH "v1model" P416_PTF TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend PTF --packet-size-range 0:12000 ${EXTRA_OPTS} "
 )
 
  p4tools_add_tests(
