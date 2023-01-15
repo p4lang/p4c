@@ -2,10 +2,15 @@ import os
 import subprocess
 import random
 import csv
+import dateutil
+import pandas as pd
 
 # generate random seeds, increase the number for extra sampling
-ITERATIONS = 2
-seeds = []
+ITERATIONS = 10
+
+# 7189 is an example of a good seed, which gets cov 1 with less than 100 tests
+# in random access stack.
+seeds = [7189]
 for s in range(ITERATIONS):
 	seed = random.randint(1001, 10001)
 	seeds.append(seed)
@@ -14,7 +19,7 @@ for s in range(ITERATIONS):
 p4testgen = "/p4/p4c/build/p4testgen"
 
 # initial max tests to be measured
-max_tests = 10
+
 
 # target program location
 p4_program = "/p4/p4c/testdata/p4_16_samples/pins/pins_middleblock.p4"
@@ -28,9 +33,11 @@ extras = ""
 
 # csv results file path
 results_path = f"/results_{p4_program_name}.csv"
-header = ["seed", "max_tests_input", "DFS Coverage", "max_tests_generated", "time (ms)", "Random Access Stack",
-"max_tests_generated", 
-"time (ms)", "Random Access Max Cov", "max_tests_generated", "time (ms)"]
+results_path_max = f"/max_results_{p4_program_name}.csv"
+
+header = ["seed", "max_tests_input", "DFS Coverage", "max_cov_on_test", "time (ms)", "Random Access Stack",
+"max_cov_on_test", 
+"time (ms)", "Random Access Max Cov", "max_cov_on_test", "time (ms)"]
 
 def run_strategies_for_max_tests():
 	data_row = [seed, max_tests]
@@ -45,7 +52,8 @@ def run_strategies_for_max_tests():
 	    text=True
 	)
 	
-	max_test_generated = str(proc.stderr).split("End Test ")[-1].split("=")[0].strip()
+	max_test_generated_arr = str(proc.stderr).split(": Statements covered: 1")
+	max_test_generated = max_test_generated_arr[0].split("Test")[-1].strip() if (len(max_test_generated_arr) > 1) else str(proc.stderr).split("End Test ")[-1].split("=")[0].strip()
 	
 	split_str = f"Test {max_test_generated}: Statements covered: "
 	statements_cov = str(proc.stderr).split(split_str)[-1].split("(")[0]
@@ -68,8 +76,9 @@ def run_strategies_for_max_tests():
 	    text=True
 	)
 	
-	max_test_generated = str(proc.stderr).split("End Test ")[-1].split("=")[0].strip()
-	
+	max_test_generated_arr = str(proc.stderr).split(": Statements covered: 1")
+	max_test_generated = max_test_generated_arr[0].split("Test")[-1].strip() if (len(max_test_generated_arr) > 1) else str(proc.stderr).split("End Test ")[-1].split("=")[0].strip()
+		
 	split_str = f"Test {max_test_generated}: Statements covered: "
 	statements_cov = str(proc.stderr).split(split_str)[-1].split("(")[0]
 	print(statements_cov)
@@ -84,14 +93,15 @@ def run_strategies_for_max_tests():
 	    [p4testgen, "--target", "bmv2", "--arch", "v1model", "--std", "p4-16", "-I", 
 	    includes, "--test-backend", "STF", "--strict", "--print-traces", "--print-performance-report", 
 	    "--seed", str(seed), "--max-tests", str(max_tests), "--out-dir", out_dir, p4_program, 
-	    "--exploration-strategy", "RANDOM_ACCESS_MAX_COVERAGE", "--saddle-point", "2"],
+	    "--exploration-strategy", "RANDOM_ACCESS_MAX_COVERAGE", "--saddle-point", "3"],
 	    stdout=subprocess.PIPE,
 	    stderr=subprocess.PIPE,
 	    text=True
 	)
 	
-	max_test_generated = str(proc.stderr).split("End Test ")[-1].split("=")[0].strip()
-	
+	max_test_generated_arr = str(proc.stderr).split(": Statements covered: 1")
+	max_test_generated = max_test_generated_arr[0].split("Test")[-1].strip() if (len(max_test_generated_arr) > 1) else str(proc.stderr).split("End Test ")[-1].split("=")[0].strip()
+		
 	split_str = f"Test {max_test_generated}: Statements covered: "
 	statements_cov = str(proc.stderr).split(split_str)[-1].split("(")[0]
 	# print(proc.stderr)
@@ -107,6 +117,7 @@ with open(results_path, 'w') as f:
 	writer = csv.writer(f)
 	writer.writerow(header)
 	for seed in seeds:
+		max_tests = 10
 		data_row = run_strategies_for_max_tests()
 		writer.writerow(data_row)
 		
@@ -119,5 +130,13 @@ with open(results_path, 'w') as f:
 		writer.writerow(data_row)
 
 		max_tests = 100
+		data_row = run_strategies_for_max_tests()
+		writer.writerow(data_row)
+
+with open(results_path_max, 'w') as f:
+	writer = csv.writer(f)
+	writer.writerow(header)
+	for seed in seeds:
+		max_tests = 1000
 		data_row = run_strategies_for_max_tests()
 		writer.writerow(data_row)
