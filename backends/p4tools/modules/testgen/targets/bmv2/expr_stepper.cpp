@@ -859,9 +859,10 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
 
              if (cloneType == BMv2Constants::CLONE_TYPE_I2E) {
                  // Pick a clone port var. For now, pick a random value from 0-511.
-                 const auto* rndConst =
-                     Utils::getRandConstantForWidth(TestgenTarget::getPortNumWidth_bits());
-                 const auto* clonePortVar = rndConst;
+                 const auto* egressPortVar = programInfo.getTargetOutputPortVar();
+                 const auto& clonePortVar = Utils::getZombieConst(
+                     egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
+                 cond = new IR::Neq(egressPortVar, clonePortVar);
                  // clone_preserving_field_list has a default state where the packet continues as
                  // is.
                  {
@@ -879,7 +880,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  // by calling copyIn on the entire state again. We need a little bit of information
                  // for that, including the exact parameter names of the ingress block we are in.
                  // Just grab the ingress from the programmable blocks.
-                 auto progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
+                 const auto* progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
                  const auto* programmableBlocks = progInfo->getProgrammableBlocks();
                  const auto* typeDecl = programmableBlocks->at("Ingress");
                  const auto* applyBlock = typeDecl->checkedTo<IR::P4Control>();
@@ -1143,9 +1144,10 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
 
              if (cloneType == BMv2Constants::CLONE_TYPE_I2E) {
                  // Pick a clone port var. For now, pick a random value from 0-511.
-                 const auto* rndConst =
-                     Utils::getRandConstantForWidth(TestgenTarget::getPortNumWidth_bits());
-                 const auto* clonePortVar = rndConst;
+                 const auto* egressPortVar = programInfo.getTargetOutputPortVar();
+                 const auto& clonePortVar = Utils::getZombieConst(
+                     egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
+                 cond = new IR::Neq(egressPortVar, clonePortVar);
                  // clone_preserving_field_list has a default state where the packet continues as
                  // is.
                  {
@@ -1223,7 +1225,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
         /// externs. This extern assumes it is executed at the end of the deparser.
         {"*.check_recirculate",
          {},
-         [this](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
+         [this](const IR::MethodCallExpression* call, const IR::Expression* /*receiver*/,
                 IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
                 const ExecutionState& state, SmallStepEvaluator::Result& result) {
              auto* recState = new ExecutionState(state);
@@ -1254,7 +1256,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  IR::getConstant(pktSizeType, recState->getPacketBufferSize() / 8);
              recState->set(packetSizeVar, packetSizeConst);
 
-             auto progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
+             const auto* progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
              if (recState->hasProperty("recirculate_index")) {
                  // Get the index set by the recirculate/resubmit function. Will fail if no index is
                  // set.
@@ -1284,9 +1286,10 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  state.hasProperty("clone_active") && state.getProperty<bool>("clone_active");
              if (cloneActive) {
                  // Pick a clone port var. For now, pick a random value from 0-511.
-                 const auto* rndConst =
-                     Utils::getRandConstantForWidth(TestgenTarget::getPortNumWidth_bits());
-                 const auto* clonePortVar = rndConst;
+                 const auto* egressPortVar = programInfo.getTargetOutputPortVar();
+                 const auto& clonePortVar = Utils::getZombieConst(
+                     egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
+                 const auto* cond = new IR::Neq(egressPortVar, clonePortVar);
                  const auto* sessionIdExpr =
                      state.getProperty<const IR::Expression*>("clone_session_id");
                  // clone_preserving_field_list has a default state where the packet continues as
@@ -1298,7 +1301,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                      defaultState->addTestObject(
                          "clone_infos", std::to_string(sessionIdExpr->clone_id), cloneInfo);
                      defaultState->popBody();
-                     result->emplace_back(defaultState);
+                     result->emplace_back(cond, state, defaultState);
                  }
                  // In the other state, we start processing from the egress.
                  const auto* topLevelBlocks = progInfo->getPipelineSequence();
@@ -1324,7 +1327,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  recState->setProperty("clone_active", false);
                  // Reset the packet buffer, which corresponds to the output packet.
                  recState->resetPacketBuffer();
-                 result->emplace_back(recState);
+                 result->emplace_back(cond, state, recState);
                  return;
              }
              // "Recirculate" by attaching the sequence again.
