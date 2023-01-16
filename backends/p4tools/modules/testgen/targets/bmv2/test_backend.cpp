@@ -34,7 +34,7 @@ namespace Bmv2 {
 
 const big_int Bmv2TestBackend::ZERO_PKT_VAL = 0x2000000;
 const big_int Bmv2TestBackend::ZERO_PKT_MAX = 0xffffffff;
-const std::vector<std::string> Bmv2TestBackend::SUPPORTED_BACKENDS = {"PTF", "STF", "PROTOBUF"};
+const std::set<std::string> Bmv2TestBackend::SUPPORTED_BACKENDS = {"PTF", "STF", "PROTOBUF"};
 
 Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo &programInfo, ExplorationStrategy &symbex,
                                  const boost::filesystem::path &testPath,
