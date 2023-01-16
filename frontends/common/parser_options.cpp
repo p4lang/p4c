@@ -71,7 +71,7 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
     registerOption(
         "-D", "arg=value",
         [this](const char* arg) {
-            preprocessor_options += std::string(" -D") + arg;
+            preprocessor_options += std::string(" -D=\"") + arg + std::string("\"");
             return true;
         },
         "Define macro (passed to preprocessor)");
