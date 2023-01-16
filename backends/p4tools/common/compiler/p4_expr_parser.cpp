@@ -195,6 +195,9 @@ std::pair<const IR::Node*, IR::ID> Parser::getDefinedType(cstring txt, const IR:
         if (nd->is<IR::P4Program>()) {
             auto* decls = program->getDeclsByName(txt);
             BUG_CHECK(decls != nullptr, "Can't find type for %1%", txt);
+            if (decls->stateName() == "NotStarted") {
+                return std::make_pair(nullptr, txt);
+            }
             decl = decls->single();
         } else if (const auto* ns = nd->to<IR::ISimpleNamespace>()) {
             decl = ns->getDeclByName(txt);
@@ -265,6 +268,12 @@ bool isValidNumber(Token t, bool isHex) {
 
 const IR::Node* Parser::createConstantOp() {
     LOG1("createConstantOp : " << tokens[index].lexeme());
+    if (tokens[index].is(Token::Kind::FieldAccess)) {
+        if (index + 1 < tokens.size() && tokens[index + 1].is(Token::Kind::Text)) {
+            // Skip access.
+            index++;
+        }
+    }
     if (tokens[index].is(Token::Kind::Text)) {
         cstring txt = "";
         do {
@@ -479,19 +488,25 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
         return mainArgument;
     }
     const IR::Node* nd = nullptr;
+    bool isNoTypes = false;
     if (const auto* namedExpr = mainArgument->to<IR::NamedExpression>()) {
         if (namedExpr->name == "FieldName") {
             const auto name = namedExpr->expression->to<IR::StringLiteral>()->value;
             auto res = getDefinedType(name, nullptr);
             nd = res.first;
-            mainArgument = new IR::PathExpression(ndToType(res.first), new IR::Path(res.second));
+            if (res.first == nullptr) {
+                isNoTypes = true;
+                mainArgument = new IR::PathExpression(new IR::Path(res.second));    
+            } else {
+                mainArgument = new IR::PathExpression(ndToType(res.first), new IR::Path(res.second));
+            }
         }
     }
     LOG1("createFunctionCallOrConstantOp next : " << tokens[index-1].lexeme());
     LOG1("createFunctionCallOrConstantOp next : " << tokens[index].lexeme());
     LOG1("createFunctionCallOrConstantOp next : " << tokens[index+1].lexeme());
     if (tokens[index].is(Token::Kind::Dot) || tokens[index].is(Token::Kind::FieldAccess)) {
-        if (nd == nullptr) {
+        if (nd == nullptr && !isNoTypes) {
             nd = getDefinedType(mainArgument->to<IR::NamedExpression>()->expression->
                                 to<IR::StringLiteral>()->value, nullptr).first;
         }
@@ -503,14 +518,25 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
                 result->to<IR::NamedExpression>()->expression->to<IR::StringLiteral>()->value;
             auto res = getDefinedType(name, nd);
             nd = res.first;
-            const IR::Type* type = ndToType(res.first);
-            if (res.second.originalName == "isValid") {
+            const IR::Type* type = nullptr;
+            if (!isNoTypes) {
+                type = ndToType(res.first);
+            }
+            if (!isNoTypes && res.second.originalName == "isValid") {
                 type = mainArgument->to<IR::Expression>()->type;
             }
             if (!addFA && isFieldAccess) {
-                mainArgument = new IR::PathExpression(type, new IR::Path(res.second));
+                if (type == nullptr) {
+                    mainArgument = new IR::PathExpression(new IR::Path(res.second));
+                } else {
+                    mainArgument = new IR::PathExpression(type, new IR::Path(res.second));
+                }
             } else {
-                mainArgument = new IR::Member(type, mainArgument->to<IR::Expression>(), res.second);
+                if (type == nullptr) {
+                    mainArgument = new IR::Member(mainArgument->to<IR::Expression>(), res.second);
+                } else {
+                    mainArgument = new IR::Member(type, mainArgument->to<IR::Expression>(), res.second);
+                }
             }
         } while (tokens[index].is(Token::Kind::Dot) || tokens[index].is(Token::Kind::FieldAccess));
         if (index >= tokens.size()) {
@@ -711,6 +737,9 @@ const IR::Node* Parser::createListExpressions(const IR::Node* first, const char*
     do {
         index++;
         components.push_back((this->*func)()->to<IR::Expression>());
+        if (index >= tokens.size()) {
+            break;
+        }
     } while (tokens[index].kind() == kind);
     return new IR::NamedExpression(name, new IR::ListExpression(components));
 }
@@ -720,6 +749,11 @@ const IR::Node* Parser::createListExpression(const char* msg, Token::Kind kind,
     LOG1(msg << " : " << tokens[index].lexeme());
     const auto* mainArgument = (this->*funcLeft)();
     if (index >= tokens.size()) {
+        return mainArgument;
+    }
+    if (kind == Token::Kind::Semicolon && index + 1 == tokens.size()) {
+        // Skip last semicolon
+        index++;
         return mainArgument;
     }
     if (tokens[index].is(kind)) {
@@ -741,6 +775,7 @@ const IR::Node* Parser::getIR() {
 
 const IR::Node* Parser::getIR(const char* str, const IR::P4Program* program, bool addFA,
                               TokensSet skippedTokens) {
+    std::cout << "Parsing string : " << str << std::endl;
     Lexer lex(str);
     std::vector<Token> tmp;
     for (auto token = lex.next(); !token.is_one_of(Token::Kind::End, Token::Kind::Unknown);

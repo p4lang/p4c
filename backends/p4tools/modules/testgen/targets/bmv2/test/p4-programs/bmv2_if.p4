@@ -12,7 +12,7 @@ header H {
     bit<8> c;
     bool b1;
     bool b2;
-    bit<4> d;
+    bit<6> d;
 }
 
 struct Headers {

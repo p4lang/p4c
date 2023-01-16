@@ -123,7 +123,8 @@ class Parser {
  public:
     Parser(const IR::P4Program* program, std::vector<Token> &tokens, bool addFA);
     static const IR::Node* getIR(const char* str, const IR::P4Program* program, bool addFA = false,
-                                       TokensSet skippedTokens = {Token::Kind::Comment});
+                                       TokensSet skippedTokens = {Token::Kind::Comment,
+                                                                  Token::Kind::EndString});
     char prev() noexcept;
 
  protected:
