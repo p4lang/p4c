@@ -36,7 +36,7 @@ class Bmv2TestBackend : public TestBackEnd {
     static const big_int ZERO_PKT_VAL;
     static const big_int ZERO_PKT_MAX;
     /// List of the supported back ends.
-    static const std::vector<std::string> SUPPORTED_BACKENDS;
+    static const std::set<std::string> SUPPORTED_BACKENDS;
 
  public:
     explicit Bmv2TestBackend(const ProgramInfo& programInfo, ExplorationStrategy& symbex,

@@ -63,8 +63,9 @@ int Testgen::mainImpl(const IR::P4Program* program) {
     enableInformationLogging();
 
     auto const inputFile = P4CContext::get().options().file;
-    cstring testDirStr = TestgenOptions::get().outputDir;
-    auto seed = TestgenOptions::get().seed;
+    const auto& testgenOptions = TestgenOptions::get();
+    cstring testDirStr = testgenOptions.outputDir;
+    auto seed = testgenOptions.seed;
 
     // Get the basename of the input file and remove the extension
     // This assumes that inputFile is not null.
@@ -85,42 +86,30 @@ int Testgen::mainImpl(const IR::P4Program* program) {
 
     Z3Solver solver;
 
-    auto symExec = [&solver, &programInfo, seed]() -> ExplorationStrategy* {
-        std::string explorationStrategy = TestgenOptions::get().explorationStrategy;
-        if (explorationStrategy.compare("randomAccessStack") == 0) {
+    auto* symExec = [&solver, &programInfo, seed, &testgenOptions]() -> ExplorationStrategy* {
+        auto explorationStrategy = testgenOptions.explorationStrategy;
+        if (explorationStrategy == "RANDOM_ACCESS_STACK") {
             // If the user mistakenly specifies an invalid popLevel, we set it to 3.
-            int popLevel = TestgenOptions::get().popLevel;
+            auto popLevel = testgenOptions.popLevel;
             if (popLevel <= 1) {
                 ::warning("--pop-level must be greater than 1; using default value of 3.\n");
                 popLevel = 3;
             }
             return new RandomAccessStack(solver, *programInfo, seed, popLevel);
         }
-        if (explorationStrategy.compare("linearEnumeration") == 0) {
-            // If the user mistakenly specifies an invalid bound, we set it to 2
-            // to generate at least 2 tests.
-            int linearBound = TestgenOptions::get().linearEnumeration;
-            if (linearBound <= 1) {
-                ::warning(
-                    "--linear-enumeration must be greater than 1; using default value of 2.\n");
-                linearBound = 2;
-            }
-            return new LinearEnumeration(solver, *programInfo, seed, linearBound);
+        if (explorationStrategy == "LINEAR_ENUMERATION") {
+            return new LinearEnumeration(solver, *programInfo, seed,
+                                         testgenOptions.linearEnumeration);
         }
-        if (explorationStrategy.compare("maxCoverage") == 0) {
+        if (explorationStrategy == "MAX_COVERAGE") {
             return new IncrementalMaxCoverageStack(solver, *programInfo, seed);
         }
-        if (explorationStrategy.compare("randomAccessMaxCoverage") == 0) {
-            // If the user mistakenly sets an invalid saddlePoint, we set it to 5.
-            int saddlePoint = TestgenOptions::get().saddlePoint;
-            if (saddlePoint <= 1) {
-                ::warning("--saddle-point must be greater than 1; using default value of 5.\n");
-                saddlePoint = 5;
-            }
-            return new RandomAccessMaxCoverage(solver, *programInfo, seed, saddlePoint);
+        if (explorationStrategy == "RANDOM_ACCESS_MAX_COVERAGE") {
+            return new RandomAccessMaxCoverage(solver, *programInfo, seed,
+                                               testgenOptions.saddlePoint);
         }
-        if (!TestgenOptions::get().selectedBranches.empty()) {
-            std::string selectedBranchesStr = TestgenOptions::get().selectedBranches;
+        if (!testgenOptions.selectedBranches.empty()) {
+            std::string selectedBranchesStr = testgenOptions.selectedBranches;
             return new SelectedBranches(solver, *programInfo, seed, selectedBranchesStr);
         }
         return new IncrementalStack(solver, *programInfo, seed);
@@ -135,7 +124,7 @@ int Testgen::mainImpl(const IR::P4Program* program) {
         // Run the symbolic executor with given exploration strategy.
         symExec->run(callBack);
     } catch (...) {
-        if (TestgenOptions::get().trackBranches) {
+        if (testgenOptions.trackBranches) {
             // Print list of the selected branches and store all information into
             // dumpFolder/selectedBranches.txt file.
             // This printed list could be used for repeat this bug in arguments of --input-branches

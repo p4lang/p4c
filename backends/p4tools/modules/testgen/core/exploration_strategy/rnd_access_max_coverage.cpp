@@ -90,7 +90,7 @@ void RandomAccessMaxCoverage::run(const Callback& callback) {
                 bufferUnexploredBranches.erase(coverageKey);
                 next = chooseBranch(successors, guaranteeViability);
             } else {
-                // If we are stuck in a sadlle point for too long,
+                // If we are stuck in a saddle point for too long,
                 // trust in the lookahead and take the higher ranks.
                 if (coverageSaddleTrack.second >= (2 * saddlePoint)) {
                     // Empty unexploredBranches.
@@ -144,6 +144,7 @@ void RandomAccessMaxCoverage::run(const Callback& callback) {
 uint64_t RandomAccessMaxCoverage::getRandomUnexploredMapEntry() {
     // Collect all the keys and select a random one.
     std::vector<uint64_t> unexploredCoverageKeys;
+    unexploredCoverageKeys.reserve(bufferUnexploredBranches.size());
     for (auto const& unexplored : bufferUnexploredBranches) {
         unexploredCoverageKeys.push_back(unexplored.first);
     }
@@ -157,6 +158,7 @@ uint64_t RandomAccessMaxCoverage::getRandomUnexploredMapEntry() {
 void RandomAccessMaxCoverage::updateBufferRankings() {
     // Collect all the keys
     std::vector<uint64_t> unexploredCoverageKeys;
+    unexploredCoverageKeys.reserve(bufferUnexploredBranches.size());
     for (auto const& unexplored : bufferUnexploredBranches) {
         unexploredCoverageKeys.push_back(unexplored.first);
     }
@@ -169,12 +171,11 @@ void RandomAccessMaxCoverage::updateBufferRankings() {
 
 void RandomAccessMaxCoverage::sortBranchesByCoverage(std::vector<Branch>& branches) {
     // Transfers branches to rankedBranches and sorts them by coverage
-    for (uint64_t i = 0; i < branches.size(); i++) {
-        auto localBranch = branches.at(i);
+    for (const auto& localBranch : branches) {
         ExecutionState* branchState = localBranch.nextState;
         // Calculate coverage for each branch:
         uint64_t coverage = 0;
-        if (branchState) {
+        if (branchState != nullptr) {
             uint64_t lookAheadCoverage = 0;
             for (const auto& stmt : branchState->getVisited()) {
                 // We need to take into account the set of visitedStatements.
@@ -246,7 +247,7 @@ ExecutionState* RandomAccessMaxCoverage::chooseBranch(std::vector<Branch>& branc
             }
         }
         // Push the new set of branches if the remaining vector is not empty.
-        if (branches.size() > 0) {
+        if (!branches.empty()) {
             unexploredBranches.push_back(branches);
         }
 

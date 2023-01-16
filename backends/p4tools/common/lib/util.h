@@ -144,6 +144,24 @@ class Utils {
         std::advance(start, random);
         return start;
     }
+
+    /// Convert a container type (array, set, vector, etc.) into a well-formed [val1, val2, ...]
+    /// representation. This function is used for debugging output.
+    template <typename ContainerType>
+    static std::string containerToString(const ContainerType& container) {
+        std::stringstream stringStream;
+
+        stringStream << '[';
+        auto val = container.cbegin();
+        if (val != container.cend()) {
+            stringStream << *val++;
+            while (val != container.cend()) {
+                stringStream << ", " << *val++;
+            }
+        }
+        stringStream << ']';
+        return stringStream.str();
+    }
 };
 
 }  // namespace P4Tools

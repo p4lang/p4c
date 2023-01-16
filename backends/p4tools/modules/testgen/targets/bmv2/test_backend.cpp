@@ -9,6 +9,7 @@
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/util.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/irutils.h"
@@ -33,7 +34,7 @@ namespace Bmv2 {
 
 const big_int Bmv2TestBackend::ZERO_PKT_VAL = 0x2000000;
 const big_int Bmv2TestBackend::ZERO_PKT_MAX = 0xffffffff;
-const std::vector<std::string> Bmv2TestBackend::SUPPORTED_BACKENDS = {"PTF-P4", "STF", "PROTOBUF"};
+const std::set<std::string> Bmv2TestBackend::SUPPORTED_BACKENDS = {"PTF-P4", "STF", "PROTOBUF"};
 
 Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo& programInfo, ExplorationStrategy& symbex,
                                  const boost::filesystem::path& testPath,
@@ -54,19 +55,9 @@ Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo& programInfo, ExplorationStra
     } else if (testBackendString == "PROTOBUF") {
         testWriter = new Protobuf(testPath.c_str(), seed);
     } else {
-        std::stringstream supportedBackendString;
-        bool isFirst = true;
-        for (const auto& backend : SUPPORTED_BACKENDS) {
-            if (!isFirst) {
-                supportedBackendString << ", ";
-            } else {
-                isFirst = false;
-            }
-            supportedBackendString << backend;
-        }
         P4C_UNIMPLEMENTED(
             "Test back end %1% not implemented for this target. Supported back ends are %2%.",
-            testBackendString, supportedBackendString.str());
+            testBackendString, Utils::containerToString(SUPPORTED_BACKENDS));
     }
 }
 
