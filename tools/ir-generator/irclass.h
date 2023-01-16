@@ -35,6 +35,7 @@ class IrField;
 class IrNamespace {
     std::map<cstring, IrClass *> classes;
     std::map<cstring, IrNamespace *> children;
+    std::set<cstring> othertypes;
     static IrNamespace &global();
     IrNamespace(IrNamespace *p, cstring n) : parent(p), name(n) {
         if (p) p->children[name] = this;
@@ -50,6 +51,8 @@ class IrNamespace {
     static void add_class(IrClass *);
     IrNamespace *lookupChild(cstring name) const { return ::get(children, name); }
     IrClass *lookupClass(cstring name) const { return ::get(classes, name); }
+    bool lookupOther(cstring name) const { return othertypes.count(name) > 0; }
+    void addOther(cstring name) { othertypes.insert(name); }
     cstring qualified_name(const IrNamespace *ctxt = nullptr) const;
     // name with scope qual if needed in the context
 };
@@ -319,6 +322,21 @@ class IrClass : public IrElement {
     Util::Enumerator<IrMethod *> *getUserMethods() const;
     cstring qualified_name(const IrNamespace *ctxt = nullptr) const;
     // name with scope qual if needed in the context
+};
+
+class IrEnumType : public IrElement {
+ public:
+    cstring name;
+    bool isClassEnum;
+    cstring body;
+
+    IrEnumType(Util::SourceInfo info, IrNamespace *ns, cstring n, bool cl, cstring b)
+        : IrElement(info), name(n), isClassEnum(cl), body(b) {
+        ns->addOther(name);
+    }
+    void generate_hdr(std::ostream &out) const override;
+    void generate_impl(std::ostream &) const override {}  // all in the header
+    cstring toString() const override { return name; }
 };
 
 class IrDefinitions {

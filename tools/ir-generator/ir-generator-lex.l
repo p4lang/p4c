@@ -50,6 +50,8 @@ static std::string      comment_block;
                             return EMITBLOCK; }
 <EMIT>.*                  { block_buffer += yytext; }
 
+"#include".*[\n]          { yylval.str = yytext; return INCLUDE; }
+
 "/*"            { comment_block.clear();
                   comment_block += yytext;
                   yy_push_state(COMMENT); }
@@ -68,6 +70,7 @@ static std::string      comment_block;
 "const"         { return CONST; }
 "default"       { return DEFAULT; }
 "delete"        { return DELETE; }
+"enum"          { return ENUM; }
 "inline"        { return INLINE; }
 "interface"     { return INTERFACE; }
 "namespace"     { return NAMESPACE; }

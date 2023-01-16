@@ -74,9 +74,9 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
     }                           emit;
 }
 
-%token          ABSTRACT APPLY CLASS CONST DBLCOL DEFAULT DELETE INLINE INTERFACE NAMESPACE NEW
-                NULLOK OPERATOR OPTIONAL PRIVATE PROTECTED PUBLIC STATIC VIRTUAL
-%token<str>     BLOCK COMMENTBLOCK IDENTIFIER INTEGER NO STRING ZERO
+%token          ABSTRACT APPLY CLASS CONST DBLCOL DEFAULT DELETE ENUM INLINE INTERFACE NAMESPACE
+                NEW NULLOK OPERATOR OPTIONAL PRIVATE PROTECTED PUBLIC STATIC VIRTUAL
+%token<str>     BLOCK COMMENTBLOCK IDENTIFIER INCLUDE INTEGER NO STRING ZERO
 %token<emit>    EMITBLOCK
 
 %type<type>                     type nonRefType type_arg
@@ -167,6 +167,12 @@ element
     | EMITBLOCK {
         pushCurrentComment();
         global.push_back(new EmitBlock(@1, $1.impl, $1.block)); }
+    | INCLUDE {
+        pushCurrentComment();
+        if ($1.startsWith("#include_impl")) {
+            global.push_back(new EmitBlock(@1, true, $1.substr(0, 7) + $1.substr(13)));
+        } else {
+            global.push_back(new EmitBlock(@1, false, $1)); } }
     | NAMESPACE { BEGIN(PARSE_BRACKET); }
       IDENTIFIER { current_namespace = IrNamespace::get(current_namespace, $3); }
       '{' input '}' {
@@ -228,6 +234,10 @@ part
       IDENTIFIER '{'  { $<irClass>$ = new IrClass(@2, &$<irClass>0->local, NodeKind::Nested, $3); }
       partList '}'    { $$ = $<irClass>5; }
     | COMMENTBLOCK    { $$ = new CommentBlock(@1, $1); }
+    | ENUM IDENTIFIER BLOCK {
+                        $$ = new IrEnumType(@1, &$<irClass>0->local, $2, false, $3); }
+    | ENUM CLASS IDENTIFIER BLOCK {
+                        $$ = new IrEnumType(@1, &$<irClass>0->local, $3, true, $4); }
     ;
 
 method
