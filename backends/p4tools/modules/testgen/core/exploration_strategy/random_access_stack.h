@@ -25,16 +25,15 @@ class RandomAccessStack : public IncrementalStack {
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
     /// given callback is invoked. If the callback returns true, then the executor terminates.
     /// Otherwise, execution of the P4 program continues on a different random path.
-    void run(const Callback& callBack);
+    void run(const Callback& callBack) override;
 
     /// Constructor for this strategy, considering inheritance
-    RandomAccessStack(AbstractSolver& solver, const ProgramInfo& programInfo,
-                      boost::optional<uint32_t> seed, int popLevel);
+    RandomAccessStack(AbstractSolver& solver, const ProgramInfo& programInfo, uint64_t popLevel);
 
  private:
     // The fraction in which we'll explore the depth of the stack. The higher the
     // number, the smaller the step.
-    int popLevel;
+    uint64_t popLevel;
 
     // Buffer of unexploredBranches. It saves the unexplored branches,
     // so we can restore them if multiPop empties the current unexploredBranches

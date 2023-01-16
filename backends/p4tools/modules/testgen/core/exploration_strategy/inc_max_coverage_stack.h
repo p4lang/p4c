@@ -39,14 +39,13 @@ class IncrementalMaxCoverageStack : public ExplorationStrategy {
     void run(const Callback& callBack) override;
 
     /// Constructor for this strategy, considering inheritance.
-    IncrementalMaxCoverageStack(AbstractSolver& solver, const ProgramInfo& programInfo,
-                                boost::optional<uint32_t> seed);
+    IncrementalMaxCoverageStack(AbstractSolver& solver, const ProgramInfo& programInfo);
 
  protected:
     /// The main datastructure for exploration in this strategy. It is a map
     /// of pairs, and each pair carries the potential coverage and a vector of
     /// branches with that same coverage.
-    std::map<uint64_t, std::vector<Branch>> unexploredBranches;
+    ordered_map<uint64_t, std::vector<Branch>> unexploredBranches;
 
     /// Chooses a branch to take, sets the current execution state to be that branch, and asserts
     /// the corresponding path constraint to the solver.

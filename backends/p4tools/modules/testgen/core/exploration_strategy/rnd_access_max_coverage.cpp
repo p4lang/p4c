@@ -205,7 +205,7 @@ void RandomAccessMaxCoverage::sortBranchesByCoverage(std::vector<Branch>& branch
         }
     }
 
-    // Clear branches and reinsert information from rankedBranches
+    // Clear branches and reinsert information from rankedBranches.
     branches.clear();
 }
 
@@ -257,9 +257,8 @@ ExecutionState* RandomAccessMaxCoverage::chooseBranch(std::vector<Branch>& branc
 
 RandomAccessMaxCoverage::RandomAccessMaxCoverage(AbstractSolver& solver,
                                                  const ProgramInfo& programInfo,
-                                                 boost::optional<uint32_t> seed,
                                                  uint64_t saddlePoint)
-    : IncrementalMaxCoverageStack(solver, programInfo, seed), saddlePoint(saddlePoint) {}
+    : IncrementalMaxCoverageStack(solver, programInfo), saddlePoint(saddlePoint) {}
 
 }  // namespace P4Testgen
 

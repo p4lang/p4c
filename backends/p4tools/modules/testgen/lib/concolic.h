@@ -29,10 +29,10 @@ namespace P4Testgen {
 /// TODO: This is a very ugly data structure. Essentially, you can store both state variables and
 /// entire expression as keys. State variables can actually compared, expressions are always unique
 /// keys. Using this map, you can look up particular state variables and check whether they actually
-/// are present, but not expressions. The reason expressions need to be keys is that some times
+/// are present, but not expressions. The reason expressions need to be keys is that sometimes
 /// entire expressions are mapped to a particular constant.
 using ConcolicVariableMap =
-    std::map<boost::variant<const StateVariable, const IR::Expression*>, const IR::Expression*>;
+    ordered_map<boost::variant<const StateVariable, const IR::Expression*>, const IR::Expression*>;
 
 /// Encapsulates a set of concolic method implementations.
 class ConcolicMethodImpls {
@@ -41,7 +41,8 @@ class ConcolicMethodImpls {
         cstring concolicMethodName, const IR::ConcolicVariable* var, const ExecutionState& state,
         const Model* completedModel, ConcolicVariableMap* resolvedConcolicVariables)>;
 
-    std::map<cstring, std::map<uint, std::list<std::pair<std::vector<cstring>, MethodImpl>>>> impls;
+    ordered_map<cstring, ordered_map<uint, std::list<std::pair<std::vector<cstring>, MethodImpl>>>>
+        impls;
 
     static bool matches(const std::vector<cstring>& paramNames,
                         const IR::Vector<IR::Argument>* args);

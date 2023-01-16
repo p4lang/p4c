@@ -82,18 +82,16 @@ void IncrementalMaxCoverageStack::run(const Callback& callback) {
 }
 
 IncrementalMaxCoverageStack::IncrementalMaxCoverageStack(AbstractSolver& solver,
-                                                         const ProgramInfo& programInfo,
-                                                         boost::optional<uint32_t> seed)
-    : ExplorationStrategy(solver, programInfo, seed) {}
+                                                         const ProgramInfo& programInfo)
+    : ExplorationStrategy(solver, programInfo) {}
 
 void IncrementalMaxCoverageStack::sortBranchesByCoverage(std::vector<Branch>& branches) {
     // Transfers branches to rankedBranches and sorts them by coverage
-    for (uint64_t i = 0; i < branches.size(); i++) {
-        auto localBranch = branches.at(i);
+    for (const auto& localBranch : branches) {
         ExecutionState* branchState = localBranch.nextState;
         // Calculate coverage for each branch:
         uint64_t coverage = 0;
-        if (branchState) {
+        if (branchState != nullptr) {
             uint64_t lookAheadCoverage = 0;
             for (const auto& stmt : branchState->getVisited()) {
                 // We need to take into account the set of visitedStatements.
@@ -178,7 +176,7 @@ ExecutionState* IncrementalMaxCoverageStack::chooseBranch(std::vector<Branch>& b
             }
         }
         // Push the new set of branches if the remaining vector is not empty.
-        if (branches.size() > 0) {
+        if (!branches.empty()) {
             auto coverageKey = unexploredBranches.find(localCoverage);
             coverageKey->second = branches;
         } else {

@@ -36,7 +36,7 @@ namespace P4Tools {
 
 boost::optional<uint32_t> Utils::currentSeed = boost::none;
 
-boost::random::mt19937 Utils::rng;
+boost::random::mt19937 Utils::rng(0);
 
 std::string Utils::getTimeStamp() {
     // get current time
@@ -56,6 +56,9 @@ std::string Utils::getTimeStamp() {
 }
 
 void Utils::setRandomSeed(int seed) {
+    if (currentSeed) {
+        BUG("Seed already initialized with %1%.", currentSeed.get());
+    }
     currentSeed = seed;
     rng.seed(seed);
 }

@@ -35,7 +35,7 @@ class RandomAccessMaxCoverage : public IncrementalMaxCoverageStack {
 
     /// Constructor for this strategy, considering inheritance.
     RandomAccessMaxCoverage(AbstractSolver& solver, const ProgramInfo& programInfo,
-                            boost::optional<uint32_t> seed, uint64_t saddlePoint);
+                            uint64_t saddlePoint);
 
  protected:
     // Saddle point indicates when we get stuck into a coverage and decides to take
@@ -57,7 +57,7 @@ class RandomAccessMaxCoverage : public IncrementalMaxCoverageStack {
     // Buffer of unexploredBranches. It saves the unexplored branches,
     // so we can restore them if getRandomUnexploredMapEntry finishes a path
     // in unexploredBranches.
-    std::map<uint64_t, std::vector<Branch>> bufferUnexploredBranches;
+    ordered_map<uint64_t, std::vector<Branch>> bufferUnexploredBranches;
 
     /// Chooses a branch to take, sets the current execution state to be that branch, and asserts
     /// the corresponding path constraint to the solver.

@@ -72,9 +72,8 @@ void IncrementalStack::run(const Callback& callback) {
     }
 }
 
-IncrementalStack::IncrementalStack(AbstractSolver& solver, const ProgramInfo& programInfo,
-                                   boost::optional<uint32_t> seed)
-    : ExplorationStrategy(solver, programInfo, seed) {}
+IncrementalStack::IncrementalStack(AbstractSolver& solver, const ProgramInfo& programInfo)
+    : ExplorationStrategy(solver, programInfo) {}
 
 ExecutionState* IncrementalStack::chooseBranch(std::vector<Branch>& branches,
                                                bool guaranteeViability) {
