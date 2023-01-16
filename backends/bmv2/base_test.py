@@ -753,7 +753,7 @@ class P4RuntimeTest(BaseTest):
 
     def _write(self, req):
         try:
-            return self.stub.Write(req)
+            return self.stub.Write(req, timeout=2)
         except grpc.RpcError as e:
             if e.code() != grpc.StatusCode.UNKNOWN:
                 raise e
@@ -990,7 +990,7 @@ class P4RuntimeTest(BaseTest):
         return req, self.write_request(req, store=False)
 
     def response_dump_helper(self, request):
-        for response in self.stub.Read(request):
+        for response in self.stub.Read(request, timeout=2):
             yield response
 
     def make_counter_read_request(self, counter_name, direct=False):

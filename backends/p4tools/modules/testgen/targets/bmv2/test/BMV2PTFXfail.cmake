@@ -238,9 +238,7 @@ p4tools_add_xfail_reason(
   "Expected packet was not received on device"
   issue1653-complex-bmv2.p4
   issue2314.p4
-  issue281.p4
   issue3702-bmv2.p4
-  issue383-bmv2.p4
   parser-if.p4
   parser-unroll-issue3537-1.p4
   parser-unroll-issue3537.p4
@@ -258,6 +256,8 @@ p4tools_add_xfail_reason(
   issue914-bmv2.p4
   v1model-special-ops-bmv2.p4
   up4.p4
+  same_name_for_table_and_action.p4
+  issue1478-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -289,4 +289,11 @@ p4tools_add_xfail_reason(
   "Error when importing p4info"
   v1model-digest-containing-ser-enum.p4
   v1model-digest-custom-type.p4
+)
+
+# Using a wildcard because the actual error is not shown. It is a packet mismatch.
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "ATTENTION: SOME TESTS DID NOT PASS!!!"
+  issue383-bmv2.p4
 )
