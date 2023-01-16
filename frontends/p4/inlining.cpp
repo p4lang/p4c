@@ -32,46 +32,46 @@ namespace P4 {
 namespace {
 
 class FindLocationSets : public Inspector {
-    StorageMap* storageMap;
-    std::map<const IR::Expression*, const LocationSet*> loc;
+    StorageMap *storageMap;
+    std::map<const IR::Expression *, const LocationSet *> loc;
 
-    const LocationSet* get(const IR::Expression* expression) const {
+    const LocationSet *get(const IR::Expression *expression) const {
         auto result = ::get(loc, expression);
         BUG_CHECK(result != nullptr, "No location set known for %1%", expression);
         return result;
     }
-    void set(const IR::Expression* expression, const LocationSet* ls) {
+    void set(const IR::Expression *expression, const LocationSet *ls) {
         CHECK_NULL(expression);
         CHECK_NULL(ls);
         loc.emplace(expression, ls);
     }
 
  public:
-    FindLocationSets(ReferenceMap* refMap, TypeMap* typeMap)
+    FindLocationSets(ReferenceMap *refMap, TypeMap *typeMap)
         : storageMap(new StorageMap(refMap, typeMap)) {}
 
     // default behavior
-    bool preorder(const IR::Expression* expression) {
+    bool preorder(const IR::Expression *expression) {
         set(expression, LocationSet::empty);
         return false;
     }
 
-    bool preorder(const IR::Slice* expression) {
+    bool preorder(const IR::Slice *expression) {
         visit(expression->e0);
         auto base = get(expression->e0);
         set(expression, base);
         return false;
     }
 
-    bool preorder(const IR::TypeNameExpression* expression) {
+    bool preorder(const IR::TypeNameExpression *expression) {
         set(expression, LocationSet::empty);
         return false;
     }
 
-    bool preorder(const IR::PathExpression* expression) {
+    bool preorder(const IR::PathExpression *expression) {
         auto decl = storageMap->refMap->getDeclaration(expression->path, true);
         auto storage = storageMap->getStorage(decl);
-        const LocationSet* result;
+        const LocationSet *result;
         if (storage != nullptr)
             result = new LocationSet(storage);
         else
@@ -80,7 +80,7 @@ class FindLocationSets : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::Member* expression) {
+    bool preorder(const IR::Member *expression) {
         visit(expression->expr);
         auto type = storageMap->typeMap->getType(expression, true);
         if (type->is<IR::Type_Method>()) return false;
@@ -100,7 +100,7 @@ class FindLocationSets : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::ArrayIndex* expression) {
+    bool preorder(const IR::ArrayIndex *expression) {
         visit(expression->left);
         visit(expression->right);
         auto storage = get(expression->left);
@@ -115,7 +115,7 @@ class FindLocationSets : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::Operation_Binary* expression) {
+    bool preorder(const IR::Operation_Binary *expression) {
         visit(expression->left);
         visit(expression->right);
         auto l = get(expression->left);
@@ -125,7 +125,7 @@ class FindLocationSets : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::Mux* expression) {
+    bool preorder(const IR::Mux *expression) {
         visit(expression->e0);
         visit(expression->e1);
         visit(expression->e2);
@@ -137,7 +137,7 @@ class FindLocationSets : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::ListExpression* expression) {
+    bool preorder(const IR::ListExpression *expression) {
         visit(expression->components, "components");
         auto l = LocationSet::empty;
         for (auto c : expression->components) {
@@ -148,14 +148,14 @@ class FindLocationSets : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::Operation_Unary* expression) {
+    bool preorder(const IR::Operation_Unary *expression) {
         visit(expression->expr);
         auto result = get(expression->expr);
         set(expression, result);
         return false;
     }
 
-    const LocationSet* locations(const IR::Expression* expression) {
+    const LocationSet *locations(const IR::Expression *expression) {
         (void)expression->apply(*this);
         auto ls = get(expression);
         if (ls != nullptr) return ls->canonicalize();
@@ -183,18 +183,18 @@ So the externally visible name for the table is "cinst.t"
 */
 class ComputeNewNames : public Inspector {
     cstring prefix;
-    P4::ReferenceMap* refMap;
-    SymRenameMap* renameMap;
+    P4::ReferenceMap *refMap;
+    SymRenameMap *renameMap;
 
  public:
-    ComputeNewNames(cstring prefix, P4::ReferenceMap* refMap, SymRenameMap* renameMap)
+    ComputeNewNames(cstring prefix, P4::ReferenceMap *refMap, SymRenameMap *renameMap)
         : prefix(prefix), refMap(refMap), renameMap(renameMap) {
         BUG_CHECK(!prefix.isNullOrEmpty(), "Null prefix");
         CHECK_NULL(refMap);
         CHECK_NULL(renameMap);
     }
 
-    void rename(const IR::Declaration* decl) {
+    void rename(const IR::Declaration *decl) {
         BUG_CHECK(decl->is<IR::IAnnotated>(), "%1%: no annotations", decl);
         cstring name = decl->externalName();
         cstring extName;
@@ -207,15 +207,15 @@ class ComputeNewNames : public Inspector {
         cstring newName = refMap->newName(baseName);
         renameMap->setNewName(decl, newName, extName);
     }
-    void postorder(const IR::P4Table* table) override { rename(table); }
-    void postorder(const IR::P4ValueSet* set) override { rename(set); }
-    void postorder(const IR::P4Action* action) override { rename(action); }
-    void postorder(const IR::Declaration_Instance* instance) override { rename(instance); }
-    void postorder(const IR::Declaration_Variable* decl) override { rename(decl); }
+    void postorder(const IR::P4Table *table) override { rename(table); }
+    void postorder(const IR::P4ValueSet *set) override { rename(set); }
+    void postorder(const IR::P4Action *action) override { rename(action); }
+    void postorder(const IR::Declaration_Instance *instance) override { rename(instance); }
+    void postorder(const IR::Declaration_Variable *decl) override { rename(decl); }
 };
 
 // Add a @name annotation ONLY.
-static const IR::Annotations* setNameAnnotation(cstring name, const IR::Annotations* annos) {
+static const IR::Annotations *setNameAnnotation(cstring name, const IR::Annotations *annos) {
     if (annos == nullptr) annos = IR::Annotations::empty;
     return annos->addOrReplace(IR::Annotation::nameAnnotation, new IR::StringLiteral(name));
 }
@@ -227,17 +227,17 @@ have to be performed at the same time, because otherwise the refMap
 is invalidated.
 */
 class Substitutions : public SubstituteParameters {
-    P4::ReferenceMap* refMap;       // updated
-    const SymRenameMap* renameMap;  // map with new names for global objects
+    P4::ReferenceMap *refMap;       // updated
+    const SymRenameMap *renameMap;  // map with new names for global objects
 
  public:
-    Substitutions(P4::ReferenceMap* refMap, P4::ParameterSubstitution* subst,
-                  P4::TypeVariableSubstitution* tvs, const SymRenameMap* renameMap)
+    Substitutions(P4::ReferenceMap *refMap, P4::ParameterSubstitution *subst,
+                  P4::TypeVariableSubstitution *tvs, const SymRenameMap *renameMap)
         : SubstituteParameters(refMap, subst, tvs), refMap(refMap), renameMap(renameMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(renameMap);
     }
-    const IR::Node* postorder(IR::P4Table* table) override {
+    const IR::Node *postorder(IR::P4Table *table) override {
         auto orig = getOriginal<IR::IDeclaration>();
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
@@ -246,7 +246,7 @@ class Substitutions : public SubstituteParameters {
         auto result = new IR::P4Table(table->srcInfo, newName, annos, table->properties);
         return result;
     }
-    const IR::Node* postorder(IR::P4ValueSet* set) override {
+    const IR::Node *postorder(IR::P4ValueSet *set) override {
         auto orig = getOriginal<IR::IDeclaration>();
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
@@ -255,7 +255,7 @@ class Substitutions : public SubstituteParameters {
         auto result = new IR::P4ValueSet(set->srcInfo, newName, annos, set->elementType, set->size);
         return result;
     }
-    const IR::Node* postorder(IR::P4Action* action) override {
+    const IR::Node *postorder(IR::P4Action *action) override {
         auto orig = getOriginal<IR::IDeclaration>();
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
@@ -265,7 +265,7 @@ class Substitutions : public SubstituteParameters {
             new IR::P4Action(action->srcInfo, newName, annos, action->parameters, action->body);
         return result;
     }
-    const IR::Node* postorder(IR::Declaration_Instance* instance) override {
+    const IR::Node *postorder(IR::Declaration_Instance *instance) override {
         auto orig = getOriginal<IR::IDeclaration>();
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
@@ -275,7 +275,7 @@ class Substitutions : public SubstituteParameters {
         instance->annotations = annos;
         return instance;
     }
-    const IR::Node* postorder(IR::Declaration_Variable* decl) override {
+    const IR::Node *postorder(IR::Declaration_Variable *decl) override {
         auto orig = getOriginal<IR::IDeclaration>();
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
@@ -285,7 +285,7 @@ class Substitutions : public SubstituteParameters {
         decl->annotations = annos;
         return decl;
     }
-    const IR::Node* postorder(IR::PathExpression* expression) override {
+    const IR::Node *postorder(IR::PathExpression *expression) override {
         LOG3("(Substitutions) visiting" << dbp(getOriginal()));
         auto decl = refMap->getDeclaration(expression->path, true);
         auto param = decl->to<IR::Parameter>();
@@ -313,7 +313,7 @@ class Substitutions : public SubstituteParameters {
 }  // namespace
 
 template <class T>
-const T* PerInstanceSubstitutions::rename(ReferenceMap* refMap, const IR::Node* node) {
+const T *PerInstanceSubstitutions::rename(ReferenceMap *refMap, const IR::Node *node) {
     Substitutions rename(refMap, &paramSubst, &tvs, &renameMap);
     auto convert = node->apply(rename);
     CHECK_NULL(convert);
@@ -323,7 +323,7 @@ const T* PerInstanceSubstitutions::rename(ReferenceMap* refMap, const IR::Node* 
 }
 
 void InlineList::analyze() {
-    P4::CallGraph<const IR::IContainer*> cg("Call-graph");
+    P4::CallGraph<const IR::IContainer *> cg("Call-graph");
 
     for (auto m : inlineMap) {
         auto inl = m.second;
@@ -346,7 +346,7 @@ void InlineList::analyze() {
     }
 
     // must inline from leaves up
-    std::vector<const IR::IContainer*> order;
+    std::vector<const IR::IContainer *> order;
     cg.sort(order);
     for (auto c : order) {
         // This is quadratic, but hopefully the call graph is not too large
@@ -359,10 +359,10 @@ void InlineList::analyze() {
     std::reverse(toInline.begin(), toInline.end());
 }
 
-InlineSummary* InlineList::next() {
+InlineSummary *InlineList::next() {
     if (toInline.size() == 0) return nullptr;
     auto result = new InlineSummary();
-    std::set<const IR::IContainer*> processing;
+    std::set<const IR::IContainer *> processing;
     while (!toInline.empty()) {
         auto toadd = toInline.back();
         if (processing.find(toadd->callee) != processing.end()) break;
@@ -375,7 +375,7 @@ InlineSummary* InlineList::next() {
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-void DiscoverInlining::postorder(const IR::MethodCallStatement* statement) {
+void DiscoverInlining::postorder(const IR::MethodCallStatement *statement) {
     LOG4("Visiting " << dbp(statement) << statement);
     auto mi = MethodInstance::resolve(statement, refMap, typeMap);
     if (!mi->isApply()) return;
@@ -390,7 +390,7 @@ void DiscoverInlining::postorder(const IR::MethodCallStatement* statement) {
                   am->object);
 }
 
-void DiscoverInlining::visit_all(const IR::Block* block) {
+void DiscoverInlining::visit_all(const IR::Block *block) {
     for (auto it : block->constantValue) {
         if (it.second == nullptr) continue;
         if (it.second->is<IR::Block>()) {
@@ -400,7 +400,7 @@ void DiscoverInlining::visit_all(const IR::Block* block) {
     }
 }
 
-bool DiscoverInlining::preorder(const IR::ControlBlock* block) {
+bool DiscoverInlining::preorder(const IR::ControlBlock *block) {
     LOG4("Visiting " << block);
     if (getContext()->node->is<IR::ParserBlock>()) {
         ::error(ErrorType::ERR_INVALID, "%1%: instantiation of control in parser", block->node);
@@ -419,7 +419,7 @@ bool DiscoverInlining::preorder(const IR::ControlBlock* block) {
     return false;
 }
 
-bool DiscoverInlining::preorder(const IR::ParserBlock* block) {
+bool DiscoverInlining::preorder(const IR::ParserBlock *block) {
     LOG4("Visiting " << block);
     if (getContext()->node->is<IR::ControlBlock>()) {
         ::error(ErrorType::ERR_INVALID, "%1%: instantiation of parser in control", block->node);
@@ -439,7 +439,7 @@ bool DiscoverInlining::preorder(const IR::ParserBlock* block) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-Visitor::profile_t GeneralInliner::init_apply(const IR::Node* node) {
+Visitor::profile_t GeneralInliner::init_apply(const IR::Node *node) {
     ResolveReferences solver(refMap);
     TypeChecking typeChecker(refMap, typeMap);
     node->apply(solver);
@@ -451,13 +451,13 @@ Visitor::profile_t GeneralInliner::init_apply(const IR::Node* node) {
  * P4Block here may be either P4Control or P4Parser.
  * P4BlockType should be either Type_Control or Type_Parser to match the P4Block. */
 template <class P4Block, class P4BlockType>
-void GeneralInliner::inline_subst(P4Block* caller,
+void GeneralInliner::inline_subst(P4Block *caller,
                                   IR::IndexedVector<IR::Declaration> P4Block::*blockLocals,
-                                  const P4BlockType* P4Block::*blockType) {
+                                  const P4BlockType *P4Block::*blockType) {
     LOG3("Analyzing " << dbp(caller));
     IR::IndexedVector<IR::Declaration> locals;
-    P4BlockType* type = (caller->*blockType)->clone();
-    IR::Annotations* annos = type->annotations->clone();
+    P4BlockType *type = (caller->*blockType)->clone();
+    IR::Annotations *annos = type->annotations->clone();
     for (auto s : caller->*blockLocals) {
         /* Even if we inline the block, the declaration may still be needed.
            Consider this example:
@@ -470,7 +470,7 @@ void GeneralInliner::inline_subst(P4Block* caller,
            }
         */
         locals.push_back(s);
-        const IR::Declaration_Instance* inst = s->template to<IR::Declaration_Instance>();
+        const IR::Declaration_Instance *inst = s->template to<IR::Declaration_Instance>();
         if (inst == nullptr || workToDo->declToCallee.find(inst) == workToDo->declToCallee.end()) {
             // not a call
         } else {
@@ -480,8 +480,8 @@ void GeneralInliner::inline_subst(P4Block* caller,
             workToDo->substitutions[inst] = substs;
 
             // Propagate annotations
-            const IR::Annotations* calleeAnnos = (callee->*blockType)->annotations;
-            for (auto* ann : calleeAnnos->annotations) {
+            const IR::Annotations *calleeAnnos = (callee->*blockType)->annotations;
+            for (auto *ann : calleeAnnos->annotations) {
                 if (!annos->getSingle(ann->name) && !Inline::isAnnotationNoPropagate(ann->name)) {
                     annos->add(ann);
                 }
@@ -500,10 +500,10 @@ void GeneralInliner::inline_subst(P4Block* caller,
             (void)callee->apply(cnn);  // populates substs.renameMap
 
             // Use temporaries for these parameters
-            std::set<const IR::Parameter*> useTemporary;
+            std::set<const IR::Parameter *> useTemporary;
 
-            const IR::MethodCallStatement* call = nullptr;
-            const IR::MethodCallStatement* firstCall = nullptr;  // to get directionless parameters
+            const IR::MethodCallStatement *call = nullptr;
+            const IR::MethodCallStatement *firstCall = nullptr;  // to get directionless parameters
             for (auto m : workToDo->callToInstance) {
                 if (m.second != inst) continue;
                 if (call) {
@@ -516,12 +516,12 @@ void GeneralInliner::inline_subst(P4Block* caller,
                 }
             }
             CHECK_NULL(firstCall);
-            MethodInstance* mi = MethodInstance::resolve(firstCall, refMap, typeMap);
+            MethodInstance *mi = MethodInstance::resolve(firstCall, refMap, typeMap);
             if (call != nullptr) {
                 // All call sites are the same (call is one of them), so we use the
                 // same arguments in all cases.  So we can avoid copies if args do
                 // not alias
-                std::map<const IR::Parameter*, const LocationSet*> locationSets;
+                std::map<const IR::Parameter *, const LocationSet *> locationSets;
                 FindLocationSets fls(refMap, typeMap);
 
                 for (auto param : *mi->substitution.getParametersInArgumentOrder()) {
@@ -588,7 +588,7 @@ void GeneralInliner::inline_subst(P4Block* caller,
     caller->*blockType = type;
 }
 
-const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
+const IR::Node *GeneralInliner::preorder(IR::P4Control *caller) {
     // prepares the code to inline
     auto orig = getOriginal<IR::P4Control>();
     if (toInline->callerToWork.find(orig) == toInline->callerToWork.end()) {
@@ -605,7 +605,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
     return caller;
 }
 
-const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
+const IR::Node *GeneralInliner::preorder(IR::MethodCallStatement *statement) {
     if (workToDo == nullptr) return statement;
     auto orig = getOriginal<IR::MethodCallStatement>();
     if (workToDo->callToInstance.find(orig) == workToDo->callToInstance.end()) return statement;
@@ -671,7 +671,7 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
     }
 
     auto annotations = callee->type->annotations->where(
-        [](const IR::Annotation* a) { return a->name != IR::Annotation::nameAnnotation; });
+        [](const IR::Annotation *a) { return a->name != IR::Annotation::nameAnnotation; });
     auto result = new IR::BlockStatement(statement->srcInfo, annotations, body);
     LOG3("Replacing " << dbp(orig) << " with " << dbp(result));
     prune();
@@ -680,19 +680,19 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
 
 namespace {
 class ComputeNewStateNames : public Inspector {
-    ReferenceMap* refMap;
+    ReferenceMap *refMap;
     cstring prefix;
     cstring acceptName;
-    std::map<cstring, cstring>* stateRenameMap;
+    std::map<cstring, cstring> *stateRenameMap;
 
  public:
-    ComputeNewStateNames(ReferenceMap* refMap, cstring prefix, cstring acceptName,
-                         std::map<cstring, cstring>* stateRenameMap)
+    ComputeNewStateNames(ReferenceMap *refMap, cstring prefix, cstring acceptName,
+                         std::map<cstring, cstring> *stateRenameMap)
         : refMap(refMap), prefix(prefix), acceptName(acceptName), stateRenameMap(stateRenameMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(stateRenameMap);
     }
-    bool preorder(const IR::ParserState* state) override {
+    bool preorder(const IR::ParserState *state) override {
         cstring newName;
         if (state->name.name == IR::ParserState::reject) {
             newName = state->name.name;
@@ -714,30 +714,30 @@ so we rely on the fact that state names only appear in very
 specific places.
 */
 class RenameStates : public Transform {
-    std::map<cstring, cstring>* stateRenameMap;
+    std::map<cstring, cstring> *stateRenameMap;
 
  public:
-    explicit RenameStates(std::map<cstring, cstring>* stateRenameMap)
+    explicit RenameStates(std::map<cstring, cstring> *stateRenameMap)
         : stateRenameMap(stateRenameMap) {
         CHECK_NULL(stateRenameMap);
     }
-    const IR::Node* preorder(IR::Path* path) override {
+    const IR::Node *preorder(IR::Path *path) override {
         // This is certainly a state name, by the way we organized the visitors
         cstring newName = ::get(stateRenameMap, path->name);
         path->name = IR::ID(path->name.srcInfo, newName, path->name.originalName);
         return path;
     }
-    const IR::Node* preorder(IR::SelectExpression* expression) override {
+    const IR::Node *preorder(IR::SelectExpression *expression) override {
         parallel_visit(expression->selectCases, "selectCases", 1);
         prune();
         return expression;
     }
-    const IR::Node* preorder(IR::SelectCase* selCase) override {
+    const IR::Node *preorder(IR::SelectCase *selCase) override {
         visit(selCase->state);
         prune();
         return selCase;
     }
-    const IR::Node* preorder(IR::ParserState* state) override {
+    const IR::Node *preorder(IR::ParserState *state) override {
         if (state->name.name == IR::ParserState::accept ||
             state->name.name == IR::ParserState::reject) {
             prune();
@@ -749,7 +749,7 @@ class RenameStates : public Transform {
         prune();
         return state;
     }
-    const IR::Node* preorder(IR::P4Parser* parser) override {
+    const IR::Node *preorder(IR::P4Parser *parser) override {
         visit(parser->states, "states");
         prune();
         return parser;
@@ -757,7 +757,7 @@ class RenameStates : public Transform {
 };
 }  // namespace
 
-const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
+const IR::Node *GeneralInliner::preorder(IR::ParserState *state) {
     LOG3("Visiting state " << dbp(state));
     auto states = new IR::IndexedVector<IR::ParserState>();
     IR::IndexedVector<IR::StatOrDecl> current;
@@ -910,7 +910,7 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
     return state;
 }
 
-const IR::Node* GeneralInliner::preorder(IR::P4Parser* caller) {
+const IR::Node *GeneralInliner::preorder(IR::P4Parser *caller) {
     // prepares the code to inline
     auto orig = getOriginal<IR::P4Parser>();
     if (toInline->callerToWork.find(orig) == toInline->callerToWork.end()) {

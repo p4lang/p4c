@@ -34,7 +34,7 @@ class RemoveComplexExpressionsPolicy {
        If the policy returns true the control block is processed,
        otherwise it is left unchanged.
     */
-    virtual bool convert(const IR::P4Control* control) const = 0;
+    virtual bool convert(const IR::P4Control *control) const = 0;
 };
 
 /**
@@ -44,45 +44,45 @@ Convert a statement like lookahead<T>() into tmp = lookahead<T>();
 */
 class RemoveComplexExpressions : public Transform {
  public:
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
-    RemoveComplexExpressionsPolicy* policy;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    RemoveComplexExpressionsPolicy *policy;
     IR::IndexedVector<IR::Declaration> newDecls;
     IR::IndexedVector<IR::StatOrDecl> assignments;
 
-    RemoveComplexExpressions(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                             RemoveComplexExpressionsPolicy* policy = nullptr)
+    RemoveComplexExpressions(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                             RemoveComplexExpressionsPolicy *policy = nullptr)
         : refMap(refMap), typeMap(typeMap), policy(policy) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("RemoveComplexExpressions");
     }
 
-    const IR::PathExpression* createTemporary(const IR::Expression* expression);
-    const IR::Expression* simplifyExpression(const IR::Expression* expression, bool force);
-    const IR::Vector<IR::Expression>* simplifyExpressions(const IR::Vector<IR::Expression>* vec,
+    const IR::PathExpression *createTemporary(const IR::Expression *expression);
+    const IR::Expression *simplifyExpression(const IR::Expression *expression, bool force);
+    const IR::Vector<IR::Expression> *simplifyExpressions(const IR::Vector<IR::Expression> *vec,
                                                           bool force = false);
-    const IR::Vector<IR::Argument>* simplifyExpressions(const IR::Vector<IR::Argument>* vec);
-    const IR::IndexedVector<IR::NamedExpression>* simplifyExpressions(
-        const IR::IndexedVector<IR::NamedExpression>* vec);
+    const IR::Vector<IR::Argument> *simplifyExpressions(const IR::Vector<IR::Argument> *vec);
+    const IR::IndexedVector<IR::NamedExpression> *simplifyExpressions(
+        const IR::IndexedVector<IR::NamedExpression> *vec);
 
-    const IR::Node* simpleStatement(IR::Statement* statement);
+    const IR::Node *simpleStatement(IR::Statement *statement);
 
-    const IR::Node* postorder(IR::SelectExpression* expression) override;
-    const IR::Node* preorder(IR::ParserState* state) override {
+    const IR::Node *postorder(IR::SelectExpression *expression) override;
+    const IR::Node *preorder(IR::ParserState *state) override {
         assignments.clear();
         return state;
     }
-    const IR::Node* postorder(IR::ParserState* state) override {
+    const IR::Node *postorder(IR::ParserState *state) override {
         state->components.append(assignments);
         return state;
     }
-    const IR::Node* postorder(IR::MethodCallExpression* expression) override;
-    const IR::Node* preorder(IR::P4Parser* parser) override {
+    const IR::Node *postorder(IR::MethodCallExpression *expression) override;
+    const IR::Node *preorder(IR::P4Parser *parser) override {
         newDecls.clear();
         return parser;
     }
-    const IR::Node* postorder(IR::P4Parser* parser) override {
+    const IR::Node *postorder(IR::P4Parser *parser) override {
         if (newDecls.size() != 0) {
             // prepend declarations
             newDecls.append(parser->parserLocals);
@@ -90,8 +90,8 @@ class RemoveComplexExpressions : public Transform {
         }
         return parser;
     }
-    const IR::Node* preorder(IR::P4Control* control) override;
-    const IR::Node* postorder(IR::P4Control* control) override {
+    const IR::Node *preorder(IR::P4Control *control) override;
+    const IR::Node *postorder(IR::P4Control *control) override {
         if (newDecls.size() != 0) {
             // prepend declarations
             newDecls.append(control->controlLocals);
@@ -99,8 +99,8 @@ class RemoveComplexExpressions : public Transform {
         }
         return control;
     }
-    const IR::Node* postorder(IR::Statement* statement) override;
-    const IR::Node* postorder(IR::MethodCallStatement* statement) override;
+    const IR::Node *postorder(IR::Statement *statement) override;
+    const IR::Node *postorder(IR::MethodCallStatement *statement) override;
 };
 
 }  // namespace P4

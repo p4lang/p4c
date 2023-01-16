@@ -27,7 +27,7 @@ limitations under the License.
 
 namespace P4V1 {
 
-const IR::Type* ExpressionConverter::getFieldType(const IR::Type_StructLike* ht,
+const IR::Type *ExpressionConverter::getFieldType(const IR::Type_StructLike *ht,
                                                   cstring fieldName) {
     auto field = ht->getField(fieldName);
     if (field != nullptr) return field->type;
@@ -35,7 +35,7 @@ const IR::Type* ExpressionConverter::getFieldType(const IR::Type_StructLike* ht,
 }
 
 // These can only come from the key of a table.
-const IR::Node* ExpressionConverter::postorder(IR::Mask* expression) {
+const IR::Node *ExpressionConverter::postorder(IR::Mask *expression) {
     if (!expression->right->is<IR::Constant>()) {
         ::error(ErrorType::ERR_INVALID, "%1%: Mask must be a constant", expression->right);
         return expression;
@@ -55,7 +55,7 @@ const IR::Node* ExpressionConverter::postorder(IR::Mask* expression) {
                          new IR::Constant(expression->srcInfo, range.lowIndex));
 }
 
-const IR::Node* ExpressionConverter::postorder(IR::Constant* expression) {
+const IR::Node *ExpressionConverter::postorder(IR::Constant *expression) {
     // The P4-14 front-end may have constants that overflow their declared type,
     // since the v1 type inference sets types to constants without any checks.
     // We fix this here.
@@ -66,7 +66,7 @@ const IR::Node* ExpressionConverter::postorder(IR::Constant* expression) {
                                 expression->base);
 }
 
-const IR::Node* ExpressionConverter::postorder(IR::FieldList* fl) {
+const IR::Node *ExpressionConverter::postorder(IR::FieldList *fl) {
     // Field lists may contain other field lists
     if (auto func = get(std::type_index(typeid(*fl)).name())) {
         return func(fl);
@@ -74,19 +74,19 @@ const IR::Node* ExpressionConverter::postorder(IR::FieldList* fl) {
     return new IR::ListExpression(fl->srcInfo, fl->fields);
 }
 
-const IR::Node* ExpressionConverter::postorder(IR::Member* field) {
+const IR::Node *ExpressionConverter::postorder(IR::Member *field) {
     if (auto ht = field->expr->type->to<IR::Type_StructLike>())
         field->type = getFieldType(ht, field->member.name);
     return field;
 }
 
-const IR::Node* ExpressionConverter::postorder(IR::ActionArg* arg) {
+const IR::Node *ExpressionConverter::postorder(IR::ActionArg *arg) {
     auto result = new IR::PathExpression(arg->name);
     result->type = arg->type;
     return result;
 }
 
-const IR::Node* ExpressionConverter::postorder(IR::Primitive* primitive) {
+const IR::Node *ExpressionConverter::postorder(IR::Primitive *primitive) {
     if (primitive->name == "current") {
         // current(a, b) => packet.lookahead<bit<a+b>>()[b-1,0]
         BUG_CHECK(primitive->operands.size() == 2, "Expected 2 operands for %1%", primitive);
@@ -103,7 +103,7 @@ const IR::Node* ExpressionConverter::postorder(IR::Primitive* primitive) {
             return primitive;
         }
 
-        const IR::Expression* method =
+        const IR::Expression *method =
             new IR::Member(structure->paramReference(structure->parserPacketIn),
                            P4::P4CoreLibrary::instance.packetIn.lookahead.Id());
         auto typeargs = new IR::Vector<IR::Type>();
@@ -123,13 +123,13 @@ const IR::Node* ExpressionConverter::postorder(IR::Primitive* primitive) {
     } else {
         auto func = new IR::PathExpression(IR::ID(primitive->srcInfo, primitive->name));
         auto args = new IR::Vector<IR::Argument>;
-        for (auto* op : primitive->operands) args->push_back(new IR::Argument(op));
+        for (auto *op : primitive->operands) args->push_back(new IR::Argument(op));
         auto result = new IR::MethodCallExpression(primitive->srcInfo, func, args);
         return result;
     }
 }
 
-const IR::Node* ExpressionConverter::postorder(IR::PathExpression* ref) {
+const IR::Node *ExpressionConverter::postorder(IR::PathExpression *ref) {
     if (ref->path->name.name == "latest") {
         if (structure->latest == nullptr) {
             ::error(ErrorType::ERR_INVALID, "%1%: latest not yet defined", ref);
@@ -151,8 +151,8 @@ const IR::Node* ExpressionConverter::postorder(IR::PathExpression* ref) {
     return ref;
 }
 
-const IR::Node* ExpressionConverter::postorder(IR::ConcreteHeaderRef* nhr) {
-    const IR::Expression* ref;
+const IR::Node *ExpressionConverter::postorder(IR::ConcreteHeaderRef *nhr) {
+    const IR::Expression *ref;
 
     // convert types defined by the target system
     if (nhr->type->is<IR::Type_Header>()) {
@@ -195,7 +195,7 @@ const IR::Node* ExpressionConverter::postorder(IR::ConcreteHeaderRef* nhr) {
     return result;
 }
 
-const IR::Node* ExpressionConverter::postorder(IR::HeaderStackItemRef* ref) {
+const IR::Node *ExpressionConverter::postorder(IR::HeaderStackItemRef *ref) {
     if (ref->index_->is<IR::PathExpression>()) {
         auto nr = ref->index_->to<IR::PathExpression>();
         if (nr->path->name == "last" || nr->path->name == "next") {
@@ -216,7 +216,7 @@ const IR::Node* ExpressionConverter::postorder(IR::HeaderStackItemRef* ref) {
     return ref;
 }
 
-const IR::Node* ExpressionConverter::postorder(IR::GlobalRef* ref) {
+const IR::Node *ExpressionConverter::postorder(IR::GlobalRef *ref) {
     // FIXME -- this is broken when the GlobalRef refers to something that the converter
     // FIXME -- has put into a different control.  In that case, ResolveReferences on this
     // FIXME -- path will later fail as the declaration is not in scope.  We should at
@@ -227,9 +227,9 @@ const IR::Node* ExpressionConverter::postorder(IR::GlobalRef* ref) {
 
 /// P4_16 is stricter on comparing booleans with ints
 /// Therefore we convert such expressions into simply the boolean test
-const IR::Node* ExpressionConverter::postorder(IR::Equ* equ) {
-    const IR::Expression* boolExpr = nullptr;
-    const IR::Expression* constExpr = nullptr;
+const IR::Node *ExpressionConverter::postorder(IR::Equ *equ) {
+    const IR::Expression *boolExpr = nullptr;
+    const IR::Expression *constExpr = nullptr;
     if (equ->left->type->is<IR::Type_Boolean>() && equ->right->is<IR::Constant>()) {
         boolExpr = equ->left;
         constExpr = equ->right;
@@ -251,9 +251,9 @@ const IR::Node* ExpressionConverter::postorder(IR::Equ* equ) {
 }
 
 /// And the Neq
-const IR::Node* ExpressionConverter::postorder(IR::Neq* neq) {
-    const IR::Expression* boolExpr = nullptr;
-    const IR::Expression* constExpr = nullptr;
+const IR::Node *ExpressionConverter::postorder(IR::Neq *neq) {
+    const IR::Expression *boolExpr = nullptr;
+    const IR::Expression *constExpr = nullptr;
     if (neq->left->type->is<IR::Type_Boolean>() && neq->right->is<IR::Constant>()) {
         boolExpr = neq->left;
         constExpr = neq->right;
@@ -273,7 +273,7 @@ const IR::Node* ExpressionConverter::postorder(IR::Neq* neq) {
         return new IR::BoolLiteral(neq->srcInfo, true);  // everything else is true
 }
 
-std::map<cstring, ExpressionConverter::funcType>* ExpressionConverter::cvtForType = nullptr;
+std::map<cstring, ExpressionConverter::funcType> *ExpressionConverter::cvtForType = nullptr;
 
 void ExpressionConverter::addConverter(cstring type, ExpressionConverter::funcType cvt) {
     static std::map<cstring, ExpressionConverter::funcType> tbl;
@@ -286,7 +286,7 @@ ExpressionConverter::funcType ExpressionConverter::get(cstring type) {
     return nullptr;
 }
 
-const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
+const IR::Node *StatementConverter::preorder(IR::Apply *apply) {
     auto table = structure->tables.get(apply->name);
     auto newname = structure->tables.get(table);
     auto tbl = new IR::PathExpression(newname);
@@ -297,8 +297,8 @@ const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
         prune();
         return stat;
     } else {
-        const IR::Vector<IR::Expression>* hit = nullptr;
-        const IR::Vector<IR::Expression>* miss = nullptr;
+        const IR::Vector<IR::Expression> *hit = nullptr;
+        const IR::Vector<IR::Expression> *miss = nullptr;
         bool otherLabels = false;
         for (auto a : apply->actions) {
             if (a.first == "hit") {
@@ -327,10 +327,10 @@ const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
             return ifstat;
         } else {
             IR::Vector<IR::SwitchCase> cases;
-            std::map<const IR::Vector<IR::Expression>*, int> converted;
+            std::map<const IR::Vector<IR::Expression> *, int> converted;
             for (auto a : apply->actions) {
                 StatementConverter conv(structure, renameMap);
-                const IR::Statement* stat = nullptr;
+                const IR::Statement *stat = nullptr;
                 auto insert_at = cases.end();
                 if (converted.count(a.second)) {
                     insert_at = cases.begin() + converted.at(a.second);
@@ -338,7 +338,7 @@ const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
                     converted[a.second] = cases.size();
                     stat = conv.convert(a.second);
                 }
-                const IR::Expression* destination;
+                const IR::Expression *destination;
                 if (a.first == "default") {
                     destination = new IR::DefaultExpression();
                 } else {
@@ -361,7 +361,7 @@ const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
     }
 }
 
-const IR::Node* StatementConverter::preorder(IR::Primitive* primitive) {
+const IR::Node *StatementConverter::preorder(IR::Primitive *primitive) {
     auto control = structure->controls.get(primitive->name);
     if (control != nullptr) {
         auto instanceName = ::get(renameMap, control->name);
@@ -376,7 +376,7 @@ const IR::Node* StatementConverter::preorder(IR::Primitive* primitive) {
     return ExpressionConverter::preorder(primitive);
 }
 
-const IR::Node* StatementConverter::preorder(IR::If* cond) {
+const IR::Node *StatementConverter::preorder(IR::If *cond) {
     StatementConverter conv(structure, renameMap);
 
     auto pred = apply_visitor(cond->pred)->to<IR::Expression>();
@@ -397,7 +397,7 @@ const IR::Node* StatementConverter::preorder(IR::If* cond) {
     return result;
 }
 
-const IR::Statement* StatementConverter::convert(const IR::Vector<IR::Expression>* toConvert) {
+const IR::Statement *StatementConverter::convert(const IR::Vector<IR::Expression> *toConvert) {
     auto stats = new IR::IndexedVector<IR::StatOrDecl>();
     for (auto e : *toConvert) {
         auto s = convert(e);
@@ -407,7 +407,7 @@ const IR::Statement* StatementConverter::convert(const IR::Vector<IR::Expression
     return result;
 }
 
-const IR::Type_Varbits* TypeConverter::postorder(IR::Type_Varbits* vbtype) {
+const IR::Type_Varbits *TypeConverter::postorder(IR::Type_Varbits *vbtype) {
     if (vbtype->size == 0) {
         if (auto type = findContext<IR::Type_StructLike>()) {
             if (auto max = type->getAnnotation("max_length")) {
@@ -430,17 +430,17 @@ namespace {
 /// are to fields prior to the varbit field.
 class ValidateLenExpr : public Inspector {
     std::set<cstring> prior;
-    const IR::StructField* varbitField;
+    const IR::StructField *varbitField;
 
  public:
-    ValidateLenExpr(const IR::Type_StructLike* headerType, const IR::StructField* varbitField)
+    ValidateLenExpr(const IR::Type_StructLike *headerType, const IR::StructField *varbitField)
         : varbitField(varbitField) {
         for (auto f : headerType->fields) {
             if (f->name.name == varbitField->name.name) break;
             prior.emplace(f->name);
         }
     }
-    void postorder(const IR::PathExpression* expression) override {
+    void postorder(const IR::PathExpression *expression) override {
         BUG_CHECK(!expression->path->absolute, "%1%: absolute path", expression);
         cstring name = expression->path->name.name;
         if (prior.find(name) == prior.end())
@@ -452,7 +452,7 @@ class ValidateLenExpr : public Inspector {
 
 }  // namespace
 
-const IR::StructField* TypeConverter::postorder(IR::StructField* field) {
+const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
     auto type = findContext<IR::Type_StructLike>();
     if (type == nullptr) return field;
 
@@ -478,8 +478,8 @@ const IR::StructField* TypeConverter::postorder(IR::StructField* field) {
     return field;
 }
 
-const IR::Type_StructLike* TypeConverter::postorder(IR::Type_StructLike* str) {
-    str->annotations = str->annotations->where([](const IR::Annotation* a) -> bool {
+const IR::Type_StructLike *TypeConverter::postorder(IR::Type_StructLike *str) {
+    str->annotations = str->annotations->where([](const IR::Annotation *a) -> bool {
         return a->name != "length" && a->name != "max_length";
     });
     return str;
@@ -489,16 +489,16 @@ const IR::Type_StructLike* TypeConverter::postorder(IR::Type_StructLike* str) {
 
 namespace {
 class FixupExtern : public Modifier {
-    ProgramStructure* structure;
+    ProgramStructure *structure;
     cstring origname, extname;
-    IR::TypeParameters* typeParams = nullptr;
+    IR::TypeParameters *typeParams = nullptr;
 
-    bool preorder(IR::Type_Extern* type) override {
+    bool preorder(IR::Type_Extern *type) override {
         BUG_CHECK(!origname, "Nested extern");
         origname = type->name;
         return true;
     }
-    void postorder(IR::Type_Extern* type) override {
+    void postorder(IR::Type_Extern *type) override {
         if (extname != type->name) {
             type->annotations = type->annotations->addAnnotationIfNew(
                 IR::Annotation::nameAnnotation, new IR::StringLiteral(type->name.name), false);
@@ -511,16 +511,16 @@ class FixupExtern : public Modifier {
                 type->name, new IR::Type_Method(new IR::ParameterList(), type->getName())));
         }
     }
-    void postorder(IR::Method* meth) override {
+    void postorder(IR::Method *meth) override {
         if (meth->name == origname) meth->name = extname;
     }
     // Convert extern methods that take a field_list_calculation to take a type param instead
-    bool preorder(IR::Type_MethodBase* mtype) override {
+    bool preorder(IR::Type_MethodBase *mtype) override {
         BUG_CHECK(!typeParams, "recursion failure");
         typeParams = mtype->typeParameters->clone();
         return true;
     }
-    bool preorder(IR::Parameter* param) override {
+    bool preorder(IR::Parameter *param) override {
         BUG_CHECK(typeParams, "recursion failure");
         if (param->type->is<IR::Type_FieldListCalculation>()) {
             auto n = new IR::Type_Var(structure->makeUniqueName("FL"));
@@ -529,30 +529,30 @@ class FixupExtern : public Modifier {
         }
         return false;
     }
-    void postorder(IR::Type_MethodBase* mtype) override {
+    void postorder(IR::Type_MethodBase *mtype) override {
         BUG_CHECK(typeParams, "recursion failure");
         if (*typeParams != *mtype->typeParameters) mtype->typeParameters = typeParams;
         typeParams = nullptr;
     }
 
  public:
-    FixupExtern(ProgramStructure* s, cstring n) : structure(s), extname(n) {}
+    FixupExtern(ProgramStructure *s, cstring n) : structure(s), extname(n) {}
 };
 }  // namespace
 
-const IR::Type_Extern* ExternConverter::convertExternType(ProgramStructure* structure,
-                                                          const IR::Type_Extern* ext,
+const IR::Type_Extern *ExternConverter::convertExternType(ProgramStructure *structure,
+                                                          const IR::Type_Extern *ext,
                                                           cstring name) {
     if (!ext->attributes.empty())
         warning(ErrorType::WARN_UNSUPPORTED, "%s: P4_14 extern type not fully supported", ext);
     return ext->apply(FixupExtern(structure, name))->to<IR::Type_Extern>();
 }
 
-const IR::Declaration_Instance* ExternConverter::convertExternInstance(
-    ProgramStructure* structure, const IR::Declaration_Instance* ext, cstring name,
-    IR::IndexedVector<IR::Declaration>*) {
-    auto* rv = ext->clone();
-    auto* et = rv->type->to<IR::Type_Extern>();
+const IR::Declaration_Instance *ExternConverter::convertExternInstance(
+    ProgramStructure *structure, const IR::Declaration_Instance *ext, cstring name,
+    IR::IndexedVector<IR::Declaration> *) {
+    auto *rv = ext->clone();
+    auto *et = rv->type->to<IR::Type_Extern>();
     BUG_CHECK(et, "Extern %s is not extern type, but %s", ext, ext->type);
     if (!ext->properties.empty())
         warning(ErrorType::WARN_UNSUPPORTED, "%s: P4_14 extern not fully supported", ext);
@@ -562,9 +562,9 @@ const IR::Declaration_Instance* ExternConverter::convertExternInstance(
     return rv->apply(TypeConverter(structure))->to<IR::Declaration_Instance>();
 }
 
-const IR::Statement* ExternConverter::convertExternCall(ProgramStructure* structure,
-                                                        const IR::Declaration_Instance* ext,
-                                                        const IR::Primitive* prim) {
+const IR::Statement *ExternConverter::convertExternCall(ProgramStructure *structure,
+                                                        const IR::Declaration_Instance *ext,
+                                                        const IR::Primitive *prim) {
     ExpressionConverter conv(structure);
     auto extref = new IR::PathExpression(structure->externs.get(ext));
     auto method = new IR::Member(prim->srcInfo, extref, prim->name);
@@ -575,15 +575,15 @@ const IR::Statement* ExternConverter::convertExternCall(ProgramStructure* struct
     return new IR::MethodCallStatement(prim->srcInfo, mc);
 }
 
-std::map<cstring, ExternConverter*>* ExternConverter::cvtForType = nullptr;
+std::map<cstring, ExternConverter *> *ExternConverter::cvtForType = nullptr;
 
-void ExternConverter::addConverter(cstring type, ExternConverter* cvt) {
-    static std::map<cstring, ExternConverter*> tbl;
+void ExternConverter::addConverter(cstring type, ExternConverter *cvt) {
+    static std::map<cstring, ExternConverter *> tbl;
     cvtForType = &tbl;
     tbl[type] = cvt;
 }
 
-ExternConverter* ExternConverter::get(cstring type) {
+ExternConverter *ExternConverter::get(cstring type) {
     static ExternConverter default_cvt;
     if (cvtForType && cvtForType->count(type)) return cvtForType->at(type);
     return &default_cvt;
@@ -591,12 +591,12 @@ ExternConverter* ExternConverter::get(cstring type) {
 
 ///////////////////////////////////////////////////////////////
 
-std::map<cstring, std::vector<PrimitiveConverter*>>* PrimitiveConverter::all_converters;
+std::map<cstring, std::vector<PrimitiveConverter *>> *PrimitiveConverter::all_converters;
 
 PrimitiveConverter::PrimitiveConverter(cstring name, int prio) : prim_name(name), priority(prio) {
-    static std::map<cstring, std::vector<PrimitiveConverter*>> converters;
+    static std::map<cstring, std::vector<PrimitiveConverter *>> converters;
     all_converters = &converters;
-    auto& vec = converters[name];
+    auto &vec = converters[name];
     auto it = vec.begin();
     while (it != vec.end() && (*it)->priority > prio) ++it;
     if (it != vec.end() && (*it)->priority == prio)
@@ -605,37 +605,37 @@ PrimitiveConverter::PrimitiveConverter(cstring name, int prio) : prim_name(name)
 }
 
 PrimitiveConverter::~PrimitiveConverter() {
-    auto& vec = all_converters->at(prim_name);
+    auto &vec = all_converters->at(prim_name);
     vec.erase(std::find(vec.begin(), vec.end(), this));
 }
 
-const IR::Statement* PrimitiveConverter::cvtPrimitive(ProgramStructure* structure,
-                                                      const IR::Primitive* primitive) {
+const IR::Statement *PrimitiveConverter::cvtPrimitive(ProgramStructure *structure,
+                                                      const IR::Primitive *primitive) {
     if (all_converters->count(primitive->name))
         for (auto cvt : all_converters->at(primitive->name))
-            if (auto* rv = cvt->convert(structure, primitive)) return rv;
+            if (auto *rv = cvt->convert(structure, primitive)) return rv;
     return nullptr;
 }
 
-safe_vector<const IR::Expression*> PrimitiveConverter::convertArgs(ProgramStructure* structure,
-                                                                   const IR::Primitive* prim) {
+safe_vector<const IR::Expression *> PrimitiveConverter::convertArgs(ProgramStructure *structure,
+                                                                    const IR::Primitive *prim) {
     ExpressionConverter conv(structure);
-    safe_vector<const IR::Expression*> rv;
+    safe_vector<const IR::Expression *> rv;
     for (auto arg : prim->operands) rv.push_back(conv.convert(arg));
     return rv;
 }
 
-static ProgramStructure* defaultCreateProgramStructure() { return new ProgramStructure(); }
+static ProgramStructure *defaultCreateProgramStructure() { return new ProgramStructure(); }
 
-static ConversionContext* defaultCreateConversionContext() { return new ConversionContext(); }
+static ConversionContext *defaultCreateConversionContext() { return new ConversionContext(); }
 
-ProgramStructure* (*Converter::createProgramStructure)() = defaultCreateProgramStructure;
+ProgramStructure *(*Converter::createProgramStructure)() = defaultCreateProgramStructure;
 
-ConversionContext* (*Converter::createConversionContext)() = defaultCreateConversionContext;
+ConversionContext *(*Converter::createConversionContext)() = defaultCreateConversionContext;
 
 namespace {
 class RemoveLengthAnnotations : public Transform {
-    const IR::Node* postorder(IR::Annotation* annotation) override {
+    const IR::Node *postorder(IR::Annotation *annotation) override {
         if (annotation->name == "length") return nullptr;
         return annotation;
     }
@@ -668,7 +668,7 @@ Converter::Converter() {
     passes.emplace_back(new RemoveLengthAnnotations());
 }
 
-Visitor::profile_t Converter::init_apply(const IR::Node* node) {
+Visitor::profile_t Converter::init_apply(const IR::Node *node) {
     if (!node->is<IR::V1Program>()) BUG("Converter only accepts IR::Globals, not %1%", node);
     return PassManager::init_apply(node);
 }

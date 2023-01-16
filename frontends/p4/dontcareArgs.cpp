@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* DontcareArgs::postorder(IR::MethodCallExpression* expression) {
+const IR::Node *DontcareArgs::postorder(IR::MethodCallExpression *expression) {
     bool changes = false;
     auto vec = new IR::Vector<IR::Argument>();
 

@@ -31,52 +31,52 @@ namespace P4Tools {
 /// This typically happens when a variable is not needed to solve a set of constraints. Completed
 /// variables are added to the model.
 class CompleteVisitor : public Inspector {
-    Model* model;
+    Model *model;
 
  public:
-    bool preorder(const IR::Member* member) override {
+    bool preorder(const IR::Member *member) override {
         if (model->count(member) == 0) {
             LOG_FEATURE(
                 "common", 5,
                 "***** Did not find a binding for " << member << ". Autocompleting." << std::endl);
-            const auto* type = member->type;
+            const auto *type = member->type;
             model->emplace(member, IR::getDefaultValue(type));
         }
         return false;
     }
 
-    bool preorder(const IR::ConcolicVariable* var) override {
+    bool preorder(const IR::ConcolicVariable *var) override {
         auto stateVar = StateVariable(var->concolicMember);
         model->emplace(stateVar, IR::getDefaultValue(var->type));
         return false;
     }
 
-    explicit CompleteVisitor(Model* model) : model(model) {}
+    explicit CompleteVisitor(Model *model) : model(model) {}
 };
 
-void Model::complete(const IR::Expression* expr) { expr->apply(CompleteVisitor(this)); }
+void Model::complete(const IR::Expression *expr) { expr->apply(CompleteVisitor(this)); }
 
-void Model::complete(const std::set<StateVariable>& inputSet) {
+void Model::complete(const std::set<StateVariable> &inputSet) {
     auto completionVisitor = CompleteVisitor(this);
-    for (const auto& var : inputSet) {
+    for (const auto &var : inputSet) {
         var->apply(completionVisitor);
     }
 }
 
-void Model::complete(const SymbolicMapType& inputMap) {
-    for (const auto& inputTuple : inputMap) {
-        const auto* expr = inputTuple.second;
+void Model::complete(const SymbolicMapType &inputMap) {
+    for (const auto &inputTuple : inputMap) {
+        const auto *expr = inputTuple.second;
         expr->apply(CompleteVisitor(this));
     }
 }
 
-const IR::StructExpression* Model::evaluateStructExpr(const IR::StructExpression* structExpr,
-                                                      ExpressionMap* resolvedExpressions) const {
-    auto* resolvedStructExpr =
+const IR::StructExpression *Model::evaluateStructExpr(const IR::StructExpression *structExpr,
+                                                      ExpressionMap *resolvedExpressions) const {
+    auto *resolvedStructExpr =
         new IR::StructExpression(structExpr->srcInfo, structExpr->type, structExpr->structType, {});
-    for (const auto* namedExpr : structExpr->components) {
-        const IR::Expression* resolvedExpr = nullptr;
-        if (const auto* subStructExpr = namedExpr->expression->to<IR::StructExpression>()) {
+    for (const auto *namedExpr : structExpr->components) {
+        const IR::Expression *resolvedExpr = nullptr;
+        if (const auto *subStructExpr = namedExpr->expression->to<IR::StructExpression>()) {
             resolvedExpr = evaluateStructExpr(subStructExpr, resolvedExpressions);
         } else {
             resolvedExpr = evaluate(namedExpr->expression, resolvedExpressions);
@@ -87,12 +87,12 @@ const IR::StructExpression* Model::evaluateStructExpr(const IR::StructExpression
     return resolvedStructExpr;
 }
 
-const IR::ListExpression* Model::evaluateListExpr(const IR::ListExpression* listExpr,
-                                                  ExpressionMap* resolvedExpressions) const {
-    auto* resolvedListExpr = new IR::ListExpression(listExpr->srcInfo, listExpr->type, {});
-    for (const auto* expr : listExpr->components) {
-        const IR::Expression* resolvedExpr = nullptr;
-        if (const auto* subStructExpr = expr->to<IR::ListExpression>()) {
+const IR::ListExpression *Model::evaluateListExpr(const IR::ListExpression *listExpr,
+                                                  ExpressionMap *resolvedExpressions) const {
+    auto *resolvedListExpr = new IR::ListExpression(listExpr->srcInfo, listExpr->type, {});
+    for (const auto *expr : listExpr->components) {
+        const IR::Expression *resolvedExpr = nullptr;
+        if (const auto *subStructExpr = expr->to<IR::ListExpression>()) {
             resolvedExpr = evaluateListExpr(subStructExpr, resolvedExpressions);
         } else {
             resolvedExpr = evaluate(expr, resolvedExpressions);
@@ -102,33 +102,33 @@ const IR::ListExpression* Model::evaluateListExpr(const IR::ListExpression* list
     return resolvedListExpr;
 }
 
-const Value* Model::evaluate(const IR::Expression* expr, ExpressionMap* resolvedExpressions) const {
+const Value *Model::evaluate(const IR::Expression *expr, ExpressionMap *resolvedExpressions) const {
     class SubstVisitor : public Transform {
-        const Model& self;
+        const Model &self;
 
      public:
-        const IR::Literal* preorder(IR::Member* member) override {
+        const IR::Literal *preorder(IR::Member *member) override {
             BUG_CHECK(self.count(member), "Variable not bound in model: %1%", member);
             prune();
             return self.at(StateVariable(member))->checkedTo<IR::Literal>();
         }
 
-        const IR::Literal* preorder(IR::TaintExpression* var) override {
+        const IR::Literal *preorder(IR::TaintExpression *var) override {
             return IR::getDefaultValue(var->type);
         }
 
-        const IR::Literal* preorder(IR::ConcolicVariable* var) override {
+        const IR::Literal *preorder(IR::ConcolicVariable *var) override {
             auto stateVar = StateVariable(var->concolicMember);
             BUG_CHECK(self.count(stateVar), "Variable not bound in model: %1%",
                       stateVar->toString());
             return self.at(stateVar)->checkedTo<IR::Literal>();
         }
 
-        explicit SubstVisitor(const Model& model) : self(model) {}
+        explicit SubstVisitor(const Model &model) : self(model) {}
     };
-    const auto* substituted = expr->apply(SubstVisitor(*this));
-    const auto* evaluated = P4::optimizeExpression(substituted);
-    const auto* literal = evaluated->checkedTo<IR::Literal>();
+    const auto *substituted = expr->apply(SubstVisitor(*this));
+    const auto *evaluated = P4::optimizeExpression(substituted);
+    const auto *literal = evaluated->checkedTo<IR::Literal>();
     // Add the variable to the resolvedExpressions list, if the list is not null.
     if (resolvedExpressions != nullptr) {
         (*resolvedExpressions)[expr] = literal;
@@ -136,17 +136,17 @@ const Value* Model::evaluate(const IR::Expression* expr, ExpressionMap* resolved
     return literal;
 }
 
-Model* Model::evaluate(const SymbolicMapType& inputMap, ExpressionMap* resolvedExpressions) const {
-    auto* result = new Model(*this);
-    for (const auto& inputTuple : inputMap) {
+Model *Model::evaluate(const SymbolicMapType &inputMap, ExpressionMap *resolvedExpressions) const {
+    auto *result = new Model(*this);
+    for (const auto &inputTuple : inputMap) {
         auto name = inputTuple.first;
-        const auto* expr = inputTuple.second;
+        const auto *expr = inputTuple.second;
         (*result)[name] = evaluate(expr, resolvedExpressions);
     }
     return result;
 }
 
-const IR::Expression* Model::get(const StateVariable& var, bool checked) const {
+const IR::Expression *Model::get(const StateVariable &var, bool checked) const {
     auto it = find(var);
     if (it != end()) {
         return it->second;

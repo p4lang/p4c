@@ -21,7 +21,7 @@ limitations under the License.
 #include "typeSubstitutionVisitor.h"
 
 namespace P4 {
-cstring TypeVariableSubstitution::compose(const IR::ITypeVar* var, const IR::Type* substitution) {
+cstring TypeVariableSubstitution::compose(const IR::ITypeVar *var, const IR::Type *substitution) {
     LOG3("Adding " << var << "->" << dbp(substitution) << "=" << substitution
                    << " to substitution");
     if (substitution->is<IR::Type_Dontcare>()) return "";
@@ -46,20 +46,20 @@ cstring TypeVariableSubstitution::compose(const IR::ITypeVar* var, const IR::Typ
 
     // Check to see whether we already have a binding for this variable
     if (containsKey(var)) {
-        const IR::Type* bound = lookup(var);
+        const IR::Type *bound = lookup(var);
         BUG("Two constraints on the same variable %1%: %2% and %3%", var->toString(),
             substitution->toString(), bound->toString());
     }
 
     // Replace var with substitution everywhere
-    TypeVariableSubstitution* tvs = new TypeVariableSubstitution();
+    TypeVariableSubstitution *tvs = new TypeVariableSubstitution();
     bool success = tvs->setBinding(var, substitution);
     if (!success) BUG("Cannot set binding");
 
     TypeVariableSubstitutionVisitor visitor(tvs);
-    for (auto& bound : binding) {
-        const IR::Type* type = bound.second;
-        const IR::Node* newType = type->apply(visitor);
+    for (auto &bound : binding) {
+        const IR::Type *type = bound.second;
+        const IR::Node *newType = type->apply(visitor);
         if (newType == nullptr) return "Could not replace '%1%' with '%2%'";
         if (newType == type) continue;
 
@@ -72,10 +72,10 @@ cstring TypeVariableSubstitution::compose(const IR::ITypeVar* var, const IR::Typ
     return "";
 }
 
-void TypeVariableSubstitution::simpleCompose(const TypeVariableSubstitution* other) {
+void TypeVariableSubstitution::simpleCompose(const TypeVariableSubstitution *other) {
     CHECK_NULL(other);
     for (auto v : other->binding) {
-        const IR::Type* subst = v.second;
+        const IR::Type *subst = v.second;
         auto it = binding.find(v.first);
         if (it != binding.end())
             BUG("Changing binding for %1% from %2% to %3%", v.first, it->second, subst);
@@ -84,9 +84,9 @@ void TypeVariableSubstitution::simpleCompose(const TypeVariableSubstitution* oth
     }
 }
 
-bool TypeVariableSubstitution::setBindings(const IR::Node* errorLocation,
-                                           const IR::TypeParameters* params,
-                                           const IR::Vector<IR::Type>* args) {
+bool TypeVariableSubstitution::setBindings(const IR::Node *errorLocation,
+                                           const IR::TypeParameters *params,
+                                           const IR::Vector<IR::Type> *args) {
     if (params == nullptr || args == nullptr) BUG("Nullptr argument to setBindings");
 
     if (params->parameters.size() != args->size()) {
@@ -111,7 +111,7 @@ bool TypeVariableSubstitution::setBindings(const IR::Node* errorLocation,
 }
 
 // to call from gdb
-void dump(P4::TypeVariableSubstitution& tvs) { std::cout << tvs << std::endl; }
-void dump(P4::TypeVariableSubstitution* tvs) { std::cout << *tvs << std::endl; }
+void dump(P4::TypeVariableSubstitution &tvs) { std::cout << tvs << std::endl; }
+void dump(P4::TypeVariableSubstitution *tvs) { std::cout << *tvs << std::endl; }
 
 }  // namespace P4

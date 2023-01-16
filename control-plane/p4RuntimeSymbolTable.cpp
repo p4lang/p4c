@@ -29,18 +29,18 @@ namespace P4 {
 
 namespace ControlPlaneAPI {
 
-bool isControllerHeader(const IR::Type_Header* type) {
+bool isControllerHeader(const IR::Type_Header *type) {
     return type->getAnnotation("controller_header") != nullptr;
 }
 
-bool isHidden(const IR::Node* node) { return node->getAnnotation("hidden") != nullptr; }
+bool isHidden(const IR::Node *node) { return node->getAnnotation("hidden") != nullptr; }
 
-boost::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated* node) {
-    const auto* idAnnotation = node->getAnnotation("id");
+boost::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated *node) {
+    const auto *idAnnotation = node->getAnnotation("id");
     if (idAnnotation == nullptr) {
         return boost::none;
     }
-    const auto* idConstant = idAnnotation->expr[0]->to<IR::Constant>();
+    const auto *idConstant = idAnnotation->expr[0]->to<IR::Constant>();
     CHECK_NULL(idConstant);
     if (!idConstant->fitsUint()) {
         ::error(ErrorType::ERR_INVALID, "%1%: @id should be an unsigned integer", node);
@@ -52,8 +52,8 @@ boost::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated* node) {
 /// @return the value of any P4 '@id' annotation @declaration may have, and
 /// ensure that the value is correct with respect to the P4Runtime
 /// specification. The name 'externalId' is in analogy with externalName().
-static boost::optional<p4rt_id_t> externalId(const P4RuntimeSymbolType& type,
-                                             const IR::IDeclaration* declaration) {
+static boost::optional<p4rt_id_t> externalId(const P4RuntimeSymbolType &type,
+                                             const IR::IDeclaration *declaration) {
     CHECK_NULL(declaration);
     if (!declaration->is<IR::IAnnotated>()) {
         return boost::none;  // Assign an id later; see below.
@@ -79,24 +79,24 @@ static boost::optional<p4rt_id_t> externalId(const P4RuntimeSymbolType& type,
     return id;
 }
 
-void collectControlSymbols(P4RuntimeSymbolTable& symbols, P4RuntimeArchHandlerIface* archHandler,
-                           const IR::ControlBlock* controlBlock, ReferenceMap* refMap,
-                           TypeMap* typeMap) {
+void collectControlSymbols(P4RuntimeSymbolTable &symbols, P4RuntimeArchHandlerIface *archHandler,
+                           const IR::ControlBlock *controlBlock, ReferenceMap *refMap,
+                           TypeMap *typeMap) {
     CHECK_NULL(controlBlock);
     CHECK_NULL(refMap);
     CHECK_NULL(typeMap);
 
-    const auto* control = controlBlock->container;
+    const auto *control = controlBlock->container;
     CHECK_NULL(control);
 
-    forAllMatching<IR::P4Action>(&control->controlLocals, [&](const IR::P4Action* action) {
+    forAllMatching<IR::P4Action>(&control->controlLocals, [&](const IR::P4Action *action) {
         // Collect the action itself.
         symbols.add(P4RuntimeSymbolType::ACTION(), action);
 
         // Collect any extern functions it may invoke.
         forAllMatching<IR::MethodCallExpression>(
-            action->body, [&](const IR::MethodCallExpression* call) {
-                auto* instance = P4::MethodInstance::resolve(call, refMap, typeMap);
+            action->body, [&](const IR::MethodCallExpression *call) {
+                auto *instance = P4::MethodInstance::resolve(call, refMap, typeMap);
                 if (instance->is<P4::ExternFunction>()) {
                     archHandler->collectExternFunction(&symbols,
                                                        instance->to<P4::ExternFunction>());
@@ -106,22 +106,22 @@ void collectControlSymbols(P4RuntimeSymbolTable& symbols, P4RuntimeArchHandlerIf
 
     // Collect any extern function invoked directly from the control.
     forAllMatching<IR::MethodCallExpression>(
-        control->body, [&](const IR::MethodCallExpression* call) {
-            auto* instance = P4::MethodInstance::resolve(call, refMap, typeMap);
+        control->body, [&](const IR::MethodCallExpression *call) {
+            auto *instance = P4::MethodInstance::resolve(call, refMap, typeMap);
             if (instance->is<P4::ExternFunction>()) {
                 archHandler->collectExternFunction(&symbols, instance->to<P4::ExternFunction>());
             }
         });
 }
 
-void collectExternSymbols(P4RuntimeSymbolTable& symbols, P4RuntimeArchHandlerIface* archHandler,
-                          const IR::ExternBlock* externBlock) {
+void collectExternSymbols(P4RuntimeSymbolTable &symbols, P4RuntimeArchHandlerIface *archHandler,
+                          const IR::ExternBlock *externBlock) {
     CHECK_NULL(externBlock);
     archHandler->collectExternInstance(&symbols, externBlock);
 }
 
-void collectTableSymbols(P4RuntimeSymbolTable& symbols, P4RuntimeArchHandlerIface* archHandler,
-                         const IR::TableBlock* tableBlock) {
+void collectTableSymbols(P4RuntimeSymbolTable &symbols, P4RuntimeArchHandlerIface *archHandler,
+                         const IR::TableBlock *tableBlock) {
     CHECK_NULL(tableBlock);
     auto name = archHandler->getControlPlaneName(tableBlock);
     auto id = externalId(P4RuntimeSymbolType::TABLE(), tableBlock->container);
@@ -129,25 +129,25 @@ void collectTableSymbols(P4RuntimeSymbolTable& symbols, P4RuntimeArchHandlerIfac
     archHandler->collectTableProperties(&symbols, tableBlock);
 }
 
-void collectParserSymbols(P4RuntimeSymbolTable& symbols, const IR::ParserBlock* parserBlock) {
+void collectParserSymbols(P4RuntimeSymbolTable &symbols, const IR::ParserBlock *parserBlock) {
     CHECK_NULL(parserBlock);
 
-    const auto* parser = parserBlock->container;
+    const auto *parser = parserBlock->container;
     CHECK_NULL(parser);
 
-    for (const auto* s : parser->parserLocals) {
-        if (const auto* inst = s->to<IR::P4ValueSet>()) {
+    for (const auto *s : parser->parserLocals) {
+        if (const auto *inst = s->to<IR::P4ValueSet>()) {
             symbols.add(P4RuntimeSymbolType::VALUE_SET(), inst);
         }
     }
 }
 
-P4::ControlPlaneAPI::P4RuntimeSymbolTable*
+P4::ControlPlaneAPI::P4RuntimeSymbolTable *
 P4::ControlPlaneAPI::P4RuntimeSymbolTable::generateSymbols(
-    const IR::P4Program* program, const IR::ToplevelBlock* evaluatedProgram, ReferenceMap* refMap,
-    TypeMap* typeMap, P4RuntimeArchHandlerIface* archHandler) {
-    return P4RuntimeSymbolTable::create([=](P4RuntimeSymbolTable& symbols) {
-        Helpers::forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
+    const IR::P4Program *program, const IR::ToplevelBlock *evaluatedProgram, ReferenceMap *refMap,
+    TypeMap *typeMap, P4RuntimeArchHandlerIface *archHandler) {
+    return P4RuntimeSymbolTable::create([=](P4RuntimeSymbolTable &symbols) {
+        Helpers::forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block *block) {
             if (block->is<IR::ControlBlock>()) {
                 collectControlSymbols(symbols, archHandler, block->to<IR::ControlBlock>(), refMap,
                                       typeMap);
@@ -159,7 +159,7 @@ P4::ControlPlaneAPI::P4RuntimeSymbolTable::generateSymbols(
                 collectParserSymbols(symbols, block->to<IR::ParserBlock>());
             }
         });
-        forAllMatching<IR::Type_Header>(program, [&](const IR::Type_Header* type) {
+        forAllMatching<IR::Type_Header>(program, [&](const IR::Type_Header *type) {
             if (isControllerHeader(type)) {
                 symbols.add(P4RuntimeSymbolType::CONTROLLER_HEADER(), type);
             }
@@ -169,14 +169,14 @@ P4::ControlPlaneAPI::P4RuntimeSymbolTable::generateSymbols(
 }
 
 void P4::ControlPlaneAPI::P4RuntimeSymbolTable::add(P4RuntimeSymbolType type,
-                                                    const IR::IDeclaration* declaration) {
+                                                    const IR::IDeclaration *declaration) {
     CHECK_NULL(declaration);
     add(type, declaration->controlPlaneName(), externalId(type, declaration));
 }
 
 void P4::ControlPlaneAPI::P4RuntimeSymbolTable::add(P4RuntimeSymbolType type, cstring name,
                                                     boost::optional<p4rt_id_t> id) {
-    auto& symbolTable = symbolTables[type];
+    auto &symbolTable = symbolTables[type];
     if (symbolTable.find(name) != symbolTable.end()) {
         return;  // This is a duplicate, but that's OK.
     }
@@ -186,7 +186,7 @@ void P4::ControlPlaneAPI::P4RuntimeSymbolTable::add(P4RuntimeSymbolType type, cs
 }
 
 P4::ControlPlaneAPI::p4rt_id_t P4::ControlPlaneAPI::P4RuntimeSymbolTable::getId(
-    P4RuntimeSymbolType type, const IR::IDeclaration* declaration) const {
+    P4RuntimeSymbolType type, const IR::IDeclaration *declaration) const {
     CHECK_NULL(declaration);
     return getId(type, declaration->controlPlaneName());
 }
@@ -231,7 +231,7 @@ void P4::ControlPlaneAPI::P4RuntimeSymbolTable::computeIdsForSymbols(P4RuntimeSy
     //
     //   [resource type] [name hash value]
     //    \____8_b____/   \_____24_b____/
-    auto& symbolTable = symbolTables.at(type);
+    auto &symbolTable = symbolTables.at(type);
     auto resourceType = static_cast<p4rt_id_t>(type);
 
     // Extract the names of every resource in the collection that does not
@@ -246,7 +246,7 @@ void P4::ControlPlaneAPI::P4RuntimeSymbolTable::computeIdsForSymbols(P4RuntimeSy
         }
     }
 
-    for (const auto& mapping : nameToIteratorMap) {
+    for (const auto &mapping : nameToIteratorMap) {
         const cstring name = mapping.first;
         const auto iterator = mapping.second;
         const uint32_t nameId = jenkinsOneAtATimeHash(name.c_str(), name.size());
@@ -270,7 +270,7 @@ void P4::ControlPlaneAPI::P4RuntimeSymbolTable::computeIdsForSymbols(P4RuntimeSy
     }
 }
 
-uint32_t P4::ControlPlaneAPI::P4RuntimeSymbolTable::jenkinsOneAtATimeHash(const char* key,
+uint32_t P4::ControlPlaneAPI::P4RuntimeSymbolTable::jenkinsOneAtATimeHash(const char *key,
                                                                           size_t length) {
     size_t i = 0;
     uint32_t hash = 0;
@@ -285,10 +285,10 @@ uint32_t P4::ControlPlaneAPI::P4RuntimeSymbolTable::jenkinsOneAtATimeHash(const 
     return hash;
 }
 
-cstring P4::ControlPlaneAPI::P4SymbolSuffixSet::shortestUniqueSuffix(const cstring& symbol) const {
+cstring P4::ControlPlaneAPI::P4SymbolSuffixSet::shortestUniqueSuffix(const cstring &symbol) const {
     BUG_CHECK(!symbol.isNullOrEmpty(), "Null or empty symbol name?");
     std::vector<cstring> components;
-    const char* cSymbol = symbol.c_str();
+    const char *cSymbol = symbol.c_str();
     boost::split(components, cSymbol, [](char c) { return c == '.'; });
 
     // Determine how many suffix components we need to uniquely identify
@@ -296,8 +296,8 @@ cstring P4::ControlPlaneAPI::P4SymbolSuffixSet::shortestUniqueSuffix(const cstri
     // the suffixes "a.c" and "b.c" are enough to identify the symbols
     // uniquely, so in both cases we only need two components.
     unsigned neededComponents = 0;
-    auto* node = suffixesRoot;
-    for (auto& component : boost::adaptors::reverse(components)) {
+    auto *node = suffixesRoot;
+    for (auto &component : boost::adaptors::reverse(components)) {
         if (node->edges.find(component) == node->edges.end()) {
             BUG("Symbol is not in suffix set: %1%", symbol);
         }
@@ -318,7 +318,7 @@ cstring P4::ControlPlaneAPI::P4SymbolSuffixSet::shortestUniqueSuffix(const cstri
     BUG_CHECK(neededComponents <= components.size(), "Too many components?");
     std::string uniqueSuffix;
     std::for_each(components.end() - neededComponents, components.end(),
-                  [&](const cstring& component) {
+                  [&](const cstring &component) {
                       if (!uniqueSuffix.empty()) {
                           uniqueSuffix.append(".");
                       }
@@ -328,7 +328,7 @@ cstring P4::ControlPlaneAPI::P4SymbolSuffixSet::shortestUniqueSuffix(const cstri
     return uniqueSuffix;
 }
 
-void P4::ControlPlaneAPI::P4SymbolSuffixSet::addSymbol(const cstring& symbol) {
+void P4::ControlPlaneAPI::P4SymbolSuffixSet::addSymbol(const cstring &symbol) {
     BUG_CHECK(!symbol.isNullOrEmpty(), "Null or empty symbol name?");
 
     // Check if the symbol is already in the set. This is necessary because
@@ -349,7 +349,7 @@ void P4::ControlPlaneAPI::P4SymbolSuffixSet::addSymbol(const cstring& symbol) {
 
     // Split the symbol name into dot-separated components.
     std::vector<cstring> components;
-    const char* cSymbol = symbol.c_str();
+    const char *cSymbol = symbol.c_str();
     boost::split(components, cSymbol, [](char c) { return c == '.'; });
 
     // Insert the components into our tree of suffixes. We work
@@ -360,8 +360,8 @@ void P4::ControlPlaneAPI::P4SymbolSuffixSet::addSymbol(const cstring& symbol) {
     //   (root) -> "c" -> (3) -> "b" -> (2) -> "a" -> (1)
     //                       \-> "d" -> (1) -> "a" -> (1)
     // (Nodes are in parentheses, and edge labels are in quotes.)
-    auto* node = suffixesRoot;
-    for (auto& component : boost::adaptors::reverse(components)) {
+    auto *node = suffixesRoot;
+    for (auto &component : boost::adaptors::reverse(components)) {
         if (node->edges.find(component) == node->edges.end()) {
             node->edges[component] = new SuffixNode;
         }

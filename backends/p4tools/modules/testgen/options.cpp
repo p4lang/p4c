@@ -11,12 +11,12 @@
 
 namespace P4Tools {
 
-TestgenOptions& TestgenOptions::get() {
+TestgenOptions &TestgenOptions::get() {
     static TestgenOptions INSTANCE;
     return INSTANCE;
 }
 
-const char* TestgenOptions::getIncludePath() {
+const char *TestgenOptions::getIncludePath() {
     P4C_UNIMPLEMENTED("getIncludePath not implemented for P4Testgen.");
 }
 
@@ -29,7 +29,7 @@ TestgenOptions::TestgenOptions()
     : AbstractP4cToolOptions("Generate packet tests for a P4 program.") {
     registerOption(
         "--strict", nullptr,
-        [this](const char*) {
+        [this](const char *) {
             strict = true;
             return true;
         },
@@ -37,7 +37,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--max-tests", "maxTests",
-        [this](const char* arg) {
+        [this](const char *arg) {
             try {
                 // Unfortunately, we can not use std::stoul because negative inputs are okay
                 // according to the C++ standard.
@@ -45,7 +45,7 @@ TestgenOptions::TestgenOptions()
                 if (maxTests < 0) {
                     throw std::invalid_argument("Invalid input.");
                 }
-            } catch (std::invalid_argument&) {
+            } catch (std::invalid_argument &) {
                 ::error("Invalid input value %1% for --max-tests. Expected positive integer.", arg);
                 return false;
             }
@@ -56,7 +56,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--stop-metric", "stopMetric",
-        [this](const char* arg) {
+        [this](const char *arg) {
             stopMetric = cstring(arg).toUpper();
             if (SUPPORTED_STOP_METRICS.count(stopMetric) == 0) {
                 ::error(
@@ -72,7 +72,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--packet-size-range", "packetSizeRange",
-        [this](const char* arg) {
+        [this](const char *arg) {
             auto rangeStr = std::string(arg);
             size_t packetLenStr = rangeStr.find_first_of(':');
             try {
@@ -91,7 +91,7 @@ TestgenOptions::TestgenOptions()
                         "least the size of the minimum packet size.",
                         minPktSize, maxPktSize);
                 }
-            } catch (std::invalid_argument&) {
+            } catch (std::invalid_argument &) {
                 ::error(
                     "Invalid packet size range %1%. Expected format is [min]:[max], where [min] "
                     "and [max] are integers.",
@@ -105,7 +105,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--out-dir", "outputDir",
-        [this](const char* arg) {
+        [this](const char *arg) {
             outputDir = arg;
             return true;
         },
@@ -114,7 +114,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--test-backend", "testBackend",
-        [this](const char* arg) {
+        [this](const char *arg) {
             testBackend = arg;
             testBackend = testBackend.toUpper();
             return true;
@@ -124,7 +124,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--input-branches", "selectedBranches",
-        [this](const char* arg) {
+        [this](const char *arg) {
             selectedBranches = arg;
             // These options are mutually exclusive.
             if (trackBranches) {
@@ -139,7 +139,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--track-branches", nullptr,
-        [this](const char*) {
+        [this](const char *) {
             trackBranches = true;
             // These options are mutually exclusive.
             if (!selectedBranches.empty()) {
@@ -155,7 +155,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--with-output-packet", nullptr,
-        [this](const char*) {
+        [this](const char *) {
             withOutputPacket = true;
             if (!selectedBranches.empty()) {
                 std::cerr << "--input-branches cannot guarantee --with-output-packet."
@@ -169,7 +169,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--exploration-strategy", "explorationStrategy",
-        [this](const char* arg) {
+        [this](const char *arg) {
             explorationStrategy = cstring(arg).toUpper();
             if (SUPPORTED_EXPLORATION_STRATEGIES.count(explorationStrategy) == 0) {
                 ::error(
@@ -188,7 +188,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--pop-level", "popLevel",
-        [this](const char* arg) {
+        [this](const char *arg) {
             int64_t popLevelTmp = 0;
             try {
                 // Unfortunately, we can not use std::stoul because negative inputs are okay
@@ -197,7 +197,7 @@ TestgenOptions::TestgenOptions()
                 if (popLevelTmp <= 0) {
                     throw std::invalid_argument("Invalid input.");
                 }
-            } catch (std::invalid_argument&) {
+            } catch (std::invalid_argument &) {
                 ::error(
                     "Invalid input value %1% for --pop-level. Expected positive, non-zero "
                     "integer.",
@@ -212,7 +212,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--linear-enumeration", "linearEnumeration",
-        [this](const char* arg) {
+        [this](const char *arg) {
             int64_t linearEnumerationTmp = 0;
             try {
                 // Unfortunately, we can not use std::stoul because negative inputs are okay
@@ -221,7 +221,7 @@ TestgenOptions::TestgenOptions()
                 if (linearEnumerationTmp <= 1) {
                     throw std::invalid_argument("Invalid input.");
                 }
-            } catch (std::invalid_argument&) {
+            } catch (std::invalid_argument &) {
                 ::error(
                     "Invalid input value %1% for --linear-enumeration. Expected an integer greater "
                     "than 1.",
@@ -235,7 +235,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--saddle-point", "saddlePoint",
-        [this](const char* arg) {
+        [this](const char *arg) {
             int64_t saddlePointTmp = 0;
             try {
                 // Unfortunately, we can not use std::stoul because negative inputs are okay
@@ -244,7 +244,7 @@ TestgenOptions::TestgenOptions()
                 if (saddlePointTmp <= 1) {
                     throw std::invalid_argument("Invalid input.");
                 }
-            } catch (std::invalid_argument&) {
+            } catch (std::invalid_argument &) {
                 ::error(
                     "Invalid input value %1% for --saddle-point. Expected an integer greater than "
                     "1.",
@@ -258,7 +258,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--print-traces", nullptr,
-        [](const char*) {
+        [](const char *) {
             P4Testgen::enableTraceLogging();
             return true;
         },
@@ -266,7 +266,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--print-steps", nullptr,
-        [](const char*) {
+        [](const char *) {
             P4Testgen::enableStepLogging();
             return true;
         },
@@ -275,7 +275,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--print-coverage", nullptr,
-        [](const char*) {
+        [](const char *) {
             P4Testgen::enableCoverageLogging();
             return true;
         },
@@ -284,7 +284,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--print-performance-report", nullptr,
-        [](const char*) {
+        [](const char *) {
             P4Testgen::enablePerformanceLogging();
             return true;
         },
@@ -292,7 +292,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--dcg", "DCG",
-        [this](const char*) {
+        [this](const char *) {
             dcg = true;
             return true;
         },
@@ -301,7 +301,7 @@ TestgenOptions::TestgenOptions()
 
     registerOption(
         "--pattern", "pattern",
-        [this](const char* arg) {
+        [this](const char *arg) {
             pattern = arg;
             return true;
         },

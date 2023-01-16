@@ -38,8 +38,8 @@ limitations under the License.
 #include "lib/source_file.h"
 
 #define SINGLETON_TYPE(NAME)                                               \
-    const IR::Type_##NAME* IR::Type_##NAME::get() {                        \
-        static const Type_##NAME* singleton;                               \
+    const IR::Type_##NAME *IR::Type_##NAME::get() {                        \
+        static const Type_##NAME *singleton;                               \
         if (!singleton) singleton = (new Type_##NAME(Util::SourceInfo())); \
         return singleton;                                                  \
     }
@@ -124,7 +124,7 @@ static const std::map<cstring, primitive_info_t> prim_info = {
 
 void IR::Primitive::typecheck() const {
     if (prim_info.count(name)) {
-        auto& info = prim_info.at(name);
+        auto &info = prim_info.at(name);
         if (operands.size() < info.min_operands)
             error(ErrorType::ERR_INSUFFICIENT, "%s: not enough operands for primitive %s", srcInfo,
                   name);
@@ -151,14 +151,14 @@ int IR::Stateful::index_width() const {
         return instance_count > 1 ? ceil_log2(instance_count) : 32;
 }
 
-static int inferIndexWidth(const IR::Expression* obj) {
-        if (auto* glob = obj->to<IR::GlobalRef>())
-            if (auto* sful = glob->obj->to<IR::Stateful>()) return sful->index_width();
+static int inferIndexWidth(const IR::Expression *obj) {
+        if (auto *glob = obj->to<IR::GlobalRef>())
+            if (auto *sful = glob->obj->to<IR::Stateful>()) return sful->index_width();
         return 32;
 }
 
-const IR::Type* IR::Primitive::inferOperandType(int operand) const {
-        const IR::Type* rv = IR::Type::Unknown::get();
+const IR::Type *IR::Primitive::inferOperandType(int operand) const {
+        const IR::Type *rv = IR::Type::Unknown::get();
         unsigned infer = 0;
 
         if (prim_info.count(name)) infer = prim_info.at(name).type_match_operands;
@@ -204,7 +204,7 @@ const IR::Type* IR::Primitive::inferOperandType(int operand) const {
 
 IR::V1Program::V1Program() {
         // This is used to typecheck P4-14 programs
-        auto* standard_metadata_t = new IR::Type_Struct(
+        auto *standard_metadata_t = new IR::Type_Struct(
             "standard_metadata_t",
             {new IR::StructField("ingress_port", IR::Type::Bits::get(9)),
              new IR::StructField("packet_length", IR::Type::Bits::get(32)),

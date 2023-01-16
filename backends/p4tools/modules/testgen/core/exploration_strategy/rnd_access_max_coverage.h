@@ -31,10 +31,10 @@ class RandomAccessMaxCoverage : public IncrementalMaxCoverageStack {
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
     /// given callback is invoked. If the callback returns true, then the executor terminates.
     /// Otherwise, execution of the P4 program continues on a different random path.
-    void run(const Callback& callBack) override;
+    void run(const Callback &callBack) override;
 
     /// Constructor for this strategy, considering inheritance.
-    RandomAccessMaxCoverage(AbstractSolver& solver, const ProgramInfo& programInfo,
+    RandomAccessMaxCoverage(AbstractSolver &solver, const ProgramInfo &programInfo,
                             uint64_t saddlePoint);
 
  protected:
@@ -75,11 +75,11 @@ class RandomAccessMaxCoverage : public IncrementalMaxCoverageStack {
     /// stack of unexplored branches and the solver's state will be unchanged.
     ///
     /// @returns next execution state to be examined on success, nullptr on failure.
-    ExecutionState* chooseBranch(std::vector<Branch>& branches, bool guaranteeViability);
+    ExecutionState *chooseBranch(std::vector<Branch> &branches, bool guaranteeViability);
 
     /// Invoked in chooseBranch to sort the branches vector according to non-visited
     /// states. It stores and ranks the branches from unexploredBranches.
-    void sortBranchesByCoverage(std::vector<Branch>& branches);
+    void sortBranchesByCoverage(std::vector<Branch> &branches);
 
     // Every time we take a random branch, we have to update the map according to the
     // new rankings of non-visited statements.

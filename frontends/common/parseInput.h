@@ -31,7 +31,7 @@ class P4Program;
 namespace P4 {
 
 template <typename Input, typename C = P4V1::Converter>
-static const IR::P4Program* parseV1Program(Input& stream, const char* sourceFile,
+static const IR::P4Program *parseV1Program(Input &stream, const char *sourceFile,
                                            unsigned sourceLine,
                                            boost::optional<DebugHook> debugHook = boost::none) {
     // We load the model before parsing the input file, so that the SourceInfo
@@ -41,7 +41,7 @@ static const IR::P4Program* parseV1Program(Input& stream, const char* sourceFile
     converter.loadModel();
 
     // Parse.
-    const IR::Node* v1 = V1::V1ParserDriver::parse(stream, sourceFile, sourceLine);
+    const IR::Node *v1 = V1::V1ParserDriver::parse(stream, sourceFile, sourceLine);
     if (::errorCount() > 0 || v1 == nullptr) return nullptr;
 
     // Convert to P4-16.
@@ -61,11 +61,11 @@ static const IR::P4Program* parseV1Program(Input& stream, const char* sourceFile
  * on failure. If failure occurs, an error will also be reported.
  */
 template <typename C = P4V1::Converter>
-const IR::P4Program* parseP4File(ParserOptions& options) {
+const IR::P4Program *parseP4File(ParserOptions &options) {
     BUG_CHECK(&options == &P4CContext::get().options(),
               "Parsing using options that don't match the current "
               "compiler context");
-    FILE* in = nullptr;
+    FILE *in = nullptr;
     if (options.doNotPreprocess) {
         in = fopen(options.file, "r");
         if (in == nullptr) {
@@ -78,7 +78,7 @@ const IR::P4Program* parseP4File(ParserOptions& options) {
     }
 
     auto result = options.isv1()
-                      ? parseV1Program<FILE*, C>(in, options.file, 1, options.getDebugHook())
+                      ? parseV1Program<FILE *, C>(in, options.file, 1, options.getDebugHook())
                       : P4ParserDriver::parse(in, options.file);
     options.closeInput(in);
 
@@ -101,10 +101,10 @@ const IR::P4Program* parseP4File(ParserOptions& options) {
  * @return a P4-16 IR tree representing the contents of the given string, or
  * null on failure. If failure occurs, an error will also be reported.
  */
-const IR::P4Program* parseP4String(const char* sourceFile, unsigned sourceLine,
-                                   const std::string& input,
+const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
+                                   const std::string &input,
                                    CompilerOptions::FrontendVersion version);
-const IR::P4Program* parseP4String(const std::string& input,
+const IR::P4Program *parseP4String(const std::string &input,
                                    CompilerOptions::FrontendVersion version);
 
 }  // namespace P4

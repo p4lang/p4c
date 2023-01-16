@@ -16,7 +16,7 @@ class EBPFConcolic : public Concolic {
 
  public:
     /// @returns the concolic  functions that are implemented for this particular target.
-    static const ConcolicMethodImpls::ImplList* getEBPFConcolicMethodImpls();
+    static const ConcolicMethodImpls::ImplList *getEBPFConcolicMethodImpls();
 };
 
 }  // namespace EBPF

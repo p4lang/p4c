@@ -33,7 +33,7 @@ enum class StandardExceptions {
 };
 }  // namespace P4
 
-inline std::ostream& operator<<(std::ostream& out, P4::StandardExceptions e) {
+inline std::ostream &operator<<(std::ostream &out, P4::StandardExceptions e) {
     switch (e) {
         case P4::StandardExceptions::NoError:
             out << "NoError";

@@ -46,7 +46,7 @@ boost::optional<std::string> stringReprConstant(big_int value, int width) {
     // auto bytes = ROUNDUP(mpz_sizeinbase(value.get_mpz_t(), 2), 8);
     auto bytes = ROUNDUP(width, 8);
     std::vector<char> data(bytes);
-    for (auto& d : data) {
+    for (auto &d : data) {
         big_int v = (value >> (--bytes * 8)) & 0xff;
         d = static_cast<uint8_t>(v);
     }
@@ -55,13 +55,13 @@ boost::optional<std::string> stringReprConstant(big_int value, int width) {
 
 /// Convert a Constant to the P4Runtime bytes representation by calling
 /// stringReprConstant.
-boost::optional<std::string> stringRepr(const IR::Constant* constant, int width) {
+boost::optional<std::string> stringRepr(const IR::Constant *constant, int width) {
     return stringReprConstant(constant->value, width);
 }
 
 /// Convert a BoolLiteral to the P4Runtime bytes representation by calling
 /// stringReprConstant.
-boost::optional<std::string> stringRepr(const IR::BoolLiteral* constant, int width) {
+boost::optional<std::string> stringRepr(const IR::BoolLiteral *constant, int width) {
     auto v = static_cast<big_int>(constant->value ? 1 : 0);
     return stringReprConstant(v, width);
 }

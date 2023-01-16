@@ -24,14 +24,14 @@ namespace P4Testgen {
 /// Implements small-step operational semantics for tables.
 class TableStepper {
  protected:
-    ExprStepper* stepper;
+    ExprStepper *stepper;
 
-    const IR::P4Table* table;
+    const IR::P4Table *table;
 
     /// KeyProperties define properties of table keys that are useful for execution.
     struct KeyProperties {
         /// The original key element
-        IR::KeyElement const* key;
+        IR::KeyElement const *key;
 
         /// The control plane name of the key.
         cstring name;
@@ -46,7 +46,7 @@ class TableStepper {
         /// For matches such as LPM and ternary, we can still generate a match.
         bool isTainted;
 
-        explicit KeyProperties(IR::KeyElement const* key, cstring name, size_t index,
+        explicit KeyProperties(IR::KeyElement const *key, cstring name, size_t index,
                                cstring matchType, bool isTainted)
             : key(key), name(name), index(index), matchType(matchType), isTainted(isTainted) {}
     };
@@ -74,31 +74,31 @@ class TableStepper {
      * Table Variable Getter functions
      * ========================================================================================= */
     /// @returns the boolean-typed state variable that tracks whether given table is reached.
-    static const StateVariable& getTableReachedVar(const IR::P4Table* table);
+    static const StateVariable &getTableReachedVar(const IR::P4Table *table);
 
     /// @returns the state variable that tracks the value read by the key at the given index in the
     /// given the table.
-    static const StateVariable& getTableKeyReadVar(const IR::P4Table* table, int keyIdx);
+    static const StateVariable &getTableKeyReadVar(const IR::P4Table *table, int keyIdx);
 
     /// @returns the boolean-typed state variable that tracks whether a table has resulted in a hit.
     /// The value of this variable is false if the table misses or is not reached.
-    static const StateVariable& getTableHitVar(const IR::P4Table* table);
+    static const StateVariable &getTableHitVar(const IR::P4Table *table);
 
     /// @returns the state variable that tracks the index of the action taken by the given table.
     ///
     /// This variable is initially set to the number of actions in the table, indicating that no
     /// action has been selected. It is set by setTableAction and read by getTableAction.
-    static const StateVariable& getTableActionVar(const IR::P4Table* table);
+    static const StateVariable &getTableActionVar(const IR::P4Table *table);
 
  protected:
     /* =========================================================================================
      * Table Utility functions
      * ========================================================================================= */
     /// @returns the execution state of the friend class ExpressionStepper.
-    const ExecutionState* getExecutionState();
+    const ExecutionState *getExecutionState();
 
     /// @returns the program info of the friend class ExpressionStepper.
-    const ProgramInfo* getProgramInfo();
+    const ProgramInfo *getProgramInfo();
 
     /// @returns the result pointer of the friend class ExpressionStepper.
     ExprStepper::Result getResult();
@@ -111,7 +111,7 @@ class TableStepper {
     /// https://github.com/p4lang/behavioral-model/blob/main/docs/simple_switch.md#longest-prefix-match-tables
     /// @param lpmIndex indicates the index of the lpm entry in the list of entries.
     /// It is used for comparison.
-    static bool compareLPMEntries(const IR::Entry* leftIn, const IR::Entry* rightIn,
+    static bool compareLPMEntries(const IR::Entry *leftIn, const IR::Entry *rightIn,
                                   size_t lpmIndex);
 
     /// @returns whether the table is immutable, meaning control plane entries can not be added.
@@ -119,14 +119,14 @@ class TableStepper {
 
     /// Add the default action path to the expression stepper. If only hits if @param
     /// tableMissCondition is true.
-    void addDefaultAction(boost::optional<const IR::Expression*> tableMissCondition);
+    void addDefaultAction(boost::optional<const IR::Expression *> tableMissCondition);
 
     /// Helper function that collects the list of actions contained in the table.
-    std::vector<const IR::ActionListElement*> buildTableActionList();
+    std::vector<const IR::ActionListElement *> buildTableActionList();
 
     /// Sets the action taken by the given table. The arguments in the given MethodCallExpression
     /// are assumed to be symbolic values.
-    void setTableAction(ExecutionState* nextState, const IR::MethodCallExpression* actionCall);
+    void setTableAction(ExecutionState *nextState, const IR::MethodCallExpression *actionCall);
 
     /// A helper function to iteratively resolve table keys into symbolic values.
     /// This function returns false, if no key needs to be resolved.
@@ -138,21 +138,21 @@ class TableStepper {
     /// match or does not match at all. The table stepper first checks these custom match types. If
     /// these do not match it steps through the default implementation. If it does not match either,
     /// a P4C_UNIMPLEMENTED is thrown.
-    virtual const IR::Expression* computeTargetMatchType(
-        ExecutionState* nextState, const KeyProperties& keyProperties,
-        std::map<cstring, const FieldMatch>* matches, const IR::Expression* hitCondition);
+    virtual const IR::Expression *computeTargetMatchType(
+        ExecutionState *nextState, const KeyProperties &keyProperties,
+        std::map<cstring, const FieldMatch> *matches, const IR::Expression *hitCondition);
 
     /// A helper function that computes whether a control-plane/table-key hits or not. This does not
     /// handle constant entries, it is specialized for control plane entries.
     /// The function also tracks the list of field matches created to achieve a  hit. We later use
     /// this to insert table entries using the STF/PTF framework.
-    const IR::Expression* computeHit(ExecutionState* nextState,
-                                     std::map<cstring, const FieldMatch>* matches);
+    const IR::Expression *computeHit(ExecutionState *nextState,
+                                     std::map<cstring, const FieldMatch> *matches);
 
     /// Collects properties that may be set per table. Target back end may have different semantics
     /// for table execution that need to be collect before evaluation the table.
     virtual void checkTargetProperties(
-        const std::vector<const IR::ActionListElement*>& tableActionList);
+        const std::vector<const IR::ActionListElement *> &tableActionList);
 
     /* =========================================================================================
      * Table Evaluation functions
@@ -170,13 +170,13 @@ class TableStepper {
     /// @returns tableMissCondition reference to the current constraints of the miss condition.
     /// Any constant entry we hit implies that the table is hit, and the default action is not
     /// executed.
-    const IR::Expression* evalTableConstEntries();
+    const IR::Expression *evalTableConstEntries();
 
     /// This helper function evaluates potential insertion from the control plane. We use zombie
     /// variables to mimic an operator inserting entries. We only cover ONE entry per table for
     /// now.
     /// @param table the table we invoke.
-    void evalTableControlEntries(const std::vector<const IR::ActionListElement*>& tableActionList);
+    void evalTableControlEntries(const std::vector<const IR::ActionListElement *> &tableActionList);
 
     /// This is a special function that handles the case where the key of a table is tainted. This
     /// means that the entire execution of the table is tainted. We can dramatically simplify
@@ -187,9 +187,9 @@ class TableStepper {
 
     /// This function allows target back ends to implement their own interpretation of table
     /// execution. How a table is evaluated is target-specific.
-    virtual void evalTargetTable(const std::vector<const IR::ActionListElement*>& tableActionList);
+    virtual void evalTargetTable(const std::vector<const IR::ActionListElement *> &tableActionList);
 
-    void setTableDefaultEntries(const std::vector<const IR::ActionListElement*>& tableActionList);
+    void setTableDefaultEntries(const std::vector<const IR::ActionListElement *> &tableActionList);
 
  public:
     /// Table implementations in P4 are rather flexible. Eval is a delegation function that chooses
@@ -199,7 +199,7 @@ class TableStepper {
     /// such as annotations, action profiles/selectors that may alter semantics, too.
     bool eval();
 
-    explicit TableStepper(ExprStepper* stepper, const IR::P4Table* table);
+    explicit TableStepper(ExprStepper *stepper, const IR::P4Table *table);
 
     virtual ~TableStepper() = default;
 };

@@ -21,7 +21,7 @@ limitations under the License.
 namespace DPDK {
 
 // make sure new decls and fields name are unique
-void DirectionToRegRead::uniqueNames(IR::DpdkAsmProgram* p) {
+void DirectionToRegRead::uniqueNames(IR::DpdkAsmProgram *p) {
     // "direction" name is used in dpdk for initialzing direction port mask
     // make sure no such decls exist with that name
     registerInstanceName = "direction";
@@ -34,7 +34,7 @@ void DirectionToRegRead::uniqueNames(IR::DpdkAsmProgram* p) {
                 registerInstanceName);
 }
 
-const IR::Node* DirectionToRegRead::preorder(IR::DpdkAsmProgram* p) {
+const IR::Node *DirectionToRegRead::preorder(IR::DpdkAsmProgram *p) {
     bool is_direction_used = false;
     auto IsDirUsed = new IsDirectionMetadataUsed(is_direction_used);
     IsDirUsed->setCalledBy(this);
@@ -51,7 +51,7 @@ const IR::Node* DirectionToRegRead::preorder(IR::DpdkAsmProgram* p) {
 }
 
 // create and add register declaration instance to program
-IR::DpdkExternDeclaration* DirectionToRegRead::addRegDeclInstance(cstring instanceName) {
+IR::DpdkExternDeclaration *DirectionToRegRead::addRegDeclInstance(cstring instanceName) {
     auto typepath = new IR::Path("Register");
     auto type = new IR::Type_Name(typepath);
     auto typeargs = new IR::Vector<IR::Type>({IR::Type::Bits::get(64), IR::Type::Bits::get(32)});
@@ -67,7 +67,7 @@ IR::DpdkExternDeclaration* DirectionToRegRead::addRegDeclInstance(cstring instan
 // replace all direction uses with m.pna_main_input_metadata_direction
 // it's initilization will be done like istd.direction = direction.read(istd.input_port)
 // at start of the pipeline
-const IR::Node* DirectionToRegRead::preorder(IR::Member* m) {
+const IR::Node *DirectionToRegRead::preorder(IR::Member *m) {
     if (isDirection(m))
         return new IR::Member(new IR::PathExpression(IR::ID("m")),
                               IR::ID(dirToDirMapping[m->member.name]));
@@ -94,20 +94,20 @@ IR::IndexedVector<IR::DpdkAsmStatement> DirectionToRegRead::addRegReadStmtForDir
 
 // check member expression using metadata pass field
 // "recircid" instruction takes the pass metadata type as argument to fetch the pass_id.
-bool PrependPassRecircId::isPass(const IR::Member* m) {
+bool PrependPassRecircId::isPass(const IR::Member *m) {
     if (m == nullptr) return false;
     return m->member.name == "pna_main_input_metadata_pass" ||
            m->member.name == "pna_pre_input_metadata_pass" ||
            m->member.name == "pna_main_parser_input_metadata_pass";
 }
 
-const IR::Node* PrependPassRecircId::postorder(IR::DpdkListStatement* l) {
+const IR::Node *PrependPassRecircId::postorder(IR::DpdkListStatement *l) {
     l->statements = prependPassWithRecircid(l->statements);
     newStmts.clear();
     return l;
 }
 
-const IR::Node* PrependPassRecircId::postorder(IR::DpdkAction* a) {
+const IR::Node *PrependPassRecircId::postorder(IR::DpdkAction *a) {
     a->statements = prependPassWithRecircid(a->statements);
     newStmts.clear();
     return a;

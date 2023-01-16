@@ -24,10 +24,10 @@ class LinearEnumeration : public ExplorationStrategy {
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
     /// given callback is invoked. If the callback returns true, then the executor terminates.
     /// Otherwise, execution of the P4 program continues on a different random path.
-    void run(const Callback& callBack) override;
+    void run(const Callback &callBack) override;
 
     /// Constructor for this strategy, considering inheritance.
-    LinearEnumeration(AbstractSolver& solver, const ProgramInfo& programInfo, uint64_t maxBound);
+    LinearEnumeration(AbstractSolver &solver, const ProgramInfo &programInfo, uint64_t maxBound);
 
  protected:
     /// The max size for the exploredBranches vector.
@@ -42,7 +42,7 @@ class LinearEnumeration : public ExplorationStrategy {
     ///
     /// It will recursively map all terminal states, or at least fill the exploredBranches
     /// vector until it reaches the maxBoud.
-    void mapBranch(Branch& branch);
+    void mapBranch(Branch &branch);
 };
 
 }  // namespace P4Testgen

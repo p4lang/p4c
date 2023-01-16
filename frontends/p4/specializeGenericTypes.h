@@ -27,20 +27,20 @@ struct TypeSpecialization : public IHasDbPrint {
     /// Name to use for specialized type.
     cstring name;
     /// Type that is being specialized
-    const IR::Type_Specialized* specialized;
+    const IR::Type_Specialized *specialized;
     /// Declaration of specialized type, which will be replaced
-    const IR::Type_Declaration* declaration;
+    const IR::Type_Declaration *declaration;
     /// New synthesized type (created later)
-    const IR::Type_StructLike* replacement;
+    const IR::Type_StructLike *replacement;
     /// Insertion point
-    const IR::Node* insertion;
+    const IR::Node *insertion;
     /// Save here the canonical types of the type arguments of 'specialized'.
     /// The typeMap will be cleared, so we cannot look them up later.
-    const IR::Vector<IR::Type>* argumentTypes;
+    const IR::Vector<IR::Type> *argumentTypes;
 
-    TypeSpecialization(cstring name, const IR::Type_Specialized* specialized,
-                       const IR::Type_Declaration* decl, const IR::Node* insertion,
-                       const IR::Vector<IR::Type>* argTypes)
+    TypeSpecialization(cstring name, const IR::Type_Specialized *specialized,
+                       const IR::Type_Declaration *decl, const IR::Node *insertion,
+                       const IR::Vector<IR::Type> *argTypes)
         : name(name),
           specialized(specialized),
           declaration(decl),
@@ -52,32 +52,32 @@ struct TypeSpecialization : public IHasDbPrint {
         CHECK_NULL(insertion);
         CHECK_NULL(argTypes);
     }
-    void dbprint(std::ostream& out) const override {
+    void dbprint(std::ostream &out) const override {
         out << "Specializing:" << dbp(specialized) << " from " << dbp(declaration) << " as "
             << dbp(replacement) << " inserted at " << dbp(insertion);
     }
 };
 
 struct TypeSpecializationMap : public IHasDbPrint {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
     // The map can have multiple keys pointing to the same value
-    ordered_map<const IR::Type_Specialized*, TypeSpecialization*> map;
+    ordered_map<const IR::Type_Specialized *, TypeSpecialization *> map;
     // Keep track of the values in the above map which are already
     // inserted in the program.
-    std::set<TypeSpecialization*> inserted;
+    std::set<TypeSpecialization *> inserted;
 
-    void add(const IR::Type_Specialized* t, const IR::Type_StructLike* decl,
-             const IR::Node* insertion);
-    TypeSpecialization* get(const IR::Type_Specialized* t) const;
-    bool same(const TypeSpecialization* left, const IR::Type_Specialized* right) const;
-    void dbprint(std::ostream& out) const override {
+    void add(const IR::Type_Specialized *t, const IR::Type_StructLike *decl,
+             const IR::Node *insertion);
+    TypeSpecialization *get(const IR::Type_Specialized *t) const;
+    bool same(const TypeSpecialization *left, const IR::Type_Specialized *right) const;
+    void dbprint(std::ostream &out) const override {
         for (auto it : map) {
             out << dbp(it.first) << " => " << it.second << std::endl;
         }
     }
-    IR::Vector<IR::Node>* getSpecializations(const IR::Node* insertionPoint) {
-        IR::Vector<IR::Node>* result = nullptr;
+    IR::Vector<IR::Node> *getSpecializations(const IR::Node *insertionPoint) {
+        IR::Vector<IR::Node> *result = nullptr;
         for (auto s : map) {
             if (inserted.find(s.second) != inserted.end()) continue;
             if (s.second->insertion == insertionPoint) {
@@ -96,15 +96,15 @@ struct TypeSpecializationMap : public IHasDbPrint {
  * Find all generic type instantiations and their type arguments.
  */
 class FindTypeSpecializations : public Inspector {
-    TypeSpecializationMap* specMap;
+    TypeSpecializationMap *specMap;
 
  public:
-    explicit FindTypeSpecializations(TypeSpecializationMap* specMap) : specMap(specMap) {
+    explicit FindTypeSpecializations(TypeSpecializationMap *specMap) : specMap(specMap) {
         CHECK_NULL(specMap);
         setName("FindTypeSpecializations");
     }
 
-    void postorder(const IR::Type_Specialized* type) override;
+    void postorder(const IR::Type_Specialized *type) override;
 };
 
 /**
@@ -112,17 +112,17 @@ class FindTypeSpecializations : public Inspector {
  * specialized type version and insert it in the program.
  */
 class CreateSpecializedTypes : public Transform {
-    TypeSpecializationMap* specMap;
+    TypeSpecializationMap *specMap;
 
  public:
-    explicit CreateSpecializedTypes(TypeSpecializationMap* specMap) : specMap(specMap) {
+    explicit CreateSpecializedTypes(TypeSpecializationMap *specMap) : specMap(specMap) {
         CHECK_NULL(specMap);
         setName("CreateSpecializedTypes");
     }
 
-    const IR::Node* insert(const IR::Node* before);
-    const IR::Node* postorder(IR::Type_Declaration* type) override;
-    const IR::Node* postorder(IR::Declaration* decl) override { return insert(decl); }
+    const IR::Node *insert(const IR::Node *before);
+    const IR::Node *postorder(IR::Type_Declaration *type) override;
+    const IR::Node *postorder(IR::Declaration *decl) override { return insert(decl); }
 };
 
 /**
@@ -130,15 +130,15 @@ class CreateSpecializedTypes : public Transform {
  * with the specialized version produced in the specialization map
  */
 class ReplaceTypeUses : public Transform {
-    TypeSpecializationMap* specMap;
+    TypeSpecializationMap *specMap;
 
  public:
-    explicit ReplaceTypeUses(TypeSpecializationMap* specMap) : specMap(specMap) {
+    explicit ReplaceTypeUses(TypeSpecializationMap *specMap) : specMap(specMap) {
         setName("ReplaceTypeUses");
         CHECK_NULL(specMap);
     }
-    const IR::Node* postorder(IR::Type_Specialized* type) override;
-    const IR::Node* postorder(IR::StructExpression* expresison) override;
+    const IR::Node *postorder(IR::Type_Specialized *type) override;
+    const IR::Node *postorder(IR::StructExpression *expresison) override;
 };
 
 /**
@@ -162,7 +162,7 @@ class SpecializeGenericTypes : public PassRepeated {
     TypeSpecializationMap specMap;
 
  public:
-    SpecializeGenericTypes(ReferenceMap* refMap, TypeMap* typeMap) {
+    SpecializeGenericTypes(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.emplace_back(new PassRepeated({
             new TypeChecking(refMap, typeMap),
             new FindTypeSpecializations(&specMap),
@@ -185,11 +185,11 @@ class SpecializeGenericTypes : public PassRepeated {
 //  back-ends may find it useful.
 class RemoveGenericTypes : public Transform {
  public:
-    const IR::Node* postorder(IR::Type_StructLike* type) override {
+    const IR::Node *postorder(IR::Type_StructLike *type) override {
         if (!type->typeParameters->empty()) return nullptr;
         return type;
     }
-    const IR::Node* postorder(IR::Type_Stack* type) override {
+    const IR::Node *postorder(IR::Type_Stack *type) override {
         if (type->elementType->is<IR::Type_Specialized>()) return nullptr;
         return type;
     }

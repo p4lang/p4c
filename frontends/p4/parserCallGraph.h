@@ -23,23 +23,23 @@ limitations under the License.
 
 namespace P4 {
 
-typedef CallGraph<const IR::ParserState*> ParserCallGraph;
+typedef CallGraph<const IR::ParserState *> ParserCallGraph;
 
 /** @brief Builds a CallGraph of ParserState nodes.
  */
 class ComputeParserCG : public Inspector {
-    const ReferenceMap* refMap;
-    ParserCallGraph* transitions;
+    const ReferenceMap *refMap;
+    ParserCallGraph *transitions;
 
  public:
-    ComputeParserCG(const ReferenceMap* refMap, /* out */ ParserCallGraph* transitions)
+    ComputeParserCG(const ReferenceMap *refMap, /* out */ ParserCallGraph *transitions)
         : refMap(refMap), transitions(transitions) {
         CHECK_NULL(refMap);
         CHECK_NULL(transitions);
         setName("ComputeParserCG");
     }
-    bool preorder(const IR::PathExpression* expression) override;
-    void postorder(const IR::SelectExpression* expression) override;
+    bool preorder(const IR::PathExpression *expression) override;
+    void postorder(const IR::SelectExpression *expression) override;
 };
 
 }  // namespace P4

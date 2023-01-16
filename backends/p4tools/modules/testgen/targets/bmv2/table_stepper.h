@@ -32,13 +32,13 @@ class BMv2_V1ModelTableStepper : public TableStepper {
     /// BMv2 specific table properties.
     struct BMv2_V1ModelProperties {
         /// The table has an action profile associated with it.
-        const Bmv2_V1ModelActionProfile* actionProfile = nullptr;
+        const Bmv2_V1ModelActionProfile *actionProfile = nullptr;
 
         /// The table has an action selector associated with it.
-        const Bmv2_V1ModelActionSelector* actionSelector = nullptr;
+        const Bmv2_V1ModelActionSelector *actionSelector = nullptr;
 
         /// The selector keys that are part of the selector hash that is calculated.
-        std::vector<const IR::Expression*> actionSelectorKeys;
+        std::vector<const IR::Expression *> actionSelectorKeys;
 
         /// The current execution state does not have this profile added to it yet.
         bool addProfileToState = false;
@@ -55,25 +55,26 @@ class BMv2_V1ModelTableStepper : public TableStepper {
 
     /// If the table has an action profile implementation, evaluate the match-action list
     /// accordingly. Entries will use indices to refer to actions instead of their labels.
-    void evalTableActionProfile(const std::vector<const IR::ActionListElement*>& tableActionList);
+    void evalTableActionProfile(const std::vector<const IR::ActionListElement *> &tableActionList);
 
     /// If the table has an action selector implementation, evaluate the match-action list
     /// accordingly. Entries will use indices to refer to actions instead of their labels.
-    void evalTableActionSelector(const std::vector<const IR::ActionListElement*>& tableActionList);
+    void evalTableActionSelector(const std::vector<const IR::ActionListElement *> &tableActionList);
 
  protected:
-    const IR::Expression* computeTargetMatchType(ExecutionState* nextState,
-                                                 const KeyProperties& keyProperties,
-                                                 std::map<cstring, const FieldMatch>* matches,
-                                                 const IR::Expression* hitCondition) override;
+    const IR::Expression *computeTargetMatchType(ExecutionState *nextState,
+                                                 const KeyProperties &keyProperties,
+                                                 std::map<cstring, const FieldMatch> *matches,
+                                                 const IR::Expression *hitCondition) override;
 
     void checkTargetProperties(
-        const std::vector<const IR::ActionListElement*>& tableActionList) override;
+        const std::vector<const IR::ActionListElement *> &tableActionList) override;
 
-    void evalTargetTable(const std::vector<const IR::ActionListElement*>& tableActionList) override;
+    void evalTargetTable(
+        const std::vector<const IR::ActionListElement *> &tableActionList) override;
 
  public:
-    explicit BMv2_V1ModelTableStepper(BMv2_V1ModelExprStepper* stepper, const IR::P4Table* table);
+    explicit BMv2_V1ModelTableStepper(BMv2_V1ModelExprStepper *stepper, const IR::P4Table *table);
 };
 
 }  // namespace Bmv2

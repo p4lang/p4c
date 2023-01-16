@@ -37,15 +37,15 @@ inside). All substitutions are composed together. Constraint solving can fail, w
 program does not type-check.
 */
 class TypeUnification final {
-    TypeConstraints* constraints;
-    const TypeMap* typeMap;
+    TypeConstraints *constraints;
+    const TypeMap *typeMap;
 
-    bool unifyCall(const BinaryConstraint* constraint);
-    bool unifyFunctions(const BinaryConstraint* constraint, bool skipReturnValues = false);
-    bool unifyBlocks(const BinaryConstraint* constraint);
+    bool unifyCall(const BinaryConstraint *constraint);
+    bool unifyFunctions(const BinaryConstraint *constraint, bool skipReturnValues = false);
+    bool unifyBlocks(const BinaryConstraint *constraint);
 
  public:
-    TypeUnification(TypeConstraints* constraints, const P4::TypeMap* typeMap)
+    TypeUnification(TypeConstraints *constraints, const P4::TypeMap *typeMap)
         : constraints(constraints), typeMap(typeMap) {}
     /**
      * Return false if unification fails right away.
@@ -53,7 +53,7 @@ class TypeUnification final {
      * If it returns true unification could still fail later.
      * @return     False if unification fails immediately.
      */
-    bool unify(const BinaryConstraint* constraint);
+    bool unify(const BinaryConstraint *constraint);
 };
 
 }  // namespace P4

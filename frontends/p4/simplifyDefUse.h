@@ -24,33 +24,33 @@ limitations under the License.
 namespace P4 {
 
 class DoSimplifyDefUse : public Transform {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
 
-    const IR::Node* process(const IR::Node* node);
+    const IR::Node *process(const IR::Node *node);
 
  public:
-    DoSimplifyDefUse(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
+    DoSimplifyDefUse(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("DoSimplifyDefUse");
     }
 
-    const IR::Node* postorder(IR::Function* function) override {
+    const IR::Node *postorder(IR::Function *function) override {
         if (findContext<IR::Declaration_Instance>() == nullptr)
             // not an abstract function implementation: these
             // are processed as part of the control body
             return process(function);
         return function;
     }
-    const IR::Node* postorder(IR::P4Parser* parser) override { return process(parser); }
-    const IR::Node* postorder(IR::P4Control* control) override { return process(control); }
+    const IR::Node *postorder(IR::P4Parser *parser) override { return process(parser); }
+    const IR::Node *postorder(IR::P4Control *control) override { return process(control); }
 };
 
 /// The Cloner pass below may insert @hidden annotations
 /// on empty control blocks; remove them
 class RemoveHidden : public Transform {
-    const IR::Node* postorder(IR::BlockStatement* stat) override {
+    const IR::Node *postorder(IR::BlockStatement *stat) override {
         if (!stat->components.empty()) return stat;
         if (stat->annotations->size() != 1) return stat;
         auto anno = stat->annotations->getSingle(IR::Annotation::hiddenAnnotation);
@@ -64,13 +64,13 @@ class SimplifyDefUse : public PassManager {
     class Cloner : public ClonePathExpressions {
      public:
         Cloner() { setName("Cloner"); }
-        const IR::Node* postorder(IR::EmptyStatement* stat) override {
+        const IR::Node *postorder(IR::EmptyStatement *stat) override {
             // You cannot clone an empty statement, since
             // the visitor claims it's equal to the original one.
             // So we convert it to an empty block.
             return new IR::BlockStatement(stat->srcInfo);
         }
-        const IR::Node* postorder(IR::BlockStatement* stat) override {
+        const IR::Node *postorder(IR::BlockStatement *stat) override {
             // If the block statement is empty then we need to clone
             // it and add an new annotation to force it to be
             // different from the original one.
@@ -90,7 +90,7 @@ class SimplifyDefUse : public PassManager {
     };
 
  public:
-    SimplifyDefUse(ReferenceMap* refMap, TypeMap* typeMap, TypeChecking* typeChecking = nullptr) {
+    SimplifyDefUse(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
 

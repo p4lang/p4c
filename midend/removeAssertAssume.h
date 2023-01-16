@@ -9,24 +9,24 @@
 namespace P4 {
 // Removes assert and assume statements if it is not in debug mode
 class DoRemoveAssertAssume : public Transform {
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
 
  public:
-    explicit DoRemoveAssertAssume(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
+    explicit DoRemoveAssertAssume(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
         : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("DoRemoveAssertAssume");
     }
 
-    const IR::Node* preorder(IR::MethodCallStatement* statement) override;
+    const IR::Node *preorder(IR::MethodCallStatement *statement) override;
 };
 
 class RemoveAssertAssume final : public PassManager {
  public:
-    RemoveAssertAssume(ReferenceMap* refMap, TypeMap* typeMap,
-                       TypeChecking* typeChecking = nullptr) {
+    RemoveAssertAssume(ReferenceMap *refMap, TypeMap *typeMap,
+                       TypeChecking *typeChecking = nullptr) {
         if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoRemoveAssertAssume(refMap, typeMap));

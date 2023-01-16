@@ -37,7 +37,7 @@ PTF::PTF(cstring testName, boost::optional<unsigned int> seed = boost::none) : T
     cstring testNameOnly(testFile.stem().c_str());
 }
 
-std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant* mask) {
+std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant *mask) {
     std::vector<std::pair<size_t, size_t>> ignoreMasks;
     if (mask == nullptr) {
         return ignoreMasks;
@@ -61,7 +61,7 @@ std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant* m
     return ignoreMasks;
 }
 
-inja::json PTF::getControlPlane(const TestSpec* testSpec) {
+inja::json PTF::getControlPlane(const TestSpec *testSpec) {
     inja::json controlPlaneJson = inja::json::object();
 
     // Map of actionProfiles and actionSelectors for easy reference.
@@ -71,17 +71,17 @@ inja::json PTF::getControlPlane(const TestSpec* testSpec) {
     if (!tables.empty()) {
         controlPlaneJson["tables"] = inja::json::array();
     }
-    for (const auto& testObject : tables) {
+    for (const auto &testObject : tables) {
         inja::json tblJson;
         tblJson["table_name"] = testObject.first.c_str();
-        const auto* const tblConfig = testObject.second->checkedTo<TableConfig>();
-        const auto* tblRules = tblConfig->getRules();
+        const auto *const tblConfig = testObject.second->checkedTo<TableConfig>();
+        const auto *tblRules = tblConfig->getRules();
         tblJson["rules"] = inja::json::array();
-        for (const auto& tblRule : *tblRules) {
+        for (const auto &tblRule : *tblRules) {
             inja::json rule;
-            const auto* matches = tblRule.getMatches();
-            const auto* actionCall = tblRule.getActionCall();
-            const auto* actionArgs = actionCall->getArgs();
+            const auto *matches = tblRule.getMatches();
+            const auto *actionCall = tblRule.getActionCall();
+            const auto *actionArgs = actionCall->getArgs();
             rule["action_name"] = actionCall->getActionName().c_str();
             auto j = getControlPlaneForTable(*matches, *actionArgs);
             rule["rules"] = std::move(j);
@@ -106,8 +106,8 @@ inja::json PTF::getControlPlane(const TestSpec* testSpec) {
     return controlPlaneJson;
 }
 
-inja::json PTF::getControlPlaneForTable(const std::map<cstring, const FieldMatch>& matches,
-                                        const std::vector<ActionArg>& args) {
+inja::json PTF::getControlPlaneForTable(const std::map<cstring, const FieldMatch> &matches,
+                                        const std::vector<ActionArg> &args) {
     inja::json rulesJson;
 
     rulesJson["single_exact_matches"] = inja::json::array();
@@ -118,39 +118,39 @@ inja::json PTF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
 
     rulesJson["act_args"] = inja::json::array();
 
-    for (const auto& match : matches) {
+    for (const auto &match : matches) {
         const auto fieldName = match.first;
-        const auto& fieldMatch = match.second;
+        const auto &fieldMatch = match.second;
 
         // Iterate over the match fields and segregate them.
         struct GetRange : public boost::static_visitor<void> {
             cstring fieldName;
-            inja::json& rulesJson;
+            inja::json &rulesJson;
 
-            GetRange(inja::json& rulesJson, cstring fieldName)
+            GetRange(inja::json &rulesJson, cstring fieldName)
                 : fieldName(fieldName), rulesJson(rulesJson) {}
 
-            void operator()(const Exact& elem) const {
+            void operator()(const Exact &elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
                 j["value"] = formatHexExpr(elem.getEvaluatedValue()).c_str();
                 rulesJson["single_exact_matches"].push_back(j);
             }
-            void operator()(const Range& elem) const {
+            void operator()(const Range &elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
                 j["lo"] = formatHexExpr(elem.getEvaluatedLow()).c_str();
                 j["hi"] = formatHexExpr(elem.getEvaluatedHigh()).c_str();
                 rulesJson["range_matches"].push_back(j);
             }
-            void operator()(const Ternary& elem) const {
+            void operator()(const Ternary &elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
                 j["value"] = formatHexExpr(elem.getEvaluatedValue()).c_str();
                 j["mask"] = formatHexExpr(elem.getEvaluatedMask()).c_str();
                 rulesJson["ternary_matches"].push_back(j);
             }
-            void operator()(const LPM& elem) const {
+            void operator()(const LPM &elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
                 j["value"] = formatHexExpr(elem.getEvaluatedValue()).c_str();
@@ -162,7 +162,7 @@ inja::json PTF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
         boost::apply_visitor(GetRange(rulesJson, fieldName), fieldMatch);
     }
 
-    for (const auto& actArg : args) {
+    for (const auto &actArg : args) {
         inja::json j;
         j["param"] = actArg.getActionParamName().c_str();
         j["value"] = formatHexExpr(actArg.getEvaluatedValue()).c_str();
@@ -172,9 +172,9 @@ inja::json PTF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
     return rulesJson;
 }
 
-inja::json PTF::getSend(const TestSpec* testSpec) {
-    const auto* iPacket = testSpec->getIngressPacket();
-    const auto* payload = iPacket->getEvaluatedPayload();
+inja::json PTF::getSend(const TestSpec *testSpec) {
+    const auto *iPacket = testSpec->getIngressPacket();
+    const auto *payload = iPacket->getEvaluatedPayload();
     inja::json sendJson;
     sendJson["ig_port"] = iPacket->getPort();
     auto dataStr = formatHexExpr(payload, false, true, false);
@@ -183,13 +183,13 @@ inja::json PTF::getSend(const TestSpec* testSpec) {
     return sendJson;
 }
 
-inja::json PTF::getVerify(const TestSpec* testSpec) {
+inja::json PTF::getVerify(const TestSpec *testSpec) {
     inja::json verifyData = inja::json::object();
     if (testSpec->getEgressPacket() != boost::none) {
-        const auto& packet = **testSpec->getEgressPacket();
+        const auto &packet = **testSpec->getEgressPacket();
         verifyData["eg_port"] = packet.getPort();
-        const auto* payload = packet.getEvaluatedPayload();
-        const auto* payloadMask = packet.getEvaluatedPayloadMask();
+        const auto *payload = packet.getEvaluatedPayload();
+        const auto *payloadMask = packet.getEvaluatedPayloadMask();
         verifyData["ignore_masks"] = getIgnoreMasks(payloadMask);
 
         auto dataStr = formatHexExpr(payload, false, true, false);
@@ -258,7 +258,7 @@ class AbstractTest(P4RuntimeTest):
     return PREAMBLE;
 }
 
-void PTF::emitPreamble(const std::string& preamble) {
+void PTF::emitPreamble(const std::string &preamble) {
     boost::filesystem::path testFile(testName + ".py");
     cstring testNameOnly(testFile.stem().c_str());
     inja::json dataJson;
@@ -376,8 +376,8 @@ class Test{{test_id}}(AbstractTest):
     return TEST_CASE;
 }
 
-void PTF::emitTestcase(const TestSpec* testSpec, cstring selectedBranches, size_t testId,
-                       const std::string& testCase, float currentCoverage) {
+void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                       const std::string &testCase, float currentCoverage) {
     inja::json dataJson;
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
@@ -401,7 +401,7 @@ void PTF::emitTestcase(const TestSpec* testSpec, cstring selectedBranches, size_
     ptfFile.flush();
 }
 
-void PTF::outputTest(const TestSpec* testSpec, cstring selectedBranches, size_t testIdx,
+void PTF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                      float currentCoverage) {
     if (!preambleEmitted) {
         ptfFile = std::ofstream(testName + ".py");

@@ -11,7 +11,7 @@ class n4 {
 
  public:
     explicit n4(uint64_t v, uint64_t d = 1) : val(v), div(d) {}
-    std::ostream& print(std::ostream& os) const {
+    std::ostream &print(std::ostream &os) const {
         uint64_t v;
         if (val % div && val < div * 100) {
             if ((v = val * 1000 + div / 2) < div * 1000) {
@@ -56,6 +56,6 @@ class n4 {
     }
 };
 
-inline std::ostream& operator<<(std::ostream& os, n4 v) { return v.print(os); }
+inline std::ostream &operator<<(std::ostream &os, n4 v) { return v.print(os); }
 
 #endif /* LIB_N4_H_ */

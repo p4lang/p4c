@@ -20,10 +20,10 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* DoEliminateSwitch::postorder(IR::P4Program* program) {
+const IR::Node *DoEliminateSwitch::postorder(IR::P4Program *program) {
     if (!exactNeeded) return program;
-    for (auto* obj : program->objects) {
-        if (auto* match_kind = obj->to<IR::Declaration_MatchKind>()) {
+    for (auto *obj : program->objects) {
+        if (auto *match_kind = obj->to<IR::Declaration_MatchKind>()) {
             if (match_kind->getDeclByName(P4CoreLibrary::instance.exactMatch.Id())) return program;
         }
     }
@@ -33,13 +33,13 @@ const IR::Node* DoEliminateSwitch::postorder(IR::P4Program* program) {
     return program;
 }
 
-const IR::Node* DoEliminateSwitch::postorder(IR::P4Control* control) {
+const IR::Node *DoEliminateSwitch::postorder(IR::P4Control *control) {
     for (auto a : toInsert) control->controlLocals.push_back(a);
     toInsert.clear();
     return control;
 }
 
-const IR::Node* DoEliminateSwitch::postorder(IR::SwitchStatement* statement) {
+const IR::Node *DoEliminateSwitch::postorder(IR::SwitchStatement *statement) {
     if (findContext<IR::P4Action>()) {
         ::error("%1%: switch statements not supported in actions on this target", statement);
         return statement;

@@ -20,38 +20,38 @@ class FinalState {
  private:
     /// The solver associated with this final state. We need the solver to resolve  under new
     /// constraints in the case of concolic execution.
-    gsl::not_null<AbstractSolver*> solver;
+    gsl::not_null<AbstractSolver *> solver;
     /// The final state of the execution.
     const ExecutionState state;
     /// The final model which has been augmented with environment completions.
     const Model completedModel;
     /// The final program trace.
-    std::vector<gsl::not_null<const TraceEvent*>> trace;
+    std::vector<gsl::not_null<const TraceEvent *>> trace;
     /// The final list of visited statements.
-    std::vector<const IR::Statement*> visitedStatements;
+    std::vector<const IR::Statement *> visitedStatements;
 
  public:
-    FinalState(AbstractSolver* solver, const ExecutionState& inputState);
+    FinalState(AbstractSolver *solver, const ExecutionState &inputState);
 
     /// Complete the model according to target-specific completion criteria.
     /// We first complete (this means we fill all the variables that have not been bound).
     /// Then we evaluate the model (we assign values to the variables that have been bound).
-    static Model completeModel(const ExecutionState& executionState, const Model* model);
+    static Model completeModel(const ExecutionState &executionState, const Model *model);
 
     /// @returns the model after it was augmented by completions from the symbolic environment.
-    const Model* getCompletedModel() const;
+    const Model *getCompletedModel() const;
 
     /// @returns the solver associated with this final state.
-    AbstractSolver* getSolver() const;
+    AbstractSolver *getSolver() const;
 
     /// @returns the execution state of this final state.
-    const ExecutionState* getExecutionState() const;
+    const ExecutionState *getExecutionState() const;
 
     /// @returns the computed traces of this final state.
-    const std::vector<gsl::not_null<const TraceEvent*>>* getTraces() const;
+    const std::vector<gsl::not_null<const TraceEvent *>> *getTraces() const;
 
     /// @returns the list of visited statements.
-    const std::vector<const IR::Statement*>& getVisited() const;
+    const std::vector<const IR::Statement *> &getVisited() const;
 };
 
 }  // namespace P4Testgen

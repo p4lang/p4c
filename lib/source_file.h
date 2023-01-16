@@ -36,7 +36,7 @@ class UtilSourceFile;
 
 class IHasDbPrint {
  public:
-    virtual void dbprint(std::ostream& out) const = 0;
+    virtual void dbprint(std::ostream &out) const = 0;
     void print() const;  // useful in the debugger
     virtual ~IHasDbPrint() {}
 };
@@ -58,26 +58,26 @@ class SourcePosition final {
     SourcePosition() : lineNumber(0), columnNumber(0) {}
 
     SourcePosition(unsigned lineNumber, unsigned columnNumber);
-    SourcePosition& operator=(const SourcePosition&) = default;
+    SourcePosition &operator=(const SourcePosition &) = default;
 
-    SourcePosition(const SourcePosition& other)
+    SourcePosition(const SourcePosition &other)
         : lineNumber(other.lineNumber), columnNumber(other.columnNumber) {}
 
-    inline bool operator==(const SourcePosition& rhs) const {
+    inline bool operator==(const SourcePosition &rhs) const {
         return columnNumber == rhs.columnNumber && lineNumber == rhs.lineNumber;
     }
-    inline bool operator!=(const SourcePosition& rhs) const { return !this->operator==(rhs); }
+    inline bool operator!=(const SourcePosition &rhs) const { return !this->operator==(rhs); }
 
-    inline bool operator<(const SourcePosition& rhs) const {
+    inline bool operator<(const SourcePosition &rhs) const {
         return (lineNumber < rhs.lineNumber) ||
                (lineNumber == rhs.lineNumber && columnNumber < rhs.columnNumber);
     }
-    inline bool operator>(const SourcePosition& rhs) const { return rhs.operator<(*this); }
-    inline bool operator<=(const SourcePosition& rhs) const { return !this->operator>(rhs); }
-    inline bool operator>=(const SourcePosition& rhs) const { return !this->operator<(rhs); }
+    inline bool operator>(const SourcePosition &rhs) const { return rhs.operator<(*this); }
+    inline bool operator<=(const SourcePosition &rhs) const { return !this->operator>(rhs); }
+    inline bool operator>=(const SourcePosition &rhs) const { return !this->operator<(rhs); }
 
     /// Move one column back.  This never moves one line back.
-    SourcePosition& operator--() {
+    SourcePosition &operator--() {
         if (columnNumber > 0) columnNumber--;
         return *this;
     }
@@ -87,12 +87,12 @@ class SourcePosition final {
         return tmp;
     }
 
-    inline const SourcePosition& min(const SourcePosition& rhs) const {
+    inline const SourcePosition &min(const SourcePosition &rhs) const {
         if (this->operator<(rhs)) return *this;
         return rhs;
     }
 
-    inline const SourcePosition& max(const SourcePosition& rhs) const {
+    inline const SourcePosition &max(const SourcePosition &rhs) const {
         if (this->operator>(rhs)) return *this;
         return rhs;
     }
@@ -139,26 +139,26 @@ class SourceInfo final {
     SourceInfo() : sources(nullptr), start(SourcePosition()), end(SourcePosition()) {}
 
     /// Creates a SourceInfo for a 'point' in the source, or invalid
-    SourceInfo(const InputSources* sources, SourcePosition point)
+    SourceInfo(const InputSources *sources, SourcePosition point)
         : sources(sources), start(point), end(point) {}
 
-    SourceInfo(const InputSources* sources, SourcePosition start, SourcePosition end);
+    SourceInfo(const InputSources *sources, SourcePosition start, SourcePosition end);
 
-    SourceInfo(const SourceInfo& other) = default;
+    SourceInfo(const SourceInfo &other) = default;
     ~SourceInfo() = default;
-    SourceInfo& operator=(const SourceInfo& other) = default;
+    SourceInfo &operator=(const SourceInfo &other) = default;
 
     /**
         A SourceInfo that spans both this and rhs.
         However, if this or rhs is invalid, it is not taken into account */
-    const SourceInfo operator+(const SourceInfo& rhs) const {
+    const SourceInfo operator+(const SourceInfo &rhs) const {
         if (!this->isValid()) return rhs;
         if (!rhs.isValid()) return *this;
         SourcePosition s = start.min(rhs.start);
         SourcePosition e = end.max(rhs.end);
         return SourceInfo(sources, s, e);
     }
-    SourceInfo& operator+=(const SourceInfo& rhs) {
+    SourceInfo &operator+=(const SourceInfo &rhs) {
         if (!isValid()) {
             *this = rhs;
         } else if (rhs.isValid()) {
@@ -168,16 +168,16 @@ class SourceInfo final {
         return *this;
     }
 
-    bool operator==(const SourceInfo& rhs) const { return start == rhs.start && end == rhs.end; }
+    bool operator==(const SourceInfo &rhs) const { return start == rhs.start && end == rhs.end; }
 
     cstring toDebugString() const;
 
-    void dbprint(std::ostream& out) const { out << this->toDebugString(); }
+    void dbprint(std::ostream &out) const { out << this->toDebugString(); }
 
     cstring toSourceFragment() const;
     cstring toBriefSourceFragment() const;
     cstring toPositionString() const;
-    cstring toSourcePositionData(unsigned* outLineNumber, unsigned* outColumnNumber) const;
+    cstring toSourcePositionData(unsigned *outLineNumber, unsigned *outColumnNumber) const;
     SourceFileLine toPosition() const;
 
     bool isValid() const { return this->start.isValid(); }
@@ -185,26 +185,26 @@ class SourceInfo final {
 
     cstring getSourceFile() const;
 
-    const SourcePosition& getStart() const { return this->start; }
+    const SourcePosition &getStart() const { return this->start; }
 
-    const SourcePosition& getEnd() const { return this->end; }
+    const SourcePosition &getEnd() const { return this->end; }
 
     /**
        True if this comes 'before' this source position.
        'invalid' source positions come first.
        This is true if the start of other is strictly before
        the start of this. */
-    bool operator<(const SourceInfo& rhs) const {
+    bool operator<(const SourceInfo &rhs) const {
         if (!rhs.isValid()) return false;
         if (!isValid()) return true;
         return this->start < rhs.start;
     }
-    inline bool operator>(const SourceInfo& rhs) const { return rhs.operator<(*this); }
-    inline bool operator<=(const SourceInfo& rhs) const { return !this->operator>(rhs); }
-    inline bool operator>=(const SourceInfo& rhs) const { return !this->operator<(rhs); }
+    inline bool operator>(const SourceInfo &rhs) const { return rhs.operator<(*this); }
+    inline bool operator<=(const SourceInfo &rhs) const { return !this->operator>(rhs); }
+    inline bool operator>=(const SourceInfo &rhs) const { return !this->operator<(rhs); }
 
  private:
-    const InputSources* sources = nullptr;
+    const InputSources *sources = nullptr;
     SourcePosition start = SourcePosition();
     SourcePosition end = SourcePosition();
 };
@@ -246,7 +246,7 @@ class Comment final : IHasDbPrint {
         if (!singleLine) result += "*/";
         return result;
     }
-    void dbprint(std::ostream& out) const { out << toString(); }
+    void dbprint(std::ostream &out) const { out << toString(); }
 };
 
 /**
@@ -277,7 +277,7 @@ class InputSources final {
     void seal();
 
     /// Append this text; it is either a newline or a text with no newlines.
-    void appendText(const char* text);
+    void appendText(const char *text);
 
     /**
         Map the next line in the file to the line with number 'originalSourceLine'
@@ -289,9 +289,9 @@ class InputSources final {
        string describing a position in the sources, e.g.:
        int<32> variable;
                ^^^^^^^^ */
-    cstring getSourceFragment(const SourcePosition& position) const;
-    cstring getSourceFragment(const SourceInfo& position) const;
-    cstring getBriefSourceFragment(const SourceInfo& position) const;
+    cstring getSourceFragment(const SourcePosition &position) const;
+    cstring getSourceFragment(const SourceInfo &position) const;
+    cstring getBriefSourceFragment(const SourceInfo &position) const;
 
     cstring toDebugString() const;
     void addComment(SourceInfo srcInfo, bool singleLine, cstring body);
@@ -310,11 +310,11 @@ class InputSources final {
     /// Each line also stores the end-of-line character(s)
     std::vector<std::string> contents;
     /// The commends found in the file.
-    std::vector<Comment*> comments;
+    std::vector<Comment *> comments;
 };
 
 }  // namespace Util
 
-inline void dbprint(const IHasDbPrint* o) { o->dbprint(std::cout); }
+inline void dbprint(const IHasDbPrint *o) { o->dbprint(std::cout); }
 
 #endif /* _LIB_SOURCE_FILE_H_ */

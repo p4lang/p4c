@@ -23,9 +23,9 @@ limitations under the License.
 
 namespace P4 {
 
-boost::optional<ExternInstance> ExternInstance::resolve(const IR::Expression* expr,
-                                                        ReferenceMap* refMap, TypeMap* typeMap,
-                                                        const boost::optional<cstring>& defaultName
+boost::optional<ExternInstance> ExternInstance::resolve(const IR::Expression *expr,
+                                                        ReferenceMap *refMap, TypeMap *typeMap,
+                                                        const boost::optional<cstring> &defaultName
                                                         /* = boost::none */) {
     CHECK_NULL(expr);
     CHECK_NULL(refMap);
@@ -40,8 +40,8 @@ boost::optional<ExternInstance> ExternInstance::resolve(const IR::Expression* ex
     }
 }
 
-boost::optional<ExternInstance> ExternInstance::resolve(const IR::PathExpression* path,
-                                                        ReferenceMap* refMap, TypeMap* typeMap) {
+boost::optional<ExternInstance> ExternInstance::resolve(const IR::PathExpression *path,
+                                                        ReferenceMap *refMap, TypeMap *typeMap) {
     CHECK_NULL(path);
     CHECK_NULL(refMap);
     CHECK_NULL(typeMap);
@@ -67,8 +67,8 @@ boost::optional<ExternInstance> ExternInstance::resolve(const IR::PathExpression
 }
 
 boost::optional<ExternInstance> ExternInstance::resolve(
-    const IR::ConstructorCallExpression* constructorCallExpr, ReferenceMap* refMap,
-    TypeMap* typeMap, const boost::optional<cstring>& name /* = boost::none */) {
+    const IR::ConstructorCallExpression *constructorCallExpr, ReferenceMap *refMap,
+    TypeMap *typeMap, const boost::optional<cstring> &name /* = boost::none */) {
     CHECK_NULL(constructorCallExpr);
     CHECK_NULL(refMap);
     CHECK_NULL(typeMap);

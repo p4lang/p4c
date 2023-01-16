@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* FillEnumMap::preorder(IR::Type_Enum* type) {
+const IR::Node *FillEnumMap::preorder(IR::Type_Enum *type) {
     if (strstr(type->srcInfo.filename, "v1model") == nullptr) {
         unsigned long long count = type->members.size();
         unsigned long long width = policy->enumSize(count);

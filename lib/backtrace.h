@@ -26,12 +26,12 @@ limitations under the License.
 #include <execinfo.h>
 #endif
 
-void backtrace_fill_stacktrace(std::string& msg, void* const* backtrace, int size);
+void backtrace_fill_stacktrace(std::string &msg, void *const *backtrace, int size);
 
 template <class E>
 class backtrace_exception : public E {
     static constexpr int buffer_size = 64;
-    void* backtrace_buffer[buffer_size];
+    void *backtrace_buffer[buffer_size];
     int backtrace_size;
     mutable std::string message;
 
@@ -45,7 +45,7 @@ class backtrace_exception : public E {
 #endif
     }
 
-    const char* what() const noexcept {
+    const char *what() const noexcept {
         try {
             message = E::what();
             if (backtrace_size > 0)

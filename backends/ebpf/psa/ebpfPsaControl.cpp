@@ -19,11 +19,11 @@ limitations under the License.
 
 namespace EBPF {
 
-ControlBodyTranslatorPSA::ControlBodyTranslatorPSA(const EBPFControlPSA* control)
+ControlBodyTranslatorPSA::ControlBodyTranslatorPSA(const EBPFControlPSA *control)
     : CodeGenInspector(control->program->refMap, control->program->typeMap),
       ControlBodyTranslator(control) {}
 
-bool ControlBodyTranslatorPSA::preorder(const IR::AssignmentStatement* a) {
+bool ControlBodyTranslatorPSA::preorder(const IR::AssignmentStatement *a) {
     if (auto methodCallExpr = a->right->to<IR::MethodCallExpression>()) {
         auto mi = P4::MethodInstance::resolve(methodCallExpr, control->program->refMap,
                                               control->program->typeMap);
@@ -56,7 +56,7 @@ bool ControlBodyTranslatorPSA::preorder(const IR::AssignmentStatement* a) {
     return CodeGenInspector::preorder(a);
 }
 
-void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod* method) {
+void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod *method) {
     auto decl = method->object;
     auto declType = method->originalExternType;
     cstring name = EBPFObject::externalName(decl);
@@ -91,16 +91,16 @@ void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod* method) {
     }
 }
 
-cstring ControlBodyTranslatorPSA::getParamName(const IR::PathExpression* expr) {
+cstring ControlBodyTranslatorPSA::getParamName(const IR::PathExpression *expr) {
     return expr->path->name.name;
 }
 
-void EBPFControlPSA::emit(CodeBuilder* builder) {
+void EBPFControlPSA::emit(CodeBuilder *builder) {
     for (auto h : hashes) h.second->emitVariables(builder);
     EBPFControl::emit(builder);
 }
 
-void EBPFControlPSA::emitTableTypes(CodeBuilder* builder) {
+void EBPFControlPSA::emitTableTypes(CodeBuilder *builder) {
     EBPFControl::emitTableTypes(builder);
 
     for (auto it : registers) it.second->emitTypes(builder);
@@ -112,14 +112,14 @@ void EBPFControlPSA::emitTableTypes(CodeBuilder* builder) {
     }
 }
 
-void EBPFControlPSA::emitTableInstances(CodeBuilder* builder) {
+void EBPFControlPSA::emitTableInstances(CodeBuilder *builder) {
     for (auto it : tables) it.second->emitInstance(builder);
     for (auto it : counters) it.second->emitInstance(builder);
     for (auto it : registers) it.second->emitInstance(builder);
     for (auto it : meters) it.second->emitInstance(builder);
 }
 
-void EBPFControlPSA::emitTableInitializers(CodeBuilder* builder) {
+void EBPFControlPSA::emitTableInitializers(CodeBuilder *builder) {
     for (auto it : tables) {
         it.second->emitInitializer(builder);
     }

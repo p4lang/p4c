@@ -34,17 +34,17 @@ namespace P4 {
 
 /// Creates a string that describes the values of current type variables
 class Explain : public Inspector {
-    std::set<const IR::ITypeVar*> explained;
-    const TypeVariableSubstitution* subst;
+    std::set<const IR::ITypeVar *> explained;
+    const TypeVariableSubstitution *subst;
 
  public:
     std::string explanation;
-    explicit Explain(const TypeVariableSubstitution* subst) : subst(subst) { CHECK_NULL(subst); }
-    profile_t init_apply(const IR::Node* node) override {
+    explicit Explain(const TypeVariableSubstitution *subst) : subst(subst) { CHECK_NULL(subst); }
+    profile_t init_apply(const IR::Node *node) override {
         explanation = "";
         return Inspector::init_apply(node);
     }
-    void postorder(const IR::Type_Var* tv) override {
+    void postorder(const IR::Type_Var *tv) override {
         if (explained.find(tv) != explained.end())
             // Do not repeat explanations.
             return;
@@ -64,23 +64,23 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
     static int crtid;
     /// The following are used when reporting errors.
     cstring errFormat;
-    std::vector<const IR::Node*> errArguments;
+    std::vector<const IR::Node *> errArguments;
 
  protected:
     /// Constraint which produced this one.  May be nullptr.
-    const TypeConstraint* derivedFrom = nullptr;
+    const TypeConstraint *derivedFrom = nullptr;
     /// Place in source code which originated the contraint.  May be nullptr.
-    const IR::Node* origin = nullptr;
+    const IR::Node *origin = nullptr;
 
-    explicit TypeConstraint(const TypeConstraint* derivedFrom)
+    explicit TypeConstraint(const TypeConstraint *derivedFrom)
         : id(crtid++), derivedFrom(derivedFrom) {}
-    explicit TypeConstraint(const IR::Node* origin) : id(crtid++), origin(origin) {}
-    std::string explain(size_t index, Explain* explainer) const {
+    explicit TypeConstraint(const IR::Node *origin) : id(crtid++), origin(origin) {}
+    std::string explain(size_t index, Explain *explainer) const {
         auto node = errArguments.at(index);
         node->apply(*explainer);
         return explainer->explanation;
     }
-    cstring localError(Explain* explainer) const {
+    cstring localError(Explain *explainer) const {
         if (errFormat.isNullOrEmpty()) return "";
         std::string message, explanation;
         boost::format fmt = boost::format(errFormat);
@@ -121,13 +121,13 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
     }
 
  public:
-    void setError(cstring format, std::initializer_list<const IR::Node*> nodes) {
+    void setError(cstring format, std::initializer_list<const IR::Node *> nodes) {
         errFormat = format;
         errArguments = nodes;
     }
     template <typename... T>
     // Always return false.
-    bool reportError(const TypeVariableSubstitution* subst, const char* format, T... args) const {
+    bool reportError(const TypeVariableSubstitution *subst, const char *format, T... args) const {
         /// The Constraints actually form a stack and the error message
         /// is composed in reverse order, from bottom to top.
         /// The top of the stack has no 'derivedFrom' field,
@@ -164,21 +164,21 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
         return false;
     }
     // Default error message; returns 'false'
-    virtual bool reportError(const TypeVariableSubstitution* subst) const = 0;
+    virtual bool reportError(const TypeVariableSubstitution *subst) const = 0;
 };
 
 /// Base class for EqualityConstraint and CanBeImplicitlyCastConstraint
 class BinaryConstraint : public TypeConstraint {
  public:
-    const IR::Type* left;
-    const IR::Type* right;
+    const IR::Type *left;
+    const IR::Type *right;
 
  protected:
-    BinaryConstraint(const IR::Type* left, const IR::Type* right, const TypeConstraint* derivedFrom)
+    BinaryConstraint(const IR::Type *left, const IR::Type *right, const TypeConstraint *derivedFrom)
         : TypeConstraint(derivedFrom), left(left), right(right) {
         validate();
     }
-    BinaryConstraint(const IR::Type* left, const IR::Type* right, const IR::Node* origin)
+    BinaryConstraint(const IR::Type *left, const IR::Type *right, const IR::Node *origin)
         : TypeConstraint(origin), left(left), right(right) {
         validate();
     }
@@ -190,26 +190,26 @@ class BinaryConstraint : public TypeConstraint {
     }
 
  public:
-    virtual void dbprint(std::ostream& out) const = 0;
-    virtual BinaryConstraint* create(const IR::Type* left, const IR::Type* right) const = 0;
+    virtual void dbprint(std::ostream &out) const = 0;
+    virtual BinaryConstraint *create(const IR::Type *left, const IR::Type *right) const = 0;
 };
 
 /// Requires two types to be equal.
 class EqualityConstraint : public BinaryConstraint {
  public:
-    EqualityConstraint(const IR::Type* left, const IR::Type* right,
-                       const TypeConstraint* derivedFrom)
+    EqualityConstraint(const IR::Type *left, const IR::Type *right,
+                       const TypeConstraint *derivedFrom)
         : BinaryConstraint(left, right, derivedFrom) {}
-    EqualityConstraint(const IR::Type* left, const IR::Type* right, const IR::Node* origin)
+    EqualityConstraint(const IR::Type *left, const IR::Type *right, const IR::Node *origin)
         : BinaryConstraint(left, right, origin) {}
-    void dbprint(std::ostream& out) const override {
+    void dbprint(std::ostream &out) const override {
         out << "Constraint:" << dbp(left) << " = " << dbp(right);
     }
     using TypeConstraint::reportError;
-    bool reportError(const TypeVariableSubstitution* subst) const override {
+    bool reportError(const TypeVariableSubstitution *subst) const override {
         return reportError(subst, "Cannot unify type '%1%' with type '%2%'", right, left);
     }
-    BinaryConstraint* create(const IR::Type* left, const IR::Type* right) const override {
+    BinaryConstraint *create(const IR::Type *left, const IR::Type *right) const override {
         return new EqualityConstraint(left, right, this);
     }
 };
@@ -217,20 +217,20 @@ class EqualityConstraint : public BinaryConstraint {
 /// The right type can be implicitly cast to the left type.
 class CanBeImplicitlyCastConstraint : public BinaryConstraint {
  public:
-    CanBeImplicitlyCastConstraint(const IR::Type* left, const IR::Type* right,
-                                  const TypeConstraint* derivedFrom)
+    CanBeImplicitlyCastConstraint(const IR::Type *left, const IR::Type *right,
+                                  const TypeConstraint *derivedFrom)
         : BinaryConstraint(left, right, derivedFrom) {}
-    CanBeImplicitlyCastConstraint(const IR::Type* left, const IR::Type* right,
-                                  const IR::Node* origin)
+    CanBeImplicitlyCastConstraint(const IR::Type *left, const IR::Type *right,
+                                  const IR::Node *origin)
         : BinaryConstraint(left, right, origin) {}
-    void dbprint(std::ostream& out) const override {
+    void dbprint(std::ostream &out) const override {
         out << "Constraint:" << dbp(left) << " := " << dbp(right);
     }
     using TypeConstraint::reportError;
-    bool reportError(const TypeVariableSubstitution* subst) const override {
+    bool reportError(const TypeVariableSubstitution *subst) const override {
         return reportError(subst, "Cannot cast implicitly type '%1%' to type '%2%'", right, left);
     }
-    BinaryConstraint* create(const IR::Type* left, const IR::Type* right) const override {
+    BinaryConstraint *create(const IR::Type *left, const IR::Type *right) const override {
         return new CanBeImplicitlyCastConstraint(left, right, this);
     }
 };
@@ -250,42 +250,42 @@ class TypeConstraints final : public IHasDbPrint {
      * This example should not typecheck: because T cannot be constrained in the invocation of f.
      * While typechecking the f(data) call, T is not a type variable that can be unified.
      */
-    std::set<const IR::ITypeVar*> unifiableTypeVariables;
-    std::vector<const TypeConstraint*> constraints;
-    TypeUnification* unification;
-    const TypeVariableSubstitution* definedVariables;
+    std::set<const IR::ITypeVar *> unifiableTypeVariables;
+    std::vector<const TypeConstraint *> constraints;
+    TypeUnification *unification;
+    const TypeVariableSubstitution *definedVariables;
     /// Keeps track of the values of all variables.
-    TypeVariableSubstitution* currentSubstitution;
+    TypeVariableSubstitution *currentSubstitution;
 
  public:
     TypeVariableSubstitutionVisitor replaceVariables;
 
-    TypeConstraints(const TypeVariableSubstitution* definedVariables, const P4::TypeMap* typeMap)
+    TypeConstraints(const TypeVariableSubstitution *definedVariables, const P4::TypeMap *typeMap)
         : unification(new TypeUnification(this, typeMap)),
           definedVariables(definedVariables),
           currentSubstitution(new TypeVariableSubstitution()),
           replaceVariables(definedVariables) {}
     // Mark this variable as being free.
-    void addUnifiableTypeVariable(const IR::ITypeVar* typeVariable) {
+    void addUnifiableTypeVariable(const IR::ITypeVar *typeVariable) {
         unifiableTypeVariables.insert(typeVariable);
     }
 
     /// True if type is a type variable that can be unified.
     /// A variable is unifiable if it is marked so and it not already
     /// part of definedVariables.
-    bool isUnifiableTypeVariable(const IR::Type* type);
-    void add(const TypeConstraint* constraint) { constraints.push_back(constraint); }
-    void addEqualityConstraint(const IR::Node* source, const IR::Type* left, const IR::Type* right);
+    bool isUnifiableTypeVariable(const IR::Type *type);
+    void add(const TypeConstraint *constraint) { constraints.push_back(constraint); }
+    void addEqualityConstraint(const IR::Node *source, const IR::Type *left, const IR::Type *right);
     /*
      * Solve the specified constraint.
      * @param subst      Variable substitution which is updated with new constraints.
      * @param constraint Constraint to solve.
      * @return           True on success.  Does not report error on failure.
      */
-    bool solve(const BinaryConstraint* constraint);
-    TypeVariableSubstitution* solve();
-    void dbprint(std::ostream& out) const;
-    const TypeVariableSubstitution* getCurrentSubstitution() const { return currentSubstitution; }
+    bool solve(const BinaryConstraint *constraint);
+    TypeVariableSubstitution *solve();
+    void dbprint(std::ostream &out) const;
+    const TypeVariableSubstitution *getCurrentSubstitution() const { return currentSubstitution; }
 };
 }  // namespace P4
 

@@ -18,14 +18,14 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* DoRemoveParserControlFlow::postorder(IR::ParserState* state) {
+const IR::Node *DoRemoveParserControlFlow::postorder(IR::ParserState *state) {
     LOG1("Visiting " << dbp(state));
     // TODO: we keep annotations on the first state,
     // but this may be wrong for something like @atomic
 
     // Set of newly created states
     auto states = new IR::IndexedVector<IR::ParserState>();
-    IR::ParserState* currentState = state;
+    IR::ParserState *currentState = state;
     // components of the currentState
     auto currentComponents = new IR::IndexedVector<IR::StatOrDecl>();
     auto origComponents = state->components;
@@ -86,7 +86,7 @@ const IR::Node* DoRemoveParserControlFlow::postorder(IR::ParserState* state) {
     return states;
 }
 
-Visitor::profile_t DoRemoveParserControlFlow::init_apply(const IR::Node* node) {
+Visitor::profile_t DoRemoveParserControlFlow::init_apply(const IR::Node *node) {
     LOG1("DoRemoveControlFlow");
     return Transform::init_apply(node);
 }

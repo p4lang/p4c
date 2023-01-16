@@ -19,6 +19,6 @@ limitations under the License.
 
 #include "irclass.h"
 
-IrDefinitions* parse(char** files, int count);
+IrDefinitions *parse(char **files, int count);
 
 #endif /* TOOLS_IR_GENERATOR_IR_GENERATOR_H_ */

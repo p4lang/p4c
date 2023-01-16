@@ -25,10 +25,10 @@ class RandomAccessStack : public IncrementalStack {
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
     /// given callback is invoked. If the callback returns true, then the executor terminates.
     /// Otherwise, execution of the P4 program continues on a different random path.
-    void run(const Callback& callBack) override;
+    void run(const Callback &callBack) override;
 
     /// Constructor for this strategy, considering inheritance
-    RandomAccessStack(AbstractSolver& solver, const ProgramInfo& programInfo, uint64_t popLevel);
+    RandomAccessStack(AbstractSolver &solver, const ProgramInfo &programInfo, uint64_t popLevel);
 
  private:
     // The fraction in which we'll explore the depth of the stack. The higher the
@@ -40,7 +40,7 @@ class RandomAccessStack : public IncrementalStack {
     std::list<StepResult> bufferUnexploredBranches;
 
     // pops multiple levels of an unexploredBranch and handles buffer updates
-    StepResult multiPop(UnexploredBranches& unexploredBranches);
+    StepResult multiPop(UnexploredBranches &unexploredBranches);
 };
 
 }  // namespace P4Testgen

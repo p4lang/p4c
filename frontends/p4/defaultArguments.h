@@ -35,23 +35,23 @@ namespace P4 {
  * f(a = 0);
  */
 class DoDefaultArguments : public Transform {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
 
  public:
-    DoDefaultArguments(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
+    DoDefaultArguments(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
         setName("DoDefaultArguments");
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
     }
-    const IR::Node* postorder(IR::MethodCallExpression* expression) override;
-    const IR::Node* postorder(IR::Declaration_Instance* inst) override;
-    const IR::Node* postorder(IR::ConstructorCallExpression* ccc) override;
+    const IR::Node *postorder(IR::MethodCallExpression *expression) override;
+    const IR::Node *postorder(IR::Declaration_Instance *inst) override;
+    const IR::Node *postorder(IR::ConstructorCallExpression *ccc) override;
 };
 
 class DefaultArguments : public PassManager {
  public:
-    DefaultArguments(ReferenceMap* refMap, TypeMap* typeMap) {
+    DefaultArguments(ReferenceMap *refMap, TypeMap *typeMap) {
         setName("DefaultArguments");
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoDefaultArguments(refMap, typeMap));

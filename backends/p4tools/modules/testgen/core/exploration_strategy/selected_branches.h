@@ -24,17 +24,17 @@ class SelectedBranches : public ExplorationStrategy {
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
     /// given callback is invoked. If the callback returns true, then the executor terminates.
     /// Otherwise, execution of the P4 program continues on a different random path.
-    void run(const Callback& callBack) override;
+    void run(const Callback &callBack) override;
 
     /// Constructor for this strategy, considering inheritance
-    SelectedBranches(AbstractSolver& solver, const ProgramInfo& programInfo,
+    SelectedBranches(AbstractSolver &solver, const ProgramInfo &programInfo,
                      std::string selectedBranchesStr);
 
  private:
     /// Chooses a branch corresponding to a given branch identifier.
     ///
     /// @returns next execution state to be examined, throws an exception on invalid nextBranch.
-    ExecutionState* chooseBranch(const std::vector<Branch>& branches, uint64_t nextBranch);
+    ExecutionState *chooseBranch(const std::vector<Branch> &branches, uint64_t nextBranch);
 
     /// The list of selected branches.
     std::list<uint64_t> selectedBranches;

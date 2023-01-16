@@ -28,25 +28,25 @@ namespace P4 {
  * This cannot be done for constant declarations, though.
  */
 class DoEliminateInvalidHeaders final : public Transform {
-    ReferenceMap* refMap;
+    ReferenceMap *refMap;
     IR::IndexedVector<IR::StatOrDecl> statements;
-    std::vector<const IR::Declaration_Variable*> variables;
+    std::vector<const IR::Declaration_Variable *> variables;
 
  public:
-    DoEliminateInvalidHeaders(ReferenceMap* refMap) : refMap(refMap) {
+    DoEliminateInvalidHeaders(ReferenceMap *refMap) : refMap(refMap) {
         setName("DoEliminateInvalidHeaders");
         CHECK_NULL(refMap);
     }
-    const IR::Node* postorder(IR::InvalidHeader* expression) override;
-    const IR::Node* postorder(IR::P4Control* control) override;
-    const IR::Node* postorder(IR::ParserState* parser) override;
-    const IR::Node* postorder(IR::P4Action* action) override;
+    const IR::Node *postorder(IR::InvalidHeader *expression) override;
+    const IR::Node *postorder(IR::P4Control *control) override;
+    const IR::Node *postorder(IR::ParserState *parser) override;
+    const IR::Node *postorder(IR::P4Action *action) override;
 };
 
 class EliminateInvalidHeaders final : public PassManager {
  public:
-    EliminateInvalidHeaders(ReferenceMap* refMap, TypeMap* typeMap,
-                            TypeChecking* typeChecking = nullptr) {
+    EliminateInvalidHeaders(ReferenceMap *refMap, TypeMap *typeMap,
+                            TypeChecking *typeChecking = nullptr) {
         if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoEliminateInvalidHeaders(refMap));

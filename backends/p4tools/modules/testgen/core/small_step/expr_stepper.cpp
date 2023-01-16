@@ -29,28 +29,28 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-ExprStepper::ExprStepper(ExecutionState& state, AbstractSolver& solver,
-                         const ProgramInfo& programInfo)
+ExprStepper::ExprStepper(ExecutionState &state, AbstractSolver &solver,
+                         const ProgramInfo &programInfo)
     : AbstractStepper(state, solver, programInfo) {}
 
-bool ExprStepper::preorder(const IR::BoolLiteral* boolLiteral) {
+bool ExprStepper::preorder(const IR::BoolLiteral *boolLiteral) {
     logStep(boolLiteral);
     return stepSymbolicValue(boolLiteral);
 }
 
-bool ExprStepper::preorder(const IR::Constant* constant) {
+bool ExprStepper::preorder(const IR::Constant *constant) {
     logStep(constant);
     return stepSymbolicValue(constant);
 }
 
-void ExprStepper::handleHitMissActionRun(const IR::Member* member) {
-    auto* nextState = new ExecutionState(state);
+void ExprStepper::handleHitMissActionRun(const IR::Member *member) {
+    auto *nextState = new ExecutionState(state);
     std::vector<Continuation::Command> replacements;
-    const auto* method = member->expr->to<IR::MethodCallExpression>();
+    const auto *method = member->expr->to<IR::MethodCallExpression>();
     BUG_CHECK(method->method->is<IR::Member>(), "Method apply has unexpected format: %1%", method);
     replacements.emplace_back(new IR::MethodCallStatement(method));
-    const auto* methodName = method->method->to<IR::Member>();
-    const auto* table = state.getTableType(methodName);
+    const auto *methodName = method->method->to<IR::Member>();
+    const auto *table = state.getTableType(methodName);
     CHECK_NULL(table);
     if (member->member.name == IR::Type_Table::hit) {
         replacements.emplace_back(Continuation::Return(TableStepper::getTableHitVar(table)));
@@ -64,7 +64,7 @@ void ExprStepper::handleHitMissActionRun(const IR::Member* member) {
     result->emplace_back(nextState);
 }
 
-bool ExprStepper::preorder(const IR::Member* member) {
+bool ExprStepper::preorder(const IR::Member *member) {
     logStep(member);
 
     if (member->expr->is<IR::MethodCallExpression>() &&
@@ -93,23 +93,23 @@ bool ExprStepper::preorder(const IR::Member* member) {
     return stepSymbolicValue(state.get(member));
 }
 
-void ExprStepper::evalActionCall(const IR::P4Action* action, const IR::MethodCallExpression* call) {
-    const auto* actionNameSpace = action->to<IR::INamespace>();
+void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCallExpression *call) {
+    const auto *actionNameSpace = action->to<IR::INamespace>();
     BUG_CHECK(actionNameSpace, "Does not instantiate an INamespace: %1%", actionNameSpace);
-    auto* nextState = new ExecutionState(state);
+    auto *nextState = new ExecutionState(state);
     // If the action has arguments, these are usually directionless control plane input.
     // We introduce a zombie variable that takes the argument value. This value is either
     // provided by a constant entry or synthesized by us.
     for (size_t argIdx = 0; argIdx < call->arguments->size(); ++argIdx) {
-        const auto& parameters = action->parameters;
-        const auto* param = parameters->getParameter(argIdx);
-        const auto* paramType = param->type;
+        const auto &parameters = action->parameters;
+        const auto *param = parameters->getParameter(argIdx);
+        const auto *paramType = param->type;
         const auto paramName = param->name;
         BUG_CHECK(param->direction == IR::Direction::None,
                   "%1%: Only directionless action parameters are supported at this point. ",
                   action);
-        const auto& tableActionDataVar = Utils::getZombieVar(paramType, 0, paramName);
-        const auto* curArg = call->arguments->at(argIdx)->expression;
+        const auto &tableActionDataVar = Utils::getZombieVar(paramType, 0, paramName);
+        const auto *curArg = call->arguments->at(argIdx)->expression;
         nextState->set(tableActionDataVar, curArg);
     }
     nextState->replaceTopBody(action->body);
@@ -118,16 +118,16 @@ void ExprStepper::evalActionCall(const IR::P4Action* action, const IR::MethodCal
     result->emplace_back(nextState);
 }
 
-bool ExprStepper::preorder(const IR::MethodCallExpression* call) {
+bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
     logStep(call);
     // A method call expression represents an invocation of an action, a table, an extern, or
     // setValid/setInvalid.
 
     // Handle method calls. These are either table invocations or extern calls.
     if (call->method->type->is<IR::Type_Method>()) {
-        if (const auto* path = call->method->to<IR::PathExpression>()) {
+        if (const auto *path = call->method->to<IR::PathExpression>()) {
             // Case where call->method is a PathExpression expression.
-            const auto* member = new IR::Member(
+            const auto *member = new IR::Member(
                 call->method->type,
                 new IR::PathExpression(new IR::Type_Extern("*method"), new IR::Path("*method")),
                 path->path->name);
@@ -135,15 +135,15 @@ bool ExprStepper::preorder(const IR::MethodCallExpression* call) {
             return false;
         }
 
-        if (const auto* method = call->method->to<IR::Member>()) {
+        if (const auto *method = call->method->to<IR::Member>()) {
             // Case where call->method is a Member expression. For table invocations, the
             // qualifier of the member determines the table being invoked. For extern calls,
             // the qualifier determines the extern object containing the method being invoked.
             BUG_CHECK(method->expr, "Method call has unexpected format: %1%", call);
 
             // Handle table calls.
-            if (const auto* table = state.getTableType(method)) {
-                auto* nextState = new ExecutionState(state);
+            if (const auto *table = state.getTableType(method)) {
+                auto *nextState = new ExecutionState(state);
                 nextState->replaceTopBody(Continuation::Return(table));
                 result->emplace_back(nextState);
                 return false;
@@ -193,7 +193,7 @@ bool ExprStepper::preorder(const IR::MethodCallExpression* call) {
         BUG("Unknown method call: %1% of type %2%", call->method, call->method->node_type_name());
         // Handle action calls. Actions are called by tables and are not inlined, unlike
         // functions.
-    } else if (const auto* action = state.getActionDecl(call->method)) {
+    } else if (const auto *action = state.getActionDecl(call->method)) {
         evalActionCall(action, call);
         return false;
     }
@@ -201,42 +201,42 @@ bool ExprStepper::preorder(const IR::MethodCallExpression* call) {
     BUG("Unknown method call expression: %1%", call);
 }
 
-bool ExprStepper::preorder(const IR::P4Table* table) {
+bool ExprStepper::preorder(const IR::P4Table *table) {
     // Delegate to the tableStepper.
     TableStepper tableStepper(this, table);
 
     return tableStepper.eval();
 }
 
-bool ExprStepper::preorder(const IR::Mux* mux) {
+bool ExprStepper::preorder(const IR::Mux *mux) {
     logStep(mux);
 
     if (!SymbolicEnv::isSymbolicValue(mux->e0)) {
-        return stepToSubexpr(mux->e0, result, state, [mux](const Continuation::Parameter* v) {
-            auto* result = mux->clone();
+        return stepToSubexpr(mux->e0, result, state, [mux](const Continuation::Parameter *v) {
+            auto *result = mux->clone();
             result->e0 = v->param;
             return Continuation::Return(result);
         });
     }
     // If the Mux condition  is tainted, just return a taint constant.
     if (state.hasTaint(mux->e0)) {
-        auto* nextState = new ExecutionState(state);
+        auto *nextState = new ExecutionState(state);
         nextState->replaceTopBody(
             Continuation::Return(programInfo.createTargetUninitialized(mux->type, true)));
         result->emplace_back(nextState);
         return false;
     }
     // A list of path conditions paired with the resulting expression for each branch.
-    std::list<std::pair<const IR::Expression*, const IR::Expression*>> branches = {
+    std::list<std::pair<const IR::Expression *, const IR::Expression *>> branches = {
         {mux->e0, mux->e1},
         {new IR::LNot(mux->e0->type, mux->e0), mux->e2},
     };
 
-    for (const auto& entry : branches) {
-        const auto* cond = entry.first;
-        const auto* expr = entry.second;
+    for (const auto &entry : branches) {
+        const auto *cond = entry.first;
+        const auto *expr = entry.second;
 
-        auto* nextState = new ExecutionState(state);
+        auto *nextState = new ExecutionState(state);
         nextState->replaceTopBody(Continuation::Return(expr));
         result->emplace_back(cond, state, nextState);
     }
@@ -244,18 +244,18 @@ bool ExprStepper::preorder(const IR::Mux* mux) {
     return false;
 }
 
-bool ExprStepper::preorder(const IR::PathExpression* pathExpression) {
+bool ExprStepper::preorder(const IR::PathExpression *pathExpression) {
     logStep(pathExpression);
 
     // If we are referencing a parser state, step into the state.
-    const auto* decl = state.findDecl(pathExpression)->getNode();
+    const auto *decl = state.findDecl(pathExpression)->getNode();
     if (decl->is<IR::ParserState>()) {
         return stepSymbolicValue(decl);
     }
-    auto* nextState = new ExecutionState(state);
+    auto *nextState = new ExecutionState(state);
     // ValueSets can be declared in parsers and are usually set by the control plane.
     // We simply return the contained valueSet.
-    if (const auto* valueSet = decl->to<IR::P4ValueSet>()) {
+    if (const auto *valueSet = decl->to<IR::P4ValueSet>()) {
         nextState->replaceTopBody(Continuation::Return(valueSet));
         result->emplace_back(nextState);
         return false;
@@ -267,14 +267,14 @@ bool ExprStepper::preorder(const IR::PathExpression* pathExpression) {
     return false;
 }
 
-bool ExprStepper::preorder(const IR::P4ValueSet* valueSet) {
+bool ExprStepper::preorder(const IR::P4ValueSet *valueSet) {
     logStep(valueSet);
 
     auto vsSize = valueSet->size->checkedTo<IR::Constant>()->value;
-    auto* nextState = new ExecutionState(state);
+    auto *nextState = new ExecutionState(state);
     IR::Vector<IR::Expression> components;
     // TODO: Fill components with values when we have an API.
-    const auto* pvsType = valueSet->elementType;
+    const auto *pvsType = valueSet->elementType;
     pvsType = state.resolveType(pvsType);
     TESTGEN_UNIMPLEMENTED("Value Set not yet fully implemented");
 
@@ -283,13 +283,13 @@ bool ExprStepper::preorder(const IR::P4ValueSet* valueSet) {
     return false;
 }
 
-bool ExprStepper::preorder(const IR::Operation_Binary* binary) {
+bool ExprStepper::preorder(const IR::Operation_Binary *binary) {
     logStep(binary);
 
     if (!SymbolicEnv::isSymbolicValue(binary->left)) {
         return stepToSubexpr(binary->left, result, state,
-                             [binary](const Continuation::Parameter* v) {
-                                 auto* result = binary->clone();
+                             [binary](const Continuation::Parameter *v) {
+                                 auto *result = binary->clone();
                                  result->left = v->param;
                                  return Continuation::Return(result);
                              });
@@ -297,8 +297,8 @@ bool ExprStepper::preorder(const IR::Operation_Binary* binary) {
 
     if (!SymbolicEnv::isSymbolicValue(binary->right)) {
         return stepToSubexpr(binary->right, result, state,
-                             [binary](const Continuation::Parameter* v) {
-                                 auto* result = binary->clone();
+                             [binary](const Continuation::Parameter *v) {
+                                 auto *result = binary->clone();
                                  result->right = v->param;
                                  return Continuation::Return(result);
                              });
@@ -306,7 +306,7 @@ bool ExprStepper::preorder(const IR::Operation_Binary* binary) {
 
     // Handle saturating arithmetic expressions by translating them into Mux expressions.
     if (P4::SaturationElim::isSaturationOperation(binary)) {
-        auto* nextState = new ExecutionState(state);
+        auto *nextState = new ExecutionState(state);
         nextState->replaceTopBody(Continuation::Return(P4::SaturationElim::eliminate(binary)));
         result->emplace_back(nextState);
         return false;
@@ -315,12 +315,12 @@ bool ExprStepper::preorder(const IR::Operation_Binary* binary) {
     return stepSymbolicValue(binary);
 }
 
-bool ExprStepper::preorder(const IR::Operation_Unary* unary) {
+bool ExprStepper::preorder(const IR::Operation_Unary *unary) {
     logStep(unary);
 
     if (!SymbolicEnv::isSymbolicValue(unary->expr)) {
-        return stepToSubexpr(unary->expr, result, state, [unary](const Continuation::Parameter* v) {
-            auto* result = unary->clone();
+        return stepToSubexpr(unary->expr, result, state, [unary](const Continuation::Parameter *v) {
+            auto *result = unary->clone();
             result->expr = v->param;
             return Continuation::Return(result);
         });
@@ -329,7 +329,7 @@ bool ExprStepper::preorder(const IR::Operation_Unary* unary) {
     return stepSymbolicValue(unary);
 }
 
-bool ExprStepper::preorder(const IR::SelectExpression* selectExpression) {
+bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
     logStep(selectExpression);
 
     // If there are no select cases, then the select expression has failed to match on anything.
@@ -339,17 +339,17 @@ bool ExprStepper::preorder(const IR::SelectExpression* selectExpression) {
         return false;
     }
 
-    const auto* selectCase = selectExpression->selectCases.at(0);
+    const auto *selectCase = selectExpression->selectCases.at(0);
     // Getting P4ValueSet from PathExpression , to highlight a particular case of processing
     // P4ValueSet.
-    if (const auto* pathExpr = selectCase->keyset->to<IR::PathExpression>()) {
-        const auto* decl = state.findDecl(pathExpr)->getNode();
+    if (const auto *pathExpr = selectCase->keyset->to<IR::PathExpression>()) {
+        const auto *decl = state.findDecl(pathExpr)->getNode();
         // Until we have test support for value set, we simply remove them from the match list.
         // TODO: Implement value sets.
         if (decl->is<IR::P4ValueSet>()) {
-            auto* newSelectExpression = selectExpression->clone();
+            auto *newSelectExpression = selectExpression->clone();
             newSelectExpression->selectCases.erase(newSelectExpression->selectCases.begin());
-            auto* nextState = new ExecutionState(state);
+            auto *nextState = new ExecutionState(state);
             nextState->replaceTopBody(Continuation::Return(newSelectExpression));
             result->emplace_back(nextState);
             return false;
@@ -359,11 +359,11 @@ bool ExprStepper::preorder(const IR::SelectExpression* selectExpression) {
     if (!SymbolicEnv::isSymbolicValue(selectCase->keyset)) {
         // Evaluate the keyset in the first select case.
         return stepToSubexpr(selectCase->keyset, result, state,
-                             [selectExpression, selectCase](const Continuation::Parameter* v) {
-                                 auto* newSelectCase = selectCase->clone();
+                             [selectExpression, selectCase](const Continuation::Parameter *v) {
+                                 auto *newSelectCase = selectCase->clone();
                                  newSelectCase->keyset = v->param;
 
-                                 auto* result = selectExpression->clone();
+                                 auto *result = selectExpression->clone();
                                  result->selectCases[0] = newSelectCase;
                                  return Continuation::Return(result);
                              });
@@ -372,8 +372,8 @@ bool ExprStepper::preorder(const IR::SelectExpression* selectExpression) {
     if (!SymbolicEnv::isSymbolicValue(selectExpression->select)) {
         // Evaluate the expression being selected.
         return stepToListSubexpr(selectExpression->select, result, state,
-                                 [selectExpression](const IR::ListExpression* listExpr) {
-                                     auto* result = selectExpression->clone();
+                                 [selectExpression](const IR::ListExpression *listExpr) {
+                                     auto *result = selectExpression->clone();
                                      result->select = listExpr;
                                      return Continuation::Return(result);
                                  });
@@ -381,7 +381,7 @@ bool ExprStepper::preorder(const IR::SelectExpression* selectExpression) {
 
     // Handle case where the first select case matches: proceed to the next parser state,
     // guarded by its path condition.
-    const auto* equality = GenEq::equate(selectExpression->select, selectCase->keyset);
+    const auto *equality = GenEq::equate(selectExpression->select, selectCase->keyset);
 
     // TODO: Implement the taint case for select expressions.
     // In the worst case, this means the entire parser is tainted.
@@ -393,18 +393,18 @@ bool ExprStepper::preorder(const IR::SelectExpression* selectExpression) {
             selectExpression);
     }
     {
-        auto* nextState = new ExecutionState(state);
+        auto *nextState = new ExecutionState(state);
         nextState->replaceTopBody(Continuation::Return(selectCase->state));
         result->emplace_back(equality, state, nextState);
     }
 
     // Handle case where the first select case doesn't match.
     {
-        auto* inequality = new IR::LNot(IR::Type::Boolean::get(), equality);
-        auto* nextState = new ExecutionState(state);
+        auto *inequality = new IR::LNot(IR::Type::Boolean::get(), equality);
+        auto *nextState = new ExecutionState(state);
 
         // Remove the first select case from the select expression.
-        auto* nextSelectExpression = selectExpression->clone();
+        auto *nextSelectExpression = selectExpression->clone();
         nextSelectExpression->selectCases.erase(nextSelectExpression->selectCases.begin());
 
         nextState->replaceTopBody(Continuation::Return(nextSelectExpression));
@@ -414,12 +414,12 @@ bool ExprStepper::preorder(const IR::SelectExpression* selectExpression) {
     return false;
 }
 
-bool ExprStepper::preorder(const IR::ListExpression* listExpression) {
+bool ExprStepper::preorder(const IR::ListExpression *listExpression) {
     if (!SymbolicEnv::isSymbolicValue(listExpression)) {
         // Evaluate the expression being selected.
         return stepToListSubexpr(listExpression, result, state,
-                                 [listExpression](const IR::ListExpression* listExpr) {
-                                     const auto* result = listExpression->clone();
+                                 [listExpression](const IR::ListExpression *listExpr) {
+                                     const auto *result = listExpression->clone();
                                      result = listExpr;
                                      return Continuation::Return(result);
                                  });
@@ -427,12 +427,12 @@ bool ExprStepper::preorder(const IR::ListExpression* listExpression) {
     return stepSymbolicValue(listExpression);
 }
 
-bool ExprStepper::preorder(const IR::StructExpression* structExpression) {
+bool ExprStepper::preorder(const IR::StructExpression *structExpression) {
     if (!SymbolicEnv::isSymbolicValue(structExpression)) {
         // Evaluate the expression being selected.
         return stepToStructSubexpr(structExpression, result, state,
-                                   [structExpression](const IR::StructExpression* structExpr) {
-                                       const auto* result = structExpression->clone();
+                                   [structExpression](const IR::StructExpression *structExpr) {
+                                       const auto *result = structExpression->clone();
                                        result = structExpr;
                                        return Continuation::Return(result);
                                    });
@@ -440,12 +440,12 @@ bool ExprStepper::preorder(const IR::StructExpression* structExpression) {
     return stepSymbolicValue(structExpression);
 }
 
-bool ExprStepper::preorder(const IR::Slice* slice) {
+bool ExprStepper::preorder(const IR::Slice *slice) {
     logStep(slice);
 
     if (!SymbolicEnv::isSymbolicValue(slice->e0)) {
-        return stepToSubexpr(slice->e0, result, state, [slice](const Continuation::Parameter* v) {
-            auto* result = slice->clone();
+        return stepToSubexpr(slice->e0, result, state, [slice](const Continuation::Parameter *v) {
+            auto *result = slice->clone();
             result->e0 = v->param;
             return Continuation::Return(result);
         });

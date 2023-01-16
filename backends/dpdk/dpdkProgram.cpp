@@ -29,7 +29,7 @@ namespace DPDK {
    Add all the structures to DPDK structtype.
 */
 IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata(
-    IR::P4Program* prog, IR::Type_Struct* metadata) {
+    IR::P4Program *prog, IR::Type_Struct *metadata) {
     IR::IndexedVector<IR::DpdkStructType> structType;
     auto new_objs = new IR::Vector<IR::Node>;
     for (auto obj : prog->objects) {
@@ -93,8 +93,8 @@ IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_postamb
     return instr;
 }
 
-const IR::DpdkAsmProgram* ConvertToDpdkProgram::create(IR::P4Program* prog) {
-    IR::Type_Struct* metadataStruct = nullptr;
+const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
+    IR::Type_Struct *metadataStruct = nullptr;
 
     for (auto obj : prog->objects) {
         if (auto s = obj->to<IR::Type_Struct>()) {
@@ -245,17 +245,17 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create(IR::P4Program* prog) {
                                   selectors, learners, statements, structure->get_globals());
 }
 
-const IR::Node* ConvertToDpdkProgram::preorder(IR::P4Program* prog) {
+const IR::Node *ConvertToDpdkProgram::preorder(IR::P4Program *prog) {
     dpdk_program = create(prog);
     return prog;
 }
 
-cstring ConvertToDpdkParser::append_parser_name(const IR::P4Parser* p, cstring label) {
+cstring ConvertToDpdkParser::append_parser_name(const IR::P4Parser *p, cstring label) {
     return p->name + "_" + label;
 }
 
-IR::Declaration_Variable* ConvertToDpdkParser::addNewTmpVarToMetadata(cstring name,
-                                                                      const IR::Type* type) {
+IR::Declaration_Variable *ConvertToDpdkParser::addNewTmpVarToMetadata(cstring name,
+                                                                      const IR::Type *type) {
     auto newTmpVar = new IR::Declaration_Variable(IR::ID(refmap->newName(name)), type);
     metadataStruct->fields.push_back(
         new IR::StructField(IR::ID(newTmpVar->name.name), newTmpVar->type));
@@ -268,8 +268,8 @@ IR::Declaration_Variable* ConvertToDpdkParser::addNewTmpVarToMetadata(cstring na
    expressions. When the keyset is Mask expression "a &&& b", it inserts temporary variables in
    Metadata structure and populates the left and right operands of comparison with
    "input & b" and "a & b" */
-void ConvertToDpdkParser::getCondVars(const IR::Expression* sv, const IR::Expression* ce,
-                                      IR::Expression** leftExpr, IR::Expression** rightExpr) {
+void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expression *ce,
+                                      IR::Expression **leftExpr, IR::Expression **rightExpr) {
     if (sv->is<IR::Constant>() && sv->type->width_bits() > 32) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "%1%, Constant expression wider than 32-bit is not permitted", sv);
@@ -320,11 +320,11 @@ void ConvertToDpdkParser::getCondVars(const IR::Expression* sv, const IR::Expres
                                          ....
     This function emits a series of jmps for each keyset.
 */
-void ConvertToDpdkParser::handleTupleExpression(const IR::ListExpression* cl,
-                                                const IR::ListExpression* input, int inputSize,
+void ConvertToDpdkParser::handleTupleExpression(const IR::ListExpression *cl,
+                                                const IR::ListExpression *input, int inputSize,
                                                 cstring trueLabel, cstring falseLabel) {
-    IR::Expression* left;
-    IR::Expression* right;
+    IR::Expression *left;
+    IR::Expression *right;
     /* Compare each element in the input tuple with the keyset tuple */
     for (auto i = 0; i < inputSize; i++) {
         auto switch_var = input->components.at(i);
@@ -337,13 +337,13 @@ void ConvertToDpdkParser::handleTupleExpression(const IR::ListExpression* cl,
     add_instr(new IR::DpdkJmpLabelStatement(trueLabel));
 }
 
-bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
+bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
     for (auto l : p->parserLocals) {
         structure->push_variable(new IR::DpdkDeclaration(l));
     }
     ordered_map<cstring, int> degree_map;
-    ordered_map<cstring, const IR::ParserState*> state_map;
-    std::vector<const IR::ParserState*> stack;
+    ordered_map<cstring, const IR::ParserState *> state_map;
+    std::vector<const IR::ParserState *> stack;
     for (auto state : p->states) {
         if (state->name == "start") stack.push_back(state);
         degree_map.insert({state->name, 0});
@@ -390,10 +390,10 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
         if (state->selectExpression) {
             if (auto e = state->selectExpression->to<IR::SelectExpression>()) {
                 auto caseList = e->selectCases;
-                const IR::Expression* switch_var;
-                const IR::Expression* caseExpr;
-                IR::Expression* left;
-                IR::Expression* right;
+                const IR::Expression *switch_var;
+                const IR::Expression *caseExpr;
+                IR::Expression *left;
+                IR::Expression *right;
 
                 /* Handling single expression in keyset as special case because :
                    - for tuple expression we emit a series of jmpneq followed by an unconditional
@@ -465,7 +465,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
         }
 
         std::set<cstring> node_to_remove;
-        for (auto& it : degree_map) {
+        for (auto &it : degree_map) {
             auto degree = it.second;
             if (degree == 0) {
                 auto result = state_map.find(it.first);
@@ -489,10 +489,10 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
     return false;
 }
 
-bool ConvertToDpdkParser::preorder(const IR::ParserState*) { return false; }
+bool ConvertToDpdkParser::preorder(const IR::ParserState *) { return false; }
 
 // =====================Control=============================
-bool ConvertToDpdkControl::preorder(const IR::P4Action* a) {
+bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
     auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure, metadataStruct);
     helper->setCalledBy(this);
     a->body->apply(*helper);
@@ -511,7 +511,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Action* a) {
      - If there is a key field with lpm match kind, the other match fields, if any,
        must all be exact match.
 */
-bool ConvertToDpdkControl::checkTableValid(const IR::P4Table* a) {
+bool ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
     auto keys = a->getKey();
     auto lpmCount = 0;
     auto nonExactCount = 0;
@@ -545,8 +545,8 @@ bool ConvertToDpdkControl::checkTableValid(const IR::P4Table* a) {
     return true;
 }
 
-boost::optional<const IR::Member*> ConvertToDpdkControl::getMemExprFromProperty(
-    const IR::P4Table* table, cstring propertyName) {
+boost::optional<const IR::Member *> ConvertToDpdkControl::getMemExprFromProperty(
+    const IR::P4Table *table, cstring propertyName) {
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return boost::none;
     if (!property->value->is<IR::ExpressionValue>()) {
@@ -566,7 +566,7 @@ boost::optional<const IR::Member*> ConvertToDpdkControl::getMemExprFromProperty(
     return expr->to<IR::Member>();
 }
 
-boost::optional<int> ConvertToDpdkControl::getNumberFromProperty(const IR::P4Table* table,
+boost::optional<int> ConvertToDpdkControl::getNumberFromProperty(const IR::P4Table *table,
                                                                  cstring propertyName) {
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return boost::none;
@@ -587,7 +587,7 @@ boost::optional<int> ConvertToDpdkControl::getNumberFromProperty(const IR::P4Tab
     return expr->to<IR::Constant>()->asInt();
 }
 
-bool ConvertToDpdkControl::preorder(const IR::P4Table* t) {
+bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
     if (!checkTableValid(t)) return false;
 
     if (t->properties->getProperty("selector") != nullptr) {
@@ -619,7 +619,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table* t) {
     return false;
 }
 
-bool ConvertToDpdkControl::preorder(const IR::P4Control* c) {
+bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
     LOG3("P4Control: " << dbp(c) << std::endl << c);
     for (auto l : c->controlLocals) {
         if (!l->is<IR::P4Action>() && !l->is<IR::P4Table>()) {

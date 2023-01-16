@@ -18,10 +18,10 @@ limitations under the License.
 
 namespace P4 {
 
-bool CheckNamedArgs::checkArguments(const IR::Vector<IR::Argument>* arguments) {
+bool CheckNamedArgs::checkArguments(const IR::Vector<IR::Argument> *arguments) {
     bool first = true;
     bool hasName = false;
-    std::map<cstring, const IR::Argument*> found;
+    std::map<cstring, const IR::Argument *> found;
 
     for (auto arg : *arguments) {
         cstring argName = arg->name.name;
@@ -45,7 +45,7 @@ bool CheckNamedArgs::checkArguments(const IR::Vector<IR::Argument>* arguments) {
     return true;
 }
 
-bool CheckNamedArgs::checkOptionalParameters(const IR::ParameterList* parameters) {
+bool CheckNamedArgs::checkOptionalParameters(const IR::ParameterList *parameters) {
     for (auto parameter : parameters->parameters) {
         if (parameter->isOptional())
             ::error(ErrorType::ERR_INVALID, "%1%: optional parameter not allowed here", parameter);
@@ -53,7 +53,7 @@ bool CheckNamedArgs::checkOptionalParameters(const IR::ParameterList* parameters
     return true;
 }
 
-bool CheckNamedArgs::preorder(const IR::Parameter* parameter) {
+bool CheckNamedArgs::preorder(const IR::Parameter *parameter) {
     if (parameter->defaultValue != nullptr) {
         if (parameter->isOptional())
             ::error(ErrorType::ERR_INVALID, "%1%: optional parameters cannot have default values",

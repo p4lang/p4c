@@ -20,13 +20,13 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* DoHandleNoMatch::postorder(IR::SelectExpression* expression) {
+const IR::Node *DoHandleNoMatch::postorder(IR::SelectExpression *expression) {
     for (auto c : expression->selectCases) {
         if (c->keyset->is<IR::DefaultExpression>()) return expression;
     }
 
     if (noMatch == nullptr) {
-        P4CoreLibrary& lib = P4CoreLibrary::instance;
+        P4CoreLibrary &lib = P4CoreLibrary::instance;
         cstring name = nameGen->newName("noMatch");
         LOG2("Inserting " << name << " state");
         auto args = new IR::Vector<IR::Argument>();
@@ -45,13 +45,13 @@ const IR::Node* DoHandleNoMatch::postorder(IR::SelectExpression* expression) {
     return expression;
 }
 
-const IR::Node* DoHandleNoMatch::postorder(IR::P4Parser* parser) {
+const IR::Node *DoHandleNoMatch::postorder(IR::P4Parser *parser) {
     if (noMatch) parser->states.push_back(noMatch);
     noMatch = nullptr;
     return parser;
 }
 
-const IR::Node* DoHandleNoMatch::postorder(IR::P4Program* program) {
+const IR::Node *DoHandleNoMatch::postorder(IR::P4Program *program) {
     if (!noMatch) return program;
     // Check if 'verify' exists.
     auto decls = program->getDeclsByName(IR::ParserState::verify);

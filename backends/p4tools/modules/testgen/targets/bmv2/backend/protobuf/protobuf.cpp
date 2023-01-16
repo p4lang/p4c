@@ -41,19 +41,19 @@ namespace P4Testgen {
 namespace Bmv2 {
 
 /// Wrapper helper function that automatically inserts separators for hex strings.
-std::string formatHexExprWithSep(const IR::Expression* expr) {
+std::string formatHexExprWithSep(const IR::Expression *expr) {
     return insertHexSeparators(formatHexExpr(expr, false, true, false));
 }
 
 Protobuf::Protobuf(cstring testName, boost::optional<unsigned int> seed = boost::none)
     : TF(testName, seed) {}
 
-boost::optional<p4rt_id_t> Protobuf::getIdAnnotation(const IR::IAnnotated* node) {
-    const auto* idAnnotation = node->getAnnotation("id");
+boost::optional<p4rt_id_t> Protobuf::getIdAnnotation(const IR::IAnnotated *node) {
+    const auto *idAnnotation = node->getAnnotation("id");
     if (idAnnotation == nullptr) {
         return boost::none;
     }
-    const auto* idConstant = idAnnotation->expr[0]->to<IR::Constant>();
+    const auto *idConstant = idAnnotation->expr[0]->to<IR::Constant>();
     CHECK_NULL(idConstant);
     if (!idConstant->fitsUint()) {
         ::error(ErrorType::ERR_INVALID, "%1%: @id should be an unsigned integer", node);
@@ -62,8 +62,8 @@ boost::optional<p4rt_id_t> Protobuf::getIdAnnotation(const IR::IAnnotated* node)
     return static_cast<p4rt_id_t>(idConstant->value);
 }
 
-boost::optional<p4rt_id_t> Protobuf::externalId(const P4RuntimeSymbolType& type,
-                                                const IR::IDeclaration* declaration) {
+boost::optional<p4rt_id_t> Protobuf::externalId(const P4RuntimeSymbolType &type,
+                                                const IR::IDeclaration *declaration) {
     CHECK_NULL(declaration);
     if (!declaration->is<IR::IAnnotated>()) {
         return boost::none;  // Assign an id later; see below.
@@ -89,7 +89,7 @@ boost::optional<p4rt_id_t> Protobuf::externalId(const P4RuntimeSymbolType& type,
     return id;
 }
 
-std::vector<std::pair<size_t, size_t>> Protobuf::getIgnoreMasks(const IR::Constant* mask) {
+std::vector<std::pair<size_t, size_t>> Protobuf::getIgnoreMasks(const IR::Constant *mask) {
     std::vector<std::pair<size_t, size_t>> ignoreMasks;
     if (mask == nullptr) {
         return ignoreMasks;
@@ -113,7 +113,7 @@ std::vector<std::pair<size_t, size_t>> Protobuf::getIgnoreMasks(const IR::Consta
     return ignoreMasks;
 }
 
-inja::json Protobuf::getControlPlane(const TestSpec* testSpec) {
+inja::json Protobuf::getControlPlane(const TestSpec *testSpec) {
     inja::json controlPlaneJson = inja::json::object();
 
     // Map of actionProfiles and actionSelectors for easy reference.
@@ -123,24 +123,24 @@ inja::json Protobuf::getControlPlane(const TestSpec* testSpec) {
     if (!tables.empty()) {
         controlPlaneJson["tables"] = inja::json::array();
     }
-    for (auto const& testObject : tables) {
+    for (auto const &testObject : tables) {
         inja::json tblJson;
         tblJson["table_name"] = testObject.first.c_str();
-        const auto* const tblConfig = testObject.second->checkedTo<TableConfig>();
-        const auto* table = tblConfig->getTable();
+        const auto *const tblConfig = testObject.second->checkedTo<TableConfig>();
+        const auto *table = tblConfig->getTable();
 
         auto p4RuntimeId = externalId(SymbolType::TABLE(), table);
         BUG_CHECK(p4RuntimeId, "Id not present for table %1%. Can not generate test.", table);
         tblJson["id"] = *p4RuntimeId;
 
-        const auto* tblRules = tblConfig->getRules();
+        const auto *tblRules = tblConfig->getRules();
         tblJson["rules"] = inja::json::array();
-        for (const auto& tblRule : *tblRules) {
+        for (const auto &tblRule : *tblRules) {
             inja::json rule;
-            const auto* matches = tblRule.getMatches();
-            const auto* actionCall = tblRule.getActionCall();
-            const auto* actionDecl = actionCall->getAction();
-            const auto* actionArgs = actionCall->getArgs();
+            const auto *matches = tblRule.getMatches();
+            const auto *actionCall = tblRule.getActionCall();
+            const auto *actionDecl = actionCall->getAction();
+            const auto *actionArgs = actionCall->getArgs();
             rule["action_name"] = actionCall->getActionName().c_str();
             auto p4RuntimeId = externalId(SymbolType::ACTION(), actionDecl);
             BUG_CHECK(p4RuntimeId, "Id not present for action %1%. Can not generate test.",
@@ -169,8 +169,8 @@ inja::json Protobuf::getControlPlane(const TestSpec* testSpec) {
     return controlPlaneJson;
 }
 
-inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const FieldMatch>& matches,
-                                             const std::vector<ActionArg>& args) {
+inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const FieldMatch> &matches,
+                                             const std::vector<ActionArg> &args) {
     inja::json rulesJson;
 
     rulesJson["single_exact_matches"] = inja::json::array();
@@ -181,19 +181,19 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
     rulesJson["act_args"] = inja::json::array();
     rulesJson["needs_priority"] = false;
 
-    for (auto const& match : matches) {
+    for (auto const &match : matches) {
         auto const fieldName = match.first;
-        auto const& fieldMatch = match.second;
+        auto const &fieldMatch = match.second;
 
         // Iterate over the match fields and segregate them.
         struct GetRange : public boost::static_visitor<void> {
             cstring fieldName;
-            inja::json& rulesJson;
+            inja::json &rulesJson;
 
-            GetRange(inja::json& rulesJson, cstring fieldName)
+            GetRange(inja::json &rulesJson, cstring fieldName)
                 : fieldName(fieldName), rulesJson(rulesJson) {}
 
-            void operator()(const Exact& elem) const {
+            void operator()(const Exact &elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
                 j["value"] = formatHexExprWithSep(elem.getEvaluatedValue());
@@ -202,7 +202,7 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
                 j["id"] = *p4RuntimeId;
                 rulesJson["single_exact_matches"].push_back(j);
             }
-            void operator()(const Range& elem) const {
+            void operator()(const Range &elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
                 j["lo"] = formatHexExprWithSep(elem.getEvaluatedLow());
@@ -214,7 +214,7 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
                 // If the rule has a range match we need to add the priority.
                 rulesJson["needs_priority"] = true;
             }
-            void operator()(const Ternary& elem) const {
+            void operator()(const Ternary &elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
                 j["value"] = formatHexExprWithSep(elem.getEvaluatedValue());
@@ -226,7 +226,7 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
                 // If the rule has a range match we need to add the priority.
                 rulesJson["needs_priority"] = true;
             }
-            void operator()(const LPM& elem) const {
+            void operator()(const LPM &elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
                 j["value"] = formatHexExprWithSep(elem.getEvaluatedValue());
@@ -240,7 +240,7 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
         boost::apply_visitor(GetRange(rulesJson, fieldName), fieldMatch);
     }
 
-    for (const auto& actArg : args) {
+    for (const auto &actArg : args) {
         inja::json j;
         j["param"] = actArg.getActionParamName().c_str();
         j["value"] = formatHexExprWithSep(actArg.getEvaluatedValue());
@@ -253,9 +253,9 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
     return rulesJson;
 }
 
-inja::json Protobuf::getSend(const TestSpec* testSpec) {
-    const auto* iPacket = testSpec->getIngressPacket();
-    const auto* payload = iPacket->getEvaluatedPayload();
+inja::json Protobuf::getSend(const TestSpec *testSpec) {
+    const auto *iPacket = testSpec->getIngressPacket();
+    const auto *payload = iPacket->getEvaluatedPayload();
     inja::json sendJson;
     sendJson["ig_port"] = iPacket->getPort();
     auto dataStr = formatHexExprWithSep(payload);
@@ -264,13 +264,13 @@ inja::json Protobuf::getSend(const TestSpec* testSpec) {
     return sendJson;
 }
 
-inja::json Protobuf::getVerify(const TestSpec* testSpec) {
+inja::json Protobuf::getVerify(const TestSpec *testSpec) {
     inja::json verifyData = inja::json::object();
     if (testSpec->getEgressPacket() != boost::none) {
-        const auto& packet = **testSpec->getEgressPacket();
+        const auto &packet = **testSpec->getEgressPacket();
         verifyData["eg_port"] = packet.getPort();
-        const auto* payload = packet.getEvaluatedPayload();
-        const auto* payloadMask = packet.getEvaluatedPayloadMask();
+        const auto *payload = packet.getEvaluatedPayload();
+        const auto *payloadMask = packet.getEvaluatedPayloadMask();
         verifyData["ignore_mask"] = formatHexExprWithSep(payloadMask);
         verifyData["exp_pkt"] = formatHexExprWithSep(payload);
     }
@@ -394,8 +394,8 @@ entities : [
     return TEST_CASE;
 }
 
-void Protobuf::emitTestcase(const TestSpec* testSpec, cstring selectedBranches, size_t testId,
-                            const std::string& testCase, float currentCoverage) {
+void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                            const std::string &testCase, float currentCoverage) {
     inja::json dataJson;
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
@@ -424,7 +424,7 @@ void Protobuf::emitTestcase(const TestSpec* testSpec, cstring selectedBranches, 
     protobufFile.flush();
 }
 
-void Protobuf::outputTest(const TestSpec* testSpec, cstring selectedBranches, size_t testIdx,
+void Protobuf::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                           float currentCoverage) {
     auto incrementedTestName = testName + "_" + std::to_string(testIdx);
 

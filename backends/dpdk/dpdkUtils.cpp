@@ -16,19 +16,19 @@ limitations under the License.
 #include "dpdkUtils.h"
 
 namespace DPDK {
-bool isSimpleExpression(const IR::Expression* e) {
+bool isSimpleExpression(const IR::Expression *e) {
     if (e->is<IR::Member>() || e->is<IR::PathExpression>() || e->is<IR::Constant>() ||
         e->is<IR::BoolLiteral>())
         return true;
     return false;
 }
 
-bool isNonConstantSimpleExpression(const IR::Expression* e) {
+bool isNonConstantSimpleExpression(const IR::Expression *e) {
     if (e->is<IR::Member>() || e->is<IR::PathExpression>()) return true;
     return false;
 }
 
-bool isCommutativeBinaryOperation(const IR::Operation_Binary* bin) {
+bool isCommutativeBinaryOperation(const IR::Operation_Binary *bin) {
     auto right = bin->right;
     if (right->is<IR::Add>() || right->is<IR::Equ>() || right->is<IR::LOr>() ||
         right->is<IR::LAnd>() || right->is<IR::BOr>() || right->is<IR::BAnd>() ||
@@ -48,13 +48,13 @@ bool isStandardMetadata(cstring name) {
     return isStdMeta;
 }
 
-bool isHeadersStruct(const IR::Type_Struct* st) {
+bool isHeadersStruct(const IR::Type_Struct *st) {
     if (!st) return false;
     auto annon = st->getAnnotation("__packet_data__");
     if (annon) return true;
     return false;
 }
-bool isMetadataStruct(const IR::Type_Struct* st) {
+bool isMetadataStruct(const IR::Type_Struct *st) {
     for (auto anno : st->annotations->annotations) {
         if (anno->name == "__metadata__") {
             return true;
@@ -63,24 +63,24 @@ bool isMetadataStruct(const IR::Type_Struct* st) {
     return false;
 }
 
-bool isMetadataField(const IR::Expression* e) {
+bool isMetadataField(const IR::Expression *e) {
     if (!e->is<IR::Member>()) return false;
     if (e->to<IR::Member>()->expr->type->is<IR::Type_Struct>())
         return isMetadataStruct(e->to<IR::Member>()->expr->type->to<IR::Type_Struct>());
     return false;
 }
 
-bool isEightBitAligned(const IR::Expression* e) {
+bool isEightBitAligned(const IR::Expression *e) {
     if (e->type->width_bits() % 8 != 0) return false;
     return true;
 }
 
-const IR::Type_Bits* getEightBitAlignedType(const IR::Type_Bits* tb) {
+const IR::Type_Bits *getEightBitAlignedType(const IR::Type_Bits *tb) {
     auto width = (tb->width_bits() + 7) & (~7);
     return IR::Type_Bits::get(width);
 }
 
-bool isDirection(const IR::Member* m) {
+bool isDirection(const IR::Member *m) {
     if (m == nullptr) return false;
     return m->member.name == "pna_main_input_metadata_direction" ||
            m->member.name == "pna_pre_input_metadata_direction" ||

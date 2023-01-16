@@ -22,10 +22,10 @@ namespace P4 {
 
 namespace ControlPlaneAPI {
 
-FlattenHeader::FlattenHeader(P4::TypeMap* typeMap, IR::Type_Header* flattenedHeader)
+FlattenHeader::FlattenHeader(P4::TypeMap *typeMap, IR::Type_Header *flattenedHeader)
     : typeMap(typeMap), flattenedHeader(flattenedHeader) {}
 
-void FlattenHeader::doFlatten(const IR::Type* type) {
+void FlattenHeader::doFlatten(const IR::Type *type) {
     if (type->is<IR::Type_Struct>()) needsFlattening = true;
     if (auto st = type->to<IR::Type_StructLike>()) {
         for (auto f : st->fields) {
@@ -36,7 +36,7 @@ void FlattenHeader::doFlatten(const IR::Type* type) {
             nameSegments.pop_back();
         }
     } else {  // primitive field types
-        auto& newFields = flattenedHeader->fields;
+        auto &newFields = flattenedHeader->fields;
         auto newName = makeName("_");
         // preserve the original name using an annotation
         auto originalName = makeName(".");
@@ -59,7 +59,7 @@ cstring FlattenHeader::makeName(cstring sep) const {
 /// Merge all the annotation vectors in allAnnotations into a single
 /// one. Duplicates are resolved, with preference given to the ones towards the
 /// end of allAnnotations, which correspond to the most "nested" ones.
-const IR::Annotations* FlattenHeader::mergeAnnotations() const {
+const IR::Annotations *FlattenHeader::mergeAnnotations() const {
     auto mergedAnnotations = new IR::Annotations();
     for (auto annosIt = allAnnotations.rbegin(); annosIt != allAnnotations.rend(); annosIt++) {
         for (auto anno : (*annosIt)->annotations) {
@@ -72,8 +72,8 @@ const IR::Annotations* FlattenHeader::mergeAnnotations() const {
 }
 
 /* static */
-const IR::Type_Header* FlattenHeader::flatten(P4::TypeMap* typeMap,
-                                              const IR::Type_Header* headerType) {
+const IR::Type_Header *FlattenHeader::flatten(P4::TypeMap *typeMap,
+                                              const IR::Type_Header *headerType) {
     auto flattenedHeader = headerType->clone();
     flattenedHeader->fields.clear();
     FlattenHeader flattener(typeMap, flattenedHeader);

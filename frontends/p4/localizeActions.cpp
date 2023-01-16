@@ -25,11 +25,11 @@ namespace {
 class ParamCloner : public ClonePathExpressions {
  public:
     ParamCloner() { setName("ParamCloner"); }
-    const IR::Node* postorder(IR::Parameter* param) override {
+    const IR::Node *postorder(IR::Parameter *param) override {
         return new IR::Parameter(param->srcInfo, param->name, param->annotations, param->direction,
                                  param->type, param->defaultValue);
     }
-    const IR::Node* postorder(IR::Declaration_Variable* decl) override {
+    const IR::Node *postorder(IR::Declaration_Variable *decl) override {
         return new IR::Declaration_Variable(decl->srcInfo, decl->name, decl->annotations,
                                             decl->type, decl->initializer);
     }
@@ -37,7 +37,7 @@ class ParamCloner : public ClonePathExpressions {
 
 }  // namespace
 
-const IR::Node* TagGlobalActions::preorder(IR::P4Action* action) {
+const IR::Node *TagGlobalActions::preorder(IR::P4Action *action) {
     if (findContext<IR::P4Control>() == nullptr) {
         auto annos = action->annotations;
         if (annos == nullptr) annos = IR::Annotations::empty;
@@ -50,12 +50,12 @@ const IR::Node* TagGlobalActions::preorder(IR::P4Action* action) {
     return action;
 }
 
-bool FindGlobalActionUses::preorder(const IR::P4Action* action) {
+bool FindGlobalActionUses::preorder(const IR::P4Action *action) {
     if (findContext<IR::P4Control>() == nullptr) globalActions.emplace(action);
     return false;
 }
 
-bool FindGlobalActionUses::preorder(const IR::PathExpression* path) {
+bool FindGlobalActionUses::preorder(const IR::PathExpression *path) {
     auto decl = refMap->getDeclaration(path->path, true);
     if (!decl->is<IR::P4Action>()) return false;
 
@@ -81,7 +81,7 @@ bool FindGlobalActionUses::preorder(const IR::PathExpression* path) {
     return false;
 }
 
-const IR::Node* LocalizeActions::postorder(IR::P4Control* control) {
+const IR::Node *LocalizeActions::postorder(IR::P4Control *control) {
     auto actions = ::get(repl->repl, getOriginal<IR::P4Control>());
     if (actions == nullptr) return control;
     IR::IndexedVector<IR::Declaration> newDecls;
@@ -96,7 +96,7 @@ const IR::Node* LocalizeActions::postorder(IR::P4Control* control) {
     return control;
 }
 
-const IR::Node* LocalizeActions::postorder(IR::PathExpression* expression) {
+const IR::Node *LocalizeActions::postorder(IR::PathExpression *expression) {
     auto control = findOrigCtxt<IR::P4Control>();
     if (control == nullptr) return expression;
     auto decl = refMap->getDeclaration(expression->path);
@@ -111,7 +111,7 @@ const IR::Node* LocalizeActions::postorder(IR::PathExpression* expression) {
     return expression;
 }
 
-bool FindRepeatedActionUses::preorder(const IR::PathExpression* expression) {
+bool FindRepeatedActionUses::preorder(const IR::PathExpression *expression) {
     auto decl = refMap->getDeclaration(expression->path, true);
     if (!decl->is<IR::P4Action>()) return false;
     auto action = decl->to<IR::P4Action>();
@@ -120,7 +120,7 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression* expression) {
         // not within a control; ignore.
         return false;
 
-    const IR::Node* actionUser = findContext<IR::P4Table>();
+    const IR::Node *actionUser = findContext<IR::P4Table>();
     if (actionUser == nullptr) actionUser = findContext<IR::MethodCallExpression>();
     if (actionUser == nullptr) actionUser = findContext<IR::SwitchStatement>();
     BUG_CHECK(actionUser != nullptr,
@@ -165,7 +165,7 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression* expression) {
     return false;
 }
 
-const IR::Node* DuplicateActions::postorder(IR::P4Control* control) {
+const IR::Node *DuplicateActions::postorder(IR::P4Control *control) {
     bool changes = false;
     IR::IndexedVector<IR::Declaration> newDecls;
     for (auto d : control->controlLocals) {
@@ -188,7 +188,7 @@ const IR::Node* DuplicateActions::postorder(IR::P4Control* control) {
     return control;
 }
 
-const IR::Node* DuplicateActions::postorder(IR::PathExpression* expression) {
+const IR::Node *DuplicateActions::postorder(IR::PathExpression *expression) {
     auto replacement = ::get(repl->repl, getOriginal<IR::PathExpression>());
     if (replacement != nullptr) {
         LOG1("Rewriting " << dbp(expression) << " to " << dbp(replacement));

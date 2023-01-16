@@ -2,7 +2,7 @@
 
 namespace P4 {
 
-void ValidateTableProperties::postorder(const IR::Property* property) {
+void ValidateTableProperties::postorder(const IR::Property *property) {
     if (legalProperties.find(property->name.name) != legalProperties.end()) return;
     warn(ErrorType::WARN_IGNORE_PROPERTY, "Unknown table property: %1%", property);
 }

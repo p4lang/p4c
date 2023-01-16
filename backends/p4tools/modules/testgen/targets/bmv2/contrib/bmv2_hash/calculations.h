@@ -52,17 +52,17 @@ class BMv2Hash {
     }
 
  public:
-    static uint16_t crc16(const char* buf, size_t len);
+    static uint16_t crc16(const char *buf, size_t len);
 
-    static uint32_t crc32(const char* buf, size_t len);
+    static uint32_t crc32(const char *buf, size_t len);
 
-    static uint16_t crcCCITT(const char* buf, size_t len);
+    static uint16_t crcCCITT(const char *buf, size_t len);
 
-    static uint16_t csum16(const char* buf, size_t len);
+    static uint16_t csum16(const char *buf, size_t len);
 
-    static uint16_t xor16(const char* buf, size_t len);
+    static uint16_t xor16(const char *buf, size_t len);
 
-    static uint64_t identity(const char* buf, size_t len);
+    static uint64_t identity(const char *buf, size_t len);
 };
 
 }  // namespace Bmv2

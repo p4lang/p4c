@@ -53,7 +53,7 @@ namespace P4 {
  *
  */
 class DoCopyStructures : public Transform {
-    TypeMap* typeMap;
+    TypeMap *typeMap;
     /// Specific targets may allow functions or methods to return structs.
     /// Such methods will not be converted in this pass. Setting the
     /// errorOnMethodCall flag will produce an error message if such a
@@ -64,12 +64,12 @@ class DoCopyStructures : public Transform {
     bool copyHeaders;
 
  public:
-    explicit DoCopyStructures(TypeMap* typeMap, bool errorOnMethodCall, bool copyHeaders = false)
+    explicit DoCopyStructures(TypeMap *typeMap, bool errorOnMethodCall, bool copyHeaders = false)
         : typeMap(typeMap), errorOnMethodCall(errorOnMethodCall), copyHeaders(copyHeaders) {
         CHECK_NULL(typeMap);
         setName("DoCopyStructures");
     }
-    const IR::Node* postorder(IR::AssignmentStatement* statement) override;
+    const IR::Node *postorder(IR::AssignmentStatement *statement) override;
 };
 
 /**
@@ -92,27 +92,27 @@ class DoCopyStructures : public Transform {
  * @post no structure assignment refers on the RHS to fields that appear in the LHS.
  */
 class RemoveAliases : public Transform {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
 
     IR::IndexedVector<IR::Declaration> declarations;
 
  public:
-    RemoveAliases(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
+    RemoveAliases(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("RemoveAliases");
     }
 
-    const IR::Node* postorder(IR::AssignmentStatement* statement) override;
-    const IR::Node* postorder(IR::P4Parser* parser) override;
-    const IR::Node* postorder(IR::P4Control* control) override;
+    const IR::Node *postorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *postorder(IR::P4Parser *parser) override;
+    const IR::Node *postorder(IR::P4Control *control) override;
 };
 
 class CopyStructures : public PassRepeated {
  public:
-    explicit CopyStructures(ReferenceMap* refMap, TypeMap* typeMap, bool errorOnMethodCall = true,
-                            bool copyHeaders = false, TypeChecking* typeChecking = nullptr)
+    explicit CopyStructures(ReferenceMap *refMap, TypeMap *typeMap, bool errorOnMethodCall = true,
+                            bool copyHeaders = false, TypeChecking *typeChecking = nullptr)
         : PassManager({}) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);

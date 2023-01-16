@@ -44,12 +44,12 @@ void Testgen::registerTarget() {
     registerCompilerTargets();
 }
 
-int Testgen::mainImpl(const IR::P4Program* program) {
+int Testgen::mainImpl(const IR::P4Program *program) {
     // Register all available testgen targets.
     // These are discovered by CMAKE, which fills out the register.h.in file.
     registerTestgenTargets();
 
-    const auto* programInfo = TestgenTarget::initProgram(program);
+    const auto *programInfo = TestgenTarget::initProgram(program);
     if (programInfo == nullptr) {
         ::error("Program not supported by target device and architecture.");
         return EXIT_FAILURE;
@@ -63,7 +63,7 @@ int Testgen::mainImpl(const IR::P4Program* program) {
     enableInformationLogging();
 
     auto const inputFile = P4CContext::get().options().file;
-    const auto& testgenOptions = TestgenOptions::get();
+    const auto &testgenOptions = TestgenOptions::get();
     cstring testDirStr = testgenOptions.outputDir;
     auto seed = Utils::getCurrentSeed();
     if (seed) {
@@ -83,7 +83,7 @@ int Testgen::mainImpl(const IR::P4Program* program) {
 
     Z3Solver solver;
 
-    auto* symExec = [&solver, &programInfo, &testgenOptions]() -> ExplorationStrategy* {
+    auto *symExec = [&solver, &programInfo, &testgenOptions]() -> ExplorationStrategy * {
         auto explorationStrategy = testgenOptions.explorationStrategy;
         if (explorationStrategy == "RANDOM_ACCESS_STACK") {
             // If the user mistakenly specifies an invalid popLevel, we set it to 3.
@@ -111,7 +111,7 @@ int Testgen::mainImpl(const IR::P4Program* program) {
     }();
 
     // Define how to handle the final state for each test. This is target defined.
-    auto* testBackend = TestgenTarget::getTestBackend(*programInfo, *symExec, testPath, seed);
+    auto *testBackend = TestgenTarget::getTestBackend(*programInfo, *symExec, testPath, seed);
     ExplorationStrategy::Callback callBack =
         std::bind(&TestBackEnd::run, testBackend, std::placeholders::_1);
 

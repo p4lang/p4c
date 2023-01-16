@@ -64,28 +64,28 @@ const cstring Type_Error::error = "error";
 int IR::Declaration::nextId = 0;
 int IR::This::nextId = 0;
 
-const Type_Method* P4Control::getConstructorMethodType() const {
+const Type_Method *P4Control::getConstructorMethodType() const {
     return new Type_Method(getTypeParameters(), type, constructorParams, getName());
 }
 
-const Type_Method* P4Parser::getConstructorMethodType() const {
+const Type_Method *P4Parser::getConstructorMethodType() const {
     return new Type_Method(getTypeParameters(), type, constructorParams, getName());
 }
 
-const Type_Method* Type_Package::getConstructorMethodType() const {
+const Type_Method *Type_Package::getConstructorMethodType() const {
     return new Type_Method(getTypeParameters(), this, constructorParams, getName());
 }
 
-Util::Enumerator<const IR::IDeclaration*>* IGeneralNamespace::getDeclsByName(cstring name) const {
-    std::function<bool(const IDeclaration*)> filter = [name](const IDeclaration* d) {
+Util::Enumerator<const IR::IDeclaration *> *IGeneralNamespace::getDeclsByName(cstring name) const {
+    std::function<bool(const IDeclaration *)> filter = [name](const IDeclaration *d) {
         CHECK_NULL(d);
         return name == d->getName().name;
     };
     return getDeclarations()->where(filter);
 }
 
-Util::Enumerator<const IDeclaration*>* INestedNamespace::getDeclarations() const {
-    Util::Enumerator<const IDeclaration*>* rv = nullptr;
+Util::Enumerator<const IDeclaration *> *INestedNamespace::getDeclarations() const {
+    Util::Enumerator<const IDeclaration *> *rv = nullptr;
     for (auto nested : getNestedNamespaces()) {
         if (nested) {
             if (rv)
@@ -94,12 +94,12 @@ Util::Enumerator<const IDeclaration*>* INestedNamespace::getDeclarations() const
                 rv = nested->getDeclarations();
         }
     }
-    return rv ? rv : new Util::EmptyEnumerator<const IDeclaration*>;
+    return rv ? rv : new Util::EmptyEnumerator<const IDeclaration *>;
 }
 
-bool IFunctional::callMatches(const Vector<Argument>* arguments) const {
+bool IFunctional::callMatches(const Vector<Argument> *arguments) const {
     auto paramList = getParameters()->parameters;
-    std::map<cstring, const IR::Parameter*> paramNames;
+    std::map<cstring, const IR::Parameter *> paramNames;
     for (auto param : paramList) paramNames.emplace(param->name.name, param);
 
     size_t index = 0;
@@ -163,8 +163,8 @@ size_t Type_Stack::getSize() const {
     return static_cast<size_t>(size);
 }
 
-const Method* Type_Extern::lookupMethod(IR::ID name, const Vector<Argument>* arguments) const {
-    const Method* result = nullptr;
+const Method *Type_Extern::lookupMethod(IR::ID name, const Vector<Argument> *arguments) const {
+    const Method *result = nullptr;
     bool reported = false;
     for (auto m : methods) {
         if (m->name != name) continue;
@@ -185,22 +185,22 @@ const Method* Type_Extern::lookupMethod(IR::ID name, const Vector<Argument>* arg
     return result;
 }
 
-const Type_Method* Type_Parser::getApplyMethodType() const {
+const Type_Method *Type_Parser::getApplyMethodType() const {
     return new Type_Method(applyParams, getName());
 }
 
-const Type_Method* Type_Control::getApplyMethodType() const {
+const Type_Method *Type_Control::getApplyMethodType() const {
     return new Type_Method(applyParams, getName());
 }
 
-const IR::Path* ActionListElement::getPath() const {
+const IR::Path *ActionListElement::getPath() const {
     auto expr = expression;
     if (expr->is<IR::MethodCallExpression>()) expr = expr->to<IR::MethodCallExpression>()->method;
     if (expr->is<IR::PathExpression>()) return expr->to<IR::PathExpression>()->path;
     BUG("%1%: unexpected expression", expression);
 }
 
-const Type_Method* P4Table::getApplyMethodType() const {
+const Type_Method *P4Table::getApplyMethodType() const {
     // Synthesize a new type for the return
     auto actions = properties->getProperty(IR::TableProperties::actionsPropertyName);
     if (actions == nullptr) {
@@ -218,9 +218,9 @@ const Type_Method* P4Table::getApplyMethodType() const {
     return applyMethod;
 }
 
-const Type_Method* Type_Table::getApplyMethodType() const { return table->getApplyMethodType(); }
+const Type_Method *Type_Table::getApplyMethodType() const { return table->getApplyMethodType(); }
 
-void Block::setValue(const Node* node, const CompileTimeValue* value) {
+void Block::setValue(const Node *node, const CompileTimeValue *value) {
     CHECK_NULL(node);
     auto it = constantValue.find(node);
     if (it != constantValue.end())
@@ -230,7 +230,7 @@ void Block::setValue(const Node* node, const CompileTimeValue* value) {
         constantValue[node] = value;
 }
 
-void InstantiatedBlock::instantiate(std::vector<const CompileTimeValue*>* args) {
+void InstantiatedBlock::instantiate(std::vector<const CompileTimeValue *> *args) {
     CHECK_NULL(args);
     auto it = args->begin();
     for (auto p : *getConstructorParameters()->getEnumerator()) {
@@ -244,26 +244,26 @@ void InstantiatedBlock::instantiate(std::vector<const CompileTimeValue*>* args) 
     }
 }
 
-const IR::CompileTimeValue* InstantiatedBlock::getParameterValue(cstring paramName) const {
+const IR::CompileTimeValue *InstantiatedBlock::getParameterValue(cstring paramName) const {
     auto param = getConstructorParameters()->getDeclByName(paramName);
     BUG_CHECK(param != nullptr, "No parameter named %1%", paramName);
     BUG_CHECK(param->is<IR::Parameter>(), "No parameter named %1%", paramName);
     return getValue(param->getNode());
 }
 
-const IR::CompileTimeValue* InstantiatedBlock::findParameterValue(cstring paramName) const {
-    auto* param = getConstructorParameters()->getDeclByName(paramName);
+const IR::CompileTimeValue *InstantiatedBlock::findParameterValue(cstring paramName) const {
+    auto *param = getConstructorParameters()->getDeclByName(paramName);
     if (!param) return nullptr;
     if (!param->is<IR::Parameter>()) return nullptr;
     return getValue(param->getNode());
 }
 
-Util::Enumerator<const IDeclaration*>* P4Program::getDeclarations() const {
-    return objects.getEnumerator()->as<const IDeclaration*>()->where(
-        [](const IDeclaration* d) { return d != nullptr; });
+Util::Enumerator<const IDeclaration *> *P4Program::getDeclarations() const {
+    return objects.getEnumerator()->as<const IDeclaration *>()->where(
+        [](const IDeclaration *d) { return d != nullptr; });
 }
 
-const IR::PackageBlock* ToplevelBlock::getMain() const {
+const IR::PackageBlock *ToplevelBlock::getMain() const {
     auto program = getProgram();
     auto mainDecls = program->getDeclsByName(IR::P4Program::main)->toVector();
     if (mainDecls->size() == 0) {

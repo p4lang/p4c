@@ -35,14 +35,14 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "midend.h"
 
-void compile(EbpfOptions& options) {
+void compile(EbpfOptions &options) {
     auto hook = options.getDebugHook();
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     if (isv1) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "This compiler only handles P4-16");
         return;
     }
-    const IR::P4Program* program = nullptr;
+    const IR::P4Program *program = nullptr;
 
     if (options.loadIRFromJson) {
         std::filebuf fb;
@@ -81,12 +81,12 @@ void compile(EbpfOptions& options) {
     EBPF::run_ebpf_backend(options, toplevel, &midend.refMap, &midend.typeMap);
 }
 
-int main(int argc, char* const argv[]) {
+int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();
 
     AutoCompileContext autoEbpfContext(new EbpfContext);
-    auto& options = EbpfContext::get().options();
+    auto &options = EbpfContext::get().options();
     options.compilerVersion = P4C_EBPF_VERSION_STRING;
 
     if (options.process(argc, argv) != nullptr) {
@@ -97,7 +97,7 @@ int main(int argc, char* const argv[]) {
     options.calculateXDP2TCMode();
     try {
         compile(options);
-    } catch (const std::exception& bug) {
+    } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }

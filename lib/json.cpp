@@ -32,7 +32,7 @@ cstring IJson::toString() const {
 
 void IJson::dump() const { std::cout << toString(); }
 
-JsonValue* JsonValue::null = new JsonValue();
+JsonValue *JsonValue::null = new JsonValue();
 
 big_int JsonValue::makeValue(long long v) {
     if (v >= 0) {
@@ -62,7 +62,7 @@ JsonValue::JsonValue(long long v) : tag(Kind::Number), value(makeValue(v)) {}
 
 JsonValue::JsonValue(unsigned long long v) : tag(Kind::Number), value(makeValue(v)) {}
 
-void JsonValue::serialize(std::ostream& out) const {
+void JsonValue::serialize(std::ostream &out) const {
     switch (tag) {
         case Kind::String:
             out << "\"" << str << "\"";
@@ -82,25 +82,25 @@ void JsonValue::serialize(std::ostream& out) const {
     }
 }
 
-bool JsonValue::operator==(const big_int& v) const {
+bool JsonValue::operator==(const big_int &v) const {
     return tag == Kind::Number ? v == value : false;
 }
-bool JsonValue::operator==(const double& v) const {
+bool JsonValue::operator==(const double &v) const {
     return tag == Kind::Number ? big_int(v) == value : false;
 }
-bool JsonValue::operator==(const float& v) const {
+bool JsonValue::operator==(const float &v) const {
     return tag == Kind::Number ? big_int(v) == value : false;
 }
-bool JsonValue::operator==(const cstring& s) const {
+bool JsonValue::operator==(const cstring &s) const {
     return tag == Kind::String ? s == str : false;
 }
-bool JsonValue::operator==(const std::string& s) const {
+bool JsonValue::operator==(const std::string &s) const {
     return tag == Kind::String ? cstring(s) == str : false;
 }
-bool JsonValue::operator==(const char* s) const {
+bool JsonValue::operator==(const char *s) const {
     return tag == Kind::String ? cstring(s) == str : false;
 }
-bool JsonValue::operator==(const JsonValue& other) const {
+bool JsonValue::operator==(const JsonValue &other) const {
     if (tag != other.tag) return false;
     switch (tag) {
         case Kind::String:
@@ -116,7 +116,7 @@ bool JsonValue::operator==(const JsonValue& other) const {
     }
 }
 
-void JsonArray::serialize(std::ostream& out) const {
+void JsonArray::serialize(std::ostream &out) const {
     bool isSmall = true;
     for (auto v : *this) {
         if (!v->is<JsonValue>()) isSmall = false;
@@ -161,15 +161,15 @@ int JsonValue::getInt() const {
     return int(val);
 }
 
-JsonArray* JsonArray::append(IJson* value) {
+JsonArray *JsonArray::append(IJson *value) {
     push_back(value);
     return this;
 }
 
-void JsonObject::serialize(std::ostream& out) const {
+void JsonObject::serialize(std::ostream &out) const {
     out << "{" << IndentCtl::indent;
     bool first = true;
-    for (auto& it : *this) {
+    for (auto &it : *this) {
         if (!first) out << ",";
         first = false;
         out << IndentCtl::endl;
@@ -183,7 +183,7 @@ void JsonObject::serialize(std::ostream& out) const {
     out << IndentCtl::unindent << IndentCtl::endl << "}";
 }
 
-JsonObject* JsonObject::emplace(cstring label, IJson* value) {
+JsonObject *JsonObject::emplace(cstring label, IJson *value) {
     if (label.isNullOrEmpty()) throw std::logic_error("Empty label");
     auto j = get(label);
     if (j != nullptr) {
@@ -192,11 +192,11 @@ JsonObject* JsonObject::emplace(cstring label, IJson* value) {
                                        "for a label which already exists ") +
                                label.c_str() + " " + s.c_str());
     }
-    ordered_map<cstring, IJson*>::emplace(label, value);
+    ordered_map<cstring, IJson *>::emplace(label, value);
     return this;
 }
 
-JsonObject* JsonObject::emplace_non_null(cstring label, IJson* value) {
+JsonObject *JsonObject::emplace_non_null(cstring label, IJson *value) {
     if (value != nullptr) {
         return emplace(label, value);
     }

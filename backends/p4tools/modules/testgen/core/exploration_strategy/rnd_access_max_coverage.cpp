@@ -26,7 +26,7 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-void RandomAccessMaxCoverage::run(const Callback& callback) {
+void RandomAccessMaxCoverage::run(const Callback &callback) {
     // Loop until we reach terminate, or until there are no more
     // branches to produce tests.
     while (true) {
@@ -54,13 +54,13 @@ void RandomAccessMaxCoverage::run(const Callback& callback) {
                 // in the state before the step was taken - we copy the current symbolic state.
                 StepResult successors = step(*executionState);
                 bool guaranteeViability = successors->size() > 1;
-                ExecutionState* next = chooseBranch(*successors, guaranteeViability);
+                ExecutionState *next = chooseBranch(*successors, guaranteeViability);
                 if (next != nullptr) {
                     executionState = next;
                     continue;
                 }
             }
-        } catch (TestgenUnimplemented& e) {
+        } catch (TestgenUnimplemented &e) {
             // If strict is enabled, bubble the exception up.
             if (TestgenOptions::get().strict) {
                 throw;
@@ -79,7 +79,7 @@ void RandomAccessMaxCoverage::run(const Callback& callback) {
             }
 
             bool guaranteeViability = true;
-            ExecutionState* next = nullptr;
+            ExecutionState *next = nullptr;
             if (unexploredBranches.empty() && !bufferUnexploredBranches.empty()) {
                 // If we don't have enough entires, then we just invoke the
                 // regular maxCoverage logic, i.e. we select the branches with
@@ -97,7 +97,7 @@ void RandomAccessMaxCoverage::run(const Callback& callback) {
                     updateBufferRankings();
                     // Merge the contents of unexploredBranches in the buffer, then
                     // empty it.
-                    for (auto& localBranches : unexploredBranches) {
+                    for (auto &localBranches : unexploredBranches) {
                         sortBranchesByCoverage(localBranches);
                     }
                     unexploredBranches.clear();
@@ -117,7 +117,7 @@ void RandomAccessMaxCoverage::run(const Callback& callback) {
                     updateBufferRankings();
                     // Merge the contents of unexploredBranches in the buffer, then
                     // empty it.
-                    for (auto& localBranches : unexploredBranches) {
+                    for (auto &localBranches : unexploredBranches) {
                         sortBranchesByCoverage(localBranches);
                     }
                     unexploredBranches.clear();
@@ -145,7 +145,7 @@ uint64_t RandomAccessMaxCoverage::getRandomUnexploredMapEntry() {
     // Collect all the keys and select a random one.
     std::vector<uint64_t> unexploredCoverageKeys;
     unexploredCoverageKeys.reserve(bufferUnexploredBranches.size());
-    for (auto const& unexplored : bufferUnexploredBranches) {
+    for (auto const &unexplored : bufferUnexploredBranches) {
         unexploredCoverageKeys.push_back(unexplored.first);
     }
     size_t unexploredRange = unexploredCoverageKeys.size() - 1;
@@ -159,25 +159,25 @@ void RandomAccessMaxCoverage::updateBufferRankings() {
     // Collect all the keys
     std::vector<uint64_t> unexploredCoverageKeys;
     unexploredCoverageKeys.reserve(bufferUnexploredBranches.size());
-    for (auto const& unexplored : bufferUnexploredBranches) {
+    for (auto const &unexplored : bufferUnexploredBranches) {
         unexploredCoverageKeys.push_back(unexplored.first);
     }
-    for (auto& coverageKey : unexploredCoverageKeys) {
+    for (auto &coverageKey : unexploredCoverageKeys) {
         auto localBranches = bufferUnexploredBranches.at(coverageKey);
         bufferUnexploredBranches.erase(coverageKey);
         sortBranchesByCoverage(localBranches);
     }
 }
 
-void RandomAccessMaxCoverage::sortBranchesByCoverage(std::vector<Branch>& branches) {
+void RandomAccessMaxCoverage::sortBranchesByCoverage(std::vector<Branch> &branches) {
     // Transfers branches to rankedBranches and sorts them by coverage
-    for (const auto& localBranch : branches) {
-        ExecutionState* branchState = localBranch.nextState;
+    for (const auto &localBranch : branches) {
+        ExecutionState *branchState = localBranch.nextState;
         // Calculate coverage for each branch:
         uint64_t coverage = 0;
         if (branchState != nullptr) {
             uint64_t lookAheadCoverage = 0;
-            for (const auto& stmt : branchState->getVisited()) {
+            for (const auto &stmt : branchState->getVisited()) {
                 // We need to take into account the set of visitedStatements.
                 // We also need to ensure the statement is in allStatements.
                 if (visitedStatements.count(stmt) == 0U && allStatements.count(stmt) != 0U) {
@@ -195,7 +195,7 @@ void RandomAccessMaxCoverage::sortBranchesByCoverage(std::vector<Branch>& branch
         // we calculate, we'll insert a new key at bufferUnexploredBranches.
         auto rankedBranches = bufferUnexploredBranches.find(coverage);
         if (rankedBranches != bufferUnexploredBranches.end()) {
-            auto& localBranches = rankedBranches->second;
+            auto &localBranches = rankedBranches->second;
             localBranches.push_back(localBranch);
             bufferUnexploredBranches.emplace(coverage, localBranches);
         } else {
@@ -209,7 +209,7 @@ void RandomAccessMaxCoverage::sortBranchesByCoverage(std::vector<Branch>& branch
     branches.clear();
 }
 
-ExecutionState* RandomAccessMaxCoverage::chooseBranch(std::vector<Branch>& branches,
+ExecutionState *RandomAccessMaxCoverage::chooseBranch(std::vector<Branch> &branches,
                                                       bool guaranteeViability) {
     while (true) {
         // Fail if we've run out of ranked branches.
@@ -227,7 +227,7 @@ ExecutionState* RandomAccessMaxCoverage::chooseBranch(std::vector<Branch>& branc
 
         // Do not bother invoking the solver for a trivial case.
         // In either case (true or false), we do not need to add the assertion and check.
-        if (const auto* boolLiteral = branch.constraint->to<IR::BoolLiteral>()) {
+        if (const auto *boolLiteral = branch.constraint->to<IR::BoolLiteral>()) {
             guaranteeViability = false;
             if (!boolLiteral->value) {
                 continue;
@@ -255,8 +255,8 @@ ExecutionState* RandomAccessMaxCoverage::chooseBranch(std::vector<Branch>& branc
     }
 }
 
-RandomAccessMaxCoverage::RandomAccessMaxCoverage(AbstractSolver& solver,
-                                                 const ProgramInfo& programInfo,
+RandomAccessMaxCoverage::RandomAccessMaxCoverage(AbstractSolver &solver,
+                                                 const ProgramInfo &programInfo,
                                                  uint64_t saddlePoint)
     : IncrementalMaxCoverageStack(solver, programInfo), saddlePoint(saddlePoint) {}
 

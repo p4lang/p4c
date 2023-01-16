@@ -19,7 +19,7 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-void SelectedBranches::run(const Callback& callback) {
+void SelectedBranches::run(const Callback &callback) {
     while (!executionState->isTerminal()) {
         StepResult successors = step(*executionState);
         if (successors->size() == 1) {
@@ -36,7 +36,7 @@ void SelectedBranches::run(const Callback& callback) {
         // successor matching the given branch decision.
         uint64_t nextBranch = selectedBranches.front();
         selectedBranches.pop_front();
-        ExecutionState* next = chooseBranch(*successors, nextBranch);
+        ExecutionState *next = chooseBranch(*successors, nextBranch);
         if (next == nullptr) {
             break;
         }
@@ -54,14 +54,14 @@ void SelectedBranches::run(const Callback& callback) {
     }
 }
 
-uint64_t getNumeric(const std::string& str) {
-    char* leftString = nullptr;
+uint64_t getNumeric(const std::string &str) {
+    char *leftString = nullptr;
     uint64_t number = strtoul(str.c_str(), &leftString, 10);
     BUG_CHECK(!(*leftString), "Can't translate selected branch %1% into int", str);
     return number;
 }
 
-SelectedBranches::SelectedBranches(AbstractSolver& solver, const ProgramInfo& programInfo,
+SelectedBranches::SelectedBranches(AbstractSolver &solver, const ProgramInfo &programInfo,
                                    std::string selectedBranchesStr)
     : ExplorationStrategy(solver, programInfo) {
     size_t n = 0;
@@ -75,11 +75,11 @@ SelectedBranches::SelectedBranches(AbstractSolver& solver, const ProgramInfo& pr
     }
 }
 
-ExecutionState* SelectedBranches::chooseBranch(const std::vector<Branch>& branches,
+ExecutionState *SelectedBranches::chooseBranch(const std::vector<Branch> &branches,
                                                uint64_t nextBranch) {
-    ExecutionState* next = nullptr;
-    for (const auto& branch : branches) {
-        const auto& selectedBranches = branch.nextState->getSelectedBranches();
+    ExecutionState *next = nullptr;
+    for (const auto &branch : branches) {
+        const auto &selectedBranches = branch.nextState->getSelectedBranches();
         BUG_CHECK(!selectedBranches.empty(), "Corrupted selectedBranches in a execution state");
         // Find branch matching given branch identifier.
         if (selectedBranches.back() == nextBranch) {

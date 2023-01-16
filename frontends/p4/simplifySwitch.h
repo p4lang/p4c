@@ -26,22 +26,22 @@ namespace P4 {
 /** @brief Simplify select and switch statements that have constant arguments.
  */
 class DoSimplifySwitch : public Transform {
-    TypeMap* typeMap;
+    TypeMap *typeMap;
 
-    bool matches(const IR::Expression* left, const IR::Expression* right) const;
+    bool matches(const IR::Expression *left, const IR::Expression *right) const;
 
  public:
-    explicit DoSimplifySwitch(TypeMap* typeMap) : typeMap(typeMap) {
+    explicit DoSimplifySwitch(TypeMap *typeMap) : typeMap(typeMap) {
         setName("DoSimplifySwitch");
         CHECK_NULL(typeMap);
     }
 
-    const IR::Node* postorder(IR::SwitchStatement* stat) override;
+    const IR::Node *postorder(IR::SwitchStatement *stat) override;
 };
 
 class SimplifySwitch : public PassManager {
  public:
-    SimplifySwitch(ReferenceMap* refMap, TypeMap* typeMap) {
+    SimplifySwitch(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoSimplifySwitch(typeMap));
         setName("SimplifySwitch");

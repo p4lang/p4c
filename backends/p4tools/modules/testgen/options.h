@@ -47,7 +47,7 @@ class TestgenOptions : public AbstractP4cToolOptions {
     uint64_t saddlePoint = 5;
 
     /// @returns the singleton instance of this class.
-    static TestgenOptions& get();
+    static TestgenOptions &get();
 
     /// Directory for generated tests. Defaults to PWD.
     cstring outputDir = nullptr;
@@ -75,7 +75,7 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// Enforces the test generation of tests with mandatory output packet.
     bool withOutputPacket = false;
 
-    const char* getIncludePath() override;
+    const char *getIncludePath() override;
 
  private:
     TestgenOptions();

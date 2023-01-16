@@ -22,19 +22,19 @@ limitations under the License.
 namespace UBPF {
 
 class OutHeaderSize final : public EBPF::CodeGenInspector {
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
-    const UBPFProgram* program;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    const UBPFProgram *program;
 
-    std::map<const IR::Parameter*, const IR::Parameter*> substitution;
+    std::map<const IR::Parameter *, const IR::Parameter *> substitution;
 
-    bool illegal(const IR::Statement* statement) {
+    bool illegal(const IR::Statement *statement) {
         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in deparser", statement);
         return false;
     }
 
  public:
-    OutHeaderSize(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, const UBPFProgram* program)
+    OutHeaderSize(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const UBPFProgram *program)
         : EBPF::CodeGenInspector(refMap, typeMap),
           refMap(refMap),
           typeMap(typeMap),
@@ -44,7 +44,7 @@ class OutHeaderSize final : public EBPF::CodeGenInspector {
         CHECK_NULL(program);
         setName("OutHeaderSize");
     }
-    bool preorder(const IR::PathExpression* expression) override {
+    bool preorder(const IR::PathExpression *expression) override {
         auto decl = refMap->getDeclaration(expression->path, true);
         auto param = decl->getNode()->to<IR::Parameter>();
         if (param != nullptr) {
@@ -57,14 +57,14 @@ class OutHeaderSize final : public EBPF::CodeGenInspector {
         builder->append(expression->path->name);
         return false;
     }
-    bool preorder(const IR::SwitchStatement* statement) override { return illegal(statement); }
-    bool preorder(const IR::IfStatement* statement) override { return illegal(statement); }
-    bool preorder(const IR::AssignmentStatement* statement) override { return illegal(statement); }
-    bool preorder(const IR::ReturnStatement* statement) override { return illegal(statement); }
-    bool preorder(const IR::ExitStatement* statement) override { return illegal(statement); }
-    bool preorder(const IR::MethodCallStatement* statement) override {
+    bool preorder(const IR::SwitchStatement *statement) override { return illegal(statement); }
+    bool preorder(const IR::IfStatement *statement) override { return illegal(statement); }
+    bool preorder(const IR::AssignmentStatement *statement) override { return illegal(statement); }
+    bool preorder(const IR::ReturnStatement *statement) override { return illegal(statement); }
+    bool preorder(const IR::ExitStatement *statement) override { return illegal(statement); }
+    bool preorder(const IR::MethodCallStatement *statement) override {
         LOG5("Calculate OutHeaderSize");
-        auto& p4lib = P4::P4CoreLibrary::instance;
+        auto &p4lib = P4::P4CoreLibrary::instance;
 
         auto mi = P4::MethodInstance::resolve(statement->methodCall, refMap, typeMap);
         auto method = mi->to<P4::ExternMethod>();
@@ -96,21 +96,21 @@ class OutHeaderSize final : public EBPF::CodeGenInspector {
         return false;
     }
 
-    void substitute(const IR::Parameter* p, const IR::Parameter* with) {
+    void substitute(const IR::Parameter *p, const IR::Parameter *with) {
         substitution.emplace(p, with);
     }
 };
 
-UBPFDeparserTranslationVisitor::UBPFDeparserTranslationVisitor(const UBPFDeparser* deparser)
+UBPFDeparserTranslationVisitor::UBPFDeparserTranslationVisitor(const UBPFDeparser *deparser)
     : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
       deparser(deparser),
       p4lib(P4::P4CoreLibrary::instance) {
     setName("UBPFDeparserTranslationVisitor");
 }
 
-void UBPFDeparserTranslationVisitor::compileEmitField(const IR::Expression* expr, cstring field,
-                                                      unsigned alignment, EBPF::EBPFType* type) {
-    auto et = dynamic_cast<EBPF::IHasWidth*>(type);
+void UBPFDeparserTranslationVisitor::compileEmitField(const IR::Expression *expr, cstring field,
+                                                      unsigned alignment, EBPF::EBPFType *type) {
+    auto et = dynamic_cast<EBPF::IHasWidth *>(type);
     if (et == nullptr) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "Only headers with fixed widths supported %1%", expr);
@@ -214,7 +214,7 @@ void UBPFDeparserTranslationVisitor::compileEmitField(const IR::Expression* expr
     builder->newline();
 }
 
-void UBPFDeparserTranslationVisitor::compileEmit(const IR::Vector<IR::Argument>* args) {
+void UBPFDeparserTranslationVisitor::compileEmit(const IR::Vector<IR::Argument> *args) {
     BUG_CHECK(args->size() == 1, "%1%: expected 1 argument for emit", args);
 
     auto expr = args->at(0)->expression;
@@ -249,7 +249,7 @@ void UBPFDeparserTranslationVisitor::compileEmit(const IR::Vector<IR::Argument>*
     for (auto f : ht->fields) {
         auto ftype = typeMap->getType(f);
         auto etype = UBPFTypeFactory::instance->create(ftype);
-        auto et = dynamic_cast<EBPF::IHasWidth*>(etype);
+        auto et = dynamic_cast<EBPF::IHasWidth *>(etype);
         if (et == nullptr) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "Only headers with fixed widths supported %1%", f);
@@ -263,7 +263,7 @@ void UBPFDeparserTranslationVisitor::compileEmit(const IR::Vector<IR::Argument>*
     builder->blockEnd(true);
 }
 
-bool UBPFDeparserTranslationVisitor::preorder(const IR::MethodCallExpression* expression) {
+bool UBPFDeparserTranslationVisitor::preorder(const IR::MethodCallExpression *expression) {
     auto mi = P4::MethodInstance::resolve(expression, deparser->program->refMap,
                                           deparser->program->typeMap);
     auto extMethod = mi->to<P4::ExternMethod>();
@@ -301,13 +301,13 @@ bool UBPFDeparser::build() {
     return ::errorCount() == 0;
 }
 
-void UBPFDeparser::emit(EBPF::CodeBuilder* builder) {
+void UBPFDeparser::emit(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat("int %s = 0", program->outerHdrLengthVar.c_str());
     builder->endOfStatement(true);
 
     auto ohs = new OutHeaderSize(program->refMap, program->typeMap,
-                                 static_cast<const UBPFProgram*>(program));
+                                 static_cast<const UBPFProgram *>(program));
     ohs->substitute(headers, parserHeaders);
     ohs->setBuilder(builder);
 

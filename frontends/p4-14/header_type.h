@@ -21,15 +21,15 @@ limitations under the License.
 #include "ir/visitor.h"
 
 class CheckHeaderTypes : public Modifier {
-    const IR::V1Program* global = nullptr;
+    const IR::V1Program *global = nullptr;
 
  public:
     CheckHeaderTypes() { setName("CheckHeaderTypes"); }
-    bool preorder(IR::V1Program* glob) override {
+    bool preorder(IR::V1Program *glob) override {
         global = glob;
         return true;
     }
-    bool preorder(IR::Metadata* meta) override {
+    bool preorder(IR::Metadata *meta) override {
         if (auto type = global->get<IR::v1HeaderType>(meta->type_name))
             meta->type = type->as_metadata;
         else
@@ -37,7 +37,7 @@ class CheckHeaderTypes : public Modifier {
                   meta->type_name);
         return true;
     }
-    bool preorder(IR::HeaderOrMetadata* hdr) override {
+    bool preorder(IR::HeaderOrMetadata *hdr) override {
         if (auto type = global->get<IR::v1HeaderType>(hdr->type_name))
             hdr->type = type->as_header;
         else
@@ -48,7 +48,7 @@ class CheckHeaderTypes : public Modifier {
 
 class HeaderTypeMaxLengthCalculator : public Modifier {
  public:
-    bool preorder(IR::Type_StructLike* hdr_type) override;
+    bool preorder(IR::Type_StructLike *hdr_type) override;
 };
 
 #endif /* FRONTENDS_P4_14_HEADER_TYPE_H_ */

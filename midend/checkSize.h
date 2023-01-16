@@ -25,7 +25,7 @@ namespace P4 {
 class CheckTableSize : public Modifier {
  public:
     CheckTableSize() { setName("CheckTableSize"); }
-    bool preorder(IR::P4Table* table) override {
+    bool preorder(IR::P4Table *table) override {
         auto size = table->getSizeProperty();
         if (size == nullptr) return false;
 

@@ -19,7 +19,7 @@ limitations under the License.
 namespace P4 {
 
 namespace {
-static const IR::Type_Struct* isNestedStruct(const P4::TypeMap* typeMap, const IR::Type* type) {
+static const IR::Type_Struct *isNestedStruct(const P4::TypeMap *typeMap, const IR::Type *type) {
     if (auto st = type->to<IR::Type_Struct>()) {
         for (auto f : st->fields) {
             auto ft = typeMap->getType(f, true);
@@ -30,7 +30,7 @@ static const IR::Type_Struct* isNestedStruct(const P4::TypeMap* typeMap, const I
 }
 }  // namespace
 
-void NestedStructMap::createReplacement(const IR::Type_Struct* type) {
+void NestedStructMap::createReplacement(const IR::Type_Struct *type) {
     auto repl = ::get(replacement, type);
     if (repl != nullptr) return;
     repl =
@@ -39,7 +39,7 @@ void NestedStructMap::createReplacement(const IR::Type_Struct* type) {
     replacement.emplace(type, repl);
 }
 
-bool FindTypesToReplace::preorder(const IR::Declaration_Instance* inst) {
+bool FindTypesToReplace::preorder(const IR::Declaration_Instance *inst) {
     auto type = map->typeMap->getTypeType(inst->type, true);
     auto ts = type->to<IR::Type_SpecializedCanonical>();
     if (ts == nullptr) return false;
@@ -52,7 +52,7 @@ bool FindTypesToReplace::preorder(const IR::Declaration_Instance* inst) {
 
 /////////////////////////////////
 
-const IR::Node* ReplaceStructs::preorder(IR::P4Program* program) {
+const IR::Node *ReplaceStructs::preorder(IR::P4Program *program) {
     if (replacementMap->empty()) {
         // nothing to do
         prune();
@@ -60,16 +60,16 @@ const IR::Node* ReplaceStructs::preorder(IR::P4Program* program) {
     return program;
 }
 
-const IR::Node* ReplaceStructs::postorder(IR::Type_Struct* type) {
+const IR::Node *ReplaceStructs::postorder(IR::Type_Struct *type) {
     auto canon = replacementMap->typeMap->getTypeType(getOriginal(), true);
     auto repl = replacementMap->getReplacement(canon);
     if (repl != nullptr) return repl->replacementType;
     return type;
 }
 
-const IR::Node* ReplaceStructs::postorder(IR::Member* expression) {
+const IR::Node *ReplaceStructs::postorder(IR::Member *expression) {
     // Find out if this applies to one of the parameters that are being replaced.
-    const IR::Expression* e = expression;
+    const IR::Expression *e = expression;
     cstring prefix = "";
     while (auto mem = e->to<IR::Member>()) {
         e = mem->expr;
@@ -85,7 +85,7 @@ const IR::Node* ReplaceStructs::postorder(IR::Member* expression) {
     auto repl = ::get(toReplace, param);
     if (repl == nullptr) return expression;
     auto newFieldName = ::get(repl->fieldNameRemap, prefix);
-    const IR::Expression* result;
+    const IR::Expression *result;
     if (newFieldName.isNullOrEmpty()) {
         auto type = replacementMap->typeMap->getType(getOriginal(), true);
         // This could be, for example, a method like setValid.
@@ -112,7 +112,7 @@ const IR::Node* ReplaceStructs::postorder(IR::Member* expression) {
     return result;
 }
 
-const IR::Node* ReplaceStructs::preorder(IR::P4Parser* parser) {
+const IR::Node *ReplaceStructs::preorder(IR::P4Parser *parser) {
     for (auto p : parser->getApplyParameters()->parameters) {
         auto pt = replacementMap->typeMap->getType(p, true);
         auto repl = replacementMap->getReplacement(pt);
@@ -124,7 +124,7 @@ const IR::Node* ReplaceStructs::preorder(IR::P4Parser* parser) {
     return parser;
 }
 
-const IR::Node* ReplaceStructs::preorder(IR::P4Control* control) {
+const IR::Node *ReplaceStructs::preorder(IR::P4Control *control) {
     for (auto p : control->getApplyParameters()->parameters) {
         auto pt = replacementMap->typeMap->getType(p, true);
         auto repl = replacementMap->getReplacement(pt);

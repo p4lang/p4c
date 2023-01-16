@@ -20,13 +20,13 @@ limitations under the License.
 
 namespace EBPF {
 
-DeparserBodyTranslatorPSA::DeparserBodyTranslatorPSA(const EBPFDeparserPSA* deparser)
+DeparserBodyTranslatorPSA::DeparserBodyTranslatorPSA(const EBPFDeparserPSA *deparser)
     : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
       DeparserBodyTranslator(deparser) {
     setName("DeparserBodyTranslatorPSA");
 }
 
-void DeparserBodyTranslatorPSA::processFunction(const P4::ExternFunction* function) {
+void DeparserBodyTranslatorPSA::processFunction(const P4::ExternFunction *function) {
     auto dprs = deparser->to<EBPFDeparserPSA>();
     CHECK_NULL(dprs);
     if (function->method->name.name == "psa_resubmit") {
@@ -35,7 +35,7 @@ void DeparserBodyTranslatorPSA::processFunction(const P4::ExternFunction* functi
     }
 }
 
-void DeparserBodyTranslatorPSA::processMethod(const P4::ExternMethod* method) {
+void DeparserBodyTranslatorPSA::processMethod(const P4::ExternMethod *method) {
     auto dprs = deparser->to<EBPFDeparserPSA>();
     CHECK_NULL(dprs);
     auto externName = method->originalExternType->name.name;
@@ -59,7 +59,7 @@ void DeparserBodyTranslatorPSA::processMethod(const P4::ExternMethod* method) {
     DeparserBodyTranslator::processMethod(method);
 }
 
-void EBPFDeparserPSA::emitDigestInstances(CodeBuilder* builder) const {
+void EBPFDeparserPSA::emitDigestInstances(CodeBuilder *builder) const {
     for (auto digest : digests) {
         builder->appendFormat("REGISTER_TABLE_NO_KEY_TYPE(%s, %s, 0, ", digest.first,
                               "BPF_MAP_TYPE_QUEUE");
@@ -70,7 +70,7 @@ void EBPFDeparserPSA::emitDigestInstances(CodeBuilder* builder) const {
     }
 }
 
-void EBPFDeparserPSA::emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) {
+void EBPFDeparserPSA::emitDeclaration(CodeBuilder *builder, const IR::Declaration *decl) {
     if (auto di = decl->to<IR::Declaration_Instance>()) {
         cstring name = di->name.name;
 
@@ -137,7 +137,7 @@ bool EgressDeparserPSA::build() {
  * - early packet drop
  * - resubmission
  */
-void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder* builder) {
+void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     builder->emitIndent();
 
     builder->newline();
@@ -172,7 +172,7 @@ void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder* builder) {
                                       "skipping deparser..");
     builder->emitIndent();
     CHECK_NULL(program);
-    auto pipeline = dynamic_cast<const EBPFPipeline*>(program);
+    auto pipeline = dynamic_cast<const EBPFPipeline *>(program);
     builder->appendFormat("%s->packet_path = RESUBMIT;", pipeline->compilerGlobalMetadata);
     builder->newline();
     builder->emitIndent();
@@ -181,7 +181,7 @@ void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder* builder) {
 }
 
 // =====================TCIngressDeparserForTrafficManagerPSA===========
-void TCIngressDeparserForTrafficManagerPSA::emitPreDeparser(CodeBuilder* builder) {
+void TCIngressDeparserForTrafficManagerPSA::emitPreDeparser(CodeBuilder *builder) {
     // clone support
     builder->emitIndent();
     builder->appendFormat("if (%s.clone) ", this->istd->name.name);
@@ -196,7 +196,7 @@ void TCIngressDeparserForTrafficManagerPSA::emitPreDeparser(CodeBuilder* builder
 }
 
 // =====================XDPIngressDeparserPSA=============================
-void XDPIngressDeparserPSA::emitPreDeparser(CodeBuilder* builder) {
+void XDPIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     builder->emitIndent();
     // Perform early multicast detection; if multicast is invoked, a packet will be
     // passed up anyway, so we can do deparsing entirely in TC.
@@ -290,7 +290,7 @@ void XDPIngressDeparserPSA::emitPreDeparser(CodeBuilder* builder) {
 }
 
 // =====================XDPEgressDeparserPSA=============================
-void XDPEgressDeparserPSA::emitPreDeparser(CodeBuilder* builder) {
+void XDPEgressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat("if (%s.drop) ", istd->name.name);
     builder->blockStart();

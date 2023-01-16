@@ -9,7 +9,7 @@ namespace P4 {
 
 unsigned SymbolicValue::crtid = 0;
 
-SymbolicValue* SymbolicValueFactory::create(const IR::Type* type, bool uninitialized) const {
+SymbolicValue *SymbolicValueFactory::create(const IR::Type *type, bool uninitialized) const {
     type = typeMap->getTypeType(type, true);
     if (type->is<IR::Type_Bits>())
         return new SymbolicInteger(ScalarValue::init(uninitialized), type->to<IR::Type_Bits>());
@@ -52,7 +52,7 @@ SymbolicValue* SymbolicValueFactory::create(const IR::Type* type, bool uninitial
     BUG("%1%: unexpected type", type);
 }
 
-bool SymbolicValueFactory::isFixedWidth(const IR::Type* type) const {
+bool SymbolicValueFactory::isFixedWidth(const IR::Type *type) const {
     type = typeMap->getTypeType(type, true);
     if (type->is<IR::Type_Varbits>()) return false;
     if (type->is<IR::Type_Extern>()) return false;
@@ -73,7 +73,7 @@ bool SymbolicValueFactory::isFixedWidth(const IR::Type* type) const {
     return true;
 }
 
-unsigned SymbolicValueFactory::getWidth(const IR::Type* type) const {
+unsigned SymbolicValueFactory::getWidth(const IR::Type *type) const {
     type = typeMap->getTypeType(type, true);
     if (type->is<IR::Type_Bits>()) return type->to<IR::Type_Bits>()->size;
     if (type->is<IR::Type_Boolean>()) return 1;
@@ -105,17 +105,17 @@ unsigned SymbolicValueFactory::getWidth(const IR::Type* type) const {
 
 /*********************************************************************************/
 
-bool SymbolicException::equals(const SymbolicValue* other) const {
+bool SymbolicException::equals(const SymbolicValue *other) const {
     if (!other->is<SymbolicException>()) return false;
     return (other->to<SymbolicException>()->exc == exc);
 }
 
-bool SymbolicStaticError::equals(const SymbolicValue* other) const {
+bool SymbolicStaticError::equals(const SymbolicValue *other) const {
     if (!other->is<SymbolicStaticError>()) return false;
     return msg == other->to<SymbolicStaticError>()->msg;
 }
 
-bool SymbolicBool::merge(const SymbolicValue* other) {
+bool SymbolicBool::merge(const SymbolicValue *other) {
     auto bo = other->to<SymbolicBool>();
     auto saveState = state;
     state = mergeState(other->to<ScalarValue>()->state);
@@ -123,14 +123,14 @@ bool SymbolicBool::merge(const SymbolicValue* other) {
     return (state != saveState);
 }
 
-void SymbolicBool::assign(const SymbolicValue* other) {
+void SymbolicBool::assign(const SymbolicValue *other) {
     BUG_CHECK(other->is<SymbolicBool>(), "%1%: expected a bool", other);
     auto bo = other->to<SymbolicBool>();
     state = bo->state;
     value = bo->value;
 }
 
-bool SymbolicBool::equals(const SymbolicValue* other) const {
+bool SymbolicBool::equals(const SymbolicValue *other) const {
     if (!other->is<SymbolicBool>()) return false;
     auto ab = other->to<SymbolicBool>();
     if (state != ab->state) return false;
@@ -138,7 +138,7 @@ bool SymbolicBool::equals(const SymbolicValue* other) const {
     return true;
 }
 
-bool SymbolicInteger::merge(const SymbolicValue* other) {
+bool SymbolicInteger::merge(const SymbolicValue *other) {
     BUG_CHECK(other->is<SymbolicInteger>(), "%1%: expected an integer", other);
     auto io = other->to<SymbolicInteger>();
     auto saveState = state;
@@ -150,7 +150,7 @@ bool SymbolicInteger::merge(const SymbolicValue* other) {
     return (state != saveState);
 }
 
-void SymbolicInteger::assign(const SymbolicValue* other) {
+void SymbolicInteger::assign(const SymbolicValue *other) {
     if (other->is<SymbolicError>()) return;
     BUG_CHECK(other->is<SymbolicInteger>(), "%1%: expected an integer", other);
     auto io = other->to<SymbolicInteger>();
@@ -158,7 +158,7 @@ void SymbolicInteger::assign(const SymbolicValue* other) {
     constant = io->constant;
 }
 
-bool SymbolicInteger::equals(const SymbolicValue* other) const {
+bool SymbolicInteger::equals(const SymbolicValue *other) const {
     if (!other->is<SymbolicInteger>()) return false;
     auto ab = other->to<SymbolicInteger>();
     if (state != ab->state) return false;
@@ -166,7 +166,7 @@ bool SymbolicInteger::equals(const SymbolicValue* other) const {
     return true;
 }
 
-bool SymbolicVarbit::merge(const SymbolicValue* other) {
+bool SymbolicVarbit::merge(const SymbolicValue *other) {
     BUG_CHECK(other->is<SymbolicVarbit>(), "%1%: expected a varbit", other);
     auto vo = other->to<SymbolicVarbit>();
     auto saveState = state;
@@ -174,27 +174,27 @@ bool SymbolicVarbit::merge(const SymbolicValue* other) {
     return (state != saveState);
 }
 
-void SymbolicVarbit::assign(const SymbolicValue* other) {
+void SymbolicVarbit::assign(const SymbolicValue *other) {
     if (other->is<SymbolicError>()) return;
     BUG_CHECK(other->is<SymbolicVarbit>(), "%1%: expected a varbit", other);
     auto vo = other->to<SymbolicVarbit>();
     state = vo->state;
 }
 
-bool SymbolicVarbit::equals(const SymbolicValue* other) const {
+bool SymbolicVarbit::equals(const SymbolicValue *other) const {
     if (!other->is<SymbolicVarbit>()) return false;
     auto ab = other->to<SymbolicVarbit>();
     return state == ab->state;
 }
 
-void SymbolicEnum::assign(const SymbolicValue* other) {
+void SymbolicEnum::assign(const SymbolicValue *other) {
     BUG_CHECK(other->is<SymbolicEnum>(), "%1%: expected an enum", other);
     auto bo = other->to<SymbolicEnum>();
     state = bo->state;
     value = bo->value;
 }
 
-bool SymbolicEnum::merge(const SymbolicValue* other) {
+bool SymbolicEnum::merge(const SymbolicValue *other) {
     auto bo = other->to<SymbolicEnum>();
     auto saveState = state;
     state = mergeState(other->to<ScalarValue>()->state);
@@ -202,7 +202,7 @@ bool SymbolicEnum::merge(const SymbolicValue* other) {
     return (state != saveState);
 }
 
-bool SymbolicEnum::equals(const SymbolicValue* other) const {
+bool SymbolicEnum::equals(const SymbolicValue *other) const {
     if (!other->is<SymbolicEnum>()) return false;
     auto ab = other->to<SymbolicEnum>();
     if (state != ab->state) return false;
@@ -212,8 +212,8 @@ bool SymbolicEnum::equals(const SymbolicValue* other) const {
 
 //////////////////////////////////////////////////////////////////////////////////
 
-SymbolicStruct::SymbolicStruct(const IR::Type_StructLike* type, bool uninitialized,
-                               const SymbolicValueFactory* factory)
+SymbolicStruct::SymbolicStruct(const IR::Type_StructLike *type, bool uninitialized,
+                               const SymbolicValueFactory *factory)
     : SymbolicValue(type) {
     CHECK_NULL(type);
     CHECK_NULL(factory);
@@ -223,20 +223,20 @@ SymbolicStruct::SymbolicStruct(const IR::Type_StructLike* type, bool uninitializ
     }
 }
 
-SymbolicValue* SymbolicStruct::clone() const {
+SymbolicValue *SymbolicStruct::clone() const {
     auto result = new SymbolicStruct(type->to<IR::Type_StructLike>());
     for (auto f : fieldValue) result->fieldValue[f.first] = f.second->clone();
     return result;
 }
 
-void SymbolicStruct::assign(const SymbolicValue* other) {
+void SymbolicStruct::assign(const SymbolicValue *other) {
     if (other->is<SymbolicError>()) return;
     BUG_CHECK(other->is<SymbolicStruct>(), "%1%: expected a struct", other);
     auto sv = other->to<SymbolicStruct>();
     for (auto f : sv->fieldValue) fieldValue[f.first]->assign(f.second);
 }
 
-bool SymbolicStruct::merge(const SymbolicValue* other) {
+bool SymbolicStruct::merge(const SymbolicValue *other) {
     BUG_CHECK(other->is<SymbolicStruct>(), "%1%: expected a struct", other);
     auto sv = other->to<SymbolicStruct>();
     bool changes = false;
@@ -249,7 +249,7 @@ void SymbolicStruct::setAllUnknown() {
         fieldValue[f->name.name]->setAllUnknown();
 }
 
-bool SymbolicStruct::equals(const SymbolicValue* other) const {
+bool SymbolicStruct::equals(const SymbolicValue *other) const {
     if (!other->is<SymbolicStruct>()) return false;
     auto sv = other->to<SymbolicStruct>();
     for (auto f : sv->fieldValue)
@@ -263,7 +263,7 @@ bool SymbolicStruct::hasUninitializedParts() const {
     return false;
 }
 
-void SymbolicStruct::dbprint(std::ostream& out) const {
+void SymbolicStruct::dbprint(std::ostream &out) const {
     bool first = true;
     out << "{ ";
     for (auto f : fieldValue) {
@@ -277,11 +277,11 @@ void SymbolicStruct::dbprint(std::ostream& out) const {
     out << " }";
 }
 
-SymbolicHeaderUnion::SymbolicHeaderUnion(const IR::Type_HeaderUnion* type, bool uninitialized,
-                                         const SymbolicValueFactory* factory)
+SymbolicHeaderUnion::SymbolicHeaderUnion(const IR::Type_HeaderUnion *type, bool uninitialized,
+                                         const SymbolicValueFactory *factory)
     : SymbolicStruct(type, uninitialized, factory) {}
 
-SymbolicBool* SymbolicHeaderUnion::isValid() const {
+SymbolicBool *SymbolicHeaderUnion::isValid() const {
     int validFields = 0;
     for (auto f : type->to<IR::Type_StructLike>()->fields) {
         if (fieldValue.count(f->name.name)) {
@@ -303,7 +303,7 @@ SymbolicBool* SymbolicHeaderUnion::isValid() const {
     return new SymbolicBool(false);
 }
 
-SymbolicValue* SymbolicHeaderUnion::get(const IR::Node* node, cstring field) const {
+SymbolicValue *SymbolicHeaderUnion::get(const IR::Node *node, cstring field) const {
     return SymbolicStruct::get(node, field);
 }
 
@@ -312,20 +312,20 @@ void SymbolicHeaderUnion::setAllUnknown() {
     this->isValid()->setAllUnknown();
 }
 
-SymbolicValue* SymbolicHeaderUnion::clone() const {
+SymbolicValue *SymbolicHeaderUnion::clone() const {
     auto result = new SymbolicHeaderUnion(type->to<IR::Type_HeaderUnion>());
     for (auto f : fieldValue) result->fieldValue[f.first] = f.second->clone();
     return result;
 }
 
-void SymbolicHeaderUnion::assign(const SymbolicValue* other) {
+void SymbolicHeaderUnion::assign(const SymbolicValue *other) {
     if (other->is<SymbolicError>()) return;
     auto hv = other->to<SymbolicHeaderUnion>();
     BUG_CHECK(hv, "%1%: expected a header union", other);
     for (auto f : hv->fieldValue) fieldValue[f.first]->assign(f.second);
 }
 
-bool SymbolicHeaderUnion::merge(const SymbolicValue* other) {
+bool SymbolicHeaderUnion::merge(const SymbolicValue *other) {
     auto hv = other->to<SymbolicHeaderUnion>();
     BUG_CHECK(hv, "%1%: expected a header union", other);
     bool changes = false;
@@ -333,12 +333,12 @@ bool SymbolicHeaderUnion::merge(const SymbolicValue* other) {
     return changes;
 }
 
-bool SymbolicHeaderUnion::equals(const SymbolicValue* other) const {
+bool SymbolicHeaderUnion::equals(const SymbolicValue *other) const {
     if (!other->is<SymbolicHeaderUnion>()) return false;
     return SymbolicStruct::equals(other);
 }
 
-void SymbolicHeaderUnion::dbprint(std::ostream& out) const {
+void SymbolicHeaderUnion::dbprint(std::ostream &out) const {
     out << "{ ";
 #if 0
     for (auto f : fieldValue) {
@@ -349,8 +349,8 @@ void SymbolicHeaderUnion::dbprint(std::ostream& out) const {
     out << " }";
 }
 
-SymbolicHeader::SymbolicHeader(const IR::Type_Header* type, bool uninitialized,
-                               const SymbolicValueFactory* factory)
+SymbolicHeader::SymbolicHeader(const IR::Type_Header *type, bool uninitialized,
+                               const SymbolicValueFactory *factory)
     : SymbolicStruct(type, uninitialized, factory), valid(new SymbolicBool(false)) {}
 
 void SymbolicHeader::setValid(bool v) {
@@ -358,7 +358,7 @@ void SymbolicHeader::setValid(bool v) {
     valid = new SymbolicBool(v);
 }
 
-SymbolicValue* SymbolicHeader::get(const IR::Node* node, cstring field) const {
+SymbolicValue *SymbolicHeader::get(const IR::Node *node, cstring field) const {
     if (valid->isKnown() && !valid->value)
         return new SymbolicStaticError(node, "Reading field from invalid header");
     return SymbolicStruct::get(node, field);
@@ -369,14 +369,14 @@ void SymbolicHeader::setAllUnknown() {
     valid->setAllUnknown();
 }
 
-SymbolicValue* SymbolicHeader::clone() const {
+SymbolicValue *SymbolicHeader::clone() const {
     auto result = new SymbolicHeader(type->to<IR::Type_Header>());
     for (auto f : fieldValue) result->fieldValue[f.first] = f.second->clone();
     result->valid = valid->clone()->to<SymbolicBool>();
     return result;
 }
 
-void SymbolicHeader::assign(const SymbolicValue* other) {
+void SymbolicHeader::assign(const SymbolicValue *other) {
     if (other->is<SymbolicError>()) return;
     BUG_CHECK(other->is<SymbolicStruct>(), "%1%: expected a struct", other);
     if (auto hv = other->to<SymbolicStruct>()) {
@@ -388,7 +388,7 @@ void SymbolicHeader::assign(const SymbolicValue* other) {
         valid->assign(new SymbolicBool(true));
 }
 
-bool SymbolicHeader::merge(const SymbolicValue* other) {
+bool SymbolicHeader::merge(const SymbolicValue *other) {
     BUG_CHECK(other->is<SymbolicHeader>(), "%1%: expected a header", other);
     auto hv = other->to<SymbolicHeader>();
     bool changes = false;
@@ -397,7 +397,7 @@ bool SymbolicHeader::merge(const SymbolicValue* other) {
     return changes;
 }
 
-bool SymbolicHeader::equals(const SymbolicValue* other) const {
+bool SymbolicHeader::equals(const SymbolicValue *other) const {
     if (!other->is<SymbolicHeader>()) return false;
     auto sh = other->to<SymbolicHeader>();
     if (!valid->equals(sh->valid)) return false;
@@ -407,7 +407,7 @@ bool SymbolicHeader::equals(const SymbolicValue* other) const {
     return SymbolicStruct::equals(other);
 }
 
-void SymbolicHeader::dbprint(std::ostream& out) const {
+void SymbolicHeader::dbprint(std::ostream &out) const {
     out << "{ ";
     out << "valid=>";
     valid->dbprint(out);
@@ -420,8 +420,8 @@ void SymbolicHeader::dbprint(std::ostream& out) const {
     out << " }";
 }
 
-SymbolicArray::SymbolicArray(const IR::Type_Stack* type, bool uninitialized,
-                             const SymbolicValueFactory* factory)
+SymbolicArray::SymbolicArray(const IR::Type_Stack *type, bool uninitialized,
+                             const SymbolicValueFactory *factory)
     : SymbolicValue(type),
       size(type->getSize()),
       elemType(type->elementType->to<IR::Type_Header>()) {
@@ -458,7 +458,7 @@ void SymbolicArray::shift(int amount) {
     }
 }
 
-SymbolicValue* SymbolicArray::next(const IR::Node* node) {
+SymbolicValue *SymbolicArray::next(const IR::Node *node) {
     for (unsigned i = 0; i < values.size(); i++) {
         auto v = values.at(i);
         if (values[i]->is<SymbolicHeader>()) {
@@ -474,7 +474,7 @@ SymbolicValue* SymbolicArray::next(const IR::Node* node) {
     return new SymbolicException(node, P4::StandardExceptions::StackOutOfBounds);
 }
 
-SymbolicValue* SymbolicArray::lastIndex(const IR::Node* node) {
+SymbolicValue *SymbolicArray::lastIndex(const IR::Node *node) {
     for (unsigned i = 0; i < values.size(); i++) {
         unsigned index = values.size() - i - 1;
         auto v = values.at(index);
@@ -493,7 +493,7 @@ SymbolicValue* SymbolicArray::lastIndex(const IR::Node* node) {
     return new SymbolicException(node, P4::StandardExceptions::StackOutOfBounds);
 }
 
-SymbolicValue* SymbolicArray::last(const IR::Node* node) {
+SymbolicValue *SymbolicArray::last(const IR::Node *node) {
     for (unsigned i = 0; i < values.size(); i++) {
         unsigned index = values.size() - i - 1;
         auto v = values.at(index);
@@ -514,21 +514,21 @@ void SymbolicArray::setAllUnknown() {
     for (unsigned i = 0; i < values.size(); i++) values.at(i)->setAllUnknown();
 }
 
-SymbolicValue* SymbolicArray::clone() const {
+SymbolicValue *SymbolicArray::clone() const {
     auto result = new SymbolicArray(type->to<IR::Type_Stack>());
     for (unsigned i = 0; i < values.size(); i++)
         result->values.push_back(get(nullptr, i)->clone()->to<SymbolicStruct>());
     return result;
 }
 
-void SymbolicArray::assign(const SymbolicValue* other) {
+void SymbolicArray::assign(const SymbolicValue *other) {
     if (other->is<SymbolicError>()) return;
     BUG_CHECK(other->is<SymbolicArray>(), "%1%: expected an array", other);
     for (unsigned i = 0; i < values.size(); i++)
         values.at(i)->assign(other->to<SymbolicArray>()->get(nullptr, i));
 }
 
-bool SymbolicArray::merge(const SymbolicValue* other) {
+bool SymbolicArray::merge(const SymbolicValue *other) {
     BUG_CHECK(other->is<SymbolicArray>(), "%1%: expected an array", other);
     bool changes = false;
     for (unsigned i = 0; i < values.size(); i++)
@@ -536,7 +536,7 @@ bool SymbolicArray::merge(const SymbolicValue* other) {
     return changes;
 }
 
-bool SymbolicArray::equals(const SymbolicValue* other) const {
+bool SymbolicArray::equals(const SymbolicValue *other) const {
     if (!other->is<SymbolicArray>()) return false;
     auto sa = other->to<SymbolicArray>();
     for (unsigned i = 0; i < values.size(); i++) {
@@ -551,7 +551,7 @@ bool SymbolicArray::hasUninitializedParts() const {
     return false;
 }
 
-void SymbolicArray::dbprint(std::ostream& out) const {
+void SymbolicArray::dbprint(std::ostream &out) const {
     bool first = true;
     unsigned index = 0;
     out << "[";
@@ -565,24 +565,24 @@ void SymbolicArray::dbprint(std::ostream& out) const {
     out << "]";
 }
 
-bool AnyElement::merge(const SymbolicValue*) {
+bool AnyElement::merge(const SymbolicValue *) {
     BUG("Merge should not be called on AnyElement");
     return false;
 }
 
-bool AnyElement::equals(const SymbolicValue*) const {
+bool AnyElement::equals(const SymbolicValue *) const {
     BUG("Equals should not be called on AnyElement");
     return true;
 }
 
-SymbolicValue* AnyElement::collapse() const {
+SymbolicValue *AnyElement::collapse() const {
     auto result = parent->get(nullptr, 0)->clone();
     for (size_t i = 1; i < parent->values.size(); i++) (void)result->merge(parent->get(nullptr, i));
     return result;
 }
 
-SymbolicTuple::SymbolicTuple(const IR::Type_Tuple* type, bool uninitialized,
-                             const SymbolicValueFactory* factory)
+SymbolicTuple::SymbolicTuple(const IR::Type_Tuple *type, bool uninitialized,
+                             const SymbolicValueFactory *factory)
     : SymbolicValue(type) {
     for (auto t : type->components) {
         auto v = factory->create(t, uninitialized);
@@ -594,13 +594,13 @@ void SymbolicTuple::setAllUnknown() {
     for (unsigned i = 0; i < values.size(); i++) values.at(i)->setAllUnknown();
 }
 
-SymbolicValue* SymbolicTuple::clone() const {
+SymbolicValue *SymbolicTuple::clone() const {
     auto result = new SymbolicTuple(type->to<IR::Type_Tuple>());
     for (unsigned i = 0; i < values.size(); i++) result->values.push_back(get(i)->clone());
     return result;
 }
 
-bool SymbolicTuple::merge(const SymbolicValue* other) {
+bool SymbolicTuple::merge(const SymbolicValue *other) {
     BUG_CHECK(other->is<SymbolicTuple>(), "%1%: expected a tuple value", other);
     auto tpl = other->to<SymbolicTuple>();
     BUG_CHECK(values.size() == tpl->values.size(), "merging tuples with different sizes");
@@ -610,7 +610,7 @@ bool SymbolicTuple::merge(const SymbolicValue* other) {
     return changes;
 }
 
-bool SymbolicTuple::equals(const SymbolicValue* other) const {
+bool SymbolicTuple::equals(const SymbolicValue *other) const {
     if (!other->is<SymbolicTuple>()) return false;
     auto st = other->to<SymbolicTuple>();
     for (unsigned i = 0; i < values.size(); i++)
@@ -624,12 +624,12 @@ bool SymbolicTuple::hasUninitializedParts() const {
     return false;
 }
 
-bool SymbolicExtern::equals(const SymbolicValue* other) const {
+bool SymbolicExtern::equals(const SymbolicValue *other) const {
     if (!other->is<SymbolicExtern>()) return false;
     return true;
 }
 
-bool SymbolicPacketIn::merge(const SymbolicValue* other) {
+bool SymbolicPacketIn::merge(const SymbolicValue *other) {
     BUG_CHECK(other->is<SymbolicPacketIn>(), "%1%: merging with non-packet", other);
     auto pv = other->to<SymbolicPacketIn>();
     bool changes = false;
@@ -641,18 +641,18 @@ bool SymbolicPacketIn::merge(const SymbolicValue* other) {
     return changes;
 }
 
-bool SymbolicPacketIn::equals(const SymbolicValue* other) const {
+bool SymbolicPacketIn::equals(const SymbolicValue *other) const {
     if (!other->is<SymbolicPacketIn>()) return false;
     auto sp = other->to<SymbolicPacketIn>();
     // ignore the conservative flag
     return minimumStreamOffset == sp->minimumStreamOffset;
 }
 
-SymbolicVoid* SymbolicVoid::instance = new SymbolicVoid();
+SymbolicVoid *SymbolicVoid::instance = new SymbolicVoid();
 
 /*****************************************************************************************/
 
-const IR::Expression* getConstant(const ScalarValue* constant) {
+const IR::Expression *getConstant(const ScalarValue *constant) {
     if (constant->is<SymbolicBool>()) {
         return new IR::BoolLiteral(IR::Type::Boolean::get(), constant->to<SymbolicBool>()->value);
     } else if (constant->is<SymbolicInteger>()) {
@@ -661,8 +661,8 @@ const IR::Expression* getConstant(const ScalarValue* constant) {
     BUG("Unimplemented structure for expression evaluation %1%", constant);
 }
 
-void ExpressionEvaluator::checkResult(const IR::Expression* expression,
-                                      const IR::Expression* result) {
+void ExpressionEvaluator::checkResult(const IR::Expression *expression,
+                                      const IR::Expression *result) {
     if (result->is<IR::Constant>()) {
         set(expression, new SymbolicInteger(result->to<IR::Constant>()));
         return;
@@ -673,7 +673,7 @@ void ExpressionEvaluator::checkResult(const IR::Expression* expression,
     BUG("%1% : expected a constant/bool literal", result);
 }
 
-void ExpressionEvaluator::setNonConstant(const IR::Expression* expression) {
+void ExpressionEvaluator::setNonConstant(const IR::Expression *expression) {
     auto type = typeMap->getType(expression, true);
     if (type->is<IR::Type_Boolean>()) {
         set(expression, new SymbolicBool(ScalarValue::ValueState::NotConstant));
@@ -685,7 +685,7 @@ void ExpressionEvaluator::setNonConstant(const IR::Expression* expression) {
     }
 }
 
-void ExpressionEvaluator::postorder(const IR::Operation_Ternary* expression) {
+void ExpressionEvaluator::postorder(const IR::Operation_Ternary *expression) {
     auto e0 = get(expression->e0);
     if (e0->is<SymbolicError>()) {
         set(expression, e0);
@@ -733,7 +733,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Ternary* expression) {
     setNonConstant(expression);
 }
 
-void ExpressionEvaluator::postorder(const IR::Operation_Binary* expression) {
+void ExpressionEvaluator::postorder(const IR::Operation_Binary *expression) {
     auto l = get(expression->left);
     if (l->is<SymbolicError>()) {
         set(expression, l);
@@ -769,7 +769,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Binary* expression) {
     setNonConstant(expression);
 }
 
-void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
+void ExpressionEvaluator::postorder(const IR::Operation_Unary *expression) {
     auto l = get(expression->expr);
     if (l->is<SymbolicError>()) {
         set(expression, l);
@@ -825,11 +825,11 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
     }
 }
 
-void ExpressionEvaluator::postorder(const IR::Constant* expression) {
+void ExpressionEvaluator::postorder(const IR::Constant *expression) {
     set(expression, new SymbolicInteger(expression));
 }
 
-void ExpressionEvaluator::postorder(const IR::ListExpression* expression) {
+void ExpressionEvaluator::postorder(const IR::ListExpression *expression) {
     auto type = typeMap->getType(expression, true);
     auto result = new SymbolicTuple(type->to<IR::Type_Tuple>());
     for (auto e : expression->components) {
@@ -839,7 +839,7 @@ void ExpressionEvaluator::postorder(const IR::ListExpression* expression) {
     set(expression, result);
 }
 
-void ExpressionEvaluator::postorder(const IR::StructExpression* expression) {
+void ExpressionEvaluator::postorder(const IR::StructExpression *expression) {
     auto type = typeMap->getType(expression, true);
     auto result = new SymbolicStruct(type->to<IR::Type_StructLike>());
     for (auto e : expression->components) {
@@ -849,11 +849,11 @@ void ExpressionEvaluator::postorder(const IR::StructExpression* expression) {
     set(expression, result);
 }
 
-void ExpressionEvaluator::postorder(const IR::BoolLiteral* expression) {
+void ExpressionEvaluator::postorder(const IR::BoolLiteral *expression) {
     set(expression, new SymbolicBool(expression));
 }
 
-void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
+void ExpressionEvaluator::postorder(const IR::Operation_Relation *expression) {
     auto l = get(expression->left);
     if (l->is<SymbolicError>()) {
         set(expression, l);
@@ -912,7 +912,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
     BUG("%1%: unexpected type", l);
 }
 
-void ExpressionEvaluator::postorder(const IR::Member* expression) {
+void ExpressionEvaluator::postorder(const IR::Member *expression) {
     auto type = typeMap->getType(expression, true);
     if (type->is<IR::Type_Error>()) {
         set(expression, new SymbolicEnum(expression->type, expression->member));
@@ -932,7 +932,7 @@ void ExpressionEvaluator::postorder(const IR::Member* expression) {
     if (basetype->is<IR::Type_Stack>()) {
         BUG_CHECK(l->is<SymbolicArray>(), "%1%: expected an array", l);
         auto array = l->to<SymbolicArray>();
-        SymbolicValue* v;
+        SymbolicValue *v;
         if (expression->member.name == IR::Type_Stack::next) {
             v = array->next(expression);
             if (v->is<SymbolicError>()) {
@@ -966,7 +966,7 @@ void ExpressionEvaluator::postorder(const IR::Member* expression) {
     }
 }
 
-bool ExpressionEvaluator::preorder(const IR::ArrayIndex* expression) {
+bool ExpressionEvaluator::preorder(const IR::ArrayIndex *expression) {
     bool lv = evaluatingLeftValue;
     evaluatingLeftValue = false;
     visit(expression->left);
@@ -975,7 +975,7 @@ bool ExpressionEvaluator::preorder(const IR::ArrayIndex* expression) {
     return true;  // don't prune
 }
 
-void ExpressionEvaluator::postorder(const IR::ArrayIndex* expression) {
+void ExpressionEvaluator::postorder(const IR::ArrayIndex *expression) {
     auto l = get(expression->left);
     auto r = get(expression->right);
 
@@ -1010,10 +1010,10 @@ void ExpressionEvaluator::postorder(const IR::ArrayIndex* expression) {
     set(expression, result);
 }
 
-void ExpressionEvaluator::postorder(const IR::PathExpression* expression) {
+void ExpressionEvaluator::postorder(const IR::PathExpression *expression) {
     auto type = typeMap->getType(expression, true);
     auto decl = refMap->getDeclaration(expression->path, true);
-    SymbolicValue* result;
+    SymbolicValue *result;
     if (type->is<IR::Type_Error>())
         result = new SymbolicEnum(type, decl->getName());
     else
@@ -1021,8 +1021,8 @@ void ExpressionEvaluator::postorder(const IR::PathExpression* expression) {
     set(expression, result);
 }
 
-void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) {
-    MethodInstance* mi = MethodInstance::resolve(expression, refMap, typeMap);
+void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) {
+    MethodInstance *mi = MethodInstance::resolve(expression, refMap, typeMap);
     for (auto arg : *expression->arguments) {
         auto argValue = get(arg->expression);
         CHECK_NULL(argValue);
@@ -1183,7 +1183,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
     }
 }
 
-SymbolicValue* ExpressionEvaluator::evaluate(const IR::Expression* expression, bool leftValue) {
+SymbolicValue *ExpressionEvaluator::evaluate(const IR::Expression *expression, bool leftValue) {
     evaluatingLeftValue = leftValue;
     (void)expression->apply(*this);
     auto result = get(expression);

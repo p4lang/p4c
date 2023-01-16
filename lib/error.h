@@ -44,8 +44,8 @@ inline unsigned diagnosticCount() {
 // LEGACY: once we transition to error types, this should be deprecated
 #if LEGACY
 template <typename... T>
-inline void error(const char* format, T... args) {
-    auto& context = BaseCompileContext::get();
+inline void error(const char *format, T... args) {
+    auto &context = BaseCompileContext::get();
     auto action = context.getDefaultErrorDiagnosticAction();
     context.errorReporter().diagnose(action, nullptr, format, "", args...);
 }
@@ -56,8 +56,8 @@ inline void error(const char* format, T... args) {
 template <class T,
           typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
           class... Args>
-void error(const int kind, const char* format, const T* node, Args... args) {
-    auto& context = BaseCompileContext::get();
+void error(const int kind, const char *format, const T *node, Args... args) {
+    auto &context = BaseCompileContext::get();
     auto action = context.getDefaultErrorDiagnosticAction();
     context.errorReporter().diagnose(action, kind, format, "", node, args...);
 }
@@ -66,9 +66,9 @@ void error(const int kind, const char* format, const T* node, Args... args) {
 template <class T,
           typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
           class... Args>
-void errorWithSuffix(const int kind, const char* format, const char* suffix, const T* node,
+void errorWithSuffix(const int kind, const char *format, const char *suffix, const T *node,
                      Args... args) {
-    auto& context = BaseCompileContext::get();
+    auto &context = BaseCompileContext::get();
     auto action = context.getDefaultErrorDiagnosticAction();
     context.errorReporter().diagnose(action, kind, format, suffix, node, args...);
 }
@@ -77,7 +77,7 @@ void errorWithSuffix(const int kind, const char* format, const char* suffix, con
 template <class T,
           typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
           class... Args>
-void error(const int kind, const char* format, const T& node, Args... args) {
+void error(const int kind, const char *format, const T &node, Args... args) {
     error(kind, format, &node, std::forward<Args>(args)...);
 }
 
@@ -89,7 +89,7 @@ void error(const int kind, const char* format, const T& node, Args... args) {
 template <class T,
           typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
           class... Args>
-void error(const char* format, const T* node, Args... args) {
+void error(const char *format, const T *node, Args... args) {
     error(ErrorType::LEGACY_ERROR, format, node, std::forward<Args>(args)...);
 }
 
@@ -98,7 +98,7 @@ void error(const char* format, const T* node, Args... args) {
 template <class T,
           typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
           class... Args>
-void error(const char* format, const T& node, Args... args) {
+void error(const char *format, const T &node, Args... args) {
     error(ErrorType::LEGACY_ERROR, format, node, std::forward<Args>(args)...);
 }
 #endif
@@ -106,8 +106,8 @@ void error(const char* format, const T& node, Args... args) {
 /// Report errors of type kind for messages that do not have a node.
 /// These will not be filtered
 template <typename... Args>
-void error(const int kind, const char* format, Args... args) {
-    auto& context = BaseCompileContext::get();
+void error(const int kind, const char *format, Args... args) {
+    auto &context = BaseCompileContext::get();
     auto action = context.getDefaultErrorDiagnosticAction();
     context.errorReporter().diagnose(action, kind, format, "", std::forward<Args>(args)...);
 }
@@ -115,8 +115,8 @@ void error(const int kind, const char* format, Args... args) {
 #if LEGACY
 /// Report a warning with the given message.
 template <typename... T>
-inline void warning(const char* format, T... args) {
-    auto& context = BaseCompileContext::get();
+inline void warning(const char *format, T... args) {
+    auto &context = BaseCompileContext::get();
     auto action = context.getDefaultWarningDiagnosticAction();
     context.errorReporter().diagnose(action, nullptr, format, "", args...);
 }
@@ -126,8 +126,8 @@ inline void warning(const char* format, T... args) {
 template <class T,
           typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
           class... Args>
-void warning(const int kind, const char* format, const T* node, Args... args) {
-    auto& context = BaseCompileContext::get();
+void warning(const int kind, const char *format, const T *node, Args... args) {
+    auto &context = BaseCompileContext::get();
     auto action = context.getDefaultWarningDiagnosticAction();
     context.errorReporter().diagnose(action, kind, format, "", node, args...);
 }
@@ -136,15 +136,15 @@ void warning(const int kind, const char* format, const T* node, Args... args) {
 template <class T,
           typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
           class... Args>
-void warning(const int kind, const char* format, const T& node, Args... args) {
+void warning(const int kind, const char *format, const T &node, Args... args) {
     ::warning(kind, format, &node, std::forward<Args>(args)...);
 }
 
 /// Report warnings of type kind, for messages that do not have a node.
 /// These will not be filtered
 template <typename... Args>
-void warning(const int kind, const char* format, Args... args) {
-    auto& context = BaseCompileContext::get();
+void warning(const int kind, const char *format, Args... args) {
+    auto &context = BaseCompileContext::get();
     auto action = context.getDefaultWarningDiagnosticAction();
     context.errorReporter().diagnose(action, kind, format, "", std::forward<Args>(args)...);
 }
@@ -163,9 +163,9 @@ void warning(const int kind, const char* format, Args... args) {
  * @param suffix  A message that is appended at the end.
  */
 template <typename... T>
-inline void diagnose(DiagnosticAction defaultAction, const char* diagnosticName, const char* format,
-                     const char* suffix, T... args) {
-    auto& context = BaseCompileContext::get();
+inline void diagnose(DiagnosticAction defaultAction, const char *diagnosticName, const char *format,
+                     const char *suffix, T... args) {
+    auto &context = BaseCompileContext::get();
     auto action = context.getDiagnosticAction(diagnosticName, defaultAction);
     context.errorReporter().diagnose(action, diagnosticName, format, suffix, args...);
 }

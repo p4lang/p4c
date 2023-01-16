@@ -25,7 +25,7 @@ limitations under the License.
 
 namespace UBPF {
 
-UBPFControlBodyTranslator::UBPFControlBodyTranslator(const UBPFControl* control)
+UBPFControlBodyTranslator::UBPFControlBodyTranslator(const UBPFControl *control)
     : EBPF::CodeGenInspector(control->program->refMap, control->program->typeMap),
       EBPF::ControlBodyTranslator(control),
       control(control),
@@ -33,7 +33,7 @@ UBPFControlBodyTranslator::UBPFControlBodyTranslator(const UBPFControl* control)
     setName("UBPFControlBodyTranslator");
 }
 
-void UBPFControlBodyTranslator::processFunction(const P4::ExternFunction* function) {
+void UBPFControlBodyTranslator::processFunction(const P4::ExternFunction *function) {
     if (function->method->name.name == control->program->model.drop.name) {
         builder->appendFormat("%s = false", control->passVariable);
         return;
@@ -77,7 +77,7 @@ void UBPFControlBodyTranslator::processFunction(const P4::ExternFunction* functi
     processCustomExternFunction(function, UBPFTypeFactory::instance);
 }
 
-void UBPFControlBodyTranslator::processChecksumReplace2(const P4::ExternFunction* function) {
+void UBPFControlBodyTranslator::processChecksumReplace2(const P4::ExternFunction *function) {
     builder->append(control->program->model.csum_replace2.name + "(");
     auto v = function->expr->arguments;
     bool first = true;
@@ -89,7 +89,7 @@ void UBPFControlBodyTranslator::processChecksumReplace2(const P4::ExternFunction
     builder->append(")");
 }
 
-void UBPFControlBodyTranslator::processChecksumReplace4(const P4::ExternFunction* function) {
+void UBPFControlBodyTranslator::processChecksumReplace4(const P4::ExternFunction *function) {
     builder->append(control->program->model.csum_replace4.name + "(");
     auto v = function->expr->arguments;
     bool first = true;
@@ -101,7 +101,7 @@ void UBPFControlBodyTranslator::processChecksumReplace4(const P4::ExternFunction
     builder->append(")");
 }
 
-cstring UBPFControlBodyTranslator::createHashKeyInstance(const P4::ExternFunction* function) {
+cstring UBPFControlBodyTranslator::createHashKeyInstance(const P4::ExternFunction *function) {
     auto dataArgument = function->expr->arguments->at(2)->expression->to<IR::ListExpression>();
 
     auto atype = UBPFTypeFactory::instance->create(dataArgument->type);
@@ -142,7 +142,7 @@ cstring UBPFControlBodyTranslator::createHashKeyInstance(const P4::ExternFunctio
     return hashKeyInstance;
 }
 
-void UBPFControlBodyTranslator::processMethod(const P4::ExternMethod* method) {
+void UBPFControlBodyTranslator::processMethod(const P4::ExternMethod *method) {
     auto decl = method->object;
     auto declType = method->originalExternType;
 
@@ -166,7 +166,7 @@ void UBPFControlBodyTranslator::processMethod(const P4::ExternMethod* method) {
     ::error(ErrorType::ERR_UNEXPECTED, "%1%: Unexpected method call", method->expr);
 }
 
-void UBPFControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
+void UBPFControlBodyTranslator::processApply(const P4::ApplyMethod *method) {
     auto table = control->getTable(method->object->getName().name);
     BUG_CHECK(table != nullptr, "No table for %1%", method->expr);
 
@@ -253,7 +253,7 @@ void UBPFControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
     builder->blockEnd(true);
 }
 
-bool UBPFControlBodyTranslator::preorder(const IR::PathExpression* expression) {
+bool UBPFControlBodyTranslator::preorder(const IR::PathExpression *expression) {
     auto decl = control->program->refMap->getDeclaration(expression->path, true);
     auto param = decl->getNode()->to<IR::Parameter>();
     if (param != nullptr) {
@@ -268,13 +268,13 @@ bool UBPFControlBodyTranslator::preorder(const IR::PathExpression* expression) {
     return false;
 }
 
-bool UBPFControlBodyTranslator::preorder(const IR::MethodCallStatement* s) {
+bool UBPFControlBodyTranslator::preorder(const IR::MethodCallStatement *s) {
     visit(s->methodCall);
     builder->endOfStatement(true);
     return false;
 }
 
-bool UBPFControlBodyTranslator::preorder(const IR::MethodCallExpression* expression) {
+bool UBPFControlBodyTranslator::preorder(const IR::MethodCallExpression *expression) {
     auto mi = P4::MethodInstance::resolve(expression, control->program->refMap,
                                           control->program->typeMap);
     if (auto apply = mi->to<P4::ApplyMethod>()) {
@@ -322,7 +322,7 @@ bool UBPFControlBodyTranslator::preorder(const IR::MethodCallExpression* express
     return false;
 }
 
-bool UBPFControlBodyTranslator::preorder(const IR::AssignmentStatement* a) {
+bool UBPFControlBodyTranslator::preorder(const IR::AssignmentStatement *a) {
     if (a->right->is<IR::MethodCallExpression>()) {
         auto method = a->right->to<IR::MethodCallExpression>();
         if (method->method->is<IR::Member>()) {
@@ -338,8 +338,8 @@ bool UBPFControlBodyTranslator::preorder(const IR::AssignmentStatement* a) {
     return false;
 }
 
-bool UBPFControlBodyTranslator::emitRegisterRead(const IR::AssignmentStatement* a,
-                                                 const IR::MethodCallExpression* method) {
+bool UBPFControlBodyTranslator::emitRegisterRead(const IR::AssignmentStatement *a,
+                                                 const IR::MethodCallExpression *method) {
     auto pathExpr = method->method->to<IR::Member>()->expr->to<IR::PathExpression>();
     auto registerName = pathExpr->path->name.name;
     auto pRegister = control->getRegister(registerName);
@@ -372,14 +372,14 @@ bool UBPFControlBodyTranslator::emitRegisterRead(const IR::AssignmentStatement* 
     return false;
 }
 
-void UBPFControlBodyTranslator::emitAssignmentStatement(const IR::AssignmentStatement* a) {
+void UBPFControlBodyTranslator::emitAssignmentStatement(const IR::AssignmentStatement *a) {
     visit(a->left);
     builder->append(" = ");
     visit(a->right);
     builder->endOfStatement();
 }
 
-bool UBPFControlBodyTranslator::preorder(const IR::BlockStatement* s) {
+bool UBPFControlBodyTranslator::preorder(const IR::BlockStatement *s) {
     builder->blockStart();
     for (auto a : s->components) {
         builder->newline();
@@ -391,17 +391,17 @@ bool UBPFControlBodyTranslator::preorder(const IR::BlockStatement* s) {
     return false;
 }
 
-bool UBPFControlBodyTranslator::preorder(const IR::ExitStatement*) {
+bool UBPFControlBodyTranslator::preorder(const IR::ExitStatement *) {
     builder->appendFormat("goto %s;", control->program->endLabel.c_str());
     return false;
 }
 
-bool UBPFControlBodyTranslator::preorder(const IR::ReturnStatement*) {
+bool UBPFControlBodyTranslator::preorder(const IR::ReturnStatement *) {
     builder->appendFormat("goto %s;", control->program->endLabel.c_str());
     return false;
 }
 
-bool UBPFControlBodyTranslator::preorder(const IR::IfStatement* statement) {
+bool UBPFControlBodyTranslator::preorder(const IR::IfStatement *statement) {
     bool isHit = P4::TableApplySolver::isHit(statement->condition, control->program->refMap,
                                              control->program->typeMap);
     if (isHit) {
@@ -440,7 +440,7 @@ bool UBPFControlBodyTranslator::preorder(const IR::IfStatement* statement) {
     return false;
 }
 
-bool UBPFControlBodyTranslator::preorder(const IR::SwitchStatement* statement) {
+bool UBPFControlBodyTranslator::preorder(const IR::SwitchStatement *statement) {
     cstring newName = control->program->refMap->newName("action_run");
     saveAction.push_back(newName);
     // This must be a table.apply().action_run
@@ -491,7 +491,7 @@ bool UBPFControlBodyTranslator::preorder(const IR::SwitchStatement* statement) {
     return false;
 }
 
-bool UBPFControlBodyTranslator::preorder(const IR::Operation_Binary* b) {
+bool UBPFControlBodyTranslator::preorder(const IR::Operation_Binary *b) {
     widthCheck(b);
     builder->append("(");
     visit(b->left);
@@ -503,7 +503,7 @@ bool UBPFControlBodyTranslator::preorder(const IR::Operation_Binary* b) {
     return false;
 }
 
-bool UBPFControlBodyTranslator::comparison(const IR::Operation_Relation* b) {
+bool UBPFControlBodyTranslator::comparison(const IR::Operation_Relation *b) {
     auto type = typeMap->getType(b->left);
     auto et = UBPFTypeFactory::instance->create(type);
 
@@ -531,7 +531,7 @@ bool UBPFControlBodyTranslator::comparison(const IR::Operation_Relation* b) {
     return false;
 }
 
-bool UBPFControlBodyTranslator::preorder(const IR::Member* expression) {
+bool UBPFControlBodyTranslator::preorder(const IR::Member *expression) {
     cstring name = "";
     if (expression->expr->is<IR::PathExpression>()) {
         name = expression->expr->to<IR::PathExpression>()->path->name.name;
@@ -549,8 +549,8 @@ bool UBPFControlBodyTranslator::preorder(const IR::Member* expression) {
     return false;
 }
 
-UBPFControl::UBPFControl(const UBPFProgram* program, const IR::ControlBlock* block,
-                         const IR::Parameter* parserHeaders)
+UBPFControl::UBPFControl(const UBPFProgram *program, const IR::ControlBlock *block,
+                         const IR::Parameter *parserHeaders)
     : EBPF::EBPFControl(program, block, parserHeaders),
       program(program),
       controlBlock(block),
@@ -587,7 +587,7 @@ void UBPFControl::scanConstants() {
     }
 }
 
-void UBPFControl::emit(EBPF::CodeBuilder* builder) {
+void UBPFControl::emit(EBPF::CodeBuilder *builder) {
     for (auto a : controlBlock->container->controlLocals) {
         emitDeclaration(builder, a);
     }
@@ -602,7 +602,7 @@ void UBPFControl::emit(EBPF::CodeBuilder* builder) {
     }
 }
 
-void UBPFControl::emitDeclaration(EBPF::CodeBuilder* builder, const IR::Declaration* decl) {
+void UBPFControl::emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declaration *decl) {
     if (decl->is<IR::Declaration_Variable>()) {
         auto vd = decl->to<IR::Declaration_Variable>();
         auto etype = UBPFTypeFactory::instance->create(vd->type);
@@ -619,16 +619,16 @@ void UBPFControl::emitDeclaration(EBPF::CodeBuilder* builder, const IR::Declarat
     BUG("%1%: not yet handled", decl);
 }
 
-void UBPFControl::emitTableTypes(EBPF::CodeBuilder* builder) {
+void UBPFControl::emitTableTypes(EBPF::CodeBuilder *builder) {
     for (auto it : tables) it.second->emitTypes(builder);
 }
 
-void UBPFControl::emitTableInstances(EBPF::CodeBuilder* builder) {
+void UBPFControl::emitTableInstances(EBPF::CodeBuilder *builder) {
     for (auto it : tables) it.second->emitInstance(builder);
     for (auto it : registers) it.second->emitInstance(builder);
 }
 
-void UBPFControl::emitTableInitializers(EBPF::CodeBuilder* builder) {
+void UBPFControl::emitTableInitializers(EBPF::CodeBuilder *builder) {
     for (auto it : tables) it.second->emitInitializer(builder);
 }
 

@@ -32,21 +32,22 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-void ExprStepper::setFields(ExecutionState* nextState,
-                            const std::vector<const IR::Member*>& flatFields, int varBitFieldSize) {
-    for (const auto* fieldRef : flatFields) {
-        const auto* fieldType = nextState->get(fieldRef)->type;
+void ExprStepper::setFields(ExecutionState *nextState,
+                            const std::vector<const IR::Member *> &flatFields,
+                            int varBitFieldSize) {
+    for (const auto *fieldRef : flatFields) {
+        const auto *fieldType = nextState->get(fieldRef)->type;
         // If the header had a varbit, the header needs to be updated.
         // We assign @param varbitFeldSize to the varbit field.
-        if (const auto* varbit = fieldType->to<IR::Extracted_Varbits>()) {
+        if (const auto *varbit = fieldType->to<IR::Extracted_Varbits>()) {
             BUG_CHECK(varBitFieldSize >= 0,
                       "varBitFieldSize should be larger or equals to zero at this "
                       "point. The value is %1%.",
                       varBitFieldSize);
-            auto* newVarbit = varbit->clone();
+            auto *newVarbit = varbit->clone();
 
             newVarbit->assignedSize = varBitFieldSize;
-            auto* newRef = fieldRef->clone();
+            auto *newRef = fieldRef->clone();
             newRef->type = newVarbit;
             fieldRef = newRef;
             fieldType = newVarbit;
@@ -59,16 +60,16 @@ void ExprStepper::setFields(ExecutionState* nextState,
         }
 
         // Slice from the buffer and append to the packet, if necessary.
-        const auto* pktVar = nextState->slicePacketBuffer(fieldWidth);
+        const auto *pktVar = nextState->slicePacketBuffer(fieldWidth);
         // We need to cast the generated variable to the appropriate type.
         if (fieldType->is<IR::Extracted_Varbits>()) {
             pktVar = new IR::Cast(fieldType, pktVar);
-        } else if (const auto* bits = fieldType->to<IR::Type_Bits>()) {
+        } else if (const auto *bits = fieldType->to<IR::Type_Bits>()) {
             if (bits->isSigned) {
                 pktVar = new IR::Cast(fieldType, pktVar);
             }
         } else if (fieldRef->type->is<IR::Type_Boolean>()) {
-            const auto* boolType = IR::Type_Boolean::get();
+            const auto *boolType = IR::Type_Boolean::get();
             pktVar = new IR::Cast(boolType, pktVar);
         }
         // Update the field and add a trace event.
@@ -78,41 +79,41 @@ void ExprStepper::setFields(ExecutionState* nextState,
 }
 
 ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateSuccessfulParserAdvance(
-    const ExecutionState& state, int advanceSize) const {
+    const ExecutionState &state, int advanceSize) const {
     // Calculate the necessary size of the packet to extract successfully.
     // The minimum required size for a packet is the current cursor and the amount we are
     // advancing into the packet minus whatever has been buffered in the current buffer.
     auto minSize =
         std::max(0, state.getInputPacketCursor() + advanceSize - state.getPacketBufferSize());
-    auto* cond = new IR::Geq(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
+    auto *cond = new IR::Geq(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
                              IR::getConstant(ExecutionState::getPacketSizeVarType(), minSize));
     return {advanceSize, cond, advanceSize, new IR::LNot(cond)};
 }
 
 ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateAdvanceExpression(
-    const ExecutionState& state, const IR::Expression* advanceExpr,
-    const IR::Expression* restrictions) const {
-    const auto* packetSizeVarType = ExecutionState::getPacketSizeVarType();
+    const ExecutionState &state, const IR::Expression *advanceExpr,
+    const IR::Expression *restrictions) const {
+    const auto *packetSizeVarType = ExecutionState::getPacketSizeVarType();
 
-    const auto* cursorConst = IR::getConstant(packetSizeVarType, state.getInputPacketCursor());
-    const auto* bufferSizeConst = IR::getConstant(packetSizeVarType, state.getPacketBufferSize());
-    const auto* advanceSum = new IR::Add(packetSizeVarType, cursorConst, advanceExpr);
-    auto* minSize = new IR::Sub(packetSizeVarType, advanceSum, bufferSizeConst);
+    const auto *cursorConst = IR::getConstant(packetSizeVarType, state.getInputPacketCursor());
+    const auto *bufferSizeConst = IR::getConstant(packetSizeVarType, state.getPacketBufferSize());
+    const auto *advanceSum = new IR::Add(packetSizeVarType, cursorConst, advanceExpr);
+    auto *minSize = new IR::Sub(packetSizeVarType, advanceSum, bufferSizeConst);
     // The packet size must be larger than the current parser cursor minus what is already
     // present in the buffer. The advance expression, i.e., the size of the advance can be freely
     // chosen.
-    auto* cond = new IR::LAnd(
+    auto *cond = new IR::LAnd(
         new IR::Geq(IR::Type::Boolean::get(), advanceSum, bufferSizeConst),
         new IR::Geq(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(), minSize));
 
     // Compute the accept case.
     int advanceVal = 0;
-    const auto* advanceCond = new IR::LAnd(cond, restrictions);
-    const auto* advanceConst = evaluateExpression(advanceExpr, advanceCond);
+    const auto *advanceCond = new IR::LAnd(cond, restrictions);
+    const auto *advanceConst = evaluateExpression(advanceExpr, advanceCond);
     // Compute the reject case.
     int notAdvanceVal = 0;
-    const auto* notAdvanceCond = new IR::LAnd(new IR::LNot(cond), restrictions);
-    const auto* notAdvanceConst = evaluateExpression(advanceExpr, notAdvanceCond);
+    const auto *notAdvanceCond = new IR::LAnd(new IR::LNot(cond), restrictions);
+    const auto *notAdvanceConst = evaluateExpression(advanceExpr, notAdvanceCond);
     // If we can not satisfy the advance, set the condition to nullptr.
     if (advanceConst == nullptr) {
         advanceCond = nullptr;
@@ -136,8 +137,8 @@ ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateAdvanceExpression(
     return {advanceVal, advanceCond, notAdvanceVal, notAdvanceCond};
 }
 
-void ExprStepper::generateCopyIn(ExecutionState* nextState, const IR::Expression* targetPath,
-                                 const IR::Expression* srcPath, cstring dir,
+void ExprStepper::generateCopyIn(ExecutionState *nextState, const IR::Expression *targetPath,
+                                 const IR::Expression *srcPath, cstring dir,
                                  bool forceTaint) const {
     // If the direction is out, we do not copy in external values.
     // We set the parameter to uninitialized.
@@ -150,10 +151,10 @@ void ExprStepper::generateCopyIn(ExecutionState* nextState, const IR::Expression
     }
 }
 
-void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression* call,
-                                               const IR::Expression* receiver, IR::ID name,
-                                               const IR::Vector<IR::Argument>* args,
-                                               const ExecutionState& state) {
+void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *call,
+                                               const IR::Expression *receiver, IR::ID name,
+                                               const IR::Vector<IR::Argument> *args,
+                                               const ExecutionState &state) {
     static const ExternMethodImpls INTERNAL_EXTERN_METHOD_IMPLS({
         /* ======================================================================================
          *  prepend_to_prog_header
@@ -163,18 +164,18 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression* c
          */
         {"*.prepend_to_prog_header",
          {"hdr"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             const auto* prependVar = args->at(0)->expression;
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             const auto *prependVar = args->at(0)->expression;
              if (!(prependVar->is<IR::Member>() || prependVar->is<IR::PathExpression>() ||
                    prependVar->is<IR::TaintExpression>() || prependVar->is<IR::Constant>())) {
                  TESTGEN_UNIMPLEMENTED("Prepend input %1% of type %2% not supported", prependVar,
                                        prependVar->type);
              }
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
 
-             if (const auto* prependType = prependVar->type->to<IR::Type_StructLike>()) {
+             if (const auto *prependType = prependVar->type->to<IR::Type_StructLike>()) {
                  // We only support flat assignments, so retrieve all fields from the input
                  // argument.
                  const auto flatFields = nextState->getFlatFields(prependVar, prependType);
@@ -182,14 +183,14 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression* c
                  // We need to append in reverse order since we are prepending to the input
                  // packet.
                  for (auto fieldIt = flatFields.rbegin(); fieldIt != flatFields.rend(); ++fieldIt) {
-                     const auto* fieldRef = *fieldIt;
+                     const auto *fieldRef = *fieldIt;
                      // Prepend the field to the packet buffer.
                      nextState->prependToPacketBuffer(nextState->get(fieldRef));
                  }
 
              } else if (prependVar->type->is<IR::Type_Bits>()) {
                  // Prepend the field to the packet buffer.
-                 if (const auto* prependVarMember = prependVar->to<IR::Member>()) {
+                 if (const auto *prependVarMember = prependVar->to<IR::Member>()) {
                      nextState->add(
                          new TraceEvent::Extract(prependVarMember, prependVarMember, "prepend"));
                  }
@@ -210,26 +211,26 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression* c
          */
         {"*.append_to_prog_header",
          {"hdr"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             const auto* appendVar = args->at(0)->expression;
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             const auto *appendVar = args->at(0)->expression;
              if (!(appendVar->is<IR::Member>() || appendVar->is<IR::PathExpression>() ||
                    appendVar->is<IR::TaintExpression>() || appendVar->is<IR::Constant>())) {
                  TESTGEN_UNIMPLEMENTED("append input %1% of type %2% not supported", appendVar,
                                        appendVar->type);
              }
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
 
-             if (const auto* appendType = appendVar->type->to<IR::Type_StructLike>()) {
+             if (const auto *appendType = appendVar->type->to<IR::Type_StructLike>()) {
                  // We only support flat assignments, so retrieve all fields from the input
                  // argument.
                  const auto flatFields = nextState->getFlatFields(appendVar, appendType);
-                 for (const auto* fieldRef : flatFields) {
+                 for (const auto *fieldRef : flatFields) {
                      nextState->appendToPacketBuffer(nextState->get(fieldRef));
                  }
              } else if (appendVar->type->is<IR::Type_Bits>()) {
-                 if (const auto* appendVarMember = appendVar->to<IR::Member>()) {
+                 if (const auto *appendVarMember = appendVar->to<IR::Member>()) {
                      nextState->add(
                          new TraceEvent::Extract(appendVarMember, appendVarMember, "append"));
                  }
@@ -250,11 +251,11 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression* c
          */
         {"*.prepend_emit_buffer",
          {},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             auto* nextState = new ExecutionState(state);
-             const auto* emitBuffer = state.getEmitBuffer();
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             auto *nextState = new ExecutionState(state);
+             const auto *emitBuffer = state.getEmitBuffer();
              nextState->prependToPacketBuffer(emitBuffer);
              nextState->add(
                  new TraceEvent::Generic("Prepending the emit buffer to the program packet."));
@@ -269,10 +270,10 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression* c
          */
         {"*.drop_and_exit",
          {},
-         [this](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             auto* nextState = new ExecutionState(state);
+         [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             auto *nextState = new ExecutionState(state);
              // If the drop variable is tainted, we also mark the port tainted.
              if (state.hasTaint(programInfo.dropIsActive())) {
                  nextState->set(programInfo.getTargetOutputPortVar(),
@@ -296,34 +297,34 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression* c
          */
         {"*.copy_in",
          {"srcRef", "targetParam", "direction", "forceUninitialized"},
-         [this](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             const auto* globalRef = args->at(0)->expression;
+         [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             const auto *globalRef = args->at(0)->expression;
              if (!(globalRef->is<IR::Member>() || globalRef->is<IR::PathExpression>())) {
                  TESTGEN_UNIMPLEMENTED("Global input %1% of type %2% not supported", globalRef,
                                        globalRef->type);
              }
 
-             const auto* argRef = args->at(1)->expression;
+             const auto *argRef = args->at(1)->expression;
              if (!(argRef->is<IR::Member>() || argRef->is<IR::PathExpression>())) {
                  TESTGEN_UNIMPLEMENTED("Param input %1% of type %2% not supported", argRef,
                                        argRef->type);
              }
 
-             const auto* direction = args->at(2)->expression->checkedTo<IR::StringLiteral>();
-             const auto* forceTaint = args->at(3)->expression->checkedTo<IR::BoolLiteral>();
+             const auto *direction = args->at(2)->expression->checkedTo<IR::StringLiteral>();
+             const auto *forceTaint = args->at(3)->expression->checkedTo<IR::BoolLiteral>();
 
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
              // Get the current level and disable it for these operations to avoid overtainting.
              auto currentTaint = state.getProperty<bool>("inUndefinedState");
              nextState->setProperty("inUndefinedState", false);
 
              auto dir = direction->value;
-             const auto* assignType = globalRef->type;
-             if (const auto* ts = assignType->to<IR::Type_StructLike>()) {
-                 std::vector<const IR::Member*> flatRefValids;
-                 std::vector<const IR::Member*> flatParamValids;
+             const auto *assignType = globalRef->type;
+             if (const auto *ts = assignType->to<IR::Type_StructLike>()) {
+                 std::vector<const IR::Member *> flatRefValids;
+                 std::vector<const IR::Member *> flatParamValids;
                  auto flatRefFields = nextState->getFlatFields(globalRef, ts, &flatRefValids);
                  auto flatParamFields = nextState->getFlatFields(argRef, ts, &flatParamValids);
                  // In case of a header, we also need to copy the validity bits.
@@ -331,8 +332,8 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression* c
                  // set validity to false.
                  // TODO: Find a more elegant method to handle this instead of code duplication.
                  for (size_t idx = 0; idx < flatRefValids.size(); ++idx) {
-                     const auto* fieldGlobalValid = flatRefValids[idx];
-                     const auto* fieldParamValid = flatParamValids[idx];
+                     const auto *fieldGlobalValid = flatRefValids[idx];
+                     const auto *fieldParamValid = flatParamValids[idx];
                      // If the validity bit did not exist before, initialize it to be false.
                      if (!nextState->exists(fieldGlobalValid)) {
                          nextState->set(fieldGlobalValid, IR::getBoolLiteral(false));
@@ -346,14 +347,14 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression* c
                  }
                  // First, complete the assignments for the data structure.
                  for (size_t idx = 0; idx < flatRefFields.size(); ++idx) {
-                     const auto* fieldGlobalRef = flatRefFields[idx];
-                     const auto* fieldargRef = flatParamFields[idx];
+                     const auto *fieldGlobalRef = flatRefFields[idx];
+                     const auto *fieldargRef = flatParamFields[idx];
                      generateCopyIn(nextState, fieldargRef, fieldGlobalRef, dir, forceTaint->value);
                  }
-             } else if (const auto* tb = assignType->to<IR::Type_Base>()) {
+             } else if (const auto *tb = assignType->to<IR::Type_Base>()) {
                  // If the type is a flat Type_Base, postfix it with a "*".
                  globalRef = Utils::addZombiePostfix(globalRef, tb);
-                 if (const auto* argPath = argRef->to<IR::PathExpression>()) {
+                 if (const auto *argPath = argRef->to<IR::PathExpression>()) {
                      argRef = nextState->convertPathExpr(argPath);
                  }
                  generateCopyIn(nextState, argRef, globalRef, dir, forceTaint->value);
@@ -377,55 +378,55 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression* c
          */
         {"*.copy_out",
          {"targetParam", "srcRef", "direction"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             const auto* globalRef = args->at(0)->expression;
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             const auto *globalRef = args->at(0)->expression;
              if (!(globalRef->is<IR::Member>() || globalRef->is<IR::PathExpression>())) {
                  TESTGEN_UNIMPLEMENTED("Global input %1% of type %2% not supported", globalRef,
                                        globalRef->type);
              }
 
-             const auto* argRef = args->at(1)->expression;
+             const auto *argRef = args->at(1)->expression;
              if (!(argRef->is<IR::Member>() || argRef->is<IR::PathExpression>())) {
                  TESTGEN_UNIMPLEMENTED("Param input %1% of type %2% not supported", argRef,
                                        argRef->type);
              }
 
-             const auto* direction = args->at(2)->expression->checkedTo<IR::StringLiteral>();
+             const auto *direction = args->at(2)->expression->checkedTo<IR::StringLiteral>();
 
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
              // Get the current level and disable it for these operations to avoid overtainting.
              auto currentTaint = state.getProperty<bool>("inUndefinedState");
              nextState->setProperty("inUndefinedState", false);
 
              auto dir = direction->value;
-             const auto* assignType = globalRef->type;
-             if (const auto* ts = assignType->to<IR::Type_StructLike>()) {
-                 std::vector<const IR::Member*> flatRefValids;
-                 std::vector<const IR::Member*> flatParamValids;
+             const auto *assignType = globalRef->type;
+             if (const auto *ts = assignType->to<IR::Type_StructLike>()) {
+                 std::vector<const IR::Member *> flatRefValids;
+                 std::vector<const IR::Member *> flatParamValids;
                  auto flatRefFields = nextState->getFlatFields(globalRef, ts, &flatRefValids);
                  auto flatParamFields = nextState->getFlatFields(argRef, ts, &flatParamValids);
                  // In case of a header, we also need to copy the validity bits.
                  for (size_t idx = 0; idx < flatRefValids.size(); ++idx) {
-                     const auto* fieldGlobalValid = flatRefValids[idx];
-                     const auto* fieldParamValid = flatParamValids[idx];
+                     const auto *fieldGlobalValid = flatRefValids[idx];
+                     const auto *fieldParamValid = flatParamValids[idx];
                      if (dir == "inout" || dir == "out") {
                          nextState->set(fieldGlobalValid, nextState->get(fieldParamValid));
                      }
                  }
                  // First, complete the assignments for the data structure.
                  for (size_t idx = 0; idx < flatRefFields.size(); ++idx) {
-                     const auto* fieldGlobalRef = flatRefFields[idx];
-                     const auto* fieldargRef = flatParamFields[idx];
+                     const auto *fieldGlobalRef = flatRefFields[idx];
+                     const auto *fieldargRef = flatParamFields[idx];
                      if (dir == "inout" || dir == "out") {
                          nextState->set(fieldGlobalRef, nextState->get(fieldargRef));
                      }
                  }
-             } else if (const auto* tb = assignType->to<IR::Type_Base>()) {
+             } else if (const auto *tb = assignType->to<IR::Type_Base>()) {
                  // If the type is a flat Type_Base, postfix it with a "*".
                  globalRef = Utils::addZombiePostfix(globalRef, tb);
-                 if (const auto* argPath = argRef->to<IR::PathExpression>()) {
+                 if (const auto *argPath = argRef->to<IR::PathExpression>()) {
                      argRef = nextState->convertPathExpr(argPath);
                  }
                  if (dir == "inout" || dir == "out") {
@@ -448,10 +449,10 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression* c
     }
 }
 
-void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
-                                       const IR::Expression* receiver, IR::ID name,
-                                       const IR::Vector<IR::Argument>* args,
-                                       ExecutionState& state) {
+void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
+                                       const IR::Expression *receiver, IR::ID name,
+                                       const IR::Vector<IR::Argument> *args,
+                                       ExecutionState &state) {
     // Provides implementations of all known extern methods built into P4 core.
     static const ExternMethodImpls CORE_EXTERN_METHOD_IMPLS({
         /* ======================================================================================
@@ -464,12 +465,12 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
          */
         {"packet_in.lookahead",
          {},
-         [this](const IR::MethodCallExpression* call, const IR::Expression* /*receiver*/,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             const auto* typeArgs = call->typeArguments;
+         [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             const auto *typeArgs = call->typeArguments;
              BUG_CHECK(typeArgs->size() == 1, "Lookahead should have exactly one type argument.");
-             const auto* lookaheadType = call->typeArguments->at(0);
+             const auto *lookaheadType = call->typeArguments->at(0);
              if (!lookaheadType->is<IR::Type_Base>()) {
                  TESTGEN_UNIMPLEMENTED(
                      "Lookahead type %1% not supported. Expected a base type. Got %2%",
@@ -485,9 +486,9 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
                  std::stringstream condStream;
                  condStream << "Lookahead Condition: ";
                  condInfo.advanceCond->dbprint(condStream);
-                 auto* nextState = new ExecutionState(state);
+                 auto *nextState = new ExecutionState(state);
                  // Peek into the buffer, we do NOT slice from it.
-                 const auto* lookaheadVar = nextState->peekPacketBuffer(lookaheadSize);
+                 const auto *lookaheadVar = nextState->peekPacketBuffer(lookaheadSize);
                  nextState->add(new TraceEvent::Expression(lookaheadVar, "Lookahead result"));
                  // Record the condition we are passing at this at this point.
                  nextState->add(new TraceEvent::Generic(condStream.str()));
@@ -496,7 +497,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
              }
              // Handle the case where the packet is too short.
              if (condInfo.advanceFailCond != nullptr) {
-                 auto* rejectState = new ExecutionState(state);
+                 auto *rejectState = new ExecutionState(state);
                  // Record the condition we are failing at this at this point.
                  rejectState->add(new TraceEvent::Generic("Lookahead: Packet too short"));
                  rejectState->replaceTopBody(Continuation::Exception::PacketTooShort);
@@ -510,17 +511,17 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
          */
         {"packet_in.advance",
          {"sizeInBits"},
-         [this](const IR::MethodCallExpression* call, const IR::Expression* /*receiver*/,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             const auto* advanceExpr = args->at(0)->expression;
+         [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             const auto *advanceExpr = args->at(0)->expression;
 
              if (!SymbolicEnv::isSymbolicValue(advanceExpr)) {
                  stepToSubexpr(advanceExpr, result, state,
-                               [call](const Continuation::Parameter* v) {
-                                   auto* clonedCall = call->clone();
-                                   auto* arguments = clonedCall->arguments->clone();
-                                   auto* arg = arguments->at(0)->clone();
+                               [call](const Continuation::Parameter *v) {
+                                   auto *clonedCall = call->clone();
+                                   auto *arguments = clonedCall->arguments->clone();
+                                   auto *arg = arguments->at(0)->clone();
                                    arg->expression = v->param;
                                    (*arguments)[0] = arg;
                                    clonedCall->arguments = arguments;
@@ -532,7 +533,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
              // There are two possibilities. Either the advance amount is a constant or a runtime
              // expression. In the first case, we just need to retrieve the value from the constant.
              PacketCursorAdvanceInfo condInfo{};
-             if (const auto* advanceConst = advanceExpr->to<IR::Constant>()) {
+             if (const auto *advanceConst = advanceExpr->to<IR::Constant>()) {
                  auto advanceValue = advanceConst->asInt();
                  // Calculate the conditions for a failed or successful advance, given the size.
                  condInfo = calculateSuccessfulParserAdvance(state, advanceValue);
@@ -551,14 +552,14 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
                  // invoke the solver.
                  // The size of the advance expression should be smaller than the maximum packet
                  // size.
-                 auto* sizeRestriction = new IR::Leq(
+                 auto *sizeRestriction = new IR::Leq(
                      advanceExpr,
                      IR::getConstant(advanceExpr->type, ExecutionState::getMaxPacketLength()));
                  // The advance expression should ideally have a size that is a multiple of 8 bits.
-                 auto* bytesRestriction =
+                 auto *bytesRestriction =
                      new IR::Equ(new IR::Mod(advanceExpr, IR::getConstant(advanceExpr->type, 8)),
                                  IR::getConstant(advanceExpr->type, 0));
-                 auto* restrictions = new IR::LAnd(sizeRestriction, bytesRestriction);
+                 auto *restrictions = new IR::LAnd(sizeRestriction, bytesRestriction);
                  condInfo = calculateAdvanceExpression(state, advanceExpr, restrictions);
              }
 
@@ -570,12 +571,12 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
                  condInfo.advanceCond->dbprint(condStream);
                  // Advancing by zero can be considered a no-op.
                  if (condInfo.advanceSize == 0) {
-                     auto* nextState = new ExecutionState(state);
+                     auto *nextState = new ExecutionState(state);
                      nextState->add(new TraceEvent::Generic("Advance: 0 bits."));
                      nextState->popBody();
                      result->emplace_back(nextState);
                  } else {
-                     auto* nextState = new ExecutionState(state);
+                     auto *nextState = new ExecutionState(state);
                      // Slice from the buffer and append to the packet, if necessary.
                      nextState->slicePacketBuffer(condInfo.advanceSize);
 
@@ -587,7 +588,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
              }
              if (condInfo.advanceFailCond != nullptr) {
                  // Handle the case where the packet is too short.
-                 auto* rejectState = new ExecutionState(state);
+                 auto *rejectState = new ExecutionState(state);
                  // Record the condition we are failing at this at this point.
                  rejectState->add(new TraceEvent::Generic("Advance: Packet too short"));
                  rejectState->replaceTopBody(Continuation::Exception::PacketTooShort);
@@ -603,19 +604,19 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
          */
         {"packet_in.extract",
          {"hdr"},
-         [this](const IR::MethodCallExpression* call, const IR::Expression* /*receiver*/,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
              // This argument is the structure being written by the extract.
-             const auto* extractOutput = args->at(0)->expression;
+             const auto *extractOutput = args->at(0)->expression;
 
              // Get the extractedType
-             const auto* typeArgs = call->typeArguments;
+             const auto *typeArgs = call->typeArguments;
              BUG_CHECK(typeArgs->size() == 1, "Must have exactly 1 type argument for extract. %1%",
                        call);
 
-             const auto* initialType = state.resolveType(typeArgs->at(0));
-             const auto* extractedType = initialType->checkedTo<IR::Type_StructLike>();
+             const auto *initialType = state.resolveType(typeArgs->at(0));
+             const auto *extractedType = initialType->checkedTo<IR::Type_StructLike>();
 
              // Calculate the conditions for a failed or successful advance, given the size.
              auto extractSize = extractedType->width_bits();
@@ -623,7 +624,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
 
              // Evaluate the case where the packet is large enough.
              if (condInfo.advanceCond != nullptr) {
-                 auto* nextState = new ExecutionState(state);
+                 auto *nextState = new ExecutionState(state);
 
                  // If we are dealing with a header, set the header valid.
                  if (extractedType->is<IR::Type_Header>()) {
@@ -632,7 +633,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
 
                  // We only support flat assignments, so retrieve all fields from the input
                  // argument.
-                 const std::vector<const IR::Member*> flatFields =
+                 const std::vector<const IR::Member *> flatFields =
                      nextState->getFlatFields(extractOutput, extractedType);
                  nextState->add(new TraceEvent::Generic("Extract: Succeeded"));
                  /// Iterate over all the fields that need to be set.
@@ -651,7 +652,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
 
              // Handle the case where the packet is too short.
              if (condInfo.advanceFailCond != nullptr) {
-                 auto* rejectState = new ExecutionState(state);
+                 auto *rejectState = new ExecutionState(state);
                  // Record the condition we are failing at this at this point.
                  rejectState->add(new TraceEvent::Generic("Extract: Packet too short"));
                  std::stringstream condStream;
@@ -666,18 +667,18 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
          }},
         {"packet_in.extract",
          {"hdr", "sizeInBits"},
-         [this](const IR::MethodCallExpression* call, const IR::Expression* /*receiver*/,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
              // This argument is the structure being written by the extract.
-             const auto* extractOutput = args->at(0)->expression;
-             const auto* varbitExtractExpr = args->at(1)->expression;
+             const auto *extractOutput = args->at(0)->expression;
+             const auto *varbitExtractExpr = args->at(1)->expression;
              if (!SymbolicEnv::isSymbolicValue(varbitExtractExpr)) {
                  stepToSubexpr(varbitExtractExpr, result, state,
-                               [call](const Continuation::Parameter* v) {
-                                   auto* clonedCall = call->clone();
-                                   auto* arguments = clonedCall->arguments->clone();
-                                   auto* arg = arguments->at(1)->clone();
+                               [call](const Continuation::Parameter *v) {
+                                   auto *clonedCall = call->clone();
+                                   auto *arguments = clonedCall->arguments->clone();
+                                   auto *arg = arguments->at(1)->clone();
                                    arg->expression = v->param;
                                    (*arguments)[1] = arg;
                                    clonedCall->arguments = arguments;
@@ -687,18 +688,18 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
              }
 
              // Get the extractedType
-             const auto* typeArgs = call->typeArguments;
+             const auto *typeArgs = call->typeArguments;
              BUG_CHECK(typeArgs->size() == 1, "Must have exactly 1 type argument for extract. %1%",
                        call);
 
-             const auto* initialType = state.resolveType(typeArgs->at(0));
-             const auto* extractedType = initialType->checkedTo<IR::Type_StructLike>();
+             const auto *initialType = state.resolveType(typeArgs->at(0));
+             const auto *extractedType = initialType->checkedTo<IR::Type_StructLike>();
              auto extractSize = extractedType->width_bits();
 
              // Try to find the varbit inside the header we are extracting.
-             const IR::Extracted_Varbits* varbit = nullptr;
-             for (const auto* fieldRef : extractedType->fields) {
-                 if (const auto* varbitTmp = fieldRef->type->to<IR::Extracted_Varbits>()) {
+             const IR::Extracted_Varbits *varbit = nullptr;
+             for (const auto *fieldRef : extractedType->fields) {
+                 if (const auto *varbitTmp = fieldRef->type->to<IR::Extracted_Varbits>()) {
                      varbit = varbitTmp;
                      break;
                  }
@@ -707,7 +708,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
 
              int varBitFieldSize = 0;
              PacketCursorAdvanceInfo condInfo{};
-             if (const auto* varbitConst = varbitExtractExpr->to<IR::Constant>()) {
+             if (const auto *varbitConst = varbitExtractExpr->to<IR::Constant>()) {
                  varBitFieldSize = varbitConst->asInt();
                  condInfo = calculateSuccessfulParserAdvance(state, varBitFieldSize + extractSize);
              } else {
@@ -724,14 +725,14 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
                  // The size of the advance expression should be smaller than the maximum packet
                  // size.
                  auto maxVarbit = std::min(ExecutionState::getMaxPacketLength(), varbit->size);
-                 auto* sizeRestriction = new IR::Leq(
+                 auto *sizeRestriction = new IR::Leq(
                      varbitExtractExpr, IR::getConstant(varbitExtractExpr->type, maxVarbit));
                  // The advance expression should ideally fit into a multiple of 8 bits.
-                 auto* bytesRestriction = new IR::Equ(
+                 auto *bytesRestriction = new IR::Equ(
                      new IR::Mod(varbitExtractExpr, IR::getConstant(varbitExtractExpr->type, 8)),
                      IR::getConstant(varbitExtractExpr->type, 0));
                  // The advance expression should not be larger than the varbit maximum width.
-                 auto* restrictions = new IR::LAnd(sizeRestriction, bytesRestriction);
+                 auto *restrictions = new IR::LAnd(sizeRestriction, bytesRestriction);
                  // In the second case, where the advance amount is a runtime expression, we need to
                  // invoke the solver.
                  varbitExtractExpr = new IR::Add(
@@ -743,14 +744,14 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
              if (condInfo.advanceCond != nullptr) {
                  // If the extract amount exceeds the size of the varbit field, fail.
                  if (varbit->size < varBitFieldSize) {
-                     auto* nextState = new ExecutionState(state);
+                     auto *nextState = new ExecutionState(state);
                      nextState->set(state.getCurrentParserErrorLabel(),
                                     IR::getConstant(programInfo.getParserErrorType(), 4));
                      nextState->replaceTopBody(Continuation::Exception::Reject);
                      result->emplace_back(condInfo.advanceCond, state, nextState);
                      return;
                  }
-                 auto* nextState = new ExecutionState(state);
+                 auto *nextState = new ExecutionState(state);
                  // If we are dealing with a header, set the header valid.
                  if (extractedType->is<IR::Type_Header>()) {
                      setHeaderValidity(extractOutput, true, nextState);
@@ -758,7 +759,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
 
                  // We only support flat assignments, so retrieve all fields from the input
                  // argument.
-                 const std::vector<const IR::Member*> flatFields =
+                 const std::vector<const IR::Member *> flatFields =
                      nextState->getFlatFields(extractOutput, extractedType);
 
                  /// Iterate over all the fields that need to be set.
@@ -778,7 +779,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
 
              // Handle the case where the packet is too short.
              if (condInfo.advanceFailCond != nullptr) {
-                 auto* rejectState = new ExecutionState(state);
+                 auto *rejectState = new ExecutionState(state);
                  // Record the condition we are failing at this at this point.
                  rejectState->add(new TraceEvent::Generic("Extract: Packet too short"));
                  std::stringstream condStream;
@@ -798,12 +799,12 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
          */
         {"packet_in.length",
          {},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*name*/, const IR::Vector<IR::Argument>* /*args*/, const ExecutionState& state,
-            SmallStepEvaluator::Result& result) {
-             auto* nextState = new ExecutionState(state);
-             const auto& lengthVar = ExecutionState::getInputPacketSizeVar();
-             const auto* divVar =
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*name*/, const IR::Vector<IR::Argument> * /*args*/,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             auto *nextState = new ExecutionState(state);
+             const auto &lengthVar = ExecutionState::getInputPacketSizeVar();
+             const auto *divVar =
                  new IR::Div(lengthVar->type, ExecutionState::getInputPacketSizeVar(),
                              IR::getConstant(lengthVar->type, 8));
              nextState->add(new TraceEvent::Expression(divVar, "Return packet length"));
@@ -818,16 +819,16 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
          */
         {"packet_out.emit",
          {"hdr"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             const auto* emitOutput = args->at(0)->expression;
-             const auto* emitType = emitOutput->type->checkedTo<IR::Type_StructLike>();
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             const auto *emitOutput = args->at(0)->expression;
+             const auto *emitType = emitOutput->type->checkedTo<IR::Type_StructLike>();
              if (!emitOutput->is<IR::Member>()) {
                  TESTGEN_UNIMPLEMENTED("Emit input %1% of type %2% not supported", emitOutput,
                                        emitType);
              }
-             const auto& validVar = Utils::getHeaderValidity(emitOutput);
+             const auto &validVar = Utils::getHeaderValidity(emitOutput);
 
              // Check whether the validity bit of the header is tainted. If it is, the entire
              // emit is tainted. There is not much we can do here, so throw an error.
@@ -842,16 +843,16 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
              // This call assumes that the "expandEmit" midend pass is being used. expandEmit
              // unravels emit calls on structs into emit calls on the header members.
              {
-                 auto* nextState = new ExecutionState(state);
-                 for (const auto* field : emitType->fields) {
-                     const auto* fieldType = field->type;
+                 auto *nextState = new ExecutionState(state);
+                 for (const auto *field : emitType->fields) {
+                     const auto *fieldType = field->type;
                      if (fieldType->is<IR::Type_StructLike>()) {
                          BUG("Unexpected emit field %1% of type %2%", field, fieldType);
                      }
-                     const auto* fieldRef = new IR::Member(fieldType, emitOutput, field->name);
-                     const IR::Expression* fieldExpr = nextState->get(fieldRef);
+                     const auto *fieldRef = new IR::Member(fieldType, emitOutput, field->name);
+                     const IR::Expression *fieldExpr = nextState->get(fieldRef);
                      fieldType = fieldExpr->type;
-                     if (const auto* varbits = fieldType->to<IR::Extracted_Varbits>()) {
+                     if (const auto *varbits = fieldType->to<IR::Extracted_Varbits>()) {
                          fieldType = IR::getBitType(varbits->assignedSize);
                      }
 
@@ -869,9 +870,9 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
                      }
                      // If the bit type is signed, we also need to cast to unsigned. This is
                      // necessary to prevent incorrect constant folding.
-                     if (const auto* bits = fieldType->to<IR::Type_Bits>()) {
+                     if (const auto *bits = fieldType->to<IR::Type_Bits>()) {
                          if (bits->isSigned) {
-                             auto* cloneType = bits->clone();
+                             auto *cloneType = bits->clone();
                              cloneType->isSigned = false;
                              fieldExpr = new IR::Cast(cloneType, fieldExpr);
                          }
@@ -888,7 +889,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
                  result->emplace_back(state.get(validVar), state, nextState);
              }
              {
-                 auto* invalidState = new ExecutionState(state);
+                 auto *invalidState = new ExecutionState(state);
                  std::stringstream traceString;
                  traceString << "Invalid emit: ";
                  validVar->dbprint(traceString);
@@ -910,17 +911,17 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
          */
         {"*method.verify",
          {"bool", "error"},
-         [this](const IR::MethodCallExpression* call, const IR::Expression* /*receiver*/,
-                IR::ID& /*name*/, const IR::Vector<IR::Argument>* args, const ExecutionState& state,
-                SmallStepEvaluator::Result& result) {
-             const auto* cond = args->at(0)->expression;
-             const auto* error = args->at(1)->expression->checkedTo<IR::Constant>();
+         [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+                IR::ID & /*name*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             const auto *cond = args->at(0)->expression;
+             const auto *error = args->at(1)->expression->checkedTo<IR::Constant>();
              if (!SymbolicEnv::isSymbolicValue(cond)) {
                  // Evaluate the condition.
-                 stepToSubexpr(cond, result, state, [call](const Continuation::Parameter* v) {
-                     auto* clonedCall = call->clone();
-                     const auto* error = clonedCall->arguments->at(1);
-                     auto* arguments = new IR::Vector<IR::Argument>();
+                 stepToSubexpr(cond, result, state, [call](const Continuation::Parameter *v) {
+                     auto *clonedCall = call->clone();
+                     const auto *error = clonedCall->arguments->at(1);
+                     auto *arguments = new IR::Vector<IR::Argument>();
                      arguments->push_back(new IR::Argument(v->param));
                      arguments->push_back(error);
                      clonedCall->arguments = arguments;
@@ -931,12 +932,12 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
 
              // If the verify condition is tainted, the error is also tainted.
              if (state.hasTaint(cond)) {
-                 auto* taintedState = new ExecutionState(state);
+                 auto *taintedState = new ExecutionState(state);
                  std::stringstream traceString;
                  traceString << "Tainted verify: ";
                  cond->dbprint(traceString);
                  taintedState->add(new TraceEvent::Expression(cond, traceString));
-                 const auto* errVar = state.getCurrentParserErrorLabel();
+                 const auto *errVar = state.getCurrentParserErrorLabel();
                  taintedState->set(errVar, Utils::getTaintExpression(errVar->type));
                  taintedState->popBody();
                  result->emplace_back(taintedState);
@@ -944,12 +945,12 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
              }
 
              // Handle the case where the condition is true.
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
              nextState->popBody();
              result->emplace_back(cond, state, nextState);
              // Handle the case where the condition is false.
-             auto* falseState = new ExecutionState(state);
-             const auto* errVar = state.getCurrentParserErrorLabel();
+             auto *falseState = new ExecutionState(state);
+             const auto *errVar = state.getCurrentParserErrorLabel();
              falseState->set(errVar,
                              IR::getConstant(programInfo.getParserErrorType(), error->value));
              falseState->replaceTopBody(Continuation::Exception::Reject);

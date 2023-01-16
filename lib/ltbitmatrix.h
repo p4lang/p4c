@@ -43,13 +43,13 @@ class LTBitMatrix : private bitvec {
     template <class T>
     class rowref {
         friend class LTBitMatrix;
-        T& self;
+        T &self;
         unsigned row;
-        rowref(T& s, unsigned r) : self(s), row(r) {}
+        rowref(T &s, unsigned r) : self(s), row(r) {}
 
      public:
-        rowref(const rowref&) = default;
-        rowref(rowref&&) = default;
+        rowref(const rowref &) = default;
+        rowref(rowref &&) = default;
         explicit operator bool() const {
             if (row < bits_per_unit)
                 return self.getrange((row * row + row) / 2, row + 1) != 0;
@@ -81,12 +81,12 @@ class LTBitMatrix : private bitvec {
     nonconst_rowref operator[](unsigned r) { return nonconst_rowref(*this, r); }
     const_rowref operator[](unsigned r) const { return const_rowref(*this, r); }
 
-    bool operator==(const LTBitMatrix& a) const { return bitvec::operator==(a); }
-    bool operator!=(const LTBitMatrix& a) const { return bitvec::operator!=(a); }
-    friend bool operator>>(const char* p, LTBitMatrix& bm);
+    bool operator==(const LTBitMatrix &a) const { return bitvec::operator==(a); }
+    bool operator!=(const LTBitMatrix &a) const { return bitvec::operator!=(a); }
+    friend bool operator>>(const char *p, LTBitMatrix &bm);
 };
 
-inline std::ostream& operator<<(std::ostream& out, const LTBitMatrix& bm) {
+inline std::ostream &operator<<(std::ostream &out, const LTBitMatrix &bm) {
     for (unsigned i = 1; i < bm.size(); i++) {
         if (i > 1) out << ' ';
         for (unsigned j = 0; j < i; j++) out << (bm[i][j] ? '1' : '0');
@@ -94,7 +94,7 @@ inline std::ostream& operator<<(std::ostream& out, const LTBitMatrix& bm) {
     return out;
 }
 
-inline bool operator>>(const char* p, LTBitMatrix& bm) {
+inline bool operator>>(const char *p, LTBitMatrix &bm) {
     bitvec rv;
     for (int i = 0; *p; ++p, ++i) switch (*p) {
             case ' ':

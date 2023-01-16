@@ -22,7 +22,7 @@ namespace Util {
 /// });
 ///
 /// uses two separate counters denoted as "A.C" and "B.C".
-void withTimer(const char* timerName, const std::function<void()>& fn);
+void withTimer(const char *timerName, const std::function<void()> &fn);
 
 struct TimerEntry {
     /// Counter name. If a timer "Y" was invoked inside timer "X", its timer name is "X.Y".
@@ -43,8 +43,8 @@ struct ScopedTimerCtx;
 /// destruction.
 class ScopedTimer {
  public:
-    explicit ScopedTimer(const char* name);
-    ScopedTimer(const ScopedTimer&) = delete;
+    explicit ScopedTimer(const char *name);
+    ScopedTimer(const ScopedTimer &) = delete;
     ~ScopedTimer();
 
  private:
