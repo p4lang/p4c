@@ -19,7 +19,7 @@ macro(check_with_bmv2 testfile testfolder p4test)
 endmacro(check_with_bmv2)
 
 
-# Write the script to check BMv2 STF tests to the designated test file.
+# Write the script to check BMv2 PTF tests to the designated test file.
 # Arguments:
 #   - testfile is the testing script that this script is written to.
 #   - testfolder is target folder of the test.
@@ -27,7 +27,7 @@ endmacro(check_with_bmv2)
 macro(check_bmv2_with_ptf testfile testfolder p4test)
   set(__p4cbmv2path "${P4C_BINARY_DIR}")
   set(__bmv2runner " ${P4C_SOURCE_DIR}/backends/bmv2/run-bmv2-ptf-test.py")
-  # Find all the stf tests generated for this P4 file and test them with bmv2 model
+  # Find all the ptf tests generated for this P4 file and test them with bmv2 model
   file(APPEND ${testfile} "ptffiles=($(find ${testfolder} -name \"*.py\"  | sort -n ))\n")
   file(APPEND ${testfile} "for item in \${ptffiles[@]}\n")
   file(APPEND ${testfile} "do\n")
