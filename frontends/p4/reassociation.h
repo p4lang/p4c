@@ -33,14 +33,14 @@ class Reassociation final : public Transform {
     }
     using Transform::postorder;
 
-    const IR::Node* reassociate(IR::Operation_Binary* root);
+    const IR::Node *reassociate(IR::Operation_Binary *root);
 
-    const IR::Node* postorder(IR::Add* expr) override { return reassociate(expr); }
-    const IR::Node* postorder(IR::Mul* expr) override { return reassociate(expr); }
-    const IR::Node* postorder(IR::BOr* expr) override { return reassociate(expr); }
-    const IR::Node* postorder(IR::BAnd* expr) override { return reassociate(expr); }
-    const IR::Node* postorder(IR::BXor* expr) override { return reassociate(expr); }
-    const IR::BlockStatement* preorder(IR::BlockStatement* bs) override {
+    const IR::Node *postorder(IR::Add *expr) override { return reassociate(expr); }
+    const IR::Node *postorder(IR::Mul *expr) override { return reassociate(expr); }
+    const IR::Node *postorder(IR::BOr *expr) override { return reassociate(expr); }
+    const IR::Node *postorder(IR::BAnd *expr) override { return reassociate(expr); }
+    const IR::Node *postorder(IR::BXor *expr) override { return reassociate(expr); }
+    const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {
         if (bs->annotations->getSingle("disable_optimization")) prune();
         return bs;
     }

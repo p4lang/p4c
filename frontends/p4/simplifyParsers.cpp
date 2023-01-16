@@ -30,16 +30,16 @@ namespace {
  * Must be invoked on each parser independently.
  */
 class RemoveUnreachableStates : public Transform {
-    ParserCallGraph* transitions;
-    std::set<const IR::ParserState*> reachable;
+    ParserCallGraph *transitions;
+    std::set<const IR::ParserState *> reachable;
 
  public:
-    explicit RemoveUnreachableStates(ParserCallGraph* transitions) : transitions(transitions) {
+    explicit RemoveUnreachableStates(ParserCallGraph *transitions) : transitions(transitions) {
         CHECK_NULL(transitions);
         setName("RemoveUnreachableStates");
     }
 
-    const IR::Node* preorder(IR::P4Parser* parser) override {
+    const IR::Node *preorder(IR::P4Parser *parser) override {
         auto start = parser->getDeclByName(IR::ParserState::start);
         if (start == nullptr) {
             ::error(ErrorType::ERR_NOT_FOUND, "%1%: parser does not have a `start' state", parser);
@@ -66,7 +66,7 @@ class RemoveUnreachableStates : public Transform {
         return parser;
     }
 
-    const IR::Node* preorder(IR::ParserState* state) override {
+    const IR::Node *preorder(IR::ParserState *state) override {
         if (state->name == IR::ParserState::start || state->name == IR::ParserState::reject)
             return state;
 
@@ -96,20 +96,20 @@ class RemoveUnreachableStates : public Transform {
  * Must only be invoked on parsers.
  */
 class CollapseChains : public Transform {
-    ParserCallGraph* transitions;
-    std::map<const IR::ParserState*, const IR::ParserState*> chain;
-    ordered_set<const IR::ParserState*> chainStart;
+    ParserCallGraph *transitions;
+    std::map<const IR::ParserState *, const IR::ParserState *> chain;
+    ordered_set<const IR::ParserState *> chainStart;
 
  public:
-    explicit CollapseChains(ParserCallGraph* transitions) : transitions(transitions) {
+    explicit CollapseChains(ParserCallGraph *transitions) : transitions(transitions) {
         CHECK_NULL(transitions);
         setName("CollapseChains");
     }
 
-    const IR::Node* preorder(IR::P4Parser* parser) override {
+    const IR::Node *preorder(IR::P4Parser *parser) override {
         // pred[s2] = s1 if there is exactly one outgoing edge from s1, it goes
         // to s2, and s2 has no other incoming edges.
-        std::map<const IR::ParserState*, const IR::ParserState*> pred;
+        std::map<const IR::ParserState *, const IR::ParserState *> pred;
 
         // Find edges s1 -> s2 such that s1 has no other outgoing edges and s2
         // has no other incoming edges.
@@ -159,7 +159,7 @@ class CollapseChains : public Transform {
                 auto components = new IR::IndexedVector<IR::StatOrDecl>();
                 auto crt = s;
                 LOG1("Chaining states into " << dbp(crt));
-                const IR::Expression* select = nullptr;
+                const IR::Expression *select = nullptr;
                 while (true) {
                     components->append(crt->components);
                     select = crt->selectExpression;
@@ -183,7 +183,7 @@ class SimplifyParser : public PassManager {
     ParserCallGraph transitions;
 
  public:
-    explicit SimplifyParser(ReferenceMap* refMap) : transitions("transitions") {
+    explicit SimplifyParser(ReferenceMap *refMap) : transitions("transitions") {
         passes.push_back(new ComputeParserCG(refMap, &transitions));
         passes.push_back(new RemoveUnreachableStates(&transitions));
         passes.push_back(new CollapseChains(&transitions));
@@ -193,7 +193,7 @@ class SimplifyParser : public PassManager {
 
 }  // namespace
 
-const IR::Node* DoSimplifyParsers::preorder(IR::P4Parser* parser) {
+const IR::Node *DoSimplifyParsers::preorder(IR::P4Parser *parser) {
     SimplifyParser simpl(refMap);
     simpl.setCalledBy(this);
     return parser->apply(simpl);

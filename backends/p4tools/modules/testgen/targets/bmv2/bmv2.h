@@ -17,7 +17,7 @@ class BMv2_V1ModelCompilerTarget : public CompilerTarget {
     static void make();
 
  private:
-    MidEnd mkMidEnd(const CompilerOptions& options) const override;
+    MidEnd mkMidEnd(const CompilerOptions &options) const override;
 
     BMv2_V1ModelCompilerTarget();
 };

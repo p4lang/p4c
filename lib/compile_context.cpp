@@ -21,7 +21,7 @@ limitations under the License.
 
 ICompileContext::~ICompileContext() {}
 
-/* static */ void CompileContextStack::push(ICompileContext* context) {
+/* static */ void CompileContextStack::push(ICompileContext *context) {
     BUG_CHECK(context != nullptr, "Pushing a null CompileContext");
     getStack().push_back(context);
 }
@@ -35,22 +35,22 @@ ICompileContext::~ICompileContext() {}
     BUG("CompileContextStack has an empty CompileContext stack");
 }
 
-/* static */ void CompileContextStack::reportContextMismatch(const char* desiredContextType) {
+/* static */ void CompileContextStack::reportContextMismatch(const char *desiredContextType) {
     BUG_CHECK(!getStack().empty(),
               "Reporting a CompileContext type mismatch, but the "
               "CompileContext stack is empty");
-    auto* topContext = getStack().back();
+    auto *topContext = getStack().back();
     BUG("The top of the CompileContextStack has type %1% but we attempted to "
         "find a context of type %2%",
         typeid(*topContext).name(), desiredContextType);
 }
 
-/* static */ CompileContextStack::StackType& CompileContextStack::getStack() {
+/* static */ CompileContextStack::StackType &CompileContextStack::getStack() {
     static StackType stack;
     return stack;
 }
 
-AutoCompileContext::AutoCompileContext(ICompileContext* context) {
+AutoCompileContext::AutoCompileContext(ICompileContext *context) {
     CompileContextStack::push(context);
 }
 
@@ -58,14 +58,14 @@ AutoCompileContext::~AutoCompileContext() { CompileContextStack::pop(); }
 
 BaseCompileContext::BaseCompileContext() {}
 
-BaseCompileContext::BaseCompileContext(const BaseCompileContext& other)
+BaseCompileContext::BaseCompileContext(const BaseCompileContext &other)
     : errorReporterInstance(other.errorReporterInstance) {}
 
-/* static */ BaseCompileContext& BaseCompileContext::get() {
+/* static */ BaseCompileContext &BaseCompileContext::get() {
     return CompileContextStack::top<BaseCompileContext>();
 }
 
-ErrorReporter& BaseCompileContext::errorReporter() { return errorReporterInstance; }
+ErrorReporter &BaseCompileContext::errorReporter() { return errorReporterInstance; }
 
 DiagnosticAction BaseCompileContext::getDefaultWarningDiagnosticAction() {
     return DiagnosticAction::Warn;

@@ -20,8 +20,8 @@ limitations under the License.
 
 namespace DPDK {
 // The assumption is compiler can only produce forward jumps.
-const IR::IndexedVector<IR::DpdkAsmStatement>* RemoveRedundantLabel::removeRedundantLabel(
-    const IR::IndexedVector<IR::DpdkAsmStatement>& s) {
+const IR::IndexedVector<IR::DpdkAsmStatement> *RemoveRedundantLabel::removeRedundantLabel(
+    const IR::IndexedVector<IR::DpdkAsmStatement> &s) {
     IR::IndexedVector<IR::DpdkAsmStatement> used_labels;
     for (auto stmt : s) {
         if (auto jmp = stmt->to<IR::DpdkJmpStatement>()) {
@@ -57,9 +57,9 @@ const IR::IndexedVector<IR::DpdkAsmStatement>* RemoveRedundantLabel::removeRedun
     return new_l;
 }
 
-const IR::IndexedVector<IR::DpdkAsmStatement>* RemoveConsecutiveJmpAndLabel::removeJmpAndLabel(
-    const IR::IndexedVector<IR::DpdkAsmStatement>& s) {
-    const IR::DpdkJmpStatement* cache = nullptr;
+const IR::IndexedVector<IR::DpdkAsmStatement> *RemoveConsecutiveJmpAndLabel::removeJmpAndLabel(
+    const IR::IndexedVector<IR::DpdkAsmStatement> &s) {
+    const IR::DpdkJmpStatement *cache = nullptr;
     auto new_l = new IR::IndexedVector<IR::DpdkAsmStatement>;
     for (auto stmt : s) {
         if (auto jmp = stmt->to<IR::DpdkJmpStatement>()) {
@@ -90,10 +90,10 @@ const IR::IndexedVector<IR::DpdkAsmStatement>* RemoveConsecutiveJmpAndLabel::rem
     return new_l;
 }
 
-const IR::IndexedVector<IR::DpdkAsmStatement>* ThreadJumps::threadJumps(
-    const IR::IndexedVector<IR::DpdkAsmStatement>& s) {
+const IR::IndexedVector<IR::DpdkAsmStatement> *ThreadJumps::threadJumps(
+    const IR::IndexedVector<IR::DpdkAsmStatement> &s) {
     std::map<const cstring, cstring> label_map;
-    const IR::DpdkLabelStatement* cache = nullptr;
+    const IR::DpdkLabelStatement *cache = nullptr;
     for (auto stmt : s) {
         if (!cache) {
             if (auto label = stmt->to<IR::DpdkLabelStatement>()) {
@@ -114,7 +114,7 @@ const IR::IndexedVector<IR::DpdkAsmStatement>* ThreadJumps::threadJumps(
         if (auto jmp = stmt->to<IR::DpdkJmpStatement>()) {
             auto res = label_map.find(jmp->label);
             if (res != label_map.end()) {
-                ((IR::DpdkJmpStatement*)stmt)->label = res->second;
+                ((IR::DpdkJmpStatement *)stmt)->label = res->second;
                 new_l->push_back(stmt);
             } else {
                 new_l->push_back(stmt);
@@ -126,10 +126,10 @@ const IR::IndexedVector<IR::DpdkAsmStatement>* ThreadJumps::threadJumps(
     return new_l;
 }
 
-const IR::IndexedVector<IR::DpdkAsmStatement>* RemoveLabelAfterLabel::removeLabelAfterLabel(
-    const IR::IndexedVector<IR::DpdkAsmStatement>& s) {
+const IR::IndexedVector<IR::DpdkAsmStatement> *RemoveLabelAfterLabel::removeLabelAfterLabel(
+    const IR::IndexedVector<IR::DpdkAsmStatement> &s) {
     std::map<const cstring, cstring> label_map;
-    const IR::DpdkLabelStatement* cache = nullptr;
+    const IR::DpdkLabelStatement *cache = nullptr;
     for (auto stmt : s) {
         if (!cache) {
             if (auto label = stmt->to<IR::DpdkLabelStatement>()) {
@@ -149,7 +149,7 @@ const IR::IndexedVector<IR::DpdkAsmStatement>* RemoveLabelAfterLabel::removeLabe
         if (auto jmp = stmt->to<IR::DpdkJmpStatement>()) {
             auto res = label_map.find(jmp->label);
             if (res != label_map.end()) {
-                ((IR::DpdkJmpStatement*)stmt)->label = res->second;
+                ((IR::DpdkJmpStatement *)stmt)->label = res->second;
                 new_l->push_back(stmt);
             } else {
                 new_l->push_back(stmt);
@@ -161,7 +161,7 @@ const IR::IndexedVector<IR::DpdkAsmStatement>* RemoveLabelAfterLabel::removeLabe
     return new_l;
 }
 
-bool RemoveUnusedMetadataFields::isByteSizeField(const IR::Type* field_type) {
+bool RemoveUnusedMetadataFields::isByteSizeField(const IR::Type *field_type) {
     // DPDK implements bool and error types as bit<8>
     if (field_type->is<IR::Type_Boolean>() || field_type->is<IR::Type_Error>()) return true;
 
@@ -171,7 +171,7 @@ bool RemoveUnusedMetadataFields::isByteSizeField(const IR::Type* field_type) {
     return false;
 }
 
-const IR::Node* RemoveUnusedMetadataFields::preorder(IR::DpdkAsmProgram* p) {
+const IR::Node *RemoveUnusedMetadataFields::preorder(IR::DpdkAsmProgram *p) {
     IR::IndexedVector<IR::DpdkStructType> usedStruct;
     for (auto st : p->structType) {
         if (isMetadataStruct(st)) {
@@ -197,12 +197,12 @@ const IR::Node* RemoveUnusedMetadataFields::preorder(IR::DpdkAsmProgram* p) {
     return p;
 }
 
-const IR::Expression* CopyPropagationAndElimination::getIrreplaceableExpr(cstring str,
+const IR::Expression *CopyPropagationAndElimination::getIrreplaceableExpr(cstring str,
                                                                           bool allowConst) {
     if (collectUseDef->dontEliminate.count(str) != 0) return nullptr;
     if (!str.startsWith("m.")) return nullptr;
     auto expr = collectUseDef->replacementMap[str];
-    const IR::Expression* prev = nullptr;
+    const IR::Expression *prev = nullptr;
     cstring exprStr;
     if (expr) exprStr = expr->toString();
     while (expr != nullptr && (!allowConst ? expr->is<IR::Member>() : true) && str != exprStr &&
@@ -221,7 +221,7 @@ const IR::Expression* CopyPropagationAndElimination::getIrreplaceableExpr(cstrin
         return prev;
 }
 
-const IR::Expression* CopyPropagationAndElimination::replaceIfCopy(const IR::Expression* expr,
+const IR::Expression *CopyPropagationAndElimination::replaceIfCopy(const IR::Expression *expr,
                                                                    bool allowConst) {
     if (!expr) return expr;
     auto str = expr->toString();
@@ -234,8 +234,8 @@ const IR::Expression* CopyPropagationAndElimination::replaceIfCopy(const IR::Exp
     return expr;
 }
 
-const IR::DpdkAsmStatement* CopyPropagationAndElimination::elimCastOrMov(
-    const IR::DpdkAsmStatement* stmt) {
+const IR::DpdkAsmStatement *CopyPropagationAndElimination::elimCastOrMov(
+    const IR::DpdkAsmStatement *stmt) {
     const IR::Expression *srcExpr = nullptr, *dstExpr = nullptr;
     if (auto mv = stmt->to<IR::DpdkMovStatement>()) {
         srcExpr = mv->src;
@@ -404,14 +404,14 @@ IR::IndexedVector<IR::DpdkAsmStatement> CopyPropagationAndElimination::copyPropA
     return instrr;
 }
 
-cstring EmitDpdkTableConfig::getKeyMatchType(const IR::KeyElement* ke, P4::ReferenceMap* refMap) {
+cstring EmitDpdkTableConfig::getKeyMatchType(const IR::KeyElement *ke, P4::ReferenceMap *refMap) {
     auto path = ke->matchType->path;
     auto mt = refMap->getDeclaration(path, true)->to<IR::Declaration_ID>();
     BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
     return mt->name.name;
 }
 
-int EmitDpdkTableConfig::getTypeWidth(const IR::Type* type, P4::TypeMap* typeMap) {
+int EmitDpdkTableConfig::getTypeWidth(const IR::Type *type, P4::TypeMap *typeMap) {
     return typeMap->widthBits(type, type->getNode(), false);
 }
 
@@ -420,14 +420,14 @@ void EmitDpdkTableConfig::print(cstring str, cstring sep) { dpdkTableConfigFile 
 void EmitDpdkTableConfig::print(big_int str, cstring sep) {
     try {
         dpdkTableConfigFile << "0x" << std::hex << str << sep;
-    } catch (const std::runtime_error& re) {
+    } catch (const std::runtime_error &re) {
         dpdkTableConfigFile << std::dec << str << sep;
     }
 }
 
-big_int EmitDpdkTableConfig::convertSimpleKeyExpressionToBigInt(const IR::Expression* k,
+big_int EmitDpdkTableConfig::convertSimpleKeyExpressionToBigInt(const IR::Expression *k,
                                                                 int keyWidth,
-                                                                P4::TypeMap* typeMap) {
+                                                                P4::TypeMap *typeMap) {
     if (k->is<IR::Constant>()) {
         return k->to<IR::Constant>()->value;
     } else if (k->is<IR::BoolLiteral>()) {
@@ -451,11 +451,11 @@ big_int EmitDpdkTableConfig::convertSimpleKeyExpressionToBigInt(const IR::Expres
     }
 }
 
-void EmitDpdkTableConfig::addAction(const IR::Expression* actionRef, P4::ReferenceMap* refMap,
-                                    P4::TypeMap* typeMap) {
+void EmitDpdkTableConfig::addAction(const IR::Expression *actionRef, P4::ReferenceMap *refMap,
+                                    P4::TypeMap *typeMap) {
     auto actionCall = actionRef->to<IR::MethodCallExpression>();
     auto method = actionCall->method->to<IR::PathExpression>()->path;
-    const IR::Path* origMethod = nullptr;
+    const IR::Path *origMethod = nullptr;
     if (ShortenTokenLength::origNameMap.count(method->name) > 0) {
         origMethod = new IR::Path(ShortenTokenLength::origNameMap[method->name]);
     } else {
@@ -506,7 +506,7 @@ void EmitDpdkTableConfig::addAction(const IR::Expression* actionRef, P4::Referen
     }
 }
 
-void EmitDpdkTableConfig::addExact(const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap) {
+void EmitDpdkTableConfig::addExact(const IR::Expression *k, int keyWidth, P4::TypeMap *typeMap) {
     if (k->is<IR::DefaultExpression>()) {
         print("0x0/0x0", " ");
     } else {
@@ -515,7 +515,7 @@ void EmitDpdkTableConfig::addExact(const IR::Expression* k, int keyWidth, P4::Ty
     }
 }
 
-void EmitDpdkTableConfig::addLpm(const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap) {
+void EmitDpdkTableConfig::addLpm(const IR::Expression *k, int keyWidth, P4::TypeMap *typeMap) {
     big_int valueStr;
     big_int mask;
     if (k->is<IR::DefaultExpression>()) {
@@ -524,10 +524,10 @@ void EmitDpdkTableConfig::addLpm(const IR::Expression* k, int keyWidth, P4::Type
     } else if (k->is<IR::Mask>()) {
         auto km = k->to<IR::Mask>();
         auto value = convertSimpleKeyExpressionToBigInt(km->left, keyWidth, typeMap);
-        auto trailing_zeros = [keyWidth](const big_int& n) -> int {
+        auto trailing_zeros = [keyWidth](const big_int &n) -> int {
             return (n == 0) ? keyWidth : boost::multiprecision::lsb(n);
         };
-        auto count_ones = [](const big_int& n) -> int { return bitcount(n); };
+        auto count_ones = [](const big_int &n) -> int { return bitcount(n); };
         mask = km->right->to<IR::Constant>()->value;
         auto len = trailing_zeros(mask);
         if (len + count_ones(mask) != keyWidth) {  // any remaining 0s in the prefix?
@@ -549,7 +549,7 @@ void EmitDpdkTableConfig::addLpm(const IR::Expression* k, int keyWidth, P4::Type
     print(mask, " ");
 }
 
-void EmitDpdkTableConfig::addTernary(const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap) {
+void EmitDpdkTableConfig::addTernary(const IR::Expression *k, int keyWidth, P4::TypeMap *typeMap) {
     big_int valueStr;
     big_int maskStr;
     if (k->is<IR::DefaultExpression>()) {
@@ -576,7 +576,7 @@ void EmitDpdkTableConfig::addTernary(const IR::Expression* k, int keyWidth, P4::
     print(maskStr, " ");
 }
 
-void EmitDpdkTableConfig::addRange(const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap) {
+void EmitDpdkTableConfig::addRange(const IR::Expression *k, int keyWidth, P4::TypeMap *typeMap) {
     big_int startStr;
     big_int endStr;
     if (k->is<IR::DefaultExpression>()) {
@@ -605,7 +605,7 @@ void EmitDpdkTableConfig::addRange(const IR::Expression* k, int keyWidth, P4::Ty
     print(endStr, " ");
 }
 
-void EmitDpdkTableConfig::addOptional(const IR::Expression* k, int keyWidth, P4::TypeMap* typeMap) {
+void EmitDpdkTableConfig::addOptional(const IR::Expression *k, int keyWidth, P4::TypeMap *typeMap) {
     if (k->is<IR::DefaultExpression>()) {
         print("0x0/0x0", " ");
     } else {
@@ -614,8 +614,8 @@ void EmitDpdkTableConfig::addOptional(const IR::Expression* k, int keyWidth, P4:
     }
 }
 
-void EmitDpdkTableConfig::addMatchKey(const IR::DpdkTable* table, const IR::ListExpression* keyset,
-                                      P4::TypeMap* typeMap) {
+void EmitDpdkTableConfig::addMatchKey(const IR::DpdkTable *table, const IR::ListExpression *keyset,
+                                      P4::TypeMap *typeMap) {
     int keyIndex = 0;
     for (auto k : keyset->components) {
         auto tableKey = table->getKey()->keyElements.at(keyIndex++);
@@ -642,7 +642,7 @@ void EmitDpdkTableConfig::addMatchKey(const IR::DpdkTable* table, const IR::List
 
 /// Checks if the @table entries need to be assigned a priority, i.e. does
 /// the match key for the table includes a ternary, range, or optional match?
-bool EmitDpdkTableConfig::tableNeedsPriority(const IR::DpdkTable* table, P4::ReferenceMap* refMap) {
+bool EmitDpdkTableConfig::tableNeedsPriority(const IR::DpdkTable *table, P4::ReferenceMap *refMap) {
     for (auto e : table->getKey()->keyElements) {
         auto matchType = getKeyMatchType(e, refMap);
         // TODO(antonin): remove dependency on v1model.
@@ -653,7 +653,7 @@ bool EmitDpdkTableConfig::tableNeedsPriority(const IR::DpdkTable* table, P4::Ref
     return false;
 }
 
-bool EmitDpdkTableConfig::isAllKeysDefaultExpression(const IR::ListExpression* keyset) {
+bool EmitDpdkTableConfig::isAllKeysDefaultExpression(const IR::ListExpression *keyset) {
     bool allKeyDefaultExp = true;
     for (auto k : keyset->components) {
         allKeyDefaultExp = allKeyDefaultExp && k->is<IR::DefaultExpression>();
@@ -661,7 +661,7 @@ bool EmitDpdkTableConfig::isAllKeysDefaultExpression(const IR::ListExpression* k
     return allKeyDefaultExp;
 }
 
-void EmitDpdkTableConfig::postorder(const IR::DpdkTable* table) {
+void EmitDpdkTableConfig::postorder(const IR::DpdkTable *table) {
     auto entriesList = table->getEntries();
     if (entriesList == nullptr) return;
     dpdkTableConfigFile.open(table->name + ".txt");

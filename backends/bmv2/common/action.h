@@ -23,16 +23,16 @@ limitations under the License.
 namespace BMV2 {
 
 class ActionConverter : public Inspector {
-    ConversionContext* ctxt;
+    ConversionContext *ctxt;
 
-    void convertActionBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);
-    void convertActionParams(const IR::ParameterList* parameters, Util::JsonArray* params);
-    cstring jsonAssignment(const IR::Type* type, bool inParser);
-    void postorder(const IR::P4Action* action) override;
+    void convertActionBody(const IR::Vector<IR::StatOrDecl> *body, Util::JsonArray *result);
+    void convertActionParams(const IR::ParameterList *parameters, Util::JsonArray *params);
+    cstring jsonAssignment(const IR::Type *type, bool inParser);
+    void postorder(const IR::P4Action *action) override;
 
  public:
     const bool emitExterns;
-    explicit ActionConverter(ConversionContext* ctxt, const bool& emitExterns_)
+    explicit ActionConverter(ConversionContext *ctxt, const bool &emitExterns_)
         : ctxt(ctxt), emitExterns(emitExterns_) {
         setName("ConvertActions");
     }

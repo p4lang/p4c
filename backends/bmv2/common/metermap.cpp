@@ -21,7 +21,7 @@ namespace BMV2 {
 /**
  * @returns direct meter information from the direct meter map
  */
-DirectMeterMap::DirectMeterInfo* DirectMeterMap::createInfo(const IR::IDeclaration* meter) {
+DirectMeterMap::DirectMeterInfo *DirectMeterMap::createInfo(const IR::IDeclaration *meter) {
     auto prev = ::get(directMeter, meter);
     BUG_CHECK(prev == nullptr, "Already created");
     auto result = new DirectMeterMap::DirectMeterInfo();
@@ -29,14 +29,14 @@ DirectMeterMap::DirectMeterInfo* DirectMeterMap::createInfo(const IR::IDeclarati
     return result;
 }
 
-DirectMeterMap::DirectMeterInfo* DirectMeterMap::getInfo(const IR::IDeclaration* meter) {
+DirectMeterMap::DirectMeterInfo *DirectMeterMap::getInfo(const IR::IDeclaration *meter) {
     return ::get(directMeter, meter);
 }
 
 /**
  * Set the table that a direct meter is attached to.
  */
-void DirectMeterMap::setTable(const IR::IDeclaration* meter, const IR::P4Table* table) {
+void DirectMeterMap::setTable(const IR::IDeclaration *meter, const IR::P4Table *table) {
     auto info = getInfo(meter);
     if (info == nullptr) {
         ::error(ErrorType::ERR_INVALID,
@@ -55,7 +55,7 @@ void DirectMeterMap::setTable(const IR::IDeclaration* meter, const IR::P4Table* 
 /**
  * Helper function to check if two expressions are syntactically identical
  */
-static bool checkSame(const IR::Expression* expr0, const IR::Expression* expr1) {
+static bool checkSame(const IR::Expression *expr0, const IR::Expression *expr1) {
     if (expr0->node_type_name() != expr1->node_type_name()) return false;
     if (auto pe0 = expr0->to<IR::PathExpression>()) {
         auto pe1 = expr1->to<IR::PathExpression>();
@@ -70,8 +70,8 @@ static bool checkSame(const IR::Expression* expr0, const IR::Expression* expr1) 
 /**
  * Set the destination that a meter is attached to??
  */
-void DirectMeterMap::setDestination(const IR::IDeclaration* meter,
-                                    const IR::Expression* destination) {
+void DirectMeterMap::setDestination(const IR::IDeclaration *meter,
+                                    const IR::Expression *destination) {
     auto info = getInfo(meter);
     if (info == nullptr) info = createInfo(meter);
     if (info->destinationField == nullptr) {
@@ -89,7 +89,7 @@ void DirectMeterMap::setDestination(const IR::IDeclaration* meter,
 /**
  * Set the size of the table that a meter is attached to.
  */
-void DirectMeterMap::setSize(const IR::IDeclaration* meter, unsigned size) {
+void DirectMeterMap::setSize(const IR::IDeclaration *meter, unsigned size) {
     auto info = getInfo(meter);
     if (info == nullptr) {
         /* This case may be reached if a table has a direct_meter

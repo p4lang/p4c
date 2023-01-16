@@ -14,10 +14,10 @@
 class JsonData : public ICastable {
  public:
     JsonData() {}
-    JsonData(const JsonData&) = default;
-    JsonData(JsonData&&) = default;
-    JsonData& operator=(const JsonData&) & = default;
-    JsonData& operator=(JsonData&&) & = default;
+    JsonData(const JsonData &) = default;
+    JsonData(JsonData &&) = default;
+    JsonData &operator=(const JsonData &) & = default;
+    JsonData &operator=(JsonData &&) & = default;
     virtual ~JsonData() {}
 };
 
@@ -38,33 +38,33 @@ class JsonBoolean : public JsonData {
 class JsonString : public JsonData, public std::string {
  public:
     JsonString() {}
-    JsonString(const std::string& s) : std::string(s) {}  // NOLINT(runtime/explicit)
-    JsonString(const char* s) : std::string(s) {}         // NOLINT(runtime/explicit)
-    JsonString(const JsonString&) = default;
-    JsonString(JsonString&&) = default;
-    JsonString& operator=(const JsonString&) & = default;
-    JsonString& operator=(JsonString&&) & = default;
+    JsonString(const std::string &s) : std::string(s) {}  // NOLINT(runtime/explicit)
+    JsonString(const char *s) : std::string(s) {}         // NOLINT(runtime/explicit)
+    JsonString(const JsonString &) = default;
+    JsonString(JsonString &&) = default;
+    JsonString &operator=(const JsonString &) & = default;
+    JsonString &operator=(JsonString &&) & = default;
     operator cstring() { return cstring(this->c_str()); }
 };
 
-class JsonVector : public JsonData, public std::vector<JsonData*> {
+class JsonVector : public JsonData, public std::vector<JsonData *> {
  public:
     JsonVector() {}
-    JsonVector(const std::vector<JsonData*>& v)  // NOLINT(runtime/explicit)
-        : std::vector<JsonData*>(v) {}
-    JsonVector& operator=(const JsonVector&) & = default;
-    JsonVector& operator=(JsonVector&&) & = default;
+    JsonVector(const std::vector<JsonData *> &v)  // NOLINT(runtime/explicit)
+        : std::vector<JsonData *>(v) {}
+    JsonVector &operator=(const JsonVector &) & = default;
+    JsonVector &operator=(JsonVector &&) & = default;
 };
 
-class JsonObject : public JsonData, public ordered_map<std::string, JsonData*> {
+class JsonObject : public JsonData, public ordered_map<std::string, JsonData *> {
     bool _hasSrcInfo = true;
 
  public:
     JsonObject() {}
-    JsonObject(const JsonObject& obj) = default;
-    JsonObject& operator=(JsonObject&&) & = default;
-    JsonObject(const ordered_map<std::string, JsonData*>& v)  // NOLINT(runtime/explicit)
-        : ordered_map<std::string, JsonData*>(v) {}
+    JsonObject(const JsonObject &obj) = default;
+    JsonObject &operator=(JsonObject &&) & = default;
+    JsonObject(const ordered_map<std::string, JsonData *> &v)  // NOLINT(runtime/explicit)
+        : ordered_map<std::string, JsonData *>(v) {}
     int get_id() const;
     std::string get_type() const;
     std::string get_filename() const;
@@ -80,7 +80,7 @@ class JsonNull : public JsonData {};
 
 std::string getIndent(int l);
 
-std::ostream& operator<<(std::ostream& out, JsonData* json);
-std::istream& operator>>(std::istream& in, JsonData*& json);
+std::ostream &operator<<(std::ostream &out, JsonData *json);
+std::istream &operator>>(std::istream &in, JsonData *&json);
 
 #endif /* IR_JSON_PARSER_H_ */

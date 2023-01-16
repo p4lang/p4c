@@ -17,12 +17,12 @@ using Clock = std::chrono::high_resolution_clock;
 /// counter has been created. Conversely, every counter can have any number of child counters,
 /// which are counters invoked when this counter was also active.
 struct CounterEntry {
-    const char* name;
+    const char *name;
     std::unordered_map<std::string, std::unique_ptr<CounterEntry>> counters;
     Clock::duration duration{};
 
     /// Lookup existing or create new child counter.
-    CounterEntry* openSubcounter(const char* name) {
+    CounterEntry *openSubcounter(const char *name) {
         auto it = counters.find(name);
         if (it == counters.end()) {
             it = counters.emplace(name, new CounterEntry(name)).first;
@@ -33,17 +33,17 @@ struct CounterEntry {
     /// Adds specified duration to the current counter.
     void add(Clock::duration d) { duration += d; }
 
-    explicit CounterEntry(const char* n) : name(n) {}
+    explicit CounterEntry(const char *n) : name(n) {}
 };
 
 struct RootCounter {
     /// The topmost counter.
     CounterEntry counter;
     /// The most inner currently active counter.
-    CounterEntry* current;
+    CounterEntry *current;
     Clock::time_point start;
 
-    static RootCounter& get() {
+    static RootCounter &get() {
         // TODO: not threadsafe currently. Instance of RootCounter could be thread_local:
         //
         // thread_local RootCounter root;
@@ -55,9 +55,9 @@ struct RootCounter {
         return ROOT;
     }
 
-    CounterEntry* getCurrent() const { return current; }
+    CounterEntry *getCurrent() const { return current; }
 
-    void setCurrent(CounterEntry* c) { current = c; }
+    void setCurrent(CounterEntry *c) { current = c; }
 
  private:
     RootCounter() : counter(""), current(&counter) { start = Clock::now(); }
@@ -77,11 +77,11 @@ struct RootCounter {
 #endif
 // RAII helper which manages lifetime of one timer invocation.
 struct ScopedTimerCtx {
-    CounterEntry* parent = nullptr;
-    CounterEntry* self = nullptr;
+    CounterEntry *parent = nullptr;
+    CounterEntry *self = nullptr;
     Clock::time_point startTime;
 
-    explicit ScopedTimerCtx(const char* timerName)
+    explicit ScopedTimerCtx(const char *timerName)
         : parent(RootCounter::get().getCurrent()), self(parent->openSubcounter(timerName)) {
         startTime = Clock::now();
         // Push new active counter - the current active counter becomes the parent of this
@@ -98,19 +98,19 @@ struct ScopedTimerCtx {
 };
 #pragma GCC diagnostic pop
 
-ScopedTimer::ScopedTimer(const char* name) : ctx(new ScopedTimerCtx(name)) {}
+ScopedTimer::ScopedTimer(const char *name) : ctx(new ScopedTimerCtx(name)) {}
 
 ScopedTimer::~ScopedTimer() = default;
 
-void withTimer(const char* timerName, const std::function<void()>& fn) {
+void withTimer(const char *timerName, const std::function<void()> &fn) {
     ScopedTimer timer(timerName);
     fn();
 }
 
 // Helper function, walks recursively tree of counter entries, collects counter values
 // and serializes them into a list.
-static void formatCounters(std::vector<TimerEntry>& out, CounterEntry& current,
-                           std::string& namePrefix, size_t parentDurationMs) {
+static void formatCounters(std::vector<TimerEntry> &out, CounterEntry &current,
+                           std::string &namePrefix, size_t parentDurationMs) {
     auto prevNamePrefix = namePrefix;
     if (!namePrefix.empty()) {
         namePrefix = '\t' + namePrefix + '.';
@@ -127,7 +127,7 @@ static void formatCounters(std::vector<TimerEntry>& out, CounterEntry& current,
         entry.relativeToParent = static_cast<float>(entry.milliseconds) / parentDurationMs;
     }
     out.emplace_back(entry);
-    for (const auto& subcounter : current.counters) {
+    for (const auto &subcounter : current.counters) {
         formatCounters(out, *subcounter.second, namePrefix, entry.milliseconds);
     }
     namePrefix = prevNamePrefix;

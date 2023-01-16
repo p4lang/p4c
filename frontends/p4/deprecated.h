@@ -28,23 +28,23 @@ namespace P4 {
  * gives warnings.
  */
 class CheckDeprecated : public Inspector {
-    const ReferenceMap* refMap;
+    const ReferenceMap *refMap;
 
  public:
-    explicit CheckDeprecated(const ReferenceMap* refMap) : refMap(refMap) {
+    explicit CheckDeprecated(const ReferenceMap *refMap) : refMap(refMap) {
         CHECK_NULL(refMap);
         setName("CheckDeprecated");
     }
 
-    void warnIfDeprecated(const IR::IAnnotated* declaration, const IR::Node* errorNode);
+    void warnIfDeprecated(const IR::IAnnotated *declaration, const IR::Node *errorNode);
 
-    bool preorder(const IR::PathExpression* path) override;
-    bool preorder(const IR::Type_Name* name) override;
+    bool preorder(const IR::PathExpression *path) override;
+    bool preorder(const IR::Type_Name *name) override;
 };
 
 class Deprecated : public PassManager {
  public:
-    explicit Deprecated(ReferenceMap* refMap) {
+    explicit Deprecated(ReferenceMap *refMap) {
         passes.push_back(new ResolveReferences(refMap));
         passes.push_back(new CheckDeprecated(refMap));
         setName("Deprecated");

@@ -20,9 +20,9 @@ limitations under the License.
 
 namespace P4 {
 
-bool DoExpandEmit::expandArg(const IR::Type* type, const IR::Argument* arg,
-                             std::vector<const IR::Argument*>* result,
-                             std::vector<const IR::Type*>* resultTypes) {
+bool DoExpandEmit::expandArg(const IR::Type *type, const IR::Argument *arg,
+                             std::vector<const IR::Argument *> *result,
+                             std::vector<const IR::Type *> *resultTypes) {
     if (type->is<IR::Type_Header>()) {
         result->push_back(arg);
         resultTypes->push_back(type);
@@ -59,7 +59,7 @@ bool DoExpandEmit::expandArg(const IR::Type* type, const IR::Argument* arg,
     }
 }
 
-const IR::Node* DoExpandEmit::postorder(IR::MethodCallStatement* statement) {
+const IR::Node *DoExpandEmit::postorder(IR::MethodCallStatement *statement) {
     auto mi = MethodInstance::resolve(statement->methodCall, refMap, typeMap);
     if (auto em = mi->to<P4::ExternMethod>()) {
         if (em->originalExternType->name.name == P4::P4CoreLibrary::instance.packetOut.name &&
@@ -71,8 +71,8 @@ const IR::Node* DoExpandEmit::postorder(IR::MethodCallStatement* statement) {
 
             auto arg0 = em->expr->arguments->at(0);
             auto type = typeMap->getType(arg0, true);
-            std::vector<const IR::Argument*> expansion;
-            std::vector<const IR::Type*> expansionTypes;
+            std::vector<const IR::Argument *> expansion;
+            std::vector<const IR::Type *> expansionTypes;
             if (expandArg(type, arg0, &expansion, &expansionTypes)) {
                 auto vec = new IR::IndexedVector<IR::StatOrDecl>();
                 auto it = expansionTypes.begin();

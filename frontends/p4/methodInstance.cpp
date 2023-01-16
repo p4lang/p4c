@@ -23,9 +23,9 @@ limitations under the License.
 namespace P4 {
 
 // If useExpressionType is true trust the type in mce->type
-MethodInstance* MethodInstance::resolve(const IR::MethodCallExpression* mce,
-                                        DeclarationLookup* refMap, TypeMap* typeMap,
-                                        bool useExpressionType, const Visitor::Context* ctxt,
+MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
+                                        DeclarationLookup *refMap, TypeMap *typeMap,
+                                        bool useExpressionType, const Visitor::Context *ctxt,
                                         bool incomplete) {
     auto mt = typeMap ? typeMap->getType(mce->method) : nullptr;
     if (mt == nullptr && useExpressionType) mt = mce->method->type;
@@ -38,7 +38,7 @@ MethodInstance* MethodInstance::resolve(const IR::MethodCallExpression* mce,
         CHECK_NULL(t);
         actualType = t->to<IR::Type_MethodBase>();
         // FIXME -- currently refMap is always a ReferenceMap, but this arg should soon go away
-        TypeInference tc(dynamic_cast<ReferenceMap*>(refMap), typeMap, true);
+        TypeInference tc(dynamic_cast<ReferenceMap *>(refMap), typeMap, true);
         (void)actualType->apply(tc, ctxt);  // may need to learn new type components
         CHECK_NULL(actualType);
     }
@@ -66,8 +66,8 @@ MethodInstance* MethodInstance::resolve(const IR::MethodCallExpression* mce,
                 mem->member == IR::Type_Stack::pop_front)
                 return new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>());
         } else {
-            const IR::IDeclaration* decl = nullptr;
-            const IR::Type* type = nullptr;
+            const IR::IDeclaration *decl = nullptr;
+            const IR::Type *type = nullptr;
             if (auto th = mem->expr->to<IR::This>()) {
                 type = basetype;
                 decl = refMap->getDeclaration(th, true);
@@ -123,19 +123,19 @@ MethodInstance* MethodInstance::resolve(const IR::MethodCallExpression* mce,
     return nullptr;  // unreachable
 }
 
-const IR::P4Action* ActionCall::specialize(ReferenceMap* refMap) const {
+const IR::P4Action *ActionCall::specialize(ReferenceMap *refMap) const {
     SubstituteParameters sp(refMap, &substitution, new TypeVariableSubstitution());
     auto result = action->apply(sp);
     return result->to<IR::P4Action>();
 }
 
-ConstructorCall* ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
-                                          DeclarationLookup* refMap, TypeMap* typeMap) {
+ConstructorCall *ConstructorCall::resolve(const IR::ConstructorCallExpression *cce,
+                                          DeclarationLookup *refMap, TypeMap *typeMap) {
     auto ct = typeMap ? typeMap->getTypeType(cce->constructedType, true) : cce->type;
-    ConstructorCall* result;
-    const IR::Vector<IR::Type>* typeArguments;
-    const IR::Type_Name* type;
-    const IR::ParameterList* constructorParameters;
+    ConstructorCall *result;
+    const IR::Vector<IR::Type> *typeArguments;
+    const IR::Type_Name *type;
+    const IR::ParameterList *constructorParameters;
 
     if (cce->constructedType->is<IR::Type_Specialized>()) {
         auto spec = cce->constructedType->to<IR::Type_Specialized>();
@@ -173,11 +173,11 @@ ConstructorCall* ConstructorCall::resolve(const IR::ConstructorCallExpression* c
     return result;
 }
 
-Instantiation* Instantiation::resolve(const IR::Declaration_Instance* instance, DeclarationLookup*,
-                                      TypeMap* typeMap) {
+Instantiation *Instantiation::resolve(const IR::Declaration_Instance *instance, DeclarationLookup *,
+                                      TypeMap *typeMap) {
     auto type = typeMap ? typeMap->getTypeType(instance->type, true) : instance->type;
     auto simpleType = type;
-    const IR::Vector<IR::Type>* typeArguments;
+    const IR::Vector<IR::Type> *typeArguments;
 
     if (auto st = type->to<IR::Type_SpecializedCanonical>()) {
         simpleType = st->baseType;
@@ -199,12 +199,12 @@ Instantiation* Instantiation::resolve(const IR::Declaration_Instance* instance, 
     return nullptr;  // unreachable
 }
 
-std::vector<const IR::IDeclaration*> ExternMethod::mayCall() const {
-    std::vector<const IR::IDeclaration*> rv;
-    auto* di = object->to<IR::Declaration_Instance>();
+std::vector<const IR::IDeclaration *> ExternMethod::mayCall() const {
+    std::vector<const IR::IDeclaration *> rv;
+    auto *di = object->to<IR::Declaration_Instance>();
     if (!di || !di->initializer) {
         rv.push_back(method);
-    } else if (auto* em_decl =
+    } else if (auto *em_decl =
                    di->initializer->components.getDeclaration<IR::IDeclaration>(method->name)) {
         rv.push_back(em_decl);
     } else {
@@ -214,7 +214,7 @@ std::vector<const IR::IDeclaration*> ExternMethod::mayCall() const {
             for (auto m : sync->expr) {
                 auto mname = m->to<IR::PathExpression>();
                 if (!mname || method->name != mname->path->name) continue;
-                if (auto* am =
+                if (auto *am =
                         di->initializer->components.getDeclaration<IR::IDeclaration>(meth->name)) {
                     rv.push_back(am);
                 } else if (!meth->getAnnotation(IR::Annotation::optionalAnnotation)) {

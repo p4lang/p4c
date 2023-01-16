@@ -16,8 +16,8 @@ limitations under the License.
 
 #include "options.h"
 
-void Util::Options::registerOption(const char* option, const char* argName,
-                                   OptionProcessor processor, const char* description,
+void Util::Options::registerOption(const char *option, const char *argName,
+                                   OptionProcessor processor, const char *description,
                                    OptionFlags flags /* = OptionFlags::Default */) {
     if (option == nullptr || processor == nullptr || description == nullptr)
         throw std::logic_error("Null argument to registerOption");
@@ -38,7 +38,7 @@ void Util::Options::registerOption(const char* option, const char* argName,
 
 // Process options; return list of remaining options.
 // Returns 'nullptr' if an error is signalled
-std::vector<const char*>* Util::Options::process(int argc, char* const argv[]) {
+std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) {
     if (argc == 0 || argv == nullptr) throw std::logic_error("No arguments to process");
     binaryName = argv[0];
     // collect command line args
@@ -56,8 +56,8 @@ std::vector<const char*>* Util::Options::process(int argc, char* const argv[]) {
     buildDate = cstring(build_date);
     for (int i = 1; i < argc; i++) {
         cstring opt = argv[i];
-        const char* arg = nullptr;
-        const Option* option = nullptr;
+        const char *arg = nullptr;
+        const Option *option = nullptr;
 
         if (opt.startsWith("--")) {
             option = get(options, opt);

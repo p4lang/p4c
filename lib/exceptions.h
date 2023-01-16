@@ -45,7 +45,7 @@ inline bool is_cerr_redirected() {
 }
 
 /// Function used to delete color in case of cerr output being redirected
-inline const char* cerr_colorize(const char* color) {
+inline const char *cerr_colorize(const char *color) {
     if (is_cerr_redirected()) {
         return "";
     }
@@ -53,7 +53,7 @@ inline const char* cerr_colorize(const char* color) {
 }
 
 /// Used to clear colors on terminal
-inline const char* cerr_clear_colors() {
+inline const char *cerr_clear_colors() {
     if (is_cerr_redirected()) {
         return "";
     }
@@ -70,20 +70,20 @@ class P4CExceptionBase : public std::exception {
 
  public:
     template <typename... T>
-    P4CExceptionBase(const char* format, T... args) {
+    P4CExceptionBase(const char *format, T... args) {
         traceCreation();
         boost::format fmt(format);
         message = ::bug_helper(fmt, "", "", "", std::forward<T>(args)...);
     }
 
-    const char* what() const noexcept { return message.c_str(); }
+    const char *what() const noexcept { return message.c_str(); }
 };
 
 /// This class indicates a bug in the compiler
 class CompilerBug final : public P4CExceptionBase {
  public:
     template <typename... T>
-    CompilerBug(const char* format, T... args) : P4CExceptionBase(format, args...) {
+    CompilerBug(const char *format, T... args) : P4CExceptionBase(format, args...) {
         // Check if output is redirected and if so, then don't color text so that
         // escape characters are not present
         message = cstring(cerr_colorize(ANSI_RED)) + "Compiler Bug" + cerr_clear_colors() + ":\n" +
@@ -91,7 +91,7 @@ class CompilerBug final : public P4CExceptionBase {
     }
 
     template <typename... T>
-    CompilerBug(int line, const char* file, const char* format, T... args)
+    CompilerBug(int line, const char *file, const char *format, T... args)
         : P4CExceptionBase(format, args...) {
         message = cstring("In file: ") + file + ":" + Util::toString(line) + "\n" +
                   cerr_colorize(ANSI_RED) + "Compiler Bug" + cerr_clear_colors() + ": " + message;
@@ -102,14 +102,14 @@ class CompilerBug final : public P4CExceptionBase {
 class CompilerUnimplemented final : public P4CExceptionBase {
  public:
     template <typename... T>
-    CompilerUnimplemented(const char* format, T... args) : P4CExceptionBase(format, args...) {
+    CompilerUnimplemented(const char *format, T... args) : P4CExceptionBase(format, args...) {
         // Do not add colors when redirecting to stderr
         message = cstring(cerr_colorize(ANSI_BLUE)) + "Not yet implemented" + cerr_clear_colors() +
                   ":\n" + message;
     }
 
     template <typename... T>
-    CompilerUnimplemented(int line, const char* file, const char* format, T... args)
+    CompilerUnimplemented(int line, const char *file, const char *format, T... args)
         : P4CExceptionBase(format, args...) {
         message = cstring("In file: ") + file + ":" + Util::toString(line) + "\n" +
                   cerr_colorize(ANSI_BLUE) + "Unimplemented compiler support" +
@@ -122,7 +122,7 @@ class CompilerUnimplemented final : public P4CExceptionBase {
 class CompilationError : public P4CExceptionBase {
  public:
     template <typename... T>
-    CompilationError(const char* format, T... args) : P4CExceptionBase(format, args...) {}
+    CompilationError(const char *format, T... args) : P4CExceptionBase(format, args...) {}
 };
 
 #define BUG(...)                                                  \

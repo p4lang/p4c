@@ -22,11 +22,11 @@ limitations under the License.
 namespace P4 {
 
 void DoExpandLookahead::expand(
-    const IR::PathExpression* bitvector,          // source value containing all bits
-    const IR::Type* type,                         // type that is being extracted from source
-    unsigned* offset,                             // current bit offset in source
-    const IR::Expression* destination,            // result is assigned to this expression
-    IR::IndexedVector<IR::StatOrDecl>* output) {  // add here new assignments
+    const IR::PathExpression *bitvector,          // source value containing all bits
+    const IR::Type *type,                         // type that is being extracted from source
+    unsigned *offset,                             // current bit offset in source
+    const IR::Expression *destination,            // result is assigned to this expression
+    IR::IndexedVector<IR::StatOrDecl> *output) {  // add here new assignments
     if (type->is<IR::Type_Struct>() || type->is<IR::Type_Header>()) {
         if (type->is<IR::Type_Header>() && !expandHeader) return;
         if (type->is<IR::Type_Header>()) {
@@ -44,7 +44,7 @@ void DoExpandLookahead::expand(
     } else if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>()) {
         unsigned size = type->width_bits();
         BUG_CHECK(size > 0, "%1%: unexpected size %2%", type, size);
-        const IR::Expression* expression =
+        const IR::Expression *expression =
             new IR::Slice(bitvector->clone(), *offset - 1, *offset - size);
         auto tb = type->to<IR::Type_Bits>();
         if (!tb || tb->isSigned) expression = new IR::Cast(type, expression);
@@ -63,8 +63,8 @@ void DoExpandLookahead::expand(
     }
 }
 
-DoExpandLookahead::ExpansionInfo* DoExpandLookahead::convertLookahead(
-    const IR::MethodCallExpression* expression) {
+DoExpandLookahead::ExpansionInfo *DoExpandLookahead::convertLookahead(
+    const IR::MethodCallExpression *expression) {
     if (expression == nullptr) return nullptr;
     auto mi = MethodInstance::resolve(expression, refMap, typeMap);
     if (!mi->is<P4::ExternMethod>()) return nullptr;
@@ -104,13 +104,13 @@ DoExpandLookahead::ExpansionInfo* DoExpandLookahead::convertLookahead(
     return result;
 }
 
-const IR::Node* DoExpandLookahead::postorder(IR::MethodCallStatement* statement) {
+const IR::Node *DoExpandLookahead::postorder(IR::MethodCallStatement *statement) {
     auto ei = convertLookahead(statement->methodCall);
     if (ei == nullptr) return statement;
     return ei->statement;
 }
 
-const IR::Node* DoExpandLookahead::postorder(IR::AssignmentStatement* statement) {
+const IR::Node *DoExpandLookahead::postorder(IR::AssignmentStatement *statement) {
     if (!statement->right->is<IR::MethodCallExpression>()) return statement;
 
     auto ei = convertLookahead(statement->right->to<IR::MethodCallExpression>());

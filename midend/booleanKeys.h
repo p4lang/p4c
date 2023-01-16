@@ -48,9 +48,9 @@ class CastBooleanTableKeys : public Transform {
  public:
     CastBooleanTableKeys() { setName("CastBooleanTableKeys"); }
 
-    const IR::Node* postorder(IR::KeyElement* key) override;
+    const IR::Node *postorder(IR::KeyElement *key) override;
 
-    const IR::Node* postorder(IR::Entry* entry) override;
+    const IR::Node *postorder(IR::Entry *entry) override;
 };
 
 }  // namespace P4

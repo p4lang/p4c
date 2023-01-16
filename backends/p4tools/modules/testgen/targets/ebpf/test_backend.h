@@ -39,17 +39,17 @@ class EBPFTestBackend : public TestBackEnd {
     static const std::vector<std::string> SUPPORTED_BACKENDS;
 
  public:
-    explicit EBPFTestBackend(const ProgramInfo& programInfo, ExplorationStrategy& symbex,
-                             const boost::filesystem::path& testPath,
+    explicit EBPFTestBackend(const ProgramInfo &programInfo, ExplorationStrategy &symbex,
+                             const boost::filesystem::path &testPath,
                              boost::optional<uint32_t> seed);
 
     TestBackEnd::TestInfo produceTestInfo(
-        const ExecutionState* executionState, const Model* completedModel,
-        const IR::Expression* outputPacketExpr, const IR::Expression* outputPortExpr,
-        const std::vector<gsl::not_null<const TraceEvent*>>* programTraces) override;
+        const ExecutionState *executionState, const Model *completedModel,
+        const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
+        const std::vector<gsl::not_null<const TraceEvent *>> *programTraces) override;
 
-    const TestSpec* createTestSpec(const ExecutionState* executionState,
-                                   const Model* completedModel, const TestInfo& testInfo) override;
+    const TestSpec *createTestSpec(const ExecutionState *executionState,
+                                   const Model *completedModel, const TestInfo &testInfo) override;
 };
 
 }  // namespace EBPF

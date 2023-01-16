@@ -26,19 +26,19 @@ class EBPFCmdStepper : public CmdStepper {
  protected:
     std::string getClassName() override { return "EBPFCmdStepper"; }
 
-    const EBPFProgramInfo& getProgramInfo() const override;
+    const EBPFProgramInfo &getProgramInfo() const override;
 
-    void initializeTargetEnvironment(ExecutionState* nextState) const override;
+    void initializeTargetEnvironment(ExecutionState *nextState) const override;
 
-    boost::optional<const Constraint*> startParser_impl(const IR::P4Parser* parser,
-                                                        ExecutionState* state) const override;
+    boost::optional<const Constraint *> startParser_impl(const IR::P4Parser *parser,
+                                                         ExecutionState *state) const override;
 
     std::map<Continuation::Exception, Continuation> getExceptionHandlers(
-        const IR::P4Parser* parser, Continuation::Body normalContinuation,
-        const ExecutionState* state) const override;
+        const IR::P4Parser *parser, Continuation::Body normalContinuation,
+        const ExecutionState *state) const override;
 
  public:
-    EBPFCmdStepper(ExecutionState& state, AbstractSolver& solver, const ProgramInfo& programInfo);
+    EBPFCmdStepper(ExecutionState &state, AbstractSolver &solver, const ProgramInfo &programInfo);
 };
 
 }  // namespace EBPF

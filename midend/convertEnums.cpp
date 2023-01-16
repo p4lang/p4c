@@ -4,7 +4,7 @@
 
 namespace P4 {
 
-const IR::Node* DoConvertEnums::preorder(IR::Type_Enum* type) {
+const IR::Node *DoConvertEnums::preorder(IR::Type_Enum *type) {
     bool convert = policy->convert(type);
     if (!convert) return type;
     unsigned long long count = type->members.size();
@@ -21,7 +21,7 @@ const IR::Node* DoConvertEnums::preorder(IR::Type_Enum* type) {
     return type;
 }
 
-const IR::Node* DoConvertEnums::postorder(IR::Type_Name* type) {
+const IR::Node *DoConvertEnums::postorder(IR::Type_Name *type) {
     auto canontype = typeMap->getTypeType(getOriginal(), true);
     if (!canontype->is<IR::Type_Enum>()) return type;
     if (findContext<IR::TypeNameExpression>() != nullptr)
@@ -34,7 +34,7 @@ const IR::Node* DoConvertEnums::postorder(IR::Type_Name* type) {
 }
 
 /// process enum expression, e.g., X.a
-const IR::Node* DoConvertEnums::postorder(IR::Member* expression) {
+const IR::Node *DoConvertEnums::postorder(IR::Member *expression) {
     auto ei = EnumInstance::resolve(getOriginal<IR::Member>(), typeMap);
     if (!ei) return expression;
     if (ei->is<SimpleEnumInstance>()) {

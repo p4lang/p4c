@@ -26,22 +26,22 @@ limitations under the License.
 /// array indexes for fields of headers or structs or unions or elements of stacks.
 class exprUses : public Inspector {
     cstring look_for;
-    const char* search_tail = nullptr;  // pointer into look_for for partial match
+    const char *search_tail = nullptr;  // pointer into look_for for partial match
     bool result = false;
-    bool preorder(const IR::Path* p) override {
+    bool preorder(const IR::Path *p) override {
         if (look_for.startsWith(p->name)) {
             search_tail = look_for.c_str() + p->name.name.size();
             if (*search_tail == 0 || *search_tail == '.' || *search_tail == '[') result = true;
         }
         return !result;
     }
-    bool preorder(const IR::Primitive* p) override {
+    bool preorder(const IR::Primitive *p) override {
         if (p->name == look_for) result = true;
         return !result;
     }
-    bool preorder(const IR::Expression*) override { return !result; }
+    bool preorder(const IR::Expression *) override { return !result; }
 
-    void postorder(const IR::Member* m) override {
+    void postorder(const IR::Member *m) override {
         if (result && search_tail && *search_tail) {
             if (*search_tail == '.') search_tail++;
             if (cstring(search_tail).startsWith(m->member)) {
@@ -54,11 +54,11 @@ class exprUses : public Inspector {
             }
         }
     }
-    void postorder(const IR::ArrayIndex* m) override {
+    void postorder(const IR::ArrayIndex *m) override {
         if (result && search_tail && *search_tail) {
             if (*search_tail == '.' || *search_tail == '[') search_tail++;
             if (isdigit(*search_tail)) {
-                int idx = strtol(search_tail, const_cast<char**>(&search_tail), 10);
+                int idx = strtol(search_tail, const_cast<char **>(&search_tail), 10);
                 if (*search_tail == ']') search_tail++;
                 if (auto k = m->right->to<IR::Constant>()) {
                     if (k->asInt() == idx) return;
@@ -70,11 +70,11 @@ class exprUses : public Inspector {
             search_tail = nullptr;
         }
     }
-    void postorder(const IR::PathExpression*) override {}
-    void postorder(const IR::Expression*) override { search_tail = nullptr; }
+    void postorder(const IR::PathExpression *) override {}
+    void postorder(const IR::Expression *) override { search_tail = nullptr; }
 
  public:
-    exprUses(const IR::Expression* e, cstring n) : look_for(n) {
+    exprUses(const IR::Expression *e, cstring n) : look_for(n) {
         visitDagOnce = false;
         e->apply(*this);
     }

@@ -24,50 +24,50 @@ namespace EBPF {
 
 class EBPFChecksumPSA : public EBPFObject {
  protected:
-    EBPFHashAlgorithmPSA* engine;
-    const IR::Declaration_Instance* declaration;
+    EBPFHashAlgorithmPSA *engine;
+    const IR::Declaration_Instance *declaration;
 
-    void init(const EBPFProgram* program, cstring name, int type);
+    void init(const EBPFProgram *program, cstring name, int type);
 
  public:
-    EBPFChecksumPSA(const EBPFProgram* program, const IR::Declaration_Instance* block,
+    EBPFChecksumPSA(const EBPFProgram *program, const IR::Declaration_Instance *block,
                     cstring name);
 
-    EBPFChecksumPSA(const EBPFProgram* program, const IR::Declaration_Instance* block, cstring name,
+    EBPFChecksumPSA(const EBPFProgram *program, const IR::Declaration_Instance *block, cstring name,
                     int type);
 
-    void emitVariables(CodeBuilder* builder) {
+    void emitVariables(CodeBuilder *builder) {
         if (engine) engine->emitVariables(builder, declaration);
     }
 
-    virtual void processMethod(CodeBuilder* builder, cstring method,
-                               const IR::MethodCallExpression* expr, Visitor* visitor);
+    virtual void processMethod(CodeBuilder *builder, cstring method,
+                               const IR::MethodCallExpression *expr, Visitor *visitor);
 };
 
 class EBPFInternetChecksumPSA : public EBPFChecksumPSA {
  public:
-    EBPFInternetChecksumPSA(const EBPFProgram* program, const IR::Declaration_Instance* block,
+    EBPFInternetChecksumPSA(const EBPFProgram *program, const IR::Declaration_Instance *block,
                             cstring name)
         : EBPFChecksumPSA(program, block, name,
                           EBPFHashAlgorithmPSA::HashAlgorithm::ONES_COMPLEMENT16) {}
 
-    void processMethod(CodeBuilder* builder, cstring method, const IR::MethodCallExpression* expr,
-                       Visitor* visitor) override;
+    void processMethod(CodeBuilder *builder, cstring method, const IR::MethodCallExpression *expr,
+                       Visitor *visitor) override;
 };
 
 class EBPFHashPSA : public EBPFChecksumPSA {
  public:
-    EBPFHashPSA(const EBPFProgram* program, const IR::Declaration_Instance* block, cstring name)
+    EBPFHashPSA(const EBPFProgram *program, const IR::Declaration_Instance *block, cstring name)
         : EBPFChecksumPSA(program, block, name) {}
 
-    void processMethod(CodeBuilder* builder, cstring method, const IR::MethodCallExpression* expr,
-                       Visitor* visitor) override;
+    void processMethod(CodeBuilder *builder, cstring method, const IR::MethodCallExpression *expr,
+                       Visitor *visitor) override;
 
-    void calculateHash(CodeBuilder* builder, const IR::MethodCallExpression* expr,
-                       Visitor* visitor);
+    void calculateHash(CodeBuilder *builder, const IR::MethodCallExpression *expr,
+                       Visitor *visitor);
 
-    void emitGetMethod(CodeBuilder* builder, const IR::MethodCallExpression* expr,
-                       Visitor* visitor);
+    void emitGetMethod(CodeBuilder *builder, const IR::MethodCallExpression *expr,
+                       Visitor *visitor);
 };
 
 }  // namespace EBPF

@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace P4 {
 
-bool TypeMap::typeIsEmpty(const IR::Type* type) const {
+bool TypeMap::typeIsEmpty(const IR::Type *type) const {
     if (auto bt = type->to<IR::Type_Bits>()) {
         return bt->size == 0;
     } else if (auto vt = type->to<IR::Type_Varbits>()) {
@@ -46,7 +46,7 @@ bool TypeMap::typeIsEmpty(const IR::Type* type) const {
     return false;
 }
 
-void TypeMap::dbprint(std::ostream& out) const {
+void TypeMap::dbprint(std::ostream &out) const {
     out << "TypeMap for " << dbp(program) << std::endl;
     for (auto it : typeMap) out << "\t" << dbp(it.first) << "->" << dbp(it.second) << std::endl;
     out << "Left values" << std::endl;
@@ -58,24 +58,24 @@ void TypeMap::dbprint(std::ostream& out) const {
     out << "--------------" << std::endl;
 }
 
-void TypeMap::setLeftValue(const IR::Expression* expression) {
+void TypeMap::setLeftValue(const IR::Expression *expression) {
     leftValues.insert(expression);
     LOG3("Left value " << dbp(expression));
 }
 
-void TypeMap::setCompileTimeConstant(const IR::Expression* expression) {
+void TypeMap::setCompileTimeConstant(const IR::Expression *expression) {
     constants.insert(expression);
     LOG3("Constant value " << dbp(expression));
 }
 
-bool TypeMap::isCompileTimeConstant(const IR::Expression* expression) const {
+bool TypeMap::isCompileTimeConstant(const IR::Expression *expression) const {
     bool result = constants.find(expression) != constants.end();
     LOG3(dbp(expression) << (result ? " constant" : " not constant"));
     return result;
 }
 
 // Method copies properties from expression to "to" expression.
-void TypeMap::cloneExpressionProperties(const IR::Expression* to, const IR::Expression* from) {
+void TypeMap::cloneExpressionProperties(const IR::Expression *to, const IR::Expression *from) {
     auto type = getType(from, true);
     setType(to, type);
     if (isLeftValue(from)) setLeftValue(to);
@@ -92,18 +92,18 @@ void TypeMap::clear() {
     ProgramMap::clear();
 }
 
-void TypeMap::checkPrecondition(const IR::Node* element, const IR::Type* type) const {
+void TypeMap::checkPrecondition(const IR::Node *element, const IR::Type *type) const {
     CHECK_NULL(element);
     CHECK_NULL(type);
     if (type->is<IR::Type_Name>())
         BUG("Element %1% maps to a Type_Name %2%", dbp(element), dbp(type));
 }
 
-void TypeMap::setType(const IR::Node* element, const IR::Type* type) {
+void TypeMap::setType(const IR::Node *element, const IR::Type *type) {
     checkPrecondition(element, type);
     auto it = typeMap.find(element);
     if (it != typeMap.end()) {
-        const IR::Type* existingType = it->second;
+        const IR::Type *existingType = it->second;
         if (!implicitlyConvertibleTo(type, existingType))
             BUG("Changing type of %1% in type map from %2% to %3%", dbp(element), dbp(existingType),
                 dbp(type));
@@ -113,7 +113,7 @@ void TypeMap::setType(const IR::Node* element, const IR::Type* type) {
     typeMap.emplace(element, type);
 }
 
-const IR::Type* TypeMap::getType(const IR::Node* element, bool notNull) const {
+const IR::Type *TypeMap::getType(const IR::Node *element, bool notNull) const {
     CHECK_NULL(element);
     auto result = get(typeMap, element);
     LOG4("Looking up type for " << dbp(element) << " => " << dbp(result));
@@ -123,14 +123,14 @@ const IR::Type* TypeMap::getType(const IR::Node* element, bool notNull) const {
     return result;
 }
 
-const IR::Type* TypeMap::getTypeType(const IR::Node* element, bool notNull) const {
+const IR::Type *TypeMap::getTypeType(const IR::Node *element, bool notNull) const {
     CHECK_NULL(element);
     auto result = getType(element, notNull);
     BUG_CHECK(result->is<IR::Type_Type>(), "%1%: expected a TypeType", result);
     return result->to<IR::Type_Type>()->type;
 }
 
-void TypeMap::addSubstitutions(const TypeVariableSubstitution* tvs) {
+void TypeMap::addSubstitutions(const TypeVariableSubstitution *tvs) {
     if (tvs == nullptr || tvs->isIdentity()) return;
     LOG3("New type variables " << tvs);
     allTypeVariables.simpleCompose(tvs);
@@ -139,7 +139,7 @@ void TypeMap::addSubstitutions(const TypeVariableSubstitution* tvs) {
 // Deep structural equivalence between canonical types.
 // Does not do unification of type variables - a type variable is only
 // equivalent to itself.  nullptr is only equivalent to nullptr.
-bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool strict) const {
+bool TypeMap::equivalent(const IR::Type *left, const IR::Type *right, bool strict) const {
     if (!strict) strict = strictStruct;
     LOG3("Checking equivalence of " << left << " and " << right);
     if (left == right) return true;
@@ -298,7 +298,7 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
     return false;
 }
 
-bool TypeMap::implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to) const {
+bool TypeMap::implicitlyConvertibleTo(const IR::Type *from, const IR::Type *to) const {
     if (equivalent(from, to)) return true;
     if (from->is<IR::Type_InfInt>()) {
         if (to->is<IR::Type_InfInt>() || to->is<IR::Type_Bits>())
@@ -330,9 +330,9 @@ bool TypeMap::implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to) 
 }
 
 // Used for tuples, stacks and lists only
-const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
+const IR::Type *TypeMap::getCanonical(const IR::Type *type) {
     // Currently a linear search; hopefully this won't be too expensive in practice
-    std::vector<const IR::Type*>* searchIn;
+    std::vector<const IR::Type *> *searchIn;
     if (type->is<IR::Type_Stack>())
         searchIn = &canonicalStacks;
     else if (type->is<IR::Type_Tuple>())
@@ -351,9 +351,9 @@ const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
     return type;
 }
 
-int TypeMap::widthBits(const IR::Type* type, const IR::Node* errorPosition, bool max) {
+int TypeMap::widthBits(const IR::Type *type, const IR::Node *errorPosition, bool max) {
     CHECK_NULL(type);
-    const IR::Type* t;
+    const IR::Type *t;
     if (auto tt = type->to<IR::Type_Type>())
         t = tt->type;
     else

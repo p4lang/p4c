@@ -34,7 +34,7 @@ class DefaultP4CConfiguration : public P4CConfiguration {
     int maximumArraySize() const { return 256; }
 
     /// @return the singleton instance.
-    static const DefaultP4CConfiguration& get() {
+    static const DefaultP4CConfiguration &get() {
         static DefaultP4CConfiguration instance;
         return instance;
     }

@@ -20,7 +20,7 @@ namespace Bmv2 {
 class Bmv2Concolic : public Concolic {
  private:
     /// In the behavioral model, checksum functions have the following signature.
-    using ChecksumFunction = std::function<big_int(const char* buf, size_t len)>;
+    using ChecksumFunction = std::function<big_int(const char *buf, size_t len)>;
 
     /// Chunk size is 8 bits, i.e., a byte.
     static constexpr int CHUNK_SIZE = 8;
@@ -46,26 +46,26 @@ class Bmv2Concolic : public Concolic {
 
     /// Call into a behavioral model helper function to compute the appropriate checksum. The
     /// checksum is determined by @param algo.
-    static big_int computeChecksum(const std::vector<const IR::Expression*>& exprList,
-                                   const Model* completedModel, int algo,
-                                   Model::ExpressionMap* resolvedExpressions);
+    static big_int computeChecksum(const std::vector<const IR::Expression *> &exprList,
+                                   const Model *completedModel, int algo,
+                                   Model::ExpressionMap *resolvedExpressions);
 
     /// Compute a payload using the provided model and update the resolved concolic variables. Then
     /// return the computed payload expression. If the payload did not previously exist, a random
     /// variable according to @param payloadSize is generated. If the variable exists already, it
     /// just returns the payload expression.
-    static const IR::Expression* setAndComputePayload(
-        const Model& completedModel, ConcolicVariableMap* resolvedConcolicVariables,
+    static const IR::Expression *setAndComputePayload(
+        const Model &completedModel, ConcolicVariableMap *resolvedConcolicVariables,
         int payloadSize);
 
     /// Converts a big integer input into a vector of bytes. This byte vector is fed into the
     /// hash function.
     /// This function mimics the conversion of data structures to bytes in the behavioral model.
-    static std::vector<char> convertBigIntToBytes(big_int& dataInt, int targetWidthBits);
+    static std::vector<char> convertBigIntToBytes(big_int &dataInt, int targetWidthBits);
 
  public:
     /// @returns the concolic  functions that are implemented for this particular target.
-    static const ConcolicMethodImpls::ImplList* getBmv2ConcolicMethodImpls();
+    static const ConcolicMethodImpls::ImplList *getBmv2ConcolicMethodImpls();
 };
 
 }  // namespace Bmv2

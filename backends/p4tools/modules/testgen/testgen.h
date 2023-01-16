@@ -15,7 +15,7 @@ class Testgen : public AbstractP4cTool<TestgenOptions> {
  protected:
     void registerTarget() override;
 
-    int mainImpl(const IR::P4Program* program) override;
+    int mainImpl(const IR::P4Program *program) override;
 };
 
 }  // namespace P4Testgen

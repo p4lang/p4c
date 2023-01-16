@@ -20,13 +20,13 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* DoRemoveMiss::preorder(IR::Member* expression) {
+const IR::Node *DoRemoveMiss::preorder(IR::Member *expression) {
     if (!TableApplySolver::isMiss(expression, refMap, typeMap)) return expression;
     auto hit = new IR::Member(expression->expr, IR::Type_Table::hit);
     return new IR::LNot(hit);
 }
 
-const IR::Node* DoRemoveMiss::preorder(IR::IfStatement* statement) {
+const IR::Node *DoRemoveMiss::preorder(IR::IfStatement *statement) {
     if (!TableApplySolver::isMiss(statement->condition, refMap, typeMap)) return statement;
     auto mem = statement->condition->checkedTo<IR::Member>();
     auto hit = new IR::Member(mem->expr, IR::Type_Table::hit);

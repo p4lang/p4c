@@ -12,7 +12,7 @@ namespace P4Testgen {
 class TestgenUnimplemented final : public Util::P4CExceptionBase {
  public:
     template <typename... T>
-    explicit TestgenUnimplemented(const char* format, T... args)
+    explicit TestgenUnimplemented(const char *format, T... args)
         : P4CExceptionBase(format, args...) {
         // Check if output is redirected and if so, then don't color text so that
         // escape characters are not present
@@ -21,7 +21,7 @@ class TestgenUnimplemented final : public Util::P4CExceptionBase {
     }
 
     template <typename... T>
-    TestgenUnimplemented(int line, const char* file, const char* format, T... args)
+    TestgenUnimplemented(int line, const char *file, const char *format, T... args)
         : P4CExceptionBase(format, args...) {
         message = cstring("In file: ") + file + ":" + Util::toString(line) + "\n" +
                   Util::cerr_colorize(Util::ANSI_BLUE) + "Unimplemented compiler support" +

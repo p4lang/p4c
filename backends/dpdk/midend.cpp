@@ -77,10 +77,10 @@ This class implements a policy suitable for the ConvertEnums pass.
 The policy is: convert all enums to bit<32>
 */
 class EnumOn32Bits : public P4::ChooseEnumRepresentation {
-    bool convert(const IR::Type_Enum*) const override { return true; }
+    bool convert(const IR::Type_Enum *) const override { return true; }
 
     /* This function assigns DPDK target compatible values to the enums */
-    unsigned encoding(const IR::Type_Enum* type, unsigned n) const override {
+    unsigned encoding(const IR::Type_Enum *type, unsigned n) const override {
         if (type->name == "PSA_MeterColor_t") {
             /* DPDK target assumes the following values for Meter colors
                (Green: 0, Yellow: 1, Red: 2)
@@ -102,7 +102,7 @@ The policy is: convert all errors to specified width
 */
 class ErrorWidth : public P4::ChooseErrorRepresentation {
     unsigned width;
-    bool convert(const IR::Type_Error*) const override { return true; }
+    bool convert(const IR::Type_Error *) const override { return true; }
 
     unsigned errorSize(unsigned) const override { return width; }
 
@@ -110,12 +110,12 @@ class ErrorWidth : public P4::ChooseErrorRepresentation {
     explicit ErrorWidth(unsigned width) : width(width) {}
 };
 
-DpdkMidEnd::DpdkMidEnd(CompilerOptions& options, std::ostream* outStream) {
+DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
     auto convertErrors = new P4::ConvertErrors(&refMap, &typeMap, new ErrorWidth(16));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
-    std::function<bool(const Context*, const IR::Expression*)> policy =
-        [=](const Context* ctx, const IR::Expression*) -> bool {
+    std::function<bool(const Context *, const IR::Expression *)> policy =
+        [=](const Context *ctx, const IR::Expression *) -> bool {
         if (auto mce = findContext<IR::MethodCallExpression>(ctx)) {
             auto mi = P4::MethodInstance::resolve(mce, &refMap, &typeMap);
             if (auto em = mi->to<P4::ExternMethod>()) {
@@ -153,7 +153,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions& options, std::ostream* outStream) {
         return true;
     };
 
-    std::function<Inspector*(cstring)> validateTableProperties = [=](cstring arch) -> Inspector* {
+    std::function<Inspector *(cstring)> validateTableProperties = [=](cstring arch) -> Inspector * {
         if (arch == "pna") {
             return new P4::ValidateTableProperties(
                 {"pna_implementation", "pna_direct_counter", "pna_direct_meter", "pna_idle_timeout",

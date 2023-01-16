@@ -50,15 +50,15 @@ static uint64_t initTime = 0;
 
 struct LevelAndOutput {
     int level = -1;
-    std::ostream* out = nullptr;
+    std::ostream *out = nullptr;
 };
 
 // The first level cache for fileLogLevel() - the most recent result returned.
-static const char* mostRecentFile = nullptr;
-static LevelAndOutput* mostRecentInfo = nullptr;
+static const char *mostRecentFile = nullptr;
+static LevelAndOutput *mostRecentInfo = nullptr;
 
 // The second level cache for fileLogLevel(), mapping filenames to log levels.
-static std::unordered_map<const void*, LevelAndOutput> logLevelCache;
+static std::unordered_map<const void *, LevelAndOutput> logLevelCache;
 
 // All log levels manually specified by the user.
 static std::vector<std::string> debugSpecs;
@@ -69,7 +69,7 @@ static std::unordered_map<std::string, std::unique_ptr<std::ostream>> logfiles;
 static std::vector<void (*)(void)> invalidateCallbacks;
 
 int OutputLogPrefix::ostream_xalloc = -1;
-void OutputLogPrefix::setup_ostream_xalloc(std::ostream& out) {
+void OutputLogPrefix::setup_ostream_xalloc(std::ostream &out) {
     if (ostream_xalloc < 0) {
 #ifdef MULTITHREAD
         static std::mutex lock;
@@ -87,12 +87,12 @@ struct OutputLogPrefix::lock_t {
 
     void lock() { theMutex.lock(); }
     void unlock() { theMutex.unlock(); }
-    static void cleanup(std::ios_base::event event, std::ios_base& out, int index) {
+    static void cleanup(std::ios_base::event event, std::ios_base &out, int index) {
         if (event == std::ios_base::erase_event) {
-            auto* p = static_cast<lock_t*>(out.pword(index));
+            auto *p = static_cast<lock_t *>(out.pword(index));
             if (p && --p->refcnt <= 0) delete p;
         } else if (event == std::ios_base::copyfmt_event) {
-            auto* p = static_cast<lock_t*>(out.pword(index));
+            auto *p = static_cast<lock_t *>(out.pword(index));
             if (p) p->refcnt++;
         }
     }
@@ -105,13 +105,13 @@ OutputLogPrefix::~OutputLogPrefix() {
 #endif  // MULTITHREAD
 }
 
-void OutputLogPrefix::indent(std::ostream& out) {
+void OutputLogPrefix::indent(std::ostream &out) {
     setup_ostream_xalloc(out);
     if (int pfx = out.iword(ostream_xalloc)) out << std::setw(pfx) << ':';
     out << indent_t::getindent(out);
 }
 
-std::ostream& operator<<(std::ostream& out, const OutputLogPrefix& pfx) {
+std::ostream &operator<<(std::ostream &out, const OutputLogPrefix &pfx) {
     std::stringstream tmp;
 #ifdef CLOCK_MONOTONIC
     if (LOGGING(2)) {
@@ -124,8 +124,8 @@ std::ostream& operator<<(std::ostream& out, const OutputLogPrefix& pfx) {
     }
 #endif
     if (LOGGING(1)) {
-        const char* s = strrchr(pfx.fn, '/');
-        const char* e = strrchr(pfx.fn, '.');
+        const char *s = strrchr(pfx.fn, '/');
+        const char *e = strrchr(pfx.fn, '.');
         s = s ? s + 1 : pfx.fn;
         if (e && e > s)
             tmp.write(s, e - s);
@@ -135,10 +135,10 @@ std::ostream& operator<<(std::ostream& out, const OutputLogPrefix& pfx) {
     }
     pfx.setup_ostream_xalloc(out);
 #ifdef MULTITHREAD
-    if (!(pfx.lock = static_cast<OutputLogPrefix::lock_t*>(out.pword(pfx.ostream_xalloc)))) {
+    if (!(pfx.lock = static_cast<OutputLogPrefix::lock_t *>(out.pword(pfx.ostream_xalloc)))) {
         static std::mutex lock;
         std::lock_guard<std::mutex> acquire(lock);
-        if (!(pfx.lock = static_cast<OutputLogPrefix::lock_t*>(out.pword(pfx.ostream_xalloc)))) {
+        if (!(pfx.lock = static_cast<OutputLogPrefix::lock_t *>(out.pword(pfx.ostream_xalloc)))) {
             out.pword(pfx.ostream_xalloc) = pfx.lock = new NOGC_ARGS OutputLogPrefix::lock_t;
             out.register_callback(OutputLogPrefix::lock_t::cleanup, pfx.ostream_xalloc);
         }
@@ -153,14 +153,14 @@ std::ostream& operator<<(std::ostream& out, const OutputLogPrefix& pfx) {
     return out;
 }
 
-std::ostream& clearPrefix(std::ostream& out) {
+std::ostream &clearPrefix(std::ostream &out) {
     if (OutputLogPrefix::ostream_xalloc >= 0) out.iword(OutputLogPrefix::ostream_xalloc) = 0;
     return out;
 }
 
-static bool match(const char* pattern, const char* name) {
-    const char* pend = pattern + strcspn(pattern, ",:");
-    const char* pbackup = 0;
+static bool match(const char *pattern, const char *name) {
+    const char *pend = pattern + strcspn(pattern, ",:");
+    const char *pbackup = 0;
     while (1) {
         while (pattern < pend && *pattern == *name) {
             pattern++;
@@ -207,19 +207,19 @@ static bool match(const char* pattern, const char* name) {
     }
 }
 
-const char* uncachedFileLogSpec(const char* file) {
-    if (auto* startOfFilename = strrchr(file, '/')) file = startOfFilename + 1;
+const char *uncachedFileLogSpec(const char *file) {
+    if (auto *startOfFilename = strrchr(file, '/')) file = startOfFilename + 1;
 
-    for (auto& spec : debugSpecs)
-        for (auto* pattern = spec.c_str(); pattern; pattern = strchr(pattern, ',')) {
+    for (auto &spec : debugSpecs)
+        for (auto *pattern = spec.c_str(); pattern; pattern = strchr(pattern, ',')) {
             while (*pattern == ',') pattern++;
             if (match(pattern, file))
-                if (auto* level = strchr(pattern, ':')) return level + 1;
+                if (auto *level = strchr(pattern, ':')) return level + 1;
         }
     return nullptr;
 }
 
-int uncachedFileLogLevel(const char* file) {
+int uncachedFileLogLevel(const char *file) {
     if (auto spec = uncachedFileLogSpec(file)) return atoi(spec);
     // If there's no matching spec, compute a default from the global verbosity level,
     // except for THIS file
@@ -227,7 +227,7 @@ int uncachedFileLogLevel(const char* file) {
     return verbosity > 0 ? verbosity - 1 : 0;
 }
 
-LevelAndOutput* cachedFileLogInfo(const char* file) {
+LevelAndOutput *cachedFileLogInfo(const char *file) {
 #ifdef MULTITHREAD
     static std::mutex lock;
     std::lock_guard<std::mutex> acquire(lock);
@@ -243,8 +243,8 @@ LevelAndOutput* cachedFileLogInfo(const char* file) {
     return mostRecentInfo = &logLevelCache[file];
 }
 
-int fileLogLevel(const char* file) {
-    auto* info = cachedFileLogInfo(file);
+int fileLogLevel(const char *file) {
+    auto *info = cachedFileLogInfo(file);
     if (info->level == -1) {
         // This is the slow path. We have to walk @debugSpecs to see if there are any
         // specs that match @file.  There's a race here in that two threads could do this
@@ -254,7 +254,7 @@ int fileLogLevel(const char* file) {
     return info->level;
 }
 
-std::ostream& uncachedFileLogOutput(const char* file) {
+std::ostream &uncachedFileLogOutput(const char *file) {
     if (auto spec = uncachedFileLogSpec(file)) {
         while (isdigit(*spec)) ++spec;
         if (*spec == '>') {
@@ -263,7 +263,7 @@ std::ostream& uncachedFileLogOutput(const char* file) {
                 mode |= std::ios_base::app;
                 ++spec;
             }
-            const char* end = strchr(spec, ',');
+            const char *end = strchr(spec, ',');
             if (!end) end = spec + strlen(spec);
             std::string logname(spec, end - spec);
             if (!logfiles.count(logname)) {
@@ -277,8 +277,8 @@ std::ostream& uncachedFileLogOutput(const char* file) {
     return std::clog;
 }
 
-std::ostream& fileLogOutput(const char* file) {
-    auto* info = cachedFileLogInfo(file);
+std::ostream &fileLogOutput(const char *file) {
+    auto *info = cachedFileLogInfo(file);
     if (!info->out) {
 #ifdef MULTITHREAD
         static std::mutex lock;
@@ -303,7 +303,7 @@ void addInvalidateCallback(void (*fn)(void)) { invalidateCallbacks.push_back(fn)
 
 }  // namespace Detail
 
-void addDebugSpec(const char* spec) {
+void addDebugSpec(const char *spec) {
 #ifdef CLOCK_MONOTONIC
     if (!Detail::initTime) {
         struct timespec ts;
@@ -315,9 +315,9 @@ void addDebugSpec(const char* spec) {
     // Validate @spec.
     bool ok = false;
     long maxLogLevelInSpec = 0;
-    for (auto* pattern = strchr(spec, ':'); pattern; pattern = strchr(pattern, ':')) {
+    for (auto *pattern = strchr(spec, ':'); pattern; pattern = strchr(pattern, ':')) {
         ok = true;
-        long level = strtol(pattern + 1, const_cast<char**>(&pattern), 10);
+        long level = strtol(pattern + 1, const_cast<char **>(&pattern), 10);
         if (*pattern && *pattern != ',' && *pattern != '>') {
             ok = false;
             break;

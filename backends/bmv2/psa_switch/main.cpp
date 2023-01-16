@@ -37,11 +37,11 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 
-int main(int argc, char* const argv[]) {
+int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
     AutoCompileContext autoPsaSwitchContext(new BMV2::PsaSwitchContext);
-    auto& options = BMV2::PsaSwitchContext::get().options();
+    auto &options = BMV2::PsaSwitchContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = BMV2_PSA_VERSION_STRING;
 
@@ -55,8 +55,8 @@ int main(int argc, char* const argv[]) {
     // BMV2 is required for compatibility with the previous compiler.
     options.preprocessor_options += " -D__TARGET_BMV2__";
 
-    const IR::P4Program* program = nullptr;
-    const IR::ToplevelBlock* toplevel = nullptr;
+    const IR::P4Program *program = nullptr;
+    const IR::ToplevelBlock *toplevel = nullptr;
 
     if (options.loadIRFromJson == false) {
         program = P4::parseP4File(options);
@@ -69,7 +69,7 @@ int main(int argc, char* const argv[]) {
             P4::FrontEnd frontend;
             frontend.addDebugHook(hook);
             program = frontend.run(options, program);
-        } catch (const std::exception& bug) {
+        } catch (const std::exception &bug) {
             std::cerr << bug.what() << std::endl;
             return 1;
         }
@@ -100,7 +100,7 @@ int main(int argc, char* const argv[]) {
         if (::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr) return 1;
         if (options.dumpJsonFile)
             JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
-    } catch (const std::exception& bug) {
+    } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
@@ -113,14 +113,14 @@ int main(int argc, char* const argv[]) {
     AutoCompileContext autoContext(new BMV2::BMV2Context(BMV2::PsaSwitchContext::get()));
     try {
         backend->convert(toplevel);
-    } catch (const std::exception& bug) {
+    } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
     if (::errorCount() > 0) return 1;
 
     if (!options.outputFile.isNullOrEmpty()) {
-        std::ostream* out = openFile(options.outputFile, false);
+        std::ostream *out = openFile(options.outputFile, false);
         if (out != nullptr) {
             backend->serialize(*out);
             out->flush();

@@ -42,7 +42,7 @@ class ChooseErrorRepresentation {
     virtual ~ChooseErrorRepresentation() = default;
 
     /// If true this type has to be converted.
-    virtual bool convert(const IR::Type_Error* type) const = 0;
+    virtual bool convert(const IR::Type_Error *type) const = 0;
 
     /// errorCount is the number of different error values.
     /// The returned value is the width of Type_Bits used
@@ -52,36 +52,36 @@ class ChooseErrorRepresentation {
 
     /// This function allows backends to override the values for the error constants.
     /// Default values for error constants is a sequence of numbers starting with 0.
-    virtual IR::IndexedVector<IR::SerEnumMember>* assignValues(IR::Type_Error* type,
+    virtual IR::IndexedVector<IR::SerEnumMember> *assignValues(IR::Type_Error *type,
                                                                unsigned width) const;
 };
 
 class DoConvertErrors : public Transform {
     friend class ConvertErrors;
 
-    std::map<cstring, P4::EnumRepresentation*> repr;
-    ChooseErrorRepresentation* policy;
-    P4::TypeMap* typeMap;
+    std::map<cstring, P4::EnumRepresentation *> repr;
+    ChooseErrorRepresentation *policy;
+    P4::TypeMap *typeMap;
 
  public:
-    DoConvertErrors(ChooseErrorRepresentation* policy, P4::TypeMap* typeMap)
+    DoConvertErrors(ChooseErrorRepresentation *policy, P4::TypeMap *typeMap)
         : policy(policy), typeMap(typeMap) {
         CHECK_NULL(policy);
         CHECK_NULL(typeMap);
         setName("DoConvertErrors");
     }
-    const IR::Node* preorder(IR::Type_Error* type) override;
-    const IR::Node* postorder(IR::Type_Name* type) override;
-    const IR::Node* postorder(IR::Member* member) override;
+    const IR::Node *preorder(IR::Type_Error *type) override;
+    const IR::Node *postorder(IR::Type_Name *type) override;
+    const IR::Node *postorder(IR::Member *member) override;
 };
 
 class ConvertErrors : public PassManager {
-    DoConvertErrors* convertErrors{nullptr};
+    DoConvertErrors *convertErrors{nullptr};
 
  public:
     using ErrorMapping = decltype(DoConvertErrors::repr);
-    ConvertErrors(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, ChooseErrorRepresentation* policy,
-                  P4::TypeChecking* typeChecking = nullptr)
+    ConvertErrors(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, ChooseErrorRepresentation *policy,
+                  P4::TypeChecking *typeChecking = nullptr)
         : convertErrors(new DoConvertErrors(policy, typeMap)) {
         if (typeChecking == nullptr) {
             typeChecking = new P4::TypeChecking(refMap, typeMap);

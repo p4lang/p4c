@@ -9,7 +9,7 @@ namespace P4 {
 /// Applies expression optimizations to the input node.
 /// Currently, performs constant folding and strength reduction.
 template <class T>
-const T* optimizeExpression(const T* node) {
+const T *optimizeExpression(const T *node) {
     auto pass = PassRepeated({
         new P4::StrengthReduction(nullptr, nullptr, nullptr),
         new P4::ConstantFolding(nullptr, nullptr, false),

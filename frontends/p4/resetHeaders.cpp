@@ -18,9 +18,9 @@ limitations under the License.
 
 namespace P4 {
 
-void DoResetHeaders::generateResets(const TypeMap* typeMap, const IR::Type* type,
-                                    const IR::Expression* expr,
-                                    IR::Vector<IR::StatOrDecl>* resets) {
+void DoResetHeaders::generateResets(const TypeMap *typeMap, const IR::Type *type,
+                                    const IR::Expression *expr,
+                                    IR::Vector<IR::StatOrDecl> *resets) {
     if (type->is<IR::Type_Struct>() || type->is<IR::Type_HeaderUnion>()) {
         auto sl = type->to<IR::Type_StructLike>();
         for (auto f : sl->fields) {
@@ -50,7 +50,7 @@ void DoResetHeaders::generateResets(const TypeMap* typeMap, const IR::Type* type
     }
 }
 
-const IR::Node* DoResetHeaders::postorder(IR::Declaration_Variable* decl) {
+const IR::Node *DoResetHeaders::postorder(IR::Declaration_Variable *decl) {
     if (decl->initializer != nullptr) return decl;
     LOG3("DoResetHeaders context " << dbp(getContext()->node));
     auto type = typeMap->getType(getOriginal(), true);
@@ -71,7 +71,7 @@ const IR::Node* DoResetHeaders::postorder(IR::Declaration_Variable* decl) {
     }
 }
 
-const IR::Node* DoResetHeaders::postorder(IR::P4Control* control) {
+const IR::Node *DoResetHeaders::postorder(IR::P4Control *control) {
     insert.append(control->body->components);
     control->body =
         new IR::BlockStatement(control->body->srcInfo, control->body->annotations, insert);
@@ -79,7 +79,7 @@ const IR::Node* DoResetHeaders::postorder(IR::P4Control* control) {
     return control;
 }
 
-const IR::Node* DoResetHeaders::postorder(IR::ParserState* state) {
+const IR::Node *DoResetHeaders::postorder(IR::ParserState *state) {
     if (state->name != IR::ParserState::start) return state;
     insert.append(state->components);
     state->components = insert;

@@ -21,8 +21,8 @@ limitations under the License.
 
 namespace EBPF {
 
-EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram* program, cstring instanceName,
-                                 const IR::Declaration_Instance* di, CodeGenInspector* codeGen)
+EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program, cstring instanceName,
+                                 const IR::Declaration_Instance *di, CodeGenInspector *codeGen)
     : EBPFTableBase(program, instanceName, codeGen) {
     CHECK_NULL(di);
     if (!di->type->is<IR::Type_Specialized>()) {
@@ -64,7 +64,7 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram* program, cstring instanceNam
 
 bool EBPFRegisterPSA::shouldUseArrayMap() {
     CHECK_NULL(this->keyType);
-    if (auto wt = dynamic_cast<IHasWidth*>(this->keyType)) {
+    if (auto wt = dynamic_cast<IHasWidth *>(this->keyType)) {
         unsigned keyWidth = wt->widthInBits();
         // For keys <= 32 bit register is based on array map,
         // otherwise we use hash map
@@ -76,26 +76,26 @@ bool EBPFRegisterPSA::shouldUseArrayMap() {
     return false;
 }
 
-void EBPFRegisterPSA::emitTypes(CodeBuilder* builder) {
+void EBPFRegisterPSA::emitTypes(CodeBuilder *builder) {
     emitKeyType(builder);
     emitValueType(builder);
 }
 
-void EBPFRegisterPSA::emitKeyType(CodeBuilder* builder) {
+void EBPFRegisterPSA::emitKeyType(CodeBuilder *builder) {
     builder->emitIndent();
     builder->append("typedef ");
     this->keyType->declare(builder, keyTypeName, false);
     builder->endOfStatement(true);
 }
 
-void EBPFRegisterPSA::emitValueType(CodeBuilder* builder) {
+void EBPFRegisterPSA::emitValueType(CodeBuilder *builder) {
     builder->emitIndent();
     builder->append("typedef ");
     this->valueType->declare(builder, valueTypeName, false);
     builder->endOfStatement(true);
 }
 
-void EBPFRegisterPSA::emitInitializer(CodeBuilder* builder) {
+void EBPFRegisterPSA::emitInitializer(CodeBuilder *builder) {
     if (!shouldUseArrayMap()) {
         // initialize array-based Registers only,
         // hash-based Registers are "lazy-initialized", upon a first lookup to the map.
@@ -144,15 +144,15 @@ void EBPFRegisterPSA::emitInitializer(CodeBuilder* builder) {
     builder->blockEnd(true);
 }
 
-void EBPFRegisterPSA::emitInstance(CodeBuilder* builder) {
+void EBPFRegisterPSA::emitInstance(CodeBuilder *builder) {
     builder->target->emitTableDecl(builder, instanceName,
                                    shouldUseArrayMap() ? TableArray : TableHash, this->keyTypeName,
                                    this->valueTypeName, size);
 }
 
-void EBPFRegisterPSA::emitRegisterRead(CodeBuilder* builder, const P4::ExternMethod* method,
-                                       ControlBodyTranslatorPSA* translator,
-                                       const IR::Expression* leftExpression) {
+void EBPFRegisterPSA::emitRegisterRead(CodeBuilder *builder, const P4::ExternMethod *method,
+                                       ControlBodyTranslatorPSA *translator,
+                                       const IR::Expression *leftExpression) {
     auto indexArg = method->expr->arguments->at(0)->expression->to<IR::PathExpression>();
     cstring indexParamName = translator->getParamName(indexArg);
     BUG_CHECK(!indexParamName.isNullOrEmpty(), "Index param cannot be empty");
@@ -203,8 +203,8 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder* builder, const P4::ExternMet
     builder->blockEnd(true);
 }
 
-void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder* builder, const P4::ExternMethod* method,
-                                        ControlBodyTranslatorPSA* translator) {
+void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder *builder, const P4::ExternMethod *method,
+                                        ControlBodyTranslatorPSA *translator) {
     auto indexArgExpr = method->expr->arguments->at(0)->expression->to<IR::PathExpression>();
     cstring indexParamName = translator->getParamName(indexArgExpr);
     auto valueArgExpr = method->expr->arguments->at(1)->expression->to<IR::PathExpression>();

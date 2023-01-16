@@ -47,7 +47,7 @@ std::string Utils::getTimeStamp() {
     // convert to std::time_t in order to convert to std::tm (broken time)
     auto timer = std::chrono::system_clock::to_time_t(now);
     // convert to broken time
-    std::tm* bt = std::localtime(&timer);
+    std::tm *bt = std::localtime(&timer);
     CHECK_NULL(bt);
     std::stringstream oss;
     oss << std::put_time(bt, "%Y-%m-%d-%H:%M:%S");  // HH:MM:SS
@@ -81,14 +81,14 @@ big_int Utils::getRandBigInt(big_int max) {
     return dist(rng);
 }
 
-const IR::Constant* Utils::getRandConstantForWidth(int bitWidth) {
+const IR::Constant *Utils::getRandConstantForWidth(int bitWidth) {
     auto maxVal = IR::getMaxBvVal(bitWidth);
     auto randInt = Utils::getRandBigInt(maxVal);
-    const auto* constType = IR::getBitType(bitWidth);
+    const auto *constType = IR::getBitType(bitWidth);
     return IR::getConstant(constType, randInt);
 }
 
-const IR::Constant* Utils::getRandConstantForType(const IR::Type_Bits* type) {
+const IR::Constant *Utils::getRandConstantForType(const IR::Type_Bits *type) {
     auto maxVal = IR::getMaxBvVal(type->width_bits());
     auto randInt = Utils::getRandBigInt(maxVal);
     return IR::getConstant(type, randInt);
@@ -100,7 +100,7 @@ const IR::Constant* Utils::getRandConstantForType(const IR::Type_Bits* type) {
 
 const cstring Utils::Valid = "*valid";
 
-const StateVariable& Utils::getZombieTableVar(const IR::Type* type, const IR::P4Table* table,
+const StateVariable &Utils::getZombieTableVar(const IR::Type *type, const IR::P4Table *table,
                                               cstring name, boost::optional<int> idx1_opt,
                                               boost::optional<int> idx2_opt) {
     // Mash the table name, the given name, and the optional indices together.
@@ -118,39 +118,39 @@ const StateVariable& Utils::getZombieTableVar(const IR::Type* type, const IR::P4
     return Zombie::getVar(type, 0, out.str());
 }
 
-const StateVariable& Utils::getZombieVar(const IR::Type* type, int incarnation, cstring name) {
+const StateVariable &Utils::getZombieVar(const IR::Type *type, int incarnation, cstring name) {
     return Zombie::getVar(type, incarnation, name);
 }
 
-const StateVariable& Utils::getZombieConst(const IR::Type* type, int incarnation, cstring name) {
+const StateVariable &Utils::getZombieConst(const IR::Type *type, int incarnation, cstring name) {
     return Zombie::getConst(type, incarnation, name);
 }
 
-StateVariable Utils::getHeaderValidity(const IR::Expression* headerRef) {
+StateVariable Utils::getHeaderValidity(const IR::Expression *headerRef) {
     return new IR::Member(IR::Type::Boolean::get(), headerRef, Valid);
 }
 
-StateVariable Utils::addZombiePostfix(const IR::Expression* paramPath,
-                                      const IR::Type_Base* baseType) {
+StateVariable Utils::addZombiePostfix(const IR::Expression *paramPath,
+                                      const IR::Type_Base *baseType) {
     return new IR::Member(baseType, paramPath, "*");
 }
 
-const IR::TaintExpression* Utils::getTaintExpression(const IR::Type* type) {
+const IR::TaintExpression *Utils::getTaintExpression(const IR::Type *type) {
     // Do not cache varbits.
     if (type->is<IR::Extracted_Varbits>()) {
         return new IR::TaintExpression(type);
     }
     // Only cache bits with width lower than 16 bit to restrict the size of the cache.
-    const auto* tb = type->to<IR::Type_Bits>();
+    const auto *tb = type->to<IR::Type_Bits>();
     if (type->width_bits() > 16 || tb == nullptr) {
         return new IR::TaintExpression(type);
     }
     // Taint expressions are interned. Keys in the intern map is the signedness and width of the
     // type.
     using key_t = std::tuple<int, bool>;
-    static std::map<key_t, const IR::TaintExpression*> taints;
+    static std::map<key_t, const IR::TaintExpression *> taints;
 
-    auto*& result = taints[{tb->width_bits(), tb->isSigned}];
+    auto *&result = taints[{tb->width_bits(), tb->isSigned}];
     if (result == nullptr) {
         result = new IR::TaintExpression(type);
     }
@@ -158,18 +158,18 @@ const IR::TaintExpression* Utils::getTaintExpression(const IR::Type* type) {
     return result;
 }
 
-const StateVariable& Utils::getConcolicMember(const IR::ConcolicVariable* var, int concolicId) {
-    const auto* const concolicMember = var->concolicMember;
-    auto* clonedMember = concolicMember->clone();
+const StateVariable &Utils::getConcolicMember(const IR::ConcolicVariable *var, int concolicId) {
+    const auto *const concolicMember = var->concolicMember;
+    auto *clonedMember = concolicMember->clone();
     clonedMember->member = std::to_string(concolicId).c_str();
     return *(new StateVariable(clonedMember));
 }
 
-const IR::MethodCallExpression* Utils::generateInternalMethodCall(
-    cstring methodName, const std::vector<const IR::Expression*>& argVector,
-    const IR::Type* returnType) {
-    auto* args = new IR::Vector<IR::Argument>();
-    for (const auto* expr : argVector) {
+const IR::MethodCallExpression *Utils::generateInternalMethodCall(
+    cstring methodName, const std::vector<const IR::Expression *> &argVector,
+    const IR::Type *returnType) {
+    auto *args = new IR::Vector<IR::Argument>();
+    for (const auto *expr : argVector) {
         args->push_back(new IR::Argument(expr));
     }
     return new IR::MethodCallExpression(

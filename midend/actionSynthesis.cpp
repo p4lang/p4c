@@ -21,7 +21,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statement) {
+const IR::Node *DoMoveActionsToTables::postorder(IR::MethodCallStatement *statement) {
     auto mi = MethodInstance::resolve(statement, refMap, typeMap);
     if (!mi->is<ActionCall>()) return statement;
     auto ac = mi->to<ActionCall>();
@@ -82,20 +82,20 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     return stat;
 }
 
-const IR::Node* DoMoveActionsToTables::postorder(IR::P4Control* control) {
+const IR::Node *DoMoveActionsToTables::postorder(IR::P4Control *control) {
     for (auto t : tables) control->controlLocals.push_back(t);
     return control;
 }
 
 /////////////////////////////////////////////////////////////////////
 
-bool DoSynthesizeActions::mustMove(const IR::MethodCallStatement* statement) {
+bool DoSynthesizeActions::mustMove(const IR::MethodCallStatement *statement) {
     auto mi = MethodInstance::resolve(statement, refMap, typeMap);
     if (mi->is<ActionCall>() || mi->is<ApplyMethod>()) return false;
     return true;
 }
 
-bool DoSynthesizeActions::mustMove(const IR::AssignmentStatement* assign) {
+bool DoSynthesizeActions::mustMove(const IR::AssignmentStatement *assign) {
     if (auto mc = assign->right->to<IR::MethodCallExpression>()) {
         auto mi = MethodInstance::resolve(mc, refMap, typeMap);
         if (!mi->is<ExternMethod>()) return true;
@@ -103,28 +103,28 @@ bool DoSynthesizeActions::mustMove(const IR::AssignmentStatement* assign) {
     return true;
 }
 
-const IR::Node* DoSynthesizeActions::preorder(IR::P4Control* control) {
+const IR::Node *DoSynthesizeActions::preorder(IR::P4Control *control) {
     actions.clear();
     changes = false;
     if (policy != nullptr && !policy->convert(getContext(), control)) prune();  // skip this one
     return control;
 }
 
-const IR::Node* DoSynthesizeActions::postorder(IR::P4Control* control) {
+const IR::Node *DoSynthesizeActions::postorder(IR::P4Control *control) {
     for (auto a : actions) control->controlLocals.push_back(a);
     return control;
 }
 
-const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
+const IR::Node *DoSynthesizeActions::preorder(IR::BlockStatement *statement) {
     // Find a chain of statements to convert
     auto actbody = new IR::BlockStatement;                       // build here new action
     auto left = new IR::BlockStatement(statement->annotations);  // leftover statements
 
     for (auto c : statement->components) {
         bool moveToAction = false;
-        if (auto* as = c->to<IR::AssignmentStatement>()) {
+        if (auto *as = c->to<IR::AssignmentStatement>()) {
             moveToAction = mustMove(as);
-        } else if (auto* mc = c->to<IR::MethodCallStatement>()) {
+        } else if (auto *mc = c->to<IR::MethodCallStatement>()) {
             moveToAction = mustMove(mc);
         } else if (c->is<IR::ExitStatement>()) {
             moveToAction = true;
@@ -166,12 +166,12 @@ const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
     return statement;
 }
 
-static cstring createName(const Util::SourceInfo& si) {
+static cstring createName(const Util::SourceInfo &si) {
     if (!si.isValid()) return "act";
     auto pos = si.toPosition();
     if (pos.fileName.isNullOrEmpty() || pos.sourceLine == 0) return "act";
     std::string name;
-    const char* p = pos.fileName.findlast('/');
+    const char *p = pos.fileName.findlast('/');
     p = p ? p + 1 : pos.fileName.c_str();
     while (*p && !isalpha(*p)) ++p;
     while (*p && *p != '.') {
@@ -183,10 +183,10 @@ static cstring createName(const Util::SourceInfo& si) {
     return name + std::to_string(pos.sourceLine);
 }
 
-const IR::Statement* DoSynthesizeActions::createAction(const IR::Statement* toAdd) {
+const IR::Statement *DoSynthesizeActions::createAction(const IR::Statement *toAdd) {
     changes = true;
     auto name = refMap->newName(createName(toAdd->srcInfo));
-    const IR::BlockStatement* body;
+    const IR::BlockStatement *body;
     if (toAdd->is<IR::BlockStatement>()) {
         body = toAdd->to<IR::BlockStatement>();
     } else {
@@ -204,17 +204,17 @@ const IR::Statement* DoSynthesizeActions::createAction(const IR::Statement* toAd
     return result;
 }
 
-const IR::Node* DoSynthesizeActions::preorder(IR::AssignmentStatement* statement) {
+const IR::Node *DoSynthesizeActions::preorder(IR::AssignmentStatement *statement) {
     if (mustMove(statement)) return createAction(statement);
     return statement;
 }
 
-const IR::Node* DoSynthesizeActions::preorder(IR::MethodCallStatement* statement) {
+const IR::Node *DoSynthesizeActions::preorder(IR::MethodCallStatement *statement) {
     if (mustMove(statement)) return createAction(statement);
     return statement;
 }
 
-const IR::Node* DoSynthesizeActions::preorder(IR::ExitStatement* statement) {
+const IR::Node *DoSynthesizeActions::preorder(IR::ExitStatement *statement) {
     return createAction(statement);
 }
 

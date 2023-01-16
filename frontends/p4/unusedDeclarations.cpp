@@ -21,19 +21,19 @@ limitations under the License.
 
 namespace P4 {
 
-Visitor::profile_t RemoveUnusedDeclarations::init_apply(const IR::Node* node) {
+Visitor::profile_t RemoveUnusedDeclarations::init_apply(const IR::Node *node) {
     LOG4("Reference map " << refMap);
     return Transform::init_apply(node);
 }
 
-bool RemoveUnusedDeclarations::giveWarning(const IR::Node* node) {
+bool RemoveUnusedDeclarations::giveWarning(const IR::Node *node) {
     if (warned == nullptr) return false;
     auto p = warned->emplace(node);
     LOG3("Warn about " << dbp(node) << " " << p.second);
     return p.second;
 }
 
-const IR::Node* RemoveUnusedDeclarations::preorder(IR::Type_Enum* type) {
+const IR::Node *RemoveUnusedDeclarations::preorder(IR::Type_Enum *type) {
     prune();  // never remove individual enum members
     if (!refMap->isUsed(getOriginal<IR::Type_Enum>())) {
         LOG3("Removing " << type);
@@ -42,7 +42,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Type_Enum* type) {
     return type;
 }
 
-const IR::Node* RemoveUnusedDeclarations::preorder(IR::Type_SerEnum* type) {
+const IR::Node *RemoveUnusedDeclarations::preorder(IR::Type_SerEnum *type) {
     prune();  // never remove individual enum members
     if (!refMap->isUsed(getOriginal<IR::Type_SerEnum>())) {
         LOG3("Removing " << type);
@@ -51,7 +51,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Type_SerEnum* type) {
     return type;
 }
 
-const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Control* cont) {
+const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Control *cont) {
     auto orig = getOriginal<IR::P4Control>();
     if (!refMap->isUsed(orig)) {
         LOG3("Removing " << cont << dbp(orig));
@@ -65,7 +65,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Control* cont) {
     return cont;
 }
 
-const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Parser* parser) {
+const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Parser *parser) {
     auto orig = getOriginal<IR::P4Parser>();
     if (!refMap->isUsed(orig)) {
         LOG3("Removing " << parser << dbp(orig));
@@ -79,7 +79,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Parser* parser) {
     return parser;
 }
 
-const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Table* table) {
+const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Table *table) {
     if (!refMap->isUsed(getOriginal<IR::IDeclaration>())) {
         if (giveWarning(getOriginal()))
             warn(ErrorType::WARN_UNUSED, "Table %1% is not used; removing", table);
@@ -90,14 +90,14 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::P4Table* table) {
     return table;
 }
 
-const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Variable* decl) {
+const IR::Node *RemoveUnusedDeclarations::preorder(IR::Declaration_Variable *decl) {
     prune();
     if (decl->initializer == nullptr) return process(decl);
     if (!SideEffects::check(decl->initializer, this, nullptr, nullptr)) return process(decl);
     return decl;
 }
 
-const IR::Node* RemoveUnusedDeclarations::process(const IR::IDeclaration* decl) {
+const IR::Node *RemoveUnusedDeclarations::process(const IR::IDeclaration *decl) {
     LOG3("Visiting " << decl);
     if (decl->getName().name == IR::ParserState::verify && getParent<IR::P4Program>())
         return decl->getNode();
@@ -110,7 +110,7 @@ const IR::Node* RemoveUnusedDeclarations::process(const IR::IDeclaration* decl) 
     return nullptr;
 }
 
-const IR::Node* RemoveUnusedDeclarations::preorder(IR::Parameter* param) {
+const IR::Node *RemoveUnusedDeclarations::preorder(IR::Parameter *param) {
     // Skip all things that just declare "prototypes"
     if (findContext<IR::Type_Parser>() && !findContext<IR::P4Parser>()) return param;
     if (findContext<IR::Type_Control>() && !findContext<IR::P4Control>()) return param;
@@ -119,13 +119,13 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Parameter* param) {
     return warnIfUnused(param);
 }
 
-const IR::Node* RemoveUnusedDeclarations::warnIfUnused(const IR::Node* node) {
+const IR::Node *RemoveUnusedDeclarations::warnIfUnused(const IR::Node *node) {
     if (!refMap->isUsed(getOriginal<IR::IDeclaration>()))
         if (giveWarning(getOriginal())) warn(ErrorType::WARN_UNUSED, "'%1%' is unused", node);
     return node;
 }
 
-const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Instance* decl) {
+const IR::Node *RemoveUnusedDeclarations::preorder(IR::Declaration_Instance *decl) {
     // Don't delete instances; they may have consequences on the control-plane API
     if (decl->getName().name == IR::P4Program::main && getParent<IR::P4Program>()) return decl;
     if (!refMap->isUsed(getOriginal<IR::Declaration_Instance>())) {
@@ -144,7 +144,7 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Instance* dec
     return decl;
 }
 
-const IR::Node* RemoveUnusedDeclarations::preorder(IR::ParserState* state) {
+const IR::Node *RemoveUnusedDeclarations::preorder(IR::ParserState *state) {
     if (state->name == IR::ParserState::accept || state->name == IR::ParserState::reject ||
         state->name == IR::ParserState::start)
         return state;
@@ -158,6 +158,6 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::ParserState* state) {
 // extern functions declared in files should be kept,
 // even if it is not referenced in the user program. Compiler
 // backend may synthesize code to use the extern functions.
-const IR::Node* RemoveUnusedDeclarations::preorder(IR::Method* method) { return method; }
+const IR::Node *RemoveUnusedDeclarations::preorder(IR::Method *method) { return method; }
 
 }  // namespace P4

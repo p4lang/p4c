@@ -24,27 +24,27 @@ limitations under the License.
 /* Should this be a method on IR::Expression?  Maybe after the refMap/typeMap go away */
 
 class hasSideEffects : public Inspector {
-    P4::ReferenceMap* refMap = nullptr;
-    P4::TypeMap* typeMap = nullptr;
+    P4::ReferenceMap *refMap = nullptr;
+    P4::TypeMap *typeMap = nullptr;
 
     bool result = false;
-    bool preorder(const IR::AssignmentStatement*) override {
+    bool preorder(const IR::AssignmentStatement *) override {
         result = true;
         return false;
     }
-    bool preorder(const IR::MethodCallExpression* mc) override {
+    bool preorder(const IR::MethodCallExpression *mc) override {
         if (result) {
             return false;
         }
         /* assume has side effects if we can't look it up */
         if (refMap && typeMap) {
-            auto* mi = P4::MethodInstance::resolve(mc, refMap, typeMap, true);
-            if (auto* bm = mi->to<P4::BuiltInMethod>()) {
+            auto *mi = P4::MethodInstance::resolve(mc, refMap, typeMap, true);
+            if (auto *bm = mi->to<P4::BuiltInMethod>()) {
                 if (bm->name == "isValid") {
                     return true;
                 }
             }
-            if (auto* em = mi->to<P4::ExternMethod>()) {
+            if (auto *em = mi->to<P4::ExternMethod>()) {
                 if (em->method->getAnnotation(IR::Annotation::noSideEffectsAnnotation)) return true;
             }
         }
@@ -52,20 +52,20 @@ class hasSideEffects : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::Primitive*) override {
+    bool preorder(const IR::Primitive *) override {
         result = true;
         return false;
     }
-    bool preorder(const IR::Expression*) override { return !result; }
+    bool preorder(const IR::Expression *) override { return !result; }
 
  public:
-    explicit hasSideEffects(const IR::Expression* e) { e->apply(*this); }
-    hasSideEffects(P4::ReferenceMap* rm, P4::TypeMap* tm) : refMap(rm), typeMap(tm) {}
-    hasSideEffects(P4::ReferenceMap* rm, P4::TypeMap* tm, const IR::Expression* e)
+    explicit hasSideEffects(const IR::Expression *e) { e->apply(*this); }
+    hasSideEffects(P4::ReferenceMap *rm, P4::TypeMap *tm) : refMap(rm), typeMap(tm) {}
+    hasSideEffects(P4::ReferenceMap *rm, P4::TypeMap *tm, const IR::Expression *e)
         : refMap(rm), typeMap(tm) {
         e->apply(*this);
     }
-    bool operator()(const IR::Expression* e) {
+    bool operator()(const IR::Expression *e) {
         result = false;
         e->apply(*this);
         return result;

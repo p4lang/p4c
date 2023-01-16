@@ -34,8 +34,8 @@ class ordered_map {
     typedef std::pair<const K, V> value_type;
     typedef COMP key_compare;
     typedef ALLOC allocator_type;
-    typedef value_type& reference;
-    typedef const value_type& const_reference;
+    typedef value_type &reference;
+    typedef const value_type &const_reference;
 
  private:
     typedef std::list<value_type, ALLOC> list_type;
@@ -56,19 +56,19 @@ class ordered_map {
         explicit value_compare(COMP c) : comp(c) {}
 
      public:
-        bool operator()(const value_type& a, const value_type& b) const {
+        bool operator()(const value_type &a, const value_type &b) const {
             return comp(a.first, b.first);
         }
     };
 
  private:
-    struct mapcmp : std::binary_function<const K*, const K*, bool> {
+    struct mapcmp : std::binary_function<const K *, const K *, bool> {
         COMP comp;
-        bool operator()(const K* a, const K* b) const { return comp(*a, *b); }
+        bool operator()(const K *a, const K *b) const { return comp(*a, *b); }
     };
     using map_alloc =
-        typename ALLOC::template rebind<std::pair<const K* const, list_iterator>>::other;
-    using map_type = std::map<const K*, list_iterator, mapcmp, map_alloc>;
+        typename ALLOC::template rebind<std::pair<const K *const, list_iterator>>::other;
+    using map_type = std::map<const K *, list_iterator, mapcmp, map_alloc>;
     map_type data_map;
     void init_data_map() {
         data_map.clear();
@@ -88,22 +88,22 @@ class ordered_map {
 
  public:
     ordered_map() {}
-    ordered_map(const ordered_map& a) : data(a.data) { init_data_map(); }
+    ordered_map(const ordered_map &a) : data(a.data) { init_data_map(); }
     template <typename InputIt>
     ordered_map(InputIt first, InputIt last) : data(first, last) {
         init_data_map();
     }
-    ordered_map(ordered_map&& a) = default; /* move is ok? */
-    ordered_map& operator=(const ordered_map& a) {
+    ordered_map(ordered_map &&a) = default; /* move is ok? */
+    ordered_map &operator=(const ordered_map &a) {
         /* std::list assignment broken by spec if elements are const... */
         if (this != &a) {
             data.clear();
-            for (auto& el : a.data) data.push_back(el);
+            for (auto &el : a.data) data.push_back(el);
             init_data_map();
         }
         return *this;
     }
-    ordered_map& operator=(ordered_map&& a) = default; /* move is ok? */
+    ordered_map &operator=(ordered_map &&a) = default; /* move is ok? */
     ordered_map(std::initializer_list<value_type> il) : data(il) { init_data_map(); }
     // FIXME add allocator and comparator ctors...
 
@@ -123,36 +123,36 @@ class ordered_map {
     bool empty() const noexcept { return data.empty(); }
     size_type size() const noexcept { return data_map.size(); }
     size_type max_size() const noexcept { return data_map.max_size(); }
-    bool operator==(const ordered_map& a) const { return data == a.data; }
-    bool operator!=(const ordered_map& a) const { return data != a.data; }
+    bool operator==(const ordered_map &a) const { return data == a.data; }
+    bool operator!=(const ordered_map &a) const { return data != a.data; }
     void clear() {
         data.clear();
         data_map.clear();
     }
 
-    iterator find(const key_type& a) { return tr_iter(data_map.find(&a)); }
-    const_iterator find(const key_type& a) const { return tr_iter(data_map.find(&a)); }
-    size_type count(const key_type& a) const { return data_map.count(&a); }
-    iterator lower_bound(const key_type& a) { return tr_iter(data_map.lower_bound(&a)); }
-    const_iterator lower_bound(const key_type& a) const {
+    iterator find(const key_type &a) { return tr_iter(data_map.find(&a)); }
+    const_iterator find(const key_type &a) const { return tr_iter(data_map.find(&a)); }
+    size_type count(const key_type &a) const { return data_map.count(&a); }
+    iterator lower_bound(const key_type &a) { return tr_iter(data_map.lower_bound(&a)); }
+    const_iterator lower_bound(const key_type &a) const {
         return tr_iter(data_map.lower_bound(&a));
     }
-    iterator upper_bound(const key_type& a) { return tr_iter(data_map.upper_bound(&a)); }
-    const_iterator upper_bound(const key_type& a) const {
+    iterator upper_bound(const key_type &a) { return tr_iter(data_map.upper_bound(&a)); }
+    const_iterator upper_bound(const key_type &a) const {
         return tr_iter(data_map.upper_bound(&a));
     }
-    iterator upper_bound_pred(const key_type& a) {
+    iterator upper_bound_pred(const key_type &a) {
         auto ub = data_map.upper_bound(&a);
         if (ub == data_map.begin()) return end();
         return tr_iter(--ub);
     }
-    const_iterator upper_bound_pred(const key_type& a) const {
+    const_iterator upper_bound_pred(const key_type &a) const {
         auto ub = data_map.upper_bound(&a);
         if (ub == data_map.begin()) return end();
         return tr_iter(--ub);
     }
 
-    V& operator[](const K& x) {
+    V &operator[](const K &x) {
         auto it = find(x);
         if (it == data.end()) {
             it = data.emplace(data.end(), x, V());
@@ -160,7 +160,7 @@ class ordered_map {
         }
         return it->second;
     }
-    V& operator[](K&& x) {
+    V &operator[](K &&x) {
         auto it = find(x);
         if (it == data.end()) {
             it = data.emplace(data.end(), std::move(x), V());
@@ -168,11 +168,11 @@ class ordered_map {
         }
         return it->second;
     }
-    V& at(const K& x) { return data_map.at(&x)->second; }
-    const V& at(const K& x) const { return data_map.at(&x)->second; }
+    V &at(const K &x) { return data_map.at(&x)->second; }
+    const V &at(const K &x) const { return data_map.at(&x)->second; }
 
     template <typename KK, typename... VV>
-    std::pair<iterator, bool> emplace(KK&& k, VV&&... v) {
+    std::pair<iterator, bool> emplace(KK &&k, VV &&...v) {
         auto it = find(k);
         if (it == data.end()) {
             it = data.emplace(data.end(), std::piecewise_construct_t(), std::forward_as_tuple(k),
@@ -183,7 +183,7 @@ class ordered_map {
         return std::make_pair(it, false);
     }
     template <typename KK, typename... VV>
-    std::pair<iterator, bool> emplace_hint(iterator pos, KK&& k, VV&&... v) {
+    std::pair<iterator, bool> emplace_hint(iterator pos, KK &&k, VV &&...v) {
         /* should be const_iterator pos, but glibc++ std::list is broken */
         auto it = find(k);
         if (it == data.end()) {
@@ -195,7 +195,7 @@ class ordered_map {
         return std::make_pair(it, false);
     }
 
-    std::pair<iterator, bool> insert(const value_type& v) {
+    std::pair<iterator, bool> insert(const value_type &v) {
         auto it = find(v.first);
         if (it == data.end()) {
             it = data.insert(data.end(), v);
@@ -207,7 +207,7 @@ class ordered_map {
 
     /* TODO: should not exist, does not make sense for map that preserves
      * insertion order. This function does not preserve it. */
-    std::pair<iterator, bool> insert(iterator pos, const value_type& v) {
+    std::pair<iterator, bool> insert(iterator pos, const value_type &v) {
         /* should be const_iterator pos, but glibc++ std::list is broken */
         auto it = find(v.first);
         if (it == data.end()) {
@@ -239,7 +239,7 @@ class ordered_map {
         data_map.erase(it);
         return data.erase(list_it);
     }
-    size_type erase(const K& k) {
+    size_type erase(const K &k) {
         auto it = find(k);
         if (it != data.end()) {
             data_map.erase(&k);
@@ -263,38 +263,38 @@ class ordered_map {
 namespace GetImpl {
 
 template <class K, class T, class V, class Comp, class Alloc>
-inline V get(const ordered_map<K, V, Comp, Alloc>& m, T key, V def = V()) {
+inline V get(const ordered_map<K, V, Comp, Alloc> &m, T key, V def = V()) {
     auto it = m.find(key);
     if (it != m.end()) return it->second;
     return def;
 }
 
 template <class K, class T, class V, class Comp, class Alloc>
-inline V* getref(ordered_map<K, V, Comp, Alloc>& m, T key) {
+inline V *getref(ordered_map<K, V, Comp, Alloc> &m, T key) {
     auto it = m.find(key);
     if (it != m.end()) return &it->second;
     return 0;
 }
 
 template <class K, class T, class V, class Comp, class Alloc>
-inline const V* getref(const ordered_map<K, V, Comp, Alloc>& m, T key) {
+inline const V *getref(const ordered_map<K, V, Comp, Alloc> &m, T key) {
     auto it = m.find(key);
     if (it != m.end()) return &it->second;
     return 0;
 }
 
 template <class K, class T, class V, class Comp, class Alloc>
-inline V get(const ordered_map<K, V, Comp, Alloc>* m, T key, V def = V()) {
+inline V get(const ordered_map<K, V, Comp, Alloc> *m, T key, V def = V()) {
     return m ? get(*m, key, def) : def;
 }
 
 template <class K, class T, class V, class Comp, class Alloc>
-inline V* getref(ordered_map<K, V, Comp, Alloc>* m, T key) {
+inline V *getref(ordered_map<K, V, Comp, Alloc> *m, T key) {
     return m ? getref(*m, key) : 0;
 }
 
 template <class K, class T, class V, class Comp, class Alloc>
-inline const V* getref(const ordered_map<K, V, Comp, Alloc>* m, T key) {
+inline const V *getref(const ordered_map<K, V, Comp, Alloc> *m, T key) {
     return m ? getref(*m, key) : 0;
 }
 

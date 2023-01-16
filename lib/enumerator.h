@@ -40,14 +40,14 @@ class Enumerator;
 template <typename T>
 class EnumeratorHandle {
  private:
-    Enumerator<T>* enumerator;  // when nullptr it represents end()
-    explicit EnumeratorHandle(Enumerator<T>* enumerator) : enumerator(enumerator) {}
+    Enumerator<T> *enumerator;  // when nullptr it represents end()
+    explicit EnumeratorHandle(Enumerator<T> *enumerator) : enumerator(enumerator) {}
     friend class Enumerator<T>;
 
  public:
     T operator*() const;
-    const EnumeratorHandle<T>& operator++();
-    bool operator!=(const EnumeratorHandle<T>& other) const;
+    const EnumeratorHandle<T> &operator++();
+    bool operator!=(const EnumeratorHandle<T> &other) const;
 };
 
 template <class T>
@@ -94,25 +94,25 @@ class Enumerator {
     }
 
     ////////////////// factories
-    static Enumerator<T>* createEnumerator(const std::vector<T>& data);
-    static Enumerator<T>* createEnumerator(const std::list<T>& data);
-    static Enumerator<T>* emptyEnumerator();  // empty data
+    static Enumerator<T> *createEnumerator(const std::vector<T> &data);
+    static Enumerator<T> *createEnumerator(const std::list<T> &data);
+    static Enumerator<T> *emptyEnumerator();  // empty data
     template <typename Iter>
-    static Enumerator<typename Iter::value_type>* createEnumerator(Iter begin, Iter end);
+    static Enumerator<typename Iter::value_type> *createEnumerator(Iter begin, Iter end);
     // concatenate all these collections into a single one
-    static Enumerator<T>* concatAll(Enumerator<Enumerator<T>*>* inputs);
+    static Enumerator<T> *concatAll(Enumerator<Enumerator<T> *> *inputs);
 
-    std::vector<T>* toVector();
+    std::vector<T> *toVector();
     /* Return an enumerator returning all elements that pass the filter */
-    Enumerator<T>* where(std::function<bool(const T&)> filter);
+    Enumerator<T> *where(std::function<bool(const T &)> filter);
     /* Apply specified function to all elements of this enumerator */
     template <typename S>
-    Enumerator<S>* map(std::function<S(const T&)> map);
+    Enumerator<S> *map(std::function<S(const T &)> map);
     // cast to an enumerator of S objects
     template <typename S>
-    Enumerator<S>* as();
+    Enumerator<S> *as();
     // append all elements of other after all elements of this
-    Enumerator<T>* concat(Enumerator<T>* other);
+    Enumerator<T> *concat(Enumerator<T> *other);
     /* enumerate all elements and return the count */
     uint64_t count();
     // True if the enumerator has at least one element
@@ -210,12 +210,12 @@ class EmptyEnumerator : public Enumerator<T> {
 template <typename T>
 class FilterEnumerator final : public Enumerator<T> {
  protected:
-    Enumerator<T>* input;
-    std::function<bool(const T&)> filter;
+    Enumerator<T> *input;
+    std::function<bool(const T &)> filter;
     T current;  // must prevent repeated evaluation
 
  public:
-    FilterEnumerator(Enumerator<T>* input, std::function<bool(const T&)> filter)
+    FilterEnumerator(Enumerator<T> *input, std::function<bool(const T &)> filter)
         : input(input), filter(filter) {}
 
  private:
@@ -270,10 +270,10 @@ class FilterEnumerator final : public Enumerator<T> {
 template <typename T, typename S>
 class AsEnumerator final : public Enumerator<S> {
  protected:
-    Enumerator<T>* input;
+    Enumerator<T> *input;
 
  public:
-    explicit AsEnumerator(Enumerator<T>* input) : input(input) {}
+    explicit AsEnumerator(Enumerator<T> *input) : input(input) {}
 
     cstring toString() const {
         return cstring("AsEnumerator(") + this->input->toString() + "):" + this->stateName();
@@ -305,12 +305,12 @@ class AsEnumerator final : public Enumerator<S> {
 template <typename T, typename S>
 class MapEnumerator final : public Enumerator<S> {
  protected:
-    Enumerator<T>* input;
-    std::function<S(const T&)> map;
+    Enumerator<T> *input;
+    std::function<S(const T &)> map;
     S current;
 
  public:
-    MapEnumerator(Enumerator<T>* input, std::function<S(const T&)> map) : input(input), map(map) {}
+    MapEnumerator(Enumerator<T> *input, std::function<S(const T &)> map) : input(input), map(map) {}
 
     void reset() {
         this->input->reset();
@@ -361,11 +361,11 @@ class MapEnumerator final : public Enumerator<S> {
 template <typename T>
 class ConcatEnumerator final : public Enumerator<T> {
  protected:
-    Enumerator<Enumerator<T>*>* inputs;
+    Enumerator<Enumerator<T> *> *inputs;
     T currentResult;
 
  public:
-    explicit ConcatEnumerator(Enumerator<Enumerator<T>*>* inputs) : inputs(inputs) {}
+    explicit ConcatEnumerator(Enumerator<Enumerator<T> *> *inputs) : inputs(inputs) {}
 
  private:
     cstring toString() const { return "ConcatEnumerator:" + this->stateName(); }
@@ -379,7 +379,7 @@ class ConcatEnumerator final : public Enumerator<T> {
         this->state = EnumeratorState::Valid;
         bool more;
         do {
-            Enumerator<T>* currentInput = this->inputs->getCurrent();
+            Enumerator<T> *currentInput = this->inputs->getCurrent();
             if (currentInput == nullptr) throw std::logic_error("Null iterator in concatenation");
             bool moreCurrent = currentInput->moveNext();
             if (moreCurrent) {
@@ -441,18 +441,18 @@ void Enumerator<T>::reset() {
 
 template <typename T>
 template <typename S>
-Enumerator<S>* Enumerator<T>::map(std::function<S(const T&)> map) {
+Enumerator<S> *Enumerator<T>::map(std::function<S(const T &)> map) {
     return new MapEnumerator<T, S>(this, map);
 }
 
 template <typename T>
 template <typename S>
-Enumerator<S>* Enumerator<T>::as() {
+Enumerator<S> *Enumerator<T>::as() {
     return new AsEnumerator<T, S>(this);
 }
 
 template <typename T>
-Enumerator<T>* Enumerator<T>::where(std::function<bool(const T&)> filter) {
+Enumerator<T> *Enumerator<T>::where(std::function<bool(const T &)> filter) {
     return new FilterEnumerator<T>(this, filter);
 }
 
@@ -472,46 +472,46 @@ template <typename T>
 std::vector<T> Enumerator<T>::emptyVector;
 
 template <typename T>
-Enumerator<T>* Enumerator<T>::createEnumerator(const std::vector<T>& data) {
+Enumerator<T> *Enumerator<T>::createEnumerator(const std::vector<T> &data) {
     return new GenericEnumerator<typename std::vector<T>::const_iterator>(data.begin(), data.end(),
                                                                           "vector");
 }
 
 template <typename T>
-Enumerator<T>* Enumerator<T>::emptyEnumerator() {
+Enumerator<T> *Enumerator<T>::emptyEnumerator() {
     return Enumerator<T>::createEnumerator(Enumerator<T>::emptyVector);
 }
 
 template <typename T>
-Enumerator<T>* Enumerator<T>::createEnumerator(const std::list<T>& data) {
+Enumerator<T> *Enumerator<T>::createEnumerator(const std::list<T> &data) {
     return new GenericEnumerator<typename std::list<T>::const_iterator>(data.begin(), data.end(),
                                                                         "list");
 }
 
 template <typename T>
 template <typename Iter>
-Enumerator<typename Iter::value_type>* Enumerator<T>::createEnumerator(Iter begin, Iter end) {
+Enumerator<typename Iter::value_type> *Enumerator<T>::createEnumerator(Iter begin, Iter end) {
     return new GenericEnumerator<Iter>(begin, end, "iterator");
 }
 
 template <typename T>
-std::vector<T>* Enumerator<T>::toVector() {
+std::vector<T> *Enumerator<T>::toVector() {
     auto result = new std::vector<T>();
     while (moveNext()) result->push_back(getCurrent());
     return result;
 }
 
 template <typename T>
-Enumerator<T>* Enumerator<T>::concatAll(Enumerator<Enumerator<T>*>* inputs) {
+Enumerator<T> *Enumerator<T>::concatAll(Enumerator<Enumerator<T> *> *inputs) {
     return new ConcatEnumerator<T>(inputs);
 }
 
 template <typename T>
-Enumerator<T>* Enumerator<T>::concat(Enumerator<T>* other) {
-    std::vector<Enumerator<T>*>* toConcat = new std::vector<Enumerator<T>*>();
+Enumerator<T> *Enumerator<T>::concat(Enumerator<T> *other) {
+    std::vector<Enumerator<T> *> *toConcat = new std::vector<Enumerator<T> *>();
     toConcat->push_back(this);
     toConcat->push_back(other);
-    Enumerator<Enumerator<T>*>* ce = Enumerator<Enumerator<T>*>::createEnumerator(*toConcat);
+    Enumerator<Enumerator<T> *> *ce = Enumerator<Enumerator<T> *>::createEnumerator(*toConcat);
     return Enumerator<T>::concatAll(ce);
 }
 
@@ -548,13 +548,13 @@ T EnumeratorHandle<T>::operator*() const {
 }
 
 template <typename T>
-const EnumeratorHandle<T>& EnumeratorHandle<T>::operator++() {
+const EnumeratorHandle<T> &EnumeratorHandle<T>::operator++() {
     enumerator->moveNext();
     return *this;
 }
 
 template <typename T>
-bool EnumeratorHandle<T>::operator!=(const EnumeratorHandle<T>& other) const {
+bool EnumeratorHandle<T>::operator!=(const EnumeratorHandle<T> &other) const {
     if (this->enumerator == other.enumerator) return true;
     if (other.enumerator != nullptr) throw std::logic_error("Comparison with different iterator");
     return this->enumerator->state == EnumeratorState::Valid;

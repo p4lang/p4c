@@ -22,7 +22,7 @@ limitations under the License.
 
 /* This is the P4 v1.0/v1.1 typechecker/type inference algorithm */
 class TypeCheck : public PassManager {
-    std::map<const IR::Node*, const IR::Type*> actionArgUseTypes;
+    std::map<const IR::Node *, const IR::Type *> actionArgUseTypes;
     int iterCounter = 0;
     class AssignInitialTypes;
     class InferExpressionsBottomUp;
@@ -34,7 +34,7 @@ class TypeCheck : public PassManager {
 
  public:
     TypeCheck();
-    const IR::Node* apply_visitor(const IR::Node*, const char*) override;
+    const IR::Node *apply_visitor(const IR::Node *, const char *) override;
 };
 
 #endif /* _FRONTENDS_P4_14_TYPECHECK_H_ */

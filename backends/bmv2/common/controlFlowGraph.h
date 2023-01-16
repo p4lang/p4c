@@ -34,27 +34,27 @@ class CFG final : public IHasDbPrint {
 
     class EdgeSet final : public IHasDbPrint {
      public:
-        ordered_set<CFG::Edge*> edges;
+        ordered_set<CFG::Edge *> edges;
 
         EdgeSet() = default;
-        explicit EdgeSet(CFG::Edge* edge) { edges.emplace(edge); }
-        explicit EdgeSet(const EdgeSet* other) { mergeWith(other); }
+        explicit EdgeSet(CFG::Edge *edge) { edges.emplace(edge); }
+        explicit EdgeSet(const EdgeSet *other) { mergeWith(other); }
 
-        void mergeWith(const EdgeSet* other) {
+        void mergeWith(const EdgeSet *other) {
             edges.insert(other->edges.begin(), other->edges.end());
         }
-        void dbprint(std::ostream& out) const;
-        void emplace(CFG::Edge* edge) { edges.emplace(edge); }
+        void dbprint(std::ostream &out) const;
+        void emplace(CFG::Edge *edge) { edges.emplace(edge); }
         size_t size() const { return edges.size(); }
         /// Checks whether the two edge sets represent the same set of
         /// nodes.  Importantly, two TableNodes are equivalent if they
         /// refer to the same table (pointer equality is not enough).
-        bool checkSame(const EdgeSet& other) const;
+        bool checkSame(const EdgeSet &other) const;
         /// Check if this destination appears in this edgeset.
         /// Importantly, a TableNode is a destination if it points to
         /// the same table as an existing destination (pointer equality
         /// is not enough).
-        bool isDestination(const CFG::Node* destination) const;
+        bool isDestination(const CFG::Node *destination) const;
     };
 
     class Node : public IHasDbPrint, public ICastable {
@@ -72,8 +72,8 @@ class CFG final : public IHasDbPrint {
         const cstring name;
         EdgeSet successors;
 
-        void dbprint(std::ostream& out) const;
-        void addPredecessors(const EdgeSet* set);
+        void dbprint(std::ostream &out) const;
+        void addPredecessors(const EdgeSet *set);
         void computeSuccessors();
         cstring toString() const { return name; }
     };
@@ -81,9 +81,9 @@ class CFG final : public IHasDbPrint {
  public:
     class TableNode final : public Node {
      public:
-        const IR::P4Table* table;
-        const IR::Expression* invocation;
-        explicit TableNode(const IR::P4Table* table, const IR::Expression* invocation)
+        const IR::P4Table *table;
+        const IR::Expression *invocation;
+        explicit TableNode(const IR::P4Table *table, const IR::Expression *invocation)
             : Node(table->controlPlaneName()), table(table), invocation(invocation) {
             CHECK_NULL(table);
             CHECK_NULL(invocation);
@@ -92,8 +92,8 @@ class CFG final : public IHasDbPrint {
 
     class IfNode final : public Node {
      public:
-        const IR::IfStatement* statement;
-        explicit IfNode(const IR::IfStatement* statement) : statement(statement) {
+        const IR::IfStatement *statement;
+        explicit IfNode(const IR::IfStatement *statement) : statement(statement) {
             CHECK_NULL(statement);
         }
     };
@@ -113,27 +113,27 @@ class CFG final : public IHasDbPrint {
     class Edge final {
      protected:
         EdgeType type;
-        Edge(Node* node, EdgeType type, cstring label) : type(type), endpoint(node), label(label) {}
+        Edge(Node *node, EdgeType type, cstring label) : type(type), endpoint(node), label(label) {}
 
      public:
         /**
          * The destination node of the edge.  The source node is not known by the edge
          */
-        Node* endpoint;
+        Node *endpoint;
         cstring label;  // only present if type == Label
 
-        explicit Edge(Node* node) : type(EdgeType::Unconditional), endpoint(node) {
+        explicit Edge(Node *node) : type(EdgeType::Unconditional), endpoint(node) {
             CHECK_NULL(node);
         }
-        Edge(Node* node, bool b) : type(b ? EdgeType::True : EdgeType::False), endpoint(node) {
+        Edge(Node *node, bool b) : type(b ? EdgeType::True : EdgeType::False), endpoint(node) {
             CHECK_NULL(node);
         }
-        Edge(Node* node, cstring label) : type(EdgeType::Label), endpoint(node), label(label) {
+        Edge(Node *node, cstring label) : type(EdgeType::Label), endpoint(node), label(label) {
             CHECK_NULL(node);
         }
-        void dbprint(std::ostream& out) const;
-        Edge* clone(Node* node) const { return new Edge(node, type, label); }
-        Node* getNode() { return endpoint; }
+        void dbprint(std::ostream &out) const;
+        Edge *clone(Node *node) const { return new Edge(node, type, label); }
+        Node *getNode() { return endpoint; }
         bool getBool() {
             BUG_CHECK(isBool(), "Edge is not Boolean");
             return type == EdgeType::True;
@@ -143,34 +143,34 @@ class CFG final : public IHasDbPrint {
     };
 
  public:
-    Node* entryPoint;
-    Node* exitPoint;
-    const IR::P4Control* container;
-    ordered_set<Node*> allNodes;
+    Node *entryPoint;
+    Node *exitPoint;
+    const IR::P4Control *container;
+    ordered_set<Node *> allNodes;
 
     CFG() : entryPoint(nullptr), exitPoint(nullptr), container(nullptr) {}
-    Node* makeNode(const IR::P4Table* table, const IR::Expression* invocation) {
+    Node *makeNode(const IR::P4Table *table, const IR::Expression *invocation) {
         auto result = new TableNode(table, invocation);
         allNodes.emplace(result);
         return result;
     }
-    Node* makeNode(const IR::IfStatement* statement) {
+    Node *makeNode(const IR::IfStatement *statement) {
         auto result = new IfNode(statement);
         allNodes.emplace(result);
         return result;
     }
-    Node* makeNode(cstring name) {
+    Node *makeNode(cstring name) {
         auto result = new DummyNode(name);
         allNodes.emplace(result);
         return result;
     }
-    void build(const IR::P4Control* cc, P4::ReferenceMap* refMap, P4::TypeMap* typeMap);
-    void setEntry(Node* entry) {
+    void build(const IR::P4Control *cc, P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
+    void setEntry(Node *entry) {
         BUG_CHECK(entryPoint == nullptr, "Entry already set");
         entryPoint = entry;
     }
-    void dbprint(std::ostream& out, Node* node, std::set<Node*>& done) const;  // helper
-    void dbprint(std::ostream& out) const;
+    void dbprint(std::ostream &out, Node *node, std::set<Node *> &done) const;  // helper
+    void dbprint(std::ostream &out) const;
     void computeSuccessors() {
         for (auto n : allNodes) n->computeSuccessors();
     }
@@ -179,13 +179,13 @@ class CFG final : public IHasDbPrint {
     bool checkImplementable() const;
 
  private:
-    bool dfs(Node* node, std::set<Node*>& visited, std::set<const IR::P4Table*>& stack) const;
+    bool dfs(Node *node, std::set<Node *> &visited, std::set<const IR::P4Table *> &stack) const;
     /// This is a set of table nodes that all represent the same
     /// table.  Check whether they could logically be merged into
     /// a single table node from a control-flow point of view.
     /// This requires their successor edgesets to be "compatible" with
     /// each other.  This is a constraint specific to BMv2.
-    bool checkMergeable(std::set<TableNode*> nodes) const;
+    bool checkMergeable(std::set<TableNode *> nodes) const;
 };
 
 }  // namespace BMV2

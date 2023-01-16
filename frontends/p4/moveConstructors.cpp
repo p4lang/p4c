@@ -20,10 +20,10 @@ namespace P4 {
 
 struct ConstructorMap {
     // Maps a constructor to the temporary used to hold its value.
-    ordered_map<const IR::ConstructorCallExpression*, cstring> tmpName;
+    ordered_map<const IR::ConstructorCallExpression *, cstring> tmpName;
 
     void clear() { tmpName.clear(); }
-    void add(const IR::ConstructorCallExpression* expression, cstring name) {
+    void add(const IR::ConstructorCallExpression *expression, cstring name) {
         CHECK_NULL(expression);
         tmpName[expression] = name;
     }
@@ -35,16 +35,16 @@ namespace {
 class MoveConstructorsImpl : public Transform {
     enum class Region { InParserStateful, InControlStateful, InBody, Outside };
 
-    ReferenceMap* refMap;
+    ReferenceMap *refMap;
     ConstructorMap cmap;
     Region convert;
 
  public:
-    explicit MoveConstructorsImpl(ReferenceMap* refMap) : refMap(refMap), convert(Region::Outside) {
+    explicit MoveConstructorsImpl(ReferenceMap *refMap) : refMap(refMap), convert(Region::Outside) {
         setName("MoveConstructorsImpl");
     }
 
-    const IR::Node* preorder(IR::P4Parser* parser) override {
+    const IR::Node *preorder(IR::P4Parser *parser) override {
         cmap.clear();
         convert = Region::InParserStateful;
         visit(parser->parserLocals, "parserLocals");
@@ -55,7 +55,7 @@ class MoveConstructorsImpl : public Transform {
         return parser;
     }
 
-    const IR::Node* preorder(IR::IndexedVector<IR::Declaration>* declarations) override {
+    const IR::Node *preorder(IR::IndexedVector<IR::Declaration> *declarations) override {
         if (convert != Region::InParserStateful) return declarations;
 
         bool changes = false;
@@ -77,7 +77,7 @@ class MoveConstructorsImpl : public Transform {
         return declarations;
     }
 
-    const IR::Node* postorder(IR::P4Parser* parser) override {
+    const IR::Node *postorder(IR::P4Parser *parser) override {
         if (cmap.empty()) return parser;
         for (auto e : cmap.tmpName) {
             auto cce = e.first;
@@ -88,7 +88,7 @@ class MoveConstructorsImpl : public Transform {
         return parser;
     }
 
-    const IR::Node* preorder(IR::P4Control* control) override {
+    const IR::Node *preorder(IR::P4Control *control) override {
         cmap.clear();
         convert = Region::InControlStateful;
         IR::IndexedVector<IR::Declaration> newDecls;
@@ -115,7 +115,7 @@ class MoveConstructorsImpl : public Transform {
         return control;
     }
 
-    const IR::Node* postorder(IR::P4Control* control) override {
+    const IR::Node *postorder(IR::P4Control *control) override {
         if (cmap.empty()) return control;
         IR::IndexedVector<IR::Declaration> newDecls;
         for (auto e : cmap.tmpName) {
@@ -129,12 +129,12 @@ class MoveConstructorsImpl : public Transform {
         return control;
     }
 
-    const IR::Node* preorder(IR::P4Table* table) override {
+    const IR::Node *preorder(IR::P4Table *table) override {
         prune();
         return table;
     }  // skip
 
-    const IR::Node* postorder(IR::ConstructorCallExpression* expression) override {
+    const IR::Node *postorder(IR::ConstructorCallExpression *expression) override {
         if (convert == Region::Outside) return expression;
         auto tmpvar = refMap->newName("tmp");
         auto tmpref = new IR::PathExpression(IR::ID(expression->srcInfo, tmpvar));
@@ -144,7 +144,7 @@ class MoveConstructorsImpl : public Transform {
 };
 }  // namespace
 
-MoveConstructors::MoveConstructors(ReferenceMap* refMap) {
+MoveConstructors::MoveConstructors(ReferenceMap *refMap) {
     setName("MoveConstructors");
     passes.emplace_back(new P4::ResolveReferences(refMap));
     passes.emplace_back(new MoveConstructorsImpl(refMap));

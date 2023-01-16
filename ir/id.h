@@ -38,15 +38,15 @@ struct ID : Util::IHasSourceInfo {
     ID(Util::SourceInfo si, cstring n) : srcInfo(si), name(n), originalName(n) {
         if (n.isNullOrEmpty()) BUG("Identifier with no name");
     }
-    ID(const char* n) : ID(Util::SourceInfo(), n) {}  // NOLINT(runtime/explicit)
+    ID(const char *n) : ID(Util::SourceInfo(), n) {}  // NOLINT(runtime/explicit)
     ID(cstring n) : ID(Util::SourceInfo(), n) {}      // NOLINT(runtime/explicit)
     ID(cstring n, cstring old) : ID(Util::SourceInfo(), n, old) {}
-    void dbprint(std::ostream& out) const {
+    void dbprint(std::ostream &out) const {
         out << name;
         if (originalName != nullptr && originalName != name) out << "/" << originalName;
     }
-    bool operator==(const ID& a) const { return name == a.name; }
-    bool operator!=(const ID& a) const { return name != a.name; }
+    bool operator==(const ID &a) const { return name == a.name; }
+    bool operator!=(const ID &a) const { return name != a.name; }
     explicit operator bool() const { return name; }
     operator cstring() const { return name; }
     bool isDontCare() const { return name == "_"; }

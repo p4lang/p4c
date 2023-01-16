@@ -46,6 +46,6 @@ typedef onullstream<char> nullstream;
 
 // If nullOnError is 'true', on error a nullstream is returned
 // otherwise a nullptr is returned
-std::ostream* openFile(cstring name, bool nullOnError);
+std::ostream *openFile(cstring name, bool nullOnError);
 
 #endif /* _LIB_NULLSTREAM_H_ */

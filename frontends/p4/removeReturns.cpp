@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* DoRemoveReturns::preorder(IR::P4Action* action) {
+const IR::Node *DoRemoveReturns::preorder(IR::P4Action *action) {
     HasExits he;
     he.setCalledBy(this);
     (void)action->apply(he);
@@ -48,7 +48,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::P4Action* action) {
     return result;
 }
 
-const IR::Node* DoRemoveReturns::preorder(IR::Function* function) {
+const IR::Node *DoRemoveReturns::preorder(IR::Function *function) {
     // We leave returns in abstract functions alone
     if (findContext<IR::Declaration_Instance>()) {
         prune();
@@ -69,7 +69,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::Function* function) {
 
     cstring var = refMap->newName(variableName);
     returnVar = IR::ID(var, nullptr);
-    IR::Declaration_Variable* retvalDecl = nullptr;
+    IR::Declaration_Variable *retvalDecl = nullptr;
     if (returnsVal) {
         var = refMap->newName(retValName);
         returnedValue = IR::ID(var, nullptr);
@@ -92,7 +92,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::Function* function) {
     return result;
 }
 
-const IR::Node* DoRemoveReturns::preorder(IR::P4Control* control) {
+const IR::Node *DoRemoveReturns::preorder(IR::P4Control *control) {
     visit(control->controlLocals, "controlLocals");
 
     HasExits he;
@@ -122,7 +122,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::P4Control* control) {
     return result;
 }
 
-const IR::Node* DoRemoveReturns::preorder(IR::ReturnStatement* statement) {
+const IR::Node *DoRemoveReturns::preorder(IR::ReturnStatement *statement) {
     set(TernaryBool::Yes);
     auto vec = new IR::IndexedVector<IR::StatOrDecl>();
 
@@ -137,12 +137,12 @@ const IR::Node* DoRemoveReturns::preorder(IR::ReturnStatement* statement) {
     return new IR::BlockStatement(*vec);
 }
 
-const IR::Node* DoRemoveReturns::preorder(IR::ExitStatement* statement) {
+const IR::Node *DoRemoveReturns::preorder(IR::ExitStatement *statement) {
     set(TernaryBool::Yes);  // exit implies return
     return statement;
 }
 
-const IR::Node* DoRemoveReturns::preorder(IR::BlockStatement* statement) {
+const IR::Node *DoRemoveReturns::preorder(IR::BlockStatement *statement) {
     auto block = new IR::BlockStatement;
     auto currentBlock = block;
     TernaryBool ret = TernaryBool::No;
@@ -170,7 +170,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::BlockStatement* statement) {
     return block;
 }
 
-const IR::Node* DoRemoveReturns::preorder(IR::IfStatement* statement) {
+const IR::Node *DoRemoveReturns::preorder(IR::IfStatement *statement) {
     push();
     visit(statement->ifTrue);
     if (statement->ifTrue == nullptr) statement->ifTrue = new IR::EmptyStatement();
@@ -193,10 +193,10 @@ const IR::Node* DoRemoveReturns::preorder(IR::IfStatement* statement) {
     return statement;
 }
 
-const IR::Node* DoRemoveReturns::preorder(IR::SwitchStatement* statement) {
+const IR::Node *DoRemoveReturns::preorder(IR::SwitchStatement *statement) {
     auto r = TernaryBool::No;
     push();
-    for (auto& swCase : statement->cases) {
+    for (auto &swCase : statement->cases) {
         push();
         visit(swCase);
         if (hasReturned() != TernaryBool::No)

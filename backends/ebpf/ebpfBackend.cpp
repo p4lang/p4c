@@ -28,8 +28,8 @@ limitations under the License.
 
 namespace EBPF {
 
-void emitFilterModel(const EbpfOptions& options, Target* target, const IR::ToplevelBlock* toplevel,
-                     P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
+void emitFilterModel(const EbpfOptions &options, Target *target, const IR::ToplevelBlock *toplevel,
+                     P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
     CodeBuilder c(target);
     CodeBuilder h(target);
 
@@ -44,7 +44,7 @@ void emitFilterModel(const EbpfOptions& options, Target* target, const IR::Tople
     if (cstream == nullptr) return;
 
     cstring hfile;
-    const char* dot = cfile.findlast('.');
+    const char *dot = cfile.findlast('.');
     if (dot == nullptr)
         hfile = cfile + ".h";
     else
@@ -60,8 +60,8 @@ void emitFilterModel(const EbpfOptions& options, Target* target, const IR::Tople
     hstream->flush();
 }
 
-void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* toplevel,
-                      P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
+void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *toplevel,
+                      P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
     if (toplevel == nullptr) return;
 
     auto main = toplevel->getMain();
@@ -71,7 +71,7 @@ void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* tople
         return;
     }
 
-    Target* target;
+    Target *target;
     if (options.target.isNullOrEmpty() || options.target == "kernel") {
         if (!options.generateToXDP)
             target = new KernelSamplesTarget(options.emitTraceMessages);

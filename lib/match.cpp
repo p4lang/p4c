@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "match.h"
 
-static int chkmask(const match_t& m, int maskbits) {
+static int chkmask(const match_t &m, int maskbits) {
     big_int mask = (big_int(1) << maskbits) - 1;
     int shift = 0;
     while (mask && ((m.word0 | m.word1) >> shift)) {
@@ -27,7 +27,7 @@ static int chkmask(const match_t& m, int maskbits) {
     return shift - maskbits;
 }
 
-std::ostream& operator<<(std::ostream& out, const match_t& m) {
+std::ostream &operator<<(std::ostream &out, const match_t &m) {
     if (!m) {
         out << "*";
         return out;
@@ -50,7 +50,7 @@ std::ostream& operator<<(std::ostream& out, const match_t& m) {
     return out;
 }
 
-bool operator>>(const char* p, match_t& m) {
+bool operator>>(const char *p, match_t &m) {
     if (!p) return false;
     match_t rv;
     unsigned base = 10;

@@ -80,7 +80,7 @@ class EdgeIf : public EdgeTypeIface {
 
 class EdgeSwitch : public EdgeTypeIface {
  public:
-    explicit EdgeSwitch(const IR::Expression* labelExpr) : labelExpr(labelExpr) {}
+    explicit EdgeSwitch(const IR::Expression *labelExpr) : labelExpr(labelExpr) {}
     cstring label() const override {
         std::stringstream sstream;
         labelExpr->dbprint(sstream);
@@ -88,7 +88,7 @@ class EdgeSwitch : public EdgeTypeIface {
     };
 
  private:
-    const IR::Expression* labelExpr;
+    const IR::Expression *labelExpr;
 };
 
 class Graphs : public Inspector {
@@ -131,15 +131,15 @@ class Graphs : public Inspector {
     using Graph = boost::subgraph<Graph_>;
     using vertex_t = boost::graph_traits<Graph>::vertex_descriptor;
 
-    using Parents = std::vector<std::pair<vertex_t, EdgeTypeIface*>>;
+    using Parents = std::vector<std::pair<vertex_t, EdgeTypeIface *>>;
 
     // merge misc control statements (action calls, extern method calls,
     // assignments) into a single vertex to reduce graph complexity
     boost::optional<vertex_t> merge_other_statements_into_vertex();
 
-    vertex_t add_vertex(const cstring& name, VertexType type);
-    vertex_t add_and_connect_vertex(const cstring& name, VertexType type);
-    void add_edge(const vertex_t& from, const vertex_t& to, const cstring& name);
+    vertex_t add_vertex(const cstring &name, VertexType type);
+    vertex_t add_and_connect_vertex(const cstring &name, VertexType type);
+    void add_edge(const vertex_t &from, const vertex_t &to, const cstring &name);
     /**
      * @brief used to connect subgraphs
      * @param from node from wich edge will start
@@ -147,15 +147,15 @@ class Graphs : public Inspector {
      * @param name used as edge label
      * @param cluster_id id of cluster, that will be connected to previous cluster
      */
-    void add_edge(const vertex_t& from, const vertex_t& to, const cstring& name,
+    void add_edge(const vertex_t &from, const vertex_t &to, const cstring &name,
                   unsigned cluster_id);
 
     class GraphAttributeSetter {
      public:
-        void operator()(Graph& g) const {
+        void operator()(Graph &g) const {
             auto vertices = boost::vertices(g);
-            for (auto& vit = vertices.first; vit != vertices.second; ++vit) {
-                const auto& vinfo = g[*vit];
+            for (auto &vit = vertices.first; vit != vertices.second; ++vit) {
+                const auto &vinfo = g[*vit];
                 auto attrs = boost::get(boost::vertex_attribute, g);
                 attrs[*vit]["label"] = vinfo.name;
                 attrs[*vit]["style"] = vertexTypeGetStyle(vinfo.type);
@@ -163,7 +163,7 @@ class Graphs : public Inspector {
                 attrs[*vit]["margin"] = vertexTypeGetMargin(vinfo.type);
             }
             auto edges = boost::edges(g);
-            for (auto& eit = edges.first; eit != edges.second; ++eit) {
+            for (auto &eit = edges.first; eit != edges.second; ++eit) {
                 auto attrs = boost::get(boost::edge_attribute, g);
                 attrs[*eit]["label"] = boost::get(boost::edge_name, g, *eit);
             }
@@ -208,11 +208,11 @@ class Graphs : public Inspector {
     };  // end class GraphAttributeSetter
 
  protected:
-    Graph* g{nullptr};
+    Graph *g{nullptr};
     vertex_t start_v{};
     vertex_t exit_v{};
     Parents parents{};
-    std::vector<const IR::Statement*> statementsStack{};
+    std::vector<const IR::Statement *> statementsStack{};
 
  private:
     /**
@@ -220,7 +220,7 @@ class Graphs : public Inspector {
      * @param[out] sstream stringstream where trimmed string is stored
      * @param helper_sstream contains string, which will be trimmed
      */
-    void limitStringSize(std::stringstream& sstream, std::stringstream& helper_sstream);
+    void limitStringSize(std::stringstream &sstream, std::stringstream &helper_sstream);
 };
 
 }  // namespace graphs

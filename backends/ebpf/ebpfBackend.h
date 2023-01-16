@@ -24,8 +24,8 @@ limitations under the License.
 
 namespace EBPF {
 
-void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* toplevel,
-                      P4::ReferenceMap* refMap, P4::TypeMap* typeMap);
+void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *toplevel,
+                      P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
 
 }  // namespace EBPF
 

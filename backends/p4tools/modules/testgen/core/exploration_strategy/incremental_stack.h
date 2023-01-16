@@ -27,10 +27,10 @@ class IncrementalStack : public ExplorationStrategy {
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
     /// given callback is invoked. If the callback returns true, then the executor terminates.
     /// Otherwise, execution of the P4 program continues on a different random path.
-    void run(const Callback& callBack) override;
+    void run(const Callback &callBack) override;
 
     /// Constructor for this strategy, considering inheritance
-    IncrementalStack(AbstractSolver& solver, const ProgramInfo& programInfo);
+    IncrementalStack(AbstractSolver &solver, const ProgramInfo &programInfo);
 
  protected:
     /// Encapsulates a stack of unexplored branches. This exists to help enforce the invariant that
@@ -75,7 +75,7 @@ class IncrementalStack : public ExplorationStrategy {
     /// stack of unexplored branches and the solver's state will be unchanged.
     ///
     /// @returns next execution state to be examined on success, nullptr on failure.
-    ExecutionState* chooseBranch(std::vector<Branch>& branches, bool guaranteeViability);
+    ExecutionState *chooseBranch(std::vector<Branch> &branches, bool guaranteeViability);
 };
 
 }  // namespace P4Testgen

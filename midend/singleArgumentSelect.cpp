@@ -2,7 +2,7 @@
 
 namespace P4 {
 
-DoSingleArgumentSelect::Pair::Pair(const IR::Expression* e, const IR::Type* type) {
+DoSingleArgumentSelect::Pair::Pair(const IR::Expression *e, const IR::Type *type) {
     auto srcInfo = e->srcInfo;
     if (auto m = e->to<IR::Mask>()) {
         expr = m->left;
@@ -23,8 +23,8 @@ DoSingleArgumentSelect::Pair::Pair(const IR::Expression* e, const IR::Type* type
     }
 }
 
-static const IR::Expression* convertList(const IR::Expression* expression,
-                                         const IR::Type* selectListType) {
+static const IR::Expression *convertList(const IR::Expression *expression,
+                                         const IR::Type *selectListType) {
     if (expression->is<IR::DefaultExpression>()) {
         int width = selectListType->width_bits();
         auto type = new IR::Type_Bits(width, false);
@@ -54,7 +54,7 @@ static const IR::Expression* convertList(const IR::Expression* expression,
 }
 
 // Check that all components of type are Type_Bits.
-void DoSingleArgumentSelect::checkExpressionType(const IR::Expression* expression) {
+void DoSingleArgumentSelect::checkExpressionType(const IR::Expression *expression) {
     auto type = typeMap->getType(expression, true);
     if (type->is<IR::Type_Bits>()) {
         return;
@@ -68,7 +68,7 @@ void DoSingleArgumentSelect::checkExpressionType(const IR::Expression* expressio
     }
 }
 
-bool DoSingleArgumentSelect::preorder(IR::SelectExpression* expression) {
+bool DoSingleArgumentSelect::preorder(IR::SelectExpression *expression) {
     selectListType = typeMap->getType(expression->select, true);
     checkExpressionType(expression->select);
     auto conv = convertList(expression->select, selectListType);
@@ -78,7 +78,7 @@ bool DoSingleArgumentSelect::preorder(IR::SelectExpression* expression) {
     return true;
 }
 
-bool DoSingleArgumentSelect::preorder(IR::SelectCase* selCase) {
+bool DoSingleArgumentSelect::preorder(IR::SelectCase *selCase) {
     selCase->keyset = convertList(selCase->keyset, selectListType);
     return false;
 }

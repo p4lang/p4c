@@ -37,18 +37,18 @@ namespace p4configv1 = ::p4::config::v1;
 
 namespace DPDK {
 class DpdkBackend {
-    DpdkOptions& options;
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
-    const p4configv1::P4Info& p4info;
-    const IR::DpdkAsmProgram* dpdk_program = nullptr;
+    DpdkOptions &options;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    const p4configv1::P4Info &p4info;
+    const IR::DpdkAsmProgram *dpdk_program = nullptr;
 
  public:
-    void convert(const IR::ToplevelBlock* tlb);
-    DpdkBackend(DpdkOptions& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                const p4configv1::P4Info& p4info)
+    void convert(const IR::ToplevelBlock *tlb);
+    DpdkBackend(DpdkOptions &options, P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                const p4configv1::P4Info &p4info)
         : options(options), refMap(refMap), typeMap(typeMap), p4info(p4info) {}
-    void codegen(std::ostream&) const;
+    void codegen(std::ostream &) const;
 };
 
 }  // namespace DPDK

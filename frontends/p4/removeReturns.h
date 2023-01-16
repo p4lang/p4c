@@ -35,8 +35,8 @@ class HasExits : public Inspector {
     bool hasReturns;
     HasExits() : hasExits(false), hasReturns(false) { setName("HasExits"); }
 
-    void postorder(const IR::ExitStatement*) override { hasExits = true; }
-    void postorder(const IR::ReturnStatement*) override { hasReturns = true; }
+    void postorder(const IR::ExitStatement *) override { hasExits = true; }
+    void postorder(const IR::ReturnStatement *) override { hasReturns = true; }
 };
 
 /**
@@ -58,7 +58,7 @@ control c(inout bit x) {
 */
 class DoRemoveReturns : public Transform {
  protected:
-    P4::ReferenceMap* refMap;
+    P4::ReferenceMap *refMap;
     IR::ID returnVar;      // one for each context
     IR::ID returnedValue;  // only for functions that return expressions
     cstring variableName;
@@ -77,7 +77,7 @@ class DoRemoveReturns : public Transform {
     }
 
  public:
-    explicit DoRemoveReturns(P4::ReferenceMap* refMap, cstring varName = "hasReturned",
+    explicit DoRemoveReturns(P4::ReferenceMap *refMap, cstring varName = "hasReturned",
                              cstring retValName = "retval")
         : refMap(refMap), variableName(varName), retValName(retValName) {
         visitDagOnce = false;
@@ -85,16 +85,16 @@ class DoRemoveReturns : public Transform {
         setName("DoRemoveReturns");
     }
 
-    const IR::Node* preorder(IR::Function* function) override;
-    const IR::Node* preorder(IR::BlockStatement* statement) override;
-    const IR::Node* preorder(IR::ReturnStatement* statement) override;
-    const IR::Node* preorder(IR::ExitStatement* statement) override;
-    const IR::Node* preorder(IR::IfStatement* statement) override;
-    const IR::Node* preorder(IR::SwitchStatement* statement) override;
+    const IR::Node *preorder(IR::Function *function) override;
+    const IR::Node *preorder(IR::BlockStatement *statement) override;
+    const IR::Node *preorder(IR::ReturnStatement *statement) override;
+    const IR::Node *preorder(IR::ExitStatement *statement) override;
+    const IR::Node *preorder(IR::IfStatement *statement) override;
+    const IR::Node *preorder(IR::SwitchStatement *statement) override;
 
-    const IR::Node* preorder(IR::P4Action* action) override;
-    const IR::Node* preorder(IR::P4Control* control) override;
-    const IR::Node* preorder(IR::P4Parser* parser) override {
+    const IR::Node *preorder(IR::P4Action *action) override;
+    const IR::Node *preorder(IR::P4Control *control) override;
+    const IR::Node *preorder(IR::P4Parser *parser) override {
         prune();
         return parser;
     }
@@ -102,7 +102,7 @@ class DoRemoveReturns : public Transform {
 
 class RemoveReturns : public PassManager {
  public:
-    explicit RemoveReturns(ReferenceMap* refMap) {
+    explicit RemoveReturns(ReferenceMap *refMap) {
         passes.push_back(new ResolveReferences(refMap));
         passes.push_back(new DoRemoveReturns(refMap));
         setName("RemoveReturns");

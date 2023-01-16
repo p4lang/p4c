@@ -39,93 +39,93 @@ class Type : public Util::IHasSourceInfo {
     Type() = default;
     explicit Type(Util::SourceInfo si) : srcInfo(si) {}
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
-    virtual const IrClass* resolve(const IrNamespace*) const = 0;
+    virtual const IrClass *resolve(const IrNamespace *) const = 0;
     virtual bool isResolved() const = 0;
     virtual cstring declSuffix() const { return ""; }
-    virtual bool operator==(const Type&) const = 0;
-    bool operator!=(const Type& t) const { return !operator==(t); }
+    virtual bool operator==(const Type &) const = 0;
+    bool operator!=(const Type &t) const { return !operator==(t); }
 #define OP_EQUALS(T) \
-    virtual bool operator==(const T&) const { return false; }
+    virtual bool operator==(const T &) const { return false; }
     ALL_TYPES(OP_EQUALS)
 #undef OP_EQUALS
 };
 
 struct LookupScope : public Util::IHasSourceInfo {
     Util::SourceInfo srcInfo;
-    const LookupScope* in;
+    const LookupScope *in;
     bool global;
     cstring name;
     LookupScope() : in(nullptr), global(true), name(nullptr) {}
-    LookupScope(const LookupScope* in, cstring name) : in(in), global(false), name(name) {}
+    LookupScope(const LookupScope *in, cstring name) : in(in), global(false), name(name) {}
     explicit LookupScope(cstring name) : in(nullptr), global(false), name(name) {}
-    explicit LookupScope(const IrNamespace*);
+    explicit LookupScope(const IrNamespace *);
 
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
     cstring toString() const override {
         if (global) return "IR::";
         return (in ? in->toString() + name : name) + "::";
     }
-    IrNamespace* resolve(const IrNamespace*) const;
-    bool operator==(const LookupScope& l) const {
+    IrNamespace *resolve(const IrNamespace *) const;
+    bool operator==(const LookupScope &l) const {
         if (name != l.name || global != l.global) return false;
         return (in == l.in || (in && l.in && *in == *l.in));
     }
 };
 
 class NamedType : public Type {
-    const LookupScope* lookup;
+    const LookupScope *lookup;
     cstring name;
-    mutable const IrClass* resolved = nullptr;
+    mutable const IrClass *resolved = nullptr;
 
  public:
-    NamedType(Util::SourceInfo si, const LookupScope* l, cstring n)
+    NamedType(Util::SourceInfo si, const LookupScope *l, cstring n)
         : Type(si), lookup(l), name(n) {}
-    NamedType(const LookupScope* l, cstring n) : lookup(l), name(n) {}
+    NamedType(const LookupScope *l, cstring n) : lookup(l), name(n) {}
     explicit NamedType(cstring n) : lookup(nullptr), name(n) {}
-    explicit NamedType(const IrClass*);
+    explicit NamedType(const IrClass *);
 
     cstring toString() const override;
-    const IrClass* resolve(const IrNamespace*) const override;
+    const IrClass *resolve(const IrNamespace *) const override;
     bool isResolved() const override { return resolved != nullptr; }
-    bool operator==(const Type& t) const override { return t == *this; }
-    bool operator==(const NamedType& t) const override {
+    bool operator==(const Type &t) const override { return t == *this; }
+    bool operator==(const NamedType &t) const override {
         if (resolved && resolved == t.resolved) return true;
         if (name != t.name) return false;
         return (lookup == t.lookup || (lookup && t.lookup && *lookup == *t.lookup));
     }
 
-    static NamedType& Bool();
-    static NamedType& Int();
-    static NamedType& Void();
-    static NamedType& Cstring();
-    static NamedType& Ostream();
-    static NamedType& Visitor();
-    static NamedType& Unordered_Set();
-    static NamedType& JSONGenerator();
-    static NamedType& JSONLoader();
-    static NamedType& JSONObject();
-    static NamedType& SourceInfo();
+    static NamedType &Bool();
+    static NamedType &Int();
+    static NamedType &Void();
+    static NamedType &Cstring();
+    static NamedType &Ostream();
+    static NamedType &Visitor();
+    static NamedType &Unordered_Set();
+    static NamedType &JSONGenerator();
+    static NamedType &JSONLoader();
+    static NamedType &JSONObject();
+    static NamedType &SourceInfo();
 };
 
 class TemplateInstantiation : public Type {
  public:
-    const Type* base;
+    const Type *base;
 
-    std::vector<const Type*> args;
-    TemplateInstantiation(Util::SourceInfo si, Type* b, const std::vector<const Type*>& a)
+    std::vector<const Type *> args;
+    TemplateInstantiation(Util::SourceInfo si, Type *b, const std::vector<const Type *> &a)
         : Type(si), base(b), args(a) {}
-    TemplateInstantiation(Util::SourceInfo si, Type* b, Type* a) : Type(si), base(b) {
+    TemplateInstantiation(Util::SourceInfo si, Type *b, Type *a) : Type(si), base(b) {
         args.push_back(a);
     }
-    TemplateInstantiation(const Type* b, const Type* a) : base(b) { args.push_back(a); }
+    TemplateInstantiation(const Type *b, const Type *a) : base(b) { args.push_back(a); }
     bool isResolved() const override { return base->isResolved(); }
-    const IrClass* resolve(const IrNamespace* ns) const override {
+    const IrClass *resolve(const IrNamespace *ns) const override {
         for (auto arg : args) arg->resolve(ns);
         return base->resolve(ns);
     }
     cstring toString() const override;
-    bool operator==(const Type& t) const override { return t == *this; }
-    bool operator==(const TemplateInstantiation& t) const override {
+    bool operator==(const Type &t) const override { return t == *this; }
+    bool operator==(const TemplateInstantiation &t) const override {
         if (args.size() != t.args.size() || *base != *t.base) return false;
         for (size_t i = 0; i < args.size(); i++)
             if (*args[i] != *t.args[i]) return false;
@@ -134,77 +134,77 @@ class TemplateInstantiation : public Type {
 };
 
 class ReferenceType : public Type {
-    const Type* base;
+    const Type *base;
     bool isConst;
 
  public:
-    explicit ReferenceType(const Type* t, bool c = false) : base(t), isConst(c) {}
-    ReferenceType(Util::SourceInfo si, const Type* t, bool c = false)
+    explicit ReferenceType(const Type *t, bool c = false) : base(t), isConst(c) {}
+    ReferenceType(Util::SourceInfo si, const Type *t, bool c = false)
         : Type(si), base(t), isConst(c) {}
     bool isResolved() const override { return false; }
-    const IrClass* resolve(const IrNamespace* ns) const override {
+    const IrClass *resolve(const IrNamespace *ns) const override {
         base->resolve(ns);
         return nullptr;
     }
     cstring toString() const override;
-    bool operator==(const Type& t) const override { return t == *this; }
-    bool operator==(const ReferenceType& t) const override {
+    bool operator==(const Type &t) const override { return t == *this; }
+    bool operator==(const ReferenceType &t) const override {
         return isConst == t.isConst && *base == *t.base;
     }
     static ReferenceType OstreamRef, VisitorRef;
 };
 
 class PointerType : public Type {
-    const Type* base;
+    const Type *base;
     bool isConst;
 
  public:
-    explicit PointerType(const Type* t, bool c = false) : base(t), isConst(c) {}
-    PointerType(Util::SourceInfo si, const Type* t, bool c = false)
+    explicit PointerType(const Type *t, bool c = false) : base(t), isConst(c) {}
+    PointerType(Util::SourceInfo si, const Type *t, bool c = false)
         : Type(si), base(t), isConst(c) {}
     bool isResolved() const override { return false; }
-    const IrClass* resolve(const IrNamespace* ns) const override {
+    const IrClass *resolve(const IrNamespace *ns) const override {
         base->resolve(ns);
         return nullptr;
     }
     cstring toString() const override;
-    bool operator==(const Type& t) const override { return t == *this; }
-    bool operator==(const PointerType& t) const override {
+    bool operator==(const Type &t) const override { return t == *this; }
+    bool operator==(const PointerType &t) const override {
         return isConst == t.isConst && *base == *t.base;
     }
 };
 
 class ArrayType : public Type {
  public:
-    const Type* base;
+    const Type *base;
     int size;
-    ArrayType(const Type* t, int s) : base(t), size(s) {}
-    ArrayType(Util::SourceInfo si, const Type* t, int s) : Type(si), base(t), size(s) {}
+    ArrayType(const Type *t, int s) : base(t), size(s) {}
+    ArrayType(Util::SourceInfo si, const Type *t, int s) : Type(si), base(t), size(s) {}
     bool isResolved() const override { return false; }
-    const IrClass* resolve(const IrNamespace* ns) const override {
+    const IrClass *resolve(const IrNamespace *ns) const override {
         base->resolve(ns);
         return nullptr;
     }
     cstring toString() const override { return base->toString(); }
     cstring declSuffix() const override;
-    bool operator==(const Type& t) const override { return t == *this; }
-    bool operator==(const ArrayType& t) const override {
+    bool operator==(const Type &t) const override { return t == *this; }
+    bool operator==(const ArrayType &t) const override {
         return size == t.size && *base == *t.base;
     }
 };
 
 class FunctionType : public Type {
  public:
-    const Type* ret;
-    const std::vector<const Type*> args;
+    const Type *ret;
+    const std::vector<const Type *> args;
 
-    FunctionType(const Type* ret, const std::vector<const Type*>& args) : ret(ret), args(args) {}
+    FunctionType(const Type *ret, const std::vector<const Type *> &args) : ret(ret), args(args) {}
 
     bool isResolved() const override { return false; }
-    const IrClass* resolve(const IrNamespace* ns) const override;
+    const IrClass *resolve(const IrNamespace *ns) const override;
     cstring toString() const override;
-    bool operator==(const Type& t) const override { return t == *this; }
-    bool operator==(const FunctionType& t) const override {
+    bool operator==(const Type &t) const override { return t == *this; }
+    bool operator==(const FunctionType &t) const override {
         if (!(*ret == *t.ret)) return false;
         if (args.size() != t.args.size()) return false;
         for (auto i(args.begin()), j(t.args.begin()); i != args.end() && j != t.args.end();

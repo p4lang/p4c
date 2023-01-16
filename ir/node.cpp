@@ -31,7 +31,7 @@ limitations under the License.
 #include "lib/json.h"
 #include "lib/log.h"
 
-void IR::Node::traceVisit(const char* visitor) const {
+void IR::Node::traceVisit(const char *visitor) const {
     LOG3("Visiting " << visitor << " " << id << ":" << node_type_name());
 }
 
@@ -47,12 +47,12 @@ void IR::Node::traceCreation() const {
 
 int IR::Node::currentId = 0;
 
-void IR::Node::toJSON(JSONGenerator& json) const {
+void IR::Node::toJSON(JSONGenerator &json) const {
     json << json.indent << "\"Node_ID\" : " << id << "," << std::endl
          << json.indent << "\"Node_Type\" : " << node_type_name();
 }
 
-IR::Node::Node(JSONLoader& json) : id(-1) {
+IR::Node::Node(JSONLoader &json) : id(-1) {
     json.load("Node_ID", id);
     if (id < 0)
         id = currentId++;
@@ -62,7 +62,7 @@ IR::Node::Node(JSONLoader& json) : id(-1) {
 }
 
 // Abbreviated debug print
-cstring IR::dbp(const IR::INode* node) {
+cstring IR::dbp(const IR::INode *node) {
     std::stringstream str;
     if (node == nullptr) {
         str << "<nullptr>";
@@ -93,8 +93,8 @@ cstring IR::dbp(const IR::INode* node) {
     return str.str();
 }
 
-cstring IR::Node::prepareSourceInfoForJSON(Util::SourceInfo& si, unsigned* lineNumber,
-                                           unsigned* columnNumber) const {
+cstring IR::Node::prepareSourceInfoForJSON(Util::SourceInfo &si, unsigned *lineNumber,
+                                           unsigned *columnNumber) const {
     if (!si.isValid()) {
         return nullptr;
     }
@@ -107,7 +107,7 @@ cstring IR::Node::prepareSourceInfoForJSON(Util::SourceInfo& si, unsigned* lineN
 
 // TODO: Find a way to eliminate the duplication below.
 
-Util::JsonObject* IR::Node::sourceInfoJsonObj() const {
+Util::JsonObject *IR::Node::sourceInfoJsonObj() const {
     Util::SourceInfo si = srcInfo;
     unsigned lineNumber, columnNumber;
     cstring fName = prepareSourceInfoForJSON(si, &lineNumber, &columnNumber);
@@ -136,7 +136,7 @@ Util::JsonObject* IR::Node::sourceInfoJsonObj() const {
     }
 }
 
-void IR::Node::sourceInfoToJSON(JSONGenerator& json) const {
+void IR::Node::sourceInfoToJSON(JSONGenerator &json) const {
     Util::SourceInfo si = srcInfo;
     unsigned lineNumber, columnNumber;
     cstring fName = prepareSourceInfoForJSON(si, &lineNumber, &columnNumber);

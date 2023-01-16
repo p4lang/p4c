@@ -20,10 +20,10 @@ limitations under the License.
 
 namespace UBPF {
 
-EBPF::EBPFTypeFactory* instance = UBPFTypeFactory::getInstance();
+EBPF::EBPFTypeFactory *instance = UBPFTypeFactory::getInstance();
 
-EBPF::EBPFType* UBPFTypeFactory::create(const IR::Type* type) {
-    EBPF::EBPFType* result = nullptr;
+EBPF::EBPFType *UBPFTypeFactory::create(const IR::Type *type) {
+    EBPF::EBPFType *result = nullptr;
     if (type->is<IR::Type_Boolean>()) {
         result = new UBPFBoolType();
     } else if (auto bt = type->to<IR::Type_Bits>()) {
@@ -53,7 +53,7 @@ EBPF::EBPFType* UBPFTypeFactory::create(const IR::Type* type) {
     return result;
 }
 
-void UBPFScalarType::emit(EBPF::CodeBuilder* builder) {
+void UBPFScalarType::emit(EBPF::CodeBuilder *builder) {
     if (width <= 8)
         builder->appendFormat("uint8_t");
     else if (width <= 16)
@@ -79,7 +79,7 @@ cstring UBPFScalarType::getAsString() {
         return cstring("uint8_t*");
 }
 
-void UBPFScalarType::declare(EBPF::CodeBuilder* builder, cstring id, bool asPointer) {
+void UBPFScalarType::declare(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
     if (EBPFScalarType::generatesScalar(width)) {
         emit(builder);
         if (asPointer) builder->append("*");
@@ -93,7 +93,7 @@ void UBPFScalarType::declare(EBPF::CodeBuilder* builder, cstring id, bool asPoin
     }
 }
 
-void UBPFScalarType::declareInit(EBPF::CodeBuilder* builder, cstring id, bool asPointer) {
+void UBPFScalarType::declareInit(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
     if (EBPFScalarType::generatesScalar(width)) {
         emit(builder);
         if (asPointer) builder->append("*");
@@ -108,7 +108,7 @@ void UBPFScalarType::declareInit(EBPF::CodeBuilder* builder, cstring id, bool as
     }
 }
 
-void UBPFStructType::emit(EBPF::CodeBuilder* builder) {
+void UBPFStructType::emit(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
     builder->append(kind);
     builder->spc();
@@ -145,19 +145,19 @@ void UBPFStructType::emit(EBPF::CodeBuilder* builder) {
     builder->endOfStatement(true);
 }
 
-void UBPFStructType::declare(EBPF::CodeBuilder* builder, cstring id, bool asPointer) {
+void UBPFStructType::declare(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
     builder->append(kind);
     builder->appendFormat(" %s ", name.c_str());
     if (asPointer) builder->append("*");
     builder->appendFormat("%s", id.c_str());
 }
 
-void UBPFStructType::declareInit(EBPF::CodeBuilder* builder, cstring id, bool asPointer) {
+void UBPFStructType::declareInit(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
     declare(builder, id, asPointer);
 }
 //////////////////////////////////////////////////////////
 
-void UBPFEnumType::emit(EBPF::CodeBuilder* builder) {
+void UBPFEnumType::emit(EBPF::CodeBuilder *builder) {
     builder->append("enum ");
     auto et = getType();
     builder->append(et->name);
@@ -172,14 +172,14 @@ void UBPFEnumType::emit(EBPF::CodeBuilder* builder) {
 
 //////////////////////////////////////////////////////////
 
-UBPFListType::UBPFListType(const IR::Type_List* lst) : EBPFType(lst) {
+UBPFListType::UBPFListType(const IR::Type_List *lst) : EBPFType(lst) {
     kind = "struct";
     width = 0;
     implWidth = 0;
     // The first iteration is to compute total width of Type_List.
     for (auto el : lst->components) {
         auto ltype = UBPFTypeFactory::instance->create(el);
-        auto wt = dynamic_cast<IHasWidth*>(ltype);
+        auto wt = dynamic_cast<IHasWidth *>(ltype);
         if (wt == nullptr) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "UBPF: Unsupported type in Type_List: %s",
                     el->getP4Type());
@@ -219,7 +219,7 @@ UBPFListType::UBPFListType(const IR::Type_List* lst) : EBPFType(lst) {
     }
 }
 
-void UBPFListType::declare(EBPF::CodeBuilder* builder, cstring id, UNUSED bool asPointer) {
+void UBPFListType::declare(EBPF::CodeBuilder *builder, cstring id, UNUSED bool asPointer) {
     builder->append(kind);
     builder->spc();
     builder->append(name);
@@ -227,11 +227,11 @@ void UBPFListType::declare(EBPF::CodeBuilder* builder, cstring id, UNUSED bool a
     builder->append(id.c_str());
 }
 
-void UBPFListType::declareInit(EBPF::CodeBuilder* builder, cstring id, bool asPointer) {
+void UBPFListType::declareInit(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
     declare(builder, id, asPointer);
 }
 
-void UBPFListType::emitInitializer(EBPF::CodeBuilder* builder) {
+void UBPFListType::emitInitializer(EBPF::CodeBuilder *builder) {
     builder->blockStart();
     for (auto f : elements) {
         if (!f->is<Padding>()) continue;
@@ -242,7 +242,7 @@ void UBPFListType::emitInitializer(EBPF::CodeBuilder* builder) {
     builder->blockEnd(false);
 }
 
-void UBPFListType::emitPadding(EBPF::CodeBuilder* builder, UBPF::UBPFListType::Padding* pad) {
+void UBPFListType::emitPadding(EBPF::CodeBuilder *builder, UBPF::UBPFListType::Padding *pad) {
     builder->appendFormat("uint8_t %s[%u]", pad->name, pad->widthInBytes);
 }
 
@@ -250,7 +250,7 @@ void UBPFListType::emitPadding(EBPF::CodeBuilder* builder, UBPF::UBPFListType::P
  * This method emits uBPF code for Type_List (tuples). As the implementation of
  * hash() extern requires n-byte aligned structs, this method appends paddings between fields.
  */
-void UBPFListType::emit(EBPF::CodeBuilder* builder) {
+void UBPFListType::emit(EBPF::CodeBuilder *builder) {
     for (auto f : elements) {
         builder->emitIndent();
         if (!f->is<Padding>())

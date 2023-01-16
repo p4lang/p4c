@@ -56,7 +56,7 @@ class SourceCodeBuilder {
         append(str);
         newline();
     }
-    void append(const std::string& str) {
+    void append(const std::string &str) {
         if (str.size() == 0) return;
         endsInSpace = ::isspace(str.at(str.size() - 1));
         buffer << str;
@@ -65,13 +65,13 @@ class SourceCodeBuilder {
         endsInSpace = ::isspace(c);
         buffer << c;
     }
-    void append(const char* str) {
+    void append(const char *str) {
         if (str == nullptr) BUG("Null argument to append");
         if (strlen(str) == 0) return;
         endsInSpace = ::isspace(str[strlen(str) - 1]);
         buffer << str;
     }
-    void appendFormat(const char* format, ...) {
+    void appendFormat(const char *format, ...) {
         va_list ap;
         va_start(ap, format);
         cstring str = Util::vprintf_format(format, ap);

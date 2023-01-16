@@ -32,11 +32,11 @@ class SubstituteParameters : public TypeVariableSubstitutionVisitor {
     // It is set to point to the same declaration as the original path.
     // But running this pass may change some declaration nodes - so
     // in general the refMap won't be up-to-date at the end.
-    ReferenceMap* refMap;                // input and output
-    const ParameterSubstitution* subst;  // input
+    ReferenceMap *refMap;                // input and output
+    const ParameterSubstitution *subst;  // input
  public:
-    SubstituteParameters(ReferenceMap* refMap, const ParameterSubstitution* subst,
-                         const TypeVariableSubstitution* tvs)
+    SubstituteParameters(ReferenceMap *refMap, const ParameterSubstitution *subst,
+                         const TypeVariableSubstitution *tvs)
         : TypeVariableSubstitutionVisitor(tvs), refMap(refMap), subst(subst) {
         CHECK_NULL(refMap);
         CHECK_NULL(subst);
@@ -46,9 +46,9 @@ class SubstituteParameters : public TypeVariableSubstitutionVisitor {
         LOG1("Will substitute " << std::endl << subst << bindings);
     }
     using TypeVariableSubstitutionVisitor::postorder;
-    const IR::Node* postorder(IR::PathExpression* expr) override;
-    const IR::Node* postorder(IR::Type_Name* type) override;
-    const IR::Node* postorder(IR::This* t) override;
+    const IR::Node *postorder(IR::PathExpression *expr) override;
+    const IR::Node *postorder(IR::Type_Name *type) override;
+    const IR::Node *postorder(IR::This *t) override;
 };
 
 }  // namespace P4

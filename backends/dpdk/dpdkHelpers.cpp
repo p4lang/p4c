@@ -25,8 +25,8 @@ namespace DPDK {
 
 // convert relation comparison statements into the corresponding branching
 // instructions in dpdk.
-void ConvertStatementToDpdk::process_relation_operation(const IR::Expression* dst,
-                                                        const IR::Operation_Relation* op) {
+void ConvertStatementToDpdk::process_relation_operation(const IR::Expression *dst,
+                                                        const IR::Operation_Relation *op) {
     auto true_label = refmap->newName("label_true");
     auto false_label = refmap->newName("label_false");
     auto end_label = refmap->newName("label_end");
@@ -83,8 +83,8 @@ void ConvertStatementToDpdk::process_relation_operation(const IR::Expression* ds
    This function assumes complex logical operations are converted to simple expressions by
    ConvertLogicalExpression pass.
 */
-void ConvertStatementToDpdk::process_logical_operation(const IR::Expression* dst,
-                                                       const IR::Operation_Binary* op) {
+void ConvertStatementToDpdk::process_logical_operation(const IR::Expression *dst,
+                                                       const IR::Operation_Binary *op) {
     if (!op->is<IR::LOr>() && !op->is<IR::LAnd>()) return;
     auto true_label = refmap->newName("label_true");
     auto false_label = refmap->newName("label_false");
@@ -110,10 +110,10 @@ void ConvertStatementToDpdk::process_logical_operation(const IR::Expression* dst
     }
 }
 
-bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement* a) {
+bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
     auto left = a->left;
     auto right = a->right;
-    IR::DpdkAsmStatement* i = nullptr;
+    IR::DpdkAsmStatement *i = nullptr;
 
     if (auto r = right->to<IR::Operation_Relation>()) {
         process_relation_operation(left, r);
@@ -254,7 +254,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement* a) {
                     hashAlgName = "crc32";
 
                 IR::Vector<IR::Expression> components;
-                IR::ListExpression* listExp = nullptr;
+                IR::ListExpression *listExp = nullptr;
 
                 /* This processes two prototypes of get_hash method of Hash extern
                     /// Constructor
@@ -367,8 +367,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement* a) {
                                 e->object->getName());
                         return false;
                     }
-                    const IR::Expression* color_in = nullptr;
-                    const IR::Expression* length = nullptr;
+                    const IR::Expression *color_in = nullptr;
+                    const IR::Expression *length = nullptr;
                     auto index = e->expr->arguments->at(0)->expression;
                     if (argSize == 2) {
                         length = e->expr->arguments->at(1)->expression;
@@ -392,8 +392,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement* a) {
                                 e->object->getName());
                         return false;
                     }
-                    const IR::Expression* color_in = nullptr;
-                    const IR::Expression* length = nullptr;
+                    const IR::Expression *color_in = nullptr;
+                    const IR::Expression *length = nullptr;
                     if (argSize == 1) {
                         length = e->expr->arguments->at(0)->expression;
                         color_in = new IR::Constant(1);
@@ -555,8 +555,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement* a) {
 /* This function processes the hash parameters and stores them in
    "components" which is further used for generating hash instruction
 */
-void ConvertStatementToDpdk::processHashParams(const IR::Argument* field,
-                                               IR::Vector<IR::Expression>& components) {
+void ConvertStatementToDpdk::processHashParams(const IR::Argument *field,
+                                               IR::Vector<IR::Expression> &components) {
     if (auto exp = field->expression->to<IR::Member>()) {
         auto typeInfo = typemap->getType(exp);
         if (auto typeheader = typeInfo->to<IR::Type_Header>()) {
@@ -590,8 +590,8 @@ void ConvertStatementToDpdk::processHashParams(const IR::Argument* field,
    to come from different header/metadata structures or are not consecutively laid in
    the structure they are coming from
 */
-void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument* field,
-                                                    IR::Vector<IR::Expression>& components) {
+void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument *field,
+                                                    IR::Vector<IR::Expression> &components) {
     if (auto s = field->expression->to<IR::StructExpression>()) {
         for (auto field1 : s->components) {
             if (auto exp = field1->expression->to<IR::Member>()) {
@@ -623,7 +623,7 @@ void ConvertStatementToDpdk::updateMdStrAndGenInstr(const IR::Argument* field,
 }
 
 /* This function returns the header/metadata structure name */
-cstring ConvertStatementToDpdk::getHdrMdStrName(const IR::Member* mem) {
+cstring ConvertStatementToDpdk::getHdrMdStrName(const IR::Member *mem) {
     cstring sName = "";
     if ((mem != nullptr) && (mem->expr != nullptr) && (mem->expr->type != nullptr)) {
         if (auto st = mem->expr->type->to<IR::Type_Header>()) {
@@ -638,7 +638,7 @@ cstring ConvertStatementToDpdk::getHdrMdStrName(const IR::Member* mem) {
 /* This function processes Hash parameters and checks if all parameters
    belong to same header/metadata structure.
 */
-bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argument* field) {
+bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argument *field) {
     if (auto s = field->expression->to<IR::StructExpression>()) {
         if (s->components.size() == 1) return true;
 
@@ -680,11 +680,11 @@ bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argumen
       Here, 'dstAddr', 'srcAddr' and 'etherType' are contiguous fields in header 'ethernet_t'.
       So this function returns "true".
 */
-bool ConvertStatementToDpdk::checkIfConsecutiveHdrMdfields(const IR::Argument* field) {
+bool ConvertStatementToDpdk::checkIfConsecutiveHdrMdfields(const IR::Argument *field) {
     if (auto s = field->expression->to<IR::StructExpression>()) {
         if (s->components.size() == 1) return true;
         cstring stName = "";
-        const IR::Type* hdrMdType = nullptr;
+        const IR::Type *hdrMdType = nullptr;
         std::vector<cstring> fldList;
         for (auto field1 : s->components) {
             if (auto exp = field1->expression->to<IR::Member>()) {
@@ -726,7 +726,7 @@ bool ConvertStatementToDpdk::checkIfConsecutiveHdrMdfields(const IR::Argument* f
  *  LAnd or LOr) or a nested expression(LAnd or LOr). The right side can be a
  * nested expression or {simple one if left side is simple as well}.
  */
-bool BranchingInstructionGeneration::generate(const IR::Expression* expr, cstring true_label,
+bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstring true_label,
                                               cstring false_label, bool is_and) {
     if (auto land = expr->to<IR::LAnd>()) {
         /* First, the left side and right side are both nested expressions. In
@@ -901,7 +901,7 @@ bool BranchingInstructionGeneration::generate(const IR::Expression* expr, cstrin
 // BranchingInstructionGeneration's recursion function, this function decides
 // whether the true or false code block will go first. This is important because
 // following optimization pass might eliminate some redundant jmps and labels.
-bool ConvertStatementToDpdk::preorder(const IR::IfStatement* s) {
+bool ConvertStatementToDpdk::preorder(const IR::IfStatement *s) {
     auto true_label = refmap->newName("label_true");
     auto false_label = refmap->newName("label_false");
     auto end_label = refmap->newName("label_end");
@@ -927,11 +927,11 @@ bool ConvertStatementToDpdk::preorder(const IR::IfStatement* s) {
     return false;
 }
 
-cstring ConvertStatementToDpdk::append_parser_name(const IR::P4Parser* p, cstring label) {
+cstring ConvertStatementToDpdk::append_parser_name(const IR::P4Parser *p, cstring label) {
     return p->name + "_" + label;
 }
 
-bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement* s) {
+bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
     auto mi = P4::MethodInstance::resolve(s->methodCall, refmap, typemap);
     if (auto a = mi->to<P4::ApplyMethod>()) {
         LOG3("apply method: " << dbp(s) << std::endl << s);
@@ -955,7 +955,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement* s) {
 
             if (a->method->getName().name == "add") {
                 auto args = a->expr->arguments;
-                const IR::Argument* arg = args->at(0);
+                const IR::Argument *arg = args->at(0);
                 if (auto l = arg->expression->to<IR::ListExpression>()) {
                     for (auto field : l->components) {
                         add_instr(new IR::DpdkChecksumAddStatement(a->object->getName(),
@@ -972,7 +972,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement* s) {
                 }
             } else if (a->method->getName().name == "subtract") {
                 auto args = a->expr->arguments;
-                const IR::Argument* arg = args->at(0);
+                const IR::Argument *arg = args->at(0);
                 if (auto l = arg->expression->to<IR::ListExpression>()) {
                     for (auto field : l->components) {
                         add_instr(new IR::DpdkChecksumSubStatement(a->object->getName(),
@@ -1069,7 +1069,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement* s) {
                             "provided %2%",
                             a->method->getName(), args->size());
                 } else {
-                    const IR::Expression* incr = nullptr;
+                    const IR::Expression *incr = nullptr;
                     auto counter = a->object->getName();
                     if (args->size() == 1) incr = args->at(0)->expression;
                     if (!incr && value > 0) {
@@ -1110,7 +1110,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement* s) {
                     ::error(ErrorType::ERR_UNEXPECTED, "Expected atleast 1 arguments for %1%",
                             a->method->getName());
                 } else {
-                    const IR::Expression* incr = nullptr;
+                    const IR::Expression *incr = nullptr;
                     auto index = args->at(0)->expression;
                     auto counter = a->object->getName();
                     if (args->size() == 2) incr = args->at(1)->expression;
@@ -1155,14 +1155,14 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement* s) {
             auto condition = args->at(0);
             auto error_id = args->at(1);
             auto end_label = refmap->newName("label_end");
-            const IR::BoolLiteral* boolLiteral = condition->expression->to<IR::BoolLiteral>();
+            const IR::BoolLiteral *boolLiteral = condition->expression->to<IR::BoolLiteral>();
             if (!boolLiteral) {
                 add_instr(new IR::DpdkJmpNotEqualStatement(end_label, condition->expression,
                                                            new IR::BoolLiteral(false)));
             } else if (boolLiteral->value == true) {
                 return false;
             }
-            IR::Member* error_meta_path;
+            IR::Member *error_meta_path;
             if (structure->isPSA()) {
                 error_meta_path = new IR::Member(new IR::PathExpression(IR::ID("m")),
                                                  IR::ID("psa_ingress_input_metadata_parser_error"));
@@ -1310,7 +1310,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement* s) {
     return false;
 }
 
-bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement* s) {
+bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
     // Check if switch expression is action_run expression. DPDK has special jump instructions
     // for jumping on action run event.
     auto tc = P4::TableApplySolver::isActionRun(s->expression, refmap, typemap);

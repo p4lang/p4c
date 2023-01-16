@@ -28,7 +28,7 @@ class IncrementalMaxCoverageStack : public ExplorationStrategy {
     /// Callbacks are invoked when the P4 program terminates. If the callback returns true,
     /// execution halts. Otherwise, execution of the P4 program continues on a different random
     /// path.
-    using Callback = std::function<bool(const FinalState&)>;
+    using Callback = std::function<bool(const FinalState &)>;
 
     using Branch = ExplorationStrategy::Branch;
     using StepResult = ExplorationStrategy::StepResult;
@@ -36,10 +36,10 @@ class IncrementalMaxCoverageStack : public ExplorationStrategy {
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
     /// given callback is invoked. If the callback returns true, then the executor terminates.
     /// Otherwise, execution of the P4 program continues on a different random path.
-    void run(const Callback& callBack) override;
+    void run(const Callback &callBack) override;
 
     /// Constructor for this strategy, considering inheritance.
-    IncrementalMaxCoverageStack(AbstractSolver& solver, const ProgramInfo& programInfo);
+    IncrementalMaxCoverageStack(AbstractSolver &solver, const ProgramInfo &programInfo);
 
  protected:
     /// The main datastructure for exploration in this strategy. It is a map
@@ -63,11 +63,11 @@ class IncrementalMaxCoverageStack : public ExplorationStrategy {
     /// stack of unexplored branches and the solver's state will be unchanged.
     ///
     /// @returns next execution state to be examined on success, nullptr on failure.
-    ExecutionState* chooseBranch(std::vector<Branch>& branches, bool guaranteeViability);
+    ExecutionState *chooseBranch(std::vector<Branch> &branches, bool guaranteeViability);
 
     /// Invoked in chooseBranch to sort the branches vector according to non-visited
     /// states.
-    void sortBranchesByCoverage(std::vector<Branch>& branches);
+    void sortBranchesByCoverage(std::vector<Branch> &branches);
 };
 
 }  // namespace P4Testgen

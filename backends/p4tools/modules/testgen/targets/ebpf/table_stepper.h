@@ -34,18 +34,19 @@ class EBPFTableStepper : public TableStepper {
     } EBPFProperties;
 
  protected:
-    const IR::Expression* computeTargetMatchType(ExecutionState* nextState,
-                                                 const KeyProperties& keyProperties,
-                                                 std::map<cstring, const FieldMatch>* matches,
-                                                 const IR::Expression* hitCondition) override;
+    const IR::Expression *computeTargetMatchType(ExecutionState *nextState,
+                                                 const KeyProperties &keyProperties,
+                                                 std::map<cstring, const FieldMatch> *matches,
+                                                 const IR::Expression *hitCondition) override;
 
     void checkTargetProperties(
-        const std::vector<const IR::ActionListElement*>& tableActionList) override;
+        const std::vector<const IR::ActionListElement *> &tableActionList) override;
 
-    void evalTargetTable(const std::vector<const IR::ActionListElement*>& tableActionList) override;
+    void evalTargetTable(
+        const std::vector<const IR::ActionListElement *> &tableActionList) override;
 
  public:
-    explicit EBPFTableStepper(EBPFExprStepper* stepper, const IR::P4Table* table);
+    explicit EBPFTableStepper(EBPFExprStepper *stepper, const IR::P4Table *table);
 };
 
 }  // namespace EBPF

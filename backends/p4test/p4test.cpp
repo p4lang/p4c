@@ -42,7 +42,7 @@ class P4TestOptions : public CompilerOptions {
     P4TestOptions() {
         registerOption(
             "--listMidendPasses", nullptr,
-            [this](const char*) {
+            [this](const char *) {
                 listMidendPasses = true;
                 loadIRFromJson = false;
                 P4Test::MidEnd MidEnd(*this, outStream);
@@ -52,21 +52,21 @@ class P4TestOptions : public CompilerOptions {
             "[p4test] Lists exact name of all midend passes.\n");
         registerOption(
             "--parse-only", nullptr,
-            [this](const char*) {
+            [this](const char *) {
                 parseOnly = true;
                 return true;
             },
             "only parse the P4 input, without any further processing");
         registerOption(
             "--validate", nullptr,
-            [this](const char*) {
+            [this](const char *) {
                 validateOnly = true;
                 return true;
             },
             "Validate the P4 input, running just the front-end");
         registerOption(
             "--fromJSON", "file",
-            [this](const char* arg) {
+            [this](const char *arg) {
                 loadIRFromJson = true;
                 file = arg;
                 return true;
@@ -77,7 +77,7 @@ class P4TestOptions : public CompilerOptions {
 
 using P4TestContext = P4CContextWithOptions<P4TestOptions>;
 
-static void log_dump(const IR::Node* node, const char* head) {
+static void log_dump(const IR::Node *node, const char *head) {
     if (node && LOGGING(1)) {
         if (head)
             std::cout << '+' << std::setw(strlen(head) + 6) << std::setfill('-') << "+\n| " << head
@@ -91,12 +91,12 @@ static void log_dump(const IR::Node* node, const char* head) {
     }
 }
 
-int main(int argc, char* const argv[]) {
+int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();
 
     AutoCompileContext autoP4TestContext(new P4TestContext);
-    auto& options = P4TestContext::get().options();
+    auto &options = P4TestContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = P4TEST_VERSION_STRING;
 
@@ -104,13 +104,13 @@ int main(int argc, char* const argv[]) {
         if (options.loadIRFromJson == false) options.setInputFile();
     }
     if (::errorCount() > 0) return 1;
-    const IR::P4Program* program = nullptr;
+    const IR::P4Program *program = nullptr;
     auto hook = options.getDebugHook();
     if (options.loadIRFromJson) {
         std::ifstream json(options.file);
         if (json) {
             JSONLoader loader(json);
-            const IR::Node* node = nullptr;
+            const IR::Node *node = nullptr;
             loader >> node;
             if (!(program = node->to<IR::P4Program>()))
                 error(ErrorType::ERR_INVALID, "%s is not a P4Program in json format", options.file);
@@ -129,7 +129,7 @@ int main(int argc, char* const argv[]) {
                     P4::FrontEnd fe;
                     fe.addDebugHook(hook);
                     program = fe.run(options, program);
-                } catch (const std::exception& bug) {
+                } catch (const std::exception &bug) {
                     std::cerr << bug.what() << std::endl;
                     return 1;
                 }
@@ -154,13 +154,13 @@ int main(int argc, char* const argv[]) {
                 loader >> program;
             }
 #endif
-            const IR::ToplevelBlock* top = nullptr;
+            const IR::ToplevelBlock *top = nullptr;
             try {
                 top = midEnd.process(program);
                 // This can modify program!
                 log_dump(program, "After midend");
                 log_dump(top, "Top level block");
-            } catch (const std::exception& bug) {
+            } catch (const std::exception &bug) {
                 std::cerr << bug.what() << std::endl;
                 return 1;
             }
@@ -173,7 +173,7 @@ int main(int argc, char* const argv[]) {
                 JSONGenerator gen1(ss1), gen2(ss2);
                 gen1 << program;
 
-                const IR::Node* node = nullptr;
+                const IR::Node *node = nullptr;
                 JSONLoader loader(ss1);
                 loader >> node;
 

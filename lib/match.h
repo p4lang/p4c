@@ -36,8 +36,8 @@ struct match_t {
     match_t() : word0(0), word1(0) {}
     match_t(big_int w0, big_int w1) : word0(w0), word1(w1) {}
     explicit operator bool() const { return (word0 | word1) != 0; }
-    bool operator==(const match_t& a) const { return word0 == a.word0 && word1 == a.word1; }
-    bool operator!=(const match_t& a) const { return word0 != a.word0 || word1 != a.word1; }
+    bool operator==(const match_t &a) const { return word0 == a.word0 && word1 == a.word1; }
+    bool operator!=(const match_t &a) const { return word0 != a.word0 || word1 != a.word1; }
     bool matches(big_int v) const {
         return (v | word1) == word1 && ((~v & word1) | word0) == word0;
     }
@@ -55,7 +55,7 @@ struct match_t {
     static match_t dont_care(int size) { return match_t(size, 0, 0); }
 };
 
-std::ostream& operator<<(std::ostream&, const match_t&);
-bool operator>>(const char*, match_t&);
+std::ostream &operator<<(std::ostream &, const match_t &);
+bool operator>>(const char *, match_t &);
 
 #endif /*_LIB_MATCH_H_ */

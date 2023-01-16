@@ -29,11 +29,11 @@ class MidEnd : public PassManager {
  public:
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
-    IR::ToplevelBlock* toplevel = nullptr;
+    IR::ToplevelBlock *toplevel = nullptr;
 
     void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
-    explicit MidEnd(CompilerOptions& options, std::ostream* outStream = nullptr);
-    IR::ToplevelBlock* process(const IR::P4Program*& program) {
+    explicit MidEnd(CompilerOptions &options, std::ostream *outStream = nullptr);
+    IR::ToplevelBlock *process(const IR::P4Program *&program) {
         addDebugHooks(hooks, true);
         program = program->apply(*this);
         return toplevel;

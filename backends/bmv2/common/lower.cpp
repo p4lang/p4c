@@ -27,7 +27,7 @@ namespace BMV2 {
 // since parent expression trees may need the information
 // when processing in post-order.
 
-const IR::Expression* LowerExpressions::shift(const IR::Operation_Binary* expression) const {
+const IR::Expression *LowerExpressions::shift(const IR::Operation_Binary *expression) const {
     auto rhs = expression->right;
     auto rhstype = typeMap->getType(rhs, true);
     if (rhstype->is<IR::Type_InfInt>()) {
@@ -49,7 +49,7 @@ const IR::Expression* LowerExpressions::shift(const IR::Operation_Binary* expres
     return expression;
 }
 
-const IR::Node* LowerExpressions::postorder(IR::Neg* expression) {
+const IR::Node *LowerExpressions::postorder(IR::Neg *expression) {
     auto type = typeMap->getType(getOriginal(), true);
     auto zero = new IR::Constant(type, 0);
     auto sub = new IR::Sub(expression->srcInfo, zero, expression->expr);
@@ -59,7 +59,7 @@ const IR::Node* LowerExpressions::postorder(IR::Neg* expression) {
     return sub;
 }
 
-const IR::Node* LowerExpressions::postorder(IR::Cast* expression) {
+const IR::Node *LowerExpressions::postorder(IR::Cast *expression) {
     // handle bool <-> bit casts
     auto destType = typeMap->getType(getOriginal(), true);
     auto srcType = typeMap->getType(expression->expr, true);
@@ -101,20 +101,20 @@ const IR::Node* LowerExpressions::postorder(IR::Cast* expression) {
     return expression;
 }
 
-const IR::Node* LowerExpressions::postorder(IR::Expression* expression) {
+const IR::Node *LowerExpressions::postorder(IR::Expression *expression) {
     // Just update the typeMap incrementally.
     auto orig = getOriginal<IR::Expression>();
     typeMap->cloneExpressionProperties(expression, orig);
     return expression;
 }
 
-const IR::Node* LowerExpressions::postorder(IR::Slice* expression) {
+const IR::Node *LowerExpressions::postorder(IR::Slice *expression) {
     // This is in a RHS expression a[m:l]  ->  (cast)(a >> l)
     int h = expression->getH();
     int l = expression->getL();
     auto e0type = typeMap->getType(expression->e0, true);
     BUG_CHECK(e0type->is<IR::Type_Bits>(), "%1%: expected a bit<> type", e0type);
-    const IR::Expression* expr;
+    const IR::Expression *expr;
     if (l != 0) {
         auto one = new IR::Constant(new IR::Type_InfInt(), l);
         expr = new IR::Shr(expression->e0->srcInfo, expression->e0, one);
@@ -140,7 +140,7 @@ const IR::Node* LowerExpressions::postorder(IR::Slice* expression) {
     return result;
 }
 
-const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
+const IR::Node *LowerExpressions::postorder(IR::Concat *expression) {
     // a ++ b  -> ((cast)a << sizeof(b)) | ((cast)b & mask)
     auto type = typeMap->getType(expression->right, true);
     auto resulttype = typeMap->getType(getOriginal(), true);
@@ -170,7 +170,7 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
 
 /////////////////////////////////////////////////////////////
 
-const IR::Node* RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
+const IR::Node *RemoveComplexExpressions::postorder(IR::MethodCallExpression *expression) {
     if (expression->arguments->size() == 0) return expression;
     auto mi = P4::MethodInstance::resolve(expression, refMap, typeMap);
     if (mi->isApply() || mi->is<P4::BuiltInMethod>()) return expression;

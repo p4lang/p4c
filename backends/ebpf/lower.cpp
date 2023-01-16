@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace EBPF {
 
-const IR::Expression* LowerExpressions::shift(const IR::Operation_Binary* expression) const {
+const IR::Expression *LowerExpressions::shift(const IR::Operation_Binary *expression) const {
     auto rhs = expression->right;
     auto rhstype = typeMap->getType(rhs, true);
     if (rhstype->is<IR::Type_InfInt>()) {
@@ -40,18 +40,18 @@ const IR::Expression* LowerExpressions::shift(const IR::Operation_Binary* expres
     return expression;
 }
 
-const IR::Node* LowerExpressions::postorder(IR::Expression* expression) {
+const IR::Node *LowerExpressions::postorder(IR::Expression *expression) {
     // Just update the typeMap incrementally.
     auto type = typeMap->getType(getOriginal(), true);
     typeMap->setType(expression, type);
     return expression;
 }
 
-const IR::Node* LowerExpressions::postorder(IR::Slice* expression) {
+const IR::Node *LowerExpressions::postorder(IR::Slice *expression) {
     // This is in a RHS expression a[m:l]  ->  (cast)(a >> l)
     int h = expression->getH();
     int l = expression->getL();
-    const IR::Expression* expr;
+    const IR::Expression *expr;
     if (l != 0) {
         expr = new IR::Shr(expression->e0->srcInfo, expression->e0, new IR::Constant(l, 16));
         auto e0type = typeMap->getType(expression->e0, true);
@@ -66,7 +66,7 @@ const IR::Node* LowerExpressions::postorder(IR::Slice* expression) {
     return result;
 }
 
-const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
+const IR::Node *LowerExpressions::postorder(IR::Concat *expression) {
     // a ++ b  -> ((cast)a << sizeof(b)) | ((cast)b & mask)
     auto type = typeMap->getType(expression->right, true);
     auto resulttype = typeMap->getType(getOriginal(), true);
@@ -94,7 +94,7 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
     return result;
 }
 
-const IR::Node* LowerExpressions::postorder(IR::Cast* expression) {
+const IR::Node *LowerExpressions::postorder(IR::Cast *expression) {
     auto destType = typeMap->getType(getOriginal(), true);
     auto srcType = typeMap->getType(expression->expr, true);
     if (destType->is<IR::Type_Boolean>() && srcType->is<IR::Type_Bits>()) {

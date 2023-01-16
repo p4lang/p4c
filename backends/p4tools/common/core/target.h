@@ -26,7 +26,7 @@ class Target {
         Spec(std::string deviceName, std::string archName);
 
         /// Lexicographic ordering on (deviceName, archName).
-        bool operator<(const Spec&) const;
+        bool operator<(const Spec &) const;
     };
 
     /// Initializes the global target device and architecture to @deviceName and @archName.
@@ -70,18 +70,18 @@ class Target {
     //
     // Implemented here because of limitations of templates.
     template <class TargetImpl>
-    static const TargetImpl& get(const std::string& toolName) {
+    static const TargetImpl &get(const std::string &toolName) {
         if (curTarget == boost::none) {
             FATAL_ERROR(
                 "Target not initialized. Please provide a target using the --target option.");
         }
 
-        const auto& instances = registry.at(*curTarget);
+        const auto &instances = registry.at(*curTarget);
         BUG_CHECK(instances.count(toolName), "Architecture %1% on device %2% not supported for %3%",
                   curTarget->archName, curTarget->deviceName, toolName);
 
-        const auto* instance = instances.at(toolName);
-        const auto* casted = dynamic_cast<const TargetImpl*>(instance);
+        const auto *instance = instances.at(toolName);
+        const auto *casted = dynamic_cast<const TargetImpl *>(instance);
         BUG_CHECK(casted, "%1%/%2% implementation for %3% has wrong type", curTarget->deviceName,
                   curTarget->archName, toolName);
         return *casted;
@@ -92,7 +92,7 @@ class Target {
     static boost::optional<Spec> curTarget;
 
     /// Maps supported target specs to Target implementations for each supported tool.
-    static std::map<Spec, std::map<std::string, const Target*>> registry;
+    static std::map<Spec, std::map<std::string, const Target *>> registry;
 
     /// Maps the name of the first architecture registered for each device name.
     static std::map<std::string, std::string> defaultArchByDevice;

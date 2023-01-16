@@ -39,18 +39,18 @@ class ErrorReporter {
     unsigned int warningCount;
     unsigned int maxErrorCount;  /// the maximum number of errors that we print before fail
 
-    std::ostream* outputstream;
+    std::ostream *outputstream;
 
     /// Track errors or warnings that have already been issued for a particular source location
     std::set<std::pair<int, const Util::SourceInfo>> errorTracker;
 
     /// Output the message and flush the stream
-    virtual void emit_message(const ErrorMessage& msg) {
+    virtual void emit_message(const ErrorMessage &msg) {
         *outputstream << msg.toString();
         outputstream->flush();
     }
 
-    virtual void emit_message(const ParserErrorMessage& msg) {
+    virtual void emit_message(const ParserErrorMessage &msg) {
         *outputstream << msg.toString();
         outputstream->flush();
     }
@@ -66,7 +66,7 @@ class ErrorReporter {
     }
 
     /// retrieve the format from the error catalog
-    const char* get_error_name(int errorCode) {
+    const char *get_error_name(int errorCode) {
         return ErrorCatalog::getCatalog().getName(errorCode);
     }
 
@@ -81,14 +81,14 @@ class ErrorReporter {
 
     // error message for a bug
     template <typename... T>
-    std::string bug_message(const char* format, T... args) {
+    std::string bug_message(const char *format, T... args) {
         boost::format fmt(format);
         std::string message = ::bug_helper(fmt, "", "", "", args...);
         return message;
     }
 
     template <typename... T>
-    std::string format_message(const char* format, T... args) {
+    std::string format_message(const char *format, T... args) {
         boost::format fmt(format);
         std::string message = ::error_helper(fmt, args...).toString();
         return message;
@@ -98,10 +98,10 @@ class ErrorReporter {
         class T,
         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
         typename... Args>
-    void diagnose(DiagnosticAction action, const int errorCode, const char* format,
-                  const char* suffix, const T* node, Args... args) {
+    void diagnose(DiagnosticAction action, const int errorCode, const char *format,
+                  const char *suffix, const T *node, Args... args) {
         if (!error_reported(errorCode, node->getSourceInfo())) {
-            const char* name = get_error_name(errorCode);
+            const char *name = get_error_name(errorCode);
             auto da = getDiagnosticAction(name, action);
             if (name)
                 diagnose(da, name, format, suffix, node, args...);
@@ -114,15 +114,15 @@ class ErrorReporter {
         class T,
         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
         typename... Args>
-    void diagnose(DiagnosticAction action, const int errorCode, const char* format,
-                  const char* suffix, const T& node, Args... args) {
+    void diagnose(DiagnosticAction action, const int errorCode, const char *format,
+                  const char *suffix, const T &node, Args... args) {
         diagnose(action, errorCode, format, suffix, &node, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    void diagnose(DiagnosticAction action, const int errorCode, const char* format,
-                  const char* suffix, Args... args) {
-        const char* name = get_error_name(errorCode);
+    void diagnose(DiagnosticAction action, const int errorCode, const char *format,
+                  const char *suffix, Args... args) {
+        const char *name = get_error_name(errorCode);
         auto da = getDiagnosticAction(name, action);
         if (name)
             diagnose(da, name, format, suffix, args...);
@@ -133,8 +133,8 @@ class ErrorReporter {
     /// The sink of all the diagnostic functions. Here the error gets printed
     /// or an exception thrown if the error count exceeds maxErrorCount.
     template <typename... T>
-    void diagnose(DiagnosticAction action, const char* diagnosticName, const char* format,
-                  const char* suffix, T... args) {
+    void diagnose(DiagnosticAction action, const char *diagnosticName, const char *format,
+                  const char *suffix, T... args) {
         if (action == DiagnosticAction::Ignore) return;
 
         ErrorMessage::MessageType msgType = ErrorMessage::MessageType::None;
@@ -175,14 +175,14 @@ class ErrorReporter {
     /// in the current CompileContext.
     unsigned getDiagnosticCount() const { return errorCount + warningCount; }
 
-    void setOutputStream(std::ostream* stream) { outputstream = stream; }
+    void setOutputStream(std::ostream *stream) { outputstream = stream; }
 
-    std::ostream* getOutputStream() const { return outputstream; }
+    std::ostream *getOutputStream() const { return outputstream; }
 
     /// Reports an error @message at @location. This allows us to use the
     /// position information provided by Bison.
     template <typename T>
-    void parser_error(const Util::SourceInfo& location, const T& message) {
+    void parser_error(const Util::SourceInfo &location, const T &message) {
         errorCount++;
         std::stringstream ss;
         ss << message;
@@ -197,7 +197,7 @@ class ErrorReporter {
      * generator's C-based Bison parser, which doesn't have location information
      * available.
      */
-    void parser_error(const Util::InputSources* sources, const char* fmt, ...) {
+    void parser_error(const Util::InputSources *sources, const char *fmt, ...) {
         va_list args;
         va_start(args, fmt);
 

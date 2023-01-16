@@ -17,17 +17,17 @@ limitations under the License.
 #include "flattenUnions.h"
 
 namespace P4 {
-const IR::MethodCallStatement* HandleValidityHeaderUnion::processValidityForStr(
-    const IR::Statement* s, const IR::Member* m, cstring headerElement, cstring setValid) {
+const IR::MethodCallStatement *HandleValidityHeaderUnion::processValidityForStr(
+    const IR::Statement *s, const IR::Member *m, cstring headerElement, cstring setValid) {
     auto method = new IR::Member(s->srcInfo, new IR::Member(m->expr, IR::ID(headerElement)),
                                  IR::ID(setValid));
     auto mc = new IR::MethodCallExpression(s->srcInfo, method, new IR::Vector<IR::Argument>());
     return new IR::MethodCallStatement(mc->srcInfo, mc);
 }
 
-const IR::Node* HandleValidityHeaderUnion::setInvalidforRest(const IR::Statement* s,
-                                                             const IR::Member* m,
-                                                             const IR::Type_HeaderUnion* hu,
+const IR::Node *HandleValidityHeaderUnion::setInvalidforRest(const IR::Statement *s,
+                                                             const IR::Member *m,
+                                                             const IR::Type_HeaderUnion *hu,
                                                              cstring exclude,
                                                              bool setValidforCurrMem) {
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
@@ -46,15 +46,15 @@ const IR::Node* HandleValidityHeaderUnion::setInvalidforRest(const IR::Statement
     return new IR::BlockStatement(*code_block);
 }
 
-const IR::Node* HandleValidityHeaderUnion::expandIsValid(
-    const IR::Statement* a, const IR::MethodCallExpression* mce,
-    IR::IndexedVector<IR::StatOrDecl>& code_block) {
+const IR::Node *HandleValidityHeaderUnion::expandIsValid(
+    const IR::Statement *a, const IR::MethodCallExpression *mce,
+    IR::IndexedVector<IR::StatOrDecl> &code_block) {
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
     if (auto bim = mi->to<P4::BuiltInMethod>()) {
         if (bim->name == "isValid") {  // hdr.u.isValid() or u.isValid
             if (auto huType = bim->appliedTo->type->to<IR::Type_HeaderUnion>()) {  // u or hdr.u
                 cstring tmp = refMap->newName("tmp");
-                IR::PathExpression* tmpVar = new IR::PathExpression(IR::ID(tmp));
+                IR::PathExpression *tmpVar = new IR::PathExpression(IR::ID(tmp));
                 toInsert.push_back(
                     new IR::Declaration_Variable(IR::ID(tmp), IR::Type_Bits::get(32)));
                 std::cout << "Code " << code_block << std::endl;
@@ -82,7 +82,7 @@ const IR::Node* HandleValidityHeaderUnion::expandIsValid(
 
 // u.h1 = {elem1, elem2....} => Already simplified to elementwise initialization
 // u = u1 => Already simplified to elementwise copy
-const IR::Node* HandleValidityHeaderUnion::postorder(IR::AssignmentStatement* a) {
+const IR::Node *HandleValidityHeaderUnion::postorder(IR::AssignmentStatement *a) {
     IR::IndexedVector<IR::StatOrDecl> code_block;
     auto left = a->left;
     auto right = a->right;
@@ -128,7 +128,7 @@ const IR::Node* HandleValidityHeaderUnion::postorder(IR::AssignmentStatement* a)
     return a;
 }
 
-const IR::Node* HandleValidityHeaderUnion::postorder(IR::IfStatement* a) {
+const IR::Node *HandleValidityHeaderUnion::postorder(IR::IfStatement *a) {
     IR::IndexedVector<IR::StatOrDecl> code_block;
     if (auto mce = a->condition->to<IR::MethodCallExpression>()) {
         auto cond = expandIsValid(a, mce, code_block);
@@ -141,7 +141,7 @@ const IR::Node* HandleValidityHeaderUnion::postorder(IR::IfStatement* a) {
     return a;
 }
 
-const IR::Node* HandleValidityHeaderUnion::postorder(IR::SwitchStatement* a) {
+const IR::Node *HandleValidityHeaderUnion::postorder(IR::SwitchStatement *a) {
     IR::IndexedVector<IR::StatOrDecl> code_block;
     if (auto mce = a->expression->to<IR::MethodCallExpression>()) {
         auto cond = expandIsValid(a, mce, code_block);
@@ -155,7 +155,7 @@ const IR::Node* HandleValidityHeaderUnion::postorder(IR::SwitchStatement* a) {
 }
 
 // Assumes nested structs are flattened before this pass
-const IR::Node* HandleValidityHeaderUnion::postorder(IR::MethodCallStatement* mcs) {
+const IR::Node *HandleValidityHeaderUnion::postorder(IR::MethodCallStatement *mcs) {
     auto mi = P4::MethodInstance::resolve(mcs->methodCall, refMap, typeMap);
     if (auto a = mi->to<P4::BuiltInMethod>()) {
         if (a->name == "setValid") {  // hdr.u.h1.setValid() or u.h1.setValid
@@ -168,7 +168,7 @@ const IR::Node* HandleValidityHeaderUnion::postorder(IR::MethodCallStatement* mc
     return mcs;
 }
 
-const IR::Node* HandleValidityHeaderUnion::postorder(IR::P4Action* action) {
+const IR::Node *HandleValidityHeaderUnion::postorder(IR::P4Action *action) {
     if (toInsert.empty()) return action;
     auto body = new IR::BlockStatement(action->body->srcInfo);
     for (auto a : toInsert) body->push_back(a);
@@ -178,21 +178,21 @@ const IR::Node* HandleValidityHeaderUnion::postorder(IR::P4Action* action) {
     return action;
 }
 
-const IR::Node* HandleValidityHeaderUnion::postorder(IR::P4Parser* parser) {
+const IR::Node *HandleValidityHeaderUnion::postorder(IR::P4Parser *parser) {
     if (toInsert.empty()) return parser;
     parser->parserLocals.append(toInsert);
     toInsert.clear();
     return parser;
 }
 
-const IR::Node* HandleValidityHeaderUnion::postorder(IR::P4Control* control) {
+const IR::Node *HandleValidityHeaderUnion::postorder(IR::P4Control *control) {
     if (toInsert.empty()) return control;
     control->controlLocals.append(toInsert);
     toInsert.clear();
     return control;
 }
 
-bool DoFlattenHeaderUnion::hasHeaderUnionField(IR::Type_Struct* s) {
+bool DoFlattenHeaderUnion::hasHeaderUnionField(IR::Type_Struct *s) {
     for (auto sf : s->fields) {
         auto ftype = typeMap->getType(sf, true);
         if (ftype->is<IR::Type_HeaderUnion>()) {
@@ -202,7 +202,7 @@ bool DoFlattenHeaderUnion::hasHeaderUnionField(IR::Type_Struct* s) {
     return false;
 }
 
-const IR::Node* DoFlattenHeaderUnion::postorder(IR::Type_Struct* s) {
+const IR::Node *DoFlattenHeaderUnion::postorder(IR::Type_Struct *s) {
     if (hasHeaderUnionField(s)) {
         IR::IndexedVector<IR::StructField> fields;
         for (auto sf : s->fields) {
@@ -225,7 +225,7 @@ const IR::Node* DoFlattenHeaderUnion::postorder(IR::Type_Struct* s) {
     return s;
 }
 
-const IR::Node* DoFlattenHeaderUnion::postorder(IR::Declaration_Variable* dv) {
+const IR::Node *DoFlattenHeaderUnion::postorder(IR::Declaration_Variable *dv) {
     auto ftype = typeMap->getTypeType(dv->type, true);
     if (ftype->is<IR::Type_HeaderUnion>()) {
         std::map<cstring, cstring> fieldMap;
@@ -242,7 +242,7 @@ const IR::Node* DoFlattenHeaderUnion::postorder(IR::Declaration_Variable* dv) {
     return dv;
 }
 
-const IR::Node* DoFlattenHeaderUnion::postorder(IR::Member* m) {
+const IR::Node *DoFlattenHeaderUnion::postorder(IR::Member *m) {
     if (m->expr->type->to<IR::Type_HeaderUnion>()) {
         if (auto huf = m->expr->to<IR::Member>()) {
             if (replacementMap.count(huf->member.name)) {
@@ -264,7 +264,7 @@ const IR::Node* DoFlattenHeaderUnion::postorder(IR::Member* m) {
     }
     return m;
 }
-const IR::Node* DoFlattenHeaderUnion::postorder(IR::P4Action* action) {
+const IR::Node *DoFlattenHeaderUnion::postorder(IR::P4Action *action) {
     auto actiondecls = action->body->components;
     for (auto rdv : replaceDVMap) {
         if (auto decl = action->getDeclByName(rdv.first->name.name)) {
@@ -286,7 +286,7 @@ const IR::Node* DoFlattenHeaderUnion::postorder(IR::P4Action* action) {
     return action;
 }
 
-const IR::Node* DoFlattenHeaderUnion::postorder(IR::P4Parser* parser) {
+const IR::Node *DoFlattenHeaderUnion::postorder(IR::P4Parser *parser) {
     auto parserdecls = parser->parserLocals;
     for (auto rdv : replaceDVMap) {
         if (auto decl = parser->getDeclByName(rdv.first->name.name)) {
@@ -301,7 +301,7 @@ const IR::Node* DoFlattenHeaderUnion::postorder(IR::P4Parser* parser) {
     return parser;
 }
 
-const IR::Node* DoFlattenHeaderUnion::postorder(IR::P4Control* control) {
+const IR::Node *DoFlattenHeaderUnion::postorder(IR::P4Control *control) {
     auto controldecls = control->controlLocals;
     for (auto rdv : replaceDVMap) {
         if (auto decl = control->getDeclByName(rdv.first->name.name)) {

@@ -14,11 +14,11 @@ enum bmv2_gress_t { BMV2_INGRESS, BMV2_EGRESS };
 class BMv2Constants {
  public:
     /// Match bits exactly or not at all.
-    static constexpr const char* MATCH_KIND_OPT = "optional";
+    static constexpr const char *MATCH_KIND_OPT = "optional";
     /// A match that is used as an argument for the selector.
-    static constexpr const char* MATCH_KIND_SELECTOR = "selector";
+    static constexpr const char *MATCH_KIND_SELECTOR = "selector";
     /// Entries that can match a range.
-    static constexpr const char* MATCH_KIND_RANGE = "range";
+    static constexpr const char *MATCH_KIND_RANGE = "range";
 
     // These definitions are derived from the numerical values of the enum
     // named "PktInstanceType" in the p4lang/behavioral-model source file

@@ -19,7 +19,7 @@ namespace P4Tools {
 
 namespace RefersToParser {
 
-RefersToParser::RefersToParser(std::vector<std::vector<const IR::Expression*>>& output)
+RefersToParser::RefersToParser(std::vector<std::vector<const IR::Expression *>> &output)
     : restrictionsVec(output) {
     setName("RefersToParser");
 }
@@ -28,7 +28,7 @@ RefersToParser::RefersToParser(std::vector<std::vector<const IR::Expression*>>& 
 /// constraints based on them
 void RefersToParser::createConstraint(bool table, cstring currentName, cstring currentKeyName,
                                       cstring destKeyName, cstring destTableName,
-                                      const IR::Type* type) {
+                                      const IR::Type *type) {
     cstring tmp = "";
     if (table) {
         tmp = currentName + "_key_" + currentKeyName;
@@ -49,26 +49,26 @@ void RefersToParser::createConstraint(bool table, cstring currentName, cstring c
     }
     tmp = str + destTableName + "_key_" + destKeyName;
     auto right = Utils::getZombieConst(type, 0, tmp);
-    auto* expr = new IR::Equ(left, right);
-    std::vector<const IR::Expression*> constraint;
+    auto *expr = new IR::Equ(left, right);
+    std::vector<const IR::Expression *> constraint;
     constraint.push_back(expr);
     restrictionsVec.push_back(constraint);
 }
 
-void RefersToParser::postorder(const IR::Annotation* annotation) {
-    const IR::P4Action* prevAction = nullptr;
+void RefersToParser::postorder(const IR::Annotation *annotation) {
+    const IR::P4Action *prevAction = nullptr;
     if (annotation->name.name != "refers_to") {
         return;
     }
-    if (const auto* action = findOrigCtxt<IR::P4Action>()) {
+    if (const auto *action = findOrigCtxt<IR::P4Action>()) {
         if (prevAction != action) {
             actionVector.push_back(action);
             prevAction = action;
         }
-    } else if (const auto* keys = findOrigCtxt<IR::Key>()) {
-        const auto* table = findOrigCtxt<IR::P4Table>();
+    } else if (const auto *keys = findOrigCtxt<IR::Key>()) {
+        const auto *table = findOrigCtxt<IR::P4Table>();
         CHECK_NULL(table);
-        const auto* key = findOrigCtxt<IR::KeyElement>();
+        const auto *key = findOrigCtxt<IR::KeyElement>();
         CHECK_NULL(key);
         auto it = find(keys->keyElements.begin(), keys->keyElements.end(), key);
         if (it != keys->keyElements.end()) {
@@ -84,8 +84,8 @@ void RefersToParser::postorder(const IR::Annotation* annotation) {
 
 // Finds a P4Action in the actionVector according
 /// to the specified input argument which is an ActionListElement
-const IR::P4Action* RefersToParser::findAction(const IR::ActionListElement* input) {
-    for (const auto* element : actionVector) {
+const IR::P4Action *RefersToParser::findAction(const IR::ActionListElement *input) {
+    for (const auto *element : actionVector) {
         if (input->getName().name == element->name.name) {
             return element;
         }
@@ -106,18 +106,18 @@ cstring buildName(IR::Vector<IR::AnnotationToken> input) {
 /// An intermediate function that determines the type for future variables and partially
 /// collects their names for them, after which it calls the createConstraint function,
 /// which completes the construction of the constraint
-void RefersToParser::createRefersToConstraint(const IR::Vector<IR::Annotation>& annotations,
-                                              const IR::Type* inputType, cstring controlPlaneName,
+void RefersToParser::createRefersToConstraint(const IR::Vector<IR::Annotation> &annotations,
+                                              const IR::Type *inputType, cstring controlPlaneName,
                                               int id, bool isParameter, cstring inputName) {
     cstring currentKeyName = inputName;
-    const IR::Type* type = nullptr;
-    for (const auto* annotation : annotations) {
+    const IR::Type *type = nullptr;
+    for (const auto *annotation : annotations) {
         if (annotation->name.name == "refers_to") {
             cstring destTableName = annotation->body[0]->text;
             cstring destKeyName = buildName(annotation->body);
-            if (const auto* bit = inputType->to<IR::Type_Bits>()) {
+            if (const auto *bit = inputType->to<IR::Type_Bits>()) {
                 type = bit;
-            } else if (const auto* varbit = inputType->to<IR::Extracted_Varbits>()) {
+            } else if (const auto *varbit = inputType->to<IR::Extracted_Varbits>()) {
                 type = varbit;
             } else if (inputType->is<IR::Type_Boolean>()) {
                 type = IR::Type_Bits::get(1);
@@ -136,15 +136,15 @@ void RefersToParser::createRefersToConstraint(const IR::Vector<IR::Annotation>& 
     }
 }
 
-void RefersToParser::postorder(const IR::ActionListElement* action) {
-    const auto* actionCall = findAction(action);
+void RefersToParser::postorder(const IR::ActionListElement *action) {
+    const auto *actionCall = findAction(action);
     if (actionCall == nullptr) {
         return;
     }
-    if (const auto* table = findOrigCtxt<IR::P4Table>()) {
+    if (const auto *table = findOrigCtxt<IR::P4Table>()) {
         if (actionCall->parameters != nullptr) {
             int id = 0;
-            for (const auto* parameter : actionCall->parameters->parameters) {
+            for (const auto *parameter : actionCall->parameters->parameters) {
                 if (parameter->annotations != nullptr) {
                     createRefersToConstraint(parameter->annotations->annotations, parameter->type,
                                              table->controlPlaneName(), id, true,

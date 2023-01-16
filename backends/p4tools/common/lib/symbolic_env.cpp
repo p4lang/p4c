@@ -19,7 +19,7 @@
 
 namespace P4Tools {
 
-const IR::Expression* SymbolicEnv::get(const StateVariable& var) const {
+const IR::Expression *SymbolicEnv::get(const StateVariable &var) const {
     auto it = map.find(var);
     if (it != map.end()) {
         return it->second;
@@ -27,34 +27,34 @@ const IR::Expression* SymbolicEnv::get(const StateVariable& var) const {
     BUG("Unable to find var %s in the symbolic environment.", var->toString());
 }
 
-bool SymbolicEnv::exists(const StateVariable& var) const { return map.find(var) != map.end(); }
+bool SymbolicEnv::exists(const StateVariable &var) const { return map.find(var) != map.end(); }
 
-void SymbolicEnv::set(const StateVariable& var, const IR::Expression* value) {
+void SymbolicEnv::set(const StateVariable &var, const IR::Expression *value) {
     map[var] = P4::optimizeExpression(value);
 }
 
-Model* SymbolicEnv::complete(const Model& model) const {
+Model *SymbolicEnv::complete(const Model &model) const {
     // Produce a new model based on the input model
     // Add the variables contained in this environment and try to complete them.
-    auto* newModel = new Model(model);
+    auto *newModel = new Model(model);
     newModel->complete(map);
     return newModel;
 }
 
-Model* SymbolicEnv::evaluate(const Model& model) const {
+Model *SymbolicEnv::evaluate(const Model &model) const {
     // Produce a new model based on the input model
     return model.evaluate(map);
 }
 
-const IR::Expression* SymbolicEnv::subst(const IR::Expression* expr) const {
+const IR::Expression *SymbolicEnv::subst(const IR::Expression *expr) const {
     /// Traverses the IR to perform substitution.
     class SubstVisitor : public Transform {
-        const SymbolicEnv& symbolicEnv;
+        const SymbolicEnv &symbolicEnv;
 
-        const IR::Node* preorder(IR::Member* member) override {
+        const IR::Node *preorder(IR::Member *member) override {
             prune();
             if (symbolicEnv.exists(member)) {
-                const auto* result = symbolicEnv.get(member);
+                const auto *result = symbolicEnv.get(member);
                 // Sometimes the symbolic constant and its declaration in the environment are the
                 // same. We check if they are equal and return the member instead.
                 if (member->equiv(*result)) {
@@ -66,22 +66,22 @@ const IR::Expression* SymbolicEnv::subst(const IR::Expression* expr) const {
         }
 
      public:
-        explicit SubstVisitor(const SymbolicEnv& symbolicEnv) : symbolicEnv(symbolicEnv) {}
+        explicit SubstVisitor(const SymbolicEnv &symbolicEnv) : symbolicEnv(symbolicEnv) {}
     };
 
     return expr->apply(SubstVisitor(*this));
 }
 
-const SymbolicMapType& SymbolicEnv::getInternalMap() const { return map; }
+const SymbolicMapType &SymbolicEnv::getInternalMap() const { return map; }
 
-bool SymbolicEnv::isSymbolicValue(const IR::Node* node) {
+bool SymbolicEnv::isSymbolicValue(const IR::Node *node) {
     // Parser states are symbolic values.
     if (node->is<IR::ParserState>()) {
         return true;
     }
 
     // All other symbolic values are P4 expressions.
-    const auto* expr = node->to<IR::Expression>();
+    const auto *expr = node->to<IR::Expression>();
     if (expr == nullptr) {
         return false;
     }
@@ -109,17 +109,17 @@ bool SymbolicEnv::isSymbolicValue(const IR::Node* node) {
     }
 
     // Symbolic constants are references to fields under the struct p4t*zombie.const.
-    if (const auto* member = expr->to<IR::Member>()) {
+    if (const auto *member = expr->to<IR::Member>()) {
         return Zombie::isSymbolicConst(member);
     }
 
     // Symbolic values can be composed using several IR nodes.
-    if (const auto* unary = expr->to<IR::Operation_Unary>()) {
+    if (const auto *unary = expr->to<IR::Operation_Unary>()) {
         return (unary->is<IR::Neg>() || unary->is<IR::LNot>() || unary->is<IR::Cmpl>() ||
                 unary->is<IR::Cast>()) &&
                isSymbolicValue(unary->expr);
     }
-    if (const auto* binary = expr->to<IR::Operation_Binary>()) {
+    if (const auto *binary = expr->to<IR::Operation_Binary>()) {
         if (binary->is<IR::ArrayIndex>()) {
             return isSymbolicValue(binary->right);
         }
@@ -132,18 +132,18 @@ bool SymbolicEnv::isSymbolicValue(const IR::Node* node) {
                 binary->is<IR::Concat>() || binary->is<IR::Mask>()) &&
                isSymbolicValue(binary->left) && isSymbolicValue(binary->right);
     }
-    if (const auto* slice = expr->to<IR::Slice>()) {
+    if (const auto *slice = expr->to<IR::Slice>()) {
         return isSymbolicValue(slice->e0) && isSymbolicValue(slice->e1) &&
                isSymbolicValue(slice->e2);
     }
-    if (const auto* listExpr = expr->to<IR::ListExpression>()) {
+    if (const auto *listExpr = expr->to<IR::ListExpression>()) {
         return std::all_of(
             listExpr->components.begin(), listExpr->components.end(),
-            [](const IR::Expression* component) { return isSymbolicValue(component); });
+            [](const IR::Expression *component) { return isSymbolicValue(component); });
     }
-    if (const auto* structExpr = expr->to<IR::StructExpression>()) {
+    if (const auto *structExpr = expr->to<IR::StructExpression>()) {
         return std::all_of(structExpr->components.begin(), structExpr->components.end(),
-                           [](const IR::NamedExpression* component) {
+                           [](const IR::NamedExpression *component) {
                                return isSymbolicValue(component->expression);
                            });
     }

@@ -49,9 +49,9 @@ class Graph_visitor : public Graphs {
          * @param from graph that will be copied
          * @param to graph to which "from" will be copied
          */
-        edge_name_copier(const Graph& from, Graph& to) : from(from), to(to) {}
-        const Graph& from;
-        Graph& to;
+        edge_name_copier(const Graph &from, Graph &to) : from(from), to(to) {}
+        const Graph &from;
+        Graph &to;
 
         void operator()(Graph::edge_descriptor input, Graph::edge_descriptor output) const {
             auto label = boost::get(boost::edge_name, from, input);
@@ -67,8 +67,8 @@ class Graph_visitor : public Graphs {
      * @param fullGraph option to create fullGraph
      * @param jsonOut option to create json fullGraph
      */
-    Graph_visitor(const cstring& graphsDir, const bool graphs, const bool fullGraph,
-                  const bool jsonOut, const cstring& filename)
+    Graph_visitor(const cstring &graphsDir, const bool graphs, const bool fullGraph,
+                  const bool jsonOut, const cstring &filename)
         : graphsDir(graphsDir),
           graphs(graphs),
           fullGraph(fullGraph),
@@ -79,13 +79,13 @@ class Graph_visitor : public Graphs {
      * @param v_type VertexType to map
      * @return string representation of v_type
      */
-    const char* getType(const VertexType& v_type);
+    const char *getType(const VertexType &v_type);
     /**
      * @brief Maps PrevType to string
      * @param prev_type PrevType to map
      * @return string representation of prev_type
      */
-    const char* getPrevType(const PrevType& prev_type);
+    const char *getPrevType(const PrevType &prev_type);
     /**
      * @brief main function
      *
@@ -98,13 +98,13 @@ class Graph_visitor : public Graphs {
      * @param controlGraphsArray vector with boost graphs of control blocks
      * @param parserGraphsArray vector with boost graphs of control parsers
      */
-    void process(std::vector<Graph*>& controlGraphsArray, std::vector<Graph*>& parserGraphsArray);
+    void process(std::vector<Graph *> &controlGraphsArray, std::vector<Graph *> &parserGraphsArray);
     /**
      * @brief Writes boost graph "g" in dot format to file given by "name"
      * @param g boost graph
      * @param name file name
      */
-    void writeGraphToFile(const Graph& g, const cstring& name);
+    void writeGraphToFile(const Graph &g, const cstring &name);
 
  private:
     /**
@@ -113,7 +113,7 @@ class Graph_visitor : public Graphs {
      * @param prev_type represents whether graphs in graphsArray are of type control or parser
      *
      */
-    void forLoopJson(std::vector<Graph*>& graphsArray, PrevType prev_type);
+    void forLoopJson(std::vector<Graph *> &graphsArray, PrevType prev_type);
     /**
      * @brief Loops over vector graphsArray with boost graphs, creating fullgraph
      * It basically merges all graphs in graphsArray into one CFG
@@ -121,11 +121,11 @@ class Graph_visitor : public Graphs {
      * @param[in,out] opts stores fullgraph and needed variables used for indexing
      * @param prev_type used to correctly connect subgraphs of parser and control type
      */
-    void forLoopFullGraph(std::vector<Graph*>& graphsArray, fullGraphOpts* opts,
+    void forLoopFullGraph(std::vector<Graph *> &graphsArray, fullGraphOpts *opts,
                           PrevType prev_type);
 
-    Util::JsonObject* json;                    // stores json that will be outputted
-    Util::JsonArray* programBlocks = nullptr;  // stores objects in top level array "nodes"
+    Util::JsonObject *json;                    // stores json that will be outputted
+    Util::JsonArray *programBlocks = nullptr;  // stores objects in top level array "nodes"
     const cstring graphsDir;
     // options
     const bool graphs;     // output boost graphs to files

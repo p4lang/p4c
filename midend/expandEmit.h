@@ -42,25 +42,25 @@ namespace P4 {
  * emit(s.h2[1]);
  */
 class DoExpandEmit : public Transform {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
 
  public:
-    DoExpandEmit(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
+    DoExpandEmit(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("DoExpandEmit");
     }
     // return true if the expansion produced something "new"
-    bool expandArg(const IR::Type* type, const IR::Argument* argument,
-                   std::vector<const IR::Argument*>* result,
-                   std::vector<const IR::Type*>* resultTypes);
-    const IR::Node* postorder(IR::MethodCallStatement* statement) override;
+    bool expandArg(const IR::Type *type, const IR::Argument *argument,
+                   std::vector<const IR::Argument *> *result,
+                   std::vector<const IR::Type *> *resultTypes);
+    const IR::Node *postorder(IR::MethodCallStatement *statement) override;
 };
 
 class ExpandEmit : public PassManager {
  public:
-    ExpandEmit(ReferenceMap* refMap, TypeMap* typeMap, TypeChecking* typeChecking = nullptr) {
+    ExpandEmit(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
         setName("ExpandEmit");
         if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);

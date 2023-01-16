@@ -44,23 +44,23 @@ namespace P4 {
  */
 class DoStrengthReduction final : public Transform {
     /// @returns `true` if @p expr is the constant `1`.
-    bool isOne(const IR::Expression* expr) const;
+    bool isOne(const IR::Expression *expr) const;
     /// @returns `true` if @p expr is the constant `0`.
-    bool isZero(const IR::Expression* expr) const;
+    bool isZero(const IR::Expression *expr) const;
     /// @returns `true` if @p expr is the constant `true`.
-    bool isTrue(const IR::Expression* expr) const;
+    bool isTrue(const IR::Expression *expr) const;
     /// @returns `true` if @p expr is the constant `false`.
-    bool isFalse(const IR::Expression* expr) const;
+    bool isFalse(const IR::Expression *expr) const;
     /// @returns `true` if @p expr is all ones.
-    bool isAllOnes(const IR::Expression* expr) const;
+    bool isAllOnes(const IR::Expression *expr) const;
     /// @returns the logarithm (base 2) of @p expr if it is positive
     /// and a power of `2` and `-1` otherwise.
-    int isPowerOf2(const IR::Expression* expr) const;
+    int isPowerOf2(const IR::Expression *expr) const;
 
     /// Used to determine conservatively if an expression
     /// has side-effects.  If we had a refMap or a typeMap
     /// we could use them here.
-    bool hasSideEffects(const IR::Expression* expr) const {
+    bool hasSideEffects(const IR::Expression *expr) const {
         return SideEffects::check(expr, this, nullptr, nullptr);
     }
 
@@ -72,30 +72,30 @@ class DoStrengthReduction final : public Transform {
 
     using Transform::postorder;
 
-    const IR::Node* postorder(IR::Cmpl* expr) override;
-    const IR::Node* postorder(IR::BAnd* expr) override;
-    const IR::Node* postorder(IR::BOr* expr) override;
-    const IR::Node* postorder(IR::Equ* expr) override;
-    const IR::Node* postorder(IR::Neq* expr) override;
-    const IR::Node* postorder(IR::BXor* expr) override;
-    const IR::Node* postorder(IR::LAnd* expr) override;
-    const IR::Node* postorder(IR::LOr* expr) override;
-    const IR::Node* postorder(IR::LNot* expr) override;
-    const IR::Node* postorder(IR::Sub* expr) override;
-    const IR::Node* postorder(IR::Add* expr) override;
-    const IR::Node* postorder(IR::UPlus* expr) override;
-    const IR::Node* postorder(IR::Shl* expr) override;
-    const IR::Node* postorder(IR::Shr* expr) override;
-    const IR::Node* postorder(IR::Mul* expr) override;
-    const IR::Node* postorder(IR::Div* expr) override;
-    const IR::Node* postorder(IR::Mod* expr) override;
-    const IR::Node* postorder(IR::Mux* expr) override;
-    const IR::Node* postorder(IR::Slice* expr) override;
-    const IR::Node* postorder(IR::Mask* expr) override;
-    const IR::Node* postorder(IR::Range* expr) override;
-    const IR::Node* postorder(IR::Concat* expr) override;
+    const IR::Node *postorder(IR::Cmpl *expr) override;
+    const IR::Node *postorder(IR::BAnd *expr) override;
+    const IR::Node *postorder(IR::BOr *expr) override;
+    const IR::Node *postorder(IR::Equ *expr) override;
+    const IR::Node *postorder(IR::Neq *expr) override;
+    const IR::Node *postorder(IR::BXor *expr) override;
+    const IR::Node *postorder(IR::LAnd *expr) override;
+    const IR::Node *postorder(IR::LOr *expr) override;
+    const IR::Node *postorder(IR::LNot *expr) override;
+    const IR::Node *postorder(IR::Sub *expr) override;
+    const IR::Node *postorder(IR::Add *expr) override;
+    const IR::Node *postorder(IR::UPlus *expr) override;
+    const IR::Node *postorder(IR::Shl *expr) override;
+    const IR::Node *postorder(IR::Shr *expr) override;
+    const IR::Node *postorder(IR::Mul *expr) override;
+    const IR::Node *postorder(IR::Div *expr) override;
+    const IR::Node *postorder(IR::Mod *expr) override;
+    const IR::Node *postorder(IR::Mux *expr) override;
+    const IR::Node *postorder(IR::Slice *expr) override;
+    const IR::Node *postorder(IR::Mask *expr) override;
+    const IR::Node *postorder(IR::Range *expr) override;
+    const IR::Node *postorder(IR::Concat *expr) override;
 
-    const IR::BlockStatement* preorder(IR::BlockStatement* bs) override {
+    const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {
         if (bs->annotations->getSingle("disable_optimization")) prune();
         return bs;
     }
@@ -103,8 +103,8 @@ class DoStrengthReduction final : public Transform {
 
 class StrengthReduction : public PassManager {
  public:
-    StrengthReduction(ReferenceMap* refMap, TypeMap* typeMap,
-                      TypeChecking* typeChecking = nullptr) {
+    StrengthReduction(ReferenceMap *refMap, TypeMap *typeMap,
+                      TypeChecking *typeChecking = nullptr) {
         if (typeMap != nullptr) {
             if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap, true);
             passes.push_back(typeChecking);

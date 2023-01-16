@@ -39,15 +39,15 @@ class ExternMethodImpls {
     /// @returns true if a matching extern-method implementation was found; false otherwise.
     ///
     /// A BUG occurs if the receiver is not an extern or if the call is ambiguous.
-    bool exec(const IR::MethodCallExpression* call, const IR::Expression* receiver, IR::ID& name,
-              const IR::Vector<IR::Argument>* args, const ExecutionState& state,
-              SmallStepEvaluator::Result& result) const;
+    bool exec(const IR::MethodCallExpression *call, const IR::Expression *receiver, IR::ID &name,
+              const IR::Vector<IR::Argument> *args, const ExecutionState &state,
+              SmallStepEvaluator::Result &result) const;
 
     /// The type of an extern-method implementation. See @ref exec for an explanation of the
     /// arguments.
-    using MethodImpl = std::function<void(const IR::MethodCallExpression*, const IR::Expression*,
-                                          IR::ID&, const IR::Vector<IR::Argument>*,
-                                          const ExecutionState&, SmallStepEvaluator::Result&)>;
+    using MethodImpl = std::function<void(const IR::MethodCallExpression *, const IR::Expression *,
+                                          IR::ID &, const IR::Vector<IR::Argument> *,
+                                          const ExecutionState &, SmallStepEvaluator::Result &)>;
 
  private:
     /// A two-level map. First-level keys are method names qualified by the extern type name (e.g.,
@@ -58,8 +58,8 @@ class ExternMethodImpls {
     /// Determines whether the given list of parameter names matches the given argument list.
     /// According to the P4 specification, a match occurs when the lists have the same length and
     /// the name of any named argument matches the name of the corresponding parameter.
-    static bool matches(const std::vector<cstring>& paramNames,
-                        const IR::Vector<IR::Argument>* args);
+    static bool matches(const std::vector<cstring> &paramNames,
+                        const IR::Vector<IR::Argument> *args);
 
  public:
     /// Represents a list of extern method implementations. The components of each element in this
@@ -69,7 +69,7 @@ class ExternMethodImpls {
     ///   3. The method's implementation.
     using ImplList = std::list<std::tuple<cstring, std::vector<cstring>, MethodImpl>>;
 
-    explicit ExternMethodImpls(const ImplList& implList);
+    explicit ExternMethodImpls(const ImplList &implList);
 };
 
 }  // namespace P4Testgen

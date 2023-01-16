@@ -35,21 +35,21 @@ std::string JsonObject::get_type() const {
     if (find("Node_Type") == end())
         return "";
     else
-        return *(dynamic_cast<JsonString*>(find("Node_Type")->second));
+        return *(dynamic_cast<JsonString *>(find("Node_Type")->second));
 }
 
 std::string JsonObject::get_filename() const {
     if (find("filename") == end())
         return "";
     else
-        return *(dynamic_cast<JsonString*>(find("filename")->second));
+        return *(dynamic_cast<JsonString *>(find("filename")->second));
 }
 
 std::string JsonObject::get_sourceFragment() const {
     if (find("source_fragment") == end())
         return "";
     else
-        return *(dynamic_cast<JsonString*>(find("source_fragment")->second));
+        return *(dynamic_cast<JsonString *>(find("source_fragment")->second));
 }
 
 int JsonObject::get_line() const {
@@ -72,7 +72,7 @@ JsonObject JsonObject::get_sourceJson() const {
         obj.setSrcInfo(false);
         return obj;
     } else {
-        return *(dynamic_cast<JsonObject*>(find("Source_Info")->second));
+        return *(dynamic_cast<JsonObject *>(find("Source_Info")->second));
     }
 }
 
@@ -85,54 +85,54 @@ std::string getIndent(int l) {
     return ss.str();
 }
 
-std::ostream& operator<<(std::ostream& out, JsonData* json) {
-    if (dynamic_cast<JsonObject*>(json)) {
-        auto obj = dynamic_cast<ordered_map<std::string, JsonData*>*>(json);
+std::ostream &operator<<(std::ostream &out, JsonData *json) {
+    if (dynamic_cast<JsonObject *>(json)) {
+        auto obj = dynamic_cast<ordered_map<std::string, JsonData *> *>(json);
         out << "{";
         if (obj->size() > 0) {
             level++;
             out << std::endl;
-            for (auto& e : *obj)
+            for (auto &e : *obj)
                 out << getIndent(level) << e.first << " : " << e.second << "," << std::endl;
             out << getIndent(--level);
         }
         out << "}";
-    } else if (dynamic_cast<JsonVector*>(json)) {
-        std::vector<JsonData*>* vec = dynamic_cast<std::vector<JsonData*>*>(json);
+    } else if (dynamic_cast<JsonVector *>(json)) {
+        std::vector<JsonData *> *vec = dynamic_cast<std::vector<JsonData *> *>(json);
         out << "[";
         if (vec->size() > 0) {
             level++;
             out << std::endl;
-            for (auto& e : *vec) {
+            for (auto &e : *vec) {
                 out << getIndent(level) << e << "," << std::endl;
             }
             out << getIndent(--level);
         }
         out << "]";
-    } else if (dynamic_cast<JsonString*>(json)) {
-        JsonString* s = dynamic_cast<JsonString*>(json);
+    } else if (dynamic_cast<JsonString *>(json)) {
+        JsonString *s = dynamic_cast<JsonString *>(json);
         out << "\"" << s->c_str() << "\"";
 
-    } else if (dynamic_cast<JsonNumber*>(json)) {
-        JsonNumber* num = dynamic_cast<JsonNumber*>(json);
+    } else if (dynamic_cast<JsonNumber *>(json)) {
+        JsonNumber *num = dynamic_cast<JsonNumber *>(json);
         out << num->val;
 
-    } else if (dynamic_cast<JsonBoolean*>(json)) {
-        JsonBoolean* b = dynamic_cast<JsonBoolean*>(json);
+    } else if (dynamic_cast<JsonBoolean *>(json)) {
+        JsonBoolean *b = dynamic_cast<JsonBoolean *>(json);
         out << (b->val ? "true" : "false");
-    } else if (dynamic_cast<JsonNull*>(json)) {
+    } else if (dynamic_cast<JsonNull *>(json)) {
         out << "null";
     }
     return out;
 }
 
-std::istream& operator>>(std::istream& in, JsonData*& json) {
+std::istream &operator>>(std::istream &in, JsonData *&json) {
     while (in) {
         char ch;
         in >> ch;
         switch (ch) {
             case '{': {
-                ordered_map<std::string, JsonData*> obj;
+                ordered_map<std::string, JsonData *> obj;
                 do {
                     in >> std::ws >> ch;
                     if (ch == '}') break;
@@ -140,7 +140,7 @@ std::istream& operator>>(std::istream& in, JsonData*& json) {
 
                     JsonData *key, *val;
                     in >> key >> std::ws >> ch >> std::ws >> val;
-                    obj[*(dynamic_cast<std::string*>(key))] = val;
+                    obj[*(dynamic_cast<std::string *>(key))] = val;
 
                     in >> std::ws >> ch;
                 } while (in && ch != '}');
@@ -149,13 +149,13 @@ std::istream& operator>>(std::istream& in, JsonData*& json) {
                 return in;
             }
             case '[': {
-                std::vector<JsonData*> vec;
+                std::vector<JsonData *> vec;
                 do {
                     in >> std::ws >> ch;
                     if (ch == ']') break;
                     in.unget();
 
-                    JsonData* elem;
+                    JsonData *elem;
                     in >> elem;
                     vec.push_back(elem);
 

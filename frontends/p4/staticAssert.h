@@ -28,19 +28,19 @@ namespace P4 {
  * A successful assertion is constant-folded to 'true'.
  */
 class DoStaticAssert : public Transform {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
     bool removeStatement;
 
  public:
-    DoStaticAssert(ReferenceMap* refMap, TypeMap* typeMap)
+    DoStaticAssert(ReferenceMap *refMap, TypeMap *typeMap)
         : refMap(refMap), typeMap(typeMap), removeStatement(false) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("DoStaticAssert");
     }
-    const IR::Node* postorder(IR::MethodCallExpression* method) override {
-        MethodInstance* mi = MethodInstance::resolve(method, refMap, typeMap);
+    const IR::Node *postorder(IR::MethodCallExpression *method) override {
+        MethodInstance *mi = MethodInstance::resolve(method, refMap, typeMap);
         if (auto ef = mi->to<ExternFunction>()) {
             if (ef->method->name == "static_assert") {
                 auto subst = ef->substitution;
@@ -84,7 +84,7 @@ class DoStaticAssert : public Transform {
         return method;
     }
 
-    const IR::Node* postorder(IR::MethodCallStatement* statement) override {
+    const IR::Node *postorder(IR::MethodCallStatement *statement) override {
         if (removeStatement) {
             removeStatement = false;
             return nullptr;
@@ -95,7 +95,7 @@ class DoStaticAssert : public Transform {
 
 class StaticAssert : public PassManager {
  public:
-    StaticAssert(ReferenceMap* refMap, TypeMap* typeMap) {
+    StaticAssert(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new TypeInference(refMap, typeMap));
         passes.push_back(new DoStaticAssert(refMap, typeMap));
         setName("StaticAssert");

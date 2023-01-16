@@ -29,7 +29,7 @@ namespace P4 {
  */
 class SwitchAddDefault : public Modifier {
  public:
-    void postorder(IR::SwitchStatement*) override;
+    void postorder(IR::SwitchStatement *) override;
 };
 
 }  // namespace P4
