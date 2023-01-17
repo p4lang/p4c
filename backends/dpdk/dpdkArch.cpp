@@ -2980,7 +2980,8 @@ const IR::Node *MoveNonHeaderFieldsToPseudoHeader::postorder(IR::MethodCallState
                         } else if (arg->expression->is<IR::Constant>() ||
                                    arg->expression->is<IR::Member>()) {
                             auto m = arg->expression->to<IR::Member>();
-                            if (m && typeMap->getType(m->expr, true)->is<IR::Type_Header>()) {
+                            if (m && (typeMap->getType(m, true)->is<IR::Type_Header>() ||
+                                      typeMap->getType(m->expr, true)->is<IR::Type_Header>())) {
                                 break;
                             }
                             added_copy = true;
