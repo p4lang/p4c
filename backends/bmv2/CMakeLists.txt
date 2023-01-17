@@ -197,6 +197,8 @@ if (HAVE_SIMPLE_SWITCH)
     p4c_add_test_with_args("bmv2" ${BMV2_DRIVER} FALSE "bmv2_emit_externs" "testdata/p4_16_samples/extern-funcs-bmv2.p4" "-a=--emit-externs --target-specific-switch-arg=\"--load-modules ${CMAKE_CURRENT_BINARY_DIR}/libextern_func_module.so\" --init=\"make extern_func_module\"" "")
     p4c_add_tests("bmv2-parser-inline-opt-disabled" ${BMV2_DRIVER} "${BMV2_PARSER_INLINE_TESTS}" "")
     p4c_add_tests("bmv2-parser-inline-opt-enabled" ${BMV2_DRIVER} "${BMV2_PARSER_INLINE_TESTS}" "" "-a=--parser-inline-opt")
+
+    p4c_add_test_with_args("bmv2-ptf" "sudo -E ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-ptf-test.py" FALSE "ternary2-bmv2.p4" testdata/p4_16_samples/ternary2-bmv2.p4 "" "")
   endif()
 else()
   MESSAGE(WARNING "BMv2 simple switch is not available, not adding v1model BMv2 tests")

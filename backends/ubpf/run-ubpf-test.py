@@ -28,8 +28,9 @@ if __name__ == "__main__":
     # Parse options and process argv
     args, argv = arg_parser.parse_known_args()
     options = run_ebpf_test.Options()
-    options.compiler = run_ebpf_test.check_if_file(args.compiler)
-    options.p4filename = run_ebpf_test.check_if_file(args.p4filename)
+    # TODO: Convert these paths to pathlib's Path.
+    options.compiler = run_ebpf_test.check_if_file(args.compiler).as_posix()
+    options.p4filename = run_ebpf_test.check_if_file(args.p4filename).as_posix()
     options.verbose = args.verbose
     options.replace = args.replace
     options.cleanupTmp = args.nocleanup
