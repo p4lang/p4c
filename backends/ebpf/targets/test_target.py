@@ -14,19 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import sys
 from glob import glob
+from pathlib import Path
 from .target import EBPFTarget
+
 # path to the tools folder of the compiler
-sys.path.insert(0, os.path.dirname(
-    os.path.realpath(__file__)) + '/../../../tools')
-from testutils import *
+# Append tools to the import path.
+FILE_DIR = Path(__file__).resolve().parent
+# Append tools to the import path.
+sys.path.append(str(FILE_DIR.joinpath("../../../tools")))
+import testutils
 
 
 class Target(EBPFTarget):
-    def __init__(self, tmpdir, options, template, outputs):
-        EBPFTarget.__init__(self, tmpdir, options, template, outputs)
+    def __init__(self, tmpdir, options, template):
+        EBPFTarget.__init__(self, tmpdir, options, template)
 
     def compile_dataplane(self):
         args = self.get_make_args(self.runtimedir, self.options.target)
@@ -45,18 +48,14 @@ class Target(EBPFTarget):
             # need to include the temporary dir because of the tmp import
             args += "INCLUDES+=-I" + self.tmpdir + " "
         errmsg = "Failed to build the filter:"
-        return run_timeout(self.options.verbose, args, TIMEOUT,
-                           self.outputs, errmsg)
+        return testutils.exec_process(args, errmsg).returncode
 
     def run(self):
-        report_output(self.outputs["stdout"],
-                      self.options.verbose, "Running model")
+        testutils.log.info("Running model")
         direction = "in"
-        pcap_pattern = self.filename('', direction)
-        num_files = len(glob(self.filename('*', direction)))
-        report_output(self.outputs["stdout"],
-                      self.options.verbose,
-                      "Input file: %s" % pcap_pattern)
+        pcap_pattern = self.filename("", direction)
+        num_files = len(glob(self.filename("*", direction)))
+        testutils.log.info(f"Input file: {pcap_pattern}")
         # Main executable
         args = self.template + " "
         # Input pcap pattern
@@ -66,6 +65,5 @@ class Target(EBPFTarget):
         # Debug flag (verbose output)
         args += "-d"
         errmsg = "Failed to execute the filter:"
-        result = run_timeout(self.options.verbose, args,
-                             TIMEOUT, self.outputs, errmsg)
+        result = testutils.exec_process(args, errmsg).returncode
         return result

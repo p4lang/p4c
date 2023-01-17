@@ -16,155 +16,155 @@
     interfaces. The bridge runs in a completely isolated namespace.
     Allows the loading and testing of eBPF programs. """
 
-import os
 import sys
-from subprocess import Popen, PIPE
+import logging
+from pathlib import Path
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/../../tools')
-from testutils import *
+# Append tools to the import path.
+FILE_DIR = Path(__file__).resolve().parent
+# Append tools to the import path.
+sys.path.append(str(FILE_DIR.joinpath("../../../tools")))
+import testutils
 
-
-class Bridge(object):
-
-    def __init__(self, namespace, outputs, verbose):
+class Bridge:
+    def __init__(self, namespace):
         self.ns_name = namespace  # identifier of the namespace
         self.br_name = "core"  # name of the central bridge
         self.br_ports = []  # list of the veth pair bridge ports
         self.edge_ports = []  # list of the veth pair edge ports
-        self.outputs = outputs  # contains standard and error output
-        self.verbose = verbose  # do we want to be chatty?
 
     def ns_init(self):
-        """ Initialize the namespace. """
-        cmd = "ip netns add %s" % self.ns_name
-        errmsg = "Failed to create namespace %s :" % self.ns_name
-        result = run_timeout(self.verbose, cmd, TIMEOUT, self.outputs, errmsg)
+        """Initialize the namespace."""
+        cmd = f"ip netns add {self.ns_name}"
+        errmsg = f"Failed to create namespace {self.ns_name} :"
+        result = testutils.exec_process(cmd, errmsg).returncode
         self.ns_exec("ip link set dev lo up")
         return result
 
     def ns_del(self):
-        """ Delete the namespace. """
-        cmd = f"ip netns pids {self.ns_name} | xargs kill; ip netns del {self.ns_name}"
-        errmsg = "Failed to delete namespace %s :" % self.ns_name
-        return run_timeout(self.verbose, cmd, TIMEOUT, self.outputs, errmsg)
+        """Delete the namespace and with it all the process running in it."""
+        cmd = f"ip netns pids {self.ns_name} | xargs -r kill; ip netns del {self.ns_name}"
+        errmsg = f"Failed to delete namespace {self.ns_name} :"
+        return testutils.exec_process(cmd, errmsg).returncode
 
     def get_ns_prefix(self):
-        """ Return the command prefix for the namespace of this bridge class.
-            """
-        return "ip netns exec %s" % self.ns_name
+        """Return the command prefix for the namespace of this bridge class."""
+        return f"ip netns exec {self.ns_name}"
 
     def ns_exec(self, cmd_string):
-        """ Run and execute an isolated command in the namespace. """
+        """Run and execute an isolated command in the namespace."""
         prefix = self.get_ns_prefix()
         # bash -c allows us to run multiple commands at once
-        cmd = "%s bash -c \"%s\"" % (prefix, cmd_string)
-        errmsg = "Failed to run command %s in namespace %s:" % (cmd,
-                                                                self.ns_name)
-        return run_timeout(self.verbose, cmd, TIMEOUT, self.outputs, errmsg)
+        cmd = f'{prefix} bash -c "{cmd_string}"'
+        errmsg = f"Failed to run command {cmd} in namespace {self.ns_name}:"
+        return testutils.exec_process(cmd, errmsg).returncode
 
     def ns_proc_open(self):
-        """ Open a bash process in the namespace and return the handle """
+        """Open a bash process in the namespace and return the handle"""
         cmd = self.get_ns_prefix() + " /usr/bin/env bash "
-        return open_process(self.verbose, cmd, self.outputs)
+        return testutils.open_process(cmd)
 
     def ns_proc_write(self, proc, cmd):
-        """ Allows writing of a command to a given process. The command is NOT
-            yet executed. """
-        report_output(self.outputs["stdout"], self.verbose,
-                      "Writing %s " % cmd)
+        """Allows writing of a command to a given process. The command is NOT
+        yet executed."""
+        testutils.log.info(f"Writing {cmd} ")
         try:
             proc.stdin.write(cmd)
         except IOError as e:
-            err_text = "Error while writing to process"
-            report_err(self.outputs["stdout"], err_text, e)
-            return FAILURE
-        return SUCCESS
+            testutils.log.error(f"Error while writing to process\n{e}")
+            return testutils.FAILURE
+        return testutils.SUCCESS
 
     def ns_proc_append(self, proc, cmd):
-        """ Append a command to an open process. """
+        """Append a command to an open process."""
         return self.ns_proc_write(proc, " && " + cmd)
 
     def ns_proc_close(self, proc):
-        report_output(self.outputs["stdout"], self.verbose,
-                      "Executing command.")
-        """ Close and actually run the process in the namespace. Returns the
-            exit code. """
-        errmsg = ("Failed to execute the command"
-                  " sequence in namespace %s" % self.ns_name)
-        return run_process(self.verbose, proc, TIMEOUT, self.outputs, errmsg)
+        """Close and actually run the process in the namespace. Returns the
+        exit code."""
+        testutils.log.info("Executing command.")
+        errmsg = f"Failed to execute the command sequence in namespace {self.ns_name}"
+        return testutils.run_process(proc, testutils.TIMEOUT, errmsg)
 
     def _configure_bridge(self, br_name):
-        """ Set the bridge active. We also disable IPv6 to
-            avoid ICMPv6 spam. """
+        """Set the bridge active. We also disable IPv6 to
+        avoid ICMPv6 spam."""
         # We do not care about failures here
-        self.ns_exec("ip link set dev %s up" % br_name)
-        self.ns_exec("ip link set dev %s mtu 9000" % br_name)
+        self.ns_exec(f"ip link set dev {br_name} up")
+        self.ns_exec(f"ip link set dev {br_name} mtu 9000")
         # Prevent the broadcasting of ipv6 link discovery messages
         self.ns_exec("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
         self.ns_exec("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
         # Also filter igmp packets, -w is necessary because of a race condition
         self.ns_exec("iptables -w -A OUTPUT -p 2 -j DROP")
-        return SUCCESS
+        return testutils.SUCCESS
 
     def create_bridge(self):
-        """ Create the central bridge of the environment and configure it. """
-        result = self.ns_exec("ip link add %s type bridge" % self.br_name)
-        if result != SUCCESS:
+        """Create the central bridge of the environment and configure it."""
+        result = self.ns_exec(f"ip link add {self.br_name} type bridge")
+        if result != testutils.SUCCESS:
             return result
         return self._configure_bridge(self.br_name)
 
     def _configure_bridge_port(self, port_name):
-        """ Set a bridge port active. """
-        cmd = "ip link set dev %s up" % port_name
-        cmd += " && ip link set dev %s mtu 9000" % port_name
+        """Set a bridge port active."""
+        cmd = f"ip link set dev {port_name} up"
+        cmd += f" && ip link set dev {port_name} mtu 9000"
         return self.ns_exec(cmd)
 
     def attach_interfaces(self, num_ifaces):
-        """ Attach and initialize n interfaces to the central bridge of the
-            namespace. """
-        for index in (range(num_ifaces)):
-            edge_veth = "%s" % index
-            bridge_veth = "br_%s" % index
-            result = self.ns_exec("ip link add %s type veth "
-                                  "peer name %s" % (edge_veth, bridge_veth))
-            if result != SUCCESS:
+        """Attach and initialize n interfaces to the central bridge of the
+        namespace."""
+        for index in range(num_ifaces):
+            edge_veth = str(index)
+            bridge_veth = f"br_{index}"
+            result = self.ns_exec(f"ip link add {edge_veth} type veth peer name {bridge_veth}")
+            if result != testutils.SUCCESS:
                 return result
             # result = self.ns_exec("ip link set %s master %s" %
             #                       (edge_veth, self.br_name))
-            # if result != SUCCESS:
+            # if result != testutils.SUCCESS:
             #     return result
             result = self._configure_bridge_port(edge_veth)
-            if result != SUCCESS:
+            if result != testutils.SUCCESS:
                 return result
             result = self._configure_bridge_port(bridge_veth)
-            if result != SUCCESS:
+            if result != testutils.SUCCESS:
                 return result
             # add interfaces to the list of existing bridge ports
             self.br_ports.append(bridge_veth)
             self.edge_ports.append(edge_veth)
-        return SUCCESS
+        return testutils.SUCCESS
 
     def create_virtual_env(self, num_ifaces):
-        """ Create the namespace, the bridge, and attach interfaces all at
-            once. """
+        """Create the namespace, the bridge, and attach interfaces all at
+        once."""
         result = self.ns_init()
-        if result != SUCCESS:
+        if result != testutils.SUCCESS:
             return result
         result = self.create_bridge()
-        if result != SUCCESS:
+        if result != testutils.SUCCESS:
             return result
-        report_output(self.outputs["stdout"], self.verbose,
-                      "Attaching %d interfaces..." % num_ifaces)
+        testutils.log.info(f"Attaching {num_ifaces} interfaces...")
         return self.attach_interfaces(num_ifaces)
 
 
 def main(argv):
-    """ main """
+    """main"""
     # This is a simple test script which creates/deletes a virtual environment
-    outputs = {}
-    outputs["stdout"] = sys.stdout
-    outputs["stderr"] = sys.stderr
-    bridge = Bridge("12345", outputs, True)
+
+    # Configure logging.
+    logging.basicConfig(
+        filename="ebpfenv.log",
+        format="%(levelname)s:%(message)s",
+        level=getattr(logging, logging.INFO),
+        filemode="w",
+    )
+    stderr_log = logging.StreamHandler()
+    stderr_log.setFormatter(logging.Formatter("%(levelname)s:%(message)s"))
+    logging.getLogger().addHandler(stderr_log)
+
+    bridge = Bridge("12345")
     bridge.create_virtual_env(5)
     bridge.ns_del()
 

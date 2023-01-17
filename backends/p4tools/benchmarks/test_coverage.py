@@ -10,7 +10,8 @@ import tempfile
 from pathlib import Path
 import datetime
 
-FILE_DIR = Path(__file__).parent.resolve()
+# Append tools to the import path.
+FILE_DIR = Path(__file__).resolve().parent
 TOOLS_PATH = FILE_DIR.joinpath("../../../tools")
 sys.path.append(str(TOOLS_PATH))
 import testutils
