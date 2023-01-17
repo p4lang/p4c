@@ -37,6 +37,17 @@ PTF::PTF(cstring testName, boost::optional<unsigned int> seed = boost::none) : T
     cstring testNameOnly(testFile.stem().c_str());
 }
 
+inja::json PTF::getCloneInfo(const TestSpec *testSpec) {
+    inja::json cloneJson = inja::json::object();
+    auto cloneMethod = testSpec->getTestObjectCategory("clone_infos");
+    if (!cloneMethod.empty()) {
+        cloneJson["clone"] = "F";
+    } else {
+        cloneJson["clone"] = "T";
+    }
+    return cloneJson;
+}
+
 std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant *mask) {
     std::vector<std::pair<size_t, size_t>> ignoreMasks;
     if (mask == nullptr) {
@@ -365,6 +376,7 @@ void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
     dataJson["send"] = getSend(testSpec);
+    dataJson["clone"] = getCloneInfo(testSpec);
     dataJson["verify"] = getVerify(testSpec);
     dataJson["timestamp"] = Utils::getTimeStamp();
     std::stringstream coverageStr;
