@@ -18,6 +18,24 @@ macro(check_with_bmv2 testfile testfolder p4test)
   file(APPEND ${testfile} "done\n")
 endmacro(check_with_bmv2)
 
+
+# Write the script to check BMv2 PTF tests to the designated test file.
+# Arguments:
+#   - testfile is the testing script that this script is written to.
+#   - testfolder is target folder of the test.
+#   - p4test is the file that is to be tested.
+macro(check_bmv2_with_ptf testfile testfolder p4test)
+  set(__p4cbmv2path "${P4C_BINARY_DIR}")
+  set(__bmv2runner " ${P4C_SOURCE_DIR}/backends/bmv2/run-bmv2-ptf-test.py")
+  # Find all the ptf tests generated for this P4 file and test them with bmv2 model
+  file(APPEND ${testfile} "ptffiles=($(find ${testfolder} -name \"*.py\"  | sort -n ))\n")
+  file(APPEND ${testfile} "for item in \${ptffiles[@]}\n")
+  file(APPEND ${testfile} "do\n")
+  file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
+  file(APPEND ${testfile} "\t python3 ${__bmv2runner} -tf \${item} ${P4C_SOURCE_DIR} -pfn ${P4C_SOURCE_DIR}/${p4test} \n")
+  file(APPEND ${testfile} "done\n")
+endmacro(check_bmv2_with_ptf)
+
 # Write the script to validate whether a given protobuf file has a valid format.
 # Arguments:
 #   - testfile is the testing script that this script is written to.
@@ -54,7 +72,7 @@ endmacro(validate_protobuf)
 # Sets the timeout on tests at 300s. For the slow CI machines.
 macro(p4tools_add_test_with_args)
   # Parse arguments.
-  set(options ENABLE_RUNNER VALIDATE_PROTOBUF)
+  set(options ENABLE_RUNNER VALIDATE_PROTOBUF P416_PTF)
   set(oneValueArgs TAG DRIVER ALIAS P4TEST TARGET ARCH)
   set(multiValueArgs TEST_ARGS CMAKE_ARGS)
   cmake_parse_arguments(
@@ -89,6 +107,10 @@ macro(p4tools_add_test_with_args)
   # If ENABLE_RUNNER is active, run the BMv2 runner.
   if(${TOOLS_BMV2_TESTS_ENABLE_RUNNER})
     check_with_bmv2(${__testfile} ${__testfolder} ${p4test})
+  endif()
+  # If P416_PTF is active, run the PTF BMv2 runner.
+  if(${TOOLS_BMV2_TESTS_P416_PTF})
+    check_bmv2_with_ptf(${__testfile} ${__testfolder} ${p4test} ${__ptfRunerFolder})
   endif()
   # If VALIDATE_PROTOBUF is active, check whether the format of the generated tests is valid.
   if(${TOOLS_BMV2_TESTS_VALIDATE_PROTOBUF})

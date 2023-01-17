@@ -34,7 +34,7 @@ namespace Bmv2 {
 
 const big_int Bmv2TestBackend::ZERO_PKT_VAL = 0x2000000;
 const big_int Bmv2TestBackend::ZERO_PKT_MAX = 0xffffffff;
-const std::set<std::string> Bmv2TestBackend::SUPPORTED_BACKENDS = {"PTF-P4", "STF", "PROTOBUF"};
+const std::set<std::string> Bmv2TestBackend::SUPPORTED_BACKENDS = {"PTF", "STF", "PROTOBUF"};
 
 Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo &programInfo, ExplorationStrategy &symbex,
                                  const boost::filesystem::path &testPath,
@@ -48,7 +48,7 @@ Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo &programInfo, ExplorationStra
         exit(EXIT_FAILURE);
     }
 
-    if (testBackendString == "PTF-P4") {
+    if (testBackendString == "PTF") {
         testWriter = new PTF(testPath.c_str(), seed);
     } else if (testBackendString == "STF") {
         testWriter = new STF(testPath.c_str(), seed);

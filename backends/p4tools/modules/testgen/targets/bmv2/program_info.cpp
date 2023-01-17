@@ -25,6 +25,7 @@
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/concolic.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
 
@@ -42,6 +43,7 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     : ProgramInfo(program),
       programmableBlocks(std::move(inputBlocks)),
       declIdToGress(declIdToGress) {
+    const auto &options = TestgenOptions::get();
     concolicMethodImpls.add(*Bmv2Concolic::getBmv2ConcolicMethodImpls());
 
     // Just concatenate everything together.
@@ -57,6 +59,7 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     /// the deparser. This sequence also includes nodes that handle transitions between the
     /// individual component instantiations.
     int pipeIdx = 0;
+
     for (const auto &declTuple : programmableBlocks) {
         // Iterate through the (ordered) pipes of the target architecture.
         auto subResult = processDeclaration(declTuple.second, pipeIdx);
@@ -64,10 +67,15 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
         ++pipeIdx;
     }
     /// Sending a too short packet in BMV2 produces nonsense, so we require the packet size to be
-    /// larger than 32 bits
+    /// larger than 32 bits.This number needs to be raised to the size of the ethernet header for
+    /// the PTF and PROTOBUF back ends.
+    auto minPktSize = BMv2Constants::STF_MIN_PKT_SIZE;
+    if (options.testBackend == "PTF") {
+        minPktSize = BMv2Constants::ETH_HDR_SIZE;
+    }
     const IR::Operation_Binary *constraint =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                    IR::getConstant(ExecutionState::getPacketSizeVarType(), 32));
+                    IR::getConstant(ExecutionState::getPacketSizeVarType(), minPktSize));
     /// Vector containing pairs of restrictions and nodes to which these restrictions apply.
     std::vector<std::vector<const IR::Expression *>> restrictionsVec;
     /// Defines all "entry_restriction" and then converts restrictions from string to IR
@@ -81,6 +89,11 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
             constraint = new IR::LAnd(constraint, restriction);
         }
     }
+
+    /// Set the restriction on the input port,
+    /// this is necessary since ptf tests use ports from 0 to 7
+    constraint = new IR::LAnd(constraint, getPortConstraint(getTargetInputPortVar()));
+
     targetConstraints = constraint;
 }
 
@@ -129,6 +142,9 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
         auto *egressPortVar =
             new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                            new IR::PathExpression("*standard_metadata"), "egress_port");
+        /// Set the restriction on the output port,
+        /// this is necessary since ptf tests use ports from 0 to 7
+        cmds.emplace_back(Continuation::Guard(getPortConstraint(getTargetOutputPortVar())));
         auto *portStmt = new IR::AssignmentStatement(egressPortVar, getTargetOutputPortVar());
         cmds.emplace_back(portStmt);
         // TODO: We have not implemented multi cast yet.
@@ -158,6 +174,12 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
 const IR::Member *BMv2_V1ModelProgramInfo::getTargetInputPortVar() const {
     return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                           new IR::PathExpression("*standard_metadata"), "ingress_port");
+}
+
+const IR::Expression *BMv2_V1ModelProgramInfo::getPortConstraint(const IR::Member *portVar) const {
+    const IR::Operation_Binary *portConstraint =
+        new IR::Leq(portVar, new IR::Constant(portVar->type, 7));
+    return portConstraint;
 }
 
 const IR::Member *BMv2_V1ModelProgramInfo::getTargetOutputPortVar() const {

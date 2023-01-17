@@ -93,8 +93,6 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
         cstring actionName = actionType->controlPlaneName();
         // Copy the previous action profile.
         auto *actionProfile = new Bmv2_V1ModelActionProfile(*bmv2_V1ModelProperties.actionProfile);
-        // The entry we are inserting using an index instead of the action name.
-        cstring actionIndex = std::to_string(actionProfile->getActionMapSize());
         // Synthesize arguments for the call based on the action parameters.
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
@@ -134,7 +132,7 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
         setTableAction(nextState, tableAction);
 
         // Finally, add all the new rules to the execution state.
-        const ActionCall ctrlPlaneActionCall(actionIndex, actionType, {});
+        const ActionCall ctrlPlaneActionCall(actionName, actionType, {});
         auto tableRule =
             TableRule(matches, TestSpec::LOW_PRIORITY, ctrlPlaneActionCall, TestSpec::TTL);
         auto *tableConfig = new TableConfig(table, {tableRule});
@@ -178,8 +176,6 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
         // Copy the previous action profile.
         auto *actionProfile = new Bmv2_V1ModelActionProfile(
             bmv2_V1ModelProperties.actionSelector->getActionProfile()->getProfileDecl());
-        // The entry we are inserting using an index instead of the action name.
-        cstring actionIndex = std::to_string(actionProfile->getActionMapSize());
         // Synthesize arguments for the call based on the action parameters.
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
@@ -226,7 +222,7 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
         setTableAction(nextState, tableAction);
 
         // Finally, add all the new rules to the execution state.
-        ActionCall ctrlPlaneActionCall(actionIndex, actionType, {});
+        ActionCall ctrlPlaneActionCall(actionName, actionType, {});
         auto tableRule =
             TableRule(matches, TestSpec::LOW_PRIORITY, ctrlPlaneActionCall, TestSpec::TTL);
         auto *tableConfig = new TableConfig(table, {tableRule});

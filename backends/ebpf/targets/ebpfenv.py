@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """ Virtual environment which models a simple bridge with n attached
     interfaces. The bridge runs in a completely isolated namespace.
     Allows the loading and testing of eBPF programs. """
@@ -20,6 +19,7 @@
 import os
 import sys
 from subprocess import Popen, PIPE
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/../../tools')
 from testutils import *
 
@@ -27,28 +27,26 @@ from testutils import *
 class Bridge(object):
 
     def __init__(self, namespace, outputs, verbose):
-        self.ns_name = namespace     # identifier of the namespace
-        self.br_name = "core"        # name of the central bridge
-        self.br_ports = []           # list of the veth pair bridge ports
-        self.edge_ports = []         # list of the veth pair edge ports
-        self.outputs = outputs       # contains standard and error output
-        self.verbose = verbose       # do we want to be chatty?
+        self.ns_name = namespace  # identifier of the namespace
+        self.br_name = "core"  # name of the central bridge
+        self.br_ports = []  # list of the veth pair bridge ports
+        self.edge_ports = []  # list of the veth pair edge ports
+        self.outputs = outputs  # contains standard and error output
+        self.verbose = verbose  # do we want to be chatty?
 
     def ns_init(self):
         """ Initialize the namespace. """
         cmd = "ip netns add %s" % self.ns_name
         errmsg = "Failed to create namespace %s :" % self.ns_name
-        result = run_timeout(self.verbose, cmd, TIMEOUT,
-                             self.outputs, errmsg)
+        result = run_timeout(self.verbose, cmd, TIMEOUT, self.outputs, errmsg)
         self.ns_exec("ip link set dev lo up")
         return result
 
     def ns_del(self):
         """ Delete the namespace. """
-        cmd = "ip netns del %s" % self.ns_name
+        cmd = f"ip netns pids {self.ns_name} | xargs kill; ip netns del {self.ns_name}"
         errmsg = "Failed to delete namespace %s :" % self.ns_name
-        return run_timeout(self.verbose, cmd, TIMEOUT,
-                           self.outputs, errmsg)
+        return run_timeout(self.verbose, cmd, TIMEOUT, self.outputs, errmsg)
 
     def get_ns_prefix(self):
         """ Return the command prefix for the namespace of this bridge class.
@@ -60,10 +58,9 @@ class Bridge(object):
         prefix = self.get_ns_prefix()
         # bash -c allows us to run multiple commands at once
         cmd = "%s bash -c \"%s\"" % (prefix, cmd_string)
-        errmsg = "Failed to run command %s in namespace %s:" % (
-            cmd, self.ns_name)
-        return run_timeout(self.verbose, cmd, TIMEOUT,
-                           self.outputs, errmsg)
+        errmsg = "Failed to run command %s in namespace %s:" % (cmd,
+                                                                self.ns_name)
+        return run_timeout(self.verbose, cmd, TIMEOUT, self.outputs, errmsg)
 
     def ns_proc_open(self):
         """ Open a bash process in the namespace and return the handle """
@@ -73,8 +70,8 @@ class Bridge(object):
     def ns_proc_write(self, proc, cmd):
         """ Allows writing of a command to a given process. The command is NOT
             yet executed. """
-        report_output(self.outputs["stdout"],
-                      self.verbose, "Writing %s " % cmd)
+        report_output(self.outputs["stdout"], self.verbose,
+                      "Writing %s " % cmd)
         try:
             proc.stdin.write(cmd)
         except IOError as e:
@@ -88,8 +85,8 @@ class Bridge(object):
         return self.ns_proc_write(proc, " && " + cmd)
 
     def ns_proc_close(self, proc):
-        report_output(self.outputs["stdout"],
-                      self.verbose, "Executing command.")
+        report_output(self.outputs["stdout"], self.verbose,
+                      "Executing command.")
         """ Close and actually run the process in the namespace. Returns the
             exit code. """
         errmsg = ("Failed to execute the command"
@@ -132,10 +129,10 @@ class Bridge(object):
                                   "peer name %s" % (edge_veth, bridge_veth))
             if result != SUCCESS:
                 return result
-            result = self.ns_exec("ip link set %s master %s" %
-                                  (edge_veth, self.br_name))
-            if result != SUCCESS:
-                return result
+            # result = self.ns_exec("ip link set %s master %s" %
+            #                       (edge_veth, self.br_name))
+            # if result != SUCCESS:
+            #     return result
             result = self._configure_bridge_port(edge_veth)
             if result != SUCCESS:
                 return result
@@ -156,8 +153,8 @@ class Bridge(object):
         result = self.create_bridge()
         if result != SUCCESS:
             return result
-        report_output(self.outputs["stdout"],
-                      self.verbose, "Attaching %d interfaces..." % num_ifaces)
+        report_output(self.outputs["stdout"], self.verbose,
+                      "Attaching %d interfaces..." % num_ifaces)
         return self.attach_interfaces(num_ifaces)
 
 
