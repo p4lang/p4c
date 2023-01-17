@@ -144,7 +144,7 @@ const Bmv2CounterValue *Bmv2CounterValue::evaluate(const Model &model) const {
     return evaluatedCounterValue;
 }
 
-Bmv2CounterCondition::Bmv2CounterCondition(const IR::Expression* index, const IR::Expression* value)
+Bmv2CounterCondition::Bmv2CounterCondition(const IR::Expression *index, const IR::Expression *value)
     : index(index), value(value) {}
 
 const IR::Constant *Bmv2CounterCondition::getEvaluatedValue() const {

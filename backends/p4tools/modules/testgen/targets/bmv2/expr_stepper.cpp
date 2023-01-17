@@ -602,15 +602,15 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
         // TODO: Count currently has no effect in the symbolic interpreter.
         {"counter.count",
          {"index"},
-         [this](const IR::MethodCallExpression * call, const IR::Expression * receiver,
-                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * args,
-                const ExecutionState & state, SmallStepEvaluator::Result & result) {
+         [this](const IR::MethodCallExpression *call, const IR::Expression *receiver,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
              const auto *arg = args->at(0);
              const auto *index = arg->expression;
              if (state.hasTaint(index)) {
                  ::warning(
                      "Count index arg are tainted and not predictable. Skipping count execution.");
-                 auto* nextState = new ExecutionState(state);
+                 auto *nextState = new ExecutionState(state);
                  nextState->popBody();
                  result->emplace_back(nextState);
                  return;
