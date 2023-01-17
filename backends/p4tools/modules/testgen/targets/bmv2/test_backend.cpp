@@ -130,10 +130,10 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     }
 
     const auto counters = executionState->getTestObjectCategory("countervalues");
-    for (const auto& testObject : counters) {
+    for (const auto &testObject : counters) {
         const auto profileName = testObject.first;
-        const auto* counter = testObject.second->checkedTo<Bmv2CounterValue>();
-        const auto* evaluatedProfile = counter->evaluate(*completedModel);
+        const auto *counter = testObject.second->checkedTo<Bmv2CounterValue>();
+        const auto *evaluatedProfile = counter->evaluate(*completedModel);
         testSpec->addTestObject("countervalues", profileName, evaluatedProfile);
     }
 

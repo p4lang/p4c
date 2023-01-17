@@ -84,7 +84,7 @@ cstring Bmv2RegisterCondition::getObjectName() const { return "Bmv2RegisterCondi
  *  Bmv2Counter
  * ========================================================================================= */
 
-Bmv2CounterValue::Bmv2CounterValue(const IR::Expression* initialValue, const IR::Expression* size,
+Bmv2CounterValue::Bmv2CounterValue(const IR::Expression *initialValue, const IR::Expression *size,
                                    CounterType type)
     : initialValue(initialValue), size(size), type(type) {}
 
@@ -92,10 +92,10 @@ void Bmv2CounterValue::addCounterCondition(Bmv2CounterCondition cond) {
     counterConditions.push_back(cond);
 }
 
-const IR::Expression* Bmv2CounterValue::getInitialValue() const { return initialValue; }
+const IR::Expression *Bmv2CounterValue::getInitialValue() const { return initialValue; }
 
-const IR::Constant* Bmv2CounterValue::getEvaluatedSize() const {
-    const auto* constant = size->to<IR::Constant>();
+const IR::Constant *Bmv2CounterValue::getEvaluatedSize() const {
+    const auto *constant = size->to<IR::Constant>();
     BUG_CHECK(constant, "Variable is not a constant, has the test object %1% been evaluated?",
               getObjectName());
     return constant;
@@ -107,19 +107,19 @@ const std::vector<Bmv2CounterCondition> Bmv2CounterValue::getCounterConditions()
 
 cstring Bmv2CounterValue::getObjectName() const { return "Bmv2CounterValue"; }
 
-const IR::Expression* Bmv2CounterValue::getCurrentValue(const IR::Expression* index) const {
-    const IR::Expression* baseExpr = initialValue;
-    for (const auto& bmv2counterValue : counterConditions) {
-        const auto* storedIndex = bmv2counterValue.index;
-        const auto* storedVal = bmv2counterValue.value;
+const IR::Expression *Bmv2CounterValue::getCurrentValue(const IR::Expression *index) const {
+    const IR::Expression *baseExpr = initialValue;
+    for (const auto &bmv2counterValue : counterConditions) {
+        const auto *storedIndex = bmv2counterValue.index;
+        const auto *storedVal = bmv2counterValue.value;
         baseExpr =
             new IR::Mux(baseExpr->type, new IR::Equ(storedIndex, index), storedVal, baseExpr);
     }
     return baseExpr;
 }
 
-const IR::Constant* Bmv2CounterValue::getEvaluatedValue() const {
-    const auto* constant = initialValue->to<IR::Constant>();
+const IR::Constant *Bmv2CounterValue::getEvaluatedValue() const {
+    const auto *constant = initialValue->to<IR::Constant>();
     BUG_CHECK(constant, "Variable is not a constant, has the test object %1% been evaluated?",
               getObjectName());
     return constant;
@@ -134,11 +134,11 @@ Bmv2CounterValue::CounterType Bmv2CounterValue::getCounterTypeByIndex(big_int in
 
 Bmv2CounterValue::CounterType Bmv2CounterValue::getType() const { return type; }
 
-const Bmv2CounterValue* Bmv2CounterValue::evaluate(const Model& model) const {
-    const auto* evaluatedValue = model.evaluate(initialValue);
-    auto* evaluatedCounterValue = new Bmv2CounterValue(evaluatedValue, size, type);
+const Bmv2CounterValue *Bmv2CounterValue::evaluate(const Model &model) const {
+    const auto *evaluatedValue = model.evaluate(initialValue);
+    auto *evaluatedCounterValue = new Bmv2CounterValue(evaluatedValue, size, type);
     const std::vector<ActionArg> evaluatedConditions;
-    for (const auto& cond : counterConditions) {
+    for (const auto &cond : counterConditions) {
         evaluatedCounterValue->addCounterCondition(*cond.evaluate(model));
     }
     return evaluatedCounterValue;
@@ -147,23 +147,23 @@ const Bmv2CounterValue* Bmv2CounterValue::evaluate(const Model& model) const {
 Bmv2CounterCondition::Bmv2CounterCondition(const IR::Expression* index, const IR::Expression* value)
     : index(index), value(value) {}
 
-const IR::Constant* Bmv2CounterCondition::getEvaluatedValue() const {
-    const auto* constant = value->to<IR::Constant>();
+const IR::Constant *Bmv2CounterCondition::getEvaluatedValue() const {
+    const auto *constant = value->to<IR::Constant>();
     BUG_CHECK(constant, "Variable is not a constant, has the test object %1% been evaluated?",
               getObjectName());
     return constant;
 }
 
-const IR::Constant* Bmv2CounterCondition::getEvaluatedIndex() const {
-    const auto* constant = index->to<IR::Constant>();
+const IR::Constant *Bmv2CounterCondition::getEvaluatedIndex() const {
+    const auto *constant = index->to<IR::Constant>();
     BUG_CHECK(constant, "Variable is not a constant, has the test object %1% been evaluated?",
               getObjectName());
     return constant;
 }
 
-const Bmv2CounterCondition* Bmv2CounterCondition::evaluate(const Model& model) const {
-    const auto* evaluatedIndex = model.evaluate(index);
-    const auto* evaluatedValue = model.evaluate(value);
+const Bmv2CounterCondition *Bmv2CounterCondition::evaluate(const Model &model) const {
+    const auto *evaluatedIndex = model.evaluate(index);
+    const auto *evaluatedValue = model.evaluate(value);
     return new Bmv2CounterCondition(evaluatedIndex, evaluatedValue);
 }
 

@@ -90,22 +90,22 @@ class Bmv2RegisterValue : public TestObject {
 class Bmv2CounterCondition : public TestObject {
  public:
     /// The counter index.
-    const IR::Expression* index;
+    const IR::Expression *index;
 
     /// The counter value.
-    const IR::Expression* value;
+    const IR::Expression *value;
 
-    explicit Bmv2CounterCondition(const IR::Expression* index, const IR::Expression* value);
+    explicit Bmv2CounterCondition(const IR::Expression *index, const IR::Expression *value);
 
     /// @returns the evaluated counter index. This means it must be a constant.
     /// The function will throw a bug if this is not the case.
-    const IR::Constant* getEvaluatedIndex() const;
+    const IR::Constant *getEvaluatedIndex() const;
 
     /// @returns the evaluated condition of the counter. This means it must be a constant.
     /// The function will throw a bug if this is not the case.
-    const IR::Constant* getEvaluatedValue() const;
+    const IR::Constant *getEvaluatedValue() const;
 
-    const Bmv2CounterCondition* evaluate(const Model& model) const override;
+    const Bmv2CounterCondition *evaluate(const Model &model) const override;
 
     cstring getObjectName() const override;
 };
@@ -125,10 +125,10 @@ class Bmv2CounterValue : public TestObject {
     };
 
     /// A new Bmv2CounterValue always requires an initial value. This can be a constant or taint.
-    const IR::Expression* initialValue;
+    const IR::Expression *initialValue;
 
     /// A new Bmv2CounterValue always requires an size value. This can be a constant or taint.
-    const IR::Expression* size;
+    const IR::Expression *size;
 
     /// A new Bmv2CounterValue always requires an type value. This can be a constant or taint.
     CounterType type;
@@ -139,7 +139,7 @@ class Bmv2CounterValue : public TestObject {
  public:
     CounterType getCounterTypeByIndex(big_int index);
 
-    explicit Bmv2CounterValue(const IR::Expression* initialValue, const IR::Expression* size,
+    explicit Bmv2CounterValue(const IR::Expression *initialValue, const IR::Expression *size,
                               CounterType type);
 
     cstring getObjectName() const override;
@@ -148,7 +148,7 @@ class Bmv2CounterValue : public TestObject {
     void addCounterCondition(Bmv2CounterCondition cond);
 
     /// @returns the value with which this counter has been initialized.
-    const IR::Expression* getInitialValue() const;
+    const IR::Expression *getInitialValue() const;
 
     /// @returns the type with which this counterhas been initialized.
     CounterType getType() const;
@@ -158,17 +158,17 @@ class Bmv2CounterValue : public TestObject {
 
     /// @returns the evaluated size of the counter. This means it must be a constant.
     /// The function will throw a bug if this is not the case.
-    const IR::Constant* getEvaluatedSize() const;
+    const IR::Constant *getEvaluatedSize() const;
 
     /// @returns the current value of this counter after writes have been performed according to a
     /// provided index.
-    const IR::Expression* getCurrentValue(const IR::Expression* index) const;
+    const IR::Expression *getCurrentValue(const IR::Expression *index) const;
 
     /// @returns the evaluated counter value. This means it must be a constant.
     /// The function will throw a bug if this is not the case.
-    const IR::Constant* getEvaluatedValue() const;
+    const IR::Constant *getEvaluatedValue() const;
 
-    const Bmv2CounterValue* evaluate(const Model& model) const override;
+    const Bmv2CounterValue *evaluate(const Model &model) const override;
 };
 
 /* =========================================================================================
